@@ -1,2 +1,0 @@
-stdx_test_slot_map 1 0.0051899
----
