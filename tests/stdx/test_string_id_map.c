@@ -4,6 +4,7 @@
 #include <ng5/strings.h>
 #include <stdx/string_id_map.h>
 #include <stdlib.h>
+#include <stdx/string_id_maps/simple_bsearch.h>
 
 START_TEST (test_string_id_map_simple_ctor)
 {

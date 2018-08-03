@@ -2,6 +2,7 @@
 #include <stdx/asnyc.h>
 #include <stdx/string_id_map.h>
 #include <stdlib.h>
+#include <stdx/string_id_maps/simple_bsearch.h>
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
@@ -61,7 +62,7 @@ int string_pool_create_naive(struct string_pool *pool, size_t capacity, const st
     pool->resolve =         naive_resolve;
 
     // define this implementation as 'naive' implementation (e.g., checked by 'naive_extra()' function)
-    pool->tag = SP_NAIVE;
+    pool->tag = STRING_POOL_NAIVE;
 
     // setup naive-implementation-specific structures
     pool->extra = allocator_malloc(&pool->alloc, sizeof(struct naive_extra_t));

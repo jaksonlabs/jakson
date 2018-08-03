@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdx/algorithm.h>
 #include <stdx/time.h>
+#include <stdx/string_id_maps/simple_bsearch.h>
 
 bool comp_int_less_eq(const void *lhs, const void *rhs)
 {

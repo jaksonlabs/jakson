@@ -28,7 +28,7 @@ typedef size_t string_id_t;
 
 struct string;
 
-enum string_pool_tag { SP_NAIVE };
+enum string_pool_tag { STRING_POOL_NAIVE };
 
 /**
  * Thread-safe string pool implementation

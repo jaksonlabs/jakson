@@ -1,4 +1,4 @@
-// file: string_id_map.c
+// file: simple_bsearch.c
 
 /**
  *  Copyright (C) 2018 Marcus Pinnecke
@@ -21,16 +21,10 @@
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <stdx/string_id_map.h>
+#include <stdx/string_id_maps/simple_bsearch.h>
 #include <stdx/asnyc.h>
 #include <stdlib.h>
 #include <stdx/algorithm.h>
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  T Y P E S
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------
 //  SIMPLE
@@ -56,187 +50,6 @@ struct simple_extra {
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
-//  PARALLEL
-// ---------------------------------------------------------------------------------------------------------------------
-
-struct parallel_extra {
-
-};
-
-/**
- * A single entry inside the list of entires inside a bucket. Each such entry represents a pair inside that
- * list where the key has a hash collision with the key of another entry.
- */
-struct NG5_BUCKET_PACKING string_map_entry {
-  /**
-   * Flag to indiciate whether this entry is free, or in use.
-   * This flag is required since the implementation uses an update-in-place strategy which requires lookup
-   * operations to skip entries that are physically stored in the list but logically not in use. Whether a
-   * particular free entry is taken to write a new entry to it, is however, controlled over the freelist of
-   * the parent bucket list (see <code>string_map_bucket_data</code>)
-   */
-  bool             in_use;
-  /**
-   * A pointer to the key. This pointer is required to enable a string comparision between a requested key
-   * and that particular key at hand.
-   */
-  const char      *str_key;
-  /**
-   * A value assigned to that key.
-   */
-  uint64_t         int_value;
-};
-
-/**
- * Data stored in Tier 3 of one single bucket.
- */
-struct string_map_bucket_data {
-  /**
-   * A fixed-length array of entries each with colliding keys. Which entry is in use and which is free
-   * is determined via a per-entry flag, and for a fast lookup to find a free place for new elements to add,
-   * in a freelist (see below)
-   */
-  struct string_map_entry  non_cache_entries[NG5_CONFIG_BUCKET_CAPACITY];
-
-  /**
-   * A freelist that determines one or more free positions inside the list of entries. An entry is free
-   * is it was not used so far, or it was removed. This, however, is additionally indicated by the corresponding
-   * flag inside the entry.
-   */
-  size_t                   non_cache_entries_freelist[NG5_CONFIG_BUCKET_CAPACITY];
-
-  /**
-   * The number of free positions left in the freelist
-   */
-  size_t                   non_cache_entries_freelist_size;
-
-  /**
-   * A flag that determines whether the entry list is sorted or not. This flag serves as an effort buffer in
-   * case binary search is used to find an requested entry. If binary search is used, the entry list must be sorted.
-   * However, this is at most one pre-processing step that is executed each time before a binary search is started.
-   * To avoid this effort, after successful sorting, the flag <code>non_cache_entries_sorted</code> is set to
-   * <b>true</b>, and the sorting pre-processing is only executed if <code>non_cache_entries_sorted</code> is
-   * <b>false</b>. Only in case an <i>insert</i> operation to the entries list that destroys the lists order, this
-   * flag is set to <b>false</b> (or in case of fresh initialization, of course).
-   */
-  bool                     non_cache_entries_sorted;
-
-  /**
-   * Flag indicating the current search mode
-   */
-  enum search_strategy { SEARCH_SCAN_SINGLE, SEARCH_SCAN_MULTI, SEARCH_BSEARCH }
-          search_mode;
-
-  /**
-   * A pointer to that entry that was last found by the search (scan or binary).
-   */
-  struct string_map_entry *search_cache;
-};
-
-/**
- * Tier 4 for bucket data
- */
-struct string_map_swap_space {
-  /**
-   * Mapping of ids to offsets in the data file
-   */
-  FILE                    *index_file;
-
-  /**
-   * Actual data swapped out to disk
-   */
-  FILE                    *data_file;
-};
-
-struct thread_local_bucket {
-  /**
-  * Tier 1: A pointer to an element inside this bucket that was read the latest. In case a read operation
-  * can be answered by the reference stored in Tier 1, the referred element is always additionally handled in its
-  * origin place as it found have been found there in order to let the successful read-operation benefit that element.
-  * In simpler words, if the latest object comes from Tier 2, it is additionally moved one position towards the
-  * head of the Tier 2 cache. If on the other hand, the latest object comes from Tier 3, it is swapped into the
-  * cache as described for Tier 3. An object referred by latest can never be in Tier 4 (see below).
-  */
-  struct string_map_entry       *latest;
-
-  /**
-  * Enumeration to remember where the latest object reference comes from
-  */
-  enum lates_origin {
-    TIER_2, TIER_3
-  }                              latest_origin;
-
-  /**
-  * Position of the latest element in the Tier 2 cache resp Tier 3 list in order to perform the tier-specific
-  * locality optimization (i.e., the move operations inside Tier 2 resp. from Tier 3 to Tier 2 in order to
-  * increase spatial locality)
-  */
-  union {
-    size_t                      cache_position;
-    size_t                      non_cache_position;
-  }                              latest_origin_ref;
-
-  /**
-  * Tier 2: The least recently read entries in this bucket. This cache is always read with a forward sequential
-  * single threaded scan (i.e., a minimum on synchronization effort, and no pre-processing requirements);
-  * for a tiny number of elements, a good strategy. Therefore, the cache size must be set to a reasonable
-  * small number. However, to increase the lookup performance even further, a requested and found element in
-  * the cache is moved one position towards the first element. If an element was found for a <i>read</i> operation,
-  * <code>latest</code> is also updated to this element.
-  */
-  struct string_map_entry         cache[NG5_CONFIG_BUCKET_CACHE_SIZE];
-
-  /**
-  * The actual cache size, in case the number of elements in this bucket is less than the maximum cache size
-  */
-  size_t                          cache_size;
-
-  /**
-  * Tier 3: All entries that are not stored in the cache. The search for an element is done via either a
-  * multi-threaded scan or a binary search depending on what is more suitable according to the underlying cost model
-  * (which considers the pre-processing effort for binary search and others). In case of a <code>read</code>
-  * operation to on of these values, this read value is removed from this entry list and stored in the cache. In case
-  * the cache is not yet full (i.e., <code>cache_size<code> is less than the maximum cache size<code>, the element is
-  * just stored at thetail of the cache. In cache the cache is full, the element at hand is stored by swapping the
-  * last element in the cache into this list, and the read element at hand into the cache. In any case, if the element
-  * was found for a <i>read</i> operation, <code>latest</code> is also updated to this element. However, elements
-  * newly stored in this map are added to the Tier 3. In case there is not enough space, an element from Tier 3
-  * is randomly picked and swapped out into the swap space (see below) and its position is occupied by the new
-  * element.
-  */
-  struct string_map_bucket_data   non_cached_entries;
-
-  /**
-  * Tier 4: Entries stored on the disk in a partition-exclusive file (swap space). Entries are swapped out in order
-  * to match the maximum memory requirements for this map (in case of adding new elements, or in case swapped-out
-  * elements are stored in Tier 3 again (see next). In case Tier 4 is considered for a lookup operation and
-  * the lookup finds an entry, this entry in swapped into Tier 3. For this, an element from Tier 3 is randomly
-  * picked and swapped out to the position of the element from the swap sapce at hand.
-  */
-  struct string_map_swap_space    swap_space;
-};
-
-/**
- * A 4-tier bucket that realizes a list of key-value pairs where the keys conflict with each other
- */
-struct string_map_bucket {
-  struct vector of_type(thread_local_bucket) thread_local_buckets;
-  struct vector of_type(pthread_t)           threads;
-};
-
-/**
- * The StringIdMap data structure
- */
-struct parallel_string_id_map
-{
-
-  /**
-   * Vector of list of 'string_hash_bucket' objects realizing the partition of the map for this particular thread
-   */
-  struct vector    buckets;
-};
-
-// ---------------------------------------------------------------------------------------------------------------------
 //
 //  H E L P E R  P R O T O T Y P E S
 //
@@ -249,21 +62,21 @@ struct parallel_string_id_map
 static int simple_drop(struct string_id_map *self);
 static int simple_put(struct string_id_map *self, char *const *keys, const uint64_t *values, size_t num_pairs);
 static int simple_get(struct string_id_map *self, uint64_t **out, bool **found_mask, size_t *num_not_found,
-                      char *const *keys, size_t num_keys);
+        char *const *keys, size_t num_keys);
 static int simple_remove(struct string_id_map *self, char *const *keys, size_t num_keys);
 static int simple_free(struct string_id_map *self, void *ptr);
 
 static int simple_create_extra(struct string_id_map *self, float grow_factor, size_t num_buckets, size_t cap_buckets);
 static struct simple_extra *simple_extra(struct string_id_map *self);
 static int simple_bucket_create(struct simple_bucket *buckets, size_t num_buckets, size_t bucket_cap,
-                                float grow_factor, struct allocator *alloc);
+        float grow_factor, struct allocator *alloc);
 static int simple_bucket_drop(struct simple_bucket *buckets, size_t num_buckets, struct allocator *alloc);
 static int simple_map_insert(struct vector of_type(simple_bucket)* buckets, char* const* keys,
         const uint64_t* values, size_t* bucket_idxs, size_t num_pairs, struct allocator *alloc);
 static void simple_bucket_lock(struct simple_bucket *bucket) force_inline;
 static void simple_bucket_unlock(struct simple_bucket *bucket) force_inline;
 static int simple_bucket_insert(struct simple_bucket *bucket, const char *key, uint64_t value,
-                                struct allocator *alloc) force_inline;
+        struct allocator *alloc) force_inline;
 static void simple_bucket_freelist_push(struct simple_bucket *bucket, size_t idx);
 static size_t simple_bucket_freelist_pop(struct simple_bucket *bucket, struct allocator *alloc) force_inline;
 static size_t simple_bucket_find_entry_by_key(struct simple_bucket *bucket, const char *key, struct allocator *alloc);
@@ -271,22 +84,6 @@ static size_t simple_bucket_find_entry_by_key(struct simple_bucket *bucket, cons
 inline static bool simple_bucket_cmp_less_entry(const void *lhs, const void *rhs);
 inline static bool simple_bucket_cmp_eq_entry(const void *lhs, const void *rhs);
 inline static bool simple_bucket_cmp_less_eq_entry(const void *lhs, const void *rhs);
-
-
-// ---------------------------------------------------------------------------------------------------------------------
-//  PARALLEL
-// ---------------------------------------------------------------------------------------------------------------------
-
-static int parallel_drop(struct string_id_map *self);
-static int parallel_put(struct string_id_map *self, char *const *keys, const uint64_t *values, size_t num_pairs);
-static int parallel_get(struct string_id_map *self, uint64_t **out, bool **found_mask, size_t *num_not_found,
-        char *const *keys, size_t num_keys);
-static int parallel_remove(struct string_id_map *self, char *const *keys, size_t num_keys);
-static int parallel_free(struct string_id_map *self, void *ptr);
-
-static int parallel_create_extra(struct string_id_map *self);
-static void parallel_free_extra(struct string_id_map *self);
-static struct parallel_extra *parallel_extra(struct string_id_map *self);
 
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -370,8 +167,8 @@ static size_t simple_bucket_find_entry_by_key(struct simple_bucket *bucket, cons
 }
 
 static int simple_map_fetch(struct vector of_type(simple_bucket) *buckets, uint64_t *values_out, bool *key_found_mask,
-                            size_t *num_keys_not_found, size_t *bucket_idxs, char *const *keys, size_t num_keys,
-                            struct allocator *alloc)
+        size_t *num_keys_not_found, size_t *bucket_idxs, char *const *keys, size_t num_keys,
+        struct allocator *alloc)
 {
     size_t num_not_found = 0;
     struct simple_bucket *data = (struct simple_bucket *) vector_data(buckets);
@@ -379,10 +176,6 @@ static int simple_map_fetch(struct vector of_type(simple_bucket) *buckets, uint6
     for (size_t i = 0; i < num_keys; i++) {
         struct simple_bucket       *bucket     = data + bucket_idxs[i];
         simple_bucket_lock(bucket);
-
-        if (i == 333) {
-            printf("XXX1");
-        }
 
         const char                 *key        = keys[i];
         size_t                      needle_pos = simple_bucket_find_entry_by_key(bucket, key, alloc);
@@ -400,7 +193,7 @@ static int simple_map_fetch(struct vector of_type(simple_bucket) *buckets, uint6
 }
 
 static int simple_get(struct string_id_map *self, uint64_t **out, bool **found_mask, size_t *num_not_found,
-                      char *const *keys, size_t num_keys)
+        char *const *keys, size_t num_keys)
 {
     assert(self->tag == STRING_ID_MAP_SIMPLE);
 
@@ -416,7 +209,7 @@ static int simple_get(struct string_id_map *self, uint64_t **out, bool **found_m
     }
 
     check_success(simple_map_fetch(&extra->buckets, values_out, found_mask_out, num_not_found, bucket_idxs,
-                                   keys, num_keys, &self->allocator));
+            keys, num_keys, &self->allocator));
     check_success(allocator_free(&self->allocator, bucket_idxs));
     *out = values_out;
     *found_mask = found_mask_out;
@@ -470,93 +263,9 @@ static int simple_free(struct string_id_map *self, void *ptr)
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
-//  PARALLEL
-// ---------------------------------------------------------------------------------------------------------------------
-
-
-int string_id_map_create_parallel(struct string_id_map *map, const struct allocator *alloc, size_t num_buckets,
-        size_t cap_buckets, float map_grow_factor, float bucket_grow_factor,
-        size_t max_memory_size, const char *swap_space_dir)
-{
-
-    /**
-     * The maximum size in byte this map is allowed to occupy during the runtime. The minimum size is the
-     * memory footprint of a single bucket map managing having one parition with one entry in each cache level of that
-     * single bucket. In case <code>max_memory_size</code> is less than this size, <code>max_memory_size</code>
-     * is ignored.
-     */
-   // size_t max_memory_size;
-
-    check_success(allocator_this_or_default(&map->allocator, alloc));
-    map->tag    = STRING_ID_MAP_PARALLEL;
-    map->drop   = parallel_drop;
-    map->put    = parallel_put;
-    map->get    = parallel_get;
-    map->remove = parallel_remove;
-    map->free   = parallel_free;
-    check_success(parallel_create_extra(map));
-
-    unused(num_buckets);
-    unused(cap_buckets);
-    unused(map_grow_factor);
-    unused(bucket_grow_factor);
-    unused(max_memory_size);
-    unused(swap_space_dir);
-    NOT_YET_IMPLEMENTED /* TODO: Implement */
-
-    return STATUS_OK;
-}
-
-static int parallel_drop(struct string_id_map *self)
-{
-    unused(self);
-    NOT_YET_IMPLEMENTED /* TODO: Implement */
-}
-
-static int parallel_put(struct string_id_map *self, char *const *keys, const uint64_t *values, size_t num_pairs)
-{
-    unused(self);
-    unused(keys);
-    unused(values);
-    unused(num_pairs);
-    NOT_YET_IMPLEMENTED /* TODO: Implement */
-}
-
-static int parallel_get(struct string_id_map *self, uint64_t **out, bool **found_mask, size_t *num_not_found,
-        char *const *keys, size_t num_keys)
-{
-    unused(self);
-    unused(out);
-    unused(found_mask);
-    unused(num_not_found);
-    unused(keys);
-    unused(num_keys);
-    NOT_YET_IMPLEMENTED /* TODO: Implement */
-}
-
-static int parallel_remove(struct string_id_map *self, char *const *keys, size_t num_keys)
-{
-    unused(self);
-    unused(keys);
-    unused(num_keys);
-    NOT_YET_IMPLEMENTED /* TODO: Implement */
-}
-
-static int parallel_free(struct string_id_map *self, void *ptr)
-{
-    unused(self);
-    unused(ptr);
-    NOT_YET_IMPLEMENTED /* TODO: Implement */
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
 //
 //  H E L P E R  I M P L E M E N T A T I O N
 //
-// ---------------------------------------------------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------------------------------------------------
-//  SIMPLE
 // ---------------------------------------------------------------------------------------------------------------------
 
 unused_fn
@@ -582,7 +291,7 @@ static struct simple_extra *simple_extra(struct string_id_map *self)
 
 unused_fn
 static int simple_bucket_create(struct simple_bucket *buckets, size_t num_buckets, size_t bucket_cap,
-                                float grow_factor, struct allocator *alloc)
+        float grow_factor, struct allocator *alloc)
 {
     check_non_null(buckets);
 
@@ -652,10 +361,10 @@ static size_t simple_bucket_freelist_pop(struct simple_bucket *bucket, struct al
     struct vector of_type(simple_bucket_entry) *entries  = &bucket->entries;
 
     struct simple_bucket_entry empty = {
-        .in_use  = false,
-        .str     = NULL,
-        .str_len = 0,
-        .value   = 0
+            .in_use  = false,
+            .str     = NULL,
+            .str_len = 0,
+            .value   = 0
     };
 
     if (unlikely(vector_is_empty(freelist))) {
@@ -777,27 +486,3 @@ static int simple_map_insert(struct vector of_type(simple_bucket)* buckets, char
     return status;
 }
 
-
-// ---------------------------------------------------------------------------------------------------------------------
-//  PARALLEL
-// ---------------------------------------------------------------------------------------------------------------------
-
-static int parallel_create_extra(struct string_id_map *self)
-{
-    self->extra = allocator_malloc(&self->allocator, sizeof(struct parallel_extra));
-    return self->extra ? STATUS_OK : STATUS_MALLOCERR;
-}
-
-unused_fn
-static void parallel_free_extra(struct string_id_map *self)
-{
-    unused(self);
-    NOT_YET_IMPLEMENTED /* TODO: Implement */
-}
-
-unused_fn
-static struct parallel_extra *parallel_extra(struct string_id_map *self)
-{
-    assert (self->tag == STRING_ID_MAP_PARALLEL);
-    return (struct parallel_extra *)(self->extra);
-}

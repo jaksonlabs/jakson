@@ -50,8 +50,9 @@ set(SORUCE_FILES
         ${CMAKE_SOURCE_DIR}/stdx/time.c
         ${CMAKE_SOURCE_DIR}/ng5/strings.c
         ${CMAKE_SOURCE_DIR}/include/stdx/unit.h
-        ${CMAKE_SOURCE_DIR}/stdx/string_id_map.c
-        ${CMAKE_SOURCE_DIR}/include/stdx/algorithm.h)
+        ${CMAKE_SOURCE_DIR}/include/stdx/algorithm.h
+        ${CMAKE_SOURCE_DIR}/include/stdx/string_id_maps/simple_bsearch.h
+        ${CMAKE_SOURCE_DIR}/stdx/string_id_maps/simple_bsearch.c)
 
 add_executable(ng5 main.c ${SORUCE_FILES})
 
