@@ -81,6 +81,15 @@ struct allocator {
 int allocator_default(struct allocator *alloc);
 
 /**
+ * Creates a new allocator 'dst' with default constructor (in case of 'this' is null), or as copy of
+ * 'this' (in case 'this' is non-null)
+ * @param dst non-null destination in which the allocator should be stored
+ * @param this possibly null-pointer to an allocator implementation
+ * @return a value unequal to STATUS_OK in case the operation is not successful
+ */
+int allocator_this_or_default(struct allocator *dst, const struct allocator *this);
+
+/**
  * Invokes memory allocation of 'size' bytes using the allocator 'alloc'.
  *
  * If allocation fails, the system may panic.
@@ -93,6 +102,7 @@ void *allocator_malloc(struct allocator *alloc, size_t size);
 
 /**
  * Invokes memory re-allocation for pointer 'ptr' (that is managed by 'alloc') to size 'size' in bytes.
+ *
  * @param alloc non-null pointer to allocator implementation
  * @param ptr non-null pointer manged by 'alloc'
  * @param size new number of bytes for 'ptr'
@@ -106,8 +116,9 @@ void *allocator_realloc(struct allocator *alloc, void *ptr, size_t size);
  *
  * @param alloc non-null pointer to allocator implementation
  * @param ptr non-null pointer manged by 'alloc'
+ * @return STATUS_OK if success, STATUS_NULLPTR if <code>alloc</code> or <code>ptr</ptr> is <b>NULL</b>
  */
-void  allocator_free(struct allocator *alloc, void *ptr);
+int  allocator_free(struct allocator *alloc, void *ptr);
 
 /**
  * Invokes a garbage collection for memory manages with 'alloc' (if supported).

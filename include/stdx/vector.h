@@ -49,6 +49,11 @@ struct vector
     size_t              cap_elems;
 
     /**
+    * The grow factor considered for resize operations
+    */
+    float               grow_factor;
+
+    /**
      *  A pointer to a memory address managed by 'allocator' that contains the user data
      */
     void               *base;
@@ -67,6 +72,17 @@ struct vector
 int vector_create(struct vector *out, const struct allocator *alloc, size_t elem_size, size_t cap_elems);
 
 /**
+ * Sets the factor for determining the reallocation size in case of a resizing operation.
+ *
+ * Note that <code>factor</code> must be larger than one.
+ *
+ * @param vec non-null vector for which the grow factor should be changed
+ * @param factor a positive real number larger than 1
+ * @return STATUS_OK if success, otherwise a value indicating the error
+ */
+int vector_set_growfactor(struct vector *vec, float factor);
+
+/**
  * Frees up memory requested via the allocator.
  *
  * Depending on the allocator implementation, dropping the reserved memory might not take immediately effect.
@@ -76,6 +92,15 @@ int vector_create(struct vector *out, const struct allocator *alloc, size_t elem
  * @return STATUS_OK if success, and STATUS_NULL_PTR in case of NULL pointer to 'vec'
  */
 int vector_drop(struct vector *vec);
+
+/**
+ * Returns information on whether elements are stored in this vector or not.
+ * @param vec non-null pointer to the vector
+ * @return Returns <code>STATUS_TRUE</code> if <code>vec</code> is empty. Otherwise <code>STATUS_FALSE</code> unless
+ *         an error occurs. In case an error is occured, the return value is neither <code>STATUS_TRUE</code> nor
+ *         <code>STATUS_FALSE</code> but an value indicating that error.
+ */
+int vector_is_empty(struct vector *vec);
 
 /**
  * Appends 'num_elems' elements stored in 'data' into the vector by copying num_elems * vec->elem_size into the
@@ -88,7 +113,38 @@ int vector_drop(struct vector *vec);
  * @param num_elems number of elements stored in data
  * @return STATUS_OK if success, and STATUS_NULLPTR in case of NULL pointer parameters
  */
-int vector_push(struct vector *vec, const char *data, size_t num_elems);
+int vector_push(struct vector *vec, const void *data, size_t num_elems);
+
+/**
+ * Appends 'how_many' elements of the same source stored in 'data' into the vector by copying how_many * vec->elem_size
+ * into the vectors memory block.
+ *
+ * In case the capacity is not sufficient, the vector gets automatically resized.
+ *
+ * @param vec the vector in which the data should be pushed
+ * @param data non-null pointer to data that should be appended. Must be at least size of one vec->elem_size.
+ * @param num_elems number of elements stored in data
+ * @return STATUS_OK if success, and STATUS_NULLPTR in case of NULL pointer parameters
+ */
+int vector_repreat_push(struct vector *vec, const void *data, size_t how_many);
+
+/**
+ * Returns a pointer to the last element in this vector, or <code>NULL</code> is the vector is already empty.
+ * The number of elements contained in that vector is decreased, too.
+ *
+ * @param vec non-null pointer to the vector
+ * @return Pointer to last element, or <code>NULL</code> if vector is empty
+ */
+const void *vector_pop(struct vector *vec);
+
+/**
+ * Increases the capacity of that vector according the internal grow factor
+ * @param num_new_slots a pointer to a value that will store the number of newly created slots in that vector if
+ *                      <code>num_new_slots</code> is non-null. If this parameter is <code>NULL</code>, it is ignored.
+ * @param vec non-null pointer to the vector that should be grown
+ * @return STATUS_OK in case of success, and another value indicating an error otherwise.
+ */
+int vector_grow(size_t *num_new_slots, struct vector *vec);
 
 /**
  * Returns the number of elements currently stored in the vector

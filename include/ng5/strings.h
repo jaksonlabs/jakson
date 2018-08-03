@@ -28,28 +28,80 @@ typedef size_t string_id_t;
 
 struct string;
 
+enum string_pool_tag { SP_NAIVE };
+
+/**
+ * Thread-safe string pool implementation
+ */
 struct string_pool
 {
     void                *extra;
 
+    enum string_pool_tag tag;
+
     struct allocator     alloc;
 
-    enum status          (*create)(struct string_pool *self);
+    /**
+     *
+     *
+     * Note: Implementation must ensure thread-safeness
+     *
+     * @param self
+     * @return
+    */
+    int                 (*drop)(struct string_pool *self);
 
-    enum status          (*drop)(struct string_pool *self);
+    /**
+     *
+     *
+     * Note: Implementation must ensure thread-safeness
+     *
+     * @param self
+     * @return
+    */
+    int                  (*insert)(struct string_pool *self, struct string *out, size_t *num_out,
+                                   const char **strings, size_t num_strings);
 
-    enum status          (*insert)(struct string *out, size_t *num_out,
-                                   struct string_pool *self, const char **strings, size_t num_strings);
+    /**
+     *
+     *
+     * Note: Implementation must ensure thread-safeness
+     *
+     * @param self
+     * @return
+    */
+    int                  (*remove)(struct string_pool *self, struct string *strings, size_t num_strings);
 
-    enum status          (*remove)(struct string_pool *self, struct string *strings, size_t num_strings);
-
-    enum status          (*find_by_string)(struct string *out, size_t *num_out, struct string_pool *self,
+    /**
+     *
+     *
+     * Note: Implementation must ensure thread-safeness
+     *
+     * @param self
+     * @return
+    */
+    int                  (*find_by_string)(struct string_pool *self, struct string *out, size_t *num_out,
                                            const char **strings, size_t num_strings);
+    /**
+     *
+     *
+     * Note: Implementation must ensure thread-safeness
+     *
+     * @param self
+     * @return
+    */
+    int                  (*find_by_id)(struct string_pool *self, const char **strings, size_t *num_out,
+                                       const string_id_t *ids, size_t num_ids);
 
-    enum status          (*find_by_id)(struct string *out, size_t *num_out, struct string_pool *self,
-                                       const char **strings, size_t num_strings);
-
-    enum status          (*resolve)(char **out, size_t *num_out, struct string_pool *self, struct string *strings,
+    /**
+     *
+     *
+     * Note: Implementation must ensure thread-safeness
+     *
+     * @param self
+     * @return
+    */
+    int                  (*resolve)(struct string_pool *self, char **out, size_t *num_out, struct string *strings,
                                     size_t num_strings);
 };
 
@@ -60,6 +112,21 @@ struct string
     size_t              len;
     hash_t              hash;
 };
+
+int string_pool_create_naive(struct string_pool *pool, size_t capacity, const struct allocator *alloc);
+
+int string_pool_drop(struct string_pool *pool);
+
+int string_pool_insert(struct string *out, size_t *num_out, struct string_pool *pool,
+                       const char **strings, size_t num_strings);
+
+int string_pool_remove(struct string_pool *pool, struct string *strings, size_t num_strings);
+
+int string_pool_find_by_string(struct string *out, size_t *num_out, struct string_pool *pool,
+                               const char **strings, size_t num_strings);
+
+int string_pool_find_by_id(const char **strings, size_t *num_out, struct string_pool *pool,
+                           const string_id_t *ids, size_t num_ids);
 
 
 #endif

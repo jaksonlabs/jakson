@@ -1,7 +1,8 @@
 #include <stdlib.h>
 #include <status.h>
-#include <ng5/allocator.h>
 #include <stdio.h>
+
+#include <ng5/allocator.h>
 
 static void *default_malloc(struct allocator *self, size_t size);
 static void *default_realloc(struct allocator *self, void *ptr, size_t size);
@@ -24,8 +25,18 @@ int allocator_default(struct allocator *alloc)
     }
 }
 
+int allocator_this_or_default(struct allocator *dst, const struct allocator *this)
+{
+    if (!this) {
+        return allocator_default(dst);
+    } else {
+        return allocator_clone(dst, this);
+    }
+}
+
 void *allocator_malloc(struct allocator *alloc, size_t size)
 {
+    assert(alloc);
     return alloc->malloc(alloc, size);
 }
 
@@ -34,9 +45,12 @@ void *allocator_realloc(struct allocator *alloc, void *ptr, size_t size)
     return alloc->realloc(alloc, ptr, size);
 }
 
-void allocator_free(struct allocator *alloc, void *ptr)
+int allocator_free(struct allocator *alloc, void *ptr)
 {
+    check_non_null(alloc);
+    check_non_null(ptr);
     alloc->free(alloc, ptr);
+    return STATUS_OK;
 }
 
 void allocator_gc(struct allocator *alloc)

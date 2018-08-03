@@ -23,12 +23,21 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <string.h>
+#include <stdio.h>
 #include <assert.h>
 #include <stdatomic.h>
+#include <pthread.h>
 
 #include "status.h"
 
 #define unused(x)   (void)(x)
+
+#define of_type(x) /* a convenience way to write types for generic containers; no effect than just a visual one */
+
+#define likely(x)                 \
+    __builtin_expect((x), 1)
+#define unlikely(x)               \
+    __builtin_expect((x), 0)
 
 #define panic(msg)                \
 {                                 \
@@ -36,11 +45,45 @@
     abort();                      \
 }
 
+#ifndef NDEBUG
 #define check_non_null(x)         \
 {                                 \
     if (!x) {                     \
         return STATUS_NULLPTR;    \
     }                             \
 }
+#else
+#define check_non_null(x) { }
+#endif
+
+#ifndef NDEBUG
+#define check_larger_one(x)          \
+{                                    \
+    if (x <= 1) {                    \
+        return STATUS_ILLEGALARG;    \
+    }                                \
+}
+#else
+#define check_larger_one(x) { }
+#endif
+
+
+#define check_success(x)            \
+{                                   \
+    if (unlikely(x != STATUS_OK)) { \
+        return x;                   \
+    }                               \
+}
+
+#define NOT_YET_IMPLEMENTED         \
+{                                   \
+    abort();                        \
+};
+
+#define force_inline                \
+    __attribute__((always_inline))
+
+#define unused_fn                   \
+    __attribute__((unused))
 
 #endif

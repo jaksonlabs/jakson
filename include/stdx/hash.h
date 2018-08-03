@@ -38,42 +38,45 @@ typedef size_t hash_t;
     c -= a; c -= b; c ^= (b >> 15); \
 }
 
-inline static hash_t jenkins_hash(size_t key_size, const void *key)
-{
-    assert ((key != NULL) && (key_size > 0));
+/* implements: hash_t jenkins_hash(size_t key_size, const void *key) */
+#define jenkins_hash(key_size_in, key)                                                             \
+({                                                                                                 \
+    size_t key_size = key_size_in;                                                                 \
+    assert ((key != NULL) && (key_size > 0));                                                      \
+                                                                                                   \
+    unsigned a, b;                                                                                 \
+    unsigned c = 0;                                                                                \
+    unsigned char *k = (unsigned char *) key;                                                      \
+                                                                                                   \
+    a = b = 0x9e3779b9;                                                                            \
+                                                                                                   \
+    while (key_size >= 12) {                                                                       \
+        a += (k[0] + ((unsigned)k[1] << 8) + ((unsigned)k[2] << 16) + ((unsigned)k[3] << 24));     \
+        b += (k[4] + ((unsigned)k[5] << 8) + ((unsigned)k[6] << 16) + ((unsigned)k[7] << 24));     \
+        c += (k[8] + ((unsigned)k[9] << 8) + ((unsigned)k[10] << 16) + ((unsigned)k[11] << 24));   \
+        JENKINS_MIX(a, b, c);                                                                      \
+        k += 12;                                                                                   \
+        key_size -= 12;                                                                            \
+    }                                                                                              \
+                                                                                                   \
+    c += key_size;                                                                                 \
+                                                                                                   \
+    switch (key_size) {                                                                            \
+        case 11: c += ((unsigned)k[10] << 24); break;                                              \
+        case 10: c += ((unsigned)k[9] << 16); break;                                               \
+        case 9: c += ((unsigned)k[8] << 8); break;                                                 \
+        case 8: b += ((unsigned)k[7] << 24); break;                                                \
+        case 7: b += ((unsigned)k[6] << 16); break;                                                \
+        case 6: b += ((unsigned)k[5] << 8); break;                                                 \
+        case 5: b += k[4]; break;                                                                  \
+        case 4: a += ((unsigned)k[3] << 24); break;                                                \
+        case 3: a += ((unsigned)k[2] << 16); break;                                                \
+        case 2: a += ((unsigned)k[1] << 8); break;                                                 \
+        case 1: a += k[0]; break;                                                                  \
+    }                                                                                              \
+    JENKINS_MIX(a, b, c);                                                                          \
+    c;                                                                                             \
+})
 
-    unsigned a, b;
-    unsigned c = 0;
-    unsigned char *k = (unsigned char *) key;
-
-    a = b = 0x9e3779b9;
-
-    while (key_size >= 12) {
-        a += (k[0] + ((unsigned)k[1] << 8) + ((unsigned)k[2] << 16) + ((unsigned)k[3] << 24));
-        b += (k[4] + ((unsigned)k[5] << 8) + ((unsigned)k[6] << 16) + ((unsigned)k[7] << 24));
-        c += (k[8] + ((unsigned)k[9] << 8) + ((unsigned)k[10] << 16) + ((unsigned)k[11] << 24));
-        JENKINS_MIX(a, b, c);
-        k += 12;
-        key_size -= 12;
-    }
-
-    c += key_size;
-
-    switch (key_size) {
-    case 11: c += ((unsigned)k[10] << 24); break;
-    case 10: c += ((unsigned)k[9] << 16); break;
-    case 9: c += ((unsigned)k[8] << 8); break;
-    case 8: b += ((unsigned)k[7] << 24); break;
-    case 7: b += ((unsigned)k[6] << 16); break;
-    case 6: b += ((unsigned)k[5] << 8); break;
-    case 5: b += k[4]; break;
-    case 4: a += ((unsigned)k[3] << 24); break;
-    case 3: a += ((unsigned)k[2] << 16); break;
-    case 2: a += ((unsigned)k[1] << 8); break;
-    case 1: a += k[0]; break;
-    }
-    JENKINS_MIX(a, b, c);
-    return c;
-}
 
 #endif

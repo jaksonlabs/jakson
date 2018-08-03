@@ -1,4 +1,4 @@
-// file: hash_table.h
+// file: unit.h
 
 /**
  *  Copyright (C) 2018 Marcus Pinnecke
@@ -17,29 +17,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _NG5_VECTOR
-#define _NG5_VECTOR
+#ifndef NG5_UNIT
+#define NG5_UNIT
 
-#include <common.h>
-#include <ng5/allocator.h>
+#include <status.h>
 
-struct hash_table
-{
-  /**
-  *  Memory allocator that is used to get memory for user data
-  */
-  struct allocator    allocator;
+/**
+ * A floating point number between 0 and 1
+ */
+typedef float unit_t;
 
-};
-
-int hash_table_create(struct hash_table *out, const struct allocator *alloc, size_t key_size, size_t elem_size,
-                      size_t num_buckets, size_t cap_buckets);
-
-int hash_table_drop(struct hash_table *out);
-
-int hash_table_put(struct hash_table *table, const char *keys, const char *values, size_t num_pairs);
-
-int hash_table_get(struct hash_table *table, const char *keys)
-
+#define check_unit(x)                       \
+{                                           \
+    if (unlikely(x < 0 || x > 1)) {         \
+        return STATUS_UNIT_OUTOFBOUNDS;     \
+    }                                       \
+}
 
 #endif

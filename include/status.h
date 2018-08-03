@@ -21,8 +21,14 @@
 #define _NG5_STATUS
 
 enum status {
-    STATUS_OK       = 0,
-    STATUS_NULLPTR
+    STATUS_FALSE                = 0,
+    STATUS_OK                   = 1,
+    STATUS_TRUE                 = 1,
+    STATUS_NULLPTR,
+    STATUS_NOTIMPL,
+    STATUS_UNIT_OUTOFBOUNDS,
+    STATUS_MALLOCERR,
+    STATUS_ILLEGALARG
 };
 
 

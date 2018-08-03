@@ -31,11 +31,11 @@ struct spinlock
   bool        owns_lock;
 } ;
 
-void spinlock_create(struct spinlock *spinlock);
+int spinlock_create(struct spinlock *spinlock);
 
-void spinlock_lock(struct spinlock *spinlock);
+int spinlock_lock(struct spinlock *spinlock);
 
-void spinlock_unlock(struct spinlock *spinlock);
+int spinlock_unlock(struct spinlock *spinlock);
 
 
 #endif
