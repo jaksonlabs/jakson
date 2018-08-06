@@ -3,7 +3,12 @@ project(ng5 C)
 
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/build)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/cmake-build-debug)
+
 set (CMAKE_C_STANDARD 11)
+
+file(MAKE_DIRECTORY ${CMAKE_HOME_DIRECTORY}/build)
 
 #set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_BUILD_TYPE Release)
@@ -30,6 +35,7 @@ set (CMAKE_RANLIB  "/usr/bin/llvm-ranlib")
 
 include_directories("include")
 include_directories("/usr/local/include")
+
 
 set(SORUCE_FILES
         ${CMAKE_SOURCE_DIR}/include/ng5/allocator.h
