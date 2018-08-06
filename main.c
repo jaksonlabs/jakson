@@ -4,6 +4,7 @@
 #include <stdx/algorithm.h>
 #include <stdx/time.h>
 #include <stdx/string_id_maps/simple_bsearch.h>
+#include <stdx/string_id_maps/simple_scan_singlethreaded.h>
 
 bool comp_int_less_eq(const void *lhs, const void *rhs)
 {
@@ -82,7 +83,8 @@ int main()
         struct string_id_map map;
 
         begin = time_current_time_ms();
-        string_id_map_create_simple(&map, NULL, 10000, 100, 1.7f);
+        //string_id_map_create_simple(&map, NULL, 10000, 100, 1.7f);
+        string_id_map_create_scan_single_threaded(&map, NULL, 10000, 100, 1.7f);
         duration_create = time_current_time_ms() - begin;
 
         char **keys = malloc(NUM_PAIRS * sizeof(char*));

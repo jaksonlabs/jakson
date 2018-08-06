@@ -1,4 +1,4 @@
-// file: simple_bsearch.c
+// file: string_id_map_create_scan_single_threaded.c
 
 /**
  *  Copyright (C) 2018 Marcus Pinnecke
@@ -21,10 +21,9 @@
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <stdx/string_id_maps/simple_bsearch.h>
+#include <stdx/string_id_maps/simple_scan_singlethreaded.h>
 #include <stdx/asnyc.h>
 #include <stdlib.h>
-#include <stdx/algorithm.h>
 
 // ---------------------------------------------------------------------------------------------------------------------
 //  SIMPLE
@@ -38,11 +37,9 @@ struct simple_bucket_entry {
 };
 
 struct simple_bucket {
-  bool                                       is_sorted;
   struct spinlock                            spinlock;
   struct vector of_type(simple_bucket_entry) entries;
   struct vector of_type(size_t)              freelist;
-  size_t                                    *indicies;
 };
 
 struct simple_extra {
@@ -79,12 +76,7 @@ static int simple_bucket_insert(struct simple_bucket *bucket, const char *key, u
         struct allocator *alloc) force_inline;
 static void simple_bucket_freelist_push(struct simple_bucket *bucket, size_t idx);
 static size_t simple_bucket_freelist_pop(struct simple_bucket *bucket, struct allocator *alloc) force_inline;
-static size_t simple_bucket_find_entry_by_key(struct simple_bucket *bucket, const char *key, struct allocator *alloc);
-
-inline static bool simple_bucket_cmp_less_entry(const void *lhs, const void *rhs);
-inline static bool simple_bucket_cmp_eq_entry(const void *lhs, const void *rhs);
-inline static bool simple_bucket_cmp_less_eq_entry(const void *lhs, const void *rhs);
-
+static size_t simple_bucket_find_entry_by_key(struct simple_bucket *bucket, const char *key);
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
@@ -96,7 +88,7 @@ inline static bool simple_bucket_cmp_less_eq_entry(const void *lhs, const void *
 //  SIMPLE
 // ---------------------------------------------------------------------------------------------------------------------
 
-int string_id_map_create_simple(struct string_id_map *map, const struct allocator *alloc, size_t num_buckets,
+int string_id_map_create_scan_single_threaded(struct string_id_map *map, const struct allocator *alloc, size_t num_buckets,
         size_t cap_buckets, float bucket_grow_factor)
 {
     check_success(allocator_this_or_default(&map->allocator, alloc));
@@ -139,37 +131,27 @@ static int simple_put(struct string_id_map *self, char *const *keys, const uint6
     return STATUS_OK;
 }
 
-static void sort_bucket_indicies_ifneeded(struct simple_bucket *bucket, struct allocator *alloc) {
-    if (!bucket->is_sorted) {
-        struct simple_bucket_entry *data = (struct simple_bucket_entry *) vector_data(&bucket->entries);
-        qsort_indicies(bucket->indicies, data, sizeof(struct simple_bucket_entry), simple_bucket_cmp_less_eq_entry,
-                bucket->entries.cap_elems, alloc);
-        bucket->is_sorted = true;
-    }
-}
 
-static size_t simple_bucket_find_entry_by_key(struct simple_bucket *bucket, const char *key, struct allocator *alloc)
+static size_t simple_bucket_find_entry_by_key(struct simple_bucket *bucket, const char *key)
 {
-    struct simple_bucket_entry *data = (struct simple_bucket_entry *) vector_data(&bucket->entries);
-    /* search for update operation */
-    sort_bucket_indicies_ifneeded(bucket, alloc);
+    struct simple_bucket_entry *entries = (struct simple_bucket_entry *) vector_data(&bucket->entries);
 
-    struct simple_bucket_entry needle = {
-            .str    = key,
-            .in_use = true
-    };
+    for (size_t i = 0; i < bucket->entries.cap_elems; i++) {
+        const struct simple_bucket_entry *entry = entries + i;
+        if (entry->in_use && strcmp(key, entry->str)) {
+            return i;
+        }
+    }
 
-    size_t needle_pos = binary_search_indicies(bucket->indicies, data, sizeof(struct simple_bucket_entry),
-            bucket->entries.cap_elems, &needle, simple_bucket_cmp_eq_entry,
-            simple_bucket_cmp_less_entry);
-
-    return needle_pos < bucket->entries.cap_elems ? bucket->indicies[needle_pos] : needle_pos;
+    return bucket->entries.cap_elems;;
 }
 
 static int simple_map_fetch(struct vector of_type(simple_bucket) *buckets, uint64_t *values_out, bool *key_found_mask,
         size_t *num_keys_not_found, size_t *bucket_idxs, char *const *keys, size_t num_keys,
         struct allocator *alloc)
 {
+    unused(alloc);
+
     size_t num_not_found = 0;
     struct simple_bucket *data = (struct simple_bucket *) vector_data(buckets);
 
@@ -178,7 +160,7 @@ static int simple_map_fetch(struct vector of_type(simple_bucket) *buckets, uint6
         simple_bucket_lock(bucket);
 
         const char                 *key        = keys[i];
-        size_t                      needle_pos = simple_bucket_find_entry_by_key(bucket, key, alloc);
+        size_t                      needle_pos = simple_bucket_find_entry_by_key(bucket, key);
 
         bool found         = needle_pos < bucket->entries.cap_elems;
         num_not_found     += found ? 0 : 1;
@@ -218,6 +200,8 @@ static int simple_get(struct string_id_map *self, uint64_t **out, bool **found_m
 
 static int simple_map_remove(struct simple_extra *extra, size_t *bucket_idxs, char *const *keys, size_t num_keys, struct allocator *alloc)
 {
+    unused(alloc);
+
     struct simple_bucket *data = (struct simple_bucket *) vector_data(&extra->buckets);
 
     for (size_t i = 0; i < num_keys; i++) {
@@ -225,13 +209,12 @@ static int simple_map_remove(struct simple_extra *extra, size_t *bucket_idxs, ch
         const char           *key        = keys[i];
 
         simple_bucket_lock(bucket);
-        size_t                needle_pos = simple_bucket_find_entry_by_key(bucket, key, alloc);
+        size_t                needle_pos = simple_bucket_find_entry_by_key(bucket, key);
         if (likely(needle_pos < bucket->entries.cap_elems)) {
             struct simple_bucket_entry *entry = (struct simple_bucket_entry *) vector_data(&bucket->entries) + needle_pos;
             assert (entry->in_use);
             entry->in_use                     = false;
             simple_bucket_freelist_push(bucket, needle_pos);
-            bucket->is_sorted                 = false;
         }
         simple_bucket_unlock(bucket);
     }
@@ -293,6 +276,8 @@ unused_fn
 static int simple_bucket_create(struct simple_bucket *buckets, size_t num_buckets, size_t bucket_cap,
         float grow_factor, struct allocator *alloc)
 {
+    unused(alloc);
+
     check_non_null(buckets);
 
     struct simple_bucket_entry entry = {
@@ -304,17 +289,11 @@ static int simple_bucket_create(struct simple_bucket *buckets, size_t num_bucket
 
     while (num_buckets--) {
         struct simple_bucket *bucket = buckets++;
-        bucket->is_sorted = false;
-        bucket->indicies  = allocator_malloc(alloc, bucket_cap * sizeof(size_t));
         spinlock_create(&bucket->spinlock);
         vector_create(&bucket->entries, alloc, sizeof(struct simple_bucket_entry), bucket_cap);
         vector_create(&bucket->freelist, alloc, sizeof(size_t), bucket_cap);
         vector_set_growfactor(&bucket->entries, grow_factor);
         vector_set_growfactor(&bucket->freelist, grow_factor);
-        for (size_t i = 0; i < bucket_cap; i++) {
-            bucket->indicies[i] = i;
-        }
-        vector_push(&bucket->freelist,  bucket->indicies, bucket_cap);
         vector_repreat_push(&bucket->entries, &entry, bucket_cap);
     }
 
@@ -323,13 +302,13 @@ static int simple_bucket_create(struct simple_bucket *buckets, size_t num_bucket
 
 static int simple_bucket_drop(struct simple_bucket *buckets, size_t num_buckets, struct allocator *alloc)
 {
+    unused(alloc);
     check_non_null(buckets);
 
     while (num_buckets--) {
         struct simple_bucket *bucket = buckets++;
         check_success(vector_drop(&bucket->entries));
         check_success(vector_drop(&bucket->freelist));
-        check_success(allocator_free(alloc, bucket->indicies));
     }
 
     return STATUS_OK;
@@ -372,12 +351,10 @@ static size_t simple_bucket_freelist_pop(struct simple_bucket *bucket, struct al
         size_t last_slot = entries->cap_elems;
         check_success(vector_grow(&new_slots, freelist));
         check_success(vector_grow(NULL, entries));
-        bucket->indicies = allocator_realloc(alloc, bucket->indicies, entries->cap_elems * sizeof(size_t));
         size_t *new_slot_ids = allocator_malloc(alloc, new_slots * sizeof(size_t));
         for (size_t slot = 0; slot < new_slots; slot++) {
             size_t new_slot_id = last_slot + slot;
             new_slot_ids[slot] = new_slot_id;
-            bucket->indicies[last_slot + slot] = new_slot_id;
             check_success(vector_push(entries, &empty, 1));
         }
         check_success(vector_push(freelist, new_slot_ids, new_slots));
@@ -390,43 +367,6 @@ static size_t simple_bucket_freelist_pop(struct simple_bucket *bucket, struct al
     return result;
 }
 
-inline static bool simple_bucket_cmp_less_entry(const void *lhs, const void *rhs)
-{
-
-    struct simple_bucket_entry *a = (struct simple_bucket_entry *) lhs;
-    struct simple_bucket_entry *b = (struct simple_bucket_entry *) rhs;
-
-    if (!a->in_use) {
-        return false;
-    } else if (!b->in_use) {
-        return true;
-    } else if (!a->in_use && !b->in_use) {
-        return true;
-    } else {
-        return strcmp(a->str, b->str) < 0;
-    }
-}
-
-inline static bool simple_bucket_cmp_eq_entry(const void *lhs, const void *rhs)
-{
-    struct simple_bucket_entry *a = (struct simple_bucket_entry *) lhs;
-    struct simple_bucket_entry *b = (struct simple_bucket_entry *) rhs;
-    if (!a->in_use) {
-        return false;
-    } else if (!b->in_use) {
-        return true;
-    } else if (!a->in_use && !b->in_use) {
-        return true;
-    } else {
-        return strcmp(a->str, b->str) == 0;
-    }
-}
-
-inline static bool simple_bucket_cmp_less_eq_entry(const void *lhs, const void *rhs)
-{
-    return simple_bucket_cmp_less_entry(lhs, rhs) || simple_bucket_cmp_eq_entry(lhs, rhs);
-}
-
 static int simple_bucket_insert(struct simple_bucket *bucket, const char *key, uint64_t value, struct allocator *alloc)
 {
     check_non_null(bucket);
@@ -434,7 +374,7 @@ static int simple_bucket_insert(struct simple_bucket *bucket, const char *key, u
 
     simple_bucket_lock(bucket);
 
-    size_t                      needle_pos = simple_bucket_find_entry_by_key(bucket, key, alloc);
+    size_t                      needle_pos = simple_bucket_find_entry_by_key(bucket, key);
     struct simple_bucket_entry *data       = (struct simple_bucket_entry *) vector_data(&bucket->entries);
 
 
@@ -452,8 +392,6 @@ static int simple_bucket_insert(struct simple_bucket *bucket, const char *key, u
 
         entry->str_len = strlen(key);
         entry->value   = value;
-
-        bucket->is_sorted = false;
     }
 
 

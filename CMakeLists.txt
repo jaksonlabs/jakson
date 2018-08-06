@@ -52,7 +52,9 @@ set(SORUCE_FILES
         ${CMAKE_SOURCE_DIR}/include/stdx/unit.h
         ${CMAKE_SOURCE_DIR}/include/stdx/algorithm.h
         ${CMAKE_SOURCE_DIR}/include/stdx/string_id_maps/simple_bsearch.h
-        ${CMAKE_SOURCE_DIR}/stdx/string_id_maps/simple_bsearch.c)
+        ${CMAKE_SOURCE_DIR}/include/stdx/string_id_maps/simple_scan_singlethreaded.h
+        ${CMAKE_SOURCE_DIR}/stdx/string_id_maps/simple_bsearch.c
+        ${CMAKE_SOURCE_DIR}/stdx/string_id_maps/simple_scan_singlethreaded.c)
 
 add_executable(ng5 main.c ${SORUCE_FILES})
 
