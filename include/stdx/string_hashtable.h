@@ -278,8 +278,6 @@ inline static int string_id_map_get_blind(uint64_t** out, struct string_hashtabl
                                           char* const* keys, size_t num_keys)
 {
     check_non_null(out);
-    check_non_null(found_mask);
-    check_non_null(num_not_found);
     check_non_null(map);
     check_non_null(keys);
     assert(map->get_blind);
@@ -304,9 +302,6 @@ inline static int string_id_map_get_blind(uint64_t** out, struct string_hashtabl
  */
 inline static int string_id_map_update_key_blind(struct string_hashtable *map, const uint64_t *values, char *const *keys, size_t num_keys)
 {
-    check_non_null(out);
-    check_non_null(found_mask);
-    check_non_null(num_not_found);
     check_non_null(map);
     check_non_null(keys);
     assert(map->update_key_blind);

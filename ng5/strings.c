@@ -209,20 +209,20 @@ static int naive_resolve(struct string_pool *self, char **out, size_t *num_out, 
 
 static inline struct naive_extra_t *naive_extra(struct string_pool *self)
 {
-    assert(self->tag == SP_NAIVE);
+    assert(self->tag == STRING_POOL_NAIVE);
     return (struct naive_extra_t *) self->extra;
 }
 
 static void naive_lock(struct string_pool *self)
 {
-    assert(self->tag == SP_NAIVE);
+    assert(self->tag == STRING_POOL_NAIVE);
     struct naive_extra_t *extra = naive_extra(self);
     spinlock_lock(&extra->spinlock);
 }
 
 static void naive_unlock(struct string_pool *self)
 {
-    assert(self->tag == SP_NAIVE);
+    assert(self->tag == STRING_POOL_NAIVE);
     struct naive_extra_t *extra = naive_extra(self);
     spinlock_unlock(&extra->spinlock);
 }

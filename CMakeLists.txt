@@ -10,8 +10,8 @@ set (CMAKE_C_STANDARD 11)
 
 file(MAKE_DIRECTORY ${CMAKE_HOME_DIRECTORY}/build)
 
-#set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
+#set(CMAKE_BUILD_TYPE Release)
 
 set (CMAKE_C_COMPILER             "/usr/bin/clang")
 set (CMAKE_C_FLAGS                "-Wall -std=c11 -Wextra -Werror")
@@ -59,9 +59,16 @@ set(SORUCE_FILES
         ${CMAKE_SOURCE_DIR}/include/stdx/algorithm.h
         ${CMAKE_SOURCE_DIR}/include/stdx/string_id_maps/simple_bsearch.h
         ${CMAKE_SOURCE_DIR}/stdx/string_id_maps/simple_bsearch.c
-)
+        ${CMAKE_SOURCE_DIR}/include/stdx/string_id_maps/simple_scan1.h
+        ${CMAKE_SOURCE_DIR}/include/stdx/string_id_maps/simple_scan2.h
+        ${CMAKE_SOURCE_DIR}/stdx/string_id_maps/simple_scan1.c
+        ${CMAKE_SOURCE_DIR}/stdx/string_id_maps/simple_scan2.c)
 
 add_executable(ng5 main.c ${SORUCE_FILES})
+
+add_executable(bench-bucket-putget-bsearch benches/bench-bucket-putget-bsearch.c ${SORUCE_FILES})
+add_executable(bench-bucket-putget-scan-1 benches/bench-bucket-putget-scan-1.c ${SORUCE_FILES})
+add_executable(bench-bucket-putget-scan-2 benches/bench-bucket-putget-scan-2.c ${SORUCE_FILES})
 
 enable_testing()
 
