@@ -69,8 +69,8 @@ test/fast: test
 
 # Special rule for the target edit_cache
 edit_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
-	/usr/local/Cellar/cmake/3.5.0/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
+	/usr/local/Cellar/cmake/3.5.0/bin/ccmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -136,6 +136,195 @@ stdx_test_string_id_map/fast:
 	cd /Users/marcus/git/ng5 && $(MAKE) -f tests/CMakeFiles/stdx_test_string_id_map.dir/build.make tests/CMakeFiles/stdx_test_string_id_map.dir/build
 .PHONY : stdx_test_string_id_map/fast
 
+__/ng5/allocator.o: __/ng5/allocator.c.o
+
+.PHONY : __/ng5/allocator.o
+
+# target to build an object file
+__/ng5/allocator.c.o:
+	cd /Users/marcus/git/ng5 && $(MAKE) -f tests/CMakeFiles/stdx_test_string_id_map.dir/build.make tests/CMakeFiles/stdx_test_string_id_map.dir/__/ng5/allocator.c.o
+.PHONY : __/ng5/allocator.c.o
+
+__/ng5/allocator.i: __/ng5/allocator.c.i
+
+.PHONY : __/ng5/allocator.i
+
+# target to preprocess a source file
+__/ng5/allocator.c.i:
+	cd /Users/marcus/git/ng5 && $(MAKE) -f tests/CMakeFiles/stdx_test_string_id_map.dir/build.make tests/CMakeFiles/stdx_test_string_id_map.dir/__/ng5/allocator.c.i
+.PHONY : __/ng5/allocator.c.i
+
+__/ng5/allocator.s: __/ng5/allocator.c.s
+
+.PHONY : __/ng5/allocator.s
+
+# target to generate assembly for a file
+__/ng5/allocator.c.s:
+	cd /Users/marcus/git/ng5 && $(MAKE) -f tests/CMakeFiles/stdx_test_string_id_map.dir/build.make tests/CMakeFiles/stdx_test_string_id_map.dir/__/ng5/allocator.c.s
+.PHONY : __/ng5/allocator.c.s
+
+__/ng5/strings.o: __/ng5/strings.c.o
+
+.PHONY : __/ng5/strings.o
+
+# target to build an object file
+__/ng5/strings.c.o:
+	cd /Users/marcus/git/ng5 && $(MAKE) -f tests/CMakeFiles/stdx_test_string_id_map.dir/build.make tests/CMakeFiles/stdx_test_string_id_map.dir/__/ng5/strings.c.o
+.PHONY : __/ng5/strings.c.o
+
+__/ng5/strings.i: __/ng5/strings.c.i
+
+.PHONY : __/ng5/strings.i
+
+# target to preprocess a source file
+__/ng5/strings.c.i:
+	cd /Users/marcus/git/ng5 && $(MAKE) -f tests/CMakeFiles/stdx_test_string_id_map.dir/build.make tests/CMakeFiles/stdx_test_string_id_map.dir/__/ng5/strings.c.i
+.PHONY : __/ng5/strings.c.i
+
+__/ng5/strings.s: __/ng5/strings.c.s
+
+.PHONY : __/ng5/strings.s
+
+# target to generate assembly for a file
+__/ng5/strings.c.s:
+	cd /Users/marcus/git/ng5 && $(MAKE) -f tests/CMakeFiles/stdx_test_string_id_map.dir/build.make tests/CMakeFiles/stdx_test_string_id_map.dir/__/ng5/strings.c.s
+.PHONY : __/ng5/strings.c.s
+
+__/stdx/async.o: __/stdx/async.c.o
+
+.PHONY : __/stdx/async.o
+
+# target to build an object file
+__/stdx/async.c.o:
+	cd /Users/marcus/git/ng5 && $(MAKE) -f tests/CMakeFiles/stdx_test_string_id_map.dir/build.make tests/CMakeFiles/stdx_test_string_id_map.dir/__/stdx/async.c.o
+.PHONY : __/stdx/async.c.o
+
+__/stdx/async.i: __/stdx/async.c.i
+
+.PHONY : __/stdx/async.i
+
+# target to preprocess a source file
+__/stdx/async.c.i:
+	cd /Users/marcus/git/ng5 && $(MAKE) -f tests/CMakeFiles/stdx_test_string_id_map.dir/build.make tests/CMakeFiles/stdx_test_string_id_map.dir/__/stdx/async.c.i
+.PHONY : __/stdx/async.c.i
+
+__/stdx/async.s: __/stdx/async.c.s
+
+.PHONY : __/stdx/async.s
+
+# target to generate assembly for a file
+__/stdx/async.c.s:
+	cd /Users/marcus/git/ng5 && $(MAKE) -f tests/CMakeFiles/stdx_test_string_id_map.dir/build.make tests/CMakeFiles/stdx_test_string_id_map.dir/__/stdx/async.c.s
+.PHONY : __/stdx/async.c.s
+
+__/stdx/string_id_maps/simple_bsearch.o: __/stdx/string_id_maps/simple_bsearch.c.o
+
+.PHONY : __/stdx/string_id_maps/simple_bsearch.o
+
+# target to build an object file
+__/stdx/string_id_maps/simple_bsearch.c.o:
+	cd /Users/marcus/git/ng5 && $(MAKE) -f tests/CMakeFiles/stdx_test_string_id_map.dir/build.make tests/CMakeFiles/stdx_test_string_id_map.dir/__/stdx/string_id_maps/simple_bsearch.c.o
+.PHONY : __/stdx/string_id_maps/simple_bsearch.c.o
+
+__/stdx/string_id_maps/simple_bsearch.i: __/stdx/string_id_maps/simple_bsearch.c.i
+
+.PHONY : __/stdx/string_id_maps/simple_bsearch.i
+
+# target to preprocess a source file
+__/stdx/string_id_maps/simple_bsearch.c.i:
+	cd /Users/marcus/git/ng5 && $(MAKE) -f tests/CMakeFiles/stdx_test_string_id_map.dir/build.make tests/CMakeFiles/stdx_test_string_id_map.dir/__/stdx/string_id_maps/simple_bsearch.c.i
+.PHONY : __/stdx/string_id_maps/simple_bsearch.c.i
+
+__/stdx/string_id_maps/simple_bsearch.s: __/stdx/string_id_maps/simple_bsearch.c.s
+
+.PHONY : __/stdx/string_id_maps/simple_bsearch.s
+
+# target to generate assembly for a file
+__/stdx/string_id_maps/simple_bsearch.c.s:
+	cd /Users/marcus/git/ng5 && $(MAKE) -f tests/CMakeFiles/stdx_test_string_id_map.dir/build.make tests/CMakeFiles/stdx_test_string_id_map.dir/__/stdx/string_id_maps/simple_bsearch.c.s
+.PHONY : __/stdx/string_id_maps/simple_bsearch.c.s
+
+__/stdx/time.o: __/stdx/time.c.o
+
+.PHONY : __/stdx/time.o
+
+# target to build an object file
+__/stdx/time.c.o:
+	cd /Users/marcus/git/ng5 && $(MAKE) -f tests/CMakeFiles/stdx_test_string_id_map.dir/build.make tests/CMakeFiles/stdx_test_string_id_map.dir/__/stdx/time.c.o
+.PHONY : __/stdx/time.c.o
+
+__/stdx/time.i: __/stdx/time.c.i
+
+.PHONY : __/stdx/time.i
+
+# target to preprocess a source file
+__/stdx/time.c.i:
+	cd /Users/marcus/git/ng5 && $(MAKE) -f tests/CMakeFiles/stdx_test_string_id_map.dir/build.make tests/CMakeFiles/stdx_test_string_id_map.dir/__/stdx/time.c.i
+.PHONY : __/stdx/time.c.i
+
+__/stdx/time.s: __/stdx/time.c.s
+
+.PHONY : __/stdx/time.s
+
+# target to generate assembly for a file
+__/stdx/time.c.s:
+	cd /Users/marcus/git/ng5 && $(MAKE) -f tests/CMakeFiles/stdx_test_string_id_map.dir/build.make tests/CMakeFiles/stdx_test_string_id_map.dir/__/stdx/time.c.s
+.PHONY : __/stdx/time.c.s
+
+__/stdx/vector.o: __/stdx/vector.c.o
+
+.PHONY : __/stdx/vector.o
+
+# target to build an object file
+__/stdx/vector.c.o:
+	cd /Users/marcus/git/ng5 && $(MAKE) -f tests/CMakeFiles/stdx_test_string_id_map.dir/build.make tests/CMakeFiles/stdx_test_string_id_map.dir/__/stdx/vector.c.o
+.PHONY : __/stdx/vector.c.o
+
+__/stdx/vector.i: __/stdx/vector.c.i
+
+.PHONY : __/stdx/vector.i
+
+# target to preprocess a source file
+__/stdx/vector.c.i:
+	cd /Users/marcus/git/ng5 && $(MAKE) -f tests/CMakeFiles/stdx_test_string_id_map.dir/build.make tests/CMakeFiles/stdx_test_string_id_map.dir/__/stdx/vector.c.i
+.PHONY : __/stdx/vector.c.i
+
+__/stdx/vector.s: __/stdx/vector.c.s
+
+.PHONY : __/stdx/vector.s
+
+# target to generate assembly for a file
+__/stdx/vector.c.s:
+	cd /Users/marcus/git/ng5 && $(MAKE) -f tests/CMakeFiles/stdx_test_string_id_map.dir/build.make tests/CMakeFiles/stdx_test_string_id_map.dir/__/stdx/vector.c.s
+.PHONY : __/stdx/vector.c.s
+
+stdx/test_string_id_map.o: stdx/test_string_id_map.c.o
+
+.PHONY : stdx/test_string_id_map.o
+
+# target to build an object file
+stdx/test_string_id_map.c.o:
+	cd /Users/marcus/git/ng5 && $(MAKE) -f tests/CMakeFiles/stdx_test_string_id_map.dir/build.make tests/CMakeFiles/stdx_test_string_id_map.dir/stdx/test_string_id_map.c.o
+.PHONY : stdx/test_string_id_map.c.o
+
+stdx/test_string_id_map.i: stdx/test_string_id_map.c.i
+
+.PHONY : stdx/test_string_id_map.i
+
+# target to preprocess a source file
+stdx/test_string_id_map.c.i:
+	cd /Users/marcus/git/ng5 && $(MAKE) -f tests/CMakeFiles/stdx_test_string_id_map.dir/build.make tests/CMakeFiles/stdx_test_string_id_map.dir/stdx/test_string_id_map.c.i
+.PHONY : stdx/test_string_id_map.c.i
+
+stdx/test_string_id_map.s: stdx/test_string_id_map.c.s
+
+.PHONY : stdx/test_string_id_map.s
+
+# target to generate assembly for a file
+stdx/test_string_id_map.c.s:
+	cd /Users/marcus/git/ng5 && $(MAKE) -f tests/CMakeFiles/stdx_test_string_id_map.dir/build.make tests/CMakeFiles/stdx_test_string_id_map.dir/stdx/test_string_id_map.c.s
+.PHONY : stdx/test_string_id_map.c.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -146,6 +335,27 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... stdx_test_string_id_map"
+	@echo "... __/ng5/allocator.o"
+	@echo "... __/ng5/allocator.i"
+	@echo "... __/ng5/allocator.s"
+	@echo "... __/ng5/strings.o"
+	@echo "... __/ng5/strings.i"
+	@echo "... __/ng5/strings.s"
+	@echo "... __/stdx/async.o"
+	@echo "... __/stdx/async.i"
+	@echo "... __/stdx/async.s"
+	@echo "... __/stdx/string_id_maps/simple_bsearch.o"
+	@echo "... __/stdx/string_id_maps/simple_bsearch.i"
+	@echo "... __/stdx/string_id_maps/simple_bsearch.s"
+	@echo "... __/stdx/time.o"
+	@echo "... __/stdx/time.i"
+	@echo "... __/stdx/time.s"
+	@echo "... __/stdx/vector.o"
+	@echo "... __/stdx/vector.i"
+	@echo "... __/stdx/vector.s"
+	@echo "... stdx/test_string_id_map.o"
+	@echo "... stdx/test_string_id_map.i"
+	@echo "... stdx/test_string_id_map.s"
 .PHONY : help
 
 
