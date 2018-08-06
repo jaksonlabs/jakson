@@ -28,7 +28,7 @@
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <common.h>
-#include <stdx/string_id_map.h>
+#include <stdx/string_hashtable.h>
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
@@ -55,7 +55,7 @@
  *                           entry list inside a single bucket has an not enough space to store additionally elements
  * @return <code>STATUS_OK</code> is call is successful, or another status value indicating the error.
  */
-int string_id_map_create_simple(struct string_id_map *map, const struct allocator *alloc, size_t num_buckets,
+int string_hashtable_create_besearch(struct string_hashtable* map, const struct allocator* alloc, size_t num_buckets,
         size_t cap_buckets, float bucket_grow_factor);
 
 #endif

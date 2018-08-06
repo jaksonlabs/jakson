@@ -1,6 +1,6 @@
 #include <ng5/strings.h>
 #include <stdx/asnyc.h>
-#include <stdx/string_id_map.h>
+#include <stdx/string_hashtable.h>
 #include <stdlib.h>
 #include <stdx/string_id_maps/simple_bsearch.h>
 
@@ -13,7 +13,7 @@
 struct naive_extra_t {
     struct spinlock      spinlock;
     struct vector        content;
-    struct string_id_map inverted_index;
+    struct string_hashtable inverted_index;
     struct vector        content_freelist;
     string_id_t          next_string_id;
 };
@@ -69,7 +69,7 @@ int string_pool_create_naive(struct string_pool *pool, size_t capacity, const st
     struct naive_extra_t *extra = naive_extra(pool);
     check_success(spinlock_create(&extra->spinlock));
     check_success(vector_create(&extra->content, alloc, sizeof(char *), capacity));
-    check_success(string_id_map_create_simple(&extra->inverted_index, alloc, capacity / 2, 2, 1.7f));
+    check_success(string_hashtable_create_besearch(&extra->inverted_index, alloc, capacity / 2, 2, 1.7f));
     check_success(vector_create(&extra->content_freelist, alloc, sizeof(string_id_t), capacity));
     extra->next_string_id = 0;
     naive_setup(pool);
@@ -133,7 +133,7 @@ static int naive_drop(struct string_pool *self)
 {
     struct naive_extra_t *extra = naive_extra(self);
     check_success(vector_drop(&extra->content));
-    check_success(string_id_map_drop(&extra->inverted_index));
+    check_success(string_hashtable_drop(&extra->inverted_index));
     check_success(vector_drop(&extra->content_freelist));
     free (self->extra);
     self->extra = NULL;

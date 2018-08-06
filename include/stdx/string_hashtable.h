@@ -1,4 +1,4 @@
-// file: string_id_map.h
+// file: string_hashtable.h
 
 /**
  *  Copyright (C) 2018 Marcus Pinnecke
@@ -41,8 +41,8 @@
  * The underlying hashing function is the Jenkins hash function.
  */
 
-#ifndef _NG5_STRING_ID_MAP
-#define _NG5_STRING_ID_MAP
+#ifndef _NG5_STRING_HASHTABLE
+#define _NG5_STRING_HASHTABLE
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
@@ -87,51 +87,67 @@
 #define NG5_CONFIG_BUCKET_CAPACITY  1024
 #endif
 
-enum string_id_map_impl { STRING_ID_MAP_SIMPLE, STRING_ID_MAP_PARALLEL };
+enum string_hashtable_impl { STRING_ID_MAP_SIMPLE, STRING_ID_MAP_PARALLEL };
 
-struct string_id_map {
+struct string_hashtable {
 
   /**
    * Implementation-specific values
    */
-  void *                  extra;
+  void *                     extra;
 
   /**
    * Implementation tag
    */
-  enum string_id_map_impl tag;
+  enum string_hashtable_impl tag;
 
   /**
   *  Memory allocator that is used to get memory for user data
   */
-  struct allocator        allocator;
+  struct allocator           allocator;
 
   /**
    *  Frees resources bound to <code>self</code> via the allocator specified by the constructor
    */
-  int (*drop)(struct string_id_map *self);
+  int (*drop)(struct string_hashtable *self);
 
   /**
    * Put <code>num_pair</code> objects into this map maybe updating old objects with the same key.
    */
-  int (*put)(struct string_id_map *self, char *const *keys, const uint64_t *values, size_t num_pairs);
+  int (*put_test)(struct string_hashtable *self, char *const *keys, const uint64_t *values, size_t num_pairs);
+
+  /**
+   * Put <code>num_pair</code> objects into this map maybe without checking for updates.
+   */
+  int (*put_blind)(struct string_hashtable *self, char *const *keys, const uint64_t *values, size_t num_pairs);
 
   /**
    * Get the values associated with <code>keys</code> in this map (if any).
    */
-  int (*get)(struct string_id_map *self, uint64_t **out, bool **found_mask, size_t *num_not_found,
+  int (*get_test)(struct string_hashtable *self, uint64_t **out, bool **found_mask, size_t *num_not_found,
           char *const *keys, size_t num_keys);
+
+  /**
+   * Get the values associated with <code>keys</code> in this map. All keys <u>must</u> exist.
+   */
+  int (*get_blind)(struct string_hashtable *self, uint64_t **out, char *const *keys, size_t num_keys);
+
+  /**
+   * Updates keys associated with <code>values</code> in this map. All values <u>must</u> exist, and the
+   * mapping between keys and values must be bidirectional.
+   */
+  int (*update_key_blind)(struct string_hashtable *self, const uint64_t *values, char *const *keys, size_t num_keys);
 
   /**
    * Removes the objects with the gives keys from this map
    */
-  int (*remove)(struct string_id_map *self, char *const *keys, size_t num_keys);
+  int (*remove)(struct string_hashtable *self, char *const *keys, size_t num_keys);
 
   /**
    * Frees up allocated memory for <code>ptr</code> via the allocator in <code>map</code> that was specified
    * by the call to <code>string_id_map_create</code>
    */
-  int (*free)(struct string_id_map *self, void *ptr);
+  int (*free)(struct string_hashtable *self, void *ptr);
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -146,7 +162,7 @@ struct string_id_map {
  * @param map a non-null pointer to the map
  * @return <code>STATUS_OK</code> in case of success, otherwise a value indiciating the error.
  */
-inline static int string_id_map_drop(struct string_id_map *map)
+inline static int string_hashtable_drop(struct string_hashtable* map)
 {
     check_non_null(map);
     assert(map->drop);
@@ -155,7 +171,9 @@ inline static int string_id_map_drop(struct string_id_map *map)
 }
 
 /**
- * Put <code>num_pair</code> objects into this map maybe updating old objects with the same key.
+ * Put <code>num_pair</code> objects into this map maybe updating old objects with the same key. If it is
+ * guaranteed that the key is not yet inserted into this table, use <code>string_hashtable_put_blind</code>
+ * instead.
  *
  * @param map a non-null pointer to the map
  * @param keys a non-null constant pointer to a list of at least <code>num_pairs</code> length of constant strings
@@ -163,19 +181,48 @@ inline static int string_id_map_drop(struct string_id_map *map)
  * @param num_pairs the number of pairs that are read via <code>keys</code> and <code>values</code>
  * @return <code>STATUS_OK</code> in case of success, otherwise a value indiciating the error.
  */
-inline static int string_id_map_put(struct string_id_map *map, char *const*keys, const uint64_t *values,
-                                    size_t num_pairs)
+inline static int string_hashtable_put_test(struct string_hashtable* map, char* const* keys, const uint64_t* values,
+        size_t num_pairs)
 {
     check_non_null(map);
     check_non_null(keys);
     check_non_null(values);
-    assert(map->put);
+    assert(map->put_test);
 
-    return map->put(map, keys, values, num_pairs);
+    return map->put_test(map, keys, values, num_pairs);
 }
 
 /**
- * Get the values associated with <code>keys</code> in this map (if any).
+ * Put <code>num_pair</code> objects into this map, ingoring whether the key exists or not. This function is
+ * useful for insert operations of pairs where it is guaranteed that the keys are not yet inserted into this hashtable.
+ * In case this guarantee is broken, the behavior is undefined. Depending on the implementation, this specialized
+ * <code>put</code> function may have a better performance.
+ *
+ * If a check for existence is required, use <code>string_hashtable_put_test</code>
+ * instead.
+ *
+ * @param map a non-null pointer to the map
+ * @param keys a non-null constant pointer to a list of at least <code>num_pairs</code> length of constant strings
+ * @param values a non-null constant pointer to a list of at least <code>num_pairs</code> length of 64bit values
+ * @param num_pairs the number of pairs that are read via <code>keys</code> and <code>values</code>
+ * @return <code>STATUS_OK</code> in case of success, otherwise a value indiciating the error.
+ */
+inline static int string_hashtable_put_blind(struct string_hashtable* map, char* const* keys, const uint64_t* values,
+        size_t num_pairs)
+{
+    check_non_null(map);
+    check_non_null(keys);
+    check_non_null(values);
+    assert(map->put_blind);
+
+    return map->put_blind(map, keys, values, num_pairs);
+}
+
+/**
+ * Get the values associated with <code>keys</code> in this map (if any). In case one <code>key</code> does not
+ * exists, the function will return this information via the parameters <code>found_mask</code> and
+ * <code>num_not_found</code>. However, in case it is guaranteed that all keys exist, consider to use
+ * <code>string_id_map_get_blind</code> instead. *
  *
  * @param out A non-null pointer to an unallocated memory address. The map will allocate enough memory to store the
  *            result. There are <code>num_keys</code> elements returned, but not all of them are guaranteed to
@@ -196,19 +243,75 @@ inline static int string_id_map_put(struct string_id_map *map, char *const*keys,
  * @param map a non-null pointer to the map
  * @param keys a non-null pointer to a list of at least <code>num_keys</code> strings
  * @param num_keys the number of keys
- * @return <code>STATUS_OK</code> in case of success, otherwise a value indiciating the error.
+ * @return <code>STATUS_OK</code> in case of success, otherwise a value indicating the error.
  */
-inline static int string_id_map_get(uint64_t **out, bool **found_mask, size_t *num_not_found, struct string_id_map *map,
-                                    char *const *keys, size_t num_keys)
+inline static int string_id_map_get_test(uint64_t** out, bool** found_mask, size_t* num_not_found,
+        struct string_hashtable* map,
+        char* const* keys, size_t num_keys)
 {
     check_non_null(out);
     check_non_null(found_mask);
     check_non_null(num_not_found);
     check_non_null(map);
     check_non_null(keys);
-    assert(map->get);
+    assert(map->get_test);
 
-    return map->get(map, out, found_mask, num_not_found, keys, num_keys);
+    return map->get_test(map, out, found_mask, num_not_found, keys, num_keys);
+}
+
+/**
+ * Get the values associated with <code>keys</code> in this map. In case one <code>key</code> does not
+ * exists, the behavior is undefined.
+ *
+ * However, if it cannot be guaranteed that all keys are known, use
+ * <code>string_id_map_get_test</code> instead.
+ *
+ * @param out A non-null pointer to an unallocated memory address. The map will allocate <code>num_keys</code>
+ *            times <code>sizeof(uint64_t)</code> bytes memory to store the result. There are <code>num_keys</code>
+ *            elements returned, and all of them are guaranteed to contain a particular value.
+ * @param map a non-null pointer to the map
+ * @param keys a non-null pointer to a list of at least <code>num_keys</code> strings
+ * @param num_keys the number of keys
+ * @return <code>STATUS_OK</code> in case of success, otherwise a value indicating the error.
+ */
+inline static int string_id_map_get_blind(uint64_t** out, struct string_hashtable* map,
+                                          char* const* keys, size_t num_keys)
+{
+    check_non_null(out);
+    check_non_null(found_mask);
+    check_non_null(num_not_found);
+    check_non_null(map);
+    check_non_null(keys);
+    assert(map->get_blind);
+
+    return map->get_blind(map, out, keys, num_keys);
+}
+
+/**
+ * Update keys for a given list of values. It must be guaranteed that the mapping between a key and its value is
+ * bidirectional, and that all values exists.
+ *
+ * If you want to update a value given its key, use <code>string_hashtable_put_test</code> or
+ * <code>string_hashtable_put_blind</code> instead.
+ *
+ * @param out A non-null pointer to an unallocated memory address. The map will allocate <code>num_keys</code>
+ *            times <code>sizeof(uint64_t)</code> bytes memory to store the result. There are <code>num_keys</code>
+ *            elements returned, and all of them are guaranteed to contain a particular value.
+ * @param map a non-null pointer to the map
+ * @param keys a non-null pointer to a list of at least <code>num_keys</code> strings
+ * @param num_keys the number of keys
+ * @return <code>STATUS_OK</code> in case of success, otherwise a value indicating the error.
+ */
+inline static int string_id_map_update_key_blind(struct string_hashtable *map, const uint64_t *values, char *const *keys, size_t num_keys)
+{
+    check_non_null(out);
+    check_non_null(found_mask);
+    check_non_null(num_not_found);
+    check_non_null(map);
+    check_non_null(keys);
+    assert(map->update_key_blind);
+
+    return map->update_key_blind(map, values, keys, num_keys);
 }
 
 /**
@@ -219,7 +322,7 @@ inline static int string_id_map_get(uint64_t **out, bool **found_mask, size_t *n
  * @param num_keys the number of keys
  * @return
  */
-inline static int string_id_map_remove(struct string_id_map *map, char *const *keys, size_t num_keys)
+inline static int string_id_map_remove(struct string_hashtable *map, char *const *keys, size_t num_keys)
 {
     check_non_null(map);
     check_non_null(keys);
@@ -235,7 +338,7 @@ inline static int string_id_map_remove(struct string_id_map *map, char *const *k
  * @param values A non-null pointer (potentially resulting from a call to <code>string_id_map_get</code>)
  * @return <code>STATUS_OK</code> in case of success, otherwise a value indiciating the error.
  */
-inline static int string_id_map_free(void *ptr, struct string_id_map *map)
+inline static int string_id_map_free(void *ptr, struct string_hashtable *map)
 {
     check_non_null(ptr);
     check_non_null(map);

@@ -39,7 +39,7 @@ set(SORUCE_FILES
         ${CMAKE_SOURCE_DIR}/include/stdx/vector.h
         ${CMAKE_SOURCE_DIR}/stdx/vector.c
         ${CMAKE_SOURCE_DIR}/include/stdx/hash.h
-        ${CMAKE_SOURCE_DIR}/include/stdx/string_id_map.h
+        ${CMAKE_SOURCE_DIR}/include/stdx/string_hashtable.h
         ${CMAKE_SOURCE_DIR}/include/stdx/slot_map.h
         ${CMAKE_SOURCE_DIR}/include/ng5/storage_engine.h
         ${CMAKE_SOURCE_DIR}/include/ng5/cursor.h
@@ -52,9 +52,8 @@ set(SORUCE_FILES
         ${CMAKE_SOURCE_DIR}/include/stdx/unit.h
         ${CMAKE_SOURCE_DIR}/include/stdx/algorithm.h
         ${CMAKE_SOURCE_DIR}/include/stdx/string_id_maps/simple_bsearch.h
-        ${CMAKE_SOURCE_DIR}/include/stdx/string_id_maps/simple_scan_singlethreaded.h
         ${CMAKE_SOURCE_DIR}/stdx/string_id_maps/simple_bsearch.c
-        ${CMAKE_SOURCE_DIR}/stdx/string_id_maps/simple_scan_singlethreaded.c)
+)
 
 add_executable(ng5 main.c ${SORUCE_FILES})
 

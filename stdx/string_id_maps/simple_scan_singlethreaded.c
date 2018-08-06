@@ -56,15 +56,15 @@ struct simple_extra {
 //  SIMPLE
 // ---------------------------------------------------------------------------------------------------------------------
 
-static int simple_drop(struct string_id_map *self);
-static int simple_put(struct string_id_map *self, char *const *keys, const uint64_t *values, size_t num_pairs);
-static int simple_get(struct string_id_map *self, uint64_t **out, bool **found_mask, size_t *num_not_found,
+static int simple_drop(struct string_hashtable *self);
+static int simple_put_test(struct string_hashtable *self, char *const *keys, const uint64_t *values, size_t num_pairs);
+static int simple_get_test(struct string_hashtable *self, uint64_t **out, bool **found_mask, size_t *num_not_found,
         char *const *keys, size_t num_keys);
-static int simple_remove(struct string_id_map *self, char *const *keys, size_t num_keys);
-static int simple_free(struct string_id_map *self, void *ptr);
+static int simple_remove(struct string_hashtable *self, char *const *keys, size_t num_keys);
+static int simple_free(struct string_hashtable *self, void *ptr);
 
-static int simple_create_extra(struct string_id_map *self, float grow_factor, size_t num_buckets, size_t cap_buckets);
-static struct simple_extra *simple_extra(struct string_id_map *self);
+static int simple_create_extra(struct string_hashtable *self, float grow_factor, size_t num_buckets, size_t cap_buckets);
+static struct simple_extra *simple_extra(struct string_hashtable *self);
 static int simple_bucket_create(struct simple_bucket *buckets, size_t num_buckets, size_t bucket_cap,
         float grow_factor, struct allocator *alloc);
 static int simple_bucket_drop(struct simple_bucket *buckets, size_t num_buckets, struct allocator *alloc);
@@ -88,14 +88,14 @@ static size_t simple_bucket_find_entry_by_key(struct simple_bucket *bucket, cons
 //  SIMPLE
 // ---------------------------------------------------------------------------------------------------------------------
 
-int string_id_map_create_scan_single_threaded(struct string_id_map *map, const struct allocator *alloc, size_t num_buckets,
+int string_id_map_create_scan_single_threaded(struct string_hashtable *map, const struct allocator *alloc, size_t num_buckets,
         size_t cap_buckets, float bucket_grow_factor)
 {
     check_success(allocator_this_or_default(&map->allocator, alloc));
     map->tag    = STRING_ID_MAP_SIMPLE;
     map->drop   = simple_drop;
-    map->put    = simple_put;
-    map->get    = simple_get;
+    map->put_test    = simple_put_test;
+    map->get_test    = simple_get_test;
     map->remove = simple_remove;
     map->free   = simple_free;
 
@@ -103,7 +103,7 @@ int string_id_map_create_scan_single_threaded(struct string_id_map *map, const s
     return STATUS_OK;
 }
 
-static int simple_drop(struct string_id_map *self)
+static int simple_drop(struct string_hashtable *self)
 {
     assert(self->tag == STRING_ID_MAP_SIMPLE);
     struct simple_extra *extra = simple_extra(self);
@@ -114,7 +114,7 @@ static int simple_drop(struct string_id_map *self)
     return STATUS_OK;
 }
 
-static int simple_put(struct string_id_map *self, char *const *keys, const uint64_t *values, size_t num_pairs)
+static int simple_put(struct string_hashtable *self, char *const *keys, const uint64_t *values, size_t num_pairs)
 {
     assert(self->tag == STRING_ID_MAP_SIMPLE);
     struct simple_extra *extra = simple_extra(self);
@@ -174,7 +174,7 @@ static int simple_map_fetch(struct vector of_type(simple_bucket) *buckets, uint6
     return STATUS_OK;
 }
 
-static int simple_get(struct string_id_map *self, uint64_t **out, bool **found_mask, size_t *num_not_found,
+static int simple_get(struct string_hashtable *self, uint64_t **out, bool **found_mask, size_t *num_not_found,
         char *const *keys, size_t num_keys)
 {
     assert(self->tag == STRING_ID_MAP_SIMPLE);
@@ -221,7 +221,7 @@ static int simple_map_remove(struct simple_extra *extra, size_t *bucket_idxs, ch
     return STATUS_OK;
 }
 
-static int simple_remove(struct string_id_map *self, char *const *keys, size_t num_keys)
+static int simple_remove(struct string_hashtable *self, char *const *keys, size_t num_keys)
 {
     assert(self->tag == STRING_ID_MAP_SIMPLE);
 
@@ -238,7 +238,7 @@ static int simple_remove(struct string_id_map *self, char *const *keys, size_t n
     return STATUS_OK;
 }
 
-static int simple_free(struct string_id_map *self, void *ptr)
+static int simple_free(struct string_hashtable *self, void *ptr)
 {
     assert(self->tag == STRING_ID_MAP_SIMPLE);
     check_success(allocator_free(&self->allocator, ptr));
@@ -252,7 +252,7 @@ static int simple_free(struct string_id_map *self, void *ptr)
 // ---------------------------------------------------------------------------------------------------------------------
 
 unused_fn
-static int simple_create_extra(struct string_id_map *self, float grow_factor, size_t num_buckets, size_t cap_buckets)
+static int simple_create_extra(struct string_hashtable *self, float grow_factor, size_t num_buckets, size_t cap_buckets)
 {
     if ((self->extra = allocator_malloc(&self->allocator, sizeof(struct simple_extra))) != NULL) {
         struct simple_extra *extra = simple_extra(self);
@@ -266,7 +266,7 @@ static int simple_create_extra(struct string_id_map *self, float grow_factor, si
 }
 
 unused_fn
-static struct simple_extra *simple_extra(struct string_id_map *self)
+static struct simple_extra *simple_extra(struct string_hashtable *self)
 {
     assert (self->tag == STRING_ID_MAP_SIMPLE);
     return (struct simple_extra *)(self->extra);

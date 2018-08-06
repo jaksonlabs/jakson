@@ -1,10 +1,9 @@
 #include <stdio.h>
-#include <stdx/string_id_map.h>
+#include <stdx/string_hashtable.h>
 #include <stdlib.h>
 #include <stdx/algorithm.h>
 #include <stdx/time.h>
 #include <stdx/string_id_maps/simple_bsearch.h>
-#include <stdx/string_id_maps/simple_scan_singlethreaded.h>
 
 bool comp_int_less_eq(const void *lhs, const void *rhs)
 {
@@ -26,8 +25,8 @@ int main()
     printf("Hello, World!\n");
 //
 //    const size_t NUM_PAIRS = 1000;
-//    struct string_id_map map;
-//    string_id_map_create_simple(&map, NULL, 10, 10, 1.7f);
+//    struct string_hashtable map;
+//    string_hashtable_create_besearch(&map, NULL, 10, 10, 1.7f);
 //    char **keys = malloc(NUM_PAIRS * sizeof(char*));
 //    char **remove_keys = malloc(NUM_PAIRS * sizeof(char*));
 //    size_t num_remove_keys = 0;
@@ -42,7 +41,7 @@ int main()
 //            num_remove_keys++;
 //        }
 //    }
-//    string_id_map_put(&map, keys, values, NUM_PAIRS);
+//    string_hashtable_put_test(&map, keys, values, NUM_PAIRS);
 //    string_id_map_remove(&map, remove_keys, num_remove_keys);
 //
 //    char **new_keys = malloc(num_remove_keys * sizeof(char*));
@@ -53,16 +52,16 @@ int main()
 //        new_keys[i] = strdup(buffer);
 //        new_values[i] = i + NUM_PAIRS;
 //    }
-//    string_id_map_put(&map, new_keys, new_values, num_remove_keys);
+//    string_hashtable_put_test(&map, new_keys, new_values, num_remove_keys);
 //
 //    uint64_t *out_values;
 //    bool     *out_mask;
 //    size_t    num_not_found_old;
-//    string_id_map_get(&out_values, &out_mask, &num_not_found_old, &map, keys, NUM_PAIRS);
+//    string_id_map_get_test(&out_values, &out_mask, &num_not_found_old, &map, keys, NUM_PAIRS);
 //    assert(num_not_found_old == num_remove_keys);
 //
 //    size_t    num_not_found_new;
-//    string_id_map_get(&out_values, &out_mask, &num_not_found_new, &map, new_keys, num_remove_keys);
+//    string_id_map_get_test(&out_values, &out_mask, &num_not_found_new, &map, new_keys, num_remove_keys);
 // //  assert(num_not_found == 0);
 //
 //
@@ -70,7 +69,7 @@ int main()
 //        printf("          index: %zu, key: %s, value: %llu, status: FOUND\n", i, keys[i], out_values[i]);
 //    }
 //
-//    string_id_map_drop(&map);
+//    string_hashtable_drop(&map);
 
 
 
@@ -80,11 +79,11 @@ int main()
 
         float duration_create, duration_insert, duration_find;
 
-        struct string_id_map map;
+        struct string_hashtable map;
 
         begin = time_current_time_ms();
-        //string_id_map_create_simple(&map, NULL, 10000, 100, 1.7f);
-        string_id_map_create_scan_single_threaded(&map, NULL, 10000, 100, 1.7f);
+        string_hashtable_create_besearch(&map, NULL, 10000, 100, 1.7f);
+        //string_id_map_create_scan_single_threaded(&map, NULL, 10000, 100, 1.7f);
         duration_create = time_current_time_ms() - begin;
 
         char **keys = malloc(NUM_PAIRS * sizeof(char*));
@@ -96,7 +95,7 @@ int main()
             values[i] = i;
         }
         begin = time_current_time_ms();
-        string_id_map_put(&map, keys, values, NUM_PAIRS);
+        string_hashtable_put_test(&map, keys, values, NUM_PAIRS);
         duration_insert = time_current_time_ms() - begin;
         duration_insert /= (float) NUM_PAIRS;
 
@@ -105,7 +104,7 @@ int main()
         size_t    num_not_found;
 
         begin = time_current_time_ms();
-        string_id_map_get(&out_values, &out_mask, &num_not_found, &map, keys, NUM_PAIRS);
+        string_id_map_get_test(&out_values, &out_mask, &num_not_found, &map, keys, NUM_PAIRS);
         duration_find = time_current_time_ms() - begin;
         duration_find /= (float) NUM_PAIRS;
 
@@ -113,13 +112,13 @@ int main()
 
         string_id_map_free(out_values, &map);
         string_id_map_free(out_mask, &map);
-        string_id_map_drop(&map);
+        string_hashtable_drop(&map);
     }
 
 /*
     const size_t NUM_PAIRS = 1000;
-    struct string_id_map map;
-    string_id_map_create_simple(&map, NULL, 10, 10, 1.7f);
+    struct string_hashtable map;
+    string_hashtable_create_besearch(&map, NULL, 10, 10, 1.7f);
     char **keys = malloc(NUM_PAIRS * sizeof(char*));
     uint64_t *values = malloc(NUM_PAIRS * sizeof(uint64_t));
     for (size_t i = 0; i < NUM_PAIRS; i++) {
@@ -128,17 +127,17 @@ int main()
         keys[i] = strdup(buffer);
         values[i] = i;
     }
-    string_id_map_put(&map, keys, values, NUM_PAIRS);
+    string_hashtable_put_test(&map, keys, values, NUM_PAIRS);
     uint64_t *out_values;
     bool     *out_mask;
     size_t    num_not_found;
-    string_id_map_get(&out_values, &out_mask, &num_not_found, &map, keys, NUM_PAIRS);
+    string_id_map_get_test(&out_values, &out_mask, &num_not_found, &map, keys, NUM_PAIRS);
 
     for (size_t i = 0; i < NUM_PAIRS; i++) {
         printf("string '%s' has key %llu\n", keys[i], out_values[i]);
     }
 
-    string_id_map_drop(&map);*/
+    string_hashtable_drop(&map);*/
 /*
     const size_t num_test = 100000000;
     int *test = malloc(num_test * sizeof(int));
