@@ -11,15 +11,15 @@
 /* Cache sizes on server: L1/L2/L3 1024/16384/22528 */
 
 static const size_t MAX_SIZE_B = (2 * 22528 * 1024) / 32; /* 2*L3 Cache in Byte where 32bit are one bucket entry */
-static const size_t STEPS = 1000;
+static const size_t STEPS = 25;
 static const size_t STEP_SIZE = MAX_SIZE_B / STEPS;
 
 int main()
 {
     printf("TYPE;NUM_PAIRS;SAMPLE;SELECTIVITY;CREATE_MSPP;PUT_MSPP;GET_MSPP;DATA_SIZE;REP;NTHREADS\n");
 
-    for (size_t CURRENT_BYTES = STEP_SIZE; CURRENT_BYTES < MAX_SIZE_B; CURRENT_BYTES += STEP_SIZE) {
-        for (size_t sample = 0; sample < 1; sample++) {
+    for (size_t CURRENT_BYTES = 1024; CURRENT_BYTES < MAX_SIZE_B; CURRENT_BYTES += STEP_SIZE) {
+        for (size_t sample = 0; sample < 5; sample++) {
             for (int i = 5; i <= 100; i += 5) {
                 for (int rep = 0; rep <= 100; rep += 10) {
 
@@ -76,6 +76,7 @@ int main()
                             (get_end-get_begin)/(float) CURRENT_BYTES,
                             CURRENT_BYTES,
                             rep);
+                    fflush(stdout);
 
                     string_id_map_free(out_values, &map);
                     string_id_map_free(out_mask, &map);

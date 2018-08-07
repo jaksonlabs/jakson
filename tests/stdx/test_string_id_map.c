@@ -100,7 +100,7 @@ END_TEST
 START_TEST (test_string_hashtable_generic_createdrop_scan1_parallel)
     {
         struct string_hashtable map;
-        int status = string_hashtable_create_scan1_parallel(&map, NULL, 100, 5, 1.7f);
+        int status = string_hashtable_create_scan1_parallel(&map, NULL, 100, 5, 1.7f, 7);
         test_string_hashtable_generic_createdrop(&map, status);
     }
 END_TEST
@@ -206,7 +206,7 @@ END_TEST
 START_TEST (test_string_hashtable_generic_putget_scan1_parallel)
     {
         struct string_hashtable map;
-        string_hashtable_create_scan1_parallel(&map, NULL, 100, 5, 1.7f);
+        string_hashtable_create_scan1_parallel(&map, NULL, 100, 5, 1.7f, 7);
         test_string_hashtable_generic_putget(&map);
     }
 END_TEST
