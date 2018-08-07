@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdx/string_hashtable.h>
 #include <stdx/time.h>
-#include <stdx/string_id_maps/simple_bsearch.h>
+#include <stdx/string_hashtables/simple_bsearch.h>
 #include <stdlib.h>
 
 static const size_t MAX_SIZE_B = 10 * 1024 * 1024; /* 10 MB > L3 Cache */

@@ -21,7 +21,7 @@
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <stdx/string_id_maps/simple_scan1.h>
+#include <stdx/string_hashtables/simple_scan3-cache.h>
 #include <stdx/asnyc.h>
 #include <stdlib.h>
 #include <stdx/algorithm.h>
@@ -41,7 +41,7 @@ struct simple_bucket {
   struct spinlock                            spinlock;
   struct vector of_type(simple_bucket_entry) entries;
   struct vector of_type(size_t)              freelist;
-  size_t                                    *indicies;
+  size_t                                     cache_idx;
 };
 
 struct simple_extra {
@@ -94,7 +94,7 @@ static size_t simple_bucket_find_entry_by_key(struct simple_bucket *bucket, cons
 //  SIMPLE
 // ---------------------------------------------------------------------------------------------------------------------
 
-int string_hashtable_create_scan1(struct string_hashtable* map, const struct allocator* alloc, size_t num_buckets,
+int string_hashtable_create_scan3_cache(struct string_hashtable* map, const struct allocator* alloc, size_t num_buckets,
         size_t cap_buckets, float bucket_grow_factor)
 {
     check_success(allocator_this_or_default(&map->allocator, alloc));
@@ -152,12 +152,26 @@ static size_t simple_bucket_find_entry_by_key(struct simple_bucket *bucket, cons
     struct simple_bucket_entry *data = (struct simple_bucket_entry *) vector_data(&bucket->entries);
     size_t key_str_len = strlen(key);
 
-    for (size_t i = 0; i < bucket->entries.cap_elems; i++) {
-        if (data[i].in_use && data[i].str_len == key_str_len && strcmp(data[i].str, key) == 0) {
-            return i;
+    if (bucket->cache_idx!=(size_t) -1) {
+        struct simple_bucket_entry* cache = data+bucket->cache_idx;
+        if (cache->str_len==key_str_len && strcmp(cache->str, key)==0) {
+            return bucket->cache_idx;
         }
     }
-    return bucket->entries.cap_elems;
+
+    bool found = false;
+    size_t i;
+    for (i = 0; i < bucket->entries.cap_elems && !found; i++) {
+        found = (data[i].in_use && data[i].str_len == key_str_len && strcmp(data[i].str, key) == 0);
+    }
+    
+    if (found) {
+        i--;
+        bucket->cache_idx = i;
+        return i;
+    } else {
+        return bucket->entries.cap_elems;
+    }
 }
 
 static int simple_map_fetch(struct vector of_type(simple_bucket) *buckets, uint64_t *values_out, bool *key_found_mask,
@@ -315,16 +329,12 @@ static int simple_bucket_create(struct simple_bucket *buckets, size_t num_bucket
 
     while (num_buckets--) {
         struct simple_bucket *bucket = buckets++;
-        bucket->indicies  = allocator_malloc(alloc, bucket_cap * sizeof(size_t));
         spinlock_create(&bucket->spinlock);
+        bucket->cache_idx = (size_t) -1;
         vector_create(&bucket->entries, alloc, sizeof(struct simple_bucket_entry), bucket_cap);
         vector_create(&bucket->freelist, alloc, sizeof(size_t), bucket_cap);
         vector_set_growfactor(&bucket->entries, grow_factor);
         vector_set_growfactor(&bucket->freelist, grow_factor);
-        for (size_t i = 0; i < bucket_cap; i++) {
-            bucket->indicies[i] = i;
-        }
-        vector_push(&bucket->freelist,  bucket->indicies, bucket_cap);
         vector_repreat_push(&bucket->entries, &entry, bucket_cap);
     }
 
@@ -333,13 +343,13 @@ static int simple_bucket_create(struct simple_bucket *buckets, size_t num_bucket
 
 static int simple_bucket_drop(struct simple_bucket *buckets, size_t num_buckets, struct allocator *alloc)
 {
+    unused(alloc);
     check_non_null(buckets);
 
     while (num_buckets--) {
         struct simple_bucket *bucket = buckets++;
         check_success(vector_drop(&bucket->entries));
         check_success(vector_drop(&bucket->freelist));
-        check_success(allocator_free(alloc, bucket->indicies));
     }
 
     return STATUS_OK;
@@ -382,12 +392,10 @@ static size_t simple_bucket_freelist_pop(struct simple_bucket *bucket, struct al
         size_t last_slot = entries->cap_elems;
         check_success(vector_grow(&new_slots, freelist));
         check_success(vector_grow(NULL, entries));
-        bucket->indicies = allocator_realloc(alloc, bucket->indicies, entries->cap_elems * sizeof(size_t));
         size_t *new_slot_ids = allocator_malloc(alloc, new_slots * sizeof(size_t));
         for (size_t slot = 0; slot < new_slots; slot++) {
             size_t new_slot_id = last_slot + slot;
             new_slot_ids[slot] = new_slot_id;
-            bucket->indicies[last_slot + slot] = new_slot_id;
             check_success(vector_push(entries, &empty, 1));
         }
         check_success(vector_push(freelist, new_slot_ids, new_slots));

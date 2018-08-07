@@ -2,7 +2,7 @@
 #include <stdx/asnyc.h>
 #include <stdx/string_hashtable.h>
 #include <stdlib.h>
-#include <stdx/string_id_maps/simple_bsearch.h>
+#include <stdx/string_hashtables/simple_bsearch.h>
 
 // ---------------------------------------------------------------------------------------------------------------------
 //

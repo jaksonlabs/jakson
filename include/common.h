@@ -34,6 +34,9 @@
 
 #define of_type(x) /* a convenience way to write types for generic containers; no effect than just a visual one */
 
+#define cast(type, name, src)     \
+      type name = (type) src
+
 #define likely(x)                 \
     __builtin_expect((x), 1)
 #define unlikely(x)               \
@@ -67,6 +70,11 @@
 #define check_larger_one(x) { }
 #endif
 
+#define prefetch_read(adr)          \
+    __builtin_prefetch(adr, 0, 3)
+
+#define prefetch_write(adr)         \
+    __builtin_prefetch(adr, 1, 3)
 
 #define check_success(x)            \
 {                                   \

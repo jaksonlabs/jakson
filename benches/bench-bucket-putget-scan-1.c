@@ -1,24 +1,22 @@
 #include <stdio.h>
 #include <stdx/string_hashtable.h>
 #include <stdx/time.h>
-#include <stdx/string_id_maps/simple_scan1.h>
+#include <stdx/string_hashtables/simple_scan1.h>
 #include <stdlib.h>
 
 #define TYPE "SIMPLE_SCAN_1"
+/* Cache sizes on server: L1/L2/L3 1024/16384/22528 */
 
-static const size_t MAX_SIZE_B = 10 * 1024 * 1024; /* 10 MB > L3 Cache */
-static const size_t STEPS = 10000;
+static const size_t MAX_SIZE_B = (2 * 22528 * 1024) / 32; /* 2*L3 Cache in Byte where 32bit are one bucket entry */
+static const size_t STEPS = 1000;
 static const size_t STEP_SIZE = MAX_SIZE_B / STEPS;
 
 int main()
 {
-    printf("TYPE;NUM_PAIRS;SAMPLE;SELECTIVITY;CREATE_MSPP;PUT_MSPP;GET_MSPP;DATA_SIZE;REP\n");
+    printf("TYPE;NUM_PAIRS;SAMPLE;SELECTIVITY;CREATE_MSPP;PUT_MSPP;GET_MSPP;DATA_SIZE;REP;NTHREADS\n");
 
-    size_t bucket_size_bsearch = 32;
-    size_t max_bytes = MAX_SIZE_B / bucket_size_bsearch;
-
-    for (size_t CURRENT_BYTES = STEP_SIZE; CURRENT_BYTES < max_bytes; CURRENT_BYTES += STEP_SIZE) {
-        for (size_t sample = 0; sample < 5; sample++) {
+    for (size_t CURRENT_BYTES = STEP_SIZE; CURRENT_BYTES < MAX_SIZE_B; CURRENT_BYTES += STEP_SIZE) {
+        for (size_t sample = 0; sample < 1; sample++) {
             for (int i = 5; i <= 100; i += 5) {
                 for (int rep = 0; rep <= 100; rep += 10) {
 
@@ -60,12 +58,12 @@ int main()
                     size_t num_not_found;
 
                     get_begin = time_current_time_ms();
-                    fprintf(stderr, "[INFO] GET %zu KiB...\n", (size_t) (CURRENT_BYTES*(i/100.0f)));
+                    fprintf(stderr, "[INFO] GET %zu KiB...\n", (size_t) (CURRENT_BYTES/1024*(i/100.0f)));
                     string_id_map_get_test(&out_values, &out_mask, &num_not_found, &map, search_keys,
                             CURRENT_BYTES*(i/100.0f));
                     get_end = time_current_time_ms();
 
-                    printf("%s;%zu;%zu;%f;%f;%f;%f;%zu;%d\n",
+                    printf("%s;%zu;%zu;%f;%f;%f;%f;%zu;%d;0\n",
                             TYPE,
                             CURRENT_BYTES,
                             sample,

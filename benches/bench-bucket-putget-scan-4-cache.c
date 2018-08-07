@@ -1,10 +1,14 @@
 #include <stdio.h>
 #include <stdx/string_hashtable.h>
 #include <stdx/time.h>
-#include <stdx/string_hashtables/simple_bsearch.h>
+#include <stdx/string_hashtables/simple_scan1.h>
 #include <stdlib.h>
+#include <stdx/string_hashtables/simple_scan2.h>
+#include <stdx/string_hashtables/simple_scan3.h>
+#include <stdx/string_hashtables/simple_scan4.h>
+#include <stdx/string_hashtables/simple_scan4-cache.h>
 
-#define TYPE "SIMPLE_BESEARCH"
+#define TYPE "SIMPLE_SCAN_4_CACHE"
 /* Cache sizes on server: L1/L2/L3 1024/16384/22528 */
 
 static const size_t MAX_SIZE_B = (2 * 22528 * 1024) / 32; /* 2*L3 Cache in Byte where 32bit are one bucket entry */
@@ -27,7 +31,7 @@ int main()
                     struct string_hashtable map;
 
                     create_begin = time_current_time_ms();
-                    string_hashtable_create_besearch(&map, NULL, 1, CURRENT_BYTES, 1.7f);
+                    string_hashtable_create_scan4_cache(&map, NULL, 1, CURRENT_BYTES, 1.7f);
                     create_end = time_current_time_ms();
 
                     char** keys = malloc(CURRENT_BYTES*sizeof(char*));
@@ -63,7 +67,7 @@ int main()
                             CURRENT_BYTES*(i/100.0f));
                     get_end = time_current_time_ms();
 
-                    printf("%s;%zu;%zu;%f;%f;%f;%f;%zu;%d\n",
+                    printf("%s;%zu;%zu;%f;%f;%f;%f;%zu;%d;0\n",
                             TYPE,
                             CURRENT_BYTES,
                             sample,

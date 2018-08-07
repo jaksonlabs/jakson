@@ -10,8 +10,8 @@ set (CMAKE_C_STANDARD 11)
 
 file(MAKE_DIRECTORY ${CMAKE_HOME_DIRECTORY}/build)
 
-set(CMAKE_BUILD_TYPE Debug)
-#set(CMAKE_BUILD_TYPE Release)
+#set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Release)
 
 set (CMAKE_C_COMPILER             "/usr/bin/clang")
 set (CMAKE_C_FLAGS                "-Wall -std=c11 -Wextra -Werror")
@@ -57,18 +57,40 @@ set(SORUCE_FILES
         ${CMAKE_SOURCE_DIR}/ng5/strings.c
         ${CMAKE_SOURCE_DIR}/include/stdx/unit.h
         ${CMAKE_SOURCE_DIR}/include/stdx/algorithm.h
-        ${CMAKE_SOURCE_DIR}/include/stdx/string_id_maps/simple_bsearch.h
-        ${CMAKE_SOURCE_DIR}/stdx/string_id_maps/simple_bsearch.c
-        ${CMAKE_SOURCE_DIR}/include/stdx/string_id_maps/simple_scan1.h
-        ${CMAKE_SOURCE_DIR}/include/stdx/string_id_maps/simple_scan2.h
-        ${CMAKE_SOURCE_DIR}/stdx/string_id_maps/simple_scan1.c
-        ${CMAKE_SOURCE_DIR}/stdx/string_id_maps/simple_scan2.c)
+        ${CMAKE_SOURCE_DIR}/include/stdx/string_hashtables/simple_bsearch.h
+        ${CMAKE_SOURCE_DIR}/stdx/string_hashtables/simple_bsearch.c
+        ${CMAKE_SOURCE_DIR}/include/stdx/string_hashtables/simple_scan1.h
+        ${CMAKE_SOURCE_DIR}/include/stdx/string_hashtables/simple_scan1-cache.h
+        ${CMAKE_SOURCE_DIR}/include/stdx/string_hashtables/simple_scan2.h
+        ${CMAKE_SOURCE_DIR}/include/stdx/string_hashtables/simple_scan2-cache.h
+        ${CMAKE_SOURCE_DIR}/include/stdx/string_hashtables/simple_scan3.h
+        ${CMAKE_SOURCE_DIR}/include/stdx/string_hashtables/simple_scan3-cache.h
+        ${CMAKE_SOURCE_DIR}/include/stdx/string_hashtables/simple_scan4.h
+        ${CMAKE_SOURCE_DIR}/include/stdx/string_hashtables/simple_scan4-cache.h
+        ${CMAKE_SOURCE_DIR}/include/stdx/string_hashtables/simple_scan1-parallel.h
+        ${CMAKE_SOURCE_DIR}/stdx/string_hashtables/simple_scan1.c
+        ${CMAKE_SOURCE_DIR}/stdx/string_hashtables/simple_scan1-cache.c
+        ${CMAKE_SOURCE_DIR}/stdx/string_hashtables/simple_scan2.c
+        ${CMAKE_SOURCE_DIR}/stdx/string_hashtables/simple_scan2-cache.c
+        ${CMAKE_SOURCE_DIR}/stdx/string_hashtables/simple_scan3.c
+        ${CMAKE_SOURCE_DIR}/stdx/string_hashtables/simple_scan3-cache.c
+        ${CMAKE_SOURCE_DIR}/stdx/string_hashtables/simple_scan4.c
+        ${CMAKE_SOURCE_DIR}/stdx/string_hashtables/simple_scan4-cache.c
+        ${CMAKE_SOURCE_DIR}/stdx/string_hashtables/simple_scan1-parallel.c)
+
 
 add_executable(ng5 main.c ${SORUCE_FILES})
 
-add_executable(bench-bucket-putget-bsearch benches/bench-bucket-putget-bsearch.c ${SORUCE_FILES})
+add_executable(bench-bucket-putget-bsearch benches/bench-bucket-putget-bsearch.c ${SORUCE_FILES} include/stdx/bolster.h)
 add_executable(bench-bucket-putget-scan-1 benches/bench-bucket-putget-scan-1.c ${SORUCE_FILES})
 add_executable(bench-bucket-putget-scan-2 benches/bench-bucket-putget-scan-2.c ${SORUCE_FILES})
+add_executable(bench-bucket-putget-scan-3 benches/bench-bucket-putget-scan-3.c ${SORUCE_FILES})
+add_executable(bench-bucket-putget-scan-4 benches/bench-bucket-putget-scan-4.c ${SORUCE_FILES})
+add_executable(bench-bucket-putget-scan-1-cache benches/bench-bucket-putget-scan-1-cache.c ${SORUCE_FILES})
+add_executable(bench-bucket-putget-scan-2-cache benches/bench-bucket-putget-scan-2-cache.c ${SORUCE_FILES})
+add_executable(bench-bucket-putget-scan-3-cache benches/bench-bucket-putget-scan-3-cache.c ${SORUCE_FILES})
+add_executable(bench-bucket-putget-scan-4-cache benches/bench-bucket-putget-scan-4-cache.c ${SORUCE_FILES})
+add_executable(bench-bucket-putget-scan-1-parallel benches/bench-bucket-putget-scan-1-parallel.c ${SORUCE_FILES})
 
 enable_testing()
 
