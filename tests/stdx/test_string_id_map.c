@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <check.h>
 
-#include <ng5/strings.h>
+#include <stdx/string_dic.h>
 #include <stdx/string_hashtable.h>
 #include <stdlib.h>
 #include <stdx/string_hashtables/simple_bsearch.h>

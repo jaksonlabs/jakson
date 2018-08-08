@@ -51,7 +51,7 @@
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <common.h>
-#include <ng5/allocator.h>
+#include <stdx/allocator.h>
 #include <stdx/vector.h>
 #include <stdx/unit.h>
 #include "hash.h"

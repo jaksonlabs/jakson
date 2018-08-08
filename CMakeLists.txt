@@ -38,10 +38,10 @@ include_directories("/usr/local/include")
 
 
 set(SORUCE_FILES
-        ${CMAKE_SOURCE_DIR}/include/ng5/allocator.h
+        ${CMAKE_SOURCE_DIR}/include/stdx/allocator.h
         ${CMAKE_SOURCE_DIR}/include/status.h
         ${CMAKE_SOURCE_DIR}/include/common.h
-        ${CMAKE_SOURCE_DIR}/ng5/allocator.c
+        ${CMAKE_SOURCE_DIR}/stdx/allocator.c
         ${CMAKE_SOURCE_DIR}/include/stdx/vector.h
         ${CMAKE_SOURCE_DIR}/stdx/vector.c
         ${CMAKE_SOURCE_DIR}/include/stdx/hash.h
@@ -51,10 +51,9 @@ set(SORUCE_FILES
         ${CMAKE_SOURCE_DIR}/include/ng5/cursor.h
         ${CMAKE_SOURCE_DIR}/include/stdx/asnyc.h
         ${CMAKE_SOURCE_DIR}/stdx/async.c
-        ${CMAKE_SOURCE_DIR}/include/ng5/strings.h
+        ${CMAKE_SOURCE_DIR}/include/stdx/string_dic.h
         ${CMAKE_SOURCE_DIR}/include/stdx/time.h
         ${CMAKE_SOURCE_DIR}/stdx/time.c
-        ${CMAKE_SOURCE_DIR}/ng5/strings.c
         ${CMAKE_SOURCE_DIR}/include/stdx/unit.h
         ${CMAKE_SOURCE_DIR}/include/stdx/algorithm.h
         ${CMAKE_SOURCE_DIR}/include/stdx/string_hashtables/simple_bsearch.h
@@ -79,7 +78,7 @@ set(SORUCE_FILES
         ${CMAKE_SOURCE_DIR}/stdx/string_hashtables/simple_scan1-parallel.c)
 
 
-add_executable(ng5 main.c ${SORUCE_FILES})
+add_executable(ng5 main.c ${SORUCE_FILES} include/stdx/string_dics/string_dic_naive.h stdx/string_dics/string_dic_naive.c)
 
 add_executable(bench-bucket-putget-bsearch benches/bench-bucket-putget-bsearch.c ${SORUCE_FILES} include/stdx/bolster.h)
 add_executable(bench-bucket-putget-scan-1 benches/bench-bucket-putget-scan-1.c ${SORUCE_FILES})

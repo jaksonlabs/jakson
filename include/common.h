@@ -49,6 +49,17 @@
 }
 
 #ifndef NDEBUG
+#define check_tag(is, expected)    \
+{                                  \
+    if (is != expected) {          \
+        return STATUS_ILLEGALIMPL; \
+    }                              \
+}
+#else
+#define check_tag(is, expected) { }
+#endif
+
+#ifndef NDEBUG
 #define check_non_null(x)         \
 {                                 \
     if (!x) {                     \
@@ -93,5 +104,15 @@
 
 #define unused_fn                   \
     __attribute__((unused))
+
+#define optional_set(x, y)          \
+    if (x) {                        \
+        *x = y;                     \
+    }
+
+#define optional_set_else(x, y, stmt)   \
+    if (x) {                            \
+        *x = y;                         \
+    } else { stmt; }
 
 #endif

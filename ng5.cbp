@@ -1,1178 +1,1170 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <CodeBlocks_project_file>
-   <FileVersion major="1" minor="6" />
-   <Project>
-      <Option title="ng5" />
-      <Option makefile_is_custom="1" />
-      <Option compiler="gcc" />
-      <Option virtualFolders="CMake Files\;CMake Files\tests\;CMake Files\cmake\;CMake Files\cmake\modules\;" />
-      <Build>
-      <Target title="all">
-         <Option working_dir="/Users/marcus/git/ng5" />
-         <Option type="4" />
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 all" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="test">
-         <Option working_dir="/Users/marcus/git/ng5" />
-         <Option type="4" />
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 test" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="edit_cache">
-         <Option working_dir="/Users/marcus/git/ng5" />
-         <Option type="4" />
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 edit_cache" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="bench-bucket-putget-scan-4-cache">
-         <Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-4-cache" prefix_auto="0" extension_auto="0" />
-         <Option working_dir="/Users/marcus/git/ng5/cmake-build-debug" />
-         <Option object_output="./" />
-         <Option type="1" />
-         <Option compiler="gcc" />
-         <Compiler>
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include" />
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include" />
-            <Add directory="/Library/Frameworks" />
-            <Add directory="/System/Library/Frameworks" />
-            <Add directory="/Users/marcus/git/ng5/include" />
-            <Add directory="/usr/include" />
-            <Add directory="/usr/local/include" />
-         </Compiler>
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-4-cache" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="bench-bucket-putget-scan-4-cache/fast">
-         <Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-4-cache" prefix_auto="0" extension_auto="0" />
-         <Option working_dir="/Users/marcus/git/ng5/cmake-build-debug" />
-         <Option object_output="./" />
-         <Option type="1" />
-         <Option compiler="gcc" />
-         <Compiler>
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include" />
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include" />
-            <Add directory="/Library/Frameworks" />
-            <Add directory="/System/Library/Frameworks" />
-            <Add directory="/Users/marcus/git/ng5/include" />
-            <Add directory="/usr/include" />
-            <Add directory="/usr/local/include" />
-         </Compiler>
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-4-cache/fast" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="bench-bucket-putget-scan-3-cache">
-         <Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-3-cache" prefix_auto="0" extension_auto="0" />
-         <Option working_dir="/Users/marcus/git/ng5/cmake-build-debug" />
-         <Option object_output="./" />
-         <Option type="1" />
-         <Option compiler="gcc" />
-         <Compiler>
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include" />
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include" />
-            <Add directory="/Library/Frameworks" />
-            <Add directory="/System/Library/Frameworks" />
-            <Add directory="/Users/marcus/git/ng5/include" />
-            <Add directory="/usr/include" />
-            <Add directory="/usr/local/include" />
-         </Compiler>
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-3-cache" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="bench-bucket-putget-scan-3-cache/fast">
-         <Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-3-cache" prefix_auto="0" extension_auto="0" />
-         <Option working_dir="/Users/marcus/git/ng5/cmake-build-debug" />
-         <Option object_output="./" />
-         <Option type="1" />
-         <Option compiler="gcc" />
-         <Compiler>
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include" />
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include" />
-            <Add directory="/Library/Frameworks" />
-            <Add directory="/System/Library/Frameworks" />
-            <Add directory="/Users/marcus/git/ng5/include" />
-            <Add directory="/usr/include" />
-            <Add directory="/usr/local/include" />
-         </Compiler>
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-3-cache/fast" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="bench-bucket-putget-scan-3">
-         <Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-3" prefix_auto="0" extension_auto="0" />
-         <Option working_dir="/Users/marcus/git/ng5/cmake-build-debug" />
-         <Option object_output="./" />
-         <Option type="1" />
-         <Option compiler="gcc" />
-         <Compiler>
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include" />
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include" />
-            <Add directory="/Library/Frameworks" />
-            <Add directory="/System/Library/Frameworks" />
-            <Add directory="/Users/marcus/git/ng5/include" />
-            <Add directory="/usr/include" />
-            <Add directory="/usr/local/include" />
-         </Compiler>
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-3" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="bench-bucket-putget-scan-3/fast">
-         <Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-3" prefix_auto="0" extension_auto="0" />
-         <Option working_dir="/Users/marcus/git/ng5/cmake-build-debug" />
-         <Option object_output="./" />
-         <Option type="1" />
-         <Option compiler="gcc" />
-         <Compiler>
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include" />
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include" />
-            <Add directory="/Library/Frameworks" />
-            <Add directory="/System/Library/Frameworks" />
-            <Add directory="/Users/marcus/git/ng5/include" />
-            <Add directory="/usr/include" />
-            <Add directory="/usr/local/include" />
-         </Compiler>
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-3/fast" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="bench-bucket-putget-scan-1-cache">
-         <Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-1-cache" prefix_auto="0" extension_auto="0" />
-         <Option working_dir="/Users/marcus/git/ng5/cmake-build-debug" />
-         <Option object_output="./" />
-         <Option type="1" />
-         <Option compiler="gcc" />
-         <Compiler>
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include" />
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include" />
-            <Add directory="/Library/Frameworks" />
-            <Add directory="/System/Library/Frameworks" />
-            <Add directory="/Users/marcus/git/ng5/include" />
-            <Add directory="/usr/include" />
-            <Add directory="/usr/local/include" />
-         </Compiler>
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-1-cache" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="bench-bucket-putget-scan-1-cache/fast">
-         <Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-1-cache" prefix_auto="0" extension_auto="0" />
-         <Option working_dir="/Users/marcus/git/ng5/cmake-build-debug" />
-         <Option object_output="./" />
-         <Option type="1" />
-         <Option compiler="gcc" />
-         <Compiler>
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include" />
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include" />
-            <Add directory="/Library/Frameworks" />
-            <Add directory="/System/Library/Frameworks" />
-            <Add directory="/Users/marcus/git/ng5/include" />
-            <Add directory="/usr/include" />
-            <Add directory="/usr/local/include" />
-         </Compiler>
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-1-cache/fast" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="bench-bucket-putget-scan-2">
-         <Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-2" prefix_auto="0" extension_auto="0" />
-         <Option working_dir="/Users/marcus/git/ng5/cmake-build-debug" />
-         <Option object_output="./" />
-         <Option type="1" />
-         <Option compiler="gcc" />
-         <Compiler>
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include" />
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include" />
-            <Add directory="/Library/Frameworks" />
-            <Add directory="/System/Library/Frameworks" />
-            <Add directory="/Users/marcus/git/ng5/include" />
-            <Add directory="/usr/include" />
-            <Add directory="/usr/local/include" />
-         </Compiler>
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-2" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="bench-bucket-putget-scan-2/fast">
-         <Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-2" prefix_auto="0" extension_auto="0" />
-         <Option working_dir="/Users/marcus/git/ng5/cmake-build-debug" />
-         <Option object_output="./" />
-         <Option type="1" />
-         <Option compiler="gcc" />
-         <Compiler>
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include" />
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include" />
-            <Add directory="/Library/Frameworks" />
-            <Add directory="/System/Library/Frameworks" />
-            <Add directory="/Users/marcus/git/ng5/include" />
-            <Add directory="/usr/include" />
-            <Add directory="/usr/local/include" />
-         </Compiler>
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-2/fast" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="bench-bucket-putget-scan-1">
-         <Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-1" prefix_auto="0" extension_auto="0" />
-         <Option working_dir="/Users/marcus/git/ng5/cmake-build-debug" />
-         <Option object_output="./" />
-         <Option type="1" />
-         <Option compiler="gcc" />
-         <Compiler>
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include" />
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include" />
-            <Add directory="/Library/Frameworks" />
-            <Add directory="/System/Library/Frameworks" />
-            <Add directory="/Users/marcus/git/ng5/include" />
-            <Add directory="/usr/include" />
-            <Add directory="/usr/local/include" />
-         </Compiler>
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-1" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="bench-bucket-putget-scan-1/fast">
-         <Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-1" prefix_auto="0" extension_auto="0" />
-         <Option working_dir="/Users/marcus/git/ng5/cmake-build-debug" />
-         <Option object_output="./" />
-         <Option type="1" />
-         <Option compiler="gcc" />
-         <Compiler>
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include" />
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include" />
-            <Add directory="/Library/Frameworks" />
-            <Add directory="/System/Library/Frameworks" />
-            <Add directory="/Users/marcus/git/ng5/include" />
-            <Add directory="/usr/include" />
-            <Add directory="/usr/local/include" />
-         </Compiler>
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-1/fast" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="bench-bucket-putget-bsearch">
-         <Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-bsearch" prefix_auto="0" extension_auto="0" />
-         <Option working_dir="/Users/marcus/git/ng5/cmake-build-debug" />
-         <Option object_output="./" />
-         <Option type="1" />
-         <Option compiler="gcc" />
-         <Compiler>
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include" />
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include" />
-            <Add directory="/Library/Frameworks" />
-            <Add directory="/System/Library/Frameworks" />
-            <Add directory="/Users/marcus/git/ng5/include" />
-            <Add directory="/usr/include" />
-            <Add directory="/usr/local/include" />
-         </Compiler>
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-bsearch" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="bench-bucket-putget-bsearch/fast">
-         <Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-bsearch" prefix_auto="0" extension_auto="0" />
-         <Option working_dir="/Users/marcus/git/ng5/cmake-build-debug" />
-         <Option object_output="./" />
-         <Option type="1" />
-         <Option compiler="gcc" />
-         <Compiler>
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include" />
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include" />
-            <Add directory="/Library/Frameworks" />
-            <Add directory="/System/Library/Frameworks" />
-            <Add directory="/Users/marcus/git/ng5/include" />
-            <Add directory="/usr/include" />
-            <Add directory="/usr/local/include" />
-         </Compiler>
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-bsearch/fast" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="rebuild_cache">
-         <Option working_dir="/Users/marcus/git/ng5" />
-         <Option type="4" />
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 rebuild_cache" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="bench-bucket-putget-scan-1-parallel">
-         <Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-1-parallel" prefix_auto="0" extension_auto="0" />
-         <Option working_dir="/Users/marcus/git/ng5/cmake-build-debug" />
-         <Option object_output="./" />
-         <Option type="1" />
-         <Option compiler="gcc" />
-         <Compiler>
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include" />
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include" />
-            <Add directory="/Library/Frameworks" />
-            <Add directory="/System/Library/Frameworks" />
-            <Add directory="/Users/marcus/git/ng5/include" />
-            <Add directory="/usr/include" />
-            <Add directory="/usr/local/include" />
-         </Compiler>
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-1-parallel" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="bench-bucket-putget-scan-1-parallel/fast">
-         <Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-1-parallel" prefix_auto="0" extension_auto="0" />
-         <Option working_dir="/Users/marcus/git/ng5/cmake-build-debug" />
-         <Option object_output="./" />
-         <Option type="1" />
-         <Option compiler="gcc" />
-         <Compiler>
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include" />
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include" />
-            <Add directory="/Library/Frameworks" />
-            <Add directory="/System/Library/Frameworks" />
-            <Add directory="/Users/marcus/git/ng5/include" />
-            <Add directory="/usr/include" />
-            <Add directory="/usr/local/include" />
-         </Compiler>
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-1-parallel/fast" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="bench-bucket-putget-scan-2-cache">
-         <Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-2-cache" prefix_auto="0" extension_auto="0" />
-         <Option working_dir="/Users/marcus/git/ng5/cmake-build-debug" />
-         <Option object_output="./" />
-         <Option type="1" />
-         <Option compiler="gcc" />
-         <Compiler>
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include" />
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include" />
-            <Add directory="/Library/Frameworks" />
-            <Add directory="/System/Library/Frameworks" />
-            <Add directory="/Users/marcus/git/ng5/include" />
-            <Add directory="/usr/include" />
-            <Add directory="/usr/local/include" />
-         </Compiler>
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-2-cache" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="bench-bucket-putget-scan-2-cache/fast">
-         <Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-2-cache" prefix_auto="0" extension_auto="0" />
-         <Option working_dir="/Users/marcus/git/ng5/cmake-build-debug" />
-         <Option object_output="./" />
-         <Option type="1" />
-         <Option compiler="gcc" />
-         <Compiler>
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include" />
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include" />
-            <Add directory="/Library/Frameworks" />
-            <Add directory="/System/Library/Frameworks" />
-            <Add directory="/Users/marcus/git/ng5/include" />
-            <Add directory="/usr/include" />
-            <Add directory="/usr/local/include" />
-         </Compiler>
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-2-cache/fast" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="bench-bucket-putget-scan-4">
-         <Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-4" prefix_auto="0" extension_auto="0" />
-         <Option working_dir="/Users/marcus/git/ng5/cmake-build-debug" />
-         <Option object_output="./" />
-         <Option type="1" />
-         <Option compiler="gcc" />
-         <Compiler>
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include" />
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include" />
-            <Add directory="/Library/Frameworks" />
-            <Add directory="/System/Library/Frameworks" />
-            <Add directory="/Users/marcus/git/ng5/include" />
-            <Add directory="/usr/include" />
-            <Add directory="/usr/local/include" />
-         </Compiler>
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-4" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="bench-bucket-putget-scan-4/fast">
-         <Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-4" prefix_auto="0" extension_auto="0" />
-         <Option working_dir="/Users/marcus/git/ng5/cmake-build-debug" />
-         <Option object_output="./" />
-         <Option type="1" />
-         <Option compiler="gcc" />
-         <Compiler>
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include" />
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include" />
-            <Add directory="/Library/Frameworks" />
-            <Add directory="/System/Library/Frameworks" />
-            <Add directory="/Users/marcus/git/ng5/include" />
-            <Add directory="/usr/include" />
-            <Add directory="/usr/local/include" />
-         </Compiler>
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-4/fast" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="ng5">
-         <Option output="/Users/marcus/git/ng5/cmake-build-debug/ng5" prefix_auto="0" extension_auto="0" />
-         <Option working_dir="/Users/marcus/git/ng5/cmake-build-debug" />
-         <Option object_output="./" />
-         <Option type="1" />
-         <Option compiler="gcc" />
-         <Compiler>
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include" />
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include" />
-            <Add directory="/Library/Frameworks" />
-            <Add directory="/System/Library/Frameworks" />
-            <Add directory="/Users/marcus/git/ng5/include" />
-            <Add directory="/usr/include" />
-            <Add directory="/usr/local/include" />
-         </Compiler>
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 ng5" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="ng5/fast">
-         <Option output="/Users/marcus/git/ng5/cmake-build-debug/ng5" prefix_auto="0" extension_auto="0" />
-         <Option working_dir="/Users/marcus/git/ng5/cmake-build-debug" />
-         <Option object_output="./" />
-         <Option type="1" />
-         <Option compiler="gcc" />
-         <Compiler>
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include" />
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include" />
-            <Add directory="/Library/Frameworks" />
-            <Add directory="/System/Library/Frameworks" />
-            <Add directory="/Users/marcus/git/ng5/include" />
-            <Add directory="/usr/include" />
-            <Add directory="/usr/local/include" />
-         </Compiler>
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 ng5/fast" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="stdx_test_string_id_map">
-         <Option output="/Users/marcus/git/ng5/cmake-build-debug/stdx_test_string_id_map" prefix_auto="0" extension_auto="0" />
-         <Option working_dir="/Users/marcus/git/ng5/cmake-build-debug" />
-         <Option object_output="./" />
-         <Option type="1" />
-         <Option compiler="gcc" />
-         <Compiler>
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include" />
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include" />
-            <Add directory="/Library/Frameworks" />
-            <Add directory="/System/Library/Frameworks" />
-            <Add directory="/Users/marcus/git/ng5/include" />
-            <Add directory="/Users/marcus/git/ng5/tests/." />
-            <Add directory="/usr/include" />
-            <Add directory="/usr/local/Cellar/check/0.12.0/include" />
-            <Add directory="/usr/local/include" />
-         </Compiler>
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/tests/Makefile&quot;  VERBOSE=1 stdx_test_string_id_map" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/tests/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/tests/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="stdx_test_string_id_map/fast">
-         <Option output="/Users/marcus/git/ng5/cmake-build-debug/stdx_test_string_id_map" prefix_auto="0" extension_auto="0" />
-         <Option working_dir="/Users/marcus/git/ng5/cmake-build-debug" />
-         <Option object_output="./" />
-         <Option type="1" />
-         <Option compiler="gcc" />
-         <Compiler>
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include" />
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include" />
-            <Add directory="/Library/Frameworks" />
-            <Add directory="/System/Library/Frameworks" />
-            <Add directory="/Users/marcus/git/ng5/include" />
-            <Add directory="/Users/marcus/git/ng5/tests/." />
-            <Add directory="/usr/include" />
-            <Add directory="/usr/local/Cellar/check/0.12.0/include" />
-            <Add directory="/usr/local/include" />
-         </Compiler>
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/tests/Makefile&quot;  VERBOSE=1 stdx_test_string_id_map/fast" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/tests/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/tests/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      </Build>
-      <Unit filename="/Users/marcus/git/ng5/benches/bench-bucket-putget-bsearch.c">
-         <Option target="bench-bucket-putget-bsearch"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/benches/bench-bucket-putget-scan-1-cache.c">
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/benches/bench-bucket-putget-scan-1-parallel.c">
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/benches/bench-bucket-putget-scan-1.c">
-         <Option target="bench-bucket-putget-scan-1"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/benches/bench-bucket-putget-scan-2-cache.c">
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/benches/bench-bucket-putget-scan-2.c">
-         <Option target="bench-bucket-putget-scan-2"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/benches/bench-bucket-putget-scan-3-cache.c">
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/benches/bench-bucket-putget-scan-3.c">
-         <Option target="bench-bucket-putget-scan-3"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/benches/bench-bucket-putget-scan-4-cache.c">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/benches/bench-bucket-putget-scan-4.c">
-         <Option target="bench-bucket-putget-scan-4"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/common.h">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/ng5/allocator.h">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/ng5/cursor.h">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/ng5/storage_engine.h">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/ng5/strings.h">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/status.h">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/algorithm.h">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/asnyc.h">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/bolster.h">
-         <Option target="bench-bucket-putget-bsearch"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/hash.h">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/slot_map.h">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/string_hashtable.h">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/string_hashtables/simple_bsearch.h">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/string_hashtables/simple_scan1-cache.h">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/string_hashtables/simple_scan1-parallel.h">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/string_hashtables/simple_scan1.h">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/string_hashtables/simple_scan2-cache.h">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/string_hashtables/simple_scan2.h">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/string_hashtables/simple_scan3-cache.h">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/string_hashtables/simple_scan3.h">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/string_hashtables/simple_scan4-cache.h">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/string_hashtables/simple_scan4.h">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/time.h">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/unit.h">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/vector.h">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/main.c">
-         <Option target="ng5"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/ng5/allocator.c">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/ng5/strings.c">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/stdx/async.c">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/stdx/string_hashtables/simple_bsearch.c">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/stdx/string_hashtables/simple_scan1-cache.c">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/stdx/string_hashtables/simple_scan1-parallel.c">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/stdx/string_hashtables/simple_scan1.c">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/stdx/string_hashtables/simple_scan2-cache.c">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/stdx/string_hashtables/simple_scan2.c">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/stdx/string_hashtables/simple_scan3-cache.c">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/stdx/string_hashtables/simple_scan3.c">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/stdx/string_hashtables/simple_scan4-cache.c">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/stdx/string_hashtables/simple_scan4.c">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/stdx/time.c">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/stdx/vector.c">
-         <Option target="bench-bucket-putget-scan-4-cache"/>
-         <Option target="bench-bucket-putget-scan-3-cache"/>
-         <Option target="bench-bucket-putget-scan-3"/>
-         <Option target="bench-bucket-putget-scan-1-cache"/>
-         <Option target="bench-bucket-putget-scan-2"/>
-         <Option target="bench-bucket-putget-scan-1"/>
-         <Option target="bench-bucket-putget-bsearch"/>
-         <Option target="bench-bucket-putget-scan-1-parallel"/>
-         <Option target="bench-bucket-putget-scan-2-cache"/>
-         <Option target="bench-bucket-putget-scan-4"/>
-         <Option target="ng5"/>
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/tests/stdx/test_string_id_map.c">
-         <Option target="stdx_test_string_id_map"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/CMakeLists.txt">
-          <Option virtualFolder="CMake Files\" />
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/tests/CMakeLists.txt">
-          <Option virtualFolder="CMake Files\tests\" />
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/cmake/modules/FindCheck.cmake">
-          <Option virtualFolder="CMake Files\cmake\modules\" />
-      </Unit>
-   </Project>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="ng5"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;CMake Files\tests\;CMake Files\cmake\;CMake Files\cmake\modules\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/Users/marcus/git/ng5"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="test">
+				<Option working_dir="/Users/marcus/git/ng5"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 test"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/Users/marcus/git/ng5"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="bench-bucket-putget-scan-4-cache">
+				<Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-4-cache" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/marcus/git/ng5/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/marcus/git/ng5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-4-cache"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="bench-bucket-putget-scan-4-cache/fast">
+				<Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-4-cache" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/marcus/git/ng5/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/marcus/git/ng5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-4-cache/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="bench-bucket-putget-scan-3-cache">
+				<Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-3-cache" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/marcus/git/ng5/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/marcus/git/ng5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-3-cache"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="bench-bucket-putget-scan-3-cache/fast">
+				<Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-3-cache" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/marcus/git/ng5/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/marcus/git/ng5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-3-cache/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="bench-bucket-putget-scan-3">
+				<Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-3" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/marcus/git/ng5/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/marcus/git/ng5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-3"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="bench-bucket-putget-scan-3/fast">
+				<Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-3" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/marcus/git/ng5/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/marcus/git/ng5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-3/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="bench-bucket-putget-scan-1-cache">
+				<Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-1-cache" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/marcus/git/ng5/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/marcus/git/ng5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-1-cache"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="bench-bucket-putget-scan-1-cache/fast">
+				<Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-1-cache" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/marcus/git/ng5/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/marcus/git/ng5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-1-cache/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="bench-bucket-putget-scan-2">
+				<Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-2" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/marcus/git/ng5/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/marcus/git/ng5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-2"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="bench-bucket-putget-scan-2/fast">
+				<Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-2" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/marcus/git/ng5/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/marcus/git/ng5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-2/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="bench-bucket-putget-scan-1">
+				<Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-1" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/marcus/git/ng5/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/marcus/git/ng5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-1"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="bench-bucket-putget-scan-1/fast">
+				<Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-1" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/marcus/git/ng5/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/marcus/git/ng5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-1/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="bench-bucket-putget-bsearch">
+				<Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-bsearch" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/marcus/git/ng5/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/marcus/git/ng5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-bsearch"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="bench-bucket-putget-bsearch/fast">
+				<Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-bsearch" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/marcus/git/ng5/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/marcus/git/ng5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-bsearch/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/Users/marcus/git/ng5"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="bench-bucket-putget-scan-1-parallel">
+				<Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-1-parallel" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/marcus/git/ng5/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/marcus/git/ng5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-1-parallel"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="bench-bucket-putget-scan-1-parallel/fast">
+				<Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-1-parallel" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/marcus/git/ng5/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/marcus/git/ng5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-1-parallel/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="bench-bucket-putget-scan-2-cache">
+				<Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-2-cache" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/marcus/git/ng5/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/marcus/git/ng5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-2-cache"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="bench-bucket-putget-scan-2-cache/fast">
+				<Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-2-cache" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/marcus/git/ng5/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/marcus/git/ng5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-2-cache/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="bench-bucket-putget-scan-4">
+				<Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-4" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/marcus/git/ng5/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/marcus/git/ng5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-4"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="bench-bucket-putget-scan-4/fast">
+				<Option output="/Users/marcus/git/ng5/cmake-build-debug/bench-bucket-putget-scan-4" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/marcus/git/ng5/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/marcus/git/ng5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 bench-bucket-putget-scan-4/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="ng5">
+				<Option output="/Users/marcus/git/ng5/cmake-build-debug/ng5" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/marcus/git/ng5/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/marcus/git/ng5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 ng5"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="ng5/fast">
+				<Option output="/Users/marcus/git/ng5/cmake-build-debug/ng5" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/marcus/git/ng5/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/marcus/git/ng5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 ng5/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="stdx_test_string_id_map">
+				<Option output="/Users/marcus/git/ng5/cmake-build-debug/stdx_test_string_id_map" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/marcus/git/ng5/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/marcus/git/ng5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/local/Cellar/check/0.12.0/include"/>
+					<Add directory="/Users/marcus/git/ng5/tests/."/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/tests/Makefile&quot;  VERBOSE=1 stdx_test_string_id_map"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/tests/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/tests/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="stdx_test_string_id_map/fast">
+				<Option output="/Users/marcus/git/ng5/cmake-build-debug/stdx_test_string_id_map" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/marcus/git/ng5/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/marcus/git/ng5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/local/Cellar/check/0.12.0/include"/>
+					<Add directory="/Users/marcus/git/ng5/tests/."/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/tests/Makefile&quot;  VERBOSE=1 stdx_test_string_id_map/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/tests/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/tests/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/Users/marcus/git/ng5/benches/bench-bucket-putget-bsearch.c">
+			<Option target="bench-bucket-putget-bsearch"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/benches/bench-bucket-putget-scan-1-cache.c">
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/benches/bench-bucket-putget-scan-1-parallel.c">
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/benches/bench-bucket-putget-scan-1.c">
+			<Option target="bench-bucket-putget-scan-1"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/benches/bench-bucket-putget-scan-2-cache.c">
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/benches/bench-bucket-putget-scan-2.c">
+			<Option target="bench-bucket-putget-scan-2"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/benches/bench-bucket-putget-scan-3-cache.c">
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/benches/bench-bucket-putget-scan-3.c">
+			<Option target="bench-bucket-putget-scan-3"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/benches/bench-bucket-putget-scan-4-cache.c">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/benches/bench-bucket-putget-scan-4.c">
+			<Option target="bench-bucket-putget-scan-4"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/common.h">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/ng5/cursor.h">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/ng5/storage_engine.h">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/status.h">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/algorithm.h">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/allocator.h">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/asnyc.h">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/bolster.h">
+			<Option target="bench-bucket-putget-bsearch"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/hash.h">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/slot_map.h">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/string_dic.h">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/string_dics/string_dic_naive.h">
+			<Option target="ng5"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/string_hashtable.h">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/string_hashtables/simple_bsearch.h">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/string_hashtables/simple_scan1-cache.h">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/string_hashtables/simple_scan1-parallel.h">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/string_hashtables/simple_scan1.h">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/string_hashtables/simple_scan2-cache.h">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/string_hashtables/simple_scan2.h">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/string_hashtables/simple_scan3-cache.h">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/string_hashtables/simple_scan3.h">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/string_hashtables/simple_scan4-cache.h">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/string_hashtables/simple_scan4.h">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/time.h">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/unit.h">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/vector.h">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/main.c">
+			<Option target="ng5"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/allocator.c">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/async.c">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/string_dics/string_dic_naive.c">
+			<Option target="ng5"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/string_hashtables/simple_bsearch.c">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/string_hashtables/simple_scan1-cache.c">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/string_hashtables/simple_scan1-parallel.c">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/string_hashtables/simple_scan1.c">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/string_hashtables/simple_scan2-cache.c">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/string_hashtables/simple_scan2.c">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/string_hashtables/simple_scan3-cache.c">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/string_hashtables/simple_scan3.c">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/string_hashtables/simple_scan4-cache.c">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/string_hashtables/simple_scan4.c">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/time.c">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/vector.c">
+			<Option target="bench-bucket-putget-scan-4-cache"/>
+			<Option target="bench-bucket-putget-scan-3-cache"/>
+			<Option target="bench-bucket-putget-scan-3"/>
+			<Option target="bench-bucket-putget-scan-1-cache"/>
+			<Option target="bench-bucket-putget-scan-2"/>
+			<Option target="bench-bucket-putget-scan-1"/>
+			<Option target="bench-bucket-putget-bsearch"/>
+			<Option target="bench-bucket-putget-scan-1-parallel"/>
+			<Option target="bench-bucket-putget-scan-2-cache"/>
+			<Option target="bench-bucket-putget-scan-4"/>
+			<Option target="ng5"/>
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/tests/stdx/test_string_id_map.c">
+			<Option target="stdx_test_string_id_map"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/tests/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\tests\"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/cmake/modules/FindCheck.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+	</Project>
 </CodeBlocks_project_file>

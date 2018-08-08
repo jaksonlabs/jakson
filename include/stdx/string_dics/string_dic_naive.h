@@ -1,4 +1,4 @@
-// file: status.h
+// file: string_dic_naive.h
 
 /**
  *  Copyright (C) 2018 Marcus Pinnecke
@@ -17,21 +17,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _NG5_STATUS
-#define _NG5_STATUS
+#ifndef NG5_STRING_DIC_NAIVE
+#define NG5_STRING_DIC_NAIVE
 
-enum status {
-    STATUS_FALSE                = 0,
-    STATUS_OK                   = 1,
-    STATUS_TRUE                 = 1,
-    STATUS_NULLPTR,
-    STATUS_NOTIMPL,
-    STATUS_UNIT_OUTOFBOUNDS,
-    STATUS_MALLOCERR,
-    STATUS_ILLEGALARG,
-    STATUS_INTERNALERR,
-    STATUS_ILLEGALIMPL,
-};
+#include <stdx/string_dic.h>
 
+int string_dic_create_naive(struct string_dic *dic, size_t capacity, size_t num_index_buckets,
+        size_t num_index_bucket_cap, size_t nthreads, const struct allocator *alloc);
 
 #endif

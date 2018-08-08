@@ -2,7 +2,7 @@
 #include <status.h>
 #include <stdio.h>
 
-#include <ng5/allocator.h>
+#include <stdx/allocator.h>
 
 static void *default_malloc(struct allocator *self, size_t size);
 static void *default_realloc(struct allocator *self, void *ptr, size_t size);

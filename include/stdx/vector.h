@@ -21,7 +21,7 @@
 #define _NG5_VECTOR
 
 #include <common.h>
-#include <ng5/allocator.h>
+#include <stdx/allocator.h>
 
 /**
  * An implementation of the concrete data type Vector, a resizeable dynamic array.
