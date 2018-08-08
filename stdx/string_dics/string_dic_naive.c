@@ -1,8 +1,8 @@
 #include <stdx/vector.h>
-#include <stdx/asnyc.h>
-#include <stdx/string_hashtable.h>
+#include <stdx/async.h>
+#include <stdx/string_lookup.h>
 #include <stdx/string_dics/string_dic_naive.h>
-#include <stdx/string_hashtables/simple_scan1-parallel.h>
+#include <stdx/string_lookups/simple_scan1-parallel.h>
 #include <stdlib.h>
 
 struct entry {
@@ -13,19 +13,18 @@ struct entry {
 struct naive_extra {
     struct vector of_type(entry)        contents;
     struct vector of_type(string_id_t)  freelist;
-    struct string_hashtable             index;
+    struct string_lookup             index;
     struct spinlock                     lock;
 };
 
 static int this_drop(struct string_dic *self);
 static int this_insert(struct string_dic *self, string_id_t **out, char * const*strings, size_t num_strings);
 static int this_remove(struct string_dic *self, string_id_t *strings, size_t num_strings);
-static int this_locate_test(struct string_dic *self, string_id_t **out, bool **found_mask,
-                            size_t *num_not_found, char *const *keys, size_t num_keys);
-static int this_locate_blind(struct string_dic *self, string_id_t **out, char *const *keys,
-                             size_t num_keys);
-static int this_extract(struct string_dic *self, const char **strings, size_t *num_out,
-                        const string_id_t *ids, size_t num_ids);
+static int this_locate_safe(struct string_dic* self, string_id_t** out, bool** found_mask,
+        size_t* num_not_found, char* const* keys, size_t num_keys);
+static int this_locate_fast(struct string_dic* self, string_id_t** out, char* const* keys,
+        size_t num_keys);
+static char **this_extract(struct string_dic *self, const string_id_t *ids, size_t num_ids);
 static int this_free(struct string_dic *self, void *ptr);
 
 static void lock(struct string_dic *self);
@@ -38,8 +37,8 @@ static struct naive_extra *this_extra(struct string_dic *self);
 static int freelist_pop(string_id_t *out, struct string_dic *self);
 static int freelist_push(struct string_dic *self, string_id_t idx);
 
-int string_dic_create_naive(struct string_dic *dic, size_t capacity, size_t num_index_buckets,
-        size_t num_index_bucket_cap, size_t nthreads, const struct allocator *alloc)
+int string_dic_create_naive(struct string_dic* dic, size_t capacity, size_t num_index_buckets,
+        size_t num_index_bucket_cap, size_t nthreads, const struct allocator* alloc)
 {
     check_non_null(dic);
     check_success(allocator_this_or_default(&dic->alloc, alloc));
@@ -48,15 +47,14 @@ int string_dic_create_naive(struct string_dic *dic, size_t capacity, size_t num_
     dic->drop         = this_drop;
     dic->insert       = this_insert;
     dic->remove       = this_remove;
-    dic->locate_test  = this_locate_test;
-    dic->locate_blind = this_locate_blind;
+    dic->locate_safe  = this_locate_safe;
+    dic->locate_fast = this_locate_fast;
     dic->extract      = this_extract;
 
     check_success(extra_create(dic, capacity, num_index_buckets, num_index_bucket_cap, nthreads));
     return STATUS_OK;
 }
 
-unused_fn
 static void lock(struct string_dic *self)
 {
     assert(self->tag == STRING_DIC_NAIVE);
@@ -64,7 +62,6 @@ static void lock(struct string_dic *self)
     spinlock_lock(&extra->lock);
 }
 
-unused_fn
 static void unlock(struct string_dic *self)
 {
     assert(self->tag == STRING_DIC_NAIVE);
@@ -121,7 +118,6 @@ static int freelist_pop(string_id_t *out, struct string_dic *self)
     return STATUS_OK;
 }
 
-unused_fn
 static int freelist_push(struct string_dic *self, string_id_t idx)
 {
     assert (self->tag == STRING_DIC_NAIVE);
@@ -134,6 +130,8 @@ static int freelist_push(struct string_dic *self, string_id_t idx)
 static int this_drop(struct string_dic *self)
 {
     check_tag(self->tag, STRING_DIC_NAIVE)
+
+    lock(self);
 
     struct naive_extra *extra = this_extra(self);
 
@@ -149,7 +147,9 @@ static int this_drop(struct string_dic *self)
 
     vector_drop(&extra->freelist);
     vector_drop(&extra->contents);
-    string_hashtable_drop(&extra->index);
+    string_lookup_drop(&extra->index);
+
+    unlock(self);
 
     return STATUS_OK;
 }
@@ -157,16 +157,17 @@ static int this_drop(struct string_dic *self)
 static int this_insert(struct string_dic *self, string_id_t **out, char * const*strings, size_t num_strings)
 {
     check_tag(self->tag, STRING_DIC_NAIVE)
+    lock(self);
 
     size_t              num_not_found;
     bool               *found_mask;
-    uint64_t           *values;
+    string_id_t        *values;
 
     struct naive_extra *extra          = this_extra(self);
     string_id_t        *ids_out        = allocator_malloc(&self->alloc, num_strings * sizeof(string_id_t));
 
     /* query index for strings to get a boolean mask which strings are new and which must be added */
-    string_id_map_get_test(&values, &found_mask, &num_not_found, &extra->index, strings, num_strings);
+    string_lookup_get_safe(&values, &found_mask, &num_not_found, &extra->index, strings, num_strings);
 
     /* copy string ids for already known strings to their result position resp. add those which are new */
     for (size_t i = 0; i < num_strings; i++) {
@@ -174,7 +175,7 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
             ids_out[i] = values[i];
         } else {
             string_id_t string_id;
-            check_success(freelist_pop(&string_id, self));
+            panic_if(freelist_pop(&string_id, self) != STATUS_OK, "slot management broken");
             struct entry *entries = (struct entry *) vector_data(&extra->contents);
             struct entry *entry   = entries + string_id;
             assert (!entry->in_use && !entries->str);
@@ -188,8 +189,10 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
     optional_set_else(out, ids_out, allocator_free(&self->alloc, ids_out));
 
     /* clean up */
-    string_id_map_free(values, &extra->index);
-    string_id_map_free(found_mask, &extra->index);
+    string_lookup_free(values, &extra->index);
+    string_lookup_free(found_mask, &extra->index);
+
+    unlock(self);
 
     return STATUS_OK;
 
@@ -197,28 +200,68 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
 
 static int this_remove(struct string_dic *self, string_id_t *strings, size_t num_strings)
 {
-    unused(self);
-    unused(strings);
-    unused(num_strings);
+    check_non_null(self);
+    check_non_null(strings);
+    check_non_null(num_strings);
     check_tag(self->tag, STRING_DIC_NAIVE)
-    NOT_YET_IMPLEMENTED
+    lock(self);
+
+    struct naive_extra *extra = this_extra(self);
+
+    size_t num_strings_to_delete = 0;
+    char **strings_to_delete = allocator_malloc(&self->alloc, num_strings * sizeof(char *));
+    string_id_t *string_ids_to_delete = allocator_malloc(&self->alloc, num_strings * sizeof(string_id_t));
+
+    /* remove strings from contents vector, and skip duplicates */
+    for (size_t i = 0; i < num_strings; i++) {
+        string_id_t string_id = strings[i];
+        struct entry *entry   = (struct entry *) vector_data(&extra->contents) + string_id;
+        if (likely(entry->in_use)) {
+            strings_to_delete[num_strings_to_delete]    = entry->str;
+            string_ids_to_delete[num_strings_to_delete] = strings[i];
+            entry->str    = NULL;
+            entry->in_use = false;
+            num_strings_to_delete++;
+            check_success(freelist_push(self, string_id));
+        }
+    }
+
+    /* remove from index */
+    check_success(string_lookup_remove(&extra->index, strings_to_delete, num_strings_to_delete));
+
+    /* free up resources for strings that should be removed */
+    for (size_t i = 0; i < num_strings_to_delete; i++) {
+        free (strings_to_delete[i]);
+    }
+
+    /* cleanup */
+    allocator_free(&self->alloc, strings_to_delete);
+    allocator_free(&self->alloc, string_ids_to_delete);
+
+    unlock(self);
+    return STATUS_OK;
 }
 
-static int this_locate_test(struct string_dic *self, string_id_t **out, bool **found_mask,
-                            size_t *num_not_found, char *const *keys, size_t num_keys)
+static int this_locate_safe(struct string_dic* self, string_id_t** out, bool** found_mask,
+        size_t* num_not_found, char* const* keys, size_t num_keys)
 {
-    unused(self);
-    unused(out);
-    unused(found_mask);
-    unused(num_not_found);
-    unused(keys);
-    unused(num_keys);
+    check_non_null(self);
+    check_non_null(out);
+    check_non_null(found_mask);
+    check_non_null(num_not_found);
+    check_non_null(keys);
+    check_non_null(num_keys);
     check_tag(self->tag, STRING_DIC_NAIVE)
-    NOT_YET_IMPLEMENTED
+
+    lock(self);
+    struct naive_extra *extra = this_extra(self);
+    int status = string_lookup_get_safe(out, found_mask, num_not_found, &extra->index, keys, num_keys);
+    unlock(self);
+    return status;
 }
 
-static int this_locate_blind(struct string_dic *self, string_id_t **out, char *const *keys,
-                             size_t num_keys)
+static int this_locate_fast(struct string_dic* self, string_id_t** out, char* const* keys,
+        size_t num_keys)
 {
     check_tag(self->tag, STRING_DIC_NAIVE)
 
@@ -226,7 +269,7 @@ static int this_locate_blind(struct string_dic *self, string_id_t **out, char *c
     size_t  num_not_found;
 
     /* use safer but in principle more slower implementation */
-    int     result         = this_locate_test(self, out, &found_mask, &num_not_found, keys, num_keys);
+    int     result         = this_locate_safe(self, out, &found_mask, &num_not_found, keys, num_keys);
 
     /* cleanup */
     this_free(self, found_mask);
@@ -234,16 +277,24 @@ static int this_locate_blind(struct string_dic *self, string_id_t **out, char *c
     return  result;
 }
 
-static int this_extract(struct string_dic *self, const char **strings, size_t *num_out,
-                        const string_id_t *ids, size_t num_ids)
+static char **this_extract(struct string_dic *self, const string_id_t *ids, size_t num_ids)
 {
-    unused(self);
-    unused(strings);
-    unused(num_out);
-    unused(ids);
-    unused(num_ids);
-    check_tag(self->tag, STRING_DIC_NAIVE)
-    NOT_YET_IMPLEMENTED
+    if (unlikely(!self || !ids || num_ids == 0 || self->tag != STRING_DIC_NAIVE)) {
+        return NULL;
+    }
+
+    lock(self);
+
+    struct naive_extra *extra = this_extra(self);
+    char **result = allocator_malloc(&self->alloc, num_ids * sizeof(char *));
+    struct entry *entries = (struct entry *) vector_data(&extra->contents);
+    for (size_t i = 0; i < num_ids; i++) {
+        assert(entries[i].in_use);
+        result[i] = entries[i].str;
+    }
+
+    unlock(self);
+    return result;
 }
 
 static int this_free(struct string_dic *self, void *ptr)

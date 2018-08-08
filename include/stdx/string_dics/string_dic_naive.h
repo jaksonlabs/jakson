@@ -22,7 +22,7 @@
 
 #include <stdx/string_dic.h>
 
-int string_dic_create_naive(struct string_dic *dic, size_t capacity, size_t num_index_buckets,
-        size_t num_index_bucket_cap, size_t nthreads, const struct allocator *alloc);
+int string_dic_create_naive(struct string_dic* dic, size_t capacity, size_t num_index_buckets,
+        size_t num_index_bucket_cap, size_t nthreads, const struct allocator* alloc);
 
 #endif

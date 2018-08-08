@@ -17,8 +17,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef NG5_SIMPLE_SCAN4
-#define NG5_SIMPLE_SCAN4
+#ifndef NG5_SIMPLE_SCAN1_BUFF
+#define NG5_SIMPLE_SCAN1_BUFF
 
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -28,7 +28,7 @@
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <common.h>
-#include <stdx/string_hashtable.h>
+#include <stdx/string_lookup.h>
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
@@ -37,9 +37,9 @@
 // ---------------------------------------------------------------------------------------------------------------------
 
 /**
- * Branch-free scan + swapping
+ * Regular, non-fancy scan + caching
  */
-int string_hashtable_create_scan4(struct string_hashtable* map, const struct allocator* alloc, size_t num_buckets,
+int string_hashtable_create_scan1_cache(struct string_lookup* map, const struct allocator* alloc, size_t num_buckets,
         size_t cap_buckets, float bucket_grow_factor);
 
 #endif

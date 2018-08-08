@@ -1,12 +1,8 @@
 #include <stdio.h>
-#include <stdx/string_hashtable.h>
+#include <stdx/string_lookup.h>
 #include <stdx/time.h>
-#include <stdx/string_hashtables/simple_scan1.h>
 #include <stdlib.h>
-#include <stdx/string_hashtables/simple_scan2.h>
-#include <stdx/string_hashtables/simple_scan3.h>
-#include <stdx/string_hashtables/simple_scan4.h>
-#include <stdx/string_hashtables/simple_scan4-cache.h>
+#include <stdx/string_lookups/simple_scan4-cache.h>
 
 #define TYPE "SIMPLE_SCAN_4_CACHE"
 /* Cache sizes on server: L1/L2/L3 1024/16384/22528 */
@@ -28,7 +24,7 @@ int main()
                     timestamp_t put_begin, put_end;
                     timestamp_t get_begin, get_end;
 
-                    struct string_hashtable map;
+                    struct string_lookup map;
 
                     create_begin = time_current_time_ms();
                     string_hashtable_create_scan4_cache(&map, NULL, 1, CURRENT_BYTES, 1.7f);
@@ -54,7 +50,7 @@ int main()
 
                     fprintf(stderr, "[INFO] PUT %zu KiB (%zu strings)...\n", CURRENT_BYTES/1024, CURRENT_BYTES);
                     put_begin = time_current_time_ms();
-                    string_hashtable_put_test(&map, keys, values, CURRENT_BYTES);
+                    string_lookup_put_safe(&map, keys, values, CURRENT_BYTES);
                     put_end = time_current_time_ms();
 
                     uint64_t* out_values;
@@ -63,7 +59,7 @@ int main()
 
                     get_begin = time_current_time_ms();
                     fprintf(stderr, "[INFO] GET %zu KiB...\n", (size_t) (CURRENT_BYTES/1024*(i/100.0f)));
-                    string_id_map_get_test(&out_values, &out_mask, &num_not_found, &map, search_keys,
+                    string_lookup_get_safe(&out_values, &out_mask, &num_not_found, &map, search_keys,
                             CURRENT_BYTES*(i/100.0f));
                     get_end = time_current_time_ms();
 
@@ -79,9 +75,9 @@ int main()
                             rep);
                     fflush(stdout);
 
-                    string_id_map_free(out_values, &map);
-                    string_id_map_free(out_mask, &map);
-                    string_hashtable_drop(&map);
+                    string_lookup_free(out_values, &map);
+                    string_lookup_free(out_mask, &map);
+                    string_lookup_drop(&map);
                     for (size_t i = 0; i<CURRENT_BYTES; i++) {
                         free (keys[i]);
                     }

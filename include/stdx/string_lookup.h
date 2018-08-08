@@ -87,9 +87,9 @@
 #define NG5_CONFIG_BUCKET_CAPACITY  1024
 #endif
 
-enum string_hashtable_impl { STRING_ID_MAP_SIMPLE, STRING_ID_MAP_PARALLEL };
+enum string_lookup_impl { STRING_ID_MAP_SIMPLE };
 
-struct string_hashtable {
+struct string_lookup {
 
   /**
    * Implementation-specific values
@@ -99,7 +99,7 @@ struct string_hashtable {
   /**
    * Implementation tag
    */
-  enum string_hashtable_impl tag;
+  enum string_lookup_impl    tag;
 
   /**
   *  Memory allocator that is used to get memory for user data
@@ -109,45 +109,45 @@ struct string_hashtable {
   /**
    *  Frees resources bound to <code>self</code> via the allocator specified by the constructor
    */
-  int (*drop)(struct string_hashtable *self);
+  int (*drop)(struct string_lookup *self);
 
   /**
    * Put <code>num_pair</code> objects into this map maybe updating old objects with the same key.
    */
-  int (*put_test)(struct string_hashtable *self, char *const *keys, const uint64_t *values, size_t num_pairs);
+  int (*put_safe)(struct string_lookup *self, char *const *keys, const string_id_t *values, size_t num_pairs);
 
   /**
    * Put <code>num_pair</code> objects into this map maybe without checking for updates.
    */
-  int (*put_blind)(struct string_hashtable *self, char *const *keys, const uint64_t *values, size_t num_pairs);
+  int (*put_fast)(struct string_lookup *self, char *const *keys, const string_id_t *values, size_t num_pairs);
 
   /**
    * Get the values associated with <code>keys</code> in this map (if any).
    */
-  int (*get_test)(struct string_hashtable *self, uint64_t **out, bool **found_mask, size_t *num_not_found,
+  int (*get_safe)(struct string_lookup *self, string_id_t **out, bool **found_mask, size_t *num_not_found,
           char *const *keys, size_t num_keys);
 
   /**
    * Get the values associated with <code>keys</code> in this map. All keys <u>must</u> exist.
    */
-  int (*get_blind)(struct string_hashtable *self, uint64_t **out, char *const *keys, size_t num_keys);
+  int (*get_fast)(struct string_lookup *self, string_id_t **out, char *const *keys, size_t num_keys);
 
   /**
    * Updates keys associated with <code>values</code> in this map. All values <u>must</u> exist, and the
    * mapping between keys and values must be bidirectional.
    */
-  int (*update_key_blind)(struct string_hashtable *self, const uint64_t *values, char *const *keys, size_t num_keys);
+  int (*update_key_fast)(struct string_lookup *self, const string_id_t *values, char *const *keys, size_t num_keys);
 
   /**
    * Removes the objects with the gives keys from this map
    */
-  int (*remove)(struct string_hashtable *self, char *const *keys, size_t num_keys);
+  int (*remove)(struct string_lookup *self, char *const *keys, size_t num_keys);
 
   /**
    * Frees up allocated memory for <code>ptr</code> via the allocator in <code>map</code> that was specified
    * by the call to <code>string_id_map_create</code>
    */
-  int (*free)(struct string_hashtable *self, void *ptr);
+  int (*free)(struct string_lookup *self, void *ptr);
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -162,7 +162,7 @@ struct string_hashtable {
  * @param map a non-null pointer to the map
  * @return <code>STATUS_OK</code> in case of success, otherwise a value indiciating the error.
  */
-inline static int string_hashtable_drop(struct string_hashtable* map)
+inline static int string_lookup_drop(struct string_lookup* map)
 {
     check_non_null(map);
     assert(map->drop);
@@ -181,15 +181,15 @@ inline static int string_hashtable_drop(struct string_hashtable* map)
  * @param num_pairs the number of pairs that are read via <code>keys</code> and <code>values</code>
  * @return <code>STATUS_OK</code> in case of success, otherwise a value indiciating the error.
  */
-inline static int string_hashtable_put_test(struct string_hashtable* map, char* const* keys, const uint64_t* values,
+inline static int string_lookup_put_safe(struct string_lookup* map, char* const* keys, const string_id_t* values,
         size_t num_pairs)
 {
     check_non_null(map);
     check_non_null(keys);
     check_non_null(values);
-    assert(map->put_test);
+    assert(map->put_safe);
 
-    return map->put_test(map, keys, values, num_pairs);
+    return map->put_safe(map, keys, values, num_pairs);
 }
 
 /**
@@ -207,15 +207,15 @@ inline static int string_hashtable_put_test(struct string_hashtable* map, char* 
  * @param num_pairs the number of pairs that are read via <code>keys</code> and <code>values</code>
  * @return <code>STATUS_OK</code> in case of success, otherwise a value indiciating the error.
  */
-inline static int string_hashtable_put_blind(struct string_hashtable* map, char* const* keys, const uint64_t* values,
+inline static int string_lookup_put_fast(struct string_lookup* map, char* const* keys, const string_id_t* values,
         size_t num_pairs)
 {
     check_non_null(map);
     check_non_null(keys);
     check_non_null(values);
-    assert(map->put_blind);
+    assert(map->put_fast);
 
-    return map->put_blind(map, keys, values, num_pairs);
+    return map->put_fast(map, keys, values, num_pairs);
 }
 
 /**
@@ -245,8 +245,8 @@ inline static int string_hashtable_put_blind(struct string_hashtable* map, char*
  * @param num_keys the number of keys
  * @return <code>STATUS_OK</code> in case of success, otherwise a value indicating the error.
  */
-inline static int string_id_map_get_test(uint64_t** out, bool** found_mask, size_t* num_not_found,
-        struct string_hashtable* map,
+inline static int string_lookup_get_safe(string_id_t** out, bool** found_mask, size_t* num_not_found,
+        struct string_lookup* map,
         char* const* keys, size_t num_keys)
 {
     check_non_null(out);
@@ -254,9 +254,9 @@ inline static int string_id_map_get_test(uint64_t** out, bool** found_mask, size
     check_non_null(num_not_found);
     check_non_null(map);
     check_non_null(keys);
-    assert(map->get_test);
+    assert(map->get_safe);
 
-    return map->get_test(map, out, found_mask, num_not_found, keys, num_keys);
+    return map->get_safe(map, out, found_mask, num_not_found, keys, num_keys);
 }
 
 /**
@@ -267,22 +267,22 @@ inline static int string_id_map_get_test(uint64_t** out, bool** found_mask, size
  * <code>string_id_map_get_test</code> instead.
  *
  * @param out A non-null pointer to an unallocated memory address. The map will allocate <code>num_keys</code>
- *            times <code>sizeof(uint64_t)</code> bytes memory to store the result. There are <code>num_keys</code>
+ *            times <code>sizeof(string_id_t)</code> bytes memory to store the result. There are <code>num_keys</code>
  *            elements returned, and all of them are guaranteed to contain a particular value.
  * @param map a non-null pointer to the map
  * @param keys a non-null pointer to a list of at least <code>num_keys</code> strings
  * @param num_keys the number of keys
  * @return <code>STATUS_OK</code> in case of success, otherwise a value indicating the error.
  */
-inline static int string_id_map_get_blind(uint64_t** out, struct string_hashtable* map,
-                                          char* const* keys, size_t num_keys)
+inline static int string_lookup_get_fast(string_id_t** out, struct string_lookup* map,
+        char* const* keys, size_t num_keys)
 {
     check_non_null(out);
     check_non_null(map);
     check_non_null(keys);
-    assert(map->get_blind);
+    assert(map->get_fast);
 
-    return map->get_blind(map, out, keys, num_keys);
+    return map->get_fast(map, out, keys, num_keys);
 }
 
 /**
@@ -293,20 +293,21 @@ inline static int string_id_map_get_blind(uint64_t** out, struct string_hashtabl
  * <code>string_hashtable_put_blind</code> instead.
  *
  * @param out A non-null pointer to an unallocated memory address. The map will allocate <code>num_keys</code>
- *            times <code>sizeof(uint64_t)</code> bytes memory to store the result. There are <code>num_keys</code>
+ *            times <code>sizeof(string_id_t)</code> bytes memory to store the result. There are <code>num_keys</code>
  *            elements returned, and all of them are guaranteed to contain a particular value.
  * @param map a non-null pointer to the map
  * @param keys a non-null pointer to a list of at least <code>num_keys</code> strings
  * @param num_keys the number of keys
  * @return <code>STATUS_OK</code> in case of success, otherwise a value indicating the error.
  */
-inline static int string_id_map_update_key_blind(struct string_hashtable *map, const uint64_t *values, char *const *keys, size_t num_keys)
+inline static int string_lookup_update_fast(struct string_lookup* map, const string_id_t* values,
+        char* const* keys, size_t num_keys)
 {
     check_non_null(map);
     check_non_null(keys);
-    assert(map->update_key_blind);
+    assert(map->update_key_fast);
 
-    return map->update_key_blind(map, values, keys, num_keys);
+    return map->update_key_fast(map, values, keys, num_keys);
 }
 
 /**
@@ -317,7 +318,7 @@ inline static int string_id_map_update_key_blind(struct string_hashtable *map, c
  * @param num_keys the number of keys
  * @return
  */
-inline static int string_id_map_remove(struct string_hashtable *map, char *const *keys, size_t num_keys)
+inline static int string_lookup_remove(struct string_lookup* map, char* const* keys, size_t num_keys)
 {
     check_non_null(map);
     check_non_null(keys);
@@ -333,7 +334,7 @@ inline static int string_id_map_remove(struct string_hashtable *map, char *const
  * @param values A non-null pointer (potentially resulting from a call to <code>string_id_map_get</code>)
  * @return <code>STATUS_OK</code> in case of success, otherwise a value indiciating the error.
  */
-inline static int string_id_map_free(void *ptr, struct string_hashtable *map)
+inline static int string_lookup_free(void* ptr, struct string_lookup* map)
 {
     check_non_null(ptr);
     check_non_null(map);

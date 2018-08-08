@@ -48,6 +48,13 @@
     abort();                      \
 }
 
+#define panic_if(expr, msg)                   \
+{                                             \
+    if (unlikely((expr))) {                   \
+        panic(msg)                            \
+    };                                        \
+}
+
 #ifndef NDEBUG
 #define check_tag(is, expected)    \
 {                                  \
@@ -116,3 +123,5 @@
     } else { stmt; }
 
 #endif
+
+typedef size_t string_id_t;

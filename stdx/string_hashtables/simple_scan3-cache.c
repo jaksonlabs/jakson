@@ -21,8 +21,8 @@
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <stdx/string_hashtables/simple_scan3-cache.h>
-#include <stdx/asnyc.h>
+#include <stdx/string_lookups/simple_scan3-cache.h>
+#include <stdx/async.h>
 #include <stdlib.h>
 #include <stdx/algorithm.h>
 
@@ -34,7 +34,7 @@ struct simple_bucket_entry {
   bool        in_use;
   const char *str;
   size_t      str_len;
-  uint64_t    value;
+  string_id_t    value;
 };
 
 struct simple_bucket {
@@ -58,26 +58,26 @@ struct simple_extra {
 //  SIMPLE
 // ---------------------------------------------------------------------------------------------------------------------
 
-static int simple_drop(struct string_hashtable *self);
-static int simple_put_test(struct string_hashtable *self, char *const *keys, const uint64_t *values, size_t num_pairs);
-static int simple_put_blind(struct string_hashtable *self, char *const *keys, const uint64_t *values, size_t num_pairs);
-static int simple_get_test(struct string_hashtable *self, uint64_t **out, bool **found_mask, size_t *num_not_found,
+static int simple_drop(struct string_lookup *self);
+static int simple_put_test(struct string_lookup *self, char *const *keys, const string_id_t *values, size_t num_pairs);
+static int simple_put_blind(struct string_lookup *self, char *const *keys, const string_id_t *values, size_t num_pairs);
+static int simple_get_test(struct string_lookup *self, string_id_t **out, bool **found_mask, size_t *num_not_found,
         char *const *keys, size_t num_keys);
-static int simple_get_blind(struct string_hashtable *self, uint64_t **out, char *const *keys, size_t num_keys);
-static int simple_update_key_blind(struct string_hashtable *self, const uint64_t *values, char *const *keys, size_t num_keys);
-static int simple_remove(struct string_hashtable *self, char *const *keys, size_t num_keys);
-static int simple_free(struct string_hashtable *self, void *ptr);
+static int simple_get_blind(struct string_lookup *self, string_id_t **out, char *const *keys, size_t num_keys);
+static int simple_update_key_blind(struct string_lookup *self, const string_id_t *values, char *const *keys, size_t num_keys);
+static int simple_remove(struct string_lookup *self, char *const *keys, size_t num_keys);
+static int simple_free(struct string_lookup *self, void *ptr);
 
-static int simple_create_extra(struct string_hashtable *self, float grow_factor, size_t num_buckets, size_t cap_buckets);
-static struct simple_extra *simple_extra(struct string_hashtable *self);
+static int simple_create_extra(struct string_lookup *self, float grow_factor, size_t num_buckets, size_t cap_buckets);
+static struct simple_extra *simple_extra(struct string_lookup *self);
 static int simple_bucket_create(struct simple_bucket *buckets, size_t num_buckets, size_t bucket_cap,
         float grow_factor, struct allocator *alloc);
 static int simple_bucket_drop(struct simple_bucket *buckets, size_t num_buckets, struct allocator *alloc);
 static int simple_map_insert(struct vector of_type(simple_bucket)* buckets, char* const* keys,
-        const uint64_t* values, size_t* bucket_idxs, size_t num_pairs, struct allocator *alloc);
+        const string_id_t* values, size_t* bucket_idxs, size_t num_pairs, struct allocator *alloc);
 static void simple_bucket_lock(struct simple_bucket *bucket) force_inline;
 static void simple_bucket_unlock(struct simple_bucket *bucket) force_inline;
-static int simple_bucket_insert(struct simple_bucket *bucket, const char *key, uint64_t value,
+static int simple_bucket_insert(struct simple_bucket *bucket, const char *key, string_id_t value,
         struct allocator *alloc) force_inline;
 static void simple_bucket_freelist_push(struct simple_bucket *bucket, size_t idx);
 static size_t simple_bucket_freelist_pop(struct simple_bucket *bucket, struct allocator *alloc) force_inline;
@@ -94,17 +94,17 @@ static size_t simple_bucket_find_entry_by_key(struct simple_bucket *bucket, cons
 //  SIMPLE
 // ---------------------------------------------------------------------------------------------------------------------
 
-int string_hashtable_create_scan3_cache(struct string_hashtable* map, const struct allocator* alloc, size_t num_buckets,
+int string_hashtable_create_scan3_cache(struct string_lookup* map, const struct allocator* alloc, size_t num_buckets,
         size_t cap_buckets, float bucket_grow_factor)
 {
     check_success(allocator_this_or_default(&map->allocator, alloc));
     map->tag              = STRING_ID_MAP_SIMPLE;
     map->drop             = simple_drop;
-    map->put_test         = simple_put_test;
-    map->put_blind        = simple_put_blind;
-    map->get_test         = simple_get_test;
-    map->get_blind        = simple_get_blind;
-    map->update_key_blind = simple_update_key_blind;
+    map->put_safe         = simple_put_test;
+    map->put_fast        = simple_put_blind;
+    map->get_safe         = simple_get_test;
+    map->get_fast        = simple_get_blind;
+    map->update_key_fast = simple_update_key_blind;
     map->remove           = simple_remove;
     map->free             = simple_free;
 
@@ -112,7 +112,7 @@ int string_hashtable_create_scan3_cache(struct string_hashtable* map, const stru
     return STATUS_OK;
 }
 
-static int simple_drop(struct string_hashtable *self)
+static int simple_drop(struct string_lookup *self)
 {
     assert(self->tag == STRING_ID_MAP_SIMPLE);
     struct simple_extra *extra = simple_extra(self);
@@ -123,7 +123,7 @@ static int simple_drop(struct string_hashtable *self)
     return STATUS_OK;
 }
 
-static int simple_put_test(struct string_hashtable* self, char* const* keys, const uint64_t* values, size_t num_pairs)
+static int simple_put_test(struct string_lookup* self, char* const* keys, const string_id_t* values, size_t num_pairs)
 {
     assert(self->tag == STRING_ID_MAP_SIMPLE);
     struct simple_extra *extra = simple_extra(self);
@@ -140,7 +140,7 @@ static int simple_put_test(struct string_hashtable* self, char* const* keys, con
     return STATUS_OK;
 }
 
-static int simple_put_blind(struct string_hashtable *self, char *const *keys, const uint64_t *values, size_t num_pairs)
+static int simple_put_blind(struct string_lookup *self, char *const *keys, const string_id_t *values, size_t num_pairs)
 {
     return simple_put_test(self, keys, values, num_pairs);
 }
@@ -154,7 +154,7 @@ static size_t simple_bucket_find_entry_by_key(struct simple_bucket *bucket, cons
 
     if (bucket->cache_idx!=(size_t) -1) {
         struct simple_bucket_entry* cache = data+bucket->cache_idx;
-        if (cache->str_len==key_str_len && strcmp(cache->str, key)==0) {
+        if (cache->in_use && cache->str_len==key_str_len && strcmp(cache->str, key)==0) {
             return bucket->cache_idx;
         }
     }
@@ -174,7 +174,7 @@ static size_t simple_bucket_find_entry_by_key(struct simple_bucket *bucket, cons
     }
 }
 
-static int simple_map_fetch(struct vector of_type(simple_bucket) *buckets, uint64_t *values_out, bool *key_found_mask,
+static int simple_map_fetch(struct vector of_type(simple_bucket) *buckets, string_id_t *values_out, bool *key_found_mask,
         size_t *num_keys_not_found, size_t *bucket_idxs, char *const *keys, size_t num_keys,
         struct allocator *alloc)
 {
@@ -200,14 +200,14 @@ static int simple_map_fetch(struct vector of_type(simple_bucket) *buckets, uint6
     return STATUS_OK;
 }
 
-static int simple_get_test(struct string_hashtable* self, uint64_t** out, bool** found_mask, size_t* num_not_found,
+static int simple_get_test(struct string_lookup* self, string_id_t** out, bool** found_mask, size_t* num_not_found,
         char* const* keys, size_t num_keys)
 {
     assert(self->tag == STRING_ID_MAP_SIMPLE);
 
     struct simple_extra *extra = simple_extra(self);
     size_t *bucket_idxs = allocator_malloc(&self->allocator, num_keys * sizeof(size_t));
-    uint64_t *values_out = allocator_malloc(&self->allocator, num_keys * sizeof(size_t));
+    string_id_t *values_out = allocator_malloc(&self->allocator, num_keys * sizeof(size_t));
     bool *found_mask_out = allocator_malloc(&self->allocator, num_keys * sizeof(bool));
 
     for (size_t i = 0; i < num_keys; i++) {
@@ -224,7 +224,7 @@ static int simple_get_test(struct string_hashtable* self, uint64_t** out, bool**
     return STATUS_OK;
 }
 
-static int simple_get_blind(struct string_hashtable *self, uint64_t **out, char *const *keys, size_t num_keys)
+static int simple_get_blind(struct string_lookup *self, string_id_t **out, char *const *keys, size_t num_keys)
 {
     bool* found_mask;
     size_t num_not_found;
@@ -233,7 +233,7 @@ static int simple_get_blind(struct string_hashtable *self, uint64_t **out, char 
     return status;
 }
 
-static int simple_update_key_blind(struct string_hashtable *self, const uint64_t *values, char *const *keys, size_t num_keys)
+static int simple_update_key_blind(struct string_lookup *self, const string_id_t *values, char *const *keys, size_t num_keys)
 {
     unused(self);
     unused(values);
@@ -263,7 +263,7 @@ static int simple_map_remove(struct simple_extra *extra, size_t *bucket_idxs, ch
     return STATUS_OK;
 }
 
-static int simple_remove(struct string_hashtable *self, char *const *keys, size_t num_keys)
+static int simple_remove(struct string_lookup *self, char *const *keys, size_t num_keys)
 {
     assert(self->tag == STRING_ID_MAP_SIMPLE);
 
@@ -280,7 +280,7 @@ static int simple_remove(struct string_hashtable *self, char *const *keys, size_
     return STATUS_OK;
 }
 
-static int simple_free(struct string_hashtable *self, void *ptr)
+static int simple_free(struct string_lookup *self, void *ptr)
 {
     assert(self->tag == STRING_ID_MAP_SIMPLE);
     check_success(allocator_free(&self->allocator, ptr));
@@ -294,7 +294,7 @@ static int simple_free(struct string_hashtable *self, void *ptr)
 // ---------------------------------------------------------------------------------------------------------------------
 
 unused_fn
-static int simple_create_extra(struct string_hashtable *self, float grow_factor, size_t num_buckets, size_t cap_buckets)
+static int simple_create_extra(struct string_lookup *self, float grow_factor, size_t num_buckets, size_t cap_buckets)
 {
     if ((self->extra = allocator_malloc(&self->allocator, sizeof(struct simple_extra))) != NULL) {
         struct simple_extra *extra = simple_extra(self);
@@ -308,7 +308,7 @@ static int simple_create_extra(struct string_hashtable *self, float grow_factor,
 }
 
 unused_fn
-static struct simple_extra *simple_extra(struct string_hashtable *self)
+static struct simple_extra *simple_extra(struct string_lookup *self)
 {
     assert (self->tag == STRING_ID_MAP_SIMPLE);
     return (struct simple_extra *)(self->extra);
@@ -408,7 +408,7 @@ static size_t simple_bucket_freelist_pop(struct simple_bucket *bucket, struct al
     return result;
 }
 
-static int simple_bucket_insert(struct simple_bucket *bucket, const char *key, uint64_t value, struct allocator *alloc)
+static int simple_bucket_insert(struct simple_bucket *bucket, const char *key, string_id_t value, struct allocator *alloc)
 {
     check_non_null(bucket);
     check_non_null(key);
@@ -441,7 +441,7 @@ static int simple_bucket_insert(struct simple_bucket *bucket, const char *key, u
 }
 
 static int simple_map_insert(struct vector of_type(simple_bucket)* buckets, char* const* keys,
-        const uint64_t* values, size_t* bucket_idxs, size_t num_pairs, struct allocator *alloc)
+        const string_id_t* values, size_t* bucket_idxs, size_t num_pairs, struct allocator *alloc)
 {
     check_non_null(buckets)
     check_non_null(keys)
@@ -453,7 +453,7 @@ static int simple_map_insert(struct vector of_type(simple_bucket)* buckets, char
     for (size_t i = 0; status == STATUS_OK && i < num_pairs; i++) {
         size_t       bucket_idx      = bucket_idxs[i];
         const char  *key             = keys[i];
-        uint64_t     value           = values[i];
+        string_id_t     value           = values[i];
 
         struct simple_bucket *bucket = buckets_data + bucket_idx;
         status = simple_bucket_insert(bucket, key, value, alloc);

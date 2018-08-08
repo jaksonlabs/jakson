@@ -24,8 +24,6 @@
 #include <stdx/hash.h>
 #include "allocator.h"
 
-typedef size_t string_id_t;
-
 enum string_dic_tag { STRING_DIC_NAIVE };
 
 /**
@@ -75,7 +73,7 @@ struct string_dic
      *
      * Note: Implementation must ensure thread-safeness
      */
-    int                  (*locate_test)(struct string_dic *self, string_id_t **out, bool **found_mask,
+    int                  (*locate_safe)(struct string_dic *self, string_id_t **out, bool **found_mask,
                                         size_t *num_not_found, char *const *keys, size_t num_keys);
 
     /**
@@ -83,7 +81,7 @@ struct string_dic
      *
      * Note: Implementation must ensure thread-safeness
     */
-    int                  (*locate_blind)(struct string_dic *self, string_id_t **out, char *const *keys,
+    int                  (*locate_fast)(struct string_dic *self, string_id_t **out, char *const *keys,
                                          size_t num_keys);
 
     /**
@@ -91,8 +89,7 @@ struct string_dic
      *
      * Note: Implementation must ensure thread-safeness
      */
-    int                  (*extract)(struct string_dic *self, const char **strings, size_t *num_out,
-                                    const string_id_t *ids, size_t num_ids);
+    char **             (*extract)(struct string_dic *self, const string_id_t *ids, size_t num_ids);
 
     /**
      * Frees up memory allocated inside a function call via the allocator given in the constructor
@@ -108,7 +105,7 @@ struct string_dic
  * @return
  */
 unused_fn
-static int string_pool_drop(struct string_dic *dic)
+static int string_dic_drop(struct string_dic* dic)
 {
     check_non_null(dic);
     assert(dic->drop);
@@ -125,7 +122,7 @@ static int string_pool_drop(struct string_dic *dic)
  * @return
  */
 unused_fn
-static int string_pool_insert(struct string_dic *dic, string_id_t **out, char * const*strings, size_t num_strings)
+static int string_dic_insert(struct string_dic* dic, string_id_t** out, char* const* strings, size_t num_strings)
 {
     check_non_null(dic);
     check_non_null(strings);
@@ -141,7 +138,7 @@ static int string_pool_insert(struct string_dic *dic, string_id_t **out, char * 
  * @return
  */
 unused_fn
-static int string_pool_remove(struct string_dic *dic, string_id_t *strings, size_t num_strings)
+static int string_dic_remove(struct string_dic* dic, string_id_t* strings, size_t num_strings)
 {
     check_non_null(dic);
     check_non_null(strings);
@@ -160,16 +157,16 @@ static int string_pool_remove(struct string_dic *dic, string_id_t *strings, size
  * @return
  */
 unused_fn
-static int string_pool_locate_test(string_id_t **out, bool **found_mask, size_t *num_not_found,
-                            struct string_dic *dic, char *const *keys, size_t num_keys)
+static int string_dic_locate_safe(string_id_t** out, bool** found_mask, size_t* num_not_found,
+        struct string_dic* dic, char* const* keys, size_t num_keys)
 {
     check_non_null(out);
     check_non_null(found_mask);
     check_non_null(num_not_found);
     check_non_null(dic);
     check_non_null(keys);
-    assert(dic->locate_test);
-    return dic->locate_test(dic, out, found_mask, num_not_found, keys, num_keys);
+    assert(dic->locate_safe);
+    return dic->locate_safe(dic, out, found_mask, num_not_found, keys, num_keys);
 }
 
 /**
@@ -181,13 +178,13 @@ static int string_pool_locate_test(string_id_t **out, bool **found_mask, size_t 
  * @return
  */
 unused_fn
-static int string_pool_locate_blind(string_id_t **out, struct string_dic *dic, char *const *keys, size_t num_keys)
+static int string_dic_locate_fast(string_id_t** out, struct string_dic* dic, char* const* keys, size_t num_keys)
 {
     check_non_null(out);
     check_non_null(dic);
     check_non_null(keys);
-    assert(dic->locate_blind);
-    return dic->locate_blind(dic, out, keys, num_keys);
+    assert(dic->locate_fast);
+    return dic->locate_fast(dic, out, keys, num_keys);
 }
 
 /**
@@ -200,15 +197,14 @@ static int string_pool_locate_blind(string_id_t **out, struct string_dic *dic, c
  * @return
  */
 unused_fn
-static int string_pool_extract(const char **strings, size_t *num_out, struct string_dic *dic, const string_id_t *ids,
-                        size_t num_ids)
+static char**string_dic_extract(struct string_dic* dic, const string_id_t* ids, size_t num_ids)
 {
     check_non_null(strings);
     check_non_null(num_out);
     check_non_null(dic);
     check_non_null(ids);
     assert(dic->extract);
-    return dic->extract(dic, strings, num_out, ids, num_ids);
+    return dic->extract(dic, ids, num_ids);
 }
 
 /**
@@ -218,7 +214,7 @@ static int string_pool_extract(const char **strings, size_t *num_out, struct str
  * @return
  */
 unused_fn
-static int string_pool_free(struct string_dic *dic, void *ptr)
+static int string_dic_free(struct string_dic* dic, void* ptr)
 {
     check_non_null(dic);
     check_non_null(ptr);
