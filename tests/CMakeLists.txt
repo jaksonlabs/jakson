@@ -3,7 +3,7 @@ enable_testing()
 find_package(Check REQUIRED)
 
 include_directories(${CHECK_INCLUDE_DIRS})
-set(LIBS ${LIBS} ${CHECK_INCLUDE_DIRS}/../lib/libcheck.a)
+set(LIBS ${LIBS} ${CHECK_INCLUDE_DIRS}/../lib/libcheck.a pthread)
 
 include_directories(.)
 
