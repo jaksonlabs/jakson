@@ -107,6 +107,7 @@ struct string_dic
  * @param dic
  * @return
  */
+unused_fn
 static int string_pool_drop(struct string_dic *dic)
 {
     check_non_null(dic);
@@ -123,6 +124,7 @@ static int string_pool_drop(struct string_dic *dic)
  * @param num_strings
  * @return
  */
+unused_fn
 static int string_pool_insert(struct string_dic *dic, string_id_t **out, char * const*strings, size_t num_strings)
 {
     check_non_null(dic);
@@ -138,6 +140,7 @@ static int string_pool_insert(struct string_dic *dic, string_id_t **out, char * 
  * @param num_strings
  * @return
  */
+unused_fn
 static int string_pool_remove(struct string_dic *dic, string_id_t *strings, size_t num_strings)
 {
     check_non_null(dic);
@@ -156,6 +159,7 @@ static int string_pool_remove(struct string_dic *dic, string_id_t *strings, size
  * @param num_keys
  * @return
  */
+unused_fn
 static int string_pool_locate_test(string_id_t **out, bool **found_mask, size_t *num_not_found,
                             struct string_dic *dic, char *const *keys, size_t num_keys)
 {
@@ -176,6 +180,7 @@ static int string_pool_locate_test(string_id_t **out, bool **found_mask, size_t 
  * @param num_keys
  * @return
  */
+unused_fn
 static int string_pool_locate_blind(string_id_t **out, struct string_dic *dic, char *const *keys, size_t num_keys)
 {
     check_non_null(out);
@@ -194,6 +199,7 @@ static int string_pool_locate_blind(string_id_t **out, struct string_dic *dic, c
  * @param num_ids
  * @return
  */
+unused_fn
 static int string_pool_extract(const char **strings, size_t *num_out, struct string_dic *dic, const string_id_t *ids,
                         size_t num_ids)
 {
@@ -211,6 +217,7 @@ static int string_pool_extract(const char **strings, size_t *num_out, struct str
  * @param ptr
  * @return
  */
+unused_fn
 static int string_pool_free(struct string_dic *dic, void *ptr)
 {
     check_non_null(dic);

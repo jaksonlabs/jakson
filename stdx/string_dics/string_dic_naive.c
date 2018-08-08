@@ -3,6 +3,7 @@
 #include <stdx/string_hashtable.h>
 #include <stdx/string_dics/string_dic_naive.h>
 #include <stdx/string_hashtables/simple_scan1-parallel.h>
+#include <stdlib.h>
 
 struct entry {
     char                               *str;
@@ -55,6 +56,7 @@ int string_dic_create_naive(struct string_dic *dic, size_t capacity, size_t num_
     return STATUS_OK;
 }
 
+unused_fn
 static void lock(struct string_dic *self)
 {
     assert(self->tag == STRING_DIC_NAIVE);
@@ -62,6 +64,7 @@ static void lock(struct string_dic *self)
     spinlock_lock(&extra->lock);
 }
 
+unused_fn
 static void unlock(struct string_dic *self)
 {
     assert(self->tag == STRING_DIC_NAIVE);
@@ -118,6 +121,7 @@ static int freelist_pop(string_id_t *out, struct string_dic *self)
     return STATUS_OK;
 }
 
+unused_fn
 static int freelist_push(struct string_dic *self, string_id_t idx)
 {
     assert (self->tag == STRING_DIC_NAIVE);
@@ -193,13 +197,24 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
 
 static int this_remove(struct string_dic *self, string_id_t *strings, size_t num_strings)
 {
+    unused(self);
+    unused(strings);
+    unused(num_strings);
     check_tag(self->tag, STRING_DIC_NAIVE)
+    NOT_YET_IMPLEMENTED
 }
 
 static int this_locate_test(struct string_dic *self, string_id_t **out, bool **found_mask,
                             size_t *num_not_found, char *const *keys, size_t num_keys)
 {
+    unused(self);
+    unused(out);
+    unused(found_mask);
+    unused(num_not_found);
+    unused(keys);
+    unused(num_keys);
     check_tag(self->tag, STRING_DIC_NAIVE)
+    NOT_YET_IMPLEMENTED
 }
 
 static int this_locate_blind(struct string_dic *self, string_id_t **out, char *const *keys,
@@ -222,7 +237,13 @@ static int this_locate_blind(struct string_dic *self, string_id_t **out, char *c
 static int this_extract(struct string_dic *self, const char **strings, size_t *num_out,
                         const string_id_t *ids, size_t num_ids)
 {
+    unused(self);
+    unused(strings);
+    unused(num_out);
+    unused(ids);
+    unused(num_ids);
     check_tag(self->tag, STRING_DIC_NAIVE)
+    NOT_YET_IMPLEMENTED
 }
 
 static int this_free(struct string_dic *self, void *ptr)
