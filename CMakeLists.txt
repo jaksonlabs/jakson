@@ -92,6 +92,7 @@ add_executable(bench-bucket-putget-scan-3-cache benches/bench-bucket-putget-scan
 add_executable(bench-bucket-putget-scan-4-cache benches/bench-bucket-putget-scan-4-cache.c ${SORUCE_FILES})
 add_executable(bench-bucket-putget-scan-1-parallel benches/bench-bucket-putget-scan-1-parallel.c ${SORUCE_FILES})
 
+target_link_libraries(ng5 ${LIBS})
 target_link_libraries(bench-bucket-putget-bsearch ${LIBS})
 target_link_libraries(bench-bucket-putget-scan-1 ${LIBS})
 target_link_libraries(bench-bucket-putget-scan-2 ${LIBS})
