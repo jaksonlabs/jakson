@@ -36,7 +36,7 @@ set (CMAKE_RANLIB  "/usr/bin/llvm-ranlib")
 include_directories("include")
 include_directories("/usr/local/include")
 
-set(LIBS ${LIBS} pthread)
+set(LIBS ${LIBS} pthread m)
 
 set(SORUCE_FILES
         ${CMAKE_SOURCE_DIR}/include/stdx/allocator.h
