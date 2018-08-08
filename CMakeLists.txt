@@ -36,6 +36,7 @@ set (CMAKE_RANLIB  "/usr/bin/llvm-ranlib")
 include_directories("include")
 include_directories("/usr/local/include")
 
+set(LIBS ${LIBS} pthread)
 
 set(SORUCE_FILES
         ${CMAKE_SOURCE_DIR}/include/stdx/allocator.h
@@ -90,6 +91,17 @@ add_executable(bench-bucket-putget-scan-2-cache benches/bench-bucket-putget-scan
 add_executable(bench-bucket-putget-scan-3-cache benches/bench-bucket-putget-scan-3-cache.c ${SORUCE_FILES})
 add_executable(bench-bucket-putget-scan-4-cache benches/bench-bucket-putget-scan-4-cache.c ${SORUCE_FILES})
 add_executable(bench-bucket-putget-scan-1-parallel benches/bench-bucket-putget-scan-1-parallel.c ${SORUCE_FILES})
+
+target_link_libraries(bench-bucket-putget-bsearch ${LIBS})
+target_link_libraries(bench-bucket-putget-scan-1 ${LIBS})
+target_link_libraries(bench-bucket-putget-scan-2 ${LIBS})
+target_link_libraries(bench-bucket-putget-scan-3 ${LIBS})
+target_link_libraries(bench-bucket-putget-scan-4 ${LIBS})
+target_link_libraries(bench-bucket-putget-scan-1-cache ${LIBS})
+target_link_libraries(bench-bucket-putget-scan-2-cache ${LIBS})
+target_link_libraries(bench-bucket-putget-scan-3-cache ${LIBS})
+target_link_libraries(bench-bucket-putget-scan-4-cache ${LIBS})
+target_link_libraries(bench-bucket-putget-scan-1-parallel ${LIBS})
 
 enable_testing()
 
