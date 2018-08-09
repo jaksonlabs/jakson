@@ -10,8 +10,8 @@ set (CMAKE_C_STANDARD 11)
 
 file(MAKE_DIRECTORY ${CMAKE_HOME_DIRECTORY}/build)
 
-#set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
+#set(CMAKE_BUILD_TYPE Release)
 
 set (CMAKE_C_COMPILER             "/usr/bin/clang")
 set (CMAKE_C_FLAGS                "-Wall -std=c11 -Wextra -Werror")
@@ -46,37 +46,36 @@ set(SORUCE_FILES
         ${CMAKE_SOURCE_DIR}/include/stdx/vector.h
         ${CMAKE_SOURCE_DIR}/stdx/vector.c
         ${CMAKE_SOURCE_DIR}/include/stdx/hash.h
-        ${CMAKE_SOURCE_DIR}/include/stdx/string_hashtable.h
-        ${CMAKE_SOURCE_DIR}/include/stdx/slot_map.h
+        ${CMAKE_SOURCE_DIR}/include/stdx/string_lookup.h
         ${CMAKE_SOURCE_DIR}/include/ng5/storage_engine.h
         ${CMAKE_SOURCE_DIR}/include/ng5/cursor.h
-        ${CMAKE_SOURCE_DIR}/include/stdx/asnyc.h
+        ${CMAKE_SOURCE_DIR}/include/stdx/async.h
         ${CMAKE_SOURCE_DIR}/stdx/async.c
         ${CMAKE_SOURCE_DIR}/include/stdx/string_dic.h
         ${CMAKE_SOURCE_DIR}/include/stdx/time.h
         ${CMAKE_SOURCE_DIR}/stdx/time.c
         ${CMAKE_SOURCE_DIR}/include/stdx/unit.h
         ${CMAKE_SOURCE_DIR}/include/stdx/algorithm.h
-        ${CMAKE_SOURCE_DIR}/include/stdx/string_hashtables/simple_bsearch.h
-        ${CMAKE_SOURCE_DIR}/stdx/string_hashtables/simple_bsearch.c
-        ${CMAKE_SOURCE_DIR}/include/stdx/string_hashtables/simple_scan1.h
-        ${CMAKE_SOURCE_DIR}/include/stdx/string_hashtables/simple_scan1-cache.h
-        ${CMAKE_SOURCE_DIR}/include/stdx/string_hashtables/simple_scan2.h
-        ${CMAKE_SOURCE_DIR}/include/stdx/string_hashtables/simple_scan2-cache.h
-        ${CMAKE_SOURCE_DIR}/include/stdx/string_hashtables/simple_scan3.h
-        ${CMAKE_SOURCE_DIR}/include/stdx/string_hashtables/simple_scan3-cache.h
-        ${CMAKE_SOURCE_DIR}/include/stdx/string_hashtables/simple_scan4.h
-        ${CMAKE_SOURCE_DIR}/include/stdx/string_hashtables/simple_scan4-cache.h
-        ${CMAKE_SOURCE_DIR}/include/stdx/string_hashtables/simple_scan1-parallel.h
-        ${CMAKE_SOURCE_DIR}/stdx/string_hashtables/simple_scan1.c
-        ${CMAKE_SOURCE_DIR}/stdx/string_hashtables/simple_scan1-cache.c
-        ${CMAKE_SOURCE_DIR}/stdx/string_hashtables/simple_scan2.c
-        ${CMAKE_SOURCE_DIR}/stdx/string_hashtables/simple_scan2-cache.c
-        ${CMAKE_SOURCE_DIR}/stdx/string_hashtables/simple_scan3.c
-        ${CMAKE_SOURCE_DIR}/stdx/string_hashtables/simple_scan3-cache.c
-        ${CMAKE_SOURCE_DIR}/stdx/string_hashtables/simple_scan4.c
-        ${CMAKE_SOURCE_DIR}/stdx/string_hashtables/simple_scan4-cache.c
-        ${CMAKE_SOURCE_DIR}/stdx/string_hashtables/simple_scan1-parallel.c)
+        ${CMAKE_SOURCE_DIR}/include/stdx/string_lookups/simple_bsearch.h
+        ${CMAKE_SOURCE_DIR}/stdx/string_lookups/simple_bsearch.c
+        ${CMAKE_SOURCE_DIR}/include/stdx/string_lookups/simple_scan1.h
+        ${CMAKE_SOURCE_DIR}/include/stdx/string_lookups/simple_scan1-cache.h
+        ${CMAKE_SOURCE_DIR}/include/stdx/string_lookups/simple_scan2.h
+        ${CMAKE_SOURCE_DIR}/include/stdx/string_lookups/simple_scan2-cache.h
+        ${CMAKE_SOURCE_DIR}/include/stdx/string_lookups/simple_scan3.h
+        ${CMAKE_SOURCE_DIR}/include/stdx/string_lookups/simple_scan3-cache.h
+        ${CMAKE_SOURCE_DIR}/include/stdx/string_lookups/simple_scan4.h
+        ${CMAKE_SOURCE_DIR}/include/stdx/string_lookups/simple_scan4-cache.h
+        ${CMAKE_SOURCE_DIR}/include/stdx/string_lookups/simple_scan1-parallel.h
+        ${CMAKE_SOURCE_DIR}/stdx/string_lookups/simple_scan1.c
+        ${CMAKE_SOURCE_DIR}/stdx/string_lookups/simple_scan1-cache.c
+        ${CMAKE_SOURCE_DIR}/stdx/string_lookups/simple_scan2.c
+        ${CMAKE_SOURCE_DIR}/stdx/string_lookups/simple_scan2-cache.c
+        ${CMAKE_SOURCE_DIR}/stdx/string_lookups/simple_scan3.c
+        ${CMAKE_SOURCE_DIR}/stdx/string_lookups/simple_scan3-cache.c
+        ${CMAKE_SOURCE_DIR}/stdx/string_lookups/simple_scan4.c
+        ${CMAKE_SOURCE_DIR}/stdx/string_lookups/simple_scan4-cache.c
+        ${CMAKE_SOURCE_DIR}/stdx/string_lookups/simple_scan1-parallel.c)
 
 
 add_executable(ng5 main.c ${SORUCE_FILES} include/stdx/string_dics/string_dic_naive.h stdx/string_dics/string_dic_naive.c)

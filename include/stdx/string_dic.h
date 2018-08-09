@@ -199,10 +199,6 @@ static int string_dic_locate_fast(string_id_t** out, struct string_dic* dic, cha
 unused_fn
 static char**string_dic_extract(struct string_dic* dic, const string_id_t* ids, size_t num_ids)
 {
-    check_non_null(strings);
-    check_non_null(num_out);
-    check_non_null(dic);
-    check_non_null(ids);
     assert(dic->extract);
     return dic->extract(dic, ids, num_ids);
 }

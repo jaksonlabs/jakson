@@ -13,7 +13,7 @@ struct entry {
 struct naive_extra {
     struct vector of_type(entry)        contents;
     struct vector of_type(string_id_t)  freelist;
-    struct string_lookup             index;
+    struct string_lookup                index;
     struct spinlock                     lock;
 };
 
