@@ -96,10 +96,10 @@ int main()
     struct string_lookup_counters counters;
     string_dic_counters(&counters, &dic);
 
-    printf("num_bucket_search_miss;%u\n", counters.num_bucket_search_miss);
-    printf("num_bucket_search_hit;%u\n", counters.num_bucket_search_hit);
-    printf("num_bucket_cache_search_miss;%u\n", counters.num_bucket_cache_search_miss);
-    printf("num_bucket_cache_search_hit;%u\n", counters.num_bucket_cache_search_hit);
+    printf("num_bucket_search_miss;%llu\n", counters.num_bucket_search_miss);
+    printf("num_bucket_search_hit;%llu\n", counters.num_bucket_search_hit);
+    printf("num_bucket_cache_search_miss;%llu\n", counters.num_bucket_cache_search_miss);
+    printf("num_bucket_cache_search_hit;%llu\n", counters.num_bucket_cache_search_hit);
 
 
     timestamp_t locate_begin = time_current_time_ms();

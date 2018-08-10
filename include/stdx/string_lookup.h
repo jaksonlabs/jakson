@@ -90,10 +90,10 @@
 enum string_lookup_impl { STRING_ID_MAP_SIMPLE };
 
 struct string_lookup_counters {
-  uint_fast32_t num_bucket_search_miss;
-  uint_fast32_t num_bucket_search_hit;
-  uint_fast32_t num_bucket_cache_search_miss;
-  uint_fast32_t num_bucket_cache_search_hit;
+  uint_fast64_t num_bucket_search_miss;
+  uint_fast64_t num_bucket_search_hit;
+  uint_fast64_t num_bucket_cache_search_miss;
+  uint_fast64_t num_bucket_cache_search_hit;
 };
 
 struct string_lookup {

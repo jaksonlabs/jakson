@@ -187,7 +187,7 @@ static size_t simple_bucket_find_entry_by_key(struct string_lookup_counters *cou
 
             counter->num_bucket_search_hit++;
 
-           
+
 
             bucket->cache_idx = i;
             return i;
