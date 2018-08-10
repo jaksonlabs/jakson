@@ -347,7 +347,7 @@ static int simple_map_remove(struct simple_extra *extra, size_t *bucket_idxs, ch
             if (likely(needle_pos<bucket->entries.cap_elems)) {
                 struct simple_bucket_entry* entry =
                         (struct simple_bucket_entry*) vector_data(&bucket->entries)+needle_pos;
-                assert (entry->in_use);
+                assert (entry->key_hash_2 != 0);
                 entry->key_hash_2 = 0;
                 simple_bucket_freelist_push(bucket, needle_pos);
             }
@@ -525,7 +525,7 @@ static int simple_bucket_insert(struct simple_bucket *bucket, const char *key, s
         size_t free_slot = simple_bucket_freelist_pop(bucket, alloc);
         data = (struct simple_bucket_entry *) vector_data(&bucket->entries);
         struct simple_bucket_entry *entry = data + free_slot;
-        assert(!entry->in_use);
+        assert(entry->key_hash_2 == 0);
         entry->str     = key;
         entry->key_hash_2 = get_hashcode_2(key);
         entry->value   = value;
