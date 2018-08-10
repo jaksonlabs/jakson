@@ -90,11 +90,8 @@ static int extra_create(struct string_dic *self, size_t capacity, size_t num_ind
     };
     for (size_t i = 0; i < capacity; i++) {
         check_success(vector_push(&extra->contents, &empty, 1));
-       // check_success(vector_push(&extra->freelist, &i, 1));
         freelist_push(self, i);
     }
-  //  check_success(string_hashtable_create_scan1_parallel(&extra->index, &self->alloc, num_index_buckets,
-  //          num_index_bucket_cap, 1.7f, nthreads));
     unused(nthreads);
       check_success(string_hashtable_create_scan1_cache(&extra->index, &self->alloc, num_index_buckets,
               num_index_bucket_cap, 1.7f));
@@ -122,7 +119,6 @@ static int freelist_pop(string_id_t *out, struct string_dic *self)
         };
         while (num_new_pos--) {
             size_t new_pos = vector_len(&extra->contents);
-            printf("%zu\n", new_pos);
             check_success(vector_push(&extra->freelist, &new_pos, 1));
             check_success(vector_push(&extra->contents, &empty, 1));
         }

@@ -36,7 +36,7 @@ struct string_dic
     /**
      * Implementation-specific fields
      */
-    void                *extra;
+    void                * extra;
 
     /**
      * Tag determining the current implementation
