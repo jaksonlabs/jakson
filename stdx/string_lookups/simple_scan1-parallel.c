@@ -133,7 +133,7 @@ static int simple_put_test(struct string_lookup* self, char* const* keys, const 
 
     for (size_t i = 0; i < num_pairs; i++) {
         const char *key        = keys[i];
-        hash_t      hash       = jenkins_hash(strlen(key), key);
+        hash_t      hash       = hash_jenkins(strlen(key), key);
         bucket_idxs[i]         = hash % extra->buckets.cap_elems;
     }
 
@@ -221,7 +221,7 @@ static int simple_get_test(struct string_lookup* self, string_id_t** out, bool**
 
     for (size_t i = 0; i < num_keys; i++) {
         const char *key        = keys[i];
-        hash_t      hash       = jenkins_hash(strlen(key), key);
+        hash_t      hash       = hash_jenkins(strlen(key), key);
         bucket_idxs[i]         = hash % extra->buckets.cap_elems;
     }
 
@@ -280,7 +280,7 @@ static int simple_remove(struct string_lookup *self, char *const *keys, size_t n
     size_t *bucket_idxs = allocator_malloc(&self->allocator, num_keys * sizeof(size_t));
     for (size_t i = 0; i < num_keys; i++) {
         const char *key        = keys[i];
-        hash_t      hash       = jenkins_hash(strlen(key), key);
+        hash_t      hash       = hash_jenkins(strlen(key), key);
         bucket_idxs[i]         = hash % extra->buckets.cap_elems;
     }
 

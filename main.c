@@ -61,6 +61,8 @@ struct vector *to_string_list(const char *contents)
     return vector;
 }
 
+#define NUM_SAMPLES 5
+
 int main()
 {
     timestamp_t read_begin = time_current_time_ms();
@@ -78,53 +80,58 @@ int main()
 
     struct string_dic dic;
 
-    timestamp_t create_begin = time_current_time_ms();
-    string_dic_create_naive(&dic, 10646182, 1.0 * vector_len(lines), 10, 8, NULL);
-    timestamp_t create_end = time_current_time_ms();
-    fprintf(stderr, "created: ... %fsec\n", (create_end - create_begin) / 1000.0f);
+    float created_agg = 0;
+    float insert_agg  = 0;
 
-    string_id_t *ids, *ids_out;
+    for (int sample = 0; sample < NUM_SAMPLES; sample++) {
+        printf("*** %d of %d in progress ***\n", sample + 1, NUM_SAMPLES);
 
-    char** strings = (char**) vector_data(lines);
-    size_t num_strings = vector_len(lines) - 1;
+        timestamp_t create_begin = time_current_time_ms();
+        string_dic_create_naive(&dic, 10646182, 1.0*vector_len(lines), 10, 8, NULL);
+        timestamp_t create_end = time_current_time_ms();
+        created_agg += (create_end-create_begin);
 
-    string_dic_reset_counters(&dic);
-    timestamp_t inserted_begin = time_current_time_ms();
-    string_dic_insert(&dic, &ids, strings, num_strings);
-    timestamp_t inserted_end = time_current_time_ms();
-    fprintf(stderr, "inserted: ... %fsec\n", (inserted_end - inserted_begin) / 1000.0f);
-    struct string_lookup_counters counters;
-    string_dic_counters(&counters, &dic);
+        string_id_t* ids; //, * ids_out;
 
-    printf("num_bucket_search_miss;%llu\n", counters.num_bucket_search_miss);
-    printf("num_bucket_search_hit;%llu\n", counters.num_bucket_search_hit);
-    printf("num_bucket_cache_search_miss;%llu\n", counters.num_bucket_cache_search_miss);
-    printf("num_bucket_cache_search_hit;%llu\n", counters.num_bucket_cache_search_hit);
+        char** strings = (char**) vector_data(lines);
+        size_t num_strings = vector_len(lines)-1;
 
+        string_dic_reset_counters(&dic);
+        timestamp_t inserted_begin = time_current_time_ms();
+        string_dic_insert(&dic, &ids, strings, num_strings);
+        timestamp_t inserted_end = time_current_time_ms();
+        insert_agg += (inserted_end-inserted_begin);
 
-    timestamp_t locate_begin = time_current_time_ms();
-    string_dic_locate_fast(&ids_out, &dic, strings, num_strings);
-    timestamp_t locate_end = time_current_time_ms();
-    fprintf(stderr, "locate: ... %fsec\n", (locate_end - locate_begin) / 1000.0f);
+        struct string_lookup_counters counters;
+        string_dic_counters(&counters, &dic);
 
-    timestamp_t extracted_begin = time_current_time_ms();
-    string_dic_extract(&dic, ids_out, num_strings);
-    timestamp_t extracted_end = time_current_time_ms();
-    fprintf(stderr, "extracted: ... %fsec\n", (extracted_end - extracted_begin) / 1000.0f);
+        printf("num_bucket_search_miss;%llu\n", counters.num_bucket_search_miss);
+        printf("num_bucket_search_hit;%llu\n", counters.num_bucket_search_hit);
+        printf("num_bucket_cache_search_miss;%llu\n", counters.num_bucket_cache_search_miss);
+        printf("num_bucket_cache_search_hit;%llu\n", counters.num_bucket_cache_search_hit);
+
+    }
+
+    fprintf(stderr, "created: ... %fsec\n", created_agg / NUM_SAMPLES / 1000.0f);
+    fprintf(stderr, "inserted: ... %fsec\n",insert_agg / NUM_SAMPLES /1000.0f);
+    fprintf(stderr, "----------------------------------\nTOTAL.........: %fsec\n", (created_agg+insert_agg) / NUM_SAMPLES /1000.0f);
+
+//
+//    timestamp_t locate_begin = time_current_time_ms();
+//    string_dic_locate_fast(&ids_out, &dic, strings, num_strings);
+//    timestamp_t locate_end = time_current_time_ms();
+//    fprintf(stderr, "locate: ... %fsec\n", (locate_end - locate_begin) / 1000.0f);
+//
+//    timestamp_t extracted_begin = time_current_time_ms();
+//    string_dic_extract(&dic, ids_out, num_strings);
+//    timestamp_t extracted_end = time_current_time_ms();
+//    fprintf(stderr, "extracted: ... %fsec\n", (extracted_end - extracted_begin) / 1000.0f);
 
     fflush(stderr);
 
-   // for (size_t i = 0; i < num_strings; i++) {
-   //     assert(strcmp(extracted_strings[i], strings[i]) == 0);
-   //     printf("id %zu -> '%s'\n", ids_out[i], extracted_strings[i]);
-  //  }
 
-    //for (size_t i = 0; i < num_strings; i++) {
-    //    free (strings[i]);
-   // }
-
-    string_dic_free(&dic, ids);
-    string_dic_free(&dic, ids_out);
+  //  string_dic_free(&dic, ids);
+  //  string_dic_free(&dic, ids_out);
 
     free(contents);
     vector_drop(lines);

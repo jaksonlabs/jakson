@@ -27,6 +27,89 @@
 #include <stdx/algorithm.h>
 #include <stdx/bloomfilter.h>
 
+#define USE_HASH_IDENTITY
+
+#ifdef USE_HASH_JENKINS
+    #ifdef get_hashcode
+        #undef get_hashcode
+    #endif
+    #define get_hashcode(key)    hash_jenkins(strlen(key), key)
+#endif
+
+#ifdef USE_HASH_IDENTITY
+    #ifdef get_hashcode
+        #undef get_hashcode
+    #endif
+    #define get_hashcode(key)    hash_identity(strlen(key), key)
+#endif
+
+#ifdef USE_HASH_ADDITIVE
+    #ifdef get_hashcode
+        #undef get_hashcode
+    #endif
+    #define get_hashcode(key)    hash_additive(strlen(key), key)
+#endif
+
+#ifdef USE_HASH_XOR
+    #ifdef get_hashcode
+        #undef get_hashcode
+    #endif
+    #define get_hashcode(key)    hash__xor(strlen(key), key)
+#endif
+
+#ifdef USE_HASH_ROT
+    #ifdef get_hashcode
+        #undef get_hashcode
+    #endif
+    #define get_hashcode(key)    hash_rot(strlen(key), key)
+#endif
+
+#ifdef USE_HASH_BERNSTEIN
+    #ifdef get_hashcode
+        #undef get_hashcode
+    #endif
+    #define get_hashcode(key)    hash_bernstein(strlen(key), key)
+#endif
+
+#ifdef USE_HASH_BERNSTEIN2
+    #ifdef get_hashcode
+        #undef get_hashcode
+    #endif
+    #define get_hashcode(key)    hash_bernstein2(strlen(key), key)
+#endif
+
+#ifdef USE_HASH_SAX
+    #ifdef get_hashcode
+        #undef get_hashcode
+    #endif
+    #define get_hashcode(key)    hash_sax(strlen(key), key)
+#endif
+
+#ifdef USE_HASH_FNV
+    #ifdef get_hashcode
+        #undef get_hashcode
+    #endif
+    #define get_hashcode(key)    hash_fnv(strlen(key), key)
+#endif
+
+#ifdef USE_HASH_OAT
+    #ifdef get_hashcode
+        #undef get_hashcode
+    #endif
+    #define get_hashcode(key)    hash_oat(strlen(key), key)
+#endif
+
+#ifdef USE_HASH_ELF
+    #ifdef get_hashcode
+        #undef get_hashcode
+    #endif
+    #define get_hashcode(key)    hash_elf(strlen(key), key)
+#endif
+
+#ifndef get_hashcode
+    #define get_hashcode(key)    hash_jenkins(strlen(key), key)
+#endif
+
 // ---------------------------------------------------------------------------------------------------------------------
 //  SIMPLE
 // ---------------------------------------------------------------------------------------------------------------------
@@ -143,7 +226,7 @@ static int simple_put_test(struct string_lookup* self, char* const* keys, const 
 
     for (size_t i = 0; i < num_pairs; i++) {
         const char *key        = keys[i];
-        hash_t      hash       = jenkins_hash(strlen(key), key);
+        hash_t      hash       = get_hashcode(key);
         bucket_idxs[i]         = hash % extra->buckets.cap_elems;
     }
 
@@ -236,7 +319,7 @@ static int simple_get_test(struct string_lookup* self, string_id_t** out, bool**
 
     for (size_t i = 0; i < num_keys; i++) {
         const char *key        = keys[i];
-        hash_t      hash       = jenkins_hash(strlen(key), key);
+        hash_t      hash       = get_hashcode(key);
         bucket_idxs[i]         = hash % extra->buckets.cap_elems;
     }
 
@@ -298,7 +381,7 @@ static int simple_remove(struct string_lookup *self, char *const *keys, size_t n
     size_t *bucket_idxs = allocator_malloc(&self->allocator, num_keys * sizeof(size_t));
     for (size_t i = 0; i < num_keys; i++) {
         const char *key        = keys[i];
-        hash_t      hash       = jenkins_hash(strlen(key), key);
+        hash_t      hash       = get_hashcode(key);
         bucket_idxs[i]         = hash % extra->buckets.cap_elems;
     }
 
