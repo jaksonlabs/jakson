@@ -708,6 +708,9 @@
 			<Option target="ng5"/>
 			<Option target="test_string_hashtable"/>
 		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/bloomfilter.h">
+			<Option target="ng5"/>
+		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/include/stdx/bolster.h">
 			<Option target="bench-bucket-putget-bsearch"/>
 		</Unit>

@@ -24,6 +24,8 @@
 #include <stdx/hash.h>
 #include "allocator.h"
 
+struct string_lookup_counters;
+
 enum string_dic_tag { STRING_DIC_NAIVE };
 
 /**
@@ -97,6 +99,16 @@ struct string_dic
      * Note: Implementation must ensure thread-safeness
      */
     int                  (*free)(struct string_dic *self, void *ptr);
+
+    /**
+     * Reset internal statistic counters
+     */
+    int                  (*reset_counters)(struct string_dic *self);
+
+    /**
+     * Get internal statistic counters
+     */
+    int                  (*counters)(struct string_dic *self, struct string_lookup_counters *counters);
 };
 
 /**
@@ -128,6 +140,22 @@ static int string_dic_insert(struct string_dic* dic, string_id_t** out, char* co
     check_non_null(strings);
     assert(dic->insert);
     return dic->insert(dic, out, strings, num_strings);
+}
+
+unused_fn
+static int string_dic_reset_counters(struct string_dic *dic)
+{
+    check_non_null(dic);
+    assert(dic->reset_counters);
+    return dic->reset_counters(dic);
+}
+
+unused_fn
+static int string_dic_counters(struct string_lookup_counters *counters, struct string_dic *dic)
+{
+    check_non_null(dic);
+    assert(dic->counters);
+    return dic->counters(dic, counters);
 }
 
 /**

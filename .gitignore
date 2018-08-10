@@ -6,3 +6,4 @@ Makefile
 tests/cmake_install.cmake
 tests/CTestTestfile.cmake
 tests/Makefile
+tmp

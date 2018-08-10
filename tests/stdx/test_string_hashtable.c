@@ -109,7 +109,7 @@ END_TEST
 void test_string_hashtable_generic_putget(struct string_lookup *map) {
     const size_t NUM_PAIRS = 1000;
     char **keys = malloc(NUM_PAIRS * sizeof(char*));
-    uint64_t *values = malloc(NUM_PAIRS * sizeof(uint64_t));
+    string_id_t *values = malloc(NUM_PAIRS * sizeof(uint64_t));
     for (size_t i = 0; i < NUM_PAIRS; i++) {
         char buffer[129];
         sprintf(buffer, "string-%zu", i);
@@ -117,7 +117,7 @@ void test_string_hashtable_generic_putget(struct string_lookup *map) {
         values[i] = i;
     }
     string_lookup_put_safe(map, keys, values, NUM_PAIRS);
-    uint64_t *out_values;
+    string_id_t *out_values;
     bool     *out_mask;
     size_t    num_not_found;
     string_lookup_get_safe(&out_values, &out_mask, &num_not_found, map, keys, NUM_PAIRS);
@@ -217,7 +217,7 @@ void test_string_hashtable_generic_remove(struct string_lookup *map)
     char **keys = malloc(NUM_PAIRS * sizeof(char*));
     char **remove_keys = malloc(NUM_PAIRS * sizeof(char*));
     size_t num_remove_keys = 0;
-    uint64_t *values = malloc(NUM_PAIRS * sizeof(uint64_t));
+    string_id_t *values = malloc(NUM_PAIRS * sizeof(uint64_t));
     for (size_t i = 0; i < NUM_PAIRS; i++) {
         char buffer[129];
         sprintf(buffer, "string-%zu", i);
@@ -231,7 +231,7 @@ void test_string_hashtable_generic_remove(struct string_lookup *map)
     string_lookup_put_safe(map, keys, values, NUM_PAIRS);
     string_lookup_remove(map, remove_keys, num_remove_keys);
 
-    uint64_t *out_values;
+    string_id_t *out_values;
     bool     *out_mask;
     size_t    num_not_found;
     string_lookup_get_safe(&out_values, &out_mask, &num_not_found, map, keys, NUM_PAIRS);

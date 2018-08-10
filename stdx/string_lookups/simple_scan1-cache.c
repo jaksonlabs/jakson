@@ -25,6 +25,7 @@
 #include <stdx/async.h>
 #include <stdlib.h>
 #include <stdx/algorithm.h>
+#include <stdx/bloomfilter.h>
 
 // ---------------------------------------------------------------------------------------------------------------------
 //  SIMPLE
@@ -41,7 +42,15 @@ struct simple_bucket {
   struct spinlock                            spinlock;
   struct vector of_type(simple_bucket_entry) entries;
   struct vector of_type(size_t)              freelist;
+
+  /* used to minimize lookup times in case the same string is queried more than once in a direct sequence */
   size_t                                     cache_idx;
+
+  /* number of entries actually occupied with data inside this bucket (since entries num == entries cap all times) */
+  size_t                                     num_entries;
+
+  /* used to minimize strcmp calls for question 'is this string contained in the bucket' in case it is not */
+  struct bloomfilter                         bloomfiler;
 };
 
 struct simple_extra {
@@ -74,14 +83,16 @@ static int simple_bucket_create(struct simple_bucket *buckets, size_t num_bucket
         float grow_factor, struct allocator *alloc);
 static int simple_bucket_drop(struct simple_bucket *buckets, size_t num_buckets, struct allocator *alloc);
 static int simple_map_insert(struct vector of_type(simple_bucket)* buckets, char* const* keys,
-        const string_id_t* values, size_t* bucket_idxs, size_t num_pairs, struct allocator *alloc);
+        const string_id_t* values, size_t* bucket_idxs, size_t num_pairs, struct allocator *alloc,
+        struct string_lookup_counters *counter);
 static void simple_bucket_lock(struct simple_bucket *bucket) force_inline;
 static void simple_bucket_unlock(struct simple_bucket *bucket) force_inline;
 static int simple_bucket_insert(struct simple_bucket *bucket, const char *key, string_id_t value,
-        struct allocator *alloc) force_inline;
+        struct allocator *alloc, struct string_lookup_counters *counter) force_inline;
 static void simple_bucket_freelist_push(struct simple_bucket *bucket, size_t idx);
 static size_t simple_bucket_freelist_pop(struct simple_bucket *bucket, struct allocator *alloc) force_inline;
-static size_t simple_bucket_find_entry_by_key(struct simple_bucket *bucket, const char *key, struct allocator *alloc);
+static size_t simple_bucket_find_entry_by_key(struct string_lookup_counters *counter, struct simple_bucket *bucket,
+        const char *key, struct allocator *alloc);
 
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -108,6 +119,7 @@ int string_hashtable_create_scan1_cache(struct string_lookup* map, const struct 
     map->remove           = simple_remove;
     map->free             = simple_free;
 
+    string_lookup_reset_counters(map);
     check_success(simple_create_extra(map, bucket_grow_factor, num_buckets, cap_buckets));
     return STATUS_OK;
 }
@@ -135,7 +147,8 @@ static int simple_put_test(struct string_lookup* self, char* const* keys, const 
         bucket_idxs[i]         = hash % extra->buckets.cap_elems;
     }
 
-    check_success(simple_map_insert(&extra->buckets, keys, values, bucket_idxs, num_pairs, &self->allocator));
+    check_success(simple_map_insert(&extra->buckets, keys, values, bucket_idxs, num_pairs, &self->allocator,
+            &self->counters));
     check_success(allocator_free(&self->allocator, bucket_idxs));
     return STATUS_OK;
 }
@@ -145,32 +158,49 @@ static int simple_put_blind(struct string_lookup *self, char *const *keys, const
     return simple_put_test(self, keys, values, num_pairs);
 }
 
-static size_t simple_bucket_find_entry_by_key(struct simple_bucket *bucket, const char *key, struct allocator *alloc)
+static size_t simple_bucket_find_entry_by_key(struct string_lookup_counters *counter,
+        struct simple_bucket *bucket, const char *key, struct allocator *alloc)
 {
     unused(alloc);
 
     size_t key_str_len = strlen(key);
     struct simple_bucket_entry* data = (struct simple_bucket_entry*) vector_data(&bucket->entries);
 
+     /* Optimization 1: EMPTY GUARD; if this bucket has no occupied slots, do not perform any lookup and comparison */
+     if (bucket->num_entries == 0) {
+        return bucket->entries.cap_elems;
+     }
+
+    /* Optimization 0: Caching; last read element is stored in front and no search is needed at all */
     if (bucket->cache_idx!=(size_t) -1) {
         struct simple_bucket_entry* cache = data+bucket->cache_idx;
         if (cache->in_use && cache->str_len==key_str_len && strcmp(cache->str, key)==0) {
+            counter->num_bucket_cache_search_hit++;
             return bucket->cache_idx;
         }
+        counter->num_bucket_cache_search_miss++;
     }
 
-    for (size_t i = 0; i<bucket->entries.cap_elems; i++) {
+    size_t i = 0;
+    for (; i<bucket->entries.cap_elems; i++) {
         if (data[i].in_use && data[i].str_len==key_str_len && strcmp(data[i].str, key)==0) {
+
+            counter->num_bucket_search_hit++;
+
+           
+
             bucket->cache_idx = i;
             return i;
+
         }
     }
+    counter->num_bucket_search_miss++;
     return bucket->entries.cap_elems;
 }
 
 static int simple_map_fetch(struct vector of_type(simple_bucket) *buckets, string_id_t *values_out, bool *key_found_mask,
         size_t *num_keys_not_found, size_t *bucket_idxs, char *const *keys, size_t num_keys,
-        struct allocator *alloc)
+        struct allocator *alloc, struct string_lookup_counters *counter)
 {
     size_t num_not_found = 0;
     struct simple_bucket *data = (struct simple_bucket *) vector_data(buckets);
@@ -180,7 +210,7 @@ static int simple_map_fetch(struct vector of_type(simple_bucket) *buckets, strin
         simple_bucket_lock(bucket);
 
         const char                 *key        = keys[i];
-        size_t                      needle_pos = simple_bucket_find_entry_by_key(bucket, key, alloc);
+        size_t                      needle_pos = simple_bucket_find_entry_by_key(counter, bucket, key, alloc);
 
         bool found         = needle_pos < bucket->entries.cap_elems;
         num_not_found     += found ? 0 : 1;
@@ -211,7 +241,7 @@ static int simple_get_test(struct string_lookup* self, string_id_t** out, bool**
     }
 
     check_success(simple_map_fetch(&extra->buckets, values_out, found_mask_out, num_not_found, bucket_idxs,
-            keys, num_keys, &self->allocator));
+            keys, num_keys, &self->allocator, &self->counters));
     check_success(allocator_free(&self->allocator, bucket_idxs));
     *out = values_out;
     *found_mask = found_mask_out;
@@ -236,7 +266,8 @@ static int simple_update_key_blind(struct string_lookup *self, const string_id_t
     return STATUS_NOTIMPL;
 }
 
-static int simple_map_remove(struct simple_extra *extra, size_t *bucket_idxs, char *const *keys, size_t num_keys, struct allocator *alloc)
+static int simple_map_remove(struct simple_extra *extra, size_t *bucket_idxs, char *const *keys, size_t num_keys,
+        struct allocator *alloc, struct string_lookup_counters *counter)
 {
     struct simple_bucket *data = (struct simple_bucket *) vector_data(&extra->buckets);
 
@@ -246,7 +277,7 @@ static int simple_map_remove(struct simple_extra *extra, size_t *bucket_idxs, ch
 
         simple_bucket_lock(bucket);
 
-        size_t needle_pos = simple_bucket_find_entry_by_key(bucket, key, alloc);
+        size_t needle_pos = simple_bucket_find_entry_by_key(counter, bucket, key, alloc);
         if (likely(needle_pos < bucket->entries.cap_elems)) {
             struct simple_bucket_entry *entry = (struct simple_bucket_entry *) vector_data(&bucket->entries) + needle_pos;
             assert (entry->in_use);
@@ -271,7 +302,7 @@ static int simple_remove(struct string_lookup *self, char *const *keys, size_t n
         bucket_idxs[i]         = hash % extra->buckets.cap_elems;
     }
 
-    check_success(simple_map_remove(extra, bucket_idxs, keys, num_keys, &self->allocator));
+    check_success(simple_map_remove(extra, bucket_idxs, keys, num_keys, &self->allocator, &self->counters));
     check_success(allocator_free(&self->allocator, bucket_idxs));
     return STATUS_OK;
 }
@@ -325,7 +356,8 @@ static int simple_bucket_create(struct simple_bucket *buckets, size_t num_bucket
 
     while (num_buckets--) {
         struct simple_bucket *bucket = buckets++;
-        bucket->cache_idx = (size_t) -1;
+        bucket->cache_idx   = (size_t) -1;
+        bucket->num_entries = 0;
         spinlock_create(&bucket->spinlock);
         vector_create(&bucket->entries, alloc, sizeof(struct simple_bucket_entry), bucket_cap);
         vector_create(&bucket->freelist, alloc, sizeof(size_t), bucket_cap);
@@ -368,6 +400,7 @@ static void simple_bucket_freelist_push(struct simple_bucket *bucket, size_t idx
     struct vector of_type(size_t)              *freelist = &bucket->freelist;
     assert (freelist->num_elems + 1 < freelist->cap_elems);
     vector_push(freelist, &idx, 1);
+    bucket->num_entries--;
 }
 
 unused_fn
@@ -401,17 +434,19 @@ static size_t simple_bucket_freelist_pop(struct simple_bucket *bucket, struct al
     assert (vector_cap(freelist) == vector_cap(entries));
 
     size_t result = *(size_t *)vector_pop(freelist);
+    bucket->num_entries++;
     return result;
 }
 
-static int simple_bucket_insert(struct simple_bucket *bucket, const char *key, string_id_t value, struct allocator *alloc)
+static int simple_bucket_insert(struct simple_bucket *bucket, const char *key, string_id_t value,
+        struct allocator *alloc, struct string_lookup_counters *counter)
 {
     check_non_null(bucket);
     check_non_null(key);
 
     simple_bucket_lock(bucket);
 
-    size_t                      needle_pos = simple_bucket_find_entry_by_key(bucket, key, alloc);
+    size_t                      needle_pos = simple_bucket_find_entry_by_key(counter, bucket, key, alloc);
     struct simple_bucket_entry *data       = (struct simple_bucket_entry *) vector_data(&bucket->entries);
 
 
@@ -437,7 +472,8 @@ static int simple_bucket_insert(struct simple_bucket *bucket, const char *key, s
 }
 
 static int simple_map_insert(struct vector of_type(simple_bucket)* buckets, char* const* keys,
-        const string_id_t* values, size_t* bucket_idxs, size_t num_pairs, struct allocator *alloc)
+        const string_id_t* values, size_t* bucket_idxs, size_t num_pairs, struct allocator *alloc,
+        struct string_lookup_counters *counter)
 {
     check_non_null(buckets)
     check_non_null(keys)
@@ -452,7 +488,7 @@ static int simple_map_insert(struct vector of_type(simple_bucket)* buckets, char
         string_id_t     value           = values[i];
 
         struct simple_bucket *bucket = buckets_data + bucket_idx;
-        status = simple_bucket_insert(bucket, key, value, alloc);
+        status = simple_bucket_insert(bucket, key, value, alloc, counter);
     }
 
     return status;

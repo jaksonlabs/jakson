@@ -4,6 +4,7 @@
 #include <stdx/string_dics/string_dic_naive.h>
 #include <stdx/string_lookups/simple_scan1-parallel.h>
 #include <stdlib.h>
+#include <stdx/string_lookups/simple_scan1-cache.h>
 
 struct entry {
     char                               *str;
@@ -27,6 +28,9 @@ static int this_locate_fast(struct string_dic* self, string_id_t** out, char* co
 static char **this_extract(struct string_dic *self, const string_id_t *ids, size_t num_ids);
 static int this_free(struct string_dic *self, void *ptr);
 
+static int this_reset_counters(struct string_dic *self);
+static int this_counters(struct string_dic *self, struct string_lookup_counters *counters);
+
 static void lock(struct string_dic *self);
 static void unlock(struct string_dic *self);
 
@@ -43,13 +47,16 @@ int string_dic_create_naive(struct string_dic* dic, size_t capacity, size_t num_
     check_non_null(dic);
     check_success(allocator_this_or_default(&dic->alloc, alloc));
 
-    dic->tag          = STRING_DIC_NAIVE;
-    dic->drop         = this_drop;
-    dic->insert       = this_insert;
-    dic->remove       = this_remove;
-    dic->locate_safe  = this_locate_safe;
-    dic->locate_fast = this_locate_fast;
-    dic->extract      = this_extract;
+    dic->tag            = STRING_DIC_NAIVE;
+    dic->drop           = this_drop;
+    dic->insert         = this_insert;
+    dic->remove         = this_remove;
+    dic->locate_safe    = this_locate_safe;
+    dic->locate_fast    = this_locate_fast;
+    dic->extract        = this_extract;
+    dic->free           = this_free;
+    dic->reset_counters = this_reset_counters;
+    dic->counters       = this_counters;
 
     check_success(extra_create(dic, capacity, num_index_buckets, num_index_bucket_cap, nthreads));
     return STATUS_OK;
@@ -83,10 +90,14 @@ static int extra_create(struct string_dic *self, size_t capacity, size_t num_ind
     };
     for (size_t i = 0; i < capacity; i++) {
         check_success(vector_push(&extra->contents, &empty, 1));
-        check_success(vector_push(&extra->freelist, &i, 1));
+       // check_success(vector_push(&extra->freelist, &i, 1));
+        freelist_push(self, i);
     }
-    check_success(string_hashtable_create_scan1_parallel(&extra->index, &self->alloc, num_index_buckets,
-            num_index_bucket_cap, 1.7f, nthreads));
+  //  check_success(string_hashtable_create_scan1_parallel(&extra->index, &self->alloc, num_index_buckets,
+  //          num_index_bucket_cap, 1.7f, nthreads));
+    unused(nthreads);
+      check_success(string_hashtable_create_scan1_cache(&extra->index, &self->alloc, num_index_buckets,
+              num_index_bucket_cap, 1.7f));
     return STATUS_OK;
 }
 
@@ -110,7 +121,9 @@ static int freelist_pop(string_id_t *out, struct string_dic *self)
             .str    = NULL
         };
         while (num_new_pos--) {
-            check_success(vector_push(&extra->freelist, &num_new_pos, 1));
+            size_t new_pos = vector_len(&extra->contents);
+            printf("%zu\n", new_pos);
+            check_success(vector_push(&extra->freelist, &new_pos, 1));
             check_success(vector_push(&extra->contents, &empty, 1));
         }
     }
@@ -166,6 +179,11 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
     struct naive_extra *extra          = this_extra(self);
     string_id_t        *ids_out        = allocator_malloc(&self->alloc, num_strings * sizeof(string_id_t));
 
+    /* buffers for fast import into lookup index; it's guaranteed that all pairs are not yet contained */
+    char              **new_strings    = allocator_malloc(&self->alloc, num_strings * sizeof(char *));
+    string_id_t        *new_ids        = allocator_malloc(&self->alloc, num_strings * sizeof(string_id_t));
+    size_t              num_new_pairs  = 0;
+
     /* query index for strings to get a boolean mask which strings are new and which must be added */
     string_lookup_get_safe(&values, &found_mask, &num_not_found, &extra->index, strings, num_strings);
 
@@ -175,20 +193,33 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
             ids_out[i] = values[i];
         } else {
             string_id_t string_id;
+
+            /* register in contents list */
             panic_if(freelist_pop(&string_id, self) != STATUS_OK, "slot management broken");
             struct entry *entries = (struct entry *) vector_data(&extra->contents);
             struct entry *entry   = entries + string_id;
-            assert (!entry->in_use && !entries->str);
+            assert (!entry->in_use);
             entry->in_use         = true;
             entry->str            = strdup(strings[i]);
             ids_out[i]            = string_id;
+
+            /* add for not yet registered pairs to buffer for fast import */
+            new_strings[num_new_pairs]  = strings[i];
+            new_ids[num_new_pairs]      = string_id;
+            num_new_pairs++;
         }
     }
+
+    /* register strings in index (as bulk operation) */
+    string_lookup_put_fast(&extra->index, new_strings, new_ids, num_new_pairs);
 
     /* set potential non-null out parameters */
     optional_set_else(out, ids_out, allocator_free(&self->alloc, ids_out));
 
     /* clean up */
+    allocator_free(&self->alloc, new_ids);
+    allocator_free(&self->alloc, new_strings);
+
     string_lookup_free(values, &extra->index);
     string_lookup_free(found_mask, &extra->index);
 
@@ -289,8 +320,10 @@ static char **this_extract(struct string_dic *self, const string_id_t *ids, size
     char **result = allocator_malloc(&self->alloc, num_ids * sizeof(char *));
     struct entry *entries = (struct entry *) vector_data(&extra->contents);
     for (size_t i = 0; i < num_ids; i++) {
-        assert(entries[i].in_use);
-        result[i] = entries[i].str;
+        string_id_t string_id = ids[i];
+        assert(string_id < vector_len(&extra->contents));
+        assert(entries[string_id].in_use);
+        result[i] = entries[string_id].str;
     }
 
     unlock(self);
@@ -300,4 +333,20 @@ static char **this_extract(struct string_dic *self, const string_id_t *ids, size
 static int this_free(struct string_dic *self, void *ptr)
 {
     return allocator_free(&self->alloc, ptr);
+}
+
+static int this_reset_counters(struct string_dic *self)
+{
+    check_tag(self->tag, STRING_DIC_NAIVE)
+    struct naive_extra *extra = this_extra(self);
+    check_success(string_lookup_reset_counters(&extra->index));
+    return STATUS_OK;
+}
+
+static int this_counters(struct string_dic *self, struct string_lookup_counters *counters)
+{
+    check_tag(self->tag, STRING_DIC_NAIVE)
+    struct naive_extra *extra = this_extra(self);
+    check_success(string_lookup_counters(counters, &extra->index));
+    return STATUS_OK;
 }

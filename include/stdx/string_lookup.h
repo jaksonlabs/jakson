@@ -89,6 +89,13 @@
 
 enum string_lookup_impl { STRING_ID_MAP_SIMPLE };
 
+struct string_lookup_counters {
+  uint_fast32_t num_bucket_search_miss;
+  uint_fast32_t num_bucket_search_hit;
+  uint_fast32_t num_bucket_cache_search_miss;
+  uint_fast32_t num_bucket_cache_search_hit;
+};
+
 struct string_lookup {
 
   /**
@@ -100,6 +107,13 @@ struct string_lookup {
    * Implementation tag
    */
   enum string_lookup_impl    tag;
+
+  /*
+   * Statistics to lookup misses and hits
+   *
+   * <b>Note</b>: Implementation must maintain counters by itself
+   */
+  struct string_lookup_counters counters;
 
   /**
   *  Memory allocator that is used to get memory for user data
@@ -148,6 +162,7 @@ struct string_lookup {
    * by the call to <code>string_id_map_create</code>
    */
   int (*free)(struct string_lookup *self, void *ptr);
+
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -171,6 +186,33 @@ inline static int string_lookup_drop(struct string_lookup* map)
 }
 
 /**
+ * Resets statistics counters
+ *
+ * @param map a non-null pointer to the map
+ * @return <code>STATUS_OK</code> in case of success, otherwise a value indicating the error.
+ */
+inline static int string_lookup_reset_counters(struct string_lookup* map)
+{
+    check_non_null(map);
+    memset(&map->counters, 0, sizeof(struct string_lookup_counters));
+    return STATUS_OK;
+}
+
+/**
+ * Returns statistics counters
+ * @param out non-null pointer to destination counter
+ * @param map non-null pointer to the map
+ * @return <code>STATUS_OK</code> in case of success, otherwise a value indicating the error.
+ */
+inline static int string_lookup_counters(struct string_lookup_counters *out, const struct string_lookup *map)
+{
+    check_non_null(map);
+    check_non_null(out);
+    *out = map->counters;
+    return STATUS_OK;
+}
+
+/**
  * Put <code>num_pair</code> objects into this map maybe updating old objects with the same key. If it is
  * guaranteed that the key is not yet inserted into this table, use <code>string_hashtable_put_blind</code>
  * instead.
@@ -179,7 +221,7 @@ inline static int string_lookup_drop(struct string_lookup* map)
  * @param keys a non-null constant pointer to a list of at least <code>num_pairs</code> length of constant strings
  * @param values a non-null constant pointer to a list of at least <code>num_pairs</code> length of 64bit values
  * @param num_pairs the number of pairs that are read via <code>keys</code> and <code>values</code>
- * @return <code>STATUS_OK</code> in case of success, otherwise a value indiciating the error.
+ * @return <code>STATUS_OK</code> in case of success, otherwise a value indicating the error.
  */
 inline static int string_lookup_put_safe(struct string_lookup* map, char* const* keys, const string_id_t* values,
         size_t num_pairs)
