@@ -16,6 +16,8 @@ int vector_create(struct vector *out, const struct allocator *alloc, size_t elem
 int vector_madvise(struct vector *vec, int madvise_advice)
 {
     check_non_null(vec);
+    unused(vec);
+    unused(madvise_advice);
     madvise(vec->base, vec->cap_elems * vec->elem_size, madvise_advice);
     return STATUS_OK;
 }

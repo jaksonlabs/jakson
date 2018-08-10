@@ -212,11 +212,17 @@ static int simple_put_test(struct string_lookup* self, char* const* keys, const 
     struct simple_extra *extra = simple_extra(self);
     size_t *bucket_idxs = allocator_malloc(&self->allocator, num_pairs * sizeof(size_t));
 
+    prefetch_write(bucket_idxs);
+
     for (size_t i = 0; i < num_pairs; i++) {
         const char *key        = keys[i];
         hash_t      hash       = get_hashcode(key);
         bucket_idxs[i]         = hash % extra->buckets.cap_elems;
     }
+
+    prefetch_read(bucket_idxs);
+    prefetch_read(keys);
+    prefetch_read(values);
 
     check_success(simple_map_insert(&extra->buckets, keys, values, bucket_idxs, num_pairs, &self->allocator,
             &self->counters));
@@ -236,18 +242,19 @@ static int simple_put_blind(struct string_lookup *self, char *const *keys, const
                                                                                                                        \
     struct simple_bucket_entry* data = (struct simple_bucket_entry*) vector_data(&bucket->entries);                    \
                                                                                                                        \
-    if (bucket->cache_idx!=(size_t) -1) {                                                                              \
+    if (likely(bucket->cache_idx!=(size_t) -1)) {                                                                      \
         struct simple_bucket_entry* cache = data + bucket->cache_idx;                                                  \
         if (cache->key_hash_2 == key_hash_2 && strcmp(cache->str, key) == 0) {                                         \
             counter->num_bucket_cache_search_hit++;                                                                    \
             return bucket->cache_idx;                                                                                  \
         }                                                                                                              \
         counter->num_bucket_cache_search_miss++;                                                                       \
+        prefetch_read(data);                                                                                           \
     }                                                                                                                  \
                                                                                                                        \
     size_t i = 0;                                                                                                      \
     for (; i<bucket->entries.cap_elems; i++) {                                                                         \
-        if (data[i].key_hash_2 == key_hash_2 && strcmp(data[i].str, key) == 0) {                                       \
+        if (unlikely(data[i].key_hash_2 == key_hash_2 && strcmp(data[i].str, key) == 0)) {                             \
             counter->num_bucket_search_hit++;                                                                          \
             bucket->cache_idx = i;                                                                                     \
             return_value = i;                                                                                          \
@@ -266,6 +273,8 @@ static int simple_map_fetch(struct vector of_type(simple_bucket) *buckets, strin
 
     size_t num_not_found = 0;
     struct simple_bucket *data = (struct simple_bucket *) vector_data(buckets);
+
+    prefetch_write(values_out);
 
     for (size_t i = 0; i < num_keys; i++) {
         struct simple_bucket       *bucket     = data + bucket_idxs[i];
@@ -293,15 +302,16 @@ static int simple_get_test(struct string_lookup* self, string_id_t** out, bool**
 {
     assert(self->tag == STRING_ID_MAP_SIMPLE);
 
-    struct simple_extra *extra = simple_extra(self);
-    size_t *bucket_idxs = allocator_malloc(&self->allocator, num_keys * sizeof(size_t));
-    string_id_t *values_out = allocator_malloc(&self->allocator, num_keys * sizeof(size_t));
-    bool *found_mask_out = allocator_malloc(&self->allocator, num_keys * sizeof(bool));
+    struct simple_extra *extra          = simple_extra(self);
+    size_t              *bucket_idxs    = allocator_malloc(&self->allocator, num_keys * sizeof(size_t));
+    string_id_t         *values_out     = allocator_malloc(&self->allocator, num_keys * sizeof(size_t));
+    bool                *found_mask_out = allocator_malloc(&self->allocator, num_keys * sizeof(bool));
 
-    for (size_t i = 0; i < num_keys; i++) {
+    for (register size_t i = 0; i < num_keys; i++) {
         const char *key        = keys[i];
         hash_t      hash       = get_hashcode(key);
         bucket_idxs[i]         = hash % extra->buckets.cap_elems;
+        prefetch_read((struct simple_bucket *) vector_data(&extra->buckets) + bucket_idxs[i]);
     }
 
     check_success(simple_map_fetch(&extra->buckets, values_out, found_mask_out, num_not_found, bucket_idxs,
@@ -337,7 +347,7 @@ static int simple_map_remove(struct simple_extra *extra, size_t *bucket_idxs, ch
 
     struct simple_bucket *data = (struct simple_bucket *) vector_data(&extra->buckets);
 
-    for (size_t i = 0; i < num_keys; i++) {
+    for (register size_t i = 0; i < num_keys; i++) {
         struct simple_bucket* bucket     = data + bucket_idxs[i];
         const char           *key        = keys[i];
 
@@ -364,7 +374,7 @@ static int simple_remove(struct string_lookup *self, char *const *keys, size_t n
 
     struct simple_extra *extra = simple_extra(self);
     size_t *bucket_idxs = allocator_malloc(&self->allocator, num_keys * sizeof(size_t));
-    for (size_t i = 0; i < num_keys; i++) {
+    for (register size_t i = 0; i < num_keys; i++) {
         const char *key        = keys[i];
         hash_t      hash       = get_hashcode(key);
         bucket_idxs[i]         = hash % extra->buckets.cap_elems;
@@ -495,7 +505,7 @@ static size_t simple_bucket_freelist_pop(struct simple_bucket *bucket, struct al
         check_success(vector_grow(&new_slots, freelist));
         check_success(vector_grow(NULL, entries));
         size_t *new_slot_ids = allocator_malloc(alloc, new_slots * sizeof(size_t));
-        for (size_t slot = 0; slot < new_slots; slot++) {
+        for (register size_t slot = 0; slot < new_slots; slot++) {
             size_t new_slot_id = last_slot + slot;
             new_slot_ids[slot] = new_slot_id;
             check_success(vector_push(entries, &empty, 1));
@@ -554,7 +564,7 @@ static int simple_map_insert(struct vector of_type(simple_bucket)* buckets, char
 
     struct simple_bucket *buckets_data = (struct simple_bucket *) vector_data(buckets);
     int status = STATUS_OK;
-    for (size_t i = 0; status == STATUS_OK && i < num_pairs; i++) {
+    for (register size_t i = 0; status == STATUS_OK && i < num_pairs; i++) {
         size_t       bucket_idx      = bucket_idxs[i];
         const char  *key             = keys[i];
         string_id_t     value           = values[i];

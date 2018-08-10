@@ -108,7 +108,7 @@ static int freelist_pop(string_id_t *out, struct string_dic *self)
 {
     assert (self->tag == STRING_DIC_NAIVE);
     struct naive_extra *extra = this_extra(self);
-    if (vector_is_empty(&extra->freelist)) {
+    if (unlikely(vector_is_empty(&extra->freelist))) {
         size_t num_new_pos;
         check_success(vector_grow(&num_new_pos, &extra->freelist));
         check_success(vector_grow(NULL, &extra->contents));
@@ -180,8 +180,16 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
     string_id_t        *new_ids        = allocator_malloc(&self->alloc, num_strings * sizeof(string_id_t));
     size_t              num_new_pairs  = 0;
 
+    prefetch_write(found_mask);
+    prefetch_write(values);
+
     /* query index for strings to get a boolean mask which strings are new and which must be added */
     string_lookup_get_safe(&values, &found_mask, &num_not_found, &extra->index, strings, num_strings);
+
+    prefetch_read(found_mask);
+    prefetch_read(values);
+    prefetch_write(new_strings);
+    prefetch_write(new_ids);
 
     /* copy string ids for already known strings to their result position resp. add those which are new */
     for (size_t i = 0; i < num_strings; i++) {

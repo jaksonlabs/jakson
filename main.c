@@ -110,6 +110,11 @@ int main()
         printf("num_bucket_cache_search_miss;%llu\n", counters.num_bucket_cache_search_miss);
         printf("num_bucket_cache_search_hit;%llu\n", counters.num_bucket_cache_search_hit);
 
+        char **strings_ex = string_dic_extract(&dic, ids, num_strings);
+        for (size_t i = 0; i < num_strings; i++) {
+            printf("[%zu] -> { '%s' }\n", ids[i], strings_ex[i]);
+        }
+
     }
 
     fprintf(stderr, "created: ... %fsec\n", created_agg / NUM_SAMPLES / 1000.0f);
