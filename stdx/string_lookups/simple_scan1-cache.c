@@ -27,77 +27,79 @@
 #include <stdx/algorithm.h>
 #include <stdx/bloomfilter.h>
 
-#define get_hashcode(key)    hash_bernstein(strlen(key), key)
+#define get_hashcode(key)      hash_bernstein(strlen(key), key)
+#define get_hashcode_2(key)    hash_additive(strlen(key), key)
 
-#define USE_HASH_ADDITIVE
-
-
-#ifdef USE_HASH_JENKINS
-    #ifdef get_hashcode_2
-        #undef get_hashcode_2
-    #endif
-    #define get_hashcode_2(key)    hash_jenkins(strlen(key), key)
-#endif
-
-#ifdef USE_HASH_ADDITIVE
-    #ifdef get_hashcode_2
-        #undef get_hashcode_2
-    #endif
-    #define get_hashcode_2(key)    hash_additive(strlen(key), key)
-#endif
-
-#ifdef USE_HASH_XOR
-    #ifdef get_hashcode_2
-        #undef get_hashcode_2
-    #endif
-    #define get_hashcode_2(key)    hash__xor(strlen(key), key)
-#endif
-
-#ifdef USE_HASH_ROT
-    #ifdef get_hashcode_2
-        #undef get_hashcode_2
-    #endif
-    #define get_hashcode_2(key)    hash_rot(strlen(key), key)
-#endif
-
-#ifdef USE_HASH_BERNSTEIN
-    #ifdef get_hashcode_2
-        #undef get_hashcode_2
-    #endif
-    #define get_hashcode_2(key)    hash_bernstein(strlen(key), key)
-#endif
-
-#ifdef USE_HASH_SAX
-    #ifdef get_hashcode_2
-        #undef get_hashcode_2
-    #endif
-    #define get_hashcode_2(key)    hash_sax(strlen(key), key)
-#endif
-
-#ifdef USE_HASH_FNV
-    #ifdef get_hashcode_2
-        #undef get_hashcode_2
-    #endif
-    #define get_hashcode_2(key)    hash_fnv(strlen(key), key)
-#endif
-
-#ifdef USE_HASH_OAT
-    #ifdef get_hashcode_2
-        #undef get_hashcode_2
-    #endif
-    #define get_hashcode_2(key)    hash_oat(strlen(key), key)
-#endif
-
-#ifdef USE_HASH_ELF
-    #ifdef get_hashcode_2
-        #undef get_hashcode_2
-    #endif
-    #define get_hashcode_2(key)    hash_elf(strlen(key), key)
-#endif
-
-#ifndef get_hashcode_2
-    #define get_hashcode_2(key)    hash_jenkins(strlen(key), key)
-#endif
+//
+//#define USE_HASH_ADDITIVE
+//
+//
+//#ifdef USE_HASH_JENKINS
+//    #ifdef get_hashcode_2
+//        #undef get_hashcode_2
+//    #endif
+//    #define get_hashcode_2(key)    hash_jenkins(strlen(key), key)
+//#endif
+//
+//#ifdef USE_HASH_ADDITIVE
+//    #ifdef get_hashcode_2
+//        #undef get_hashcode_2
+//    #endif
+//    #define get_hashcode_2(key)    hash_additive(strlen(key), key)
+//#endif
+//
+//#ifdef USE_HASH_XOR
+//    #ifdef get_hashcode_2
+//        #undef get_hashcode_2
+//    #endif
+//    #define get_hashcode_2(key)    hash__xor(strlen(key), key)
+//#endif
+//
+//#ifdef USE_HASH_ROT
+//    #ifdef get_hashcode_2
+//        #undef get_hashcode_2
+//    #endif
+//    #define get_hashcode_2(key)    hash_rot(strlen(key), key)
+//#endif
+//
+//#ifdef USE_HASH_BERNSTEIN
+//    #ifdef get_hashcode_2
+//        #undef get_hashcode_2
+//    #endif
+//    #define get_hashcode_2(key)    hash_bernstein(strlen(key), key)
+//#endif
+//
+//#ifdef USE_HASH_SAX
+//    #ifdef get_hashcode_2
+//        #undef get_hashcode_2
+//    #endif
+//    #define get_hashcode_2(key)    hash_sax(strlen(key), key)
+//#endif
+//
+//#ifdef USE_HASH_FNV
+//    #ifdef get_hashcode_2
+//        #undef get_hashcode_2
+//    #endif
+//    #define get_hashcode_2(key)    hash_fnv(strlen(key), key)
+//#endif
+//
+//#ifdef USE_HASH_OAT
+//    #ifdef get_hashcode_2
+//        #undef get_hashcode_2
+//    #endif
+//    #define get_hashcode_2(key)    hash_oat(strlen(key), key)
+//#endif
+//
+//#ifdef USE_HASH_ELF
+//    #ifdef get_hashcode_2
+//        #undef get_hashcode_2
+//    #endif
+//    #define get_hashcode_2(key)    hash_elf(strlen(key), key)
+//#endif
+//
+//#ifndef get_hashcode_2
+//    #define get_hashcode_2(key)    hash_jenkins(strlen(key), key)
+//#endif
 
 // ---------------------------------------------------------------------------------------------------------------------
 //  SIMPLE
