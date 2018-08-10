@@ -229,10 +229,9 @@ static int simple_put_blind(struct string_lookup *self, char *const *keys, const
     return simple_put_test(self, keys, values, num_pairs);
 }
 
-#define simple_bucket_find_entry_by_key(counter, bucket, key, alloc)                                                   \
+#define simple_bucket_find_entry_by_key(counter, bucket, key)                                                          \
 ({                                                                                                                     \
-    unused(alloc);                                                                                                     \
-                                                                                                                       \
+                                                                                                                      \
     hash_t key_hash_2  = get_hashcode_2(key);                                                                          \
                                                                                                                        \
     struct simple_bucket_entry* data = (struct simple_bucket_entry*) vector_data(&bucket->entries);                    \
@@ -262,26 +261,26 @@ static int simple_map_fetch(struct vector of_type(simple_bucket) *buckets, strin
         size_t *num_keys_not_found, size_t *bucket_idxs, char *const *keys, size_t num_keys,
         struct allocator *alloc, struct string_lookup_counters *counter)
 {
+    unused(alloc);
+
     size_t num_not_found = 0;
     struct simple_bucket *data = (struct simple_bucket *) vector_data(buckets);
 
     for (size_t i = 0; i < num_keys; i++) {
         struct simple_bucket       *bucket     = data + bucket_idxs[i];
 
+        simple_bucket_lock(bucket);
+
+        const char* key = keys[i];
         /* Optimization 1/5: EMPTY GUARD (but before "find" call); if this bucket has no occupied slots, do not perform any lookup and comparison */
-        if (bucket->num_entries > 0) {
-            simple_bucket_lock(bucket);
+        size_t needle_pos = bucket->num_entries > 0 ? simple_bucket_find_entry_by_key(counter, bucket, key) : bucket->entries.cap_elems;
 
-            const char* key = keys[i];
-            size_t needle_pos = simple_bucket_find_entry_by_key(counter, bucket, key, alloc);
+        bool found = needle_pos < bucket->entries.cap_elems;
+        num_not_found += found ? 0 : 1;
+        key_found_mask[i] = found;
+        values_out[i] = found ? (((struct simple_bucket_entry*) bucket->entries.base)+needle_pos)->value : -1;
 
-            bool found = needle_pos<bucket->entries.cap_elems;
-            num_not_found += found ? 0 : 1;
-            key_found_mask[i] = found;
-            values_out[i] = found ? (((struct simple_bucket_entry*) bucket->entries.base)+needle_pos)->value : -1;
-
-            simple_bucket_unlock(bucket);
-        }
+        simple_bucket_unlock(bucket);
     }
 
     *num_keys_not_found = num_not_found;
@@ -333,27 +332,27 @@ static int simple_update_key_blind(struct string_lookup *self, const string_id_t
 static int simple_map_remove(struct simple_extra *extra, size_t *bucket_idxs, char *const *keys, size_t num_keys,
         struct allocator *alloc, struct string_lookup_counters *counter)
 {
+    unused(alloc);
+
     struct simple_bucket *data = (struct simple_bucket *) vector_data(&extra->buckets);
 
     for (size_t i = 0; i < num_keys; i++) {
         struct simple_bucket* bucket     = data + bucket_idxs[i];
         const char           *key        = keys[i];
 
+        simple_bucket_lock(bucket);
+
         /* Optimization 1/5: EMPTY GUARD (but before "find" call); if this bucket has no occupied slots, do not perform any lookup and comparison */
-        if (bucket->num_entries > 0) {
-            simple_bucket_lock(bucket);
-
-            size_t needle_pos = simple_bucket_find_entry_by_key(counter, bucket, key, alloc);
-            if (likely(needle_pos<bucket->entries.cap_elems)) {
-                struct simple_bucket_entry* entry =
-                        (struct simple_bucket_entry*) vector_data(&bucket->entries)+needle_pos;
-                assert (entry->key_hash_2 != 0);
-                entry->key_hash_2 = 0;
-                simple_bucket_freelist_push(bucket, needle_pos);
-            }
-
-            simple_bucket_unlock(bucket);
+        size_t needle_pos = bucket->num_entries > 0 ? simple_bucket_find_entry_by_key(counter, bucket, key) : bucket->entries.cap_elems;
+        if (likely(needle_pos < bucket->entries.cap_elems)) {
+            struct simple_bucket_entry* entry =
+                    (struct simple_bucket_entry*) vector_data(&bucket->entries)+needle_pos;
+            assert (entry->key_hash_2 != 0);
+            entry->key_hash_2 = 0;
+            simple_bucket_freelist_push(bucket, needle_pos);
         }
+
+        simple_bucket_unlock(bucket);
     }
     return STATUS_OK;
 }
@@ -513,7 +512,7 @@ static int simple_bucket_insert(struct simple_bucket *bucket, const char *key, s
     simple_bucket_lock(bucket);
 
     /* Optimization 1/5: EMPTY GUARD (but before "find" call); if this bucket has no occupied slots, do not perform any lookup and comparison */
-    size_t                      needle_pos = bucket->num_entries > 0 ? simple_bucket_find_entry_by_key(counter, bucket, key, alloc) : bucket->entries.cap_elems;
+    size_t                      needle_pos = bucket->num_entries > 0 ? simple_bucket_find_entry_by_key(counter, bucket, key) : bucket->entries.cap_elems;
     struct simple_bucket_entry *data       = (struct simple_bucket_entry *) vector_data(&bucket->entries);
 
 
