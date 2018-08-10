@@ -27,87 +27,76 @@
 #include <stdx/algorithm.h>
 #include <stdx/bloomfilter.h>
 
-#define USE_HASH_BERNSTEIN2
+#define get_hashcode(key)    hash_bernstein(strlen(key), key)
+
+#define USE_HASH_ADDITIVE
+
 
 #ifdef USE_HASH_JENKINS
-    #ifdef get_hashcode
-        #undef get_hashcode
+    #ifdef get_hashcode_2
+        #undef get_hashcode_2
     #endif
-    #define get_hashcode(key)    hash_jenkins(strlen(key), key)
-#endif
-
-#ifdef USE_HASH_IDENTITY
-    #ifdef get_hashcode
-        #undef get_hashcode
-    #endif
-    #define get_hashcode(key)    hash_identity(strlen(key), key)
+    #define get_hashcode_2(key)    hash_jenkins(strlen(key), key)
 #endif
 
 #ifdef USE_HASH_ADDITIVE
-    #ifdef get_hashcode
-        #undef get_hashcode
+    #ifdef get_hashcode_2
+        #undef get_hashcode_2
     #endif
-    #define get_hashcode(key)    hash_additive(strlen(key), key)
+    #define get_hashcode_2(key)    hash_additive(strlen(key), key)
 #endif
 
 #ifdef USE_HASH_XOR
-    #ifdef get_hashcode
-        #undef get_hashcode
+    #ifdef get_hashcode_2
+        #undef get_hashcode_2
     #endif
-    #define get_hashcode(key)    hash__xor(strlen(key), key)
+    #define get_hashcode_2(key)    hash__xor(strlen(key), key)
 #endif
 
 #ifdef USE_HASH_ROT
-    #ifdef get_hashcode
-        #undef get_hashcode
+    #ifdef get_hashcode_2
+        #undef get_hashcode_2
     #endif
-    #define get_hashcode(key)    hash_rot(strlen(key), key)
+    #define get_hashcode_2(key)    hash_rot(strlen(key), key)
 #endif
 
 #ifdef USE_HASH_BERNSTEIN
-    #ifdef get_hashcode
-        #undef get_hashcode
+    #ifdef get_hashcode_2
+        #undef get_hashcode_2
     #endif
-    #define get_hashcode(key)    hash_bernstein(strlen(key), key)
-#endif
-
-#ifdef USE_HASH_BERNSTEIN2
-    #ifdef get_hashcode
-        #undef get_hashcode
-    #endif
-    #define get_hashcode(key)    hash_bernstein2(strlen(key), key)
+    #define get_hashcode_2(key)    hash_bernstein(strlen(key), key)
 #endif
 
 #ifdef USE_HASH_SAX
-    #ifdef get_hashcode
-        #undef get_hashcode
+    #ifdef get_hashcode_2
+        #undef get_hashcode_2
     #endif
-    #define get_hashcode(key)    hash_sax(strlen(key), key)
+    #define get_hashcode_2(key)    hash_sax(strlen(key), key)
 #endif
 
 #ifdef USE_HASH_FNV
-    #ifdef get_hashcode
-        #undef get_hashcode
+    #ifdef get_hashcode_2
+        #undef get_hashcode_2
     #endif
-    #define get_hashcode(key)    hash_fnv(strlen(key), key)
+    #define get_hashcode_2(key)    hash_fnv(strlen(key), key)
 #endif
 
 #ifdef USE_HASH_OAT
-    #ifdef get_hashcode
-        #undef get_hashcode
+    #ifdef get_hashcode_2
+        #undef get_hashcode_2
     #endif
-    #define get_hashcode(key)    hash_oat(strlen(key), key)
+    #define get_hashcode_2(key)    hash_oat(strlen(key), key)
 #endif
 
 #ifdef USE_HASH_ELF
-    #ifdef get_hashcode
-        #undef get_hashcode
+    #ifdef get_hashcode_2
+        #undef get_hashcode_2
     #endif
-    #define get_hashcode(key)    hash_elf(strlen(key), key)
+    #define get_hashcode_2(key)    hash_elf(strlen(key), key)
 #endif
 
-#ifndef get_hashcode
-    #define get_hashcode(key)    hash_jenkins(strlen(key), key)
+#ifndef get_hashcode_2
+    #define get_hashcode_2(key)    hash_jenkins(strlen(key), key)
 #endif
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -115,10 +104,9 @@
 // ---------------------------------------------------------------------------------------------------------------------
 
 struct simple_bucket_entry {
-  bool        in_use;
-  const char *str;
-  size_t      str_len;
+  const char    *str;
   string_id_t    value;
+  hash_t         key_hash_2;
 };
 
 struct simple_bucket {
@@ -246,7 +234,12 @@ static size_t simple_bucket_find_entry_by_key(struct string_lookup_counters *cou
 {
     unused(alloc);
 
-    size_t key_str_len = strlen(key);
+    /* Optimization 3: to delay strcmp cost while searching, compare with another hash first (different from the one used to
+     * determine the bucket index since this we are inside the bucket in which keys have a collision with the
+     * first one). Only in case of equality of this second hash of the key and the element at hand to compare,
+     * call strcmp. */
+    hash_t key_hash_2  = get_hashcode_2(key);
+
     struct simple_bucket_entry* data = (struct simple_bucket_entry*) vector_data(&bucket->entries);
 
      /* Optimization 1: EMPTY GUARD; if this bucket has no occupied slots, do not perform any lookup and comparison */
@@ -257,7 +250,7 @@ static size_t simple_bucket_find_entry_by_key(struct string_lookup_counters *cou
     /* Optimization 0: Caching; last read element is stored in front and no search is needed at all */
     if (bucket->cache_idx!=(size_t) -1) {
         struct simple_bucket_entry* cache = data+bucket->cache_idx;
-        if (cache->in_use && cache->str_len==key_str_len && strcmp(cache->str, key)==0) {
+        if (cache->key_hash_2 == key_hash_2 && strcmp(cache->str, key)==0) {
             counter->num_bucket_cache_search_hit++;
             return bucket->cache_idx;
         }
@@ -266,7 +259,9 @@ static size_t simple_bucket_find_entry_by_key(struct string_lookup_counters *cou
 
     size_t i = 0;
     for (; i<bucket->entries.cap_elems; i++) {
-        if (data[i].in_use && data[i].str_len==key_str_len && strcmp(data[i].str, key)==0) {
+        /* Optimization 4: instead to check "entry.in_use" and to compare strlen entry with strlen key (both
+         * pre-computed), hash 2 is used. For empty entries, we define 0 as "not in use" */
+        if (data[i].key_hash_2 == key_hash_2 && strcmp(data[i].str, key)==0) {
 
             counter->num_bucket_search_hit++;
 
@@ -364,7 +359,7 @@ static int simple_map_remove(struct simple_extra *extra, size_t *bucket_idxs, ch
         if (likely(needle_pos < bucket->entries.cap_elems)) {
             struct simple_bucket_entry *entry = (struct simple_bucket_entry *) vector_data(&bucket->entries) + needle_pos;
             assert (entry->in_use);
-            entry->in_use                     = false;
+            entry->key_hash_2                = 0;
             simple_bucket_freelist_push(bucket, needle_pos);
         }
 
@@ -431,10 +426,9 @@ static int simple_bucket_create(struct simple_bucket *buckets, size_t num_bucket
     check_non_null(buckets);
 
     struct simple_bucket_entry entry = {
-            .str     = NULL,
-            .in_use  = false,
-            .str_len = 0,
-            .value   = 0
+            .str        = NULL,
+            .value      = 0,
+            .key_hash_2 = 0
     };
 
     while (num_buckets--) {
@@ -493,10 +487,9 @@ static size_t simple_bucket_freelist_pop(struct simple_bucket *bucket, struct al
     struct vector of_type(simple_bucket_entry) *entries  = &bucket->entries;
 
     struct simple_bucket_entry empty = {
-            .in_use  = false,
-            .str     = NULL,
-            .str_len = 0,
-            .value   = 0
+            .str        = NULL,
+            .value      = 0,
+            .key_hash_2 = 0
     };
 
     if (unlikely(vector_is_empty(freelist))) {
@@ -542,10 +535,8 @@ static int simple_bucket_insert(struct simple_bucket *bucket, const char *key, s
         data = (struct simple_bucket_entry *) vector_data(&bucket->entries);
         struct simple_bucket_entry *entry = data + free_slot;
         assert(!entry->in_use);
-        entry->in_use  = true;
         entry->str     = key;
-
-        entry->str_len = strlen(key);
+        entry->key_hash_2 = get_hashcode_2(key);
         entry->value   = value;
     }
 
