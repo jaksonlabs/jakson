@@ -164,8 +164,6 @@ static int simple_bucket_insert(struct simple_bucket *bucket, const char *key, s
         struct allocator *alloc, struct string_lookup_counters *counter) force_inline;
 static void simple_bucket_freelist_push(struct simple_bucket *bucket, size_t idx);
 static size_t simple_bucket_freelist_pop(struct simple_bucket *bucket, struct allocator *alloc) force_inline;
-static size_t simple_bucket_find_entry_by_key(struct string_lookup_counters *counter, struct simple_bucket *bucket,
-        const char *key, struct allocator *alloc);
 
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -231,47 +229,34 @@ static int simple_put_blind(struct string_lookup *self, char *const *keys, const
     return simple_put_test(self, keys, values, num_pairs);
 }
 
-static size_t simple_bucket_find_entry_by_key(struct string_lookup_counters *counter,
-        struct simple_bucket *bucket, const char *key, struct allocator *alloc)
-{
-    unused(alloc);
-
-    /* Optimization 3: to delay strcmp cost while searching, compare with another hash first (different from the one used to
-     * determine the bucket index since this we are inside the bucket in which keys have a collision with the
-     * first one). Only in case of equality of this second hash of the key and the element at hand to compare,
-     * call strcmp. */
-    hash_t key_hash_2  = get_hashcode_2(key);
-
-    struct simple_bucket_entry* data = (struct simple_bucket_entry*) vector_data(&bucket->entries);
-
-    /* Optimization 0: Caching; last read element is stored in front and no search is needed at all */
-    if (bucket->cache_idx!=(size_t) -1) {
-        struct simple_bucket_entry* cache = data+bucket->cache_idx;
-        if (cache->key_hash_2 == key_hash_2 && strcmp(cache->str, key)==0) {
-            counter->num_bucket_cache_search_hit++;
-            return bucket->cache_idx;
-        }
-        counter->num_bucket_cache_search_miss++;
-    }
-
-    size_t i = 0;
-    for (; i<bucket->entries.cap_elems; i++) {
-        /* Optimization 4: instead to check "entry.in_use" and to compare strlen entry with strlen key (both
-         * pre-computed), hash 2 is used. For empty entries, we define 0 as "not in use" */
-        if (data[i].key_hash_2 == key_hash_2 && strcmp(data[i].str, key)==0) {
-
-            counter->num_bucket_search_hit++;
-
-
-
-            bucket->cache_idx = i;
-            return i;
-
-        }
-    }
-    counter->num_bucket_search_miss++;
-    return bucket->entries.cap_elems;
-}
+#define simple_bucket_find_entry_by_key(counter, bucket, key, alloc)                                                   \
+({                                                                                                                     \
+    unused(alloc);                                                                                                     \
+                                                                                                                       \
+    hash_t key_hash_2  = get_hashcode_2(key);                                                                          \
+                                                                                                                       \
+    struct simple_bucket_entry* data = (struct simple_bucket_entry*) vector_data(&bucket->entries);                    \
+                                                                                                                       \
+    if (bucket->cache_idx!=(size_t) -1) {                                                                              \
+        struct simple_bucket_entry* cache = data+bucket->cache_idx;                                                    \
+        if (cache->key_hash_2 == key_hash_2 && strcmp(cache->str, key)==0) {                                           \
+            counter->num_bucket_cache_search_hit++;                                                                    \
+            return bucket->cache_idx;                                                                                  \
+        }                                                                                                              \
+        counter->num_bucket_cache_search_miss++;                                                                       \
+    }                                                                                                                  \
+                                                                                                                       \
+    size_t i = 0;                                                                                                      \
+    for (; i<bucket->entries.cap_elems; i++) {                                                                         \
+        if (data[i].key_hash_2 == key_hash_2 && strcmp(data[i].str, key)==0) {                                         \
+            counter->num_bucket_search_hit++;                                                                          \
+            bucket->cache_idx = i;                                                                                     \
+            return i;                                                                                                  \
+        }                                                                                                              \
+    }                                                                                                                  \
+    counter->num_bucket_search_miss++;                                                                                 \
+    bucket->entries.cap_elems;                                                                                         \
+})
 
 static int simple_map_fetch(struct vector of_type(simple_bucket) *buckets, string_id_t *values_out, bool *key_found_mask,
         size_t *num_keys_not_found, size_t *bucket_idxs, char *const *keys, size_t num_keys,
