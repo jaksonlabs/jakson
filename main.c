@@ -61,7 +61,7 @@ struct vector *to_string_list(const char *contents)
     return vector;
 }
 
-#define NUM_SAMPLES 5
+#define NUM_SAMPLES 3
 
 int main()
 {
@@ -114,7 +114,7 @@ int main()
 
     fprintf(stderr, "created: ... %fsec\n", created_agg / NUM_SAMPLES / 1000.0f);
     fprintf(stderr, "inserted: ... %fsec\n",insert_agg / NUM_SAMPLES /1000.0f);
-    fprintf(stderr, "----------------------------------\nTOTAL.........: %fsec\n", (created_agg+insert_agg) / NUM_SAMPLES /1000.0f);
+    fprintf(stderr, "----------------------------------\nTOTAL.........: %fsec (incl. 2sec I/O)\n", (2 + (created_agg+insert_agg) / NUM_SAMPLES /1000.0f));
 
 //
 //    timestamp_t locate_begin = time_current_time_ms();

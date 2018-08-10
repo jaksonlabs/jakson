@@ -27,7 +27,7 @@
 #include <stdx/algorithm.h>
 #include <stdx/bloomfilter.h>
 
-#define USE_HASH_IDENTITY
+#define USE_HASH_BERNSTEIN2
 
 #ifdef USE_HASH_JENKINS
     #ifdef get_hashcode
