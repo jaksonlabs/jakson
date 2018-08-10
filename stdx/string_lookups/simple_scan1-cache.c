@@ -231,8 +231,8 @@ static int simple_put_blind(struct string_lookup *self, char *const *keys, const
 
 #define simple_bucket_find_entry_by_key(counter, bucket, key)                                                          \
 ({                                                                                                                     \
-                                                                                                                      \
-    hash_t key_hash_2  = get_hashcode_2(key);                                                                          \
+    hash_t key_hash_2   = get_hashcode_2(key);                                                                         \
+    size_t return_value = bucket->entries.cap_elems;                                                                   \
                                                                                                                        \
     struct simple_bucket_entry* data = (struct simple_bucket_entry*) vector_data(&bucket->entries);                    \
                                                                                                                        \
@@ -250,11 +250,12 @@ static int simple_put_blind(struct string_lookup *self, char *const *keys, const
         if (data[i].key_hash_2 == key_hash_2 && strcmp(data[i].str, key)==0) {                                         \
             counter->num_bucket_search_hit++;                                                                          \
             bucket->cache_idx = i;                                                                                     \
-            return i;                                                                                                  \
+            return_value = i;                                                                                          \
+            break;                                                                                                     \
         }                                                                                                              \
     }                                                                                                                  \
     counter->num_bucket_search_miss++;                                                                                 \
-    bucket->entries.cap_elems;                                                                                         \
+    return_value;                                                                                                      \
 })
 
 static int simple_map_fetch(struct vector of_type(simple_bucket) *buckets, string_id_t *values_out, bool *key_found_mask,

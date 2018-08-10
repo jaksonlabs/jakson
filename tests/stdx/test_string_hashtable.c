@@ -22,13 +22,13 @@ void test_string_hashtable_generic_createdrop(struct string_lookup *map, int sta
     ck_assert_msg(status == STATUS_OK, "destruction fails");
 }
 
-START_TEST (test_string_hashtable_generic_createdrop_besearch)
-{
-    struct string_lookup map;
-    int status = string_hashtable_create_besearch(&map, NULL, 100, 5, 1.7f);
-    test_string_hashtable_generic_createdrop(&map, status);
-}
-END_TEST
+//START_TEST (test_string_hashtable_generic_createdrop_besearch)
+//{
+//    struct string_lookup map;
+//    int status = string_hashtable_create_besearch(&map, NULL, 100, 5, 1.7f);
+//    test_string_hashtable_generic_createdrop(&map, status);
+//}
+//END_TEST
 
 START_TEST (test_string_hashtable_generic_createdrop_scan1)
     {
@@ -129,13 +129,13 @@ void test_string_hashtable_generic_putget(struct string_lookup *map) {
     string_lookup_drop(map);
 }
 
-START_TEST (test_string_hashtable_generic_putget_bsearch)
-    {
-        struct string_lookup map;
-        string_hashtable_create_besearch(&map, NULL, 100, 5, 1.7f);
-        test_string_hashtable_generic_putget(&map);
-    }
-END_TEST
+//START_TEST (test_string_hashtable_generic_putget_bsearch)
+//    {
+//        struct string_lookup map;
+//        string_hashtable_create_besearch(&map, NULL, 100, 5, 1.7f);
+//        test_string_hashtable_generic_putget(&map);
+//    }
+//END_TEST
 
 START_TEST (test_string_hashtable_generic_putget_scan1)
     {
@@ -250,14 +250,14 @@ void test_string_hashtable_generic_remove(struct string_lookup *map)
 
     string_lookup_drop(map);
 }
-
-START_TEST (test_string_hashtable_generic_remove_besearch)
-    {
-        struct string_lookup map;
-        string_hashtable_create_besearch(&map, NULL, 100, 5, 1.7f);
-        test_string_hashtable_generic_remove(&map);
-    }
-END_TEST
+//
+//START_TEST (test_string_hashtable_generic_remove_besearch)
+//    {
+//        struct string_lookup map;
+//        string_hashtable_create_besearch(&map, NULL, 100, 5, 1.7f);
+//        test_string_hashtable_generic_remove(&map);
+//    }
+//END_TEST
 
 START_TEST (test_string_hashtable_generic_remove_scan1)
     {
@@ -336,11 +336,11 @@ Suite* str_suite (void)
     TCase *tcase;
 
     Suite *suite = suite_create("String HashTable");
-        tcase = tcase_create("BSearch");
-            tcase_add_test(tcase, test_string_hashtable_generic_createdrop_besearch);
-            tcase_add_test(tcase, test_string_hashtable_generic_putget_bsearch);
-            tcase_add_test(tcase, test_string_hashtable_generic_remove_besearch);
-        suite_add_tcase(suite, tcase);
+       // tcase = tcase_create("BSearch");
+    //     tcase_add_test(tcase, test_string_hashtable_generic_createdrop_besearch);
+    //       tcase_add_test(tcase, test_string_hashtable_generic_putget_bsearch);
+    //      tcase_add_test(tcase, test_string_hashtable_generic_remove_besearch);
+    //  suite_add_tcase(suite, tcase);
 
         tcase = tcase_create("Scan1");
             tcase_add_test(tcase, test_string_hashtable_generic_createdrop_scan1);
