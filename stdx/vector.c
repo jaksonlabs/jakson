@@ -1,4 +1,5 @@
 #include <stdx/vector.h>
+#include <sys/mman.h>
 
 int vector_create(struct vector *out, const struct allocator *alloc, size_t elem_size, size_t cap_elems)
 {
@@ -9,6 +10,13 @@ int vector_create(struct vector *out, const struct allocator *alloc, size_t elem
     out->cap_elems   = cap_elems;
     out->elem_size   = elem_size;
     out->grow_factor = 1.7f;
+    return STATUS_OK;
+}
+
+int vector_madvise(struct vector *vec, int madvise_advice)
+{
+    check_non_null(vec);
+    madvise(vec->base, vec->cap_elems * vec->elem_size, madvise_advice);
     return STATUS_OK;
 }
 

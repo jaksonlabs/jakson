@@ -20,6 +20,8 @@
 #ifndef _NG5_VECTOR
 #define _NG5_VECTOR
 
+#include <sys/mman.h>
+
 #include <common.h>
 #include <stdx/allocator.h>
 
@@ -70,6 +72,16 @@ struct vector
  * @return STATUS_OK if success, and STATUS_NULLPTR in case of NULL pointer parameters
  */
 int vector_create(struct vector *out, const struct allocator *alloc, size_t elem_size, size_t cap_elems);
+
+/**
+ * Provides hints on the OS kernel how to deal with memory inside this vector.
+ *
+ * @param vec non-null vector
+ * @param madvise_advice value to give underlying <code>madvise</code> syscall and advice, see man page
+ * of <code>madvise</code>
+ * @return STATUS_OK if success, otherwise a value indicating the error
+ */
+int vector_madvise(struct vector *vec, int madvise_advice);
 
 /**
  * Sets the factor for determining the reallocation size in case of a resizing operation.

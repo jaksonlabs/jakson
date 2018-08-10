@@ -315,6 +315,10 @@ static char **this_extract(struct string_dic *self, const string_id_t *ids, size
     struct naive_extra *extra = this_extra(self);
     char **result = allocator_malloc(&self->alloc, num_ids * sizeof(char *));
     struct entry *entries = (struct entry *) vector_data(&extra->contents);
+
+    /* Optimization: notify the kernel that the content list is accessed randomly (since hash based access)*/
+    vector_madvise(&extra->contents, MADV_RANDOM | MADV_WILLNEED);
+
     for (size_t i = 0; i < num_ids; i++) {
         string_id_t string_id = ids[i];
         assert(string_id < vector_len(&extra->contents));

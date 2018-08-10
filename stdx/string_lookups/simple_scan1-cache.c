@@ -394,6 +394,11 @@ static int simple_create_extra(struct string_lookup *self, float grow_factor, si
     if ((self->extra = allocator_malloc(&self->allocator, sizeof(struct simple_extra))) != NULL) {
         struct simple_extra *extra = simple_extra(self);
         vector_create(&extra->buckets, &self->allocator, sizeof(struct simple_bucket), num_buckets);
+
+        /* Optimization: notify the kernel that the list of buckets are accessed randomly (since hash based access)*/
+        vector_madvise(&extra->buckets, MADV_RANDOM | MADV_WILLNEED);
+
+
         struct simple_bucket *data = (struct simple_bucket *) vector_data(&extra->buckets);
         check_success(simple_bucket_create(data, num_buckets, cap_buckets, grow_factor, &self->allocator));
         return STATUS_OK;
@@ -426,8 +431,10 @@ static int simple_bucket_create(struct simple_bucket *buckets, size_t num_bucket
         bucket->cache_idx   = (size_t) -1;
         bucket->num_entries = 0;
         spinlock_create(&bucket->spinlock);
+
         vector_create(&bucket->entries, alloc, sizeof(struct simple_bucket_entry), bucket_cap);
         vector_create(&bucket->freelist, alloc, sizeof(size_t), bucket_cap);
+
         vector_set_growfactor(&bucket->entries, grow_factor);
         vector_set_growfactor(&bucket->freelist, grow_factor);
         vector_repreat_push(&bucket->entries, &entry, bucket_cap);
