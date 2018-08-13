@@ -105,10 +105,10 @@ int main()
         struct string_lookup_counters counters;
         string_dic_counters(&counters, &dic);
 
-        printf("num_bucket_search_miss;%llu\n", counters.num_bucket_search_miss);
-        printf("num_bucket_search_hit;%llu\n", counters.num_bucket_search_hit);
-        printf("num_bucket_cache_search_miss;%llu\n", counters.num_bucket_cache_search_miss);
-        printf("num_bucket_cache_search_hit;%llu\n", counters.num_bucket_cache_search_hit);
+        printf("num_bucket_search_miss;%zu\n", counters.num_bucket_search_miss);
+        printf("num_bucket_search_hit;%zu\n", counters.num_bucket_search_hit);
+        printf("num_bucket_cache_search_miss;%zu\n", counters.num_bucket_cache_search_miss);
+        printf("num_bucket_cache_search_hit;%zu\n", counters.num_bucket_cache_search_hit);
 
        // char **strings_ex = string_dic_extract(&dic, ids, num_strings);
         // for (size_t i = 0; i < num_strings; i++) {
