@@ -66,7 +66,8 @@ struct vector *to_string_list(const char *contents)
 int main()
 {
     timestamp_t read_begin = time_current_time_ms();
-    char *contents = read_contents("/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-15pc-stringlist.txt");
+    //char *contents = read_contents("/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-15pc-stringlist.txt");
+    char *contents = read_contents("/home/pinnecke/datasets/yago1/stringlists/yago1-11pc-stringlist.txt");
     timestamp_t read_end = time_current_time_ms();
     fprintf(stderr, "... %fsec\n", (read_end - read_begin) / 1000.0f);
 
