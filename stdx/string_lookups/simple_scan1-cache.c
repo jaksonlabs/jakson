@@ -304,7 +304,7 @@ static int simple_get_test(struct string_lookup* self, string_id_t** out, bool**
 
     struct simple_extra *extra          = simple_extra(self);
     size_t              *bucket_idxs    = allocator_malloc(&self->allocator, num_keys * sizeof(size_t));
-    string_id_t         *values_out     = allocator_malloc(&self->allocator, num_keys * sizeof(size_t));
+    string_id_t         *values_out     = allocator_malloc(&self->allocator, num_keys * sizeof(string_id_t));
     bool                *found_mask_out = allocator_malloc(&self->allocator, num_keys * sizeof(bool));
 
     for (register size_t i = 0; i < num_keys; i++) {

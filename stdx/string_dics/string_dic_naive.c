@@ -168,33 +168,28 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
     check_tag(self->tag, STRING_DIC_NAIVE)
     lock(self);
 
-    size_t              num_not_found;
-    bool               *found_mask;
-    string_id_t        *values;
+
 
     struct naive_extra *extra          = this_extra(self);
     string_id_t        *ids_out        = allocator_malloc(&self->alloc, num_strings * sizeof(string_id_t));
 
-    /* buffers for fast import into lookup index; it's guaranteed that all pairs are not yet contained */
-    char              **new_strings    = allocator_malloc(&self->alloc, num_strings * sizeof(char *));
-    string_id_t        *new_ids        = allocator_malloc(&self->alloc, num_strings * sizeof(string_id_t));
-    size_t              num_new_pairs  = 0;
-
-    prefetch_write(found_mask);
-    prefetch_write(values);
-
-    /* query index for strings to get a boolean mask which strings are new and which must be added */
-    string_lookup_get_safe(&values, &found_mask, &num_not_found, &extra->index, strings, num_strings);
-
-    prefetch_read(found_mask);
-    prefetch_read(values);
-    prefetch_write(new_strings);
-    prefetch_write(new_ids);
 
     /* copy string ids for already known strings to their result position resp. add those which are new */
     for (size_t i = 0; i < num_strings; i++) {
-        if (found_mask[i]) {
-            ids_out[i] = values[i];
+
+        size_t              num_not_found;
+        bool               *found_mask;
+        string_id_t        *values;
+
+        /* query index for strings to get a boolean mask which strings are new and which must be added */
+        string_lookup_get_safe(&values, &found_mask, &num_not_found, &extra->index, strings + i, 1);
+
+        if (found_mask[0]) {
+            ids_out[i] = values[0];
+
+            /* cleanup */
+         //   string_lookup_free(values, &extra->index);    // TODO: Memory Leak!
+        //    string_lookup_free(found_mask, &extra->index);
         } else {
             string_id_t string_id;
 
@@ -208,24 +203,12 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
             ids_out[i]            = string_id;
 
             /* add for not yet registered pairs to buffer for fast import */
-            new_strings[num_new_pairs]  = strings[i];
-            new_ids[num_new_pairs]      = string_id;
-            num_new_pairs++;
+            string_lookup_put_fast(&extra->index, &strings[i], &string_id, 1);
         }
     }
 
-    /* register strings in index (as bulk operation) */
-    string_lookup_put_fast(&extra->index, new_strings, new_ids, num_new_pairs);
-
     /* set potential non-null out parameters */
     optional_set_else(out, ids_out, allocator_free(&self->alloc, ids_out));
-
-    /* clean up */
-    allocator_free(&self->alloc, new_ids);
-    allocator_free(&self->alloc, new_strings);
-
-    string_lookup_free(values, &extra->index);
-    string_lookup_free(found_mask, &extra->index);
 
     unlock(self);
 

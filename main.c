@@ -66,7 +66,7 @@ struct vector *to_string_list(const char *contents)
 int main()
 {
     timestamp_t read_begin = time_current_time_ms();
-    char *contents = read_contents("/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-11pc-stringlist.txt");
+    char *contents = read_contents("/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-15pc-stringlist.txt");
     timestamp_t read_end = time_current_time_ms();
     fprintf(stderr, "... %fsec\n", (read_end - read_begin) / 1000.0f);
 
@@ -87,7 +87,7 @@ int main()
         printf("*** %d of %d in progress ***\n", sample + 1, NUM_SAMPLES);
 
         timestamp_t create_begin = time_current_time_ms();
-        string_dic_create_naive(&dic, 10646182, 1.0*vector_len(lines), 10, 8, NULL);
+        string_dic_create_naive(&dic, 10646182, 10.0*vector_len(lines), 10, 8, NULL);
         timestamp_t create_end = time_current_time_ms();
         created_agg += (create_end-create_begin);
 
@@ -110,10 +110,13 @@ int main()
         printf("num_bucket_cache_search_miss;%llu\n", counters.num_bucket_cache_search_miss);
         printf("num_bucket_cache_search_hit;%llu\n", counters.num_bucket_cache_search_hit);
 
-        char **strings_ex = string_dic_extract(&dic, ids, num_strings);
-        for (size_t i = 0; i < num_strings; i++) {
-            printf("[%zu] -> { '%s' }\n", ids[i], strings_ex[i]);
-        }
+       // char **strings_ex = string_dic_extract(&dic, ids, num_strings);
+        // for (size_t i = 0; i < num_strings; i++) {
+        //    printf("[%zu] -> { '%s' }\n", ids[i], strings_ex[i]);
+        // }
+
+        string_dic_free(&dic, ids);
+
 
     }
 
