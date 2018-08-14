@@ -29,21 +29,36 @@ enum storage_engine_tag {
 
 typedef uint64_t resource_id_t;
 
+typedef uint64_t prop_id_t;
+
+typedef uint64_t relation_id_t;
+
 struct IRI
 {
   const char        *path;
 };
 
+enum rdf_builtin_type { RDF_BUILTIN_TYPE_INT, RDF_BUILTIN_TYPE_STRING };
 
 struct storage_engine
 {
     void            *extra;
 
-    int              create_resources(struct resource_id_t **resources, size_t num_resources);
+    int              create_resources(resource_id_t *out, const struct IRI *iri);
 
-    int              drop_resources(const struct resource_id_t *resources, size_t num_resources);
+    int              create_blank_resources(resource_id_t *out);
 
-    int
+    int              drop_resources(resource_id_t out);
+
+    int              find_resource_by_IRI(resource_id_t *out, const struct IRI *iri);
+
+    int              get_IRI_of_resource(const struct IRI *out, resource_id_t id);
+
+    int              create_property(prop_id_t *out, resource_id_t subject, const struct IRI *predicate_iri,
+                                     enum rdf_builtin_type type, const void *literal);
+
+    int              create_relationship(relation_id_t *out, resource_id_t subject, const struct IRI *relationship_iri,
+                                         resource_id_t object);
 
 };
 

@@ -205,6 +205,9 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
             /* add for not yet registered pairs to buffer for fast import */
             string_lookup_put_fast(&extra->index, &strings[i], &string_id, 1);
         }
+
+        string_lookup_free(values, self);
+        string_lookup_free(found_mask, self);
     }
 
     /* set potential non-null out parameters */
