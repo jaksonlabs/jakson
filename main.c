@@ -125,7 +125,7 @@ int main()
         struct string_dic dic;
 
 
-        for (int bucket_size = 1; bucket_size <= 4000; bucket_size += 160) {
+        for (int bucket_size = 1; bucket_size <= 4000; bucket_size += 40) {
             for (int sample = 0; sample<NUM_SAMPLES; sample++) {
 
                 float created_duration = 0;
