@@ -180,6 +180,10 @@ int string_hashtable_create_scan1_cache(struct string_lookup* map, const struct 
         size_t cap_buckets, float bucket_grow_factor)
 {
     check_success(allocator_this_or_default(&map->allocator, alloc));
+
+    num_buckets  = num_buckets  < 1 ? 1 : num_buckets;
+    cap_buckets  = cap_buckets  < 1 ? 1 : cap_buckets;
+
     map->tag              = STRING_ID_MAP_SIMPLE;
     map->drop             = simple_drop;
     map->put_safe         = simple_put_test;
@@ -327,7 +331,7 @@ static int simple_get_blind(struct string_lookup *self, string_id_t **out, char 
     bool* found_mask;
     size_t num_not_found;
     int status = simple_get_test(self, out, &found_mask, &num_not_found, keys, num_keys);
-    simple_free(self, &found_mask);
+    simple_free(self, found_mask);
     return status;
 }
 

@@ -68,7 +68,7 @@ int main()
     printf("yago_percent;sample;num_buckets;time_created_sec;time_inserted_sec;time_bulk_sum_created_inserted;num_strings\n");
 
     const char *paths[11];/*
-    paths[0] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-11pc-stringlist.txt";
+    paths[0] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/100.txt";
     paths[1] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-19pc-stringlist.txt";
     paths[2] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-27pc-stringlist.txt";
     paths[3] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-35pc-stringlist.txt";
@@ -78,8 +78,8 @@ int main()
     paths[7] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-67pc-stringlist.txt";
     paths[8] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-75pc-stringlist.txt";
     paths[9] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-83pc-stringlist.txt";
-    paths[10] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-91pc-stringlist.txt";
- */
+    paths[10] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-91pc-stringlist.txt";*/
+
     paths[0] = "/home/pinnecke/datasets/yago1/stringlists/yago1-11pc-stringlist.txt";
     paths[1] = "/home/pinnecke/datasets/yago1/stringlists/yago1-19pc-stringlist.txt";
     paths[2] = "/home/pinnecke/datasets/yago1/stringlists/yago1-27pc-stringlist.txt";
@@ -151,6 +151,7 @@ int main()
                 string_dic_insert(&dic, &ids, strings, num_strings);
                 timestamp_t inserted_end = time_current_time_ms();
                 insert_duration = (inserted_end-inserted_begin) / 1000.0f;
+
 
                 //struct string_lookup_counters counters;
                 //string_dic_counters(&counters, &dic);

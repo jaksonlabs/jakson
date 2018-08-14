@@ -20,26 +20,30 @@
 #ifndef _NG5_STORAGE_ENGINE
 #define _NG5_STORAGE_ENGINE
 
+#include <common.h>
+
 enum storage_engine_tag {
     STORAGE_ENGINE_TAG_ROADFIRE
 };
 
-struct storage_engine;
 
-typedef
+typedef uint64_t resource_id_t;
 
-struct resource {
-
-    struct storage_engine   *storage;
-
-
+struct IRI
+{
+  const char        *path;
 };
+
 
 struct storage_engine
 {
     void            *extra;
 
-    int              create_resource()
+    int              create_resources(struct resource_id_t **resources, size_t num_resources);
+
+    int              drop_resources(const struct resource_id_t *resources, size_t num_resources);
+
+    int
 
 };
 
