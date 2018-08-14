@@ -624,20 +624,6 @@
 			<Option target="ng5"/>
 			<Option target="test_string_hashtable"/>
 		</Unit>
-		<Unit filename="/Users/marcus/git/ng5/include/ng5/cursor.h">
-			<Option target="bench-bucket-putget-scan-4-cache"/>
-			<Option target="bench-bucket-putget-scan-3-cache"/>
-			<Option target="bench-bucket-putget-scan-3"/>
-			<Option target="bench-bucket-putget-scan-1-cache"/>
-			<Option target="bench-bucket-putget-scan-2"/>
-			<Option target="bench-bucket-putget-scan-1"/>
-			<Option target="bench-bucket-putget-bsearch"/>
-			<Option target="bench-bucket-putget-scan-1-parallel"/>
-			<Option target="bench-bucket-putget-scan-2-cache"/>
-			<Option target="bench-bucket-putget-scan-4"/>
-			<Option target="ng5"/>
-			<Option target="test_string_hashtable"/>
-		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/include/ng5/storage_engine.h">
 			<Option target="bench-bucket-putget-scan-4-cache"/>
 			<Option target="bench-bucket-putget-scan-3-cache"/>

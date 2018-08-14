@@ -48,7 +48,6 @@ set(SORUCE_FILES
         ${CMAKE_SOURCE_DIR}/include/stdx/hash.h
         ${CMAKE_SOURCE_DIR}/include/stdx/string_lookup.h
         ${CMAKE_SOURCE_DIR}/include/ng5/storage_engine.h
-        ${CMAKE_SOURCE_DIR}/include/ng5/cursor.h
         ${CMAKE_SOURCE_DIR}/include/stdx/async.h
         ${CMAKE_SOURCE_DIR}/stdx/async.c
         ${CMAKE_SOURCE_DIR}/include/stdx/string_dic.h
