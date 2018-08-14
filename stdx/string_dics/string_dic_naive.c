@@ -178,8 +178,8 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
     for (size_t i = 0; i < num_strings; i++) {
 
         size_t              num_not_found;
-        bool               *found_mask;
-        string_id_t        *values;
+        bool               *found_mask = NULL;
+        string_id_t        *values = NULL;
 
         /* query index for strings to get a boolean mask which strings are new and which must be added */
         string_lookup_get_safe(&values, &found_mask, &num_not_found, &extra->index, strings + i, 1);
