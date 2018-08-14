@@ -298,7 +298,12 @@ inline static int string_lookup_get_safe(string_id_t** out, bool** found_mask, s
     check_non_null(keys);
     assert(map->get_safe);
 
-    return map->get_safe(map, out, found_mask, num_not_found, keys, num_keys);
+    int result = map->get_safe(map, out, found_mask, num_not_found, keys, num_keys);
+
+    assert (out != NULL);
+    assert (found_mask != NULL);
+
+    return result;
 }
 
 /**

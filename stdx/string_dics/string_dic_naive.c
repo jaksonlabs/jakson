@@ -184,6 +184,9 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
         /* query index for strings to get a boolean mask which strings are new and which must be added */
         string_lookup_get_safe(&values, &found_mask, &num_not_found, &extra->index, strings + i, 1);
 
+        assert(found_mask != NULL);
+        assert(values != NULL);
+
         if (found_mask[0]) {
             ids_out[i] = values[0];
 
@@ -206,8 +209,8 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
             string_lookup_put_fast(&extra->index, &strings[i], &string_id, 1);
         }
 
-        string_lookup_free(values, &extra->index);
-        string_lookup_free(found_mask, &extra->index);
+        //string_lookup_free(values, &extra->index);
+        //string_lookup_free(found_mask, &extra->index);
     }
 
     /* set potential non-null out parameters */

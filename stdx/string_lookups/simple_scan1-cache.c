@@ -250,7 +250,8 @@ static int simple_put_blind(struct string_lookup *self, char *const *keys, const
         struct simple_bucket_entry* cache = data + bucket->cache_idx;                                                  \
         if (cache->key_hash_2 == key_hash_2 && strcmp(cache->str, key) == 0) {                                         \
             counter->num_bucket_cache_search_hit++;                                                                    \
-            return bucket->cache_idx;                                                                                  \
+            return_value = bucket->cache_idx;                                                                          \
+            goto exit_find_macro;                                                                                      \
         }                                                                                                              \
         counter->num_bucket_cache_search_miss++;                                                                       \
         prefetch_read(data);                                                                                           \
@@ -266,6 +267,7 @@ static int simple_put_blind(struct string_lookup *self, char *const *keys, const
         }                                                                                                              \
     }                                                                                                                  \
     counter->num_bucket_search_miss++;                                                                                 \
+exit_find_macro:                                                                                                       \
     return_value;                                                                                                      \
 })
 
@@ -311,6 +313,10 @@ static int simple_get_test(struct string_lookup* self, string_id_t** out, bool**
     string_id_t         *values_out     = allocator_malloc(&self->allocator, num_keys * sizeof(string_id_t));
     bool                *found_mask_out = allocator_malloc(&self->allocator, num_keys * sizeof(bool));
 
+    assert(bucket_idxs != NULL);
+    assert(values_out != NULL);
+    assert(found_mask_out != NULL);
+
     for (register size_t i = 0; i < num_keys; i++) {
         const char *key        = keys[i];
         hash_t      hash       = get_hashcode(key);
@@ -321,6 +327,10 @@ static int simple_get_test(struct string_lookup* self, string_id_t** out, bool**
     check_success(simple_map_fetch(&extra->buckets, values_out, found_mask_out, num_not_found, bucket_idxs,
             keys, num_keys, &self->allocator, &self->counters));
     check_success(allocator_free(&self->allocator, bucket_idxs));
+
+    assert(values_out != NULL);
+    assert(found_mask_out != NULL);
+
     *out = values_out;
     *found_mask = found_mask_out;
     return STATUS_OK;
