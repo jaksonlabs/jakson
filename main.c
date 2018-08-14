@@ -156,6 +156,7 @@ int main()
                 //string_dic_counters(&counters, &dic);
 
                 string_dic_free(&dic, ids);
+                string_dic_drop(&dic);
 
                 printf("%d;%d;%zu;%f;%f;%f;%zu\n", yago_percent[pi], sample, num_buckets, created_duration, insert_duration, (created_duration + insert_duration), vector_len(lines));
 

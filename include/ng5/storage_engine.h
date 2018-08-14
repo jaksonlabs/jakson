@@ -20,5 +20,27 @@
 #ifndef _NG5_STORAGE_ENGINE
 #define _NG5_STORAGE_ENGINE
 
+enum storage_engine_tag {
+    STORAGE_ENGINE_TAG_ROADFIRE
+};
+
+struct storage_engine;
+
+typedef
+
+struct resource {
+
+    struct storage_engine   *storage;
+
+
+};
+
+struct storage_engine
+{
+    void            *extra;
+
+    int              create_resource()
+
+};
 
 #endif
