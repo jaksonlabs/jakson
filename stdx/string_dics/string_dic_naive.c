@@ -209,8 +209,8 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
             string_lookup_put_fast(&extra->index, &strings[i], &string_id, 1);
         }
 
-        //string_lookup_free(values, &extra->index);
-        //string_lookup_free(found_mask, &extra->index);
+        string_lookup_free(values, &extra->index);
+        string_lookup_free(found_mask, &extra->index);
     }
 
     /* set potential non-null out parameters */
