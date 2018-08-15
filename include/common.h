@@ -34,6 +34,8 @@
 
 #define of_type(x) /* a convenience way to write types for generic containers; no effect than just a visual one */
 
+#define optional /* parameters to functions marked with this tag can be NULL and will be ignored */
+
 #define cast(type, name, src)     \
       type name = (type) src
 
