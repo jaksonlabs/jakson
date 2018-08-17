@@ -10,8 +10,8 @@ set (CMAKE_C_STANDARD 11)
 
 file(MAKE_DIRECTORY ${CMAKE_HOME_DIRECTORY}/build)
 
-#set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
+#set(CMAKE_BUILD_TYPE Release)
 
 set (CMAKE_C_COMPILER             "/usr/bin/clang")
 set (CMAKE_C_FLAGS                "-Wall -std=c11 -Wextra -Werror")
@@ -56,6 +56,8 @@ set(SORUCE_FILES
         ${CMAKE_SOURCE_DIR}/include/stdx/unit.h
         ${CMAKE_SOURCE_DIR}/include/stdx/algorithm.h
         ${CMAKE_SOURCE_DIR}/include/stdx/string_lookups/simple_bsearch.h
+        ${CMAKE_SOURCE_DIR}/include/ng5/roadfire/roadfire.h
+        ${CMAKE_SOURCE_DIR}/ng5/roadfire/roadfire.c
         ${CMAKE_SOURCE_DIR}/stdx/string_lookups/simple_bsearch.c
         ${CMAKE_SOURCE_DIR}/include/stdx/string_lookups/simple_scan1.h
         ${CMAKE_SOURCE_DIR}/include/stdx/string_lookups/simple_scan1-cache.h
@@ -74,12 +76,18 @@ set(SORUCE_FILES
         ${CMAKE_SOURCE_DIR}/stdx/string_lookups/simple_scan3-cache.c
         ${CMAKE_SOURCE_DIR}/stdx/string_lookups/simple_scan4.c
         ${CMAKE_SOURCE_DIR}/stdx/string_lookups/simple_scan4-cache.c
-        ${CMAKE_SOURCE_DIR}/stdx/string_lookups/simple_scan1-parallel.c)
+        ${CMAKE_SOURCE_DIR}/stdx/string_lookups/simple_scan1-parallel.c
+        ${CMAKE_SOURCE_DIR}/include/ng5/result_handle.h
+        ${CMAKE_SOURCE_DIR}/ng5/result_handle.c
+        ${CMAKE_SOURCE_DIR}/include/ng5/roadfire/roadfire.h
+        ${CMAKE_SOURCE_DIR}/include/stdx/slot_vector.h
+        ${CMAKE_SOURCE_DIR}/stdx/slot_vector.c
+        )
 
 
-add_executable(ng5 main.c ${SORUCE_FILES} include/stdx/string_dics/string_dic_naive.h stdx/string_dics/string_dic_naive.c include/stdx/bloomfilter.h)
+add_executable(ng5 main.c ${SORUCE_FILES} include/stdx/string_dics/string_dic_naive.h stdx/string_dics/string_dic_naive.c include/stdx/bloomfilter.h ng5/roadfire/roadfire.c)
 
-add_executable(bench-bucket-putget-bsearch benches/bench-bucket-putget-bsearch.c ${SORUCE_FILES} include/stdx/bolster.h)
+add_executable(bench-bucket-putget-bsearch benches/bench-bucket-putget-bsearch.c ${SORUCE_FILES} include/stdx/bolster.h include/stdx/slot_vector.h stdx/slot_vector.c)
 add_executable(bench-bucket-putget-scan-1 benches/bench-bucket-putget-scan-1.c ${SORUCE_FILES})
 add_executable(bench-bucket-putget-scan-2 benches/bench-bucket-putget-scan-2.c ${SORUCE_FILES})
 add_executable(bench-bucket-putget-scan-3 benches/bench-bucket-putget-scan-3.c ${SORUCE_FILES})

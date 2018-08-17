@@ -110,6 +110,21 @@ size_t vector_cap(const struct vector *vec)
     return vec->cap_elems;
 }
 
+int vector_enlarge_size(struct vector *vec)
+{
+    check_non_null(vec);
+    vec->num_elems = vec->cap_elems;
+    return STATUS_OK;
+}
+
+int vector_set(struct vector *vec, size_t pos, const void *data)
+{
+    check_non_null(vec)
+    assert(pos < vec->num_elems);
+    memcpy(vec->base + pos * vec->elem_size, data, vec->elem_size);
+    return STATUS_OK;
+}
+
 const void *vector_data(struct vector *vec)
 {
     return vec ? vec->base : NULL;

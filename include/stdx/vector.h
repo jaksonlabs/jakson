@@ -175,6 +175,13 @@ size_t vector_len(const struct vector *vec);
 size_t vector_cap(const struct vector *vec);
 
 /**
+ * Set the internal size of <code>vec</code> to its capacity.
+ */
+int vector_enlarge_size(struct vector *vec);
+
+int vector_set(struct vector *vec, size_t pos, const void *data);
+
+/**
  * Gives raw data access to data stored in the vector; do not manipulate this data since otherwise the vector
  * might get corrupted.
  *
