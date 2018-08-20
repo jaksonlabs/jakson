@@ -27,6 +27,7 @@
 #include <assert.h>
 #include <stdatomic.h>
 #include <pthread.h>
+#include <stdlib.h>
 
 #include "status.h"
 

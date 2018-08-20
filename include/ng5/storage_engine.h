@@ -180,7 +180,7 @@ struct storage_engine
  * input <code>strings</code> and the already imported strings inside the database. In case a string
  * in <code>strings</code> is already imported, this string will be skipped.
 */
-static int storage_engine_import_strings(struct storage_engine *engine,
+unused_fn static int storage_engine_import_strings(struct storage_engine *engine,
         optional struct result_handle of_type(store_string_id_t) *out,
         const struct vector of_type(char *) *strings)
 {
@@ -194,7 +194,7 @@ static int storage_engine_import_strings(struct storage_engine *engine,
  * Same as <code>import_strings</code> but does not add strings into then database which are not yet
  * imported.
  */
-static int storage_engine_locate_strings(struct storage_engine *engine,
+unused_fn static int storage_engine_locate_strings(struct storage_engine *engine,
         optional struct result_handle of_type(store_string_id_t) *out,
         const struct vector of_type(char *) *strings)
 {
@@ -207,20 +207,22 @@ static int storage_engine_locate_strings(struct storage_engine *engine,
 /**
  * Decodes strings given in <code>input</code> and returns c-strings for them.
  */
-static int storage_engine_extract_strings(struct result_handle of_type(char *) *out, struct storage_engine *engine,
+unused_fn static int storage_engine_extract_strings(struct result_handle of_type(char *) *out, struct storage_engine *engine,
         const struct vector of_type(struct compressed_string) *input)
 {
     check_non_null(engine)
     check_non_null(out)
     check_non_null(input)
     assert(engine->extract_strings);
-    return engine->extract_strings(engine, out, input);
+    NOT_YET_IMPLEMENTED
+    return 0;
+   // return engine->extract_strings(engine, out, input);
 }
 
 /**
  * Returns encoded strings where the original uncoded strings satisfy the predicate <code>pred</code>
  */
-static int storage_engine_find_strings(struct result_handle of_type(store_string_id_t) *out,
+unused_fn static int storage_engine_find_strings(struct result_handle of_type(store_string_id_t) *out,
         struct storage_engine *engine, pred_func_t pred)
 {
     check_non_null(engine)
@@ -233,7 +235,7 @@ static int storage_engine_find_strings(struct result_handle of_type(store_string
 /**
  * Drops the handle to this result, eventually freeing resources or recycle resources for other results
  */
-static int storage_engine_drop_result(struct result_handle *handle)
+unused_fn static int storage_engine_drop_result(struct result_handle *handle)
 {
     check_non_null(handle)
     check_non_null(handle->context)

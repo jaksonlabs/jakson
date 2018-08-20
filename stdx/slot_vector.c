@@ -66,7 +66,7 @@ int slot_vector_insert(struct slot_vector *vec, optional struct vector of_type(s
     /* perform insert */
     assert(vector_len(&vec->freelist) > 0);
     slot_vector_slot_t slot = *(slot_vector_slot_t *) vector_pop(&vec->freelist);
-    slot_vector_at(&vec->content, slot);
+    vector_at(&vec->content, slot);
     if (ids) {
         vector_push(ids, &slot, 1);
     }
@@ -76,8 +76,7 @@ int slot_vector_insert(struct slot_vector *vec, optional struct vector of_type(s
 
 const void *slot_vector_at(struct slot_vector *vec, slot_vector_slot_t slot)
 {
-    check_non_null(vec)
-    if (slot >= vector_len(&vec->content)) {
+    if (!vec || slot >= vector_len(&vec->content)) {
         return NULL;
     } else {
         return vec->content.base + slot * vec->content.elem_size;

@@ -104,6 +104,11 @@ size_t vector_len(const struct vector *vec)
     return vec->num_elems;
 }
 
+const void *vector_at(const struct vector *vec, size_t pos)
+{
+    return (vec && pos > vec->num_elems) ? vec->base + pos * vec->elem_size : NULL;
+}
+
 size_t vector_cap(const struct vector *vec)
 {
     check_non_null(vec)
@@ -125,7 +130,7 @@ int vector_set(struct vector *vec, size_t pos, const void *data)
     return STATUS_OK;
 }
 
-const void *vector_data(struct vector *vec)
+const void *vector_data(const struct vector *vec)
 {
     return vec ? vec->base : NULL;
 }

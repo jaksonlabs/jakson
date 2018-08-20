@@ -3,7 +3,7 @@
 #include <stdx/time.h>
 #include <stdlib.h>
 #include <stdx/string_dics/string_dic_naive.h>
-#include <ng5/roadfire/roadfire.h>
+//#include <ng5/roadfire/roadfire.h>
 
 static char *read_contents(const char *path)
 {
@@ -64,10 +64,10 @@ struct vector *to_string_list(const char *contents)
 
 #define NUM_SAMPLES 25
 
-void roadfire_test() {
+/*void roadfire_test() {
     struct storage_engine engine;
     storage_engine_roadfire_create(&engine, NULL, NULL);
-}
+}*/
 
 void experiments_hashing() {
     printf("yago_percent;sample;num_buckets;time_created_sec;time_inserted_sec;time_bulk_sum_created_inserted;num_strings\n");
@@ -182,7 +182,7 @@ void experiments_hashing() {
 
 int main()
 {
-    roadfire_test();
+    //roadfire_test();
     experiments_hashing();
 
 

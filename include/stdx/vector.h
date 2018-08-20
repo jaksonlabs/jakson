@@ -166,6 +166,8 @@ int vector_grow(size_t *num_new_slots, struct vector *vec);
  */
 size_t vector_len(const struct vector *vec);
 
+const void *vector_at(const struct vector *vec, size_t pos);
+
 /**
  * Returns the number of elements for which memory is currently reserved in the vector
  *
@@ -188,6 +190,6 @@ int vector_set(struct vector *vec, size_t pos, const void *data);
  * @param vec the vector for which the operation is started
  * @return pointer to user-data managed by this vector
  */
-const void *vector_data(struct vector *vec);
+const void *vector_data(const struct vector *vec);
 
 #endif

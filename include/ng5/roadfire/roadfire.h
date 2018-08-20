@@ -40,7 +40,7 @@ struct roadfire_conf {
 
 };
 
-extern static struct roadfire_conf roadfire_conf_default;
+extern struct roadfire_conf roadfire_conf_default;
 
 int storage_engine_roadfire_create(struct storage_engine *out, optional struct roadfire_conf *conf, const struct allocator *alloc);
 

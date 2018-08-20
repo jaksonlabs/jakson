@@ -9,7 +9,7 @@
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-static struct roadfire_conf roadfire_conf_default = {
+struct roadfire_conf roadfire_conf_default = {
     .string_dic_capacity                 = 5000000,
     .string_dic_lookup_num_buckets       =  150000,
     .string_dic_bucket_capacity          =      10,
@@ -70,36 +70,7 @@ int storage_engine_roadfire_create(struct storage_engine *roadfire, optional str
     check_success(allocator_this_or_default(&roadfire->alloc, alloc));
     roadfire->tag = STORAGE_ENGINE_TAG_ROADFIRE;
     extra_create(roadfire, conf);
-}
-
-int roadfire_import_strings(struct storage_engine *self,
-        optional struct result_handle of_type(store_string_id_t) *out,
-        const struct vector_cursor of_type(char *) *strings)
-{
-
-}
-
-int roadfire_locate_strings(struct storage_engine *self, optional struct result_handle of_type(store_string_id_t) *out,
-        const struct vector_cursor of_type(char *) *strings)
-{
-
-}
-
-int roadfire_extract_strings(struct storage_engine *self, struct result_handle of_type(char *) strings,
-        const struct vector_cursor of_type(struct compressed_string) *input)
-{
-
-}
-
-int roadfire_find_strings(struct storage_engine *self, struct result_handle of_type(store_string_id_t) *out,
-        pred_func_t pred)
-{
-
-}
-
-int roadfire_drop_result(struct storage_engine *self, slot_vector_slot_t result_slot)
-{
-
+    return STATUS_OK;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -110,7 +81,7 @@ int roadfire_drop_result(struct storage_engine *self, slot_vector_slot_t result_
 
 void extra_create(struct storage_engine *roadfire, struct roadfire_conf *conf)
 {
-    assert(out);
+    assert(roadfire);
 
     roadfire->extra = allocator_malloc(&roadfire->alloc, (sizeof(struct roadfire_extra)));
     struct roadfire_extra *extra = extra_get(roadfire);
