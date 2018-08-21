@@ -130,4 +130,15 @@
 
 #endif
 
+#define debug(msg, ...)                 \
+{                                       \
+    fprintf(stderr, msg, __VA_ARGS__);  \
+    fprintf(stderr, "\n");              \
+    fflush(stderr);                     \
+}
+
+#ifndef thread_local
+#define thread_local __thread
+#endif
+
 typedef size_t string_id_t;

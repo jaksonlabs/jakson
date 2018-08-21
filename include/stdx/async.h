@@ -28,7 +28,7 @@
 typedef struct spinlock
 {
   atomic_flag lock;
-  bool        owns_lock;
+  pthread_t owning_thread;
 } spinlock_t;
 
 int spinlock_create(struct spinlock *spinlock);

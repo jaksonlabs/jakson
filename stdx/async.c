@@ -1,20 +1,24 @@
 #include <stdx/async.h>
+#include <zconf.h>
 
 int spinlock_create(struct spinlock *spinlock)
 {
     check_non_null(spinlock)
     atomic_flag_clear(&spinlock->lock);
-    spinlock->owns_lock = false;
+
+    memset(&spinlock->owning_thread, 0, sizeof(pthread_t));
+
     return STATUS_OK;
 }
 
 int spinlock_lock(struct spinlock *spinlock)
 {
     check_non_null(spinlock)
-    if (!spinlock->owns_lock) {
+    if (!pthread_equal(spinlock->owning_thread, pthread_self())) {
         while(atomic_flag_test_and_set(&spinlock->lock))
             ;
-        spinlock->owns_lock = true;
+        /* remeber the thread that aquires this lock */
+        spinlock->owning_thread = pthread_self();
     }
     return STATUS_OK;
 }
@@ -23,6 +27,6 @@ int spinlock_unlock(struct spinlock *spinlock)
 {
     check_non_null(spinlock)
     atomic_flag_clear(&spinlock->lock);
-    spinlock->owns_lock = false;
+    memset(&spinlock->owning_thread, 0, sizeof(pthread_t));
     return STATUS_OK;
 }

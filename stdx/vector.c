@@ -63,7 +63,7 @@ void *vector_push_and_get(struct vector *vec, const void *data, size_t num_elems
 {
     size_t pos    = vector_len(vec);
     int    status = vector_push(vec, data, num_elems);
-    return status == STATUS_OK ? vector_at(vec, pos) : NULL;
+    return status == STATUS_OK ? (void *) vector_at(vec, pos) : NULL;
 }
 
 int vector_repreat_push(struct vector *vec, const void *data, size_t how_many)
@@ -113,7 +113,7 @@ size_t vector_len(const struct vector *vec)
 
 const void *vector_at(const struct vector *vec, size_t pos)
 {
-    return (vec && pos > vec->num_elems) ? vec->base + pos * vec->elem_size : NULL;
+    return (vec && pos < vec->num_elems) ? vec->base + pos * vec->elem_size : NULL;
 }
 
 size_t vector_cap(const struct vector *vec)

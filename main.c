@@ -3,6 +3,8 @@
 #include <stdx/time.h>
 #include <stdlib.h>
 #include <stdx/string_dics/string_dic_naive.h>
+#include <stdx/string_dics/string_dic_async.h>
+#include <apr-1/apr_general.h>
 //#include <ng5/roadfire/roadfire.h>
 
 static char *read_contents(const char *path)
@@ -70,10 +72,14 @@ struct vector *to_string_list(const char *contents)
 }*/
 
 void experiments_hashing() {
+
+    apr_initialize();
+
     printf("yago_percent;sample;num_buckets;time_created_sec;time_inserted_sec;time_bulk_sum_created_inserted;num_strings\n");
 
-    const char *paths[11];/*
-    paths[0] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-11pc-stringlist.txt";
+    const char *paths[11];
+    paths[0] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/100.txt";
+    // paths[0] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-11pc-stringlist.txt";
     paths[1] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-19pc-stringlist.txt";
     paths[2] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-27pc-stringlist.txt";
     paths[3] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-35pc-stringlist.txt";
@@ -84,7 +90,7 @@ void experiments_hashing() {
     paths[8] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-75pc-stringlist.txt";
     paths[9] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-83pc-stringlist.txt";
     paths[10] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-91pc-stringlist.txt";
-*/
+/*
     paths[0] = "/home/pinnecke/datasets/yago1/stringlists/yago1-11pc-stringlist.txt";
     paths[1] = "/home/pinnecke/datasets/yago1/stringlists/yago1-19pc-stringlist.txt";
     paths[2] = "/home/pinnecke/datasets/yago1/stringlists/yago1-27pc-stringlist.txt";
@@ -96,7 +102,7 @@ void experiments_hashing() {
     paths[8] = "/home/pinnecke/datasets/yago1/stringlists/yago1-75pc-stringlist.txt";
     paths[9] = "/home/pinnecke/datasets/yago1/stringlists/yago1-83pc-stringlist.txt";
     paths[10] = "/home/pinnecke/datasets/yago1/stringlists/yago1-91pc-stringlist.txt";
-
+*/
 
     int yago_percent[11] = {
             11,
@@ -142,7 +148,7 @@ void experiments_hashing() {
 
 
                 timestamp_t create_begin = time_current_time_ms();
-                string_dic_create_naive(&dic, vector_len(lines), num_buckets , 10, 8, NULL);
+                string_dic_create_async(&dic, vector_len(lines), num_buckets , 10, 1, NULL);
                 timestamp_t create_end = time_current_time_ms();
                 created_duration = (create_end-create_begin) / 1000.0f;
 

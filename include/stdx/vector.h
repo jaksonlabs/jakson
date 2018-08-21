@@ -168,6 +168,8 @@ int vector_grow(size_t *num_new_slots, struct vector *vec);
  */
 size_t vector_len(const struct vector *vec);
 
+#define vector_get(vec, pos, type) (type *) vector_at(vec, pos);
+
 const void *vector_at(const struct vector *vec, size_t pos);
 
 /**

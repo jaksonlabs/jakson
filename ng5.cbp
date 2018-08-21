@@ -5,7 +5,7 @@
 		<Option title="ng5"/>
 		<Option makefile_is_custom="1"/>
 		<Option compiler="gcc"/>
-		<Option virtualFolders="CMake Files\;CMake Files\tests\;CMake Files\cmake\;CMake Files\cmake\modules\;"/>
+		<Option virtualFolders="CMake Files\;CMake Files\cmake\;CMake Files\cmake\modules\;CMake Files\tests\;"/>
 		<Build>
 			<Target title="all">
 				<Option working_dir="/Users/marcus/git/ng5"/>
@@ -770,7 +770,7 @@
 			<Option target="ng5"/>
 			<Option target="test_string_hashtable"/>
 		</Unit>
-		<Unit filename="/Users/marcus/git/ng5/include/stdx/string_dics/string_dic_default.h">
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/string_dics/string_dic_async.h">
 			<Option target="bench-bucket-putget-scan-4-cache"/>
 			<Option target="bench-bucket-putget-scan-3-cache"/>
 			<Option target="bench-bucket-putget-scan-3"/>
@@ -1056,7 +1056,7 @@
 			<Option target="ng5"/>
 			<Option target="test_string_hashtable"/>
 		</Unit>
-		<Unit filename="/Users/marcus/git/ng5/stdx/string_dics/string_dic_default.c">
+		<Unit filename="/Users/marcus/git/ng5/stdx/string_dics/string_dic_async.c">
 			<Option target="bench-bucket-putget-scan-4-cache"/>
 			<Option target="bench-bucket-putget-scan-3-cache"/>
 			<Option target="bench-bucket-putget-scan-3"/>
@@ -1247,11 +1247,17 @@
 		<Unit filename="/Users/marcus/git/ng5/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
 		</Unit>
-		<Unit filename="/Users/marcus/git/ng5/tests/CMakeLists.txt">
-			<Option virtualFolder="CMake Files\tests\"/>
+		<Unit filename="/Users/marcus/git/ng5/cmake/modules/FindAPR.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/cmake/modules/FindCheck.cmake">
 			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/cmake/modules/FindCheck.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/tests/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\tests\"/>
 		</Unit>
 	</Project>
 </CodeBlocks_project_file>
