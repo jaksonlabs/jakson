@@ -486,9 +486,9 @@ static int async_drop_carriers(struct string_dic *self)
     for (size_t thread_id = 0; thread_id < nthreads; thread_id++) {
         debug("JOINING ... %zu", thread_id);
         carrier_t *carrier = vector_get(&extra->carriers, thread_id, carrier_t);
-        bool runstate = atomic_flag_test_and_set(&carrier->keep_running);
-        assert (!runstate);
-        atomic_flag_clear(&carrier->keep_running);
+       // bool runstate = atomic_flag_test_and_set(&carrier->keep_running);
+       // assert (!runstate);
+       // atomic_flag_clear(&carrier->keep_running);
         debug("carrier %zu num tasks: %u", carrier->id, apr_queue_size(carrier->input));
         pthread_join(carrier->thread, NULL);
     }
