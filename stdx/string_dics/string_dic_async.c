@@ -227,15 +227,15 @@ static int async_insert(struct string_dic *self, string_id_t **out, char * const
     /* synchronize and wait for carrier to finish execution */
     async_carrier_sync(self);
 
-    for (size_t thread_id = 0; thread_id < nthreads; thread_id++) {
-        //carrier_push_arg_t *thread_push_args = *vector_get(&carrier_args, thread_id, carrier_push_arg_t *);
-        for (size_t i = 0; i < carrier_reserve_nstrings[thread_id]; i++) {
-           // TODO:... debug(">> (%zu, %zu)\n", thread_id, thread_push_args->out[i]);
-        }
+    debug("*** SYNC PASSED ***%s", "\n");
 
+    /* cleanup */
+    for (size_t thread_id = 0; thread_id < nthreads; thread_id++) {
+        carrier_push_arg_t *thread_push_args = *vector_get(&carrier_args, thread_id, carrier_push_arg_t *);
+        allocator_free(&self->alloc, thread_push_args);
     }
 
-    debug("*** SYNC PASSED ***%s", "\n");
+
 
 
     // TODO:... out
