@@ -27,7 +27,6 @@ typedef struct carrier
     pthread_t                     thread;
     size_t                        id;
     atomic_flag                   keep_running;
-    atomic_flag                   is_waiting_for_jobs;
     struct string_dic            *context;
 
     /* lock used to sync all carriers regarding their "waiting for jobs" state */
@@ -347,31 +346,6 @@ static int async_counters(struct string_dic *self, struct string_lookup_counters
     return STATUS_OK;
 }
 
-inline static void register_carrier_as_working(carrier_t *self )
-{
-    atomic_flag_clear(&self->is_waiting_for_jobs);
-}
-
-inline static void update_carrier_working_state(carrier_t *self )
-{
-    apr_status_t        status;
-    carrier_push_arg_t *push_arg;
-
-    while ((status = apr_queue_trypop(self->input, (void **) &push_arg)) == APR_EINTR)
-    { }
-
-    switch (status) {
-    case APR_EAGAIN:
-        atomic_flag_test_and_set(&self->is_waiting_for_jobs);
-        break;
-    case APR_SUCCESS:
-        apr_queue_push(self->input, (void **) &push_arg);
-        break;
-    default:
-    panic("Unknown string dictionary carrier state, or queue was already terminated.");
-    }
-}
-
 inline static void exec_carrier_insert(carrier_t *self, carrier_push_arg_t *push_arg)
 {
     char **data = (char **) vector_data(&push_arg->strings);
@@ -390,13 +364,7 @@ void *carrier_thread_func(void *args)
 
     while (atomic_flag_test_and_set(&self->keep_running)) {
         apr_queue_pop(self->input, (void **) &push_arg);
-
-        carrier_lock(self);
-        register_carrier_as_working(self);
         exec_carrier_insert(self, push_arg);
-        update_carrier_working_state(self);
-        carrier_unlock(self);
-
         vector_drop(&push_arg->strings);
     }
 
@@ -447,11 +415,8 @@ unused_fn static int async_carrier_sync(struct string_dic *self)
 
         for (size_t carrier_id = 0; carrier_id < vector_len(&extra->carriers); carrier_id++) {
             carrier_t *carrier = vector_get(&extra->carriers, carrier_id, carrier_t);
-            bool carrier_is_waiting = atomic_flag_test_and_set(&carrier->is_waiting_for_jobs);
+            bool carrier_is_waiting = apr_queue_size(carrier->input) == 0;
             one_is_working &= !carrier_is_waiting;
-            if (!carrier_is_waiting) {
-                atomic_flag_clear(&carrier->is_waiting_for_jobs);
-            }
         }
 
         for (size_t carrier_id = 0; carrier_id < vector_len(&extra->carriers); carrier_id++) {
@@ -471,7 +436,6 @@ static void async_carrier_create(carrier_t *carrier, size_t thread_id, size_t ca
     string_dic_create_naive(&carrier->local_dict, capacity, bucket_num, bucket_cap, 0, alloc);
     apr_queue_create(&carrier->input, 100000, pool);
     atomic_flag_test_and_set(&carrier->keep_running);
-    atomic_flag_test_and_set(&carrier->is_waiting_for_jobs);
     pthread_create(&carrier->thread, NULL, carrier_thread_func, carrier);
 }
 
@@ -518,12 +482,12 @@ static int async_unlock(struct string_dic *self)
 
 static int carrier_lock(carrier_t *carrier)
 {
-    debug("acquire lock for '%zu'", carrier->id);
+   // debug("acquire lock for '%zu'", carrier->id);
     return spinlock_lock(&carrier->spinlock);
 }
 
 static int carrier_unlock(carrier_t *carrier)
 {
-    debug("unlock for '%zu'", carrier->id);
+  //  debug("unlock for '%zu'", carrier->id);
     return spinlock_unlock(&carrier->spinlock);
 }
