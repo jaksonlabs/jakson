@@ -130,12 +130,18 @@
 
 #endif
 
+#ifndef NDEBUG
 #define debug(msg, ...)                 \
 {                                       \
     fprintf(stderr, msg, __VA_ARGS__);  \
     fprintf(stderr, "\n");              \
     fflush(stderr);                     \
 }
+#else
+#define debug(msg, ...)                 \
+{ }
+#endif
+
 
 #ifndef thread_local
 #define thread_local __thread

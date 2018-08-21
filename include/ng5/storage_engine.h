@@ -214,6 +214,9 @@ unused_fn static int storage_engine_extract_strings(struct result_handle of_type
     check_non_null(out)
     check_non_null(input)
     assert(engine->extract_strings);
+    unused(out);
+    unused(engine);
+    unused(input);
     NOT_YET_IMPLEMENTED
     return 0;
    // return engine->extract_strings(engine, out, input);

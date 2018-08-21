@@ -51,6 +51,7 @@ typedef struct carrier_push_arg_t
     vector_t of_type(char *)      strings;
     string_id_t                  *out;
     push_arg_type_e               type;
+    atomic_flag                   task_done;
 } carrier_push_arg_t;
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -202,6 +203,7 @@ static int async_insert(struct string_dic *self, string_id_t **out, char * const
     for (size_t i = 0; i < nthreads; i++) {
         carrier_push_arg_t *entry = allocator_malloc(&self->alloc, sizeof(carrier_push_arg_t));
         entry->type = push_type_insert_strings;
+        atomic_flag_clear(&entry->task_done);
         vector_create(&entry->strings, &self->alloc, sizeof(char *), carrier_reserve_nstrings[i]);
         vector_push(&carrier_args, &entry, 1);
         assert (entry->strings.base != NULL);
@@ -225,7 +227,22 @@ static int async_insert(struct string_dic *self, string_id_t **out, char * const
     debug("*** START SYNC ***%s", "\n");
 
     /* synchronize and wait for carrier to finish execution */
-    async_carrier_sync(self);
+    //async_carrier_sync(self);
+
+    bool carrier_working = true;
+    do {
+        for (size_t thread_id = 0; carrier_working && thread_id < nthreads; thread_id++) {
+            carrier_push_arg_t *thread_push_args = *vector_get(&carrier_args, thread_id, carrier_push_arg_t *);
+            carrier_t *carrier = vector_get(&extra->carriers, thread_id, carrier_t);
+            carrier_lock(carrier);
+            bool done = atomic_flag_test_and_set(&thread_push_args->task_done);
+            if (!done) {
+                atomic_flag_clear(&thread_push_args->task_done);
+            }
+            carrier_working &= !done;
+            carrier_unlock(carrier);
+        }
+    } while (carrier_working);
 
     debug("*** SYNC PASSED ***%s", "\n");
 
@@ -377,9 +394,10 @@ void *carrier_thread_func(void *args)
 
         switch (push_arg->type) {
         case push_type_insert_strings:
-            //exec_carrier_insert(self, push_arg);
-            //vector_drop(&push_arg->strings);
             debug("[INSERT] carrier %zu task found: %d", self->id, push_arg->type);
+            exec_carrier_insert(self, push_arg);
+            vector_drop(&push_arg->strings);
+            debug("[INSERT] carrier %zu done", self->id);
             break;
         case push_type_heartbeat:
             debug("[STOP  ] carrier %zu task found: %d", self->id, push_arg->type);
@@ -387,6 +405,10 @@ void *carrier_thread_func(void *args)
         default:
             panic("Unknown type for task queue detected");
         }
+
+        carrier_lock(self);
+        atomic_flag_test_and_set(&push_arg->task_done);
+        carrier_unlock(self);
     }
 
     debug("carrier %zu stopped", self->id);
@@ -486,9 +508,6 @@ static int async_drop_carriers(struct string_dic *self)
     for (size_t thread_id = 0; thread_id < nthreads; thread_id++) {
         debug("JOINING ... %zu", thread_id);
         carrier_t *carrier = vector_get(&extra->carriers, thread_id, carrier_t);
-       // bool runstate = atomic_flag_test_and_set(&carrier->keep_running);
-       // assert (!runstate);
-       // atomic_flag_clear(&carrier->keep_running);
         debug("carrier %zu num tasks: %u", carrier->id, apr_queue_size(carrier->input));
         pthread_join(carrier->thread, NULL);
     }

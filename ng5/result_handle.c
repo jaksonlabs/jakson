@@ -23,6 +23,6 @@ const void *result_handle_read(size_t *num_elements, const struct result_handle 
 int result_handle_drop(struct result_handle *handle)
 {
     check_non_null(handle);
-
+    unused(handle);
     return STATUS_OK;
 }

@@ -38,6 +38,8 @@ int slot_vector_insert(struct slot_vector *vec, optional struct vector of_type(s
     check_non_null(ids)
     check_non_null(data)
 
+    unused(data); // TODO: ???
+
     if (ids) {
         vector_create(ids, &vec->content.allocator, sizeof(slot_vector_slot_t), num_elems);
     }

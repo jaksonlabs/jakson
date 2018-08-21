@@ -78,8 +78,8 @@ void experiments_hashing() {
     printf("yago_percent;sample;num_buckets;time_created_sec;time_inserted_sec;time_bulk_sum_created_inserted;num_strings\n");
 
     const char *paths[11];
-    /*//paths[0] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/100.txt";
-       paths[0] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-11pc-stringlist.txt";
+    paths[0] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/100.txt";
+    //   paths[0] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-11pc-stringlist.txt";
       paths[1] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-19pc-stringlist.txt";
       paths[2] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-27pc-stringlist.txt";
       paths[3] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-35pc-stringlist.txt";
@@ -89,110 +89,110 @@ void experiments_hashing() {
       paths[7] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-67pc-stringlist.txt";
       paths[8] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-75pc-stringlist.txt";
       paths[9] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-83pc-stringlist.txt";
-      paths[10] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-91pc-stringlist.txt";*/
+      paths[10] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-91pc-stringlist.txt";
 
-          paths[0] = "/home/pinnecke/datasets/yago1/stringlists/yago1-11pc-stringlist.txt";
-          paths[1] = "/home/pinnecke/datasets/yago1/stringlists/yago1-19pc-stringlist.txt";
-          paths[2] = "/home/pinnecke/datasets/yago1/stringlists/yago1-27pc-stringlist.txt";
-          paths[3] = "/home/pinnecke/datasets/yago1/stringlists/yago1-35pc-stringlist.txt";
-          paths[4] = "/home/pinnecke/datasets/yago1/stringlists/yago1-43pc-stringlist.txt";
-          paths[5] = "/home/pinnecke/datasets/yago1/stringlists/yago1-51pc-stringlist.txt";
-          paths[6] = "/home/pinnecke/datasets/yago1/stringlists/yago1-59pc-stringlist.txt";
-          paths[7] = "/home/pinnecke/datasets/yago1/stringlists/yago1-67pc-stringlist.txt";
-          paths[8] = "/home/pinnecke/datasets/yago1/stringlists/yago1-75pc-stringlist.txt";
-          paths[9] = "/home/pinnecke/datasets/yago1/stringlists/yago1-83pc-stringlist.txt";
-          paths[10] = "/home/pinnecke/datasets/yago1/stringlists/yago1-91pc-stringlist.txt";
-
-
-    int yago_percent[11] = {
-            11,
-            19,
-            27,
-            35,
-            43,
-            51,
-            59,
-            67,
-            75,
-            83,
-            91
-    };
-
-    for (int pi = 0; pi < 11; pi++) {
-
-        timestamp_t read_begin = time_current_time_ms();
-        char *contents = read_contents(paths[pi]);
-        fprintf(stderr, "processing '%s'\n", paths[pi]);
-        timestamp_t read_end = time_current_time_ms();
-        fprintf(stderr, "... %fsec\n", (read_end - read_begin) / 1000.0f);
-
-        timestamp_t convert_begin = time_current_time_ms();
-        struct vector *lines = to_string_list(contents);
-        timestamp_t convert_end = time_current_time_ms();
-        fprintf(stderr, "... %fsec\n", (convert_end - convert_begin) / 1000.0f);
-        fflush(stderr);
+/*     paths[0] = "/home/pinnecke/datasets/yago1/stringlists/yago1-11pc-stringlist.txt";
+     paths[1] = "/home/pinnecke/datasets/yago1/stringlists/yago1-19pc-stringlist.txt";
+     paths[2] = "/home/pinnecke/datasets/yago1/stringlists/yago1-27pc-stringlist.txt";
+     paths[3] = "/home/pinnecke/datasets/yago1/stringlists/yago1-35pc-stringlist.txt";
+     paths[4] = "/home/pinnecke/datasets/yago1/stringlists/yago1-43pc-stringlist.txt";
+     paths[5] = "/home/pinnecke/datasets/yago1/stringlists/yago1-51pc-stringlist.txt";
+     paths[6] = "/home/pinnecke/datasets/yago1/stringlists/yago1-59pc-stringlist.txt";
+     paths[7] = "/home/pinnecke/datasets/yago1/stringlists/yago1-67pc-stringlist.txt";
+     paths[8] = "/home/pinnecke/datasets/yago1/stringlists/yago1-75pc-stringlist.txt";
+     paths[9] = "/home/pinnecke/datasets/yago1/stringlists/yago1-83pc-stringlist.txt";
+     paths[10] = "/home/pinnecke/datasets/yago1/stringlists/yago1-91pc-stringlist.txt";*/
 
 
-        struct string_dic dic;
+int yago_percent[11] = {
+       11,
+       19,
+       27,
+       35,
+       43,
+       51,
+       59,
+       67,
+       75,
+       83,
+       91
+};
+
+for (int pi = 0; pi < 11; pi++) {
+
+   timestamp_t read_begin = time_current_time_ms();
+   char *contents = read_contents(paths[pi]);
+   fprintf(stderr, "processing '%s'\n", paths[pi]);
+   timestamp_t read_end = time_current_time_ms();
+   fprintf(stderr, "... %fsec\n", (read_end - read_begin) / 1000.0f);
+
+   timestamp_t convert_begin = time_current_time_ms();
+   struct vector *lines = to_string_list(contents);
+   timestamp_t convert_end = time_current_time_ms();
+   fprintf(stderr, "... %fsec\n", (convert_end - convert_begin) / 1000.0f);
+   fflush(stderr);
 
 
-        for (int bucket_size = 1; bucket_size <= 4000; bucket_size += 40) {
-            for (int sample = 0; sample<NUM_SAMPLES; sample++) {
-
-                float created_duration = 0;
-                float insert_duration  = 0;
+   struct string_dic dic;
 
 
-                fprintf(stderr, "*** %d of %d in progress ***\n", sample+1, NUM_SAMPLES);
-                size_t num_buckets = bucket_size / 4000.0f * vector_len(lines);
+   for (int bucket_size = 1; bucket_size <= 4000; bucket_size += 40) {
+       for (int sample = 0; sample<NUM_SAMPLES; sample++) {
+
+           float created_duration = 0;
+           float insert_duration  = 0;
 
 
-                timestamp_t create_begin = time_current_time_ms();
-                string_dic_create_async(&dic, vector_len(lines), num_buckets , 10, 8, NULL);
-                timestamp_t create_end = time_current_time_ms();
-                created_duration = (create_end-create_begin) / 1000.0f;
-
-                string_id_t* ids = NULL; //, * ids_out;
-
-                char** strings = (char**) vector_data(lines);
-                size_t num_strings = vector_len(lines)-1;
-
-                string_dic_reset_counters(&dic);
-                timestamp_t inserted_begin = time_current_time_ms();
-                string_dic_insert(&dic, &ids, strings, num_strings);
-                timestamp_t inserted_end = time_current_time_ms();
-                insert_duration = (inserted_end-inserted_begin) / 1000.0f;
+           fprintf(stderr, "*** %d of %d in progress ***\n", sample+1, NUM_SAMPLES);
+           size_t num_buckets = bucket_size / 4000.0f * vector_len(lines);
 
 
-                //struct string_lookup_counters counters;
-                //string_dic_counters(&counters, &dic);
+           timestamp_t create_begin = time_current_time_ms();
+           string_dic_create_async(&dic, vector_len(lines), num_buckets , 10, 1, NULL);
+           timestamp_t create_end = time_current_time_ms();
+           created_duration = (create_end-create_begin) / 1000.0f;
 
-                string_dic_free(&dic, ids);
-                string_dic_drop(&dic);
+           string_id_t* ids = NULL; //, * ids_out;
 
-                printf("%d;%d;%zu;%f;%f;%f;%zu\n", yago_percent[pi], sample, num_buckets, created_duration, insert_duration, (created_duration + insert_duration), vector_len(lines));
+           char** strings = (char**) vector_data(lines);
+           size_t num_strings = vector_len(lines)-1;
 
-                fflush(stderr);
-                fflush(stdout);
-            }
-        }
+           string_dic_reset_counters(&dic);
+           timestamp_t inserted_begin = time_current_time_ms();
+           string_dic_insert(&dic, &ids, strings, num_strings);
+           timestamp_t inserted_end = time_current_time_ms();
+           insert_duration = (inserted_end-inserted_begin) / 1000.0f;
+
+
+           //struct string_lookup_counters counters;
+           //string_dic_counters(&counters, &dic);
+
+           string_dic_free(&dic, ids);
+           string_dic_drop(&dic);
+
+           printf("%d;%d;%zu;%f;%f;%f;%zu\n", yago_percent[pi], sample, num_buckets, created_duration, insert_duration, (created_duration + insert_duration), vector_len(lines));
+
+           fflush(stderr);
+           fflush(stdout);
+       }
+   }
 
 
 
-        free(contents);
-        vector_drop(lines);
-        free(lines);
+   free(contents);
+   vector_drop(lines);
+   free(lines);
 
-    }
+}
 }
 
 int main()
 {
-    //roadfire_test();
-    experiments_hashing();
+//roadfire_test();
+experiments_hashing();
 
 
 
 
-    return 0;
+return 0;
 }
