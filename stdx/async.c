@@ -1,5 +1,4 @@
 #include <stdx/async.h>
-#include <zconf.h>
 
 int spinlock_create(struct spinlock *spinlock)
 {
