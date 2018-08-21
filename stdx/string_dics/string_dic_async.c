@@ -162,6 +162,9 @@ static int async_drop(struct string_dic *self)
 {
     check_tag(self->tag, STRING_DIC_ASYNC);
     async_extra_t *extra = async_extra_get(self);
+
+    async_drop_carriers(self);
+
     check_success(vector_drop(&extra->carriers));
     check_success(vector_drop(&extra->carrier_mapping));
     check_success(allocator_free(&self->alloc, extra));
@@ -352,7 +355,7 @@ static int async_counters(struct string_dic *self, struct string_lookup_counters
     return STATUS_OK;
 }
 
-inline static void exec_carrier_insert(carrier_t *self, carrier_push_arg_t *push_arg)
+unused_fn inline static void exec_carrier_insert(carrier_t *self, carrier_push_arg_t *push_arg)
 {
     char **data = (char **) vector_data(&push_arg->strings);
 
@@ -369,18 +372,24 @@ void *carrier_thread_func(void *args)
     carrier_push_arg_t *push_arg;
 
     while (atomic_flag_test_and_set(&self->keep_running)) {
+        debug("carrier %zu queries for task...", self->id);
         apr_queue_pop(self->input, (void **) &push_arg);
+
         switch (push_arg->type) {
         case push_type_insert_strings:
-            exec_carrier_insert(self, push_arg);
-            vector_drop(&push_arg->strings);
+            //exec_carrier_insert(self, push_arg);
+            //vector_drop(&push_arg->strings);
+            debug("[INSERT] carrier %zu task found: %d", self->id, push_arg->type);
             break;
         case push_type_heartbeat:
+            debug("[STOP  ] carrier %zu task found: %d", self->id, push_arg->type);
             break;
         default:
             panic("Unknown type for task queue detected");
         }
     }
+
+    debug("carrier %zu stopped", self->id);
 
     return NULL;
 }
@@ -453,7 +462,7 @@ static void async_carrier_create(carrier_t *carrier, size_t thread_id, size_t ca
     pthread_create(&carrier->thread, NULL, carrier_thread_func, carrier);
 }
 
-unused_fn static int async_drop_carriers(struct string_dic *self)
+static int async_drop_carriers(struct string_dic *self)
 {
     assert(self);
     async_extra_t *extra    = async_extra_get(self);
@@ -475,7 +484,12 @@ unused_fn static int async_drop_carriers(struct string_dic *self)
 
     /* wait for threads being finished */
     for (size_t thread_id = 0; thread_id < nthreads; thread_id++) {
+        debug("JOINING ... %zu", thread_id);
         carrier_t *carrier = vector_get(&extra->carriers, thread_id, carrier_t);
+        bool runstate = atomic_flag_test_and_set(&carrier->keep_running);
+        assert (!runstate);
+        atomic_flag_clear(&carrier->keep_running);
+        debug("carrier %zu num tasks: %u", carrier->id, apr_queue_size(carrier->input));
         pthread_join(carrier->thread, NULL);
     }
 
