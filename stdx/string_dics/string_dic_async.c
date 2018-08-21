@@ -42,10 +42,15 @@ typedef struct async_extra
 
 } async_extra_t;
 
+typedef enum {
+  push_type_insert_strings, push_type_heartbeat
+} push_arg_type_e;
+
 typedef struct carrier_push_arg_t
 {
     vector_t of_type(char *)      strings;
     string_id_t                  *out;
+    push_arg_type_e               type;
 } carrier_push_arg_t;
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -88,7 +93,7 @@ static int async_setup_carriers(struct string_dic *self, size_t capacity, size_t
         size_t num_index_bucket_cap, size_t nthreads);
 static int async_drop_carriers(struct string_dic *self);
 
-static int async_carrier_insert(struct string_dic *self, size_t carrier_id, carrier_push_arg_t *args);
+static int async_carrier_submit(struct string_dic* self, size_t carrier_id, carrier_push_arg_t* args);
 
 static int async_carrier_sync(struct string_dic *self);
 
@@ -193,6 +198,7 @@ static int async_insert(struct string_dic *self, string_id_t **out, char * const
     /* prepare to move string subsets to carriers */
     for (size_t i = 0; i < nthreads; i++) {
         carrier_push_arg_t *entry = allocator_malloc(&self->alloc, sizeof(carrier_push_arg_t));
+        entry->type = push_type_insert_strings;
         vector_create(&entry->strings, &self->alloc, sizeof(char *), carrier_reserve_nstrings[i]);
         vector_push(&carrier_args, &entry, 1);
         assert (entry->strings.base != NULL);
@@ -209,7 +215,7 @@ static int async_insert(struct string_dic *self, string_id_t **out, char * const
     /* schedule insert operation per carrier */
     for (size_t thread_id = 0; thread_id < nthreads; thread_id++) {
         carrier_push_arg_t *thread_push_args = *vector_get(&carrier_args, thread_id, carrier_push_arg_t *);
-        async_carrier_insert(self, thread_id, thread_push_args);
+        async_carrier_submit(self, thread_id, thread_push_args);
     }
 
 
@@ -364,8 +370,16 @@ void *carrier_thread_func(void *args)
 
     while (atomic_flag_test_and_set(&self->keep_running)) {
         apr_queue_pop(self->input, (void **) &push_arg);
-        exec_carrier_insert(self, push_arg);
-        vector_drop(&push_arg->strings);
+        switch (push_arg->type) {
+        case push_type_insert_strings:
+            exec_carrier_insert(self, push_arg);
+            vector_drop(&push_arg->strings);
+            break;
+        case push_type_heartbeat:
+            break;
+        default:
+            panic("Unknown type for task queue detected");
+        }
     }
 
     return NULL;
@@ -393,7 +407,7 @@ static int async_setup_carriers(struct string_dic *self, size_t capacity, size_t
     return STATUS_OK;
 }
 
-static int async_carrier_insert(struct string_dic *self, size_t carrier_id, carrier_push_arg_t *args)
+static int async_carrier_submit(struct string_dic* self, size_t carrier_id, carrier_push_arg_t* args)
 {
     async_extra_t *extra  = async_extra_get(self);
     assert (carrier_id < vector_len(&extra->carriers));
@@ -449,6 +463,14 @@ unused_fn static int async_drop_carriers(struct string_dic *self)
     for (size_t thread_id = 0; thread_id < nthreads; thread_id++) {
         carrier_t *carrier = vector_get(&extra->carriers, thread_id, carrier_t);
         atomic_flag_clear(&carrier->keep_running);
+    }
+
+    /* send hearbeat to wake up threads in case of sleeping for queue input */
+    for (size_t thread_id = 0; thread_id < nthreads; thread_id++) {
+        carrier_push_arg_t heartbeat = {
+            .type = push_type_heartbeat
+        };
+        async_carrier_submit(self, thread_id, &heartbeat);
     }
 
     /* wait for threads being finished */
