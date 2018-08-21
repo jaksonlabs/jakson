@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdx/string_dics/string_dic_naive.h>
 #include <stdx/string_dics/string_dic_async.h>
-#include <apr-1/apr_general.h>
+#include <apr_general.h>
 //#include <ng5/roadfire/roadfire.h>
 
 static char *read_contents(const char *path)
