@@ -2,7 +2,7 @@
 #include <stdx/vector.h>
 #include <stdx/async.h>
 #include <stdx/string_dics/string_dic_naive.h>
-#include <apr-1/apr_queue.h>
+#include <apr_queue.h>
 
 // ---------------------------------------------------------------------------------------------------------------------
 //

@@ -46,6 +46,7 @@
 				<Compiler>
 					<Add directory="/Users/marcus/git/ng5/include"/>
 					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/apr-1"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
 					<Add directory="/usr/include"/>
@@ -68,6 +69,7 @@
 				<Compiler>
 					<Add directory="/Users/marcus/git/ng5/include"/>
 					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/apr-1"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
 					<Add directory="/usr/include"/>
@@ -90,6 +92,7 @@
 				<Compiler>
 					<Add directory="/Users/marcus/git/ng5/include"/>
 					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/apr-1"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
 					<Add directory="/usr/include"/>
@@ -112,6 +115,7 @@
 				<Compiler>
 					<Add directory="/Users/marcus/git/ng5/include"/>
 					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/apr-1"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
 					<Add directory="/usr/include"/>
@@ -134,6 +138,7 @@
 				<Compiler>
 					<Add directory="/Users/marcus/git/ng5/include"/>
 					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/apr-1"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
 					<Add directory="/usr/include"/>
@@ -156,6 +161,7 @@
 				<Compiler>
 					<Add directory="/Users/marcus/git/ng5/include"/>
 					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/apr-1"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
 					<Add directory="/usr/include"/>
@@ -178,6 +184,7 @@
 				<Compiler>
 					<Add directory="/Users/marcus/git/ng5/include"/>
 					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/apr-1"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
 					<Add directory="/usr/include"/>
@@ -200,6 +207,7 @@
 				<Compiler>
 					<Add directory="/Users/marcus/git/ng5/include"/>
 					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/apr-1"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
 					<Add directory="/usr/include"/>
@@ -222,6 +230,7 @@
 				<Compiler>
 					<Add directory="/Users/marcus/git/ng5/include"/>
 					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/apr-1"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
 					<Add directory="/usr/include"/>
@@ -244,6 +253,7 @@
 				<Compiler>
 					<Add directory="/Users/marcus/git/ng5/include"/>
 					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/apr-1"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
 					<Add directory="/usr/include"/>
@@ -266,6 +276,7 @@
 				<Compiler>
 					<Add directory="/Users/marcus/git/ng5/include"/>
 					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/apr-1"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
 					<Add directory="/usr/include"/>
@@ -288,6 +299,7 @@
 				<Compiler>
 					<Add directory="/Users/marcus/git/ng5/include"/>
 					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/apr-1"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
 					<Add directory="/usr/include"/>
@@ -310,6 +322,7 @@
 				<Compiler>
 					<Add directory="/Users/marcus/git/ng5/include"/>
 					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/apr-1"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
 					<Add directory="/usr/include"/>
@@ -332,6 +345,7 @@
 				<Compiler>
 					<Add directory="/Users/marcus/git/ng5/include"/>
 					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/apr-1"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
 					<Add directory="/usr/include"/>
@@ -364,6 +378,7 @@
 				<Compiler>
 					<Add directory="/Users/marcus/git/ng5/include"/>
 					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/apr-1"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
 					<Add directory="/usr/include"/>
@@ -386,6 +401,7 @@
 				<Compiler>
 					<Add directory="/Users/marcus/git/ng5/include"/>
 					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/apr-1"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
 					<Add directory="/usr/include"/>
@@ -408,6 +424,7 @@
 				<Compiler>
 					<Add directory="/Users/marcus/git/ng5/include"/>
 					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/apr-1"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
 					<Add directory="/usr/include"/>
@@ -430,6 +447,7 @@
 				<Compiler>
 					<Add directory="/Users/marcus/git/ng5/include"/>
 					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/apr-1"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
 					<Add directory="/usr/include"/>
@@ -452,6 +470,7 @@
 				<Compiler>
 					<Add directory="/Users/marcus/git/ng5/include"/>
 					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/apr-1"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
 					<Add directory="/usr/include"/>
@@ -474,6 +493,7 @@
 				<Compiler>
 					<Add directory="/Users/marcus/git/ng5/include"/>
 					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/apr-1"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
 					<Add directory="/usr/include"/>
@@ -496,6 +516,7 @@
 				<Compiler>
 					<Add directory="/Users/marcus/git/ng5/include"/>
 					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/apr-1"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
 					<Add directory="/usr/include"/>
@@ -518,6 +539,7 @@
 				<Compiler>
 					<Add directory="/Users/marcus/git/ng5/include"/>
 					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/apr-1"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
 					<Add directory="/usr/include"/>
@@ -540,6 +562,7 @@
 				<Compiler>
 					<Add directory="/Users/marcus/git/ng5/include"/>
 					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/apr-1"/>
 					<Add directory="/usr/local/Cellar/check/0.12.0/include"/>
 					<Add directory="/Users/marcus/git/ng5/tests/."/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
@@ -564,6 +587,7 @@
 				<Compiler>
 					<Add directory="/Users/marcus/git/ng5/include"/>
 					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/apr-1"/>
 					<Add directory="/usr/local/Cellar/check/0.12.0/include"/>
 					<Add directory="/Users/marcus/git/ng5/tests/."/>
 					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>

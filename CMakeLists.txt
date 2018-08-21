@@ -33,11 +33,12 @@ set (CMAKE_NM      "/usr/bin/llvm-nm")
 set (CMAKE_OBJDUMP "/usr/bin/llvm-objdump")
 set (CMAKE_RANLIB  "/usr/bin/llvm-ranlib")
 
-include_directories("include")
-include_directories("/usr/local/include")
-
 include(${CMAKE_SOURCE_DIR}/cmake/modules/FindAPR.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/modules/FindCheck.cmake)
+
+include_directories("include")
+include_directories("/usr/local/include")
+include_directories(${APRUTIL_INCLUDE_DIR})
 
 set(LIBS ${LIBS} pthread m ${APR_LIBRARIES} ${APRUTIL_LIBRARIES})
 
