@@ -59,6 +59,13 @@ int vector_push(struct vector *vec, const void *data, size_t num_elems)
     return STATUS_OK;
 }
 
+void *vector_push_and_get(struct vector *vec, const void *data, size_t num_elems)
+{
+    size_t pos    = vector_len(vec);
+    int    status = vector_push(vec, data, num_elems);
+    return status == STATUS_OK ? vector_at(vec, pos) : NULL;
+}
+
 int vector_repreat_push(struct vector *vec, const void *data, size_t how_many)
 {
     check_non_null(vec && data)

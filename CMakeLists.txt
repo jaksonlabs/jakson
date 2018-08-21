@@ -82,6 +82,8 @@ set(SORUCE_FILES
         ${CMAKE_SOURCE_DIR}/include/ng5/roadfire/roadfire.h
         ${CMAKE_SOURCE_DIR}/include/stdx/slot_vector.h
         ${CMAKE_SOURCE_DIR}/stdx/slot_vector.c
+        ${CMAKE_SOURCE_DIR}/include/stdx/string_dics/string_dic_default.h
+        ${CMAKE_SOURCE_DIR}/stdx/string_dics/string_dic_default.c
         )
 
 

@@ -1,4 +1,4 @@
-// file: asnyc.h
+// file: string_dic_naive.h
 
 /**
  *  Copyright (C) 2018 Marcus Pinnecke
@@ -17,25 +17,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#ifndef NG5_STRING_DIC_DEFAULT
+#define NG5_STRING_DIC_DEFAULT
 
-#ifndef _NG5_ASYNC
-#define _NG5_ASYNC
+#include <stdx/string_dic.h>
 
-#include <common.h>
-#include <stdx/vector.h>
-
-typedef struct spinlock
-{
-  atomic_flag lock;
-  bool        owns_lock;
-} spinlock_t;
-
-int spinlock_create(struct spinlock *spinlock);
-
-int spinlock_lock(struct spinlock *spinlock);
-
-int spinlock_unlock(struct spinlock *spinlock);
-
+int string_dic_create_async(struct string_dic* dic, size_t capacity, size_t num_index_buckets,
+        size_t num_index_bucket_cap, size_t nthreads, const struct allocator* alloc);
 
 #endif

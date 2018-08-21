@@ -26,12 +26,12 @@
 
 struct string_lookup_counters;
 
-enum string_dic_tag { STRING_DIC_NAIVE };
+enum string_dic_tag { STRING_DIC_NAIVE, STRING_DIC_ASYNC };
 
 /**
  * Thread-safe string pool implementation
  */
-struct string_dic
+typedef struct string_dic
 {
     /**
      * Implementation-specific fields
@@ -109,7 +109,7 @@ struct string_dic
      * Get internal statistic counters
      */
     int                  (*counters)(struct string_dic *self, struct string_lookup_counters *counters);
-};
+} string_dic_t;
 
 /**
  *

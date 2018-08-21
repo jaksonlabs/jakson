@@ -37,6 +37,9 @@
 
 #define optional /* parameters to functions marked with this tag can be NULL and will be ignored */
 
+#define max(a,b)                  \
+    ((b) > (a) ? (b) : (a))
+
 #define cast(type, name, src)     \
       type name = (type) src
 

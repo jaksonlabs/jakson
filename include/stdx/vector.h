@@ -28,7 +28,7 @@
 /**
  * An implementation of the concrete data type Vector, a resizeable dynamic array.
  */
-struct vector
+typedef struct vector
 {
     /**
     *  Memory allocator that is used to get memory for user data
@@ -59,7 +59,7 @@ struct vector
      *  A pointer to a memory address managed by 'allocator' that contains the user data
      */
     void               *base;
-};
+} vector_t;
 
 /**
  * Constructs a new vector for elements of size 'elem_size', reserving memory for 'cap_elems' elements using
@@ -126,6 +126,8 @@ int vector_is_empty(struct vector *vec);
  * @return STATUS_OK if success, and STATUS_NULLPTR in case of NULL pointer parameters
  */
 int vector_push(struct vector *vec, const void *data, size_t num_elems);
+
+void *vector_push_and_get(struct vector *vec, const void *data, size_t num_elems);
 
 /**
  * Appends 'how_many' elements of the same source stored in 'data' into the vector by copying how_many * vec->elem_size
