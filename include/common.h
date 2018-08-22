@@ -54,6 +54,12 @@
     abort();                      \
 }
 
+#define panic_wargs(msg, ...)               \
+{                                           \
+    fprintf(stderr, msg, __VA_ARGS__);      \
+    abort();                                \
+}
+
 #define panic_if(expr, msg)                   \
 {                                             \
     if (unlikely((expr))) {                   \
@@ -131,17 +137,25 @@
 #endif
 
 #ifndef NDEBUG
-#define debug(msg, ...)                 \
-{                                       \
-    fprintf(stderr, msg, __VA_ARGS__);  \
-    fprintf(stderr, "\n");              \
-    fflush(stderr);                     \
+#define debug(msg, ...)                    \
+{                                          \
+    char buffer[1024];                     \
+    sprintf(buffer, "%s\n", msg);          \
+    fprintf(stderr, buffer, __VA_ARGS__);  \
+    fflush(stderr);                        \
 }
 #else
 #define debug(msg, ...)                 \
 { }
 #endif
 
+#define warn(msg, ...)                  \
+{                                       \
+    char buffer[1024];                     \
+    sprintf(buffer, "WARNING: %s\n", msg);          \
+    fprintf(stderr, buffer, __VA_ARGS__);  \
+    fflush(stderr);                        \
+}
 
 #ifndef thread_local
 #define thread_local __thread

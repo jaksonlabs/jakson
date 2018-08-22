@@ -3,6 +3,8 @@
 #include <stdx/async.h>
 #include <stdx/string_dics/string_dic_naive.h>
 #include <apr_queue.h>
+#include <zconf.h>
+#include <stdx/time.h>
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
@@ -51,7 +53,7 @@ typedef struct carrier_push_arg_t
     vector_t of_type(char *)      strings;
     string_id_t                  *out;
     push_arg_type_e               type;
-    atomic_flag                   task_done;
+    bool                          task_done;
 } carrier_push_arg_t;
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -95,8 +97,6 @@ static int async_setup_carriers(struct string_dic *self, size_t capacity, size_t
 static int async_drop_carriers(struct string_dic *self);
 
 static int async_carrier_submit(struct string_dic* self, size_t carrier_id, carrier_push_arg_t* args);
-
-static int async_carrier_sync(struct string_dic *self);
 
 static void async_carrier_create(carrier_t *carrier, size_t thread_id, size_t capacity, size_t bucket_num,
         size_t bucket_cap, const struct allocator *alloc, apr_pool_t *pool);
@@ -172,6 +172,37 @@ static int async_drop(struct string_dic *self)
     return STATUS_OK;
 }
 
+static void async_carriers_sync(vector_t of_type(carrier_t) *carriers, vector_t of_type(carrier_push_arg_t *) *carrier_args, size_t timeout)
+{
+    timeout = timeout == 0 ? (size_t) - 1 : timeout * 1000;
+    timestamp_t start = time_current_time_ms();
+    debug("*SYNC*** async_carriers_sync [BEGIN]%s", "");
+    bool all_carriers_done;
+    assert (vector_len(carriers) == vector_len(carrier_args));
+    size_t nthreads = vector_len(carriers);
+    debug("INFO: %zu threads running", nthreads);
+    do {
+        all_carriers_done = true;
+        for (size_t thread_id = 0; all_carriers_done && thread_id < nthreads; thread_id++) {
+            carrier_push_arg_t *thread_push_args = *vector_get(carrier_args, thread_id, carrier_push_arg_t *);
+            carrier_t *carrier = vector_get(carriers, thread_id, carrier_t);
+            debug("~LOCK  ~ main thread aquires lock for carrier %zu", thread_id);
+            carrier_lock(carrier);
+            debug("~LOCKED~ main thread aquired lock for carrier %zu", thread_id);
+            bool done = thread_push_args->task_done;
+            debug("~STATE ~ carrier %zu finished task: %s", thread_id, done ? "YES" : "NO");
+            carrier_unlock(carrier);
+            debug("~UNLOCK~ main thread aquired lock for carrier %zu", thread_id);
+            all_carriers_done &= done;
+        }
+        if (!all_carriers_done && (size_t) (time_current_time_ms() - start) > timeout) {
+            warn("timeout for carrier sync reached: %zusec", timeout/1000);
+            all_carriers_done = true;
+        }
+    } while (!all_carriers_done);
+    debug("*SYNC*** async_carriers_sync [END]%s", "");
+}
+
 static int async_insert(struct string_dic *self, string_id_t **out, char * const*strings, size_t num_strings)
 {
     check_tag(self->tag, STRING_DIC_ASYNC);
@@ -201,14 +232,12 @@ static int async_insert(struct string_dic *self, string_id_t **out, char * const
 
     /* prepare to move string subsets to carriers */
     for (size_t i = 0; i < nthreads; i++) {
-        if (carrier_reserve_nstrings[i] > 0) {
-            carrier_push_arg_t* entry = allocator_malloc(&self->alloc, sizeof(carrier_push_arg_t));
-            entry->type = push_type_insert_strings;
-            atomic_flag_clear(&entry->task_done);
-            vector_create(&entry->strings, &self->alloc, sizeof(char*), carrier_reserve_nstrings[i]);
-            vector_push(&carrier_args, &entry, 1);
-            assert (entry->strings.base!=NULL);
-        }
+        carrier_push_arg_t* entry = allocator_malloc(&self->alloc, sizeof(carrier_push_arg_t));
+        entry->type = push_type_insert_strings;
+       // atomic_flag_clear(&entry->task_done);
+        vector_create(&entry->strings, &self->alloc, sizeof(char*), carrier_reserve_nstrings[i]);
+        vector_push(&carrier_args, &entry, 1);
+        assert (entry->strings.base!=NULL);
     }
 
     /* create per-carrier string subset */
@@ -221,37 +250,19 @@ static int async_insert(struct string_dic *self, string_id_t **out, char * const
 
     /* schedule insert operation per carrier */
     for (size_t thread_id = 0; thread_id < nthreads; thread_id++) {
-        carrier_push_arg_t *thread_push_args = *vector_get(&carrier_args, thread_id, carrier_push_arg_t *);
-        async_carrier_submit(self, thread_id, thread_push_args);
+        if (carrier_reserve_nstrings[thread_id] > 0) {
+            carrier_push_arg_t* thread_push_args = *vector_get(&carrier_args, thread_id, carrier_push_arg_t *);
+            async_carrier_submit(self, thread_id, thread_push_args);
+        }
     }
 
 
-    debug("*** MAIN-THREAD WAITING FOR TAKSK-COMPLETION ***%s", "\n");
+    debug("*** MAIN-THREAD WAITING FOR TASK-COMPLETION ***%s", "\n");
 
     /* synchronize and wait for carrier to finish execution */
-    //async_carrier_sync(self);
+    async_carriers_sync(&extra->carriers, &carrier_args, 0);
 
-    bool all_carriers_done;
-    do {
-        all_carriers_done = true;
-        for (size_t thread_id = 0; all_carriers_done && thread_id < nthreads; thread_id++) {
-            carrier_push_arg_t *thread_push_args = *vector_get(&carrier_args, thread_id, carrier_push_arg_t *);
-            carrier_t *carrier = vector_get(&extra->carriers, thread_id, carrier_t);
-            debug("~LOCK  ~ main thread aquires lock for carrier %zu", thread_id);
-            carrier_lock(carrier);
-            debug("~LOCKED~ main thread aquired lock for carrier %zu", thread_id);
-            bool done = atomic_flag_test_and_set(&thread_push_args->task_done);
-            debug("~STATE ~ carrier %zu finished task: %s", thread_id, done ? "YES" : "NO");
-            if (!done) {
-                atomic_flag_clear(&thread_push_args->task_done);
-            }
-            carrier_unlock(carrier);
-            debug("~UNLOCK~ main thread aquired lock for carrier %zu", thread_id);
-            all_carriers_done &= done;
-        }
-    } while (!all_carriers_done);
-
-    debug("*** MAIN-THREAD CONTINUES AFTER TAKSK-COMPLETION ***%s", "\n");
+    debug("*** MAIN-THREAD CONTINUES AFTER TASK-COMPLETION ***%s", "\n");
 
     /* cleanup */
     for (size_t thread_id = 0; thread_id < nthreads; thread_id++) {
@@ -381,15 +392,19 @@ static int async_counters(struct string_dic *self, struct string_lookup_counters
 
 unused_fn inline static void exec_carrier_insert(carrier_t *self, carrier_push_arg_t *push_arg)
 {
-    debug("[EXEC  ] carrier %zu starts task", self->id);
-    char **data = (char **) vector_data(&push_arg->strings);
+    if (push_arg->strings.num_elems > 0) {
+        debug("[EXEC  ] carrier %zu starts task", self->id);
+        char** data = (char**) vector_data(&push_arg->strings);
 
-    int status = string_dic_insert(&self->local_dict, &push_arg->out, data, vector_len(&push_arg->strings));
-    panic_if(status != STATUS_OK, "internal error during thread-local string dictionary building process");
+        int status = string_dic_insert(&self->local_dict, &push_arg->out, data, vector_len(&push_arg->strings));
+        panic_if(status!=STATUS_OK, "internal error during thread-local string dictionary building process");
 
-    printf("DEBUG: inserted  %zu strings for carrier '%zu'\n", push_arg->strings.num_elems, self->id);
-    fflush(stdout);
-    debug("[EXEC  ] carrier %zu finished task", self->id);
+        printf("DEBUG: inserted  %zu strings for carrier '%zu'\n", push_arg->strings.num_elems, self->id);
+        fflush(stdout);
+        debug("[EXEC  ] carrier %zu finished task", self->id);
+    } else {
+        warn("carrier %zu was requested to insert empty string list %s", self->id, (push_arg->strings.base == NULL ? "[INTERNAL ERROR]" : ""));
+    }
 }
 
 void *carrier_thread_func(void *args)
@@ -403,9 +418,19 @@ void *carrier_thread_func(void *args)
         apr_queue_pop(self->input, (void **) &push_arg);
         debug("[CONT  ] carrier %zu found task", self->id);
 
+        debug("[LOCK  ] carrier %zu waits for aquires lock", self->id);
+        carrier_lock(self);
+        debug("[LOCKED] carrier %zu aquired lock", self->id);
+        push_arg->task_done = false;
+        debug("[FLAG  ] carrier %zu notified on task acknowledgement", self->id);
+        carrier_unlock(self);
+        debug("[UNLOCK] carrier %zu releases lock", self->id);
+
+        assert(push_arg);
+
         switch (push_arg->type) {
         case push_type_insert_strings:
-            debug("[INSERT] carrier %zu task found: %d", self->id, push_arg->type);
+            debug("[INSERT] carrier %zu task found", self->id);
             exec_carrier_insert(self, push_arg);
             vector_drop(&push_arg->strings);
             debug("[INSERT] carrier %zu done", self->id);
@@ -414,7 +439,7 @@ void *carrier_thread_func(void *args)
             debug("[HEART ] carrier %zu gets hearbeat", self->id);
             break;
         default:
-            panic("Unknown type for task queue detected");
+            panic_wargs("Unknown type for task queue in carrier %zu detected: type id is '%d'", self->id, push_arg->type);
             break;
         }
 
@@ -423,10 +448,10 @@ void *carrier_thread_func(void *args)
         debug("[LOCK  ] carrier %zu waits for aquires lock", self->id);
         carrier_lock(self);
         debug("[LOCKED] carrier %zu aquired lock", self->id);
-        atomic_flag_test_and_set(&push_arg->task_done);
+        push_arg->task_done = true;
         debug("[FLAG  ] carrier %zu notified on task completion", self->id);
         carrier_unlock(self);
-        debug("[UNLOCK] carrier %zu waits for releases lock", self->id);
+        debug("[UNLOCK] carrier %zu releases lock", self->id);
     }
 
     debug("[LOOP  ] carrier %zu exists main loop", self->id);
@@ -465,32 +490,6 @@ static int async_carrier_submit(struct string_dic* self, size_t carrier_id, carr
     return STATUS_OK;
 }
 
-unused_fn static int async_carrier_sync(struct string_dic *self)
-{
-    async_extra_t *extra          = async_extra_get(self);
-    bool           one_is_working = true;
-
-    do {
-        for (size_t carrier_id = 0; carrier_id < vector_len(&extra->carriers); carrier_id++) {
-            carrier_t *carrier = vector_get(&extra->carriers, carrier_id, carrier_t);
-            carrier_lock(carrier);
-        }
-
-        for (size_t carrier_id = 0; carrier_id < vector_len(&extra->carriers); carrier_id++) {
-            carrier_t *carrier = vector_get(&extra->carriers, carrier_id, carrier_t);
-            bool carrier_is_waiting = apr_queue_size(carrier->input) == 0;
-            one_is_working &= !carrier_is_waiting;
-        }
-
-        for (size_t carrier_id = 0; carrier_id < vector_len(&extra->carriers); carrier_id++) {
-            carrier_t *carrier = vector_get(&extra->carriers, carrier_id, carrier_t);
-            carrier_unlock(carrier);
-        }
-    } while (one_is_working);
-
-    return STATUS_OK;
-}
-
 static void async_carrier_create(carrier_t *carrier, size_t thread_id, size_t capacity, size_t bucket_num,
                                 size_t bucket_cap, const struct allocator *alloc, apr_pool_t *pool)
 {
@@ -504,36 +503,55 @@ static void async_carrier_create(carrier_t *carrier, size_t thread_id, size_t ca
 
 static int async_drop_carriers(struct string_dic *self)
 {
+    debug("~DROP  ~ dropping of carriers issued %s", "");
+
     assert(self);
-    async_extra_t *extra    = async_extra_get(self);
-    size_t         nthreads = vector_len(&extra->carriers);
+    async_extra_t                          *extra        = async_extra_get(self);
+    size_t                                  nthreads     = vector_len(&extra->carriers);
+    vector_t of_type(carrier_push_arg_t *)  carrier_args;
+
+    vector_create(&carrier_args, &self->alloc, sizeof(carrier_push_arg_t *), nthreads);
 
     /* break the running loop of each thread */
     for (size_t thread_id = 0; thread_id < nthreads; thread_id++) {
         carrier_t *carrier = vector_get(&extra->carriers, thread_id, carrier_t);
+        debug("~DROP  ~ stop main loop for carriers %zu", thread_id);
         atomic_flag_clear(&carrier->keep_running);
     }
 
     /* send hearbeat to wake up threads in case of sleeping for queue input */
     for (size_t thread_id = 0; thread_id < nthreads; thread_id++) {
-        carrier_push_arg_t heartbeat = {
-            .type = push_type_heartbeat
-        };
-        async_carrier_submit(self, thread_id, &heartbeat);
+        debug("~DROP  ~ issue hearbeat for carriers %zu", thread_id);
+        carrier_push_arg_t* entry = allocator_malloc(&self->alloc, sizeof(carrier_push_arg_t));
+        entry->type = push_type_heartbeat;
+        entry->task_done = false;
+        vector_push(&carrier_args, &entry, 1);
+        async_carrier_submit(self, thread_id, entry);
     }
+
+
+    debug("~DROP  ~ synchronize [BEGIN]%s", "");
+    async_carriers_sync(&extra->carriers, &carrier_args, 3);
+    debug("~DROP  ~ synchronize [PASSED]%s", "");
 
     /* wait for threads being finished */
     for (size_t thread_id = 0; thread_id < nthreads; thread_id++) {
-        debug("JOINING ... %zu", thread_id);
+        debug("~DROP  ~ join carrier thread %zu", thread_id);
         carrier_t *carrier = vector_get(&extra->carriers, thread_id, carrier_t);
-        debug("carrier %zu num tasks: %u", carrier->id, apr_queue_size(carrier->input));
         pthread_join(carrier->thread, NULL);
+        debug("~DROP  ~ join carrier thread %zu [DONE]", thread_id);
     }
 
+    /* cleanup */
     for (size_t thread_id = 0; thread_id < nthreads; thread_id++) {
         carrier_t *carrier = vector_get(&extra->carriers, thread_id, carrier_t);
+        debug("~DROP  ~ cleanup thread-local dictionary for carrier %zu", thread_id);
         string_dic_drop(&carrier->local_dict);
+
+        carrier_push_arg_t* entry = *vector_get(&carrier_args, thread_id, carrier_push_arg_t*);
+        allocator_free(&self->alloc, entry);
     }
+    vector_drop(&carrier_args);
 
     apr_pool_destroy(extra->mem_pool);
     return STATUS_OK;
