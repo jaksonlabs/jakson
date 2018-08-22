@@ -224,7 +224,7 @@ static int async_insert(struct string_dic *self, string_id_t **out, char * const
     }
 
 
-    debug("*** START SYNC ***%s", "\n");
+    debug("*** MAIN-THREAD WAITING FOR TAKSK-COMPLETION ***%s", "\n");
 
     /* synchronize and wait for carrier to finish execution */
     //async_carrier_sync(self);
@@ -234,17 +234,21 @@ static int async_insert(struct string_dic *self, string_id_t **out, char * const
         for (size_t thread_id = 0; carrier_working && thread_id < nthreads; thread_id++) {
             carrier_push_arg_t *thread_push_args = *vector_get(&carrier_args, thread_id, carrier_push_arg_t *);
             carrier_t *carrier = vector_get(&extra->carriers, thread_id, carrier_t);
+            debug("~LOCK  ~ main thread aquires lock for carrier %zu", thread_id);
             carrier_lock(carrier);
+            debug("~LOCKED~ main thread aquired lock for carrier %zu", thread_id);
             bool done = atomic_flag_test_and_set(&thread_push_args->task_done);
+            debug("~STATE ~ carrier %zu finished task: %s", thread_id, done ? "YES" : "NO");
             if (!done) {
                 atomic_flag_clear(&thread_push_args->task_done);
             }
-            carrier_working &= !done;
             carrier_unlock(carrier);
+            debug("~UNLOCK~ main thread aquired lock for carrier %zu", thread_id);
+            carrier_working &= !done;
         }
     } while (carrier_working);
 
-    debug("*** SYNC PASSED ***%s", "\n");
+    debug("*** MAIN-THREAD CONTINUES AFTER TAKSK-COMPLETION ***%s", "\n");
 
     /* cleanup */
     for (size_t thread_id = 0; thread_id < nthreads; thread_id++) {
@@ -374,6 +378,7 @@ static int async_counters(struct string_dic *self, struct string_lookup_counters
 
 unused_fn inline static void exec_carrier_insert(carrier_t *self, carrier_push_arg_t *push_arg)
 {
+    debug("[EXEC  ] carrier %zu starts task", self->id);
     char **data = (char **) vector_data(&push_arg->strings);
 
     int status = string_dic_insert(&self->local_dict, &push_arg->out, data, vector_len(&push_arg->strings));
@@ -381,6 +386,7 @@ unused_fn inline static void exec_carrier_insert(carrier_t *self, carrier_push_a
 
     printf("DEBUG: inserted  %zu strings for carrier '%zu'\n", push_arg->strings.num_elems, self->id);
     fflush(stdout);
+    debug("[EXEC  ] carrier %zu finished task", self->id);
 }
 
 void *carrier_thread_func(void *args)
@@ -389,8 +395,10 @@ void *carrier_thread_func(void *args)
     carrier_push_arg_t *push_arg;
 
     while (atomic_flag_test_and_set(&self->keep_running)) {
-        debug("carrier %zu queries for task...", self->id);
+        debug("[WAIT  ] carrier %zu ask for task", self->id);
+
         apr_queue_pop(self->input, (void **) &push_arg);
+        debug("[CONT  ] carrier %zu found task", self->id);
 
         switch (push_arg->type) {
         case push_type_insert_strings:
@@ -400,18 +408,24 @@ void *carrier_thread_func(void *args)
             debug("[INSERT] carrier %zu done", self->id);
             break;
         case push_type_heartbeat:
-            debug("[STOP  ] carrier %zu task found: %d", self->id, push_arg->type);
+            debug("[HEART ] carrier %zu get hearbeat", self->id);
             break;
         default:
             panic("Unknown type for task queue detected");
         }
 
+        debug("[END   ] carrier %zu ended task select", self->id);
+
+        debug("[LOCK  ] carrier %zu waits for aquires lock", self->id);
         carrier_lock(self);
+        debug("[LOCKED] carrier %zu aquired lock", self->id);
         atomic_flag_test_and_set(&push_arg->task_done);
+        debug("[FLAG  ] carrier %zu notified on task completion", self->id);
         carrier_unlock(self);
+        debug("[UNLOCK] carrier %zu waits for releases lock", self->id);
     }
 
-    debug("carrier %zu stopped", self->id);
+    debug("[LOOP  ] carrier %zu exists main loop", self->id);
 
     return NULL;
 }
