@@ -174,6 +174,8 @@ for (int pi = 0; pi < 11; pi++) {
 
            fflush(stderr);
            fflush(stdout);
+
+           exit(0);
        }
    }
 
