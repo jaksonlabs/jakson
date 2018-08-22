@@ -3,7 +3,6 @@
 #include <stdx/async.h>
 #include <stdx/string_dics/string_dic_naive.h>
 #include <apr_queue.h>
-#include <zconf.h>
 #include <stdx/time.h>
 
 // ---------------------------------------------------------------------------------------------------------------------
