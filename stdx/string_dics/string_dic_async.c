@@ -185,13 +185,13 @@ static void async_carriers_sync(vector_t of_type(carrier_t) *carriers, vector_t 
         for (size_t thread_id = 0; all_carriers_done && thread_id < nthreads; thread_id++) {
             carrier_push_arg_t *thread_push_args = *vector_get(carrier_args, thread_id, carrier_push_arg_t *);
             carrier_t *carrier = vector_get(carriers, thread_id, carrier_t);
-            debug("~LOCK  ~ main thread aquires lock for carrier %zu", thread_id);
+          //  debug("~LOCK  ~ main thread aquires lock for carrier %zu", thread_id);
             carrier_lock(carrier);
-            debug("~LOCKED~ main thread aquired lock for carrier %zu", thread_id);
+         //   debug("~LOCKED~ main thread aquired lock for carrier %zu", thread_id);
             bool done = thread_push_args->task_done;
-            debug("~STATE ~ carrier %zu finished task: %s", thread_id, done ? "YES" : "NO");
+         //   debug("~STATE ~ carrier %zu finished task: %s", thread_id, done ? "YES" : "NO");
             carrier_unlock(carrier);
-            debug("~UNLOCK~ main thread aquired lock for carrier %zu", thread_id);
+        //    debug("~UNLOCK~ main thread aquired lock for carrier %zu", thread_id);
             all_carriers_done &= done;
         }
         if (!all_carriers_done && (size_t) (time_current_time_ms() - start) > timeout) {
