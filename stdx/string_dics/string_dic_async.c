@@ -229,9 +229,9 @@ static int async_insert(struct string_dic *self, string_id_t **out, char * const
     /* synchronize and wait for carrier to finish execution */
     //async_carrier_sync(self);
 
-    bool carrier_working = true;
+    bool all_carriers_done = true;
     do {
-        for (size_t thread_id = 0; carrier_working && thread_id < nthreads; thread_id++) {
+        for (size_t thread_id = 0; all_carriers_done && thread_id < nthreads; thread_id++) {
             carrier_push_arg_t *thread_push_args = *vector_get(&carrier_args, thread_id, carrier_push_arg_t *);
             carrier_t *carrier = vector_get(&extra->carriers, thread_id, carrier_t);
             debug("~LOCK  ~ main thread aquires lock for carrier %zu", thread_id);
@@ -244,9 +244,9 @@ static int async_insert(struct string_dic *self, string_id_t **out, char * const
             }
             carrier_unlock(carrier);
             debug("~UNLOCK~ main thread aquired lock for carrier %zu", thread_id);
-            carrier_working &= !done;
+            all_carriers_done &= done;
         }
-    } while (carrier_working);
+    } while (!all_carriers_done);
 
     debug("*** MAIN-THREAD CONTINUES AFTER TAKSK-COMPLETION ***%s", "\n");
 
