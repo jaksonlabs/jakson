@@ -409,10 +409,11 @@ void *carrier_thread_func(void *args)
             debug("[INSERT] carrier %zu done", self->id);
             break;
         case push_type_heartbeat:
-            debug("[HEART ] carrier %zu get hearbeat", self->id);
+            debug("[HEART ] carrier %zu gets hearbeat", self->id);
             break;
         default:
             panic("Unknown type for task queue detected");
+            break;
         }
 
         debug("[END   ] carrier %zu ended task select", self->id);
