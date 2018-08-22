@@ -201,12 +201,14 @@ static int async_insert(struct string_dic *self, string_id_t **out, char * const
 
     /* prepare to move string subsets to carriers */
     for (size_t i = 0; i < nthreads; i++) {
-        carrier_push_arg_t *entry = allocator_malloc(&self->alloc, sizeof(carrier_push_arg_t));
-        entry->type = push_type_insert_strings;
-        atomic_flag_clear(&entry->task_done);
-        vector_create(&entry->strings, &self->alloc, sizeof(char *), carrier_reserve_nstrings[i]);
-        vector_push(&carrier_args, &entry, 1);
-        assert (entry->strings.base != NULL);
+        if (carrier_reserve_nstrings[i] > 0) {
+            carrier_push_arg_t* entry = allocator_malloc(&self->alloc, sizeof(carrier_push_arg_t));
+            entry->type = push_type_insert_strings;
+            atomic_flag_clear(&entry->task_done);
+            vector_create(&entry->strings, &self->alloc, sizeof(char*), carrier_reserve_nstrings[i]);
+            vector_push(&carrier_args, &entry, 1);
+            assert (entry->strings.base!=NULL);
+        }
     }
 
     /* create per-carrier string subset */
