@@ -229,8 +229,9 @@ static int async_insert(struct string_dic *self, string_id_t **out, char * const
     /* synchronize and wait for carrier to finish execution */
     //async_carrier_sync(self);
 
-    bool all_carriers_done = true;
+    bool all_carriers_done;
     do {
+        all_carriers_done = true;
         for (size_t thread_id = 0; all_carriers_done && thread_id < nthreads; thread_id++) {
             carrier_push_arg_t *thread_push_args = *vector_get(&carrier_args, thread_id, carrier_push_arg_t *);
             carrier_t *carrier = vector_get(&extra->carriers, thread_id, carrier_t);
