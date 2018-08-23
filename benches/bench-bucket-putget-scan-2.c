@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <stdx/string_lookup.h>
+#include <stdx/string_map.h>
 #include <stdx/time.h>
 #include <stdlib.h>
 #include <stdx/string_lookups/simple_scan2.h>
@@ -24,7 +24,7 @@ int main()
                     timestamp_t put_begin, put_end;
                     timestamp_t get_begin, get_end;
 
-                    struct string_lookup map;
+                    struct string_map map;
 
                     create_begin = time_current_time_ms();
                     string_hashtable_create_scan2(&map, NULL, 1, CURRENT_BYTES, 1.7f);

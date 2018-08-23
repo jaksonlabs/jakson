@@ -2,7 +2,7 @@
 #include <check.h>
 
 #include <stdx/string_dic.h>
-#include <stdx/string_lookup.h>
+#include <stdx/string_map.h>
 #include <stdlib.h>
 #include <stdx/string_lookups/simple_bsearch.h>
 #include <stdx/string_lookups/simple_scan1.h>
@@ -15,7 +15,7 @@
 #include <stdx/string_lookups/simple_scan4-cache.h>
 #include <stdx/string_lookups/simple_scan1-parallel.h>
 
-void test_string_hashtable_generic_createdrop(struct string_lookup *map, int status) {
+void test_string_hashtable_generic_createdrop(struct string_map *map, int status) {
 
     ck_assert_msg(status == STATUS_OK, "construction fails");
     status = string_lookup_drop(map);
@@ -24,7 +24,7 @@ void test_string_hashtable_generic_createdrop(struct string_lookup *map, int sta
 
 //START_TEST (test_string_hashtable_generic_createdrop_besearch)
 //{
-//    struct string_lookup map;
+//    struct string_map map;
 //    int status = string_hashtable_create_besearch(&map, NULL, 100, 5, 1.7f);
 //    test_string_hashtable_generic_createdrop(&map, status);
 //}
@@ -32,7 +32,7 @@ void test_string_hashtable_generic_createdrop(struct string_lookup *map, int sta
 
 START_TEST (test_string_hashtable_generic_createdrop_scan1)
     {
-        struct string_lookup map;
+        struct string_map map;
         int status = string_hashtable_create_scan1(&map, NULL, 100, 5, 1.7f);
         test_string_hashtable_generic_createdrop(&map, status);
     }
@@ -40,7 +40,7 @@ END_TEST
 
 START_TEST (test_string_hashtable_generic_createdrop_scan2)
     {
-        struct string_lookup map;
+        struct string_map map;
         int status = string_hashtable_create_scan2(&map, NULL, 100, 5, 1.7f);
         test_string_hashtable_generic_createdrop(&map, status);
     }
@@ -48,7 +48,7 @@ END_TEST
 
 START_TEST (test_string_hashtable_generic_createdrop_scan3)
     {
-        struct string_lookup map;
+        struct string_map map;
         int status = string_hashtable_create_scan3(&map, NULL, 100, 5, 1.7f);
         test_string_hashtable_generic_createdrop(&map, status);
     }
@@ -57,7 +57,7 @@ END_TEST
 
 START_TEST (test_string_hashtable_generic_createdrop_scan4)
     {
-        struct string_lookup map;
+        struct string_map map;
         int status = string_hashtable_create_scan4(&map, NULL, 100, 5, 1.7f);
         test_string_hashtable_generic_createdrop(&map, status);
     }
@@ -65,7 +65,7 @@ END_TEST
 
 START_TEST (test_string_hashtable_generic_createdrop_scan1_cache)
     {
-        struct string_lookup map;
+        struct string_map map;
         int status = string_hashtable_create_scan1_cache(&map, NULL, 100, 5, 1.7f);
         test_string_hashtable_generic_createdrop(&map, status);
     }
@@ -73,7 +73,7 @@ END_TEST
 
 START_TEST (test_string_hashtable_generic_createdrop_scan2_cache)
     {
-        struct string_lookup map;
+        struct string_map map;
         int status = string_hashtable_create_scan2_cache(&map, NULL, 100, 5, 1.7f);
         test_string_hashtable_generic_createdrop(&map, status);
     }
@@ -81,7 +81,7 @@ END_TEST
 
 START_TEST (test_string_hashtable_generic_createdrop_scan3_cache)
     {
-        struct string_lookup map;
+        struct string_map map;
         int status = string_hashtable_create_scan3_cache(&map, NULL, 100, 5, 1.7f);
         test_string_hashtable_generic_createdrop(&map, status);
     }
@@ -90,7 +90,7 @@ END_TEST
 
 START_TEST (test_string_hashtable_generic_createdrop_scan4_cache)
     {
-        struct string_lookup map;
+        struct string_map map;
         int status = string_hashtable_create_scan4_cache(&map, NULL, 100, 5, 1.7f);
         test_string_hashtable_generic_createdrop(&map, status);
     }
@@ -99,14 +99,14 @@ END_TEST
 
 START_TEST (test_string_hashtable_generic_createdrop_scan1_parallel)
     {
-        struct string_lookup map;
+        struct string_map map;
         int status = string_hashtable_create_scan1_parallel(&map, NULL, 100, 5, 1.7f, 7);
         test_string_hashtable_generic_createdrop(&map, status);
     }
 END_TEST
 
 
-void test_string_hashtable_generic_putget(struct string_lookup *map) {
+void test_string_hashtable_generic_putget(struct string_map *map) {
     const size_t NUM_PAIRS = 1000;
     char **keys = malloc(NUM_PAIRS * sizeof(char*));
     string_id_t *values = malloc(NUM_PAIRS * sizeof(uint64_t));
@@ -131,7 +131,7 @@ void test_string_hashtable_generic_putget(struct string_lookup *map) {
 
 //START_TEST (test_string_hashtable_generic_putget_bsearch)
 //    {
-//        struct string_lookup map;
+//        struct string_map map;
 //        string_hashtable_create_besearch(&map, NULL, 100, 5, 1.7f);
 //        test_string_hashtable_generic_putget(&map);
 //    }
@@ -139,7 +139,7 @@ void test_string_hashtable_generic_putget(struct string_lookup *map) {
 
 START_TEST (test_string_hashtable_generic_putget_scan1)
     {
-        struct string_lookup map;
+        struct string_map map;
         string_hashtable_create_scan1(&map, NULL, 100, 5, 1.7f);
         test_string_hashtable_generic_putget(&map);
     }
@@ -147,7 +147,7 @@ END_TEST
 
 START_TEST (test_string_hashtable_generic_putget_scan2)
     {
-        struct string_lookup map;
+        struct string_map map;
         string_hashtable_create_scan2(&map, NULL, 100, 5, 1.7f);
         test_string_hashtable_generic_putget(&map);
     }
@@ -155,7 +155,7 @@ END_TEST
 
 START_TEST (test_string_hashtable_generic_putget_scan3)
     {
-        struct string_lookup map;
+        struct string_map map;
         string_hashtable_create_scan3(&map, NULL, 100, 5, 1.7f);
         test_string_hashtable_generic_putget(&map);
     }
@@ -163,7 +163,7 @@ END_TEST
 
 START_TEST (test_string_hashtable_generic_putget_scan4)
     {
-        struct string_lookup map;
+        struct string_map map;
         string_hashtable_create_scan4(&map, NULL, 100, 5, 1.7f);
         test_string_hashtable_generic_putget(&map);
     }
@@ -172,7 +172,7 @@ END_TEST
 
 START_TEST (test_string_hashtable_generic_putget_scan1_cache)
     {
-        struct string_lookup map;
+        struct string_map map;
         string_hashtable_create_scan1_cache(&map, NULL, 100, 5, 1.7f);
         test_string_hashtable_generic_putget(&map);
     }
@@ -181,7 +181,7 @@ END_TEST
 
 START_TEST (test_string_hashtable_generic_putget_scan2_cache)
     {
-        struct string_lookup map;
+        struct string_map map;
         string_hashtable_create_scan2_cache(&map, NULL, 100, 5, 1.7f);
         test_string_hashtable_generic_putget(&map);
     }
@@ -189,7 +189,7 @@ END_TEST
 
 START_TEST (test_string_hashtable_generic_putget_scan3_cache)
     {
-        struct string_lookup map;
+        struct string_map map;
         string_hashtable_create_scan3_cache(&map, NULL, 100, 5, 1.7f);
         test_string_hashtable_generic_putget(&map);
     }
@@ -197,7 +197,7 @@ END_TEST
 
 START_TEST (test_string_hashtable_generic_putget_scan4_cache)
     {
-        struct string_lookup map;
+        struct string_map map;
         string_hashtable_create_scan4_cache(&map, NULL, 100, 5, 1.7f);
         test_string_hashtable_generic_putget(&map);
     }
@@ -205,13 +205,13 @@ END_TEST
 
 START_TEST (test_string_hashtable_generic_putget_scan1_parallel)
     {
-        struct string_lookup map;
+        struct string_map map;
         string_hashtable_create_scan1_parallel(&map, NULL, 100, 5, 1.7f, 7);
         test_string_hashtable_generic_putget(&map);
     }
 END_TEST
 
-void test_string_hashtable_generic_remove(struct string_lookup *map)
+void test_string_hashtable_generic_remove(struct string_map *map)
 {
     const size_t NUM_PAIRS = 1000;
     char **keys = malloc(NUM_PAIRS * sizeof(char*));
@@ -253,7 +253,7 @@ void test_string_hashtable_generic_remove(struct string_lookup *map)
 //
 //START_TEST (test_string_hashtable_generic_remove_besearch)
 //    {
-//        struct string_lookup map;
+//        struct string_map map;
 //        string_hashtable_create_besearch(&map, NULL, 100, 5, 1.7f);
 //        test_string_hashtable_generic_remove(&map);
 //    }
@@ -261,7 +261,7 @@ void test_string_hashtable_generic_remove(struct string_lookup *map)
 
 START_TEST (test_string_hashtable_generic_remove_scan1)
     {
-        struct string_lookup map;
+        struct string_map map;
         string_hashtable_create_scan1(&map, NULL, 100, 5, 1.7f);
         test_string_hashtable_generic_remove(&map);
     }
@@ -269,7 +269,7 @@ END_TEST
 
 START_TEST (test_string_hashtable_generic_remove_scan1_cache)
     {
-        struct string_lookup map;
+        struct string_map map;
         string_hashtable_create_scan1_cache(&map, NULL, 100, 5, 1.7f);
         test_string_hashtable_generic_remove(&map);
     }
@@ -277,7 +277,7 @@ END_TEST
 
 START_TEST (test_string_hashtable_generic_remove_scan2)
     {
-        struct string_lookup map;
+        struct string_map map;
         string_hashtable_create_scan2(&map, NULL, 100, 5, 1.7f);
         test_string_hashtable_generic_remove(&map);
     }
@@ -285,7 +285,7 @@ END_TEST
 
 START_TEST (test_string_hashtable_generic_remove_scan2_cache)
     {
-        struct string_lookup map;
+        struct string_map map;
         string_hashtable_create_scan2_cache(&map, NULL, 100, 5, 1.7f);
         test_string_hashtable_generic_remove(&map);
     }
@@ -293,7 +293,7 @@ END_TEST
 
 START_TEST (test_string_hashtable_generic_remove_scan3)
     {
-        struct string_lookup map;
+        struct string_map map;
         string_hashtable_create_scan3(&map, NULL, 100, 5, 1.7f);
         test_string_hashtable_generic_remove(&map);
     }
@@ -301,7 +301,7 @@ END_TEST
 
 START_TEST (test_string_hashtable_generic_remove_scan4)
     {
-        struct string_lookup map;
+        struct string_map map;
         string_hashtable_create_scan4(&map, NULL, 100, 5, 1.7f);
         test_string_hashtable_generic_remove(&map);
     }
@@ -309,7 +309,7 @@ END_TEST
 
 START_TEST (test_string_hashtable_generic_remove_scan3_cache)
     {
-        struct string_lookup map;
+        struct string_map map;
         string_hashtable_create_scan3_cache(&map, NULL, 100, 5, 1.7f);
         test_string_hashtable_generic_remove(&map);
     }
@@ -317,7 +317,7 @@ END_TEST
 
 START_TEST (test_string_hashtable_generic_remove_scan4_cache)
     {
-        struct string_lookup map;
+        struct string_map map;
         string_hashtable_create_scan4_cache(&map, NULL, 100, 5, 1.7f);
         test_string_hashtable_generic_remove(&map);
     }
@@ -325,7 +325,7 @@ END_TEST
 
 START_TEST (test_string_hashtable_generic_remove_scan1_parallel)
     {
-        struct string_lookup map;
+        struct string_map map;
         string_hashtable_create_scan1_parallel(&map, NULL, 100, 5, 1.7f, 8);
         test_string_hashtable_generic_remove(&map);
     }

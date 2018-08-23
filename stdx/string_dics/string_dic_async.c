@@ -35,12 +35,13 @@ typedef struct async_extra
 
 } async_extra_t;
 
-typedef struct carrier_push_arg_t
+typedef struct carrier_arg_t
 {
     vector_t of_type(char *)      strings;
     string_id_t                  *out;
     carrier_t                    *carrier;
-} carrier_push_arg_t;
+    bool                          write_out;
+} carrier_arg_t;
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
@@ -48,8 +49,11 @@ typedef struct carrier_push_arg_t
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-#define hashcode_of(string)             \
+#define hashcode_of(string)                                     \
     hash_func(strlen(string), string)
+
+#define make_global(thread_id, thread_local_id)                 \
+    ((thread_id << 54) | thread_local_id);
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
@@ -152,22 +156,23 @@ static int async_drop(struct string_dic *self)
 }
 
 
-void *carrier_thread_func(void *args)
+void *carrier_insert_func(void *args)
 {
-    carrier_push_arg_t *push_arg = (carrier_push_arg_t *) args;
+    carrier_arg_t * restrict this_args = (carrier_arg_t * restrict) args;
 
-    if (push_arg->strings.num_elems > 0) {
-        debug("[EXEC  ] carrier %zu starts task", push_arg->carrier->id);
-        char** data = (char**) vector_data(&push_arg->strings);
+    if (likely(this_args->strings.num_elems > 0)) {
+        debug("[EXEC  ] carrier %zu starts task", this_args->carrier->id);
+        char** data = (char**) vector_data(&this_args->strings);
 
-        int status = string_dic_insert(&push_arg->carrier->local_dict, &push_arg->out, data, vector_len(&push_arg->strings));
+        int status = string_dic_insert(&this_args->carrier->local_dict,
+                this_args->write_out ? &this_args->out : NULL,
+                data, vector_len(&this_args->strings));
+
         panic_if(status!=STATUS_OK, "internal error during thread-local string dictionary building process");
-
-        printf("DEBUG: inserted  %zu strings for carrier '%zu'\n", push_arg->strings.num_elems, push_arg->carrier->id);
-        fflush(stdout);
-        debug("[EXEC  ] carrier %zu finished task", push_arg->carrier->id);
+        debug("[EXEC  ] carrier %zu finished task", this_args->carrier->id);
     } else {
-        warn("carrier %zu was requested to insert empty string list %s", push_arg->carrier->id, (push_arg->strings.base == NULL ? "[INTERNAL ERROR]" : ""));
+        warn("carrier %zu was requested to insert empty string list %s", this_args->carrier->id,
+                (this_args->strings.base == NULL ? "[INTERNAL ERROR]" : ""));
     }
 
     return NULL;
@@ -180,78 +185,99 @@ static int async_insert(struct string_dic *self, string_id_t **out, char * const
     async_lock(self);
 
     async_extra_t      *extra                    = async_extra_get(self);
-    size_t              nthreads                 = vector_len(&extra->carriers);
+    uint_fast16_t       nthreads                 = vector_len(&extra->carriers);
 
     /* map string depending on hash value to a particular carrier */
-    size_t             *str_carrier_mapping      = allocator_malloc(&self->alloc, num_strings * sizeof(size_t));
+    uint_fast16_t      *str_carrier_mapping      = allocator_malloc(&self->alloc, num_strings * sizeof(uint_fast16_t));
 
     /* counters to compute how many strings go to a particular carrier */
-    size_t             *carrier_reserve_nstrings = allocator_malloc(&self->alloc, nthreads * sizeof(size_t));
-    memset(carrier_reserve_nstrings, 0, nthreads * sizeof(size_t));
+    size_t             *carrier_nstrings         = allocator_malloc(&self->alloc, nthreads * sizeof(size_t));
+    memset(carrier_nstrings, 0, nthreads * sizeof(size_t));
 
-    vector_t of_type(carrier_push_arg_t *) carrier_args;
-    vector_create(&carrier_args, &self->alloc, sizeof(carrier_push_arg_t *), nthreads);
+    vector_t of_type(carrier_arg_t *) carrier_args;
+    vector_create(&carrier_args, &self->alloc, sizeof(carrier_arg_t *), nthreads);
 
     /* compute which carrier is responsible for which string */
     for (size_t i = 0; i < num_strings; i++) {
         const char     *key       = strings[i];
         size_t          thread_id = hashcode_of(key) % nthreads;
         str_carrier_mapping[i]    = thread_id;
-        carrier_reserve_nstrings[thread_id]++;
+        carrier_nstrings[thread_id]++;
     }
 
     /* prepare to move string subsets to carriers */
-    for (size_t i = 0; i < nthreads; i++) {
-        carrier_push_arg_t* entry = allocator_malloc(&self->alloc, sizeof(carrier_push_arg_t));
-        entry->carrier = vector_get(&extra->carriers, i, carrier_t);
-        vector_create(&entry->strings, &self->alloc, sizeof(char*), carrier_reserve_nstrings[i]);
+    for (uint_fast16_t i = 0; i < nthreads; i++) {
+        carrier_arg_t* entry = allocator_malloc(&self->alloc, sizeof(carrier_arg_t));
+        entry->carrier       = vector_get(&extra->carriers, i, carrier_t);
+
+        vector_create(&entry->strings, &self->alloc, sizeof(char*), carrier_nstrings[i]);
         vector_push(&carrier_args, &entry, 1);
         assert (entry->strings.base != NULL);
     }
 
     /* create per-carrier string subset */
     for (size_t i = 0; i < num_strings; i++) {
-        size_t thread_id                     = str_carrier_mapping[i];
-        carrier_push_arg_t *thread_push_args = *vector_get(&carrier_args, thread_id, carrier_push_arg_t *);
-        char *dummy = strdup(strings[i]); // XXXXXXXX
-        vector_push(&thread_push_args->strings, &dummy, 1);
+        uint_fast16_t  thread_id   = str_carrier_mapping[i];
+        carrier_arg_t *carrier_arg = *vector_get(&carrier_args, thread_id, carrier_arg_t *);
+        carrier_arg->write_out     = out != NULL;
+
+        vector_push(&carrier_arg->strings, &strings[i], 1);
     }
 
     /* schedule insert operation per carrier */
-    for (size_t thread_id = 0; thread_id < nthreads; thread_id++) {
-        if (carrier_reserve_nstrings[thread_id] > 0) {
-            carrier_push_arg_t* thread_push_args = *vector_get(&carrier_args, thread_id, carrier_push_arg_t *);
-            carrier_t *carrier = vector_get(&extra->carriers, thread_id, carrier_t);
-            pthread_create(&carrier->thread, NULL, carrier_thread_func, thread_push_args);
+    for (uint_fast16_t thread_id = 0; thread_id < nthreads; thread_id++) {
+        if (carrier_nstrings[thread_id] > 0) {
+            carrier_arg_t *carrier_arg = *vector_get(&carrier_args, thread_id, carrier_arg_t *);
+            carrier_t      *carrier    =  vector_get(&extra->carriers, thread_id, carrier_t);
+            pthread_create(&carrier->thread, NULL, carrier_insert_func, carrier_arg);
         }
     }
 
-
-    debug("*** MAIN-THREAD WAITING FOR TASK-COMPLETION ***%s", "\n");
-
-    for (size_t thread_id = 0; thread_id < nthreads; thread_id++) {
+    /* synchronize */
+    for (uint_fast16_t thread_id = 0; thread_id < nthreads; thread_id++) {
         carrier_t *carrier = vector_get(&extra->carriers, thread_id, carrier_t);
         pthread_join(carrier->thread, NULL);
     }
 
-    debug("*** MAIN-THREAD CONTINUES AFTER TASK-COMPLETION ***%s", "\n");
+    /* compute string ids; the string id produced by this implementation is a compound identifier encoding
+     * both the owning thread id and the thread-local string id. For this, the returned (global) string identifier
+     * is split into 10bits encoded the thread (given a maximum of 1024 threads that can be handled by this
+     * implementation), and 54bits used to encode the thread-local string id
+     *
+     * TECHNICAL LIMIT: 1024 threads
+     */
 
-    /* cleanup */
-    for (size_t thread_id = 0; thread_id < nthreads; thread_id++) {
-        carrier_push_arg_t *thread_push_args = *vector_get(&carrier_args, thread_id, carrier_push_arg_t *);
-        vector_drop(&thread_push_args->strings);
-        // TODO: get "out" result
-        allocator_free(&self->alloc, thread_push_args);
+    /* optionally, return the created string ids. In case 'out' is NULL, nothing has to be done (especially
+     * none of the carrier threads allocated thread-local 'out's which mean that no cleanup must be done */
+    if (likely(out != NULL)) {
+        string_id_t *total_out   = allocator_malloc(&self->alloc, num_strings * sizeof(string_id_t));
+        size_t       current_out = 0;
+
+        for (uint_fast16_t thread_id = 0; thread_id < nthreads; thread_id++) {
+            carrier_arg_t *carrier_arg = *vector_get(&carrier_args, thread_id, carrier_arg_t *);
+            for (size_t local_idx = 0; local_idx < carrier_nstrings[thread_id]; local_idx++) {
+                string_id_t global_string_owner_id = thread_id;
+                string_id_t global_string_local_id = carrier_arg->out[local_idx];
+                string_id_t global_string_id       = make_global(global_string_owner_id, global_string_local_id);
+                total_out[current_out++]           = global_string_id;
+            }
+
+            /* cleanup */
+            allocator_free(&self->alloc, carrier_arg->out);
+        }
+        *out = total_out;
     }
 
-
-    // TODO:... out
-    unused(out);
+    /* cleanup */
+    for (uint_fast16_t thread_id = 0; thread_id < nthreads; thread_id++) {
+        carrier_arg_t *carrier_arg = *vector_get(&carrier_args, thread_id, carrier_arg_t *);
+        vector_drop(&carrier_arg->strings);
+        allocator_free(&self->alloc, carrier_arg);
+    }
 
     /* cleanup */
-    allocator_free(&self->alloc, carrier_reserve_nstrings);
+    allocator_free(&self->alloc, carrier_nstrings);
     allocator_free(&self->alloc, str_carrier_mapping);
-
     vector_drop(&carrier_args);
 
     async_unlock(self);

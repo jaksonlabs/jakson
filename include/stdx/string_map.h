@@ -96,7 +96,7 @@ struct string_lookup_counters {
   size_t num_bucket_cache_search_hit;
 };
 
-struct string_lookup {
+struct string_map {
 
   /**
    * Implementation-specific values
@@ -123,45 +123,45 @@ struct string_lookup {
   /**
    *  Frees resources bound to <code>self</code> via the allocator specified by the constructor
    */
-  int (*drop)(struct string_lookup *self);
+  int (*drop)(struct string_map *self);
 
   /**
    * Put <code>num_pair</code> objects into this map maybe updating old objects with the same key.
    */
-  int (*put_safe)(struct string_lookup *self, char *const *keys, const string_id_t *values, size_t num_pairs);
+  int (*put_safe)(struct string_map *self, char *const *keys, const string_id_t *values, size_t num_pairs);
 
   /**
    * Put <code>num_pair</code> objects into this map maybe without checking for updates.
    */
-  int (*put_fast)(struct string_lookup *self, char *const *keys, const string_id_t *values, size_t num_pairs);
+  int (*put_fast)(struct string_map *self, char *const *keys, const string_id_t *values, size_t num_pairs);
 
   /**
    * Get the values associated with <code>keys</code> in this map (if any).
    */
-  int (*get_safe)(struct string_lookup *self, string_id_t **out, bool **found_mask, size_t *num_not_found,
+  int (*get_safe)(struct string_map *self, string_id_t **out, bool **found_mask, size_t *num_not_found,
           char *const *keys, size_t num_keys);
 
   /**
    * Get the values associated with <code>keys</code> in this map. All keys <u>must</u> exist.
    */
-  int (*get_fast)(struct string_lookup *self, string_id_t **out, char *const *keys, size_t num_keys);
+  int (*get_fast)(struct string_map *self, string_id_t **out, char *const *keys, size_t num_keys);
 
   /**
    * Updates keys associated with <code>values</code> in this map. All values <u>must</u> exist, and the
    * mapping between keys and values must be bidirectional.
    */
-  int (*update_key_fast)(struct string_lookup *self, const string_id_t *values, char *const *keys, size_t num_keys);
+  int (*update_key_fast)(struct string_map *self, const string_id_t *values, char *const *keys, size_t num_keys);
 
   /**
    * Removes the objects with the gives keys from this map
    */
-  int (*remove)(struct string_lookup *self, char *const *keys, size_t num_keys);
+  int (*remove)(struct string_map *self, char *const *keys, size_t num_keys);
 
   /**
    * Frees up allocated memory for <code>ptr</code> via the allocator in <code>map</code> that was specified
    * by the call to <code>string_id_map_create</code>
    */
-  int (*free)(struct string_lookup *self, void *ptr);
+  int (*free)(struct string_map *self, void *ptr);
 
 };
 
@@ -177,7 +177,7 @@ struct string_lookup {
  * @param map a non-null pointer to the map
  * @return <code>STATUS_OK</code> in case of success, otherwise a value indiciating the error.
  */
-inline static int string_lookup_drop(struct string_lookup* map)
+inline static int string_lookup_drop(struct string_map* map)
 {
     check_non_null(map);
     assert(map->drop);
@@ -191,7 +191,7 @@ inline static int string_lookup_drop(struct string_lookup* map)
  * @param map a non-null pointer to the map
  * @return <code>STATUS_OK</code> in case of success, otherwise a value indicating the error.
  */
-inline static int string_lookup_reset_counters(struct string_lookup* map)
+inline static int string_lookup_reset_counters(struct string_map* map)
 {
     check_non_null(map);
     memset(&map->counters, 0, sizeof(struct string_lookup_counters));
@@ -204,7 +204,7 @@ inline static int string_lookup_reset_counters(struct string_lookup* map)
  * @param map non-null pointer to the map
  * @return <code>STATUS_OK</code> in case of success, otherwise a value indicating the error.
  */
-inline static int string_lookup_counters(struct string_lookup_counters *out, const struct string_lookup *map)
+inline static int string_lookup_counters(struct string_lookup_counters *out, const struct string_map *map)
 {
     check_non_null(map);
     check_non_null(out);
@@ -223,7 +223,7 @@ inline static int string_lookup_counters(struct string_lookup_counters *out, con
  * @param num_pairs the number of pairs that are read via <code>keys</code> and <code>values</code>
  * @return <code>STATUS_OK</code> in case of success, otherwise a value indicating the error.
  */
-inline static int string_lookup_put_safe(struct string_lookup* map, char* const* keys, const string_id_t* values,
+inline static int string_lookup_put_safe(struct string_map* map, char* const* keys, const string_id_t* values,
         size_t num_pairs)
 {
     check_non_null(map);
@@ -249,7 +249,7 @@ inline static int string_lookup_put_safe(struct string_lookup* map, char* const*
  * @param num_pairs the number of pairs that are read via <code>keys</code> and <code>values</code>
  * @return <code>STATUS_OK</code> in case of success, otherwise a value indiciating the error.
  */
-inline static int string_lookup_put_fast(struct string_lookup* map, char* const* keys, const string_id_t* values,
+inline static int string_lookup_put_fast(struct string_map* map, char* const* keys, const string_id_t* values,
         size_t num_pairs)
 {
     check_non_null(map);
@@ -288,7 +288,7 @@ inline static int string_lookup_put_fast(struct string_lookup* map, char* const*
  * @return <code>STATUS_OK</code> in case of success, otherwise a value indicating the error.
  */
 inline static int string_lookup_get_safe(string_id_t** out, bool** found_mask, size_t* num_not_found,
-        struct string_lookup* map,
+        struct string_map* map,
         char* const* keys, size_t num_keys)
 {
     check_non_null(out);
@@ -321,7 +321,7 @@ inline static int string_lookup_get_safe(string_id_t** out, bool** found_mask, s
  * @param num_keys the number of keys
  * @return <code>STATUS_OK</code> in case of success, otherwise a value indicating the error.
  */
-inline static int string_lookup_get_fast(string_id_t** out, struct string_lookup* map,
+inline static int string_lookup_get_fast(string_id_t** out, struct string_map* map,
         char* const* keys, size_t num_keys)
 {
     check_non_null(out);
@@ -347,7 +347,7 @@ inline static int string_lookup_get_fast(string_id_t** out, struct string_lookup
  * @param num_keys the number of keys
  * @return <code>STATUS_OK</code> in case of success, otherwise a value indicating the error.
  */
-inline static int string_lookup_update_fast(struct string_lookup* map, const string_id_t* values,
+inline static int string_lookup_update_fast(struct string_map* map, const string_id_t* values,
         char* const* keys, size_t num_keys)
 {
     check_non_null(map);
@@ -365,7 +365,7 @@ inline static int string_lookup_update_fast(struct string_lookup* map, const str
  * @param num_keys the number of keys
  * @return
  */
-inline static int string_lookup_remove(struct string_lookup* map, char* const* keys, size_t num_keys)
+inline static int string_lookup_remove(struct string_map* map, char* const* keys, size_t num_keys)
 {
     check_non_null(map);
     check_non_null(keys);
@@ -381,7 +381,7 @@ inline static int string_lookup_remove(struct string_lookup* map, char* const* k
  * @param values A non-null pointer (potentially resulting from a call to <code>string_id_map_get</code>)
  * @return <code>STATUS_OK</code> in case of success, otherwise a value indiciating the error.
  */
-inline static int string_lookup_free(void* ptr, struct string_lookup* map)
+inline static int string_lookup_free(void* ptr, struct string_map* map)
 {
     check_non_null(ptr);
     check_non_null(map);

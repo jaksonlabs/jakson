@@ -28,7 +28,7 @@
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <common.h>
-#include <stdx/string_lookup.h>
+#include <stdx/string_map.h>
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
@@ -39,7 +39,7 @@
 /**
  * Branch-free scan + swapping + caching
  */
-int string_hashtable_create_scan4_cache(struct string_lookup* map, const struct allocator* alloc, size_t num_buckets,
+int string_hashtable_create_scan4_cache(struct string_map* map, const struct allocator* alloc, size_t num_buckets,
         size_t cap_buckets, float bucket_grow_factor);
 
 #endif

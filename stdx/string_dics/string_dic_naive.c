@@ -1,6 +1,6 @@
 #include <stdx/vector.h>
 #include <stdx/async.h>
-#include <stdx/string_lookup.h>
+#include <stdx/string_map.h>
 #include <stdx/string_dics/string_dic_naive.h>
 #include <stdx/string_lookups/simple_scan1-parallel.h>
 #include <stdlib.h>
@@ -14,7 +14,7 @@ struct entry {
 struct naive_extra {
     struct vector of_type(entry)        contents;
     struct vector of_type(string_id_t)  freelist;
-    struct string_lookup                index;
+    struct string_map                index;
     struct spinlock                     lock;
 };
 

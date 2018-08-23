@@ -88,10 +88,14 @@ set(SORUCE_FILES
         ${CMAKE_SOURCE_DIR}/stdx/slot_vector.c
         ${CMAKE_SOURCE_DIR}/include/stdx/string_dics/string_dic_async.h
         ${CMAKE_SOURCE_DIR}/stdx/string_dics/string_dic_async.c
+        ${CMAKE_SOURCE_DIR}/include/stdx/string_dics/string_dic_naive.h
+        ${CMAKE_SOURCE_DIR}/stdx/string_dics/string_dic_naive.c
+        ${CMAKE_SOURCE_DIR}/include/stdx/bloomfilter.h
+        ${CMAKE_SOURCE_DIR}/ng5/roadfire/roadfire.c
         )
 
 
-add_executable(ng5 main.c ${SORUCE_FILES} include/stdx/string_dics/string_dic_naive.h stdx/string_dics/string_dic_naive.c include/stdx/bloomfilter.h ng5/roadfire/roadfire.c)
+add_executable(ng5 main.c ${SORUCE_FILES})
 
 add_executable(bench-bucket-putget-bsearch benches/bench-bucket-putget-bsearch.c ${SORUCE_FILES} include/stdx/bolster.h include/stdx/slot_vector.h stdx/slot_vector.c)
 add_executable(bench-bucket-putget-scan-1 benches/bench-bucket-putget-scan-1.c ${SORUCE_FILES})

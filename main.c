@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <stdx/string_lookup.h>
+#include <stdx/string_map.h>
 #include <stdx/time.h>
 #include <stdlib.h>
 #include <stdx/string_dics/string_dic_naive.h>
@@ -157,6 +157,10 @@ void experiments_hashing()
                 string_dic_insert(&dic, &ids, strings, num_strings);
                 timestamp_t inserted_end = time_current_time_ms();
                 insert_duration = (inserted_end-inserted_begin)/1000.0f;
+
+                for (size_t i = 0; i < num_strings; i++) {
+                    printf("returned string id: %zu\n", ids[i]);
+                }
 
 
                 //struct string_lookup_counters counters;
