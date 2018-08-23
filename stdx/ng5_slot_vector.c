@@ -31,7 +31,7 @@ int slot_vector_is_empty(struct slot_vector *vec)
     return vector_is_empty(&vec->content);
 }
 
-int slot_vector_insert(struct slot_vector *vec, optional struct ng5_vector of_type(slot_vector_slot_t) *ids,
+int slot_vector_insert(struct slot_vector *vec, optional ng5_vector_t of_type(slot_vector_slot_t) *ids,
         const void *data, size_t num_elems)
 {
     check_non_null(vec)

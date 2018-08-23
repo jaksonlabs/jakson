@@ -39,13 +39,13 @@ struct simple_bucket_entry {
 
 struct simple_bucket {
   struct spinlock                            spinlock;
-  struct ng5_vector of_type(simple_bucket_entry) entries;
-  struct ng5_vector of_type(size_t)              freelist;
+  ng5_vector_t of_type(simple_bucket_entry) entries;
+  ng5_vector_t of_type(size_t)              freelist;
   size_t                                     cache_idx;
 };
 
 struct simple_extra {
-  struct ng5_vector of_type(simple_bucket) buckets;
+  ng5_vector_t of_type(simple_bucket) buckets;
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -73,7 +73,7 @@ static struct simple_extra *simple_extra(struct string_map *self);
 static int simple_bucket_create(struct simple_bucket *buckets, size_t num_buckets, size_t bucket_cap,
         float grow_factor, ng5_allocator_t *alloc);
 static int simple_bucket_drop(struct simple_bucket *buckets, size_t num_buckets, ng5_allocator_t *alloc);
-static int simple_map_insert(struct ng5_vector of_type(simple_bucket)* buckets, char* const* keys,
+static int simple_map_insert(ng5_vector_t of_type(simple_bucket)* buckets, char* const* keys,
         const string_id_t* values, size_t* bucket_idxs, size_t num_pairs, ng5_allocator_t *alloc);
 static void simple_bucket_lock(struct simple_bucket *bucket) force_inline;
 static void simple_bucket_unlock(struct simple_bucket *bucket) force_inline;
@@ -176,7 +176,7 @@ static size_t simple_bucket_find_entry_by_key(struct simple_bucket *bucket, cons
     return found ? (i - 1) : bucket->entries.cap_elems;
 }
 
-static int simple_map_fetch(struct ng5_vector of_type(simple_bucket) *buckets, string_id_t *values_out, bool *key_found_mask,
+static int simple_map_fetch(ng5_vector_t of_type(simple_bucket) *buckets, string_id_t *values_out, bool *key_found_mask,
         size_t *num_keys_not_found, size_t *bucket_idxs, char *const *keys, size_t num_keys,
         ng5_allocator_t *alloc)
 {
@@ -371,7 +371,7 @@ static void simple_bucket_unlock(struct simple_bucket *bucket)
 unused_fn
 static void simple_bucket_freelist_push(struct simple_bucket *bucket, size_t idx)
 {
-    struct ng5_vector of_type(size_t)              *freelist = &bucket->freelist;
+    ng5_vector_t of_type(size_t)              *freelist = &bucket->freelist;
     assert (freelist->num_elems + 1 < freelist->cap_elems);
     vector_push(freelist, &idx, 1);
 }
@@ -379,8 +379,8 @@ static void simple_bucket_freelist_push(struct simple_bucket *bucket, size_t idx
 unused_fn
 static size_t simple_bucket_freelist_pop(struct simple_bucket *bucket, ng5_allocator_t *alloc)
 {
-    struct ng5_vector of_type(size_t)              *freelist = &bucket->freelist;
-    struct ng5_vector of_type(simple_bucket_entry) *entries  = &bucket->entries;
+    ng5_vector_t of_type(size_t)              *freelist = &bucket->freelist;
+    ng5_vector_t of_type(simple_bucket_entry) *entries  = &bucket->entries;
 
     struct simple_bucket_entry empty = {
             .in_use  = false,
@@ -442,7 +442,7 @@ static int simple_bucket_insert(struct simple_bucket *bucket, const char *key, s
     return STATUS_OK;
 }
 
-static int simple_map_insert(struct ng5_vector of_type(simple_bucket)* buckets, char* const* keys,
+static int simple_map_insert(ng5_vector_t of_type(simple_bucket)* buckets, char* const* keys,
         const string_id_t* values, size_t* bucket_idxs, size_t num_pairs, ng5_allocator_t *alloc)
 {
     check_non_null(buckets)

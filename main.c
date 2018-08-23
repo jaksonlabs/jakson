@@ -40,10 +40,10 @@ static char *read_contents(const char *path)
     return buffer;
 }
 
-struct ng5_vector *to_string_list(const char *contents)
+ng5_vector_t *to_string_list(const char *contents)
 {
     fprintf(stderr, "converting to line list...");
-    struct ng5_vector *vector = malloc(sizeof(struct ng5_vector));
+    ng5_vector_t *vector = malloc(sizeof(ng5_vector_t));
     vector_create(vector, NULL, sizeof(char *), 15372804);
     char *begin, *end;
     begin = (char *) contents;
@@ -126,7 +126,7 @@ void experiments_hashing()
         fprintf(stderr, "... %fsec\n", (read_end-read_begin)/1000.0f);
 
         timestamp_t convert_begin = time_current_time_ms();
-        struct ng5_vector* lines = to_string_list(contents);
+        ng5_vector_t* lines = to_string_list(contents);
         timestamp_t convert_end = time_current_time_ms();
         fprintf(stderr, "... %fsec\n", (convert_end-convert_begin)/1000.0f);
         fflush(stderr);

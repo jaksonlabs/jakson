@@ -27,8 +27,8 @@ typedef size_t slot_vector_slot_t;
 
 struct slot_vector
 {
-    struct ng5_vector of_type(T)                    content;
-    struct ng5_vector of_type(slot_vector_slot_t)   freelist;
+    ng5_vector_t of_type(T)                    content;
+    ng5_vector_t of_type(slot_vector_slot_t)   freelist;
 };
 
 int slot_vector_create(struct slot_vector *vector, const ng5_allocator_t *alloc, size_t elem_size, size_t cap_elems);
@@ -39,7 +39,7 @@ int slot_vector_drop(struct slot_vector *vec);
 
 int slot_vector_is_empty(struct slot_vector *vec);
 
-int slot_vector_insert(struct slot_vector *vec, optional struct ng5_vector of_type(slot_vector_slot_t) *ids,
+int slot_vector_insert(struct slot_vector *vec, optional ng5_vector_t of_type(slot_vector_slot_t) *ids,
                      const void *data, size_t num_elems);
 
 const void *slot_vector_at(struct slot_vector *vec, slot_vector_slot_t slot);

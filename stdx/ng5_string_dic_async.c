@@ -29,15 +29,15 @@ typedef struct carrier
 
 typedef struct async_extra
 {
-    vector_t of_type(carrier_t)   carriers;
-    vector_t of_type(carrier_t *) carrier_mapping;
+    ng5_vector_t of_type(carrier_t)   carriers;
+    ng5_vector_t of_type(carrier_t *) carrier_mapping;
     spinlock_t                    spinlock;
 
 } async_extra_t;
 
 typedef struct carrier_arg_t
 {
-    vector_t of_type(char *)      strings;
+    ng5_vector_t of_type(char *)      strings;
     string_id_t                  *out;
     carrier_t                    *carrier;
     bool                          write_out;
@@ -194,7 +194,7 @@ static int async_insert(struct string_dic *self, string_id_t **out, char * const
     size_t             *carrier_nstrings         = allocator_malloc(&self->alloc, nthreads * sizeof(size_t));
     memset(carrier_nstrings, 0, nthreads * sizeof(size_t));
 
-    vector_t of_type(carrier_arg_t *) carrier_args;
+    ng5_vector_t of_type(carrier_arg_t *) carrier_args;
     vector_create(&carrier_args, &self->alloc, sizeof(carrier_arg_t *), nthreads);
 
     /* compute which carrier is responsible for which string */

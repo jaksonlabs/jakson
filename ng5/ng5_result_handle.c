@@ -1,7 +1,7 @@
 #include <ng5/ng5_result_handle.h>
 
 int result_handle_create(struct result_handle *handle, struct storage_engine *context, slot_vector_slot_t id,
-        const struct ng5_vector of_type(T) *result, enum result_handle_type type)
+        const ng5_vector_t of_type(T) *result, enum result_handle_type type)
 {
     check_non_null(handle);
     check_non_null(context);

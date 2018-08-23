@@ -57,13 +57,13 @@ struct storage_engine
 
     int (*import_strings)(struct storage_engine *self,
                           optional struct result_handle of_type(store_string_id_t) *out,
-                          const struct ng5_vector of_type(char *) *strings);
+                          const ng5_vector_t of_type(char *) *strings);
 
     int (*locate_strings)(struct storage_engine *self, optional struct result_handle of_type(store_string_id_t) *out,
-                          const struct ng5_vector of_type(char *) *strings);
+                          const ng5_vector_t of_type(char *) *strings);
 
     int (*extract_strings)(struct storage_engine *self, struct result_handle of_type(char *) strings,
-                           const struct ng5_vector of_type(struct compressed_string) *input);
+                           const ng5_vector_t of_type(struct compressed_string) *input);
 
     int (*find_strings)(struct storage_engine *self, struct result_handle of_type(store_string_id_t) *out,
                         pred_func_t pred);
@@ -182,7 +182,7 @@ struct storage_engine
 */
 unused_fn static int storage_engine_import_strings(struct storage_engine *engine,
         optional struct result_handle of_type(store_string_id_t) *out,
-        const struct ng5_vector of_type(char *) *strings)
+        const ng5_vector_t of_type(char *) *strings)
 {
     check_non_null(engine)
     check_non_null(strings)
@@ -196,7 +196,7 @@ unused_fn static int storage_engine_import_strings(struct storage_engine *engine
  */
 unused_fn static int storage_engine_locate_strings(struct storage_engine *engine,
         optional struct result_handle of_type(store_string_id_t) *out,
-        const struct ng5_vector of_type(char *) *strings)
+        const ng5_vector_t of_type(char *) *strings)
 {
     check_non_null(engine)
     check_non_null(strings)
@@ -208,7 +208,7 @@ unused_fn static int storage_engine_locate_strings(struct storage_engine *engine
  * Decodes strings given in <code>input</code> and returns c-strings for them.
  */
 unused_fn static int storage_engine_extract_strings(struct result_handle of_type(char *) *out, struct storage_engine *engine,
-        const struct ng5_vector of_type(struct compressed_string) *input)
+        const ng5_vector_t of_type(struct compressed_string) *input)
 {
     check_non_null(engine)
     check_non_null(out)

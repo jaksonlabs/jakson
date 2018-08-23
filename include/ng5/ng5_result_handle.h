@@ -31,13 +31,13 @@ enum result_handle_type {
 struct result_handle
 {
     struct storage_engine          *context;
-    const struct ng5_vector of_type(T) *result;
+    const ng5_vector_t of_type(T) *result;
     slot_vector_slot_t              id;
     enum result_handle_type         type;
 };
 
 int result_handle_create(struct result_handle *handle, struct storage_engine *context, slot_vector_slot_t id,
-        const struct ng5_vector of_type(T) *result, enum result_handle_type type);
+        const ng5_vector_t of_type(T) *result, enum result_handle_type type);
 
 const void *result_handle_read(size_t *num_elements, const struct result_handle *handle);
 

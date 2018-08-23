@@ -1,7 +1,7 @@
 #include <stdx/ng5_vector.h>
 #include <sys/mman.h>
 
-int vector_create(struct ng5_vector *out, const ng5_allocator_t *alloc, size_t elem_size, size_t cap_elems)
+int vector_create(ng5_vector_t *out, const ng5_allocator_t *alloc, size_t elem_size, size_t cap_elems)
 {
     check_non_null(out)
     allocator_this_or_default(&out->allocator, alloc);
@@ -13,7 +13,7 @@ int vector_create(struct ng5_vector *out, const ng5_allocator_t *alloc, size_t e
     return STATUS_OK;
 }
 
-int vector_madvise(struct ng5_vector *vec, int madvise_advice)
+int vector_madvise(ng5_vector_t *vec, int madvise_advice)
 {
     check_non_null(vec);
     unused(vec);
@@ -22,7 +22,7 @@ int vector_madvise(struct ng5_vector *vec, int madvise_advice)
     return STATUS_OK;
 }
 
-int vector_set_growfactor(struct ng5_vector *vec, float factor)
+int vector_set_growfactor(ng5_vector_t *vec, float factor)
 {
     check_non_null(vec);
     check_larger_one(factor);
@@ -30,7 +30,7 @@ int vector_set_growfactor(struct ng5_vector *vec, float factor)
     return STATUS_OK;
 }
 
-int vector_drop(struct ng5_vector *vec)
+int vector_drop(ng5_vector_t *vec)
 {
     check_non_null(vec)
     allocator_free(&vec->allocator, vec->base);
@@ -39,13 +39,13 @@ int vector_drop(struct ng5_vector *vec)
     return STATUS_OK;
 }
 
-int vector_is_empty(struct ng5_vector *vec)
+int vector_is_empty(ng5_vector_t *vec)
 {
     check_non_null(vec)
     return vec->num_elems == 0 ? STATUS_TRUE : STATUS_FALSE;
 }
 
-int vector_push(struct ng5_vector *vec, const void *data, size_t num_elems)
+int vector_push(ng5_vector_t *vec, const void *data, size_t num_elems)
 {
     check_non_null(vec && data)
     size_t next_num = vec->num_elems + num_elems;
@@ -59,14 +59,14 @@ int vector_push(struct ng5_vector *vec, const void *data, size_t num_elems)
     return STATUS_OK;
 }
 
-void *vector_push_and_get(struct ng5_vector *vec, const void *data, size_t num_elems)
+void *vector_push_and_get(ng5_vector_t *vec, const void *data, size_t num_elems)
 {
     size_t pos    = vector_len(vec);
     int    status = vector_push(vec, data, num_elems);
     return status == STATUS_OK ? (void *) vector_at(vec, pos) : NULL;
 }
 
-int vector_repreat_push(struct ng5_vector *vec, const void *data, size_t how_many)
+int vector_repreat_push(ng5_vector_t *vec, const void *data, size_t how_many)
 {
     check_non_null(vec && data)
     size_t next_num = vec->num_elems + how_many;
@@ -83,7 +83,7 @@ int vector_repreat_push(struct ng5_vector *vec, const void *data, size_t how_man
     return STATUS_OK;
 }
 
-const void *vector_pop(struct ng5_vector *vec)
+const void *vector_pop(ng5_vector_t *vec)
 {
     void *result;
     if (likely((result = (vec? (vec->num_elems > 0 ? vec->base + (vec->num_elems - 1) * vec->elem_size : NULL) : NULL)) != NULL)) {
@@ -92,7 +92,7 @@ const void *vector_pop(struct ng5_vector *vec)
     return result;
 }
 
-int vector_grow(size_t *num_new_slots, struct ng5_vector *vec)
+int vector_grow(size_t *num_new_slots, ng5_vector_t *vec)
 {
     check_non_null(vec)
     size_t free_slots_before = vec->cap_elems - vec->num_elems;
@@ -105,31 +105,31 @@ int vector_grow(size_t *num_new_slots, struct ng5_vector *vec)
     return STATUS_OK;
 }
 
-size_t vector_len(const struct ng5_vector *vec)
+size_t vector_len(const ng5_vector_t *vec)
 {
     check_non_null(vec)
     return vec->num_elems;
 }
 
-const void *vector_at(const struct ng5_vector *vec, size_t pos)
+const void *vector_at(const ng5_vector_t *vec, size_t pos)
 {
     return (vec && pos < vec->num_elems) ? vec->base + pos * vec->elem_size : NULL;
 }
 
-size_t vector_cap(const struct ng5_vector *vec)
+size_t vector_cap(const ng5_vector_t *vec)
 {
     check_non_null(vec)
     return vec->cap_elems;
 }
 
-int vector_enlarge_size(struct ng5_vector *vec)
+int vector_enlarge_size(ng5_vector_t *vec)
 {
     check_non_null(vec);
     vec->num_elems = vec->cap_elems;
     return STATUS_OK;
 }
 
-int vector_set(struct ng5_vector *vec, size_t pos, const void *data)
+int vector_set(ng5_vector_t *vec, size_t pos, const void *data)
 {
     check_non_null(vec)
     assert(pos < vec->num_elems);
@@ -137,7 +137,7 @@ int vector_set(struct ng5_vector *vec, size_t pos, const void *data)
     return STATUS_OK;
 }
 
-const void *vector_data(const struct ng5_vector *vec)
+const void *vector_data(const ng5_vector_t *vec)
 {
     return vec ? vec->base : NULL;
 }

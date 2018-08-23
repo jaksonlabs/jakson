@@ -12,8 +12,8 @@ struct entry {
 };
 
 struct naive_extra {
-    struct ng5_vector of_type(entry)        contents;
-    struct ng5_vector of_type(string_id_t)  freelist;
+    ng5_vector_t of_type(entry)        contents;
+    ng5_vector_t of_type(string_id_t)  freelist;
     struct string_map                index;
     struct spinlock                     lock;
 };
