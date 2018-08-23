@@ -44,7 +44,7 @@ ng5_vector_t *to_string_list(const char *contents)
 {
     fprintf(stderr, "converting to line list...");
     ng5_vector_t *vector = malloc(sizeof(ng5_vector_t));
-    vector_create(vector, NULL, sizeof(char *), 15372804);
+    ng5_vector_create(vector, NULL, sizeof(char*), 15372804);
     char *begin, *end;
     begin = (char *) contents;
     for (end = (char *) contents; *end != '\0'; end++) {
@@ -54,13 +54,13 @@ ng5_vector_t *to_string_list(const char *contents)
             memcpy(string, begin, len);
             string[len] = '\0';
 
-            vector_push(vector, &string, 1);
+            ng5_vector_push(vector, &string, 1);
             begin = end + 1;
 
         }
        // fprintf(stderr, "%f done so far...\n", vector_len(ng5_vector) / 4561977.0f * 100);
     }
-    fprintf(stderr, "DONE, %zu lines\n", vector_len(vector));
+    fprintf(stderr, "DONE, %zu lines\n", ng5_vector_len(vector));
     return vector;
 }
 
@@ -140,17 +140,17 @@ void experiments_hashing()
                 float insert_duration = 0;
 
                 fprintf(stderr, "*** %d of %d in progress ***\n", sample+1, NUM_SAMPLES);
-                size_t num_buckets = bucket_size/4000.0f*vector_len(lines);
+                size_t num_buckets = bucket_size/4000.0f*ng5_vector_len(lines);
 
                 timestamp_t create_begin = time_current_time_ms();
-                string_dic_create_async(&dic, vector_len(lines), num_buckets, 10, 64, NULL);
+                string_dic_create_async(&dic, ng5_vector_len(lines), num_buckets, 10, 64, NULL);
                 timestamp_t create_end = time_current_time_ms();
                 created_duration = (create_end-create_begin)/1000.0f;
 
                 string_id_t* ids = NULL; //, * ids_out;
 
-                char** strings = (char**) vector_data(lines);
-                size_t num_strings = vector_len(lines)-1;
+                char** strings = (char**) ng5_vector_data(lines);
+                size_t num_strings = ng5_vector_len(lines)-1;
 
                 string_dic_reset_counters(&dic);
                 timestamp_t inserted_begin = time_current_time_ms();
@@ -171,7 +171,7 @@ void experiments_hashing()
 
                 printf("%d;%d;%zu;%f;%f;%f;%zu\n", yago_percent[pi], sample, num_buckets, created_duration,
                         insert_duration,
-                        (created_duration+insert_duration), vector_len(lines));
+                        (created_duration+insert_duration), ng5_vector_len(lines));
 
                 fflush(stderr);
                 fflush(stdout);
@@ -181,12 +181,12 @@ void experiments_hashing()
 
         free(contents);
 
-        for (size_t i = 0; i < vector_len(lines); i++) {
-            char *string = *vector_get(lines, i, char *);
+        for (size_t i = 0; i <ng5_vector_len(lines); i++) {
+            char *string = *ng5_vector_get(lines, i, char *);
             free(string);
         }
 
-        vector_drop(lines);
+        ng5_vector_drop(lines);
         free(lines);
 
     }

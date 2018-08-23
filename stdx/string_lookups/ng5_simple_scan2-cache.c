@@ -116,9 +116,9 @@ static int simple_drop(struct string_map *self)
 {
     assert(self->tag == STRING_ID_MAP_SIMPLE);
     struct simple_extra *extra = simple_extra(self);
-    struct simple_bucket *data = (struct simple_bucket *) vector_data(&extra->buckets);
+    struct simple_bucket *data = (struct simple_bucket *) ng5_vector_data(&extra->buckets);
     check_success(simple_bucket_drop(data, extra->buckets.cap_elems, &self->allocator));
-    vector_drop(&extra->buckets);
+    ng5_vector_drop(&extra->buckets);
     allocator_free(&self->allocator, self->extra);
     return STATUS_OK;
 }
@@ -149,7 +149,7 @@ static size_t simple_bucket_find_entry_by_key(struct simple_bucket *bucket, cons
 {
     unused(alloc);
 
-    struct simple_bucket_entry *data = (struct simple_bucket_entry *) vector_data(&bucket->entries);
+    struct simple_bucket_entry *data = (struct simple_bucket_entry *) ng5_vector_data(&bucket->entries);
     size_t key_str_len = strlen(key);
 
     if (bucket->cache_idx!=(size_t) -1) {
@@ -181,7 +181,7 @@ static int simple_map_fetch(ng5_vector_t of_type(simple_bucket) *buckets, string
         ng5_allocator_t *alloc)
 {
     size_t num_not_found = 0;
-    struct simple_bucket *data = (struct simple_bucket *) vector_data(buckets);
+    struct simple_bucket *data = (struct simple_bucket *) ng5_vector_data(buckets);
 
     for (size_t i = 0; i < num_keys; i++) {
         struct simple_bucket       *bucket     = data + bucket_idxs[i];
@@ -246,7 +246,7 @@ static int simple_update_key_blind(struct string_map *self, const string_id_t *v
 
 static int simple_map_remove(struct simple_extra *extra, size_t *bucket_idxs, char *const *keys, size_t num_keys, ng5_allocator_t *alloc)
 {
-    struct simple_bucket *data = (struct simple_bucket *) vector_data(&extra->buckets);
+    struct simple_bucket *data = (struct simple_bucket *) ng5_vector_data(&extra->buckets);
 
     for (size_t i = 0; i < num_keys; i++) {
         struct simple_bucket* bucket     = data + bucket_idxs[i];
@@ -255,7 +255,7 @@ static int simple_map_remove(struct simple_extra *extra, size_t *bucket_idxs, ch
         simple_bucket_lock(bucket);
         size_t                needle_pos = simple_bucket_find_entry_by_key(bucket, key, alloc);
         if (likely(needle_pos < bucket->entries.cap_elems)) {
-            struct simple_bucket_entry *entry = (struct simple_bucket_entry *) vector_data(&bucket->entries) + needle_pos;
+            struct simple_bucket_entry *entry = (struct simple_bucket_entry *) ng5_vector_data(&bucket->entries) + needle_pos;
             assert (entry->in_use);
             entry->in_use                     = false;
             simple_bucket_freelist_push(bucket, needle_pos);
@@ -300,8 +300,8 @@ static int simple_create_extra(struct string_map *self, float grow_factor, size_
 {
     if ((self->extra = allocator_malloc(&self->allocator, sizeof(struct simple_extra))) != NULL) {
         struct simple_extra *extra = simple_extra(self);
-        vector_create(&extra->buckets, &self->allocator, sizeof(struct simple_bucket), num_buckets);
-        struct simple_bucket *data = (struct simple_bucket *) vector_data(&extra->buckets);
+        ng5_vector_create(&extra->buckets, &self->allocator, sizeof(struct simple_bucket), num_buckets);
+        struct simple_bucket *data = (struct simple_bucket *) ng5_vector_data(&extra->buckets);
         check_success(simple_bucket_create(data, num_buckets, cap_buckets, grow_factor, &self->allocator));
         return STATUS_OK;
     } else {
@@ -333,11 +333,11 @@ static int simple_bucket_create(struct simple_bucket *buckets, size_t num_bucket
         struct simple_bucket *bucket = buckets++;
         bucket->cache_idx = (size_t) -1;
         spinlock_create(&bucket->spinlock);
-        vector_create(&bucket->entries, alloc, sizeof(struct simple_bucket_entry), bucket_cap);
-        vector_create(&bucket->freelist, alloc, sizeof(size_t), bucket_cap);
-        vector_set_growfactor(&bucket->entries, grow_factor);
-        vector_set_growfactor(&bucket->freelist, grow_factor);
-        vector_repreat_push(&bucket->entries, &entry, bucket_cap);
+        ng5_vector_create(&bucket->entries, alloc, sizeof(struct simple_bucket_entry), bucket_cap);
+        ng5_vector_create(&bucket->freelist, alloc, sizeof(size_t), bucket_cap);
+        ng5_vector_set_growfactor(&bucket->entries, grow_factor);
+        ng5_vector_set_growfactor(&bucket->freelist, grow_factor);
+        ng5_vector_repreat_push(&bucket->entries, &entry, bucket_cap);
     }
 
     return STATUS_OK;
@@ -350,8 +350,8 @@ static int simple_bucket_drop(struct simple_bucket *buckets, size_t num_buckets,
 
     while (num_buckets--) {
         struct simple_bucket *bucket = buckets++;
-        check_success(vector_drop(&bucket->entries));
-        check_success(vector_drop(&bucket->freelist));
+        check_success(ng5_vector_drop(&bucket->entries));
+        check_success(ng5_vector_drop(&bucket->freelist));
     }
 
     return STATUS_OK;
@@ -373,7 +373,7 @@ static void simple_bucket_freelist_push(struct simple_bucket *bucket, size_t idx
 {
     ng5_vector_t of_type(size_t)              *freelist = &bucket->freelist;
     assert (freelist->num_elems + 1 < freelist->cap_elems);
-    vector_push(freelist, &idx, 1);
+    ng5_vector_push(freelist, &idx, 1);
 }
 
 unused_fn
@@ -389,24 +389,24 @@ static size_t simple_bucket_freelist_pop(struct simple_bucket *bucket, ng5_alloc
             .value   = 0
     };
 
-    if (unlikely(vector_is_empty(freelist))) {
+    if (unlikely(ng5_vector_is_empty(freelist))) {
         size_t new_slots;
         size_t last_slot = entries->cap_elems;
-        check_success(vector_grow(&new_slots, freelist));
-        check_success(vector_grow(NULL, entries));
+        check_success(ng5_vector_grow(&new_slots, freelist));
+        check_success(ng5_vector_grow(NULL, entries));
         size_t *new_slot_ids = allocator_malloc(alloc, new_slots * sizeof(size_t));
         for (size_t slot = 0; slot < new_slots; slot++) {
             size_t new_slot_id = last_slot + slot;
             new_slot_ids[slot] = new_slot_id;
-            check_success(vector_push(entries, &empty, 1));
+            check_success(ng5_vector_push(entries, &empty, 1));
         }
-        check_success(vector_push(freelist, new_slot_ids, new_slots));
+        check_success(ng5_vector_push(freelist, new_slot_ids, new_slots));
         check_success(allocator_free(alloc, new_slot_ids));
     }
-    assert (!vector_is_empty(freelist));
-    assert (vector_cap(freelist) == vector_cap(entries));
+    assert (!ng5_vector_is_empty(freelist));
+    assert (ng5_vector_cap(freelist) ==ng5_vector_cap(entries));
 
-    size_t result = *(size_t *)vector_pop(freelist);
+    size_t result = *(size_t *) ng5_vector_pop(freelist);
     return result;
 }
 
@@ -418,7 +418,7 @@ static int simple_bucket_insert(struct simple_bucket *bucket, const char *key, s
     simple_bucket_lock(bucket);
 
     size_t                      needle_pos = simple_bucket_find_entry_by_key(bucket, key, alloc);
-    struct simple_bucket_entry *data       = (struct simple_bucket_entry *) vector_data(&bucket->entries);
+    struct simple_bucket_entry *data       = (struct simple_bucket_entry *) ng5_vector_data(&bucket->entries);
 
 
     if (needle_pos < bucket->entries.cap_elems) {
@@ -427,7 +427,7 @@ static int simple_bucket_insert(struct simple_bucket *bucket, const char *key, s
     } else {
         /* no entry found */
         size_t free_slot = simple_bucket_freelist_pop(bucket, alloc);
-        data = (struct simple_bucket_entry *) vector_data(&bucket->entries);
+        data = (struct simple_bucket_entry *) ng5_vector_data(&bucket->entries);
         struct simple_bucket_entry *entry = data + free_slot;
         assert(!entry->in_use);
         entry->in_use  = true;
@@ -450,7 +450,7 @@ static int simple_map_insert(ng5_vector_t of_type(simple_bucket)* buckets, char*
     check_non_null(values)
     check_non_null(bucket_idxs)
 
-    struct simple_bucket *buckets_data = (struct simple_bucket *) vector_data(buckets);
+    struct simple_bucket *buckets_data = (struct simple_bucket *) ng5_vector_data(buckets);
     int status = STATUS_OK;
     for (size_t i = 0; status == STATUS_OK && i < num_pairs; i++) {
         size_t       bucket_idx      = bucket_idxs[i];

@@ -137,9 +137,9 @@ static int async_extra_create(struct string_dic *self, size_t capacity, size_t n
     self->extra          = allocator_malloc(&self->alloc, sizeof(async_extra_t));
     async_extra_t *extra = async_extra_get(self);
     spinlock_create(&extra->spinlock);
-    vector_create(&extra->carriers, &self->alloc, sizeof(carrier_t), nthreads);
+    ng5_vector_create(&extra->carriers, &self->alloc, sizeof(carrier_t), nthreads);
     async_setup_carriers(self, capacity, num_index_buckets, num_index_bucket_cap, nthreads);
-    vector_create(&extra->carrier_mapping, &self->alloc, sizeof(carrier_t *), capacity);
+    ng5_vector_create(&extra->carrier_mapping, &self->alloc, sizeof(carrier_t*), capacity);
 
     return STATUS_OK;
 }
@@ -149,8 +149,8 @@ static int async_drop(struct string_dic *self)
     check_tag(self->tag, STRING_DIC_ASYNC);
     async_extra_t *extra = async_extra_get(self);
 
-    check_success(vector_drop(&extra->carriers));
-    check_success(vector_drop(&extra->carrier_mapping));
+    check_success(ng5_vector_drop(&extra->carriers));
+    check_success(ng5_vector_drop(&extra->carrier_mapping));
     check_success(allocator_free(&self->alloc, extra));
     return STATUS_OK;
 }
@@ -162,11 +162,11 @@ void *carrier_insert_func(void *args)
 
     if (likely(this_args->strings.num_elems > 0)) {
         debug("[EXEC  ] carrier %zu starts task", this_args->carrier->id);
-        char** data = (char**) vector_data(&this_args->strings);
+        char** data = (char**) ng5_vector_data(&this_args->strings);
 
         int status = string_dic_insert(&this_args->carrier->local_dict,
                 this_args->write_out ? &this_args->out : NULL,
-                data, vector_len(&this_args->strings));
+                data, ng5_vector_len(&this_args->strings));
 
         panic_if(status!=STATUS_OK, "internal error during thread-local string dictionary building process");
         debug("[EXEC  ] carrier %zu finished task", this_args->carrier->id);
@@ -185,7 +185,7 @@ static int async_insert(struct string_dic *self, string_id_t **out, char * const
     async_lock(self);
 
     async_extra_t      *extra                    = async_extra_get(self);
-    uint_fast16_t       nthreads                 = vector_len(&extra->carriers);
+    uint_fast16_t       nthreads                 = ng5_vector_len(&extra->carriers);
 
     /* map string depending on hash value to a particular carrier */
     uint_fast16_t      *str_carrier_mapping      = allocator_malloc(&self->alloc, num_strings * sizeof(uint_fast16_t));
@@ -195,7 +195,7 @@ static int async_insert(struct string_dic *self, string_id_t **out, char * const
     memset(carrier_nstrings, 0, nthreads * sizeof(size_t));
 
     ng5_vector_t of_type(carrier_arg_t *) carrier_args;
-    vector_create(&carrier_args, &self->alloc, sizeof(carrier_arg_t *), nthreads);
+    ng5_vector_create(&carrier_args, &self->alloc, sizeof(carrier_arg_t*), nthreads);
 
     /* compute which carrier is responsible for which string */
     for (size_t i = 0; i < num_strings; i++) {
@@ -208,34 +208,34 @@ static int async_insert(struct string_dic *self, string_id_t **out, char * const
     /* prepare to move string subsets to carriers */
     for (uint_fast16_t i = 0; i < nthreads; i++) {
         carrier_arg_t* entry = allocator_malloc(&self->alloc, sizeof(carrier_arg_t));
-        entry->carrier       = vector_get(&extra->carriers, i, carrier_t);
+        entry->carrier       = ng5_vector_get(&extra->carriers, i, carrier_t);
 
-        vector_create(&entry->strings, &self->alloc, sizeof(char*), carrier_nstrings[i]);
-        vector_push(&carrier_args, &entry, 1);
+        ng5_vector_create(&entry->strings, &self->alloc, sizeof(char*), carrier_nstrings[i]);
+        ng5_vector_push(&carrier_args, &entry, 1);
         assert (entry->strings.base != NULL);
     }
 
     /* create per-carrier string subset */
     for (size_t i = 0; i < num_strings; i++) {
         uint_fast16_t  thread_id   = str_carrier_mapping[i];
-        carrier_arg_t *carrier_arg = *vector_get(&carrier_args, thread_id, carrier_arg_t *);
+        carrier_arg_t *carrier_arg = *ng5_vector_get(&carrier_args, thread_id, carrier_arg_t *);
         carrier_arg->write_out     = out != NULL;
 
-        vector_push(&carrier_arg->strings, &strings[i], 1);
+        ng5_vector_push(&carrier_arg->strings, &strings[i], 1);
     }
 
     /* schedule insert operation per carrier */
     for (uint_fast16_t thread_id = 0; thread_id < nthreads; thread_id++) {
         if (carrier_nstrings[thread_id] > 0) {
-            carrier_arg_t *carrier_arg = *vector_get(&carrier_args, thread_id, carrier_arg_t *);
-            carrier_t      *carrier    =  vector_get(&extra->carriers, thread_id, carrier_t);
+            carrier_arg_t *carrier_arg = *ng5_vector_get(&carrier_args, thread_id, carrier_arg_t *);
+            carrier_t      *carrier    = ng5_vector_get(&extra->carriers, thread_id, carrier_t);
             pthread_create(&carrier->thread, NULL, carrier_insert_func, carrier_arg);
         }
     }
 
     /* synchronize */
     for (uint_fast16_t thread_id = 0; thread_id < nthreads; thread_id++) {
-        carrier_t *carrier = vector_get(&extra->carriers, thread_id, carrier_t);
+        carrier_t *carrier = ng5_vector_get(&extra->carriers, thread_id, carrier_t);
         pthread_join(carrier->thread, NULL);
     }
 
@@ -254,7 +254,7 @@ static int async_insert(struct string_dic *self, string_id_t **out, char * const
         size_t       current_out = 0;
 
         for (uint_fast16_t thread_id = 0; thread_id < nthreads; thread_id++) {
-            carrier_arg_t *carrier_arg = *vector_get(&carrier_args, thread_id, carrier_arg_t *);
+            carrier_arg_t *carrier_arg = *ng5_vector_get(&carrier_args, thread_id, carrier_arg_t *);
             for (size_t local_idx = 0; local_idx < carrier_nstrings[thread_id]; local_idx++) {
                 string_id_t global_string_owner_id = thread_id;
                 string_id_t global_string_local_id = carrier_arg->out[local_idx];
@@ -270,15 +270,15 @@ static int async_insert(struct string_dic *self, string_id_t **out, char * const
 
     /* cleanup */
     for (uint_fast16_t thread_id = 0; thread_id < nthreads; thread_id++) {
-        carrier_arg_t *carrier_arg = *vector_get(&carrier_args, thread_id, carrier_arg_t *);
-        vector_drop(&carrier_arg->strings);
+        carrier_arg_t *carrier_arg = *ng5_vector_get(&carrier_args, thread_id, carrier_arg_t *);
+        ng5_vector_drop(&carrier_arg->strings);
         allocator_free(&self->alloc, carrier_arg);
     }
 
     /* cleanup */
     allocator_free(&self->alloc, carrier_nstrings);
     allocator_free(&self->alloc, str_carrier_mapping);
-    vector_drop(&carrier_args);
+    ng5_vector_drop(&carrier_args);
 
     async_unlock(self);
 
@@ -400,8 +400,8 @@ static int async_setup_carriers(struct string_dic *self, size_t capacity, size_t
     carrier_t      new_carrier, *carrier;
 
     for (size_t thread_id = 0; thread_id < nthreads; thread_id++) {
-        vector_push(&extra->carriers, &new_carrier, 1);
-        carrier = vector_get(&extra->carriers, thread_id, carrier_t);
+        ng5_vector_push(&extra->carriers, &new_carrier, 1);
+        carrier = ng5_vector_get(&extra->carriers, thread_id, carrier_t);
         async_carrier_create(carrier, thread_id, local_capacity, local_bucket_num, local_bucket_cap,
         &self->alloc);
     }

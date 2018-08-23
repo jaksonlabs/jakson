@@ -82,14 +82,14 @@ static int extra_create(struct string_dic *self, size_t capacity, size_t num_ind
     self->extra = allocator_malloc(&self->alloc, sizeof(struct naive_extra));
     struct naive_extra *extra = this_extra(self);
     spinlock_create(&extra->lock);
-    check_success(vector_create(&extra->contents, &self->alloc, sizeof(struct entry), capacity));
-    check_success(vector_create(&extra->freelist, &self->alloc, sizeof(string_id_t), capacity));
+    check_success(ng5_vector_create(&extra->contents, &self->alloc, sizeof(struct entry), capacity));
+    check_success(ng5_vector_create(&extra->freelist, &self->alloc, sizeof(string_id_t), capacity));
     struct entry empty = {
         .str    = NULL,
         .in_use = false
     };
     for (size_t i = 0; i < capacity; i++) {
-        check_success(vector_push(&extra->contents, &empty, 1));
+        check_success(ng5_vector_push(&extra->contents, &empty, 1));
         freelist_push(self, i);
     }
     unused(nthreads);
@@ -108,22 +108,22 @@ static int freelist_pop(string_id_t *out, struct string_dic *self)
 {
     assert (self->tag == STRING_DIC_NAIVE);
     struct naive_extra *extra = this_extra(self);
-    if (unlikely(vector_is_empty(&extra->freelist))) {
+    if (unlikely(ng5_vector_is_empty(&extra->freelist))) {
         size_t num_new_pos;
-        check_success(vector_grow(&num_new_pos, &extra->freelist));
-        check_success(vector_grow(NULL, &extra->contents));
+        check_success(ng5_vector_grow(&num_new_pos, &extra->freelist));
+        check_success(ng5_vector_grow(NULL, &extra->contents));
         assert (extra->freelist.cap_elems == extra->contents.cap_elems);
         struct entry empty = {
             .in_use = false,
             .str    = NULL
         };
         while (num_new_pos--) {
-            size_t new_pos = vector_len(&extra->contents);
-            check_success(vector_push(&extra->freelist, &new_pos, 1));
-            check_success(vector_push(&extra->contents, &empty, 1));
+            size_t new_pos = ng5_vector_len(&extra->contents);
+            check_success(ng5_vector_push(&extra->freelist, &new_pos, 1));
+            check_success(ng5_vector_push(&extra->contents, &empty, 1));
         }
     }
-    *out = *(string_id_t *) vector_pop(&extra->freelist);
+    *out = *(string_id_t *) ng5_vector_pop(&extra->freelist);
     return STATUS_OK;
 }
 
@@ -131,7 +131,7 @@ static int freelist_push(struct string_dic *self, string_id_t idx)
 {
     assert (self->tag == STRING_DIC_NAIVE);
     struct naive_extra *extra = this_extra(self);
-    check_success(vector_push(&extra->freelist, &idx, 1));
+    check_success(ng5_vector_push(&extra->freelist, &idx, 1));
     assert (extra->freelist.cap_elems == extra->contents.cap_elems);
     return STATUS_OK;
 }
@@ -154,8 +154,8 @@ static int this_drop(struct string_dic *self)
         }
     }
 
-    vector_drop(&extra->freelist);
-    vector_drop(&extra->contents);
+    ng5_vector_drop(&extra->freelist);
+    ng5_vector_drop(&extra->contents);
     string_lookup_drop(&extra->index);
 
     unlock(self);
@@ -198,7 +198,7 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
 
             /* register in contents list */
             panic_if(freelist_pop(&string_id, self) != STATUS_OK, "slot management broken");
-            struct entry *entries = (struct entry *) vector_data(&extra->contents);
+            struct entry *entries = (struct entry *) ng5_vector_data(&extra->contents);
             struct entry *entry   = entries + string_id;
             assert (!entry->in_use);
             entry->in_use         = true;
@@ -239,7 +239,7 @@ static int this_remove(struct string_dic *self, string_id_t *strings, size_t num
     /* remove strings from contents ng5_vector, and skip duplicates */
     for (size_t i = 0; i < num_strings; i++) {
         string_id_t string_id = strings[i];
-        struct entry *entry   = (struct entry *) vector_data(&extra->contents) + string_id;
+        struct entry *entry   = (struct entry *) ng5_vector_data(&extra->contents) + string_id;
         if (likely(entry->in_use)) {
             strings_to_delete[num_strings_to_delete]    = entry->str;
             string_ids_to_delete[num_strings_to_delete] = strings[i];
@@ -311,14 +311,14 @@ static char **this_extract(struct string_dic *self, const string_id_t *ids, size
 
     struct naive_extra *extra = this_extra(self);
     char **result = allocator_malloc(&self->alloc, num_ids * sizeof(char *));
-    struct entry *entries = (struct entry *) vector_data(&extra->contents);
+    struct entry *entries = (struct entry *) ng5_vector_data(&extra->contents);
 
     /* Optimization: notify the kernel that the content list is accessed randomly (since hash based access)*/
-    vector_madvise(&extra->contents, MADV_RANDOM | MADV_WILLNEED);
+    ng5_vector_advise(&extra->contents, MADV_RANDOM | MADV_WILLNEED);
 
     for (size_t i = 0; i < num_ids; i++) {
         string_id_t string_id = ids[i];
-        assert(string_id < vector_len(&extra->contents));
+        assert(string_id <ng5_vector_len(&extra->contents));
         assert(entries[string_id].in_use);
         result[i] = entries[string_id].str;
     }
