@@ -1,19 +1,19 @@
 #include <stdio.h>
 #include <check.h>
 
-#include <stdx/string_dic.h>
-#include <stdx/string_map.h>
+#include <stdx/ng5_string_dic.h>
+#include <stdx/ng5_string_map.h>
 #include <stdlib.h>
-#include <stdx/string_lookups/simple_bsearch.h>
-#include <stdx/string_lookups/simple_scan1.h>
-#include <stdx/string_lookups/simple_scan1-cache.h>
-#include <stdx/string_lookups/simple_scan2.h>
-#include <stdx/string_lookups/simple_scan3.h>
-#include <stdx/string_lookups/simple_scan4.h>
-#include <stdx/string_lookups/simple_scan2-cache.h>
-#include <stdx/string_lookups/simple_scan3-cache.h>
-#include <stdx/string_lookups/simple_scan4-cache.h>
-#include <stdx/string_lookups/simple_scan1-parallel.h>
+#include <stdx/string_lookups/ng5_simple_bsearch.h>
+#include <stdx/string_lookups/ng5_simple_scan1.h>
+#include <stdx/string_lookups/ng5_simple_scan1-cache.h>
+#include <stdx/string_lookups/ng5_simple_scan2.h>
+#include <stdx/string_lookups/ng5_simple_scan3.h>
+#include <stdx/string_lookups/ng5_simple_scan4.h>
+#include <stdx/string_lookups/ng5_simple_scan2-cache.h>
+#include <stdx/string_lookups/ng5_simple_scan3-cache.h>
+#include <stdx/string_lookups/ng5_simple_scan4-cache.h>
+#include <stdx/string_lookups/ng5_simple_scan1-parallel.h>
 
 void test_string_hashtable_generic_createdrop(struct string_map *map, int status) {
 

@@ -1,9 +1,9 @@
 #include <stdio.h>
-#include <stdx/string_map.h>
-#include <stdx/time.h>
+#include <stdx/ng5_string_map.h>
+#include <stdx/ng5_time.h>
 #include <stdlib.h>
-#include <stdx/string_dics/string_dic_naive.h>
-#include <stdx/string_dics/string_dic_async.h>
+#include <stdx/ng5_string_dic_sync.h>
+#include <stdx/ng5_string_dic_async.h>
 #include <apr_general.h>
 //#include <ng5/roadfire/roadfire.h>
 
@@ -40,10 +40,10 @@ static char *read_contents(const char *path)
     return buffer;
 }
 
-struct vector *to_string_list(const char *contents)
+struct ng5_vector *to_string_list(const char *contents)
 {
     fprintf(stderr, "converting to line list...");
-    struct vector *vector = malloc(sizeof(struct vector));
+    struct ng5_vector *vector = malloc(sizeof(struct ng5_vector));
     vector_create(vector, NULL, sizeof(char *), 15372804);
     char *begin, *end;
     begin = (char *) contents;
@@ -58,7 +58,7 @@ struct vector *to_string_list(const char *contents)
             begin = end + 1;
 
         }
-       // fprintf(stderr, "%f done so far...\n", vector_len(vector) / 4561977.0f * 100);
+       // fprintf(stderr, "%f done so far...\n", vector_len(ng5_vector) / 4561977.0f * 100);
     }
     fprintf(stderr, "DONE, %zu lines\n", vector_len(vector));
     return vector;
@@ -126,7 +126,7 @@ void experiments_hashing()
         fprintf(stderr, "... %fsec\n", (read_end-read_begin)/1000.0f);
 
         timestamp_t convert_begin = time_current_time_ms();
-        struct vector* lines = to_string_list(contents);
+        struct ng5_vector* lines = to_string_list(contents);
         timestamp_t convert_end = time_current_time_ms();
         fprintf(stderr, "... %fsec\n", (convert_end-convert_begin)/1000.0f);
         fflush(stderr);
