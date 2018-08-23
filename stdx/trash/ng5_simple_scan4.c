@@ -21,7 +21,7 @@
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <stdx/string_lookups/ng5_simple_scan2-cache.h>
+#include <stdx/trash/ng5_simple_scan4.h>
 #include <stdx/ng5_spinlock.h>
 #include <stdlib.h>
 #include <stdx/ng5_algorithm.h>
@@ -41,7 +41,6 @@ struct simple_bucket {
   struct spinlock                            spinlock;
   ng5_vector_t of_type(simple_bucket_entry) entries;
   ng5_vector_t of_type(size_t)              freelist;
-  size_t                                     cache_idx;
 };
 
 struct simple_extra {
@@ -94,7 +93,7 @@ static size_t simple_bucket_find_entry_by_key(struct simple_bucket *bucket, cons
 //  SIMPLE
 // ---------------------------------------------------------------------------------------------------------------------
 
-int string_hashtable_create_scan2_cache(struct string_map* map, const ng5_allocator_t* alloc, size_t num_buckets,
+int string_hashtable_create_scan4(struct string_map* map, const ng5_allocator_t* alloc, size_t num_buckets,
         size_t cap_buckets, float bucket_grow_factor)
 {
     check_success(allocator_this_or_default(&map->allocator, alloc));
@@ -152,28 +151,20 @@ static size_t simple_bucket_find_entry_by_key(struct simple_bucket *bucket, cons
     struct simple_bucket_entry *data = (struct simple_bucket_entry *) ng5_vector_data(&bucket->entries);
     size_t key_str_len = strlen(key);
 
-    if (bucket->cache_idx!=(size_t) -1) {
-        struct simple_bucket_entry* cache = data+bucket->cache_idx;
-        if (cache->in_use && cache->str_len==key_str_len && strcmp(cache->str, key)==0) {
-            return bucket->cache_idx;
-        }
+    bool found = false;
+    size_t i;
+    for (i = 0; i < bucket->entries.cap_elems && !found; i++) {
+        found = (data[i].in_use && data[i].str_len == key_str_len && strcmp(data[i].str, key) == 0);
     }
+    --i;
 
-    for (size_t i = 0; i < bucket->entries.cap_elems; i++) {
-        if (data[i].in_use && data[i].str_len == key_str_len && strcmp(data[i].str, key) == 0) {
-            /* swap */
-            if (i > 0) {
-                struct simple_bucket_entry tmp = data[i - 1];
-                *(data + (i - 1)) = *(data + i);
-                *(data + i) = tmp;
-                bucket->cache_idx = (i - 1);
-                return i - 1;
-            }
-            bucket->cache_idx = i;
-            return i;
-        }
+    if (found && i > 0) {
+        struct simple_bucket_entry tmp = data[i - 1];
+        *(data + (i - 1)) = *(data + i);
+        *(data + i) = tmp;
+        return i - 1;
     }
-    return bucket->entries.cap_elems;
+    return found ? (i - 1) : bucket->entries.cap_elems;
 }
 
 static int simple_map_fetch(ng5_vector_t of_type(simple_bucket) *buckets, string_id_t *values_out, bool *key_found_mask,
@@ -331,7 +322,6 @@ static int simple_bucket_create(struct simple_bucket *buckets, size_t num_bucket
 
     while (num_buckets--) {
         struct simple_bucket *bucket = buckets++;
-        bucket->cache_idx = (size_t) -1;
         spinlock_create(&bucket->spinlock);
         ng5_vector_create(&bucket->entries, alloc, sizeof(struct simple_bucket_entry), bucket_cap);
         ng5_vector_create(&bucket->freelist, alloc, sizeof(size_t), bucket_cap);

@@ -2,9 +2,9 @@
 #include <stdx/ng5_spinlock.h>
 #include <stdx/ng5_string_map.h>
 #include <stdx/ng5_string_dic_sync.h>
-#include <stdx/string_lookups/ng5_simple_scan1-parallel.h>
+#include <stdx/trash/ng5_simple_scan1-parallel.h>
 #include <stdlib.h>
-#include <stdx/string_lookups/ng5_simple_scan1-cache.h>
+#include <stdx/ng5_string_map_smart.h>
 
 struct entry {
     char                               *str;

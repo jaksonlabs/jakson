@@ -4,16 +4,16 @@
 #include <stdx/ng5_string_dic.h>
 #include <stdx/ng5_string_map.h>
 #include <stdlib.h>
-#include <stdx/string_lookups/ng5_simple_bsearch.h>
-#include <stdx/string_lookups/ng5_simple_scan1.h>
-#include <stdx/string_lookups/ng5_simple_scan1-cache.h>
-#include <stdx/string_lookups/ng5_simple_scan2.h>
-#include <stdx/string_lookups/ng5_simple_scan3.h>
-#include <stdx/string_lookups/ng5_simple_scan4.h>
-#include <stdx/string_lookups/ng5_simple_scan2-cache.h>
-#include <stdx/string_lookups/ng5_simple_scan3-cache.h>
-#include <stdx/string_lookups/ng5_simple_scan4-cache.h>
-#include <stdx/string_lookups/ng5_simple_scan1-parallel.h>
+#include <stdx/trash/ng5_simple_bsearch.h>
+#include <stdx/trash/ng5_simple_scan1.h>
+#include <stdx/ng5_string_map_smart.h>
+#include <stdx/trash/ng5_simple_scan2.h>
+#include <stdx/trash/ng5_simple_scan3.h>
+#include <stdx/trash/ng5_simple_scan4.h>
+#include <stdx/trash/ng5_simple_scan2-cache.h>
+#include <stdx/trash/ng5_simple_scan3-cache.h>
+#include <stdx/trash/ng5_simple_scan4-cache.h>
+#include <stdx/trash/ng5_simple_scan1-parallel.h>
 
 void test_string_hashtable_generic_createdrop(struct string_map *map, int status) {
 
@@ -331,7 +331,7 @@ START_TEST (test_string_hashtable_generic_remove_scan1_parallel)
     }
 END_TEST
 
-Suite* str_suite (void)
+static int run_test_string_hashtable (void)
 {
     TCase *tcase;
 
@@ -395,16 +395,9 @@ Suite* str_suite (void)
             tcase_add_test(tcase, test_string_hashtable_generic_putget_scan1_parallel);
             tcase_add_test(tcase, test_string_hashtable_generic_remove_scan1_parallel);
         suite_add_tcase(suite, tcase);
-    return suite;
-}
-
-int main (int argc, char *argv[])
-{
-    unused(argc);
-    unused(argv);
 
     int number_failed;
-    Suite *suite = str_suite();
+
     SRunner *runner = srunner_create(suite);
     srunner_run_all(runner, CK_NORMAL);
     number_failed = srunner_ntests_failed(runner);

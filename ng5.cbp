@@ -1,357 +1,363 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <CodeBlocks_project_file>
-   <FileVersion major="1" minor="6" />
-   <Project>
-      <Option title="ng5" />
-      <Option makefile_is_custom="1" />
-      <Option compiler="gcc" />
-      <Option virtualFolders="CMake Files\;CMake Files\cmake\;CMake Files\cmake\modules\;CMake Files\tests\;" />
-      <Build>
-      <Target title="all">
-         <Option working_dir="/Users/marcus/git/ng5" />
-         <Option type="4" />
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 all" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="test">
-         <Option working_dir="/Users/marcus/git/ng5" />
-         <Option type="4" />
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 test" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="edit_cache">
-         <Option working_dir="/Users/marcus/git/ng5" />
-         <Option type="4" />
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 edit_cache" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="rebuild_cache">
-         <Option working_dir="/Users/marcus/git/ng5" />
-         <Option type="4" />
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 rebuild_cache" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="ng5">
-         <Option output="/Users/marcus/git/ng5/cmake-build-debug/ng5" prefix_auto="0" extension_auto="0" />
-         <Option working_dir="/Users/marcus/git/ng5/cmake-build-debug" />
-         <Option object_output="./" />
-         <Option type="1" />
-         <Option compiler="gcc" />
-         <Compiler>
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include" />
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include" />
-            <Add directory="/Library/Frameworks" />
-            <Add directory="/System/Library/Frameworks" />
-            <Add directory="/Users/marcus/git/ng5/include" />
-            <Add directory="/usr/include" />
-            <Add directory="/usr/include/apr-1" />
-            <Add directory="/usr/local/include" />
-         </Compiler>
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 ng5" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="ng5/fast">
-         <Option output="/Users/marcus/git/ng5/cmake-build-debug/ng5" prefix_auto="0" extension_auto="0" />
-         <Option working_dir="/Users/marcus/git/ng5/cmake-build-debug" />
-         <Option object_output="./" />
-         <Option type="1" />
-         <Option compiler="gcc" />
-         <Compiler>
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include" />
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include" />
-            <Add directory="/Library/Frameworks" />
-            <Add directory="/System/Library/Frameworks" />
-            <Add directory="/Users/marcus/git/ng5/include" />
-            <Add directory="/usr/include" />
-            <Add directory="/usr/include/apr-1" />
-            <Add directory="/usr/local/include" />
-         </Compiler>
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 ng5/fast" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="test_string_hashtable">
-         <Option output="/Users/marcus/git/ng5/cmake-build-debug/test_string_hashtable" prefix_auto="0" extension_auto="0" />
-         <Option working_dir="/Users/marcus/git/ng5/cmake-build-debug" />
-         <Option object_output="./" />
-         <Option type="1" />
-         <Option compiler="gcc" />
-         <Compiler>
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include" />
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include" />
-            <Add directory="/Library/Frameworks" />
-            <Add directory="/System/Library/Frameworks" />
-            <Add directory="/Users/marcus/git/ng5/include" />
-            <Add directory="/Users/marcus/git/ng5/tests/." />
-            <Add directory="/usr/include" />
-            <Add directory="/usr/include/apr-1" />
-            <Add directory="/usr/local/Cellar/check/0.12.0/include" />
-            <Add directory="/usr/local/include" />
-         </Compiler>
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/tests/Makefile&quot;  VERBOSE=1 test_string_hashtable" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/tests/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/tests/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      <Target title="test_string_hashtable/fast">
-         <Option output="/Users/marcus/git/ng5/cmake-build-debug/test_string_hashtable" prefix_auto="0" extension_auto="0" />
-         <Option working_dir="/Users/marcus/git/ng5/cmake-build-debug" />
-         <Option object_output="./" />
-         <Option type="1" />
-         <Option compiler="gcc" />
-         <Compiler>
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include" />
-            <Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include" />
-            <Add directory="/Library/Frameworks" />
-            <Add directory="/System/Library/Frameworks" />
-            <Add directory="/Users/marcus/git/ng5/include" />
-            <Add directory="/Users/marcus/git/ng5/tests/." />
-            <Add directory="/usr/include" />
-            <Add directory="/usr/include/apr-1" />
-            <Add directory="/usr/local/Cellar/check/0.12.0/include" />
-            <Add directory="/usr/local/include" />
-         </Compiler>
-         <MakeCommands>
-            <Build command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/tests/Makefile&quot;  VERBOSE=1 test_string_hashtable/fast" />
-            <CompileFile command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
-            <Clean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/tests/Makefile&quot;  VERBOSE=1 clean" />
-            <DistClean command="/usr/bin/make -f &quot;/Users/marcus/git/ng5/tests/Makefile&quot;  VERBOSE=1 clean" />
-         </MakeCommands>
-      </Target>
-      </Build>
-      <Unit filename="/Users/marcus/git/ng5/include/ng5/ng5_result_handle.h">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/ng5/ng5_storage_engine.h">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/ng5/roadfire/ng5_roadfire.h">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/ng5_common.h">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/ng5_status.h">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_algorithm.h">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_allocator.h">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_bolster.h">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_hash.h">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_slot_vector.h">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_spinlock.h">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_string_dic.h">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_string_dic_async.h">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_string_dic_sync.h">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_string_map.h">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_time.h">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_unit.h">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_vector.h">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/string_lookups/ng5_simple_bsearch.h">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/string_lookups/ng5_simple_scan1-cache.h">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/string_lookups/ng5_simple_scan1-parallel.h">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/string_lookups/ng5_simple_scan1.h">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/string_lookups/ng5_simple_scan2-cache.h">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/string_lookups/ng5_simple_scan2.h">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/string_lookups/ng5_simple_scan3-cache.h">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/string_lookups/ng5_simple_scan3.h">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/string_lookups/ng5_simple_scan4-cache.h">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/include/stdx/string_lookups/ng5_simple_scan4.h">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/main.c">
-         <Option target="ng5"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/ng5/ng5_result_handle.c">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/ng5/roadfire/ng5_roadfire.c">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/stdx/ng5_allocator.c">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/stdx/ng5_slot_vector.c">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/stdx/ng5_spinlock.c">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/stdx/ng5_string_dic_async.c">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/stdx/ng5_string_dic_sync.c">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/stdx/ng5_time.c">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/stdx/ng5_vector.c">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/stdx/string_lookups/ng5_simple_bsearch.c">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/stdx/string_lookups/ng5_simple_scan1-cache.c">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/stdx/string_lookups/ng5_simple_scan1-parallel.c">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/stdx/string_lookups/ng5_simple_scan1.c">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/stdx/string_lookups/ng5_simple_scan2-cache.c">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/stdx/string_lookups/ng5_simple_scan2.c">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/stdx/string_lookups/ng5_simple_scan3-cache.c">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/stdx/string_lookups/ng5_simple_scan3.c">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/stdx/string_lookups/ng5_simple_scan4-cache.c">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/stdx/string_lookups/ng5_simple_scan4.c">
-         <Option target="ng5"/>
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/tests/stdx/test_string_hashtable.c">
-         <Option target="test_string_hashtable"/>
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/CMakeLists.txt">
-          <Option virtualFolder="CMake Files\" />
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/cmake/modules/FindAPR.cmake">
-          <Option virtualFolder="CMake Files\cmake\modules\" />
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/cmake/modules/FindCheck.cmake">
-          <Option virtualFolder="CMake Files\cmake\modules\" />
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/cmake/modules/FindCheck.cmake">
-          <Option virtualFolder="CMake Files\cmake\modules\" />
-      </Unit>
-      <Unit filename="/Users/marcus/git/ng5/tests/CMakeLists.txt">
-          <Option virtualFolder="CMake Files\tests\" />
-      </Unit>
-   </Project>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="ng5"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;CMake Files\cmake\;CMake Files\cmake\modules\;CMake Files\tests\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/Users/marcus/git/ng5"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="test">
+				<Option working_dir="/Users/marcus/git/ng5"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 test"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/Users/marcus/git/ng5"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/Users/marcus/git/ng5"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="ng5">
+				<Option output="/Users/marcus/git/ng5/cmake-build-debug/ng5" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/marcus/git/ng5/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/marcus/git/ng5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/apr-1"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 ng5"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="ng5/fast">
+				<Option output="/Users/marcus/git/ng5/cmake-build-debug/ng5" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/marcus/git/ng5/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/marcus/git/ng5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/apr-1"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 ng5/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="tests">
+				<Option output="/Users/marcus/git/ng5/cmake-build-debug/tests" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/marcus/git/ng5/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/marcus/git/ng5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/apr-1"/>
+					<Add directory="/usr/local/Cellar/check/0.12.0/include"/>
+					<Add directory="/Users/marcus/git/ng5/tests/."/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/tests/Makefile&quot;  VERBOSE=1 tests"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/tests/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/tests/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="tests/fast">
+				<Option output="/Users/marcus/git/ng5/cmake-build-debug/tests" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/marcus/git/ng5/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/marcus/git/ng5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/apr-1"/>
+					<Add directory="/usr/local/Cellar/check/0.12.0/include"/>
+					<Add directory="/Users/marcus/git/ng5/tests/."/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/tests/Makefile&quot;  VERBOSE=1 tests/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/tests/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/marcus/git/ng5/tests/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/Users/marcus/git/ng5/include/ng5/ng5_result_handle.h">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/ng5/ng5_storage_engine.h">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/ng5/roadfire/ng5_roadfire.h">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/ng5_common.h">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/ng5_status.h">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_algorithm.h">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_allocator.h">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_bolster.h">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_hash.h">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_slot_vector.h">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_spinlock.h">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_string_dic.h">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_string_dic_async.h">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_string_dic_sync.h">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_string_map.h">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_string_map_smart.h">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_time.h">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_unit.h">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_vector.h">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/trash/ng5_simple_bsearch.h">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/trash/ng5_simple_scan1-parallel.h">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/trash/ng5_simple_scan1.h">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/trash/ng5_simple_scan2-cache.h">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/trash/ng5_simple_scan2.h">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/trash/ng5_simple_scan3-cache.h">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/trash/ng5_simple_scan3.h">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/trash/ng5_simple_scan4-cache.h">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/trash/ng5_simple_scan4.h">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/main.c">
+			<Option target="ng5"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/ng5/ng5_result_handle.c">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/ng5/roadfire/ng5_roadfire.c">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/ng5_allocator.c">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/ng5_slot_vector.c">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/ng5_spinlock.c">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/ng5_string_dic_async.c">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/ng5_string_dic_sync.c">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/ng5_string_map_smart.c">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/ng5_time.c">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/ng5_vector.c">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/trash/ng5_simple_bsearch.c">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/trash/ng5_simple_scan1-parallel.c">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/trash/ng5_simple_scan1.c">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/trash/ng5_simple_scan2-cache.c">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/trash/ng5_simple_scan2.c">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/trash/ng5_simple_scan3-cache.c">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/trash/ng5_simple_scan3.c">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/trash/ng5_simple_scan4-cache.c">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/trash/ng5_simple_scan4.c">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/tests/main.c">
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/tests/stdx/test_string_dic.h">
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/tests/stdx/test_string_hashtable.h">
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/cmake/modules/FindAPR.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/cmake/modules/FindCheck.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/cmake/modules/FindCheck.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/tests/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\tests\"/>
+		</Unit>
+	</Project>
 </CodeBlocks_project_file>

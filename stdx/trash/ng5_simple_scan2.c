@@ -21,7 +21,7 @@
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <stdx/string_lookups/ng5_simple_scan1.h>
+#include <stdx/trash/ng5_simple_scan2.h>
 #include <stdx/ng5_spinlock.h>
 #include <stdlib.h>
 #include <stdx/ng5_algorithm.h>
@@ -93,7 +93,7 @@ static size_t simple_bucket_find_entry_by_key(struct simple_bucket *bucket, cons
 //  SIMPLE
 // ---------------------------------------------------------------------------------------------------------------------
 
-int string_hashtable_create_scan1(struct string_map* map, const ng5_allocator_t* alloc, size_t num_buckets,
+int string_hashtable_create_scan2(struct string_map* map, const ng5_allocator_t* alloc, size_t num_buckets,
         size_t cap_buckets, float bucket_grow_factor)
 {
     check_success(allocator_this_or_default(&map->allocator, alloc));
@@ -153,6 +153,13 @@ static size_t simple_bucket_find_entry_by_key(struct simple_bucket *bucket, cons
 
     for (size_t i = 0; i < bucket->entries.cap_elems; i++) {
         if (data[i].in_use && data[i].str_len == key_str_len && strcmp(data[i].str, key) == 0) {
+            /* swap */
+            if (i > 0) {
+                struct simple_bucket_entry tmp = data[i - 1];
+                *(data + (i - 1)) = *(data + i);
+                *(data + i) = tmp;
+                return i - 1;
+            }
             return i;
         }
     }

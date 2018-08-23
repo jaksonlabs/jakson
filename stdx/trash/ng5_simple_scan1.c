@@ -21,11 +21,10 @@
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <stdx/string_lookups/ng5_simple_scan1-parallel.h>
+#include <stdx/trash/ng5_simple_scan1.h>
 #include <stdx/ng5_spinlock.h>
 #include <stdlib.h>
 #include <stdx/ng5_algorithm.h>
-#include <stdx/ng5_bolster.h>
 
 // ---------------------------------------------------------------------------------------------------------------------
 //  SIMPLE
@@ -46,7 +45,6 @@ struct simple_bucket {
 
 struct simple_extra {
   ng5_vector_t of_type(simple_bucket) buckets;
-  size_t                               num_threads;
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -69,21 +67,20 @@ static int simple_update_key_blind(struct string_map *self, const string_id_t *v
 static int simple_remove(struct string_map *self, char *const *keys, size_t num_keys);
 static int simple_free(struct string_map *self, void *ptr);
 
-static int simple_create_extra(struct string_map *self, float grow_factor, size_t num_buckets,
-        size_t cap_buckets, size_t num_threads);
+static int simple_create_extra(struct string_map *self, float grow_factor, size_t num_buckets, size_t cap_buckets);
 static struct simple_extra *simple_extra(struct string_map *self);
 static int simple_bucket_create(struct simple_bucket *buckets, size_t num_buckets, size_t bucket_cap,
         float grow_factor, ng5_allocator_t *alloc);
 static int simple_bucket_drop(struct simple_bucket *buckets, size_t num_buckets, ng5_allocator_t *alloc);
 static int simple_map_insert(ng5_vector_t of_type(simple_bucket)* buckets, char* const* keys,
-        const string_id_t* values, size_t* bucket_idxs, size_t num_pairs, ng5_allocator_t *alloc, size_t nthreads);
+        const string_id_t* values, size_t* bucket_idxs, size_t num_pairs, ng5_allocator_t *alloc);
 static void simple_bucket_lock(struct simple_bucket *bucket) force_inline;
 static void simple_bucket_unlock(struct simple_bucket *bucket) force_inline;
 static int simple_bucket_insert(struct simple_bucket *bucket, const char *key, string_id_t value,
-        ng5_allocator_t *alloc, size_t num_threads) force_inline;
+        ng5_allocator_t *alloc) force_inline;
 static void simple_bucket_freelist_push(struct simple_bucket *bucket, size_t idx);
 static size_t simple_bucket_freelist_pop(struct simple_bucket *bucket, ng5_allocator_t *alloc) force_inline;
-static size_t simple_bucket_find_entry_by_key(struct simple_bucket *bucket, const char *key, ng5_allocator_t *alloc, size_t num_threads);
+static size_t simple_bucket_find_entry_by_key(struct simple_bucket *bucket, const char *key, ng5_allocator_t *alloc);
 
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -96,8 +93,8 @@ static size_t simple_bucket_find_entry_by_key(struct simple_bucket *bucket, cons
 //  SIMPLE
 // ---------------------------------------------------------------------------------------------------------------------
 
-int string_hashtable_create_scan1_parallel(struct string_map* map, const ng5_allocator_t* alloc, size_t num_buckets,
-        size_t cap_buckets, float bucket_grow_factor, size_t num_threads)
+int string_hashtable_create_scan1(struct string_map* map, const ng5_allocator_t* alloc, size_t num_buckets,
+        size_t cap_buckets, float bucket_grow_factor)
 {
     check_success(allocator_this_or_default(&map->allocator, alloc));
     map->tag              = STRING_ID_MAP_SIMPLE;
@@ -110,7 +107,7 @@ int string_hashtable_create_scan1_parallel(struct string_map* map, const ng5_all
     map->remove           = simple_remove;
     map->free             = simple_free;
 
-    check_success(simple_create_extra(map, bucket_grow_factor, num_buckets, cap_buckets, num_threads));
+    check_success(simple_create_extra(map, bucket_grow_factor, num_buckets, cap_buckets));
     return STATUS_OK;
 }
 
@@ -137,7 +134,7 @@ static int simple_put_test(struct string_map* self, char* const* keys, const str
         bucket_idxs[i]         = hash % extra->buckets.cap_elems;
     }
 
-    check_success(simple_map_insert(&extra->buckets, keys, values, bucket_idxs, num_pairs, &self->allocator, extra->num_threads));
+    check_success(simple_map_insert(&extra->buckets, keys, values, bucket_idxs, num_pairs, &self->allocator));
     check_success(allocator_free(&self->allocator, bucket_idxs));
     return STATUS_OK;
 }
@@ -147,45 +144,24 @@ static int simple_put_blind(struct string_map *self, char *const *keys, const st
     return simple_put_test(self, keys, values, num_pairs);
 }
 
-static void pred_find_entry(size_t *matching_positions, size_t *num_matching_positions, const void *restrict src,
-        size_t width, size_t len, void *restrict args, size_t position_offset_to_add)
-{
-    unused(width);
-
-    size_t result_size = 0;
-    const struct simple_bucket_entry *data = (const struct simple_bucket_entry *) src;
-    const char *needle_key = (const char *) args;
-    size_t key_str_len = strlen(needle_key);
-
-    for (size_t i = 0; i < len; i++) {
-        if (data[i].in_use && data[i].str_len == key_str_len && strcmp(data[i].str, needle_key) == 0) {
-            matching_positions[result_size++] = position_offset_to_add + i;
-            break;
-        }
-    }
-
-    *num_matching_positions = result_size;
-}
-
-static size_t simple_bucket_find_entry_by_key(struct simple_bucket *bucket, const char *key, ng5_allocator_t *alloc, size_t num_threads)
+static size_t simple_bucket_find_entry_by_key(struct simple_bucket *bucket, const char *key, ng5_allocator_t *alloc)
 {
     unused(alloc);
 
     struct simple_bucket_entry *data = (struct simple_bucket_entry *) ng5_vector_data(&bucket->entries);
+    size_t key_str_len = strlen(key);
 
-    size_t positions;
-    size_t num_positions;
-    bolster_filter_late(&positions, &num_positions, data, sizeof(struct simple_bucket_entry),
-            bucket->entries.cap_elems, pred_find_entry, (void *) key, threading_hint_multi, num_threads);
-
-    assert(num_positions == 0 || num_positions == 1);
-
-    return num_positions == 1 ? positions : bucket->entries.cap_elems;
+    for (size_t i = 0; i < bucket->entries.cap_elems; i++) {
+        if (data[i].in_use && data[i].str_len == key_str_len && strcmp(data[i].str, key) == 0) {
+            return i;
+        }
+    }
+    return bucket->entries.cap_elems;
 }
 
 static int simple_map_fetch(ng5_vector_t of_type(simple_bucket) *buckets, string_id_t *values_out, bool *key_found_mask,
         size_t *num_keys_not_found, size_t *bucket_idxs, char *const *keys, size_t num_keys,
-        ng5_allocator_t *alloc, size_t num_threads)
+        ng5_allocator_t *alloc)
 {
     size_t num_not_found = 0;
     struct simple_bucket *data = (struct simple_bucket *) ng5_vector_data(buckets);
@@ -195,7 +171,7 @@ static int simple_map_fetch(ng5_vector_t of_type(simple_bucket) *buckets, string
         simple_bucket_lock(bucket);
 
         const char                 *key        = keys[i];
-        size_t                      needle_pos = simple_bucket_find_entry_by_key(bucket, key, alloc, num_threads);
+        size_t                      needle_pos = simple_bucket_find_entry_by_key(bucket, key, alloc);
 
         bool found         = needle_pos < bucket->entries.cap_elems;
         num_not_found     += found ? 0 : 1;
@@ -226,7 +202,7 @@ static int simple_get_test(struct string_map* self, string_id_t** out, bool** fo
     }
 
     check_success(simple_map_fetch(&extra->buckets, values_out, found_mask_out, num_not_found, bucket_idxs,
-            keys, num_keys, &self->allocator, extra->num_threads));
+            keys, num_keys, &self->allocator));
     check_success(allocator_free(&self->allocator, bucket_idxs));
     *out = values_out;
     *found_mask = found_mask_out;
@@ -251,7 +227,7 @@ static int simple_update_key_blind(struct string_map *self, const string_id_t *v
     return STATUS_NOTIMPL;
 }
 
-static int simple_map_remove(struct simple_extra *extra, size_t *bucket_idxs, char *const *keys, size_t num_keys, ng5_allocator_t *alloc, size_t num_threads)
+static int simple_map_remove(struct simple_extra *extra, size_t *bucket_idxs, char *const *keys, size_t num_keys, ng5_allocator_t *alloc)
 {
     struct simple_bucket *data = (struct simple_bucket *) ng5_vector_data(&extra->buckets);
 
@@ -260,7 +236,7 @@ static int simple_map_remove(struct simple_extra *extra, size_t *bucket_idxs, ch
         const char           *key        = keys[i];
 
         simple_bucket_lock(bucket);
-        size_t                needle_pos = simple_bucket_find_entry_by_key(bucket, key, alloc, num_threads);
+        size_t                needle_pos = simple_bucket_find_entry_by_key(bucket, key, alloc);
         if (likely(needle_pos < bucket->entries.cap_elems)) {
             struct simple_bucket_entry *entry = (struct simple_bucket_entry *) ng5_vector_data(&bucket->entries) + needle_pos;
             assert (entry->in_use);
@@ -284,7 +260,7 @@ static int simple_remove(struct string_map *self, char *const *keys, size_t num_
         bucket_idxs[i]         = hash % extra->buckets.cap_elems;
     }
 
-    check_success(simple_map_remove(extra, bucket_idxs, keys, num_keys, &self->allocator, extra->num_threads));
+    check_success(simple_map_remove(extra, bucket_idxs, keys, num_keys, &self->allocator));
     check_success(allocator_free(&self->allocator, bucket_idxs));
     return STATUS_OK;
 }
@@ -303,12 +279,10 @@ static int simple_free(struct string_map *self, void *ptr)
 // ---------------------------------------------------------------------------------------------------------------------
 
 unused_fn
-static int simple_create_extra(struct string_map *self, float grow_factor, size_t num_buckets,
-        size_t cap_buckets, size_t num_threads)
+static int simple_create_extra(struct string_map *self, float grow_factor, size_t num_buckets, size_t cap_buckets)
 {
     if ((self->extra = allocator_malloc(&self->allocator, sizeof(struct simple_extra))) != NULL) {
         struct simple_extra *extra = simple_extra(self);
-        extra->num_threads = num_threads;
         ng5_vector_create(&extra->buckets, &self->allocator, sizeof(struct simple_bucket), num_buckets);
         struct simple_bucket *data = (struct simple_bucket *) ng5_vector_data(&extra->buckets);
         check_success(simple_bucket_create(data, num_buckets, cap_buckets, grow_factor, &self->allocator));
@@ -418,14 +392,14 @@ static size_t simple_bucket_freelist_pop(struct simple_bucket *bucket, ng5_alloc
     return result;
 }
 
-static int simple_bucket_insert(struct simple_bucket *bucket, const char *key, string_id_t value, ng5_allocator_t *alloc, size_t num_threads)
+static int simple_bucket_insert(struct simple_bucket *bucket, const char *key, string_id_t value, ng5_allocator_t *alloc)
 {
     check_non_null(bucket);
     check_non_null(key);
 
     simple_bucket_lock(bucket);
 
-    size_t                      needle_pos = simple_bucket_find_entry_by_key(bucket, key, alloc, num_threads);
+    size_t                      needle_pos = simple_bucket_find_entry_by_key(bucket, key, alloc);
     struct simple_bucket_entry *data       = (struct simple_bucket_entry *) ng5_vector_data(&bucket->entries);
 
 
@@ -451,7 +425,7 @@ static int simple_bucket_insert(struct simple_bucket *bucket, const char *key, s
 }
 
 static int simple_map_insert(ng5_vector_t of_type(simple_bucket)* buckets, char* const* keys,
-        const string_id_t* values, size_t* bucket_idxs, size_t num_pairs, ng5_allocator_t *alloc, size_t nthreads)
+        const string_id_t* values, size_t* bucket_idxs, size_t num_pairs, ng5_allocator_t *alloc)
 {
     check_non_null(buckets)
     check_non_null(keys)
@@ -466,7 +440,7 @@ static int simple_map_insert(ng5_vector_t of_type(simple_bucket)* buckets, char*
         string_id_t     value           = values[i];
 
         struct simple_bucket *bucket = buckets_data + bucket_idx;
-        status = simple_bucket_insert(bucket, key, value, alloc, nthreads);
+        status = simple_bucket_insert(bucket, key, value, alloc);
     }
 
     return status;
