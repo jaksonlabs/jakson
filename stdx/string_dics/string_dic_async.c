@@ -1,9 +1,8 @@
+
+#include <stdx/string_dics/string_dic_naive.h>
 #include <stdx/string_dics/string_dic_async.h>
 #include <stdx/vector.h>
 #include <stdx/async.h>
-#include <stdx/string_dics/string_dic_naive.h>
-#include <apr_queue.h>
-#include <stdx/time.h>
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
@@ -26,7 +25,6 @@ typedef struct carrier
     string_dic_t                  local_dict;
     pthread_t                     thread;
     size_t                        id;
-    struct string_dic            *context;
 } carrier_t;
 
 typedef struct async_extra
@@ -34,13 +32,8 @@ typedef struct async_extra
     vector_t of_type(carrier_t)   carriers;
     vector_t of_type(carrier_t *) carrier_mapping;
     spinlock_t                    spinlock;
-    apr_pool_t                   *mem_pool;
 
 } async_extra_t;
-
-typedef enum {
-  push_type_insert_strings, push_type_heartbeat
-} push_arg_type_e;
 
 typedef struct carrier_push_arg_t
 {
@@ -374,7 +367,6 @@ static int async_setup_carriers(struct string_dic *self, size_t capacity, size_t
         size_t num_index_bucket_cap, size_t nthreads)
 {
     async_extra_t *extra               = async_extra_get(self);
-    apr_pool_create(&extra->mem_pool, NULL);
 
     size_t         local_capacity      = max(1, capacity / nthreads);
     size_t         local_bucket_num    = max(1, num_index_buckets / nthreads);
@@ -384,22 +376,12 @@ static int async_setup_carriers(struct string_dic *self, size_t capacity, size_t
     for (size_t thread_id = 0; thread_id < nthreads; thread_id++) {
         vector_push(&extra->carriers, &new_carrier, 1);
         carrier = vector_get(&extra->carriers, thread_id, carrier_t);
-        carrier->context = self;
         async_carrier_create(carrier, thread_id, local_capacity, local_bucket_num, local_bucket_cap,
         &self->alloc);
     }
 
     return STATUS_OK;
 }
-/*
-static int async_carrier_submit(struct string_dic* self, size_t carrier_id, carrier_push_arg_t* args)
-{
-    async_extra_t *extra  = async_extra_get(self);
-    assert (carrier_id < vector_len(&extra->carriers));
-    carrier_t *carrier = vector_get(&extra->carriers, carrier_id, carrier_t);
-    apr_queue_push(carrier->input, (void *) args);
-    return STATUS_OK;
-}*/
 
 static void async_carrier_create(carrier_t *carrier, size_t thread_id, size_t capacity, size_t bucket_num,
                                 size_t bucket_cap, const struct allocator *alloc)
@@ -407,63 +389,6 @@ static void async_carrier_create(carrier_t *carrier, size_t thread_id, size_t ca
     carrier->id = thread_id;
     string_dic_create_naive(&carrier->local_dict, capacity, bucket_num, bucket_cap, 0, alloc);
 }
-
-//
-//static int async_drop_carriers(struct string_dic *self)
-//{
-//    debug("~DROP  ~ dropping of carriers issued %s", "");
-//
-//    assert(self);
-//    async_extra_t                          *extra        = async_extra_get(self);
-//    size_t                                  nthreads     = vector_len(&extra->carriers);
-//    vector_t of_type(carrier_push_arg_t *)  carrier_args;
-//
-//    vector_create(&carrier_args, &self->alloc, sizeof(carrier_push_arg_t *), nthreads);
-//
-//    /* break the running loop of each thread */
-//    for (size_t thread_id = 0; thread_id < nthreads; thread_id++) {
-//        carrier_t *carrier = vector_get(&extra->carriers, thread_id, carrier_t);
-//        debug("~DROP  ~ stop main loop for carriers %zu", thread_id);
-//        atomic_flag_clear(&carrier->keep_running);
-//    }
-//
-//    /* send hearbeat to wake up threads in case of sleeping for queue input */
-//    for (size_t thread_id = 0; thread_id < nthreads; thread_id++) {
-//        debug("~DROP  ~ issue hearbeat for carriers %zu", thread_id);
-//        carrier_push_arg_t* entry = allocator_malloc(&self->alloc, sizeof(carrier_push_arg_t));
-//        entry->type = push_type_heartbeat;
-//        entry->task_done = false;
-//        vector_push(&carrier_args, &entry, 1);
-//        async_carrier_submit(self, thread_id, entry);
-//    }
-//
-//
-//    debug("~DROP  ~ synchronize [BEGIN]%s", "");
-//    async_carriers_sync(&extra->carriers, &carrier_args, 3);
-//    debug("~DROP  ~ synchronize [PASSED]%s", "");
-//
-//    /* wait for threads being finished */
-//    for (size_t thread_id = 0; thread_id < nthreads; thread_id++) {
-//        debug("~DROP  ~ join carrier thread %zu", thread_id);
-//        carrier_t *carrier = vector_get(&extra->carriers, thread_id, carrier_t);
-//        pthread_join(carrier->thread, NULL);
-//        debug("~DROP  ~ join carrier thread %zu [DONE]", thread_id);
-//    }
-//
-//    /* cleanup */
-//    for (size_t thread_id = 0; thread_id < nthreads; thread_id++) {
-//        carrier_t *carrier = vector_get(&extra->carriers, thread_id, carrier_t);
-//        debug("~DROP  ~ cleanup thread-local dictionary for carrier %zu", thread_id);
-//        string_dic_drop(&carrier->local_dict);
-//
-//        carrier_push_arg_t* entry = *vector_get(&carrier_args, thread_id, carrier_push_arg_t*);
-//        allocator_free(&self->alloc, entry);
-//    }
-//    vector_drop(&carrier_args);
-//
-//    apr_pool_destroy(extra->mem_pool);
-//    return STATUS_OK;
-//}
 
 static int async_lock(struct string_dic *self)
 {
@@ -478,15 +403,3 @@ static int async_unlock(struct string_dic *self)
     check_success(spinlock_unlock(&extra->spinlock));
     return STATUS_OK;
 }
-//
-//static int carrier_lock(carrier_t *carrier)
-//{
-//   // debug("acquire lock for '%zu'", carrier->id);
-//    return spinlock_lock(&carrier->spinlock);
-//}
-//
-//static int carrier_unlock(carrier_t *carrier)
-//{
-//  //  debug("unlock for '%zu'", carrier->id);
-//    return spinlock_unlock(&carrier->spinlock);
-//}
