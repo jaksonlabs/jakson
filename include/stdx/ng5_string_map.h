@@ -89,7 +89,7 @@
 
 enum string_lookup_impl { STRING_ID_MAP_SIMPLE };
 
-struct string_lookup_counters {
+struct string_map_counters {
   size_t num_bucket_search_miss;
   size_t num_bucket_search_hit;
   size_t num_bucket_cache_search_miss;
@@ -113,7 +113,7 @@ struct string_map {
    *
    * <b>Note</b>: Implementation must maintain counters by itself
    */
-  struct string_lookup_counters counters;
+  struct string_map_counters counters;
 
   /**
   *  Memory allocator that is used to get memory for user data
@@ -194,7 +194,7 @@ inline static int string_lookup_drop(struct string_map* map)
 inline static int string_lookup_reset_counters(struct string_map* map)
 {
     check_non_null(map);
-    memset(&map->counters, 0, sizeof(struct string_lookup_counters));
+    memset(&map->counters, 0, sizeof(struct string_map_counters));
     return STATUS_OK;
 }
 
@@ -204,7 +204,7 @@ inline static int string_lookup_reset_counters(struct string_map* map)
  * @param map non-null pointer to the map
  * @return <code>STATUS_OK</code> in case of success, otherwise a value indicating the error.
  */
-inline static int string_lookup_counters(struct string_lookup_counters *out, const struct string_map *map)
+inline static int string_lookup_counters(struct string_map_counters *out, const struct string_map *map)
 {
     check_non_null(map);
     check_non_null(out);
@@ -388,6 +388,36 @@ inline static int string_lookup_free(void* ptr, struct string_map* map)
     assert(map->free);
 
     return map->free(map, ptr);
+}
+
+/**
+ * Resets the counter <code>counters</code> by setting all members to zero.
+ *
+ * @param counters non-null pointer to counter object
+ * @return STATUS_OK if everything went normal, otherwise an value indicating the error
+ */
+inline static int string_map_counters_init(struct string_map_counters *counters) {
+    check_non_null(counters);
+    memset(counters, 0, sizeof(struct string_map_counters));
+    return STATUS_OK;
+}
+
+/**
+ * Adds members of both input parameters and stores the result in <code>dst_lhs</code>.
+ *
+ * @param dst_lhs non-null pointer to counter (will contain the result)
+ * @param rhs non-null pointer to counter
+ * @return STATUS_OK if everything went normal, otherwise an value indicating the error
+ */
+inline static int string_map_counters_add(struct string_map_counters *dst_lhs, const struct string_map_counters *rhs)
+{
+    check_non_null(dst_lhs);
+    check_non_null(rhs);
+    dst_lhs->num_bucket_search_miss       += rhs->num_bucket_search_miss;
+    dst_lhs->num_bucket_search_hit        += rhs->num_bucket_search_hit;
+    dst_lhs->num_bucket_cache_search_hit  += rhs->num_bucket_cache_search_hit;
+    dst_lhs->num_bucket_cache_search_miss += rhs->num_bucket_cache_search_miss;
+    return STATUS_OK;
 }
 
 #endif

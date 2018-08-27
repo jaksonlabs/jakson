@@ -22,6 +22,31 @@
 
 #include <ng5_common.h>
 
+// ---------------------------------------------------------------------------------------------------------------------
+//
+//  M A C R O S
+//
+// ---------------------------------------------------------------------------------------------------------------------
+
+/**
+ * Allocates <code>num</code> elements of size <code>sizeof(type)</code> using the allocator <code>alloc</code> and
+ * creates a new stack variable <code>type *name</code>.
+ */
+#define NG5_HEAP_ALLOC(type, name, num, alloc)                  \
+    type *name = allocator_malloc(alloc, num *sizeof(type))
+
+/**
+ * Invokes a free operation in <code>alloc</code> allocator to free up memory assigned to pointer <code>name</code>
+ */
+#define NG5_HEAP_FREE(name, alloc)                              \
+    check_success(allocator_free(alloc, name))
+
+// ---------------------------------------------------------------------------------------------------------------------
+//
+//  I N T E R F A C E
+//
+// ---------------------------------------------------------------------------------------------------------------------
+
 /**
  * Abstraction over memory allocation. Use 'allocator_default' for the standard c-lib allocator
  */

@@ -145,11 +145,11 @@ void experiments_hashing()
                 size_t num_buckets = bucket_size/4000.0f*ng5_vector_len(lines);
 
                 timestamp_t create_begin = time_current_time_ms();
-                string_dic_create_async(&dic, ng5_vector_len(lines), num_buckets, 10, 10, NULL);
+                string_dic_create_async(&dic, ng5_vector_len(lines), num_buckets, 10, 10, NULL);                         // <--------------------------------------------
                 timestamp_t create_end = time_current_time_ms();
                 created_duration = (create_end-create_begin)/1000.0f;
 
-                string_id_t* ids = NULL; //, * ids_out;
+                string_id_t* ids = NULL, * ids_out;
 
                 char** strings = (char**) ng5_vector_data(lines);
                 size_t num_strings = ng5_vector_len(lines)-1;
@@ -159,6 +159,24 @@ void experiments_hashing()
                 string_dic_insert(&dic, &ids, strings, num_strings);
                 timestamp_t inserted_end = time_current_time_ms();
                 insert_duration = (inserted_end-inserted_begin)/1000.0f;
+
+                string_dic_locate_fast(&ids_out, &dic, strings, num_strings);
+                for (size_t i = 0; i < num_strings; i++) {
+                    string_id_t id_created = ids[i];
+                    string_id_t id_located = ids_out[i];
+                  //  debug("[%s] -> %zu\n", strings[i], id_located);
+                    panic_if(id_created != id_located, "mapping broken");
+                    assert(id_created == id_located);
+                }
+
+                char **extracted_strings = string_dic_extract(&dic, ids, num_strings);
+                for (size_t i = 0; i < num_strings; i++) {
+                    char *extracted = extracted_strings[i];
+                    char *given     = strings[i];
+                    panic_if(strcmp(extracted, given) != 0, "extraction broken");
+                    assert(strcmp(extracted, given) == 0);
+               //     debug("extracted id=%zu -> string [%s]\n", ids[i], extracted);
+                }
 
                  string_dic_remove(&dic, ids, num_strings);
 

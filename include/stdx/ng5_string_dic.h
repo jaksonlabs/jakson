@@ -24,7 +24,7 @@
 #include <stdx/ng5_hash.h>
 #include "ng5_allocator.h"
 
-struct string_lookup_counters;
+struct string_map_counters;
 
 enum string_dic_tag { STRING_DIC_NAIVE, STRING_DIC_ASYNC };
 
@@ -108,7 +108,7 @@ typedef struct string_dic
     /**
      * Get internal statistic counters
      */
-    int                  (*counters)(struct string_dic *self, struct string_lookup_counters *counters);
+    int                  (*counters)(struct string_dic *self, struct string_map_counters *counters);
 } string_dic_t;
 
 /**
@@ -151,7 +151,7 @@ static int string_dic_reset_counters(struct string_dic *dic)
 }
 
 unused_fn
-static int string_dic_counters(struct string_lookup_counters *counters, struct string_dic *dic)
+static int string_dic_counters(struct string_map_counters *counters, struct string_dic *dic)
 {
     check_non_null(dic);
     assert(dic->counters);

@@ -59,28 +59,10 @@ set(SORUCE_FILES
         ${CMAKE_SOURCE_DIR}/stdx/ng5_time.c
         ${CMAKE_SOURCE_DIR}/include/stdx/ng5_unit.h
         ${CMAKE_SOURCE_DIR}/include/stdx/ng5_algorithm.h
-        ${CMAKE_SOURCE_DIR}/include/stdx/trash/ng5_simple_bsearch.h
         ${CMAKE_SOURCE_DIR}/include/ng5/roadfire/ng5_roadfire.h
         ${CMAKE_SOURCE_DIR}/ng5/roadfire/ng5_roadfire.c
-        ${CMAKE_SOURCE_DIR}/stdx/trash/ng5_simple_bsearch.c
-        ${CMAKE_SOURCE_DIR}/include/stdx/trash/ng5_simple_scan1.h
         ${CMAKE_SOURCE_DIR}/include/stdx/ng5_string_map_smart.h
-        ${CMAKE_SOURCE_DIR}/include/stdx/trash/ng5_simple_scan2.h
-        ${CMAKE_SOURCE_DIR}/include/stdx/trash/ng5_simple_scan2-cache.h
-        ${CMAKE_SOURCE_DIR}/include/stdx/trash/ng5_simple_scan3.h
-        ${CMAKE_SOURCE_DIR}/include/stdx/trash/ng5_simple_scan3-cache.h
-        ${CMAKE_SOURCE_DIR}/include/stdx/trash/ng5_simple_scan4.h
-        ${CMAKE_SOURCE_DIR}/include/stdx/trash/ng5_simple_scan4-cache.h
-        ${CMAKE_SOURCE_DIR}/include/stdx/trash/ng5_simple_scan1-parallel.h
-        ${CMAKE_SOURCE_DIR}/stdx/trash/ng5_simple_scan1.c
         ${CMAKE_SOURCE_DIR}/stdx/ng5_string_map_smart.c
-        ${CMAKE_SOURCE_DIR}/stdx/trash/ng5_simple_scan2.c
-        ${CMAKE_SOURCE_DIR}/stdx/trash/ng5_simple_scan2-cache.c
-        ${CMAKE_SOURCE_DIR}/stdx/trash/ng5_simple_scan3.c
-        ${CMAKE_SOURCE_DIR}/stdx/trash/ng5_simple_scan3-cache.c
-        ${CMAKE_SOURCE_DIR}/stdx/trash/ng5_simple_scan4.c
-        ${CMAKE_SOURCE_DIR}/stdx/trash/ng5_simple_scan4-cache.c
-        ${CMAKE_SOURCE_DIR}/stdx/trash/ng5_simple_scan1-parallel.c
         ${CMAKE_SOURCE_DIR}/include/ng5/ng5_result_handle.h
         ${CMAKE_SOURCE_DIR}/ng5/ng5_result_handle.c
         ${CMAKE_SOURCE_DIR}/include/ng5/roadfire/ng5_roadfire.h

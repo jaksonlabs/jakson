@@ -196,6 +196,6 @@ int ng5_vector_set(ng5_vector_t* vec, size_t pos, const void* data);
  */
 const void *ng5_vector_data(const ng5_vector_t* vec);
 
-#define ng5_vector_all(vec, type) (type *) ng5_vector_data(vec);
+#define ng5_vector_all(vec, type) (type *) ng5_vector_data(vec)
 
 #endif

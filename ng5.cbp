@@ -220,42 +220,6 @@
 			<Option target="ng5"/>
 			<Option target="tests"/>
 		</Unit>
-		<Unit filename="/Users/marcus/git/ng5/include/stdx/trash/ng5_simple_bsearch.h">
-			<Option target="ng5"/>
-			<Option target="tests"/>
-		</Unit>
-		<Unit filename="/Users/marcus/git/ng5/include/stdx/trash/ng5_simple_scan1-parallel.h">
-			<Option target="ng5"/>
-			<Option target="tests"/>
-		</Unit>
-		<Unit filename="/Users/marcus/git/ng5/include/stdx/trash/ng5_simple_scan1.h">
-			<Option target="ng5"/>
-			<Option target="tests"/>
-		</Unit>
-		<Unit filename="/Users/marcus/git/ng5/include/stdx/trash/ng5_simple_scan2-cache.h">
-			<Option target="ng5"/>
-			<Option target="tests"/>
-		</Unit>
-		<Unit filename="/Users/marcus/git/ng5/include/stdx/trash/ng5_simple_scan2.h">
-			<Option target="ng5"/>
-			<Option target="tests"/>
-		</Unit>
-		<Unit filename="/Users/marcus/git/ng5/include/stdx/trash/ng5_simple_scan3-cache.h">
-			<Option target="ng5"/>
-			<Option target="tests"/>
-		</Unit>
-		<Unit filename="/Users/marcus/git/ng5/include/stdx/trash/ng5_simple_scan3.h">
-			<Option target="ng5"/>
-			<Option target="tests"/>
-		</Unit>
-		<Unit filename="/Users/marcus/git/ng5/include/stdx/trash/ng5_simple_scan4-cache.h">
-			<Option target="ng5"/>
-			<Option target="tests"/>
-		</Unit>
-		<Unit filename="/Users/marcus/git/ng5/include/stdx/trash/ng5_simple_scan4.h">
-			<Option target="ng5"/>
-			<Option target="tests"/>
-		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/main.c">
 			<Option target="ng5"/>
 		</Unit>
@@ -296,42 +260,6 @@
 			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/stdx/ng5_vector.c">
-			<Option target="ng5"/>
-			<Option target="tests"/>
-		</Unit>
-		<Unit filename="/Users/marcus/git/ng5/stdx/trash/ng5_simple_bsearch.c">
-			<Option target="ng5"/>
-			<Option target="tests"/>
-		</Unit>
-		<Unit filename="/Users/marcus/git/ng5/stdx/trash/ng5_simple_scan1-parallel.c">
-			<Option target="ng5"/>
-			<Option target="tests"/>
-		</Unit>
-		<Unit filename="/Users/marcus/git/ng5/stdx/trash/ng5_simple_scan1.c">
-			<Option target="ng5"/>
-			<Option target="tests"/>
-		</Unit>
-		<Unit filename="/Users/marcus/git/ng5/stdx/trash/ng5_simple_scan2-cache.c">
-			<Option target="ng5"/>
-			<Option target="tests"/>
-		</Unit>
-		<Unit filename="/Users/marcus/git/ng5/stdx/trash/ng5_simple_scan2.c">
-			<Option target="ng5"/>
-			<Option target="tests"/>
-		</Unit>
-		<Unit filename="/Users/marcus/git/ng5/stdx/trash/ng5_simple_scan3-cache.c">
-			<Option target="ng5"/>
-			<Option target="tests"/>
-		</Unit>
-		<Unit filename="/Users/marcus/git/ng5/stdx/trash/ng5_simple_scan3.c">
-			<Option target="ng5"/>
-			<Option target="tests"/>
-		</Unit>
-		<Unit filename="/Users/marcus/git/ng5/stdx/trash/ng5_simple_scan4-cache.c">
-			<Option target="ng5"/>
-			<Option target="tests"/>
-		</Unit>
-		<Unit filename="/Users/marcus/git/ng5/stdx/trash/ng5_simple_scan4.c">
 			<Option target="ng5"/>
 			<Option target="tests"/>
 		</Unit>

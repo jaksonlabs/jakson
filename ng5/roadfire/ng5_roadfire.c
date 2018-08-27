@@ -87,7 +87,7 @@ void extra_create(struct storage_engine *roadfire, struct roadfire_conf *conf)
     struct roadfire_extra *extra = extra_get(roadfire);
     extra->conf = conf ? *conf : roadfire_conf_default;
 
-    string_dic_create_naive(&extra->dictionary, extra->conf.string_dic_capacity,
+    string_dic_create_sync(&extra->dictionary, extra->conf.string_dic_capacity,
             extra->conf.string_dic_lookup_num_buckets, extra->conf.string_dic_bucket_capacity,
             extra->conf.string_dic_nthreads, &roadfire->alloc);
 

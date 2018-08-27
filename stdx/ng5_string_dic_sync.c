@@ -2,7 +2,6 @@
 #include <stdx/ng5_spinlock.h>
 #include <stdx/ng5_string_map.h>
 #include <stdx/ng5_string_dic_sync.h>
-#include <stdx/trash/ng5_simple_scan1-parallel.h>
 #include <stdlib.h>
 #include <stdx/ng5_string_map_smart.h>
 
@@ -29,7 +28,7 @@ static char **this_extract(struct string_dic *self, const string_id_t *ids, size
 static int this_free(struct string_dic *self, void *ptr);
 
 static int this_reset_counters(struct string_dic *self);
-static int this_counters(struct string_dic *self, struct string_lookup_counters *counters);
+static int this_counters(struct string_dic *self, struct string_map_counters *counters);
 
 static void lock(struct string_dic *self);
 static void unlock(struct string_dic *self);
@@ -41,7 +40,7 @@ static struct naive_extra *this_extra(struct string_dic *self);
 static int freelist_pop(string_id_t *out, struct string_dic *self);
 static int freelist_push(struct string_dic *self, string_id_t idx);
 
-int string_dic_create_naive(struct string_dic* dic, size_t capacity, size_t num_index_buckets,
+int string_dic_create_sync(struct string_dic* dic, size_t capacity, size_t num_index_buckets,
         size_t num_index_bucket_cap, size_t nthreads, const ng5_allocator_t* alloc)
 {
     check_non_null(dic);
@@ -340,7 +339,7 @@ static int this_reset_counters(struct string_dic *self)
     return STATUS_OK;
 }
 
-static int this_counters(struct string_dic *self, struct string_lookup_counters *counters)
+static int this_counters(struct string_dic *self, struct string_map_counters *counters)
 {
     check_tag(self->tag, STRING_DIC_NAIVE)
     struct naive_extra *extra = this_extra(self);
