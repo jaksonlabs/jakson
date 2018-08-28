@@ -765,6 +765,7 @@ static void async_carrier_create(carrier_t *carrier, size_t thread_id, size_t ca
 {
     carrier->id = thread_id;
     string_dic_create_sync(&carrier->local_dict, capacity, bucket_num, bucket_cap, 0, alloc);
+    memset(&carrier->thread, 0, sizeof(pthread_t));
 }
 
 static int async_lock(struct string_dic *self)
