@@ -120,10 +120,10 @@ static int async_lock(struct string_dic *self);
 static int async_unlock(struct string_dic *self);
 
 static int async_extra_create(struct string_dic *self, size_t capacity, size_t num_index_buckets,
-        size_t num_index_bucket_cap, size_t nthreads);
+        size_t approx_num_unique_str, size_t nthreads);
 
 static int async_setup_carriers(struct string_dic *self, size_t capacity, size_t num_index_buckets,
-        size_t num_index_bucket_cap, size_t nthreads);
+        size_t approx_num_unique_str, size_t nthreads);
 
 static void async_carrier_create(carrier_t *carrier, size_t thread_id, size_t capacity, size_t bucket_num,
         size_t bucket_cap, const ng5_allocator_t *alloc);
@@ -147,7 +147,7 @@ static void async_carrier_create(carrier_t *carrier, size_t thread_id, size_t ca
 // ---------------------------------------------------------------------------------------------------------------------
 
 int string_dic_create_async(struct string_dic* dic, size_t capacity, size_t num_index_buckets,
-        size_t num_index_bucket_cap, size_t nthreads, const ng5_allocator_t* alloc)
+        size_t approx_num_unique_str, size_t nthreads, const ng5_allocator_t* alloc)
 {
     check_success(allocator_this_or_default(&dic->alloc, alloc));
 
@@ -162,7 +162,7 @@ int string_dic_create_async(struct string_dic* dic, size_t capacity, size_t num_
     dic->reset_counters = async_reset_counters;
     dic->counters       = async_counters;
 
-    check_success(async_extra_create(dic, capacity, num_index_buckets, num_index_bucket_cap, nthreads));
+    check_success(async_extra_create(dic, capacity, num_index_buckets, approx_num_unique_str, nthreads));
     return STATUS_OK;
 }
 
@@ -173,7 +173,7 @@ int string_dic_create_async(struct string_dic* dic, size_t capacity, size_t num_
 // ---------------------------------------------------------------------------------------------------------------------
 
 static int async_extra_create(struct string_dic *self, size_t capacity, size_t num_index_buckets,
-        size_t num_index_bucket_cap, size_t nthreads)
+        size_t approx_num_unique_str, size_t nthreads)
 {
     assert(self);
 
@@ -181,7 +181,7 @@ static int async_extra_create(struct string_dic *self, size_t capacity, size_t n
     async_extra_t *extra = async_extra_get(self);
     spinlock_create(&extra->spinlock);
     ng5_vector_create(&extra->carriers, &self->alloc, sizeof(carrier_t), nthreads);
-    async_setup_carriers(self, capacity, num_index_buckets, num_index_bucket_cap, nthreads);
+    async_setup_carriers(self, capacity, num_index_buckets, approx_num_unique_str, nthreads);
     ng5_vector_create(&extra->carrier_mapping, &self->alloc, sizeof(carrier_t*), capacity);
 
     return STATUS_OK;
@@ -742,13 +742,13 @@ static int async_counters(struct string_dic *self, struct string_map_counters *c
 
 
 static int async_setup_carriers(struct string_dic *self, size_t capacity, size_t num_index_buckets,
-        size_t num_index_bucket_cap, size_t nthreads)
+        size_t approx_num_unique_str, size_t nthreads)
 {
     async_extra_t *extra               = async_extra_get(self);
 
     size_t         local_capacity      = max(1, capacity / nthreads);
     size_t         local_bucket_num    = max(1, num_index_buckets / nthreads);
-    size_t         local_bucket_cap    = max(1, num_index_bucket_cap / nthreads);
+    size_t         local_bucket_cap    = max(1, approx_num_unique_str / nthreads / local_bucket_num);
     carrier_t      new_carrier, *carrier;
 
     for (size_t thread_id = 0; thread_id < nthreads; thread_id++) {
