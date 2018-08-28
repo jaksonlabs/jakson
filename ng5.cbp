@@ -146,102 +146,143 @@
 		</Build>
 		<Unit filename="/Users/marcus/git/ng5/include/ng5/ng5_result_handle.h">
 			<Option target="ng5"/>
+			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/include/ng5/ng5_storage_engine.h">
 			<Option target="ng5"/>
+			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/include/ng5/roadfire/ng5_roadfire.h">
 			<Option target="ng5"/>
+			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/include/ng5_common.h">
 			<Option target="ng5"/>
+			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/include/ng5_static_conf.h">
 			<Option target="ng5"/>
+			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/include/ng5_status.h">
 			<Option target="ng5"/>
+			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_algorithm.h">
 			<Option target="ng5"/>
+			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_allocator.h">
 			<Option target="ng5"/>
+			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_bolster.h">
 			<Option target="ng5"/>
+			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_hash.h">
 			<Option target="ng5"/>
+			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_slot_vector.h">
 			<Option target="ng5"/>
+			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_spinlock.h">
 			<Option target="ng5"/>
+			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_string_dic.h">
 			<Option target="ng5"/>
+			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_string_dic_async.h">
 			<Option target="ng5"/>
+			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_string_dic_sync.h">
 			<Option target="ng5"/>
+			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_string_map.h">
 			<Option target="ng5"/>
+			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_string_map_smart.h">
 			<Option target="ng5"/>
+			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_time.h">
 			<Option target="ng5"/>
+			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_trace_alloc.h">
 			<Option target="ng5"/>
+			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_unit.h">
 			<Option target="ng5"/>
+			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_vector.h">
 			<Option target="ng5"/>
+			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/main.c">
 			<Option target="ng5"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/ng5/ng5_result_handle.c">
 			<Option target="ng5"/>
+			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/ng5/roadfire/ng5_roadfire.c">
 			<Option target="ng5"/>
+			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/stdx/ng5_allocator.c">
 			<Option target="ng5"/>
+			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/stdx/ng5_slot_vector.c">
 			<Option target="ng5"/>
+			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/stdx/ng5_spinlock.c">
 			<Option target="ng5"/>
+			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/stdx/ng5_string_dic_async.c">
 			<Option target="ng5"/>
+			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/stdx/ng5_string_dic_sync.c">
 			<Option target="ng5"/>
+			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/stdx/ng5_string_map_smart.c">
 			<Option target="ng5"/>
+			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/stdx/ng5_time.c">
 			<Option target="ng5"/>
+			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/stdx/ng5_trace_alloc.c">
 			<Option target="ng5"/>
+			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/stdx/ng5_vector.c">
 			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/tests/main.c">
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/tests/stdx/test_string_dic.h">
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/tests/stdx/test_string_hashtable.h">
+			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
