@@ -6,9 +6,6 @@
 #include <stdx/ng5_string_map_smart.h>
 #include <stdx/ng5_trace_alloc.h>
 
-// HACK:
-#define NG5_CONFIG_TRACE_STRING_DIC_ALLOC
-
 struct entry {
     char                               *str;
     bool                                in_use;
@@ -49,12 +46,7 @@ int string_dic_create_sync(struct string_dic* dic, size_t capacity, size_t num_i
 {
     check_non_null(dic);
 
-#if defined(NG5_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
-    unused(alloc);
-    check_success(allocator_trace(&dic->alloc));
-#else
     check_success(allocator_this_or_default(&dic->alloc, alloc));
-#endif
 
     dic->tag            = STRING_DIC_NAIVE;
     dic->drop           = this_drop;
@@ -102,7 +94,15 @@ static int extra_create(struct string_dic *self, size_t capacity, size_t num_ind
         freelist_push(self, i);
     }
     unused(nthreads);
-      check_success(string_hashtable_create_scan1_cache(&extra->index, &self->alloc, num_index_buckets,
+
+    ng5_allocator_t hashtable_alloc;
+#if defined(NG5_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
+    check_success(allocator_trace(&hashtable_alloc));
+#else
+    check_success(allocator_this_or_default(&hashtable_alloc, &self->alloc));
+#endif
+
+    check_success(string_hashtable_create_scan1_cache(&extra->index, &hashtable_alloc, num_index_buckets,
               num_index_bucket_cap, 1.7f));
     return STATUS_OK;
 }
@@ -180,7 +180,18 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
 
 
     struct naive_extra *extra          = this_extra(self);
-    string_id_t        *ids_out        = allocator_malloc(&self->alloc, num_strings * sizeof(string_id_t));
+
+
+
+    ng5_allocator_t hashtable_alloc;
+#if defined(NG5_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
+    check_success(allocator_trace(&hashtable_alloc));
+#else
+    check_success(allocator_this_or_default(&hashtable_alloc, &self->alloc));
+#endif
+
+
+    string_id_t        *ids_out        = allocator_malloc(&hashtable_alloc, num_strings * sizeof(string_id_t));
 
 
     /* copy string ids for already known strings to their result position resp. add those which are new */
@@ -318,8 +329,15 @@ static char **this_extract(struct string_dic *self, const string_id_t *ids, size
 
     lock(self);
 
+    ng5_allocator_t hashtable_alloc;
+#if defined(NG5_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
+    allocator_trace(&hashtable_alloc);
+#else
+    allocator_this_or_default(&hashtable_alloc, &self->alloc);
+#endif
+
     struct naive_extra *extra = this_extra(self);
-    char **result = allocator_malloc(&self->alloc, num_ids * sizeof(char *));
+    char **result = allocator_malloc(&hashtable_alloc, num_ids * sizeof(char *));
     struct entry *entries = (struct entry *) ng5_vector_data(&extra->contents);
 
     /* Optimization: notify the kernel that the content list is accessed randomly (since hash based access)*/
@@ -338,7 +356,16 @@ static char **this_extract(struct string_dic *self, const string_id_t *ids, size
 
 static int this_free(struct string_dic *self, void *ptr)
 {
-    return allocator_free(&self->alloc, ptr);
+    unused(self);
+
+    ng5_allocator_t hashtable_alloc;
+#if defined(NG5_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
+    check_success(allocator_trace(&hashtable_alloc));
+#else
+    check_success(allocator_this_or_default(&hashtable_alloc, &self->alloc));
+#endif
+
+    return allocator_free(&hashtable_alloc, ptr);
 }
 
 static int this_reset_counters(struct string_dic *self)

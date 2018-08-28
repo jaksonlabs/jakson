@@ -75,7 +75,7 @@ set(SORUCE_FILES
         ${CMAKE_SOURCE_DIR}/ng5/roadfire/ng5_roadfire.c
         ${CMAKE_SOURCE_DIR}/include/stdx/ng5_bolster.h
         ${CMAKE_SOURCE_DIR}/include/stdx/ng5_trace_alloc.h
-        ${CMAKE_SOURCE_DIR}/stdx/ng5_trace_alloc.c)
+        ${CMAKE_SOURCE_DIR}/stdx/ng5_trace_alloc.c include/ng5_static_conf.h)
 
 
 add_executable(ng5 main.c ${SORUCE_FILES})

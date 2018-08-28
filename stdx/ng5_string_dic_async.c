@@ -176,6 +176,7 @@ static int async_extra_create(struct string_dic *self, size_t capacity, size_t n
         size_t num_index_bucket_cap, size_t nthreads)
 {
     assert(self);
+
     self->extra          = allocator_malloc(&self->alloc, sizeof(async_extra_t));
     async_extra_t *extra = async_extra_get(self);
     spinlock_create(&extra->spinlock);
