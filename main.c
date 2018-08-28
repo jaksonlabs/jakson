@@ -64,7 +64,7 @@ ng5_vector_t *to_string_list(const char *contents)
     return vector;
 }
 
-#define NUM_SAMPLES 25
+#define NUM_SAMPLES 2
 
 /*void roadfire_test() {
     struct storage_engine engine;
@@ -80,7 +80,7 @@ void experiments_hashing()
     paths[0] = "/Users/marcus/Downloads/50.txt";
 
     //paths[0] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/100.txt";
-    /*    //  paths[0] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-11pc-stringlist.txt";
+      paths[0] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-15pc-stringlist.txt";
       paths[1] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-19pc-stringlist.txt";
       paths[2] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-27pc-stringlist.txt";
       paths[3] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-35pc-stringlist.txt";
@@ -91,7 +91,7 @@ void experiments_hashing()
       paths[8] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-75pc-stringlist.txt";
       paths[9] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-83pc-stringlist.txt";
       paths[10] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-91pc-stringlist.txt";
- */
+/*
     paths[0] = "/home/pinnecke/datasets/yago1/stringlists/yago1-11pc-stringlist.txt";
      paths[1] = "/home/pinnecke/datasets/yago1/stringlists/yago1-19pc-stringlist.txt";
      paths[2] = "/home/pinnecke/datasets/yago1/stringlists/yago1-27pc-stringlist.txt";
@@ -103,7 +103,7 @@ void experiments_hashing()
      paths[8] = "/home/pinnecke/datasets/yago1/stringlists/yago1-75pc-stringlist.txt";
      paths[9] = "/home/pinnecke/datasets/yago1/stringlists/yago1-83pc-stringlist.txt";
      paths[10] = "/home/pinnecke/datasets/yago1/stringlists/yago1-91pc-stringlist.txt";
-
+ */
 
     int yago_percent[11] = {
             11,
@@ -135,7 +135,7 @@ void experiments_hashing()
 
         struct string_dic dic;
 
-        for (int bucket_size = 1; bucket_size<=4000; bucket_size += 40) {
+        for (int bucket_size = 382087; bucket_size<=382087; bucket_size += 40) {
             for (int sample = 0; sample<NUM_SAMPLES; sample++) {
 
                 float created_duration = 0;
@@ -150,6 +150,7 @@ void experiments_hashing()
                 created_duration = (create_end-create_begin)/1000.0f;
 
                 string_id_t* ids = NULL, * ids_out;
+                unused(ids_out);
 
                 char** strings = (char**) ng5_vector_data(lines);
                 size_t num_strings = ng5_vector_len(lines)-1;
@@ -160,7 +161,7 @@ void experiments_hashing()
                 timestamp_t inserted_end = time_current_time_ms();
                 insert_duration = (inserted_end-inserted_begin)/1000.0f;
 
-                string_dic_locate_fast(&ids_out, &dic, strings, num_strings);
+            /*    string_dic_locate_fast(&ids_out, &dic, strings, num_strings);
                 for (size_t i = 0; i < num_strings; i++) {
                     string_id_t id_created = ids[i];
                     string_id_t id_located = ids_out[i];
@@ -181,7 +182,7 @@ void experiments_hashing()
                  string_dic_remove(&dic, ids, num_strings);
 
                 //struct string_lookup_counters counters;
-                //string_dic_counters(&counters, &dic);
+                //string_dic_counters(&counters, &dic);*/
 
                 string_dic_free(&dic, ids);
                 string_dic_drop(&dic);

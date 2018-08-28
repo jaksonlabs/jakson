@@ -28,6 +28,7 @@
 #include <stdatomic.h>
 #include <pthread.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "ng5_status.h"
 
@@ -137,24 +138,24 @@
 #endif
 
 #ifndef NDEBUG
-#define debug(msg, ...)                    \
-{                                          \
-    char buffer[1024];                     \
-    sprintf(buffer, "%s\n", msg);          \
-    fprintf(stderr, buffer, __VA_ARGS__);  \
-    fflush(stderr);                        \
+#define debug(tag, msg, ...)                                        \
+{                                                                   \
+    char buffer[1024];                                              \
+    sprintf(buffer, "--%d-- [DEBUG   : %-10s] %s\n", getpid(), tag, msg);    \
+    fprintf(stderr, buffer, __VA_ARGS__);                           \
+    fflush(stderr);                                                 \
 }
 #else
 #define debug(msg, ...)                 \
 { }
 #endif
 
-#define warn(msg, ...)                  \
-{                                       \
-    char buffer[1024];                     \
-    sprintf(buffer, "WARNING: %s\n", msg);          \
-    fprintf(stderr, buffer, __VA_ARGS__);  \
-    fflush(stderr);                        \
+#define warn(tag, msg, ...)                                                \
+{                                                                          \
+    char buffer[1024];                                                     \
+    sprintf(buffer, "--%d-- [WARNING: %-10s] WARNING: %s\n", getpid(), tag, msg);  \
+    fprintf(stderr, buffer, __VA_ARGS__);                                  \
+    fflush(stderr);                                                        \
 }
 
 #ifndef thread_local

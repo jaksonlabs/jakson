@@ -39,7 +39,7 @@
  * Invokes a free operation in <code>alloc</code> allocator to free up memory assigned to pointer <code>name</code>
  */
 #define NG5_HEAP_FREE(name, alloc)                              \
-    check_success(allocator_free(alloc, name))
+    allocator_free(alloc, name)
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
