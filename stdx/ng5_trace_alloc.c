@@ -2,6 +2,7 @@
 #include <stdx/ng5_vector.h>
 #include <stdx/ng5_algorithm.h>
 #include <stdx/ng5_spinlock.h>
+#include <stdx/ng5_time.h>
 
 #define TRACE_ALLOC_TAG "trace_alloc"
 
@@ -15,6 +16,8 @@ typedef struct trace_stats_t
     size_t                        total_size;
     ng5_vector_t of_type(size_t) *malloc_sizes;
     spinlock_t                   *spinlock;
+    FILE                         *statistics_file;
+    timestamp_t                   startup_timestamp;
 } trace_stats_t;
 
 
@@ -158,6 +161,10 @@ if (!global_trace_stats.malloc_sizes) {                                         
     ng5_vector_create(global_trace_stats.malloc_sizes, &default_alloc, sizeof(size_t), 1000000);            \
     global_trace_stats.spinlock = allocator_malloc(&default_alloc, sizeof(spinlock_t));                     \
     spinlock_create(global_trace_stats.spinlock);                                                           \
+    global_trace_stats.statistics_file = fopen("trace-alloc-stats.csv", "a");                               \
+    fprintf(global_trace_stats.statistics_file,                                                             \
+            "system_time;num_alloc_calls;num_realloc_calls;num_free_calls;memory_in_use\n");                \
+    global_trace_stats.startup_timestamp = time_current_time_ms();                                          \
 }
 
 int allocator_trace(ng5_allocator_t *alloc)
@@ -177,6 +184,17 @@ int allocator_trace(ng5_allocator_t *alloc)
     alloc->drop         = NULL;
 
     return STATUS_OK;
+}
+
+#define WRITE_STATS_FILE()                                                          \
+{                                                                                   \
+    fprintf(global_trace_stats.statistics_file, "%lld;%zu;%zu;%zu;%zu\n",           \
+            time_current_time_ms() - global_trace_stats.startup_timestamp,          \
+            global_trace_stats.num_malloc_calls,                                    \
+            global_trace_stats.num_realloc_calls,                                   \
+            global_trace_stats.num_free_calls,                                      \
+            global_trace_stats.total_size);                                         \
+    fflush(global_trace_stats.statistics_file);                                     \
 }
 
 static void *this_malloc(ng5_allocator_t *self, size_t size)
@@ -215,6 +233,8 @@ static void *this_malloc(ng5_allocator_t *self, size_t size)
 
     void *result = alloc_register(size);
 
+    WRITE_STATS_FILE();
+
     spinlock_unlock(global_trace_stats.spinlock);
 
 
@@ -244,6 +264,8 @@ static void *this_realloc(ng5_allocator_t *self, void *ptr, size_t size)
 
     debug(TRACE_ALLOC_TAG, "allocated size in at total: %zu B (%f GiB)", global_trace_stats.total_size,
             TO_GIB(global_trace_stats.total_size));
+
+    WRITE_STATS_FILE();
 
     if (size <= page_capacity) {
         *(size_t *) (ptr - 2 * sizeof(size_t)) = size;
@@ -278,6 +300,7 @@ static void  this_free(ng5_allocator_t *self, void *ptr)
     debug(TRACE_ALLOC_TAG, "allocated size in at total: %zu B (%f GiB)", global_trace_stats.total_size,
             TO_GIB(global_trace_stats.total_size));
 
+    WRITE_STATS_FILE();
 
     free (page_ptr);
 
