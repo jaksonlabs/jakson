@@ -80,7 +80,7 @@ void experiments_hashing()
     paths[0] = "/Users/marcus/Downloads/50.txt";
 
     //paths[0] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/100.txt";
-      paths[0] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-15pc-stringlist.txt";
+   //   paths[0] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-15pc-stringlist.txt";
       paths[1] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-19pc-stringlist.txt";
       paths[2] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-27pc-stringlist.txt";
       paths[3] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-35pc-stringlist.txt";
@@ -161,7 +161,7 @@ void experiments_hashing()
                 timestamp_t inserted_end = time_current_time_ms();
                 insert_duration = (inserted_end-inserted_begin)/1000.0f;
 
-            /*    string_dic_locate_fast(&ids_out, &dic, strings, num_strings);
+                string_dic_locate_fast(&ids_out, &dic, strings, num_strings);
                 for (size_t i = 0; i < num_strings; i++) {
                     string_id_t id_created = ids[i];
                     string_id_t id_located = ids_out[i];
@@ -182,7 +182,7 @@ void experiments_hashing()
                  string_dic_remove(&dic, ids, num_strings);
 
                 //struct string_lookup_counters counters;
-                //string_dic_counters(&counters, &dic);*/
+                //string_dic_counters(&counters, &dic);
 
                 string_dic_free(&dic, ids);
                 string_dic_drop(&dic);

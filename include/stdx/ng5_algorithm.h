@@ -121,4 +121,43 @@ static size_t ng5_binary_search_indicies(const size_t* indicies, const void* bas
     return num_elem;
 }
 
+unused_fn
+static size_t ng5_statistics_min(const size_t *elements, size_t num_elements)
+{
+    size_t min = (size_t) -1;
+    while (num_elements--) {
+        min = min < *elements ? min : *elements;
+        elements++;
+    }
+    return min;
+}
+
+unused_fn
+static size_t ng5_statistics_max(const size_t *elements, size_t num_elements)
+{
+    size_t max = 0;
+    while (num_elements--) {
+        max = max > *elements ? max : *elements;
+        elements++;
+    }
+    return max;
+}
+
+unused_fn
+static double ng5_statistics_sum(const size_t *elements, size_t num_elements)
+{
+    double sum = 0;
+    while (num_elements--) {
+        sum += *elements;
+        elements++;
+    }
+    return sum;
+}
+
+unused_fn
+static double ng5_statistics_avg(const size_t *elements, size_t num_elements)
+{
+    return ng5_statistics_sum(elements, num_elements) / (double) num_elements;
+}
+
 #endif

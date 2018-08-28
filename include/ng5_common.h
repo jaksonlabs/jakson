@@ -146,7 +146,7 @@
     fflush(stderr);                                                 \
 }
 #else
-#define debug(msg, ...)                 \
+#define debug(tag, msg, ...)                 \
 { }
 #endif
 
@@ -161,5 +161,8 @@
 #ifndef thread_local
 #define thread_local __thread
 #endif
+
+#define array_len(x)        \
+    sizeof(x)/sizeof(x[0])
 
 typedef size_t string_id_t;

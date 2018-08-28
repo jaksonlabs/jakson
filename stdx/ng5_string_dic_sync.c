@@ -4,6 +4,10 @@
 #include <stdx/ng5_string_dic_sync.h>
 #include <stdlib.h>
 #include <stdx/ng5_string_map_smart.h>
+#include <stdx/ng5_trace_alloc.h>
+
+// HACK:
+#define NG5_CONFIG_TRACE_STRING_DIC_ALLOC
 
 struct entry {
     char                               *str;
@@ -44,7 +48,13 @@ int string_dic_create_sync(struct string_dic* dic, size_t capacity, size_t num_i
         size_t num_index_bucket_cap, size_t nthreads, const ng5_allocator_t* alloc)
 {
     check_non_null(dic);
+
+#ifdef NG5_CONFIG_TRACE_STRING_DIC_ALLOC
+    unused(alloc);
+    check_success(allocator_trace(&dic->alloc));
+#else
     check_success(allocator_this_or_default(&dic->alloc, alloc));
+#endif
 
     dic->tag            = STRING_DIC_NAIVE;
     dic->drop           = this_drop;

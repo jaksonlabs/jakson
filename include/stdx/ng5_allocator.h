@@ -97,6 +97,7 @@ typedef struct ng5_allocator_t {
      * @param self non-null ponter to this allocator
      */
     void              (*drop)(ng5_allocator_t *self);
+
 } ng5_allocator_t;
 
 /**

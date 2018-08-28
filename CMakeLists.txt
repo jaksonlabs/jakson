@@ -10,8 +10,8 @@ set (CMAKE_C_STANDARD 11)
 
 file(MAKE_DIRECTORY ${CMAKE_HOME_DIRECTORY}/build)
 
-#set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
+#set(CMAKE_BUILD_TYPE Release)
 
 set (CMAKE_C_COMPILER             "/usr/bin/clang")
 set (CMAKE_C_FLAGS                "-Wall -std=c11 -Wextra -Werror")
@@ -74,7 +74,8 @@ set(SORUCE_FILES
         ${CMAKE_SOURCE_DIR}/stdx/ng5_string_dic_sync.c
         ${CMAKE_SOURCE_DIR}/ng5/roadfire/ng5_roadfire.c
         ${CMAKE_SOURCE_DIR}/include/stdx/ng5_bolster.h
-        )
+        ${CMAKE_SOURCE_DIR}/include/stdx/ng5_trace_alloc.h
+        ${CMAKE_SOURCE_DIR}/stdx/ng5_trace_alloc.c)
 
 
 add_executable(ng5 main.c ${SORUCE_FILES})

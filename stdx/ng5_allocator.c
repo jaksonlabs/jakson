@@ -12,13 +12,13 @@ static void default_clone(ng5_allocator_t *dst, const ng5_allocator_t *self);
 int allocator_default(ng5_allocator_t *alloc)
 {
     if (alloc) {
-        alloc->extra       = NULL;
-        alloc->malloc      = default_malloc;
-        alloc->realloc     = default_realloc;
-        alloc->free        = default_free;
-        alloc->gc          = NULL;
-        alloc->clone       = default_clone;
-        alloc->drop        = NULL;
+        alloc->extra        = NULL;
+        alloc->malloc       = default_malloc;
+        alloc->realloc      = default_realloc;
+        alloc->free         = default_free;
+        alloc->gc           = NULL;
+        alloc->clone        = default_clone;
+        alloc->drop         = NULL;
         return STATUS_OK;
     } else {
         return STATUS_NULLPTR;

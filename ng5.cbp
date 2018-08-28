@@ -212,6 +212,10 @@
 			<Option target="ng5"/>
 			<Option target="tests"/>
 		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_trace_alloc.h">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_unit.h">
 			<Option target="ng5"/>
 			<Option target="tests"/>
@@ -256,6 +260,10 @@
 			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/stdx/ng5_time.c">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/ng5_trace_alloc.c">
 			<Option target="ng5"/>
 			<Option target="tests"/>
 		</Unit>
