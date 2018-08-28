@@ -49,7 +49,7 @@ int string_dic_create_sync(struct string_dic* dic, size_t capacity, size_t num_i
 {
     check_non_null(dic);
 
-#ifdef NG5_CONFIG_TRACE_STRING_DIC_ALLOC
+#if defined(NG5_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
     unused(alloc);
     check_success(allocator_trace(&dic->alloc));
 #else
@@ -327,7 +327,7 @@ static char **this_extract(struct string_dic *self, const string_id_t *ids, size
 
     for (size_t i = 0; i < num_ids; i++) {
         string_id_t string_id = ids[i];
-        assert(string_id <ng5_vector_len(&extra->contents));
+        assert(string_id < ng5_vector_len(&extra->contents));
         assert(entries[string_id].in_use);
         result[i] = entries[string_id].str;
     }

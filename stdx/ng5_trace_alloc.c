@@ -181,6 +181,8 @@ int allocator_trace(ng5_allocator_t *alloc)
 
 static void *this_malloc(ng5_allocator_t *self, size_t size)
 {
+    unused(self);
+
     spinlock_lock(global_trace_stats.spinlock);
 
     ng5_allocator_t default_alloc;
@@ -221,6 +223,8 @@ static void *this_malloc(ng5_allocator_t *self, size_t size)
 
 static void *this_realloc(ng5_allocator_t *self, void *ptr, size_t size)
 {
+    unused(self);
+
     spinlock_lock(global_trace_stats.spinlock);
 
     ng5_allocator_t default_alloc;
@@ -256,6 +260,8 @@ static void *this_realloc(ng5_allocator_t *self, void *ptr, size_t size)
 
 static void  this_free(ng5_allocator_t *self, void *ptr)
 {
+    unused(self);
+
     spinlock_lock(global_trace_stats.spinlock);
 
     ng5_allocator_t default_alloc;

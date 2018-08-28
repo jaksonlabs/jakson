@@ -408,7 +408,7 @@ static int async_insert(struct string_dic *self, string_id_t **out, char * const
     /* cleanup */
     for (uint_fast16_t thread_id = 0; thread_id < nthreads; thread_id++) {
         carrier_insert_arg_t *carrier_arg = *ng5_vector_get(&carrier_args, thread_id, carrier_insert_arg_t *);
-        allocator_free(&self->alloc, carrier_arg->out);
+        string_dic_free(&carrier_arg->carrier->local_dict, carrier_arg->out);
     }
 
     /* cleanup */
@@ -573,8 +573,8 @@ static int async_locate_safe(struct string_dic* self, string_id_t** out, bool** 
         global_num_not_found += arg->out_num_not_found;
 
         /* cleanup */
-        NG5_HEAP_FREE(arg->out_found_mask, &self->alloc);
-        NG5_HEAP_FREE(arg->out_ids, &self->alloc);
+        string_dic_free(&arg->carrier->local_dict, arg->out_found_mask);
+        string_dic_free(&arg->carrier->local_dict, arg->out_ids);
     }
 
     /* cleanup */
