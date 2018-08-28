@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "ng5_static_conf.h"
 #include "ng5_status.h"
 
 #define unused(x)   (void)(x)
