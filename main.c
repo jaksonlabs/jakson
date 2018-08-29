@@ -136,14 +136,13 @@ for (int pi = 0; pi<11; pi++) {
 
   struct string_dic dic;
 
-  for (int bucket_size = 10000; bucket_size<=10000; bucket_size += 10000) {
+  for (size_t num_buckets = 10000; num_buckets<=10000; num_buckets += 10000) {
       for (int sample = 0; sample<NUM_SAMPLES; sample++) {
 
           float created_duration = 0;
           float insert_duration = 0;
 
           fprintf(stderr, "*** %d of %d in progress ***\n", sample+1, NUM_SAMPLES);
-          size_t num_buckets = bucket_size/4000.0f*ng5_vector_len(lines);
 
           timestamp_t create_begin = time_current_time_ms();
           string_dic_create_async(&dic, ng5_vector_len(lines), num_buckets, num_lines, 64, NULL);                         // <--------------------------------------------

@@ -43,7 +43,7 @@ struct simple_bucket_entry {
 struct simple_bucket {
   struct spinlock                            spinlock;
   ng5_vector_t of_type(simple_bucket_entry) entries;
-  ng5_vector_t of_type(size_t)              freelist;
+  ng5_vector_t of_type(uint32_t)             freelist;  /* OPTIMIZATION: in "string map", freelist uses 32bit instead of 64bit since that's enough (i.e., maps are used by several threads which means: the number of total managble strings scale with the number of threads */
 
   /* used to minimize lookup times in case the same string is queried more than once in a direct sequence */
   size_t                                     cache_idx;
@@ -88,8 +88,8 @@ static void simple_bucket_lock(struct simple_bucket *bucket) force_inline;
 static void simple_bucket_unlock(struct simple_bucket *bucket) force_inline;
 static int simple_bucket_insert(struct simple_bucket *bucket, const char * restrict key, string_id_t value,
         ng5_allocator_t *alloc, struct string_map_counters *counter) force_inline;
-static void simple_bucket_freelist_push(struct simple_bucket *bucket, size_t idx);
-static size_t simple_bucket_freelist_pop(struct simple_bucket *bucket, ng5_allocator_t *alloc) force_inline;
+static void simple_bucket_freelist_push(struct simple_bucket *bucket, uint32_t idx);
+static uint32_t simple_bucket_freelist_pop(struct simple_bucket *bucket, ng5_allocator_t *alloc) force_inline;
 
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -168,7 +168,7 @@ static int simple_put_fast(struct string_map* self, char* const* keys, const str
 #define simple_bucket_find_entry_by_key(counter, bucket, key)                                                          \
 ({                                                                                                                     \
     hash_t key_hash_2   = get_hashcode_2(key);                                                                         \
-    size_t return_value = bucket->entries.cap_elems;                                                                   \
+    uint32_t return_value = bucket->entries.cap_elems;                                                                 \
                                                                                                                        \
     struct simple_bucket_entry* data = (struct simple_bucket_entry*) ng5_vector_data(&bucket->entries);                \
                                                                                                                        \
@@ -301,7 +301,7 @@ static int simple_map_remove(struct simple_extra *extra, size_t *bucket_idxs, ch
         simple_bucket_lock(bucket);
 
         /* Optimization 1/5: EMPTY GUARD (but before "find" call); if this bucket has no occupied slots, do not perform any lookup and comparison */
-        size_t needle_pos = bucket->num_entries > 0 ? simple_bucket_find_entry_by_key(counter, bucket, key) : bucket->entries.cap_elems;
+        uint32_t needle_pos = bucket->num_entries > 0 ? simple_bucket_find_entry_by_key(counter, bucket, key) : bucket->entries.cap_elems;
         if (likely(needle_pos < bucket->entries.cap_elems)) {
             struct simple_bucket_entry* entry =
                     (struct simple_bucket_entry*) ng5_vector_data(&bucket->entries)+needle_pos;
@@ -390,7 +390,7 @@ static int simple_bucket_create(struct simple_bucket *buckets, size_t num_bucket
         spinlock_create(&bucket->spinlock);
 
         ng5_vector_create(&bucket->entries, alloc, sizeof(struct simple_bucket_entry), bucket_cap);
-        ng5_vector_create(&bucket->freelist, alloc, sizeof(size_t), bucket_cap);
+        ng5_vector_create(&bucket->freelist, alloc, sizeof(uint32_t), bucket_cap);
 
         ng5_vector_set_growfactor(&bucket->entries, grow_factor);
         ng5_vector_set_growfactor(&bucket->freelist, grow_factor);
@@ -426,18 +426,20 @@ static void simple_bucket_unlock(struct simple_bucket *bucket)
 }
 
 unused_fn
-static void simple_bucket_freelist_push(struct simple_bucket *bucket, size_t idx)
+static void simple_bucket_freelist_push(struct simple_bucket *bucket, uint32_t idx)
 {
-    ng5_vector_t of_type(size_t)              *freelist = &bucket->freelist;
+    ng5_vector_t of_type(uint32_t) *freelist = &bucket->freelist;
+
     assert (freelist->num_elems + 1 < freelist->cap_elems);
+
     ng5_vector_push(freelist, &idx, 1);
     bucket->num_entries--;
 }
 
 unused_fn
-static size_t simple_bucket_freelist_pop(struct simple_bucket *bucket, ng5_allocator_t *alloc)
+static uint32_t simple_bucket_freelist_pop(struct simple_bucket *bucket, ng5_allocator_t *alloc)
 {
-    ng5_vector_t of_type(size_t)              *freelist = &bucket->freelist;
+    ng5_vector_t of_type(uint32_t)            *freelist = &bucket->freelist;
     ng5_vector_t of_type(simple_bucket_entry) *entries  = &bucket->entries;
 
     struct simple_bucket_entry empty = {
@@ -448,12 +450,12 @@ static size_t simple_bucket_freelist_pop(struct simple_bucket *bucket, ng5_alloc
 
     if (unlikely(ng5_vector_is_empty(freelist))) {
         size_t new_slots;
-        size_t last_slot = entries->cap_elems;
+        uint32_t last_slot = entries->cap_elems;
         check_success(ng5_vector_grow(&new_slots, freelist));
         check_success(ng5_vector_grow(NULL, entries));
-        size_t *new_slot_ids = allocator_malloc(alloc, new_slots * sizeof(size_t));
-        for (register size_t slot = 0; slot < new_slots; slot++) {
-            size_t new_slot_id = last_slot + slot;
+        uint32_t *new_slot_ids = allocator_malloc(alloc, new_slots * sizeof(uint32_t));
+        for (register uint32_t slot = 0; slot < new_slots; slot++) {
+            uint32_t new_slot_id = last_slot + slot;
             new_slot_ids[slot] = new_slot_id;
             check_success(ng5_vector_push(entries, &empty, 1));
         }
@@ -463,7 +465,7 @@ static size_t simple_bucket_freelist_pop(struct simple_bucket *bucket, ng5_alloc
     assert (!ng5_vector_is_empty(freelist));
     assert (ng5_vector_cap(freelist) ==ng5_vector_cap(entries));
 
-    size_t result = *(size_t *) ng5_vector_pop(freelist);
+    uint32_t result = *(uint32_t *) ng5_vector_pop(freelist);
     bucket->num_entries++;
     return result;
 }
@@ -486,7 +488,7 @@ static int simple_bucket_insert(struct simple_bucket *bucket, const char * restr
         data->value = value;
     } else {
         /* no entry found */
-        size_t free_slot = simple_bucket_freelist_pop(bucket, alloc);
+        uint32_t free_slot = simple_bucket_freelist_pop(bucket, alloc);
         data = (struct simple_bucket_entry *) ng5_vector_data(&bucket->entries);
         struct simple_bucket_entry *entry = data + free_slot;
         assert(entry->key_hash_2 == 0);

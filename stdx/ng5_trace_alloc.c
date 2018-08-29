@@ -201,6 +201,10 @@ static void *this_malloc(ng5_allocator_t *self, size_t size)
 {
     unused(self);
 
+    if (size >= 14616) {
+        printf("???\n");
+    }
+
     spinlock_lock(global_trace_stats.spinlock);
 
     ng5_allocator_t default_alloc;
