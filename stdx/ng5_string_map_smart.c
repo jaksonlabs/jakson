@@ -524,6 +524,8 @@ static void smart_bucket_freelist_push(struct simple_bucket* bucket, uint32_t id
 unused_fn
 static uint32_t smart_bucket_freelist_pop(struct simple_bucket* bucket, ng5_allocator_t* alloc)
 {
+    unused(alloc);
+
     ng5_vector_t of_type(uint32_t)            *freelist = &bucket->freelist;
     ng5_vector_t of_type(simple_bucket_entry) *entries  = &bucket->entries;
 
@@ -538,14 +540,11 @@ static uint32_t smart_bucket_freelist_pop(struct simple_bucket* bucket, ng5_allo
         uint32_t last_slot = entries->cap_elems;
         check_success(ng5_vector_grow(&new_slots, freelist));
         check_success(ng5_vector_grow(NULL, entries));
-        uint32_t *new_slot_ids = allocator_malloc(alloc, new_slots * sizeof(uint32_t));
         for (register uint32_t slot = 0; slot < new_slots; slot++) {
             uint32_t new_slot_id = last_slot + slot;
-            new_slot_ids[slot] = new_slot_id;
             check_success(ng5_vector_push(entries, &empty, 1));
+            check_success(ng5_vector_push(freelist, &new_slot_id, 1));
         }
-        check_success(ng5_vector_push(freelist, new_slot_ids, new_slots));
-        check_success(allocator_free(alloc, new_slot_ids));
     }
     assert (!ng5_vector_is_empty(freelist));
     assert (ng5_vector_cap(freelist) ==ng5_vector_cap(entries));

@@ -96,6 +96,7 @@ int ng5_vector_grow(size_t* num_new_slots, ng5_vector_t* vec)
 {
     check_non_null(vec)
     size_t free_slots_before = vec->cap_elems - vec->num_elems;
+
     vec->cap_elems           = (vec->cap_elems * vec->grow_factor) + 1;
     vec->base = allocator_realloc(&vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
     size_t free_slots_after  = vec->cap_elems - vec->num_elems;

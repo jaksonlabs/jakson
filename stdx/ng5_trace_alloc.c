@@ -201,10 +201,6 @@ static void *this_malloc(ng5_allocator_t *self, size_t size)
 {
     unused(self);
 
-    if (size == 8) {
-            printf("???\n");
-    }
-
     spinlock_lock(global_trace_stats.spinlock);
 
     ng5_allocator_t default_alloc;
@@ -299,7 +295,8 @@ static void  this_free(ng5_allocator_t *self, void *ptr)
 
     global_trace_stats.num_free_calls++;
 
-    debug(TRACE_ALLOC_TAG, "num free calls %zu (allocator %p)", global_trace_stats.num_free_calls, self);
+    debug(TRACE_ALLOC_TAG, "freed %zu B, num free calls %zu (allocator %p)", *(size_t *) (page_ptr),
+            global_trace_stats.num_free_calls, self);
 
     debug(TRACE_ALLOC_TAG, "allocated size in at total: %zu B (%f GiB)", global_trace_stats.total_size,
             TO_GIB(global_trace_stats.total_size));
