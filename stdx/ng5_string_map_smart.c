@@ -72,6 +72,7 @@ static int simple_put_safe(struct string_map *self, char *const *keys, const str
 static int simple_put_fast(struct string_map *self, char *const *keys, const string_id_t *values, size_t num_pairs);
 static int simple_get_safe(struct string_map *self, string_id_t **out, bool **found_mask, size_t *num_not_found,
         char *const *keys, size_t num_keys);
+static int simple_get_safe_exact(struct string_map *self, string_id_t *out, bool *found_mask, const char *key);
 static int simple_get_fast(struct string_map *self, string_id_t **out, char *const *keys, size_t num_keys);
 static int simple_update_key_blind(struct string_map *self, const string_id_t *values, char *const *keys, size_t num_keys);
 static int simple_remove(struct string_map *self, char *const *keys, size_t num_keys);
@@ -115,11 +116,12 @@ int string_hashtable_create_scan1_cache(struct string_map* map, const ng5_alloca
     map->drop             = simple_drop;
     map->put_safe         = simple_put_safe;
     map->put_fast        = simple_put_fast;
-    map->get_safe         = simple_get_safe;
+    map->get_safe_bulk         = simple_get_safe;
     map->get_fast        = simple_get_fast;
     map->update_key_fast = simple_update_key_blind;
     map->remove           = simple_remove;
     map->free             = simple_free;
+    map->get_safe_exact   = simple_get_safe_exact;
 
     string_lookup_reset_counters(map);
     check_success(simple_create_extra(map, bucket_grow_factor, num_buckets, cap_buckets));
@@ -268,6 +270,11 @@ static int simple_get_safe(struct string_map* self, string_id_t** out, bool** fo
     *out = values_out;
     *found_mask = found_mask_out;
     return STATUS_OK;
+}
+
+static int simple_get_safe_exact(struct string_map *self, string_id_t *out, bool *found_mask, const char *key)
+{
+    
 }
 
 static int simple_get_fast(struct string_map* self, string_id_t** out, char* const* keys, size_t num_keys)

@@ -138,8 +138,13 @@ struct string_map {
   /**
    * Get the values associated with <code>keys</code> in this map (if any).
    */
-  int (*get_safe)(struct string_map *self, string_id_t **out, bool **found_mask, size_t *num_not_found,
+  int (*get_safe_bulk)(struct string_map *self, string_id_t **out, bool **found_mask, size_t *num_not_found,
           char *const *keys, size_t num_keys);
+
+  /**
+   * The same as 'get_safe_bulk' but optimized for a single element
+   */
+  int (*get_safe_exact)(struct string_map *self, string_id_t *out, bool *found_mask, const char *key);
 
   /**
    * Get the values associated with <code>keys</code> in this map. All keys <u>must</u> exist.
@@ -296,12 +301,28 @@ inline static int string_lookup_get_safe_bulk(string_id_t** out, bool** found_ma
     check_non_null(num_not_found);
     check_non_null(map);
     check_non_null(keys);
-    assert(map->get_safe);
+    assert(map->get_safe_bulk);
 
-    int result = map->get_safe(map, out, found_mask, num_not_found, keys, num_keys);
+    int result = map->get_safe_bulk(map, out, found_mask, num_not_found, keys, num_keys);
 
     assert (out != NULL);
     assert (found_mask != NULL);
+
+    return result;
+}
+
+inline static int string_lookup_get_safe_exact(string_id_t* out, bool* found, struct string_map* map, const char* key)
+{
+    check_non_null(out);
+    check_non_null(found);
+    check_non_null(map);
+    check_non_null(key);
+    assert(map->get_safe_exact);
+
+    int result = map->get_safe_exact(map, out, found, key);
+
+    assert (out != NULL);
+    assert (found != NULL);
 
     return result;
 }

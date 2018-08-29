@@ -202,7 +202,7 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
         string_id_t        *values = NULL;
 
         /* query index for strings to get a boolean mask which strings are new and which must be added */
-        string_lookup_get_safe_bulk(&values, &found_mask, &num_not_found, &extra->index, strings+i, 1);
+        string_lookup_get_safe_bulk(&values, &found_mask, &num_not_found, &extra->index, strings+i, 1);XXX
 
         assert(found_mask != NULL);
         assert(values != NULL);
