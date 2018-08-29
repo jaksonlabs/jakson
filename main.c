@@ -90,7 +90,7 @@ void experiments_hashing()
       paths[7] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-67pc-stringlist.txt";
       paths[8] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-75pc-stringlist.txt";
       paths[9] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-83pc-stringlist.txt";
-      paths[10] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-91pc-stringlist.txt";
+      paths[1] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-91pc-stringlist.txt";
     /*
   paths[0] = "/home/pinnecke/datasets/yago1/stringlists/yago1-11pc-stringlist.txt";
   paths[1] = "/home/pinnecke/datasets/yago1/stringlists/yago1-19pc-stringlist.txt";
@@ -145,7 +145,7 @@ for (int pi = 0; pi<11; pi++) {
           fprintf(stderr, "*** %d of %d in progress ***\n", sample+1, NUM_SAMPLES);
 
           timestamp_t create_begin = time_current_time_ms();
-          string_dic_create_async(&dic, ng5_vector_len(lines), num_buckets, num_lines, 64, NULL);                         // <--------------------------------------------
+          string_dic_create_async(&dic, ng5_vector_len(lines), num_buckets, num_lines, 4, NULL);                         // <--------------------------------------------
           timestamp_t create_end = time_current_time_ms();
           created_duration = (create_end-create_begin)/1000.0f;
 

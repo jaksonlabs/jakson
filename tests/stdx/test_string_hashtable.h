@@ -120,7 +120,7 @@ void test_string_hashtable_generic_putget(struct string_map *map) {
     string_id_t *out_values;
     bool     *out_mask;
     size_t    num_not_found;
-    string_lookup_get_safe(&out_values, &out_mask, &num_not_found, map, keys, NUM_PAIRS);
+    string_lookup_get_safe_bulk(&out_values, &out_mask, &num_not_found, map, keys, NUM_PAIRS);
 
     for (size_t i = 0; i < NUM_PAIRS; i++) {
         ck_assert_msg(out_values[i] == values[i], "mapping broken");
@@ -234,7 +234,7 @@ void test_string_hashtable_generic_remove(struct string_map *map)
     string_id_t *out_values;
     bool     *out_mask;
     size_t    num_not_found;
-    string_lookup_get_safe(&out_values, &out_mask, &num_not_found, map, keys, NUM_PAIRS);
+    string_lookup_get_safe_bulk(&out_values, &out_mask, &num_not_found, map, keys, NUM_PAIRS);
 
     ck_assert_msg(num_not_found == num_remove_keys, "illegal number of not-found values");
 

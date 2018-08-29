@@ -287,7 +287,7 @@ inline static int string_lookup_put_fast(struct string_map* map, char* const* ke
  * @param num_keys the number of keys
  * @return <code>STATUS_OK</code> in case of success, otherwise a value indicating the error.
  */
-inline static int string_lookup_get_safe(string_id_t** out, bool** found_mask, size_t* num_not_found,
+inline static int string_lookup_get_safe_bulk(string_id_t** out, bool** found_mask, size_t* num_not_found,
         struct string_map* map,
         char* const* keys, size_t num_keys)
 {

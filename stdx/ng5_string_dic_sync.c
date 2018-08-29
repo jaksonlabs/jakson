@@ -202,7 +202,7 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
         string_id_t        *values = NULL;
 
         /* query index for strings to get a boolean mask which strings are new and which must be added */
-        string_lookup_get_safe(&values, &found_mask, &num_not_found, &extra->index, strings + i, 1);
+        string_lookup_get_safe_bulk(&values, &found_mask, &num_not_found, &extra->index, strings+i, 1);
 
         assert(found_mask != NULL);
         assert(values != NULL);
@@ -299,7 +299,7 @@ static int this_locate_safe(struct string_dic* self, string_id_t** out, bool** f
 
     lock(self);
     struct naive_extra *extra = this_extra(self);
-    int status = string_lookup_get_safe(out, found_mask, num_not_found, &extra->index, keys, num_keys);
+    int status = string_lookup_get_safe_bulk(out, found_mask, num_not_found, &extra->index, keys, num_keys);
     unlock(self);
     return status;
 }

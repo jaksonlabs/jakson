@@ -34,6 +34,7 @@
 //  SIMPLE
 // ---------------------------------------------------------------------------------------------------------------------
 
+
 struct simple_bucket_entry {
   const char    *str;
   string_id_t    value;
@@ -46,10 +47,10 @@ struct simple_bucket {
   ng5_vector_t of_type(uint32_t)             freelist;  /* OPTIMIZATION: in "string map", freelist uses 32bit instead of 64bit since that's enough (i.e., maps are used by several threads which means: the number of total managble strings scale with the number of threads */
 
   /* used to minimize lookup times in case the same string is queried more than once in a direct sequence */
-  size_t                                     cache_idx;
+  uint32_t                                    cache_idx;
 
   /* number of entries actually occupied with data inside this bucket (since entries num == entries cap all times) */
-  size_t                                     num_entries;
+  uint32_t                                     num_entries;
 };
 
 struct simple_extra {
@@ -172,7 +173,7 @@ static int simple_put_fast(struct string_map* self, char* const* keys, const str
                                                                                                                        \
     struct simple_bucket_entry* data = (struct simple_bucket_entry*) ng5_vector_data(&bucket->entries);                \
                                                                                                                        \
-    if (likely(bucket->cache_idx!=(size_t) -1)) {                                                                      \
+    if (likely(bucket->cache_idx!=(uint32_t) -1)) {                                                                    \
         struct simple_bucket_entry* cache = data + bucket->cache_idx;                                                  \
         if (cache->key_hash_2 == key_hash_2 && strcmp(cache->str, key) == 0) {                                         \
             counter->num_bucket_cache_search_hit++;                                                                    \
@@ -215,7 +216,7 @@ static int simple_map_fetch(ng5_vector_t of_type(simple_bucket) *buckets, string
 
         const char* key = keys[i];
         /* Optimization 1/5: EMPTY GUARD (but before "find" call); if this bucket has no occupied slots, do not perform any lookup and comparison */
-        size_t needle_pos = bucket->num_entries > 0 ? simple_bucket_find_entry_by_key(counter, bucket, key) : bucket->entries.cap_elems;
+        uint32_t needle_pos = bucket->num_entries > 0 ? simple_bucket_find_entry_by_key(counter, bucket, key) : bucket->entries.cap_elems;
 
         bool found = needle_pos < bucket->entries.cap_elems;
         num_not_found += found ? 0 : 1;
@@ -383,9 +384,10 @@ static int simple_bucket_create(struct simple_bucket *buckets, size_t num_bucket
             .key_hash_2 = 0
     };
 
+    // TODO: parallize this!
     while (num_buckets--) {
         struct simple_bucket *bucket = buckets++;
-        bucket->cache_idx   = (size_t) -1;
+        bucket->cache_idx   = (uint32_t) -1;
         bucket->num_entries = 0;
         spinlock_create(&bucket->spinlock);
 
@@ -479,7 +481,7 @@ static int simple_bucket_insert(struct simple_bucket *bucket, const char * restr
     simple_bucket_lock(bucket);
 
     /* Optimization 1/5: EMPTY GUARD (but before "find" call); if this bucket has no occupied slots, do not perform any lookup and comparison */
-    size_t                      needle_pos = bucket->num_entries > 0 ? simple_bucket_find_entry_by_key(counter, bucket, key) : bucket->entries.cap_elems;
+    uint32_t                      needle_pos = bucket->num_entries > 0 ? simple_bucket_find_entry_by_key(counter, bucket, key) : bucket->entries.cap_elems;
     struct simple_bucket_entry *data       = (struct simple_bucket_entry *) ng5_vector_data(&bucket->entries);
 
 
