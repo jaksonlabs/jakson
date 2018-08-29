@@ -68,8 +68,10 @@ struct simple_extra {
 // ---------------------------------------------------------------------------------------------------------------------
 
 static int smart_drop(struct string_map* self);
-static int smart_put_safe(struct string_map* self, char* const* keys, const string_id_t* values, size_t num_pairs);
-static int smart_put_fast(struct string_map* self, char* const* keys, const string_id_t* values, size_t num_pairs);
+static int smart_put_safe_bulk(struct string_map* self, char* const* keys, const string_id_t* values, size_t num_pairs);
+static int smart_put_fast_bulk(struct string_map* self, char* const* keys, const string_id_t* values, size_t num_pairs);
+static int smart_put_safe_exact(struct string_map* self, const char *key, string_id_t value);
+static int smart_put_fast_exact(struct string_map* self, const char *key, string_id_t value);
 static int smart_get_safe(struct string_map* self, string_id_t** out, bool** found_mask, size_t* num_not_found,
         char* const* keys, size_t num_keys);
 static int smart_get_safe_exact(struct string_map* self, string_id_t* out, bool* found_mask, const char* key);
@@ -79,9 +81,11 @@ static int smart_update_key_fast(struct string_map* self, const string_id_t* val
 static int smart_remove(struct string_map* self, char* const* keys, size_t num_keys);
 static int smart_free(struct string_map* self, void* ptr);
 
-static int smart_map_insert(ng5_vector_t of_type(simple_bucket)* buckets, char* const* restrict keys,
+static int smart_map_insert_bulk(ng5_vector_t of_type(simple_bucket)* buckets, char* const* restrict keys,
         const string_id_t* restrict values, size_t* restrict bucket_idxs, size_t num_pairs, ng5_allocator_t* alloc,
         struct string_map_counters* counter);
+static int smart_map_insert_exact(ng5_vector_t of_type(simple_bucket)* buckets, const char * restrict key,
+        string_id_t value, size_t bucket_idx, ng5_allocator_t* alloc, struct string_map_counters* counter);
 static int simple_map_fetch_bulk(ng5_vector_t of_type(simple_bucket)* buckets, string_id_t* values_out,
         bool* key_found_mask,
         size_t* num_keys_not_found, size_t* bucket_idxs, char* const* keys, size_t num_keys,
@@ -121,11 +125,13 @@ int string_hashtable_create_scan1_cache(struct string_map* map, const ng5_alloca
 
     map->tag              = STRING_ID_MAP_SMART;
     map->drop             = smart_drop;
-    map->put_safe         = smart_put_safe;
-    map->put_fast        = smart_put_fast;
-    map->get_safe_bulk         = smart_get_safe;
-    map->get_fast        = smart_get_fast;
-    map->update_key_fast = smart_update_key_fast;
+    map->put_safe_bulk    = smart_put_safe_bulk;
+    map->put_fast_bulk    = smart_put_fast_bulk;
+    map->put_safe_exact    = smart_put_safe_exact;
+    map->put_fast_exact    = smart_put_fast_exact;
+    map->get_safe_bulk    = smart_get_safe;
+    map->get_fast         = smart_get_fast;
+    map->update_key_fast  = smart_update_key_fast;
     map->remove           = smart_remove;
     map->free             = smart_free;
     map->get_safe_exact   = smart_get_safe_exact;
@@ -146,7 +152,7 @@ static int smart_drop(struct string_map* self)
     return STATUS_OK;
 }
 
-static int smart_put_safe(struct string_map* self, char* const* keys, const string_id_t* values, size_t num_pairs)
+static int smart_put_safe_bulk(struct string_map* self, char* const* keys, const string_id_t* values, size_t num_pairs)
 {
     assert(self->tag == STRING_ID_MAP_SMART);
     struct simple_extra *extra = smart_extra_get(self);
@@ -164,15 +170,36 @@ static int smart_put_safe(struct string_map* self, char* const* keys, const stri
     prefetch_read(keys);
     prefetch_read(values);
 
-    check_success(smart_map_insert(&extra->buckets, keys, values, bucket_idxs, num_pairs, &self->allocator,
+    check_success(smart_map_insert_bulk(&extra->buckets, keys, values, bucket_idxs, num_pairs, &self->allocator,
             &self->counters));
     check_success(allocator_free(&self->allocator, bucket_idxs));
     return STATUS_OK;
 }
 
-static int smart_put_fast(struct string_map* self, char* const* keys, const string_id_t* values, size_t num_pairs)
+static int smart_put_safe_exact(struct string_map* self, const char *key, string_id_t value)
 {
-    return smart_put_safe(self, keys, values, num_pairs);
+    assert(self->tag == STRING_ID_MAP_SMART);
+    struct simple_extra *extra = smart_extra_get(self);
+
+    hash_t      hash       = get_hashcode(key);
+    size_t      bucket_idx = hash % extra->buckets.cap_elems;
+
+    prefetch_read(key);
+
+    check_success(smart_map_insert_exact(&extra->buckets, key, value, bucket_idx, &self->allocator,
+            &self->counters));
+
+    return STATUS_OK;
+}
+
+static int smart_put_fast_exact(struct string_map* self, const char *key, string_id_t value)
+{
+    return smart_put_safe_exact(self, key, value);
+}
+
+static int smart_put_fast_bulk(struct string_map* self, char* const* keys, const string_id_t* values, size_t num_pairs)
+{
+    return smart_put_safe_bulk(self, keys, values, num_pairs);
 }
 
 #define simple_bucket_find_entry_by_key(counter, bucket, key)                                                          \
@@ -559,7 +586,7 @@ static int smart_bucket_insert(struct simple_bucket* bucket, const char* restric
     return STATUS_OK;
 }
 
-static int smart_map_insert(ng5_vector_t of_type(simple_bucket)* buckets, char* const* restrict keys,
+static int smart_map_insert_bulk(ng5_vector_t of_type(simple_bucket)* buckets, char* const* restrict keys,
         const string_id_t* restrict values, size_t* restrict bucket_idxs, size_t num_pairs, ng5_allocator_t* alloc,
         struct string_map_counters* counter)
 {
@@ -582,3 +609,13 @@ static int smart_map_insert(ng5_vector_t of_type(simple_bucket)* buckets, char* 
     return status;
 }
 
+static int smart_map_insert_exact(ng5_vector_t of_type(simple_bucket)* buckets, const char * restrict key,
+        string_id_t value, size_t bucket_idx, ng5_allocator_t* alloc, struct string_map_counters* counter)
+{
+    check_non_null(buckets)
+    check_non_null(key)
+
+    struct simple_bucket *buckets_data = (struct simple_bucket *) ng5_vector_data(buckets);
+    struct simple_bucket *bucket = buckets_data + bucket_idx;
+    return smart_bucket_insert(bucket, key, value, alloc, counter);
+}

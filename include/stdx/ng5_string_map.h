@@ -128,12 +128,22 @@ struct string_map {
   /**
    * Put <code>num_pair</code> objects into this map maybe updating old objects with the same key.
    */
-  int (*put_safe)(struct string_map *self, char *const *keys, const string_id_t *values, size_t num_pairs);
+  int (*put_safe_bulk)(struct string_map *self, char *const *keys, const string_id_t *values, size_t num_pairs);
 
   /**
    * Put <code>num_pair</code> objects into this map maybe without checking for updates.
    */
-  int (*put_fast)(struct string_map *self, char *const *keys, const string_id_t *values, size_t num_pairs);
+  int (*put_fast_bulk)(struct string_map *self, char *const *keys, const string_id_t *values, size_t num_pairs);
+
+  /**
+   * Same as 'put_safe_bulk' but specialized for a single element
+   */
+  int (*put_safe_exact)(struct string_map *self, const char *key, string_id_t value);
+
+  /**
+   * Same as 'put_fast_bulk' but specialized for a single element
+   */
+  int (*put_fast_exact)(struct string_map *self, const char *key, string_id_t value);
 
   /**
    * Get the values associated with <code>keys</code> in this map (if any).
@@ -234,9 +244,9 @@ inline static int string_lookup_put_safe(struct string_map* map, char* const* ke
     check_non_null(map);
     check_non_null(keys);
     check_non_null(values);
-    assert(map->put_safe);
+    assert(map->put_safe_bulk);
 
-    return map->put_safe(map, keys, values, num_pairs);
+    return map->put_safe_bulk(map, keys, values, num_pairs);
 }
 
 /**
@@ -254,15 +264,40 @@ inline static int string_lookup_put_safe(struct string_map* map, char* const* ke
  * @param num_pairs the number of pairs that are read via <code>keys</code> and <code>values</code>
  * @return <code>STATUS_OK</code> in case of success, otherwise a value indiciating the error.
  */
-inline static int string_lookup_put_fast(struct string_map* map, char* const* keys, const string_id_t* values,
+inline static int string_lookup_put_fast_bulk(struct string_map* map, char* const* keys, const string_id_t* values,
         size_t num_pairs)
 {
     check_non_null(map);
     check_non_null(keys);
     check_non_null(values);
-    assert(map->put_fast);
+    assert(map->put_fast_bulk);
 
-    return map->put_fast(map, keys, values, num_pairs);
+    return map->put_fast_bulk(map, keys, values, num_pairs);
+}
+
+/**
+ * Same as 'string_lookup_put_bulk' but specialized for a single pair
+ */
+inline static int string_lookup_put_exact(struct string_map* map, const char *key, string_id_t value)
+{
+    check_non_null(map);
+    check_non_null(key);
+    assert(map->put_safe_exact);
+
+    return map->put_safe_exact(map, key, value);
+}
+
+/**
+ * Same as 'string_lookup_put_fast_bulk' but specialized for a single pair
+ */
+inline static int string_lookup_put_fast_exact(struct string_map* map, const char *key, string_id_t value)
+{
+    check_non_null(map);
+    check_non_null(key);
+
+    assert(map->put_fast_exact);
+
+    return map->put_fast_exact(map, key, value);
 }
 
 /**

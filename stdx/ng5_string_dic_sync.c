@@ -219,7 +219,7 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
             ids_out[i]            = string_id;
 
             /* add for not yet registered pairs to buffer for fast import */
-            string_lookup_put_fast(&extra->index, &strings[i], &string_id, 1);
+            string_lookup_put_fast_exact(&extra->index, strings[i], string_id);
         }
     }
 
