@@ -23,7 +23,7 @@
 #include <stdx/ng5_allocator.h>
 /**
  * Returns standard c-lib allocator (malloc, realloc, free) that collects some statistics
- * for inspection purposes. Genernally, this implementation is slow and should not be used
+ * for inspection purposes. Generally, this implementation is slow and should not be used
  * in productive mode
  *
  * @param alloc must be non-null
