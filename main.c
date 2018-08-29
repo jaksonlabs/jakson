@@ -80,7 +80,7 @@ void experiments_hashing()
     paths[0] = "/Users/marcus/Downloads/50.txt";
 
 //      paths[0] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/100.txt";
-     paths[0] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-15pc-stringlist.txt";
+     //paths[0] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-15pc-stringlist.txt";
      paths[1] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-19pc-stringlist.txt";
       paths[2] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-27pc-stringlist.txt";
       paths[3] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-35pc-stringlist.txt";
@@ -90,7 +90,7 @@ void experiments_hashing()
       paths[7] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-67pc-stringlist.txt";
       paths[8] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-75pc-stringlist.txt";
       paths[9] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-83pc-stringlist.txt";
-      paths[1] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-91pc-stringlist.txt";
+      paths[10] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-91pc-stringlist.txt";
     /*
   paths[0] = "/home/pinnecke/datasets/yago1/stringlists/yago1-11pc-stringlist.txt";
   paths[1] = "/home/pinnecke/datasets/yago1/stringlists/yago1-19pc-stringlist.txt";
@@ -106,7 +106,7 @@ void experiments_hashing()
 
 
 int yago_percent[11] = {
-      11,
+      15,
       19,
       27,
       35,
@@ -136,13 +136,15 @@ for (int pi = 0; pi<11; pi++) {
 
   struct string_dic dic;
 
-  for (size_t num_buckets = 10000; num_buckets<=10000; num_buckets += 10000) {
+  for (size_t num_buckets = 50000; num_buckets<=50000; num_buckets += 50000) {
       for (int sample = 0; sample<NUM_SAMPLES; sample++) {
 
           float created_duration = 0;
           float insert_duration = 0;
 
           fprintf(stderr, "*** %d of %d in progress ***\n", sample+1, NUM_SAMPLES);
+
+          fprintf(stderr, "create..\n");
 
           timestamp_t create_begin = time_current_time_ms();
           string_dic_create_async(&dic, ng5_vector_len(lines), num_buckets, num_lines, 64, NULL);                         // <--------------------------------------------
@@ -156,6 +158,7 @@ for (int pi = 0; pi<11; pi++) {
           size_t num_strings = ng5_vector_len(lines)-1;
 
 
+          fprintf(stderr, "insert..\n");
 
           string_dic_reset_counters(&dic);
           timestamp_t inserted_begin = time_current_time_ms();
@@ -163,14 +166,18 @@ for (int pi = 0; pi<11; pi++) {
           timestamp_t inserted_end = time_current_time_ms();
           insert_duration = (inserted_end-inserted_begin)/1000.0f;
 
+          fprintf(stderr, "locate..\n");
+
           string_dic_locate_fast(&ids_out, &dic, strings, num_strings);
           for (size_t i = 0; i < num_strings; i++) {
               string_id_t id_created = ids[i];
               string_id_t id_located = ids_out[i];
-            //  debug("[%s] -> %zu\n", strings[i], id_located);
+              //debug("check", "[%s] -> %zu", strings[i], id_located);
               panic_if(id_created != id_located, "mapping broken");
               assert(id_created == id_located);
           }
+
+          fprintf(stderr, "extract..\n");
 
           char **extracted_strings = string_dic_extract(&dic, ids, num_strings);
           for (size_t i = 0; i < num_strings; i++) {
@@ -180,6 +187,8 @@ for (int pi = 0; pi<11; pi++) {
               assert(strcmp(extracted, given) == 0);
          //     debug("extracted id=%zu -> string [%s]\n", ids[i], extracted);
           }
+
+          fprintf(stderr, "remove..\n");
 
            string_dic_remove(&dic, ids, num_strings);
 

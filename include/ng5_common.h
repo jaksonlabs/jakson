@@ -139,12 +139,12 @@
 #endif
 
 #ifndef NDEBUG
-#define debug(tag, msg, ...)                                        \
-{                                                                   \
-    char buffer[1024];                                              \
+#define debug(tag, msg, ...)                                                 \
+{                                                                            \
+    char buffer[1024];                                                       \
     sprintf(buffer, "--%d-- [DEBUG   : %-10s] %s\n", getpid(), tag, msg);    \
-    fprintf(stderr, buffer, __VA_ARGS__);                           \
-    fflush(stderr);                                                 \
+    fprintf(stderr, buffer, __VA_ARGS__);                                    \
+    fflush(stderr);                                                          \
 }
 #else
 #define debug(tag, msg, ...)                 \
@@ -154,7 +154,7 @@
 #define warn(tag, msg, ...)                                                \
 {                                                                          \
     char buffer[1024];                                                     \
-    sprintf(buffer, "--%d-- [WARNING: %-10s] WARNING: %s\n", getpid(), tag, msg);  \
+    sprintf(buffer, "--%d-- [WARNING: %-10s] %s\n", getpid(), tag, msg);   \
     fprintf(stderr, buffer, __VA_ARGS__);                                  \
     fflush(stderr);                                                        \
 }
