@@ -125,9 +125,9 @@ int ng5_vector_is_empty(ng5_vector_t* vec);
  * @param num_elems number of elements stored in data
  * @return STATUS_OK if success, and STATUS_NULLPTR in case of NULL pointer parameters
  */
-int ng5_vector_push(ng5_vector_t* vec, const void* data, size_t num_elems);
+int ng5_vector_push(ng5_vector_t* vec, const void* data, size_t num_elems) force_inline;    /* OPTIMIZATION: Force inline */
 
-void *ng5_vector_push_and_get(ng5_vector_t* vec, const void* data, size_t num_elems);
+void *ng5_vector_push_and_get(ng5_vector_t* vec, const void* data, size_t num_elems) force_inline; /* OPTIMIZATION: Force inline */
 
 /**
  * Appends 'how_many' elements of the same source stored in 'data' into the vector by copying how_many * vec->elem_size
@@ -149,7 +149,7 @@ int ng5_vector_repreat_push(ng5_vector_t* vec, const void* data, size_t how_many
  * @param vec non-null pointer to the vector
  * @return Pointer to last element, or <code>NULL</code> if vector is empty
  */
-const void *ng5_vector_pop(ng5_vector_t* vec);
+const void *ng5_vector_pop(ng5_vector_t* vec) force_inline; /* OPTIMIZATION: Force inline */
 
 /**
  * Increases the capacity of that vector according the internal grow factor
@@ -170,7 +170,7 @@ size_t ng5_vector_len(const ng5_vector_t* vec);
 
 #define ng5_vector_get(vec, pos, type) (type *) ng5_vector_at(vec, pos);
 
-const void *ng5_vector_at(const ng5_vector_t* vec, size_t pos);
+const void *ng5_vector_at(const ng5_vector_t* vec, size_t pos) force_inline; /* OPTIMIZATION: Force inline */
 
 /**
  * Returns the number of elements for which memory is currently reserved in the vector
