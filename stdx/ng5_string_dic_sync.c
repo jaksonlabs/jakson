@@ -197,22 +197,15 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
     /* copy string ids for already known strings to their result position resp. add those which are new */
     for (size_t i = 0; i < num_strings; i++) {
 
-        size_t              num_not_found;
-        bool               *found_mask = NULL;
-        string_id_t        *values = NULL;
+        const char        *key = (const char *)(strings[i]);
+        bool               found_mask;
+        string_id_t        value;
 
         /* query index for strings to get a boolean mask which strings are new and which must be added */
-        string_lookup_get_safe_bulk(&values, &found_mask, &num_not_found, &extra->index, strings+i, 1);XXX
+        string_lookup_get_safe_exact(&value, &found_mask, &extra->index, key);  /* OPTIMIZATION: use specialized function for "exact" query to avoid unnessecary malloc calls to manage set of results if only a single result is needed */
 
-        assert(found_mask != NULL);
-        assert(values != NULL);
-
-        if (found_mask[0]) {
-            ids_out[i] = values[0];
-
-            /* cleanup */
-         //   string_lookup_free(values, &extra->index);    // TODO: Memory Leak!
-        //    string_lookup_free(found_mask, &extra->index);
+        if (found_mask) {
+            ids_out[i] = value;
         } else {
             string_id_t string_id;
 
@@ -228,9 +221,6 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
             /* add for not yet registered pairs to buffer for fast import */
             string_lookup_put_fast(&extra->index, &strings[i], &string_id, 1);
         }
-
-        string_lookup_free(values, &extra->index);
-        string_lookup_free(found_mask, &extra->index);
     }
 
     /* set potential non-null out parameters */

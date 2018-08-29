@@ -145,7 +145,7 @@ for (int pi = 0; pi<11; pi++) {
           fprintf(stderr, "*** %d of %d in progress ***\n", sample+1, NUM_SAMPLES);
 
           timestamp_t create_begin = time_current_time_ms();
-          string_dic_create_async(&dic, ng5_vector_len(lines), num_buckets, num_lines, 4, NULL);                         // <--------------------------------------------
+          string_dic_create_async(&dic, ng5_vector_len(lines), num_buckets, num_lines, 64, NULL);                         // <--------------------------------------------
           timestamp_t create_end = time_current_time_ms();
           created_duration = (create_end-create_begin)/1000.0f;
 

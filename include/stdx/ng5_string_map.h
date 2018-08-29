@@ -87,7 +87,7 @@
 #define NG5_CONFIG_BUCKET_CAPACITY  1024
 #endif
 
-enum string_lookup_impl { STRING_ID_MAP_SIMPLE };
+enum string_lookup_impl { STRING_ID_MAP_SMART };
 
 struct string_map_counters {
   size_t num_bucket_search_miss;
