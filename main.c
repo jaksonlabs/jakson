@@ -80,7 +80,7 @@ void experiments_hashing()
     paths[0] = "/Users/marcus/Downloads/50.txt";
 
 //      paths[0] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/100.txt";
-     //paths[0] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-15pc-stringlist.txt";
+     paths[0] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-15pc-stringlist.txt";
      paths[1] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-19pc-stringlist.txt";
       paths[2] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-27pc-stringlist.txt";
       paths[3] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-35pc-stringlist.txt";
@@ -119,7 +119,7 @@ int yago_percent[11] = {
       91
 };
 
-for (int pi = 0; pi<1; pi++) {
+for (int pi = 0; pi<11; pi++) {
 
   timestamp_t read_begin = time_current_time_ms();
   char* contents = read_contents(paths[pi]);
@@ -136,7 +136,7 @@ for (int pi = 0; pi<1; pi++) {
 
   struct string_dic dic;
 
-  for (int bucket_size = 382087; bucket_size<=382087; bucket_size += 40) {
+  for (int bucket_size = 10000; bucket_size<=10000; bucket_size += 10000) {
       for (int sample = 0; sample<NUM_SAMPLES; sample++) {
 
           float created_duration = 0;
@@ -146,7 +146,7 @@ for (int pi = 0; pi<1; pi++) {
           size_t num_buckets = bucket_size/4000.0f*ng5_vector_len(lines);
 
           timestamp_t create_begin = time_current_time_ms();
-          string_dic_create_async(&dic, ng5_vector_len(lines), num_buckets, num_lines, 10, NULL);                         // <--------------------------------------------
+          string_dic_create_async(&dic, ng5_vector_len(lines), num_buckets, num_lines, 64, NULL);                         // <--------------------------------------------
           timestamp_t create_end = time_current_time_ms();
           created_duration = (create_end-create_begin)/1000.0f;
 
@@ -155,6 +155,8 @@ for (int pi = 0; pi<1; pi++) {
 
           char** strings = (char**) ng5_vector_data(lines);
           size_t num_strings = ng5_vector_len(lines)-1;
+
+
 
           string_dic_reset_counters(&dic);
           timestamp_t inserted_begin = time_current_time_ms();
