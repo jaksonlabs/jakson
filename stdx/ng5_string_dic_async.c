@@ -352,6 +352,8 @@ static void compute_thread_assign_parallel_func(const void *restrict start, size
     while (len--) {
         size_t          i         = strings - func_args->base_strings;
         const char     *key       = *strings;
+        /* re-using this hashcode for the thread-local dictionary is more costly than to compute it fresh
+         * (due to more I/O with the RAM) */
         size_t          thread_id = hashcode_of(key) % func_args->nthreads;
         atomic_fetch_add(&func_args->str_carrier_mapping[i], thread_id);
         atomic_fetch_add(&func_args->carrier_nstrings[thread_id], 1);

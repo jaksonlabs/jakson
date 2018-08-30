@@ -162,18 +162,18 @@ for (int pi = 0; pi<11; pi++) {
 
           string_dic_reset_counters(&dic);
           timestamp_t inserted_begin = time_current_time_ms();
-          string_dic_insert(&dic, &ids, strings, num_strings);
+          string_dic_insert(&dic, &ids, strings, NULL, num_strings);
           timestamp_t inserted_end = time_current_time_ms();
           insert_duration = (inserted_end-inserted_begin)/1000.0f;
 
           fprintf(stderr, "locate..\n");
 
-          string_dic_locate_fast(&ids_out, &dic, strings, num_strings);
+          string_dic_locate_fast(&ids_out, &dic, strings, NULL, num_strings);
           for (size_t i = 0; i < num_strings; i++) {
               string_id_t id_created = ids[i];
               string_id_t id_located = ids_out[i];
               //debug("check", "[%s] -> %zu", strings[i], id_located);
-              panic_if(id_created != id_located, "mapping broken");
+              panic_if_wargs(id_created != id_located, "mapping broken for string id '%zu': expected %zu, is %zu", i, id_created, id_located);
               assert(id_created == id_located);
           }
 
@@ -190,7 +190,7 @@ for (int pi = 0; pi<11; pi++) {
 
           fprintf(stderr, "remove..\n");
 
-           string_dic_remove(&dic, ids, num_strings);
+         //  string_dic_remove(&dic, ids, num_strings);
 
           //struct string_lookup_counters counters;
           //string_dic_counters(&counters, &dic);

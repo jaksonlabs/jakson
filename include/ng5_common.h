@@ -69,6 +69,13 @@
     };                                        \
 }
 
+#define panic_if_wargs(expr, msg, ...)        \
+{                                             \
+    if (unlikely((expr))) {                   \
+        panic_wargs(msg, __VA_ARGS__)         \
+    };                                        \
+}
+
 #ifndef NDEBUG
 #define check_tag(is, expected)    \
 {                                  \
