@@ -23,14 +23,6 @@
 #include <stdlib.h>
 
 // ---------------------------------------------------------------------------------------------------------------------
-// C O N F I G U R A T I O N
-// ---------------------------------------------------------------------------------------------------------------------
-
-#ifndef BOLSTER_NTHREADS
-#define BOLSTER_NTHREADS 7
-#endif
-
-// ---------------------------------------------------------------------------------------------------------------------
 // C O N S T A N T S
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -98,19 +90,19 @@ inline static void *__for_proxy_func(void *restrict args)
 // ---------------------------------------------------------------------------------------------------------------------
 
 inline static int bolster_for(const void *restrict base, size_t width, size_t len, functor_t f,
-        void *restrict args, threading_hint_e hint);
+        void *restrict args, threading_hint_e hint, uint_fast16_t nthreads);
 
 inline static int bolster_map(void *restrict dst, const void *restrict src, size_t src_width, size_t len,
-        size_t dst_width, map_func_t f, void *restrict args, threading_hint_e hint);
+        size_t dst_width, map_func_t f, void *restrict args, threading_hint_e hint, uint_fast16_t nthreads);
 
 inline static int bolster_gather(void *restrict dst, const void *restrict src, size_t width,
-        const size_t *restrict idx, size_t dst_src_len, threading_hint_e hint);
+        const size_t *restrict idx, size_t dst_src_len, threading_hint_e hint, uint_fast16_t nthreads);
 
 inline static int bolster_gather_adr(void *restrict dst, const void *restrict src, size_t src_width,
-        const size_t *restrict idx, size_t num, threading_hint_e hint);
+        const size_t *restrict idx, size_t num, threading_hint_e hint, uint_fast16_t nthreads);
 
 inline static int bolster_scatter(void *restrict dst, const void *restrict src, size_t width,
-        const size_t *restrict idx, size_t num, threading_hint_e hint);
+        const size_t *restrict idx, size_t num, threading_hint_e hint, uint_fast16_t nthreads);
 
 inline static int bolster_shuffle(void *restrict dst, const void *restrict src, size_t width,
         const size_t *restrict dst_idx, const size_t *restrict src_idx,
@@ -119,7 +111,7 @@ inline static int bolster_shuffle(void *restrict dst, const void *restrict src, 
 inline static int bolster_filter_early(void *restrict result, size_t *restrict result_size,
         const void *restrict src,
         size_t width, size_t len, pred_func_t pred, void *restrict args,
-        threading_hint_e hint);
+        threading_hint_e hint, uint_fast16_t nthreads);
 
 inline static int bolster_filter_late(size_t *restrict pos, size_t *restrict num_pos, const void *restrict src,
         size_t width, size_t len, pred_func_t pred, void *restrict args,
@@ -133,25 +125,25 @@ inline static int bolster_filter_late(size_t *restrict pos, size_t *restrict num
 inline static int __sequential_for(const void *restrict base, size_t width, size_t len, functor_t f,
         void *restrict args);
 inline static int __parallel_for(const void *restrict base, size_t width, size_t len, functor_t f,
-        void *restrict args);
+        void *restrict args, uint_fast16_t nthreads);
 
 inline static int __map(void *restrict dst, const void *restrict src, size_t src_width, size_t len,
-        size_t dst_width, map_func_t f, void *restrict args, threading_hint_e hint);
+        size_t dst_width, map_func_t f, void *restrict args, threading_hint_e hint, uint_fast16_t nthreads);
 
 inline static int __sequential_gather(void *restrict dst, const void *restrict src, size_t width,
         const size_t *restrict idx, size_t dst_src_len);
 inline static int __parallel_gather(void *restrict dst, const void *restrict src, size_t width,
-        const size_t *restrict idx, size_t dst_src_len);
+        const size_t *restrict idx, size_t dst_src_len, uint_fast16_t nthreads);
 
 inline static int __sequential_gather_adr(void *restrict dst, const void *restrict src, size_t src_width,
         const size_t *restrict idx, size_t num);
 inline static int __parallel_gather_adr(void *restrict dst, const void *restrict src, size_t src_width,
-        const size_t *restrict idx, size_t num);
+        const size_t *restrict idx, size_t num, uint_fast16_t nthreads);
 
 inline static int __sequential_scatter(void *restrict dst, const void *restrict src, size_t width,
         const size_t *restrict idx, size_t num);
 inline static int __parallel_scatter(void *restrict dst, const void *restrict src, size_t width,
-        const size_t *restrict idx, size_t num);
+        const size_t *restrict idx, size_t num, uint_fast16_t nthreads);
 
 inline static int __sequential_shuffle(void *restrict dst, const void *restrict src, size_t width,
         const size_t *restrict dst_idx, const size_t *restrict src_idx,
@@ -167,7 +159,7 @@ inline static int __sequential_filter_early(void *restrict result, size_t *restr
 
 inline static int __parallel_filter_early(void *restrict result, size_t *restrict result_size,
         const void *restrict src, size_t width, size_t len, pred_func_t pred,
-        void *restrict args);
+        void *restrict args, uint_fast16_t nthreads);
 
 inline static int __sequential_filter_late(size_t *restrict pos, size_t *restrict num_pos,
         const void *restrict src, size_t width, size_t len, pred_func_t pred,
@@ -183,37 +175,37 @@ inline static int __parallel_filter_late(size_t *restrict pos, size_t *restrict 
 // ---------------------------------------------------------------------------------------------------------------------
 
 inline static int bolster_for(const void *restrict base, size_t width, size_t len, functor_t f,
-        void *restrict args, threading_hint_e hint)
+        void *restrict args, threading_hint_e hint, uint_fast16_t nthreads)
 {
     bolster_threading_switch(__sequential_for(base, width, len, f, args),
-            __parallel_for  (base, width, len, f, args))
+            __parallel_for  (base, width, len, f, args, nthreads))
 }
 
 inline static int bolster_map(void *restrict dst, const void *restrict src, size_t src_width, size_t len,
-        size_t dst_width, map_func_t f, void *restrict args, threading_hint_e hint)
+        size_t dst_width, map_func_t f, void *restrict args, threading_hint_e hint, uint_fast16_t nthreads)
 {
-    return __map(dst, src, src_width, len, dst_width, f, args, hint);
+    return __map(dst, src, src_width, len, dst_width, f, args, hint, nthreads);
 }
 
 inline static int bolster_gather(void *restrict dst, const void *restrict src, size_t width,
-        const size_t *restrict idx, size_t dst_src_len, threading_hint_e hint)
+        const size_t *restrict idx, size_t dst_src_len, threading_hint_e hint, uint_fast16_t nthreads)
 {
     bolster_threading_switch(__sequential_gather(dst, src, width, idx, dst_src_len),
-            __parallel_gather(dst, src, width, idx, dst_src_len))
+            __parallel_gather(dst, src, width, idx, dst_src_len, nthreads))
 }
 
 inline static int bolster_gather_adr(void *restrict dst, const void *restrict src, size_t src_width,
-        const size_t *restrict idx, size_t num, threading_hint_e hint)
+        const size_t *restrict idx, size_t num, threading_hint_e hint, uint_fast16_t nthreads)
 {
     bolster_threading_switch(__sequential_gather_adr(dst, src, src_width, idx, num),
-            __parallel_gather_adr(dst, src, src_width, idx, num))
+            __parallel_gather_adr(dst, src, src_width, idx, num, nthreads))
 }
 
 inline static int bolster_scatter(void *restrict dst, const void *restrict src, size_t width,
-        const size_t *restrict idx, size_t num, threading_hint_e hint)
+        const size_t *restrict idx, size_t num, threading_hint_e hint, uint_fast16_t nthreads)
 {
     bolster_threading_switch(__sequential_scatter(dst, src, width, idx, num),
-            __parallel_scatter(dst, src, width, idx, num))
+            __parallel_scatter(dst, src, width, idx, num, nthreads))
 }
 
 inline static int bolster_shuffle(void *restrict dst, const void *restrict src, size_t width,
@@ -227,10 +219,10 @@ inline static int bolster_shuffle(void *restrict dst, const void *restrict src, 
 inline static int bolster_filter_early(void *restrict result, size_t *restrict result_size,
         const void *restrict src,
         size_t width, size_t len, pred_func_t pred, void *restrict args,
-        threading_hint_e hint)
+        threading_hint_e hint, uint_fast16_t nthreads)
 {
     bolster_threading_switch(__sequential_filter_early(result, result_size, src, width, len, pred, args),
-            __parallel_filter_early(result, result_size, src, width, len, pred, args))
+            __parallel_filter_early(result, result_size, src, width, len, pred, args, nthreads))
 }
 
 inline static int bolster_filter_late(size_t *restrict pos, size_t *restrict num_pos, const void *restrict src,
@@ -258,24 +250,24 @@ inline static int __sequential_for(const void *restrict base, size_t width, size
 }
 
 inline static int __parallel_for(const void *restrict base, size_t width, size_t len, functor_t f,
-        void *restrict args)
+        void *restrict args, uint_fast16_t nthreads)
 {
     check_non_null(base)
     check_non_null(width)
     check_non_null(len)
 
-    uint_fast16_t          num_thread               = BOLSTER_NTHREADS + 1; /* +1 since one is this thread */
-    pthread_t              threads[BOLSTER_NTHREADS];
+    uint_fast16_t          num_thread               = nthreads + 1; /* +1 since one is this thread */
+    pthread_t              threads[nthreads];
     __for_proxy_arg_t      proxy_args[num_thread];
     register size_t        chunk_len                = len / num_thread;
     size_t                 chunk_len_remain         = len % num_thread;
-    const void *restrict   main_thread_base         = base + BOLSTER_NTHREADS * chunk_len * width;
+    const void *restrict   main_thread_base         = base + nthreads * chunk_len * width;
 
     prefetch_read(f);
     prefetch_read(args);
 
     /* run f on NTHREADS_FOR additional threads */
-    for (register uint_fast16_t tid = 0; tid < BOLSTER_NTHREADS; tid++)
+    for (register uint_fast16_t tid = 0; tid < nthreads; tid++)
     {
         __for_proxy_arg_t *proxy_arg = proxy_args + tid;
         proxy_arg->start  = base + tid * chunk_len * width;
@@ -291,7 +283,7 @@ inline static int __parallel_for(const void *restrict base, size_t width, size_t
     prefetch_read(main_thread_base);
     f(main_thread_base, width, chunk_len + chunk_len_remain, args);
 
-    for (register uint_fast16_t tid = 0; tid < BOLSTER_NTHREADS; tid++) {
+    for (register uint_fast16_t tid = 0; tid < nthreads; tid++) {
         pthread_join(threads[tid], NULL);
     }
 
@@ -321,7 +313,7 @@ inline static void __map_proxy(const void *restrict src, size_t src_width, size_
 }
 
 inline static int __map(void *restrict dst, const void *restrict src, size_t src_width, size_t len, size_t
-dst_width, map_func_t f, void *restrict args, threading_hint_e hint)
+dst_width, map_func_t f, void *restrict args, threading_hint_e hint, uint_fast16_t nthreads)
 {
     check_non_null(src)
     check_non_null(src_width)
@@ -339,7 +331,7 @@ dst_width, map_func_t f, void *restrict args, threading_hint_e hint)
             .src = src
     };
 
-    return bolster_for((void *restrict) src, src_width, len, &__map_proxy, &map_args, hint);
+    return bolster_for((void *restrict) src, src_width, len, &__map_proxy, &map_args, hint, nthreads);
 }
 
 //  B O L S T E R   G A T H E R  ---------------------------------------------------------------------------------------
@@ -405,7 +397,7 @@ inline static int __sequential_gather(void *restrict dst, const void *restrict s
 }
 
 inline static int __parallel_gather(void *restrict dst, const void *restrict src, size_t width,
-        const size_t *restrict idx, size_t dst_src_len)
+        const size_t *restrict idx, size_t dst_src_len, uint_fast16_t nthreads)
 {
     check_non_null(dst)
     check_non_null(src)
@@ -421,7 +413,7 @@ inline static int __parallel_gather(void *restrict dst, const void *restrict src
             .src           = src,
             .dst           = dst,
     };
-    return __parallel_for(dst, width, dst_src_len, __gather_func, &args);
+    return __parallel_for(dst, width, dst_src_len, __gather_func, &args, nthreads);
 }
 
 inline static int __sequential_gather_adr(void *restrict dst, const void *restrict src, size_t src_width,
@@ -479,7 +471,7 @@ inline static void __gather_adr_func(const void *restrict start, size_t width, s
 }
 
 inline static int __parallel_gather_adr(void *restrict dst, const void *restrict src, size_t src_width,
-        const size_t *restrict idx, size_t num)
+        const size_t *restrict idx, size_t num, uint_fast16_t nthreads)
 {
     check_non_null(dst)
     check_non_null(src)
@@ -495,7 +487,7 @@ inline static int __parallel_gather_adr(void *restrict dst, const void *restrict
             .src = src,
             .dst = dst
     };
-    return __parallel_for(dst, src_width, num, __gather_adr_func, &args);
+    return __parallel_for(dst, src_width, num, __gather_adr_func, &args, nthreads);
 }
 
 //  B O L S T E R   S C A T T E R  -------------------------------------------------------------------------------------
@@ -550,7 +542,7 @@ inline static int __sequential_scatter(void *restrict dst, const void *restrict 
 }
 
 inline static int __parallel_scatter(void *restrict dst, const void *restrict src, size_t width,
-        const size_t *restrict idx, size_t num)
+        const size_t *restrict idx, size_t num, uint_fast16_t nthreads)
 {
     check_non_null(dst)
     check_non_null(src)
@@ -566,7 +558,7 @@ inline static int __parallel_scatter(void *restrict dst, const void *restrict sr
             .src = src,
             .dst = dst
     };
-    return __parallel_for(dst, width, num, __scatter_func, &args);
+    return __parallel_for(dst, width, num, __scatter_func, &args, nthreads);
 }
 
 //  B O L S T E R   S H U F F L E  -------------------------------------------------------------------------------------
@@ -753,7 +745,7 @@ inline static int __sequential_filter_early(void *restrict result, size_t *restr
 
     pred(matching_positions, &num_matching_positions, src, width, len, args, 0);
 
-    bolster_gather(result, src, width, matching_positions, num_matching_positions, threading_hint_single);
+    bolster_gather(result, src, width, matching_positions, num_matching_positions, threading_hint_single, 0);
     *result_size = num_matching_positions;
 
     free (matching_positions);
@@ -763,7 +755,7 @@ inline static int __sequential_filter_early(void *restrict result, size_t *restr
 
 inline static int __parallel_filter_early(void *restrict result, size_t *restrict result_size,
         const void *restrict src, size_t width, size_t len, pred_func_t pred,
-        void *restrict args)
+        void *restrict args, uint_fast16_t nthreads)
 {
     check_non_null(result);
     check_non_null(result_size);
@@ -772,21 +764,21 @@ inline static int __parallel_filter_early(void *restrict result, size_t *restric
     check_non_null(len);
     check_non_null(pred);
 
-    uint_fast16_t          num_thread                  = BOLSTER_NTHREADS + 1; /* +1 since one is this thread */
+    uint_fast16_t          num_thread                  = nthreads + 1; /* +1 since one is this thread */
 
-    pthread_t              threads[BOLSTER_NTHREADS];
+    pthread_t              threads[nthreads];
     __filter_arg_t         thread_args[num_thread];
 
     register size_t        chunk_len                   = len / num_thread;
     size_t                 chunk_len_remain            = len % num_thread;
-    size_t                 main_position_offset_to_add = BOLSTER_NTHREADS * chunk_len;
+    size_t                 main_position_offset_to_add = nthreads * chunk_len;
     const void *restrict   main_thread_base            = src + main_position_offset_to_add * width;
 
     prefetch_read(pred);
     prefetch_read(args);
 
     /* run f on NTHREADS_FOR additional threads */
-    for (register uint_fast16_t tid = 0; tid < BOLSTER_NTHREADS; tid++)
+    for (register uint_fast16_t tid = 0; tid < nthreads; tid++)
     {
         __filter_arg_t *arg = thread_args + tid;
         arg->num_positions          = 0;
@@ -814,7 +806,7 @@ inline static int __parallel_filter_early(void *restrict result, size_t *restric
     size_t total_num_matching_positions = main_num_positions;
     size_t partial_num_matching_positions = 0;
 
-    for (register uint_fast16_t tid = 0; tid < BOLSTER_NTHREADS; tid++)
+    for (register uint_fast16_t tid = 0; tid < nthreads; tid++)
     {
         pthread_join(threads[tid], NULL);
         const __filter_arg_t *restrict thread_arg = (thread_args + tid);
@@ -822,7 +814,7 @@ inline static int __parallel_filter_early(void *restrict result, size_t *restric
         prefetch_read(thread_arg->src_positions);
     }
 
-    for (register uint_fast16_t tid = 0; tid < BOLSTER_NTHREADS; tid++)
+    for (register uint_fast16_t tid = 0; tid < nthreads; tid++)
     {
         const __filter_arg_t *restrict thread_arg = (thread_args + tid);
 
@@ -830,7 +822,7 @@ inline static int __parallel_filter_early(void *restrict result, size_t *restric
         {
             bolster_gather(result + partial_num_matching_positions * width, src, width, thread_arg->src_positions,
                     thread_arg->num_positions,
-                    threading_hint_multi);
+                    threading_hint_multi, nthreads);
         }
 
         partial_num_matching_positions += thread_arg->num_positions;
@@ -840,7 +832,7 @@ inline static int __parallel_filter_early(void *restrict result, size_t *restric
     if (likely(main_num_positions > 0))
     {
         bolster_gather(result + partial_num_matching_positions * width, src, width, main_src_positions,
-                main_num_positions, threading_hint_multi);
+                main_num_positions, threading_hint_multi, nthreads);
     }
     free (main_src_positions);
 

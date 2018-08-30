@@ -17,4 +17,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define NG5_CONFIG_TRACE_STRING_DIC_ALLOC
+//#define NG5_CONFIG_TRACE_STRING_DIC_ALLOC
