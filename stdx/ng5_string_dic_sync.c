@@ -343,6 +343,8 @@ static int this_remove(struct string_dic *self, string_id_t *strings, size_t num
 static int this_locate_safe(struct string_dic* self, string_id_t** out, bool** found_mask,
         size_t* num_not_found, char* const* keys, size_t num_keys)
 {
+    trace(STRING_DIC_SYNC_TAG, "'locate_safe' function invoked for %zu strings", num_keys)
+
     check_non_null(self);
     check_non_null(out);
     check_non_null(found_mask);

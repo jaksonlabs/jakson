@@ -253,6 +253,8 @@ void *carrier_locate_safe_func(void *args)
     carrier_locate_arg_t * restrict this_args = (carrier_locate_arg_t * restrict) args;
     this_args->did_work                       = ng5_vector_len(&this_args->in_keys) > 0;
 
+    trace(STRING_DIC_ASYNC_TAG, "thread-local 'locate' function invoked for thread %zu...", this_args->carrier->id)
+
     debug(STRING_DIC_ASYNC_TAG, "thread %zu spawned for locate (safe) task (%zu elements)", this_args->carrier->id,
             ng5_vector_len(&this_args->in_keys));
 
@@ -601,6 +603,7 @@ static int async_locate_safe(struct string_dic* self, string_id_t** out, bool** 
         assert (&arg->in_keys.base != NULL);
     }
 
+    trace(STRING_DIC_ASYNC_TAG, "computing per-thread string subset for %zu strings", num_keys)
     /* create per-carrier string subset */
     for (size_t i = 0; i < num_keys; i++) {
         /* get thread responsible for this particular string */
@@ -616,6 +619,7 @@ static int async_locate_safe(struct string_dic* self, string_id_t** out, bool** 
         ng5_vector_push(&arg->in_keys, &keys[i], 1);
     }
 
+    trace(STRING_DIC_ASYNC_TAG, "schedule operation to threads to %zu threads...", nthreads)
     /* schedule operation to threads */
     for (uint_fast16_t thread_id = 0; thread_id < nthreads; thread_id++) {
         carrier_t            *carrier    = ng5_vector_get(&extra->carriers, thread_id, carrier_t);
@@ -626,9 +630,12 @@ static int async_locate_safe(struct string_dic* self, string_id_t** out, bool** 
     }
 
     /* synchronize */
+    trace(STRING_DIC_ASYNC_TAG, "start syncing %zu threads...", nthreads)
     async_sync(&extra->carriers, nthreads);
+    trace(STRING_DIC_ASYNC_TAG, "%zu threads in sync.", nthreads)
 
     /* collect and merge results */
+    trace(STRING_DIC_ASYNC_TAG, "merging results of %zu threads", nthreads)
     for (size_t i = 0; i < num_keys; i++) {
         /* get thread responsible for this particular string, and local position of that string inside the
          * thread storage */
@@ -657,6 +664,8 @@ static int async_locate_safe(struct string_dic* self, string_id_t** out, bool** 
             string_dic_free(&arg->carrier->local_dict, arg->out_ids);
         }
     }
+
+    trace(STRING_DIC_ASYNC_TAG, "cleanup%s", "...")
 
     /* cleanup */
     thread_assign_drop(&self->alloc, str_carrier_mapping, carrier_nstrings, str_carrier_idx_mapping);
