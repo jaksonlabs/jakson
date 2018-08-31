@@ -343,6 +343,7 @@ static int this_remove(struct string_dic *self, string_id_t *strings, size_t num
 static int this_locate_safe(struct string_dic* self, string_id_t** out, bool** found_mask,
         size_t* num_not_found, char* const* keys, size_t num_keys)
 {
+    timestamp_t begin = time_current_time_ms();
     trace(STRING_DIC_SYNC_TAG, "'locate_safe' function invoked for %zu strings", num_keys)
 
     check_non_null(self);
@@ -357,6 +358,10 @@ static int this_locate_safe(struct string_dic* self, string_id_t** out, bool** f
     struct naive_extra *extra = this_extra(self);
     int status = string_lookup_get_safe_bulk(out, found_mask, num_not_found, &extra->index, keys, num_keys);
     unlock(self);
+
+    timestamp_t end = time_current_time_ms();
+    trace(STRING_DIC_SYNC_TAG, "'locate_safe' function done: %f seconds spent here", (end-begin)/1000.0f)
+
     return status;
 }
 
