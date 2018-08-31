@@ -7,6 +7,8 @@
 #include <stdx/ng5_trace_alloc.h>
 #include <stdx/ng5_bolster.h>
 
+#define STRING_DIC_SYNC_TAG "string-dic-sync"
+
 struct entry {
     char                               *str;
     bool                                in_use;
@@ -195,6 +197,8 @@ static int this_drop(struct string_dic *self)
 static int this_insert(struct string_dic *self, string_id_t **out, char * const*strings, size_t num_strings,
         size_t nthreads)
 {
+    trace(STRING_DIC_SYNC_TAG, "local string dictionary insertion invoked for %zu strings", num_strings);
+
     unused(nthreads);
 
     check_tag(self->tag, STRING_DIC_NAIVE)
@@ -219,7 +223,11 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
     /* query index for strings to get a boolean mask which strings are new and which must be added */
     /* This is for the case that the string dictionary is not empty to skip processing of those new elements
      * which are already contained */
+    trace(STRING_DIC_SYNC_TAG, "local string dictionary check for new strings in insertion bulk%s", "...");
+
     string_lookup_get_safe_bulk(&values, &found_masks, &num_not_found, &extra->index, strings, num_strings);
+
+    trace(STRING_DIC_SYNC_TAG, "insertion check done for bulk of %zu strings: %zu new strings detected", num_strings, num_not_found);
 //    parallel_check_containment_func_local_args_t thread_args[nthreads];
 //    for (uint_fast16_t i = 0; i < nthreads; i++) {
 //        parallel_check_containment_func_local_args_t arg = {

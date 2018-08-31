@@ -145,6 +145,14 @@
 
 #endif
 
+#define trace(tag, msg, ...)                                                 \
+{                                                                            \
+    char buffer[1024];                                                       \
+    sprintf(buffer, "--%d-- [TRACE   : %-10s] %s\n", getpid(), tag, msg);    \
+    fprintf(stderr, buffer, __VA_ARGS__);                                    \
+    fflush(stderr);                                                          \
+}
+
 #ifndef NDEBUG
 #define debug(tag, msg, ...)                                                 \
 {                                                                            \

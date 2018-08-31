@@ -227,10 +227,12 @@ void *carrier_insert_func(void *args)
     carrier_insert_arg_t * restrict this_args = (carrier_insert_arg_t * restrict) args;
     this_args->did_work             = this_args->strings.num_elems > 0;
 
+    trace(STRING_DIC_ASYNC_TAG, "thread-local insert function started (thread %zu)", this_args->carrier->id);
     debug(STRING_DIC_ASYNC_TAG, "thread %zu spawned for insert task (%zu elements)", this_args->carrier->id,
             ng5_vector_len(&this_args->strings));
 
     if (this_args->did_work) {
+        trace(STRING_DIC_ASYNC_TAG, "thread %zu starts insertion of %zu strings", this_args->carrier->id, ng5_vector_len(&this_args->strings));
         char** data = (char**) ng5_vector_data(&this_args->strings);
 
         int status = string_dic_insert(&this_args->carrier->local_dict,
@@ -377,6 +379,8 @@ static void compute_thread_assign(atomic_uint_fast16_t *str_carrier_mapping, ato
 
 static int async_insert(struct string_dic *self, string_id_t **out, char * const*strings, size_t num_strings, size_t __nthreads)
 {
+    trace(STRING_DIC_ASYNC_TAG, "insert operation invoked: %zu strings in total", num_strings)
+
     check_tag(self->tag, STRING_DIC_ASYNC);
     panic_if(__nthreads != 0, "parameter 'nthreads' must be set to 0 for async dictionary")
 
@@ -428,14 +432,20 @@ static int async_insert(struct string_dic *self, string_id_t **out, char * const
 
 
     /* schedule insert operation per carrier */
+    trace(STRING_DIC_ASYNC_TAG, "schedule insert operation to %zu threads", nthreads)
     for (uint_fast16_t thread_id = 0; thread_id < nthreads; thread_id++) {
         carrier_insert_arg_t *carrier_arg = *ng5_vector_get(&carrier_args, thread_id, carrier_insert_arg_t *);
         carrier_t   *carrier              = ng5_vector_get(&extra->carriers, thread_id, carrier_t);
+        trace(STRING_DIC_ASYNC_TAG, "create thread %zu...", thread_id)
         pthread_create(&carrier->thread, NULL, carrier_insert_func, carrier_arg);
+        trace(STRING_DIC_ASYNC_TAG, "thread %zu created", thread_id)
     }
+    trace(STRING_DIC_ASYNC_TAG, "scheduling done for %zu threads", nthreads)
 
     /* synchronize */
+    trace(STRING_DIC_ASYNC_TAG, "start synchronizing %zu threads", nthreads)
     async_sync(&extra->carriers, nthreads);
+    trace(STRING_DIC_ASYNC_TAG, "%zu threads in sync", nthreads)
 
     /* compute string ids; the string id produced by this implementation is a compound identifier encoding
      * both the owning thread id and the thread-local string id. For this, the returned (global) string identifier
