@@ -498,7 +498,7 @@ static int smart_bucket_create(struct simple_bucket* buckets, size_t num_buckets
         ng5_vector_set_growfactor(&bucket->freelist, grow_factor);
         ng5_vector_repreat_push(&bucket->entries, &entry, bucket_cap);
 
-        ng5_bloomfilter_create(&bucket->bloomfilter, 256);
+        ng5_bloomfilter_create(&bucket->bloomfilter, 50000);
     }
 
     return STATUS_OK;
