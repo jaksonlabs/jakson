@@ -25,7 +25,7 @@ int spinlock_lock(struct spinlock *spinlock)
     }
     timestamp_t end = time_current_time_ms();
     float duration = (end-begin)/1000.0f;
-    if (duration > 1) {
+    if (duration > 0.01f) {
         warn(SPINLOCK_TAG, "spin lock acquisition takes exceptionally long: %f seconds", duration);
     }
 
