@@ -26,8 +26,10 @@ int spinlock_lock(struct spinlock *spinlock)
         spinlock->owning_thread = pthread_self();
     }
     timestamp_t end = time_current_time_ms();
-
-    trace(SPINLOCK_TAG, "spin lock aquired after %f seconds", (end-begin)/1000.0f);
+    float duration = (end-begin)/1000.0f;
+    if (duration > 1) {
+        warn(SPINLOCK_TAG, "spin lock acquisition takes exceptionally long: %f seconds", duration);
+    }
 
     return STATUS_OK;
 }
