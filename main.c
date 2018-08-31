@@ -147,7 +147,7 @@ for (int pi = 0; pi<11; pi++) {
           fprintf(stderr, "create..\n");
 
           timestamp_t create_begin = time_current_time_ms();
-          string_dic_create_async(&dic, ng5_vector_len(lines), num_buckets, num_lines, 64, NULL);                         // <--------------------------------------------
+          string_dic_create_async(&dic, ng5_vector_len(lines), num_buckets, num_lines, 1, NULL);                         // <--------------------------------------------
           timestamp_t create_end = time_current_time_ms();
           created_duration = (create_end-create_begin)/1000.0f;
 
@@ -162,13 +162,13 @@ for (int pi = 0; pi<11; pi++) {
 
           string_dic_reset_counters(&dic);
           timestamp_t inserted_begin = time_current_time_ms();
-          string_dic_insert(&dic, &ids, strings, NULL, num_strings);
+          string_dic_insert(&dic, &ids, strings, num_strings);
           timestamp_t inserted_end = time_current_time_ms();
           insert_duration = (inserted_end-inserted_begin)/1000.0f;
 
           fprintf(stderr, "locate..\n");
 
-          string_dic_locate_fast(&ids_out, &dic, strings, NULL, num_strings);
+          string_dic_locate_fast(&ids_out, &dic, strings, num_strings);
           for (size_t i = 0; i < num_strings; i++) {
               string_id_t id_created = ids[i];
               string_id_t id_located = ids_out[i];

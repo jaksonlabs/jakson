@@ -191,40 +191,58 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
 #endif
 
 
-    string_id_t        *ids_out        = allocator_malloc(&hashtable_alloc, num_strings * sizeof(string_id_t));
+    string_id_t  *ids_out           = allocator_malloc(&hashtable_alloc, num_strings * sizeof(string_id_t));
 
+    size_t        num_not_found;
+    bool         *found_masks       = allocator_malloc(&hashtable_alloc, num_strings * sizeof(bool));
+    string_id_t  *values            = allocator_malloc(&hashtable_alloc, num_strings * sizeof(string_id_t));
+
+
+    /* query index for strings to get a boolean mask which strings are new and which must be added */
+    /* This is for the case that the string dictionary is not empty to skip processing of those new elements
+     * which are already contained */
+    string_lookup_get_safe_bulk(&values, &found_masks, &num_not_found, &extra->index, strings, num_strings);
 
     /* copy string ids for already known strings to their result position resp. add those which are new */
     for (size_t i = 0; i < num_strings; i++) {
 
-        const char        *key = (const char *)(strings[i]);
-        bool               found_mask;
-        string_id_t        value;
-
-        /* query index for strings to get a boolean mask which strings are new and which must be added */
-        string_lookup_get_safe_exact(&value, &found_mask, &extra->index, key);  /* OPTIMIZATION: use specialized function for "exact" query to avoid unnessecary malloc calls to manage set of results if only a single result is needed */
-
-        if (found_mask) {
-            ids_out[i] = value;
+        if (found_masks[i]) {
+            ids_out[i] = values[i];
         } else {
-            string_id_t string_id;
+            string_id_t        string_id;
+            const char        *key = (const char *)(strings[i]);
+            bool               found_mask;
+            string_id_t        value;
 
-            /* register in contents list */
-            panic_if(freelist_pop(&string_id, self) != STATUS_OK, "slot management broken");
-            struct entry *entries = (struct entry *) ng5_vector_data(&extra->contents);
-            struct entry *entry   = entries + string_id;
-            assert (!entry->in_use);
-            entry->in_use         = true;
-            entry->str            = strdup(strings[i]);
-            ids_out[i]            = string_id;
+            /* query index for strings to get a boolean mask which strings are new and which must be added */
+            /* This is for the case that the string was not already contained in the string dictionary but may have
+             * duplicates in this insertion batch that are already inserted */
+            string_lookup_get_safe_exact(&value, &found_mask, &extra->index, key);  /* OPTIMIZATION: use specialized function for "exact" query to avoid unnessecary malloc calls to manage set of results if only a single result is needed */
 
-            /* add for not yet registered pairs to buffer for fast import */
-            string_lookup_put_fast_exact(&extra->index, strings[i], string_id);
+            if (found_mask) {
+                ids_out[i] = value;
+            } else {
+                /* register in contents list */
+                panic_if(freelist_pop(&string_id, self) != STATUS_OK, "slot management broken");
+                struct entry *entries = (struct entry *) ng5_vector_data(&extra->contents);
+                struct entry *entry   = entries + string_id;
+                assert (!entry->in_use);
+                entry->in_use         = true;
+                entry->str            = strdup(strings[i]);
+                ids_out[i]            = string_id;
+
+                /* add for not yet registered pairs to buffer for fast import */
+                string_lookup_put_fast_exact(&extra->index, strings[i], string_id);
+            }
         }
     }
 
     /* set potential non-null out parameters */
     optional_set_else(out, ids_out, allocator_free(&self->alloc, ids_out));
+
+    /* cleanup */
+    allocator_free(&hashtable_alloc, found_masks);
+    allocator_free(&hashtable_alloc, values);
 
     unlock(self);
 
