@@ -15,8 +15,6 @@ int spinlock_create(struct spinlock *spinlock)
 
 int spinlock_lock(struct spinlock *spinlock)
 {
-    trace(SPINLOCK_TAG, "request aquire spin lock%s", "...");
-
     timestamp_t begin = time_current_time_ms();
     check_non_null(spinlock)
     if (!pthread_equal(spinlock->owning_thread, pthread_self())) {
