@@ -237,7 +237,7 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
              * is requried since the filter maybe made a mistake. Of the filter returns "no", the
              * key is new for sure. In this case, one can skip the lookup into the buckets. */
             hash_t bloom_key = hash_fnv(strlen(key), key); /* using a hash of a key instead of the string key itself avoids reading the entire string for computing k hashes inside the bloomfilter */
-            if (ng5_bloomfilter_test_and_set(&bloomfilter, bloom_key, strlen(hash_t))) {
+            if (ng5_bloomfilter_test_and_set(&bloomfilter, bloom_key, sizeof(hash_t))) {
                 /* ensure that the string really was seen (due to collisions in the bloom filter the key might not
                  * been actually seen) */
 
