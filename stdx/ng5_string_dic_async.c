@@ -380,8 +380,7 @@ static void compute_thread_assign(atomic_uint_fast16_t *str_carrier_mapping, ato
 static int async_insert(struct string_dic *self, string_id_t **out, char * const*strings, size_t num_strings, size_t __nthreads)
 {
     timestamp_t begin = time_current_time_ms();
-
-    trace(STRING_DIC_ASYNC_TAG, "insert operation invoked: %zu strings in total", num_strings)
+    info(STRING_DIC_ASYNC_TAG, "insert operation invoked: %zu strings in total", num_strings)
 
 
     check_tag(self->tag, STRING_DIC_ASYNC);
@@ -503,6 +502,9 @@ static int async_insert(struct string_dic *self, string_id_t **out, char * const
 
 static int async_remove(struct string_dic *self, string_id_t *strings, size_t num_strings)
 {
+    timestamp_t begin = time_current_time_ms();
+    info(STRING_DIC_ASYNC_TAG, "remove operation started: %zu strings to remove", num_strings);
+
     check_tag(self->tag, STRING_DIC_ASYNC);
 
     async_lock(self);
@@ -555,12 +557,18 @@ static int async_remove(struct string_dic *self, string_id_t *strings, size_t nu
 
     async_unlock(self);
 
+    timestamp_t end = time_current_time_ms();
+    info(STRING_DIC_ASYNC_TAG, "remove operation done: %f seconds spent here", (end - begin)/1000.0f)
+
     return STATUS_OK;
 }
 
 static int async_locate_safe(struct string_dic* self, string_id_t** out, bool** found_mask,
         size_t* num_not_found, char* const* keys, size_t num_keys)
 {
+    timestamp_t begin = time_current_time_ms();
+    info(STRING_DIC_ASYNC_TAG, "locate (safe) operation started: %zu strings to locate", num_keys)
+
     check_tag(self->tag, STRING_DIC_ASYNC);
 
     async_lock(self);
@@ -665,6 +673,9 @@ static int async_locate_safe(struct string_dic* self, string_id_t** out, bool** 
 
     async_unlock(self);
 
+    timestamp_t end = time_current_time_ms();
+    info(STRING_DIC_ASYNC_TAG, "locate (safe) operation done: %f seconds spent here", (end - begin)/1000.0f)
+
     return STATUS_OK;
 }
 
@@ -692,6 +703,9 @@ static int async_locate_fast(struct string_dic* self, string_id_t** out, char* c
 
 static char **async_extract(struct string_dic *self, const string_id_t *ids, size_t num_ids)
 {
+    timestamp_t begin = time_current_time_ms();
+    info(STRING_DIC_ASYNC_TAG, "extract (safe) operation started: %zu strings to extract", num_ids)
+
     if (self->tag != STRING_DIC_ASYNC) {
         return NULL;
     }
@@ -758,6 +772,9 @@ static char **async_extract(struct string_dic *self, const string_id_t *ids, siz
     NG5_HEAP_FREE(thread_args, &self->alloc);
 
     async_unlock(self);
+
+    timestamp_t end = time_current_time_ms();
+    info(STRING_DIC_ASYNC_TAG, "extract (safe) operation done: %f seconds spent here", (end - begin)/1000.0f)
 
     return global_result;
 }
