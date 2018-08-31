@@ -379,7 +379,10 @@ static void compute_thread_assign(atomic_uint_fast16_t *str_carrier_mapping, ato
 
 static int async_insert(struct string_dic *self, string_id_t **out, char * const*strings, size_t num_strings, size_t __nthreads)
 {
+    timestamp_t begin = time_current_time_ms();
+
     trace(STRING_DIC_ASYNC_TAG, "insert operation invoked: %zu strings in total", num_strings)
+
 
     check_tag(self->tag, STRING_DIC_ASYNC);
     panic_if(__nthreads != 0, "parameter 'nthreads' must be set to 0 for async dictionary")
@@ -491,6 +494,9 @@ static int async_insert(struct string_dic *self, string_id_t **out, char * const
     ng5_vector_drop(&carrier_args);
 
     async_unlock(self);
+
+    timestamp_t end = time_current_time_ms();
+    info(STRING_DIC_ASYNC_TAG, "insertion operation done: %f seconds spent here", (end - begin)/1000.0f)
 
     return STATUS_OK;
 }
