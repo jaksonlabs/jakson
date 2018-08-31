@@ -430,7 +430,7 @@ static int async_insert(struct string_dic *self, string_id_t **out, char * const
     /* schedule insert operation per carrier */
     for (uint_fast16_t thread_id = 0; thread_id < nthreads; thread_id++) {
         carrier_insert_arg_t *carrier_arg = *ng5_vector_get(&carrier_args, thread_id, carrier_insert_arg_t *);
-        volatile carrier_t   *carrier     = ng5_vector_get(&extra->carriers, thread_id, carrier_t);
+        carrier_t   *carrier              = ng5_vector_get(&extra->carriers, thread_id, carrier_t);
         pthread_create(&carrier->thread, NULL, carrier_insert_func, carrier_arg);
     }
 
