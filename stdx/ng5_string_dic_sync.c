@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdx/ng5_string_map_smart.h>
 #include <stdx/ng5_trace_alloc.h>
+#include <stdx/ng5_bolster.h>
 
 struct entry {
     char                               *str;
@@ -19,7 +20,8 @@ struct naive_extra {
 };
 
 static int this_drop(struct string_dic *self);
-static int this_insert(struct string_dic *self, string_id_t **out, char * const*strings, size_t num_strings);
+static int this_insert(struct string_dic *self, string_id_t **out, char * const*strings, size_t num_strings,
+        size_t nthreads);
 static int this_remove(struct string_dic *self, string_id_t *strings, size_t num_strings);
 static int this_locate_safe(struct string_dic* self, string_id_t** out, bool** found_mask,
         size_t* num_not_found, char* const* keys, size_t num_keys);
@@ -171,17 +173,34 @@ static int this_drop(struct string_dic *self)
 
     return STATUS_OK;
 }
+//
+//typedef struct parallel_check_containment_func_local_args_t
+//{
+//    string_id_t       *values;
+//    bool              *found_masks;
+//    struct string_map *map;
+//} parallel_check_containment_func_local_args_t;
+//
+//static void parallel_check_containment_func(const void *restrict start, size_t width, size_t len,
+//        void *restrict args)
+//{
+//    parallel_check_containment_func_local_args_t *func_args = (parallel_check_containment_func_local_args_t *) args;
+//    char * const *strings                                   = (char * const*) start;
+//    size_t        num_not_found;
+//
+//    string_lookup_get_safe_bulk(&func_args->values, func_args->found_masks, &num_not_found, func_args->map, strings,
+//            len);
+//}
 
-static int this_insert(struct string_dic *self, string_id_t **out, char * const*strings, size_t num_strings)
+static int this_insert(struct string_dic *self, string_id_t **out, char * const*strings, size_t num_strings,
+        size_t nthreads)
 {
+    unused(nthreads);
+
     check_tag(self->tag, STRING_DIC_NAIVE)
     lock(self);
 
-
-
     struct naive_extra *extra          = this_extra(self);
-
-
 
     ng5_allocator_t hashtable_alloc;
 #if defined(NG5_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
@@ -197,11 +216,21 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
     bool         *found_masks       = allocator_malloc(&hashtable_alloc, num_strings * sizeof(bool));
     string_id_t  *values            = allocator_malloc(&hashtable_alloc, num_strings * sizeof(string_id_t));
 
-
     /* query index for strings to get a boolean mask which strings are new and which must be added */
     /* This is for the case that the string dictionary is not empty to skip processing of those new elements
      * which are already contained */
     string_lookup_get_safe_bulk(&values, &found_masks, &num_not_found, &extra->index, strings, num_strings);
+//    parallel_check_containment_func_local_args_t thread_args[nthreads];
+//    for (uint_fast16_t i = 0; i < nthreads; i++) {
+//        parallel_check_containment_func_local_args_t arg = {
+//            .
+//        };
+//    }
+//    parallel_check_containment_func_args_t args = {
+//
+//    };
+//    bolster_for(strings, sizeof(char * const*), num_strings, parallel_check_containment_func, &args,
+//            threading_hint_multi, nthreads);
 
     /* copy string ids for already known strings to their result position resp. add those which are new */
     for (size_t i = 0; i < num_strings; i++) {
@@ -209,6 +238,10 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
         if (found_masks[i]) {
             ids_out[i] = values[i];
         } else {
+            /* This path is taken only for strings that are not already contained in the dictionary. However,
+             * since this insertion batch may contain duplicate string, querying for already inserted strings
+             * must be done anyway for each string in the insertion batch that is inserted. */
+
             string_id_t        string_id;
             const char        *key = (const char *)(strings[i]);
             bool               found_mask;

@@ -60,7 +60,8 @@ typedef struct string_dic
      *
      * Note: Implementation must ensure thread-safeness
     */
-    int                  (*insert)(struct string_dic *self, string_id_t **out, char * const*strings, size_t num_strings);
+    int                  (*insert)(struct string_dic *self, string_id_t **out, char * const*strings,
+                                   size_t num_strings, size_t nthreads);
 
     /**
      * Removes a particular number of strings from this dictionary by their ids. The caller must ensure that
@@ -134,12 +135,13 @@ static int string_dic_drop(struct string_dic* dic)
  * @return
  */
 unused_fn
-static int string_dic_insert(struct string_dic* dic, string_id_t** out, char* const* strings, size_t num_strings)
+static int string_dic_insert(struct string_dic* dic, string_id_t** out, char* const* strings, size_t num_strings,
+        size_t nthreads)
 {
     check_non_null(dic);
     check_non_null(strings);
     assert(dic->insert);
-    return dic->insert(dic, out, strings, num_strings);
+    return dic->insert(dic, out, strings, num_strings, nthreads);
 }
 
 unused_fn

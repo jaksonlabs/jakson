@@ -53,6 +53,7 @@ typedef struct carrier_insert_arg_t
     carrier_t                    *carrier;
     bool                          write_out;
     bool                          did_work;
+    uint_fast16_t                 insert_nthreads;
 } carrier_insert_arg_t;
 
 typedef struct carrier_remove_arg_t
@@ -109,7 +110,7 @@ typedef struct carrier_extract_arg_t
 // ---------------------------------------------------------------------------------------------------------------------
 
 static int async_drop(struct string_dic *self);
-static int async_insert(struct string_dic *self, string_id_t **out, char * const*strings, size_t num_strings);
+static int async_insert(struct string_dic *self, string_id_t **out, char * const*strings, size_t num_strings, size_t nthreads);
 static int async_remove(struct string_dic *self, string_id_t *strings, size_t num_strings);
 static int async_locate_safe(struct string_dic* self, string_id_t** out, bool** found_mask,
         size_t* num_not_found, char* const* keys, size_t num_keys);
@@ -234,7 +235,7 @@ void *carrier_insert_func(void *args)
 
         int status = string_dic_insert(&this_args->carrier->local_dict,
                 this_args->write_out ? &this_args->out : NULL,
-                data, ng5_vector_len(&this_args->strings));
+                data, ng5_vector_len(&this_args->strings), this_args->insert_nthreads);
 
         panic_if(status!=STATUS_OK, "internal error during thread-local string dictionary building process");
         debug(STRING_DIC_ASYNC_TAG, "thread %zu done", this_args->carrier->id);
@@ -374,9 +375,10 @@ static void compute_thread_assign(atomic_uint_fast16_t *str_carrier_mapping, ato
 
 }
 
-static int async_insert(struct string_dic *self, string_id_t **out, char * const*strings, size_t num_strings)
+static int async_insert(struct string_dic *self, string_id_t **out, char * const*strings, size_t num_strings, size_t __nthreads)
 {
     check_tag(self->tag, STRING_DIC_ASYNC);
+    panic_if(__nthreads != 0, "parameter 'nthreads' must be set to 0 for async dictionary")
 
     async_lock(self);
 
@@ -401,6 +403,7 @@ static int async_insert(struct string_dic *self, string_id_t **out, char * const
     for (uint_fast16_t i = 0; i < nthreads; i++) {
         carrier_insert_arg_t* entry = allocator_malloc(&self->alloc, sizeof(carrier_insert_arg_t));
         entry->carrier       = ng5_vector_get(&extra->carriers, i, carrier_t);
+        entry->insert_nthreads = nthreads;
 
         ng5_vector_create(&entry->strings, &self->alloc, sizeof(char*), max(1, carrier_nstrings[i]));
         ng5_vector_push(&carrier_args, &entry, 1);

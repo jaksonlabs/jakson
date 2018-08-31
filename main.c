@@ -65,6 +65,7 @@ ng5_vector_t *to_string_list(const char *contents)
 }
 
 #define NUM_SAMPLES 2
+#define NTHREADS   16
 
 /*void roadfire_test() {
     struct storage_engine engine;
@@ -119,6 +120,7 @@ int yago_percent[11] = {
       91
 };
 
+
 for (int pi = 0; pi<11; pi++) {
 
   timestamp_t read_begin = time_current_time_ms();
@@ -147,7 +149,7 @@ for (int pi = 0; pi<11; pi++) {
           fprintf(stderr, "create..\n");
 
           timestamp_t create_begin = time_current_time_ms();
-          string_dic_create_async(&dic, ng5_vector_len(lines), num_buckets, num_lines, 1, NULL);                         // <--------------------------------------------
+          string_dic_create_async(&dic, ng5_vector_len(lines), num_buckets, num_lines, NTHREADS, NULL);                         // <--------------------------------------------
           timestamp_t create_end = time_current_time_ms();
           created_duration = (create_end-create_begin)/1000.0f;
 
@@ -162,7 +164,8 @@ for (int pi = 0; pi<11; pi++) {
 
           string_dic_reset_counters(&dic);
           timestamp_t inserted_begin = time_current_time_ms();
-          string_dic_insert(&dic, &ids, strings, num_strings);
+          string_dic_insert(&dic, &ids, strings, num_strings, 0);
+          string_dic_insert(&dic, &ids, strings, num_strings, 0); // HACK: Test for bulk existence
           timestamp_t inserted_end = time_current_time_ms();
           insert_duration = (inserted_end-inserted_begin)/1000.0f;
 
