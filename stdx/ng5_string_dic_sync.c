@@ -176,24 +176,36 @@ static int this_drop(struct string_dic *self)
 
     return STATUS_OK;
 }
-//
-//typedef struct parallel_check_containment_func_local_args_t
-//{
-//    string_id_t       *values;
-//    bool              *found_masks;
-//    struct string_map *map;
-//} parallel_check_containment_func_local_args_t;
-//
-//static void parallel_check_containment_func(const void *restrict start, size_t width, size_t len,
-//        void *restrict args)
-//{
-//    parallel_check_containment_func_local_args_t *func_args = (parallel_check_containment_func_local_args_t *) args;
-//    char * const *strings                                   = (char * const*) start;
-//    size_t        num_not_found;
-//
-//    string_lookup_get_safe_bulk(&func_args->values, func_args->found_masks, &num_not_found, func_args->map, strings,
-//            len);
-//}
+
+typedef struct parallel_check_containment_func_local_args_t
+{
+    ng5_vector_t of_type(string_id_t*) thread_local_values;
+    ng5_vector_t of_type(bool *)       thread_local_found_masks;
+    ng5_vector_t of_type(size_t)       thread_local_lengths;
+    struct string_map                  *map;
+    char * const*                       base;
+} parallel_check_containment_func_local_args_t;
+
+static void parallel_check_containment_func(const void *restrict start, size_t width, size_t len,
+        void *restrict args, thread_id_t tid)
+{
+    unused(width);
+
+    parallel_check_containment_func_local_args_t *func_args = (parallel_check_containment_func_local_args_t *) args;
+    char * const *strings    = (char * const*) start;
+    uint_fast16_t thread_id  = tid;
+    string_id_t  *values     = *ng5_vector_get(&func_args->thread_local_values, thread_id, string_id_t  *);
+    bool         *found_mask = *ng5_vector_get(&func_args->thread_local_found_masks, thread_id, bool *);
+    size_t        num_not_found;
+
+    ng5_vector_set(&func_args->thread_local_lengths, thread_id, &len);
+
+    string_lookup_get_safe_bulk(&values, &found_mask, &num_not_found, func_args->map, strings,
+            len);
+
+    ng5_vector_set(&func_args->thread_local_values, thread_id, &values);
+    ng5_vector_set(&func_args->thread_local_found_masks, thread_id, &found_mask);
+}
 
 static int this_insert(struct string_dic *self, string_id_t **out, char * const*strings, size_t num_strings,
         size_t nthreads)
@@ -216,37 +228,51 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
 #endif
 
 
-    string_id_t  *ids_out           = allocator_malloc(&hashtable_alloc, num_strings * sizeof(string_id_t));
-
-    size_t        num_not_found;
-    bool         *found_masks       = allocator_malloc(&hashtable_alloc, num_strings * sizeof(bool));
-    string_id_t  *values            = allocator_malloc(&hashtable_alloc, num_strings * sizeof(string_id_t));
+    string_id_t  *ids_out                  = allocator_malloc(&hashtable_alloc, num_strings * sizeof(string_id_t));
+    bool         *global_found_masks       = allocator_malloc(&hashtable_alloc, num_strings * sizeof(bool));
+    string_id_t  *global_values            = allocator_malloc(&hashtable_alloc, num_strings * sizeof(string_id_t));
 
     /* query index for strings to get a boolean mask which strings are new and which must be added */
     /* This is for the case that the string dictionary is not empty to skip processing of those new elements
      * which are already contained */
     trace(STRING_DIC_SYNC_TAG, "local string dictionary check for new strings in insertion bulk%s", "...");
 
-    string_lookup_get_safe_bulk(&values, &found_masks, &num_not_found, &extra->index, strings, num_strings);
+    //string_lookup_get_safe_bulk(&values, &found_masks, &num_not_found, &extra->index, strings, num_strings);
 
     trace(STRING_DIC_SYNC_TAG, "insertion check done for bulk of %zu strings: %zu new strings detected", num_strings, num_not_found);
-//    parallel_check_containment_func_local_args_t thread_args[nthreads];
-//    for (uint_fast16_t i = 0; i < nthreads; i++) {
-//        parallel_check_containment_func_local_args_t arg = {
-//            .
-//        };
-//    }
-//    parallel_check_containment_func_args_t args = {
-//
-//    };
-//    bolster_for(strings, sizeof(char * const*), num_strings, parallel_check_containment_func, &args,
-//            threading_hint_multi, nthreads);
+    parallel_check_containment_func_local_args_t thread_args = {
+        .map  = &extra->index,
+        .base = strings
+    };
+    ng5_vector_create(&thread_args.thread_local_values,      &self->alloc, sizeof(string_id_t*), nthreads);
+    ng5_vector_create(&thread_args.thread_local_found_masks, &self->alloc, sizeof(bool*),        nthreads);
+    ng5_vector_create(&thread_args.thread_local_lengths,     &self->alloc, sizeof(size_t),       nthreads);
+    ng5_vector_enlarge_size(&thread_args.thread_local_values);
+    ng5_vector_enlarge_size(&thread_args.thread_local_found_masks);
+    ng5_vector_enlarge_size(&thread_args.thread_local_lengths);
+
+    bolster_for(strings, sizeof(char * const*), num_strings, parallel_check_containment_func, &thread_args,
+            threading_hint_multi, nthreads - 1 /* since main thread is also used */);
+
+    size_t cpy_offset = 0;
+    for (uint_fast16_t thread_id = 0; thread_id < nthreads; thread_id++) {
+        string_id_t *values     = *ng5_vector_get(&thread_args.thread_local_values, thread_id, string_id_t  *);
+        bool        *found_mask = *ng5_vector_get(&thread_args.thread_local_found_masks, thread_id, bool *);
+        size_t       length     = *ng5_vector_get(&thread_args.thread_local_lengths, thread_id, size_t);
+
+        memcpy(global_values + cpy_offset *sizeof(string_id_t), values, length *sizeof(string_id_t));
+        memcpy(global_found_masks + cpy_offset *sizeof(bool), values, length *sizeof(bool));
+        cpy_offset += length;
+
+        allocator_free(&self->alloc, values);
+        allocator_free(&self->alloc, found_mask);
+    }
 
     /* copy string ids for already known strings to their result position resp. add those which are new */
     for (size_t i = 0; i < num_strings; i++) {
 
-        if (found_masks[i]) {
-            ids_out[i] = values[i];
+        if (global_found_masks[i]) {
+            ids_out[i] = global_values[i];
         } else {
             /* This path is taken only for strings that are not already contained in the dictionary. However,
              * since this insertion batch may contain duplicate string, querying for already inserted strings
@@ -284,8 +310,8 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
     optional_set_else(out, ids_out, allocator_free(&self->alloc, ids_out));
 
     /* cleanup */
-    allocator_free(&hashtable_alloc, found_masks);
-    allocator_free(&hashtable_alloc, values);
+    allocator_free(&hashtable_alloc, global_found_masks);
+    allocator_free(&hashtable_alloc, global_values);
 
     unlock(self);
 

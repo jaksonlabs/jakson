@@ -34,7 +34,9 @@ __BEGIN_DECLS
 // D A T A   T Y P E S
 // ---------------------------------------------------------------------------------------------------------------------
 
-typedef void (*functor_t)(const void *restrict start, size_t width, size_t len, void *restrict args);
+typedef uint_fast16_t thread_id_t;
+
+typedef void (*functor_t)(const void *restrict start, size_t width, size_t len, void *restrict args, thread_id_t tid);
 
 typedef void (*map_func_t)(void *restrict dst, const void *restrict src, size_t src_width, size_t dst_width, size_t len,
         void *restrict args);
@@ -56,13 +58,14 @@ typedef struct __func_proxy_arg_t
   const void      *restrict start;
   size_t           width;
   size_t           len;
+  thread_id_t      tid;
   void            *args;
 } __for_proxy_arg_t;
 
 inline static void *__for_proxy_func(void *restrict args)
 {
     cast(__for_proxy_arg_t *restrict, proxy_arg, args);
-    proxy_arg->f(proxy_arg->start, proxy_arg->width, proxy_arg->len, proxy_arg->args);
+    proxy_arg->f(proxy_arg->start, proxy_arg->width, proxy_arg->len, proxy_arg->args, proxy_arg->tid);
     return NULL;
 }
 
@@ -245,7 +248,7 @@ inline static int __sequential_for(const void *restrict base, size_t width, size
     check_non_null(base)
     check_non_null(width)
     check_non_null(len)
-    f(base, width, len, args);
+    f(base, width, len, args, 0);
     return STATUS_OK;
 }
 
@@ -272,6 +275,7 @@ inline static int __parallel_for(const void *restrict base, size_t width, size_t
         __for_proxy_arg_t *proxy_arg = proxy_args + tid;
         proxy_arg->start  = base + tid * chunk_len * width;
         proxy_arg->len    = chunk_len;
+        proxy_arg->tid    = (tid + 1);
         proxy_arg->width  = width;
         proxy_arg->args   = args;
         proxy_arg->f      = f;
@@ -281,7 +285,7 @@ inline static int __parallel_for(const void *restrict base, size_t width, size_t
     }
     /* run f on this thread */
     prefetch_read(main_thread_base);
-    f(main_thread_base, width, chunk_len + chunk_len_remain, args);
+    f(main_thread_base, width, chunk_len + chunk_len_remain, args, 0);
 
     for (register uint_fast16_t tid = 0; tid < nthreads; tid++) {
         pthread_join(threads[tid], NULL);
@@ -300,8 +304,10 @@ typedef struct __map_args_t {
   void *               args;
 } __map_args_t;
 
-inline static void __map_proxy(const void *restrict src, size_t src_width, size_t len, void *restrict args)
+inline static void __map_proxy(const void *restrict src, size_t src_width, size_t len, void *restrict args,
+        thread_id_t tid)
 {
+    unused(tid);
     cast(__map_args_t *, map_args, args);
     size_t global_start = (src - map_args->src) / src_width;
 
@@ -343,8 +349,10 @@ typedef struct __gather_scatter_args_t
   void *restrict         dst;
 } __gather_scatter_args_t;
 
-inline static void __gather_func(const void *restrict start, size_t width, size_t len, void *restrict args)
+inline static void __gather_func(const void *restrict start, size_t width, size_t len, void *restrict args,
+        thread_id_t tid)
 {
+    unused(tid);
     cast(__gather_scatter_args_t *, gather_args, args);
     size_t global_index_start = (start - gather_args->dst) / width;
 
@@ -446,8 +454,10 @@ inline static int __sequential_gather_adr(void *restrict dst, const void *restri
     return STATUS_OK;
 }
 
-inline static void __gather_adr_func(const void *restrict start, size_t width, size_t len, void *restrict args)
+inline static void __gather_adr_func(const void *restrict start, size_t width, size_t len, void *restrict args,
+        thread_id_t tid)
 {
+    unused(tid);
     cast(__gather_scatter_args_t *, gather_args, args);
 
     prefetch_read(gather_args->idx);
@@ -492,8 +502,10 @@ inline static int __parallel_gather_adr(void *restrict dst, const void *restrict
 
 //  B O L S T E R   S C A T T E R  -------------------------------------------------------------------------------------
 
-inline static void __scatter_func(const void *restrict start, size_t width, size_t len, void *restrict args)
+inline static void __scatter_func(const void *restrict start, size_t width, size_t len, void *restrict args,
+        thread_id_t tid)
 {
+    unused(tid);
     cast(__gather_scatter_args_t *, scatter_args, args);
 
     prefetch_read(scatter_args->idx);

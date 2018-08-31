@@ -346,8 +346,9 @@ typedef struct compute_thread_assign_parallel_func_args_t
 } compute_thread_assign_parallel_func_args_t;
 
 static void compute_thread_assign_parallel_func(const void *restrict start, size_t width, size_t len,
-        void *restrict args)
+        void *restrict args, thread_id_t tid)
 {
+    unused(tid);
     unused(width);
 
     char * const*strings = (char * const*) start;
@@ -853,8 +854,10 @@ typedef struct carrier_parallel_create_args_t {
   const ng5_allocator_t     *alloc;
 } carrier_parallel_create_args_t;
 
-static void carrier_parallel_create(const void *restrict start, size_t width, size_t len, void *restrict args)
+static void carrier_parallel_create(const void *restrict start, size_t width, size_t len, void *restrict args,
+        thread_id_t tid)
 {
+    unused(tid);
     unused(width);
 
     carrier_t *carrier = (carrier_t *) start;
