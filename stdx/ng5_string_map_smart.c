@@ -26,9 +26,12 @@
 #include <stdlib.h>
 #include <stdx/ng5_algorithm.h>
 #include <stdx/ng5_trace_alloc.h>
+#include <stdx/ng5_time.h>
 
 #define get_hashcode(key)      hash_bernstein(strlen(key), key)
 #define get_hashcode_2(key)    hash_additive(strlen(key), key)
+
+#define SMART_MAP_TAG "smart-map"
 
 // ---------------------------------------------------------------------------------------------------------------------
 //  SIMPLE
@@ -295,6 +298,9 @@ static int smart_get_safe(struct string_map* self, string_id_t** out, bool** fou
 {
     assert(self->tag == STRING_ID_MAP_SMART);
 
+    timestamp_t begin = time_current_time_ms();
+    trace(SMART_MAP_TAG, "'get_safe' function invoked for %zu strings", num_keys)
+
     ng5_allocator_t hashtable_alloc;
 #if defined(NG5_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
     check_success(allocator_trace(&hashtable_alloc));
@@ -327,6 +333,10 @@ static int smart_get_safe(struct string_map* self, string_id_t** out, bool** fou
 
     *out = values_out;
     *found_mask = found_mask_out;
+
+    timestamp_t end = time_current_time_ms();
+    trace(SMART_MAP_TAG, "'get_safe' function done: %f seconds spent here", (end-begin)/1000.0f)
+
     return STATUS_OK;
 }
 
