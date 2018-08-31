@@ -252,7 +252,7 @@ static int simple_map_fetch_bulk(ng5_vector_t of_type(simple_bucket)* buckets, s
     for (size_t i = 0; i < num_keys; i++) {
         struct simple_bucket       *bucket     = data + bucket_idxs[i];
 
-        smart_bucket_lock(bucket);
+      //  smart_bucket_lock(bucket);
 
         const char* key = keys[i];
         /* Optimization 1/5: EMPTY GUARD (but before "find" call); if this bucket has no occupied slots, do not perform any lookup and comparison */
@@ -263,7 +263,7 @@ static int simple_map_fetch_bulk(ng5_vector_t of_type(simple_bucket)* buckets, s
         key_found_mask[i] = found;
         values_out[i] = found ? (((struct simple_bucket_entry*) bucket->entries.base)+needle_pos)->value : -1;
 
-        smart_bucket_unlock(bucket);
+        //  smart_bucket_unlock(bucket);
     }
 
     *num_keys_not_found = num_not_found;
