@@ -145,6 +145,9 @@
 
 #endif
 
+#ifdef NLOG_DEBUG
+#define trace(tag, msg, ...) { }
+#else
 #define trace(tag, msg, ...)                                                 \
 {                                                                            \
     char buffer[1024];                                                       \
@@ -152,7 +155,11 @@
     fprintf(stderr, buffer, __VA_ARGS__);                                    \
     fflush(stderr);                                                          \
 }
+#endif
 
+#ifdef NLOG_INFO
+#define info(tag, msg, ...) { }
+#else
 #define info(tag, msg, ...)                                                 \
 {                                                                            \
     char buffer[1024];                                                       \
@@ -160,6 +167,7 @@
     fprintf(stderr, buffer, __VA_ARGS__);                                    \
     fflush(stderr);                                                          \
 }
+#endif
 
 #ifndef NDEBUG
 #define debug(tag, msg, ...)                                                 \

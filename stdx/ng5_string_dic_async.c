@@ -497,6 +497,8 @@ static int async_insert(struct string_dic *self, string_id_t **out, char * const
     async_unlock(self);
 
     timestamp_t end = time_current_time_ms();
+    unused(begin);
+    unused(end);
     info(STRING_DIC_ASYNC_TAG, "insertion operation done: %f seconds spent here", (end - begin)/1000.0f)
 
     return STATUS_OK;
@@ -560,6 +562,8 @@ static int async_remove(struct string_dic *self, string_id_t *strings, size_t nu
     async_unlock(self);
 
     timestamp_t end = time_current_time_ms();
+    unused(begin);
+    unused(end);
     info(STRING_DIC_ASYNC_TAG, "remove operation done: %f seconds spent here", (end - begin)/1000.0f)
 
     return STATUS_OK;
@@ -683,6 +687,8 @@ static int async_locate_safe(struct string_dic* self, string_id_t** out, bool** 
     async_unlock(self);
 
     timestamp_t end = time_current_time_ms();
+    unused(begin);
+    unused(end);
     info(STRING_DIC_ASYNC_TAG, "locate (safe) operation done: %f seconds spent here", (end - begin)/1000.0f)
 
     return STATUS_OK;
@@ -783,6 +789,8 @@ static char **async_extract(struct string_dic *self, const string_id_t *ids, siz
     async_unlock(self);
 
     timestamp_t end = time_current_time_ms();
+    unused(begin);
+    unused(end);
     info(STRING_DIC_ASYNC_TAG, "extract (safe) operation done: %f seconds spent here", (end - begin)/1000.0f)
 
     return global_result;

@@ -290,6 +290,8 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
     unlock(self);
 
     timestamp_t end = time_current_time_ms();
+    unused(begin);
+    unused(end);
     info(STRING_DIC_SYNC_TAG, "insertion operation done: %f seconds spent here", (end - begin)/1000.0f)
 
     return STATUS_OK;
