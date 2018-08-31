@@ -194,6 +194,7 @@ static void parallel_check_containment_func(const void *restrict start, size_t w
     parallel_check_containment_func_local_args_t *func_args = (parallel_check_containment_func_local_args_t *) args;
     char * const *strings    = (char * const*) start;
     uint_fast16_t thread_id  = tid;
+    debug("XXX", "TID:", tid);
     string_id_t  **values     = ng5_vector_get(&func_args->thread_local_values, thread_id, string_id_t  *);
     bool         **found_mask = ng5_vector_get(&func_args->thread_local_found_masks, thread_id, bool *);
     size_t        num_not_found;
