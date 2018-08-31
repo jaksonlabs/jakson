@@ -236,7 +236,7 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
             /* Query the bloomfilter if the key was already seend. If the filter returns "yes", a lookup
              * is requried since the filter maybe made a mistake. Of the filter returns "no", the
              * key is new for sure. In this case, one can skip the lookup into the buckets. */
-            if (ng5_bloomfilter_test_and_set(&bloomfilter, key, strlen(key))) {
+            //if (ng5_bloomfilter_test_and_set(&bloomfilter, key, strlen(key))) {
                 /* ensure that the string really was seen (due to collisions in the bloom filter the key might not
                  * been actually seen) */
 
@@ -244,7 +244,7 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
                 /* This is for the case that the string was not already contained in the string dictionary but may have
                  * duplicates in this insertion batch that are already inserted */
                 string_lookup_get_safe_exact(&value, &found, &extra->index, key);  /* OPTIMIZATION: use specialized function for "exact" query to avoid unnessecary malloc calls to manage set of results if only a single result is needed */
-            }
+          //  }
 
             if (found) {
                 ids_out[i] = value;
