@@ -194,17 +194,17 @@ static void parallel_check_containment_func(const void *restrict start, size_t w
     parallel_check_containment_func_local_args_t *func_args = (parallel_check_containment_func_local_args_t *) args;
     char * const *strings    = (char * const*) start;
     uint_fast16_t thread_id  = tid;
-    string_id_t  *values     = *ng5_vector_get(&func_args->thread_local_values, thread_id, string_id_t  *);
-    bool         *found_mask = *ng5_vector_get(&func_args->thread_local_found_masks, thread_id, bool *);
+    string_id_t  **values     = ng5_vector_get(&func_args->thread_local_values, thread_id, string_id_t  *);
+    bool         **found_mask = ng5_vector_get(&func_args->thread_local_found_masks, thread_id, bool *);
     size_t        num_not_found;
 
     ng5_vector_set(&func_args->thread_local_lengths, thread_id, &len);
 
-    string_lookup_get_safe_bulk(&values, &found_mask, &num_not_found, func_args->map, strings,
+    string_lookup_get_safe_bulk(values, found_mask, &num_not_found, func_args->map, strings,
             len);
 
-    ng5_vector_set(&func_args->thread_local_values, thread_id, &values);
-    ng5_vector_set(&func_args->thread_local_found_masks, thread_id, &found_mask);
+    ng5_vector_set(&func_args->thread_local_values, thread_id, values);
+    ng5_vector_set(&func_args->thread_local_found_masks, thread_id, found_mask);
 }
 
 static int this_insert(struct string_dic *self, string_id_t **out, char * const*strings, size_t num_strings,
@@ -260,8 +260,8 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
         bool        *found_mask = *ng5_vector_get(&thread_args.thread_local_found_masks, thread_id, bool *);
         size_t       length     = *ng5_vector_get(&thread_args.thread_local_lengths, thread_id, size_t);
 
-        memcpy(global_values + cpy_offset *sizeof(string_id_t), values, length *sizeof(string_id_t));
-        memcpy(global_found_masks + cpy_offset *sizeof(bool), values, length *sizeof(bool));
+        memcpy(global_values + cpy_offset * sizeof(string_id_t), values, length * sizeof(string_id_t));
+        memcpy(global_found_masks + cpy_offset * sizeof(bool), values, length * sizeof(bool));
         cpy_offset += length;
 
         allocator_free(&self->alloc, values);
