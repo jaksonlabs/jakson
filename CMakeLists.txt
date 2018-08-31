@@ -76,7 +76,11 @@ set(SORUCE_FILES
         ${CMAKE_SOURCE_DIR}/include/stdx/ng5_bolster.h
         ${CMAKE_SOURCE_DIR}/include/stdx/ng5_trace_alloc.h
         ${CMAKE_SOURCE_DIR}/stdx/ng5_trace_alloc.c
-        ${CMAKE_SOURCE_DIR}/include/ng5_static_conf.h)
+        ${CMAKE_SOURCE_DIR}/include/ng5_static_conf.h
+        ${CMAKE_SOURCE_DIR}/include/stdx/ng5_bloomfilter.h
+        ${CMAKE_SOURCE_DIR}/stdx/ng5_bloomfilter.c
+        ${CMAKE_SOURCE_DIR}/include/stdx/ng5_bitset.h
+        ${CMAKE_SOURCE_DIR}/stdx/ng5_bitset.c)
 
 
 add_executable(ng5 main.c ${SORUCE_FILES})

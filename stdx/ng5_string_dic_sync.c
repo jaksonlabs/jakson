@@ -7,6 +7,7 @@
 #include <stdx/ng5_trace_alloc.h>
 #include <stdx/ng5_bolster.h>
 #include <stdx/ng5_time.h>
+#include <stdx/ng5_bloomfilter.h>
 
 #define STRING_DIC_SYNC_TAG "string-dic-sync"
 
@@ -211,6 +212,12 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
     /* NOTE: palatalization of the call to this function decreases performance */
     string_lookup_get_safe_bulk(&values, &found_mask, &num_not_found, &extra->index, strings, num_strings);
 
+    /* OPTIMIZATION: use a bloomfilter to check whether a string (which has not appeared in the
+     * dictionary before this batch but might occur multiple times in the current batch) was seen
+     * before (with a slight prob. of doing too much work) */
+    ng5_bloomfilter_t bloomfilter;
+    ng5_bloomfilter_create(&bloomfilter, num_not_found);
+
     /* copy string ids for already known strings to their result position resp. add those which are new */
     for (size_t i = 0; i < num_strings; i++) {
 
@@ -223,17 +230,26 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
 
             string_id_t        string_id;
             const char        *key = (const char *)(strings[i]);
-            bool               found_mask;
+            bool               found = false;
             string_id_t        value;
 
-            /* query index for strings to get a boolean mask which strings are new and which must be added */
-            /* This is for the case that the string was not already contained in the string dictionary but may have
-             * duplicates in this insertion batch that are already inserted */
-            string_lookup_get_safe_exact(&value, &found_mask, &extra->index, key);  /* OPTIMIZATION: use specialized function for "exact" query to avoid unnessecary malloc calls to manage set of results if only a single result is needed */
+            /* Query the bloomfilter if the key was already seend. If the filter returns "yes", a lookup
+             * is requried since the filter maybe made a mistake. Of the filter returns "no", the
+             * key is new for sure. In this case, one can skip the lookup into the buckets. */
+            if (ng5_bloomfilter_test_and_set(&bloomfilter, key, strlen(key))) {
+                /* ensure that the string really was seen (due to collisions in the bloom filter the key might not
+                 * been actually seen) */
 
-            if (found_mask) {
+                /* query index for strings to get a boolean mask which strings are new and which must be added */
+                /* This is for the case that the string was not already contained in the string dictionary but may have
+                 * duplicates in this insertion batch that are already inserted */
+                string_lookup_get_safe_exact(&value, &found, &extra->index, key);  /* OPTIMIZATION: use specialized function for "exact" query to avoid unnessecary malloc calls to manage set of results if only a single result is needed */
+            }
+
+            if (found) {
                 ids_out[i] = value;
             } else {
+
                 /* register in contents list */
                 panic_if(freelist_pop(&string_id, self) != STATUS_OK, "slot management broken");
                 struct entry *entries = (struct entry *) ng5_vector_data(&extra->contents);

@@ -5,6 +5,7 @@
 #include <stdx/ng5_string_dic_sync.h>
 #include <stdx/ng5_string_dic_async.h>
 #include <apr_general.h>
+#include <stdx/ng5_bitset.h>
 //#include <ng5/roadfire/roadfire.h>
 
 static char *read_contents(const char *path)
@@ -65,7 +66,7 @@ ng5_vector_t *to_string_list(const char *contents)
 }
 
 #define NUM_SAMPLES 2
-#define NTHREADS   256
+#define NTHREADS   1
 
 /*void roadfire_test() {
     struct storage_engine engine;
@@ -74,12 +75,38 @@ ng5_vector_t *to_string_list(const char *contents)
 
 void experiments_hashing()
 {
+    ng5_bitset_t set;
+    ng5_bitset_create(&set, 65);
+    assert (ng5_bitset_get(&set, 4) == false);
+    assert (ng5_bitset_get(&set, 11) == false);
+    assert (ng5_bitset_get(&set, 0) == false);
+    ng5_bitset_set(&set, 4, true);
+    ng5_bitset_set(&set, 11, true);
+    ng5_bitset_set(&set, 0, true);
+    assert (ng5_bitset_get(&set, 4) == true);
+    assert (ng5_bitset_get(&set, 11) == true);
+    assert (ng5_bitset_get(&set, 0) == true);
+    ng5_bitset_set(&set, 11, false);
+    ng5_bitset_set(&set, 64, true);
+    assert (ng5_bitset_get(&set, 4) == true);
+    assert (ng5_bitset_get(&set, 11) == false);
+    assert (ng5_bitset_get(&set, 1) == false);
+    assert (ng5_bitset_get(&set, 64) == true);
+    ng5_bitset_set(&set, 64, false);
+    assert (ng5_bitset_get(&set, 64) == false);
+    ng5_bitset_clear(&set);
+    assert (ng5_bitset_get(&set, 4) == false);
+    assert (ng5_bitset_get(&set, 11) == false);
+    assert (ng5_bitset_get(&set, 1) == false);
+    assert (ng5_bitset_get(&set, 64) == false);
+
+    printf("OK\n");
 
     printf("yago_percent;sample;num_buckets;time_created_sec;time_inserted_sec;time_bulk_sum_created_inserted;num_strings\n");
 
     const char* paths[11];
     paths[0] = "/Users/marcus/Downloads/50.txt";
-    /*
+/*
    //      paths[0] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/100.txt";
        paths[0] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-15pc-stringlist.txt";
        paths[1] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-19pc-stringlist.txt";
@@ -175,7 +202,7 @@ void experiments_hashing()
                     string_id_t id_created = ids[i];
                     string_id_t id_located = ids_out[i];
                     //debug("check", "[%s] -> %zu", strings[i], id_located);
-                    panic_if_wargs(id_created != id_located, "mapping broken for string id '%zu': expected %zu, is %zu", i, id_created, id_located);
+                    panic_if_wargs(id_created != id_located, "mapping broken for string [%s] id '%zu': expected %zu, is %zu", strings[i], i, id_created, id_located);
                     assert(id_created == id_located);
                 }
 

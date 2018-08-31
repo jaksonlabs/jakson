@@ -176,6 +176,14 @@
 			<Option target="ng5"/>
 			<Option target="tests"/>
 		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_bitset.h">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_bloomfilter.h">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/include/stdx/ng5_bolster.h">
 			<Option target="ng5"/>
 			<Option target="tests"/>
@@ -240,6 +248,14 @@
 			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/stdx/ng5_allocator.c">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/ng5_bitset.c">
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/stdx/ng5_bloomfilter.c">
 			<Option target="ng5"/>
 			<Option target="tests"/>
 		</Unit>
