@@ -65,7 +65,7 @@ ng5_vector_t *to_string_list(const char *contents)
 }
 
 #define NUM_SAMPLES 2
-#define NTHREADS   16
+#define NTHREADS   64
 
 /*void roadfire_test() {
     struct storage_engine engine;
