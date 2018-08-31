@@ -203,8 +203,11 @@ static void parallel_check_containment_func(const void *restrict start, size_t w
     string_lookup_get_safe_bulk(&values, &found_mask, &num_not_found, func_args->map, strings,
             len);
 
-    ng5_vector_set(&func_args->thread_local_values, thread_id, &values);
-    ng5_vector_set(&func_args->thread_local_found_masks, thread_id, &found_mask);
+    string_id_t  **value_ref = ng5_vector_get(&func_args->thread_local_values, thread_id, string_id_t *);
+    bool         **mask_ref  = ng5_vector_get(&func_args->thread_local_found_masks, thread_id, bool *);
+
+    *value_ref = values;
+    *mask_ref  = found_mask;
 }
 
 static int this_insert(struct string_dic *self, string_id_t **out, char * const*strings, size_t num_strings,
