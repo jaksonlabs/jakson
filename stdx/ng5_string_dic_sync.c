@@ -6,6 +6,7 @@
 #include <stdx/ng5_string_map_smart.h>
 #include <stdx/ng5_trace_alloc.h>
 #include <stdx/ng5_bolster.h>
+#include <stdx/ng5_time.h>
 
 #define STRING_DIC_SYNC_TAG "string-dic-sync"
 
@@ -198,6 +199,7 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
         size_t nthreads)
 {
     trace(STRING_DIC_SYNC_TAG, "local string dictionary insertion invoked for %zu strings", num_strings);
+    timestamp_t begin = time_current_time_ms();
 
     unused(nthreads);
 
@@ -286,6 +288,9 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
     allocator_free(&hashtable_alloc, values);
 
     unlock(self);
+
+    timestamp_t end = time_current_time_ms();
+    info(STRING_DIC_SYNC_TAG, "insertion operation done: %f seconds spent here", (end - begin)/1000.0f)
 
     return STATUS_OK;
 
