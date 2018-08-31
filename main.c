@@ -165,7 +165,7 @@ for (size_t num_buckets = 50000; num_buckets<=50000; num_buckets += 50000) {
       string_dic_reset_counters(&dic);
       timestamp_t inserted_begin = time_current_time_ms();
       string_dic_insert(&dic, &ids, strings, num_strings, 0);
-     // string_dic_insert(&dic, &ids, strings, num_strings, 0); // HACK: Test for bulk existence
+      string_dic_insert(&dic, &ids, strings, num_strings, 0); // HACK: Test for bulk existence
       timestamp_t inserted_end = time_current_time_ms();
       insert_duration = (inserted_end-inserted_begin)/1000.0f;
 
