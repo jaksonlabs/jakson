@@ -27,6 +27,7 @@
 #include <stdx/ng5_algorithm.h>
 #include <stdx/ng5_trace_alloc.h>
 #include <stdx/ng5_time.h>
+#include <stdx/ng5_bloomfilter.h>
 
 #define get_hashcode(key)      hash_bernstein(strlen(key), key)
 #define get_hashcode_2(key)    hash_additive(strlen(key), key)
@@ -54,6 +55,9 @@ struct simple_bucket {
 
   /* number of entries actually occupied with data inside this bucket (since entries num == entries cap all times) */
   uint32_t                                     num_entries;
+
+  /* bloomfilter to skip searching in case of that a key definitively was never added */
+  ng5_bloomfilter_t                            bloomfilter;
 };
 
 struct simple_extra {
@@ -493,6 +497,8 @@ static int smart_bucket_create(struct simple_bucket* buckets, size_t num_buckets
         ng5_vector_set_growfactor(&bucket->entries, grow_factor);
         ng5_vector_set_growfactor(&bucket->freelist, grow_factor);
         ng5_vector_repreat_push(&bucket->entries, &entry, bucket_cap);
+
+        ng5_bloomfilter_create(&bucket->bloomfilter, 256);
     }
 
     return STATUS_OK;
@@ -575,13 +581,19 @@ static int smart_bucket_insert(struct simple_bucket* bucket, const char* restric
 
     smart_bucket_lock(bucket);
 
-    /* Optimization 1/5: EMPTY GUARD (but before "find" call); if this bucket has no occupied slots, do not perform any lookup and comparison */
-    uint32_t                      needle_pos = bucket->num_entries > 0 ? simple_bucket_find_entry_by_key(counter, bucket, key) : bucket->entries.cap_elems;
-    struct simple_bucket_entry *data       = (struct simple_bucket_entry *) ng5_vector_data(&bucket->entries);
+    uint32_t                    needle_pos     = bucket->entries.cap_elems;
+    struct simple_bucket_entry *data           = NULL;
+    hash_t                      bloom_hash_key = hash_fnv(strlen(key), key);
 
+    if (ng5_bloomfilter_test_and_set(&bucket->bloomfilter, bloom_hash_key, sizeof(hash_t))) { /* OPTIMIZATION: insert with test whether this key was already inserted into the bucket */
+        /* Optimization 1/5: EMPTY GUARD (but before "find" call); if this bucket has no occupied slots, do not perform any lookup and comparison */
+        needle_pos = bucket->num_entries > 0 ? simple_bucket_find_entry_by_key(counter, bucket, key) : bucket->entries.cap_elems;
+        data       = (struct simple_bucket_entry *) ng5_vector_data(&bucket->entries);
+    }
 
     if (needle_pos < bucket->entries.cap_elems) {
         /* entry found by key */
+        assert (data != NULL);
         data->value = value;
     } else {
         /* no entry found */
