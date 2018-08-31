@@ -145,7 +145,7 @@
 
 #endif
 
-#ifdef NLOG_DEBUG
+#ifdef NLOG_TRACE
 #define trace(tag, msg, ...) { }
 #else
 #define trace(tag, msg, ...)                                                 \
