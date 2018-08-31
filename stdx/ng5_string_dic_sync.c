@@ -362,6 +362,8 @@ static int this_locate_safe(struct string_dic* self, string_id_t** out, bool** f
     unlock(self);
 
     timestamp_t end = time_current_time_ms();
+    unused(begin);
+    unused(end);
     trace(STRING_DIC_SYNC_TAG, "'locate_safe' function done: %f seconds spent here", (end-begin)/1000.0f)
 
     return status;

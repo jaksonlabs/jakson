@@ -336,6 +336,8 @@ static int smart_get_safe(struct string_map* self, string_id_t** out, bool** fou
     *found_mask = found_mask_out;
 
     timestamp_t end = time_current_time_ms();
+    unused(begin);
+    unused(end);
     trace(SMART_MAP_TAG, "'get_safe' function done: %f seconds spent here", (end-begin)/1000.0f)
 
     return STATUS_OK;
