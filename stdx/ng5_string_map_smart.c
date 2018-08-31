@@ -585,7 +585,7 @@ static int smart_bucket_insert(struct simple_bucket* bucket, const char* restric
     struct simple_bucket_entry *data           = NULL;
     hash_t                      bloom_hash_key = hash_fnv(strlen(key), key);
 
-    if (ng5_bloomfilter_test_and_set(&bucket->bloomfilter, bloom_hash_key, sizeof(hash_t))) { /* OPTIMIZATION: insert with test whether this key was already inserted into the bucket */
+    if (ng5_bloomfilter_test_and_set(&bucket->bloomfilter, &bloom_hash_key, sizeof(hash_t))) { /* OPTIMIZATION: insert with test whether this key was already inserted into the bucket */
         /* Optimization 1/5: EMPTY GUARD (but before "find" call); if this bucket has no occupied slots, do not perform any lookup and comparison */
         needle_pos = bucket->num_entries > 0 ? simple_bucket_find_entry_by_key(counter, bucket, key) : bucket->entries.cap_elems;
         data       = (struct simple_bucket_entry *) ng5_vector_data(&bucket->entries);
