@@ -20,7 +20,7 @@ struct naive_extra {
     ng5_vector_t of_type(entry)        contents;
     ng5_vector_t of_type(string_id_t)  freelist;
     struct string_map                index;
-    struct spinlock                     lock;
+    struct ng5_spinlock                     lock;
 };
 
 static int this_drop(struct string_dic *self);
@@ -73,14 +73,14 @@ static void lock(struct string_dic *self)
 {
     assert(self->tag == STRING_DIC_NAIVE);
     struct naive_extra *extra = this_extra(self);
-    spinlock_lock(&extra->lock);
+    ng5_spinlock_lock(&extra->lock);
 }
 
 static void unlock(struct string_dic *self)
 {
     assert(self->tag == STRING_DIC_NAIVE);
     struct naive_extra *extra = this_extra(self);
-    spinlock_unlock(&extra->lock);
+    ng5_spinlock_unlock(&extra->lock);
 }
 
 static int extra_create(struct string_dic *self, size_t capacity, size_t num_index_buckets,
@@ -88,7 +88,7 @@ static int extra_create(struct string_dic *self, size_t capacity, size_t num_ind
 {
     self->extra = allocator_malloc(&self->alloc, sizeof(struct naive_extra));
     struct naive_extra *extra = this_extra(self);
-    spinlock_create(&extra->lock);
+    ng5_spinlock_create(&extra->lock);
     check_success(ng5_vector_create(&extra->contents, &self->alloc, sizeof(struct entry), capacity));
     check_success(ng5_vector_create(&extra->freelist, &self->alloc, sizeof(string_id_t), capacity));
     struct entry empty = {

@@ -34,7 +34,7 @@ typedef struct ng5_slice_t
     ng5_slice_t            *next;
     ng5_slice_find_func_t   find;
 
-    spinlock_t              spinlock;
+    ng5_spinlock_t          spinlock;
 
     void                   *base;
     uint32_t               *indices;

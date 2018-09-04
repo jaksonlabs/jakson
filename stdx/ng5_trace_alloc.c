@@ -15,7 +15,7 @@ typedef struct trace_stats_t
     size_t                        num_free_calls;
     size_t                        total_size;
     ng5_vector_t of_type(size_t) *malloc_sizes;
-    spinlock_t                   *spinlock;
+    ng5_spinlock_t               *spinlock;
     FILE                         *statistics_file;
     timestamp_t                   startup_timestamp;
 } trace_stats_t;
@@ -159,8 +159,8 @@ static void  this_clone(ng5_allocator_t *dst, const ng5_allocator_t *self);
 if (!global_trace_stats.malloc_sizes) {                                                                     \
     global_trace_stats.malloc_sizes = malloc(sizeof(ng5_vector_t));                                         \
     ng5_vector_create(global_trace_stats.malloc_sizes, &default_alloc, sizeof(size_t), 1000000);            \
-    global_trace_stats.spinlock = allocator_malloc(&default_alloc, sizeof(spinlock_t));                     \
-    spinlock_create(global_trace_stats.spinlock);                                                           \
+    global_trace_stats.spinlock = allocator_malloc(&default_alloc, sizeof(ng5_spinlock_t));                 \
+    ng5_spinlock_create(global_trace_stats.spinlock);                                                       \
     global_trace_stats.statistics_file = fopen("trace-alloc-stats.csv", "a");                               \
     fprintf(global_trace_stats.statistics_file,                                                             \
             "system_time;num_alloc_calls;num_realloc_calls;num_free_calls;memory_in_use\n");                \
@@ -201,7 +201,7 @@ static void *this_malloc(ng5_allocator_t *self, size_t size)
 {
     unused(self);
 
-    spinlock_lock(global_trace_stats.spinlock);
+    ng5_spinlock_lock(global_trace_stats.spinlock);
 
     ng5_allocator_t default_alloc;
     allocator_default(&default_alloc);
@@ -235,7 +235,7 @@ static void *this_malloc(ng5_allocator_t *self, size_t size)
 
     WRITE_STATS_FILE();
 
-    spinlock_unlock(global_trace_stats.spinlock);
+    ng5_spinlock_unlock(global_trace_stats.spinlock);
 
 
     return result;
@@ -245,7 +245,7 @@ static void *this_realloc(ng5_allocator_t *self, void *ptr, size_t size)
 {
     unused(self);
 
-    spinlock_lock(global_trace_stats.spinlock);
+    ng5_spinlock_lock(global_trace_stats.spinlock);
 
     ng5_allocator_t default_alloc;
     allocator_default(&default_alloc);
@@ -269,13 +269,13 @@ static void *this_realloc(ng5_allocator_t *self, void *ptr, size_t size)
 
     if (size <= page_capacity) {
         *(size_t *) (ptr - 2 * sizeof(size_t)) = size;
-        spinlock_unlock(global_trace_stats.spinlock);
+        ng5_spinlock_unlock(global_trace_stats.spinlock);
         return ptr;
     } else {
         void *page_ptr = ptr - 2 * sizeof(size_t);
         free (page_ptr);
         void *result = alloc_register(size);
-        spinlock_unlock(global_trace_stats.spinlock);
+        ng5_spinlock_unlock(global_trace_stats.spinlock);
         return result;
     }
 }
@@ -284,7 +284,7 @@ static void  this_free(ng5_allocator_t *self, void *ptr)
 {
     unused(self);
 
-    spinlock_lock(global_trace_stats.spinlock);
+    ng5_spinlock_lock(global_trace_stats.spinlock);
 
     ng5_allocator_t default_alloc;
     allocator_default(&default_alloc);
@@ -305,7 +305,7 @@ static void  this_free(ng5_allocator_t *self, void *ptr)
 
     free (page_ptr);
 
-    spinlock_unlock(global_trace_stats.spinlock);
+    ng5_spinlock_unlock(global_trace_stats.spinlock);
 }
 
 static void  this_clone(ng5_allocator_t *dst, const ng5_allocator_t *self)

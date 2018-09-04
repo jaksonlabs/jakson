@@ -19,23 +19,23 @@
 
 #pragma once
 
-#ifndef _NG5_ASYNC
-#define _NG5_ASYNC
+#ifndef _NG5_SPINLOCK
+#define _NG5_SPINLOCK
 
 #include <ng5_common.h>
 #include <stdx/ng5_vector.h>
 
-typedef struct spinlock
+typedef struct ng5_spinlock
 {
   atomic_flag lock;
   pthread_t owning_thread;
-} spinlock_t;
+} ng5_spinlock_t;
 
-int spinlock_create(struct spinlock *spinlock);
+int ng5_spinlock_create(struct ng5_spinlock* spinlock);
 
-int spinlock_lock(struct spinlock *spinlock);
+int ng5_spinlock_lock(struct ng5_spinlock* spinlock);
 
-int spinlock_unlock(struct spinlock *spinlock);
+int ng5_spinlock_unlock(struct ng5_spinlock* spinlock);
 
 
 #endif

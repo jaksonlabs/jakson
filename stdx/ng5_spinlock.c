@@ -3,7 +3,7 @@
 
 #define SPINLOCK_TAG "spinlock"
 
-int spinlock_create(struct spinlock *spinlock)
+int ng5_spinlock_create(struct ng5_spinlock* spinlock)
 {
     check_non_null(spinlock)
     atomic_flag_clear(&spinlock->lock);
@@ -13,7 +13,7 @@ int spinlock_create(struct spinlock *spinlock)
     return STATUS_OK;
 }
 
-int spinlock_lock(struct spinlock *spinlock)
+int ng5_spinlock_lock(struct ng5_spinlock* spinlock)
 {
     timestamp_t begin = time_current_time_ms();
     check_non_null(spinlock)
@@ -32,7 +32,7 @@ int spinlock_lock(struct spinlock *spinlock)
     return STATUS_OK;
 }
 
-int spinlock_unlock(struct spinlock *spinlock)
+int ng5_spinlock_unlock(struct ng5_spinlock* spinlock)
 {
     check_non_null(spinlock)
     atomic_flag_clear(&spinlock->lock);

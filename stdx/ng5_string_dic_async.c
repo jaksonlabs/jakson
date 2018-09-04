@@ -42,7 +42,7 @@ typedef struct async_extra
 {
     ng5_vector_t of_type(carrier_t)   carriers;
     ng5_vector_t of_type(carrier_t *) carrier_mapping;
-    spinlock_t                    spinlock;
+    ng5_spinlock_t                    spinlock;
 
 } async_extra_t;
 
@@ -182,7 +182,7 @@ static int async_extra_create(struct string_dic *self, size_t capacity, size_t n
 
     self->extra          = allocator_malloc(&self->alloc, sizeof(async_extra_t));
     async_extra_t *extra = async_extra_get(self);
-    spinlock_create(&extra->spinlock);
+    ng5_spinlock_create(&extra->spinlock);
     ng5_vector_create(&extra->carriers, &self->alloc, sizeof(carrier_t), nthreads);
     async_setup_carriers(self, capacity, num_index_buckets, approx_num_unique_str, nthreads);
     ng5_vector_create(&extra->carrier_mapping, &self->alloc, sizeof(carrier_t*), capacity);
@@ -899,13 +899,13 @@ static int async_setup_carriers(struct string_dic *self, size_t capacity, size_t
 static int async_lock(struct string_dic *self)
 {
     async_extra_t *extra = async_extra_get(self);
-    check_success(spinlock_lock(&extra->spinlock));
+    check_success(ng5_spinlock_lock(&extra->spinlock));
     return STATUS_OK;
 }
 
 static int async_unlock(struct string_dic *self)
 {
     async_extra_t *extra = async_extra_get(self);
-    check_success(spinlock_unlock(&extra->spinlock));
+    check_success(ng5_spinlock_unlock(&extra->spinlock));
     return STATUS_OK;
 }

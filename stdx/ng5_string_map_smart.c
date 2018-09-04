@@ -46,7 +46,7 @@ struct simple_bucket_entry {
 };
 
 struct simple_bucket {
-  struct spinlock                            spinlock;
+  struct ng5_spinlock                            spinlock;
   ng5_vector_t of_type(simple_bucket_entry) entries;
   ng5_vector_t of_type(uint32_t)             freelist;  /* OPTIMIZATION: in "string map", freelist uses 32bit instead of 64bit since that's enough (i.e., maps are used by several threads which means: the number of total managble strings scale with the number of threads */
 
@@ -489,7 +489,7 @@ static int smart_bucket_create(struct simple_bucket* buckets, size_t num_buckets
         struct simple_bucket *bucket = buckets++;
         bucket->cache_idx   = (uint32_t) -1;
         bucket->num_entries = 0;
-        spinlock_create(&bucket->spinlock);
+        ng5_spinlock_create(&bucket->spinlock);
 
         ng5_vector_create(&bucket->entries, alloc, sizeof(struct simple_bucket_entry), bucket_cap);
         ng5_vector_create(&bucket->freelist, alloc, sizeof(uint32_t), bucket_cap);
@@ -520,13 +520,13 @@ static int smart_bucket_drop(struct simple_bucket* buckets, size_t num_buckets, 
 
 static void smart_bucket_lock(struct simple_bucket* bucket)
 {
-    spinlock_lock(&bucket->spinlock);
+    ng5_spinlock_lock(&bucket->spinlock);
 }
 
 unused_fn
 static void smart_bucket_unlock(struct simple_bucket* bucket)
 {
-    spinlock_unlock(&bucket->spinlock);
+    ng5_spinlock_unlock(&bucket->spinlock);
 }
 
 unused_fn

@@ -35,7 +35,7 @@ struct roadfire_extra
   struct slot_vector of_type (struct ng5_vector *)            result_register;
 
   /* spinlock to ensure thread-safeness */
-  struct spinlock                                         spinlock;
+  struct ng5_spinlock                                         spinlock;
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -94,5 +94,5 @@ void extra_create(struct storage_engine *roadfire, struct roadfire_conf *conf)
     slot_vector_create(&extra->result_register, &roadfire->alloc, sizeof(struct ng5_vector *),
             extra->conf.string_dic_lookup_num_buckets);
 
-    spinlock_create(&extra->spinlock);
+    ng5_spinlock_create(&extra->spinlock);
 }
