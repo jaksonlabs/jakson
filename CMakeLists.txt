@@ -80,7 +80,9 @@ set(SORUCE_FILES
         ${CMAKE_SOURCE_DIR}/include/stdx/ng5_bloomfilter.h
         ${CMAKE_SOURCE_DIR}/stdx/ng5_bloomfilter.c
         ${CMAKE_SOURCE_DIR}/include/stdx/ng5_bitset.h
-        ${CMAKE_SOURCE_DIR}/stdx/ng5_bitset.c)
+        ${CMAKE_SOURCE_DIR}/stdx/ng5_bitset.c
+        ${CMAKE_SOURCE_DIR}/include/stdx/ng5_slice_list.h
+        ${CMAKE_SOURCE_DIR}/stdx/ng5_slice_list.c)
 
 
 add_executable(ng5 main.c ${SORUCE_FILES})
