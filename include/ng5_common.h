@@ -199,3 +199,5 @@
     sizeof(x)/sizeof(x[0])
 
 typedef size_t string_id_t;
+
+typedef char ng5_byte_t;

@@ -4,16 +4,7 @@
 #include <stdx/ng5_string_dic.h>
 #include <stdx/ng5_string_map.h>
 #include <stdlib.h>
-#include <stdx/trash/ng5_simple_bsearch.h>
-#include <stdx/trash/ng5_simple_scan1.h>
 #include <stdx/ng5_string_map_smart.h>
-#include <stdx/trash/ng5_simple_scan2.h>
-#include <stdx/trash/ng5_simple_scan3.h>
-#include <stdx/trash/ng5_simple_scan4.h>
-#include <stdx/trash/ng5_simple_scan2-cache.h>
-#include <stdx/trash/ng5_simple_scan3-cache.h>
-#include <stdx/trash/ng5_simple_scan4-cache.h>
-#include <stdx/trash/ng5_simple_scan1-parallel.h>
 
 void test_string_hashtable_generic_createdrop(struct string_map *map, int status) {
 
@@ -30,77 +21,10 @@ void test_string_hashtable_generic_createdrop(struct string_map *map, int status
 //}
 //END_TEST
 
-START_TEST (test_string_hashtable_generic_createdrop_scan1)
-    {
-        struct string_map map;
-        int status = string_hashtable_create_scan1(&map, NULL, 100, 5, 1.7f);
-        test_string_hashtable_generic_createdrop(&map, status);
-    }
-END_TEST
-
-START_TEST (test_string_hashtable_generic_createdrop_scan2)
-    {
-        struct string_map map;
-        int status = string_hashtable_create_scan2(&map, NULL, 100, 5, 1.7f);
-        test_string_hashtable_generic_createdrop(&map, status);
-    }
-END_TEST
-
-START_TEST (test_string_hashtable_generic_createdrop_scan3)
-    {
-        struct string_map map;
-        int status = string_hashtable_create_scan3(&map, NULL, 100, 5, 1.7f);
-        test_string_hashtable_generic_createdrop(&map, status);
-    }
-END_TEST
-
-
-START_TEST (test_string_hashtable_generic_createdrop_scan4)
-    {
-        struct string_map map;
-        int status = string_hashtable_create_scan4(&map, NULL, 100, 5, 1.7f);
-        test_string_hashtable_generic_createdrop(&map, status);
-    }
-END_TEST
-
 START_TEST (test_string_hashtable_generic_createdrop_scan1_cache)
     {
         struct string_map map;
         int status = string_hashtable_create_scan1_cache(&map, NULL, 100, 5, 1.7f);
-        test_string_hashtable_generic_createdrop(&map, status);
-    }
-END_TEST
-
-START_TEST (test_string_hashtable_generic_createdrop_scan2_cache)
-    {
-        struct string_map map;
-        int status = string_hashtable_create_scan2_cache(&map, NULL, 100, 5, 1.7f);
-        test_string_hashtable_generic_createdrop(&map, status);
-    }
-END_TEST
-
-START_TEST (test_string_hashtable_generic_createdrop_scan3_cache)
-    {
-        struct string_map map;
-        int status = string_hashtable_create_scan3_cache(&map, NULL, 100, 5, 1.7f);
-        test_string_hashtable_generic_createdrop(&map, status);
-    }
-END_TEST
-
-
-START_TEST (test_string_hashtable_generic_createdrop_scan4_cache)
-    {
-        struct string_map map;
-        int status = string_hashtable_create_scan4_cache(&map, NULL, 100, 5, 1.7f);
-        test_string_hashtable_generic_createdrop(&map, status);
-    }
-END_TEST
-
-
-START_TEST (test_string_hashtable_generic_createdrop_scan1_parallel)
-    {
-        struct string_map map;
-        int status = string_hashtable_create_scan1_parallel(&map, NULL, 100, 5, 1.7f, 7);
         test_string_hashtable_generic_createdrop(&map, status);
     }
 END_TEST
@@ -137,76 +61,11 @@ void test_string_hashtable_generic_putget(struct string_map *map) {
 //    }
 //END_TEST
 
-START_TEST (test_string_hashtable_generic_putget_scan1)
-    {
-        struct string_map map;
-        string_hashtable_create_scan1(&map, NULL, 100, 5, 1.7f);
-        test_string_hashtable_generic_putget(&map);
-    }
-END_TEST
-
-START_TEST (test_string_hashtable_generic_putget_scan2)
-    {
-        struct string_map map;
-        string_hashtable_create_scan2(&map, NULL, 100, 5, 1.7f);
-        test_string_hashtable_generic_putget(&map);
-    }
-END_TEST
-
-START_TEST (test_string_hashtable_generic_putget_scan3)
-    {
-        struct string_map map;
-        string_hashtable_create_scan3(&map, NULL, 100, 5, 1.7f);
-        test_string_hashtable_generic_putget(&map);
-    }
-END_TEST
-
-START_TEST (test_string_hashtable_generic_putget_scan4)
-    {
-        struct string_map map;
-        string_hashtable_create_scan4(&map, NULL, 100, 5, 1.7f);
-        test_string_hashtable_generic_putget(&map);
-    }
-END_TEST
-
 
 START_TEST (test_string_hashtable_generic_putget_scan1_cache)
     {
         struct string_map map;
         string_hashtable_create_scan1_cache(&map, NULL, 100, 5, 1.7f);
-        test_string_hashtable_generic_putget(&map);
-    }
-END_TEST
-
-
-START_TEST (test_string_hashtable_generic_putget_scan2_cache)
-    {
-        struct string_map map;
-        string_hashtable_create_scan2_cache(&map, NULL, 100, 5, 1.7f);
-        test_string_hashtable_generic_putget(&map);
-    }
-END_TEST
-
-START_TEST (test_string_hashtable_generic_putget_scan3_cache)
-    {
-        struct string_map map;
-        string_hashtable_create_scan3_cache(&map, NULL, 100, 5, 1.7f);
-        test_string_hashtable_generic_putget(&map);
-    }
-END_TEST
-
-START_TEST (test_string_hashtable_generic_putget_scan4_cache)
-    {
-        struct string_map map;
-        string_hashtable_create_scan4_cache(&map, NULL, 100, 5, 1.7f);
-        test_string_hashtable_generic_putget(&map);
-    }
-END_TEST
-
-START_TEST (test_string_hashtable_generic_putget_scan1_parallel)
-    {
-        struct string_map map;
-        string_hashtable_create_scan1_parallel(&map, NULL, 100, 5, 1.7f, 7);
         test_string_hashtable_generic_putget(&map);
     }
 END_TEST
@@ -259,14 +118,6 @@ void test_string_hashtable_generic_remove(struct string_map *map)
 //    }
 //END_TEST
 
-START_TEST (test_string_hashtable_generic_remove_scan1)
-    {
-        struct string_map map;
-        string_hashtable_create_scan1(&map, NULL, 100, 5, 1.7f);
-        test_string_hashtable_generic_remove(&map);
-    }
-END_TEST
-
 START_TEST (test_string_hashtable_generic_remove_scan1_cache)
     {
         struct string_map map;
@@ -275,61 +126,6 @@ START_TEST (test_string_hashtable_generic_remove_scan1_cache)
     }
 END_TEST
 
-START_TEST (test_string_hashtable_generic_remove_scan2)
-    {
-        struct string_map map;
-        string_hashtable_create_scan2(&map, NULL, 100, 5, 1.7f);
-        test_string_hashtable_generic_remove(&map);
-    }
-END_TEST
-
-START_TEST (test_string_hashtable_generic_remove_scan2_cache)
-    {
-        struct string_map map;
-        string_hashtable_create_scan2_cache(&map, NULL, 100, 5, 1.7f);
-        test_string_hashtable_generic_remove(&map);
-    }
-END_TEST
-
-START_TEST (test_string_hashtable_generic_remove_scan3)
-    {
-        struct string_map map;
-        string_hashtable_create_scan3(&map, NULL, 100, 5, 1.7f);
-        test_string_hashtable_generic_remove(&map);
-    }
-END_TEST
-
-START_TEST (test_string_hashtable_generic_remove_scan4)
-    {
-        struct string_map map;
-        string_hashtable_create_scan4(&map, NULL, 100, 5, 1.7f);
-        test_string_hashtable_generic_remove(&map);
-    }
-END_TEST
-
-START_TEST (test_string_hashtable_generic_remove_scan3_cache)
-    {
-        struct string_map map;
-        string_hashtable_create_scan3_cache(&map, NULL, 100, 5, 1.7f);
-        test_string_hashtable_generic_remove(&map);
-    }
-END_TEST
-
-START_TEST (test_string_hashtable_generic_remove_scan4_cache)
-    {
-        struct string_map map;
-        string_hashtable_create_scan4_cache(&map, NULL, 100, 5, 1.7f);
-        test_string_hashtable_generic_remove(&map);
-    }
-END_TEST
-
-START_TEST (test_string_hashtable_generic_remove_scan1_parallel)
-    {
-        struct string_map map;
-        string_hashtable_create_scan1_parallel(&map, NULL, 100, 5, 1.7f, 8);
-        test_string_hashtable_generic_remove(&map);
-    }
-END_TEST
 
 static int run_test_string_hashtable (void)
 {
@@ -342,60 +138,13 @@ static int run_test_string_hashtable (void)
     //      tcase_add_test(tcase, test_string_hashtable_generic_remove_besearch);
     //  suite_add_tcase(suite, tcase);
 
-        tcase = tcase_create("Scan1");
-            tcase_add_test(tcase, test_string_hashtable_generic_createdrop_scan1);
-            tcase_add_test(tcase, test_string_hashtable_generic_putget_scan1);
-            tcase_add_test(tcase, test_string_hashtable_generic_remove_scan1);
-        suite_add_tcase(suite, tcase);
-
-        tcase = tcase_create("Scan2");
-            tcase_add_test(tcase, test_string_hashtable_generic_createdrop_scan2);
-            tcase_add_test(tcase, test_string_hashtable_generic_putget_scan2);
-            tcase_add_test(tcase, test_string_hashtable_generic_remove_scan2);
-        suite_add_tcase(suite, tcase);
-
-        tcase = tcase_create("Scan3");
-            tcase_add_test(tcase, test_string_hashtable_generic_createdrop_scan3);
-            tcase_add_test(tcase, test_string_hashtable_generic_putget_scan3);
-            tcase_add_test(tcase, test_string_hashtable_generic_remove_scan3);
-        suite_add_tcase(suite, tcase);
-
-        tcase = tcase_create("Scan4");
-            tcase_add_test(tcase, test_string_hashtable_generic_createdrop_scan4);
-            tcase_add_test(tcase, test_string_hashtable_generic_putget_scan4);
-            tcase_add_test(tcase, test_string_hashtable_generic_remove_scan4);
-        suite_add_tcase(suite, tcase);
-
         tcase = tcase_create("Scan1-Cache");
             tcase_add_test(tcase, test_string_hashtable_generic_createdrop_scan1_cache);
             tcase_add_test(tcase, test_string_hashtable_generic_putget_scan1_cache);
             tcase_add_test(tcase, test_string_hashtable_generic_remove_scan1_cache);
         suite_add_tcase(suite, tcase);
 
-        tcase = tcase_create("Scan2-Cache");
-            tcase_add_test(tcase, test_string_hashtable_generic_createdrop_scan2_cache);
-            tcase_add_test(tcase, test_string_hashtable_generic_putget_scan2_cache);
-            tcase_add_test(tcase, test_string_hashtable_generic_remove_scan2_cache);
-        suite_add_tcase(suite, tcase);
-
-        tcase = tcase_create("Scan3-Cache");
-        tcase_add_test(tcase, test_string_hashtable_generic_createdrop_scan3_cache);
-            tcase_add_test(tcase, test_string_hashtable_generic_putget_scan3_cache);
-            tcase_add_test(tcase, test_string_hashtable_generic_remove_scan3_cache);
-        suite_add_tcase(suite, tcase);
-
-        tcase = tcase_create("Scan4-Cache");
-            tcase_add_test(tcase, test_string_hashtable_generic_createdrop_scan4_cache);
-            tcase_add_test(tcase, test_string_hashtable_generic_putget_scan4_cache);
-            tcase_add_test(tcase, test_string_hashtable_generic_remove_scan4_cache);
-        suite_add_tcase(suite, tcase);
-
-        tcase = tcase_create("Scan1-Parallel");
-            tcase_add_test(tcase, test_string_hashtable_generic_createdrop_scan1_parallel);
-            tcase_add_test(tcase, test_string_hashtable_generic_putget_scan1_parallel);
-            tcase_add_test(tcase, test_string_hashtable_generic_remove_scan1_parallel);
-        suite_add_tcase(suite, tcase);
-
+     
     int number_failed;
 
     SRunner *runner = srunner_create(suite);
