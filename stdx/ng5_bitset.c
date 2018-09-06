@@ -7,7 +7,7 @@
 #define FLIP(x)                 ( ~x )
 #define FIELD_AND(x, y)         ( x & y )
 
-int ng5_bitset_create(ng5_bitset_t *bitset, size_t num_bits)
+int ng5_bitset_create(ng5_bitset_t *bitset, uint16_t num_bits)
 {
     check_non_null(bitset);
 
@@ -41,7 +41,7 @@ int ng5_bitset_clear(ng5_bitset_t *bitset)
     return STATUS_OK;
 }
 
-int ng5_bitset_set(ng5_bitset_t *bitset, size_t bit_pos, bool on)
+int ng5_bitset_set(ng5_bitset_t *bitset, uint16_t bit_pos, bool on)
 {
     check_non_null(bitset)
     size_t   block_pos = floor(bit_pos / (double) NUM_BITS(uint64_t));
@@ -57,7 +57,7 @@ int ng5_bitset_set(ng5_bitset_t *bitset, size_t bit_pos, bool on)
     return STATUS_OK;
 }
 
-bool ng5_bitset_get(ng5_bitset_t *bitset, size_t bit_pos)
+bool ng5_bitset_get(ng5_bitset_t *bitset, uint16_t bit_pos)
 {
     check_non_null(bitset)
     size_t   block_pos = floor(bit_pos / (double) NUM_BITS(uint64_t));

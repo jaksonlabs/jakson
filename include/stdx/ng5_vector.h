@@ -1,4 +1,4 @@
-// file: vector.h
+#include <ntsid.h>// file: vector.h
 
 /**
  *  Copyright (C) 2018 Marcus Pinnecke
@@ -33,22 +33,22 @@ typedef struct ng5_vector_t
     /**
     *  Memory allocator that is used to get memory for user data
     */
-    ng5_allocator_t     allocator;
+    ng5_allocator_t    *allocator;
 
     /**
      *  Fixed number of bytes for a single element that should be stored in the vector
      */
-    size_t              elem_size;
+    uint8_t             elem_size;
 
     /**
      *  The number of elements currently stored in the vector
      */
-    size_t              num_elems;
+    uint32_t            num_elems;
 
     /**
      *  The number of elements for which currently memory is reserved
      */
-    size_t              cap_elems;
+    uint32_t            cap_elems;
 
     /**
     * The grow factor considered for resize operations
@@ -127,7 +127,8 @@ int ng5_vector_is_empty(ng5_vector_t* vec);
  */
 int ng5_vector_push(ng5_vector_t* vec, const void* data, size_t num_elems) force_inline;    /* OPTIMIZATION: Force inline */
 
-void *ng5_vector_push_and_get(ng5_vector_t* vec, const void* data, size_t num_elems) force_inline; /* OPTIMIZATION: Force inline */
+// TODO: remove
+//void *ng5_vector_push_and_get(ng5_vector_t* vec, const void* data, size_t num_elems) force_inline; /* OPTIMIZATION: Force inline */
 
 /**
  * Appends 'how_many' elements of the same source stored in 'data' into the vector by copying how_many * vec->elem_size
@@ -169,6 +170,14 @@ int ng5_vector_grow(size_t* num_new_slots, ng5_vector_t* vec);
 size_t ng5_vector_len(const ng5_vector_t* vec);
 
 #define ng5_vector_get(vec, pos, type) (type *) ng5_vector_at(vec, pos);
+
+#define ng5_vector_push_and_get(vec, object, type)  \
+({                                                  \
+    size_t pos   = ng5_vector_len(vec);             \
+    ng5_vector_push(vec, object, 1);                \
+    type *retval = ng5_vector_get(vec, pos, type);  \
+    retval;                                         \
+})
 
 const void *ng5_vector_at(const ng5_vector_t* vec, size_t pos) force_inline; /* OPTIMIZATION: Force inline */
 

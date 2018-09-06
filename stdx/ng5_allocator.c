@@ -16,9 +16,7 @@ int allocator_default(ng5_allocator_t *alloc)
         alloc->malloc       = default_malloc;
         alloc->realloc      = default_realloc;
         alloc->free         = default_free;
-        alloc->gc           = NULL;
         alloc->clone        = default_clone;
-        alloc->drop         = NULL;
         return STATUS_OK;
     } else {
         return STATUS_NULLPTR;
@@ -53,26 +51,10 @@ int allocator_free(ng5_allocator_t *alloc, void *ptr)
     return STATUS_OK;
 }
 
-void allocator_gc(ng5_allocator_t *alloc)
-{
-    if (alloc->gc) {
-        alloc->gc(alloc);
-    }
-}
-
 int allocator_clone(ng5_allocator_t *dst, const ng5_allocator_t *src)
 {
     check_non_null(dst && src)
     src->clone(dst, src);
-    return STATUS_OK;
-}
-
-int allocator_drop(ng5_allocator_t *alloc)
-{
-    check_non_null(alloc)
-    if (alloc->drop) {
-        alloc->drop(alloc);
-    }
     return STATUS_OK;
 }
 

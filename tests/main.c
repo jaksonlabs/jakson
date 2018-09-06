@@ -2,6 +2,7 @@
 
 #include <stdx/test_string_dic.h>
 #include <stdx/test_string_hashtable.h>
+#include <stdx/test_slice_list.h>
 
 int main (int argc, char *argv[])
 {
@@ -12,6 +13,7 @@ int main (int argc, char *argv[])
 
     number_failed += run_test_string_hashtable();
     number_failed += run_test_string_dic();
+    number_failed += run_test_slice_list();
 
     return number_failed;
 }

@@ -26,10 +26,10 @@
 typedef struct ng5_bitset_t
 {
     ng5_vector_t of_type(uint64_t) data;
-    size_t                         num_bits;
+    uint16_t                       num_bits;
 } ng5_bitset_t;
 
-int ng5_bitset_create(ng5_bitset_t *bitset, size_t num_bits);
+int ng5_bitset_create(ng5_bitset_t *bitset, uint16_t num_bits);
 
 int ng5_bitset_drop(ng5_bitset_t *bitset);
 
@@ -37,8 +37,8 @@ size_t ng5_bitset_num_bits(const ng5_bitset_t *bitset);
 
 int ng5_bitset_clear(ng5_bitset_t *bitset);
 
-int ng5_bitset_set(ng5_bitset_t *bitset, size_t bit_pos, bool on);
+int ng5_bitset_set(ng5_bitset_t *bitset, uint16_t bit_pos, bool on);
 
-bool ng5_bitset_get(ng5_bitset_t *bitset, size_t bit_pos);
+bool ng5_bitset_get(ng5_bitset_t *bitset, uint16_t bit_pos);
 
 #endif

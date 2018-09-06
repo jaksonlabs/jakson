@@ -25,23 +25,42 @@
 #include <stdx/ng5_bitset.h>
 #include <stdx/ng5_spinlock.h>
 #include "ng5_bloomfilter.h"
+#include "ng5_hash.h"
 
 typedef struct ng5_slice_t ng5_slice_t;
 
-#ifndef NG5_SLICE_LIST_CPU_L3_SIZE_IN_BYTE
-#define NG5_SLICE_LIST_CPU_L3_SIZE_IN_BYTE 6291456
+
+#ifndef NG5_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_NAME
+#define NG5_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_NAME "1 of 100 in CPU L1"
+#endif
+#ifndef NG5_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE
+#define NG5_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE (32768/100)
 #endif
 
-#define SLICE_DATA_SIZE (NG5_SLICE_LIST_CPU_L3_SIZE_IN_BYTE - 4 * sizeof(void *) - sizeof(ng5_bitset_t))
+#ifndef NG5_SLICE_LIST_TARGET_MEMORY_NAME
+#define NG5_SLICE_LIST_TARGET_MEMORY_NAME "10 of 100 in CPU L1"
+#endif
+#ifndef NG5_SLICE_LIST_TARGET_MEMORY_SIZE_IN_BYTE
+#define NG5_SLICE_LIST_TARGET_MEMORY_SIZE_IN_BYTE (32768/10)
+#endif
+
+
+
+#define SLICE_DATA_SIZE (NG5_SLICE_LIST_TARGET_MEMORY_SIZE_IN_BYTE - sizeof(slice_lookup_strat_e) - sizeof(ng5_slice_find_func_t) - sizeof(uint32_t))
+
 
 /* A function that implements the particular search strategy applied to a slice */
-typedef uint32_t (*ng5_slice_find_func_t)(ng5_slice_t *slice, const void *needle);
+typedef uint32_t (*ng5_slice_find_func_t)(ng5_slice_t *slice, hash_t needle_hash, const char *needle_str);
+
+#define SLICE_KEY_COLUMN_MAX_ELEMS (SLICE_DATA_SIZE / 8 / 3) /* one array with elements of 64 bits each, 3 of them */
 
 typedef enum slice_lookup_strat_e
 {
   SLICE_LOOKUP_SCAN,
   SLICE_LOOKUP_BESEARCH,
 } slice_lookup_strat_e;
+
+typedef struct ng5_slice_desc_t ng5_slice_desc_t;
 
 /* A slice is a fixed-size partition inside an array. It is optimized for a mixed' A slice size is chosen such that a
  * single slice will fit into the L3 CPU cache. A slice as it own is a small self-optimizing and self-containing data
@@ -58,10 +77,10 @@ typedef struct ng5_slice_t
      * slice will get search linearly without sorting. Which actual search strategy will be executed depends
      * on the function to which 'find' points to.  As a side note: since a slice always fits into the CPU cache,
      * binary search will never produce a cache miss in L3. */
-    ng5_slice_find_func_t   find;
+    ng5_slice_find_func_t     find;
 
     /* Enumeration to determine which strategy for 'find' is currently applied */
-    slice_lookup_strat_e    strat;
+    slice_lookup_strat_e      strat;
 
     /* Data stored inside this slice. By setting 'NG5_SLICE_LIST_CPU_L3_SIZE_IN_BYTE' statically to the target
      * CPU L3 size, it is intended that one entire 'ng5_slice_t' structure fits into the L3 cache of the CPU.
@@ -72,27 +91,23 @@ typedef struct ng5_slice_t
      * avoids to lookup in a bitmap or other structure whether a particular element is removed or not; also
      * this does not steal an element from the domain of the used data type to encode 'not present' with a
      * particular value. However, a remove operation is expensive. */
-    ng5_byte_t              data[SLICE_DATA_SIZE];
+    char *                    key_column[SLICE_KEY_COLUMN_MAX_ELEMS];
+    hash_t                    key_hash_column[SLICE_KEY_COLUMN_MAX_ELEMS];
+    string_id_t               string_id_column[SLICE_KEY_COLUMN_MAX_ELEMS];
 
-    /* The number of elements stored in 'data' */
-    uint32_t                num_elems;
+    /* The number of elements stored in 'key_colum', 'key_hash_column', and 'string_id_column' */
+    uint32_t                  num_elems;
 } ng5_slice_t;
 
-typedef struct ng5_slice_lookup_guard_t
+typedef struct ng5_hash_bounds_t
 {
-   /* Next and prev slices inside the logical data array. Which element is the prev and which one is the next
-    * depends on the data access. In fact, the list build with these both pointers organize itself depending
-    * on the (read) data access frequency: the element that has the most frequent number of hits for a search
-    * becomes the head of the list, while the last element was either never considered for a lookup, or
-    * is was read over and over again but the number of hits is low (we call this MFH-sort). */
-    ng5_slice_t             *prev,
-                            *slice,
-                            *next;
-
     /* Min and max value inside this slice. Used to skip the lookup in the per-slice bloomfilter during search */
-    uint32_t                min_idx,
-                            max_idx;
+    uint32_t                  min_idx,
+                              max_idx;
+} ng5_hash_bounds_t;
 
+typedef struct ng5_slice_desc_t
+{
     /* The number of reads to this slice including misses and hits. Along with 'num_reads_hit' used to determine
      * the order of this element w.r.t. to other elements in the list */
     size_t                  num_reads_all;
@@ -107,17 +122,19 @@ typedef struct ng5_slice_lookup_guard_t
     /* Positions stored in the freel ist */
     uint32_t                num_freelist;
 
-} ng5_slice_lookup_guard_t;
+} ng5_slice_desc_t;
 
 typedef struct ng5_slice_list_t
 {
-    size_t                  slice_elem_size;
-    ng5_allocator_t         alloc;
-    ng5_slice_t            *head,
-                           *tail,
-                           *appender;
-    ng5_bitset_t            slice_freelist;
-    ng5_spinlock_t          spinlock;
+    ng5_allocator_t                                   alloc;
+    ng5_spinlock_t                                    spinlock;
+
+    ng5_vector_t of_type(ng5_slice_t)                 slices;
+    ng5_vector_t of_type(ng5_slice_desc_t)            descriptors;
+    ng5_vector_t of_type(ng5_bloomfilter_t)           filters;
+    ng5_vector_t of_type(ng5_hash_bounds_t)           bounds;
+
+    ng5_slice_t                                      *appender;
 } ng5_slice_list_t;
 
 typedef struct ng5_slice_handle_t
@@ -126,12 +143,12 @@ typedef struct ng5_slice_handle_t
     const void             *element;
 } ng5_slice_handle_t;
 
-int ng5_slice_list_create(ng5_slice_list_t *list, const ng5_allocator_t *alloc, size_t elem_size);
+int ng5_slice_list_create(ng5_slice_list_t *list, const ng5_allocator_t *alloc, size_t slice_cap);
 
 int ng5_slice_list_drop(ng5_slice_list_t *list);
 
 int ng5_slice_list_lookup(ng5_slice_handle_t *handle, ng5_slice_list_t *list, const void *needle);
 
-int ng5_slice_list_insert(ng5_slice_list_t *list, const void *elems, size_t neleme);
+int ng5_slice_list_insert(ng5_slice_list_t *list, char ** strings, string_id_t *ids, size_t npairs);
 
 #endif

@@ -11,6 +11,7 @@ add_executable(tests
         main.c
         ${CMAKE_SOURCE_DIR}/tests/stdx/test_string_hashtable.h
         ${CMAKE_SOURCE_DIR}/tests/stdx/test_string_dic.h
+        ${CMAKE_SOURCE_DIR}/tests/stdx/test_slice_list.h
         ${SORUCE_FILES} )
 
 target_link_libraries(tests ${LIBS})

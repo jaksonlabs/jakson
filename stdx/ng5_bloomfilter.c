@@ -16,5 +16,15 @@ int ng5_bloomfilter_clear(ng5_bloomfilter_t *filter)
     return ng5_bitset_clear(filter);
 }
 
+size_t ng5_bloomfilter_nbits(ng5_bloomfilter_t *filter)
+{
+    return ng5_bitset_num_bits(filter);
+}
+
+unsigned ng5_bloomfilter_nhashes()
+{
+    return 4;
+}
+
 
 

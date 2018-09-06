@@ -31,6 +31,37 @@ int ng5_bloomfilter_drop(ng5_bloomfilter_t *filter);
 
 int ng5_bloomfilter_clear(ng5_bloomfilter_t *filter);
 
+size_t ng5_bloomfilter_nbits(ng5_bloomfilter_t *filter);
+
+unsigned ng5_bloomfilter_nhashes();
+
+#define ng5_bloomfilter_set(filter, key, key_size) \
+({                                                          \
+    size_t nbits = ng5_bitset_num_bits(filter);             \
+    size_t b0 = hash_additive(key_size, key) % nbits;       \
+    size_t b1 = hash__xor(key_size, key) % nbits;           \
+    size_t b2 = hash_rot(key_size, key) % nbits;            \
+    size_t b3 = hash_sax(key_size, key) % nbits;            \
+    ng5_bitset_set(filter, b0, true);                       \
+    ng5_bitset_set(filter, b1, true);                       \
+    ng5_bitset_set(filter, b2, true);                       \
+    ng5_bitset_set(filter, b3, true);                       \
+})
+
+#define ng5_bloomfilter_test(filter, key, key_size)         \
+({                                                          \
+    size_t nbits = ng5_bitset_num_bits(filter);             \
+    size_t b0 = hash_additive(key_size, key) % nbits;       \
+    size_t b1 = hash__xor(key_size, key) % nbits;           \
+    size_t b2 = hash_rot(key_size, key) % nbits;            \
+    size_t b3 = hash_sax(key_size, key) % nbits;            \
+    bool b0set = ng5_bitset_get(filter, b0);                \
+    bool b1set = ng5_bitset_get(filter, b1);                \
+    bool b2set = ng5_bitset_get(filter, b2);                \
+    bool b3set = ng5_bitset_get(filter, b3);                \
+    (b0set && b1set && b2set && b3set);                     \
+})
+
 #define ng5_bloomfilter_test_and_set(filter, key, key_size) \
 ({                                                          \
     size_t nbits = ng5_bitset_num_bits(filter);             \

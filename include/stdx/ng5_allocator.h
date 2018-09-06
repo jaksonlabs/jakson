@@ -76,27 +76,12 @@ typedef struct ng5_allocator_t {
     void              (*free)(ng5_allocator_t *self, void *ptr);
 
     /**
-     *  Implementation to call garbage collection (if implemented).
-     *  Setting this function pointer to NULL indicates that garbage collection is not supported.
-     */
-    void              (*gc)(ng5_allocator_t *self);
-
-    /**
      *  Perform a deep copy of this allocator including implementation-specific data stored in 'extra'
      *
      * @param dst non-null target in which 'self' should be cloned
      * @param self non-null source which should be clones in 'dst'
      */
     void               (*clone)(ng5_allocator_t *dst, const ng5_allocator_t *self);
-
-    /**
-     *  Deletes this allocator by freeing up implementation-specific data that might be stored in 'extra'.
-     *  Setting this function pointer to NULL indicates that no futher cleanup is required
-     *  (i.e., extra must not be freed)
-     *
-     * @param self non-null ponter to this allocator
-     */
-    void              (*drop)(ng5_allocator_t *self);
 
 } ng5_allocator_t;
 
@@ -149,15 +134,6 @@ void *allocator_realloc(ng5_allocator_t *alloc, void *ptr, size_t size);
 int  allocator_free(ng5_allocator_t *alloc, void *ptr);
 
 /**
- * Invokes a garbage collection for memory manages with 'alloc' (if supported).
- * Depending on the implementation, a call to this function may also frees up memory previously
- * marked as to-be-freed via a call to 'allocator_realloc' (if the allocator implements a lazy strategy)
- *
- * @param alloc non-null pointer to allocator implementation
- */
-void  allocator_gc(ng5_allocator_t *alloc);
-
-/**
  * Performs a deep copy of the allocator 'src' into the allocator 'dst'.
  *
  * @param dst non-null pointer to allocator implementation (of same implementation as src)
@@ -165,13 +141,5 @@ void  allocator_gc(ng5_allocator_t *alloc);
  * @return STATUS_OK in case of success, otherwise a value unequal to STATUS_OK describing the error
  */
 int allocator_clone(ng5_allocator_t *dst, const ng5_allocator_t *src);
-
-/**
- *  Deletes this allocator by freeing up implementation-specific data.
- *
- * @param alloc non-null pointer to allocator implementation
- * @return STATUS_OK in case of success, otherwise a value unequal to STATUS_OK describing the error
- */
-int allocator_drop(ng5_allocator_t *alloc);
 
 #endif

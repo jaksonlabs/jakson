@@ -144,7 +144,7 @@ static int run_test_string_hashtable (void)
             tcase_add_test(tcase, test_string_hashtable_generic_remove_scan1_cache);
         suite_add_tcase(suite, tcase);
 
-     
+
     int number_failed;
 
     SRunner *runner = srunner_create(suite);

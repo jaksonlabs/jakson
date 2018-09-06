@@ -41,7 +41,7 @@ int slot_vector_insert(struct slot_vector *vec, optional ng5_vector_t of_type(sl
     unused(data); // TODO: ???
 
     if (ids) {
-        ng5_vector_create(ids, &vec->content.allocator, sizeof(slot_vector_slot_t), num_elems);
+        ng5_vector_create(ids, vec->content.allocator, sizeof(slot_vector_slot_t), num_elems);
     }
 
     /* check and handle whether the content ng5_vector must be resized */

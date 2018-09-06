@@ -179,9 +179,7 @@ int allocator_trace(ng5_allocator_t *alloc)
     alloc->malloc       = this_malloc;
     alloc->realloc      = this_realloc;
     alloc->free         = this_free;
-    alloc->gc           = NULL;
     alloc->clone        = this_clone;
-    alloc->drop         = NULL;
 
     return STATUS_OK;
 }

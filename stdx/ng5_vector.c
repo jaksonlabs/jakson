@@ -4,8 +4,9 @@
 int ng5_vector_create(ng5_vector_t* out, const ng5_allocator_t* alloc, size_t elem_size, size_t cap_elems)
 {
     check_non_null(out)
-    allocator_this_or_default(&out->allocator, alloc);
-    out->base = allocator_malloc(&out->allocator, cap_elems * elem_size);
+    out->allocator = malloc(sizeof(ng5_allocator_t));
+    allocator_this_or_default(out->allocator, alloc);
+    out->base = allocator_malloc(out->allocator, cap_elems * elem_size);
     out->num_elems   = 0;
     out->cap_elems   = cap_elems;
     out->elem_size   = elem_size;
@@ -33,8 +34,8 @@ int ng5_vector_set_growfactor(ng5_vector_t* vec, float factor)
 int ng5_vector_drop(ng5_vector_t* vec)
 {
     check_non_null(vec)
-    allocator_free(&vec->allocator, vec->base);
-    allocator_drop(&vec->allocator);
+    allocator_free(vec->allocator, vec->base);
+    free(vec->allocator);
     vec->base = NULL;
     return STATUS_OK;
 }
@@ -52,19 +53,20 @@ int ng5_vector_push(ng5_vector_t* vec, const void* data, size_t num_elems)
     while (next_num > vec->cap_elems) {
         size_t more = next_num - vec->cap_elems;
         vec->cap_elems = (vec->cap_elems + more) * vec->grow_factor;
-        vec->base = allocator_realloc(&vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
+        vec->base = allocator_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
     }
     memcpy(vec->base + vec->num_elems * vec->elem_size, data, num_elems * vec->elem_size);
     vec->num_elems += num_elems;
     return STATUS_OK;
 }
 
-void *ng5_vector_push_and_get(ng5_vector_t* vec, const void* data, size_t num_elems)
-{
-    size_t pos    = ng5_vector_len(vec);
-    int    status = ng5_vector_push(vec, data, num_elems);
-    return status == STATUS_OK ? (void *) ng5_vector_at(vec, pos) : NULL;
-}
+// TODO: remove
+//void *ng5_vector_push_and_get(ng5_vector_t* vec, const void* data, size_t num_elems)
+//{
+//    size_t pos    = ng5_vector_len(vec);
+//    int    status = ng5_vector_push(vec, data, num_elems);
+//    return status == STATUS_OK ? (void *) ng5_vector_at(vec, pos) : NULL;
+//}
 
 int ng5_vector_repreat_push(ng5_vector_t* vec, const void* data, size_t how_many)
 {
@@ -73,7 +75,7 @@ int ng5_vector_repreat_push(ng5_vector_t* vec, const void* data, size_t how_many
     while (next_num > vec->cap_elems) {
         size_t more = next_num - vec->cap_elems;
         vec->cap_elems = (vec->cap_elems + more) * vec->grow_factor;
-        vec->base = allocator_realloc(&vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
+        vec->base = allocator_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
     }
     for (size_t i = 0; i < how_many; i++) {
         memcpy(vec->base + (vec->num_elems + i) * vec->elem_size, data, vec->elem_size);
@@ -98,7 +100,7 @@ int ng5_vector_grow(size_t* num_new_slots, ng5_vector_t* vec)
     size_t free_slots_before = vec->cap_elems - vec->num_elems;
 
     vec->cap_elems           = (vec->cap_elems * vec->grow_factor) + 1;
-    vec->base = allocator_realloc(&vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
+    vec->base = allocator_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
     size_t free_slots_after  = vec->cap_elems - vec->num_elems;
     if (likely(num_new_slots != NULL)) {
         *num_new_slots = free_slots_after - free_slots_before;

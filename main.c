@@ -6,6 +6,7 @@
 #include <stdx/ng5_string_dic_async.h>
 #include <apr_general.h>
 #include <stdx/ng5_bitset.h>
+#include <stdx/ng5_slice_list.h>
 //#include <ng5/roadfire/roadfire.h>
 
 static char *read_contents(const char *path)
@@ -73,8 +74,31 @@ ng5_vector_t *to_string_list(const char *contents)
     storage_engine_roadfire_create(&engine, NULL, NULL);
 }*/
 
+#define NUM_SLICE_INSERT 100000
+
 void experiments_hashing()
 {
+    ng5_slice_list_t list;
+    ng5_slice_list_create(&list, NULL, 100);
+    char **data = malloc(NUM_SLICE_INSERT * sizeof(char));
+    string_id_t *ids = malloc(NUM_SLICE_INSERT * sizeof(string_id_t));
+
+    for (size_t i = 0; i < NUM_SLICE_INSERT; i++) {
+        char buf[10];
+        for (size_t j = 0; j < 10; j++) {
+            buf[j] = (char) rand() % 255;
+        }
+
+        data[i] = strdup(buf);
+        ids[i]  = (string_id_t) rand();
+    }
+
+    ng5_slice_list_insert(&list, data, ids, NUM_SLICE_INSERT);
+
+
+    abort();
+
+
     ng5_bitset_t set;
     ng5_bitset_create(&set, 65);
     assert (ng5_bitset_get(&set, 4) == false);
