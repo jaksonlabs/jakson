@@ -91,7 +91,7 @@ typedef struct ng5_slice_t
      * avoids to lookup in a bitmap or other structure whether a particular element is removed or not; also
      * this does not steal an element from the domain of the used data type to encode 'not present' with a
      * particular value. However, a remove operation is expensive. */
-    char *                    key_column[SLICE_KEY_COLUMN_MAX_ELEMS];
+    const char *              key_column[SLICE_KEY_COLUMN_MAX_ELEMS];
     hash_t                    key_hash_column[SLICE_KEY_COLUMN_MAX_ELEMS];
     string_id_t               string_id_column[SLICE_KEY_COLUMN_MAX_ELEMS];
 
@@ -102,8 +102,8 @@ typedef struct ng5_slice_t
 typedef struct ng5_hash_bounds_t
 {
     /* Min and max value inside this slice. Used to skip the lookup in the per-slice bloomfilter during search */
-    uint32_t                  min_idx,
-                              max_idx;
+    hash_t                    min_hash,
+                              max_hash;
 } ng5_hash_bounds_t;
 
 typedef struct ng5_slice_desc_t
@@ -114,13 +114,6 @@ typedef struct ng5_slice_desc_t
 
     /* The number of reads to this slice that lead to a search hit. See 'num_reads_all' for the purpose. */
     size_t                  num_reads_hit;
-
-    /* A free list containing positions in 'data' than are free to use. This structure is used to fetch
-    * new positions for insertion operations. */
-    uint32_t               *freelist;
-
-    /* Positions stored in the freel ist */
-    uint32_t                num_freelist;
 
 } ng5_slice_desc_t;
 
@@ -134,7 +127,7 @@ typedef struct ng5_slice_list_t
     ng5_vector_t of_type(ng5_bloomfilter_t)           filters;
     ng5_vector_t of_type(ng5_hash_bounds_t)           bounds;
 
-    ng5_slice_t                                      *appender;
+    uint32_t                                          appender_idx;
 } ng5_slice_list_t;
 
 typedef struct ng5_slice_handle_t
