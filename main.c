@@ -78,59 +78,11 @@ ng5_vector_t *to_string_list(const char *contents)
 
 void experiments_hashing()
 {
-    ng5_slice_list_t list;
-    ng5_slice_list_create(&list, NULL, 100);
-    char **data = malloc(NUM_SLICE_INSERT * sizeof(char));
-    string_id_t *ids = malloc(NUM_SLICE_INSERT * sizeof(string_id_t));
-
-    for (size_t i = 0; i < NUM_SLICE_INSERT; i++) {
-        char buf[10];
-        for (size_t j = 0; j < 10; j++) {
-            buf[j] = (char) rand() % 255;
-        }
-
-        data[i] = strdup(buf);
-        ids[i]  = (string_id_t) rand();
-    }
-
-    ng5_slice_list_insert(&list, data, ids, NUM_SLICE_INSERT);
-
-
-    abort();
-
-
-    ng5_bitset_t set;
-    ng5_bitset_create(&set, 65);
-    assert (ng5_bitset_get(&set, 4) == false);
-    assert (ng5_bitset_get(&set, 11) == false);
-    assert (ng5_bitset_get(&set, 0) == false);
-    ng5_bitset_set(&set, 4, true);
-    ng5_bitset_set(&set, 11, true);
-    ng5_bitset_set(&set, 0, true);
-    assert (ng5_bitset_get(&set, 4) == true);
-    assert (ng5_bitset_get(&set, 11) == true);
-    assert (ng5_bitset_get(&set, 0) == true);
-    ng5_bitset_set(&set, 11, false);
-    ng5_bitset_set(&set, 64, true);
-    assert (ng5_bitset_get(&set, 4) == true);
-    assert (ng5_bitset_get(&set, 11) == false);
-    assert (ng5_bitset_get(&set, 1) == false);
-    assert (ng5_bitset_get(&set, 64) == true);
-    ng5_bitset_set(&set, 64, false);
-    assert (ng5_bitset_get(&set, 64) == false);
-    ng5_bitset_clear(&set);
-    assert (ng5_bitset_get(&set, 4) == false);
-    assert (ng5_bitset_get(&set, 11) == false);
-    assert (ng5_bitset_get(&set, 1) == false);
-    assert (ng5_bitset_get(&set, 64) == false);
-
-    printf("OK\n");
-
     printf("yago_percent;sample;num_buckets;time_created_sec;time_inserted_sec;time_bulk_sum_created_inserted;num_strings\n");
 
     const char* paths[11];
     paths[0] = "/Users/marcus/Downloads/50.txt";
-/*
+
    //      paths[0] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/100.txt";
        paths[0] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-15pc-stringlist.txt";
        paths[1] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-19pc-stringlist.txt";
@@ -144,7 +96,7 @@ void experiments_hashing()
        paths[9] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-83pc-stringlist.txt";
        paths[10] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-91pc-stringlist.txt";
 
-    */
+    /*
        paths[0] = "/home/pinnecke/datasets/yago1/stringlists/yago1-15pc-stringlist.txt";
        paths[1] = "/home/pinnecke/datasets/yago1/stringlists/yago1-19pc-stringlist.txt";
        paths[2] = "/home/pinnecke/datasets/yago1/stringlists/yago1-27pc-stringlist.txt";
@@ -155,7 +107,7 @@ void experiments_hashing()
        paths[7] = "/home/pinnecke/datasets/yago1/stringlists/yago1-67pc-stringlist.txt";
        paths[8] = "/home/pinnecke/datasets/yago1/stringlists/yago1-75pc-stringlist.txt";
        paths[9] = "/home/pinnecke/datasets/yago1/stringlists/yago1-83pc-stringlist.txt";
-       paths[10] = "/home/pinnecke/datasets/yago1/stringlists/yago1-91pc-stringlist.txt";
+       paths[10] = "/home/pinnecke/datasets/yago1/stringlists/yago1-91pc-stringlist.txt";*/
 
     int yago_percent[11] = {
             15,
