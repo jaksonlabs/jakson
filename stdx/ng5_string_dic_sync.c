@@ -109,7 +109,7 @@ static int extra_create(struct string_dic *self, size_t capacity, size_t num_ind
 #endif
 
     check_success(string_hashtable_create_scan1_cache(&extra->index, &hashtable_alloc, num_index_buckets,
-              num_index_bucket_cap, 1.7f));
+              num_index_bucket_cap));
     return STATUS_OK;
 }
 
@@ -216,7 +216,7 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
      * dictionary before this batch but might occur multiple times in the current batch) was seen
      * before (with a slight prob. of doing too much work) */
     ng5_bloomfilter_t bloomfilter;
-    ng5_bloomfilter_create(&bloomfilter, num_not_found);
+    ng5_bloomfilter_create(&bloomfilter, 22 * num_not_found);
 
     /* copy string ids for already known strings to their result position resp. add those which are new */
     for (size_t i = 0; i < num_strings; i++) {
@@ -230,6 +230,11 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
 
             string_id_t        string_id;
             const char        *key = (const char *)(strings[i]);
+
+            if (strcmp("<Miki_Imai>", key) == 0) {
+                ; // TODO: remove
+            }
+
             bool               found = false;
             string_id_t        value;
 
@@ -272,6 +277,7 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
     /* cleanup */
     allocator_free(&hashtable_alloc, found_mask);
     allocator_free(&hashtable_alloc, values);
+    ng5_bloomfilter_drop(&bloomfilter);
 
     unlock(self);
 

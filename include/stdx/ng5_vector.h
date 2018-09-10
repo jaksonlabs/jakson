@@ -112,7 +112,7 @@ int ng5_vector_drop(ng5_vector_t* vec);
  *         an error occurs. In case an error is occured, the return value is neither <code>STATUS_TRUE</code> nor
  *         <code>STATUS_FALSE</code> but an value indicating that error.
  */
-int ng5_vector_is_empty(ng5_vector_t* vec);
+int ng5_vector_is_empty(const ng5_vector_t* vec);
 
 /**
  * Appends 'num_elems' elements stored in 'data' into the vector by copying num_elems * vec->elem_size into the

@@ -40,6 +40,6 @@
  * Regular, non-fancy scan + caching
  */
 int string_hashtable_create_scan1_cache(struct string_map* map, const ng5_allocator_t* alloc, size_t num_buckets,
-        size_t cap_buckets, float bucket_grow_factor);
+        size_t cap_buckets);
 
 #endif

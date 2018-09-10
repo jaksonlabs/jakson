@@ -41,7 +41,7 @@ typedef struct ng5_slice_t ng5_slice_t;
 #define NG5_SLICE_LIST_TARGET_MEMORY_NAME "10 of 100 in CPU L1"
 #endif
 #ifndef NG5_SLICE_LIST_TARGET_MEMORY_SIZE_IN_BYTE
-#define NG5_SLICE_LIST_TARGET_MEMORY_SIZE_IN_BYTE (32768/10)
+#define NG5_SLICE_LIST_TARGET_MEMORY_SIZE_IN_BYTE (3276800/10)
 #endif
 
 
@@ -72,13 +72,6 @@ typedef struct ng5_slice_desc_t ng5_slice_desc_t;
  * For this, slices that had a relative high search hit rate are moved to the front of the list. */
 typedef struct ng5_slice_t
 {
-    /* The current find function implementation. This implementation will change depending on the environment
-     * and slice state (e.g., a 'read-only' slice will get sorted and binary searched, and a 'append-heavy'
-     * slice will get search linearly without sorting. Which actual search strategy will be executed depends
-     * on the function to which 'find' points to.  As a side note: since a slice always fits into the CPU cache,
-     * binary search will never produce a cache miss in L3. */
-    ng5_slice_find_func_t     find;
-
     /* Enumeration to determine which strategy for 'find' is currently applied */
     slice_lookup_strat_e      strat;
 
@@ -97,6 +90,8 @@ typedef struct ng5_slice_t
 
     /* The number of elements stored in 'key_colum', 'key_hash_column', and 'string_id_column' */
     uint32_t                  num_elems;
+
+    uint32_t                  cache_idx;
 } ng5_slice_t;
 
 typedef struct ng5_hash_bounds_t
@@ -133,15 +128,25 @@ typedef struct ng5_slice_list_t
 typedef struct ng5_slice_handle_t
 {
     ng5_slice_t            *container;
-    const void             *element;
+    const char             *key;
+    string_id_t             value;
+    bool                    is_contained;
 } ng5_slice_handle_t;
 
 int ng5_slice_list_create(ng5_slice_list_t *list, const ng5_allocator_t *alloc, size_t slice_cap);
 
 int ng5_slice_list_drop(ng5_slice_list_t *list);
 
-int ng5_slice_list_lookup(ng5_slice_handle_t *handle, ng5_slice_list_t *list, const void *needle);
+int ng5_slice_list_lookup_by_key(ng5_slice_handle_t *handle, ng5_slice_list_t *list, const char *needle);
+
+int ng5_slice_list_is_empty(const ng5_slice_list_t *list);
 
 int ng5_slice_list_insert(ng5_slice_list_t *list, char ** strings, string_id_t *ids, size_t npairs);
+
+int ng5_slice_list_remove(ng5_slice_list_t *list, ng5_slice_handle_t *handle);
+
+int ng5_slice_list_lock(ng5_slice_list_t *list);
+
+int ng5_slice_list_unlock(ng5_slice_list_t *list);
 
 #endif

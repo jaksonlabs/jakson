@@ -26,7 +26,7 @@ int ng5_spinlock_lock(struct ng5_spinlock* spinlock)
     timestamp_t end = time_current_time_ms();
     float duration = (end-begin)/1000.0f;
     if (duration > 0.01f) {
-        warn(SPINLOCK_TAG, "spin lock acquisition takes exceptionally long: %f seconds", duration);
+        warn(SPINLOCK_TAG, "spin lock acquisition took exceptionally long: %f seconds", duration);
     }
 
     return STATUS_OK;

@@ -40,7 +40,7 @@ int ng5_vector_drop(ng5_vector_t* vec)
     return STATUS_OK;
 }
 
-int ng5_vector_is_empty(ng5_vector_t* vec)
+int ng5_vector_is_empty(const ng5_vector_t* vec)
 {
     check_non_null(vec)
     return vec->num_elems == 0 ? STATUS_TRUE : STATUS_FALSE;

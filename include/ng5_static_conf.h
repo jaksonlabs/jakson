@@ -20,4 +20,4 @@
 //#define NG5_CONFIG_TRACE_STRING_DIC_ALLOC
 
 #define NLOG_TRACE
-//#define NLOG_INFO
+#define NLOG_INFO
