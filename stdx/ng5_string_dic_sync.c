@@ -172,6 +172,7 @@ static int this_drop(struct string_dic *self)
     ng5_vector_drop(&extra->freelist);
     ng5_vector_drop(&extra->contents);
     string_lookup_drop(&extra->index);
+    allocator_free(&self->alloc, self->extra);
 
     unlock(self);
 
