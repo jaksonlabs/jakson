@@ -201,6 +201,8 @@ void experiments_hashing()
                 //string_dic_counters(&counters, &dic);
 
                 string_dic_free(&dic, ids);
+                string_dic_free(&dic, extracted_strings);
+                string_dic_free(&dic, ids_out);
                 string_dic_drop(&dic);
 
                 printf("%d;%d;%zu;%f;%f;%f;%zu\n", yago_percent[pi], sample, num_buckets, created_duration,

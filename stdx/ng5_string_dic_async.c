@@ -194,10 +194,10 @@ static int async_drop(struct string_dic *self)
 {
     check_tag(self->tag, STRING_DIC_ASYNC);
     async_extra_t *extra = async_extra_get(self);
-
     check_success(ng5_vector_drop(&extra->carriers));
     check_success(ng5_vector_drop(&extra->carrier_mapping));
     check_success(allocator_free(&self->alloc, extra));
+    allocator_free(&self->alloc, extra);
     return STATUS_OK;
 }
 
