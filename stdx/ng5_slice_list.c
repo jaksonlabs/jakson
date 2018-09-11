@@ -122,7 +122,7 @@ int ng5_slice_list_insert(ng5_slice_list_t *list, char ** strings, string_id_t *
             appender_bounds->max_hash                       = appender_bounds->max_hash > key_hash ?
                                                               appender_bounds->max_hash : key_hash;
             ng5_bloomfilter_set(appender_filter, &key_hash, sizeof(hash_t));
-            if (unlikely(++appender->num_elems == SLICE_KEY_COLUMN_MAX_ELEMS)) {
+            if (unlikely(++appender->num_elems + 1 == SLICE_KEY_COLUMN_MAX_ELEMS)) {
                 appender_seal(appender);
                 appender_new(list);
             }
