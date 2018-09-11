@@ -113,7 +113,7 @@ int ng5_slice_list_insert(ng5_slice_list_t *list, char ** strings, string_id_t *
             ng5_bloomfilter_t        * restrict appender_filter = filters + list->appender_idx;
             ng5_hash_bounds_t        * restrict appender_bounds = bounds + list->appender_idx;
 
-            debug("appender # of elems: %zu, limit: %zu", appender->num_elems, SLICE_KEY_COLUMN_MAX_ELEMS);
+            debug(NG5_SLICE_LIST_TAG, "appender # of elems: %zu, limit: %zu", appender->num_elems, SLICE_KEY_COLUMN_MAX_ELEMS);
             assert(appender->num_elems < SLICE_KEY_COLUMN_MAX_ELEMS);
             appender->key_column[appender->num_elems]       = key;
             appender->key_hash_column[appender->num_elems]  = key_hash;
