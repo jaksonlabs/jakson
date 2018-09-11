@@ -155,8 +155,6 @@ static int this_drop(struct string_dic *self)
 {
     check_tag(self->tag, STRING_DIC_NAIVE)
 
-    lock(self);
-
     struct naive_extra *extra = this_extra(self);
 
     struct entry *entries = (struct entry *) extra->contents.base;
@@ -173,9 +171,7 @@ static int this_drop(struct string_dic *self)
     ng5_vector_drop(&extra->contents);
     string_lookup_drop(&extra->index);
     allocator_free(&self->alloc, self->extra);
-
-    unlock(self);
-
+    
     return STATUS_OK;
 }
 
