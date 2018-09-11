@@ -183,6 +183,9 @@
 { }
 #endif
 
+#define zero_memory(dst, len)   \
+    memset((void *) dst, 0, len);
+
 #define warn(tag, msg, ...)                                                \
 {                                                                          \
     char buffer[1024];                                                     \

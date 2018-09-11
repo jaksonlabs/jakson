@@ -49,6 +49,11 @@ int ng5_slice_list_create(ng5_slice_list_t *list, const ng5_allocator_t *alloc, 
     ng5_vector_create(&list->filters, &list->alloc, sizeof(ng5_bloomfilter_t), slice_cap);
     ng5_vector_create(&list->bounds, &list->alloc, sizeof(ng5_hash_bounds_t), slice_cap);
 
+    zero_memory(ng5_vector_data(&list->slices), slice_cap * sizeof(ng5_slice_t));
+    zero_memory(ng5_vector_data(&list->descriptors), slice_cap * sizeof(ng5_slice_desc_t));
+    zero_memory(ng5_vector_data(&list->filters), slice_cap * sizeof(ng5_bloomfilter_t));
+    zero_memory(ng5_vector_data(&list->bounds), slice_cap * sizeof(ng5_hash_bounds_t));
+
     appender_new(list);
 
     return STATUS_OK;
