@@ -884,7 +884,7 @@ static int async_setup_carriers(struct string_dic *self, size_t capacity, size_t
     carrier_parallel_create_args_t create_args = {
             .local_capacity      = max(1, capacity / nthreads),
             .local_bucket_num    = local_bucket_num,
-            .local_bucket_cap    = 2, // TODO: check again: max(1, approx_num_unique_str / nthreads / local_bucket_num),
+            .local_bucket_cap    = max(1, min(3, approx_num_unique_str / nthreads / local_bucket_num)),
             .alloc               = &self->alloc
     };
 

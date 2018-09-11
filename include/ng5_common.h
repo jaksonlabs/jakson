@@ -43,6 +43,9 @@
 #define max(a,b)                  \
     ((b) > (a) ? (b) : (a))
 
+#define min(a,b)                  \
+    ((a) < (b) ? (a) : (b))
+
 #define cast(type, name, src)     \
       type name = (type) src
 
