@@ -453,10 +453,10 @@ static int smart_bucket_insert(struct simple_bucket* bucket, const char* restric
     if (handle.is_contained) {
         /* entry found by key */
         assert(value == handle.value);
-        debug(SMART_MAP_TAG, "debug(SMART_MAP_TAG, \"*** put *** '%s' into bucket [new]\", key);*** put *** '%s' into bucket [already contained]", key);
+        //debug(SMART_MAP_TAG, "debug(SMART_MAP_TAG, \"*** put *** '%s' into bucket [new]\", key);*** put *** '%s' into bucket [already contained]", key);
     } else {
         /* no entry found */
-        debug(SMART_MAP_TAG, "*** put *** '%s' into bucket [new]", key);
+        //debug(SMART_MAP_TAG, "*** put *** '%s' into bucket [new]", key);
         ng5_slice_list_insert(&bucket->slice_list, (char **) &key, &value, 1);
     }
 

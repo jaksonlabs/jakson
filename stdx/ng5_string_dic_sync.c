@@ -231,10 +231,6 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
             string_id_t        string_id;
             const char        *key = (const char *)(strings[i]);
 
-            if (strcmp("<Miki_Imai>", key) == 0) {
-                ; // TODO: remove
-            }
-
             bool               found = false;
             string_id_t        value;
 

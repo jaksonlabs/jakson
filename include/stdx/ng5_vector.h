@@ -1,4 +1,4 @@
-#include <ntsid.h>// file: vector.h
+// file: vector.h
 
 /**
  *  Copyright (C) 2018 Marcus Pinnecke
