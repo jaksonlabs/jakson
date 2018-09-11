@@ -21,3 +21,4 @@
 
 #define NLOG_TRACE
 #define NLOG_INFO
+#define NDEBUG
