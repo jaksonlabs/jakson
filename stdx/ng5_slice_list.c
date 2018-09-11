@@ -287,6 +287,8 @@ unused_fn uint32_t slice_find_scan_2(ng5_slice_t *slice, hash_t needle_hash, con
 
 static void appender_new(ng5_slice_list_t* list)
 {
+    /* ANTI-OPTIMIZATION: madvising sequential access to columns in slice decrease performance */
+
     /* the slice itself */
     ng5_slice_t  slice       = {
         .strat     = SLICE_LOOKUP_SCAN,
@@ -294,7 +296,7 @@ static void appender_new(ng5_slice_list_t* list)
         .cache_idx = (uint32_t) -1
     };
 
-    uint32_t     num_slices         =     ng5_vector_len(&list->slices);
+    uint32_t     num_slices         = ng5_vector_len(&list->slices);
     ng5_vector_push(&list->slices, &slice, 1);
 
     assert(SLICE_KEY_COLUMN_MAX_ELEMS > 0);
