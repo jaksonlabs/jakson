@@ -16,6 +16,33 @@
 
 #define get_hashcode(key)    hash_additive(strlen(key), key)
 
+/* OPTIMIZATION: we have only one item to find. Use branch-less scan instead of branching scan */
+/* OPTIMIZATION: find function as macro */
+#define slice_find_scan_default(slice, needle_hash, needle_str)                                                        \
+({                                                                                                                     \
+    trace(NG5_SLICE_LIST_TAG, "slice_find_scan_default for '%s' started", needle_str);                                 \
+    assert(slice);                                                slice_find_scan_default                              \
+    assert(needle_str);                                                                                                \
+                                                                                                                       \
+    register bool          continue_scan, key_match, key_hash_no_match, end_reached;                                   \
+    register bool          cache_on   = (slice->cache_idx != (uint32_t) -1);                                           \
+    register bool          hash_eq    = cache_on && (slice->key_hash_column[slice->cache_idx] == needle_hash);         \
+    register bool          cache_hit  = hash_eq && (strcmp(slice->key_column[slice->cache_idx], needle_str) == 0);     \
+    register uint_fast32_t i          = 0;                                                                             \
+    if (!cache_hit) {                                                                                                  \
+        do {                                                                                                           \
+            while ((key_hash_no_match = (slice->key_hash_column[i]!=needle_hash)) && i++<slice->num_elems) { ; }       \
+            end_reached    = ((i+1)>slice->num_elems);                                                                 \
+            key_match      = end_reached || (!key_hash_no_match && (strcmp(slice->key_column[i], needle_str)==0));     \
+            continue_scan  = !end_reached && !key_match;                                                               \
+            i             += continue_scan;                                                                            \
+        }                                                                                                              \
+        while (continue_scan);                                                                                         \
+        slice->cache_idx = !end_reached && key_match ? i : slice->cache_idx;                                           \
+    }                                                                                                                  \
+    cache_hit ? slice->cache_idx : (!end_reached && key_match ? i : slice->num_elems);                                 \
+})
+
 // ---------------------------------------------------------------------------------------------------------------------
 //
 //  H E L P E R
@@ -25,7 +52,6 @@
 static void appender_new(ng5_slice_list_t* list);
 static void appender_seal(ng5_slice_t* slice);
 
-uint32_t slice_find_scan_default(ng5_slice_t *slice, hash_t needle_hash, const char *needle_str);
 uint32_t slice_find_scan_2(ng5_slice_t *slice, hash_t needle_hash, const char *needle_str);
 
 static void lock(ng5_slice_list_t* list);
@@ -172,7 +198,7 @@ int ng5_slice_list_lookup_by_key(ng5_slice_handle_t *handle, ng5_slice_list_t *l
                 bool                        maybe_in     = ng5_bloomfilter_test(filter, &key_hash, sizeof(hash_t));
                 if (maybe_in) {
                     debug(NG5_SLICE_LIST_TAG, "ng5_slice_list_lookup_by_key key(%s) -> ?", needle);
-                    uint32_t                pair_pos     = slice_find_scan_default(slice, key_hash, needle);
+                    uint32_t                pair_pos     = (slice, key_hash, needle);
                     debug(NG5_SLICE_LIST_TAG, "ng5_slice_list_lookup_by_key key(%s) -> pos(%zu in slice #%zu)", needle, pair_pos, i);
                     if (pair_pos < slice->num_elems) {
                         /* pair is contained */
@@ -228,35 +254,7 @@ int ng5_slice_list_unlock(ng5_slice_list_t *list)
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-/* OPTIMIZATION: we have only one item to find. Use branch-less scan instead of branching scan */
-uint32_t slice_find_scan_default(ng5_slice_t *restrict slice, hash_t needle_hash, register const char *restrict needle_str)
-{
-    trace(NG5_SLICE_LIST_TAG, "slice_find_scan_default for '%s' started", needle_str);
-    assert(slice);
-    assert(needle_str);
 
-    register bool          continue_scan, key_match, key_hash_no_match, end_reached;
-    register bool          cache_on   = (slice->cache_idx != (uint32_t) -1);
-    register bool          hash_eq    = cache_on && (slice->key_hash_column[slice->cache_idx] == needle_hash);
-    register bool          cache_hit  = hash_eq && (strcmp(slice->key_column[slice->cache_idx], needle_str) == 0);
-    register uint_fast32_t i          = 0;
-
-    if (!cache_hit) {
-        do {
-            while ((key_hash_no_match = (slice->key_hash_column[i]!=needle_hash)) && i++<slice->num_elems)
-                ;
-            end_reached    = ((i+1)>slice->num_elems);
-            key_match      = end_reached || (!key_hash_no_match && (strcmp(slice->key_column[i], needle_str)==0));
-            continue_scan  = !end_reached && !key_match;
-            i             += continue_scan;
-        }
-        while (continue_scan);
-
-        slice->cache_idx = !end_reached && key_match ? i : slice->cache_idx;
-    }
-
-    return cache_hit ? slice->cache_idx : (!end_reached && key_match ? i : slice->num_elems);
-}
 
 unused_fn uint32_t slice_find_scan_2(ng5_slice_t *slice, hash_t needle_hash, const char *needle_str)
 {
