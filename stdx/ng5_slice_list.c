@@ -62,7 +62,7 @@ int ng5_slice_list_drop(ng5_slice_list_t *list)
     ng5_vector_drop(&list->slices);
     ng5_vector_drop(&list->descriptors);
     ng5_vector_drop(&list->bounds);
-    for (size_t i = 0; i < list->filters.num_elems) {
+    for (size_t i = 0; i < list->filters.num_elems; i++) {
         ng5_bloomfilter_t *filter = ng5_vector_get(&list->filters, i, ng5_bloomfilter_t);
         ng5_bloomfilter_drop(filter);
     }
