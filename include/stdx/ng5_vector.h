@@ -38,7 +38,7 @@ typedef struct ng5_vector_t
     /**
      *  Fixed number of bytes for a single element that should be stored in the vector
      */
-    uint8_t             elem_size;
+    size_t              elem_size;
 
     /**
      *  The number of elements currently stored in the vector

@@ -91,11 +91,13 @@ int ng5_slice_list_insert(ng5_slice_list_t *list, char ** strings, string_id_t *
 
     while (npairs--) {
 
-        const char                        * key               = *strings++;
+        const char                         *key               = *strings++;
         string_id_t                         value             = *ids++;
         hash_t                              key_hash          = get_hashcode(key);
         ng5_slice_handle_t                  handle;
         int                                 status;
+
+        assert (key);
 
         /* check whether the key-value pair is already contained in one slice */
         status = ng5_slice_list_lookup_by_key(&handle, list, key);
@@ -128,7 +130,8 @@ int ng5_slice_list_insert(ng5_slice_list_t *list, char ** strings, string_id_t *
             appender_bounds->max_hash                       = appender_bounds->max_hash > key_hash ?
                                                               appender_bounds->max_hash : key_hash;
             ng5_bloomfilter_set(appender_filter, &key_hash, sizeof(hash_t));
-            if (unlikely(++appender->num_elems + 1 >= SLICE_KEY_COLUMN_MAX_ELEMS)) {
+            appender->num_elems++;
+            if (unlikely(appender->num_elems == SLICE_KEY_COLUMN_MAX_ELEMS)) {
                 appender_seal(appender);
                 appender_new(list);
             }

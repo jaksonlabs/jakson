@@ -6,6 +6,7 @@
 #include <stdx/ng5_string_map.h>
 #include <stdx/ng5_time.h>
 #include <stdx/ng5_bolster.h>
+#include <stdx/ng5_slice_list.h>
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
@@ -884,7 +885,7 @@ static int async_setup_carriers(struct string_dic *self, size_t capacity, size_t
     carrier_parallel_create_args_t create_args = {
             .local_capacity      = max(1, capacity / nthreads),
             .local_bucket_num    = local_bucket_num,
-            .local_bucket_cap    = max(1, min(3, approx_num_unique_str / nthreads / local_bucket_num)),
+            .local_bucket_cap    = max(1, approx_num_unique_str / nthreads / local_bucket_num / SLICE_KEY_COLUMN_MAX_ELEMS),
             .alloc               = &self->alloc
     };
 
