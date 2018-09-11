@@ -57,7 +57,9 @@ int ng5_slice_list_create(ng5_slice_list_t *list, const ng5_allocator_t *alloc, 
 int ng5_slice_list_drop(ng5_slice_list_t *list)
 {
     unused(list);
-    NOT_YET_IMPLEMENTED
+//    NOT_YET_IMPLEMENTED
+    // TODO: implement
+    return STATUS_OK;
 }
 
 int ng5_slice_list_is_empty(const ng5_slice_list_t *list)
