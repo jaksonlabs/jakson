@@ -27,6 +27,8 @@
 #include "ng5_bloomfilter.h"
 #include "ng5_hash.h"
 
+NG5_BEGIN_DECL
+
 typedef struct ng5_slice_t ng5_slice_t;
 
 
@@ -148,5 +150,7 @@ int ng5_slice_list_remove(ng5_slice_list_t *list, ng5_slice_handle_t *handle);
 int ng5_slice_list_lock(ng5_slice_list_t *list);
 
 int ng5_slice_list_unlock(ng5_slice_list_t *list);
+
+NG5_END_DECL
 
 #endif

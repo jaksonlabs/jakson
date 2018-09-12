@@ -110,26 +110,26 @@ typedef struct carrier_extract_arg_t
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-static int async_drop(struct string_dic *self);
-static int async_insert(struct string_dic *self, string_id_t **out, char * const*strings, size_t num_strings, size_t nthreads);
-static int async_remove(struct string_dic *self, string_id_t *strings, size_t num_strings);
-static int async_locate_safe(struct string_dic* self, string_id_t** out, bool** found_mask,
+static int async_drop(struct Dictionary *self);
+static int async_insert(struct Dictionary *self, string_id_t **out, char * const*strings, size_t num_strings, size_t nthreads);
+static int async_remove(struct Dictionary *self, string_id_t *strings, size_t num_strings);
+static int async_locate_safe(struct Dictionary* self, string_id_t** out, bool** found_mask,
         size_t* num_not_found, char* const* keys, size_t num_keys);
-static int async_locate_fast(struct string_dic* self, string_id_t** out, char* const* keys,
+static int async_locate_fast(struct Dictionary* self, string_id_t** out, char* const* keys,
         size_t num_keys);
-static char **async_extract(struct string_dic *self, const string_id_t *ids, size_t num_ids);
-static int async_free(struct string_dic *self, void *ptr);
+static char **async_extract(struct Dictionary *self, const string_id_t *ids, size_t num_ids);
+static int async_free(struct Dictionary *self, void *ptr);
 
-static int async_reset_counters(struct string_dic *self);
-static int async_counters(struct string_dic *self, struct string_map_counters *counters);
+static int async_reset_counters(struct Dictionary *self);
+static int async_counters(struct Dictionary *self, struct string_map_counters *counters);
 
-static int async_lock(struct string_dic *self);
-static int async_unlock(struct string_dic *self);
+static int async_lock(struct Dictionary *self);
+static int async_unlock(struct Dictionary *self);
 
-static int async_extra_create(struct string_dic *self, size_t capacity, size_t num_index_buckets,
+static int async_extra_create(struct Dictionary *self, size_t capacity, size_t num_index_buckets,
         size_t approx_num_unique_str, size_t nthreads);
 
-static int async_setup_carriers(struct string_dic *self, size_t capacity, size_t num_index_buckets,
+static int async_setup_carriers(struct Dictionary *self, size_t capacity, size_t num_index_buckets,
         size_t approx_num_unique_str, size_t nthreads);
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -150,7 +150,7 @@ static int async_setup_carriers(struct string_dic *self, size_t capacity, size_t
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-int string_dic_create_async(struct string_dic* dic, size_t capacity, size_t num_index_buckets,
+int string_dic_create_async(struct Dictionary* dic, size_t capacity, size_t num_index_buckets,
         size_t approx_num_unique_str, size_t nthreads, const ng5_allocator_t* alloc)
 {
     check_success(allocator_this_or_default(&dic->alloc, alloc));
@@ -176,7 +176,7 @@ int string_dic_create_async(struct string_dic* dic, size_t capacity, size_t num_
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-static int async_extra_create(struct string_dic *self, size_t capacity, size_t num_index_buckets,
+static int async_extra_create(struct Dictionary *self, size_t capacity, size_t num_index_buckets,
         size_t approx_num_unique_str, size_t nthreads)
 {
     assert(self);
@@ -191,7 +191,7 @@ static int async_extra_create(struct string_dic *self, size_t capacity, size_t n
     return STATUS_OK;
 }
 
-static int async_drop(struct string_dic *self)
+static int async_drop(struct Dictionary *self)
 {
     check_tag(self->tag, STRING_DIC_ASYNC);
     async_extra_t *extra = async_extra_get(self);
@@ -214,7 +214,7 @@ void *carrier_remove_func(void *args)
     debug(STRING_DIC_ASYNC_TAG, "thread %zu spawned for remove task (%zu elements)", carrier_arg->carrier->id,
             ng5_vector_len(carrier_arg->local_ids));
     if (len > 0) {
-        struct string_dic    *dic         = &carrier_arg->carrier->local_dict;
+        struct Dictionary    *dic         = &carrier_arg->carrier->local_dict;
         string_id_t          *ids         = ng5_vector_all(carrier_arg->local_ids, string_id_t);
         carrier_arg->result               = string_dic_remove(dic, ids, len);
         debug(STRING_DIC_ASYNC_TAG, "thread %zu task done", carrier_arg->carrier->id);
@@ -384,7 +384,7 @@ static void compute_thread_assign(atomic_uint_fast16_t *str_carrier_mapping, ato
 
 }
 
-static int async_insert(struct string_dic *self, string_id_t **out, char * const*strings, size_t num_strings, size_t __nthreads)
+static int async_insert(struct Dictionary *self, string_id_t **out, char * const*strings, size_t num_strings, size_t __nthreads)
 {
     timestamp_t begin = time_current_time_ms();
     info(STRING_DIC_ASYNC_TAG, "insert operation invoked: %zu strings in total", num_strings)
@@ -509,7 +509,7 @@ static int async_insert(struct string_dic *self, string_id_t **out, char * const
     return STATUS_OK;
 }
 
-static int async_remove(struct string_dic *self, string_id_t *strings, size_t num_strings)
+static int async_remove(struct Dictionary *self, string_id_t *strings, size_t num_strings)
 {
     timestamp_t begin = time_current_time_ms();
     info(STRING_DIC_ASYNC_TAG, "remove operation started: %zu strings to remove", num_strings);
@@ -574,7 +574,7 @@ static int async_remove(struct string_dic *self, string_id_t *strings, size_t nu
     return STATUS_OK;
 }
 
-static int async_locate_safe(struct string_dic* self, string_id_t** out, bool** found_mask,
+static int async_locate_safe(struct Dictionary* self, string_id_t** out, bool** found_mask,
         size_t* num_not_found, char* const* keys, size_t num_keys)
 {
     timestamp_t begin = time_current_time_ms();
@@ -699,7 +699,7 @@ static int async_locate_safe(struct string_dic* self, string_id_t** out, bool** 
     return STATUS_OK;
 }
 
-static int async_locate_fast(struct string_dic* self, string_id_t** out, char* const* keys,
+static int async_locate_fast(struct Dictionary* self, string_id_t** out, char* const* keys,
         size_t num_keys)
 {
     check_tag(self->tag, STRING_DIC_ASYNC);
@@ -721,7 +721,7 @@ static int async_locate_fast(struct string_dic* self, string_id_t** out, char* c
     return result;
 }
 
-static char **async_extract(struct string_dic *self, const string_id_t *ids, size_t num_ids)
+static char **async_extract(struct Dictionary *self, const string_id_t *ids, size_t num_ids)
 {
     timestamp_t begin = time_current_time_ms();
     info(STRING_DIC_ASYNC_TAG, "extract (safe) operation started: %zu strings to extract", num_ids)
@@ -801,7 +801,7 @@ static char **async_extract(struct string_dic *self, const string_id_t *ids, siz
     return global_result;
 }
 
-static int async_free(struct string_dic *self, void *ptr)
+static int async_free(struct Dictionary *self, void *ptr)
 {
     check_tag(self->tag, STRING_DIC_ASYNC);
     allocator_free(&self->alloc, ptr);
@@ -809,7 +809,7 @@ static int async_free(struct string_dic *self, void *ptr)
 }
 
 
-static int async_reset_counters(struct string_dic *self)
+static int async_reset_counters(struct Dictionary *self)
 {
     check_tag(self->tag, STRING_DIC_ASYNC);
 
@@ -828,7 +828,7 @@ static int async_reset_counters(struct string_dic *self)
     return STATUS_OK;
 }
 
-static int async_counters(struct string_dic *self, struct string_map_counters *counters)
+static int async_counters(struct Dictionary *self, struct string_map_counters *counters)
 {
     check_tag(self->tag, STRING_DIC_ASYNC);
 
@@ -875,7 +875,7 @@ static void carrier_parallel_create(const void *restrict start, size_t width, si
 }
 
 
-static int async_setup_carriers(struct string_dic *self, size_t capacity, size_t num_index_buckets,
+static int async_setup_carriers(struct Dictionary *self, size_t capacity, size_t num_index_buckets,
         size_t approx_num_unique_str, size_t nthreads)
 {
     async_extra_t *extra               = async_extra_get(self);
@@ -900,14 +900,14 @@ static int async_setup_carriers(struct string_dic *self, size_t capacity, size_t
     return STATUS_OK;
 }
 
-static int async_lock(struct string_dic *self)
+static int async_lock(struct Dictionary *self)
 {
     async_extra_t *extra = async_extra_get(self);
     check_success(ng5_spinlock_lock(&extra->spinlock));
     return STATUS_OK;
 }
 
-static int async_unlock(struct string_dic *self)
+static int async_unlock(struct Dictionary *self)
 {
     async_extra_t *extra = async_extra_get(self);
     check_success(ng5_spinlock_unlock(&extra->spinlock));

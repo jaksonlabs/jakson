@@ -21,7 +21,7 @@
 #define slice_find_scan_default(slice, needle_hash, needle_str)                                                        \
 ({                                                                                                                     \
     trace(NG5_SLICE_LIST_TAG, "slice_find_scan_default for '%s' started", needle_str);                                 \
-    assert(slice);                                                slice_find_scan_default                              \
+    assert(slice);                                                                                                     \
     assert(needle_str);                                                                                                \
                                                                                                                        \
     register bool          continue_scan, key_match, key_hash_no_match, end_reached;                                   \
@@ -43,6 +43,10 @@
     cache_hit ? slice->cache_idx : (!end_reached && key_match ? i : slice->num_elems);                                 \
 })
 
+#define slice_find_besearch(slice, needle_hash, needle_str)                                                            \
+({                                                                                                                     \
+    0; \
+})
 // ---------------------------------------------------------------------------------------------------------------------
 //
 //  H E L P E R
@@ -198,7 +202,19 @@ int ng5_slice_list_lookup_by_key(ng5_slice_handle_t *handle, ng5_slice_list_t *l
                 bool                        maybe_in     = ng5_bloomfilter_test(filter, &key_hash, sizeof(hash_t));
                 if (maybe_in) {
                     debug(NG5_SLICE_LIST_TAG, "ng5_slice_list_lookup_by_key key(%s) -> ?", needle);
-                    uint32_t                pair_pos     = (slice, key_hash, needle);
+                    uint32_t                pair_pos;
+
+                    switch(slice->strat) {
+                    case SLICE_LOOKUP_SCAN:
+                                            pair_pos     = slice_find_scan_default(slice, key_hash, needle);
+                        break;
+                    case SLICE_LOOKUP_BESEARCH:
+                                            pair_pos     = slice_find_besearch(slice, key_hash, needle);
+                        break;
+                    default:
+                        panic("unknown slice find strategy");
+                    }
+
                     debug(NG5_SLICE_LIST_TAG, "ng5_slice_list_lookup_by_key key(%s) -> pos(%zu in slice #%zu)", needle, pair_pos, i);
                     if (pair_pos < slice->num_elems) {
                         /* pair is contained */
@@ -353,6 +369,10 @@ static void appender_new(ng5_slice_list_t* list)
 static void appender_seal(ng5_slice_t* slice)
 {
     unused(slice);
+  //  slice->cache_idx = 0;
+  //  slice_sort(slice);
+  //  slice->strat = SLICE_LOOKUP_BESEARCH;
+
     // TODO: sealing means (radix) sort and then replace 'find' with bsearch or something. Not yet implemented: sealed slices are also search in a linear fashion
 }
 

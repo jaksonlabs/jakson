@@ -23,31 +23,31 @@ struct naive_extra {
     struct ng5_spinlock                     lock;
 };
 
-static int this_drop(struct string_dic *self);
-static int this_insert(struct string_dic *self, string_id_t **out, char * const*strings, size_t num_strings,
+static int this_drop(struct Dictionary *self);
+static int this_insert(struct Dictionary *self, string_id_t **out, char * const*strings, size_t num_strings,
         size_t nthreads);
-static int this_remove(struct string_dic *self, string_id_t *strings, size_t num_strings);
-static int this_locate_safe(struct string_dic* self, string_id_t** out, bool** found_mask,
+static int this_remove(struct Dictionary *self, string_id_t *strings, size_t num_strings);
+static int this_locate_safe(struct Dictionary* self, string_id_t** out, bool** found_mask,
         size_t* num_not_found, char* const* keys, size_t num_keys);
-static int this_locate_fast(struct string_dic* self, string_id_t** out, char* const* keys,
+static int this_locate_fast(struct Dictionary* self, string_id_t** out, char* const* keys,
         size_t num_keys);
-static char **this_extract(struct string_dic *self, const string_id_t *ids, size_t num_ids);
-static int this_free(struct string_dic *self, void *ptr);
+static char **this_extract(struct Dictionary *self, const string_id_t *ids, size_t num_ids);
+static int this_free(struct Dictionary *self, void *ptr);
 
-static int this_reset_counters(struct string_dic *self);
-static int this_counters(struct string_dic *self, struct string_map_counters *counters);
+static int this_reset_counters(struct Dictionary *self);
+static int this_counters(struct Dictionary *self, struct string_map_counters *counters);
 
-static void lock(struct string_dic *self);
-static void unlock(struct string_dic *self);
+static void lock(struct Dictionary *self);
+static void unlock(struct Dictionary *self);
 
-static int extra_create(struct string_dic *self, size_t capacity, size_t num_index_buckets,
+static int extra_create(struct Dictionary *self, size_t capacity, size_t num_index_buckets,
         size_t num_index_bucket_cap, size_t nthreads);
-static struct naive_extra *this_extra(struct string_dic *self);
+static struct naive_extra *this_extra(struct Dictionary *self);
 
-static int freelist_pop(string_id_t *out, struct string_dic *self);
-static int freelist_push(struct string_dic *self, string_id_t idx);
+static int freelist_pop(string_id_t *out, struct Dictionary *self);
+static int freelist_push(struct Dictionary *self, string_id_t idx);
 
-int string_dic_create_sync(struct string_dic* dic, size_t capacity, size_t num_index_buckets,
+int string_dic_create_sync(struct Dictionary* dic, size_t capacity, size_t num_index_buckets,
         size_t num_index_bucket_cap, size_t nthreads, const ng5_allocator_t* alloc)
 {
     check_non_null(dic);
@@ -69,21 +69,21 @@ int string_dic_create_sync(struct string_dic* dic, size_t capacity, size_t num_i
     return STATUS_OK;
 }
 
-static void lock(struct string_dic *self)
+static void lock(struct Dictionary *self)
 {
     assert(self->tag == STRING_DIC_NAIVE);
     struct naive_extra *extra = this_extra(self);
     ng5_spinlock_lock(&extra->lock);
 }
 
-static void unlock(struct string_dic *self)
+static void unlock(struct Dictionary *self)
 {
     assert(self->tag == STRING_DIC_NAIVE);
     struct naive_extra *extra = this_extra(self);
     ng5_spinlock_unlock(&extra->lock);
 }
 
-static int extra_create(struct string_dic *self, size_t capacity, size_t num_index_buckets,
+static int extra_create(struct Dictionary *self, size_t capacity, size_t num_index_buckets,
         size_t num_index_bucket_cap, size_t nthreads)
 {
     self->extra = allocator_malloc(&self->alloc, sizeof(struct naive_extra));
@@ -113,13 +113,13 @@ static int extra_create(struct string_dic *self, size_t capacity, size_t num_ind
     return STATUS_OK;
 }
 
-static struct naive_extra *this_extra(struct string_dic *self)
+static struct naive_extra *this_extra(struct Dictionary *self)
 {
     assert (self->tag == STRING_DIC_NAIVE);
     return (struct naive_extra *) self->extra;
 }
 
-static int freelist_pop(string_id_t *out, struct string_dic *self)
+static int freelist_pop(string_id_t *out, struct Dictionary *self)
 {
     assert (self->tag == STRING_DIC_NAIVE);
     struct naive_extra *extra = this_extra(self);
@@ -142,7 +142,7 @@ static int freelist_pop(string_id_t *out, struct string_dic *self)
     return STATUS_OK;
 }
 
-static int freelist_push(struct string_dic *self, string_id_t idx)
+static int freelist_push(struct Dictionary *self, string_id_t idx)
 {
     assert (self->tag == STRING_DIC_NAIVE);
     struct naive_extra *extra = this_extra(self);
@@ -151,7 +151,7 @@ static int freelist_push(struct string_dic *self, string_id_t idx)
     return STATUS_OK;
 }
 
-static int this_drop(struct string_dic *self)
+static int this_drop(struct Dictionary *self)
 {
     check_tag(self->tag, STRING_DIC_NAIVE)
 
@@ -175,7 +175,7 @@ static int this_drop(struct string_dic *self)
     return STATUS_OK;
 }
 
-static int this_insert(struct string_dic *self, string_id_t **out, char * const*strings, size_t num_strings,
+static int this_insert(struct Dictionary *self, string_id_t **out, char * const*strings, size_t num_strings,
         size_t nthreads)
 {
     trace(STRING_DIC_SYNC_TAG, "local string dictionary insertion invoked for %zu strings", num_strings);
@@ -283,7 +283,7 @@ static int this_insert(struct string_dic *self, string_id_t **out, char * const*
 
 }
 
-static int this_remove(struct string_dic *self, string_id_t *strings, size_t num_strings)
+static int this_remove(struct Dictionary *self, string_id_t *strings, size_t num_strings)
 {
     check_non_null(self);
     check_non_null(strings);
@@ -327,7 +327,7 @@ static int this_remove(struct string_dic *self, string_id_t *strings, size_t num
     return STATUS_OK;
 }
 
-static int this_locate_safe(struct string_dic* self, string_id_t** out, bool** found_mask,
+static int this_locate_safe(struct Dictionary* self, string_id_t** out, bool** found_mask,
         size_t* num_not_found, char* const* keys, size_t num_keys)
 {
     timestamp_t begin = time_current_time_ms();
@@ -354,7 +354,7 @@ static int this_locate_safe(struct string_dic* self, string_id_t** out, bool** f
     return status;
 }
 
-static int this_locate_fast(struct string_dic* self, string_id_t** out, char* const* keys,
+static int this_locate_fast(struct Dictionary* self, string_id_t** out, char* const* keys,
         size_t num_keys)
 {
     check_tag(self->tag, STRING_DIC_NAIVE)
@@ -371,7 +371,7 @@ static int this_locate_fast(struct string_dic* self, string_id_t** out, char* co
     return  result;
 }
 
-static char **this_extract(struct string_dic *self, const string_id_t *ids, size_t num_ids)
+static char **this_extract(struct Dictionary *self, const string_id_t *ids, size_t num_ids)
 {
     if (unlikely(!self || !ids || num_ids == 0 || self->tag != STRING_DIC_NAIVE)) {
         return NULL;
@@ -404,7 +404,7 @@ static char **this_extract(struct string_dic *self, const string_id_t *ids, size
     return result;
 }
 
-static int this_free(struct string_dic *self, void *ptr)
+static int this_free(struct Dictionary *self, void *ptr)
 {
     unused(self);
 
@@ -418,7 +418,7 @@ static int this_free(struct string_dic *self, void *ptr)
     return allocator_free(&hashtable_alloc, ptr);
 }
 
-static int this_reset_counters(struct string_dic *self)
+static int this_reset_counters(struct Dictionary *self)
 {
     check_tag(self->tag, STRING_DIC_NAIVE)
     struct naive_extra *extra = this_extra(self);
@@ -426,7 +426,7 @@ static int this_reset_counters(struct string_dic *self)
     return STATUS_OK;
 }
 
-static int this_counters(struct string_dic *self, struct string_map_counters *counters)
+static int this_counters(struct Dictionary *self, struct string_map_counters *counters)
 {
     check_tag(self->tag, STRING_DIC_NAIVE)
     struct naive_extra *extra = this_extra(self);

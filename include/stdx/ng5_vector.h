@@ -25,6 +25,8 @@
 #include <ng5_common.h>
 #include <stdx/ng5_allocator.h>
 
+NG5_BEGIN_DECL
+
 /**
  * An implementation of the concrete data type Vector, a resizeable dynamic array.
  */
@@ -206,5 +208,7 @@ int ng5_vector_set(ng5_vector_t* vec, size_t pos, const void* data);
 const void *ng5_vector_data(const ng5_vector_t* vec);
 
 #define ng5_vector_all(vec, type) (type *) ng5_vector_data(vec)
+
+NG5_END_DECL
 
 #endif

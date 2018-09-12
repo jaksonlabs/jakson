@@ -23,6 +23,8 @@
 #include <ng5_common.h>
 #include <stdx/ng5_vector.h>
 
+NG5_BEGIN_DECL
+
 typedef struct ng5_bitset_t
 {
     ng5_vector_t of_type(uint64_t) data;
@@ -40,5 +42,7 @@ int ng5_bitset_clear(ng5_bitset_t *bitset);
 int ng5_bitset_set(ng5_bitset_t *bitset, uint16_t bit_pos, bool on);
 
 bool ng5_bitset_get(ng5_bitset_t *bitset, uint16_t bit_pos);
+
+NG5_END_DECL
 
 #endif

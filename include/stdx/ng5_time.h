@@ -20,8 +20,14 @@
 #ifndef _NG5_TIME
 #define _NG5_TIME
 
+#include <ng5_common.h>
+
+NG5_BEGIN_DECL
+
 typedef long long timestamp_t;
 
 timestamp_t time_current_time_ms();
+
+NG5_END_DECL
 
 #endif

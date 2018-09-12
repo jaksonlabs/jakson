@@ -20,6 +20,8 @@
 #include <ng5_common.h>
 #include <stdlib.h>
 
+NG5_BEGIN_DECL
+
 #ifndef NG5_SORT
 #define NG5_SORT
 
@@ -159,5 +161,7 @@ static double ng5_statistics_avg(const size_t *elements, size_t num_elements)
 {
     return ng5_statistics_sum(elements, num_elements) / (double) num_elements;
 }
+
+NG5_END_DECL
 
 #endif

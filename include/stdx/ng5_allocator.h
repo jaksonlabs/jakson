@@ -22,6 +22,8 @@
 
 #include <ng5_common.h>
 
+NG5_BEGIN_DECL
+
 // ---------------------------------------------------------------------------------------------------------------------
 //
 //  M A C R O S
@@ -97,10 +99,10 @@ int allocator_default(ng5_allocator_t *alloc);
  * Creates a new allocator 'dst' with default constructor (in case of 'this' is null), or as copy of
  * 'this' (in case 'this' is non-null)
  * @param dst non-null destination in which the allocator should be stored
- * @param this possibly null-pointer to an allocator implementation
+ * @param self possibly null-pointer to an allocator implementation
  * @return a value unequal to STATUS_OK in case the operation is not successful
  */
-int allocator_this_or_default(ng5_allocator_t *dst, const ng5_allocator_t *this);
+int allocator_this_or_default(ng5_allocator_t *dst, const ng5_allocator_t *self);
 
 /**
  * Invokes memory allocation of 'size' bytes using the allocator 'alloc'.
@@ -141,5 +143,7 @@ int  allocator_free(ng5_allocator_t *alloc, void *ptr);
  * @return STATUS_OK in case of success, otherwise a value unequal to STATUS_OK describing the error
  */
 int allocator_clone(ng5_allocator_t *dst, const ng5_allocator_t *src);
+
+NG5_END_DECL
 
 #endif

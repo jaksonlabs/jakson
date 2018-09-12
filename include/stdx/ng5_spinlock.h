@@ -25,6 +25,8 @@
 #include <ng5_common.h>
 #include <stdx/ng5_vector.h>
 
+NG5_BEGIN_DECL
+
 typedef struct ng5_spinlock
 {
   atomic_flag lock;
@@ -37,5 +39,6 @@ int ng5_spinlock_lock(struct ng5_spinlock* spinlock);
 
 int ng5_spinlock_unlock(struct ng5_spinlock* spinlock);
 
+NG5_END_DECL
 
 #endif

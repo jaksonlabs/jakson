@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(ng5 C)
+project(ng5 C CXX)
 
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
@@ -10,8 +10,8 @@ set (CMAKE_C_STANDARD 11)
 
 file(MAKE_DIRECTORY ${CMAKE_HOME_DIRECTORY}/build)
 
-#set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
+#set(CMAKE_BUILD_TYPE Release)
 
 set (CMAKE_C_COMPILER             "/usr/bin/clang")
 set (CMAKE_C_FLAGS                "-Wall -std=c11 -Wextra -Werror")
@@ -86,6 +86,9 @@ set(SORUCE_FILES
 
 
 add_executable(ng5 main.c ${SORUCE_FILES})
+
+add_executable(compare_cpp benches/baseline/compare_cpp_dic.cpp ${SORUCE_FILES})
+set_property(TARGET compare_cpp PROPERTY CXX_STANDARD 11)
 
 target_link_libraries(ng5 ${LIBS})
 

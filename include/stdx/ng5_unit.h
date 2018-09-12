@@ -22,6 +22,8 @@
 
 #include <ng5_status.h>
 
+NG5_BEGIN_DECL
+
 /**
  * A floating point number between 0 and 1
  */
@@ -33,5 +35,7 @@ typedef float unit_t;
         return STATUS_UNIT_OUTOFBOUNDS;     \
     }                                       \
 }
+
+NG5_END_DECL
 
 #endif

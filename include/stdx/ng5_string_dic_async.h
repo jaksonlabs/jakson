@@ -22,8 +22,12 @@
 
 #include <stdx/ng5_string_dic.h>
 
+NG5_BEGIN_DECL
+
 /* OPTIMIZATION: use "approx_num_unique_str" to compute per-thread-per-bucket capacity assuming equal distribution */
-int string_dic_create_async(struct string_dic* dic, size_t capacity, size_t num_index_buckets,
+int string_dic_create_async(struct Dictionary* dic, size_t capacity, size_t num_index_buckets,
         size_t approx_num_unique_str, size_t nthreads, const ng5_allocator_t* alloc);
+
+NG5_END_DECL
 
 #endif

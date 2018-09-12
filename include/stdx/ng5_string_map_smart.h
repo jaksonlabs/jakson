@@ -30,6 +30,8 @@
 #include <ng5_common.h>
 #include <stdx/ng5_string_map.h>
 
+NG5_BEGIN_DECL
+
 // ---------------------------------------------------------------------------------------------------------------------
 //
 //  I N T E R F A C E   P R O T O T Y P E S
@@ -41,5 +43,7 @@
  */
 int string_hashtable_create_scan1_cache(struct string_map* map, const ng5_allocator_t* alloc, size_t num_buckets,
         size_t cap_buckets);
+
+NG5_END_DECL
 
 #endif

@@ -29,7 +29,7 @@ struct roadfire_extra
   struct roadfire_conf                                    conf;
 
   /* string dictionary to manage string encoding */
-  struct string_dic                                       dictionary;
+  struct Dictionary                                       dictionary;
 
   /* register for results of requests of different kind; memory is recycled if reasonable */
   struct slot_vector of_type (struct ng5_vector *)            result_register;

@@ -23,12 +23,12 @@ int allocator_default(ng5_allocator_t *alloc)
     }
 }
 
-int allocator_this_or_default(ng5_allocator_t *dst, const ng5_allocator_t *this)
+int allocator_this_or_default(ng5_allocator_t *dst, const ng5_allocator_t *self)
 {
-    if (!this) {
+    if (!self) {
         return allocator_default(dst);
     } else {
-        return allocator_clone(dst, this);
+        return allocator_clone(dst, self);
     }
 }
 

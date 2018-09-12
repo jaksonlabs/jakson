@@ -20,6 +20,14 @@
 #ifndef _NG5_STDINC
 #define _NG5_STDINC
 
+#ifdef __cplusplus
+    #define NG5_BEGIN_DECL  extern "C" {
+    #define NG5_END_DECL    }
+#else
+    #define NG5_BEGIN_DECL
+    #define NG5_END_DECL
+#endif
+
 #include <stdbool.h>
 #include <stddef.h>
 #include <string.h>

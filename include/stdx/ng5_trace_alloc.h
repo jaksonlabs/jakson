@@ -21,6 +21,9 @@
 #define NG5_TRACE_ALLOC
 
 #include <stdx/ng5_allocator.h>
+
+NG5_BEGIN_DECL
+
 /**
  * Returns standard c-lib allocator (malloc, realloc, free) that collects some statistics
  * for inspection purposes. Generally, this implementation is slow and should not be used
@@ -30,5 +33,7 @@
  * @return STATUS_OK in case of non-null parameter alloc, STATUS_NULLPTR otherwise
  */
 int allocator_trace(ng5_allocator_t *alloc);
+
+NG5_END_DECL
 
 #endif

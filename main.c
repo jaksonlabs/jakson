@@ -67,7 +67,7 @@ ng5_vector_t *to_string_list(const char *contents)
 }
 
 #define NUM_SAMPLES 2
-#define NTHREADS    8
+#define NTHREADS    64
 
 /*void roadfire_test() {
     struct storage_engine engine;
@@ -139,7 +139,7 @@ void experiments_hashing()
         fprintf(stderr, "... %fsec\n", (convert_end-convert_begin)/1000.0f);
         fflush(stderr);
 
-        struct string_dic dic;
+        struct Dictionary dic;
 
         for (size_t num_buckets = 50000; num_buckets<=50000; num_buckets += 50000) {
             for (int sample = 0; sample<NUM_SAMPLES; sample++) {

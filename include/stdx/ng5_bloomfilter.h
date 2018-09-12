@@ -23,6 +23,8 @@
 #include <ng5_common.h>
 #include "ng5_bitset.h"
 
+NG5_BEGIN_DECL
+
 typedef ng5_bitset_t ng5_bloomfilter_t;
 
 int ng5_bloomfilter_create(ng5_bloomfilter_t *filter, size_t size);
@@ -79,5 +81,7 @@ unsigned ng5_bloomfilter_nhashes();
     ng5_bitset_set(filter, b3, true);                       \
     (b0set && b1set && b2set && b3set);                     \
 })
+
+NG5_END_DECL
 
 #endif

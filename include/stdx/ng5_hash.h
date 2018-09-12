@@ -23,6 +23,8 @@
 
 #include <ng5_common.h>
 
+NG5_BEGIN_DECL
+
 typedef size_t hash_t;
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -237,5 +239,7 @@ typedef size_t hash_t;
     }                                                       \
     hash;                                                   \
 })
+
+NG5_END_DECL
 
 #endif

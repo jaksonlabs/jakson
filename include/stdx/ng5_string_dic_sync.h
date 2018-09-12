@@ -22,7 +22,11 @@
 
 #include <stdx/ng5_string_dic.h>
 
-int string_dic_create_sync(struct string_dic* dic, size_t capacity, size_t num_index_buckets,
+NG5_BEGIN_DECL
+
+int string_dic_create_sync(struct Dictionary* dic, size_t capacity, size_t num_index_buckets,
         size_t num_index_bucket_cap, size_t nthreads, const ng5_allocator_t* alloc);
+
+NG5_END_DECL
 
 #endif

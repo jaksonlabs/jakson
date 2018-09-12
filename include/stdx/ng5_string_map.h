@@ -56,6 +56,8 @@
 #include <stdx/ng5_unit.h>
 #include "ng5_hash.h"
 
+NG5_BEGIN_DECL
+
 // ---------------------------------------------------------------------------------------------------------------------
 //
 //  S T A T I C   C O N F I G U R A T I O N
@@ -475,5 +477,7 @@ inline static int string_map_counters_add(struct string_map_counters *dst_lhs, c
     dst_lhs->num_bucket_cache_search_miss += rhs->num_bucket_cache_search_miss;
     return STATUS_OK;
 }
+
+NG5_END_DECL
 
 #endif

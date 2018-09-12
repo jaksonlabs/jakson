@@ -23,6 +23,8 @@
 #include <ng5_common.h>
 #include <stdx/ng5_vector.h>
 
+NG5_BEGIN_DECL
+
 typedef size_t slot_vector_slot_t;
 
 struct slot_vector
@@ -50,5 +52,6 @@ size_t slot_vector_len(const struct slot_vector *vec);
 
 size_t slot_vector_cap(const struct slot_vector *vec);
 
+NG5_END_DECL
 
 #endif

@@ -22,13 +22,13 @@
 #include <ng5_common.h>
 #include <stdlib.h>
 
+NG5_BEGIN_DECL
+
 // ---------------------------------------------------------------------------------------------------------------------
 // C O N S T A N T S
 // ---------------------------------------------------------------------------------------------------------------------
 
 #define BOLSTER_MSG_UNKNOWN_HINT "Unknown threading hint"
-
-__BEGIN_DECLS
 
 // ---------------------------------------------------------------------------------------------------------------------
 // D A T A   T Y P E S
@@ -853,6 +853,6 @@ inline static int __parallel_filter_early(void *restrict result, size_t *restric
     return STATUS_OK;
 }
 
-__END_DECLS
+NG5_END_DECL
 
 #endif //BOLSTER_H
