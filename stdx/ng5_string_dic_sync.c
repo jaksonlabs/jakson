@@ -37,6 +37,8 @@ static int this_free(struct Dictionary *self, void *ptr);
 static int this_reset_counters(struct Dictionary *self);
 static int this_counters(struct Dictionary *self, struct string_map_counters *counters);
 
+static int this_num_distinct(struct Dictionary *self, size_t *num);
+
 static void lock(struct Dictionary *self);
 static void unlock(struct Dictionary *self);
 
@@ -64,6 +66,7 @@ int string_dic_create_sync(struct Dictionary* dic, size_t capacity, size_t num_i
     dic->free           = this_free;
     dic->reset_counters = this_reset_counters;
     dic->counters       = this_counters;
+    dic->num_distinct   = this_num_distinct;
 
     check_success(extra_create(dic, capacity, num_index_buckets, num_index_bucket_cap, nthreads));
     return STATUS_OK;
@@ -431,5 +434,13 @@ static int this_counters(struct Dictionary *self, struct string_map_counters *co
     check_tag(self->tag, STRING_DIC_NAIVE)
     struct naive_extra *extra = this_extra(self);
     check_success(string_lookup_counters(counters, &extra->index));
+    return STATUS_OK;
+}
+
+static int this_num_distinct(struct Dictionary *self, size_t *num)
+{
+    check_tag(self->tag, STRING_DIC_NAIVE)
+    struct naive_extra *extra = this_extra(self);
+    *num = ng5_vector_len(&extra->contents);
     return STATUS_OK;
 }

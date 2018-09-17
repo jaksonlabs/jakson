@@ -120,6 +120,8 @@ static int async_locate_fast(struct Dictionary* self, string_id_t** out, char* c
 static char **async_extract(struct Dictionary *self, const string_id_t *ids, size_t num_ids);
 static int async_free(struct Dictionary *self, void *ptr);
 
+static int async_num_distinct(struct Dictionary *self, size_t *num);
+
 static int async_reset_counters(struct Dictionary *self);
 static int async_counters(struct Dictionary *self, struct string_map_counters *counters);
 
@@ -165,6 +167,7 @@ int string_dic_create_async(struct Dictionary* dic, size_t capacity, size_t num_
     dic->free           = async_free;
     dic->reset_counters = async_reset_counters;
     dic->counters       = async_counters;
+    dic->num_distinct   = async_num_distinct;
 
     check_success(async_extra_create(dic, capacity, num_index_buckets, approx_num_unique_str, nthreads));
     return STATUS_OK;
@@ -805,6 +808,26 @@ static int async_free(struct Dictionary *self, void *ptr)
 {
     check_tag(self->tag, STRING_DIC_ASYNC);
     allocator_free(&self->alloc, ptr);
+    return STATUS_OK;
+}
+
+static int async_num_distinct(struct Dictionary *self, size_t *num)
+{
+    check_tag(self->tag, STRING_DIC_ASYNC);
+    async_lock(self);
+
+    struct async_extra  *extra                   = async_extra_get(self);
+    size_t               num_carriers            = ng5_vector_len(&extra->carriers);
+    carrier_t           *carriers                = ng5_vector_all(&extra->carriers, carrier_t);
+    size_t               num_distinct            = 0;
+    while(num_carriers--) {
+        size_t local_distinct;
+        string_dic_num_distinct_values(&local_distinct, &carriers->local_dict);
+        num_distinct += local_distinct;
+        carriers++;
+    }
+    *num = num_distinct;
+    async_unlock(self);
     return STATUS_OK;
 }
 

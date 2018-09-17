@@ -112,6 +112,11 @@ typedef struct Dictionary
      * Get internal statistic counters
      */
     int                  (*counters)(struct Dictionary *self, struct string_map_counters *counters);
+
+    /**
+     * Returns number of distinct strings stored in the dictionary
+     */
+    int                 (*num_distinct)(struct Dictionary *self, size_t *num);
 } string_dic_t;
 
 /**
@@ -248,6 +253,15 @@ static int string_dic_free(struct Dictionary* dic, void* ptr)
     check_non_null(ptr);
     assert(dic->free);
     return dic->free(dic, ptr);
+}
+
+unused_fn
+static int string_dic_num_distinct_values(size_t *num, struct Dictionary* dic)
+{
+    check_non_null(num);
+    check_non_null(dic);
+    assert(dic->num_distinct);
+    return dic->num_distinct(dic, num);
 }
 
 NG5_END_DECL

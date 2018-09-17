@@ -67,7 +67,7 @@ ng5_vector_t *to_string_list(const char *contents)
 }
 
 #define NUM_SAMPLES 2
-#define NTHREADS    64
+#define NTHREADS    1
 
 /*void roadfire_test() {
     struct storage_engine engine;
@@ -78,13 +78,13 @@ ng5_vector_t *to_string_list(const char *contents)
 
 void experiments_hashing()
 {
-    printf("yago_percent;sample;num_buckets;time_created_sec;time_inserted_sec;time_bulk_sum_created_inserted;num_strings\n");
+    printf("yago_percent;sample;num_buckets;time_created_sec;time_inserted_sec;time_bulk_sum_created_inserted;num_strings;num_distinct_strings\n");
 
     const char* paths[11];
-    paths[0] = "/Users/marcus/Downloads/50.txt";
+    paths[0] = "/Volumes/PINNECKE EXT/science/cleaned_datasets/tpch-sf10-cleaned.txt.list";
 
    //      paths[0] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/100.txt";
-       paths[0] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-15pc-stringlist.txt";
+   //    paths[0] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-15pc-stringlist.txt";
        paths[1] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-19pc-stringlist.txt";
        paths[2] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-27pc-stringlist.txt";
        paths[3] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-35pc-stringlist.txt";
@@ -200,14 +200,19 @@ void experiments_hashing()
                 //struct string_lookup_counters counters;
                 //string_dic_counters(&counters, &dic);
 
+                size_t num_distinct;
+                string_dic_num_distinct_values(&num_distinct, &dic);
+
                 string_dic_free(&dic, ids);
                 string_dic_free(&dic, extracted_strings);
                 string_dic_free(&dic, ids_out);
                 string_dic_drop(&dic);
 
-                printf("%d;%d;%zu;%f;%f;%f;%zu\n", yago_percent[pi], sample, num_buckets, created_duration,
+
+
+                printf("%d;%d;%zu;%f;%f;%f;%zu;%zu\n", yago_percent[pi], sample, num_buckets, created_duration,
                         insert_duration,
-                        (created_duration+insert_duration), ng5_vector_len(lines));
+                        (created_duration+insert_duration), ng5_vector_len(lines), num_distinct);
 
                 fflush(stderr);
                 fflush(stdout);
