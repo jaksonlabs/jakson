@@ -119,6 +119,7 @@ void experiments_hashing()
                     char* string = *ng5_vector_get(vector, i, char *);
                     free(string);
                 }
+                ng5_vector_drop(vector);
                 free(vector);
 
             }
