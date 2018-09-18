@@ -95,6 +95,9 @@ ng5_vector_t of_type(char *) *ng5_chunked_reader_next(ng5_chunked_reader_t *read
 
         fprintf(stderr, "DONE\n");
 
-        return to_string_list(buffer, bytes_to_read);
+        ng5_vector_t of_type(char *) *result = to_string_list(buffer, bytes_to_read);
+        free (buffer);
+
+        return result;
     }
 }
