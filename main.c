@@ -11,7 +11,7 @@
 //#include <ng5/roadfire/roadfire.h>
 
 #define NUM_SAMPLES 1
-#define NTHREADS    64
+#define NTHREADS    1
 
 /*void roadfire_test() {
     struct storage_engine engine;
@@ -35,7 +35,7 @@ void experiments_hashing()
         for (int sample = 0; sample<NUM_SAMPLES; sample++) {
 
             ng5_chunked_reader_t reader;
-            ng5_chunked_reader_create(&reader, NULL, path, 100*1024*1024);
+            ng5_chunked_reader_create(&reader, NULL, path, 1000*1024*1024);
 
             float created_duration = 0;
             float insert_duration = 0;

@@ -91,6 +91,8 @@ ng5_vector_t of_type(char *) *ng5_chunked_reader_next(ng5_chunked_reader_t *read
 
         reader->offset += bytes_to_read;
 
+        fprintf(stderr, "input read, progress %f%%\n", reader->offset * 100 / (float) reader->file_size);
+
         buffer[bytes_to_read] = '\0';
 
         fprintf(stderr, "DONE\n");
