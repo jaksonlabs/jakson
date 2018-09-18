@@ -319,6 +319,11 @@
 			<Option target="ng5"/>
 			<Option target="tests"/>
 		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/include/utils/ng5_chunked_reader.h">
+			<Option target="compare_cpp"/>
+			<Option target="ng5"/>
+			<Option target="tests"/>
+		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/main.c">
 			<Option target="ng5"/>
 		</Unit>
@@ -402,6 +407,11 @@
 			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/tests/stdx/test_string_hashtable.h">
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/Users/marcus/git/ng5/utils/ng5_chunked_reader.c">
+			<Option target="compare_cpp"/>
+			<Option target="ng5"/>
 			<Option target="tests"/>
 		</Unit>
 		<Unit filename="/Users/marcus/git/ng5/CMakeLists.txt">

@@ -269,6 +269,7 @@ static int smart_get_safe(struct string_map* self, string_id_t** out, bool** fou
         bucket_idxs[i]         = hash % extra->buckets.cap_elems;
         prefetch_read((struct simple_bucket *) ng5_vector_data(&extra->buckets) + bucket_idxs[i]);
     }
+
     trace(SMART_MAP_TAG, "'get_safe' function invoke fetch...for %zu strings", num_keys)
     check_success(simple_map_fetch_bulk(&extra->buckets, values_out, found_mask_out, num_not_found, bucket_idxs,
             keys, num_keys, &self->allocator, &self->counters));

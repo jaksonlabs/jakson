@@ -10,8 +10,8 @@ set (CMAKE_C_STANDARD 11)
 
 file(MAKE_DIRECTORY ${CMAKE_HOME_DIRECTORY}/build)
 
-#set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
+#set(CMAKE_BUILD_TYPE Release)
 
 set (CMAKE_C_COMPILER             "/usr/bin/clang")
 set (CMAKE_C_FLAGS                "-Wall -std=c11 -Wextra -Werror")
@@ -82,7 +82,9 @@ set(SORUCE_FILES
         ${CMAKE_SOURCE_DIR}/include/stdx/ng5_bitset.h
         ${CMAKE_SOURCE_DIR}/stdx/ng5_bitset.c
         ${CMAKE_SOURCE_DIR}/include/stdx/ng5_slice_list.h
-        ${CMAKE_SOURCE_DIR}/stdx/ng5_slice_list.c)
+        ${CMAKE_SOURCE_DIR}/stdx/ng5_slice_list.c
+        ${CMAKE_SOURCE_DIR}/utils/ng5_chunked_reader.c
+        ${CMAKE_SOURCE_DIR}/include/utils/ng5_chunked_reader.h)
 
 
 add_executable(ng5 main.c ${SORUCE_FILES})

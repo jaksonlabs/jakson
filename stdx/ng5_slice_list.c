@@ -206,7 +206,7 @@ int ng5_slice_list_lookup_by_key(ng5_slice_handle_t *handle, ng5_slice_list_t *l
 
                     switch(slice->strat) {
                     case SLICE_LOOKUP_SCAN:
-                                            pair_pos     = slice_find_scan_default(slice, key_hash, needle);
+                                            pair_pos     = slice_find_scan_2(slice, key_hash, needle);//slice_find_scan_default(slice, key_hash, needle);
                         break;
                     case SLICE_LOOKUP_BESEARCH:
                                             pair_pos     = slice_find_besearch(slice, key_hash, needle);

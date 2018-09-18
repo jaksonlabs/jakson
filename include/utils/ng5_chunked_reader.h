@@ -1,4 +1,4 @@
-// file: status.h
+// file: ng5_chunked_reader.h
 
 /**
  *  Copyright (C) 2018 Marcus Pinnecke
@@ -17,23 +17,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _NG5_STATUS
-#define _NG5_STATUS
+#ifndef NG5_CHUNKED_READER
+#define NG5_CHUNKED_READER
 
-enum status {
-    STATUS_FALSE                = 0,
-    STATUS_OK                   = 1,
-    STATUS_TRUE                 = 1,
-    STATUS_NULLPTR,
-    STATUS_NOTIMPL,
-    STATUS_UNIT_OUTOFBOUNDS,
-    STATUS_MALLOCERR,
-    STATUS_ILLEGALARG,
-    STATUS_INTERNALERR,
-    STATUS_ILLEGALIMPL,
-    STATUS_NOTFOUND,
-    STATUS_FAILED
-};
+#include <ng5_common.h>
+#include <stdx/ng5_vector.h>
+
+typedef struct ng5_chunked_reader_t
+{
+    ng5_allocator_t  alloc;
+    char            *file_path;
+    size_t           chunk_size_threshold;
+    FILE            *file;
+    size_t           offset;
+    size_t           file_size;
+} ng5_chunked_reader_t;
+
+int ng5_chunked_reader_create(ng5_chunked_reader_t *reader, ng5_allocator_t *alloc, const char *file_path,
+        size_t chunk_size_threshold);
+
+int ng5_chunked_reader_drop(ng5_chunked_reader_t *reader);
+
+ng5_vector_t of_type(char *) *ng5_chunked_reader_next(ng5_chunked_reader_t *reader);
+
 
 
 #endif

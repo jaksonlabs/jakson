@@ -7,64 +7,8 @@
 #include <apr_general.h>
 #include <stdx/ng5_bitset.h>
 #include <stdx/ng5_slice_list.h>
+#include <utils/ng5_chunked_reader.h>
 //#include <ng5/roadfire/roadfire.h>
-
-static char *read_contents(const char *path)
-{
-    fprintf(stderr, "reading '%s'...", path);
-
-    FILE    *infile;
-    char    *buffer;
-    long    numbytes;
-
-    infile = fopen(path, "r");
-
-    if(infile == NULL)
-        return NULL;
-
-    fseek(infile, 0L, SEEK_END);
-    numbytes = ftell(infile);
-
-    fseek(infile, 0L, SEEK_SET);
-
-    buffer = (char*)malloc(numbytes * sizeof(char) + 1);
-
-    if(buffer == NULL)
-        return NULL;
-
-    fread(buffer, sizeof(char), numbytes, infile);
-    fclose(infile);
-
-    buffer[numbytes] = '\0';
-
-    fprintf(stderr, "DONE\n");
-
-    return buffer;
-}
-
-ng5_vector_t *to_string_list(const char *contents)
-{
-    fprintf(stderr, "converting to line list...");
-    ng5_vector_t *vector = malloc(sizeof(ng5_vector_t));
-    ng5_vector_create(vector, NULL, sizeof(char*), 15372804);
-    char *begin, *end;
-    begin = (char *) contents;
-    for (end = (char *) contents; *end != '\0'; end++) {
-        size_t len = (end - begin);
-        if (unlikely(*end == '\n' && len > 0)) {
-            char *string = malloc(len + 1);
-            memcpy(string, begin, len);
-            string[len] = '\0';
-
-            ng5_vector_push(vector, &string, 1);
-            begin = end + 1;
-
-        }
-        // fprintf(stderr, "%f done so far...\n", vector_len(ng5_vector) / 4561977.0f * 100);
-    }
-    fprintf(stderr, "DONE, %zu lines\n", ng5_vector_len(vector));
-    return vector;
-}
 
 #define NUM_SAMPLES 2
 #define NTHREADS    1
@@ -78,90 +22,47 @@ ng5_vector_t *to_string_list(const char *contents)
 
 void experiments_hashing()
 {
-    printf("yago_percent;sample;num_buckets;time_created_sec;time_inserted_sec;time_bulk_sum_created_inserted;num_strings;num_distinct_strings\n");
+    printf("chunk_num;sample;num_buckets;time_created_sec;time_inserted_sec;time_bulk_sum_created_inserted;num_strings;num_distinct_strings\n");
 
-    const char* paths[11];
-    paths[0] = "/Volumes/PINNECKE EXT/science/cleaned_datasets/tpch-sf10-cleaned.txt.list";
-
-   //      paths[0] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/100.txt";
-   //    paths[0] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-15pc-stringlist.txt";
-       paths[1] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-19pc-stringlist.txt";
-       paths[2] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-27pc-stringlist.txt";
-       paths[3] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-35pc-stringlist.txt";
-       paths[4] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-43pc-stringlist.txt";
-       paths[5] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-51pc-stringlist.txt";
-       paths[6] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-59pc-stringlist.txt";
-       paths[7] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-67pc-stringlist.txt";
-       paths[8] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-75pc-stringlist.txt";
-       paths[9] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-83pc-stringlist.txt";
-       paths[10] = "/Volumes/PINNECKE EXT/science/datasets/yago/datasets/rdf3x/yago1.n3/samples-stringlist/yago1-91pc-stringlist.txt";
-
-    /*
-       paths[0] = "/home/pinnecke/datasets/yago1/stringlists/yago1-15pc-stringlist.txt";
-          paths[1] = "/home/pinnecke/datasets/yago1/stringlists/yago1-19pc-stringlist.txt";
-          paths[2] = "/home/pinnecke/datasets/yago1/stringlists/yago1-27pc-stringlist.txt";
-          paths[3] = "/home/pinnecke/datasets/yago1/stringlists/yago1-35pc-stringlist.txt";
-          paths[4] = "/home/pinnecke/datasets/yago1/stringlists/yago1-43pc-stringlist.txt";
-          paths[5] = "/home/pinnecke/datasets/yago1/stringlists/yago1-51pc-stringlist.txt";
-          paths[6] = "/home/pinnecke/datasets/yago1/stringlists/yago1-59pc-stringlist.txt";
-          paths[7] = "/home/pinnecke/datasets/yago1/stringlists/yago1-67pc-stringlist.txt";
-          paths[8] = "/home/pinnecke/datasets/yago1/stringlists/yago1-75pc-stringlist.txt";
-          paths[9] = "/home/pinnecke/datasets/yago1/stringlists/yago1-83pc-stringlist.txt";
-          paths[10] = "/home/pinnecke/datasets/yago1/stringlists/yago1-91pc-stringlist.txt"; */
-
-    int yago_percent[11] = {
-            15,
-            19,
-            27,
-            35,
-            43,
-            51,
-            59,
-            67,
-            75,
-            83,
-            91
-    };
+    const char* path = "/Volumes/PINNECKE EXT/science/cleaned_datasets/yago1-99pc-stringlist-lengths.txt";
 
 
-    for (int pi = 0; pi<11; pi++) {
+    struct Dictionary dic;
 
-        timestamp_t read_begin = time_current_time_ms();
-        char* contents = read_contents(paths[pi]);
-        fprintf(stderr, "processing '%s'\n", paths[pi]);
-        timestamp_t read_end = time_current_time_ms();
-        fprintf(stderr, "... %fsec\n", (read_end-read_begin)/1000.0f);
+    for (size_t num_buckets = 50000; num_buckets<=50000; num_buckets += 50000) {
+        for (int sample = 0; sample<NUM_SAMPLES; sample++) {
 
-        timestamp_t convert_begin = time_current_time_ms();
-        ng5_vector_t* lines = to_string_list(contents);
-        size_t num_lines = ng5_vector_len(lines);
-        timestamp_t convert_end = time_current_time_ms();
-        fprintf(stderr, "... %fsec\n", (convert_end-convert_begin)/1000.0f);
-        fflush(stderr);
+            ng5_chunked_reader_t reader;
+            ng5_chunked_reader_create(&reader, NULL, path, 10*1024*1024);
 
-        struct Dictionary dic;
+            float created_duration = 0;
+            float insert_duration = 0;
 
-        for (size_t num_buckets = 50000; num_buckets<=50000; num_buckets += 50000) {
-            for (int sample = 0; sample<NUM_SAMPLES; sample++) {
+            fprintf(stderr, "*** %d of %d in progress ***\n", sample+1, NUM_SAMPLES);
 
-                float created_duration = 0;
-                float insert_duration = 0;
+            fprintf(stderr, "create..\n");
 
-                fprintf(stderr, "*** %d of %d in progress ***\n", sample+1, NUM_SAMPLES);
+            timestamp_t create_begin = time_current_time_ms();
+            string_dic_create_async(&dic, 3720000, num_buckets, 3720000, NTHREADS,
+                    NULL);                         // <--------------------------------------------
+            timestamp_t create_end = time_current_time_ms();
+            created_duration = (create_end-create_begin)/1000.0f;
 
-                fprintf(stderr, "create..\n");
+            timestamp_t next_begin = time_current_time_ms();
+            ng5_vector_t of_type(char *) *vector;
 
-                timestamp_t create_begin = time_current_time_ms();
-                string_dic_create_async(&dic, ng5_vector_len(lines), num_buckets, num_lines, NTHREADS, NULL);                         // <--------------------------------------------
-                timestamp_t create_end = time_current_time_ms();
-                created_duration = (create_end-create_begin)/1000.0f;
+            size_t chunk_num = 0;
+
+            while((vector = ng5_chunked_reader_next(&reader))) {
+                timestamp_t next_end = time_current_time_ms();
+                fprintf(stderr, "got next %zu lines in %f sec\n", vector!=NULL ? ng5_vector_len(vector) : 0,
+                        (next_end-next_begin)/1000.0f);
 
                 string_id_t* ids = NULL, * ids_out;
                 unused(ids_out);
 
-                char** strings = (char**) ng5_vector_data(lines);
-                size_t num_strings = ng5_vector_len(lines)-1;
-
+                char** strings = (char**) ng5_vector_data(vector);
+                size_t num_strings = ng5_vector_len(vector)-1;
 
                 fprintf(stderr, "insert..\n");
 
@@ -174,22 +75,24 @@ void experiments_hashing()
                 fprintf(stderr, "locate..\n");
 
                 string_dic_locate_fast(&ids_out, &dic, strings, num_strings);
-                for (size_t i = 0; i < num_strings; i++) {
+                for (size_t i = 0; i<num_strings; i++) {
                     string_id_t id_created = ids[i];
                     string_id_t id_located = ids_out[i];
                     //debug("check", "[%s] -> %zu", strings[i], id_located);
-                    panic_if_wargs(id_created != id_located, "mapping broken for string [%s] id '%zu': expected %zu, is %zu", strings[i], i, id_created, id_located);
-                    assert(id_created == id_located);
+                    panic_if_wargs(id_created!=id_located,
+                            "mapping broken for string [%s] id '%zu': expected %zu, is %zu",
+                            strings[i], i, id_created, id_located);
+                    assert(id_created==id_located);
                 }
 
                 fprintf(stderr, "extract..\n");
 
-                char **extracted_strings = string_dic_extract(&dic, ids, num_strings);
-                for (size_t i = 0; i < num_strings; i++) {
-                    char *extracted = extracted_strings[i];
-                    char *given     = strings[i];
-                    panic_if(strcmp(extracted, given) != 0, "extraction broken");
-                    assert(strcmp(extracted, given) == 0);
+                char** extracted_strings = string_dic_extract(&dic, ids, num_strings);
+                for (size_t i = 0; i<num_strings; i++) {
+                    char* extracted = extracted_strings[i];
+                    char* given = strings[i];
+                    panic_if(strcmp(extracted, given)!=0, "extraction broken");
+                    assert(strcmp(extracted, given)==0);
                     //     debug("extracted id=%zu -> string [%s]\n", ids[i], extracted);
                 }
 
@@ -203,33 +106,29 @@ void experiments_hashing()
                 size_t num_distinct;
                 string_dic_num_distinct_values(&num_distinct, &dic);
 
+                printf("%zu;%d;%zu;%f;%f;%f;%zu;%zu\n", chunk_num++, sample, num_buckets, created_duration,
+                        insert_duration,
+                        (created_duration+insert_duration), ng5_vector_len(vector), num_distinct);
+
                 string_dic_free(&dic, ids);
                 string_dic_free(&dic, extracted_strings);
                 string_dic_free(&dic, ids_out);
-                string_dic_drop(&dic);
 
-
-
-                printf("%d;%d;%zu;%f;%f;%f;%zu;%zu\n", yago_percent[pi], sample, num_buckets, created_duration,
-                        insert_duration,
-                        (created_duration+insert_duration), ng5_vector_len(lines), num_distinct);
-
-                fflush(stderr);
-                fflush(stdout);
+                for (size_t i = 0; i<ng5_vector_len(vector); i++) {
+                    char* string = *ng5_vector_get(vector, i, char *);
+                    free(string);
+                }
+                free(vector);
 
             }
+
+            fflush(stderr);
+            fflush(stdout);
+
+            ng5_chunked_reader_drop(&reader);
+            string_dic_drop(&dic);
+
         }
-
-        free(contents);
-
-        for (size_t i = 0; i <ng5_vector_len(lines); i++) {
-            char *string = *ng5_vector_get(lines, i, char *);
-            free(string);
-        }
-
-        ng5_vector_drop(lines);
-        free(lines);
-
     }
 }
 
