@@ -24,7 +24,8 @@ void experiments_hashing()
 {
     printf("chunk_num;sample;num_buckets;time_created_sec;time_inserted_sec;time_bulk_sum_created_inserted;num_strings;num_distinct_strings\n");
 
-    const char* path = "/Volumes/PINNECKE EXT/science/cleaned_datasets/yago1-99pc-stringlist-lengths.txt";
+    //const char* path = "/Volumes/PINNECKE EXT/science/cleaned_datasets/yago1-99pc-stringlist-lengths.txt";
+    const char* path = "/home/pinnecke/datasets/yago1/stringlists/yago1-15pc-stringlist.txt";
 
 
     struct Dictionary dic;
