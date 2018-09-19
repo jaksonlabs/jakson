@@ -11,7 +11,7 @@
 //#include <ng5/roadfire/roadfire.h>
 
 #define NUM_SAMPLES 1
-#define NTHREADS    32
+#define NTHREADS    144
 
 /*void roadfire_test() {
     struct storage_engine engine;
@@ -26,7 +26,7 @@ void experiments_hashing()
 
     //const char* path = "/Volumes/PINNECKE EXT/science/cleaned_datasets/dbpedia-cleaned.txt";
     //const char* path = "/home/pinnecke/datasets/yago1/stringlists/yago1-15pc-stringlist.txt";
-    const char* path = "/home/pinnecke/datasets/lumb-1600-cleaned.txt.list";
+    const char* path = "/home/pinnecke/datasets/dbpedia-cleaned.txt";
 
 
     struct Dictionary dic;
@@ -35,7 +35,7 @@ void experiments_hashing()
         for (int sample = 0; sample<NUM_SAMPLES; sample++) {
 
             ng5_chunked_reader_t reader;
-            ng5_chunked_reader_create(&reader, NULL, path, 500000*1024*1024);
+            ng5_chunked_reader_create(&reader, NULL, path, 500000000*1024*1024);
 
             float created_duration = 0;
             float insert_duration = 0;
