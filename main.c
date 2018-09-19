@@ -35,7 +35,7 @@ void experiments_hashing()
         for (int sample = 0; sample<NUM_SAMPLES; sample++) {
 
             ng5_chunked_reader_t reader;
-            ng5_chunked_reader_create(&reader, NULL, path, 500000000*1024*1024);
+            ng5_chunked_reader_create(&reader, NULL, path, 1 * 1024 * 1024 * 1204);
 
             float created_duration = 0;
             float insert_duration = 0;
