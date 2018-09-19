@@ -87,7 +87,7 @@ ng5_vector_t of_type(char *) *ng5_chunked_reader_next(ng5_chunked_reader_t *read
             return NULL;
 
         size_t bytes_to_read = min(reader->chunk_size_threshold, (reader->file_size - reader->offset));
-        fread(buffer, sizeof(char), bytes_to_read, reader->file);
+        fread(buffer, bytes_to_read, 1, reader->file);
 
         reader->offset += bytes_to_read;
 
