@@ -36,56 +36,13 @@ set (CMAKE_RANLIB  "/usr/bin/llvm-ranlib")
 include(${CMAKE_SOURCE_DIR}/cmake/modules/FindAPR.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/modules/FindCheck.cmake)
 
-include_directories("include")
 include_directories("/usr/local/include")
 include_directories(${APRUTIL_INCLUDE_DIR})
 
 set(LIBS ${LIBS} pthread m ${APR_LIBRARIES} ${APRUTIL_LIBRARIES})
 
-set(SORUCE_FILES
-        ${CMAKE_SOURCE_DIR}/include/stdx/ng5_allocator.h
-        ${CMAKE_SOURCE_DIR}/include/ng5_status.h
-        ${CMAKE_SOURCE_DIR}/include/ng5_common.h
-        ${CMAKE_SOURCE_DIR}/stdx/ng5_allocator.c
-        ${CMAKE_SOURCE_DIR}/include/stdx/ng5_vector.h
-        ${CMAKE_SOURCE_DIR}/stdx/ng5_vector.c
-        ${CMAKE_SOURCE_DIR}/include/stdx/ng5_hash.h
-        ${CMAKE_SOURCE_DIR}/include/stdx/ng5_string_map.h
-        ${CMAKE_SOURCE_DIR}/include/ng5/ng5_storage_engine.h
-        ${CMAKE_SOURCE_DIR}/include/stdx/ng5_spinlock.h
-        ${CMAKE_SOURCE_DIR}/stdx/ng5_spinlock.c
-        ${CMAKE_SOURCE_DIR}/include/stdx/ng5_string_dic.h
-        ${CMAKE_SOURCE_DIR}/include/stdx/ng5_time.h
-        ${CMAKE_SOURCE_DIR}/stdx/ng5_time.c
-        ${CMAKE_SOURCE_DIR}/include/stdx/ng5_unit.h
-        ${CMAKE_SOURCE_DIR}/include/stdx/ng5_algorithm.h
-        ${CMAKE_SOURCE_DIR}/include/ng5/roadfire/ng5_roadfire.h
-        ${CMAKE_SOURCE_DIR}/ng5/roadfire/ng5_roadfire.c
-        ${CMAKE_SOURCE_DIR}/include/stdx/ng5_string_map_smart.h
-        ${CMAKE_SOURCE_DIR}/stdx/ng5_string_map_smart.c
-        ${CMAKE_SOURCE_DIR}/include/ng5/ng5_result_handle.h
-        ${CMAKE_SOURCE_DIR}/ng5/ng5_result_handle.c
-        ${CMAKE_SOURCE_DIR}/include/ng5/roadfire/ng5_roadfire.h
-        ${CMAKE_SOURCE_DIR}/include/stdx/ng5_slot_vector.h
-        ${CMAKE_SOURCE_DIR}/stdx/ng5_slot_vector.c
-        ${CMAKE_SOURCE_DIR}/include/stdx/ng5_string_dic_async.h
-        ${CMAKE_SOURCE_DIR}/stdx/ng5_string_dic_async.c
-        ${CMAKE_SOURCE_DIR}/include/stdx/ng5_string_dic_sync.h
-        ${CMAKE_SOURCE_DIR}/stdx/ng5_string_dic_sync.c
-        ${CMAKE_SOURCE_DIR}/ng5/roadfire/ng5_roadfire.c
-        ${CMAKE_SOURCE_DIR}/include/stdx/ng5_bolster.h
-        ${CMAKE_SOURCE_DIR}/include/stdx/ng5_trace_alloc.h
-        ${CMAKE_SOURCE_DIR}/stdx/ng5_trace_alloc.c
-        ${CMAKE_SOURCE_DIR}/include/ng5_static_conf.h
-        ${CMAKE_SOURCE_DIR}/include/stdx/ng5_bloomfilter.h
-        ${CMAKE_SOURCE_DIR}/stdx/ng5_bloomfilter.c
-        ${CMAKE_SOURCE_DIR}/include/stdx/ng5_bitset.h
-        ${CMAKE_SOURCE_DIR}/stdx/ng5_bitset.c
-        ${CMAKE_SOURCE_DIR}/include/stdx/ng5_slice_list.h
-        ${CMAKE_SOURCE_DIR}/stdx/ng5_slice_list.c
-        ${CMAKE_SOURCE_DIR}/utils/ng5_chunked_reader.c
-        ${CMAKE_SOURCE_DIR}/include/utils/ng5_chunked_reader.h)
-
+aux_source_directory("${CMAKE_SOURCE_DIR}/src" SORUCE_FILES)
+aux_source_directory("${CMAKE_SOURCE_DIR}/src" SORUCE_FILES)
 
 add_executable(ng5 main.c ${SORUCE_FILES})
 

@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <check.h>
 
-#include <stdx/ng5_string_dic.h>
-#include <stdx/ng5_string_map.h>
+#include <ng5_string_dic.h>
+#include <ng5_string_map.h>
 #include <stdlib.h>
-#include <stdx/ng5_string_map_smart.h>
+#include <ng5_string_map_smart.h>
 
 void test_string_hashtable_generic_createdrop(struct string_map *map, int status) {
 

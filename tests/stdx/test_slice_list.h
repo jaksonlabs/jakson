@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <check.h>
-#include <stdx/ng5_slice_list.h>
+#include <ng5_slice_list.h>
 
 START_TEST (test_slice_list_complex)
     {

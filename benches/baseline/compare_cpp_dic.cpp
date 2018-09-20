@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <iostream>
-#include <stdx/ng5_vector.h>
-#include <stdx/ng5_time.h>
+#include <vector.h>
+#include <time.h>
 #include <map>
 #include <vector>
 
@@ -190,8 +190,8 @@ int main(void) {
 
 #ifndef NDEBUG
         for (size_t i = 0; i < num_strings; i++) {
-            string_id_t id_created = ids[i];
-            string_id_t id_located = ids_out[i];
+            StringId id_created = ids[i];
+            StringId id_located = ids_out[i];
             //debug("check", "[%s] -> %zu", strings[i], id_located);
             panic_if_wargs(id_created != id_located, "mapping broken for string [%s] id '%zu': expected %zu, is %zu", strings[i], i, id_created, id_located);
             assert(id_created == id_located);

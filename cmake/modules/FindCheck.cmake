@@ -2,7 +2,7 @@
 #  Once done this will define
 #
 #  CHECK_FOUND - system has check
-#  CHECK_INCLUDE_DIR - the check include directory
+#  CHECK_INCLUDE_DIR - the check src directory
 #  CHECK_LIBRARIES - check library
 #
 #  This configuration file for finding libcheck is originally from
@@ -22,7 +22,7 @@ INCLUDE( FindPkgConfig )
 # Take care about check.pc settings
 PKG_SEARCH_MODULE( CHECK check )
 
-# Look for CHECK include dir and libraries
+# Look for CHECK src dir and libraries
 IF( NOT CHECK_FOUND )
     IF ( CHECK_INSTALL_DIR )
         MESSAGE ( STATUS "Using override CHECK_INSTALL_DIR to find check" )

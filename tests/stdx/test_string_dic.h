@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <check.h>
 
-#include <stdx/ng5_string_dic.h>
+#include <ng5_string_dic.h>
 
 
 
