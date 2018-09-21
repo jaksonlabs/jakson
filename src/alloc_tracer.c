@@ -40,9 +40,9 @@ typedef struct trace_stats_t
     size_t num_free_calls;
     size_t total_size;
     Vector ofType(size_t) *malloc_sizes;
-    ng5_spinlock_t *spinlock;
+    Spinlock *spinlock;
     FILE *statistics_file;
-    timestamp_t startup_timestamp;
+    Timestamp startup_timestamp;
 } trace_stats_t;
 
 
@@ -236,18 +236,18 @@ static void invokeClone(Allocator *dst, const Allocator *self);
 if (!global_trace_stats.malloc_sizes) {                                                                                \
     global_trace_stats.malloc_sizes = malloc(sizeof(Vector));                                                          \
     VectorCreate(global_trace_stats.malloc_sizes, &default_alloc, sizeof(size_t), 1000000);                            \
-    global_trace_stats.spinlock = AllocatorMalloc(&default_alloc, sizeof(ng5_spinlock_t));                             \
-    ng5_spinlock_create(global_trace_stats.spinlock);                                                                  \
+    global_trace_stats.spinlock = AllocatorMalloc(&default_alloc, sizeof(Spinlock));                                   \
+    SpinlockCreate(global_trace_stats.spinlock);                                                                       \
     global_trace_stats.statistics_file = fopen("trace-alloc-stats.csv", "a");                                          \
     fprintf(global_trace_stats.statistics_file,                                                                        \
             "system_time;num_alloc_calls;num_realloc_calls;num_free_calls;memory_in_use\n");                           \
-    global_trace_stats.startup_timestamp = time_current_time_ms();                                                     \
+    global_trace_stats.startup_timestamp = TimeCurrentSystemTime();                                                    \
 }
 
 #define WRITE_STATS_FILE()                                                                                             \
 {                                                                                                                      \
     fprintf(global_trace_stats.statistics_file, "%lld;%zu;%zu;%zu;%zu\n",                                              \
-            time_current_time_ms() - global_trace_stats.startup_timestamp,                                             \
+            TimeCurrentSystemTime() - global_trace_stats.startup_timestamp,                                            \
             global_trace_stats.num_malloc_calls,                                                                       \
             global_trace_stats.num_realloc_calls,                                                                      \
             global_trace_stats.num_free_calls,                                                                         \
@@ -288,7 +288,7 @@ static void *invokeMalloc(Allocator *self, size_t size)
 {
     UNUSED(self);
 
-    ng5_spinlock_lock(global_trace_stats.spinlock);
+    SpinlockAcquire(global_trace_stats.spinlock);
 
     Allocator default_alloc;
     AllocatorCreateDefault(&default_alloc);
@@ -301,12 +301,12 @@ static void *invokeMalloc(Allocator *self, size_t size)
           global_trace_stats.num_malloc_calls, self);
     VectorPush(global_trace_stats.malloc_sizes, &size, 1);
 
-    size_t min_alloc_size = ng5_statistics_min(ng5_vector_all(global_trace_stats.malloc_sizes, size_t),
-                                               ng5_vector_len(global_trace_stats.malloc_sizes));
-    size_t max_alloc_size = ng5_statistics_max(ng5_vector_all(global_trace_stats.malloc_sizes, size_t),
-                                               ng5_vector_len(global_trace_stats.malloc_sizes));
-    double avg_alloc_size = ng5_statistics_avg(ng5_vector_all(global_trace_stats.malloc_sizes, size_t),
-                                               ng5_vector_len(global_trace_stats.malloc_sizes));
+    size_t min_alloc_size = GetMinimum(VECTOR_ALL(global_trace_stats.malloc_sizes, size_t),
+                                       VectorLength(global_trace_stats.malloc_sizes));
+    size_t max_alloc_size = GetMaximum(VECTOR_ALL(global_trace_stats.malloc_sizes, size_t),
+                                       VectorLength(global_trace_stats.malloc_sizes));
+    double avg_alloc_size = GetAvg(VECTOR_ALL(global_trace_stats.malloc_sizes, size_t),
+                                   VectorLength(global_trace_stats.malloc_sizes));
     global_trace_stats.total_size += size;
 
     UNUSED(min_alloc_size);
@@ -322,7 +322,7 @@ static void *invokeMalloc(Allocator *self, size_t size)
 
     WRITE_STATS_FILE();
 
-    ng5_spinlock_unlock(global_trace_stats.spinlock);
+    SpinlockRelease(global_trace_stats.spinlock);
 
 
     return result;
@@ -332,7 +332,7 @@ static void *invokeRealloc(Allocator *self, void *ptr, size_t size)
 {
     UNUSED(self);
 
-    ng5_spinlock_lock(global_trace_stats.spinlock);
+    SpinlockAcquire(global_trace_stats.spinlock);
 
     Allocator default_alloc;
     AllocatorCreateDefault(&default_alloc);
@@ -356,14 +356,14 @@ static void *invokeRealloc(Allocator *self, void *ptr, size_t size)
 
     if (size <= page_capacity) {
         *(size_t *) (ptr - 2 * sizeof(size_t)) = size;
-        ng5_spinlock_unlock(global_trace_stats.spinlock);
+        SpinlockRelease(global_trace_stats.spinlock);
         return ptr;
     }
     else {
         void *page_ptr = ptr - 2 * sizeof(size_t);
         free(page_ptr);
         void *result = alloc_register(size);
-        ng5_spinlock_unlock(global_trace_stats.spinlock);
+        SpinlockRelease(global_trace_stats.spinlock);
         return result;
     }
 }
@@ -372,7 +372,7 @@ static void invokeFree(Allocator *self, void *ptr)
 {
     UNUSED(self);
 
-    ng5_spinlock_lock(global_trace_stats.spinlock);
+    SpinlockAcquire(global_trace_stats.spinlock);
 
     Allocator default_alloc;
     AllocatorCreateDefault(&default_alloc);
@@ -393,7 +393,7 @@ static void invokeFree(Allocator *self, void *ptr)
 
     free(page_ptr);
 
-    ng5_spinlock_unlock(global_trace_stats.spinlock);
+    SpinlockRelease(global_trace_stats.spinlock);
 }
 
 static void invokeClone(Allocator *dst, const Allocator *self)

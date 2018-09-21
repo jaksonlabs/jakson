@@ -90,7 +90,7 @@ Vector ofType(char *) *ChunkReaderNext(ChunkReader *reader)
         if (buffer == NULL)
             return NULL;
 
-        size_t bytesToRead = min(reader->chunkSizeThreshold, (reader->fileSize - reader->offset));
+        size_t bytesToRead = MIN(reader->chunkSizeThreshold, (reader->fileSize - reader->offset));
         fread(buffer, bytesToRead, 1, reader->file);
 
         reader->offset += bytesToRead;
@@ -143,6 +143,6 @@ static Vector *toStringList(const char *contents, size_t numBytes)
             begin++;
         }
     }
-    fprintf(stderr, "DONE, %zu lines\n", ng5_vector_len(vector));
+    fprintf(stderr, "DONE, %zu lines\n", VectorLength(vector));
     return vector;
 }

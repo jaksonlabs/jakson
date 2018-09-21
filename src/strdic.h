@@ -32,17 +32,30 @@
 
 NG5_BEGIN_DECL
 
-struct string_map_counters;
+// ---------------------------------------------------------------------------------------------------------------------
+//
+//  T Y P E   F O R W A R D I N G
+//
+// ---------------------------------------------------------------------------------------------------------------------
 
-enum string_dic_tag
+typedef struct StringDictionary StringDictionary;
+typedef struct StringHashCounters StringHashCounters;
+
+// ---------------------------------------------------------------------------------------------------------------------
+//
+//  T Y P E S
+//
+// ---------------------------------------------------------------------------------------------------------------------
+
+enum StrDicTag
 {
-    STRING_DIC_NAIVE, STRING_DIC_ASYNC
+    STRDIC_SYNC, STRDIC_ASYNC
 };
 
 /**
  * Thread-safe string pool implementation
  */
-typedef struct Dictionary
+typedef struct StringDictionary
 {
     /**
      * Implementation-specific fields
@@ -52,7 +65,7 @@ typedef struct Dictionary
     /**
      * Tag determining the current implementation
      */
-    enum string_dic_tag tag;
+    enum StrDicTag tag;
 
     /**
      * Memory allocator that is used to get memory for user data
@@ -64,15 +77,15 @@ typedef struct Dictionary
      *
      * Note: Implementation must ensure thread-safeness
      */
-    int (*drop)(struct Dictionary *self);
+    int (*drop)(StringDictionary *self);
 
     /**
      * Inserts a particular number of strings into this dictionary and returns associated string identifiers.
      *
      * Note: Implementation must ensure thread-safeness
     */
-    int (*insert)(struct Dictionary *self, StringId **out, char *const *strings,
-                  size_t num_strings, size_t nthreads);
+    int (*insert)(StringDictionary *self, StringId **out, char *const *strings,
+                  size_t numStrings, size_t numThreads);
 
     /**
      * Removes a particular number of strings from this dictionary by their ids. The caller must ensure that
@@ -80,61 +93,67 @@ typedef struct Dictionary
      *
      * Note: Implementation must ensure thread-safeness
      */
-    int (*remove)(struct Dictionary *self, StringId *strings, size_t num_strings);
+    int (*remove)(StringDictionary *self, StringId *strings, size_t numStrings);
 
     /**
      * Get the string ids associated with <code>keys</code> in this map (if any).
      *
      * Note: Implementation must ensure thread-safeness
      */
-    int (*locate_safe)(struct Dictionary *self, StringId **out, bool **found_mask,
-                       size_t *num_not_found, char *const *keys, size_t num_keys);
+    int (*locateSafe)(StringDictionary *self, StringId **out, bool **foundMask,
+                       size_t *numNotFound, char *const *keys, size_t numKeys);
 
     /**
      * Get the string ids associated with <code>keys</code> in this dic. All keys <u>must</u> exist.
      *
      * Note: Implementation must ensure thread-safeness
     */
-    int (*locate_fast)(struct Dictionary *self, StringId **out, char *const *keys,
-                       size_t num_keys);
+    int (*locateFast)(StringDictionary *self, StringId **out, char *const *keys,
+                       size_t numKeys);
 
     /**
      * Extracts strings given their string identifier. All <code>ids</code> must be known.
      *
      * Note: Implementation must ensure thread-safeness
      */
-    char **(*extract)(struct Dictionary *self, const StringId *ids, size_t num_ids);
+    char **(*extract)(StringDictionary *self, const StringId *ids, size_t numIds);
 
     /**
      * Frees up memory allocated inside a function call via the allocator given in the constructor
      *
      * Note: Implementation must ensure thread-safeness
      */
-    int (*free)(struct Dictionary *self, void *ptr);
+    int (*free)(StringDictionary *self, void *ptr);
 
     /**
      * Reset internal statistic counters
      */
-    int (*reset_counters)(struct Dictionary *self);
+    int (*resetCounters)(StringDictionary *self);
 
     /**
      * Get internal statistic counters
      */
-    int (*counters)(struct Dictionary *self, struct string_map_counters *counters);
+    int (*counters)(StringDictionary *self, StringHashCounters *counters);
 
     /**
      * Returns number of distinct strings stored in the dictionary
      */
-    int (*num_distinct)(struct Dictionary *self, size_t *num);
-} string_dic_t;
+    int (*numDistinct)(StringDictionary *self, size_t *num);
+} StringDictionary;
+
+// ---------------------------------------------------------------------------------------------------------------------
+//
+//  I N T E R F A C E
+//
+// ---------------------------------------------------------------------------------------------------------------------
 
 /**
  *
  * @param dic
  * @return
  */
-UNUSED_FUNCTION
-static int string_dic_drop(struct Dictionary *dic)
+NG5_LIB_FUNCTION
+static int StringDictionaryDrop(StringDictionary *dic)
 {
     CHECK_NON_NULL(dic);
     assert(dic->drop);
@@ -147,29 +166,29 @@ static int string_dic_drop(struct Dictionary *dic)
  * @param out
  * @param num_out
  * @param strings
- * @param num_strings
+ * @param numStrings
  * @return
  */
-UNUSED_FUNCTION
-static int string_dic_insert(struct Dictionary *dic, StringId **out, char *const *strings, size_t num_strings,
-                             size_t nthreads)
+NG5_LIB_FUNCTION
+static int StringDictionaryInsert(StringDictionary *dic, StringId **out, char *const *strings, size_t numStrings,
+                                  size_t numThreads)
 {
     CHECK_NON_NULL(dic);
     CHECK_NON_NULL(strings);
     assert(dic->insert);
-    return dic->insert(dic, out, strings, num_strings, nthreads);
+    return dic->insert(dic, out, strings, numStrings, numThreads);
 }
 
-UNUSED_FUNCTION
-static int string_dic_reset_counters(struct Dictionary *dic)
+NG5_LIB_FUNCTION
+static int StringDictionaryResetCounters(StringDictionary *dic)
 {
     CHECK_NON_NULL(dic);
-    assert(dic->reset_counters);
-    return dic->reset_counters(dic);
+    assert(dic->resetCounters);
+    return dic->resetCounters(dic);
 }
 
-UNUSED_FUNCTION
-static int string_dic_counters(struct string_map_counters *counters, struct Dictionary *dic)
+NG5_LIB_FUNCTION
+static int StringDictionaryGetCounters(StringHashCounters *counters, StringDictionary *dic)
 {
     CHECK_NON_NULL(dic);
     assert(dic->counters);
@@ -180,39 +199,39 @@ static int string_dic_counters(struct string_map_counters *counters, struct Dict
  *
  * @param dic
  * @param strings
- * @param num_strings
+ * @param numStrings
  * @return
  */
-UNUSED_FUNCTION
-static int string_dic_remove(struct Dictionary *dic, StringId *strings, size_t num_strings)
+NG5_LIB_FUNCTION
+static int StringDictionaryRemove(StringDictionary *dic, StringId *strings, size_t numStrings)
 {
     CHECK_NON_NULL(dic);
     CHECK_NON_NULL(strings);
     assert(dic->remove);
-    return dic->remove(dic, strings, num_strings);
+    return dic->remove(dic, strings, numStrings);
 }
 
 /**
  *
  * @param out
- * @param found_mask
- * @param num_not_found
+ * @param foundMask
+ * @param numNotFound
  * @param dic
  * @param keys
- * @param num_keys
+ * @param numKeys
  * @return
  */
-UNUSED_FUNCTION
-static int string_dic_locate_safe(StringId **out, bool **found_mask, size_t *num_not_found,
-                                  struct Dictionary *dic, char *const *keys, size_t num_keys)
+NG5_LIB_FUNCTION
+static int StringDictionaryLocateSafe(StringId **out, bool **foundMask, size_t *numNotFound,
+                                      StringDictionary *dic, char *const *keys, size_t numKeys)
 {
     CHECK_NON_NULL(out);
-    CHECK_NON_NULL(found_mask);
-    CHECK_NON_NULL(num_not_found);
+    CHECK_NON_NULL(foundMask);
+    CHECK_NON_NULL(numNotFound);
     CHECK_NON_NULL(dic);
     CHECK_NON_NULL(keys);
-    assert(dic->locate_safe);
-    return dic->locate_safe(dic, out, found_mask, num_not_found, keys, num_keys);
+    assert(dic->locateSafe);
+    return dic->locateSafe(dic, out, foundMask, numNotFound, keys, numKeys);
 }
 
 /**
@@ -220,17 +239,17 @@ static int string_dic_locate_safe(StringId **out, bool **found_mask, size_t *num
  * @param out
  * @param dic
  * @param keys
- * @param num_keys
+ * @param numKeys
  * @return
  */
-UNUSED_FUNCTION
-static int string_dic_locate_fast(StringId **out, struct Dictionary *dic, char *const *keys, size_t num_keys)
+NG5_LIB_FUNCTION
+static int StringDictionaryLocateFast(StringId **out, StringDictionary *dic, char *const *keys, size_t numKeys)
 {
     CHECK_NON_NULL(out);
     CHECK_NON_NULL(dic);
     CHECK_NON_NULL(keys);
-    assert(dic->locate_fast);
-    return dic->locate_fast(dic, out, keys, num_keys);
+    assert(dic->locateFast);
+    return dic->locateFast(dic, out, keys, numKeys);
 }
 
 /**
@@ -239,14 +258,14 @@ static int string_dic_locate_fast(StringId **out, struct Dictionary *dic, char *
  * @param num_out
  * @param dic
  * @param ids
- * @param num_ids
+ * @param numIds
  * @return
  */
-UNUSED_FUNCTION
-static char **string_dic_extract(struct Dictionary *dic, const StringId *ids, size_t num_ids)
+NG5_LIB_FUNCTION
+static char **StringDictionaryExtract(StringDictionary *dic, const StringId *ids, size_t numIds)
 {
     assert(dic->extract);
-    return dic->extract(dic, ids, num_ids);
+    return dic->extract(dic, ids, numIds);
 }
 
 /**
@@ -255,8 +274,8 @@ static char **string_dic_extract(struct Dictionary *dic, const StringId *ids, si
  * @param ptr
  * @return
  */
-UNUSED_FUNCTION
-static int string_dic_free(struct Dictionary *dic, void *ptr)
+NG5_LIB_FUNCTION
+static int StringDictionaryFree(StringDictionary *dic, void *ptr)
 {
     CHECK_NON_NULL(dic);
     CHECK_NON_NULL(ptr);
@@ -264,13 +283,13 @@ static int string_dic_free(struct Dictionary *dic, void *ptr)
     return dic->free(dic, ptr);
 }
 
-UNUSED_FUNCTION
-static int string_dic_num_distinct_values(size_t *num, struct Dictionary *dic)
+NG5_LIB_FUNCTION
+static int StringDictionaryNumDistinct(size_t *num, StringDictionary *dic)
 {
     CHECK_NON_NULL(num);
     CHECK_NON_NULL(dic);
-    assert(dic->num_distinct);
-    return dic->num_distinct(dic, num);
+    assert(dic->numDistinct);
+    return dic->numDistinct(dic, num);
 }
 
 NG5_END_DECL

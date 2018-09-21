@@ -15,7 +15,7 @@ void test_string_hashtable_generic_createdrop(struct string_map *map, int status
 
 //START_TEST (test_string_hashtable_generic_createdrop_besearch)
 //{
-//    struct string_map map;
+//    struct StringHashTable map;
 //    int status = string_hashtable_create_besearch(&map, NULL, 100, 5, 1.7f);
 //    test_string_hashtable_generic_createdrop(&map, status);
 //}
@@ -55,7 +55,7 @@ void test_string_hashtable_generic_putget(struct string_map *map) {
 
 //START_TEST (test_string_hashtable_generic_putget_bsearch)
 //    {
-//        struct string_map map;
+//        struct StringHashTable map;
 //        string_hashtable_create_besearch(&map, NULL, 100, 5, 1.7f);
 //        test_string_hashtable_generic_putget(&map);
 //    }
@@ -112,7 +112,7 @@ void test_string_hashtable_generic_remove(struct string_map *map)
 //
 //START_TEST (test_string_hashtable_generic_remove_besearch)
 //    {
-//        struct string_map map;
+//        struct StringHashTable map;
 //        string_hashtable_create_besearch(&map, NULL, 100, 5, 1.7f);
 //        test_string_hashtable_generic_remove(&map);
 //    }

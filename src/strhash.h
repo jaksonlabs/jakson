@@ -90,20 +90,34 @@ NG5_BEGIN_DECL
 #define NG5_CONFIG_BUCKET_CAPACITY  1024
 #endif
 
-enum string_lookup_impl
+// ---------------------------------------------------------------------------------------------------------------------
+//
+//  T Y P E   F O R W A R D I N G
+//
+// ---------------------------------------------------------------------------------------------------------------------
+
+typedef struct StringHashTable StringHashTable;
+
+// ---------------------------------------------------------------------------------------------------------------------
+//
+//  T Y P E S
+//
+// ---------------------------------------------------------------------------------------------------------------------
+
+enum StringHashTableTag
 {
-    STRING_ID_MAP_SMART
+    STRINGHASHTABLE_MEM
 };
 
-struct string_map_counters
+typedef struct StringHashCounters
 {
-    size_t num_bucket_search_miss;
-    size_t num_bucket_search_hit;
-    size_t num_bucket_cache_search_miss;
-    size_t num_bucket_cache_search_hit;
-};
+    size_t numBucketSearchMiss;
+    size_t numBucketSearchHit;
+    size_t numBucketCacheSearchMiss;
+    size_t numBucketCacheSearchHit;
+} StringHashCounters;
 
-struct string_map
+typedef struct StringHashTable
 {
 
     /**
@@ -114,14 +128,14 @@ struct string_map
     /**
      * Implementation tag
      */
-    enum string_lookup_impl tag;
+    enum StringHashTableTag tag;
 
     /*
      * Statistics to lookup misses and hits
      *
      * <b>Note</b>: Implementation must maintain counters by itself
      */
-    struct string_map_counters counters;
+    struct StringHashCounters counters;
 
     /**
     *  Memory allocator that is used to get memory for user data
@@ -131,62 +145,62 @@ struct string_map
     /**
      *  Frees resources bound to <code>self</code> via the allocator specified by the constructor
      */
-    int (*drop)(struct string_map *self);
+    int (*drop)(StringHashTable *self);
 
     /**
      * Put <code>num_pair</code> objects into this map maybe updating old objects with the same key.
      */
-    int (*put_safe_bulk)(struct string_map *self, char *const *keys, const StringId *values, size_t num_pairs);
+    int (*putSafeBulk)(StringHashTable *self, char *const *keys, const StringId *values, size_t numPairs);
 
     /**
      * Put <code>num_pair</code> objects into this map maybe without checking for updates.
      */
-    int (*put_fast_bulk)(struct string_map *self, char *const *keys, const StringId *values, size_t num_pairs);
+    int (*putFastBulk)(StringHashTable *self, char *const *keys, const StringId *values, size_t numPairs);
 
     /**
      * Same as 'put_safe_bulk' but specialized for a single element
      */
-    int (*put_safe_exact)(struct string_map *self, const char *key, StringId value);
+    int (*putSafeExact)(StringHashTable *self, const char *key, StringId value);
 
     /**
      * Same as 'put_fast_bulk' but specialized for a single element
      */
-    int (*put_fast_exact)(struct string_map *self, const char *key, StringId value);
+    int (*putFastExact)(StringHashTable *self, const char *key, StringId value);
 
     /**
      * Get the values associated with <code>keys</code> in this map (if any).
      */
-    int (*get_safe_bulk)(struct string_map *self, StringId **out, bool **found_mask, size_t *num_not_found,
-                         char *const *keys, size_t num_keys);
+    int (*getSafeBulk)(StringHashTable *self, StringId **out, bool **foundMask, size_t *numNotFound,
+                         char *const *keys, size_t numKeys);
 
     /**
      * The same as 'get_safe_bulk' but optimized for a single element
      */
-    int (*get_safe_exact)(struct string_map *self, StringId *out, bool *found_mask, const char *key);
+    int (*getSafeExact)(StringHashTable *self, StringId *out, bool *foundMask, const char *key);
 
     /**
      * Get the values associated with <code>keys</code> in this map. All keys <u>must</u> exist.
      */
-    int (*get_fast)(struct string_map *self, StringId **out, char *const *keys, size_t num_keys);
+    int (*getFast)(StringHashTable *self, StringId **out, char *const *keys, size_t numKeys);
 
     /**
      * Updates keys associated with <code>values</code> in this map. All values <u>must</u> exist, and the
      * mapping between keys and values must be bidirectional.
      */
-    int (*update_key_fast)(struct string_map *self, const StringId *values, char *const *keys, size_t num_keys);
+    int (*updateKeyFast)(StringHashTable *self, const StringId *values, char *const *keys, size_t numKeys);
 
     /**
      * Removes the objects with the gives keys from this map
      */
-    int (*remove)(struct string_map *self, char *const *keys, size_t num_keys);
+    int (*remove)(StringHashTable *self, char *const *keys, size_t numKeys);
 
     /**
      * Frees up allocated memory for <code>ptr</code> via the allocator in <code>map</code> that was specified
      * by the call to <code>string_id_map_create</code>
      */
-    int (*free)(struct string_map *self, void *ptr);
+    int (*free)(StringHashTable *self, void *ptr);
 
-};
+} StringHashTable;
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
@@ -200,7 +214,7 @@ struct string_map
  * @param map a non-null pointer to the map
  * @return <code>STATUS_OK</code> in case of success, otherwise a value indiciating the error.
  */
-inline static int string_lookup_drop(struct string_map *map)
+inline static int StringHashTableDrop(StringHashTable *map)
 {
     CHECK_NON_NULL(map);
     assert(map->drop);
@@ -214,10 +228,10 @@ inline static int string_lookup_drop(struct string_map *map)
  * @param map a non-null pointer to the map
  * @return <code>STATUS_OK</code> in case of success, otherwise a value indicating the error.
  */
-inline static int string_lookup_reset_counters(struct string_map *map)
+inline static int StringHashTableResetCounters(StringHashTable *map)
 {
     CHECK_NON_NULL(map);
-    memset(&map->counters, 0, sizeof(struct string_map_counters));
+    memset(&map->counters, 0, sizeof(struct StringHashCounters));
     return STATUS_OK;
 }
 
@@ -227,7 +241,7 @@ inline static int string_lookup_reset_counters(struct string_map *map)
  * @param map non-null pointer to the map
  * @return <code>STATUS_OK</code> in case of success, otherwise a value indicating the error.
  */
-inline static int string_lookup_counters(struct string_map_counters *out, const struct string_map *map)
+inline static int StringHashTableCounters(StringHashCounters *out, const StringHashTable *map)
 {
     CHECK_NON_NULL(map);
     CHECK_NON_NULL(out);
@@ -241,20 +255,20 @@ inline static int string_lookup_counters(struct string_map_counters *out, const 
  * instead.
  *
  * @param map a non-null pointer to the map
- * @param keys a non-null constant pointer to a list of at least <code>num_pairs</code> length of constant strings
- * @param values a non-null constant pointer to a list of at least <code>num_pairs</code> length of 64bit values
- * @param num_pairs the number of pairs that are read via <code>keys</code> and <code>values</code>
+ * @param keys a non-null constant pointer to a list of at least <code>numPairs</code> length of constant strings
+ * @param values a non-null constant pointer to a list of at least <code>numPairs</code> length of 64bit values
+ * @param numPairs the number of pairs that are read via <code>keys</code> and <code>values</code>
  * @return <code>STATUS_OK</code> in case of success, otherwise a value indicating the error.
  */
-inline static int string_lookup_put_safe(struct string_map *map, char *const *keys, const StringId *values,
-                                         size_t num_pairs)
+inline static int StringHashTablePutSafe(StringHashTable *map, char *const *keys, const StringId *values,
+                                         size_t numPairs)
 {
     CHECK_NON_NULL(map);
     CHECK_NON_NULL(keys);
     CHECK_NON_NULL(values);
-    assert(map->put_safe_bulk);
+    assert(map->putSafeBulk);
 
-    return map->put_safe_bulk(map, keys, values, num_pairs);
+    return map->putSafeBulk(map, keys, values, numPairs);
 }
 
 /**
@@ -267,102 +281,102 @@ inline static int string_lookup_put_safe(struct string_map *map, char *const *ke
  * instead.
  *
  * @param map a non-null pointer to the map
- * @param keys a non-null constant pointer to a list of at least <code>num_pairs</code> length of constant strings
- * @param values a non-null constant pointer to a list of at least <code>num_pairs</code> length of 64bit values
- * @param num_pairs the number of pairs that are read via <code>keys</code> and <code>values</code>
+ * @param keys a non-null constant pointer to a list of at least <code>numPairs</code> length of constant strings
+ * @param values a non-null constant pointer to a list of at least <code>numPairs</code> length of 64bit values
+ * @param numPairs the number of pairs that are read via <code>keys</code> and <code>values</code>
  * @return <code>STATUS_OK</code> in case of success, otherwise a value indiciating the error.
  */
-inline static int string_lookup_put_fast_bulk(struct string_map *map, char *const *keys, const StringId *values,
-                                              size_t num_pairs)
+inline static int StringHashTablePutFastBulk(StringHashTable *map, char *const *keys, const StringId *values,
+                                             size_t numPairs)
 {
     CHECK_NON_NULL(map);
     CHECK_NON_NULL(keys);
     CHECK_NON_NULL(values);
-    assert(map->put_fast_bulk);
+    assert(map->putFastBulk);
 
-    return map->put_fast_bulk(map, keys, values, num_pairs);
+    return map->putFastBulk(map, keys, values, numPairs);
 }
 
 /**
  * Same as 'string_lookup_put_bulk' but specialized for a single pair
  */
-inline static int string_lookup_put_exact(struct string_map *map, const char *key, StringId value)
+inline static int StringHashTablePutExact(StringHashTable *map, const char *key, StringId value)
 {
     CHECK_NON_NULL(map);
     CHECK_NON_NULL(key);
-    assert(map->put_safe_exact);
+    assert(map->putSafeExact);
 
-    return map->put_safe_exact(map, key, value);
+    return map->putSafeExact(map, key, value);
 }
 
 /**
  * Same as 'string_lookup_put_fast_bulk' but specialized for a single pair
  */
-inline static int string_lookup_put_fast_exact(struct string_map *map, const char *key, StringId value)
+inline static int StringHashTablePutFastExact(StringHashTable *map, const char *key, StringId value)
 {
     CHECK_NON_NULL(map);
     CHECK_NON_NULL(key);
 
-    assert(map->put_fast_exact);
+    assert(map->putFastExact);
 
-    return map->put_fast_exact(map, key, value);
+    return map->putFastExact(map, key, value);
 }
 
 /**
  * Get the values associated with <code>keys</code> in this map (if any). In case one <code>key</code> does not
- * exists, the function will return this information via the parameters <code>found_mask</code> and
- * <code>num_not_found</code>. However, in case it is guaranteed that all keys exist, consider to use
+ * exists, the function will return this information via the parameters <code>foundMask</code> and
+ * <code>numNotFound</code>. However, in case it is guaranteed that all keys exist, consider to use
  * <code>string_id_map_get_blind</code> instead. *
  *
  * @param out A non-null pointer to an unallocated memory address. The map will allocate enough memory to store the
- *            result. There are <code>num_keys</code> elements returned, but not all of them are guaranteed to
+ *            result. There are <code>numKeys</code> elements returned, but not all of them are guaranteed to
  *            contain a particular value. That an entry does not contain a particular value happens if the
  *            associated key is not stored in this map. Whether or not one particular entry is a valid value,
- *            can be determined by the caller via the <code>found_mask</code>.
+ *            can be determined by the caller via the <code>foundMask</code>.
  *            <b>Important</b> <code>out</code> must be freed manually by calling <code>string_id_map_free</code>.
- * @param found_mask A non-null pointer to an unallocated memory address. The map will allocate enough memory to store
- *            the result. There are <code>num_keys</code> boolean values returned. This mask is used to determine
- *            if the i-th key has a mapping in this map. If this is the case, the i-th entry in <code>found_mask</code>
+ * @param foundMask A non-null pointer to an unallocated memory address. The map will allocate enough memory to store
+ *            the result. There are <code>numKeys</code> boolean values returned. This mask is used to determine
+ *            if the i-th key has a mapping in this map. If this is the case, the i-th entry in <code>foundMask</code>
  *            is <b>true</b> and the i-th entry in <code>out</code> holds the value. Otherwise, in case the i-th
- *            value in <code>found_mask</code> is <b>false</b>, there is no value stored to the i-th key in
+ *            value in <code>foundMask</code> is <b>false</b>, there is no value stored to the i-th key in
  *            <code>keys</code>, and reading <code>out</code> for the i-th position is undefined.
- * @param num_not_found A non-null pointer to a value that will store the number of keys in <code>keys</code> for
+ * @param numNotFound A non-null pointer to a value that will store the number of keys in <code>keys</code> for
  *                      which no value is stored in this map.
  * @param num_out A non-null pointer to an unsigned integer that will contain the number of values return by the
  *                call to this function.
  * @param map a non-null pointer to the map
- * @param keys a non-null pointer to a list of at least <code>num_keys</code> strings
- * @param num_keys the number of keys
+ * @param keys a non-null pointer to a list of at least <code>numKeys</code> strings
+ * @param numKeys the number of keys
  * @return <code>STATUS_OK</code> in case of success, otherwise a value indicating the error.
  */
-inline static int string_lookup_get_safe_bulk(StringId **out, bool **found_mask, size_t *num_not_found,
-                                              struct string_map *map,
-                                              char *const *keys, size_t num_keys)
+inline static int StringHashTableGetSafeBulk(StringId **out, bool **foundMask, size_t *numNotFound,
+                                             StringHashTable *map,
+                                             char *const *keys, size_t numKeys)
 {
     CHECK_NON_NULL(out);
-    CHECK_NON_NULL(found_mask);
-    CHECK_NON_NULL(num_not_found);
+    CHECK_NON_NULL(foundMask);
+    CHECK_NON_NULL(numNotFound);
     CHECK_NON_NULL(map);
     CHECK_NON_NULL(keys);
-    assert(map->get_safe_bulk);
+    assert(map->getSafeBulk);
 
-    int result = map->get_safe_bulk(map, out, found_mask, num_not_found, keys, num_keys);
+    int result = map->getSafeBulk(map, out, foundMask, numNotFound, keys, numKeys);
 
     assert (out != NULL);
-    assert (found_mask != NULL);
+    assert (foundMask != NULL);
 
     return result;
 }
 
-inline static int string_lookup_get_safe_exact(StringId *out, bool *found, struct string_map *map, const char *key)
+inline static int StringHashTableGetSafeExact(StringId *out, bool *found, StringHashTable *map, const char *key)
 {
     CHECK_NON_NULL(out);
     CHECK_NON_NULL(found);
     CHECK_NON_NULL(map);
     CHECK_NON_NULL(key);
-    assert(map->get_safe_exact);
+    assert(map->getSafeExact);
 
-    int result = map->get_safe_exact(map, out, found, key);
+    int result = map->getSafeExact(map, out, found, key);
 
     assert (out != NULL);
     assert (found != NULL);
@@ -377,23 +391,23 @@ inline static int string_lookup_get_safe_exact(StringId *out, bool *found, struc
  * However, if it cannot be guaranteed that all keys are known, use
  * <code>string_id_map_get_test</code> instead.
  *
- * @param out A non-null pointer to an unallocated memory address. The map will allocate <code>num_keys</code>
- *            times <code>sizeof(StringId)</code> bytes memory to store the result. There are <code>num_keys</code>
+ * @param out A non-null pointer to an unallocated memory address. The map will allocate <code>numKeys</code>
+ *            times <code>sizeof(StringId)</code> bytes memory to store the result. There are <code>numKeys</code>
  *            elements returned, and all of them are guaranteed to contain a particular value.
  * @param map a non-null pointer to the map
- * @param keys a non-null pointer to a list of at least <code>num_keys</code> strings
- * @param num_keys the number of keys
+ * @param keys a non-null pointer to a list of at least <code>numKeys</code> strings
+ * @param numKeys the number of keys
  * @return <code>STATUS_OK</code> in case of success, otherwise a value indicating the error.
  */
-inline static int string_lookup_get_fast(StringId **out, struct string_map *map,
-                                         char *const *keys, size_t num_keys)
+inline static int StringHashTableGetFast(StringId **out, StringHashTable *map,
+                                         char *const *keys, size_t numKeys)
 {
     CHECK_NON_NULL(out);
     CHECK_NON_NULL(map);
     CHECK_NON_NULL(keys);
-    assert(map->get_fast);
+    assert(map->getFast);
 
-    return map->get_fast(map, out, keys, num_keys);
+    return map->getFast(map, out, keys, numKeys);
 }
 
 /**
@@ -403,39 +417,39 @@ inline static int string_lookup_get_fast(StringId **out, struct string_map *map,
  * If you want to update a value given its key, use <code>string_hashtable_put_test</code> or
  * <code>string_hashtable_put_blind</code> instead.
  *
- * @param out A non-null pointer to an unallocated memory address. The map will allocate <code>num_keys</code>
- *            times <code>sizeof(StringId)</code> bytes memory to store the result. There are <code>num_keys</code>
+ * @param out A non-null pointer to an unallocated memory address. The map will allocate <code>numKeys</code>
+ *            times <code>sizeof(StringId)</code> bytes memory to store the result. There are <code>numKeys</code>
  *            elements returned, and all of them are guaranteed to contain a particular value.
  * @param map a non-null pointer to the map
- * @param keys a non-null pointer to a list of at least <code>num_keys</code> strings
- * @param num_keys the number of keys
+ * @param keys a non-null pointer to a list of at least <code>numKeys</code> strings
+ * @param numKeys the number of keys
  * @return <code>STATUS_OK</code> in case of success, otherwise a value indicating the error.
  */
-inline static int string_lookup_update_fast(struct string_map *map, const StringId *values,
-                                            char *const *keys, size_t num_keys)
+inline static int StringHashTableUpdateFast(StringHashTable *map, const StringId *values,
+                                            char *const *keys, size_t numKeys)
 {
     CHECK_NON_NULL(map);
     CHECK_NON_NULL(keys);
-    assert(map->update_key_fast);
+    assert(map->updateKeyFast);
 
-    return map->update_key_fast(map, values, keys, num_keys);
+    return map->updateKeyFast(map, values, keys, numKeys);
 }
 
 /**
  * Removes the objects with the gives keys from this map
  *
  * @param map a non-null pointer to the map
- * @param keys a non-null pointer to a list of at least <code>num_keys</code> strings
- * @param num_keys the number of keys
+ * @param keys a non-null pointer to a list of at least <code>numKeys</code> strings
+ * @param numKeys the number of keys
  * @return
  */
-inline static int string_lookup_remove(struct string_map *map, char *const *keys, size_t num_keys)
+inline static int StringHashTableRemove(StringHashTable *map, char *const *keys, size_t numKeys)
 {
     CHECK_NON_NULL(map);
     CHECK_NON_NULL(keys);
     assert(map->remove);
 
-    return map->remove(map, keys, num_keys);
+    return map->remove(map, keys, numKeys);
 }
 
 /**
@@ -445,7 +459,7 @@ inline static int string_lookup_remove(struct string_map *map, char *const *keys
  * @param values A non-null pointer (potentially resulting from a call to <code>string_id_map_get</code>)
  * @return <code>STATUS_OK</code> in case of success, otherwise a value indiciating the error.
  */
-inline static int string_lookup_free(void *ptr, struct string_map *map)
+inline static int StringHashTableUnalloc(void *ptr, StringHashTable *map)
 {
     CHECK_NON_NULL(ptr);
     CHECK_NON_NULL(map);
@@ -460,28 +474,28 @@ inline static int string_lookup_free(void *ptr, struct string_map *map)
  * @param counters non-null pointer to counter object
  * @return STATUS_OK if everything went normal, otherwise an value indicating the error
  */
-inline static int string_map_counters_init(struct string_map_counters *counters)
+inline static int StringHashTableCountersInit(StringHashCounters *counters)
 {
     CHECK_NON_NULL(counters);
-    memset(counters, 0, sizeof(struct string_map_counters));
+    memset(counters, 0, sizeof(StringHashCounters));
     return STATUS_OK;
 }
 
 /**
- * Adds members of both input parameters and stores the result in <code>dst_lhs</code>.
+ * Adds members of both input parameters and stores the result in <code>dstLhs</code>.
  *
- * @param dst_lhs non-null pointer to counter (will contain the result)
+ * @param dstLhs non-null pointer to counter (will contain the result)
  * @param rhs non-null pointer to counter
  * @return STATUS_OK if everything went normal, otherwise an value indicating the error
  */
-inline static int string_map_counters_add(struct string_map_counters *dst_lhs, const struct string_map_counters *rhs)
+inline static int StringHashTableCountersAdd(StringHashCounters *dstLhs, const StringHashCounters *rhs)
 {
-    CHECK_NON_NULL(dst_lhs);
+    CHECK_NON_NULL(dstLhs);
     CHECK_NON_NULL(rhs);
-    dst_lhs->num_bucket_search_miss += rhs->num_bucket_search_miss;
-    dst_lhs->num_bucket_search_hit += rhs->num_bucket_search_hit;
-    dst_lhs->num_bucket_cache_search_hit += rhs->num_bucket_cache_search_hit;
-    dst_lhs->num_bucket_cache_search_miss += rhs->num_bucket_cache_search_miss;
+    dstLhs->numBucketSearchMiss += rhs->numBucketSearchMiss;
+    dstLhs->numBucketSearchHit += rhs->numBucketSearchHit;
+    dstLhs->numBucketCacheSearchHit += rhs->numBucketCacheSearchHit;
+    dstLhs->numBucketCacheSearchMiss += rhs->numBucketCacheSearchMiss;
     return STATUS_OK;
 }
 

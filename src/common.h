@@ -54,10 +54,10 @@
 
 #define optional /* parameters to functions marked with this tag can be NULL and will be ignored */
 
-#define max(a, b)                                                                                                      \
+#define MAX(a, b)                                                                                                      \
     ((b) > (a) ? (b) : (a))
 
-#define min(a, b)                                                                                                      \
+#define MIN(a, b)                                                                                                      \
     ((a) < (b) ? (a) : (b))
 
 #define CAST(type, name, src)                                                                                          \
@@ -150,6 +150,9 @@
 
 #define UNUSED_FUNCTION                                                                                                \
     __attribute__((unused))
+
+#define NG5_LIB_FUNCTION                                                                                               \
+    UNUSED_FUNCTION
 
 #define OPTIONAL_SET(x, y)                                                                                             \
     if (x) {                                                                                                           \

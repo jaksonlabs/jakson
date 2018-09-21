@@ -32,18 +32,19 @@
 #include "bloomfilter.h"
 #include "slicelist.h"
 
-#define get_hashcode(key)      hash_bernstein(strlen(key), key)
-#define get_hashcode_2(key)    hash_additive(strlen(key), key)
+#define HASHCODE_OF(key)      HashBernstein(strlen(key), key)
 
-#define SMART_MAP_TAG "smart-map"
+#define SMART_MAP_TAG "strhash-mem"
 
-struct simple_bucket {
-  ng5_slice_list_t                    slice_list;
-};
+typedef struct Bucket
+{
+    SliceList sliceList;
+} Bucket;
 
-struct simple_extra {
-  Vector ofType(simple_bucket) buckets;
-};
+typedef struct MemExtra
+{
+    Vector ofType(Bucket) buckets;
+} MemExtra;
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
@@ -51,39 +52,54 @@ struct simple_extra {
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-static int smart_drop(struct string_map* self);
-static int smart_put_safe_bulk(struct string_map* self, char* const* keys, const StringId* values, size_t num_pairs);
-static int smart_put_fast_bulk(struct string_map* self, char* const* keys, const StringId* values, size_t num_pairs);
-static int smart_put_safe_exact(struct string_map* self, const char *key, StringId value);
-static int smart_put_fast_exact(struct string_map* self, const char *key, StringId value);
-static int smart_get_safe(struct string_map* self, StringId** out, bool** found_mask, size_t* num_not_found,
-        char* const* keys, size_t num_keys);
-static int smart_get_safe_exact(struct string_map* self, StringId* out, bool* found_mask, const char* key);
-static int smart_get_fast(struct string_map* self, StringId** out, char* const* keys, size_t num_keys);
-static int smart_update_key_fast(struct string_map* self, const StringId* values, char* const* keys,
-        size_t num_keys);
-static int smart_remove(struct string_map* self, char* const* keys, size_t num_keys);
-static int smart_free(struct string_map* self, void* ptr);
+static int thisDrop(struct StringHashTable *self);
+static int thisPutSafeBulk(struct StringHashTable *self,
+                           char *const *keys,
+                           const StringId *values,
+                           size_t numPairs);
+static int thisPutFastBulk(struct StringHashTable *self,
+                           char *const *keys,
+                           const StringId *values,
+                           size_t numPairs);
+static int thisPutSafeExact(struct StringHashTable *self, const char *key, StringId value);
+static int thisPutFastExact(struct StringHashTable *self, const char *key, StringId value);
+static int thisGetSafe(struct StringHashTable *self, StringId **out, bool **foundMask, size_t *numNotFound,
+                       char *const *keys, size_t numKeys);
+static int thisGetSafeExact(struct StringHashTable *self, StringId *out, bool *foundMask, const char *key);
+static int thisGetFast(struct StringHashTable *self, StringId **out, char *const *keys, size_t numKeys);
+static int thisUpdateKeyFast(struct StringHashTable *self, const StringId *values, char *const *keys,
+                             size_t numKeys);
+static int thisRemove(struct StringHashTable *self, char *const *keys, size_t numKeys);
+static int thisFree(struct StringHashTable *self, void *ptr);
 
-static int smart_map_insert_bulk(Vector ofType(simple_bucket)* buckets, char* const* restrict keys,
-        const StringId* restrict values, size_t* restrict bucket_idxs, size_t num_pairs, Allocator* alloc,
-        struct string_map_counters* counter);
-static int smart_map_insert_exact(Vector ofType(simple_bucket)* buckets, const char * restrict key,
-        StringId value, size_t bucket_idx, Allocator* alloc, struct string_map_counters* counter);
-static int simple_map_fetch_bulk(Vector ofType(simple_bucket)* buckets, StringId* values_out,
-        bool* key_found_mask,
-        size_t* num_keys_not_found, size_t* bucket_idxs, char* const* keys, size_t num_keys,
-        Allocator* alloc, struct string_map_counters* counter);
-static int simple_map_fetch_single(Vector ofType(simple_bucket)* buckets, StringId* value_out,
-        bool* key_found, const size_t bucket_idx, const char* key, struct string_map_counters* counter);
+static int thisInsertBulk(Vector ofType(Bucket) *buckets,
+                          char *const *restrict keys,
+                          const StringId *restrict values,
+                          size_t *restrict bucketIdxs,
+                          size_t numPairs,
+                          Allocator *alloc,
+                          StringHashCounters *counter);
 
-static int smart_extra_create(struct string_map* self, size_t num_buckets, size_t cap_buckets);
-static struct simple_extra *smart_extra_get(struct string_map* self);
-static int smart_bucket_create(struct simple_bucket* buckets, size_t num_buckets, size_t bucket_cap,
-        Allocator* alloc);
-static int smart_bucket_drop(struct simple_bucket* buckets, size_t num_buckets, Allocator* alloc);
-static int smart_bucket_insert(struct simple_bucket* bucket, const char* restrict key, StringId value,
-        Allocator* alloc, struct string_map_counters* counter) FORCE_INLINE;
+static int thisInsertExact(Vector ofType(Bucket) *buckets, const char *restrict key,
+                           StringId value, size_t bucketIdx, Allocator *alloc, StringHashCounters *counter);
+static int thisFetchBulk(Vector ofType(Bucket) *buckets, StringId *valuesOut,
+                         bool *keyFoundMask,
+                         size_t *numKeysNotFound, size_t *bucketIdxs, char *const *keys, size_t numKeys,
+                         Allocator *alloc, StringHashCounters *counter);
+static int thisFetchSingle(Vector ofType(Bucket) *buckets,
+                           StringId *valueOut,
+                           bool *keyFound,
+                           const size_t bucketIdx,
+                           const char *key,
+                           StringHashCounters *counter);
+
+static int thisCreateExtra(struct StringHashTable *self, size_t numBuckets, size_t capBuckets);
+static MemExtra *thisGetExta(struct StringHashTable *self);
+static int BucketCreate(Bucket *buckets, size_t numBuckets, size_t bucketCap,
+                        Allocator *alloc);
+static int BucketDrop(Bucket *buckets, size_t numBuckets, Allocator *alloc);
+static int BucketInsert(Bucket *bucket, const char *restrict key, StringId value,
+                        Allocator *alloc, StringHashCounters *counter) FORCE_INLINE;
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
@@ -91,150 +107,160 @@ static int smart_bucket_insert(struct simple_bucket* bucket, const char* restric
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-int string_hashtable_create_scan1_cache(struct string_map* map, const Allocator* alloc, size_t num_buckets,
-        size_t cap_buckets)
+int StringHashtableCreateMem(struct StringHashTable *map, const Allocator *alloc, size_t numBuckets,
+                             size_t capBuckets)
 {
     CHECK_SUCCESS(AllocatorThisOrDefault(&map->allocator, alloc));
 
-    num_buckets  = num_buckets  < 1 ? 1 : num_buckets;
-    cap_buckets  = cap_buckets  < 1 ? 1 : cap_buckets;
+    numBuckets = numBuckets < 1 ? 1 : numBuckets;
+    capBuckets = capBuckets < 1 ? 1 : capBuckets;
 
-    map->tag              = STRING_ID_MAP_SMART;
-    map->drop             = smart_drop;
-    map->put_safe_bulk    = smart_put_safe_bulk;
-    map->put_fast_bulk    = smart_put_fast_bulk;
-    map->put_safe_exact    = smart_put_safe_exact;
-    map->put_fast_exact    = smart_put_fast_exact;
-    map->get_safe_bulk    = smart_get_safe;
-    map->get_fast         = smart_get_fast;
-    map->update_key_fast  = smart_update_key_fast;
-    map->remove           = smart_remove;
-    map->free             = smart_free;
-    map->get_safe_exact   = smart_get_safe_exact;
+    map->tag = STRINGHASHTABLE_MEM;
+    map->drop = thisDrop;
+    map->putSafeBulk = thisPutSafeBulk;
+    map->putFastBulk = thisPutFastBulk;
+    map->putSafeExact = thisPutSafeExact;
+    map->putFastExact = thisPutFastExact;
+    map->getSafeBulk = thisGetSafe;
+    map->getFast = thisGetFast;
+    map->updateKeyFast = thisUpdateKeyFast;
+    map->remove = thisRemove;
+    map->free = thisFree;
+    map->getSafeExact = thisGetSafeExact;
 
-    string_lookup_reset_counters(map);
-    CHECK_SUCCESS(smart_extra_create(map, num_buckets, cap_buckets));
+    StringHashTableResetCounters(map);
+    CHECK_SUCCESS(thisCreateExtra(map, numBuckets, capBuckets));
     return STATUS_OK;
 }
 
-static int smart_drop(struct string_map* self)
+static int thisDrop(struct StringHashTable *self)
 {
-    assert(self->tag == STRING_ID_MAP_SMART);
-    struct simple_extra *extra = smart_extra_get(self);
-    struct simple_bucket *data = (struct simple_bucket *) ng5_vector_data(&extra->buckets);
-    CHECK_SUCCESS(smart_bucket_drop(data, extra->buckets.cap_elems, &self->allocator));
+    assert(self->tag == STRINGHASHTABLE_MEM);
+    MemExtra *extra = thisGetExta(self);
+    Bucket *data = (Bucket *) VectorData(&extra->buckets);
+    CHECK_SUCCESS(BucketDrop(data, extra->buckets.capElems, &self->allocator));
     VectorDrop(&extra->buckets);
     AllocatorFree(&self->allocator, self->extra);
     return STATUS_OK;
 }
 
-static int smart_put_safe_bulk(struct string_map* self, char* const* keys, const StringId* values, size_t num_pairs)
+static int thisPutSafeBulk(struct StringHashTable *self,
+                           char *const *keys,
+                           const StringId *values,
+                           size_t numPairs)
 {
-    assert(self->tag == STRING_ID_MAP_SMART);
-    struct simple_extra *extra = smart_extra_get(self);
-    size_t *bucket_idxs = AllocatorMalloc(&self->allocator, num_pairs * sizeof(size_t));
+    assert(self->tag == STRINGHASHTABLE_MEM);
+    MemExtra *extra = thisGetExta(self);
+    size_t *bucketIdxs = AllocatorMalloc(&self->allocator, numPairs * sizeof(size_t));
 
-    PREFETCH_WRITE(bucket_idxs);
+    PREFETCH_WRITE(bucketIdxs);
 
-    for (size_t i = 0; i < num_pairs; i++) {
-        const char *key        = keys[i];
-        hash_t      hash       = get_hashcode(key);
-        bucket_idxs[i]         = hash % extra->buckets.cap_elems;
+    for (size_t i = 0; i < numPairs; i++) {
+        const char *key = keys[i];
+        Hash hash = HASHCODE_OF(key);
+        bucketIdxs[i] = hash % extra->buckets.capElems;
     }
 
-    PREFETCH_READ(bucket_idxs);
+    PREFETCH_READ(bucketIdxs);
     PREFETCH_READ(keys);
     PREFETCH_READ(values);
 
-    CHECK_SUCCESS(smart_map_insert_bulk(&extra->buckets, keys, values, bucket_idxs, num_pairs, &self->allocator,
-            &self->counters));
-    CHECK_SUCCESS(AllocatorFree(&self->allocator, bucket_idxs));
+    CHECK_SUCCESS(thisInsertBulk(&extra->buckets, keys, values, bucketIdxs, numPairs, &self->allocator,
+                                 &self->counters));
+    CHECK_SUCCESS(AllocatorFree(&self->allocator, bucketIdxs));
     return STATUS_OK;
 }
 
-static int smart_put_safe_exact(struct string_map* self, const char *key, StringId value)
+static int thisPutSafeExact(struct StringHashTable *self, const char *key, StringId value)
 {
-    assert(self->tag == STRING_ID_MAP_SMART);
-    struct simple_extra *extra = smart_extra_get(self);
+    assert(self->tag == STRINGHASHTABLE_MEM);
+    MemExtra *extra = thisGetExta(self);
 
-    hash_t      hash       = get_hashcode(key);
-    size_t      bucket_idx = hash % extra->buckets.cap_elems;
+    Hash hash = HASHCODE_OF(key);
+    size_t bucketIdx = hash % extra->buckets.capElems;
 
     PREFETCH_READ(key);
 
-    CHECK_SUCCESS(smart_map_insert_exact(&extra->buckets, key, value, bucket_idx, &self->allocator,
-            &self->counters));
+    CHECK_SUCCESS(thisInsertExact(&extra->buckets, key, value, bucketIdx, &self->allocator,
+                                  &self->counters));
 
     return STATUS_OK;
 }
 
-static int smart_put_fast_exact(struct string_map* self, const char *key, StringId value)
+static int thisPutFastExact(struct StringHashTable *self, const char *key, StringId value)
 {
-    return smart_put_safe_exact(self, key, value);
+    return thisPutSafeExact(self, key, value);
 }
 
-static int smart_put_fast_bulk(struct string_map* self, char* const* keys, const StringId* values, size_t num_pairs)
+static int thisPutFastBulk(struct StringHashTable *self,
+                           char *const *keys,
+                           const StringId *values,
+                           size_t numPairs)
 {
-    return smart_put_safe_bulk(self, keys, values, num_pairs);
+    return thisPutSafeBulk(self, keys, values, numPairs);
 }
 
-static int simple_map_fetch_bulk(Vector ofType(simple_bucket)* buckets, StringId* values_out,
-        bool* key_found_mask,
-        size_t* num_keys_not_found, size_t* bucket_idxs, char* const* keys, size_t num_keys,
-        Allocator* alloc, struct string_map_counters* counter)
+static int thisFetchBulk(Vector ofType(Bucket) *buckets, StringId *valuesOut,
+                         bool *keyFoundMask,
+                         size_t *numKeysNotFound, size_t *bucketIdxs, char *const *keys, size_t numKeys,
+                         Allocator *alloc, StringHashCounters *counter)
 {
     UNUSED(counter);
     UNUSED(alloc);
 
-    ng5_slice_handle_t    result_handle;
-    size_t                num_not_found = 0;
-    struct simple_bucket *data          = (struct simple_bucket *) ng5_vector_data(buckets);
+    SliceHandle result_handle;
+    size_t numNotFound = 0;
+    Bucket *data = (Bucket *) VectorData(buckets);
 
-    PREFETCH_WRITE(values_out);
+    PREFETCH_WRITE(valuesOut);
 
-    for (size_t i = 0; i < num_keys; i++) {
-        struct simple_bucket       *bucket     = data + bucket_idxs[i];
-        const char                 *key        = keys[i];
+    for (size_t i = 0; i < numKeys; i++) {
+        Bucket *bucket = data + bucketIdxs[i];
+        const char *key = keys[i];
 
-        ng5_slice_list_lookup_by_key(&result_handle, &bucket->slice_list, key);
+        SliceListLookupByKey(&result_handle, &bucket->sliceList, key);
 
-        num_not_found += result_handle.is_contained ? 0 : 1;
-        key_found_mask[i] = result_handle.is_contained;
-        values_out[i] = result_handle.is_contained ? result_handle.value : -1;
+        numNotFound += result_handle.isContained ? 0 : 1;
+        keyFoundMask[i] = result_handle.isContained;
+        valuesOut[i] = result_handle.isContained ? result_handle.value : -1;
     }
 
-    *num_keys_not_found = num_not_found;
+    *numKeysNotFound = numNotFound;
     return STATUS_OK;
 }
 
-static int simple_map_fetch_single(Vector ofType(simple_bucket)* buckets, StringId* value_out,
-        bool* key_found, const size_t bucket_idx, const char* key, struct string_map_counters* counter)
+static int thisFetchSingle(Vector ofType(Bucket) *buckets,
+                           StringId *valueOut,
+                           bool *keyFound,
+                           const size_t bucketIdx,
+                           const char *key,
+                           StringHashCounters *counter)
 {
     UNUSED(counter);
 
-    ng5_slice_handle_t    handle;
-    struct simple_bucket *data    = (struct simple_bucket *) ng5_vector_data(buckets);
+    SliceHandle handle;
+    Bucket *data = (Bucket *) VectorData(buckets);
 
-    PREFETCH_WRITE(value_out);
-    PREFETCH_WRITE(key_found);
+    PREFETCH_WRITE(valueOut);
+    PREFETCH_WRITE(keyFound);
 
-    struct simple_bucket       *bucket     = data + bucket_idx;
+    Bucket *bucket = data + bucketIdx;
 
     /* Optimization 1/5: EMPTY GUARD (but before "find" call); if this bucket has no occupied slots, do not perform any lookup and comparison */
-    ng5_slice_list_lookup_by_key(&handle, &bucket->slice_list, key);
-    *key_found = !ng5_slice_list_is_empty(&bucket->slice_list) && handle.is_contained;
-    *value_out = (*key_found) ? handle.value : -1;
+    SliceListLookupByKey(&handle, &bucket->sliceList, key);
+    *keyFound = !SliceListIsEmpty(&bucket->sliceList) && handle.isContained;
+    *valueOut = (*keyFound) ? handle.value : -1;
 
     return STATUS_OK;
 }
 
-static int smart_get_safe(struct string_map* self, StringId** out, bool** found_mask, size_t* num_not_found,
-        char* const* keys, size_t num_keys)
+static int thisGetSafe(struct StringHashTable *self, StringId **out, bool **foundMask, size_t *numNotFound,
+                       char *const *keys, size_t numKeys)
 {
-    assert(self->tag == STRING_ID_MAP_SMART);
+    assert(self->tag == STRINGHASHTABLE_MEM);
 
-    timestamp_t begin = time_current_time_ms();
-    TRACE(SMART_MAP_TAG, "'get_safe' function invoked for %zu strings", num_keys)
+    Timestamp begin = TimeCurrentSystemTime();
+    TRACE(SMART_MAP_TAG, "'get_safe' function invoked for %zu strings", numKeys)
 
     Allocator hashtable_alloc;
 #if defined(NG5_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
@@ -243,45 +269,45 @@ static int smart_get_safe(struct string_map* self, StringId** out, bool** found_
     CHECK_SUCCESS(AllocatorThisOrDefault(&hashtable_alloc, &self->allocator));
 #endif
 
-    struct simple_extra *extra          = smart_extra_get(self);
-    size_t              *bucket_idxs    = AllocatorMalloc(&self->allocator, num_keys * sizeof(size_t));
-    StringId         *values_out     = AllocatorMalloc(&self->allocator, num_keys * sizeof(StringId));
-    bool                *found_mask_out = AllocatorMalloc(&self->allocator, num_keys * sizeof(bool));
+    MemExtra *extra = thisGetExta(self);
+    size_t *bucketIdxs = AllocatorMalloc(&self->allocator, numKeys * sizeof(size_t));
+    StringId *valuesOut = AllocatorMalloc(&self->allocator, numKeys * sizeof(StringId));
+    bool *foundMask_out = AllocatorMalloc(&self->allocator, numKeys * sizeof(bool));
 
-    assert(bucket_idxs != NULL);
-    assert(values_out != NULL);
-    assert(found_mask_out != NULL);
+    assert(bucketIdxs != NULL);
+    assert(valuesOut != NULL);
+    assert(foundMask_out != NULL);
 
-    for (register size_t i = 0; i < num_keys; i++) {
-        const char *key        = keys[i];
-        hash_t      hash       = get_hashcode(key);
-        bucket_idxs[i]         = hash % extra->buckets.cap_elems;
-        PREFETCH_READ((struct simple_bucket *) ng5_vector_data(&extra->buckets) + bucket_idxs[i]);
+    for (register size_t i = 0; i < numKeys; i++) {
+        const char *key = keys[i];
+        Hash hash = HASHCODE_OF(key);
+        bucketIdxs[i] = hash % extra->buckets.capElems;
+        PREFETCH_READ((Bucket *) VectorData(&extra->buckets) + bucketIdxs[i]);
     }
 
-    TRACE(SMART_MAP_TAG, "'get_safe' function invoke fetch...for %zu strings", num_keys)
-    CHECK_SUCCESS(simple_map_fetch_bulk(&extra->buckets, values_out, found_mask_out, num_not_found, bucket_idxs,
-            keys, num_keys, &self->allocator, &self->counters));
-    CHECK_SUCCESS(AllocatorFree(&self->allocator, bucket_idxs));
-    TRACE(SMART_MAP_TAG, "'get_safe' function invok fetch: done for %zu strings", num_keys)
+    TRACE(SMART_MAP_TAG, "'get_safe' function invoke fetch...for %zu strings", numKeys)
+    CHECK_SUCCESS(thisFetchBulk(&extra->buckets, valuesOut, foundMask_out, numNotFound, bucketIdxs,
+                                keys, numKeys, &self->allocator, &self->counters));
+    CHECK_SUCCESS(AllocatorFree(&self->allocator, bucketIdxs));
+    TRACE(SMART_MAP_TAG, "'get_safe' function invok fetch: done for %zu strings", numKeys)
 
-    assert(values_out != NULL);
-    assert(found_mask_out != NULL);
+    assert(valuesOut != NULL);
+    assert(foundMask_out != NULL);
 
-    *out = values_out;
-    *found_mask = found_mask_out;
+    *out = valuesOut;
+    *foundMask = foundMask_out;
 
-    timestamp_t end = time_current_time_ms();
+    Timestamp end = TimeCurrentSystemTime();
     UNUSED(begin);
     UNUSED(end);
-    TRACE(SMART_MAP_TAG, "'get_safe' function done: %f seconds spent here", (end-begin)/1000.0f)
+    TRACE(SMART_MAP_TAG, "'get_safe' function done: %f seconds spent here", (end - begin) / 1000.0f)
 
     return STATUS_OK;
 }
 
-static int smart_get_safe_exact(struct string_map* self, StringId* out, bool* found_mask, const char* key)
+static int thisGetSafeExact(struct StringHashTable *self, StringId *out, bool *foundMask, const char *key)
 {
-    assert(self->tag == STRING_ID_MAP_SMART);
+    assert(self->tag == STRINGHASHTABLE_MEM);
 
     Allocator hashtable_alloc;
 #if defined(NG5_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
@@ -290,78 +316,78 @@ static int smart_get_safe_exact(struct string_map* self, StringId* out, bool* fo
     CHECK_SUCCESS(AllocatorThisOrDefault(&hashtable_alloc, &self->allocator));
 #endif
 
-    struct simple_extra *extra          = smart_extra_get(self);
+    MemExtra *extra = thisGetExta(self);
 
-    hash_t      hash       = get_hashcode(key);
-    size_t      bucket_idx = hash % extra->buckets.cap_elems;
-    PREFETCH_READ((struct simple_bucket *) ng5_vector_data(&extra->buckets) + bucket_idx);
+    Hash hash = HASHCODE_OF(key);
+    size_t bucketIdx = hash % extra->buckets.capElems;
+    PREFETCH_READ((Bucket *) VectorData(&extra->buckets) + bucketIdx);
 
-    CHECK_SUCCESS(simple_map_fetch_single(&extra->buckets, out, found_mask, bucket_idx, key, &self->counters));
+    CHECK_SUCCESS(thisFetchSingle(&extra->buckets, out, foundMask, bucketIdx, key, &self->counters));
 
     return STATUS_OK;
 }
 
-static int smart_get_fast(struct string_map* self, StringId** out, char* const* keys, size_t num_keys)
+static int thisGetFast(struct StringHashTable *self, StringId **out, char *const *keys, size_t numKeys)
 {
-    bool* found_mask;
-    size_t num_not_found;
-    int status = smart_get_safe(self, out, &found_mask, &num_not_found, keys, num_keys);
-    smart_free(self, found_mask);
+    bool *foundMask;
+    size_t numNotFound;
+    int status = thisGetSafe(self, out, &foundMask, &numNotFound, keys, numKeys);
+    thisFree(self, foundMask);
     return status;
 }
 
-static int smart_update_key_fast(struct string_map* self, const StringId* values, char* const* keys,
-        size_t num_keys)
+static int thisUpdateKeyFast(struct StringHashTable *self, const StringId *values, char *const *keys,
+                             size_t numKeys)
 {
     UNUSED(self);
     UNUSED(values);
     UNUSED(keys);
-    UNUSED(num_keys);
+    UNUSED(numKeys);
     return STATUS_NOTIMPL;
 }
 
-static int simple_map_remove(struct simple_extra *extra, size_t *bucket_idxs, char *const *keys, size_t num_keys,
-        Allocator *alloc, struct string_map_counters *counter)
+static int simple_map_remove(MemExtra *extra, size_t *bucketIdxs, char *const *keys, size_t numKeys,
+                             Allocator *alloc, StringHashCounters *counter)
 {
     UNUSED(counter);
     UNUSED(alloc);
 
-    ng5_slice_handle_t    handle;
-    struct simple_bucket *data = (struct simple_bucket *) ng5_vector_data(&extra->buckets);
+    SliceHandle handle;
+    Bucket *data = (Bucket *) VectorData(&extra->buckets);
 
-    for (register size_t i = 0; i < num_keys; i++) {
-        struct simple_bucket* bucket     = data + bucket_idxs[i];
-        const char           *key        = keys[i];
+    for (register size_t i = 0; i < numKeys; i++) {
+        Bucket *bucket = data + bucketIdxs[i];
+        const char *key = keys[i];
 
         /* Optimization 1/5: EMPTY GUARD (but before "find" call); if this bucket has no occupied slots, do not perform any lookup and comparison */
-        ng5_slice_list_lookup_by_key(&handle, &bucket->slice_list, key);
-        if (BRANCH_LIKELY(handle.is_contained)) {
-            ng5_slice_list_remove(&bucket->slice_list, &handle);
+        SliceListLookupByKey(&handle, &bucket->sliceList, key);
+        if (BRANCH_LIKELY(handle.isContained)) {
+            SliceListRemove(&bucket->sliceList, &handle);
         }
     }
     return STATUS_OK;
 }
 
-static int smart_remove(struct string_map* self, char* const* keys, size_t num_keys)
+static int thisRemove(struct StringHashTable *self, char *const *keys, size_t numKeys)
 {
-    assert(self->tag == STRING_ID_MAP_SMART);
+    assert(self->tag == STRINGHASHTABLE_MEM);
 
-    struct simple_extra *extra = smart_extra_get(self);
-    size_t *bucket_idxs = AllocatorMalloc(&self->allocator, num_keys * sizeof(size_t));
-    for (register size_t i = 0; i < num_keys; i++) {
-        const char *key        = keys[i];
-        hash_t      hash       = get_hashcode(key);
-        bucket_idxs[i]         = hash % extra->buckets.cap_elems;
+    MemExtra *extra = thisGetExta(self);
+    size_t *bucketIdxs = AllocatorMalloc(&self->allocator, numKeys * sizeof(size_t));
+    for (register size_t i = 0; i < numKeys; i++) {
+        const char *key = keys[i];
+        Hash hash = HASHCODE_OF(key);
+        bucketIdxs[i] = hash % extra->buckets.capElems;
     }
 
-    CHECK_SUCCESS(simple_map_remove(extra, bucket_idxs, keys, num_keys, &self->allocator, &self->counters));
-    CHECK_SUCCESS(AllocatorFree(&self->allocator, bucket_idxs));
+    CHECK_SUCCESS(simple_map_remove(extra, bucketIdxs, keys, numKeys, &self->allocator, &self->counters));
+    CHECK_SUCCESS(AllocatorFree(&self->allocator, bucketIdxs));
     return STATUS_OK;
 }
 
-static int smart_free(struct string_map* self, void* ptr)
+static int thisFree(struct StringHashTable *self, void *ptr)
 {
-    assert(self->tag == STRING_ID_MAP_SMART);
+    assert(self->tag == STRINGHASHTABLE_MEM);
     CHECK_SUCCESS(AllocatorFree(&self->allocator, ptr));
     return STATUS_OK;
 }
@@ -373,61 +399,62 @@ static int smart_free(struct string_map* self, void* ptr)
 // ---------------------------------------------------------------------------------------------------------------------
 
 UNUSED_FUNCTION
-static int smart_extra_create(struct string_map* self, size_t num_buckets, size_t cap_buckets)
+static int thisCreateExtra(struct StringHashTable *self, size_t numBuckets, size_t capBuckets)
 {
-    if ((self->extra = AllocatorMalloc(&self->allocator, sizeof(struct simple_extra))) != NULL) {
-        struct simple_extra *extra = smart_extra_get(self);
-        VectorCreate(&extra->buckets, &self->allocator, sizeof(struct simple_bucket), num_buckets);
+    if ((self->extra = AllocatorMalloc(&self->allocator, sizeof(MemExtra))) != NULL) {
+        MemExtra *extra = thisGetExta(self);
+        VectorCreate(&extra->buckets, &self->allocator, sizeof(Bucket), numBuckets);
 
         /* Optimization: notify the kernel that the list of buckets are accessed randomly (since hash based access)*/
-        ng5_vector_advise(&extra->buckets, MADV_RANDOM | MADV_WILLNEED);
+        VectorMemoryAdvice(&extra->buckets, MADV_RANDOM | MADV_WILLNEED);
 
 
-        struct simple_bucket *data = (struct simple_bucket *) ng5_vector_data(&extra->buckets);
-        CHECK_SUCCESS(smart_bucket_create(data, num_buckets, cap_buckets, &self->allocator));
+        Bucket *data = (Bucket *) VectorData(&extra->buckets);
+        CHECK_SUCCESS(BucketCreate(data, numBuckets, capBuckets, &self->allocator));
         return STATUS_OK;
-    } else {
+    }
+    else {
         return STATUS_MALLOCERR;
     }
 }
 
 UNUSED_FUNCTION
-static struct simple_extra *smart_extra_get(struct string_map* self)
+static MemExtra *thisGetExta(struct StringHashTable *self)
 {
-    assert (self->tag == STRING_ID_MAP_SMART);
-    return (struct simple_extra *)(self->extra);
+    assert (self->tag == STRINGHASHTABLE_MEM);
+    return (MemExtra *) (self->extra);
 }
 
 UNUSED_FUNCTION
-static int smart_bucket_create(struct simple_bucket* buckets, size_t num_buckets, size_t bucket_cap,
-        Allocator* alloc)
+static int BucketCreate(Bucket *buckets, size_t numBuckets, size_t bucketCap,
+                        Allocator *alloc)
 {
     CHECK_NON_NULL(buckets);
 
     // TODO: parallize this!
-    while (num_buckets--) {
-        struct simple_bucket *bucket = buckets++;
-        ng5_slice_list_create(&bucket->slice_list, alloc, bucket_cap);
+    while (numBuckets--) {
+        Bucket *bucket = buckets++;
+        SliceListCreate(&bucket->sliceList, alloc, bucketCap);
     }
 
     return STATUS_OK;
 }
 
-static int smart_bucket_drop(struct simple_bucket* buckets, size_t num_buckets, Allocator* alloc)
+static int BucketDrop(Bucket *buckets, size_t numBuckets, Allocator *alloc)
 {
     UNUSED(alloc);
     CHECK_NON_NULL(buckets);
 
-    while (num_buckets--) {
-        struct simple_bucket *bucket = buckets++;
-        ng5_slice_list_drop(&bucket->slice_list);
+    while (numBuckets--) {
+        Bucket *bucket = buckets++;
+        SliceListDrop(&bucket->sliceList);
     }
 
     return STATUS_OK;
 }
 
-static int smart_bucket_insert(struct simple_bucket* bucket, const char* restrict key, StringId value,
-        Allocator* alloc, struct string_map_counters* counter)
+static int BucketInsert(Bucket *bucket, const char *restrict key, StringId value,
+                        Allocator *alloc, StringHashCounters *counter)
 {
     UNUSED(counter);
     UNUSED(alloc);
@@ -435,54 +462,59 @@ static int smart_bucket_insert(struct simple_bucket* bucket, const char* restric
     CHECK_NON_NULL(bucket);
     CHECK_NON_NULL(key);
 
-    ng5_slice_handle_t          handle;
+    SliceHandle handle;
 
     /* Optimization 1/5: EMPTY GUARD (but before "find" call); if this bucket has no occupied slots, do not perform any lookup and comparison */
-    ng5_slice_list_lookup_by_key(&handle, &bucket->slice_list, key);
+    SliceListLookupByKey(&handle, &bucket->sliceList, key);
 
-    if (handle.is_contained) {
+    if (handle.isContained) {
         /* entry found by key */
         assert(value == handle.value);
         //debug(SMART_MAP_TAG, "debug(SMART_MAP_TAG, \"*** put *** '%s' into bucket [new]\", key);*** put *** '%s' into bucket [already contained]", key);
-    } else {
+    }
+    else {
         /* no entry found */
         //debug(SMART_MAP_TAG, "*** put *** '%s' into bucket [new]", key);
-        ng5_slice_list_insert(&bucket->slice_list, (char **) &key, &value, 1);
+        SliceListInsert(&bucket->sliceList, (char **) &key, &value, 1);
     }
 
     return STATUS_OK;
 }
 
-static int smart_map_insert_bulk(Vector ofType(simple_bucket)* buckets, char* const* restrict keys,
-        const StringId* restrict values, size_t* restrict bucket_idxs, size_t num_pairs, Allocator* alloc,
-        struct string_map_counters* counter)
+static int thisInsertBulk(Vector ofType(Bucket) *buckets,
+                          char *const *restrict keys,
+                          const StringId *restrict values,
+                          size_t *restrict bucketIdxs,
+                          size_t numPairs,
+                          Allocator *alloc,
+                          StringHashCounters *counter)
 {
     CHECK_NON_NULL(buckets)
     CHECK_NON_NULL(keys)
     CHECK_NON_NULL(values)
-    CHECK_NON_NULL(bucket_idxs)
+    CHECK_NON_NULL(bucketIdxs)
 
-    struct simple_bucket *buckets_data = (struct simple_bucket *) ng5_vector_data(buckets);
+    Bucket *buckets_data = (Bucket *) VectorData(buckets);
     int status = STATUS_OK;
-    for (register size_t i = 0; status == STATUS_OK && i < num_pairs; i++) {
-        size_t       bucket_idx      = bucket_idxs[i];
-        const char  *key             = keys[i];
-        StringId     value           = values[i];
+    for (register size_t i = 0; status == STATUS_OK && i < numPairs; i++) {
+        size_t bucketIdx = bucketIdxs[i];
+        const char *key = keys[i];
+        StringId value = values[i];
 
-        struct simple_bucket *bucket = buckets_data + bucket_idx;
-        status = smart_bucket_insert(bucket, key, value, alloc, counter);
+        Bucket *bucket = buckets_data + bucketIdx;
+        status = BucketInsert(bucket, key, value, alloc, counter);
     }
 
     return status;
 }
 
-static int smart_map_insert_exact(Vector ofType(simple_bucket)* buckets, const char * restrict key,
-        StringId value, size_t bucket_idx, Allocator* alloc, struct string_map_counters* counter)
+static int thisInsertExact(Vector ofType(Bucket) *buckets, const char *restrict key,
+                           StringId value, size_t bucketIdx, Allocator *alloc, StringHashCounters *counter)
 {
     CHECK_NON_NULL(buckets)
     CHECK_NON_NULL(key)
 
-    struct simple_bucket *buckets_data = (struct simple_bucket *) ng5_vector_data(buckets);
-    struct simple_bucket *bucket = buckets_data + bucket_idx;
-    return smart_bucket_insert(bucket, key, value, alloc, counter);
+    Bucket *buckets_data = (Bucket *) VectorData(buckets);
+    Bucket *bucket = buckets_data + bucketIdx;
+    return BucketInsert(bucket, key, value, alloc, counter);
 }

@@ -37,13 +37,13 @@ NG5_BEGIN_DECL
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-typedef size_t slot_vector_slot_t;
+typedef size_t SlotVectorSlot;
 
-struct slot_vector
+typedef struct SlotVector
 {
     Vector ofType(T) content;
-    Vector ofType(slot_vector_slot_t) freelist;
-};
+    Vector ofType(slot_vector_slot_t) freeList;
+} SlotVector;
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
@@ -51,24 +51,24 @@ struct slot_vector
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-int slot_vector_create(struct slot_vector *vector, const Allocator *alloc, size_t elem_size, size_t cap_elems);
+int SlotVectorCreate(SlotVector *vector, const Allocator *alloc, size_t elemSize, size_t capElems);
 
-int slot_vector_set_growfactor(struct slot_vector *vec, float factor);
+int SlotVectorSetGrowFactor(SlotVector *vec, float factor);
 
-int slot_vector_drop(struct slot_vector *vec);
+int SlotVectorDrop(SlotVector *vec);
 
-int slot_vector_is_empty(struct slot_vector *vec);
+int SlotVectorIsEmpty(SlotVector *vec);
 
-int slot_vector_insert(struct slot_vector *vec, optional Vector ofType(slot_vector_slot_t) *ids,
-                       const void *data, size_t num_elems);
+int SlotVectorInsert(SlotVector *vec, optional Vector ofType(SlotVectorSlot) *ids,
+                     const void *data, size_t numElems);
 
-const void *slot_vector_at(struct slot_vector *vec, slot_vector_slot_t slot);
+const void *SlotVectorAt(SlotVector *vec, SlotVectorSlot slot);
 
-int slot_vector_remove(struct slot_vector *vec, slot_vector_slot_t slot);
+int SlotVectorRemove(SlotVector *vec, SlotVectorSlot slot);
 
-size_t slot_vector_len(const struct slot_vector *vec);
+size_t SlotVectorLength(const SlotVector *vec);
 
-size_t slot_vector_cap(const struct slot_vector *vec);
+size_t SlotVectorCapacity(const SlotVector *vec);
 
 NG5_END_DECL
 

@@ -39,7 +39,7 @@
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-#define STRING_DIC_ASYNC_TAG "str_dic_async"
+#define STRING_DIC_ASYNC_TAG "strdic_async"
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
@@ -47,7 +47,7 @@
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-#define hash_func                  hash_sax
+#define HASH_FUNCTION                  HashSax
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
@@ -55,60 +55,58 @@
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-typedef struct async_extra async_extra_t;
+typedef struct AsyncExtra AsyncExtra;
 
-typedef struct carrier
+typedef struct Carrier
 {
-    string_dic_t local_dict;
+    StringDictionary localDictionary;
     pthread_t thread;
     size_t id;
-} carrier_t;
+} Carrier;
 
-typedef struct async_extra
+typedef struct AsyncExtra
 {
-    Vector ofType(carrier_t) carriers;
-    Vector ofType(carrier_t *) carrier_mapping;
-    ng5_spinlock_t spinlock;
+    Vector ofType(Carrier) carriers;
+    Vector ofType(Carrier *) carrierMapping;
+    Spinlock lock;
+} AsyncExtra;
 
-} async_extra_t;
-
-typedef struct carrier_insert_arg_t
+typedef struct ParallelInsertArg
 {
     Vector ofType(char *) strings;
     StringId *out;
-    carrier_t *carrier;
-    bool write_out;
-    bool did_work;
-    uint_fast16_t insert_nthreads;
-} carrier_insert_arg_t;
+    Carrier *carrier;
+    bool enableWriteOut;
+    bool didWork;
+    uint_fast16_t insertNumThreads;
+} ParallelInsertArg;
 
-typedef struct carrier_remove_arg_t
+typedef struct ParallelRemoveArg
 {
-    Vector ofType(StringId) *local_ids;
-    carrier_t *carrier;
+    Vector ofType(StringId) *localIds;
+    Carrier *carrier;
     int result;
-    bool did_work;
-} carrier_remove_arg_t;
+    bool didWork;
+} ParallelRemoveArg;
 
-typedef struct carrier_locate_arg_t
+typedef struct ParallelLocateArg
 {
-
-    carrier_t *carrier;
-    StringId *out_ids;
-    bool *out_found_mask;
-    size_t out_num_not_found;
-    Vector ofType(char *) in_keys;
+    Carrier *carrier;
+    StringId *idsOut;
+    bool *foundMaskOut;
+    size_t numNotFoundOut;
+    Vector ofType(char *) keysIn;
     int result;
-    bool did_work;
-} carrier_locate_arg_t;
+    bool didWork;
+} ParallelLocateArg;
 
-typedef struct carrier_extract_arg_t
+typedef struct ParallelExtractArg
 {
-    Vector ofType(StringId) in_local_ids;
-    char **out_strings;
-    carrier_t *carrier;
-    bool did_work;
-} carrier_extract_arg_t;
+    Vector ofType(StringId) localIdsIn;
+    char **stringsOut;
+    Carrier *carrier;
+    bool didWork;
+} ParallelExtractArg;
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
@@ -116,18 +114,17 @@ typedef struct carrier_extract_arg_t
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-#define hashcode_of(string)                                     \
-    hash_func(strlen(string), string)
+#define HASHCODE_OF(string)                                                                                            \
+    HASH_FUNCTION(strlen(string), string)
 
-#define string_id_make_global(thread_id, thread_local_id)       \
-    ((thread_id << 54) | thread_local_id)
+#define MAKE_GLOBAL(threadId, localThreadId)                                                                           \
+    ((threadId << 54) | localThreadId)
 
-#define string_id_get_owner_of_global(global_id)                \
-    (global_id >> 54)
+#define GET_OWNER(globalId)                                                                                            \
+    (globalId >> 54)
 
-#define string_id_get_local_id_of_global(global_id)             \
-    ((~((StringId) 0)) >> 10 & global_string_id);
-
+#define GET_STRINGID(globalId)                                                                                         \
+    ((~((StringId) 0)) >> 10 & globalStringId);
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
@@ -135,33 +132,33 @@ typedef struct carrier_extract_arg_t
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-static int async_drop(struct Dictionary *self);
-static int async_insert(struct Dictionary *self,
-                        StringId **out,
-                        char *const *strings,
-                        size_t num_strings,
-                        size_t nthreads);
-static int async_remove(struct Dictionary *self, StringId *strings, size_t num_strings);
-static int async_locate_safe(struct Dictionary *self, StringId **out, bool **found_mask,
-                             size_t *num_not_found, char *const *keys, size_t num_keys);
-static int async_locate_fast(struct Dictionary *self, StringId **out, char *const *keys,
-                             size_t num_keys);
-static char **async_extract(struct Dictionary *self, const StringId *ids, size_t num_ids);
-static int async_free(struct Dictionary *self, void *ptr);
+static int thisDrop(struct StringDictionary *self);
+static int thisInsert(struct StringDictionary *self,
+                      StringId **out,
+                      char *const *strings,
+                      size_t numStrings,
+                      size_t __numThreads);
+static int thisRemove(struct StringDictionary *self, StringId *strings, size_t numStrings);
+static int thisLocateSafe(struct StringDictionary *self, StringId **out, bool **foundMask,
+                          size_t *numNotFound, char *const *keys, size_t numKeys);
+static int thisLocateFast(struct StringDictionary *self, StringId **out, char *const *keys,
+                          size_t numKeys);
+static char **thisExtract(struct StringDictionary *self, const StringId *ids, size_t numIds);
+static int thisFree(struct StringDictionary *self, void *ptr);
 
-static int async_num_distinct(struct Dictionary *self, size_t *num);
+static int thisNumDistinct(struct StringDictionary *self, size_t *num);
 
-static int async_reset_counters(struct Dictionary *self);
-static int async_counters(struct Dictionary *self, struct string_map_counters *counters);
+static int thisResetCounters(struct StringDictionary *self);
+static int thisCounters(struct StringDictionary *self, StringHashCounters *counters);
 
-static int async_lock(struct Dictionary *self);
-static int async_unlock(struct Dictionary *self);
+static int thisLock(struct StringDictionary *self);
+static int thisUnlock(struct StringDictionary *self);
 
-static int async_extra_create(struct Dictionary *self, size_t capacity, size_t num_index_buckets,
-                              size_t approx_num_unique_str, size_t nthreads);
+static int thisCreateExtra(struct StringDictionary *self, size_t capacity, size_t numIndexBuckets,
+                           size_t approxNumUniqueStr, size_t numThreads);
 
-static int async_setup_carriers(struct Dictionary *self, size_t capacity, size_t num_index_buckets,
-                                size_t approx_num_unique_str, size_t nthreads);
+static int thisSetupCarriers(struct StringDictionary *self, size_t capacity, size_t numIndexBuckets,
+                             size_t approxNumUniqueStr, size_t numThreads);
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
@@ -169,10 +166,10 @@ static int async_setup_carriers(struct Dictionary *self, size_t capacity, size_t
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-#define async_extra_get(self)                       \
-({                                                  \
-    CHECK_TAG(self->tag, STRING_DIC_ASYNC);         \
-    (async_extra_t *) self->extra;                  \
+#define THIS_EXTRAS(self)                                                                                              \
+({                                                                                                                     \
+    CHECK_TAG(self->tag, STRING_DIC_ASYNC);                                                                            \
+    (AsyncExtra *) self->extra;                                                                                        \
 })
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -181,24 +178,24 @@ static int async_setup_carriers(struct Dictionary *self, size_t capacity, size_t
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-int string_dic_create_async(struct Dictionary *dic, size_t capacity, size_t num_index_buckets,
-                            size_t approx_num_unique_str, size_t nthreads, const Allocator *alloc)
+int StringDictionaryCreateAsync(struct StringDictionary *dic, size_t capacity, size_t numIndexBuckets,
+                                size_t approxNumUniqueStr, size_t numThreads, const Allocator *alloc)
 {
     CHECK_SUCCESS(AllocatorThisOrDefault(&dic->alloc, alloc));
 
-    dic->tag = STRING_DIC_ASYNC;
-    dic->drop = async_drop;
-    dic->insert = async_insert;
-    dic->remove = async_remove;
-    dic->locate_safe = async_locate_safe;
-    dic->locate_fast = async_locate_fast;
-    dic->extract = async_extract;
-    dic->free = async_free;
-    dic->reset_counters = async_reset_counters;
-    dic->counters = async_counters;
-    dic->num_distinct = async_num_distinct;
+    dic->tag = STRDIC_ASYNC;
+    dic->drop = thisDrop;
+    dic->insert = thisInsert;
+    dic->remove = thisRemove;
+    dic->locateSafe = thisLocateSafe;
+    dic->locateFast = thisLocateFast;
+    dic->extract = thisExtract;
+    dic->free = thisFree;
+    dic->resetCounters = thisResetCounters;
+    dic->counters = thisCounters;
+    dic->numDistinct = thisNumDistinct;
 
-    CHECK_SUCCESS(async_extra_create(dic, capacity, num_index_buckets, approx_num_unique_str, nthreads));
+    CHECK_SUCCESS(thisCreateExtra(dic, capacity, numIndexBuckets, approxNumUniqueStr, numThreads));
     return STATUS_OK;
 }
 
@@ -208,302 +205,302 @@ int string_dic_create_async(struct Dictionary *dic, size_t capacity, size_t num_
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-static int async_extra_create(struct Dictionary *self, size_t capacity, size_t num_index_buckets,
-                              size_t approx_num_unique_str, size_t nthreads)
+static int thisCreateExtra(struct StringDictionary *self, size_t capacity, size_t numIndexBuckets,
+                           size_t approxNumUniqueStr, size_t numThreads)
 {
     assert(self);
 
-    self->extra = AllocatorMalloc(&self->alloc, sizeof(async_extra_t));
-    async_extra_t *extra = async_extra_get(self);
-    ng5_spinlock_create(&extra->spinlock);
-    VectorCreate(&extra->carriers, &self->alloc, sizeof(carrier_t), nthreads);
-    async_setup_carriers(self, capacity, num_index_buckets, approx_num_unique_str, nthreads);
-    VectorCreate(&extra->carrier_mapping, &self->alloc, sizeof(carrier_t *), capacity);
+    self->extra = AllocatorMalloc(&self->alloc, sizeof(AsyncExtra));
+    AsyncExtra *extra = THIS_EXTRAS(self);
+    SpinlockCreate(&extra->lock);
+    VectorCreate(&extra->carriers, &self->alloc, sizeof(Carrier), numThreads);
+    thisSetupCarriers(self, capacity, numIndexBuckets, approxNumUniqueStr, numThreads);
+    VectorCreate(&extra->carrierMapping, &self->alloc, sizeof(Carrier *), capacity);
 
     return STATUS_OK;
 }
 
-static int async_drop(struct Dictionary *self)
+static int thisDrop(struct StringDictionary *self)
 {
-    CHECK_TAG(self->tag, STRING_DIC_ASYNC);
-    async_extra_t *extra = async_extra_get(self);
-    for (size_t i = 0; i < extra->carriers.num_elems; i++) {
-        carrier_t *carrier = ng5_vector_get(&extra->carriers, i, carrier_t);
-        string_dic_drop(&carrier->local_dict);
+    CHECK_TAG(self->tag, STRDIC_ASYNC);
+    AsyncExtra *extra = THIS_EXTRAS(self);
+    for (size_t i = 0; i < extra->carriers.numElems; i++) {
+        Carrier *carrier = VECTOR_GET(&extra->carriers, i, Carrier);
+        StringDictionaryDrop(&carrier->localDictionary);
     }
     CHECK_SUCCESS(VectorDrop(&extra->carriers));
-    CHECK_SUCCESS(VectorDrop(&extra->carrier_mapping));
+    CHECK_SUCCESS(VectorDrop(&extra->carrierMapping));
     CHECK_SUCCESS(AllocatorFree(&self->alloc, extra));
     return STATUS_OK;
 }
 
-void *carrier_remove_func(void *args)
+void *parallelRemoveFunction(void *args)
 {
-    carrier_remove_arg_t *carrier_arg = (carrier_remove_arg_t *) args;
-    StringId len = ng5_vector_len(carrier_arg->local_ids);
-    carrier_arg->did_work = len > 0;
+    ParallelRemoveArg *carrierArg = (ParallelRemoveArg *) args;
+    StringId len = VectorLength(carrierArg->localIds);
+    carrierArg->didWork = len > 0;
 
-    DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu spawned for remove task (%zu elements)", carrier_arg->carrier->id,
-          ng5_vector_len(carrier_arg->local_ids));
+    DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu spawned for remove task (%zu elements)", carrierArg->carrier->id,
+          VectorLength(carrierArg->localIds));
     if (len > 0) {
-        struct Dictionary *dic = &carrier_arg->carrier->local_dict;
-        StringId *ids = ng5_vector_all(carrier_arg->local_ids, StringId);
-        carrier_arg->result = string_dic_remove(dic, ids, len);
-        DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu task done", carrier_arg->carrier->id);
+        struct StringDictionary *dic = &carrierArg->carrier->localDictionary;
+        StringId *ids = VECTOR_ALL(carrierArg->localIds, StringId);
+        carrierArg->result = StringDictionaryRemove(dic, ids, len);
+        DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu task done", carrierArg->carrier->id);
     }
     else {
-        carrier_arg->result = STATUS_OK;
-        WARN(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", carrier_arg->carrier->id);
+        carrierArg->result = STATUS_OK;
+        WARN(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", carrierArg->carrier->id);
     }
 
     return NULL;
 }
 
-void *carrier_insert_func(void *args)
+void *parallelInsertFunction(void *args)
 {
-    carrier_insert_arg_t *restrict this_args = (carrier_insert_arg_t *restrict) args;
-    this_args->did_work = this_args->strings.num_elems > 0;
+    ParallelInsertArg *restrict thisArgs = (ParallelInsertArg *restrict) args;
+    thisArgs->didWork = thisArgs->strings.numElems > 0;
 
-    TRACE(STRING_DIC_ASYNC_TAG, "thread-local insert function started (thread %zu)", this_args->carrier->id);
-    DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu spawned for insert task (%zu elements)", this_args->carrier->id,
-          ng5_vector_len(&this_args->strings));
+    TRACE(STRING_DIC_ASYNC_TAG, "thread-local insert function started (thread %zu)", thisArgs->carrier->id);
+    DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu spawned for insert task (%zu elements)", thisArgs->carrier->id,
+          VectorLength(&thisArgs->strings));
 
-    if (this_args->did_work) {
+    if (thisArgs->didWork) {
         TRACE(STRING_DIC_ASYNC_TAG,
               "thread %zu starts insertion of %zu strings",
-              this_args->carrier->id,
-              ng5_vector_len(&this_args->strings));
-        char **data = (char **) ng5_vector_data(&this_args->strings);
+              thisArgs->carrier->id,
+              VectorLength(&thisArgs->strings));
+        char **data = (char **) VectorData(&thisArgs->strings);
 
-        int status = string_dic_insert(&this_args->carrier->local_dict,
-                                       this_args->write_out ? &this_args->out : NULL,
-                                       data, ng5_vector_len(&this_args->strings), this_args->insert_nthreads);
+        int status = StringDictionaryInsert(&thisArgs->carrier->localDictionary,
+                                            thisArgs->enableWriteOut ? &thisArgs->out : NULL,
+                                            data, VectorLength(&thisArgs->strings), thisArgs->insertNumThreads);
 
         PANIC_IF(status != STATUS_OK, "internal error during thread-local string dictionary building process");
-        DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu done", this_args->carrier->id);
+        DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu done", thisArgs->carrier->id);
     }
     else {
-        WARN(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", this_args->carrier->id);
+        WARN(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", thisArgs->carrier->id);
     }
 
     return NULL;
 }
 
-void *carrier_locate_safe_func(void *args)
+void *parallelLocateSafeFunction(void *args)
 {
-    carrier_locate_arg_t *restrict this_args = (carrier_locate_arg_t *restrict) args;
-    this_args->did_work = ng5_vector_len(&this_args->in_keys) > 0;
+    ParallelLocateArg *restrict thisArgs = (ParallelLocateArg *restrict) args;
+    thisArgs->didWork = VectorLength(&thisArgs->keysIn) > 0;
 
-    TRACE(STRING_DIC_ASYNC_TAG, "thread-local 'locate' function invoked for thread %zu...", this_args->carrier->id)
+    TRACE(STRING_DIC_ASYNC_TAG, "thread-local 'locate' function invoked for thread %zu...", thisArgs->carrier->id)
 
-    DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu spawned for locate (safe) task (%zu elements)", this_args->carrier->id,
-          ng5_vector_len(&this_args->in_keys));
+    DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu spawned for locate (safe) task (%zu elements)", thisArgs->carrier->id,
+          VectorLength(&thisArgs->keysIn));
 
-    if (this_args->did_work) {
-        this_args->result = string_dic_locate_safe(&this_args->out_ids,
-                                                   &this_args->out_found_mask,
-                                                   &this_args->out_num_not_found,
-                                                   &this_args->carrier->local_dict,
-                                                   ng5_vector_all(&this_args->in_keys, char *),
-                                                   ng5_vector_len(&this_args->in_keys));
+    if (thisArgs->didWork) {
+        thisArgs->result = StringDictionaryLocateSafe(&thisArgs->idsOut,
+                                                      &thisArgs->foundMaskOut,
+                                                      &thisArgs->numNotFoundOut,
+                                                      &thisArgs->carrier->localDictionary,
+                                                      VECTOR_ALL(&thisArgs->keysIn, char *),
+                                                      VectorLength(&thisArgs->keysIn));
 
-        DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu done", this_args->carrier->id);
+        DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu done", thisArgs->carrier->id);
     }
     else {
-        WARN(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", this_args->carrier->id);
+        WARN(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", thisArgs->carrier->id);
     }
 
     return NULL;
 }
 
-void *carrier_extract_func(void *args)
+void *parallelExtractFunction(void *args)
 {
-    carrier_extract_arg_t *restrict this_args = (carrier_extract_arg_t *restrict) args;
-    this_args->did_work = ng5_vector_len(&this_args->in_local_ids) > 0;
+    ParallelExtractArg *restrict thisArgs = (ParallelExtractArg *restrict) args;
+    thisArgs->didWork = VectorLength(&thisArgs->localIdsIn) > 0;
 
-    DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu spawned for extract task (%zu elements)", this_args->carrier->id,
-          ng5_vector_len(&this_args->in_local_ids));
+    DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu spawned for extract task (%zu elements)", thisArgs->carrier->id,
+          VectorLength(&thisArgs->localIdsIn));
 
-    if (this_args->did_work) {
-        this_args->out_strings = string_dic_extract(&this_args->carrier->local_dict,
-                                                    ng5_vector_all(&this_args->in_local_ids, StringId),
-                                                    ng5_vector_len(&this_args->in_local_ids));
-        DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu done", this_args->carrier->id);
+    if (thisArgs->didWork) {
+        thisArgs->stringsOut = StringDictionaryExtract(&thisArgs->carrier->localDictionary,
+                                                       VECTOR_ALL(&thisArgs->localIdsIn, StringId),
+                                                       VectorLength(&thisArgs->localIdsIn));
+        DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu done", thisArgs->carrier->id);
     }
     else {
-        WARN(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", this_args->carrier->id);
+        WARN(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", thisArgs->carrier->id);
     }
 
     return NULL;
 }
 
-static void async_sync(Vector ofType(carrier_t) *carriers, size_t nthreads)
+static void Synchronize(Vector ofType(Carrier) *carriers, size_t numThreads)
 {
-    DEBUG(STRING_DIC_ASYNC_TAG, "barrier installed for %d threads", nthreads);
+    DEBUG(STRING_DIC_ASYNC_TAG, "barrier installed for %d threads", numThreads);
 
-    timestamp_t begin = time_current_time_ms();
-    for (uint_fast16_t thread_id = 0; thread_id < nthreads; thread_id++) {
-        volatile carrier_t *carrier = ng5_vector_get(carriers, thread_id, carrier_t);
+    Timestamp begin = TimeCurrentSystemTime();
+    for (uint_fast16_t threadId = 0; threadId < numThreads; threadId++) {
+        volatile Carrier *carrier = VECTOR_GET(carriers, threadId, Carrier);
         pthread_join(carrier->thread, NULL);
         DEBUG(STRING_DIC_ASYNC_TAG, "thread %d joined", carrier->id);
     }
-    timestamp_t end = time_current_time_ms();
-    timestamp_t duration = (end - begin);
+    Timestamp end = TimeCurrentSystemTime();
+    Timestamp duration = (end - begin);
     UNUSED(duration);
 
-    DEBUG(STRING_DIC_ASYNC_TAG, "barrier passed for %d threads after %f seconds", nthreads, duration / 1000.0f);
+    DEBUG(STRING_DIC_ASYNC_TAG, "barrier passed for %d threads after %f seconds", numThreads, duration / 1000.0f);
 }
 
-static void thread_assign_create(atomic_uint_fast16_t **str_carrier_mapping, atomic_size_t **carrier_nstrings,
-                                 size_t **str_carrier_idx_mapping,
-                                 Allocator *alloc, size_t num_strings, size_t nthreads)
+static void createThreadAssignment(atomic_uint_fast16_t **strCarrierMapping, atomic_size_t **carrierNumStrings,
+                                   size_t **strCarrierIdxMapping,
+                                   Allocator *alloc, size_t numStrings, size_t numThreads)
 {
-    /* map string depending on hash value to a particular carrier */
-    *str_carrier_mapping = AllocatorMalloc(alloc, num_strings * sizeof(atomic_uint_fast16_t));
-    memset(*str_carrier_mapping, 0, num_strings * sizeof(atomic_uint_fast16_t));
+    /* map string depending on hash value to a particular Carrier */
+    *strCarrierMapping = AllocatorMalloc(alloc, numStrings * sizeof(atomic_uint_fast16_t));
+    memset(*strCarrierMapping, 0, numStrings * sizeof(atomic_uint_fast16_t));
 
-    /* counters to compute how many strings go to a particular carrier */
-    *carrier_nstrings = AllocatorMalloc(alloc, nthreads * sizeof(atomic_size_t));
-    memset(*carrier_nstrings, 0, nthreads * sizeof(atomic_size_t));
+    /* counters to compute how many strings go to a particular Carrier */
+    *carrierNumStrings = AllocatorMalloc(alloc, numThreads * sizeof(atomic_size_t));
+    memset(*carrierNumStrings, 0, numThreads * sizeof(atomic_size_t));
 
-    /* an inverted index that contains the i-th position for string k that was assigned to carrier m.
-     * With this, given a (global) string and and its carrier, one can have directly the position of the
+    /* an inverted index that contains the i-th position for string k that was assigned to Carrier m.
+     * With this, given a (global) string and and its Carrier, one can have directly the position of the
      * string in the carriers "thread-local locate" args */
-    *str_carrier_idx_mapping = AllocatorMalloc(alloc, num_strings * sizeof(size_t));
+    *strCarrierIdxMapping = AllocatorMalloc(alloc, numStrings * sizeof(size_t));
 }
 
-static void thread_assign_drop(Allocator *alloc, atomic_uint_fast16_t *str_carrier_mapping,
-                               atomic_size_t *carrier_nstrings, size_t *str_carrier_idx_mapping)
+static void dropThreadAssignment(Allocator *alloc, atomic_uint_fast16_t *strCarrierMapping,
+                                 atomic_size_t *carrierNumStrings, size_t *strCarrierIdxMapping)
 {
-    AllocatorFree(alloc, carrier_nstrings);
-    AllocatorFree(alloc, str_carrier_mapping);
-    AllocatorFree(alloc, str_carrier_idx_mapping);
+    AllocatorFree(alloc, carrierNumStrings);
+    AllocatorFree(alloc, strCarrierMapping);
+    AllocatorFree(alloc, strCarrierIdxMapping);
 }
 
-typedef struct compute_thread_assign_parallel_func_args_t
+typedef struct ParallelComputeThreadAssignmentArg
 {
-    atomic_uint_fast16_t *str_carrier_mapping;
-    size_t nthreads;
-    atomic_size_t *carrier_nstrings;
-    char *const *base_strings;
-} compute_thread_assign_parallel_func_args_t;
+    atomic_uint_fast16_t *strCarrierMapping;
+    size_t numThreads;
+    atomic_size_t *carrierNumStrings;
+    char *const *baseStrings;
+} ParallelComputeThreadAssignmentArg;
 
-static void compute_thread_assign_parallel_func(const void *restrict start, size_t width, size_t len,
-                                                void *restrict args, ThreadId tid)
+static void ParallelComputeThreadAssignmentFunction(const void *restrict start, size_t width, size_t len,
+                                                    void *restrict args, ThreadId tid)
 {
     UNUSED(tid);
     UNUSED(width);
 
     char *const *strings = (char *const *) start;
 
-    compute_thread_assign_parallel_func_args_t *func_args = (compute_thread_assign_parallel_func_args_t *) args;
+    ParallelComputeThreadAssignmentArg *funcArgs = (ParallelComputeThreadAssignmentArg *) args;
 
     while (len--) {
-        size_t i = strings - func_args->base_strings;
+        size_t i = strings - funcArgs->baseStrings;
         const char *key = *strings;
         /* re-using this hashcode for the thread-local dictionary is more costly than to compute it fresh
          * (due to more I/O with the RAM) */
-        size_t thread_id = hashcode_of(key) % func_args->nthreads;
-        atomic_fetch_add(&func_args->str_carrier_mapping[i], thread_id);
-        atomic_fetch_add(&func_args->carrier_nstrings[thread_id], 1);
+        size_t threadId = HASHCODE_OF(key) % funcArgs->numThreads;
+        atomic_fetch_add(&funcArgs->strCarrierMapping[i], threadId);
+        atomic_fetch_add(&funcArgs->carrierNumStrings[threadId], 1);
         strings++;
     }
 }
 
-static void compute_thread_assign(atomic_uint_fast16_t *str_carrier_mapping, atomic_size_t *carrier_nstrings,
-                                  char *const *strings, size_t num_strings, size_t nthreads)
+static void computeThreadAssignment(atomic_uint_fast16_t *strCarrierMapping, atomic_size_t *carrierNumStrings,
+                                    char *const *strings, size_t numStrings, size_t numThreads)
 {
-    compute_thread_assign_parallel_func_args_t args = {
-        .base_strings        = strings,
-        .carrier_nstrings    = carrier_nstrings,
-        .nthreads            = nthreads,
-        .str_carrier_mapping = str_carrier_mapping
+    ParallelComputeThreadAssignmentArg args = {
+        .baseStrings = strings,
+        .carrierNumStrings = carrierNumStrings,
+        .numThreads = numThreads,
+        .strCarrierMapping = strCarrierMapping
     };
     ParallelFor(strings,
                 sizeof(char *const *),
-                num_strings,
-                compute_thread_assign_parallel_func,
+                numStrings,
+                ParallelComputeThreadAssignmentFunction,
                 &args,
                 ThreadingHint_Multi,
-                nthreads);
+                numThreads);
 
 }
 
-static int async_insert(struct Dictionary *self,
-                        StringId **out,
-                        char *const *strings,
-                        size_t num_strings,
-                        size_t __nthreads)
+static int thisInsert(struct StringDictionary *self,
+                      StringId **out,
+                      char *const *strings,
+                      size_t numStrings,
+                      size_t __numThreads)
 {
-    timestamp_t begin = time_current_time_ms();
-    INFO(STRING_DIC_ASYNC_TAG, "insert operation invoked: %zu strings in total", num_strings)
+    Timestamp begin = TimeCurrentSystemTime();
+    INFO(STRING_DIC_ASYNC_TAG, "insert operation invoked: %zu strings in total", numStrings)
 
 
-    CHECK_TAG(self->tag, STRING_DIC_ASYNC);
-    PANIC_IF(__nthreads != 0, "parameter 'nthreads' must be set to 0 for async dictionary")
+    CHECK_TAG(self->tag, STRDIC_ASYNC);
+    PANIC_IF(__numThreads != 0, "parameter 'numThreads' must be set to 0 for async dictionary")
 
-    async_lock(self);
+    thisLock(self);
 
-    async_extra_t *extra = async_extra_get(self);
-    uint_fast16_t nthreads = ng5_vector_len(&extra->carriers);
+    AsyncExtra *extra = THIS_EXTRAS(self);
+    uint_fast16_t numThreads = VectorLength(&extra->carriers);
 
-    atomic_uint_fast16_t *str_carrier_mapping;
-    size_t *str_carrier_idx_mapping;
-    atomic_size_t *carrier_nstrings;
+    atomic_uint_fast16_t *strCarrierMapping;
+    size_t *strCarrierIdxMapping;
+    atomic_size_t *carrierNumStrings;
 
 
-    thread_assign_create(&str_carrier_mapping, &carrier_nstrings, &str_carrier_idx_mapping,
-                         &self->alloc, num_strings, nthreads);
+    createThreadAssignment(&strCarrierMapping, &carrierNumStrings, &strCarrierIdxMapping,
+                           &self->alloc, numStrings, numThreads);
 
-    Vector ofType(carrier_insert_arg_t *) carrier_args;
-    VectorCreate(&carrier_args, &self->alloc, sizeof(carrier_insert_arg_t *), nthreads);
+    Vector ofType(ParallelInsertArg *) carrierArgs;
+    VectorCreate(&carrierArgs, &self->alloc, sizeof(ParallelInsertArg *), numThreads);
 
-    /* compute which carrier is responsible for which string */
-    compute_thread_assign(str_carrier_mapping, carrier_nstrings, strings, num_strings, nthreads);
+    /* compute which Carrier is responsible for which string */
+    computeThreadAssignment(strCarrierMapping, carrierNumStrings, strings, numStrings, numThreads);
 
     /* prepare to move string subsets to carriers */
-    for (uint_fast16_t i = 0; i < nthreads; i++) {
-        carrier_insert_arg_t *entry = AllocatorMalloc(&self->alloc, sizeof(carrier_insert_arg_t));
-        entry->carrier = ng5_vector_get(&extra->carriers, i, carrier_t);
-        entry->insert_nthreads = nthreads;
+    for (uint_fast16_t i = 0; i < numThreads; i++) {
+        ParallelInsertArg *entry = AllocatorMalloc(&self->alloc, sizeof(ParallelInsertArg));
+        entry->carrier = VECTOR_GET(&extra->carriers, i, Carrier);
+        entry->insertNumThreads = numThreads;
 
-        VectorCreate(&entry->strings, &self->alloc, sizeof(char *), max(1, carrier_nstrings[i]));
-        VectorPush(&carrier_args, &entry, 1);
+        VectorCreate(&entry->strings, &self->alloc, sizeof(char *), MAX(1, carrierNumStrings[i]));
+        VectorPush(&carrierArgs, &entry, 1);
         assert (entry->strings.base != NULL);
 
-        carrier_insert_arg_t *carrier_arg = *ng5_vector_get(&carrier_args, i, carrier_insert_arg_t *);
-        carrier_arg->out = NULL;
+        ParallelInsertArg *carrierArg = *VECTOR_GET(&carrierArgs, i, ParallelInsertArg *);
+        carrierArg->out = NULL;
     }
 
-    /* create per-carrier string subset */
+    /* create per-Carrier string subset */
     /* parallizing this makes no sense but waste of resources and energy */
-    for (size_t i = 0; i < num_strings; i++) {
-        uint_fast16_t thread_id = str_carrier_mapping[i];
-        carrier_insert_arg_t *carrier_arg = *ng5_vector_get(&carrier_args, thread_id, carrier_insert_arg_t *);
-        carrier_arg->write_out = out != NULL;
+    for (size_t i = 0; i < numStrings; i++) {
+        uint_fast16_t threadId = strCarrierMapping[i];
+        ParallelInsertArg *carrierArg = *VECTOR_GET(&carrierArgs, threadId, ParallelInsertArg *);
+        carrierArg->enableWriteOut = out != NULL;
 
         /* store local index of string i inside the thread */
-        str_carrier_idx_mapping[i] = ng5_vector_len(&carrier_arg->strings);
+        strCarrierIdxMapping[i] = VectorLength(&carrierArg->strings);
 
-        VectorPush(&carrier_arg->strings, &strings[i], 1);
+        VectorPush(&carrierArg->strings, &strings[i], 1);
     }
 
 
-    /* schedule insert operation per carrier */
-    TRACE(STRING_DIC_ASYNC_TAG, "schedule insert operation to %zu threads", nthreads)
-    for (uint_fast16_t thread_id = 0; thread_id < nthreads; thread_id++) {
-        carrier_insert_arg_t *carrier_arg = *ng5_vector_get(&carrier_args, thread_id, carrier_insert_arg_t *);
-        carrier_t *carrier = ng5_vector_get(&extra->carriers, thread_id, carrier_t);
-        TRACE(STRING_DIC_ASYNC_TAG, "create thread %zu...", thread_id)
-        pthread_create(&carrier->thread, NULL, carrier_insert_func, carrier_arg);
-        TRACE(STRING_DIC_ASYNC_TAG, "thread %zu created", thread_id)
+    /* schedule insert operation per Carrier */
+    TRACE(STRING_DIC_ASYNC_TAG, "schedule insert operation to %zu threads", numThreads)
+    for (uint_fast16_t threadId = 0; threadId < numThreads; threadId++) {
+        ParallelInsertArg *carrierArg = *VECTOR_GET(&carrierArgs, threadId, ParallelInsertArg *);
+        Carrier *carrier = VECTOR_GET(&extra->carriers, threadId, Carrier);
+        TRACE(STRING_DIC_ASYNC_TAG, "create thread %zu...", threadId)
+        pthread_create(&carrier->thread, NULL, parallelInsertFunction, carrierArg);
+        TRACE(STRING_DIC_ASYNC_TAG, "thread %zu created", threadId)
     }
-    TRACE(STRING_DIC_ASYNC_TAG, "scheduling done for %zu threads", nthreads)
+    TRACE(STRING_DIC_ASYNC_TAG, "scheduling done for %zu threads", numThreads)
 
     /* synchronize */
-    TRACE(STRING_DIC_ASYNC_TAG, "start synchronizing %zu threads", nthreads)
-    async_sync(&extra->carriers, nthreads);
-    TRACE(STRING_DIC_ASYNC_TAG, "%zu threads in sync", nthreads)
+    TRACE(STRING_DIC_ASYNC_TAG, "start synchronizing %zu threads", numThreads)
+    Synchronize(&extra->carriers, numThreads);
+    TRACE(STRING_DIC_ASYNC_TAG, "%zu threads in sync", numThreads)
 
     /* compute string ids; the string id produced by this implementation is a compound identifier encoding
      * both the owning thread id and the thread-local string id. For this, the returned (global) string identifier
@@ -514,43 +511,43 @@ static int async_insert(struct Dictionary *self,
      */
 
     /* optionally, return the created string ids. In case 'out' is NULL, nothing has to be done (especially
-     * none of the carrier threads allocated thread-local 'out's which mean that no cleanup must be done */
+     * none of the Carrier threads allocated thread-local 'out's which mean that no cleanup must be done */
 
     /* parallelizing the following block makes no sense but waste of compute power and energy */
     if (BRANCH_LIKELY(out != NULL)) {
-        StringId *total_out = AllocatorMalloc(&self->alloc, num_strings * sizeof(StringId));
-        size_t current_out = 0;
+        StringId *totalOut = AllocatorMalloc(&self->alloc, numStrings * sizeof(StringId));
+        size_t currentOut = 0;
 
-        for (size_t string_idx = 0; string_idx < num_strings; string_idx++) {
-            uint_fast16_t thread_id = str_carrier_mapping[string_idx];
-            size_t local_idx = str_carrier_idx_mapping[string_idx];
-            carrier_insert_arg_t *carrier_arg = *ng5_vector_get(&carrier_args, thread_id, carrier_insert_arg_t *);
-            StringId global_string_owner_id = thread_id;
-            StringId global_string_local_id = carrier_arg->out[local_idx];
-            StringId global_string_id = string_id_make_global(global_string_owner_id, global_string_local_id);
-            total_out[current_out++] = global_string_id;
+        for (size_t string_idx = 0; string_idx < numStrings; string_idx++) {
+            uint_fast16_t threadId = strCarrierMapping[string_idx];
+            size_t localIdx = strCarrierIdxMapping[string_idx];
+            ParallelInsertArg *carrierArg = *VECTOR_GET(&carrierArgs, threadId, ParallelInsertArg *);
+            StringId globalStringOwnerId = threadId;
+            StringId globalStringLocalId = carrierArg->out[localIdx];
+            StringId globalStringId = MAKE_GLOBAL(globalStringOwnerId, globalStringLocalId);
+            totalOut[currentOut++] = globalStringId;
         }
 
-        *out = total_out;
+        *out = totalOut;
     }
 
     /* cleanup */
-    for (uint_fast16_t thread_id = 0; thread_id < nthreads; thread_id++) {
-        carrier_insert_arg_t *carrier_arg = *ng5_vector_get(&carrier_args, thread_id, carrier_insert_arg_t *);
-        if (carrier_arg->did_work) {
-            string_dic_free(&carrier_arg->carrier->local_dict, carrier_arg->out);
+    for (uint_fast16_t threadId = 0; threadId < numThreads; threadId++) {
+        ParallelInsertArg *carrierArg = *VECTOR_GET(&carrierArgs, threadId, ParallelInsertArg *);
+        if (carrierArg->didWork) {
+            StringDictionaryFree(&carrierArg->carrier->localDictionary, carrierArg->out);
         }
-        VectorDrop(&carrier_arg->strings);
-        AllocatorFree(&self->alloc, carrier_arg);
+        VectorDrop(&carrierArg->strings);
+        AllocatorFree(&self->alloc, carrierArg);
     }
 
     /* cleanup */
-    thread_assign_drop(&self->alloc, str_carrier_mapping, carrier_nstrings, str_carrier_idx_mapping);
-    VectorDrop(&carrier_args);
+    dropThreadAssignment(&self->alloc, strCarrierMapping, carrierNumStrings, strCarrierIdxMapping);
+    VectorDrop(&carrierArgs);
 
-    async_unlock(self);
+    thisUnlock(self);
 
-    timestamp_t end = time_current_time_ms();
+    Timestamp end = TimeCurrentSystemTime();
     UNUSED(begin);
     UNUSED(end);
     INFO(STRING_DIC_ASYNC_TAG, "insertion operation done: %f seconds spent here", (end - begin) / 1000.0f)
@@ -558,64 +555,64 @@ static int async_insert(struct Dictionary *self,
     return STATUS_OK;
 }
 
-static int async_remove(struct Dictionary *self, StringId *strings, size_t num_strings)
+static int thisRemove(struct StringDictionary *self, StringId *strings, size_t numStrings)
 {
-    timestamp_t begin = time_current_time_ms();
-    INFO(STRING_DIC_ASYNC_TAG, "remove operation started: %zu strings to remove", num_strings);
+    Timestamp begin = TimeCurrentSystemTime();
+    INFO(STRING_DIC_ASYNC_TAG, "remove operation started: %zu strings to remove", numStrings);
 
-    CHECK_TAG(self->tag, STRING_DIC_ASYNC);
+    CHECK_TAG(self->tag, STRDIC_ASYNC);
 
-    async_lock(self);
+    thisLock(self);
 
-    carrier_remove_arg_t empty;
-    struct async_extra *extra = async_extra_get(self);
-    uint_fast16_t nthreads = ng5_vector_len(&extra->carriers);
-    size_t est_nstrings_per_thread = max(1, num_strings / nthreads);
-    Vector ofType(StringId) *str_map = AllocatorMalloc(&self->alloc, nthreads * sizeof(Vector));
+    ParallelRemoveArg empty;
+    struct AsyncExtra *extra = THIS_EXTRAS(self);
+    uint_fast16_t numThreads = VectorLength(&extra->carriers);
+    size_t approxNumStringsPerThread = MAX(1, numStrings / numThreads);
+    Vector ofType(StringId) *stringMap = AllocatorMalloc(&self->alloc, numThreads * sizeof(Vector));
 
-    Vector ofType(carrier_remove_arg_t) carrier_args;
-    VectorCreate(&carrier_args, &self->alloc, sizeof(carrier_remove_arg_t), nthreads);
+    Vector ofType(ParallelRemoveArg) carrierArgs;
+    VectorCreate(&carrierArgs, &self->alloc, sizeof(ParallelRemoveArg), numThreads);
 
     /* prepare thread-local subset of string ids */
-    VectorRepreatedPush(&carrier_args, &empty, nthreads);
-    for (uint_fast16_t thread_id = 0; thread_id < nthreads; thread_id++) {
-        VectorCreate(str_map + thread_id, &self->alloc, sizeof(StringId), est_nstrings_per_thread);
+    VectorRepreatedPush(&carrierArgs, &empty, numThreads);
+    for (uint_fast16_t threadId = 0; threadId < numThreads; threadId++) {
+        VectorCreate(stringMap + threadId, &self->alloc, sizeof(StringId), approxNumStringsPerThread);
     }
 
     /* compute subset of string ids per thread  */
-    for (size_t i = 0; i < num_strings; i++) {
-        StringId global_string_id = strings[i];
-        uint_fast16_t owning_thread_id = string_id_get_owner_of_global(global_string_id);
-        StringId local_string_id = string_id_get_local_id_of_global(global_string_id);
-        assert(owning_thread_id < nthreads);
+    for (size_t i = 0; i < numStrings; i++) {
+        StringId globalStringId = strings[i];
+        uint_fast16_t owningThreadId = GET_OWNER(globalStringId);
+        StringId localStringId = GET_STRINGID(globalStringId);
+        assert(owningThreadId < numThreads);
 
-        VectorPush(str_map + owning_thread_id, &local_string_id, 1);
+        VectorPush(stringMap + owningThreadId, &localStringId, 1);
     }
 
-    /* schedule remove operation per carrier */
-    for (uint_fast16_t thread_id = 0; thread_id < nthreads; thread_id++) {
-        carrier_t *carrier = ng5_vector_get(&extra->carriers, thread_id, carrier_t);
-        carrier_remove_arg_t *carrier_arg = ng5_vector_get(&carrier_args, thread_id, carrier_remove_arg_t);
-        carrier_arg->carrier = carrier;
-        carrier_arg->local_ids = str_map + thread_id;
+    /* schedule remove operation per Carrier */
+    for (uint_fast16_t threadId = 0; threadId < numThreads; threadId++) {
+        Carrier *carrier = VECTOR_GET(&extra->carriers, threadId, Carrier);
+        ParallelRemoveArg *carrierArg = VECTOR_GET(&carrierArgs, threadId, ParallelRemoveArg);
+        carrierArg->carrier = carrier;
+        carrierArg->localIds = stringMap + threadId;
 
-        pthread_create(&carrier->thread, NULL, carrier_remove_func, carrier_arg);
+        pthread_create(&carrier->thread, NULL, parallelRemoveFunction, carrierArg);
     }
 
     /* synchronize */
-    async_sync(&extra->carriers, nthreads);
+    Synchronize(&extra->carriers, numThreads);
 
     /* cleanup */
-    for (uint_fast16_t thread_id = 0; thread_id < nthreads; thread_id++) {
-        VectorDrop(str_map + thread_id);
+    for (uint_fast16_t threadId = 0; threadId < numThreads; threadId++) {
+        VectorDrop(stringMap + threadId);
     }
 
-    AllocatorFree(&self->alloc, str_map);
-    ng5_vector_data(&carrier_args);
+    AllocatorFree(&self->alloc, stringMap);
+    VectorData(&carrierArgs);
 
-    async_unlock(self);
+    thisUnlock(self);
 
-    timestamp_t end = time_current_time_ms();
+    Timestamp end = TimeCurrentSystemTime();
     UNUSED(begin);
     UNUSED(end);
     INFO(STRING_DIC_ASYNC_TAG, "remove operation done: %f seconds spent here", (end - begin) / 1000.0f)
@@ -623,124 +620,122 @@ static int async_remove(struct Dictionary *self, StringId *strings, size_t num_s
     return STATUS_OK;
 }
 
-static int async_locate_safe(struct Dictionary *self, StringId **out, bool **found_mask,
-                             size_t *num_not_found, char *const *keys, size_t num_keys)
+static int thisLocateSafe(struct StringDictionary *self, StringId **out, bool **foundMask,
+                          size_t *numNotFound, char *const *keys, size_t numKeys)
 {
-    timestamp_t begin = time_current_time_ms();
-    INFO(STRING_DIC_ASYNC_TAG, "locate (safe) operation started: %zu strings to locate", num_keys)
+    Timestamp begin = TimeCurrentSystemTime();
+    INFO(STRING_DIC_ASYNC_TAG, "locate (safe) operation started: %zu strings to locate", numKeys)
 
-    CHECK_TAG(self->tag, STRING_DIC_ASYNC);
+    CHECK_TAG(self->tag, STRDIC_ASYNC);
 
-    async_lock(self);
+    thisLock(self);
 
-    struct async_extra *extra = async_extra_get(self);
-    uint_fast16_t nthreads = ng5_vector_len(&extra->carriers);
+    struct AsyncExtra *extra = THIS_EXTRAS(self);
+    uint_fast16_t numThreads = VectorLength(&extra->carriers);
 
     /* global result output */
-    ALLOCATOR_MALLOC(StringId, global_out, num_keys, &self->alloc);
-    ALLOCATOR_MALLOC(bool, global_found_mask, num_keys, &self->alloc);
+    ALLOCATOR_MALLOC(StringId, globalOut, numKeys, &self->alloc);
+    ALLOCATOR_MALLOC(bool, globalFoundMask, numKeys, &self->alloc);
 
-    size_t global_num_not_found = 0;
+    size_t globalNumNotFound = 0;
 
-    atomic_uint_fast16_t *str_carrier_mapping;
-    size_t *str_carrier_idx_mapping;
-    atomic_size_t *carrier_nstrings;
+    atomic_uint_fast16_t *strCarrierMapping;
+    size_t *strCarrierIdxMapping;
+    atomic_size_t *carrierNumStrings;
 
-    carrier_locate_arg_t carrier_args[nthreads];
+    ParallelLocateArg carrierArgs[numThreads];
 
-    thread_assign_create(&str_carrier_mapping, &carrier_nstrings, &str_carrier_idx_mapping,
-                         &self->alloc, num_keys, nthreads);
+    createThreadAssignment(&strCarrierMapping, &carrierNumStrings, &strCarrierIdxMapping,
+                           &self->alloc, numKeys, numThreads);
 
-    /* compute which carrier is responsible for which string */
-    compute_thread_assign(str_carrier_mapping, carrier_nstrings, keys, num_keys, nthreads);
+    /* compute which Carrier is responsible for which string */
+    computeThreadAssignment(strCarrierMapping, carrierNumStrings, keys, numKeys, numThreads);
 
     /* prepare to move string subsets to carriers */
-    for (uint_fast16_t thread_id = 0; thread_id < nthreads; thread_id++) {
-        carrier_locate_arg_t *arg = carrier_args + thread_id;
-        VectorCreate(&arg->in_keys, &self->alloc, sizeof(char *), carrier_nstrings[thread_id]);
-        assert (&arg->in_keys.base != NULL);
+    for (uint_fast16_t threadId = 0; threadId < numThreads; threadId++) {
+        ParallelLocateArg *arg = carrierArgs + threadId;
+        VectorCreate(&arg->keysIn, &self->alloc, sizeof(char *), carrierNumStrings[threadId]);
+        assert (&arg->keysIn.base != NULL);
     }
 
-    TRACE(STRING_DIC_ASYNC_TAG, "computing per-thread string subset for %zu strings", num_keys)
-    /* create per-carrier string subset */
-    for (size_t i = 0; i < num_keys; i++) {
+    TRACE(STRING_DIC_ASYNC_TAG, "computing per-thread string subset for %zu strings", numKeys)
+    /* create per-Carrier string subset */
+    for (size_t i = 0; i < numKeys; i++) {
         /* get thread responsible for this particular string */
-        uint_fast16_t thread_id = str_carrier_mapping[i];
+        uint_fast16_t threadId = strCarrierMapping[i];
 
         /* get the thread-local argument list for the thread that is responsible for this particular string */
-        carrier_locate_arg_t *arg = carrier_args + thread_id;
+        ParallelLocateArg *arg = carrierArgs + threadId;
 
         /* store local index of string i inside the thread */
-        str_carrier_idx_mapping[i] = ng5_vector_len(&arg->in_keys);
+        strCarrierIdxMapping[i] = VectorLength(&arg->keysIn);
 
         /* push that string into the thread-local vector */
-        VectorPush(&arg->in_keys, &keys[i], 1);
+        VectorPush(&arg->keysIn, &keys[i], 1);
     }
 
-    TRACE(STRING_DIC_ASYNC_TAG, "schedule operation to threads to %zu threads...", nthreads)
+    TRACE(STRING_DIC_ASYNC_TAG, "schedule operation to threads to %zu threads...", numThreads)
     /* schedule operation to threads */
-    for (uint_fast16_t thread_id = 0; thread_id < nthreads; thread_id++) {
-        carrier_t *carrier = ng5_vector_get(&extra->carriers, thread_id, carrier_t);
-        carrier_locate_arg_t *arg = carrier_args + thread_id;
-
-        carrier_args[thread_id].carrier = carrier;
-        pthread_create(&carrier->thread, NULL, carrier_locate_safe_func, arg);
+    for (uint_fast16_t threadId = 0; threadId < numThreads; threadId++) {
+        Carrier *carrier = VECTOR_GET(&extra->carriers, threadId, Carrier);
+        ParallelLocateArg *arg = carrierArgs + threadId;
+        carrierArgs[threadId].carrier = carrier;
+        pthread_create(&carrier->thread, NULL, parallelLocateSafeFunction, arg);
     }
 
     /* synchronize */
-    TRACE(STRING_DIC_ASYNC_TAG, "start syncing %zu threads...", nthreads)
-    async_sync(&extra->carriers, nthreads);
-    TRACE(STRING_DIC_ASYNC_TAG, "%zu threads in sync.", nthreads)
+    TRACE(STRING_DIC_ASYNC_TAG, "start syncing %zu threads...", numThreads)
+    Synchronize(&extra->carriers, numThreads);
+    TRACE(STRING_DIC_ASYNC_TAG, "%zu threads in sync.", numThreads)
 
     /* collect and merge results */
-    TRACE(STRING_DIC_ASYNC_TAG, "merging results of %zu threads", nthreads)
-    for (size_t i = 0; i < num_keys; i++) {
+    TRACE(STRING_DIC_ASYNC_TAG, "merging results of %zu threads", numThreads)
+    for (size_t i = 0; i < numKeys; i++) {
         /* get thread responsible for this particular string, and local position of that string inside the
          * thread storage */
-        uint_fast16_t thread_id = str_carrier_mapping[i];
-        size_t thread_local_idx = str_carrier_idx_mapping[i];
+        uint_fast16_t threadId = strCarrierMapping[i];
+        size_t localThreadIdx = strCarrierIdxMapping[i];
 
         /* get the thread-local argument list for the thread that is responsible for this particular string */
-        carrier_locate_arg_t *arg = carrier_args + thread_id;
+        ParallelLocateArg *arg = carrierArgs + threadId;
 
         /* merge into global result */
-        StringId global_string_id_owner = thread_id;
-        StringId global_string_id_local_idx = arg->out_ids[thread_local_idx];
-        StringId global_string_id = string_id_make_global(global_string_id_owner, global_string_id_local_idx);
-        global_out[i] = global_string_id;
-        global_found_mask[i] = arg->out_found_mask[thread_local_idx];
+        StringId globalStringId_owner = threadId;
+        StringId globalStringId_localIdx = arg->idsOut[localThreadIdx];
+        StringId globalStringId = MAKE_GLOBAL(globalStringId_owner, globalStringId_localIdx);
+        globalOut[i] = globalStringId;
+        globalFoundMask[i] = arg->foundMaskOut[localThreadIdx];
     }
-    for (size_t thread_id = 0; thread_id < nthreads; thread_id++) {
+    for (size_t threadId = 0; threadId < numThreads; threadId++) {
         /* compute total number of not-found elements */
-        carrier_locate_arg_t *arg = carrier_args + thread_id;
-
-        global_num_not_found += arg->out_num_not_found;
+        ParallelLocateArg *arg = carrierArgs + threadId;
+        globalNumNotFound += arg->numNotFoundOut;
 
         /* cleanup */
-        if (BRANCH_LIKELY(arg->did_work)) {
-            string_dic_free(&arg->carrier->local_dict, arg->out_found_mask);
-            string_dic_free(&arg->carrier->local_dict, arg->out_ids);
+        if (BRANCH_LIKELY(arg->didWork)) {
+            StringDictionaryFree(&arg->carrier->localDictionary, arg->foundMaskOut);
+            StringDictionaryFree(&arg->carrier->localDictionary, arg->idsOut);
         }
     }
 
     TRACE(STRING_DIC_ASYNC_TAG, "cleanup%s", "...")
 
     /* cleanup */
-    thread_assign_drop(&self->alloc, str_carrier_mapping, carrier_nstrings, str_carrier_idx_mapping);
+    dropThreadAssignment(&self->alloc, strCarrierMapping, carrierNumStrings, strCarrierIdxMapping);
 
-    for (size_t thread_id = 0; thread_id < nthreads; thread_id++) {
-        carrier_locate_arg_t *arg = carrier_args + thread_id;
-        VectorDrop(&arg->in_keys);
+    for (size_t threadId = 0; threadId < numThreads; threadId++) {
+        ParallelLocateArg *arg = carrierArgs + threadId;
+        VectorDrop(&arg->keysIn);
     }
 
     /* return results */
-    *out = global_out;
-    *found_mask = global_found_mask;
-    *num_not_found = global_num_not_found;
+    *out = globalOut;
+    *foundMask = globalFoundMask;
+    *numNotFound = globalNumNotFound;
 
-    async_unlock(self);
+    thisUnlock(self);
 
-    timestamp_t end = time_current_time_ms();
+    Timestamp end = TimeCurrentSystemTime();
     UNUSED(begin);
     UNUSED(end);
     INFO(STRING_DIC_ASYNC_TAG, "locate (safe) operation done: %f seconds spent here", (end - begin) / 1000.0f)
@@ -748,236 +743,236 @@ static int async_locate_safe(struct Dictionary *self, StringId **out, bool **fou
     return STATUS_OK;
 }
 
-static int async_locate_fast(struct Dictionary *self, StringId **out, char *const *keys,
-                             size_t num_keys)
+static int thisLocateFast(struct StringDictionary *self, StringId **out, char *const *keys,
+                          size_t numKeys)
 {
-    CHECK_TAG(self->tag, STRING_DIC_ASYNC);
+    CHECK_TAG(self->tag, STRDIC_ASYNC);
 
-    async_lock(self);
+    thisLock(self);
 
-    bool *found_mask;
-    size_t num_not_found;
+    bool *foundMask;
+    size_t numNotFound;
     int result;
 
     /* use safer but in principle more slower implementation */
-    result = async_locate_safe(self, out, &found_mask, &num_not_found, keys, num_keys);
+    result = thisLocateSafe(self, out, &foundMask, &numNotFound, keys, numKeys);
 
     /* cleanup */
-    async_free(self, found_mask);
+    thisFree(self, foundMask);
 
-    async_unlock(self);
+    thisUnlock(self);
 
     return result;
 }
 
-static char **async_extract(struct Dictionary *self, const StringId *ids, size_t num_ids)
+static char **thisExtract(struct StringDictionary *self, const StringId *ids, size_t numIds)
 {
-    timestamp_t begin = time_current_time_ms();
-    INFO(STRING_DIC_ASYNC_TAG, "extract (safe) operation started: %zu strings to extract", num_ids)
+    Timestamp begin = TimeCurrentSystemTime();
+    INFO(STRING_DIC_ASYNC_TAG, "extract (safe) operation started: %zu strings to extract", numIds)
 
-    if (self->tag != STRING_DIC_ASYNC) {
+    if (self->tag != STRDIC_ASYNC) {
         return NULL;
     }
 
-    async_lock(self);
+    thisLock(self);
 
-    ALLOCATOR_MALLOC(char *, global_result, num_ids, &self->alloc);
+    ALLOCATOR_MALLOC(char *, globalResult, numIds, &self->alloc);
 
-    struct async_extra *extra = (struct async_extra *) self->extra;
-    uint_fast16_t nthreads = ng5_vector_len(&extra->carriers);
-    size_t est_nstrings_per_thread = max(1, num_ids / nthreads);
+    struct AsyncExtra *extra = (struct AsyncExtra *) self->extra;
+    uint_fast16_t numThreads = VectorLength(&extra->carriers);
+    size_t approxNumStringsPerThread = MAX(1, numIds / numThreads);
 
-    ALLOCATOR_MALLOC(size_t, thread_local_idx, num_ids, &self->alloc);
-    ALLOCATOR_MALLOC(uint_fast16_t, owning_thread_ids, num_ids, &self->alloc);
-    ALLOCATOR_MALLOC(carrier_extract_arg_t, thread_args, nthreads, &self->alloc);
+    ALLOCATOR_MALLOC(size_t, localThreadIdx, numIds, &self->alloc);
+    ALLOCATOR_MALLOC(uint_fast16_t, owningThreadIds, numIds, &self->alloc);
+    ALLOCATOR_MALLOC(ParallelExtractArg, threadArgs, numThreads, &self->alloc);
 
-    for (uint_fast16_t thread_id = 0; thread_id < nthreads; thread_id++) {
-        carrier_extract_arg_t *arg = thread_args + thread_id;
-        VectorCreate(&arg->in_local_ids, &self->alloc, sizeof(StringId), est_nstrings_per_thread);
+    for (uint_fast16_t threadId = 0; threadId < numThreads; threadId++) {
+        ParallelExtractArg *arg = threadArgs + threadId;
+        VectorCreate(&arg->localIdsIn, &self->alloc, sizeof(StringId), approxNumStringsPerThread);
     }
 
     /* compute subset of string ids per thread  */
-    for (size_t i = 0; i < num_ids; i++) {
-        StringId global_string_id = ids[i];
-        owning_thread_ids[i] = string_id_get_owner_of_global(global_string_id);
-        StringId local_string_id = string_id_get_local_id_of_global(global_string_id);
-        assert(owning_thread_ids[i] < nthreads);
+    for (size_t i = 0; i < numIds; i++) {
+        StringId globalStringId = ids[i];
+        owningThreadIds[i] = GET_OWNER(globalStringId);
+        StringId localStringId = GET_STRINGID(globalStringId);
+        assert(owningThreadIds[i] < numThreads);
 
-        carrier_extract_arg_t *arg = thread_args + owning_thread_ids[i];
-        thread_local_idx[i] = ng5_vector_len(&arg->in_local_ids);
-        VectorPush(&arg->in_local_ids, &local_string_id, 1);
+        ParallelExtractArg *arg = threadArgs + owningThreadIds[i];
+        localThreadIdx[i] = VectorLength(&arg->localIdsIn);
+        VectorPush(&arg->localIdsIn, &localStringId, 1);
     }
 
-    /* schedule remove operation per carrier */
-    for (uint_fast16_t thread_id = 0; thread_id < nthreads; thread_id++) {
-        carrier_t *carrier = ng5_vector_get(&extra->carriers, thread_id, carrier_t);
-        carrier_extract_arg_t *carrier_arg = thread_args + thread_id;
-        carrier_arg->carrier = carrier;
-        pthread_create(&carrier->thread, NULL, carrier_extract_func, carrier_arg);
+    /* schedule remove operation per Carrier */
+    for (uint_fast16_t threadId = 0; threadId < numThreads; threadId++) {
+        Carrier *carrier = VECTOR_GET(&extra->carriers, threadId, Carrier);
+        ParallelExtractArg *carrierArg = threadArgs + threadId;
+        carrierArg->carrier = carrier;
+        pthread_create(&carrier->thread, NULL, parallelExtractFunction, carrierArg);
     }
 
     /* synchronize */
-    async_sync(&extra->carriers, nthreads);
+    Synchronize(&extra->carriers, numThreads);
 
-    for (size_t i = 0; i < num_ids; i++) {
-        uint_fast16_t owning_thread_id = owning_thread_ids[i];
-        size_t local_idx = thread_local_idx[i];
-        carrier_extract_arg_t *carrier_arg = thread_args + owning_thread_id;
-        char *extracted_string = carrier_arg->out_strings[local_idx];
-        global_result[i] = extracted_string;
+    for (size_t i = 0; i < numIds; i++) {
+        uint_fast16_t owningThreadId = owningThreadIds[i];
+        size_t localIdx = localThreadIdx[i];
+        ParallelExtractArg *carrierArg = threadArgs + owningThreadId;
+        char *extractedString = carrierArg->stringsOut[localIdx];
+        globalResult[i] = extractedString;
     }
 
     /* cleanup */
-    for (uint_fast16_t thread_id = 0; thread_id < nthreads; thread_id++) {
-        carrier_extract_arg_t *carrier_arg = thread_args + thread_id;
-        VectorDrop(&carrier_arg->in_local_ids);
-        if (BRANCH_LIKELY(carrier_arg->did_work)) {
-            string_dic_free(&carrier_arg->carrier->local_dict, carrier_arg->out_strings);
+    for (uint_fast16_t threadId = 0; threadId < numThreads; threadId++) {
+        ParallelExtractArg *carrierArg = threadArgs + threadId;
+        VectorDrop(&carrierArg->localIdsIn);
+        if (BRANCH_LIKELY(carrierArg->didWork)) {
+            StringDictionaryFree(&carrierArg->carrier->localDictionary, carrierArg->stringsOut);
         }
     }
 
-    ALLOCATOR_FREE(thread_local_idx, &self->alloc);
-    ALLOCATOR_FREE(owning_thread_ids, &self->alloc);
-    ALLOCATOR_FREE(thread_args, &self->alloc);
+    ALLOCATOR_FREE(localThreadIdx, &self->alloc);
+    ALLOCATOR_FREE(owningThreadIds, &self->alloc);
+    ALLOCATOR_FREE(threadArgs, &self->alloc);
 
-    async_unlock(self);
+    thisUnlock(self);
 
-    timestamp_t end = time_current_time_ms();
+    Timestamp end = TimeCurrentSystemTime();
     UNUSED(begin);
     UNUSED(end);
     INFO(STRING_DIC_ASYNC_TAG, "extract (safe) operation done: %f seconds spent here", (end - begin) / 1000.0f)
 
-    return global_result;
+    return globalResult;
 }
 
-static int async_free(struct Dictionary *self, void *ptr)
+static int thisFree(struct StringDictionary *self, void *ptr)
 {
-    CHECK_TAG(self->tag, STRING_DIC_ASYNC);
+    CHECK_TAG(self->tag, STRDIC_ASYNC);
     AllocatorFree(&self->alloc, ptr);
     return STATUS_OK;
 }
 
-static int async_num_distinct(struct Dictionary *self, size_t *num)
+static int thisNumDistinct(struct StringDictionary *self, size_t *num)
 {
-    CHECK_TAG(self->tag, STRING_DIC_ASYNC);
-    async_lock(self);
+    CHECK_TAG(self->tag, STRDIC_ASYNC);
+    thisLock(self);
 
-    struct async_extra *extra = async_extra_get(self);
-    size_t num_carriers = ng5_vector_len(&extra->carriers);
-    carrier_t *carriers = ng5_vector_all(&extra->carriers, carrier_t);
-    size_t num_distinct = 0;
-    while (num_carriers--) {
+    struct AsyncExtra *extra = THIS_EXTRAS(self);
+    size_t numCarriers = VectorLength(&extra->carriers);
+    Carrier *carriers = VECTOR_ALL(&extra->carriers, Carrier);
+    size_t numDistinct = 0;
+    while (numCarriers--) {
         size_t local_distinct;
-        string_dic_num_distinct_values(&local_distinct, &carriers->local_dict);
-        num_distinct += local_distinct;
+        StringDictionaryNumDistinct(&local_distinct, &carriers->localDictionary);
+        numDistinct += local_distinct;
         carriers++;
     }
-    *num = num_distinct;
-    async_unlock(self);
+    *num = numDistinct;
+    thisUnlock(self);
     return STATUS_OK;
 }
 
-static int async_reset_counters(struct Dictionary *self)
+static int thisResetCounters(struct StringDictionary *self)
 {
-    CHECK_TAG(self->tag, STRING_DIC_ASYNC);
+    CHECK_TAG(self->tag, STRDIC_ASYNC);
 
-    async_lock(self);
+    thisLock(self);
 
-    struct async_extra *extra = async_extra_get(self);
-    size_t nthreads = ng5_vector_len(&extra->carriers);
+    struct AsyncExtra *extra = THIS_EXTRAS(self);
+    size_t numThreads = VectorLength(&extra->carriers);
 
-    for (size_t thread_id = 0; thread_id < nthreads; thread_id++) {
-        carrier_t *carrier = ng5_vector_get(&extra->carriers, thread_id, carrier_t);
-        string_dic_reset_counters(&carrier->local_dict);
+    for (size_t threadId = 0; threadId < numThreads; threadId++) {
+        Carrier *carrier = VECTOR_GET(&extra->carriers, threadId, Carrier);
+        StringDictionaryResetCounters(&carrier->localDictionary);
     }
 
-    async_unlock(self);
+    thisUnlock(self);
 
     return STATUS_OK;
 }
 
-static int async_counters(struct Dictionary *self, struct string_map_counters *counters)
+static int thisCounters(struct StringDictionary *self, StringHashCounters *counters)
 {
-    CHECK_TAG(self->tag, STRING_DIC_ASYNC);
+    CHECK_TAG(self->tag, STRDIC_ASYNC);
 
-    async_lock(self);
+    thisLock(self);
 
-    struct async_extra *extra = async_extra_get(self);
-    size_t nthreads = ng5_vector_len(&extra->carriers);
+    struct AsyncExtra *extra = THIS_EXTRAS(self);
+    size_t numThreads = VectorLength(&extra->carriers);
 
-    CHECK_SUCCESS(string_map_counters_init(counters));
+    CHECK_SUCCESS(StringHashTableCountersInit(counters));
 
-    for (size_t thread_id = 0; thread_id < nthreads; thread_id++) {
-        carrier_t *carrier = ng5_vector_get(&extra->carriers, thread_id, carrier_t);
-        struct string_map_counters local_counters;
-        string_dic_counters(&local_counters, &carrier->local_dict);
-        string_map_counters_add(counters, &local_counters);
+    for (size_t threadId = 0; threadId < numThreads; threadId++) {
+        Carrier *carrier = VECTOR_GET(&extra->carriers, threadId, Carrier);
+        StringHashCounters local_counters;
+        StringDictionaryGetCounters(&local_counters, &carrier->localDictionary);
+        StringHashTableCountersAdd(counters, &local_counters);
     }
 
-    async_unlock(self);
+    thisUnlock(self);
 
     return STATUS_OK;
 }
 
-typedef struct carrier_parallel_create_args_t
+typedef struct ParallelCreateCarrierArg
 {
-    size_t local_capacity;
-    size_t local_bucket_num;
-    size_t local_bucket_cap;
+    size_t localCapacity;
+    size_t localBucketNum;
+    size_t localBucketCap;
     const Allocator *alloc;
-} carrier_parallel_create_args_t;
+} ParallelCreateCarrierArg;
 
-static void carrier_parallel_create(const void *restrict start, size_t width, size_t len, void *restrict args,
-                                    ThreadId tid)
+static void parallelCreateCarrier(const void *restrict start, size_t width, size_t len, void *restrict args,
+                                  ThreadId tid)
 {
     UNUSED(tid);
     UNUSED(width);
 
-    carrier_t *carrier = (carrier_t *) start;
-    const carrier_parallel_create_args_t *create_args = (const carrier_parallel_create_args_t *) args;
+    Carrier *carrier = (Carrier *) start;
+    const ParallelCreateCarrierArg *createArgs = (const ParallelCreateCarrierArg *) args;
     while (len--) {
-        string_dic_create_sync(&carrier->local_dict, create_args->local_capacity, create_args->local_bucket_num,
-                               create_args->local_bucket_cap, 0, create_args->alloc);
+        StringDicationaryCreateSync(&carrier->localDictionary, createArgs->localCapacity, createArgs->localBucketNum,
+                                    createArgs->localBucketCap, 0, createArgs->alloc);
         memset(&carrier->thread, 0, sizeof(pthread_t));
         carrier++;
     }
 }
 
-static int async_setup_carriers(struct Dictionary *self, size_t capacity, size_t num_index_buckets,
-                                size_t approx_num_unique_str, size_t nthreads)
+static int thisSetupCarriers(struct StringDictionary *self, size_t capacity, size_t numIndexBuckets,
+                             size_t approxNumUniqueStr, size_t numThreads)
 {
-    async_extra_t *extra = async_extra_get(self);
-    size_t local_bucket_num = max(1, num_index_buckets / nthreads);
-    carrier_t new_carrier;
+    AsyncExtra *extra = THIS_EXTRAS(self);
+    size_t localBucketNum = MAX(1, numIndexBuckets / numThreads);
+    Carrier new_carrier;
 
-    carrier_parallel_create_args_t create_args = {
-        .local_capacity      = max(1, capacity / nthreads),
-        .local_bucket_num    = local_bucket_num,
-        .local_bucket_cap    = max(1, approx_num_unique_str / nthreads / local_bucket_num / SLICE_KEY_COLUMN_MAX_ELEMS),
-        .alloc               = &self->alloc
+    ParallelCreateCarrierArg createArgs = {
+        .localCapacity = MAX(1, capacity / numThreads),
+        .localBucketNum = localBucketNum,
+        .localBucketCap = MAX(1, approxNumUniqueStr / numThreads / localBucketNum / SLICE_KEY_COLUMN_MAX_ELEMS),
+        .alloc = &self->alloc
     };
 
-    for (size_t thread_id = 0; thread_id < nthreads; thread_id++) {
-        new_carrier.id = thread_id;
+    for (size_t threadId = 0; threadId < numThreads; threadId++) {
+        new_carrier.id = threadId;
         VectorPush(&extra->carriers, &new_carrier, 1);
     }
 
-    ParallelFor(ng5_vector_all(&extra->carriers, carrier_t), sizeof(carrier_t), nthreads, carrier_parallel_create,
-                &create_args, ThreadingHint_Multi, nthreads);
+    ParallelFor(VECTOR_ALL(&extra->carriers, Carrier), sizeof(Carrier), numThreads, parallelCreateCarrier,
+                &createArgs, ThreadingHint_Multi, numThreads);
 
     return STATUS_OK;
 }
 
-static int async_lock(struct Dictionary *self)
+static int thisLock(struct StringDictionary *self)
 {
-    async_extra_t *extra = async_extra_get(self);
-    CHECK_SUCCESS(ng5_spinlock_lock(&extra->spinlock));
+    AsyncExtra *extra = THIS_EXTRAS(self);
+    CHECK_SUCCESS(SpinlockAcquire(&extra->lock));
     return STATUS_OK;
 }
 
-static int async_unlock(struct Dictionary *self)
+static int thisUnlock(struct StringDictionary *self)
 {
-    async_extra_t *extra = async_extra_get(self);
-    CHECK_SUCCESS(ng5_spinlock_unlock(&extra->spinlock));
+    AsyncExtra *extra = THIS_EXTRAS(self);
+    CHECK_SUCCESS(SpinlockRelease(&extra->lock));
     return STATUS_OK;
 }

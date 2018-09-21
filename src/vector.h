@@ -33,10 +33,16 @@
 
 NG5_BEGIN_DECL
 
+// ---------------------------------------------------------------------------------------------------------------------
+//
+//  T Y P E S
+//
+// ---------------------------------------------------------------------------------------------------------------------
+
 /**
  * An implementation of the concrete data type Vector, a resizeable dynamic array.
  */
-typedef struct ng5_vector_t
+typedef struct Vector
 {
     /**
     *  Memory allocator that is used to get memory for user data
@@ -46,22 +52,22 @@ typedef struct ng5_vector_t
     /**
      *  Fixed number of bytes for a single element that should be stored in the vector
      */
-    size_t elem_size;
+    size_t elemSize;
 
     /**
      *  The number of elements currently stored in the vector
      */
-    uint32_t num_elems;
+    uint32_t numElems;
 
     /**
      *  The number of elements for which currently memory is reserved
      */
-    uint32_t cap_elems;
+    uint32_t capElems;
 
     /**
     * The grow factor considered for resize operations
     */
-    float grow_factor;
+    float growFactor;
 
     /**
      *  A pointer to a memory address managed by 'allocator' that contains the user data
@@ -75,21 +81,21 @@ typedef struct ng5_vector_t
  *
  * @param out non-null vector that should be constructed
  * @param alloc an allocator
- * @param elem_size fixed-length element size
- * @param cap_elems number of elements for which memory should be reserved
+ * @param elemSize fixed-length element size
+ * @param capElems number of elements for which memory should be reserved
  * @return STATUS_OK if success, and STATUS_NULLPTR in case of NULL pointer parameters
  */
-int VectorCreate(Vector *out, const Allocator *alloc, size_t elem_size, size_t cap_elems);
+int VectorCreate(Vector *out, const Allocator *alloc, size_t elemSize, size_t capElems);
 
 /**
  * Provides hints on the OS kernel how to deal with memory inside this vector.
  *
  * @param vec non-null vector
- * @param madvise_advice value to give underlying <code>madvise</code> syscall and advice, see man page
+ * @param madviseAdvice value to give underlying <code>madvise</code> syscall and advice, see man page
  * of <code>madvise</code>
  * @return STATUS_OK if success, otherwise a value indicating the error
  */
-int ng5_vector_advise(Vector *vec, int madvise_advice);
+int VectorMemoryAdvice(Vector *vec, int madviseAdvice);
 
 /**
  * Sets the factor for determining the reallocation size in case of a resizing operation.
@@ -100,7 +106,7 @@ int ng5_vector_advise(Vector *vec, int madvise_advice);
  * @param factor a positive real number larger than 1
  * @return STATUS_OK if success, otherwise a value indicating the error
  */
-int ng5_vector_set_growfactor(Vector *vec, float factor);
+int VectorSetGrowFactor(Vector *vec, float factor);
 
 /**
  * Frees up memory requested via the allocator.
@@ -120,25 +126,25 @@ int VectorDrop(Vector *vec);
  *         an error occurs. In case an error is occured, the return value is neither <code>STATUS_TRUE</code> nor
  *         <code>STATUS_FALSE</code> but an value indicating that error.
  */
-int ng5_vector_is_empty(const Vector *vec);
+int VectorIsEmpty(const Vector *vec);
 
 /**
- * Appends 'num_elems' elements stored in 'data' into the vector by copying num_elems * vec->elem_size into the
+ * Appends 'numElems' elements stored in 'data' into the vector by copying numElems * vec->elem_size into the
  * vectors memory block.
  *
  * In case the capacity is not sufficient, the vector gets automatically resized.
  *
  * @param vec the vector in which the data should be pushed
- * @param data non-null pointer to data that should be appended. Must be at least size of 'num_elems' * vec->elem_size.
- * @param num_elems number of elements stored in data
+ * @param data non-null pointer to data that should be appended. Must be at least size of 'numElems' * vec->elem_size.
+ * @param numElems number of elements stored in data
  * @return STATUS_OK if success, and STATUS_NULLPTR in case of NULL pointer parameters
  */
 int VectorPush(Vector *vec,
                const void *data,
-               size_t num_elems) FORCE_INLINE;    /* OPTIMIZATION: Force inline */
+               size_t numElems) FORCE_INLINE;    /* OPTIMIZATION: Force inline */
 
 // TODO: remove
-//void *ng5_vector_push_and_get(Vector* vec, const void* data, size_t num_elems) FORCE_INLINE; /* OPTIMIZATION: Force inline */
+//void *ng5_vector_push_and_get(Vector* vec, const void* data, size_t numElems) FORCE_INLINE; /* OPTIMIZATION: Force inline */
 
 /**
  * Appends 'how_many' elements of the same source stored in 'data' into the vector by copying how_many * vec->elem_size
@@ -148,10 +154,10 @@ int VectorPush(Vector *vec,
  *
  * @param vec the vector in which the data should be pushed
  * @param data non-null pointer to data that should be appended. Must be at least size of one vec->elem_size.
- * @param num_elems number of elements stored in data
+ * @param numElems number of elements stored in data
  * @return STATUS_OK if success, and STATUS_NULLPTR in case of NULL pointer parameters
  */
-int VectorRepreatedPush(Vector *vec, const void *data, size_t how_many);
+int VectorRepreatedPush(Vector *vec, const void *data, size_t howOften);
 
 /**
  * Returns a pointer to the last element in this vector, or <code>NULL</code> is the vector is already empty.
@@ -160,16 +166,16 @@ int VectorRepreatedPush(Vector *vec, const void *data, size_t how_many);
  * @param vec non-null pointer to the vector
  * @return Pointer to last element, or <code>NULL</code> if vector is empty
  */
-const void *ng5_vector_pop(Vector *vec) FORCE_INLINE; /* OPTIMIZATION: Force inline */
+const void *VectorPop(Vector *vec) FORCE_INLINE; /* OPTIMIZATION: Force inline */
 
 /**
  * Increases the capacity of that vector according the internal grow factor
- * @param num_new_slots a pointer to a value that will store the number of newly created slots in that vector if
+ * @param numNewSlots a pointer to a value that will store the number of newly created slots in that vector if
  *                      <code>num_new_slots</code> is non-null. If this parameter is <code>NULL</code>, it is ignored.
  * @param vec non-null pointer to the vector that should be grown
  * @return STATUS_OK in case of success, and another value indicating an error otherwise.
  */
-int ng5_vector_grow(size_t *num_new_slots, Vector *vec);
+int VectorGrow(size_t *numNewSlots, Vector *vec);
 
 /**
  * Returns the number of elements currently stored in the vector
@@ -177,19 +183,11 @@ int ng5_vector_grow(size_t *num_new_slots, Vector *vec);
  * @param vec the vector for which the operation is started
  * @return 0 in case of NULL pointer to 'vec', or the number of elements otherwise.
  */
-size_t ng5_vector_len(const Vector *vec);
+size_t VectorLength(const Vector *vec);
 
-#define ng5_vector_get(vec, pos, type) (type *) ng5_vector_at(vec, pos);
+#define VECTOR_GET(vec, pos, type) (type *) VectorAt(vec, pos);
 
-#define ng5_vector_push_and_get(vec, object, type)  \
-({                                                  \
-    size_t pos   = ng5_vector_len(vec);             \
-    ng5_vector_push(vec, object, 1);                \
-    type *retval = ng5_vector_get(vec, pos, type);  \
-    retval;                                         \
-})
-
-const void *ng5_vector_at(const Vector *vec, size_t pos) FORCE_INLINE; /* OPTIMIZATION: Force inline */
+const void *VectorAt(const Vector *vec, size_t pos) FORCE_INLINE; /* OPTIMIZATION: Force inline */
 
 /**
  * Returns the number of elements for which memory is currently reserved in the vector
@@ -202,9 +200,9 @@ size_t VectorCapacity(const Vector *vec);
 /**
  * Set the internal size of <code>vec</code> to its capacity.
  */
-int ng5_vector_enlarge_size(Vector *vec);
+int VectorEnlargeSizeToCapacity(Vector *vec);
 
-int ng5_vector_set(Vector *vec, size_t pos, const void *data);
+int VectorSet(Vector *vec, size_t pos, const void *data);
 
 /**
  * Gives raw data access to data stored in the vector; do not manipulate this data since otherwise the vector
@@ -213,9 +211,9 @@ int ng5_vector_set(Vector *vec, size_t pos, const void *data);
  * @param vec the vector for which the operation is started
  * @return pointer to user-data managed by this vector
  */
-const void *ng5_vector_data(const Vector *vec);
+const void *VectorData(const Vector *vec);
 
-#define ng5_vector_all(vec, type) (type *) ng5_vector_data(vec)
+#define VECTOR_ALL(vec, type) (type *) VectorData(vec)
 
 NG5_END_DECL
 

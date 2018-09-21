@@ -27,7 +27,7 @@
 
 #include "time.h"
 
-timestamp_t time_current_time_ms()
+Timestamp TimeCurrentSystemTime()
 {
     long ms;
     time_t s;

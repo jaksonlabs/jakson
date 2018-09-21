@@ -68,7 +68,7 @@ ng5_vector_t *to_string_list(const char *contents)
 
 using namespace std;
 
-template<typename K = string, typename V = string_id_t, typename S = size_t> class Dictionary
+template<typename K = string, typename V = string_id_t, typename S = size_t> class StrDic
 {
 public:
     using KeyType = K;
@@ -80,12 +80,12 @@ private:
     vector<KeyType>             inverted_index;
 
 public:
-    Dictionary(size_t reserve): mapping(), inverted_index()
+    StrDic(size_t reserve): mapping(), inverted_index()
     {
         inverted_index.reserve(reserve);
     }
 
-    ~Dictionary()
+    ~StrDic()
     {
         mapping.clear();
         inverted_index.clear();
@@ -174,7 +174,7 @@ int main(void) {
         }
 
         timestamp_t create_begin = time_current_time_ms();
-        Dictionary<> cxx_dic(num_strings);
+        StrDic<> cxx_dic(num_strings);
         timestamp_t create_end = time_current_time_ms();
         created_duration = (create_end-create_begin);
 

@@ -28,26 +28,26 @@
 
 #define SPINLOCK_TAG "spinlock"
 
-int ng5_spinlock_create(struct ng5_spinlock *spinlock)
+int SpinlockCreate(Spinlock *spinlock)
 {
     CHECK_NON_NULL(spinlock)
     atomic_flag_clear(&spinlock->lock);
 
-    memset(&spinlock->owning_thread, 0, sizeof(pthread_t));
+    memset(&spinlock->owner, 0, sizeof(pthread_t));
 
     return STATUS_OK;
 }
 
-int ng5_spinlock_lock(struct ng5_spinlock *spinlock)
+int SpinlockAcquire(Spinlock *spinlock)
 {
-    timestamp_t begin = time_current_time_ms();
+    Timestamp begin = TimeCurrentSystemTime();
     CHECK_NON_NULL(spinlock)
-    if (!pthread_equal(spinlock->owning_thread, pthread_self())) {
+    if (!pthread_equal(spinlock->owner, pthread_self())) {
         while (atomic_flag_test_and_set(&spinlock->lock));
         /* remeber the thread that aquires this lock */
-        spinlock->owning_thread = pthread_self();
+        spinlock->owner = pthread_self();
     }
-    timestamp_t end = time_current_time_ms();
+    Timestamp end = TimeCurrentSystemTime();
     float duration = (end - begin) / 1000.0f;
     if (duration > 0.01f) {
         WARN(SPINLOCK_TAG, "spin lock acquisition took exceptionally long: %f seconds", duration);
@@ -56,10 +56,10 @@ int ng5_spinlock_lock(struct ng5_spinlock *spinlock)
     return STATUS_OK;
 }
 
-int ng5_spinlock_unlock(struct ng5_spinlock *spinlock)
+int SpinlockRelease(Spinlock *spinlock)
 {
     CHECK_NON_NULL(spinlock)
     atomic_flag_clear(&spinlock->lock);
-    memset(&spinlock->owning_thread, 0, sizeof(pthread_t));
+    memset(&spinlock->owner, 0, sizeof(pthread_t));
     return STATUS_OK;
 }

@@ -27,26 +27,23 @@
 #include "spinlock.h"
 #include "strhash.h"
 #include "strdic_sync.h"
-#include "stdlib.h"
 #include "strhash_mem.h"
-#include "alloc_tracer.h"
-#include "parallel.h"
 #include "time.h"
 #include "bloomfilter.h"
 
 #define STRING_DIC_SYNC_TAG "string-dic-sync"
 
 struct entry {
-    char                               *str;
-    bool                                in_use;
+    char *str;
+    bool inUse;
 };
 
-struct naive_extra {
-    Vector ofType(entry)        contents;
-    Vector ofType(string_id_t)  freelist;
-    struct string_map                index;
-    struct ng5_spinlock                     lock;
-};
+typedef struct SyncExtra {
+    Vector ofType(entry) contents;
+    Vector ofType(stringId_t) freelist;
+    struct StringHashTable index;
+    Spinlock lock;
+} SyncExtra;
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
@@ -54,147 +51,147 @@ struct naive_extra {
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-static int this_drop(struct Dictionary *self);
-static int this_insert(struct Dictionary *self, StringId **out, char * const*strings, size_t num_strings,
-        size_t nthreads);
-static int this_remove(struct Dictionary *self, StringId *strings, size_t num_strings);
-static int this_locate_safe(struct Dictionary* self, StringId** out, bool** found_mask,
-        size_t* num_not_found, char* const* keys, size_t num_keys);
-static int this_locate_fast(struct Dictionary* self, StringId** out, char* const* keys,
-        size_t num_keys);
-static char **this_extract(struct Dictionary *self, const StringId *ids, size_t num_ids);
-static int this_free(struct Dictionary *self, void *ptr);
+static int thisDrop(StringDictionary *self);
+static int thisInsert(StringDictionary *self, StringId **out, char *const *strings, size_t numStrings,
+                      size_t numThreads);
+static int thisRemove(StringDictionary *self, StringId *strings, size_t numStrings);
+static int thisLocateSafe(StringDictionary *self, StringId **out, bool **foundMask,
+                          size_t *numNotFound, char *const *keys, size_t numKeys);
+static int thisLocateFast(StringDictionary *self, StringId **out, char *const *keys,
+                          size_t numKeys);
+static char **thisExtract(StringDictionary *self, const StringId *ids, size_t numIds);
+static int thisFree(StringDictionary *self, void *ptr);
 
-static int this_reset_counters(struct Dictionary *self);
-static int this_counters(struct Dictionary *self, struct string_map_counters *counters);
+static int thisResetCounters(StringDictionary *self);
+static int thisCounters(StringDictionary *self, StringHashCounters *counters);
 
-static int this_num_distinct(struct Dictionary *self, size_t *num);
+static int thisNumDistinct(StringDictionary *self, size_t *num);
 
-static void lock(struct Dictionary *self);
-static void unlock(struct Dictionary *self);
+static void lock(StringDictionary *self);
+static void unlock(StringDictionary *self);
 
-static int extra_create(struct Dictionary *self, size_t capacity, size_t num_index_buckets,
-        size_t num_index_bucket_cap, size_t nthreads);
-static struct naive_extra *this_extra(struct Dictionary *self);
+static int createExtra(StringDictionary *self, size_t capacity, size_t numIndexBuckets,
+                       size_t numIndexBucketCap, size_t numThreads);
+static SyncExtra *thisExtra(StringDictionary *self);
 
-static int freelist_pop(StringId *out, struct Dictionary *self);
-static int freelist_push(struct Dictionary *self, StringId idx);
+static int freelistPop(StringId *out, StringDictionary *self);
+static int freelistPush(StringDictionary *self, StringId idx);
 
-int string_dic_create_sync(struct Dictionary* dic, size_t capacity, size_t num_index_buckets,
-        size_t num_index_bucket_cap, size_t nthreads, const Allocator* alloc)
+int StringDicationaryCreateSync(StringDictionary *dic, size_t capacity, size_t numIndexBuckets,
+                                size_t numIndexBucketCap, size_t numThreads, const Allocator *alloc)
 {
     CHECK_NON_NULL(dic);
 
     CHECK_SUCCESS(AllocatorThisOrDefault(&dic->alloc, alloc));
 
-    dic->tag            = STRING_DIC_NAIVE;
-    dic->drop           = this_drop;
-    dic->insert         = this_insert;
-    dic->remove         = this_remove;
-    dic->locate_safe    = this_locate_safe;
-    dic->locate_fast    = this_locate_fast;
-    dic->extract        = this_extract;
-    dic->free           = this_free;
-    dic->reset_counters = this_reset_counters;
-    dic->counters       = this_counters;
-    dic->num_distinct   = this_num_distinct;
+    dic->tag = STRDIC_SYNC;
+    dic->drop = thisDrop;
+    dic->insert = thisInsert;
+    dic->remove = thisRemove;
+    dic->locateSafe = thisLocateSafe;
+    dic->locateFast = thisLocateFast;
+    dic->extract = thisExtract;
+    dic->free = thisFree;
+    dic->resetCounters = thisResetCounters;
+    dic->counters = thisCounters;
+    dic->numDistinct = thisNumDistinct;
 
-    CHECK_SUCCESS(extra_create(dic, capacity, num_index_buckets, num_index_bucket_cap, nthreads));
+    CHECK_SUCCESS(createExtra(dic, capacity, numIndexBuckets, numIndexBucketCap, numThreads));
     return STATUS_OK;
 }
 
-static void lock(struct Dictionary *self)
+static void lock(StringDictionary *self)
 {
-    assert(self->tag == STRING_DIC_NAIVE);
-    struct naive_extra *extra = this_extra(self);
-    ng5_spinlock_lock(&extra->lock);
+    assert(self->tag == STRDIC_SYNC);
+    SyncExtra *extra = thisExtra(self);
+    SpinlockAcquire(&extra->lock);
 }
 
-static void unlock(struct Dictionary *self)
+static void unlock(StringDictionary *self)
 {
-    assert(self->tag == STRING_DIC_NAIVE);
-    struct naive_extra *extra = this_extra(self);
-    ng5_spinlock_unlock(&extra->lock);
+    assert(self->tag == STRDIC_SYNC);
+    SyncExtra *extra = thisExtra(self);
+    SpinlockRelease(&extra->lock);
 }
 
-static int extra_create(struct Dictionary *self, size_t capacity, size_t num_index_buckets,
-        size_t num_index_bucket_cap, size_t nthreads)
+static int createExtra(StringDictionary *self, size_t capacity, size_t numIndexBuckets,
+                       size_t numIndexBucketCap, size_t numThreads)
 {
-    self->extra = AllocatorMalloc(&self->alloc, sizeof(struct naive_extra));
-    struct naive_extra *extra = this_extra(self);
-    ng5_spinlock_create(&extra->lock);
+    self->extra = AllocatorMalloc(&self->alloc, sizeof(SyncExtra));
+    SyncExtra *extra = thisExtra(self);
+    SpinlockCreate(&extra->lock);
     CHECK_SUCCESS(VectorCreate(&extra->contents, &self->alloc, sizeof(struct entry), capacity));
     CHECK_SUCCESS(VectorCreate(&extra->freelist, &self->alloc, sizeof(StringId), capacity));
     struct entry empty = {
         .str    = NULL,
-        .in_use = false
+        .inUse = false
     };
     for (size_t i = 0; i < capacity; i++) {
         CHECK_SUCCESS(VectorPush(&extra->contents, &empty, 1));
-        freelist_push(self, i);
+        freelistPush(self, i);
     }
-    UNUSED(nthreads);
+    UNUSED(numThreads);
 
-    Allocator hashtable_alloc;
+    Allocator hashtableAlloc;
 #if defined(NG5_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
-    CHECK_SUCCESS(allocator_TRACE(&hashtable_alloc));
+    CHECK_SUCCESS(allocatorTrace(&hashtableAlloc));
 #else
-    CHECK_SUCCESS(AllocatorThisOrDefault(&hashtable_alloc, &self->alloc));
+    CHECK_SUCCESS(AllocatorThisOrDefault(&hashtableAlloc, &self->alloc));
 #endif
 
-    CHECK_SUCCESS(string_hashtable_create_scan1_cache(&extra->index, &hashtable_alloc, num_index_buckets,
-              num_index_bucket_cap));
+    CHECK_SUCCESS(StringHashtableCreateMem(&extra->index, &hashtableAlloc, numIndexBuckets,
+                                           numIndexBucketCap));
     return STATUS_OK;
 }
 
-static struct naive_extra *this_extra(struct Dictionary *self)
+static SyncExtra *thisExtra(StringDictionary *self)
 {
-    assert (self->tag == STRING_DIC_NAIVE);
-    return (struct naive_extra *) self->extra;
+    assert (self->tag == STRDIC_SYNC);
+    return (SyncExtra *) self->extra;
 }
 
-static int freelist_pop(StringId *out, struct Dictionary *self)
+static int freelistPop(StringId *out, StringDictionary *self)
 {
-    assert (self->tag == STRING_DIC_NAIVE);
-    struct naive_extra *extra = this_extra(self);
-    if (BRANCH_UNLIKELY(ng5_vector_is_empty(&extra->freelist))) {
-        size_t num_new_pos;
-        CHECK_SUCCESS(ng5_vector_grow(&num_new_pos, &extra->freelist));
-        CHECK_SUCCESS(ng5_vector_grow(NULL, &extra->contents));
-        assert (extra->freelist.cap_elems == extra->contents.cap_elems);
+    assert (self->tag == STRDIC_SYNC);
+    SyncExtra *extra = thisExtra(self);
+    if (BRANCH_UNLIKELY(VectorIsEmpty(&extra->freelist))) {
+        size_t numNewPos;
+        CHECK_SUCCESS(VectorGrow(&numNewPos, &extra->freelist));
+        CHECK_SUCCESS(VectorGrow(NULL, &extra->contents));
+        assert (extra->freelist.capElems == extra->contents.capElems);
         struct entry empty = {
-            .in_use = false,
+            .inUse = false,
             .str    = NULL
         };
-        while (num_new_pos--) {
-            size_t new_pos = ng5_vector_len(&extra->contents);
+        while (numNewPos--) {
+            size_t new_pos = VectorLength(&extra->contents);
             CHECK_SUCCESS(VectorPush(&extra->freelist, &new_pos, 1));
             CHECK_SUCCESS(VectorPush(&extra->contents, &empty, 1));
         }
     }
-    *out = *(StringId *) ng5_vector_pop(&extra->freelist);
+    *out = *(StringId *) VectorPop(&extra->freelist);
     return STATUS_OK;
 }
 
-static int freelist_push(struct Dictionary *self, StringId idx)
+static int freelistPush(StringDictionary *self, StringId idx)
 {
-    assert (self->tag == STRING_DIC_NAIVE);
-    struct naive_extra *extra = this_extra(self);
+    assert (self->tag == STRDIC_SYNC);
+    SyncExtra *extra = thisExtra(self);
     CHECK_SUCCESS(VectorPush(&extra->freelist, &idx, 1));
-    assert (extra->freelist.cap_elems == extra->contents.cap_elems);
+    assert (extra->freelist.capElems == extra->contents.capElems);
     return STATUS_OK;
 }
 
-static int this_drop(struct Dictionary *self)
+static int thisDrop(StringDictionary *self)
 {
-    CHECK_TAG(self->tag, STRING_DIC_NAIVE)
+    CHECK_TAG(self->tag, STRDIC_SYNC)
 
-    struct naive_extra *extra = this_extra(self);
+    SyncExtra *extra = thisExtra(self);
 
     struct entry *entries = (struct entry *) extra->contents.base;
-    for (size_t i = 0; i < extra->contents.num_elems; i++) {
+    for (size_t i = 0; i < extra->contents.numElems; i++) {
         struct entry *entry = entries + i;
-        if (entry->in_use) {
+        if (entry->inUse) {
             assert (entry->str);
             AllocatorFree(&self->alloc, entry->str);
             entry->str = NULL;
@@ -203,37 +200,37 @@ static int this_drop(struct Dictionary *self)
 
     VectorDrop(&extra->freelist);
     VectorDrop(&extra->contents);
-    string_lookup_drop(&extra->index);
+    StringHashTableDrop(&extra->index);
     AllocatorFree(&self->alloc, self->extra);
 
     return STATUS_OK;
 }
 
-static int this_insert(struct Dictionary *self, StringId **out, char * const*strings, size_t num_strings,
-        size_t nthreads)
+static int thisInsert(StringDictionary *self, StringId **out, char *const *strings, size_t numStrings,
+                      size_t numThreads)
 {
-    TRACE(STRING_DIC_SYNC_TAG, "local string dictionary insertion invoked for %zu strings", num_strings);
-    timestamp_t begin = time_current_time_ms();
+    TRACE(STRING_DIC_SYNC_TAG, "local string dictionary insertion invoked for %zu strings", numStrings);
+    Timestamp begin = TimeCurrentSystemTime();
 
-    UNUSED(nthreads);
+    UNUSED(numThreads);
 
-    CHECK_TAG(self->tag, STRING_DIC_NAIVE)
+    CHECK_TAG(self->tag, STRDIC_SYNC)
     lock(self);
 
-    struct naive_extra *extra          = this_extra(self);
+    SyncExtra *extra          = thisExtra(self);
 
-    Allocator hashtable_alloc;
+    Allocator hashtableAlloc;
 #if defined(NG5_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
-    CHECK_SUCCESS(allocator_TRACE(&hashtable_alloc));
+    CHECK_SUCCESS(allocatorTrace(&hashtableAlloc));
 #else
-    CHECK_SUCCESS(AllocatorThisOrDefault(&hashtable_alloc, &self->alloc));
+    CHECK_SUCCESS(AllocatorThisOrDefault(&hashtableAlloc, &self->alloc));
 #endif
 
 
-    StringId  *ids_out                  = AllocatorMalloc(&hashtable_alloc, num_strings * sizeof(StringId));
-    bool         *found_mask;
-    StringId  *values;
-    size_t        num_not_found;
+    StringId  *idsOut = AllocatorMalloc(&hashtableAlloc, numStrings * sizeof(StringId));
+    bool *foundMask;
+    StringId *values;
+    size_t numNotFound;
 
     /* query index for strings to get a boolean mask which strings are new and which must be added */
     /* This is for the case that the string dictionary is not empty to skip processing of those new elements
@@ -241,74 +238,74 @@ static int this_insert(struct Dictionary *self, StringId **out, char * const*str
     TRACE(STRING_DIC_SYNC_TAG, "local string dictionary check for new strings in insertion bulk%s", "...");
 
     /* NOTE: palatalization of the call to this function decreases performance */
-    string_lookup_get_safe_bulk(&values, &found_mask, &num_not_found, &extra->index, strings, num_strings);
+    StringHashTableGetSafeBulk(&values, &foundMask, &numNotFound, &extra->index, strings, numStrings);
 
     /* OPTIMIZATION: use a bloomfilter to check whether a string (which has not appeared in the
      * dictionary before this batch but might occur multiple times in the current batch) was seen
      * before (with a slight prob. of doing too much work) */
     Bloomfilter bloomfilter;
-    BloomfilterCreate(&bloomfilter, 22 * num_not_found);
+    BloomfilterCreate(&bloomfilter, 22 * numNotFound);
 
     /* copy string ids for already known strings to their result position resp. add those which are new */
-    for (size_t i = 0; i < num_strings; i++) {
+    for (size_t i = 0; i < numStrings; i++) {
 
-        if (found_mask[i]) {
-            ids_out[i] = values[i];
+        if (foundMask[i]) {
+            idsOut[i] = values[i];
         } else {
             /* This path is taken only for strings that are not already contained in the dictionary. However,
              * since this insertion batch may contain duplicate string, querying for already inserted strings
              * must be done anyway for each string in the insertion batch that is inserted. */
 
-            StringId        string_id;
-            const char        *key = (const char *)(strings[i]);
+            StringId stringId;
+            const char *key = (const char *)(strings[i]);
 
-            bool               found = false;
-            StringId        value;
+            bool found = false;
+            StringId value;
 
             /* Query the bloomfilter if the key was already seend. If the filter returns "yes", a lookup
              * is requried since the filter maybe made a mistake. Of the filter returns "no", the
              * key is new for sure. In this case, one can skip the lookup into the buckets. */
-            hash_t bloom_key = hash_fnv(strlen(key), key); /* using a hash of a key instead of the string key itself avoids reading the entire string for computing k hashes inside the bloomfilter */
-            if (BLOOMFILTER_TEST_AND_SET(&bloomfilter, &bloom_key, sizeof(hash_t))) {
+            Hash bloomKey = HashFnv(strlen(key), key); /* using a hash of a key instead of the string key itself avoids reading the entire string for computing k hashes inside the bloomfilter */
+            if (BLOOMFILTER_TEST_AND_SET(&bloomfilter, &bloomKey, sizeof(Hash))) {
                 /* ensure that the string really was seen (due to collisions in the bloom filter the key might not
                  * been actually seen) */
 
                 /* query index for strings to get a boolean mask which strings are new and which must be added */
                 /* This is for the case that the string was not already contained in the string dictionary but may have
                  * duplicates in this insertion batch that are already inserted */
-                string_lookup_get_safe_exact(&value, &found, &extra->index, key);  /* OPTIMIZATION: use specialized function for "exact" query to avoid unnessecary malloc calls to manage set of results if only a single result is needed */
+                StringHashTableGetSafeExact(&value, &found, &extra->index, key);  /* OPTIMIZATION: use specialized function for "exact" query to avoid unnessecary malloc calls to manage set of results if only a single result is needed */
             }
 
             if (found) {
-                ids_out[i] = value;
+                idsOut[i] = value;
             } else {
 
                 /* register in contents list */
-                PANIC_IF(freelist_pop(&string_id, self) != STATUS_OK, "slot management broken");
-                struct entry *entries = (struct entry *) ng5_vector_data(&extra->contents);
-                struct entry *entry   = entries + string_id;
-                assert (!entry->in_use);
-                entry->in_use         = true;
+                PANIC_IF(freelistPop(&stringId, self) != STATUS_OK, "slot management broken");
+                struct entry *entries = (struct entry *) VectorData(&extra->contents);
+                struct entry *entry   = entries + stringId;
+                assert (!entry->inUse);
+                entry->inUse         = true;
                 entry->str            = strdup(strings[i]);
-                ids_out[i]            = string_id;
+                idsOut[i]            = stringId;
 
                 /* add for not yet registered pairs to buffer for fast import */
-                string_lookup_put_fast_exact(&extra->index, entry->str, string_id);
+                StringHashTablePutFastExact(&extra->index, entry->str, stringId);
             }
         }
     }
 
     /* set potential non-null out parameters */
-    OPTIONAL_SET_OR_ELSE(out, ids_out, AllocatorFree(&self->alloc, ids_out));
+    OPTIONAL_SET_OR_ELSE(out, idsOut, AllocatorFree(&self->alloc, idsOut));
 
     /* cleanup */
-    AllocatorFree(&hashtable_alloc, found_mask);
-    AllocatorFree(&hashtable_alloc, values);
+    AllocatorFree(&hashtableAlloc, foundMask);
+    AllocatorFree(&hashtableAlloc, values);
     BloomfilterDrop(&bloomfilter);
 
     unlock(self);
 
-    timestamp_t end = time_current_time_ms();
+    Timestamp end = TimeCurrentSystemTime();
     UNUSED(begin);
     UNUSED(end);
     INFO(STRING_DIC_SYNC_TAG, "insertion operation done: %f seconds spent here", (end - begin)/1000.0f)
@@ -317,161 +314,161 @@ static int this_insert(struct Dictionary *self, StringId **out, char * const*str
 
 }
 
-static int this_remove(struct Dictionary *self, StringId *strings, size_t num_strings)
+static int thisRemove(StringDictionary *self, StringId *strings, size_t numStrings)
 {
     CHECK_NON_NULL(self);
     CHECK_NON_NULL(strings);
-    CHECK_NON_NULL(num_strings);
-    CHECK_TAG(self->tag, STRING_DIC_NAIVE)
+    CHECK_NON_NULL(numStrings);
+    CHECK_TAG(self->tag, STRDIC_SYNC)
     lock(self);
 
-    struct naive_extra *extra = this_extra(self);
+    SyncExtra *extra = thisExtra(self);
 
-    size_t num_strings_to_delete = 0;
-    char **strings_to_delete = AllocatorMalloc(&self->alloc, num_strings * sizeof(char *));
-    StringId *string_ids_to_delete = AllocatorMalloc(&self->alloc, num_strings * sizeof(StringId));
+    size_t numStringsToDelete = 0;
+    char **stringsToDelete = AllocatorMalloc(&self->alloc, numStrings * sizeof(char *));
+    StringId *stringIdsToDelete = AllocatorMalloc(&self->alloc, numStrings * sizeof(StringId));
 
     /* remove strings from contents ng5_vector, and skip duplicates */
-    for (size_t i = 0; i < num_strings; i++) {
-        StringId string_id = strings[i];
-        struct entry *entry   = (struct entry *) ng5_vector_data(&extra->contents) + string_id;
-        if (BRANCH_LIKELY(entry->in_use)) {
-            strings_to_delete[num_strings_to_delete]    = entry->str;
-            string_ids_to_delete[num_strings_to_delete] = strings[i];
+    for (size_t i = 0; i < numStrings; i++) {
+        StringId stringId = strings[i];
+        struct entry *entry   = (struct entry *) VectorData(&extra->contents) + stringId;
+        if (BRANCH_LIKELY(entry->inUse)) {
+            stringsToDelete[numStringsToDelete]    = entry->str;
+            stringIdsToDelete[numStringsToDelete] = strings[i];
             entry->str    = NULL;
-            entry->in_use = false;
-            num_strings_to_delete++;
-            CHECK_SUCCESS(freelist_push(self, string_id));
+            entry->inUse = false;
+            numStringsToDelete++;
+            CHECK_SUCCESS(freelistPush(self, stringId));
         }
     }
 
     /* remove from index */
-    CHECK_SUCCESS(string_lookup_remove(&extra->index, strings_to_delete, num_strings_to_delete));
+    CHECK_SUCCESS(StringHashTableRemove(&extra->index, stringsToDelete, numStringsToDelete));
 
     /* free up resources for strings that should be removed */
-    for (size_t i = 0; i < num_strings_to_delete; i++) {
-        free (strings_to_delete[i]);
+    for (size_t i = 0; i < numStringsToDelete; i++) {
+        free (stringsToDelete[i]);
     }
 
     /* cleanup */
-    AllocatorFree(&self->alloc, strings_to_delete);
-    AllocatorFree(&self->alloc, string_ids_to_delete);
+    AllocatorFree(&self->alloc, stringsToDelete);
+    AllocatorFree(&self->alloc, stringIdsToDelete);
 
     unlock(self);
     return STATUS_OK;
 }
 
-static int this_locate_safe(struct Dictionary* self, StringId** out, bool** found_mask,
-        size_t* num_not_found, char* const* keys, size_t num_keys)
+static int thisLocateSafe(StringDictionary *self, StringId **out, bool **foundMask,
+                          size_t *numNotFound, char *const *keys, size_t numKeys)
 {
-    timestamp_t begin = time_current_time_ms();
-    TRACE(STRING_DIC_SYNC_TAG, "'locate_safe' function invoked for %zu strings", num_keys)
+    Timestamp begin = TimeCurrentSystemTime();
+    TRACE(STRING_DIC_SYNC_TAG, "'locateSafe' function invoked for %zu strings", numKeys)
 
     CHECK_NON_NULL(self);
     CHECK_NON_NULL(out);
-    CHECK_NON_NULL(found_mask);
-    CHECK_NON_NULL(num_not_found);
+    CHECK_NON_NULL(foundMask);
+    CHECK_NON_NULL(numNotFound);
     CHECK_NON_NULL(keys);
-    CHECK_NON_NULL(num_keys);
-    CHECK_TAG(self->tag, STRING_DIC_NAIVE)
+    CHECK_NON_NULL(numKeys);
+    CHECK_TAG(self->tag, STRDIC_SYNC)
 
     lock(self);
-    struct naive_extra *extra = this_extra(self);
-    int status = string_lookup_get_safe_bulk(out, found_mask, num_not_found, &extra->index, keys, num_keys);
+    SyncExtra *extra = thisExtra(self);
+    int status = StringHashTableGetSafeBulk(out, foundMask, numNotFound, &extra->index, keys, numKeys);
     unlock(self);
 
-    timestamp_t end = time_current_time_ms();
+    Timestamp end = TimeCurrentSystemTime();
     UNUSED(begin);
     UNUSED(end);
-    TRACE(STRING_DIC_SYNC_TAG, "'locate_safe' function done: %f seconds spent here", (end-begin)/1000.0f)
+    TRACE(STRING_DIC_SYNC_TAG, "'locateSafe' function done: %f seconds spent here", (end-begin)/1000.0f)
 
     return status;
 }
 
-static int this_locate_fast(struct Dictionary* self, StringId** out, char* const* keys,
-        size_t num_keys)
+static int thisLocateFast(StringDictionary *self, StringId **out, char *const *keys,
+                          size_t numKeys)
 {
-    CHECK_TAG(self->tag, STRING_DIC_NAIVE)
+    CHECK_TAG(self->tag, STRDIC_SYNC)
 
-    bool   *found_mask;
-    size_t  num_not_found;
+    bool   *foundMask;
+    size_t  numNotFound;
 
     /* use safer but in principle more slower implementation */
-    int     result         = this_locate_safe(self, out, &found_mask, &num_not_found, keys, num_keys);
+    int     result = thisLocateSafe(self, out, &foundMask, &numNotFound, keys, numKeys);
 
     /* cleanup */
-    this_free(self, found_mask);
+    thisFree(self, foundMask);
 
-    return  result;
+    return result;
 }
 
-static char **this_extract(struct Dictionary *self, const StringId *ids, size_t num_ids)
+static char **thisExtract(StringDictionary *self, const StringId *ids, size_t numIds)
 {
-    if (BRANCH_UNLIKELY(!self || !ids || num_ids == 0 || self->tag != STRING_DIC_NAIVE)) {
+    if (BRANCH_UNLIKELY(!self || !ids || numIds == 0 || self->tag != STRDIC_SYNC)) {
         return NULL;
     }
 
     lock(self);
 
-    Allocator hashtable_alloc;
+    Allocator hashtableAlloc;
 #if defined(NG5_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
-    allocator_TRACE(&hashtable_alloc);
+    allocatorTrace(&hashtableAlloc);
 #else
-    AllocatorThisOrDefault(&hashtable_alloc, &self->alloc);
+    AllocatorThisOrDefault(&hashtableAlloc, &self->alloc);
 #endif
 
-    struct naive_extra *extra = this_extra(self);
-    char **result = AllocatorMalloc(&hashtable_alloc, num_ids * sizeof(char *));
-    struct entry *entries = (struct entry *) ng5_vector_data(&extra->contents);
+    SyncExtra *extra = thisExtra(self);
+    char **result = AllocatorMalloc(&hashtableAlloc, numIds * sizeof(char *));
+    struct entry *entries = (struct entry *) VectorData(&extra->contents);
 
     /* Optimization: notify the kernel that the content list is accessed randomly (since hash based access)*/
-    ng5_vector_advise(&extra->contents, MADV_RANDOM | MADV_WILLNEED);
+    VectorMemoryAdvice(&extra->contents, MADV_RANDOM | MADV_WILLNEED);
 
-    for (size_t i = 0; i < num_ids; i++) {
-        StringId string_id = ids[i];
-        assert(string_id < ng5_vector_len(&extra->contents));
-        assert(entries[string_id].in_use);
-        result[i] = entries[string_id].str;
+    for (size_t i = 0; i < numIds; i++) {
+        StringId stringId = ids[i];
+        assert(stringId < VectorLength(&extra->contents));
+        assert(entries[stringId].inUse);
+        result[i] = entries[stringId].str;
     }
 
     unlock(self);
     return result;
 }
 
-static int this_free(struct Dictionary *self, void *ptr)
+static int thisFree(StringDictionary *self, void *ptr)
 {
     UNUSED(self);
 
-    Allocator hashtable_alloc;
+    Allocator hashtableAlloc;
 #if defined(NG5_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
-    CHECK_SUCCESS(allocator_TRACE(&hashtable_alloc));
+    CHECK_SUCCESS(allocatorTrace(&hashtableAlloc));
 #else
-    CHECK_SUCCESS(AllocatorThisOrDefault(&hashtable_alloc, &self->alloc));
+    CHECK_SUCCESS(AllocatorThisOrDefault(&hashtableAlloc, &self->alloc));
 #endif
 
-    return AllocatorFree(&hashtable_alloc, ptr);
+    return AllocatorFree(&hashtableAlloc, ptr);
 }
 
-static int this_reset_counters(struct Dictionary *self)
+static int thisResetCounters(StringDictionary *self)
 {
-    CHECK_TAG(self->tag, STRING_DIC_NAIVE)
-    struct naive_extra *extra = this_extra(self);
-    CHECK_SUCCESS(string_lookup_reset_counters(&extra->index));
+    CHECK_TAG(self->tag, STRDIC_SYNC)
+    SyncExtra *extra = thisExtra(self);
+    CHECK_SUCCESS(StringHashTableResetCounters(&extra->index));
     return STATUS_OK;
 }
 
-static int this_counters(struct Dictionary *self, struct string_map_counters *counters)
+static int thisCounters(StringDictionary *self, StringHashCounters *counters)
 {
-    CHECK_TAG(self->tag, STRING_DIC_NAIVE)
-    struct naive_extra *extra = this_extra(self);
-    CHECK_SUCCESS(string_lookup_counters(counters, &extra->index));
+    CHECK_TAG(self->tag, STRDIC_SYNC)
+    SyncExtra *extra = thisExtra(self);
+    CHECK_SUCCESS(StringHashTableCounters(counters, &extra->index));
     return STATUS_OK;
 }
 
-static int this_num_distinct(struct Dictionary *self, size_t *num)
+static int thisNumDistinct(StringDictionary *self, size_t *num)
 {
-    CHECK_TAG(self->tag, STRING_DIC_NAIVE)
-    struct naive_extra *extra = this_extra(self);
-    *num = ng5_vector_len(&extra->contents);
+    CHECK_TAG(self->tag, STRDIC_SYNC)
+    SyncExtra *extra = thisExtra(self);
+    *num = VectorLength(&extra->contents);
     return STATUS_OK;
 }

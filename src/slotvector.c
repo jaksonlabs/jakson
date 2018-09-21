@@ -25,39 +25,39 @@
 
 #include "slotvector.h"
 
-int slot_vector_create(struct slot_vector *vector, const Allocator *alloc, size_t elem_size, size_t cap_elems)
+int SlotVectorCreate(SlotVector *vector, const Allocator *alloc, size_t elemSize, size_t capElems)
 {
     CHECK_NON_NULL(vector)
     CHECK_NON_NULL(alloc)
-    CHECK_SUCCESS(VectorCreate(&vector->content, alloc, elem_size, cap_elems));
-    CHECK_SUCCESS(VectorCreate(&vector->freelist, alloc, sizeof(slot_vector_slot_t), cap_elems));
+    CHECK_SUCCESS(VectorCreate(&vector->content, alloc, elemSize, capElems));
+    CHECK_SUCCESS(VectorCreate(&vector->freeList, alloc, sizeof(SlotVectorSlot), capElems));
     return STATUS_OK;
 }
 
-int slot_vector_set_growfactor(struct slot_vector *vec, float factor)
+int SlotVectorSetGrowFactor(SlotVector *vec, float factor)
 {
     CHECK_NON_NULL(vec)
-    CHECK_SUCCESS(ng5_vector_set_growfactor(&vec->content, factor));
-    CHECK_SUCCESS(ng5_vector_set_growfactor(&vec->freelist, factor));
+    CHECK_SUCCESS(VectorSetGrowFactor(&vec->content, factor));
+    CHECK_SUCCESS(VectorSetGrowFactor(&vec->freeList, factor));
     return STATUS_OK;
 }
 
-int slot_vector_drop(struct slot_vector *vec)
+int SlotVectorDrop(SlotVector *vec)
 {
     CHECK_NON_NULL(vec)
     CHECK_SUCCESS(VectorDrop(&vec->content));
-    CHECK_SUCCESS(VectorDrop(&vec->freelist));
+    CHECK_SUCCESS(VectorDrop(&vec->freeList));
     return STATUS_OK;
 }
 
-int slot_vector_is_empty(struct slot_vector *vec)
+int SlotVectorIsEmpty(SlotVector *vec)
 {
     CHECK_NON_NULL(vec)
-    return ng5_vector_is_empty(&vec->content);
+    return VectorIsEmpty(&vec->content);
 }
 
-int slot_vector_insert(struct slot_vector *vec, optional Vector ofType(slot_vector_slot_t) *ids,
-                       const void *data, size_t num_elems)
+int SlotVectorInsert(SlotVector *vec, optional Vector ofType(slot_vector_slot_t) *ids,
+                     const void *data, size_t numElems)
 {
     CHECK_NON_NULL(vec)
     CHECK_NON_NULL(ids)
@@ -66,34 +66,34 @@ int slot_vector_insert(struct slot_vector *vec, optional Vector ofType(slot_vect
     UNUSED(data); // TODO: ???
 
     if (ids) {
-        VectorCreate(ids, vec->content.allocator, sizeof(slot_vector_slot_t), num_elems);
+        VectorCreate(ids, vec->content.allocator, sizeof(SlotVectorSlot), numElems);
     }
 
     /* check and handle whether the content ng5_vector must be resized */
-    size_t target = ng5_vector_len(&vec->content) + num_elems;
+    size_t target = VectorLength(&vec->content) + numElems;
     if (target > VectorCapacity(&vec->content)) {
-        assert(VectorCapacity(&vec->freelist) == VectorCapacity(&vec->content));
+        assert(VectorCapacity(&vec->freeList) == VectorCapacity(&vec->content));
         size_t required = target - VectorCapacity(&vec->content);
         size_t has = 0;
         size_t add = 0;
         while (has < required) {
-            ng5_vector_grow(&add, &vec->freelist);
-            ng5_vector_grow(NULL, &vec->content);
+            VectorGrow(&add, &vec->freeList);
+            VectorGrow(NULL, &vec->content);
             has += add;
         }
-        assert(VectorCapacity(&vec->freelist) == VectorCapacity(&vec->content));
-        ng5_vector_enlarge_size(&vec->content);
-        slot_vector_slot_t next_slot = ng5_vector_len(&vec->content);
+        assert(VectorCapacity(&vec->freeList) == VectorCapacity(&vec->content));
+        VectorEnlargeSizeToCapacity(&vec->content);
+        SlotVectorSlot nextSlot = VectorLength(&vec->content);
         while (has--) {
-            VectorPush(&vec->freelist, &next_slot, 1);
-            next_slot++;
+            VectorPush(&vec->freeList, &nextSlot, 1);
+            nextSlot++;
         }
     }
 
     /* perform insert */
-    assert(ng5_vector_len(&vec->freelist) > 0);
-    slot_vector_slot_t slot = *(slot_vector_slot_t *) ng5_vector_pop(&vec->freelist);
-    ng5_vector_at(&vec->content, slot);
+    assert(VectorLength(&vec->freeList) > 0);
+    SlotVectorSlot slot = *(SlotVectorSlot *) VectorPop(&vec->freeList);
+    VectorAt(&vec->content, slot);
     if (ids) {
         VectorPush(ids, &slot, 1);
     }
@@ -101,36 +101,36 @@ int slot_vector_insert(struct slot_vector *vec, optional Vector ofType(slot_vect
     return STATUS_OK;
 }
 
-const void *slot_vector_at(struct slot_vector *vec, slot_vector_slot_t slot)
+const void *SlotVectorAt(SlotVector *vec, SlotVectorSlot slot)
 {
-    if (!vec || slot >= ng5_vector_len(&vec->content)) {
+    if (!vec || slot >= VectorLength(&vec->content)) {
         return NULL;
     }
     else {
-        return vec->content.base + slot * vec->content.elem_size;
+        return vec->content.base + slot * vec->content.elemSize;
     }
 }
 
-int slot_vector_remove(struct slot_vector *vec, slot_vector_slot_t slot)
+int SlotVectorRemove(SlotVector *vec, SlotVectorSlot slot)
 {
     CHECK_NON_NULL(vec)
-    if (slot >= ng5_vector_len(&vec->content)) {
+    if (slot >= VectorLength(&vec->content)) {
         return STATUS_ILLEGALARG;
     }
     else {
-        VectorPush(&vec->freelist, &slot, 1);
+        VectorPush(&vec->freeList, &slot, 1);
         return STATUS_OK;
     }
 }
 
-size_t slot_vector_len(const struct slot_vector *vec)
+size_t SlotVectorLength(const SlotVector *vec)
 {
     CHECK_NON_NULL(vec);
-    return ng5_vector_len(&vec->content);
+    return VectorLength(&vec->content);
 }
 
-size_t slot_vector_cap(const struct slot_vector *vec)
+size_t SlotVectorCapacity(const SlotVector *vec)
 {
     CHECK_NON_NULL(vec);
-    return ng5_vector_len(&vec->freelist);
+    return VectorLength(&vec->freeList);
 }

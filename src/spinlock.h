@@ -31,17 +31,29 @@
 
 NG5_BEGIN_DECL
 
-typedef struct ng5_spinlock
+// ---------------------------------------------------------------------------------------------------------------------
+//
+//  T Y P E S
+//
+// ---------------------------------------------------------------------------------------------------------------------
+
+typedef struct Spinlock
 {
     atomic_flag lock;
-    pthread_t owning_thread;
-} ng5_spinlock_t;
+    pthread_t owner;
+} Spinlock;
 
-int ng5_spinlock_create(struct ng5_spinlock *spinlock);
+// ---------------------------------------------------------------------------------------------------------------------
+//
+//  I N T E R F A C E
+//
+// ---------------------------------------------------------------------------------------------------------------------
 
-int ng5_spinlock_lock(struct ng5_spinlock *spinlock);
+int SpinlockCreate(Spinlock *spinlock);
 
-int ng5_spinlock_unlock(struct ng5_spinlock *spinlock);
+int SpinlockAcquire(Spinlock *spinlock);
+
+int SpinlockRelease(Spinlock *spinlock);
 
 NG5_END_DECL
 

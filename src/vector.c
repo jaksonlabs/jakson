@@ -27,33 +27,39 @@
 
 #include "vector.h"
 
-int VectorCreate(Vector *out, const Allocator *alloc, size_t elem_size, size_t cap_elems)
+// ---------------------------------------------------------------------------------------------------------------------
+//
+//  I N T E R F A C E
+//
+// ---------------------------------------------------------------------------------------------------------------------
+
+int VectorCreate(Vector *out, const Allocator *alloc, size_t elemSize, size_t capElems)
 {
     CHECK_NON_NULL(out)
     out->allocator = malloc(sizeof(Allocator));
     AllocatorThisOrDefault(out->allocator, alloc);
-    out->base = AllocatorMalloc(out->allocator, cap_elems * elem_size);
-    out->num_elems = 0;
-    out->cap_elems = cap_elems;
-    out->elem_size = elem_size;
-    out->grow_factor = 1.7f;
+    out->base = AllocatorMalloc(out->allocator, capElems * elemSize);
+    out->numElems = 0;
+    out->capElems = capElems;
+    out->elemSize = elemSize;
+    out->growFactor = 1.7f;
     return STATUS_OK;
 }
 
-int ng5_vector_advise(Vector *vec, int madvise_advice)
+int VectorMemoryAdvice(Vector *vec, int madviseAdvice)
 {
     CHECK_NON_NULL(vec);
     UNUSED(vec);
-    UNUSED(madvise_advice);
-    madvise(vec->base, vec->cap_elems * vec->elem_size, madvise_advice);
+    UNUSED(madviseAdvice);
+    madvise(vec->base, vec->capElems * vec->elemSize, madviseAdvice);
     return STATUS_OK;
 }
 
-int ng5_vector_set_growfactor(Vector *vec, float factor)
+int VectorSetGrowFactor(Vector *vec, float factor)
 {
     CHECK_NON_NULL(vec);
     CHECK_LARGER_ONE(factor);
-    vec->grow_factor = factor;
+    vec->growFactor = factor;
     return STATUS_OK;
 }
 
@@ -66,108 +72,100 @@ int VectorDrop(Vector *vec)
     return STATUS_OK;
 }
 
-int ng5_vector_is_empty(const Vector *vec)
+int VectorIsEmpty(const Vector *vec)
 {
     CHECK_NON_NULL(vec)
-    return vec->num_elems == 0 ? STATUS_TRUE : STATUS_FALSE;
+    return vec->numElems == 0 ? STATUS_TRUE : STATUS_FALSE;
 }
 
-int VectorPush(Vector *vec, const void *data, size_t num_elems)
+int VectorPush(Vector *vec, const void *data, size_t numElems)
 {
     CHECK_NON_NULL(vec && data)
-    size_t next_num = vec->num_elems + num_elems;
-    while (next_num > vec->cap_elems) {
-        size_t more = next_num - vec->cap_elems;
-        vec->cap_elems = (vec->cap_elems + more) * vec->grow_factor;
-        vec->base = AllocatorRealloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
+    size_t nextNum = vec->numElems + numElems;
+    while (nextNum > vec->capElems) {
+        size_t more = nextNum - vec->capElems;
+        vec->capElems = (vec->capElems + more) * vec->growFactor;
+        vec->base = AllocatorRealloc(vec->allocator, vec->base, vec->capElems * vec->elemSize);
     }
-    memcpy(vec->base + vec->num_elems * vec->elem_size, data, num_elems * vec->elem_size);
-    vec->num_elems += num_elems;
+    memcpy(vec->base + vec->numElems * vec->elemSize, data, numElems * vec->elemSize);
+    vec->numElems += numElems;
     return STATUS_OK;
 }
 
-// TODO: remove
-//void *ng5_vector_push_and_get(Vector* vec, const void* data, size_t num_elems)
-//{
-//    size_t pos    = ng5_vector_len(vec);
-//    int    status = VectorPush(vec, data, num_elems);
-//    return status == STATUS_OK ? (void *) ng5_vector_at(vec, pos) : NULL;
-//}
-
-int VectorRepreatedPush(Vector *vec, const void *data, size_t how_many)
+int VectorRepreatedPush(Vector *vec, const void *data, size_t howOften)
 {
     CHECK_NON_NULL(vec && data)
-    size_t next_num = vec->num_elems + how_many;
-    while (next_num > vec->cap_elems) {
-        size_t more = next_num - vec->cap_elems;
-        vec->cap_elems = (vec->cap_elems + more) * vec->grow_factor;
-        vec->base = AllocatorRealloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
+    size_t nextNum = vec->numElems + howOften;
+    while (nextNum > vec->capElems) {
+        size_t more = nextNum - vec->capElems;
+        vec->capElems = (vec->capElems + more) * vec->growFactor;
+        vec->base = AllocatorRealloc(vec->allocator, vec->base, vec->capElems * vec->elemSize);
     }
-    for (size_t i = 0; i < how_many; i++) {
-        memcpy(vec->base + (vec->num_elems + i) * vec->elem_size, data, vec->elem_size);
+    for (size_t i = 0; i < howOften; i++) {
+        memcpy(vec->base + (vec->numElems + i) * vec->elemSize, data, vec->elemSize);
     }
 
-    vec->num_elems += how_many;
+    vec->numElems += howOften;
     return STATUS_OK;
 }
 
-const void *ng5_vector_pop(Vector *vec)
+const void *VectorPop(Vector *vec)
 {
     void *result;
-    if (BRANCH_LIKELY((result = (vec ? (vec->num_elems > 0 ? vec->base + (vec->num_elems - 1) * vec->elem_size : NULL) : NULL))
+    if (BRANCH_LIKELY((result = (vec ? (vec->numElems > 0 ? vec->base + (vec->numElems - 1) * vec->elemSize : NULL) : NULL))
                    != NULL)) {
-        vec->num_elems--;
+        vec->numElems--;
     }
     return result;
 }
 
-int ng5_vector_grow(size_t *num_new_slots, Vector *vec)
+int VectorGrow(size_t *numNewSlots, Vector *vec)
 {
     CHECK_NON_NULL(vec)
-    size_t free_slots_before = vec->cap_elems - vec->num_elems;
+    size_t freeSlotsBefore = vec->capElems - vec->numElems;
 
-    vec->cap_elems = (vec->cap_elems * vec->grow_factor) + 1;
-    vec->base = AllocatorRealloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
-    size_t free_slots_after = vec->cap_elems - vec->num_elems;
-    if (BRANCH_LIKELY(num_new_slots != NULL)) {
-        *num_new_slots = free_slots_after - free_slots_before;
+    vec->capElems = (vec->capElems * vec->growFactor) + 1;
+    vec->base = AllocatorRealloc(vec->allocator, vec->base, vec->capElems * vec->elemSize);
+    size_t freeSlotsAfter = vec->capElems - vec->numElems;
+    if (BRANCH_LIKELY(numNewSlots != NULL)) {
+        *numNewSlots = freeSlotsAfter - freeSlotsBefore;
     }
     return STATUS_OK;
 }
 
-size_t ng5_vector_len(const Vector *vec)
+size_t VectorLength(const Vector *vec)
 {
     CHECK_NON_NULL(vec)
-    return vec->num_elems;
+    return vec->numElems;
 }
 
-const void *ng5_vector_at(const Vector *vec, size_t pos)
+const void *VectorAt(const Vector *vec, size_t pos)
 {
-    return (vec && pos < vec->num_elems) ? vec->base + pos * vec->elem_size : NULL;
+    return (vec && pos < vec->numElems) ? vec->base + pos * vec->elemSize : NULL;
 }
 
 size_t VectorCapacity(const Vector *vec)
 {
     CHECK_NON_NULL(vec)
-    return vec->cap_elems;
+    return vec->capElems;
 }
 
-int ng5_vector_enlarge_size(Vector *vec)
+int VectorEnlargeSizeToCapacity(Vector *vec)
 {
     CHECK_NON_NULL(vec);
-    vec->num_elems = vec->cap_elems;
+    vec->numElems = vec->capElems;
     return STATUS_OK;
 }
 
-int ng5_vector_set(Vector *vec, size_t pos, const void *data)
+int VectorSet(Vector *vec, size_t pos, const void *data)
 {
     CHECK_NON_NULL(vec)
-    assert(pos < vec->num_elems);
-    memcpy(vec->base + pos * vec->elem_size, data, vec->elem_size);
+    assert(pos < vec->numElems);
+    memcpy(vec->base + pos * vec->elemSize, data, vec->elemSize);
     return STATUS_OK;
 }
 
-const void *ng5_vector_data(const Vector *vec)
+const void *VectorData(const Vector *vec)
 {
     return vec ? vec->base : NULL;
 }

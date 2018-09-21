@@ -10,7 +10,7 @@
 //#src <ng5/roadfire/roadfire.h>
 
 #define NUM_SAMPLES 1
-#define NTHREADS    (72 * 2)
+#define NTHREADS    (8)
 
 /*void roadfire_test() {
     struct storage_engine engine;
@@ -23,13 +23,13 @@ void experiments_hashing()
 {
     printf("chunk_num;sample;num_buckets;time_created_sec;time_inserted_sec;time_bulk_sum_created_inserted;num_strings_chunk;num_strings_total;num_distinct_strings\n");
 
-    //const char* path = "/Volumes/PINNECKE EXT/science/cleaned_datasets/dbpedia-cleaned.txt";
+    const char* path = "/Volumes/PINNECKE EXT/science/cleaned_datasets/dbpedia-cleaned.txt";
     //const char* path = "/home/pinnecke/datasets/yago1/stringlists/yago1-15pc-stringlist.txt";
-    const char* path = "/home/pinnecke/mnt/datasets/mag-cleaned.txt";
+    //const char* path = "/home/pinnecke/mnt/datasets/mag-cleaned.txt";
     //const char* path = "/Users/marcus/temp/file.txt";
 
 
-    struct Dictionary dic;
+    StringDictionary dic;
 
     for (size_t num_buckets = 50000; num_buckets<=50000; num_buckets += 50000) {
         for (int sample = 0; sample<NUM_SAMPLES; sample++) {
@@ -44,35 +44,35 @@ void experiments_hashing()
 
             fprintf(stderr, "create..\n");
 
-            timestamp_t create_begin = time_current_time_ms();
-            string_dic_create_async(&dic, 3720000, num_buckets, 3720000, NTHREADS,
-                    NULL);                         // <--------------------------------------------
-            timestamp_t create_end = time_current_time_ms();
+            Timestamp create_begin = TimeCurrentSystemTime();
+            StringDictionaryCreateAsync(&dic, 3720000, num_buckets, 3720000, NTHREADS,
+                                        NULL);                         // <--------------------------------------------
+            Timestamp create_end = TimeCurrentSystemTime();
             created_duration = (create_end-create_begin)/1000.0f;
 
-            timestamp_t next_begin = time_current_time_ms();
+            Timestamp next_begin = TimeCurrentSystemTime();
             Vector ofType(char *) *vector;
 
             size_t chunk_num = 0;
             size_t total_num = 0;
 
             while((vector = ChunkReaderNext(&reader))) {
-                timestamp_t next_end = time_current_time_ms();
-                fprintf(stderr, "got next %zu lines in %f sec\n", vector!=NULL ? ng5_vector_len(vector) : 0,
+                Timestamp next_end = TimeCurrentSystemTime();
+                fprintf(stderr, "got next %zu lines in %f sec\n", vector!=NULL ? VectorLength(vector) : 0,
                         (next_end-next_begin)/1000.0f);
 
                 StringId* ids = NULL, * ids_out;
                 UNUSED(ids_out);
 
-                char** strings = (char**) ng5_vector_data(vector);
-                size_t num_strings = ng5_vector_len(vector)-1;
+                char** strings = (char**) VectorData(vector);
+                size_t num_strings = VectorLength(vector)-1;
 
                 fprintf(stderr, "insert..\n");
 
-                string_dic_reset_counters(&dic);
-                timestamp_t inserted_begin = time_current_time_ms();
-                string_dic_insert(&dic, &ids, strings, num_strings, 0);
-                timestamp_t inserted_end = time_current_time_ms();
+                StringDictionaryResetCounters(&dic);
+                Timestamp inserted_begin = TimeCurrentSystemTime();
+                StringDictionaryInsert(&dic, &ids, strings, num_strings, 0);
+                Timestamp inserted_end = TimeCurrentSystemTime();
                 insert_duration = (inserted_end-inserted_begin)/1000.0f;
 
 //                fprintf(stderr, "locate..\n");
@@ -107,20 +107,20 @@ void experiments_hashing()
                 //string_dic_counters(&counters, &dic);
 
                 size_t num_distinct;
-                string_dic_num_distinct_values(&num_distinct, &dic);
+                StringDictionaryNumDistinct(&num_distinct, &dic);
 
-                total_num +=  ng5_vector_len(vector);
+                total_num += VectorLength(vector);
 
                 printf("%zu;%d;%zu;%f;%f;%f;%zu;%zu;%zu\n", chunk_num++, sample, num_buckets, created_duration,
                         insert_duration,
-                        (created_duration+insert_duration), ng5_vector_len(vector), total_num, num_distinct);
+                        (created_duration+insert_duration), VectorLength(vector), total_num, num_distinct);
 
-                string_dic_free(&dic, ids);
+                StringDictionaryFree(&dic, ids);
                 //string_dic_free(&dic, extracted_strings);
                 //string_dic_free(&dic, ids_out);
 
-                for (size_t i = 0; i<ng5_vector_len(vector); i++) {
-                    char* string = *ng5_vector_get(vector, i, char *);
+                for (size_t i = 0; i< VectorLength(vector); i++) {
+                    char* string = *VECTOR_GET(vector, i, char *);
                     free(string);
                 }
                 VectorDrop(vector);
@@ -132,7 +132,7 @@ void experiments_hashing()
             fflush(stdout);
 
             ChunkReaderDrop(&reader);
-            string_dic_drop(&dic);
+            StringDictionaryDrop(&dic);
 
         }
         exit(0);

@@ -71,7 +71,7 @@ size_t BitmapNumBits(const Bitmap *bitset)
 int BitmapClear(Bitmap *bitset)
 {
     CHECK_NON_NULL(bitset);
-    void *data = (void *) ng5_vector_data(&bitset->data);
+    void *data = (void *) VectorData(&bitset->data);
     memset(data, 0, sizeof(uint64_t) * VectorCapacity(&bitset->data));
     return STATUS_OK;
 }
@@ -81,7 +81,7 @@ int BitmapSet(Bitmap *bitset, uint16_t bitPosition, bool on)
     CHECK_NON_NULL(bitset)
     size_t blockPos = floor(bitPosition / (double) NUM_BITS(uint64_t));
     size_t blockBit = bitPosition % NUM_BITS(uint64_t);
-    uint64_t block = *ng5_vector_get(&bitset->data, blockPos, uint64_t);
+    uint64_t block = *VECTOR_GET(&bitset->data, blockPos, uint64_t);
     uint64_t mask = SET_BIT(blockBit);
     if (on) {
         FIELD_SET(block, mask);
@@ -89,7 +89,7 @@ int BitmapSet(Bitmap *bitset, uint16_t bitPosition, bool on)
     else {
         FIELD_CLEAR(block, mask);
     }
-    ng5_vector_set(&bitset->data, blockPos, &block);
+    VectorSet(&bitset->data, blockPos, &block);
     return STATUS_OK;
 }
 
@@ -98,7 +98,7 @@ bool BitmapGet(Bitmap *bitset, uint16_t bitPosition)
     CHECK_NON_NULL(bitset)
     size_t blockPos = floor(bitPosition / (double) NUM_BITS(uint64_t));
     size_t blockBit = bitPosition % NUM_BITS(uint64_t);
-    uint64_t block = *ng5_vector_get(&bitset->data, blockPos, uint64_t);
+    uint64_t block = *VECTOR_GET(&bitset->data, blockPos, uint64_t);
     uint64_t mask = SET_BIT(blockBit);
     return ((mask & block) >> bitPosition) == true;
 }

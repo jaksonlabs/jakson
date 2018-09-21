@@ -37,11 +37,8 @@ NG5_BEGIN_DECL
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-/**
- * Regular, non-fancy scan + caching
- */
-int string_hashtable_create_scan1_cache(struct string_map *map, const Allocator *alloc, size_t num_buckets,
-                                        size_t cap_buckets);
+int StringHashtableCreateMem(struct StringHashTable *map, const Allocator *alloc, size_t numBuckets,
+                             size_t capBuckets);
 
 NG5_END_DECL
 

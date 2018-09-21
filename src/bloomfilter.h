@@ -48,10 +48,10 @@ typedef Bitmap Bloomfilter;
 #define BLOOMFILTER_SET(filter, key, keySize)              \
 ({                                                         \
     size_t nbits = BitmapNumBits(filter);                  \
-    size_t b0 = hash_additive(keySize, key) % nbits;       \
-    size_t b1 = hash__xor(keySize, key) % nbits;           \
-    size_t b2 = hash_rot(keySize, key) % nbits;            \
-    size_t b3 = hash_sax(keySize, key) % nbits;            \
+    size_t b0 = HashAdditive(keySize, key) % nbits;       \
+    size_t b1 = HashXor(keySize, key) % nbits;           \
+    size_t b2 = HashRot(keySize, key) % nbits;            \
+    size_t b3 = HashSax(keySize, key) % nbits;            \
     BitmapSet(filter, b0, true);                           \
     BitmapSet(filter, b1, true);                           \
     BitmapSet(filter, b2, true);                           \
@@ -61,10 +61,10 @@ typedef Bitmap Bloomfilter;
 #define BLOOMFILTER_TEST(filter, key, keySize)             \
 ({                                                         \
     size_t nbits = BitmapNumBits(filter);                  \
-    size_t b0 = hash_additive(keySize, key) % nbits;       \
-    size_t b1 = hash__xor(keySize, key) % nbits;           \
-    size_t b2 = hash_rot(keySize, key) % nbits;            \
-    size_t b3 = hash_sax(keySize, key) % nbits;            \
+    size_t b0 = HashAdditive(keySize, key) % nbits;       \
+    size_t b1 = HashXor(keySize, key) % nbits;           \
+    size_t b2 = HashRot(keySize, key) % nbits;            \
+    size_t b3 = HashSax(keySize, key) % nbits;            \
     bool b0set = BitmapGet(filter, b0);                    \
     bool b1set = BitmapGet(filter, b1);                    \
     bool b2set = BitmapGet(filter, b2);                    \
@@ -75,10 +75,10 @@ typedef Bitmap Bloomfilter;
 #define BLOOMFILTER_TEST_AND_SET(filter, key, keySize)     \
 ({                                                         \
     size_t nbits = BitmapNumBits(filter);                  \
-    size_t b0 = hash_additive(keySize, key) % nbits;       \
-    size_t b1 = hash__xor(keySize, key) % nbits;           \
-    size_t b2 = hash_rot(keySize, key) % nbits;            \
-    size_t b3 = hash_sax(keySize, key) % nbits;            \
+    size_t b0 = HashAdditive(keySize, key) % nbits;       \
+    size_t b1 = HashXor(keySize, key) % nbits;           \
+    size_t b2 = HashRot(keySize, key) % nbits;            \
+    size_t b3 = HashSax(keySize, key) % nbits;            \
     bool b0set = BitmapGet(filter, b0);                    \
     bool b1set = BitmapGet(filter, b1);                    \
     bool b2set = BitmapGet(filter, b2);                    \

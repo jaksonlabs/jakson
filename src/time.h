@@ -30,9 +30,9 @@
 
 NG5_BEGIN_DECL
 
-typedef long long timestamp_t;
+typedef long long Timestamp;
 
-timestamp_t time_current_time_ms();
+Timestamp TimeCurrentSystemTime();
 
 NG5_END_DECL
 
