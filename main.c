@@ -10,7 +10,7 @@
 //#src <ng5/roadfire/roadfire.h>
 
 #define NUM_SAMPLES 1
-#define NTHREADS    (8)
+#define NTHREADS    (1)
 
 /*void roadfire_test() {
     struct storage_engine engine;

@@ -272,12 +272,12 @@
 			<Option target="ng5"/>
 			<Option target="tests"/>
 		</Unit>
-		<Unit filename="/Users/marcus/git/ng5/src/lock.c">
+		<Unit filename="/Users/marcus/git/ng5/src/spinlock.c">
 			<Option target="compare_cpp"/>
 			<Option target="ng5"/>
 			<Option target="tests"/>
 		</Unit>
-		<Unit filename="/Users/marcus/git/ng5/src/lock.h">
+		<Unit filename="/Users/marcus/git/ng5/src/spinlock.h">
 			<Option target="compare_cpp"/>
 			<Option target="ng5"/>
 			<Option target="tests"/>
