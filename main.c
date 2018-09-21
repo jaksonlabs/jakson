@@ -75,31 +75,31 @@ void experiments_hashing()
                 timestamp_t inserted_end = time_current_time_ms();
                 insert_duration = (inserted_end-inserted_begin)/1000.0f;
 
-                fprintf(stderr, "locate..\n");
-
-                string_dic_locate_fast(&ids_out, &dic, strings, num_strings);
-                for (size_t i = 0; i<num_strings; i++) {
-                    StringId id_created = ids[i];
-                    StringId id_located = ids_out[i];
-                    //debug("check", "[%s] -> %zu", strings[i], id_located);
-                    PANIC_IF_WARGS(id_created!=id_located,
-                            "mapping broken for string [%s] id '%zu': expected %zu, is %zu",
-                            strings[i], i, id_created, id_located);
-                    assert(id_created==id_located);
-                }
-
-                fprintf(stderr, "extract..\n");
-
-                char** extracted_strings = string_dic_extract(&dic, ids, num_strings);
-                for (size_t i = 0; i<num_strings; i++) {
-                    char* extracted = extracted_strings[i];
-                    char* given = strings[i];
-                    PANIC_IF(strcmp(extracted, given)!=0, "extraction broken");
-                    assert(strcmp(extracted, given)==0);
-                    //     debug("extracted id=%zu -> string [%s]\n", ids[i], extracted);
-                }
-
-                fprintf(stderr, "remove..\n");
+//                fprintf(stderr, "locate..\n");
+//
+//                string_dic_locate_fast(&ids_out, &dic, strings, num_strings);
+//                for (size_t i = 0; i<num_strings; i++) {
+//                    StringId id_created = ids[i];
+//                    StringId id_located = ids_out[i];
+//                    //debug("check", "[%s] -> %zu", strings[i], id_located);
+//                    PANIC_IF_WARGS(id_created!=id_located,
+//                            "mapping broken for string [%s] id '%zu': expected %zu, is %zu",
+//                            strings[i], i, id_created, id_located);
+//                    assert(id_created==id_located);
+//                }
+//
+//                fprintf(stderr, "extract..\n");
+//
+//                char** extracted_strings = string_dic_extract(&dic, ids, num_strings);
+//                for (size_t i = 0; i<num_strings; i++) {
+//                    char* extracted = extracted_strings[i];
+//                    char* given = strings[i];
+//                    PANIC_IF(strcmp(extracted, given)!=0, "extraction broken");
+//                    assert(strcmp(extracted, given)==0);
+//                    //     debug("extracted id=%zu -> string [%s]\n", ids[i], extracted);
+//                }
+//
+//                fprintf(stderr, "remove..\n");
 
                 //  string_dic_remove(&dic, ids, num_strings);
 
