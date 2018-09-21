@@ -10,7 +10,7 @@
 //#src <ng5/roadfire/roadfire.h>
 
 #define NUM_SAMPLES 1
-#define NTHREADS    1
+#define NTHREADS    (72 * 2)
 
 /*void roadfire_test() {
     struct storage_engine engine;
@@ -25,8 +25,8 @@ void experiments_hashing()
 
     //const char* path = "/Volumes/PINNECKE EXT/science/cleaned_datasets/dbpedia-cleaned.txt";
     //const char* path = "/home/pinnecke/datasets/yago1/stringlists/yago1-15pc-stringlist.txt";
-    //const char* path = "/home/pinnecke/datasets/dbpedia-cleaned.txt";
-    const char* path = "/Users/marcus/temp/file.txt";
+    const char* path = "/home/pinnecke/mnt/datasets/mag-cleaned.txt";
+    //const char* path = "/Users/marcus/temp/file.txt";
 
 
     struct Dictionary dic;
