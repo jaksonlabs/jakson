@@ -35,7 +35,15 @@ void experiments_hashing()
         for (int sample = 0; sample<NUM_SAMPLES; sample++) {
 
             ChunkReader reader;
-            ChunkReaderCreate(&reader, NULL, path, 5 * 1024 * 1024 * 1204);
+
+            /**
+             * Here occurs undefined behaviour on different systems. Problem is,
+             * that on Linux the compiler treats the result of the calculation as int 
+             * before casting it to size_t in the function call, but the result is too big
+             * for int. Therefore, an explicit size_t cast is required to build
+             * without werror
+             **/
+            ChunkReaderCreate(&reader, NULL, path, (size_t)5 * 1024 * 1024 * 1204);
 
             float created_duration = 0;
             float insert_duration = 0;

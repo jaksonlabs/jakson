@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <iostream>
-#include <vector.h>
+#include <vector>
+#include "../../src/vector.h"
 #include <time.h>
 #include <map>
-#include <vector>
 
 using namespace std;
 
