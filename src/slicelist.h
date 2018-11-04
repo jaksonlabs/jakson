@@ -32,6 +32,7 @@
 #include "spinlock.h"
 #include "bloomfilter.h"
 #include "hash.h"
+#include "simd.h"
 
 NG5_BEGIN_DECL
 
