@@ -60,19 +60,20 @@ uint32_t SLICE_SCAN_SIMD(Slice* slice, Hash needleHash, const char * needleStr) 
     simdScanOperation.searchValue = needleHash;
 
     SIMDScanPrepare(&simdScanOperation);
-
-    if (!cacheHit) {                                                                                                                                                                                                           
-        while (!SIMDScanExecuteSingleOperation(&simdScanOperation)) { ; }             
-    
-        endReached    = simdScanOperation.endReached;   
-        keyHashsNoMatch = simdScanOperation.matchIndex == 0;                                                                
-        keysMatch      = endReached || (!keyHashsNoMatch && (strcmp(slice->keyColumn[simdScanOperation.matchIndex], needleStr)==0));          
-        continueScan  = !endReached && !keysMatch;                                                                                                                                                                                                                                   
-        slice->cacheIdx = !endReached && keysMatch ? simdScanOperation.matchIndex : slice->cacheIdx;                                              
+    do { 
+        if (!cacheHit) {                                                                                                                                                                                                           
+            while (!SIMDScanExecuteSingleOperation(&simdScanOperation)) { ; }             
+        
+            endReached    = simdScanOperation.endReached;   
+            keyHashsNoMatch = simdScanOperation.matchIndex == 0;                                                                
+            keysMatch      = endReached || (!keyHashsNoMatch && (strcmp(slice->keyColumn[simdScanOperation.matchIndex], needleStr)==0));          
+            continueScan  = !endReached && !keysMatch;                                                                                                                                                                                                                                   
+            slice->cacheIdx = !endReached && keysMatch ? simdScanOperation.matchIndex : slice->cacheIdx;                                              
+        }
     }
-
+    while (continueScan);
     SIMDScanFree(&simdScanOperation);
-                                                                                                                      
+
     return cacheHit ? slice->cacheIdx : (!endReached && keysMatch ? simdScanOperation.matchIndex : slice->numElems);                                     
 }
 
