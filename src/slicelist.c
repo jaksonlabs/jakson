@@ -69,7 +69,10 @@ uint32_t SLICE_SCAN_SIMD(Slice* slice, Hash needleHash, const char * needleStr) 
         keysMatch      = endReached || (!keyHashsNoMatch && (strcmp(slice->keyColumn[simdScanOperation.matchIndex], needleStr)==0));          
         continueScan  = !endReached && !keysMatch;                                                                                                                                                                                                                                   
         slice->cacheIdx = !endReached && keysMatch ? simdScanOperation.matchIndex : slice->cacheIdx;                                              
-    }                                                                                                                  
+    }
+
+    SIMDScanFree(&simdScanOperation);
+                                                                                                                      
     return cacheHit ? slice->cacheIdx : (!endReached && keysMatch ? simdScanOperation.matchIndex : slice->numElems);                                     
 }
 
