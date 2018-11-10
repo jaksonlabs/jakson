@@ -39,8 +39,10 @@ include(${CMAKE_SOURCE_DIR}/cmake/modules/FindCheck.cmake)
 
 include_directories("/usr/local/include")
 include_directories(${APRUTIL_INCLUDE_DIR})
+include_directories("$ENV{HOME}/.local/include")
+link_directories("$ENV{HOME}/.local/lib")
 
-set(LIBS ${LIBS} pthread m ${APR_LIBRARIES} ${APRUTIL_LIBRARIES})
+set(LIBS ${LIBS} pthread m ${APR_LIBRARIES} ${APRUTIL_LIBRARIES} slog)
 
 aux_source_directory("${CMAKE_SOURCE_DIR}/src" SOURCE_FILES)
 # aux_source_directory("${CMAKE_SOURCE_DIR}/src" SOURCE_FILES)
