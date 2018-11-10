@@ -7,6 +7,10 @@ tests/cmake_install.cmake
 tests/CTestTestfile.cmake
 tests/Makefile
 tmp
+build
+sbin
+dump
+cmake-build-debug
 
 .vscode/
 CMakeFiles/
