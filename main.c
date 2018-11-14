@@ -193,6 +193,9 @@ void experiments_hashing() {
       fprintf(statistics_file, "%zu, %f, %f, %f\n", num_threads,
               statistics.created_duration, statistics.insert_duration,
               statistics.total_duration);
+      statistics.created_duration = 0;
+      statistics.insert_duration = 0;
+      statistics.total_duration = 0;
     }
   }
   fclose(statistics_file);
