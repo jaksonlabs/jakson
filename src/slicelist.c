@@ -58,7 +58,8 @@ uint32_t SLICE_SCAN_SIMD(Slice* slice, Hash needleHash, const char * needleStr) 
     SIMDScanOperation simdScanOperation;
     simdScanOperation.data = slice->keyHashColumn;
     simdScanOperation.searchValue = needleHash;
-
+    simdScanOperation.elementCount = sizeof(slice->keyColumn) / sizeof(size_t);
+    
     SIMDScanPrepare(&simdScanOperation);
     do { 
         if (!cacheHit) {                                                                                                                                                                                                           

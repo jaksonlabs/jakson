@@ -81,7 +81,7 @@ inline static size_t* replicateSearchValue(size_t searchValue) {
 }
 
 // Returns position of the only set bit in 'n' 
-inline static int findPosition(unsigned n) { 
+/*nline static int findPosition(unsigned n) { 
   
     unsigned i = 1, pos = 1; 
   
@@ -98,7 +98,7 @@ inline static int findPosition(unsigned n) {
     } 
   
     return pos; 
-} 
+} */
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
@@ -119,19 +119,25 @@ inline int SIMDScanPrepare(SIMDScanOperation* scanOperation) {
 
 inline int SIMDScanExecuteSingleOperation(SIMDScanOperation* scanOperation) {
 
-    // TODO: Check for end of list
-    
-    size_t* currentSearchData = scanOperation->data + scanOperation->currentIndex;
+    // Check for end of list    
+    size_t restElements = NG5_SIMD_COMPARE_ELEMENT_COUNT - (scanOperation->elementCount - scanOperation->currentIndex);
+
+    // If there is a positive rest of elements, that are smaller than the simd size
+    // Move the pointer back to compare the correct amount of elements
+    // Compares the last x < NG5_SIMD_COMPARE_ELEMENT_COUNT twice, but the other solution
+    // Would be to fill up the remaining slots with some static value like MAXINT
+    size_t* currentSearchData = restElements > 0 ? 
+        scanOperation->data + scanOperation->currentIndex - restElements
+        : scanOperation->data + scanOperation->currentIndex;
 
     __m256i simdSearchData = NG5_SIMD_LOAD((__m256i *)currentSearchData);
     __m256i simdSearchValue = NG5_SIMD_LOAD(scanOperation->replicatedSearchValue);
     __m256i compareResult = NG5_SIMD_COMPARE_EQUALS(simdSearchData, simdSearchValue);
-
-    unsigned bitmask = _mm256_movemask_epi8(compareResult);
     
-    if(bitmask) {
-        scanOperation->matchIndex = scanOperation->currentIndex + findPosition(bitmask);
-
+    // Check if the result is empty
+    if(!_mm256_testz_si256(compareResult, compareResult)) {
+        unsigned bitmask = _mm256_movemask_epi8(compareResult);
+        scanOperation->matchIndex = scanOperation->currentIndex + _bit_scan_forward(bitmask);
     }
     scanOperation->currentIndex += NG5_SIMD_COMPARE_ELEMENT_COUNT;
 

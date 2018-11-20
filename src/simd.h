@@ -66,6 +66,7 @@ typedef struct SIMDScanOperation {
     size_t searchValue;
     __m256i* replicatedSearchValue;
     bool endReached;
+    size_t elementCount;
 } SIMDScanOperation;
 
 // ---------------------------------------------------------------------------------------------------------------------
