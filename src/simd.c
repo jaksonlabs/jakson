@@ -150,7 +150,7 @@ inline int SIMDScanExecuteSingleOperation(SIMDScanOperation *scanOperation) {
     }
 
     __m256i *searchData = (__m256i *) currentSearchData;
-    __m256i simdSearchValue = _mm256_load_si256(scanOperation->replicatedSearchValue);
+    __m256i simdSearchValue = <(scanOperation->replicatedSearchValue);
     __m256i simdSearchData = _mm256_loadu_si256(searchData);
     __m256i compareResult = NG5_SIMD_COMPARE_EQUALS(simdSearchData, simdSearchValue);
 
