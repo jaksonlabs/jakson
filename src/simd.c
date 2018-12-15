@@ -57,7 +57,7 @@
 // TODO: Futher investigation, can size_t be smaller?
 #ifndef NG5_SIMD_LOAD
 #define NG5_SIMD_LOAD _mm256_load_si256
-#endif 
+#endif
 
 #ifndef NG5_SIMD_COMPARE_EQUALS
 #define NG5_SIMD_COMPARE_EQUALS _mm256_cmpeq_epi64
@@ -69,12 +69,12 @@
 //  H E L P E R
 //
 // ---------------------------------------------------------------------------------------------------------------------
-inline static size_t* replicateSearchValue(size_t searchValue) {
-    size_t* searchValueArray = malloc(NG5_SIMD_COMPARE_ELEMENT_COUNT * NG5_SIMD_SIZEOF_SIZET);
+inline static size_t *replicateSearchValue(size_t searchValue) {
+    size_t *searchValueArray = malloc(NG5_SIMD_COMPARE_ELEMENT_COUNT * NG5_SIMD_SIZEOF_SIZET);
     uint8_t i = 0;
 
-    for(i = 0; i < NG5_SIMD_COMPARE_ELEMENT_COUNT; ++i) {
-        searchValueArray[0] = searchValue;
+    for (i = 0; i < NG5_SIMD_COMPARE_ELEMENT_COUNT; ++i) {
+        searchValueArray[i] = searchValue;
     }
 
     return searchValueArray;
@@ -106,47 +106,69 @@ inline static size_t* replicateSearchValue(size_t searchValue) {
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-inline int SIMDScanPrepare(SIMDScanOperation* scanOperation) {
-    size_t* replicatedSearchValue = replicateSearchValue(scanOperation->searchValue);
-    scanOperation->replicatedSearchValue = (__m256i *)replicatedSearchValue;
+inline int SIMDScanPrepare(SIMDScanOperation *scanOperation) {
+    size_t *replicatedSearchValue = replicateSearchValue(scanOperation->searchValue);
+    scanOperation->replicatedSearchValue = (__m256i *) replicatedSearchValue;
     scanOperation->currentIndex = 0;
-    scanOperation->matchIndex = 0;
+    // scanOperation->matchIndex = -1;
     scanOperation->endReached = 0;
 
     // TODO: Success/Error?
     return 1;
 }
 
-inline int SIMDScanExecuteSingleOperation(SIMDScanOperation* scanOperation) {
+inline int SIMDScanExecuteSingleOperation(SIMDScanOperation *scanOperation) {
+
+    scanOperation->matchIndex = -1;
+    // Sequential scan for < 4 Elements
+    if (scanOperation->elementCount < NG5_SIMD_COMPARE_ELEMENT_COUNT) {
+        uint32_t i = 0;
+        for (i = 0; i < scanOperation->elementCount; ++i) {
+            if (scanOperation->data[i] == scanOperation->searchValue) {
+                scanOperation->matchIndex = i;
+                break;
+            }
+        }
+
+        scanOperation->currentIndex += scanOperation->elementCount;
+        scanOperation->endReached = scanOperation->currentIndex == (scanOperation->elementCount);
+        return (scanOperation->endReached || scanOperation->matchIndex > -1);
+    }
+
+    size_t *currentSearchData = scanOperation->data + scanOperation->currentIndex;
 
     // Check for end of list    
-    size_t restElements = NG5_SIMD_COMPARE_ELEMENT_COUNT - (scanOperation->elementCount - scanOperation->currentIndex);
+    int restElements = NG5_SIMD_COMPARE_ELEMENT_COUNT - (scanOperation->elementCount - scanOperation->currentIndex);
 
     // If there is a positive rest of elements, that are smaller than the simd size
     // Move the pointer back to compare the correct amount of elements
     // Compares the last x < NG5_SIMD_COMPARE_ELEMENT_COUNT twice, but the other solution
     // Would be to fill up the remaining slots with some static value like MAXINT
-    size_t* currentSearchData = restElements > 0 ? 
-        scanOperation->data + scanOperation->currentIndex - restElements
-        : scanOperation->data + scanOperation->currentIndex;
+    if (restElements > 0) {
+        scanOperation->endReached = true;
+        currentSearchData = scanOperation->data + scanOperation->currentIndex - restElements;
+    }
 
-    __m256i simdSearchData = NG5_SIMD_LOAD((__m256i *)currentSearchData);
-    __m256i simdSearchValue = NG5_SIMD_LOAD(scanOperation->replicatedSearchValue);
+    __m256i *searchData = (__m256i *) currentSearchData;
+    __m256i simdSearchValue = _mm256_load_si256(scanOperation->replicatedSearchValue);
+    __m256i simdSearchData = _mm256_loadu_si256(searchData);
     __m256i compareResult = NG5_SIMD_COMPARE_EQUALS(simdSearchData, simdSearchValue);
-    
+
     // Check if the result is empty
-    if(!_mm256_testz_si256(compareResult, compareResult)) {
+    if (!_mm256_testz_si256(compareResult, compareResult)) {
         unsigned bitmask = _mm256_movemask_epi8(compareResult);
-        scanOperation->matchIndex = scanOperation->currentIndex + _bit_scan_forward(bitmask);
+        int matchIndex = scanOperation->currentIndex + _bit_scan_forward(bitmask) / 8; // TODO: why / 8?
+        scanOperation->matchIndex = matchIndex;
     }
     scanOperation->currentIndex += NG5_SIMD_COMPARE_ELEMENT_COUNT;
 
-    return (scanOperation->matchIndex != 0);
+    return (scanOperation->endReached || scanOperation->matchIndex > -1);
 }
 
-inline int SIMDScanFree(SIMDScanOperation* scanOperation) {
+inline int SIMDScanFree(SIMDScanOperation *scanOperation) {
     free(scanOperation->replicatedSearchValue);
-    free(scanOperation);
+    // This one doesnt make sense, since it's allocated on the stack
+    // free(scanOperation);
 
     return 1;
 }

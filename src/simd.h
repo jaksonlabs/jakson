@@ -50,7 +50,7 @@ typedef struct SIMDScanOperation SIMDScanOperation;
 #endif
 
 #ifndef NG5_SIMD_COMPARE_ELEMENT_COUNT
-#define NG5_SIMD_COMPARE_ELEMENT_COUNT sizeof(__m256i) / NG5_SIMD_SIZEOF_SIZET
+#define NG5_SIMD_COMPARE_ELEMENT_COUNT 4 // sizeof(__m256i) / NG5_SIMD_SIZEOF_SIZET
 #endif
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -60,7 +60,7 @@ typedef struct SIMDScanOperation SIMDScanOperation;
 // ---------------------------------------------------------------------------------------------------------------------
 
 typedef struct SIMDScanOperation {
-    uint32_t matchIndex;
+    int matchIndex;
     uint32_t currentIndex;
     size_t* data;
     size_t searchValue;
