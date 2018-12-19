@@ -8,14 +8,38 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
 //#src <ng5/roadfire/roadfire.h>
 
-/*void roadfire_test() {
-    struct storage_engine engine;
-    storage_engine_roadfire_create(&engine, NULL, NULL);
-}*/
+#ifdef __unix__
+#include <sys/sysinfo.h>
+#include <sys/stat.h>
+
+#define TOTAL_PROC_NUM sysconf(_SC_NPROCESSORS_ONLN)
+
+struct sysinfo _system_information;
+struct stat _file_stat;
+
+void getsysteminfo(const char* path) {
+  if (0 != sysinfo(&_system_information)) {
+    slog_panic(0, "Could not read in system information");
+    exit(1);
+  }
+  stat(path, &_file_stat);
+}
+
+#else
+// TODO Test for MacOS -- @marcus
+
+void getsysteminfo(const char* path) {
+  slog_panic(0, "NOT IMPLEMENTED");
+  exit(1);
+}
+
+#endif
 
 #define NUM_SLICE_INSERT 100000
+#define BATCH_SIZE (size_t)5 * 1024 * 1024 * 1024
 
 typedef struct {
   float created_duration;
@@ -23,17 +47,39 @@ typedef struct {
   float total_duration;
 } stats;
 
+typedef struct {
+  unsigned long load;
+  unsigned long processor_number;
+  unsigned long batch_size;
+  unsigned long file_size;
+} context;
+
+void system_info(const char* path, context *system_context) {
+  getsysteminfo(path);
+  slog_info(0, "System processors: %zu, Load Average: %.2f, Batch Size: %zu, Complete File Size: %zu", TOTAL_PROC_NUM, (float) _system_information.loads[0] / (float)(1 << SI_LOAD_SHIFT), BATCH_SIZE, _file_stat.st_size);
+
+  system_context->load = (float) _system_information.loads[0] / (float)(1 << SI_LOAD_SHIFT);
+  system_context->processor_number = TOTAL_PROC_NUM;
+  system_context->batch_size = BATCH_SIZE;
+  system_context->file_size = _file_stat.st_size;
+}
+
+size_t calculate_threads(context system_context) {
+  //TODO gradient descent
+
+  return system_context.processor_number;
+}
+
 void experiments_hashing() {
   slog_info(0, "chunk_num;sample;num_buckets;time_created_sec;time_inserted_"
                "sec;time_bulk_sum_created_inserted;num_strings_chunk;num_"
                "strings_total;num_distinct_strings");
 
-  // const char* path = "/Volumes/PINNECKE
-  // EXT/science/cleaned_datasets/dbpedia-cleaned.txt";
   slog_info(0, "Reading in environment");
 
   FILE *statistics_file = fopen("statistics.csv", "w");
   stats statistics = {0.0, 0.0, 0.0};
+  context system_context = {0, 0, 0, 0};
 
   fprintf(statistics_file, "%s, %s, %s, %s\n", "thread_num", "created_duration",
           "insert_duration", "total_time");
@@ -43,10 +89,6 @@ void experiments_hashing() {
     slog_panic(0, "No dataset defined; Define NG5_SET");
     exit(1);
   }
-  // const char* path =
-  // "/home/pinnecke/datasets/yago1/stringlists/yago1-15pc-stringlist.txt"; const
-  // char* path = "/home/pinnecke/mnt/datasets/mag-cleaned.txt"; const char* path
-  // = "/Users/marcus/temp/file.txt";
 
   const char *max_threads_string = getenv("NG5_THREADS");
   if (max_threads_string == NULL) {
@@ -61,6 +103,8 @@ void experiments_hashing() {
   }
   const size_t samples = (size_t)atoi(samples_string);
 
+  system_info(path, &system_context);
+  calculate_threads(system_context);
   StringDictionary dic;
   for (size_t num_threads = 1; num_threads <= max_threads; num_threads++) {
     slog_info(0, "%s %zu %s\n", "PERFORMING SAMPLE WITH", num_threads,
@@ -80,7 +124,7 @@ void experiments_hashing() {
          *is too big for int. Therefore, an explicit size_t cast is required to
          *build without werror
          **/
-        ChunkReaderCreate(&reader, NULL, path, (size_t)5 * 1024 * 1024 * 1024);
+        ChunkReaderCreate(&reader, NULL, path, BATCH_SIZE);
 
         float created_duration = 0;
         float insert_duration = 0;
@@ -204,7 +248,6 @@ void experiments_hashing() {
 
 int main() {
   slog_init("logfile", NULL, 1, 0);
-
   experiments_hashing();
 
   return 0;

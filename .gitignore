@@ -12,6 +12,8 @@ sbin
 dump
 cmake-build-debug
 
+*#*
+
 .vscode/
 CMakeFiles/
 cmake_clang.sh

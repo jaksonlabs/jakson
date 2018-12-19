@@ -64,3 +64,4 @@ actual benefit achieved through it. This way through slight learning a better re
 be achieved
 
 ## ~~Cost Model Design~~ Gradient Descent Design
+
