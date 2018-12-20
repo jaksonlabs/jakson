@@ -156,6 +156,7 @@ static int thisUnlock(struct StringDictionary *self);
 
 static int thisCreateExtra(struct StringDictionary *self, size_t capacity, size_t numIndexBuckets,
                            size_t approxNumUniqueStr, size_t numThreads);
+static int thisSetExtra(struct StringDictionary *self, size_t numThreads);
 
 static int thisSetupCarriers(struct StringDictionary *self, size_t capacity, size_t numIndexBuckets,
                              size_t approxNumUniqueStr, size_t numThreads);
@@ -199,6 +200,12 @@ int StringDictionaryCreateAsync(struct StringDictionary *dic, size_t capacity, s
     return STATUS_OK;
 }
 
+int StringDictionaryResize(struct StringDictionary *dic, size_t numThreads)
+{
+  CHECK_SUCCESS(thisSetExtra(dic, numThreads));
+  return STATUS_OK;
+}
+
 // ---------------------------------------------------------------------------------------------------------------------
 //
 //  H E L P E R   I M P L E M E N T A T I O N
@@ -218,6 +225,17 @@ static int thisCreateExtra(struct StringDictionary *self, size_t capacity, size_
     VectorCreate(&extra->carrierMapping, &self->alloc, sizeof(Carrier *), capacity);
 
     return STATUS_OK;
+}
+
+static int thisSetExtra(struct StringDictionary *self, size_t numThreads)
+{
+  assert(self);
+
+  AsyncExtra *extra = THIS_EXTRAS(self);
+  CHECK_SUCCESS(VectorGrow(&numThreads, &extra->carriers));
+  CHECK_SUCCESS(VectorGrow(&numThreads, &extra->carriers));
+
+  return STATUS_OK;
 }
 
 static int thisDrop(struct StringDictionary *self)

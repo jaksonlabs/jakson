@@ -119,7 +119,7 @@ static void *invokeRealloc(Allocator *self, void *ptr, size_t size)
     void *result;
 
     if ((result = realloc(ptr, size)) == NULL) {
-        PANIC("malloc failed");
+        PANIC("realloc failed");
     }
     else {
         return result;

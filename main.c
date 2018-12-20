@@ -39,7 +39,7 @@ void getsysteminfo(const char* path) {
 #endif
 
 #define NUM_SLICE_INSERT 100000
-#define BATCH_SIZE (size_t)5 * 1024 * 1024 * 1024
+#define BATCH_SIZE (size_t)5 * 1024 * 1024
 
 typedef struct {
   float created_duration;
@@ -144,6 +144,8 @@ void experiments_hashing() {
         size_t chunk_num = 0;
         size_t total_num = 0;
 
+        size_t iteration = 0;
+
         while ((vector = ChunkReaderNext(&reader))) {
           Timestamp next_end = TimeCurrentSystemTime();
           slog_info(0, "got next %zu lines in %f sec",
@@ -158,8 +160,14 @@ void experiments_hashing() {
 
           slog_info(0, "insert..");
 
+          size_t newThreads = calculate_threads(system_context);
+          slog_info(0, "Iteration: %zu", ++iteration)
+          slog_info(0, "Resizing Threads to %zu", newThreads);
+          StringDictionaryResize(&dic, newThreads);
+
           StringDictionaryResetCounters(&dic);
           Timestamp inserted_begin = TimeCurrentSystemTime();
+          // In this case num_threads has to be 0
           StringDictionaryInsert(&dic, &ids, strings, num_strings, 0);
           Timestamp inserted_end = TimeCurrentSystemTime();
           insert_duration = (inserted_end - inserted_begin) / 1000.0f;
