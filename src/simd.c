@@ -121,7 +121,7 @@ inline int SIMDScanExecuteSingleOperation(SIMDScanOperation *scanOperation) {
 
     scanOperation->matchIndex = -1;
     // Sequential scan for < 4 Elements
-    if (scanOperation->elementCount < NG5_SIMD_COMPARE_ELEMENT_COUNT) {
+    /*if (scanOperation->elementCount < NG5_SIMD_COMPARE_ELEMENT_COUNT) {
         uint32_t i = 0;
         for (i = 0; i < scanOperation->elementCount; ++i) {
             if (scanOperation->data[i] == scanOperation->searchValue) {
@@ -133,7 +133,7 @@ inline int SIMDScanExecuteSingleOperation(SIMDScanOperation *scanOperation) {
         scanOperation->currentIndex += scanOperation->elementCount;
         scanOperation->endReached = scanOperation->currentIndex == (scanOperation->elementCount);
         return (scanOperation->endReached || scanOperation->matchIndex > -1);
-    }
+    }*/
 
     size_t *currentSearchData = scanOperation->data + scanOperation->currentIndex;
 
@@ -150,7 +150,7 @@ inline int SIMDScanExecuteSingleOperation(SIMDScanOperation *scanOperation) {
     }
 
     __m256i *searchData = (__m256i *) currentSearchData;
-    __m256i simdSearchValue = <(scanOperation->replicatedSearchValue);
+    __m256i simdSearchValue = _mm256_loadu_si256(scanOperation->replicatedSearchValue);
     __m256i simdSearchData = _mm256_loadu_si256(searchData);
     __m256i compareResult = NG5_SIMD_COMPARE_EQUALS(simdSearchData, simdSearchValue);
 
