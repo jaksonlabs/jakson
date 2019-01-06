@@ -69,7 +69,7 @@
 //  H E L P E R
 //
 // ---------------------------------------------------------------------------------------------------------------------
-inline static size_t *replicateSearchValue(size_t searchValue) {
+/*inline static size_t *replicateSearchValue(size_t searchValue) {
     size_t *searchValueArray = malloc(NG5_SIMD_COMPARE_ELEMENT_COUNT * NG5_SIMD_SIZEOF_SIZET);
     uint8_t i = 0;
 
@@ -78,7 +78,7 @@ inline static size_t *replicateSearchValue(size_t searchValue) {
     }
 
     return searchValueArray;
-}
+}*/
 
 // Returns position of the only set bit in 'n' 
 /*nline static int findPosition(unsigned n) { 
@@ -107,8 +107,8 @@ inline static size_t *replicateSearchValue(size_t searchValue) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 inline int SIMDScanPrepare(SIMDScanOperation *scanOperation) {
-    size_t *replicatedSearchValue = replicateSearchValue(scanOperation->searchValue);
-    scanOperation->replicatedSearchValue = (__m256i *) replicatedSearchValue;
+    // size_t *replicatedSearchValue = replicateSearchValue(scanOperation->searchValue);
+    // scanOperation->replicatedSearchValue = (__m256i *) replicatedSearchValue;
     scanOperation->currentIndex = 0;
     // scanOperation->matchIndex = -1;
     scanOperation->endReached = 0;
@@ -138,16 +138,64 @@ inline int SIMDScanExecuteSingleOperation(SIMDScanOperation *scanOperation) {
     size_t *currentSearchData = scanOperation->data + scanOperation->currentIndex;
 
     // Check for end of list    
-    int restElements = NG5_SIMD_COMPARE_ELEMENT_COUNT - (scanOperation->elementCount - scanOperation->currentIndex);
+    // int restElements = NG5_SIMD_COMPARE_ELEMENT_COUNT - (scanOperation->elementCount - scanOperation->currentIndex);
 
     // If there is a positive rest of elements, that are smaller than the simd size
     // Move the pointer back to compare the correct amount of elements
     // Compares the last x < NG5_SIMD_COMPARE_ELEMENT_COUNT twice, but the other solution
     // Would be to fill up the remaining slots with some static value like MAXINT
-    if (restElements > 0) {
-        scanOperation->endReached = true;
-        currentSearchData = scanOperation->data + scanOperation->currentIndex - restElements;
+    //if (restElements > 0) {
+    //    scanOperation->endReached = true;
+    //    currentSearchData = scanOperation->data + scanOperation->currentIndex - restElements;
+    //}
+
+    __m256i *searchData = (__m256i *) currentSearchData;
+    __m256i simdSearchValue = _mm256_set1_epi64x(scanOperation->searchValue);
+    __m256i simdSearchData = _mm256_loadu_si256(searchData);
+    __m256i compareResult = _mm256_cmpeq_epi64(simdSearchData, simdSearchValue);
+
+    // Check if the result is empty
+    if (!_mm256_testz_si256(compareResult, compareResult)) {
+        unsigned bitmask = _mm256_movemask_epi8(compareResult);
+        int matchIndex = scanOperation->currentIndex + _bit_scan_forward(bitmask) / 8; // TODO: why / 8?
+        scanOperation->matchIndex = matchIndex;
     }
+    scanOperation->currentIndex += NG5_SIMD_COMPARE_ELEMENT_COUNT;
+    scanOperation->endReached = scanOperation->currentIndex >= scanOperation->elementCount;
+    return (scanOperation->endReached || scanOperation->matchIndex > -1);
+}
+
+inline int SIMDScanExecuteSingleOperation2(SIMDScanOperation *scanOperation) {
+
+    scanOperation->matchIndex = -1;
+    // Sequential scan for < 4 Elements
+    /*if (scanOperation->elementCount < NG5_SIMD_COMPARE_ELEMENT_COUNT) {
+        uint32_t i = 0;
+        for (i = 0; i < scanOperation->elementCount; ++i) {
+            if (scanOperation->data[i] == scanOperation->searchValue) {
+                scanOperation->matchIndex = i;
+                break;
+            }
+        }
+
+        scanOperation->currentIndex += scanOperation->elementCount;
+        scanOperation->endReached = scanOperation->currentIndex == (scanOperation->elementCount);
+        return (scanOperation->endReached || scanOperation->matchIndex > -1);
+    }*/
+
+    size_t *currentSearchData = scanOperation->data + scanOperation->currentIndex;
+
+    // Check for end of list
+    //int restElements = NG5_SIMD_COMPARE_ELEMENT_COUNT - (scanOperation->elementCount - scanOperation->currentIndex);
+
+    // If there is a positive rest of elements, that are smaller than the simd size
+    // Move the pointer back to compare the correct amount of elements
+    // Compares the last x < NG5_SIMD_COMPARE_ELEMENT_COUNT twice, but the other solution
+    // Would be to fill up the remaining slots with some static value like MAXINT
+    //if (restElements > 0) {
+    //    scanOperation->endReached = true;
+    //    currentSearchData = scanOperation->data + scanOperation->currentIndex - restElements;
+    //}
 
     __m256i *searchData = (__m256i *) currentSearchData;
     __m256i simdSearchValue = _mm256_loadu_si256(scanOperation->replicatedSearchValue);
@@ -166,9 +214,9 @@ inline int SIMDScanExecuteSingleOperation(SIMDScanOperation *scanOperation) {
 }
 
 inline int SIMDScanFree(SIMDScanOperation *scanOperation) {
-    free(scanOperation->replicatedSearchValue);
+    // free(scanOperation->replicatedSearchValue);
     // This one doesnt make sense, since it's allocated on the stack
     // free(scanOperation);
 
-    return 1;
+    return scanOperation == 0;
 }

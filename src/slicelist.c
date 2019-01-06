@@ -73,6 +73,77 @@
 
 /* OPTIMIZATION: we have only one item to find. Use branch-less scan instead of branching scan */
 /* OPTIMIZATION: find function as macro */
+uint32_t SLICE_SCAN_SIMD_INLINE(Slice* slice, Hash needleHash, const char * needleStr)  {
+
+    TRACE(NG5_SLICE_LIST_TAG, "SLICE_SCAN_SIMD for '%s' started", needleStr);
+    assert(slice);
+    assert(needleStr);
+
+    register bool continueScan, keysMatch, keyHashsNoMatch, endReached = false;
+    register bool cacheAvailable = (slice->cacheIdx != (uint32_t) -1);
+    register bool hashsEq = cacheAvailable && (slice->keyHashColumn[slice->cacheIdx] == needleHash);
+    register bool cacheHit = hashsEq && (strcmp(slice->keyColumn[slice->cacheIdx], needleStr) == 0);
+    register uint32_t index = 0;
+    register int matchIndex = -1;
+
+    /*size_t *searchValueArray = malloc(NG5_SIMD_COMPARE_ELEMENT_COUNT * NG5_SIMD_SIZEOF_SIZET);
+    uint8_t i = 0;
+
+    for (i = 0; i < NG5_SIMD_COMPARE_ELEMENT_COUNT; ++i) {
+        searchValueArray[i] = needleHash;
+    }*/
+
+
+    do {
+        if (!cacheHit) {       \
+            while (!endReached && matchIndex < 0) {
+                size_t *currentSearchData = slice->keyHashColumn + index;
+
+                // Check for end of list
+                // int restElements = NG5_SIMD_COMPARE_ELEMENT_COUNT - (slice->numElems - index);
+
+                // If there is a positive rest of elements, that are smaller than the simd size
+                // Move the pointer back to compare the correct amount of elements
+                // Compares the last x < NG5_SIMD_COMPARE_ELEMENT_COUNT twice, but the other solution
+                // Would be to fill up the remaining slots with some static value like MAXINT
+                // if (index > 0 && restElements > 0) {
+                //    endReached = true;
+                //    currentSearchData = slice->keyHashColumn + index - restElements;
+                //}
+
+                __m256i *searchData = (__m256i *) currentSearchData;
+                __m256i simdSearchValue = _mm256_set1_epi64x(needleHash);
+                __m256i simdSearchData = _mm256_loadu_si256(searchData);
+                __m256i compareResult = _mm256_cmpeq_epi64(simdSearchData, simdSearchValue);
+
+                // Check if the result is empty
+                if (!_mm256_testz_si256(compareResult, compareResult)) {
+                    unsigned bitmask = _mm256_movemask_epi8(compareResult);
+                    matchIndex = index + _bit_scan_forward(bitmask) / 8; // TODO: why / 8?
+                }
+                index += slice->numElems >= NG5_SIMD_COMPARE_ELEMENT_COUNT ? NG5_SIMD_COMPARE_ELEMENT_COUNT : slice->numElems;
+
+            }
+
+
+
+            keyHashsNoMatch = matchIndex == -1;
+
+            // 2 Branches (|| and &&)
+            keysMatch      = endReached || (!keyHashsNoMatch && (strcmp(slice->keyColumn[matchIndex], needleStr)==0));
+            // 1 Branch
+            continueScan  = !endReached && !keysMatch;
+            // 1 Branch
+            slice->cacheIdx = !endReached && keysMatch ? matchIndex : slice->cacheIdx;
+        }
+    }
+    while (continueScan);
+
+    return cacheHit ? slice->cacheIdx : (!endReached && keysMatch ? matchIndex: slice->numElems);
+}
+
+/* OPTIMIZATION: we have only one item to find. Use branch-less scan instead of branching scan */
+/* OPTIMIZATION: find function as macro */
 uint32_t SLICE_SCAN_SIMD(Slice* slice, Hash needleHash, const char * needleStr)  {
 
     TRACE(NG5_SLICE_LIST_TAG, "SLICE_SCAN_SIMD for '%s' started", needleStr);
