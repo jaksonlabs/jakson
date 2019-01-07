@@ -142,6 +142,55 @@ uint32_t SLICE_SCAN_SIMD_INLINE(Slice* slice, Hash needleHash, const char * need
     return cacheHit ? slice->cacheIdx : (!endReached && keysMatch ? matchIndex: slice->numElems);
 }
 
+uint32_t SLICE_SCAN_SIMD_INLINE_2(Slice* slice, Hash needleHash, const char * needleStr)  {
+
+    TRACE(NG5_SLICE_LIST_TAG, "SLICE_SCAN_SIMD for '%s' started", needleStr);
+    assert(slice);
+    assert(needleStr);
+
+    register bool continueScan, keysMatch, keyHashsNoMatch, endReached = false;
+    register bool cacheAvailable = (slice->cacheIdx != (uint32_t) -1);
+    register bool hashsEq = cacheAvailable && (slice->keyHashColumn[slice->cacheIdx] == needleHash);
+    register bool cacheHit = hashsEq && (strcmp(slice->keyColumn[slice->cacheIdx], needleStr) == 0);
+    register int matchIndex = -1;
+    register uint32_t index = 0;
+    do {
+        if (!cacheHit) {
+
+            while (!(endReached || matchIndex > -1)) {
+                matchIndex = -1;
+
+                size_t *currentSearchData = slice->keyHashColumn + index;
+
+                __m256i *searchData = (__m256i *) currentSearchData;
+                __m256i simdSearchData = _mm256_loadu_si256(searchData);
+                __m256i simdSearchValue = _mm256_set1_epi64x(needleHash);
+                __m256i compareResult = _mm256_cmpeq_epi64(simdSearchData, simdSearchValue);
+
+                // Check if the result is empty
+                if (!_mm256_testz_si256(compareResult, compareResult)) {
+                    unsigned bitmask = _mm256_movemask_epi8(compareResult);
+                    matchIndex = index + _bit_scan_forward(bitmask) / 8; // TODO: why / 8?
+                }
+                index += NG5_SIMD_COMPARE_ELEMENT_COUNT;
+                endReached = index >= slice->numElems;
+            }
+
+            keyHashsNoMatch = matchIndex == -1;
+
+            // 2 Branches (|| and &&)
+            keysMatch      = endReached || (!keyHashsNoMatch && (strcmp(slice->keyColumn[matchIndex], needleStr)==0));
+            // 1 Branch
+            continueScan  = !endReached && !keysMatch;
+            // 1 Branch
+            slice->cacheIdx = !endReached && keysMatch ? matchIndex : slice->cacheIdx;
+        }
+    }
+    while (continueScan);
+
+    return cacheHit ? slice->cacheIdx : (!endReached && keysMatch ? matchIndex : slice->numElems);
+}
+
 /* OPTIMIZATION: we have only one item to find. Use branch-less scan instead of branching scan */
 /* OPTIMIZATION: find function as macro */
 uint32_t SLICE_SCAN_SIMD(Slice* slice, Hash needleHash, const char * needleStr)  {
@@ -183,6 +232,47 @@ uint32_t SLICE_SCAN_SIMD(Slice* slice, Hash needleHash, const char * needleStr) 
     return cacheHit ? slice->cacheIdx : (!endReached && keysMatch ? simdScanOperation.matchIndex : slice->numElems);
 }
 
+/* OPTIMIZATION: we have only one item to find. Use branch-less scan instead of branching scan */
+/* OPTIMIZATION: find function as macro */
+#define SLICE_SCAN_IMPR_SIMD(slice, needleHash, needleStr)                                                                       \
+({ \
+TRACE(NG5_SLICE_LIST_TAG, "SLICE_SCAN_SIMD for '%s' started", needleStr); \
+    assert(slice); \
+    assert(needleStr);  \
+ \
+    register bool continueScan, keysMatch, keyHashsNoMatch, endReached; \
+    register bool cacheAvailable = (slice->cacheIdx != (uint32_t) -1); \
+    register bool hashsEq = cacheAvailable && (slice->keyHashColumn[slice->cacheIdx] == needleHash); \
+    register bool cacheHit = hashsEq && (strcmp(slice->keyColumn[slice->cacheIdx], needleStr) == 0); \
+ \
+ \
+    SIMDScanOperation simdScanOperation; \
+    simdScanOperation.data = slice->keyHashColumn; \
+    simdScanOperation.searchValue = needleHash; \
+    simdScanOperation.elementCount = slice->numElems; \
+    SIMDScanPrepare(&simdScanOperation); \
+ \
+    do { \
+        if (!cacheHit) {       \
+            while (!SIMDScanExecuteSingleOperation(&simdScanOperation)) { ; } \
+ \
+            endReached    = simdScanOperation.endReached; \
+            keyHashsNoMatch = simdScanOperation.matchIndex == -1; \
+ \
+            \
+            keysMatch      = endReached || (!keyHashsNoMatch && (strcmp(slice->keyColumn[simdScanOperation.matchIndex], needleStr)==0)); \
+            \
+            continueScan  = !endReached && !keysMatch; \
+            \
+            slice->cacheIdx = !endReached && keysMatch ? simdScanOperation.matchIndex : slice->cacheIdx; \
+        } \
+    } \
+    while (continueScan); \
+    SIMDScanFree(&simdScanOperation); \
+ \
+    cacheHit ? slice->cacheIdx : (!endReached && keysMatch ? simdScanOperation.matchIndex : slice->numElems); \
+})
+
 uint32_t SLICE_SCAN_SIMD2(Slice* slice, Hash needleHash, const char * needleStr)  {                                                                                                                     \
     TRACE(NG5_SLICE_LIST_TAG, "SLICE_SCAN_SIMD for '%s' started", needleStr);
     assert(slice);
@@ -198,29 +288,68 @@ uint32_t SLICE_SCAN_SIMD2(Slice* slice, Hash needleHash, const char * needleStr)
     simdScanOperation.data = slice->keyHashColumn;
     simdScanOperation.searchValue = needleHash;
     simdScanOperation.elementCount =  slice->numElems;
-
-    SIMDScanPrepare(&simdScanOperation);
     if (!cacheHit) {
         do {
 
             while (!SIMDScanExecuteSingleOperation(&simdScanOperation)) { ; }
 
             // 1 Branch
-            if (simdScanOperation.endReached &(simdScanOperation.matchIndex == 0))
+            if (simdScanOperation.endReached)
                 break;
 
             keysMatch = strcmp(slice->keyColumn[simdScanOperation.matchIndex], needleStr)==0;
-
-            // 1 Branch                                                                                                                                                                                                                                   
-            slice->cacheIdx = keysMatch ? simdScanOperation.matchIndex : slice->cacheIdx;
         }
-        while (true);
+        while (!keysMatch);
     }
 
     SIMDScanFree(&simdScanOperation);
-
+    // 1 Branch
+    slice->cacheIdx = keysMatch ? simdScanOperation.matchIndex : slice->cacheIdx;
     return cacheHit ? slice->cacheIdx : (!simdScanOperation.endReached && keysMatch ? simdScanOperation.matchIndex : slice->numElems);
 }
+
+/* OPTIMIZATION: we have only one item to find. Use branch-less scan instead of branching scan */
+/* OPTIMIZATION: find function as macro */
+#define SLICE_SCAN_IMPR(slice, needleHash, needleStr)                                                                       \
+({                                                                                                                     \
+    TRACE(NG5_SLICE_LIST_TAG, "SLICE_SCAN for '%s' started", needleStr);                                               \
+    assert(slice);                                                                                                     \
+    assert(needleStr);                                                                                                 \
+    \
+    if (slice->numElems > 4) {\
+        TRACE(NG5_SLICE_LIST_TAG, "SLICE_SCAN for '%s' started", needleStr);\
+\
+    }\
+\
+                                                                                                                       \
+    register bool continueScan, keysMatch, keyHashsNoMatch, endReached;                                                \
+    register bool cacheAvailable = (slice->cacheIdx != (uint32_t) -1);                                                 \
+    register bool hashsEq = cacheAvailable && (slice->keyHashColumn[slice->cacheIdx] == needleHash);                   \
+    register bool cacheHit = hashsEq && (strcmp(slice->keyColumn[slice->cacheIdx], needleStr) == 0);                   \
+    register uint_fast32_t i = 0; \
+    SIMDScanOperation simdScanOperation; \
+    simdScanOperation.data = slice->keyHashColumn; \
+    simdScanOperation.searchValue = needleHash; \
+    simdScanOperation.elementCount =  slice->numElems; \
+\
+    if (!cacheHit) {                                                                                                   \
+        do {                                                                                                           \
+            while (!SIMDScanExecuteSingleOperation(&simdScanOperation)) { ; }             \
+            endReached    = simdScanOperation.endReached; \
+            keyHashsNoMatch = simdScanOperation.matchIndex == -1; \
+            keysMatch      = endReached || (!keyHashsNoMatch && (strcmp(slice->keyColumn[simdScanOperation.matchIndex], needleStr)==0)); \
+            continueScan  = !endReached && !keysMatch; \
+            slice->cacheIdx = !endReached && keysMatch ? simdScanOperation.matchIndex : slice->cacheIdx; \
+            endReached    = ((i+1)>slice->numElems);                                                                   \
+            keysMatch      = endReached || (!keyHashsNoMatch && (strcmp(slice->keyColumn[i], needleStr)==0));          \
+            continueScan  = !endReached && !keysMatch;                                                                 \
+            i             += continueScan;                                                                             \
+        }                                                                                                              \
+        while (continueScan);                                                                                          \
+        slice->cacheIdx = !endReached && keysMatch ? simdScanOperation.matchIndex : slice->cacheIdx;                                              \
+    }                                                                                                                  \
+    cacheHit ? slice->cacheIdx : (!endReached && keysMatch ? simdScanOperation.matchIndex : slice->numElems);                                     \
+})
 
 /* OPTIMIZATION: we have only one item to find. Use branch-less scan instead of branching scan */
 /* OPTIMIZATION: find function as macro */
@@ -413,7 +542,7 @@ int SliceListLookupByKey(SliceHandle *handle, SliceList *list, const char *needl
 
                     switch (slice->strat) {
                     case SLICE_LOOKUP_SCAN:
-                        pairPosition = SLICE_SCAN_SIMD(slice, keyHash, needle);
+                        pairPosition = SLICE_SCAN_SIMD2(slice, keyHash, needle);
                         break;
                     case SLICE_LOOKUP_BESEARCH:
                         pairPosition = SLICE_BESEARCH(slice, keyHash, needle);
