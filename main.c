@@ -163,7 +163,8 @@ void experiments_hashing() {
           size_t newThreads = calculate_threads(system_context);
           slog_info(0, "Iteration: %zu", ++iteration)
           slog_info(0, "Resizing Threads to %zu", newThreads);
-          StringDictionaryResize(&dic, newThreads);
+          StringDictionaryResize(&dic, newThreads, num_buckets, 3720000,
+                                 newThreads);
 
           StringDictionaryResetCounters(&dic);
           Timestamp inserted_begin = TimeCurrentSystemTime();

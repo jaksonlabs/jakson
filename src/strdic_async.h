@@ -33,7 +33,8 @@ NG5_BEGIN_DECL
 /* OPTIMIZATION: use "approx_num_unique_str" to compute per-thread-per-bucket capacity assuming equal distribution */
 int StringDictionaryCreateAsync(StringDictionary *dic, size_t capacity, size_t numIndexBuckets,
                                 size_t approxNumUniqueStr, size_t numThreads, const Allocator *alloc);
-int StringDictionaryResize(StringDictionary *dic, size_t numThreads);
+int StringDictionaryResize(StringDictionary *dic, size_t capacity, size_t numIndexBuckets,
+                           size_t approxNumUniqueStr, size_t numThreads);
 NG5_END_DECL
 
 #endif

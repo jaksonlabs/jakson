@@ -32,6 +32,7 @@
 #include "parallel.h"
 #include "alloc.h"
 #include "slicelist.h"
+#include <slog.h>
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
@@ -108,6 +109,14 @@ typedef struct ParallelExtractArg
     bool didWork;
 } ParallelExtractArg;
 
+typedef struct ParallelCreateCarrierArg
+{
+  size_t localCapacity;
+  size_t localBucketNum;
+  size_t localBucketCap;
+  const Allocator *alloc;
+} ParallelCreateCarrierArg;
+
 // ---------------------------------------------------------------------------------------------------------------------
 //
 //  M A C R O S
@@ -156,11 +165,14 @@ static int thisUnlock(struct StringDictionary *self);
 
 static int thisCreateExtra(struct StringDictionary *self, size_t capacity, size_t numIndexBuckets,
                            size_t approxNumUniqueStr, size_t numThreads);
-static int thisSetExtra(struct StringDictionary *self, size_t numThreads);
+static int thisSetExtra(struct StringDictionary *self, size_t capacity, size_t numIndexBuckets,
+                        size_t approxNumUniqueStr, size_t numThreads);
 
 static int thisSetupCarriers(struct StringDictionary *self, size_t capacity, size_t numIndexBuckets,
                              size_t approxNumUniqueStr, size_t numThreads);
 
+static void parallelCreateCarrier(const void *restrict start, size_t width, size_t len, void *restrict args,
+                                  ThreadId tid);
 // ---------------------------------------------------------------------------------------------------------------------
 //
 //  M A C R O S
@@ -200,9 +212,10 @@ int StringDictionaryCreateAsync(struct StringDictionary *dic, size_t capacity, s
     return STATUS_OK;
 }
 
-int StringDictionaryResize(struct StringDictionary *dic, size_t numThreads)
+int StringDictionaryResize(struct StringDictionary *dic, size_t capacity, size_t numIndexBuckets,
+                           size_t approxNumUniqueStr, size_t numThreads)
 {
-  CHECK_SUCCESS(thisSetExtra(dic, numThreads));
+  CHECK_SUCCESS(thisSetExtra(dic, capacity, numIndexBuckets, approxNumUniqueStr, numThreads));
   return STATUS_OK;
 }
 
@@ -227,13 +240,43 @@ static int thisCreateExtra(struct StringDictionary *self, size_t capacity, size_
     return STATUS_OK;
 }
 
-static int thisSetExtra(struct StringDictionary *self, size_t numThreads)
+static int thisSetExtra(struct StringDictionary *self, size_t capacity, size_t numIndexBuckets,
+                        size_t approxNumUniqueStr, size_t numThreads)
 {
   assert(self);
-
   AsyncExtra *extra = THIS_EXTRAS(self);
-  CHECK_SUCCESS(VectorGrow(&numThreads, &extra->carriers));
-  CHECK_SUCCESS(VectorGrow(&numThreads, &extra->carriers));
+
+  slog_info(0, "Current carrier length: %zu", VectorLength(&extra->carriers));
+
+  int diff = (int)numThreads - (int)(VectorLength(&extra->carriers));
+
+  //Increment amount of threads
+  if (diff > 0) {
+    size_t localBucketNum = MAX(1, numIndexBuckets / numThreads);
+    Carrier new_carrier = *(Carrier*)VectorAt(&extra->carriers, 0);
+
+    ParallelCreateCarrierArg createArgs = {
+                                           .localCapacity = MAX(1, capacity / numThreads),
+                                           .localBucketNum = localBucketNum,
+                                           .localBucketCap = MAX(1, approxNumUniqueStr / numThreads / localBucketNum / SLICE_KEY_COLUMN_MAX_ELEMS),
+                                           .alloc = &self->alloc
+    };
+
+    for (size_t threadId = 0; threadId < numThreads-1; threadId++) {
+      new_carrier.id = threadId;
+      VectorPush(&extra->carriers, &new_carrier, 1);
+    }
+
+    ParallelFor(VECTOR_ALL(&extra->carriers, Carrier), sizeof(Carrier), numThreads, parallelCreateCarrier,
+                &createArgs, ThreadingHint_Multi, numThreads);
+  //Decrement amount of threads
+  } else if (diff < 0) {
+    for (size_t threads = 0; threads < numThreads; threads++) {
+      VectorPop(&extra->carriers);
+    }
+  } else {
+    //noop
+  }
 
   return STATUS_OK;
 }
@@ -932,13 +975,6 @@ static int thisCounters(struct StringDictionary *self, StringHashCounters *count
     return STATUS_OK;
 }
 
-typedef struct ParallelCreateCarrierArg
-{
-    size_t localCapacity;
-    size_t localBucketNum;
-    size_t localBucketCap;
-    const Allocator *alloc;
-} ParallelCreateCarrierArg;
 
 static void parallelCreateCarrier(const void *restrict start, size_t width, size_t len, void *restrict args,
                                   ThreadId tid)
@@ -980,6 +1016,7 @@ static int thisSetupCarriers(struct StringDictionary *self, size_t capacity, siz
 
     return STATUS_OK;
 }
+
 
 static int thisLock(struct StringDictionary *self)
 {
