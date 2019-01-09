@@ -4,6 +4,8 @@
 #include "src/strdic_async.h"
 #include "src/strdic_sync.h"
 #include "src/time.h"
+#include "src/information.h"
+#include "src/descent.h"
 #include <slog.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,32 +13,6 @@
 #include <unistd.h>
 //#src <ng5/roadfire/roadfire.h>
 
-#ifdef __unix__
-#include <sys/sysinfo.h>
-#include <sys/stat.h>
-
-#define TOTAL_PROC_NUM sysconf(_SC_NPROCESSORS_ONLN)
-
-struct sysinfo _system_information;
-struct stat _file_stat;
-
-void getsysteminfo(const char* path) {
-  if (0 != sysinfo(&_system_information)) {
-    slog_panic(0, "Could not read in system information");
-    exit(1);
-  }
-  stat(path, &_file_stat);
-}
-
-#else
-// TODO Test for MacOS -- @marcus
-
-void getsysteminfo(const char* path) {
-  slog_panic(0, "NOT IMPLEMENTED");
-  exit(1);
-}
-
-#endif
 
 #define NUM_SLICE_INSERT 100000
 #define BATCH_SIZE (size_t)5 * 1024 * 1024
@@ -47,28 +23,6 @@ typedef struct {
   float total_duration;
 } stats;
 
-typedef struct {
-  unsigned long load;
-  unsigned long processor_number;
-  unsigned long batch_size;
-  unsigned long file_size;
-} context;
-
-void system_info(const char* path, context *system_context) {
-  getsysteminfo(path);
-  slog_info(0, "System processors: %zu, Load Average: %.2f, Batch Size: %zu, Complete File Size: %zu", TOTAL_PROC_NUM, (float) _system_information.loads[0] / (float)(1 << SI_LOAD_SHIFT), BATCH_SIZE, _file_stat.st_size);
-
-  system_context->load = (float) _system_information.loads[0] / (float)(1 << SI_LOAD_SHIFT);
-  system_context->processor_number = TOTAL_PROC_NUM;
-  system_context->batch_size = BATCH_SIZE;
-  system_context->file_size = _file_stat.st_size;
-}
-
-size_t calculate_threads(context system_context) {
-  //TODO gradient descent
-
-  return system_context.processor_number;
-}
 
 void experiments_hashing() {
   slog_info(0, "chunk_num;sample;num_buckets;time_created_sec;time_inserted_"
@@ -103,7 +57,7 @@ void experiments_hashing() {
   }
   const size_t samples = (size_t)atoi(samples_string);
 
-  system_info(path, &system_context);
+  system_info(path, &system_context, BATCH_SIZE);
   calculate_threads(system_context);
   StringDictionary dic;
   for (size_t num_threads = 1; num_threads <= max_threads; num_threads++) {
