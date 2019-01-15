@@ -65,3 +65,35 @@ be achieved
 
 ## ~~Cost Model Design~~ Gradient Descent Design
 
+### How to Gradient Descent
+
+I propose we should use in our case a stochastic gradient descent since we try to adjust our solution "on the fly".
+
+We would start with generating a vector for our weights, generally we use rather small values for this. I suggest a value of 0.1 for this, at the beginning, this can be changed later if desired.
+
+Vectors we require in our algorithm are:
+
+w - weight vector
+x - input vector
+
+other values are: 
+
+n - learning rate, again something small 0.1 to 0.01
+y - current result
+py - previous result
+
+Then to update our values according to our observation with 
+
+w_i = w_i - n * (2* x_i (py - y))
+
+to adjust weigths, results should be adjust over time to fit the local optimum this way
+
+### Weight Vector
+- load
+- processor_count
+- batch_size
+- file_size
+
+### Result
+
+Result of the current weigths with the system context: sum(w_i + x_i)
