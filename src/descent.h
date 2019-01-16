@@ -19,7 +19,9 @@ NG5_BEGIN_DECL
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-size_t calculate_threads(context system_context);
+void DescentInit();
+
+size_t DescentCalculate(context system_context);
 
 NG5_END_DECL
 

@@ -58,7 +58,7 @@ void experiments_hashing() {
   const size_t samples = (size_t)atoi(samples_string);
 
   system_info(path, &system_context, BATCH_SIZE);
-  calculate_threads(system_context);
+  DescentCalculate(system_context);
   StringDictionary dic;
   for (size_t num_threads = 1; num_threads <= max_threads; num_threads++) {
     slog_info(0, "%s %zu %s\n", "PERFORMING SAMPLE WITH", num_threads,
@@ -114,7 +114,7 @@ void experiments_hashing() {
 
           slog_info(0, "insert..");
 
-          size_t newThreads = calculate_threads(system_context);
+          size_t newThreads = DescentCalculate(system_context);
           slog_info(0, "Iteration: %zu", ++iteration)
           slog_info(0, "Resizing Threads to %zu", newThreads);
           StringDictionaryResize(&dic, newThreads, num_buckets, 3720000,
