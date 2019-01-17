@@ -58,6 +58,7 @@ void experiments_hashing() {
   const size_t samples = (size_t)atoi(samples_string);
 
   system_info(path, &system_context, BATCH_SIZE);
+  DescentInit();
   DescentCalculate(system_context);
   StringDictionary dic;
   for (size_t num_threads = 1; num_threads <= max_threads; num_threads++) {
@@ -126,6 +127,8 @@ void experiments_hashing() {
           StringDictionaryInsert(&dic, &ids, strings, num_strings, 0);
           Timestamp inserted_end = TimeCurrentSystemTime();
           insert_duration = (inserted_end - inserted_begin) / 1000.0f;
+
+          DescentTrain(system_context, insert_duration);
 
           //                fprintf(stderr, "locate..\n");
           //

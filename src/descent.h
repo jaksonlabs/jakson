@@ -20,6 +20,7 @@ NG5_BEGIN_DECL
 // ---------------------------------------------------------------------------------------------------------------------
 
 void DescentInit();
+void DescentTrain(context system_context, float performance);
 
 size_t DescentCalculate(context system_context);
 

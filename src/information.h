@@ -55,7 +55,7 @@ struct stat _file_stat;
 // ---------------------------------------------------------------------------------------------------------------------
 
 typedef struct {
-  unsigned long load;
+  float load;
   unsigned long processor_number;
   unsigned long batch_size;
   unsigned long file_size;

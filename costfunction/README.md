@@ -96,4 +96,4 @@ to adjust weigths, results should be adjust over time to fit the local optimum t
 
 ### Result
 
-Result of the current weigths with the system context: sum(w_i + x_i)
+Result of the current weigths with the system context: sum(w_i * x_i)
