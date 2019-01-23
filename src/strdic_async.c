@@ -250,6 +250,9 @@ static int thisSetExtra(struct StringDictionary *self, size_t capacity, size_t n
 
   int diff = (int)numThreads - (int)(VectorLength(&extra->carriers));
 
+  slog_info(0, "Changing size by %i", diff);
+
+  SpinlockCreate(&extra->lock);
   //Increment amount of threads
   if (diff > 0) {
     size_t localBucketNum = MAX(1, numIndexBuckets / numThreads);
@@ -262,7 +265,7 @@ static int thisSetExtra(struct StringDictionary *self, size_t capacity, size_t n
                                            .alloc = &self->alloc
     };
 
-    for (size_t threadId = 0; threadId < numThreads-1; threadId++) {
+    for (int threadId = 0; threadId < diff; threadId++) {
       new_carrier.id = threadId;
       VectorPush(&extra->carriers, &new_carrier, 1);
     }
@@ -271,7 +274,7 @@ static int thisSetExtra(struct StringDictionary *self, size_t capacity, size_t n
                 &createArgs, ThreadingHint_Multi, numThreads);
   //Decrement amount of threads
   } else if (diff < 0) {
-    for (size_t threads = 0; threads < numThreads; threads++) {
+    for (int threads = 0; threads < -1 * diff; threads++) {
       VectorPop(&extra->carriers);
     }
   } else {

@@ -212,8 +212,28 @@ void experiments_hashing() {
   exit(0);
 }
 
+bool test_resize() {
+  StringDictionary dic;
+
+  size_t num_buckets = 50000;
+  size_t num_threads = 4;
+
+  StringDictionaryCreateAsync(&dic, 3720000, num_buckets, 3720000,
+                              num_threads, NULL);
+
+  num_threads = 8;
+  slog_info(0, "Resizing to %zu", num_threads);
+  StringDictionaryResize(&dic, 3720000, num_buckets, 3720000, num_threads);
+  return true;
+}
+
 int main() {
   slog_init("logfile", NULL, 1, 0);
+
+  if (!test_resize()){
+    return 1;
+  }
+
   experiments_hashing();
 
   return 0;
