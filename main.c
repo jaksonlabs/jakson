@@ -32,24 +32,18 @@ void experiments_hashing() {
   slog_info(0, "Reading in environment");
 
   FILE *statistics_file = fopen("statistics.csv", "w");
+  //FILE *thread_file = fopen("threads.csv", "w");
   stats statistics = {0.0, 0.0, 0.0};
   context system_context = {0, 0, 0, 0};
 
-  fprintf(statistics_file, "%s, %s, %s, %s\n", "thread_num", "created_duration",
-          "insert_duration", "total_time");
+  fprintf(statistics_file, "%s, %s, %s, %s, %s\n", "thread_num", "created_duration",
+          "insert_duration", "total_time", "chunk_size");
 
   const char *path = getenv("NG5_SET");
   if (path == NULL) {
     slog_panic(0, "No dataset defined; Define NG5_SET");
     exit(1);
   }
-
-  const char *max_threads_string = getenv("NG5_THREADS");
-  if (max_threads_string == NULL) {
-    slog_panic(0, "No maximum threads defined; Define NG5_THREADS");
-    exit(1);
-  }
-  const size_t max_threads = (size_t)atoi(max_threads_string);
 
   const char *samples_string = getenv("NG5_SAMPLES");
   if (samples_string == NULL) {
@@ -58,12 +52,10 @@ void experiments_hashing() {
   const size_t samples = (size_t)atoi(samples_string);
 
   system_info(path, &system_context, BATCH_SIZE);
+
   DescentInit();
   DescentCalculate(system_context);
   StringDictionary dic;
-  for (size_t num_threads = 1; num_threads <= max_threads; num_threads++) {
-    slog_info(0, "%s %zu %s\n", "PERFORMING SAMPLE WITH", num_threads,
-              "THREADS");
     for (size_t num_buckets = 50000; num_buckets <= 50000;
          num_buckets += 50000) {
       for (size_t sample = 1; sample <= samples; sample++) {
@@ -89,7 +81,7 @@ void experiments_hashing() {
 
         Timestamp create_begin = TimeCurrentSystemTime();
         StringDictionaryCreateAsync(&dic, 3720000, num_buckets, 3720000,
-                                    num_threads, NULL);
+                                    system_context.processor_number, NULL);
         Timestamp create_end = TimeCurrentSystemTime();
         created_duration = (create_end - create_begin) / 1000.0f;
 
@@ -181,6 +173,8 @@ void experiments_hashing() {
                                statistics.total_duration + created_duration +
                                    insert_duration};
 
+          fprintf(statistics_file, "%zu, %f, %f, %f, %zu\n", newThreads, created_duration, insert_duration, created_duration + insert_duration, BATCH_SIZE);
+
           StringDictionaryFree(&dic, ids);
           // string_dic_free(&dic, extracted_strings);
           // string_dic_free(&dic, ids_out);
@@ -200,14 +194,10 @@ void experiments_hashing() {
       statistics = (stats){statistics.created_duration / samples,
                            statistics.insert_duration / samples,
                            statistics.total_duration / samples};
-      fprintf(statistics_file, "%zu, %f, %f, %f\n", num_threads,
-              statistics.created_duration, statistics.insert_duration,
-              statistics.total_duration);
       statistics.created_duration = 0;
       statistics.insert_duration = 0;
       statistics.total_duration = 0;
     }
-  }
   fclose(statistics_file);
   exit(0);
 }
@@ -224,6 +214,12 @@ bool test_resize() {
   num_threads = 8;
   slog_info(0, "Resizing to %zu", num_threads);
   StringDictionaryResize(&dic, 3720000, num_buckets, 3720000, num_threads);
+
+  num_threads = 2;
+  slog_info(0, "Resizing to %zu", num_threads);
+  StringDictionaryResize(&dic, 3720000, num_buckets, 3720000, num_threads);
+  StringDictionaryDrop(&dic);
+
   return true;
 }
 
