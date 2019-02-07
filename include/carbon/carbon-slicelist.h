@@ -75,7 +75,7 @@ typedef struct Slice
     carbon_string_id_t carbon_string_id_tColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
 
     /** The number of elements stored in 'key_colum', 'key_hash_column', and 'string_id_column' */
-    uint32_t numElems;
+    uint32_t num_elems;
 
     uint32_t cacheIdx;
 } Slice;

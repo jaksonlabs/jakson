@@ -103,17 +103,17 @@ CARBON_EXPORT(bool)
 carbon_doc_bulk_Drop(carbon_doc_bulk_t *bulk)
 {
     CARBON_NON_NULL_OR_ERROR(bulk)
-    for (size_t i = 0; i < bulk->keys.numElems; i++) {
+    for (size_t i = 0; i < bulk->keys.num_elems; i++) {
         char *string = *VECTOR_GET(&bulk->keys, i, char *);
         free (string);
     }
-    for (size_t i = 0; i < bulk->values.numElems; i++) {
+    for (size_t i = 0; i < bulk->values.num_elems; i++) {
         char *string = *VECTOR_GET(&bulk->values, i, char *);
         free (string);
     }
-    for (size_t i = 0; i < bulk->models.numElems; i++) {
+    for (size_t i = 0; i < bulk->models.num_elems; i++) {
         carbon_doc_t *model = VECTOR_GET(&bulk->models, i, carbon_doc_t);
-        for (size_t j = 0; j < model->obj_model.numElems; j++) {
+        for (size_t j = 0; j < model->obj_model.num_elems; j++) {
             carbon_doc_obj_t *objectModel = VECTOR_GET(&model->obj_model, j, carbon_doc_obj_t);
             carbon_doc_drop(objectModel);
         }
@@ -144,15 +144,15 @@ carbon_doc_bulk_print(FILE *file, carbon_doc_bulk_t *bulk)
     fprintf(file, "{");
     char **keyStrings = VECTOR_ALL(&bulk->keys, char *);
     fprintf(file, "\"Key Strings\": [");
-    for (size_t i = 0; i < bulk->keys.numElems; i++) {
-        fprintf(file, "\"%s\"%s", keyStrings[i], i + 1 < bulk->keys.numElems ? ", " : "");
+    for (size_t i = 0; i < bulk->keys.num_elems; i++) {
+        fprintf(file, "\"%s\"%s", keyStrings[i], i + 1 < bulk->keys.num_elems ? ", " : "");
     }
     fprintf(file, "], ");
 
     char **valueStrings = VECTOR_ALL(&bulk->values, char *);
     fprintf(file, "\"Value Strings\": [");
-    for (size_t i = 0; i < bulk->values.numElems; i++) {
-        fprintf(file, "\"%s\"%s", valueStrings[i], i + 1 < bulk->values.numElems ? ", " : "");
+    for (size_t i = 0; i < bulk->values.num_elems; i++) {
+        fprintf(file, "\"%s\"%s", valueStrings[i], i + 1 < bulk->values.num_elems ? ", " : "");
     }
     fprintf(file, "]}");
 
@@ -165,22 +165,22 @@ carbon_doc_print(FILE *file, const carbon_doc_t *model)
     CARBON_NON_NULL_OR_ERROR(file)
     CARBON_NON_NULL_OR_ERROR(model)
 
-    if (model->obj_model.numElems == 0) {
+    if (model->obj_model.num_elems == 0) {
         fprintf(file, "{ }");
     }
 
-    if (model->obj_model.numElems > 1) {
+    if (model->obj_model.num_elems > 1) {
         fprintf(file, "[");
     }
 
-    for (size_t numEntries = 0; numEntries < model->obj_model.numElems; numEntries++) {
-        carbon_doc_obj_t *object = VECTOR_GET(&model->obj_model, numEntries, carbon_doc_obj_t);
+    for (size_t num_entries = 0; num_entries < model->obj_model.num_elems; num_entries++) {
+        carbon_doc_obj_t *object = VECTOR_GET(&model->obj_model, num_entries, carbon_doc_obj_t);
         printObject(file, object);
-        fprintf(file, "%s", numEntries + 1 < model->obj_model.numElems ? ", " : "");
+        fprintf(file, "%s", num_entries + 1 < model->obj_model.num_elems ? ", " : "");
     }
 
 
-    if (model->obj_model.numElems > 1) {
+    if (model->obj_model.num_elems > 1) {
         fprintf(file, "]");
     }
 
@@ -199,7 +199,7 @@ void carbon_doc_print_entries(FILE *file, const carbon_doc_entries_t *entries)
 
 void carbon_doc_drop(carbon_doc_obj_t *model)
 {
-    for (size_t i = 0; i < model->entries.numElems; i++) {
+    for (size_t i = 0; i < model->entries.num_elems; i++) {
         carbon_doc_entries_t *entry = VECTOR_GET(&model->entries, i, carbon_doc_entries_t);
         entryModelDrop(entry);
     }
@@ -361,13 +361,13 @@ static bool importJsonObjectArrayProperty(carbon_doc_obj_t *target, carbon_err_t
 
     if (!carbon_vec_is_empty(&array->elements.elements))
     {
-        size_t numElements = array->elements.elements.numElems;
+        size_t num_elements = array->elements.elements.num_elems;
 
         /** Find first type that is not null unless the entire array is of type null */
         carbon_json_ast_node_value_type_e arrayDataType = CARBON_JSON_AST_NODE_VALUE_TYPE_NULL;
         carbon_field_type_e documentModelArrayValueType;
 
-        for (size_t i = 0; i < numElements && arrayDataType == CARBON_JSON_AST_NODE_VALUE_TYPE_NULL; i++) {
+        for (size_t i = 0; i < num_elements && arrayDataType == CARBON_JSON_AST_NODE_VALUE_TYPE_NULL; i++) {
             const carbon_json_ast_node_element_t *element = VECTOR_GET(&array->elements.elements, i, carbon_json_ast_node_element_t);
             arrayDataType = element->value.value_type;
         }
@@ -382,7 +382,7 @@ static bool importJsonObjectArrayProperty(carbon_doc_obj_t *target, carbon_err_t
         case CARBON_JSON_AST_NODE_VALUE_TYPE_NUMBER: {
             /** find smallest fitting physical number type */
             carbon_field_type_e arrayNumberType = carbon_field_type_null;
-            for (size_t i = 0; i < numElements; i++) {
+            for (size_t i = 0; i < num_elements; i++) {
                 const carbon_json_ast_node_element_t *element = VECTOR_GET(&array->elements.elements, i, carbon_json_ast_node_element_t);
                 if (CARBON_BRANCH_UNLIKELY(element->value.value_type == CARBON_JSON_AST_NODE_VALUE_TYPE_NULL)) {
                     continue;
@@ -456,7 +456,7 @@ static bool importJsonObjectArrayProperty(carbon_doc_obj_t *target, carbon_err_t
 
         carbon_doc_obj_add_key(&entry, target, key, documentModelArrayValueType);
 
-        for (size_t i = 0; i < numElements; i++)
+        for (size_t i = 0; i < num_elements; i++)
         {
             const carbon_json_ast_node_element_t *element = VECTOR_GET(&array->elements.elements, i, carbon_json_ast_node_element_t);
             carbon_json_ast_node_value_type_e astNodeDataType = element->value.value_type;
@@ -580,10 +580,10 @@ static bool importJsonObjectArrayProperty(carbon_doc_obj_t *target, carbon_err_t
 
 static bool importJsonObject(carbon_doc_obj_t *target, carbon_err_t *err, const carbon_json_ast_node_object_t *jsonObject)
 {
-    for (size_t i = 0; i < jsonObject->value->members.numElems; i++) {
+    for (size_t i = 0; i < jsonObject->value->members.num_elems; i++) {
         carbon_json_ast_node_member_t *member = VECTOR_GET(&jsonObject->value->members, i, carbon_json_ast_node_member_t);
-        carbon_json_ast_node_value_type_e valueType = member->value.value.value_type;
-        switch (valueType) {
+        carbon_json_ast_node_value_type_e value_type = member->value.value.value_type;
+        switch (value_type) {
         case CARBON_JSON_AST_NODE_VALUE_TYPE_STRING:
             importJsonObjectStringProperty(target, member->key.value, member->value.value.value.string);
             break;
@@ -594,7 +594,7 @@ static bool importJsonObject(carbon_doc_obj_t *target, carbon_err_t *err, const 
             break;
         case CARBON_JSON_AST_NODE_VALUE_TYPE_TRUE:
         case CARBON_JSON_AST_NODE_VALUE_TYPE_FALSE: {
-            carbon_bool_t value = valueType == CARBON_JSON_AST_NODE_VALUE_TYPE_TRUE ? CARBON_BOOLEAN_TRUE : CARBON_BOOLEAN_FALSE;
+            carbon_bool_t value = value_type == CARBON_JSON_AST_NODE_VALUE_TYPE_TRUE ? CARBON_BOOLEAN_TRUE : CARBON_BOOLEAN_FALSE;
             importJsonObjectBooleanProperty(target, member->key.value, value);
         } break;
         case CARBON_JSON_AST_NODE_VALUE_TYPE_NULL:
@@ -620,8 +620,8 @@ static bool importJsonObject(carbon_doc_obj_t *target, carbon_err_t *err, const 
 
 static bool importJson(carbon_doc_obj_t *target, carbon_err_t *err, const carbon_json_t *json, carbon_doc_entries_t *partition)
 {
-    carbon_json_ast_node_value_type_e valueType = json->element->value.value_type;
-    switch (valueType) {
+    carbon_json_ast_node_value_type_e value_type = json->element->value.value_type;
+    switch (value_type) {
     case CARBON_JSON_AST_NODE_VALUE_TYPE_OBJECT:
         if (!importJsonObject(target, err, json->element->value.value.object)) {
             return false;
@@ -636,7 +636,7 @@ static bool importJson(carbon_doc_obj_t *target, carbon_err_t *err, const carbon
                 if (!importJsonObject(target, err, first->value.value.object)) {
                     return false;
                 }
-                for (size_t i = 1; i < arrayContent->numElems; i++) {
+                for (size_t i = 1; i < arrayContent->num_elems; i++) {
                     const carbon_json_ast_node_element_t *element = VECTOR_GET(arrayContent, i, carbon_json_ast_node_element_t);
                     carbon_doc_obj_t *nested;
                     carbon_doc_obj_push_object(&nested, partition);
@@ -733,7 +733,7 @@ static bool compareEncodedStringLessEqFunc(const void *lhs, const void *rhs, voi
 static void sortNestedPrimitiveObject(carbon_columndoc_obj_t *metaModel)
 {
     if (metaModel->parent->read_optimized) {
-        for (size_t i = 0; i < metaModel->obj_prop_vals.numElems; i++) {
+        for (size_t i = 0; i < metaModel->obj_prop_vals.num_elems; i++) {
             carbon_columndoc_obj_t *nestedModel = VECTOR_GET(&metaModel->obj_prop_vals, i, carbon_columndoc_obj_t);
             sortMetaModelEntries(nestedModel);
         }
@@ -747,7 +747,7 @@ static bool compare##type##ArrayLessEqFunc(const void *lhs, const void *rhs)    
     carbon_vec_t ofType(type) *b = (carbon_vec_t *) rhs;                                        \
     const type *aValues = VECTOR_ALL(a, type);                                      \
     const type *bValues = VECTOR_ALL(b, type);                                      \
-    size_t maxCompareIdx = a->numElems < b->numElems ? a->numElems : b->numElems;   \
+    size_t maxCompareIdx = a->num_elems < b->num_elems ? a->num_elems : b->num_elems;   \
     for (size_t i = 0; i < maxCompareIdx; i++) {                                    \
         if (aValues[i] > bValues[i]) {                                              \
             return false;                                                           \
@@ -774,7 +774,7 @@ static bool compareEncodedStringArrayLessEqFunc(const void *lhs, const void *rhs
     carbon_vec_t ofType(carbon_string_id_t) *b = (carbon_vec_t *) rhs;
     const carbon_string_id_t *aValues = VECTOR_ALL(a, carbon_string_id_t);
     const carbon_string_id_t *bValues = VECTOR_ALL(b, carbon_string_id_t);
-    size_t maxCompareIdx = a->numElems < b->numElems ? a->numElems : b->numElems;
+    size_t maxCompareIdx = a->num_elems < b->num_elems ? a->num_elems : b->num_elems;
     for (size_t i = 0; i < maxCompareIdx; i++) {
         char **aString = carbon_strdic_extract(dic, aValues + i, 1);
         char **bString = carbon_strdic_extract(dic, bValues + i, 1);
@@ -791,18 +791,18 @@ static bool compareEncodedStringArrayLessEqFunc(const void *lhs, const void *rhs
 static void sortedNestedArrayObjects(carbon_columndoc_obj_t *metaModel)
 {
     if (metaModel->parent->read_optimized) {
-        for (size_t i = 0; i < metaModel->obj_array_props.numElems; i++) {
+        for (size_t i = 0; i < metaModel->obj_array_props.num_elems; i++) {
             carbon_columndoc_columngroup_t *arrayColumns = VECTOR_GET(&metaModel->obj_array_props, i, carbon_columndoc_columngroup_t);
-            for (size_t j = 0; j < arrayColumns->columns.numElems; j++) {
+            for (size_t j = 0; j < arrayColumns->columns.num_elems; j++) {
                 carbon_columndoc_column_t *column = VECTOR_GET(&arrayColumns->columns, j, carbon_columndoc_column_t);
                 carbon_vec_t ofType(uint32_t) *arrayIndices = &column->array_positions;
                 carbon_vec_t ofType(carbon_vec_t ofType(<T>)) *valuesForIndicies = &column->values;
-                assert (arrayIndices->numElems == valuesForIndicies->numElems);
+                assert (arrayIndices->num_elems == valuesForIndicies->num_elems);
 
-                for (size_t k = 0; k < arrayIndices->numElems; k++) {
+                for (size_t k = 0; k < arrayIndices->num_elems; k++) {
                     carbon_vec_t ofType(<T>) *valuesForIndex = VECTOR_GET(valuesForIndicies, k, carbon_vec_t);
                     if (column->type == carbon_field_type_object) {
-                        for (size_t l = 0; l < valuesForIndex->numElems; l++) {
+                        for (size_t l = 0; l < valuesForIndex->num_elems; l++) {
                             carbon_columndoc_obj_t *nestedObject = VECTOR_GET(valuesForIndex, l, carbon_columndoc_obj_t);
                             sortMetaModelEntries(nestedObject);
                         }
@@ -813,30 +813,30 @@ static void sortedNestedArrayObjects(carbon_columndoc_obj_t *metaModel)
     }
 }
 
-#define SORT_META_MODEL_VALUES(keyVector, valueVector, valueType, compareValueFunc)                                    \
+#define SORT_META_MODEL_VALUES(keyVector, valueVector, value_type, compareValueFunc)                                    \
 {                                                                                                                      \
-    size_t numElements = carbon_vec_length(&keyVector);                                                                     \
+    size_t num_elements = carbon_vec_length(&keyVector);                                                                     \
                                                                                                                        \
-    if (numElements > 0) {                                                                                             \
-        size_t *valueIndicies = malloc(sizeof(size_t) * numElements);                                                  \
-        for (size_t i = 0; i < numElements; i++) {                                                                     \
+    if (num_elements > 0) {                                                                                             \
+        size_t *valueIndicies = malloc(sizeof(size_t) * num_elements);                                                  \
+        for (size_t i = 0; i < num_elements; i++) {                                                                     \
             valueIndicies[i] = i;                                                                                      \
         }                                                                                                              \
                                                                                                                        \
         carbon_vec_t ofType(carbon_string_id_t) keyCpy;                                                                                \
-        carbon_vec_t ofType(valueType) valueCpy;                                                                             \
+        carbon_vec_t ofType(value_type) valueCpy;                                                                             \
                                                                                                                        \
         VectorCpy(&keyCpy, &keyVector);                                                                                \
         VectorCpy(&valueCpy, &valueVector);                                                                            \
                                                                                                                        \
-        valueType *values = VECTOR_ALL(&valueCpy, valueType);                                                          \
+        value_type *values = VECTOR_ALL(&valueCpy, value_type);                                                          \
                                                                                                                        \
-        carbon_sort_qsort_indicies(valueIndicies, values, sizeof(valueType), compareValueFunc, numElements,                         \
+        carbon_sort_qsort_indicies(valueIndicies, values, sizeof(value_type), compareValueFunc, num_elements,                         \
                       keyVector.allocator);                                                                            \
                                                                                                                        \
-        for (size_t i = 0; i < numElements; i++) {                                                                     \
+        for (size_t i = 0; i < num_elements; i++) {                                                                     \
             VectorSet(&keyVector, i, VECTOR_GET(&keyCpy, valueIndicies[i], carbon_string_id_t));                                 \
-            VectorSet(&valueVector, i, VECTOR_GET(&valueCpy, valueIndicies[i], valueType));                            \
+            VectorSet(&valueVector, i, VECTOR_GET(&valueCpy, valueIndicies[i], value_type));                            \
         }                                                                                                              \
                                                                                                                        \
                                                                                                                        \
@@ -849,11 +849,11 @@ static void sortedNestedArrayObjects(carbon_columndoc_obj_t *metaModel)
 static void sortMetaModelStringValues(carbon_vec_t ofType(carbon_string_id_t) *keyVector, carbon_vec_t ofType(carbon_string_id_t) *valueVector,
                                       carbon_strdic_t *dic)
 {
-    size_t numElements = carbon_vec_length(keyVector);
+    size_t num_elements = carbon_vec_length(keyVector);
 
-    if (numElements > 0) {
-        size_t *valueIndicies = malloc(sizeof(size_t) * numElements);
-        for (size_t i = 0; i < numElements; i++) {
+    if (num_elements > 0) {
+        size_t *valueIndicies = malloc(sizeof(size_t) * num_elements);
+        for (size_t i = 0; i < num_elements; i++) {
             valueIndicies[i] = i;
         }
 
@@ -869,11 +869,11 @@ static void sortMetaModelStringValues(carbon_vec_t ofType(carbon_string_id_t) *k
                                          values,
                                          sizeof(carbon_string_id_t),
                                          compareEncodedStringLessEqFunc,
-                                         numElements,
+                                         num_elements,
                                          keyVector->allocator,
                                          dic);
 
-        for (size_t i = 0; i < numElements; i++) {
+        for (size_t i = 0; i < num_elements; i++) {
             VectorSet(keyVector, i, VECTOR_GET(&keyCpy, valueIndicies[i], carbon_string_id_t));
             VectorSet(valueVector, i, VECTOR_GET(&valueCpy, valueIndicies[i], carbon_string_id_t));
         }
@@ -886,11 +886,11 @@ static void sortMetaModelStringValues(carbon_vec_t ofType(carbon_string_id_t) *k
 
 #define SORT_META_MODEL_ARRAYS(keyVector, valueArrayVector, compareFunc)                                               \
 {                                                                                                                      \
-    size_t numElements = carbon_vec_length(&keyVector);                                                                     \
+    size_t num_elements = carbon_vec_length(&keyVector);                                                                     \
                                                                                                                        \
-    if (numElements > 0) {                                                                                             \
-        size_t *valueIndicies = malloc(sizeof(size_t) * numElements);                                                  \
-        for (size_t i = 0; i < numElements; i++) {                                                                     \
+    if (num_elements > 0) {                                                                                             \
+        size_t *valueIndicies = malloc(sizeof(size_t) * num_elements);                                                  \
+        for (size_t i = 0; i < num_elements; i++) {                                                                     \
             valueIndicies[i] = i;                                                                                      \
         }                                                                                                              \
                                                                                                                        \
@@ -902,10 +902,10 @@ static void sortMetaModelStringValues(carbon_vec_t ofType(carbon_string_id_t) *k
                                                                                                                        \
         const carbon_vec_t *values = VECTOR_ALL(&valueArrayVector, carbon_vec_t);                                                  \
                                                                                                                        \
-        carbon_sort_qsort_indicies(valueIndicies, values, sizeof(carbon_vec_t), compareFunc, numElements,                                 \
+        carbon_sort_qsort_indicies(valueIndicies, values, sizeof(carbon_vec_t), compareFunc, num_elements,                                 \
                       keyVector.allocator);                                                                            \
                                                                                                                        \
-        for (size_t i = 0; i < numElements; i++) {                                                                     \
+        for (size_t i = 0; i < num_elements; i++) {                                                                     \
             VectorSet(&keyVector, i, VECTOR_GET(&keyCpy, valueIndicies[i], carbon_string_id_t));                                 \
             VectorSet(&valueArrayVector, i, VECTOR_GET(&valueCpy, valueIndicies[i], carbon_vec_t));                          \
         }                                                                                                              \
@@ -919,11 +919,11 @@ static void sortMetaModelStringValues(carbon_vec_t ofType(carbon_string_id_t) *k
 static void sortMetaModelStringArrays(carbon_vec_t ofType(carbon_string_id_t) *keyVector, carbon_vec_t ofType(carbon_string_id_t) *valueArrayVector,
                                       carbon_strdic_t *dic)
 {
-    size_t numElements = carbon_vec_length(keyVector);
+    size_t num_elements = carbon_vec_length(keyVector);
 
-    if (numElements > 0) {
-        size_t *valueIndicies = malloc(sizeof(size_t) * numElements);
-        for (size_t i = 0; i < numElements; i++) {
+    if (num_elements > 0) {
+        size_t *valueIndicies = malloc(sizeof(size_t) * num_elements);
+        for (size_t i = 0; i < num_elements; i++) {
             valueIndicies[i] = i;
         }
 
@@ -939,11 +939,11 @@ static void sortMetaModelStringArrays(carbon_vec_t ofType(carbon_string_id_t) *k
                                          values,
                                          sizeof(carbon_vec_t),
                                          compareEncodedStringArrayLessEqFunc,
-                                         numElements,
+                                         num_elements,
                                          keyVector->allocator,
                                          dic);
 
-        for (size_t i = 0; i < numElements; i++) {
+        for (size_t i = 0; i < num_elements; i++) {
             VectorSet(keyVector, i, VECTOR_GET(&keyCpy, valueIndicies[i], carbon_string_id_t));
             VectorSet(valueArrayVector, i, VECTOR_GET(&valueCpy, valueIndicies[i], carbon_vec_t));
         }
@@ -984,7 +984,7 @@ static bool compareObjectArrayKeyColumnLessEqFunc(const void *lhs, const void *r
 
 typedef struct {
     carbon_strdic_t *dic;
-    carbon_field_type_e valueType;
+    carbon_field_type_e value_type;
 } CompareColumnLessEqFuncArg;
 
 #define ARRAY_LEQ_PRIMITIVE_FUNC(maxNumElem, type, valueVectorAPtr, valueVectorBPtr)    \
@@ -1005,11 +1005,11 @@ static bool compareColumnLessEqFunc(const void *lhs, const void *rhs, void *args
     carbon_vec_t ofType(<T>) *b = (carbon_vec_t *) rhs;
     CompareColumnLessEqFuncArg *funcArg = (CompareColumnLessEqFuncArg *) args;
 
-    size_t maxNumElem = CARBON_MIN(a->numElems, b->numElems);
+    size_t maxNumElem = CARBON_MIN(a->num_elems, b->num_elems);
 
-    switch (funcArg->valueType) {
+    switch (funcArg->value_type) {
     case carbon_field_type_null:
-        return (a->numElems <= b->numElems);
+        return (a->num_elems <= b->num_elems);
         break;
     case carbon_field_type_bool:
         ARRAY_LEQ_PRIMITIVE_FUNC(maxNumElem, carbon_bool_t, a, b);
@@ -1073,29 +1073,29 @@ static void sortMetaModelColumn(carbon_columndoc_column_t *column, carbon_strdic
     VectorCpy(&arrayPositionCpy, &column->array_positions);
     VectorCpy(&valuesCpy, &column->values);
 
-    assert(column->array_positions.numElems == column->values.numElems);
-    assert(arrayPositionCpy.numElems == valuesCpy.numElems);
-    assert(valuesCpy.numElems == column->array_positions.numElems);
+    assert(column->array_positions.num_elems == column->values.num_elems);
+    assert(arrayPositionCpy.num_elems == valuesCpy.num_elems);
+    assert(valuesCpy.num_elems == column->array_positions.num_elems);
 
-    size_t *indices = malloc(valuesCpy.numElems * sizeof(size_t));
-    for (size_t i = 0; i < valuesCpy.numElems; i++) {
+    size_t *indices = malloc(valuesCpy.num_elems * sizeof(size_t));
+    for (size_t i = 0; i < valuesCpy.num_elems; i++) {
         indices[i] = i;
     }
 
     CompareColumnLessEqFuncArg funcArg = {
         .dic = dic,
-        .valueType = column->type
+        .value_type = column->type
     };
 
     carbon_sort_qsort_indicies_wargs(indices,
                                      valuesCpy.base,
                                      valuesCpy.elemSize,
                                      compareColumnLessEqFunc,
-                                     valuesCpy.numElems,
+                                     valuesCpy.num_elems,
                                      valuesCpy.allocator,
                                      &funcArg);
 
-    for (size_t i = 0; i < valuesCpy.numElems; i++) {
+    for (size_t i = 0; i < valuesCpy.num_elems; i++) {
         VectorSet(&column->values, i, VectorAt(&valuesCpy, indices[i]));
         VectorSet(&column->array_positions, i, VectorAt(&arrayPositionCpy, indices[i]));
     }
@@ -1109,36 +1109,36 @@ static void sortMetaModelColumnArrays(carbon_columndoc_obj_t *metaModel)
 {
     carbon_vec_t ofType(carbon_columndoc_columngroup_t) cpy;
     VectorCpy(&cpy, &metaModel->obj_array_props);
-    size_t *indices = malloc(cpy.numElems * sizeof(size_t));
-    for (size_t i = 0; i < cpy.numElems; i++) {
+    size_t *indices = malloc(cpy.num_elems * sizeof(size_t));
+    for (size_t i = 0; i < cpy.num_elems; i++) {
         indices[i] = i;
     }
     carbon_sort_qsort_indicies_wargs(indices,
                                      cpy.base,
                                      sizeof(carbon_columndoc_columngroup_t),
                                      compareObjectArrayKeyColumnsLessEqFunc,
-                                     cpy.numElems,
+                                     cpy.num_elems,
                                      cpy.allocator,
                                      metaModel->parent->dic);
-    for (size_t i = 0; i < cpy.numElems; i++) {
+    for (size_t i = 0; i < cpy.num_elems; i++) {
         VectorSet(&metaModel->obj_array_props, i, VECTOR_GET(&cpy, indices[i], carbon_columndoc_columngroup_t));
     }
     free(indices);
 
-    for (size_t i = 0; i < cpy.numElems; i++) {
+    for (size_t i = 0; i < cpy.num_elems; i++) {
         carbon_columndoc_columngroup_t *keyColumns = VECTOR_GET(&metaModel->obj_array_props, i, carbon_columndoc_columngroup_t);
-        size_t *columnIndices = malloc(keyColumns->columns.numElems * sizeof(size_t));
+        size_t *columnIndices = malloc(keyColumns->columns.num_elems * sizeof(size_t));
         carbon_vec_t ofType(carbon_columndoc_column_t) columnCpy;
         VectorCpy(&columnCpy, &keyColumns->columns);
-        for (size_t i = 0; i < keyColumns->columns.numElems; i++) {
+        for (size_t i = 0; i < keyColumns->columns.num_elems; i++) {
             columnIndices[i] = i;
         }
 
         /** First, sort by column name; Then, sort by columns with same name by type */
         carbon_sort_qsort_indicies_wargs(columnIndices, columnCpy.base, sizeof(carbon_columndoc_column_t),
-                                         compareObjectArrayKeyColumnLessEqFunc, keyColumns->columns.numElems,
+                                         compareObjectArrayKeyColumnLessEqFunc, keyColumns->columns.num_elems,
                                          keyColumns->columns.allocator, metaModel->parent->dic);
-        for (size_t i = 0; i < keyColumns->columns.numElems; i++) {
+        for (size_t i = 0; i < keyColumns->columns.num_elems; i++) {
             VectorSet(&keyColumns->columns, i, VECTOR_GET(&columnCpy, columnIndices[i], carbon_columndoc_column_t));
             carbon_columndoc_column_t *column = VECTOR_GET(&keyColumns->columns, i, carbon_columndoc_column_t);
             sortMetaModelColumn(column, metaModel->parent->dic);
@@ -1228,7 +1228,7 @@ carbon_columndoc_t *carbon_doc_entries_to_columndoc(const carbon_doc_bulk_t *bul
 
     // Step 2: for each document doc, create a meta doc, and construct a binary compressed document
     const carbon_doc_t *models = VECTOR_ALL(&bulk->models, carbon_doc_t);
-    assert (bulk->models.numElems == 1);
+    assert (bulk->models.num_elems == 1);
 
     const carbon_doc_t *model = models;
 
@@ -1321,7 +1321,7 @@ static void createTypedVector(carbon_doc_entries_t *entry)
 static void entryModelDrop(carbon_doc_entries_t *entry)
 {
     if (entry->type == carbon_field_type_object) {
-        for (size_t i = 0; i < entry->values.numElems; i++)
+        for (size_t i = 0; i < entry->values.num_elems; i++)
         {
             carbon_doc_obj_t *model = VECTOR_GET(&entry->values, i, carbon_doc_obj_t);
             carbon_doc_drop(model);
@@ -1332,7 +1332,7 @@ static void entryModelDrop(carbon_doc_entries_t *entry)
 
 static bool printValue(FILE *file, carbon_field_type_e type, const carbon_vec_t ofType(<T>) *values)
 {
-    size_t numValues = values->numElems;
+    size_t numValues = values->num_elems;
     if (numValues == 0) {
         fprintf(file, "null");
         return true;
@@ -1492,11 +1492,11 @@ static bool printValue(FILE *file, carbon_field_type_e type, const carbon_vec_t 
 static void printObject(FILE *file, const carbon_doc_obj_t *model)
 {
     fprintf(file, "{");
-    for (size_t i = 0; i < model->entries.numElems; i++) {
+    for (size_t i = 0; i < model->entries.num_elems; i++) {
         carbon_doc_entries_t *entry = VECTOR_GET(&model->entries, i, carbon_doc_entries_t);
         fprintf(file, "\"%s\": ", entry->key);
         printValue(file, entry->type, &entry->values);
-        fprintf(file, "%s", i + 1 < model->entries.numElems ? ", " : "");
+        fprintf(file, "%s", i + 1 < model->entries.num_elems ? ", " : "");
     }
     fprintf(file, "}");
 }

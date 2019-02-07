@@ -20,8 +20,8 @@
 #include "carbon/carbon-memfile.h"
 #include "carbon/carbon-vector.h"
 
-#define DEFINE_PRINTER_FUNCTION_WCAST(type, castType, formatString)                                                    \
-void vector_##type##_PrinterFunc(carbon_memfile_t *dst, void ofType(T) *values, size_t numElems)                         \
+#define DEFINE_PRINTER_FUNCTION_WCAST(type, castType, format_string)                                                    \
+void vector_##type##_PrinterFunc(carbon_memfile_t *dst, void ofType(T) *values, size_t num_elems)                         \
 {                                                                                                                      \
     char *data;                                                                                                        \
     type *typedValues = (type *) values;                                                                               \
@@ -29,9 +29,9 @@ void vector_##type##_PrinterFunc(carbon_memfile_t *dst, void ofType(T) *values, 
     data = carbon_memfile_current_pos(dst, sizeof(char));                                                                  \
     int nchars = sprintf(data, "[");                                                                                   \
     carbon_memfile_skip(dst, nchars);                                                                                          \
-    for (size_t i = 0; i < numElems; i++) {                                                                            \
+    for (size_t i = 0; i < num_elems; i++) {                                                                            \
         data = carbon_memfile_current_pos(dst, sizeof(type));                                                              \
-        nchars = sprintf(data, formatString"%s", (castType) typedValues[i], i + 1 < numElems ? ", " : "");             \
+        nchars = sprintf(data, format_string"%s", (castType) typedValues[i], i + 1 < num_elems ? ", " : "");             \
         carbon_memfile_skip(dst, nchars);                                                                                      \
     }                                                                                                                  \
     data = carbon_memfile_current_pos(dst, sizeof(char));                                                                  \
@@ -39,8 +39,8 @@ void vector_##type##_PrinterFunc(carbon_memfile_t *dst, void ofType(T) *values, 
     carbon_memfile_skip(dst, nchars);                                                                                          \
 }
 
-#define DEFINE_PRINTER_FUNCTION(type, formatString)                                                                    \
-    DEFINE_PRINTER_FUNCTION_WCAST(type, type, formatString)
+#define DEFINE_PRINTER_FUNCTION(type, format_string)                                                                    \
+    DEFINE_PRINTER_FUNCTION_WCAST(type, type, format_string)
 
 DEFINE_PRINTER_FUNCTION_WCAST(u_char, int8_t, "%d")
 DEFINE_PRINTER_FUNCTION(int8_t, "%d")
@@ -59,7 +59,7 @@ bool carbon_vec_create(carbon_vec_t *out, const carbon_alloc_t *alloc, size_t el
     out->allocator = malloc(sizeof(carbon_alloc_t));
     carbon_alloc_this_or_std(out->allocator, alloc);
     out->base = carbon_malloc(out->allocator, cap_elems * elemSize);
-    out->numElems = 0;
+    out->num_elems = 0;
     out->cap_elems = cap_elems;
     out->elemSize = elemSize;
     out->growFactor = 1.7f;
@@ -96,20 +96,20 @@ bool carbon_vec_drop(carbon_vec_t *vec)
 bool carbon_vec_is_empty(const carbon_vec_t *vec)
 {
     CARBON_NON_NULL_OR_ERROR(vec)
-    return vec->numElems == 0 ? true : false;
+    return vec->num_elems == 0 ? true : false;
 }
 
-bool carbon_vec_push(carbon_vec_t *vec, const void *data, size_t numElems)
+bool carbon_vec_push(carbon_vec_t *vec, const void *data, size_t num_elems)
 {
     CARBON_NON_NULL_OR_ERROR(vec && data)
-    size_t nextNum = vec->numElems + numElems;
+    size_t nextNum = vec->num_elems + num_elems;
     while (nextNum > vec->cap_elems) {
         size_t more = nextNum - vec->cap_elems;
         vec->cap_elems = (vec->cap_elems + more) * vec->growFactor;
         vec->base = carbon_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elemSize);
     }
-    memcpy(vec->base + vec->numElems * vec->elemSize, data, numElems * vec->elemSize);
-    vec->numElems += numElems;
+    memcpy(vec->base + vec->num_elems * vec->elemSize, data, num_elems * vec->elemSize);
+    vec->num_elems += num_elems;
     return true;
 }
 
@@ -118,33 +118,33 @@ const void *VectorPeek(carbon_vec_t *vec)
     if (!vec) {
         return NULL;
     } else {
-        return (vec->numElems > 0) ? VectorAt(vec, vec->numElems - 1) : NULL;
+        return (vec->num_elems > 0) ? VectorAt(vec, vec->num_elems - 1) : NULL;
     }
 }
 
 bool carbon_vec_repeated_push(carbon_vec_t *vec, const void *data, size_t howOften)
 {
     CARBON_NON_NULL_OR_ERROR(vec && data)
-    size_t nextNum = vec->numElems + howOften;
+    size_t nextNum = vec->num_elems + howOften;
     while (nextNum > vec->cap_elems) {
         size_t more = nextNum - vec->cap_elems;
         vec->cap_elems = (vec->cap_elems + more) * vec->growFactor;
         vec->base = carbon_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elemSize);
     }
     for (size_t i = 0; i < howOften; i++) {
-        memcpy(vec->base + (vec->numElems + i) * vec->elemSize, data, vec->elemSize);
+        memcpy(vec->base + (vec->num_elems + i) * vec->elemSize, data, vec->elemSize);
     }
 
-    vec->numElems += howOften;
+    vec->num_elems += howOften;
     return true;
 }
 
 const void *carbon_vec_pop(carbon_vec_t *vec)
 {
     void *result;
-    if (CARBON_BRANCH_LIKELY((result = (vec ? (vec->numElems > 0 ? vec->base + (vec->numElems - 1) * vec->elemSize : NULL) : NULL))
+    if (CARBON_BRANCH_LIKELY((result = (vec ? (vec->num_elems > 0 ? vec->base + (vec->num_elems - 1) * vec->elemSize : NULL) : NULL))
                    != NULL)) {
-        vec->numElems--;
+        vec->num_elems--;
     }
     return result;
 }
@@ -152,15 +152,15 @@ const void *carbon_vec_pop(carbon_vec_t *vec)
 bool carbon_vec_clear(carbon_vec_t *vec)
 {
     CARBON_NON_NULL_OR_ERROR(vec)
-    vec->numElems = 0;
+    vec->num_elems = 0;
     return true;
 }
 
 bool VectorShrink(carbon_vec_t *vec)
 {
     CARBON_NON_NULL_OR_ERROR(vec);
-    if (vec->numElems < vec->cap_elems) {
-        vec->cap_elems = vec->numElems;
+    if (vec->num_elems < vec->cap_elems) {
+        vec->cap_elems = vec->num_elems;
         vec->base = carbon_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elemSize);
     }
     return true;
@@ -169,11 +169,11 @@ bool VectorShrink(carbon_vec_t *vec)
 bool carbon_vec_grow(size_t *numNewSlots, carbon_vec_t *vec)
 {
     CARBON_NON_NULL_OR_ERROR(vec)
-    size_t freeSlotsBefore = vec->cap_elems - vec->numElems;
+    size_t freeSlotsBefore = vec->cap_elems - vec->num_elems;
 
     vec->cap_elems = (vec->cap_elems * vec->growFactor) + 1;
     vec->base = carbon_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elemSize);
-    size_t freeSlotsAfter = vec->cap_elems - vec->numElems;
+    size_t freeSlotsAfter = vec->cap_elems - vec->num_elems;
     if (CARBON_BRANCH_LIKELY(numNewSlots != NULL)) {
         *numNewSlots = freeSlotsAfter - freeSlotsBefore;
     }
@@ -183,12 +183,12 @@ bool carbon_vec_grow(size_t *numNewSlots, carbon_vec_t *vec)
 size_t carbon_vec_length(const carbon_vec_t *vec)
 {
     CARBON_NON_NULL_OR_ERROR(vec)
-    return vec->numElems;
+    return vec->num_elems;
 }
 
 const void *VectorAt(const carbon_vec_t *vec, size_t pos)
 {
-    return (vec && pos < vec->numElems) ? vec->base + pos * vec->elemSize : NULL;
+    return (vec && pos < vec->num_elems) ? vec->base + pos * vec->elemSize : NULL;
 }
 
 size_t VectorCapacity(const carbon_vec_t *vec)
@@ -200,24 +200,24 @@ size_t VectorCapacity(const carbon_vec_t *vec)
 bool VectorEnlargeSizeToCapacity(carbon_vec_t *vec)
 {
     CARBON_NON_NULL_OR_ERROR(vec);
-    vec->numElems = vec->cap_elems;
+    vec->num_elems = vec->cap_elems;
     return true;
 }
 
 bool VectorSet(carbon_vec_t *vec, size_t pos, const void *data)
 {
     CARBON_NON_NULL_OR_ERROR(vec)
-    assert(pos < vec->numElems);
+    assert(pos < vec->num_elems);
     memcpy(vec->base + pos * vec->elemSize, data, vec->elemSize);
     return true;
 }
 
 bool VectorCpy(carbon_vec_t *dst, const carbon_vec_t *src)
 {
-    CARBON_CHECK_SUCCESS(carbon_vec_create(dst, NULL, src->elemSize, src->numElems));
-    dst->numElems = src->numElems;
-    if (dst->numElems > 0) {
-        memcpy(dst->base, src->base, src->elemSize * src->numElems);
+    CARBON_CHECK_SUCCESS(carbon_vec_create(dst, NULL, src->elemSize, src->num_elems));
+    dst->num_elems = src->num_elems;
+    if (dst->num_elems > 0) {
+        memcpy(dst->base, src->base, src->elemSize * src->num_elems);
     }
     return true;
 }
@@ -228,12 +228,12 @@ const void *carbon_vec_data(const carbon_vec_t *vec)
 }
 
 char *VectorToString(const carbon_vec_t ofType(T) *vec,
-                     void (*printerFunc)(carbon_memfile_t *dst, void ofType(T) *values, size_t numElems))
+                     void (*printerFunc)(carbon_memfile_t *dst, void ofType(T) *values, size_t num_elems))
 {
     carbon_memblock_t *block;
     carbon_memfile_t file;
-    carbon_memblock_create(&block, vec->numElems * vec->elemSize);
+    carbon_memblock_create(&block, vec->num_elems * vec->elemSize);
     carbon_memfile_open(&file, block, CARBON_MEMFILE_MODE_READWRITE);
-    printerFunc(&file, vec->base, vec->numElems);
+    printerFunc(&file, vec->base, vec->num_elems);
     return carbon_memblock_move_contents_and_drop(block);
 }

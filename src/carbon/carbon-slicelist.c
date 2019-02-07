@@ -36,8 +36,8 @@
     register uint_fast32_t i = 0;                                                                                      \
     if (!cacheHit) {                                                                                                   \
         do {                                                                                                           \
-            while ((keyHashsNoMatch = (slice->keyHashColumn[i]!=needleHash)) && i++<slice->numElems) { ; }             \
-            endReached    = ((i+1)>slice->numElems);                                                                   \
+            while ((keyHashsNoMatch = (slice->keyHashColumn[i]!=needleHash)) && i++<slice->num_elems) { ; }             \
+            endReached    = ((i+1)>slice->num_elems);                                                                   \
             keysMatch      = endReached || (!keyHashsNoMatch && (strcmp(slice->keyColumn[i], needleStr)==0));          \
             continueScan  = !endReached && !keysMatch;                                                                 \
             i             += continueScan;                                                                             \
@@ -45,7 +45,7 @@
         while (continueScan);                                                                                          \
         slice->cacheIdx = !endReached && keysMatch ? i : slice->cacheIdx;                                              \
     }                                                                                                                  \
-    cacheHit ? slice->cacheIdx : (!endReached && keysMatch ? i : slice->numElems);                                     \
+    cacheHit ? slice->cacheIdx : (!endReached && keysMatch ? i : slice->num_elems);                                     \
 })
 
 #define SLICE_BESEARCH(slice, needleHash, needleStr)                                                                   \
@@ -93,7 +93,7 @@ SliceListDrop(carbon_slice_list_t *list)
     carbon_vec_drop(&list->slices);
     carbon_vec_drop(&list->descriptors);
     carbon_vec_drop(&list->bounds);
-    for (size_t i = 0; i < list->filters.numElems; i++) {
+    for (size_t i = 0; i < list->filters.num_elems; i++) {
         carbon_bloom_t *filter = VECTOR_GET(&list->filters, i, carbon_bloom_t);
         carbon_bloom_drop(filter);
     }
@@ -144,19 +144,19 @@ carbon_slice_list_insert(carbon_slice_list_t *list, char **strings, carbon_strin
 
             CARBON_DEBUG(CARBON_SLICE_LIST_TAG,
                   "appender # of elems: %zu, limit: %zu",
-                  appender->numElems,
+                  appender->num_elems,
                   SLICE_KEY_COLUMN_MAX_ELEMS);
-            assert(appender->numElems < SLICE_KEY_COLUMN_MAX_ELEMS);
-            appender->keyColumn[appender->numElems] = key;
-            appender->keyHashColumn[appender->numElems] = keyHash;
-            appender->carbon_string_id_tColumn[appender->numElems] = value;
+            assert(appender->num_elems < SLICE_KEY_COLUMN_MAX_ELEMS);
+            appender->keyColumn[appender->num_elems] = key;
+            appender->keyHashColumn[appender->num_elems] = keyHash;
+            appender->carbon_string_id_tColumn[appender->num_elems] = value;
             appenderBounds->minHash = appenderBounds->minHash < keyHash ?
                                        appenderBounds->minHash : keyHash;
             appenderBounds->maxHash = appenderBounds->maxHash > keyHash ?
                                        appenderBounds->maxHash : keyHash;
             CARBON_BLOOM_SET(appenderFilter, &keyHash, sizeof(carbon_hash_t));
-            appender->numElems++;
-            if (CARBON_BRANCH_UNLIKELY(appender->numElems == SLICE_KEY_COLUMN_MAX_ELEMS)) {
+            appender->num_elems++;
+            if (CARBON_BRANCH_UNLIKELY(appender->num_elems == SLICE_KEY_COLUMN_MAX_ELEMS)) {
                 appenderSeal(appender);
                 appenderNew(list);
             }
@@ -190,7 +190,7 @@ carbon_slice_list_lookup(slice_handle_t *handle, carbon_slice_list_t *list, cons
 
         desc->numReadsAll++;
 
-        if (slice->numElems > 0) {
+        if (slice->num_elems > 0) {
             bool keyHashIn = keyHash >= bound->minHash && keyHash <= bound->maxHash;
             if (keyHashIn) {
                 carbon_bloom_t *restrict filter = filters + i;
@@ -216,7 +216,7 @@ carbon_slice_list_lookup(slice_handle_t *handle, carbon_slice_list_t *list, cons
                           needle,
                           pairPosition,
                           i);
-                    if (pairPosition < slice->numElems) {
+                    if (pairPosition < slice->num_elems) {
                         /** pair is contained */
                         desc->numReadsHit++;
                         handle->is_contained = true;
@@ -260,7 +260,7 @@ static void appenderNew(carbon_slice_list_t *list)
     /** the slice itself */
     Slice slice = {
         .strat     = SLICE_LOOKUP_SCAN,
-        .numElems = 0,
+        .num_elems = 0,
         .cacheIdx = (uint32_t) -1
     };
 
@@ -305,7 +305,7 @@ static void appenderNew(carbon_slice_list_t *list)
         "Single slice type size..............................: %zuB\n\t"
         "Total slice-list size...............................: %f MiB",
          list,
-         list->slices.numElems,
+         list->slices.num_elems,
          (size_t) CARBON_SLICE_LIST_TARGET_MEMORY_SIZE_IN_BYTE,
          CARBON_SLICE_LIST_TARGET_MEMORY_NAME,
          (size_t) CARBON_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE,
@@ -316,8 +316,8 @@ static void appenderNew(carbon_slice_list_t *list)
                           / ((double) carbon_bitmap_nbits(&filter) / (double) SLICE_KEY_COLUMN_MAX_ELEMS)),
               carbon_bitmap_nbits(&filter))),
          sizeof(Slice),
-         (sizeof(carbon_slice_list_t) + list->slices.numElems
-             * (sizeof(Slice) + sizeof(SliceDescriptor) + (sizeof(uint32_t) * list->descriptors.numElems)
+         (sizeof(carbon_slice_list_t) + list->slices.num_elems
+             * (sizeof(Slice) + sizeof(SliceDescriptor) + (sizeof(uint32_t) * list->descriptors.num_elems)
                  + sizeof(carbon_bloom_t) + carbon_bitmap_nbits(&filter) / 8 + sizeof(HashBounds))) / 1024.0
              / 1024.0
     );

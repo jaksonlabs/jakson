@@ -59,7 +59,7 @@ bool SlotVectorIsEmpty(SlotVector *vec)
 }
 
 bool SlotVectorInsert(SlotVector *vec, CARBON_NULLABLE carbon_vec_t ofType(slot_vector_slot_t) *ids,
-                     const void *data, size_t numElems)
+                     const void *data, size_t num_elems)
 {
     CARBON_NON_NULL_OR_ERROR(vec)
     CARBON_NON_NULL_OR_ERROR(ids)
@@ -68,11 +68,11 @@ bool SlotVectorInsert(SlotVector *vec, CARBON_NULLABLE carbon_vec_t ofType(slot_
     CARBON_UNUSED(data); // TODO: ???
 
     if (ids) {
-        carbon_vec_create(ids, vec->content.allocator, sizeof(SlotVectorSlot), numElems);
+        carbon_vec_create(ids, vec->content.allocator, sizeof(SlotVectorSlot), num_elems);
     }
 
     /** check and handle whether the content CARBON_vector must be resized */
-    size_t target = carbon_vec_length(&vec->content) + numElems;
+    size_t target = carbon_vec_length(&vec->content) + num_elems;
     if (target > VectorCapacity(&vec->content)) {
         assert(VectorCapacity(&vec->freeList) == VectorCapacity(&vec->content));
         size_t required = target - VectorCapacity(&vec->content);

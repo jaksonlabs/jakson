@@ -49,7 +49,7 @@ SlotVectorIsEmpty(SlotVector *vec);
 
 CARBON_EXPORT(bool)
 SlotVectorInsert(SlotVector *vec, CARBON_NULLABLE carbon_vec_t ofType(SlotVectorSlot) *ids,
-                     const void *data, size_t numElems);
+                     const void *data, size_t num_elems);
 
 CARBON_EXPORT(const void *)
 SlotVectorAt(SlotVector *vec, SlotVectorSlot slot);

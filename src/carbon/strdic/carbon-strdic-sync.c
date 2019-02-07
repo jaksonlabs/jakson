@@ -179,7 +179,7 @@ static bool this_drop(carbon_strdic_t *self)
     struct sync_extra *extra = this_extra(self);
 
     struct entry *entries = (struct entry *) extra->contents.base;
-    for (size_t i = 0; i < extra->contents.numElems; i++) {
+    for (size_t i = 0; i < extra->contents.num_elems; i++) {
         struct entry *entry = entries + i;
         if (entry->in_use) {
             assert (entry->str);
@@ -472,7 +472,7 @@ static bool this_get_contents(carbon_strdic_t *self, carbon_vec_t ofType (char *
     CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_SYNC);
     struct sync_extra *extra = this_extra(self);
 
-    for (carbon_string_id_t i = 0; i < extra->contents.numElems; i++) {
+    for (carbon_string_id_t i = 0; i < extra->contents.num_elems; i++) {
         const struct entry *e = VECTOR_GET(&extra->contents, i, struct entry);
         if (e->in_use) {
             carbon_vec_push(strings, &e->str, 1);

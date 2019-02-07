@@ -40,9 +40,9 @@ typedef struct carbon_archive_compressor
     void                             *extra;
 
     void (*set_flags)(union carbon_archive_dic_flags *flags);
-    void (*serialize_dic)(carbon_memfile_t *memFile, const carbon_vec_t ofType (const char *) *strings,
+    void (*serialize_dic)(carbon_memfile_t *mem_file, const carbon_vec_t ofType (const char *) *strings,
                           const carbon_vec_t ofType(carbon_string_id_t) *string_ids);
-    void (*dump_dic)(FILE *file, carbon_memfile_t *memFile);
+    void (*dump_dic)(FILE *file, carbon_memfile_t *mem_file);
 } carbon_archive_compressor_t;
 
 typedef struct carbon_archive_record_flags

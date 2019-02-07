@@ -172,7 +172,7 @@ static bool this_drop(carbon_strdic_t *self)
 {
     CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_ASYNC);
     async_extra *extra = THIS_EXTRAS(self);
-    for (size_t i = 0; i < extra->carriers.numElems; i++) {
+    for (size_t i = 0; i < extra->carriers.num_elems; i++) {
         carrier_t *carrier = VECTOR_GET(&extra->carriers, i, carrier_t);
         carbon_strdic_drop(&carrier->local_dictionary);
     }
@@ -207,7 +207,7 @@ void *parallel_remove_function(void *args)
 void *parallel_insert_function(void *args)
 {
     parallel_insert_arg *restrict this_args = (parallel_insert_arg *restrict) args;
-    this_args->did_work = this_args->strings.numElems > 0;
+    this_args->did_work = this_args->strings.num_elems > 0;
 
     CARBON_TRACE(STRING_DIC_ASYNC_TAG, "thread-local insert function started (thread %zu)", this_args->carrier->id);
     CARBON_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu spawned for insert task (%zu elements)", this_args->carrier->id,
@@ -834,7 +834,7 @@ static bool this_get_contents(carbon_strdic_t *self, carbon_vec_t ofType (char *
     carbon_vec_t ofType (carbon_string_id_t) local_string_id_results;
     size_t approx_num_distinct_local_values;
     this_num_distinct(self, &approx_num_distinct_local_values);
-    approx_num_distinct_local_values = CARBON_MAX(1, approx_num_distinct_local_values / extra->carriers.numElems);
+    approx_num_distinct_local_values = CARBON_MAX(1, approx_num_distinct_local_values / extra->carriers.num_elems);
     approx_num_distinct_local_values *= 1.2f;
 
     carbon_vec_create(&local_string_results, NULL, sizeof(char *), approx_num_distinct_local_values);
@@ -850,8 +850,8 @@ static bool this_get_contents(carbon_strdic_t *self, carbon_vec_t ofType (char *
 
         carbon_strdic_get_contents(&local_string_results, &local_string_id_results, &carrier->local_dictionary);
 
-        assert(local_string_id_results.numElems == local_string_results.numElems);
-        for (size_t k = 0; k < local_string_results.numElems; k++) {
+        assert(local_string_id_results.num_elems == local_string_results.num_elems);
+        for (size_t k = 0; k < local_string_results.num_elems; k++) {
             char *string = *VECTOR_GET(&local_string_results, k, char *);
             carbon_string_id_t localcarbon_string_id_t = *VECTOR_GET(&local_string_id_results, k, carbon_string_id_t);
             carbon_string_id_t global_string_id = MAKE_GLOBAL(thread_id, localcarbon_string_id_t);

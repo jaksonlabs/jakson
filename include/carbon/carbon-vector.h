@@ -28,7 +28,7 @@ CARBON_BEGIN_DECL
 typedef struct carbon_memfile carbon_memfile_t;
 
 #define DECLARE_PRINTER_FUNC(type)                                                                                     \
-    void vector_##type##_PrinterFunc(carbon_memfile_t *dst, void ofType(T) *values, size_t numElems);
+    void vector_##type##_PrinterFunc(carbon_memfile_t *dst, void ofType(T) *values, size_t num_elems);
 
 DECLARE_PRINTER_FUNC(u_char)
 DECLARE_PRINTER_FUNC(int8_t)
@@ -70,7 +70,7 @@ typedef struct carbon_vec
     /**
      *  The number of elements currently stored in the vector
      */
-    uint32_t numElems;
+    uint32_t num_elems;
 
     /**
      *  The number of elements for which currently memory is reserved
@@ -107,7 +107,7 @@ typedef carbon_vec_t ofType(const char *) StringRefVector;
 
 #define STRING_VECTOR_DROP(vec)                                                                                        \
 ({                                                                                                                     \
-    for (size_t i = 0; i < vec->numElems; i++) {                                                                       \
+    for (size_t i = 0; i < vec->num_elems; i++) {                                                                       \
         char *s = *VECTOR_GET(vec, i, char *);                                                                         \
         free (s);                                                                                                      \
     }                                                                                                                  \
@@ -186,20 +186,20 @@ CARBON_EXPORT(bool)
 carbon_vec_is_empty(const carbon_vec_t *vec);
 
 /**
- * Appends 'numElems' elements stored in 'data' into the vector by copying numElems * vec->elem_size into the
+ * Appends 'num_elems' elements stored in 'data' into the vector by copying num_elems * vec->elem_size into the
  * vectors memory block.
  *
  * In case the capacity is not sufficient, the vector gets automatically resized.
  *
  * @param vec the vector in which the data should be pushed
- * @param data non-null pointer to data that should be appended. Must be at least size of 'numElems' * vec->elem_size.
- * @param numElems number of elements stored in data
+ * @param data non-null pointer to data that should be appended. Must be at least size of 'num_elems' * vec->elem_size.
+ * @param num_elems number of elements stored in data
  * @return STATUS_OK if success, and STATUS_NULLPTR in case of NULL pointer parameters
  */
 CARBON_EXPORT(bool)
 carbon_vec_push(carbon_vec_t *vec,
                const void *data,
-               size_t numElems);
+               size_t num_elems);
 
 CARBON_EXPORT(const void *)
 VectorPeek(carbon_vec_t *vec);
@@ -214,7 +214,7 @@ VectorPeek(carbon_vec_t *vec);
  *
  * @param vec the vector in which the data should be pushed
  * @param data non-null pointer to data that should be appended. Must be at least size of one vec->elem_size.
- * @param numElems number of elements stored in data
+ * @param num_elems number of elements stored in data
  * @return STATUS_OK if success, and STATUS_NULLPTR in case of NULL pointer parameters
  */
 CARBON_EXPORT(bool)
@@ -307,7 +307,7 @@ carbon_vec_data(const carbon_vec_t *vec);
 
 CARBON_EXPORT(char *)
 VectorToString(const carbon_vec_t ofType(T) *vec,
-        void (*printerFunc)(carbon_memfile_t *dst, void ofType(T) *values, size_t numElems));
+        void (*printerFunc)(carbon_memfile_t *dst, void ofType(T) *values, size_t num_elems));
 
 #define VECTOR_ALL(vec, type) (type *) carbon_vec_data(vec)
 

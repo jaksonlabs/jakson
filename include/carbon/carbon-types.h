@@ -48,7 +48,7 @@ typedef const char *          carbon_cstring_t;
 #define CARBON_NULL_UINT32                    UINT32_MAX
 #define CARBON_NULL_UINT64                    UINT64_MAX
 #define CARBON_NULL_FLOAT                     NAN
-#define CARBON_NULL_OBJECT_MODEL(objectModel) (objectModel->entries.numElems == 0)
+#define CARBON_NULL_OBJECT_MODEL(objectModel) (objectModel->entries.num_elems == 0)
 
 #define CARBON_LIMITS_INT8_MAX                (CARBON_NULL_INT8 - 1)
 #define CARBON_LIMITS_INT16_MAX               (CARBON_NULL_INT16 - 1)
@@ -90,10 +90,10 @@ typedef enum carbon_field_type
     carbon_field_type_object        = 12
 } carbon_field_type_e;
 
-#define GET_TYPE_SIZE(valueType)                                                                                       \
+#define GET_TYPE_SIZE(value_type)                                                                                       \
 ({                                                                                                                     \
     size_t value_size;                                                                                                 \
-    switch (valueType) {                                                                                               \
+    switch (value_type) {                                                                                               \
         case carbon_field_type_null:                                                                                   \
             value_size = sizeof(uint16_t);                                                                             \
             break;                                                                                                     \

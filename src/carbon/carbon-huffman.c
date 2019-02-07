@@ -52,7 +52,7 @@ bool carbon_huffman_create(carbon_huffman_t **out, const StringRefVector *string
     uint32_t *freqData = VECTOR_ALL(&frequencies, uint32_t);
     CARBON_ZERO_MEMORY(freqData, UCHAR_MAX * sizeof(uint32_t));
 
-    for (size_t i = 0; i < strings->numElems; i++) {
+    for (size_t i = 0; i < strings->num_elems; i++) {
         const char *string = *VECTOR_GET(strings, i, const char *);
         size_t stringLength = strlen(string);
         for (size_t k = 0; k < stringLength; k++) {
@@ -85,7 +85,7 @@ bool carbon_huffman_drop(carbon_huffman_t *dic)
 {
     CARBON_NON_NULL_OR_ERROR(dic);
 
-    for (size_t i = 0; i < dic->encodingTable.numElems; i++) {
+    for (size_t i = 0; i < dic->encodingTable.num_elems; i++) {
         carbon_huffman_entry_t *entry = VECTOR_GET(&dic->encodingTable, i, carbon_huffman_entry_t);
         free(entry->blocks);
     }
@@ -102,7 +102,7 @@ bool carbon_huffman_serialize_dic(carbon_memfile_t *file, const carbon_huffman_t
     CARBON_NON_NULL_OR_ERROR(file)
     CARBON_NON_NULL_OR_ERROR(dic)
 
-    for (size_t i = 0; i < dic->encodingTable.numElems; i++) {
+    for (size_t i = 0; i < dic->encodingTable.num_elems; i++) {
         carbon_huffman_entry_t *entry = VECTOR_GET(&dic->encodingTable, i, carbon_huffman_entry_t);
         carbon_memfile_write(file, &markerSymbol, sizeof(char));
         carbon_memfile_write(file, &entry->letter, sizeof(unsigned char));
@@ -140,7 +140,7 @@ bool carbon_huffman_serialize_dic(carbon_memfile_t *file, const carbon_huffman_t
 
 static carbon_huffman_entry_t *findDicEntry(carbon_huffman_t *dic, unsigned char c)
 {
-    for (size_t i = 0; i < dic->encodingTable.numElems; i++) {
+    for (size_t i = 0; i < dic->encodingTable.num_elems; i++) {
         carbon_huffman_entry_t *entry = VECTOR_GET(&dic->encodingTable, i, carbon_huffman_entry_t);
         if (entry->letter == c) {
             return entry;
@@ -196,9 +196,9 @@ bool carbon_huffman_encode(carbon_memfile_t *file,
     CARBON_NON_NULL_OR_ERROR(dic)
     CARBON_NON_NULL_OR_ERROR(strings)
 
-    assert(carbon_string_id_ts->numElems == strings->numElems);
+    assert(carbon_string_id_ts->num_elems == strings->num_elems);
 
-    for (size_t i = 0; i < strings->numElems; i++) {
+    for (size_t i = 0; i < strings->num_elems; i++) {
         const char *string = *VECTOR_GET(strings, i, const char *);
         carbon_string_id_t string_id = *VECTOR_GET(carbon_string_id_ts, i, carbon_string_id_t);
         carbon_off_t offset, offsetContinue;
@@ -389,7 +389,7 @@ static struct HuffNode *trimAndBegin(carbon_vec_t ofType(HuffNode) *candidates)
 
 static void createHuffmanTree(carbon_vec_t ofType(carbon_huffman_entry_t) *encodingTable, const carbon_vec_t ofType(uint32_t) *frequencies)
 {
-    assert(UCHAR_MAX == frequencies->numElems);
+    assert(UCHAR_MAX == frequencies->num_elems);
 
     carbon_vec_t ofType(HuffNode) candidates;
     carbon_vec_create(&candidates, NULL, sizeof(struct HuffNode), UCHAR_MAX * UCHAR_MAX);
