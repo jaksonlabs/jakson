@@ -60,14 +60,14 @@
 
 #define WRITE_PRIMITIVE_VALUES(memfile, values_vec, type)                                                               \
 {                                                                                                                      \
-    type *values = VECTOR_ALL(values_vec, type);                                                                        \
+    type *values = CARBON_VECTOR_ALL(values_vec, type);                                                                        \
     carbon_memfile_write(memfile, values, values_vec->num_elems * sizeof(type));                                                 \
 }
 
 #define WRITE_ARRAY_VALUES(memfile, values_vec, type)                                                                   \
 {                                                                                                                      \
     for (uint32_t i = 0; i < values_vec->num_elems; i++) {                                                               \
-        carbon_vec_t ofType(type) *nested_values = VECTOR_GET(values_vec, i, carbon_vec_t);                            \
+        carbon_vec_t ofType(type) *nested_values = CARBON_VECTOR_GET(values_vec, i, carbon_vec_t);                            \
         WRITE_PRIMITIVE_VALUES(memfile, nested_values, type);                                                           \
     }                                                                                                                  \
 }
@@ -507,8 +507,8 @@ static void compressor_none_write_dictionary(carbon_memfile_t *memfile, const ca
                                                 const carbon_vec_t ofType(carbon_string_id_t) *string_ids)
 {
     for (size_t i = 0; i < strings->num_elems; i++) {
-        carbon_string_id_t *string_id_t = VECTOR_GET(string_ids, i, carbon_string_id_t);
-        const char *string = *VECTOR_GET(strings, i, const char *);
+        carbon_string_id_t *string_id_t = CARBON_VECTOR_GET(string_ids, i, carbon_string_id_t);
+        const char *string = *CARBON_VECTOR_GET(strings, i, const char *);
         size_t string_length = strlen(string);
 
         struct embedded_string embedded_string = {
@@ -710,7 +710,7 @@ static carbon_field_type_e value_type_symbol_to_value_type(char symbol)
 
 static void write_primitive_key_column(carbon_memfile_t *memfile, carbon_vec_t ofType(carbon_string_id_t) *keys)
 {
-    carbon_string_id_t *string_ids = VECTOR_ALL(keys, carbon_string_id_t);
+    carbon_string_id_t *string_ids = CARBON_VECTOR_ALL(keys, carbon_string_id_t);
     carbon_memfile_write(memfile, string_ids, keys->num_elems * sizeof(carbon_string_id_t));
 }
 
@@ -784,7 +784,7 @@ static carbon_off_t *write_primitive_var_value_column(carbon_memfile_t *memfile,
                                                       carbon_off_t root_object_header_offset)
 {
     carbon_off_t *result = malloc(values_vec->num_elems * sizeof(carbon_off_t));
-    carbon_columndoc_obj_t *mapped_objects = VECTOR_ALL(values_vec, carbon_columndoc_obj_t);
+    carbon_columndoc_obj_t *mapped_objects = CARBON_VECTOR_ALL(values_vec, carbon_columndoc_obj_t);
     for (uint32_t i = 0; i < values_vec->num_elems; i++) {
         carbon_columndoc_obj_t *mapped_object = mapped_objects + i;
         result[i] = CARBON_MEMFILE_TELL(memfile) - root_object_header_offset;
@@ -812,7 +812,7 @@ static bool write_array_lengths_column(carbon_err_t *err, carbon_memfile_t *memf
     case carbon_field_type_float:
     case carbon_field_type_string:
         for (uint32_t i = 0; i < values_vec->num_elems; i++) {
-            carbon_vec_t *nested_arrays = VECTOR_GET(values_vec, i, carbon_vec_t);
+            carbon_vec_t *nested_arrays = CARBON_VECTOR_GET(values_vec, i, carbon_vec_t);
             carbon_memfile_write(memfile, &nested_arrays->num_elems, sizeof(uint32_t));
         }
         break;
@@ -1121,7 +1121,7 @@ static bool write_column_entry(carbon_memfile_t *memfile, carbon_err_t *err, car
         case carbon_field_type_object: {
             carbon_off_t preObjectNext = 0;
             for (size_t i = 0; i < column->num_elems; i++) {
-                carbon_columndoc_obj_t *object = VECTOR_GET(column, i, carbon_columndoc_obj_t);
+                carbon_columndoc_obj_t *object = CARBON_VECTOR_GET(column, i, carbon_columndoc_obj_t);
                 if (CARBON_BRANCH_LIKELY(preObjectNext != 0)) {
                     carbon_off_t continuePos = CARBON_MEMFILE_TELL(memfile);
                     carbon_off_t relativeContinuePos = continuePos - root_object_header_offset;
@@ -1172,7 +1172,7 @@ static bool write_column(carbon_memfile_t *memfile, carbon_err_t *err, carbon_co
     carbon_memfile_write(memfile, column->array_positions.base, column->array_positions.num_elems * sizeof(uint32_t));
 
     for (size_t i = 0; i < column->values.num_elems; i++) {
-        carbon_vec_t ofType(<T>) *column_data = VECTOR_GET(&column->values, i, carbon_vec_t);
+        carbon_vec_t ofType(<T>) *column_data = CARBON_VECTOR_GET(&column->values, i, carbon_vec_t);
         carbon_off_t column_entry_offset = CARBON_MEMFILE_TELL(memfile);
         carbon_off_t relative_entry_offset = column_entry_offset - root_object_header_offset;
         carbon_memfile_seek(memfile, value_entry_offsets + i * sizeof(carbon_off_t));
@@ -1198,7 +1198,7 @@ static bool write_object_array_props(carbon_memfile_t *memfile, carbon_err_t *er
         carbon_memfile_write(memfile, &header, sizeof(struct object_array_header));
 
         for (size_t i = 0; i < object_key_columns->num_elems; i++) {
-            carbon_columndoc_columngroup_t *column_group = VECTOR_GET(object_key_columns, i, carbon_columndoc_columngroup_t);
+            carbon_columndoc_columngroup_t *column_group = CARBON_VECTOR_GET(object_key_columns, i, carbon_columndoc_columngroup_t);
             carbon_memfile_write(memfile, &column_group->key, sizeof(carbon_string_id_t));
         }
 
@@ -1207,7 +1207,7 @@ static bool write_object_array_props(carbon_memfile_t *memfile, carbon_err_t *er
         carbon_memfile_skip(memfile, object_key_columns->num_elems * sizeof(carbon_off_t));
 
         for (size_t i = 0; i < object_key_columns->num_elems; i++) {
-            carbon_columndoc_columngroup_t *column_group = VECTOR_GET(object_key_columns, i, carbon_columndoc_columngroup_t);
+            carbon_columndoc_columngroup_t *column_group = CARBON_VECTOR_GET(object_key_columns, i, carbon_columndoc_columngroup_t);
 
             struct column_group_header column_group_header = {
                 .marker = marker_symbols[MARKER_TYPE_COLUMN_GROUP].symbol,
@@ -1225,7 +1225,7 @@ static bool write_object_array_props(carbon_memfile_t *memfile, carbon_err_t *er
             carbon_memfile_skip(memfile, column_group->columns.num_elems * sizeof(carbon_off_t));
 
             for (size_t k = 0; k < column_group->columns.num_elems; k++) {
-                carbon_columndoc_column_t *column = VECTOR_GET(&column_group->columns, k, carbon_columndoc_column_t);
+                carbon_columndoc_column_t *column = CARBON_VECTOR_GET(&column_group->columns, k, carbon_columndoc_column_t);
                 carbon_off_t continue_write = CARBON_MEMFILE_TELL(memfile);
                 carbon_off_t column_off = continue_write - root_object_header_offset;
                 carbon_memfile_seek(memfile, offset_column_to_columns + k * sizeof(carbon_off_t));
@@ -1550,7 +1550,7 @@ static bool serialize_string_dic(carbon_memfile_t *memfile, carbon_err_t *err, c
     carbon_vec_t ofType (const char *) *strings;
     carbon_vec_t ofType(carbon_string_id_t) *string_ids;
 
-    carbon_doc_bulk_get_dic_conetnts(&strings, &string_ids, context);
+    carbon_doc_bulk_get_dic_contents(&strings, &string_ids, context);
 
     assert(strings->num_elems == string_ids->num_elems);
 

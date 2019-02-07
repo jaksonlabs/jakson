@@ -115,67 +115,67 @@ static void object_meta_model_free(carbon_columndoc_obj_t *columndoc)
     carbon_vec_drop(&columndoc->string_prop_vals);
 
     for (size_t i = 0; i < columndoc->bool_array_prop_vals.num_elems; i++) {
-        carbon_vec_t *vec = VECTOR_GET(&columndoc->bool_array_prop_vals, i, carbon_vec_t);
+        carbon_vec_t *vec = CARBON_VECTOR_GET(&columndoc->bool_array_prop_vals, i, carbon_vec_t);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->bool_array_prop_vals);
 
     for (size_t i = 0; i < columndoc->int8_array_prop_vals.num_elems; i++) {
-        carbon_vec_t *vec = VECTOR_GET(&columndoc->int8_array_prop_vals, i, carbon_vec_t);
+        carbon_vec_t *vec = CARBON_VECTOR_GET(&columndoc->int8_array_prop_vals, i, carbon_vec_t);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->int8_array_prop_vals);
 
     for (size_t i = 0; i < columndoc->int16_array_prop_vals.num_elems; i++) {
-        carbon_vec_t *vec = VECTOR_GET(&columndoc->int16_array_prop_vals, i, carbon_vec_t);
+        carbon_vec_t *vec = CARBON_VECTOR_GET(&columndoc->int16_array_prop_vals, i, carbon_vec_t);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->int16_array_prop_vals);
 
     for (size_t i = 0; i < columndoc->int32_array_prop_vals.num_elems; i++) {
-        carbon_vec_t *vec = VECTOR_GET(&columndoc->int32_array_prop_vals, i, carbon_vec_t);
+        carbon_vec_t *vec = CARBON_VECTOR_GET(&columndoc->int32_array_prop_vals, i, carbon_vec_t);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->int32_array_prop_vals);
 
     for (size_t i = 0; i < columndoc->int64_array_prop_vals.num_elems; i++) {
-        carbon_vec_t *vec = VECTOR_GET(&columndoc->int64_array_prop_vals, i, carbon_vec_t);
+        carbon_vec_t *vec = CARBON_VECTOR_GET(&columndoc->int64_array_prop_vals, i, carbon_vec_t);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->int64_array_prop_vals);
 
     for (size_t i = 0; i < columndoc->uint8_array_prop_vals.num_elems; i++) {
-        carbon_vec_t *vec = VECTOR_GET(&columndoc->uint8_array_prop_vals, i, carbon_vec_t);
+        carbon_vec_t *vec = CARBON_VECTOR_GET(&columndoc->uint8_array_prop_vals, i, carbon_vec_t);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->uint8_array_prop_vals);
 
     for (size_t i = 0; i < columndoc->uint16_array_prop_vals.num_elems; i++) {
-        carbon_vec_t *vec = VECTOR_GET(&columndoc->uint16_array_prop_vals, i, carbon_vec_t);
+        carbon_vec_t *vec = CARBON_VECTOR_GET(&columndoc->uint16_array_prop_vals, i, carbon_vec_t);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->uint16_array_prop_vals);
 
     for (size_t i = 0; i < columndoc->uint32_array_prop_vals.num_elems; i++) {
-        carbon_vec_t *vec = VECTOR_GET(&columndoc->uint32_array_prop_vals, i, carbon_vec_t);
+        carbon_vec_t *vec = CARBON_VECTOR_GET(&columndoc->uint32_array_prop_vals, i, carbon_vec_t);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->uint32_array_prop_vals);
 
     for (size_t i = 0; i < columndoc->uin64_array_prop_vals.num_elems; i++) {
-        carbon_vec_t *vec = VECTOR_GET(&columndoc->uin64_array_prop_vals, i, carbon_vec_t);
+        carbon_vec_t *vec = CARBON_VECTOR_GET(&columndoc->uin64_array_prop_vals, i, carbon_vec_t);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->uin64_array_prop_vals);
 
     for (size_t i = 0; i < columndoc->float_array_prop_vals.num_elems; i++) {
-        carbon_vec_t *vec = VECTOR_GET(&columndoc->float_array_prop_vals, i, carbon_vec_t);
+        carbon_vec_t *vec = CARBON_VECTOR_GET(&columndoc->float_array_prop_vals, i, carbon_vec_t);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->float_array_prop_vals);
 
     for (size_t i = 0; i < columndoc->string_array_prop_vals.num_elems; i++) {
-        carbon_vec_t *vec = VECTOR_GET(&columndoc->string_array_prop_vals, i, carbon_vec_t);
+        carbon_vec_t *vec = CARBON_VECTOR_GET(&columndoc->string_array_prop_vals, i, carbon_vec_t);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->string_array_prop_vals);
@@ -195,73 +195,73 @@ static void object_meta_model_free(carbon_columndoc_obj_t *columndoc)
     carbon_vec_drop(&columndoc->string_val_idxs);
 
     for (size_t i = 0; i < columndoc->bool_array_idxs.num_elems; i++) {
-        carbon_vec_t *vec = VECTOR_GET(&columndoc->bool_array_idxs, i, carbon_vec_t);
+        carbon_vec_t *vec = CARBON_VECTOR_GET(&columndoc->bool_array_idxs, i, carbon_vec_t);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->bool_array_idxs);
 
     for (size_t i = 0; i < columndoc->int8_array_idxs.num_elems; i++) {
-        carbon_vec_t *vec = VECTOR_GET(&columndoc->int8_array_idxs, i, carbon_vec_t);
+        carbon_vec_t *vec = CARBON_VECTOR_GET(&columndoc->int8_array_idxs, i, carbon_vec_t);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->int8_array_idxs);
 
     for (size_t i = 0; i < columndoc->int16_array_idxs.num_elems; i++) {
-        carbon_vec_t *vec = VECTOR_GET(&columndoc->int16_array_idxs, i, carbon_vec_t);
+        carbon_vec_t *vec = CARBON_VECTOR_GET(&columndoc->int16_array_idxs, i, carbon_vec_t);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->int16_array_idxs);
 
     for (size_t i = 0; i < columndoc->int32_array_idxs.num_elems; i++) {
-        carbon_vec_t *vec = VECTOR_GET(&columndoc->int32_array_idxs, i, carbon_vec_t);
+        carbon_vec_t *vec = CARBON_VECTOR_GET(&columndoc->int32_array_idxs, i, carbon_vec_t);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->int32_array_idxs);
 
     for (size_t i = 0; i < columndoc->int64_array_idxs.num_elems; i++) {
-        carbon_vec_t *vec = VECTOR_GET(&columndoc->int64_array_idxs, i, carbon_vec_t);
+        carbon_vec_t *vec = CARBON_VECTOR_GET(&columndoc->int64_array_idxs, i, carbon_vec_t);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->int64_array_idxs);
 
     for (size_t i = 0; i < columndoc->uint8_array_idxs.num_elems; i++) {
-        carbon_vec_t *vec = VECTOR_GET(&columndoc->uint8_array_idxs, i, carbon_vec_t);
+        carbon_vec_t *vec = CARBON_VECTOR_GET(&columndoc->uint8_array_idxs, i, carbon_vec_t);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->uint8_array_idxs);
 
     for (size_t i = 0; i < columndoc->uint16_array_idxs.num_elems; i++) {
-        carbon_vec_t *vec = VECTOR_GET(&columndoc->uint16_array_idxs, i, carbon_vec_t);
+        carbon_vec_t *vec = CARBON_VECTOR_GET(&columndoc->uint16_array_idxs, i, carbon_vec_t);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->uint16_array_idxs);
 
     for (size_t i = 0; i < columndoc->uint32_array_idxs.num_elems; i++) {
-        carbon_vec_t *vec = VECTOR_GET(&columndoc->uint32_array_idxs, i, carbon_vec_t);
+        carbon_vec_t *vec = CARBON_VECTOR_GET(&columndoc->uint32_array_idxs, i, carbon_vec_t);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->uint32_array_idxs);
 
     for (size_t i = 0; i < columndoc->uint64_array_idxs.num_elems; i++) {
-        carbon_vec_t *vec = VECTOR_GET(&columndoc->uint64_array_idxs, i, carbon_vec_t);
+        carbon_vec_t *vec = CARBON_VECTOR_GET(&columndoc->uint64_array_idxs, i, carbon_vec_t);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->uint64_array_idxs);
 
     for (size_t i = 0; i < columndoc->float_array_idxs.num_elems; i++) {
-        carbon_vec_t *vec = VECTOR_GET(&columndoc->float_array_idxs, i, carbon_vec_t);
+        carbon_vec_t *vec = CARBON_VECTOR_GET(&columndoc->float_array_idxs, i, carbon_vec_t);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->float_array_idxs);
 
     for (size_t i = 0; i < columndoc->string_array_idxs.num_elems; i++) {
-        carbon_vec_t *vec = VECTOR_GET(&columndoc->string_array_idxs, i, carbon_vec_t);
+        carbon_vec_t *vec = CARBON_VECTOR_GET(&columndoc->string_array_idxs, i, carbon_vec_t);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->string_array_idxs);
 
     for (size_t i = 0; i < columndoc->obj_prop_vals.num_elems; i++) {
-        carbon_columndoc_obj_t *object = VECTOR_GET(&columndoc->obj_prop_vals, i, carbon_columndoc_obj_t);
+        carbon_columndoc_obj_t *object = CARBON_VECTOR_GET(&columndoc->obj_prop_vals, i, carbon_columndoc_obj_t);
         object_meta_model_free(object);
     }
     carbon_vec_drop(&columndoc->obj_prop_vals);
@@ -282,13 +282,13 @@ bool carbon_columndoc_free(carbon_columndoc_t *doc)
     if(!carbon_vec_is_empty((key_vector))) {                                                                   \
         fprintf(file, "\"Keys\": [ ");                                                                  \
         for (size_t i = 0; i < (key_vector)->num_elems; i++) {                                            \
-            carbon_string_id_t string_id = *VECTOR_GET((key_vector), i, carbon_string_id_t);              \
+            carbon_string_id_t string_id = *CARBON_VECTOR_GET((key_vector), i, carbon_string_id_t);              \
             fprintf(file, "%"PRIu64"%s", string_id, i + 1 < (key_vector)->num_elems ? ", " : "");                \
         }                                                                                               \
         fprintf(file, "], ");                                                                           \
         fprintf(file, "\"Keys Decoded\": [ ");                                                          \
         for (size_t i = 0; i < (key_vector)->num_elems; i++) {                                            \
-            carbon_string_id_t string_id = *VECTOR_GET((key_vector), i, carbon_string_id_t);              \
+            carbon_string_id_t string_id = *CARBON_VECTOR_GET((key_vector), i, carbon_string_id_t);              \
             char **encString = carbon_strdic_extract(dic, &string_id, 1);                              \
             fprintf(file, "\"%s\"%s", encString[0], i + 1 < (key_vector)->num_elems ? ", " : "");         \
             carbon_strdic_free(dic, encString);                                                       \
@@ -303,7 +303,7 @@ bool carbon_columndoc_free(carbon_columndoc_t *doc)
     if(!carbon_vec_is_empty((key_vector))) {                                                                   \
         fprintf(file, "\"Values\": [ ");                                                                \
         for (size_t i = 0; i < (value_vector)->num_elems; i++) {                                          \
-            TYPE value = *VECTOR_GET(value_vector, i, TYPE);                                             \
+            TYPE value = *CARBON_VECTOR_GET(value_vector, i, TYPE);                                             \
             fprintf(file, FORMAT_STR "%s", value, i + 1 < (value_vector)->num_elems ? ", " : "");         \
         }                                                                                               \
         fprintf(file, "] ");                                                                            \
@@ -318,7 +318,7 @@ bool carbon_columndoc_free(carbon_columndoc_t *doc)
     if(!carbon_vec_is_empty((key_vector))) {                                                                           \
         fprintf(file, "\"Values\": [ ");                                                                        \
         for (size_t i = 0; i < (value_vector)->num_elems; i++) {                                                  \
-            carbon_bool_t value = *VECTOR_GET(value_vector, i, carbon_bool_t);                                     \
+            carbon_bool_t value = *CARBON_VECTOR_GET(value_vector, i, carbon_bool_t);                                     \
             fprintf(file, "%s%s", value == 0 ? "false" : "true", i + 1 < (value_vector)->num_elems ? ", " : "");  \
         }                                                                                                       \
         fprintf(file, "]");                                                                                     \
@@ -342,7 +342,7 @@ static bool print_primitive_objects(FILE *file, carbon_err_t *err, const char *t
     if(!carbon_vec_is_empty((key_vector))) {
         fprintf(file, "\"Values\": [ ");
         for (size_t i = 0; i < (value_vector)->num_elems; i++) {
-            const carbon_columndoc_obj_t *object = VECTOR_GET(value_vector, i, carbon_columndoc_obj_t);
+            const carbon_columndoc_obj_t *object = CARBON_VECTOR_GET(value_vector, i, carbon_columndoc_obj_t);
             if(!print_object(file, err, object, dic)) {
                 return false;
             }
@@ -360,13 +360,13 @@ static bool print_primitive_objects(FILE *file, carbon_err_t *err, const char *t
     if(!carbon_vec_is_empty((&key_vector))) {                                                                  \
         fprintf(file, "\"Keys\": [ ");                                                                  \
         for (size_t i = 0; i < (&key_vector)->num_elems; i++) {                                           \
-            carbon_string_id_t string_id = *VECTOR_GET((&key_vector), i, carbon_string_id_t);             \
+            carbon_string_id_t string_id = *CARBON_VECTOR_GET((&key_vector), i, carbon_string_id_t);             \
             fprintf(file, "%"PRIu64"%s", string_id, i + 1 < (&key_vector)->num_elems ? ", " : "");               \
         }                                                                                               \
         fprintf(file, "], ");                                                                           \
         fprintf(file, "\"Keys Decoded\": [ ");                                                          \
         for (size_t i = 0; i < (&key_vector)->num_elems; i++) {                                           \
-            carbon_string_id_t string_id = *VECTOR_GET((&key_vector), i, carbon_string_id_t);             \
+            carbon_string_id_t string_id = *CARBON_VECTOR_GET((&key_vector), i, carbon_string_id_t);             \
             char **encString = carbon_strdic_extract(dic, &string_id, 1);                              \
             fprintf(file, "\"%s\"%s", encString[0], i + 1 < (&key_vector)->num_elems ? ", " : "");        \
             carbon_strdic_free(dic, encString);                                                       \
@@ -374,10 +374,10 @@ static bool print_primitive_objects(FILE *file, carbon_err_t *err, const char *t
         fprintf(file, "],");                                                                            \
         fprintf(file, "\"Values\": [ ");                                                                \
         for (size_t i = 0; i < (&value_vector)->num_elems; i++) {                                         \
-            const carbon_vec_t ofType(TYPE) *values = VECTOR_GET(&value_vector, i, carbon_vec_t);      \
+            const carbon_vec_t ofType(TYPE) *values = CARBON_VECTOR_GET(&value_vector, i, carbon_vec_t);      \
             fprintf(file, "[ ");                                                                        \
             for (size_t j = 0; j < values->num_elems; j++) {                                             \
-                TYPE value = *VECTOR_GET(values, j, TYPE);                                              \
+                TYPE value = *CARBON_VECTOR_GET(values, j, TYPE);                                              \
                 if (nonnull_expr) {                                                                     \
                     fprintf(file, "" TYPE_FORMAT "%s", value, j + 1 < values->num_elems ? ", " : "");    \
                 } else {                                                                                \
@@ -397,13 +397,13 @@ static bool print_primitive_objects(FILE *file, carbon_err_t *err, const char *t
     if(!carbon_vec_is_empty((&key_vector))) {                                                                      \
         fprintf(file, "\"Keys\": [ ");                                                                      \
         for (size_t i = 0; i < (&key_vector)->num_elems; i++) {                                               \
-            carbon_string_id_t string_id = *VECTOR_GET((&key_vector), i, carbon_string_id_t);                 \
+            carbon_string_id_t string_id = *CARBON_VECTOR_GET((&key_vector), i, carbon_string_id_t);                 \
             fprintf(file, "%"PRIu64"%s", string_id, i + 1 < (&key_vector)->num_elems ? ", " : "");                   \
         }                                                                                                   \
         fprintf(file, "], ");                                                                               \
         fprintf(file, "\"Keys Decoded\": [ ");                                                              \
         for (size_t i = 0; i < (&key_vector)->num_elems; i++) {                                               \
-            carbon_string_id_t string_id = *VECTOR_GET((&key_vector), i, carbon_string_id_t);                 \
+            carbon_string_id_t string_id = *CARBON_VECTOR_GET((&key_vector), i, carbon_string_id_t);                 \
             char **encString = carbon_strdic_extract(dic, &string_id, 1);                                  \
             fprintf(file, "\"%s\"%s", encString[0], i + 1 < (&key_vector)->num_elems ? ", " : "");            \
             carbon_strdic_free(dic, encString);                                                           \
@@ -411,10 +411,10 @@ static bool print_primitive_objects(FILE *file, carbon_err_t *err, const char *t
         fprintf(file, "],");                                                                                \
         fprintf(file, "\"Values\": [ ");                                                                    \
         for (size_t i = 0; i < (&value_vector)->num_elems; i++) {                                             \
-            const carbon_vec_t ofType(carbon_bool_t) *values = VECTOR_GET(&value_vector, i, carbon_vec_t);  \
+            const carbon_vec_t ofType(carbon_bool_t) *values = CARBON_VECTOR_GET(&value_vector, i, carbon_vec_t);  \
             fprintf(file, "[ ");                                                                            \
             for (size_t j = 0; j < values->num_elems; j++) {                                                 \
-                carbon_bool_t value = *VECTOR_GET(values, j, carbon_bool_t);                                  \
+                carbon_bool_t value = *CARBON_VECTOR_GET(values, j, carbon_bool_t);                                  \
                 fprintf(file, "%s%s", value == 0 ? "false" : "true", j + 1 < values->num_elems ? ", " : ""); \
             }                                                                                               \
             fprintf(file, "]%s ", i + 1 < (&value_vector)->num_elems ? "," : "");                             \
@@ -431,13 +431,13 @@ static void print_array_null(FILE *file, const char *type_name, const carbon_vec
     if(!carbon_vec_is_empty((key_vector))) {
         fprintf(file, "\"Keys\": [ ");
         for (size_t i = 0; i < (key_vector)->num_elems; i++) {
-            carbon_string_id_t string_id = *VECTOR_GET((key_vector), i, carbon_string_id_t);
+            carbon_string_id_t string_id = *CARBON_VECTOR_GET((key_vector), i, carbon_string_id_t);
             fprintf(file, "%"PRIu64"%s", string_id, i + 1 < (key_vector)->num_elems ? ", " : "");
         }
         fprintf(file, "], ");
         fprintf(file, "\"Keys Decoded\": [ ");
         for (size_t i = 0; i < (key_vector)->num_elems; i++) {
-            carbon_string_id_t string_id = *VECTOR_GET((key_vector), i, carbon_string_id_t);
+            carbon_string_id_t string_id = *CARBON_VECTOR_GET((key_vector), i, carbon_string_id_t);
             char **encString = carbon_strdic_extract(dic, &string_id, 1);
             fprintf(file, "\"%s\"%s", encString[0], i + 1 < (key_vector)->num_elems ? ", " : "");
             carbon_strdic_free(dic, encString);
@@ -445,7 +445,7 @@ static void print_array_null(FILE *file, const char *type_name, const carbon_vec
         fprintf(file, "],");
         fprintf(file, "\"Values\": [ ");
         for (size_t i = 0; i < (value_vector)->num_elems; i++) {
-            uint16_t amount = *VECTOR_GET(value_vector, i, uint16_t);
+            uint16_t amount = *CARBON_VECTOR_GET(value_vector, i, uint16_t);
             fprintf(file, "%d%s", amount, i + 1 < value_vector->num_elems ? ", " : "");
         }
         fprintf(file, "]");
@@ -460,13 +460,13 @@ static void print_array_strings(FILE *file, const char *type_name, const carbon_
     if(!carbon_vec_is_empty((key_vector))) {
         fprintf(file, "\"Keys\": [ ");
         for (size_t i = 0; i < (key_vector)->num_elems; i++) {
-            carbon_string_id_t string_id = *VECTOR_GET((key_vector), i, carbon_string_id_t);
+            carbon_string_id_t string_id = *CARBON_VECTOR_GET((key_vector), i, carbon_string_id_t);
             fprintf(file, "%"PRIu64"%s", string_id, i + 1 < (key_vector)->num_elems ? ", " : "");
         }
         fprintf(file, "], ");
         fprintf(file, "\"Keys Decoded\": [ ");
         for (size_t i = 0; i < (key_vector)->num_elems; i++) {
-            carbon_string_id_t string_id_t = *VECTOR_GET((key_vector), i, carbon_string_id_t);
+            carbon_string_id_t string_id_t = *CARBON_VECTOR_GET((key_vector), i, carbon_string_id_t);
             char **encString = carbon_strdic_extract(dic, &string_id_t, 1);
             fprintf(file, "\"%s\"%s", encString[0], i + 1 < (key_vector)->num_elems ? ", " : "");
             carbon_strdic_free(dic, encString);
@@ -474,10 +474,10 @@ static void print_array_strings(FILE *file, const char *type_name, const carbon_
         fprintf(file, "],");
         fprintf(file, "\"Values\": [ ");
         for (size_t i = 0; i < (value_vector)->num_elems; i++) {
-            const carbon_vec_t ofType(carbon_string_id_t) *values = VECTOR_GET(value_vector, i, carbon_vec_t);
+            const carbon_vec_t ofType(carbon_string_id_t) *values = CARBON_VECTOR_GET(value_vector, i, carbon_vec_t);
             fprintf(file, "[");
             for (size_t j = 0; j < values->num_elems; j++) {
-                carbon_string_id_t value = *VECTOR_GET(values, j, carbon_string_id_t);
+                carbon_string_id_t value = *CARBON_VECTOR_GET(values, j, carbon_string_id_t);
                 fprintf(file, "%"PRIu64"%s", value, j + 1 < values->num_elems ? ", " : "");
             }
             fprintf(file, "]%s", i + 1 < (value_vector)->num_elems ? ", " : "");
@@ -486,10 +486,10 @@ static void print_array_strings(FILE *file, const char *type_name, const carbon_
         fprintf(file, "], ");
         fprintf(file, "\"Values Decoded\": [ ");
         for (size_t i = 0; i < (value_vector)->num_elems; i++) {
-            const carbon_vec_t ofType(carbon_string_id_t) *values = VECTOR_GET(value_vector, i, carbon_vec_t);
+            const carbon_vec_t ofType(carbon_string_id_t) *values = CARBON_VECTOR_GET(value_vector, i, carbon_vec_t);
             fprintf(file, "[");
             for (size_t j = 0; j < values->num_elems; j++) {
-                carbon_string_id_t value = *VECTOR_GET(values, j, carbon_string_id_t);
+                carbon_string_id_t value = *CARBON_VECTOR_GET(values, j, carbon_string_id_t);
 
                 if (CARBON_BRANCH_LIKELY(value != CARBON_NULL_ENCODED_STRING)) {
                     char **decoded = carbon_strdic_extract(dic, &value, 1);
@@ -515,13 +515,13 @@ static void print_primitive_strings(FILE *file, const char *type_name, const car
     if(!carbon_vec_is_empty((key_vector))) {
         fprintf(file, "\"Values\": [ ");
         for (size_t i = 0; i < (value_vector)->num_elems; i++) {
-            carbon_string_id_t string_id_t = *VECTOR_GET(value_vector, i, carbon_string_id_t);
+            carbon_string_id_t string_id_t = *CARBON_VECTOR_GET(value_vector, i, carbon_string_id_t);
             fprintf(file, "%"PRIu64"%s", string_id_t, i + 1 < (value_vector)->num_elems ? ", " : "");
         }
         fprintf(file, "], ");
         fprintf(file, "\"Values Decoded\": [ ");
         for (size_t i = 0; i < (value_vector)->num_elems; i++) {
-            carbon_string_id_t string_id_t = *VECTOR_GET(value_vector, i, carbon_string_id_t);
+            carbon_string_id_t string_id_t = *CARBON_VECTOR_GET(value_vector, i, carbon_string_id_t);
             char **values = carbon_strdic_extract(dic, &string_id_t, 1);
             fprintf(file, "\"%s\"%s", *values, i + 1 < (value_vector)->num_elems ? ", " : "");
             carbon_strdic_free(dic, values);
@@ -534,10 +534,10 @@ static void print_primitive_strings(FILE *file, const char *type_name, const car
 
 #define PRINT_COLUMN(file, columnTable, array_idx, type, format_string)               \
 {                                                                                   \
-    const carbon_vec_t *column = VECTOR_GET(&columnTable->values, array_idx, carbon_vec_t);      \
+    const carbon_vec_t *column = CARBON_VECTOR_GET(&columnTable->values, array_idx, carbon_vec_t);      \
     fprintf(file, "%s", column->num_elems > 1 ? "[" : "");                           \
     for (size_t i = 0; i < column->num_elems; i++) {                                 \
-        fprintf(file, format_string, *VECTOR_GET(column, i, type));                  \
+        fprintf(file, format_string, *CARBON_VECTOR_GET(column, i, type));                  \
         fprintf(file, "%s", i + 1 < column->num_elems ? ", " : "");                  \
     }                                                                               \
     fprintf(file, "%s", column->num_elems > 1 ? "]" : "");                           \
@@ -549,12 +549,12 @@ static bool print_array_objects(FILE *file, carbon_err_t *err, const char *type_
     fprintf(file, "\"%s\": {", type_name);
     fprintf(file, "\"Keys\": [");
     for (size_t array_key_idx = 0; array_key_idx < key_columns->num_elems; array_key_idx++) {
-        const carbon_columndoc_columngroup_t *arrayKeyColumns = VECTOR_GET(key_columns, array_key_idx, carbon_columndoc_columngroup_t);
+        const carbon_columndoc_columngroup_t *arrayKeyColumns = CARBON_VECTOR_GET(key_columns, array_key_idx, carbon_columndoc_columngroup_t);
         fprintf(file, "%"PRIu64"%s", arrayKeyColumns->key, array_key_idx + 1 < key_columns->num_elems ? ", " : "");
     }
     fprintf(file, "], \"Keys Decoded\": [");
     for (size_t array_key_idx = 0; array_key_idx < key_columns->num_elems; array_key_idx++) {
-        const carbon_columndoc_columngroup_t *arrayKeyColumns = VECTOR_GET(key_columns, array_key_idx, carbon_columndoc_columngroup_t);
+        const carbon_columndoc_columngroup_t *arrayKeyColumns = CARBON_VECTOR_GET(key_columns, array_key_idx, carbon_columndoc_columngroup_t);
         carbon_string_id_t encKeyName = arrayKeyColumns->key;
         char **decKeyName = carbon_strdic_extract(dic, &encKeyName, 1);
         fprintf(file, "\"%s\"%s", *decKeyName, array_key_idx + 1 < key_columns->num_elems ? ", " : "");
@@ -564,10 +564,10 @@ static bool print_array_objects(FILE *file, carbon_err_t *err, const char *type_
     fprintf(file, "\"Tables\": [");
     for (size_t array_key_idx = 0; array_key_idx < key_columns->num_elems; array_key_idx++) {
         fprintf(file, "[");
-        const carbon_columndoc_columngroup_t *arrayKeyColumns = VECTOR_GET(key_columns, array_key_idx, carbon_columndoc_columngroup_t);
+        const carbon_columndoc_columngroup_t *arrayKeyColumns = CARBON_VECTOR_GET(key_columns, array_key_idx, carbon_columndoc_columngroup_t);
         for (size_t columnIdx = 0; columnIdx < arrayKeyColumns->columns.num_elems; columnIdx++) {
             fprintf(file, "{");
-            const carbon_columndoc_column_t *columnTable = VECTOR_GET(&arrayKeyColumns->columns, columnIdx, carbon_columndoc_column_t);
+            const carbon_columndoc_column_t *columnTable = CARBON_VECTOR_GET(&arrayKeyColumns->columns, columnIdx, carbon_columndoc_column_t);
             char **decColumnKeyName = carbon_strdic_extract(dic, &columnTable->key_name, 1);
 
             const char *column_type_name = get_type_name(err, columnTable->type);
@@ -589,7 +589,7 @@ static bool print_array_objects(FILE *file, carbon_err_t *err, const char *type_
             for (size_t array_idx = 0; array_idx < columnTable->values.num_elems; array_idx++) {
                 switch (columnTable->type) {
                 case carbon_field_type_null: {
-                    const carbon_vec_t *column = VECTOR_GET(&columnTable->values, array_idx, carbon_vec_t);
+                    const carbon_vec_t *column = CARBON_VECTOR_GET(&columnTable->values, array_idx, carbon_vec_t);
                     fprintf(file, "%s", column->num_elems > 1 ? "[" : "");
                     for (size_t i = 0; i < column->num_elems; i++) {
                         fprintf(file, "null");
@@ -625,10 +625,10 @@ static bool print_array_objects(FILE *file, carbon_err_t *err, const char *type_
                     PRINT_COLUMN(file, columnTable, array_idx, carbon_float_t , "%f")
                     break;
                 case carbon_field_type_string: {
-                    const carbon_vec_t *column = VECTOR_GET(&columnTable->values, array_idx, carbon_vec_t);
+                    const carbon_vec_t *column = CARBON_VECTOR_GET(&columnTable->values, array_idx, carbon_vec_t);
                     fprintf(file, "%s", column->num_elems > 1 ? "[" : "");
                     for (size_t i = 0; i < column->num_elems; i++) {
-                        carbon_string_id_t encodedString = *VECTOR_GET(column, i, carbon_string_id_t);
+                        carbon_string_id_t encodedString = *CARBON_VECTOR_GET(column, i, carbon_string_id_t);
                         char **decodedString = carbon_strdic_extract(dic, &encodedString, 1);
                         fprintf(file, "{\"Encoded\": %"PRIu64", \"Decoded\": \"%s\"}", encodedString, *decodedString);
                         fprintf(file, "%s", i + 1 < column->num_elems ? ", " : "");
@@ -637,12 +637,12 @@ static bool print_array_objects(FILE *file, carbon_err_t *err, const char *type_
                     fprintf(file, "%s", column->num_elems > 1 ? "]" : "");
                 } break;
                 case carbon_field_type_object: {
-                   // carbon_columndoc_obj_t *doc = VECTOR_GET(&column->values, valueIdx, carbon_columndoc_obj_t);
+                   // carbon_columndoc_obj_t *doc = CARBON_VECTOR_GET(&column->values, valueIdx, carbon_columndoc_obj_t);
                   //  print_object(file, doc, strdic);
-                    const carbon_vec_t *column = VECTOR_GET(&columnTable->values, array_idx, carbon_vec_t);
+                    const carbon_vec_t *column = CARBON_VECTOR_GET(&columnTable->values, array_idx, carbon_vec_t);
                     fprintf(file, "%s", column->num_elems > 1 ? "[" : "");
                     for (size_t i = 0; i < column->num_elems; i++) {
-                        const carbon_columndoc_obj_t *object = VECTOR_GET(column, i, carbon_columndoc_obj_t);
+                        const carbon_columndoc_obj_t *object = CARBON_VECTOR_GET(column, i, carbon_columndoc_obj_t);
                         if(!print_object(file, err, object, dic)) {
                             return false;
                         }
@@ -659,7 +659,7 @@ static bool print_array_objects(FILE *file, carbon_err_t *err, const char *type_
             fprintf(file, "],");
             fprintf(file, "\"Positions\": [");
             for (size_t positionIdx = 0; positionIdx < columnTable->array_positions.num_elems; positionIdx++) {
-                fprintf(file, "%d%s", *VECTOR_GET(&columnTable->array_positions, positionIdx, int16_t), (positionIdx + 1 < columnTable->array_positions.num_elems ? ", " : ""));
+                fprintf(file, "%d%s", *CARBON_VECTOR_GET(&columnTable->array_positions, positionIdx, int16_t), (positionIdx + 1 < columnTable->array_positions.num_elems ? ", " : ""));
             }
             fprintf(file, "]");
             carbon_strdic_free(dic, decColumnKeyName);
@@ -740,11 +740,11 @@ static void object_array_key_columns_create(carbon_vec_t ofType(carbon_columndoc
 static void object_array_key_columns_drop(carbon_vec_t ofType(carbon_columndoc_columngroup_t) *columns)
 {
     for (size_t i = 0; i < columns->num_elems; i++) {
-        carbon_columndoc_columngroup_t *array_columns = VECTOR_GET(columns, i, carbon_columndoc_columngroup_t);
+        carbon_columndoc_columngroup_t *array_columns = CARBON_VECTOR_GET(columns, i, carbon_columndoc_columngroup_t);
         for (size_t j = 0; j < array_columns->columns.num_elems; j++) {
 
 
-            carbon_columndoc_column_t *column = VECTOR_GET(&array_columns->columns, j, carbon_columndoc_column_t);
+            carbon_columndoc_column_t *column = CARBON_VECTOR_GET(&array_columns->columns, j, carbon_columndoc_column_t);
 
             carbon_vec_t ofType(uint32_t) *array_indices = &column->array_positions;
             carbon_vec_t ofType(carbon_vec_t ofType(<T>)) *values_for_indicies = &column->values;
@@ -753,10 +753,10 @@ static void object_array_key_columns_drop(carbon_vec_t ofType(carbon_columndoc_c
 
             for (size_t k = 0; k < array_indices->num_elems; k++) {
 
-                carbon_vec_t ofType(<T>) *values_for_index = VECTOR_GET(values_for_indicies, k, carbon_vec_t);
+                carbon_vec_t ofType(<T>) *values_for_index = CARBON_VECTOR_GET(values_for_indicies, k, carbon_vec_t);
                 if (column->type == carbon_field_type_object) {
                     for (size_t l = 0; l < values_for_index->num_elems; l++) {
-                        carbon_columndoc_obj_t *nested_object = VECTOR_GET(values_for_index, l, carbon_columndoc_obj_t);
+                        carbon_columndoc_obj_t *nested_object = CARBON_VECTOR_GET(values_for_index, l, carbon_columndoc_obj_t);
                         object_meta_model_free(nested_object);
                     }
                 }
@@ -802,11 +802,11 @@ static carbon_columndoc_column_t *object_array_key_columns_find_or_new(carbon_ve
 
     for (size_t i = 0; i < columns->num_elems; i++) {
         /** Find object array pair having the key `key` */
-        key_columns = VECTOR_GET(columns, i, carbon_columndoc_columngroup_t);
+        key_columns = CARBON_VECTOR_GET(columns, i, carbon_columndoc_columngroup_t);
         if (key_columns->key == array_key) {
             /** In case such a pair is found, find column that matches the desired type */
             for (size_t j = 0; j < key_columns->columns.num_elems; j++) {
-                key_column = VECTOR_GET(&key_columns->columns, j, carbon_columndoc_column_t);
+                key_column = CARBON_VECTOR_GET(&key_columns->columns, j, carbon_columndoc_column_t);
                 if (key_column->key_name == nested_object_entry_key && key_column->type == nested_object_entry_type) {
                     /** Column for the object array with the desired key, the nested object entry with the desired key
                      * and a matching type is found */
@@ -869,7 +869,7 @@ static bool object_array_key_column_push(carbon_columndoc_column_t *col, carbon_
         break;
     case carbon_field_type_string: {
         assert(!is_null_by_def);
-        char **strings = VECTOR_ALL(&entry->values, char *);
+        char **strings = CARBON_VECTOR_ALL(&entry->values, char *);
         carbon_string_id_t *string_ids;
         carbon_strdic_locate_fast(&string_ids, dic, (char *const *) strings, num_elements);
         carbon_vec_push(values_for_entry, string_ids, num_elements);
@@ -886,7 +886,7 @@ static bool object_array_key_column_push(carbon_columndoc_column_t *col, carbon_
         {
             carbon_columndoc_obj_t *nested_object = VECTOR_NEW_AND_GET(values_for_entry, carbon_columndoc_obj_t);
             setup_object(nested_object, model->parent, *array_key, array_idx);
-            if (!import_object(nested_object, err, VECTOR_GET(&entry->values, array_idx, carbon_doc_obj_t), dic)) {
+            if (!import_object(nested_object, err, CARBON_VECTOR_GET(&entry->values, array_idx, carbon_doc_obj_t), dic)) {
                 return false;
             }
         }
@@ -1045,9 +1045,9 @@ static bool object_put_primitive(carbon_columndoc_obj_t *columndoc, carbon_err_t
         size_t position = carbon_vec_length(&columndoc->obj_prop_keys);
         carbon_vec_push(&columndoc->obj_prop_keys, key_id, 1);
         carbon_vec_push(&columndoc->obj_prop_vals, &template, 1);
-        nested_object = VECTOR_GET(&columndoc->obj_prop_vals, position, carbon_columndoc_obj_t);
+        nested_object = CARBON_VECTOR_GET(&columndoc->obj_prop_vals, position, carbon_columndoc_obj_t);
         setup_object(nested_object, columndoc->parent, *key_id, 0);
-        if (!import_object(nested_object, err, VECTOR_GET(&entry->values, 0, carbon_doc_obj_t), dic)) {
+        if (!import_object(nested_object, err, CARBON_VECTOR_GET(&entry->values, 0, carbon_doc_obj_t), dic)) {
             return false;
         }
     } break;
@@ -1063,7 +1063,7 @@ static void object_push_array(carbon_vec_t ofType(Vector ofType(<T>)) *values, s
     carbon_vec_t ofType(<T>) template, *vector;
     size_t idx = carbon_vec_length(values);
     carbon_vec_push(values, &template, 1);
-    vector = VECTOR_GET(values, idx, carbon_vec_t);
+    vector = CARBON_VECTOR_GET(values, idx, carbon_vec_t);
     carbon_vec_create(vector, NULL, TSize, num_elements);
     carbon_vec_push(vector, data, num_elements);
     carbon_vec_push(key_vector, &key_id, 1);
@@ -1126,7 +1126,7 @@ static bool object_put_array(carbon_columndoc_obj_t *model, carbon_err_t *err, c
                         &model->float_array_prop_keys);
         break;
     case carbon_field_type_string: {
-        const char **strings = VECTOR_ALL(&entry->values, const char *);
+        const char **strings = CARBON_VECTOR_ALL(&entry->values, const char *);
         carbon_string_id_t *string_ids;
         carbon_strdic_locate_fast(&string_ids, dic, (char *const *) strings, num_elements);
         object_push_array(&model->string_array_prop_vals,
@@ -1141,9 +1141,9 @@ static bool object_put_array(carbon_columndoc_obj_t *model, carbon_err_t *err, c
     case carbon_field_type_object: {
         carbon_string_id_t *nested_object_key_name;
         for (uint32_t array_idx = 0; array_idx < num_elements; array_idx++) {
-            const carbon_doc_obj_t *object = VECTOR_GET(&entry->values, array_idx, carbon_doc_obj_t);
+            const carbon_doc_obj_t *object = CARBON_VECTOR_GET(&entry->values, array_idx, carbon_doc_obj_t);
             for (size_t pair_idx = 0; pair_idx < object->entries.num_elems; pair_idx++) {
-                const carbon_doc_entries_t *pair = VECTOR_GET(&object->entries, pair_idx, carbon_doc_entries_t);
+                const carbon_doc_entries_t *pair = CARBON_VECTOR_GET(&object->entries, pair_idx, carbon_doc_entries_t);
                 carbon_strdic_locate_fast(&nested_object_key_name, dic, (char *const *) &pair->key, 1);
                 carbon_columndoc_column_t *key_column = object_array_key_columns_find_or_new(&model->obj_array_props, *key_id,
                                                                                       *nested_object_key_name, pair->type);
@@ -1199,7 +1199,7 @@ static bool object_put(carbon_columndoc_obj_t *model, carbon_err_t *err, const c
 static bool import_object(carbon_columndoc_obj_t *dst, carbon_err_t *err, const carbon_doc_obj_t *doc, carbon_strdic_t *dic)
 {
     const carbon_vec_t ofType(carbon_doc_entries_t) *objectEntries = carbon_doc_get_entries(doc);
-    const carbon_doc_entries_t *entries = VECTOR_ALL(objectEntries, carbon_doc_entries_t);
+    const carbon_doc_entries_t *entries = CARBON_VECTOR_ALL(objectEntries, carbon_doc_entries_t);
     for (size_t i = 0; i < objectEntries->num_elems; i++) {
         const carbon_doc_entries_t *entry = entries + i;
         if (!object_put(dst, err, entry, dic)) {

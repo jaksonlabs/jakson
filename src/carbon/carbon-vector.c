@@ -204,7 +204,7 @@ bool VectorEnlargeSizeToCapacity(carbon_vec_t *vec)
     return true;
 }
 
-bool VectorSet(carbon_vec_t *vec, size_t pos, const void *data)
+bool carbon_vec_set(carbon_vec_t *vec, size_t pos, const void *data)
 {
     CARBON_NON_NULL_OR_ERROR(vec)
     assert(pos < vec->num_elems);
@@ -212,7 +212,7 @@ bool VectorSet(carbon_vec_t *vec, size_t pos, const void *data)
     return true;
 }
 
-bool VectorCpy(carbon_vec_t *dst, const carbon_vec_t *src)
+bool carbon_vec_cpy(carbon_vec_t *dst, const carbon_vec_t *src)
 {
     CARBON_CHECK_SUCCESS(carbon_vec_create(dst, NULL, src->elemSize, src->num_elems));
     dst->num_elems = src->num_elems;

@@ -270,11 +270,11 @@ static void *invoke_malloc(carbon_alloc_t *self, size_t size)
     //      global_trace_stats.num_malloc_calls, self);
     carbon_vec_push(global_trace_stats.malloc_sizes, &size, 1);
 
-    size_t min_alloc_size = carbon_sort_get_min(VECTOR_ALL(global_trace_stats.malloc_sizes, size_t),
+    size_t min_alloc_size = carbon_sort_get_min(CARBON_VECTOR_ALL(global_trace_stats.malloc_sizes, size_t),
                                                 carbon_vec_length(global_trace_stats.malloc_sizes));
-    size_t max_alloc_size = carbon_sort_get_max(VECTOR_ALL(global_trace_stats.malloc_sizes, size_t),
+    size_t max_alloc_size = carbon_sort_get_max(CARBON_VECTOR_ALL(global_trace_stats.malloc_sizes, size_t),
                                                 carbon_vec_length(global_trace_stats.malloc_sizes));
-    double avg_alloc_size = carbon_sort_get_avg(VECTOR_ALL(global_trace_stats.malloc_sizes, size_t),
+    double avg_alloc_size = carbon_sort_get_avg(CARBON_VECTOR_ALL(global_trace_stats.malloc_sizes, size_t),
                                                 carbon_vec_length(global_trace_stats.malloc_sizes));
     global_trace_stats.total_size += size;
 

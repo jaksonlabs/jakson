@@ -49,11 +49,11 @@ bool carbon_huffman_create(carbon_huffman_t **out, const StringRefVector *string
     carbon_vec_create(&frequencies, NULL, sizeof(uint32_t), UCHAR_MAX);
     VectorEnlargeSizeToCapacity(&frequencies);
 
-    uint32_t *freqData = VECTOR_ALL(&frequencies, uint32_t);
+    uint32_t *freqData = CARBON_VECTOR_ALL(&frequencies, uint32_t);
     CARBON_ZERO_MEMORY(freqData, UCHAR_MAX * sizeof(uint32_t));
 
     for (size_t i = 0; i < strings->num_elems; i++) {
-        const char *string = *VECTOR_GET(strings, i, const char *);
+        const char *string = *CARBON_VECTOR_GET(strings, i, const char *);
         size_t string_length = strlen(string);
         for (size_t k = 0; k < string_length; k++) {
             size_t c = (unsigned char) string[k];
@@ -86,7 +86,7 @@ bool carbon_huffman_drop(carbon_huffman_t *dic)
     CARBON_NON_NULL_OR_ERROR(dic);
 
     for (size_t i = 0; i < dic->encodingTable.num_elems; i++) {
-        carbon_huffman_entry_t *entry = VECTOR_GET(&dic->encodingTable, i, carbon_huffman_entry_t);
+        carbon_huffman_entry_t *entry = CARBON_VECTOR_GET(&dic->encodingTable, i, carbon_huffman_entry_t);
         free(entry->blocks);
     }
 
@@ -103,7 +103,7 @@ bool carbon_huffman_serialize_dic(carbon_memfile_t *file, const carbon_huffman_t
     CARBON_NON_NULL_OR_ERROR(dic)
 
     for (size_t i = 0; i < dic->encodingTable.num_elems; i++) {
-        carbon_huffman_entry_t *entry = VECTOR_GET(&dic->encodingTable, i, carbon_huffman_entry_t);
+        carbon_huffman_entry_t *entry = CARBON_VECTOR_GET(&dic->encodingTable, i, carbon_huffman_entry_t);
         carbon_memfile_write(file, &markerSymbol, sizeof(char));
         carbon_memfile_write(file, &entry->letter, sizeof(unsigned char));
 
@@ -141,7 +141,7 @@ bool carbon_huffman_serialize_dic(carbon_memfile_t *file, const carbon_huffman_t
 static carbon_huffman_entry_t *findDicEntry(carbon_huffman_t *dic, unsigned char c)
 {
     for (size_t i = 0; i < dic->encodingTable.num_elems; i++) {
-        carbon_huffman_entry_t *entry = VECTOR_GET(&dic->encodingTable, i, carbon_huffman_entry_t);
+        carbon_huffman_entry_t *entry = CARBON_VECTOR_GET(&dic->encodingTable, i, carbon_huffman_entry_t);
         if (entry->letter == c) {
             return entry;
         }
@@ -199,8 +199,8 @@ bool carbon_huffman_encode(carbon_memfile_t *file,
     assert(string_ids->num_elems == strings->num_elems);
 
     for (size_t i = 0; i < strings->num_elems; i++) {
-        const char *string = *VECTOR_GET(strings, i, const char *);
-        carbon_string_id_t string_id = *VECTOR_GET(string_ids, i, carbon_string_id_t);
+        const char *string = *CARBON_VECTOR_GET(strings, i, const char *);
+        carbon_string_id_t string_id = *CARBON_VECTOR_GET(string_ids, i, carbon_string_id_t);
         carbon_off_t offset, offsetContinue;
         uint32_t string_length = (uint32_t) strlen(string);
         uint32_t numBytesEncoded = 0;
@@ -365,7 +365,7 @@ static void assignCode(struct HuffNode *node, const carbon_bitmap_t *path, carbo
 static struct HuffNode *trimAndBegin(carbon_vec_t ofType(HuffNode) *candidates)
 {
     struct HuffNode *begin = NULL;
-    for (struct HuffNode *it = VECTOR_GET(candidates, 0, struct HuffNode); ; it++) {
+    for (struct HuffNode *it = CARBON_VECTOR_GET(candidates, 0, struct HuffNode); ; it++) {
         if (it->freq == 0) {
             if (it->prev) {
                 it->prev->next = it->next;
@@ -398,13 +398,13 @@ static void createHuffmanTree(carbon_vec_t ofType(carbon_huffman_entry_t) *encod
     for (unsigned char i = 0; i < UCHAR_MAX; i++) {
         struct HuffNode *node = VECTOR_NEW_AND_GET(&candidates, struct HuffNode);
         node->letter = i;
-        node->freq = *VECTOR_GET(frequencies, i, uint32_t);
+        node->freq = *CARBON_VECTOR_GET(frequencies, i, uint32_t);
     }
 
     for (unsigned char i = 0; i < UCHAR_MAX; i++) {
-        struct HuffNode *node = VECTOR_GET(&candidates, i, struct HuffNode);
-        struct HuffNode *prev = i > 0 ? VECTOR_GET(&candidates, i - 1, struct HuffNode) : NULL;
-        struct HuffNode *next = i + 1 < UCHAR_MAX ? VECTOR_GET(&candidates, i + 1, struct HuffNode) : NULL;
+        struct HuffNode *node = CARBON_VECTOR_GET(&candidates, i, struct HuffNode);
+        struct HuffNode *prev = i > 0 ? CARBON_VECTOR_GET(&candidates, i - 1, struct HuffNode) : NULL;
+        struct HuffNode *next = i + 1 < UCHAR_MAX ? CARBON_VECTOR_GET(&candidates, i + 1, struct HuffNode) : NULL;
         node->next = next;
         node->prev = prev;
         node->left = node->right = NULL;

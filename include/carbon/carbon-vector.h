@@ -108,7 +108,7 @@ typedef carbon_vec_t ofType(const char *) StringRefVector;
 #define STRING_VECTOR_DROP(vec)                                                                                        \
 ({                                                                                                                     \
     for (size_t i = 0; i < vec->num_elems; i++) {                                                                       \
-        char *s = *VECTOR_GET(vec, i, char *);                                                                         \
+        char *s = *CARBON_VECTOR_GET(vec, i, char *);                                                                         \
         free (s);                                                                                                      \
     }                                                                                                                  \
     carbon_vec_drop(vec);                                                                                                   \
@@ -261,14 +261,14 @@ carbon_vec_grow(size_t *numNewSlots, carbon_vec_t *vec);
 CARBON_EXPORT(size_t)
 carbon_vec_length(const carbon_vec_t *vec);
 
-#define VECTOR_GET(vec, pos, type) (type *) VectorAt(vec, pos)
+#define CARBON_VECTOR_GET(vec, pos, type) (type *) VectorAt(vec, pos)
 
 #define VECTOR_NEW_AND_GET(vec, type)                                                                                  \
 ({                                                                                                                     \
     type template;                                                                                                     \
     size_t vectorLength = carbon_vec_length(vec);                                                                           \
     carbon_vec_push(vec, &template, 1);                                                                                     \
-    VECTOR_GET(vec, vectorLength, type);                                                                               \
+    CARBON_VECTOR_GET(vec, vectorLength, type);                                                                               \
 })
 
 CARBON_EXPORT(const void *)
@@ -290,10 +290,10 @@ CARBON_EXPORT(bool)
 VectorEnlargeSizeToCapacity(carbon_vec_t *vec);
 
 CARBON_EXPORT(bool)
-VectorSet(carbon_vec_t *vec, size_t pos, const void *data);
+carbon_vec_set(carbon_vec_t *vec, size_t pos, const void *data);
 
 CARBON_EXPORT(bool)
-VectorCpy(carbon_vec_t *dst, const carbon_vec_t *src);
+carbon_vec_cpy(carbon_vec_t *dst, const carbon_vec_t *src);
 
 /**
  * Gives raw data access to data stored in the vector; do not manipulate this data since otherwise the vector
@@ -309,7 +309,7 @@ CARBON_EXPORT(char *)
 VectorToString(const carbon_vec_t ofType(T) *vec,
         void (*printerFunc)(carbon_memfile_t *dst, void ofType(T) *values, size_t num_elems));
 
-#define VECTOR_ALL(vec, type) (type *) carbon_vec_data(vec)
+#define CARBON_VECTOR_ALL(vec, type) (type *) carbon_vec_data(vec)
 
 CARBON_END_DECL
 

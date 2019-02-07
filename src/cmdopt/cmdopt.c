@@ -38,9 +38,9 @@ bool carbon_cmdopt_mgr_drop(carbon_cmdopt_mgr_t *manager)
 {
     CARBON_NON_NULL_OR_ERROR(manager);
     for (size_t i = 0; i < manager->groups.num_elems; i++) {
-        carbon_cmdopt_group_t *cmdGroup = VECTOR_GET(&manager->groups, i, carbon_cmdopt_group_t);
+        carbon_cmdopt_group_t *cmdGroup = CARBON_VECTOR_GET(&manager->groups, i, carbon_cmdopt_group_t);
         for (size_t j = 0; j < cmdGroup->cmd_options.num_elems; j++) {
-            carbon_cmdopt_t *option = VECTOR_GET(&cmdGroup->cmd_options, j, carbon_cmdopt_t);
+            carbon_cmdopt_t *option = CARBON_VECTOR_GET(&cmdGroup->cmd_options, j, carbon_cmdopt_t);
             free(option->opt_name);
             free(option->opt_desc);
             free(option->opt_manfile);
@@ -130,10 +130,10 @@ bool carbon_cmdopt_mgr_show_help(FILE *file, carbon_cmdopt_mgr_t *manager)
         }
         fprintf(file, "These are common commands used in various situations:\n\n");
         for (size_t i = 0; i < manager->groups.num_elems; i++) {
-            carbon_cmdopt_group_t *cmdGroup = VECTOR_GET(&manager->groups, i, carbon_cmdopt_group_t);
+            carbon_cmdopt_group_t *cmdGroup = CARBON_VECTOR_GET(&manager->groups, i, carbon_cmdopt_group_t);
             fprintf(file, "%s\n", cmdGroup->desc);
             for (size_t j = 0; j < cmdGroup->cmd_options.num_elems; j++) {
-                carbon_cmdopt_t *option = VECTOR_GET(&cmdGroup->cmd_options, j, carbon_cmdopt_t);
+                carbon_cmdopt_t *option = CARBON_VECTOR_GET(&cmdGroup->cmd_options, j, carbon_cmdopt_t);
                 fprintf(file, "   %-15s%s\n", option->opt_name, option->opt_desc);
             }
             fprintf(file, "\n");
@@ -155,9 +155,9 @@ bool carbon_cmdopt_mgr_show_help(FILE *file, carbon_cmdopt_mgr_t *manager)
 static carbon_cmdopt_t *findOptionByName(carbon_cmdopt_mgr_t *manager, const char *name)
 {
     for (size_t i = 0; i < manager->groups.num_elems; i++) {
-        carbon_cmdopt_group_t *cmdGroup = VECTOR_GET(&manager->groups, i, carbon_cmdopt_group_t);
+        carbon_cmdopt_group_t *cmdGroup = CARBON_VECTOR_GET(&manager->groups, i, carbon_cmdopt_group_t);
         for (size_t j = 0; j < cmdGroup->cmd_options.num_elems; j++) {
-            carbon_cmdopt_t *option = VECTOR_GET(&cmdGroup->cmd_options, j, carbon_cmdopt_t);
+            carbon_cmdopt_t *option = CARBON_VECTOR_GET(&cmdGroup->cmd_options, j, carbon_cmdopt_t);
             if (strcmp(option->opt_name, name) == 0) {
                 return option;
             }

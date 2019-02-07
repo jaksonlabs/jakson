@@ -94,7 +94,7 @@ SliceListDrop(carbon_slice_list_t *list)
     carbon_vec_drop(&list->descriptors);
     carbon_vec_drop(&list->bounds);
     for (size_t i = 0; i < list->filters.num_elems; i++) {
-        carbon_bloom_t *filter = VECTOR_GET(&list->filters, i, carbon_bloom_t);
+        carbon_bloom_t *filter = CARBON_VECTOR_GET(&list->filters, i, carbon_bloom_t);
         carbon_bloom_drop(filter);
     }
     carbon_vec_drop(&list->filters);
@@ -131,9 +131,9 @@ carbon_slice_list_insert(carbon_slice_list_t *list, char **strings, carbon_strin
         }
         else {
             /** pair is not found; append it */
-            HashBounds *restrict bounds = VECTOR_ALL(&list->bounds, HashBounds);
-            carbon_bloom_t *restrict filters = VECTOR_ALL(&list->filters, carbon_bloom_t);
-            Slice *restrict slices = VECTOR_ALL(&list->slices, Slice);
+            HashBounds *restrict bounds = CARBON_VECTOR_ALL(&list->bounds, HashBounds);
+            carbon_bloom_t *restrict filters = CARBON_VECTOR_ALL(&list->filters, carbon_bloom_t);
+            Slice *restrict slices = CARBON_VECTOR_ALL(&list->slices, Slice);
 
             if (list->appenderIdx != 0) { ; // TODO: remove
             }
@@ -178,10 +178,10 @@ carbon_slice_list_lookup(slice_handle_t *handle, carbon_slice_list_t *list, cons
     uint32_t numSlices = carbon_vec_length(&list->slices);
 
     /** check whether the keys-values pair is already contained in one slice */
-    HashBounds *restrict bounds = VECTOR_ALL(&list->bounds, HashBounds);
-    carbon_bloom_t *restrict filters = VECTOR_ALL(&list->filters, carbon_bloom_t);
-    Slice *restrict slices = VECTOR_ALL(&list->slices, Slice);
-    SliceDescriptor *restrict descs = VECTOR_ALL(&list->descriptors, SliceDescriptor);
+    HashBounds *restrict bounds = CARBON_VECTOR_ALL(&list->bounds, HashBounds);
+    carbon_bloom_t *restrict filters = CARBON_VECTOR_ALL(&list->filters, carbon_bloom_t);
+    Slice *restrict slices = CARBON_VECTOR_ALL(&list->slices, Slice);
+    SliceDescriptor *restrict descs = CARBON_VECTOR_ALL(&list->descriptors, SliceDescriptor);
 
     for (register uint32_t i = 0; i < numSlices; i++) {
         SliceDescriptor *restrict desc = descs + i;

@@ -37,7 +37,7 @@ CARBON_EXPORT(bool)
 carbon_bitmap_cpy(carbon_bitmap_t *dst, const carbon_bitmap_t *src)
 {
     dst->num_bits = src->num_bits;
-    return VectorCpy(&dst->data, &src->data);
+    return carbon_vec_cpy(&dst->data, &src->data);
 }
 
 CARBON_EXPORT(bool)
@@ -67,7 +67,7 @@ carbon_bitmap_set(carbon_bitmap_t *bitset, uint16_t bit_position, bool on)
     CARBON_NON_NULL_OR_ERROR(bitset)
     size_t block_pos = floor(bit_position / (double) CARBON_NUM_BITS(uint32_t));
     size_t block_bit = bit_position % CARBON_NUM_BITS(uint32_t);
-    uint32_t block = *VECTOR_GET(&bitset->data, block_pos, uint32_t);
+    uint32_t block = *CARBON_VECTOR_GET(&bitset->data, block_pos, uint32_t);
     uint32_t mask = CARBON_SET_BIT(block_bit);
     if (on) {
         CARBON_FIELD_SET(block, mask);
@@ -75,7 +75,7 @@ carbon_bitmap_set(carbon_bitmap_t *bitset, uint16_t bit_position, bool on)
     else {
         CARBON_FIELD_CLEAR(block, mask);
     }
-    VectorSet(&bitset->data, block_pos, &block);
+    carbon_vec_set(&bitset->data, block_pos, &block);
     return true;
 }
 
@@ -84,7 +84,7 @@ bool carbon_bitmap_get(carbon_bitmap_t *bitset, uint16_t bit_position)
     CARBON_NON_NULL_OR_ERROR(bitset)
     size_t block_pos = floor(bit_position / (double) CARBON_NUM_BITS(uint32_t));
     size_t block_bit = bit_position % CARBON_NUM_BITS(uint32_t);
-    uint32_t block = *VECTOR_GET(&bitset->data, block_pos, uint32_t);
+    uint32_t block = *CARBON_VECTOR_GET(&bitset->data, block_pos, uint32_t);
     uint32_t mask = CARBON_SET_BIT(block_bit);
     return ((mask & block) >> bit_position) == true;
 }
@@ -128,7 +128,7 @@ bool carbon_bitmap_blocks(uint32_t **blocks, uint32_t *num_blocks, const carbon_
     uint32_t *result = malloc(carbon_bitmap_t->data.num_elems * sizeof(uint32_t));
     int32_t k = 0;
     for (int32_t i = carbon_bitmap_t->data.num_elems - 1; i >= 0; i--) {
-        result[k++] = *VECTOR_GET(&carbon_bitmap_t->data, i, uint32_t);
+        result[k++] = *CARBON_VECTOR_GET(&carbon_bitmap_t->data, i, uint32_t);
     }
     *blocks = result;
     *num_blocks = carbon_bitmap_t->data.num_elems;
@@ -151,7 +151,7 @@ bool carbon_bitmap_print(FILE *file, const carbon_bitmap_t *carbon_bitmap_t)
     free(blocks);
 
     for (int32_t i = carbon_bitmap_t->data.num_elems - 1; i >= 0; i--) {
-        uint32_t block = *VECTOR_GET(&carbon_bitmap_t->data, i, uint32_t);
+        uint32_t block = *CARBON_VECTOR_GET(&carbon_bitmap_t->data, i, uint32_t);
         carbon_bitmap_print_bits(stdout, block);
         fprintf(file, " |");
     }

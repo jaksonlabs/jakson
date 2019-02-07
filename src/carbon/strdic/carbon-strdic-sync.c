@@ -473,7 +473,7 @@ static bool this_get_contents(carbon_strdic_t *self, carbon_vec_t ofType (char *
     struct sync_extra *extra = this_extra(self);
 
     for (carbon_string_id_t i = 0; i < extra->contents.num_elems; i++) {
-        const struct entry *e = VECTOR_GET(&extra->contents, i, struct entry);
+        const struct entry *e = CARBON_VECTOR_GET(&extra->contents, i, struct entry);
         if (e->in_use) {
             carbon_vec_push(strings, &e->str, 1);
             carbon_vec_push(string_ids, &i, 1);

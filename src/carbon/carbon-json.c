@@ -286,7 +286,7 @@ bool testConditionValue(carbon_err_t *err, carbon_json_ast_node_value_t *value)
     switch (value->value_type) {
     case CARBON_JSON_AST_NODE_VALUE_TYPE_OBJECT:
         for (size_t i = 0; i < value->value.object->value->members.num_elems; i++) {
-            carbon_json_ast_node_member_t *member = VECTOR_GET(&value->value.object->value->members, i, carbon_json_ast_node_member_t);
+            carbon_json_ast_node_member_t *member = CARBON_VECTOR_GET(&value->value.object->value->members, i, carbon_json_ast_node_member_t);
             if (!testConditionValue(err, &member->value.value)) {
                 return false;
             }
@@ -297,7 +297,7 @@ bool testConditionValue(carbon_err_t *err, carbon_json_ast_node_value_t *value)
         carbon_json_ast_node_value_type_e value_type = CARBON_JSON_AST_NODE_VALUE_TYPE_NULL;
 
         for (size_t i = 0; i < elements->elements.num_elems; i++) {
-            carbon_json_ast_node_element_t *element = VECTOR_GET(&elements->elements, i, carbon_json_ast_node_element_t);
+            carbon_json_ast_node_element_t *element = CARBON_VECTOR_GET(&elements->elements, i, carbon_json_ast_node_element_t);
             value_type = ((i == 0 || value_type == CARBON_JSON_AST_NODE_VALUE_TYPE_NULL) ? element->value.value_type : value_type);
 
             /** Test "All elements in array of same type" condition */
@@ -318,7 +318,7 @@ bool testConditionValue(carbon_err_t *err, carbon_json_ast_node_value_t *value)
             case CARBON_JSON_AST_NODE_VALUE_TYPE_OBJECT: {
                 carbon_json_ast_node_object_t *object = element->value.value.object;
                 for (size_t i = 0; i < object->value->members.num_elems; i++) {
-                    carbon_json_ast_node_member_t *member = VECTOR_GET(&object->value->members, i, carbon_json_ast_node_member_t);
+                    carbon_json_ast_node_member_t *member = CARBON_VECTOR_GET(&object->value->members, i, carbon_json_ast_node_member_t);
                     if (!testConditionValue(err, &member->value.value)) {
                         return false;
                     }
@@ -579,7 +579,7 @@ static void connectChildAndParentsObject(carbon_json_ast_node_object_t *object)
 {
     object->value->parent = object;
     for (size_t i = 0; i < object->value->members.num_elems; i++) {
-        carbon_json_ast_node_member_t *member = VECTOR_GET(&object->value->members, i, carbon_json_ast_node_member_t);
+        carbon_json_ast_node_member_t *member = CARBON_VECTOR_GET(&object->value->members, i, carbon_json_ast_node_member_t);
         member->parent = object->value;
 
         member->key.parent = member;
@@ -595,7 +595,7 @@ static void connectChildAndParentsArray(carbon_json_ast_node_array_t *array)
 {
     array->elements.parent = array;
     for (size_t i = 0; i < array->elements.elements.num_elems; i++) {
-        carbon_json_ast_node_element_t *element = VECTOR_GET(&array->elements.elements, i, carbon_json_ast_node_element_t);
+        carbon_json_ast_node_element_t *element = CARBON_VECTOR_GET(&array->elements.elements, i, carbon_json_ast_node_element_t);
         element->parent_type = CARBON_JSON_AST_NODE_ELEMENT_PARENT_TYPE_ELEMENTS;
         element->parent.elements = &array->elements;
         connectChildAndParentsElement(element);
@@ -784,7 +784,7 @@ static bool jsonAstNodeObjectPrint(FILE *file, carbon_err_t *err, carbon_json_as
 {
     fprintf(file, "{");
     for (size_t i = 0; i < object->value->members.num_elems; i++) {
-        carbon_json_ast_node_member_t *member = VECTOR_GET(&object->value->members, i, carbon_json_ast_node_member_t);
+        carbon_json_ast_node_member_t *member = CARBON_VECTOR_GET(&object->value->members, i, carbon_json_ast_node_member_t);
         if (!jsonAstNodeMemberPrint(file, err, member)) {
             return false;
         }
@@ -798,7 +798,7 @@ static bool jsonAstNodeArrayPrint(FILE *file, carbon_err_t *err, carbon_json_ast
 {
     fprintf(file, "[");
     for (size_t i = 0; i < array->elements.elements.num_elems; i++) {
-        carbon_json_ast_node_element_t *element = VECTOR_GET(&array->elements.elements, i, carbon_json_ast_node_element_t);
+        carbon_json_ast_node_element_t *element = CARBON_VECTOR_GET(&array->elements.elements, i, carbon_json_ast_node_element_t);
         if (!jsonAstNodeElementPrint(file, err, element)) {
             return false;
         }
@@ -890,7 +890,7 @@ static bool jsonAstNodeMemberDrop(carbon_json_ast_node_member_t *member, carbon_
 static bool jsonAstNodeMembersDrop(carbon_json_ast_node_members_t *members, carbon_err_t *err)
 {
     for (size_t i = 0; i < members->members.num_elems; i++) {
-        carbon_json_ast_node_member_t *member = VECTOR_GET(&members->members, i, carbon_json_ast_node_member_t);
+        carbon_json_ast_node_member_t *member = CARBON_VECTOR_GET(&members->members, i, carbon_json_ast_node_member_t);
         if (!jsonAstNodeMemberDrop(member, err)) {
             return false;
         }
@@ -902,7 +902,7 @@ static bool jsonAstNodeMembersDrop(carbon_json_ast_node_members_t *members, carb
 static bool jsonAstNodeElementsDrop(carbon_json_ast_node_elements_t *elements, carbon_err_t *err)
 {
     for (size_t i = 0; i < elements->elements.num_elems; i++) {
-        carbon_json_ast_node_element_t *element = VECTOR_GET(&elements->elements, i, carbon_json_ast_node_element_t);
+        carbon_json_ast_node_element_t *element = CARBON_VECTOR_GET(&elements->elements, i, carbon_json_ast_node_element_t);
         if (!jsonAstNodeElementDrop(element, err)) {
             return false;
         }
