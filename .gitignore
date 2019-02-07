@@ -12,6 +12,9 @@ sbin
 dump
 cmake-build-debug
 statistics.csv
+.RData
+*.pdf
+*.csv
 
 *#*
 

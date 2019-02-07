@@ -23,38 +23,84 @@ typedef struct {
   float total_duration;
 } stats;
 
+bool test_resize() {
+  StringDictionary dic;
 
-void experiments_hashing() {
-  slog_info(0, "chunk_num;sample;num_buckets;time_created_sec;time_inserted_"
-               "sec;time_bulk_sum_created_inserted;num_strings_chunk;num_"
-               "strings_total;num_distinct_strings");
+  size_t num_buckets = 50000;
+  size_t num_threads = 4;
 
-  slog_info(0, "Reading in environment");
+  StringDictionaryCreateAsync(&dic, 3720000, num_buckets, 3720000,
+                              num_threads, NULL);
 
-  FILE *statistics_file = fopen("statistics.csv", "w");
+  num_threads = 8;
+  slog_info(0, "Resizing to %zu", num_threads);
+  StringDictionaryResize(&dic, 3720000, num_buckets, 3720000, num_threads);
+
+  num_threads = 2;
+  slog_info(0, "Resizing to %zu", num_threads);
+  StringDictionaryResize(&dic, 3720000, num_buckets, 3720000, num_threads);
+  StringDictionaryDrop(&dic);
+
+  return true;
+}
+
+//void unit_test() {
+//   fprintf(stderr, "locate..\n");
+//
+//   string_dic_locate_fast(&ids_out, &dic, strings,
+//   num_strings); for (size_t i = 0; i<num_strings; i++)
+//   {
+//       StringId id_created = ids[i];
+//       StringId id_located = ids_out[i];
+//       debug("check", "[%s] -> %zu", strings[i],
+//       id_located);
+//       PANIC_IF_WARGS(id_created!=id_located,
+//               "mapping broken for string [%s] id
+//               '%zu': expected %zu, is %zu",
+//               strings[i], i, id_created, id_located);
+//       assert(id_created==id_located);
+//   }
+//
+//   fprintf(stderr, "extract..\n");
+//
+//   char** extracted_strings = string_dic_extract(&dic,
+//   ids, num_strings); for (size_t i = 0; i<num_strings;
+//   i++) {
+//       char* extracted = extracted_strings[i];
+//       char* given = strings[i];
+//       PANIC_IF(strcmp(extracted, given)!=0,
+//       "extraction broken"); assert(strcmp(extracted,
+//       given)==0);
+//       debug("extracted id=%zu -> string[%s]\n", ids[i], extracted);
+//   }
+//
+//   fprintf(stderr, "remove..\n");
+//
+//   string_dic_remove(&dic, ids, num_strings);
+//
+//   struct string_lookup_counters counters;
+//   string_dic_counters(&counters, &dic);
+//}
+
+void benchmark(const size_t limit, const char* path, const size_t samples, const char* method, size_t (*eval) (context sys_cont, float performance)) {
+
+  (void) limit;
+  char* postfix = "_statistics.csv";
+  char* file_name = malloc(strlen(method)+strlen(postfix));
+  strcpy(file_name, method);
+  strcat(file_name, postfix);
+  FILE *statistics_file = fopen(file_name, "w");
+  free(file_name);
   //FILE *thread_file = fopen("threads.csv", "w");
   stats statistics = {0.0, 0.0, 0.0};
   context system_context = {0, 0, 0, 0};
+  float performance;
 
   fprintf(statistics_file, "%s, %s, %s, %s, %s\n", "thread_num", "created_duration",
           "insert_duration", "total_time", "chunk_size");
 
-  const char *path = getenv("NG5_SET");
-  if (path == NULL) {
-    slog_panic(0, "No dataset defined; Define NG5_SET");
-    exit(1);
-  }
-
-  const char *samples_string = getenv("NG5_SAMPLES");
-  if (samples_string == NULL) {
-    slog_panic(0, "No sample number defined; Define NG5_SAMPLES");
-  }
-  const size_t samples = (size_t)atoi(samples_string);
-
   system_info(path, &system_context, BATCH_SIZE);
 
-  DescentInit();
-  DescentCalculate(system_context);
   StringDictionary dic;
     for (size_t num_buckets = 50000; num_buckets <= 50000;
          num_buckets += 50000) {
@@ -64,13 +110,6 @@ void experiments_hashing() {
 
         ChunkReader reader;
 
-        /**
-         * Here occurs undefined behaviour on different systems. Problem is,
-         * that on Linux the compiler treats the result of the calculation as
-         *int before casting it to size_t in the function call, but the result
-         *is too big for int. Therefore, an explicit size_t cast is required to
-         *build without werror
-         **/
         ChunkReaderCreate(&reader, NULL, path, BATCH_SIZE);
 
         float created_duration = 0;
@@ -88,7 +127,7 @@ void experiments_hashing() {
         Timestamp next_begin = TimeCurrentSystemTime();
         Vector ofType(char *) * vector;
 
-        size_t chunk_num = 0;
+        //size_t chunk_num = 0;
         size_t total_num = 0;
 
         size_t iteration = 0;
@@ -107,7 +146,7 @@ void experiments_hashing() {
 
           slog_info(0, "insert..");
 
-          size_t newThreads = DescentCalculate(system_context);
+          size_t newThreads = eval(system_context, performance);
           slog_info(0, "Iteration: %zu", ++iteration)
           slog_info(0, "Resizing Threads to %zu", newThreads);
           StringDictionaryResize(&dic, newThreads, num_buckets, 3720000,
@@ -120,54 +159,13 @@ void experiments_hashing() {
           Timestamp inserted_end = TimeCurrentSystemTime();
           insert_duration = (inserted_end - inserted_begin) / 1000.0f;
 
-          DescentTrain(system_context, insert_duration);
-
-          //                fprintf(stderr, "locate..\n");
-          //
-          //                string_dic_locate_fast(&ids_out, &dic, strings,
-          //                num_strings); for (size_t i = 0; i<num_strings; i++)
-          //                {
-          //                    StringId id_created = ids[i];
-          //                    StringId id_located = ids_out[i];
-          //                    //debug("check", "[%s] -> %zu", strings[i],
-          //                    id_located);
-          //                    PANIC_IF_WARGS(id_created!=id_located,
-          //                            "mapping broken for string [%s] id
-          //                            '%zu': expected %zu, is %zu",
-          //                            strings[i], i, id_created, id_located);
-          //                    assert(id_created==id_located);
-          //                }
-          //
-          //                fprintf(stderr, "extract..\n");
-          //
-          //                char** extracted_strings = string_dic_extract(&dic,
-          //                ids, num_strings); for (size_t i = 0; i<num_strings;
-          //                i++) {
-          //                    char* extracted = extracted_strings[i];
-          //                    char* given = strings[i];
-          //                    PANIC_IF(strcmp(extracted, given)!=0,
-          //                    "extraction broken"); assert(strcmp(extracted,
-          //                    given)==0);
-          //                    //     debug("extracted id=%zu -> string
-          //                    [%s]\n", ids[i], extracted);
-          //                }
-          //
-          //                fprintf(stderr, "remove..\n");
-
-          //  string_dic_remove(&dic, ids, num_strings);
-
-          // struct string_lookup_counters counters;
-          // string_dic_counters(&counters, &dic);
+          performance = insert_duration;
 
           size_t num_distinct;
           StringDictionaryNumDistinct(&num_distinct, &dic);
 
           total_num += VectorLength(vector);
 
-          slog_info(0, "%zu;%d;%zu;%f;%f;%f;%zu;%zu;%zu", chunk_num++, sample,
-                    num_buckets, created_duration, insert_duration,
-                    (created_duration + insert_duration), VectorLength(vector),
-                    total_num, num_distinct);
           statistics = (stats){statistics.created_duration + created_duration,
                                statistics.insert_duration + insert_duration,
                                statistics.total_duration + created_duration +
@@ -199,38 +197,58 @@ void experiments_hashing() {
       statistics.total_duration = 0;
     }
   fclose(statistics_file);
-  exit(0);
 }
 
-bool test_resize() {
-  StringDictionary dic;
+char init_check = 0;
 
-  size_t num_buckets = 50000;
-  size_t num_threads = 4;
+size_t descent_eval(context sys_cont, float performance) {
+  if (init_check == 0) {
+    DescentInit();
+    init_check = 1;
+  }
 
-  StringDictionaryCreateAsync(&dic, 3720000, num_buckets, 3720000,
-                              num_threads, NULL);
+  DescentTrain(sys_cont, performance);
+  return DescentCalculate(sys_cont);
+}
 
-  num_threads = 8;
-  slog_info(0, "Resizing to %zu", num_threads);
-  StringDictionaryResize(&dic, 3720000, num_buckets, 3720000, num_threads);
-
-  num_threads = 2;
-  slog_info(0, "Resizing to %zu", num_threads);
-  StringDictionaryResize(&dic, 3720000, num_buckets, 3720000, num_threads);
-  StringDictionaryDrop(&dic);
-
-  return true;
+size_t static_eval(context sys_cont, float performance) {
+  (void) performance;
+  return sys_cont.processor_number;
 }
 
 int main() {
   slog_init("logfile", NULL, 1, 0);
 
+  slog_info(0, "Testing Basic Functionalities");
+
   if (!test_resize()){
+    slog_panic(0, "Testing failed");
     return 1;
   }
 
-  experiments_hashing();
+  slog_info(0, "Reading in environment");
+  const char *limit_string = getenv("NG5_LIMIT");
+  if (limit_string == NULL) {
+    slog_panic(0, "No sample number defined; Define NG5_LIMIT");
+  }
+  const size_t limit = (size_t)atoi(limit_string);
+
+  const char *path = getenv("NG5_SET");
+  if (path == NULL) {
+    slog_panic(0, "No dataset defined; Define NG5_SET");
+    exit(1);
+  }
+
+  const char *samples_string = getenv("NG5_SAMPLES");
+  if (samples_string == NULL) {
+    slog_panic(0, "No sample number defined; Define NG5_SAMPLES");
+  }
+  const size_t samples = (size_t)atoi(samples_string);
+
+
+  benchmark(limit, path, samples, "descent", descent_eval);
+
+  benchmark(limit, path, samples, "static", static_eval);
 
   return 0;
 }
