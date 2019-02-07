@@ -72,7 +72,7 @@
     }                                                                                                                  \
 }
 
-#define OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(numPairs, obj, bitFlagName, offsetName)                                    \
+#define OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(num_pairs, obj, bitFlagName, offsetName)                                    \
 {                                                                                                                      \
     if (!obj) {                                                                                                        \
         CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_NULLPTR)                                                   \
@@ -84,10 +84,10 @@
         EmbeddedFixedProp prop;                                                                                        \
         embeddedFixedPropsRead(&prop, &obj->file);                                                                  \
         resetCabinObjectMemFile(obj);                                                                                  \
-        CARBON_OPTIONAL_SET(numPairs, prop.header->numEntries);                                                               \
+        CARBON_OPTIONAL_SET(num_pairs, prop.header->numEntries);                                                               \
         return prop.keys;                                                                                              \
     } else {                                                                                                           \
-        CARBON_OPTIONAL_SET(numPairs, 0);                                                                                     \
+        CARBON_OPTIONAL_SET(num_pairs, 0);                                                                                     \
         return NULL;                                                                                                   \
     }                                                                                                                  \
 }

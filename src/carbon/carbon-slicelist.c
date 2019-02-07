@@ -53,14 +53,14 @@
     0; \
 })
 
-static void appenderNew(SliceList *list);
+static void appenderNew(carbon_slice_list_t *list);
 static void appenderSeal(Slice *slice);
 
-static void lock(SliceList *list);
-static void unlock(SliceList *list);
+static void lock(carbon_slice_list_t *list);
+static void unlock(carbon_slice_list_t *list);
 
 CARBON_EXPORT(bool)
-SliceListCreate(SliceList *list, const carbon_alloc_t *alloc, size_t sliceCapacity)
+carbon_slice_list_create(carbon_slice_list_t *list, const carbon_alloc_t *alloc, size_t sliceCapacity)
 {
     CARBON_NON_NULL_OR_ERROR(list)
     CARBON_NON_NULL_OR_ERROR(sliceCapacity)
@@ -85,7 +85,7 @@ SliceListCreate(SliceList *list, const carbon_alloc_t *alloc, size_t sliceCapaci
 }
 
 CARBON_EXPORT(bool)
-SliceListDrop(SliceList *list)
+SliceListDrop(carbon_slice_list_t *list)
 {
     CARBON_UNUSED(list);
 //    NOT_YET_IMPLEMENTED
@@ -102,27 +102,27 @@ SliceListDrop(SliceList *list)
 }
 
 CARBON_EXPORT(bool)
-SliceListIsEmpty(const SliceList *list)
+SliceListIsEmpty(const carbon_slice_list_t *list)
 {
     return (carbon_vec_is_empty(&list->slices));
 }
 
 CARBON_EXPORT(bool)
-SliceListInsert(SliceList *list, char **strings, carbon_string_id_t *ids, size_t numPairs)
+carbon_slice_list_insert(carbon_slice_list_t *list, char **strings, carbon_string_id_t *ids, size_t num_pairs)
 {
     lock(list);
 
-    while (numPairs--) {
+    while (num_pairs--) {
         const char *key = *strings++;
         carbon_string_id_t value = *ids++;
         carbon_hash_t keyHash = get_hashcode(key);
-        SliceHandle handle;
+        slice_handle_t handle;
         int status;
 
         assert (key);
 
         /** check whether the keys-values pair is already contained in one slice */
-        status = SliceListLookupByKey(&handle, list, key);
+        status = carbon_slice_list_lookup(&handle, list, key);
 
         if (status == true) {
             /** pair was found, do not insert it twice */
@@ -168,7 +168,7 @@ SliceListInsert(SliceList *list, char **strings, carbon_string_id_t *ids, size_t
 }
 
 CARBON_EXPORT(bool)
-SliceListLookupByKey(SliceHandle *handle, SliceList *list, const char *needle)
+carbon_slice_list_lookup(slice_handle_t *handle, carbon_slice_list_t *list, const char *needle)
 {
     CARBON_UNUSED(list);
     CARBON_UNUSED(handle);
@@ -219,7 +219,7 @@ SliceListLookupByKey(SliceHandle *handle, SliceList *list, const char *needle)
                     if (pairPosition < slice->numElems) {
                         /** pair is contained */
                         desc->numReadsHit++;
-                        handle->isContained = true;
+                        handle->is_contained = true;
                         handle->value = slice->carbon_string_id_tColumn[pairPosition];
                         handle->key = needle;
                         handle->container = slice;
@@ -240,20 +240,20 @@ SliceListLookupByKey(SliceHandle *handle, SliceList *list, const char *needle)
         }
     }
 
-    handle->isContained = false;
+    handle->is_contained = false;
 
     return false;
 }
 
 CARBON_EXPORT(bool)
-SliceListRemove(SliceList *list, SliceHandle *handle)
+SliceListRemove(carbon_slice_list_t *list, slice_handle_t *handle)
 {
     CARBON_UNUSED(list);
     CARBON_UNUSED(handle);
     CARBON_NOT_IMPLEMENTED
 }
 
-static void appenderNew(SliceList *list)
+static void appenderNew(carbon_slice_list_t *list)
 {
     /** ANTI-OPTIMIZATION: madvising sequential access to columns in slice decrease performance */
 
@@ -316,7 +316,7 @@ static void appenderNew(SliceList *list)
                           / ((double) carbon_bitmap_nbits(&filter) / (double) SLICE_KEY_COLUMN_MAX_ELEMS)),
               carbon_bitmap_nbits(&filter))),
          sizeof(Slice),
-         (sizeof(SliceList) + list->slices.numElems
+         (sizeof(carbon_slice_list_t) + list->slices.numElems
              * (sizeof(Slice) + sizeof(SliceDescriptor) + (sizeof(uint32_t) * list->descriptors.numElems)
                  + sizeof(carbon_bloom_t) + carbon_bitmap_nbits(&filter) / 8 + sizeof(HashBounds))) / 1024.0
              / 1024.0
@@ -336,12 +336,12 @@ static void appenderSeal(Slice *slice)
     // TODO: sealing means sort and then replace 'find' with bsearch or something. Not yet implemented: sealed slices are also search in a linear fashion
 }
 
-static void lock(SliceList *list)
+static void lock(carbon_slice_list_t *list)
 {
     carbon_spinlock_acquire(&list->lock);
 }
 
-static void unlock(SliceList *list)
+static void unlock(carbon_slice_list_t *list)
 {
     carbon_spinlock_release(&list->lock);
 }

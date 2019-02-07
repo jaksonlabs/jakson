@@ -53,14 +53,14 @@ DEFINE_PRINTER_FUNCTION(uint32_t, "%d")
 DEFINE_PRINTER_FUNCTION(uint64_t, "%"PRIu64)
 DEFINE_PRINTER_FUNCTION(size_t, "%zu")
 
-bool carbon_vec_create(carbon_vec_t *out, const carbon_alloc_t *alloc, size_t elemSize, size_t capElems)
+bool carbon_vec_create(carbon_vec_t *out, const carbon_alloc_t *alloc, size_t elemSize, size_t cap_elems)
 {
     CARBON_NON_NULL_OR_ERROR(out)
     out->allocator = malloc(sizeof(carbon_alloc_t));
     carbon_alloc_this_or_std(out->allocator, alloc);
-    out->base = carbon_malloc(out->allocator, capElems * elemSize);
+    out->base = carbon_malloc(out->allocator, cap_elems * elemSize);
     out->numElems = 0;
-    out->capElems = capElems;
+    out->cap_elems = cap_elems;
     out->elemSize = elemSize;
     out->growFactor = 1.7f;
     carbon_error_init(&out->err);
@@ -72,7 +72,7 @@ bool carbon_vec_memadvice(carbon_vec_t *vec, int madviseAdvice)
     CARBON_NON_NULL_OR_ERROR(vec);
     CARBON_UNUSED(vec);
     CARBON_UNUSED(madviseAdvice);
-    madvise(vec->base, vec->capElems * vec->elemSize, madviseAdvice);
+    madvise(vec->base, vec->cap_elems * vec->elemSize, madviseAdvice);
     return true;
 }
 
@@ -103,10 +103,10 @@ bool carbon_vec_push(carbon_vec_t *vec, const void *data, size_t numElems)
 {
     CARBON_NON_NULL_OR_ERROR(vec && data)
     size_t nextNum = vec->numElems + numElems;
-    while (nextNum > vec->capElems) {
-        size_t more = nextNum - vec->capElems;
-        vec->capElems = (vec->capElems + more) * vec->growFactor;
-        vec->base = carbon_realloc(vec->allocator, vec->base, vec->capElems * vec->elemSize);
+    while (nextNum > vec->cap_elems) {
+        size_t more = nextNum - vec->cap_elems;
+        vec->cap_elems = (vec->cap_elems + more) * vec->growFactor;
+        vec->base = carbon_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elemSize);
     }
     memcpy(vec->base + vec->numElems * vec->elemSize, data, numElems * vec->elemSize);
     vec->numElems += numElems;
@@ -126,10 +126,10 @@ bool carbon_vec_repeated_push(carbon_vec_t *vec, const void *data, size_t howOft
 {
     CARBON_NON_NULL_OR_ERROR(vec && data)
     size_t nextNum = vec->numElems + howOften;
-    while (nextNum > vec->capElems) {
-        size_t more = nextNum - vec->capElems;
-        vec->capElems = (vec->capElems + more) * vec->growFactor;
-        vec->base = carbon_realloc(vec->allocator, vec->base, vec->capElems * vec->elemSize);
+    while (nextNum > vec->cap_elems) {
+        size_t more = nextNum - vec->cap_elems;
+        vec->cap_elems = (vec->cap_elems + more) * vec->growFactor;
+        vec->base = carbon_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elemSize);
     }
     for (size_t i = 0; i < howOften; i++) {
         memcpy(vec->base + (vec->numElems + i) * vec->elemSize, data, vec->elemSize);
@@ -159,9 +159,9 @@ bool carbon_vec_clear(carbon_vec_t *vec)
 bool VectorShrink(carbon_vec_t *vec)
 {
     CARBON_NON_NULL_OR_ERROR(vec);
-    if (vec->numElems < vec->capElems) {
-        vec->capElems = vec->numElems;
-        vec->base = carbon_realloc(vec->allocator, vec->base, vec->capElems * vec->elemSize);
+    if (vec->numElems < vec->cap_elems) {
+        vec->cap_elems = vec->numElems;
+        vec->base = carbon_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elemSize);
     }
     return true;
 }
@@ -169,11 +169,11 @@ bool VectorShrink(carbon_vec_t *vec)
 bool carbon_vec_grow(size_t *numNewSlots, carbon_vec_t *vec)
 {
     CARBON_NON_NULL_OR_ERROR(vec)
-    size_t freeSlotsBefore = vec->capElems - vec->numElems;
+    size_t freeSlotsBefore = vec->cap_elems - vec->numElems;
 
-    vec->capElems = (vec->capElems * vec->growFactor) + 1;
-    vec->base = carbon_realloc(vec->allocator, vec->base, vec->capElems * vec->elemSize);
-    size_t freeSlotsAfter = vec->capElems - vec->numElems;
+    vec->cap_elems = (vec->cap_elems * vec->growFactor) + 1;
+    vec->base = carbon_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elemSize);
+    size_t freeSlotsAfter = vec->cap_elems - vec->numElems;
     if (CARBON_BRANCH_LIKELY(numNewSlots != NULL)) {
         *numNewSlots = freeSlotsAfter - freeSlotsBefore;
     }
@@ -194,13 +194,13 @@ const void *VectorAt(const carbon_vec_t *vec, size_t pos)
 size_t VectorCapacity(const carbon_vec_t *vec)
 {
     CARBON_NON_NULL_OR_ERROR(vec)
-    return vec->capElems;
+    return vec->cap_elems;
 }
 
 bool VectorEnlargeSizeToCapacity(carbon_vec_t *vec)
 {
     CARBON_NON_NULL_OR_ERROR(vec);
-    vec->numElems = vec->capElems;
+    vec->numElems = vec->cap_elems;
     return true;
 }
 

@@ -27,220 +27,220 @@
 
 #define SMART_MAP_TAG "strhash-mem"
 
-typedef struct Bucket
+typedef struct bucket
 {
-    SliceList sliceList;
-} Bucket;
+    carbon_slice_list_t slice_list;
+} bucket_t;
 
-typedef struct MemExtra
+typedef struct mem_extra
 {
-    carbon_vec_t ofType(Bucket) buckets;
-} MemExtra;
+    carbon_vec_t ofType(bucket) buckets;
+} mem_extra_t;
 
 static int this_drop(carbon_strhash_t *self);
-static int thisPutSafeBulk(carbon_strhash_t *self,
+static int this_put_safe_bulk(carbon_strhash_t *self,
                            char *const *keys,
                            const carbon_string_id_t *values,
-                           size_t numPairs);
-static int thisPutFastBulk(carbon_strhash_t *self,
+                           size_t num_pairs);
+static int this_put_fast_bulk(carbon_strhash_t *self,
                            char *const *keys,
                            const carbon_string_id_t *values,
-                           size_t numPairs);
-static int thisPutSafeExact(carbon_strhash_t *self, const char *key, carbon_string_id_t value);
-static int thisPutFastExact(carbon_strhash_t *self, const char *key, carbon_string_id_t value);
-static int thisGetSafe(carbon_strhash_t *self, carbon_string_id_t **out, bool **found_mask, size_t *num_not_found,
+                           size_t num_pairs);
+static int this_put_safe_exact(carbon_strhash_t *self, const char *key, carbon_string_id_t value);
+static int this_put_fast_exact(carbon_strhash_t *self, const char *key, carbon_string_id_t value);
+static int this_get_safe(carbon_strhash_t *self, carbon_string_id_t **out, bool **found_mask, size_t *num_not_found,
                        char *const *keys, size_t num_keys);
-static int thisGetSafeExact(carbon_strhash_t *self, carbon_string_id_t *out, bool *found_mask, const char *key);
-static int thisGetFast(carbon_strhash_t *self, carbon_string_id_t **out, char *const *keys, size_t num_keys);
-static int thisUpdateKeyFast(carbon_strhash_t *self, const carbon_string_id_t *values, char *const *keys,
+static int this_get_safe_exact(carbon_strhash_t *self, carbon_string_id_t *out, bool *found_mask, const char *key);
+static int this_get_fast(carbon_strhash_t *self, carbon_string_id_t **out, char *const *keys, size_t num_keys);
+static int this_update_key_fast(carbon_strhash_t *self, const carbon_string_id_t *values, char *const *keys,
                              size_t num_keys);
 static int this_remove(carbon_strhash_t *self, char *const *keys, size_t num_keys);
 static int this_free(carbon_strhash_t *self, void *ptr);
 
-static int thisInsertBulk(carbon_vec_t ofType(Bucket) *buckets,
+static int this_insert_bulk(carbon_vec_t ofType(bucket) *buckets,
                           char *const *restrict keys,
                           const carbon_string_id_t *restrict values,
-                          size_t *restrict bucketIdxs,
-                          size_t numPairs,
+                          size_t *restrict bucket_idxs,
+                          size_t num_pairs,
                           carbon_alloc_t *alloc,
                           carbon_string_hash_counters_t *counter);
 
-static int thisInsertExact(carbon_vec_t ofType(Bucket) *buckets, const char *restrict key,
-                           carbon_string_id_t value, size_t bucketIdx, carbon_alloc_t *alloc, carbon_string_hash_counters_t *counter);
-static int thisFetchBulk(carbon_vec_t ofType(Bucket) *buckets, carbon_string_id_t *valuesOut,
-                         bool *keyFoundMask,
-                         size_t *numKeysNotFound, size_t *bucketIdxs, char *const *keys, size_t num_keys,
+static int this_insert_exact(carbon_vec_t ofType(bucket) *buckets, const char *restrict key,
+                           carbon_string_id_t value, size_t bucket_idx, carbon_alloc_t *alloc, carbon_string_hash_counters_t *counter);
+static int this_fetch_bulk(carbon_vec_t ofType(bucket) *buckets, carbon_string_id_t *values_out,
+                         bool *key_found_mask,
+                         size_t *num_keys_not_found, size_t *bucket_idxs, char *const *keys, size_t num_keys,
                          carbon_alloc_t *alloc, carbon_string_hash_counters_t *counter);
-static int thisFetchSingle(carbon_vec_t ofType(Bucket) *buckets,
-                           carbon_string_id_t *valueOut,
-                           bool *keyFound,
-                           const size_t bucketIdx,
+static int this_fetch_single(carbon_vec_t ofType(bucket) *buckets,
+                           carbon_string_id_t *value_out,
+                           bool *key_found,
+                           const size_t bucket_idx,
                            const char *key,
                            carbon_string_hash_counters_t *counter);
 
-static int this_create_extra(carbon_strhash_t *self, size_t numBuckets, size_t capBuckets);
-static MemExtra *thisGetExta(carbon_strhash_t *self);
-static int BucketCreate(Bucket *buckets, size_t numBuckets, size_t bucketCap,
+static int this_create_extra(carbon_strhash_t *self, size_t num_buckets, size_t cap_buckets);
+static mem_extra_t *this_get_exta(carbon_strhash_t *self);
+static int bucket_create(bucket_t *buckets, size_t num_buckets, size_t bucket_cap,
                         carbon_alloc_t *alloc);
-static int BucketDrop(Bucket *buckets, size_t numBuckets, carbon_alloc_t *alloc);
-static int BucketInsert(Bucket *bucket, const char *restrict key, carbon_string_id_t value,
+static int bucket_drop(bucket_t *buckets, size_t num_buckets, carbon_alloc_t *alloc);
+static int bucket_insert(bucket_t *bucket, const char *restrict key, carbon_string_id_t value,
                         carbon_alloc_t *alloc, carbon_string_hash_counters_t *counter);
 
 bool carbon_strhash_create_inmemory(carbon_strhash_t *map, const carbon_alloc_t *alloc, size_t num_buckets,
-                                    size_t capBuckets)
+                                    size_t cap_buckets)
 {
     CARBON_CHECK_SUCCESS(carbon_alloc_this_or_std(&map->allocator, alloc));
 
     num_buckets = num_buckets < 1 ? 1 : num_buckets;
-    capBuckets = capBuckets < 1 ? 1 : capBuckets;
+    cap_buckets = cap_buckets < 1 ? 1 : cap_buckets;
 
     map->tag = CARBON_STRHASH_INMEMORY;
     map->drop = this_drop;
-    map->put_bulk_safe = thisPutSafeBulk;
-    map->put_bulk_fast = thisPutFastBulk;
-    map->put_exact_safe = thisPutSafeExact;
-    map->put_exact_fast = thisPutFastExact;
-    map->get_bulk_safe = thisGetSafe;
-    map->get_fast = thisGetFast;
-    map->update_key_fast = thisUpdateKeyFast;
+    map->put_bulk_safe = this_put_safe_bulk;
+    map->put_bulk_fast = this_put_fast_bulk;
+    map->put_exact_safe = this_put_safe_exact;
+    map->put_exact_fast = this_put_fast_exact;
+    map->get_bulk_safe = this_get_safe;
+    map->get_fast = this_get_fast;
+    map->update_key_fast = this_update_key_fast;
     map->remove = this_remove;
     map->free = this_free;
-    map->get_exact_safe = thisGetSafeExact;
+    map->get_exact_safe = this_get_safe_exact;
     carbon_error_init(&map->err);
 
     carbon_strhash_reset_counters(map);
-    CARBON_CHECK_SUCCESS(this_create_extra(map, num_buckets, capBuckets));
+    CARBON_CHECK_SUCCESS(this_create_extra(map, num_buckets, cap_buckets));
     return true;
 }
 
 static int this_drop(carbon_strhash_t *self)
 {
     assert(self->tag == CARBON_STRHASH_INMEMORY);
-    MemExtra *extra = thisGetExta(self);
-    Bucket *data = (Bucket *) carbon_vec_data(&extra->buckets);
-    CARBON_CHECK_SUCCESS(BucketDrop(data, extra->buckets.capElems, &self->allocator));
+    mem_extra_t *extra = this_get_exta(self);
+    bucket_t *data = (bucket_t *) carbon_vec_data(&extra->buckets);
+    CARBON_CHECK_SUCCESS(bucket_drop(data, extra->buckets.cap_elems, &self->allocator));
     carbon_vec_drop(&extra->buckets);
     carbon_free(&self->allocator, self->extra);
     return true;
 }
 
-static int thisPutSafeBulk(carbon_strhash_t *self,
+static int this_put_safe_bulk(carbon_strhash_t *self,
                            char *const *keys,
                            const carbon_string_id_t *values,
-                           size_t numPairs)
+                           size_t num_pairs)
 {
     assert(self->tag == CARBON_STRHASH_INMEMORY);
-    MemExtra *extra = thisGetExta(self);
-    size_t *bucketIdxs = carbon_malloc(&self->allocator, numPairs * sizeof(size_t));
+    mem_extra_t *extra = this_get_exta(self);
+    size_t *bucket_idxs = carbon_malloc(&self->allocator, num_pairs * sizeof(size_t));
 
-    CARBON_PREFETCH_WRITE(bucketIdxs);
+    CARBON_PREFETCH_WRITE(bucket_idxs);
 
-    for (size_t i = 0; i < numPairs; i++) {
+    for (size_t i = 0; i < num_pairs; i++) {
         const char *key = keys[i];
         carbon_hash_t hash = HASHCODE_OF(key);
-        bucketIdxs[i] = hash % extra->buckets.capElems;
+        bucket_idxs[i] = hash % extra->buckets.cap_elems;
     }
 
-    CARBON_PREFETCH_READ(bucketIdxs);
+    CARBON_PREFETCH_READ(bucket_idxs);
     CARBON_PREFETCH_READ(keys);
     CARBON_PREFETCH_READ(values);
 
-    CARBON_CHECK_SUCCESS(thisInsertBulk(&extra->buckets, keys, values, bucketIdxs, numPairs, &self->allocator,
+    CARBON_CHECK_SUCCESS(this_insert_bulk(&extra->buckets, keys, values, bucket_idxs, num_pairs, &self->allocator,
                                  &self->counters));
-    CARBON_CHECK_SUCCESS(carbon_free(&self->allocator, bucketIdxs));
+    CARBON_CHECK_SUCCESS(carbon_free(&self->allocator, bucket_idxs));
     return true;
 }
 
-static int thisPutSafeExact(carbon_strhash_t *self, const char *key, carbon_string_id_t value)
+static int this_put_safe_exact(carbon_strhash_t *self, const char *key, carbon_string_id_t value)
 {
     assert(self->tag == CARBON_STRHASH_INMEMORY);
-    MemExtra *extra = thisGetExta(self);
+    mem_extra_t *extra = this_get_exta(self);
 
     carbon_hash_t hash = strcmp("", key) != 0 ? HASHCODE_OF(key) : 0;
-    size_t bucketIdx = hash % extra->buckets.capElems;
+    size_t bucket_idx = hash % extra->buckets.cap_elems;
 
     CARBON_PREFETCH_READ(key);
 
-    CARBON_CHECK_SUCCESS(thisInsertExact(&extra->buckets, key, value, bucketIdx, &self->allocator,
+    CARBON_CHECK_SUCCESS(this_insert_exact(&extra->buckets, key, value, bucket_idx, &self->allocator,
                                   &self->counters));
 
     return true;
 }
 
-static int thisPutFastExact(carbon_strhash_t *self, const char *key, carbon_string_id_t value)
+static int this_put_fast_exact(carbon_strhash_t *self, const char *key, carbon_string_id_t value)
 {
-    return thisPutSafeExact(self, key, value);
+    return this_put_safe_exact(self, key, value);
 }
 
-static int thisPutFastBulk(carbon_strhash_t *self,
+static int this_put_fast_bulk(carbon_strhash_t *self,
                            char *const *keys,
                            const carbon_string_id_t *values,
-                           size_t numPairs)
+                           size_t num_pairs)
 {
-    return thisPutSafeBulk(self, keys, values, numPairs);
+    return this_put_safe_bulk(self, keys, values, num_pairs);
 }
 
-static int thisFetchBulk(carbon_vec_t ofType(Bucket) *buckets, carbon_string_id_t *valuesOut,
-                         bool *keyFoundMask,
-                         size_t *numKeysNotFound, size_t *bucketIdxs, char *const *keys, size_t num_keys,
+static int this_fetch_bulk(carbon_vec_t ofType(bucket) *buckets, carbon_string_id_t *values_out,
+                         bool *key_found_mask,
+                         size_t *num_keys_not_found, size_t *bucket_idxs, char *const *keys, size_t num_keys,
                          carbon_alloc_t *alloc, carbon_string_hash_counters_t *counter)
 {
     CARBON_UNUSED(counter);
     CARBON_UNUSED(alloc);
 
-    SliceHandle result_handle;
+    slice_handle_t result_handle;
     size_t num_not_found = 0;
-    Bucket *data = (Bucket *) carbon_vec_data(buckets);
+    bucket_t *data = (bucket_t *) carbon_vec_data(buckets);
 
-    CARBON_PREFETCH_WRITE(valuesOut);
+    CARBON_PREFETCH_WRITE(values_out);
 
     for (size_t i = 0; i < num_keys; i++) {
-        Bucket *bucket = data + bucketIdxs[i];
+        bucket_t *bucket = data + bucket_idxs[i];
         const char *key = keys[i];
         if (CARBON_BRANCH_LIKELY(key != NULL)) {
-            SliceListLookupByKey(&result_handle, &bucket->sliceList, key);
+            carbon_slice_list_lookup(&result_handle, &bucket->slice_list, key);
         } else {
-            result_handle.isContained = true;
+            result_handle.is_contained = true;
             result_handle.value = CARBON_NULL_ENCODED_STRING;
         }
 
 
 
-        num_not_found += result_handle.isContained ? 0 : 1;
-        keyFoundMask[i] = result_handle.isContained;
-        valuesOut[i] = result_handle.isContained ? result_handle.value : ((carbon_string_id_t) -1);
+        num_not_found += result_handle.is_contained ? 0 : 1;
+        key_found_mask[i] = result_handle.is_contained;
+        values_out[i] = result_handle.is_contained ? result_handle.value : ((carbon_string_id_t) -1);
     }
 
-    *numKeysNotFound = num_not_found;
+    *num_keys_not_found = num_not_found;
     return true;
 }
 
-static int thisFetchSingle(carbon_vec_t ofType(Bucket) *buckets,
-                           carbon_string_id_t *valueOut,
-                           bool *keyFound,
-                           const size_t bucketIdx,
+static int this_fetch_single(carbon_vec_t ofType(bucket) *buckets,
+                           carbon_string_id_t *value_out,
+                           bool *key_found,
+                           const size_t bucket_idx,
                            const char *key,
                            carbon_string_hash_counters_t *counter)
 {
     CARBON_UNUSED(counter);
 
-    SliceHandle handle;
-    Bucket *data = (Bucket *) carbon_vec_data(buckets);
+    slice_handle_t handle;
+    bucket_t *data = (bucket_t *) carbon_vec_data(buckets);
 
-    CARBON_PREFETCH_WRITE(valueOut);
-    CARBON_PREFETCH_WRITE(keyFound);
+    CARBON_PREFETCH_WRITE(value_out);
+    CARBON_PREFETCH_WRITE(key_found);
 
-    Bucket *bucket = data + bucketIdx;
+    bucket_t *bucket = data + bucket_idx;
 
     /** Optimization 1/5: EMPTY GUARD (but before "find" call); if this bucket has no occupied slots, do not perform any lookup and comparison */
-    SliceListLookupByKey(&handle, &bucket->sliceList, key);
-    *keyFound = !SliceListIsEmpty(&bucket->sliceList) && handle.isContained;
-    *valueOut = (*keyFound) ? handle.value : ((carbon_string_id_t) -1);
+    carbon_slice_list_lookup(&handle, &bucket->slice_list, key);
+    *key_found = !SliceListIsEmpty(&bucket->slice_list) && handle.is_contained;
+    *value_out = (*key_found) ? handle.value : ((carbon_string_id_t) -1);
 
     return true;
 }
 
-static int thisGetSafe(carbon_strhash_t *self, carbon_string_id_t **out, bool **found_mask, size_t *num_not_found,
+static int this_get_safe(carbon_strhash_t *self, carbon_string_id_t **out, bool **found_mask, size_t *num_not_found,
                        char *const *keys, size_t num_keys)
 {
     assert(self->tag == CARBON_STRHASH_INMEMORY);
@@ -255,33 +255,33 @@ static int thisGetSafe(carbon_strhash_t *self, carbon_string_id_t **out, bool **
     CARBON_CHECK_SUCCESS(carbon_alloc_this_or_std(&hashtable_alloc, &self->allocator));
 #endif
 
-    MemExtra *extra = thisGetExta(self);
-    size_t *bucketIdxs = carbon_malloc(&self->allocator, num_keys * sizeof(size_t));
-    carbon_string_id_t *valuesOut = carbon_malloc(&self->allocator, num_keys * sizeof(carbon_string_id_t));
-    bool *foundMask_out = carbon_malloc(&self->allocator, num_keys * sizeof(bool));
+    mem_extra_t *extra = this_get_exta(self);
+    size_t *bucket_idxs = carbon_malloc(&self->allocator, num_keys * sizeof(size_t));
+    carbon_string_id_t *values_out = carbon_malloc(&self->allocator, num_keys * sizeof(carbon_string_id_t));
+    bool *found_mask_out = carbon_malloc(&self->allocator, num_keys * sizeof(bool));
 
-    assert(bucketIdxs != NULL);
-    assert(valuesOut != NULL);
-    assert(foundMask_out != NULL);
+    assert(bucket_idxs != NULL);
+    assert(values_out != NULL);
+    assert(found_mask_out != NULL);
 
     for (register size_t i = 0; i < num_keys; i++) {
         const char *key = keys[i];
         carbon_hash_t hash = key && strcmp("", key) != 0 ? HASHCODE_OF(key) : 0;
-        bucketIdxs[i] = hash % extra->buckets.capElems;
-        CARBON_PREFETCH_READ((Bucket *) carbon_vec_data(&extra->buckets) + bucketIdxs[i]);
+        bucket_idxs[i] = hash % extra->buckets.cap_elems;
+        CARBON_PREFETCH_READ((bucket_t *) carbon_vec_data(&extra->buckets) + bucket_idxs[i]);
     }
 
     CARBON_TRACE(SMART_MAP_TAG, "'get_safe' function invoke fetch...for %zu strings", num_keys)
-    CARBON_CHECK_SUCCESS(thisFetchBulk(&extra->buckets, valuesOut, foundMask_out, num_not_found, bucketIdxs,
+    CARBON_CHECK_SUCCESS(this_fetch_bulk(&extra->buckets, values_out, found_mask_out, num_not_found, bucket_idxs,
                                 keys, num_keys, &self->allocator, &self->counters));
-    CARBON_CHECK_SUCCESS(carbon_free(&self->allocator, bucketIdxs));
+    CARBON_CHECK_SUCCESS(carbon_free(&self->allocator, bucket_idxs));
     CARBON_TRACE(SMART_MAP_TAG, "'get_safe' function invok fetch: done for %zu strings", num_keys)
 
-    assert(valuesOut != NULL);
-    assert(foundMask_out != NULL);
+    assert(values_out != NULL);
+    assert(found_mask_out != NULL);
 
-    *out = valuesOut;
-    *found_mask = foundMask_out;
+    *out = values_out;
+    *found_mask = found_mask_out;
 
     carbon_timestamp_t end = carbon_time_now_wallclock();
     CARBON_UNUSED(begin);
@@ -291,7 +291,7 @@ static int thisGetSafe(carbon_strhash_t *self, carbon_string_id_t **out, bool **
     return true;
 }
 
-static int thisGetSafeExact(carbon_strhash_t *self, carbon_string_id_t *out, bool *found_mask, const char *key)
+static int this_get_safe_exact(carbon_strhash_t *self, carbon_string_id_t *out, bool *found_mask, const char *key)
 {
     assert(self->tag == CARBON_STRHASH_INMEMORY);
 
@@ -302,27 +302,27 @@ static int thisGetSafeExact(carbon_strhash_t *self, carbon_string_id_t *out, boo
     CARBON_CHECK_SUCCESS(carbon_alloc_this_or_std(&hashtable_alloc, &self->allocator));
 #endif
 
-    MemExtra *extra = thisGetExta(self);
+    mem_extra_t *extra = this_get_exta(self);
 
     carbon_hash_t hash = strcmp("", key) != 0 ? HASHCODE_OF(key) : 0;
-    size_t bucketIdx = hash % extra->buckets.capElems;
-    CARBON_PREFETCH_READ((Bucket *) carbon_vec_data(&extra->buckets) + bucketIdx);
+    size_t bucket_idx = hash % extra->buckets.cap_elems;
+    CARBON_PREFETCH_READ((bucket_t *) carbon_vec_data(&extra->buckets) + bucket_idx);
 
-    CARBON_CHECK_SUCCESS(thisFetchSingle(&extra->buckets, out, found_mask, bucketIdx, key, &self->counters));
+    CARBON_CHECK_SUCCESS(this_fetch_single(&extra->buckets, out, found_mask, bucket_idx, key, &self->counters));
 
     return true;
 }
 
-static int thisGetFast(carbon_strhash_t *self, carbon_string_id_t **out, char *const *keys, size_t num_keys)
+static int this_get_fast(carbon_strhash_t *self, carbon_string_id_t **out, char *const *keys, size_t num_keys)
 {
     bool *found_mask;
     size_t num_not_found;
-    int status = thisGetSafe(self, out, &found_mask, &num_not_found, keys, num_keys);
+    int status = this_get_safe(self, out, &found_mask, &num_not_found, keys, num_keys);
     this_free(self, found_mask);
     return status;
 }
 
-static int thisUpdateKeyFast(carbon_strhash_t *self, const carbon_string_id_t *values, char *const *keys,
+static int this_update_key_fast(carbon_strhash_t *self, const carbon_string_id_t *values, char *const *keys,
                              size_t num_keys)
 {
     CARBON_UNUSED(self);
@@ -334,23 +334,23 @@ static int thisUpdateKeyFast(carbon_strhash_t *self, const carbon_string_id_t *v
     return false;
 }
 
-static int simple_map_remove(MemExtra *extra, size_t *bucketIdxs, char *const *keys, size_t num_keys,
+static int simple_map_remove(mem_extra_t *extra, size_t *bucket_idxs, char *const *keys, size_t num_keys,
                              carbon_alloc_t *alloc, carbon_string_hash_counters_t *counter)
 {
     CARBON_UNUSED(counter);
     CARBON_UNUSED(alloc);
 
-    SliceHandle handle;
-    Bucket *data = (Bucket *) carbon_vec_data(&extra->buckets);
+    slice_handle_t handle;
+    bucket_t *data = (bucket_t *) carbon_vec_data(&extra->buckets);
 
     for (register size_t i = 0; i < num_keys; i++) {
-        Bucket *bucket = data + bucketIdxs[i];
+        bucket_t *bucket = data + bucket_idxs[i];
         const char *key = keys[i];
 
         /** Optimization 1/5: EMPTY GUARD (but before "find" call); if this bucket has no occupied slots, do not perform any lookup and comparison */
-        SliceListLookupByKey(&handle, &bucket->sliceList, key);
-        if (CARBON_BRANCH_LIKELY(handle.isContained)) {
-            SliceListRemove(&bucket->sliceList, &handle);
+        carbon_slice_list_lookup(&handle, &bucket->slice_list, key);
+        if (CARBON_BRANCH_LIKELY(handle.is_contained)) {
+            SliceListRemove(&bucket->slice_list, &handle);
         }
     }
     return true;
@@ -360,16 +360,16 @@ static int this_remove(carbon_strhash_t *self, char *const *keys, size_t num_key
 {
     assert(self->tag == CARBON_STRHASH_INMEMORY);
 
-    MemExtra *extra = thisGetExta(self);
-    size_t *bucketIdxs = carbon_malloc(&self->allocator, num_keys * sizeof(size_t));
+    mem_extra_t *extra = this_get_exta(self);
+    size_t *bucket_idxs = carbon_malloc(&self->allocator, num_keys * sizeof(size_t));
     for (register size_t i = 0; i < num_keys; i++) {
         const char *key = keys[i];
         carbon_hash_t hash = HASHCODE_OF(key);
-        bucketIdxs[i] = hash % extra->buckets.capElems;
+        bucket_idxs[i] = hash % extra->buckets.cap_elems;
     }
 
-    CARBON_CHECK_SUCCESS(simple_map_remove(extra, bucketIdxs, keys, num_keys, &self->allocator, &self->counters));
-    CARBON_CHECK_SUCCESS(carbon_free(&self->allocator, bucketIdxs));
+    CARBON_CHECK_SUCCESS(simple_map_remove(extra, bucket_idxs, keys, num_keys, &self->allocator, &self->counters));
+    CARBON_CHECK_SUCCESS(carbon_free(&self->allocator, bucket_idxs));
     return true;
 }
 
@@ -381,18 +381,18 @@ static int this_free(carbon_strhash_t *self, void *ptr)
 }
 
 CARBON_FUNC_UNUSED
-static int this_create_extra(carbon_strhash_t *self, size_t numBuckets, size_t capBuckets)
+static int this_create_extra(carbon_strhash_t *self, size_t num_buckets, size_t cap_buckets)
 {
-    if ((self->extra = carbon_malloc(&self->allocator, sizeof(MemExtra))) != NULL) {
-        MemExtra *extra = thisGetExta(self);
-        carbon_vec_create(&extra->buckets, &self->allocator, sizeof(Bucket), numBuckets);
+    if ((self->extra = carbon_malloc(&self->allocator, sizeof(mem_extra_t))) != NULL) {
+        mem_extra_t *extra = this_get_exta(self);
+        carbon_vec_create(&extra->buckets, &self->allocator, sizeof(bucket_t), num_buckets);
 
         /** Optimization: notify the kernel that the list of buckets are accessed randomly (since hash based access)*/
         carbon_vec_memadvice(&extra->buckets, MADV_RANDOM | MADV_WILLNEED);
 
 
-        Bucket *data = (Bucket *) carbon_vec_data(&extra->buckets);
-        CARBON_CHECK_SUCCESS(BucketCreate(data, numBuckets, capBuckets, &self->allocator));
+        bucket_t *data = (bucket_t *) carbon_vec_data(&extra->buckets);
+        CARBON_CHECK_SUCCESS(bucket_create(data, num_buckets, cap_buckets, &self->allocator));
         return true;
     }
     else {
@@ -402,41 +402,41 @@ static int this_create_extra(carbon_strhash_t *self, size_t numBuckets, size_t c
 }
 
 CARBON_FUNC_UNUSED
-static MemExtra *thisGetExta(carbon_strhash_t *self)
+static mem_extra_t *this_get_exta(carbon_strhash_t *self)
 {
     assert (self->tag == CARBON_STRHASH_INMEMORY);
-    return (MemExtra *) (self->extra);
+    return (mem_extra_t *) (self->extra);
 }
 
 CARBON_FUNC_UNUSED
-static int BucketCreate(Bucket *buckets, size_t numBuckets, size_t bucketCap,
+static int bucket_create(bucket_t *buckets, size_t num_buckets, size_t bucket_cap,
                         carbon_alloc_t *alloc)
 {
     CARBON_NON_NULL_OR_ERROR(buckets);
 
     // TODO: parallize this!
-    while (numBuckets--) {
-        Bucket *bucket = buckets++;
-        SliceListCreate(&bucket->sliceList, alloc, bucketCap);
+    while (num_buckets--) {
+        bucket_t *bucket = buckets++;
+        carbon_slice_list_create(&bucket->slice_list, alloc, bucket_cap);
     }
 
     return true;
 }
 
-static int BucketDrop(Bucket *buckets, size_t numBuckets, carbon_alloc_t *alloc)
+static int bucket_drop(bucket_t *buckets, size_t num_buckets, carbon_alloc_t *alloc)
 {
     CARBON_UNUSED(alloc);
     CARBON_NON_NULL_OR_ERROR(buckets);
 
-    while (numBuckets--) {
-        Bucket *bucket = buckets++;
-        SliceListDrop(&bucket->sliceList);
+    while (num_buckets--) {
+        bucket_t *bucket = buckets++;
+        SliceListDrop(&bucket->slice_list);
     }
 
     return true;
 }
 
-static int BucketInsert(Bucket *bucket, const char *restrict key, carbon_string_id_t value,
+static int bucket_insert(bucket_t *bucket, const char *restrict key, carbon_string_id_t value,
                         carbon_alloc_t *alloc, carbon_string_hash_counters_t *counter)
 {
     CARBON_UNUSED(counter);
@@ -445,12 +445,12 @@ static int BucketInsert(Bucket *bucket, const char *restrict key, carbon_string_
     CARBON_NON_NULL_OR_ERROR(bucket);
     CARBON_NON_NULL_OR_ERROR(key);
 
-    SliceHandle handle;
+    slice_handle_t handle;
 
     /** Optimization 1/5: EMPTY GUARD (but before "find" call); if this bucket has no occupied slots, do not perform any lookup and comparison */
-    SliceListLookupByKey(&handle, &bucket->sliceList, key);
+    carbon_slice_list_lookup(&handle, &bucket->slice_list, key);
 
-    if (handle.isContained) {
+    if (handle.is_contained) {
         /** entry found by keys */
         assert(value == handle.value);
         //debug(SMART_MAP_TAG, "debug(SMART_MAP_TAG, \"*** put *** '%s' into bucket [new]\", keys);*** put *** '%s' into bucket [already contained]", keys);
@@ -458,46 +458,46 @@ static int BucketInsert(Bucket *bucket, const char *restrict key, carbon_string_
     else {
         /** no entry found */
         //debug(SMART_MAP_TAG, "*** put *** '%s' into bucket [new]", keys);
-        SliceListInsert(&bucket->sliceList, (char **) &key, &value, 1);
+        carbon_slice_list_insert(&bucket->slice_list, (char **) &key, &value, 1);
     }
 
     return true;
 }
 
-static int thisInsertBulk(carbon_vec_t ofType(Bucket) *buckets,
+static int this_insert_bulk(carbon_vec_t ofType(bucket) *buckets,
                           char *const *restrict keys,
                           const carbon_string_id_t *restrict values,
-                          size_t *restrict bucketIdxs,
-                          size_t numPairs,
+                          size_t *restrict bucket_idxs,
+                          size_t num_pairs,
                           carbon_alloc_t *alloc,
                           carbon_string_hash_counters_t *counter)
 {
     CARBON_NON_NULL_OR_ERROR(buckets)
     CARBON_NON_NULL_OR_ERROR(keys)
     CARBON_NON_NULL_OR_ERROR(values)
-    CARBON_NON_NULL_OR_ERROR(bucketIdxs)
+    CARBON_NON_NULL_OR_ERROR(bucket_idxs)
 
-    Bucket *buckets_data = (Bucket *) carbon_vec_data(buckets);
+    bucket_t *buckets_data = (bucket_t *) carbon_vec_data(buckets);
     int status = true;
-    for (register size_t i = 0; status == true && i < numPairs; i++) {
-        size_t bucketIdx = bucketIdxs[i];
+    for (register size_t i = 0; status == true && i < num_pairs; i++) {
+        size_t bucket_idx = bucket_idxs[i];
         const char *key = keys[i];
         carbon_string_id_t value = values[i];
 
-        Bucket *bucket = buckets_data + bucketIdx;
-        status = BucketInsert(bucket, key, value, alloc, counter);
+        bucket_t *bucket = buckets_data + bucket_idx;
+        status = bucket_insert(bucket, key, value, alloc, counter);
     }
 
     return status;
 }
 
-static int thisInsertExact(carbon_vec_t ofType(Bucket) *buckets, const char *restrict key,
-                           carbon_string_id_t value, size_t bucketIdx, carbon_alloc_t *alloc, carbon_string_hash_counters_t *counter)
+static int this_insert_exact(carbon_vec_t ofType(bucket) *buckets, const char *restrict key,
+                           carbon_string_id_t value, size_t bucket_idx, carbon_alloc_t *alloc, carbon_string_hash_counters_t *counter)
 {
     CARBON_NON_NULL_OR_ERROR(buckets)
     CARBON_NON_NULL_OR_ERROR(key)
 
-    Bucket *buckets_data = (Bucket *) carbon_vec_data(buckets);
-    Bucket *bucket = buckets_data + bucketIdx;
-    return BucketInsert(bucket, key, value, alloc, counter);
+    bucket_t *buckets_data = (bucket_t *) carbon_vec_data(buckets);
+    bucket_t *bucket = buckets_data + bucket_idx;
+    return bucket_insert(bucket, key, value, alloc, counter);
 }

@@ -234,9 +234,9 @@ carbon_strhash_get_counters(carbon_string_hash_counters_t *out, const carbon_str
  * instead.
  *
  * @param map a non-null pointer to the map
- * @param keys a non-null constant pointer to a list of at least <code>numPairs</code> length of constant strings
- * @param values a non-null constant pointer to a list of at least <code>numPairs</code> length of 64bit values
- * @param numPairs the number of pairs that are read via <code>keys</code> and <code>values</code>
+ * @param keys a non-null constant pointer to a list of at least <code>num_pairs</code> length of constant strings
+ * @param values a non-null constant pointer to a list of at least <code>num_pairs</code> length of 64bit values
+ * @param num_pairs the number of pairs that are read via <code>keys</code> and <code>values</code>
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
 inline static int
@@ -261,9 +261,9 @@ carbon_strhash_put_safe(carbon_strhash_t *map, char *const *keys, const carbon_s
  * instead.
  *
  * @param map a non-null pointer to the map
- * @param keys a non-null constant pointer to a list of at least <code>numPairs</code> length of constant strings
- * @param values a non-null constant pointer to a list of at least <code>numPairs</code> length of 64bit values
- * @param numPairs the number of pairs that are read via <code>keys</code> and <code>values</code>
+ * @param keys a non-null constant pointer to a list of at least <code>num_pairs</code> length of constant strings
+ * @param values a non-null constant pointer to a list of at least <code>num_pairs</code> length of 64bit values
+ * @param num_pairs the number of pairs that are read via <code>keys</code> and <code>values</code>
  * @return <code>true</code> in case of success, otherwise a value indiciating the error.
  */
 inline static int

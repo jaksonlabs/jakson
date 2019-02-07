@@ -148,7 +148,7 @@ static int freelist_pop(carbon_string_id_t *out, carbon_strdic_t *self)
         size_t num_new_pos;
         CARBON_CHECK_SUCCESS(carbon_vec_grow(&num_new_pos, &extra->freelist));
         CARBON_CHECK_SUCCESS(carbon_vec_grow(NULL, &extra->contents));
-        assert (extra->freelist.capElems == extra->contents.capElems);
+        assert (extra->freelist.cap_elems == extra->contents.cap_elems);
         struct entry empty = {
             .in_use = false,
             .str    = NULL
@@ -168,7 +168,7 @@ static int freelist_push(carbon_strdic_t *self, carbon_string_id_t idx)
     assert (self->tag == CARBON_STRDIC_TYPE_SYNC);
     struct sync_extra *extra = this_extra(self);
     CARBON_CHECK_SUCCESS(carbon_vec_push(&extra->freelist, &idx, 1));
-    assert (extra->freelist.capElems == extra->contents.capElems);
+    assert (extra->freelist.cap_elems == extra->contents.cap_elems);
     return true;
 }
 

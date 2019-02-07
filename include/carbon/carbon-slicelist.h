@@ -111,33 +111,33 @@ typedef struct CARBON_slice_list_t
     uint32_t appenderIdx;
 
     carbon_err_t err;
-} SliceList;
+} carbon_slice_list_t;
 
 typedef struct CARBON_slice_handle_t
 {
     Slice *container;
     const char *key;
     carbon_string_id_t value;
-    bool isContained;
-} SliceHandle;
+    bool is_contained;
+} slice_handle_t;
 
 CARBON_EXPORT(bool)
-SliceListCreate(SliceList *list, const carbon_alloc_t *alloc, size_t sliceCapacity);
+carbon_slice_list_create(carbon_slice_list_t *list, const carbon_alloc_t *alloc, size_t sliceCapacity);
 
 CARBON_EXPORT(bool)
-SliceListDrop(SliceList *list);
+SliceListDrop(carbon_slice_list_t *list);
 
 CARBON_EXPORT(bool)
-SliceListLookupByKey(SliceHandle *handle, SliceList *list, const char *needle);
+carbon_slice_list_lookup(slice_handle_t *handle, carbon_slice_list_t *list, const char *needle);
 
 CARBON_EXPORT(bool)
-SliceListIsEmpty(const SliceList *list);
+SliceListIsEmpty(const carbon_slice_list_t *list);
 
 CARBON_EXPORT(bool)
-SliceListInsert(SliceList *list, char **strings, carbon_string_id_t *ids, size_t npairs);
+carbon_slice_list_insert(carbon_slice_list_t *list, char **strings, carbon_string_id_t *ids, size_t npairs);
 
 CARBON_EXPORT(bool)
-SliceListRemove(SliceList *list, SliceHandle *handle);
+SliceListRemove(carbon_slice_list_t *list, slice_handle_t *handle);
 
 CARBON_END_DECL
 

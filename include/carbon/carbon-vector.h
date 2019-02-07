@@ -75,7 +75,7 @@ typedef struct carbon_vec
     /**
      *  The number of elements for which currently memory is reserved
      */
-    uint32_t capElems;
+    uint32_t cap_elems;
 
     /**
     * The grow factor considered for resize operations
@@ -99,11 +99,11 @@ typedef struct carbon_vec
 typedef carbon_vec_t ofType(char *) StringVector;
 typedef carbon_vec_t ofType(const char *) StringRefVector;
 
-#define STRING_VECTOR_CREATE(vec, alloc, capElems)                                                                     \
-    carbon_vec_create(vec, alloc, sizeof(char *), capElems);
+#define STRING_VECTOR_CREATE(vec, alloc, cap_elems)                                                                     \
+    carbon_vec_create(vec, alloc, sizeof(char *), cap_elems);
 
-#define STRING_REF_VECTOR_CREATE(vec, alloc, capElems)                                                                 \
-    STRING_VECTOR_CREATE(vec, alloc, capElems)                                                                         \
+#define STRING_REF_VECTOR_CREATE(vec, alloc, cap_elems)                                                                 \
+    STRING_VECTOR_CREATE(vec, alloc, cap_elems)                                                                         \
 
 #define STRING_VECTOR_DROP(vec)                                                                                        \
 ({                                                                                                                     \
@@ -133,11 +133,11 @@ typedef carbon_vec_t ofType(const char *) StringRefVector;
  * @param out non-null vector that should be constructed
  * @param alloc an allocator
  * @param elemSize fixed-length element size
- * @param capElems number of elements for which memory should be reserved
+ * @param cap_elems number of elements for which memory should be reserved
  * @return STATUS_OK if success, and STATUS_NULLPTR in case of NULL pointer parameters
  */
 CARBON_EXPORT(bool)
-carbon_vec_create(carbon_vec_t *out, const carbon_alloc_t *alloc, size_t elemSize, size_t capElems);
+carbon_vec_create(carbon_vec_t *out, const carbon_alloc_t *alloc, size_t elemSize, size_t cap_elems);
 
 
 /**

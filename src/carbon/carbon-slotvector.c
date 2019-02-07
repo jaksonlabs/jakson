@@ -17,12 +17,12 @@
 
 #include "carbon/carbon-slotvector.h"
 
-bool SlotVectorCreate(SlotVector *vector, const carbon_alloc_t *alloc, size_t elemSize, size_t capElems)
+bool SlotVectorCreate(SlotVector *vector, const carbon_alloc_t *alloc, size_t elemSize, size_t cap_elems)
 {
     CARBON_NON_NULL_OR_ERROR(vector)
     CARBON_NON_NULL_OR_ERROR(alloc)
-    CARBON_CHECK_SUCCESS(carbon_vec_create(&vector->content, alloc, elemSize, capElems));
-    CARBON_CHECK_SUCCESS(carbon_vec_create(&vector->freeList, alloc, sizeof(SlotVectorSlot), capElems));
+    CARBON_CHECK_SUCCESS(carbon_vec_create(&vector->content, alloc, elemSize, cap_elems));
+    CARBON_CHECK_SUCCESS(carbon_vec_create(&vector->freeList, alloc, sizeof(SlotVectorSlot), cap_elems));
     carbon_error_init(&vector->err);
     return true;
 }

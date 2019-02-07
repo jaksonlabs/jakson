@@ -33,7 +33,7 @@ typedef struct SlotVector
 } SlotVector;
 
 CARBON_EXPORT(bool)
-SlotVectorCreate(SlotVector *vector, const carbon_alloc_t *alloc, size_t elemSize, size_t capElems);
+SlotVectorCreate(SlotVector *vector, const carbon_alloc_t *alloc, size_t elemSize, size_t cap_elems);
 
 CARBON_EXPORT(bool)
 SlotVectorGetError(carbon_err_t *err, const SlotVector *vector);
