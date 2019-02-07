@@ -1,0 +1,7 @@
+*.carbon
+*.json
+*.dylib
+*.cbp
+install_manifest.txt
+build
+cmake-build-debug
