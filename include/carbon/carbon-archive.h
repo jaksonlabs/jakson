@@ -321,8 +321,7 @@ carbon_archive_object_values_null_array_lengths(uint32_t *length, size_t idx, ca
 CARBON_EXPORT(bool)
 carbon_archive_table_open(carbon_archive_table_t *out, carbon_archive_object_t *obj);
 
-CARBON_EXPORT(bool)
-carbon_archive_table_get_error(carbon_err_t *out, carbon_archive_table_t *table);
+CARBON_DEFINE_GET_ERROR_FUNCTION(carbon_archive_table, carbon_archive_table_t, table);
 
 CARBON_EXPORT(bool)
 carbon_archive_table_column_group(carbon_column_group_t *group, size_t idx, carbon_archive_table_t *table);

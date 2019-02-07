@@ -81,7 +81,7 @@
     if (obj->flags.bits.bit_flag_name) {                                                                           \
         assert(obj->props.offset_name != 0);                                                                      \
         carbon_memfile_seek(&obj->file, obj->props.offset_name);                                                       \
-        ewmbedded_fixed_prop_t prop;                                                                                        \
+        embedded_fixed_prop_t prop;                                                                                        \
         embedded_fixed_props_read(&prop, &obj->file);                                                                  \
         reset_cabin_object_mem_file(obj);                                                                                  \
         CARBON_OPTIONAL_SET(num_pairs, prop.header->num_entries);                                                               \
@@ -1617,8 +1617,8 @@ static bool print_column_form_memfile(FILE *file, carbon_err_t *err, carbon_memf
             header->column_name, header->value_type, type_name, header->num_entries);
 
     for (size_t i = 0; i < header->num_entries; i++) {
-        carbon_off_t entryOff = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
-        fprintf(file, "offset: 0x%04x%s", (unsigned) entryOff, i + 1 < header->num_entries ? ", " : "");
+        carbon_off_t entry_off = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
+        fprintf(file, "offset: 0x%04x%s", (unsigned) entry_off, i + 1 < header->num_entries ? ", " : "");
     }
 
     uint32_t *positions = (uint32_t *) CARBON_MEMFILE_READ(memfile, header->num_entries * sizeof(uint32_t));
@@ -1929,7 +1929,7 @@ typedef struct
     struct simple_prop_header *header;
     const carbon_string_id_t *keys;
     const void *values;
-} ewmbedded_fixed_prop_t;
+} embedded_fixed_prop_t;
 
 typedef struct
 {
@@ -1960,7 +1960,7 @@ typedef struct
     const carbon_string_id_t *keys;
 } embedded_null_prop_t;
 
-static void embedded_fixed_props_read(ewmbedded_fixed_prop_t *prop, carbon_memfile_t *memfile) {
+static void embedded_fixed_props_read(embedded_fixed_prop_t *prop, carbon_memfile_t *memfile) {
     prop->header = CARBON_MEMFILE_READ_TYPE(memfile, struct simple_prop_header);
     prop->keys = (carbon_string_id_t *) CARBON_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(carbon_string_id_t));
     prop->values = carbon_memfile_peek(memfile, 1);
@@ -2244,20 +2244,20 @@ static bool is_valid_carbon_file(const struct carbon_file_header *header)
     }
 }
 
-static void dumpPrintRecordHeader(FILE *file, carbon_memfile_t *memfile)
+static void print_record_header_from_memfile(FILE *file, carbon_memfile_t *memfile)
 {
     unsigned offset = CARBON_MEMFILE_TELL(memfile);
     struct record_header *header = CARBON_MEMFILE_READ_TYPE(memfile, struct record_header);
     carbon_archive_record_flags_t flags;
     flags.value = header->flags;
-    char *flagsString = record_header_flags_to_string(&flags);
+    char *flags_string = record_header_flags_to_string(&flags);
     fprintf(file, "0x%04x ", offset);
     fprintf(file, "[marker: %c] [flags: %s] [record_size: 0x%04x]\n",
-            header->marker, flagsString, (unsigned) header->record_size);
-    free(flagsString);
+            header->marker, flags_string, (unsigned) header->record_size);
+    free(flags_string);
 }
 
-static bool dumpPrintCabinHeader(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile)
+static bool print_carbon_header_from_memfile(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile)
 {
     unsigned offset = CARBON_MEMFILE_TELL(memfile);
     assert(carbon_memfile_size(memfile) > sizeof(struct carbon_file_header));
@@ -2273,7 +2273,7 @@ static bool dumpPrintCabinHeader(FILE *file, carbon_err_t *err, carbon_memfile_t
     return true;
 }
 
-static bool dumpEmbeddedDic(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile)
+static bool print_embedded_dic_from_memfile(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile)
 {
     carbon_archive_compressor_t strategy;
     union carbon_archive_dic_flags flags;
@@ -2304,13 +2304,13 @@ static bool dumpEmbeddedDic(FILE *file, carbon_err_t *err, carbon_memfile_t *mem
 
 static bool print_archive_from_memfile(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile)
 {
-    if (!dumpPrintCabinHeader(file, err, memfile)) {
+    if (!print_carbon_header_from_memfile(file, err, memfile)) {
         return false;
     }
-    if (!dumpEmbeddedDic(file, err, memfile)) {
+    if (!print_embedded_dic_from_memfile(file, err, memfile)) {
         return false;
     }
-    dumpPrintRecordHeader(file, memfile);
+    print_record_header_from_memfile(file, memfile);
     if (!print_object(file, err, memfile, 0)) {
         return false;
     }
@@ -2349,10 +2349,9 @@ static carbon_archive_object_flags_t *get_flags(carbon_archive_object_flags_t *f
     return flags;
 }
 
-static bool initDecompressor(carbon_archive_record_table_t *file);
-static bool readRecord(carbon_archive_record_table_t *file, carbon_off_t record_header_offset);
-static void resetStringDicDiskFileCursor(carbon_archive_record_table_t *file);
-static void convertObjectToModel(carbon_doc_t *model, carbon_archive_object_t *obj);
+static bool init_decompressor(carbon_archive_record_table_t *file);
+static bool read_record(carbon_archive_record_table_t *file, carbon_off_t record_header_offset);
+static void reset_string_dic_disk_file_cursor(carbon_archive_record_table_t *file);
 
 bool carbon_archive_open(carbon_archive_t *out,
                         const char *file_path)
@@ -2378,10 +2377,10 @@ bool carbon_archive_open(carbon_archive_t *out,
                 CARBON_PRINT_ERROR(CARBON_ERR_FORMATVERERR);
                 return false;
             } else {
-                if ((status = initDecompressor(&out->record_table)) != true) {
+                if ((status = init_decompressor(&out->record_table)) != true) {
                     return status;
                 }
-                if ((status = readRecord(&out->record_table, header.root_object_header_offset)) != true) {
+                if ((status = read_record(&out->record_table, header.root_object_header_offset)) != true) {
                     return status;
                 }
 
@@ -2395,7 +2394,7 @@ bool carbon_archive_open(carbon_archive_t *out,
                 out->info.record_table_size = fileEnd - header.root_object_header_offset;
                 carbon_error_init(&out->err);
 
-                resetStringDicDiskFileCursor(&out->record_table);
+                reset_string_dic_disk_file_cursor(&out->record_table);
             }
         }
     }
@@ -2412,7 +2411,7 @@ carbon_archive_get_info(carbon_archive_info_t *info, const struct carbon_archive
     return true;
 }
 
-static carbon_off_t objectSetup(carbon_archive_object_t *obj, carbon_memblock_t *memBlock, carbon_off_t objectHeaderOffset, carbon_archive_record_table_t *context)
+static carbon_off_t object_init(carbon_archive_object_t *obj, carbon_memblock_t *memBlock, carbon_off_t objectHeaderOffset, carbon_archive_record_table_t *context)
 {
     carbon_memfile_open(&obj->file, memBlock, CARBON_MEMFILE_MODE_READONLY);
     carbon_memfile_seek(&obj->file, objectHeaderOffset);
@@ -2426,9 +2425,9 @@ static carbon_off_t objectSetup(carbon_archive_object_t *obj, carbon_memblock_t 
     obj->flags.value = header->flags;
     read_prop_offsets(&obj->props, &obj->file, &flags);
     obj->self = objectHeaderOffset;
-    carbon_off_t readLength = CARBON_MEMFILE_TELL(&obj->file) - objectHeaderOffset;
+    carbon_off_t read_length = CARBON_MEMFILE_TELL(&obj->file) - objectHeaderOffset;
     carbon_memfile_seek(&obj->file, objectHeaderOffset);
-    return readLength;
+    return read_length;
 }
 
 bool carbon_archive_close(carbon_archive_t *archive)
@@ -2439,7 +2438,7 @@ bool carbon_archive_close(carbon_archive_t *archive)
     return true;
 }
 
-static bool initDecompressor(carbon_archive_record_table_t *file)
+static bool init_decompressor(carbon_archive_record_table_t *file)
 {
     assert(file->diskFile);
 
@@ -2461,7 +2460,7 @@ static bool initDecompressor(carbon_archive_record_table_t *file)
     return true;
 }
 
-static bool readRecord(carbon_archive_record_table_t *file, carbon_off_t record_header_offset)
+static bool read_record(carbon_archive_record_table_t *file, carbon_off_t record_header_offset)
 {
     carbon_err_t err;
     fseek(file->diskFile, record_header_offset, SEEK_SET);
@@ -2491,17 +2490,9 @@ static bool readRecord(carbon_archive_record_table_t *file, carbon_off_t record_
     }
 }
 
-static void resetStringDicDiskFileCursor(carbon_archive_record_table_t *file)
+static void reset_string_dic_disk_file_cursor(carbon_archive_record_table_t *file)
 {
     fseek(file->diskFile, sizeof(struct carbon_file_header) + sizeof(struct embedded_dic_header), SEEK_SET);
-}
-
-CARBON_FUNC_UNUSED
-static void convertObjectToModel(carbon_doc_t *model, carbon_archive_object_t *obj)
-{
-//    carbon_doc_t
-    CARBON_UNUSED(model);
-    CARBON_UNUSED(obj);
 }
 
 static void reset_cabin_object_mem_file(carbon_archive_object_t *object)
@@ -2510,7 +2501,7 @@ static void reset_cabin_object_mem_file(carbon_archive_object_t *object)
 }
 
 CARBON_FUNC_UNUSED
-static void getObjectProperties(carbon_archive_object_t *object)
+static void get_object_props(carbon_archive_object_t *object)
 {
     if (object->flags.bits.has_object_props) {
         assert(object->props.objects != 0);
@@ -2526,7 +2517,7 @@ carbon_archive_record(carbon_archive_object_t *root, carbon_archive_t *archive)
 {
     CARBON_NON_NULL_OR_ERROR(root)
     CARBON_NON_NULL_OR_ERROR(archive)
-    objectSetup(root, archive->record_table.recordDataBase, 0, &archive->record_table);
+    object_init(root, archive->record_table.recordDataBase, 0, &archive->record_table);
     return true;
 }
 
@@ -2652,15 +2643,6 @@ bool carbon_archive_table_open(carbon_archive_table_t *out, carbon_archive_objec
     }
 }
 
-CARBON_EXPORT(bool)
-carbon_archive_table_get_error(carbon_err_t *out, carbon_archive_table_t *table)
-{
-    CARBON_NON_NULL_OR_ERROR(out)
-    CARBON_NON_NULL_OR_ERROR(table)
-    carbon_error_cpy(out, &table->err);
-    return true;
-}
-
 bool carbon_archive_object_values_object(carbon_archive_object_t *out, size_t idx,
                                          carbon_archive_object_t *props)
 {
@@ -2679,13 +2661,13 @@ bool carbon_archive_object_values_object(carbon_archive_object_t *out, size_t id
             CARBON_ERROR(&props->err, CARBON_ERR_NOTFOUND);
             return false;
         } else {
-            objectSetup(out, props->context->recordDataBase, objectProp.offsets[idx], props->context);
+            object_init(out, props->context->recordDataBase, objectProp.offsets[idx], props->context);
             return true;
         }
     }
 }
 
-#define OBJECT_GET_VALUES_OF_FIX_TYPE_GENERIC(obj, bitflagPropName, offsetPropName, T)                              \
+#define OBJECT_GET_VALUES_OF_FIX_TYPE_GENERIC(obj, bit_flag_prop_name, offset_prop_name, T)                              \
 ({                                                                                                                     \
     if (!obj) {                                                                                                        \
         CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_NULLPTR);                                                \
@@ -2693,10 +2675,10 @@ bool carbon_archive_object_values_object(carbon_archive_object_t *out, size_t id
                                                                                                                        \
     const void *result = NULL;                                                                                         \
                                                                                                                        \
-    if (obj->flags.bits.bitflagPropName) {                                                                       \
-        assert(obj->props.offsetPropName != 0);                                                                  \
-        carbon_memfile_seek(&obj->file, obj->props.offsetPropName);                                                   \
-        ewmbedded_fixed_prop_t prop;                                                                                        \
+    if (obj->flags.bits.bit_flag_prop_name) {                                                                       \
+        assert(obj->props.offset_prop_name != 0);                                                                  \
+        carbon_memfile_seek(&obj->file, obj->props.offset_prop_name);                                                   \
+        embedded_fixed_prop_t prop;                                                                                        \
         embedded_fixed_props_read(&prop, &obj->file);                                                                  \
         reset_cabin_object_mem_file(obj);                                                                                  \
         CARBON_OPTIONAL_SET(npairs, prop.header->num_entries);                                                               \
@@ -2784,11 +2766,11 @@ const carbon_string_id_t *carbon_archive_object_values_strings(CARBON_NULLABLE
     return OBJECT_GET_VALUES_OF_FIX_TYPE_GENERIC(obj, has_string_props, strings, carbon_string_id_t);
 }
 
-#define OBJECT_GET_ARRAY_LENGTHS_GENERIC(err, length, obj, bitfielName, offset_name, idx, prop)                              \
+#define OBJECT_GET_ARRAY_LENGTHS_GENERIC(err, length, obj, bit_fiel_name, offset_name, idx, prop)                              \
 ({                                                                                                                     \
     int status;                                                                                                        \
                                                                                                                        \
-    if (obj->flags.bits.bitfielName) {                                                                           \
+    if (obj->flags.bits.bit_fiel_name) {                                                                           \
         assert(obj->props.offset_name != 0);                                                                      \
         carbon_memfile_seek(&obj->file, obj->props.offset_name);                                                       \
         embedded_array_props_read(&prop, &obj->file);                                                                  \
@@ -2813,11 +2795,11 @@ const carbon_string_id_t *carbon_archive_object_values_strings(CARBON_NULLABLE
 ({                                                                                                                     \
     const void *result = NULL;                                                                                         \
     if (status == true) {                                                                                         \
-        size_t skipSize = 0;                                                                                           \
+        size_t skip_size = 0;                                                                                           \
         for (size_t i = 0; i < idx; i++) {                                                                             \
-            skipSize += prop.lengths[i] * sizeof(T);                                                                \
+            skip_size += prop.lengths[i] * sizeof(T);                                                                \
         }                                                                                                              \
-        carbon_memfile_seek(&obj->file, prop.values_begin + skipSize);                                                       \
+        carbon_memfile_seek(&obj->file, prop.values_begin + skip_size);                                                       \
         result = carbon_memfile_peek(&obj->file, 1);                                                                        \
         reset_cabin_object_mem_file(obj);                                                                                  \
     }                                                                                                                  \
@@ -2953,9 +2935,9 @@ bool carbon_archive_table_column_group(carbon_column_group_t *group, size_t idx,
         CARBON_ERROR(&table->err, CARBON_ERR_OUTOFBOUNDS);
         return false;
     } else {
-        carbon_off_t groupOff = table->groups_offsets[idx];
+        carbon_off_t group_off = table->groups_offsets[idx];
         carbon_off_t last = CARBON_MEMFILE_TELL(&table->context->file);
-        carbon_memfile_seek(&table->context->file, groupOff);
+        carbon_memfile_seek(&table->context->file, group_off);
         struct column_group_header *column_group_header = CARBON_MEMFILE_READ_TYPE(&table->context->file,
                                                                         struct column_group_header);
         group->ncolumns = column_group_header->num_columns;
@@ -3009,13 +2991,13 @@ bool carbon_archive_table_field_get(carbon_field_t *field, size_t idx, carbon_co
         CARBON_ERROR(&column->err, CARBON_ERR_OUTOFBOUNDS);
     } else {
         carbon_off_t last = CARBON_MEMFILE_TELL(&column->context->file);
-        carbon_off_t entryOff = column->entry_offsets[idx];
-        carbon_memfile_seek(&column->context->file, entryOff);
+        carbon_off_t entry_off = column->entry_offsets[idx];
+        carbon_memfile_seek(&column->context->file, entry_off);
         field->nentries = *CARBON_MEMFILE_READ_TYPE(&column->context->file, uint32_t);
         field->data = carbon_memfile_peek(&column->context->file, 1);
         field->type = column->type;
         field->context = column->context;
-        field->data_offset = entryOff + sizeof(uint32_t);
+        field->data_offset = entry_off + sizeof(uint32_t);
         carbon_memfile_seek(&column->context->file, last);
         return true;
     }
@@ -3112,9 +3094,9 @@ bool carbon_archive_table_field_object_cursor_next(carbon_archive_object_t **obj
     CARBON_NON_NULL_OR_ERROR(obj);
     CARBON_NON_NULL_OR_ERROR(cursor);
     if (cursor->current_idx < cursor->max_idx) {
-        carbon_off_t readLength = objectSetup(&cursor->obj, cursor->mem_block, cursor->field->data_offset,
+        carbon_off_t read_length = object_init(&cursor->obj, cursor->mem_block, cursor->field->data_offset,
                                         cursor->field->context->context);
-        cursor->field->data_offset += readLength;
+        cursor->field->data_offset += read_length;
         carbon_memfile_t file;
         carbon_memfile_open(&file, cursor->mem_block, CARBON_MEMFILE_MODE_READONLY);
         carbon_memfile_seek(&file, cursor->field->data_offset);
