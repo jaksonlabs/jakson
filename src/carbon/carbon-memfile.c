@@ -103,14 +103,14 @@ const carbon_byte_t *carbon_memfile_read(carbon_memfile_t *file, carbon_off_t nb
 
 bool carbon_memfile_skip(carbon_memfile_t *file, carbon_off_t nbytes)
 {
-    carbon_off_t requiredSize = file->pos + nbytes;
+    carbon_off_t required_size = file->pos + nbytes;
     file->pos += nbytes;
     carbon_off_t file_size;
     carbon_memblock_size(&file_size, file->memblock);
 
-    if (CARBON_BRANCH_UNLIKELY(requiredSize >= file_size)) {
+    if (CARBON_BRANCH_UNLIKELY(required_size >= file_size)) {
         if (file->mode == CARBON_MEMFILE_MODE_READWRITE) {
-            carbon_memblock_resize(file->memblock, requiredSize * 1.7f);
+            carbon_memblock_resize(file->memblock, required_size * 1.7f);
         } else {
             CARBON_ERROR(&file->err, CARBON_ERR_WRITEPROT);
             return false;
@@ -141,9 +141,9 @@ bool carbon_memfile_write(carbon_memfile_t *file, const void *data, carbon_off_t
     if (file->mode == CARBON_MEMFILE_MODE_READWRITE) {
         carbon_off_t file_size;
         carbon_memblock_size(&file_size, file->memblock);
-        carbon_off_t requiredSize = file->pos + nbytes;
-        if (CARBON_BRANCH_UNLIKELY(requiredSize >= file_size)) {
-            carbon_memblock_resize(file->memblock, requiredSize * 1.7f);
+        carbon_off_t required_size = file->pos + nbytes;
+        if (CARBON_BRANCH_UNLIKELY(required_size >= file_size)) {
+            carbon_memblock_resize(file->memblock, required_size * 1.7f);
         }
 
         carbon_memblock_write(file->memblock, file->pos, data, nbytes);
@@ -262,10 +262,10 @@ void *carbon_memfile_current_pos(carbon_memfile_t *file, carbon_off_t nbytes)
     if (file && nbytes > 0) {
         carbon_off_t file_size;
         carbon_memblock_size(&file_size, file->memblock);
-        carbon_off_t requiredSize = file->pos + nbytes;
+        carbon_off_t required_size = file->pos + nbytes;
         if (CARBON_BRANCH_UNLIKELY(file->pos + nbytes >= file_size)) {
             if (file->mode == CARBON_MEMFILE_MODE_READWRITE) {
-                carbon_memblock_resize(file->memblock, requiredSize * 1.7f);
+                carbon_memblock_resize(file->memblock, required_size * 1.7f);
             } else {
                 CARBON_ERROR(&file->err, CARBON_ERR_WRITEPROT);
                 return NULL;
