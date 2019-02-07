@@ -3,7 +3,15 @@
 The following grammar describes the structure of a valid CARBON archive file (in Version 1). You may use 
 a [Railroad Diagram Generator](https://www.bottlecaps.de/rr/ui) to generate a syntax diagram.
 
+A CARBON archive is encoded using a marker-based structure:
+```
+<marker> <data>
+```
+A `marker` is an particular 8-bit character determining how the byte-stream `data` is interpreted. 
 In the following, ``u8``, ``u32``, and ``u64`` refer to a 8-bit, 32-bit resp. 64-bit unsigned integer values.
+
+
+Using an EBNF notation, the structure of a CARBON file is:
 
 ```
 archive  ::= archive-header string-table record-header carbon-object
