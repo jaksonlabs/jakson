@@ -444,13 +444,13 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
             keyNames = carbon_archive_object_keys_to_type(&numNestedKeys, CARBON_TYPE_INT32, &nested);
             const carbon_int32_t* valueInt32 = carbon_archive_object_values_int32(NULL, &nested);
             for (size_t j = 0; j < numNestedKeys; j++) {
-                printf("  key '%"PRIu64"' maps to int32s: %d\n", keyNames[j], valueInt32[j]);
+                printf("  key '%"PRIu64"' maps to int32s: %"PRIi32"\n", keyNames[j], valueInt32[j]);
             }
             //----------------------------------------------------------------------------------------------------------
             keyNames = carbon_archive_object_keys_to_type(&numNestedKeys, CARBON_TYPE_INT64, &nested);
             const carbon_int64_t* valueInt64 = carbon_archive_object_values_int64s(NULL, &nested);
             for (size_t j = 0; j < numNestedKeys; j++) {
-                printf("  key '%"PRIu64"' maps to int64: %lld\n", keyNames[j], valueInt64[j]);
+                printf("  key '%"PRIu64"' maps to int64: %"PRIi64"\n", keyNames[j], valueInt64[j]);
             }
             //----------------------------------------------------------------------------------------------------------
             keyNames = carbon_archive_object_keys_to_type(&numNestedKeys, CARBON_TYPE_UINT8, &nested);
@@ -474,7 +474,7 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
             keyNames = carbon_archive_object_keys_to_type(&numNestedKeys, CARBON_TYPE_UINT64, &nested);
             const carbon_uin64_t* valueUInt64 = carbon_archive_object_values_uint64(NULL, &nested);
             for (size_t j = 0; j < numNestedKeys; j++) {
-                printf("  key '%"PRIu64"' maps to uint64s: %llu\n", keyNames[j], valueUInt64[j]);
+                printf("  key '%"PRIu64"' maps to uint64s: %"PRIu64"\n", keyNames[j], valueUInt64[j]);
             }
             //----------------------------------------------------------------------------------------------------------
             keyNames = carbon_archive_object_keys_to_type(&numNestedKeys, CARBON_TYPE_BOOL, &nested);
@@ -540,7 +540,7 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
                 const carbon_int64_t *values = carbon_archive_object_values_int64_arrays(&length, j, &nested);
                 printf("  key '%"PRIu64"' maps to int64 array\n\t -> [", keyNames[j]);
                 for (size_t k = 0; k < length; k++) {
-                    printf("%lld ", values[k]);
+                    printf("%"PRIi64" ", values[k]);
                 }
                 printf("]\n");
             }
@@ -580,7 +580,7 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
                 const carbon_uin64_t *values = carbon_archive_object_values_uint64_arrays(&length, j, &nested);
                 printf("  key '%"PRIu64"' maps to uint64 array\n\t -> [", keyNames[j]);
                 for (size_t k = 0; k < length; k++) {
-                    printf("%llu ", values[k]);
+                    printf("%"PRIu64" ", values[k]);
                 }
                 printf("]\n");
             }
@@ -674,7 +674,7 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
                             case carbon_field_type_int64: {
                                 const carbon_int64_t *vals = carbon_archive_table_field_get_int64_array(&len, &field);
                                 for (size_t x = 0; x < len; x++) {
-                                    printf("%lld ", vals[x]);
+                                    printf("%"PRIi64" ", vals[x]);
                                 }
                             } break;
                             case carbon_field_type_uint8: {
@@ -698,7 +698,7 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
                             case carbon_field_type_uint64: {
                                 const carbon_uin64_t *vals = carbon_archive_table_field_get_uint64_array(&len, &field);
                                 for (size_t x = 0; x < len; x++) {
-                                    printf("%llu ", vals[x]);
+                                    printf("%"PRIu64"", vals[x]);
                                 }
                             } break;
                             case carbon_field_type_float: {
