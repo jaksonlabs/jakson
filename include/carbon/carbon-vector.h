@@ -231,7 +231,7 @@ CARBON_EXPORT(const void *)
 carbon_vec_pop(carbon_vec_t *vec);
 
 CARBON_EXPORT(bool)
-VectorClear(carbon_vec_t *vec);
+carbon_vec_clear(carbon_vec_t *vec);
 
 /**
  * Shinks the vector's internal data block to fits its real size, i.e., remove reserved memory

@@ -149,7 +149,7 @@ const void *carbon_vec_pop(carbon_vec_t *vec)
     return result;
 }
 
-bool VectorClear(carbon_vec_t *vec)
+bool carbon_vec_clear(carbon_vec_t *vec)
 {
     CARBON_NON_NULL_OR_ERROR(vec)
     vec->numElems = 0;

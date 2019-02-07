@@ -115,13 +115,13 @@ static bool this_get_contents(carbon_strdic_t *self, carbon_vec_t ofType (char *
 static bool this_reset_counters(carbon_strdic_t *self);
 static bool this_counters(carbon_strdic_t *self, carbon_string_hash_counters_t *counters);
 
-static bool thisLock(carbon_strdic_t *self);
+static bool this_lock(carbon_strdic_t *self);
 static bool this_unlock(carbon_strdic_t *self);
 
 static bool this_create_extra(carbon_strdic_t *self, size_t capacity, size_t num_index_buckets,
                            size_t approx_num_unique_str, size_t num_threads);
 
-static bool thisSetupCarriers(carbon_strdic_t *self, size_t capacity, size_t num_index_buckets,
+static bool this_setup_carriers(carbon_strdic_t *self, size_t capacity, size_t num_index_buckets,
                              size_t approx_num_unique_str, size_t num_threads);
 
 #define THIS_EXTRAS(self)                                                                                              \
@@ -162,7 +162,7 @@ static bool this_create_extra(carbon_strdic_t *self, size_t capacity, size_t num
     async_extra *extra = THIS_EXTRAS(self);
     carbon_spinlock_init(&extra->lock);
     carbon_vec_create(&extra->carriers, &self->alloc, sizeof(carrier_t), num_threads);
-    thisSetupCarriers(self, capacity, num_index_buckets, approx_num_unique_str, num_threads);
+    this_setup_carriers(self, capacity, num_index_buckets, approx_num_unique_str, num_threads);
     carbon_vec_create(&extra->carrier_mapping, &self->alloc, sizeof(carrier_t *), capacity);
 
     return true;
@@ -389,7 +389,7 @@ static bool this_insert(carbon_strdic_t *self,
     /** parameter 'num_threads' must be set to 0 for async dictionary */
     CARBON_PRINT_ERROR_AND_DIE_IF(__num_threads != 0, CARBON_ERR_INTERNALERR);
 
-    thisLock(self);
+    this_lock(self);
 
     async_extra *extra = THIS_EXTRAS(self);
     uint_fast16_t num_threads = carbon_vec_length(&extra->carriers);
@@ -512,7 +512,7 @@ static bool this_remove(carbon_strdic_t *self, carbon_string_id_t *strings, size
 
     CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_ASYNC);
 
-    thisLock(self);
+    this_lock(self);
 
     parallel_remove_arg empty;
     struct async_extra *extra = THIS_EXTRAS(self);
@@ -579,7 +579,7 @@ static bool this_locate_safe(carbon_strdic_t *self, carbon_string_id_t **out, bo
 
     CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_ASYNC);
 
-    thisLock(self);
+    this_lock(self);
 
     struct async_extra *extra = THIS_EXTRAS(self);
     uint_fast16_t num_threads = carbon_vec_length(&extra->carriers);
@@ -699,7 +699,7 @@ static bool this_locate_fast(carbon_strdic_t *self, carbon_string_id_t **out, ch
 {
     CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_ASYNC);
 
-    thisLock(self);
+    this_lock(self);
 
     bool *found_mask;
     size_t num_not_found;
@@ -725,7 +725,7 @@ static char **this_extract(carbon_strdic_t *self, const carbon_string_id_t *ids,
         return NULL;
     }
 
-    thisLock(self);
+    this_lock(self);
 
     CARBON_MALLOC(char *, globalResult, num_ids, &self->alloc);
 
@@ -806,7 +806,7 @@ static bool this_free(carbon_strdic_t *self, void *ptr)
 static bool this_num_distinct(carbon_strdic_t *self, size_t *num)
 {
     CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_ASYNC);
-    thisLock(self);
+    this_lock(self);
 
     struct async_extra *extra = THIS_EXTRAS(self);
     size_t num_carriers = carbon_vec_length(&extra->carriers);
@@ -827,41 +827,41 @@ static bool this_get_contents(carbon_strdic_t *self, carbon_vec_t ofType (char *
                            carbon_vec_t ofType(carbon_string_id_t) * string_ids)
 {
     CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_ASYNC);
-    thisLock(self);
+    this_lock(self);
     struct async_extra *extra = THIS_EXTRAS(self);
     size_t num_carriers = carbon_vec_length(&extra->carriers);
-    carbon_vec_t ofType (char *) localStringResults;
-    carbon_vec_t ofType (carbon_string_id_t) localcarbon_string_id_tResults;
-    size_t approxNumDistinctLocalValues;
-    this_num_distinct(self, &approxNumDistinctLocalValues);
-    approxNumDistinctLocalValues = CARBON_MAX(1, approxNumDistinctLocalValues / extra->carriers.numElems);
-    approxNumDistinctLocalValues *= 1.2f;
+    carbon_vec_t ofType (char *) local_string_results;
+    carbon_vec_t ofType (carbon_string_id_t) local_string_id_results;
+    size_t approx_num_distinct_local_values;
+    this_num_distinct(self, &approx_num_distinct_local_values);
+    approx_num_distinct_local_values = CARBON_MAX(1, approx_num_distinct_local_values / extra->carriers.numElems);
+    approx_num_distinct_local_values *= 1.2f;
 
-    carbon_vec_create(&localStringResults, NULL, sizeof(char *), approxNumDistinctLocalValues);
-    carbon_vec_create(&localcarbon_string_id_tResults, NULL, sizeof(carbon_string_id_t), approxNumDistinctLocalValues);
+    carbon_vec_create(&local_string_results, NULL, sizeof(char *), approx_num_distinct_local_values);
+    carbon_vec_create(&local_string_id_results, NULL, sizeof(carbon_string_id_t), approx_num_distinct_local_values);
 
 
     for (size_t thread_id = 0; thread_id < num_carriers; thread_id++)
     {
-        VectorClear(&localStringResults);
-        VectorClear(&localcarbon_string_id_tResults);
+        carbon_vec_clear(&local_string_results);
+        carbon_vec_clear(&local_string_id_results);
 
         carrier_t *carrier = VECTOR_GET(&extra->carriers, thread_id, carrier_t);
 
-        carbon_strdic_get_contents(&localStringResults, &localcarbon_string_id_tResults, &carrier->local_dictionary);
+        carbon_strdic_get_contents(&local_string_results, &local_string_id_results, &carrier->local_dictionary);
 
-        assert(localcarbon_string_id_tResults.numElems == localStringResults.numElems);
-        for (size_t k = 0; k < localStringResults.numElems; k++) {
-            char *string = *VECTOR_GET(&localStringResults, k, char *);
-            carbon_string_id_t localcarbon_string_id_t = *VECTOR_GET(&localcarbon_string_id_tResults, k, carbon_string_id_t);
+        assert(local_string_id_results.numElems == local_string_results.numElems);
+        for (size_t k = 0; k < local_string_results.numElems; k++) {
+            char *string = *VECTOR_GET(&local_string_results, k, char *);
+            carbon_string_id_t localcarbon_string_id_t = *VECTOR_GET(&local_string_id_results, k, carbon_string_id_t);
             carbon_string_id_t global_string_id = MAKE_GLOBAL(thread_id, localcarbon_string_id_t);
             carbon_vec_push(strings, &string, 1);
             carbon_vec_push(string_ids, &global_string_id, 1);
         }
     }
 
-    carbon_vec_drop(&localStringResults);
-    carbon_vec_drop(&localcarbon_string_id_tResults);
+    carbon_vec_drop(&local_string_results);
+    carbon_vec_drop(&local_string_id_results);
     this_unlock(self);
     return true;
 }
@@ -870,7 +870,7 @@ static bool this_reset_counters(carbon_strdic_t *self)
 {
     CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_ASYNC);
 
-    thisLock(self);
+    this_lock(self);
 
     struct async_extra *extra = THIS_EXTRAS(self);
     size_t num_threads = carbon_vec_length(&extra->carriers);
@@ -889,7 +889,7 @@ static bool this_counters(carbon_strdic_t *self, carbon_string_hash_counters_t *
 {
     CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_ASYNC);
 
-    thisLock(self);
+    this_lock(self);
 
     struct async_extra *extra = THIS_EXTRAS(self);
     size_t num_threads = carbon_vec_length(&extra->carriers);
@@ -908,41 +908,41 @@ static bool this_counters(carbon_strdic_t *self, carbon_string_hash_counters_t *
     return true;
 }
 
-typedef struct ParallelCreateCarrierArg
+typedef struct parallel_create_carrier_arg
 {
-    size_t localCapacity;
-    size_t localBucketNum;
-    size_t localBucketCap;
+    size_t local_capacity;
+    size_t local_bucket_num;
+    size_t local_bucket_cap;
     const carbon_alloc_t *alloc;
-} ParallelCreateCarrierArg;
+} parallel_create_carrier_arg_t;
 
-static void parallelCreateCarrier(const void *restrict start, size_t width, size_t len, void *restrict args,
+static void parallel_create_carrier(const void *restrict start, size_t width, size_t len, void *restrict args,
                                   thread_id_t tid)
 {
     CARBON_UNUSED(tid);
     CARBON_UNUSED(width);
 
     carrier_t *carrier = (carrier_t *) start;
-    const ParallelCreateCarrierArg *createArgs = (const ParallelCreateCarrierArg *) args;
+    const parallel_create_carrier_arg_t *createArgs = (const parallel_create_carrier_arg_t *) args;
     while (len--) {
-        carbon_strdic_create_sync(&carrier->local_dictionary, createArgs->localCapacity, createArgs->localBucketNum,
-                                  createArgs->localBucketCap, 0, createArgs->alloc);
+        carbon_strdic_create_sync(&carrier->local_dictionary, createArgs->local_capacity, createArgs->local_bucket_num,
+                                  createArgs->local_bucket_cap, 0, createArgs->alloc);
         memset(&carrier->thread, 0, sizeof(pthread_t));
         carrier++;
     }
 }
 
-static bool thisSetupCarriers(carbon_strdic_t *self, size_t capacity, size_t num_index_buckets,
+static bool this_setup_carriers(carbon_strdic_t *self, size_t capacity, size_t num_index_buckets,
                              size_t approx_num_unique_str, size_t num_threads)
 {
     async_extra *extra = THIS_EXTRAS(self);
-    size_t localBucketNum = CARBON_MAX(1, num_index_buckets / num_threads);
+    size_t local_bucket_num = CARBON_MAX(1, num_index_buckets / num_threads);
     carrier_t new_carrier;
 
-    ParallelCreateCarrierArg createArgs = {
-        .localCapacity = CARBON_MAX(1, capacity / num_threads),
-        .localBucketNum = localBucketNum,
-        .localBucketCap = CARBON_MAX(1, approx_num_unique_str / num_threads / localBucketNum / SLICE_KEY_COLUMN_MAX_ELEMS),
+    parallel_create_carrier_arg_t createArgs = {
+        .local_capacity = CARBON_MAX(1, capacity / num_threads),
+        .local_bucket_num = local_bucket_num,
+        .local_bucket_cap = CARBON_MAX(1, approx_num_unique_str / num_threads / local_bucket_num / SLICE_KEY_COLUMN_MAX_ELEMS),
         .alloc = &self->alloc
     };
 
@@ -951,13 +951,13 @@ static bool thisSetupCarriers(carbon_strdic_t *self, size_t capacity, size_t num
         carbon_vec_push(&extra->carriers, &new_carrier, 1);
     }
 
-    carbon_parallel_for(VECTOR_ALL(&extra->carriers, carrier_t), sizeof(carrier_t), num_threads, parallelCreateCarrier,
+    carbon_parallel_for(VECTOR_ALL(&extra->carriers, carrier_t), sizeof(carrier_t), num_threads, parallel_create_carrier,
                 &createArgs, CARBON_PARALLEL_THREAD_HINT_MULTI, num_threads);
 
     return true;
 }
 
-static bool thisLock(carbon_strdic_t *self)
+static bool this_lock(carbon_strdic_t *self)
 {
     async_extra *extra = THIS_EXTRAS(self);
     CARBON_CHECK_SUCCESS(carbon_spinlock_acquire(&extra->lock));
