@@ -253,13 +253,13 @@ bool carbon_huffman_read_dic_entry(carbon_huffman_entry_info_t *info, carbon_mem
     }
 }
 
-static const uint32_t *getNumUsedBlocks(uint16_t *numUsedBlocks, carbon_huffman_entry_t *entry, uint16_t numBlocks,
+static const uint32_t *getNumUsedBlocks(uint16_t *numUsedBlocks, carbon_huffman_entry_t *entry, uint16_t num_blocks,
                                         const uint32_t *blocks)
 {
-    for (entry->nblocks = 0; entry->nblocks < numBlocks; entry->nblocks++) {
+    for (entry->nblocks = 0; entry->nblocks < num_blocks; entry->nblocks++) {
         const uint32_t *block = blocks + entry->nblocks;
         if (*block != 0) {
-            *numUsedBlocks = (numBlocks - entry->nblocks);
+            *numUsedBlocks = (num_blocks - entry->nblocks);
             return block;
         }
     }
@@ -269,12 +269,12 @@ static const uint32_t *getNumUsedBlocks(uint16_t *numUsedBlocks, carbon_huffman_
 static void importIntoEntry(carbon_huffman_entry_t *entry, const struct HuffNode *node, const carbon_bitmap_t *carbon_bitmap_t)
 {
     entry->letter = node->letter;
-    uint32_t *blocks, numBlocks;
+    uint32_t *blocks, num_blocks;
     const uint32_t *usedBlocks;
-    carbon_bitmap_blocks(&blocks, &numBlocks, carbon_bitmap_t);
-    usedBlocks = getNumUsedBlocks(&entry->nblocks, entry, numBlocks, blocks);
+    carbon_bitmap_blocks(&blocks, &num_blocks, carbon_bitmap_t);
+    usedBlocks = getNumUsedBlocks(&entry->nblocks, entry, num_blocks, blocks);
     entry->blocks = malloc(entry->nblocks * sizeof(uint32_t));
-    if (numBlocks > 0) {
+    if (num_blocks > 0) {
         memcpy(entry->blocks, usedBlocks, entry->nblocks * sizeof(uint32_t));
     } else {
         entry->blocks = NULL;

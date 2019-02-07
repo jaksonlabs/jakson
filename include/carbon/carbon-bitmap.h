@@ -48,7 +48,7 @@ CARBON_EXPORT(bool)
 carbon_bitmap_set(carbon_bitmap_t *carbon_bitmap_t, uint16_t bit_position, bool on);
 
 CARBON_EXPORT(bool)
-carbon_bitmap_get(carbon_bitmap_t *carbon_bitmap_t, uint16_t bitPosition);
+carbon_bitmap_get(carbon_bitmap_t *carbon_bitmap_t, uint16_t bit_position);
 
 CARBON_EXPORT(bool)
 carbon_bitmap_lshift(carbon_bitmap_t *carbon_bitmap_t);
@@ -57,7 +57,7 @@ CARBON_EXPORT(bool)
 carbon_bitmap_print(FILE *file, const carbon_bitmap_t *carbon_bitmap_t);
 
 CARBON_EXPORT(bool)
-carbon_bitmap_blocks(uint32_t **blocks, uint32_t *numBlocks, const carbon_bitmap_t *carbon_bitmap_t);
+carbon_bitmap_blocks(uint32_t **blocks, uint32_t *num_blocks, const carbon_bitmap_t *carbon_bitmap_t);
 
 CARBON_EXPORT(void)
 carbon_bitmap_print_bits(FILE *file, uint32_t n);
