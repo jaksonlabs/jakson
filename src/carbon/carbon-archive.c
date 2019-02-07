@@ -887,7 +887,7 @@ static bool write_array_prop(carbon_off_t *offset, carbon_err_t *err, carbon_mem
             .marker = marker_symbols[value_array_marker_mapping[type].marker].symbol,
             .num_entries = keys->num_elems
         };
-        carbon_off_t propOffset = CARBON_MEMFILE_TELL(memfile);
+        carbon_off_t prop_ofOffset = CARBON_MEMFILE_TELL(memfile);
         carbon_memfile_write(memfile, &header, sizeof(struct array_prop_header));
 
         write_primitive_key_column(memfile, keys);
@@ -897,7 +897,7 @@ static bool write_array_prop(carbon_off_t *offset, carbon_err_t *err, carbon_mem
         if(!write_array_value_column(memfile, err, type, values)) {
             return false;
         }
-        *offset = (propOffset - root_object_header_offset);
+        *offset = (prop_ofOffset - root_object_header_offset);
     } else {
         *offset = 0;
     }
@@ -959,14 +959,14 @@ static bool write_array_props(carbon_memfile_t *memfile, carbon_err_t *err, carb
 }
 
 /** Fixed-length property lists; value position can be determined by size of value and position of key in key column.
- * In contrast, variable-length property list require an additional offset column (see 'writeVarProps') */
-static bool writeFixedProps(carbon_off_t *offset, carbon_err_t *err, carbon_memfile_t *memfile,
+ * In contrast, variable-length property list require an additional offset column (see 'write_var_props') */
+static bool write_fixed_props(carbon_off_t *offset, carbon_err_t *err, carbon_memfile_t *memfile,
                               carbon_vec_t ofType(carbon_string_id_t) *keys,
                               carbon_field_type_e type,
                               carbon_vec_t ofType(T) *values)
 {
     assert(!values || keys->num_elems == values->num_elems);
-    assert(type != carbon_field_type_object); /** use 'writeVarProps' instead */
+    assert(type != carbon_field_type_object); /** use 'write_var_props' instead */
 
     if (keys->num_elems > 0) {
         struct simple_prop_header header = {
@@ -974,14 +974,14 @@ static bool writeFixedProps(carbon_off_t *offset, carbon_err_t *err, carbon_memf
                 .num_entries = keys->num_elems
         };
 
-        carbon_off_t propOffset = CARBON_MEMFILE_TELL(memfile);
+        carbon_off_t prop_ofOffset = CARBON_MEMFILE_TELL(memfile);
         carbon_memfile_write(memfile, &header, sizeof(struct simple_prop_header));
 
         write_primitive_key_column(memfile, keys);
         if(!write_primitive_fixed_value_column(memfile, err, type, values)) {
             return false;
         }
-        *offset = propOffset;
+        *offset = prop_ofOffset;
     } else {
         *offset = 0;
     }
@@ -992,13 +992,13 @@ static bool writeFixedProps(carbon_off_t *offset, carbon_err_t *err, carbon_memf
  * value has unknown size. Hence, a dedicated offset column is added to these properties allowing to seek directly
  * to a particular property. Due to the move of strings (i.e., variable-length values) to a dedicated string table,
  * the only variable-length value for properties are "JSON objects".
- * In contrast, fixed-length property list doesn't require an additional offset column (see 'writeFixedProps') */
-static bool writeVarProps(carbon_off_t *offset,
-                          carbon_err_t *err,
-                          carbon_memfile_t *memfile,
-                          carbon_vec_t ofType(carbon_string_id_t) *keys,
-                          carbon_vec_t ofType(carbon_columndoc_obj_t) *objects,
-                          carbon_off_t root_object_header_offset)
+ * In contrast, fixed-length property list doesn't require an additional offset column (see 'write_fixed_props') */
+static bool write_var_props(carbon_off_t *offset,
+                            carbon_err_t *err,
+                            carbon_memfile_t *memfile,
+                            carbon_vec_t ofType(carbon_string_id_t) *keys,
+                            carbon_vec_t ofType(carbon_columndoc_obj_t) *objects,
+                            carbon_off_t root_object_header_offset)
 {
     assert(!objects || keys->num_elems == objects->num_elems);
 
@@ -1008,78 +1008,78 @@ static bool writeVarProps(carbon_off_t *offset,
             .num_entries = keys->num_elems
         };
 
-        carbon_off_t propOffset = CARBON_MEMFILE_TELL(memfile);
+        carbon_off_t prop_ofOffset = CARBON_MEMFILE_TELL(memfile);
         carbon_memfile_write(memfile, &header, sizeof(struct simple_prop_header));
 
         write_primitive_key_column(memfile, keys);
-        carbon_off_t valueOffset = skip_var_value_offset_column(memfile, keys->num_elems);
-        carbon_off_t *valueOffsets = write_primitive_var_value_column(memfile, err, objects, root_object_header_offset);
-        if (!valueOffsets) {
+        carbon_off_t value_offset = skip_var_value_offset_column(memfile, keys->num_elems);
+        carbon_off_t *value_offsets = write_primitive_var_value_column(memfile, err, objects, root_object_header_offset);
+        if (!value_offsets) {
             return false;
         }
 
         carbon_off_t last = CARBON_MEMFILE_TELL(memfile);
-        write_var_value_offset_column(memfile, valueOffset, last, valueOffsets, keys->num_elems);
-        free(valueOffsets);
-        *offset = propOffset;
+        write_var_value_offset_column(memfile, value_offset, last, value_offsets, keys->num_elems);
+        free(value_offsets);
+        *offset = prop_ofOffset;
     } else {
         *offset = 0;
     }
     return true;
 }
 
-static bool writePrimitiveProps(carbon_memfile_t *memfile, carbon_err_t *err, carbon_columndoc_obj_t *columndoc, carbon_archive_prop_offs_t *offsets,
+static bool write_primitive_props(carbon_memfile_t *memfile, carbon_err_t *err, carbon_columndoc_obj_t *columndoc, carbon_archive_prop_offs_t *offsets,
                                 carbon_off_t root_object_header_offset)
 {
-     if (!writeFixedProps(&offsets->nulls, err, memfile, &columndoc->null_prop_keys, carbon_field_type_null,
+     if (!write_fixed_props(&offsets->nulls, err, memfile, &columndoc->null_prop_keys, carbon_field_type_null,
                                                     NULL)) {
          return false;
      }
-    if (!writeFixedProps(&offsets->bools, err, memfile, &columndoc->bool_prop_keys, carbon_field_type_bool,
+    if (!write_fixed_props(&offsets->bools, err, memfile, &columndoc->bool_prop_keys, carbon_field_type_bool,
                                                        &columndoc->bool_prop_vals)) {
         return false;
     }
-    if (!writeFixedProps(&offsets->int8s, err, memfile, &columndoc->int8_prop_keys, carbon_field_type_int8,
+    if (!write_fixed_props(&offsets->int8s, err, memfile, &columndoc->int8_prop_keys, carbon_field_type_int8,
                                                     &columndoc->int8_prop_vals)) {
         return false;
     }
-    if (!writeFixedProps(&offsets->int16s, err, memfile, &columndoc->int16_prop_keys, carbon_field_type_int16,
+    if (!write_fixed_props(&offsets->int16s, err, memfile, &columndoc->int16_prop_keys, carbon_field_type_int16,
                                                      &columndoc->int16_prop_vals)) {
         return false;
     }
-    if (!writeFixedProps(&offsets->int32s, err, memfile, &columndoc->int32_prop_keys, carbon_field_type_int32,
+    if (!write_fixed_props(&offsets->int32s, err, memfile, &columndoc->int32_prop_keys, carbon_field_type_int32,
                                                      &columndoc->int32_prop_vals)) {
         return false;
     }
-    if (!writeFixedProps(&offsets->int64s, err, memfile, &columndoc->int64_prop_keys, carbon_field_type_int64,
+    if (!write_fixed_props(&offsets->int64s, err, memfile, &columndoc->int64_prop_keys, carbon_field_type_int64,
                                                      &columndoc->int64_prop_vals)) {
         return false;
     }
-    if (!writeFixedProps(&offsets->uint8s, err, memfile, &columndoc->uint8_prop_keys, carbon_field_type_uint8,
+    if (!write_fixed_props(&offsets->uint8s, err, memfile, &columndoc->uint8_prop_keys, carbon_field_type_uint8,
                                                      &columndoc->uint8_prop_vals)) {
         return false;
     }
-    if (!writeFixedProps(&offsets->uint16s, err, memfile, &columndoc->uint16_prop_keys, carbon_field_type_uint16,
+    if (!write_fixed_props(&offsets->uint16s, err, memfile, &columndoc->uint16_prop_keys, carbon_field_type_uint16,
                                                       &columndoc->uint16_prop_vals)) {
         return false;
     }
-    if (!writeFixedProps(&offsets->uint32s, err, memfile, &columndoc->uin32_prop_keys, carbon_field_type_uint32,
+    if (!write_fixed_props(&offsets->uint32s, err, memfile, &columndoc->uin32_prop_keys, carbon_field_type_uint32,
                                                       &columndoc->uint32_prop_vals)) {
         return false;
     }
-    if (!writeFixedProps(&offsets->uint64s, err, memfile, &columndoc->uint64_prop_keys, carbon_field_type_uint64,
+    if (!write_fixed_props(&offsets->uint64s, err, memfile, &columndoc->uint64_prop_keys, carbon_field_type_uint64,
                                                       &columndoc->uint64_prop_vals)) {
         return false;
     }
-    if (!writeFixedProps(&offsets->floats, err, memfile, &columndoc->float_prop_keys, carbon_field_type_float,
+    if (!write_fixed_props(&offsets->floats, err, memfile, &columndoc->float_prop_keys, carbon_field_type_float,
                                                     &columndoc->float_prop_vals)) {
         return false;
     }
-    if (!writeFixedProps(&offsets->strings, err, memfile, &columndoc->string_prop_keys, carbon_field_type_string,
+    if (!write_fixed_props(&offsets->strings, err, memfile, &columndoc->string_prop_keys, carbon_field_type_string,
                                                       &columndoc->string_prop_vals)) {
         return false;
     }
-    if (!writeVarProps(&offsets->objects, err, memfile, &columndoc->obj_prop_keys,
+    if (!write_var_props(&offsets->objects, err, memfile, &columndoc->obj_prop_keys,
                                                     &columndoc->obj_prop_vals, root_object_header_offset)) {
         return false;
     }
@@ -1100,7 +1100,7 @@ static bool writePrimitiveProps(carbon_memfile_t *memfile, carbon_err_t *err, ca
     return true;
 }
 
-static bool writeColumnEntry(carbon_memfile_t *memfile, carbon_err_t *err, carbon_field_type_e type, carbon_vec_t ofType(<T>) *column, carbon_off_t root_object_header_offset)
+static bool write_column_entry(carbon_memfile_t *memfile, carbon_err_t *err, carbon_field_type_e type, carbon_vec_t ofType(<T>) *column, carbon_off_t root_object_header_offset)
 {
     carbon_memfile_write(memfile, &column->num_elems, sizeof(uint32_t));
     switch (type) {
@@ -1141,7 +1141,7 @@ static bool writeColumnEntry(carbon_memfile_t *memfile, carbon_err_t *err, carbo
     return true;
 }
 
-static carbon_field_type_e getValueTypeOfChar(char c)
+static carbon_field_type_e get_value_type_of_char(char c)
 {
     size_t len = sizeof(value_array_marker_mapping)/ sizeof(value_array_marker_mapping[0]);
     for (size_t i = 0; i < len; i++) {
@@ -1152,7 +1152,7 @@ static carbon_field_type_e getValueTypeOfChar(char c)
     return carbon_field_type_null;
 }
 
-static bool writeColumn(carbon_memfile_t *memfile, carbon_err_t *err, carbon_columndoc_column_t *column, carbon_off_t root_object_header_offset)
+static bool write_column(carbon_memfile_t *memfile, carbon_err_t *err, carbon_columndoc_column_t *column, carbon_off_t root_object_header_offset)
 {
     assert(column->array_positions.num_elems == column->values.num_elems);
 
@@ -1166,72 +1166,72 @@ static bool writeColumn(carbon_memfile_t *memfile, carbon_err_t *err, carbon_col
     carbon_memfile_write(memfile, &header, sizeof(struct column_header));
 
     /** skip offset column to value entry points */
-    carbon_off_t valueEntryOffsets = CARBON_MEMFILE_TELL(memfile);
+    carbon_off_t value_entry_offsets = CARBON_MEMFILE_TELL(memfile);
     carbon_memfile_skip(memfile, column->values.num_elems * sizeof(carbon_off_t));
 
     carbon_memfile_write(memfile, column->array_positions.base, column->array_positions.num_elems * sizeof(uint32_t));
 
     for (size_t i = 0; i < column->values.num_elems; i++) {
-        carbon_vec_t ofType(<T>) *columnData = VECTOR_GET(&column->values, i, carbon_vec_t);
-        carbon_off_t columnEntryOffset = CARBON_MEMFILE_TELL(memfile);
-        carbon_off_t relativeEntryOffset = columnEntryOffset - root_object_header_offset;
-        carbon_memfile_seek(memfile, valueEntryOffsets + i * sizeof(carbon_off_t));
-        carbon_memfile_write(memfile, &relativeEntryOffset, sizeof(carbon_off_t));
-        carbon_memfile_seek(memfile, columnEntryOffset);
-        if (!writeColumnEntry(memfile, err, column->type, columnData, root_object_header_offset)) {
+        carbon_vec_t ofType(<T>) *column_data = VECTOR_GET(&column->values, i, carbon_vec_t);
+        carbon_off_t column_entry_offset = CARBON_MEMFILE_TELL(memfile);
+        carbon_off_t relative_entry_offset = column_entry_offset - root_object_header_offset;
+        carbon_memfile_seek(memfile, value_entry_offsets + i * sizeof(carbon_off_t));
+        carbon_memfile_write(memfile, &relative_entry_offset, sizeof(carbon_off_t));
+        carbon_memfile_seek(memfile, column_entry_offset);
+        if (!write_column_entry(memfile, err, column->type, column_data, root_object_header_offset)) {
             return false;
         }
     }
     return true;
 }
 
-static bool writeObjectArrayProps(carbon_memfile_t *memfile, carbon_err_t *err, carbon_vec_t ofType(carbon_columndoc_columngroup_t) *objectKeyColumns,
+static bool write_object_array_props(carbon_memfile_t *memfile, carbon_err_t *err, carbon_vec_t ofType(carbon_columndoc_columngroup_t) *object_key_columns,
                                   carbon_archive_prop_offs_t *offsets, carbon_off_t root_object_header_offset)
 {
-    if (objectKeyColumns->num_elems > 0) {
+    if (object_key_columns->num_elems > 0) {
         struct object_array_header header = {
             .marker = marker_symbols[MARKER_TYPE_PROP_OBJECT_ARRAY].symbol,
-            .num_entries = objectKeyColumns->num_elems
+            .num_entries = object_key_columns->num_elems
         };
 
         offsets->object_arrays = CARBON_MEMFILE_TELL(memfile) - root_object_header_offset;
         carbon_memfile_write(memfile, &header, sizeof(struct object_array_header));
 
-        for (size_t i = 0; i < objectKeyColumns->num_elems; i++) {
-            carbon_columndoc_columngroup_t *columnGroup = VECTOR_GET(objectKeyColumns, i, carbon_columndoc_columngroup_t);
-            carbon_memfile_write(memfile, &columnGroup->key, sizeof(carbon_string_id_t));
+        for (size_t i = 0; i < object_key_columns->num_elems; i++) {
+            carbon_columndoc_columngroup_t *column_group = VECTOR_GET(object_key_columns, i, carbon_columndoc_columngroup_t);
+            carbon_memfile_write(memfile, &column_group->key, sizeof(carbon_string_id_t));
         }
 
         // skip offset column to column groups
-        carbon_off_t columnOffsets = CARBON_MEMFILE_TELL(memfile);
-        carbon_memfile_skip(memfile, objectKeyColumns->num_elems * sizeof(carbon_off_t));
+        carbon_off_t column_offsets = CARBON_MEMFILE_TELL(memfile);
+        carbon_memfile_skip(memfile, object_key_columns->num_elems * sizeof(carbon_off_t));
 
-        for (size_t i = 0; i < objectKeyColumns->num_elems; i++) {
-            carbon_columndoc_columngroup_t *columnGroup = VECTOR_GET(objectKeyColumns, i, carbon_columndoc_columngroup_t);
+        for (size_t i = 0; i < object_key_columns->num_elems; i++) {
+            carbon_columndoc_columngroup_t *column_group = VECTOR_GET(object_key_columns, i, carbon_columndoc_columngroup_t);
 
-            struct column_group_header columnGroupHeader = {
+            struct column_group_header column_group_header = {
                 .marker = marker_symbols[MARKER_TYPE_COLUMN_GROUP].symbol,
-                .num_columns = columnGroup->columns.num_elems
+                .num_columns = column_group->columns.num_elems
             };
 
-            carbon_off_t thisColumnOffsetRelative = CARBON_MEMFILE_TELL(memfile) - root_object_header_offset;
-            carbon_memfile_write(memfile, &columnGroupHeader, sizeof(struct column_group_header));
-            carbon_off_t continueWrite = CARBON_MEMFILE_TELL(memfile);
-            carbon_memfile_seek(memfile, columnOffsets + i * sizeof(carbon_off_t));
-            carbon_memfile_write(memfile, &thisColumnOffsetRelative, sizeof(carbon_off_t));
-            carbon_memfile_seek(memfile, continueWrite);
+            carbon_off_t this_column_offfset_relative = CARBON_MEMFILE_TELL(memfile) - root_object_header_offset;
+            carbon_memfile_write(memfile, &column_group_header, sizeof(struct column_group_header));
+            carbon_off_t continue_write = CARBON_MEMFILE_TELL(memfile);
+            carbon_memfile_seek(memfile, column_offsets + i * sizeof(carbon_off_t));
+            carbon_memfile_write(memfile, &this_column_offfset_relative, sizeof(carbon_off_t));
+            carbon_memfile_seek(memfile, continue_write);
 
-            carbon_off_t offsetColumnToColumns = continueWrite;
-            carbon_memfile_skip(memfile, columnGroup->columns.num_elems * sizeof(carbon_off_t));
+            carbon_off_t offset_column_to_columns = continue_write;
+            carbon_memfile_skip(memfile, column_group->columns.num_elems * sizeof(carbon_off_t));
 
-            for (size_t k = 0; k < columnGroup->columns.num_elems; k++) {
-                carbon_columndoc_column_t *column = VECTOR_GET(&columnGroup->columns, k, carbon_columndoc_column_t);
-                carbon_off_t continueWrite = CARBON_MEMFILE_TELL(memfile);
-                carbon_off_t columnOff = continueWrite - root_object_header_offset;
-                carbon_memfile_seek(memfile, offsetColumnToColumns + k * sizeof(carbon_off_t));
+            for (size_t k = 0; k < column_group->columns.num_elems; k++) {
+                carbon_columndoc_column_t *column = VECTOR_GET(&column_group->columns, k, carbon_columndoc_column_t);
+                carbon_off_t continue_write = CARBON_MEMFILE_TELL(memfile);
+                carbon_off_t columnOff = continue_write - root_object_header_offset;
+                carbon_memfile_seek(memfile, offset_column_to_columns + k * sizeof(carbon_off_t));
                 carbon_memfile_write(memfile, &columnOff, sizeof(carbon_off_t));
-                carbon_memfile_seek(memfile, continueWrite);
-                if(!writeColumn(memfile, err, column, root_object_header_offset)) {
+                carbon_memfile_seek(memfile, continue_write);
+                if(!write_column(memfile, err, column, root_object_header_offset)) {
                     return false;
                 }
             }
@@ -1271,202 +1271,202 @@ static void update_record_header(carbon_memfile_t *memfile,
     carbon_memfile_seek(memfile, offset);
 }
 
-static void propOffsetsWrite(carbon_memfile_t *memfile, const carbon_archive_object_flags_t *flags, carbon_archive_prop_offs_t *propOffsets)
+static void propOffsetsWrite(carbon_memfile_t *memfile, const carbon_archive_object_flags_t *flags, carbon_archive_prop_offs_t *prop_offsets)
 {
     if (flags->bits.has_null_props) {
-        carbon_memfile_write(memfile, &propOffsets->nulls, sizeof(carbon_off_t));
+        carbon_memfile_write(memfile, &prop_offsets->nulls, sizeof(carbon_off_t));
     }
     if (flags->bits.has_bool_props) {
-        carbon_memfile_write(memfile, &propOffsets->bools, sizeof(carbon_off_t));
+        carbon_memfile_write(memfile, &prop_offsets->bools, sizeof(carbon_off_t));
     }
     if (flags->bits.has_int8_props) {
-        carbon_memfile_write(memfile, &propOffsets->int8s, sizeof(carbon_off_t));
+        carbon_memfile_write(memfile, &prop_offsets->int8s, sizeof(carbon_off_t));
     }
     if (flags->bits.has_int16_props) {
-        carbon_memfile_write(memfile, &propOffsets->int16s, sizeof(carbon_off_t));
+        carbon_memfile_write(memfile, &prop_offsets->int16s, sizeof(carbon_off_t));
     }
     if (flags->bits.has_int32_props) {
-        carbon_memfile_write(memfile, &propOffsets->int32s, sizeof(carbon_off_t));
+        carbon_memfile_write(memfile, &prop_offsets->int32s, sizeof(carbon_off_t));
     }
     if (flags->bits.has_int64_props) {
-        carbon_memfile_write(memfile, &propOffsets->int64s, sizeof(carbon_off_t));
+        carbon_memfile_write(memfile, &prop_offsets->int64s, sizeof(carbon_off_t));
     }
     if (flags->bits.has_uint8_props) {
-        carbon_memfile_write(memfile, &propOffsets->uint8s, sizeof(carbon_off_t));
+        carbon_memfile_write(memfile, &prop_offsets->uint8s, sizeof(carbon_off_t));
     }
     if (flags->bits.has_uint16_props) {
-        carbon_memfile_write(memfile, &propOffsets->uint16s, sizeof(carbon_off_t));
+        carbon_memfile_write(memfile, &prop_offsets->uint16s, sizeof(carbon_off_t));
     }
     if (flags->bits.has_uint32_props) {
-        carbon_memfile_write(memfile, &propOffsets->uint32s, sizeof(carbon_off_t));
+        carbon_memfile_write(memfile, &prop_offsets->uint32s, sizeof(carbon_off_t));
     }
     if (flags->bits.has_uint64_props) {
-        carbon_memfile_write(memfile, &propOffsets->uint64s, sizeof(carbon_off_t));
+        carbon_memfile_write(memfile, &prop_offsets->uint64s, sizeof(carbon_off_t));
     }
     if (flags->bits.has_float_props) {
-        carbon_memfile_write(memfile, &propOffsets->floats, sizeof(carbon_off_t));
+        carbon_memfile_write(memfile, &prop_offsets->floats, sizeof(carbon_off_t));
     }
     if (flags->bits.has_string_props) {
-        carbon_memfile_write(memfile, &propOffsets->strings, sizeof(carbon_off_t));
+        carbon_memfile_write(memfile, &prop_offsets->strings, sizeof(carbon_off_t));
     }
     if (flags->bits.has_object_props) {
-        carbon_memfile_write(memfile, &propOffsets->objects, sizeof(carbon_off_t));
+        carbon_memfile_write(memfile, &prop_offsets->objects, sizeof(carbon_off_t));
     }
     if (flags->bits.has_null_array_props) {
-        carbon_memfile_write(memfile, &propOffsets->null_arrays, sizeof(carbon_off_t));
+        carbon_memfile_write(memfile, &prop_offsets->null_arrays, sizeof(carbon_off_t));
     }
     if (flags->bits.has_bool_array_props) {
-        carbon_memfile_write(memfile, &propOffsets->bool_arrays, sizeof(carbon_off_t));
+        carbon_memfile_write(memfile, &prop_offsets->bool_arrays, sizeof(carbon_off_t));
     }
     if (flags->bits.has_int8_array_props) {
-        carbon_memfile_write(memfile, &propOffsets->int8_arrays, sizeof(carbon_off_t));
+        carbon_memfile_write(memfile, &prop_offsets->int8_arrays, sizeof(carbon_off_t));
     }
     if (flags->bits.has_int16_array_props) {
-        carbon_memfile_write(memfile, &propOffsets->int16_arrays, sizeof(carbon_off_t));
+        carbon_memfile_write(memfile, &prop_offsets->int16_arrays, sizeof(carbon_off_t));
     }
     if (flags->bits.has_int32_array_props) {
-        carbon_memfile_write(memfile, &propOffsets->int32_arrays, sizeof(carbon_off_t));
+        carbon_memfile_write(memfile, &prop_offsets->int32_arrays, sizeof(carbon_off_t));
     }
     if (flags->bits.has_int64_array_props) {
-        carbon_memfile_write(memfile, &propOffsets->int64_arrays, sizeof(carbon_off_t));
+        carbon_memfile_write(memfile, &prop_offsets->int64_arrays, sizeof(carbon_off_t));
     }
     if (flags->bits.has_uint8_array_props) {
-        carbon_memfile_write(memfile, &propOffsets->uint8_arrays, sizeof(carbon_off_t));
+        carbon_memfile_write(memfile, &prop_offsets->uint8_arrays, sizeof(carbon_off_t));
     }
     if (flags->bits.has_uint16_array_props) {
-        carbon_memfile_write(memfile, &propOffsets->uint16_arrays, sizeof(carbon_off_t));
+        carbon_memfile_write(memfile, &prop_offsets->uint16_arrays, sizeof(carbon_off_t));
     }
     if (flags->bits.has_uint32_array_props) {
-        carbon_memfile_write(memfile, &propOffsets->uint32_arrays, sizeof(carbon_off_t));
+        carbon_memfile_write(memfile, &prop_offsets->uint32_arrays, sizeof(carbon_off_t));
     }
     if (flags->bits.has_uint64_array_props) {
-        carbon_memfile_write(memfile, &propOffsets->uint64_arrays, sizeof(carbon_off_t));
+        carbon_memfile_write(memfile, &prop_offsets->uint64_arrays, sizeof(carbon_off_t));
     }
     if (flags->bits.has_float_array_props) {
-        carbon_memfile_write(memfile, &propOffsets->float_arrays, sizeof(carbon_off_t));
+        carbon_memfile_write(memfile, &prop_offsets->float_arrays, sizeof(carbon_off_t));
     }
     if (flags->bits.has_string_array_props) {
-        carbon_memfile_write(memfile, &propOffsets->string_arrays, sizeof(carbon_off_t));
+        carbon_memfile_write(memfile, &prop_offsets->string_arrays, sizeof(carbon_off_t));
     }
     if (flags->bits.has_object_array_props) {
-        carbon_memfile_write(memfile, &propOffsets->object_arrays, sizeof(carbon_off_t));
+        carbon_memfile_write(memfile, &prop_offsets->object_arrays, sizeof(carbon_off_t));
     }
 }
 
-static void propOffsetsSkipWrite(carbon_memfile_t *memfile, const carbon_archive_object_flags_t *flags)
+static void prop_offsets_skip_write(carbon_memfile_t *memfile, const carbon_archive_object_flags_t *flags)
 {
-    unsigned numSkipOffsetBytes = 0;
+    unsigned num_skip_offset_bytes = 0;
     if (flags->bits.has_null_props) {
-        numSkipOffsetBytes++;
+        num_skip_offset_bytes++;
     }
     if (flags->bits.has_bool_props) {
-        numSkipOffsetBytes++;
+        num_skip_offset_bytes++;
     }
     if (flags->bits.has_int8_props) {
-        numSkipOffsetBytes++;
+        num_skip_offset_bytes++;
     }
     if (flags->bits.has_int16_props) {
-        numSkipOffsetBytes++;
+        num_skip_offset_bytes++;
     }
     if (flags->bits.has_int32_props) {
-        numSkipOffsetBytes++;
+        num_skip_offset_bytes++;
     }
     if (flags->bits.has_int64_props) {
-        numSkipOffsetBytes++;
+        num_skip_offset_bytes++;
     }
     if (flags->bits.has_uint8_props) {
-        numSkipOffsetBytes++;
+        num_skip_offset_bytes++;
     }
     if (flags->bits.has_uint16_props) {
-        numSkipOffsetBytes++;
+        num_skip_offset_bytes++;
     }
     if (flags->bits.has_uint32_props) {
-        numSkipOffsetBytes++;
+        num_skip_offset_bytes++;
     }
     if (flags->bits.has_uint64_props) {
-        numSkipOffsetBytes++;
+        num_skip_offset_bytes++;
     }
     if (flags->bits.has_float_props) {
-        numSkipOffsetBytes++;
+        num_skip_offset_bytes++;
     }
     if (flags->bits.has_string_props) {
-        numSkipOffsetBytes++;
+        num_skip_offset_bytes++;
     }
     if (flags->bits.has_object_props) {
-        numSkipOffsetBytes++;
+        num_skip_offset_bytes++;
     }
     if (flags->bits.has_null_array_props) {
-        numSkipOffsetBytes++;
+        num_skip_offset_bytes++;
     }
     if (flags->bits.has_bool_array_props) {
-        numSkipOffsetBytes++;
+        num_skip_offset_bytes++;
     }
     if (flags->bits.has_int8_array_props) {
-        numSkipOffsetBytes++;
+        num_skip_offset_bytes++;
     }
     if (flags->bits.has_int16_array_props) {
-        numSkipOffsetBytes++;
+        num_skip_offset_bytes++;
     }
     if (flags->bits.has_int32_array_props) {
-        numSkipOffsetBytes++;
+        num_skip_offset_bytes++;
     }
     if (flags->bits.has_int64_array_props) {
-        numSkipOffsetBytes++;
+        num_skip_offset_bytes++;
     }
     if (flags->bits.has_uint8_array_props) {
-        numSkipOffsetBytes++;
+        num_skip_offset_bytes++;
     }
     if (flags->bits.has_uint16_array_props) {
-        numSkipOffsetBytes++;
+        num_skip_offset_bytes++;
     }
     if (flags->bits.has_uint32_array_props) {
-        numSkipOffsetBytes++;
+        num_skip_offset_bytes++;
     }
     if (flags->bits.has_uint64_array_props) {
-        numSkipOffsetBytes++;
+        num_skip_offset_bytes++;
     }
     if (flags->bits.has_float_array_props) {
-        numSkipOffsetBytes++;
+        num_skip_offset_bytes++;
     }
     if (flags->bits.has_string_array_props) {
-        numSkipOffsetBytes++;
+        num_skip_offset_bytes++;
     }
     if (flags->bits.has_object_array_props) {
-        numSkipOffsetBytes++;
+        num_skip_offset_bytes++;
     }
 
-    carbon_memfile_skip(memfile, numSkipOffsetBytes * sizeof(carbon_off_t));
+    carbon_memfile_skip(memfile, num_skip_offset_bytes * sizeof(carbon_off_t));
 }
 
 static bool serialize_columndoc(carbon_off_t *offset, carbon_err_t *err, carbon_memfile_t *memfile, carbon_columndoc_obj_t *columndoc, carbon_off_t root_object_header_offset)
 {
     carbon_archive_object_flags_t flags;
-    carbon_archive_prop_offs_t propOffsets;
+    carbon_archive_prop_offs_t prop_offsets;
     get_flags(&flags, columndoc);
 
-    carbon_off_t headerOffset = CARBON_MEMFILE_TELL(memfile);
+    carbon_off_t header_offset = CARBON_MEMFILE_TELL(memfile);
     carbon_memfile_skip(memfile, sizeof(struct object_header));
 
-    propOffsetsSkipWrite(memfile, &flags);
-    carbon_off_t nextOffset = CARBON_MEMFILE_TELL(memfile);
-    carbon_off_t defaultNextNil = 0;
-    carbon_memfile_write(memfile, &defaultNextNil, sizeof(carbon_off_t));
+    prop_offsets_skip_write(memfile, &flags);
+    carbon_off_t next_offset = CARBON_MEMFILE_TELL(memfile);
+    carbon_off_t default_next_nil = 0;
+    carbon_memfile_write(memfile, &default_next_nil, sizeof(carbon_off_t));
 
-    if (!writePrimitiveProps(memfile, err, columndoc, &propOffsets, root_object_header_offset)) {
+    if (!write_primitive_props(memfile, err, columndoc, &prop_offsets, root_object_header_offset)) {
         return false;
     }
-    if (!write_array_props(memfile, err, columndoc, &propOffsets, root_object_header_offset)) {
+    if (!write_array_props(memfile, err, columndoc, &prop_offsets, root_object_header_offset)) {
         return false;
     }
-    if (!writeObjectArrayProps(memfile, err, &columndoc->obj_array_props, &propOffsets, root_object_header_offset)) {
+    if (!write_object_array_props(memfile, err, &columndoc->obj_array_props, &prop_offsets, root_object_header_offset)) {
         return false;
     }
 
     carbon_memfile_write(memfile, &marker_symbols[MARKER_TYPE_OBJECT_END].symbol, 1);
 
 
-    carbon_off_t objectEndOffset = CARBON_MEMFILE_TELL(memfile);
-    carbon_memfile_seek(memfile, headerOffset);
+    carbon_off_t object_end_offset = CARBON_MEMFILE_TELL(memfile);
+    carbon_memfile_seek(memfile, header_offset);
 
     struct object_header header = {
         .marker = marker_symbols[MARKER_TYPE_OBJECT_BEGIN].symbol,
@@ -1475,14 +1475,14 @@ static bool serialize_columndoc(carbon_off_t *offset, carbon_err_t *err, carbon_
 
     carbon_memfile_write(memfile, &header, sizeof(struct object_header));
 
-    propOffsetsWrite(memfile, &flags, &propOffsets);
+    propOffsetsWrite(memfile, &flags, &prop_offsets);
 
-    carbon_memfile_seek(memfile, objectEndOffset);
-    CARBON_OPTIONAL_SET(offset, nextOffset);
+    carbon_memfile_seek(memfile, object_end_offset);
+    CARBON_OPTIONAL_SET(offset, next_offset);
     return true;
 }
 
-static char *embeddedDicFlagsToString(const union carbon_archive_dic_flags *flags)
+static char *embedded_dic_flags_to_string(const union carbon_archive_dic_flags *flags)
 {
     size_t max = 2048;
     char *string = malloc(max + 1);
@@ -1509,7 +1509,7 @@ static char *embeddedDicFlagsToString(const union carbon_archive_dic_flags *flag
     return string;
 }
 
-static char *recordHeaderFlagsToString(const carbon_archive_record_flags_t *flags)
+static char *record_header_flags_to_string(const carbon_archive_record_flags_t *flags)
 {
     size_t max = 2048;
     char *string = malloc(max + 1);
@@ -1530,7 +1530,7 @@ static char *recordHeaderFlagsToString(const carbon_archive_record_flags_t *flag
     return string;
 }
 
-static bool validateEmbeddedDicHeaderFlags(carbon_err_t *err, const union carbon_archive_dic_flags *flags)
+static bool validate_embedded_dic_header_flags(carbon_err_t *err, const union carbon_archive_dic_flags *flags)
 {
     if (flags->value != 0) {
         if (!flags->bits.is_compressed) {
@@ -1559,7 +1559,7 @@ static bool serialize_string_dic(carbon_memfile_t *memfile, carbon_err_t *err, c
         return false;
     }
     strategy.set_flags(&flags);
-    if (!validateEmbeddedDicHeaderFlags(err, &flags)) {
+    if (!validate_embedded_dic_header_flags(err, &flags)) {
         return false;
     }
 
@@ -1587,15 +1587,15 @@ static void skip_cabin_file_header(carbon_memfile_t *memfile)
 
 static void update_carbon_file_header(carbon_memfile_t *memfile, carbon_off_t record_header_offset)
 {
-    carbon_off_t currentPos;
-    carbon_memfile_tell(&currentPos, memfile);
+    carbon_off_t current_pos;
+    carbon_memfile_tell(&current_pos, memfile);
     carbon_memfile_seek(memfile, 0);
     this_carbon_file_header.root_object_header_offset = record_header_offset;
     carbon_memfile_write(memfile, &this_carbon_file_header, sizeof(struct carbon_file_header));
-    carbon_memfile_seek(memfile, currentPos);
+    carbon_memfile_seek(memfile, current_pos);
 }
 
-static bool dumpColumn(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile, unsigned nesting_level)
+static bool print_column_form_memfile(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile, unsigned nesting_level)
 {
     carbon_off_t offset;
     carbon_memfile_tell(&offset, memfile);
@@ -1731,24 +1731,24 @@ static bool dumpObjectArray(FILE *file, carbon_err_t *err, carbon_memfile_t *mem
 
     for (size_t i = 0; i < header->num_entries; i++) {
         offset = CARBON_MEMFILE_TELL(memfile);
-        struct column_group_header *columnGroupHeader = CARBON_MEMFILE_READ_TYPE(memfile, struct column_group_header);
-        if (columnGroupHeader->marker != MARKER_SYMBOL_COLUMN_GROUP) {
+        struct column_group_header *column_group_header = CARBON_MEMFILE_READ_TYPE(memfile, struct column_group_header);
+        if (column_group_header->marker != MARKER_SYMBOL_COLUMN_GROUP) {
             char buffer[256];
-            sprintf(buffer, "expected marker [%c] but found [%c]", MARKER_SYMBOL_COLUMN_GROUP, columnGroupHeader->marker);
+            sprintf(buffer, "expected marker [%c] but found [%c]", MARKER_SYMBOL_COLUMN_GROUP, column_group_header->marker);
             CARBON_ERROR_WDETAILS(err, CARBON_ERR_CORRUPTED, buffer);
             return false;
         }
         fprintf(file, "0x%04x ", offset);
         INTENT_LINE(nesting_level);
-        fprintf(file, "[marker: %c (Column Group)] [num_columns: %d] [", columnGroupHeader->marker, columnGroupHeader->num_columns);
-        for (size_t k = 0; k < columnGroupHeader->num_columns; k++) {
+        fprintf(file, "[marker: %c (Column Group)] [num_columns: %d] [", column_group_header->marker, column_group_header->num_columns);
+        for (size_t k = 0; k < column_group_header->num_columns; k++) {
             carbon_off_t columnOff = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
-            fprintf(file, "offset: 0x%04x%s", (unsigned) columnOff, k + 1 < columnGroupHeader->num_columns ? ", " : "");
+            fprintf(file, "offset: 0x%04x%s", (unsigned) columnOff, k + 1 < column_group_header->num_columns ? ", " : "");
         }
         fprintf(file, "]\n");
 
-        for (size_t k = 0; k < columnGroupHeader->num_columns; k++) {
-            if(!dumpColumn(file, err, memfile, nesting_level + 1)) {
+        for (size_t k = 0; k < column_group_header->num_columns; k++) {
+            if(!print_column_form_memfile(file, err, memfile, nesting_level + 1)) {
                 return false;
             }
         }
@@ -1760,167 +1760,167 @@ static bool dumpObjectArray(FILE *file, carbon_err_t *err, carbon_memfile_t *mem
     return true;
 }
 
-static void propertyOffsetsPrint(FILE *file, const carbon_archive_object_flags_t *flags, const carbon_archive_prop_offs_t *propOffsets)
+static void propertyOffsetsPrint(FILE *file, const carbon_archive_object_flags_t *flags, const carbon_archive_prop_offs_t *prop_offsets)
 {
     if (flags->bits.has_null_props) {
-        fprintf(file, " nulls: 0x%04x", (unsigned) propOffsets->nulls);
+        fprintf(file, " nulls: 0x%04x", (unsigned) prop_offsets->nulls);
     }
     if (flags->bits.has_bool_props) {
-        fprintf(file, " bools: 0x%04x", (unsigned) propOffsets->bools);
+        fprintf(file, " bools: 0x%04x", (unsigned) prop_offsets->bools);
     }
     if (flags->bits.has_int8_props) {
-        fprintf(file, " int8s: 0x%04x", (unsigned) propOffsets->int8s);
+        fprintf(file, " int8s: 0x%04x", (unsigned) prop_offsets->int8s);
     }
     if (flags->bits.has_int16_props) {
-        fprintf(file, " int16s: 0x%04x", (unsigned) propOffsets->int16s);
+        fprintf(file, " int16s: 0x%04x", (unsigned) prop_offsets->int16s);
     }
     if (flags->bits.has_int32_props) {
-        fprintf(file, " int32s: 0x%04x", (unsigned) propOffsets->int32s);
+        fprintf(file, " int32s: 0x%04x", (unsigned) prop_offsets->int32s);
     }
     if (flags->bits.has_int64_props) {
-        fprintf(file, " int64s: 0x%04x", (unsigned) propOffsets->int64s);
+        fprintf(file, " int64s: 0x%04x", (unsigned) prop_offsets->int64s);
     }
     if (flags->bits.has_uint8_props) {
-        fprintf(file, " uint8s: 0x%04x", (unsigned) propOffsets->uint8s);
+        fprintf(file, " uint8s: 0x%04x", (unsigned) prop_offsets->uint8s);
     }
     if (flags->bits.has_uint16_props) {
-        fprintf(file, " uint16s: 0x%04x", (unsigned) propOffsets->uint16s);
+        fprintf(file, " uint16s: 0x%04x", (unsigned) prop_offsets->uint16s);
     }
     if (flags->bits.has_uint32_props) {
-        fprintf(file, " uint32s: 0x%04x", (unsigned) propOffsets->uint32s);
+        fprintf(file, " uint32s: 0x%04x", (unsigned) prop_offsets->uint32s);
     }
     if (flags->bits.has_uint64_props) {
-        fprintf(file, " uint64s: 0x%04x", (unsigned) propOffsets->uint64s);
+        fprintf(file, " uint64s: 0x%04x", (unsigned) prop_offsets->uint64s);
     }
     if (flags->bits.has_float_props) {
-        fprintf(file, " floats: 0x%04x", (unsigned) propOffsets->floats);
+        fprintf(file, " floats: 0x%04x", (unsigned) prop_offsets->floats);
     }
     if (flags->bits.has_string_props) {
-        fprintf(file, " texts: 0x%04x", (unsigned) propOffsets->strings);
+        fprintf(file, " texts: 0x%04x", (unsigned) prop_offsets->strings);
     }
     if (flags->bits.has_object_props) {
-        fprintf(file, " objects: 0x%04x", (unsigned) propOffsets->objects);
+        fprintf(file, " objects: 0x%04x", (unsigned) prop_offsets->objects);
     }
     if (flags->bits.has_null_array_props) {
-        fprintf(file, " nullArrays: 0x%04x", (unsigned) propOffsets->null_arrays);
+        fprintf(file, " nullArrays: 0x%04x", (unsigned) prop_offsets->null_arrays);
     }
     if (flags->bits.has_bool_array_props) {
-        fprintf(file, " boolArrays: 0x%04x", (unsigned) propOffsets->bool_arrays);
+        fprintf(file, " boolArrays: 0x%04x", (unsigned) prop_offsets->bool_arrays);
     }
     if (flags->bits.has_int8_array_props) {
-        fprintf(file, " int8Arrays: 0x%04x", (unsigned) propOffsets->int8_arrays);
+        fprintf(file, " int8Arrays: 0x%04x", (unsigned) prop_offsets->int8_arrays);
     }
     if (flags->bits.has_int16_array_props) {
-        fprintf(file, " int16Arrays: 0x%04x", (unsigned) propOffsets->int16_arrays);
+        fprintf(file, " int16Arrays: 0x%04x", (unsigned) prop_offsets->int16_arrays);
     }
     if (flags->bits.has_int32_array_props) {
-        fprintf(file, " int32Arrays: 0x%04x", (unsigned) propOffsets->int32_arrays);
+        fprintf(file, " int32Arrays: 0x%04x", (unsigned) prop_offsets->int32_arrays);
     }
     if (flags->bits.has_int64_array_props) {
-        fprintf(file, " int16Arrays: 0x%04x", (unsigned) propOffsets->int64_arrays);
+        fprintf(file, " int16Arrays: 0x%04x", (unsigned) prop_offsets->int64_arrays);
     }
     if (flags->bits.has_uint8_array_props) {
-        fprintf(file, " uint8Arrays: 0x%04x", (unsigned) propOffsets->uint8_arrays);
+        fprintf(file, " uint8Arrays: 0x%04x", (unsigned) prop_offsets->uint8_arrays);
     }
     if (flags->bits.has_uint16_array_props) {
-        fprintf(file, " uint16Arrays: 0x%04x", (unsigned) propOffsets->uint16_arrays);
+        fprintf(file, " uint16Arrays: 0x%04x", (unsigned) prop_offsets->uint16_arrays);
     }
     if (flags->bits.has_uint32_array_props) {
-        fprintf(file, " uint32Arrays: 0x%04x", (unsigned) propOffsets->uint32_arrays);
+        fprintf(file, " uint32Arrays: 0x%04x", (unsigned) prop_offsets->uint32_arrays);
     }
     if (flags->bits.has_uint64_array_props) {
-        fprintf(file, " uint64Arrays: 0x%04x", (unsigned) propOffsets->uint64_arrays);
+        fprintf(file, " uint64Arrays: 0x%04x", (unsigned) prop_offsets->uint64_arrays);
     }
     if (flags->bits.has_float_array_props) {
-        fprintf(file, " floatArrays: 0x%04x", (unsigned) propOffsets->float_arrays);
+        fprintf(file, " floatArrays: 0x%04x", (unsigned) prop_offsets->float_arrays);
     }
     if (flags->bits.has_string_array_props) {
-        fprintf(file, " textArrays: 0x%04x", (unsigned) propOffsets->string_arrays);
+        fprintf(file, " textArrays: 0x%04x", (unsigned) prop_offsets->string_arrays);
     }
     if (flags->bits.has_object_array_props) {
-        fprintf(file, " objectArrays: 0x%04x", (unsigned) propOffsets->object_arrays);
+        fprintf(file, " objectArrays: 0x%04x", (unsigned) prop_offsets->object_arrays);
     }
 }
 
-static void readPropertyOffsets(carbon_archive_prop_offs_t *propOffsets, carbon_memfile_t *memfile, const carbon_archive_object_flags_t *flags)
+static void readPropertyOffsets(carbon_archive_prop_offs_t *prop_offsets, carbon_memfile_t *memfile, const carbon_archive_object_flags_t *flags)
 {
     if (flags->bits.has_null_props) {
-        propOffsets->nulls = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
+        prop_offsets->nulls = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
     }
     if (flags->bits.has_bool_props) {
-        propOffsets->bools = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
+        prop_offsets->bools = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
     }
     if (flags->bits.has_int8_props) {
-        propOffsets->int8s = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
+        prop_offsets->int8s = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
     }
     if (flags->bits.has_int16_props) {
-        propOffsets->int16s = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
+        prop_offsets->int16s = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
     }
     if (flags->bits.has_int32_props) {
-        propOffsets->int32s = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
+        prop_offsets->int32s = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
     }
     if (flags->bits.has_int64_props) {
-        propOffsets->int64s = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
+        prop_offsets->int64s = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
     }
     if (flags->bits.has_uint8_props) {
-        propOffsets->uint8s = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
+        prop_offsets->uint8s = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
     }
     if (flags->bits.has_uint16_props) {
-        propOffsets->uint16s = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
+        prop_offsets->uint16s = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
     }
     if (flags->bits.has_uint32_props) {
-        propOffsets->uint32s = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
+        prop_offsets->uint32s = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
     }
     if (flags->bits.has_uint64_props) {
-        propOffsets->uint64s = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
+        prop_offsets->uint64s = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
     }
     if (flags->bits.has_float_props) {
-        propOffsets->floats = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
+        prop_offsets->floats = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
     }
     if (flags->bits.has_string_props) {
-        propOffsets->strings = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
+        prop_offsets->strings = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
     }
     if (flags->bits.has_object_props) {
-        propOffsets->objects = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
+        prop_offsets->objects = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
     }
     if (flags->bits.has_null_array_props) {
-        propOffsets->null_arrays = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
+        prop_offsets->null_arrays = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
     }
     if (flags->bits.has_bool_array_props) {
-        propOffsets->bool_arrays = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
+        prop_offsets->bool_arrays = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
     }
     if (flags->bits.has_int8_array_props) {
-        propOffsets->int8_arrays = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
+        prop_offsets->int8_arrays = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
     }
     if (flags->bits.has_int16_array_props) {
-        propOffsets->int16_arrays = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
+        prop_offsets->int16_arrays = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
     }
     if (flags->bits.has_int32_array_props) {
-        propOffsets->int32_arrays = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
+        prop_offsets->int32_arrays = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
     }
     if (flags->bits.has_int64_array_props) {
-        propOffsets->int64_arrays = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
+        prop_offsets->int64_arrays = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
     }
     if (flags->bits.has_uint8_array_props) {
-        propOffsets->uint8_arrays = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
+        prop_offsets->uint8_arrays = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
     }
     if (flags->bits.has_uint16_array_props) {
-        propOffsets->uint16_arrays = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
+        prop_offsets->uint16_arrays = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
     }
     if (flags->bits.has_uint32_array_props) {
-        propOffsets->uint32_arrays = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
+        prop_offsets->uint32_arrays = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
     }
     if (flags->bits.has_uint64_array_props) {
-        propOffsets->uint64_arrays = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
+        prop_offsets->uint64_arrays = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
     }
     if (flags->bits.has_float_array_props) {
-        propOffsets->float_arrays = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
+        prop_offsets->float_arrays = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
     }
     if (flags->bits.has_string_array_props) {
-        propOffsets->string_arrays = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
+        prop_offsets->string_arrays = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
     }
     if (flags->bits.has_object_array_props) {
-        propOffsets->object_arrays = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
+        prop_offsets->object_arrays = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
     }
 }
 
@@ -1997,12 +1997,12 @@ bool print_object(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile, unsi
     unsigned offset = (unsigned) CARBON_MEMFILE_TELL(memfile);
     struct object_header *header = CARBON_MEMFILE_READ_TYPE(memfile, struct object_header);
 
-    carbon_archive_prop_offs_t propOffsets;
+    carbon_archive_prop_offs_t prop_offsets;
     carbon_archive_object_flags_t flags = {
         .value = header->flags
     };
 
-    readPropertyOffsets(&propOffsets, memfile, &flags);
+    readPropertyOffsets(&prop_offsets, memfile, &flags);
     carbon_off_t nextObjectOrNil = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
 
     if (header->marker != MARKER_SYMBOL_OBJECT_BEGIN) {
@@ -2016,7 +2016,7 @@ bool print_object(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile, unsi
     INTENT_LINE(nesting_level);
     nesting_level++;
     fprintf(file, "[marker: %c (BeginObject)] [flags: %u] [propertyOffsets: [", header->marker, header->flags);
-    propertyOffsetsPrint(file, &flags, &propOffsets);
+    propertyOffsetsPrint(file, &flags, &prop_offsets);
     fprintf(file, " ] [next: 0x%04x] \n", (unsigned) nextObjectOrNil);
 
     bool continueRead = true;
@@ -2250,7 +2250,7 @@ static void dumpPrintRecordHeader(FILE *file, carbon_memfile_t *memfile)
     struct record_header *header = CARBON_MEMFILE_READ_TYPE(memfile, struct record_header);
     carbon_archive_record_flags_t flags;
     flags.value = header->flags;
-    char *flagsString = recordHeaderFlagsToString(&flags);
+    char *flagsString = record_header_flags_to_string(&flags);
     fprintf(file, "0x%04x ", offset);
     fprintf(file, "[marker: %c] [flags: %s] [record_size: 0x%04x]\n",
             header->marker, flagsString, (unsigned) header->record_size);
@@ -2288,7 +2288,7 @@ static bool dumpEmbeddedDic(FILE *file, carbon_err_t *err, carbon_memfile_t *mem
     }
     flags.value = header->flags;
 
-    char *flagsStr = embeddedDicFlagsToString(&flags);
+    char *flagsStr = embedded_dic_flags_to_string(&flags);
     fprintf(file, "0x%04x ", offset);
     fprintf(file, "[marker: %c] [nentries: %d] [flags:%s]\n", header->marker,
             header->num_entries, flagsStr);
@@ -2956,9 +2956,9 @@ bool carbon_archive_table_column_group(carbon_column_group_t *group, size_t idx,
         carbon_off_t groupOff = table->groups_offsets[idx];
         carbon_off_t last = CARBON_MEMFILE_TELL(&table->context->file);
         carbon_memfile_seek(&table->context->file, groupOff);
-        struct column_group_header *columnGroupHeader = CARBON_MEMFILE_READ_TYPE(&table->context->file,
+        struct column_group_header *column_group_header = CARBON_MEMFILE_READ_TYPE(&table->context->file,
                                                                         struct column_group_header);
-        group->ncolumns = columnGroupHeader->num_columns;
+        group->ncolumns = column_group_header->num_columns;
         group->column_offsets = (const carbon_off_t *) carbon_memfile_peek(&table->context->file, sizeof(carbon_off_t));
         group->context = table->context;
         carbon_error_init(&group->err);
@@ -2982,7 +2982,7 @@ bool carbon_archive_table_column(carbon_column_t *column, size_t idx, carbon_col
         carbon_memfile_seek(&group->context->file, columnOff);
         const struct column_header *header = CARBON_MEMFILE_READ_TYPE(&group->context->file, struct column_header);
         column->nelems = header->num_entries;
-        column->type = getValueTypeOfChar(header->value_type);
+        column->type = get_value_type_of_char(header->value_type);
         column->entry_offsets = (const carbon_off_t *) carbon_memfile_peek(&group->context->file, sizeof(carbon_off_t));
         carbon_memfile_skip(&group->context->file, column->nelems * sizeof(carbon_off_t));
         column->position_list = (const uint32_t*) carbon_memfile_peek(&group->context->file, sizeof(uint32_t));
