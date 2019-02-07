@@ -208,7 +208,7 @@ struct
 {
     enum marker_type type;
     char symbol;
-} markerSymbols [] = {
+} marker_symbols [] = {
     { MARKER_TYPE_OBJECT_BEGIN,        MARKER_SYMBOL_OBJECT_BEGIN },
     { MARKER_TYPE_OBJECT_END,          MARKER_SYMBOL_OBJECT_END },
     { MARKER_TYPE_PROP_NULL,           MARKER_SYMBOL_PROP_NULL },
@@ -249,7 +249,7 @@ struct
 {
     carbon_field_type_e value_type;
     enum marker_type marker;
-} valueArrayMarkerMapping [] = {
+} value_array_marker_mapping [] = {
     { carbon_field_type_null,    MARKER_TYPE_PROP_NULL_ARRAY },
     { carbon_field_type_bool,    MARKER_TYPE_PROP_BOOLEAN_ARRAY },
     { carbon_field_type_int8,    MARKER_TYPE_PROP_INT8_ARRAY },
@@ -364,8 +364,8 @@ static void update_record_header(carbon_memfile_t *memfile,
                                carbon_off_t root_object_header_offset,
                                carbon_columndoc_t *model,
                                uint64_t record_size);
-static bool serialize_columndoc(carbon_off_t *offset, carbon_err_t *err, carbon_memfile_t *memfile, carbon_columndoc_obj_t *objMetaModel, carbon_off_t root_object_header_offset);
-static carbon_archive_object_flags_t *get_flags(carbon_archive_object_flags_t *flags, carbon_columndoc_obj_t *objMetaModel);
+static bool serialize_columndoc(carbon_off_t *offset, carbon_err_t *err, carbon_memfile_t *memfile, carbon_columndoc_obj_t *columndoc, carbon_off_t root_object_header_offset);
+static carbon_archive_object_flags_t *get_flags(carbon_archive_object_flags_t *flags, carbon_columndoc_obj_t *columndoc);
 static void update_carbon_file_header(carbon_memfile_t *memfile, carbon_off_t root_object_header_offset);
 static void skip_cabin_file_header(carbon_memfile_t *memfile);
 static bool serialize_string_dic(carbon_memfile_t *memfile, carbon_err_t *err, const carbon_doc_bulk_t *context, carbon_archive_compressor_type_e compressor);
@@ -512,7 +512,7 @@ static void compressor_none_write_dictionary(carbon_memfile_t *memfile, const ca
         size_t string_length = strlen(string);
 
         struct embedded_string embedded_string = {
-            .marker = markerSymbols[MARKER_TYPE_EMBEDDED_UNCOMP_STR].symbol,
+            .marker = marker_symbols[MARKER_TYPE_EMBEDDED_UNCOMP_STR].symbol,
             .strlen = string_length
         };
 
@@ -524,7 +524,7 @@ static void compressor_none_write_dictionary(carbon_memfile_t *memfile, const ca
 
 static void compressor_none_dump_dictionary(FILE *file, carbon_memfile_t *memfile)
 {
-    while ((*CARBON_MEMFILE_PEEK(memfile, char)) == markerSymbols[MARKER_TYPE_EMBEDDED_UNCOMP_STR].symbol) {
+    while ((*CARBON_MEMFILE_PEEK(memfile, char)) == marker_symbols[MARKER_TYPE_EMBEDDED_UNCOMP_STR].symbol) {
         unsigned offset = CARBON_MEMFILE_TELL(memfile);
         struct embedded_string *embedded_string = CARBON_MEMFILE_READ_TYPE(memfile, struct embedded_string);
         carbon_string_id_t *string_id = CARBON_MEMFILE_READ_TYPE(memfile, carbon_string_id_t);
@@ -632,16 +632,16 @@ static void compressor_huffman_create(carbon_archive_compressor_t *strategy)
 
 bool print_object(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile, unsigned nesting_level);
 
-static uint32_t flagsToInt32(carbon_archive_object_flags_t *flags)
+static uint32_t flags_to_int32(carbon_archive_object_flags_t *flags)
 {
     return *((int32_t *) flags);
 }
 
-static const char *arrayValueTypeToString(carbon_err_t *err, carbon_field_type_e type)
+static const char *array_value_type_to_string(carbon_err_t *err, carbon_field_type_e type)
 {
     switch (type) {
         case carbon_field_type_null:    return "Null Array";
-        case carbon_field_type_bool: return "Boolean Array";
+        case carbon_field_type_bool:    return "Boolean Array";
         case carbon_field_type_int8:    return "Int8 Array";
         case carbon_field_type_int16:   return "Int16 Array";
         case carbon_field_type_int32:   return "Int32 Array";
@@ -657,11 +657,10 @@ static const char *arrayValueTypeToString(carbon_err_t *err, carbon_field_type_e
             CARBON_ERROR(err, CARBON_ERR_NOVALUESTR)
             return NULL;
         }
-
     }
 }
 
-static carbon_field_type_e valueTypeSymbolToValueType(char symbol)
+static carbon_field_type_e value_type_symbol_to_value_type(char symbol)
 {
     switch (symbol) {
         case MARKER_SYMBOL_PROP_NULL:
@@ -709,32 +708,32 @@ static carbon_field_type_e valueTypeSymbolToValueType(char symbol)
     }
 }
 
-static void writePrimitiveKeyColumn(carbon_memfile_t *memfile, carbon_vec_t ofType(carbon_string_id_t) *keys)
+static void write_primitive_key_column(carbon_memfile_t *memfile, carbon_vec_t ofType(carbon_string_id_t) *keys)
 {
     carbon_string_id_t *string_ids = VECTOR_ALL(keys, carbon_string_id_t);
     carbon_memfile_write(memfile, string_ids, keys->num_elems * sizeof(carbon_string_id_t));
 }
 
-static carbon_off_t skipVarValueOffsetColumn(carbon_memfile_t *memfile, size_t num_keys)
+static carbon_off_t skip_var_value_offset_column(carbon_memfile_t *memfile, size_t num_keys)
 {
     carbon_off_t result = CARBON_MEMFILE_TELL(memfile);
     carbon_memfile_skip(memfile, num_keys * sizeof(carbon_off_t));
     return result;
 }
 
-static void writeVarValueOffsetColumn(carbon_memfile_t *file, carbon_off_t where, carbon_off_t after, const carbon_off_t *values, size_t n)
+static void write_var_value_offset_column(carbon_memfile_t *file, carbon_off_t where, carbon_off_t after, const carbon_off_t *values, size_t n)
 {
     carbon_memfile_seek(file, where);
     carbon_memfile_write(file, values, n * sizeof(carbon_off_t));
     carbon_memfile_seek(file, after);
 }
 
-static bool writePrimitiveFixedValueColumn(carbon_memfile_t *memfile,
+static bool write_primitive_fixed_value_column(carbon_memfile_t *memfile,
                                            carbon_err_t *err,
                                            carbon_field_type_e type,
                                            carbon_vec_t ofType(T) *values_vec)
 {
-    assert (type != carbon_field_type_object); /** use 'writePrimitiveVarValueColumn' instead */
+    assert (type != carbon_field_type_object); /** use 'write_primitive_var_value_column' instead */
 
     switch (type) {
     case carbon_field_type_null:
@@ -779,24 +778,24 @@ static bool writePrimitiveFixedValueColumn(carbon_memfile_t *memfile,
     return true;
 }
 
-static carbon_off_t *writePrimitiveVarValueColumn(carbon_memfile_t *memfile,
-                                                  carbon_err_t *err,
-                                         carbon_vec_t ofType(carbon_columndoc_obj_t) *values_vec,
-                                         carbon_off_t root_object_header_offset)
+static carbon_off_t *write_primitive_var_value_column(carbon_memfile_t *memfile,
+                                                      carbon_err_t *err,
+                                                      carbon_vec_t ofType(carbon_columndoc_obj_t) *values_vec,
+                                                      carbon_off_t root_object_header_offset)
 {
     carbon_off_t *result = malloc(values_vec->num_elems * sizeof(carbon_off_t));
-    carbon_columndoc_obj_t *mappedObjects = VECTOR_ALL(values_vec, carbon_columndoc_obj_t);
+    carbon_columndoc_obj_t *mapped_objects = VECTOR_ALL(values_vec, carbon_columndoc_obj_t);
     for (uint32_t i = 0; i < values_vec->num_elems; i++) {
-        carbon_columndoc_obj_t *mappedObject = mappedObjects + i;
+        carbon_columndoc_obj_t *mapped_object = mapped_objects + i;
         result[i] = CARBON_MEMFILE_TELL(memfile) - root_object_header_offset;
-        if (!serialize_columndoc(NULL, err, memfile, mappedObject, root_object_header_offset)) {
+        if (!serialize_columndoc(NULL, err, memfile, mapped_object, root_object_header_offset)) {
             return NULL;
         }
     }
     return result;
 }
 
-static bool writeArrayLengthsColumn(carbon_err_t *err, carbon_memfile_t *memfile, carbon_field_type_e type, carbon_vec_t ofType(...) *values_vec)
+static bool write_array_lengths_column(carbon_err_t *err, carbon_memfile_t *memfile, carbon_field_type_e type, carbon_vec_t ofType(...) *values_vec)
 {
     switch (type) {
     case carbon_field_type_null:
@@ -813,8 +812,8 @@ static bool writeArrayLengthsColumn(carbon_err_t *err, carbon_memfile_t *memfile
     case carbon_field_type_float:
     case carbon_field_type_string:
         for (uint32_t i = 0; i < values_vec->num_elems; i++) {
-            carbon_vec_t *nestedArrays = VECTOR_GET(values_vec, i, carbon_vec_t);
-            carbon_memfile_write(memfile, &nestedArrays->num_elems, sizeof(uint32_t));
+            carbon_vec_t *nested_arrays = VECTOR_GET(values_vec, i, carbon_vec_t);
+            carbon_memfile_write(memfile, &nested_arrays->num_elems, sizeof(uint32_t));
         }
         break;
     case carbon_field_type_object:
@@ -828,7 +827,7 @@ static bool writeArrayLengthsColumn(carbon_err_t *err, carbon_memfile_t *memfile
     return true;
 }
 
-static bool writeArrayValueColumn(carbon_memfile_t *memfile, carbon_err_t *err, carbon_field_type_e type, carbon_vec_t ofType(...) *values_vec)
+static bool write_array_value_column(carbon_memfile_t *memfile, carbon_err_t *err, carbon_field_type_e type, carbon_vec_t ofType(...) *values_vec)
 {
 
     switch (type) {
@@ -878,24 +877,24 @@ static bool writeArrayValueColumn(carbon_memfile_t *memfile, carbon_err_t *err, 
     return true;
 }
 
-static bool writeArrayProp(carbon_off_t *offset, carbon_err_t *err, carbon_memfile_t *memfile, carbon_vec_t ofType(carbon_string_id_t) *keys, carbon_field_type_e type,
+static bool write_array_prop(carbon_off_t *offset, carbon_err_t *err, carbon_memfile_t *memfile, carbon_vec_t ofType(carbon_string_id_t) *keys, carbon_field_type_e type,
                              carbon_vec_t ofType(...) *values, carbon_off_t root_object_header_offset)
 {
     assert(keys->num_elems == values->num_elems);
 
     if (keys->num_elems > 0) {
         struct array_prop_header header = {
-            .marker = markerSymbols[valueArrayMarkerMapping[type].marker].symbol,
+            .marker = marker_symbols[value_array_marker_mapping[type].marker].symbol,
             .num_entries = keys->num_elems
         };
         carbon_off_t propOffset = CARBON_MEMFILE_TELL(memfile);
         carbon_memfile_write(memfile, &header, sizeof(struct array_prop_header));
 
-        writePrimitiveKeyColumn(memfile, keys);
-        if(!writeArrayLengthsColumn(err, memfile, type, values)) {
+        write_primitive_key_column(memfile, keys);
+        if(!write_array_lengths_column(err, memfile, type, values)) {
             return false;
         }
-        if(!writeArrayValueColumn(memfile, err, type, values)) {
+        if(!write_array_value_column(memfile, err, type, values)) {
             return false;
         }
         *offset = (propOffset - root_object_header_offset);
@@ -905,55 +904,55 @@ static bool writeArrayProp(carbon_off_t *offset, carbon_err_t *err, carbon_memfi
     return true;
 }
 
-static bool writeArrayProps(carbon_memfile_t *memfile, carbon_err_t *err, carbon_columndoc_obj_t *objMetaModel, carbon_archive_prop_offs_t *offsets,
+static bool write_array_props(carbon_memfile_t *memfile, carbon_err_t *err, carbon_columndoc_obj_t *columndoc, carbon_archive_prop_offs_t *offsets,
                             carbon_off_t root_object_header_offset)
 {
-     if (!writeArrayProp(&offsets->null_arrays, err, memfile, &objMetaModel->null_array_prop_keys, carbon_field_type_null,
-                                                        &objMetaModel->null_array_prop_vals, root_object_header_offset)) {
+     if (!write_array_prop(&offsets->null_arrays, err, memfile, &columndoc->null_array_prop_keys, carbon_field_type_null,
+                                                        &columndoc->null_array_prop_vals, root_object_header_offset)) {
          return false;
      }
-    if (!writeArrayProp(&offsets->bool_arrays, err, memfile, &objMetaModel->bool_array_prop_keys, carbon_field_type_bool,
-                                                           &objMetaModel->bool_array_prop_vals, root_object_header_offset)) {
+    if (!write_array_prop(&offsets->bool_arrays, err, memfile, &columndoc->bool_array_prop_keys, carbon_field_type_bool,
+                                                           &columndoc->bool_array_prop_vals, root_object_header_offset)) {
         return false;
     }
-    if (!writeArrayProp(&offsets->int8_arrays, err, memfile, &objMetaModel->int8_array_prop_keys, carbon_field_type_int8,
-                                                        &objMetaModel->int8_array_prop_vals, root_object_header_offset)) {
+    if (!write_array_prop(&offsets->int8_arrays, err, memfile, &columndoc->int8_array_prop_keys, carbon_field_type_int8,
+                                                        &columndoc->int8_array_prop_vals, root_object_header_offset)) {
         return false;
     }
-    if (!writeArrayProp(&offsets->int16_arrays, err, memfile, &objMetaModel->int16_array_prop_keys, carbon_field_type_int16,
-                                                         &objMetaModel->int16_array_prop_vals, root_object_header_offset)) {
+    if (!write_array_prop(&offsets->int16_arrays, err, memfile, &columndoc->int16_array_prop_keys, carbon_field_type_int16,
+                                                         &columndoc->int16_array_prop_vals, root_object_header_offset)) {
         return false;
     }
-    if (!writeArrayProp(&offsets->int32_arrays, err, memfile, &objMetaModel->int32_array_prop_keys, carbon_field_type_int32,
-                                                         &objMetaModel->int32_array_prop_vals, root_object_header_offset)) {
+    if (!write_array_prop(&offsets->int32_arrays, err, memfile, &columndoc->int32_array_prop_keys, carbon_field_type_int32,
+                                                         &columndoc->int32_array_prop_vals, root_object_header_offset)) {
         return false;
     }
-    if (!writeArrayProp(&offsets->int64_arrays, err, memfile, &objMetaModel->int64_array_prop_keys, carbon_field_type_int64,
-                                                         &objMetaModel->int64_array_prop_vals, root_object_header_offset)) {
+    if (!write_array_prop(&offsets->int64_arrays, err, memfile, &columndoc->int64_array_prop_keys, carbon_field_type_int64,
+                                                         &columndoc->int64_array_prop_vals, root_object_header_offset)) {
         return false;
     }
-    if (!writeArrayProp(&offsets->uint8_arrays, err, memfile, &objMetaModel->uint8_array_prop_keys, carbon_field_type_uint8,
-                                                    &objMetaModel->uint8_array_prop_vals, root_object_header_offset)) {
+    if (!write_array_prop(&offsets->uint8_arrays, err, memfile, &columndoc->uint8_array_prop_keys, carbon_field_type_uint8,
+                                                    &columndoc->uint8_array_prop_vals, root_object_header_offset)) {
         return false;
     }
-    if (!writeArrayProp(&offsets->uint16_arrays, err, memfile, &objMetaModel->uint16_array_prop_keys, carbon_field_type_uint16,
-                                                     &objMetaModel->uint16_array_prop_vals, root_object_header_offset)) {
+    if (!write_array_prop(&offsets->uint16_arrays, err, memfile, &columndoc->uint16_array_prop_keys, carbon_field_type_uint16,
+                                                     &columndoc->uint16_array_prop_vals, root_object_header_offset)) {
         return false;
     }
-    if (!writeArrayProp(&offsets->uint32_arrays, err, memfile, &objMetaModel->uint32_array_prop_keys, carbon_field_type_uint32,
-                                                     &objMetaModel->uint32_array_prop_vals, root_object_header_offset)) {
+    if (!write_array_prop(&offsets->uint32_arrays, err, memfile, &columndoc->uint32_array_prop_keys, carbon_field_type_uint32,
+                                                     &columndoc->uint32_array_prop_vals, root_object_header_offset)) {
         return false;
     }
-    if (!writeArrayProp(&offsets->uint64_arrays, err, memfile, &objMetaModel->uint64_array_prop_keys, carbon_field_type_uint64,
-                                                     &objMetaModel->uin64_array_prop_vals, root_object_header_offset)) {
+    if (!write_array_prop(&offsets->uint64_arrays, err, memfile, &columndoc->uint64_array_prop_keys, carbon_field_type_uint64,
+                                                     &columndoc->uin64_array_prop_vals, root_object_header_offset)) {
         return false;
     }
-    if (!writeArrayProp(&offsets->float_arrays, err, memfile, &objMetaModel->float_array_prop_keys, carbon_field_type_float,
-                                                        &objMetaModel->float_array_prop_vals, root_object_header_offset)) {
+    if (!write_array_prop(&offsets->float_arrays, err, memfile, &columndoc->float_array_prop_keys, carbon_field_type_float,
+                                                        &columndoc->float_array_prop_vals, root_object_header_offset)) {
         return false;
     }
-    if (!writeArrayProp(&offsets->string_arrays, err, memfile, &objMetaModel->string_array_prop_keys, carbon_field_type_string,
-                                                          &objMetaModel->string_array_prop_vals, root_object_header_offset)) {
+    if (!write_array_prop(&offsets->string_arrays, err, memfile, &columndoc->string_array_prop_keys, carbon_field_type_string,
+                                                          &columndoc->string_array_prop_vals, root_object_header_offset)) {
         return false;
     }
     return true;
@@ -971,15 +970,15 @@ static bool writeFixedProps(carbon_off_t *offset, carbon_err_t *err, carbon_memf
 
     if (keys->num_elems > 0) {
         struct simple_prop_header header = {
-                .marker = markerSymbols[valueMarkerMapping[type].marker].symbol,
+                .marker = marker_symbols[valueMarkerMapping[type].marker].symbol,
                 .num_entries = keys->num_elems
         };
 
         carbon_off_t propOffset = CARBON_MEMFILE_TELL(memfile);
         carbon_memfile_write(memfile, &header, sizeof(struct simple_prop_header));
 
-        writePrimitiveKeyColumn(memfile, keys);
-        if(!writePrimitiveFixedValueColumn(memfile, err, type, values)) {
+        write_primitive_key_column(memfile, keys);
+        if(!write_primitive_fixed_value_column(memfile, err, type, values)) {
             return false;
         }
         *offset = propOffset;
@@ -1012,15 +1011,15 @@ static bool writeVarProps(carbon_off_t *offset,
         carbon_off_t propOffset = CARBON_MEMFILE_TELL(memfile);
         carbon_memfile_write(memfile, &header, sizeof(struct simple_prop_header));
 
-        writePrimitiveKeyColumn(memfile, keys);
-        carbon_off_t valueOffset = skipVarValueOffsetColumn(memfile, keys->num_elems);
-        carbon_off_t *valueOffsets = writePrimitiveVarValueColumn(memfile, err, objects, root_object_header_offset);
+        write_primitive_key_column(memfile, keys);
+        carbon_off_t valueOffset = skip_var_value_offset_column(memfile, keys->num_elems);
+        carbon_off_t *valueOffsets = write_primitive_var_value_column(memfile, err, objects, root_object_header_offset);
         if (!valueOffsets) {
             return false;
         }
 
         carbon_off_t last = CARBON_MEMFILE_TELL(memfile);
-        writeVarValueOffsetColumn(memfile, valueOffset, last, valueOffsets, keys->num_elems);
+        write_var_value_offset_column(memfile, valueOffset, last, valueOffsets, keys->num_elems);
         free(valueOffsets);
         *offset = propOffset;
     } else {
@@ -1029,59 +1028,59 @@ static bool writeVarProps(carbon_off_t *offset,
     return true;
 }
 
-static bool writePrimitiveProps(carbon_memfile_t *memfile, carbon_err_t *err, carbon_columndoc_obj_t *objMetaModel, carbon_archive_prop_offs_t *offsets,
+static bool writePrimitiveProps(carbon_memfile_t *memfile, carbon_err_t *err, carbon_columndoc_obj_t *columndoc, carbon_archive_prop_offs_t *offsets,
                                 carbon_off_t root_object_header_offset)
 {
-     if (!writeFixedProps(&offsets->nulls, err, memfile, &objMetaModel->null_prop_keys, carbon_field_type_null,
+     if (!writeFixedProps(&offsets->nulls, err, memfile, &columndoc->null_prop_keys, carbon_field_type_null,
                                                     NULL)) {
          return false;
      }
-    if (!writeFixedProps(&offsets->bools, err, memfile, &objMetaModel->bool_prop_keys, carbon_field_type_bool,
-                                                       &objMetaModel->bool_prop_vals)) {
+    if (!writeFixedProps(&offsets->bools, err, memfile, &columndoc->bool_prop_keys, carbon_field_type_bool,
+                                                       &columndoc->bool_prop_vals)) {
         return false;
     }
-    if (!writeFixedProps(&offsets->int8s, err, memfile, &objMetaModel->int8_prop_keys, carbon_field_type_int8,
-                                                    &objMetaModel->int8_prop_vals)) {
+    if (!writeFixedProps(&offsets->int8s, err, memfile, &columndoc->int8_prop_keys, carbon_field_type_int8,
+                                                    &columndoc->int8_prop_vals)) {
         return false;
     }
-    if (!writeFixedProps(&offsets->int16s, err, memfile, &objMetaModel->int16_prop_keys, carbon_field_type_int16,
-                                                     &objMetaModel->int16_prop_vals)) {
+    if (!writeFixedProps(&offsets->int16s, err, memfile, &columndoc->int16_prop_keys, carbon_field_type_int16,
+                                                     &columndoc->int16_prop_vals)) {
         return false;
     }
-    if (!writeFixedProps(&offsets->int32s, err, memfile, &objMetaModel->int32_prop_keys, carbon_field_type_int32,
-                                                     &objMetaModel->int32_prop_vals)) {
+    if (!writeFixedProps(&offsets->int32s, err, memfile, &columndoc->int32_prop_keys, carbon_field_type_int32,
+                                                     &columndoc->int32_prop_vals)) {
         return false;
     }
-    if (!writeFixedProps(&offsets->int64s, err, memfile, &objMetaModel->int64_prop_keys, carbon_field_type_int64,
-                                                     &objMetaModel->int64_prop_vals)) {
+    if (!writeFixedProps(&offsets->int64s, err, memfile, &columndoc->int64_prop_keys, carbon_field_type_int64,
+                                                     &columndoc->int64_prop_vals)) {
         return false;
     }
-    if (!writeFixedProps(&offsets->uint8s, err, memfile, &objMetaModel->uint8_prop_keys, carbon_field_type_uint8,
-                                                     &objMetaModel->uint8_prop_vals)) {
+    if (!writeFixedProps(&offsets->uint8s, err, memfile, &columndoc->uint8_prop_keys, carbon_field_type_uint8,
+                                                     &columndoc->uint8_prop_vals)) {
         return false;
     }
-    if (!writeFixedProps(&offsets->uint16s, err, memfile, &objMetaModel->uint16_prop_keys, carbon_field_type_uint16,
-                                                      &objMetaModel->uint16_prop_vals)) {
+    if (!writeFixedProps(&offsets->uint16s, err, memfile, &columndoc->uint16_prop_keys, carbon_field_type_uint16,
+                                                      &columndoc->uint16_prop_vals)) {
         return false;
     }
-    if (!writeFixedProps(&offsets->uint32s, err, memfile, &objMetaModel->uin32_prop_keys, carbon_field_type_uint32,
-                                                      &objMetaModel->uint32_prop_vals)) {
+    if (!writeFixedProps(&offsets->uint32s, err, memfile, &columndoc->uin32_prop_keys, carbon_field_type_uint32,
+                                                      &columndoc->uint32_prop_vals)) {
         return false;
     }
-    if (!writeFixedProps(&offsets->uint64s, err, memfile, &objMetaModel->uint64_prop_keys, carbon_field_type_uint64,
-                                                      &objMetaModel->uint64_prop_vals)) {
+    if (!writeFixedProps(&offsets->uint64s, err, memfile, &columndoc->uint64_prop_keys, carbon_field_type_uint64,
+                                                      &columndoc->uint64_prop_vals)) {
         return false;
     }
-    if (!writeFixedProps(&offsets->floats, err, memfile, &objMetaModel->float_prop_keys, carbon_field_type_float,
-                                                    &objMetaModel->float_prop_vals)) {
+    if (!writeFixedProps(&offsets->floats, err, memfile, &columndoc->float_prop_keys, carbon_field_type_float,
+                                                    &columndoc->float_prop_vals)) {
         return false;
     }
-    if (!writeFixedProps(&offsets->strings, err, memfile, &objMetaModel->string_prop_keys, carbon_field_type_string,
-                                                      &objMetaModel->string_prop_vals)) {
+    if (!writeFixedProps(&offsets->strings, err, memfile, &columndoc->string_prop_keys, carbon_field_type_string,
+                                                      &columndoc->string_prop_vals)) {
         return false;
     }
-    if (!writeVarProps(&offsets->objects, err, memfile, &objMetaModel->obj_prop_keys,
-                                                    &objMetaModel->obj_prop_vals, root_object_header_offset)) {
+    if (!writeVarProps(&offsets->objects, err, memfile, &columndoc->obj_prop_keys,
+                                                    &columndoc->obj_prop_vals, root_object_header_offset)) {
         return false;
     }
 
@@ -1144,10 +1143,10 @@ static bool writeColumnEntry(carbon_memfile_t *memfile, carbon_err_t *err, carbo
 
 static carbon_field_type_e getValueTypeOfChar(char c)
 {
-    size_t len = sizeof(valueArrayMarkerMapping)/ sizeof(valueArrayMarkerMapping[0]);
+    size_t len = sizeof(value_array_marker_mapping)/ sizeof(value_array_marker_mapping[0]);
     for (size_t i = 0; i < len; i++) {
-        if (markerSymbols[valueArrayMarkerMapping[i].marker].symbol == c) {
-            return valueArrayMarkerMapping[i].value_type;
+        if (marker_symbols[value_array_marker_mapping[i].marker].symbol == c) {
+            return value_array_marker_mapping[i].value_type;
         }
     }
     return carbon_field_type_null;
@@ -1158,9 +1157,9 @@ static bool writeColumn(carbon_memfile_t *memfile, carbon_err_t *err, carbon_col
     assert(column->array_positions.num_elems == column->values.num_elems);
 
     struct column_header header = {
-        .marker = markerSymbols[MARKER_TYPE_COLUMN].symbol,
+        .marker = marker_symbols[MARKER_TYPE_COLUMN].symbol,
         .column_name = column->key_name,
-        .value_type = markerSymbols[valueArrayMarkerMapping[column->type].marker].symbol,
+        .value_type = marker_symbols[value_array_marker_mapping[column->type].marker].symbol,
         .num_entries = column->values.num_elems
     };
 
@@ -1191,7 +1190,7 @@ static bool writeObjectArrayProps(carbon_memfile_t *memfile, carbon_err_t *err, 
 {
     if (objectKeyColumns->num_elems > 0) {
         struct object_array_header header = {
-            .marker = markerSymbols[MARKER_TYPE_PROP_OBJECT_ARRAY].symbol,
+            .marker = marker_symbols[MARKER_TYPE_PROP_OBJECT_ARRAY].symbol,
             .num_entries = objectKeyColumns->num_elems
         };
 
@@ -1211,7 +1210,7 @@ static bool writeObjectArrayProps(carbon_memfile_t *memfile, carbon_err_t *err, 
             carbon_columndoc_columngroup_t *columnGroup = VECTOR_GET(objectKeyColumns, i, carbon_columndoc_columngroup_t);
 
             struct column_group_header columnGroupHeader = {
-                .marker = markerSymbols[MARKER_TYPE_COLUMN_GROUP].symbol,
+                .marker = marker_symbols[MARKER_TYPE_COLUMN_GROUP].symbol,
                 .num_columns = columnGroup->columns.num_elems
             };
 
@@ -1439,11 +1438,11 @@ static void propOffsetsSkipWrite(carbon_memfile_t *memfile, const carbon_archive
     carbon_memfile_skip(memfile, numSkipOffsetBytes * sizeof(carbon_off_t));
 }
 
-static bool serialize_columndoc(carbon_off_t *offset, carbon_err_t *err, carbon_memfile_t *memfile, carbon_columndoc_obj_t *objMetaModel, carbon_off_t root_object_header_offset)
+static bool serialize_columndoc(carbon_off_t *offset, carbon_err_t *err, carbon_memfile_t *memfile, carbon_columndoc_obj_t *columndoc, carbon_off_t root_object_header_offset)
 {
     carbon_archive_object_flags_t flags;
     carbon_archive_prop_offs_t propOffsets;
-    get_flags(&flags, objMetaModel);
+    get_flags(&flags, columndoc);
 
     carbon_off_t headerOffset = CARBON_MEMFILE_TELL(memfile);
     carbon_memfile_skip(memfile, sizeof(struct object_header));
@@ -1453,25 +1452,25 @@ static bool serialize_columndoc(carbon_off_t *offset, carbon_err_t *err, carbon_
     carbon_off_t defaultNextNil = 0;
     carbon_memfile_write(memfile, &defaultNextNil, sizeof(carbon_off_t));
 
-    if (!writePrimitiveProps(memfile, err, objMetaModel, &propOffsets, root_object_header_offset)) {
+    if (!writePrimitiveProps(memfile, err, columndoc, &propOffsets, root_object_header_offset)) {
         return false;
     }
-    if (!writeArrayProps(memfile, err, objMetaModel, &propOffsets, root_object_header_offset)) {
+    if (!write_array_props(memfile, err, columndoc, &propOffsets, root_object_header_offset)) {
         return false;
     }
-    if (!writeObjectArrayProps(memfile, err, &objMetaModel->obj_array_props, &propOffsets, root_object_header_offset)) {
+    if (!writeObjectArrayProps(memfile, err, &columndoc->obj_array_props, &propOffsets, root_object_header_offset)) {
         return false;
     }
 
-    carbon_memfile_write(memfile, &markerSymbols[MARKER_TYPE_OBJECT_END].symbol, 1);
+    carbon_memfile_write(memfile, &marker_symbols[MARKER_TYPE_OBJECT_END].symbol, 1);
 
 
     carbon_off_t objectEndOffset = CARBON_MEMFILE_TELL(memfile);
     carbon_memfile_seek(memfile, headerOffset);
 
     struct object_header header = {
-        .marker = markerSymbols[MARKER_TYPE_OBJECT_BEGIN].symbol,
-        .flags = flagsToInt32(&flags),
+        .marker = marker_symbols[MARKER_TYPE_OBJECT_BEGIN].symbol,
+        .flags = flags_to_int32(&flags),
     };
 
     carbon_memfile_write(memfile, &header, sizeof(struct object_header));
@@ -1565,7 +1564,7 @@ static bool serialize_string_dic(carbon_memfile_t *memfile, carbon_err_t *err, c
     }
 
     header = (struct embedded_dic_header) {
-        .marker = markerSymbols[MARKER_TYPE_EMBEDDED_STR_DIC].symbol,
+        .marker = marker_symbols[MARKER_TYPE_EMBEDDED_STR_DIC].symbol,
         .flags = flags.value,
         .num_entries = strings->num_elems
     };
@@ -1609,7 +1608,7 @@ static bool dumpColumn(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile,
     }
     fprintf(file, "0x%04x ", (unsigned) offset);
     INTENT_LINE(nesting_level);
-    const char *type_name = arrayValueTypeToString(err, valueTypeSymbolToValueType(header->value_type));
+    const char *type_name = array_value_type_to_string(err, value_type_symbol_to_value_type(header->value_type));
     if (!type_name) {
         return false;
     }
@@ -1629,7 +1628,7 @@ static bool dumpColumn(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile,
     }
     fprintf(file, "]]\n");
 
-    carbon_field_type_e dataType = valueTypeSymbolToValueType(header->value_type);
+    carbon_field_type_e dataType = value_type_symbol_to_value_type(header->value_type);
 
     //fprintf(file, "[");
     for (size_t i = 0; i < header->num_entries; i++) {
@@ -2281,9 +2280,9 @@ static bool dumpEmbeddedDic(FILE *file, carbon_err_t *err, carbon_memfile_t *mem
 
     unsigned offset = CARBON_MEMFILE_TELL(memfile);
     struct embedded_dic_header *header = CARBON_MEMFILE_READ_TYPE(memfile, struct embedded_dic_header);
-    if (header->marker != markerSymbols[MARKER_TYPE_EMBEDDED_STR_DIC].symbol) {
+    if (header->marker != marker_symbols[MARKER_TYPE_EMBEDDED_STR_DIC].symbol) {
         char buffer[256];
-        sprintf(buffer, "expected [%c] marker, but found [%c]", markerSymbols[MARKER_TYPE_EMBEDDED_STR_DIC].symbol, header->marker);
+        sprintf(buffer, "expected [%c] marker, but found [%c]", marker_symbols[MARKER_TYPE_EMBEDDED_STR_DIC].symbol, header->marker);
         CARBON_ERROR_WDETAILS(err, CARBON_ERR_CORRUPTED, buffer);
         return false;
     }
@@ -2318,34 +2317,34 @@ static bool print_archive_from_memfile(FILE *file, carbon_err_t *err, carbon_mem
     return true;
 }
 
-static carbon_archive_object_flags_t *get_flags(carbon_archive_object_flags_t *flags, carbon_columndoc_obj_t *objMetaModel) {
+static carbon_archive_object_flags_t *get_flags(carbon_archive_object_flags_t *flags, carbon_columndoc_obj_t *columndoc) {
     CARBON_ZERO_MEMORY(flags, sizeof(carbon_archive_object_flags_t));
-    flags->bits.has_null_props         = (objMetaModel->null_prop_keys.num_elems > 0);
-    flags->bits.has_bool_props      = (objMetaModel->bool_prop_keys.num_elems > 0);
-    flags->bits.has_int8_props         = (objMetaModel->int8_prop_keys.num_elems > 0);
-    flags->bits.has_int16_props        = (objMetaModel->int16_prop_keys.num_elems > 0);
-    flags->bits.has_int32_props        = (objMetaModel->int32_prop_keys.num_elems > 0);
-    flags->bits.has_int64_props        = (objMetaModel->int64_prop_keys.num_elems > 0);
-    flags->bits.has_uint8_props        = (objMetaModel->uint8_prop_keys.num_elems > 0);
-    flags->bits.has_uint16_props       = (objMetaModel->uint16_prop_keys.num_elems > 0);
-    flags->bits.has_uint32_props       = (objMetaModel->uin32_prop_keys.num_elems > 0);
-    flags->bits.has_uint64_props       = (objMetaModel->uint64_prop_keys.num_elems > 0);
-    flags->bits.has_float_props         = (objMetaModel->float_prop_keys.num_elems > 0);
-    flags->bits.has_string_props       = (objMetaModel->string_prop_keys.num_elems > 0);
-    flags->bits.has_object_props       = (objMetaModel->obj_prop_keys.num_elems > 0);
-    flags->bits.has_null_array_props    = (objMetaModel->null_array_prop_keys.num_elems > 0);
-    flags->bits.has_bool_array_props = (objMetaModel->bool_array_prop_keys.num_elems > 0);
-    flags->bits.has_int8_array_props    = (objMetaModel->int8_array_prop_keys.num_elems > 0);
-    flags->bits.has_int16_array_props   = (objMetaModel->int16_array_prop_keys.num_elems > 0);
-    flags->bits.has_int32_array_props   = (objMetaModel->int32_array_prop_keys.num_elems > 0);
-    flags->bits.has_int64_array_props   = (objMetaModel->int64_array_prop_keys.num_elems > 0);
-    flags->bits.has_uint8_array_props   = (objMetaModel->uint8_array_prop_keys.num_elems > 0);
-    flags->bits.has_uint16_array_props  = (objMetaModel->uint16_array_prop_keys.num_elems > 0);
-    flags->bits.has_uint32_array_props  = (objMetaModel->uint32_array_prop_keys.num_elems > 0);
-    flags->bits.has_uint64_array_props  = (objMetaModel->uint64_array_prop_keys.num_elems > 0);
-    flags->bits.has_float_array_props    = (objMetaModel->float_array_prop_keys.num_elems > 0);
-    flags->bits.has_string_array_props  = (objMetaModel->string_array_prop_keys.num_elems > 0);
-    flags->bits.has_object_array_props  = (objMetaModel->obj_array_props.num_elems > 0);
+    flags->bits.has_null_props         = (columndoc->null_prop_keys.num_elems > 0);
+    flags->bits.has_bool_props      = (columndoc->bool_prop_keys.num_elems > 0);
+    flags->bits.has_int8_props         = (columndoc->int8_prop_keys.num_elems > 0);
+    flags->bits.has_int16_props        = (columndoc->int16_prop_keys.num_elems > 0);
+    flags->bits.has_int32_props        = (columndoc->int32_prop_keys.num_elems > 0);
+    flags->bits.has_int64_props        = (columndoc->int64_prop_keys.num_elems > 0);
+    flags->bits.has_uint8_props        = (columndoc->uint8_prop_keys.num_elems > 0);
+    flags->bits.has_uint16_props       = (columndoc->uint16_prop_keys.num_elems > 0);
+    flags->bits.has_uint32_props       = (columndoc->uin32_prop_keys.num_elems > 0);
+    flags->bits.has_uint64_props       = (columndoc->uint64_prop_keys.num_elems > 0);
+    flags->bits.has_float_props         = (columndoc->float_prop_keys.num_elems > 0);
+    flags->bits.has_string_props       = (columndoc->string_prop_keys.num_elems > 0);
+    flags->bits.has_object_props       = (columndoc->obj_prop_keys.num_elems > 0);
+    flags->bits.has_null_array_props    = (columndoc->null_array_prop_keys.num_elems > 0);
+    flags->bits.has_bool_array_props = (columndoc->bool_array_prop_keys.num_elems > 0);
+    flags->bits.has_int8_array_props    = (columndoc->int8_array_prop_keys.num_elems > 0);
+    flags->bits.has_int16_array_props   = (columndoc->int16_array_prop_keys.num_elems > 0);
+    flags->bits.has_int32_array_props   = (columndoc->int32_array_prop_keys.num_elems > 0);
+    flags->bits.has_int64_array_props   = (columndoc->int64_array_prop_keys.num_elems > 0);
+    flags->bits.has_uint8_array_props   = (columndoc->uint8_array_prop_keys.num_elems > 0);
+    flags->bits.has_uint16_array_props  = (columndoc->uint16_array_prop_keys.num_elems > 0);
+    flags->bits.has_uint32_array_props  = (columndoc->uint32_array_prop_keys.num_elems > 0);
+    flags->bits.has_uint64_array_props  = (columndoc->uint64_array_prop_keys.num_elems > 0);
+    flags->bits.has_float_array_props    = (columndoc->float_array_prop_keys.num_elems > 0);
+    flags->bits.has_string_array_props  = (columndoc->string_array_prop_keys.num_elems > 0);
+    flags->bits.has_object_array_props  = (columndoc->obj_array_props.num_elems > 0);
     assert(flags->value != 0);
     return flags;
 }
@@ -2448,7 +2447,7 @@ static bool initDecompressor(carbon_archive_record_table_t *file)
     union carbon_archive_dic_flags flags;
 
     fread(&header, sizeof(struct embedded_dic_header), 1, file->diskFile);
-    if (header.marker != markerSymbols[MARKER_TYPE_EMBEDDED_STR_DIC].symbol) {
+    if (header.marker != marker_symbols[MARKER_TYPE_EMBEDDED_STR_DIC].symbol) {
         CARBON_ERROR(&file->err, CARBON_ERR_CORRUPTED);
         return false;
     }
