@@ -54,8 +54,8 @@ bool carbon_huffman_create(carbon_huffman_t **out, const StringRefVector *string
 
     for (size_t i = 0; i < strings->num_elems; i++) {
         const char *string = *VECTOR_GET(strings, i, const char *);
-        size_t stringLength = strlen(string);
-        for (size_t k = 0; k < stringLength; k++) {
+        size_t string_length = strlen(string);
+        for (size_t k = 0; k < string_length; k++) {
             size_t c = (unsigned char) string[k];
             freqData[c]++;
         }
@@ -189,24 +189,24 @@ static size_t encodeString(carbon_memfile_t *file, carbon_huffman_t *dic, const 
 bool carbon_huffman_encode(carbon_memfile_t *file,
                            carbon_huffman_t *dic,
                            char markerSymbol,
-                           const carbon_vec_t ofType(carbon_string_id_t) *carbon_string_id_ts,
+                           const carbon_vec_t ofType(carbon_string_id_t) *string_ids,
                            const StringRefVector *strings)
 {
     CARBON_NON_NULL_OR_ERROR(file)
     CARBON_NON_NULL_OR_ERROR(dic)
     CARBON_NON_NULL_OR_ERROR(strings)
 
-    assert(carbon_string_id_ts->num_elems == strings->num_elems);
+    assert(string_ids->num_elems == strings->num_elems);
 
     for (size_t i = 0; i < strings->num_elems; i++) {
         const char *string = *VECTOR_GET(strings, i, const char *);
-        carbon_string_id_t string_id = *VECTOR_GET(carbon_string_id_ts, i, carbon_string_id_t);
+        carbon_string_id_t string_id = *VECTOR_GET(string_ids, i, carbon_string_id_t);
         carbon_off_t offset, offsetContinue;
-        uint32_t stringLength = (uint32_t) strlen(string);
+        uint32_t string_length = (uint32_t) strlen(string);
         uint32_t numBytesEncoded = 0;
         carbon_memfile_write(file, &markerSymbol, sizeof(char));
         carbon_memfile_write(file, &string_id, sizeof(carbon_string_id_t));
-        carbon_memfile_write(file, &stringLength, sizeof(uint32_t));
+        carbon_memfile_write(file, &string_length, sizeof(uint32_t));
         carbon_memfile_tell(&offset, file);
         carbon_memfile_skip(file, sizeof(uint32_t));
         if ((numBytesEncoded = (uint32_t) encodeString(file, dic, string)) == 0) {

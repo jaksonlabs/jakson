@@ -65,7 +65,7 @@ CARBON_EXPORT(bool)
 carbon_huffman_encode(carbon_memfile_t *file,
                       carbon_huffman_t *dic,
                       char markerSymbol,
-                      const carbon_vec_t ofType(carbon_string_id_t) *carbon_string_id_ts,
+                      const carbon_vec_t ofType(carbon_string_id_t) *string_ids,
                       const StringRefVector *strings);
 
 CARBON_EXPORT(bool)

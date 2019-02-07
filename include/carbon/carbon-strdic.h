@@ -244,14 +244,14 @@ carbon_strdic_num_distinct(size_t *num, carbon_strdic_t *dic)
 CARBON_FUNC_UNUSED
 static bool
 carbon_strdic_get_contents(carbon_vec_t ofType (char *) *strings,
-                           carbon_vec_t ofType(carbon_string_id_t) *carbon_string_id_ts,
+                           carbon_vec_t ofType(carbon_string_id_t) *string_ids,
                            carbon_strdic_t *dic)
 {
     CARBON_NON_NULL_OR_ERROR(strings)
-    CARBON_NON_NULL_OR_ERROR(carbon_string_id_ts)
+    CARBON_NON_NULL_OR_ERROR(string_ids)
     CARBON_NON_NULL_OR_ERROR(dic);
     assert(dic->get_contents);
-    return dic->get_contents(dic, strings, carbon_string_id_ts);
+    return dic->get_contents(dic, strings, string_ids);
 }
 
 CARBON_END_DECL

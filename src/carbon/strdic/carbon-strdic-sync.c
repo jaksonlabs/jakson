@@ -54,7 +54,7 @@ static bool this_counters(carbon_strdic_t *self, carbon_string_hash_counters_t *
 static bool this_num_distinct(carbon_strdic_t *self, size_t *num);
 
 static bool this_get_contents(carbon_strdic_t *self, carbon_vec_t ofType (char *) * strings,
-                           carbon_vec_t ofType(carbon_string_id_t) * carbon_string_id_ts);
+                           carbon_vec_t ofType(carbon_string_id_t) * string_ids);
 
 static void lock(carbon_strdic_t *self);
 static void unlock(carbon_strdic_t *self);
@@ -467,7 +467,7 @@ static bool this_num_distinct(carbon_strdic_t *self, size_t *num)
 }
 
 static bool this_get_contents(carbon_strdic_t *self, carbon_vec_t ofType (char *) * strings,
-                           carbon_vec_t ofType(carbon_string_id_t) * carbon_string_id_ts)
+                           carbon_vec_t ofType(carbon_string_id_t) * string_ids)
 {
     CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_SYNC);
     struct sync_extra *extra = this_extra(self);
@@ -476,7 +476,7 @@ static bool this_get_contents(carbon_strdic_t *self, carbon_vec_t ofType (char *
         const struct entry *e = VECTOR_GET(&extra->contents, i, struct entry);
         if (e->in_use) {
             carbon_vec_push(strings, &e->str, 1);
-            carbon_vec_push(carbon_string_id_ts, &i, 1);
+            carbon_vec_push(string_ids, &i, 1);
         }
     }
     return true;

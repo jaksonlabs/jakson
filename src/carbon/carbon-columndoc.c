@@ -870,10 +870,10 @@ static bool objectArrayKeyColumnPush(carbon_columndoc_column_t *col, carbon_err_
     case carbon_field_type_string: {
         assert(!isNullByDef);
         char **strings = VECTOR_ALL(&entry->values, char *);
-        carbon_string_id_t *carbon_string_id_ts;
-        carbon_strdic_locate_fast(&carbon_string_id_ts, dic, (char *const *) strings, num_elements);
-        carbon_vec_push(valuesForEntry, carbon_string_id_ts, num_elements);
-        carbon_strdic_free(dic, carbon_string_id_ts);
+        carbon_string_id_t *string_ids;
+        carbon_strdic_locate_fast(&string_ids, dic, (char *const *) strings, num_elements);
+        carbon_vec_push(valuesForEntry, string_ids, num_elements);
+        carbon_strdic_free(dic, string_ids);
         //carbon_strdic_free(strdic, strings);
     } break;
     case carbon_field_type_object:
@@ -1127,15 +1127,15 @@ static bool objectPutArray(carbon_columndoc_obj_t *model, carbon_err_t *err, con
         break;
     case carbon_field_type_string: {
         const char **strings = VECTOR_ALL(&entry->values, const char *);
-        carbon_string_id_t *carbon_string_id_ts;
-        carbon_strdic_locate_fast(&carbon_string_id_ts, dic, (char *const *) strings, num_elements);
+        carbon_string_id_t *string_ids;
+        carbon_strdic_locate_fast(&string_ids, dic, (char *const *) strings, num_elements);
         objectPushArray(&model->string_array_prop_vals,
                         sizeof(carbon_string_id_t),
                         num_elements,
-                        carbon_string_id_ts,
+                        string_ids,
                         *keyId,
                         &model->string_array_prop_keys);
-        carbon_strdic_free(dic, carbon_string_id_ts);
+        carbon_strdic_free(dic, string_ids);
     }
         break;
     case carbon_field_type_object: {
