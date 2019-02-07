@@ -70,7 +70,7 @@ typedef struct Slice
      * avoids to lookup in a carbon_bitmap_t or other structure whether a particular element is removed or not; also
      * this does not steal an element from the domain of the used data type to encode 'not present' with a
      * particular values. However, a remove operation is expensive. */
-    const char *keyColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
+    const char *key_column[SLICE_KEY_COLUMN_MAX_ELEMS];
     carbon_hash_t keyHashColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
     carbon_string_id_t carbon_string_id_tColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
 

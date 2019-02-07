@@ -32,13 +32,13 @@
     register bool continueScan, keysMatch, keyHashsNoMatch, endReached;                                                \
     register bool cacheAvailable = (slice->cacheIdx != (uint32_t) -1);                                                 \
     register bool hashsEq = cacheAvailable && (slice->keyHashColumn[slice->cacheIdx] == needleHash);                   \
-    register bool cacheHit = hashsEq && (strcmp(slice->keyColumn[slice->cacheIdx], needleStr) == 0);                   \
+    register bool cacheHit = hashsEq && (strcmp(slice->key_column[slice->cacheIdx], needleStr) == 0);                   \
     register uint_fast32_t i = 0;                                                                                      \
     if (!cacheHit) {                                                                                                   \
         do {                                                                                                           \
             while ((keyHashsNoMatch = (slice->keyHashColumn[i]!=needleHash)) && i++<slice->num_elems) { ; }             \
             endReached    = ((i+1)>slice->num_elems);                                                                   \
-            keysMatch      = endReached || (!keyHashsNoMatch && (strcmp(slice->keyColumn[i], needleStr)==0));          \
+            keysMatch      = endReached || (!keyHashsNoMatch && (strcmp(slice->key_column[i], needleStr)==0));          \
             continueScan  = !endReached && !keysMatch;                                                                 \
             i             += continueScan;                                                                             \
         }                                                                                                              \
@@ -147,7 +147,7 @@ carbon_slice_list_insert(carbon_slice_list_t *list, char **strings, carbon_strin
                   appender->num_elems,
                   SLICE_KEY_COLUMN_MAX_ELEMS);
             assert(appender->num_elems < SLICE_KEY_COLUMN_MAX_ELEMS);
-            appender->keyColumn[appender->num_elems] = key;
+            appender->key_column[appender->num_elems] = key;
             appender->keyHashColumn[appender->num_elems] = keyHash;
             appender->carbon_string_id_tColumn[appender->num_elems] = value;
             appenderBounds->minHash = appenderBounds->minHash < keyHash ?
