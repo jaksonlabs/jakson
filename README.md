@@ -2,7 +2,7 @@
 
 This is [libcarbon](https://github.com/protolabs/libcarbon) a C library for creating, modifying and querying Columnar Binary-Encoded JSON (Carbon) files.
 
-The documentation is available at [CodeDocs](https://codedocs.xyz/protolabs/jsongen/). If you have any issues, please use our [issue tracker](https://github.com/protolabs/libcarbon/issues).
+The documentation is available at [CodeDocs](https://codedocs.xyz/protolabs/libcarbon/). If you have any issues, please use our [issue tracker](https://github.com/protolabs/libcarbon/issues).
 
 ## Installation
 
@@ -25,4 +25,4 @@ If you find tools in this repository helpful, and want to support the author wit
 
 ### States
 
-[![Documentation](https://codedocs.xyz/protolabs/jsongen.svg)](https://codedocs.xyz/protolabs/jsongen/)
+[![Documentation](https://codedocs.xyz/protolabs/libcarbon.svg)](https://codedocs.xyz/protolabs/libcarbon/)
