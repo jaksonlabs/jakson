@@ -171,15 +171,15 @@ typedef enum carbon_type
 #define CARBON_MIN(a, b)                                                                                               \
     ((a) < (b) ? (a) : (b))
 
-#define CARBON_NON_NULL_OR_ERROR(x)                         \
-{                                                           \
-    if (!(x)) {                                             \
-        carbon_err_t err;                                   \
-        carbon_error_init(&err);                            \
-        CARBON_ERROR(&err, CARBON_ERR_NULLPTR);             \
-        carbon_error_print(&err);                           \
-        return false;                                       \
-    }                                                       \
+#define CARBON_NON_NULL_OR_ERROR(x)                                                                                    \
+{                                                                                                                      \
+    if (!(x)) {                                                                                                        \
+        carbon_err_t err;                                                                                              \
+        carbon_error_init(&err);                                                                                       \
+        CARBON_ERROR(&err, CARBON_ERR_NULLPTR);                                                                        \
+        carbon_error_print(&err);                                                                                      \
+        return false;                                                                                                  \
+    }                                                                                                                  \
 }
 
 

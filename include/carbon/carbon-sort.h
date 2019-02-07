@@ -33,7 +33,7 @@ typedef bool (*carbon_eq_func_t)(const void *lhs, const void *rhs);
 
 typedef bool (*carbon_less_func_t)(const void *lhs, const void *rhs);
 
-#define CARBON_QSORT_INDICES_SWAP(x, y)                                                                                   \
+#define CARBON_QSORT_INDICES_SWAP(x, y)                                                                                \
 {                                                                                                                      \
     size_t *a = x;                                                                                                     \
     size_t *b = y;                                                                                                     \
@@ -42,7 +42,7 @@ typedef bool (*carbon_less_func_t)(const void *lhs, const void *rhs);
     *b = tmp;                                                                                                          \
 }
 
-#define CARBON_QSORT_INDICIES_PARTITION(indices, base, width, comp, l, h)                                                 \
+#define CARBON_QSORT_INDICIES_PARTITION(indices, base, width, comp, l, h)                                              \
 ({                                                                                                                     \
     const void   *x       = base + indices[h] * width;                                                                 \
     int64_t        i       = (l - 1);                                                                                  \
@@ -52,14 +52,14 @@ typedef bool (*carbon_less_func_t)(const void *lhs, const void *rhs);
         if (comp(base + indices[j] * width, x))                                                                        \
         {                                                                                                              \
             i++;                                                                                                       \
-            CARBON_QSORT_INDICES_SWAP (indices + i, indices + j);                                                         \
+            CARBON_QSORT_INDICES_SWAP (indices + i, indices + j);                                                      \
         }                                                                                                              \
     }                                                                                                                  \
-    CARBON_QSORT_INDICES_SWAP (indices + (i + 1), indices + h);                                                           \
+    CARBON_QSORT_INDICES_SWAP (indices + (i + 1), indices + h);                                                        \
     (i + 1);                                                                                                           \
 })
 
-#define CARBON_QSORT_INDICIES_PARTITION_WARGS(indices, base, width, comp, l, h, args)                                     \
+#define CARBON_QSORT_INDICIES_PARTITION_WARGS(indices, base, width, comp, l, h, args)                                  \
 ({                                                                                                                     \
     const void   *x       = base + indices[h] * width;                                                                 \
     int64_t        i       = (l - 1);                                                                                  \
@@ -69,10 +69,10 @@ typedef bool (*carbon_less_func_t)(const void *lhs, const void *rhs);
         if (comp(base + indices[j] * width, x, args))                                                                  \
         {                                                                                                              \
             i++;                                                                                                       \
-            CARBON_QSORT_INDICES_SWAP (indices + i, indices + j);                                                         \
+            CARBON_QSORT_INDICES_SWAP (indices + i, indices + j);                                                      \
         }                                                                                                              \
     }                                                                                                                  \
-    CARBON_QSORT_INDICES_SWAP (indices + (i + 1), indices + h);                                                           \
+    CARBON_QSORT_INDICES_SWAP (indices + (i + 1), indices + h);                                                        \
     (i + 1);                                                                                                           \
 })
 

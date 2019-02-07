@@ -58,19 +58,19 @@ inline static void *forProxyFunction(void *restrict args)
     return NULL;
 }
 
-#define PARALLEL_ERROR(msg, retval)                                      \
-{                                                                        \
-    perror(msg);                                                         \
-    return retval;                                                       \
+#define PARALLEL_ERROR(msg, retval)                                                                                    \
+{                                                                                                                      \
+    perror(msg);                                                                                                       \
+    return retval;                                                                                                     \
 }
 
-#define PARALLEL_MATCH(forSingle, forMulti)                              \
-{                                                                        \
-    if (CARBON_BRANCH_LIKELY(hint == ThreadingHint_Multi)) {             \
-        return (forMulti);                                               \
-    } else if (hint == ThreadingHint_Single) {                           \
-        return (forSingle);                                              \
-    } else PARALLEL_ERROR(PARALLEL_MSG_UNKNOWN_HINT, false);             \
+#define PARALLEL_MATCH(forSingle, forMulti)                                                                            \
+{                                                                                                                      \
+    if (CARBON_BRANCH_LIKELY(hint == ThreadingHint_Multi)) {                                                           \
+        return (forMulti);                                                                                             \
+    } else if (hint == ThreadingHint_Single) {                                                                         \
+        return (forSingle);                                                                                            \
+    } else PARALLEL_ERROR(PARALLEL_MSG_UNKNOWN_HINT, false);                                                           \
 }
 
 inline static bool

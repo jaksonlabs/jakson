@@ -15,23 +15,10 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  I N C L U D E S
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
 #include <sys/mman.h>
 
 #include "carbon/carbon-memfile.h"
 #include "carbon/carbon-vector.h"
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  M A C R O S
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
 
 #define DEFINE_PRINTER_FUNCTION_WCAST(type, castType, formatString)                                                    \
 void vector_##type##_PrinterFunc(carbon_memfile_t *dst, void ofType(T) *values, size_t numElems)                         \
@@ -55,12 +42,6 @@ void vector_##type##_PrinterFunc(carbon_memfile_t *dst, void ofType(T) *values, 
 #define DEFINE_PRINTER_FUNCTION(type, formatString)                                                                    \
     DEFINE_PRINTER_FUNCTION_WCAST(type, type, formatString)
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  D E F I N I T I O N S
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
 DEFINE_PRINTER_FUNCTION_WCAST(u_char, int8_t, "%d")
 DEFINE_PRINTER_FUNCTION(int8_t, "%d")
 DEFINE_PRINTER_FUNCTION(int16_t, "%d")
@@ -71,12 +52,6 @@ DEFINE_PRINTER_FUNCTION(uint16_t, "%d")
 DEFINE_PRINTER_FUNCTION(uint32_t, "%d")
 DEFINE_PRINTER_FUNCTION(uint64_t, "%"PRIu64)
 DEFINE_PRINTER_FUNCTION(size_t, "%zu")
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  I N T E R F A C E
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 bool VectorCreate(carbon_vec_t *out, const carbon_alloc_t *alloc, size_t elemSize, size_t capElems)
 {

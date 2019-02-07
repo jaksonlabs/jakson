@@ -38,29 +38,29 @@ typedef struct carbon_memfile
     carbon_err_t err;
 } carbon_memfile_t;
 
-#define CARBON_MEMFILE_PEEK(file, type)                            \
-({                                                          \
-    assert (carbon_memfile_remain_size(file) >= sizeof(type));       \
-    (type*) carbon_memfile_peek(file, sizeof(type));                \
+#define CARBON_MEMFILE_PEEK(file, type)                                                                                \
+({                                                                                                                     \
+    assert (carbon_memfile_remain_size(file) >= sizeof(type));                                                         \
+    (type*) carbon_memfile_peek(file, sizeof(type));                                                                   \
 })
 
-#define CARBON_MEMFILE_READ_TYPE(file, type)                       \
-({                                                          \
-    assert (carbon_memfile_remain_size(file) >= sizeof(type));       \
-    (type*) carbon_memfile_read(file, sizeof(type));                \
+#define CARBON_MEMFILE_READ_TYPE(file, type)                                                                           \
+({                                                                                                                     \
+    assert (carbon_memfile_remain_size(file) >= sizeof(type));                                                         \
+    (type*) carbon_memfile_read(file, sizeof(type));                                                                   \
 })
 
-#define CARBON_MEMFILE_READ(file, nbytes)                          \
-({                                                          \
-    assert (carbon_memfile_remain_size(file) >= nbytes);             \
-    carbon_memfile_read(file, nbytes);                              \
+#define CARBON_MEMFILE_READ(file, nbytes)                                                                              \
+({                                                                                                                     \
+    assert (carbon_memfile_remain_size(file) >= nbytes);                                                               \
+    carbon_memfile_read(file, nbytes);                                                                                 \
 })
 
-#define CARBON_MEMFILE_TELL(file)                                  \
-({                                                          \
-    carbon_off_t offset;                                          \
-    carbon_memfile_tell(&offset, file);                             \
-    offset;                                                 \
+#define CARBON_MEMFILE_TELL(file)                                                                                      \
+({                                                                                                                     \
+    carbon_off_t offset;                                                                                               \
+    carbon_memfile_tell(&offset, file);                                                                                \
+    offset;                                                                                                            \
 })
 
 CARBON_EXPORT(bool)

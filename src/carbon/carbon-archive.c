@@ -20,22 +20,6 @@
 #include "carbon/carbon-huffman.h"
 #include "carbon/carbon-archive.h"
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//
-//
-//  C A B I N   F I L E   B Y T E   S T R E A M
-//
-//
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  C O N S T A N T S
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
 #define CABIN_FILE_MAGIC                    "MP/CARBON"
 #define CABIN_FILE_VERSION                  1
 
@@ -73,12 +57,6 @@
 #define  MARKER_SYMBOL_COLUMN              'x'
 #define  MARKER_SYMBOL_HUFFMAN_DIC_ENTRY   'd'
 #define  MARKER_SYMBOL_RECORD_HEADER       'r'
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  M A C R O S
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 #define WRITE_PRIMITIVE_VALUES(memFile, valuesVec, type)                                                               \
 {                                                                                                                      \
@@ -187,12 +165,6 @@
     }                                                                                                                  \
     fprintf(file, "]\n");                                                                                              \
 }
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  T Y P E S
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 enum MarkerType
 {
@@ -387,12 +359,6 @@ struct __attribute__((packed)) ColumnHeader
     uint32_t numEntries;
 };
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  H E L P E R   P R O T O T Y P E S
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
 static carbon_off_t skipRecordHeader(carbon_memfile_t *memFile);
 static void updateRecordHeader(carbon_memfile_t *memFile,
                                carbon_off_t rootObjectHeaderOffset,
@@ -405,11 +371,36 @@ static void skipCabinFileHeader(carbon_memfile_t *memFile);
 static bool serializeStringDic(carbon_memfile_t *memFile, carbon_err_t *err, const carbon_doc_bulk_t *context, carbon_archive_compressor_type_e compressor);
 static bool dumpPrint(FILE *file, carbon_err_t *err, carbon_memfile_t *memFile);
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  I N T E R F A C E   I M P L E M E N T A T I O N
-//
-// ---------------------------------------------------------------------------------------------------------------------
+static void stringCompressorNoneSetHeaderFlags(union carbon_archive_dic_flags *flags);
+static bool stringCompressorNoneAccepts(const union carbon_archive_dic_flags *flags);
+static void stringCompressorNoneWriteDictionary(carbon_memfile_t *memFile, const carbon_vec_t ofType (const char *) *strings,
+                                                const carbon_vec_t ofType(carbon_string_id_t) *carbon_string_id_ts);
+static void stringCompressorNoneDumpDictionary(FILE *file, carbon_memfile_t *memFile);
+static void stringCompressorNoneCreate(carbon_archive_compressor_t *strategy);
+
+static void stringCompressorHuffmanSetHeaderFlags(union carbon_archive_dic_flags *flags);
+static bool stringCompressorHuffmanAccepts(const union carbon_archive_dic_flags *flags);
+static void stringCompressorHuffmanWriteDictionary(carbon_memfile_t *memFile, const carbon_vec_t ofType (const char *) *strings,
+                                                   const carbon_vec_t ofType(carbon_string_id_t) *carbon_string_id_ts);
+static void stringCompressorHuffmanDumpDictionary(FILE *file, carbon_memfile_t *memFile);
+static void stringCompressorHuffmanCreate(carbon_archive_compressor_t *strategy);
+
+struct
+{
+    carbon_archive_compressor_type_e type;
+    void (*create)(carbon_archive_compressor_t *strategy);
+    bool (*accepts)(const union carbon_archive_dic_flags *flags);
+} CompressorStrategyRegister[] =
+    {
+        { .type = CARBON_ARCHIVE_COMPRESSOR_TYPE_NONE,
+            .create = stringCompressorNoneCreate,
+            .accepts = stringCompressorNoneAccepts },
+
+        { .type = CARBON_ARCHIVE_COMPRESSOR_TYPE_HUFFMAN,
+            .create = stringCompressorHuffmanCreate,
+            .accepts = stringCompressorHuffmanAccepts }
+    };
+
 
 bool carbon_archive_from_model(carbon_memblock_t **stream,
                                carbon_err_t *err,
@@ -475,70 +466,6 @@ bool carbon_archive_print(FILE *file, carbon_err_t *err, carbon_memblock_t *stre
     }
 }
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//
-//
-//  S T R I N G   C O M P R E S S O R
-//
-//
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  C O M P R E S S O R   B I N D I N G S
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------------------------------------------------
-//  N O   C O M P R E S S I O N
-// ---------------------------------------------------------------------------------------------------------------------
-static void stringCompressorNoneSetHeaderFlags(union carbon_archive_dic_flags *flags);
-static bool stringCompressorNoneAccepts(const union carbon_archive_dic_flags *flags);
-static void stringCompressorNoneWriteDictionary(carbon_memfile_t *memFile, const carbon_vec_t ofType (const char *) *strings,
-                                                const carbon_vec_t ofType(carbon_string_id_t) *carbon_string_id_ts);
-static void stringCompressorNoneDumpDictionary(FILE *file, carbon_memfile_t *memFile);
-static void stringCompressorNoneCreate(carbon_archive_compressor_t *strategy);
-
-// ---------------------------------------------------------------------------------------------------------------------
-//  H U F F M A N   C O M P R E S S I O N
-// ---------------------------------------------------------------------------------------------------------------------
-static void stringCompressorHuffmanSetHeaderFlags(union carbon_archive_dic_flags *flags);
-static bool stringCompressorHuffmanAccepts(const union carbon_archive_dic_flags *flags);
-static void stringCompressorHuffmanWriteDictionary(carbon_memfile_t *memFile, const carbon_vec_t ofType (const char *) *strings,
-                                                   const carbon_vec_t ofType(carbon_string_id_t) *carbon_string_id_ts);
-static void stringCompressorHuffmanDumpDictionary(FILE *file, carbon_memfile_t *memFile);
-static void stringCompressorHuffmanCreate(carbon_archive_compressor_t *strategy);
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  I M P L E M E N T A T I O N   R E G I S T E R
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
-struct
-{
-    carbon_archive_compressor_type_e type;
-    void (*create)(carbon_archive_compressor_t *strategy);
-    bool (*accepts)(const union carbon_archive_dic_flags *flags);
-} CompressorStrategyRegister[] =
-    {
-        { .type = CARBON_ARCHIVE_COMPRESSOR_TYPE_NONE,
-            .create = stringCompressorNoneCreate,
-            .accepts = stringCompressorNoneAccepts },
-
-        { .type = CARBON_ARCHIVE_COMPRESSOR_TYPE_HUFFMAN,
-            .create = stringCompressorHuffmanCreate,
-            .accepts = stringCompressorHuffmanAccepts }
-    };
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  H E L P E R   I M P L E M E N T A T I O N
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
 static bool compressorStrategyByType(carbon_err_t *err, carbon_archive_compressor_t *strategy, carbon_archive_compressor_type_e type)
 {
     for (size_t i = 0; i < CARBON_ARRAY_LENGTH(CompressorStrategyRegister); i++) {
@@ -565,10 +492,6 @@ static bool compressorStrategyByFlags(carbon_archive_compressor_t *strategy, con
     }
     return false;
 }
-
-// ---------------------------------------------------------------------------------------------------------------------
-//  N O   C O M P R E S S I O N
-// ---------------------------------------------------------------------------------------------------------------------
 
 static void stringCompressorNoneSetHeaderFlags(union carbon_archive_dic_flags *flags)
 {
@@ -626,10 +549,6 @@ static void stringCompressorNoneCreate(carbon_archive_compressor_t *strategy)
     strategy->serialize_dic = stringCompressorNoneWriteDictionary;
     strategy->dump_dic = stringCompressorNoneDumpDictionary;
 }
-
-// ---------------------------------------------------------------------------------------------------------------------
-//  H U F F M A N   C O M P R E S S I O N
-// ---------------------------------------------------------------------------------------------------------------------
 
 static void stringCompressorHuffmanSetHeaderFlags(union carbon_archive_dic_flags *flags)
 {
@@ -710,12 +629,6 @@ static void stringCompressorHuffmanCreate(carbon_archive_compressor_t *strategy)
     strategy->serialize_dic = stringCompressorHuffmanWriteDictionary;
     strategy->dump_dic = stringCompressorHuffmanDumpDictionary;
 }
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  H E L P E R   I M P L E M E N T A T I O N
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 bool dumpPrintObject(FILE *file, carbon_err_t *err, carbon_memfile_t *memFile, unsigned nestingLevel);
 
@@ -2437,32 +2350,10 @@ static carbon_archive_object_flags_t *getFlags(carbon_archive_object_flags_t *fl
     return flags;
 }
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//
-//
-//  C A B I N   F I L E
-//
-//
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  H E L P E R   P R O T O T Y P E S
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
 static bool initDecompressor(carbon_archive_record_table_t *file);
 static bool readRecord(carbon_archive_record_table_t *file, carbon_off_t recordHeaderOffset);
 static void resetStringDicDiskFileCursor(carbon_archive_record_table_t *file);
 static void convertObjectToModel(carbon_doc_t *model, carbon_archive_object_t *obj);
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  I N T E R F A C E   I M P L E M E N T A T I O N
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 bool carbon_archive_open(carbon_archive_t *out,
                         const char *file_path)
@@ -2549,12 +2440,6 @@ bool carbon_archive_close(carbon_archive_t *archive)
     return true;
 }
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  H E L P E R   I M P L E M E N T A T I O N
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
 static bool initDecompressor(carbon_archive_record_table_t *file)
 {
     assert(file->diskFile);
@@ -2620,22 +2505,6 @@ static void convertObjectToModel(carbon_doc_t *model, carbon_archive_object_t *o
     CARBON_UNUSED(obj);
 }
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//
-//
-//  C A B I N   O B J E C T
-//
-//
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  H E L P E R   P R O T O T Y P E S
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
 static void resetCabinObjectMemFile(carbon_archive_object_t *object)
 {
     carbon_memfile_seek(&object->file, object->self);
@@ -2652,12 +2521,6 @@ static void getObjectProperties(carbon_archive_object_t *object)
 
     }
 }
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  R E C O R D   T A B L E   I N T E R F A C E
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 CARBON_EXPORT(bool)
 carbon_archive_record(carbon_archive_object_t *root, carbon_archive_t *archive)
@@ -3239,9 +3102,9 @@ bool carbon_archive_table_field_object_cursor_open(carbon_object_cursor_t *curso
     CARBON_NON_NULL_OR_ERROR(cursor);
     CARBON_NON_NULL_OR_ERROR(field);
     cursor->field = field;
-    cursor->currentIdx = 0;
-    cursor->maxIdx = field->nentries;
-    cursor->memBlock = field->context->file.memblock;
+    cursor->current_idx = 0;
+    cursor->max_idx = field->nentries;
+    cursor->mem_block = field->context->file.memblock;
     return true;
 }
 
@@ -3249,15 +3112,15 @@ bool carbon_archive_table_field_object_cursor_next(carbon_archive_object_t **obj
 {
     CARBON_NON_NULL_OR_ERROR(obj);
     CARBON_NON_NULL_OR_ERROR(cursor);
-    if (cursor->currentIdx < cursor->maxIdx) {
-        carbon_off_t readLength = objectSetup(&cursor->obj, cursor->memBlock, cursor->field->data_offset,
+    if (cursor->current_idx < cursor->max_idx) {
+        carbon_off_t readLength = objectSetup(&cursor->obj, cursor->mem_block, cursor->field->data_offset,
                                         cursor->field->context->context);
         cursor->field->data_offset += readLength;
         carbon_memfile_t file;
-        carbon_memfile_open(&file, cursor->memBlock, CARBON_MEMFILE_MODE_READONLY);
+        carbon_memfile_open(&file, cursor->mem_block, CARBON_MEMFILE_MODE_READONLY);
         carbon_memfile_seek(&file, cursor->field->data_offset);
         cursor->field->data_offset = *CARBON_MEMFILE_READ_TYPE(&file, carbon_off_t);
-        cursor->currentIdx++;
+        cursor->current_idx++;
         *obj = &cursor->obj;
         return true;
     } else {

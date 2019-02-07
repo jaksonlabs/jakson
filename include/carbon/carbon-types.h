@@ -90,53 +90,53 @@ typedef enum carbon_field_type
     carbon_field_type_object        = 12
 } carbon_field_type_e;
 
-#define GET_TYPE_SIZE(valueType)                            \
-({                                                          \
-    size_t value_size;                                       \
-    switch (valueType) {                                    \
-        case carbon_field_type_null:                                 \
-            value_size = sizeof(uint16_t);                   \
-            break;                                          \
-        case carbon_field_type_bool:                              \
-            value_size = sizeof(carbon_bool_t);               \
-            break;                                          \
-        case carbon_field_type_int8:                                 \
-            value_size = sizeof(carbon_int8_t);                  \
-            break;                                          \
-        case carbon_field_type_int16:                                \
-            value_size = sizeof(carbon_int16_t);                 \
-            break;                                          \
-        case carbon_field_type_int32:                                \
-            value_size = sizeof(carbon_int32_t);                 \
-            break;                                          \
-        case carbon_field_type_int64:                                \
-            value_size = sizeof(carbon_int64_t);                 \
-            break;                                          \
-        case carbon_field_type_uint8:                                \
-            value_size = sizeof(carbon_uint8_t);                 \
-            break;                                          \
-        case carbon_field_type_uint16:                               \
-            value_size = sizeof(carbon_uint16_t);                \
-            break;                                          \
-        case carbon_field_type_uint32:                               \
-            value_size = sizeof(carbon_uin32_t);                \
-            break;                                          \
-        case carbon_field_type_uint64:                               \
-            value_size = sizeof(carbon_uin64_t);                \
-            break;                                          \
-        case carbon_field_type_float:                                \
-            value_size = sizeof(carbon_float_t);                 \
-            break;                                          \
-        case carbon_field_type_string:                               \
-            value_size = sizeof(carbon_string_id_t);                   \
-            break;                                          \
-        case carbon_field_type_object:                               \
-            value_size = sizeof(carbon_columndoc_obj_t);     \
-            break;                                          \
-        default:                                            \
-        CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_NOTYPE);        \
-    }                                                       \
-    value_size;                                              \
+#define GET_TYPE_SIZE(valueType)                                                                                       \
+({                                                                                                                     \
+    size_t value_size;                                                                                                 \
+    switch (valueType) {                                                                                               \
+        case carbon_field_type_null:                                                                                   \
+            value_size = sizeof(uint16_t);                                                                             \
+            break;                                                                                                     \
+        case carbon_field_type_bool:                                                                                   \
+            value_size = sizeof(carbon_bool_t);                                                                        \
+            break;                                                                                                     \
+        case carbon_field_type_int8:                                                                                   \
+            value_size = sizeof(carbon_int8_t);                                                                        \
+            break;                                                                                                     \
+        case carbon_field_type_int16:                                                                                  \
+            value_size = sizeof(carbon_int16_t);                                                                       \
+            break;                                                                                                     \
+        case carbon_field_type_int32:                                                                                  \
+            value_size = sizeof(carbon_int32_t);                                                                       \
+            break;                                                                                                     \
+        case carbon_field_type_int64:                                                                                  \
+            value_size = sizeof(carbon_int64_t);                                                                       \
+            break;                                                                                                     \
+        case carbon_field_type_uint8:                                                                                  \
+            value_size = sizeof(carbon_uint8_t);                                                                       \
+            break;                                                                                                     \
+        case carbon_field_type_uint16:                                                                                 \
+            value_size = sizeof(carbon_uint16_t);                                                                      \
+            break;                                                                                                     \
+        case carbon_field_type_uint32:                                                                                 \
+            value_size = sizeof(carbon_uin32_t);                                                                       \
+            break;                                                                                                     \
+        case carbon_field_type_uint64:                                                                                 \
+            value_size = sizeof(carbon_uin64_t);                                                                       \
+            break;                                                                                                     \
+        case carbon_field_type_float:                                                                                  \
+            value_size = sizeof(carbon_float_t);                                                                       \
+            break;                                                                                                     \
+        case carbon_field_type_string:                                                                                 \
+            value_size = sizeof(carbon_string_id_t);                                                                   \
+            break;                                                                                                     \
+        case carbon_field_type_object:                                                                                 \
+            value_size = sizeof(carbon_columndoc_obj_t);                                                               \
+            break;                                                                                                     \
+        default:                                                                                                       \
+        CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_NOTYPE);                                                                 \
+    }                                                                                                                  \
+    value_size;                                                                                                        \
 })
 
 CARBON_END_DECL

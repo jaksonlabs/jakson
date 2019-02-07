@@ -195,9 +195,9 @@ typedef struct carbon_field
 typedef struct carbon_object_cursor
 {
     carbon_field_t *field;
-    carbon_memblock_t *memBlock;
-    uint32_t currentIdx;
-    uint32_t maxIdx;
+    carbon_memblock_t *mem_block;
+    uint32_t current_idx;
+    uint32_t max_idx;
     carbon_archive_object_t obj;
 } carbon_object_cursor_t;
 

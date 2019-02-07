@@ -15,12 +15,6 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  I N C L U D E S
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
 #include <math.h>
 
 #include "carbon/carbon-time.h"

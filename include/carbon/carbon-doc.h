@@ -114,7 +114,7 @@ carbon_doc_entries_get_root(const carbon_doc_entries_t *partition);
 
 CARBON_EXPORT(carbon_columndoc_t *)
 carbon_doc_entries_to_columndoc(const carbon_doc_bulk_t *bulk,
-                                const carbon_doc_entries_t *partition, bool optimizeForRead);
+                                const carbon_doc_entries_t *partition, bool read_optimized);
 
 CARBON_EXPORT(bool)
 carbon_doc_entries_drop(carbon_doc_entries_t *partition);

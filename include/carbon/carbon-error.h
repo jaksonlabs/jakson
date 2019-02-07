@@ -131,7 +131,7 @@ carbon_error_print(const carbon_err_t *err);
 CARBON_EXPORT(bool)
 carbon_error_print_and_abort(const carbon_err_t *err);
 
-#define CARBON_ERROR_OCCURRED(x)                ((x)->err.code != CARBON_ERR_NOERR)
+#define CARBON_ERROR_OCCURRED(x)                   ((x)->err.code != CARBON_ERR_NOERR)
 
 #define CARBON_ERROR(err, code)                     CARBON_ERROR_IF (true, err, code)
 #define CARBON_ERROR_IF(expr, err, code)            { if (expr) { carbon_error_set(err, code, __FILE__, __LINE__); } }
@@ -151,11 +151,11 @@ carbon_error_print_and_abort(const carbon_err_t *err);
 }
 
 #define CARBON_DEFINE_GET_ERROR_FUNCTION(type_name, type, arg)                                                         \
-CARBON_FUNC_UNUSED static bool                                                                          \
+CARBON_FUNC_UNUSED static bool                                                                                         \
 carbon_##type_name##_get_error(carbon_err_t *err, const type *arg)                                                     \
 {                                                                                                                      \
-    CARBON_NON_NULL_OR_ERROR(err)                                                                                             \
-    CARBON_NON_NULL_OR_ERROR(arg)                                                                                             \
+    CARBON_NON_NULL_OR_ERROR(err)                                                                                      \
+    CARBON_NON_NULL_OR_ERROR(arg)                                                                                      \
     carbon_error_cpy(err, &arg->err);                                                                                  \
     return true;                                                                                                       \
 }

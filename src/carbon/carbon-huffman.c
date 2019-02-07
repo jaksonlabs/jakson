@@ -14,30 +14,13 @@
  * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  I N C L U D E S
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 #include <limits.h>
 
 #include "carbon/carbon-huffman.h"
 #include "carbon/carbon-bitmap.h"
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  D E B U G C O N F I G
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
 // #define DIAG_HUFFMAN_ENABLE_DEBUG
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  T Y P E S
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 typedef struct carbon_huffman
 {
@@ -55,20 +38,7 @@ struct HuffNode
     unsigned char letter;
 };
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  H E L P E R   P R O T O T Y P E S
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
-//static int compareNodesByFrequency(const void *lhs, const void *rhs);
 static void createHuffmanTree(carbon_vec_t ofType(carbon_huffman_entry_t) *encodingTable, const carbon_vec_t ofType(uint32_t) *frequencies);
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  I N T E R F A C E   I M P L E M E N T A T I O N
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 bool carbon_huffman_create(carbon_huffman_t **out, const StringRefVector *strings)
 {
@@ -282,12 +252,6 @@ bool carbon_huffman_read_dic_entry(carbon_huffman_entry_info_t *info, carbon_mem
         return false;
     }
 }
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  H E L P E R   I M P L E M E N T A T I O N
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 static const uint32_t *getNumUsedBlocks(uint16_t *numUsedBlocks, carbon_huffman_entry_t *entry, uint16_t numBlocks,
                                         const uint32_t *blocks)

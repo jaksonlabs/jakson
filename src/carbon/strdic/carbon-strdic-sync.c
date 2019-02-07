@@ -15,12 +15,6 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  I N C L U D E S
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
 #include "carbon/carbon-vector.h"
 #include "carbon/carbon-spinlock.h"
 #include "carbon/carbon-strhash.h"
@@ -42,12 +36,6 @@ typedef struct SyncExtra {
     carbon_strhash_t index;
     carbon_spinlock_t lock;
 } SyncExtra;
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  H E L P E R   P R O T O T Y P E S
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 static bool thisDrop(carbon_strdic_t *self);
 static bool thisInsert(carbon_strdic_t *self, carbon_string_id_t **out, char *const *strings, size_t numStrings,

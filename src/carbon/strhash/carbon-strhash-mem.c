@@ -15,12 +15,6 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  I N C L U D E S
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
 #include "carbon/strhash/carbon-strhash-mem.h"
 #include "carbon/carbon-spinlock.h"
 #include "carbon/carbon-sort.h"
@@ -42,12 +36,6 @@ typedef struct MemExtra
 {
     carbon_vec_t ofType(Bucket) buckets;
 } MemExtra;
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  H E L P E R  P R O T O T Y P E S
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 static int thisDrop(carbon_strhash_t *self);
 static int thisPutSafeBulk(carbon_strhash_t *self,
@@ -97,12 +85,6 @@ static int BucketCreate(Bucket *buckets, size_t numBuckets, size_t bucketCap,
 static int BucketDrop(Bucket *buckets, size_t numBuckets, carbon_alloc_t *alloc);
 static int BucketInsert(Bucket *bucket, const char *restrict key, carbon_string_id_t value,
                         carbon_alloc_t *alloc, carbon_string_hash_counters_t *counter);
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  I N T E R F A C E   I M P L E M E N T A T I O N
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 bool carbon_strhash_create_inmemory(carbon_strhash_t *map, const carbon_alloc_t *alloc, size_t num_buckets,
                                     size_t capBuckets)
@@ -397,12 +379,6 @@ static int thisFree(carbon_strhash_t *self, void *ptr)
     CARBON_CHECK_SUCCESS(carbon_free(&self->allocator, ptr));
     return true;
 }
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  H E L P E R  I M P L E M E N T A T I O N
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 CARBON_FUNC_UNUSED
 static int thisCreateExtra(carbon_strhash_t *self, size_t numBuckets, size_t capBuckets)

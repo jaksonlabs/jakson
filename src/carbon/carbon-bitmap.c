@@ -14,32 +14,21 @@
  * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  I N C L U D E S
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 #include "carbon/carbon-bitmap.h"
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  I N T E R F A C E   I M E P L E M E N T A T I O N
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
 CARBON_EXPORT(bool)
-carbon_bitmap_create(carbon_bitmap_t *bitmap, uint16_t numBits)
+carbon_bitmap_create(carbon_bitmap_t *bitmap, uint16_t num_bits)
 {
     CARBON_NON_NULL_OR_ERROR(bitmap);
 
     carbon_alloc_t alloc;
     carbon_alloc_create_std(&alloc);
-    VectorCreate(&bitmap->data, &alloc, sizeof(uint32_t), ceil(numBits / (double) CARBON_NUM_BITS(uint32_t)));
+    VectorCreate(&bitmap->data, &alloc, sizeof(uint32_t), ceil(num_bits / (double) CARBON_NUM_BITS(uint32_t)));
     size_t cap = VectorCapacity(&bitmap->data);
     uint32_t zero = 0;
     VectorRepreatedPush(&bitmap->data, &zero, cap);
-    bitmap->numBits = numBits;
+    bitmap->num_bits = num_bits;
 
     return true;
 }
@@ -47,7 +36,7 @@ carbon_bitmap_create(carbon_bitmap_t *bitmap, uint16_t numBits)
 CARBON_EXPORT(bool)
 carbon_bitmap_cpy(carbon_bitmap_t *dst, const carbon_bitmap_t *src)
 {
-    dst->numBits = src->numBits;
+    dst->num_bits = src->num_bits;
     return VectorCpy(&dst->data, &src->data);
 }
 
@@ -60,7 +49,7 @@ carbon_bitmap_drop(carbon_bitmap_t *bitset)
 size_t carbon_bitmap_nbits(const carbon_bitmap_t *bitset)
 {
     CARBON_NON_NULL_OR_ERROR(bitset);
-    return bitset->numBits;
+    return bitset->num_bits;
 }
 
 CARBON_EXPORT(bool)
@@ -73,11 +62,11 @@ carbon_bitmap_clear(carbon_bitmap_t *bitset)
 }
 
 CARBON_EXPORT(bool)
-carbon_bitmap_set(carbon_bitmap_t *bitset, uint16_t bitPosition, bool on)
+carbon_bitmap_set(carbon_bitmap_t *bitset, uint16_t bit_position, bool on)
 {
     CARBON_NON_NULL_OR_ERROR(bitset)
-    size_t blockPos = floor(bitPosition / (double) CARBON_NUM_BITS(uint32_t));
-    size_t blockBit = bitPosition % CARBON_NUM_BITS(uint32_t);
+    size_t blockPos = floor(bit_position / (double) CARBON_NUM_BITS(uint32_t));
+    size_t blockBit = bit_position % CARBON_NUM_BITS(uint32_t);
     uint32_t block = *VECTOR_GET(&bitset->data, blockPos, uint32_t);
     uint32_t mask = CARBON_SET_BIT(blockBit);
     if (on) {
@@ -104,7 +93,7 @@ CARBON_EXPORT(bool)
 carbon_bitmap_lshift(carbon_bitmap_t *carbon_bitmap_t)
 {
     CARBON_NON_NULL_OR_ERROR(carbon_bitmap_t)
-    for (int i = carbon_bitmap_t->numBits - 1; i >= 0; i--) {
+    for (int i = carbon_bitmap_t->num_bits - 1; i >= 0; i--) {
         bool f = i > 0 ? carbon_bitmap_get(carbon_bitmap_t, i - 1) : false;
         carbon_bitmap_set(carbon_bitmap_t, i, f);
     }

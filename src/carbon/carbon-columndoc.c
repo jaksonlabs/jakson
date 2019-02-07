@@ -15,20 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  I N C L U D E S
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
 #include "carbon/carbon-columndoc.h"
 #include "carbon/carbon-doc.h"
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  H E L P E R   P R O T O T Y P E S
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 static void setupObject(carbon_columndoc_obj_t *model, carbon_columndoc_t *parent, carbon_string_id_t key, size_t idx);
 
@@ -48,12 +36,6 @@ static carbon_columndoc_column_t *objectArrayKeyColumnsFindOrNew(carbon_vec_t of
 
 static bool objectArrayKeyColumnPush(carbon_columndoc_column_t *col, carbon_err_t *err, const carbon_doc_entries_t *entry, uint32_t arrayIdx,
                                      carbon_strdic_t *dic, carbon_columndoc_obj_t *model);
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  I N T E R F A C E
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 bool carbon_columndoc_create(carbon_columndoc_t *columndoc,
                              carbon_err_t *err,
@@ -749,12 +731,6 @@ bool carbon_columndoc_drop(carbon_columndoc_t *doc)
     CARBON_UNUSED(doc);
     CARBON_NOT_IMPLEMENTED
 }
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  H E L P E R   I M P L E M E N T A T I O N
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 static void objectArrayKeyColumnsCreate(carbon_vec_t ofType(carbon_columndoc_columngroup_t) *columns)
 {

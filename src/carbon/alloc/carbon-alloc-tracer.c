@@ -15,12 +15,6 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  I N C L U D E S
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
 #include "carbon/carbon-vector.h"
 
 #include "carbon/alloc/carbon-alloc_tracer.h"
@@ -214,22 +208,10 @@ trace_stats_t global_trace_stats = {
     .spinlock           = NULL
 };
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  H E L P E R   P R O T O T Y P E S
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
 static void *invoke_malloc(carbon_alloc_t *self, size_t size);
 static void *invoke_realloc(carbon_alloc_t *self, void *ptr, size_t size);
 static void invoke_free(carbon_alloc_t *self, void *ptr);
 static void invoke_clone(carbon_alloc_t *dst, const carbon_alloc_t *self);
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  M A C R O S
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 #define LAZY_INIT()                                                                                                    \
 if (!global_trace_stats.malloc_sizes) {                                                                                \
@@ -254,12 +236,6 @@ if (!global_trace_stats.malloc_sizes) {                                         
     fflush(global_trace_stats.statistics_file);                                                                        \
 }
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  I N T E R F A C E   I M P L E M E N T A T I O N
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
 int carbon_tracer_alloc_create(carbon_alloc_t *alloc)
 {
     CARBON_NON_NULL_OR_ERROR(alloc);
@@ -276,12 +252,6 @@ int carbon_tracer_alloc_create(carbon_alloc_t *alloc)
 
     return true;
 }
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  H E L P E R   I M P L E M E N T A T I O N
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 static void *invoke_malloc(carbon_alloc_t *self, size_t size)
 {

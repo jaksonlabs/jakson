@@ -99,31 +99,31 @@ typedef struct carbon_vec
 typedef carbon_vec_t ofType(char *) StringVector;
 typedef carbon_vec_t ofType(const char *) StringRefVector;
 
-#define STRING_VECTOR_CREATE(vec, alloc, capElems)          \
+#define STRING_VECTOR_CREATE(vec, alloc, capElems)                                                                     \
     VectorCreate(vec, alloc, sizeof(char *), capElems);
 
-#define STRING_REF_VECTOR_CREATE(vec, alloc, capElems)      \
-    STRING_VECTOR_CREATE(vec, alloc, capElems)              \
+#define STRING_REF_VECTOR_CREATE(vec, alloc, capElems)                                                                 \
+    STRING_VECTOR_CREATE(vec, alloc, capElems)                                                                         \
 
-#define STRING_VECTOR_DROP(vec)                             \
-({                                                          \
-    for (size_t i = 0; i < vec->numElems; i++) {            \
-        char *s = *VECTOR_GET(vec, i, char *);              \
-        free (s);                                           \
-    }                                                       \
-    VectorDrop(vec);                                        \
+#define STRING_VECTOR_DROP(vec)                                                                                        \
+({                                                                                                                     \
+    for (size_t i = 0; i < vec->numElems; i++) {                                                                       \
+        char *s = *VECTOR_GET(vec, i, char *);                                                                         \
+        free (s);                                                                                                      \
+    }                                                                                                                  \
+    VectorDrop(vec);                                                                                                   \
 })
 
-#define STRING_REF_VECTOR_DROP(vec)                         \
+#define STRING_REF_VECTOR_DROP(vec)                                                                                    \
     VectorDrop(vec);
 
-#define STRING_VECTOR_PUSH(vec, string)                     \
-({                                                          \
-    char *cpy = strdup(string);                             \
-    VectorPush(vec, &cpy, 1);                               \
+#define STRING_VECTOR_PUSH(vec, string)                                                                                \
+({                                                                                                                     \
+    char *cpy = strdup(string);                                                                                        \
+    VectorPush(vec, &cpy, 1);                                                                                          \
 })
 
-#define STRING_REF_VECTOR_PUSH(vec, string)                 \
+#define STRING_REF_VECTOR_PUSH(vec, string)                                                                            \
     VectorPush(vec, &string, 1)
 
 /*
@@ -263,12 +263,12 @@ VectorLength(const carbon_vec_t *vec);
 
 #define VECTOR_GET(vec, pos, type) (type *) VectorAt(vec, pos)
 
-#define VECTOR_NEW_AND_GET(vec, type)                           \
-({                                                              \
-    type template;                                              \
-    size_t vectorLength = VectorLength(vec);                    \
-    VectorPush(vec, &template, 1);                              \
-    VECTOR_GET(vec, vectorLength, type);                        \
+#define VECTOR_NEW_AND_GET(vec, type)                                                                                  \
+({                                                                                                                     \
+    type template;                                                                                                     \
+    size_t vectorLength = VectorLength(vec);                                                                           \
+    VectorPush(vec, &template, 1);                                                                                     \
+    VECTOR_GET(vec, vectorLength, type);                                                                               \
 })
 
 CARBON_EXPORT(const void *)
@@ -310,12 +310,6 @@ VectorToString(const carbon_vec_t ofType(T) *vec,
         void (*printerFunc)(carbon_memfile_t *dst, void ofType(T) *values, size_t numElems));
 
 #define VECTOR_ALL(vec, type) (type *) VectorData(vec)
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  E X T E R N   C   M A C R O
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 CARBON_END_DECL
 

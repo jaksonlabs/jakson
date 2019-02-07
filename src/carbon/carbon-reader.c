@@ -15,25 +15,11 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  I N C L U D E S
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
 #include <errno.h>
 
 #include "carbon/carbon-reader.h"
 
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  H E L P E R   P R O T O T Y P E S
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
 static carbon_vec_t *toStringList(const char *contents, size_t numBytes);
-
 
 CARBON_EXPORT(bool)
 ChunkReaderCreate(ChunkReader *reader, carbon_alloc_t *alloc,
@@ -109,12 +95,6 @@ carbon_vec_t ofType(char *) *ChunkReaderNext(ChunkReader *reader)
         return result;
     }
 }
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  H E L P E R   I M P L E M E N T A T I O N
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 static carbon_vec_t *toStringList(const char *contents, size_t numBytes)
 {

@@ -15,12 +15,6 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  I N C L U D E S
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
 #include "carbon/carbon-slotvector.h"
 
 bool SlotVectorCreate(SlotVector *vector, const carbon_alloc_t *alloc, size_t elemSize, size_t capElems)

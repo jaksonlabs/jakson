@@ -15,12 +15,6 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  I N C L U D E S
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
 #include "carbon/carbon-alloc.h"
 #include "carbon/carbon-vector.h"
 #include "carbon/strdic/carbon-strdic-sync.h"
@@ -31,27 +25,9 @@
 #include "carbon/carbon-parallel.h"
 #include "carbon/carbon-slicelist.h"
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  C O N S T A N T S
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
 #define STRING_DIC_ASYNC_TAG "strdic_async"
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  S T A T I C   C O N F I G
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
 #define HASH_FUNCTION                  CARBON_HASH_SAX
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  T Y P E S
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 typedef struct AsyncExtra AsyncExtra;
 
@@ -106,12 +82,6 @@ typedef struct ParallelExtractArg
     bool didWork;
 } ParallelExtractArg;
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  M A C R O S
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
 #define HASHCODE_OF(string)                                                                                            \
     HASH_FUNCTION(strlen(string), string)
 
@@ -123,12 +93,6 @@ typedef struct ParallelExtractArg
 
 #define GET_carbon_string_id_t(globalId)                                                                                         \
     ((~((carbon_string_id_t) 0)) >> 10 & globalcarbon_string_id_t);
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  H E L P E R   P R O T O T Y P E S
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 static bool thisDrop(carbon_strdic_t *self);
 static bool thisInsert(carbon_strdic_t *self,
@@ -160,23 +124,11 @@ static bool thisCreateExtra(carbon_strdic_t *self, size_t capacity, size_t numIn
 static bool thisSetupCarriers(carbon_strdic_t *self, size_t capacity, size_t numIndexBuckets,
                              size_t approxNumUniqueStr, size_t numThreads);
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  M A C R O S
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
 #define THIS_EXTRAS(self)                                                                                              \
 ({                                                                                                                     \
     CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_ASYNC);                                                                         \
     (AsyncExtra *) self->extra;                                                                                        \
 })
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  I N T E R F A C E   I M P L E M E N T A T I O N
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 CARBON_EXPORT (int)
 carbon_strdic_create_async(carbon_strdic_t *dic, size_t capacity, size_t num_index_buckets,
@@ -200,12 +152,6 @@ carbon_strdic_create_async(carbon_strdic_t *dic, size_t capacity, size_t num_ind
     CARBON_CHECK_SUCCESS(thisCreateExtra(dic, capacity, num_index_buckets, approx_num_unique_strs, num_threads));
     return true;
 }
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  H E L P E R   I M P L E M E N T A T I O N
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 static bool thisCreateExtra(carbon_strdic_t *self, size_t capacity, size_t numIndexBuckets,
                            size_t approxNumUniqueStr, size_t numThreads)

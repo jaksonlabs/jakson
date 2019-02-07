@@ -40,8 +40,8 @@ typedef size_t carbon_hash_t;
 /* implements: carbon_hash_t hash_jenkins(size_t key_size, const void *key) */
 #define CARBON_HASH_JENKINS(keySizeIn, key)                                                                            \
 ({                                                                                                                     \
-    size_t key_size = keySizeIn;                                                                                        \
-    assert ((key != NULL) && (key_size > 0));                                                                           \
+    size_t key_size = keySizeIn;                                                                                       \
+    assert ((key != NULL) && (key_size > 0));                                                                          \
                                                                                                                        \
     unsigned a, b;                                                                                                     \
     unsigned c = 0;                                                                                                    \
@@ -49,18 +49,18 @@ typedef size_t carbon_hash_t;
                                                                                                                        \
     a = b = 0x9e3779b9;                                                                                                \
                                                                                                                        \
-    while (key_size >= 12) {                                                                                            \
+    while (key_size >= 12) {                                                                                           \
         a += (k[0] + ((unsigned)k[1] << 8) + ((unsigned)k[2] << 16) + ((unsigned)k[3] << 24));                         \
         b += (k[4] + ((unsigned)k[5] << 8) + ((unsigned)k[6] << 16) + ((unsigned)k[7] << 24));                         \
         c += (k[8] + ((unsigned)k[9] << 8) + ((unsigned)k[10] << 16) + ((unsigned)k[11] << 24));                       \
         JENKINS_MIX(a, b, c);                                                                                          \
         k += 12;                                                                                                       \
-        key_size -= 12;                                                                                                 \
+        key_size -= 12;                                                                                                \
     }                                                                                                                  \
                                                                                                                        \
-    c += key_size;                                                                                                      \
+    c += key_size;                                                                                                     \
                                                                                                                        \
-    switch (key_size) {                                                                                                 \
+    switch (key_size) {                                                                                                \
         case 11: c += ((unsigned)k[10] << 24); break;                                                                  \
         case 10: c += ((unsigned)k[9] << 16); break;                                                                   \
         case 9: c += ((unsigned)k[8] << 8); break;                                                                     \
@@ -77,87 +77,87 @@ typedef size_t carbon_hash_t;
     c;                                                                                                                 \
 })
 
-#define CARBON_HASH_IDENTITY(key_size, key)                                                                                     \
+#define CARBON_HASH_IDENTITY(key_size, key)                                                                            \
 ({                                                                                                                     \
-    assert (key_size == sizeof(carbon_hash_t) && (key != NULL));                                                                 \
-    *((carbon_hash_t *)key);                                                                                                    \
+    assert (key_size == sizeof(carbon_hash_t) && (key != NULL));                                                       \
+    *((carbon_hash_t *)key);                                                                                           \
 })
 
-#define CARBON_HASH_ADDITIVE(key_size, key)                                                                                     \
+#define CARBON_HASH_ADDITIVE(key_size, key)                                                                            \
 ({                                                                                                                     \
-    carbon_hash_t hash = 0;                                                                                                     \
-    for (size_t i = 0; i < key_size; i++) {                                                                             \
+    carbon_hash_t hash = 0;                                                                                            \
+    for (size_t i = 0; i < key_size; i++) {                                                                            \
         hash += ((unsigned char* )key)[i];                                                                             \
     }                                                                                                                  \
     hash;                                                                                                              \
 })
 
-#define CARBON_HASH_XOR(key_size, key)                                                                                          \
+#define CARBON_HASH_XOR(key_size, key)                                                                                 \
 ({                                                                                                                     \
-    carbon_hash_t hash = 0;                                                                                                     \
-    for (size_t i = 0; i < key_size; i++) {                                                                             \
+    carbon_hash_t hash = 0;                                                                                            \
+    for (size_t i = 0; i < key_size; i++) {                                                                            \
         hash ^= ((unsigned char* )key)[i];                                                                             \
     }                                                                                                                  \
     hash;                                                                                                              \
 })
 
-#define CARBON_HASH_ROT(key_size, key)                                                                                          \
+#define CARBON_HASH_ROT(key_size, key)                                                                                 \
 ({                                                                                                                     \
-    carbon_hash_t hash = 0;                                                                                                     \
-    for (size_t i = 0; i < key_size; i++) {                                                                             \
+    carbon_hash_t hash = 0;                                                                                            \
+    for (size_t i = 0; i < key_size; i++) {                                                                            \
         hash ^= (hash << 4) ^ (hash >> 28) ^ ((unsigned char* )key)[i];                                                \
     }                                                                                                                  \
     hash;                                                                                                              \
 })
 
-#define CARBON_HASH_BERNSTEIN(key_size, key)                                                                                    \
+#define CARBON_HASH_BERNSTEIN(key_size, key)                                                                           \
 ({                                                                                                                     \
-    assert ((key != NULL) && (key_size > 0));                                                                           \
+    assert ((key != NULL) && (key_size > 0));                                                                          \
                                                                                                                        \
-    carbon_hash_t hash = 0;                                                                                                     \
-    for (size_t i = 0; i < key_size; i++) {                                                                             \
+    carbon_hash_t hash = 0;                                                                                            \
+    for (size_t i = 0; i < key_size; i++) {                                                                            \
         hash ^= 33 * hash + ((unsigned char* )key)[i];                                                                 \
     }                                                                                                                  \
     hash;                                                                                                              \
 })
 
-#define CARBON_HASH_BERNSTEIN2(key_size, key)                                                                                   \
+#define CARBON_HASH_BERNSTEIN2(key_size, key)                                                                          \
 ({                                                                                                                     \
-    assert ((key != NULL) && (key_size > 0));                                                                           \
+    assert ((key != NULL) && (key_size > 0));                                                                          \
                                                                                                                        \
-    carbon_hash_t hash = 0;                                                                                                     \
-    for (size_t i = 0; i < key_size; i++) {                                                                             \
+    carbon_hash_t hash = 0;                                                                                            \
+    for (size_t i = 0; i < key_size; i++) {                                                                            \
         hash ^= 33 * hash ^ ((unsigned char* )key)[i];                                                                 \
     }                                                                                                                  \
     hash;                                                                                                              \
 })
 
-#define CARBON_HASH_SAX(key_size, key)                                                                                          \
+#define CARBON_HASH_SAX(key_size, key)                                                                                 \
 ({                                                                                                                     \
-    carbon_hash_t hash = 0;                                                                                                     \
-    for (size_t i = 0; i < key_size; i++) {                                                                             \
+    carbon_hash_t hash = 0;                                                                                            \
+    for (size_t i = 0; i < key_size; i++) {                                                                            \
         hash ^= (hash << 5) + (hash >> 2) + ((unsigned char* )key)[i];                                                 \
     }                                                                                                                  \
     hash;                                                                                                              \
 })
 
-#define CARBON_HASH_FNV(key_size, key)                                                                                          \
+#define CARBON_HASH_FNV(key_size, key)                                                                                 \
 ({                                                                                                                     \
-    assert ((key != NULL) && (key_size > 0));                                                                           \
+    assert ((key != NULL) && (key_size > 0));                                                                          \
                                                                                                                        \
-    carbon_hash_t hash = 2166136261;                                                                                            \
-    for (size_t i = 0; i < key_size; i++) {                                                                             \
+    carbon_hash_t hash = 2166136261;                                                                                   \
+    for (size_t i = 0; i < key_size; i++) {                                                                            \
         hash = (hash * 16777619) ^ ((unsigned char* )key)[i];                                                          \
     }                                                                                                                  \
     hash;                                                                                                              \
 })
 
-#define CARBON_HASH_OAT(key_size, key)                                                                                          \
+#define CARBON_HASH_OAT(key_size, key)                                                                                 \
 ({                                                                                                                     \
-    assert ((key != NULL) && (key_size > 0));                                                                           \
+    assert ((key != NULL) && (key_size > 0));                                                                          \
                                                                                                                        \
-    carbon_hash_t hash = 0;                                                                                                     \
-    for (size_t i = 0; i < key_size; i++) {                                                                             \
+    carbon_hash_t hash = 0;                                                                                            \
+    for (size_t i = 0; i < key_size; i++) {                                                                            \
         hash += ((unsigned char* )key)[i];                                                                             \
         hash += (hash << 10);                                                                                          \
         hash ^= (hash >> 6);                                                                                           \
@@ -170,12 +170,12 @@ typedef size_t carbon_hash_t;
     hash;                                                                                                              \
 })
 
-#define CARBON_HASH_ELF(key_size, key)                                                                                          \
+#define CARBON_HASH_ELF(key_size, key)                                                                                 \
 ({                                                                                                                     \
-    assert ((key != NULL) && (key_size > 0));                                                                           \
+    assert ((key != NULL) && (key_size > 0));                                                                          \
                                                                                                                        \
-    carbon_hash_t hash = 0, g;                                                                                                  \
-    for (size_t i = 0; i < key_size; i++) {                                                                             \
+    carbon_hash_t hash = 0, g;                                                                                         \
+    for (size_t i = 0; i < key_size; i++) {                                                                            \
         hash = (hash << 4) + ((unsigned char* )key)[i];                                                                \
         if ((g = hash & 0xf0000000L) != 0) {                                                                           \
             hash ^= g >> 24;                                                                                           \

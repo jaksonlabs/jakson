@@ -189,12 +189,6 @@ void carbon_json_token_print(FILE *file, const carbon_json_token_t *token)
     free(string);
 }
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  J S O N   A S T   H E L P E R   P R O T O T Y P E S
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
 static bool parseObject(carbon_json_ast_node_object_t *object, carbon_err_t *err, carbon_vec_t ofType(JsonToken) *tokenStream, size_t *tokenIdx);
 static bool parseArray(carbon_json_ast_node_array_t *array, carbon_err_t *err, carbon_vec_t ofType(JsonToken) *tokenStream, size_t *tokenIdx);
 static void parseString(carbon_json_ast_node_string_t *string, carbon_vec_t ofType(JsonToken) *tokenStream, size_t *tokenIdx);
@@ -217,20 +211,8 @@ static bool jsonAstNodeNumberPrint(FILE *file, carbon_err_t *err, carbon_json_as
 static bool jsonAstNodeValuePrint(FILE *file, carbon_err_t *err, carbon_json_ast_node_value_t *value);
 static bool jsonAstNodeElementPrint(FILE *file, carbon_err_t *err, carbon_json_ast_node_element_t *element);
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  J S O N   A S T   M A C R O S
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
 #define NEXT_TOKEN(x) { *x = *x + 1; }
 #define PREV_TOKEN(x) { *x = *x - 1; }
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  J S O N   A S T   I N T E R F A C E   I M P L E M E N T A T I O N
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 CARBON_EXPORT(bool)
 carbon_json_parser_create(JsonParser *parser, carbon_doc_bulk_t *partition)
@@ -366,12 +348,6 @@ carbon_jest_test_doc(carbon_err_t *err, carbon_json_t *json)
 {
     return (testConditionValue(err, &json->element->value));
 }
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  J S O N   A S T   H E L P E R   I M P L E M E N T A T I O N
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 static carbon_json_token_t getToken(carbon_vec_t ofType(JsonToken) *tokenStream, size_t tokenIdx)
 {
@@ -653,12 +629,6 @@ static void connectChildAndParents(carbon_json_t *json)
     connectChildAndParentsElement(json->element);
 }
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-// H E L P E R   I M P L E M E N T A T I O N
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
 static bool isValue(carbon_json_token_type_e token) {
     return (token == CARBON_JSON_TOKEN_STRING_LITERAL || token == CARBON_JSON_TOKEN_REAL_NUMBER || token == CARBON_JSON_TOKEN_INT_NUMBER ||
         token == CARBON_JSON_TOKEN_LITERAL_TRUE || token == CARBON_JSON_TOKEN_LITERAL_FALSE || token == CARBON_JSON_TOKEN_LITERAL_NULL );
@@ -903,12 +873,6 @@ static bool jsonAstNodeElementPrint(FILE *file, carbon_err_t *err, carbon_json_a
 {
     return jsonAstNodeValuePrint(file, err, &element->value);
 }
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  J S O N   A S T   N O D E   I N T E R F A C E   I M P L E M E N T A T I O N
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 static bool jsonAstNodeValueDrop(carbon_json_ast_node_value_t *value, carbon_err_t *err);
 

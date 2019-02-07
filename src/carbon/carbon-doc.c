@@ -15,30 +15,12 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  I N C L U D E S
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
 #include "carbon/carbon-doc.h"
 #include "carbon/carbon-columndoc.h"
 #include "carbon/carbon-json.h"
 #include "carbon/carbon-sort.h"
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  G L O B A L S
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
 char VALUE_NULL = '\0';
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  H E L P E R   P R O T O T Y P E S
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 static void createObjectModel(carbon_doc_obj_t *model, carbon_doc_t *doc);
 
@@ -53,12 +35,6 @@ static void printObject(FILE *file, const carbon_doc_obj_t *model);
 static bool importJsonObject(carbon_doc_obj_t *target, carbon_err_t *err, const carbon_json_ast_node_object_t *jsonObject);
 
 static void sortMetaModelEntries(carbon_columndoc_obj_t *metaModel);
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  I N T E R F A C E   I M P L E M E N T A T I O N
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 CARBON_EXPORT(bool)
 carbon_doc_bulk_create(carbon_doc_bulk_t *bulk, carbon_strdic_t *dic)
@@ -1238,7 +1214,7 @@ static void sortMetaModelEntries(carbon_columndoc_obj_t *metaModel)
 
 carbon_columndoc_t *carbon_doc_entries_to_columndoc(const carbon_doc_bulk_t *bulk,
                                                           const carbon_doc_entries_t *partition,
-                                                          bool optimizeForRead)
+                                                          bool read_optimized)
 {
     if (!bulk || !partition) {
         return NULL;
@@ -1261,7 +1237,7 @@ carbon_columndoc_t *carbon_doc_entries_to_columndoc(const carbon_doc_bulk_t *bul
    // DocumentModelPrint(stdout, doc);
 
     carbon_columndoc_t *metaModel = malloc(sizeof(carbon_columndoc_t));
-    metaModel->read_optimized = optimizeForRead;
+    metaModel->read_optimized = read_optimized;
     carbon_err_t err;
     if (!carbon_columndoc_create(metaModel, &err, model, bulk, partition, bulk->dic)) {
         carbon_error_print_and_abort(&err);
@@ -1285,12 +1261,6 @@ carbon_doc_entries_drop(carbon_doc_entries_t *partition)
     CARBON_UNUSED(partition);
     return true;
 }
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-//  H E L P E R   I M P L E M E N T A T I O N
-//
-// ---------------------------------------------------------------------------------------------------------------------
 
 static void createObjectModel(carbon_doc_obj_t *model, carbon_doc_t *doc)
 {

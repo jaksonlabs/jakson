@@ -26,11 +26,11 @@ CARBON_BEGIN_DECL
 typedef struct carbon_bitmap
 {
     carbon_vec_t ofType(uint64_t) data;
-    uint16_t numBits;
+    uint16_t num_bits;
 } carbon_bitmap_t;
 
 CARBON_EXPORT(bool)
-carbon_bitmap_create(carbon_bitmap_t *bitmap, uint16_t numBits);
+carbon_bitmap_create(carbon_bitmap_t *bitmap, uint16_t num_bits);
 
 CARBON_EXPORT(bool)
 carbon_bitmap_cpy(carbon_bitmap_t *dst, const carbon_bitmap_t *src);
@@ -45,7 +45,7 @@ CARBON_EXPORT(bool)
 carbon_bitmap_clear(carbon_bitmap_t *carbon_bitmap_t);
 
 CARBON_EXPORT(bool)
-carbon_bitmap_set(carbon_bitmap_t *carbon_bitmap_t, uint16_t bitPosition, bool on);
+carbon_bitmap_set(carbon_bitmap_t *carbon_bitmap_t, uint16_t bit_position, bool on);
 
 CARBON_EXPORT(bool)
 carbon_bitmap_get(carbon_bitmap_t *carbon_bitmap_t, uint16_t bitPosition);
