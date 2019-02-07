@@ -307,29 +307,29 @@ carbon_strhash_put_exact_fast(carbon_strhash_t *map, const char *key, carbon_str
 
 /**
  * Get the values associated with <code>keys</code> in this map (if any). In case one <code>key</code> does not
- * exists, the function will return this information via the parameters <code>foundMask</code> and
- * <code>numNotFound</code>. However, in case it is guaranteed that all keys exist, consider to use
+ * exists, the function will return this information via the parameters <code>found_mask</code> and
+ * <code>num_not_found</code>. However, in case it is guaranteed that all keys exist, consider to use
  * <code>string_id_map_get_blind</code> instead. *
  *
  * @param out A non-null pointer to an unallocated memory address. The map will allocate enough memory to store the
- *            result. There are <code>numKeys</code> elements returned, but not all of them are guaranteed to
+ *            result. There are <code>num_keys</code> elements returned, but not all of them are guaranteed to
  *            contain a particular value. That an entry does not contain a particular value happens if the
  *            associated key is not stored in this map. Whether or not one particular entry is a valid value,
- *            can be determined by the caller via the <code>foundMask</code>.
+ *            can be determined by the caller via the <code>found_mask</code>.
  *            <b>Important</b> <code>out</code> must be freed manually by calling <code>string_id_map_free</code>.
- * @param foundMask A non-null pointer to an unallocated memory address. The map will allocate enough memory to store
- *            the result. There are <code>numKeys</code> boolean values returned. This mask is used to determine
- *            if the i-th key has a mapping in this map. If this is the case, the i-th entry in <code>foundMask</code>
+ * @param found_mask A non-null pointer to an unallocated memory address. The map will allocate enough memory to store
+ *            the result. There are <code>num_keys</code> boolean values returned. This mask is used to determine
+ *            if the i-th key has a mapping in this map. If this is the case, the i-th entry in <code>found_mask</code>
  *            is <b>true</b> and the i-th entry in <code>out</code> holds the value. Otherwise, in case the i-th
- *            value in <code>foundMask</code> is <b>false</b>, there is no value stored to the i-th key in
+ *            value in <code>found_mask</code> is <b>false</b>, there is no value stored to the i-th key in
  *            <code>keys</code>, and reading <code>out</code> for the i-th position is undefined.
- * @param numNotFound A non-null pointer to a value that will store the number of keys in <code>keys</code> for
+ * @param num_not_found A non-null pointer to a value that will store the number of keys in <code>keys</code> for
  *                      which no value is stored in this map.
  * @param num_out A non-null pointer to an unsigned integer that will contain the number of values return by the
  *                call to this function.
  * @param map a non-null pointer to the map
- * @param keys a non-null pointer to a list of at least <code>numKeys</code> strings
- * @param numKeys the number of keys
+ * @param keys a non-null pointer to a list of at least <code>num_keys</code> strings
+ * @param num_keys the number of keys
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
 inline static int
@@ -376,12 +376,12 @@ carbon_strhash_get_bulk_safe_exact(carbon_string_id_t *out, bool *found, carbon_
  * However, if it cannot be guaranteed that all keys are known, use
  * <code>string_id_map_get_test</code> instead.
  *
- * @param out A non-null pointer to an unallocated memory address. The map will allocate <code>numKeys</code>
- *            times <code>sizeof(carbon_string_id_t)</code> bytes memory to store the result. There are <code>numKeys</code>
+ * @param out A non-null pointer to an unallocated memory address. The map will allocate <code>num_keys</code>
+ *            times <code>sizeof(carbon_string_id_t)</code> bytes memory to store the result. There are <code>num_keys</code>
  *            elements returned, and all of them are guaranteed to contain a particular value.
  * @param map a non-null pointer to the map
- * @param keys a non-null pointer to a list of at least <code>numKeys</code> strings
- * @param numKeys the number of keys
+ * @param keys a non-null pointer to a list of at least <code>num_keys</code> strings
+ * @param num_keys the number of keys
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
 inline static int
@@ -403,12 +403,12 @@ carbon_strhash_get_bulk_fast(carbon_string_id_t **out, carbon_strhash_t *map,
  * If you want to update a value given its key, use <code>string_hashtable_put_test</code> or
  * <code>string_hashtable_put_blind</code> instead.
  *
- * @param out A non-null pointer to an unallocated memory address. The map will allocate <code>numKeys</code>
- *            times <code>sizeof(carbon_string_id_t)</code> bytes memory to store the result. There are <code>numKeys</code>
+ * @param out A non-null pointer to an unallocated memory address. The map will allocate <code>num_keys</code>
+ *            times <code>sizeof(carbon_string_id_t)</code> bytes memory to store the result. There are <code>num_keys</code>
  *            elements returned, and all of them are guaranteed to contain a particular value.
  * @param map a non-null pointer to the map
- * @param keys a non-null pointer to a list of at least <code>numKeys</code> strings
- * @param numKeys the number of keys
+ * @param keys a non-null pointer to a list of at least <code>num_keys</code> strings
+ * @param num_keys the number of keys
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
 inline static int
@@ -426,8 +426,8 @@ carbon_strhash_update_fast(carbon_strhash_t *map, const carbon_string_id_t *valu
  * Removes the objects with the gives keys from this map
  *
  * @param map a non-null pointer to the map
- * @param keys a non-null pointer to a list of at least <code>numKeys</code> strings
- * @param numKeys the number of keys
+ * @param keys a non-null pointer to a list of at least <code>num_keys</code> strings
+ * @param num_keys the number of keys
  * @return
  */
 inline static int

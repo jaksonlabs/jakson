@@ -187,16 +187,16 @@ carbon_strdic_remove(carbon_strdic_t *dic, carbon_string_id_t *strings, size_t n
 
 CARBON_FUNC_UNUSED
 static bool
-carbon_strdic_locate_safe(carbon_string_id_t **out, bool **foundMask, size_t *numNotFound,
-                          carbon_strdic_t *dic, char *const *keys, size_t numKeys)
+carbon_strdic_locate_safe(carbon_string_id_t **out, bool **found_mask, size_t *num_not_found,
+                          carbon_strdic_t *dic, char *const *keys, size_t num_keys)
 {
     CARBON_NON_NULL_OR_ERROR(out);
-    CARBON_NON_NULL_OR_ERROR(foundMask);
-    CARBON_NON_NULL_OR_ERROR(numNotFound);
+    CARBON_NON_NULL_OR_ERROR(found_mask);
+    CARBON_NON_NULL_OR_ERROR(num_not_found);
     CARBON_NON_NULL_OR_ERROR(dic);
     CARBON_NON_NULL_OR_ERROR(keys);
     assert(dic->locate_safe);
-    return dic->locate_safe(dic, out, foundMask, numNotFound, keys, numKeys);
+    return dic->locate_safe(dic, out, found_mask, num_not_found, keys, num_keys);
 }
 
 CARBON_FUNC_UNUSED

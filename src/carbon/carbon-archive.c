@@ -715,10 +715,10 @@ static void writePrimitiveKeyColumn(carbon_memfile_t *memFile, carbon_vec_t ofTy
     carbon_memfile_write(memFile, carbon_string_id_ts, keys->numElems * sizeof(carbon_string_id_t));
 }
 
-static carbon_off_t skipVarValueOffsetColumn(carbon_memfile_t *memFile, size_t numKeys)
+static carbon_off_t skipVarValueOffsetColumn(carbon_memfile_t *memFile, size_t num_keys)
 {
     carbon_off_t result = CARBON_MEMFILE_TELL(memFile);
-    carbon_memfile_skip(memFile, numKeys * sizeof(carbon_off_t));
+    carbon_memfile_skip(memFile, num_keys * sizeof(carbon_off_t));
     return result;
 }
 

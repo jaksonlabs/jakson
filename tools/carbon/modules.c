@@ -410,13 +410,13 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
         }
 
         carbon_archive_object_t root;
-        size_t numKeys;
+        size_t num_keys;
         const carbon_string_id_t *keys;
 
         carbon_archive_record(&root, &archive);
 
-        keys = carbon_archive_object_keys_to_type(&numKeys, CARBON_TYPE_OBJECT, &root);
-        for (size_t i = 0; i < numKeys; i++) {
+        keys = carbon_archive_object_keys_to_type(&num_keys, CARBON_TYPE_OBJECT, &root);
+        for (size_t i = 0; i < num_keys; i++) {
             printf("key %"PRIu64"\n", keys[i]);
 
             carbon_archive_object_t nested;

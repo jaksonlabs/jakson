@@ -215,20 +215,20 @@ static void invoke_clone(carbon_alloc_t *dst, const carbon_alloc_t *self);
 
 #define LAZY_INIT()                                                                                                    \
 if (!global_trace_stats.malloc_sizes) {                                                                                \
-    global_trace_stats.malloc_sizes = malloc(sizeof(carbon_vec_t));                                                   \
+    global_trace_stats.malloc_sizes = malloc(sizeof(carbon_vec_t));                                                    \
     VectorCreate(global_trace_stats.malloc_sizes, &default_alloc, sizeof(size_t), 1000000);                            \
-    global_trace_stats.spinlock = carbon_malloc(&default_alloc, sizeof(carbon_spinlock_t));                                   \
-    carbon_spinlock_init(global_trace_stats.spinlock);                                                                       \
+    global_trace_stats.spinlock = carbon_malloc(&default_alloc, sizeof(carbon_spinlock_t));                            \
+    carbon_spinlock_init(global_trace_stats.spinlock);                                                                 \
     global_trace_stats.statistics_file = fopen("trace-alloc-stats.csv", "a");                                          \
     fprintf(global_trace_stats.statistics_file,                                                                        \
             "system_time;num_alloc_calls;num_realloc_calls;num_free_calls;memory_in_use\n");                           \
-    global_trace_stats.startup_timestamp = carbon_time_now_wallclock();                                                    \
+    global_trace_stats.startup_timestamp = carbon_time_now_wallclock();                                                \
 }
 
 #define WRITE_STATS_FILE()                                                                                             \
 {                                                                                                                      \
     fprintf(global_trace_stats.statistics_file, "%lld;%zu;%zu;%zu;%zu\n",                                              \
-            carbon_time_now_wallclock() - global_trace_stats.startup_timestamp,                                            \
+            carbon_time_now_wallclock() - global_trace_stats.startup_timestamp,                                        \
             global_trace_stats.num_malloc_calls,                                                                       \
             global_trace_stats.num_realloc_calls,                                                                      \
             global_trace_stats.num_free_calls,                                                                         \

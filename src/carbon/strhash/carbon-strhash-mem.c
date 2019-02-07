@@ -37,7 +37,7 @@ typedef struct MemExtra
     carbon_vec_t ofType(Bucket) buckets;
 } MemExtra;
 
-static int thisDrop(carbon_strhash_t *self);
+static int this_drop(carbon_strhash_t *self);
 static int thisPutSafeBulk(carbon_strhash_t *self,
                            char *const *keys,
                            const carbon_string_id_t *values,
@@ -48,14 +48,14 @@ static int thisPutFastBulk(carbon_strhash_t *self,
                            size_t numPairs);
 static int thisPutSafeExact(carbon_strhash_t *self, const char *key, carbon_string_id_t value);
 static int thisPutFastExact(carbon_strhash_t *self, const char *key, carbon_string_id_t value);
-static int thisGetSafe(carbon_strhash_t *self, carbon_string_id_t **out, bool **foundMask, size_t *numNotFound,
-                       char *const *keys, size_t numKeys);
-static int thisGetSafeExact(carbon_strhash_t *self, carbon_string_id_t *out, bool *foundMask, const char *key);
-static int thisGetFast(carbon_strhash_t *self, carbon_string_id_t **out, char *const *keys, size_t numKeys);
+static int thisGetSafe(carbon_strhash_t *self, carbon_string_id_t **out, bool **found_mask, size_t *num_not_found,
+                       char *const *keys, size_t num_keys);
+static int thisGetSafeExact(carbon_strhash_t *self, carbon_string_id_t *out, bool *found_mask, const char *key);
+static int thisGetFast(carbon_strhash_t *self, carbon_string_id_t **out, char *const *keys, size_t num_keys);
 static int thisUpdateKeyFast(carbon_strhash_t *self, const carbon_string_id_t *values, char *const *keys,
-                             size_t numKeys);
-static int thisRemove(carbon_strhash_t *self, char *const *keys, size_t numKeys);
-static int thisFree(carbon_strhash_t *self, void *ptr);
+                             size_t num_keys);
+static int this_remove(carbon_strhash_t *self, char *const *keys, size_t num_keys);
+static int this_free(carbon_strhash_t *self, void *ptr);
 
 static int thisInsertBulk(carbon_vec_t ofType(Bucket) *buckets,
                           char *const *restrict keys,
@@ -69,7 +69,7 @@ static int thisInsertExact(carbon_vec_t ofType(Bucket) *buckets, const char *res
                            carbon_string_id_t value, size_t bucketIdx, carbon_alloc_t *alloc, carbon_string_hash_counters_t *counter);
 static int thisFetchBulk(carbon_vec_t ofType(Bucket) *buckets, carbon_string_id_t *valuesOut,
                          bool *keyFoundMask,
-                         size_t *numKeysNotFound, size_t *bucketIdxs, char *const *keys, size_t numKeys,
+                         size_t *numKeysNotFound, size_t *bucketIdxs, char *const *keys, size_t num_keys,
                          carbon_alloc_t *alloc, carbon_string_hash_counters_t *counter);
 static int thisFetchSingle(carbon_vec_t ofType(Bucket) *buckets,
                            carbon_string_id_t *valueOut,
@@ -95,7 +95,7 @@ bool carbon_strhash_create_inmemory(carbon_strhash_t *map, const carbon_alloc_t 
     capBuckets = capBuckets < 1 ? 1 : capBuckets;
 
     map->tag = CARBON_STRHASH_INMEMORY;
-    map->drop = thisDrop;
+    map->drop = this_drop;
     map->put_bulk_safe = thisPutSafeBulk;
     map->put_bulk_fast = thisPutFastBulk;
     map->put_exact_safe = thisPutSafeExact;
@@ -103,8 +103,8 @@ bool carbon_strhash_create_inmemory(carbon_strhash_t *map, const carbon_alloc_t 
     map->get_bulk_safe = thisGetSafe;
     map->get_fast = thisGetFast;
     map->update_key_fast = thisUpdateKeyFast;
-    map->remove = thisRemove;
-    map->free = thisFree;
+    map->remove = this_remove;
+    map->free = this_free;
     map->get_exact_safe = thisGetSafeExact;
     carbon_error_init(&map->err);
 
@@ -113,7 +113,7 @@ bool carbon_strhash_create_inmemory(carbon_strhash_t *map, const carbon_alloc_t 
     return true;
 }
 
-static int thisDrop(carbon_strhash_t *self)
+static int this_drop(carbon_strhash_t *self)
 {
     assert(self->tag == CARBON_STRHASH_INMEMORY);
     MemExtra *extra = thisGetExta(self);
@@ -182,19 +182,19 @@ static int thisPutFastBulk(carbon_strhash_t *self,
 
 static int thisFetchBulk(carbon_vec_t ofType(Bucket) *buckets, carbon_string_id_t *valuesOut,
                          bool *keyFoundMask,
-                         size_t *numKeysNotFound, size_t *bucketIdxs, char *const *keys, size_t numKeys,
+                         size_t *numKeysNotFound, size_t *bucketIdxs, char *const *keys, size_t num_keys,
                          carbon_alloc_t *alloc, carbon_string_hash_counters_t *counter)
 {
     CARBON_UNUSED(counter);
     CARBON_UNUSED(alloc);
 
     SliceHandle result_handle;
-    size_t numNotFound = 0;
+    size_t num_not_found = 0;
     Bucket *data = (Bucket *) VectorData(buckets);
 
     CARBON_PREFETCH_WRITE(valuesOut);
 
-    for (size_t i = 0; i < numKeys; i++) {
+    for (size_t i = 0; i < num_keys; i++) {
         Bucket *bucket = data + bucketIdxs[i];
         const char *key = keys[i];
         if (CARBON_BRANCH_LIKELY(key != NULL)) {
@@ -206,12 +206,12 @@ static int thisFetchBulk(carbon_vec_t ofType(Bucket) *buckets, carbon_string_id_
 
 
 
-        numNotFound += result_handle.isContained ? 0 : 1;
+        num_not_found += result_handle.isContained ? 0 : 1;
         keyFoundMask[i] = result_handle.isContained;
         valuesOut[i] = result_handle.isContained ? result_handle.value : ((carbon_string_id_t) -1);
     }
 
-    *numKeysNotFound = numNotFound;
+    *numKeysNotFound = num_not_found;
     return true;
 }
 
@@ -240,13 +240,13 @@ static int thisFetchSingle(carbon_vec_t ofType(Bucket) *buckets,
     return true;
 }
 
-static int thisGetSafe(carbon_strhash_t *self, carbon_string_id_t **out, bool **foundMask, size_t *numNotFound,
-                       char *const *keys, size_t numKeys)
+static int thisGetSafe(carbon_strhash_t *self, carbon_string_id_t **out, bool **found_mask, size_t *num_not_found,
+                       char *const *keys, size_t num_keys)
 {
     assert(self->tag == CARBON_STRHASH_INMEMORY);
 
     carbon_timestamp_t begin = carbon_time_now_wallclock();
-    CARBON_TRACE(SMART_MAP_TAG, "'get_safe' function invoked for %zu strings", numKeys)
+    CARBON_TRACE(SMART_MAP_TAG, "'get_safe' function invoked for %zu strings", num_keys)
 
     carbon_alloc_t hashtable_alloc;
 #if defined(CARBON_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
@@ -256,32 +256,32 @@ static int thisGetSafe(carbon_strhash_t *self, carbon_string_id_t **out, bool **
 #endif
 
     MemExtra *extra = thisGetExta(self);
-    size_t *bucketIdxs = carbon_malloc(&self->allocator, numKeys * sizeof(size_t));
-    carbon_string_id_t *valuesOut = carbon_malloc(&self->allocator, numKeys * sizeof(carbon_string_id_t));
-    bool *foundMask_out = carbon_malloc(&self->allocator, numKeys * sizeof(bool));
+    size_t *bucketIdxs = carbon_malloc(&self->allocator, num_keys * sizeof(size_t));
+    carbon_string_id_t *valuesOut = carbon_malloc(&self->allocator, num_keys * sizeof(carbon_string_id_t));
+    bool *foundMask_out = carbon_malloc(&self->allocator, num_keys * sizeof(bool));
 
     assert(bucketIdxs != NULL);
     assert(valuesOut != NULL);
     assert(foundMask_out != NULL);
 
-    for (register size_t i = 0; i < numKeys; i++) {
+    for (register size_t i = 0; i < num_keys; i++) {
         const char *key = keys[i];
         carbon_hash_t hash = key && strcmp("", key) != 0 ? HASHCODE_OF(key) : 0;
         bucketIdxs[i] = hash % extra->buckets.capElems;
         CARBON_PREFETCH_READ((Bucket *) VectorData(&extra->buckets) + bucketIdxs[i]);
     }
 
-    CARBON_TRACE(SMART_MAP_TAG, "'get_safe' function invoke fetch...for %zu strings", numKeys)
-    CARBON_CHECK_SUCCESS(thisFetchBulk(&extra->buckets, valuesOut, foundMask_out, numNotFound, bucketIdxs,
-                                keys, numKeys, &self->allocator, &self->counters));
+    CARBON_TRACE(SMART_MAP_TAG, "'get_safe' function invoke fetch...for %zu strings", num_keys)
+    CARBON_CHECK_SUCCESS(thisFetchBulk(&extra->buckets, valuesOut, foundMask_out, num_not_found, bucketIdxs,
+                                keys, num_keys, &self->allocator, &self->counters));
     CARBON_CHECK_SUCCESS(carbon_free(&self->allocator, bucketIdxs));
-    CARBON_TRACE(SMART_MAP_TAG, "'get_safe' function invok fetch: done for %zu strings", numKeys)
+    CARBON_TRACE(SMART_MAP_TAG, "'get_safe' function invok fetch: done for %zu strings", num_keys)
 
     assert(valuesOut != NULL);
     assert(foundMask_out != NULL);
 
     *out = valuesOut;
-    *foundMask = foundMask_out;
+    *found_mask = foundMask_out;
 
     carbon_timestamp_t end = carbon_time_now_wallclock();
     CARBON_UNUSED(begin);
@@ -291,7 +291,7 @@ static int thisGetSafe(carbon_strhash_t *self, carbon_string_id_t **out, bool **
     return true;
 }
 
-static int thisGetSafeExact(carbon_strhash_t *self, carbon_string_id_t *out, bool *foundMask, const char *key)
+static int thisGetSafeExact(carbon_strhash_t *self, carbon_string_id_t *out, bool *found_mask, const char *key)
 {
     assert(self->tag == CARBON_STRHASH_INMEMORY);
 
@@ -308,33 +308,33 @@ static int thisGetSafeExact(carbon_strhash_t *self, carbon_string_id_t *out, boo
     size_t bucketIdx = hash % extra->buckets.capElems;
     CARBON_PREFETCH_READ((Bucket *) VectorData(&extra->buckets) + bucketIdx);
 
-    CARBON_CHECK_SUCCESS(thisFetchSingle(&extra->buckets, out, foundMask, bucketIdx, key, &self->counters));
+    CARBON_CHECK_SUCCESS(thisFetchSingle(&extra->buckets, out, found_mask, bucketIdx, key, &self->counters));
 
     return true;
 }
 
-static int thisGetFast(carbon_strhash_t *self, carbon_string_id_t **out, char *const *keys, size_t numKeys)
+static int thisGetFast(carbon_strhash_t *self, carbon_string_id_t **out, char *const *keys, size_t num_keys)
 {
-    bool *foundMask;
-    size_t numNotFound;
-    int status = thisGetSafe(self, out, &foundMask, &numNotFound, keys, numKeys);
-    thisFree(self, foundMask);
+    bool *found_mask;
+    size_t num_not_found;
+    int status = thisGetSafe(self, out, &found_mask, &num_not_found, keys, num_keys);
+    this_free(self, found_mask);
     return status;
 }
 
 static int thisUpdateKeyFast(carbon_strhash_t *self, const carbon_string_id_t *values, char *const *keys,
-                             size_t numKeys)
+                             size_t num_keys)
 {
     CARBON_UNUSED(self);
     CARBON_UNUSED(values);
     CARBON_UNUSED(keys);
-    CARBON_UNUSED(numKeys);
+    CARBON_UNUSED(num_keys);
     CARBON_ERROR(&self->err, CARBON_ERR_NOTIMPL);
     carbon_error_print(&self->err);
     return false;
 }
 
-static int simple_map_remove(MemExtra *extra, size_t *bucketIdxs, char *const *keys, size_t numKeys,
+static int simple_map_remove(MemExtra *extra, size_t *bucketIdxs, char *const *keys, size_t num_keys,
                              carbon_alloc_t *alloc, carbon_string_hash_counters_t *counter)
 {
     CARBON_UNUSED(counter);
@@ -343,7 +343,7 @@ static int simple_map_remove(MemExtra *extra, size_t *bucketIdxs, char *const *k
     SliceHandle handle;
     Bucket *data = (Bucket *) VectorData(&extra->buckets);
 
-    for (register size_t i = 0; i < numKeys; i++) {
+    for (register size_t i = 0; i < num_keys; i++) {
         Bucket *bucket = data + bucketIdxs[i];
         const char *key = keys[i];
 
@@ -356,24 +356,24 @@ static int simple_map_remove(MemExtra *extra, size_t *bucketIdxs, char *const *k
     return true;
 }
 
-static int thisRemove(carbon_strhash_t *self, char *const *keys, size_t numKeys)
+static int this_remove(carbon_strhash_t *self, char *const *keys, size_t num_keys)
 {
     assert(self->tag == CARBON_STRHASH_INMEMORY);
 
     MemExtra *extra = thisGetExta(self);
-    size_t *bucketIdxs = carbon_malloc(&self->allocator, numKeys * sizeof(size_t));
-    for (register size_t i = 0; i < numKeys; i++) {
+    size_t *bucketIdxs = carbon_malloc(&self->allocator, num_keys * sizeof(size_t));
+    for (register size_t i = 0; i < num_keys; i++) {
         const char *key = keys[i];
         carbon_hash_t hash = HASHCODE_OF(key);
         bucketIdxs[i] = hash % extra->buckets.capElems;
     }
 
-    CARBON_CHECK_SUCCESS(simple_map_remove(extra, bucketIdxs, keys, numKeys, &self->allocator, &self->counters));
+    CARBON_CHECK_SUCCESS(simple_map_remove(extra, bucketIdxs, keys, num_keys, &self->allocator, &self->counters));
     CARBON_CHECK_SUCCESS(carbon_free(&self->allocator, bucketIdxs));
     return true;
 }
 
-static int thisFree(carbon_strhash_t *self, void *ptr)
+static int this_free(carbon_strhash_t *self, void *ptr)
 {
     assert(self->tag == CARBON_STRHASH_INMEMORY);
     CARBON_CHECK_SUCCESS(carbon_free(&self->allocator, ptr));
