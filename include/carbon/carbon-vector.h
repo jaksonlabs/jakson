@@ -97,7 +97,7 @@ typedef struct carbon_vec
  * Utility implementation of generic vector to specialize for type of 'char *'
  */
 typedef carbon_vec_t ofType(char *) StringVector;
-typedef carbon_vec_t ofType(const char *) StringRefVector;
+typedef carbon_vec_t ofType(const char *) carbon_string_ref_vec;
 
 #define STRING_VECTOR_CREATE(vec, alloc, cap_elems)                                                                     \
     carbon_vec_create(vec, alloc, sizeof(char *), cap_elems);
@@ -287,7 +287,7 @@ VectorCapacity(const carbon_vec_t *vec);
  * Set the internal size of <code>vec</code> to its capacity.
  */
 CARBON_EXPORT(bool)
-VectorEnlargeSizeToCapacity(carbon_vec_t *vec);
+carbon_vec_enlarge_size_to_capacity(carbon_vec_t *vec);
 
 CARBON_EXPORT(bool)
 carbon_vec_set(carbon_vec_t *vec, size_t pos, const void *data);

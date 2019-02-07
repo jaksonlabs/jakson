@@ -84,7 +84,7 @@ bool SlotVectorInsert(SlotVector *vec, CARBON_NULLABLE carbon_vec_t ofType(slot_
             has += add;
         }
         assert(VectorCapacity(&vec->freeList) == VectorCapacity(&vec->content));
-        VectorEnlargeSizeToCapacity(&vec->content);
+        carbon_vec_enlarge_size_to_capacity(&vec->content);
         SlotVectorSlot nextSlot = carbon_vec_length(&vec->content);
         while (has--) {
             carbon_vec_push(&vec->freeList, &nextSlot, 1);

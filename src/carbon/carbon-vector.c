@@ -197,7 +197,7 @@ size_t VectorCapacity(const carbon_vec_t *vec)
     return vec->cap_elems;
 }
 
-bool VectorEnlargeSizeToCapacity(carbon_vec_t *vec)
+bool carbon_vec_enlarge_size_to_capacity(carbon_vec_t *vec)
 {
     CARBON_NON_NULL_OR_ERROR(vec);
     vec->num_elems = vec->cap_elems;

@@ -108,7 +108,7 @@ typedef struct CARBON_slice_list_t
     carbon_vec_t ofType(CARBON_bloomfilter_t) filters;
     carbon_vec_t ofType(CARBON_hash_bounds_t) bounds;
 
-    uint32_t appenderIdx;
+    uint32_t appender_idx;
 
     carbon_err_t err;
 } carbon_slice_list_t;

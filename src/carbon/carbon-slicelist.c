@@ -135,12 +135,12 @@ carbon_slice_list_insert(carbon_slice_list_t *list, char **strings, carbon_strin
             carbon_bloom_t *restrict filters = CARBON_VECTOR_ALL(&list->filters, carbon_bloom_t);
             Slice *restrict slices = CARBON_VECTOR_ALL(&list->slices, Slice);
 
-            if (list->appenderIdx != 0) { ; // TODO: remove
+            if (list->appender_idx != 0) { ; // TODO: remove
             }
 
-            Slice *restrict appender = slices + list->appenderIdx;
-            carbon_bloom_t *restrict appenderFilter = filters + list->appenderIdx;
-            HashBounds *restrict appenderBounds = bounds + list->appenderIdx;
+            Slice *restrict appender = slices + list->appender_idx;
+            carbon_bloom_t *restrict appenderFilter = filters + list->appender_idx;
+            HashBounds *restrict appenderBounds = bounds + list->appender_idx;
 
             CARBON_DEBUG(CARBON_SLICE_LIST_TAG,
                   "appender # of elems: %zu, limit: %zu",
@@ -323,7 +323,7 @@ static void appenderNew(carbon_slice_list_t *list)
     );
 
     /** register new slice as the current appender */
-    list->appenderIdx = numSlices;
+    list->appender_idx = numSlices;
 }
 
 static void appenderSeal(Slice *slice)

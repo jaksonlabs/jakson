@@ -50,7 +50,7 @@ typedef struct
 } carbon_huffman_encoded_str_info_t;
 
 CARBON_EXPORT(bool)
-carbon_huffman_create(carbon_huffman_t **out, const StringRefVector *strings);
+carbon_huffman_create(carbon_huffman_t **out, const carbon_string_ref_vec *strings);
 
 CARBON_EXPORT(bool)
 carbon_huffman_get_error(carbon_err_t *err, const carbon_huffman_t *dic);
@@ -59,20 +59,20 @@ CARBON_EXPORT(bool)
 carbon_huffman_drop(carbon_huffman_t *dic);
 
 CARBON_EXPORT(bool)
-carbon_huffman_serialize_dic(carbon_memfile_t *file, const carbon_huffman_t *dic, char markerSymbol);
+carbon_huffman_serialize_dic(carbon_memfile_t *file, const carbon_huffman_t *dic, char marker_symbol);
 
 CARBON_EXPORT(bool)
 carbon_huffman_encode(carbon_memfile_t *file,
                       carbon_huffman_t *dic,
-                      char markerSymbol,
+                      char marker_symbol,
                       const carbon_vec_t ofType(carbon_string_id_t) *string_ids,
-                      const StringRefVector *strings);
+                      const carbon_string_ref_vec *strings);
 
 CARBON_EXPORT(bool)
-carbon_huffman_read_string(carbon_huffman_encoded_str_info_t *info, carbon_memfile_t *file, char markerSymbol);
+carbon_huffman_read_string(carbon_huffman_encoded_str_info_t *info, carbon_memfile_t *file, char marker_symbol);
 
 CARBON_EXPORT(bool)
-carbon_huffman_read_dic_entry(carbon_huffman_entry_info_t *info, carbon_memfile_t *file, char markerSymbol);
+carbon_huffman_read_dic_entry(carbon_huffman_entry_info_t *info, carbon_memfile_t *file, char marker_symbol);
 
 CARBON_END_DECL
 
