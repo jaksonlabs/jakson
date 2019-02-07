@@ -188,8 +188,8 @@ static bool this_drop(carbon_strdic_t *self)
         }
     }
 
-    VectorDrop(&extra->freelist);
-    VectorDrop(&extra->contents);
+    carbon_vec_drop(&extra->freelist);
+    carbon_vec_drop(&extra->contents);
     carbon_strhash_drop(&extra->index);
     carbon_free(&self->alloc, self->extra);
 
@@ -217,7 +217,7 @@ static bool this_insert(carbon_strdic_t *self, carbon_string_id_t **out, char *c
 #endif
 
 
-    carbon_string_id_t  *idsOut = carbon_malloc(&hashtable_alloc, num_strings * sizeof(carbon_string_id_t));
+    carbon_string_id_t  *ids_out = carbon_malloc(&hashtable_alloc, num_strings * sizeof(carbon_string_id_t));
     bool *found_mask;
     carbon_string_id_t *values;
     size_t num_not_found;
@@ -240,7 +240,7 @@ static bool this_insert(carbon_strdic_t *self, carbon_string_id_t **out, char *c
     for (size_t i = 0; i < num_strings; i++) {
 
         if (found_mask[i]) {
-            idsOut[i] = values[i];
+            ids_out[i] = values[i];
         } else {
             /** This path is taken only for strings that are not already contained in the dictionary. However,
              * since this insertion batch may contain duplicate string, querying for already inserted strings
@@ -255,9 +255,9 @@ static bool this_insert(carbon_strdic_t *self, carbon_string_id_t **out, char *c
             /** Query the carbon_bloom_t if the keys was already seend. If the filter returns "yes", a lookup
              * is requried since the filter maybe made a mistake. Of the filter returns "no", the
              * keys is new for sure. In this case, one can skip the lookup into the buckets. */
-            size_t keyLength = strlen(key);
-            carbon_hash_t bloomKey = keyLength > 0 ? CARBON_HASH_FNV(strlen(key), key) : 0; /** using a hash of a keys instead of the string keys itself avoids reading the entire string for computing k hashes inside the carbon_bloom_t */
-            if (CARBON_BLOOM_TEST_AND_SET(&carbon_bloom_t, &bloomKey, sizeof(carbon_hash_t))) {
+            size_t key_length = strlen(key);
+            carbon_hash_t bloom_key = key_length > 0 ? CARBON_HASH_FNV(strlen(key), key) : 0; /** using a hash of a keys instead of the string keys itself avoids reading the entire string for computing k hashes inside the carbon_bloom_t */
+            if (CARBON_BLOOM_TEST_AND_SET(&carbon_bloom_t, &bloom_key, sizeof(carbon_hash_t))) {
                 /** ensure that the string really was seen (due to collisions in the bloom filter the keys might not
                  * been actually seen) */
 
@@ -268,18 +268,18 @@ static bool this_insert(carbon_strdic_t *self, carbon_string_id_t **out, char *c
             }
 
             if (found) {
-                idsOut[i] = value;
+                ids_out[i] = value;
             } else {
 
                 /** register in contents list */
                 bool pop_result = freelist_pop(&string_id, self);
                 CARBON_PRINT_ERROR_AND_DIE_IF(!pop_result, CARBON_ERR_SLOTBROKEN)
-                struct entry *entries = (struct entry *) VectorData(&extra->contents);
+                struct entry *entries = (struct entry *) carbon_vec_data(&extra->contents);
                 struct entry *entry   = entries + string_id;
                 assert (!entry->in_use);
                 entry->in_use         = true;
                 entry->str            = strdup(strings[i]);
-                idsOut[i]            = string_id;
+                ids_out[i]            = string_id;
 
                 /** add for not yet registered pairs to buffer for fast import */
                 carbon_strhash_put_exact_fast(&extra->index, entry->str, string_id);
@@ -288,7 +288,7 @@ static bool this_insert(carbon_strdic_t *self, carbon_string_id_t **out, char *c
     }
 
     /** set potential non-null out parameters */
-    CARBON_OPTIONAL_SET_OR_ELSE(out, idsOut, carbon_free(&self->alloc, idsOut));
+    CARBON_OPTIONAL_SET_OR_ELSE(out, ids_out, carbon_free(&self->alloc, ids_out));
 
     /** cleanup */
     carbon_free(&hashtable_alloc, found_mask);
@@ -316,36 +316,36 @@ static bool this_remove(carbon_strdic_t *self, carbon_string_id_t *strings, size
 
     struct sync_extra *extra = this_extra(self);
 
-    size_t numStringsToDelete = 0;
-    char **stringsToDelete = carbon_malloc(&self->alloc, num_strings * sizeof(char *));
-    carbon_string_id_t *carbon_string_id_tsToDelete =
+    size_t num_strings_to_delete = 0;
+    char **string_to_delete = carbon_malloc(&self->alloc, num_strings * sizeof(char *));
+    carbon_string_id_t *string_ids_to_delete =
         carbon_malloc(&self->alloc, num_strings * sizeof(carbon_string_id_t));
 
     /** remove strings from contents CARBON_vector, and skip duplicates */
     for (size_t i = 0; i < num_strings; i++) {
         carbon_string_id_t carbon_string_id_t = strings[i];
-        struct entry *entry   = (struct entry *) VectorData(&extra->contents) + carbon_string_id_t;
+        struct entry *entry   = (struct entry *) carbon_vec_data(&extra->contents) + carbon_string_id_t;
         if (CARBON_BRANCH_LIKELY(entry->in_use)) {
-            stringsToDelete[numStringsToDelete]    = entry->str;
-            carbon_string_id_tsToDelete[numStringsToDelete] = strings[i];
+            string_to_delete[num_strings_to_delete]    = entry->str;
+            string_ids_to_delete[num_strings_to_delete] = strings[i];
             entry->str    = NULL;
             entry->in_use = false;
-            numStringsToDelete++;
+            num_strings_to_delete++;
             CARBON_CHECK_SUCCESS(freelist_push(self, carbon_string_id_t));
         }
     }
 
     /** remove from index */
-    CARBON_CHECK_SUCCESS(carbon_strhash_remove(&extra->index, stringsToDelete, numStringsToDelete));
+    CARBON_CHECK_SUCCESS(carbon_strhash_remove(&extra->index, string_to_delete, num_strings_to_delete));
 
     /** free up resources for strings that should be removed */
-    for (size_t i = 0; i < numStringsToDelete; i++) {
-        free (stringsToDelete[i]);
+    for (size_t i = 0; i < num_strings_to_delete; i++) {
+        free (string_to_delete[i]);
     }
 
     /** cleanup */
-    carbon_free(&self->alloc, stringsToDelete);
-    carbon_free(&self->alloc, carbon_string_id_tsToDelete);
+    carbon_free(&self->alloc, string_to_delete);
+    carbon_free(&self->alloc, string_ids_to_delete);
 
     unlock(self);
     return true;
@@ -412,10 +412,10 @@ static char **this_extract(carbon_strdic_t *self, const carbon_string_id_t *ids,
 
     struct sync_extra *extra = this_extra(self);
     char **result = carbon_malloc(&hashtable_alloc, num_ids * sizeof(char *));
-    struct entry *entries = (struct entry *) VectorData(&extra->contents);
+    struct entry *entries = (struct entry *) carbon_vec_data(&extra->contents);
 
     /** Optimization: notify the kernel that the content list is accessed randomly (since hash based access)*/
-    VectorMemoryAdvice(&extra->contents, MADV_RANDOM | MADV_WILLNEED);
+    carbon_vec_memadvice(&extra->contents, MADV_RANDOM | MADV_WILLNEED);
 
     for (size_t i = 0; i < num_ids; i++) {
         carbon_string_id_t carbon_string_id_t = ids[i];

@@ -47,8 +47,8 @@ bool SlotVectorSetGrowFactor(SlotVector *vec, float factor)
 bool SlotVectorDrop(SlotVector *vec)
 {
     CARBON_NON_NULL_OR_ERROR(vec)
-    CARBON_CHECK_SUCCESS(VectorDrop(&vec->content));
-    CARBON_CHECK_SUCCESS(VectorDrop(&vec->freeList));
+    CARBON_CHECK_SUCCESS(carbon_vec_drop(&vec->content));
+    CARBON_CHECK_SUCCESS(carbon_vec_drop(&vec->freeList));
     return true;
 }
 

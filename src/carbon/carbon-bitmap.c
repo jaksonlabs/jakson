@@ -43,7 +43,7 @@ carbon_bitmap_cpy(carbon_bitmap_t *dst, const carbon_bitmap_t *src)
 CARBON_EXPORT(bool)
 carbon_bitmap_drop(carbon_bitmap_t *bitset)
 {
-    return VectorDrop(&bitset->data);
+    return carbon_vec_drop(&bitset->data);
 }
 
 size_t carbon_bitmap_nbits(const carbon_bitmap_t *bitset)
@@ -56,7 +56,7 @@ CARBON_EXPORT(bool)
 carbon_bitmap_clear(carbon_bitmap_t *bitset)
 {
     CARBON_NON_NULL_OR_ERROR(bitset);
-    void *data = (void *) VectorData(&bitset->data);
+    void *data = (void *) carbon_vec_data(&bitset->data);
     memset(data, 0, sizeof(uint32_t) * VectorCapacity(&bitset->data));
     return true;
 }

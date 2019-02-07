@@ -74,10 +74,10 @@ SliceListCreate(SliceList *list, const carbon_alloc_t *alloc, size_t sliceCapaci
     carbon_vec_create(&list->filters, &list->alloc, sizeof(carbon_bloom_t), sliceCapacity);
     carbon_vec_create(&list->bounds, &list->alloc, sizeof(HashBounds), sliceCapacity);
 
-    CARBON_ZERO_MEMORY(VectorData(&list->slices), sliceCapacity * sizeof(Slice));
-    CARBON_ZERO_MEMORY(VectorData(&list->descriptors), sliceCapacity * sizeof(SliceDescriptor));
-    CARBON_ZERO_MEMORY(VectorData(&list->filters), sliceCapacity * sizeof(carbon_bloom_t));
-    CARBON_ZERO_MEMORY(VectorData(&list->bounds), sliceCapacity * sizeof(HashBounds));
+    CARBON_ZERO_MEMORY(carbon_vec_data(&list->slices), sliceCapacity * sizeof(Slice));
+    CARBON_ZERO_MEMORY(carbon_vec_data(&list->descriptors), sliceCapacity * sizeof(SliceDescriptor));
+    CARBON_ZERO_MEMORY(carbon_vec_data(&list->filters), sliceCapacity * sizeof(carbon_bloom_t));
+    CARBON_ZERO_MEMORY(carbon_vec_data(&list->bounds), sliceCapacity * sizeof(HashBounds));
 
     appenderNew(list);
 
@@ -90,14 +90,14 @@ SliceListDrop(SliceList *list)
     CARBON_UNUSED(list);
 //    NOT_YET_IMPLEMENTED
     // TODO: implement
-    VectorDrop(&list->slices);
-    VectorDrop(&list->descriptors);
-    VectorDrop(&list->bounds);
+    carbon_vec_drop(&list->slices);
+    carbon_vec_drop(&list->descriptors);
+    carbon_vec_drop(&list->bounds);
     for (size_t i = 0; i < list->filters.numElems; i++) {
         carbon_bloom_t *filter = VECTOR_GET(&list->filters, i, carbon_bloom_t);
         carbon_bloom_drop(filter);
     }
-    VectorDrop(&list->filters);
+    carbon_vec_drop(&list->filters);
     return true;
 }
 

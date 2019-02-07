@@ -66,7 +66,7 @@ bool carbon_huffman_create(carbon_huffman_t **out, const StringRefVector *string
     createHuffmanTree(&dic->encodingTable, &frequencies);
     carbon_error_init(&dic->err);
 
-    VectorDrop(&frequencies);
+    carbon_vec_drop(&frequencies);
     *out = dic;
 
     return true;
@@ -90,7 +90,7 @@ bool carbon_huffman_drop(carbon_huffman_t *dic)
         free(entry->blocks);
     }
 
-    VectorDrop(&dic->encodingTable);
+    carbon_vec_drop(&dic->encodingTable);
 
     free(dic);
 
@@ -494,5 +494,5 @@ static void createHuffmanTree(carbon_vec_t ofType(carbon_huffman_entry_t) *encod
     assignCode(newNode, &rootPath, encodingTable);
     carbon_bitmap_drop(&rootPath);
 
-    VectorDrop(&candidates);
+    carbon_vec_drop(&candidates);
 }

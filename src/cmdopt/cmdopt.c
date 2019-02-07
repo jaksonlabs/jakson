@@ -45,11 +45,11 @@ bool carbon_cmdopt_mgr_drop(carbon_cmdopt_mgr_t *manager)
             free(option->opt_desc);
             free(option->opt_manfile);
         }
-        CARBON_CHECK_SUCCESS(VectorDrop(&cmdGroup->cmd_options));
+        CARBON_CHECK_SUCCESS(carbon_vec_drop(&cmdGroup->cmd_options));
         free(cmdGroup->desc);
     }
 
-    CARBON_CHECK_SUCCESS(VectorDrop(&manager->groups));
+    CARBON_CHECK_SUCCESS(carbon_vec_drop(&manager->groups));
     free(manager->module_name);
     if (manager->module_desc) {
         free(manager->module_desc);

@@ -75,196 +75,196 @@ static void objectArrayKeyColumnsDrop(carbon_vec_t ofType(carbon_columndoc_colum
 
 static void objectMetaModelFree(carbon_columndoc_obj_t *metaModel)
 {
-    VectorDrop(&metaModel->bool_prop_keys);
-    VectorDrop(&metaModel->int8_prop_keys);
-    VectorDrop(&metaModel->int16_prop_keys);
-    VectorDrop(&metaModel->int32_prop_keys);
-    VectorDrop(&metaModel->int64_prop_keys);
-    VectorDrop(&metaModel->uint8_prop_keys);
-    VectorDrop(&metaModel->uint16_prop_keys);
-    VectorDrop(&metaModel->uin32_prop_keys);
-    VectorDrop(&metaModel->uint64_prop_keys);
-    VectorDrop(&metaModel->string_prop_keys);
-    VectorDrop(&metaModel->float_prop_keys);
-    VectorDrop(&metaModel->null_prop_keys);
-    VectorDrop(&metaModel->obj_prop_keys);
+    carbon_vec_drop(&metaModel->bool_prop_keys);
+    carbon_vec_drop(&metaModel->int8_prop_keys);
+    carbon_vec_drop(&metaModel->int16_prop_keys);
+    carbon_vec_drop(&metaModel->int32_prop_keys);
+    carbon_vec_drop(&metaModel->int64_prop_keys);
+    carbon_vec_drop(&metaModel->uint8_prop_keys);
+    carbon_vec_drop(&metaModel->uint16_prop_keys);
+    carbon_vec_drop(&metaModel->uin32_prop_keys);
+    carbon_vec_drop(&metaModel->uint64_prop_keys);
+    carbon_vec_drop(&metaModel->string_prop_keys);
+    carbon_vec_drop(&metaModel->float_prop_keys);
+    carbon_vec_drop(&metaModel->null_prop_keys);
+    carbon_vec_drop(&metaModel->obj_prop_keys);
 
-    VectorDrop(&metaModel->bool_array_prop_keys);
-    VectorDrop(&metaModel->int8_array_prop_keys);
-    VectorDrop(&metaModel->int16_array_prop_keys);
-    VectorDrop(&metaModel->int32_array_prop_keys);
-    VectorDrop(&metaModel->int64_array_prop_keys);
-    VectorDrop(&metaModel->uint8_array_prop_keys);
-    VectorDrop(&metaModel->uint16_array_prop_keys);
-    VectorDrop(&metaModel->uint32_array_prop_keys);
-    VectorDrop(&metaModel->uint64_array_prop_keys);
-    VectorDrop(&metaModel->string_array_prop_keys);
-    VectorDrop(&metaModel->float_array_prop_keys);
-    VectorDrop(&metaModel->null_array_prop_keys);
+    carbon_vec_drop(&metaModel->bool_array_prop_keys);
+    carbon_vec_drop(&metaModel->int8_array_prop_keys);
+    carbon_vec_drop(&metaModel->int16_array_prop_keys);
+    carbon_vec_drop(&metaModel->int32_array_prop_keys);
+    carbon_vec_drop(&metaModel->int64_array_prop_keys);
+    carbon_vec_drop(&metaModel->uint8_array_prop_keys);
+    carbon_vec_drop(&metaModel->uint16_array_prop_keys);
+    carbon_vec_drop(&metaModel->uint32_array_prop_keys);
+    carbon_vec_drop(&metaModel->uint64_array_prop_keys);
+    carbon_vec_drop(&metaModel->string_array_prop_keys);
+    carbon_vec_drop(&metaModel->float_array_prop_keys);
+    carbon_vec_drop(&metaModel->null_array_prop_keys);
 
-    VectorDrop(&metaModel->bool_prop_vals);
-    VectorDrop(&metaModel->int8_prop_vals);
-    VectorDrop(&metaModel->int16_prop_vals);
-    VectorDrop(&metaModel->int32_prop_vals);
-    VectorDrop(&metaModel->int64_prop_vals);
-    VectorDrop(&metaModel->uint8_prop_vals);
-    VectorDrop(&metaModel->uint16_prop_vals);
-    VectorDrop(&metaModel->uint32_prop_vals);
-    VectorDrop(&metaModel->uint64_prop_vals);
-    VectorDrop(&metaModel->float_prop_vals);
-    VectorDrop(&metaModel->string_prop_vals);
+    carbon_vec_drop(&metaModel->bool_prop_vals);
+    carbon_vec_drop(&metaModel->int8_prop_vals);
+    carbon_vec_drop(&metaModel->int16_prop_vals);
+    carbon_vec_drop(&metaModel->int32_prop_vals);
+    carbon_vec_drop(&metaModel->int64_prop_vals);
+    carbon_vec_drop(&metaModel->uint8_prop_vals);
+    carbon_vec_drop(&metaModel->uint16_prop_vals);
+    carbon_vec_drop(&metaModel->uint32_prop_vals);
+    carbon_vec_drop(&metaModel->uint64_prop_vals);
+    carbon_vec_drop(&metaModel->float_prop_vals);
+    carbon_vec_drop(&metaModel->string_prop_vals);
 
     for (size_t i = 0; i < metaModel->bool_array_prop_vals.numElems; i++) {
         carbon_vec_t *vec = VECTOR_GET(&metaModel->bool_array_prop_vals, i, carbon_vec_t);
-        VectorDrop(vec);
+        carbon_vec_drop(vec);
     }
-    VectorDrop(&metaModel->bool_array_prop_vals);
+    carbon_vec_drop(&metaModel->bool_array_prop_vals);
 
     for (size_t i = 0; i < metaModel->int8_array_prop_vals.numElems; i++) {
         carbon_vec_t *vec = VECTOR_GET(&metaModel->int8_array_prop_vals, i, carbon_vec_t);
-        VectorDrop(vec);
+        carbon_vec_drop(vec);
     }
-    VectorDrop(&metaModel->int8_array_prop_vals);
+    carbon_vec_drop(&metaModel->int8_array_prop_vals);
 
     for (size_t i = 0; i < metaModel->int16_array_prop_vals.numElems; i++) {
         carbon_vec_t *vec = VECTOR_GET(&metaModel->int16_array_prop_vals, i, carbon_vec_t);
-        VectorDrop(vec);
+        carbon_vec_drop(vec);
     }
-    VectorDrop(&metaModel->int16_array_prop_vals);
+    carbon_vec_drop(&metaModel->int16_array_prop_vals);
 
     for (size_t i = 0; i < metaModel->int32_array_prop_vals.numElems; i++) {
         carbon_vec_t *vec = VECTOR_GET(&metaModel->int32_array_prop_vals, i, carbon_vec_t);
-        VectorDrop(vec);
+        carbon_vec_drop(vec);
     }
-    VectorDrop(&metaModel->int32_array_prop_vals);
+    carbon_vec_drop(&metaModel->int32_array_prop_vals);
 
     for (size_t i = 0; i < metaModel->int64_array_prop_vals.numElems; i++) {
         carbon_vec_t *vec = VECTOR_GET(&metaModel->int64_array_prop_vals, i, carbon_vec_t);
-        VectorDrop(vec);
+        carbon_vec_drop(vec);
     }
-    VectorDrop(&metaModel->int64_array_prop_vals);
+    carbon_vec_drop(&metaModel->int64_array_prop_vals);
 
     for (size_t i = 0; i < metaModel->uint8_array_prop_vals.numElems; i++) {
         carbon_vec_t *vec = VECTOR_GET(&metaModel->uint8_array_prop_vals, i, carbon_vec_t);
-        VectorDrop(vec);
+        carbon_vec_drop(vec);
     }
-    VectorDrop(&metaModel->uint8_array_prop_vals);
+    carbon_vec_drop(&metaModel->uint8_array_prop_vals);
 
     for (size_t i = 0; i < metaModel->uint16_array_prop_vals.numElems; i++) {
         carbon_vec_t *vec = VECTOR_GET(&metaModel->uint16_array_prop_vals, i, carbon_vec_t);
-        VectorDrop(vec);
+        carbon_vec_drop(vec);
     }
-    VectorDrop(&metaModel->uint16_array_prop_vals);
+    carbon_vec_drop(&metaModel->uint16_array_prop_vals);
 
     for (size_t i = 0; i < metaModel->uint32_array_prop_vals.numElems; i++) {
         carbon_vec_t *vec = VECTOR_GET(&metaModel->uint32_array_prop_vals, i, carbon_vec_t);
-        VectorDrop(vec);
+        carbon_vec_drop(vec);
     }
-    VectorDrop(&metaModel->uint32_array_prop_vals);
+    carbon_vec_drop(&metaModel->uint32_array_prop_vals);
 
     for (size_t i = 0; i < metaModel->uin64_array_prop_vals.numElems; i++) {
         carbon_vec_t *vec = VECTOR_GET(&metaModel->uin64_array_prop_vals, i, carbon_vec_t);
-        VectorDrop(vec);
+        carbon_vec_drop(vec);
     }
-    VectorDrop(&metaModel->uin64_array_prop_vals);
+    carbon_vec_drop(&metaModel->uin64_array_prop_vals);
 
     for (size_t i = 0; i < metaModel->float_array_prop_vals.numElems; i++) {
         carbon_vec_t *vec = VECTOR_GET(&metaModel->float_array_prop_vals, i, carbon_vec_t);
-        VectorDrop(vec);
+        carbon_vec_drop(vec);
     }
-    VectorDrop(&metaModel->float_array_prop_vals);
+    carbon_vec_drop(&metaModel->float_array_prop_vals);
 
     for (size_t i = 0; i < metaModel->string_array_prop_vals.numElems; i++) {
         carbon_vec_t *vec = VECTOR_GET(&metaModel->string_array_prop_vals, i, carbon_vec_t);
-        VectorDrop(vec);
+        carbon_vec_drop(vec);
     }
-    VectorDrop(&metaModel->string_array_prop_vals);
+    carbon_vec_drop(&metaModel->string_array_prop_vals);
 
-    VectorDrop(&metaModel->null_array_prop_vals);
+    carbon_vec_drop(&metaModel->null_array_prop_vals);
 
-    VectorDrop(&metaModel->bool_val_idxs);
-    VectorDrop(&metaModel->int8_val_idxs);
-    VectorDrop(&metaModel->int16_val_idxs);
-    VectorDrop(&metaModel->int32_val_idxs);
-    VectorDrop(&metaModel->int64_val_idxs);
-    VectorDrop(&metaModel->uint8_val_idxs);
-    VectorDrop(&metaModel->uint16_val_idxs);
-    VectorDrop(&metaModel->uint32_val_idxs);
-    VectorDrop(&metaModel->uint64_val_idxs);
-    VectorDrop(&metaModel->float_val_idxs);
-    VectorDrop(&metaModel->string_val_idxs);
+    carbon_vec_drop(&metaModel->bool_val_idxs);
+    carbon_vec_drop(&metaModel->int8_val_idxs);
+    carbon_vec_drop(&metaModel->int16_val_idxs);
+    carbon_vec_drop(&metaModel->int32_val_idxs);
+    carbon_vec_drop(&metaModel->int64_val_idxs);
+    carbon_vec_drop(&metaModel->uint8_val_idxs);
+    carbon_vec_drop(&metaModel->uint16_val_idxs);
+    carbon_vec_drop(&metaModel->uint32_val_idxs);
+    carbon_vec_drop(&metaModel->uint64_val_idxs);
+    carbon_vec_drop(&metaModel->float_val_idxs);
+    carbon_vec_drop(&metaModel->string_val_idxs);
 
     for (size_t i = 0; i < metaModel->bool_array_idxs.numElems; i++) {
         carbon_vec_t *vec = VECTOR_GET(&metaModel->bool_array_idxs, i, carbon_vec_t);
-        VectorDrop(vec);
+        carbon_vec_drop(vec);
     }
-    VectorDrop(&metaModel->bool_array_idxs);
+    carbon_vec_drop(&metaModel->bool_array_idxs);
 
     for (size_t i = 0; i < metaModel->int8_array_idxs.numElems; i++) {
         carbon_vec_t *vec = VECTOR_GET(&metaModel->int8_array_idxs, i, carbon_vec_t);
-        VectorDrop(vec);
+        carbon_vec_drop(vec);
     }
-    VectorDrop(&metaModel->int8_array_idxs);
+    carbon_vec_drop(&metaModel->int8_array_idxs);
 
     for (size_t i = 0; i < metaModel->int16_array_idxs.numElems; i++) {
         carbon_vec_t *vec = VECTOR_GET(&metaModel->int16_array_idxs, i, carbon_vec_t);
-        VectorDrop(vec);
+        carbon_vec_drop(vec);
     }
-    VectorDrop(&metaModel->int16_array_idxs);
+    carbon_vec_drop(&metaModel->int16_array_idxs);
 
     for (size_t i = 0; i < metaModel->int32_array_idxs.numElems; i++) {
         carbon_vec_t *vec = VECTOR_GET(&metaModel->int32_array_idxs, i, carbon_vec_t);
-        VectorDrop(vec);
+        carbon_vec_drop(vec);
     }
-    VectorDrop(&metaModel->int32_array_idxs);
+    carbon_vec_drop(&metaModel->int32_array_idxs);
 
     for (size_t i = 0; i < metaModel->int64_array_idxs.numElems; i++) {
         carbon_vec_t *vec = VECTOR_GET(&metaModel->int64_array_idxs, i, carbon_vec_t);
-        VectorDrop(vec);
+        carbon_vec_drop(vec);
     }
-    VectorDrop(&metaModel->int64_array_idxs);
+    carbon_vec_drop(&metaModel->int64_array_idxs);
 
     for (size_t i = 0; i < metaModel->uint8_array_idxs.numElems; i++) {
         carbon_vec_t *vec = VECTOR_GET(&metaModel->uint8_array_idxs, i, carbon_vec_t);
-        VectorDrop(vec);
+        carbon_vec_drop(vec);
     }
-    VectorDrop(&metaModel->uint8_array_idxs);
+    carbon_vec_drop(&metaModel->uint8_array_idxs);
 
     for (size_t i = 0; i < metaModel->uint16_array_idxs.numElems; i++) {
         carbon_vec_t *vec = VECTOR_GET(&metaModel->uint16_array_idxs, i, carbon_vec_t);
-        VectorDrop(vec);
+        carbon_vec_drop(vec);
     }
-    VectorDrop(&metaModel->uint16_array_idxs);
+    carbon_vec_drop(&metaModel->uint16_array_idxs);
 
     for (size_t i = 0; i < metaModel->uint32_array_idxs.numElems; i++) {
         carbon_vec_t *vec = VECTOR_GET(&metaModel->uint32_array_idxs, i, carbon_vec_t);
-        VectorDrop(vec);
+        carbon_vec_drop(vec);
     }
-    VectorDrop(&metaModel->uint32_array_idxs);
+    carbon_vec_drop(&metaModel->uint32_array_idxs);
 
     for (size_t i = 0; i < metaModel->uint64_array_idxs.numElems; i++) {
         carbon_vec_t *vec = VECTOR_GET(&metaModel->uint64_array_idxs, i, carbon_vec_t);
-        VectorDrop(vec);
+        carbon_vec_drop(vec);
     }
-    VectorDrop(&metaModel->uint64_array_idxs);
+    carbon_vec_drop(&metaModel->uint64_array_idxs);
 
     for (size_t i = 0; i < metaModel->float_array_idxs.numElems; i++) {
         carbon_vec_t *vec = VECTOR_GET(&metaModel->float_array_idxs, i, carbon_vec_t);
-        VectorDrop(vec);
+        carbon_vec_drop(vec);
     }
-    VectorDrop(&metaModel->float_array_idxs);
+    carbon_vec_drop(&metaModel->float_array_idxs);
 
     for (size_t i = 0; i < metaModel->string_array_idxs.numElems; i++) {
         carbon_vec_t *vec = VECTOR_GET(&metaModel->string_array_idxs, i, carbon_vec_t);
-        VectorDrop(vec);
+        carbon_vec_drop(vec);
     }
-    VectorDrop(&metaModel->string_array_idxs);
+    carbon_vec_drop(&metaModel->string_array_idxs);
 
     for (size_t i = 0; i < metaModel->obj_prop_vals.numElems; i++) {
         carbon_columndoc_obj_t *object = VECTOR_GET(&metaModel->obj_prop_vals, i, carbon_columndoc_obj_t);
         objectMetaModelFree(object);
     }
-    VectorDrop(&metaModel->obj_prop_vals);
+    carbon_vec_drop(&metaModel->obj_prop_vals);
 
     objectArrayKeyColumnsDrop(&metaModel->obj_array_props);
 }
@@ -760,15 +760,15 @@ static void objectArrayKeyColumnsDrop(carbon_vec_t ofType(carbon_columndoc_colum
                         objectMetaModelFree(nestedObject);
                     }
                 }
-                VectorDrop(valuesForIndex);
+                carbon_vec_drop(valuesForIndex);
             }
 
-            VectorDrop(arrayIndices);
-            VectorDrop(valuesForIndicies);
+            carbon_vec_drop(arrayIndices);
+            carbon_vec_drop(valuesForIndicies);
         }
-        VectorDrop(&arrayColumns->columns);
+        carbon_vec_drop(&arrayColumns->columns);
     }
-    VectorDrop(columns);
+    carbon_vec_drop(columns);
 }
 
 static const char *getTypeName(carbon_err_t *err, carbon_field_type_e type)

@@ -1574,8 +1574,8 @@ static bool serializeStringDic(carbon_memfile_t *memFile, carbon_err_t *err, con
 
     strategy.serialize_dic(memFile, strings, carbon_string_id_ts);
 
-    VectorDrop(strings);
-    VectorDrop(carbon_string_id_ts);
+    carbon_vec_drop(strings);
+    carbon_vec_drop(carbon_string_id_ts);
     free(strings);
     free(carbon_string_id_ts);
     return true;

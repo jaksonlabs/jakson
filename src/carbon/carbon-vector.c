@@ -67,7 +67,7 @@ bool carbon_vec_create(carbon_vec_t *out, const carbon_alloc_t *alloc, size_t el
     return true;
 }
 
-bool VectorMemoryAdvice(carbon_vec_t *vec, int madviseAdvice)
+bool carbon_vec_memadvice(carbon_vec_t *vec, int madviseAdvice)
 {
     CARBON_NON_NULL_OR_ERROR(vec);
     CARBON_UNUSED(vec);
@@ -84,7 +84,7 @@ bool VectorSetGrowFactor(carbon_vec_t *vec, float factor)
     return true;
 }
 
-bool VectorDrop(carbon_vec_t *vec)
+bool carbon_vec_drop(carbon_vec_t *vec)
 {
     CARBON_NON_NULL_OR_ERROR(vec)
     carbon_free(vec->allocator, vec->base);
@@ -222,7 +222,7 @@ bool VectorCpy(carbon_vec_t *dst, const carbon_vec_t *src)
     return true;
 }
 
-const void *VectorData(const carbon_vec_t *vec)
+const void *carbon_vec_data(const carbon_vec_t *vec)
 {
     return vec ? vec->base : NULL;
 }

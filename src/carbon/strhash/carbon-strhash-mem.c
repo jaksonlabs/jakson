@@ -117,9 +117,9 @@ static int this_drop(carbon_strhash_t *self)
 {
     assert(self->tag == CARBON_STRHASH_INMEMORY);
     MemExtra *extra = thisGetExta(self);
-    Bucket *data = (Bucket *) VectorData(&extra->buckets);
+    Bucket *data = (Bucket *) carbon_vec_data(&extra->buckets);
     CARBON_CHECK_SUCCESS(BucketDrop(data, extra->buckets.capElems, &self->allocator));
-    VectorDrop(&extra->buckets);
+    carbon_vec_drop(&extra->buckets);
     carbon_free(&self->allocator, self->extra);
     return true;
 }
@@ -190,7 +190,7 @@ static int thisFetchBulk(carbon_vec_t ofType(Bucket) *buckets, carbon_string_id_
 
     SliceHandle result_handle;
     size_t num_not_found = 0;
-    Bucket *data = (Bucket *) VectorData(buckets);
+    Bucket *data = (Bucket *) carbon_vec_data(buckets);
 
     CARBON_PREFETCH_WRITE(valuesOut);
 
@@ -225,7 +225,7 @@ static int thisFetchSingle(carbon_vec_t ofType(Bucket) *buckets,
     CARBON_UNUSED(counter);
 
     SliceHandle handle;
-    Bucket *data = (Bucket *) VectorData(buckets);
+    Bucket *data = (Bucket *) carbon_vec_data(buckets);
 
     CARBON_PREFETCH_WRITE(valueOut);
     CARBON_PREFETCH_WRITE(keyFound);
@@ -268,7 +268,7 @@ static int thisGetSafe(carbon_strhash_t *self, carbon_string_id_t **out, bool **
         const char *key = keys[i];
         carbon_hash_t hash = key && strcmp("", key) != 0 ? HASHCODE_OF(key) : 0;
         bucketIdxs[i] = hash % extra->buckets.capElems;
-        CARBON_PREFETCH_READ((Bucket *) VectorData(&extra->buckets) + bucketIdxs[i]);
+        CARBON_PREFETCH_READ((Bucket *) carbon_vec_data(&extra->buckets) + bucketIdxs[i]);
     }
 
     CARBON_TRACE(SMART_MAP_TAG, "'get_safe' function invoke fetch...for %zu strings", num_keys)
@@ -306,7 +306,7 @@ static int thisGetSafeExact(carbon_strhash_t *self, carbon_string_id_t *out, boo
 
     carbon_hash_t hash = strcmp("", key) != 0 ? HASHCODE_OF(key) : 0;
     size_t bucketIdx = hash % extra->buckets.capElems;
-    CARBON_PREFETCH_READ((Bucket *) VectorData(&extra->buckets) + bucketIdx);
+    CARBON_PREFETCH_READ((Bucket *) carbon_vec_data(&extra->buckets) + bucketIdx);
 
     CARBON_CHECK_SUCCESS(thisFetchSingle(&extra->buckets, out, found_mask, bucketIdx, key, &self->counters));
 
@@ -341,7 +341,7 @@ static int simple_map_remove(MemExtra *extra, size_t *bucketIdxs, char *const *k
     CARBON_UNUSED(alloc);
 
     SliceHandle handle;
-    Bucket *data = (Bucket *) VectorData(&extra->buckets);
+    Bucket *data = (Bucket *) carbon_vec_data(&extra->buckets);
 
     for (register size_t i = 0; i < num_keys; i++) {
         Bucket *bucket = data + bucketIdxs[i];
@@ -388,10 +388,10 @@ static int thisCreateExtra(carbon_strhash_t *self, size_t numBuckets, size_t cap
         carbon_vec_create(&extra->buckets, &self->allocator, sizeof(Bucket), numBuckets);
 
         /** Optimization: notify the kernel that the list of buckets are accessed randomly (since hash based access)*/
-        VectorMemoryAdvice(&extra->buckets, MADV_RANDOM | MADV_WILLNEED);
+        carbon_vec_memadvice(&extra->buckets, MADV_RANDOM | MADV_WILLNEED);
 
 
-        Bucket *data = (Bucket *) VectorData(&extra->buckets);
+        Bucket *data = (Bucket *) carbon_vec_data(&extra->buckets);
         CARBON_CHECK_SUCCESS(BucketCreate(data, numBuckets, capBuckets, &self->allocator));
         return true;
     }
@@ -477,7 +477,7 @@ static int thisInsertBulk(carbon_vec_t ofType(Bucket) *buckets,
     CARBON_NON_NULL_OR_ERROR(values)
     CARBON_NON_NULL_OR_ERROR(bucketIdxs)
 
-    Bucket *buckets_data = (Bucket *) VectorData(buckets);
+    Bucket *buckets_data = (Bucket *) carbon_vec_data(buckets);
     int status = true;
     for (register size_t i = 0; status == true && i < numPairs; i++) {
         size_t bucketIdx = bucketIdxs[i];
@@ -497,7 +497,7 @@ static int thisInsertExact(carbon_vec_t ofType(Bucket) *buckets, const char *res
     CARBON_NON_NULL_OR_ERROR(buckets)
     CARBON_NON_NULL_OR_ERROR(key)
 
-    Bucket *buckets_data = (Bucket *) VectorData(buckets);
+    Bucket *buckets_data = (Bucket *) carbon_vec_data(buckets);
     Bucket *bucket = buckets_data + bucketIdx;
     return BucketInsert(bucket, key, value, alloc, counter);
 }

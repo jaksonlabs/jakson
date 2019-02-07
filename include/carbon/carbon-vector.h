@@ -111,11 +111,11 @@ typedef carbon_vec_t ofType(const char *) StringRefVector;
         char *s = *VECTOR_GET(vec, i, char *);                                                                         \
         free (s);                                                                                                      \
     }                                                                                                                  \
-    VectorDrop(vec);                                                                                                   \
+    carbon_vec_drop(vec);                                                                                                   \
 })
 
 #define STRING_REF_VECTOR_DROP(vec)                                                                                    \
-    VectorDrop(vec);
+    carbon_vec_drop(vec);
 
 #define STRING_VECTOR_PUSH(vec, string)                                                                                \
 ({                                                                                                                     \
@@ -149,7 +149,7 @@ carbon_vec_create(carbon_vec_t *out, const carbon_alloc_t *alloc, size_t elemSiz
  * @return STATUS_OK if success, otherwise a value indicating the error
  */
 CARBON_EXPORT(bool)
-VectorMemoryAdvice(carbon_vec_t *vec, int madviseAdvice);
+carbon_vec_memadvice(carbon_vec_t *vec, int madviseAdvice);
 
 /**
  * Sets the factor for determining the reallocation size in case of a resizing operation.
@@ -173,7 +173,7 @@ VectorSetGrowFactor(carbon_vec_t *vec, float factor);
  * @return STATUS_OK if success, and STATUS_NULL_PTR in case of NULL pointer to 'vec'
  */
 CARBON_EXPORT(bool)
-VectorDrop(carbon_vec_t *vec);
+carbon_vec_drop(carbon_vec_t *vec);
 
 /**
  * Returns information on whether elements are stored in this vector or not.
@@ -303,13 +303,13 @@ VectorCpy(carbon_vec_t *dst, const carbon_vec_t *src);
  * @return pointer to user-data managed by this vector
  */
 CARBON_EXPORT(const void *)
-VectorData(const carbon_vec_t *vec);
+carbon_vec_data(const carbon_vec_t *vec);
 
 CARBON_EXPORT(char *)
 VectorToString(const carbon_vec_t ofType(T) *vec,
         void (*printerFunc)(carbon_memfile_t *dst, void ofType(T) *values, size_t numElems));
 
-#define VECTOR_ALL(vec, type) (type *) VectorData(vec)
+#define VECTOR_ALL(vec, type) (type *) carbon_vec_data(vec)
 
 CARBON_END_DECL
 

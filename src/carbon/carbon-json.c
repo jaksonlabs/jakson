@@ -276,8 +276,8 @@ bool carbon_json_parse(CARBON_NULLABLE carbon_json_t *json, CARBON_NULLABLE carb
     status = true;
 
     cleanup:
-    VectorDrop(&brackets);
-    VectorDrop(&tokenStream);
+    carbon_vec_drop(&brackets);
+    carbon_vec_drop(&tokenStream);
     return status;
 }
 
@@ -895,7 +895,7 @@ static bool jsonAstNodeMembersDrop(carbon_json_ast_node_members_t *members, carb
             return false;
         }
     }
-    VectorDrop(&members->members);
+    carbon_vec_drop(&members->members);
     return true;
 }
 
@@ -907,7 +907,7 @@ static bool jsonAstNodeElementsDrop(carbon_json_ast_node_elements_t *elements, c
             return false;
         }
     }
-    VectorDrop(&elements->elements);
+    carbon_vec_drop(&elements->elements);
     return true;
 }
 

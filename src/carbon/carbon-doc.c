@@ -117,12 +117,12 @@ carbon_doc_bulk_Drop(carbon_doc_bulk_t *bulk)
             carbon_doc_obj_t *objectModel = VECTOR_GET(&model->obj_model, j, carbon_doc_obj_t);
             carbon_doc_drop(objectModel);
         }
-        VectorDrop(&model->obj_model);
+        carbon_vec_drop(&model->obj_model);
     }
 
-    VectorDrop(&bulk->keys);
-    VectorDrop(&bulk->values);
-    VectorDrop(&bulk->models);
+    carbon_vec_drop(&bulk->keys);
+    carbon_vec_drop(&bulk->values);
+    carbon_vec_drop(&bulk->models);
     return true;
 }
 
@@ -203,7 +203,7 @@ void carbon_doc_drop(carbon_doc_obj_t *model)
         carbon_doc_entries_t *entry = VECTOR_GET(&model->entries, i, carbon_doc_entries_t);
         entryModelDrop(entry);
     }
-    VectorDrop(&model->entries);
+    carbon_vec_drop(&model->entries);
 }
 
 bool carbon_doc_obj_add_key(carbon_doc_entries_t **out,
@@ -841,8 +841,8 @@ static void sortedNestedArrayObjects(carbon_columndoc_obj_t *metaModel)
                                                                                                                        \
                                                                                                                        \
         free(valueIndicies);                                                                                           \
-        VectorDrop(&keyCpy);                                                                                           \
-        VectorDrop(&valueCpy);                                                                                         \
+        carbon_vec_drop(&keyCpy);                                                                                           \
+        carbon_vec_drop(&valueCpy);                                                                                         \
     }                                                                                                                  \
 }
 
@@ -879,8 +879,8 @@ static void sortMetaModelStringValues(carbon_vec_t ofType(carbon_string_id_t) *k
         }
 
         free(valueIndicies);
-        VectorDrop(&keyCpy);
-        VectorDrop(&valueCpy);
+        carbon_vec_drop(&keyCpy);
+        carbon_vec_drop(&valueCpy);
     }
 }
 
@@ -911,8 +911,8 @@ static void sortMetaModelStringValues(carbon_vec_t ofType(carbon_string_id_t) *k
         }                                                                                                              \
                                                                                                                        \
         free(valueIndicies);                                                                                           \
-        VectorDrop(&keyCpy);                                                                                           \
-        VectorDrop(&valueCpy);                                                                                         \
+        carbon_vec_drop(&keyCpy);                                                                                           \
+        carbon_vec_drop(&valueCpy);                                                                                         \
     }                                                                                                                  \
 }
 
@@ -949,8 +949,8 @@ static void sortMetaModelStringArrays(carbon_vec_t ofType(carbon_string_id_t) *k
         }
 
         free(valueIndicies);
-        VectorDrop(&keyCpy);
-        VectorDrop(&valueCpy);
+        carbon_vec_drop(&keyCpy);
+        carbon_vec_drop(&valueCpy);
     }
 }
 
@@ -1101,8 +1101,8 @@ static void sortMetaModelColumn(carbon_columndoc_column_t *column, carbon_strdic
     }
 
     free (indices);
-    VectorDrop(&arrayPositionCpy);
-    VectorDrop(&valuesCpy);
+    carbon_vec_drop(&arrayPositionCpy);
+    carbon_vec_drop(&valuesCpy);
 }
 
 static void sortMetaModelColumnArrays(carbon_columndoc_obj_t *metaModel)
@@ -1144,10 +1144,10 @@ static void sortMetaModelColumnArrays(carbon_columndoc_obj_t *metaModel)
             sortMetaModelColumn(column, metaModel->parent->dic);
         }
 
-        VectorDrop(&columnCpy);
+        carbon_vec_drop(&columnCpy);
         free(columnIndices);
     }
-    VectorDrop(&cpy);
+    carbon_vec_drop(&cpy);
 }
 
 static void sortMetaModelValues(carbon_columndoc_obj_t *metaModel)
@@ -1327,7 +1327,7 @@ static void entryModelDrop(carbon_doc_entries_t *entry)
             carbon_doc_drop(model);
         }
     }
-    VectorDrop(&entry->values);
+    carbon_vec_drop(&entry->values);
 }
 
 static bool printValue(FILE *file, carbon_field_type_e type, const carbon_vec_t ofType(<T>) *values)
