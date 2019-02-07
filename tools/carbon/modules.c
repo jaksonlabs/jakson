@@ -40,18 +40,18 @@ static int convertJs2Model(Js2CabContext *context, FILE *file, bool optimizeForR
 
     CARBON_CONSOLE_WRITE(file, "  - Parse JSON file%s", "");
     JsonParser parser;
-    carbon_json_parse_err_t errorDesc;
+    carbon_json_parse_err_t error_desc;
     carbon_json_t jsonAst;
     carbon_json_parser_create(&parser, &context->context);
-    int status = carbon_json_parse(&jsonAst, &errorDesc, &parser, context->jsonContent);
+    int status = carbon_json_parse(&jsonAst, &error_desc, &parser, context->jsonContent);
     if (!status) {
         CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
-        if (errorDesc.token) {
+        if (error_desc.token) {
             CARBON_CONSOLE_WRITELN(file, "** ERROR ** Parsing failed: %s\nBut token %s was found in line %u column %u",
-                            errorDesc.msg, errorDesc.token_type_str, errorDesc.token->line,
-                            errorDesc.token->column);
+                            error_desc.msg, error_desc.token_type_str, error_desc.token->line,
+                            error_desc.token->column);
         } else {
-            CARBON_CONSOLE_WRITELN(file, "** ERROR ** Parsing failed: %s", errorDesc.msg);
+            CARBON_CONSOLE_WRITELN(file, "** ERROR ** Parsing failed: %s", error_desc.msg);
         }
         return false;
     } else {

@@ -44,12 +44,12 @@ typedef struct
 {
     carbon_json_token_type_e type;
     bool init;
-} TokenMemory;
+} token_memory_t;
 
-static int processToken(carbon_err_t *err, carbon_json_parse_err_t *errorDesc, const carbon_json_token_t *token, carbon_vec_t ofType(JsonTokenType) *brackets,
-                        TokenMemory *tokenMemory);
+static int process_token(carbon_err_t *err, carbon_json_parse_err_t *error_desc, const carbon_json_token_t *token, carbon_vec_t ofType(carbon_json_token_type_e) *brackets,
+                        token_memory_t *token_mem);
 
-static int setError(carbon_json_parse_err_t *errorDesc, const carbon_json_token_t *token, const char *msg);
+static int set_error(carbon_json_parse_err_t *error_desc, const carbon_json_token_t *token, const char *msg);
 
 
 CARBON_EXPORT(bool)
@@ -189,27 +189,27 @@ void carbon_json_token_print(FILE *file, const carbon_json_token_t *token)
     free(string);
 }
 
-static bool parseObject(carbon_json_ast_node_object_t *object, carbon_err_t *err, carbon_vec_t ofType(JsonToken) *tokenStream, size_t *tokenIdx);
-static bool parseArray(carbon_json_ast_node_array_t *array, carbon_err_t *err, carbon_vec_t ofType(JsonToken) *tokenStream, size_t *tokenIdx);
-static void parseString(carbon_json_ast_node_string_t *string, carbon_vec_t ofType(JsonToken) *tokenStream, size_t *tokenIdx);
-static void parseNumber(carbon_json_ast_node_number_t *number, carbon_vec_t ofType(JsonToken) *tokenStream, size_t *tokenIdx);
-static bool parseElement(carbon_json_ast_node_element_t *element, carbon_err_t *err, carbon_vec_t ofType(JsonToken) *tokenStream, size_t *tokenIdx);
-static bool parseElements(carbon_json_ast_node_elements_t *elements, carbon_err_t *err, carbon_vec_t ofType(JsonToken) *tokenStream, size_t *tokenIdx);
-static bool parseTokenStream(carbon_json_t *json, carbon_err_t *err, carbon_vec_t ofType(JsonToken) *tokenStream);
-static carbon_json_token_t getToken(carbon_vec_t ofType(JsonToken) *tokenStream, size_t tokenIdx);
-static void connectChildAndParentsMember(carbon_json_ast_node_member_t *member);
-static void connectChildAndParentsObject(carbon_json_ast_node_object_t *object);
-static void connectChildAndParentsArray(carbon_json_ast_node_array_t *array);
-static void connectChildAndParentsValue(carbon_json_ast_node_value_t *value);
-static void connectChildAndParentsElement(carbon_json_ast_node_element_t *element);
-static void connectChildAndParents(carbon_json_t *json);
-static bool jsonAstNodeMemberPrint(FILE *file, carbon_err_t *err, carbon_json_ast_node_member_t *member);
-static bool jsonAstNodeObjectPrint(FILE *file, carbon_err_t *err, carbon_json_ast_node_object_t *object);
-static bool jsonAstNodeArrayPrint(FILE *file, carbon_err_t *err, carbon_json_ast_node_array_t *array);
-static void jsonAstNodeStringPrint(FILE *file, carbon_json_ast_node_string_t *string);
-static bool jsonAstNodeNumberPrint(FILE *file, carbon_err_t *err, carbon_json_ast_node_number_t *number);
-static bool jsonAstNodeValuePrint(FILE *file, carbon_err_t *err, carbon_json_ast_node_value_t *value);
-static bool jsonAstNodeElementPrint(FILE *file, carbon_err_t *err, carbon_json_ast_node_element_t *element);
+static bool parse_object(carbon_json_ast_node_object_t *object, carbon_err_t *err, carbon_vec_t ofType(carbon_json_token_t) *token_stream, size_t *token_idx);
+static bool parse_array(carbon_json_ast_node_array_t *array, carbon_err_t *err, carbon_vec_t ofType(carbon_json_token_t) *token_stream, size_t *token_idx);
+static void parse_string(carbon_json_ast_node_string_t *string, carbon_vec_t ofType(carbon_json_token_t) *token_stream, size_t *token_idx);
+static void parse_number(carbon_json_ast_node_number_t *number, carbon_vec_t ofType(carbon_json_token_t) *token_stream, size_t *token_idx);
+static bool parse_element(carbon_json_ast_node_element_t *element, carbon_err_t *err, carbon_vec_t ofType(carbon_json_token_t) *token_stream, size_t *token_idx);
+static bool parse_elements(carbon_json_ast_node_elements_t *elements, carbon_err_t *err, carbon_vec_t ofType(carbon_json_token_t) *token_stream, size_t *token_idx);
+static bool parse_token_stream(carbon_json_t *json, carbon_err_t *err, carbon_vec_t ofType(carbon_json_token_t) *token_stream);
+static carbon_json_token_t get_token(carbon_vec_t ofType(carbon_json_token_t) *token_stream, size_t token_idx);
+static void connect_child_and_parents_member(carbon_json_ast_node_member_t *member);
+static void connect_child_and_parents_object(carbon_json_ast_node_object_t *object);
+static void connect_child_and_parents_array(carbon_json_ast_node_array_t *array);
+static void connect_child_and_parents_value(carbon_json_ast_node_value_t *value);
+static void connect_child_and_parents_element(carbon_json_ast_node_element_t *element);
+static void connect_child_and_parents(carbon_json_t *json);
+static bool json_ast_node_member_print(FILE *file, carbon_err_t *err, carbon_json_ast_node_member_t *member);
+static bool json_ast_node_object_print(FILE *file, carbon_err_t *err, carbon_json_ast_node_object_t *object);
+static bool json_ast_node_array_print(FILE *file, carbon_err_t *err, carbon_json_ast_node_array_t *array);
+static void json_ast_node_string_print(FILE *file, carbon_json_ast_node_string_t *string);
+static bool json_ast_node_number_print(FILE *file, carbon_err_t *err, carbon_json_ast_node_number_t *number);
+static bool json_ast_node_value_print(FILE *file, carbon_err_t *err, carbon_json_ast_node_value_t *value);
+static bool json_ast_node_element_print(FILE *file, carbon_err_t *err, carbon_json_ast_node_element_t *element);
 
 #define NEXT_TOKEN(x) { *x = *x + 1; }
 #define PREV_TOKEN(x) { *x = *x - 1; }
@@ -232,8 +232,8 @@ bool carbon_json_parse(CARBON_NULLABLE carbon_json_t *json, CARBON_NULLABLE carb
     CARBON_NON_NULL_OR_ERROR(parser)
     CARBON_NON_NULL_OR_ERROR(input)
 
-    carbon_vec_t ofType(JsonTokenType) brackets;
-    carbon_vec_t ofType(JsonToken) tokenStream;
+    carbon_vec_t ofType(carbon_json_token_type_e) brackets;
+    carbon_vec_t ofType(carbon_json_token_t) token_stream;
 
     carbon_json_t retval = {
         .element = malloc(sizeof(carbon_json_ast_node_element_t))
@@ -244,16 +244,16 @@ bool carbon_json_parse(CARBON_NULLABLE carbon_json_t *json, CARBON_NULLABLE carb
 
     carbon_json_tokenizer_init(&parser->tokenizer, input);
     carbon_vec_create(&brackets, NULL, sizeof(carbon_json_token_type_e), 15);
-    carbon_vec_create(&tokenStream, NULL, sizeof(carbon_json_token_t), 200);
+    carbon_vec_create(&token_stream, NULL, sizeof(carbon_json_token_t), 200);
 
-    TokenMemory tokenMemory = {
+    token_memory_t token_mem = {
         .init = true,
         .type = CARBON_JSON_TOKEN_UNKNOWN
     };
 
     while ((token = carbon_json_tokenizer_next(&parser->tokenizer))) {
-        if (CARBON_BRANCH_LIKELY((status = processToken(&parser->err, error_desc, token, &brackets, &tokenMemory)) == true)) {
-            carbon_json_token_t *newToken = VECTOR_NEW_AND_GET(&tokenStream, carbon_json_token_t);
+        if (CARBON_BRANCH_LIKELY((status = process_token(&parser->err, error_desc, token, &brackets, &token_mem)) == true)) {
+            carbon_json_token_t *newToken = VECTOR_NEW_AND_GET(&token_stream, carbon_json_token_t);
             carbon_json_token_dup(newToken, token);
         } else {
             goto cleanup;
@@ -264,11 +264,11 @@ bool carbon_json_parse(CARBON_NULLABLE carbon_json_t *json, CARBON_NULLABLE carb
         char buffer[1024];
         sprintf(&buffer[0], "Unexpected end of file: missing '%s' to match unclosed '%s' (if any)",
                 type == CARBON_JSON_TOKEN_SCOPE_OPEN ? "}" : "]", type == CARBON_JSON_TOKEN_SCOPE_OPEN ? "{" : "[");
-        status = setError(error_desc, token, &buffer[0]);
+        status = set_error(error_desc, token, &buffer[0]);
         goto cleanup;
     }
 
-    if (!parseTokenStream(&retval, &parser->err, &tokenStream)) {
+    if (!parse_token_stream(&retval, &parser->err, &token_stream)) {
         return false;
     }
 
@@ -277,17 +277,17 @@ bool carbon_json_parse(CARBON_NULLABLE carbon_json_t *json, CARBON_NULLABLE carb
 
     cleanup:
     carbon_vec_drop(&brackets);
-    carbon_vec_drop(&tokenStream);
+    carbon_vec_drop(&token_stream);
     return status;
 }
 
-bool testConditionValue(carbon_err_t *err, carbon_json_ast_node_value_t *value)
+bool test_condition_value(carbon_err_t *err, carbon_json_ast_node_value_t *value)
 {
     switch (value->value_type) {
     case CARBON_JSON_AST_NODE_VALUE_TYPE_OBJECT:
         for (size_t i = 0; i < value->value.object->value->members.num_elems; i++) {
             carbon_json_ast_node_member_t *member = CARBON_VECTOR_GET(&value->value.object->value->members, i, carbon_json_ast_node_member_t);
-            if (!testConditionValue(err, &member->value.value)) {
+            if (!test_condition_value(err, &member->value.value)) {
                 return false;
             }
         }
@@ -319,7 +319,7 @@ bool testConditionValue(carbon_err_t *err, carbon_json_ast_node_value_t *value)
                 carbon_json_ast_node_object_t *object = element->value.value.object;
                 for (size_t i = 0; i < object->value->members.num_elems; i++) {
                     carbon_json_ast_node_member_t *member = CARBON_VECTOR_GET(&object->value->members, i, carbon_json_ast_node_member_t);
-                    if (!testConditionValue(err, &member->value.value)) {
+                    if (!test_condition_value(err, &member->value.value)) {
                         return false;
                     }
                 }
@@ -346,121 +346,121 @@ bool testConditionValue(carbon_err_t *err, carbon_json_ast_node_value_t *value)
 CARBON_EXPORT(bool)
 carbon_jest_test_doc(carbon_err_t *err, carbon_json_t *json)
 {
-    return (testConditionValue(err, &json->element->value));
+    return (test_condition_value(err, &json->element->value));
 }
 
-static carbon_json_token_t getToken(carbon_vec_t ofType(JsonToken) *tokenStream, size_t tokenIdx)
+static carbon_json_token_t get_token(carbon_vec_t ofType(carbon_json_token_t) *token_stream, size_t token_idx)
 {
-    return *(carbon_json_token_t *) VectorAt(tokenStream, tokenIdx);
+    return *(carbon_json_token_t *) VectorAt(token_stream, token_idx);
 }
 
-bool parseMembers(carbon_err_t *err, carbon_json_ast_node_members_t *members, carbon_vec_t ofType(JsonToken) *tokenStream, size_t *tokenIdx)
+bool parse_members(carbon_err_t *err, carbon_json_ast_node_members_t *members, carbon_vec_t ofType(carbon_json_token_t) *token_stream, size_t *token_idx)
 {
     carbon_vec_create(&members->members, NULL, sizeof(carbon_json_ast_node_member_t), 20);
-    carbon_json_token_t delimiterToken;
+    carbon_json_token_t delimiter_token;
 
     do {
         carbon_json_ast_node_member_t *member = VECTOR_NEW_AND_GET(&members->members, carbon_json_ast_node_member_t);
-        carbon_json_token_t keyNameToken = getToken(tokenStream, *tokenIdx);
+        carbon_json_token_t keyNameToken = get_token(token_stream, *token_idx);
 
         member->key.value = malloc(keyNameToken.length + 1);
         strncpy(member->key.value, keyNameToken.string, keyNameToken.length);
         member->key.value[keyNameToken.length] = '\0';
 
-        NEXT_TOKEN(tokenIdx); /** skip assignment token */
-        NEXT_TOKEN(tokenIdx);
-        carbon_json_token_t valueToken = getToken(tokenStream, *tokenIdx);
+        NEXT_TOKEN(token_idx); /** skip assignment token */
+        NEXT_TOKEN(token_idx);
+        carbon_json_token_t valueToken = get_token(token_stream, *token_idx);
 
         switch (valueToken.type) {
         case CARBON_JSON_TOKEN_SCOPE_OPEN:
             member->value.value.value_type = CARBON_JSON_AST_NODE_VALUE_TYPE_OBJECT;
             member->value.value.value.object = malloc(sizeof(carbon_json_ast_node_object_t));
-            if(!parseObject(member->value.value.value.object, err, tokenStream, tokenIdx)) {
+            if(!parse_object(member->value.value.value.object, err, token_stream, token_idx)) {
                 return false;
             }
             break;
         case CARBON_JSON_TOKEN_ARRAY_BEGIN:
             member->value.value.value_type = CARBON_JSON_AST_NODE_VALUE_TYPE_ARRAY;
             member->value.value.value.array = malloc(sizeof(carbon_json_ast_node_array_t));
-            if(!parseArray(member->value.value.value.array, err, tokenStream, tokenIdx)) {
+            if(!parse_array(member->value.value.value.array, err, token_stream, token_idx)) {
                 return false;
             }
             break;
         case CARBON_JSON_TOKEN_STRING_LITERAL:
             member->value.value.value_type = CARBON_JSON_AST_NODE_VALUE_TYPE_STRING;
             member->value.value.value.string = malloc(sizeof(carbon_json_ast_node_string_t));
-            parseString(member->value.value.value.string, tokenStream, tokenIdx);
+            parse_string(member->value.value.value.string, token_stream, token_idx);
             break;
         case CARBON_JSON_TOKEN_INT_NUMBER:
         case CARBON_JSON_TOKEN_REAL_NUMBER:
             member->value.value.value_type = CARBON_JSON_AST_NODE_VALUE_TYPE_NUMBER;
             member->value.value.value.number = malloc(sizeof(carbon_json_ast_node_number_t));
-            parseNumber(member->value.value.value.number, tokenStream, tokenIdx);
+            parse_number(member->value.value.value.number, token_stream, token_idx);
             break;
         case CARBON_JSON_TOKEN_LITERAL_TRUE:
             member->value.value.value_type = CARBON_JSON_AST_NODE_VALUE_TYPE_TRUE;
-            NEXT_TOKEN(tokenIdx);
+            NEXT_TOKEN(token_idx);
             break;
         case CARBON_JSON_TOKEN_LITERAL_FALSE:
             member->value.value.value_type = CARBON_JSON_AST_NODE_VALUE_TYPE_FALSE;
-            NEXT_TOKEN(tokenIdx);
+            NEXT_TOKEN(token_idx);
             break;
         case CARBON_JSON_TOKEN_LITERAL_NULL:
             member->value.value.value_type = CARBON_JSON_AST_NODE_VALUE_TYPE_NULL;
-            NEXT_TOKEN(tokenIdx);
+            NEXT_TOKEN(token_idx);
             break;
         default:
             CARBON_ERROR(err, CARBON_ERR_PARSETYPE)
             return false;
         }
 
-        delimiterToken = getToken(tokenStream, *tokenIdx);
-        NEXT_TOKEN(tokenIdx);
-    } while (delimiterToken.type == CARBON_JSON_TOKEN_COMMA);
-    PREV_TOKEN(tokenIdx);
+        delimiter_token = get_token(token_stream, *token_idx);
+        NEXT_TOKEN(token_idx);
+    } while (delimiter_token.type == CARBON_JSON_TOKEN_COMMA);
+    PREV_TOKEN(token_idx);
     return true;
 }
 
-static bool parseObject(carbon_json_ast_node_object_t *object, carbon_err_t *err, carbon_vec_t ofType(JsonToken) *tokenStream, size_t *tokenIdx)
+static bool parse_object(carbon_json_ast_node_object_t *object, carbon_err_t *err, carbon_vec_t ofType(carbon_json_token_t) *token_stream, size_t *token_idx)
 {
-    assert(getToken(tokenStream, *tokenIdx).type == CARBON_JSON_TOKEN_SCOPE_OPEN);
-    NEXT_TOKEN(tokenIdx);  /** Skip '{' */
+    assert(get_token(token_stream, *token_idx).type == CARBON_JSON_TOKEN_SCOPE_OPEN);
+    NEXT_TOKEN(token_idx);  /** Skip '{' */
     object->value = malloc(sizeof(carbon_json_ast_node_members_t));
 
     /** test whether this is an empty object */
-    carbon_json_token_t token = getToken(tokenStream, *tokenIdx);
+    carbon_json_token_t token = get_token(token_stream, *token_idx);
 
     if (token.type != CARBON_JSON_TOKEN_SCOPE_CLOSE) {
-        if(!parseMembers(err, object->value, tokenStream, tokenIdx)) {
+        if(!parse_members(err, object->value, token_stream, token_idx)) {
             return false;
         }
     } else {
         carbon_vec_create(&object->value->members, NULL, sizeof(carbon_json_ast_node_member_t), 20);
     }
 
-    NEXT_TOKEN(tokenIdx);  /** Skip '}' */
+    NEXT_TOKEN(token_idx);  /** Skip '}' */
     return true;
 }
 
-static bool parseArray(carbon_json_ast_node_array_t *array, carbon_err_t *err, carbon_vec_t ofType(JsonToken) *tokenStream, size_t *tokenIdx)
+static bool parse_array(carbon_json_ast_node_array_t *array, carbon_err_t *err, carbon_vec_t ofType(carbon_json_token_t) *token_stream, size_t *token_idx)
 {
-    carbon_json_token_t token = getToken(tokenStream, *tokenIdx);
+    carbon_json_token_t token = get_token(token_stream, *token_idx);
     CARBON_UNUSED(token);
     assert(token.type == CARBON_JSON_TOKEN_ARRAY_BEGIN);
-    NEXT_TOKEN(tokenIdx); /** Skip '[' */
+    NEXT_TOKEN(token_idx); /** Skip '[' */
 
     carbon_vec_create(&array->elements.elements, NULL, sizeof(carbon_json_ast_node_element_t), 250);
-    if (!parseElements(&array->elements, err, tokenStream, tokenIdx)) {
+    if (!parse_elements(&array->elements, err, token_stream, token_idx)) {
         return false;
     }
 
-    NEXT_TOKEN(tokenIdx); /** Skip ']' */
+    NEXT_TOKEN(token_idx); /** Skip ']' */
     return true;
 }
 
-static void parseString(carbon_json_ast_node_string_t *string, carbon_vec_t ofType(JsonToken) *tokenStream, size_t *tokenIdx)
+static void parse_string(carbon_json_ast_node_string_t *string, carbon_vec_t ofType(carbon_json_token_t) *token_stream, size_t *token_idx)
 {
-    carbon_json_token_t token = getToken(tokenStream, *tokenIdx);
+    carbon_json_token_t token = get_token(token_stream, *token_idx);
     assert(token.type == CARBON_JSON_TOKEN_STRING_LITERAL);
 
     string->value = malloc(token.length + 1);
@@ -468,12 +468,12 @@ static void parseString(carbon_json_ast_node_string_t *string, carbon_vec_t ofTy
         strncpy(string->value, token.string, token.length);
     }
     string->value[token.length] = '\0';
-    NEXT_TOKEN(tokenIdx);
+    NEXT_TOKEN(token_idx);
 }
 
-static void parseNumber(carbon_json_ast_node_number_t *number, carbon_vec_t ofType(JsonToken) *tokenStream, size_t *tokenIdx)
+static void parse_number(carbon_json_ast_node_number_t *number, carbon_vec_t ofType(carbon_json_token_t) *token_stream, size_t *token_idx)
 {
-    carbon_json_token_t token = getToken(tokenStream, *tokenIdx);
+    carbon_json_token_t token = get_token(token_stream, *token_idx);
     assert(token.type == CARBON_JSON_TOKEN_REAL_NUMBER || token.type == CARBON_JSON_TOKEN_INT_NUMBER);
 
     char *value = malloc(token.length + 1);
@@ -502,80 +502,80 @@ static void parseNumber(carbon_json_ast_node_number_t *number, carbon_vec_t ofTy
     }
 
     free(value);
-    NEXT_TOKEN(tokenIdx);
+    NEXT_TOKEN(token_idx);
 }
 
-static bool parseElement(carbon_json_ast_node_element_t *element, carbon_err_t *err, carbon_vec_t ofType(JsonToken) *tokenStream, size_t *tokenIdx)
+static bool parse_element(carbon_json_ast_node_element_t *element, carbon_err_t *err, carbon_vec_t ofType(carbon_json_token_t) *token_stream, size_t *token_idx)
 {
-    carbon_json_token_t token = getToken(tokenStream, *tokenIdx);
+    carbon_json_token_t token = get_token(token_stream, *token_idx);
 
     if (token.type == CARBON_JSON_TOKEN_SCOPE_OPEN) { /** Parse object */
         element->value.value_type = CARBON_JSON_AST_NODE_VALUE_TYPE_OBJECT;
         element->value.value.object = malloc(sizeof(carbon_json_ast_node_object_t));
-        if (!parseObject(element->value.value.object, err, tokenStream, tokenIdx)) {
+        if (!parse_object(element->value.value.object, err, token_stream, token_idx)) {
             return false;
         }
     } else if (token.type == CARBON_JSON_TOKEN_ARRAY_BEGIN) { /** Parse array */
         element->value.value_type = CARBON_JSON_AST_NODE_VALUE_TYPE_ARRAY;
         element->value.value.array = malloc(sizeof(carbon_json_ast_node_array_t));
-        if (!parseArray(element->value.value.array, err, tokenStream, tokenIdx)) {
+        if (!parse_array(element->value.value.array, err, token_stream, token_idx)) {
             return false;
         }
     } else if (token.type == CARBON_JSON_TOKEN_STRING_LITERAL) { /** Parse string */
         element->value.value_type = CARBON_JSON_AST_NODE_VALUE_TYPE_STRING;
         element->value.value.string = malloc(sizeof(carbon_json_ast_node_string_t));
-        parseString(element->value.value.string, tokenStream, tokenIdx);
+        parse_string(element->value.value.string, token_stream, token_idx);
     } else if (token.type == CARBON_JSON_TOKEN_REAL_NUMBER || token.type == CARBON_JSON_TOKEN_INT_NUMBER) { /** Parse number */
         element->value.value_type = CARBON_JSON_AST_NODE_VALUE_TYPE_NUMBER;
         element->value.value.number = malloc(sizeof(carbon_json_ast_node_number_t));
-        parseNumber(element->value.value.number, tokenStream, tokenIdx);
+        parse_number(element->value.value.number, token_stream, token_idx);
     } else if (token.type == CARBON_JSON_TOKEN_LITERAL_TRUE) {
         element->value.value_type = CARBON_JSON_AST_NODE_VALUE_TYPE_TRUE;
-        NEXT_TOKEN(tokenIdx);
+        NEXT_TOKEN(token_idx);
     } else if (token.type == CARBON_JSON_TOKEN_LITERAL_FALSE) {
         element->value.value_type = CARBON_JSON_AST_NODE_VALUE_TYPE_FALSE;
-        NEXT_TOKEN(tokenIdx);
+        NEXT_TOKEN(token_idx);
     } else if (token.type == CARBON_JSON_TOKEN_LITERAL_NULL) {
         element->value.value_type = CARBON_JSON_AST_NODE_VALUE_TYPE_NULL;
-        NEXT_TOKEN(tokenIdx);
+        NEXT_TOKEN(token_idx);
     } else {
         element->value.value_type = CARBON_JSON_AST_NODE_VALUE_TYPE_NULL;
     }
     return true;
 }
 
-static bool parseElements(carbon_json_ast_node_elements_t *elements, carbon_err_t *err, carbon_vec_t ofType(JsonToken) *tokenStream, size_t *tokenIdx)
+static bool parse_elements(carbon_json_ast_node_elements_t *elements, carbon_err_t *err, carbon_vec_t ofType(carbon_json_token_t) *token_stream, size_t *token_idx)
 {
     carbon_json_token_t delimiter;
     do {
-        if (!parseElement(VECTOR_NEW_AND_GET(&elements->elements, carbon_json_ast_node_element_t), err,
-                     tokenStream, tokenIdx)) {
+        if (!parse_element(VECTOR_NEW_AND_GET(&elements->elements, carbon_json_ast_node_element_t), err,
+                     token_stream, token_idx)) {
             return false;
         }
-        delimiter = getToken(tokenStream, *tokenIdx);
-        NEXT_TOKEN(tokenIdx);
+        delimiter = get_token(token_stream, *token_idx);
+        NEXT_TOKEN(token_idx);
     } while (delimiter.type == CARBON_JSON_TOKEN_COMMA);
-    PREV_TOKEN(tokenIdx);
+    PREV_TOKEN(token_idx);
     return true;
 }
 
-static bool parseTokenStream(carbon_json_t *json, carbon_err_t *err, carbon_vec_t ofType(JsonToken) *tokenStream)
+static bool parse_token_stream(carbon_json_t *json, carbon_err_t *err, carbon_vec_t ofType(carbon_json_token_t) *token_stream)
 {
-    size_t tokenIdx = 0;
-    if (!parseElement(json->element, err, tokenStream, &tokenIdx)) {
+    size_t token_idx = 0;
+    if (!parse_element(json->element, err, token_stream, &token_idx)) {
         return false;
     }
-    connectChildAndParents(json);
+    connect_child_and_parents(json);
     return true;
 }
 
 
-static void connectChildAndParentsMember(carbon_json_ast_node_member_t *member)
+static void connect_child_and_parents_member(carbon_json_ast_node_member_t *member)
 {
-    connectChildAndParentsElement(&member->value);
+    connect_child_and_parents_element(&member->value);
 }
 
-static void connectChildAndParentsObject(carbon_json_ast_node_object_t *object)
+static void connect_child_and_parents_object(carbon_json_ast_node_object_t *object)
 {
     object->value->parent = object;
     for (size_t i = 0; i < object->value->members.num_elems; i++) {
@@ -587,46 +587,46 @@ static void connectChildAndParentsObject(carbon_json_ast_node_object_t *object)
         member->value.parent_type = CARBON_JSON_AST_NODE_ELEMENT_PARENT_TYPE_MEMBER;
         member->value.parent.member = member;
 
-        connectChildAndParentsMember(member);
+        connect_child_and_parents_member(member);
     }
 }
 
-static void connectChildAndParentsArray(carbon_json_ast_node_array_t *array)
+static void connect_child_and_parents_array(carbon_json_ast_node_array_t *array)
 {
     array->elements.parent = array;
     for (size_t i = 0; i < array->elements.elements.num_elems; i++) {
         carbon_json_ast_node_element_t *element = CARBON_VECTOR_GET(&array->elements.elements, i, carbon_json_ast_node_element_t);
         element->parent_type = CARBON_JSON_AST_NODE_ELEMENT_PARENT_TYPE_ELEMENTS;
         element->parent.elements = &array->elements;
-        connectChildAndParentsElement(element);
+        connect_child_and_parents_element(element);
     }
 }
 
-static void connectChildAndParentsValue(carbon_json_ast_node_value_t *value)
+static void connect_child_and_parents_value(carbon_json_ast_node_value_t *value)
 {
     switch (value->value_type) {
     case CARBON_JSON_AST_NODE_VALUE_TYPE_OBJECT:
-        connectChildAndParentsObject(value->value.object);
+        connect_child_and_parents_object(value->value.object);
         break;
     case CARBON_JSON_AST_NODE_VALUE_TYPE_ARRAY:
-        connectChildAndParentsArray(value->value.array);
+        connect_child_and_parents_array(value->value.array);
         break;
     default:
         break;
     }
 }
 
-static void connectChildAndParentsElement(carbon_json_ast_node_element_t *element)
+static void connect_child_and_parents_element(carbon_json_ast_node_element_t *element)
 {
     element->value.parent = element;
-    connectChildAndParentsValue(&element->value);
+    connect_child_and_parents_value(&element->value);
 }
 
-static void connectChildAndParents(carbon_json_t *json)
+static void connect_child_and_parents(carbon_json_t *json)
 {
     json->element->parent_type = CARBON_JSON_AST_NODE_ELEMENT_PARENT_TYPE_JSON;
     json->element->parent.json = json;
-    connectChildAndParentsElement(json->element);
+    connect_child_and_parents_element(json->element);
 }
 
 static bool isValue(carbon_json_token_type_e token) {
@@ -634,8 +634,8 @@ static bool isValue(carbon_json_token_type_e token) {
         token == CARBON_JSON_TOKEN_LITERAL_TRUE || token == CARBON_JSON_TOKEN_LITERAL_FALSE || token == CARBON_JSON_TOKEN_LITERAL_NULL );
 }
 
-static int processToken(carbon_err_t *err, carbon_json_parse_err_t *errorDesc, const carbon_json_token_t *token, carbon_vec_t ofType(JsonTokenType) *brackets,
-                        TokenMemory *tokenMemory)
+static int process_token(carbon_err_t *err, carbon_json_parse_err_t *error_desc, const carbon_json_token_t *token, carbon_vec_t ofType(carbon_json_token_type_e) *brackets,
+                        token_memory_t *token_mem)
 {
     switch (token->type) {
     case CARBON_JSON_TOKEN_SCOPE_OPEN:
@@ -661,15 +661,14 @@ static int processToken(carbon_err_t *err, carbon_json_parse_err_t *errorDesc, c
         break;
     }
 
-    switch (tokenMemory->type) {
+    switch (token_mem->type) {
     case CARBON_JSON_TOKEN_SCOPE_OPEN:
-
         switch (token->type) {
         case CARBON_JSON_TOKEN_STRING_LITERAL:
         case CARBON_JSON_TOKEN_SCOPE_CLOSE:
             break;
         default:
-            return setError(errorDesc, token, "Expected key name or '}'");
+            return set_error(error_desc, token, "Expected key name or '}'");
         }
         break;
     case CARBON_JSON_TOKEN_STRING_LITERAL:
@@ -680,7 +679,7 @@ static int processToken(carbon_err_t *err, carbon_json_parse_err_t *errorDesc, c
         case CARBON_JSON_TOKEN_SCOPE_CLOSE:
             break;
         default:
-            return setError(errorDesc, token, "Expected key name (missing ':'), enumeration (','), "
+            return set_error(error_desc, token, "Expected key name (missing ':'), enumeration (','), "
                 "end of enumeration (']'), or end of object ('}')");
         }
         break;
@@ -696,7 +695,7 @@ static int processToken(carbon_err_t *err, carbon_json_parse_err_t *errorDesc, c
         case CARBON_JSON_TOKEN_SCOPE_CLOSE:
             break;
         default:
-            return setError(errorDesc, token, "Expected enumeration (','), end of enumeration (']'), "
+            return set_error(error_desc, token, "Expected enumeration (','), end of enumeration (']'), "
                 "or end of object ('})");
         }
         break;
@@ -713,7 +712,7 @@ static int processToken(carbon_err_t *err, carbon_json_parse_err_t *errorDesc, c
         case CARBON_JSON_TOKEN_LITERAL_NULL:
             break;
         default:
-            return setError(errorDesc, token, "Expected key name, or value (string, number, object, enumeration, true, "
+            return set_error(error_desc, token, "Expected key name, or value (string, number, object, enumeration, true, "
                 "false, or null).");
         }
         break;
@@ -730,7 +729,7 @@ static int processToken(carbon_err_t *err, carbon_json_parse_err_t *errorDesc, c
         case CARBON_JSON_TOKEN_LITERAL_NULL:
             break;
         default:
-            return setError(errorDesc, token, "End of enumeration (']'), enumeration (','), or "
+            return set_error(error_desc, token, "End of enumeration (']'), enumeration (','), or "
                 "end of enumeration (']')");
         }
         break;
@@ -741,18 +740,18 @@ static int processToken(carbon_err_t *err, carbon_json_parse_err_t *errorDesc, c
         case CARBON_JSON_TOKEN_SCOPE_CLOSE:
             break;
         default:
-            return setError(errorDesc, token, "End of enumeration (']'), enumeration (','), or "
+            return set_error(error_desc, token, "End of enumeration (']'), enumeration (','), or "
                 "end of object ('}')");
         }
         break;
     case CARBON_JSON_TOKEN_UNKNOWN:
-        if (tokenMemory->init) {
+        if (token_mem->init) {
             if (token->type != CARBON_JSON_TOKEN_SCOPE_OPEN && token->type != CARBON_JSON_TOKEN_ARRAY_BEGIN && !isValue(token->type)) {
-                return setError(errorDesc, token, "Expected JSON document: missing '{' or '['");
+                return set_error(error_desc, token, "Expected JSON document: missing '{' or '['");
             }
-            tokenMemory->init = false;
+            token_mem->init = false;
         } else {
-            return setError(errorDesc, token, "Unexpected token");
+            return set_error(error_desc, token, "Unexpected token");
         }
         break;
     default:
@@ -760,32 +759,32 @@ static int processToken(carbon_err_t *err, carbon_json_parse_err_t *errorDesc, c
         return false;
     }
 
-    tokenMemory->type = token->type;
+    token_mem->type = token->type;
     return true;
 }
 
-static int setError(carbon_json_parse_err_t *errorDesc, const carbon_json_token_t *token, const char *msg)
+static int set_error(carbon_json_parse_err_t *error_desc, const carbon_json_token_t *token, const char *msg)
 {
-    if (errorDesc) {
-        errorDesc->token = token;
-        errorDesc->token_type_str = token ? TOKEN_STRING[token->type].string : "(no token)";
-        errorDesc->msg = msg;
+    if (error_desc) {
+        error_desc->token = token;
+        error_desc->token_type_str = token ? TOKEN_STRING[token->type].string : "(no token)";
+        error_desc->msg = msg;
     }
     return false;
 }
 
-static bool jsonAstNodeMemberPrint(FILE *file, carbon_err_t *err, carbon_json_ast_node_member_t *member)
+static bool json_ast_node_member_print(FILE *file, carbon_err_t *err, carbon_json_ast_node_member_t *member)
 {
     fprintf(file, "\"%s\": ", member->key.value);
-    return jsonAstNodeValuePrint(file, err, &member->value.value);
+    return json_ast_node_value_print(file, err, &member->value.value);
 }
 
-static bool jsonAstNodeObjectPrint(FILE *file, carbon_err_t *err, carbon_json_ast_node_object_t *object)
+static bool json_ast_node_object_print(FILE *file, carbon_err_t *err, carbon_json_ast_node_object_t *object)
 {
     fprintf(file, "{");
     for (size_t i = 0; i < object->value->members.num_elems; i++) {
         carbon_json_ast_node_member_t *member = CARBON_VECTOR_GET(&object->value->members, i, carbon_json_ast_node_member_t);
-        if (!jsonAstNodeMemberPrint(file, err, member)) {
+        if (!json_ast_node_member_print(file, err, member)) {
             return false;
         }
         fprintf(file, "%s", i + 1 < object->value->members.num_elems ? ", " : "");
@@ -794,12 +793,12 @@ static bool jsonAstNodeObjectPrint(FILE *file, carbon_err_t *err, carbon_json_as
     return true;
 }
 
-static bool jsonAstNodeArrayPrint(FILE *file, carbon_err_t *err, carbon_json_ast_node_array_t *array)
+static bool json_ast_node_array_print(FILE *file, carbon_err_t *err, carbon_json_ast_node_array_t *array)
 {
     fprintf(file, "[");
     for (size_t i = 0; i < array->elements.elements.num_elems; i++) {
         carbon_json_ast_node_element_t *element = CARBON_VECTOR_GET(&array->elements.elements, i, carbon_json_ast_node_element_t);
-        if (!jsonAstNodeElementPrint(file, err, element)) {
+        if (!json_ast_node_element_print(file, err, element)) {
             return false;
         }
         fprintf(file, "%s", i + 1 < array->elements.elements.num_elems ? ", " : "");
@@ -808,12 +807,12 @@ static bool jsonAstNodeArrayPrint(FILE *file, carbon_err_t *err, carbon_json_ast
     return true;
 }
 
-static void jsonAstNodeStringPrint(FILE *file, carbon_json_ast_node_string_t *string)
+static void json_ast_node_string_print(FILE *file, carbon_json_ast_node_string_t *string)
 {
     fprintf(file, "\"%s\"", string->value);
 }
 
-static bool jsonAstNodeNumberPrint(FILE *file, carbon_err_t *err, carbon_json_ast_node_number_t *number)
+static bool json_ast_node_number_print(FILE *file, carbon_err_t *err, carbon_json_ast_node_number_t *number)
 {
     switch (number->value_type) {
     case CARBON_JSON_AST_NODE_NUMBER_VALUE_TYPE_REAL_NUMBER:
@@ -832,24 +831,24 @@ static bool jsonAstNodeNumberPrint(FILE *file, carbon_err_t *err, carbon_json_as
     return true;
 }
 
-static bool jsonAstNodeValuePrint(FILE *file, carbon_err_t *err, carbon_json_ast_node_value_t *value)
+static bool json_ast_node_value_print(FILE *file, carbon_err_t *err, carbon_json_ast_node_value_t *value)
 {
     switch (value->value_type) {
     case CARBON_JSON_AST_NODE_VALUE_TYPE_OBJECT:
-        if (!jsonAstNodeObjectPrint(file, err, value->value.object)) {
+        if (!json_ast_node_object_print(file, err, value->value.object)) {
             return false;
         }
         break;
     case CARBON_JSON_AST_NODE_VALUE_TYPE_ARRAY:
-        if (!jsonAstNodeArrayPrint(file, err, value->value.array)) {
+        if (!json_ast_node_array_print(file, err, value->value.array)) {
             return false;
         }
         break;
     case CARBON_JSON_AST_NODE_VALUE_TYPE_STRING:
-        jsonAstNodeStringPrint(file, value->value.string);
+        json_ast_node_string_print(file, value->value.string);
         break;
     case CARBON_JSON_AST_NODE_VALUE_TYPE_NUMBER:
-        if (!jsonAstNodeNumberPrint(file, err, value->value.number)) {
+        if (!json_ast_node_number_print(file, err, value->value.number)) {
             return false;
         }
         break;
@@ -869,29 +868,29 @@ static bool jsonAstNodeValuePrint(FILE *file, carbon_err_t *err, carbon_json_ast
     return true;
 }
 
-static bool jsonAstNodeElementPrint(FILE *file, carbon_err_t *err, carbon_json_ast_node_element_t *element)
+static bool json_ast_node_element_print(FILE *file, carbon_err_t *err, carbon_json_ast_node_element_t *element)
 {
-    return jsonAstNodeValuePrint(file, err, &element->value);
+    return json_ast_node_value_print(file, err, &element->value);
 }
 
-static bool jsonAstNodeValueDrop(carbon_json_ast_node_value_t *value, carbon_err_t *err);
+static bool json_ast_node_value_drop(carbon_json_ast_node_value_t *value, carbon_err_t *err);
 
-static bool jsonAstNodeElementDrop(carbon_json_ast_node_element_t *element, carbon_err_t *err)
+static bool json_ast_node_element_drop(carbon_json_ast_node_element_t *element, carbon_err_t *err)
 {
-    return jsonAstNodeValueDrop(&element->value, err);
+    return json_ast_node_value_drop(&element->value, err);
 }
 
-static bool jsonAstNodeMemberDrop(carbon_json_ast_node_member_t *member, carbon_err_t *err)
+static bool json_ast_node_member_drop(carbon_json_ast_node_member_t *member, carbon_err_t *err)
 {
     free(member->key.value);
-    return jsonAstNodeElementDrop(&member->value, err);
+    return json_ast_node_element_drop(&member->value, err);
 }
 
-static bool jsonAstNodeMembersDrop(carbon_json_ast_node_members_t *members, carbon_err_t *err)
+static bool json_ast_node_members_drop(carbon_json_ast_node_members_t *members, carbon_err_t *err)
 {
     for (size_t i = 0; i < members->members.num_elems; i++) {
         carbon_json_ast_node_member_t *member = CARBON_VECTOR_GET(&members->members, i, carbon_json_ast_node_member_t);
-        if (!jsonAstNodeMemberDrop(member, err)) {
+        if (!json_ast_node_member_drop(member, err)) {
             return false;
         }
     }
@@ -899,11 +898,11 @@ static bool jsonAstNodeMembersDrop(carbon_json_ast_node_members_t *members, carb
     return true;
 }
 
-static bool jsonAstNodeElementsDrop(carbon_json_ast_node_elements_t *elements, carbon_err_t *err)
+static bool json_ast_node_elements_drop(carbon_json_ast_node_elements_t *elements, carbon_err_t *err)
 {
     for (size_t i = 0; i < elements->elements.num_elems; i++) {
         carbon_json_ast_node_element_t *element = CARBON_VECTOR_GET(&elements->elements, i, carbon_json_ast_node_element_t);
-        if (!jsonAstNodeElementDrop(element, err)) {
+        if (!json_ast_node_element_drop(element, err)) {
             return false;
         }
     }
@@ -911,9 +910,9 @@ static bool jsonAstNodeElementsDrop(carbon_json_ast_node_elements_t *elements, c
     return true;
 }
 
-static bool jsonAstNodeObjectDrop(carbon_json_ast_node_object_t *object, carbon_err_t *err)
+static bool json_ast_node_object_drop(carbon_json_ast_node_object_t *object, carbon_err_t *err)
 {
-    if (!jsonAstNodeMembersDrop(object->value, err)) {
+    if (!json_ast_node_members_drop(object->value, err)) {
         return false;
     } else {
         free(object->value);
@@ -921,44 +920,44 @@ static bool jsonAstNodeObjectDrop(carbon_json_ast_node_object_t *object, carbon_
     }
 }
 
-static bool jsonAstNodeArrayDrop(carbon_json_ast_node_array_t *array, carbon_err_t *err)
+static bool json_ast_node_array_drop(carbon_json_ast_node_array_t *array, carbon_err_t *err)
 {
-    return jsonAstNodeElementsDrop(&array->elements, err);
+    return json_ast_node_elements_drop(&array->elements, err);
 }
 
-static void jsonAstNodeStringDrop(carbon_json_ast_node_string_t *string)
+static void json_ast_node_string_drop(carbon_json_ast_node_string_t *string)
 {
     free(string->value);
 }
 
-static void jsonAstNodeNumberDrop(carbon_json_ast_node_number_t *number)
+static void json_ast_node_number_drop(carbon_json_ast_node_number_t *number)
 {
     CARBON_UNUSED(number);
 }
 
-static bool jsonAstNodeValueDrop(carbon_json_ast_node_value_t *value, carbon_err_t *err)
+static bool json_ast_node_value_drop(carbon_json_ast_node_value_t *value, carbon_err_t *err)
 {
     switch (value->value_type) {
     case CARBON_JSON_AST_NODE_VALUE_TYPE_OBJECT:
-        if (!jsonAstNodeObjectDrop(value->value.object, err)) {
+        if (!json_ast_node_object_drop(value->value.object, err)) {
             return false;
         } else {
             free(value->value.object);
         }
         break;
     case CARBON_JSON_AST_NODE_VALUE_TYPE_ARRAY:
-        if (!jsonAstNodeArrayDrop(value->value.array, err)) {
+        if (!json_ast_node_array_drop(value->value.array, err)) {
             return false;
         } else {
             free(value->value.array);
         }
         break;
     case CARBON_JSON_AST_NODE_VALUE_TYPE_STRING:
-        jsonAstNodeStringDrop(value->value.string);
+        json_ast_node_string_drop(value->value.string);
         free(value->value.string);
         break;
     case CARBON_JSON_AST_NODE_VALUE_TYPE_NUMBER:
-        jsonAstNodeNumberDrop(value->value.number);
+        json_ast_node_number_drop(value->value.number);
         free(value->value.number);
         break;
     case CARBON_JSON_AST_NODE_VALUE_TYPE_TRUE:
@@ -976,7 +975,7 @@ static bool jsonAstNodeValueDrop(carbon_json_ast_node_value_t *value, carbon_err
 bool carbon_json_drop(carbon_json_t *json)
 {
     carbon_json_ast_node_element_t *element = json->element;
-    if (!jsonAstNodeValueDrop(&element->value, &json->err)) {
+    if (!json_ast_node_value_drop(&element->value, &json->err)) {
         return false;
     } else {
         free(json->element);
@@ -986,5 +985,5 @@ bool carbon_json_drop(carbon_json_t *json)
 
 bool carbon_json_print(FILE *file, carbon_json_t *json)
 {
-    return jsonAstNodeElementPrint(file, &json->err, json->element);
+    return json_ast_node_element_print(file, &json->err, json->element);
 }
