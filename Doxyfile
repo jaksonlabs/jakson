@@ -103,9 +103,9 @@ INPUT                  = src \
                          vhdlparser
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.h \
-                         *.cpp \
+                         *.c \
                          *.md
-RECURSIVE              = NO
+RECURSIVE              = YES
 EXCLUDE                = src/logos.cpp \
                          src/lodepng.cpp
 EXCLUDE_SYMLINKS       = NO
@@ -227,7 +227,7 @@ RTF_EXTENSIONS_FILE    =
 #---------------------------------------------------------------------------
 # Configuration options related to the man page output
 #---------------------------------------------------------------------------
-GENERATE_MAN           = NO
+GENERATE_MAN           = YES
 MAN_OUTPUT             =
 MAN_EXTENSION          = .3
 MAN_SUBDIR             =
