@@ -78,7 +78,7 @@ static int thisFetchSingle(carbon_vec_t ofType(Bucket) *buckets,
                            const char *key,
                            carbon_string_hash_counters_t *counter);
 
-static int thisCreateExtra(carbon_strhash_t *self, size_t numBuckets, size_t capBuckets);
+static int this_create_extra(carbon_strhash_t *self, size_t numBuckets, size_t capBuckets);
 static MemExtra *thisGetExta(carbon_strhash_t *self);
 static int BucketCreate(Bucket *buckets, size_t numBuckets, size_t bucketCap,
                         carbon_alloc_t *alloc);
@@ -109,7 +109,7 @@ bool carbon_strhash_create_inmemory(carbon_strhash_t *map, const carbon_alloc_t 
     carbon_error_init(&map->err);
 
     carbon_strhash_reset_counters(map);
-    CARBON_CHECK_SUCCESS(thisCreateExtra(map, num_buckets, capBuckets));
+    CARBON_CHECK_SUCCESS(this_create_extra(map, num_buckets, capBuckets));
     return true;
 }
 
@@ -381,7 +381,7 @@ static int this_free(carbon_strhash_t *self, void *ptr)
 }
 
 CARBON_FUNC_UNUSED
-static int thisCreateExtra(carbon_strhash_t *self, size_t numBuckets, size_t capBuckets)
+static int this_create_extra(carbon_strhash_t *self, size_t numBuckets, size_t capBuckets)
 {
     if ((self->extra = carbon_malloc(&self->allocator, sizeof(MemExtra))) != NULL) {
         MemExtra *extra = thisGetExta(self);

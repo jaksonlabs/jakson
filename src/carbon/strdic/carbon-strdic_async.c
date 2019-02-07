@@ -57,7 +57,7 @@ typedef struct parallel_insert_arg
 
 typedef struct parallel_remove_arg
 {
-    carbon_vec_t ofType(carbon_string_id_t) *localIds;
+    carbon_vec_t ofType(carbon_string_id_t) *local_ids;
     carrier_t *carrier;
     int result;
     bool did_work;
@@ -98,9 +98,9 @@ static bool this_drop(carbon_strdic_t *self);
 static bool this_insert(carbon_strdic_t *self,
                       carbon_string_id_t **out,
                       char *const *strings,
-                      size_t numStrings,
-                      size_t __numThreads);
-static bool this_remove(carbon_strdic_t *self, carbon_string_id_t *strings, size_t numStrings);
+                      size_t num_strings,
+                      size_t __num_threads);
+static bool this_remove(carbon_strdic_t *self, carbon_string_id_t *strings, size_t num_strings);
 static bool this_locate_safe(carbon_strdic_t *self, carbon_string_id_t **out, bool **found_mask,
                           size_t *num_not_found, char *const *keys, size_t num_keys);
 static bool this_locate_fast(carbon_strdic_t *self, carbon_string_id_t **out, char *const *keys,
@@ -116,13 +116,13 @@ static bool this_reset_counters(carbon_strdic_t *self);
 static bool this_counters(carbon_strdic_t *self, carbon_string_hash_counters_t *counters);
 
 static bool thisLock(carbon_strdic_t *self);
-static bool thisUnlock(carbon_strdic_t *self);
+static bool this_unlock(carbon_strdic_t *self);
 
-static bool thisCreateExtra(carbon_strdic_t *self, size_t capacity, size_t num_index_buckets,
-                           size_t approxNumUniqueStr, size_t num_threads);
+static bool this_create_extra(carbon_strdic_t *self, size_t capacity, size_t num_index_buckets,
+                           size_t approx_num_unique_str, size_t num_threads);
 
 static bool thisSetupCarriers(carbon_strdic_t *self, size_t capacity, size_t num_index_buckets,
-                             size_t approxNumUniqueStr, size_t num_threads);
+                             size_t approx_num_unique_str, size_t num_threads);
 
 #define THIS_EXTRAS(self)                                                                                              \
 ({                                                                                                                     \
@@ -149,12 +149,12 @@ carbon_strdic_create_async(carbon_strdic_t *dic, size_t capacity, size_t num_ind
     dic->num_distinct = this_num_distinct;
     dic->get_contents = this_get_contents;
 
-    CARBON_CHECK_SUCCESS(thisCreateExtra(dic, capacity, num_index_buckets, approx_num_unique_strs, num_threads));
+    CARBON_CHECK_SUCCESS(this_create_extra(dic, capacity, num_index_buckets, approx_num_unique_strs, num_threads));
     return true;
 }
 
-static bool thisCreateExtra(carbon_strdic_t *self, size_t capacity, size_t num_index_buckets,
-                           size_t approxNumUniqueStr, size_t num_threads)
+static bool this_create_extra(carbon_strdic_t *self, size_t capacity, size_t num_index_buckets,
+                           size_t approx_num_unique_str, size_t num_threads)
 {
     assert(self);
 
@@ -162,7 +162,7 @@ static bool thisCreateExtra(carbon_strdic_t *self, size_t capacity, size_t num_i
     async_extra *extra = THIS_EXTRAS(self);
     carbon_spinlock_init(&extra->lock);
     carbon_vec_create(&extra->carriers, &self->alloc, sizeof(carrier_t), num_threads);
-    thisSetupCarriers(self, capacity, num_index_buckets, approxNumUniqueStr, num_threads);
+    thisSetupCarriers(self, capacity, num_index_buckets, approx_num_unique_str, num_threads);
     carbon_vec_create(&extra->carrier_mapping, &self->alloc, sizeof(carrier_t *), capacity);
 
     return true;
@@ -182,108 +182,108 @@ static bool this_drop(carbon_strdic_t *self)
     return true;
 }
 
-void *parallelRemoveFunction(void *args)
+void *parallel_remove_function(void *args)
 {
-    parallel_remove_arg *carrierArg = (parallel_remove_arg *) args;
-    carbon_string_id_t len = carbon_vec_length(carrierArg->localIds);
-    carrierArg->did_work = len > 0;
+    parallel_remove_arg *carrier_arg = (parallel_remove_arg *) args;
+    carbon_string_id_t len = carbon_vec_length(carrier_arg->local_ids);
+    carrier_arg->did_work = len > 0;
 
-    CARBON_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu spawned for remove task (%zu elements)", carrierArg->carrier->id,
-          carbon_vec_length(carrierArg->localIds));
+    CARBON_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu spawned for remove task (%zu elements)", carrier_arg->carrier->id,
+          carbon_vec_length(carrier_arg->local_ids));
     if (len > 0) {
-        carbon_strdic_t *dic = &carrierArg->carrier->local_dictionary;
-        carbon_string_id_t *ids = VECTOR_ALL(carrierArg->localIds, carbon_string_id_t);
-        carrierArg->result = carbon_strdic_remove(dic, ids, len);
-        CARBON_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu task done", carrierArg->carrier->id);
+        carbon_strdic_t *dic = &carrier_arg->carrier->local_dictionary;
+        carbon_string_id_t *ids = VECTOR_ALL(carrier_arg->local_ids, carbon_string_id_t);
+        carrier_arg->result = carbon_strdic_remove(dic, ids, len);
+        CARBON_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu task done", carrier_arg->carrier->id);
     }
     else {
-        carrierArg->result = true;
-        CARBON_WARN(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", carrierArg->carrier->id);
+        carrier_arg->result = true;
+        CARBON_WARN(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", carrier_arg->carrier->id);
     }
 
     return NULL;
 }
 
-void *parallelInsertFunction(void *args)
+void *parallel_insert_function(void *args)
 {
-    parallel_insert_arg *restrict thisArgs = (parallel_insert_arg *restrict) args;
-    thisArgs->did_work = thisArgs->strings.numElems > 0;
+    parallel_insert_arg *restrict this_args = (parallel_insert_arg *restrict) args;
+    this_args->did_work = this_args->strings.numElems > 0;
 
-    CARBON_TRACE(STRING_DIC_ASYNC_TAG, "thread-local insert function started (thread %zu)", thisArgs->carrier->id);
-    CARBON_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu spawned for insert task (%zu elements)", thisArgs->carrier->id,
-          carbon_vec_length(&thisArgs->strings));
+    CARBON_TRACE(STRING_DIC_ASYNC_TAG, "thread-local insert function started (thread %zu)", this_args->carrier->id);
+    CARBON_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu spawned for insert task (%zu elements)", this_args->carrier->id,
+          carbon_vec_length(&this_args->strings));
 
-    if (thisArgs->did_work) {
+    if (this_args->did_work) {
         CARBON_TRACE(STRING_DIC_ASYNC_TAG,
               "thread %zu starts insertion of %zu strings",
-              thisArgs->carrier->id,
-              carbon_vec_length(&thisArgs->strings));
-        char **data = (char **) carbon_vec_data(&thisArgs->strings);
+              this_args->carrier->id,
+              carbon_vec_length(&this_args->strings));
+        char **data = (char **) carbon_vec_data(&this_args->strings);
 
-        int status = carbon_strdic_insert(&thisArgs->carrier->local_dictionary,
-                                          thisArgs->enable_write_out ? &thisArgs->out : NULL,
-                                          data, carbon_vec_length(&thisArgs->strings), thisArgs->insert_num_threads);
+        int status = carbon_strdic_insert(&this_args->carrier->local_dictionary,
+                                          this_args->enable_write_out ? &this_args->out : NULL,
+                                          data, carbon_vec_length(&this_args->strings), this_args->insert_num_threads);
 
         /** internal error during thread-local string dictionary building process */
         CARBON_PRINT_ERROR_AND_DIE_IF(status != true, CARBON_ERR_INTERNALERR);
-        CARBON_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu done", thisArgs->carrier->id);
+        CARBON_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu done", this_args->carrier->id);
     }
     else {
-        CARBON_WARN(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", thisArgs->carrier->id);
+        CARBON_WARN(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", this_args->carrier->id);
     }
 
     return NULL;
 }
 
-void *parallelLocateSafeFunction(void *args)
+void *parallel_locate_safe_function(void *args)
 {
-    parallel_locate_arg *restrict thisArgs = (parallel_locate_arg *restrict) args;
-    thisArgs->did_work = carbon_vec_length(&thisArgs->keys_in) > 0;
+    parallel_locate_arg *restrict this_args = (parallel_locate_arg *restrict) args;
+    this_args->did_work = carbon_vec_length(&this_args->keys_in) > 0;
 
-    CARBON_TRACE(STRING_DIC_ASYNC_TAG, "thread-local 'locate' function invoked for thread %zu...", thisArgs->carrier->id)
+    CARBON_TRACE(STRING_DIC_ASYNC_TAG, "thread-local 'locate' function invoked for thread %zu...", this_args->carrier->id)
 
-    CARBON_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu spawned for locate (safe) task (%zu elements)", thisArgs->carrier->id,
-          carbon_vec_length(&thisArgs->keys_in));
+    CARBON_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu spawned for locate (safe) task (%zu elements)", this_args->carrier->id,
+          carbon_vec_length(&this_args->keys_in));
 
-    if (thisArgs->did_work) {
-        thisArgs->result = carbon_strdic_locate_safe(&thisArgs->ids_out,
-                                                     &thisArgs->found_mask_out,
-                                                     &thisArgs->num_not_found_out,
-                                                     &thisArgs->carrier->local_dictionary,
-                                                     VECTOR_ALL(&thisArgs->keys_in, char *),
-                                                     carbon_vec_length(&thisArgs->keys_in));
+    if (this_args->did_work) {
+        this_args->result = carbon_strdic_locate_safe(&this_args->ids_out,
+                                                     &this_args->found_mask_out,
+                                                     &this_args->num_not_found_out,
+                                                     &this_args->carrier->local_dictionary,
+                                                     VECTOR_ALL(&this_args->keys_in, char *),
+                                                     carbon_vec_length(&this_args->keys_in));
 
-        CARBON_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu done", thisArgs->carrier->id);
+        CARBON_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu done", this_args->carrier->id);
     }
     else {
-        CARBON_WARN(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", thisArgs->carrier->id);
+        CARBON_WARN(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", this_args->carrier->id);
     }
 
     return NULL;
 }
 
-void *parallelExtractFunction(void *args)
+void *parallel_extract_function(void *args)
 {
-    parallel_extract_arg *restrict thisArgs = (parallel_extract_arg *restrict) args;
-    thisArgs->did_work = carbon_vec_length(&thisArgs->local_ids_in) > 0;
+    parallel_extract_arg *restrict this_args = (parallel_extract_arg *restrict) args;
+    this_args->did_work = carbon_vec_length(&this_args->local_ids_in) > 0;
 
-    CARBON_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu spawned for extract task (%zu elements)", thisArgs->carrier->id,
-          carbon_vec_length(&thisArgs->local_ids_in));
+    CARBON_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu spawned for extract task (%zu elements)", this_args->carrier->id,
+          carbon_vec_length(&this_args->local_ids_in));
 
-    if (thisArgs->did_work) {
-        thisArgs->strings_out = carbon_strdic_extract(&thisArgs->carrier->local_dictionary,
-                                                     VECTOR_ALL(&thisArgs->local_ids_in, carbon_string_id_t),
-                                                     carbon_vec_length(&thisArgs->local_ids_in));
-        CARBON_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu done", thisArgs->carrier->id);
+    if (this_args->did_work) {
+        this_args->strings_out = carbon_strdic_extract(&this_args->carrier->local_dictionary,
+                                                     VECTOR_ALL(&this_args->local_ids_in, carbon_string_id_t),
+                                                     carbon_vec_length(&this_args->local_ids_in));
+        CARBON_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu done", this_args->carrier->id);
     }
     else {
-        CARBON_WARN(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", thisArgs->carrier->id);
+        CARBON_WARN(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", this_args->carrier->id);
     }
 
     return NULL;
 }
 
-static void Synchronize(carbon_vec_t ofType(carrier) *carriers, size_t num_threads)
+static void synchronize(carbon_vec_t ofType(carrier) *carriers, size_t num_threads)
 {
     CARBON_DEBUG(STRING_DIC_ASYNC_TAG, "barrier installed for %d threads", num_threads);
 
@@ -300,77 +300,77 @@ static void Synchronize(carbon_vec_t ofType(carrier) *carriers, size_t num_threa
     CARBON_DEBUG(STRING_DIC_ASYNC_TAG, "barrier passed for %d threads after %f seconds", num_threads, duration / 1000.0f);
 }
 
-static void createThreadAssignment(atomic_uint_fast16_t **strCarrierMapping, atomic_size_t **carrierNumStrings,
-                                   size_t **strCarrierIdxMapping,
-                                   carbon_alloc_t *alloc, size_t numStrings, size_t num_threads)
+static void create_thread_assignment(atomic_uint_fast16_t **str_carrier_mapping, atomic_size_t **carrier_num_strings,
+                                   size_t **str_carrier_idx_mapping,
+                                   carbon_alloc_t *alloc, size_t num_strings, size_t num_threads)
 {
     /** map string depending on hash values to a particular carrier */
-    *strCarrierMapping = carbon_malloc(alloc, numStrings * sizeof(atomic_uint_fast16_t));
-    memset(*strCarrierMapping, 0, numStrings * sizeof(atomic_uint_fast16_t));
+    *str_carrier_mapping = carbon_malloc(alloc, num_strings * sizeof(atomic_uint_fast16_t));
+    memset(*str_carrier_mapping, 0, num_strings * sizeof(atomic_uint_fast16_t));
 
     /** counters to compute how many strings go to a particular carrier */
-    *carrierNumStrings = carbon_malloc(alloc, num_threads * sizeof(atomic_size_t));
-    memset(*carrierNumStrings, 0, num_threads * sizeof(atomic_size_t));
+    *carrier_num_strings = carbon_malloc(alloc, num_threads * sizeof(atomic_size_t));
+    memset(*carrier_num_strings, 0, num_threads * sizeof(atomic_size_t));
 
     /** an inverted index that contains the i-th position for string k that was assigned to carrier m.
      * With this, given a (global) string and and its carrier, one can have directly the position of the
      * string in the carriers "thread-local locate" args */
-    *strCarrierIdxMapping = carbon_malloc(alloc, numStrings * sizeof(size_t));
+    *str_carrier_idx_mapping = carbon_malloc(alloc, num_strings * sizeof(size_t));
 }
 
-static void dropThreadAssignment(carbon_alloc_t *alloc, atomic_uint_fast16_t *strCarrierMapping,
-                                 atomic_size_t *carrierNumStrings, size_t *strCarrierIdxMapping)
+static void drop_thread_assignment(carbon_alloc_t *alloc, atomic_uint_fast16_t *str_carrier_mapping,
+                                 atomic_size_t *carrier_num_strings, size_t *str_carrier_idx_mapping)
 {
-    carbon_free(alloc, carrierNumStrings);
-    carbon_free(alloc, strCarrierMapping);
-    carbon_free(alloc, strCarrierIdxMapping);
+    carbon_free(alloc, carrier_num_strings);
+    carbon_free(alloc, str_carrier_mapping);
+    carbon_free(alloc, str_carrier_idx_mapping);
 }
 
-typedef struct ParallelComputeThreadAssignmentArg
+typedef struct parallel_compute_thread_assignment_arg
 {
-    atomic_uint_fast16_t *strCarrierMapping;
+    atomic_uint_fast16_t *str_carrier_mapping;
     size_t num_threads;
-    atomic_size_t *carrierNumStrings;
-    char *const *baseStrings;
-} ParallelComputeThreadAssignmentArg;
+    atomic_size_t *carrier_num_strings;
+    char *const *base_strings;
+} parallel_compute_thread_assignment_arg_t;
 
-static void ParallelComputeThreadAssignmentFunction(const void *restrict start, size_t width, size_t len,
-                                                    void *restrict args, ThreadId tid)
+static void parallel_compute_thread_assignment_function(const void *restrict start, size_t width, size_t len,
+                                                    void *restrict args, thread_id_t tid)
 {
     CARBON_UNUSED(tid);
     CARBON_UNUSED(width);
 
     char *const *strings = (char *const *) start;
 
-    ParallelComputeThreadAssignmentArg *funcArgs = (ParallelComputeThreadAssignmentArg *) args;
+    parallel_compute_thread_assignment_arg_t *func_args = (parallel_compute_thread_assignment_arg_t *) args;
 
     while (len--) {
-        size_t i = strings - funcArgs->baseStrings;
+        size_t i = strings - func_args->base_strings;
         const char *key = *strings;
         /** re-using this hashcode for the thread-local dictionary is more costly than to compute it fresh
          * (due to more I/O with the RAM) */
-        size_t thread_id = HASHCODE_OF(key) % funcArgs->num_threads;
-        atomic_fetch_add(&funcArgs->strCarrierMapping[i], thread_id);
-        atomic_fetch_add(&funcArgs->carrierNumStrings[thread_id], 1);
+        size_t thread_id = HASHCODE_OF(key) % func_args->num_threads;
+        atomic_fetch_add(&func_args->str_carrier_mapping[i], thread_id);
+        atomic_fetch_add(&func_args->carrier_num_strings[thread_id], 1);
         strings++;
     }
 }
 
-static void computeThreadAssignment(atomic_uint_fast16_t *strCarrierMapping, atomic_size_t *carrierNumStrings,
-                                    char *const *strings, size_t numStrings, size_t num_threads)
+static void compute_thread_assignment(atomic_uint_fast16_t *str_carrier_mapping, atomic_size_t *carrier_num_strings,
+                                    char *const *strings, size_t num_strings, size_t num_threads)
 {
-    ParallelComputeThreadAssignmentArg args = {
-        .baseStrings = strings,
-        .carrierNumStrings = carrierNumStrings,
+    parallel_compute_thread_assignment_arg_t args = {
+        .base_strings = strings,
+        .carrier_num_strings = carrier_num_strings,
         .num_threads = num_threads,
-        .strCarrierMapping = strCarrierMapping
+        .str_carrier_mapping = str_carrier_mapping
     };
-    ParallelFor(strings,
+    carbon_parallel_for(strings,
                 sizeof(char *const *),
-                numStrings,
-                ParallelComputeThreadAssignmentFunction,
+                num_strings,
+                parallel_compute_thread_assignment_function,
                 &args,
-                ThreadingHint_Multi,
+                CARBON_PARALLEL_THREAD_HINT_MULTI,
                 num_threads);
 
 }
@@ -378,35 +378,35 @@ static void computeThreadAssignment(atomic_uint_fast16_t *strCarrierMapping, ato
 static bool this_insert(carbon_strdic_t *self,
                       carbon_string_id_t **out,
                       char *const *strings,
-                      size_t numStrings,
-                      size_t __numThreads)
+                      size_t num_strings,
+                      size_t __num_threads)
 {
     carbon_timestamp_t begin = carbon_time_now_wallclock();
-    CARBON_INFO(STRING_DIC_ASYNC_TAG, "insert operation invoked: %zu strings in total", numStrings)
+    CARBON_INFO(STRING_DIC_ASYNC_TAG, "insert operation invoked: %zu strings in total", num_strings)
 
 
     CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_ASYNC);
     /** parameter 'num_threads' must be set to 0 for async dictionary */
-    CARBON_PRINT_ERROR_AND_DIE_IF(__numThreads != 0, CARBON_ERR_INTERNALERR);
+    CARBON_PRINT_ERROR_AND_DIE_IF(__num_threads != 0, CARBON_ERR_INTERNALERR);
 
     thisLock(self);
 
     async_extra *extra = THIS_EXTRAS(self);
     uint_fast16_t num_threads = carbon_vec_length(&extra->carriers);
 
-    atomic_uint_fast16_t *strCarrierMapping;
-    size_t *strCarrierIdxMapping;
-    atomic_size_t *carrierNumStrings;
+    atomic_uint_fast16_t *str_carrier_mapping;
+    size_t *str_carrier_idx_mapping;
+    atomic_size_t *carrier_num_strings;
 
 
-    createThreadAssignment(&strCarrierMapping, &carrierNumStrings, &strCarrierIdxMapping,
-                           &self->alloc, numStrings, num_threads);
+    create_thread_assignment(&str_carrier_mapping, &carrier_num_strings, &str_carrier_idx_mapping,
+                           &self->alloc, num_strings, num_threads);
 
-    carbon_vec_t ofType(parallel_insert_arg *) carrierArgs;
-    carbon_vec_create(&carrierArgs, &self->alloc, sizeof(parallel_insert_arg *), num_threads);
+    carbon_vec_t ofType(parallel_insert_arg *) carrier_args;
+    carbon_vec_create(&carrier_args, &self->alloc, sizeof(parallel_insert_arg *), num_threads);
 
     /** compute which carrier is responsible for which string */
-    computeThreadAssignment(strCarrierMapping, carrierNumStrings, strings, numStrings, num_threads);
+    compute_thread_assignment(str_carrier_mapping, carrier_num_strings, strings, num_strings, num_threads);
 
     /** prepare to move string subsets to carriers */
     for (uint_fast16_t i = 0; i < num_threads; i++) {
@@ -414,42 +414,42 @@ static bool this_insert(carbon_strdic_t *self,
         entry->carrier = VECTOR_GET(&extra->carriers, i, carrier_t);
         entry->insert_num_threads = num_threads;
 
-        carbon_vec_create(&entry->strings, &self->alloc, sizeof(char *), CARBON_MAX(1, carrierNumStrings[i]));
-        carbon_vec_push(&carrierArgs, &entry, 1);
+        carbon_vec_create(&entry->strings, &self->alloc, sizeof(char *), CARBON_MAX(1, carrier_num_strings[i]));
+        carbon_vec_push(&carrier_args, &entry, 1);
         assert (entry->strings.base != NULL);
 
-        parallel_insert_arg *carrierArg = *VECTOR_GET(&carrierArgs, i, parallel_insert_arg *);
-        carrierArg->out = NULL;
+        parallel_insert_arg *carrier_arg = *VECTOR_GET(&carrier_args, i, parallel_insert_arg *);
+        carrier_arg->out = NULL;
     }
 
     /** create per-carrier string subset */
     /** parallizing this makes no sense but waste of resources and energy */
-    for (size_t i = 0; i < numStrings; i++) {
-        uint_fast16_t thread_id = strCarrierMapping[i];
-        parallel_insert_arg *carrierArg = *VECTOR_GET(&carrierArgs, thread_id, parallel_insert_arg *);
-        carrierArg->enable_write_out = out != NULL;
+    for (size_t i = 0; i < num_strings; i++) {
+        uint_fast16_t thread_id = str_carrier_mapping[i];
+        parallel_insert_arg *carrier_arg = *VECTOR_GET(&carrier_args, thread_id, parallel_insert_arg *);
+        carrier_arg->enable_write_out = out != NULL;
 
         /** store local index of string i inside the thread */
-        strCarrierIdxMapping[i] = carbon_vec_length(&carrierArg->strings);
+        str_carrier_idx_mapping[i] = carbon_vec_length(&carrier_arg->strings);
 
-        carbon_vec_push(&carrierArg->strings, &strings[i], 1);
+        carbon_vec_push(&carrier_arg->strings, &strings[i], 1);
     }
 
 
     /** schedule insert operation per carrier */
     CARBON_TRACE(STRING_DIC_ASYNC_TAG, "schedule insert operation to %zu threads", num_threads)
     for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
-        parallel_insert_arg *carrierArg = *VECTOR_GET(&carrierArgs, thread_id, parallel_insert_arg *);
+        parallel_insert_arg *carrier_arg = *VECTOR_GET(&carrier_args, thread_id, parallel_insert_arg *);
         carrier_t *carrier = VECTOR_GET(&extra->carriers, thread_id, carrier_t);
         CARBON_TRACE(STRING_DIC_ASYNC_TAG, "create thread %zu...", thread_id)
-        pthread_create(&carrier->thread, NULL, parallelInsertFunction, carrierArg);
+        pthread_create(&carrier->thread, NULL, parallel_insert_function, carrier_arg);
         CARBON_TRACE(STRING_DIC_ASYNC_TAG, "thread %zu created", thread_id)
     }
     CARBON_TRACE(STRING_DIC_ASYNC_TAG, "scheduling done for %zu threads", num_threads)
 
     /** synchronize */
     CARBON_TRACE(STRING_DIC_ASYNC_TAG, "start synchronizing %zu threads", num_threads)
-    Synchronize(&extra->carriers, num_threads);
+    synchronize(&extra->carriers, num_threads);
     CARBON_TRACE(STRING_DIC_ASYNC_TAG, "%zu threads in sync", num_threads)
 
     /** compute string ids; the string id produced by this implementation is a compound identifier encoding
@@ -465,37 +465,37 @@ static bool this_insert(carbon_strdic_t *self,
 
     /** parallelizing the following block makes no sense but waste of compute power and energy */
     if (CARBON_BRANCH_LIKELY(out != NULL)) {
-        carbon_string_id_t *totalOut = carbon_malloc(&self->alloc, numStrings * sizeof(carbon_string_id_t));
+        carbon_string_id_t *total_out = carbon_malloc(&self->alloc, num_strings * sizeof(carbon_string_id_t));
         size_t currentOut = 0;
 
-        for (size_t string_idx = 0; string_idx < numStrings; string_idx++) {
-            uint_fast16_t thread_id = strCarrierMapping[string_idx];
-            size_t localIdx = strCarrierIdxMapping[string_idx];
-            parallel_insert_arg *carrierArg = *VECTOR_GET(&carrierArgs, thread_id, parallel_insert_arg *);
-            carbon_string_id_t globalStringOwnerId = thread_id;
-            carbon_string_id_t globalStringLocalId = carrierArg->out[localIdx];
-            carbon_string_id_t globalcarbon_string_id_t = MAKE_GLOBAL(globalStringOwnerId, globalStringLocalId);
-            totalOut[currentOut++] = globalcarbon_string_id_t;
+        for (size_t string_idx = 0; string_idx < num_strings; string_idx++) {
+            uint_fast16_t thread_id = str_carrier_mapping[string_idx];
+            size_t localIdx = str_carrier_idx_mapping[string_idx];
+            parallel_insert_arg *carrier_arg = *VECTOR_GET(&carrier_args, thread_id, parallel_insert_arg *);
+            carbon_string_id_t global_string_owner_id = thread_id;
+            carbon_string_id_t global_string_local_id = carrier_arg->out[localIdx];
+            carbon_string_id_t globalcarbon_string_id_t = MAKE_GLOBAL(global_string_owner_id, global_string_local_id);
+            total_out[currentOut++] = globalcarbon_string_id_t;
         }
 
-        *out = totalOut;
+        *out = total_out;
     }
 
     /** cleanup */
     for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
-        parallel_insert_arg *carrierArg = *VECTOR_GET(&carrierArgs, thread_id, parallel_insert_arg *);
-        if (carrierArg->did_work) {
-            carbon_strdic_free(&carrierArg->carrier->local_dictionary, carrierArg->out);
+        parallel_insert_arg *carrier_arg = *VECTOR_GET(&carrier_args, thread_id, parallel_insert_arg *);
+        if (carrier_arg->did_work) {
+            carbon_strdic_free(&carrier_arg->carrier->local_dictionary, carrier_arg->out);
         }
-        carbon_vec_drop(&carrierArg->strings);
-        carbon_free(&self->alloc, carrierArg);
+        carbon_vec_drop(&carrier_arg->strings);
+        carbon_free(&self->alloc, carrier_arg);
     }
 
     /** cleanup */
-    dropThreadAssignment(&self->alloc, strCarrierMapping, carrierNumStrings, strCarrierIdxMapping);
-    carbon_vec_drop(&carrierArgs);
+    drop_thread_assignment(&self->alloc, str_carrier_mapping, carrier_num_strings, str_carrier_idx_mapping);
+    carbon_vec_drop(&carrier_args);
 
-    thisUnlock(self);
+    this_unlock(self);
 
     carbon_timestamp_t end = carbon_time_now_wallclock();
     CARBON_UNUSED(begin);
@@ -505,10 +505,10 @@ static bool this_insert(carbon_strdic_t *self,
     return true;
 }
 
-static bool this_remove(carbon_strdic_t *self, carbon_string_id_t *strings, size_t numStrings)
+static bool this_remove(carbon_strdic_t *self, carbon_string_id_t *strings, size_t num_strings)
 {
     carbon_timestamp_t begin = carbon_time_now_wallclock();
-    CARBON_INFO(STRING_DIC_ASYNC_TAG, "remove operation started: %zu strings to remove", numStrings);
+    CARBON_INFO(STRING_DIC_ASYNC_TAG, "remove operation started: %zu strings to remove", num_strings);
 
     CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_ASYNC);
 
@@ -517,51 +517,51 @@ static bool this_remove(carbon_strdic_t *self, carbon_string_id_t *strings, size
     parallel_remove_arg empty;
     struct async_extra *extra = THIS_EXTRAS(self);
     uint_fast16_t num_threads = carbon_vec_length(&extra->carriers);
-    size_t approxNumStringsPerThread = CARBON_MAX(1, numStrings / num_threads);
-    carbon_vec_t ofType(carbon_string_id_t) *stringMap =
+    size_t approx_num_strings_per_thread = CARBON_MAX(1, num_strings / num_threads);
+    carbon_vec_t ofType(carbon_string_id_t) *string_map =
         carbon_malloc(&self->alloc, num_threads * sizeof(carbon_vec_t));
 
-    carbon_vec_t ofType(parallel_remove_arg) carrierArgs;
-    carbon_vec_create(&carrierArgs, &self->alloc, sizeof(parallel_remove_arg), num_threads);
+    carbon_vec_t ofType(parallel_remove_arg) carrier_args;
+    carbon_vec_create(&carrier_args, &self->alloc, sizeof(parallel_remove_arg), num_threads);
 
     /** prepare thread-local subset of string ids */
-    VectorRepreatedPush(&carrierArgs, &empty, num_threads);
+    carbon_vec_repeated_push(&carrier_args, &empty, num_threads);
     for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
-        carbon_vec_create(stringMap + thread_id, &self->alloc, sizeof(carbon_string_id_t), approxNumStringsPerThread);
+        carbon_vec_create(string_map + thread_id, &self->alloc, sizeof(carbon_string_id_t), approx_num_strings_per_thread);
     }
 
     /** compute subset of string ids per thread  */
-    for (size_t i = 0; i < numStrings; i++) {
+    for (size_t i = 0; i < num_strings; i++) {
         carbon_string_id_t globalcarbon_string_id_t = strings[i];
-        uint_fast16_t owningThreadId = GET_OWNER(globalcarbon_string_id_t);
+        uint_fast16_t owning_thread_id = GET_OWNER(globalcarbon_string_id_t);
         carbon_string_id_t localcarbon_string_id_t = GET_carbon_string_id_t(globalcarbon_string_id_t);
-        assert(owningThreadId < num_threads);
+        assert(owning_thread_id < num_threads);
 
-        carbon_vec_push(stringMap + owningThreadId, &localcarbon_string_id_t, 1);
+        carbon_vec_push(string_map + owning_thread_id, &localcarbon_string_id_t, 1);
     }
 
     /** schedule remove operation per carrier */
     for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
         carrier_t *carrier = VECTOR_GET(&extra->carriers, thread_id, carrier_t);
-        parallel_remove_arg *carrierArg = VECTOR_GET(&carrierArgs, thread_id, parallel_remove_arg);
-        carrierArg->carrier = carrier;
-        carrierArg->localIds = stringMap + thread_id;
+        parallel_remove_arg *carrier_arg = VECTOR_GET(&carrier_args, thread_id, parallel_remove_arg);
+        carrier_arg->carrier = carrier;
+        carrier_arg->local_ids = string_map + thread_id;
 
-        pthread_create(&carrier->thread, NULL, parallelRemoveFunction, carrierArg);
+        pthread_create(&carrier->thread, NULL, parallel_remove_function, carrier_arg);
     }
 
     /** synchronize */
-    Synchronize(&extra->carriers, num_threads);
+    synchronize(&extra->carriers, num_threads);
 
     /** cleanup */
     for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
-        carbon_vec_drop(stringMap + thread_id);
+        carbon_vec_drop(string_map + thread_id);
     }
 
-    carbon_free(&self->alloc, stringMap);
-    carbon_vec_data(&carrierArgs);
+    carbon_free(&self->alloc, string_map);
+    carbon_vec_data(&carrier_args);
 
-    thisUnlock(self);
+    this_unlock(self);
 
     carbon_timestamp_t end = carbon_time_now_wallclock();
     CARBON_UNUSED(begin);
@@ -590,22 +590,22 @@ static bool this_locate_safe(carbon_strdic_t *self, carbon_string_id_t **out, bo
 
     size_t globalNumNotFound = 0;
 
-    atomic_uint_fast16_t *strCarrierMapping;
-    size_t *strCarrierIdxMapping;
-    atomic_size_t *carrierNumStrings;
+    atomic_uint_fast16_t *str_carrier_mapping;
+    size_t *str_carrier_idx_mapping;
+    atomic_size_t *carrier_num_strings;
 
-    parallel_locate_arg carrierArgs[num_threads];
+    parallel_locate_arg carrier_args[num_threads];
 
-    createThreadAssignment(&strCarrierMapping, &carrierNumStrings, &strCarrierIdxMapping,
+    create_thread_assignment(&str_carrier_mapping, &carrier_num_strings, &str_carrier_idx_mapping,
                            &self->alloc, num_keys, num_threads);
 
     /** compute which carrier is responsible for which string */
-    computeThreadAssignment(strCarrierMapping, carrierNumStrings, keys, num_keys, num_threads);
+    compute_thread_assignment(str_carrier_mapping, carrier_num_strings, keys, num_keys, num_threads);
 
     /** prepare to move string subsets to carriers */
     for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
-        parallel_locate_arg *arg = carrierArgs + thread_id;
-        carbon_vec_create(&arg->keys_in, &self->alloc, sizeof(char *), carrierNumStrings[thread_id]);
+        parallel_locate_arg *arg = carrier_args + thread_id;
+        carbon_vec_create(&arg->keys_in, &self->alloc, sizeof(char *), carrier_num_strings[thread_id]);
         assert (&arg->keys_in.base != NULL);
     }
 
@@ -613,13 +613,13 @@ static bool this_locate_safe(carbon_strdic_t *self, carbon_string_id_t **out, bo
     /** create per-carrier string subset */
     for (size_t i = 0; i < num_keys; i++) {
         /** get thread responsible for this particular string */
-        uint_fast16_t thread_id = strCarrierMapping[i];
+        uint_fast16_t thread_id = str_carrier_mapping[i];
 
         /** get the thread-local argument list for the thread that is responsible for this particular string */
-        parallel_locate_arg *arg = carrierArgs + thread_id;
+        parallel_locate_arg *arg = carrier_args + thread_id;
 
         /** store local index of string i inside the thread */
-        strCarrierIdxMapping[i] = carbon_vec_length(&arg->keys_in);
+        str_carrier_idx_mapping[i] = carbon_vec_length(&arg->keys_in);
 
         /** push that string into the thread-local vector */
         carbon_vec_push(&arg->keys_in, &keys[i], 1);
@@ -629,14 +629,14 @@ static bool this_locate_safe(carbon_strdic_t *self, carbon_string_id_t **out, bo
     /** schedule operation to threads */
     for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
         carrier_t *carrier = VECTOR_GET(&extra->carriers, thread_id, carrier_t);
-        parallel_locate_arg *arg = carrierArgs + thread_id;
-        carrierArgs[thread_id].carrier = carrier;
-        pthread_create(&carrier->thread, NULL, parallelLocateSafeFunction, arg);
+        parallel_locate_arg *arg = carrier_args + thread_id;
+        carrier_args[thread_id].carrier = carrier;
+        pthread_create(&carrier->thread, NULL, parallel_locate_safe_function, arg);
     }
 
     /** synchronize */
     CARBON_TRACE(STRING_DIC_ASYNC_TAG, "start syncing %zu threads...", num_threads)
-    Synchronize(&extra->carriers, num_threads);
+    synchronize(&extra->carriers, num_threads);
     CARBON_TRACE(STRING_DIC_ASYNC_TAG, "%zu threads in sync.", num_threads)
 
     /** collect and merge results */
@@ -644,11 +644,11 @@ static bool this_locate_safe(carbon_strdic_t *self, carbon_string_id_t **out, bo
     for (size_t i = 0; i < num_keys; i++) {
         /** get thread responsible for this particular string, and local position of that string inside the
          * thread storage */
-        uint_fast16_t thread_id = strCarrierMapping[i];
-        size_t localThreadIdx = strCarrierIdxMapping[i];
+        uint_fast16_t thread_id = str_carrier_mapping[i];
+        size_t localThreadIdx = str_carrier_idx_mapping[i];
 
         /** get the thread-local argument list for the thread that is responsible for this particular string */
-        parallel_locate_arg *arg = carrierArgs + thread_id;
+        parallel_locate_arg *arg = carrier_args + thread_id;
 
         /** merge into global result */
         carbon_string_id_t globalcarbon_string_id_t_owner = thread_id;
@@ -659,7 +659,7 @@ static bool this_locate_safe(carbon_strdic_t *self, carbon_string_id_t **out, bo
     }
     for (size_t thread_id = 0; thread_id < num_threads; thread_id++) {
         /** compute total number of not-found elements */
-        parallel_locate_arg *arg = carrierArgs + thread_id;
+        parallel_locate_arg *arg = carrier_args + thread_id;
         globalNumNotFound += arg->num_not_found_out;
 
         /** cleanup */
@@ -672,10 +672,10 @@ static bool this_locate_safe(carbon_strdic_t *self, carbon_string_id_t **out, bo
     CARBON_TRACE(STRING_DIC_ASYNC_TAG, "cleanup%s", "...")
 
     /** cleanup */
-    dropThreadAssignment(&self->alloc, strCarrierMapping, carrierNumStrings, strCarrierIdxMapping);
+    drop_thread_assignment(&self->alloc, str_carrier_mapping, carrier_num_strings, str_carrier_idx_mapping);
 
     for (size_t thread_id = 0; thread_id < num_threads; thread_id++) {
-        parallel_locate_arg *arg = carrierArgs + thread_id;
+        parallel_locate_arg *arg = carrier_args + thread_id;
         carbon_vec_drop(&arg->keys_in);
     }
 
@@ -684,7 +684,7 @@ static bool this_locate_safe(carbon_strdic_t *self, carbon_string_id_t **out, bo
     *found_mask = globalFoundMask;
     *num_not_found = globalNumNotFound;
 
-    thisUnlock(self);
+    this_unlock(self);
 
     carbon_timestamp_t end = carbon_time_now_wallclock();
     CARBON_UNUSED(begin);
@@ -711,7 +711,7 @@ static bool this_locate_fast(carbon_strdic_t *self, carbon_string_id_t **out, ch
     /** cleanup */
     this_free(self, found_mask);
 
-    thisUnlock(self);
+    this_unlock(self);
 
     return result;
 }
@@ -731,7 +731,7 @@ static char **this_extract(carbon_strdic_t *self, const carbon_string_id_t *ids,
 
     struct async_extra *extra = (struct async_extra *) self->extra;
     uint_fast16_t num_threads = carbon_vec_length(&extra->carriers);
-    size_t approxNumStringsPerThread = CARBON_MAX(1, num_ids / num_threads);
+    size_t approx_num_strings_per_thread = CARBON_MAX(1, num_ids / num_threads);
 
     CARBON_MALLOC(size_t, localThreadIdx, num_ids, &self->alloc);
     CARBON_MALLOC(uint_fast16_t, owningThreadIds, num_ids, &self->alloc);
@@ -739,7 +739,7 @@ static char **this_extract(carbon_strdic_t *self, const carbon_string_id_t *ids,
 
     for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
         parallel_extract_arg *arg = threadArgs + thread_id;
-        carbon_vec_create(&arg->local_ids_in, &self->alloc, sizeof(carbon_string_id_t), approxNumStringsPerThread);
+        carbon_vec_create(&arg->local_ids_in, &self->alloc, sizeof(carbon_string_id_t), approx_num_strings_per_thread);
     }
 
     /** compute subset of string ids per thread  */
@@ -757,28 +757,28 @@ static char **this_extract(carbon_strdic_t *self, const carbon_string_id_t *ids,
     /** schedule remove operation per carrier */
     for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
         carrier_t *carrier = VECTOR_GET(&extra->carriers, thread_id, carrier_t);
-        parallel_extract_arg *carrierArg = threadArgs + thread_id;
-        carrierArg->carrier = carrier;
-        pthread_create(&carrier->thread, NULL, parallelExtractFunction, carrierArg);
+        parallel_extract_arg *carrier_arg = threadArgs + thread_id;
+        carrier_arg->carrier = carrier;
+        pthread_create(&carrier->thread, NULL, parallel_extract_function, carrier_arg);
     }
 
     /** synchronize */
-    Synchronize(&extra->carriers, num_threads);
+    synchronize(&extra->carriers, num_threads);
 
     for (size_t i = 0; i < num_ids; i++) {
-        uint_fast16_t owningThreadId = owningThreadIds[i];
+        uint_fast16_t owning_thread_id = owningThreadIds[i];
         size_t localIdx = localThreadIdx[i];
-        parallel_extract_arg *carrierArg = threadArgs + owningThreadId;
-        char *extractedString = carrierArg->strings_out[localIdx];
+        parallel_extract_arg *carrier_arg = threadArgs + owning_thread_id;
+        char *extractedString = carrier_arg->strings_out[localIdx];
         globalResult[i] = extractedString;
     }
 
     /** cleanup */
     for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
-        parallel_extract_arg *carrierArg = threadArgs + thread_id;
-        carbon_vec_drop(&carrierArg->local_ids_in);
-        if (CARBON_BRANCH_LIKELY(carrierArg->did_work)) {
-            carbon_strdic_free(&carrierArg->carrier->local_dictionary, carrierArg->strings_out);
+        parallel_extract_arg *carrier_arg = threadArgs + thread_id;
+        carbon_vec_drop(&carrier_arg->local_ids_in);
+        if (CARBON_BRANCH_LIKELY(carrier_arg->did_work)) {
+            carbon_strdic_free(&carrier_arg->carrier->local_dictionary, carrier_arg->strings_out);
         }
     }
 
@@ -786,7 +786,7 @@ static char **this_extract(carbon_strdic_t *self, const carbon_string_id_t *ids,
     CARBON_FREE(owningThreadIds, &self->alloc);
     CARBON_FREE(threadArgs, &self->alloc);
 
-    thisUnlock(self);
+    this_unlock(self);
 
     carbon_timestamp_t end = carbon_time_now_wallclock();
     CARBON_UNUSED(begin);
@@ -819,7 +819,7 @@ static bool this_num_distinct(carbon_strdic_t *self, size_t *num)
         carriers++;
     }
     *num = numDistinct;
-    thisUnlock(self);
+    this_unlock(self);
     return true;
 }
 
@@ -862,7 +862,7 @@ static bool this_get_contents(carbon_strdic_t *self, carbon_vec_t ofType (char *
 
     carbon_vec_drop(&localStringResults);
     carbon_vec_drop(&localcarbon_string_id_tResults);
-    thisUnlock(self);
+    this_unlock(self);
     return true;
 }
 
@@ -880,7 +880,7 @@ static bool this_reset_counters(carbon_strdic_t *self)
         carbon_strdic_reset_counters(&carrier->local_dictionary);
     }
 
-    thisUnlock(self);
+    this_unlock(self);
 
     return true;
 }
@@ -903,7 +903,7 @@ static bool this_counters(carbon_strdic_t *self, carbon_string_hash_counters_t *
         carbon_strhash_counters_add(counters, &local_counters);
     }
 
-    thisUnlock(self);
+    this_unlock(self);
 
     return true;
 }
@@ -917,7 +917,7 @@ typedef struct ParallelCreateCarrierArg
 } ParallelCreateCarrierArg;
 
 static void parallelCreateCarrier(const void *restrict start, size_t width, size_t len, void *restrict args,
-                                  ThreadId tid)
+                                  thread_id_t tid)
 {
     CARBON_UNUSED(tid);
     CARBON_UNUSED(width);
@@ -933,7 +933,7 @@ static void parallelCreateCarrier(const void *restrict start, size_t width, size
 }
 
 static bool thisSetupCarriers(carbon_strdic_t *self, size_t capacity, size_t num_index_buckets,
-                             size_t approxNumUniqueStr, size_t num_threads)
+                             size_t approx_num_unique_str, size_t num_threads)
 {
     async_extra *extra = THIS_EXTRAS(self);
     size_t localBucketNum = CARBON_MAX(1, num_index_buckets / num_threads);
@@ -942,7 +942,7 @@ static bool thisSetupCarriers(carbon_strdic_t *self, size_t capacity, size_t num
     ParallelCreateCarrierArg createArgs = {
         .localCapacity = CARBON_MAX(1, capacity / num_threads),
         .localBucketNum = localBucketNum,
-        .localBucketCap = CARBON_MAX(1, approxNumUniqueStr / num_threads / localBucketNum / SLICE_KEY_COLUMN_MAX_ELEMS),
+        .localBucketCap = CARBON_MAX(1, approx_num_unique_str / num_threads / localBucketNum / SLICE_KEY_COLUMN_MAX_ELEMS),
         .alloc = &self->alloc
     };
 
@@ -951,8 +951,8 @@ static bool thisSetupCarriers(carbon_strdic_t *self, size_t capacity, size_t num
         carbon_vec_push(&extra->carriers, &new_carrier, 1);
     }
 
-    ParallelFor(VECTOR_ALL(&extra->carriers, carrier_t), sizeof(carrier_t), num_threads, parallelCreateCarrier,
-                &createArgs, ThreadingHint_Multi, num_threads);
+    carbon_parallel_for(VECTOR_ALL(&extra->carriers, carrier_t), sizeof(carrier_t), num_threads, parallelCreateCarrier,
+                &createArgs, CARBON_PARALLEL_THREAD_HINT_MULTI, num_threads);
 
     return true;
 }
@@ -964,7 +964,7 @@ static bool thisLock(carbon_strdic_t *self)
     return true;
 }
 
-static bool thisUnlock(carbon_strdic_t *self)
+static bool this_unlock(carbon_strdic_t *self)
 {
     async_extra *extra = THIS_EXTRAS(self);
     CARBON_CHECK_SUCCESS(carbon_spinlock_release(&extra->lock));

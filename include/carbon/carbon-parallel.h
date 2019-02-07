@@ -25,9 +25,9 @@ CARBON_BEGIN_DECL
 
 #define PARALLEL_MSG_UNKNOWN_HINT "Unknown threading hint"
 
-typedef uint_fast16_t ThreadId;
+typedef uint_fast16_t thread_id_t;
 
-typedef void (*ForFunctionBody)(const void *restrict start, size_t width, size_t len, void *restrict args, ThreadId tid);
+typedef void (*ForFunctionBody)(const void *restrict start, size_t width, size_t len, void *restrict args, thread_id_t tid);
 
 typedef void (*MapFunctionBody)(void *restrict dst, const void *restrict src, size_t srcWidth, size_t dstWidth,
                                 size_t len, void *restrict args);
@@ -38,7 +38,7 @@ typedef void (*Predicate)(size_t *matchingPositions, size_t *numMatchingPosition
 typedef enum ThreadingHint
 {
     ThreadingHint_Single,
-    ThreadingHint_Multi
+    CARBON_PARALLEL_THREAD_HINT_MULTI
 } ThreadingHint;
 
 typedef struct FunctionProxy
@@ -47,7 +47,7 @@ typedef struct FunctionProxy
     const void *restrict start;
     size_t width;
     size_t len;
-    ThreadId tid;
+    thread_id_t tid;
     void *args;
 } FunctionProxy;
 
@@ -66,7 +66,7 @@ inline static void *forProxyFunction(void *restrict args)
 
 #define PARALLEL_MATCH(forSingle, forMulti)                                                                            \
 {                                                                                                                      \
-    if (CARBON_BRANCH_LIKELY(hint == ThreadingHint_Multi)) {                                                           \
+    if (CARBON_BRANCH_LIKELY(hint == CARBON_PARALLEL_THREAD_HINT_MULTI)) {                                                           \
         return (forMulti);                                                                                             \
     } else if (hint == ThreadingHint_Single) {                                                                         \
         return (forSingle);                                                                                            \
@@ -74,7 +74,7 @@ inline static void *forProxyFunction(void *restrict args)
 }
 
 inline static bool
-ParallelFor(const void *restrict base, size_t width, size_t len, ForFunctionBody f,
+carbon_parallel_for(const void *restrict base, size_t width, size_t len, ForFunctionBody f,
                               void *restrict args, ThreadingHint hint, uint_fast16_t num_threads);
 
 inline static bool
@@ -201,7 +201,7 @@ parallelFilterLate(size_t *restrict pos, size_t *restrict numPos,
                                          void *restrict args, size_t num_threads);
 
 inline static bool
-ParallelFor(const void *restrict base, size_t width, size_t len, ForFunctionBody f,
+carbon_parallel_for(const void *restrict base, size_t width, size_t len, ForFunctionBody f,
                               void *restrict args, ThreadingHint hint, uint_fast16_t num_threads)
 {
     PARALLEL_MATCH(sequentialFor(base, width, len, f, args),
@@ -348,7 +348,7 @@ typedef struct MapArgs
 
 inline static void
 mapProxy(const void *restrict src, size_t srcWidth, size_t len, void *restrict args,
-                               ThreadId tid)
+                               thread_id_t tid)
 {
     CARBON_UNUSED(tid);
     CARBON_CAST(MapArgs *, mapArgs, args);
@@ -381,7 +381,7 @@ map(void *restrict dst, const void *restrict src, size_t srcWidth, size_t len, s
         .src = src
     };
 
-    return ParallelFor((void *restrict) src, srcWidth, len, &mapProxy, &mapArgs, hint, num_threads);
+    return carbon_parallel_for((void *restrict) src, srcWidth, len, &mapProxy, &mapArgs, hint, num_threads);
 }
 
 typedef struct GatherScatterArgs
@@ -393,7 +393,7 @@ typedef struct GatherScatterArgs
 
 inline static void
 gatherFunction(const void *restrict start, size_t width, size_t len, void *restrict args,
-                                 ThreadId tid)
+                                 thread_id_t tid)
 {
     CARBON_UNUSED(tid);
     CARBON_CAST(GatherScatterArgs *, gatherArgs, args);
@@ -499,7 +499,7 @@ sequentialGatherAddress(void *restrict dst, const void *restrict src, size_t src
 
 inline static void
 gatherAddressFunc(const void *restrict start, size_t width, size_t len, void *restrict args,
-                                     ThreadId tid)
+                                     thread_id_t tid)
 {
     CARBON_UNUSED(tid);
     CARBON_CAST(GatherScatterArgs *, gatherArgs, args);
@@ -546,7 +546,7 @@ parallelGather_adr(void *restrict dst, const void *restrict src, size_t srcWidth
 
 inline static void
 scatterFunction(const void *restrict start, size_t width, size_t len, void *restrict args,
-                                   ThreadId tid)
+                                   thread_id_t tid)
 {
     CARBON_UNUSED(tid);
     CARBON_CAST(GatherScatterArgs *, scatter_args, args);
@@ -877,7 +877,7 @@ parallelFilterEarly(void *restrict result, size_t *restrict resultSize,
         if (CARBON_BRANCH_LIKELY(threadArg->numPositions > 0)) {
             ParallelGather(result + partial_numMatchingPositions * width, src, width, threadArg->srcPositions,
                            threadArg->numPositions,
-                           ThreadingHint_Multi, num_threads);
+                           CARBON_PARALLEL_THREAD_HINT_MULTI, num_threads);
         }
 
         partial_numMatchingPositions += threadArg->numPositions;
@@ -886,7 +886,7 @@ parallelFilterEarly(void *restrict result, size_t *restrict resultSize,
 
     if (CARBON_BRANCH_LIKELY(mainNumPositions > 0)) {
         ParallelGather(result + partial_numMatchingPositions * width, src, width, mainSrcPositions,
-                       mainNumPositions, ThreadingHint_Multi, num_threads);
+                       mainNumPositions, CARBON_PARALLEL_THREAD_HINT_MULTI, num_threads);
     }
     free(mainSrcPositions);
 

@@ -177,12 +177,12 @@ carbon_strdic_get_counters(carbon_string_hash_counters_t *counters, carbon_strdi
 
 CARBON_FUNC_UNUSED
 static bool
-carbon_strdic_remove(carbon_strdic_t *dic, carbon_string_id_t *strings, size_t numStrings)
+carbon_strdic_remove(carbon_strdic_t *dic, carbon_string_id_t *strings, size_t num_strings)
 {
     CARBON_NON_NULL_OR_ERROR(dic);
     CARBON_NON_NULL_OR_ERROR(strings);
     assert(dic->remove);
-    return dic->remove(dic, strings, numStrings);
+    return dic->remove(dic, strings, num_strings);
 }
 
 CARBON_FUNC_UNUSED

@@ -218,7 +218,7 @@ VectorPeek(carbon_vec_t *vec);
  * @return STATUS_OK if success, and STATUS_NULLPTR in case of NULL pointer parameters
  */
 CARBON_EXPORT(bool)
-VectorRepreatedPush(carbon_vec_t *vec, const void *data, size_t howOften);
+carbon_vec_repeated_push(carbon_vec_t *vec, const void *data, size_t howOften);
 
 /**
  * Returns a pointer to the last element in this vector, or <code>NULL</code> is the vector is already empty.

@@ -27,7 +27,7 @@ carbon_bitmap_create(carbon_bitmap_t *bitmap, uint16_t num_bits)
     carbon_vec_create(&bitmap->data, &alloc, sizeof(uint32_t), ceil(num_bits / (double) CARBON_NUM_BITS(uint32_t)));
     size_t cap = VectorCapacity(&bitmap->data);
     uint32_t zero = 0;
-    VectorRepreatedPush(&bitmap->data, &zero, cap);
+    carbon_vec_repeated_push(&bitmap->data, &zero, cap);
     bitmap->num_bits = num_bits;
 
     return true;

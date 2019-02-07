@@ -122,7 +122,7 @@ const void *VectorPeek(carbon_vec_t *vec)
     }
 }
 
-bool VectorRepreatedPush(carbon_vec_t *vec, const void *data, size_t howOften)
+bool carbon_vec_repeated_push(carbon_vec_t *vec, const void *data, size_t howOften)
 {
     CARBON_NON_NULL_OR_ERROR(vec && data)
     size_t nextNum = vec->numElems + howOften;
