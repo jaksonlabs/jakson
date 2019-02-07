@@ -8,7 +8,7 @@ The documentation is available at [CodeDocs](https://codedocs.xyz/protolabs/libc
 
 Installing instructions for [libcarbon](https://github.com/protolabs/libcarbon) given in the [INSTALL.md](INSTALL.md) file. 
 
-The latest reelease can always be found in `master` branch of the [official GitHub repository](https://github.com/protolabs/libcarbon).
+The latest release can always be found in `master` branch of the [official GitHub repository](https://github.com/protolabs/libcarbon).
 
 ## Examples and Usage
 
