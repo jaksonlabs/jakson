@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2018 Marcus Pinnecke
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -23,7 +23,7 @@
 
 CARBON_BEGIN_DECL
 
-/* forwarded */
+/** forwarded */
 typedef struct carbon_json carbon_json_t;
 typedef struct carbon_doc_bulk carbon_doc_bulk_t;
 typedef struct carbon_json_ast_node_element carbon_json_ast_node_element_t;

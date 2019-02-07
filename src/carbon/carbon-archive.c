@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2018 Marcus Pinnecke
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -734,7 +734,7 @@ static bool writePrimitiveFixedValueColumn(carbon_memfile_t *memFile,
                                            carbon_field_type_e type,
                                            carbon_vec_t ofType(T) *valuesVec)
 {
-    assert (type != carbon_field_type_object); /* use 'writePrimitiveVarValueColumn' instead */
+    assert (type != carbon_field_type_object); /** use 'writePrimitiveVarValueColumn' instead */
 
     switch (type) {
     case carbon_field_type_null:
@@ -959,7 +959,7 @@ static bool writeArrayProps(carbon_memfile_t *memFile, carbon_err_t *err, carbon
     return true;
 }
 
-/* Fixed-length property lists; value position can be determined by size of value and position of key in key column.
+/** Fixed-length property lists; value position can be determined by size of value and position of key in key column.
  * In contrast, variable-length property list require an additional offset column (see 'writeVarProps') */
 static bool writeFixedProps(carbon_off_t *offset, carbon_err_t *err, carbon_memfile_t *memFile,
                               carbon_vec_t ofType(carbon_string_id_t) *keys,
@@ -967,7 +967,7 @@ static bool writeFixedProps(carbon_off_t *offset, carbon_err_t *err, carbon_memf
                               carbon_vec_t ofType(T) *values)
 {
     assert(!values || keys->numElems == values->numElems);
-    assert(type != carbon_field_type_object); /* use 'writeVarProps' instead */
+    assert(type != carbon_field_type_object); /** use 'writeVarProps' instead */
 
     if (keys->numElems > 0) {
         struct SimplePropHeader header = {
@@ -989,7 +989,7 @@ static bool writeFixedProps(carbon_off_t *offset, carbon_err_t *err, carbon_memf
     return true;
 }
 
-/* Variable-length property lists; value position cannot be determined by position of key in key column, since single
+/** Variable-length property lists; value position cannot be determined by position of key in key column, since single
  * value has unknown size. Hence, a dedicated offset column is added to these properties allowing to seek directly
  * to a particular property. Due to the move of strings (i.e., variable-length values) to a dedicated string table,
  * the only variable-length value for properties are "JSON objects".
@@ -1166,7 +1166,7 @@ static bool writeColumn(carbon_memfile_t *memFile, carbon_err_t *err, carbon_col
 
     carbon_memfile_write(memFile, &header, sizeof(struct ColumnHeader));
 
-    /* skip offset column to value entry points */
+    /** skip offset column to value entry points */
     carbon_off_t valueEntryOffsets = CARBON_MEMFILE_TELL(memFile);
     carbon_memfile_skip(memFile, column->values.numElems * sizeof(carbon_off_t));
 
@@ -2621,7 +2621,7 @@ carbon_archive_object_keys_to_array(CARBON_NULLABLE size_t *npairs, carbon_type_
         OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(npairs, obj, has_null_array_props, null_arrays);
     }
     case CARBON_TYPE_OBJECT: {
-        CARBON_ERROR(&obj->err, CARBON_ERR_ERRINTERNAL) /* wrong usage: use table get function instead */
+        CARBON_ERROR(&obj->err, CARBON_ERR_ERRINTERNAL) /** wrong usage: use table get function instead */
         return NULL;
     }
     default:
@@ -3091,7 +3091,7 @@ bool carbon_archive_table_field_get_null_array_lengths(uint32_t *length, const c
 {
     assert(length);
     assert(field);
-    /* array does not map to array of type NULL */
+    /** array does not map to array of type NULL */
     CARBON_PRINT_ERROR_AND_DIE_IF(field->type != carbon_field_type_null, CARBON_ERR_ERRINTERNAL)
     *length = *(uint32_t *) field->data;
     return true;

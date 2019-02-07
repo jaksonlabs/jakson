@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2018 Marcus Pinnecke
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -52,48 +52,48 @@ DECLARE_PRINTER_FUNC(size_t)
 #define VECTOR_PRINT_INT64  vector_int64_t_PrinterFunc
 #define VECTOR_PRINT_SIZE_T vector_size_t_PrinterFunc
 
-/*
+/**
  * An implementation of the concrete data type Vector, a resizeable dynamic array.
  */
 typedef struct carbon_vec
 {
-    /*
+    /**
     *  Memory allocator that is used to get memory for user data
     */
     carbon_alloc_t *allocator;
 
-    /*
+    /**
      *  Fixed number of bytes for a single element that should be stored in the vector
      */
     size_t elemSize;
 
-    /*
+    /**
      *  The number of elements currently stored in the vector
      */
     uint32_t numElems;
 
-    /*
+    /**
      *  The number of elements for which currently memory is reserved
      */
     uint32_t capElems;
 
-    /*
+    /**
     * The grow factor considered for resize operations
     */
     float growFactor;
 
-    /*
+    /**
      * A pointer to a memory address managed by 'allocator' that contains the user data
      */
     void *base;
 
-    /*
+    /**
      *  Error information
      */
     carbon_err_t err;
 } carbon_vec_t;
 
-/*
+/**
  * Utility implementation of generic vector to specialize for type of 'char *'
  */
 typedef carbon_vec_t ofType(char *) StringVector;
@@ -126,7 +126,7 @@ typedef carbon_vec_t ofType(const char *) StringRefVector;
 #define STRING_REF_VECTOR_PUSH(vec, string)                                                                            \
     VectorPush(vec, &string, 1)
 
-/*
+/**
  * Constructs a new vector for elements of size 'elem_size', reserving memory for 'cap_elems' elements using
  * the allocator 'alloc'.
  *

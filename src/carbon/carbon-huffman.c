@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2018 Marcus Pinnecke
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -107,10 +107,10 @@ bool carbon_huffman_serialize_dic(carbon_memfile_t *file, const carbon_huffman_t
         carbon_memfile_write(file, &markerSymbol, sizeof(char));
         carbon_memfile_write(file, &entry->letter, sizeof(unsigned char));
 
-        /* block one is the block that holds the significant part of the prefix code */
+        /** block one is the block that holds the significant part of the prefix code */
         carbon_off_t offsetMeta, offsetContinue;
         carbon_memfile_tell(&offsetMeta, file);
-        /* this will be the number of bytes used to encode the significant part of the prefix code */
+        /** this will be the number of bytes used to encode the significant part of the prefix code */
         carbon_memfile_skip(file, sizeof(uint8_t));
 
         carbon_memfile_begin_bit_mode(file);

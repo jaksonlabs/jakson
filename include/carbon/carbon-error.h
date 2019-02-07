@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2018 Marcus Pinnecke
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -20,41 +20,41 @@
 
 #include "carbon-common.h"
 
-#define CARBON_ERR_NOERR 0                  /* No error */
-#define CARBON_ERR_NULLPTR 1                /* Null pointer detected */
-#define CARBON_ERR_NOTIMPL 2                /* Function not implemented */
-#define CARBON_ERR_OUTOFBOUNDS 3            /* Index is out of bounds */
-#define CARBON_ERR_MALLOCERR 4              /* Memory allocation failed */
-#define CARBON_ERR_ILLEGALARG 5             /* Illegal arguments */
-#define CARBON_ERR_INTERNALERR 6            /* Internal error */
-#define CARBON_ERR_ILLEGALIMPL 7            /* Illegal implementation */
-#define CARBON_ERR_NOTFOUND 8               /* Not found */
-#define CARBON_ERR_NIL 9                    /* Element not in list */
-#define CARBON_ERR_ARRAYOFARRAYS 10         /* Array index out of bounds */
-#define CARBON_ERR_ARRAYOFMIXEDTYPES 11     /* Illegal JSON array: mixed types */
-#define CARBON_ERR_FOPEN_FAILED 12          /* Reading from file failed */
-#define CARBON_ERR_IO 13                    /* I/O error */
-#define CARBON_ERR_FORMATVERERR 14          /* Unsupported archive format version */
-#define CARBON_ERR_CORRUPTED 15             /* Archive file is corrupted */
-#define CARBON_ERR_NOCARBONSTREAM 16        /* Stream is not a carbon archive */
-#define CARBON_ERR_NOBITMODE 17             /* Not in bit writing mode */
-#define CARBON_ERR_NOTIMPLEMENTED 18        /* Funciton is not yet implemented */
-#define CARBON_ERR_NOTYPE 19                /* Unsupported type found */
-#define CARBON_ERR_NOCOMPRESSOR 20          /* Unsupported compressor strategy requested */
-#define CARBON_ERR_NOVALUESTR 21            /* No string representation for type available */
-#define CARBON_ERR_MARKERMAPPING 22         /* Marker type cannot be mapped to value type */
-#define CARBON_ERR_PARSETYPE 23             /* Parsing stopped; unknown data type requested */
-#define CARBON_ERR_NOJSONTOKEN 24           /* Unknown token during parsing JSON detected */
-#define CARBON_ERR_NOJSONNUMBERT 25         /* Unknown value type for number in JSON property */
-#define CARBON_ERR_NOARCHIVEFILE 26         /* Stream is not a valid archive file */
-#define CARBON_ERR_UNSUPFINDSTRAT 27        /* Unsupported strategy requested for key lookup */
-#define CARBON_ERR_ERRINTERNAL 28           /* Internal error */
-#define CARBON_ERR_HUFFERR 29               /* No huffman code table entry found for character */
-#define CARBON_ERR_MEMSTATE 30              /* Memory file was opened as read-only but requested a modification */
-#define CARBON_ERR_JSONTYPE 31              /* Unable to import json file: unsupported type */
-#define CARBON_ERR_WRITEPROT 32             /* Mode set to read-only but modification was requested */
-#define CARBON_ERR_READOUTOFBOUNDS 33       /* Read outside of memory range bounds */
-#define CARBON_ERR_SLOTBROKEN 34            /* Slot management broken */
+#define CARBON_ERR_NOERR 0                  /** No error */
+#define CARBON_ERR_NULLPTR 1                /** Null pointer detected */
+#define CARBON_ERR_NOTIMPL 2                /** Function not implemented */
+#define CARBON_ERR_OUTOFBOUNDS 3            /** Index is out of bounds */
+#define CARBON_ERR_MALLOCERR 4              /** Memory allocation failed */
+#define CARBON_ERR_ILLEGALARG 5             /** Illegal arguments */
+#define CARBON_ERR_INTERNALERR 6            /** Internal error */
+#define CARBON_ERR_ILLEGALIMPL 7            /** Illegal implementation */
+#define CARBON_ERR_NOTFOUND 8               /** Not found */
+#define CARBON_ERR_NIL 9                    /** Element not in list */
+#define CARBON_ERR_ARRAYOFARRAYS 10         /** Array index out of bounds */
+#define CARBON_ERR_ARRAYOFMIXEDTYPES 11     /** Illegal JSON array: mixed types */
+#define CARBON_ERR_FOPEN_FAILED 12          /** Reading from file failed */
+#define CARBON_ERR_IO 13                    /** I/O error */
+#define CARBON_ERR_FORMATVERERR 14          /** Unsupported archive format version */
+#define CARBON_ERR_CORRUPTED 15             /** Archive file is corrupted */
+#define CARBON_ERR_NOCARBONSTREAM 16        /** Stream is not a carbon archive */
+#define CARBON_ERR_NOBITMODE 17             /** Not in bit writing mode */
+#define CARBON_ERR_NOTIMPLEMENTED 18        /** Funciton is not yet implemented */
+#define CARBON_ERR_NOTYPE 19                /** Unsupported type found */
+#define CARBON_ERR_NOCOMPRESSOR 20          /** Unsupported compressor strategy requested */
+#define CARBON_ERR_NOVALUESTR 21            /** No string representation for type available */
+#define CARBON_ERR_MARKERMAPPING 22         /** Marker type cannot be mapped to value type */
+#define CARBON_ERR_PARSETYPE 23             /** Parsing stopped; unknown data type requested */
+#define CARBON_ERR_NOJSONTOKEN 24           /** Unknown token during parsing JSON detected */
+#define CARBON_ERR_NOJSONNUMBERT 25         /** Unknown value type for number in JSON property */
+#define CARBON_ERR_NOARCHIVEFILE 26         /** Stream is not a valid archive file */
+#define CARBON_ERR_UNSUPFINDSTRAT 27        /** Unsupported strategy requested for key lookup */
+#define CARBON_ERR_ERRINTERNAL 28           /** Internal error */
+#define CARBON_ERR_HUFFERR 29               /** No huffman code table entry found for character */
+#define CARBON_ERR_MEMSTATE 30              /** Memory file was opened as read-only but requested a modification */
+#define CARBON_ERR_JSONTYPE 31              /** Unable to import json file: unsupported type */
+#define CARBON_ERR_WRITEPROT 32             /** Mode set to read-only but modification was requested */
+#define CARBON_ERR_READOUTOFBOUNDS 33       /** Read outside of memory range bounds */
+#define CARBON_ERR_SLOTBROKEN 34            /** Slot management broken */
 
 static const char *const _carbon_err_str[] = {
     "No error",

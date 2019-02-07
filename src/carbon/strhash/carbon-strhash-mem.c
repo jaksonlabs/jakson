@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2018 Marcus Pinnecke
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -232,7 +232,7 @@ static int thisFetchSingle(carbon_vec_t ofType(Bucket) *buckets,
 
     Bucket *bucket = data + bucketIdx;
 
-    /* Optimization 1/5: EMPTY GUARD (but before "find" call); if this bucket has no occupied slots, do not perform any lookup and comparison */
+    /** Optimization 1/5: EMPTY GUARD (but before "find" call); if this bucket has no occupied slots, do not perform any lookup and comparison */
     SliceListLookupByKey(&handle, &bucket->sliceList, key);
     *keyFound = !SliceListIsEmpty(&bucket->sliceList) && handle.isContained;
     *valueOut = (*keyFound) ? handle.value : ((carbon_string_id_t) -1);
@@ -347,7 +347,7 @@ static int simple_map_remove(MemExtra *extra, size_t *bucketIdxs, char *const *k
         Bucket *bucket = data + bucketIdxs[i];
         const char *key = keys[i];
 
-        /* Optimization 1/5: EMPTY GUARD (but before "find" call); if this bucket has no occupied slots, do not perform any lookup and comparison */
+        /** Optimization 1/5: EMPTY GUARD (but before "find" call); if this bucket has no occupied slots, do not perform any lookup and comparison */
         SliceListLookupByKey(&handle, &bucket->sliceList, key);
         if (CARBON_BRANCH_LIKELY(handle.isContained)) {
             SliceListRemove(&bucket->sliceList, &handle);
@@ -387,7 +387,7 @@ static int thisCreateExtra(carbon_strhash_t *self, size_t numBuckets, size_t cap
         MemExtra *extra = thisGetExta(self);
         VectorCreate(&extra->buckets, &self->allocator, sizeof(Bucket), numBuckets);
 
-        /* Optimization: notify the kernel that the list of buckets are accessed randomly (since hash based access)*/
+        /** Optimization: notify the kernel that the list of buckets are accessed randomly (since hash based access)*/
         VectorMemoryAdvice(&extra->buckets, MADV_RANDOM | MADV_WILLNEED);
 
 
@@ -447,16 +447,16 @@ static int BucketInsert(Bucket *bucket, const char *restrict key, carbon_string_
 
     SliceHandle handle;
 
-    /* Optimization 1/5: EMPTY GUARD (but before "find" call); if this bucket has no occupied slots, do not perform any lookup and comparison */
+    /** Optimization 1/5: EMPTY GUARD (but before "find" call); if this bucket has no occupied slots, do not perform any lookup and comparison */
     SliceListLookupByKey(&handle, &bucket->sliceList, key);
 
     if (handle.isContained) {
-        /* entry found by keys */
+        /** entry found by keys */
         assert(value == handle.value);
         //debug(SMART_MAP_TAG, "debug(SMART_MAP_TAG, \"*** put *** '%s' into bucket [new]\", keys);*** put *** '%s' into bucket [already contained]", keys);
     }
     else {
-        /* no entry found */
+        /** no entry found */
         //debug(SMART_MAP_TAG, "*** put *** '%s' into bucket [new]", keys);
         SliceListInsert(&bucket->sliceList, (char **) &key, &value, 1);
     }

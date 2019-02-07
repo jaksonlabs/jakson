@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2018 Marcus Pinnecke
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -23,14 +23,14 @@
 
 CARBON_BEGIN_DECL
 
-/*
+/**
  * Allocates <code>num</code> elements of size <code>sizeof(type)</code> using the allocator <code>alloc</code> and
  * creates a new stack variable <code>type *name</code>.
  */
 #define CARBON_MALLOC(type, name, num, alloc)                                                                          \
     type *name = carbon_malloc(alloc, num *sizeof(type))
 
-/*
+/**
  * Invokes a free operation in <code>alloc</code> allocator to free up memory assigned to pointer <code>name</code>
  */
 #define CARBON_FREE(name, alloc)                                                                                       \
@@ -38,34 +38,34 @@ CARBON_BEGIN_DECL
 
 typedef struct carbon_alloc
 {
-    /*
+    /**
      *  Implementation-specific data (private fields etc.)
      *  This pointer may point to NULL.
      */
     void *extra;
 
-    /*
+    /**
      *  Error information
      */
     carbon_err_t err;
 
-    /*
+    /**
      *  Implementation to call memory allocation.
      */
     void *(*malloc)(struct carbon_alloc *self, size_t size);
 
-    /*
+    /**
      *  Implementation to call memory re-allocation.
      */
     void *(*realloc)(struct carbon_alloc *self, void *ptr, size_t size);
 
-    /*
+    /**
      *  Implementation to call freeing up memory.
      *  Depending on the strategy, freeing up memory might be lazy.
      */
     void (*free)(struct carbon_alloc *self, void *ptr);
 
-    /*
+    /**
      *  Perform a deep copy of this allocator including implementation-specific data stored in 'extra'
      *
      * @param dst non-null target in which 'self' should be cloned
@@ -74,7 +74,7 @@ typedef struct carbon_alloc
     void (*clone)(struct carbon_alloc *dst, const struct carbon_alloc *self);
 } carbon_alloc_t;
 
-/*
+/**
  * Returns standard c-lib allocator (malloc, realloc, free)
  *
  * @param alloc must be non-null
@@ -83,7 +83,7 @@ typedef struct carbon_alloc
 CARBON_EXPORT (bool)
 carbon_alloc_create_std(carbon_alloc_t *alloc);
 
-/*
+/**
  * Creates a new allocator 'dst' with default constructor (in case of 'this' is null), or as copy of
  * 'this' (in case 'this' is non-null)
  * @param dst non-null destination in which the allocator should be stored
@@ -103,7 +103,7 @@ carbon_alloc_this_or_std(carbon_alloc_t *dst, const carbon_alloc_t *self);
 CARBON_EXPORT (bool)
 carbon_alloc_clone(carbon_alloc_t *dst, const carbon_alloc_t *src);
 
-/*
+/**
  * Invokes memory allocation of 'size' bytes using the allocator 'alloc'.
  *
  * If allocation fails, the system may panic.

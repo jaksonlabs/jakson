@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2018 Marcus Pinnecke
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -37,7 +37,7 @@ typedef size_t carbon_hash_t;
     c -= a; c -= b; c ^= (b >> 15);                                                                                    \
 }
 
-/* implements: carbon_hash_t hash_jenkins(size_t key_size, const void *key) */
+/** implements: carbon_hash_t hash_jenkins(size_t key_size, const void *key) */
 #define CARBON_HASH_JENKINS(keySizeIn, key)                                                                            \
 ({                                                                                                                     \
     size_t key_size = keySizeIn;                                                                                       \

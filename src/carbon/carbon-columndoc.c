@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2018 Marcus Pinnecke
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -801,24 +801,24 @@ static carbon_columndoc_column_t *objectArrayKeyColumnsFindOrNew(carbon_vec_t of
     carbon_columndoc_column_t *keyColumn, *newColumn;
 
     for (size_t i = 0; i < columns->numElems; i++) {
-        /* Find object array pair having the key `key` */
+        /** Find object array pair having the key `key` */
         keyColumns = VECTOR_GET(columns, i, carbon_columndoc_columngroup_t);
         if (keyColumns->key == arrayKey) {
-            /* In case such a pair is found, find column that matches the desired type */
+            /** In case such a pair is found, find column that matches the desired type */
             for (size_t j = 0; j < keyColumns->columns.numElems; j++) {
                 keyColumn = VECTOR_GET(&keyColumns->columns, j, carbon_columndoc_column_t);
                 if (keyColumn->key_name == nestedObjectEntryKey && keyColumn->type == nestedObjectEntryType) {
-                    /* Column for the object array with the desired key, the nested object entry with the desired key
+                    /** Column for the object array with the desired key, the nested object entry with the desired key
                      * and a matching type is found */
                     return keyColumn;
                 }
             }
-            /* In this case, the requested arrayKey is found, but the nested object entry does not match, hence
+            /** In this case, the requested arrayKey is found, but the nested object entry does not match, hence
              * create a new one */
             goto objectArrayKeyColumnsNewColumn;
         }
     }
-    /* In this case, the array key is also not known. Create a new one array entry with the fitting key column and
+    /** In this case, the array key is also not known. Create a new one array entry with the fitting key column and
      * return that newly created column */
     keyColumns = VECTOR_NEW_AND_GET(columns, carbon_columndoc_columngroup_t);
     keyColumns->key = arrayKey;
@@ -1174,7 +1174,7 @@ static bool objectPut(carbon_columndoc_obj_t *model, carbon_err_t *err, const ca
 
     switch (entryType) {
     case ENTRY_TYPE_NULL:
-        /* For a key which does not map to any value, the value is defined as 'null'  */
+        /** For a key which does not map to any value, the value is defined as 'null'  */
         VectorPush(&model->null_prop_keys, keyId, 1);
         break;
     case ENTRY_TYPE_PRIMITIVE:

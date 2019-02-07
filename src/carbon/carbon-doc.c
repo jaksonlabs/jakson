@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2018 Marcus Pinnecke
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -363,7 +363,7 @@ static bool importJsonObjectArrayProperty(carbon_doc_obj_t *target, carbon_err_t
     {
         size_t numElements = array->elements.elements.numElems;
 
-        /* Find first type that is not null unless the entire array is of type null */
+        /** Find first type that is not null unless the entire array is of type null */
         carbon_json_ast_node_value_type_e arrayDataType = CARBON_JSON_AST_NODE_VALUE_TYPE_NULL;
         carbon_field_type_e documentModelArrayValueType;
 
@@ -380,7 +380,7 @@ static bool importJsonObjectArrayProperty(carbon_doc_obj_t *target, carbon_err_t
             documentModelArrayValueType = carbon_field_type_string;
             break;
         case CARBON_JSON_AST_NODE_VALUE_TYPE_NUMBER: {
-            /* find smallest fitting physical number type */
+            /** find smallest fitting physical number type */
             carbon_field_type_e arrayNumberType = carbon_field_type_null;
             for (size_t i = 0; i < numElements; i++) {
                 const carbon_json_ast_node_element_t *element = VECTOR_GET(&array->elements.elements, i, carbon_json_ast_node_element_t);
@@ -447,7 +447,7 @@ static bool importJsonObjectArrayProperty(carbon_doc_obj_t *target, carbon_err_t
             documentModelArrayValueType = carbon_field_type_null;
             break;
         case CARBON_JSON_AST_NODE_VALUE_TYPE_ARRAY:
-            CARBON_ERROR(err, CARBON_ERR_ERRINTERNAL) /* array type is illegal here */
+            CARBON_ERROR(err, CARBON_ERR_ERRINTERNAL) /** array type is illegal here */
             return false;
         default:
             CARBON_ERROR(err, CARBON_ERR_NOTYPE)
@@ -466,7 +466,7 @@ static bool importJsonObjectArrayProperty(carbon_doc_obj_t *target, carbon_err_t
                 carbon_doc_obj_t *nestedObject;
                 carbon_doc_obj_push_object(&nestedObject, entry);
                 if (astNodeDataType != CARBON_JSON_AST_NODE_VALUE_TYPE_NULL) {
-                    /* the object is null by definition, if no entries are contained */
+                    /** the object is null by definition, if no entries are contained */
                     if (!importJsonObject(nestedObject, err, element->value.value.object)) {
                         return false;
                     }
@@ -540,14 +540,14 @@ static bool importJsonObjectArrayProperty(carbon_doc_obj_t *target, carbon_err_t
                         } else if (elementNumberType == CARBON_JSON_AST_NODE_NUMBER_VALUE_TYPE_SIGNED_INTEGER) {
                             value = element->value.value.number->value.signed_integer;
                         } else {
-                            CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_INTERNALERR) /* type mismatch */
+                            CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_INTERNALERR) /** type mismatch */
                             return false;
                         }
                     }
                     carbon_doc_obj_push_primtive(entry, &value);
                 } break;
                 default:
-                    CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_INTERNALERR) /* not a number type  */
+                    CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_INTERNALERR) /** not a number type  */
                     return false;
                 }
             } break;
@@ -652,7 +652,7 @@ static bool importJson(carbon_doc_obj_t *target, carbon_err_t *err, const carbon
             case CARBON_JSON_AST_NODE_VALUE_TYPE_FALSE:
             case CARBON_JSON_AST_NODE_VALUE_TYPE_NULL:
             default:
-                CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_INTERNALERR) /* Unsupported operation in arrays */
+                CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_INTERNALERR) /** Unsupported operation in arrays */
                 break;
             }
         }
@@ -1066,7 +1066,7 @@ static bool compareColumnLessEqFunc(const void *lhs, const void *rhs, void *args
 
 static void sortMetaModelColumn(carbon_columndoc_column_t *column, carbon_strdic_t *dic)
 {
-    /* Sort column by its value, and re-arrange the array position list according this new order */
+    /** Sort column by its value, and re-arrange the array position list according this new order */
     carbon_vec_t ofType(uint32_t) arrayPositionCpy;
     carbon_vec_t ofType(carbon_vec_t ofType(<T>)) valuesCpy;
 
@@ -1134,7 +1134,7 @@ static void sortMetaModelColumnArrays(carbon_columndoc_obj_t *metaModel)
             columnIndices[i] = i;
         }
 
-        /* First, sort by column name; Then, sort by columns with same name by type */
+        /** First, sort by column name; Then, sort by columns with same name by type */
         carbon_sort_qsort_indicies_wargs(columnIndices, columnCpy.base, sizeof(carbon_columndoc_column_t),
                                          compareObjectArrayKeyColumnLessEqFunc, keyColumns->columns.numElems,
                                          keyColumns->columns.allocator, metaModel->parent->dic);
@@ -1312,7 +1312,7 @@ static void createTypedVector(carbon_doc_entries_t *entry)
         size = sizeof(carbon_doc_obj_t);
         break;
     default:
-        CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_INTERNALERR) /* unknown type */
+        CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_INTERNALERR) /** unknown type */
         return;
     }
     VectorCreate(&entry->values, NULL, size, 10);

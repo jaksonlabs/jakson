@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2018 Marcus Pinnecke
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -21,8 +21,8 @@
 
 #define get_hashcode(key)    CARBON_HASH_ADDITIVE(strlen(key), key)
 
-/* OPTIMIZATION: we have only one item to find. Use branch-less scan instead of branching scan */
-/* OPTIMIZATION: find function as macro */
+/** OPTIMIZATION: we have only one item to find. Use branch-less scan instead of branching scan */
+/** OPTIMIZATION: find function as macro */
 #define SLICE_SCAN(slice, needleHash, needleStr)                                                                       \
 ({                                                                                                                     \
     CARBON_TRACE(CARBON_SLICE_LIST_TAG, "SLICE_SCAN for '%s' started", needleStr);                                     \
@@ -121,16 +121,16 @@ SliceListInsert(SliceList *list, char **strings, carbon_string_id_t *ids, size_t
 
         assert (key);
 
-        /* check whether the keys-values pair is already contained in one slice */
+        /** check whether the keys-values pair is already contained in one slice */
         status = SliceListLookupByKey(&handle, list, key);
 
         if (status == true) {
-            /* pair was found, do not insert it twice */
+            /** pair was found, do not insert it twice */
             assert (value == handle.value);
             continue;
         }
         else {
-            /* pair is not found; append it */
+            /** pair is not found; append it */
             HashBounds *restrict bounds = VECTOR_ALL(&list->bounds, HashBounds);
             carbon_bloom_t *restrict filters = VECTOR_ALL(&list->filters, carbon_bloom_t);
             Slice *restrict slices = VECTOR_ALL(&list->slices, Slice);
@@ -177,7 +177,7 @@ SliceListLookupByKey(SliceHandle *handle, SliceList *list, const char *needle)
     carbon_hash_t keyHash = get_hashcode(needle);
     uint32_t numSlices = VectorLength(&list->slices);
 
-    /* check whether the keys-values pair is already contained in one slice */
+    /** check whether the keys-values pair is already contained in one slice */
     HashBounds *restrict bounds = VECTOR_ALL(&list->bounds, HashBounds);
     carbon_bloom_t *restrict filters = VECTOR_ALL(&list->filters, carbon_bloom_t);
     Slice *restrict slices = VECTOR_ALL(&list->slices, Slice);
@@ -217,7 +217,7 @@ SliceListLookupByKey(SliceHandle *handle, SliceList *list, const char *needle)
                           pairPosition,
                           i);
                     if (pairPosition < slice->numElems) {
-                        /* pair is contained */
+                        /** pair is contained */
                         desc->numReadsHit++;
                         handle->isContained = true;
                         handle->value = slice->carbon_string_id_tColumn[pairPosition];
@@ -229,12 +229,12 @@ SliceListLookupByKey(SliceHandle *handle, SliceList *list, const char *needle)
                     }
                 }
                 else {
-                    /* carbon_bloom_t is sure that pair is not contained */
+                    /** carbon_bloom_t is sure that pair is not contained */
                     continue;
                 }
             }
             else {
-                /* keys hash is not inside bounds of hashes in slice */
+                /** keys hash is not inside bounds of hashes in slice */
                 continue;
             }
         }
@@ -255,9 +255,9 @@ SliceListRemove(SliceList *list, SliceHandle *handle)
 
 static void appenderNew(SliceList *list)
 {
-    /* ANTI-OPTIMIZATION: madvising sequential access to columns in slice decrease performance */
+    /** ANTI-OPTIMIZATION: madvising sequential access to columns in slice decrease performance */
 
-    /* the slice itself */
+    /** the slice itself */
     Slice slice = {
         .strat     = SLICE_LOOKUP_SCAN,
         .numElems = 0,
@@ -269,7 +269,7 @@ static void appenderNew(SliceList *list)
 
     assert(SLICE_KEY_COLUMN_MAX_ELEMS > 0);
 
-    /* the descriptor */
+    /** the descriptor */
     SliceDescriptor desc = {
         .numReadsHit  = 0,
         .numReadsAll  = 0,
@@ -277,11 +277,11 @@ static void appenderNew(SliceList *list)
 
     VectorPush(&list->descriptors, &desc, 1);
 
-    /* the lookup guards */
+    /** the lookup guards */
     assert(sizeof(carbon_bloom_t) <= CARBON_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE);
     carbon_bloom_t filter;
 
-    /* NOTE: the size of each carbon_bloom_t lead to a false positive probability of 100%, i.e., number of items in the
+    /** NOTE: the size of each carbon_bloom_t lead to a false positive probability of 100%, i.e., number of items in the
      * slice is around 32644 depending on the CPU cache size, the number of actual bits in the filter (Cache line size
      * in bits minus the header for the carbon_bloom_t) along with the number of used hash functions (4), lead to that
      * probability. However, the reason a carbon_bloom_t is used is to skip slices whch definitively do NOT contain the
@@ -322,7 +322,7 @@ static void appenderNew(SliceList *list)
              / 1024.0
     );
 
-    /* register new slice as the current appender */
+    /** register new slice as the current appender */
     list->appenderIdx = numSlices;
 }
 

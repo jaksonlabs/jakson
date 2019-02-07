@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2018 Marcus Pinnecke
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -36,7 +36,7 @@ bool carbon_spinlock_acquire(carbon_spinlock_t *spinlock)
     CARBON_NON_NULL_OR_ERROR(spinlock)
     if (!pthread_equal(spinlock->owner, pthread_self())) {
         while (atomic_flag_test_and_set(&spinlock->lock));
-        /* remeber the thread that aquires this lock */
+        /** remeber the thread that aquires this lock */
         spinlock->owner = pthread_self();
     }
     carbon_timestamp_t end = carbon_time_now_wallclock();

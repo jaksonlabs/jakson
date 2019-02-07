@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2018 Marcus Pinnecke
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -21,7 +21,7 @@
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-/*
+/**
  * SUMMARY
  *
  * A specialized hash table that uses strings as keys, and 64bit values. The specialization is to avoid some
@@ -53,7 +53,7 @@
 
 CARBON_BEGIN_DECL
 
-/*
+/**
  * Enables or disabled packing of entries inside a bucket. By default, packing is disabled.
  * To turn on packing, set 'CARBON_CONFIG_PACK_BUCKETS' symbol
  */
@@ -64,14 +64,14 @@ CARBON_BEGIN_DECL
 #define CARBON_BUCKET_PACKING
 #endif
 
-/*
+/**
  * Number of elements stored in the per-bucket cache (Tier 2, see below)
  */
 #ifndef CARBON_CONFIG_BUCKET_CACHE_SIZE
 #define CARBON_CONFIG_BUCKET_CACHE_SIZE  16
 #endif
 
-/*
+/**
  * Maximum number of elements stored per bucket (Tier 3, see below)
  */
 #ifndef CARBON_CONFIG_BUCKET_CAPACITY
@@ -95,87 +95,87 @@ typedef struct carbon_string_hash_counters
 
 typedef struct carbon_strhash
 {
-    /*
+    /**
      * Implementation-specific values
      */
     void *extra;
 
-    /*
+    /**
      * Implementation tag
      */
     carbon_strhash_tag_e tag;
 
-    /*
+    /**
      * Statistics to lookup misses and hits
      *
      * <b>Note</b>: Implementation must maintain counters by itself
      */
     carbon_string_hash_counters_t counters;
 
-    /*
+    /**
     *  Memory allocator that is used to get memory for user data
     */
     carbon_alloc_t allocator;
 
-    /*
+    /**
      *  Frees resources bound to <code>self</code> via the allocator specified by the constructor
      */
     int (*drop)(carbon_strhash_t *self);
 
-    /*
+    /**
      * Put <code>num_pair</code> objects into this map maybe updating old objects with the same key.
      */
     int (*put_bulk_safe)(carbon_strhash_t *self, char *const *keys, const carbon_string_id_t *values, size_t npairs);
 
-    /*
+    /**
      * Put <code>num_pair</code> objects into this map maybe without checking for updates.
      */
     int (*put_bulk_fast)(carbon_strhash_t *self, char *const *keys, const carbon_string_id_t *values, size_t npairs);
 
-    /*
+    /**
      * Same as 'put_safe_bulk' but specialized for a single element
      */
     int (*put_exact_safe)(carbon_strhash_t *self, const char *key, carbon_string_id_t value);
 
-    /*
+    /**
      * Same as 'put_fast_bulk' but specialized for a single element
      */
     int (*put_exact_fast)(carbon_strhash_t *self, const char *key, carbon_string_id_t value);
 
-    /*
+    /**
      * Get the values associated with <code>keys</code> in this map (if any).
      */
     int (*get_bulk_safe)(carbon_strhash_t *self, carbon_string_id_t **out, bool **found_mask, size_t *nnot_found,
                          char *const *keys, size_t nkeys);
 
-    /*
+    /**
      * The same as 'get_safe_bulk' but optimized for a single element
      */
     int (*get_exact_safe)(carbon_strhash_t *self, carbon_string_id_t *out, bool *found_mask, const char *key);
 
-    /*
+    /**
      * Get the values associated with <code>keys</code> in this map. All keys <u>must</u> exist.
      */
     int (*get_fast)(carbon_strhash_t *self, carbon_string_id_t **out, char *const *keys, size_t nkeys);
 
-    /*
+    /**
      * Updates keys associated with <code>values</code> in this map. All values <u>must</u> exist, and the
      * mapping between keys and values must be bidirectional.
      */
     int (*update_key_fast)(carbon_strhash_t *self, const carbon_string_id_t *values, char *const *keys, size_t nkeys);
 
-    /*
+    /**
      * Removes the objects with the gives keys from this map
      */
     int (*remove)(carbon_strhash_t *self, char *const *keys, size_t nkeys);
 
-    /*
+    /**
      * Frees up allocated memory for <code>ptr</code> via the allocator in <code>map</code> that was specified
      * by the call to <code>string_id_map_create</code>
      */
     int (*free)(carbon_strhash_t *self, void *ptr);
 
-    /*
+    /**
      *  Error information
      */
     carbon_err_t err;
@@ -184,7 +184,7 @@ typedef struct carbon_strhash
 
 CARBON_DEFINE_GET_ERROR_FUNCTION(carbon_strhash_t, carbon_strhash_t, table);
 
-/*
+/**
  * Frees resources bound to <code>map</code> via the allocator specified by the call to <code>string_id_map_create</code>.
  *
  * @param map a non-null pointer to the map
@@ -199,7 +199,7 @@ carbon_strhash_drop(carbon_strhash_t *map)
     return map->drop(map);
 }
 
-/*
+/**
  * Resets statistics counters
  *
  * @param map a non-null pointer to the map
@@ -213,7 +213,7 @@ carbon_strhash_reset_counters(carbon_strhash_t *map)
     return true;
 }
 
-/*
+/**
  * Returns statistics counters
  * @param out non-null pointer to destination counter
  * @param map non-null pointer to the map
@@ -228,7 +228,7 @@ carbon_strhash_get_counters(carbon_string_hash_counters_t *out, const carbon_str
     return true;
 }
 
-/*
+/**
  * Put <code>num_pair</code> objects into this map maybe updating old objects with the same key. If it is
  * guaranteed that the key is not yet inserted into this table, use <code>string_hashtable_put_blind</code>
  * instead.
@@ -251,7 +251,7 @@ carbon_strhash_put_safe(carbon_strhash_t *map, char *const *keys, const carbon_s
     return map->put_bulk_safe(map, keys, values, npairs);
 }
 
-/*
+/**
  * Put <code>num_pair</code> objects into this map, ingoring whether the key exists or not. This function is
  * useful for insert operations of pairs where it is guaranteed that the keys are not yet inserted into this hashtable.
  * In case this guarantee is broken, the behavior is undefined. Depending on the implementation, this specialized
@@ -278,7 +278,7 @@ carbon_strhash_put_bulk_fast(carbon_strhash_t *map, char *const *keys, const car
     return map->put_bulk_fast(map, keys, values, npairs);
 }
 
-/*
+/**
  * Same as 'string_lookup_put_bulk' but specialized for a single pair
  */
 inline static int
@@ -291,7 +291,7 @@ carbon_strhash_put_exact(carbon_strhash_t *map, const char *key, carbon_string_i
     return map->put_exact_safe(map, key, value);
 }
 
-/*
+/**
  * Same as 'string_lookup_put_fast_bulk' but specialized for a single pair
  */
 inline static int
@@ -305,7 +305,7 @@ carbon_strhash_put_exact_fast(carbon_strhash_t *map, const char *key, carbon_str
     return map->put_exact_fast(map, key, value);
 }
 
-/*
+/**
  * Get the values associated with <code>keys</code> in this map (if any). In case one <code>key</code> does not
  * exists, the function will return this information via the parameters <code>foundMask</code> and
  * <code>numNotFound</code>. However, in case it is guaranteed that all keys exist, consider to use
@@ -369,7 +369,7 @@ carbon_strhash_get_bulk_safe_exact(carbon_string_id_t *out, bool *found, carbon_
     return result;
 }
 
-/*
+/**
  * Get the values associated with <code>keys</code> in this map. In case one <code>key</code> does not
  * exists, the behavior is undefined.
  *
@@ -396,7 +396,7 @@ carbon_strhash_get_bulk_fast(carbon_string_id_t **out, carbon_strhash_t *map,
     return map->get_fast(map, out, keys, nkeys);
 }
 
-/*
+/**
  * Update keys for a given list of values. It must be guaranteed that the mapping between a key and its value is
  * bidirectional, and that all values exists.
  *
@@ -422,7 +422,7 @@ carbon_strhash_update_fast(carbon_strhash_t *map, const carbon_string_id_t *valu
     return map->update_key_fast(map, values, keys, nkeys);
 }
 
-/*
+/**
  * Removes the objects with the gives keys from this map
  *
  * @param map a non-null pointer to the map
@@ -440,7 +440,7 @@ carbon_strhash_remove(carbon_strhash_t *map, char *const *keys, size_t nkeys)
     return map->remove(map, keys, nkeys);
 }
 
-/*
+/**
  * Frees up allocated memory for <code>values</code> via the allocator in <code>map</code> that was specified
  * by the call to <code>string_id_map_create</code>
  *
@@ -457,7 +457,7 @@ carbon_strhash_free(void *ptr, carbon_strhash_t *map)
     return map->free(map, ptr);
 }
 
-/*
+/**
  * Resets the counter <code>counters</code> by setting all members to zero.
  *
  * @param counters non-null pointer to counter object
@@ -471,7 +471,7 @@ carbon_strhash_counters_init(carbon_string_hash_counters_t *counters)
     return true;
 }
 
-/*
+/**
  * Adds members of both input parameters and stores the result in <code>dstLhs</code>.
  *
  * @param dstLhs non-null pointer to counter (will contain the result)

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2018 Marcus Pinnecke
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -303,7 +303,7 @@ parallelFor(const void *restrict base, size_t width, size_t len, ForFunctionBody
     CARBON_NON_NULL_OR_ERROR(width)
 
     if (len > 0) {
-        uint_fast16_t numThread = numThreads + 1; /* +1 since one is this thread */
+        uint_fast16_t numThread = numThreads + 1; /** +1 since one is this thread */
         pthread_t threads[numThreads];
         FunctionProxy proxyArgs[numThread];
         register size_t chunkLen = len / numThread;
@@ -313,7 +313,7 @@ parallelFor(const void *restrict base, size_t width, size_t len, ForFunctionBody
         CARBON_PREFETCH_READ(f);
         CARBON_PREFETCH_READ(args);
 
-        /* run f on NTHREADS_FOR additional threads */
+        /** run f on NTHREADS_FOR additional threads */
         for (register uint_fast16_t tid = 0; tid < numThreads; tid++) {
             FunctionProxy *proxyArg = proxyArgs + tid;
             proxyArg->start = base + tid * chunkLen * width;
@@ -326,7 +326,7 @@ parallelFor(const void *restrict base, size_t width, size_t len, ForFunctionBody
             CARBON_PREFETCH_READ(proxyArg->start);
             pthread_create(threads + tid, NULL, forProxyFunction, proxyArgs + tid);
         }
-        /* run f on this thread */
+        /** run f on this thread */
         CARBON_PREFETCH_READ(mainThreadBase);
         f(mainThreadBase, width, chunkLen + chunkLenRemain, args, 0);
 
@@ -715,7 +715,7 @@ parallelFilterLate(size_t *restrict pos, size_t *restrict numPos,
         return true;
     }
 
-    uint_fast16_t numThread = numThreads + 1; /* +1 since one is this thread */
+    uint_fast16_t numThread = numThreads + 1; /** +1 since one is this thread */
 
     pthread_t threads[numThreads];
     FilterArg threadArgs[numThread];
@@ -728,7 +728,7 @@ parallelFilterLate(size_t *restrict pos, size_t *restrict numPos,
     CARBON_PREFETCH_READ(pred);
     CARBON_PREFETCH_READ(args);
 
-    /* run f on NTHREADS_FOR additional threads */
+    /** run f on NTHREADS_FOR additional threads */
     if (CARBON_BRANCH_LIKELY(chunkLen > 0)) {
         for (register uint_fast16_t tid = 0; tid < numThreads; tid++) {
             FilterArg *arg = threadArgs + tid;
@@ -745,7 +745,7 @@ parallelFilterLate(size_t *restrict pos, size_t *restrict numPos,
             pthread_create(threads + tid, NULL, filterProxyFunc, arg);
         }
     }
-    /* run f on this thread */
+    /** run f on this thread */
     CARBON_PREFETCH_READ(mainThreadBase);
     size_t mainChunkLen = chunkLen + chunkLenRemain;
     size_t *mainSrcPositions = malloc(mainChunkLen * sizeof(size_t));
@@ -823,7 +823,7 @@ parallelFilterEarly(void *restrict result, size_t *restrict resultSize,
     CARBON_NON_NULL_OR_ERROR(len);
     CARBON_NON_NULL_OR_ERROR(pred);
 
-    uint_fast16_t numThread = numThreads + 1; /* +1 since one is this thread */
+    uint_fast16_t numThread = numThreads + 1; /** +1 since one is this thread */
 
     pthread_t threads[numThreads];
     FilterArg threadArgs[numThread];
@@ -836,7 +836,7 @@ parallelFilterEarly(void *restrict result, size_t *restrict resultSize,
     CARBON_PREFETCH_READ(pred);
     CARBON_PREFETCH_READ(args);
 
-    /* run f on NTHREADS_FOR additional threads */
+    /** run f on NTHREADS_FOR additional threads */
     for (register uint_fast16_t tid = 0; tid < numThreads; tid++) {
         FilterArg *arg = threadArgs + tid;
         arg->numPositions = 0;
@@ -851,7 +851,7 @@ parallelFilterEarly(void *restrict result, size_t *restrict resultSize,
         CARBON_PREFETCH_READ(arg->start);
         pthread_create(threads + tid, NULL, filterProxyFunc, arg);
     }
-    /* run f on this thread */
+    /** run f on this thread */
     CARBON_PREFETCH_READ(mainThreadBase);
     size_t mainChunkLen = chunkLen + chunkLenRemain;
     size_t *mainSrcPositions = malloc(mainChunkLen * sizeof(size_t));

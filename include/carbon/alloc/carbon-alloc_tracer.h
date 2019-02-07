@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2018 Marcus Pinnecke
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -22,7 +22,7 @@
 
 CARBON_BEGIN_DECL
 
-/*
+/**
  * Returns standard c-lib allocator (malloc, realloc, free) that collects some statistics
  * for inspection purposes. Generally, this implementation is slow and should not be used
  * in productive mode

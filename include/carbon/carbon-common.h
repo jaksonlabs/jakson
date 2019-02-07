@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2018 Marcus Pinnecke
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -160,9 +160,9 @@ typedef enum carbon_type
 
 #define CARBON_FUNC_UNUSED __attribute__((unused))
 
-#define ofType(x) /* a convenience way to write types for generic containers; no effect than just a visual one */
+#define ofType(x) /** a convenience way to write types for generic containers; no effect than just a visual one */
 
-#define CARBON_NULLABLE /* parameters to functions marked with this tag can be NULL and will be ignored; is attached
+#define CARBON_NULLABLE /** parameters to functions marked with this tag can be NULL and will be ignored; is attached
                     to a return value (typically a pointer), the this means the function may return NULL. */
 
 #define CARBON_MAX(a, b)                                                                                               \

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2018 Marcus Pinnecke
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -222,27 +222,27 @@ static bool thisInsert(carbon_strdic_t *self, carbon_string_id_t **out, char *co
     carbon_string_id_t *values;
     size_t numNotFound;
 
-    /* query index for strings to get a boolean mask which strings are new and which must be added */
-    /* This is for the case that the string dictionary is not empty to skip processing of those new elements
+    /** query index for strings to get a boolean mask which strings are new and which must be added */
+    /** This is for the case that the string dictionary is not empty to skip processing of those new elements
      * which are already contained */
     CARBON_TRACE(STRING_DIC_SYNC_TAG, "local string dictionary check for new strings in insertion bulk%s", "...");
 
-    /* NOTE: palatalization of the call to this function decreases performance */
+    /** NOTE: palatalization of the call to this function decreases performance */
     carbon_strhash_get_bulk_safe(&values, &foundMask, &numNotFound, &extra->index, strings, numStrings);
 
-    /* OPTIMIZATION: use a carbon_bloom_t to check whether a string (which has not appeared in the
+    /** OPTIMIZATION: use a carbon_bloom_t to check whether a string (which has not appeared in the
      * dictionary before this batch but might occur multiple times in the current batch) was seen
      * before (with a slight prob. of doing too much work) */
     carbon_bloom_t carbon_bloom_t;
     carbon_bloom_create(&carbon_bloom_t, 22 * numNotFound);
 
-    /* copy string ids for already known strings to their result position resp. add those which are new */
+    /** copy string ids for already known strings to their result position resp. add those which are new */
     for (size_t i = 0; i < numStrings; i++) {
 
         if (foundMask[i]) {
             idsOut[i] = values[i];
         } else {
-            /* This path is taken only for strings that are not already contained in the dictionary. However,
+            /** This path is taken only for strings that are not already contained in the dictionary. However,
              * since this insertion batch may contain duplicate string, querying for already inserted strings
              * must be done anyway for each string in the insertion batch that is inserted. */
 
@@ -252,26 +252,26 @@ static bool thisInsert(carbon_strdic_t *self, carbon_string_id_t **out, char *co
             bool found = false;
             carbon_string_id_t value;
 
-            /* Query the carbon_bloom_t if the keys was already seend. If the filter returns "yes", a lookup
+            /** Query the carbon_bloom_t if the keys was already seend. If the filter returns "yes", a lookup
              * is requried since the filter maybe made a mistake. Of the filter returns "no", the
              * keys is new for sure. In this case, one can skip the lookup into the buckets. */
             size_t keyLength = strlen(key);
-            carbon_hash_t bloomKey = keyLength > 0 ? CARBON_HASH_FNV(strlen(key), key) : 0; /* using a hash of a keys instead of the string keys itself avoids reading the entire string for computing k hashes inside the carbon_bloom_t */
+            carbon_hash_t bloomKey = keyLength > 0 ? CARBON_HASH_FNV(strlen(key), key) : 0; /** using a hash of a keys instead of the string keys itself avoids reading the entire string for computing k hashes inside the carbon_bloom_t */
             if (CARBON_BLOOM_TEST_AND_SET(&carbon_bloom_t, &bloomKey, sizeof(carbon_hash_t))) {
-                /* ensure that the string really was seen (due to collisions in the bloom filter the keys might not
+                /** ensure that the string really was seen (due to collisions in the bloom filter the keys might not
                  * been actually seen) */
 
-                /* query index for strings to get a boolean mask which strings are new and which must be added */
-                /* This is for the case that the string was not already contained in the string dictionary but may have
+                /** query index for strings to get a boolean mask which strings are new and which must be added */
+                /** This is for the case that the string was not already contained in the string dictionary but may have
                  * duplicates in this insertion batch that are already inserted */
-                carbon_strhash_get_bulk_safe_exact(&value, &found, &extra->index, key);  /* OPTIMIZATION: use specialized function for "exact" query to avoid unnessecary malloc calls to manage set of results if only a single result is needed */
+                carbon_strhash_get_bulk_safe_exact(&value, &found, &extra->index, key);  /** OPTIMIZATION: use specialized function for "exact" query to avoid unnessecary malloc calls to manage set of results if only a single result is needed */
             }
 
             if (found) {
                 idsOut[i] = value;
             } else {
 
-                /* register in contents list */
+                /** register in contents list */
                 bool pop_result = freelistPop(&string_id, self);
                 CARBON_PRINT_ERROR_AND_DIE_IF(!pop_result, CARBON_ERR_SLOTBROKEN)
                 struct entry *entries = (struct entry *) VectorData(&extra->contents);
@@ -281,16 +281,16 @@ static bool thisInsert(carbon_strdic_t *self, carbon_string_id_t **out, char *co
                 entry->str            = strdup(strings[i]);
                 idsOut[i]            = string_id;
 
-                /* add for not yet registered pairs to buffer for fast import */
+                /** add for not yet registered pairs to buffer for fast import */
                 carbon_strhash_put_exact_fast(&extra->index, entry->str, string_id);
             }
         }
     }
 
-    /* set potential non-null out parameters */
+    /** set potential non-null out parameters */
     CARBON_OPTIONAL_SET_OR_ELSE(out, idsOut, carbon_free(&self->alloc, idsOut));
 
-    /* cleanup */
+    /** cleanup */
     carbon_free(&hashtableAlloc, foundMask);
     carbon_free(&hashtableAlloc, values);
     carbon_bloom_drop(&carbon_bloom_t);
@@ -321,7 +321,7 @@ static bool thisRemove(carbon_strdic_t *self, carbon_string_id_t *strings, size_
     carbon_string_id_t *carbon_string_id_tsToDelete =
         carbon_malloc(&self->alloc, numStrings * sizeof(carbon_string_id_t));
 
-    /* remove strings from contents CARBON_vector, and skip duplicates */
+    /** remove strings from contents CARBON_vector, and skip duplicates */
     for (size_t i = 0; i < numStrings; i++) {
         carbon_string_id_t carbon_string_id_t = strings[i];
         struct entry *entry   = (struct entry *) VectorData(&extra->contents) + carbon_string_id_t;
@@ -335,15 +335,15 @@ static bool thisRemove(carbon_strdic_t *self, carbon_string_id_t *strings, size_
         }
     }
 
-    /* remove from index */
+    /** remove from index */
     CARBON_CHECK_SUCCESS(carbon_strhash_remove(&extra->index, stringsToDelete, numStringsToDelete));
 
-    /* free up resources for strings that should be removed */
+    /** free up resources for strings that should be removed */
     for (size_t i = 0; i < numStringsToDelete; i++) {
         free (stringsToDelete[i]);
     }
 
-    /* cleanup */
+    /** cleanup */
     carbon_free(&self->alloc, stringsToDelete);
     carbon_free(&self->alloc, carbon_string_id_tsToDelete);
 
@@ -386,10 +386,10 @@ static bool thisLocateFast(carbon_strdic_t *self, carbon_string_id_t **out, char
     bool   *foundMask;
     size_t  numNotFound;
 
-    /* use safer but in principle more slower implementation */
+    /** use safer but in principle more slower implementation */
     int     result = thisLocateSafe(self, out, &foundMask, &numNotFound, keys, numKeys);
 
-    /* cleanup */
+    /** cleanup */
     thisFree(self, foundMask);
 
     return result;
@@ -414,7 +414,7 @@ static char **thisExtract(carbon_strdic_t *self, const carbon_string_id_t *ids, 
     char **result = carbon_malloc(&hashtableAlloc, numIds * sizeof(char *));
     struct entry *entries = (struct entry *) VectorData(&extra->contents);
 
-    /* Optimization: notify the kernel that the content list is accessed randomly (since hash based access)*/
+    /** Optimization: notify the kernel that the content list is accessed randomly (since hash based access)*/
     VectorMemoryAdvice(&extra->contents, MADV_RANDOM | MADV_WILLNEED);
 
     for (size_t i = 0; i < numIds; i++) {

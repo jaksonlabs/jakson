@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2018 Marcus Pinnecke
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -35,7 +35,7 @@ typedef enum
     CARBON_STRDIC_TYPE_SYNC, CARBON_STRDIC_TYPE_ASYNC
 } carbon_strdic_type_e;
 
-/*
+/**
  * Thread-safe string pool implementation
  */
 typedef struct carbon_strdic carbon_strdic_t;
@@ -132,7 +132,7 @@ typedef struct carbon_strdic
                        carbon_vec_t ofType(carbon_string_id_t) * string_ids);
 } carbon_strdic_t;
 
-/*
+/**
  *
  * @param dic
  * @return

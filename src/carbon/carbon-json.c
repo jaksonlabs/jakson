@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2018 Marcus Pinnecke
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -300,7 +300,7 @@ bool testConditionValue(carbon_err_t *err, carbon_json_ast_node_value_t *value)
             carbon_json_ast_node_element_t *element = VECTOR_GET(&elements->elements, i, carbon_json_ast_node_element_t);
             valueType = ((i == 0 || valueType == CARBON_JSON_AST_NODE_VALUE_TYPE_NULL) ? element->value.value_type : valueType);
 
-            /* Test "All elements in array of same type" condition */
+            /** Test "All elements in array of same type" condition */
             if ((element->value.value_type != CARBON_JSON_AST_NODE_VALUE_TYPE_NULL) &&
                 (valueType == CARBON_JSON_AST_NODE_VALUE_TYPE_TRUE && (element->value.value_type != CARBON_JSON_AST_NODE_VALUE_TYPE_TRUE || element->value.value_type != CARBON_JSON_AST_NODE_VALUE_TYPE_FALSE)) &&
                 (valueType == CARBON_JSON_AST_NODE_VALUE_TYPE_FALSE && (element->value.value_type != CARBON_JSON_AST_NODE_VALUE_TYPE_TRUE || element->value.value_type != CARBON_JSON_AST_NODE_VALUE_TYPE_FALSE)) &&
@@ -324,7 +324,7 @@ bool testConditionValue(carbon_err_t *err, carbon_json_ast_node_value_t *value)
                     }
                 }
             } break;
-            case CARBON_JSON_AST_NODE_VALUE_TYPE_ARRAY: {/* Test "No Array of Arrays" condition */
+            case CARBON_JSON_AST_NODE_VALUE_TYPE_ARRAY: {/** Test "No Array of Arrays" condition */
                 char message[] = "JSON file constraint broken: arrays of arrays detected";
                 char *result = malloc(strlen(message) + 1);
                 strcpy(result, &message[0]);
@@ -367,7 +367,7 @@ bool parseMembers(carbon_err_t *err, carbon_json_ast_node_members_t *members, ca
         strncpy(member->key.value, keyNameToken.string, keyNameToken.length);
         member->key.value[keyNameToken.length] = '\0';
 
-        NEXT_TOKEN(tokenIdx); /* skip assignment token */
+        NEXT_TOKEN(tokenIdx); /** skip assignment token */
         NEXT_TOKEN(tokenIdx);
         carbon_json_token_t valueToken = getToken(tokenStream, *tokenIdx);
 
@@ -424,10 +424,10 @@ bool parseMembers(carbon_err_t *err, carbon_json_ast_node_members_t *members, ca
 static bool parseObject(carbon_json_ast_node_object_t *object, carbon_err_t *err, carbon_vec_t ofType(JsonToken) *tokenStream, size_t *tokenIdx)
 {
     assert(getToken(tokenStream, *tokenIdx).type == CARBON_JSON_TOKEN_SCOPE_OPEN);
-    NEXT_TOKEN(tokenIdx);  /* Skip '{' */
+    NEXT_TOKEN(tokenIdx);  /** Skip '{' */
     object->value = malloc(sizeof(carbon_json_ast_node_members_t));
 
-    /* test whether this is an empty object */
+    /** test whether this is an empty object */
     carbon_json_token_t token = getToken(tokenStream, *tokenIdx);
 
     if (token.type != CARBON_JSON_TOKEN_SCOPE_CLOSE) {
@@ -438,7 +438,7 @@ static bool parseObject(carbon_json_ast_node_object_t *object, carbon_err_t *err
         VectorCreate(&object->value->members, NULL, sizeof(carbon_json_ast_node_member_t), 20);
     }
 
-    NEXT_TOKEN(tokenIdx);  /* Skip '}' */
+    NEXT_TOKEN(tokenIdx);  /** Skip '}' */
     return true;
 }
 
@@ -447,14 +447,14 @@ static bool parseArray(carbon_json_ast_node_array_t *array, carbon_err_t *err, c
     carbon_json_token_t token = getToken(tokenStream, *tokenIdx);
     CARBON_UNUSED(token);
     assert(token.type == CARBON_JSON_TOKEN_ARRAY_BEGIN);
-    NEXT_TOKEN(tokenIdx); /* Skip '[' */
+    NEXT_TOKEN(tokenIdx); /** Skip '[' */
 
     VectorCreate(&array->elements.elements, NULL, sizeof(carbon_json_ast_node_element_t), 250);
     if (!parseElements(&array->elements, err, tokenStream, tokenIdx)) {
         return false;
     }
 
-    NEXT_TOKEN(tokenIdx); /* Skip ']' */
+    NEXT_TOKEN(tokenIdx); /** Skip ']' */
     return true;
 }
 
@@ -509,23 +509,23 @@ static bool parseElement(carbon_json_ast_node_element_t *element, carbon_err_t *
 {
     carbon_json_token_t token = getToken(tokenStream, *tokenIdx);
 
-    if (token.type == CARBON_JSON_TOKEN_SCOPE_OPEN) { /* Parse object */
+    if (token.type == CARBON_JSON_TOKEN_SCOPE_OPEN) { /** Parse object */
         element->value.value_type = CARBON_JSON_AST_NODE_VALUE_TYPE_OBJECT;
         element->value.value.object = malloc(sizeof(carbon_json_ast_node_object_t));
         if (!parseObject(element->value.value.object, err, tokenStream, tokenIdx)) {
             return false;
         }
-    } else if (token.type == CARBON_JSON_TOKEN_ARRAY_BEGIN) { /* Parse array */
+    } else if (token.type == CARBON_JSON_TOKEN_ARRAY_BEGIN) { /** Parse array */
         element->value.value_type = CARBON_JSON_AST_NODE_VALUE_TYPE_ARRAY;
         element->value.value.array = malloc(sizeof(carbon_json_ast_node_array_t));
         if (!parseArray(element->value.value.array, err, tokenStream, tokenIdx)) {
             return false;
         }
-    } else if (token.type == CARBON_JSON_TOKEN_STRING_LITERAL) { /* Parse string */
+    } else if (token.type == CARBON_JSON_TOKEN_STRING_LITERAL) { /** Parse string */
         element->value.value_type = CARBON_JSON_AST_NODE_VALUE_TYPE_STRING;
         element->value.value.string = malloc(sizeof(carbon_json_ast_node_string_t));
         parseString(element->value.value.string, tokenStream, tokenIdx);
-    } else if (token.type == CARBON_JSON_TOKEN_REAL_NUMBER || token.type == CARBON_JSON_TOKEN_INT_NUMBER) { /* Parse number */
+    } else if (token.type == CARBON_JSON_TOKEN_REAL_NUMBER || token.type == CARBON_JSON_TOKEN_INT_NUMBER) { /** Parse number */
         element->value.value_type = CARBON_JSON_AST_NODE_VALUE_TYPE_NUMBER;
         element->value.value.number = malloc(sizeof(carbon_json_ast_node_number_t));
         parseNumber(element->value.value.number, tokenStream, tokenIdx);

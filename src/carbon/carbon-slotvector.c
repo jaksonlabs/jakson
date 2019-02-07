@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2018 Marcus Pinnecke
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -71,7 +71,7 @@ bool SlotVectorInsert(SlotVector *vec, CARBON_NULLABLE carbon_vec_t ofType(slot_
         VectorCreate(ids, vec->content.allocator, sizeof(SlotVectorSlot), numElems);
     }
 
-    /* check and handle whether the content CARBON_vector must be resized */
+    /** check and handle whether the content CARBON_vector must be resized */
     size_t target = VectorLength(&vec->content) + numElems;
     if (target > VectorCapacity(&vec->content)) {
         assert(VectorCapacity(&vec->freeList) == VectorCapacity(&vec->content));
@@ -92,7 +92,7 @@ bool SlotVectorInsert(SlotVector *vec, CARBON_NULLABLE carbon_vec_t ofType(slot_
         }
     }
 
-    /* perform insert */
+    /** perform insert */
     assert(VectorLength(&vec->freeList) > 0);
     SlotVectorSlot slot = *(SlotVectorSlot *) VectorPop(&vec->freeList);
     VectorAt(&vec->content, slot);
