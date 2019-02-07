@@ -100,7 +100,7 @@ static carbon_vec_t *toStringList(const char *contents, size_t numBytes)
 {
     fprintf(stderr, "converting to line list...");
     carbon_vec_t *vector = malloc(sizeof(carbon_vec_t));
-    VectorCreate(vector, NULL, sizeof(char *), 15372804);
+    carbon_vec_create(vector, NULL, sizeof(char *), 15372804);
     char *begin, *end;
     begin = (char *) contents;
     end = (char *) contents + numBytes;
@@ -118,13 +118,13 @@ static carbon_vec_t *toStringList(const char *contents, size_t numBytes)
             char *string = malloc(len + 1);
             memcpy(string, begin, len);
             string[len] = '\0';
-            VectorPush(vector, &string, 1);
+            carbon_vec_push(vector, &string, 1);
             begin += len;
         }
         else {
             begin++;
         }
     }
-    fprintf(stderr, "DONE, %zu lines\n", VectorLength(vector));
+    fprintf(stderr, "DONE, %zu lines\n", carbon_vec_length(vector));
     return vector;
 }

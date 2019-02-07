@@ -27,7 +27,7 @@
 
 struct entry {
     char *str;
-    bool inUse;
+    bool in_use;
 };
 
 typedef struct sync_extra {
@@ -110,26 +110,26 @@ static int create_extra(carbon_strdic_t *self, size_t capacity, size_t num_index
     self->extra = carbon_malloc(&self->alloc, sizeof(struct sync_extra));
     struct sync_extra *extra = this_extra(self);
     carbon_spinlock_init(&extra->lock);
-    CARBON_CHECK_SUCCESS(VectorCreate(&extra->contents, &self->alloc, sizeof(struct entry), capacity));
-    CARBON_CHECK_SUCCESS(VectorCreate(&extra->freelist, &self->alloc, sizeof(carbon_string_id_t), capacity));
+    CARBON_CHECK_SUCCESS(carbon_vec_create(&extra->contents, &self->alloc, sizeof(struct entry), capacity));
+    CARBON_CHECK_SUCCESS(carbon_vec_create(&extra->freelist, &self->alloc, sizeof(carbon_string_id_t), capacity));
     struct entry empty = {
         .str    = NULL,
-        .inUse = false
+        .in_use = false
     };
     for (size_t i = 0; i < capacity; i++) {
-        CARBON_CHECK_SUCCESS(VectorPush(&extra->contents, &empty, 1));
+        CARBON_CHECK_SUCCESS(carbon_vec_push(&extra->contents, &empty, 1));
         freelist_push(self, i);
     }
     CARBON_UNUSED(num_threads);
 
-    carbon_alloc_t hashtableAlloc;
+    carbon_alloc_t hashtable_alloc;
 #if defined(CARBON_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
-    CHECK_SUCCESS(allocatorTrace(&hashtableAlloc));
+    CHECK_SUCCESS(allocatorTrace(&hashtable_alloc));
 #else
-    CARBON_CHECK_SUCCESS(carbon_alloc_this_or_std(&hashtableAlloc, &self->alloc));
+    CARBON_CHECK_SUCCESS(carbon_alloc_this_or_std(&hashtable_alloc, &self->alloc));
 #endif
 
-    CARBON_CHECK_SUCCESS(carbon_strhash_create_inmemory(&extra->index, &hashtableAlloc, num_index_buckets,
+    CARBON_CHECK_SUCCESS(carbon_strhash_create_inmemory(&extra->index, &hashtable_alloc, num_index_buckets,
                                                         num_index_bucket_cap));
     return true;
 }
@@ -144,22 +144,22 @@ static int freelist_pop(carbon_string_id_t *out, carbon_strdic_t *self)
 {
     assert (self->tag == CARBON_STRDIC_TYPE_SYNC);
     struct sync_extra *extra = this_extra(self);
-    if (CARBON_BRANCH_UNLIKELY(VectorIsEmpty(&extra->freelist))) {
-        size_t numNewPos;
-        CARBON_CHECK_SUCCESS(VectorGrow(&numNewPos, &extra->freelist));
-        CARBON_CHECK_SUCCESS(VectorGrow(NULL, &extra->contents));
+    if (CARBON_BRANCH_UNLIKELY(carbon_vec_is_empty(&extra->freelist))) {
+        size_t num_new_pos;
+        CARBON_CHECK_SUCCESS(carbon_vec_grow(&num_new_pos, &extra->freelist));
+        CARBON_CHECK_SUCCESS(carbon_vec_grow(NULL, &extra->contents));
         assert (extra->freelist.capElems == extra->contents.capElems);
         struct entry empty = {
-            .inUse = false,
+            .in_use = false,
             .str    = NULL
         };
-        while (numNewPos--) {
-            size_t new_pos = VectorLength(&extra->contents);
-            CARBON_CHECK_SUCCESS(VectorPush(&extra->freelist, &new_pos, 1));
-            CARBON_CHECK_SUCCESS(VectorPush(&extra->contents, &empty, 1));
+        while (num_new_pos--) {
+            size_t new_pos = carbon_vec_length(&extra->contents);
+            CARBON_CHECK_SUCCESS(carbon_vec_push(&extra->freelist, &new_pos, 1));
+            CARBON_CHECK_SUCCESS(carbon_vec_push(&extra->contents, &empty, 1));
         }
     }
-    *out = *(carbon_string_id_t *) VectorPop(&extra->freelist);
+    *out = *(carbon_string_id_t *) carbon_vec_pop(&extra->freelist);
     return true;
 }
 
@@ -167,7 +167,7 @@ static int freelist_push(carbon_strdic_t *self, carbon_string_id_t idx)
 {
     assert (self->tag == CARBON_STRDIC_TYPE_SYNC);
     struct sync_extra *extra = this_extra(self);
-    CARBON_CHECK_SUCCESS(VectorPush(&extra->freelist, &idx, 1));
+    CARBON_CHECK_SUCCESS(carbon_vec_push(&extra->freelist, &idx, 1));
     assert (extra->freelist.capElems == extra->contents.capElems);
     return true;
 }
@@ -181,7 +181,7 @@ static bool this_drop(carbon_strdic_t *self)
     struct entry *entries = (struct entry *) extra->contents.base;
     for (size_t i = 0; i < extra->contents.numElems; i++) {
         struct entry *entry = entries + i;
-        if (entry->inUse) {
+        if (entry->in_use) {
             assert (entry->str);
             carbon_free(&self->alloc, entry->str);
             entry->str = NULL;
@@ -209,15 +209,15 @@ static bool this_insert(carbon_strdic_t *self, carbon_string_id_t **out, char *c
 
     struct sync_extra *extra          = this_extra(self);
 
-    carbon_alloc_t hashtableAlloc;
+    carbon_alloc_t hashtable_alloc;
 #if defined(CARBON_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
-    CHECK_SUCCESS(allocatorTrace(&hashtableAlloc));
+    CHECK_SUCCESS(allocatorTrace(&hashtable_alloc));
 #else
-    CARBON_CHECK_SUCCESS(carbon_alloc_this_or_std(&hashtableAlloc, &self->alloc));
+    CARBON_CHECK_SUCCESS(carbon_alloc_this_or_std(&hashtable_alloc, &self->alloc));
 #endif
 
 
-    carbon_string_id_t  *idsOut = carbon_malloc(&hashtableAlloc, num_strings * sizeof(carbon_string_id_t));
+    carbon_string_id_t  *idsOut = carbon_malloc(&hashtable_alloc, num_strings * sizeof(carbon_string_id_t));
     bool *found_mask;
     carbon_string_id_t *values;
     size_t num_not_found;
@@ -276,8 +276,8 @@ static bool this_insert(carbon_strdic_t *self, carbon_string_id_t **out, char *c
                 CARBON_PRINT_ERROR_AND_DIE_IF(!pop_result, CARBON_ERR_SLOTBROKEN)
                 struct entry *entries = (struct entry *) VectorData(&extra->contents);
                 struct entry *entry   = entries + string_id;
-                assert (!entry->inUse);
-                entry->inUse         = true;
+                assert (!entry->in_use);
+                entry->in_use         = true;
                 entry->str            = strdup(strings[i]);
                 idsOut[i]            = string_id;
 
@@ -291,8 +291,8 @@ static bool this_insert(carbon_strdic_t *self, carbon_string_id_t **out, char *c
     CARBON_OPTIONAL_SET_OR_ELSE(out, idsOut, carbon_free(&self->alloc, idsOut));
 
     /** cleanup */
-    carbon_free(&hashtableAlloc, found_mask);
-    carbon_free(&hashtableAlloc, values);
+    carbon_free(&hashtable_alloc, found_mask);
+    carbon_free(&hashtable_alloc, values);
     carbon_bloom_drop(&carbon_bloom_t);
 
     unlock(self);
@@ -325,11 +325,11 @@ static bool this_remove(carbon_strdic_t *self, carbon_string_id_t *strings, size
     for (size_t i = 0; i < num_strings; i++) {
         carbon_string_id_t carbon_string_id_t = strings[i];
         struct entry *entry   = (struct entry *) VectorData(&extra->contents) + carbon_string_id_t;
-        if (CARBON_BRANCH_LIKELY(entry->inUse)) {
+        if (CARBON_BRANCH_LIKELY(entry->in_use)) {
             stringsToDelete[numStringsToDelete]    = entry->str;
             carbon_string_id_tsToDelete[numStringsToDelete] = strings[i];
             entry->str    = NULL;
-            entry->inUse = false;
+            entry->in_use = false;
             numStringsToDelete++;
             CARBON_CHECK_SUCCESS(freelist_push(self, carbon_string_id_t));
         }
@@ -403,15 +403,15 @@ static char **this_extract(carbon_strdic_t *self, const carbon_string_id_t *ids,
 
     lock(self);
 
-    carbon_alloc_t hashtableAlloc;
+    carbon_alloc_t hashtable_alloc;
 #if defined(CARBON_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
-    allocatorTrace(&hashtableAlloc);
+    allocatorTrace(&hashtable_alloc);
 #else
-    carbon_alloc_this_or_std(&hashtableAlloc, &self->alloc);
+    carbon_alloc_this_or_std(&hashtable_alloc, &self->alloc);
 #endif
 
     struct sync_extra *extra = this_extra(self);
-    char **result = carbon_malloc(&hashtableAlloc, num_ids * sizeof(char *));
+    char **result = carbon_malloc(&hashtable_alloc, num_ids * sizeof(char *));
     struct entry *entries = (struct entry *) VectorData(&extra->contents);
 
     /** Optimization: notify the kernel that the content list is accessed randomly (since hash based access)*/
@@ -419,8 +419,8 @@ static char **this_extract(carbon_strdic_t *self, const carbon_string_id_t *ids,
 
     for (size_t i = 0; i < num_ids; i++) {
         carbon_string_id_t carbon_string_id_t = ids[i];
-        assert(carbon_string_id_t < VectorLength(&extra->contents));
-        assert(carbon_string_id_t == CARBON_NULL_ENCODED_STRING || entries[carbon_string_id_t].inUse);
+        assert(carbon_string_id_t < carbon_vec_length(&extra->contents));
+        assert(carbon_string_id_t == CARBON_NULL_ENCODED_STRING || entries[carbon_string_id_t].in_use);
         result[i] = carbon_string_id_t != CARBON_NULL_ENCODED_STRING ? entries[carbon_string_id_t].str : CARBON_NULL_TEXT;
     }
 
@@ -432,14 +432,14 @@ static bool this_free(carbon_strdic_t *self, void *ptr)
 {
     CARBON_UNUSED(self);
 
-    carbon_alloc_t hashtableAlloc;
+    carbon_alloc_t hashtable_alloc;
 #if defined(CARBON_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
-    CHECK_SUCCESS(allocatorTrace(&hashtableAlloc));
+    CHECK_SUCCESS(allocatorTrace(&hashtable_alloc));
 #else
-    CARBON_CHECK_SUCCESS(carbon_alloc_this_or_std(&hashtableAlloc, &self->alloc));
+    CARBON_CHECK_SUCCESS(carbon_alloc_this_or_std(&hashtable_alloc, &self->alloc));
 #endif
 
-    return carbon_free(&hashtableAlloc, ptr);
+    return carbon_free(&hashtable_alloc, ptr);
 }
 
 static bool this_reset_counters(carbon_strdic_t *self)
@@ -462,7 +462,7 @@ static bool this_num_distinct(carbon_strdic_t *self, size_t *num)
 {
     CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_SYNC)
     struct sync_extra *extra = this_extra(self);
-    *num = VectorLength(&extra->contents);
+    *num = carbon_vec_length(&extra->contents);
     return true;
 }
 
@@ -474,9 +474,9 @@ static bool this_get_contents(carbon_strdic_t *self, carbon_vec_t ofType (char *
 
     for (carbon_string_id_t i = 0; i < extra->contents.numElems; i++) {
         const struct entry *e = VECTOR_GET(&extra->contents, i, struct entry);
-        if (e->inUse) {
-            VectorPush(strings, &e->str, 1);
-            VectorPush(carbon_string_id_ts, &i, 1);
+        if (e->in_use) {
+            carbon_vec_push(strings, &e->str, 1);
+            carbon_vec_push(carbon_string_id_ts, &i, 1);
         }
     }
     return true;

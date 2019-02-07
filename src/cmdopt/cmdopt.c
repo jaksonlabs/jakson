@@ -30,7 +30,7 @@ bool carbon_cmdopt_mgr_create(carbon_cmdopt_mgr_t *manager, char *moduleName, ch
     manager->module_desc = moduleDesc ? strdup(moduleDesc) : NULL;
     manager->policy = policy;
     manager->fallback = fallback;
-    CARBON_CHECK_SUCCESS(VectorCreate(&manager->groups, NULL, sizeof(carbon_cmdopt_group_t), 5));
+    CARBON_CHECK_SUCCESS(carbon_vec_create(&manager->groups, NULL, sizeof(carbon_cmdopt_group_t), 5));
     return true;
 }
 
@@ -91,7 +91,7 @@ bool carbon_cmdopt_mgr_create_group(carbon_cmdopt_group_t **group,
     CARBON_NON_NULL_OR_ERROR(manager)
     carbon_cmdopt_group_t *cmdGroup = VECTOR_NEW_AND_GET(&manager->groups, carbon_cmdopt_group_t);
     cmdGroup->desc = strdup(desc);
-    CARBON_CHECK_SUCCESS(VectorCreate(&cmdGroup->cmd_options, NULL, sizeof(carbon_cmdopt_t), 10));
+    CARBON_CHECK_SUCCESS(carbon_vec_create(&cmdGroup->cmd_options, NULL, sizeof(carbon_cmdopt_t), 10));
     *group = cmdGroup;
     return true;
 }

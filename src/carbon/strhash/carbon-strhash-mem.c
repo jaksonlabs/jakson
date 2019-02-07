@@ -385,7 +385,7 @@ static int thisCreateExtra(carbon_strhash_t *self, size_t numBuckets, size_t cap
 {
     if ((self->extra = carbon_malloc(&self->allocator, sizeof(MemExtra))) != NULL) {
         MemExtra *extra = thisGetExta(self);
-        VectorCreate(&extra->buckets, &self->allocator, sizeof(Bucket), numBuckets);
+        carbon_vec_create(&extra->buckets, &self->allocator, sizeof(Bucket), numBuckets);
 
         /** Optimization: notify the kernel that the list of buckets are accessed randomly (since hash based access)*/
         VectorMemoryAdvice(&extra->buckets, MADV_RANDOM | MADV_WILLNEED);

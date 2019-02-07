@@ -53,7 +53,7 @@ DEFINE_PRINTER_FUNCTION(uint32_t, "%d")
 DEFINE_PRINTER_FUNCTION(uint64_t, "%"PRIu64)
 DEFINE_PRINTER_FUNCTION(size_t, "%zu")
 
-bool VectorCreate(carbon_vec_t *out, const carbon_alloc_t *alloc, size_t elemSize, size_t capElems)
+bool carbon_vec_create(carbon_vec_t *out, const carbon_alloc_t *alloc, size_t elemSize, size_t capElems)
 {
     CARBON_NON_NULL_OR_ERROR(out)
     out->allocator = malloc(sizeof(carbon_alloc_t));
@@ -93,13 +93,13 @@ bool VectorDrop(carbon_vec_t *vec)
     return true;
 }
 
-bool VectorIsEmpty(const carbon_vec_t *vec)
+bool carbon_vec_is_empty(const carbon_vec_t *vec)
 {
     CARBON_NON_NULL_OR_ERROR(vec)
     return vec->numElems == 0 ? true : false;
 }
 
-bool VectorPush(carbon_vec_t *vec, const void *data, size_t numElems)
+bool carbon_vec_push(carbon_vec_t *vec, const void *data, size_t numElems)
 {
     CARBON_NON_NULL_OR_ERROR(vec && data)
     size_t nextNum = vec->numElems + numElems;
@@ -139,7 +139,7 @@ bool VectorRepreatedPush(carbon_vec_t *vec, const void *data, size_t howOften)
     return true;
 }
 
-const void *VectorPop(carbon_vec_t *vec)
+const void *carbon_vec_pop(carbon_vec_t *vec)
 {
     void *result;
     if (CARBON_BRANCH_LIKELY((result = (vec ? (vec->numElems > 0 ? vec->base + (vec->numElems - 1) * vec->elemSize : NULL) : NULL))
@@ -166,7 +166,7 @@ bool VectorShrink(carbon_vec_t *vec)
     return true;
 }
 
-bool VectorGrow(size_t *numNewSlots, carbon_vec_t *vec)
+bool carbon_vec_grow(size_t *numNewSlots, carbon_vec_t *vec)
 {
     CARBON_NON_NULL_OR_ERROR(vec)
     size_t freeSlotsBefore = vec->capElems - vec->numElems;
@@ -180,7 +180,7 @@ bool VectorGrow(size_t *numNewSlots, carbon_vec_t *vec)
     return true;
 }
 
-size_t VectorLength(const carbon_vec_t *vec)
+size_t carbon_vec_length(const carbon_vec_t *vec)
 {
     CARBON_NON_NULL_OR_ERROR(vec)
     return vec->numElems;
@@ -214,7 +214,7 @@ bool VectorSet(carbon_vec_t *vec, size_t pos, const void *data)
 
 bool VectorCpy(carbon_vec_t *dst, const carbon_vec_t *src)
 {
-    CARBON_CHECK_SUCCESS(VectorCreate(dst, NULL, src->elemSize, src->numElems));
+    CARBON_CHECK_SUCCESS(carbon_vec_create(dst, NULL, src->elemSize, src->numElems));
     dst->numElems = src->numElems;
     if (dst->numElems > 0) {
         memcpy(dst->base, src->base, src->elemSize * src->numElems);

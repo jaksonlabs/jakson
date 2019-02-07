@@ -243,8 +243,8 @@ bool carbon_json_parse(CARBON_NULLABLE carbon_json_t *json, CARBON_NULLABLE carb
     int status;
 
     carbon_json_tokenizer_init(&parser->tokenizer, input);
-    VectorCreate(&brackets, NULL, sizeof(carbon_json_token_type_e), 15);
-    VectorCreate(&tokenStream, NULL, sizeof(carbon_json_token_t), 200);
+    carbon_vec_create(&brackets, NULL, sizeof(carbon_json_token_type_e), 15);
+    carbon_vec_create(&tokenStream, NULL, sizeof(carbon_json_token_t), 200);
 
     TokenMemory tokenMemory = {
         .init = true,
@@ -259,7 +259,7 @@ bool carbon_json_parse(CARBON_NULLABLE carbon_json_t *json, CARBON_NULLABLE carb
             goto cleanup;
         }
     }
-    if (!VectorIsEmpty(&brackets)) {
+    if (!carbon_vec_is_empty(&brackets)) {
         carbon_json_token_type_e type = *VECTOR_PEEK(&brackets, carbon_json_token_type_e);
         char buffer[1024];
         sprintf(&buffer[0], "Unexpected end of file: missing '%s' to match unclosed '%s' (if any)",
@@ -356,7 +356,7 @@ static carbon_json_token_t getToken(carbon_vec_t ofType(JsonToken) *tokenStream,
 
 bool parseMembers(carbon_err_t *err, carbon_json_ast_node_members_t *members, carbon_vec_t ofType(JsonToken) *tokenStream, size_t *tokenIdx)
 {
-    VectorCreate(&members->members, NULL, sizeof(carbon_json_ast_node_member_t), 20);
+    carbon_vec_create(&members->members, NULL, sizeof(carbon_json_ast_node_member_t), 20);
     carbon_json_token_t delimiterToken;
 
     do {
@@ -435,7 +435,7 @@ static bool parseObject(carbon_json_ast_node_object_t *object, carbon_err_t *err
             return false;
         }
     } else {
-        VectorCreate(&object->value->members, NULL, sizeof(carbon_json_ast_node_member_t), 20);
+        carbon_vec_create(&object->value->members, NULL, sizeof(carbon_json_ast_node_member_t), 20);
     }
 
     NEXT_TOKEN(tokenIdx);  /** Skip '}' */
@@ -449,7 +449,7 @@ static bool parseArray(carbon_json_ast_node_array_t *array, carbon_err_t *err, c
     assert(token.type == CARBON_JSON_TOKEN_ARRAY_BEGIN);
     NEXT_TOKEN(tokenIdx); /** Skip '[' */
 
-    VectorCreate(&array->elements.elements, NULL, sizeof(carbon_json_ast_node_element_t), 250);
+    carbon_vec_create(&array->elements.elements, NULL, sizeof(carbon_json_ast_node_element_t), 250);
     if (!parseElements(&array->elements, err, tokenStream, tokenIdx)) {
         return false;
     }
@@ -640,21 +640,21 @@ static int processToken(carbon_err_t *err, carbon_json_parse_err_t *errorDesc, c
     switch (token->type) {
     case CARBON_JSON_TOKEN_SCOPE_OPEN:
     case CARBON_JSON_TOKEN_ARRAY_BEGIN:
-        VectorPush(brackets, &token->type, 1);
+        carbon_vec_push(brackets, &token->type, 1);
         break;
     case CARBON_JSON_TOKEN_SCOPE_CLOSE:
     case CARBON_JSON_TOKEN_ARRAY_END: {
-        if (!VectorIsEmpty(brackets)) {
+        if (!carbon_vec_is_empty(brackets)) {
             carbon_json_token_type_e bracket = *VECTOR_PEEK(brackets, carbon_json_token_type_e);
             if ((token->type == CARBON_JSON_TOKEN_ARRAY_END && bracket == CARBON_JSON_TOKEN_ARRAY_BEGIN) ||
                 (token->type == CARBON_JSON_TOKEN_SCOPE_CLOSE && bracket == CARBON_JSON_TOKEN_SCOPE_OPEN)) {
-                VectorPop(brackets);
+                carbon_vec_pop(brackets);
             } else {
                 goto pushEntry;
             }
         } else {
             pushEntry:
-            VectorPush(brackets, &token->type, 1);
+            carbon_vec_push(brackets, &token->type, 1);
         }
     } break;
     default:

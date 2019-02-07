@@ -69,10 +69,10 @@ SliceListCreate(SliceList *list, const carbon_alloc_t *alloc, size_t sliceCapaci
     carbon_spinlock_init(&list->lock);
     carbon_error_init(&list->err);
 
-    VectorCreate(&list->slices, &list->alloc, sizeof(Slice), sliceCapacity);
-    VectorCreate(&list->descriptors, &list->alloc, sizeof(SliceDescriptor), sliceCapacity);
-    VectorCreate(&list->filters, &list->alloc, sizeof(carbon_bloom_t), sliceCapacity);
-    VectorCreate(&list->bounds, &list->alloc, sizeof(HashBounds), sliceCapacity);
+    carbon_vec_create(&list->slices, &list->alloc, sizeof(Slice), sliceCapacity);
+    carbon_vec_create(&list->descriptors, &list->alloc, sizeof(SliceDescriptor), sliceCapacity);
+    carbon_vec_create(&list->filters, &list->alloc, sizeof(carbon_bloom_t), sliceCapacity);
+    carbon_vec_create(&list->bounds, &list->alloc, sizeof(HashBounds), sliceCapacity);
 
     CARBON_ZERO_MEMORY(VectorData(&list->slices), sliceCapacity * sizeof(Slice));
     CARBON_ZERO_MEMORY(VectorData(&list->descriptors), sliceCapacity * sizeof(SliceDescriptor));
@@ -104,7 +104,7 @@ SliceListDrop(SliceList *list)
 CARBON_EXPORT(bool)
 SliceListIsEmpty(const SliceList *list)
 {
-    return (VectorIsEmpty(&list->slices));
+    return (carbon_vec_is_empty(&list->slices));
 }
 
 CARBON_EXPORT(bool)
@@ -175,7 +175,7 @@ SliceListLookupByKey(SliceHandle *handle, SliceList *list, const char *needle)
     CARBON_UNUSED(needle);
 
     carbon_hash_t keyHash = get_hashcode(needle);
-    uint32_t numSlices = VectorLength(&list->slices);
+    uint32_t numSlices = carbon_vec_length(&list->slices);
 
     /** check whether the keys-values pair is already contained in one slice */
     HashBounds *restrict bounds = VECTOR_ALL(&list->bounds, HashBounds);
@@ -264,8 +264,8 @@ static void appenderNew(SliceList *list)
         .cacheIdx = (uint32_t) -1
     };
 
-    uint32_t numSlices = VectorLength(&list->slices);
-    VectorPush(&list->slices, &slice, 1);
+    uint32_t numSlices = carbon_vec_length(&list->slices);
+    carbon_vec_push(&list->slices, &slice, 1);
 
     assert(SLICE_KEY_COLUMN_MAX_ELEMS > 0);
 
@@ -275,7 +275,7 @@ static void appenderNew(SliceList *list)
         .numReadsAll  = 0,
     };
 
-    VectorPush(&list->descriptors, &desc, 1);
+    carbon_vec_push(&list->descriptors, &desc, 1);
 
     /** the lookup guards */
     assert(sizeof(carbon_bloom_t) <= CARBON_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE);
@@ -288,12 +288,12 @@ static void appenderNew(SliceList *list)
      * keys-values pair - and that still works ;) */
     carbon_bloom_create(&filter,
                         (CARBON_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE - sizeof(carbon_bloom_t)) * 8);
-    VectorPush(&list->filters, &filter, 1);
+    carbon_vec_push(&list->filters, &filter, 1);
     HashBounds bounds = {
         .minHash        = (carbon_hash_t) -1,
         .maxHash        = (carbon_hash_t) 0
     };
-    VectorPush(&list->bounds, &bounds, 1);
+    carbon_vec_push(&list->bounds, &bounds, 1);
 
     CARBON_INFO(CARBON_SLICE_LIST_TAG, "created new appender in slice list %p\n\t"
         "# of slices (incl. appender) in total...............: %zu\n\t"

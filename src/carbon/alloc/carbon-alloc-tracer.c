@@ -216,7 +216,7 @@ static void invoke_clone(carbon_alloc_t *dst, const carbon_alloc_t *self);
 #define LAZY_INIT()                                                                                                    \
 if (!global_trace_stats.malloc_sizes) {                                                                                \
     global_trace_stats.malloc_sizes = malloc(sizeof(carbon_vec_t));                                                    \
-    VectorCreate(global_trace_stats.malloc_sizes, &default_alloc, sizeof(size_t), 1000000);                            \
+    carbon_vec_create(global_trace_stats.malloc_sizes, &default_alloc, sizeof(size_t), 1000000);                            \
     global_trace_stats.spinlock = carbon_malloc(&default_alloc, sizeof(carbon_spinlock_t));                            \
     carbon_spinlock_init(global_trace_stats.spinlock);                                                                 \
     global_trace_stats.statistics_file = fopen("trace-alloc-stats.csv", "a");                                          \
@@ -268,14 +268,14 @@ static void *invoke_malloc(carbon_alloc_t *self, size_t size)
 
     //DEBUG(TRACE_ALLOC_TAG, "malloc %zu B, call to malloc: %zu so far (allocator %p)", size,
     //      global_trace_stats.num_malloc_calls, self);
-    VectorPush(global_trace_stats.malloc_sizes, &size, 1);
+    carbon_vec_push(global_trace_stats.malloc_sizes, &size, 1);
 
     size_t min_alloc_size = carbon_sort_get_min(VECTOR_ALL(global_trace_stats.malloc_sizes, size_t),
-                                                VectorLength(global_trace_stats.malloc_sizes));
+                                                carbon_vec_length(global_trace_stats.malloc_sizes));
     size_t max_alloc_size = carbon_sort_get_max(VECTOR_ALL(global_trace_stats.malloc_sizes, size_t),
-                                                VectorLength(global_trace_stats.malloc_sizes));
+                                                carbon_vec_length(global_trace_stats.malloc_sizes));
     double avg_alloc_size = carbon_sort_get_avg(VECTOR_ALL(global_trace_stats.malloc_sizes, size_t),
-                                                VectorLength(global_trace_stats.malloc_sizes));
+                                                carbon_vec_length(global_trace_stats.malloc_sizes));
     global_trace_stats.total_size += size;
 
     CARBON_UNUSED(min_alloc_size);

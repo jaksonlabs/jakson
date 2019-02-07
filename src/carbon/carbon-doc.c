@@ -42,9 +42,9 @@ carbon_doc_bulk_create(carbon_doc_bulk_t *bulk, carbon_strdic_t *dic)
     CARBON_NON_NULL_OR_ERROR(bulk)
     CARBON_NON_NULL_OR_ERROR(dic)
     bulk->dic = dic;
-    VectorCreate(&bulk->keys, NULL, sizeof(char *), 500);
-    VectorCreate(&bulk->values, NULL, sizeof(char *), 1000);
-    VectorCreate(&bulk->models, NULL, sizeof(carbon_doc_t), 50);
+    carbon_vec_create(&bulk->keys, NULL, sizeof(char *), 500);
+    carbon_vec_create(&bulk->values, NULL, sizeof(char *), 1000);
+    carbon_vec_create(&bulk->models, NULL, sizeof(carbon_doc_t), 50);
     return true;
 }
 
@@ -70,8 +70,8 @@ carbon_doc_bulk_get_dic_conetnts(carbon_vec_t ofType (const char *) **strings,
     carbon_strdic_num_distinct(&numDistinctValues, context->dic);
     carbon_vec_t ofType (const char *) *resultStrings = malloc(sizeof(carbon_vec_t));
     carbon_vec_t ofType (carbon_string_id_t) *resultcarbon_string_id_ts = malloc(sizeof(carbon_vec_t));
-    VectorCreate(resultStrings, NULL, sizeof(const char *), numDistinctValues);
-    VectorCreate(resultcarbon_string_id_ts, NULL, sizeof(carbon_string_id_t), numDistinctValues);
+    carbon_vec_create(resultStrings, NULL, sizeof(const char *), numDistinctValues);
+    carbon_vec_create(resultcarbon_string_id_ts, NULL, sizeof(carbon_string_id_t), numDistinctValues);
 
     int status = carbon_strdic_get_contents(resultStrings, resultcarbon_string_id_ts, context->dic);
     CARBON_CHECK_SUCCESS(status);
@@ -88,13 +88,13 @@ carbon_doc_t *carbon_doc_bulk_new_doc(carbon_doc_bulk_t *context, carbon_field_t
     }
 
     carbon_doc_t template, *model;
-    size_t idx = VectorLength(&context->models);
-    VectorPush(&context->models, &template, 1);
+    size_t idx = carbon_vec_length(&context->models);
+    carbon_vec_push(&context->models, &template, 1);
     model = VECTOR_GET(&context->models, idx, carbon_doc_t);
     model->context = context;
     model->type = type;
 
-    VectorCreate(&model->obj_model, NULL, sizeof(carbon_doc_obj_t), 10);
+    carbon_vec_create(&model->obj_model, NULL, sizeof(carbon_doc_obj_t), 10);
 
     return model;
 }
@@ -225,10 +225,10 @@ bool carbon_doc_obj_add_key(carbon_doc_entries_t **out,
     };
 
     createTypedVector(&entry_model);
-    VectorPush(&obj->doc->context->keys, &key_dup, 1);
+    carbon_vec_push(&obj->doc->context->keys, &key_dup, 1);
 
-    entry_idx = VectorLength(&obj->entries);
-    VectorPush(&obj->entries, &entry_model, 1);
+    entry_idx = carbon_vec_length(&obj->entries);
+    carbon_vec_push(&obj->entries, &entry_model, 1);
 
     *out = VECTOR_GET(&obj->entries, entry_idx, carbon_doc_entries_t);
 
@@ -242,16 +242,16 @@ bool carbon_doc_obj_push_primtive(carbon_doc_entries_t *entry, const void *value
 
     switch(entry->type) {
         case carbon_field_type_null:
-            VectorPush(&entry->values, &VALUE_NULL, 1);
+            carbon_vec_push(&entry->values, &VALUE_NULL, 1);
         break;
         case carbon_field_type_string: {
             char *string = value ? strdup((char *) value) : NULL;
-            VectorPush(&entry->context->doc->context->values, &string, 1);
-            VectorPush(&entry->values, &string, 1);
+            carbon_vec_push(&entry->context->doc->context->values, &string, 1);
+            carbon_vec_push(&entry->values, &string, 1);
         }
         break;
     default:
-            VectorPush(&entry->values, value, 1);
+            carbon_vec_push(&entry->values, value, 1);
         break;
     }
     return true;
@@ -267,8 +267,8 @@ bool carbon_doc_obj_push_object(carbon_doc_obj_t **out, carbon_doc_entries_t *en
     carbon_doc_obj_t objectModel;
 
     createObjectModel(&objectModel, entry->context->doc);
-    size_t length = VectorLength(&entry->values);
-    VectorPush(&entry->values, &objectModel, 1);
+    size_t length = carbon_vec_length(&entry->values);
+    carbon_vec_push(&entry->values, &objectModel, 1);
 
     *out = VECTOR_GET(&entry->values, length, carbon_doc_obj_t);
 
@@ -359,7 +359,7 @@ static bool importJsonObjectArrayProperty(carbon_doc_obj_t *target, carbon_err_t
 {
     carbon_doc_entries_t *entry;
 
-    if (!VectorIsEmpty(&array->elements.elements))
+    if (!carbon_vec_is_empty(&array->elements.elements))
     {
         size_t numElements = array->elements.elements.numElems;
 
@@ -629,7 +629,7 @@ static bool importJson(carbon_doc_obj_t *target, carbon_err_t *err, const carbon
         break;
     case CARBON_JSON_AST_NODE_VALUE_TYPE_ARRAY: {
         const carbon_vec_t ofType(carbon_json_ast_node_element_t) *arrayContent = &json->element->value.value.array->elements.elements;
-        if (!VectorIsEmpty(arrayContent)) {
+        if (!carbon_vec_is_empty(arrayContent)) {
             const carbon_json_ast_node_element_t *first = VECTOR_GET(arrayContent, 0, carbon_json_ast_node_element_t);
             switch (first->value.value_type) {
             case CARBON_JSON_AST_NODE_VALUE_TYPE_OBJECT:
@@ -815,7 +815,7 @@ static void sortedNestedArrayObjects(carbon_columndoc_obj_t *metaModel)
 
 #define SORT_META_MODEL_VALUES(keyVector, valueVector, valueType, compareValueFunc)                                    \
 {                                                                                                                      \
-    size_t numElements = VectorLength(&keyVector);                                                                     \
+    size_t numElements = carbon_vec_length(&keyVector);                                                                     \
                                                                                                                        \
     if (numElements > 0) {                                                                                             \
         size_t *valueIndicies = malloc(sizeof(size_t) * numElements);                                                  \
@@ -849,7 +849,7 @@ static void sortedNestedArrayObjects(carbon_columndoc_obj_t *metaModel)
 static void sortMetaModelStringValues(carbon_vec_t ofType(carbon_string_id_t) *keyVector, carbon_vec_t ofType(carbon_string_id_t) *valueVector,
                                       carbon_strdic_t *dic)
 {
-    size_t numElements = VectorLength(keyVector);
+    size_t numElements = carbon_vec_length(keyVector);
 
     if (numElements > 0) {
         size_t *valueIndicies = malloc(sizeof(size_t) * numElements);
@@ -886,7 +886,7 @@ static void sortMetaModelStringValues(carbon_vec_t ofType(carbon_string_id_t) *k
 
 #define SORT_META_MODEL_ARRAYS(keyVector, valueArrayVector, compareFunc)                                               \
 {                                                                                                                      \
-    size_t numElements = VectorLength(&keyVector);                                                                     \
+    size_t numElements = carbon_vec_length(&keyVector);                                                                     \
                                                                                                                        \
     if (numElements > 0) {                                                                                             \
         size_t *valueIndicies = malloc(sizeof(size_t) * numElements);                                                  \
@@ -919,7 +919,7 @@ static void sortMetaModelStringValues(carbon_vec_t ofType(carbon_string_id_t) *k
 static void sortMetaModelStringArrays(carbon_vec_t ofType(carbon_string_id_t) *keyVector, carbon_vec_t ofType(carbon_string_id_t) *valueArrayVector,
                                       carbon_strdic_t *dic)
 {
-    size_t numElements = VectorLength(keyVector);
+    size_t numElements = carbon_vec_length(keyVector);
 
     if (numElements > 0) {
         size_t *valueIndicies = malloc(sizeof(size_t) * numElements);
@@ -1223,8 +1223,8 @@ carbon_columndoc_t *carbon_doc_entries_to_columndoc(const carbon_doc_bulk_t *bul
     // Step 1: encode all strings at once in a bulk
     char *const* keyStrings = VECTOR_ALL(&bulk->keys, char *);
     char *const* valueStrings = VECTOR_ALL(&bulk->values, char *);
-    carbon_strdic_insert(bulk->dic, NULL, keyStrings, VectorLength(&bulk->keys), 0);
-    carbon_strdic_insert(bulk->dic, NULL, valueStrings, VectorLength(&bulk->values), 0);
+    carbon_strdic_insert(bulk->dic, NULL, keyStrings, carbon_vec_length(&bulk->keys), 0);
+    carbon_strdic_insert(bulk->dic, NULL, valueStrings, carbon_vec_length(&bulk->values), 0);
 
     // Step 2: for each document doc, create a meta doc, and construct a binary compressed document
     const carbon_doc_t *models = VECTOR_ALL(&bulk->models, carbon_doc_t);
@@ -1264,7 +1264,7 @@ carbon_doc_entries_drop(carbon_doc_entries_t *partition)
 
 static void createObjectModel(carbon_doc_obj_t *model, carbon_doc_t *doc)
 {
-    VectorCreate(&model->entries, NULL, sizeof(carbon_doc_entries_t), 50);
+    carbon_vec_create(&model->entries, NULL, sizeof(carbon_doc_entries_t), 50);
     model->doc = doc;
 }
 
@@ -1315,7 +1315,7 @@ static void createTypedVector(carbon_doc_entries_t *entry)
         CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_INTERNALERR) /** unknown type */
         return;
     }
-    VectorCreate(&entry->values, NULL, size, 10);
+    carbon_vec_create(&entry->values, NULL, size, 10);
 }
 
 static void entryModelDrop(carbon_doc_entries_t *entry)

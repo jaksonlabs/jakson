@@ -46,7 +46,7 @@ bool carbon_huffman_create(carbon_huffman_t **out, const StringRefVector *string
     CARBON_NON_NULL_OR_ERROR(strings);
 
     carbon_vec_t ofType(uint32_t) frequencies;
-    VectorCreate(&frequencies, NULL, sizeof(uint32_t), UCHAR_MAX);
+    carbon_vec_create(&frequencies, NULL, sizeof(uint32_t), UCHAR_MAX);
     VectorEnlargeSizeToCapacity(&frequencies);
 
     uint32_t *freqData = VECTOR_ALL(&frequencies, uint32_t);
@@ -62,7 +62,7 @@ bool carbon_huffman_create(carbon_huffman_t **out, const StringRefVector *string
     }
 
     carbon_huffman_t *dic = malloc(sizeof(carbon_huffman_t));
-    VectorCreate(&dic->encodingTable, NULL, sizeof(carbon_huffman_entry_t), UCHAR_MAX / 4);
+    carbon_vec_create(&dic->encodingTable, NULL, sizeof(carbon_huffman_entry_t), UCHAR_MAX / 4);
     createHuffmanTree(&dic->encodingTable, &frequencies);
     carbon_error_init(&dic->err);
 
@@ -392,7 +392,7 @@ static void createHuffmanTree(carbon_vec_t ofType(carbon_huffman_entry_t) *encod
     assert(UCHAR_MAX == frequencies->numElems);
 
     carbon_vec_t ofType(HuffNode) candidates;
-    VectorCreate(&candidates, NULL, sizeof(struct HuffNode), UCHAR_MAX * UCHAR_MAX);
+    carbon_vec_create(&candidates, NULL, sizeof(struct HuffNode), UCHAR_MAX * UCHAR_MAX);
     size_t appenderIdx = UCHAR_MAX;
 
     for (unsigned char i = 0; i < UCHAR_MAX; i++) {

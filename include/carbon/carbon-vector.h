@@ -100,7 +100,7 @@ typedef carbon_vec_t ofType(char *) StringVector;
 typedef carbon_vec_t ofType(const char *) StringRefVector;
 
 #define STRING_VECTOR_CREATE(vec, alloc, capElems)                                                                     \
-    VectorCreate(vec, alloc, sizeof(char *), capElems);
+    carbon_vec_create(vec, alloc, sizeof(char *), capElems);
 
 #define STRING_REF_VECTOR_CREATE(vec, alloc, capElems)                                                                 \
     STRING_VECTOR_CREATE(vec, alloc, capElems)                                                                         \
@@ -120,11 +120,11 @@ typedef carbon_vec_t ofType(const char *) StringRefVector;
 #define STRING_VECTOR_PUSH(vec, string)                                                                                \
 ({                                                                                                                     \
     char *cpy = strdup(string);                                                                                        \
-    VectorPush(vec, &cpy, 1);                                                                                          \
+    carbon_vec_push(vec, &cpy, 1);                                                                                          \
 })
 
 #define STRING_REF_VECTOR_PUSH(vec, string)                                                                            \
-    VectorPush(vec, &string, 1)
+    carbon_vec_push(vec, &string, 1)
 
 /**
  * Constructs a new vector for elements of size 'elem_size', reserving memory for 'cap_elems' elements using
@@ -137,7 +137,7 @@ typedef carbon_vec_t ofType(const char *) StringRefVector;
  * @return STATUS_OK if success, and STATUS_NULLPTR in case of NULL pointer parameters
  */
 CARBON_EXPORT(bool)
-VectorCreate(carbon_vec_t *out, const carbon_alloc_t *alloc, size_t elemSize, size_t capElems);
+carbon_vec_create(carbon_vec_t *out, const carbon_alloc_t *alloc, size_t elemSize, size_t capElems);
 
 
 /**
@@ -183,7 +183,7 @@ VectorDrop(carbon_vec_t *vec);
  *         <code>STATUS_FALSE</code> but an value indicating that error.
  */
 CARBON_EXPORT(bool)
-VectorIsEmpty(const carbon_vec_t *vec);
+carbon_vec_is_empty(const carbon_vec_t *vec);
 
 /**
  * Appends 'numElems' elements stored in 'data' into the vector by copying numElems * vec->elem_size into the
@@ -197,7 +197,7 @@ VectorIsEmpty(const carbon_vec_t *vec);
  * @return STATUS_OK if success, and STATUS_NULLPTR in case of NULL pointer parameters
  */
 CARBON_EXPORT(bool)
-VectorPush(carbon_vec_t *vec,
+carbon_vec_push(carbon_vec_t *vec,
                const void *data,
                size_t numElems);
 
@@ -228,7 +228,7 @@ VectorRepreatedPush(carbon_vec_t *vec, const void *data, size_t howOften);
  * @return Pointer to last element, or <code>NULL</code> if vector is empty
  */
 CARBON_EXPORT(const void *)
-VectorPop(carbon_vec_t *vec);
+carbon_vec_pop(carbon_vec_t *vec);
 
 CARBON_EXPORT(bool)
 VectorClear(carbon_vec_t *vec);
@@ -250,7 +250,7 @@ VectorShrink(carbon_vec_t *vec);
  * @return STATUS_OK in case of success, and another value indicating an error otherwise.
  */
 CARBON_EXPORT(bool)
-VectorGrow(size_t *numNewSlots, carbon_vec_t *vec);
+carbon_vec_grow(size_t *numNewSlots, carbon_vec_t *vec);
 
 /**
  * Returns the number of elements currently stored in the vector
@@ -259,15 +259,15 @@ VectorGrow(size_t *numNewSlots, carbon_vec_t *vec);
  * @return 0 in case of NULL pointer to 'vec', or the number of elements otherwise.
  */
 CARBON_EXPORT(size_t)
-VectorLength(const carbon_vec_t *vec);
+carbon_vec_length(const carbon_vec_t *vec);
 
 #define VECTOR_GET(vec, pos, type) (type *) VectorAt(vec, pos)
 
 #define VECTOR_NEW_AND_GET(vec, type)                                                                                  \
 ({                                                                                                                     \
     type template;                                                                                                     \
-    size_t vectorLength = VectorLength(vec);                                                                           \
-    VectorPush(vec, &template, 1);                                                                                     \
+    size_t vectorLength = carbon_vec_length(vec);                                                                           \
+    carbon_vec_push(vec, &template, 1);                                                                                     \
     VECTOR_GET(vec, vectorLength, type);                                                                               \
 })
 
