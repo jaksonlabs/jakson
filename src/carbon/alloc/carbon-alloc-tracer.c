@@ -39,20 +39,20 @@ typedef struct trace_stats_t
 } trace_stats_t;
 
 
-#define DEFINE_PAGE_WITH_SIZE(x)                                        \
-typedef struct page_##x##b_t                                            \
-{                                                                       \
-    size_t                        user_size;                            \
-    size_t                        capacity;                             \
-    char                          data[x];                              \
-} page_##x##b_t;                                                        \
-                                                                        \
-CARBON_FUNC_UNUSED static inline void *page_##x##b_new(size_t user_size) { \
-    assert (user_size <= x);                                                         \
-    struct page_##x##b_t *page = malloc(sizeof(struct page_##x##b_t));               \
-    page->user_size = user_size;                                                     \
-    page->capacity = x;                                                              \
-    return (((void *)page) + 2 * sizeof(size_t));                                    \
+#define DEFINE_PAGE_WITH_SIZE(x)                                                                                       \
+typedef struct page_##x##b_t                                                                                           \
+{                                                                                                                      \
+    size_t                        user_size;                                                                           \
+    size_t                        capacity;                                                                            \
+    char                          data[x];                                                                             \
+} page_##x##b_t;                                                                                                       \
+                                                                                                                       \
+CARBON_FUNC_UNUSED static inline void *page_##x##b_new(size_t user_size) {                                             \
+    assert (user_size <= x);                                                                                           \
+    struct page_##x##b_t *page = malloc(sizeof(struct page_##x##b_t));                                                 \
+    page->user_size = user_size;                                                                                       \
+    page->capacity = x;                                                                                                \
+    return (((void *)page) + 2 * sizeof(size_t));                                                                      \
 }
 
 DEFINE_PAGE_WITH_SIZE(1)
@@ -216,7 +216,7 @@ static void invoke_clone(carbon_alloc_t *dst, const carbon_alloc_t *self);
 #define LAZY_INIT()                                                                                                    \
 if (!global_trace_stats.malloc_sizes) {                                                                                \
     global_trace_stats.malloc_sizes = malloc(sizeof(carbon_vec_t));                                                    \
-    carbon_vec_create(global_trace_stats.malloc_sizes, &default_alloc, sizeof(size_t), 1000000);                            \
+    carbon_vec_create(global_trace_stats.malloc_sizes, &default_alloc, sizeof(size_t), 1000000);                       \
     global_trace_stats.spinlock = carbon_malloc(&default_alloc, sizeof(carbon_spinlock_t));                            \
     carbon_spinlock_init(global_trace_stats.spinlock);                                                                 \
     global_trace_stats.statistics_file = fopen("trace-alloc-stats.csv", "a");                                          \

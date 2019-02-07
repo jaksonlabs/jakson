@@ -15,8 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef MOPT_CMDOPT_H
-#define MOPT_CMDOPT_H
+#ifndef CMDOPT_H
+#define CMDOPT_H
 
 #include "../carbon/carbon-common.h"
 #include "../carbon/carbon-vector.h"
@@ -55,7 +55,7 @@ typedef struct carbon_cmdopt_mgr
 } carbon_cmdopt_mgr_t;
 
 CARBON_EXPORT(bool)
-carbon_cmdopt_mgr_create(carbon_cmdopt_mgr_t *manager, char *moduleName, char *moduleDesc,
+carbon_cmdopt_mgr_create(carbon_cmdopt_mgr_t *manager, char *module_name, char *module_desc,
                          carbon_mod_arg_policy_e policy, bool (*fallback)(int argc, char **argv, FILE *file,
                                                                           carbon_cmdopt_mgr_t *manager));
 CARBON_EXPORT(bool)

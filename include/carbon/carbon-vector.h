@@ -65,7 +65,7 @@ typedef struct carbon_vec
     /**
      *  Fixed number of bytes for a single element that should be stored in the vector
      */
-    size_t elemSize;
+    size_t elem_size;
 
     /**
      *  The number of elements currently stored in the vector
@@ -80,7 +80,7 @@ typedef struct carbon_vec
     /**
     * The grow factor considered for resize operations
     */
-    float growFactor;
+    float grow_factor;
 
     /**
      * A pointer to a memory address managed by 'allocator' that contains the user data
@@ -107,11 +107,11 @@ typedef carbon_vec_t ofType(const char *) carbon_string_ref_vec;
 
 #define STRING_VECTOR_DROP(vec)                                                                                        \
 ({                                                                                                                     \
-    for (size_t i = 0; i < vec->num_elems; i++) {                                                                       \
-        char *s = *CARBON_VECTOR_GET(vec, i, char *);                                                                         \
+    for (size_t i = 0; i < vec->num_elems; i++) {                                                                      \
+        char *s = *CARBON_VECTOR_GET(vec, i, char *);                                                                  \
         free (s);                                                                                                      \
     }                                                                                                                  \
-    carbon_vec_drop(vec);                                                                                                   \
+    carbon_vec_drop(vec);                                                                                              \
 })
 
 #define STRING_REF_VECTOR_DROP(vec)                                                                                    \
@@ -120,7 +120,7 @@ typedef carbon_vec_t ofType(const char *) carbon_string_ref_vec;
 #define STRING_VECTOR_PUSH(vec, string)                                                                                \
 ({                                                                                                                     \
     char *cpy = strdup(string);                                                                                        \
-    carbon_vec_push(vec, &cpy, 1);                                                                                          \
+    carbon_vec_push(vec, &cpy, 1);                                                                                     \
 })
 
 #define STRING_REF_VECTOR_PUSH(vec, string)                                                                            \
@@ -132,12 +132,12 @@ typedef carbon_vec_t ofType(const char *) carbon_string_ref_vec;
  *
  * @param out non-null vector that should be constructed
  * @param alloc an allocator
- * @param elemSize fixed-length element size
+ * @param elem_size fixed-length element size
  * @param cap_elems number of elements for which memory should be reserved
  * @return STATUS_OK if success, and STATUS_NULLPTR in case of NULL pointer parameters
  */
 CARBON_EXPORT(bool)
-carbon_vec_create(carbon_vec_t *out, const carbon_alloc_t *alloc, size_t elemSize, size_t cap_elems);
+carbon_vec_create(carbon_vec_t *out, const carbon_alloc_t *alloc, size_t elem_size, size_t cap_elems);
 
 
 /**
@@ -161,7 +161,7 @@ carbon_vec_memadvice(carbon_vec_t *vec, int madviseAdvice);
  * @return STATUS_OK if success, otherwise a value indicating the error
  */
 CARBON_EXPORT(bool)
-VectorSetGrowFactor(carbon_vec_t *vec, float factor);
+carbon_vec_set_grow_factor(carbon_vec_t *vec, float factor);
 
 /**
  * Frees up memory requested via the allocator.
@@ -202,9 +202,9 @@ carbon_vec_push(carbon_vec_t *vec,
                size_t num_elems);
 
 CARBON_EXPORT(const void *)
-VectorPeek(carbon_vec_t *vec);
+carbon_vec_peek(carbon_vec_t *vec);
 
-#define VECTOR_PEEK(vec, type) (type *)(VectorPeek(vec))
+#define VECTOR_PEEK(vec, type) (type *)(carbon_vec_peek(vec))
 
 /**
  * Appends 'how_many' elements of the same source stored in 'data' into the vector by copying how_many * vec->elem_size
@@ -218,7 +218,7 @@ VectorPeek(carbon_vec_t *vec);
  * @return STATUS_OK if success, and STATUS_NULLPTR in case of NULL pointer parameters
  */
 CARBON_EXPORT(bool)
-carbon_vec_repeated_push(carbon_vec_t *vec, const void *data, size_t howOften);
+carbon_vec_repeated_push(carbon_vec_t *vec, const void *data, size_t how_often);
 
 /**
  * Returns a pointer to the last element in this vector, or <code>NULL</code> is the vector is already empty.
@@ -261,18 +261,18 @@ carbon_vec_grow(size_t *numNewSlots, carbon_vec_t *vec);
 CARBON_EXPORT(size_t)
 carbon_vec_length(const carbon_vec_t *vec);
 
-#define CARBON_VECTOR_GET(vec, pos, type) (type *) VectorAt(vec, pos)
+#define CARBON_VECTOR_GET(vec, pos, type) (type *) carbon_vec_at(vec, pos)
 
 #define VECTOR_NEW_AND_GET(vec, type)                                                                                  \
 ({                                                                                                                     \
     type template;                                                                                                     \
-    size_t vectorLength = carbon_vec_length(vec);                                                                           \
-    carbon_vec_push(vec, &template, 1);                                                                                     \
-    CARBON_VECTOR_GET(vec, vectorLength, type);                                                                               \
+    size_t vectorLength = carbon_vec_length(vec);                                                                      \
+    carbon_vec_push(vec, &template, 1);                                                                                \
+    CARBON_VECTOR_GET(vec, vectorLength, type);                                                                        \
 })
 
 CARBON_EXPORT(const void *)
-VectorAt(const carbon_vec_t *vec, size_t pos);
+carbon_vec_at(const carbon_vec_t *vec, size_t pos);
 
 /**
  * Returns the number of elements for which memory is currently reserved in the vector
@@ -281,7 +281,7 @@ VectorAt(const carbon_vec_t *vec, size_t pos);
  * @return 0 in case of NULL pointer to 'vec', or the number of elements otherwise.
  */
 CARBON_EXPORT(size_t)
-VectorCapacity(const carbon_vec_t *vec);
+carbon_vec_capacity(const carbon_vec_t *vec);
 
 /**
  * Set the internal size of <code>vec</code> to its capacity.
@@ -306,7 +306,7 @@ CARBON_EXPORT(const void *)
 carbon_vec_data(const carbon_vec_t *vec);
 
 CARBON_EXPORT(char *)
-VectorToString(const carbon_vec_t ofType(T) *vec,
+carbon_vec_to_string(const carbon_vec_t ofType(T) *vec,
         void (*printerFunc)(carbon_memfile_t *dst, void ofType(T) *values, size_t num_elems));
 
 #define CARBON_VECTOR_ALL(vec, type) (type *) carbon_vec_data(vec)

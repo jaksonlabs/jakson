@@ -85,13 +85,13 @@ typedef struct parallel_extract_arg
 #define HASHCODE_OF(string)                                                                                            \
     HASH_FUNCTION(strlen(string), string)
 
-#define MAKE_GLOBAL(thread_id, localcarbon_string_id_t)                                                                           \
+#define MAKE_GLOBAL(thread_id, localcarbon_string_id_t)                                                                \
     ((thread_id << 54) | localcarbon_string_id_t)
 
 #define GET_OWNER(globalId)                                                                                            \
     (globalId >> 54)
 
-#define GET_carbon_string_id_t(globalId)                                                                                         \
+#define GET_carbon_string_id_t(globalId)                                                                               \
     ((~((carbon_string_id_t) 0)) >> 10 & global_string_id);
 
 static bool this_drop(carbon_strdic_t *self);
@@ -126,8 +126,8 @@ static bool this_setup_carriers(carbon_strdic_t *self, size_t capacity, size_t n
 
 #define THIS_EXTRAS(self)                                                                                              \
 ({                                                                                                                     \
-    CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_ASYNC);                                                                         \
-    (async_extra *) self->extra;                                                                                        \
+    CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_ASYNC);                                                             \
+    (async_extra *) self->extra;                                                                                       \
 })
 
 CARBON_EXPORT (int)
@@ -304,7 +304,7 @@ static void create_thread_assignment(atomic_uint_fast16_t **str_carrier_mapping,
                                    size_t **str_carrier_idx_mapping,
                                    carbon_alloc_t *alloc, size_t num_strings, size_t num_threads)
 {
-    /** map string depending on hash values to a particular carrier */
+    /** carbon_parallel_map_exec string depending on hash values to a particular carrier */
     *str_carrier_mapping = carbon_malloc(alloc, num_strings * sizeof(atomic_uint_fast16_t));
     memset(*str_carrier_mapping, 0, num_strings * sizeof(atomic_uint_fast16_t));
 

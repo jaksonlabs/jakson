@@ -31,9 +31,7 @@
 #include "carbon/carbon-memfile.h"
 #include "carbon/carbon-sort.h"
 #include "carbon/carbon-parallel.h"
-#include "carbon/carbon-reader.h"
 #include "carbon/carbon-slicelist.h"
-#include "carbon/carbon-slotvector.h"
 #include "carbon/carbon-spinlock.h"
 #include "carbon/carbon-strdic.h"
 #include "carbon/carbon-strhash.h"
@@ -46,8 +44,8 @@
 #include "carbon/strdic/carbon-strdic-sync.h"
 #include "carbon/strhash/carbon-strhash-mem.h"
 
-#ifndef CARBON_LIBCARBON_H
-#define CARBON_LIBCARBON_H
+#ifndef CARBON_H
+#define CARBON_H
 
 CARBON_BEGIN_DECL
 

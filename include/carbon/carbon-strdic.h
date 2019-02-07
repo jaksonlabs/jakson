@@ -81,7 +81,7 @@ typedef struct carbon_strdic
     bool (*remove)(carbon_strdic_t *self, carbon_string_id_t *strings, size_t nstrings);
 
     /**
-     * Get the string ids associated with <code>keys</code> in this map (if any).
+     * Get the string ids associated with <code>keys</code> in this carbon_parallel_map_exec (if any).
      *
      * Note: Implementation must ensure thread-safeness
      */

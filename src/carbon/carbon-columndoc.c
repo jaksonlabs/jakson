@@ -276,54 +276,54 @@ bool carbon_columndoc_free(carbon_columndoc_t *doc)
     return true;
 }
 
-#define PRINT_PRIMITIVE_KEY_PART(file, type_name, key_vector, dic, suffix)                                \
-{                                                                                                       \
-    fprintf(file, "\"%s\": { ", type_name);                                                              \
-    if(!carbon_vec_is_empty((key_vector))) {                                                                   \
-        fprintf(file, "\"Keys\": [ ");                                                                  \
-        for (size_t i = 0; i < (key_vector)->num_elems; i++) {                                            \
-            carbon_string_id_t string_id = *CARBON_VECTOR_GET((key_vector), i, carbon_string_id_t);              \
-            fprintf(file, "%"PRIu64"%s", string_id, i + 1 < (key_vector)->num_elems ? ", " : "");                \
-        }                                                                                               \
-        fprintf(file, "], ");                                                                           \
-        fprintf(file, "\"Keys Decoded\": [ ");                                                          \
-        for (size_t i = 0; i < (key_vector)->num_elems; i++) {                                            \
-            carbon_string_id_t string_id = *CARBON_VECTOR_GET((key_vector), i, carbon_string_id_t);              \
-            char **encString = carbon_strdic_extract(dic, &string_id, 1);                              \
-            fprintf(file, "\"%s\"%s", encString[0], i + 1 < (key_vector)->num_elems ? ", " : "");         \
-            carbon_strdic_free(dic, encString);                                                       \
-        }                                                                                               \
-        fprintf(file, "]%s", suffix);                                                                   \
-    }                                                                                                   \
-}                                                                                                       \
+#define PRINT_PRIMITIVE_KEY_PART(file, type_name, key_vector, dic, suffix)                                             \
+{                                                                                                                      \
+    fprintf(file, "\"%s\": { ", type_name);                                                                            \
+    if(!carbon_vec_is_empty((key_vector))) {                                                                           \
+        fprintf(file, "\"Keys\": [ ");                                                                                 \
+        for (size_t i = 0; i < (key_vector)->num_elems; i++) {                                                         \
+            carbon_string_id_t string_id = *CARBON_VECTOR_GET((key_vector), i, carbon_string_id_t);                    \
+            fprintf(file, "%"PRIu64"%s", string_id, i + 1 < (key_vector)->num_elems ? ", " : "");                      \
+        }                                                                                                              \
+        fprintf(file, "], ");                                                                                          \
+        fprintf(file, "\"Keys Decoded\": [ ");                                                                         \
+        for (size_t i = 0; i < (key_vector)->num_elems; i++) {                                                         \
+            carbon_string_id_t string_id = *CARBON_VECTOR_GET((key_vector), i, carbon_string_id_t);                    \
+            char **encString = carbon_strdic_extract(dic, &string_id, 1);                                              \
+            fprintf(file, "\"%s\"%s", encString[0], i + 1 < (key_vector)->num_elems ? ", " : "");                      \
+            carbon_strdic_free(dic, encString);                                                                        \
+        }                                                                                                              \
+        fprintf(file, "]%s", suffix);                                                                                  \
+    }                                                                                                                  \
+}                                                                                                                      \
 
-#define PRINT_PRIMITIVE_COLUMN(file, type_name, key_vector, value_vector, keyIndicesVector, dic, TYPE, FORMAT_STR)           \
-{                                                                                                       \
-    PRINT_PRIMITIVE_KEY_PART(file, type_name, key_vector, dic, ", ")                                      \
-    if(!carbon_vec_is_empty((key_vector))) {                                                                   \
-        fprintf(file, "\"Values\": [ ");                                                                \
-        for (size_t i = 0; i < (value_vector)->num_elems; i++) {                                          \
-            TYPE value = *CARBON_VECTOR_GET(value_vector, i, TYPE);                                             \
-            fprintf(file, FORMAT_STR "%s", value, i + 1 < (value_vector)->num_elems ? ", " : "");         \
-        }                                                                                               \
-        fprintf(file, "] ");                                                                            \
-    }                                                                                                   \
-    fprintf(file, "}, ");                                                                               \
+#define PRINT_PRIMITIVE_COLUMN(file, type_name, key_vector, value_vector, keyIndicesVector, dic, TYPE, FORMAT_STR)     \
+{                                                                                                                      \
+    PRINT_PRIMITIVE_KEY_PART(file, type_name, key_vector, dic, ", ")                                                   \
+    if(!carbon_vec_is_empty((key_vector))) {                                                                           \
+        fprintf(file, "\"Values\": [ ");                                                                               \
+        for (size_t i = 0; i < (value_vector)->num_elems; i++) {                                                       \
+            TYPE value = *CARBON_VECTOR_GET(value_vector, i, TYPE);                                                    \
+            fprintf(file, FORMAT_STR "%s", value, i + 1 < (value_vector)->num_elems ? ", " : "");                      \
+        }                                                                                                              \
+        fprintf(file, "] ");                                                                                           \
+    }                                                                                                                  \
+    fprintf(file, "}, ");                                                                                              \
 }
 
 
-#define PRINT_PRIMITIVE_BOOLEAN_COLUMN(file, type_name, key_vector, value_vector, dic)                             \
-{                                                                                                               \
-    PRINT_PRIMITIVE_KEY_PART(file, type_name, key_vector, dic, ", ")                                              \
+#define PRINT_PRIMITIVE_BOOLEAN_COLUMN(file, type_name, key_vector, value_vector, dic)                                 \
+{                                                                                                                      \
+    PRINT_PRIMITIVE_KEY_PART(file, type_name, key_vector, dic, ", ")                                                   \
     if(!carbon_vec_is_empty((key_vector))) {                                                                           \
-        fprintf(file, "\"Values\": [ ");                                                                        \
-        for (size_t i = 0; i < (value_vector)->num_elems; i++) {                                                  \
-            carbon_bool_t value = *CARBON_VECTOR_GET(value_vector, i, carbon_bool_t);                                     \
-            fprintf(file, "%s%s", value == 0 ? "false" : "true", i + 1 < (value_vector)->num_elems ? ", " : "");  \
-        }                                                                                                       \
-        fprintf(file, "]");                                                                                     \
-    }                                                                                                           \
-    fprintf(file, "}, ");                                                                                       \
+        fprintf(file, "\"Values\": [ ");                                                                               \
+        for (size_t i = 0; i < (value_vector)->num_elems; i++) {                                                       \
+            carbon_bool_t value = *CARBON_VECTOR_GET(value_vector, i, carbon_bool_t);                                  \
+            fprintf(file, "%s%s", value == 0 ? "false" : "true", i + 1 < (value_vector)->num_elems ? ", " : "");       \
+        }                                                                                                              \
+        fprintf(file, "]");                                                                                            \
+    }                                                                                                                  \
+    fprintf(file, "}, ");                                                                                              \
 }
 
 static void print_primitive_null(FILE *file, const char *type_name, const carbon_vec_t ofType(carbon_string_id_t) *key_vector,
@@ -354,74 +354,74 @@ static bool print_primitive_objects(FILE *file, carbon_err_t *err, const char *t
     return true;
 }
 
-#define PRINT_ARRAY(file, type_name, key_vector, value_vector, TYPE, TYPE_FORMAT, nonnull_expr)            \
-{                                                                                                       \
-    fprintf(file, "\"%s\": { ", type_name);                                                              \
-    if(!carbon_vec_is_empty((&key_vector))) {                                                                  \
-        fprintf(file, "\"Keys\": [ ");                                                                  \
-        for (size_t i = 0; i < (&key_vector)->num_elems; i++) {                                           \
-            carbon_string_id_t string_id = *CARBON_VECTOR_GET((&key_vector), i, carbon_string_id_t);             \
-            fprintf(file, "%"PRIu64"%s", string_id, i + 1 < (&key_vector)->num_elems ? ", " : "");               \
-        }                                                                                               \
-        fprintf(file, "], ");                                                                           \
-        fprintf(file, "\"Keys Decoded\": [ ");                                                          \
-        for (size_t i = 0; i < (&key_vector)->num_elems; i++) {                                           \
-            carbon_string_id_t string_id = *CARBON_VECTOR_GET((&key_vector), i, carbon_string_id_t);             \
-            char **encString = carbon_strdic_extract(dic, &string_id, 1);                              \
-            fprintf(file, "\"%s\"%s", encString[0], i + 1 < (&key_vector)->num_elems ? ", " : "");        \
-            carbon_strdic_free(dic, encString);                                                       \
-        }                                                                                               \
-        fprintf(file, "],");                                                                            \
-        fprintf(file, "\"Values\": [ ");                                                                \
-        for (size_t i = 0; i < (&value_vector)->num_elems; i++) {                                         \
-            const carbon_vec_t ofType(TYPE) *values = CARBON_VECTOR_GET(&value_vector, i, carbon_vec_t);      \
-            fprintf(file, "[ ");                                                                        \
-            for (size_t j = 0; j < values->num_elems; j++) {                                             \
-                TYPE value = *CARBON_VECTOR_GET(values, j, TYPE);                                              \
-                if (nonnull_expr) {                                                                     \
-                    fprintf(file, "" TYPE_FORMAT "%s", value, j + 1 < values->num_elems ? ", " : "");    \
-                } else {                                                                                \
-                    fprintf(file, CARBON_NULL_TEXT "%s", j + 1 < values->num_elems ? ", " : "");          \
-                }                                                                                       \
-            }                                                                                           \
-            fprintf(file, "]%s ", i + 1 < (&value_vector)->num_elems ? "," : "");                         \
-        }                                                                                               \
-        fprintf(file, "]");                                                                             \
-    }                                                                                                   \
-    fprintf(file, "}, ");                                                                               \
+#define PRINT_ARRAY(file, type_name, key_vector, value_vector, TYPE, TYPE_FORMAT, nonnull_expr)                        \
+{                                                                                                                      \
+    fprintf(file, "\"%s\": { ", type_name);                                                                            \
+    if(!carbon_vec_is_empty((&key_vector))) {                                                                          \
+        fprintf(file, "\"Keys\": [ ");                                                                                 \
+        for (size_t i = 0; i < (&key_vector)->num_elems; i++) {                                                        \
+            carbon_string_id_t string_id = *CARBON_VECTOR_GET((&key_vector), i, carbon_string_id_t);                   \
+            fprintf(file, "%"PRIu64"%s", string_id, i + 1 < (&key_vector)->num_elems ? ", " : "");                     \
+        }                                                                                                              \
+        fprintf(file, "], ");                                                                                          \
+        fprintf(file, "\"Keys Decoded\": [ ");                                                                         \
+        for (size_t i = 0; i < (&key_vector)->num_elems; i++) {                                                        \
+            carbon_string_id_t string_id = *CARBON_VECTOR_GET((&key_vector), i, carbon_string_id_t);                   \
+            char **encString = carbon_strdic_extract(dic, &string_id, 1);                                              \
+            fprintf(file, "\"%s\"%s", encString[0], i + 1 < (&key_vector)->num_elems ? ", " : "");                     \
+            carbon_strdic_free(dic, encString);                                                                        \
+        }                                                                                                              \
+        fprintf(file, "],");                                                                                           \
+        fprintf(file, "\"Values\": [ ");                                                                               \
+        for (size_t i = 0; i < (&value_vector)->num_elems; i++) {                                                      \
+            const carbon_vec_t ofType(TYPE) *values = CARBON_VECTOR_GET(&value_vector, i, carbon_vec_t);               \
+            fprintf(file, "[ ");                                                                                       \
+            for (size_t j = 0; j < values->num_elems; j++) {                                                           \
+                TYPE value = *CARBON_VECTOR_GET(values, j, TYPE);                                                      \
+                if (nonnull_expr) {                                                                                    \
+                    fprintf(file, "" TYPE_FORMAT "%s", value, j + 1 < values->num_elems ? ", " : "");                  \
+                } else {                                                                                               \
+                    fprintf(file, CARBON_NULL_TEXT "%s", j + 1 < values->num_elems ? ", " : "");                       \
+                }                                                                                                      \
+            }                                                                                                          \
+            fprintf(file, "]%s ", i + 1 < (&value_vector)->num_elems ? "," : "");                                      \
+        }                                                                                                              \
+        fprintf(file, "]");                                                                                            \
+    }                                                                                                                  \
+    fprintf(file, "}, ");                                                                                              \
 }
 
-#define PRINT_BOOLEAN_ARRAY(file, type_name, key_vector, value_vector)                                         \
-{                                                                                                           \
-    fprintf(file, "\"%s\": { ", "Boolean");                                                                 \
-    if(!carbon_vec_is_empty((&key_vector))) {                                                                      \
-        fprintf(file, "\"Keys\": [ ");                                                                      \
-        for (size_t i = 0; i < (&key_vector)->num_elems; i++) {                                               \
-            carbon_string_id_t string_id = *CARBON_VECTOR_GET((&key_vector), i, carbon_string_id_t);                 \
-            fprintf(file, "%"PRIu64"%s", string_id, i + 1 < (&key_vector)->num_elems ? ", " : "");                   \
-        }                                                                                                   \
-        fprintf(file, "], ");                                                                               \
-        fprintf(file, "\"Keys Decoded\": [ ");                                                              \
-        for (size_t i = 0; i < (&key_vector)->num_elems; i++) {                                               \
-            carbon_string_id_t string_id = *CARBON_VECTOR_GET((&key_vector), i, carbon_string_id_t);                 \
-            char **encString = carbon_strdic_extract(dic, &string_id, 1);                                  \
-            fprintf(file, "\"%s\"%s", encString[0], i + 1 < (&key_vector)->num_elems ? ", " : "");            \
-            carbon_strdic_free(dic, encString);                                                           \
-        }                                                                                                   \
-        fprintf(file, "],");                                                                                \
-        fprintf(file, "\"Values\": [ ");                                                                    \
-        for (size_t i = 0; i < (&value_vector)->num_elems; i++) {                                             \
-            const carbon_vec_t ofType(carbon_bool_t) *values = CARBON_VECTOR_GET(&value_vector, i, carbon_vec_t);  \
-            fprintf(file, "[ ");                                                                            \
-            for (size_t j = 0; j < values->num_elems; j++) {                                                 \
-                carbon_bool_t value = *CARBON_VECTOR_GET(values, j, carbon_bool_t);                                  \
-                fprintf(file, "%s%s", value == 0 ? "false" : "true", j + 1 < values->num_elems ? ", " : ""); \
-            }                                                                                               \
-            fprintf(file, "]%s ", i + 1 < (&value_vector)->num_elems ? "," : "");                             \
-        }                                                                                                   \
-        fprintf(file, "]");                                                                                 \
-    }                                                                                                       \
-    fprintf(file, "}, ");                                                                                   \
+#define PRINT_BOOLEAN_ARRAY(file, type_name, key_vector, value_vector)                                                 \
+{                                                                                                                      \
+    fprintf(file, "\"%s\": { ", "Boolean");                                                                            \
+    if(!carbon_vec_is_empty((&key_vector))) {                                                                          \
+        fprintf(file, "\"Keys\": [ ");                                                                                 \
+        for (size_t i = 0; i < (&key_vector)->num_elems; i++) {                                                        \
+            carbon_string_id_t string_id = *CARBON_VECTOR_GET((&key_vector), i, carbon_string_id_t);                   \
+            fprintf(file, "%"PRIu64"%s", string_id, i + 1 < (&key_vector)->num_elems ? ", " : "");                     \
+        }                                                                                                              \
+        fprintf(file, "], ");                                                                                          \
+        fprintf(file, "\"Keys Decoded\": [ ");                                                                         \
+        for (size_t i = 0; i < (&key_vector)->num_elems; i++) {                                                        \
+            carbon_string_id_t string_id = *CARBON_VECTOR_GET((&key_vector), i, carbon_string_id_t);                   \
+            char **encString = carbon_strdic_extract(dic, &string_id, 1);                                              \
+            fprintf(file, "\"%s\"%s", encString[0], i + 1 < (&key_vector)->num_elems ? ", " : "");                     \
+            carbon_strdic_free(dic, encString);                                                                        \
+        }                                                                                                              \
+        fprintf(file, "],");                                                                                           \
+        fprintf(file, "\"Values\": [ ");                                                                               \
+        for (size_t i = 0; i < (&value_vector)->num_elems; i++) {                                                      \
+            const carbon_vec_t ofType(carbon_bool_t) *values = CARBON_VECTOR_GET(&value_vector, i, carbon_vec_t);      \
+            fprintf(file, "[ ");                                                                                       \
+            for (size_t j = 0; j < values->num_elems; j++) {                                                           \
+                carbon_bool_t value = *CARBON_VECTOR_GET(values, j, carbon_bool_t);                                    \
+                fprintf(file, "%s%s", value == 0 ? "false" : "true", j + 1 < values->num_elems ? ", " : "");           \
+            }                                                                                                          \
+            fprintf(file, "]%s ", i + 1 < (&value_vector)->num_elems ? "," : "");                                      \
+        }                                                                                                              \
+        fprintf(file, "]");                                                                                            \
+    }                                                                                                                  \
+    fprintf(file, "}, ");                                                                                              \
 }
 
 static void print_array_null(FILE *file, const char *type_name, const carbon_vec_t ofType(carbon_string_id_t) *key_vector,
@@ -532,15 +532,15 @@ static void print_primitive_strings(FILE *file, const char *type_name, const car
 
 }
 
-#define PRINT_COLUMN(file, columnTable, array_idx, type, format_string)               \
-{                                                                                   \
-    const carbon_vec_t *column = CARBON_VECTOR_GET(&columnTable->values, array_idx, carbon_vec_t);      \
-    fprintf(file, "%s", column->num_elems > 1 ? "[" : "");                           \
-    for (size_t i = 0; i < column->num_elems; i++) {                                 \
-        fprintf(file, format_string, *CARBON_VECTOR_GET(column, i, type));                  \
-        fprintf(file, "%s", i + 1 < column->num_elems ? ", " : "");                  \
-    }                                                                               \
-    fprintf(file, "%s", column->num_elems > 1 ? "]" : "");                           \
+#define PRINT_COLUMN(file, columnTable, array_idx, type, format_string)                                                \
+{                                                                                                                      \
+    const carbon_vec_t *column = CARBON_VECTOR_GET(&columnTable->values, array_idx, carbon_vec_t);                     \
+    fprintf(file, "%s", column->num_elems > 1 ? "[" : "");                                                             \
+    for (size_t i = 0; i < column->num_elems; i++) {                                                                   \
+        fprintf(file, format_string, *CARBON_VECTOR_GET(column, i, type));                                             \
+        fprintf(file, "%s", i + 1 < column->num_elems ? ", " : "");                                                    \
+    }                                                                                                                  \
+    fprintf(file, "%s", column->num_elems > 1 ? "]" : "");                                                             \
 }
 
 static bool print_array_objects(FILE *file, carbon_err_t *err, const char *type_name, const carbon_vec_t ofType(carbon_columndoc_columngroup_t) *key_columns,
@@ -1174,7 +1174,7 @@ static bool object_put(carbon_columndoc_obj_t *model, carbon_err_t *err, const c
 
     switch (entryType) {
     case ENTRY_TYPE_NULL:
-        /** For a key which does not map to any value, the value is defined as 'null'  */
+        /** For a key which does not carbon_parallel_map_exec to any value, the value is defined as 'null'  */
         carbon_vec_push(&model->null_prop_keys, key_id, 1);
         break;
     case ENTRY_TYPE_PRIMITIVE:

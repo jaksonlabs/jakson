@@ -25,9 +25,9 @@ CARBON_BEGIN_DECL
 
 typedef carbon_bitmap_t carbon_bloom_t;
 
-#define CARBON_BLOOM_SET(filter, key, keySize)             \
-({                                                         \
-    size_t nbits = carbon_bitmap_nbits(filter);                  \
+#define CARBON_BLOOM_SET(filter, key, keySize)                     \
+({                                                                 \
+    size_t nbits = carbon_bitmap_nbits(filter);                    \
     size_t b0 = CARBON_HASH_ADDITIVE(keySize, key) % nbits;        \
     size_t b1 = CARBON_HASH_XOR(keySize, key) % nbits;             \
     size_t b2 = CARBON_HASH_ROT(keySize, key) % nbits;             \
@@ -38,9 +38,9 @@ typedef carbon_bitmap_t carbon_bloom_t;
     carbon_bitmap_set(filter, b3, true);                           \
 })
 
-#define CARBON_BLOOM_TEST(filter, key, keySize)             \
-({                                                         \
-    size_t nbits = carbon_bitmap_nbits(filter);                  \
+#define CARBON_BLOOM_TEST(filter, key, keySize)                    \
+({                                                                 \
+    size_t nbits = carbon_bitmap_nbits(filter);                    \
     size_t b0 = CARBON_HASH_ADDITIVE(keySize, key) % nbits;        \
     size_t b1 = CARBON_HASH_XOR(keySize, key) % nbits;             \
     size_t b2 = CARBON_HASH_ROT(keySize, key) % nbits;             \
@@ -49,12 +49,12 @@ typedef carbon_bitmap_t carbon_bloom_t;
     bool b1set = carbon_bitmap_get(filter, b1);                    \
     bool b2set = carbon_bitmap_get(filter, b2);                    \
     bool b3set = carbon_bitmap_get(filter, b3);                    \
-    (b0set && b1set && b2set && b3set);                    \
+    (b0set && b1set && b2set && b3set);                            \
 })
 
-#define CARBON_BLOOM_TEST_AND_SET(filter, key, keySize)     \
-({                                                         \
-    size_t nbits = carbon_bitmap_nbits(filter);                  \
+#define CARBON_BLOOM_TEST_AND_SET(filter, key, keySize)            \
+({                                                                 \
+    size_t nbits = carbon_bitmap_nbits(filter);                    \
     size_t b0 = CARBON_HASH_ADDITIVE(keySize, key) % nbits;        \
     size_t b1 = CARBON_HASH_XOR(keySize, key) % nbits;             \
     size_t b2 = CARBON_HASH_ROT(keySize, key) % nbits;             \
@@ -67,7 +67,7 @@ typedef carbon_bitmap_t carbon_bloom_t;
     carbon_bitmap_set(filter, b1, true);                           \
     carbon_bitmap_set(filter, b2, true);                           \
     carbon_bitmap_set(filter, b3, true);                           \
-    (b0set && b1set && b2set && b3set);                    \
+    (b0set && b1set && b2set && b3set);                            \
 })
 
 CARBON_EXPORT(bool)

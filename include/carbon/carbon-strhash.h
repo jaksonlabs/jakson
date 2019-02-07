@@ -28,15 +28,15 @@
  * indirection cost to compare keys, e.g., by calling a function pointer to compare two objects like clib suggest it,
  * and to ensure that the value is embedded in continuous memory rather than a pointer to another distant memory block.
  *
- * Internally, the map is organized by paritions where each partition is assigned exclusively to one thread. Each
- * such parition contains of as a vector of length 'num_buckets' which contains of elements of a bucket type.
- * A bucket type is an fixed-size array of entries, each containing a key and a value. In case of no collisions, this
- * array contains of exactly one element. In case of collisions, colliding keys are stored in this array of entries in
- * the same bucket. To speedup lookups, this entry vector may be additionally sorted and a (specialized) binary search
- * is invoked to find the bucket entry associated to a particular key (if any). Other lookup strategies includes
- * both single and multi-threaded forward scans. Which strategy to use in which case is decided by the map itself,
- * however. To satisfy user-specific memory limitations, some per-bucket elements may be swapped out to a didicated
- * swap space.
+ * Internally, the carbon_parallel_map_exec is organized by paritions where each partition is assigned exclusively to
+ * one thread. Each such parition contains of as a vector of length 'num_buckets' which contains of elements of a bucket
+ * type. A bucket type is an fixed-size array of entries, each containing a key and a value. In case of no collisions,
+ * this array contains of exactly one element. In case of collisions, colliding keys are stored in this array of entries
+ * in the same bucket. To speedup lookups, this entry vector may be additionally sorted and a (specialized) binary
+ * search is invoked to find the bucket entry associated to a particular key (if any). Other lookup strategies includes
+ * both single and multi-threaded forward scans. Which strategy to use in which case is decided by the
+ * carbon_parallel_map_exec itself, however. To satisfy user-specific memory limitations, some per-bucket elements may
+ * be swapped out to a didicated swap space.
  *
  * The underlying hashing function is the Jenkins hash function.
  */
@@ -123,12 +123,12 @@ typedef struct carbon_strhash
     int (*drop)(carbon_strhash_t *self);
 
     /**
-     * Put <code>num_pair</code> objects into this map maybe updating old objects with the same key.
+     * Put <code>num_pair</code> objects into this carbon_parallel_map_exec maybe updating old objects with the same key.
      */
     int (*put_bulk_safe)(carbon_strhash_t *self, char *const *keys, const carbon_string_id_t *values, size_t npairs);
 
     /**
-     * Put <code>num_pair</code> objects into this map maybe without checking for updates.
+     * Put <code>num_pair</code> objects into this carbon_parallel_map_exec maybe without checking for updates.
      */
     int (*put_bulk_fast)(carbon_strhash_t *self, char *const *keys, const carbon_string_id_t *values, size_t npairs);
 
@@ -143,7 +143,7 @@ typedef struct carbon_strhash
     int (*put_exact_fast)(carbon_strhash_t *self, const char *key, carbon_string_id_t value);
 
     /**
-     * Get the values associated with <code>keys</code> in this map (if any).
+     * Get the values associated with <code>keys</code> in this carbon_parallel_map_exec (if any).
      */
     int (*get_bulk_safe)(carbon_strhash_t *self, carbon_string_id_t **out, bool **found_mask, size_t *nnot_found,
                          char *const *keys, size_t nkeys);
@@ -154,23 +154,23 @@ typedef struct carbon_strhash
     int (*get_exact_safe)(carbon_strhash_t *self, carbon_string_id_t *out, bool *found_mask, const char *key);
 
     /**
-     * Get the values associated with <code>keys</code> in this map. All keys <u>must</u> exist.
+     * Get the values associated with <code>keys</code> in this carbon_parallel_map_exec. All keys <u>must</u> exist.
      */
     int (*get_fast)(carbon_strhash_t *self, carbon_string_id_t **out, char *const *keys, size_t nkeys);
 
     /**
-     * Updates keys associated with <code>values</code> in this map. All values <u>must</u> exist, and the
+     * Updates keys associated with <code>values</code> in this carbon_parallel_map_exec. All values <u>must</u> exist, and the
      * mapping between keys and values must be bidirectional.
      */
     int (*update_key_fast)(carbon_strhash_t *self, const carbon_string_id_t *values, char *const *keys, size_t nkeys);
 
     /**
-     * Removes the objects with the gives keys from this map
+     * Removes the objects with the gives keys from this carbon_parallel_map_exec
      */
     int (*remove)(carbon_strhash_t *self, char *const *keys, size_t nkeys);
 
     /**
-     * Frees up allocated memory for <code>ptr</code> via the allocator in <code>map</code> that was specified
+     * Frees up allocated memory for <code>ptr</code> via the allocator in <code>carbon_parallel_map_exec</code> that was specified
      * by the call to <code>string_id_map_create</code>
      */
     int (*free)(carbon_strhash_t *self, void *ptr);
@@ -185,74 +185,74 @@ typedef struct carbon_strhash
 CARBON_DEFINE_GET_ERROR_FUNCTION(carbon_strhash_t, carbon_strhash_t, table);
 
 /**
- * Frees resources bound to <code>map</code> via the allocator specified by the call to <code>string_id_map_create</code>.
+ * Frees resources bound to <code>carbon_parallel_map_exec</code> via the allocator specified by the call to <code>string_id_map_create</code>.
  *
- * @param map a non-null pointer to the map
+ * @param carbon_parallel_map_exec a non-null pointer to the carbon_parallel_map_exec
  * @return <code>true</code> in case of success, otherwise a value indiciating the error.
  */
 inline static int
-carbon_strhash_drop(carbon_strhash_t *map)
+carbon_strhash_drop(carbon_strhash_t *carbon_parallel_map_exec)
 {
-    CARBON_NON_NULL_OR_ERROR(map);
-    assert(map->drop);
+    CARBON_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
+    assert(carbon_parallel_map_exec->drop);
 
-    return map->drop(map);
+    return carbon_parallel_map_exec->drop(carbon_parallel_map_exec);
 }
 
 /**
  * Resets statistics counters
  *
- * @param map a non-null pointer to the map
+ * @param carbon_parallel_map_exec a non-null pointer to the carbon_parallel_map_exec
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
 inline static bool
-carbon_strhash_reset_counters(carbon_strhash_t *map)
+carbon_strhash_reset_counters(carbon_strhash_t *carbon_parallel_map_exec)
 {
-    CARBON_NON_NULL_OR_ERROR(map);
-    memset(&map->counters, 0, sizeof(carbon_string_hash_counters_t));
+    CARBON_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
+    memset(&carbon_parallel_map_exec->counters, 0, sizeof(carbon_string_hash_counters_t));
     return true;
 }
 
 /**
  * Returns statistics counters
  * @param out non-null pointer to destination counter
- * @param map non-null pointer to the map
+ * @param carbon_parallel_map_exec non-null pointer to the carbon_parallel_map_exec
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
 inline static int
-carbon_strhash_get_counters(carbon_string_hash_counters_t *out, const carbon_strhash_t *map)
+carbon_strhash_get_counters(carbon_string_hash_counters_t *out, const carbon_strhash_t *carbon_parallel_map_exec)
 {
-    CARBON_NON_NULL_OR_ERROR(map);
+    CARBON_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
     CARBON_NON_NULL_OR_ERROR(out);
-    *out = map->counters;
+    *out = carbon_parallel_map_exec->counters;
     return true;
 }
 
 /**
- * Put <code>num_pair</code> objects into this map maybe updating old objects with the same key. If it is
+ * Put <code>num_pair</code> objects into this carbon_parallel_map_exec maybe updating old objects with the same key. If it is
  * guaranteed that the key is not yet inserted into this table, use <code>string_hashtable_put_blind</code>
  * instead.
  *
- * @param map a non-null pointer to the map
+ * @param carbon_parallel_map_exec a non-null pointer to the carbon_parallel_map_exec
  * @param keys a non-null constant pointer to a list of at least <code>num_pairs</code> length of constant strings
  * @param values a non-null constant pointer to a list of at least <code>num_pairs</code> length of 64bit values
  * @param num_pairs the number of pairs that are read via <code>keys</code> and <code>values</code>
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
 inline static int
-carbon_strhash_put_safe(carbon_strhash_t *map, char *const *keys, const carbon_string_id_t *values,
+carbon_strhash_put_safe(carbon_strhash_t *carbon_parallel_map_exec, char *const *keys, const carbon_string_id_t *values,
                         size_t npairs)
 {
-    CARBON_NON_NULL_OR_ERROR(map);
+    CARBON_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
     CARBON_NON_NULL_OR_ERROR(keys);
     CARBON_NON_NULL_OR_ERROR(values);
-    assert(map->put_bulk_safe);
+    assert(carbon_parallel_map_exec->put_bulk_safe);
 
-    return map->put_bulk_safe(map, keys, values, npairs);
+    return carbon_parallel_map_exec->put_bulk_safe(carbon_parallel_map_exec, keys, values, npairs);
 }
 
 /**
- * Put <code>num_pair</code> objects into this map, ingoring whether the key exists or not. This function is
+ * Put <code>num_pair</code> objects into this carbon_parallel_map_exec, ingoring whether the key exists or not. This function is
  * useful for insert operations of pairs where it is guaranteed that the keys are not yet inserted into this hashtable.
  * In case this guarantee is broken, the behavior is undefined. Depending on the implementation, this specialized
  * <code>put</code> function may have a better performance.
@@ -260,91 +260,91 @@ carbon_strhash_put_safe(carbon_strhash_t *map, char *const *keys, const carbon_s
  * If a check for existence is required, use <code>string_hashtable_put_test</code>
  * instead.
  *
- * @param map a non-null pointer to the map
+ * @param carbon_parallel_map_exec a non-null pointer to the carbon_parallel_map_exec
  * @param keys a non-null constant pointer to a list of at least <code>num_pairs</code> length of constant strings
  * @param values a non-null constant pointer to a list of at least <code>num_pairs</code> length of 64bit values
  * @param num_pairs the number of pairs that are read via <code>keys</code> and <code>values</code>
  * @return <code>true</code> in case of success, otherwise a value indiciating the error.
  */
 inline static int
-carbon_strhash_put_bulk_fast(carbon_strhash_t *map, char *const *keys, const carbon_string_id_t *values,
+carbon_strhash_put_bulk_fast(carbon_strhash_t *carbon_parallel_map_exec, char *const *keys, const carbon_string_id_t *values,
                              size_t npairs)
 {
-    CARBON_NON_NULL_OR_ERROR(map);
+    CARBON_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
     CARBON_NON_NULL_OR_ERROR(keys);
     CARBON_NON_NULL_OR_ERROR(values);
-    assert(map->put_bulk_fast);
+    assert(carbon_parallel_map_exec->put_bulk_fast);
 
-    return map->put_bulk_fast(map, keys, values, npairs);
+    return carbon_parallel_map_exec->put_bulk_fast(carbon_parallel_map_exec, keys, values, npairs);
 }
 
 /**
  * Same as 'string_lookup_put_bulk' but specialized for a single pair
  */
 inline static int
-carbon_strhash_put_exact(carbon_strhash_t *map, const char *key, carbon_string_id_t value)
+carbon_strhash_put_exact(carbon_strhash_t *carbon_parallel_map_exec, const char *key, carbon_string_id_t value)
 {
-    CARBON_NON_NULL_OR_ERROR(map);
+    CARBON_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
     CARBON_NON_NULL_OR_ERROR(key);
-    assert(map->put_exact_safe);
+    assert(carbon_parallel_map_exec->put_exact_safe);
 
-    return map->put_exact_safe(map, key, value);
+    return carbon_parallel_map_exec->put_exact_safe(carbon_parallel_map_exec, key, value);
 }
 
 /**
  * Same as 'string_lookup_put_fast_bulk' but specialized for a single pair
  */
 inline static int
-carbon_strhash_put_exact_fast(carbon_strhash_t *map, const char *key, carbon_string_id_t value)
+carbon_strhash_put_exact_fast(carbon_strhash_t *carbon_parallel_map_exec, const char *key, carbon_string_id_t value)
 {
-    CARBON_NON_NULL_OR_ERROR(map);
+    CARBON_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
     CARBON_NON_NULL_OR_ERROR(key);
 
-    assert(map->put_exact_fast);
+    assert(carbon_parallel_map_exec->put_exact_fast);
 
-    return map->put_exact_fast(map, key, value);
+    return carbon_parallel_map_exec->put_exact_fast(carbon_parallel_map_exec, key, value);
 }
 
 /**
- * Get the values associated with <code>keys</code> in this map (if any). In case one <code>key</code> does not
+ * Get the values associated with <code>keys</code> in this carbon_parallel_map_exec (if any). In case one <code>key</code> does not
  * exists, the function will return this information via the parameters <code>found_mask</code> and
  * <code>num_not_found</code>. However, in case it is guaranteed that all keys exist, consider to use
  * <code>string_id_map_get_blind</code> instead. *
  *
- * @param out A non-null pointer to an unallocated memory address. The map will allocate enough memory to store the
+ * @param out A non-null pointer to an unallocated memory address. The carbon_parallel_map_exec will allocate enough memory to store the
  *            result. There are <code>num_keys</code> elements returned, but not all of them are guaranteed to
  *            contain a particular value. That an entry does not contain a particular value happens if the
- *            associated key is not stored in this map. Whether or not one particular entry is a valid value,
+ *            associated key is not stored in this carbon_parallel_map_exec. Whether or not one particular entry is a valid value,
  *            can be determined by the caller via the <code>found_mask</code>.
  *            <b>Important</b> <code>out</code> must be freed manually by calling <code>string_id_map_free</code>.
- * @param found_mask A non-null pointer to an unallocated memory address. The map will allocate enough memory to store
+ * @param found_mask A non-null pointer to an unallocated memory address. The carbon_parallel_map_exec will allocate enough memory to store
  *            the result. There are <code>num_keys</code> boolean values returned. This mask is used to determine
- *            if the i-th key has a mapping in this map. If this is the case, the i-th entry in <code>found_mask</code>
+ *            if the i-th key has a mapping in this carbon_parallel_map_exec. If this is the case, the i-th entry in <code>found_mask</code>
  *            is <b>true</b> and the i-th entry in <code>out</code> holds the value. Otherwise, in case the i-th
  *            value in <code>found_mask</code> is <b>false</b>, there is no value stored to the i-th key in
  *            <code>keys</code>, and reading <code>out</code> for the i-th position is undefined.
  * @param num_not_found A non-null pointer to a value that will store the number of keys in <code>keys</code> for
- *                      which no value is stored in this map.
+ *                      which no value is stored in this carbon_parallel_map_exec.
  * @param num_out A non-null pointer to an unsigned integer that will contain the number of values return by the
  *                call to this function.
- * @param map a non-null pointer to the map
+ * @param carbon_parallel_map_exec a non-null pointer to the carbon_parallel_map_exec
  * @param keys a non-null pointer to a list of at least <code>num_keys</code> strings
  * @param num_keys the number of keys
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
 inline static int
 carbon_strhash_get_bulk_safe(carbon_string_id_t **out, bool **found_mask, size_t *num_not_found,
-                             carbon_strhash_t *map,
+                             carbon_strhash_t *carbon_parallel_map_exec,
                              char *const *keys, size_t nkeys)
 {
     CARBON_NON_NULL_OR_ERROR(out);
     CARBON_NON_NULL_OR_ERROR(found_mask);
     CARBON_NON_NULL_OR_ERROR(num_not_found);
-    CARBON_NON_NULL_OR_ERROR(map);
+    CARBON_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
     CARBON_NON_NULL_OR_ERROR(keys);
-    assert(map->get_bulk_safe);
+    assert(carbon_parallel_map_exec->get_bulk_safe);
 
-    int result = map->get_bulk_safe(map, out, found_mask, num_not_found, keys, nkeys);
+    int result = carbon_parallel_map_exec->get_bulk_safe(carbon_parallel_map_exec, out, found_mask, num_not_found, keys, nkeys);
 
     assert (out != NULL);
     assert (found_mask != NULL);
@@ -353,15 +353,15 @@ carbon_strhash_get_bulk_safe(carbon_string_id_t **out, bool **found_mask, size_t
 }
 
 inline static int
-carbon_strhash_get_bulk_safe_exact(carbon_string_id_t *out, bool *found, carbon_strhash_t *map, const char *key)
+carbon_strhash_get_bulk_safe_exact(carbon_string_id_t *out, bool *found, carbon_strhash_t *carbon_parallel_map_exec, const char *key)
 {
     CARBON_NON_NULL_OR_ERROR(out);
     CARBON_NON_NULL_OR_ERROR(found);
-    CARBON_NON_NULL_OR_ERROR(map);
+    CARBON_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
     CARBON_NON_NULL_OR_ERROR(key);
-    assert(map->get_exact_safe);
+    assert(carbon_parallel_map_exec->get_exact_safe);
 
-    int result = map->get_exact_safe(map, out, found, key);
+    int result = carbon_parallel_map_exec->get_exact_safe(carbon_parallel_map_exec, out, found, key);
 
     assert (out != NULL);
     assert (found != NULL);
@@ -370,30 +370,30 @@ carbon_strhash_get_bulk_safe_exact(carbon_string_id_t *out, bool *found, carbon_
 }
 
 /**
- * Get the values associated with <code>keys</code> in this map. In case one <code>key</code> does not
+ * Get the values associated with <code>keys</code> in this carbon_parallel_map_exec. In case one <code>key</code> does not
  * exists, the behavior is undefined.
  *
  * However, if it cannot be guaranteed that all keys are known, use
  * <code>string_id_map_get_test</code> instead.
  *
- * @param out A non-null pointer to an unallocated memory address. The map will allocate <code>num_keys</code>
+ * @param out A non-null pointer to an unallocated memory address. The carbon_parallel_map_exec will allocate <code>num_keys</code>
  *            times <code>sizeof(carbon_string_id_t)</code> bytes memory to store the result. There are <code>num_keys</code>
  *            elements returned, and all of them are guaranteed to contain a particular value.
- * @param map a non-null pointer to the map
+ * @param carbon_parallel_map_exec a non-null pointer to the carbon_parallel_map_exec
  * @param keys a non-null pointer to a list of at least <code>num_keys</code> strings
  * @param num_keys the number of keys
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
 inline static int
-carbon_strhash_get_bulk_fast(carbon_string_id_t **out, carbon_strhash_t *map,
+carbon_strhash_get_bulk_fast(carbon_string_id_t **out, carbon_strhash_t *carbon_parallel_map_exec,
                              char *const *keys, size_t nkeys)
 {
     CARBON_NON_NULL_OR_ERROR(out);
-    CARBON_NON_NULL_OR_ERROR(map);
+    CARBON_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
     CARBON_NON_NULL_OR_ERROR(keys);
-    assert(map->get_fast);
+    assert(carbon_parallel_map_exec->get_fast);
 
-    return map->get_fast(map, out, keys, nkeys);
+    return carbon_parallel_map_exec->get_fast(carbon_parallel_map_exec, out, keys, nkeys);
 }
 
 /**
@@ -403,58 +403,58 @@ carbon_strhash_get_bulk_fast(carbon_string_id_t **out, carbon_strhash_t *map,
  * If you want to update a value given its key, use <code>string_hashtable_put_test</code> or
  * <code>string_hashtable_put_blind</code> instead.
  *
- * @param out A non-null pointer to an unallocated memory address. The map will allocate <code>num_keys</code>
+ * @param out A non-null pointer to an unallocated memory address. The carbon_parallel_map_exec will allocate <code>num_keys</code>
  *            times <code>sizeof(carbon_string_id_t)</code> bytes memory to store the result. There are <code>num_keys</code>
  *            elements returned, and all of them are guaranteed to contain a particular value.
- * @param map a non-null pointer to the map
+ * @param carbon_parallel_map_exec a non-null pointer to the carbon_parallel_map_exec
  * @param keys a non-null pointer to a list of at least <code>num_keys</code> strings
  * @param num_keys the number of keys
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
 inline static int
-carbon_strhash_update_fast(carbon_strhash_t *map, const carbon_string_id_t *values,
+carbon_strhash_update_fast(carbon_strhash_t *carbon_parallel_map_exec, const carbon_string_id_t *values,
                            char *const *keys, size_t nkeys)
 {
-    CARBON_NON_NULL_OR_ERROR(map);
+    CARBON_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
     CARBON_NON_NULL_OR_ERROR(keys);
-    assert(map->update_key_fast);
+    assert(carbon_parallel_map_exec->update_key_fast);
 
-    return map->update_key_fast(map, values, keys, nkeys);
+    return carbon_parallel_map_exec->update_key_fast(carbon_parallel_map_exec, values, keys, nkeys);
 }
 
 /**
- * Removes the objects with the gives keys from this map
+ * Removes the objects with the gives keys from this carbon_parallel_map_exec
  *
- * @param map a non-null pointer to the map
+ * @param carbon_parallel_map_exec a non-null pointer to the carbon_parallel_map_exec
  * @param keys a non-null pointer to a list of at least <code>num_keys</code> strings
  * @param num_keys the number of keys
  * @return
  */
 inline static int
-carbon_strhash_remove(carbon_strhash_t *map, char *const *keys, size_t nkeys)
+carbon_strhash_remove(carbon_strhash_t *carbon_parallel_map_exec, char *const *keys, size_t nkeys)
 {
-    CARBON_NON_NULL_OR_ERROR(map);
+    CARBON_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
     CARBON_NON_NULL_OR_ERROR(keys);
-    assert(map->remove);
+    assert(carbon_parallel_map_exec->remove);
 
-    return map->remove(map, keys, nkeys);
+    return carbon_parallel_map_exec->remove(carbon_parallel_map_exec, keys, nkeys);
 }
 
 /**
- * Frees up allocated memory for <code>values</code> via the allocator in <code>map</code> that was specified
+ * Frees up allocated memory for <code>values</code> via the allocator in <code>carbon_parallel_map_exec</code> that was specified
  * by the call to <code>string_id_map_create</code>
  *
  * @param values A non-null pointer (potentially resulting from a call to <code>string_id_map_get</code>)
  * @return <code>true</code> in case of success, otherwise a value indiciating the error.
  */
 inline static int
-carbon_strhash_free(void *ptr, carbon_strhash_t *map)
+carbon_strhash_free(void *ptr, carbon_strhash_t *carbon_parallel_map_exec)
 {
     CARBON_NON_NULL_OR_ERROR(ptr);
-    CARBON_NON_NULL_OR_ERROR(map);
-    assert(map->free);
+    CARBON_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
+    assert(carbon_parallel_map_exec->free);
 
-    return map->free(map, ptr);
+    return carbon_parallel_map_exec->free(carbon_parallel_map_exec, ptr);
 }
 
 /**

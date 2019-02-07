@@ -25,7 +25,7 @@ carbon_bitmap_create(carbon_bitmap_t *bitmap, uint16_t num_bits)
     carbon_alloc_t alloc;
     carbon_alloc_create_std(&alloc);
     carbon_vec_create(&bitmap->data, &alloc, sizeof(uint32_t), ceil(num_bits / (double) CARBON_NUM_BITS(uint32_t)));
-    size_t cap = VectorCapacity(&bitmap->data);
+    size_t cap = carbon_vec_capacity(&bitmap->data);
     uint32_t zero = 0;
     carbon_vec_repeated_push(&bitmap->data, &zero, cap);
     bitmap->num_bits = num_bits;
@@ -57,7 +57,7 @@ carbon_bitmap_clear(carbon_bitmap_t *bitset)
 {
     CARBON_NON_NULL_OR_ERROR(bitset);
     void *data = (void *) carbon_vec_data(&bitset->data);
-    memset(data, 0, sizeof(uint32_t) * VectorCapacity(&bitset->data));
+    memset(data, 0, sizeof(uint32_t) * carbon_vec_capacity(&bitset->data));
     return true;
 }
 

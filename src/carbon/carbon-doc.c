@@ -698,12 +698,12 @@ carbon_doc_entries_t *carbon_doc_bulk_new_entries(carbon_doc_bulk_t *dst)
     return partition;
 }
 
-#define DEFINE_CARBON_TYPE_LQ_FUNC(type)                                         \
-static bool compare##type##LessEqFunc(const void *lhs, const void *rhs)         \
-{                                                                               \
-    type a = *(type *) lhs;                                                     \
-    type b = *(type *) rhs;                                                     \
-    return (a <= b);                                                            \
+#define DEFINE_CARBON_TYPE_LQ_FUNC(type)                                                                               \
+static bool compare##type##LessEqFunc(const void *lhs, const void *rhs)                                                \
+{                                                                                                                      \
+    type a = *(type *) lhs;                                                                                            \
+    type b = *(type *) rhs;                                                                                            \
+    return (a <= b);                                                                                                   \
 }
 
 DEFINE_CARBON_TYPE_LQ_FUNC(carbon_bool_t)
@@ -740,20 +740,20 @@ static void sort_nested_primitive_object(carbon_columndoc_obj_t *columndoc)
     }
 }
 
-#define DEFINE_CARBON_ARRAY_TYPE_LQ_FUNC(type)                                       \
-static bool compare##type##ArrayLessEqFunc(const void *lhs, const void *rhs)        \
-{                                                                                   \
-    carbon_vec_t ofType(type) *a = (carbon_vec_t *) lhs;                                        \
-    carbon_vec_t ofType(type) *b = (carbon_vec_t *) rhs;                                        \
-    const type *aValues = CARBON_VECTOR_ALL(a, type);                                      \
-    const type *bValues = CARBON_VECTOR_ALL(b, type);                                      \
-    size_t max_compare_idx = a->num_elems < b->num_elems ? a->num_elems : b->num_elems;   \
-    for (size_t i = 0; i < max_compare_idx; i++) {                                    \
-        if (aValues[i] > bValues[i]) {                                              \
-            return false;                                                           \
-        }                                                                           \
-    }                                                                               \
-    return true;                                                                    \
+#define DEFINE_CARBON_ARRAY_TYPE_LQ_FUNC(type)                                                                         \
+static bool compare##type##ArrayLessEqFunc(const void *lhs, const void *rhs)                                           \
+{                                                                                                                      \
+    carbon_vec_t ofType(type) *a = (carbon_vec_t *) lhs;                                                               \
+    carbon_vec_t ofType(type) *b = (carbon_vec_t *) rhs;                                                               \
+    const type *aValues = CARBON_VECTOR_ALL(a, type);                                                                  \
+    const type *bValues = CARBON_VECTOR_ALL(b, type);                                                                  \
+    size_t max_compare_idx = a->num_elems < b->num_elems ? a->num_elems : b->num_elems;                                \
+    for (size_t i = 0; i < max_compare_idx; i++) {                                                                     \
+        if (aValues[i] > bValues[i]) {                                                                                 \
+            return false;                                                                                              \
+        }                                                                                                              \
+    }                                                                                                                  \
+    return true;                                                                                                       \
 }
 
 DEFINE_CARBON_ARRAY_TYPE_LQ_FUNC(carbon_bool_t)
@@ -813,36 +813,36 @@ static void sorted_nested_array_objects(carbon_columndoc_obj_t *columndoc)
     }
 }
 
-#define SORT_META_MODEL_VALUES(key_vector, value_vector, value_type, compareValueFunc)                                    \
+#define SORT_META_MODEL_VALUES(key_vector, value_vector, value_type, compareValueFunc)                                 \
 {                                                                                                                      \
-    size_t num_elements = carbon_vec_length(&key_vector);                                                                     \
+    size_t num_elements = carbon_vec_length(&key_vector);                                                              \
                                                                                                                        \
-    if (num_elements > 0) {                                                                                             \
-        size_t *value_indicies = malloc(sizeof(size_t) * num_elements);                                                  \
-        for (size_t i = 0; i < num_elements; i++) {                                                                     \
-            value_indicies[i] = i;                                                                                      \
+    if (num_elements > 0) {                                                                                            \
+        size_t *value_indicies = malloc(sizeof(size_t) * num_elements);                                                \
+        for (size_t i = 0; i < num_elements; i++) {                                                                    \
+            value_indicies[i] = i;                                                                                     \
         }                                                                                                              \
                                                                                                                        \
-        carbon_vec_t ofType(carbon_string_id_t) key_cpy;                                                                                \
-        carbon_vec_t ofType(value_type) value_cpy;                                                                             \
+        carbon_vec_t ofType(carbon_string_id_t) key_cpy;                                                               \
+        carbon_vec_t ofType(value_type) value_cpy;                                                                     \
                                                                                                                        \
-        carbon_vec_cpy(&key_cpy, &key_vector);                                                                                \
-        carbon_vec_cpy(&value_cpy, &value_vector);                                                                            \
+        carbon_vec_cpy(&key_cpy, &key_vector);                                                                         \
+        carbon_vec_cpy(&value_cpy, &value_vector);                                                                     \
                                                                                                                        \
-        value_type *values = CARBON_VECTOR_ALL(&value_cpy, value_type);                                                          \
+        value_type *values = CARBON_VECTOR_ALL(&value_cpy, value_type);                                                \
                                                                                                                        \
-        carbon_sort_qsort_indicies(value_indicies, values, sizeof(value_type), compareValueFunc, num_elements,                         \
-                      key_vector.allocator);                                                                            \
+        carbon_sort_qsort_indicies(value_indicies, values, sizeof(value_type), compareValueFunc, num_elements,         \
+                      key_vector.allocator);                                                                           \
                                                                                                                        \
-        for (size_t i = 0; i < num_elements; i++) {                                                                     \
-            carbon_vec_set(&key_vector, i, CARBON_VECTOR_GET(&key_cpy, value_indicies[i], carbon_string_id_t));                                 \
-            carbon_vec_set(&value_vector, i, CARBON_VECTOR_GET(&value_cpy, value_indicies[i], value_type));                            \
+        for (size_t i = 0; i < num_elements; i++) {                                                                    \
+            carbon_vec_set(&key_vector, i, CARBON_VECTOR_GET(&key_cpy, value_indicies[i], carbon_string_id_t));        \
+            carbon_vec_set(&value_vector, i, CARBON_VECTOR_GET(&value_cpy, value_indicies[i], value_type));            \
         }                                                                                                              \
                                                                                                                        \
                                                                                                                        \
-        free(value_indicies);                                                                                           \
-        carbon_vec_drop(&key_cpy);                                                                                           \
-        carbon_vec_drop(&value_cpy);                                                                                         \
+        free(value_indicies);                                                                                          \
+        carbon_vec_drop(&key_cpy);                                                                                     \
+        carbon_vec_drop(&value_cpy);                                                                                   \
     }                                                                                                                  \
 }
 
@@ -884,35 +884,35 @@ static void sort_meta_model_string_values(carbon_vec_t ofType(carbon_string_id_t
     }
 }
 
-#define SORT_META_MODEL_ARRAYS(key_vector, value_array_vector, compare_func)                                               \
+#define SORT_META_MODEL_ARRAYS(key_vector, value_array_vector, compare_func)                                           \
 {                                                                                                                      \
-    size_t num_elements = carbon_vec_length(&key_vector);                                                                     \
+    size_t num_elements = carbon_vec_length(&key_vector);                                                              \
                                                                                                                        \
-    if (num_elements > 0) {                                                                                             \
-        size_t *value_indicies = malloc(sizeof(size_t) * num_elements);                                                  \
-        for (size_t i = 0; i < num_elements; i++) {                                                                     \
-            value_indicies[i] = i;                                                                                      \
+    if (num_elements > 0) {                                                                                            \
+        size_t *value_indicies = malloc(sizeof(size_t) * num_elements);                                                \
+        for (size_t i = 0; i < num_elements; i++) {                                                                    \
+            value_indicies[i] = i;                                                                                     \
         }                                                                                                              \
                                                                                                                        \
-        carbon_vec_t ofType(carbon_string_id_t) key_cpy;                                                                                \
-        carbon_vec_t ofType(carbon_vec_t) value_cpy;                                                                                \
+        carbon_vec_t ofType(carbon_string_id_t) key_cpy;                                                               \
+        carbon_vec_t ofType(carbon_vec_t) value_cpy;                                                                   \
                                                                                                                        \
-        carbon_vec_cpy(&key_cpy, &key_vector);                                                                                \
-        carbon_vec_cpy(&value_cpy, &value_array_vector);                                                                       \
+        carbon_vec_cpy(&key_cpy, &key_vector);                                                                         \
+        carbon_vec_cpy(&value_cpy, &value_array_vector);                                                               \
                                                                                                                        \
-        const carbon_vec_t *values = CARBON_VECTOR_ALL(&value_array_vector, carbon_vec_t);                                                  \
+        const carbon_vec_t *values = CARBON_VECTOR_ALL(&value_array_vector, carbon_vec_t);                             \
                                                                                                                        \
-        carbon_sort_qsort_indicies(value_indicies, values, sizeof(carbon_vec_t), compare_func, num_elements,                                 \
-                      key_vector.allocator);                                                                            \
+        carbon_sort_qsort_indicies(value_indicies, values, sizeof(carbon_vec_t), compare_func, num_elements,           \
+                      key_vector.allocator);                                                                           \
                                                                                                                        \
-        for (size_t i = 0; i < num_elements; i++) {                                                                     \
-            carbon_vec_set(&key_vector, i, CARBON_VECTOR_GET(&key_cpy, value_indicies[i], carbon_string_id_t));                                 \
-            carbon_vec_set(&value_array_vector, i, CARBON_VECTOR_GET(&value_cpy, value_indicies[i], carbon_vec_t));                          \
+        for (size_t i = 0; i < num_elements; i++) {                                                                    \
+            carbon_vec_set(&key_vector, i, CARBON_VECTOR_GET(&key_cpy, value_indicies[i], carbon_string_id_t));        \
+            carbon_vec_set(&value_array_vector, i, CARBON_VECTOR_GET(&value_cpy, value_indicies[i], carbon_vec_t));    \
         }                                                                                                              \
                                                                                                                        \
-        free(value_indicies);                                                                                           \
-        carbon_vec_drop(&key_cpy);                                                                                           \
-        carbon_vec_drop(&value_cpy);                                                                                         \
+        free(value_indicies);                                                                                          \
+        carbon_vec_drop(&key_cpy);                                                                                     \
+        carbon_vec_drop(&value_cpy);                                                                                   \
     }                                                                                                                  \
 }
 
@@ -987,16 +987,16 @@ typedef struct {
     carbon_field_type_e value_type;
 } compare_column_less_eq_func_arg;
 
-#define ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, type, valueVectorAPtr, valueVectorBPtr)    \
-{                                                                                       \
-    for (size_t i = 0; i < max_num_elem; i++) {                                           \
-        type o1 = *CARBON_VECTOR_GET(valueVectorAPtr, i, type);                                \
-        type o2 = *CARBON_VECTOR_GET(valueVectorBPtr, i, type);                                \
-        if (o1 > o2) {                                                                  \
-            return false;                                                               \
-        }                                                                               \
-    }                                                                                   \
-    return true;                                                                        \
+#define ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, type, valueVectorAPtr, valueVectorBPtr)                                 \
+{                                                                                                                      \
+    for (size_t i = 0; i < max_num_elem; i++) {                                                                        \
+        type o1 = *CARBON_VECTOR_GET(valueVectorAPtr, i, type);                                                        \
+        type o2 = *CARBON_VECTOR_GET(valueVectorBPtr, i, type);                                                        \
+        if (o1 > o2) {                                                                                                 \
+            return false;                                                                                              \
+        }                                                                                                              \
+    }                                                                                                                  \
+    return true;                                                                                                       \
 }
 
 static bool compare_column_less_eq_func(const void *lhs, const void *rhs, void *args)
@@ -1089,15 +1089,15 @@ static void sort_columndoc_column(carbon_columndoc_column_t *column, carbon_strd
 
     carbon_sort_qsort_indicies_wargs(indices,
                                      values_cpy.base,
-                                     values_cpy.elemSize,
+                                     values_cpy.elem_size,
                                      compare_column_less_eq_func,
                                      values_cpy.num_elems,
                                      values_cpy.allocator,
                                      &func_arg);
 
     for (size_t i = 0; i < values_cpy.num_elems; i++) {
-        carbon_vec_set(&column->values, i, VectorAt(&values_cpy, indices[i]));
-        carbon_vec_set(&column->array_positions, i, VectorAt(&array_position_cpy, indices[i]));
+        carbon_vec_set(&column->values, i, carbon_vec_at(&values_cpy, indices[i]));
+        carbon_vec_set(&column->array_positions, i, carbon_vec_at(&array_position_cpy, indices[i]));
     }
 
     free (indices);

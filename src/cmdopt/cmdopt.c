@@ -17,17 +17,17 @@
 
 #include "cmdopt/cmdopt.h"
 
-static carbon_cmdopt_t *findOptionByName(carbon_cmdopt_mgr_t *manager, const char *name);
+static carbon_cmdopt_t *option_by_name(carbon_cmdopt_mgr_t *manager, const char *name);
 
-bool carbon_cmdopt_mgr_create(carbon_cmdopt_mgr_t *manager, char *moduleName, char *moduleDesc,
+bool carbon_cmdopt_mgr_create(carbon_cmdopt_mgr_t *manager, char *module_name, char *module_desc,
                               carbon_mod_arg_policy_e policy, bool (*fallback)(int argc, char **argv, FILE *file,
                                                                                carbon_cmdopt_mgr_t *manager))
 {
     CARBON_NON_NULL_OR_ERROR(manager)
-    CARBON_NON_NULL_OR_ERROR(moduleName)
+    CARBON_NON_NULL_OR_ERROR(module_name)
     CARBON_NON_NULL_OR_ERROR(fallback)
-    manager->module_name = strdup(moduleName);
-    manager->module_desc = moduleDesc ? strdup(moduleDesc) : NULL;
+    manager->module_name = strdup(module_name);
+    manager->module_desc = module_desc ? strdup(module_desc) : NULL;
     manager->policy = policy;
     manager->fallback = fallback;
     CARBON_CHECK_SUCCESS(carbon_vec_create(&manager->groups, NULL, sizeof(carbon_cmdopt_group_t), 5));
@@ -71,7 +71,7 @@ bool carbon_cmdopt_mgr_process(carbon_cmdopt_mgr_t *manager, int argc, char **ar
         }
     } else {
         const char *arg = argv[0];
-        carbon_cmdopt_t *option = findOptionByName(manager, arg);
+        carbon_cmdopt_t *option = option_by_name(manager, arg);
         if (option) {
             return option->callback(argc - 1, argv + 1, file);
         } else {
@@ -152,7 +152,7 @@ bool carbon_cmdopt_mgr_show_help(FILE *file, carbon_cmdopt_mgr_t *manager)
     return true;
 }
 
-static carbon_cmdopt_t *findOptionByName(carbon_cmdopt_mgr_t *manager, const char *name)
+static carbon_cmdopt_t *option_by_name(carbon_cmdopt_mgr_t *manager, const char *name)
 {
     for (size_t i = 0; i < manager->groups.num_elems; i++) {
         carbon_cmdopt_group_t *cmdGroup = CARBON_VECTOR_GET(&manager->groups, i, carbon_cmdopt_group_t);

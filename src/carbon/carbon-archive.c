@@ -58,110 +58,112 @@
 #define  MARKER_SYMBOL_HUFFMAN_DIC_ENTRY   'd'
 #define  MARKER_SYMBOL_RECORD_HEADER       'r'
 
-#define WRITE_PRIMITIVE_VALUES(memfile, values_vec, type)                                                               \
+#define WRITE_PRIMITIVE_VALUES(memfile, values_vec, type)                                                              \
 {                                                                                                                      \
-    type *values = CARBON_VECTOR_ALL(values_vec, type);                                                                        \
-    carbon_memfile_write(memfile, values, values_vec->num_elems * sizeof(type));                                                 \
+    type *values = CARBON_VECTOR_ALL(values_vec, type);                                                                \
+    carbon_memfile_write(memfile, values, values_vec->num_elems * sizeof(type));                                       \
 }
 
-#define WRITE_ARRAY_VALUES(memfile, values_vec, type)                                                                   \
+#define WRITE_ARRAY_VALUES(memfile, values_vec, type)                                                                  \
 {                                                                                                                      \
-    for (uint32_t i = 0; i < values_vec->num_elems; i++) {                                                               \
-        carbon_vec_t ofType(type) *nested_values = CARBON_VECTOR_GET(values_vec, i, carbon_vec_t);                            \
-        WRITE_PRIMITIVE_VALUES(memfile, nested_values, type);                                                           \
+    for (uint32_t i = 0; i < values_vec->num_elems; i++) {                                                             \
+        carbon_vec_t ofType(type) *nested_values = CARBON_VECTOR_GET(values_vec, i, carbon_vec_t);                     \
+        WRITE_PRIMITIVE_VALUES(memfile, nested_values, type);                                                          \
     }                                                                                                                  \
 }
 
-#define OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(num_pairs, obj, bit_flag_name, offset_name)                                    \
+#define OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(num_pairs, obj, bit_flag_name, offset_name)                                \
 {                                                                                                                      \
     if (!obj) {                                                                                                        \
-        CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_NULLPTR)                                                   \
+        CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_NULLPTR)                                                                 \
     }                                                                                                                  \
                                                                                                                        \
-    if (obj->flags.bits.bit_flag_name) {                                                                           \
-        assert(obj->props.offset_name != 0);                                                                      \
+    if (obj->flags.bits.bit_flag_name) {                                                                               \
+        assert(obj->props.offset_name != 0);                                                                           \
         carbon_memfile_seek(&obj->file, obj->props.offset_name);                                                       \
-        embedded_fixed_prop_t prop;                                                                                        \
+        embedded_fixed_prop_t prop;                                                                                    \
         embedded_fixed_props_read(&prop, &obj->file);                                                                  \
-        reset_cabin_object_mem_file(obj);                                                                                  \
-        CARBON_OPTIONAL_SET(num_pairs, prop.header->num_entries);                                                               \
+        reset_cabin_object_mem_file(obj);                                                                              \
+        CARBON_OPTIONAL_SET(num_pairs, prop.header->num_entries);                                                      \
         return prop.keys;                                                                                              \
     } else {                                                                                                           \
-        CARBON_OPTIONAL_SET(num_pairs, 0);                                                                                     \
+        CARBON_OPTIONAL_SET(num_pairs, 0);                                                                             \
         return NULL;                                                                                                   \
     }                                                                                                                  \
 }
 
-#define PRINT_SIMPLE_PROPS(file, memfile, offset, nesting_level, value_type, type_string, format_string)                   \
+#define PRINT_SIMPLE_PROPS(file, memfile, offset, nesting_level, value_type, type_string, format_string)               \
 {                                                                                                                      \
-    struct simple_prop_header *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, struct simple_prop_header);                         \
-    carbon_string_id_t *keys = (carbon_string_id_t *) CARBON_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(carbon_string_id_t));                    \
-    value_type *values = (value_type *) CARBON_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(value_type));               \
+    struct simple_prop_header *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, struct simple_prop_header);             \
+    carbon_string_id_t *keys = (carbon_string_id_t *) CARBON_MEMFILE_READ(memfile, prop_header->num_entries *          \
+                                   sizeof(carbon_string_id_t));                                                        \
+    value_type *values = (value_type *) CARBON_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(value_type));   \
     fprintf(file, "0x%04x ", (unsigned) offset);                                                                       \
-    INTENT_LINE(nesting_level)                                                                                          \
-    fprintf(file, "[marker: %c (" type_string ")] [num_entries: %d] [", entryMarker, prop_header->num_entries);            \
-    for (uint32_t i = 0; i < prop_header->num_entries; i++) {                                                            \
-        fprintf(file, "key: %"PRIu64"%s", keys[i], i + 1 < prop_header->num_entries ? ", " : "");                              \
+    INTENT_LINE(nesting_level)                                                                                         \
+    fprintf(file, "[marker: %c (" type_string ")] [num_entries: %d] [", entryMarker, prop_header->num_entries);        \
+    for (uint32_t i = 0; i < prop_header->num_entries; i++) {                                                          \
+        fprintf(file, "key: %"PRIu64"%s", keys[i], i + 1 < prop_header->num_entries ? ", " : "");                      \
     }                                                                                                                  \
     fprintf(file, "] [");                                                                                              \
-    for (uint32_t i = 0; i < prop_header->num_entries; i++) {                                                            \
-      fprintf(file, "value: "format_string"%s", values[i], i + 1 < prop_header->num_entries ? ", " : "");                 \
+    for (uint32_t i = 0; i < prop_header->num_entries; i++) {                                                          \
+      fprintf(file, "value: "format_string"%s", values[i], i + 1 < prop_header->num_entries ? ", " : "");              \
     }                                                                                                                  \
     fprintf(file, "]\n");                                                                                              \
 }
 
-#define PRINT_ARRAY_PROPS(memfile, offset, nesting_level, entryMarker, type, type_string, format_string)                  \
+#define PRINT_ARRAY_PROPS(memfile, offset, nesting_level, entryMarker, type, type_string, format_string)               \
 {                                                                                                                      \
-    struct simple_prop_header *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, struct simple_prop_header);                         \
+    struct simple_prop_header *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, struct simple_prop_header);             \
                                                                                                                        \
-    carbon_string_id_t *keys = (carbon_string_id_t *) CARBON_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(carbon_string_id_t));                    \
-    uint32_t *array_lengths;                                                                                            \
+    carbon_string_id_t *keys = (carbon_string_id_t *) CARBON_MEMFILE_READ(memfile, prop_header->num_entries *          \
+                                        sizeof(carbon_string_id_t));                                                   \
+    uint32_t *array_lengths;                                                                                           \
                                                                                                                        \
     fprintf(file, "0x%04x ", (unsigned) offset);                                                                       \
-    INTENT_LINE(nesting_level)                                                                                          \
-    fprintf(file, "[marker: %c ("type_string")] [num_entries: %d] [", entryMarker, prop_header->num_entries);              \
+    INTENT_LINE(nesting_level)                                                                                         \
+    fprintf(file, "[marker: %c ("type_string")] [num_entries: %d] [", entryMarker, prop_header->num_entries);          \
                                                                                                                        \
-    for (uint32_t i = 0; i < prop_header->num_entries; i++) {                                                            \
-        fprintf(file, "key: %"PRIu64"%s", keys[i], i + 1 < prop_header->num_entries ? ", " : "");                              \
+    for (uint32_t i = 0; i < prop_header->num_entries; i++) {                                                          \
+        fprintf(file, "key: %"PRIu64"%s", keys[i], i + 1 < prop_header->num_entries ? ", " : "");                      \
     }                                                                                                                  \
     fprintf(file, "] [");                                                                                              \
                                                                                                                        \
-    array_lengths = (uint32_t *) CARBON_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(uint32_t));                      \
+    array_lengths = (uint32_t *) CARBON_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(uint32_t));            \
                                                                                                                        \
-    for (uint32_t i = 0; i < prop_header->num_entries; i++) {                                                            \
-        fprintf(file, "num_entries: %d%s", array_lengths[i], i + 1 < prop_header->num_entries ? ", " : "");                \
+    for (uint32_t i = 0; i < prop_header->num_entries; i++) {                                                          \
+        fprintf(file, "num_entries: %d%s", array_lengths[i], i + 1 < prop_header->num_entries ? ", " : "");            \
     }                                                                                                                  \
                                                                                                                        \
     fprintf(file, "] [");                                                                                              \
                                                                                                                        \
-    for (uint32_t array_idx = 0; array_idx < prop_header->num_entries; array_idx++) {                                       \
-        type *values = (type *) CARBON_MEMFILE_READ(memfile, array_lengths[array_idx] * sizeof(type));                          \
+    for (uint32_t array_idx = 0; array_idx < prop_header->num_entries; array_idx++) {                                  \
+        type *values = (type *) CARBON_MEMFILE_READ(memfile, array_lengths[array_idx] * sizeof(type));                 \
         fprintf(file, "[");                                                                                            \
-        for (uint32_t i = 0; i < array_lengths[array_idx]; i++) {                                                        \
-            fprintf(file, "value: "format_string"%s", values[i], i + 1 < array_lengths[array_idx] ? ", " : "");           \
+        for (uint32_t i = 0; i < array_lengths[array_idx]; i++) {                                                      \
+            fprintf(file, "value: "format_string"%s", values[i], i + 1 < array_lengths[array_idx] ? ", " : "");        \
         }                                                                                                              \
-        fprintf(file, "]%s", array_idx + 1 < prop_header->num_entries ? ", " : "");                                       \
+        fprintf(file, "]%s", array_idx + 1 < prop_header->num_entries ? ", " : "");                                    \
     }                                                                                                                  \
                                                                                                                        \
     fprintf(file, "]\n");                                                                                              \
 }
 
-#define INTENT_LINE(nesting_level)                                                                                      \
+#define INTENT_LINE(nesting_level)                                                                                     \
 {                                                                                                                      \
-    for (unsigned nest_level = 0; nest_level < nesting_level; nest_level++) {                                              \
+    for (unsigned nest_level = 0; nest_level < nesting_level; nest_level++) {                                          \
         fprintf(file, "   ");                                                                                          \
     }                                                                                                                  \
 }
 
-#define PRINT_VALUE_ARRAY(type, memfile, header, format_string)                                                         \
+#define PRINT_VALUE_ARRAY(type, memfile, header, format_string)                                                        \
 {                                                                                                                      \
-    uint32_t num_elements = *CARBON_MEMFILE_READ_TYPE(memfile, uint32_t);                                                      \
-    const type *values = (const type *) CARBON_MEMFILE_READ(memfile, num_elements * sizeof(type));                             \
-    fprintf(file, "0x%04x ", (unsigned) offset);                                                                        \
-    INTENT_LINE(nesting_level);                                                                                         \
-    fprintf(file, "   [num_elements: %d] [values: [", num_elements);                                                     \
-    for (size_t i = 0; i < num_elements; i++) {                                                                         \
-        fprintf(file, "value: "format_string"%s", values[i], i + 1 < num_elements ? ", " : "");                          \
+    uint32_t num_elements = *CARBON_MEMFILE_READ_TYPE(memfile, uint32_t);                                              \
+    const type *values = (const type *) CARBON_MEMFILE_READ(memfile, num_elements * sizeof(type));                     \
+    fprintf(file, "0x%04x ", (unsigned) offset);                                                                       \
+    INTENT_LINE(nesting_level);                                                                                        \
+    fprintf(file, "   [num_elements: %d] [values: [", num_elements);                                                   \
+    for (size_t i = 0; i < num_elements; i++) {                                                                        \
+        fprintf(file, "value: "format_string"%s", values[i], i + 1 < num_elements ? ", " : "");                        \
     }                                                                                                                  \
     fprintf(file, "]\n");                                                                                              \
 }
@@ -2667,26 +2669,26 @@ bool carbon_archive_object_values_object(carbon_archive_object_t *out, size_t id
     }
 }
 
-#define OBJECT_GET_VALUES_OF_FIX_TYPE_GENERIC(obj, bit_flag_prop_name, offset_prop_name, T)                              \
+#define OBJECT_GET_VALUES_OF_FIX_TYPE_GENERIC(obj, bit_flag_prop_name, offset_prop_name, T)                            \
 ({                                                                                                                     \
     if (!obj) {                                                                                                        \
-        CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_NULLPTR);                                                \
+        CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_NULLPTR);                                                                \
     }                                                                                                                  \
                                                                                                                        \
     const void *result = NULL;                                                                                         \
                                                                                                                        \
-    if (obj->flags.bits.bit_flag_prop_name) {                                                                       \
-        assert(obj->props.offset_prop_name != 0);                                                                  \
-        carbon_memfile_seek(&obj->file, obj->props.offset_prop_name);                                                   \
-        embedded_fixed_prop_t prop;                                                                                        \
+    if (obj->flags.bits.bit_flag_prop_name) {                                                                          \
+        assert(obj->props.offset_prop_name != 0);                                                                      \
+        carbon_memfile_seek(&obj->file, obj->props.offset_prop_name);                                                  \
+        embedded_fixed_prop_t prop;                                                                                    \
         embedded_fixed_props_read(&prop, &obj->file);                                                                  \
-        reset_cabin_object_mem_file(obj);                                                                                  \
-        CARBON_OPTIONAL_SET(npairs, prop.header->num_entries);                                                               \
+        reset_cabin_object_mem_file(obj);                                                                              \
+        CARBON_OPTIONAL_SET(npairs, prop.header->num_entries);                                                         \
         result = prop.values;                                                                                          \
     } else {                                                                                                           \
-        CARBON_OPTIONAL_SET(npairs, 0);                                                                                     \
+        CARBON_OPTIONAL_SET(npairs, 0);                                                                                \
     }                                                                                                                  \
-    (const T *) result;                                                                                             \
+    (const T *) result;                                                                                                \
 })
 
 const carbon_int8_t *carbon_archive_object_values_int8(CARBON_NULLABLE
@@ -2766,44 +2768,44 @@ const carbon_string_id_t *carbon_archive_object_values_strings(CARBON_NULLABLE
     return OBJECT_GET_VALUES_OF_FIX_TYPE_GENERIC(obj, has_string_props, strings, carbon_string_id_t);
 }
 
-#define OBJECT_GET_ARRAY_LENGTHS_GENERIC(err, length, obj, bit_fiel_name, offset_name, idx, prop)                              \
+#define OBJECT_GET_ARRAY_LENGTHS_GENERIC(err, length, obj, bit_fiel_name, offset_name, idx, prop)                      \
 ({                                                                                                                     \
     int status;                                                                                                        \
                                                                                                                        \
-    if (obj->flags.bits.bit_fiel_name) {                                                                           \
-        assert(obj->props.offset_name != 0);                                                                      \
+    if (obj->flags.bits.bit_fiel_name) {                                                                               \
+        assert(obj->props.offset_name != 0);                                                                           \
         carbon_memfile_seek(&obj->file, obj->props.offset_name);                                                       \
         embedded_array_props_read(&prop, &obj->file);                                                                  \
-        reset_cabin_object_mem_file(obj);                                                                                  \
-        if (CARBON_BRANCH_UNLIKELY(idx >= prop.header->num_entries)) {                                                         \
+        reset_cabin_object_mem_file(obj);                                                                              \
+        if (CARBON_BRANCH_UNLIKELY(idx >= prop.header->num_entries)) {                                                 \
             *length = 0;                                                                                               \
-            CARBON_ERROR(err, CARBON_ERR_OUTOFBOUNDS);                                                   \
-            status = false;                                                                               \
+            CARBON_ERROR(err, CARBON_ERR_OUTOFBOUNDS);                                                                 \
+            status = false;                                                                                            \
         } else {                                                                                                       \
             *length = prop.lengths[idx];                                                                               \
-            status = true;                                                                                        \
+            status = true;                                                                                             \
         }                                                                                                              \
     } else {                                                                                                           \
         *length = 0;                                                                                                   \
-        CARBON_ERROR(err, CARBON_ERR_NOTFOUND);                                                      \
-        status = false;                                                                                      \
+        CARBON_ERROR(err, CARBON_ERR_NOTFOUND);                                                                        \
+        status = false;                                                                                                \
     }                                                                                                                  \
     status;                                                                                                            \
 })
 
-#define OBJECT_GET_ARRAY_VALUES_GENERIC(status, idx, prop, obj, T)                                                  \
+#define OBJECT_GET_ARRAY_VALUES_GENERIC(status, idx, prop, obj, T)                                                     \
 ({                                                                                                                     \
     const void *result = NULL;                                                                                         \
-    if (status == true) {                                                                                         \
-        size_t skip_size = 0;                                                                                           \
+    if (status == true) {                                                                                              \
+        size_t skip_size = 0;                                                                                          \
         for (size_t i = 0; i < idx; i++) {                                                                             \
-            skip_size += prop.lengths[i] * sizeof(T);                                                                \
+            skip_size += prop.lengths[i] * sizeof(T);                                                                  \
         }                                                                                                              \
-        carbon_memfile_seek(&obj->file, prop.values_begin + skip_size);                                                       \
-        result = carbon_memfile_peek(&obj->file, 1);                                                                        \
-        reset_cabin_object_mem_file(obj);                                                                                  \
+        carbon_memfile_seek(&obj->file, prop.values_begin + skip_size);                                                \
+        result = carbon_memfile_peek(&obj->file, 1);                                                                   \
+        reset_cabin_object_mem_file(obj);                                                                              \
     }                                                                                                                  \
-    (const T*) result;                                                                                              \
+    (const T*) result;                                                                                                 \
 })
 
 const carbon_int8_t *carbon_archive_object_values_int8_arrays(uint32_t *length,
@@ -3004,13 +3006,13 @@ bool carbon_archive_table_field_get(carbon_field_t *field, size_t idx, carbon_co
     return true;
 }
 
-#define FIELD_GET_VALUE_ARRAY_GENERIC(length, field, expectedType, T)                                               \
+#define FIELD_GET_VALUE_ARRAY_GENERIC(length, field, expectedType, T)                                                  \
 ({                                                                                                                     \
     assert(length);                                                                                                    \
     assert(field);                                                                                                     \
-    CARBON_PRINT_ERROR_AND_DIE_IF(field->type != expectedType, CARBON_ERR_ERRINTERNAL)                                                                    \
-    *length = field->nentries;                                                                                       \
-    (const T *) field->data;                                                                                        \
+    CARBON_PRINT_ERROR_AND_DIE_IF(field->type != expectedType, CARBON_ERR_ERRINTERNAL)                                 \
+    *length = field->nentries;                                                                                         \
+    (const T *) field->data;                                                                                           \
 })
 
 const carbon_int8_t *carbon_archive_table_field_get_int8_array(uint32_t *length, const carbon_field_t *field)
@@ -3072,7 +3074,7 @@ bool carbon_archive_table_field_get_null_array_lengths(uint32_t *length, const c
 {
     assert(length);
     assert(field);
-    /** array does not map to array of type NULL */
+    /** array does not carbon_parallel_map_exec to array of type NULL */
     CARBON_PRINT_ERROR_AND_DIE_IF(field->type != carbon_field_type_null, CARBON_ERR_ERRINTERNAL)
     *length = *(uint32_t *) field->data;
     return true;

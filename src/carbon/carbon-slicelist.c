@@ -23,32 +23,32 @@
 
 /** OPTIMIZATION: we have only one item to find. Use branch-less scan instead of branching scan */
 /** OPTIMIZATION: find function as macro */
-#define SLICE_SCAN(slice, needleHash, needleStr)                                                                       \
+#define SLICE_SCAN(slice, needle_hash, needle_str)                                                                     \
 ({                                                                                                                     \
-    CARBON_TRACE(CARBON_SLICE_LIST_TAG, "SLICE_SCAN for '%s' started", needleStr);                                     \
+    CARBON_TRACE(CARBON_SLICE_LIST_TAG, "SLICE_SCAN for '%s' started", needle_str);                                    \
     assert(slice);                                                                                                     \
-    assert(needleStr);                                                                                                 \
+    assert(needle_str);                                                                                                \
                                                                                                                        \
     register bool continueScan, keysMatch, keyHashsNoMatch, endReached;                                                \
     register bool cacheAvailable = (slice->cacheIdx != (uint32_t) -1);                                                 \
-    register bool hashsEq = cacheAvailable && (slice->keyHashColumn[slice->cacheIdx] == needleHash);                   \
-    register bool cacheHit = hashsEq && (strcmp(slice->key_column[slice->cacheIdx], needleStr) == 0);                   \
+    register bool hashsEq = cacheAvailable && (slice->keyHashColumn[slice->cacheIdx] == needle_hash);                  \
+    register bool cacheHit = hashsEq && (strcmp(slice->key_column[slice->cacheIdx], needle_str) == 0);                 \
     register uint_fast32_t i = 0;                                                                                      \
     if (!cacheHit) {                                                                                                   \
         do {                                                                                                           \
-            while ((keyHashsNoMatch = (slice->keyHashColumn[i]!=needleHash)) && i++<slice->num_elems) { ; }             \
-            endReached    = ((i+1)>slice->num_elems);                                                                   \
-            keysMatch      = endReached || (!keyHashsNoMatch && (strcmp(slice->key_column[i], needleStr)==0));          \
+            while ((keyHashsNoMatch = (slice->keyHashColumn[i]!=needle_hash)) && i++<slice->num_elems) { ; }           \
+            endReached    = ((i+1)>slice->num_elems);                                                                  \
+            keysMatch      = endReached || (!keyHashsNoMatch && (strcmp(slice->key_column[i], needle_str)==0));        \
             continueScan  = !endReached && !keysMatch;                                                                 \
             i             += continueScan;                                                                             \
         }                                                                                                              \
         while (continueScan);                                                                                          \
         slice->cacheIdx = !endReached && keysMatch ? i : slice->cacheIdx;                                              \
     }                                                                                                                  \
-    cacheHit ? slice->cacheIdx : (!endReached && keysMatch ? i : slice->num_elems);                                     \
+    cacheHit ? slice->cacheIdx : (!endReached && keysMatch ? i : slice->num_elems);                                    \
 })
 
-#define SLICE_BESEARCH(slice, needleHash, needleStr)                                                                   \
+#define SLICE_BESEARCH(slice, needle_hash, needle_str)                                                                 \
 ({                                                                                                                     \
     0; \
 })

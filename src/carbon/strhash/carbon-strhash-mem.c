@@ -86,30 +86,30 @@ static int bucket_drop(bucket_t *buckets, size_t num_buckets, carbon_alloc_t *al
 static int bucket_insert(bucket_t *bucket, const char *restrict key, carbon_string_id_t value,
                         carbon_alloc_t *alloc, carbon_string_hash_counters_t *counter);
 
-bool carbon_strhash_create_inmemory(carbon_strhash_t *map, const carbon_alloc_t *alloc, size_t num_buckets,
+bool carbon_strhash_create_inmemory(carbon_strhash_t *carbon_parallel_map_exec, const carbon_alloc_t *alloc, size_t num_buckets,
                                     size_t cap_buckets)
 {
-    CARBON_CHECK_SUCCESS(carbon_alloc_this_or_std(&map->allocator, alloc));
+    CARBON_CHECK_SUCCESS(carbon_alloc_this_or_std(&carbon_parallel_map_exec->allocator, alloc));
 
     num_buckets = num_buckets < 1 ? 1 : num_buckets;
     cap_buckets = cap_buckets < 1 ? 1 : cap_buckets;
 
-    map->tag = CARBON_STRHASH_INMEMORY;
-    map->drop = this_drop;
-    map->put_bulk_safe = this_put_safe_bulk;
-    map->put_bulk_fast = this_put_fast_bulk;
-    map->put_exact_safe = this_put_safe_exact;
-    map->put_exact_fast = this_put_fast_exact;
-    map->get_bulk_safe = this_get_safe;
-    map->get_fast = this_get_fast;
-    map->update_key_fast = this_update_key_fast;
-    map->remove = this_remove;
-    map->free = this_free;
-    map->get_exact_safe = this_get_safe_exact;
-    carbon_error_init(&map->err);
+    carbon_parallel_map_exec->tag = CARBON_STRHASH_INMEMORY;
+    carbon_parallel_map_exec->drop = this_drop;
+    carbon_parallel_map_exec->put_bulk_safe = this_put_safe_bulk;
+    carbon_parallel_map_exec->put_bulk_fast = this_put_fast_bulk;
+    carbon_parallel_map_exec->put_exact_safe = this_put_safe_exact;
+    carbon_parallel_map_exec->put_exact_fast = this_put_fast_exact;
+    carbon_parallel_map_exec->get_bulk_safe = this_get_safe;
+    carbon_parallel_map_exec->get_fast = this_get_fast;
+    carbon_parallel_map_exec->update_key_fast = this_update_key_fast;
+    carbon_parallel_map_exec->remove = this_remove;
+    carbon_parallel_map_exec->free = this_free;
+    carbon_parallel_map_exec->get_exact_safe = this_get_safe_exact;
+    carbon_error_init(&carbon_parallel_map_exec->err);
 
-    carbon_strhash_reset_counters(map);
-    CARBON_CHECK_SUCCESS(this_create_extra(map, num_buckets, cap_buckets));
+    carbon_strhash_reset_counters(carbon_parallel_map_exec);
+    CARBON_CHECK_SUCCESS(this_create_extra(carbon_parallel_map_exec, num_buckets, cap_buckets));
     return true;
 }
 

@@ -30,8 +30,8 @@
 #define DESC_CAB_VIEW "Print CARBON file in human readable form to stdout"
 #define DESC_CAB_INFO "Display information about a CARBON file to stdout"
 
-#define DEFINE_MODULE(moduleName, moduleCommand, desc, invokeFunc)                                              \
-static int module##moduleName##Entry(int argc, char **argv, FILE *file)                                         \
+#define DEFINE_MODULE(module_name, moduleCommand, desc, invokeFunc)                                              \
+static int module##module_name##Entry(int argc, char **argv, FILE *file)                                         \
 {                                                                                                               \
     carbon_cmdopt_mgr_t manager;                                                                        \
     carbon_cmdopt_mgr_create(&manager, moduleCommand, desc, CARBON_MOD_ARG_REQUIRED, invokeFunc);            \

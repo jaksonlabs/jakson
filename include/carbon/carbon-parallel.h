@@ -27,38 +27,38 @@ CARBON_BEGIN_DECL
 
 typedef uint_fast16_t thread_id_t;
 
-typedef void (*ForFunctionBody)(const void *restrict start, size_t width, size_t len, void *restrict args, thread_id_t tid);
+typedef void (*carbon_parallel_for_body)(const void *restrict start, size_t width, size_t len, void *restrict args, thread_id_t tid);
 
-typedef void (*MapFunctionBody)(void *restrict dst, const void *restrict src, size_t srcWidth, size_t dstWidth,
+typedef void (*carbon_parallel_map_body)(void *restrict dst, const void *restrict src, size_t src_width, size_t dst_width,
                                 size_t len, void *restrict args);
 
-typedef void (*Predicate)(size_t *matchingPositions, size_t *numMatchingPositions, const void *restrict src,
-                            size_t width, size_t len, void *restrict args, size_t positionOffsetToAdd);
+typedef void (*carbon_parallel_predicate)(size_t *matching_positions, size_t *num_matching_positions, const void *restrict src,
+                            size_t width, size_t len, void *restrict args, size_t position_offset_to_add);
 
-typedef enum ThreadingHint
+typedef enum carbon_parallel_threading_hint
 {
-    ThreadingHint_Single,
+    CARBON_PARALLEL_THREAD_HINT_SINGLE,
     CARBON_PARALLEL_THREAD_HINT_MULTI
-} ThreadingHint;
+} carbon_parallel_threading_hint_t;
 
-typedef struct FunctionProxy
+typedef struct carbon_parallel_func_proxy
 {
-    ForFunctionBody function;
+    carbon_parallel_for_body function;
     const void *restrict start;
     size_t width;
     size_t len;
     thread_id_t tid;
     void *args;
-} FunctionProxy;
+} carbon_parallel_func_proxy_t;
 
-inline static void *forProxyFunction(void *restrict args)
+inline static void *carbon_parallel_for_proxy_function(void *restrict args)
 {
-    CARBON_CAST(FunctionProxy *restrict, proxyArg, args);
-    proxyArg->function(proxyArg->start, proxyArg->width, proxyArg->len, proxyArg->args, proxyArg->tid);
+    CARBON_CAST(carbon_parallel_func_proxy_t *restrict, proxy_arg, args);
+    proxy_arg->function(proxy_arg->start, proxy_arg->width, proxy_arg->len, proxy_arg->args, proxy_arg->tid);
     return NULL;
 }
 
-#define PARALLEL_ERROR(msg, retval)                                                                                    \
+#define CARBON_PARALLEL_ERROR(msg, retval)                                                                             \
 {                                                                                                                      \
     perror(msg);                                                                                                       \
     return retval;                                                                                                     \
@@ -66,226 +66,226 @@ inline static void *forProxyFunction(void *restrict args)
 
 #define PARALLEL_MATCH(forSingle, forMulti)                                                                            \
 {                                                                                                                      \
-    if (CARBON_BRANCH_LIKELY(hint == CARBON_PARALLEL_THREAD_HINT_MULTI)) {                                                           \
+    if (CARBON_BRANCH_LIKELY(hint == CARBON_PARALLEL_THREAD_HINT_MULTI)) {                                             \
         return (forMulti);                                                                                             \
-    } else if (hint == ThreadingHint_Single) {                                                                         \
+    } else if (hint == CARBON_PARALLEL_THREAD_HINT_SINGLE) {                                                           \
         return (forSingle);                                                                                            \
-    } else PARALLEL_ERROR(PARALLEL_MSG_UNKNOWN_HINT, false);                                                           \
+    } else CARBON_PARALLEL_ERROR(PARALLEL_MSG_UNKNOWN_HINT, false);                                                    \
 }
 
 inline static bool
-carbon_parallel_for(const void *restrict base, size_t width, size_t len, ForFunctionBody f,
-                              void *restrict args, ThreadingHint hint, uint_fast16_t num_threads);
+carbon_parallel_for(const void *restrict base, size_t width, size_t len, carbon_parallel_for_body f,
+                              void *restrict args, carbon_parallel_threading_hint_t hint, uint_fast16_t num_threads);
 
 inline static bool
-ParallelMap(void *restrict dst,
+carbon_parallel_map(void *restrict dst,
                               const void *restrict src,
-                              size_t srcWidth,
+                              size_t src_width,
                               size_t len,
-                              size_t dstWidth,
-                              MapFunctionBody f,
+                              size_t dst_width,
+                              carbon_parallel_map_body f,
                               void *restrict args,
-                              ThreadingHint hint,
+                              carbon_parallel_threading_hint_t hint,
                               uint_fast16_t num_threads);
 
 inline static bool
-ParallelGather(void *restrict dst,
+carbon_parallel_gather(void *restrict dst,
                                  const void *restrict src,
                                  size_t width,
                                  const size_t *restrict idx,
                                  size_t dstSrcLen,
-                                 ThreadingHint hint,
+                                 carbon_parallel_threading_hint_t hint,
                                  uint_fast16_t num_threads);
 
 inline static bool
-ParallelGatherAddress(void *restrict dst,
+carbon_parallel_gather_adr(void *restrict dst,
                                      const void *restrict src,
-                                     size_t srcWidth,
+                                     size_t src_width,
                                      const size_t *restrict idx,
                                      size_t num,
-                                     ThreadingHint hint,
+                                     carbon_parallel_threading_hint_t hint,
                                      uint_fast16_t num_threads);
 
 inline static bool
-ParallelScatter(void *restrict dst,
+carbon_parallel_scatter(void *restrict dst,
                                   const void *restrict src,
                                   size_t width,
                                   const size_t *restrict idx,
                                   size_t num,
-                                  ThreadingHint hint,
+                                  carbon_parallel_threading_hint_t hint,
                                   uint_fast16_t num_threads);
 
 inline static bool
-ParallelShuffle(void *restrict dst, const void *restrict src, size_t width,
-                                  const size_t *restrict dstIdx, const size_t *restrict srcIdx,
-                                  size_t idxLen, ThreadingHint hint);
+carbon_parallel_shuffle(void *restrict dst, const void *restrict src, size_t width,
+                                  const size_t *restrict dst_idx, const size_t *restrict src_idx,
+                                  size_t idxLen, carbon_parallel_threading_hint_t hint);
 
 inline static bool
-ParallelFilterEarly(void *restrict result, size_t *restrict resultSize,
+carbon_parallel_filter_early(void *restrict result, size_t *restrict result_size,
                                        const void *restrict src,
-                                       size_t width, size_t len, Predicate pred, void *restrict args,
-                                       ThreadingHint hint, uint_fast16_t num_threads);
+                                       size_t width, size_t len, carbon_parallel_predicate pred, void *restrict args,
+                                       carbon_parallel_threading_hint_t hint, uint_fast16_t num_threads);
 
 inline static bool
-ParallelFilterLate(size_t *restrict pos, size_t *restrict numPos, const void *restrict src,
-                                      size_t width, size_t len, Predicate pred, void *restrict args,
-                                      ThreadingHint hint, size_t num_threads);
+carbon_parallel_filter_late(size_t *restrict pos, size_t *restrict num_pos, const void *restrict src,
+                                      size_t width, size_t len, carbon_parallel_predicate pred, void *restrict args,
+                                      carbon_parallel_threading_hint_t hint, size_t num_threads);
 
 inline static bool
-sequentialFor(const void *restrict base, size_t width, size_t len, ForFunctionBody f,
+carbon_parallel_sequential_for(const void *restrict base, size_t width, size_t len, carbon_parallel_for_body f,
                                    void *restrict args);
 inline static bool
-parallelFor(const void *restrict base, size_t width, size_t len, ForFunctionBody f,
+carbon_parallel_parallel_for(const void *restrict base, size_t width, size_t len, carbon_parallel_for_body f,
                                  void *restrict args, uint_fast16_t num_threads);
 
 inline static bool
-map(void *restrict dst,
+carbon_parallel_map_exec(void *restrict dst,
                         const void *restrict src,
-                        size_t srcWidth,
+                        size_t src_width,
                         size_t len,
-                        size_t dstWidth,
-                        MapFunctionBody f,
+                        size_t dst_width,
+                        carbon_parallel_map_body f,
                         void *restrict args,
-                        ThreadingHint hint,
+                        carbon_parallel_threading_hint_t hint,
                         uint_fast16_t num_threads);
 
 inline static bool
-sequentialGather(void *restrict dst, const void *restrict src, size_t width,
+carbon_parallel_sequential_gather(void *restrict dst, const void *restrict src, size_t width,
                                       const size_t *restrict idx, size_t dstSrcLen);
 inline static bool
-parallelGather(void *restrict dst, const void *restrict src, size_t width,
+carbon_parallel_parallel_gather(void *restrict dst, const void *restrict src, size_t width,
                                     const size_t *restrict idx, size_t dstSrcLen, uint_fast16_t num_threads);
 
 inline static bool
-sequentialGatherAddress(void *restrict dst, const void *restrict src, size_t srcWidth,
+carbon_parallel_sequential_gather_adr(void *restrict dst, const void *restrict src, size_t src_width,
                                           const size_t *restrict idx, size_t num);
 inline static bool
-parallelGather_adr(void *restrict dst, const void *restrict src, size_t srcWidth,
+carbon_parallel_parallel_gather_adr_func(void *restrict dst, const void *restrict src, size_t src_width,
                                         const size_t *restrict idx, size_t num, uint_fast16_t num_threads);
 
 inline static bool
-sequentialScatter(void *restrict dst, const void *restrict src, size_t width,
+carbon_parallel_sequential_scatter_func(void *restrict dst, const void *restrict src, size_t width,
                                        const size_t *restrict idx, size_t num);
 inline static bool
-parallelScatter(void *restrict dst, const void *restrict src, size_t width,
+carbon_parallel_parallel_scatter_func(void *restrict dst, const void *restrict src, size_t width,
                                      const size_t *restrict idx, size_t num, uint_fast16_t num_threads);
 
 inline static bool
-sequentialShuffle(void *restrict dst, const void *restrict src, size_t width,
-                                       const size_t *restrict dstIdx, const size_t *restrict srcIdx,
+carbon_parallel_sequential_shuffle(void *restrict dst, const void *restrict src, size_t width,
+                                       const size_t *restrict dst_idx, const size_t *restrict src_idx,
                                        size_t idx_len);
 
 inline static bool
-parallelShuffle(void *restrict dst, const void *restrict src, size_t width,
-                                     const size_t *restrict dstIdx, const size_t *restrict srcIdx,
+carbon_parallel_parallel_shuffle(void *restrict dst, const void *restrict src, size_t width,
+                                     const size_t *restrict dst_idx, const size_t *restrict src_idx,
                                      size_t idx_len);
 
 inline static bool
-sequentialFilterEarly(void *restrict result, size_t *restrict resultSize,
-                                            const void *restrict src, size_t width, size_t len, Predicate pred,
+carbon_parallel_sequential_filter_early(void *restrict result, size_t *restrict result_size,
+                                            const void *restrict src, size_t width, size_t len, carbon_parallel_predicate pred,
                                             void *restrict args);
 
 inline static bool
-parallelFilterEarly(void *restrict result, size_t *restrict resultSize,
-                                          const void *restrict src, size_t width, size_t len, Predicate pred,
+carbon_parallel_parallel_filter_early(void *restrict result, size_t *restrict result_size,
+                                          const void *restrict src, size_t width, size_t len, carbon_parallel_predicate pred,
                                           void *restrict args, uint_fast16_t num_threads);
 
 inline static bool
-sequentialFilterLate(size_t *restrict pos, size_t *restrict numPos,
-                                           const void *restrict src, size_t width, size_t len, Predicate pred,
+carbon_parallel_sequential_filter_late(size_t *restrict pos, size_t *restrict num_pos,
+                                           const void *restrict src, size_t width, size_t len, carbon_parallel_predicate pred,
                                            void *restrict args);
 
 inline static bool
-parallelFilterLate(size_t *restrict pos, size_t *restrict numPos,
-                                         const void *restrict src, size_t width, size_t len, Predicate pred,
+carbon_parallel_parallel_filter_late(size_t *restrict pos, size_t *restrict num_pos,
+                                         const void *restrict src, size_t width, size_t len, carbon_parallel_predicate pred,
                                          void *restrict args, size_t num_threads);
 
 inline static bool
-carbon_parallel_for(const void *restrict base, size_t width, size_t len, ForFunctionBody f,
-                              void *restrict args, ThreadingHint hint, uint_fast16_t num_threads)
+carbon_parallel_for(const void *restrict base, size_t width, size_t len, carbon_parallel_for_body f,
+                              void *restrict args, carbon_parallel_threading_hint_t hint, uint_fast16_t num_threads)
 {
-    PARALLEL_MATCH(sequentialFor(base, width, len, f, args),
-                   parallelFor(base, width, len, f, args, num_threads))
+    PARALLEL_MATCH(carbon_parallel_sequential_for(base, width, len, f, args),
+                   carbon_parallel_parallel_for(base, width, len, f, args, num_threads))
 }
 
 inline static bool
-ParallelMap(void *restrict dst,
+carbon_parallel_map(void *restrict dst,
                               const void *restrict src,
-                              size_t srcWidth,
+                              size_t src_width,
                               size_t len,
-                              size_t dstWidth,
-                              MapFunctionBody f,
+                              size_t dst_width,
+                              carbon_parallel_map_body f,
                               void *restrict args,
-                              ThreadingHint hint,
+                              carbon_parallel_threading_hint_t hint,
                               uint_fast16_t num_threads)
 {
-    return map(dst, src, srcWidth, len, dstWidth, f, args, hint, num_threads);
+    return carbon_parallel_map_exec(dst, src, src_width, len, dst_width, f, args, hint, num_threads);
 }
 
 inline static bool
-ParallelGather(void *restrict dst,
+carbon_parallel_gather(void *restrict dst,
                                  const void *restrict src,
                                  size_t width,
                                  const size_t *restrict idx,
                                  size_t dst_src_len,
-                                 ThreadingHint hint,
+                                 carbon_parallel_threading_hint_t hint,
                                  uint_fast16_t num_threads)
 {
-    PARALLEL_MATCH(sequentialGather(dst, src, width, idx, dst_src_len),
-                   parallelGather(dst, src, width, idx, dst_src_len, num_threads))
+    PARALLEL_MATCH(carbon_parallel_sequential_gather(dst, src, width, idx, dst_src_len),
+                   carbon_parallel_parallel_gather(dst, src, width, idx, dst_src_len, num_threads))
 }
 
 inline static bool
-ParallelGatherAddress(void *restrict dst,
+carbon_parallel_gather_adr(void *restrict dst,
                                      const void *restrict src,
-                                     size_t srcWidth,
+                                     size_t src_width,
                                      const size_t *restrict idx,
                                      size_t num,
-                                     ThreadingHint hint,
+                                     carbon_parallel_threading_hint_t hint,
                                      uint_fast16_t num_threads)
 {
-    PARALLEL_MATCH(sequentialGatherAddress(dst, src, srcWidth, idx, num),
-                   parallelGather_adr(dst, src, srcWidth, idx, num, num_threads))
+    PARALLEL_MATCH(carbon_parallel_sequential_gather_adr(dst, src, src_width, idx, num),
+                   carbon_parallel_parallel_gather_adr_func(dst, src, src_width, idx, num, num_threads))
 }
 
 inline static bool
-ParallelScatter(void *restrict dst, const void *restrict src, size_t width,
-                                  const size_t *restrict idx, size_t num, ThreadingHint hint, uint_fast16_t num_threads)
+carbon_parallel_scatter(void *restrict dst, const void *restrict src, size_t width,
+                                  const size_t *restrict idx, size_t num, carbon_parallel_threading_hint_t hint, uint_fast16_t num_threads)
 {
-    PARALLEL_MATCH(sequentialScatter(dst, src, width, idx, num),
-                   parallelScatter(dst, src, width, idx, num, num_threads))
+    PARALLEL_MATCH(carbon_parallel_sequential_scatter_func(dst, src, width, idx, num),
+                   carbon_parallel_parallel_scatter_func(dst, src, width, idx, num, num_threads))
 }
 
 inline static bool
-ParallelShuffle(void *restrict dst, const void *restrict src, size_t width,
-                                  const size_t *restrict dstIdx, const size_t *restrict srcIdx,
-                                  size_t idx_len, ThreadingHint hint)
+carbon_parallel_shuffle(void *restrict dst, const void *restrict src, size_t width,
+                                  const size_t *restrict dst_idx, const size_t *restrict src_idx,
+                                  size_t idx_len, carbon_parallel_threading_hint_t hint)
 {
-    PARALLEL_MATCH(sequentialShuffle(dst, src, width, dstIdx, srcIdx, idx_len),
-                   parallelShuffle(dst, src, width, dstIdx, srcIdx, idx_len))
+    PARALLEL_MATCH(carbon_parallel_sequential_shuffle(dst, src, width, dst_idx, src_idx, idx_len),
+                   carbon_parallel_parallel_shuffle(dst, src, width, dst_idx, src_idx, idx_len))
 }
 
 inline static bool
-ParallelFilterEarly(void *restrict result, size_t *restrict resultSize,
+carbon_parallel_filter_early(void *restrict result, size_t *restrict result_size,
                                        const void *restrict src,
-                                       size_t width, size_t len, Predicate pred, void *restrict args,
-                                       ThreadingHint hint, uint_fast16_t num_threads)
+                                       size_t width, size_t len, carbon_parallel_predicate pred, void *restrict args,
+                                       carbon_parallel_threading_hint_t hint, uint_fast16_t num_threads)
 {
-    PARALLEL_MATCH(sequentialFilterEarly(result, resultSize, src, width, len, pred, args),
-                   parallelFilterEarly(result, resultSize, src, width, len, pred, args, num_threads))
+    PARALLEL_MATCH(carbon_parallel_sequential_filter_early(result, result_size, src, width, len, pred, args),
+                   carbon_parallel_parallel_filter_early(result, result_size, src, width, len, pred, args, num_threads))
 }
 
 inline static bool
-ParallelFilterLate(size_t *restrict pos, size_t *restrict numPos, const void *restrict src,
-                                      size_t width, size_t len, Predicate pred, void *restrict args,
-                                      ThreadingHint hint, size_t num_threads)
+carbon_parallel_filter_late(size_t *restrict pos, size_t *restrict num_pos, const void *restrict src,
+                                      size_t width, size_t len, carbon_parallel_predicate pred, void *restrict args,
+                                      carbon_parallel_threading_hint_t hint, size_t num_threads)
 {
-    PARALLEL_MATCH(sequentialFilterLate(pos, numPos, src, width, len, pred, args),
-                   parallelFilterLate(pos, numPos, src, width, len, pred, args, num_threads))
+    PARALLEL_MATCH(carbon_parallel_sequential_filter_late(pos, num_pos, src, width, len, pred, args),
+                   carbon_parallel_parallel_filter_late(pos, num_pos, src, width, len, pred, args, num_threads))
 }
 
 inline static bool
-sequentialFor(const void *restrict base, size_t width, size_t len, ForFunctionBody f,
+carbon_parallel_sequential_for(const void *restrict base, size_t width, size_t len, carbon_parallel_for_body f,
                                    void *restrict args)
 {
     CARBON_NON_NULL_OR_ERROR(base)
@@ -296,39 +296,39 @@ sequentialFor(const void *restrict base, size_t width, size_t len, ForFunctionBo
 }
 
 inline static bool
-parallelFor(const void *restrict base, size_t width, size_t len, ForFunctionBody f,
+carbon_parallel_parallel_for(const void *restrict base, size_t width, size_t len, carbon_parallel_for_body f,
                                  void *restrict args, uint_fast16_t num_threads)
 {
     CARBON_NON_NULL_OR_ERROR(base)
     CARBON_NON_NULL_OR_ERROR(width)
 
     if (len > 0) {
-        uint_fast16_t numThread = num_threads + 1; /** +1 since one is this thread */
+        uint_fast16_t num_thread = num_threads + 1; /** +1 since one is this thread */
         pthread_t threads[num_threads];
-        FunctionProxy proxyArgs[numThread];
-        register size_t chunkLen = len / numThread;
-        size_t chunkLenRemain = len % numThread;
-        const void *restrict mainThreadBase = base + num_threads * chunkLen * width;
+        carbon_parallel_func_proxy_t proxyArgs[num_thread];
+        register size_t chunk_len = len / num_thread;
+        size_t chunk_len_remain = len % num_thread;
+        const void *restrict main_thread_base = base + num_threads * chunk_len * width;
 
         CARBON_PREFETCH_READ(f);
         CARBON_PREFETCH_READ(args);
 
         /** run f on NTHREADS_FOR additional threads */
         for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
-            FunctionProxy *proxyArg = proxyArgs + tid;
-            proxyArg->start = base + tid * chunkLen * width;
-            proxyArg->len = chunkLen;
-            proxyArg->tid = (tid + 1);
-            proxyArg->width = width;
-            proxyArg->args = args;
-            proxyArg->function = f;
+            carbon_parallel_func_proxy_t *proxy_arg = proxyArgs + tid;
+            proxy_arg->start = base + tid * chunk_len * width;
+            proxy_arg->len = chunk_len;
+            proxy_arg->tid = (tid + 1);
+            proxy_arg->width = width;
+            proxy_arg->args = args;
+            proxy_arg->function = f;
 
-            CARBON_PREFETCH_READ(proxyArg->start);
-            pthread_create(threads + tid, NULL, forProxyFunction, proxyArgs + tid);
+            CARBON_PREFETCH_READ(proxy_arg->start);
+            pthread_create(threads + tid, NULL, carbon_parallel_for_proxy_function, proxyArgs + tid);
         }
         /** run f on this thread */
-        CARBON_PREFETCH_READ(mainThreadBase);
-        f(mainThreadBase, width, chunkLen + chunkLenRemain, args, 0);
+        CARBON_PREFETCH_READ(main_thread_base);
+        f(main_thread_base, width, chunk_len + chunk_len_remain, args, 0);
 
         for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
             pthread_join(threads[tid], NULL);
@@ -339,35 +339,35 @@ parallelFor(const void *restrict base, size_t width, size_t len, ForFunctionBody
 
 typedef struct MapArgs
 {
-    MapFunctionBody mapFunction;
+    carbon_parallel_map_body mapFunction;
     void *restrict dst;
     const void *restrict src;
-    size_t dstWidth;
+    size_t dst_width;
     void *args;
 } MapArgs;
 
 inline static void
-mapProxy(const void *restrict src, size_t srcWidth, size_t len, void *restrict args,
+mapProxy(const void *restrict src, size_t src_width, size_t len, void *restrict args,
                                thread_id_t tid)
 {
     CARBON_UNUSED(tid);
     CARBON_CAST(MapArgs *, mapArgs, args);
-    size_t globalStart = (src - mapArgs->src) / srcWidth;
+    size_t globalStart = (src - mapArgs->src) / src_width;
 
     CARBON_PREFETCH_READ(mapArgs->src);
     CARBON_PREFETCH_READ(mapArgs->args);
     CARBON_PREFETCH_WRITE(mapArgs->dst);
-    mapArgs->mapFunction(mapArgs->dst + globalStart * mapArgs->dstWidth,
-                       src, srcWidth, mapArgs->dstWidth, len, mapArgs->args);
+    mapArgs->mapFunction(mapArgs->dst + globalStart * mapArgs->dst_width,
+                       src, src_width, mapArgs->dst_width, len, mapArgs->args);
 }
 
 inline static bool
-map(void *restrict dst, const void *restrict src, size_t srcWidth, size_t len, size_t
-                      dstWidth, MapFunctionBody f, void *restrict args, ThreadingHint hint, uint_fast16_t num_threads)
+carbon_parallel_map_exec(void *restrict dst, const void *restrict src, size_t src_width, size_t len, size_t
+                      dst_width, carbon_parallel_map_body f, void *restrict args, carbon_parallel_threading_hint_t hint, uint_fast16_t num_threads)
 {
     CARBON_NON_NULL_OR_ERROR(src)
-    CARBON_NON_NULL_OR_ERROR(srcWidth)
-    CARBON_NON_NULL_OR_ERROR(dstWidth)
+    CARBON_NON_NULL_OR_ERROR(src_width)
+    CARBON_NON_NULL_OR_ERROR(dst_width)
     CARBON_NON_NULL_OR_ERROR(f)
 
     CARBON_PREFETCH_READ(f);
@@ -377,48 +377,48 @@ map(void *restrict dst, const void *restrict src, size_t srcWidth, size_t len, s
         .args = args,
         .mapFunction = f,
         .dst = dst,
-        .dstWidth = dstWidth,
+        .dst_width = dst_width,
         .src = src
     };
 
-    return carbon_parallel_for((void *restrict) src, srcWidth, len, &mapProxy, &mapArgs, hint, num_threads);
+    return carbon_parallel_for((void *restrict) src, src_width, len, &mapProxy, &mapArgs, hint, num_threads);
 }
 
-typedef struct GatherScatterArgs
+typedef struct carbon_gather_scatter_args
 {
     const size_t *restrict idx;
     const void *restrict src;
     void *restrict dst;
-} GatherScatterArgs;
+} carbon_gather_scatter_args_t;
 
 inline static void
-gatherFunction(const void *restrict start, size_t width, size_t len, void *restrict args,
+carbon_gather_function(const void *restrict start, size_t width, size_t len, void *restrict args,
                                  thread_id_t tid)
 {
     CARBON_UNUSED(tid);
-    CARBON_CAST(GatherScatterArgs *, gatherArgs, args);
-    size_t globalIndexStart = (start - gatherArgs->dst) / width;
+    CARBON_CAST(carbon_gather_scatter_args_t *, gather_args, args);
+    size_t global_index_start = (start - gather_args->dst) / width;
 
-    CARBON_PREFETCH_WRITE(gatherArgs->dst);
-    CARBON_PREFETCH_WRITE(gatherArgs->idx);
-    CARBON_PREFETCH_READ((len > 0) ? gatherArgs->src + gatherArgs->idx[0] * width : NULL);
+    CARBON_PREFETCH_WRITE(gather_args->dst);
+    CARBON_PREFETCH_WRITE(gather_args->idx);
+    CARBON_PREFETCH_READ((len > 0) ? gather_args->src + gather_args->idx[0] * width : NULL);
 
     for (register size_t i = 0, next_i = 1; i < len; next_i = ++i + 1) {
-        size_t globalIndexCur = globalIndexStart + i;
-        size_t globalIndexNext = globalIndexStart + next_i;
-        memcpy(gatherArgs->dst + globalIndexCur * width,
-               gatherArgs->src + gatherArgs->idx[globalIndexCur] * width,
+        size_t global_index_cur = global_index_start + i;
+        size_t global_index_next = global_index_start + next_i;
+        memcpy(gather_args->dst + global_index_cur * width,
+               gather_args->src + gather_args->idx[global_index_cur] * width,
                width);
 
         bool has_next = (next_i < len);
-        CARBON_PREFETCH_READ(has_next ? gatherArgs->idx + globalIndexNext : NULL);
-        CARBON_PREFETCH_READ(has_next ? gatherArgs->src + gatherArgs->idx[globalIndexNext] * width : NULL);
-        CARBON_PREFETCH_WRITE(has_next ? gatherArgs->dst + globalIndexNext * width : NULL);
+        CARBON_PREFETCH_READ(has_next ? gather_args->idx + global_index_next : NULL);
+        CARBON_PREFETCH_READ(has_next ? gather_args->src + gather_args->idx[global_index_next] * width : NULL);
+        CARBON_PREFETCH_WRITE(has_next ? gather_args->dst + global_index_next * width : NULL);
     }
 }
 
 inline static bool
-sequentialGather(void *restrict dst, const void *restrict src, size_t width,
+carbon_parallel_sequential_gather(void *restrict dst, const void *restrict src, size_t width,
                                       const size_t *restrict idx, size_t dst_src_len)
 {
     CARBON_NON_NULL_OR_ERROR(dst)
@@ -447,7 +447,7 @@ sequentialGather(void *restrict dst, const void *restrict src, size_t width,
 }
 
 inline static bool
-parallelGather(void *restrict dst, const void *restrict src, size_t width,
+carbon_parallel_parallel_gather(void *restrict dst, const void *restrict src, size_t width,
                                     const size_t *restrict idx, size_t dst_src_len, uint_fast16_t num_threads)
 {
     CARBON_NON_NULL_OR_ERROR(dst)
@@ -459,22 +459,22 @@ parallelGather(void *restrict dst, const void *restrict src, size_t width,
     CARBON_PREFETCH_READ(idx);
     CARBON_PREFETCH_WRITE(dst);
 
-    GatherScatterArgs args = {
+    carbon_gather_scatter_args_t args = {
         .idx           = idx,
         .src           = src,
         .dst           = dst,
     };
-    return parallelFor(dst, width, dst_src_len, gatherFunction, &args, num_threads);
+    return carbon_parallel_parallel_for(dst, width, dst_src_len, carbon_gather_function, &args, num_threads);
 }
 
 inline static bool
-sequentialGatherAddress(void *restrict dst, const void *restrict src, size_t srcWidth,
+carbon_parallel_sequential_gather_adr(void *restrict dst, const void *restrict src, size_t src_width,
                                           const size_t *restrict idx, size_t num)
 {
     CARBON_NON_NULL_OR_ERROR(dst)
     CARBON_NON_NULL_OR_ERROR(src)
     CARBON_NON_NULL_OR_ERROR(idx)
-    CARBON_NON_NULL_OR_ERROR(srcWidth)
+    CARBON_NON_NULL_OR_ERROR(src_width)
 
     CARBON_PREFETCH_READ(src);
     CARBON_PREFETCH_READ(idx);
@@ -482,97 +482,97 @@ sequentialGatherAddress(void *restrict dst, const void *restrict src, size_t src
 
     CARBON_PREFETCH_READ(idx);
     CARBON_PREFETCH_WRITE(dst);
-    CARBON_PREFETCH_READ(num > 0 ? src + idx[0] * srcWidth : NULL);
+    CARBON_PREFETCH_READ(num > 0 ? src + idx[0] * src_width : NULL);
 
     for (register size_t i = 0, next_i = 1; i < num; next_i = ++i + 1) {
-        const void *ptr = src + idx[i] * srcWidth;
+        const void *ptr = src + idx[i] * src_width;
         size_t adr = (size_t) ptr;
         memcpy(dst + i * sizeof(void *), &adr, sizeof(size_t));
 
         bool has_next = (next_i < num);
         CARBON_PREFETCH_READ(has_next ? idx + next_i : NULL);
-        CARBON_PREFETCH_READ(has_next ? src + idx[next_i] * srcWidth : NULL);
+        CARBON_PREFETCH_READ(has_next ? src + idx[next_i] * src_width : NULL);
         CARBON_PREFETCH_WRITE(has_next ? dst + next_i * sizeof(void *) : NULL);
     }
     return true;
 }
 
 inline static void
-gatherAddressFunc(const void *restrict start, size_t width, size_t len, void *restrict args,
+carbon_parallel_gather_adr_func(const void *restrict start, size_t width, size_t len, void *restrict args,
                                      thread_id_t tid)
 {
     CARBON_UNUSED(tid);
-    CARBON_CAST(GatherScatterArgs *, gatherArgs, args);
+    CARBON_CAST(carbon_gather_scatter_args_t *, gather_args, args);
 
-    CARBON_PREFETCH_READ(gatherArgs->idx);
-    CARBON_PREFETCH_WRITE(gatherArgs->dst);
-    CARBON_PREFETCH_READ((len > 0) ? gatherArgs->src + gatherArgs->idx[0] * width : NULL);
+    CARBON_PREFETCH_READ(gather_args->idx);
+    CARBON_PREFETCH_WRITE(gather_args->dst);
+    CARBON_PREFETCH_READ((len > 0) ? gather_args->src + gather_args->idx[0] * width : NULL);
 
-    size_t globalIndexStart = (start - gatherArgs->dst) / width;
+    size_t global_index_start = (start - gather_args->dst) / width;
     for (register size_t i = 0, next_i = 1; i < len; next_i = ++i + 1) {
-        size_t globalIndexCur = globalIndexStart + i;
-        size_t globalIndexNext = globalIndexStart + next_i;
-        const void *ptr = gatherArgs->src + gatherArgs->idx[globalIndexCur] * width;
+        size_t global_index_cur = global_index_start + i;
+        size_t global_index_next = global_index_start + next_i;
+        const void *ptr = gather_args->src + gather_args->idx[global_index_cur] * width;
         size_t adr = (size_t) ptr;
-        memcpy(gatherArgs->dst + globalIndexCur * sizeof(void *), &adr, sizeof(size_t));
+        memcpy(gather_args->dst + global_index_cur * sizeof(void *), &adr, sizeof(size_t));
 
         bool has_next = (next_i < len);
-        CARBON_PREFETCH_READ(has_next ? gatherArgs->idx + globalIndexNext : NULL);
-        CARBON_PREFETCH_READ(has_next ? gatherArgs->src + gatherArgs->idx[globalIndexNext] * width : NULL);
-        CARBON_PREFETCH_WRITE(has_next ? gatherArgs->dst + globalIndexNext * sizeof(void *) : NULL);
+        CARBON_PREFETCH_READ(has_next ? gather_args->idx + global_index_next : NULL);
+        CARBON_PREFETCH_READ(has_next ? gather_args->src + gather_args->idx[global_index_next] * width : NULL);
+        CARBON_PREFETCH_WRITE(has_next ? gather_args->dst + global_index_next * sizeof(void *) : NULL);
     }
 }
 
 inline static bool
-parallelGather_adr(void *restrict dst, const void *restrict src, size_t srcWidth,
+carbon_parallel_parallel_gather_adr_func(void *restrict dst, const void *restrict src, size_t src_width,
                                      const size_t *restrict idx, size_t num, uint_fast16_t num_threads)
 {
     CARBON_NON_NULL_OR_ERROR(dst)
     CARBON_NON_NULL_OR_ERROR(src)
     CARBON_NON_NULL_OR_ERROR(idx)
-    CARBON_NON_NULL_OR_ERROR(srcWidth)
+    CARBON_NON_NULL_OR_ERROR(src_width)
 
     CARBON_PREFETCH_READ(src);
     CARBON_PREFETCH_READ(idx);
     CARBON_PREFETCH_WRITE(dst);
 
-    GatherScatterArgs args = {
+    carbon_gather_scatter_args_t args = {
         .idx = idx,
         .src = src,
         .dst = dst
     };
-    return parallelFor(dst, srcWidth, num, gatherAddressFunc, &args, num_threads);
+    return carbon_parallel_parallel_for(dst, src_width, num, carbon_parallel_gather_adr_func, &args, num_threads);
 }
 
 inline static void
-scatterFunction(const void *restrict start, size_t width, size_t len, void *restrict args,
+carbon_parallel_scatter_func(const void *restrict start, size_t width, size_t len, void *restrict args,
                                    thread_id_t tid)
 {
     CARBON_UNUSED(tid);
-    CARBON_CAST(GatherScatterArgs *, scatter_args, args);
+    CARBON_CAST(carbon_gather_scatter_args_t *, scatter_args, args);
 
     CARBON_PREFETCH_READ(scatter_args->idx);
     CARBON_PREFETCH_READ(scatter_args->src);
     CARBON_PREFETCH_WRITE((len > 0) ? scatter_args->dst + scatter_args->idx[0] * width : NULL);
 
-    size_t globalIndexStart = (start - scatter_args->dst) / width;
+    size_t global_index_start = (start - scatter_args->dst) / width;
     for (register size_t i = 0, next_i = 1; i < len; next_i = ++i + 1) {
-        size_t globalIndexCur = globalIndexStart + i;
-        size_t globalIndexNext = globalIndexStart + next_i;
+        size_t global_index_cur = global_index_start + i;
+        size_t global_index_next = global_index_start + next_i;
 
-        memcpy(scatter_args->dst + scatter_args->idx[globalIndexCur] * width,
-               scatter_args->src + globalIndexCur * width,
+        memcpy(scatter_args->dst + scatter_args->idx[global_index_cur] * width,
+               scatter_args->src + global_index_cur * width,
                width);
 
         bool has_next = (next_i < len);
-        CARBON_PREFETCH_READ(has_next ? scatter_args->idx + globalIndexNext : NULL);
-        CARBON_PREFETCH_READ(has_next ? scatter_args->src + globalIndexNext * width : NULL);
-        CARBON_PREFETCH_WRITE(has_next ? scatter_args->dst + scatter_args->idx[globalIndexNext] * width : NULL);
+        CARBON_PREFETCH_READ(has_next ? scatter_args->idx + global_index_next : NULL);
+        CARBON_PREFETCH_READ(has_next ? scatter_args->src + global_index_next * width : NULL);
+        CARBON_PREFETCH_WRITE(has_next ? scatter_args->dst + scatter_args->idx[global_index_next] * width : NULL);
     }
 }
 
 inline static bool
-sequentialScatter(void *restrict dst, const void *restrict src, size_t width,
+carbon_parallel_sequential_scatter_func(void *restrict dst, const void *restrict src, size_t width,
                                     const size_t *restrict idx, size_t num)
 {
     CARBON_NON_NULL_OR_ERROR(dst)
@@ -596,7 +596,7 @@ sequentialScatter(void *restrict dst, const void *restrict src, size_t width,
 }
 
 inline static bool
-parallelScatter(void *restrict dst, const void *restrict src, size_t width,
+carbon_parallel_parallel_scatter_func(void *restrict dst, const void *restrict src, size_t width,
                                   const size_t *restrict idx, size_t num, uint_fast16_t num_threads)
 {
     CARBON_NON_NULL_OR_ERROR(dst)
@@ -608,289 +608,289 @@ parallelScatter(void *restrict dst, const void *restrict src, size_t width,
     CARBON_PREFETCH_READ(idx);
     CARBON_PREFETCH_WRITE(dst);
 
-    GatherScatterArgs args = {
+    carbon_gather_scatter_args_t args = {
         .idx = idx,
         .src = src,
         .dst = dst
     };
-    return parallelFor(dst, width, num, scatterFunction, &args, num_threads);
+    return carbon_parallel_parallel_for(dst, width, num, carbon_parallel_scatter_func, &args, num_threads);
 }
 
 inline static bool
-sequentialShuffle(void *restrict dst, const void *restrict src, size_t width,
-                                    const size_t *restrict dstIdx, const size_t *restrict srcIdx,
+carbon_parallel_sequential_shuffle(void *restrict dst, const void *restrict src, size_t width,
+                                    const size_t *restrict dst_idx, const size_t *restrict src_idx,
                                     size_t idx_len)
 {
     CARBON_NON_NULL_OR_ERROR(dst)
     CARBON_NON_NULL_OR_ERROR(src)
-    CARBON_NON_NULL_OR_ERROR(dstIdx)
-    CARBON_NON_NULL_OR_ERROR(srcIdx)
+    CARBON_NON_NULL_OR_ERROR(dst_idx)
+    CARBON_NON_NULL_OR_ERROR(src_idx)
     CARBON_NON_NULL_OR_ERROR(width)
 
     bool has_first = (idx_len > 0);
-    CARBON_PREFETCH_READ(srcIdx);
-    CARBON_PREFETCH_READ(dstIdx);
-    CARBON_PREFETCH_READ(has_first ? src + srcIdx[0] * width : NULL);
-    CARBON_PREFETCH_WRITE(has_first ? dst + dstIdx[0] * width : NULL);
+    CARBON_PREFETCH_READ(src_idx);
+    CARBON_PREFETCH_READ(dst_idx);
+    CARBON_PREFETCH_READ(has_first ? src + src_idx[0] * width : NULL);
+    CARBON_PREFETCH_WRITE(has_first ? dst + dst_idx[0] * width : NULL);
 
     for (register size_t i = 0, next_i = 1; i < idx_len; next_i = ++i + 1) {
-        memcpy(dst + dstIdx[i] * width, src + srcIdx[i] * width, width);
+        memcpy(dst + dst_idx[i] * width, src + src_idx[i] * width, width);
 
         bool has_next = (next_i < idx_len);
-        CARBON_PREFETCH_READ(has_next ? srcIdx + next_i : NULL);
-        CARBON_PREFETCH_READ(has_next ? dstIdx + next_i : NULL);
-        CARBON_PREFETCH_READ(has_next ? src + srcIdx[next_i] * width : NULL);
-        CARBON_PREFETCH_WRITE(has_next ? dst + dstIdx[next_i] * width : NULL);
+        CARBON_PREFETCH_READ(has_next ? src_idx + next_i : NULL);
+        CARBON_PREFETCH_READ(has_next ? dst_idx + next_i : NULL);
+        CARBON_PREFETCH_READ(has_next ? src + src_idx[next_i] * width : NULL);
+        CARBON_PREFETCH_WRITE(has_next ? dst + dst_idx[next_i] * width : NULL);
     }
 
     return true;
 }
 
 inline static bool
-parallelShuffle(void *restrict dst, const void *restrict src, size_t width,
-                                  const size_t *restrict dstIdx, const size_t *restrict srcIdx,
+carbon_parallel_parallel_shuffle(void *restrict dst, const void *restrict src, size_t width,
+                                  const size_t *restrict dst_idx, const size_t *restrict src_idx,
                                   size_t idx_len)
 {
     CARBON_UNUSED(dst);
     CARBON_UNUSED(src);
     CARBON_UNUSED(width);
-    CARBON_UNUSED(dstIdx);
-    CARBON_UNUSED(srcIdx);
+    CARBON_UNUSED(dst_idx);
+    CARBON_UNUSED(src_idx);
     CARBON_UNUSED(idx_len);
     CARBON_NOT_IMPLEMENTED
 }
 
-typedef struct FilterArg
+typedef struct carbon_filter_arg
 {
-    size_t numPositions;
-    size_t *restrict srcPositions;
+    size_t num_positions;
+    size_t *restrict src_positions;
     const void *restrict start;
     size_t len;
     size_t width;
     void *restrict args;
-    Predicate pred;
-    size_t positionOffsetToAdd;
-} FilterArg;
+    carbon_parallel_predicate pred;
+    size_t position_offset_to_add;
+} carbon_filter_arg_t;
 
 inline static bool
-sequentialFilterLate(size_t *restrict positions, size_t *restrict numPositions,
-                                       const void *restrict source, size_t width, size_t length, Predicate predicate,
+carbon_parallel_sequential_filter_late(size_t *restrict positions, size_t *restrict num_positions,
+                                       const void *restrict source, size_t width, size_t length, carbon_parallel_predicate predicate,
                                        void *restrict arguments)
 {
     CARBON_NON_NULL_OR_ERROR(positions);
-    CARBON_NON_NULL_OR_ERROR(numPositions);
+    CARBON_NON_NULL_OR_ERROR(num_positions);
     CARBON_NON_NULL_OR_ERROR(source);
     CARBON_NON_NULL_OR_ERROR(width);
     CARBON_NON_NULL_OR_ERROR(length);
     CARBON_NON_NULL_OR_ERROR(predicate);
 
-    predicate(positions, numPositions, source, width, length, arguments, 0);
+    predicate(positions, num_positions, source, width, length, arguments, 0);
 
     return true;
 }
 
 inline static void *
-filterProxyFunc(void *restrict args)
+carbon_parallel_filter_proxy_func(void *restrict args)
 {
-    CARBON_CAST(FilterArg *restrict, proxyArg, args);
-    proxyArg->pred(proxyArg->srcPositions, &proxyArg->numPositions,
-                   proxyArg->start, proxyArg->width, proxyArg->len, proxyArg->args,
-                   proxyArg->positionOffsetToAdd);
+    CARBON_CAST(carbon_filter_arg_t *restrict, proxy_arg, args);
+    proxy_arg->pred(proxy_arg->src_positions, &proxy_arg->num_positions,
+                   proxy_arg->start, proxy_arg->width, proxy_arg->len, proxy_arg->args,
+                   proxy_arg->position_offset_to_add);
     return NULL;
 }
 
 inline static bool
-parallelFilterLate(size_t *restrict pos, size_t *restrict numPos,
-                                         const void *restrict src, size_t width, size_t len, Predicate pred,
+carbon_parallel_parallel_filter_late(size_t *restrict pos, size_t *restrict num_pos,
+                                         const void *restrict src, size_t width, size_t len, carbon_parallel_predicate pred,
                                          void *restrict args, size_t num_threads)
 {
     CARBON_NON_NULL_OR_ERROR(pos);
-    CARBON_NON_NULL_OR_ERROR(numPos);
+    CARBON_NON_NULL_OR_ERROR(num_pos);
     CARBON_NON_NULL_OR_ERROR(src);
     CARBON_NON_NULL_OR_ERROR(width);
     CARBON_NON_NULL_OR_ERROR(pred);
 
     if (CARBON_BRANCH_UNLIKELY(len == 0)) {
-        *numPos = 0;
+        *num_pos = 0;
         return true;
     }
 
-    uint_fast16_t numThread = num_threads + 1; /** +1 since one is this thread */
+    uint_fast16_t num_thread = num_threads + 1; /** +1 since one is this thread */
 
     pthread_t threads[num_threads];
-    FilterArg thread_args[numThread];
+    carbon_filter_arg_t thread_args[num_thread];
 
-    register size_t chunkLen = len / numThread;
-    size_t chunkLenRemain = len % numThread;
-    size_t mainPositionOffsetToAdd = num_threads * chunkLen;
-    const void *restrict mainThreadBase = src + mainPositionOffsetToAdd * width;
+    register size_t chunk_len = len / num_thread;
+    size_t chunk_len_remain = len % num_thread;
+    size_t main_position_offset_to_add = num_threads * chunk_len;
+    const void *restrict main_thread_base = src + main_position_offset_to_add * width;
 
     CARBON_PREFETCH_READ(pred);
     CARBON_PREFETCH_READ(args);
 
     /** run f on NTHREADS_FOR additional threads */
-    if (CARBON_BRANCH_LIKELY(chunkLen > 0)) {
+    if (CARBON_BRANCH_LIKELY(chunk_len > 0)) {
         for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
-            FilterArg *arg = thread_args + tid;
-            arg->numPositions = 0;
-            arg->srcPositions = malloc(chunkLen * sizeof(size_t));
-            arg->positionOffsetToAdd = tid * chunkLen;
-            arg->start = src + arg->positionOffsetToAdd * width;
-            arg->len = chunkLen;
+            carbon_filter_arg_t *arg = thread_args + tid;
+            arg->num_positions = 0;
+            arg->src_positions = malloc(chunk_len * sizeof(size_t));
+            arg->position_offset_to_add = tid * chunk_len;
+            arg->start = src + arg->position_offset_to_add * width;
+            arg->len = chunk_len;
             arg->width = width;
             arg->args = args;
             arg->pred = pred;
 
             CARBON_PREFETCH_READ(arg->start);
-            pthread_create(threads + tid, NULL, filterProxyFunc, arg);
+            pthread_create(threads + tid, NULL, carbon_parallel_filter_proxy_func, arg);
         }
     }
     /** run f on this thread */
-    CARBON_PREFETCH_READ(mainThreadBase);
-    size_t mainChunkLen = chunkLen + chunkLenRemain;
-    size_t *mainSrcPositions = malloc(mainChunkLen * sizeof(size_t));
-    size_t mainNumPositions = 0;
+    CARBON_PREFETCH_READ(main_thread_base);
+    size_t main_chunk_len = chunk_len + chunk_len_remain;
+    size_t *main_src_positions = malloc(main_chunk_len * sizeof(size_t));
+    size_t main_num_positions = 0;
 
-    pred(mainSrcPositions,
-         &mainNumPositions,
-         mainThreadBase,
+    pred(main_src_positions,
+         &main_num_positions,
+         main_thread_base,
          width,
-         mainChunkLen,
+         main_chunk_len,
          args,
-         mainPositionOffsetToAdd);
+         main_position_offset_to_add);
 
-    size_t totalNumMatchingPositions = 0;
+    size_t total_num_matching_positions = 0;
 
-    if (CARBON_BRANCH_LIKELY(chunkLen > 0)) {
+    if (CARBON_BRANCH_LIKELY(chunk_len > 0)) {
         for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
             pthread_join(threads[tid], NULL);
-            const FilterArg *restrict threadArg = (thread_args + tid);
-            if (threadArg->numPositions > 0) {
-                memcpy(pos + totalNumMatchingPositions, threadArg->srcPositions,
-                       threadArg->numPositions * sizeof(size_t));
-                totalNumMatchingPositions += threadArg->numPositions;
+            const carbon_filter_arg_t *restrict thread_arg = (thread_args + tid);
+            if (thread_arg->num_positions > 0) {
+                memcpy(pos + total_num_matching_positions, thread_arg->src_positions,
+                       thread_arg->num_positions * sizeof(size_t));
+                total_num_matching_positions += thread_arg->num_positions;
             }
-            free(thread_args[tid].srcPositions);
+            free(thread_args[tid].src_positions);
         }
     }
 
-    if (CARBON_BRANCH_LIKELY(mainNumPositions > 0)) {
-        memcpy(pos + totalNumMatchingPositions, mainSrcPositions,
-               mainNumPositions * sizeof(size_t));
-        totalNumMatchingPositions += mainNumPositions;
+    if (CARBON_BRANCH_LIKELY(main_num_positions > 0)) {
+        memcpy(pos + total_num_matching_positions, main_src_positions,
+               main_num_positions * sizeof(size_t));
+        total_num_matching_positions += main_num_positions;
     }
-    free(mainSrcPositions);
+    free(main_src_positions);
 
-    *numPos = totalNumMatchingPositions;
+    *num_pos = total_num_matching_positions;
 
     return true;
 }
 
 inline static bool
-sequentialFilterEarly(void *restrict result, size_t *restrict resultSize,
-                                            const void *restrict src, size_t width, size_t len, Predicate pred,
+carbon_parallel_sequential_filter_early(void *restrict result, size_t *restrict result_size,
+                                            const void *restrict src, size_t width, size_t len, carbon_parallel_predicate pred,
                                             void *restrict args)
 {
     CARBON_NON_NULL_OR_ERROR(result);
-    CARBON_NON_NULL_OR_ERROR(resultSize);
+    CARBON_NON_NULL_OR_ERROR(result_size);
     CARBON_NON_NULL_OR_ERROR(src);
     CARBON_NON_NULL_OR_ERROR(width);
     CARBON_NON_NULL_OR_ERROR(len);
     CARBON_NON_NULL_OR_ERROR(pred);
 
-    size_t numMatchingPositions;
-    size_t *restrict matchingPositions = malloc(len * sizeof(size_t));
+    size_t num_matching_positions;
+    size_t *restrict matching_positions = malloc(len * sizeof(size_t));
 
-    pred(matchingPositions, &numMatchingPositions, src, width, len, args, 0);
+    pred(matching_positions, &num_matching_positions, src, width, len, args, 0);
 
-    ParallelGather(result, src, width, matchingPositions, numMatchingPositions, ThreadingHint_Single, 0);
-    *resultSize = numMatchingPositions;
+    carbon_parallel_gather(result, src, width, matching_positions, num_matching_positions, CARBON_PARALLEL_THREAD_HINT_SINGLE, 0);
+    *result_size = num_matching_positions;
 
-    free(matchingPositions);
+    free(matching_positions);
 
     return true;
 }
 
 inline static bool
-parallelFilterEarly(void *restrict result, size_t *restrict resultSize,
-                                          const void *restrict src, size_t width, size_t len, Predicate pred,
+carbon_parallel_parallel_filter_early(void *restrict result, size_t *restrict result_size,
+                                          const void *restrict src, size_t width, size_t len, carbon_parallel_predicate pred,
                                           void *restrict args, uint_fast16_t num_threads)
 {
     CARBON_NON_NULL_OR_ERROR(result);
-    CARBON_NON_NULL_OR_ERROR(resultSize);
+    CARBON_NON_NULL_OR_ERROR(result_size);
     CARBON_NON_NULL_OR_ERROR(src);
     CARBON_NON_NULL_OR_ERROR(width);
     CARBON_NON_NULL_OR_ERROR(len);
     CARBON_NON_NULL_OR_ERROR(pred);
 
-    uint_fast16_t numThread = num_threads + 1; /** +1 since one is this thread */
+    uint_fast16_t num_thread = num_threads + 1; /** +1 since one is this thread */
 
     pthread_t threads[num_threads];
-    FilterArg thread_args[numThread];
+    carbon_filter_arg_t thread_args[num_thread];
 
-    register size_t chunkLen = len / numThread;
-    size_t chunkLenRemain = len % numThread;
-    size_t mainPositionOffsetToAdd = num_threads * chunkLen;
-    const void *restrict mainThreadBase = src + mainPositionOffsetToAdd * width;
+    register size_t chunk_len = len / num_thread;
+    size_t chunk_len_remain = len % num_thread;
+    size_t main_position_offset_to_add = num_threads * chunk_len;
+    const void *restrict main_thread_base = src + main_position_offset_to_add * width;
 
     CARBON_PREFETCH_READ(pred);
     CARBON_PREFETCH_READ(args);
 
     /** run f on NTHREADS_FOR additional threads */
     for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
-        FilterArg *arg = thread_args + tid;
-        arg->numPositions = 0;
-        arg->srcPositions = malloc(chunkLen * sizeof(size_t));
-        arg->positionOffsetToAdd = tid * chunkLen;
-        arg->start = src + arg->positionOffsetToAdd * width;
-        arg->len = chunkLen;
+        carbon_filter_arg_t *arg = thread_args + tid;
+        arg->num_positions = 0;
+        arg->src_positions = malloc(chunk_len * sizeof(size_t));
+        arg->position_offset_to_add = tid * chunk_len;
+        arg->start = src + arg->position_offset_to_add * width;
+        arg->len = chunk_len;
         arg->width = width;
         arg->args = args;
         arg->pred = pred;
 
         CARBON_PREFETCH_READ(arg->start);
-        pthread_create(threads + tid, NULL, filterProxyFunc, arg);
+        pthread_create(threads + tid, NULL, carbon_parallel_filter_proxy_func, arg);
     }
     /** run f on this thread */
-    CARBON_PREFETCH_READ(mainThreadBase);
-    size_t mainChunkLen = chunkLen + chunkLenRemain;
-    size_t *mainSrcPositions = malloc(mainChunkLen * sizeof(size_t));
-    size_t mainNumPositions = 0;
+    CARBON_PREFETCH_READ(main_thread_base);
+    size_t main_chunk_len = chunk_len + chunk_len_remain;
+    size_t *main_src_positions = malloc(main_chunk_len * sizeof(size_t));
+    size_t main_num_positions = 0;
 
-    pred(mainSrcPositions, &mainNumPositions, mainThreadBase, width, mainChunkLen, args,
-         mainPositionOffsetToAdd);
+    pred(main_src_positions, &main_num_positions, main_thread_base, width, main_chunk_len, args,
+         main_position_offset_to_add);
 
 
-    size_t totalNumMatchingPositions = mainNumPositions;
-    size_t partial_numMatchingPositions = 0;
+    size_t total_num_matching_positions = main_num_positions;
+    size_t partial_num_matching_positions = 0;
 
     for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
         pthread_join(threads[tid], NULL);
-        const FilterArg *restrict threadArg = (thread_args + tid);
-        totalNumMatchingPositions += threadArg->numPositions;
-        CARBON_PREFETCH_READ(threadArg->srcPositions);
+        const carbon_filter_arg_t *restrict thread_arg = (thread_args + tid);
+        total_num_matching_positions += thread_arg->num_positions;
+        CARBON_PREFETCH_READ(thread_arg->src_positions);
     }
 
     for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
-        const FilterArg *restrict threadArg = (thread_args + tid);
+        const carbon_filter_arg_t *restrict thread_arg = (thread_args + tid);
 
-        if (CARBON_BRANCH_LIKELY(threadArg->numPositions > 0)) {
-            ParallelGather(result + partial_numMatchingPositions * width, src, width, threadArg->srcPositions,
-                           threadArg->numPositions,
+        if (CARBON_BRANCH_LIKELY(thread_arg->num_positions > 0)) {
+            carbon_parallel_gather(result + partial_num_matching_positions * width, src, width, thread_arg->src_positions,
+                           thread_arg->num_positions,
                            CARBON_PARALLEL_THREAD_HINT_MULTI, num_threads);
         }
 
-        partial_numMatchingPositions += threadArg->numPositions;
-        free(threadArg->srcPositions);
+        partial_num_matching_positions += thread_arg->num_positions;
+        free(thread_arg->src_positions);
     }
 
-    if (CARBON_BRANCH_LIKELY(mainNumPositions > 0)) {
-        ParallelGather(result + partial_numMatchingPositions * width, src, width, mainSrcPositions,
-                       mainNumPositions, CARBON_PARALLEL_THREAD_HINT_MULTI, num_threads);
+    if (CARBON_BRANCH_LIKELY(main_num_positions > 0)) {
+        carbon_parallel_gather(result + partial_num_matching_positions * width, src, width, main_src_positions,
+                       main_num_positions, CARBON_PARALLEL_THREAD_HINT_MULTI, num_threads);
     }
-    free(mainSrcPositions);
+    free(main_src_positions);
 
-    *resultSize = totalNumMatchingPositions;
+    *result_size = total_num_matching_positions;
 
     return true;
 }

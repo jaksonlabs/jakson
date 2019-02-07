@@ -351,7 +351,7 @@ carbon_jest_test_doc(carbon_err_t *err, carbon_json_t *json)
 
 static carbon_json_token_t get_token(carbon_vec_t ofType(carbon_json_token_t) *token_stream, size_t token_idx)
 {
-    return *(carbon_json_token_t *) VectorAt(token_stream, token_idx);
+    return *(carbon_json_token_t *) carbon_vec_at(token_stream, token_idx);
 }
 
 bool parse_members(carbon_err_t *err, carbon_json_ast_node_members_t *members, carbon_vec_t ofType(carbon_json_token_t) *token_stream, size_t *token_idx)
