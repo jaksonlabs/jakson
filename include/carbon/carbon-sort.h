@@ -77,7 +77,7 @@ typedef bool (*carbon_less_func_t)(const void *lhs, const void *rhs);
 })
 
 CARBON_FUNC_UNUSED
-CARBON_EXPORT(static bool)
+static bool
 carbon_sort_qsort_indicies(size_t *indices, const void *base, size_t width, carbon_less_eq_func_t comp, size_t nelemns,
                            carbon_alloc_t *alloc)
 {
@@ -120,7 +120,7 @@ carbon_sort_qsort_indicies(size_t *indices, const void *base, size_t width, carb
 }
 
 CARBON_FUNC_UNUSED
-CARBON_EXPORT(static int )
+static int
 carbon_sort_qsort_indicies_wargs(size_t *indices, const void *base, size_t width, carbon_less_eq_wargs_func_t comp,
                                  size_t nelemens, carbon_alloc_t *alloc, void *args)
 {
@@ -165,7 +165,7 @@ carbon_sort_qsort_indicies_wargs(size_t *indices, const void *base, size_t width
 }
 
 CARBON_FUNC_UNUSED
-CARBON_EXPORT(static size_t)
+static size_t
 carbon_sort_bsearch_indicies(const size_t *indicies, const void *base, size_t width, size_t nelemens,
                              const void *neelde, carbon_eq_func_t compEq, carbon_less_func_t compLess)
 {
@@ -194,7 +194,7 @@ carbon_sort_bsearch_indicies(const size_t *indicies, const void *base, size_t wi
 }
 
 CARBON_FUNC_UNUSED
-CARBON_EXPORT(static size_t)
+static size_t
 carbon_sort_get_min(const size_t *elements, size_t nelemens)
 {
     size_t min = (size_t) -1;
@@ -206,7 +206,7 @@ carbon_sort_get_min(const size_t *elements, size_t nelemens)
 }
 
 CARBON_FUNC_UNUSED
-CARBON_EXPORT(static size_t)
+static size_t
 carbon_sort_get_max(const size_t *elements, size_t nelemens)
 {
     size_t max = 0;
@@ -218,7 +218,7 @@ carbon_sort_get_max(const size_t *elements, size_t nelemens)
 }
 
 CARBON_FUNC_UNUSED
-CARBON_EXPORT(static double)
+static double
 carbon_sort_get_sum(const size_t *elements, size_t nelemens)
 {
     double sum = 0;
@@ -230,7 +230,7 @@ carbon_sort_get_sum(const size_t *elements, size_t nelemens)
 }
 
 CARBON_FUNC_UNUSED
-CARBON_EXPORT(static double)
+static double
 carbon_sort_get_avg(const size_t *elements, size_t nelemens)
 {
     return carbon_sort_get_sum(elements, nelemens) / (double) nelemens;

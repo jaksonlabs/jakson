@@ -151,7 +151,7 @@ carbon_error_print_and_abort(const carbon_err_t *err);
 }
 
 #define CARBON_DEFINE_GET_ERROR_FUNCTION(type_name, type, arg)                                                         \
-CARBON_FUNC_UNUSED static CARBON_EXPORT(bool)                                                                          \
+CARBON_FUNC_UNUSED static bool                                                                          \
 carbon_##type_name##_get_error(carbon_err_t *err, const type *arg)                                                     \
 {                                                                                                                      \
     CARBON_NON_NULL_OR_ERROR(err)                                                                                             \

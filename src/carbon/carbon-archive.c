@@ -2048,7 +2048,7 @@ typedef struct
     const carbon_string_id_t *keys;
 } EmbeddedNullProp;
 
-__unused static void embeddedFixedPropsRead(EmbeddedFixedProp *prop, carbon_memfile_t *memFile) {
+static void embeddedFixedPropsRead(EmbeddedFixedProp *prop, carbon_memfile_t *memFile) {
     prop->header = CARBON_MEMFILE_READ_TYPE(memFile, struct SimplePropHeader);
     prop->keys = (carbon_string_id_t *) CARBON_MEMFILE_READ(memFile, prop->header->numEntries * sizeof(carbon_string_id_t));
     prop->values = carbon_memfile_peek(memFile, 1);

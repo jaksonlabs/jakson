@@ -138,7 +138,7 @@ typedef struct carbon_strdic
  * @return
  */
 CARBON_FUNC_UNUSED
-CARBON_EXPORT(static bool)
+static bool
 carbon_strdic_drop(carbon_strdic_t *dic)
 {
     CARBON_NON_NULL_OR_ERROR(dic);
@@ -147,7 +147,7 @@ carbon_strdic_drop(carbon_strdic_t *dic)
 }
 
 CARBON_FUNC_UNUSED
-CARBON_EXPORT(static bool)
+static bool
 carbon_strdic_insert(carbon_strdic_t *dic, carbon_string_id_t **out, char *const *strings, size_t nstrings,
                      size_t nthreads)
 {
@@ -158,7 +158,7 @@ carbon_strdic_insert(carbon_strdic_t *dic, carbon_string_id_t **out, char *const
 }
 
 CARBON_FUNC_UNUSED
-CARBON_EXPORT(static bool)
+static bool
 carbon_strdic_reset_counters(carbon_strdic_t *dic)
 {
     CARBON_NON_NULL_OR_ERROR(dic);
@@ -167,7 +167,7 @@ carbon_strdic_reset_counters(carbon_strdic_t *dic)
 }
 
 CARBON_FUNC_UNUSED
-CARBON_EXPORT(static bool)
+static bool
 carbon_strdic_get_counters(carbon_string_hash_counters_t *counters, carbon_strdic_t *dic)
 {
     CARBON_NON_NULL_OR_ERROR(dic);
@@ -176,7 +176,7 @@ carbon_strdic_get_counters(carbon_string_hash_counters_t *counters, carbon_strdi
 }
 
 CARBON_FUNC_UNUSED
-CARBON_EXPORT(static bool)
+static bool
 carbon_strdic_remove(carbon_strdic_t *dic, carbon_string_id_t *strings, size_t numStrings)
 {
     CARBON_NON_NULL_OR_ERROR(dic);
@@ -186,7 +186,7 @@ carbon_strdic_remove(carbon_strdic_t *dic, carbon_string_id_t *strings, size_t n
 }
 
 CARBON_FUNC_UNUSED
-CARBON_EXPORT(static bool)
+static bool
 carbon_strdic_locate_safe(carbon_string_id_t **out, bool **foundMask, size_t *numNotFound,
                           carbon_strdic_t *dic, char *const *keys, size_t numKeys)
 {
@@ -200,7 +200,7 @@ carbon_strdic_locate_safe(carbon_string_id_t **out, bool **foundMask, size_t *nu
 }
 
 CARBON_FUNC_UNUSED
-CARBON_EXPORT(static bool)
+static bool
 carbon_strdic_locate_fast(carbon_string_id_t **out, carbon_strdic_t *dic, char *const *keys, size_t nkeys)
 {
     CARBON_NON_NULL_OR_ERROR(out);
@@ -211,7 +211,7 @@ carbon_strdic_locate_fast(carbon_string_id_t **out, carbon_strdic_t *dic, char *
 }
 
 CARBON_FUNC_UNUSED
-CARBON_EXPORT(static char **)
+static char **
 carbon_strdic_extract(carbon_strdic_t *dic, const carbon_string_id_t *ids, size_t nids)
 {
     CARBON_NON_NULL_OR_ERROR(dic->extract);
@@ -219,7 +219,7 @@ carbon_strdic_extract(carbon_strdic_t *dic, const carbon_string_id_t *ids, size_
 }
 
 CARBON_FUNC_UNUSED
-CARBON_EXPORT(static bool)
+static bool
 carbon_strdic_free(carbon_strdic_t *dic, void *ptr)
 {
     CARBON_NON_NULL_OR_ERROR(dic);
@@ -232,7 +232,7 @@ carbon_strdic_free(carbon_strdic_t *dic, void *ptr)
 }
 
 CARBON_FUNC_UNUSED
-CARBON_EXPORT(static bool)
+static bool
 carbon_strdic_num_distinct(size_t *num, carbon_strdic_t *dic)
 {
     CARBON_NON_NULL_OR_ERROR(num);
@@ -242,7 +242,7 @@ carbon_strdic_num_distinct(size_t *num, carbon_strdic_t *dic)
 }
 
 CARBON_FUNC_UNUSED
-CARBON_EXPORT(static bool)
+static bool
 carbon_strdic_get_contents(carbon_vec_t ofType (char *) *strings,
                            carbon_vec_t ofType(carbon_string_id_t) *carbon_string_id_ts,
                            carbon_strdic_t *dic)

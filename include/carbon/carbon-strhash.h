@@ -190,7 +190,7 @@ CARBON_DEFINE_GET_ERROR_FUNCTION(carbon_strhash_t, carbon_strhash_t, table);
  * @param map a non-null pointer to the map
  * @return <code>true</code> in case of success, otherwise a value indiciating the error.
  */
-CARBON_EXPORT(inline static int)
+inline static int
 carbon_strhash_drop(carbon_strhash_t *map)
 {
     CARBON_NON_NULL_OR_ERROR(map);
@@ -205,7 +205,7 @@ carbon_strhash_drop(carbon_strhash_t *map)
  * @param map a non-null pointer to the map
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
-CARBON_EXPORT(inline static bool)
+inline static bool
 carbon_strhash_reset_counters(carbon_strhash_t *map)
 {
     CARBON_NON_NULL_OR_ERROR(map);
@@ -219,7 +219,7 @@ carbon_strhash_reset_counters(carbon_strhash_t *map)
  * @param map non-null pointer to the map
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
-CARBON_EXPORT(inline static int)
+inline static int
 carbon_strhash_get_counters(carbon_string_hash_counters_t *out, const carbon_strhash_t *map)
 {
     CARBON_NON_NULL_OR_ERROR(map);
@@ -239,7 +239,7 @@ carbon_strhash_get_counters(carbon_string_hash_counters_t *out, const carbon_str
  * @param numPairs the number of pairs that are read via <code>keys</code> and <code>values</code>
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
-CARBON_EXPORT(inline static int)
+inline static int
 carbon_strhash_put_safe(carbon_strhash_t *map, char *const *keys, const carbon_string_id_t *values,
                         size_t npairs)
 {
@@ -266,7 +266,7 @@ carbon_strhash_put_safe(carbon_strhash_t *map, char *const *keys, const carbon_s
  * @param numPairs the number of pairs that are read via <code>keys</code> and <code>values</code>
  * @return <code>true</code> in case of success, otherwise a value indiciating the error.
  */
-CARBON_EXPORT(inline static int)
+inline static int
 carbon_strhash_put_bulk_fast(carbon_strhash_t *map, char *const *keys, const carbon_string_id_t *values,
                              size_t npairs)
 {
@@ -281,7 +281,7 @@ carbon_strhash_put_bulk_fast(carbon_strhash_t *map, char *const *keys, const car
 /*
  * Same as 'string_lookup_put_bulk' but specialized for a single pair
  */
-CARBON_EXPORT(inline static int)
+inline static int
 carbon_strhash_put_exact(carbon_strhash_t *map, const char *key, carbon_string_id_t value)
 {
     CARBON_NON_NULL_OR_ERROR(map);
@@ -294,7 +294,7 @@ carbon_strhash_put_exact(carbon_strhash_t *map, const char *key, carbon_string_i
 /*
  * Same as 'string_lookup_put_fast_bulk' but specialized for a single pair
  */
-CARBON_EXPORT(inline static int)
+inline static int
 carbon_strhash_put_exact_fast(carbon_strhash_t *map, const char *key, carbon_string_id_t value)
 {
     CARBON_NON_NULL_OR_ERROR(map);
@@ -332,7 +332,7 @@ carbon_strhash_put_exact_fast(carbon_strhash_t *map, const char *key, carbon_str
  * @param numKeys the number of keys
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
-CARBON_EXPORT(inline static int)
+inline static int
 carbon_strhash_get_bulk_safe(carbon_string_id_t **out, bool **found_mask, size_t *num_not_found,
                              carbon_strhash_t *map,
                              char *const *keys, size_t nkeys)
@@ -352,7 +352,7 @@ carbon_strhash_get_bulk_safe(carbon_string_id_t **out, bool **found_mask, size_t
     return result;
 }
 
-CARBON_EXPORT(inline static int)
+inline static int
 carbon_strhash_get_bulk_safe_exact(carbon_string_id_t *out, bool *found, carbon_strhash_t *map, const char *key)
 {
     CARBON_NON_NULL_OR_ERROR(out);
@@ -384,7 +384,7 @@ carbon_strhash_get_bulk_safe_exact(carbon_string_id_t *out, bool *found, carbon_
  * @param numKeys the number of keys
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
-CARBON_EXPORT(inline static int)
+inline static int
 carbon_strhash_get_bulk_fast(carbon_string_id_t **out, carbon_strhash_t *map,
                              char *const *keys, size_t nkeys)
 {
@@ -411,7 +411,7 @@ carbon_strhash_get_bulk_fast(carbon_string_id_t **out, carbon_strhash_t *map,
  * @param numKeys the number of keys
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
-CARBON_EXPORT(inline static int)
+inline static int
 carbon_strhash_update_fast(carbon_strhash_t *map, const carbon_string_id_t *values,
                            char *const *keys, size_t nkeys)
 {
@@ -430,7 +430,7 @@ carbon_strhash_update_fast(carbon_strhash_t *map, const carbon_string_id_t *valu
  * @param numKeys the number of keys
  * @return
  */
-CARBON_EXPORT(inline static int)
+inline static int
 carbon_strhash_remove(carbon_strhash_t *map, char *const *keys, size_t nkeys)
 {
     CARBON_NON_NULL_OR_ERROR(map);
@@ -447,7 +447,7 @@ carbon_strhash_remove(carbon_strhash_t *map, char *const *keys, size_t nkeys)
  * @param values A non-null pointer (potentially resulting from a call to <code>string_id_map_get</code>)
  * @return <code>true</code> in case of success, otherwise a value indiciating the error.
  */
-CARBON_EXPORT(inline static int)
+inline static int
 carbon_strhash_free(void *ptr, carbon_strhash_t *map)
 {
     CARBON_NON_NULL_OR_ERROR(ptr);
@@ -463,7 +463,7 @@ carbon_strhash_free(void *ptr, carbon_strhash_t *map)
  * @param counters non-null pointer to counter object
  * @return true if everything went normal, otherwise an value indicating the error
  */
-CARBON_EXPORT(inline static int)
+inline static int
 carbon_strhash_counters_init(carbon_string_hash_counters_t *counters)
 {
     CARBON_NON_NULL_OR_ERROR(counters);
@@ -478,7 +478,7 @@ carbon_strhash_counters_init(carbon_string_hash_counters_t *counters)
  * @param rhs non-null pointer to counter
  * @return true if everything went normal, otherwise an value indicating the error
  */
-CARBON_EXPORT(inline static int)
+inline static int
 carbon_strhash_counters_add(carbon_string_hash_counters_t *dst_lhs, const carbon_string_hash_counters_t *rhs)
 {
     CARBON_NON_NULL_OR_ERROR(dst_lhs);

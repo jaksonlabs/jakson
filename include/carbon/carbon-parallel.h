@@ -73,11 +73,11 @@ inline static void *forProxyFunction(void *restrict args)
     } else PARALLEL_ERROR(PARALLEL_MSG_UNKNOWN_HINT, false);             \
 }
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 ParallelFor(const void *restrict base, size_t width, size_t len, ForFunctionBody f,
                               void *restrict args, ThreadingHint hint, uint_fast16_t numThreads);
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 ParallelMap(void *restrict dst,
                               const void *restrict src,
                               size_t srcWidth,
@@ -88,7 +88,7 @@ ParallelMap(void *restrict dst,
                               ThreadingHint hint,
                               uint_fast16_t numThreads);
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 ParallelGather(void *restrict dst,
                                  const void *restrict src,
                                  size_t width,
@@ -97,7 +97,7 @@ ParallelGather(void *restrict dst,
                                  ThreadingHint hint,
                                  uint_fast16_t numThreads);
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 ParallelGatherAddress(void *restrict dst,
                                      const void *restrict src,
                                      size_t srcWidth,
@@ -106,7 +106,7 @@ ParallelGatherAddress(void *restrict dst,
                                      ThreadingHint hint,
                                      uint_fast16_t numThreads);
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 ParallelScatter(void *restrict dst,
                                   const void *restrict src,
                                   size_t width,
@@ -115,30 +115,30 @@ ParallelScatter(void *restrict dst,
                                   ThreadingHint hint,
                                   uint_fast16_t numThreads);
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 ParallelShuffle(void *restrict dst, const void *restrict src, size_t width,
                                   const size_t *restrict dstIdx, const size_t *restrict srcIdx,
                                   size_t idxLen, ThreadingHint hint);
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 ParallelFilterEarly(void *restrict result, size_t *restrict resultSize,
                                        const void *restrict src,
                                        size_t width, size_t len, Predicate pred, void *restrict args,
                                        ThreadingHint hint, uint_fast16_t numThreads);
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 ParallelFilterLate(size_t *restrict pos, size_t *restrict numPos, const void *restrict src,
                                       size_t width, size_t len, Predicate pred, void *restrict args,
                                       ThreadingHint hint, size_t numThreads);
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 sequentialFor(const void *restrict base, size_t width, size_t len, ForFunctionBody f,
                                    void *restrict args);
-CARBON_EXPORT(inline static bool)
+inline static bool
 parallelFor(const void *restrict base, size_t width, size_t len, ForFunctionBody f,
                                  void *restrict args, uint_fast16_t numThreads);
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 map(void *restrict dst,
                         const void *restrict src,
                         size_t srcWidth,
@@ -149,58 +149,58 @@ map(void *restrict dst,
                         ThreadingHint hint,
                         uint_fast16_t numThreads);
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 sequentialGather(void *restrict dst, const void *restrict src, size_t width,
                                       const size_t *restrict idx, size_t dstSrcLen);
-CARBON_EXPORT(inline static bool)
+inline static bool
 parallelGather(void *restrict dst, const void *restrict src, size_t width,
                                     const size_t *restrict idx, size_t dstSrcLen, uint_fast16_t numThreads);
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 sequentialGatherAddress(void *restrict dst, const void *restrict src, size_t srcWidth,
                                           const size_t *restrict idx, size_t num);
-CARBON_EXPORT(inline static bool)
+inline static bool
 parallelGather_adr(void *restrict dst, const void *restrict src, size_t srcWidth,
                                         const size_t *restrict idx, size_t num, uint_fast16_t numThreads);
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 sequentialScatter(void *restrict dst, const void *restrict src, size_t width,
                                        const size_t *restrict idx, size_t num);
-CARBON_EXPORT(inline static bool)
+inline static bool
 parallelScatter(void *restrict dst, const void *restrict src, size_t width,
                                      const size_t *restrict idx, size_t num, uint_fast16_t numThreads);
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 sequentialShuffle(void *restrict dst, const void *restrict src, size_t width,
                                        const size_t *restrict dstIdx, const size_t *restrict srcIdx,
                                        size_t idx_len);
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 parallelShuffle(void *restrict dst, const void *restrict src, size_t width,
                                      const size_t *restrict dstIdx, const size_t *restrict srcIdx,
                                      size_t idx_len);
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 sequentialFilterEarly(void *restrict result, size_t *restrict resultSize,
                                             const void *restrict src, size_t width, size_t len, Predicate pred,
                                             void *restrict args);
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 parallelFilterEarly(void *restrict result, size_t *restrict resultSize,
                                           const void *restrict src, size_t width, size_t len, Predicate pred,
                                           void *restrict args, uint_fast16_t numThreads);
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 sequentialFilterLate(size_t *restrict pos, size_t *restrict numPos,
                                            const void *restrict src, size_t width, size_t len, Predicate pred,
                                            void *restrict args);
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 parallelFilterLate(size_t *restrict pos, size_t *restrict numPos,
                                          const void *restrict src, size_t width, size_t len, Predicate pred,
                                          void *restrict args, size_t numThreads);
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 ParallelFor(const void *restrict base, size_t width, size_t len, ForFunctionBody f,
                               void *restrict args, ThreadingHint hint, uint_fast16_t numThreads)
 {
@@ -208,7 +208,7 @@ ParallelFor(const void *restrict base, size_t width, size_t len, ForFunctionBody
                    parallelFor(base, width, len, f, args, numThreads))
 }
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 ParallelMap(void *restrict dst,
                               const void *restrict src,
                               size_t srcWidth,
@@ -222,7 +222,7 @@ ParallelMap(void *restrict dst,
     return map(dst, src, srcWidth, len, dstWidth, f, args, hint, numThreads);
 }
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 ParallelGather(void *restrict dst,
                                  const void *restrict src,
                                  size_t width,
@@ -235,7 +235,7 @@ ParallelGather(void *restrict dst,
                    parallelGather(dst, src, width, idx, dst_src_len, numThreads))
 }
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 ParallelGatherAddress(void *restrict dst,
                                      const void *restrict src,
                                      size_t srcWidth,
@@ -248,7 +248,7 @@ ParallelGatherAddress(void *restrict dst,
                    parallelGather_adr(dst, src, srcWidth, idx, num, numThreads))
 }
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 ParallelScatter(void *restrict dst, const void *restrict src, size_t width,
                                   const size_t *restrict idx, size_t num, ThreadingHint hint, uint_fast16_t numThreads)
 {
@@ -256,7 +256,7 @@ ParallelScatter(void *restrict dst, const void *restrict src, size_t width,
                    parallelScatter(dst, src, width, idx, num, numThreads))
 }
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 ParallelShuffle(void *restrict dst, const void *restrict src, size_t width,
                                   const size_t *restrict dstIdx, const size_t *restrict srcIdx,
                                   size_t idx_len, ThreadingHint hint)
@@ -265,7 +265,7 @@ ParallelShuffle(void *restrict dst, const void *restrict src, size_t width,
                    parallelShuffle(dst, src, width, dstIdx, srcIdx, idx_len))
 }
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 ParallelFilterEarly(void *restrict result, size_t *restrict resultSize,
                                        const void *restrict src,
                                        size_t width, size_t len, Predicate pred, void *restrict args,
@@ -275,7 +275,7 @@ ParallelFilterEarly(void *restrict result, size_t *restrict resultSize,
                    parallelFilterEarly(result, resultSize, src, width, len, pred, args, numThreads))
 }
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 ParallelFilterLate(size_t *restrict pos, size_t *restrict numPos, const void *restrict src,
                                       size_t width, size_t len, Predicate pred, void *restrict args,
                                       ThreadingHint hint, size_t numThreads)
@@ -284,7 +284,7 @@ ParallelFilterLate(size_t *restrict pos, size_t *restrict numPos, const void *re
                    parallelFilterLate(pos, numPos, src, width, len, pred, args, numThreads))
 }
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 sequentialFor(const void *restrict base, size_t width, size_t len, ForFunctionBody f,
                                    void *restrict args)
 {
@@ -295,7 +295,7 @@ sequentialFor(const void *restrict base, size_t width, size_t len, ForFunctionBo
     return true;
 }
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 parallelFor(const void *restrict base, size_t width, size_t len, ForFunctionBody f,
                                  void *restrict args, uint_fast16_t numThreads)
 {
@@ -346,7 +346,7 @@ typedef struct MapArgs
     void *args;
 } MapArgs;
 
-CARBON_EXPORT(inline static void)
+inline static void
 mapProxy(const void *restrict src, size_t srcWidth, size_t len, void *restrict args,
                                ThreadId tid)
 {
@@ -361,7 +361,7 @@ mapProxy(const void *restrict src, size_t srcWidth, size_t len, void *restrict a
                        src, srcWidth, mapArgs->dstWidth, len, mapArgs->args);
 }
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 map(void *restrict dst, const void *restrict src, size_t srcWidth, size_t len, size_t
                       dstWidth, MapFunctionBody f, void *restrict args, ThreadingHint hint, uint_fast16_t numThreads)
 {
@@ -391,7 +391,7 @@ typedef struct GatherScatterArgs
     void *restrict dst;
 } GatherScatterArgs;
 
-CARBON_EXPORT(inline static void)
+inline static void
 gatherFunction(const void *restrict start, size_t width, size_t len, void *restrict args,
                                  ThreadId tid)
 {
@@ -417,7 +417,7 @@ gatherFunction(const void *restrict start, size_t width, size_t len, void *restr
     }
 }
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 sequentialGather(void *restrict dst, const void *restrict src, size_t width,
                                       const size_t *restrict idx, size_t dst_src_len)
 {
@@ -446,7 +446,7 @@ sequentialGather(void *restrict dst, const void *restrict src, size_t width,
     return true;
 }
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 parallelGather(void *restrict dst, const void *restrict src, size_t width,
                                     const size_t *restrict idx, size_t dst_src_len, uint_fast16_t numThreads)
 {
@@ -467,7 +467,7 @@ parallelGather(void *restrict dst, const void *restrict src, size_t width,
     return parallelFor(dst, width, dst_src_len, gatherFunction, &args, numThreads);
 }
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 sequentialGatherAddress(void *restrict dst, const void *restrict src, size_t srcWidth,
                                           const size_t *restrict idx, size_t num)
 {
@@ -497,7 +497,7 @@ sequentialGatherAddress(void *restrict dst, const void *restrict src, size_t src
     return true;
 }
 
-CARBON_EXPORT(inline static void)
+inline static void
 gatherAddressFunc(const void *restrict start, size_t width, size_t len, void *restrict args,
                                      ThreadId tid)
 {
@@ -523,7 +523,7 @@ gatherAddressFunc(const void *restrict start, size_t width, size_t len, void *re
     }
 }
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 parallelGather_adr(void *restrict dst, const void *restrict src, size_t srcWidth,
                                      const size_t *restrict idx, size_t num, uint_fast16_t numThreads)
 {
@@ -544,7 +544,7 @@ parallelGather_adr(void *restrict dst, const void *restrict src, size_t srcWidth
     return parallelFor(dst, srcWidth, num, gatherAddressFunc, &args, numThreads);
 }
 
-CARBON_EXPORT(inline static void)
+inline static void
 scatterFunction(const void *restrict start, size_t width, size_t len, void *restrict args,
                                    ThreadId tid)
 {
@@ -571,7 +571,7 @@ scatterFunction(const void *restrict start, size_t width, size_t len, void *rest
     }
 }
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 sequentialScatter(void *restrict dst, const void *restrict src, size_t width,
                                     const size_t *restrict idx, size_t num)
 {
@@ -595,7 +595,7 @@ sequentialScatter(void *restrict dst, const void *restrict src, size_t width,
     return true;
 }
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 parallelScatter(void *restrict dst, const void *restrict src, size_t width,
                                   const size_t *restrict idx, size_t num, uint_fast16_t numThreads)
 {
@@ -616,7 +616,7 @@ parallelScatter(void *restrict dst, const void *restrict src, size_t width,
     return parallelFor(dst, width, num, scatterFunction, &args, numThreads);
 }
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 sequentialShuffle(void *restrict dst, const void *restrict src, size_t width,
                                     const size_t *restrict dstIdx, const size_t *restrict srcIdx,
                                     size_t idx_len)
@@ -646,7 +646,7 @@ sequentialShuffle(void *restrict dst, const void *restrict src, size_t width,
     return true;
 }
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 parallelShuffle(void *restrict dst, const void *restrict src, size_t width,
                                   const size_t *restrict dstIdx, const size_t *restrict srcIdx,
                                   size_t idx_len)
@@ -672,7 +672,7 @@ typedef struct FilterArg
     size_t positionOffsetToAdd;
 } FilterArg;
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 sequentialFilterLate(size_t *restrict positions, size_t *restrict numPositions,
                                        const void *restrict source, size_t width, size_t length, Predicate predicate,
                                        void *restrict arguments)
@@ -689,7 +689,7 @@ sequentialFilterLate(size_t *restrict positions, size_t *restrict numPositions,
     return true;
 }
 
-CARBON_EXPORT(inline static void *)
+inline static void *
 filterProxyFunc(void *restrict args)
 {
     CARBON_CAST(FilterArg *restrict, proxyArg, args);
@@ -699,7 +699,7 @@ filterProxyFunc(void *restrict args)
     return NULL;
 }
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 parallelFilterLate(size_t *restrict pos, size_t *restrict numPos,
                                          const void *restrict src, size_t width, size_t len, Predicate pred,
                                          void *restrict args, size_t numThreads)
@@ -786,7 +786,7 @@ parallelFilterLate(size_t *restrict pos, size_t *restrict numPos,
     return true;
 }
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 sequentialFilterEarly(void *restrict result, size_t *restrict resultSize,
                                             const void *restrict src, size_t width, size_t len, Predicate pred,
                                             void *restrict args)
@@ -811,7 +811,7 @@ sequentialFilterEarly(void *restrict result, size_t *restrict resultSize,
     return true;
 }
 
-CARBON_EXPORT(inline static bool)
+inline static bool
 parallelFilterEarly(void *restrict result, size_t *restrict resultSize,
                                           const void *restrict src, size_t width, size_t len, Predicate pred,
                                           void *restrict args, uint_fast16_t numThreads)

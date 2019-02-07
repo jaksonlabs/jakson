@@ -332,6 +332,7 @@ static carbon_field_type_e valueTypeForJsonNumber(bool *success, carbon_err_t *e
     default:
         CARBON_ERROR(err, CARBON_ERR_NOJSONNUMBERT);
         *success = false;
+	return carbon_field_type_int8;
     }
 }
 
