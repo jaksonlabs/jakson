@@ -718,7 +718,7 @@ parallelFilterLate(size_t *restrict pos, size_t *restrict numPos,
     uint_fast16_t numThread = num_threads + 1; /** +1 since one is this thread */
 
     pthread_t threads[num_threads];
-    FilterArg threadArgs[numThread];
+    FilterArg thread_args[numThread];
 
     register size_t chunkLen = len / numThread;
     size_t chunkLenRemain = len % numThread;
@@ -731,7 +731,7 @@ parallelFilterLate(size_t *restrict pos, size_t *restrict numPos,
     /** run f on NTHREADS_FOR additional threads */
     if (CARBON_BRANCH_LIKELY(chunkLen > 0)) {
         for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
-            FilterArg *arg = threadArgs + tid;
+            FilterArg *arg = thread_args + tid;
             arg->numPositions = 0;
             arg->srcPositions = malloc(chunkLen * sizeof(size_t));
             arg->positionOffsetToAdd = tid * chunkLen;
@@ -764,13 +764,13 @@ parallelFilterLate(size_t *restrict pos, size_t *restrict numPos,
     if (CARBON_BRANCH_LIKELY(chunkLen > 0)) {
         for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
             pthread_join(threads[tid], NULL);
-            const FilterArg *restrict threadArg = (threadArgs + tid);
+            const FilterArg *restrict threadArg = (thread_args + tid);
             if (threadArg->numPositions > 0) {
                 memcpy(pos + totalNumMatchingPositions, threadArg->srcPositions,
                        threadArg->numPositions * sizeof(size_t));
                 totalNumMatchingPositions += threadArg->numPositions;
             }
-            free(threadArgs[tid].srcPositions);
+            free(thread_args[tid].srcPositions);
         }
     }
 
@@ -826,7 +826,7 @@ parallelFilterEarly(void *restrict result, size_t *restrict resultSize,
     uint_fast16_t numThread = num_threads + 1; /** +1 since one is this thread */
 
     pthread_t threads[num_threads];
-    FilterArg threadArgs[numThread];
+    FilterArg thread_args[numThread];
 
     register size_t chunkLen = len / numThread;
     size_t chunkLenRemain = len % numThread;
@@ -838,7 +838,7 @@ parallelFilterEarly(void *restrict result, size_t *restrict resultSize,
 
     /** run f on NTHREADS_FOR additional threads */
     for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
-        FilterArg *arg = threadArgs + tid;
+        FilterArg *arg = thread_args + tid;
         arg->numPositions = 0;
         arg->srcPositions = malloc(chunkLen * sizeof(size_t));
         arg->positionOffsetToAdd = tid * chunkLen;
@@ -866,13 +866,13 @@ parallelFilterEarly(void *restrict result, size_t *restrict resultSize,
 
     for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
         pthread_join(threads[tid], NULL);
-        const FilterArg *restrict threadArg = (threadArgs + tid);
+        const FilterArg *restrict threadArg = (thread_args + tid);
         totalNumMatchingPositions += threadArg->numPositions;
         CARBON_PREFETCH_READ(threadArg->srcPositions);
     }
 
     for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
-        const FilterArg *restrict threadArg = (threadArgs + tid);
+        const FilterArg *restrict threadArg = (thread_args + tid);
 
         if (CARBON_BRANCH_LIKELY(threadArg->numPositions > 0)) {
             ParallelGather(result + partial_numMatchingPositions * width, src, width, threadArg->srcPositions,
