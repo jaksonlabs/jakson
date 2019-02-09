@@ -15,6 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include <inttypes.h>
+
 #include "carbon/carbon-convert.h"
 
 int64_t carbon_convert_atoi64(const char *string)

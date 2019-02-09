@@ -15,6 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include <assert.h>
+
 #include "carbon/carbon-memfile.h"
 
 bool carbon_memfile_open(carbon_memfile_t *file, carbon_memblock_t *block, carbon_memfile_mode_e mode)

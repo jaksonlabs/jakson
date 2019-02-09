@@ -15,30 +15,48 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_SPINLOCK_H
-#define CARBON_SPINLOCK_H
-
-#include <stdatomic.h>
+#ifndef CARBON_OID_H
+#define CARBON_OID_H
 
 #include "carbon-common.h"
-#include "carbon-vector.h"
 
 CARBON_BEGIN_DECL
 
-typedef struct carbon_spinlock
-{
-    atomic_flag lock;
-    pthread_t owner;
-} carbon_spinlock_t;
+typedef uint64_t carbon_object_id_t;
+
+CARBON_EXPORT(carbon_object_id_t)
+carbon_object_id_create(void);
 
 CARBON_EXPORT(bool)
-carbon_spinlock_init(carbon_spinlock_t *spinlock);
+carbon_object_id_get_global_wallclocktime(uint_fast8_t *out, carbon_object_id_t id);
 
 CARBON_EXPORT(bool)
-carbon_spinlock_acquire(carbon_spinlock_t *spinlock);
+carbon_object_id_get_global_build_path_bit(uint_fast8_t *out, carbon_object_id_t id);
 
 CARBON_EXPORT(bool)
-carbon_spinlock_release(carbon_spinlock_t *spinlock);
+carbon_object_id_get_global_build_time_bit(uint_fast8_t *out, carbon_object_id_t id);
+
+CARBON_EXPORT(bool)
+carbon_object_id_get_process_id(uint_fast8_t *out, carbon_object_id_t id);
+
+CARBON_EXPORT(bool)
+carbon_object_id_get_process_magic(uint_fast8_t *out, carbon_object_id_t id);
+
+CARBON_EXPORT(bool)
+carbon_object_id_get_process_counter(uint_fast16_t *out, carbon_object_id_t id);
+
+CARBON_EXPORT(bool)
+carbon_object_id_get_thread_id(uint_fast8_t *out, carbon_object_id_t id);
+
+CARBON_EXPORT(bool)
+carbon_object_id_get_thread_magic(uint_fast8_t *out, carbon_object_id_t id);
+
+CARBON_EXPORT(bool)
+carbon_object_id_get_thread_counter(uint_fast32_t *out, carbon_object_id_t id);
+
+CARBON_EXPORT(bool)
+carbon_object_id_get_call_random(uint_fast8_t *out, carbon_object_id_t id);
+
 
 CARBON_END_DECL
 

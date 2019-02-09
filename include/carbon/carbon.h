@@ -15,6 +15,13 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#ifndef CARBON_H
+#define CARBON_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "carbon/carbon-common.h"
 #include "carbon/carbon-alloc.h"
 #include "carbon/carbon-bitmap.h"
@@ -29,6 +36,7 @@
 #include "carbon/carbon-json.h"
 #include "carbon/carbon-memblock.h"
 #include "carbon/carbon-memfile.h"
+#include "carbon/carbon-oid.h"
 #include "carbon/carbon-sort.h"
 #include "carbon/carbon-parallel.h"
 #include "carbon/carbon-slicelist.h"
@@ -44,14 +52,11 @@
 #include "carbon/strdic/carbon-strdic-sync.h"
 #include "carbon/strhash/carbon-strhash-mem.h"
 
-#ifndef CARBON_H
-#define CARBON_H
-
-CARBON_BEGIN_DECL
-
 CARBON_EXPORT (bool)
 carbon_init(void);
 
-CARBON_END_DECL
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -18,6 +18,8 @@
 #ifndef CARBON_STRDIC_H
 #define CARBON_STRDIC_H
 
+#include <assert.h>
+
 #include "carbon-common.h"
 #include "carbon-alloc.h"
 #include "carbon-types.h"
@@ -214,7 +216,6 @@ CARBON_FUNC_UNUSED
 static char **
 carbon_strdic_extract(carbon_strdic_t *dic, const carbon_string_id_t *ids, size_t nids)
 {
-    CARBON_NON_NULL_OR_ERROR(dic->extract);
     return dic->extract(dic, ids, nids);
 }
 

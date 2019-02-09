@@ -16,6 +16,7 @@
  */
 
 #include <limits.h>
+#include <assert.h>
 
 #include "carbon/carbon-huffman.h"
 #include "carbon/carbon-bitmap.h"

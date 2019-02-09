@@ -15,6 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include <math.h>
+#include <inttypes.h>
 #include "carbon/carbon-doc.h"
 #include "carbon/carbon-columndoc.h"
 #include "carbon/carbon-json.h"

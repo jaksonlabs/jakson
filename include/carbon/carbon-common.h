@@ -22,14 +22,9 @@
 #include <stddef.h>
 #include <string.h>
 #include <stdio.h>
-#include <assert.h>
-#include <stdatomic.h>
 #include <pthread.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <math.h>
-#include <inttypes.h>
-#include <execinfo.h>
 
 #ifdef __cplusplus
 #define CARBON_BEGIN_DECL  extern "C" {

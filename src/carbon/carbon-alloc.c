@@ -16,6 +16,7 @@
  */
 
 #include <errno.h>
+#include <assert.h>
 
 #include "carbon/carbon-alloc.h"
 

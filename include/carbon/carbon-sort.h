@@ -22,6 +22,7 @@
 #include "carbon-alloc.h"
 
 #include "stdlib.h"
+#include <assert.h>
 
 CARBON_BEGIN_DECL
 
@@ -76,165 +77,29 @@ typedef bool (*carbon_less_func_t)(const void *lhs, const void *rhs);
     (i + 1);                                                                                                           \
 })
 
-CARBON_FUNC_UNUSED
-static bool
+CARBON_EXPORT(bool)
 carbon_sort_qsort_indicies(size_t *indices, const void *base, size_t width, carbon_less_eq_func_t comp, size_t nelemns,
-                           carbon_alloc_t *alloc)
-{
-    CARBON_NON_NULL_OR_ERROR(base);
-    CARBON_NON_NULL_OR_ERROR(alloc);
+                           carbon_alloc_t *alloc);
 
-    if(nelemns <= 1) {
-        return true;
-    }
-
-    int64_t h      = nelemns - 1;
-    int64_t *stack = carbon_malloc(alloc, (h + 1) *sizeof(int64_t));
-    int64_t top   = -1;
-    int64_t l      = 0;
-
-    stack[ ++top ] = l;
-    stack[ ++top ] = h;
-
-    while ( top >= 0 )
-    {
-        h = stack[ top-- ];
-        l = stack[ top-- ];
-
-        int64_t p = CARBON_QSORT_INDICIES_PARTITION(indices, base, width, comp, l, h );
-
-        if ( p - 1 > l ) {
-            stack[ ++top ] = l;
-            stack[ ++top ] = p - 1;
-        }
-
-        if ( p + 1 < h )
-        {
-            stack[ ++top ] = p + 1;
-            stack[ ++top ] = h;
-        }
-    }
-
-    CARBON_CHECK_SUCCESS(carbon_free(alloc, stack));
-    return true;
-}
-
-CARBON_FUNC_UNUSED
-static int
+CARBON_EXPORT(int)
 carbon_sort_qsort_indicies_wargs(size_t *indices, const void *base, size_t width, carbon_less_eq_wargs_func_t comp,
-                                 size_t nelemens, carbon_alloc_t *alloc, void *args)
-{
-    CARBON_NON_NULL_OR_ERROR(base);
-    CARBON_NON_NULL_OR_ERROR(alloc);
+                                 size_t nelemens, carbon_alloc_t *alloc, void *args);
 
-    if(nelemens <= 1) {
-        return true;
-    }
-
-    int64_t h      = nelemens - 1;
-    int64_t *stack = carbon_malloc(alloc, (h + 1) *sizeof(int64_t));
-    assert (stack);
-
-    int64_t top   = -1;
-    int64_t l      = 0;
-
-    stack[ ++top ] = l;
-    stack[ ++top ] = h;
-
-    while ( top >= 0 )
-    {
-        h = stack[ top-- ];
-        l = stack[ top-- ];
-
-        int64_t p = CARBON_QSORT_INDICIES_PARTITION_WARGS(indices, base, width, comp, l, h, args);
-
-        if ( p - 1 > l ) {
-            stack[ ++top ] = l;
-            stack[ ++top ] = p - 1;
-        }
-
-        if ( p + 1 < h )
-        {
-            stack[ ++top ] = p + 1;
-            stack[ ++top ] = h;
-        }
-    }
-
-    CARBON_CHECK_SUCCESS(carbon_free(alloc, stack));
-    return true;
-}
-
-CARBON_FUNC_UNUSED
-static size_t
+CARBON_EXPORT(size_t)
 carbon_sort_bsearch_indicies(const size_t *indicies, const void *base, size_t width, size_t nelemens,
-                             const void *neelde, carbon_eq_func_t compEq, carbon_less_func_t compLess)
-{
-    size_t l = 0;
-    size_t r = nelemens - 1;
-    while (l <= r && r < SIZE_MAX)
-    {
-        size_t m = l + (r-l)/2;
+                             const void *neelde, carbon_eq_func_t compEq, carbon_less_func_t compLess);
 
-        // Check if x is present at mid
-        if (compEq(base + indicies[m] * width, neelde))
-            return m;
+CARBON_EXPORT(size_t)
+carbon_sort_get_min(const size_t *elements, size_t nelemens);
 
-        // If x greater, ignore left half
-        if (compLess(base + indicies[m] * width, neelde))
-            l = m + 1;
+CARBON_EXPORT(size_t)
+carbon_sort_get_max(const size_t *elements, size_t nelemens);
 
-            // If x is smaller, ignore right half
-        else
-            r = m - 1;
-    }
+CARBON_EXPORT(double)
+carbon_sort_get_sum(const size_t *elements, size_t nelemens);
 
-    // if we reach here, then element was
-    // not present
-    return nelemens;
-}
-
-CARBON_FUNC_UNUSED
-static size_t
-carbon_sort_get_min(const size_t *elements, size_t nelemens)
-{
-    size_t min = (size_t) -1;
-    while (nelemens--) {
-        min = min < *elements ? min : *elements;
-        elements++;
-    }
-    return min;
-}
-
-CARBON_FUNC_UNUSED
-static size_t
-carbon_sort_get_max(const size_t *elements, size_t nelemens)
-{
-    size_t max = 0;
-    while (nelemens--) {
-        max = max > *elements ? max : *elements;
-        elements++;
-    }
-    return max;
-}
-
-CARBON_FUNC_UNUSED
-static double
-carbon_sort_get_sum(const size_t *elements, size_t nelemens)
-{
-    double sum = 0;
-    while (nelemens--) {
-        sum += *elements;
-        elements++;
-    }
-    return sum;
-}
-
-CARBON_FUNC_UNUSED
-static double
-carbon_sort_get_avg(const size_t *elements, size_t nelemens)
-{
-    return carbon_sort_get_sum(elements, nelemens) / (double) nelemens;
-}
+CARBON_EXPORT(double)
+carbon_sort_get_avg(const size_t *elements, size_t nelemens);
 
 CARBON_END_DECL
 

@@ -44,6 +44,8 @@
 #ifndef CARBON_STRHASH_H
 #define CARBON_STRHASH_H
 
+#include <assert.h>
+
 #include "carbon-common.h"
 #include "carbon-alloc.h"
 #include "carbon-vector.h"

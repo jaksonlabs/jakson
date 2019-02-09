@@ -18,11 +18,17 @@
 #ifndef CARBON_HASH_H
 #define CARBON_HASH_H
 
+#include <assert.h>
 #include "carbon-common.h"
 
 CARBON_BEGIN_DECL
 
-typedef size_t carbon_hash_t;
+
+typedef uint16_t carbon_hash16_t;
+typedef uint32_t carbon_hash32_t;
+typedef uint8_t  carbon_hash8_t;
+
+typedef carbon_hash32_t   carbon_hash_t;
 
 #define CARBON_JENKINS_MIX(a, b, c)                                                                                    \
 {                                                                                                                      \
@@ -110,16 +116,21 @@ typedef size_t carbon_hash_t;
     hash;                                                                                                              \
 })
 
-#define CARBON_HASH_BERNSTEIN(key_size, key)                                                                           \
+#define CARBON_HASH_BERNSTEIN(key_size, key)        CARBON_HASH_BERNSTEIN_WTYPE(key_size, key, carbon_hash_t)
+#define CARBON_HASH8_BERNSTEIN(key_size, key)       CARBON_HASH_BERNSTEIN_WTYPE(key_size, key, carbon_hash8_t)
+#define CARBON_HASH16_BERNSTEIN(key_size, key)      CARBON_HASH_BERNSTEIN_WTYPE(key_size, key, carbon_hash16_t)
+
+#define CARBON_HASH_BERNSTEIN_WTYPE(key_size, key, hash_type)                                                          \
 ({                                                                                                                     \
     assert ((key != NULL) && (key_size > 0));                                                                          \
                                                                                                                        \
-    carbon_hash_t hash = 0;                                                                                            \
+    hash_type hash = 0;                                                                                                \
     for (size_t i = 0; i < key_size; i++) {                                                                            \
         hash ^= 33 * hash + ((unsigned char* )key)[i];                                                                 \
     }                                                                                                                  \
     hash;                                                                                                              \
 })
+
 
 #define CARBON_HASH_BERNSTEIN2(key_size, key)                                                                          \
 ({                                                                                                                     \
@@ -141,11 +152,15 @@ typedef size_t carbon_hash_t;
     hash;                                                                                                              \
 })
 
-#define CARBON_HASH_FNV(key_size, key)                                                                                 \
+#define CARBON_HASH_FNV(key_size, key)              CARBON_HASH_FNV_WTYPE(key_size, key, carbon_hash_t)
+#define CARBON_HASH16_FNV(key_size, key)            CARBON_HASH_FNV_WTYPE(key_size, key, carbon_hash16_t)
+#define CARBON_HASH8_FNV(key_size, key)            CARBON_HASH_FNV_WTYPE(key_size, key, carbon_hash8_t)
+
+#define CARBON_HASH_FNV_WTYPE(key_size, key, hash_type)                                                                \
 ({                                                                                                                     \
     assert ((key != NULL) && (key_size > 0));                                                                          \
                                                                                                                        \
-    carbon_hash_t hash = 2166136261;                                                                                   \
+    hash_type hash = (hash_type) 2166136261;                                                                           \
     for (size_t i = 0; i < key_size; i++) {                                                                            \
         hash = (hash * 16777619) ^ ((unsigned char* )key)[i];                                                          \
     }                                                                                                                  \

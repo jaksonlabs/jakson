@@ -15,6 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include <assert.h>
+#include <inttypes.h>
 #include <sys/mman.h>
 
 #include "carbon/carbon-memfile.h"

@@ -26,12 +26,6 @@
 
 CARBON_BEGIN_DECL
 
-CARBON_FORWARD_STRUCT_DECL(carbon_doc_t)
-
-CARBON_FORWARD_STRUCT_DECL(carbon_columndoc_t);
-
-CARBON_FORWARD_STRUCT_DECL(carbon_doc_entries_t)
-
 /**
  * Transformation of an JSON-like array of objects to a columnar representation of key values.
  *

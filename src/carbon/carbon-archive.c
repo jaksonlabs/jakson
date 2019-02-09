@@ -15,6 +15,9 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include <inttypes.h>
+
+#include "carbon/carbon-common.h"
 #include "carbon/carbon-memblock.h"
 #include "carbon/carbon-memfile.h"
 #include "carbon/carbon-huffman.h"
@@ -2270,7 +2273,7 @@ static bool print_carbon_header_from_memfile(FILE *file, carbon_err_t *err, carb
     }
 
     fprintf(file, "0x%04x ", offset);
-    fprintf(file, "[magic: " CABIN_FILE_MAGIC "] [version: %d] [recordOffset: 0x%04x]\n",
+    fprintf(file, "[thread_magic: " CABIN_FILE_MAGIC "] [version: %d] [recordOffset: 0x%04x]\n",
             header->version, (unsigned) header->root_object_header_offset);
     return true;
 }
