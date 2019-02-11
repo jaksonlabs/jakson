@@ -54,7 +54,7 @@ huffman-dictionary
 huffman-string
          ::= '-' string-id string-length data-length byte+
 carbon-object
-         ::= '{' object-flags property-offset+ next-object columnified-props+ '}'
+         ::= '{' object-id object-flags property-offset+ next-object columnified-props+ '}'
 columnified-props
          ::= null-prop
            | nullable-prop
@@ -100,7 +100,7 @@ signed-number-array
 object-array-prop
          ::= 'O' column-length key-column offset-column column-groups+
 column-groups
-         ::= 'X' column-count offset-column column+
+         ::= 'X' column-count object-count object-id-column offset-column column+
 column   ::= 'x' column-name ( null-column | nullable-column | object-column )
 null-column
          ::= 'N' column-length offset-column value-column
@@ -116,6 +116,10 @@ positioning-column
          ::= u32+
 column-count
          ::= u32
+object-count 
+         ::= u32
+object-id-column
+         ::= u64
 object-flags
          ::= object-flags-32bitmask
 object-flags-32bitmask
@@ -149,6 +153,8 @@ string-length
 data-length
          ::= u32
 string-id
+         ::= u64
+object-id
          ::= u64
 character
          ::= #x0000 - #x00FF
