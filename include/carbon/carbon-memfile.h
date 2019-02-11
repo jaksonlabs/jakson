@@ -50,6 +50,9 @@ typedef struct carbon_memfile
     (type*) carbon_memfile_read(file, sizeof(type));                                                                   \
 })
 
+#define CARBON_MEMFILE_READ_TYPE_LIST(file, type, how_many)                                                            \
+    (const type *) CARBON_MEMFILE_READ(file, how_many * sizeof(type))
+
 #define CARBON_MEMFILE_READ(file, nbytes)                                                                              \
 ({                                                                                                                     \
     assert (carbon_memfile_remain_size(file) >= nbytes);                                                               \

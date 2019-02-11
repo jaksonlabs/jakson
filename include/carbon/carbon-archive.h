@@ -106,7 +106,7 @@ typedef struct carbon_archive_info
     size_t record_table_size;
 } carbon_archive_info_t;
 
-typedef union carbon_archive_object_flags
+typedef union
 {
     struct {
         uint32_t has_null_props            : 1;
@@ -209,13 +209,28 @@ typedef struct carbon_archive
 } carbon_archive_t;
 
 CARBON_EXPORT(bool)
+carbon_archive_from_json(carbon_archive_t *out,
+                         const char *file,
+                         carbon_err_t *err,
+                         const char *json_string,
+                         carbon_archive_compressor_type_e compressor,
+                         bool read_optimized);
+
+CARBON_EXPORT(bool)
+carbon_archive_stream_from_json(carbon_memblock_t **stream,
+                                carbon_err_t *err,
+                                const char *json_string,
+                                carbon_archive_compressor_type_e compressor,
+                                bool read_optimized);
+
+CARBON_EXPORT(bool)
 carbon_archive_from_model(carbon_memblock_t **stream,
                           carbon_err_t *err,
                           carbon_columndoc_t *model,
                           carbon_archive_compressor_type_e compressor);
 
 CARBON_EXPORT(bool)
-carbon_archive_drop(carbon_memblock_t *stream);
+carbon_archive_drop(carbon_archive_t *archive);
 
 CARBON_EXPORT(bool)
 carbon_archive_write(FILE *file, const carbon_memblock_t *stream);

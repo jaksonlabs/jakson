@@ -216,7 +216,7 @@ static bool json_ast_node_element_print(FILE *file, carbon_err_t *err, carbon_js
 #define PREV_TOKEN(x) { *x = *x - 1; }
 
 CARBON_EXPORT(bool)
-carbon_json_parser_create(JsonParser *parser, carbon_doc_bulk_t *partition)
+carbon_json_parser_create(carbon_json_parser_t *parser, carbon_doc_bulk_t *partition)
 {
     CARBON_NON_NULL_OR_ERROR(parser)
     CARBON_NON_NULL_OR_ERROR(partition)
@@ -228,7 +228,7 @@ carbon_json_parser_create(JsonParser *parser, carbon_doc_bulk_t *partition)
 }
 
 bool carbon_json_parse(CARBON_NULLABLE carbon_json_t *json, CARBON_NULLABLE carbon_json_parse_err_t *error_desc,
-                       JsonParser *parser, const char *input)
+                       carbon_json_parser_t *parser, const char *input)
 {
     CARBON_NON_NULL_OR_ERROR(parser)
     CARBON_NON_NULL_OR_ERROR(input)

@@ -1,3 +1,6 @@
+
+#include <inttypes.h>
+
 #include "carbon/carbon.h"
 
 #include "modules.h"
@@ -39,7 +42,7 @@ static int convertJs2Model(Js2CabContext *context, FILE *file, bool optimizeForR
     CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
 
     CARBON_CONSOLE_WRITE(file, "  - Parse JSON file%s", "");
-    JsonParser parser;
+    carbon_json_parser_t parser;
     carbon_json_parse_err_t error_desc;
     carbon_json_t jsonAst;
     carbon_json_parser_create(&parser, &context->context);
@@ -274,7 +277,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
         CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
 
         CARBON_CONSOLE_WRITE(file, "  - Clean up in-memory CARBON file%s", "");
-        carbon_archive_drop(carbonFile);
+        carbon_memblock_drop(carbonFile);
         CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
 
         cleanup(file, &cabContext);
@@ -311,7 +314,7 @@ bool moduleViewCabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t 
             carbon_error_print(&err);
             carbon_error_drop(&err);
         }
-        carbon_archive_drop(stream);
+        carbon_memblock_drop(stream);
         fclose(inputFile);
 
     }

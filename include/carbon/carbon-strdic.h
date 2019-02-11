@@ -24,6 +24,7 @@
 #include "carbon-alloc.h"
 #include "carbon-types.h"
 #include "carbon-hash.h"
+#include "carbon-vector.h"
 
 CARBON_BEGIN_DECL
 

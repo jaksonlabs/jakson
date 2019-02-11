@@ -2,8 +2,10 @@ libcarbon uses [CMake](https://cmake.org) as build system. CMake 3.9.6 or higher
 
 The basic usage is 
 ```
-cmake .
-make
+cmake . &&
+make  &&
+make tests  &&
+make test  &&
 make install
 ```
 After installation, link against `libcarbon` and use

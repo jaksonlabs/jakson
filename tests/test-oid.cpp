@@ -12,7 +12,7 @@ TEST(ObjectIdTest, CreateId) {
 
 TEST(ObjectIdTest, CreateUniqueIds) {
     std::set<carbon_object_id_t> haystack;
-    for (size_t i = 0; i < 2000000000; i++) {
+    for (size_t i = 0; i < 1000000; i++) {
         carbon_object_id_t id;
         bool result = carbon_object_id_create(&id);
         if (!result) {

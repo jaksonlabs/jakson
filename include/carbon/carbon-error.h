@@ -56,6 +56,11 @@
 #define CARBON_ERR_READOUTOFBOUNDS 33       /** Read outside of memory range bounds */
 #define CARBON_ERR_SLOTBROKEN 34            /** Slot management broken */
 #define CARBON_ERR_THREADOOOBJIDS 35        /** Thread run out of object ids: start another one */
+#define CARBON_ERR_JSONPARSEERR 36          /** JSON parsing error */
+#define CARBON_ERR_BULKCREATEFAILED 37      /** Document insertion bulk creation failed */
+#define CARBON_ERR_FOPENWRITE 38            /** File cannot be opened for writing */
+#define CARBON_ERR_WRITEARCHIVE 39          /** Archive cannot be serialized into file */
+#define CARBON_ERR_ARCHIVEOPEN 40           /** Archive cannot be deserialized form file */
 
 static const char *const _carbon_err_str[] = {
     "No error",
@@ -93,7 +98,12 @@ static const char *const _carbon_err_str[] = {
     "Mode set to read-only but modification was requested",
     "Read outside of memory range bounds",
     "Slot management broken",
-    "Thread run out of object ids: start another one"
+    "Thread run out of object ids: start another one",
+    "JSON parsing error",
+    "Document insertion bulk creation failed",
+    "File cannot be opened for writing",
+    "Archive cannot be serialized into file",
+    "Archive cannot be deserialized form file"
 };
 
 #define CARBON_ERRSTR_ILLEGAL_CODE "illegal error code"

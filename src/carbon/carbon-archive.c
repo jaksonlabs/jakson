@@ -16,6 +16,8 @@
  */
 
 #include <inttypes.h>
+#include <carbon/carbon-oid.h>
+#include <carbon/strdic/carbon-strdic-async.h>
 
 #include "carbon/carbon-common.h"
 #include "carbon/carbon-memblock.h"
@@ -307,6 +309,7 @@ struct carbon_file_header this_carbon_file_header = {
 struct __attribute__((packed)) object_header
 {
     char marker;
+    carbon_object_id_t oid;
     uint32_t flags;
 };
 
@@ -354,6 +357,7 @@ struct __attribute__((packed)) column_group_header
 {
     char marker;
     uint32_t num_columns;
+    uint32_t num_objects;
 };
 
 struct __attribute__((packed)) column_header
@@ -406,6 +410,116 @@ struct
             .accepts = compressor_huffman_accepts }
     };
 
+CARBON_EXPORT(bool)
+carbon_archive_from_json(carbon_archive_t *out,
+                         const char *file,
+                         carbon_err_t *err,
+                         const char *json_string,
+                         carbon_archive_compressor_type_e compressor,
+                         bool read_optimized)
+{
+    CARBON_NON_NULL_OR_ERROR(out);
+    CARBON_NON_NULL_OR_ERROR(file);
+    CARBON_NON_NULL_OR_ERROR(err);
+    CARBON_NON_NULL_OR_ERROR(json_string);
+
+    carbon_memblock_t *stream;
+    FILE *out_file;
+
+    if (!carbon_archive_stream_from_json(&stream, err, json_string, compressor, read_optimized)) {
+        return false;
+    }
+
+    if ((out_file = fopen(file, "w")) == NULL) {
+        CARBON_ERROR(err, CARBON_ERR_FOPENWRITE);
+        carbon_memblock_drop(stream);
+        return false;
+    }
+
+    if (!carbon_archive_write(out_file, stream)) {
+        CARBON_ERROR(err, CARBON_ERR_WRITEARCHIVE);
+        fclose(out_file);
+        carbon_memblock_drop(stream);
+        return false;
+    }
+
+    fclose(out_file);
+
+
+    if (!carbon_archive_open(out, file)) {
+        CARBON_ERROR(err, CARBON_ERR_ARCHIVEOPEN);
+        return false;
+    }
+
+    carbon_memblock_drop(stream);
+
+    return true;
+}
+
+CARBON_EXPORT(bool)
+carbon_archive_stream_from_json(carbon_memblock_t **stream,
+                                carbon_err_t *err,
+                                const char *json_string,
+                                carbon_archive_compressor_type_e compressor,
+                                bool read_optimized)
+{
+    CARBON_NON_NULL_OR_ERROR(stream);
+    CARBON_NON_NULL_OR_ERROR(err);
+    CARBON_NON_NULL_OR_ERROR(json_string);
+
+    carbon_strdic_t          dic;
+    carbon_json_parser_t     parser;
+    carbon_json_parse_err_t  error_desc;
+    carbon_doc_bulk_t        bulk;
+    carbon_doc_entries_t    *partition;
+    carbon_columndoc_t      *columndoc;
+    carbon_json_t            json;
+
+    carbon_strdic_create_async(&dic, 1000, 1000, 1000, 8, NULL);
+    carbon_json_parser_create(&parser, &bulk);
+    if (!(carbon_json_parse(&json, &error_desc, &parser, json_string))) {
+        char buffer[2048];
+        if (error_desc.token) {
+            sprintf(buffer, "%s. Token %s was found in line %u column %u",
+                    error_desc.msg, error_desc.token_type_str, error_desc.token->line,
+                    error_desc.token->column);
+            CARBON_ERROR_WDETAILS(err, CARBON_ERR_JSONPARSEERR, &buffer[0]);
+        } else {
+            sprintf(buffer, "%s", error_desc.msg);
+            CARBON_ERROR_WDETAILS(err, CARBON_ERR_JSONPARSEERR, &buffer[0]);
+        }
+        return false;
+    }
+
+    if (!carbon_jest_test_doc(err, &json)) {
+        return false;
+    }
+
+    if (!carbon_doc_bulk_create(&bulk, &dic)) {
+        CARBON_ERROR(err, CARBON_ERR_BULKCREATEFAILED);
+        return false;
+    }
+
+    partition = carbon_doc_bulk_new_entries(&bulk);
+    carbon_doc_bulk_add_json(partition, &json);
+
+    carbon_json_drop(&json);
+    carbon_doc_bulk_shrink(&bulk);
+
+    columndoc = carbon_doc_entries_to_columndoc(&bulk, partition, read_optimized);
+
+    if (!carbon_archive_from_model(stream, err, columndoc, compressor)) {
+        return false;
+    }
+
+    carbon_strdic_drop(&dic);
+    carbon_doc_bulk_Drop(&bulk);
+    carbon_doc_entries_drop(partition);
+    carbon_columndoc_free(columndoc);
+    free(columndoc);
+
+    return true;
+}
 
 bool carbon_archive_from_model(carbon_memblock_t **stream,
                                carbon_err_t *err,
@@ -437,9 +551,13 @@ bool carbon_archive_from_model(carbon_memblock_t **stream,
     return true;
 }
 
-bool carbon_archive_drop(carbon_memblock_t *stream)
+CARBON_EXPORT(bool)
+carbon_archive_drop(carbon_archive_t *archive)
 {
-    carbon_memblock_drop(stream);
+    CARBON_NON_NULL_OR_ERROR(archive)
+    fclose(archive->record_table.diskFile);
+    free(archive->record_table.diskFilePath);
+    carbon_memblock_drop(archive->record_table.recordDataBase);
     return true;
 }
 
@@ -1213,14 +1331,33 @@ static bool write_object_array_props(carbon_memfile_t *memfile, carbon_err_t *er
 
         for (size_t i = 0; i < object_key_columns->num_elems; i++) {
             carbon_columndoc_columngroup_t *column_group = CARBON_VECTOR_GET(object_key_columns, i, carbon_columndoc_columngroup_t);
+            carbon_off_t this_column_offfset_relative = CARBON_MEMFILE_TELL(memfile) - root_object_header_offset;
 
+            /* write an object-id for each position number */
+            size_t max_pos = 0;
+            for (size_t k = 0; k < column_group->columns.num_elems; k++) {
+                carbon_columndoc_column_t *column = CARBON_VECTOR_GET(&column_group->columns, k, carbon_columndoc_column_t);
+                const uint32_t *array_pos = CARBON_VECTOR_ALL(&column->array_positions, uint32_t);
+                for (size_t m = 0; m < column->array_positions.num_elems; m++) {
+                    max_pos = CARBON_MAX(max_pos, array_pos[m]);
+                }
+            }
             struct column_group_header column_group_header = {
                 .marker = marker_symbols[MARKER_TYPE_COLUMN_GROUP].symbol,
-                .num_columns = column_group->columns.num_elems
+                .num_columns = column_group->columns.num_elems,
+                .num_objects = max_pos + 1
             };
-
-            carbon_off_t this_column_offfset_relative = CARBON_MEMFILE_TELL(memfile) - root_object_header_offset;
             carbon_memfile_write(memfile, &column_group_header, sizeof(struct column_group_header));
+
+            for (size_t i = 0; i < column_group_header.num_objects; i++) {
+                carbon_object_id_t oid;
+                if (!carbon_object_id_create(&oid)) {
+                    CARBON_ERROR(err, CARBON_ERR_THREADOOOBJIDS);
+                    return false;
+                }
+                carbon_memfile_write(memfile, &oid, sizeof(carbon_object_id_t));
+            }
+
             carbon_off_t continue_write = CARBON_MEMFILE_TELL(memfile);
             carbon_memfile_seek(memfile, column_offsets + i * sizeof(carbon_off_t));
             carbon_memfile_write(memfile, &this_column_offfset_relative, sizeof(carbon_off_t));
@@ -1473,9 +1610,17 @@ static bool serialize_columndoc(carbon_off_t *offset, carbon_err_t *err, carbon_
     carbon_off_t object_end_offset = CARBON_MEMFILE_TELL(memfile);
     carbon_memfile_seek(memfile, header_offset);
 
+    carbon_object_id_t oid;
+    if (!carbon_object_id_create(&oid)) {
+        CARBON_ERROR(err, CARBON_ERR_THREADOOOBJIDS);
+        return false;
+    }
+
     struct object_header header = {
         .marker = marker_symbols[MARKER_TYPE_OBJECT_BEGIN].symbol,
+        .oid = oid,
         .flags = flags_to_int32(&flags),
+
     };
 
     carbon_memfile_write(memfile, &header, sizeof(struct object_header));
@@ -1631,6 +1776,7 @@ static bool print_column_form_memfile(FILE *file, carbon_err_t *err, carbon_memf
     for (size_t i = 0; i < header->num_entries; i++) {
         fprintf(file, "%d%s", positions[i], i + 1 < header->num_entries ? ", " : "");
     }
+
     fprintf(file, "]]\n");
 
     carbon_field_type_e data_type = value_type_symbol_to_value_type(header->value_type);
@@ -1745,11 +1891,18 @@ static bool print_object_array_from_memfile(FILE *file, carbon_err_t *err, carbo
         }
         fprintf(file, "0x%04x ", offset);
         INTENT_LINE(nesting_level);
-        fprintf(file, "[marker: %c (Column Group)] [num_columns: %d] [", column_group_header->marker, column_group_header->num_columns);
+        fprintf(file, "[marker: %c (Column Group)] [num_columns: %d] [num_objects: %d] [object_ids: ", column_group_header->marker,
+                column_group_header->num_columns, column_group_header->num_objects);
+        const carbon_object_id_t *oids = CARBON_MEMFILE_READ_TYPE_LIST(memfile, carbon_object_id_t, column_group_header->num_objects);
+        for (size_t k = 0; k < column_group_header->num_objects; k++) {
+            fprintf(file, "%"PRIu64"%s", oids[k], k + 1 < column_group_header->num_objects ? ", " : "");
+        }
+        fprintf(file, "] [offsets: ");
         for (size_t k = 0; k < column_group_header->num_columns; k++) {
             carbon_off_t column_off = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
-            fprintf(file, "offset: 0x%04x%s", (unsigned) column_off, k + 1 < column_group_header->num_columns ? ", " : "");
+            fprintf(file, "0x%04x%s", (unsigned) column_off, k + 1 < column_group_header->num_columns ? ", " : "");
         }
+
         fprintf(file, "]\n");
 
         for (size_t k = 0; k < column_group_header->num_columns; k++) {
@@ -2020,7 +2173,8 @@ bool print_object(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile, unsi
     fprintf(file, "0x%04x ", offset);
     INTENT_LINE(nesting_level);
     nesting_level++;
-    fprintf(file, "[marker: %c (BeginObject)] [flags: %u] [propertyOffsets: [", header->marker, header->flags);
+    fprintf(file, "[marker: %c (BeginObject)] [object-id: %"PRIu64"] [flags: %u] [propertyOffsets: [", header->marker,
+            header->oid, header->flags);
     print_prop_offsets(file, &flags, &prop_offsets);
     fprintf(file, " ] [next: 0x%04x] \n", (unsigned) nextObjectOrNil);
 
@@ -2361,12 +2515,10 @@ static void reset_string_dic_disk_file_cursor(carbon_archive_record_table_t *fil
 bool carbon_archive_open(carbon_archive_t *out,
                         const char *file_path)
 {
-    CARBON_UNUSED(out);
-    CARBON_UNUSED(file_path);
-
     int status;
 
-    out->record_table.diskFile = fopen(file_path, "r");
+    out->record_table.diskFilePath = strdup(file_path);
+    out->record_table.diskFile = fopen(out->record_table.diskFilePath, "r");
     if (!out->record_table.diskFile) {
         CARBON_PRINT_ERROR(CARBON_ERR_FOPEN_FAILED);
         return false;

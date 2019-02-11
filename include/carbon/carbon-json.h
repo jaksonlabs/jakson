@@ -79,7 +79,7 @@ typedef struct
     carbon_json_tokenizer_t tokenizer;
     carbon_doc_bulk_t *partition;
     carbon_err_t err;
-} JsonParser;
+} carbon_json_parser_t;
 
 CARBON_EXPORT(bool)
 carbon_json_tokenizer_init(carbon_json_tokenizer_t *tokenizer, const char *input);
@@ -94,11 +94,11 @@ CARBON_EXPORT(void)
 carbon_json_token_print(FILE *file, const carbon_json_token_t *token);
 
 CARBON_EXPORT(bool)
-carbon_json_parser_create(JsonParser *parser, carbon_doc_bulk_t *partition);
+carbon_json_parser_create(carbon_json_parser_t *parser, carbon_doc_bulk_t *partition);
 
 CARBON_EXPORT(bool)
 carbon_json_parse(CARBON_NULLABLE carbon_json_t *json, CARBON_NULLABLE carbon_json_parse_err_t *error_desc,
-                  JsonParser *parser, const char *input);
+                  carbon_json_parser_t *parser, const char *input);
 
 CARBON_EXPORT(bool)
 carbon_jest_test_doc(carbon_err_t *err, carbon_json_t *json);

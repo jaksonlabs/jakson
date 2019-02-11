@@ -7,8 +7,8 @@ include(GNUInstallDirs)
 
 set (CMAKE_C_STANDARD 11)
 
-#set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
+#set(CMAKE_BUILD_TYPE Release)
 
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
@@ -65,3 +65,4 @@ add_subdirectory("${CMAKE_SOURCE_DIR}/examples")
 
 enable_testing()
 add_subdirectory("${CMAKE_SOURCE_DIR}/tests")
+
