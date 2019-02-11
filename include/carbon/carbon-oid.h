@@ -24,8 +24,8 @@ CARBON_BEGIN_DECL
 
 typedef uint64_t carbon_object_id_t;
 
-CARBON_EXPORT(carbon_object_id_t)
-carbon_object_id_create(void);
+CARBON_EXPORT(bool)
+carbon_object_id_create(carbon_object_id_t *out);
 
 CARBON_EXPORT(bool)
 carbon_object_id_get_global_wallclocktime(uint_fast8_t *out, carbon_object_id_t id);

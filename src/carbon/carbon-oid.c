@@ -24,6 +24,7 @@ _Thread_local bool     thread_local_init;
 _Thread_local uint64_t thread_local_id;
 _Thread_local uint8_t  thread_local_magic;
 _Thread_local uint32_t thread_local_counter;
+_Thread_local uint32_t thread_local_counter_limit;
 
 /**
  * Object identifier that acts as the primary key for any object stored in a CARBON record.
@@ -59,9 +60,11 @@ typedef union
     uint64_t value;
 } internal_object_id_t;
 
-CARBON_EXPORT(carbon_object_id_t)
-carbon_object_id_create(void)
+CARBON_EXPORT(bool)
+carbon_object_id_create(carbon_object_id_t *out)
 {
+    assert(out);
+
     static bool     process_init;
     static uint64_t process_local_id;
     static uint8_t  process_magic;
@@ -85,26 +88,33 @@ carbon_object_id_create(void)
 
     if (!thread_local_init) {
         thread_local_counter = rand();
+        thread_local_counter_limit = thread_local_counter++;
         thread_local_id = (uint64_t) pthread_self();
         process_local_id = getpid();
         thread_local_magic = rand();
         thread_local_init = true;
     }
 
-    internal_object_id_t internal = {
-        .global_wallclock  = carbon_time_now_wallclock(),
-        .global_build_date = global_build_date_bit,
-        .global_build_path = global_build_path_bit,
-        .process_id        = process_local_id,
-        .process_magic     = process_magic,
-        .process_counter   = process_counter++,
-        .thread_id         = (uint64_t) thread_local_id,
-        .thread_magic      = thread_local_magic,
-        .thread_counter    = thread_local_counter++,
-        .call_random       = rand()
-    };
-
-    return internal.value;
+    bool capacity_left = (thread_local_counter != thread_local_counter_limit);
+    CARBON_PRINT_ERROR_IF(!capacity_left, CARBON_ERR_THREADOOOBJIDS)
+    if (CARBON_BRANCH_LIKELY(capacity_left)) {
+        internal_object_id_t internal = {
+            .global_wallclock  = carbon_time_now_wallclock(),
+            .global_build_date = global_build_date_bit,
+            .global_build_path = global_build_path_bit,
+            .process_id        = process_local_id,
+            .process_magic     = process_magic,
+            .process_counter   = process_counter++,
+            .thread_id         = (uint64_t) thread_local_id,
+            .thread_magic      = thread_local_magic,
+            .thread_counter    = thread_local_counter++,
+            .call_random       = rand()
+        };
+        *out = internal.value;
+    } else {
+        *out = 0;
+    }
+    return capacity_left;
 }
 
 CARBON_EXPORT(bool)

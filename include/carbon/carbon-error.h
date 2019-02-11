@@ -55,6 +55,7 @@
 #define CARBON_ERR_WRITEPROT 32             /** Mode set to read-only but modification was requested */
 #define CARBON_ERR_READOUTOFBOUNDS 33       /** Read outside of memory range bounds */
 #define CARBON_ERR_SLOTBROKEN 34            /** Slot management broken */
+#define CARBON_ERR_THREADOOOBJIDS 35        /** Thread run out of object ids: start another one */
 
 static const char *const _carbon_err_str[] = {
     "No error",
@@ -91,7 +92,8 @@ static const char *const _carbon_err_str[] = {
     "Unable to import json file: unsupported type",
     "Mode set to read-only but modification was requested",
     "Read outside of memory range bounds",
-    "Slot management broken"
+    "Slot management broken",
+    "Thread run out of object ids: start another one"
 };
 
 #define CARBON_ERRSTR_ILLEGAL_CODE "illegal error code"

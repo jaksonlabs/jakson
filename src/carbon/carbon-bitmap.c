@@ -16,6 +16,7 @@
  */
 
 #include <math.h>
+#include <lzma.h>
 #include "carbon/carbon-bitmap.h"
 
 CARBON_EXPORT(bool)
