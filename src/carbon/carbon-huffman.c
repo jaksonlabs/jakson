@@ -366,7 +366,6 @@ static huff_node_t *trim_and_begin(carbon_vec_t ofType(HuffNode) *candidates)
     huff_node_t *begin = NULL;
     for (huff_node_t *it = CARBON_VECTOR_GET(candidates, 0, huff_node_t); ; it++) {
         if (it->freq == 0) {
-            --candidates->num_elems;
             if (it->prev) {
                 it->prev->next = it->next;
             }
@@ -479,7 +478,7 @@ static void huff_tree_create(carbon_vec_t ofType(carbon_huffman_entry_t) *table,
         huff_node_t *finalNode = VECTOR_NEW_AND_GET(&candidates, huff_node_t);
         finalNode->freq = small->freq + smallest->freq;
         finalNode->letter = '\0';
-        if (handle->freq < handle->next->freq) {
+        if (handle->freq > handle->next->freq) {
             finalNode->left = handle;
             finalNode->right = handle->next;
         } else {

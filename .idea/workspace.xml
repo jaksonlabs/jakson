@@ -31,8 +31,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/carbon/carbon-huffman.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="237">
-              <caret line="476" lean-forward="true" selection-start-line="476" selection-end-line="476" />
+            <state relative-caret-position="417">
+              <caret line="459" column="13" lean-forward="true" selection-start-line="459" selection-start-column="13" selection-end-line="459" selection-end-column="13" />
               <folding>
                 <element signature="e#1103#1122#0" expanded="true" />
               </folding>
@@ -70,8 +70,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/carbon/carbon-json.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-13732">
-              <caret column="3" lean-forward="true" selection-start-column="3" selection-end-column="3" />
+            <state relative-caret-position="158">
+              <caret line="930" column="1" lean-forward="true" selection-start-line="930" selection-start-column="1" selection-end-line="930" selection-end-column="1" />
             </state>
           </provider>
         </entry>
@@ -91,8 +91,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/carbon/carbon-memblock.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="224">
-              <caret line="109" column="31" selection-start-line="109" selection-start-column="31" selection-end-line="109" selection-end-column="31" />
+            <state relative-caret-position="27">
+              <caret line="105" column="17" lean-forward="true" selection-start-line="105" selection-start-column="17" selection-end-line="105" selection-end-column="17" />
             </state>
           </provider>
         </entry>
@@ -109,7 +109,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/carbon/carbon-error.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="192">
+            <state relative-caret-position="342">
               <caret line="115" selection-start-line="115" selection-end-line="115" />
             </state>
           </provider>
@@ -119,7 +119,7 @@
         <entry file="file://$PROJECT_DIR$/build/hufferror.json">
           <provider selected="true" editor-type-id="text-editor">
             <state>
-              <caret column="10" selection-start-column="10" selection-end-column="10" />
+              <caret column="17" selection-start-column="17" selection-end-column="17" />
             </state>
           </provider>
         </entry>
@@ -264,12 +264,12 @@
       <option name="presentableId" value="Default" />
       <updated>1549983707569</updated>
       <workItem from="1549983710099" duration="2881000" />
-      <workItem from="1549986703533" duration="28914000" />
+      <workItem from="1549986703533" duration="29857000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="31795000" />
+    <option name="totallyTimeSpent" value="32738000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="67" y="25" width="1213" height="775" extended-state="6" />
@@ -305,7 +305,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/carbon/carbon-huffman.c</url>
-          <line>418</line>
+          <line>417</line>
           <option name="timeStamp" value="12" />
         </line-breakpoint>
       </breakpoints>
@@ -329,31 +329,10 @@
     <entry file="file://$PROJECT_DIR$/src/carbon/carbon.c">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/carbon/carbon-archive.c">
+    <entry file="file://$PROJECT_DIR$/include/carbon/carbon-vector.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="571" selection-start-line="571" selection-end-line="571" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/carbon/carbon-error.c">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="192">
-          <caret line="115" selection-start-line="115" selection-end-line="115" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/carbon/carbon-memblock.c">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="224">
-          <caret line="109" column="31" selection-start-line="109" selection-start-column="31" selection-end-line="109" selection-end-column="31" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/carbon/carbon-memfile.c">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="216">
-          <caret line="114" selection-start-line="114" selection-end-line="114" />
+        <state relative-caret-position="250">
+          <caret line="269" column="4" lean-forward="true" selection-start-line="269" selection-start-column="4" selection-end-line="269" selection-end-column="19" />
         </state>
       </provider>
     </entry>
@@ -364,17 +343,45 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/include/carbon/carbon-vector.h">
+    <entry file="file://$PROJECT_DIR$/src/carbon/carbon-memfile.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="250">
-          <caret line="269" column="4" lean-forward="true" selection-start-line="269" selection-start-column="4" selection-end-line="269" selection-end-column="19" />
+        <state relative-caret-position="216">
+          <caret line="114" selection-start-line="114" selection-end-line="114" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/build/hufferror.json">
       <provider selected="true" editor-type-id="text-editor">
         <state>
-          <caret column="10" selection-start-column="10" selection-end-column="10" />
+          <caret column="17" selection-start-column="17" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/carbon/carbon-error.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="342">
+          <caret line="115" selection-start-line="115" selection-end-line="115" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/carbon/carbon-archive.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="571" selection-start-line="571" selection-end-line="571" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/carbon/carbon-memblock.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="27">
+          <caret line="105" column="17" lean-forward="true" selection-start-line="105" selection-start-column="17" selection-end-line="105" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/carbon/carbon-json.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="158">
+          <caret line="930" column="1" lean-forward="true" selection-start-line="930" selection-start-column="1" selection-end-line="930" selection-end-column="1" />
         </state>
       </provider>
     </entry>
@@ -388,17 +395,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/carbon/carbon-json.c">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-13732">
-          <caret column="3" lean-forward="true" selection-start-column="3" selection-end-column="3" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/carbon/carbon-huffman.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="237">
-          <caret line="476" lean-forward="true" selection-start-line="476" selection-end-line="476" />
+        <state relative-caret-position="417">
+          <caret line="459" column="13" lean-forward="true" selection-start-line="459" selection-start-column="13" selection-end-line="459" selection-end-column="13" />
           <folding>
             <element signature="e#1103#1122#0" expanded="true" />
           </folding>
