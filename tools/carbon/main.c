@@ -13,8 +13,7 @@
                           "Optionally, the following options are available that must be defined before <output>:\n\n" \
                           "   --size-optimized           Compress the embedded string dictionary using a particular compressor\n" \
                           "   --compressor=<compressor>  Use <compressor> as compression technique for size optimization.\n" \
-                          "                              Available values for <compressor>:\n" \
-                          "                                 huffman   Use huffman-code compressor (default)\n" \
+                          "                              Run `carbon-tool list compressors` to see options.\n" \
                           "   --read-optimized           Sort keys and values during pre-processing for efficient reads\n" \
                           "   --force-overwrite          Overwrite the output file if this file already exists\n" \
                           "   --silent                   Suppresses all outputs to stdout\n" \
@@ -29,6 +28,10 @@
 
 #define DESC_CAB_VIEW "Print CARBON file in human readable form to stdout"
 #define DESC_CAB_INFO "Display information about a CARBON file to stdout"
+
+#define DESC_LIST       "List properties and configurations for carbon-tool to stdout"
+#define DESC_LIST_USAGE "The parameter <args> is one of the following constants:\n\n"                                  \
+                        "   compressors               Shows available compressors used by `convert` module"
 
 #define DEFINE_MODULE(module_name, moduleCommand, desc, invokeFunc)                                              \
 static int module##module_name##Entry(int argc, char **argv, FILE *file)                                         \
@@ -46,6 +49,9 @@ DEFINE_MODULE(Js2Cab, "convert", DESC_JS2CAB_USAGE, moduleJs2CabInvoke);
 DEFINE_MODULE(ViewCab, "view", DESC_CAB_VIEW, moduleViewCabInvoke);
 DEFINE_MODULE(Inspect, "inspect", DESC_CAB_INFO, moduleInspectInvoke);
 DEFINE_MODULE(Cab2Js, "to_json", DESC_CAB2JS_USAGE, moduleCab2JsInvoke);
+
+DEFINE_MODULE(List, "list", DESC_LIST_USAGE, moduleListInvoke);
+
 
 static bool showHelp(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *manager);
 
@@ -83,6 +89,12 @@ int main (int argc, char **argv)
                                 "to_json", DESC_CAB2JS_INFO,
                                 "manpages/carbon/to_json",
                                 moduleCab2JsEntry);
+
+    carbon_cmdopt_mgr_create_group(&group, "misc and orientation", &manager);
+    carbon_cmdopt_group_add_cmd(group,
+                                "list", DESC_LIST,
+                                "manpages/carbon/list",
+                                moduleListEntry);
 
     int status = carbon_cmdopt_mgr_process(&manager, argc - 1, argv + 1, stdout);
     carbon_cmdopt_mgr_drop(&manager);

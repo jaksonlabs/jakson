@@ -21,29 +21,14 @@
 #include "carbon-common.h"
 #include "carbon-memblock.h"
 #include "carbon-memfile.h"
-
+#include "carbon-compressor.h"
 #include "carbon-columndoc.h"
 
 CARBON_BEGIN_DECL
 
+typedef struct carbon_strtable_iter carbon_strtable_iter_t; /* forwarded from carbon-strtable.h */
+
 union carbon_archive_dic_flags;
-
-typedef enum carbon_archive_compressor_type
-{
-    CARBON_ARCHIVE_COMPRESSOR_TYPE_NONE,
-    CARBON_ARCHIVE_COMPRESSOR_TYPE_HUFFMAN
-} carbon_archive_compressor_type_e;
-
-typedef struct carbon_archive_compressor
-{
-    carbon_archive_compressor_type_e  tag;
-    void                             *extra;
-
-    void (*set_flags)(union carbon_archive_dic_flags *flags);
-    void (*serialize_dic)(carbon_memfile_t *memfile, const carbon_vec_t ofType (const char *) *strings,
-                          const carbon_vec_t ofType(carbon_string_id_t) *string_ids);
-    void (*dump_dic)(FILE *file, carbon_memfile_t *memfile);
-} carbon_archive_compressor_t;
 
 typedef struct carbon_archive_record_flags
 {
@@ -90,22 +75,6 @@ typedef struct carbon_archive_prop_offs {
     carbon_off_t object_arrays;
 } carbon_archive_prop_offs_t;
 
-typedef struct carbon_archive_record_table
-{
-    carbon_archive_compressor_t     strategy;
-    carbon_archive_record_flags_t   flags;
-    char                           *diskFilePath;
-    FILE                           *diskFile;
-    carbon_memblock_t              *recordDataBase;
-    carbon_err_t                    err;
-} carbon_archive_record_table_t;
-
-typedef struct carbon_archive_info
-{
-    size_t string_table_size;
-    size_t record_table_size;
-} carbon_archive_info_t;
-
 typedef union
 {
     struct {
@@ -145,6 +114,24 @@ typedef union
     } bits;
     uint32_t value;
 } carbon_archive_object_flags_t;
+
+typedef struct carbon_archive_string_table
+{
+    carbon_compressor_t     strategy;
+
+} carbon_archive_string_table_t;
+
+typedef struct carbon_archive_record_table
+{
+    carbon_archive_record_flags_t   flags;
+    carbon_memblock_t              *recordDataBase;
+} carbon_archive_record_table_t;
+
+typedef struct carbon_archive_info
+{
+    size_t string_table_size;
+    size_t record_table_size;
+} carbon_archive_info_t;
 
 typedef struct carbon_archive_object
 {
@@ -203,7 +190,10 @@ typedef struct carbon_object_cursor
 
 typedef struct carbon_archive
 {
-    carbon_archive_info_t info;
+    carbon_archive_info_t         info;
+    char                         *diskFilePath;
+    FILE                         *diskFile;
+    carbon_archive_string_table_t string_table;
     carbon_archive_record_table_t record_table;
     carbon_err_t err;
 } carbon_archive_t;
@@ -213,24 +203,27 @@ carbon_archive_from_json(carbon_archive_t *out,
                          const char *file,
                          carbon_err_t *err,
                          const char *json_string,
-                         carbon_archive_compressor_type_e compressor,
+                         carbon_compressor_type_e compressor,
                          bool read_optimized);
 
 CARBON_EXPORT(bool)
 carbon_archive_stream_from_json(carbon_memblock_t **stream,
                                 carbon_err_t *err,
                                 const char *json_string,
-                                carbon_archive_compressor_type_e compressor,
+                                carbon_compressor_type_e compressor,
                                 bool read_optimized);
 
 CARBON_EXPORT(bool)
 carbon_archive_from_model(carbon_memblock_t **stream,
                           carbon_err_t *err,
                           carbon_columndoc_t *model,
-                          carbon_archive_compressor_type_e compressor);
+                          carbon_compressor_type_e compressor);
 
 CARBON_EXPORT(bool)
 carbon_archive_drop(carbon_archive_t *archive);
+
+CARBON_EXPORT(bool)
+carbon_archive_fullscan_strings(carbon_strtable_iter_t *it, carbon_predicate_string_t *pred, carbon_archive_t *archive);
 
 CARBON_EXPORT(bool)
 carbon_archive_write(FILE *file, const carbon_memblock_t *stream);

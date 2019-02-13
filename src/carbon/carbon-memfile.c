@@ -148,7 +148,9 @@ bool carbon_memfile_write(carbon_memfile_t *file, const void *data, carbon_off_t
                 carbon_memblock_resize(file->memblock, required_size * 1.7f);
             }
 
-            carbon_memblock_write(file->memblock, file->pos, data, nbytes);
+            if (CARBON_BRANCH_UNLIKELY(!carbon_memblock_write(file->memblock, file->pos, data, nbytes))) {
+                return false;
+            }
             file->pos += nbytes;
         }
         return true;

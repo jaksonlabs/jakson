@@ -99,10 +99,13 @@ bool carbon_memblock_write(carbon_memblock_t *block,
 {
     CARBON_NON_NULL_OR_ERROR(block)
     CARBON_NON_NULL_OR_ERROR(data)
-    assert(position + nbytes < block->blockLength);
-    memcpy(block->base + position, data, nbytes);
-    block->lastByte = CARBON_MAX(block->lastByte, position + nbytes);
-    return true;
+    if (CARBON_BRANCH_LIKELY(position + nbytes < block->blockLength)) {
+        memcpy(block->base + position, data, nbytes);
+        block->lastByte = CARBON_MAX(block->lastByte, position + nbytes);
+        return true;
+    } else {
+        return false;
+    }
 }
 
 bool carbon_memblock_cpy(carbon_memblock_t **dst, carbon_memblock_t *src)

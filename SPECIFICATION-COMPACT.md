@@ -14,11 +14,12 @@ Using an EBNF notation, the structure of a CARBON file is:
 archive               ::= archive-header string-table record-header carbon-object
 archive-header        ::= magic-word version-string record-offset
 record-header         ::= 'r' record-header-flags record-size
-string-table          ::= 'D' num-strings table-flags ( no-compressor | huffman-compressor )
-no-compressor         ::= ('-' string-length string-id character+)+
+string-table          ::= ::= 'D' num-strings table-flags first-entry-offset ( no-compressor | huffman-compressor )
+string-entry-header   ::= '-' next-entry-offset string-id string-length 
+no-compressor         ::= (string-entry-header character+)+
 huffman-compressor    ::= huffman-dictionary huffman-string+
 huffman-dictionary    ::= 'd' character prefix-length prefix-code+
-huffman-string        ::= '-' string-id string-length data-length byte+
+huffman-string        ::= string-entry-header data-length byte+
 carbon-object         ::= '{' object-id object-flags property-offset+ next-object-offset columnified-props+ '}'
 columnified-props     ::= null-prop | nullable-prop | null-array-prop | nullable-array-prop | object-array-prop
 null-prop             ::= 'n' column-length key-column
