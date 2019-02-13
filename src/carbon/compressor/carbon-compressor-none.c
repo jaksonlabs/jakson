@@ -16,58 +16,90 @@
  */
 
 #include <inttypes.h>
+#include <assert.h>
 #include "carbon/compressor/carbon-compressor-none.h"
 
-
-
-void compressor_none_write_dictionary(carbon_memfile_t *memfile, const carbon_vec_t ofType (const char *) *strings,
-                                      const carbon_vec_t ofType(carbon_string_id_t) *string_ids)
+CARBON_EXPORT(bool)
+carbon_compressor_none_init(carbon_compressor_t *self)
 {
-    for (size_t i = 0; i < strings->num_elems; i++) {
-        carbon_string_id_t *string_id_t = CARBON_VECTOR_GET(string_ids, i, carbon_string_id_t);
-        const char *string = *CARBON_VECTOR_GET(strings, i, const char *);
-        size_t string_length = strlen(string);
-
-        struct embedded_string embedded_string = {
-            .marker = marker_symbols[MARKER_TYPE_EMBEDDED_UNCOMP_STR].symbol,
-            .strlen = string_length
-        };
-
-        carbon_memfile_write(memfile, &embedded_string, sizeof(struct embedded_string));
-        carbon_memfile_write(memfile, string_id_t, sizeof(carbon_string_id_t));
-        carbon_memfile_write(memfile, string, string_length);
-    }
+    CARBON_UNUSED(self);
+    /* nothing to do for uncompressed dictionaries */
+    return true;
 }
 
-void compressor_none_dump_dictionary(FILE *file, carbon_memfile_t *memfile)
+CARBON_EXPORT(bool)
+carbon_compressor_none_drop(carbon_compressor_t *self)
 {
-    while ((*CARBON_MEMFILE_PEEK(memfile, char)) == marker_symbols[MARKER_TYPE_EMBEDDED_UNCOMP_STR].symbol) {
-        unsigned offset = CARBON_MEMFILE_TELL(memfile);
-        struct embedded_string *embedded_string = CARBON_MEMFILE_READ_TYPE(memfile, struct embedded_string);
-        carbon_string_id_t *string_id = CARBON_MEMFILE_READ_TYPE(memfile, carbon_string_id_t);
-        const char *string = CARBON_MEMFILE_READ(memfile, embedded_string->strlen);
-        char *printableString = malloc(embedded_string->strlen + 1);
-        memcpy(printableString, string, embedded_string->strlen);
-        printableString[embedded_string->strlen] = '\0';
-
-        fprintf(file, "0x%04x ", offset);
-        fprintf(file, "   [marker: %c] [string_length: %"PRIu64"] [string_id: %"PRIu64"] [string: '%s']\n",
-            embedded_string->marker,
-            embedded_string->strlen, *string_id, printableString);
-
-        free(printableString);
-    }
+    CARBON_UNUSED(self);
+    /* nothing to do for uncompressed dictionaries */
+    return true;
 }
 
-
-bool compressor_none_encode_string(carbon_compressor_t *self, carbon_memfile_t *dst, carbon_err_t *err,
-                                   carbon_string_id_t string_id, const char *string)
+CARBON_EXPORT(bool)
+carbon_compressor_none_write_extra(carbon_compressor_t *self, carbon_memfile_t *dst,
+                                        const carbon_vec_t ofType (const char *) *strings)
 {
-
+    CARBON_UNUSED(self);
+    CARBON_UNUSED(dst);
+    CARBON_UNUSED(strings);
+    /* nothing to do for uncompressed dictionaries */
+    return true;
 }
 
-char *compressor_none_decode_string(carbon_compressor_t *self, carbon_memfile_t *dst, carbon_err_t *err,
-                                    carbon_string_id_t string_id)
+bool carbon_compressor_none_print_extra(carbon_compressor_t *self, FILE *file, carbon_memfile_t *src)
 {
+    CARBON_UNUSED(self);
+    CARBON_UNUSED(file);
+    CARBON_UNUSED(src);
+    /* nothing to do for uncompressed dictionaries */
+    return true;
+}
 
+CARBON_EXPORT(bool)
+carbon_compressor_none_print_encoded_string(carbon_compressor_t *self,
+                                                 FILE *file,
+                                                 carbon_memfile_t *src,
+                                                 uint32_t decompressed_strlen)
+{
+    CARBON_UNUSED(self);
+
+    const char         *string        =  CARBON_MEMFILE_READ(src, decompressed_strlen);
+
+    char *printableString = malloc(decompressed_strlen + 1);
+    memcpy(printableString, string, decompressed_strlen);
+    printableString[decompressed_strlen] = '\0';
+
+    fprintf(file, "[string: %s]", printableString);
+
+    free(printableString);
+
+    return true;
+}
+
+CARBON_EXPORT(bool)
+carbon_compressor_none_encode_string(carbon_compressor_t *self, carbon_memfile_t *dst, carbon_err_t *err,
+                                          const char *string)
+{
+    CARBON_UNUSED(self);
+
+    uint32_t string_length = strlen(string);
+
+    CARBON_SUCCESS_OR_JUMP(carbon_memfile_write(dst, string, string_length), error_handling)
+
+    return true;
+
+error_handling:
+    CARBON_ERROR(err, CARBON_ERR_IO)
+    return false;
+}
+
+CARBON_EXPORT(char *)
+carbon_compressor_none_decode_string(carbon_compressor_t *self, carbon_memfile_t *dst, carbon_err_t *err,
+                                           carbon_string_id_t string_id)
+{
+    CARBON_UNUSED(self);
+    CARBON_UNUSED(dst);
+    CARBON_UNUSED(err);
+    CARBON_UNUSED(string_id);
+    return NULL;
 }

@@ -16,24 +16,52 @@
  */
 
 #include <assert.h>
-#include <carbon/carbon-bitmap.h>
+#include <inttypes.h>
+
+#include "carbon/carbon-bitmap.h"
+#include "carbon/carbon-compressor.h"
 #include "carbon/carbon-huffman.h"
-#include "carbon/compressor/carbon-compressor-huffman.h"
 
 #define  MARKER_SYMBOL_HUFFMAN_DIC_ENTRY   'd'
 
-
-void huffman_dump_dictionary(FILE *file, carbon_memfile_t *memfile)
+CARBON_EXPORT(bool)
+carbon_compressor_huffman_init(carbon_compressor_t *self)
 {
+    self->extra = malloc(sizeof(carbon_huffman_t));
+    if (self->extra != NULL) {
+        carbon_huffman_t *encoder = (carbon_huffman_t *) self->extra;
+        carbon_huffman_create(encoder);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+CARBON_EXPORT(bool)
+carbon_compressor_huffman_drop(carbon_compressor_t *self)
+{
+    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_HUFFMAN);
+
+    carbon_huffman_t *encoder = (carbon_huffman_t *) self->extra;
+    carbon_huffman_drop(encoder);
+
+    return true;
+}
+
+bool huffman_dump_dictionary(FILE *file, carbon_memfile_t *memfile)
+{
+    carbon_huffman_entry_info_t entry_info;
+    carbon_off_t                offset;
+
     while ((*CARBON_MEMFILE_PEEK(memfile, char)) == MARKER_SYMBOL_HUFFMAN_DIC_ENTRY) {
-        carbon_huffman_entry_info_t entry_info;
-        carbon_off_t offset;
         carbon_memfile_tell(&offset, memfile);
         carbon_huffman_read_dic_entry(&entry_info, memfile, MARKER_SYMBOL_HUFFMAN_DIC_ENTRY);
+
         fprintf(file, "0x%04x ", (unsigned) offset);
         fprintf(file, "[marker: %c] [letter: '%c'] [nbytes_prefix: %d] [code: ",
                 MARKER_SYMBOL_HUFFMAN_DIC_ENTRY, entry_info.letter,
                 entry_info.nbytes_prefix);
+
         if (entry_info.nbytes_prefix > 0) {
             for (uint16_t i = 0; i < entry_info.nbytes_prefix; i++) {
                 carbon_bitmap_print_bits_in_char(file, entry_info.prefix_code[i]);
@@ -45,53 +73,87 @@ void huffman_dump_dictionary(FILE *file, carbon_memfile_t *memfile)
 
         fprintf(file, "]\n");
     }
+    return true;
 }
 
-void huffman_dump_string_table(FILE *file, carbon_memfile_t *memfile)
+bool huffman_dump_string_table_entry(FILE *file, carbon_memfile_t *memfile)
 {
-    char marker;
-    while ((marker = *CARBON_MEMFILE_PEEK(memfile, char)) == MARKER_SYMBOL_EMBEDDED_STR) {
-        carbon_huffman_encoded_str_info_t info;
-        carbon_off_t offset;
-        carbon_memfile_tell(&offset, memfile);
-        carbon_huffman_read_string(&info, memfile, MARKER_SYMBOL_EMBEDDED_STR);
-        fprintf(file, "0x%04x ", (unsigned) offset);
-        fprintf(file, "[marker: %c] [string_id: '%"PRIu64"'] [string_length: '%d'] [nbytes_encoded: %d] [bytes: ",
-            marker, info.string_id, info.str_length, info.nbytes_encoded);
-        for (size_t i = 0; i < info.nbytes_encoded; i++) {
-            char byte = info.encoded_bytes[i];
-            carbon_bitmap_print_bits_in_char(file, byte);
-            fprintf(file, "%s", i + 1 < info.nbytes_encoded ? "," : "");
-        }
-        fprintf(file, "]\n");
+    CARBON_UNUSED(file);
+    CARBON_UNUSED(memfile);
+
+    carbon_huffman_encoded_str_info_t info;
+
+    carbon_huffman_read_string(&info, memfile);
+
+    fprintf(file, "[[nbytes_encoded: %d] [bytes: ", info.nbytes_encoded);
+    for (size_t i = 0; i < info.nbytes_encoded; i++) {
+        char byte = info.encoded_bytes[i];
+        carbon_bitmap_print_bits_in_char(file, byte);
+        fprintf(file, "%s", i + 1 < info.nbytes_encoded ? "," : "");
     }
+    fprintf(file, "]\n");
+
+    return true;
 }
 
 
-void compressor_huffman_write_dictionary(carbon_compressor_t *self, carbon_memfile_t *memfile, const carbon_vec_t ofType (const char *) *strings,
-                                         const carbon_vec_t ofType(carbon_string_id_t) *string_ids)
+CARBON_EXPORT(bool)
+carbon_compressor_huffman_write_extra(carbon_compressor_t *self, carbon_memfile_t *dst,
+                                      const carbon_vec_t ofType (const char *) *strings)
 {
-    carbon_huffman_t *dic;
+    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_HUFFMAN);
 
-    carbon_huffman_create(&dic, strings);
-    carbon_huffman_serialize_dic(memfile, dic, MARKER_SYMBOL_HUFFMAN_DIC_ENTRY);
-    carbon_huffman_encode(memfile, dic, MARKER_SYMBOL_EMBEDDED_STR, string_ids, strings);
-    carbon_huffman_drop(dic);
+    carbon_huffman_t *encoder = (carbon_huffman_t *) self->extra;
+
+    carbon_huffman_build(encoder, strings);
+    carbon_huffman_serialize_dic(dst, encoder, MARKER_SYMBOL_HUFFMAN_DIC_ENTRY);
+
+    return true;
 }
 
-void compressor_huffman_dump_dictionary(carbon_compressor_t *self, FILE *file, carbon_memfile_t *memfile)
+CARBON_EXPORT(bool)
+carbon_compressor_huffman_print_extra(carbon_compressor_t *self, FILE *file, carbon_memfile_t *src)
 {
-    huffman_dump_dictionary(file, memfile);
-    huffman_dump_string_table(file, memfile);
+    CARBON_UNUSED(self);
+
+    huffman_dump_dictionary(file, src);
+
+    return true;
 }
 
-bool compressor_huffman_encode_string(carbon_compressor_t *self, carbon_memfile_t *dst, carbon_err_t *err, carbon_string_id_t string_id,
-                                      const char *string)
+CARBON_EXPORT(bool)
+carbon_compressor_huffman_print_encoded(carbon_compressor_t *self, FILE *file, carbon_memfile_t *src,
+                                        uint32_t decompressed_strlen)
 {
+    CARBON_UNUSED(self);
+    CARBON_UNUSED(file);
+    CARBON_UNUSED(src);
+    CARBON_UNUSED(decompressed_strlen);
 
+    huffman_dump_string_table_entry(file, src);
+
+    return true;
 }
 
-char *compressor_huffman_decode_string(carbon_compressor_t *self, carbon_memfile_t *dst, carbon_err_t *err, carbon_string_id_t string_id)
+bool carbon_compressor_huffman_encode_string(carbon_compressor_t *self, carbon_memfile_t *dst, carbon_err_t *err,
+                                             const char *string)
 {
+    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_HUFFMAN);
 
+    carbon_huffman_t *encoder = (carbon_huffman_t *) self->extra;
+    bool status = carbon_huffman_encode_one(dst, encoder, string);
+    carbon_error_cpy(err, &encoder->err);
+
+    return status;
+}
+
+CARBON_EXPORT(char *)
+carbon_compressor_huffman_decode_string(carbon_compressor_t *self, carbon_memfile_t *dst, carbon_err_t *err,
+                                        carbon_string_id_t string_id)
+{
+    CARBON_UNUSED(self);
+    CARBON_UNUSED(dst);
+    CARBON_UNUSED(err);
+    CARBON_UNUSED(string_id);
+    return NULL;
 }

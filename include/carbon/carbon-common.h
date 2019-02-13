@@ -176,11 +176,17 @@ typedef enum carbon_type
     }                                                                                                                  \
 }
 
-
 #define CARBON_CHECK_SUCCESS(x)                                                                                        \
 {                                                                                                                      \
     if (CARBON_BRANCH_UNLIKELY(!x)) {                                                                                  \
         return x;                                                                                                      \
+    }                                                                                                                  \
+}
+
+#define CARBON_SUCCESS_OR_JUMP(expr, label)                                                                            \
+{                                                                                                                      \
+    if (CARBON_BRANCH_UNLIKELY(!expr)) {                                                                               \
+        goto label;                                                                                                    \
     }                                                                                                                  \
 }
 

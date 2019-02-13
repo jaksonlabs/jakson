@@ -52,6 +52,11 @@ extern "C" {
 #include "carbon/strdic/carbon-strdic-sync.h"
 #include "carbon/strhash/carbon-strhash-mem.h"
 
+typedef struct carbon
+{
+
+} carbon_t;
+
 CARBON_EXPORT (bool)
 carbon_init(void);
 

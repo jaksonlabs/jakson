@@ -22,6 +22,8 @@
 
 CARBON_BEGIN_DECL
 
+typedef struct carbon carbon_t; /* forwarded from 'carbon.h' */
+
 typedef struct carbon_doc_obj carbon_doc_obj_t;
 typedef uint64_t              carbon_string_id_t;
 typedef char                  carbon_null_t;
@@ -138,6 +140,8 @@ typedef enum carbon_field_type
     }                                                                                                                  \
     value_size;                                                                                                        \
 })
+
+typedef bool (*carbon_predicate_string_t)(carbon_string_id_t id, const void *capture, carbon_t *context);
 
 CARBON_END_DECL
 

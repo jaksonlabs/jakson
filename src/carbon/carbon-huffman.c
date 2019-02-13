@@ -23,12 +23,6 @@
 
 // #define DIAG_HUFFMAN_ENABLE_DEBUG
 
-typedef struct carbon_huffman
-{
-    carbon_vec_t ofType(carbon_huffman_entry_t) table;
-    carbon_err_t err;
-} carbon_huffman_t;
-
 typedef struct huff_node huff_node_t;
 
 typedef struct huff_node
@@ -40,9 +34,20 @@ typedef struct huff_node
 
 static void huff_tree_create(carbon_vec_t ofType(carbon_huffman_entry_t) *table, const carbon_vec_t ofType(uint32_t) *frequencies);
 
-bool carbon_huffman_create(carbon_huffman_t **out, const carbon_string_ref_vec *strings)
+bool carbon_huffman_create(carbon_huffman_t *dic)
 {
-    CARBON_NON_NULL_OR_ERROR(out);
+    CARBON_NON_NULL_OR_ERROR(dic);
+
+    carbon_vec_create(&dic->table, NULL, sizeof(carbon_huffman_entry_t), UCHAR_MAX / 4);
+    carbon_error_init(&dic->err);
+
+    return true;
+}
+
+CARBON_EXPORT(bool)
+carbon_huffman_build(carbon_huffman_t *encoder, const carbon_string_ref_vec *strings)
+{
+    CARBON_NON_NULL_OR_ERROR(encoder);
     CARBON_NON_NULL_OR_ERROR(strings);
 
     carbon_vec_t ofType(uint32_t) frequencies;
@@ -61,13 +66,8 @@ bool carbon_huffman_create(carbon_huffman_t **out, const carbon_string_ref_vec *
         }
     }
 
-    carbon_huffman_t *dic = malloc(sizeof(carbon_huffman_t));
-    carbon_vec_create(&dic->table, NULL, sizeof(carbon_huffman_entry_t), UCHAR_MAX / 4);
-    huff_tree_create(&dic->table, &frequencies);
-    carbon_error_init(&dic->err);
-
+    huff_tree_create(&encoder->table, &frequencies);
     carbon_vec_drop(&frequencies);
-    *out = dic;
 
     return true;
 }
@@ -186,54 +186,37 @@ static size_t encodeString(carbon_memfile_t *file, carbon_huffman_t *dic, const 
     return num_written_bytes;
 }
 
-bool carbon_huffman_encode(carbon_memfile_t *file,
-                           carbon_huffman_t *dic,
-                           char marker_symbol,
-                           const carbon_vec_t ofType(carbon_string_id_t) *string_ids,
-                           const carbon_string_ref_vec *strings)
+CARBON_EXPORT(bool)
+carbon_huffman_encode_one(carbon_memfile_t *file,
+                          carbon_huffman_t *dic,
+                          const char *string)
 {
     CARBON_NON_NULL_OR_ERROR(file)
     CARBON_NON_NULL_OR_ERROR(dic)
-    CARBON_NON_NULL_OR_ERROR(strings)
+    CARBON_NON_NULL_OR_ERROR(string)
 
-    assert(string_ids->num_elems == strings->num_elems);
+    uint32_t num_bytes_encoded = 0;
 
-    for (size_t i = 0; i < strings->num_elems; i++) {
-        const char *string = *CARBON_VECTOR_GET(strings, i, const char *);
-        carbon_string_id_t string_id = *CARBON_VECTOR_GET(string_ids, i, carbon_string_id_t);
-        carbon_off_t offset, offset_continue;
-        uint32_t string_length = (uint32_t) strlen(string);
-        uint32_t num_bytes_encoded = 0;
-        carbon_memfile_write(file, &marker_symbol, sizeof(char));
-        carbon_memfile_write(file, &string_id, sizeof(carbon_string_id_t));
-        carbon_memfile_write(file, &string_length, sizeof(uint32_t));
-        carbon_memfile_tell(&offset, file);
-        carbon_memfile_skip(file, sizeof(uint32_t));
-        if ((num_bytes_encoded = (uint32_t) encodeString(file, dic, string)) == 0) {
-            return false;
-        }
-        carbon_memfile_tell(&offset_continue, file);
-        carbon_memfile_seek(file, offset);
-        carbon_memfile_write(file, &num_bytes_encoded, sizeof(uint32_t));
-        carbon_memfile_seek(file, offset_continue);
+    carbon_off_t num_bytes_encoded_off = CARBON_MEMFILE_TELL(file);
+    carbon_memfile_skip(file, sizeof(uint32_t));
+
+    if ((num_bytes_encoded = (uint32_t) encodeString(file, dic, string)) == 0) {
+        return false;
     }
+
+    carbon_off_t continue_off = CARBON_MEMFILE_TELL(file);
+    carbon_memfile_seek(file, num_bytes_encoded_off);
+    carbon_memfile_write(file, &num_bytes_encoded, sizeof(uint32_t));
+    carbon_memfile_seek(file, continue_off);
 
     return true;
 }
 
-bool carbon_huffman_read_string(carbon_huffman_encoded_str_info_t *info, carbon_memfile_t *file, char marker_symbol)
+bool carbon_huffman_read_string(carbon_huffman_encoded_str_info_t *info, carbon_memfile_t *src)
 {
-    char marker = *CARBON_MEMFILE_PEEK(file, char);
-    if (marker == marker_symbol) {
-        carbon_memfile_skip(file, sizeof(char));
-        info->string_id = *CARBON_MEMFILE_READ_TYPE(file, carbon_string_id_t);
-        info->str_length = *CARBON_MEMFILE_READ_TYPE(file, uint32_t);
-        info->nbytes_encoded = *CARBON_MEMFILE_READ_TYPE(file, uint32_t);
-        info->encoded_bytes = CARBON_MEMFILE_READ(file, info->nbytes_encoded);
-        return true;
-    } else {
-        return false;
-    }
+    info->nbytes_encoded = *CARBON_MEMFILE_READ_TYPE(src, uint32_t);
+    info->encoded_bytes = CARBON_MEMFILE_READ(src, info->nbytes_encoded);
+    return true;
 }
 
 bool carbon_huffman_read_dic_entry(carbon_huffman_entry_info_t *info, carbon_memfile_t *file, char marker_symbol)

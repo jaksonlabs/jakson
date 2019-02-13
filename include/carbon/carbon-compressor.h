@@ -1,22 +1,19 @@
-// file: carbon-archive-compr.h
-
 /**
- *  Copyright (C) 2018 Marcus Pinnecke
+ * Copyright 2018 Marcus Pinnecke
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+ * the Software.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 
 #ifndef CARBON_ARCHIVE_COMPR_H
 #define CARBON_ARCHIVE_COMPR_H
@@ -34,7 +31,7 @@ typedef struct carbon_compressor carbon_compressor_t; /* forwarded */
  * Unique tag identifying a specific implementation for compressing/decompressing string in a CARBON archives
  * string table.
  */
-typedef enum carbon_archive_compressor_type
+typedef enum carbon_compressor_type
 {
     CARBON_COMPRESSOR_NONE,
     CARBON_COMPRESSOR_HUFFMAN
@@ -53,74 +50,164 @@ typedef struct carbon_compressor
     void  *extra;
 
     /**
-     * Function to construct and serialize an implementation-specific dictionary (e.g., a code table)
+     * Constructor for implementation-dependent initialization of the compressor at hand.
      *
-     * Depending on the implementation, a set of book-keeping data must be managed for an compressor. For instance,
+     * Depending on the implementation, the compressor might allocate dynamic memory for
+     * <code>extra</code> for book-keeping purposes.
+     *
+     * @param self A pointer to itself
+     * @return <b>true</b> in case of success, or <b>false</b> otherwise.
+     *
+     * @author Marcus Pinnecke
+     * @since 0.1.00.05
+     */
+    bool (*create)(carbon_compressor_t *self);
+
+    /**
+     * Destructor for implementation-dependent deinitialization of the compressor at hand.
+     *
+     * If the implementation acquired dynamic memory during a call to <code>create</code>,
+     * a call to this function frees up this memory.
+     *
+     * @param self A pointer to itself
+     * @return <b>true</b> in case of success, or <b>false</b> otherwise.
+     *
+     * @author Marcus Pinnecke
+     * @since 0.1.00.05
+     */
+    bool (*drop)(carbon_compressor_t *self);
+
+    /**
+     * Function to construct and serialize an implementation-specific dictionary, book-keeping data, or extra data
+     * (e.g., a code table)
+     *
+     * Depending on the implementation, a set of book-keeping data must be managed for a compressor. For instance,
      * in case of a huffman encoded this book-keeping is the code table that maps letters to prefix codes. This
      * function is invoked before any string gets encoded, and implements a compressor-specific management and
-     * serialization of that book-keeping data. After construction of this book-keeping data, this data is serialized
-     * into the <code>dst</code> parameter.
+     * serialization of that book-keeping data. After internal construction of this book-keeping data,
+     * this data is serialized into the <code>dst</code> parameter.
      *
-     * Note: single strings must not be encoded, this is is done when the framework invokes 'encode_str'
+     * @note single strings must not be encoded; this is is done when the framework invokes <code>encode_string</code>
      *
      * @param self A pointer to the compressor that is used; maybe accesses <code>extra</code>
-     * @param dst A memory file in which the book-keeping data for this compressor is serialized
-     * @param strings The set of all strings that should be encoded
-     * @param string_ids The set of all string ids that map to strings in <code>strings</code>
+     * @param dst A memory file in which the book-keeping data (<code>extra</code>) for this compressor is serialized
+     * @param strings The set of all strings that should be encoded. Used for tweaking the compressor;
+     *                 <b>not</b> for serialization into <code>dst</code>
      *
-     * @note Both <code>strings</code> and <code>string_ids</code> have the same length, and the i-th element
-     * in <code>string_id</code> maps to the i-th element in <code>strings</code>. This mapping is bijective, and
-     * strings in <code>strings</code> are unique (but not sorted)
+     * @note strings in <code>strings</code> are unique (but not sorted)
      *
      * @author Marcus Pinnecke
      * @since 0.1.00.05
      * */
-    void (*build_and_store)(carbon_compressor_t *self, carbon_memfile_t *dst,
-                            const carbon_vec_t ofType (const char *) *strings,
-                            const carbon_vec_t ofType(carbon_string_id_t) *string_ids);
+    bool (*write_extra)(carbon_compressor_t *self, carbon_memfile_t *dst,
+                            const carbon_vec_t ofType (const char *) *strings);
 
+    /**
+     * Encodes an input string and writes its encoded version into a memory file.
+     *
+     * @param self A pointer to the compressor that is used; maybe accesses <code>extra</code>
+     * @param dst A memory file in which the encoded string should be stored
+     * @param err An error information
+     * @param string The string that should be encoded
+     *
+     * @return <b>true</b> in case of success, or <b>false</b> otherwise.
+     *
+     * @author Marcus Pinnecke
+     * @since 0.1.00.05
+     */
     bool (*encode_string)(carbon_compressor_t *self, carbon_memfile_t *dst, carbon_err_t *err,
-                          carbon_string_id_t string_id, const char *string);
+                          const char *string);
 
     char *(*decode_string)(carbon_compressor_t *self, carbon_memfile_t *dst, carbon_err_t *err,
                            carbon_string_id_t string_id);
 
-    void (*dump_dic)(carbon_compressor_t *self, FILE *file, carbon_memfile_t *memfile);
+    /**
+     * Reads implementation-specific book-keeping, meta or extra data from the input memory file and
+     * prints its contents in a human-readable version to <code>file</code>
+     *
+     * @param self A pointer to the compressor that is used; potentially accessing <code>extra</code>
+     * @param file A file to which a human-readable version of <code>extra</code> is printed (if any)
+     * @param src A memory file which cursor is positioned at the begin of the serialized extra field. After
+     *            a call to this function, the memory file cursor must be positioned after the serialized extra
+     *            field (i.e., the entire entry must be read (if any))
+     *
+     * @return <b>true</b> in case of success, or <b>false</b> otherwise.
+     *
+     * @author Marcus Pinnecke
+     * @since 0.1.00.05
+     */
+    bool (*print_extra)(carbon_compressor_t *self, FILE *file, carbon_memfile_t *src);
+
+    /**
+     * Reads an implementation-specific encoded string from a memory file <code>src</code>, and prints
+     * the encoded string in a human-readable version to <code>file</code>
+     *
+     * @param self A pointer to the compressor that is used; potentially accessing <code>extra</code>
+     * @param file A file to which a human-readable version of the encoded string is printed.
+     * @param src A memory file which cursor is positioned at the begin of the encoded string. After a call
+     *            to this function, the memory file cursor must be positioned after the encoded string (i.e.,
+     *            the entire encoded string must be read)
+     * @param decompressed_strlen The length of the decoded string in number of characters
+     *
+     * @return <b>true</b> in case of success, or <b>false</b> otherwise.
+     *
+     * @author Marcus Pinnecke
+     * @since 0.1.00.05
+     */
+    bool (*print_encoded)(carbon_compressor_t *self, FILE *file, carbon_memfile_t *src,
+                                 uint32_t decompressed_strlen);
 
 } carbon_compressor_t;
 
 static void carbon_compressor_none_create(carbon_compressor_t *strategy)
 {
     strategy->tag             = CARBON_COMPRESSOR_NONE;
-    strategy->build_and_store = compressor_none_write_dictionary;
-    strategy->encode_string   = compressor_none_encode_string;
-    strategy->decode_string   = compressor_none_decode_string;
-    strategy->dump_dic        = compressor_none_dump_dictionary;
+    strategy->create          = carbon_compressor_none_init;
+    strategy->drop            = carbon_compressor_none_drop;
+    strategy->write_extra     = carbon_compressor_none_write_extra;
+    strategy->encode_string   = carbon_compressor_none_encode_string;
+    strategy->decode_string   = carbon_compressor_none_decode_string;
+    strategy->print_extra     = carbon_compressor_none_print_extra;
+    strategy->print_encoded   = carbon_compressor_none_print_encoded_string;
 }
 
 static void carbon_compressor_huffman_create(carbon_compressor_t *strategy)
 {
     strategy->tag             = CARBON_COMPRESSOR_HUFFMAN;
-    strategy->build_and_store = compressor_huffman_write_dictionary;
-    strategy->encode_string   = compressor_huffman_encode_string;
-    strategy->decode_string   = compressor_huffman_decode_string;
-    strategy->dump_dic        = compressor_huffman_dump_dictionary;
+    strategy->create          = carbon_compressor_huffman_init;
+    strategy->drop            = carbon_compressor_huffman_drop;
+    strategy->write_extra     = carbon_compressor_huffman_write_extra;
+    strategy->encode_string   = carbon_compressor_huffman_encode_string;
+    strategy->decode_string   = carbon_compressor_huffman_decode_string;
+    strategy->print_extra     = carbon_compressor_huffman_print_extra;
+    strategy->print_encoded   = carbon_compressor_huffman_print_encoded;
 }
 
-struct
+static struct
 {
     carbon_compressor_type_e             type;
+    const char                          *name;
     void (*create) (carbon_compressor_t *strategy);
     uint8_t                              flag_bit;
-} compressor_strategy_register[] =
+} carbon_compressor_strategy_register[] =
 {
-    { .type = CARBON_COMPRESSOR_NONE,    .create = carbon_compressor_none_create,    .flag_bit = 1 << 0 },
-    { .type = CARBON_COMPRESSOR_HUFFMAN, .create = carbon_compressor_huffman_create, .flag_bit = 1 << 1  }
+    { .type = CARBON_COMPRESSOR_NONE, .name = "none",
+      .create = carbon_compressor_none_create,                .flag_bit = 1 << 0 },
+    { .type = CARBON_COMPRESSOR_HUFFMAN, .name = "huffman",
+       .create = carbon_compressor_huffman_create,            .flag_bit = 1 << 1  }
 };
 
-bool compressor_strategy_by_type(carbon_err_t *err, carbon_compressor_t *strategy, carbon_compressor_type_e type);
+CARBON_EXPORT(bool)
+carbon_compressor_by_type(carbon_err_t *err, carbon_compressor_t *strategy, carbon_compressor_type_e type);
 
-bool compressor_strategy_by_flags(carbon_compressor_t *strategy, uint8_t flags);
+CARBON_EXPORT(uint8_t)
+carbon_compressor_flagbit_by_type(carbon_compressor_type_e type);
+
+CARBON_EXPORT(bool)
+carbon_compressor_by_flags(carbon_compressor_t *strategy, uint8_t flags);
+
+CARBON_EXPORT(bool)
+carbon_compressor_by_name(carbon_compressor_type_e *type, const char *name);
 
 CARBON_END_DECL
 

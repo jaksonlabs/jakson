@@ -26,15 +26,30 @@ CARBON_BEGIN_DECL
 
 typedef struct carbon_compressor carbon_compressor_t; /* forwarded from 'carbon-compressor.h' */
 
-void compressor_huffman_write_dictionary(carbon_compressor_t *self, carbon_memfile_t *memfile, const carbon_vec_t ofType (const char *) *strings,
-                                         const carbon_vec_t ofType(carbon_string_id_t) *string_ids);
+CARBON_EXPORT(bool)
+carbon_compressor_huffman_init(carbon_compressor_t *self);
 
-void compressor_huffman_dump_dictionary(carbon_compressor_t *self, FILE *file, carbon_memfile_t *memfile);
+CARBON_EXPORT(bool)
+carbon_compressor_huffman_drop(carbon_compressor_t *self);
 
-bool compressor_huffman_encode_string(carbon_compressor_t *self, carbon_memfile_t *dst, carbon_err_t *err, carbon_string_id_t string_id,
-                                      const char *string);
+CARBON_EXPORT(bool)
+carbon_compressor_huffman_write_extra(carbon_compressor_t *self, carbon_memfile_t *dst,
+                                      const carbon_vec_t ofType (const char *) *strings);
 
-char *compressor_huffman_decode_string(carbon_compressor_t *self, carbon_memfile_t *dst, carbon_err_t *err, carbon_string_id_t string_id);
+CARBON_EXPORT(bool)
+carbon_compressor_huffman_print_extra(carbon_compressor_t *self, FILE *file, carbon_memfile_t *src);
+
+CARBON_EXPORT(bool)
+carbon_compressor_huffman_print_encoded(carbon_compressor_t *self, FILE *file, carbon_memfile_t *src,
+                                        uint32_t decompressed_strlen);
+
+CARBON_EXPORT(bool)
+carbon_compressor_huffman_encode_string(carbon_compressor_t *self, carbon_memfile_t *dst, carbon_err_t *err,
+                                        const char *string);
+
+CARBON_EXPORT(char *)
+carbon_compressor_huffman_decode_string(carbon_compressor_t *self, carbon_memfile_t *dst, carbon_err_t *err,
+                                        carbon_string_id_t string_id);
 
 
 CARBON_END_DECL

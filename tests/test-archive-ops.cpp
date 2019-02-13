@@ -103,7 +103,7 @@ TEST(CarbonArchiveOpsTest, CreateStreamFromJsonString)
     bool               read_optimized = false;
 
     bool status = carbon_archive_stream_from_json(&stream, &err, json_string,
-                                                  CARBON_ARCHIVE_COMPRESSOR_TYPE_NONE, read_optimized);
+                                                  CARBON_COMPRESSOR_NONE, read_optimized);
     carbon_memblock_drop(stream);
     ASSERT_TRUE(status);
 }
@@ -118,7 +118,7 @@ TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonString)
     bool               read_optimized = false;
 
     bool status = carbon_archive_from_json(&archive, archive_file, &err, json_string,
-                                           CARBON_ARCHIVE_COMPRESSOR_TYPE_NONE, read_optimized);
+                                           CARBON_COMPRESSOR_NONE, read_optimized);
     carbon_archive_drop(&archive);
     ASSERT_TRUE(status);
 }
@@ -133,7 +133,10 @@ TEST(CarbonArchiveOpsTest, CreateArchiveStringHandling)
     bool               read_optimized = false;
 
     bool status = carbon_archive_from_json(&archive, archive_file, &err, json_string,
-                                           CARBON_ARCHIVE_COMPRESSOR_TYPE_NONE, read_optimized);
+                                           CARBON_COMPRESSOR_NONE, read_optimized);
+
+
+
     carbon_archive_drop(&archive);
     ASSERT_TRUE(status);
 }

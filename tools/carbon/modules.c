@@ -1,5 +1,6 @@
 
 #include <inttypes.h>
+#include <carbon/carbon-compressor.h>
 
 #include "carbon/carbon.h"
 
@@ -183,7 +184,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
         bool flagSizeOptimized = false;
         bool flagReadOptimized = false;
         bool flagForceOverwrite = false;
-        carbon_archive_compressor_type_e compressor = CARBON_ARCHIVE_COMPRESSOR_TYPE_NONE;
+        carbon_compressor_type_e compressor = CARBON_COMPRESSOR_NONE;
 
         int outputIdx = 0, inputIdx = 1;
         int i;
@@ -193,7 +194,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
             if (strncmp(opt, "--", 2) == 0) {
                 if (strcmp(opt, JS_2_CAB_OPTION_SIZE_OPTIMIZED) == 0) {
                     flagSizeOptimized = true;
-                    compressor = CARBON_ARCHIVE_COMPRESSOR_TYPE_HUFFMAN;
+                    compressor = CARBON_COMPRESSOR_HUFFMAN;
                 } else if (strcmp(opt, JS_2_CAB_OPTION_READ_OPTIMIZED) == 0) {
                     flagReadOptimized = true;
                 } else if (strcmp(opt, JS_2_CAB_OPTION_SILENT_OUTPUT) == 0) {
@@ -202,9 +203,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
                     flagForceOverwrite = true;
                 } else if (strncmp(opt, JS_2_CAB_OPTION_USE_COMPRESSOR, strlen(JS_2_CAB_OPTION_USE_COMPRESSOR)) == 0) {
                     const char *compressor_name = opt + strlen(JS_2_CAB_OPTION_USE_COMPRESSOR);
-                    if (strcmp(compressor_name, JS_2_CAB_OPTION_USE_COMPRESSOR_HUFFMAN) == 0) {
-                        compressor = CARBON_ARCHIVE_COMPRESSOR_TYPE_HUFFMAN;
-                    } else {
+                    if (!carbon_compressor_by_name(&compressor, compressor_name)) {
                         CARBON_CONSOLE_WRITE(file, "unsupported compressor requested: '%s'",
                                              compressor_name);
                         CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
@@ -220,7 +219,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
             }
         }
 
-        if (!flagSizeOptimized && compressor != CARBON_ARCHIVE_COMPRESSOR_TYPE_NONE) {
+        if (!flagSizeOptimized && compressor != CARBON_COMPRESSOR_NONE) {
             CARBON_CONSOLE_WRITELN(file, "** WARNING ** a compressor was specified but will be ignored because size "
                 "optimization is turned off. Use '--size-optimized' such that a compressor has any effect%s", "");
         }
@@ -742,6 +741,31 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
         carbon_archive_close(&archive);
 
         CARBON_CONSOLE_WRITELN(file, "DEBUG: XXX Okay%s", "");
+
+        return true;
+    }
+}
+
+bool moduleListInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *manager)
+{
+    CARBON_UNUSED(manager);
+
+    if (argc != 1) {
+        CARBON_CONSOLE_WRITE(file, "Require one constant for <args> parameter.%s", "");
+        CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
+        CARBON_CONSOLE_WRITELN(file, "Run '%s' to see an example on the usage.", "$ carbon list");
+        return false;
+    } else {
+        const char *constant = argv[0];
+        if (strcmp(constant, "compressors") == 0) {
+            for (size_t i = 0; i < CARBON_ARRAY_LENGTH(carbon_compressor_strategy_register); i++) {
+                CARBON_CONSOLE_WRITELN(file, "%s", carbon_compressor_strategy_register[i].name);
+            }
+        } else {
+            CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
+            CARBON_CONSOLE_WRITELN(file, "Constant '%s' is not known.", constant);
+            return false;
+        }
 
         return true;
     }

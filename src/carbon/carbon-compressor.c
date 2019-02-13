@@ -16,30 +16,62 @@
  */
 
 #include <assert.h>
-#include <carbon/carbon-compressor.h>
 #include "carbon/carbon-compressor.h"
 
-bool compressor_strategy_by_type(carbon_err_t *err, carbon_compressor_t *strategy, carbon_compressor_type_e type)
+static bool
+create_strategy(size_t i, carbon_compressor_t *strategy)
 {
-    for (size_t i = 0; i < CARBON_ARRAY_LENGTH(compressor_strategy_register); i++) {
-        if (compressor_strategy_register[i].type == type) {
-            compressor_strategy_register[i].create(strategy);
-            assert (strategy->tag == type);
-            assert (strategy->dump_dic);
-            assert (strategy->set_flags);
-            assert (strategy->serialize_dic);
-            return true;
+    assert(strategy);
+    carbon_compressor_strategy_register[i].create(strategy);
+    assert (strategy->create);
+    assert (strategy->drop);
+    assert (strategy->write_extra);
+    assert (strategy->encode_string);
+    assert (strategy->decode_string);
+    assert (strategy->print_extra);
+    return strategy->create(strategy);
+}
+
+CARBON_EXPORT(bool)
+carbon_compressor_by_type(carbon_err_t *err, carbon_compressor_t *strategy, carbon_compressor_type_e type)
+{
+    for (size_t i = 0; i < CARBON_ARRAY_LENGTH(carbon_compressor_strategy_register); i++) {
+        if (carbon_compressor_strategy_register[i].type == type) {
+            return create_strategy(i, strategy);
         }
     }
     CARBON_ERROR(err, CARBON_ERR_NOCOMPRESSOR)
     return false;
 }
 
-bool compressor_strategy_by_flags(carbon_compressor_t *strategy, uint8_t flags)
+CARBON_EXPORT(uint8_t)
+carbon_compressor_flagbit_by_type(carbon_compressor_type_e type)
 {
-    for (size_t i = 0; i < CARBON_ARRAY_LENGTH(compressor_strategy_register); i++) {
-        if (compressor_strategy_register[i].flag_bit && flags) {
-            compressor_strategy_register[i].create(strategy);
+    for (size_t i = 0; i < CARBON_ARRAY_LENGTH(carbon_compressor_strategy_register); i++) {
+        if (carbon_compressor_strategy_register[i].type == type) {
+            return carbon_compressor_strategy_register[i].flag_bit;
+        }
+    }
+    return 0;
+}
+
+CARBON_EXPORT(bool)
+carbon_compressor_by_flags(carbon_compressor_t *strategy, uint8_t flags)
+{
+    for (size_t i = 0; i < CARBON_ARRAY_LENGTH(carbon_compressor_strategy_register); i++) {
+        if (carbon_compressor_strategy_register[i].flag_bit & flags) {
+            return create_strategy(i, strategy);
+        }
+    }
+    return false;
+}
+
+CARBON_EXPORT(bool)
+carbon_compressor_by_name(carbon_compressor_type_e *type, const char *name)
+{
+    for (size_t i = 0; i < CARBON_ARRAY_LENGTH(carbon_compressor_strategy_register); i++) {
+        if (strcmp(carbon_compressor_strategy_register[i].name, name) == 0) {
+            *type = carbon_compressor_strategy_register[i].type;
             return true;
         }
     }
