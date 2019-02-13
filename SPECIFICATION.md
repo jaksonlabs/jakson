@@ -32,27 +32,29 @@ reserved-bit
          ::= '1'
            | '0'
 string-table
-         ::= 'D' num-strings table-flags ( no-compressor | huffman-compressor )
+         ::= 'D' num-strings table-flags first-entry-offset ( no-compressor | huffman-compressor )
 table-flags
          ::= table-flags-8-bitmask
 table-flags-8-bitmask
-         ::= is-compressed-flag huffman-compressed reserved-bit+
-is-compressed-flag
+         ::= not-compressed-flag huffman-compressed-flag reserved-bit+
+not-compressed-flag
          ::= '1'
            | '0'
-huffman-compressed
+huffman-compressed-flag
          ::= '1'
            | '0'
 no-compressor
          ::= uncompressed-string+
+string-entry-header  
+         ::= '-' next-entry-offset string-id string-length 
 uncompressed-string
-         ::= '-' string-length string-id character+
+         ::= string-entry-header character+
 huffman-compressor
          ::= huffman-dictionary huffman-string+
 huffman-dictionary
          ::= 'd' character prefix-length prefix-code+
 huffman-string
-         ::= '-' string-id string-length data-length byte+
+         ::= string-entry-header data-length byte+
 carbon-object
          ::= '{' object-id object-flags property-offset+ next-object columnified-props+ '}'
 columnified-props
@@ -138,10 +140,16 @@ key-column
          ::= string-id+
 value-column
          ::= ( nbyte | 'null' )+
-nbyte    ::= u8+
+nbyte    
+         ::= u8+
 offset-column
-         ::= u64+         
-version  ::= u8
+         ::= u64+    
+first-entry-offset
+         ::= u64   
+next-entry-offset
+         ::= u64           
+version  
+         ::= u8
 record-offset
          ::= u8
 prefix-length
