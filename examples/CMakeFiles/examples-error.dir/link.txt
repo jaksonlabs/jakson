@@ -1,0 +1,1 @@
+/usr/bin/cc -Wall -std=c11 -Wextra -Werror -g   CMakeFiles/examples-error.dir/examples-error.c.o  -o ../build/examples-error 

@@ -16,11 +16,10 @@
  */
 
 #include <limits.h>
-
 #include "carbon/carbon-huffman.h"
 #include "carbon/carbon-bitmap.h"
 
-// #define DIAG_HUFFMAN_ENABLE_DEBUG
+#define DIAG_HUFFMAN_ENABLE_DEBUG
 
 typedef struct carbon_huffman
 {
@@ -309,6 +308,7 @@ static void __diag_print_insight(huff_node_t *n)
         }
     }
     printf(")");
+    printf(": %zu",n->freq);
 }
 
 CARBON_FUNC_UNUSED
@@ -366,6 +366,7 @@ static huff_node_t *trim_and_begin(carbon_vec_t ofType(HuffNode) *candidates)
     huff_node_t *begin = NULL;
     for (huff_node_t *it = CARBON_VECTOR_GET(candidates, 0, huff_node_t); ; it++) {
         if (it->freq == 0) {
+            --candidates->num_elems;
             if (it->prev) {
                 it->prev->next = it->next;
             }
@@ -412,6 +413,7 @@ static void huff_tree_create(carbon_vec_t ofType(carbon_huffman_entry_t) *table,
     huff_node_t *handle = trim_and_begin(&candidates);
     huff_node_t *new_node;
 
+
     while (handle->next != NULL) {
         smallest = find_smallest(handle, 0, NULL);
         small = find_smallest(handle, smallest->freq, smallest);
@@ -423,10 +425,13 @@ static void huff_tree_create(carbon_vec_t ofType(carbon_huffman_entry_t) *table,
         new_node->left = small;
         new_node->right = smallest;
 
-        if(smallest->prev == NULL && small->next == NULL) {
+        if((small->prev == NULL && smallest->next == NULL) && small->next == smallest) {
             break;
         }
 
+        if((smallest->prev == NULL && small->next == NULL) && smallest->next == small) {
+            break;
+        }
         if (smallest->prev) {
             smallest->prev->next = smallest->next;
         }
@@ -442,10 +447,10 @@ static void huff_tree_create(carbon_vec_t ofType(carbon_huffman_entry_t) *table,
 
         if (small->prev) {
             handle = seek_to_begin(small->prev);
-        } else if (small->next) {
-            handle = seek_to_begin(small->next);
         } else if (smallest->prev) {
             handle = seek_to_begin(smallest->prev);
+        } else if (small->next) {
+            handle = seek_to_begin(small->next);
         } else if (smallest->next) {
             handle = seek_to_begin(smallest->next);
         } else {
@@ -474,8 +479,13 @@ static void huff_tree_create(carbon_vec_t ofType(carbon_huffman_entry_t) *table,
         huff_node_t *finalNode = VECTOR_NEW_AND_GET(&candidates, huff_node_t);
         finalNode->freq = small->freq + smallest->freq;
         finalNode->letter = '\0';
-        finalNode->left = handle->next;
-        finalNode->right = new_node;
+        if (handle->freq < handle->next->freq) {
+            finalNode->left = handle;
+            finalNode->right = handle->next;
+        } else {
+            finalNode->left = handle->next;
+            finalNode->right = handle;
+        }
         new_node = finalNode;
     }
 
