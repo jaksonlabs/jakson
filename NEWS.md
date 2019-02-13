@@ -1,4 +1,6 @@
-## 0.1.00.05 [2019-02-XX]
+## 0.1.00.06 [2019-02-XX]
+
+## 0.1.00.05 [2019-02-13]
 - **Compressor Framework** refactored compressor framework. 
     - Extension with new compressors in [carbon-compressor.c](src/carbon/carbon-compressor.c)
     - Current compressors are located in [include/carbon/compressor](include/carbon/compressor)
