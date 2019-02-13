@@ -16,6 +16,7 @@
  */
 
 #include <assert.h>
+#include <math.h>
 
 #include "carbon/carbon-slicelist.h"
 

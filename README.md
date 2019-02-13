@@ -19,9 +19,9 @@ Example source code is located in the [examples](examples) directory. This libra
 This project is licensed under the terms of the MIT LICENSE. See the [LICENSE file](https://github.com/protolabs/libcarbon/blob/master/LICENSE).
 
 
-## Donate
+## Support
 
-If you find tools in this repository helpful, and want to support the author with a donation: give a donation to [patreon.com/pinnecke](patreon.com/pinnecke) ;)
+If you find tools in this repository helpful, and want to support with a donation: give a donation to [patreon.com/pinnecke](patreon.com/pinnecke) or via [paypal.me/MarcusPinnecke](http://paypal.me/MarcusPinnecke)
 
 ### States
 

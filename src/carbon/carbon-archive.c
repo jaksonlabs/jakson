@@ -376,7 +376,7 @@ static void update_record_header(carbon_memfile_t *memfile,
 static bool serialize_columndoc(carbon_off_t *offset, carbon_err_t *err, carbon_memfile_t *memfile, carbon_columndoc_obj_t *columndoc, carbon_off_t root_object_header_offset);
 static carbon_archive_object_flags_t *get_flags(carbon_archive_object_flags_t *flags, carbon_columndoc_obj_t *columndoc);
 static void update_carbon_file_header(carbon_memfile_t *memfile, carbon_off_t root_object_header_offset);
-static void skip_cabin_file_header(carbon_memfile_t *memfile);
+static void skip_carbon_file_header(carbon_memfile_t *memfile);
 static bool serialize_string_dic(carbon_memfile_t *memfile, carbon_err_t *err, const carbon_doc_bulk_t *context, carbon_archive_compressor_type_e compressor);
 static bool print_archive_from_memfile(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile);
 
@@ -534,7 +534,7 @@ bool carbon_archive_from_model(carbon_memblock_t **stream,
     carbon_memfile_t memfile;
     carbon_memfile_open(&memfile, *stream, CARBON_MEMFILE_MODE_READWRITE);
 
-    skip_cabin_file_header(&memfile);
+    skip_carbon_file_header(&memfile);
     if(!serialize_string_dic(&memfile, err, model->bulk, compressor)) {
         return false;
     }
@@ -1730,7 +1730,7 @@ static bool serialize_string_dic(carbon_memfile_t *memfile, carbon_err_t *err, c
     return true;
 }
 
-static void skip_cabin_file_header(carbon_memfile_t *memfile)
+static void skip_carbon_file_header(carbon_memfile_t *memfile)
 {
     carbon_memfile_skip(memfile, sizeof(struct carbon_file_header));
 }

@@ -95,8 +95,7 @@ typedef enum carbon_type
 #define CARBON_CHECK_TAG(is, expected) { }
 #endif
 
-
-#ifdef NLOG_TRACE
+#if !defined(CARBON_LOG_TRACE) || defined(NDEBUG)
 #define CARBON_TRACE(tag, msg, ...) { }
 #else
 #define CARBON_TRACE(tag, msg, ...)                                                                                    \
@@ -108,7 +107,7 @@ typedef enum carbon_type
 }
 #endif
 
-#ifdef NLOG_INFO
+#if !defined(CARBON_LOG_INFO) || defined(NDEBUG)
 #define CARBON_INFO(tag, msg, ...) { }
 #else
 #define CARBON_INFO(tag, msg, ...)                                                                                     \
@@ -120,7 +119,10 @@ typedef enum carbon_type
 }
 #endif
 
-#ifndef NDEBUG
+#if !defined(CARBON_LOG_DEBUG) || defined(NDEBUG)
+#define CARBON_DEBUG(tag, msg, ...)                                                                                    \
+{ }
+#else
 #define CARBON_DEBUG(tag, msg, ...)                                                                                    \
 {                                                                                                                      \
     char buffer[1024];                                                                                                 \
@@ -128,18 +130,12 @@ typedef enum carbon_type
     fprintf(stderr, buffer, __VA_ARGS__);                                                                              \
     fflush(stderr);                                                                                                    \
 }
-#else
-#define CARBON_DEBUG(tag, msg, ...)                                                                                    \
-{ }
 #endif
 
-#define CARBON_ZERO_MEMORY(dst, len)                                                                                   \
-    memset((void *) dst, 0, len);
-
-#ifdef NLOG_WARN
-    #define CARBON_WARN(tag, msg, ...) { }
+#if !defined(CARBON_LOG_WARN) || defined(NDEBUG)
+#define CARBON_WARN(tag, msg, ...) { }
 #else
-    #define CARBON_WARN(tag, msg, ...)                                                                                 \
+#define CARBON_WARN(tag, msg, ...)                                                                                     \
     {                                                                                                                  \
         char buffer[1024];                                                                                             \
         sprintf(buffer, "--%d-- [WARNING: %-10s] %s\n", getpid(), tag, msg);                                           \
@@ -147,6 +143,9 @@ typedef enum carbon_type
         fflush(stderr);                                                                                                \
     }
 #endif
+
+#define CARBON_ZERO_MEMORY(dst, len)                                                                                   \
+    memset((void *) dst, 0, len);
 
 #define CARBON_CAST(type, name, src)                                                                                   \
       type name = (type) src

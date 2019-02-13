@@ -105,6 +105,7 @@ carbon_error_print(const carbon_err_t *err)
         } else {
             fprintf(stderr, "*** ERROR ***   internal error during error information fetch");
         }
+        fflush(stderr);
     }
     return (err != NULL);
 }

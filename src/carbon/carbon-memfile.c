@@ -139,17 +139,18 @@ bool carbon_memfile_write(carbon_memfile_t *file, const void *data, carbon_off_t
 {
     CARBON_NON_NULL_OR_ERROR(file)
     CARBON_NON_NULL_OR_ERROR(data)
-    CARBON_PRINT_ERROR_IF(nbytes < 1, CARBON_ERR_ILLEGALARG)
     if (file->mode == CARBON_MEMFILE_MODE_READWRITE) {
-        carbon_off_t file_size;
-        carbon_memblock_size(&file_size, file->memblock);
-        carbon_off_t required_size = file->pos + nbytes;
-        if (CARBON_BRANCH_UNLIKELY(required_size >= file_size)) {
-            carbon_memblock_resize(file->memblock, required_size * 1.7f);
-        }
+        if (CARBON_BRANCH_LIKELY(nbytes != 0)) {
+            carbon_off_t file_size;
+            carbon_memblock_size(&file_size, file->memblock);
+            carbon_off_t required_size = file->pos + nbytes;
+            if (CARBON_BRANCH_UNLIKELY(required_size >= file_size)) {
+                carbon_memblock_resize(file->memblock, required_size * 1.7f);
+            }
 
-        carbon_memblock_write(file->memblock, file->pos, data, nbytes);
-        file->pos += nbytes;
+            carbon_memblock_write(file->memblock, file->pos, data, nbytes);
+            file->pos += nbytes;
+        }
         return true;
     } else {
         CARBON_ERROR(&file->err, CARBON_ERR_WRITEPROT);
