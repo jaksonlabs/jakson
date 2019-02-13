@@ -308,7 +308,7 @@ static void __diag_print_insight(huff_node_t *n)
         }
     }
     printf(")");
-    printf(": %zu",n->freq);
+    printf(": %"PRIu64"",n->freq);
 }
 
 CARBON_FUNC_UNUSED
