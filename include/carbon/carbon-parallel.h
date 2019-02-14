@@ -280,7 +280,7 @@ typedef struct MapArgs
     void *args;
 } MapArgs;
 
-inline static void
+void
 mapProxy(const void * src, size_t src_width, size_t len, void * args,
                                thread_id_t tid);
 
@@ -295,7 +295,7 @@ typedef struct carbon_gather_scatter_args
     void * dst;
 } carbon_gather_scatter_args_t;
 
-inline static void
+void
 carbon_gather_function(const void * start, size_t width, size_t len, void * args,
                                  thread_id_t tid);
 
@@ -311,7 +311,7 @@ CARBON_EXPORT(bool)
 carbon_parallel_sequential_gather_adr(void * dst, const void * src, size_t src_width,
                                           const size_t * idx, size_t num);
 
-inline static void
+void
 carbon_parallel_gather_adr_func(const void * start, size_t width, size_t len, void * args,
                                      thread_id_t tid);
 
@@ -319,7 +319,7 @@ CARBON_EXPORT(bool)
 carbon_parallel_parallel_gather_adr_func(void * dst, const void * src, size_t src_width,
                                      const size_t * idx, size_t num, uint_fast16_t num_threads);
 
-inline static void
+void
 carbon_parallel_scatter_func(const void * start, size_t width, size_t len, void * args,
                                    thread_id_t tid);
 
@@ -346,7 +346,7 @@ carbon_parallel_sequential_filter_late(size_t * positions, size_t * num_position
                                        const void * source, size_t width, size_t length, carbon_parallel_predicate predicate,
                                        void * arguments);
 
-inline static void *
+ void *
 carbon_parallel_filter_proxy_func(void * args);
 
 CARBON_EXPORT(bool)

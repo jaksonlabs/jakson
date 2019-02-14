@@ -1,4 +1,4 @@
-libcarbon uses [CMake](https://cmake.org) as build system. CMake 3.9.6 or higher is required.
+libcarbon uses [CMake](https://cmake.org) as build system. CMake 3.9.6 or higher is required. For testing, [Google Test Framework](https://github.com/google/googletest) is required.  
 
 The basic usage is 
 ```

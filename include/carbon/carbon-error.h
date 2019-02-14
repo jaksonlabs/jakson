@@ -18,6 +18,8 @@
 #ifndef CARBON_ERROR_H
 #define CARBON_ERROR_H
 
+#include <stdint.h>
+
 #include "carbon-common.h"
 
 #define CARBON_ERR_NOERR 0                  /** No error */

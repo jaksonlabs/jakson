@@ -5,11 +5,17 @@ set (CMAKE_CXX_STANDARD 11)
 
 link_directories("/usr/local/lib/")
 
+set(
+    TEST_LIBS
+        gtest
+        ${LIBS}
+)
+
 add_executable(test-object-ids EXCLUDE_FROM_ALL test-oid.cpp ${LIB_SOURCES})
-target_link_libraries(test-object-ids gtest)
+target_link_libraries(test-object-ids ${TEST_LIBS})
 
 add_executable(test-archive-ops EXCLUDE_FROM_ALL test-archive-ops.cpp ${LIB_SOURCES})
-target_link_libraries(test-archive-ops gtest)
+target_link_libraries(test-archive-ops gtest ${TEST_LIBS})
 
 ADD_CUSTOM_TARGET(tests)
 ADD_DEPENDENCIES(tests test-object-ids)

@@ -2242,6 +2242,7 @@ static void print_record_header_from_memfile(FILE *file, carbon_memfile_t *memfi
     unsigned offset = CARBON_MEMFILE_TELL(memfile);
     struct record_header *header = CARBON_MEMFILE_READ_TYPE(memfile, struct record_header);
     carbon_archive_record_flags_t flags;
+    memset(&flags, 0, sizeof(carbon_archive_record_flags_t));
     flags.value = header->flags;
     char *flags_string = record_header_flags_to_string(&flags);
     fprintf(file, "0x%04x ", offset);
@@ -2453,7 +2454,11 @@ static bool init_decompressor(carbon_archive_t *archive)
     struct embedded_dic_header header;
     union carbon_archive_dic_flags flags;
 
-    fread(&header, sizeof(struct embedded_dic_header), 1, archive->diskFile);
+    size_t num_read = fread(&header, sizeof(struct embedded_dic_header), 1, archive->diskFile);
+    if (num_read != 1) {
+        CARBON_ERROR(&archive->err, CARBON_ERR_IO);
+        return false;
+    }
     if (header.marker != marker_symbols[MARKER_TYPE_EMBEDDED_STR_DIC].symbol) {
         CARBON_ERROR(&archive->err, CARBON_ERR_CORRUPTED);
         return false;

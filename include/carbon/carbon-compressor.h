@@ -183,6 +183,9 @@ static void carbon_compressor_huffman_create(carbon_compressor_t *strategy)
     strategy->print_encoded   = carbon_compressor_huffman_print_encoded;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
 static struct
 {
     carbon_compressor_type_e             type;
@@ -196,6 +199,8 @@ static struct
     { .type = CARBON_COMPRESSOR_HUFFMAN, .name = "huffman",
        .create = carbon_compressor_huffman_create,            .flag_bit = 1 << 1  }
 };
+
+#pragma GCC diagnostic pop
 
 CARBON_EXPORT(bool)
 carbon_compressor_by_type(carbon_err_t *err, carbon_compressor_t *strategy, carbon_compressor_type_e type);

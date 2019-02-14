@@ -25,6 +25,7 @@
 #include <pthread.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 #define CARBON_BEGIN_DECL  extern "C" {

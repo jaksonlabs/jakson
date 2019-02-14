@@ -395,7 +395,7 @@ static void huff_tree_create(carbon_vec_t ofType(carbon_huffman_entry_t) *table,
 
     huff_node_t *smallest, *small;
     huff_node_t *handle = trim_and_begin(&candidates);
-    huff_node_t *new_node;
+    huff_node_t *new_node = NULL;
 
 
     while (handle->next != NULL) {

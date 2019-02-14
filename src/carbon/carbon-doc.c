@@ -351,7 +351,7 @@ static void import_json_object_null_prop(carbon_doc_obj_t *target, const char *k
 static bool import_json_object_object_prop(carbon_doc_obj_t *target, carbon_err_t *err, const char *key, const carbon_json_ast_node_object_t *object)
 {
     carbon_doc_entries_t *entry;
-    carbon_doc_obj_t *nested_object;
+    carbon_doc_obj_t *nested_object = NULL;
     carbon_doc_obj_add_key(&entry, target, key, carbon_field_type_object);
     carbon_doc_obj_push_object(&nested_object, entry);
     return import_json_object(nested_object, err, object);
@@ -465,7 +465,7 @@ static bool import_json_object_array_prop(carbon_doc_obj_t *target, carbon_err_t
 
             switch (field_type) {
             case carbon_field_type_object: {
-                carbon_doc_obj_t *nested_object;
+                carbon_doc_obj_t *nested_object = NULL;
                 carbon_doc_obj_push_object(&nested_object, entry);
                 if (ast_node_data_type != CARBON_JSON_AST_NODE_VALUE_TYPE_NULL) {
                     /** the object is null by definition, if no entries are contained */
@@ -693,7 +693,7 @@ carbon_doc_obj_t *carbon_doc_entries_get_root(const carbon_doc_entries_t *partit
 
 carbon_doc_entries_t *carbon_doc_bulk_new_entries(carbon_doc_bulk_t *dst)
 {
-    carbon_doc_entries_t *partition;
+    carbon_doc_entries_t *partition = NULL;
     carbon_doc_t *model = carbon_doc_bulk_new_doc(dst, carbon_field_type_object);
     carbon_doc_obj_t *object = carbon_doc_bulk_new_obj(model);
     carbon_doc_obj_add_key(&partition, object, "/", carbon_field_type_object);
