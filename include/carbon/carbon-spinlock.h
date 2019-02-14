@@ -18,7 +18,12 @@
 #ifndef CARBON_SPINLOCK_H
 #define CARBON_SPINLOCK_H
 
+#ifndef __STDC_NO_ATOMICS__
 #include <stdatomic.h>
+#else
+#warning "** WARN ** No C standard atomics available on this platform. Fallback to slow mutex-based lock will be used!"
+#include <pthread>
+#endif
 
 #include "carbon-common.h"
 #include "carbon-vector.h"
@@ -27,7 +32,11 @@ CARBON_BEGIN_DECL
 
 typedef struct carbon_spinlock
 {
+#ifndef __STDC_NO_ATOMICS__
     atomic_flag lock;
+#else
+    pthread_mutex_t mutex;
+#endif
     pthread_t owner;
 } carbon_spinlock_t;
 
