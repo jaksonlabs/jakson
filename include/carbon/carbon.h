@@ -43,6 +43,7 @@ extern "C" {
 #include "carbon/carbon-spinlock.h"
 #include "carbon/carbon-strdic.h"
 #include "carbon/carbon-strhash.h"
+#include "carbon/carbon-strid-iter.h"
 #include "carbon/carbon-time.h"
 #include "carbon/carbon-types.h"
 #include "carbon/carbon-vector.h"

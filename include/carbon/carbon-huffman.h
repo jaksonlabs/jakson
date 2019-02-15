@@ -55,6 +55,9 @@ CARBON_EXPORT(bool)
 carbon_huffman_create(carbon_huffman_t *dic);
 
 CARBON_EXPORT(bool)
+carbon_huffman_cpy(carbon_huffman_t *dst, carbon_huffman_t *src);
+
+CARBON_EXPORT(bool)
 carbon_huffman_build(carbon_huffman_t *encoder, const carbon_string_ref_vec *strings);
 
 CARBON_EXPORT(bool)

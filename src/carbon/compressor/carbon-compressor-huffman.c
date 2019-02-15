@@ -38,6 +38,22 @@ carbon_compressor_huffman_init(carbon_compressor_t *self)
 }
 
 CARBON_EXPORT(bool)
+carbon_compressor_huffman_cpy(const carbon_compressor_t *self, carbon_compressor_t *dst)
+{
+    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_HUFFMAN);
+
+    *dst = *self;
+    dst->extra = malloc(sizeof(carbon_huffman_t));
+    if (dst->extra != NULL) {
+        carbon_huffman_t *self_encoder = (carbon_huffman_t *) self->extra;
+        carbon_huffman_t *dst_encoder = (carbon_huffman_t *) dst->extra;
+        return carbon_huffman_cpy(dst_encoder, self_encoder);
+    } else {
+        return false;
+    }
+}
+
+CARBON_EXPORT(bool)
 carbon_compressor_huffman_drop(carbon_compressor_t *self)
 {
     CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_HUFFMAN);
@@ -147,13 +163,13 @@ bool carbon_compressor_huffman_encode_string(carbon_compressor_t *self, carbon_m
     return status;
 }
 
-CARBON_EXPORT(char *)
-carbon_compressor_huffman_decode_string(carbon_compressor_t *self, carbon_memfile_t *dst, carbon_err_t *err,
-                                        carbon_string_id_t string_id)
+CARBON_EXPORT(bool)
+carbon_compressor_huffman_decode_string(carbon_compressor_t *self, char *dst, size_t strlen, FILE *src)
 {
     CARBON_UNUSED(self);
     CARBON_UNUSED(dst);
-    CARBON_UNUSED(err);
-    CARBON_UNUSED(string_id);
-    return NULL;
+    CARBON_UNUSED(strlen);
+    CARBON_UNUSED(src);
+    abort(); /* not implemented */
+    return false;
 }

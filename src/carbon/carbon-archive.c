@@ -19,6 +19,7 @@
 #include <carbon/carbon-oid.h>
 #include <carbon/strdic/carbon-strdic-async.h>
 #include <carbon/carbon-compressor.h>
+#include <carbon/carbon-strid-iter.h>
 
 #include "carbon/carbon-common.h"
 #include "carbon/carbon-memblock.h"
@@ -523,26 +524,101 @@ bool carbon_archive_from_model(carbon_memblock_t **stream,
     return true;
 }
 
-CARBON_EXPORT(bool)
-carbon_archive_drop(carbon_archive_t *archive)
+CARBON_EXPORT(carbon_io_context_t *)
+carbon_archive_io_context_create(carbon_archive_t *archive)
 {
-    CARBON_NON_NULL_OR_ERROR(archive)
-    fclose(archive->diskFile);
-    free(archive->diskFilePath);
-    carbon_memblock_drop(archive->record_table.recordDataBase);
-    return true;
+    CARBON_NON_NULL_OR_ERROR(archive);
+    carbon_io_context_t *context;
+    if (carbon_io_context_create(&context, &archive->err, archive->diskFilePath)) {
+        return context;
+    } else {
+        CARBON_ERROR(&archive->err, CARBON_ERR_IO)
+        return NULL;
+    }
 }
 
 CARBON_EXPORT(bool)
-carbon_archive_fullscan_strings(carbon_strtable_iter_t *it, carbon_predicate_string_t *pred, carbon_archive_t *archive)
+carbon_archive_query_fullscan_strids(carbon_strid_iter_t *it, carbon_archive_t *archive)
 {
     CARBON_NON_NULL_OR_ERROR(it)
-    CARBON_NON_NULL_OR_ERROR(pred)
     CARBON_NON_NULL_OR_ERROR(archive)
+    return carbon_strid_iter_open(it, &archive->err, archive);
+}
 
+CARBON_EXPORT(char *)
+carbon_archive_query_fullscan_string_by_id(carbon_archive_t *archive, carbon_string_id_t id)
+{
+    assert(archive);
 
+    carbon_strid_iter_t  strid_iter;
+    carbon_strid_info_t *info;
+    size_t               vector_len;
+    bool                 status;
+    bool                 success;
 
-    return true;
+    status = carbon_archive_query_fullscan_strids(&strid_iter, archive);
+
+    if (status) {
+        while (carbon_strid_iter_next(&success, &info, &archive->err, &vector_len, &strid_iter)) {
+            for (size_t i = 0; i < vector_len; i++) {
+                if (info[i].id == id) {
+                    char *result = malloc(info[i].strlen + 1);
+                    memset(result, 0, info[i].strlen + 1);
+
+                    fseek(strid_iter.disk_file, info[i].offset, SEEK_SET);
+
+                    bool decode_result = carbon_compressor_decode_string(&archive->err, &archive->string_table.compressor,
+                                                      result, info[i].strlen, strid_iter.disk_file);
+
+                    bool close_iter_result = carbon_strid_iter_close(&strid_iter);
+
+                    if (!decode_result || !close_iter_result) {
+                        free (result);
+                        CARBON_ERROR(&archive->err, !decode_result ? CARBON_ERR_DECOMPRESSFAILED :
+                                                    CARBON_ERR_ITERATORNOTCLOSED);
+                        return NULL;
+                    } else {
+                        return result;
+                    }
+                }
+            }
+        }
+        CARBON_ERROR(&archive->err, CARBON_ERR_NOTFOUND);
+        return NULL;
+    } else {
+        CARBON_ERROR(&archive->err, CARBON_ERR_SCAN_FAILED);
+        return NULL;
+    }
+}
+
+CARBON_EXPORT(char *)
+carbon_archive_query_unsafe_string_by_offset(carbon_io_context_t *context, carbon_archive_t *archive, carbon_off_t off, size_t strlen)
+{
+    assert(context);
+
+    char *result = malloc((strlen + 1) * sizeof(char));
+    if (!result) {
+        CARBON_ERROR(carbon_io_context_get_error(context), CARBON_ERR_MALLOCERR);
+        return NULL;
+    } else {
+        memset(result, 0, (strlen + 1) * sizeof(char));
+
+        FILE *file = carbon_io_context_seek_lock_and_access(context, off);
+        if (!file) {
+            carbon_error_cpy(&archive->err, carbon_io_context_get_error(context));
+            free(result);
+            return NULL;
+        }
+
+        if (!carbon_compressor_decode_string(carbon_io_context_get_error(context),
+                                             &archive->string_table.compressor, result, strlen, file)) {
+            free(result);
+            result = NULL;
+        }
+
+        carbon_io_context_unlock(context);
+        return result;
+    }
 }
 
 bool carbon_archive_write(FILE *file, const carbon_memblock_t *stream)
@@ -1521,7 +1597,7 @@ static bool serialize_string_dic(carbon_memfile_t *memfile, carbon_err_t *err, c
     carbon_off_t header_pos = CARBON_MEMFILE_TELL(memfile);
     carbon_memfile_skip(memfile, sizeof(struct embedded_dic_header));
 
-    strategy.write_extra(&strategy, memfile, strings);
+    carbon_compressor_write_extra(err, &strategy, memfile, strings);
 
     header = (struct embedded_dic_header) {
         .marker = marker_symbols[MARKER_TYPE_EMBEDDED_STR_DIC].symbol,
@@ -1533,20 +1609,25 @@ static bool serialize_string_dic(carbon_memfile_t *memfile, carbon_err_t *err, c
     for (size_t i = 0; i < strings->num_elems; i++) {
         carbon_string_id_t id = *CARBON_VECTOR_GET(string_ids, i, carbon_string_id_t);
         const char *string = *CARBON_VECTOR_GET(strings, i, char *);
-        carbon_memfile_write(memfile, &marker_symbols[MARKER_TYPE_EMBEDDED_UNCOMP_STR].symbol, 1);
-        carbon_off_t next_entry_off_ref = CARBON_MEMFILE_TELL(memfile);
-        carbon_memfile_skip(memfile, sizeof(carbon_off_t));
-        carbon_memfile_write(memfile, &id, sizeof(carbon_string_id_t));
-        uint32_t decompressed_strlen = strlen(string);
-        carbon_memfile_write(memfile, &decompressed_strlen, sizeof(uint32_t));
-        if (!strategy.encode_string(&strategy, memfile, err, string)) {
-            CARBON_PRINT_ERROR(err);
+
+        carbon_string_entry_header_t header = {
+            .marker = marker_symbols[MARKER_TYPE_EMBEDDED_UNCOMP_STR].symbol,
+            .next_entry_off = 0,
+            .string_id = id,
+            .string_len = strlen(string)
+        };
+
+        carbon_off_t header_pos_off = CARBON_MEMFILE_TELL(memfile);
+        carbon_memfile_skip(memfile, sizeof(carbon_string_entry_header_t));
+
+        if (!carbon_compressor_encode_string(err, &strategy, memfile, string)) {
+            CARBON_PRINT_ERROR(err.code);
             return false;
         }
         carbon_off_t continue_off = CARBON_MEMFILE_TELL(memfile);
-        carbon_off_t next_entry_off = i + 1 < strings->num_elems ? continue_off : 0;
-        carbon_memfile_seek(memfile, next_entry_off_ref);
-        carbon_memfile_write(memfile, &next_entry_off, sizeof(carbon_off_t));
+        carbon_memfile_seek(memfile, header_pos_off);
+        header.next_entry_off = i + 1 < strings->num_elems ? continue_off : 0;
+        carbon_memfile_write(memfile, &header, sizeof(carbon_string_entry_header_t));
         carbon_memfile_seek(memfile, continue_off);
     }
 
@@ -1561,7 +1642,7 @@ static bool serialize_string_dic(carbon_memfile_t *memfile, carbon_err_t *err, c
     free(strings);
     free(string_ids);
 
-    return strategy.drop(&strategy);
+    return carbon_compressor_drop(err, &strategy);
 }
 
 static void skip_carbon_file_header(carbon_memfile_t *memfile)
@@ -2293,23 +2374,18 @@ static bool print_embedded_dic_from_memfile(FILE *file, carbon_err_t *err, carbo
         return false;
     }
 
-    strategy.print_extra(&strategy, file, memfile);
+    carbon_compressor_print_extra(err, &strategy, file, memfile);
 
     while ((*CARBON_MEMFILE_PEEK(memfile, char)) == marker_symbols[MARKER_TYPE_EMBEDDED_UNCOMP_STR].symbol) {
         unsigned offset = CARBON_MEMFILE_TELL(memfile);
-        char marker = *CARBON_MEMFILE_READ_TYPE(memfile, char);
-        carbon_off_t next_entry_off = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
-        carbon_string_id_t string_id = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_string_id_t);
-        uint32_t  decompressed_strlen = *CARBON_MEMFILE_READ_TYPE(memfile, uint32_t);
-
+        carbon_string_entry_header_t header = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_string_entry_header_t);
         fprintf(file, "0x%04x    [marker: %c] [next-entry-off: 0x%04zx] [string-id: %"PRIu64"] [string-length: %"PRIu32"]",
-                offset, marker, next_entry_off, string_id, decompressed_strlen);
-        strategy.print_encoded(&strategy, file, memfile, decompressed_strlen);
+                offset, header.marker, header.next_entry_off, header.string_id, header.string_len);
+        carbon_compressor_print_encoded(err, &strategy, file, memfile, header.string_len);
         fprintf(file, "\n");
     }
 
-
-    return strategy.drop(&strategy);
+    return carbon_compressor_drop(err, &strategy);
 }
 
 static bool print_archive_from_memfile(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile)
@@ -2359,27 +2435,27 @@ static carbon_archive_object_flags_t *get_flags(carbon_archive_object_flags_t *f
     return flags;
 }
 
-static bool init_decompressor(carbon_archive_t *archive);
-static bool read_stringtable(carbon_archive_t *archive);
-static bool read_record(carbon_archive_t *archive, carbon_off_t record_header_offset);
-static void reset_string_dic_disk_file_cursor(carbon_archive_t *archive);
+static bool init_decompressor(carbon_compressor_t *strategy, uint8_t flags);
+static bool read_stringtable(carbon_archive_string_table_t *table, carbon_err_t *err, FILE *disk_file);
+static bool read_record(carbon_archive_t *archive, FILE *disk_file, carbon_off_t record_header_offset);
 
 bool carbon_archive_open(carbon_archive_t *out,
                         const char *file_path)
 {
     int status;
+    FILE *disk_file;
 
     carbon_error_init(&out->err);
     out->diskFilePath = strdup(file_path);
-    out->diskFile = fopen(out->diskFilePath, "r");
-    if (!out->diskFile) {
+    disk_file = fopen(out->diskFilePath, "r");
+    if (!disk_file) {
         CARBON_PRINT_ERROR(CARBON_ERR_FOPEN_FAILED);
         return false;
     } else {
         struct carbon_file_header header;
-        size_t nread = fread(&header, sizeof(struct carbon_file_header), 1, out->diskFile);
+        size_t nread = fread(&header, sizeof(struct carbon_file_header), 1, disk_file);
         if (nread != 1) {
-            fclose(out->diskFile);
+            fclose(disk_file);
             CARBON_PRINT_ERROR(CARBON_ERR_IO);
             return false;
         } else {
@@ -2387,23 +2463,22 @@ bool carbon_archive_open(carbon_archive_t *out,
                 CARBON_PRINT_ERROR(CARBON_ERR_FORMATVERERR);
                 return false;
             } else {
-                if ((status = read_stringtable(out)) != true) {
+                if ((status = read_stringtable(&out->string_table, &out->err, disk_file)) != true) {
                     return status;
                 }
-                if ((status = read_record(out, header.root_object_header_offset)) != true) {
+                if ((status = read_record(out, disk_file, header.root_object_header_offset)) != true) {
                     return status;
                 }
 
-                fseek(out->diskFile, sizeof(struct carbon_file_header), SEEK_SET);
-                carbon_off_t stringDicStart = ftell(out->diskFile);
-                fseek(out->diskFile, 0, SEEK_END);
-                carbon_off_t fileEnd = ftell(out->diskFile);
-                fseek(out->diskFile, stringDicStart, SEEK_SET);
+                fseek(disk_file, sizeof(struct carbon_file_header), SEEK_SET);
+                carbon_off_t stringDicStart = ftell(disk_file);
+                fseek(disk_file, 0, SEEK_END);
+                carbon_off_t fileEnd = ftell(disk_file);
+                fseek(disk_file, stringDicStart, SEEK_SET);
+                fclose(disk_file);
 
                 out->info.string_table_size = header.root_object_header_offset - stringDicStart;
                 out->info.record_table_size = fileEnd - header.root_object_header_offset;
-
-                reset_string_dic_disk_file_cursor(out);
             }
         }
     }
@@ -2439,59 +2514,60 @@ static carbon_off_t object_init(carbon_archive_object_t *obj, carbon_memblock_t 
     return read_length;
 }
 
-bool carbon_archive_close(carbon_archive_t *archive)
+CARBON_EXPORT(bool)
+carbon_archive_close(carbon_archive_t *archive)
 {
     CARBON_NON_NULL_OR_ERROR(archive);
-    fclose(archive->diskFile);
+    free(archive->diskFilePath);
     carbon_memblock_drop(archive->record_table.recordDataBase);
     return true;
 }
 
-static bool init_decompressor(carbon_archive_t *archive)
+static bool init_decompressor(carbon_compressor_t *strategy, uint8_t flags)
 {
-    assert(archive->diskFile);
+    if (carbon_compressor_by_flags(strategy, flags) != true) {
+        return false;
+    }
+    return true;
+}
+
+static bool read_stringtable(carbon_archive_string_table_t *table, carbon_err_t *err, FILE *disk_file)
+{
+    assert(disk_file);
 
     struct embedded_dic_header header;
     union carbon_archive_dic_flags flags;
 
-    size_t num_read = fread(&header, sizeof(struct embedded_dic_header), 1, archive->diskFile);
+    size_t num_read = fread(&header, sizeof(struct embedded_dic_header), 1, disk_file);
     if (num_read != 1) {
-        CARBON_ERROR(&archive->err, CARBON_ERR_IO);
+        CARBON_ERROR(err, CARBON_ERR_IO);
         return false;
     }
     if (header.marker != marker_symbols[MARKER_TYPE_EMBEDDED_STR_DIC].symbol) {
-        CARBON_ERROR(&archive->err, CARBON_ERR_CORRUPTED);
+        CARBON_ERROR(err, CARBON_ERR_CORRUPTED);
         return false;
     }
 
     flags.value = header.flags;
+    table->first_entry_off = header.first_entry;
 
-    if (carbon_compressor_by_flags(&archive->string_table.strategy, flags.value) != true) {
-        return false;
-    }
-
-    return true;
-}
-
-static bool read_stringtable(carbon_archive_t *archive)
-{
-    if ((init_decompressor(archive)) != true) {
+    if ((init_decompressor(&table->compressor, flags.value)) != true) {
         return false;
     }
     return true;
 }
 
-static bool read_record(carbon_archive_t *archive, carbon_off_t record_header_offset)
+static bool read_record(carbon_archive_t *archive, FILE *disk_file, carbon_off_t record_header_offset)
 {
     carbon_err_t err;
-    fseek(archive->diskFile, record_header_offset, SEEK_SET);
+    fseek(disk_file, record_header_offset, SEEK_SET);
     struct record_header header;
-    if (fread(&header, sizeof(struct record_header), 1, archive->diskFile) != 1) {
+    if (fread(&header, sizeof(struct record_header), 1, disk_file) != 1) {
         CARBON_ERROR(&archive->err, CARBON_ERR_CORRUPTED);
         return false;
     } else {
         archive->record_table.flags.value = header.flags;
-        bool status = carbon_memblock_from_file(&archive->record_table.recordDataBase, archive->diskFile,
+        bool status = carbon_memblock_from_file(&archive->record_table.recordDataBase, disk_file,
                                                 header.record_size);
         if (!status) {
             carbon_memblock_get_error(&err, archive->record_table.recordDataBase);
@@ -2510,11 +2586,6 @@ static bool read_record(carbon_archive_t *archive, carbon_off_t record_header_of
         }
         return true;
     }
-}
-
-static void reset_string_dic_disk_file_cursor(carbon_archive_t *archive)
-{
-    fseek(archive->diskFile, sizeof(struct carbon_file_header) + sizeof(struct embedded_dic_header), SEEK_SET);
 }
 
 static void reset_cabin_object_mem_file(carbon_archive_object_t *object)

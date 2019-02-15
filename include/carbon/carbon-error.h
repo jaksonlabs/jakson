@@ -40,7 +40,7 @@
 #define CARBON_ERR_CORRUPTED 15             /** Archive file is corrupted */
 #define CARBON_ERR_NOCARBONSTREAM 16        /** Stream is not a carbon archive */
 #define CARBON_ERR_NOBITMODE 17             /** Not in bit writing mode */
-#define CARBON_ERR_NOTIMPLEMENTED 18        /** Funciton is not yet implemented */
+#define CARBON_ERR_NOTIMPLEMENTED 18        /** Function is not yet implemented */
 #define CARBON_ERR_NOTYPE 19                /** Unsupported type found */
 #define CARBON_ERR_NOCOMPRESSOR 20          /** Unsupported compressor strategy requested */
 #define CARBON_ERR_NOVALUESTR 21            /** No string representation for type available */
@@ -63,6 +63,11 @@
 #define CARBON_ERR_FOPENWRITE 38            /** File cannot be opened for writing */
 #define CARBON_ERR_WRITEARCHIVE 39          /** Archive cannot be serialized into file */
 #define CARBON_ERR_ARCHIVEOPEN 40           /** Archive cannot be deserialized form file */
+#define CARBON_ERR_FREAD_FAILED 41          /** Unable to read from file */
+#define CARBON_ERR_SCAN_FAILED 42           /** Unable to perform full scan in archive file */
+#define CARBON_ERR_DECOMPRESSFAILED 43      /** String decompression from archive failed */
+#define CARBON_ERR_ITERATORNOTCLOSED 44     /** Closing iterator failed */
+#define CARBON_ERR_HARDCOPYFAILED 45        /** Unable to construct a hard copy of the source object */
 
 static const char *const _carbon_err_str[] = {
     "No error",
@@ -83,7 +88,7 @@ static const char *const _carbon_err_str[] = {
     "Archive file is corrupted",
     "Stream is not a carbon archive",
     "Not in bit writing mode",
-    "Funciton is not yet implemented",
+    "Function is not yet implemented",
     "Unsupported type found",
     "Unsupported compressor strategy requested",
     "No string representation for type available",
@@ -105,7 +110,12 @@ static const char *const _carbon_err_str[] = {
     "Document insertion bulk creation failed",
     "File cannot be opened for writing",
     "Archive cannot be serialized into file",
-    "Archive cannot be deserialized form file"
+    "Archive cannot be deserialized form file",
+    "Unable to read from file",
+    "Unable to perform full scan in archive file",
+    "String decompression from archive failed",
+    "Closing iterator failed",
+    "Unable to construct a hard copy of the source object"
 };
 
 #define CARBON_ERRSTR_ILLEGAL_CODE "illegal error code"
@@ -154,12 +164,12 @@ carbon_error_print_and_abort(const carbon_err_t *err);
 #define CARBON_PRINT_ERROR(code)                    CARBON_PRINT_ERROR_IF(true, code)
 #define CARBON_PRINT_ERROR_AND_DIE(code)            { CARBON_PRINT_ERROR(code); abort(); }
 #define CARBON_PRINT_ERROR_AND_DIE_IF(expr, code)   { if(expr) { CARBON_PRINT_ERROR_AND_DIE(code) } }
-#define CARBON_PRINT_ERROR_IF(expr, ode)                                                                               \
+#define CARBON_PRINT_ERROR_IF(expr, code)                                                                              \
 {                                                                                                                      \
     if (expr) {                                                                                                        \
         carbon_err_t err;                                                                                              \
         carbon_error_init(&err);                                                                                       \
-        CARBON_ERROR(&err, CARBON_ERR_NULLPTR);                                                                        \
+        CARBON_ERROR(&err, code);                                                                                      \
         carbon_error_print(&err);                                                                                      \
     }                                                                                                                  \
 }

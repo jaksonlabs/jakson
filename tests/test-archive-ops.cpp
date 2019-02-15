@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <inttypes.h>
 #include "carbon/carbon.h"
 
 
@@ -75,30 +76,150 @@ TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonString)
 
     bool status = carbon_archive_from_json(&archive, archive_file, &err, json_string,
                                            CARBON_COMPRESSOR_NONE, read_optimized);
-    carbon_archive_drop(&archive);
+    carbon_archive_close(&archive);
     ASSERT_TRUE(status);
 }
 
 TEST(CarbonArchiveOpsTest, CreateArchiveStringHandling)
 {
-    carbon_archive_t   archive;
-    carbon_err_t       err;
+    std::set<carbon_string_id_t> haystack;
+
+    carbon_archive_t     archive;
+    carbon_strid_iter_t  strid_iter;
+    carbon_strid_info_t *info;
+    size_t               vector_len;
+    bool                 status;
+    bool                 success;
+    carbon_err_t         err;
 
     const char        *json_string = JSON_EXAMPLE;
     const char        *archive_file = "tmp-test-archive.carbon";
     bool               read_optimized = false;
 
-    bool status = carbon_archive_from_json(&archive, archive_file, &err, json_string,
-                                           CARBON_COMPRESSOR_NONE, read_optimized);
+    status = carbon_archive_from_json(&archive, archive_file, &err, json_string,
+                                      CARBON_COMPRESSOR_NONE, read_optimized);
+    ASSERT_TRUE(status);
 
+    status = carbon_archive_query_fullscan_strids(&strid_iter, &archive);
+    ASSERT_TRUE(status);
 
+    while (carbon_strid_iter_next(&success, &info, &err, &vector_len, &strid_iter)) {
+        for (size_t i = 0; i < vector_len; i++) {
+            /* longest string is 31 in size; if 'next' is broken, we may read something exceeding this length */
+            ASSERT_LE(info[i].strlen, 31);
 
-    carbon_archive_drop(&archive);
+            /* highest offset is 1590; if 'next' is broken, we may read something beyond this value */
+            ASSERT_LE(info[i].offset, 1590);
+
+            /* Note, that 'info[i].id' cannot be tested based on its value because it is not deterministic generated;
+             * all ids must be unique. In case we read something wrong, we may find some duplicate
+             * (which is unlikely, however) */
+            auto result = haystack.find(info[i].id);
+            if (result != haystack.end()) {
+                FAIL() << "id collision for { \"id\": " << info[i].id << " }!\n";
+            }
+            haystack.insert(info[i].id);
+        }
+    }
+
+    status = carbon_strid_iter_close(&strid_iter);
+    ASSERT_TRUE(status);
+
+    status = carbon_archive_close(&archive);
     ASSERT_TRUE(status);
 }
 
-int main(int argc, char **argv) {
-    ::testing::InitGoogleTest(&argc, argv);
+TEST(CarbonArchiveOpsTest, DecodeStringByIdFullScan)
+{
+    std::set<carbon_string_id_t> all_str_ids;
 
+    carbon_archive_t     archive;
+    carbon_strid_iter_t  strid_iter;
+    carbon_strid_info_t *info;
+    size_t               vector_len;
+    bool                 status;
+    bool                 success;
+    carbon_err_t         err;
+
+    const char        *json_string = JSON_EXAMPLE;
+    const char        *archive_file = "tmp-test-archive.carbon";
+    bool               read_optimized = false;
+
+    status = carbon_archive_from_json(&archive, archive_file, &err, json_string,
+                                      CARBON_COMPRESSOR_NONE, read_optimized);
+    ASSERT_TRUE(status);
+
+    status = carbon_archive_query_fullscan_strids(&strid_iter, &archive);
+    ASSERT_TRUE(status);
+
+    while (carbon_strid_iter_next(&success, &info, &err, &vector_len, &strid_iter)) {
+        for (size_t i = 0; i < vector_len; i++) {
+            all_str_ids.insert(info[i].id);
+        }
+    }
+
+    status = carbon_strid_iter_close(&strid_iter);
+    ASSERT_TRUE(status);
+
+    for (std::set<carbon_string_id_t>::iterator it = all_str_ids.begin(); it != all_str_ids.end(); it++) {
+        carbon_string_id_t string_id = *it;
+        char *string = carbon_archive_query_fullscan_string_by_id(&archive, string_id);
+        ASSERT_TRUE(string != NULL);
+        printf("%" PRIu64 " -> '%s'\n", string_id, string);
+        free(string);
+    }
+
+    status = carbon_archive_close(&archive);
+    ASSERT_TRUE(status);
+}
+
+TEST(CarbonArchiveOpsTest, DecodeStringByFastUnsafeAccess)
+{
+    carbon_archive_t                 archive;
+    carbon_strid_iter_t              strid_iter;
+    carbon_strid_info_t             *info;
+    size_t                           vector_len;
+    bool                             status;
+    bool                             success;
+    carbon_err_t                     err;
+    carbon_io_context_t *context;
+
+    const char        *json_string = JSON_EXAMPLE;
+    const char        *archive_file = "tmp-test-archive.carbon";
+    bool               read_optimized = false;
+
+    status = carbon_archive_from_json(&archive, archive_file, &err, json_string,
+                                      CARBON_COMPRESSOR_NONE, read_optimized);
+    ASSERT_TRUE(status);
+
+    status = carbon_archive_query_fullscan_strids(&strid_iter, &archive);
+    ASSERT_TRUE(status);
+
+
+    context = carbon_archive_io_context_create(&archive);
+    ASSERT_TRUE(context != NULL);
+
+    while (carbon_strid_iter_next(&success, &info, &err, &vector_len, &strid_iter)) {
+        for (size_t i = 0; i < vector_len; i++) {
+            char *string = carbon_archive_query_unsafe_string_by_offset(context, &archive, info[i].offset, info[i].strlen);
+            ASSERT_TRUE(string != NULL);
+            printf("%" PRIu64 " -> '%s'\n", info[i].id, string);
+            free(string);
+        }
+    }
+
+    status = carbon_io_context_drop(context);
+    ASSERT_TRUE(status);
+
+    status = carbon_strid_iter_close(&strid_iter);
+    ASSERT_TRUE(status);
+
+    status = carbon_archive_close(&archive);
+    ASSERT_TRUE(status);
+}
+
+int main(int argc, char **argv)
+{
+    ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

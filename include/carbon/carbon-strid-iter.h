@@ -15,4 +15,39 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "carbon/carbon-strtable.h"
+#ifndef CARBON_STRID_ITER_H
+#define CARBON_STRID_ITER_H
+
+#include "carbon-common.h"
+#include "carbon-types.h"
+#include "carbon-archive.h"
+
+CARBON_BEGIN_DECL
+
+typedef struct carbon_strid_info
+{
+    carbon_string_id_t id;
+    uint32_t           strlen;
+    carbon_off_t       offset;
+} carbon_strid_info_t;
+
+typedef struct carbon_strid_iter
+{
+    FILE *disk_file;
+    bool is_open;
+    carbon_off_t disk_offset;
+    carbon_strid_info_t vector[5];
+} carbon_strid_iter_t;
+
+CARBON_EXPORT(bool)
+carbon_strid_iter_open(carbon_strid_iter_t *it, carbon_err_t *err, carbon_archive_t *archive);
+
+CARBON_EXPORT(bool)
+carbon_strid_iter_next(bool *success, carbon_strid_info_t **info, carbon_err_t *err, size_t *info_length, carbon_strid_iter_t *it);
+
+CARBON_EXPORT(bool)
+carbon_strid_iter_close(carbon_strid_iter_t *it);
+
+CARBON_END_DECL
+
+#endif

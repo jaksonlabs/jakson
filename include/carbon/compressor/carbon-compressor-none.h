@@ -31,6 +31,9 @@ CARBON_EXPORT(bool)
 carbon_compressor_none_init(carbon_compressor_t *self);
 
 CARBON_EXPORT(bool)
+carbon_compressor_none_cpy(const carbon_compressor_t *self, carbon_compressor_t *dst);
+
+CARBON_EXPORT(bool)
 carbon_compressor_none_drop(carbon_compressor_t *self);
 
 CARBON_EXPORT(bool)
@@ -48,9 +51,8 @@ CARBON_EXPORT(bool)
 carbon_compressor_none_encode_string(carbon_compressor_t *self, carbon_memfile_t *dst, carbon_err_t *err,
                                           const char *string);
 
-CARBON_EXPORT(char *)
-carbon_compressor_none_decode_string(carbon_compressor_t *self, carbon_memfile_t *dst, carbon_err_t *err,
-                                           carbon_string_id_t string_id);
+CARBON_EXPORT(bool)
+carbon_compressor_none_decode_string(carbon_compressor_t *self, char *dst, size_t strlen, FILE *src);
 
 CARBON_END_DECL
 

@@ -23,15 +23,6 @@
 
 CARBON_BEGIN_DECL
 
-typedef struct carbon_strtable_iter
-{
-
-} carbon_strtable_iter_t;
-
-CARBON_EXPORT(bool)
-carbon_strtable_iter_create(carbon_strtable_iter_t *iter);
-
-
 
 CARBON_END_DECL
 

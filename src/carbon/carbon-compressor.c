@@ -24,6 +24,7 @@ create_strategy(size_t i, carbon_compressor_t *strategy)
     assert(strategy);
     carbon_compressor_strategy_register[i].create(strategy);
     assert (strategy->create);
+    assert (strategy->cpy);
     assert (strategy->drop);
     assert (strategy->write_extra);
     assert (strategy->encode_string);
@@ -78,3 +79,62 @@ carbon_compressor_by_name(carbon_compressor_type_e *type, const char *name)
     return false;
 }
 
+CARBON_EXPORT(bool)
+carbon_compressor_cpy(carbon_err_t *err, carbon_compressor_t *dst, const carbon_compressor_t *src)
+{
+    CARBON_NON_NULL_OR_ERROR(dst)
+    CARBON_NON_NULL_OR_ERROR(src)
+    CARBON_IMPLEMENTS_OR_ERROR(err, src, cpy)
+    return src->cpy(src, dst);
+}
+
+CARBON_EXPORT(bool)
+carbon_compressor_drop(carbon_err_t *err, carbon_compressor_t *self)
+{
+    CARBON_NON_NULL_OR_ERROR(self)
+    CARBON_IMPLEMENTS_OR_ERROR(err, self, drop)
+    return self->drop(self);
+}
+
+CARBON_EXPORT(bool)
+carbon_compressor_write_extra(carbon_err_t *err, carbon_compressor_t *self, carbon_memfile_t *dst,
+                              const carbon_vec_t ofType (const char *) *strings)
+{
+    CARBON_NON_NULL_OR_ERROR(self)
+    CARBON_IMPLEMENTS_OR_ERROR(err, self, write_extra)
+    return self->write_extra(self, dst, strings);
+}
+
+CARBON_EXPORT(bool)
+carbon_compressor_encode_string(carbon_err_t *err, carbon_compressor_t *self, carbon_memfile_t *dst,
+                                const char *string)
+{
+    CARBON_NON_NULL_OR_ERROR(self)
+    CARBON_IMPLEMENTS_OR_ERROR(err, self, encode_string)
+    return self->encode_string(self, dst, err, string);
+}
+
+CARBON_EXPORT(bool)
+carbon_compressor_decode_string(carbon_err_t *err, carbon_compressor_t *self, char *dst, size_t strlen, FILE *src)
+{
+    CARBON_NON_NULL_OR_ERROR(self)
+    CARBON_IMPLEMENTS_OR_ERROR(err, self, decode_string)
+    return self->decode_string(self, dst, strlen, src);
+}
+
+CARBON_EXPORT(bool)
+carbon_compressor_print_extra(carbon_err_t *err, carbon_compressor_t *self, FILE *file, carbon_memfile_t *src)
+{
+    CARBON_NON_NULL_OR_ERROR(self)
+    CARBON_IMPLEMENTS_OR_ERROR(err, self, print_extra)
+    return self->print_extra(self, file, src);
+}
+
+CARBON_EXPORT(bool)
+carbon_compressor_print_encoded(carbon_err_t *err, carbon_compressor_t *self, FILE *file, carbon_memfile_t *src,
+                                uint32_t decompressed_strlen)
+{
+    CARBON_NON_NULL_OR_ERROR(self)
+    CARBON_IMPLEMENTS_OR_ERROR(err, self, print_encoded)
+    return self->print_encoded(self, file, src, decompressed_strlen);
+}

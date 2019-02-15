@@ -17,6 +17,7 @@
 
 #include <inttypes.h>
 #include <assert.h>
+#include <carbon/carbon-compressor.h>
 #include "carbon/compressor/carbon-compressor-none.h"
 
 CARBON_EXPORT(bool)
@@ -28,8 +29,20 @@ carbon_compressor_none_init(carbon_compressor_t *self)
 }
 
 CARBON_EXPORT(bool)
+carbon_compressor_none_cpy(const carbon_compressor_t *self, carbon_compressor_t *dst)
+{
+    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_NONE);
+
+    /* nothing to hard copy but the function pointers */
+    *dst = *self;
+    return true;
+}
+
+CARBON_EXPORT(bool)
 carbon_compressor_none_drop(carbon_compressor_t *self)
 {
+    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_NONE);
+
     CARBON_UNUSED(self);
     /* nothing to do for uncompressed dictionaries */
     return true;
@@ -39,6 +52,8 @@ CARBON_EXPORT(bool)
 carbon_compressor_none_write_extra(carbon_compressor_t *self, carbon_memfile_t *dst,
                                         const carbon_vec_t ofType (const char *) *strings)
 {
+    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_NONE);
+
     CARBON_UNUSED(self);
     CARBON_UNUSED(dst);
     CARBON_UNUSED(strings);
@@ -48,6 +63,8 @@ carbon_compressor_none_write_extra(carbon_compressor_t *self, carbon_memfile_t *
 
 bool carbon_compressor_none_print_extra(carbon_compressor_t *self, FILE *file, carbon_memfile_t *src)
 {
+    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_NONE);
+
     CARBON_UNUSED(self);
     CARBON_UNUSED(file);
     CARBON_UNUSED(src);
@@ -61,6 +78,8 @@ carbon_compressor_none_print_encoded_string(carbon_compressor_t *self,
                                                  carbon_memfile_t *src,
                                                  uint32_t decompressed_strlen)
 {
+    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_NONE);
+
     CARBON_UNUSED(self);
 
     const char         *string        =  CARBON_MEMFILE_READ(src, decompressed_strlen);
@@ -80,6 +99,8 @@ CARBON_EXPORT(bool)
 carbon_compressor_none_encode_string(carbon_compressor_t *self, carbon_memfile_t *dst, carbon_err_t *err,
                                           const char *string)
 {
+    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_NONE);
+
     CARBON_UNUSED(self);
 
     uint32_t string_length = strlen(string);
@@ -93,13 +114,13 @@ error_handling:
     return false;
 }
 
-CARBON_EXPORT(char *)
-carbon_compressor_none_decode_string(carbon_compressor_t *self, carbon_memfile_t *dst, carbon_err_t *err,
-                                           carbon_string_id_t string_id)
+CARBON_EXPORT(bool)
+carbon_compressor_none_decode_string(carbon_compressor_t *self, char *dst, size_t strlen, FILE *src)
 {
+    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_NONE);
+
     CARBON_UNUSED(self);
-    CARBON_UNUSED(dst);
-    CARBON_UNUSED(err);
-    CARBON_UNUSED(string_id);
-    return NULL;
+
+    size_t num_read = fread(dst, sizeof(char), strlen, src);
+    return (num_read == strlen);
 }

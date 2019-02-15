@@ -88,7 +88,7 @@ typedef enum carbon_type
 #define CARBON_CHECK_TAG(is, expected)                                                                                 \
 {                                                                                                                      \
     if (is != expected) {                                                                                              \
-        CARBON_PRINT_ERROR(STATUS_ILLEGALIMPL)                                                                         \
+        CARBON_PRINT_ERROR(CARBON_ERR_ERRINTERNAL)                                                                     \
         return false;                                                                                                  \
     }                                                                                                                  \
 }
@@ -209,10 +209,14 @@ typedef enum carbon_type
 #define CARBON_FIELD_SET(x, mask)      ( x |=  (mask) )
 #define CARBON_FIELD_CLEAR(x, mask)    ( x &= ~(mask) )
 
+#define CARBON_IMPLEMENTS_OR_ERROR(err, x, func)                                                                       \
+    CARBON_OPTIONAL(x->func == NULL, CARBON_ERROR(err, CARBON_ERR_NOTIMPLEMENTED))
+
+#define CARBON_OPTIONAL(expr, stmt)                                                                                    \
+    if (expr) { stmt; }
+
 #define CARBON_OPTIONAL_SET(x, y)                                                                                      \
-    if (x) {                                                                                                           \
-        *x = y;                                                                                                        \
-    }
+     CARBON_OPTIONAL(x, *x = y)
 
 #define CARBON_OPTIONAL_SET_OR_ELSE(x, y, stmt)                                                                        \
     if (x) {                                                                                                           \

@@ -45,6 +45,19 @@ bool carbon_huffman_create(carbon_huffman_t *dic)
 }
 
 CARBON_EXPORT(bool)
+carbon_huffman_cpy(carbon_huffman_t *dst, carbon_huffman_t *src)
+{
+    CARBON_NON_NULL_OR_ERROR(dst);
+    CARBON_NON_NULL_OR_ERROR(src);
+    if (!carbon_vec_cpy(&dst->table, &src->table)) {
+        CARBON_ERROR(&src->err, CARBON_ERR_HARDCOPYFAILED);
+        return false;
+    } else {
+        return carbon_error_cpy(&dst->err, &src->err);
+    }
+}
+
+CARBON_EXPORT(bool)
 carbon_huffman_build(carbon_huffman_t *encoder, const carbon_string_ref_vec *strings)
 {
     CARBON_NON_NULL_OR_ERROR(encoder);

@@ -23,10 +23,11 @@
 #include "carbon-memfile.h"
 #include "carbon-compressor.h"
 #include "carbon-columndoc.h"
+#include "carbon-io-context.h"
 
 CARBON_BEGIN_DECL
 
-typedef struct carbon_strtable_iter carbon_strtable_iter_t; /* forwarded from carbon-strtable.h */
+typedef struct carbon_strid_iter carbon_strid_iter_t; /* fordwarded from 'carbon-strid-iter.h' */
 
 union carbon_archive_dic_flags;
 
@@ -117,7 +118,8 @@ typedef union
 
 typedef struct carbon_archive_string_table
 {
-    carbon_compressor_t     strategy;
+    carbon_compressor_t     compressor;
+    carbon_off_t            first_entry_off;
 
 } carbon_archive_string_table_t;
 
@@ -192,11 +194,19 @@ typedef struct carbon_archive
 {
     carbon_archive_info_t         info;
     char                         *diskFilePath;
-    FILE                         *diskFile;
     carbon_archive_string_table_t string_table;
     carbon_archive_record_table_t record_table;
-    carbon_err_t err;
+    carbon_err_t                  err;
 } carbon_archive_t;
+
+
+typedef struct __attribute__((packed)) carbon_string_entry_header
+{
+    char                          marker;
+    carbon_off_t                  next_entry_off;
+    carbon_string_id_t            string_id;
+    uint32_t                      string_len;
+} carbon_string_entry_header_t;
 
 CARBON_EXPORT(bool)
 carbon_archive_from_json(carbon_archive_t *out,
@@ -219,11 +229,6 @@ carbon_archive_from_model(carbon_memblock_t **stream,
                           carbon_columndoc_t *model,
                           carbon_compressor_type_e compressor);
 
-CARBON_EXPORT(bool)
-carbon_archive_drop(carbon_archive_t *archive);
-
-CARBON_EXPORT(bool)
-carbon_archive_fullscan_strings(carbon_strtable_iter_t *it, carbon_predicate_string_t *pred, carbon_archive_t *archive);
 
 CARBON_EXPORT(bool)
 carbon_archive_write(FILE *file, const carbon_memblock_t *stream);
@@ -244,6 +249,33 @@ CARBON_DEFINE_GET_ERROR_FUNCTION(archive, carbon_archive_t, archive);
 
 CARBON_EXPORT(bool)
 carbon_archive_close(carbon_archive_t *archive);
+
+
+
+/**
+ * Creates a new <code>carbon_io_context_t</code> to access the archives underlying file for unsafe operations.
+ *
+ * An unsafe operation directly seeks randomly in the underlying file. To avoid creation of multiple file
+ * descriptors while at the same time allow to access unsafe operations in a multi-threading environment, an
+ * <code>carbon_io_context_t</code> is used. Roughly, such a context is a regular FILE that is protected by a lock.
+ *
+ * @param archive The archive
+ * @return a heap-allocated instance of <code>carbon_io_context_t</code>, or NULL if not successful
+ */
+CARBON_EXPORT(carbon_io_context_t *)
+carbon_archive_io_context_create(carbon_archive_t *archive);
+
+
+
+CARBON_EXPORT(bool)
+carbon_archive_query_fullscan_strids(carbon_strid_iter_t *it, carbon_archive_t *archive);
+
+CARBON_EXPORT(char *)
+carbon_archive_query_fullscan_string_by_id(carbon_archive_t *archive, carbon_string_id_t id);
+
+CARBON_EXPORT(char *)
+carbon_archive_query_unsafe_string_by_offset(carbon_io_context_t *context, carbon_archive_t *archive, carbon_off_t off, size_t strlen);
+
 
 CARBON_EXPORT(bool)
 carbon_archive_record(carbon_archive_object_t *root, carbon_archive_t *archive);

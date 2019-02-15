@@ -78,6 +78,19 @@ typedef struct carbon_compressor
     bool (*drop)(carbon_compressor_t *self);
 
     /**
+     * Perform a hard-copy of this compressor to dst
+     *
+     * @param self  A pointer to itself
+     * @param dst   A pointer to the copy target
+     *
+     * @return <b>true</b> in case of success, or <b>false</b> otherwise.
+     *
+     * @author Marcus Pinnecke
+     * @since 0.1.00.05
+     */
+    bool (*cpy)(const carbon_compressor_t *self, carbon_compressor_t *dst);
+
+    /**
      * Function to construct and serialize an implementation-specific dictionary, book-keeping data, or extra data
      * (e.g., a code table)
      *
@@ -118,8 +131,7 @@ typedef struct carbon_compressor
     bool (*encode_string)(carbon_compressor_t *self, carbon_memfile_t *dst, carbon_err_t *err,
                           const char *string);
 
-    char *(*decode_string)(carbon_compressor_t *self, carbon_memfile_t *dst, carbon_err_t *err,
-                           carbon_string_id_t string_id);
+    bool (*decode_string)(carbon_compressor_t *self, char *dst, size_t strlen, FILE *src);
 
     /**
      * Reads implementation-specific book-keeping, meta or extra data from the input memory file and
@@ -163,6 +175,7 @@ static void carbon_compressor_none_create(carbon_compressor_t *strategy)
 {
     strategy->tag             = CARBON_COMPRESSOR_NONE;
     strategy->create          = carbon_compressor_none_init;
+    strategy->cpy             = carbon_compressor_none_cpy;
     strategy->drop            = carbon_compressor_none_drop;
     strategy->write_extra     = carbon_compressor_none_write_extra;
     strategy->encode_string   = carbon_compressor_none_encode_string;
@@ -175,6 +188,7 @@ static void carbon_compressor_huffman_create(carbon_compressor_t *strategy)
 {
     strategy->tag             = CARBON_COMPRESSOR_HUFFMAN;
     strategy->create          = carbon_compressor_huffman_init;
+    strategy->cpy             = carbon_compressor_huffman_cpy;
     strategy->drop            = carbon_compressor_huffman_drop;
     strategy->write_extra     = carbon_compressor_huffman_write_extra;
     strategy->encode_string   = carbon_compressor_huffman_encode_string;
@@ -202,6 +216,8 @@ static struct
 
 #pragma GCC diagnostic pop
 
+
+
 CARBON_EXPORT(bool)
 carbon_compressor_by_type(carbon_err_t *err, carbon_compressor_t *strategy, carbon_compressor_type_e type);
 
@@ -213,6 +229,32 @@ carbon_compressor_by_flags(carbon_compressor_t *strategy, uint8_t flags);
 
 CARBON_EXPORT(bool)
 carbon_compressor_by_name(carbon_compressor_type_e *type, const char *name);
+
+
+CARBON_EXPORT(bool)
+carbon_compressor_cpy(carbon_err_t *err, carbon_compressor_t *dst, const carbon_compressor_t *src);
+
+CARBON_EXPORT(bool)
+carbon_compressor_drop(carbon_err_t *err, carbon_compressor_t *self);
+
+CARBON_EXPORT(bool)
+carbon_compressor_write_extra(carbon_err_t *err, carbon_compressor_t *self, carbon_memfile_t *dst,
+                    const carbon_vec_t ofType (const char *) *strings);
+
+CARBON_EXPORT(bool)
+carbon_compressor_encode_string(carbon_err_t *err, carbon_compressor_t *self, carbon_memfile_t *dst,
+                      const char *string);
+
+CARBON_EXPORT(bool)
+carbon_compressor_decode_string(carbon_err_t *err, carbon_compressor_t *self, char *dst, size_t strlen, FILE *src);
+
+
+CARBON_EXPORT(bool)
+carbon_compressor_print_extra(carbon_err_t *err, carbon_compressor_t *self, FILE *file, carbon_memfile_t *src);
+
+CARBON_EXPORT(bool)
+carbon_compressor_print_encoded(carbon_err_t *err, carbon_compressor_t *self, FILE *file, carbon_memfile_t *src,
+                      uint32_t decompressed_strlen);
 
 CARBON_END_DECL
 
