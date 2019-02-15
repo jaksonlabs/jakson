@@ -386,7 +386,7 @@ static bool import_json_object_array_prop(carbon_doc_obj_t *target, carbon_err_t
             carbon_field_type_e array_number_type = carbon_field_type_null;
             for (size_t i = 0; i < num_elements; i++) {
                 const carbon_json_ast_node_element_t *element = CARBON_VECTOR_GET(&array->elements.elements, i, carbon_json_ast_node_element_t);
-                if (CARBON_BRANCH_UNLIKELY(element->value.value_type == CARBON_JSON_AST_NODE_VALUE_TYPE_NULL)) {
+                if (CARBON_UNLIKELY(element->value.value_type == CARBON_JSON_AST_NODE_VALUE_TYPE_NULL)) {
                     continue;
                 } else {
                     bool success;
@@ -399,7 +399,7 @@ static bool import_json_object_array_prop(carbon_doc_obj_t *target, carbon_err_t
                            element_number_type == carbon_field_type_uint8 || element_number_type == carbon_field_type_uint16 ||
                            element_number_type == carbon_field_type_uint32 || element_number_type == carbon_field_type_uint64 ||
                            element_number_type == carbon_field_type_float);
-                    if (CARBON_BRANCH_UNLIKELY(array_number_type == carbon_field_type_null)) {
+                    if (CARBON_UNLIKELY(array_number_type == carbon_field_type_null)) {
                         array_number_type = element_number_type;
                     } else {
                         if (array_number_type == carbon_field_type_int8) {
@@ -554,7 +554,7 @@ static bool import_json_object_array_prop(carbon_doc_obj_t *target, carbon_err_t
                 }
             } break;
             case carbon_field_type_bool:
-                if (CARBON_BRANCH_LIKELY(ast_node_data_type == CARBON_JSON_AST_NODE_VALUE_TYPE_TRUE ||
+                if (CARBON_LIKELY(ast_node_data_type == CARBON_JSON_AST_NODE_VALUE_TYPE_TRUE ||
                                   ast_node_data_type == CARBON_JSON_AST_NODE_VALUE_TYPE_FALSE)) {
                     carbon_bool_t value = ast_node_data_type == CARBON_JSON_AST_NODE_VALUE_TYPE_TRUE ?
                                          CARBON_BOOLEAN_TRUE : CARBON_BOOLEAN_FALSE;

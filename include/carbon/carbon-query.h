@@ -21,6 +21,7 @@
 #include "carbon-common.h"
 #include "carbon-archive.h"
 #include "carbon-strid-iter.h"
+#include "carbon-string-pred.h"
 
 CARBON_BEGIN_DECL
 
@@ -43,10 +44,14 @@ CARBON_EXPORT(bool)
 carbon_query_scan_strids(carbon_strid_iter_t *it, carbon_query_t *query);
 
 CARBON_EXPORT(char *)
-carbon_query_find_string_by_id(carbon_query_t *query, carbon_string_id_t id);
+carbon_query_fetch_string_by_id(carbon_query_t *query, carbon_string_id_t id);
 
-CARBON_EXPORT(char *)
-carbon_query_fetch_string_unsafe(carbon_query_t *query, carbon_off_t off, size_t strlen);
+CARBON_EXPORT(char **)
+carbon_query_fetch_strings_by_offset(carbon_query_t *query, carbon_off_t *offs, uint32_t *strlens, size_t num_offs);
+
+CARBON_EXPORT(carbon_string_id_t *)
+carbon_query_find_ids(size_t *num_found, carbon_query_t *query, const carbon_string_pred_t *pred,
+                      void *capture, int64_t limit);
 
 
 

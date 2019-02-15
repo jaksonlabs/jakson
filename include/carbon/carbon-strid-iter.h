@@ -36,7 +36,7 @@ typedef struct carbon_strid_iter
     FILE *disk_file;
     bool is_open;
     carbon_off_t disk_offset;
-    carbon_strid_info_t vector[5];
+    carbon_strid_info_t vector[10000];
 } carbon_strid_iter_t;
 
 CARBON_EXPORT(bool)

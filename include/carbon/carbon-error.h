@@ -22,6 +22,8 @@
 
 #include "carbon-common.h"
 
+CARBON_BEGIN_DECL
+
 #define CARBON_ERR_NOERR 0                  /** No error */
 #define CARBON_ERR_NULLPTR 1                /** Null pointer detected */
 #define CARBON_ERR_NOTIMPL 2                /** Function not implemented */
@@ -68,6 +70,8 @@
 #define CARBON_ERR_DECOMPRESSFAILED 43      /** String decompression from archive failed */
 #define CARBON_ERR_ITERATORNOTCLOSED 44     /** Closing iterator failed */
 #define CARBON_ERR_HARDCOPYFAILED 45        /** Unable to construct a hard copy of the source object */
+#define CARBON_ERR_REALLOCERR 46            /** Memory reallocation failed */
+#define CARBON_ERR_PREDEVAL_FAILED 47       /** Predicate evaluation failed */
 
 static const char *const _carbon_err_str[] = {
     "No error",
@@ -115,7 +119,9 @@ static const char *const _carbon_err_str[] = {
     "Unable to perform full scan in archive file",
     "String decompression from archive failed",
     "Closing iterator failed",
-    "Unable to construct a hard copy of the source object"
+    "Unable to construct a hard copy of the source object",
+    "Memory reallocation failed",
+    "Predicate evaluation failed"
 };
 
 #define CARBON_ERRSTR_ILLEGAL_CODE "illegal error code"
@@ -183,5 +189,7 @@ carbon_##type_name##_get_error(carbon_err_t *err, const type *arg)              
     carbon_error_cpy(err, &arg->err);                                                                                  \
     return true;                                                                                                       \
 }
+
+CARBON_END_DECL
 
 #endif

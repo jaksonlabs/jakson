@@ -4,54 +4,6 @@
 #include <carbon/carbon-query.h>
 #include "carbon/carbon.h"
 
-
-
-/* taken from https://json.org/example.html */
-const char *JSON_EXAMPLE = "{\"web-app\": {\n"
-                            "  \"servlet\": [   \n"
-                            "    {\n"
-                            "      \"servlet-name\": \"cofaxCDS\",\n"
-                            "      \"servlet-class\": \"org.cofax.cds.CDSServlet\",\n"
-                            "      \"init-param\": {\n"
-                            "        \"configGlossary:installationAt\": \"Philadelphia, PA\",\n"
-                            "        \"configGlossary:adminEmail\": \"ksm@pobox.com\",\n"
-                            "        \"dataStoreInitConns\": 10,\n"
-                            "        \"dataStoreMaxConns\": 100,\n"
-                            "        \"dataStoreConnUsageLimit\": 100,\n"
-                            "        \"dataStoreLogLevel\": \"debug\",\n"
-                            "        \"maxUrlLength\": 500}},\n"
-                            "    {\n"
-                            "      \"servlet-name\": \"cofaxEmail\",\n"
-                            "      \"servlet-class\": \"org.cofax.cds.EmailServlet\",\n"
-                            "      \"init-param\": {\n"
-                            "      \"mailHost\": \"mail1\",\n"
-                            "      \"mailHostOverride\": \"mail2\"}},\n"
-                            "    {\n"
-                            "      \"servlet-name\": \"cofaxAdmin\",\n"
-                            "      \"servlet-class\": \"org.cofax.cds.AdminServlet\"},\n"
-                            " \n"
-                            "    {\n"
-                            "      \"servlet-name\": \"fileServlet\",\n"
-                            "      \"servlet-class\": \"org.cofax.cds.FileServlet\"},\n"
-                            "    {\n"
-                            "      \"servlet-name\": \"cofaxTools\",\n"
-                            "      \"servlet-class\": \"org.cofax.cms.CofaxToolsServlet\",\n"
-                            "      \"init-param\": {\n"
-                            "        \"templatePath\": \"toolstemplates/\",\n"
-                            "        \"log\": 1,\n"
-                            "        \"adminGroupID\": 4,\n"
-                            "        \"betaServer\": true}}],\n"
-                            "  \"servlet-mapping\": {\n"
-                            "    \"cofaxCDS\": \"/\",\n"
-                            "    \"cofaxEmail\": \"/cofaxutil/aemail/*\",\n"
-                            "    \"cofaxAdmin\": \"/admin/*\",\n"
-                            "    \"fileServlet\": \"/static/*\",\n"
-                            "    \"cofaxTools\": \"/tools/*\"},\n"
-                            " \n"
-                            "  \"taglib\": {\n"
-                            "    \"taglib-uri\": \"cofax.tld\",\n"
-                            "    \"taglib-location\": \"/WEB-INF/tlds/cofax.tld\"}}}";
-
 TEST(CarbonArchiveOpsTest, CreateStreamFromJsonString)
 {
     carbon_memblock_t *stream;
@@ -94,12 +46,8 @@ TEST(CarbonArchiveOpsTest, CreateArchiveStringHandling)
     carbon_err_t         err;
     carbon_query_t       query;
 
-    const char        *json_string = JSON_EXAMPLE;
-    const char        *archive_file = "tmp-test-archive.carbon";
-    bool               read_optimized = false;
-
-    status = carbon_archive_from_json(&archive, archive_file, &err, json_string,
-                                      CARBON_COMPRESSOR_NONE, read_optimized);
+    /* in order to access this file, the working directory of this test executable must be set to the project root */
+    status = carbon_archive_open(&archive, "tests/assets/test-archive.carbon");
     ASSERT_TRUE(status);
 
     status = carbon_archive_query(&query, &archive);
@@ -110,12 +58,6 @@ TEST(CarbonArchiveOpsTest, CreateArchiveStringHandling)
 
     while (carbon_strid_iter_next(&success, &info, &err, &vector_len, &strid_iter)) {
         for (size_t i = 0; i < vector_len; i++) {
-            /* longest string is 31 in size; if 'next' is broken, we may read something exceeding this length */
-            ASSERT_LE(info[i].strlen, 31);
-
-            /* highest offset is 1590; if 'next' is broken, we may read something beyond this value */
-            ASSERT_LE(info[i].offset, 1590);
-
             /* Note, that 'info[i].id' cannot be tested based on its value because it is not deterministic generated;
              * all ids must be unique. In case we read something wrong, we may find some duplicate
              * (which is unlikely, however) */
@@ -150,12 +92,8 @@ TEST(CarbonArchiveOpsTest, DecodeStringByIdFullScan)
     carbon_err_t         err;
     carbon_query_t       query;
 
-    const char        *json_string = JSON_EXAMPLE;
-    const char        *archive_file = "tmp-test-archive.carbon";
-    bool               read_optimized = false;
-
-    status = carbon_archive_from_json(&archive, archive_file, &err, json_string,
-                                      CARBON_COMPRESSOR_NONE, read_optimized);
+    /* in order to access this file, the working directory of this test executable must be set to the project root */
+    status = carbon_archive_open(&archive, "tests/assets/test-archive.carbon");
     ASSERT_TRUE(status);
 
     status = carbon_archive_query(&query, &archive);
@@ -175,9 +113,9 @@ TEST(CarbonArchiveOpsTest, DecodeStringByIdFullScan)
 
     for (std::set<carbon_string_id_t>::iterator it = all_str_ids.begin(); it != all_str_ids.end(); it++) {
         carbon_string_id_t string_id = *it;
-        char *string = carbon_query_find_string_by_id(&query, string_id);
+        char *string = carbon_query_fetch_string_by_id(&query, string_id);
         ASSERT_TRUE(string != NULL);
-        printf("%" PRIu64 " -> '%s'\n", string_id, string);
+        printf("DecodeStringByIdFullScan: %" PRIu64 " -> '%s'\n", string_id, string);
         free(string);
     }
 
@@ -199,12 +137,8 @@ TEST(CarbonArchiveOpsTest, DecodeStringByFastUnsafeAccess)
     carbon_err_t                     err;
     carbon_query_t                   query;
 
-    const char        *json_string = JSON_EXAMPLE;
-    const char        *archive_file = "tmp-test-archive.carbon";
-    bool               read_optimized = false;
-
-    status = carbon_archive_from_json(&archive, archive_file, &err, json_string,
-                                      CARBON_COMPRESSOR_NONE, read_optimized);
+    /* in order to access this file, the working directory of this test executable must be set to the project root */
+    status = carbon_archive_open(&archive, "tests/assets/test-archive.carbon");
     ASSERT_TRUE(status);
 
     status = carbon_archive_query(&query, &archive);
@@ -215,10 +149,12 @@ TEST(CarbonArchiveOpsTest, DecodeStringByFastUnsafeAccess)
 
     while (carbon_strid_iter_next(&success, &info, &err, &vector_len, &strid_iter)) {
         for (size_t i = 0; i < vector_len; i++) {
-            char *string = carbon_query_fetch_string_unsafe(&query, info[i].offset, info[i].strlen);
-            ASSERT_TRUE(string != NULL);
-            printf("%" PRIu64 " -> '%s'\n", info[i].id, string);
-            free(string);
+            char **strings = carbon_query_fetch_strings_by_offset(&query, &(info[i].offset), &(info[i].strlen), 1);
+            ASSERT_TRUE(strings != NULL);
+            ASSERT_TRUE(strings[0] != NULL);
+            printf("%" PRIu64 " -> '%s'\n", info[i].id, strings[0]);
+            free(strings[0]);
+            free(strings);
         }
     }
 
@@ -230,6 +166,75 @@ TEST(CarbonArchiveOpsTest, DecodeStringByFastUnsafeAccess)
 
     status = carbon_archive_close(&archive);
     ASSERT_TRUE(status);
+}
+
+TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateContains)
+{
+    carbon_archive_t      archive;
+    carbon_query_t        query;
+    bool                  status;
+    size_t                num_match;
+    carbon_string_pred_t  pred;
+    carbon_string_id_t   *result;
+
+    /* in order to access this file, the working directory of this test executable must be set to the project root */
+    status = carbon_archive_open(&archive, "tests/assets/test-archive.carbon");
+    ASSERT_TRUE(status);
+
+    status = carbon_archive_query(&query, &archive);
+    ASSERT_TRUE(status);
+
+    const char *needle = "arg";
+
+    carbon_string_pred_contains_init(&pred);
+    result = carbon_query_find_ids(&num_match, &query, &pred, (void *) needle, CARBON_QUERY_LIMIT_NONE);
+    ASSERT_TRUE(result != NULL);
+
+    for (size_t i = 0; i < num_match; i++) {
+        char *string = carbon_query_fetch_string_by_id(&query, result[i]);
+        ASSERT_TRUE(string != NULL);
+        printf("MATCHED %" PRIu64 " ('%s')\n", result[i], string);
+        ASSERT_TRUE(strstr(string, needle) != NULL);
+        free(string);
+    }
+
+    free(result);
+
+    carbon_archive_close(&archive);
+}
+
+TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateEquals)
+{
+    carbon_archive_t      archive;
+    carbon_query_t        query;
+    bool                  status;
+    size_t                num_match;
+    carbon_string_pred_t  pred;
+    carbon_string_id_t   *result;
+
+    /* in order to access this file, the working directory of this test executable must be set to the project root */
+    status = carbon_archive_open(&archive, "tests/assets/test-archive.carbon");
+    ASSERT_TRUE(status);
+
+    status = carbon_archive_query(&query, &archive);
+    ASSERT_TRUE(status);
+
+    const char *needle = "phoneNumbers";
+
+    carbon_string_pred_equals_init(&pred);
+    result = carbon_query_find_ids(&num_match, &query, &pred, (void *) needle, CARBON_QUERY_LIMIT_NONE);
+    ASSERT_TRUE(result != NULL);
+
+    ASSERT_TRUE(num_match == 1);
+    char *string = carbon_query_fetch_string_by_id(&query, result[0]);
+    ASSERT_TRUE(string != NULL);
+    printf("MATCHED %" PRIu64 " ('%s')\n", result[0], string);
+    ASSERT_TRUE(strcmp(string, needle) == 0);
+    free(string);
+
+    free(result);
+
+    carbon_archive_close(&archive);
 }
 
 int main(int argc, char **argv)

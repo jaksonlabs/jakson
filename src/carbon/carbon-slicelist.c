@@ -159,7 +159,7 @@ carbon_slice_list_insert(carbon_slice_list_t *list, char **strings, carbon_strin
                                        appenderBounds->maxHash : keyHash;
             CARBON_BLOOM_SET(appenderFilter, &keyHash, sizeof(carbon_hash_t));
             appender->num_elems++;
-            if (CARBON_BRANCH_UNLIKELY(appender->num_elems == SLICE_KEY_COLUMN_MAX_ELEMS)) {
+            if (CARBON_UNLIKELY(appender->num_elems == SLICE_KEY_COLUMN_MAX_ELEMS)) {
                 appenderSeal(appender);
                 appenderNew(list);
             }

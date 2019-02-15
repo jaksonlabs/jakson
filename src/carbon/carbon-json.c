@@ -72,7 +72,7 @@ carbon_json_tokenizer_init(carbon_json_tokenizer_t *tokenizer, const char *input
 
 const carbon_json_token_t *carbon_json_tokenizer_next(carbon_json_tokenizer_t *tokenizer)
 {
-    if (CARBON_BRANCH_LIKELY(*tokenizer->cursor != '\0')) {
+    if (CARBON_LIKELY(*tokenizer->cursor != '\0')) {
         char c = *tokenizer->cursor;
         tokenizer->token.string = tokenizer->cursor;
         tokenizer->token.column += tokenizer->token.length;
@@ -111,7 +111,7 @@ next_char:
                 last_2_c = last_1_c;
                 last_1_c = c;
                 c = *(++tokenizer->cursor);
-                if (CARBON_BRANCH_UNLIKELY(c == '\\' && last_1_c == '\\')) {
+                if (CARBON_UNLIKELY(c == '\\' && last_1_c == '\\')) {
                     goto next_char;
                 }
                 escapeQuote =  c == '"' && last_1_c == '\\' && ((last_2_c == '\\' && last_3_c == '\\' && last_4_c != '\\') ||
@@ -253,7 +253,7 @@ bool carbon_json_parse(CARBON_NULLABLE carbon_json_t *json, CARBON_NULLABLE carb
     };
 
     while ((token = carbon_json_tokenizer_next(&parser->tokenizer))) {
-        if (CARBON_BRANCH_LIKELY((status = process_token(&parser->err, error_desc, token, &brackets, &token_mem)) == true)) {
+        if (CARBON_LIKELY((status = process_token(&parser->err, error_desc, token, &brackets, &token_mem)) == true)) {
             carbon_json_token_t *newToken = VECTOR_NEW_AND_GET(&token_stream, carbon_json_token_t);
             carbon_json_token_dup(newToken, token);
         } else {
@@ -465,7 +465,7 @@ static void parse_string(carbon_json_ast_node_string_t *string, carbon_vec_t ofT
     assert(token.type == CARBON_JSON_TOKEN_STRING_LITERAL);
 
     string->value = malloc(token.length + 1);
-    if (CARBON_BRANCH_LIKELY(token.length > 0)) {
+    if (CARBON_LIKELY(token.length > 0)) {
         strncpy(string->value, token.string, token.length);
     }
     string->value[token.length] = '\0';

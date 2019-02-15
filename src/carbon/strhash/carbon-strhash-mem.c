@@ -197,7 +197,7 @@ static int this_fetch_bulk(carbon_vec_t ofType(bucket) *buckets, carbon_string_i
     for (size_t i = 0; i < num_keys; i++) {
         bucket_t *bucket = data + bucket_idxs[i];
         const char *key = keys[i];
-        if (CARBON_BRANCH_LIKELY(key != NULL)) {
+        if (CARBON_LIKELY(key != NULL)) {
             carbon_slice_list_lookup(&result_handle, &bucket->slice_list, key);
         } else {
             result_handle.is_contained = true;
@@ -349,7 +349,7 @@ static int simple_map_remove(mem_extra_t *extra, size_t *bucket_idxs, char *cons
 
         /** Optimization 1/5: EMPTY GUARD (but before "find" call); if this bucket has no occupied slots, do not perform any lookup and comparison */
         carbon_slice_list_lookup(&handle, &bucket->slice_list, key);
-        if (CARBON_BRANCH_LIKELY(handle.is_contained)) {
+        if (CARBON_LIKELY(handle.is_contained)) {
             SliceListRemove(&bucket->slice_list, &handle);
         }
     }

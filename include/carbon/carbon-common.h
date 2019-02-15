@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdint.h>
+#include <assert.h>
 
 #ifdef __cplusplus
 #define CARBON_BEGIN_DECL  extern "C" {
@@ -48,6 +49,9 @@
 #define CARBON_EXPORT(x) x
 #endif
 #endif
+
+#define CARBON_QUERY_LIMIT_NONE -1
+#define CARBON_QUERY_LIMIT_1     1
 
 #define CARBON_ARRAY_LENGTH(x)                                                                                         \
     sizeof(x)/sizeof(x[0])
@@ -194,6 +198,8 @@ typedef enum carbon_type
 
 #define CARBON_FUNC_UNUSED __attribute__((unused))
 
+#define CARBON_BUILT_IN(x)   CARBON_FUNC_UNUSED x
+
 #define ofType(x) /** a convenience way to write types for generic containers; no effect than just a visual one */
 
 #define CARBON_NULLABLE /** parameters to functions marked with this tag can be NULL and will be ignored; is attached
@@ -218,21 +224,21 @@ typedef enum carbon_type
 
 #define CARBON_CHECK_SUCCESS(x)                                                                                        \
 {                                                                                                                      \
-    if (CARBON_BRANCH_UNLIKELY(!x)) {                                                                                  \
+    if (CARBON_UNLIKELY(!x)) {                                                                                         \
         return x;                                                                                                      \
     }                                                                                                                  \
 }
 
 #define CARBON_SUCCESS_OR_JUMP(expr, label)                                                                            \
 {                                                                                                                      \
-    if (CARBON_BRANCH_UNLIKELY(!expr)) {                                                                               \
+    if (CARBON_UNLIKELY(!expr)) {                                                                                      \
         goto label;                                                                                                    \
     }                                                                                                                  \
 }
 
-#define CARBON_BRANCH_LIKELY(x)                                                                                        \
+#define CARBON_LIKELY(x)                                                                                               \
     __builtin_expect((x), 1)
-#define CARBON_BRANCH_UNLIKELY(x)                                                                                      \
+#define CARBON_UNLIKELY(x)                                                                                             \
     __builtin_expect((x), 0)
 
 #define CARBON_PREFETCH_READ(adr)                                                                                      \

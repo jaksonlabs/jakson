@@ -34,7 +34,7 @@ carbon_parallel_for_proxy_function(void * args)
 
 #define PARALLEL_MATCH(forSingle, forMulti)                                                                            \
 {                                                                                                                      \
-    if (CARBON_BRANCH_LIKELY(hint == CARBON_PARALLEL_THREAD_HINT_MULTI)) {                                             \
+    if (CARBON_LIKELY(hint == CARBON_PARALLEL_THREAD_HINT_MULTI)) {                                             \
         return (forMulti);                                                                                             \
     } else if (hint == CARBON_PARALLEL_THREAD_HINT_SINGLE) {                                                           \
         return (forSingle);                                                                                            \
@@ -650,7 +650,7 @@ carbon_parallel_parallel_filter_late(size_t * pos, size_t * num_pos,
     CARBON_NON_NULL_OR_ERROR(width);
     CARBON_NON_NULL_OR_ERROR(pred);
 
-    if (CARBON_BRANCH_UNLIKELY(len == 0)) {
+    if (CARBON_UNLIKELY(len == 0)) {
         *num_pos = 0;
         return true;
     }
@@ -669,7 +669,7 @@ carbon_parallel_parallel_filter_late(size_t * pos, size_t * num_pos,
     CARBON_PREFETCH_READ(args);
 
     /** run f on NTHREADS_FOR additional threads */
-    if (CARBON_BRANCH_LIKELY(chunk_len > 0)) {
+    if (CARBON_LIKELY(chunk_len > 0)) {
         for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
             carbon_filter_arg_t *arg = thread_args + tid;
             arg->num_positions = 0;
@@ -701,7 +701,7 @@ carbon_parallel_parallel_filter_late(size_t * pos, size_t * num_pos,
 
     size_t total_num_matching_positions = 0;
 
-    if (CARBON_BRANCH_LIKELY(chunk_len > 0)) {
+    if (CARBON_LIKELY(chunk_len > 0)) {
         for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
             pthread_join(threads[tid], NULL);
             const carbon_filter_arg_t * thread_arg = (thread_args + tid);
@@ -714,7 +714,7 @@ carbon_parallel_parallel_filter_late(size_t * pos, size_t * num_pos,
         }
     }
 
-    if (CARBON_BRANCH_LIKELY(main_num_positions > 0)) {
+    if (CARBON_LIKELY(main_num_positions > 0)) {
         memcpy(pos + total_num_matching_positions, main_src_positions,
                main_num_positions * sizeof(size_t));
         total_num_matching_positions += main_num_positions;
@@ -814,7 +814,7 @@ carbon_parallel_parallel_filter_early(void * result, size_t * result_size,
     for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
         const carbon_filter_arg_t * thread_arg = (thread_args + tid);
 
-        if (CARBON_BRANCH_LIKELY(thread_arg->num_positions > 0)) {
+        if (CARBON_LIKELY(thread_arg->num_positions > 0)) {
             carbon_parallel_gather(result + partial_num_matching_positions * width, src, width, thread_arg->src_positions,
                                    thread_arg->num_positions,
                                    CARBON_PARALLEL_THREAD_HINT_MULTI, num_threads);
@@ -824,7 +824,7 @@ carbon_parallel_parallel_filter_early(void * result, size_t * result_size,
         free(thread_arg->src_positions);
     }
 
-    if (CARBON_BRANCH_LIKELY(main_num_positions > 0)) {
+    if (CARBON_LIKELY(main_num_positions > 0)) {
         carbon_parallel_gather(result + partial_num_matching_positions * width, src, width, main_src_positions,
                                main_num_positions, CARBON_PARALLEL_THREAD_HINT_MULTI, num_threads);
     }

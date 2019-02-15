@@ -64,12 +64,11 @@ carbon_io_context_get_error(carbon_io_context_t *context)
 }
 
 CARBON_EXPORT(FILE *)
-carbon_io_context_seek_lock_and_access(carbon_io_context_t *context, carbon_off_t off)
+carbon_io_context_lock(carbon_io_context_t *context)
 {
     if (context) {
         carbon_spinlock_acquire(&context->lock);
         context->last_pos = ftell(context->file);
-        fseek(context->file, off, SEEK_SET);
         return context->file;
     } else {
         CARBON_ERROR(&context->err, CARBON_ERR_NULLPTR);

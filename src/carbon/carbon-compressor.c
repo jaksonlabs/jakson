@@ -106,8 +106,8 @@ carbon_compressor_write_extra(carbon_err_t *err, carbon_compressor_t *self, carb
 }
 
 CARBON_EXPORT(bool)
-carbon_compressor_encode_string(carbon_err_t *err, carbon_compressor_t *self, carbon_memfile_t *dst,
-                                const char *string)
+carbon_compressor_encode(carbon_err_t *err, carbon_compressor_t *self, carbon_memfile_t *dst,
+                         const char *string)
 {
     CARBON_NON_NULL_OR_ERROR(self)
     CARBON_IMPLEMENTS_OR_ERROR(err, self, encode_string)
@@ -115,7 +115,7 @@ carbon_compressor_encode_string(carbon_err_t *err, carbon_compressor_t *self, ca
 }
 
 CARBON_EXPORT(bool)
-carbon_compressor_decode_string(carbon_err_t *err, carbon_compressor_t *self, char *dst, size_t strlen, FILE *src)
+carbon_compressor_decode(carbon_err_t *err, carbon_compressor_t *self, char *dst, size_t strlen, FILE *src)
 {
     CARBON_NON_NULL_OR_ERROR(self)
     CARBON_IMPLEMENTS_OR_ERROR(err, self, decode_string)

@@ -97,7 +97,7 @@ carbon_object_id_create(carbon_object_id_t *out)
 
     bool capacity_left = (thread_local_counter != thread_local_counter_limit);
     CARBON_PRINT_ERROR_IF(!capacity_left, CARBON_ERR_THREADOOOBJIDS)
-    if (CARBON_BRANCH_LIKELY(capacity_left)) {
+    if (CARBON_LIKELY(capacity_left)) {
         internal_object_id_t internal = {
             .global_wallclock  = carbon_time_now_wallclock(),
             .global_build_date = global_build_date_bit,

@@ -36,7 +36,7 @@ bool carbon_memfile_seek(carbon_memfile_t *file, carbon_off_t pos)
     CARBON_NON_NULL_OR_ERROR(file)
     carbon_off_t file_size;
     carbon_memblock_size(&file_size, file->memblock);
-    if (CARBON_BRANCH_UNLIKELY(pos >= file_size)) {
+    if (CARBON_UNLIKELY(pos >= file_size)) {
         if (file->mode == CARBON_MEMFILE_MODE_READWRITE) {
             carbon_off_t new_size = pos + 1;
             carbon_memblock_resize(file->memblock, new_size);
@@ -110,7 +110,7 @@ bool carbon_memfile_skip(carbon_memfile_t *file, carbon_off_t nbytes)
     carbon_off_t file_size;
     carbon_memblock_size(&file_size, file->memblock);
 
-    if (CARBON_BRANCH_UNLIKELY(required_size >= file_size)) {
+    if (CARBON_UNLIKELY(required_size >= file_size)) {
         if (file->mode == CARBON_MEMFILE_MODE_READWRITE) {
             carbon_memblock_resize(file->memblock, required_size * 1.7f);
         } else {
@@ -126,7 +126,7 @@ const carbon_byte_t *carbon_memfile_peek(carbon_memfile_t *file, carbon_off_t nb
 {
     carbon_off_t file_size;
     carbon_memblock_size(&file_size, file->memblock);
-    if (CARBON_BRANCH_UNLIKELY(file->pos + nbytes > file_size)) {
+    if (CARBON_UNLIKELY(file->pos + nbytes > file_size)) {
         CARBON_ERROR(&file->err, CARBON_ERR_READOUTOFBOUNDS);
         return NULL;
     } else {
@@ -140,15 +140,15 @@ bool carbon_memfile_write(carbon_memfile_t *file, const void *data, carbon_off_t
     CARBON_NON_NULL_OR_ERROR(file)
     CARBON_NON_NULL_OR_ERROR(data)
     if (file->mode == CARBON_MEMFILE_MODE_READWRITE) {
-        if (CARBON_BRANCH_LIKELY(nbytes != 0)) {
+        if (CARBON_LIKELY(nbytes != 0)) {
             carbon_off_t file_size;
             carbon_memblock_size(&file_size, file->memblock);
             carbon_off_t required_size = file->pos + nbytes;
-            if (CARBON_BRANCH_UNLIKELY(required_size >= file_size)) {
+            if (CARBON_UNLIKELY(required_size >= file_size)) {
                 carbon_memblock_resize(file->memblock, required_size * 1.7f);
             }
 
-            if (CARBON_BRANCH_UNLIKELY(!carbon_memblock_write(file->memblock, file->pos, data, nbytes))) {
+            if (CARBON_UNLIKELY(!carbon_memblock_write(file->memblock, file->pos, data, nbytes))) {
                 return false;
             }
             file->pos += nbytes;
@@ -268,7 +268,7 @@ void *carbon_memfile_current_pos(carbon_memfile_t *file, carbon_off_t nbytes)
         carbon_off_t file_size;
         carbon_memblock_size(&file_size, file->memblock);
         carbon_off_t required_size = file->pos + nbytes;
-        if (CARBON_BRANCH_UNLIKELY(file->pos + nbytes >= file_size)) {
+        if (CARBON_UNLIKELY(file->pos + nbytes >= file_size)) {
             if (file->mode == CARBON_MEMFILE_MODE_READWRITE) {
                 carbon_memblock_resize(file->memblock, required_size * 1.7f);
             } else {

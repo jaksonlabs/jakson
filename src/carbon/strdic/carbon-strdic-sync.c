@@ -144,7 +144,7 @@ static int freelist_pop(carbon_string_id_t *out, carbon_strdic_t *self)
 {
     assert (self->tag == CARBON_STRDIC_TYPE_SYNC);
     struct sync_extra *extra = this_extra(self);
-    if (CARBON_BRANCH_UNLIKELY(carbon_vec_is_empty(&extra->freelist))) {
+    if (CARBON_UNLIKELY(carbon_vec_is_empty(&extra->freelist))) {
         size_t num_new_pos;
         CARBON_CHECK_SUCCESS(carbon_vec_grow(&num_new_pos, &extra->freelist));
         CARBON_CHECK_SUCCESS(carbon_vec_grow(NULL, &extra->contents));
@@ -325,7 +325,7 @@ static bool this_remove(carbon_strdic_t *self, carbon_string_id_t *strings, size
     for (size_t i = 0; i < num_strings; i++) {
         carbon_string_id_t carbon_string_id_t = strings[i];
         struct entry *entry   = (struct entry *) carbon_vec_data(&extra->contents) + carbon_string_id_t;
-        if (CARBON_BRANCH_LIKELY(entry->in_use)) {
+        if (CARBON_LIKELY(entry->in_use)) {
             string_to_delete[num_strings_to_delete]    = entry->str;
             string_ids_to_delete[num_strings_to_delete] = strings[i];
             entry->str    = NULL;
@@ -397,7 +397,7 @@ static bool this_locate_fast(carbon_strdic_t *self, carbon_string_id_t **out, ch
 
 static char **this_extract(carbon_strdic_t *self, const carbon_string_id_t *ids, size_t num_ids)
 {
-    if (CARBON_BRANCH_UNLIKELY(!self || !ids || num_ids == 0 || self->tag != CARBON_STRDIC_TYPE_SYNC)) {
+    if (CARBON_UNLIKELY(!self || !ids || num_ids == 0 || self->tag != CARBON_STRDIC_TYPE_SYNC)) {
         return NULL;
     }
 

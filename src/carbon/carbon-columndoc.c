@@ -494,7 +494,7 @@ static void print_array_strings(FILE *file, const char *type_name, const carbon_
             for (size_t j = 0; j < values->num_elems; j++) {
                 carbon_string_id_t value = *CARBON_VECTOR_GET(values, j, carbon_string_id_t);
 
-                if (CARBON_BRANCH_LIKELY(value != CARBON_NULL_ENCODED_STRING)) {
+                if (CARBON_LIKELY(value != CARBON_NULL_ENCODED_STRING)) {
                     char **decoded = carbon_strdic_extract(dic, &value, 1);
                     fprintf(file, "\"%s\"%s", *decoded, j + 1 < values->num_elems ? ", " : "");
                     carbon_strdic_free(dic, decoded);

@@ -52,6 +52,8 @@ extern "C" {
 #include "carbon/strdic/carbon-strdic-async.h"
 #include "carbon/strdic/carbon-strdic-sync.h"
 #include "carbon/strhash/carbon-strhash-mem.h"
+#include "carbon/string-pred/carbon-string-pred-contains.h"
+#include "carbon/string-pred/carbon-string-pred-equals.h"
 
 typedef struct carbon
 {

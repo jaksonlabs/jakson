@@ -806,7 +806,7 @@ static bool write_column_entry(carbon_memfile_t *memfile, carbon_err_t *err, car
             carbon_off_t preObjectNext = 0;
             for (size_t i = 0; i < column->num_elems; i++) {
                 carbon_columndoc_obj_t *object = CARBON_VECTOR_GET(column, i, carbon_columndoc_obj_t);
-                if (CARBON_BRANCH_LIKELY(preObjectNext != 0)) {
+                if (CARBON_LIKELY(preObjectNext != 0)) {
                     carbon_off_t continuePos = CARBON_MEMFILE_TELL(memfile);
                     carbon_off_t relativeContinuePos = continuePos - root_object_header_offset;
                     carbon_memfile_seek(memfile, preObjectNext);
@@ -1274,7 +1274,7 @@ static bool serialize_string_dic(carbon_memfile_t *memfile, carbon_err_t *err, c
         carbon_off_t header_pos_off = CARBON_MEMFILE_TELL(memfile);
         carbon_memfile_skip(memfile, sizeof(carbon_string_entry_header_t));
 
-        if (!carbon_compressor_encode_string(err, &strategy, memfile, string)) {
+        if (!carbon_compressor_encode(err, &strategy, memfile, string)) {
             CARBON_PRINT_ERROR(err.code);
             return false;
         }

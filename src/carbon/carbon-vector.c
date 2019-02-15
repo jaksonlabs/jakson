@@ -144,7 +144,7 @@ bool carbon_vec_repeated_push(carbon_vec_t *vec, const void *data, size_t how_of
 const void *carbon_vec_pop(carbon_vec_t *vec)
 {
     void *result;
-    if (CARBON_BRANCH_LIKELY((result = (vec ? (vec->num_elems > 0 ? vec->base + (vec->num_elems - 1) * vec->elem_size : NULL) : NULL))
+    if (CARBON_LIKELY((result = (vec ? (vec->num_elems > 0 ? vec->base + (vec->num_elems - 1) * vec->elem_size : NULL) : NULL))
                    != NULL)) {
         vec->num_elems--;
     }
@@ -176,7 +176,7 @@ bool carbon_vec_grow(size_t *numNewSlots, carbon_vec_t *vec)
     vec->cap_elems = (vec->cap_elems * vec->grow_factor) + 1;
     vec->base = carbon_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
     size_t freeSlotsAfter = vec->cap_elems - vec->num_elems;
-    if (CARBON_BRANCH_LIKELY(numNewSlots != NULL)) {
+    if (CARBON_LIKELY(numNewSlots != NULL)) {
         *numNewSlots = freeSlotsAfter - freeSlotsBefore;
     }
     return true;

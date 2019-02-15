@@ -464,7 +464,7 @@ static bool this_insert(carbon_strdic_t *self,
      * none of the carrier threads allocated thread-local 'out's which mean that no cleanup must be done */
 
     /** parallelizing the following block makes no sense but waste of compute power and energy */
-    if (CARBON_BRANCH_LIKELY(out != NULL)) {
+    if (CARBON_LIKELY(out != NULL)) {
         carbon_string_id_t *total_out = carbon_malloc(&self->alloc, num_strings * sizeof(carbon_string_id_t));
         size_t currentOut = 0;
 
@@ -663,7 +663,7 @@ static bool this_locate_safe(carbon_strdic_t *self, carbon_string_id_t **out, bo
         global_num_not_found += arg->num_not_found_out;
 
         /** cleanup */
-        if (CARBON_BRANCH_LIKELY(arg->did_work)) {
+        if (CARBON_LIKELY(arg->did_work)) {
             carbon_strdic_free(&arg->carrier->local_dictionary, arg->found_mask_out);
             carbon_strdic_free(&arg->carrier->local_dictionary, arg->ids_out);
         }
@@ -777,7 +777,7 @@ static char **this_extract(carbon_strdic_t *self, const carbon_string_id_t *ids,
     for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
         parallel_extract_arg *carrier_arg = thread_args + thread_id;
         carbon_vec_drop(&carrier_arg->local_ids_in);
-        if (CARBON_BRANCH_LIKELY(carrier_arg->did_work)) {
+        if (CARBON_LIKELY(carrier_arg->did_work)) {
             carbon_strdic_free(&carrier_arg->carrier->local_dictionary, carrier_arg->strings_out);
         }
     }

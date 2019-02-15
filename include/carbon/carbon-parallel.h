@@ -76,7 +76,7 @@ carbon_parallel_for_proxy_function(void * args);
 
 #define PARALLEL_MATCH(forSingle, forMulti)                                                                            \
 {                                                                                                                      \
-    if (CARBON_BRANCH_LIKELY(hint == CARBON_PARALLEL_THREAD_HINT_MULTI)) {                                             \
+    if (CARBON_LIKELY(hint == CARBON_PARALLEL_THREAD_HINT_MULTI)) {                                             \
         return (forMulti);                                                                                             \
     } else if (hint == CARBON_PARALLEL_THREAD_HINT_SINGLE) {                                                           \
         return (forSingle);                                                                                            \

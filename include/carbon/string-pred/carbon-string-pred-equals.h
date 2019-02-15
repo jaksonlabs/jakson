@@ -15,38 +15,38 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_IO_CONTEXT_H
-#define CARBON_IO_CONTEXT_H
+#ifndef CARBON_STRING_PRED_EQUALS_H
+#define CARBON_STRING_PRED_EQUALS_H
 
-#include "carbon-common.h"
-#include "carbon-error.h"
+#include "carbon/carbon-common.h"
+#include "carbon/carbon-string-pred.h"
 
 CARBON_BEGIN_DECL
 
-typedef struct carbon_archive carbon_archive_t; /* forwarded from 'carbon-archive.h' */
+CARBON_BUILT_IN(static bool)
+__carbon_string_pred_equals_func(size_t *idxs_matching, size_t *num_matching, char **strings, size_t num_strings,
+                                   void *capture)
+{
+    size_t result_size = 0;
+    const char *needle = (const char *) capture;
+    for (size_t i = 0; i < num_strings; i++)
+    {
+        if (strstr(strings[i], needle) != NULL) {
+            idxs_matching[result_size++] = i;
+        }
+    }
+    *num_matching = result_size;
+    return true;
+}
 
-/**
- * Thread-safe I/O with an underlying archive file.
- * Locking is implemented using a spinlock. *
- */
-typedef struct carbon_io_context carbon_io_context_t;
-
-
-CARBON_EXPORT(bool)
-carbon_io_context_create(carbon_io_context_t **context, carbon_err_t *err, const char *file_path);
-
-CARBON_EXPORT(carbon_err_t *)
-carbon_io_context_get_error(carbon_io_context_t *context);
-
-CARBON_EXPORT(FILE *)
-carbon_io_context_lock(carbon_io_context_t *context);
-
-CARBON_EXPORT(bool)
-carbon_io_context_unlock(carbon_io_context_t *context);
-
-CARBON_EXPORT(bool)
-carbon_io_context_drop(carbon_io_context_t *context);
-
+CARBON_BUILT_IN(static bool)
+carbon_string_pred_equals_init(carbon_string_pred_t *pred)
+{
+    CARBON_NON_NULL_OR_ERROR(pred);
+    pred->limit = CARBON_QUERY_LIMIT_1;
+    pred->func  = __carbon_string_pred_equals_func;
+    return true;
+}
 
 CARBON_END_DECL
 
