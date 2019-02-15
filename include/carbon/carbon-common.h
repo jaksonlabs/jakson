@@ -145,6 +145,45 @@ typedef enum carbon_type
     }
 #endif
 
+
+#define CABIN_FILE_MAGIC                    "MP/CARBON"
+#define CABIN_FILE_VERSION                  1
+
+#define  MARKER_SYMBOL_OBJECT_BEGIN        '{'
+#define  MARKER_SYMBOL_OBJECT_END          '}'
+#define  MARKER_SYMBOL_PROP_NULL           'n'
+#define  MARKER_SYMBOL_PROP_BOOLEAN        'b'
+#define  MARKER_SYMBOL_PROP_INT8           'c'
+#define  MARKER_SYMBOL_PROP_INT16          's'
+#define  MARKER_SYMBOL_PROP_INT32          'i'
+#define  MARKER_SYMBOL_PROP_INT64          'l'
+#define  MARKER_SYMBOL_PROP_UINT8          'r'
+#define  MARKER_SYMBOL_PROP_UINT16         'h'
+#define  MARKER_SYMBOL_PROP_UINT32         'e'
+#define  MARKER_SYMBOL_PROP_UINT64         'g'
+#define  MARKER_SYMBOL_PROP_REAL           'f'
+#define  MARKER_SYMBOL_PROP_TEXT           't'
+#define  MARKER_SYMBOL_PROP_OBJECT         'o'
+#define  MARKER_SYMBOL_PROP_NULL_ARRAY     'N'
+#define  MARKER_SYMBOL_PROP_BOOLEAN_ARRAY  'B'
+#define  MARKER_SYMBOL_PROP_INT8_ARRAY     'C'
+#define  MARKER_SYMBOL_PROP_INT16_ARRAY    'S'
+#define  MARKER_SYMBOL_PROP_INT32_ARRAY    'I'
+#define  MARKER_SYMBOL_PROP_INT64_ARRAY    'L'
+#define  MARKER_SYMBOL_PROP_UINT8_ARRAY    'R'
+#define  MARKER_SYMBOL_PROP_UINT16_ARRAY   'H'
+#define  MARKER_SYMBOL_PROP_UINT32_ARRAY   'E'
+#define  MARKER_SYMBOL_PROP_UINT64_ARRAY   'G'
+#define  MARKER_SYMBOL_PROP_REAL_ARRAY     'F'
+#define  MARKER_SYMBOL_PROP_TEXT_ARRAY     'T'
+#define  MARKER_SYMBOL_PROP_OBJECT_ARRAY   'O'
+#define  MARKER_SYMBOL_EMBEDDED_STR_DIC    'D'
+#define  MARKER_SYMBOL_EMBEDDED_STR        '-'
+#define  MARKER_SYMBOL_COLUMN_GROUP        'X'
+#define  MARKER_SYMBOL_COLUMN              'x'
+#define  MARKER_SYMBOL_HUFFMAN_DIC_ENTRY   'd'
+#define  MARKER_SYMBOL_RECORD_HEADER       'r'
+
 #define CARBON_ZERO_MEMORY(dst, len)                                                                                   \
     memset((void *) dst, 0, len);
 

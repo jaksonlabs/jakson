@@ -1,6 +1,7 @@
 
 #include <inttypes.h>
 #include <carbon/carbon-compressor.h>
+#include <carbon/carbon-query.h>
 
 #include "carbon/carbon.h"
 

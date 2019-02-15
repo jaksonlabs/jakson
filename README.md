@@ -1,27 +1,35 @@
 # libcarbon
 
-This is [libcarbon](https://github.com/protolabs/libcarbon) a C library for creating, modifying and querying Columnar Binary-Encoded JSON (Carbon) files.
+This is [libcarbon](https://github.com/protolabs/libcarbon), a C library for creating, modifying and querying 
+Columnar Binary-Encoded JSON (CARBON) files.
 
-The documentation is available at [CodeDocs](https://codedocs.xyz/protolabs/libcarbon/). If you have any issues, please use our [issue tracker](https://github.com/protolabs/libcarbon/issues).
+The documentation is available at [CodeDocs](https://codedocs.xyz/protolabs/libcarbon/). If you have any issues, please 
+use our [issue tracker](https://github.com/protolabs/libcarbon/issues).
 
 ## Installation
 
-Installing instructions for [libcarbon](https://github.com/protolabs/libcarbon) given in the [INSTALL.md](INSTALL.md) file. 
+Installing instructions for [libcarbon](https://github.com/protolabs/libcarbon) given in the [INSTALL.md](INSTALL.md) 
+file. 
 
-The latest release can always be found in `master` branch of the [official GitHub repository](https://github.com/protolabs/libcarbon).
+The latest release can always be found in `master` branch in the 
+[official GitHub repository](https://github.com/protolabs/libcarbon).
 
 ## Examples and Usage
 
-Example source code is located in the [examples](examples) directory. This library shipped with a tool to work on CARBON files, see [carbon-tool](tools/carbon/). 
+Example source code is located in the [examples](examples) directory, and [tests](tests). This library shipped with a 
+tool to work on CARBON files, see [carbon-tool](tools/carbon/). 
 
 ## License
 
-This project is licensed under the terms of the MIT LICENSE. See the [LICENSE file](https://github.com/protolabs/libcarbon/blob/master/LICENSE).
+This project is licensed under the terms of the MIT license, see 
+[LICENSE.md](https://github.com/protolabs/libcarbon/blob/master/LICENSE).
 
 
 ## Support
 
-If you find tools in this repository helpful, and want to support with a donation: give a donation to [patreon.com/pinnecke](patreon.com/pinnecke) or via [paypal.me/MarcusPinnecke](http://paypal.me/MarcusPinnecke)
+If you find tools in this repository helpful, and want to support our research and development with a donation,
+consider a recurrent donation via [Patreon](patreon.com/pinnecke), or a single donation via 
+[PayPal](http://paypal.me/MarcusPinnecke).
 
 ### States
 

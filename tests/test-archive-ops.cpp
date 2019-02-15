@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <inttypes.h>
+#include <carbon/carbon-query.h>
 #include "carbon/carbon.h"
 
 
