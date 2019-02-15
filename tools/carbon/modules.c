@@ -413,10 +413,12 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
         }
 
         carbon_archive_object_t root;
+        carbon_query_t query;
         size_t num_keys;
         const carbon_string_id_t *keys;
 
-        carbon_archive_record(&root, &archive);
+        carbon_archive_query(&query, &archive);
+        carbon_archive_record(&root, &query);
 
         keys = carbon_archive_object_keys_to_type(&num_keys, CARBON_TYPE_OBJECT, &root);
         for (size_t i = 0; i < num_keys; i++) {
@@ -738,6 +740,8 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
             printf("  --> # nested %zu\n", numNestedKeys);
         }
 
+
+        carbon_query_drop(&query);
 
         carbon_archive_close(&archive);
 

@@ -24,20 +24,38 @@
 
 CARBON_BEGIN_DECL
 
+typedef struct carbon_query
+{
+    carbon_archive_t    *archive;
+    carbon_io_context_t *context;
+    carbon_err_t         err;
+} carbon_query_t;
+
+CARBON_DEFINE_GET_ERROR_FUNCTION(query, carbon_query_t, query)
 
 CARBON_EXPORT(bool)
-carbon_archive_query_fullscan_strids(carbon_strid_iter_t *it, carbon_archive_t *archive);
+carbon_query_create(carbon_query_t *query, carbon_archive_t *archive);
+
+CARBON_EXPORT(bool)
+carbon_query_drop(carbon_query_t *query);
+
+CARBON_EXPORT(bool)
+carbon_query_scan_strids(carbon_strid_iter_t *it, carbon_query_t *query);
 
 CARBON_EXPORT(char *)
-carbon_archive_query_fullscan_string_by_id(carbon_archive_t *archive, carbon_string_id_t id);
+carbon_query_find_string_by_id(carbon_query_t *query, carbon_string_id_t id);
 
 CARBON_EXPORT(char *)
-carbon_archive_query_unsafe_string_by_offset(carbon_io_context_t *context, carbon_archive_t *archive, carbon_off_t off, size_t strlen);
+carbon_query_fetch_string_unsafe(carbon_query_t *query, carbon_off_t off, size_t strlen);
+
+
+
+
 
 
 
 CARBON_EXPORT(bool)
-carbon_archive_record(carbon_archive_object_t *root, carbon_archive_t *archive);
+carbon_archive_record(carbon_archive_object_t *root, carbon_query_t *query);
 
 CARBON_EXPORT(CARBON_NULLABLE const carbon_string_id_t *)
 carbon_archive_object_keys_to_type(CARBON_NULLABLE size_t *npairs, carbon_type_e type, carbon_archive_object_t *obj);

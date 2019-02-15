@@ -28,7 +28,7 @@
 
 CARBON_BEGIN_DECL
 
-typedef struct carbon_strid_iter carbon_strid_iter_t; /* fordwarded from 'carbon-strid-iter.h' */
+typedef struct carbon_query carbon_query_t; /* forwarded from 'carbon-query.h' */
 
 union carbon_archive_dic_flags;
 
@@ -83,6 +83,9 @@ CARBON_DEFINE_GET_ERROR_FUNCTION(archive, carbon_archive_t, archive);
 
 CARBON_EXPORT(bool)
 carbon_archive_close(carbon_archive_t *archive);
+
+CARBON_EXPORT(bool)
+carbon_archive_query(carbon_query_t *query, carbon_archive_t *archive);
 
 
 

@@ -92,6 +92,7 @@ TEST(CarbonArchiveOpsTest, CreateArchiveStringHandling)
     bool                 status;
     bool                 success;
     carbon_err_t         err;
+    carbon_query_t       query;
 
     const char        *json_string = JSON_EXAMPLE;
     const char        *archive_file = "tmp-test-archive.carbon";
@@ -101,7 +102,10 @@ TEST(CarbonArchiveOpsTest, CreateArchiveStringHandling)
                                       CARBON_COMPRESSOR_NONE, read_optimized);
     ASSERT_TRUE(status);
 
-    status = carbon_archive_query_fullscan_strids(&strid_iter, &archive);
+    status = carbon_archive_query(&query, &archive);
+    ASSERT_TRUE(status);
+
+    status = carbon_query_scan_strids(&strid_iter, &query);
     ASSERT_TRUE(status);
 
     while (carbon_strid_iter_next(&success, &info, &err, &vector_len, &strid_iter)) {
@@ -126,6 +130,9 @@ TEST(CarbonArchiveOpsTest, CreateArchiveStringHandling)
     status = carbon_strid_iter_close(&strid_iter);
     ASSERT_TRUE(status);
 
+    status = carbon_query_drop(&query);
+    ASSERT_TRUE(status);
+
     status = carbon_archive_close(&archive);
     ASSERT_TRUE(status);
 }
@@ -141,6 +148,7 @@ TEST(CarbonArchiveOpsTest, DecodeStringByIdFullScan)
     bool                 status;
     bool                 success;
     carbon_err_t         err;
+    carbon_query_t       query;
 
     const char        *json_string = JSON_EXAMPLE;
     const char        *archive_file = "tmp-test-archive.carbon";
@@ -150,7 +158,10 @@ TEST(CarbonArchiveOpsTest, DecodeStringByIdFullScan)
                                       CARBON_COMPRESSOR_NONE, read_optimized);
     ASSERT_TRUE(status);
 
-    status = carbon_archive_query_fullscan_strids(&strid_iter, &archive);
+    status = carbon_archive_query(&query, &archive);
+    ASSERT_TRUE(status);
+
+    status = carbon_query_scan_strids(&strid_iter, &query);
     ASSERT_TRUE(status);
 
     while (carbon_strid_iter_next(&success, &info, &err, &vector_len, &strid_iter)) {
@@ -164,11 +175,14 @@ TEST(CarbonArchiveOpsTest, DecodeStringByIdFullScan)
 
     for (std::set<carbon_string_id_t>::iterator it = all_str_ids.begin(); it != all_str_ids.end(); it++) {
         carbon_string_id_t string_id = *it;
-        char *string = carbon_archive_query_fullscan_string_by_id(&archive, string_id);
+        char *string = carbon_query_find_string_by_id(&query, string_id);
         ASSERT_TRUE(string != NULL);
         printf("%" PRIu64 " -> '%s'\n", string_id, string);
         free(string);
     }
+
+    status = carbon_query_drop(&query);
+    ASSERT_TRUE(status);
 
     status = carbon_archive_close(&archive);
     ASSERT_TRUE(status);
@@ -183,7 +197,7 @@ TEST(CarbonArchiveOpsTest, DecodeStringByFastUnsafeAccess)
     bool                             status;
     bool                             success;
     carbon_err_t                     err;
-    carbon_io_context_t *context;
+    carbon_query_t                   query;
 
     const char        *json_string = JSON_EXAMPLE;
     const char        *archive_file = "tmp-test-archive.carbon";
@@ -193,23 +207,22 @@ TEST(CarbonArchiveOpsTest, DecodeStringByFastUnsafeAccess)
                                       CARBON_COMPRESSOR_NONE, read_optimized);
     ASSERT_TRUE(status);
 
-    status = carbon_archive_query_fullscan_strids(&strid_iter, &archive);
+    status = carbon_archive_query(&query, &archive);
     ASSERT_TRUE(status);
 
-
-    context = carbon_archive_io_context_create(&archive);
-    ASSERT_TRUE(context != NULL);
+    status = carbon_query_scan_strids(&strid_iter, &query);
+    ASSERT_TRUE(status);
 
     while (carbon_strid_iter_next(&success, &info, &err, &vector_len, &strid_iter)) {
         for (size_t i = 0; i < vector_len; i++) {
-            char *string = carbon_archive_query_unsafe_string_by_offset(context, &archive, info[i].offset, info[i].strlen);
+            char *string = carbon_query_fetch_string_unsafe(&query, info[i].offset, info[i].strlen);
             ASSERT_TRUE(string != NULL);
             printf("%" PRIu64 " -> '%s'\n", info[i].id, string);
             free(string);
         }
     }
 
-    status = carbon_io_context_drop(context);
+    status = carbon_query_drop(&query);
     ASSERT_TRUE(status);
 
     status = carbon_strid_iter_close(&strid_iter);

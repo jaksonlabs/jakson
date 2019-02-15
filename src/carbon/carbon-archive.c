@@ -21,6 +21,7 @@
 #include <carbon/carbon-compressor.h>
 #include <carbon/carbon-strid-iter.h>
 #include <carbon/carbon-int-archive.h>
+#include <carbon/carbon-query.h>
 
 #include "carbon/carbon-common.h"
 #include "carbon/carbon-memblock.h"
@@ -44,7 +45,7 @@
 
 #define PRINT_SIMPLE_PROPS(file, memfile, offset, nesting_level, value_type, type_string, format_string)               \
 {                                                                                                                      \
-    struct simple_prop_header *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, struct simple_prop_header);             \
+    struct carbon_prop_header *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, struct carbon_prop_header);             \
     carbon_string_id_t *keys = (carbon_string_id_t *) CARBON_MEMFILE_READ(memfile, prop_header->num_entries *          \
                                    sizeof(carbon_string_id_t));                                                        \
     value_type *values = (value_type *) CARBON_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(value_type));   \
@@ -63,7 +64,7 @@
 
 #define PRINT_ARRAY_PROPS(memfile, offset, nesting_level, entryMarker, type, type_string, format_string)               \
 {                                                                                                                      \
-    struct simple_prop_header *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, struct simple_prop_header);             \
+    struct carbon_prop_header *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, struct carbon_prop_header);             \
                                                                                                                        \
     carbon_string_id_t *keys = (carbon_string_id_t *) CARBON_MEMFILE_READ(memfile, prop_header->num_entries *          \
                                         sizeof(carbon_string_id_t));                                                   \
@@ -270,6 +271,7 @@ bool carbon_archive_from_model(carbon_memblock_t **stream,
     carbon_memfile_shrink(&memfile);
     return true;
 }
+
 
 CARBON_EXPORT(carbon_io_context_t *)
 carbon_archive_io_context_create(carbon_archive_t *archive)
@@ -565,12 +567,12 @@ static bool write_array_prop(carbon_off_t *offset, carbon_err_t *err, carbon_mem
     assert(keys->num_elems == values->num_elems);
 
     if (keys->num_elems > 0) {
-        struct array_prop_header header = {
+        struct carbon_prop_header header = {
             .marker = marker_symbols[value_array_marker_mapping[type].marker].symbol,
             .num_entries = keys->num_elems
         };
         carbon_off_t prop_ofOffset = CARBON_MEMFILE_TELL(memfile);
-        carbon_memfile_write(memfile, &header, sizeof(struct array_prop_header));
+        carbon_memfile_write(memfile, &header, sizeof(struct carbon_prop_header));
 
         write_primitive_key_column(memfile, keys);
         if(!write_array_lengths_column(err, memfile, type, values)) {
@@ -651,13 +653,13 @@ static bool write_fixed_props(carbon_off_t *offset, carbon_err_t *err, carbon_me
     assert(type != carbon_field_type_object); /** use 'write_var_props' instead */
 
     if (keys->num_elems > 0) {
-        struct simple_prop_header header = {
+        struct carbon_prop_header header = {
                 .marker = marker_symbols[valueMarkerMapping[type].marker].symbol,
                 .num_entries = keys->num_elems
         };
 
         carbon_off_t prop_ofOffset = CARBON_MEMFILE_TELL(memfile);
-        carbon_memfile_write(memfile, &header, sizeof(struct simple_prop_header));
+        carbon_memfile_write(memfile, &header, sizeof(struct carbon_prop_header));
 
         write_primitive_key_column(memfile, keys);
         if(!write_primitive_fixed_value_column(memfile, err, type, values)) {
@@ -685,13 +687,13 @@ static bool write_var_props(carbon_off_t *offset,
     assert(!objects || keys->num_elems == objects->num_elems);
 
     if (keys->num_elems > 0) {
-        struct simple_prop_header header = {
+        struct carbon_prop_header header = {
             .marker = MARKER_SYMBOL_PROP_OBJECT,
             .num_entries = keys->num_elems
         };
 
         carbon_off_t prop_ofOffset = CARBON_MEMFILE_TELL(memfile);
-        carbon_memfile_write(memfile, &header, sizeof(struct simple_prop_header));
+        carbon_memfile_write(memfile, &header, sizeof(struct carbon_prop_header));
 
         write_primitive_key_column(memfile, keys);
         carbon_off_t value_offset = skip_var_value_offset_column(memfile, keys->num_elems);
@@ -1578,7 +1580,7 @@ bool print_object(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile, unsi
         .value = header->flags
     };
 
-    read_prop_offsets(&prop_offsets, memfile, &flags);
+    carbon_int_read_prop_offsets(&prop_offsets, memfile, &flags);
     carbon_off_t nextObjectOrNil = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
 
     if (header->marker != MARKER_SYMBOL_OBJECT_BEGIN) {
@@ -1603,7 +1605,7 @@ bool print_object(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile, unsi
 
         switch (entryMarker) {
             case MARKER_SYMBOL_PROP_NULL: {
-                struct simple_prop_header *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, struct simple_prop_header);
+                struct carbon_prop_header *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, struct carbon_prop_header);
                 carbon_string_id_t *keys = (carbon_string_id_t *) CARBON_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(carbon_string_id_t));
                 fprintf(file, "0x%04x ", offset);
                 INTENT_LINE(nesting_level)
@@ -1615,7 +1617,7 @@ bool print_object(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile, unsi
                 fprintf(file, "]\n");
             } break;
             case MARKER_SYMBOL_PROP_BOOLEAN: {
-                struct simple_prop_header *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, struct simple_prop_header);
+                struct carbon_prop_header *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, struct carbon_prop_header);
                 carbon_string_id_t *keys = (carbon_string_id_t *) CARBON_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(carbon_string_id_t));
                 carbon_bool_t *values = (carbon_bool_t *) CARBON_MEMFILE_READ(memfile,
                                                                 prop_header->num_entries * sizeof(carbon_bool_t));
@@ -1663,7 +1665,7 @@ bool print_object(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile, unsi
                 break;
             case MARKER_SYMBOL_PROP_OBJECT: {
                 embedded_var_prop_t prop;
-                embedded_var_props_read(&prop, memfile);
+                carbon_int_embedded_var_props_read(&prop, memfile);
                 fprintf(file, "0x%04x ", offset);
                 INTENT_LINE(nesting_level)
                 fprintf(file, "[marker: %c (Object)] [nentries: %d] [", entryMarker, prop.header->num_entries);
@@ -1686,7 +1688,7 @@ bool print_object(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile, unsi
 
             } break;
             case MARKER_SYMBOL_PROP_NULL_ARRAY: {
-                struct simple_prop_header *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, struct simple_prop_header);
+                struct carbon_prop_header *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, struct carbon_prop_header);
 
                 carbon_string_id_t *keys = (carbon_string_id_t *) CARBON_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(carbon_string_id_t));
                 uint32_t *nullArrayLengths;
@@ -1709,7 +1711,7 @@ bool print_object(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile, unsi
                 fprintf(file, "]\n");
             } break;
             case MARKER_SYMBOL_PROP_BOOLEAN_ARRAY: {
-                struct simple_prop_header *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, struct simple_prop_header);
+                struct carbon_prop_header *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, struct carbon_prop_header);
 
                 carbon_string_id_t *keys = (carbon_string_id_t *) CARBON_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(carbon_string_id_t));
                 uint32_t *array_lengths;
@@ -2007,6 +2009,12 @@ carbon_archive_close(carbon_archive_t *archive)
     return true;
 }
 
+CARBON_EXPORT(bool)
+carbon_archive_query(carbon_query_t *query, carbon_archive_t *archive)
+{
+    return carbon_query_create(query, archive);;
+}
+
 static bool init_decompressor(carbon_compressor_t *strategy, uint8_t flags)
 {
     if (carbon_compressor_by_flags(strategy, flags) != true) {
@@ -2078,7 +2086,7 @@ static void get_object_props(carbon_archive_object_t *object)
     if (object->flags.bits.has_object_props) {
         assert(object->props.objects != 0);
         carbon_memfile_seek(&object->file, object->props.objects);
-        reset_cabin_object_mem_file(object);
+        carbon_int_reset_cabin_object_mem_file(object);
     } else {
 
     }

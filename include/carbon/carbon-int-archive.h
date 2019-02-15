@@ -53,13 +53,7 @@ struct __attribute__((packed)) object_header
     uint32_t flags;
 };
 
-struct __attribute__((packed)) simple_prop_header
-{
-    char marker;
-    uint32_t num_entries;
-};
-
-struct __attribute__((packed)) array_prop_header
+struct __attribute__((packed)) carbon_prop_header
 {
     char marker;
     uint32_t num_entries;
@@ -182,21 +176,21 @@ typedef struct carbon_archive_prop_offs {
 
 typedef struct
 {
-    struct simple_prop_header *header;
+    struct carbon_prop_header *header;
     const carbon_string_id_t *keys;
     const void *values;
 } embedded_fixed_prop_t;
 
 typedef struct
 {
-    struct simple_prop_header *header;
+    struct carbon_prop_header *header;
     const carbon_string_id_t *keys;
     const carbon_off_t *groupOffs;
 } embedded_table_prop_t;
 
 typedef struct
 {
-    struct simple_prop_header *header;
+    struct carbon_prop_header *header;
     const carbon_string_id_t *keys;
     const carbon_off_t *offsets;
     const void *values;
@@ -204,7 +198,7 @@ typedef struct
 
 typedef struct
 {
-    struct simple_prop_header *header;
+    struct carbon_prop_header *header;
     const carbon_string_id_t *keys;
     const uint32_t *lengths;
     carbon_off_t values_begin;
@@ -212,7 +206,7 @@ typedef struct
 
 typedef struct
 {
-    struct simple_prop_header *header;
+    struct carbon_prop_header *header;
     const carbon_string_id_t *keys;
 } embedded_null_prop_t;
 
@@ -431,28 +425,30 @@ typedef struct __attribute__((packed)) carbon_string_entry_header
 } carbon_string_entry_header_t;
 
 void
-read_prop_offsets(carbon_archive_prop_offs_t *prop_offsets, carbon_memfile_t *memfile, const carbon_archive_object_flags_t *flags);
+carbon_int_read_prop_offsets(carbon_archive_prop_offs_t *prop_offsets,
+                             carbon_memfile_t *memfile,
+                             const carbon_archive_object_flags_t *flags);
 
 void
-embedded_fixed_props_read(embedded_fixed_prop_t *prop, carbon_memfile_t *memfile);
+carbon_int_embedded_fixed_props_read(embedded_fixed_prop_t *prop, carbon_memfile_t *memfile);
 
 void
-embedded_var_props_read(embedded_var_prop_t *prop, carbon_memfile_t *memfile);
+carbon_int_embedded_var_props_read(embedded_var_prop_t *prop, carbon_memfile_t *memfile);
 
 void
-embedded_null_props_read(embedded_null_prop_t *prop, carbon_memfile_t *memfile);
+carbon_int_embedded_null_props_read(embedded_null_prop_t *prop, carbon_memfile_t *memfile);
 
 void
-embedded_array_props_read(embedded_array_prop_t *prop, carbon_memfile_t *memfile);
+carbon_int_embedded_array_props_read(embedded_array_prop_t *prop, carbon_memfile_t *memfile);
 
 void
-embedded_table_props_read(embedded_table_prop_t *prop, carbon_memfile_t *memfile);
+carbon_int_embedded_table_props_read(embedded_table_prop_t *prop, carbon_memfile_t *memfile);
 
 void
-reset_cabin_object_mem_file(carbon_archive_object_t *object);
+carbon_int_reset_cabin_object_mem_file(carbon_archive_object_t *object);
 
 carbon_field_type_e
-get_value_type_of_char(char c);
+carbon_int_get_value_type_of_char(char c);
 
 CARBON_END_DECL
 

@@ -29,8 +29,8 @@
         assert(obj->props.offset_name != 0);                                                                           \
         carbon_memfile_seek(&obj->file, obj->props.offset_name);                                                       \
         embedded_fixed_prop_t prop;                                                                                    \
-        embedded_fixed_props_read(&prop, &obj->file);                                                                  \
-        reset_cabin_object_mem_file(obj);                                                                              \
+        carbon_int_embedded_fixed_props_read(&prop, &obj->file);                                                       \
+        carbon_int_reset_cabin_object_mem_file(obj);                                                                   \
         CARBON_OPTIONAL_SET(num_pairs, prop.header->num_entries);                                                      \
         return prop.keys;                                                                                              \
     } else {                                                                                                           \
@@ -51,27 +51,44 @@ static carbon_off_t object_init(carbon_archive_object_t *obj, carbon_memblock_t 
     carbon_error_init(&obj->err);
     obj->context = context;
     obj->flags.value = header->flags;
-    read_prop_offsets(&obj->props, &obj->file, &flags);
+    carbon_int_read_prop_offsets(&obj->props, &obj->file, &flags);
     obj->self = objectHeaderOffset;
     carbon_off_t read_length = CARBON_MEMFILE_TELL(&obj->file) - objectHeaderOffset;
     carbon_memfile_seek(&obj->file, objectHeaderOffset);
     return read_length;
 }
 
+CARBON_EXPORT(bool)
+carbon_query_create(carbon_query_t *query, carbon_archive_t *archive)
+{
+    CARBON_NON_NULL_OR_ERROR(query)
+    CARBON_NON_NULL_OR_ERROR(archive)
+    query->archive = archive;
+    query->context = carbon_archive_io_context_create(archive);
+    carbon_error_init(&query->err);
+    return query->context != NULL;
+}
 
 CARBON_EXPORT(bool)
-carbon_archive_query_fullscan_strids(carbon_strid_iter_t *it, carbon_archive_t *archive)
+carbon_query_drop(carbon_query_t *query)
+{
+    CARBON_NON_NULL_OR_ERROR(query)
+    return carbon_io_context_drop(query->context);
+}
+
+CARBON_EXPORT(bool)
+carbon_query_scan_strids(carbon_strid_iter_t *it, carbon_query_t *query)
 {
     CARBON_NON_NULL_OR_ERROR(it)
-    CARBON_NON_NULL_OR_ERROR(archive)
-    return carbon_strid_iter_open(it, &archive->err, archive);
+    CARBON_NON_NULL_OR_ERROR(query)
+    return carbon_strid_iter_open(it, &query->err, query->archive);
 }
 
 
 CARBON_EXPORT(char *)
-carbon_archive_query_fullscan_string_by_id(carbon_archive_t *archive, carbon_string_id_t id)
+carbon_query_find_string_by_id(carbon_query_t *query, carbon_string_id_t id)
 {
-    assert(archive);
+    assert(query);
 
     carbon_strid_iter_t  strid_iter;
     carbon_strid_info_t *info;
@@ -79,10 +96,10 @@ carbon_archive_query_fullscan_string_by_id(carbon_archive_t *archive, carbon_str
     bool                 status;
     bool                 success;
 
-    status = carbon_archive_query_fullscan_strids(&strid_iter, archive);
+    status = carbon_query_scan_strids(&strid_iter, query);
 
     if (status) {
-        while (carbon_strid_iter_next(&success, &info, &archive->err, &vector_len, &strid_iter)) {
+        while (carbon_strid_iter_next(&success, &info, &query->err, &vector_len, &strid_iter)) {
             for (size_t i = 0; i < vector_len; i++) {
                 if (info[i].id == id) {
                     char *result = malloc(info[i].strlen + 1);
@@ -90,14 +107,14 @@ carbon_archive_query_fullscan_string_by_id(carbon_archive_t *archive, carbon_str
 
                     fseek(strid_iter.disk_file, info[i].offset, SEEK_SET);
 
-                    bool decode_result = carbon_compressor_decode_string(&archive->err, &archive->string_table.compressor,
+                    bool decode_result = carbon_compressor_decode_string(&query->err, &query->archive->string_table.compressor,
                                                                          result, info[i].strlen, strid_iter.disk_file);
 
                     bool close_iter_result = carbon_strid_iter_close(&strid_iter);
 
                     if (!decode_result || !close_iter_result) {
                         free (result);
-                        CARBON_ERROR(&archive->err, !decode_result ? CARBON_ERR_DECOMPRESSFAILED :
+                        CARBON_ERROR(&query->err, !decode_result ? CARBON_ERR_DECOMPRESSFAILED :
                                                     CARBON_ERR_ITERATORNOTCLOSED);
                         return NULL;
                     } else {
@@ -106,10 +123,10 @@ carbon_archive_query_fullscan_string_by_id(carbon_archive_t *archive, carbon_str
                 }
             }
         }
-        CARBON_ERROR(&archive->err, CARBON_ERR_NOTFOUND);
+        CARBON_ERROR(&query->err, CARBON_ERR_NOTFOUND);
         return NULL;
     } else {
-        CARBON_ERROR(&archive->err, CARBON_ERR_SCAN_FAILED);
+        CARBON_ERROR(&query->err, CARBON_ERR_SCAN_FAILED);
         return NULL;
     }
 }
@@ -117,42 +134,42 @@ carbon_archive_query_fullscan_string_by_id(carbon_archive_t *archive, carbon_str
 
 
 CARBON_EXPORT(char *)
-carbon_archive_query_unsafe_string_by_offset(carbon_io_context_t *context, carbon_archive_t *archive, carbon_off_t off, size_t strlen)
+carbon_query_fetch_string_unsafe(carbon_query_t *query, carbon_off_t off, size_t strlen)
 {
-    assert(context);
+    assert(query);
 
     char *result = malloc((strlen + 1) * sizeof(char));
     if (!result) {
-        CARBON_ERROR(carbon_io_context_get_error(context), CARBON_ERR_MALLOCERR);
+        CARBON_ERROR(carbon_io_context_get_error(query->context), CARBON_ERR_MALLOCERR);
         return NULL;
     } else {
         memset(result, 0, (strlen + 1) * sizeof(char));
 
-        FILE *file = carbon_io_context_seek_lock_and_access(context, off);
+        FILE *file = carbon_io_context_seek_lock_and_access(query->context, off);
         if (!file) {
-            carbon_error_cpy(&archive->err, carbon_io_context_get_error(context));
+            carbon_error_cpy(&query->err, carbon_io_context_get_error(query->context));
             free(result);
             return NULL;
         }
 
-        if (!carbon_compressor_decode_string(carbon_io_context_get_error(context),
-                                             &archive->string_table.compressor, result, strlen, file)) {
+        if (!carbon_compressor_decode_string(&query->err,
+                                             &query->archive->string_table.compressor, result, strlen, file)) {
             free(result);
             result = NULL;
         }
 
-        carbon_io_context_unlock(context);
+        carbon_io_context_unlock(query->context);
         return result;
     }
 }
 
 
 CARBON_EXPORT(bool)
-carbon_archive_record(carbon_archive_object_t *root, carbon_archive_t *archive)
+carbon_archive_record(carbon_archive_object_t *root, carbon_query_t *query)
 {
     CARBON_NON_NULL_OR_ERROR(root)
-    CARBON_NON_NULL_OR_ERROR(archive)
-    object_init(root, archive->record_table.recordDataBase, 0, &archive->record_table);
+    CARBON_NON_NULL_OR_ERROR(query)
+    object_init(root, query->archive->record_table.recordDataBase, 0, &query->archive->record_table);
     return true;
 }
 
@@ -187,8 +204,8 @@ carbon_archive_object_keys_to_type(CARBON_NULLABLE size_t *npairs, carbon_type_e
             assert(obj->props.nulls != 0);
             carbon_memfile_seek(&obj->file, obj->props.nulls);
             embedded_null_prop_t prop;
-            embedded_null_props_read(&prop, &obj->file);
-            reset_cabin_object_mem_file(obj);
+            carbon_int_embedded_null_props_read(&prop, &obj->file);
+            carbon_int_reset_cabin_object_mem_file(obj);
             CARBON_OPTIONAL_SET(npairs, prop.header->num_entries);
             return prop.keys;
         } else {
@@ -201,8 +218,8 @@ carbon_archive_object_keys_to_type(CARBON_NULLABLE size_t *npairs, carbon_type_e
             assert(obj->props.objects != 0);
             carbon_memfile_seek(&obj->file, obj->props.objects);
             embedded_var_prop_t objectProp;
-            embedded_var_props_read(&objectProp, &obj->file);
-            reset_cabin_object_mem_file(obj);
+            carbon_int_embedded_var_props_read(&objectProp, &obj->file);
+            carbon_int_reset_cabin_object_mem_file(obj);
             CARBON_OPTIONAL_SET(npairs, objectProp.header->num_entries);
             return objectProp.keys;
         } else {
@@ -264,8 +281,8 @@ bool carbon_archive_table_open(carbon_archive_table_t *out, carbon_archive_objec
         assert(obj->props.object_arrays != 0);
         carbon_memfile_seek(&obj->file, obj->props.object_arrays);
         embedded_table_prop_t prop;
-        embedded_table_props_read(&prop, &obj->file);
-        reset_cabin_object_mem_file(obj);
+        carbon_int_embedded_table_props_read(&prop, &obj->file);
+        carbon_int_reset_cabin_object_mem_file(obj);
         out->ngroups = prop.header->num_entries;
         out->keys = prop.keys;
         out->groups_offsets = prop.groupOffs;
@@ -290,9 +307,9 @@ bool carbon_archive_object_values_object(carbon_archive_object_t *out, size_t id
         assert(props->props.objects != 0);
         carbon_memfile_seek(&props->file, props->props.objects);
         embedded_var_prop_t objectProp;
-        embedded_var_props_read(&objectProp, &props->file);
+        carbon_int_embedded_var_props_read(&objectProp, &props->file);
         if (idx > objectProp.header->num_entries) {
-            reset_cabin_object_mem_file(props);
+            carbon_int_reset_cabin_object_mem_file(props);
             CARBON_ERROR(&props->err, CARBON_ERR_NOTFOUND);
             return false;
         } else {
@@ -314,8 +331,8 @@ bool carbon_archive_object_values_object(carbon_archive_object_t *out, size_t id
         assert(obj->props.offset_prop_name != 0);                                                                      \
         carbon_memfile_seek(&obj->file, obj->props.offset_prop_name);                                                  \
         embedded_fixed_prop_t prop;                                                                                    \
-        embedded_fixed_props_read(&prop, &obj->file);                                                                  \
-        reset_cabin_object_mem_file(obj);                                                                              \
+        carbon_int_embedded_fixed_props_read(&prop, &obj->file);                                                       \
+        carbon_int_reset_cabin_object_mem_file(obj);                                                                   \
         CARBON_OPTIONAL_SET(npairs, prop.header->num_entries);                                                         \
         result = prop.values;                                                                                          \
     } else {                                                                                                           \
@@ -408,8 +425,8 @@ const carbon_string_id_t *carbon_archive_object_values_strings(CARBON_NULLABLE
     if (obj->flags.bits.bit_fiel_name) {                                                                               \
         assert(obj->props.offset_name != 0);                                                                           \
         carbon_memfile_seek(&obj->file, obj->props.offset_name);                                                       \
-        embedded_array_props_read(&prop, &obj->file);                                                                  \
-        reset_cabin_object_mem_file(obj);                                                                              \
+        carbon_int_embedded_array_props_read(&prop, &obj->file);                                                       \
+        carbon_int_reset_cabin_object_mem_file(obj);                                                                   \
         if (CARBON_BRANCH_UNLIKELY(idx >= prop.header->num_entries)) {                                                 \
             *length = 0;                                                                                               \
             CARBON_ERROR(err, CARBON_ERR_OUTOFBOUNDS);                                                                 \
@@ -436,7 +453,7 @@ const carbon_string_id_t *carbon_archive_object_values_strings(CARBON_NULLABLE
         }                                                                                                              \
         carbon_memfile_seek(&obj->file, prop.values_begin + skip_size);                                                \
         result = carbon_memfile_peek(&obj->file, 1);                                                                   \
-        reset_cabin_object_mem_file(obj);                                                                              \
+        carbon_int_reset_cabin_object_mem_file(obj);                                                                   \
     }                                                                                                                  \
     (const T*) result;                                                                                                 \
 })
@@ -599,7 +616,7 @@ bool carbon_archive_table_column(carbon_column_t *column, size_t idx, carbon_col
         carbon_memfile_seek(&group->context->file, column_off);
         const struct column_header *header = CARBON_MEMFILE_READ_TYPE(&group->context->file, struct column_header);
         column->nelems = header->num_entries;
-        column->type = get_value_type_of_char(header->value_type);
+        column->type = carbon_int_get_value_type_of_char(header->value_type);
         column->entry_offsets = (const carbon_off_t *) carbon_memfile_peek(&group->context->file, sizeof(carbon_off_t));
         carbon_memfile_skip(&group->context->file, column->nelems * sizeof(carbon_off_t));
         column->position_list = (const uint32_t*) carbon_memfile_peek(&group->context->file, sizeof(uint32_t));
