@@ -28,7 +28,7 @@
     if (obj->flags.bits.bit_flag_name) {                                                                               \
         assert(obj->props.offset_name != 0);                                                                           \
         carbon_memfile_seek(&obj->file, obj->props.offset_name);                                                       \
-        embedded_fixed_prop_t prop;                                                                                    \
+        carbon_fixed_prop_t prop;                                                                                    \
         carbon_int_embedded_fixed_props_read(&prop, &obj->file);                                                       \
         carbon_int_reset_cabin_object_mem_file(obj);                                                                   \
         CARBON_OPTIONAL_SET(num_pairs, prop.header->num_entries);                                                      \
@@ -44,7 +44,7 @@ static carbon_off_t object_init(carbon_archive_object_t *obj, carbon_memblock_t 
     carbon_memfile_open(&obj->file, memBlock, CARBON_MEMFILE_MODE_READONLY);
     carbon_memfile_seek(&obj->file, objectHeaderOffset);
     assert (*CARBON_MEMFILE_PEEK(&obj->file, char) == MARKER_SYMBOL_OBJECT_BEGIN);
-    struct object_header *header = CARBON_MEMFILE_READ_TYPE(&obj->file, struct object_header);
+    carbon_object_header_t *header = CARBON_MEMFILE_READ_TYPE(&obj->file, carbon_object_header_t);
     carbon_archive_object_flags_t flags = {
         .value = header->flags
     };
@@ -203,7 +203,7 @@ carbon_archive_object_keys_to_type(CARBON_NULLABLE size_t *npairs, carbon_type_e
         if (obj->flags.bits.has_null_props) {
             assert(obj->props.nulls != 0);
             carbon_memfile_seek(&obj->file, obj->props.nulls);
-            embedded_null_prop_t prop;
+            carbon_null_prop_t prop;
             carbon_int_embedded_null_props_read(&prop, &obj->file);
             carbon_int_reset_cabin_object_mem_file(obj);
             CARBON_OPTIONAL_SET(npairs, prop.header->num_entries);
@@ -217,7 +217,7 @@ carbon_archive_object_keys_to_type(CARBON_NULLABLE size_t *npairs, carbon_type_e
         if (obj->flags.bits.has_object_props) {
             assert(obj->props.objects != 0);
             carbon_memfile_seek(&obj->file, obj->props.objects);
-            embedded_var_prop_t objectProp;
+            carbon_var_prop_t objectProp;
             carbon_int_embedded_var_props_read(&objectProp, &obj->file);
             carbon_int_reset_cabin_object_mem_file(obj);
             CARBON_OPTIONAL_SET(npairs, objectProp.header->num_entries);
@@ -280,7 +280,7 @@ bool carbon_archive_table_open(carbon_archive_table_t *out, carbon_archive_objec
     if (obj->flags.bits.has_object_array_props) {
         assert(obj->props.object_arrays != 0);
         carbon_memfile_seek(&obj->file, obj->props.object_arrays);
-        embedded_table_prop_t prop;
+        carbon_table_prop_t prop;
         carbon_int_embedded_table_props_read(&prop, &obj->file);
         carbon_int_reset_cabin_object_mem_file(obj);
         out->ngroups = prop.header->num_entries;
@@ -306,7 +306,7 @@ bool carbon_archive_object_values_object(carbon_archive_object_t *out, size_t id
     } else {
         assert(props->props.objects != 0);
         carbon_memfile_seek(&props->file, props->props.objects);
-        embedded_var_prop_t objectProp;
+        carbon_var_prop_t objectProp;
         carbon_int_embedded_var_props_read(&objectProp, &props->file);
         if (idx > objectProp.header->num_entries) {
             carbon_int_reset_cabin_object_mem_file(props);
@@ -330,7 +330,7 @@ bool carbon_archive_object_values_object(carbon_archive_object_t *out, size_t id
     if (obj->flags.bits.bit_flag_prop_name) {                                                                          \
         assert(obj->props.offset_prop_name != 0);                                                                      \
         carbon_memfile_seek(&obj->file, obj->props.offset_prop_name);                                                  \
-        embedded_fixed_prop_t prop;                                                                                    \
+        carbon_fixed_prop_t prop;                                                                                    \
         carbon_int_embedded_fixed_props_read(&prop, &obj->file);                                                       \
         carbon_int_reset_cabin_object_mem_file(obj);                                                                   \
         CARBON_OPTIONAL_SET(npairs, prop.header->num_entries);                                                         \
@@ -462,7 +462,7 @@ const carbon_int8_t *carbon_archive_object_values_int8_arrays(uint32_t *length,
                                                               size_t idx,
                                                               carbon_archive_object_t *obj)
 {
-    embedded_array_prop_t prop;
+    carbon_array_prop_t prop;
     int status = OBJECT_GET_ARRAY_LENGTHS_GENERIC(&obj->err, length, obj, has_int8_array_props,
                                                   int8_arrays, idx, prop);
     return OBJECT_GET_ARRAY_VALUES_GENERIC(status, idx, prop, obj, carbon_int8_t);
@@ -472,7 +472,7 @@ const carbon_int16_t *carbon_archive_object_values_int16_arrays(uint32_t *length
                                                                 size_t idx,
                                                                 carbon_archive_object_t *obj)
 {
-    embedded_array_prop_t prop;
+    carbon_array_prop_t prop;
     int status = OBJECT_GET_ARRAY_LENGTHS_GENERIC(&obj->err, length, obj, has_int16_array_props,
                                                   int16_arrays, idx, prop);
     return OBJECT_GET_ARRAY_VALUES_GENERIC(status, idx, prop, obj, carbon_int16_t);
@@ -482,7 +482,7 @@ const carbon_int32_t *carbon_archive_object_values_int32_arrays(uint32_t *length
                                                                 size_t idx,
                                                                 carbon_archive_object_t *obj)
 {
-    embedded_array_prop_t prop;
+    carbon_array_prop_t prop;
     int status = OBJECT_GET_ARRAY_LENGTHS_GENERIC(&obj->err, length, obj, has_int32_array_props,
                                                   int32_arrays, idx, prop);
     return OBJECT_GET_ARRAY_VALUES_GENERIC(status, idx, prop, obj, carbon_int32_t);
@@ -492,7 +492,7 @@ const carbon_int64_t *carbon_archive_object_values_int64_arrays(uint32_t *length
                                                                 size_t idx,
                                                                 carbon_archive_object_t *obj)
 {
-    embedded_array_prop_t prop;
+    carbon_array_prop_t prop;
     int status = OBJECT_GET_ARRAY_LENGTHS_GENERIC(&obj->err, length, obj, has_int64_array_props,
                                                   int64_arrays, idx, prop);
     return OBJECT_GET_ARRAY_VALUES_GENERIC(status, idx, prop, obj, carbon_int64_t);
@@ -502,7 +502,7 @@ const carbon_uint8_t *carbon_archive_object_values_uint8_arrays(uint32_t *length
                                                                 size_t idx,
                                                                 carbon_archive_object_t *obj)
 {
-    embedded_array_prop_t prop;
+    carbon_array_prop_t prop;
     int status = OBJECT_GET_ARRAY_LENGTHS_GENERIC(&obj->err, length, obj, has_uint8_array_props,
                                                   uint8_arrays, idx, prop);
     return OBJECT_GET_ARRAY_VALUES_GENERIC(status, idx, prop, obj, carbon_uint8_t);
@@ -512,7 +512,7 @@ const carbon_uint16_t *carbon_archive_object_values_uint16_arrays(uint32_t *leng
                                                                   size_t idx,
                                                                   carbon_archive_object_t *obj)
 {
-    embedded_array_prop_t prop;
+    carbon_array_prop_t prop;
     int status = OBJECT_GET_ARRAY_LENGTHS_GENERIC(&obj->err, length, obj, has_uint16_array_props,
                                                   uint16_arrays, idx, prop);
     return OBJECT_GET_ARRAY_VALUES_GENERIC(status, idx, prop, obj, carbon_uint16_t);
@@ -522,7 +522,7 @@ const carbon_uin32_t *carbon_archive_object_values_uint32_arrays(uint32_t *lengt
                                                                  size_t idx,
                                                                  carbon_archive_object_t *obj)
 {
-    embedded_array_prop_t prop;
+    carbon_array_prop_t prop;
     int status = OBJECT_GET_ARRAY_LENGTHS_GENERIC(&obj->err, length, obj, has_uint32_array_props,
                                                   uint32_arrays, idx, prop);
     return OBJECT_GET_ARRAY_VALUES_GENERIC(status, idx, prop, obj, carbon_uin32_t);
@@ -532,7 +532,7 @@ const carbon_uin64_t *carbon_archive_object_values_uint64_arrays(uint32_t *lengt
                                                                  size_t idx,
                                                                  carbon_archive_object_t *obj)
 {
-    embedded_array_prop_t prop;
+    carbon_array_prop_t prop;
     int status = OBJECT_GET_ARRAY_LENGTHS_GENERIC(&obj->err, length, obj, has_uint64_array_props,
                                                   uint64_arrays, idx, prop);
     return OBJECT_GET_ARRAY_VALUES_GENERIC(status, idx, prop, obj, carbon_uin64_t);
@@ -542,7 +542,7 @@ const carbon_bool_t *carbon_archive_object_values_bool_arrays(uint32_t *length,
                                                               size_t idx,
                                                               carbon_archive_object_t *obj)
 {
-    embedded_array_prop_t prop;
+    carbon_array_prop_t prop;
     int status = OBJECT_GET_ARRAY_LENGTHS_GENERIC(&obj->err, length, obj, has_bool_array_props,
                                                   bool_arrays, idx, prop);
     return OBJECT_GET_ARRAY_VALUES_GENERIC(status, idx, prop, obj, carbon_bool_t);
@@ -552,7 +552,7 @@ const carbon_float_t *carbon_archive_object_values_float_arrays(uint32_t *length
                                                                 size_t idx,
                                                                 carbon_archive_object_t *obj)
 {
-    embedded_array_prop_t prop;
+    carbon_array_prop_t prop;
     int status = OBJECT_GET_ARRAY_LENGTHS_GENERIC(&obj->err, length, obj, has_float_array_props,
                                                   float_arrays, idx, prop);
     return OBJECT_GET_ARRAY_VALUES_GENERIC(status, idx, prop, obj, carbon_float_t);
@@ -562,7 +562,7 @@ const carbon_string_id_t *carbon_archive_object_values_string_arrays(uint32_t *l
                                                                      size_t idx,
                                                                      carbon_archive_object_t *obj)
 {
-    embedded_array_prop_t prop;
+    carbon_array_prop_t prop;
     int status = OBJECT_GET_ARRAY_LENGTHS_GENERIC(&obj->err, length, obj, has_string_array_props,
                                                   string_arrays, idx, prop);
     return OBJECT_GET_ARRAY_VALUES_GENERIC(status, idx, prop, obj, carbon_string_id_t);
@@ -572,7 +572,7 @@ bool carbon_archive_object_values_null_array_lengths(uint32_t *length, size_t id
 {
     CARBON_NON_NULL_OR_ERROR(length);
     CARBON_NON_NULL_OR_ERROR(obj);
-    embedded_array_prop_t prop;
+    carbon_array_prop_t prop;
     return OBJECT_GET_ARRAY_LENGTHS_GENERIC(&obj->err, length, obj, has_null_array_props,
                                             null_arrays, idx, prop);
 }
@@ -590,8 +590,8 @@ bool carbon_archive_table_column_group(carbon_column_group_t *group, size_t idx,
         carbon_off_t group_off = table->groups_offsets[idx];
         carbon_off_t last = CARBON_MEMFILE_TELL(&table->context->file);
         carbon_memfile_seek(&table->context->file, group_off);
-        struct column_group_header *column_group_header = CARBON_MEMFILE_READ_TYPE(&table->context->file,
-        struct column_group_header);
+        carbon_column_group_header_t *column_group_header = CARBON_MEMFILE_READ_TYPE(&table->context->file,
+        carbon_column_group_header_t);
         group->ncolumns = column_group_header->num_columns;
         group->column_offsets = (const carbon_off_t *) carbon_memfile_peek(&table->context->file, sizeof(carbon_off_t));
         group->context = table->context;
@@ -614,7 +614,7 @@ bool carbon_archive_table_column(carbon_column_t *column, size_t idx, carbon_col
         carbon_off_t last = CARBON_MEMFILE_TELL(&group->context->file);
         carbon_off_t column_off = group->column_offsets[idx];
         carbon_memfile_seek(&group->context->file, column_off);
-        const struct column_header *header = CARBON_MEMFILE_READ_TYPE(&group->context->file, struct column_header);
+        const carbon_column_header_t *header = CARBON_MEMFILE_READ_TYPE(&group->context->file, carbon_column_header_t);
         column->nelems = header->num_entries;
         column->type = carbon_int_get_value_type_of_char(header->value_type);
         column->entry_offsets = (const carbon_off_t *) carbon_memfile_peek(&group->context->file, sizeof(carbon_off_t));

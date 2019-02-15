@@ -30,7 +30,7 @@ CARBON_BEGIN_DECL
 
 typedef struct carbon_query carbon_query_t; /* forwarded from 'carbon-query.h' */
 
-union carbon_archive_dic_flags;
+typedef union carbon_archive_dic_flags carbon_archive_dic_flags_t;
 
 typedef struct carbon_archive
 {

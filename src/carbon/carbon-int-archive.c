@@ -104,36 +104,36 @@ carbon_int_read_prop_offsets(carbon_archive_prop_offs_t *prop_offsets,
 }
 
 void
-carbon_int_embedded_fixed_props_read(embedded_fixed_prop_t *prop, carbon_memfile_t *memfile) {
-    prop->header = CARBON_MEMFILE_READ_TYPE(memfile, struct carbon_prop_header);
+carbon_int_embedded_fixed_props_read(carbon_fixed_prop_t *prop, carbon_memfile_t *memfile) {
+    prop->header = CARBON_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);
     prop->keys = (carbon_string_id_t *) CARBON_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(carbon_string_id_t));
     prop->values = carbon_memfile_peek(memfile, 1);
 }
 
 void
-carbon_int_embedded_var_props_read(embedded_var_prop_t *prop, carbon_memfile_t *memfile) {
-    prop->header = CARBON_MEMFILE_READ_TYPE(memfile, struct carbon_prop_header);
+carbon_int_embedded_var_props_read(carbon_var_prop_t *prop, carbon_memfile_t *memfile) {
+    prop->header = CARBON_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);
     prop->keys = (carbon_string_id_t *) CARBON_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(carbon_string_id_t));
     prop->offsets = (carbon_off_t *) CARBON_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(carbon_off_t));
     prop->values = carbon_memfile_peek(memfile, 1);
 }
 
 void
-carbon_int_embedded_null_props_read(embedded_null_prop_t *prop, carbon_memfile_t *memfile) {
-    prop->header = CARBON_MEMFILE_READ_TYPE(memfile, struct carbon_prop_header);
+carbon_int_embedded_null_props_read(carbon_null_prop_t *prop, carbon_memfile_t *memfile) {
+    prop->header = CARBON_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);
     prop->keys = (carbon_string_id_t *) CARBON_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(carbon_string_id_t));
 }
 
 void
-carbon_int_embedded_array_props_read(embedded_array_prop_t *prop, carbon_memfile_t *memfile) {
-    prop->header = CARBON_MEMFILE_READ_TYPE(memfile, struct carbon_prop_header);
+carbon_int_embedded_array_props_read(carbon_array_prop_t *prop, carbon_memfile_t *memfile) {
+    prop->header = CARBON_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);
     prop->keys = (carbon_string_id_t *) CARBON_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(carbon_string_id_t));
     prop->lengths = (uint32_t *) CARBON_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(uint32_t));
     prop->values_begin = CARBON_MEMFILE_TELL(memfile);
 }
 
 void
-carbon_int_embedded_table_props_read(embedded_table_prop_t *prop, carbon_memfile_t *memfile) {
+carbon_int_embedded_table_props_read(carbon_table_prop_t *prop, carbon_memfile_t *memfile) {
     prop->header->marker = *CARBON_MEMFILE_READ_TYPE(memfile, char);
     prop->header->num_entries = *CARBON_MEMFILE_READ_TYPE(memfile, uint8_t);
     prop->keys = (carbon_string_id_t *) CARBON_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(carbon_string_id_t));

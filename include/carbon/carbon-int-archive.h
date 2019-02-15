@@ -27,81 +27,75 @@
 CARBON_BEGIN_DECL
 
 
-struct __attribute__((packed)) carbon_file_header
+typedef struct __attribute__((packed))
 {
     char magic[9];
     uint8_t version;
     carbon_off_t root_object_header_offset;
-};
+} carbon_file_header_t;
 
-struct __attribute__((packed)) record_header
+typedef struct __attribute__((packed))
 {
     char marker;
     uint8_t flags;
     uint64_t record_size;
-};
+} carbon_record_header_t;
 
-static struct carbon_file_header this_carbon_file_header = {
+static carbon_file_header_t this_carbon_file_header = {
     .version = CABIN_FILE_VERSION,
     .root_object_header_offset = 0
 };
 
-struct __attribute__((packed)) object_header
+typedef struct __attribute__((packed))
 {
     char marker;
     carbon_object_id_t oid;
     uint32_t flags;
-};
+} carbon_object_header_t;
 
-struct __attribute__((packed)) carbon_prop_header
+typedef struct __attribute__((packed))
 {
     char marker;
     uint32_t num_entries;
-};
+} carbon_prop_header_t;
 
-union __attribute__((packed)) carbon_archive_dic_flags
+typedef union __attribute__((packed)) carbon_archive_dic_flags
 {
     struct {
         uint8_t compressor_none           : 1;
         uint8_t compressed_huffman        : 1;
     } bits;
     uint8_t value;
-};
+} carbon_archive_dic_flags_t;
 
-struct __attribute__((packed)) embedded_dic_header
+typedef struct __attribute__((packed))
 {
     char marker;
     uint32_t num_entries;
     uint8_t flags;
     carbon_off_t first_entry;
-};
+} carbon_string_table_header_t;
 
-struct __attribute__((packed)) embedded_string
-{
-    char marker;
-    uint64_t strlen;
-};
-
-struct __attribute__((packed)) object_array_header
+typedef struct __attribute__((packed))
 {
     char marker;
     uint8_t num_entries;
-};
+} carbon_object_array_header_t;
 
-struct __attribute__((packed)) column_group_header
+typedef struct __attribute__((packed))
 {
     char marker;
     uint32_t num_columns;
     uint32_t num_objects;
-};
+} carbon_column_group_header_t;
 
-struct __attribute__((packed)) column_header
+typedef struct __attribute__((packed))
 {
     char marker;
     carbon_string_id_t column_name;
     char value_type;
     uint32_t num_entries;
-};
+} carbon_column_header_t;
 
 typedef union
 {
@@ -144,7 +138,7 @@ typedef union
 } carbon_archive_object_flags_t;
 
 
-typedef struct carbon_archive_prop_offs {
+typedef struct {
     carbon_off_t nulls;
     carbon_off_t bools;
     carbon_off_t int8s;
@@ -173,43 +167,41 @@ typedef struct carbon_archive_prop_offs {
     carbon_off_t object_arrays;
 } carbon_archive_prop_offs_t;
 
-
 typedef struct
 {
-    struct carbon_prop_header *header;
+    carbon_prop_header_t *header;
     const carbon_string_id_t *keys;
     const void *values;
-} embedded_fixed_prop_t;
+} carbon_fixed_prop_t;
 
 typedef struct
 {
-    struct carbon_prop_header *header;
+    carbon_prop_header_t *header;
     const carbon_string_id_t *keys;
     const carbon_off_t *groupOffs;
-} embedded_table_prop_t;
+} carbon_table_prop_t;
 
 typedef struct
 {
-    struct carbon_prop_header *header;
+    carbon_prop_header_t *header;
     const carbon_string_id_t *keys;
     const carbon_off_t *offsets;
     const void *values;
-} embedded_var_prop_t;
+} carbon_var_prop_t;
 
 typedef struct
 {
-    struct carbon_prop_header *header;
+    carbon_prop_header_t *header;
     const carbon_string_id_t *keys;
     const uint32_t *lengths;
     carbon_off_t values_begin;
-} embedded_array_prop_t;
+} carbon_array_prop_t;
 
 typedef struct
 {
-    struct carbon_prop_header *header;
+    carbon_prop_header_t *header;
     const carbon_string_id_t *keys;
-} embedded_null_prop_t;
-
+} carbon_null_prop_t;
 
 enum marker_type
 {
@@ -324,8 +316,7 @@ static struct
     { carbon_field_type_object,  MARKER_TYPE_PROP_OBJECT }
 };
 
-
-typedef struct carbon_archive_record_flags
+typedef struct
 {
     struct {
         uint8_t is_sorted                 : 1;
@@ -341,26 +332,25 @@ typedef struct carbon_archive_record_flags
     uint8_t value;
 } carbon_archive_record_flags_t;
 
-typedef struct carbon_archive_string_table
+typedef struct
 {
     carbon_compressor_t     compressor;
     carbon_off_t            first_entry_off;
-
 } carbon_archive_string_table_t;
 
-typedef struct carbon_archive_record_table
+typedef struct
 {
     carbon_archive_record_flags_t   flags;
     carbon_memblock_t              *recordDataBase;
 } carbon_archive_record_table_t;
 
-typedef struct carbon_archive_info
+typedef struct
 {
     size_t string_table_size;
     size_t record_table_size;
 } carbon_archive_info_t;
 
-typedef struct carbon_archive_object
+typedef struct
 {
     carbon_memfile_t               file;
     carbon_archive_record_table_t *context;
@@ -370,7 +360,7 @@ typedef struct carbon_archive_object
     carbon_err_t                   err;
 } carbon_archive_object_t;
 
-typedef struct carbon_archive_table
+typedef struct
 {
     size_t                         ngroups;
     const carbon_string_id_t      *keys;
@@ -379,7 +369,7 @@ typedef struct carbon_archive_table
     carbon_err_t                   err;
 } carbon_archive_table_t;
 
-typedef struct carbon_column_group
+typedef struct
 {
     size_t                         ncolumns;
     const carbon_off_t            *column_offsets;
@@ -387,7 +377,7 @@ typedef struct carbon_column_group
     carbon_err_t                   err;
 } carbon_column_group_t;
 
-typedef struct carbon_column
+typedef struct
 {
     size_t                         nelems;
     carbon_field_type_e            type;
@@ -397,7 +387,7 @@ typedef struct carbon_column
     carbon_err_t                   err;
 } carbon_column_t;
 
-typedef struct carbon_field
+typedef struct
 {
     carbon_off_t                   data_offset;
     uint32_t                       nentries;
@@ -406,7 +396,7 @@ typedef struct carbon_field
     const void                    *data;
 } carbon_field_t;
 
-typedef struct carbon_object_cursor
+typedef struct
 {
     carbon_field_t *field;
     carbon_memblock_t *mem_block;
@@ -415,8 +405,7 @@ typedef struct carbon_object_cursor
     carbon_archive_object_t obj;
 } carbon_object_cursor_t;
 
-
-typedef struct __attribute__((packed)) carbon_string_entry_header
+typedef struct __attribute__((packed))
 {
     char                          marker;
     carbon_off_t                  next_entry_off;
@@ -430,19 +419,19 @@ carbon_int_read_prop_offsets(carbon_archive_prop_offs_t *prop_offsets,
                              const carbon_archive_object_flags_t *flags);
 
 void
-carbon_int_embedded_fixed_props_read(embedded_fixed_prop_t *prop, carbon_memfile_t *memfile);
+carbon_int_embedded_fixed_props_read(carbon_fixed_prop_t *prop, carbon_memfile_t *memfile);
 
 void
-carbon_int_embedded_var_props_read(embedded_var_prop_t *prop, carbon_memfile_t *memfile);
+carbon_int_embedded_var_props_read(carbon_var_prop_t *prop, carbon_memfile_t *memfile);
 
 void
-carbon_int_embedded_null_props_read(embedded_null_prop_t *prop, carbon_memfile_t *memfile);
+carbon_int_embedded_null_props_read(carbon_null_prop_t *prop, carbon_memfile_t *memfile);
 
 void
-carbon_int_embedded_array_props_read(embedded_array_prop_t *prop, carbon_memfile_t *memfile);
+carbon_int_embedded_array_props_read(carbon_array_prop_t *prop, carbon_memfile_t *memfile);
 
 void
-carbon_int_embedded_table_props_read(embedded_table_prop_t *prop, carbon_memfile_t *memfile);
+carbon_int_embedded_table_props_read(carbon_table_prop_t *prop, carbon_memfile_t *memfile);
 
 void
 carbon_int_reset_cabin_object_mem_file(carbon_archive_object_t *object);

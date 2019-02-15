@@ -45,7 +45,7 @@
 
 #define PRINT_SIMPLE_PROPS(file, memfile, offset, nesting_level, value_type, type_string, format_string)               \
 {                                                                                                                      \
-    struct carbon_prop_header *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, struct carbon_prop_header);             \
+    carbon_prop_header_t *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);             \
     carbon_string_id_t *keys = (carbon_string_id_t *) CARBON_MEMFILE_READ(memfile, prop_header->num_entries *          \
                                    sizeof(carbon_string_id_t));                                                        \
     value_type *values = (value_type *) CARBON_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(value_type));   \
@@ -64,7 +64,7 @@
 
 #define PRINT_ARRAY_PROPS(memfile, offset, nesting_level, entryMarker, type, type_string, format_string)               \
 {                                                                                                                      \
-    struct carbon_prop_header *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, struct carbon_prop_header);             \
+    carbon_prop_header_t *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);             \
                                                                                                                        \
     carbon_string_id_t *keys = (carbon_string_id_t *) CARBON_MEMFILE_READ(memfile, prop_header->num_entries *          \
                                         sizeof(carbon_string_id_t));                                                   \
@@ -265,7 +265,7 @@ bool carbon_archive_from_model(carbon_memblock_t **stream,
     if(!serialize_columndoc(NULL, err, &memfile, &model->columndoc, root_object_header_offset)) {
         return false;
     }
-    uint64_t record_size = CARBON_MEMFILE_TELL(&memfile) - (record_header_offset + sizeof(struct record_header));
+    uint64_t record_size = CARBON_MEMFILE_TELL(&memfile) - (record_header_offset + sizeof(carbon_record_header_t));
     update_record_header(&memfile, record_header_offset, model, record_size);
 
     carbon_memfile_shrink(&memfile);
@@ -306,7 +306,7 @@ bool carbon_archive_print(FILE *file, carbon_err_t *err, carbon_memblock_t *stre
 {
     carbon_memfile_t memfile;
     carbon_memfile_open(&memfile, stream, CARBON_MEMFILE_MODE_READONLY);
-    if (carbon_memfile_size(&memfile) < sizeof(struct carbon_file_header) + sizeof(struct embedded_dic_header) + sizeof(struct object_header)) {
+    if (carbon_memfile_size(&memfile) < sizeof(carbon_file_header_t) + sizeof(carbon_string_table_header_t) + sizeof(carbon_object_header_t)) {
         CARBON_ERROR(err, CARBON_ERR_NOCARBONSTREAM);
         return false;
     } else {
@@ -567,12 +567,12 @@ static bool write_array_prop(carbon_off_t *offset, carbon_err_t *err, carbon_mem
     assert(keys->num_elems == values->num_elems);
 
     if (keys->num_elems > 0) {
-        struct carbon_prop_header header = {
+        carbon_prop_header_t header = {
             .marker = marker_symbols[value_array_marker_mapping[type].marker].symbol,
             .num_entries = keys->num_elems
         };
         carbon_off_t prop_ofOffset = CARBON_MEMFILE_TELL(memfile);
-        carbon_memfile_write(memfile, &header, sizeof(struct carbon_prop_header));
+        carbon_memfile_write(memfile, &header, sizeof(carbon_prop_header_t));
 
         write_primitive_key_column(memfile, keys);
         if(!write_array_lengths_column(err, memfile, type, values)) {
@@ -653,13 +653,13 @@ static bool write_fixed_props(carbon_off_t *offset, carbon_err_t *err, carbon_me
     assert(type != carbon_field_type_object); /** use 'write_var_props' instead */
 
     if (keys->num_elems > 0) {
-        struct carbon_prop_header header = {
+        carbon_prop_header_t header = {
                 .marker = marker_symbols[valueMarkerMapping[type].marker].symbol,
                 .num_entries = keys->num_elems
         };
 
         carbon_off_t prop_ofOffset = CARBON_MEMFILE_TELL(memfile);
-        carbon_memfile_write(memfile, &header, sizeof(struct carbon_prop_header));
+        carbon_memfile_write(memfile, &header, sizeof(carbon_prop_header_t));
 
         write_primitive_key_column(memfile, keys);
         if(!write_primitive_fixed_value_column(memfile, err, type, values)) {
@@ -687,13 +687,13 @@ static bool write_var_props(carbon_off_t *offset,
     assert(!objects || keys->num_elems == objects->num_elems);
 
     if (keys->num_elems > 0) {
-        struct carbon_prop_header header = {
+        carbon_prop_header_t header = {
             .marker = MARKER_SYMBOL_PROP_OBJECT,
             .num_entries = keys->num_elems
         };
 
         carbon_off_t prop_ofOffset = CARBON_MEMFILE_TELL(memfile);
-        carbon_memfile_write(memfile, &header, sizeof(struct carbon_prop_header));
+        carbon_memfile_write(memfile, &header, sizeof(carbon_prop_header_t));
 
         write_primitive_key_column(memfile, keys);
         carbon_off_t value_offset = skip_var_value_offset_column(memfile, keys->num_elems);
@@ -829,14 +829,14 @@ static bool write_column(carbon_memfile_t *memfile, carbon_err_t *err, carbon_co
 {
     assert(column->array_positions.num_elems == column->values.num_elems);
 
-    struct column_header header = {
+    carbon_column_header_t header = {
         .marker = marker_symbols[MARKER_TYPE_COLUMN].symbol,
         .column_name = column->key_name,
         .value_type = marker_symbols[value_array_marker_mapping[column->type].marker].symbol,
         .num_entries = column->values.num_elems
     };
 
-    carbon_memfile_write(memfile, &header, sizeof(struct column_header));
+    carbon_memfile_write(memfile, &header, sizeof(carbon_column_header_t));
 
     /** skip offset column to value entry points */
     carbon_off_t value_entry_offsets = CARBON_MEMFILE_TELL(memfile);
@@ -862,13 +862,13 @@ static bool write_object_array_props(carbon_memfile_t *memfile, carbon_err_t *er
                                   carbon_archive_prop_offs_t *offsets, carbon_off_t root_object_header_offset)
 {
     if (object_key_columns->num_elems > 0) {
-        struct object_array_header header = {
+        carbon_object_array_header_t header = {
             .marker = marker_symbols[MARKER_TYPE_PROP_OBJECT_ARRAY].symbol,
             .num_entries = object_key_columns->num_elems
         };
 
         offsets->object_arrays = CARBON_MEMFILE_TELL(memfile) - root_object_header_offset;
-        carbon_memfile_write(memfile, &header, sizeof(struct object_array_header));
+        carbon_memfile_write(memfile, &header, sizeof(carbon_object_array_header_t));
 
         for (size_t i = 0; i < object_key_columns->num_elems; i++) {
             carbon_columndoc_columngroup_t *column_group = CARBON_VECTOR_GET(object_key_columns, i, carbon_columndoc_columngroup_t);
@@ -892,12 +892,12 @@ static bool write_object_array_props(carbon_memfile_t *memfile, carbon_err_t *er
                     max_pos = CARBON_MAX(max_pos, array_pos[m]);
                 }
             }
-            struct column_group_header column_group_header = {
+            carbon_column_group_header_t column_group_header = {
                 .marker = marker_symbols[MARKER_TYPE_COLUMN_GROUP].symbol,
                 .num_columns = column_group->columns.num_elems,
                 .num_objects = max_pos + 1
             };
-            carbon_memfile_write(memfile, &column_group_header, sizeof(struct column_group_header));
+            carbon_memfile_write(memfile, &column_group_header, sizeof(carbon_column_group_header_t));
 
             for (size_t i = 0; i < column_group_header.num_objects; i++) {
                 carbon_object_id_t oid;
@@ -939,7 +939,7 @@ static bool write_object_array_props(carbon_memfile_t *memfile, carbon_err_t *er
 static carbon_off_t skip_record_header(carbon_memfile_t *memfile)
 {
     carbon_off_t offset = CARBON_MEMFILE_TELL(memfile);
-    carbon_memfile_skip(memfile, sizeof(struct record_header));
+    carbon_memfile_skip(memfile, sizeof(carbon_record_header_t));
     return offset;
 }
 
@@ -951,7 +951,7 @@ static void update_record_header(carbon_memfile_t *memfile,
     carbon_archive_record_flags_t flags = {
         .bits.is_sorted = model->read_optimized
     };
-    struct record_header header = {
+    carbon_record_header_t header = {
         .marker = MARKER_SYMBOL_RECORD_HEADER,
         .flags = flags.value,
         .record_size = record_size
@@ -959,7 +959,7 @@ static void update_record_header(carbon_memfile_t *memfile,
     carbon_off_t offset;
     carbon_memfile_tell(&offset, memfile);
     carbon_memfile_seek(memfile, root_object_header_offset);
-    carbon_memfile_write(memfile, &header, sizeof(struct record_header));
+    carbon_memfile_write(memfile, &header, sizeof(carbon_record_header_t));
     carbon_memfile_seek(memfile, offset);
 }
 
@@ -1137,7 +1137,7 @@ static bool serialize_columndoc(carbon_off_t *offset, carbon_err_t *err, carbon_
     get_flags(&flags, columndoc);
 
     carbon_off_t header_offset = CARBON_MEMFILE_TELL(memfile);
-    carbon_memfile_skip(memfile, sizeof(struct object_header));
+    carbon_memfile_skip(memfile, sizeof(carbon_object_header_t));
 
     prop_offsets_skip_write(memfile, &flags);
     carbon_off_t next_offset = CARBON_MEMFILE_TELL(memfile);
@@ -1166,14 +1166,14 @@ static bool serialize_columndoc(carbon_off_t *offset, carbon_err_t *err, carbon_
         return false;
     }
 
-    struct object_header header = {
+    carbon_object_header_t header = {
         .marker = marker_symbols[MARKER_TYPE_OBJECT_BEGIN].symbol,
         .oid = oid,
         .flags = flags_to_int32(&flags),
 
     };
 
-    carbon_memfile_write(memfile, &header, sizeof(struct object_header));
+    carbon_memfile_write(memfile, &header, sizeof(carbon_object_header_t));
 
     propOffsetsWrite(memfile, &flags, &prop_offsets);
 
@@ -1182,7 +1182,7 @@ static bool serialize_columndoc(carbon_off_t *offset, carbon_err_t *err, carbon_
     return true;
 }
 
-static char *embedded_dic_flags_to_string(const union carbon_archive_dic_flags *flags)
+static char *embedded_dic_flags_to_string(const carbon_archive_dic_flags_t *flags)
 {
     size_t max = 2048;
     char *string = malloc(max + 1);
@@ -1230,9 +1230,9 @@ static char *record_header_flags_to_string(const carbon_archive_record_flags_t *
 
 static bool serialize_string_dic(carbon_memfile_t *memfile, carbon_err_t *err, const carbon_doc_bulk_t *context, carbon_compressor_type_e compressor)
 {
-    union carbon_archive_dic_flags flags;
+    carbon_archive_dic_flags_t flags;
     carbon_compressor_t strategy;
-    struct embedded_dic_header header;
+    carbon_string_table_header_t header;
 
     carbon_vec_t ofType (const char *) *strings;
     carbon_vec_t ofType(carbon_string_id_t) *string_ids;
@@ -1249,11 +1249,11 @@ static bool serialize_string_dic(carbon_memfile_t *memfile, carbon_err_t *err, c
     CARBON_FIELD_SET(flags.value, flag_bit);
 
     carbon_off_t header_pos = CARBON_MEMFILE_TELL(memfile);
-    carbon_memfile_skip(memfile, sizeof(struct embedded_dic_header));
+    carbon_memfile_skip(memfile, sizeof(carbon_string_table_header_t));
 
     carbon_compressor_write_extra(err, &strategy, memfile, strings);
 
-    header = (struct embedded_dic_header) {
+    header = (carbon_string_table_header_t) {
         .marker = marker_symbols[MARKER_TYPE_EMBEDDED_STR_DIC].symbol,
         .flags = flags.value,
         .num_entries = strings->num_elems,
@@ -1288,7 +1288,7 @@ static bool serialize_string_dic(carbon_memfile_t *memfile, carbon_err_t *err, c
 
     carbon_off_t continue_pos = CARBON_MEMFILE_TELL(memfile);
     carbon_memfile_seek(memfile, header_pos);
-    carbon_memfile_write(memfile, &header, sizeof(struct embedded_dic_header));
+    carbon_memfile_write(memfile, &header, sizeof(carbon_string_table_header_t));
     carbon_memfile_seek(memfile, continue_pos);
 
     carbon_vec_drop(strings);
@@ -1301,7 +1301,7 @@ static bool serialize_string_dic(carbon_memfile_t *memfile, carbon_err_t *err, c
 
 static void skip_carbon_file_header(carbon_memfile_t *memfile)
 {
-    carbon_memfile_skip(memfile, sizeof(struct carbon_file_header));
+    carbon_memfile_skip(memfile, sizeof(carbon_file_header_t));
 }
 
 static void update_carbon_file_header(carbon_memfile_t *memfile, carbon_off_t record_header_offset)
@@ -1311,7 +1311,7 @@ static void update_carbon_file_header(carbon_memfile_t *memfile, carbon_off_t re
     carbon_memfile_seek(memfile, 0);
     memcpy(&this_carbon_file_header.magic, CABIN_FILE_MAGIC, strlen(CABIN_FILE_MAGIC));
     this_carbon_file_header.root_object_header_offset = record_header_offset;
-    carbon_memfile_write(memfile, &this_carbon_file_header, sizeof(struct carbon_file_header));
+    carbon_memfile_write(memfile, &this_carbon_file_header, sizeof(carbon_file_header_t));
     carbon_memfile_seek(memfile, current_pos);
 }
 
@@ -1319,7 +1319,7 @@ static bool print_column_form_memfile(FILE *file, carbon_err_t *err, carbon_memf
 {
     carbon_off_t offset;
     carbon_memfile_tell(&offset, memfile);
-    struct column_header *header = CARBON_MEMFILE_READ_TYPE(memfile, struct column_header);
+    carbon_column_header_t *header = CARBON_MEMFILE_READ_TYPE(memfile, carbon_column_header_t);
     if (header->marker != MARKER_SYMBOL_COLUMN) {
         char buffer[256];
         sprintf(buffer, "expected marker [%c] but found [%c]", MARKER_SYMBOL_COLUMN, header->marker);
@@ -1425,7 +1425,7 @@ static bool print_column_form_memfile(FILE *file, carbon_err_t *err, carbon_memf
 static bool print_object_array_from_memfile(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile, unsigned nesting_level)
 {
     unsigned offset = (unsigned) CARBON_MEMFILE_TELL(memfile);
-    struct object_array_header *header = CARBON_MEMFILE_READ_TYPE(memfile, struct object_array_header);
+    carbon_object_array_header_t *header = CARBON_MEMFILE_READ_TYPE(memfile, carbon_object_array_header_t);
     if (header->marker != MARKER_SYMBOL_PROP_OBJECT_ARRAY) {
         char buffer[256];
         sprintf(buffer, "expected marker [%c] but found [%c]", MARKER_SYMBOL_PROP_OBJECT_ARRAY, header->marker);
@@ -1452,7 +1452,7 @@ static bool print_object_array_from_memfile(FILE *file, carbon_err_t *err, carbo
 
     for (size_t i = 0; i < header->num_entries; i++) {
         offset = CARBON_MEMFILE_TELL(memfile);
-        struct column_group_header *column_group_header = CARBON_MEMFILE_READ_TYPE(memfile, struct column_group_header);
+        carbon_column_group_header_t *column_group_header = CARBON_MEMFILE_READ_TYPE(memfile, carbon_column_group_header_t);
         if (column_group_header->marker != MARKER_SYMBOL_COLUMN_GROUP) {
             char buffer[256];
             sprintf(buffer, "expected marker [%c] but found [%c]", MARKER_SYMBOL_COLUMN_GROUP, column_group_header->marker);
@@ -1573,7 +1573,7 @@ static void print_prop_offsets(FILE *file, const carbon_archive_object_flags_t *
 bool print_object(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile, unsigned nesting_level)
 {
     unsigned offset = (unsigned) CARBON_MEMFILE_TELL(memfile);
-    struct object_header *header = CARBON_MEMFILE_READ_TYPE(memfile, struct object_header);
+    carbon_object_header_t *header = CARBON_MEMFILE_READ_TYPE(memfile, carbon_object_header_t);
 
     carbon_archive_prop_offs_t prop_offsets;
     carbon_archive_object_flags_t flags = {
@@ -1605,7 +1605,7 @@ bool print_object(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile, unsi
 
         switch (entryMarker) {
             case MARKER_SYMBOL_PROP_NULL: {
-                struct carbon_prop_header *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, struct carbon_prop_header);
+                carbon_prop_header_t *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);
                 carbon_string_id_t *keys = (carbon_string_id_t *) CARBON_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(carbon_string_id_t));
                 fprintf(file, "0x%04x ", offset);
                 INTENT_LINE(nesting_level)
@@ -1617,7 +1617,7 @@ bool print_object(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile, unsi
                 fprintf(file, "]\n");
             } break;
             case MARKER_SYMBOL_PROP_BOOLEAN: {
-                struct carbon_prop_header *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, struct carbon_prop_header);
+                carbon_prop_header_t *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);
                 carbon_string_id_t *keys = (carbon_string_id_t *) CARBON_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(carbon_string_id_t));
                 carbon_bool_t *values = (carbon_bool_t *) CARBON_MEMFILE_READ(memfile,
                                                                 prop_header->num_entries * sizeof(carbon_bool_t));
@@ -1664,7 +1664,7 @@ bool print_object(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile, unsi
                 PRINT_SIMPLE_PROPS(file, memfile, CARBON_MEMFILE_TELL(memfile), nesting_level, carbon_string_id_t, "Text", "%"PRIu64"");
                 break;
             case MARKER_SYMBOL_PROP_OBJECT: {
-                embedded_var_prop_t prop;
+                carbon_var_prop_t prop;
                 carbon_int_embedded_var_props_read(&prop, memfile);
                 fprintf(file, "0x%04x ", offset);
                 INTENT_LINE(nesting_level)
@@ -1688,7 +1688,7 @@ bool print_object(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile, unsi
 
             } break;
             case MARKER_SYMBOL_PROP_NULL_ARRAY: {
-                struct carbon_prop_header *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, struct carbon_prop_header);
+                carbon_prop_header_t *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);
 
                 carbon_string_id_t *keys = (carbon_string_id_t *) CARBON_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(carbon_string_id_t));
                 uint32_t *nullArrayLengths;
@@ -1711,7 +1711,7 @@ bool print_object(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile, unsi
                 fprintf(file, "]\n");
             } break;
             case MARKER_SYMBOL_PROP_BOOLEAN_ARRAY: {
-                struct carbon_prop_header *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, struct carbon_prop_header);
+                carbon_prop_header_t *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);
 
                 carbon_string_id_t *keys = (carbon_string_id_t *) CARBON_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(carbon_string_id_t));
                 uint32_t *array_lengths;
@@ -1803,7 +1803,7 @@ bool print_object(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile, unsi
     return true;
 }
 
-static bool is_valid_carbon_file(const struct carbon_file_header *header)
+static bool is_valid_carbon_file(const carbon_file_header_t *header)
 {
     if (CARBON_ARRAY_LENGTH(header->magic) != strlen(CABIN_FILE_MAGIC)) {
         return false;
@@ -1826,7 +1826,7 @@ static bool is_valid_carbon_file(const struct carbon_file_header *header)
 static void print_record_header_from_memfile(FILE *file, carbon_memfile_t *memfile)
 {
     unsigned offset = CARBON_MEMFILE_TELL(memfile);
-    struct record_header *header = CARBON_MEMFILE_READ_TYPE(memfile, struct record_header);
+    carbon_record_header_t *header = CARBON_MEMFILE_READ_TYPE(memfile, carbon_record_header_t);
     carbon_archive_record_flags_t flags;
     memset(&flags, 0, sizeof(carbon_archive_record_flags_t));
     flags.value = header->flags;
@@ -1840,8 +1840,8 @@ static void print_record_header_from_memfile(FILE *file, carbon_memfile_t *memfi
 static bool print_carbon_header_from_memfile(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile)
 {
     unsigned offset = CARBON_MEMFILE_TELL(memfile);
-    assert(carbon_memfile_size(memfile) > sizeof(struct carbon_file_header));
-    struct carbon_file_header *header = CARBON_MEMFILE_READ_TYPE(memfile, struct carbon_file_header);
+    assert(carbon_memfile_size(memfile) > sizeof(carbon_file_header_t));
+    carbon_file_header_t *header = CARBON_MEMFILE_READ_TYPE(memfile, carbon_file_header_t);
     if (!is_valid_carbon_file(header)) {
         CARBON_ERROR(err, CARBON_ERR_NOARCHIVEFILE)
         return false;
@@ -1856,10 +1856,10 @@ static bool print_carbon_header_from_memfile(FILE *file, carbon_err_t *err, carb
 static bool print_embedded_dic_from_memfile(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile)
 {
     carbon_compressor_t strategy;
-    union carbon_archive_dic_flags flags;
+    carbon_archive_dic_flags_t flags;
 
     unsigned offset = CARBON_MEMFILE_TELL(memfile);
-    struct embedded_dic_header *header = CARBON_MEMFILE_READ_TYPE(memfile, struct embedded_dic_header);
+    carbon_string_table_header_t *header = CARBON_MEMFILE_READ_TYPE(memfile, carbon_string_table_header_t);
     if (header->marker != marker_symbols[MARKER_TYPE_EMBEDDED_STR_DIC].symbol) {
         char buffer[256];
         sprintf(buffer, "expected [%c] marker, but found [%c]", marker_symbols[MARKER_TYPE_EMBEDDED_STR_DIC].symbol, header->marker);
@@ -1957,8 +1957,8 @@ bool carbon_archive_open(carbon_archive_t *out,
         CARBON_PRINT_ERROR(CARBON_ERR_FOPEN_FAILED);
         return false;
     } else {
-        struct carbon_file_header header;
-        size_t nread = fread(&header, sizeof(struct carbon_file_header), 1, disk_file);
+        carbon_file_header_t header;
+        size_t nread = fread(&header, sizeof(carbon_file_header_t), 1, disk_file);
         if (nread != 1) {
             fclose(disk_file);
             CARBON_PRINT_ERROR(CARBON_ERR_IO);
@@ -1975,7 +1975,7 @@ bool carbon_archive_open(carbon_archive_t *out,
                     return status;
                 }
 
-                fseek(disk_file, sizeof(struct carbon_file_header), SEEK_SET);
+                fseek(disk_file, sizeof(carbon_file_header_t), SEEK_SET);
                 carbon_off_t stringDicStart = ftell(disk_file);
                 fseek(disk_file, 0, SEEK_END);
                 carbon_off_t fileEnd = ftell(disk_file);
@@ -2027,10 +2027,10 @@ static bool read_stringtable(carbon_archive_string_table_t *table, carbon_err_t 
 {
     assert(disk_file);
 
-    struct embedded_dic_header header;
-    union carbon_archive_dic_flags flags;
+    carbon_string_table_header_t header;
+    carbon_archive_dic_flags_t flags;
 
-    size_t num_read = fread(&header, sizeof(struct embedded_dic_header), 1, disk_file);
+    size_t num_read = fread(&header, sizeof(carbon_string_table_header_t), 1, disk_file);
     if (num_read != 1) {
         CARBON_ERROR(err, CARBON_ERR_IO);
         return false;
@@ -2053,8 +2053,8 @@ static bool read_record(carbon_archive_t *archive, FILE *disk_file, carbon_off_t
 {
     carbon_err_t err;
     fseek(disk_file, record_header_offset, SEEK_SET);
-    struct record_header header;
-    if (fread(&header, sizeof(struct record_header), 1, disk_file) != 1) {
+    carbon_record_header_t header;
+    if (fread(&header, sizeof(carbon_record_header_t), 1, disk_file) != 1) {
         CARBON_ERROR(&archive->err, CARBON_ERR_CORRUPTED);
         return false;
     } else {
