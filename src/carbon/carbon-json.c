@@ -86,7 +86,7 @@ const carbon_json_token_t *carbon_json_tokenizer_next(carbon_json_tokenizer_t *t
             do {
                 tokenizer->cursor++;
                 tokenizer->token.column++;
-            } while (isspace(c = *tokenizer->cursor));
+            } while (isspace(c = *tokenizer->cursor) && c != '\n');
             return carbon_json_tokenizer_next(tokenizer);
         } else if (c == '{' || c == '}' || c == '[' || c == ']' || c == ':' || c == ',') {
             tokenizer->token.type = c == '{' ? CARBON_JSON_TOKEN_SCOPE_OPEN : c == '}' ? CARBON_JSON_TOKEN_SCOPE_CLOSE :

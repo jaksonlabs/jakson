@@ -96,7 +96,7 @@ carbon_doc_t *carbon_doc_bulk_new_doc(carbon_doc_bulk_t *context, carbon_field_t
     model->context = context;
     model->type = type;
 
-    carbon_vec_create(&model->obj_model, NULL, sizeof(carbon_doc_obj_t), 10);
+    carbon_vec_create(&model->obj_model, NULL, sizeof(carbon_doc_obj_t), 500);
 
     return model;
 }
@@ -1317,7 +1317,7 @@ static void create_typed_vector(carbon_doc_entries_t *entry)
         CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_INTERNALERR) /** unknown type */
         return;
     }
-    carbon_vec_create(&entry->values, NULL, size, 10);
+    carbon_vec_create(&entry->values, NULL, size, 50);
 }
 
 static void entries_drop(carbon_doc_entries_t *entry)
