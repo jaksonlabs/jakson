@@ -189,11 +189,12 @@ TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateContains)
     carbon_string_pred_contains_init(&pred);
     result = carbon_query_find_ids(&num_match, &query, &pred, (void *) needle, CARBON_QUERY_LIMIT_NONE);
     ASSERT_TRUE(result != NULL);
+    ASSERT_TRUE(num_match == 4);
 
     for (size_t i = 0; i < num_match; i++) {
         char *string = carbon_query_fetch_string_by_id(&query, result[i]);
         ASSERT_TRUE(string != NULL);
-        printf("MATCHED %" PRIu64 " ('%s')\n", result[i], string);
+        printf("MATCHED CONTAINS %" PRIu64 " ('%s')\n", result[i], string);
         ASSERT_TRUE(strstr(string, needle) != NULL);
         free(string);
     }
@@ -228,8 +229,9 @@ TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateEquals)
     ASSERT_TRUE(num_match == 1);
     char *string = carbon_query_fetch_string_by_id(&query, result[0]);
     ASSERT_TRUE(string != NULL);
-    printf("MATCHED %" PRIu64 " ('%s')\n", result[0], string);
+    printf("MATCHED EQUALS %" PRIu64 " ('%s')\n", result[0], string);
     ASSERT_TRUE(strcmp(string, needle) == 0);
+    ASSERT_TRUE(result[0] == 72057594037928054);
     free(string);
 
     free(result);
