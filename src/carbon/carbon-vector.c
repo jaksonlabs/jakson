@@ -182,6 +182,15 @@ bool carbon_vec_grow(size_t *numNewSlots, carbon_vec_t *vec)
     return true;
 }
 
+CARBON_EXPORT(bool)
+carbon_vec_grow_to(carbon_vec_t *vec, size_t capacity)
+{
+    CARBON_NON_NULL_OR_ERROR(vec);
+    vec->cap_elems = CARBON_MAX(vec->cap_elems, capacity);
+    vec->base = carbon_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
+    return true;
+}
+
 size_t carbon_vec_length(const carbon_vec_t *vec)
 {
     CARBON_NON_NULL_OR_ERROR(vec)
@@ -206,6 +215,24 @@ bool carbon_vec_enlarge_size_to_capacity(carbon_vec_t *vec)
     return true;
 }
 
+CARBON_EXPORT(bool)
+carbon_vec_zero_memory(carbon_vec_t *vec)
+{
+    CARBON_NON_NULL_OR_ERROR(vec);
+    CARBON_ZERO_MEMORY(vec->base, vec->elem_size * vec->num_elems);
+    return true;
+}
+
+CARBON_EXPORT(bool)
+carbon_vec_zero_memory_in_range(carbon_vec_t *vec, size_t from, size_t to)
+{
+    CARBON_NON_NULL_OR_ERROR(vec);
+    assert(from < to);
+    assert(to <= vec->cap_elems);
+    CARBON_ZERO_MEMORY(vec->base + from * vec->elem_size, vec->elem_size * (to -from));
+    return true;
+}
+
 bool carbon_vec_set(carbon_vec_t *vec, size_t pos, const void *data)
 {
     CARBON_NON_NULL_OR_ERROR(vec)
@@ -222,6 +249,27 @@ bool carbon_vec_cpy(carbon_vec_t *dst, const carbon_vec_t *src)
         memcpy(dst->base, src->base, src->elem_size * src->num_elems);
     }
     return true;
+}
+
+CARBON_EXPORT(bool)
+carbon_vec_cpy_to(carbon_vec_t *dst, carbon_vec_t *src)
+{
+    CARBON_NON_NULL_OR_ERROR(dst)
+    CARBON_NON_NULL_OR_ERROR(src)
+    void *handle = realloc(dst->base, src->cap_elems * src->elem_size);
+    if (handle) {
+        dst->elem_size = src->elem_size;
+        dst->num_elems = src->num_elems;
+        dst->cap_elems = src->cap_elems;
+        dst->grow_factor = src->grow_factor;
+        dst->base = handle;
+        memcpy(dst->base, src->base, src->cap_elems * src->elem_size);
+        carbon_error_cpy(&dst->err, &src->err);
+        return true;
+    } else {
+        CARBON_ERROR(&src->err, CARBON_ERR_HARDCOPYFAILED)
+        return false;
+    }
 }
 
 const void *carbon_vec_data(const carbon_vec_t *vec)

@@ -252,6 +252,9 @@ VectorShrink(carbon_vec_t *vec);
 CARBON_EXPORT(bool)
 carbon_vec_grow(size_t *numNewSlots, carbon_vec_t *vec);
 
+CARBON_EXPORT(bool)
+carbon_vec_grow_to(carbon_vec_t *vec, size_t capacity);
+
 /**
  * Returns the number of elements currently stored in the vector
  *
@@ -290,10 +293,19 @@ CARBON_EXPORT(bool)
 carbon_vec_enlarge_size_to_capacity(carbon_vec_t *vec);
 
 CARBON_EXPORT(bool)
+carbon_vec_zero_memory(carbon_vec_t *vec);
+
+CARBON_EXPORT(bool)
+carbon_vec_zero_memory_in_range(carbon_vec_t *vec, size_t from, size_t to);
+
+CARBON_EXPORT(bool)
 carbon_vec_set(carbon_vec_t *vec, size_t pos, const void *data);
 
 CARBON_EXPORT(bool)
 carbon_vec_cpy(carbon_vec_t *dst, const carbon_vec_t *src);
+
+CARBON_EXPORT(bool)
+carbon_vec_cpy_to(carbon_vec_t *dst, carbon_vec_t *src);
 
 /**
  * Gives raw data access to data stored in the vector; do not manipulate this data since otherwise the vector

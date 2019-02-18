@@ -72,6 +72,10 @@ CARBON_BEGIN_DECL
 #define CARBON_ERR_HARDCOPYFAILED 45        /** Unable to construct a hard copy of the source object */
 #define CARBON_ERR_REALLOCERR 46            /** Memory reallocation failed */
 #define CARBON_ERR_PREDEVAL_FAILED 47       /** Predicate evaluation failed */
+#define CARBON_ERR_INITFAILED 48            /** Initialization failed */
+#define CARBON_ERR_DROPFAILED 49            /** Resource release failed: potentially a memory leak occurred */
+#define CARBON_ERR_OPPFAILED 50             /** Operation failed */
+#define CARBON_ERR_REHASH_NOROLLBACK 51     /** Rehashing hash table failed; rollback is not performed */
 
 static const char *const _carbon_err_str[] = {
     "No error",
@@ -121,7 +125,11 @@ static const char *const _carbon_err_str[] = {
     "Closing iterator failed",
     "Unable to construct a hard copy of the source object",
     "Memory reallocation failed",
-    "Predicate evaluation failed"
+    "Predicate evaluation failed",
+    "Initialization failed",
+    "Resource release failed: potentially a memory leak occurred",
+    "Operation failed",
+    "Rehashing hash table failed; rollback is not performed"
 };
 
 #define CARBON_ERRSTR_ILLEGAL_CODE "illegal error code"
