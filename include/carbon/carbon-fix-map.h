@@ -68,6 +68,9 @@ CARBON_EXPORT(bool)
 carbon_fix_map_clear(carbon_fix_map_t *map);
 
 CARBON_EXPORT(bool)
+carbon_fix_map_avg_displace(float *displace, const carbon_fix_map_t *map);
+
+CARBON_EXPORT(bool)
 carbon_fix_map_lock(carbon_fix_map_t *map);
 
 CARBON_EXPORT(bool)

@@ -19,6 +19,7 @@
 #include <carbon/carbon-fix-map.h>
 
 #define HASHCODE_OF(size, x) CARBON_HASH_BERNSTEIN(size, x)
+#define FIX_MAP_AUTO_REHASH_LOADFACTOR 0.9f
 
 CARBON_EXPORT(bool)
 carbon_fix_map_create(carbon_fix_map_t *map, carbon_err_t *err, size_t key_size, size_t value_size, size_t capacity)
@@ -144,6 +145,22 @@ carbon_fix_map_clear(carbon_fix_map_t *map)
 }
 
 CARBON_EXPORT(bool)
+carbon_fix_map_avg_displace(float *displace, const carbon_fix_map_t *map)
+{
+    CARBON_NON_NULL_OR_ERROR(displace);
+    CARBON_NON_NULL_OR_ERROR(map);
+
+    size_t sum_dis = 0;
+    for (size_t i = 0; i < map->table.num_elems; i++) {
+        carbon_bucket_t *bucket = CARBON_VECTOR_GET(&map->table, i, carbon_bucket_t);
+        sum_dis += abs(bucket->displacement);
+    }
+    *displace = (sum_dis / (float) map->table.num_elems);
+
+    return true;
+}
+
+CARBON_EXPORT(bool)
 carbon_fix_map_lock(carbon_fix_map_t *map)
 {
     CARBON_NON_NULL_OR_ERROR(map)
@@ -171,7 +188,22 @@ get_bucket_value(const carbon_bucket_t *bucket, const carbon_fix_map_t *map)
     return map->value_data.base + bucket->data_idx * map->value_data.elem_size;
 }
 
-static uint_fast32_t
+static void
+insert(carbon_bucket_t *bucket, carbon_fix_map_t *map, const void *key, const void *value, int32_t displacement)
+{
+    assert(map->key_data.num_elems == map->value_data.num_elems);
+    uint64_t idx = map->key_data.num_elems;
+    void *key_datum = VECTOR_NEW_AND_GET(&map->key_data, void *);
+    void *value_datum = VECTOR_NEW_AND_GET(&map->value_data, void *);
+    memcpy(key_datum, key, map->key_data.elem_size);
+    memcpy(value_datum, value, map->value_data.elem_size);
+    bucket->data_idx = idx;
+    bucket->in_use_flag = true;
+    bucket->displacement = displacement;
+    map->size++;
+}
+
+static inline uint_fast32_t
 insert_or_update(carbon_fix_map_t *map, const uint32_t *bucket_idxs, const void *keys, const void *values,
                  uint_fast32_t num_pairs)
 {
@@ -181,9 +213,6 @@ insert_or_update(carbon_fix_map_t *map, const uint32_t *bucket_idxs, const void 
         const void *value = values + i * map->key_data.elem_size;
         uint32_t intended_bucket_idx = bucket_idxs[i];
 
-        uint32_t  ____key___ = *((uint32_t *) key);
-        CARBON_UNUSED(____key___);
-
         uint32_t bucket_idx = intended_bucket_idx;
 
         carbon_bucket_t *bucket = CARBON_VECTOR_GET(&map->table, bucket_idx, carbon_bucket_t);
@@ -192,10 +221,20 @@ insert_or_update(carbon_fix_map_t *map, const uint32_t *bucket_idxs, const void 
             uint32_t displace_idx;
             for (displace_idx = bucket_idx + 1; displace_idx < map->table.num_elems; displace_idx++)
             {
-                const carbon_bucket_t *bucket = CARBON_VECTOR_GET(&map->table, displace_idx, carbon_bucket_t);
+                carbon_bucket_t *bucket = CARBON_VECTOR_GET(&map->table, displace_idx, carbon_bucket_t);
                 fitting_bucket_found = !bucket->in_use_flag || (bucket->in_use_flag && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0);
                 if (fitting_bucket_found) {
                     break;
+                } else {
+                    int32_t displacement = displace_idx - bucket_idx;
+                    const void *swap_key = get_bucket_key(bucket, map);
+                    const void *swap_value = get_bucket_value(bucket, map);
+
+                    if (bucket->displacement < displacement) {
+                        insert(bucket, map, key, value, displacement);
+                        insert_or_update(map, &displace_idx, swap_key, swap_value, 1);
+                        goto next_round;
+                    }
                 }
             }
             if (!fitting_bucket_found) {
@@ -219,22 +258,16 @@ insert_or_update(carbon_fix_map_t *map, const uint32_t *bucket_idxs, const void 
             void *bucket_value = (void *) get_bucket_value(bucket, map);
             memcpy(bucket_value, value, map->value_data.elem_size);
         } else {
-            assert(map->key_data.num_elems == map->value_data.num_elems);
-            uint64_t idx = map->key_data.num_elems;
-            void *key_datum = VECTOR_NEW_AND_GET(&map->key_data, void *);
-            void *value_datum = VECTOR_NEW_AND_GET(&map->value_data, void *);
-            memcpy(key_datum, key, map->key_data.elem_size);
-            memcpy(value_datum, value, map->value_data.elem_size);
-            bucket->data_idx = idx;
-            bucket->in_use_flag = true;
-            bucket->displacement = bucket_idx - intended_bucket_idx;
-            map->size++;
+            int32_t displacement = intended_bucket_idx - bucket_idx;
+            insert(bucket, map, key, value, displacement);
         }
 
-        if (map->size >= 0.75f * map->table.cap_elems)
+        next_round:
+        if (map->size >= FIX_MAP_AUTO_REHASH_LOADFACTOR * map->table.cap_elems)
         {
             return i + 1; /* tell the caller that pair i was inserted, but it successors not */
         }
+
     }
     return 0;
 }
