@@ -76,6 +76,9 @@ CARBON_BEGIN_DECL
 #define CARBON_ERR_DROPFAILED 49            /** Resource release failed: potentially a memory leak occurred */
 #define CARBON_ERR_OPPFAILED 50             /** Operation failed */
 #define CARBON_ERR_REHASH_NOROLLBACK 51     /** Rehashing hash table failed; rollback is not performed */
+#define CARBON_ERR_MEMFILEOPEN_FAILED 52    /** Unable to open memory file */
+#define CARBON_ERR_VITEROPEN_FAILED 53      /** Value iterator cannot be initialized */
+#define CARBON_ERR_MEMFILESKIP_FAILED 54    /** Memfile cannot skip desired amount of bytes */
 
 static const char *const _carbon_err_str[] = {
     "No error",
@@ -129,7 +132,10 @@ static const char *const _carbon_err_str[] = {
     "Initialization failed",
     "Resource release failed: potentially a memory leak occurred",
     "Operation failed",
-    "Rehashing hash table failed; rollback is not performed"
+    "Rehashing hash table failed; rollback is not performed",
+    "Unable to open memory file",
+    "Value iterator cannot be initialized",
+    "Memfile cannot skip desired amount of bytes"
 };
 
 #define CARBON_ERRSTR_ILLEGAL_CODE "illegal error code"

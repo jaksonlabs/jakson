@@ -2079,21 +2079,21 @@ static bool read_record(carbon_archive_t *archive, FILE *disk_file, carbon_off_t
         return true;
     }
 }
-
-CARBON_FUNC_UNUSED
-static void get_object_props(carbon_archive_object_t *object)
-{
-    if (object->flags.bits.has_object_props) {
-        assert(object->props.objects != 0);
-        carbon_memfile_seek(&object->file, object->props.objects);
-        carbon_int_reset_cabin_object_mem_file(object);
-    } else {
-
-    }
-}
-
-
-
+// TODO: Delete
+//CARBON_FUNC_UNUSED
+//static void get_object_props(carbon_archive_object_t *object)
+//{
+//    if (object->flags.bits.has_object_props) {
+//        assert(object->props.objects != 0);
+//        carbon_memfile_seek(&object->file, object->props.objects);
+//        carbon_int_reset_cabin_object_mem_file(object);
+//    } else {
+//
+//    }
+//}
+//
+//
+//
 
 
 

@@ -64,7 +64,7 @@ carbon_io_context_get_error(carbon_io_context_t *context)
 }
 
 CARBON_EXPORT(FILE *)
-carbon_io_context_lock(carbon_io_context_t *context)
+carbon_io_context_lock_and_access(carbon_io_context_t *context)
 {
     if (context) {
         carbon_spinlock_acquire(&context->lock);

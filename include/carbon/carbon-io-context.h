@@ -39,7 +39,7 @@ CARBON_EXPORT(carbon_err_t *)
 carbon_io_context_get_error(carbon_io_context_t *context);
 
 CARBON_EXPORT(FILE *)
-carbon_io_context_lock(carbon_io_context_t *context);
+carbon_io_context_lock_and_access(carbon_io_context_t *context);
 
 CARBON_EXPORT(bool)
 carbon_io_context_unlock(carbon_io_context_t *context);

@@ -350,60 +350,6 @@ typedef struct
     size_t record_table_size;
 } carbon_archive_info_t;
 
-typedef struct
-{
-    carbon_memfile_t               file;
-    carbon_archive_record_table_t *context;
-    carbon_archive_object_flags_t  flags;
-    carbon_archive_prop_offs_t     props;
-    carbon_off_t                   self;
-    carbon_err_t                   err;
-} carbon_archive_object_t;
-
-typedef struct
-{
-    size_t                         ngroups;
-    const carbon_string_id_t      *keys;
-    const carbon_off_t            *groups_offsets;
-    carbon_archive_object_t       *context;
-    carbon_err_t                   err;
-} carbon_archive_table_t;
-
-typedef struct
-{
-    size_t                         ncolumns;
-    const carbon_off_t            *column_offsets;
-    carbon_archive_object_t       *context;
-    carbon_err_t                   err;
-} carbon_column_group_t;
-
-typedef struct
-{
-    size_t                         nelems;
-    carbon_field_type_e            type;
-    const carbon_off_t            *entry_offsets;
-    const uint32_t                *position_list;
-    carbon_archive_object_t       *context;
-    carbon_err_t                   err;
-} carbon_column_t;
-
-typedef struct
-{
-    carbon_off_t                   data_offset;
-    uint32_t                       nentries;
-    carbon_field_type_e            type;
-    carbon_archive_object_t       *context;
-    const void                    *data;
-} carbon_field_t;
-
-typedef struct
-{
-    carbon_field_t *field;
-    carbon_memblock_t *mem_block;
-    uint32_t current_idx;
-    uint32_t max_idx;
-    carbon_archive_object_t obj;
-} carbon_object_cursor_t;
 
 typedef struct __attribute__((packed))
 {
@@ -432,9 +378,6 @@ carbon_int_embedded_array_props_read(carbon_array_prop_t *prop, carbon_memfile_t
 
 void
 carbon_int_embedded_table_props_read(carbon_table_prop_t *prop, carbon_memfile_t *memfile);
-
-void
-carbon_int_reset_cabin_object_mem_file(carbon_archive_object_t *object);
 
 carbon_field_type_e
 carbon_int_get_value_type_of_char(char c);

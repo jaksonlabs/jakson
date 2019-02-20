@@ -23,6 +23,7 @@ carbon_int_read_prop_offsets(carbon_archive_prop_offs_t *prop_offsets,
                              carbon_memfile_t *memfile,
                              const carbon_archive_object_flags_t *flags)
 {
+    CARBON_ZERO_MEMORY(prop_offsets, sizeof(carbon_archive_prop_offs_t));
     if (flags->bits.has_null_props) {
         prop_offsets->nulls = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
     }
@@ -138,12 +139,6 @@ carbon_int_embedded_table_props_read(carbon_table_prop_t *prop, carbon_memfile_t
     prop->header->num_entries = *CARBON_MEMFILE_READ_TYPE(memfile, uint8_t);
     prop->keys = (carbon_string_id_t *) CARBON_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(carbon_string_id_t));
     prop->groupOffs = (carbon_off_t *) CARBON_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(carbon_off_t));
-}
-
-void
-carbon_int_reset_cabin_object_mem_file(carbon_archive_object_t *object)
-{
-    carbon_memfile_seek(&object->file, object->self);
 }
 
 carbon_field_type_e

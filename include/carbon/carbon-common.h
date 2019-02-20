@@ -253,6 +253,7 @@ typedef enum carbon_type
 #define CARBON_SET_BIT(n)              ( ((uint32_t) 1) << (n) )
 #define CARBON_FIELD_SET(x, mask)      ( x |=  (mask) )
 #define CARBON_FIELD_CLEAR(x, mask)    ( x &= ~(mask) )
+#define CARBON_MASK_IS_BIT_SET(mask, bit)    (((bit) & mask ) == (bit))
 
 #define CARBON_IMPLEMENTS_OR_ERROR(err, x, func)                                                                       \
     CARBON_OPTIONAL(x->func == NULL, CARBON_ERROR(err, CARBON_ERR_NOTIMPLEMENTED))

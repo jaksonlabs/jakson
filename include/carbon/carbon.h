@@ -27,6 +27,7 @@ extern "C" {
 #include "carbon/carbon-bitmap.h"
 #include "carbon/carbon-bloom.h"
 #include "carbon/carbon-archive.h"
+#include "carbon/carbon-archive-iter.h"
 #include "carbon/carbon-common.h"
 #include "carbon/carbon-convert.h"
 #include "carbon/carbon-columndoc.h"
