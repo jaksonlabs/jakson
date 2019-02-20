@@ -16,24 +16,28 @@
  */
 
 #include <carbon/carbon-archive-iter.h>
+#include <carbon/carbon-int-archive.h>
 
 static bool
-base_object_in_record_table(carbon_archive_object_t *obj, carbon_memfile_t *record_table_memfile)
+init_object_from_memfile(carbon_archive_object_t *obj, carbon_memfile_t *memfile)
 {
     assert(obj);
+    carbon_off_t                  object_off;
     carbon_object_header_t       *header;
     carbon_archive_object_flags_t flags;
 
-    header = CARBON_MEMFILE_READ_TYPE(record_table_memfile, carbon_object_header_t);
+    object_off = CARBON_MEMFILE_TELL(memfile);
+    header = CARBON_MEMFILE_READ_TYPE(memfile, carbon_object_header_t);
     if (CARBON_UNLIKELY(header->marker != MARKER_SYMBOL_OBJECT_BEGIN)) {
         return false;
     }
 
     flags.value = header->flags;
-    carbon_int_read_prop_offsets(&obj->prop_offsets, record_table_memfile, &flags);
+    carbon_int_read_prop_offsets(&obj->prop_offsets, memfile, &flags);
 
     obj->object_id = header->oid;
-    obj->next_obj_off = *CARBON_MEMFILE_READ_TYPE(record_table_memfile, carbon_off_t);
+    obj->offset = object_off;
+    obj->next_obj_off = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_off_t);
 
     return true;
 }
@@ -253,24 +257,30 @@ prop_iter_state_init(carbon_archive_prop_iter_t *iter)
 
 }
 
-CARBON_EXPORT(bool)
-carbon_archive_prop_iter_from_archive(carbon_archive_prop_iter_t *iter,
-                                      carbon_err_t *err,
-                                      uint16_t mask,
-                                      carbon_archive_t *archive)
+
+static bool
+carbon_archive_prop_iter_from_memblock(carbon_archive_prop_iter_t *iter,
+                                       carbon_err_t *err,
+                                       uint16_t mask,
+                                       carbon_memblock_t *memblock,
+                                       carbon_off_t object_offset)
 {
     CARBON_NON_NULL_OR_ERROR(iter)
     CARBON_NON_NULL_OR_ERROR(err)
-    CARBON_NON_NULL_OR_ERROR(archive)
+    CARBON_NON_NULL_OR_ERROR(memblock)
 
-    iter->archive = archive;
-    iter->mask    = mask;
-    if (!carbon_memfile_open(&iter->record_table_memfile, archive->record_table.recordDataBase,
-                        CARBON_MEMFILE_MODE_READONLY)) {
+    iter->mask = mask;
+    if (!carbon_memfile_open(&iter->record_table_memfile, memblock,
+                             CARBON_MEMFILE_MODE_READONLY)) {
         CARBON_ERROR(err, CARBON_ERR_MEMFILEOPEN_FAILED)
         return false;
     }
-    if (!base_object_in_record_table(&iter->object, &iter->record_table_memfile)) {
+    if (!carbon_memfile_seek(&iter->record_table_memfile, object_offset))
+    {
+        CARBON_ERROR(err, CARBON_ERR_MEMFILESEEK_FAILED)
+        return false;
+    }
+    if (!init_object_from_memfile(&iter->object, &iter->record_table_memfile)) {
         CARBON_ERROR(err, CARBON_ERR_INTERNALERR);
         return false;
     }
@@ -283,59 +293,67 @@ carbon_archive_prop_iter_from_archive(carbon_archive_prop_iter_t *iter,
 }
 
 CARBON_EXPORT(bool)
-carbon_archive_prop_iter_from_object(carbon_archive_prop_iter_t *iter,
-                                     uint16_t mask,
-                                     carbon_archive_object_t *obj)
+carbon_archive_prop_iter_from_archive(carbon_archive_prop_iter_t *iter,
+                                      carbon_err_t *err,
+                                      uint16_t mask,
+                                      carbon_archive_t *archive)
 {
-    CARBON_UNUSED(iter);
-    CARBON_UNUSED(mask);
-    CARBON_UNUSED(obj);
-    return false;
+    return carbon_archive_prop_iter_from_memblock(iter, err, mask, archive->record_table.recordDataBase, 0);
 }
 
-static carbon_type_e
+CARBON_EXPORT(bool)
+carbon_archive_prop_iter_from_object(carbon_archive_prop_iter_t *iter,
+                                     uint16_t mask,
+                                     carbon_archive_object_t *obj,
+                                     carbon_archive_value_t *value)
+{
+    return carbon_archive_prop_iter_from_memblock(iter, &value->err, mask,
+                                                  value->record_table_memfile.memblock, obj->offset);
+}
+
+static carbon_basic_type_e
 get_basic_type(carbon_prop_iter_state_e state)
 {
     switch (state) {
     case CARBON_PROP_ITER_STATE_NULLS:
     case CARBON_PROP_ITER_STATE_NULL_ARRAYS:
-        return CARBON_TYPE_VOID;
+        return CARBON_BASIC_TYPE_NULL;
     case CARBON_PROP_ITER_STATE_BOOLS:
     case CARBON_PROP_ITER_STATE_BOOL_ARRAYS:
-        return CARBON_TYPE_BOOL;
+        return CARBON_BASIC_TYPE_BOOLEAN;
     case CARBON_PROP_ITER_STATE_INT8S:
     case CARBON_PROP_ITER_STATE_INT8_ARRAYS:
-        return CARBON_TYPE_INT8;
+        return CARBON_BASIC_TYPE_INT8;
     case CARBON_PROP_ITER_STATE_INT16S:
     case CARBON_PROP_ITER_STATE_INT16_ARRAYS:
-        return CARBON_TYPE_INT16;
+        return CARBON_BASIC_TYPE_INT16;
     case CARBON_PROP_ITER_STATE_INT32S:
     case CARBON_PROP_ITER_STATE_INT32_ARRAYS:
-        return CARBON_TYPE_INT32;
+        return CARBON_BASIC_TYPE_INT32;
     case CARBON_PROP_ITER_STATE_INT64S:
     case CARBON_PROP_ITER_STATE_INT64_ARRAYS:
-        return CARBON_TYPE_INT64;
+        return CARBON_BASIC_TYPE_INT64;
     case CARBON_PROP_ITER_STATE_UINT8S:
     case CARBON_PROP_ITER_STATE_UINT8_ARRAYS:
-        return CARBON_TYPE_UINT8;
+        return CARBON_BASIC_TYPE_UINT8;
     case CARBON_PROP_ITER_STATE_UINT16S:
     case CARBON_PROP_ITER_STATE_UINT16_ARRAYS:
-        return CARBON_TYPE_UINT16;
+        return CARBON_BASIC_TYPE_UINT16;
     case CARBON_PROP_ITER_STATE_UINT32S:
     case CARBON_PROP_ITER_STATE_UINT32_ARRAYS:
-        return CARBON_TYPE_UINT32;
+        return CARBON_BASIC_TYPE_UINT32;
     case CARBON_PROP_ITER_STATE_UINT64S:
     case CARBON_PROP_ITER_STATE_UINT64_ARRAYS:
-        return CARBON_TYPE_UINT64;
+        return CARBON_BASIC_TYPE_UINT64;
     case CARBON_PROP_ITER_STATE_FLOATS:
     case CARBON_PROP_ITER_STATE_FLOAT_ARRAYS:
-        return CARBON_TYPE_FLOAT;
+        return CARBON_BASIC_TYPE_NUMBER;
     case CARBON_PROP_ITER_STATE_STRINGS:
     case CARBON_PROP_ITER_STATE_STRING_ARRAYS:
-        return CARBON_TYPE_STRING;
+        return CARBON_BASIC_TYPE_STRING;
     case CARBON_PROP_ITER_STATE_OBJECTS:
     case CARBON_PROP_ITER_STATE_OBJECT_ARRAYS:
-        return CARBON_TYPE_OBJECT;
+        return CARBON_BASIC_TYPE_OBJECT;
     default:
         CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_INTERNALERR);
     }
@@ -379,7 +397,7 @@ is_array_type(carbon_prop_iter_state_e state)
 }
 
 CARBON_EXPORT(bool)
-carbon_archive_prop_iter_next(carbon_string_id_t *key, carbon_archive_value_iter_t *value_iter,
+carbon_archive_prop_iter_next(carbon_string_id_t *key, carbon_archive_value_t *value,
                               carbon_archive_prop_iter_t *iter)
 {
     CARBON_NON_NULL_OR_ERROR(iter)
@@ -389,14 +407,14 @@ carbon_archive_prop_iter_next(carbon_string_id_t *key, carbon_archive_value_iter
         if (iter->prop_pos_current == iter->prop_header.header->num_entries)
         {
             prop_iter_state_next(iter);
-            return carbon_archive_prop_iter_next(key, value_iter, iter);
+            return carbon_archive_prop_iter_next(key, value, iter);
         } else
         {
             iter->key = iter->prop_header.keys[iter->prop_pos_current];
             iter->type = get_basic_type(iter->prop_cursor);
             iter->is_array = is_array_type(iter->prop_cursor);
             CARBON_OPTIONAL_SET(key, iter->key);
-            if (value_iter && !carbon_archive_value_iter_from_prop_iter(value_iter, &iter->err, iter))
+            if (value && !carbon_archive_value_from_prop_iter(value, &iter->err, iter))
             {
                 CARBON_ERROR(&iter->err, CARBON_ERR_VITEROPEN_FAILED);
                 return false;
@@ -419,78 +437,242 @@ carbon_archive_prop_iter_get_object_id(carbon_object_id_t *id, carbon_archive_pr
     return true;
 }
 
-CARBON_EXPORT(bool)
-carbon_archive_value_iter_from_prop_iter(carbon_archive_value_iter_t *value_iter,
-                                         carbon_err_t *err,
-                                         carbon_archive_prop_iter_t *prop_iter)
+static void
+value_iter_setup_array_values(carbon_archive_value_t *iter)
 {
-    CARBON_NON_NULL_OR_ERROR(value_iter);
+
+    CARBON_UNUSED(iter);
+    abort(); // TODO: implement
+}
+
+#define READ_BASIC_TYPE_AT_POSITION(dst, type)                                                                         \
+{                                                                                                                      \
+    carbon_memfile_skip(&iter->record_table_memfile, iter->value_idx * sizeof(type));                                  \
+    iter->data.basic.dst = *CARBON_MEMFILE_READ_TYPE(&iter->record_table_memfile, type);                               \
+}
+
+
+static void
+value_iter_setup_basic_values(carbon_archive_value_t *iter)
+{
+    switch (iter->prop_type) {
+    case CARBON_BASIC_TYPE_INT8:
+        READ_BASIC_TYPE_AT_POSITION(int8, carbon_int8_t);
+    break;
+    case CARBON_BASIC_TYPE_INT16:
+        READ_BASIC_TYPE_AT_POSITION(int16, carbon_int16_t);
+    break;
+    case CARBON_BASIC_TYPE_INT32:
+        READ_BASIC_TYPE_AT_POSITION(int32, carbon_int32_t);
+    break;
+    case CARBON_BASIC_TYPE_INT64:
+        READ_BASIC_TYPE_AT_POSITION(int64, carbon_int64_t);
+    break;
+    case CARBON_BASIC_TYPE_UINT8:
+        READ_BASIC_TYPE_AT_POSITION(uint8, carbon_uint8_t);
+    break;
+    case CARBON_BASIC_TYPE_UINT16:
+        READ_BASIC_TYPE_AT_POSITION(uint16, carbon_uint8_t);
+    break;
+    case CARBON_BASIC_TYPE_UINT32:
+        READ_BASIC_TYPE_AT_POSITION(uint32, carbon_uint32_t);
+    break;
+    case CARBON_BASIC_TYPE_UINT64:
+        READ_BASIC_TYPE_AT_POSITION(uint64, carbon_uint64_t);
+    break;
+    case CARBON_BASIC_TYPE_NUMBER:
+        READ_BASIC_TYPE_AT_POSITION(number, carbon_float_t);
+    break;
+    case CARBON_BASIC_TYPE_STRING:
+        READ_BASIC_TYPE_AT_POSITION(boolean, carbon_bool_t);
+    break;
+    case CARBON_BASIC_TYPE_BOOLEAN:
+        READ_BASIC_TYPE_AT_POSITION(boolean, carbon_bool_t);
+    break;
+    case CARBON_BASIC_TYPE_NULL:
+        /* nothing to setup for nulls */
+        break;
+    case CARBON_BASIC_TYPE_OBJECT: {
+        //carbon_memfile_seek(&iter->record_table_memfile, iter->data_off);
+        const carbon_off_t *offs = CARBON_MEMFILE_READ_TYPE_LIST(&iter->record_table_memfile,
+                                                                 carbon_off_t, iter->value_idx_max);
+        carbon_off_t start_obj = offs[0];
+        carbon_memfile_seek(&iter->record_table_memfile, start_obj);
+        init_object_from_memfile(&iter->data.basic.object, &iter->record_table_memfile);
+    } break;
+    default:
+    CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_INTERNALERR);
+    }
+}
+
+CARBON_EXPORT(bool)
+carbon_archive_value_from_prop_iter(carbon_archive_value_t *value,
+                                    carbon_err_t *err,
+                                    carbon_archive_prop_iter_t *prop_iter)
+{
+    CARBON_NON_NULL_OR_ERROR(value);
     CARBON_NON_NULL_OR_ERROR(prop_iter);
-    value_iter->prop_iter = prop_iter;
-    if (!carbon_memfile_open(&value_iter->record_table_memfile, prop_iter->record_table_memfile.memblock,
+    value->prop_iter = prop_iter;
+    value->data_off = prop_iter->prop_type_off_data;
+    if (!carbon_memfile_open(&value->record_table_memfile, prop_iter->record_table_memfile.memblock,
                         CARBON_MEMFILE_MODE_READONLY)) {
         CARBON_ERROR(err, CARBON_ERR_MEMFILEOPEN_FAILED);
         return false;
     }
-    if (!carbon_memfile_skip(&value_iter->record_table_memfile, prop_iter->prop_type_off_data)) {
+    if (!carbon_memfile_skip(&value->record_table_memfile, value->data_off)) {
         CARBON_ERROR(err, CARBON_ERR_MEMFILESKIP_FAILED);
         return false;
     }
-    value_iter->prop_type = prop_iter->type;
-    value_iter->is_array = prop_iter->is_array;
-    carbon_error_init(&value_iter->err);
+    value->prop_type = prop_iter->type;
+    value->is_array = prop_iter->is_array;
+    value->value_idx = prop_iter->prop_pos_current;
+    value->value_idx_max = prop_iter->prop_header.header->num_entries;
+    carbon_error_init(&value->err);
+
+    if (value->is_array) {
+        value_iter_setup_array_values(value);
+    } else {
+        value_iter_setup_basic_values(value);
+    }
 
     return true;
 }
 
 CARBON_EXPORT(bool)
-carbon_archive_value_iter_get_basic_type(carbon_type_e *type, const carbon_archive_value_iter_t *value_iter)
+carbon_archive_value_get_basic_type(carbon_basic_type_e *type, const carbon_archive_value_t *value)
 {
     CARBON_NON_NULL_OR_ERROR(type)
-    CARBON_NON_NULL_OR_ERROR(value_iter)
-    *type = value_iter->prop_type;
+    CARBON_NON_NULL_OR_ERROR(value)
+    *type = value->prop_type;
     return true;
 }
 
 CARBON_EXPORT(bool)
-carbon_archive_value_iter_is_array_type(bool *is_array, const carbon_archive_value_iter_t *value_iter)
+carbon_archive_value_is_array_type(bool *is_array, const carbon_archive_value_t *value)
 {
     CARBON_NON_NULL_OR_ERROR(is_array)
-    CARBON_NON_NULL_OR_ERROR(value_iter)
-    *is_array = value_iter->is_array;
+    CARBON_NON_NULL_OR_ERROR(value)
+    *is_array = value->is_array;
     return true;
 }
 
 CARBON_EXPORT(bool)
-carbon_archive_value_iter_position(uint32_t *pos, carbon_archive_value_iter_t *iter)
+carbon_archive_value_is_object(bool *is_object, carbon_archive_value_t *value)
 {
-    CARBON_UNUSED(pos);
-    CARBON_UNUSED(iter);
-    return false;
-}
+    CARBON_NON_NULL_OR_ERROR(is_object)
+    CARBON_NON_NULL_OR_ERROR(value)
 
-CARBON_EXPORT(const void *)
-carbon_archive_value_iter_values(uint32_t *num_values, carbon_archive_value_iter_t *iter)
-{
-    CARBON_UNUSED(num_values);
-    CARBON_UNUSED(iter);
-    return false;
+    *is_object = value->prop_type == CARBON_BASIC_TYPE_OBJECT && !value->is_array;
+
+    return true;
 }
 
 CARBON_EXPORT(bool)
-carbon_archive_value_iter_next_object(carbon_archive_prop_iter_t *iter, carbon_archive_value_iter_t *value_iter)
+carbon_archive_value_get_object(carbon_archive_object_t *object, carbon_archive_value_t *value)
 {
-    CARBON_UNUSED(iter);
-    CARBON_UNUSED(value_iter);
-    return false;
+    CARBON_NON_NULL_OR_ERROR(object)
+    CARBON_NON_NULL_OR_ERROR(value)
+
+    bool is_object;
+
+    carbon_archive_value_is_object(&is_object, value);
+
+    if (is_object) {
+        *object = value->data.basic.object;
+        return true;
+    } else {
+        CARBON_ERROR(&value->err, CARBON_ERR_ITER_NOOBJ);
+        return false;
+    }
 }
 
 CARBON_EXPORT(bool)
-carbon_archive_value_iter_close_and_drop(carbon_archive_value_iter_t *iter)
+carbon_archive_value_is_null(bool *is_null, carbon_archive_value_t *value)
 {
-    CARBON_UNUSED(iter);
-    return false;
+    CARBON_NON_NULL_OR_ERROR(is_null)
+    CARBON_NON_NULL_OR_ERROR(value)
+
+    *is_null = value->prop_type == CARBON_BASIC_TYPE_NULL && !value->is_array;
+
+    return true;
 }
+
+#define DEFINE_ARCHIVE_BASIC_TYPE_GETTERS(type, name, basic_type, error_code)                                          \
+                                                                                                                       \
+CARBON_EXPORT(bool)                                                                                                    \
+carbon_archive_value_is_##name(bool *is_##name, carbon_archive_value_t *value)                                         \
+{                                                                                                                      \
+    CARBON_NON_NULL_OR_ERROR(is_##name)                                                                                \
+    CARBON_NON_NULL_OR_ERROR(value)                                                                                    \
+                                                                                                                       \
+    *is_##name = value->prop_type == basic_type && !value->is_array;                                                   \
+                                                                                                                       \
+    return true;                                                                                                       \
+}                                                                                                                      \
+                                                                                                                       \
+CARBON_EXPORT(bool)                                                                                                    \
+carbon_archive_value_get_##name(type *name, carbon_archive_value_t *value)                                             \
+{                                                                                                                      \
+    CARBON_NON_NULL_OR_ERROR(name)                                                                                     \
+    CARBON_NON_NULL_OR_ERROR(value)                                                                                    \
+                                                                                                                       \
+    bool type_match;                                                                                                   \
+                                                                                                                       \
+    carbon_archive_value_is_##name(&type_match, value);                                                                \
+    if (type_match) {                                                                                                  \
+        *name = value->data.basic.name;                                                                                \
+        return true;                                                                                                   \
+    } else {                                                                                                           \
+        CARBON_ERROR(&value->err, error_code);                                                                         \
+        return false;                                                                                                  \
+    }                                                                                                                  \
+}
+
+DEFINE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_int8_t, int8, CARBON_BASIC_TYPE_INT8, CARBON_ERR_ITER_NOINT8)
+DEFINE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_int16_t, int16, CARBON_BASIC_TYPE_INT16, CARBON_ERR_ITER_NOINT16)
+DEFINE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_int32_t, int32, CARBON_BASIC_TYPE_INT32, CARBON_ERR_ITER_NOINT32)
+DEFINE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_int64_t, int64, CARBON_BASIC_TYPE_INT64, CARBON_ERR_ITER_NOINT64)
+DEFINE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_uint8_t, uint8, CARBON_BASIC_TYPE_UINT8, CARBON_ERR_ITER_NOUINT8)
+DEFINE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_uint16_t, uint16, CARBON_BASIC_TYPE_UINT16, CARBON_ERR_ITER_NOUINT16)
+DEFINE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_uint32_t, uint32, CARBON_BASIC_TYPE_UINT32, CARBON_ERR_ITER_NOUINT32)
+DEFINE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_uint64_t, uint64, CARBON_BASIC_TYPE_UINT64, CARBON_ERR_ITER_NOUINT64)
+DEFINE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_float_t, number, CARBON_BASIC_TYPE_NUMBER, CARBON_ERR_ITER_NONUMBER)
+DEFINE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_string_id_t, string, CARBON_BASIC_TYPE_STRING, CARBON_ERR_ITER_NOSTRING)
+DEFINE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_bool_t, boolean, CARBON_BASIC_TYPE_BOOLEAN, CARBON_ERR_ITER_NOBOOL)
+
+
+//
+//
+//CARBON_EXPORT(bool)
+//carbon_archive_value_iter_position(uint32_t *pos, carbon_archive_value_iter_t *iter)
+//{
+//    CARBON_UNUSED(pos);
+//    CARBON_UNUSED(iter);
+//    return false;
+//}
+//
+//CARBON_EXPORT(const void *)
+//carbon_archive_value_iter_values(uint32_t *num_values, carbon_archive_value_iter_t *iter)
+//{
+//    CARBON_UNUSED(num_values);
+//    CARBON_UNUSED(iter);
+//    return false;
+//}
+//
+//CARBON_EXPORT(bool)
+//carbon_archive_value_iter_next_object(carbon_archive_prop_iter_t *iter, carbon_archive_value_iter_t *value_iter)
+//{
+//    CARBON_UNUSED(iter);
+//    CARBON_UNUSED(value_iter);
+//    return false;
+//}
+//
+//CARBON_EXPORT(bool)
+//carbon_archive_value_iter_close_and_drop(carbon_archive_value_iter_t *iter)
+//{
+//    CARBON_UNUSED(iter);
+//    return false;
+//}
 
 
 void

@@ -522,13 +522,13 @@ static bool import_json_object_array_prop(carbon_doc_obj_t *target, carbon_err_t
                     carbon_doc_obj_push_primtive(entry, &value);
                 } break;
                 case carbon_field_type_uint32: {
-                    carbon_uin32_t value = ast_node_data_type == CARBON_JSON_AST_NODE_VALUE_TYPE_NULL ? CARBON_NULL_UINT32 :
-                                        (carbon_uin32_t) element->value.value.number->value.unsigned_integer;
+                    carbon_uint32_t value = ast_node_data_type == CARBON_JSON_AST_NODE_VALUE_TYPE_NULL ? CARBON_NULL_UINT32 :
+                                        (carbon_uint32_t) element->value.value.number->value.unsigned_integer;
                     carbon_doc_obj_push_primtive(entry, &value);
                 } break;
                 case carbon_field_type_uint64: {
-                    carbon_uin64_t value = ast_node_data_type == CARBON_JSON_AST_NODE_VALUE_TYPE_NULL ? CARBON_NULL_UINT64 :
-                                        (carbon_uin64_t) element->value.value.number->value.unsigned_integer;
+                    carbon_uint64_t value = ast_node_data_type == CARBON_JSON_AST_NODE_VALUE_TYPE_NULL ? CARBON_NULL_UINT64 :
+                                        (carbon_uint64_t) element->value.value.number->value.unsigned_integer;
                     carbon_doc_obj_push_primtive(entry, &value);
                 } break;
                 case carbon_field_type_float: {
@@ -716,8 +716,8 @@ DEFINE_CARBON_TYPE_LQ_FUNC(carbon_int32_t)
 DEFINE_CARBON_TYPE_LQ_FUNC(carbon_int64_t)
 DEFINE_CARBON_TYPE_LQ_FUNC(carbon_uint8_t)
 DEFINE_CARBON_TYPE_LQ_FUNC(carbon_uint16_t)
-DEFINE_CARBON_TYPE_LQ_FUNC(carbon_uin32_t)
-DEFINE_CARBON_TYPE_LQ_FUNC(carbon_uin64_t)
+DEFINE_CARBON_TYPE_LQ_FUNC(carbon_uint32_t)
+DEFINE_CARBON_TYPE_LQ_FUNC(carbon_uint64_t)
 
 static bool compare_encoded_string_less_eq_func(const void *lhs, const void *rhs, void *args)
 {
@@ -765,8 +765,8 @@ DEFINE_CARBON_ARRAY_TYPE_LQ_FUNC(carbon_int32_t)
 DEFINE_CARBON_ARRAY_TYPE_LQ_FUNC(carbon_int64_t)
 DEFINE_CARBON_ARRAY_TYPE_LQ_FUNC(carbon_uint8_t)
 DEFINE_CARBON_ARRAY_TYPE_LQ_FUNC(carbon_uint16_t)
-DEFINE_CARBON_ARRAY_TYPE_LQ_FUNC(carbon_uin32_t)
-DEFINE_CARBON_ARRAY_TYPE_LQ_FUNC(carbon_uin64_t)
+DEFINE_CARBON_ARRAY_TYPE_LQ_FUNC(carbon_uint32_t)
+DEFINE_CARBON_ARRAY_TYPE_LQ_FUNC(carbon_uint64_t)
 DEFINE_CARBON_ARRAY_TYPE_LQ_FUNC(carbon_float_t)
 
 static bool compare_encoded_string_array_less_eq_func(const void *lhs, const void *rhs, void *args)
@@ -1035,10 +1035,10 @@ static bool compare_column_less_eq_func(const void *lhs, const void *rhs, void *
         ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, carbon_uint16_t, a, b);
         break;
     case carbon_field_type_uint32:
-        ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, carbon_uin32_t, a, b);
+        ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, carbon_uint32_t, a, b);
         break;
     case carbon_field_type_uint64:
-        ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, carbon_uin64_t, a, b);
+        ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, carbon_uint64_t, a, b);
         break;
     case carbon_field_type_float:
         ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, carbon_float_t, a, b);
@@ -1169,10 +1169,10 @@ static void sort_columndoc_values(carbon_columndoc_obj_t *columndoc)
                                comparecarbon_uint8_tLessEqFunc);
         SORT_META_MODEL_VALUES(columndoc->uint16_prop_keys, columndoc->uint16_prop_vals, carbon_uint16_t,
                                comparecarbon_uint16_tLessEqFunc);
-        SORT_META_MODEL_VALUES(columndoc->uin32_prop_keys, columndoc->uint32_prop_vals, carbon_uin32_t,
-                               comparecarbon_uin32_tLessEqFunc);
-        SORT_META_MODEL_VALUES(columndoc->uint64_prop_keys, columndoc->uint64_prop_vals, carbon_uin64_t,
-                               comparecarbon_uin64_tLessEqFunc);
+        SORT_META_MODEL_VALUES(columndoc->uin32_prop_keys, columndoc->uint32_prop_vals, carbon_uint32_t,
+                               comparecarbon_uint32_tLessEqFunc);
+        SORT_META_MODEL_VALUES(columndoc->uint64_prop_keys, columndoc->uint64_prop_vals, carbon_uint64_t,
+                               comparecarbon_uint64_tLessEqFunc);
         SORT_META_MODEL_VALUES(columndoc->float_prop_keys, columndoc->float_prop_vals, carbon_float_t,
                                comparecarbon_float_tLessEqFunc);
         sort_meta_model_string_values(&columndoc->string_prop_keys, &columndoc->string_prop_vals,
@@ -1193,9 +1193,9 @@ static void sort_columndoc_values(carbon_columndoc_obj_t *columndoc)
         SORT_META_MODEL_ARRAYS(columndoc->uint16_array_prop_keys, columndoc->uint16_array_prop_vals,
                                comparecarbon_uint16_tArrayLessEqFunc);
         SORT_META_MODEL_ARRAYS(columndoc->uint32_array_prop_keys, columndoc->uint32_array_prop_vals,
-                               comparecarbon_uin32_tArrayLessEqFunc);
+                               comparecarbon_uint32_tArrayLessEqFunc);
         SORT_META_MODEL_ARRAYS(columndoc->uint64_array_prop_keys, columndoc->uin64_array_prop_vals,
-                               comparecarbon_uin64_tArrayLessEqFunc);
+                               comparecarbon_uint64_tArrayLessEqFunc);
         SORT_META_MODEL_ARRAYS(columndoc->float_array_prop_keys, columndoc->float_array_prop_vals,
                                comparecarbon_float_tArrayLessEqFunc);
         sort_columndoc_strings_arrays(&columndoc->string_array_prop_keys, &columndoc->string_array_prop_vals,
@@ -1299,10 +1299,10 @@ static void create_typed_vector(carbon_doc_entries_t *entry)
         size = sizeof(carbon_uint16_t);
         break;
     case carbon_field_type_uint32:
-        size = sizeof(carbon_uin32_t);
+        size = sizeof(carbon_uint32_t);
         break;
     case carbon_field_type_uint64:
-        size = sizeof(carbon_uin64_t);
+        size = sizeof(carbon_uint64_t);
         break;
     case carbon_field_type_float:
         size = sizeof(carbon_float_t);
@@ -1429,7 +1429,7 @@ static bool print_value(FILE *file, carbon_field_type_e type, const carbon_vec_t
     case carbon_field_type_uint32:
     {
         for (size_t i = 0; i < num_values; i++) {
-            carbon_uin32_t value = *(CARBON_VECTOR_GET(values, i, carbon_uin32_t));
+            carbon_uint32_t value = *(CARBON_VECTOR_GET(values, i, carbon_uint32_t));
             if (value != CARBON_NULL_UINT32) {
                 fprintf(file, "%d%s", value, i + 1 < num_values ? ", " : "");
             } else {
@@ -1440,7 +1440,7 @@ static bool print_value(FILE *file, carbon_field_type_e type, const carbon_vec_t
     case carbon_field_type_uint64:
     {
         for (size_t i = 0; i < num_values; i++) {
-            carbon_uin64_t value = *(CARBON_VECTOR_GET(values, i, carbon_uin64_t));
+            carbon_uint64_t value = *(CARBON_VECTOR_GET(values, i, carbon_uint64_t));
             if (value != CARBON_NULL_UINT64) {
                 fprintf(file, "%" PRIu64 "%s", value, i + 1 < num_values ? ", " : "");
             } else {

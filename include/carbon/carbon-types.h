@@ -34,8 +34,8 @@ typedef int32_t               carbon_int32_t;
 typedef int64_t               carbon_int64_t;
 typedef uint8_t               carbon_uint8_t;
 typedef uint16_t              carbon_uint16_t;
-typedef uint32_t              carbon_uin32_t;
-typedef uint64_t              carbon_uin64_t;
+typedef uint32_t              carbon_uint32_t;
+typedef uint64_t              carbon_uint64_t;
 typedef float                 carbon_float_t;
 typedef const char *          carbon_cstring_t;
 
@@ -121,10 +121,10 @@ typedef enum carbon_field_type
             value_size = sizeof(carbon_uint16_t);                                                                      \
             break;                                                                                                     \
         case carbon_field_type_uint32:                                                                                 \
-            value_size = sizeof(carbon_uin32_t);                                                                       \
+            value_size = sizeof(carbon_uint32_t);                                                                       \
             break;                                                                                                     \
         case carbon_field_type_uint64:                                                                                 \
-            value_size = sizeof(carbon_uin64_t);                                                                       \
+            value_size = sizeof(carbon_uint64_t);                                                                       \
             break;                                                                                                     \
         case carbon_field_type_float:                                                                                  \
             value_size = sizeof(carbon_float_t);                                                                       \

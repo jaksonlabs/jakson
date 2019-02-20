@@ -62,6 +62,7 @@ typedef enum
 typedef struct
 {
     carbon_object_id_t            object_id;     /* unique object id */
+    carbon_off_t                  offset;        /* this objects header offset */
     carbon_archive_prop_offs_t    prop_offsets;  /* per-property type offset in the record table byte stream */
     carbon_off_t                  next_obj_off;  /* offset to next object in list, or NULL if no such exists */
 } carbon_archive_object_t;
@@ -113,7 +114,7 @@ typedef struct
 
 typedef struct carbon_archive_prop_iter
 {
-    carbon_archive_t          *archive;                 /* pointer to archive that is iterated */
+    //carbon_archive_t          *archive;                 /* pointer to archive that is iterated */
     carbon_archive_object_t    object;                  /* current object */
     carbon_memfile_t           record_table_memfile;    /* iterator-local read-only memfile on archive record table */
 
@@ -126,7 +127,7 @@ typedef struct carbon_archive_prop_iter
     carbon_fixed_prop_t        prop_header;             /* type, num props and keys */
 
     carbon_string_id_t         key;                     /* current property key in this iteration */
-    carbon_type_e              type;                    /* property basic value type (e.g., int8, or object) */
+    carbon_basic_type_e              type;                    /* property basic value type (e.g., int8, or object) */
     bool                       is_array;                /* flag indicating that property is an array type */
     carbon_err_t               err;                     /* error information */
 } carbon_archive_prop_iter_t;
@@ -135,11 +136,38 @@ typedef struct carbon_archive_value_iter
 {
     carbon_archive_prop_iter_t *prop_iter;               /* pointer to property iterator that created this iterator */
     carbon_memfile_t            record_table_memfile;    /* iterator-local read-only memfile on archive record table */
-    carbon_type_e               prop_type;               /* property basic value type (e.g., int8, or object) */
+    carbon_basic_type_e         prop_type;               /* property basic value type (e.g., int8, or object) */
     bool                        is_array;                /* flag indicating whether value type is an array or not */
+    carbon_off_t                data_off;                /* offset in memfile where type-dependend data begins */
+    uint32_t                    value_idx;               /* the index of this value in the group (also index of key) */
+    uint32_t                    value_idx_max;           /* max index of this value in the group (also index of key) */
 
     carbon_err_t                err;                     /* error information */
-} carbon_archive_value_iter_t;
+
+    union {
+        union {
+
+        } array;
+
+        union {
+            carbon_int8_t           int8;
+            carbon_int16_t          int16;
+            carbon_int32_t          int32;
+            carbon_int64_t          int64;
+            carbon_uint8_t          uint8;
+            carbon_uint16_t         uint16;
+            carbon_uint32_t         uint32;
+            carbon_uint64_t         uint64;
+            carbon_float_t          number;
+            carbon_string_id_t      string;
+            carbon_bool_t           boolean;
+            carbon_archive_object_t object;
+        } basic;
+
+    } data;
+
+
+} carbon_archive_value_t;
 
 
 
@@ -162,38 +190,39 @@ typedef struct carbon_archive_value_iter
 #define CARBON_ARCHIVE_ITER_MASK_OBJECT                 (1 << 15)
 
 #define CARBON_ARCHIVE_ITER_MASK_INTEGER                CARBON_ARCHIVE_ITER_MASK_INT8       |                          \
-                                                        CARBON_ARCHIVE_ITER_MASK_INT16      |                          \
-                                                        CARBON_ARCHIVE_ITER_MASK_INT32      |                          \
-                                                        CARBON_ARCHIVE_ITER_MASK_INT64      |                          \
-                                                        CARBON_ARCHIVE_ITER_MASK_UINT8      |                          \
-                                                        CARBON_ARCHIVE_ITER_MASK_UINT16     |                          \
-                                                        CARBON_ARCHIVE_ITER_MASK_UINT32     |                          \
-                                                        CARBON_ARCHIVE_ITER_MASK_UINT64
+                                                    CARBON_ARCHIVE_ITER_MASK_INT16      |                          \
+                                                    CARBON_ARCHIVE_ITER_MASK_INT32      |                          \
+                                                    CARBON_ARCHIVE_ITER_MASK_INT64      |                          \
+                                                    CARBON_ARCHIVE_ITER_MASK_UINT8      |                          \
+                                                    CARBON_ARCHIVE_ITER_MASK_UINT16     |                          \
+                                                    CARBON_ARCHIVE_ITER_MASK_UINT32     |                          \
+                                                    CARBON_ARCHIVE_ITER_MASK_UINT64
 
 #define CARBON_ARCHIVE_ITER_MASK_ANY                    CARBON_ARCHIVE_ITER_MASK_PRIMITIVES |                          \
-                                                        CARBON_ARCHIVE_ITER_MASK_ARRAYS     |                          \
-                                                        CARBON_ARCHIVE_ITER_MASK_INTEGER    |                          \
-                                                        CARBON_ARCHIVE_ITER_MASK_NUMBER     |                          \
-                                                        CARBON_ARCHIVE_ITER_MASK_STRING     |                          \
-                                                        CARBON_ARCHIVE_ITER_MASK_BOOLEAN    |                          \
-                                                        CARBON_ARCHIVE_ITER_MASK_NULL       |                          \
-                                                        CARBON_ARCHIVE_ITER_MASK_OBJECT
+                                                    CARBON_ARCHIVE_ITER_MASK_ARRAYS     |                          \
+                                                    CARBON_ARCHIVE_ITER_MASK_INTEGER    |                          \
+                                                    CARBON_ARCHIVE_ITER_MASK_NUMBER     |                          \
+                                                    CARBON_ARCHIVE_ITER_MASK_STRING     |                          \
+                                                    CARBON_ARCHIVE_ITER_MASK_BOOLEAN    |                          \
+                                                    CARBON_ARCHIVE_ITER_MASK_NULL       |                          \
+                                                    CARBON_ARCHIVE_ITER_MASK_OBJECT
 
 
 CARBON_EXPORT(bool)
 carbon_archive_prop_iter_from_archive(carbon_archive_prop_iter_t *iter,
-                                      carbon_err_t *err,
-                                      uint16_t mask,
-                                      carbon_archive_t *archive);
+                                  carbon_err_t *err,
+                                  uint16_t mask,
+                                  carbon_archive_t *archive);
 
 CARBON_EXPORT(bool)
 carbon_archive_prop_iter_from_object(carbon_archive_prop_iter_t *iter,
-                                     uint16_t mask,
-                                     carbon_archive_object_t *obj);
+                                 uint16_t mask,
+                                 carbon_archive_object_t *obj,
+                                 carbon_archive_value_t *value);
 
 CARBON_EXPORT(bool)
-carbon_archive_prop_iter_next(carbon_string_id_t *key, carbon_archive_value_iter_t *value_iter,
-                              carbon_archive_prop_iter_t *iter);
+carbon_archive_prop_iter_next(carbon_string_id_t *key, carbon_archive_value_t *value,
+                          carbon_archive_prop_iter_t *iter);
 
 CARBON_EXPORT(bool)
 carbon_archive_prop_iter_get_object_id(carbon_object_id_t *id, carbon_archive_prop_iter_t *iter);
@@ -201,15 +230,52 @@ carbon_archive_prop_iter_get_object_id(carbon_object_id_t *id, carbon_archive_pr
 
 
 CARBON_EXPORT(bool)
-carbon_archive_value_iter_from_prop_iter(carbon_archive_value_iter_t *value_iter,
-                                         carbon_err_t *err,
-                                         carbon_archive_prop_iter_t *prop_iter);
+carbon_archive_value_from_prop_iter(carbon_archive_value_t *value,
+                                    carbon_err_t *err,
+                                    carbon_archive_prop_iter_t *prop_iter);
 
 CARBON_EXPORT(bool)
-carbon_archive_value_iter_get_basic_type(carbon_type_e *type, const carbon_archive_value_iter_t *value_iter);
+carbon_archive_value_get_basic_type(carbon_basic_type_e *type, const carbon_archive_value_t *value);
 
 CARBON_EXPORT(bool)
-carbon_archive_value_iter_is_array_type(bool *is_array, const carbon_archive_value_iter_t *value_iter);
+carbon_archive_value_is_array_type(bool *is_array, const carbon_archive_value_t *value);
+
+
+CARBON_EXPORT(bool)
+carbon_archive_value_is_object(bool *is_object, carbon_archive_value_t *value);
+
+CARBON_EXPORT(bool)
+carbon_archive_value_get_object(carbon_archive_object_t *object, carbon_archive_value_t *value);
+
+
+CARBON_EXPORT(bool)
+carbon_archive_value_is_null(bool *is_null, carbon_archive_value_t *value);
+
+
+#define DECLARE_ARCHIVE_BASIC_TYPE_GETTERS(type, name)                                                                 \
+    CARBON_EXPORT(bool)                                                                                                \
+    carbon_archive_value_is_##name (bool *is_##name, carbon_archive_value_t *value);                                   \
+                                                                                                                       \
+    CARBON_EXPORT(bool)                                                                                                \
+    carbon_archive_value_get_##name (type *name, carbon_archive_value_t *value);                                       \
+
+DECLARE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_bool_t, boolean)
+DECLARE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_int8_t, int8)
+DECLARE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_int16_t, int16)
+DECLARE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_int32_t, int32)
+DECLARE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_int64_t, int64)
+DECLARE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_uint8_t, uint8)
+DECLARE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_uint16_t, uint16)
+DECLARE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_uint32_t, uint32)
+DECLARE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_uint64_t, uint64)
+DECLARE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_float_t, number)
+DECLARE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_string_id_t, string)
+
+//CARBON_EXPORT(bool)
+//carbon_archive_value_is_boolean(bool *is_boolean, carbon_archive_value_t *value);
+
+//CARBON_EXPORT(bool)
+//carbon_archive_value_get_boolean(bool *boolean, carbon_archive_value_t *value);
 
 //CARBON_EXPORT(bool)
 //carbon_archive_value_iter_position(uint32_t *pos, carbon_archive_value_iter_t *iter);

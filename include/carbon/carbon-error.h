@@ -79,6 +79,19 @@ CARBON_BEGIN_DECL
 #define CARBON_ERR_MEMFILEOPEN_FAILED 52    /** Unable to open memory file */
 #define CARBON_ERR_VITEROPEN_FAILED 53      /** Value iterator cannot be initialized */
 #define CARBON_ERR_MEMFILESKIP_FAILED 54    /** Memfile cannot skip desired amount of bytes */
+#define CARBON_ERR_MEMFILESEEK_FAILED 55    /** Unable to seek in memory file */
+#define CARBON_ERR_ITER_NOOBJ 56            /** Unable to get value: type is not non-array object */
+#define CARBON_ERR_ITER_NOBOOL 57           /** Unable to get value: type is not non-array boolean */
+#define CARBON_ERR_ITER_NOINT8 58           /** Unable to get value: type is not non-array int8 */
+#define CARBON_ERR_ITER_NOINT16 59          /** Unable to get value: type is not non-array int16 */
+#define CARBON_ERR_ITER_NOINT32 60          /** Unable to get value: type is not non-array int32 */
+#define CARBON_ERR_ITER_NOINT64 61          /** Unable to get value: type is not non-array int64 */
+#define CARBON_ERR_ITER_NOUINT8 62          /** Unable to get value: type is not non-array uint8 */
+#define CARBON_ERR_ITER_NOUINT16 63         /** Unable to get value: type is not non-array uint16 */
+#define CARBON_ERR_ITER_NOUINT32 64         /** Unable to get value: type is not non-array uint32 */
+#define CARBON_ERR_ITER_NOUINT64 65         /** Unable to get value: type is not non-array uint64 */
+#define CARBON_ERR_ITER_NONUMBER 66         /** Unable to get value: type is not non-array number */
+#define CARBON_ERR_ITER_NOSTRING 67         /** Unable to get value: type is not non-array string */
 
 static const char *const _carbon_err_str[] = {
     "No error",
@@ -135,7 +148,20 @@ static const char *const _carbon_err_str[] = {
     "Rehashing hash table failed; rollback is not performed",
     "Unable to open memory file",
     "Value iterator cannot be initialized",
-    "Memfile cannot skip desired amount of bytes"
+    "Memfile cannot skip desired amount of bytes",
+    "Unable to seek in memory file",
+    "Unable to get value: type is not non-array object",
+    "Unable to get value: type is not non-array boolean",
+    "Unable to get value: type is not non-array int8",
+    "Unable to get value: type is not non-array int16",
+    "Unable to get value: type is not non-array int32",
+    "Unable to get value: type is not non-array int64",
+    "Unable to get value: type is not non-array uint8",
+    "Unable to get value: type is not non-array uint16",
+    "Unable to get value: type is not non-array uint32",
+    "Unable to get value: type is not non-array uint64",
+    "Unable to get value: type is not non-array number",
+    "Unable to get value: type is not non-array string"
 };
 
 #define CARBON_ERRSTR_ILLEGAL_CODE "illegal error code"

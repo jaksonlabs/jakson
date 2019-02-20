@@ -62,22 +62,22 @@ typedef size_t          carbon_off_t;
 
 typedef unsigned char   u_char;
 
-typedef enum carbon_type
+typedef enum carbon_basic_type
 {
-    CARBON_TYPE_INT8,
-    CARBON_TYPE_INT16,
-    CARBON_TYPE_INT32,
-    CARBON_TYPE_INT64,
-    CARBON_TYPE_UINT8,
-    CARBON_TYPE_UINT16,
-    CARBON_TYPE_UINT32,
-    CARBON_TYPE_UINT64,
-    CARBON_TYPE_FLOAT,
-    CARBON_TYPE_STRING,
-    CARBON_TYPE_BOOL,
-    CARBON_TYPE_VOID,
-    CARBON_TYPE_OBJECT,
-} carbon_type_e;
+    CARBON_BASIC_TYPE_INT8,
+    CARBON_BASIC_TYPE_INT16,
+    CARBON_BASIC_TYPE_INT32,
+    CARBON_BASIC_TYPE_INT64,
+    CARBON_BASIC_TYPE_UINT8,
+    CARBON_BASIC_TYPE_UINT16,
+    CARBON_BASIC_TYPE_UINT32,
+    CARBON_BASIC_TYPE_UINT64,
+    CARBON_BASIC_TYPE_NUMBER,
+    CARBON_BASIC_TYPE_STRING,
+    CARBON_BASIC_TYPE_BOOLEAN,
+    CARBON_BASIC_TYPE_NULL,
+    CARBON_BASIC_TYPE_OBJECT,
+} carbon_basic_type_e;
 
 #define CARBON_NOT_IMPLEMENTED                                                                                         \
 {                                                                                                                      \

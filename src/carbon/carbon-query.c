@@ -368,32 +368,32 @@ cleanup_result_and_error:
 //}
 //
 //CARBON_EXPORT(CARBON_NULLABLE const carbon_string_id_t *)
-//carbon_archive_object_keys_to_type(CARBON_NULLABLE size_t *npairs, carbon_type_e type, carbon_archive_object_t *obj)
+//carbon_archive_object_keys_to_type(CARBON_NULLABLE size_t *npairs, carbon_basic_type_e type, carbon_archive_object_t *obj)
 //{
 //    switch (type) {
-//    case CARBON_TYPE_INT8:
+//    case CARBON_BASIC_TYPE_INT8:
 //        OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(npairs, obj, has_int8_props, int8s);
-//    case CARBON_TYPE_INT16:
+//    case CARBON_BASIC_TYPE_INT16:
 //        OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(npairs, obj, has_int16_props, int16s);
-//    case CARBON_TYPE_INT32:
+//    case CARBON_BASIC_TYPE_INT32:
 //        OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(npairs, obj, has_int32_props, int32s);
-//    case CARBON_TYPE_INT64:
+//    case CARBON_BASIC_TYPE_INT64:
 //        OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(npairs, obj, has_int64_props, int64s);
-//    case CARBON_TYPE_UINT8:
+//    case CARBON_BASIC_TYPE_UINT8:
 //        OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(npairs, obj, has_uint8_props, uint8s);
-//    case CARBON_TYPE_UINT16:
+//    case CARBON_BASIC_TYPE_UINT16:
 //        OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(npairs, obj, has_uint16_props, uint16s);
-//    case CARBON_TYPE_UINT32:
+//    case CARBON_BASIC_TYPE_UINT32:
 //        OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(npairs, obj, has_uint32_props, uint32s);
-//    case CARBON_TYPE_UINT64:
+//    case CARBON_BASIC_TYPE_UINT64:
 //        OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(npairs, obj, has_uint64_props, uint64s);
-//    case CARBON_TYPE_FLOAT:
+//    case CARBON_BASIC_TYPE_NUMBER:
 //        OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(npairs, obj, has_float_props, floats);
-//    case CARBON_TYPE_STRING:
+//    case CARBON_BASIC_TYPE_STRING:
 //        OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(npairs, obj, has_string_props, strings);
-//    case CARBON_TYPE_BOOL:
+//    case CARBON_BASIC_TYPE_BOOLEAN:
 //        OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(npairs, obj, has_bool_props, bools);
-//    case CARBON_TYPE_VOID: {
+//    case CARBON_BASIC_TYPE_NULL: {
 //        if (obj->flags.bits.has_null_props) {
 //            assert(obj->props.nulls != 0);
 //            carbon_memfile_seek(&obj->file, obj->props.nulls);
@@ -407,7 +407,7 @@ cleanup_result_and_error:
 //            return NULL;
 //        }
 //    }
-//    case CARBON_TYPE_OBJECT: {
+//    case CARBON_BASIC_TYPE_OBJECT: {
 //        if (obj->flags.bits.has_object_props) {
 //            assert(obj->props.objects != 0);
 //            carbon_memfile_seek(&obj->file, obj->props.objects);
@@ -428,35 +428,35 @@ cleanup_result_and_error:
 //}
 //
 //CARBON_EXPORT(CARBON_NULLABLE const carbon_string_id_t *)
-//carbon_archive_object_keys_to_array(CARBON_NULLABLE size_t *npairs, carbon_type_e type, carbon_archive_object_t *obj)
+//carbon_archive_object_keys_to_array(CARBON_NULLABLE size_t *npairs, carbon_basic_type_e type, carbon_archive_object_t *obj)
 //{
 //    switch (type) {
-//    case CARBON_TYPE_INT8:
+//    case CARBON_BASIC_TYPE_INT8:
 //        OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(npairs, obj, has_int8_array_props, int8_arrays);
-//    case CARBON_TYPE_INT16:
+//    case CARBON_BASIC_TYPE_INT16:
 //        OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(npairs, obj, has_int16_array_props, int16_arrays);
-//    case CARBON_TYPE_INT32:
+//    case CARBON_BASIC_TYPE_INT32:
 //        OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(npairs, obj, has_int32_array_props, int32_arrays);
-//    case CARBON_TYPE_INT64:
+//    case CARBON_BASIC_TYPE_INT64:
 //        OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(npairs, obj, has_int64_array_props, int64_arrays);
-//    case CARBON_TYPE_UINT8:
+//    case CARBON_BASIC_TYPE_UINT8:
 //        OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(npairs, obj, has_uint8_array_props, uint8_arrays);
-//    case CARBON_TYPE_UINT16:
+//    case CARBON_BASIC_TYPE_UINT16:
 //        OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(npairs, obj, has_uint16_array_props, uint16_arrays);
-//    case CARBON_TYPE_UINT32:
+//    case CARBON_BASIC_TYPE_UINT32:
 //        OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(npairs, obj, has_uint32_array_props, uint32_arrays);
-//    case CARBON_TYPE_UINT64:
+//    case CARBON_BASIC_TYPE_UINT64:
 //        OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(npairs, obj, has_uint64_array_props, uint64_arrays);
-//    case CARBON_TYPE_FLOAT:
+//    case CARBON_BASIC_TYPE_NUMBER:
 //        OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(npairs, obj, has_float_array_props, float_arrays);
-//    case CARBON_TYPE_STRING:
+//    case CARBON_BASIC_TYPE_STRING:
 //        OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(npairs, obj, has_string_array_props, string_arrays);
-//    case CARBON_TYPE_BOOL:
+//    case CARBON_BASIC_TYPE_BOOLEAN:
 //        OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(npairs, obj, has_bool_array_props, bool_arrays);
-//    case CARBON_TYPE_VOID: {
+//    case CARBON_BASIC_TYPE_NULL: {
 //        OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(npairs, obj, has_null_array_props, null_arrays);
 //    }
-//    case CARBON_TYPE_OBJECT: {
+//    case CARBON_BASIC_TYPE_OBJECT: {
 //        CARBON_ERROR(&obj->err, CARBON_ERR_ERRINTERNAL) /** wrong usage: use table get function instead */
 //        return NULL;
 //    }
@@ -577,18 +577,18 @@ cleanup_result_and_error:
 //    return OBJECT_GET_VALUES_OF_FIX_TYPE_GENERIC(obj, has_uint16_props, uint16s, carbon_uint16_t);
 //}
 //
-//const carbon_uin32_t *carbon_archive_object_values_uint32(CARBON_NULLABLE
+//const carbon_uint32_t *carbon_archive_object_values_uint32(CARBON_NULLABLE
 //                                                          size_t *npairs,
 //                                                          carbon_archive_object_t *obj)
 //{
-//    return OBJECT_GET_VALUES_OF_FIX_TYPE_GENERIC(obj, has_uint32_props, uint32s, carbon_uin32_t);
+//    return OBJECT_GET_VALUES_OF_FIX_TYPE_GENERIC(obj, has_uint32_props, uint32s, carbon_uint32_t);
 //}
 //
-//const carbon_uin64_t *carbon_archive_object_values_uint64(CARBON_NULLABLE
+//const carbon_uint64_t *carbon_archive_object_values_uint64(CARBON_NULLABLE
 //                                                          size_t *npairs,
 //                                                          carbon_archive_object_t *obj)
 //{
-//    return OBJECT_GET_VALUES_OF_FIX_TYPE_GENERIC(obj, has_uint64_props, uint64s, carbon_uin64_t);
+//    return OBJECT_GET_VALUES_OF_FIX_TYPE_GENERIC(obj, has_uint64_props, uint64s, carbon_uint64_t);
 //}
 //
 //const carbon_bool_t *carbon_archive_object_values_bool(CARBON_NULLABLE
@@ -712,24 +712,24 @@ cleanup_result_and_error:
 //    return OBJECT_GET_ARRAY_VALUES_GENERIC(status, idx, prop, obj, carbon_uint16_t);
 //}
 //
-//const carbon_uin32_t *carbon_archive_object_values_uint32_arrays(uint32_t *length,
+//const carbon_uint32_t *carbon_archive_object_values_uint32_arrays(uint32_t *length,
 //                                                                 size_t idx,
 //                                                                 carbon_archive_object_t *obj)
 //{
 //    carbon_array_prop_t prop;
 //    int status = OBJECT_GET_ARRAY_LENGTHS_GENERIC(&obj->err, length, obj, has_uint32_array_props,
 //                                                  uint32_arrays, idx, prop);
-//    return OBJECT_GET_ARRAY_VALUES_GENERIC(status, idx, prop, obj, carbon_uin32_t);
+//    return OBJECT_GET_ARRAY_VALUES_GENERIC(status, idx, prop, obj, carbon_uint32_t);
 //}
 //
-//const carbon_uin64_t *carbon_archive_object_values_uint64_arrays(uint32_t *length,
+//const carbon_uint64_t *carbon_archive_object_values_uint64_arrays(uint32_t *length,
 //                                                                 size_t idx,
 //                                                                 carbon_archive_object_t *obj)
 //{
 //    carbon_array_prop_t prop;
 //    int status = OBJECT_GET_ARRAY_LENGTHS_GENERIC(&obj->err, length, obj, has_uint64_array_props,
 //                                                  uint64_arrays, idx, prop);
-//    return OBJECT_GET_ARRAY_VALUES_GENERIC(status, idx, prop, obj, carbon_uin64_t);
+//    return OBJECT_GET_ARRAY_VALUES_GENERIC(status, idx, prop, obj, carbon_uint64_t);
 //}
 //
 //const carbon_bool_t *carbon_archive_object_values_bool_arrays(uint32_t *length,
@@ -889,14 +889,14 @@ cleanup_result_and_error:
 //    return FIELD_GET_VALUE_ARRAY_GENERIC(length, field, carbon_field_type_uint16, carbon_uint16_t);
 //}
 //
-//const carbon_uin32_t *carbon_archive_table_field_get_uint32_array(uint32_t *length, const carbon_field_t *field)
+//const carbon_uint32_t *carbon_archive_table_field_get_uint32_array(uint32_t *length, const carbon_field_t *field)
 //{
-//    return FIELD_GET_VALUE_ARRAY_GENERIC(length, field, carbon_field_type_uint32, carbon_uin32_t);
+//    return FIELD_GET_VALUE_ARRAY_GENERIC(length, field, carbon_field_type_uint32, carbon_uint32_t);
 //}
 //
-//const carbon_uin64_t *carbon_archive_table_field_get_uint64_array(uint32_t *length, const carbon_field_t *field)
+//const carbon_uint64_t *carbon_archive_table_field_get_uint64_array(uint32_t *length, const carbon_field_t *field)
 //{
-//    return FIELD_GET_VALUE_ARRAY_GENERIC(length, field, carbon_field_type_uint64, carbon_uin64_t);
+//    return FIELD_GET_VALUE_ARRAY_GENERIC(length, field, carbon_field_type_uint64, carbon_uint64_t);
 //}
 //
 //const carbon_bool_t *carbon_archive_table_field_get_bool_array(uint32_t *length, const carbon_field_t *field)

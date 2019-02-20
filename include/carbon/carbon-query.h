@@ -63,10 +63,10 @@ carbon_query_find_ids(size_t *num_found, carbon_query_t *query, const carbon_str
 //carbon_archive_record(carbon_archive_object_t *root, carbon_query_t *query);
 //
 //CARBON_EXPORT(CARBON_NULLABLE const carbon_string_id_t *)
-//carbon_archive_object_keys_to_type(CARBON_NULLABLE size_t *npairs, carbon_type_e type, carbon_archive_object_t *obj);
+//carbon_archive_object_keys_to_type(CARBON_NULLABLE size_t *npairs, carbon_basic_type_e type, carbon_archive_object_t *obj);
 //
 //CARBON_EXPORT(CARBON_NULLABLE const carbon_string_id_t *)
-//carbon_archive_object_keys_to_array(CARBON_NULLABLE size_t *npairs, carbon_type_e type, carbon_archive_object_t *obj);
+//carbon_archive_object_keys_to_array(CARBON_NULLABLE size_t *npairs, carbon_basic_type_e type, carbon_archive_object_t *obj);
 //
 //CARBON_EXPORT(bool)
 //carbon_archive_object_values_object(carbon_archive_object_t *out, size_t idx, carbon_archive_object_t *props);
@@ -89,10 +89,10 @@ carbon_query_find_ids(size_t *num_found, carbon_query_t *query, const carbon_str
 //CARBON_EXPORT(const carbon_uint16_t *)
 //carbon_archive_object_values_uin16(CARBON_NULLABLE size_t *npairs, carbon_archive_object_t *obj);
 //
-//CARBON_EXPORT(const carbon_uin32_t *)
+//CARBON_EXPORT(const carbon_uint32_t *)
 //carbon_archive_object_values_uint32(CARBON_NULLABLE size_t *npairs, carbon_archive_object_t *obj);
 //
-//CARBON_EXPORT(const carbon_uin64_t *)
+//CARBON_EXPORT(const carbon_uint64_t *)
 //carbon_archive_object_values_uint64(CARBON_NULLABLE size_t *npairs, carbon_archive_object_t *obj);
 //
 //CARBON_EXPORT(const carbon_bool_t *)
@@ -122,10 +122,10 @@ carbon_query_find_ids(size_t *num_found, carbon_query_t *query, const carbon_str
 //CARBON_EXPORT(const carbon_uint16_t *)
 //carbon_archive_object_values_uint16_arrays(uint32_t *length, size_t idx, carbon_archive_object_t *obj);
 //
-//CARBON_EXPORT(const carbon_uin32_t *)
+//CARBON_EXPORT(const carbon_uint32_t *)
 //carbon_archive_object_values_uint32_arrays(uint32_t *length, size_t idx, carbon_archive_object_t *obj);
 //
-//CARBON_EXPORT(const carbon_uin64_t *)
+//CARBON_EXPORT(const carbon_uint64_t *)
 //carbon_archive_object_values_uint64_arrays(uint32_t *length, size_t idx, carbon_archive_object_t *obj);
 //
 //CARBON_EXPORT(const carbon_bool_t *)
@@ -179,10 +179,10 @@ carbon_query_find_ids(size_t *num_found, carbon_query_t *query, const carbon_str
 //CARBON_EXPORT(const carbon_uint16_t *)
 //carbon_archive_table_field_get_uint16_array(uint32_t *length, const carbon_field_t *field);
 //
-//CARBON_EXPORT(const carbon_uin32_t *)
+//CARBON_EXPORT(const carbon_uint32_t *)
 //carbon_archive_table_field_get_uint32_array(uint32_t *length, const carbon_field_t *field);
 //
-//CARBON_EXPORT(const carbon_uin64_t *)
+//CARBON_EXPORT(const carbon_uint64_t *)
 //carbon_archive_table_field_get_uint64_array(uint32_t *length, const carbon_field_t *field);
 //
 //CARBON_EXPORT(const carbon_bool_t *)

@@ -619,10 +619,10 @@ static bool print_array_objects(FILE *file, carbon_err_t *err, const char *type_
                     PRINT_COLUMN(file, columnTable, array_idx, carbon_uint16_t, "%d")
                     break;
                 case carbon_field_type_uint32:
-                    PRINT_COLUMN(file, columnTable, array_idx, carbon_uin32_t, "%d")
+                    PRINT_COLUMN(file, columnTable, array_idx, carbon_uint32_t, "%d")
                     break;
                 case carbon_field_type_uint64:
-                    PRINT_COLUMN(file, columnTable, array_idx, carbon_uin64_t, "%" PRIu64)
+                    PRINT_COLUMN(file, columnTable, array_idx, carbon_uint64_t, "%" PRIu64)
                     break;
                 case carbon_field_type_float:
                     PRINT_COLUMN(file, columnTable, array_idx, carbon_float_t , "%f")
@@ -686,8 +686,8 @@ static bool print_object(FILE *file, carbon_err_t *err, const carbon_columndoc_o
             PRINT_PRIMITIVE_BOOLEAN_COLUMN(file, "Boolean", &object->bool_prop_keys, &object->bool_prop_vals, dic)
             PRINT_PRIMITIVE_COLUMN(file, "UInt8", &object->uint8_prop_keys, &object->uint8_prop_vals, &object->uint8_val_idxs, dic, carbon_uint8_t, "%d")
             PRINT_PRIMITIVE_COLUMN(file, "UInt16", &object->uint16_prop_keys, &object->uint16_prop_vals, &object->uint16_val_idxs, dic, carbon_uint16_t, "%d")
-            PRINT_PRIMITIVE_COLUMN(file, "UInt32", &object->uin32_prop_keys, &object->uint32_prop_vals, &object->uint32_val_idxs, dic, carbon_uin32_t, "%d")
-            PRINT_PRIMITIVE_COLUMN(file, "UInt64", &object->uint64_prop_keys, &object->uint64_prop_vals, &object->uint64_val_idxs, dic, carbon_uin64_t, "%" PRIu64)
+            PRINT_PRIMITIVE_COLUMN(file, "UInt32", &object->uin32_prop_keys, &object->uint32_prop_vals, &object->uint32_val_idxs, dic, carbon_uint32_t, "%d")
+            PRINT_PRIMITIVE_COLUMN(file, "UInt64", &object->uint64_prop_keys, &object->uint64_prop_vals, &object->uint64_val_idxs, dic, carbon_uint64_t, "%" PRIu64)
             PRINT_PRIMITIVE_COLUMN(file, "Int8", &object->int8_prop_keys, &object->int8_prop_vals, &object->int8_val_idxs, dic, carbon_int8_t, "%d")
             PRINT_PRIMITIVE_COLUMN(file, "Int16", &object->int16_prop_keys, &object->int16_prop_vals, &object->int16_val_idxs, dic, carbon_int16_t, "%d")
             PRINT_PRIMITIVE_COLUMN(file, "Int32", &object->int32_prop_keys, &object->int32_prop_vals, &object->int32_val_idxs, dic, carbon_int32_t, "%d")
@@ -703,8 +703,8 @@ static bool print_object(FILE *file, carbon_err_t *err, const carbon_columndoc_o
             PRINT_BOOLEAN_ARRAY(file, "Boolean", object->bool_array_prop_keys, object->bool_array_prop_vals);
             PRINT_ARRAY(file, "UInt8", object->uint8_array_prop_keys, object->uint8_array_prop_vals, carbon_uint8_t, "%d", (value != CARBON_NULL_UINT8));
             PRINT_ARRAY(file, "UInt16", object->uint16_array_prop_keys, object->uint16_array_prop_vals, carbon_uint16_t, "%d", (value !=CARBON_NULL_UINT16));
-            PRINT_ARRAY(file, "UInt32", object->uint32_array_prop_keys, object->uint32_array_prop_vals, carbon_uin32_t, "%d", (value !=CARBON_NULL_UINT32));
-            PRINT_ARRAY(file, "UInt64", object->uint64_array_prop_keys, object->uin64_array_prop_vals, carbon_uin64_t, "%" PRIu64, (value !=CARBON_NULL_UINT64));
+            PRINT_ARRAY(file, "UInt32", object->uint32_array_prop_keys, object->uint32_array_prop_vals, carbon_uint32_t, "%d", (value !=CARBON_NULL_UINT32));
+            PRINT_ARRAY(file, "UInt64", object->uint64_array_prop_keys, object->uin64_array_prop_vals, carbon_uint64_t, "%" PRIu64, (value !=CARBON_NULL_UINT64));
             PRINT_ARRAY(file, "Int8", object->int8_array_prop_keys, object->int8_array_prop_vals, carbon_int8_t, "%d", (value !=CARBON_NULL_INT8));
             PRINT_ARRAY(file, "Int16", object->int16_array_prop_keys, object->int16_array_prop_vals, carbon_int16_t, "%d", (value !=CARBON_NULL_INT16));
             PRINT_ARRAY(file, "Int32", object->int32_array_prop_keys, object->int32_array_prop_vals, carbon_int32_t, "%d", (value !=CARBON_NULL_INT32));
@@ -942,8 +942,8 @@ static void setup_object(carbon_columndoc_obj_t *model, carbon_columndoc_t *pare
     carbon_vec_create(&model->int64_prop_vals, NULL, sizeof(carbon_int64_t), 10);
     carbon_vec_create(&model->uint8_prop_vals, NULL, sizeof(carbon_uint8_t), 10);
     carbon_vec_create(&model->uint16_prop_vals, NULL, sizeof(carbon_uint16_t), 10);
-    carbon_vec_create(&model->uint32_prop_vals, NULL, sizeof(carbon_uin32_t), 10);
-    carbon_vec_create(&model->uint64_prop_vals, NULL, sizeof(carbon_uin64_t), 10);
+    carbon_vec_create(&model->uint32_prop_vals, NULL, sizeof(carbon_uint32_t), 10);
+    carbon_vec_create(&model->uint64_prop_vals, NULL, sizeof(carbon_uint64_t), 10);
     carbon_vec_create(&model->float_prop_vals, NULL, sizeof(carbon_float_t), 10);
     carbon_vec_create(&model->string_prop_vals, NULL, sizeof(carbon_string_id_t), 50);
 
@@ -1117,11 +1117,11 @@ static bool object_put_array(carbon_columndoc_obj_t *model, carbon_err_t *err, c
                         &model->uint16_array_prop_keys);
         break;
     case carbon_field_type_uint32:
-        object_push_array(&model->uint32_array_prop_vals, sizeof(carbon_uin32_t), num_elements, entry->values.base, *key_id,
+        object_push_array(&model->uint32_array_prop_vals, sizeof(carbon_uint32_t), num_elements, entry->values.base, *key_id,
                         &model->uint32_array_prop_keys);
         break;
     case carbon_field_type_uint64:
-        object_push_array(&model->uin64_array_prop_vals, sizeof(carbon_uin64_t), num_elements, entry->values.base, *key_id,
+        object_push_array(&model->uin64_array_prop_vals, sizeof(carbon_uint64_t), num_elements, entry->values.base, *key_id,
                         &model->uint64_array_prop_keys);
         break;
     case carbon_field_type_float:

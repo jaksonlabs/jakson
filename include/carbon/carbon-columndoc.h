@@ -134,9 +134,9 @@ typedef struct carbon_columndoc_obj
     /** Primitive uint16 number values associated to keys stored above (sorted by key) */
     carbon_vec_t ofType(carbon_uint16_t) uint16_prop_vals;
     /** Primitive uint32 number values associated to keys stored above (sorted by key) */
-    carbon_vec_t ofType(carbon_uin32_t) uint32_prop_vals;
+    carbon_vec_t ofType(carbon_uint32_t) uint32_prop_vals;
     /** Primitive uint64 number values associated to keys stored above (sorted by key) */
-    carbon_vec_t ofType(carbon_uin64_t) uint64_prop_vals;
+    carbon_vec_t ofType(carbon_uint64_t) uint64_prop_vals;
     /** Primitive real number values associated to keys stored above (sorted by key) */
     carbon_vec_t ofType(carbon_float_t) float_prop_vals;
     /** Primitive string number values associated to keys stored above (sorted by key) */
