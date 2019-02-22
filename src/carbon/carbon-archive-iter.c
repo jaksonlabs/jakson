@@ -106,6 +106,76 @@ offset_by_state(carbon_archive_prop_iter_t *iter)
     }
 }
 
+static bool
+prop_iter_read_colum_entry(carbon_archive_prop_iter_t *iter)
+{
+    assert(iter->mode == CARBON_ARCHIVE_PROP_ITER_MODE_COLLECTION);
+    assert(iter->mode_collection.current_column_group.current_column.current_entry.idx <
+        iter->mode_collection.current_column_group.current_column.num_elem);
+
+    uint32_t     current_idx = iter->mode_collection.current_column_group.current_column.current_entry.idx;
+    carbon_off_t entry_off   = iter->mode_collection.current_column_group.current_column.elem_offsets[current_idx];
+    carbon_memfile_seek(&iter->record_table_memfile, entry_off);
+
+    iter->mode_collection.current_column_group.current_column.current_entry.array_length =
+                        *CARBON_MEMFILE_READ_TYPE(&iter->record_table_memfile, uint32_t);
+    iter->mode_collection.current_column_group.current_column.current_entry.array_base =
+                        CARBON_MEMFILE_PEEK(&iter->record_table_memfile, void);
+
+    return (++iter->mode_collection.current_column_group.current_column.current_entry.idx) <
+        iter->mode_collection.current_column_group.current_column.num_elem;
+}
+
+static bool
+prop_iter_read_column(carbon_archive_prop_iter_t *iter)
+{
+    assert(iter->mode == CARBON_ARCHIVE_PROP_ITER_MODE_COLLECTION);
+    assert(iter->mode_collection.current_column_group.current_column.idx <
+           iter->mode_collection.current_column_group.num_columns);
+
+    uint32_t     current_idx = iter->mode_collection.current_column_group.current_column.idx;
+    carbon_off_t column_off  = iter->mode_collection.current_column_group.column_offs[current_idx];
+    carbon_memfile_seek(&iter->record_table_memfile, column_off);
+    const carbon_column_header_t *header = CARBON_MEMFILE_READ_TYPE(&iter->record_table_memfile,
+                                                                    carbon_column_header_t);
+
+    assert(header->marker == MARKER_SYMBOL_COLUMN);
+    iter->mode_collection.current_column_group.current_column.name = header->column_name;
+    iter->mode_collection.current_column_group.current_column.type =
+               carbon_int_field_type_to_basic_type(carbon_int_marker_to_field_type(header->value_type));
+
+    iter->mode_collection.current_column_group.current_column.num_elem = header->num_entries;
+    iter->mode_collection.current_column_group.current_column.elem_offsets = CARBON_MEMFILE_READ_TYPE_LIST(
+                                           &iter->record_table_memfile, carbon_off_t, header->num_entries);
+    iter->mode_collection.current_column_group.current_column.elem_positions = CARBON_MEMFILE_READ_TYPE_LIST(
+                                           &iter->record_table_memfile, uint32_t, header->num_entries);
+    iter->mode_collection.current_column_group.current_column.current_entry.idx = 0;
+
+    return (++iter->mode_collection.current_column_group.current_column.idx) <
+              iter->mode_collection.current_column_group.num_columns;
+}
+
+static bool
+prop_iter_read_column_group(carbon_archive_prop_iter_t *iter)
+{
+    assert(iter->mode == CARBON_ARCHIVE_PROP_ITER_MODE_COLLECTION);
+    assert(iter->mode_collection.current_column_group_idx < iter->mode_collection.num_column_groups);
+    carbon_memfile_seek(&iter->record_table_memfile,
+                        iter->mode_collection.column_group_offsets[iter->mode_collection.current_column_group_idx]);
+    const carbon_column_group_header_t *header = CARBON_MEMFILE_READ_TYPE(&iter->record_table_memfile,
+                                                                          carbon_column_group_header_t);
+    assert(header->marker == MARKER_SYMBOL_COLUMN_GROUP);
+    iter->mode_collection.current_column_group.num_columns = header->num_columns;
+    iter->mode_collection.current_column_group.num_objects = header->num_objects;
+    iter->mode_collection.current_column_group.object_ids  = CARBON_MEMFILE_READ_TYPE_LIST(&iter->record_table_memfile,
+                                                                carbon_object_id_t, header->num_objects);
+    iter->mode_collection.current_column_group.column_offs = CARBON_MEMFILE_READ_TYPE_LIST(&iter->record_table_memfile,
+                                                                carbon_off_t, header->num_columns);
+    iter->mode_collection.current_column_group.current_column.idx = 0;
+
+    return (++iter->mode_collection.current_column_group_idx) < iter->mode_collection.num_column_groups;
+}
+
 static void
 prop_iter_cursor_init(carbon_archive_prop_iter_t *iter)
 {
@@ -140,7 +210,20 @@ prop_iter_cursor_init(carbon_archive_prop_iter_t *iter)
 
     if (iter->mode == CARBON_ARCHIVE_PROP_ITER_MODE_COLLECTION)
     {
-        abort(); // TODO
+        iter->mode_collection.collection_start_off = offset_by_state(iter);
+        carbon_memfile_seek(&iter->record_table_memfile, iter->mode_collection.collection_start_off);
+        const carbon_object_array_header_t *header = CARBON_MEMFILE_READ_TYPE(&iter->record_table_memfile, carbon_object_array_header_t);
+        iter->mode_collection.num_column_groups = header->num_entries;
+        iter->mode_collection.current_column_group_idx = 0;
+        iter->mode_collection.column_group_keys = CARBON_MEMFILE_READ_TYPE_LIST(&iter->record_table_memfile,
+                                                                                carbon_string_id_t,
+                                                                                iter->mode_collection.num_column_groups);
+        iter->mode_collection.column_group_offsets = CARBON_MEMFILE_READ_TYPE_LIST(&iter->record_table_memfile,
+                                                                                carbon_off_t,
+                                                                                iter->mode_collection.num_column_groups);
+        prop_iter_read_column_group(iter);
+        prop_iter_read_column(iter);
+        prop_iter_read_colum_entry(iter);
     } else
     {
         iter->mode_object.current_prop_group_off = offset_by_state(iter);
@@ -408,9 +491,31 @@ is_array_type(carbon_prop_iter_state_e state)
     }
 }
 
+
+CARBON_EXPORT(bool)
+carbon_archive_prop_iter_next(carbon_archive_prop_iter_t *iter)
+{
+    CARBON_UNUSED(iter);
+    return false;
+}
+
+CARBON_EXPORT(bool)
+carbon_archive_prop_iter_type(carbon_archive_prop_iter_mode_e *type, carbon_archive_prop_iter_t *iter)
+{
+    CARBON_NON_NULL_OR_ERROR(type)
+    CARBON_NON_NULL_OR_ERROR(iter)
+
+    *type = iter->mode;
+
+    return true;
+}
+
 CARBON_EXPORT(const carbon_string_id_t *)
-carbon_archive_prop_iter_next(uint32_t *num_pairs, carbon_basic_type_e *type, bool *is_array, carbon_archive_value_vector_t *value,
-                              carbon_archive_prop_iter_t *iter)
+carbon_archive_prop_iter_document_get_value_vector(uint32_t *num_pairs,
+                                                   carbon_basic_type_e *type,
+                                                   bool *is_array,
+                                                   carbon_archive_value_vector_t *value,
+                                                   carbon_archive_prop_iter_t *iter)
 {
     CARBON_NON_NULL_OR_ERROR(iter)
 
@@ -443,7 +548,7 @@ carbon_archive_prop_iter_next(uint32_t *num_pairs, carbon_basic_type_e *type, bo
 }
 
 CARBON_EXPORT(bool)
-carbon_archive_prop_iter_get_object_id(carbon_object_id_t *id, carbon_archive_prop_iter_t *iter)
+carbon_archive_prop_iter_document_get_object_id(carbon_object_id_t *id, carbon_archive_prop_iter_t *iter)
 {
     CARBON_NON_NULL_OR_ERROR(id)
     CARBON_NON_NULL_OR_ERROR(iter)

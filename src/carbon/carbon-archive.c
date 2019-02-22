@@ -344,54 +344,6 @@ static const char *array_value_type_to_string(carbon_err_t *err, carbon_field_ty
     }
 }
 
-static carbon_field_type_e value_type_symbol_to_value_type(char symbol)
-{
-    switch (symbol) {
-        case MARKER_SYMBOL_PROP_NULL:
-        case MARKER_SYMBOL_PROP_NULL_ARRAY:
-            return carbon_field_type_null;
-        case MARKER_SYMBOL_PROP_BOOLEAN:
-        case MARKER_SYMBOL_PROP_BOOLEAN_ARRAY:
-            return carbon_field_type_bool;
-        case MARKER_SYMBOL_PROP_INT8:
-        case MARKER_SYMBOL_PROP_INT8_ARRAY:
-            return carbon_field_type_int8;
-        case MARKER_SYMBOL_PROP_INT16:
-        case MARKER_SYMBOL_PROP_INT16_ARRAY:
-            return carbon_field_type_int16;
-        case MARKER_SYMBOL_PROP_INT32:
-        case MARKER_SYMBOL_PROP_INT32_ARRAY:
-            return carbon_field_type_int32;
-        case MARKER_SYMBOL_PROP_INT64:
-        case MARKER_SYMBOL_PROP_INT64_ARRAY:
-            return carbon_field_type_int64;
-        case MARKER_SYMBOL_PROP_UINT8:
-        case MARKER_SYMBOL_PROP_UINT8_ARRAY:
-            return carbon_field_type_uint8;
-        case MARKER_SYMBOL_PROP_UINT16:
-        case MARKER_SYMBOL_PROP_UINT16_ARRAY:
-            return carbon_field_type_uint16;
-        case MARKER_SYMBOL_PROP_UINT32:
-        case MARKER_SYMBOL_PROP_UINT32_ARRAY:
-            return carbon_field_type_uint32;
-        case MARKER_SYMBOL_PROP_UINT64:
-        case MARKER_SYMBOL_PROP_UINT64_ARRAY:
-            return carbon_field_type_uint64;
-        case MARKER_SYMBOL_PROP_REAL:
-        case MARKER_SYMBOL_PROP_REAL_ARRAY:
-            return carbon_field_type_float;
-        case MARKER_SYMBOL_PROP_TEXT:
-        case MARKER_SYMBOL_PROP_TEXT_ARRAY:
-            return carbon_field_type_string;
-        case MARKER_SYMBOL_PROP_OBJECT:
-        case MARKER_SYMBOL_PROP_OBJECT_ARRAY:
-            return carbon_field_type_object;
-        default: {
-            CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_MARKERMAPPING);
-        }
-    }
-}
-
 static void write_primitive_key_column(carbon_memfile_t *memfile, carbon_vec_t ofType(carbon_string_id_t) *keys)
 {
     carbon_string_id_t *string_ids = CARBON_VECTOR_ALL(keys, carbon_string_id_t);
@@ -1328,7 +1280,7 @@ static bool print_column_form_memfile(FILE *file, carbon_err_t *err, carbon_memf
     }
     fprintf(file, "0x%04x ", (unsigned) offset);
     INTENT_LINE(nesting_level);
-    const char *type_name = array_value_type_to_string(err, value_type_symbol_to_value_type(header->value_type));
+    const char *type_name = array_value_type_to_string(err, carbon_int_marker_to_field_type(header->value_type));
     if (!type_name) {
         return false;
     }
@@ -1349,7 +1301,7 @@ static bool print_column_form_memfile(FILE *file, carbon_err_t *err, carbon_memf
 
     fprintf(file, "]]\n");
 
-    carbon_field_type_e data_type = value_type_symbol_to_value_type(header->value_type);
+    carbon_field_type_e data_type = carbon_int_marker_to_field_type(header->value_type);
 
     //fprintf(file, "[");
     for (size_t i = 0; i < header->num_entries; i++) {

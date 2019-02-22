@@ -140,10 +140,35 @@ typedef struct carbon_archive_prop_iter
         bool                       is_array;                /* flag indicating that property is an array type */
     } mode_object;
 
+    struct {
+        carbon_off_t                collection_start_off;
+        uint32_t                    num_column_groups;
+        uint32_t                    current_column_group_idx;
+        const carbon_string_id_t   *column_group_keys;
+        const carbon_off_t         *column_group_offsets;
 
+        struct {
+            uint32_t                       num_columns;
+            uint32_t                       num_objects;
+            const carbon_object_id_t       *object_ids;
+            const carbon_off_t             *column_offs;
 
+            struct {
+                carbon_string_id_t          idx;
+                carbon_string_id_t          name;
+                carbon_basic_type_e         type;
+                uint32_t                    num_elem;
+                const carbon_off_t         *elem_offsets;
+                const uint32_t             *elem_positions;
 
-
+                struct {
+                    uint32_t                idx;
+                    uint32_t                array_length;
+                    const void             *array_base;
+                } current_entry;
+            } current_column;
+        } current_column_group;
+    } mode_collection;
 } carbon_archive_prop_iter_t;
 
 
@@ -155,9 +180,6 @@ typedef struct carbon_archive_value_vector
     bool                        is_array;                /* flag indicating whether value type is an array or not */
     carbon_off_t                data_off;                /* offset in memfile where type-dependent data begins */
     uint32_t                    value_max_idx;           /* maximum index of a value callable by 'at' functions */
-    //uint32_t                    value_idx;               /* the index of this value in the group (also index of key) */
-    //uint32_t                    value_idx_max;           /* max index of this value in the group (also index of key) */
-
     carbon_err_t                err;                     /* error information */
 
     union {
@@ -254,19 +276,30 @@ carbon_archive_prop_iter_from_object(carbon_archive_prop_iter_t *iter,
                                  carbon_archive_object_t *obj,
                                  carbon_archive_value_vector_t *value);
 
-CARBON_EXPORT(const carbon_string_id_t *)
-carbon_archive_prop_iter_next(uint32_t *num_pairs, carbon_basic_type_e *type, bool *is_array,
-                              carbon_archive_value_vector_t *value, carbon_archive_prop_iter_t *iter);
-
-CARBON_EXPORT(bool)
-carbon_archive_prop_iter_get_object_id(carbon_object_id_t *id, carbon_archive_prop_iter_t *iter);
-
-
-
 CARBON_EXPORT(bool)
 carbon_archive_value_vector_from_prop_iter(carbon_archive_value_vector_t *value,
                                            carbon_err_t *err,
                                            carbon_archive_prop_iter_t *prop_iter);
+
+CARBON_EXPORT(bool)
+carbon_archive_prop_iter_next(carbon_archive_prop_iter_t *iter);
+
+CARBON_EXPORT(bool)
+carbon_archive_prop_iter_type(carbon_archive_prop_iter_mode_e *type, carbon_archive_prop_iter_t *iter);
+
+CARBON_EXPORT(const carbon_string_id_t *)
+carbon_archive_prop_iter_document_get_value_vector(uint32_t *num_pairs,
+                                                   carbon_basic_type_e *type,
+                                                   bool *is_array,
+                                                   carbon_archive_value_vector_t *value,
+                                                   carbon_archive_prop_iter_t *iter);
+
+CARBON_EXPORT(bool)
+carbon_archive_prop_iter_document_get_object_id(carbon_object_id_t *id, carbon_archive_prop_iter_t *iter);
+
+
+
+
 
 CARBON_EXPORT(bool)
 carbon_archive_value_vector_get_basic_type(carbon_basic_type_e *type, const carbon_archive_value_vector_t *value);

@@ -152,3 +152,87 @@ carbon_int_get_value_type_of_char(char c)
     }
     return carbon_field_type_null;
 }
+
+carbon_field_type_e // TODO: check whether 'carbon_field_type_e' can be replaced by 'carbon_basic_type_e'
+carbon_int_marker_to_field_type(char symbol)
+{
+    switch (symbol) {
+    case MARKER_SYMBOL_PROP_NULL:
+    case MARKER_SYMBOL_PROP_NULL_ARRAY:
+        return carbon_field_type_null;
+    case MARKER_SYMBOL_PROP_BOOLEAN:
+    case MARKER_SYMBOL_PROP_BOOLEAN_ARRAY:
+        return carbon_field_type_bool;
+    case MARKER_SYMBOL_PROP_INT8:
+    case MARKER_SYMBOL_PROP_INT8_ARRAY:
+        return carbon_field_type_int8;
+    case MARKER_SYMBOL_PROP_INT16:
+    case MARKER_SYMBOL_PROP_INT16_ARRAY:
+        return carbon_field_type_int16;
+    case MARKER_SYMBOL_PROP_INT32:
+    case MARKER_SYMBOL_PROP_INT32_ARRAY:
+        return carbon_field_type_int32;
+    case MARKER_SYMBOL_PROP_INT64:
+    case MARKER_SYMBOL_PROP_INT64_ARRAY:
+        return carbon_field_type_int64;
+    case MARKER_SYMBOL_PROP_UINT8:
+    case MARKER_SYMBOL_PROP_UINT8_ARRAY:
+        return carbon_field_type_uint8;
+    case MARKER_SYMBOL_PROP_UINT16:
+    case MARKER_SYMBOL_PROP_UINT16_ARRAY:
+        return carbon_field_type_uint16;
+    case MARKER_SYMBOL_PROP_UINT32:
+    case MARKER_SYMBOL_PROP_UINT32_ARRAY:
+        return carbon_field_type_uint32;
+    case MARKER_SYMBOL_PROP_UINT64:
+    case MARKER_SYMBOL_PROP_UINT64_ARRAY:
+        return carbon_field_type_uint64;
+    case MARKER_SYMBOL_PROP_REAL:
+    case MARKER_SYMBOL_PROP_REAL_ARRAY:
+        return carbon_field_type_float;
+    case MARKER_SYMBOL_PROP_TEXT:
+    case MARKER_SYMBOL_PROP_TEXT_ARRAY:
+        return carbon_field_type_string;
+    case MARKER_SYMBOL_PROP_OBJECT:
+    case MARKER_SYMBOL_PROP_OBJECT_ARRAY:
+        return carbon_field_type_object;
+    default: {
+        CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_MARKERMAPPING);
+    }
+    }
+}
+
+carbon_basic_type_e
+carbon_int_field_type_to_basic_type(carbon_field_type_e type)
+{
+    switch (type) {
+    case carbon_field_type_null:
+        return CARBON_BASIC_TYPE_NULL;
+    case carbon_field_type_bool:
+        return CARBON_BASIC_TYPE_BOOLEAN;
+    case carbon_field_type_int8:
+        return CARBON_BASIC_TYPE_INT8;
+    case carbon_field_type_int16:
+        return CARBON_BASIC_TYPE_INT16;
+    case carbon_field_type_int32:
+        return CARBON_BASIC_TYPE_INT32;
+    case carbon_field_type_int64:
+        return CARBON_BASIC_TYPE_INT64;
+    case carbon_field_type_uint8:
+        return CARBON_BASIC_TYPE_UINT8;
+    case carbon_field_type_uint16:
+        return CARBON_BASIC_TYPE_UINT16;
+    case carbon_field_type_uint32:
+        return CARBON_BASIC_TYPE_UINT32;
+    case carbon_field_type_uint64:
+        return CARBON_BASIC_TYPE_UINT64;
+    case carbon_field_type_float:
+        return CARBON_BASIC_TYPE_NUMBER;
+    case carbon_field_type_string:
+        return CARBON_BASIC_TYPE_STRING;
+    case carbon_field_type_object:
+        return CARBON_BASIC_TYPE_OBJECT;
+    default:
+        CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_INTERNALERR);
+    }
+}

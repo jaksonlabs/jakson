@@ -382,6 +382,12 @@ carbon_int_embedded_table_props_read(carbon_table_prop_t *prop, carbon_memfile_t
 carbon_field_type_e
 carbon_int_get_value_type_of_char(char c);
 
+carbon_field_type_e
+carbon_int_marker_to_field_type(char symbol);
+
+carbon_basic_type_e
+carbon_int_field_type_to_basic_type(carbon_field_type_e type);
+
 CARBON_END_DECL
 
 #endif

@@ -513,8 +513,8 @@ iterate_properties(carbon_archive_prop_iter_t *prop_iter)
     const carbon_string_id_t   *keys;
     uint32_t                    num_pairs;
 
-    carbon_archive_prop_iter_get_object_id(&oid, prop_iter);
-    while (keys = carbon_archive_prop_iter_next(&num_pairs, &type, &is_array, &value_iter, prop_iter))
+    carbon_archive_prop_iter_document_get_object_id(&oid, prop_iter);
+    while (keys = carbon_archive_prop_iter_document_get_value_vector(&num_pairs, &type, &is_array, &value_iter, prop_iter))
     {
         for (uint32_t i = 0; i < num_pairs; i++) {
             printf("Key %" PRIu64 ", type: %d, is-array: %d\n", keys[i], type, is_array);
