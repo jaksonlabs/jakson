@@ -321,7 +321,7 @@ bool carbon_columndoc_free(carbon_columndoc_t *doc)
     if(!carbon_vec_is_empty((key_vector))) {                                                                           \
         fprintf(file, "\"Values\": [ ");                                                                               \
         for (size_t i = 0; i < (value_vector)->num_elems; i++) {                                                       \
-            carbon_bool_t value = *CARBON_VECTOR_GET(value_vector, i, carbon_bool_t);                                  \
+            carbon_boolean_t value = *CARBON_VECTOR_GET(value_vector, i, carbon_boolean_t);                                  \
             fprintf(file, "%s%s", value == 0 ? "false" : "true", i + 1 < (value_vector)->num_elems ? ", " : "");       \
         }                                                                                                              \
         fprintf(file, "]");                                                                                            \
@@ -414,10 +414,10 @@ static bool print_primitive_objects(FILE *file, carbon_err_t *err, const char *t
         fprintf(file, "],");                                                                                           \
         fprintf(file, "\"Values\": [ ");                                                                               \
         for (size_t i = 0; i < (&value_vector)->num_elems; i++) {                                                      \
-            const carbon_vec_t ofType(carbon_bool_t) *values = CARBON_VECTOR_GET(&value_vector, i, carbon_vec_t);      \
+            const carbon_vec_t ofType(carbon_boolean_t) *values = CARBON_VECTOR_GET(&value_vector, i, carbon_vec_t);      \
             fprintf(file, "[ ");                                                                                       \
             for (size_t j = 0; j < values->num_elems; j++) {                                                           \
-                carbon_bool_t value = *CARBON_VECTOR_GET(values, j, carbon_bool_t);                                    \
+                carbon_boolean_t value = *CARBON_VECTOR_GET(values, j, carbon_boolean_t);                                    \
                 fprintf(file, "%s%s", value == 0 ? "false" : "true", j + 1 < values->num_elems ? ", " : "");           \
             }                                                                                                          \
             fprintf(file, "]%s ", i + 1 < (&value_vector)->num_elems ? "," : "");                                      \
@@ -625,7 +625,7 @@ static bool print_array_objects(FILE *file, carbon_err_t *err, const char *type_
                     PRINT_COLUMN(file, columnTable, array_idx, carbon_uint64_t, "%" PRIu64)
                     break;
                 case carbon_field_type_float:
-                    PRINT_COLUMN(file, columnTable, array_idx, carbon_float_t , "%f")
+                    PRINT_COLUMN(file, columnTable, array_idx, carbon_number_t , "%f")
                     break;
                 case carbon_field_type_string: {
                     const carbon_vec_t *column = CARBON_VECTOR_GET(&columnTable->values, array_idx, carbon_vec_t);
@@ -692,7 +692,7 @@ static bool print_object(FILE *file, carbon_err_t *err, const carbon_columndoc_o
             PRINT_PRIMITIVE_COLUMN(file, "Int16", &object->int16_prop_keys, &object->int16_prop_vals, &object->int16_val_idxs, dic, carbon_int16_t, "%d")
             PRINT_PRIMITIVE_COLUMN(file, "Int32", &object->int32_prop_keys, &object->int32_prop_vals, &object->int32_val_idxs, dic, carbon_int32_t, "%d")
             PRINT_PRIMITIVE_COLUMN(file, "Int64", &object->int64_prop_keys, &object->int64_prop_vals, &object->int64_val_idxs, dic, carbon_int64_t, "%" PRIi64)
-            PRINT_PRIMITIVE_COLUMN(file, "Real", &object->float_prop_keys, &object->float_prop_vals, &object->float_val_idxs, dic, carbon_float_t, "%f")
+            PRINT_PRIMITIVE_COLUMN(file, "Real", &object->float_prop_keys, &object->float_prop_vals, &object->float_val_idxs, dic, carbon_number_t, "%f")
             print_primitive_strings(file, "Strings", &object->string_prop_keys, &object->string_prop_vals, dic);
             print_primitive_null(file, "Null", &object->null_prop_keys, dic);
             if(print_primitive_objects(file, err, "Objects", &object->obj_prop_keys, &object->obj_prop_vals, dic)) {
@@ -709,7 +709,7 @@ static bool print_object(FILE *file, carbon_err_t *err, const carbon_columndoc_o
             PRINT_ARRAY(file, "Int16", object->int16_array_prop_keys, object->int16_array_prop_vals, carbon_int16_t, "%d", (value !=CARBON_NULL_INT16));
             PRINT_ARRAY(file, "Int32", object->int32_array_prop_keys, object->int32_array_prop_vals, carbon_int32_t, "%d", (value !=CARBON_NULL_INT32));
             PRINT_ARRAY(file, "Int64", object->int64_array_prop_keys, object->int64_array_prop_vals, carbon_int64_t, "%" PRIi64, (value !=CARBON_NULL_INT64));
-            PRINT_ARRAY(file, "Real", object->float_array_prop_keys, object->float_array_prop_vals, carbon_float_t, "%f", (!isnan(value)));
+            PRINT_ARRAY(file, "Real", object->float_array_prop_keys, object->float_array_prop_vals, carbon_number_t, "%f", (!isnan(value)));
             print_array_strings(file, "Strings", &object->string_array_prop_keys, &object->string_array_prop_vals, dic);
             print_array_null(file, "Null", &object->null_array_prop_keys, &object->null_array_prop_vals, dic);
             if(!print_array_objects(file, err, "Objects", &object->obj_array_props, dic)) {
@@ -935,7 +935,7 @@ static void setup_object(carbon_columndoc_obj_t *model, carbon_columndoc_t *pare
     carbon_vec_create(&model->float_array_prop_keys, NULL, sizeof(carbon_string_id_t), 10);
     carbon_vec_create(&model->null_array_prop_keys, NULL, sizeof(carbon_string_id_t), 10);
 
-    carbon_vec_create(&model->bool_prop_vals, NULL, sizeof(carbon_bool_t), 10);
+    carbon_vec_create(&model->bool_prop_vals, NULL, sizeof(carbon_boolean_t), 10);
     carbon_vec_create(&model->int8_prop_vals, NULL, sizeof(carbon_int8_t), 10);
     carbon_vec_create(&model->int16_prop_vals, NULL, sizeof(carbon_int16_t), 10);
     carbon_vec_create(&model->int32_prop_vals, NULL, sizeof(carbon_int32_t), 10);
@@ -944,7 +944,7 @@ static void setup_object(carbon_columndoc_obj_t *model, carbon_columndoc_t *pare
     carbon_vec_create(&model->uint16_prop_vals, NULL, sizeof(carbon_uint16_t), 10);
     carbon_vec_create(&model->uint32_prop_vals, NULL, sizeof(carbon_uint32_t), 10);
     carbon_vec_create(&model->uint64_prop_vals, NULL, sizeof(carbon_uint64_t), 10);
-    carbon_vec_create(&model->float_prop_vals, NULL, sizeof(carbon_float_t), 10);
+    carbon_vec_create(&model->float_prop_vals, NULL, sizeof(carbon_number_t), 10);
     carbon_vec_create(&model->string_prop_vals, NULL, sizeof(carbon_string_id_t), 50);
 
     carbon_vec_create(&model->bool_array_prop_vals, NULL, sizeof(carbon_vec_t), 10);
@@ -1085,7 +1085,7 @@ static bool object_put_array(carbon_columndoc_obj_t *model, carbon_err_t *err, c
     }
         break;
     case carbon_field_type_bool:
-        object_push_array(&model->bool_array_prop_vals, sizeof(carbon_bool_t), num_elements, entry->values.base, *key_id,
+        object_push_array(&model->bool_array_prop_vals, sizeof(carbon_boolean_t), num_elements, entry->values.base, *key_id,
                         &model->bool_array_prop_keys);
         break;
     case carbon_field_type_int8:
@@ -1125,7 +1125,7 @@ static bool object_put_array(carbon_columndoc_obj_t *model, carbon_err_t *err, c
                         &model->uint64_array_prop_keys);
         break;
     case carbon_field_type_float:
-        object_push_array(&model->float_array_prop_vals, sizeof(carbon_float_t), num_elements, entry->values.base, *key_id,
+        object_push_array(&model->float_array_prop_vals, sizeof(carbon_number_t), num_elements, entry->values.base, *key_id,
                         &model->float_array_prop_keys);
         break;
     case carbon_field_type_string: {

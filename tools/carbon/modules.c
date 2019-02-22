@@ -488,13 +488,13 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
 //            }
 //            //----------------------------------------------------------------------------------------------------------
 //            keyNames = carbon_archive_object_keys_to_type(&numNestedKeys, CARBON_BASIC_TYPE_BOOLEAN, &nested);
-//            const carbon_bool_t *valueBoolean = carbon_archive_object_values_bool(NULL, &nested);
+//            const carbon_boolean_t *valueBoolean = carbon_archive_object_values_bool(NULL, &nested);
 //            for (size_t j = 0; j < numNestedKeys; j++) {
 //                printf("  key '%"PRIu64"' maps to booleans: %d\n", keyNames[j], valueBoolean[j]);
 //            }
 //            //----------------------------------------------------------------------------------------------------------
 //            keyNames = carbon_archive_object_keys_to_type(&numNestedKeys,CARBON_BASIC_TYPE_NUMBER,  &nested);
-//            const carbon_float_t *valueFloat = carbon_archive_object_values_float(NULL, &nested);
+//            const carbon_number_t *valueFloat = carbon_archive_object_values_float(NULL, &nested);
 //            for (size_t j = 0; j < numNestedKeys; j++) {
 //                printf("  key '%"PRIu64"' maps to floats: %f\n", keyNames[j], valueFloat[j]);
 //            }
@@ -597,7 +597,7 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
 //            //----------------------------------------------------------------------------------------------------------
 //            keyNames = carbon_archive_object_keys_to_array(&numNestedKeys, CARBON_BASIC_TYPE_BOOLEAN, &nested);
 //            for (size_t j = 0; j < numNestedKeys; j++) {
-//                const carbon_bool_t *values = carbon_archive_object_values_bool_arrays(&length, j, &nested);
+//                const carbon_boolean_t *values = carbon_archive_object_values_bool_arrays(&length, j, &nested);
 //                printf("  key '%"PRIu64"' maps to boolean array\n\t -> [", keyNames[j]);
 //                for (size_t k = 0; k < length; k++) {
 //                    printf("%d ", values[k]);
@@ -607,7 +607,7 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
 //            //----------------------------------------------------------------------------------------------------------
 //            keyNames = carbon_archive_object_keys_to_array(&numNestedKeys, CARBON_BASIC_TYPE_NUMBER, &nested);
 //            for (size_t j = 0; j < numNestedKeys; j++) {
-//                const carbon_float_t *values = carbon_archive_object_values_float_arrays(&length, j, &nested);
+//                const carbon_number_t *values = carbon_archive_object_values_float_arrays(&length, j, &nested);
 //                printf("  key '%"PRIu64"' maps to float array\n\t -> [", keyNames[j]);
 //                for (size_t k = 0; k < length; k++) {
 //                    printf("%f ", values[k]);
@@ -658,7 +658,7 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
 //                                printf("%d", len);
 //                            } break;
 //                            case carbon_field_type_bool: {
-//                                const carbon_bool_t *vals = carbon_archive_table_field_get_bool_array(&len, &field);
+//                                const carbon_boolean_t *vals = carbon_archive_table_field_get_bool_array(&len, &field);
 //                                for (size_t x = 0; x < len; x++) {
 //                                    printf("%d ", vals[x]);
 //                                }
@@ -712,7 +712,7 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
 //                                }
 //                            } break;
 //                            case carbon_field_type_float: {
-//                                const carbon_float_t *vals = carbon_archive_table_field_get_float_array(&len, &field);
+//                                const carbon_number_t *vals = carbon_archive_table_field_get_float_array(&len, &field);
 //                                for (size_t x = 0; x < len; x++) {
 //                                    printf("%f ", vals[x]);
 //                                }

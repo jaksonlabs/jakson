@@ -121,56 +121,78 @@ typedef struct carbon_archive_prop_iter
     uint16_t                   mask;                    /* user-defined mask which properties to include */
     carbon_prop_iter_state_e   prop_cursor;             /* current property type in iteration */
 
-    uint32_t                   prop_pos_current;        /* current position */
-    carbon_off_t               prop_type_off_current;   /* current offset in memfile to start of prop group */
+    //uint32_t                   prop_pos_current;        /* current position */
+    //carbon_off_t               prop_type_off_current;   /* current offset in memfile to start of prop group */
     carbon_off_t               prop_type_off_data;      /* offset of type-dependent data in memfile */
-    carbon_fixed_prop_t        prop_header;             /* type, num props and keys */
+    carbon_fixed_prop_t         prop_group_header;             /* type, num props and keys */
+    carbon_off_t                current_prop_group_off;
+    carbon_off_t                prop_data_off;
 
-    carbon_string_id_t         key;                     /* current property key in this iteration */
+    const carbon_string_id_t         *keys;                     /* current property key in this iteration */
     carbon_basic_type_e              type;                    /* property basic value type (e.g., int8, or object) */
     bool                       is_array;                /* flag indicating that property is an array type */
     carbon_err_t               err;                     /* error information */
 } carbon_archive_prop_iter_t;
 
-typedef struct carbon_archive_value
+
+typedef struct carbon_archive_value_vector
 {
     carbon_archive_prop_iter_t *prop_iter;               /* pointer to property iterator that created this iterator */
     carbon_memfile_t            record_table_memfile;    /* iterator-local read-only memfile on archive record table */
     carbon_basic_type_e         prop_type;               /* property basic value type (e.g., int8, or object) */
     bool                        is_array;                /* flag indicating whether value type is an array or not */
-    carbon_off_t                data_off;                /* offset in memfile where type-dependend data begins */
-    uint32_t                    value_idx;               /* the index of this value in the group (also index of key) */
-    uint32_t                    value_idx_max;           /* max index of this value in the group (also index of key) */
+    carbon_off_t                data_off;                /* offset in memfile where type-dependent data begins */
+    uint32_t                    value_max_idx;           /* maximum index of a value callable by 'at' functions */
+    //uint32_t                    value_idx;               /* the index of this value in the group (also index of key) */
+    //uint32_t                    value_idx_max;           /* max index of this value in the group (also index of key) */
 
     carbon_err_t                err;                     /* error information */
 
     union {
-        union {
-
-        } array;
-
-        union {
-            carbon_int8_t           int8;
-            carbon_int16_t          int16;
-            carbon_int32_t          int32;
-            carbon_int64_t          int64;
-            carbon_uint8_t          uint8;
-            carbon_uint16_t         uint16;
-            carbon_uint32_t         uint32;
-            carbon_uint64_t         uint64;
-            carbon_float_t          number;
-            carbon_string_id_t      string;
-            carbon_bool_t           boolean;
+        struct {
+            const carbon_off_t *offsets;
             carbon_archive_object_t object;
+        } object;
+        struct {
+            union {
+            const carbon_int8_t *int8s;
+            const carbon_int16_t *int16s;
+            const carbon_int32_t *int32s;
+            const carbon_int64_t *int64s;
+            const carbon_uint8_t *uint8s;
+            const carbon_uint16_t *uint16s;
+            const carbon_uint32_t *uint32s;
+            const carbon_uint64_t *uint64s;
+            const carbon_number_t *numbers;
+            const carbon_string_id_t *strings;
+            const carbon_boolean_t *booleans;
+            } values;
         } basic;
+        struct {
+            union {
+                const uint32_t *array_lengths;
+                const uint32_t *num_nulls_contained;
+            } meta;
 
+            union
+            {
+                const carbon_int8_t *int8s_base;
+                const carbon_int16_t *int16s_base;
+                const carbon_int32_t *int32s_base;
+                const carbon_int64_t *int64s_base;
+                const carbon_uint8_t *uint8s_base;
+                const carbon_uint16_t *uint16s_base;
+                const carbon_uint32_t *uint32s_base;
+                const carbon_uint64_t *uint64s_base;
+                const carbon_number_t *numbers_base;
+                const carbon_string_id_t *strings_base;
+                const carbon_boolean_t *booleans_base;
+            } values;
+        } arrays;
     } data;
 
 
-} carbon_archive_value_t;
-
-
-
+} carbon_archive_value_vector_t;
 
 #define CARBON_ARCHIVE_ITER_MASK_PRIMITIVES             (1 << 1)
 #define CARBON_ARCHIVE_ITER_MASK_ARRAYS                 (1 << 2)
@@ -218,11 +240,11 @@ CARBON_EXPORT(bool)
 carbon_archive_prop_iter_from_object(carbon_archive_prop_iter_t *iter,
                                  uint16_t mask,
                                  carbon_archive_object_t *obj,
-                                 carbon_archive_value_t *value);
+                                 carbon_archive_value_vector_t *value);
 
-CARBON_EXPORT(bool)
-carbon_archive_prop_iter_next(carbon_string_id_t *key, carbon_archive_value_t *value,
-                          carbon_archive_prop_iter_t *iter);
+CARBON_EXPORT(const carbon_string_id_t *)
+carbon_archive_prop_iter_next(uint32_t *num_pairs, carbon_basic_type_e *type, bool *is_array,
+                              carbon_archive_value_vector_t *value, carbon_archive_prop_iter_t *iter);
 
 CARBON_EXPORT(bool)
 carbon_archive_prop_iter_get_object_id(carbon_object_id_t *id, carbon_archive_prop_iter_t *iter);
@@ -230,70 +252,81 @@ carbon_archive_prop_iter_get_object_id(carbon_object_id_t *id, carbon_archive_pr
 
 
 CARBON_EXPORT(bool)
-carbon_archive_value_from_prop_iter(carbon_archive_value_t *value,
-                                    carbon_err_t *err,
-                                    carbon_archive_prop_iter_t *prop_iter);
+carbon_archive_value_vector_from_prop_iter(carbon_archive_value_vector_t *value,
+                                           carbon_err_t *err,
+                                           carbon_archive_prop_iter_t *prop_iter);
 
 CARBON_EXPORT(bool)
-carbon_archive_value_get_basic_type(carbon_basic_type_e *type, const carbon_archive_value_t *value);
+carbon_archive_value_vector_get_basic_type(carbon_basic_type_e *type, const carbon_archive_value_vector_t *value);
 
 CARBON_EXPORT(bool)
-carbon_archive_value_is_array_type(bool *is_array, const carbon_archive_value_t *value);
-
-
-CARBON_EXPORT(bool)
-carbon_archive_value_is_object(bool *is_object, carbon_archive_value_t *value);
+carbon_archive_value_vector_is_array_type(bool *is_array, const carbon_archive_value_vector_t *value);
 
 CARBON_EXPORT(bool)
-carbon_archive_value_get_object(carbon_archive_object_t *object, carbon_archive_value_t *value);
+carbon_archive_value_vector_get_length(uint32_t *length, const carbon_archive_value_vector_t *value);
 
 
 CARBON_EXPORT(bool)
-carbon_archive_value_is_null(bool *is_null, carbon_archive_value_t *value);
+carbon_archive_value_vector_is_of_objects(bool *is_object, carbon_archive_value_vector_t *value);
+
+CARBON_EXPORT(bool)
+carbon_archive_value_vector_get_object_at(carbon_archive_object_t *object, uint32_t idx,
+                                          carbon_archive_value_vector_t *value);
 
 
-#define DECLARE_ARCHIVE_BASIC_TYPE_GETTERS(type, name)                                                                 \
-    CARBON_EXPORT(bool)                                                                                                \
-    carbon_archive_value_is_##name (bool *is_##name, carbon_archive_value_t *value);                                   \
-                                                                                                                       \
-    CARBON_EXPORT(bool)                                                                                                \
-    carbon_archive_value_get_##name (type *name, carbon_archive_value_t *value);                                       \
-
-DECLARE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_bool_t, boolean)
-DECLARE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_int8_t, int8)
-DECLARE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_int16_t, int16)
-DECLARE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_int32_t, int32)
-DECLARE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_int64_t, int64)
-DECLARE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_uint8_t, uint8)
-DECLARE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_uint16_t, uint16)
-DECLARE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_uint32_t, uint32)
-DECLARE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_uint64_t, uint64)
-DECLARE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_float_t, number)
-DECLARE_ARCHIVE_BASIC_TYPE_GETTERS(carbon_string_id_t, string)
-
-//CARBON_EXPORT(bool)
-//carbon_archive_value_is_boolean(bool *is_boolean, carbon_archive_value_t *value);
-
-//CARBON_EXPORT(bool)
-//carbon_archive_value_get_boolean(bool *boolean, carbon_archive_value_t *value);
-
-//CARBON_EXPORT(bool)
-//carbon_archive_value_iter_position(uint32_t *pos, carbon_archive_value_iter_t *iter);
-//
-//CARBON_EXPORT(const void *)
-//carbon_archive_value_iter_values(uint32_t *num_values, carbon_archive_value_iter_t *iter);
-//
-//CARBON_EXPORT(bool)
-//carbon_archive_value_iter_next_object(carbon_archive_prop_iter_t *iter, carbon_archive_value_iter_t *value_iter);
-//
-//CARBON_EXPORT(bool)
-//carbon_archive_value_iter_close_and_drop(carbon_archive_value_iter_t *iter);
+#define DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(name)                                                         \
+CARBON_EXPORT(bool)                                                                                                    \
+carbon_archive_value_vector_is_##name(bool *type_match, carbon_archive_value_vector_t *value);
 
 
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(int8);
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(int16);
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(int32);
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(int64);
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(uint8);
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(uint16);
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(uint32);
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(uint64);
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(string);
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(number);
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(boolean);
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(null);
 
+#define DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(name, built_in_type)                                         \
+CARBON_EXPORT(const built_in_type *)                                                                                   \
+carbon_archive_value_vector_get_##name(uint32_t *num_values, carbon_archive_value_vector_t *value);
 
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int8s, carbon_int8_t)
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int16s, carbon_int16_t)
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int32s, carbon_int32_t)
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int64s, carbon_int64_t)
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint8s, carbon_uint8_t)
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint16s, carbon_uint16_t)
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint32s, carbon_uint32_t)
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint64s, carbon_uint64_t)
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(strings, carbon_string_id_t)
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(numbers, carbon_number_t)
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(booleans, carbon_boolean_t)
 
+CARBON_EXPORT(const carbon_uint32_t *)
+carbon_archive_value_vector_get_null_arrays(uint32_t *num_values, carbon_archive_value_vector_t *value);
 
+#define DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(name, built_in_type)                                      \
+CARBON_EXPORT(const built_in_type *)                                                                                   \
+carbon_archive_value_vector_get_##name##_arrays_at(uint32_t *array_length, uint32_t idx,                               \
+                                               carbon_archive_value_vector_t *value);                                  \
+
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(int8, carbon_int8_t);
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(int16, carbon_int16_t);
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(int32, carbon_int32_t);
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(int64, carbon_int64_t);
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(uint8, carbon_uint8_t);
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(uint16, carbon_uint16_t);
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(uint32, carbon_uint32_t);
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(uint64, carbon_uint64_t);
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(string, carbon_string_id_t);
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(number, carbon_number_t);
+DEFINE_CARBON_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(boolean, carbon_boolean_t);
 
 
 void

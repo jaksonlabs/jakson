@@ -591,18 +591,18 @@ cleanup_result_and_error:
 //    return OBJECT_GET_VALUES_OF_FIX_TYPE_GENERIC(obj, has_uint64_props, uint64s, carbon_uint64_t);
 //}
 //
-//const carbon_bool_t *carbon_archive_object_values_bool(CARBON_NULLABLE
+//const carbon_boolean_t *carbon_archive_object_values_bool(CARBON_NULLABLE
 //                                                       size_t *npairs,
 //                                                       carbon_archive_object_t *obj)
 //{
-//    return OBJECT_GET_VALUES_OF_FIX_TYPE_GENERIC(obj, has_bool_props, bools, carbon_bool_t);
+//    return OBJECT_GET_VALUES_OF_FIX_TYPE_GENERIC(obj, has_bool_props, bools, carbon_boolean_t);
 //}
 //
-//const carbon_float_t *carbon_archive_object_values_float(CARBON_NULLABLE
+//const carbon_number_t *carbon_archive_object_values_float(CARBON_NULLABLE
 //                                                         size_t *npairs,
 //                                                         carbon_archive_object_t *obj)
 //{
-//    return OBJECT_GET_VALUES_OF_FIX_TYPE_GENERIC(obj, has_float_props, floats, carbon_float_t);
+//    return OBJECT_GET_VALUES_OF_FIX_TYPE_GENERIC(obj, has_float_props, floats, carbon_number_t);
 //}
 //
 //const carbon_string_id_t *carbon_archive_object_values_strings(CARBON_NULLABLE
@@ -732,24 +732,24 @@ cleanup_result_and_error:
 //    return OBJECT_GET_ARRAY_VALUES_GENERIC(status, idx, prop, obj, carbon_uint64_t);
 //}
 //
-//const carbon_bool_t *carbon_archive_object_values_bool_arrays(uint32_t *length,
+//const carbon_boolean_t *carbon_archive_object_values_bool_arrays(uint32_t *length,
 //                                                              size_t idx,
 //                                                              carbon_archive_object_t *obj)
 //{
 //    carbon_array_prop_t prop;
 //    int status = OBJECT_GET_ARRAY_LENGTHS_GENERIC(&obj->err, length, obj, has_bool_array_props,
 //                                                  bool_arrays, idx, prop);
-//    return OBJECT_GET_ARRAY_VALUES_GENERIC(status, idx, prop, obj, carbon_bool_t);
+//    return OBJECT_GET_ARRAY_VALUES_GENERIC(status, idx, prop, obj, carbon_boolean_t);
 //}
 //
-//const carbon_float_t *carbon_archive_object_values_float_arrays(uint32_t *length,
+//const carbon_number_t *carbon_archive_object_values_float_arrays(uint32_t *length,
 //                                                                size_t idx,
 //                                                                carbon_archive_object_t *obj)
 //{
 //    carbon_array_prop_t prop;
 //    int status = OBJECT_GET_ARRAY_LENGTHS_GENERIC(&obj->err, length, obj, has_float_array_props,
 //                                                  float_arrays, idx, prop);
-//    return OBJECT_GET_ARRAY_VALUES_GENERIC(status, idx, prop, obj, carbon_float_t);
+//    return OBJECT_GET_ARRAY_VALUES_GENERIC(status, idx, prop, obj, carbon_number_t);
 //}
 //
 //const carbon_string_id_t *carbon_archive_object_values_string_arrays(uint32_t *length,
@@ -899,14 +899,14 @@ cleanup_result_and_error:
 //    return FIELD_GET_VALUE_ARRAY_GENERIC(length, field, carbon_field_type_uint64, carbon_uint64_t);
 //}
 //
-//const carbon_bool_t *carbon_archive_table_field_get_bool_array(uint32_t *length, const carbon_field_t *field)
+//const carbon_boolean_t *carbon_archive_table_field_get_bool_array(uint32_t *length, const carbon_field_t *field)
 //{
-//    return FIELD_GET_VALUE_ARRAY_GENERIC(length, field, carbon_field_type_bool, carbon_bool_t);
+//    return FIELD_GET_VALUE_ARRAY_GENERIC(length, field, carbon_field_type_bool, carbon_boolean_t);
 //}
 //
-//const carbon_float_t *carbon_archive_table_field_get_float_array(uint32_t *length, const carbon_field_t *field)
+//const carbon_number_t *carbon_archive_table_field_get_float_array(uint32_t *length, const carbon_field_t *field)
 //{
-//    return FIELD_GET_VALUE_ARRAY_GENERIC(length, field, carbon_field_type_float, carbon_float_t);
+//    return FIELD_GET_VALUE_ARRAY_GENERIC(length, field, carbon_field_type_float, carbon_number_t);
 //}
 //
 //const carbon_string_id_t *carbon_archive_table_field_get_string_array(uint32_t *length, const carbon_field_t *field)

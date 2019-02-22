@@ -334,7 +334,7 @@ static bool import_json_object_number_prop(carbon_doc_obj_t *target, carbon_err_
     return true;
 }
 
-static void import_json_object_bool_prop(carbon_doc_obj_t *target, const char *key, carbon_bool_t value)
+static void import_json_object_bool_prop(carbon_doc_obj_t *target, const char *key, carbon_boolean_t value)
 {
     carbon_doc_entries_t *entry;
     carbon_doc_obj_add_key(&entry, target, key, carbon_field_type_bool);
@@ -532,7 +532,7 @@ static bool import_json_object_array_prop(carbon_doc_obj_t *target, carbon_err_t
                     carbon_doc_obj_push_primtive(entry, &value);
                 } break;
                 case carbon_field_type_float: {
-                    carbon_float_t value = CARBON_NULL_FLOAT;
+                    carbon_number_t value = CARBON_NULL_FLOAT;
                     if (ast_node_data_type != CARBON_JSON_AST_NODE_VALUE_TYPE_NULL) {
                         carbon_json_ast_node_number_value_type_e element_number_type = element->value.value.number->value_type;
                         if (element_number_type == CARBON_JSON_AST_NODE_NUMBER_VALUE_TYPE_REAL_NUMBER) {
@@ -556,12 +556,12 @@ static bool import_json_object_array_prop(carbon_doc_obj_t *target, carbon_err_t
             case carbon_field_type_bool:
                 if (CARBON_LIKELY(ast_node_data_type == CARBON_JSON_AST_NODE_VALUE_TYPE_TRUE ||
                                   ast_node_data_type == CARBON_JSON_AST_NODE_VALUE_TYPE_FALSE)) {
-                    carbon_bool_t value = ast_node_data_type == CARBON_JSON_AST_NODE_VALUE_TYPE_TRUE ?
+                    carbon_boolean_t value = ast_node_data_type == CARBON_JSON_AST_NODE_VALUE_TYPE_TRUE ?
                                          CARBON_BOOLEAN_TRUE : CARBON_BOOLEAN_FALSE;
                     carbon_doc_obj_push_primtive(entry, &value);
                 } else {
                     assert(ast_node_data_type == CARBON_JSON_AST_NODE_VALUE_TYPE_NULL);
-                    carbon_bool_t value = CARBON_NULL_BOOLEAN;
+                    carbon_boolean_t value = CARBON_NULL_BOOLEAN;
                     carbon_doc_obj_push_primtive(entry, &value);
                 }
                 break;
@@ -596,7 +596,7 @@ static bool import_json_object(carbon_doc_obj_t *target, carbon_err_t *err, cons
             break;
         case CARBON_JSON_AST_NODE_VALUE_TYPE_TRUE:
         case CARBON_JSON_AST_NODE_VALUE_TYPE_FALSE: {
-            carbon_bool_t value = value_type == CARBON_JSON_AST_NODE_VALUE_TYPE_TRUE ? CARBON_BOOLEAN_TRUE : CARBON_BOOLEAN_FALSE;
+            carbon_boolean_t value = value_type == CARBON_JSON_AST_NODE_VALUE_TYPE_TRUE ? CARBON_BOOLEAN_TRUE : CARBON_BOOLEAN_FALSE;
             import_json_object_bool_prop(target, member->key.value, value);
         } break;
         case CARBON_JSON_AST_NODE_VALUE_TYPE_NULL:
@@ -708,8 +708,8 @@ static bool compare##type##LessEqFunc(const void *lhs, const void *rhs)         
     return (a <= b);                                                                                                   \
 }
 
-DEFINE_CARBON_TYPE_LQ_FUNC(carbon_bool_t)
-DEFINE_CARBON_TYPE_LQ_FUNC(carbon_float_t)
+DEFINE_CARBON_TYPE_LQ_FUNC(carbon_boolean_t)
+DEFINE_CARBON_TYPE_LQ_FUNC(carbon_number_t)
 DEFINE_CARBON_TYPE_LQ_FUNC(carbon_int8_t)
 DEFINE_CARBON_TYPE_LQ_FUNC(carbon_int16_t)
 DEFINE_CARBON_TYPE_LQ_FUNC(carbon_int32_t)
@@ -758,7 +758,7 @@ static bool compare##type##ArrayLessEqFunc(const void *lhs, const void *rhs)    
     return true;                                                                                                       \
 }
 
-DEFINE_CARBON_ARRAY_TYPE_LQ_FUNC(carbon_bool_t)
+DEFINE_CARBON_ARRAY_TYPE_LQ_FUNC(carbon_boolean_t)
 DEFINE_CARBON_ARRAY_TYPE_LQ_FUNC(carbon_int8_t)
 DEFINE_CARBON_ARRAY_TYPE_LQ_FUNC(carbon_int16_t)
 DEFINE_CARBON_ARRAY_TYPE_LQ_FUNC(carbon_int32_t)
@@ -767,7 +767,7 @@ DEFINE_CARBON_ARRAY_TYPE_LQ_FUNC(carbon_uint8_t)
 DEFINE_CARBON_ARRAY_TYPE_LQ_FUNC(carbon_uint16_t)
 DEFINE_CARBON_ARRAY_TYPE_LQ_FUNC(carbon_uint32_t)
 DEFINE_CARBON_ARRAY_TYPE_LQ_FUNC(carbon_uint64_t)
-DEFINE_CARBON_ARRAY_TYPE_LQ_FUNC(carbon_float_t)
+DEFINE_CARBON_ARRAY_TYPE_LQ_FUNC(carbon_number_t)
 
 static bool compare_encoded_string_array_less_eq_func(const void *lhs, const void *rhs, void *args)
 {
@@ -1014,7 +1014,7 @@ static bool compare_column_less_eq_func(const void *lhs, const void *rhs, void *
         return (a->num_elems <= b->num_elems);
         break;
     case carbon_field_type_bool:
-        ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, carbon_bool_t, a, b);
+        ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, carbon_boolean_t, a, b);
         break;
     case carbon_field_type_int8:
         ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, carbon_int8_t, a, b);
@@ -1041,7 +1041,7 @@ static bool compare_column_less_eq_func(const void *lhs, const void *rhs, void *
         ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, carbon_uint64_t, a, b);
         break;
     case carbon_field_type_float:
-        ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, carbon_float_t, a, b);
+        ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, carbon_number_t, a, b);
         break;
     case carbon_field_type_string:
         for (size_t i = 0; i < max_num_elem; i++) {
@@ -1155,8 +1155,8 @@ static void sort_columndoc_column_arrays(carbon_columndoc_obj_t *columndoc)
 static void sort_columndoc_values(carbon_columndoc_obj_t *columndoc)
 {
     if (columndoc->parent->read_optimized) {
-        SORT_META_MODEL_VALUES(columndoc->bool_prop_keys, columndoc->bool_prop_vals, carbon_bool_t,
-                               comparecarbon_bool_tLessEqFunc);
+        SORT_META_MODEL_VALUES(columndoc->bool_prop_keys, columndoc->bool_prop_vals, carbon_boolean_t,
+                               comparecarbon_boolean_tLessEqFunc);
         SORT_META_MODEL_VALUES(columndoc->int8_prop_keys, columndoc->int8_prop_vals, carbon_int8_t,
                                comparecarbon_int8_tLessEqFunc);
         SORT_META_MODEL_VALUES(columndoc->int16_prop_keys, columndoc->int16_prop_vals, carbon_int16_t,
@@ -1173,13 +1173,13 @@ static void sort_columndoc_values(carbon_columndoc_obj_t *columndoc)
                                comparecarbon_uint32_tLessEqFunc);
         SORT_META_MODEL_VALUES(columndoc->uint64_prop_keys, columndoc->uint64_prop_vals, carbon_uint64_t,
                                comparecarbon_uint64_tLessEqFunc);
-        SORT_META_MODEL_VALUES(columndoc->float_prop_keys, columndoc->float_prop_vals, carbon_float_t,
-                               comparecarbon_float_tLessEqFunc);
+        SORT_META_MODEL_VALUES(columndoc->float_prop_keys, columndoc->float_prop_vals, carbon_number_t,
+                               comparecarbon_number_tLessEqFunc);
         sort_meta_model_string_values(&columndoc->string_prop_keys, &columndoc->string_prop_vals,
                                   columndoc->parent->dic);
 
         SORT_META_MODEL_ARRAYS(columndoc->bool_array_prop_keys, columndoc->bool_array_prop_vals,
-                               comparecarbon_bool_tArrayLessEqFunc);
+                               comparecarbon_boolean_tArrayLessEqFunc);
         SORT_META_MODEL_ARRAYS(columndoc->int8_array_prop_keys, columndoc->int8_array_prop_vals,
                                comparecarbon_int8_tArrayLessEqFunc);
         SORT_META_MODEL_ARRAYS(columndoc->int16_array_prop_keys, columndoc->int16_array_prop_vals,
@@ -1197,7 +1197,7 @@ static void sort_columndoc_values(carbon_columndoc_obj_t *columndoc)
         SORT_META_MODEL_ARRAYS(columndoc->uint64_array_prop_keys, columndoc->uin64_array_prop_vals,
                                comparecarbon_uint64_tArrayLessEqFunc);
         SORT_META_MODEL_ARRAYS(columndoc->float_array_prop_keys, columndoc->float_array_prop_vals,
-                               comparecarbon_float_tArrayLessEqFunc);
+                               comparecarbon_number_tArrayLessEqFunc);
         sort_columndoc_strings_arrays(&columndoc->string_array_prop_keys, &columndoc->string_array_prop_vals,
                                   columndoc->parent->dic);
 
@@ -1278,7 +1278,7 @@ static void create_typed_vector(carbon_doc_entries_t *entry)
         size = sizeof(carbon_null_t);
         break;
     case carbon_field_type_bool:
-        size = sizeof(carbon_bool_t);
+        size = sizeof(carbon_boolean_t);
         break;
     case carbon_field_type_int8:
         size = sizeof(carbon_int8_t);
@@ -1305,7 +1305,7 @@ static void create_typed_vector(carbon_doc_entries_t *entry)
         size = sizeof(carbon_uint64_t);
         break;
     case carbon_field_type_float:
-        size = sizeof(carbon_float_t);
+        size = sizeof(carbon_number_t);
         break;
     case carbon_field_type_string:
         size = sizeof(carbon_cstring_t);
@@ -1352,7 +1352,7 @@ static bool print_value(FILE *file, carbon_field_type_e type, const carbon_vec_t
     case carbon_field_type_bool:
     {
         for (size_t i = 0; i < num_values; i++) {
-            carbon_bool_t value = *(CARBON_VECTOR_GET(values, i, carbon_bool_t));
+            carbon_boolean_t value = *(CARBON_VECTOR_GET(values, i, carbon_boolean_t));
             if (value != CARBON_NULL_BOOLEAN) {
                 fprintf(file, "%s%s", value == 0 ? "false" : "true", i + 1 < num_values ? ", " : "");
             } else {
@@ -1451,7 +1451,7 @@ static bool print_value(FILE *file, carbon_field_type_e type, const carbon_vec_t
     case carbon_field_type_float:
     {
         for (size_t i = 0; i < num_values; i++) {
-            carbon_float_t value = *(CARBON_VECTOR_GET(values, i, carbon_float_t));
+            carbon_number_t value = *(CARBON_VECTOR_GET(values, i, carbon_number_t));
             if (!isnan(value)) {
                 fprintf(file, "%f%s", value, i + 1 < num_values ? ", " : "");
             } else {

@@ -27,7 +27,7 @@ typedef struct carbon carbon_t; /* forwarded from 'carbon.h' */
 typedef struct carbon_doc_obj carbon_doc_obj_t;
 typedef uint64_t              carbon_string_id_t;
 typedef char                  carbon_null_t;
-typedef int8_t                carbon_bool_t;
+typedef int8_t                carbon_boolean_t;
 typedef int8_t                carbon_int8_t;
 typedef int16_t               carbon_int16_t;
 typedef int32_t               carbon_int32_t;
@@ -36,7 +36,7 @@ typedef uint8_t               carbon_uint8_t;
 typedef uint16_t              carbon_uint16_t;
 typedef uint32_t              carbon_uint32_t;
 typedef uint64_t              carbon_uint64_t;
-typedef float                 carbon_float_t;
+typedef float                 carbon_number_t;
 typedef const char *          carbon_cstring_t;
 
 #define CARBON_NULL_ENCODED_STRING            0
@@ -100,7 +100,7 @@ typedef enum carbon_field_type
             value_size = sizeof(uint16_t);                                                                             \
             break;                                                                                                     \
         case carbon_field_type_bool:                                                                                   \
-            value_size = sizeof(carbon_bool_t);                                                                        \
+            value_size = sizeof(carbon_boolean_t);                                                                        \
             break;                                                                                                     \
         case carbon_field_type_int8:                                                                                   \
             value_size = sizeof(carbon_int8_t);                                                                        \
@@ -127,7 +127,7 @@ typedef enum carbon_field_type
             value_size = sizeof(carbon_uint64_t);                                                                       \
             break;                                                                                                     \
         case carbon_field_type_float:                                                                                  \
-            value_size = sizeof(carbon_float_t);                                                                       \
+            value_size = sizeof(carbon_number_t);                                                                       \
             break;                                                                                                     \
         case carbon_field_type_string:                                                                                 \
             value_size = sizeof(carbon_string_id_t);                                                                   \

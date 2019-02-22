@@ -120,7 +120,7 @@ typedef struct carbon_columndoc_obj
     carbon_vec_t ofType(carbon_string_id_t) null_array_prop_keys;
 
     /** Primitive boolean values associated to keys stored above (sorted by key) */
-    carbon_vec_t ofType(carbon_bool_t) bool_prop_vals;
+    carbon_vec_t ofType(carbon_boolean_t) bool_prop_vals;
     /** Primitive int8 number values associated to keys stored above (sorted by key) */
     carbon_vec_t ofType(carbon_int8_t) int8_prop_vals;
     /** Primitive int16 number values associated to keys stored above (sorted by key) */
@@ -138,7 +138,7 @@ typedef struct carbon_columndoc_obj
     /** Primitive uint64 number values associated to keys stored above (sorted by key) */
     carbon_vec_t ofType(carbon_uint64_t) uint64_prop_vals;
     /** Primitive real number values associated to keys stored above (sorted by key) */
-    carbon_vec_t ofType(carbon_float_t) float_prop_vals;
+    carbon_vec_t ofType(carbon_number_t) float_prop_vals;
     /** Primitive string number values associated to keys stored above (sorted by key) */
     carbon_vec_t ofType(carbon_string_id_t) string_prop_vals;
 

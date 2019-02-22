@@ -423,7 +423,7 @@ static bool write_primitive_fixed_value_column(carbon_memfile_t *memfile,
     case carbon_field_type_null:
         break;
     case carbon_field_type_bool:
-        WRITE_PRIMITIVE_VALUES(memfile, values_vec, carbon_bool_t);
+        WRITE_PRIMITIVE_VALUES(memfile, values_vec, carbon_boolean_t);
         break;
     case carbon_field_type_int8:
         WRITE_PRIMITIVE_VALUES(memfile, values_vec, carbon_int8_t);
@@ -450,7 +450,7 @@ static bool write_primitive_fixed_value_column(carbon_memfile_t *memfile,
         WRITE_PRIMITIVE_VALUES(memfile, values_vec, carbon_uint64_t);
         break;
     case carbon_field_type_float:
-        WRITE_PRIMITIVE_VALUES(memfile, values_vec, carbon_float_t);
+        WRITE_PRIMITIVE_VALUES(memfile, values_vec, carbon_number_t);
         break;
     case carbon_field_type_string:
         WRITE_PRIMITIVE_VALUES(memfile, values_vec, carbon_string_id_t);
@@ -519,7 +519,7 @@ static bool write_array_value_column(carbon_memfile_t *memfile, carbon_err_t *er
         WRITE_PRIMITIVE_VALUES(memfile, values_vec, uint32_t);
         break;
     case carbon_field_type_bool:
-        WRITE_ARRAY_VALUES(memfile, values_vec, carbon_bool_t);
+        WRITE_ARRAY_VALUES(memfile, values_vec, carbon_boolean_t);
         break;
     case carbon_field_type_int8:
         WRITE_ARRAY_VALUES(memfile, values_vec, carbon_int8_t);
@@ -546,7 +546,7 @@ static bool write_array_value_column(carbon_memfile_t *memfile, carbon_err_t *er
         WRITE_ARRAY_VALUES(memfile, values_vec, carbon_uint64_t);
         break;
     case carbon_field_type_float:
-        WRITE_ARRAY_VALUES(memfile, values_vec, carbon_float_t);
+        WRITE_ARRAY_VALUES(memfile, values_vec, carbon_number_t);
         break;
     case carbon_field_type_string:
         WRITE_ARRAY_VALUES(memfile, values_vec, carbon_string_id_t);
@@ -1359,7 +1359,7 @@ static bool print_column_form_memfile(FILE *file, carbon_err_t *err, carbon_memf
             }
                 break;
             case carbon_field_type_bool: {
-                PRINT_VALUE_ARRAY(carbon_bool_t, memfile, header, "%d");
+                PRINT_VALUE_ARRAY(carbon_boolean_t, memfile, header, "%d");
             }
                 break;
             case carbon_field_type_int8: {
@@ -1395,7 +1395,7 @@ static bool print_column_form_memfile(FILE *file, carbon_err_t *err, carbon_memf
             }
                 break;
             case carbon_field_type_float: {
-                PRINT_VALUE_ARRAY(carbon_float_t, memfile, header, "%f");
+                PRINT_VALUE_ARRAY(carbon_number_t, memfile, header, "%f");
             }
                 break;
             case carbon_field_type_string: {
@@ -1619,8 +1619,8 @@ bool print_object(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile, unsi
             case MARKER_SYMBOL_PROP_BOOLEAN: {
                 carbon_prop_header_t *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);
                 carbon_string_id_t *keys = (carbon_string_id_t *) CARBON_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(carbon_string_id_t));
-                carbon_bool_t *values = (carbon_bool_t *) CARBON_MEMFILE_READ(memfile,
-                                                                prop_header->num_entries * sizeof(carbon_bool_t));
+                carbon_boolean_t *values = (carbon_boolean_t *) CARBON_MEMFILE_READ(memfile,
+                                                                prop_header->num_entries * sizeof(carbon_boolean_t));
                 fprintf(file, "0x%04x ", offset);
                 INTENT_LINE(nesting_level)
                 fprintf(file, "[marker: %c (boolean)] [nentries: %d] [", entryMarker, prop_header->num_entries);
@@ -1658,7 +1658,7 @@ bool print_object(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile, unsi
                 PRINT_SIMPLE_PROPS(file, memfile, CARBON_MEMFILE_TELL(memfile), nesting_level, carbon_uint64_t, "UInt64", "%"PRIu64);
                 break;
             case MARKER_SYMBOL_PROP_REAL:
-                PRINT_SIMPLE_PROPS(file, memfile, CARBON_MEMFILE_TELL(memfile), nesting_level, carbon_float_t , "Float", "%f");
+                PRINT_SIMPLE_PROPS(file, memfile, CARBON_MEMFILE_TELL(memfile), nesting_level, carbon_number_t , "Float", "%f");
                 break;
             case MARKER_SYMBOL_PROP_TEXT:
                 PRINT_SIMPLE_PROPS(file, memfile, CARBON_MEMFILE_TELL(memfile), nesting_level, carbon_string_id_t, "Text", "%"PRIu64"");
@@ -1734,8 +1734,8 @@ bool print_object(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile, unsi
                 fprintf(file, "] [");
 
                 for (uint32_t array_idx = 0; array_idx < prop_header->num_entries; array_idx++) {
-                    carbon_bool_t *values = (carbon_bool_t *) CARBON_MEMFILE_READ(memfile,
-                                                                   array_lengths[array_idx] * sizeof(carbon_bool_t));
+                    carbon_boolean_t *values = (carbon_boolean_t *) CARBON_MEMFILE_READ(memfile,
+                                                                   array_lengths[array_idx] * sizeof(carbon_boolean_t));
                     fprintf(file, "[");
                     for (uint32_t i = 0; i < array_lengths[array_idx]; i++) {
                         fprintf(file, "value: %s%s", values[i] ? "true" : "false", i + 1 < array_lengths[array_idx] ? ", " : "");
@@ -1771,7 +1771,7 @@ bool print_object(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile, unsi
                 PRINT_ARRAY_PROPS(memfile, CARBON_MEMFILE_TELL(memfile), nesting_level, entryMarker, carbon_uint64_t, "UInt64 Array", "%"PRIu64);
                 break;
             case MARKER_SYMBOL_PROP_REAL_ARRAY:
-                PRINT_ARRAY_PROPS(memfile, CARBON_MEMFILE_TELL(memfile), nesting_level, entryMarker, carbon_float_t, "Float Array", "%f");
+                PRINT_ARRAY_PROPS(memfile, CARBON_MEMFILE_TELL(memfile), nesting_level, entryMarker, carbon_number_t, "Float Array", "%f");
                 break;
             case MARKER_SYMBOL_PROP_TEXT_ARRAY:
                 PRINT_ARRAY_PROPS(memfile, CARBON_MEMFILE_TELL(memfile), nesting_level, entryMarker, carbon_string_id_t, "Text Array", "%"PRIu64"");
