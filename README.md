@@ -1,7 +1,7 @@
 # libcarbon
 
 This is [libcarbon](https://github.com/protolabs/libcarbon), a C library for creating, modifying and querying 
-Columnar Binary-Encoded JSON (CARBON) files.
+Columnar Binary-Encoded JSON (CARBON) files. The CARBON format is designed and optimized for analytics on document collections.
 
 The documentation is available at [CodeDocs](https://codedocs.xyz/protolabs/libcarbon/). If you have any issues, please 
 use our [issue tracker](https://github.com/protolabs/libcarbon/issues).
