@@ -440,54 +440,55 @@ carbon_archive_prop_iter_get_object_id(carbon_object_id_t *id, carbon_archive_pr
 static void
 value_iter_setup_array_values(carbon_archive_value_t *iter)
 {
-    switch (iter->prop_type) {
-    case CARBON_BASIC_TYPE_INT8:
-        READ_BASIC_TYPE_AT_POSITION(int8, carbon_int8_t);
-        break;
-    case CARBON_BASIC_TYPE_INT16:
-        READ_BASIC_TYPE_AT_POSITION(int16, carbon_int16_t);
-        break;
-    case CARBON_BASIC_TYPE_INT32:
-        READ_BASIC_TYPE_AT_POSITION(int32, carbon_int32_t);
-        break;
-    case CARBON_BASIC_TYPE_INT64:
-        READ_BASIC_TYPE_AT_POSITION(int64, carbon_int64_t);
-        break;
-    case CARBON_BASIC_TYPE_UINT8:
-        READ_BASIC_TYPE_AT_POSITION(uint8, carbon_uint8_t);
-        break;
-    case CARBON_BASIC_TYPE_UINT16:
-        READ_BASIC_TYPE_AT_POSITION(uint16, carbon_uint8_t);
-        break;
-    case CARBON_BASIC_TYPE_UINT32:
-        READ_BASIC_TYPE_AT_POSITION(uint32, carbon_uint32_t);
-        break;
-    case CARBON_BASIC_TYPE_UINT64:
-        READ_BASIC_TYPE_AT_POSITION(uint64, carbon_uint64_t);
-        break;
-    case CARBON_BASIC_TYPE_NUMBER:
-        READ_BASIC_TYPE_AT_POSITION(number, carbon_float_t);
-        break;
-    case CARBON_BASIC_TYPE_STRING:
-        READ_BASIC_TYPE_AT_POSITION(boolean, carbon_bool_t);
-        break;
-    case CARBON_BASIC_TYPE_BOOLEAN:
-        READ_BASIC_TYPE_AT_POSITION(boolean, carbon_bool_t);
-        break;
-    case CARBON_BASIC_TYPE_NULL:
-        /* nothing to setup for nulls */
-        break;
-    case CARBON_BASIC_TYPE_OBJECT: {
-        //const carbon_off_t *offs = CARBON_MEMFILE_READ_TYPE_LIST(&iter->record_table_memfile,
-        //                                                         carbon_off_t, iter->value_idx_max);
-        //carbon_off_t start_obj = offs[0];
-        //carbon_memfile_seek(&iter->record_table_memfile, start_obj);
-        //init_object_from_memfile(&iter->data.basic.object, &iter->record_table_memfile);
-        CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_INTERNALERR); // TODO: Implement
-    } break;
-    default:
-    CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_INTERNALERR);
-    }
+    CARBON_UNUSED(iter);
+//    switch (iter->prop_type) {
+//    case CARBON_BASIC_TYPE_INT8:
+//        READ_BASIC_TYPE_AT_POSITION(int8, carbon_int8_t);
+//        break;
+//    case CARBON_BASIC_TYPE_INT16:
+//        READ_BASIC_TYPE_AT_POSITION(int16, carbon_int16_t);
+//        break;
+//    case CARBON_BASIC_TYPE_INT32:
+//        READ_BASIC_TYPE_AT_POSITION(int32, carbon_int32_t);
+//        break;
+//    case CARBON_BASIC_TYPE_INT64:
+//        READ_BASIC_TYPE_AT_POSITION(int64, carbon_int64_t);
+//        break;
+//    case CARBON_BASIC_TYPE_UINT8:
+//        READ_BASIC_TYPE_AT_POSITION(uint8, carbon_uint8_t);
+//        break;
+//    case CARBON_BASIC_TYPE_UINT16:
+//        READ_BASIC_TYPE_AT_POSITION(uint16, carbon_uint8_t);
+//        break;
+//    case CARBON_BASIC_TYPE_UINT32:
+//        READ_BASIC_TYPE_AT_POSITION(uint32, carbon_uint32_t);
+//        break;
+//    case CARBON_BASIC_TYPE_UINT64:
+//        READ_BASIC_TYPE_AT_POSITION(uint64, carbon_uint64_t);
+//        break;
+//    case CARBON_BASIC_TYPE_NUMBER:
+//        READ_BASIC_TYPE_AT_POSITION(number, carbon_float_t);
+//        break;
+//    case CARBON_BASIC_TYPE_STRING:
+//        READ_BASIC_TYPE_AT_POSITION(boolean, carbon_bool_t);
+//        break;
+//    case CARBON_BASIC_TYPE_BOOLEAN:
+//        READ_BASIC_TYPE_AT_POSITION(boolean, carbon_bool_t);
+//        break;
+//    case CARBON_BASIC_TYPE_NULL:
+//        /* nothing to setup for nulls */
+//        break;
+//    case CARBON_BASIC_TYPE_OBJECT: {
+//        //const carbon_off_t *offs = CARBON_MEMFILE_READ_TYPE_LIST(&iter->record_table_memfile,
+//        //                                                         carbon_off_t, iter->value_idx_max);
+//        //carbon_off_t start_obj = offs[0];
+//        //carbon_memfile_seek(&iter->record_table_memfile, start_obj);
+//        //init_object_from_memfile(&iter->data.basic.object, &iter->record_table_memfile);
+//        CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_INTERNALERR); // TODO: Implement
+//    } break;
+//    default:
+//    CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_INTERNALERR);
+//    }
 }
 
 #define READ_BASIC_TYPE_AT_POSITION(dst, type)                                                                         \
