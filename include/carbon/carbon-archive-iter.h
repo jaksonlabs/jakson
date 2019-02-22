@@ -132,7 +132,7 @@ typedef struct carbon_archive_prop_iter
     carbon_err_t               err;                     /* error information */
 } carbon_archive_prop_iter_t;
 
-typedef struct carbon_archive_value_iter
+typedef struct carbon_archive_value
 {
     carbon_archive_prop_iter_t *prop_iter;               /* pointer to property iterator that created this iterator */
     carbon_memfile_t            record_table_memfile;    /* iterator-local read-only memfile on archive record table */
