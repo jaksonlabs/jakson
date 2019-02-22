@@ -112,26 +112,38 @@ typedef struct
 //    carbon_archive_object_t obj;
 //} carbon_object_cursor_t;
 
+typedef enum
+{
+    CARBON_ARCHIVE_PROP_ITER_MODE_OBJECT,
+    CARBON_ARCHIVE_PROP_ITER_MODE_COLLECTION,
+} carbon_archive_prop_iter_mode_e;
+
+
 typedef struct carbon_archive_prop_iter
 {
-    //carbon_archive_t          *archive;                 /* pointer to archive that is iterated */
-    carbon_archive_object_t    object;                  /* current object */
-    carbon_memfile_t           record_table_memfile;    /* iterator-local read-only memfile on archive record table */
+    carbon_archive_object_t         object;                  /* current object */
+    carbon_memfile_t                record_table_memfile;    /* iterator-local read-only memfile on archive record table */
 
-    uint16_t                   mask;                    /* user-defined mask which properties to include */
-    carbon_prop_iter_state_e   prop_cursor;             /* current property type in iteration */
+    uint16_t                        mask;                    /* user-defined mask which properties to include */
+    carbon_archive_prop_iter_mode_e mode;                    /* determines whether to iterating over object or collection */
+    carbon_err_t                    err;                     /* error information */
+    carbon_prop_iter_state_e        prop_cursor;             /* current property type in iteration */
 
-    //uint32_t                   prop_pos_current;        /* current position */
-    //carbon_off_t               prop_type_off_current;   /* current offset in memfile to start of prop group */
-    carbon_off_t               prop_type_off_data;      /* offset of type-dependent data in memfile */
-    carbon_fixed_prop_t         prop_group_header;             /* type, num props and keys */
-    carbon_off_t                current_prop_group_off;
-    carbon_off_t                prop_data_off;
+    struct {
+        carbon_off_t               prop_type_off_data;      /* offset of type-dependent data in memfile */
+        carbon_fixed_prop_t        prop_group_header;       /* type, num props and keys */
+        carbon_off_t               current_prop_group_off;
+        carbon_off_t               prop_data_off;
 
-    const carbon_string_id_t         *keys;                     /* current property key in this iteration */
-    carbon_basic_type_e              type;                    /* property basic value type (e.g., int8, or object) */
-    bool                       is_array;                /* flag indicating that property is an array type */
-    carbon_err_t               err;                     /* error information */
+        const carbon_string_id_t   *keys;                   /* current property key in this iteration */
+        carbon_basic_type_e        type;                    /* property basic value type (e.g., int8, or object) */
+        bool                       is_array;                /* flag indicating that property is an array type */
+    } mode_object;
+
+
+
+
+
 } carbon_archive_prop_iter_t;
 
 

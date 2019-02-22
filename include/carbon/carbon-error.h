@@ -92,6 +92,7 @@ CARBON_BEGIN_DECL
 #define CARBON_ERR_ITER_NOUINT64 65         /** Unable to get value: type is not non-array uint64 */
 #define CARBON_ERR_ITER_NONUMBER 66         /** Unable to get value: type is not non-array number */
 #define CARBON_ERR_ITER_NOSTRING 67         /** Unable to get value: type is not non-array string */
+#define CARBON_ERR_ITER_COLLECTED_NEEDED 68 /** Illegal state: iteration over object issued, but collection found */
 
 static const char *const _carbon_err_str[] = {
     "No error",
@@ -161,7 +162,8 @@ static const char *const _carbon_err_str[] = {
     "Unable to get value: type is not non-array uint32",
     "Unable to get value: type is not non-array uint64",
     "Unable to get value: type is not non-array number",
-    "Unable to get value: type is not non-array string"
+    "Unable to get value: type is not non-array string",
+    "Illegal state: iteration over object issued, but collection found"
 };
 
 #define CARBON_ERRSTR_ILLEGAL_CODE "illegal error code"
@@ -205,6 +207,8 @@ carbon_error_print_and_abort(const carbon_err_t *err);
 
 #define CARBON_ERROR(err, code)                     CARBON_ERROR_IF (true, err, code)
 #define CARBON_ERROR_IF(expr, err, code)            { if (expr) { carbon_error_set(err, code, __FILE__, __LINE__); } }
+#define CARBON_ERROR_IF_AND_RETURN(expr, err, code) { if (expr) { carbon_error_set(err, code, __FILE__, __LINE__);     \
+                                                                  return false; } }
 #define CARBON_ERROR_WDETAILS(err, code, msg)       carbon_error_set_wdetails(err, code, __FILE__, __LINE__, msg);
 
 #define CARBON_PRINT_ERROR(code)                    CARBON_PRINT_ERROR_IF(true, code)

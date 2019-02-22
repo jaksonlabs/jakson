@@ -136,15 +136,17 @@ prop_iter_cursor_init(carbon_archive_prop_iter_t *iter)
     assert(STATE_AND_PROPERTY_EXISTS(CARBON_PROP_ITER_STATE_STRING_ARRAYS, prop_offsets.string_arrays));
     assert(STATE_AND_PROPERTY_EXISTS(CARBON_PROP_ITER_STATE_OBJECT_ARRAYS, prop_offsets.object_arrays));
 
-    if (iter->prop_cursor == CARBON_PROP_ITER_STATE_OBJECT_ARRAYS)
+
+
+    if (iter->mode == CARBON_ARCHIVE_PROP_ITER_MODE_COLLECTION)
     {
         abort(); // TODO
     } else
     {
-        iter->current_prop_group_off = offset_by_state(iter);
-        carbon_memfile_seek(&iter->record_table_memfile, iter->current_prop_group_off);
-        carbon_int_embedded_fixed_props_read(&iter->prop_group_header, &iter->record_table_memfile);
-        iter->prop_data_off = CARBON_MEMFILE_TELL(&iter->record_table_memfile);
+        iter->mode_object.current_prop_group_off = offset_by_state(iter);
+        carbon_memfile_seek(&iter->record_table_memfile, iter->mode_object.current_prop_group_off);
+        carbon_int_embedded_fixed_props_read(&iter->mode_object.prop_group_header, &iter->record_table_memfile);
+        iter->mode_object.prop_data_off = CARBON_MEMFILE_TELL(&iter->record_table_memfile);
     }
 
 }
@@ -250,6 +252,10 @@ prop_iter_state_next(carbon_archive_prop_iter_t *iter)
     default:
         CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_INTERNALERR);
     }
+
+    iter->mode = iter->prop_cursor == CARBON_PROP_ITER_STATE_OBJECT_ARRAYS ?
+                 CARBON_ARCHIVE_PROP_ITER_MODE_COLLECTION : CARBON_ARCHIVE_PROP_ITER_MODE_OBJECT;
+
     if (iter->prop_cursor != CARBON_PROP_ITER_STATE_DONE) {
         prop_iter_cursor_init(iter);
     }
@@ -260,7 +266,7 @@ static void
 prop_iter_state_init(carbon_archive_prop_iter_t *iter)
 {
     iter->prop_cursor = CARBON_PROP_ITER_STATE_INIT;
-
+    iter->mode = CARBON_ARCHIVE_PROP_ITER_MODE_OBJECT;
 }
 
 
@@ -408,16 +414,19 @@ carbon_archive_prop_iter_next(uint32_t *num_pairs, carbon_basic_type_e *type, bo
 {
     CARBON_NON_NULL_OR_ERROR(iter)
 
+    CARBON_ERROR_IF_AND_RETURN (iter->mode != CARBON_ARCHIVE_PROP_ITER_MODE_OBJECT, &iter->err,
+                                CARBON_ERR_ITER_COLLECTED_NEEDED)
+
     if (iter->prop_cursor != CARBON_PROP_ITER_STATE_DONE)
     {
-        const carbon_string_id_t *result = iter->prop_group_header.keys;
+        const carbon_string_id_t *result = iter->mode_object.prop_group_header.keys;
 
-        iter->type = get_basic_type(iter->prop_cursor);
-        iter->is_array = is_array_type(iter->prop_cursor);
+        iter->mode_object.type = get_basic_type(iter->prop_cursor);
+        iter->mode_object.is_array = is_array_type(iter->prop_cursor);
 
-        CARBON_OPTIONAL_SET(num_pairs, iter->prop_group_header.header->num_entries);
-        CARBON_OPTIONAL_SET(type, iter->type);
-        CARBON_OPTIONAL_SET(is_array, iter->is_array);
+        CARBON_OPTIONAL_SET(num_pairs, iter->mode_object.prop_group_header.header->num_entries);
+        CARBON_OPTIONAL_SET(type, iter->mode_object.type);
+        CARBON_OPTIONAL_SET(is_array, iter->mode_object.is_array);
 
         if (value && !carbon_archive_value_vector_from_prop_iter(value, &iter->err, iter))
         {
@@ -441,120 +450,6 @@ carbon_archive_prop_iter_get_object_id(carbon_object_id_t *id, carbon_archive_pr
     *id = iter->object.object_id;
     return true;
 }
-//
-//static void
-//value_iter_setup_array_values(carbon_archive_value_vector_t *iter)
-//{
-//    CARBON_UNUSED(iter);
-////    switch (iter->prop_type) {
-////    case CARBON_BASIC_TYPE_INT8:
-////        READ_BASIC_TYPE_AT_POSITION(int8, carbon_int8_t);
-////        break;
-////    case CARBON_BASIC_TYPE_INT16:
-////        READ_BASIC_TYPE_AT_POSITION(int16, carbon_int16_t);
-////        break;
-////    case CARBON_BASIC_TYPE_INT32:
-////        READ_BASIC_TYPE_AT_POSITION(int32, carbon_int32_t);
-////        break;
-////    case CARBON_BASIC_TYPE_INT64:
-////        READ_BASIC_TYPE_AT_POSITION(int64, carbon_int64_t);
-////        break;
-////    case CARBON_BASIC_TYPE_UINT8:
-////        READ_BASIC_TYPE_AT_POSITION(uint8, carbon_uint8_t);
-////        break;
-////    case CARBON_BASIC_TYPE_UINT16:
-////        READ_BASIC_TYPE_AT_POSITION(uint16, carbon_uint8_t);
-////        break;
-////    case CARBON_BASIC_TYPE_UINT32:
-////        READ_BASIC_TYPE_AT_POSITION(uint32, carbon_uint32_t);
-////        break;
-////    case CARBON_BASIC_TYPE_UINT64:
-////        READ_BASIC_TYPE_AT_POSITION(uint64, carbon_uint64_t);
-////        break;
-////    case CARBON_BASIC_TYPE_NUMBER:
-////        READ_BASIC_TYPE_AT_POSITION(number, carbon_number_t);
-////        break;
-////    case CARBON_BASIC_TYPE_STRING:
-////        READ_BASIC_TYPE_AT_POSITION(boolean, carbon_boolean_t);
-////        break;
-////    case CARBON_BASIC_TYPE_BOOLEAN:
-////        READ_BASIC_TYPE_AT_POSITION(boolean, carbon_boolean_t);
-////        break;
-////    case CARBON_BASIC_TYPE_NULL:
-////        /* nothing to setup for nulls */
-////        break;
-////    case CARBON_BASIC_TYPE_OBJECT: {
-////        //const carbon_off_t *offs = CARBON_MEMFILE_READ_TYPE_LIST(&iter->record_table_memfile,
-////        //                                                         carbon_off_t, iter->value_idx_max);
-////        //carbon_off_t start_obj = offs[0];
-////        //carbon_memfile_seek(&iter->record_table_memfile, start_obj);
-////        //init_object_from_memfile(&iter->data.basic.object, &iter->record_table_memfile);
-////        CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_INTERNALERR); // TODO: Implement
-////    } break;
-////    default:
-////    CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_INTERNALERR);
-////    }
-//}
-//
-//#define READ_BASIC_TYPE_AT_POSITION(dst, type)                                                                         \
-//{                                                                                                                      \
-//    carbon_memfile_skip(&value->record_table_memfile, value->value_idx * sizeof(type));                                \
-//    value->data.basic.dst = *CARBON_MEMFILE_READ_TYPE(&value->record_table_memfile, type);                             \
-//}
-//
-//
-//static void
-//value_iter_setup_basic_values(carbon_archive_value_vector_t *value)
-//{
-//    CARBON_UNUSED(value);
-////    switch (value->prop_type) {
-////    case CARBON_BASIC_TYPE_INT8:
-////        READ_BASIC_TYPE_AT_POSITION(int8, carbon_int8_t);
-////    break;
-////    case CARBON_BASIC_TYPE_INT16:
-////        READ_BASIC_TYPE_AT_POSITION(int16, carbon_int16_t);
-////    break;
-////    case CARBON_BASIC_TYPE_INT32:
-////        READ_BASIC_TYPE_AT_POSITION(int32, carbon_int32_t);
-////    break;
-////    case CARBON_BASIC_TYPE_INT64:
-////        READ_BASIC_TYPE_AT_POSITION(int64, carbon_int64_t);
-////    break;
-////    case CARBON_BASIC_TYPE_UINT8:
-////        READ_BASIC_TYPE_AT_POSITION(uint8, carbon_uint8_t);
-////    break;
-////    case CARBON_BASIC_TYPE_UINT16:
-////        READ_BASIC_TYPE_AT_POSITION(uint16, carbon_uint8_t);
-////    break;
-////    case CARBON_BASIC_TYPE_UINT32:
-////        READ_BASIC_TYPE_AT_POSITION(uint32, carbon_uint32_t);
-////    break;
-////    case CARBON_BASIC_TYPE_UINT64:
-////        READ_BASIC_TYPE_AT_POSITION(uint64, carbon_uint64_t);
-////    break;
-////    case CARBON_BASIC_TYPE_NUMBER:
-////        READ_BASIC_TYPE_AT_POSITION(number, carbon_number_t);
-////    break;
-////    case CARBON_BASIC_TYPE_STRING:
-////        READ_BASIC_TYPE_AT_POSITION(boolean, carbon_boolean_t);
-////    break;
-////    case CARBON_BASIC_TYPE_BOOLEAN:
-////        READ_BASIC_TYPE_AT_POSITION(boolean, carbon_boolean_t);
-////    break;
-////    case CARBON_BASIC_TYPE_NULL:
-////        /* nothing to setup for nulls */
-////        break;
-////    case CARBON_BASIC_TYPE_OBJECT: {
-////        const carbon_off_t *offs = CARBON_MEMFILE_READ_TYPE_LIST(&value->record_table_memfile,
-////                                                                 carbon_off_t, value->value_idx_max);
-////        carbon_off_t start_obj = offs[0];
-////        carbon_memfile_seek(&value->record_table_memfile, start_obj);
-////        init_object_from_memfile(&value->data.basic.object, &value->record_table_memfile);
-////    } break;
-////    default:
-////    CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_INTERNALERR);
-////    }
-//}
 
 static void
 value_vector_init_object_basic(carbon_archive_value_vector_t *value)
@@ -704,10 +599,13 @@ carbon_archive_value_vector_from_prop_iter(carbon_archive_value_vector_t *value,
     CARBON_NON_NULL_OR_ERROR(value);
     CARBON_NON_NULL_OR_ERROR(prop_iter);
 
+    CARBON_ERROR_IF_AND_RETURN (prop_iter->mode != CARBON_ARCHIVE_PROP_ITER_MODE_OBJECT, &prop_iter->err,
+                                CARBON_ERR_ITER_COLLECTED_NEEDED)
+
     carbon_error_init(&value->err);
 
     value->prop_iter = prop_iter;
-    value->data_off = prop_iter->prop_data_off;
+    value->data_off = prop_iter->mode_object.prop_data_off;
 
     if (!carbon_memfile_open(&value->record_table_memfile, prop_iter->record_table_memfile.memblock,
                         CARBON_MEMFILE_MODE_READONLY)) {
@@ -719,9 +617,9 @@ carbon_archive_value_vector_from_prop_iter(carbon_archive_value_vector_t *value,
         return false;
     }
 
-    value->prop_type = prop_iter->type;
-    value->is_array = prop_iter->is_array;
-    value->value_max_idx = prop_iter->prop_group_header.header->num_entries;
+    value->prop_type = prop_iter->mode_object.type;
+    value->is_array = prop_iter->mode_object.is_array;
+    value->value_max_idx = prop_iter->mode_object.prop_group_header.header->num_entries;
 
     switch (value->prop_type) {
     case CARBON_BASIC_TYPE_OBJECT:
@@ -748,16 +646,6 @@ carbon_archive_value_vector_from_prop_iter(carbon_archive_value_vector_t *value,
     default:
         CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_INTERNALERR);
     }
-
-    //value->value_idx = prop_iter->prop_pos_current;
-    //value->value_idx_max = prop_iter->prop_header.header->num_entries;
-
-
-//    if (value->is_array) {
-//        value_iter_setup_array_values(value);
-//    } else {
-//        value_iter_setup_basic_values(value);
-//    }
 
     return true;
 }
@@ -852,7 +740,7 @@ DECLARE_CARBON_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(number, CARBON_BASIC_TYPE_NUMB
 DECLARE_CARBON_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(boolean, CARBON_BASIC_TYPE_BOOLEAN)
 DECLARE_CARBON_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(null, CARBON_BASIC_TYPE_NULL)
 
-#define DECLARE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(names, name, built_in_type)                                 \
+#define DECLARE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(names, name, built_in_type, err_code)                       \
 CARBON_EXPORT(const built_in_type *)                                                                                   \
 carbon_archive_value_vector_get_##names(uint32_t *num_values, carbon_archive_value_vector_t *value)                    \
 {                                                                                                                      \
@@ -868,24 +756,23 @@ carbon_archive_value_vector_get_##names(uint32_t *num_values, carbon_archive_val
         return value->data.basic.values.names;                                                                         \
     } else                                                                                                             \
     {                                                                                                                  \
+        CARBON_ERROR(&value->err, err_code);                                                                           \
         return NULL;                                                                                                   \
     }                                                                                                                  \
 }
 
 
-DECLARE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int8s, int8, carbon_int8_t)
-DECLARE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int16s, int16, carbon_int16_t)
-DECLARE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int32s, int32, carbon_int32_t)
-DECLARE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int64s, int64, carbon_int64_t)
-
-DECLARE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint8s, uint8, carbon_uint8_t)
-DECLARE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint16s, uint16, carbon_uint16_t)
-DECLARE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint32s, uint32, carbon_uint32_t)
-DECLARE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint64s, uint64, carbon_uint64_t)
-
-DECLARE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(strings, string, carbon_string_id_t)
-DECLARE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(numbers, number, carbon_number_t)
-DECLARE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(booleans, boolean, carbon_boolean_t)
+DECLARE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int8s, int8, carbon_int8_t, CARBON_ERR_ITER_NOINT8)
+DECLARE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int16s, int16, carbon_int16_t, CARBON_ERR_ITER_NOINT16)
+DECLARE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int32s, int32, carbon_int32_t, CARBON_ERR_ITER_NOINT32)
+DECLARE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int64s, int64, carbon_int64_t, CARBON_ERR_ITER_NOINT64)
+DECLARE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint8s, uint8, carbon_uint8_t, CARBON_ERR_ITER_NOUINT8)
+DECLARE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint16s, uint16, carbon_uint16_t, CARBON_ERR_ITER_NOUINT16)
+DECLARE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint32s, uint32, carbon_uint32_t, CARBON_ERR_ITER_NOUINT32)
+DECLARE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint64s, uint64, carbon_uint64_t, CARBON_ERR_ITER_NOUINT64)
+DECLARE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(strings, string, carbon_string_id_t, CARBON_ERR_ITER_NOSTRING)
+DECLARE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(numbers, number, carbon_number_t, CARBON_ERR_ITER_NONUMBER)
+DECLARE_CARBON_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(booleans, boolean, carbon_boolean_t, CARBON_ERR_ITER_NOBOOL)
 
 CARBON_EXPORT(const carbon_uint32_t *)
 carbon_archive_value_vector_get_null_arrays(uint32_t *num_values, carbon_archive_value_vector_t *value)
