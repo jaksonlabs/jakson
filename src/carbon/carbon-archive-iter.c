@@ -107,7 +107,7 @@ offset_by_state(carbon_archive_prop_iter_t *iter)
     }
 }
 
-__unused static bool // TODO: remove __unused
+static bool
 prop_iter_read_colum_entry(carbon_archive_collection_iter_state_t *state, carbon_memfile_t *memfile)
 {
     assert(state->current_column_group.current_column.current_entry.idx <
@@ -126,7 +126,7 @@ prop_iter_read_colum_entry(carbon_archive_collection_iter_state_t *state, carbon
         state->current_column_group.current_column.num_elem;
 }
 
-__unused static bool // TODO: remove __unused
+static bool
 prop_iter_read_column(carbon_archive_collection_iter_state_t *state, carbon_memfile_t *memfile)
 {
     assert(state->current_column_group.current_column.idx <
@@ -240,6 +240,9 @@ prop_iter_cursor_init(carbon_archive_prop_iter_t *iter)
     }                                                                                                                  \
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+
 static carbon_prop_iter_state_e
 prop_iter_state_next(carbon_archive_prop_iter_t *iter)
 {
@@ -340,6 +343,8 @@ prop_iter_state_next(carbon_archive_prop_iter_t *iter)
     }
     return iter->prop_cursor;
 }
+
+#pragma GCC diagnostic pop
 
 static void
 prop_iter_state_init(carbon_archive_prop_iter_t *iter)
