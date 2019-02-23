@@ -9,148 +9,6 @@ static void
 iterate_properties(carbon_archive_prop_iter_t *prop_iter);
 
 static void
-iterate_int8_vals(carbon_archive_value_vector_t *value_iter)
-{
-//    bool type_match;
-//    carbon_int8_t value;
-//    bool status = carbon_archive_value_is_int8(&type_match, value_iter);
-//    ASSERT_TRUE(status);
-//    ASSERT_TRUE(type_match);
-//    carbon_archive_value_get_int8(&value, value_iter);
-//    printf("\t\t{type: int8, value: %" PRIi8 " }\n", value);
-}
-
-static void
-iterate_int16_vals(carbon_archive_value_vector_t *value_iter)
-{
-//    bool type_match;
-//    carbon_int16_t value;
-//    bool status = carbon_archive_value_is_int16(&type_match, value_iter);
-//    ASSERT_TRUE(status);
-//    ASSERT_TRUE(type_match);
-//    carbon_archive_value_get_int16(&value, value_iter);
-//    printf("\t\t{type: int16, value: %" PRIi16 " }\n", value);
-}
-
-static void
-iterate_int32_vals(carbon_archive_value_vector_t *value_iter)
-{
-//    bool type_match;
-//    carbon_int32_t value;
-//    bool status = carbon_archive_value_is_int32(&type_match, value_iter);
-//    ASSERT_TRUE(status);
-//    ASSERT_TRUE(type_match);
-//    carbon_archive_value_get_int32(&value, value_iter);
-//    printf("\t\t{type: int32, value: %" PRIi32 " }\n", value);
-}
-
-static void
-iterate_int64_vals(carbon_archive_value_vector_t *value_iter)
-{
-//    bool type_match;
-//    carbon_int64_t value;
-//    bool status = carbon_archive_value_is_int64(&type_match, value_iter);
-//    ASSERT_TRUE(status);
-//    ASSERT_TRUE(type_match);
-//    carbon_archive_value_get_int64(&value, value_iter);
-//    printf("\t\t{type: int64, value: %" PRIi64 " }\n", value);
-}
-
-static void
-iterate_uint8_vals(carbon_archive_value_vector_t *value_iter)
-{
-//    bool type_match;
-//    carbon_uint8_t value;
-//    bool status = carbon_archive_value_is_uint8(&type_match, value_iter);
-//    ASSERT_TRUE(status);
-//    ASSERT_TRUE(type_match);
-//    carbon_archive_value_get_uint8(&value, value_iter);
-//    printf("\t\t{type: uint8, value: %" PRIu8 " }\n", value);
-}
-
-static void
-iterate_uint16_vals(carbon_archive_value_vector_t *value_iter)
-{
-//    bool type_match;
-//    carbon_uint16_t value;
-//    bool status = carbon_archive_value_is_uint16(&type_match, value_iter);
-//    ASSERT_TRUE(status);
-//    ASSERT_TRUE(type_match);
-//    carbon_archive_value_get_uint16(&value, value_iter);
-//    printf("\t\t{type: uint16, value: %" PRIu16 " }\n", value);
-}
-
-static void
-iterate_uint32_vals(carbon_archive_value_vector_t *value_iter)
-{
-//    bool type_match;
-//    carbon_uint32_t value;
-//    bool status = carbon_archive_value_is_uint32(&type_match, value_iter);
-//    ASSERT_TRUE(status);
-//    ASSERT_TRUE(type_match);
-//    carbon_archive_value_get_uint32(&value, value_iter);
-//    printf("\t\t{type: uint32, value: %" PRIu32 " }\n", value);
-}
-
-static void
-iterate_uint64_vals(carbon_archive_value_vector_t *value_iter)
-{
-//    bool type_match;
-//    carbon_uint64_t value;
-//    bool status = carbon_archive_value_is_uint64(&type_match, value_iter);
-//    ASSERT_TRUE(status);
-//    ASSERT_TRUE(type_match);
-//    carbon_archive_value_get_uint64(&value, value_iter);
-//    printf("\t\t{type: uint64, value: %" PRIu64 " }\n", value);
-}
-
-static void
-iterate_float_vals(carbon_archive_value_vector_t *value_iter)
-{
-//    bool is_float;
-//    carbon_number_t value;
-//    bool status = carbon_archive_value_is_number(&is_float, value_iter);
-//    ASSERT_TRUE(status);
-//    ASSERT_TRUE(is_float);
-//    carbon_archive_value_get_number(&value, value_iter);
-//    printf("\t\t{type: number, value: %f }\n", value);
-}
-
-static void
-iterate_string_vals(carbon_archive_value_vector_t *value_iter)
-{
-//    bool is_string;
-//    carbon_string_id_t value;
-//    bool status = carbon_archive_value_is_string(&is_string, value_iter);
-//    ASSERT_TRUE(status);
-//    ASSERT_TRUE(is_string);
-//    carbon_archive_value_get_string(&value, value_iter);
-//    printf("\t\t{type: string, value: %" PRIu64 " }\n", value);
-}
-
-static void
-iterate_boolean_vals(carbon_archive_value_vector_t *value_iter)
-{
-//    bool is_bool;
-//    carbon_boolean_t value;
-//    bool status = carbon_archive_value_is_boolean(&is_bool, value_iter);
-//    ASSERT_TRUE(status);
-//    ASSERT_TRUE(is_bool);
-//    carbon_archive_value_get_boolean(&value, value_iter);
-//    printf("\t\t{type: boolean, value: %d }\n", value);
-}
-
-static void
-iterate_null_vals(carbon_archive_value_vector_t *value_iter)
-{
-    bool is_null;
-    bool status = carbon_archive_value_vector_is_null(&is_null, value_iter);
-    ASSERT_TRUE(status);
-    ASSERT_TRUE(is_null);
-    printf("\t\t{type: null }\n");
-}
-
-static void
 iterate_object_vals(carbon_archive_value_vector_t *value_iter)
 {
     bool status;
@@ -158,6 +16,7 @@ iterate_object_vals(carbon_archive_value_vector_t *value_iter)
     uint32_t vector_length;
     carbon_archive_object_t object;
     carbon_archive_prop_iter_t  prop_iter;
+    carbon_err_t err;
 
     status = carbon_archive_value_vector_is_of_objects(&is_object, value_iter);
     ASSERT_TRUE(status);
@@ -172,103 +31,19 @@ iterate_object_vals(carbon_archive_value_vector_t *value_iter)
         ASSERT_TRUE(status);
         printf("\t\t{type: object, id: %" PRIu64 "}\n", object.object_id);
 
-        status = carbon_archive_prop_iter_from_object(&prop_iter, CARBON_ARCHIVE_ITER_MASK_ANY, &object, value_iter);
+
+        status = carbon_archive_prop_iter_from_object(&prop_iter, CARBON_ARCHIVE_ITER_MASK_ANY, &err, &object);
         ASSERT_TRUE(status);
 
         iterate_properties(&prop_iter);
     }
 }
 
-
-
-
-static void
-iterate_int8_array_vals(carbon_archive_value_vector_t *value_iter)
-{
-    FAIL() << "Not implemented";
-}
-
-static void
-iterate_int16_array_vals(carbon_archive_value_vector_t *value_iter)
-{
-    FAIL() << "Not implemented";
-}
-
-static void
-iterate_int32_array_vals(carbon_archive_value_vector_t *value_iter)
-{
-    FAIL() << "Not implemented";
-}
-
-static void
-iterate_int64_array_vals(carbon_archive_value_vector_t *value_iter)
-{
-    FAIL() << "Not implemented";
-}
-
-static void
-iterate_uint8_array_vals(carbon_archive_value_vector_t *value_iter)
-{
-    FAIL() << "Not implemented";
-}
-
-static void
-iterate_uint16_array_vals(carbon_archive_value_vector_t *value_iter)
-{
-    FAIL() << "Not implemented";
-}
-
-static void
-iterate_uint32_array_vals(carbon_archive_value_vector_t *value_iter)
-{
-    FAIL() << "Not implemented";
-}
-
-static void
-iterate_uint64_array_vals(carbon_archive_value_vector_t *value_iter)
-{
-    FAIL() << "Not implemented";
-}
-
-static void
-iterate_float_array_vals(carbon_archive_value_vector_t *value_iter)
-{
-    FAIL() << "Not implemented";
-}
-
-static void
-iterate_string_array_vals(carbon_archive_value_vector_t *value_iter)
-{
-    FAIL() << "Not implemented";
-}
-
-static void
-iterate_boolean_array_vals(carbon_archive_value_vector_t *value_iter)
-{
-    FAIL() << "Not implemented";
-}
-
-static void
-iterate_null_array_vals(carbon_archive_value_vector_t *value_iter)
-{
-    FAIL() << "Not implemented";
-}
-
-static void
-iterate_object_array_vals(carbon_archive_value_vector_t *value_iter)
-{
-    FAIL() << "Not implemented";
-}
-
-
 static void
 iterate_object(carbon_archive_value_vector_t *value_iter)
 {
-    if (value_iter->is_array) {
-        iterate_object_array_vals(value_iter);
-    } else {
-        iterate_object_vals(value_iter);
-    }
+    ASSERT_TRUE (!value_iter->is_array);
+    iterate_object_vals(value_iter);
 }
 
 static void
@@ -506,143 +281,216 @@ print_basic_fixed_types(carbon_archive_value_vector_t *value_iter, uint32_t idx)
 static void
 iterate_properties(carbon_archive_prop_iter_t *prop_iter)
 {
-    carbon_object_id_t          oid;
-    carbon_archive_value_vector_t value_iter;
-    carbon_basic_type_e         type;
-    bool                        is_array;
-    const carbon_string_id_t   *keys;
-    uint32_t                    num_pairs;
+    carbon_object_id_t                oid;
+    carbon_archive_value_vector_t     value_iter;
+    carbon_basic_type_e               type;
+    bool                              is_array;
+    const carbon_string_id_t         *keys;
+    uint32_t                          num_pairs;
+    carbon_archive_prop_iter_mode_e   iter_type;
+    carbon_archive_collection_iter_t  collection_iter;
+    uint32_t                          num_column_groups;
+    carbon_archive_column_group_iter_t group_iter;
+    carbon_archive_column_iter_t       column_iter;
+    carbon_archive_column_entry_iter_t entry_iter;
+    carbon_err_t                       err;
 
-    carbon_archive_prop_iter_document_get_object_id(&oid, prop_iter);
-    while (keys = carbon_archive_prop_iter_document_get_value_vector(&num_pairs, &type, &is_array, &value_iter, prop_iter))
+    while (carbon_archive_prop_iter_next(&iter_type, &value_iter, &collection_iter, prop_iter))
     {
-        for (uint32_t i = 0; i < num_pairs; i++) {
-            printf("Key %" PRIu64 ", type: %d, is-array: %d\n", keys[i], type, is_array);
+        if (iter_type == CARBON_ARCHIVE_PROP_ITER_MODE_OBJECT)
+        {
+            keys = carbon_archive_value_vector_get_keys(&num_pairs, &value_iter);
+            carbon_archive_value_vector_is_array_type(&is_array, &value_iter);
+            carbon_archive_value_vector_get_basic_type(&type, &value_iter);
+            carbon_archive_value_vector_get_object_id(&oid, &value_iter);
+            for (uint32_t i = 0; i < num_pairs; i++) {
+                printf("Key %" PRIu64 ", type: %d, is-array: %d\n", keys[i], type, is_array);
 
-            switch (type) {
-            case CARBON_BASIC_TYPE_OBJECT:
-                iterate_object(&value_iter);
-                break;
-            case CARBON_BASIC_TYPE_NULL:
-                printf("\t\t{ type: null }\n");
-                break;
-            case CARBON_BASIC_TYPE_INT8:
-            case CARBON_BASIC_TYPE_INT16:
-            case CARBON_BASIC_TYPE_INT32:
-            case CARBON_BASIC_TYPE_INT64:
-            case CARBON_BASIC_TYPE_UINT8:
-            case CARBON_BASIC_TYPE_UINT16:
-            case CARBON_BASIC_TYPE_UINT32:
-            case CARBON_BASIC_TYPE_UINT64:
-            case CARBON_BASIC_TYPE_NUMBER:
-            case CARBON_BASIC_TYPE_STRING:
-            case CARBON_BASIC_TYPE_BOOLEAN:
-                print_basic_fixed_types(&value_iter, i);
-                break;
-            default:
-                FAIL() << "unknown basic type";
+                switch (type) {
+                case CARBON_BASIC_TYPE_OBJECT:
+                    iterate_object(&value_iter);
+                    break;
+                case CARBON_BASIC_TYPE_NULL:
+                    printf("\t\t{ type: null }\n");
+                    break;
+                case CARBON_BASIC_TYPE_INT8:
+                case CARBON_BASIC_TYPE_INT16:
+                case CARBON_BASIC_TYPE_INT32:
+                case CARBON_BASIC_TYPE_INT64:
+                case CARBON_BASIC_TYPE_UINT8:
+                case CARBON_BASIC_TYPE_UINT16:
+                case CARBON_BASIC_TYPE_UINT32:
+                case CARBON_BASIC_TYPE_UINT64:
+                case CARBON_BASIC_TYPE_NUMBER:
+                case CARBON_BASIC_TYPE_STRING:
+                case CARBON_BASIC_TYPE_BOOLEAN:
+                    print_basic_fixed_types(&value_iter, i);
+                    break;
+                default:
+                    FAIL() << "unknown basic type";
+                }
+            }
+        } else {
+            keys = carbon_archive_collection_iter_get_keys(&num_column_groups, &collection_iter);
+            ASSERT_TRUE(keys != NULL);
+            printf("\t\t{ column groups for keys:");
+            for (uint32_t i = 0; i < num_column_groups; i++) {
+                printf("%" PRIu64 " ", keys[i]);
+            }
+            printf("}\n");
+            while (carbon_archive_collection_next_column_group(&group_iter, &collection_iter)) {
+
+                uint32_t num_objs;
+                const carbon_object_id_t *ids = carbon_archive_column_group_get_object_ids(&num_objs, &group_iter);
+
+                printf("\t\t{ column groups object ids:");
+                for (uint32_t i = 0; i < num_objs; i++) {
+                    printf("%" PRIu64 " ", ids[i]);
+                }
+                printf("}\n");
+
+                while(carbon_archive_column_group_next_column(&column_iter, &group_iter)) {
+                    carbon_string_id_t column_name;
+                    carbon_basic_type_e column_entry_type;
+                    uint32_t num_entries;
+                    carbon_archive_column_get_name(&column_name, &column_entry_type, &column_iter);
+                    const uint32_t *positions = carbon_archive_column_get_entry_positions(&num_entries, &column_iter);
+                    printf("\t\t{ column-name: %" PRIu64 ", type: %d }\n", column_name, column_entry_type);
+                    printf("\t\t{ entry positions:");
+                    for (uint32_t i = 0; i < num_entries; i++) {
+                        printf("%" PRIu32 " ", positions[i]);
+                    }
+                    printf("}\n");
+
+                    while(carbon_archive_column_next_entry(&entry_iter, &column_iter)) {
+
+                        carbon_basic_type_e entry_type;
+                        uint32_t entry_length;
+                        carbon_archive_column_entry_get_type(&entry_type, &entry_iter);
+
+                        switch (entry_type) {
+                        case CARBON_BASIC_TYPE_STRING: {
+                            const carbon_string_id_t *values = carbon_archive_column_entry_get_strings(&entry_length, &entry_iter);
+                            printf("\t\t{ strings: [");
+                            for (uint32_t i = 0; i < entry_length; i++) {
+                                printf("%" PRIu64 "%s", values[i], i + 1 < entry_length ? ", " : "");
+                            }
+                            printf("]\n");
+                        } break;
+                        case CARBON_BASIC_TYPE_INT8: {
+                            const carbon_int8_t *values = carbon_archive_column_entry_get_int8s(&entry_length, &entry_iter);
+                            printf("\t\t{ int8s: [");
+                            for (uint32_t i = 0; i < entry_length; i++) {
+                                printf("% " PRIi8 "%s", values[i], i + 1 < entry_length ? ", " : "");
+                            }
+                            printf("]\n");
+                        } break;
+                        case CARBON_BASIC_TYPE_INT16: {
+                            const carbon_int16_t *values = carbon_archive_column_entry_get_int16s(&entry_length, &entry_iter);
+                            printf("\t\t{ int16s: [");
+                            for (uint32_t i = 0; i < entry_length; i++) {
+                                printf("% " PRIi16 "%s", values[i], i + 1 < entry_length ? ", " : "");
+                            }
+                            printf("]\n");
+                        } break;
+                        case CARBON_BASIC_TYPE_INT32: {
+                            const carbon_int32_t *values = carbon_archive_column_entry_get_int32s(&entry_length, &entry_iter);
+                            printf("\t\t{ int32s: [");
+                            for (uint32_t i = 0; i < entry_length; i++) {
+                                printf("% " PRIi32 "%s", values[i], i + 1 < entry_length ? ", " : "");
+                            }
+                            printf("]\n");
+                        } break;
+                        case CARBON_BASIC_TYPE_INT64: {
+                            const carbon_int64_t *values = carbon_archive_column_entry_get_int64s(&entry_length, &entry_iter);
+                            printf("\t\t{ int64s: [");
+                            for (uint32_t i = 0; i < entry_length; i++) {
+                                printf("% " PRIi64 "%s", values[i], i + 1 < entry_length ? ", " : "");
+                            }
+                            printf("]\n");
+                        } break;
+                        case CARBON_BASIC_TYPE_UINT8: {
+                            const carbon_uint8_t *values = carbon_archive_column_entry_get_uint8s(&entry_length, &entry_iter);
+                            printf("\t\t{ uint8s: [");
+                            for (uint32_t i = 0; i < entry_length; i++) {
+                                printf("%" PRIu8 "%s", values[i], i + 1 < entry_length ? ", " : "");
+                            }
+                            printf("]\n");
+                        } break;
+                        case CARBON_BASIC_TYPE_UINT16: {
+                            const carbon_uint16_t *values = carbon_archive_column_entry_get_uint16s(&entry_length, &entry_iter);
+                            printf("\t\t{ uint16s: [");
+                            for (uint32_t i = 0; i < entry_length; i++) {
+                                printf("%" PRIu16 "%s", values[i], i + 1 < entry_length ? ", " : "");
+                            }
+                            printf("]\n");
+                        } break;
+                        case CARBON_BASIC_TYPE_UINT32: {
+                            const carbon_uint32_t *values = carbon_archive_column_entry_get_uint32s(&entry_length, &entry_iter);
+                            printf("\t\t{ uint32s: [");
+                            for (uint32_t i = 0; i < entry_length; i++) {
+                                printf("%" PRIu32 "%s", values[i], i + 1 < entry_length ? ", " : "");
+                            }
+                            printf("]\n");
+                        } break;
+                        case CARBON_BASIC_TYPE_UINT64: {
+                            const carbon_uint64_t *values = carbon_archive_column_entry_get_uint64s(&entry_length, &entry_iter);
+                            printf("\t\t{ uint64s: [");
+                            for (uint64_t i = 0; i < entry_length; i++) {
+                                printf("%" PRIu64 "%s", values[i], i + 1 < entry_length ? ", " : "");
+                            }
+                            printf("]\n");
+                        } break;
+                        case CARBON_BASIC_TYPE_NUMBER: {
+                            const carbon_number_t *values = carbon_archive_column_entry_get_numbers(&entry_length, &entry_iter);
+                            printf("\t\t{ numbers: [");
+                            for (uint64_t i = 0; i < entry_length; i++) {
+                                printf("%f%s", values[i], i + 1 < entry_length ? ", " : "");
+                            }
+                            printf("]\n");
+                        } break;
+                        case CARBON_BASIC_TYPE_BOOLEAN: {
+                            const carbon_boolean_t *values = carbon_archive_column_entry_get_booleans(&entry_length, &entry_iter);
+                            printf("\t\t{ booleans: [");
+                            for (uint64_t i = 0; i < entry_length; i++) {
+                                printf("%d%s", values[i], i + 1 < entry_length ? ", " : "");
+                            }
+                            printf("]\n");
+                        } break;
+                        case CARBON_BASIC_TYPE_NULL: {
+                            const carbon_uint32_t *values = carbon_archive_column_entry_get_nulls(&entry_length, &entry_iter);
+                            printf("\t\t{ nulls: [");
+                            for (uint64_t i = 0; i < entry_length; i++) {
+                                printf("%d%s", values[i], i + 1 < entry_length ? ", " : "");
+                            }
+                            printf("]\n");
+                        } break;
+                        case CARBON_BASIC_TYPE_OBJECT: {
+                            carbon_archive_column_entry_object_iter_t iter;
+                            const carbon_archive_object_t *archive_object;
+                            carbon_archive_column_entry_get_objects(&iter, &entry_iter);
+                            printf("\t\t{ << objects >>: [");
+                            while ((archive_object = carbon_archive_column_entry_object_iter_next_object(&iter)) != NULL) {
+                                carbon_object_id_t id;
+                                carbon_archive_object_get_object_id(&id, archive_object);
+                                printf("{ oid: %" PRIu64 " } \n", id);
+
+                                carbon_archive_prop_iter_t nested_obj_prop_iter;
+                                carbon_archive_prop_iter_from_object(&nested_obj_prop_iter, CARBON_ARCHIVE_ITER_MASK_ANY,
+                                                                     &err, archive_object);
+                                iterate_properties(&nested_obj_prop_iter);
+                            }
+                            printf("]\n");
+                        } break;
+                        default:
+                            FAIL() << "Unknown type";
+                        }
+
+                    }
+                }
 
             }
         }
-
-//        carbon_archive_value_get_basic_type(&type, &value_iter);
-//        carbon_archive_value_is_array_type(&is_array, &value_iter);
-//
-//        printf("object id: %" PRIu64 ", key: %" PRIu64 "\n", oid, string_id);
-//        printf("\ttype : %d, is-array: %d\n", type, is_array);
-//
-//        if (is_array)
-//        {
-//            switch (type) {
-//            case CARBON_BASIC_TYPE_INT8:
-//                iterate_int8_array_vals(&value_iter);
-//                break;
-//            case CARBON_BASIC_TYPE_INT16:
-//                iterate_int16_array_vals(&value_iter);
-//                break;
-//            case CARBON_BASIC_TYPE_INT32:
-//                iterate_int32_array_vals(&value_iter);
-//                break;
-//            case CARBON_BASIC_TYPE_INT64:
-//                iterate_int64_array_vals(&value_iter);
-//                break;
-//            case CARBON_BASIC_TYPE_UINT8:
-//                iterate_uint8_array_vals(&value_iter);
-//                break;
-//            case CARBON_BASIC_TYPE_UINT16:
-//                iterate_uint16_array_vals(&value_iter);
-//                break;
-//            case CARBON_BASIC_TYPE_UINT32:
-//                iterate_uint32_array_vals(&value_iter);
-//                break;
-//            case CARBON_BASIC_TYPE_UINT64:
-//                iterate_uint64_array_vals(&value_iter);
-//                break;
-//            case CARBON_BASIC_TYPE_NUMBER:
-//                iterate_float_array_vals(&value_iter);
-//                break;
-//            case CARBON_BASIC_TYPE_STRING:
-//                iterate_string_array_vals(&value_iter);
-//                break;
-//            case CARBON_BASIC_TYPE_BOOLEAN:
-//                iterate_boolean_array_vals(&value_iter);
-//                break;
-//            case CARBON_BASIC_TYPE_NULL:
-//                iterate_null_array_vals(&value_iter);
-//                break;
-//            case CARBON_BASIC_TYPE_OBJECT:
-//                iterate_object_array_vals(&value_iter);
-//                break;
-//            default:
-//                FAIL() << "unknown type";
-//            }
-//        } else
-//        {
-//            switch (type) {
-//            case CARBON_BASIC_TYPE_INT8:
-//                iterate_int8_vals(&value_iter);
-//                break;
-//            case CARBON_BASIC_TYPE_INT16:
-//                iterate_int16_vals(&value_iter);
-//                break;
-//            case CARBON_BASIC_TYPE_INT32:
-//                iterate_int32_vals(&value_iter);
-//                break;
-//            case CARBON_BASIC_TYPE_INT64:
-//                iterate_int64_vals(&value_iter);
-//                break;
-//            case CARBON_BASIC_TYPE_UINT8:
-//                iterate_uint8_vals(&value_iter);
-//                break;
-//            case CARBON_BASIC_TYPE_UINT16:
-//                iterate_uint16_vals(&value_iter);
-//                break;
-//            case CARBON_BASIC_TYPE_UINT32:
-//                iterate_uint32_vals(&value_iter);
-//                break;
-//            case CARBON_BASIC_TYPE_UINT64:
-//                iterate_uint64_vals(&value_iter);
-//                break;
-//            case CARBON_BASIC_TYPE_NUMBER:
-//                iterate_float_vals(&value_iter);
-//                break;
-//            case CARBON_BASIC_TYPE_STRING:
-//                iterate_string_vals(&value_iter);
-//                break;
-//            case CARBON_BASIC_TYPE_BOOLEAN:
-//                iterate_boolean_vals(&value_iter);
-//                break;
-//            case CARBON_BASIC_TYPE_NULL:
-//                iterate_null_vals(&value_iter);
-//                break;
-//            case CARBON_BASIC_TYPE_OBJECT:
-//                iterate_object_vals(&value_iter);
-//                break;
-//            default:
-//                FAIL() << "unknown type";
-//            }
-//        }
-
     }
 }
 
@@ -653,8 +501,9 @@ TEST(ArchiveIterTest, CreateIterator)
     carbon_archive_prop_iter_t  prop_iter;
     bool                        status;
 
-    /* in order to access this file, the working directory of this test executable must be set to the project root */
-    status = carbon_archive_open(&archive, "tests/assets/test-archive.carbon");
+    /* in order to access this file, the working directory of this test executable must be set to a sub directory
+     * below the projects root directory (e.g., 'build/') */
+    status = carbon_archive_open(&archive, "../tests/assets/test-archive.carbon");
     ASSERT_TRUE(status);
 
     status = carbon_archive_prop_iter_from_archive(&prop_iter, &err, CARBON_ARCHIVE_ITER_MASK_ANY, &archive);

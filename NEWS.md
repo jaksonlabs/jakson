@@ -28,7 +28,9 @@
       string identifiers inside the vector. For all of these strings, the predicate is invoked
       resulting in the indices inside the vector where the strings match the condition. Marked
       indices are added to the result set. Depending on the predicate and the users choice, a limit
-      to the result set size can be set, stopping the fetch potentially earlier. 
+      to the result set size can be set, stopping the fetch potentially earlier.
+- Implemented iterator model to iterate trough CARBON archives in order to fully exploit zero-cost access
+  to columnar stored key and value data, see [iterators](include/carbon/carbon-archive-iter.h). 
 
 ## 0.1.00.05 [2019-02-13]
 - **Compressor Framework** refactored compressor framework. 

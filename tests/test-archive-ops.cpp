@@ -46,8 +46,9 @@ TEST(CarbonArchiveOpsTest, CreateArchiveStringHandling)
     carbon_err_t         err;
     carbon_query_t       query;
 
-    /* in order to access this file, the working directory of this test executable must be set to the project root */
-    status = carbon_archive_open(&archive, "tests/assets/test-archive.carbon");
+    /* in order to access this file, the working directory of this test executable must be set to a sub directory
+     * below the projects root directory (e.g., 'build/') */
+    status = carbon_archive_open(&archive, "../tests/assets/test-archive.carbon");
     ASSERT_TRUE(status);
 
     status = carbon_archive_query(&query, &archive);
@@ -92,8 +93,9 @@ TEST(CarbonArchiveOpsTest, DecodeStringByIdFullScan)
     carbon_err_t         err;
     carbon_query_t       query;
 
-    /* in order to access this file, the working directory of this test executable must be set to the project root */
-    status = carbon_archive_open(&archive, "tests/assets/test-archive.carbon");
+    /* in order to access this file, the working directory of this test executable must be set to a sub directory
+     * below the projects root directory (e.g., 'build/') */
+    status = carbon_archive_open(&archive, "../tests/assets/test-archive.carbon");
     ASSERT_TRUE(status);
 
     status = carbon_archive_query(&query, &archive);
@@ -137,8 +139,9 @@ TEST(CarbonArchiveOpsTest, DecodeStringByFastUnsafeAccess)
     carbon_err_t                     err;
     carbon_query_t                   query;
 
-    /* in order to access this file, the working directory of this test executable must be set to the project root */
-    status = carbon_archive_open(&archive, "tests/assets/test-archive.carbon");
+    /* in order to access this file, the working directory of this test executable must be set to a sub directory
+     * below the projects root directory (e.g., 'build/') */
+    status = carbon_archive_open(&archive, "../tests/assets/test-archive.carbon");
     ASSERT_TRUE(status);
 
     status = carbon_archive_query(&query, &archive);
@@ -177,8 +180,9 @@ TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateContains)
     carbon_string_pred_t  pred;
     carbon_string_id_t   *result;
 
-    /* in order to access this file, the working directory of this test executable must be set to the project root */
-    status = carbon_archive_open(&archive, "tests/assets/test-archive.carbon");
+    /* in order to access this file, the working directory of this test executable must be set to a sub directory
+     * below the projects root directory (e.g., 'build/') */
+    status = carbon_archive_open(&archive, "../tests/assets/test-archive.carbon");
     ASSERT_TRUE(status);
 
     status = carbon_archive_query(&query, &archive);
@@ -213,8 +217,9 @@ TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateEquals)
     carbon_string_pred_t  pred;
     carbon_string_id_t   *result;
 
-    /* in order to access this file, the working directory of this test executable must be set to the project root */
-    status = carbon_archive_open(&archive, "tests/assets/test-archive.carbon");
+    /* in order to access this file, the working directory of this test executable must be set to a sub directory
+     * below the projects root directory (e.g., 'build/') */
+    status = carbon_archive_open(&archive, "../tests/assets/test-archive.carbon");
     ASSERT_TRUE(status);
 
     status = carbon_archive_query(&query, &archive);
