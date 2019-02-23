@@ -162,7 +162,7 @@ bool VectorShrink(carbon_vec_t *vec)
 {
     CARBON_NON_NULL_OR_ERROR(vec);
     if (vec->num_elems < vec->cap_elems) {
-        vec->cap_elems = vec->num_elems;
+        vec->cap_elems = CARBON_MAX(1, vec->num_elems);
         vec->base = carbon_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
     }
     return true;
