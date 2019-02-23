@@ -41,11 +41,6 @@ typedef struct __attribute__((packed))
     uint64_t record_size;
 } carbon_record_header_t;
 
-static carbon_file_header_t this_carbon_file_header = {
-    .version = CABIN_FILE_VERSION,
-    .root_object_header_offset = 0
-};
-
 typedef struct __attribute__((packed))
 {
     char marker;
@@ -241,6 +236,14 @@ enum marker_type
     MARKER_TYPE_RECORD_HEADER           = 33,
 };
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
+static carbon_file_header_t this_carbon_file_header = {
+    .version = CABIN_FILE_VERSION,
+    .root_object_header_offset = 0
+};
+
 static struct
 {
     enum marker_type type;
@@ -315,6 +318,8 @@ static struct
     { carbon_field_type_string,  MARKER_TYPE_PROP_TEXT },
     { carbon_field_type_object,  MARKER_TYPE_PROP_OBJECT }
 };
+
+#pragma GCC diagnostic pop
 
 typedef struct
 {
