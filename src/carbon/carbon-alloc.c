@@ -113,7 +113,8 @@ invoke_realloc(carbon_alloc_t *self, void *ptr, size_t size)
     void *result;
 
     if ((result = realloc(ptr, size)) == NULL) {
-        CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_MALLOCERR)
+        CARBON_PRINT_ERROR(CARBON_ERR_MALLOCERR)
+        return ptr;
     }
     else {
         return result;
