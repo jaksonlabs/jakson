@@ -1,4 +1,7 @@
-## 0.1.00.06 [2019-02-15]
+## 0.1.00.07 [2019-XX-XX]
+
+
+## 0.1.00.06 [2019-02-23]
 - Completed compressor framework including embedding into carbin archive operations 
   (e.g., automatically call <code>encode</code> or <code>decode</code> when needed)
     - Compressor _none_ works fully, _huffman_ still cannot <code>decode</code>
