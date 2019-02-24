@@ -29,8 +29,8 @@ typedef struct
     bool     in_use_flag;  /* flag indicating if bucket is in use */
     int32_t  displacement; /* difference between intended position during insert, and actual position in table */
     uint32_t num_probs;    /* number of probe calls to this bucket */
-    uint64_t data_idx;      /* position of key element in owning carbon_fix_map_t structure */
-} carbon_bucket_t;
+    uint64_t data_idx;      /* position of key element in owning carbon_hashtable_t structure */
+} carbon_hashtable_bucket_t;
 
 /**
  * Hash table implementation specialized for key and value types of fixed-length size, and where comparision
@@ -51,45 +51,45 @@ typedef struct
     carbon_spinlock_t lock;
     uint32_t size;
     carbon_err_t err;
-} carbon_fix_map_t;
+} carbon_hashtable_t;
 
-CARBON_DEFINE_GET_ERROR_FUNCTION(fix_map, carbon_fix_map_t, map);
-
-CARBON_EXPORT(bool)
-carbon_fix_map_create(carbon_fix_map_t *map, carbon_err_t *err, size_t key_size, size_t value_size, size_t capacity);
-
-CARBON_EXPORT(carbon_fix_map_t *)
-carbon_fix_map_cpy(carbon_fix_map_t *src);
+CARBON_DEFINE_GET_ERROR_FUNCTION(hashtable, carbon_hashtable_t, table);
 
 CARBON_EXPORT(bool)
-carbon_fix_map_drop(carbon_fix_map_t *map);
+carbon_hashtable_create(carbon_hashtable_t *map, carbon_err_t *err, size_t key_size, size_t value_size, size_t capacity);
+
+CARBON_EXPORT(carbon_hashtable_t *)
+carbon_hashtable_cpy(carbon_hashtable_t *src);
 
 CARBON_EXPORT(bool)
-carbon_fix_map_clear(carbon_fix_map_t *map);
+carbon_hashtable_drop(carbon_hashtable_t *map);
 
 CARBON_EXPORT(bool)
-carbon_fix_map_avg_displace(float *displace, const carbon_fix_map_t *map);
+carbon_hashtable_clear(carbon_hashtable_t *map);
 
 CARBON_EXPORT(bool)
-carbon_fix_map_lock(carbon_fix_map_t *map);
+carbon_hashtable_avg_displace(float *displace, const carbon_hashtable_t *map);
 
 CARBON_EXPORT(bool)
-carbon_fix_map_unlock(carbon_fix_map_t *map);
+carbon_hashtable_lock(carbon_hashtable_t *map);
 
 CARBON_EXPORT(bool)
-carbon_fix_map_insert_or_update(carbon_fix_map_t *map, const void *keys, const void *values, uint_fast32_t num_pairs);
+carbon_hashtable_unlock(carbon_hashtable_t *map);
 
 CARBON_EXPORT(bool)
-carbon_fix_map_remove_if_contained(carbon_fix_map_t *map, const void *keys, size_t num_pairs);
+carbon_hashtable_insert_or_update(carbon_hashtable_t *map, const void *keys, const void *values, uint_fast32_t num_pairs);
+
+CARBON_EXPORT(bool)
+carbon_hashtable_remove_if_contained(carbon_hashtable_t *map, const void *keys, size_t num_pairs);
 
 CARBON_EXPORT(const void *)
-carbon_fix_map_get_value(carbon_fix_map_t *map, const void *key);
+carbon_hashtable_get_value(carbon_hashtable_t *map, const void *key);
 
 CARBON_EXPORT(bool)
-carbon_fix_map_get_fload_factor(float *factor, carbon_fix_map_t *map);
+carbon_hashtable_get_fload_factor(float *factor, carbon_hashtable_t *map);
 
 CARBON_EXPORT(bool)
-carbon_fix_map_rehash(carbon_fix_map_t *map);
+carbon_hashtable_rehash(carbon_hashtable_t *map);
 
 CARBON_END_DECL
 

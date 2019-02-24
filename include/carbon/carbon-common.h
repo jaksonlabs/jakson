@@ -201,6 +201,7 @@ typedef enum carbon_basic_type
 #define CARBON_BUILT_IN(x)   CARBON_FUNC_UNUSED x
 
 #define ofType(x) /** a convenience way to write types for generic containers; no effect than just a visual one */
+#define ofMapping(x, y) /** a convenience way to write types for generic containers; no effect than just a visual one */
 
 #define CARBON_NULLABLE /** parameters to functions marked with this tag can be NULL and will be ignored; is attached
                     to a return value (typically a pointer), the this means the function may return NULL. */

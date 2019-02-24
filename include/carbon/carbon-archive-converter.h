@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 Marcus Pinnecke
+ * Copyright 2019 Marcus Pinnecke
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -15,17 +15,17 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_TIME_H
-#define CARBON_TIME_H
+#ifndef CARBON_ARCHIVE_DOC_CONVERTER_H
+#define CARBON_ARCHIVE_DOC_CONVERTER_H
 
-#include "carbon-common.h"
+#include "carbon/carbon-common.h"
+#include "carbon/carbon-encoded-doc.h"
 
 CARBON_BEGIN_DECL
 
-typedef long long carbon_timestamp_t;
+CARBON_EXPORT(bool)
+carbon_archive_converter(carbon_encoded_doc_collection_t *collection, carbon_archive_t *archive);
 
-CARBON_EXPORT(carbon_timestamp_t)
-carbon_time_now_wallclock();
 
 CARBON_END_DECL
 

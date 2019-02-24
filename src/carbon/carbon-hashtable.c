@@ -16,13 +16,13 @@
  */
 
 #include <carbon/carbon-hash.h>
-#include <carbon/carbon-fix-map.h>
+#include <carbon/carbon-hashtable.h>
 
 #define HASHCODE_OF(size, x) CARBON_HASH_BERNSTEIN(size, x)
 #define FIX_MAP_AUTO_REHASH_LOADFACTOR 0.9f
 
 CARBON_EXPORT(bool)
-carbon_fix_map_create(carbon_fix_map_t *map, carbon_err_t *err, size_t key_size, size_t value_size, size_t capacity)
+carbon_hashtable_create(carbon_hashtable_t *map, carbon_err_t *err, size_t key_size, size_t value_size, size_t capacity)
 {
     CARBON_NON_NULL_OR_ERROR(map)
     CARBON_NON_NULL_OR_ERROR(key_size)
@@ -36,7 +36,7 @@ carbon_fix_map_create(carbon_fix_map_t *map, carbon_err_t *err, size_t key_size,
                            error_handling);
     CARBON_SUCCESS_OR_JUMP(carbon_vec_create(&map->value_data, NULL, value_size, capacity),
                            cleanup_key_data_and_error);
-    CARBON_SUCCESS_OR_JUMP(carbon_vec_create(&map->table, NULL, sizeof(carbon_bucket_t), capacity),
+    CARBON_SUCCESS_OR_JUMP(carbon_vec_create(&map->table, NULL, sizeof(carbon_hashtable_bucket_t), capacity),
                            cleanup_value_key_data_and_error);
     CARBON_SUCCESS_OR_JUMP(carbon_vec_enlarge_size_to_capacity(&map->table),
                            cleanup_key_value_table_and_error);
@@ -67,7 +67,7 @@ error_handling:
 }
 
 CARBON_EXPORT(bool)
-carbon_fix_map_drop(carbon_fix_map_t *map)
+carbon_hashtable_drop(carbon_hashtable_t *map)
 {
     CARBON_NON_NULL_OR_ERROR(map)
 
@@ -84,17 +84,17 @@ carbon_fix_map_drop(carbon_fix_map_t *map)
     return status;
 }
 
-CARBON_EXPORT(carbon_fix_map_t *)
-carbon_fix_map_cpy(carbon_fix_map_t *src)
+CARBON_EXPORT(carbon_hashtable_t *)
+carbon_hashtable_cpy(carbon_hashtable_t *src)
 {
     if(src)
     {
-        carbon_fix_map_t *cpy = malloc(sizeof(carbon_fix_map_t));
+        carbon_hashtable_t *cpy = malloc(sizeof(carbon_hashtable_t));
 
-        carbon_fix_map_lock(src);
+        carbon_hashtable_lock(src);
 
-        carbon_fix_map_create(cpy, &src->err, src->key_data.elem_size, src->value_data.elem_size,
-                              src->table.cap_elems);
+        carbon_hashtable_create(cpy, &src->err, src->key_data.elem_size, src->value_data.elem_size,
+                                src->table.cap_elems);
 
         assert(src->key_data.cap_elems == src->value_data.cap_elems && src->value_data.cap_elems == src->table.cap_elems);
         assert((src->key_data.num_elems == src->value_data.num_elems) && src->value_data.num_elems <= src->table.num_elems);
@@ -108,7 +108,7 @@ carbon_fix_map_cpy(carbon_fix_map_t *src)
         assert(cpy->key_data.cap_elems == src->value_data.cap_elems && src->value_data.cap_elems == cpy->table.cap_elems);
         assert((cpy->key_data.num_elems == src->value_data.num_elems) && src->value_data.num_elems <= cpy->table.num_elems);
 
-        carbon_fix_map_unlock(src);
+        carbon_hashtable_unlock(src);
         return cpy;
     } else
     {
@@ -118,13 +118,13 @@ carbon_fix_map_cpy(carbon_fix_map_t *src)
 }
 
 CARBON_EXPORT(bool)
-carbon_fix_map_clear(carbon_fix_map_t *map)
+carbon_hashtable_clear(carbon_hashtable_t *map)
 {
     CARBON_NON_NULL_OR_ERROR(map)
     assert(map->key_data.cap_elems == map->value_data.cap_elems && map->value_data.cap_elems == map->table.cap_elems);
     assert((map->key_data.num_elems == map->value_data.num_elems) && map->value_data.num_elems <= map->table.num_elems);
 
-    carbon_fix_map_lock(map);
+    carbon_hashtable_lock(map);
 
     bool     status   = carbon_vec_clear(&map->key_data) &&
                         carbon_vec_clear(&map->value_data) &&
@@ -139,20 +139,20 @@ carbon_fix_map_clear(carbon_fix_map_t *map)
         CARBON_ERROR(&map->err, CARBON_ERR_OPPFAILED);
     }
 
-    carbon_fix_map_unlock(map);
+    carbon_hashtable_unlock(map);
 
     return status;
 }
 
 CARBON_EXPORT(bool)
-carbon_fix_map_avg_displace(float *displace, const carbon_fix_map_t *map)
+carbon_hashtable_avg_displace(float *displace, const carbon_hashtable_t *map)
 {
     CARBON_NON_NULL_OR_ERROR(displace);
     CARBON_NON_NULL_OR_ERROR(map);
 
     size_t sum_dis = 0;
     for (size_t i = 0; i < map->table.num_elems; i++) {
-        carbon_bucket_t *bucket = CARBON_VECTOR_GET(&map->table, i, carbon_bucket_t);
+        carbon_hashtable_bucket_t *bucket = CARBON_VECTOR_GET(&map->table, i, carbon_hashtable_bucket_t);
         sum_dis += abs(bucket->displacement);
     }
     *displace = (sum_dis / (float) map->table.num_elems);
@@ -161,35 +161,35 @@ carbon_fix_map_avg_displace(float *displace, const carbon_fix_map_t *map)
 }
 
 CARBON_EXPORT(bool)
-carbon_fix_map_lock(carbon_fix_map_t *map)
+carbon_hashtable_lock(carbon_hashtable_t *map)
 {
     CARBON_NON_NULL_OR_ERROR(map)
-  //  carbon_spinlock_acquire(&map->lock);
+    carbon_spinlock_acquire(&map->lock);
     return true;
 }
 
 CARBON_EXPORT(bool)
-carbon_fix_map_unlock(carbon_fix_map_t *map)
+carbon_hashtable_unlock(carbon_hashtable_t *map)
 {
     CARBON_NON_NULL_OR_ERROR(map)
-  //  carbon_spinlock_release(&map->lock);
+    carbon_spinlock_release(&map->lock);
     return true;
 }
 
 static inline const void *
-get_bucket_key(const carbon_bucket_t *bucket, const carbon_fix_map_t *map)
+get_bucket_key(const carbon_hashtable_bucket_t *bucket, const carbon_hashtable_t *map)
 {
     return map->key_data.base + bucket->data_idx * map->key_data.elem_size;
 }
 
 static inline const void *
-get_bucket_value(const carbon_bucket_t *bucket, const carbon_fix_map_t *map)
+get_bucket_value(const carbon_hashtable_bucket_t *bucket, const carbon_hashtable_t *map)
 {
     return map->value_data.base + bucket->data_idx * map->value_data.elem_size;
 }
 
 static void
-insert(carbon_bucket_t *bucket, carbon_fix_map_t *map, const void *key, const void *value, int32_t displacement)
+insert(carbon_hashtable_bucket_t *bucket, carbon_hashtable_t *map, const void *key, const void *value, int32_t displacement)
 {
     assert(map->key_data.num_elems == map->value_data.num_elems);
     uint64_t idx = map->key_data.num_elems;
@@ -204,7 +204,7 @@ insert(carbon_bucket_t *bucket, carbon_fix_map_t *map, const void *key, const vo
 }
 
 static inline uint_fast32_t
-insert_or_update(carbon_fix_map_t *map, const uint32_t *bucket_idxs, const void *keys, const void *values,
+insert_or_update(carbon_hashtable_t *map, const uint32_t *bucket_idxs, const void *keys, const void *values,
                  uint_fast32_t num_pairs)
 {
     for (uint_fast32_t i = 0; i < num_pairs; i++)
@@ -215,13 +215,13 @@ insert_or_update(carbon_fix_map_t *map, const uint32_t *bucket_idxs, const void 
 
         uint32_t bucket_idx = intended_bucket_idx;
 
-        carbon_bucket_t *bucket = CARBON_VECTOR_GET(&map->table, bucket_idx, carbon_bucket_t);
+        carbon_hashtable_bucket_t *bucket = CARBON_VECTOR_GET(&map->table, bucket_idx, carbon_hashtable_bucket_t);
         if (bucket->in_use_flag && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) != 0) {
             bool fitting_bucket_found = false;
             uint32_t displace_idx;
             for (displace_idx = bucket_idx + 1; displace_idx < map->table.num_elems; displace_idx++)
             {
-                carbon_bucket_t *bucket = CARBON_VECTOR_GET(&map->table, displace_idx, carbon_bucket_t);
+                carbon_hashtable_bucket_t *bucket = CARBON_VECTOR_GET(&map->table, displace_idx, carbon_hashtable_bucket_t);
                 fitting_bucket_found = !bucket->in_use_flag || (bucket->in_use_flag && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0);
                 if (fitting_bucket_found) {
                     break;
@@ -240,7 +240,7 @@ insert_or_update(carbon_fix_map_t *map, const uint32_t *bucket_idxs, const void 
             if (!fitting_bucket_found) {
                 for (displace_idx = 0; displace_idx < bucket_idx - 1; displace_idx++)
                 {
-                    const carbon_bucket_t *bucket = CARBON_VECTOR_GET(&map->table, displace_idx, carbon_bucket_t);
+                    const carbon_hashtable_bucket_t *bucket = CARBON_VECTOR_GET(&map->table, displace_idx, carbon_hashtable_bucket_t);
                     fitting_bucket_found = !bucket->in_use_flag || (bucket->in_use_flag && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0);
                     if (fitting_bucket_found) {
                         break;
@@ -250,7 +250,7 @@ insert_or_update(carbon_fix_map_t *map, const uint32_t *bucket_idxs, const void 
 
             assert(fitting_bucket_found == true);
             bucket_idx = displace_idx;
-            bucket = CARBON_VECTOR_GET(&map->table, bucket_idx, carbon_bucket_t);
+            bucket = CARBON_VECTOR_GET(&map->table, bucket_idx, carbon_hashtable_bucket_t);
         }
 
         bool is_update = bucket->in_use_flag && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
@@ -273,7 +273,7 @@ insert_or_update(carbon_fix_map_t *map, const uint32_t *bucket_idxs, const void 
 }
 
 CARBON_EXPORT(bool)
-carbon_fix_map_insert_or_update(carbon_fix_map_t *map, const void *keys, const void *values, uint_fast32_t num_pairs)
+carbon_hashtable_insert_or_update(carbon_hashtable_t *map, const void *keys, const void *values, uint_fast32_t num_pairs)
 {
     CARBON_NON_NULL_OR_ERROR(map)
     CARBON_NON_NULL_OR_ERROR(keys)
@@ -282,7 +282,7 @@ carbon_fix_map_insert_or_update(carbon_fix_map_t *map, const void *keys, const v
     assert(map->key_data.cap_elems == map->value_data.cap_elems && map->value_data.cap_elems == map->table.cap_elems);
     assert((map->key_data.num_elems == map->value_data.num_elems) && map->value_data.num_elems <= map->table.num_elems);
 
-    carbon_fix_map_lock(map);
+    carbon_hashtable_lock(map);
 
     uint32_t *bucket_idxs = malloc(num_pairs * sizeof(uint32_t));
     if (!bucket_idxs)
@@ -307,32 +307,32 @@ carbon_fix_map_insert_or_update(carbon_fix_map_t *map, const void *keys, const v
                                     num_pairs - cont_idx);
         if (cont_idx != 0) {
             /* rehashing is required, and [status, num_pairs) are left to be inserted */
-            if (!carbon_fix_map_rehash(map)) {
-                carbon_fix_map_unlock(map);
+            if (!carbon_hashtable_rehash(map)) {
+                carbon_hashtable_unlock(map);
                 return false;
             }
         }
     } while (cont_idx != 0);
 
     free(bucket_idxs);
-    carbon_fix_map_unlock(map);
+    carbon_hashtable_unlock(map);
 
     return true;
 }
 
 CARBON_EXPORT(bool)
-carbon_fix_map_remove_if_contained(carbon_fix_map_t *map, const void *keys, size_t num_pairs)
+carbon_hashtable_remove_if_contained(carbon_hashtable_t *map, const void *keys, size_t num_pairs)
 {
     CARBON_NON_NULL_OR_ERROR(map)
     CARBON_NON_NULL_OR_ERROR(keys)
 
-    carbon_fix_map_lock(map);
+    carbon_hashtable_lock(map);
 
     uint32_t *bucket_idxs = malloc(num_pairs * sizeof(uint32_t));
     if (!bucket_idxs)
     {
         CARBON_ERROR(&map->err, CARBON_ERR_MALLOCERR);
-        carbon_fix_map_unlock(map);
+        carbon_hashtable_unlock(map);
         return false;
     }
 
@@ -351,19 +351,19 @@ carbon_fix_map_remove_if_contained(carbon_fix_map_t *map, const void *keys, size
 
         for (uint32_t k = bucket_idx; !bucket_found && k < map->table.num_elems; k++)
         {
-            const carbon_bucket_t *bucket = CARBON_VECTOR_GET(&map->table, k, carbon_bucket_t);
+            const carbon_hashtable_bucket_t *bucket = CARBON_VECTOR_GET(&map->table, k, carbon_hashtable_bucket_t);
             bucket_found = bucket->in_use_flag && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
             actual_idx = k;
         }
         for (uint32_t k = 0; !bucket_found && k < bucket_idx; k++)
         {
-            const carbon_bucket_t *bucket = CARBON_VECTOR_GET(&map->table, k, carbon_bucket_t);
+            const carbon_hashtable_bucket_t *bucket = CARBON_VECTOR_GET(&map->table, k, carbon_hashtable_bucket_t);
             bucket_found = bucket->in_use_flag && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
             actual_idx = k;
         }
 
         if (bucket_found) {
-            carbon_bucket_t *bucket = CARBON_VECTOR_GET(&map->table, actual_idx, carbon_bucket_t);
+            carbon_hashtable_bucket_t *bucket = CARBON_VECTOR_GET(&map->table, actual_idx, carbon_hashtable_bucket_t);
             bucket->in_use_flag = false;
             bucket->data_idx = 0;
             bucket->num_probs = 0;
@@ -372,20 +372,20 @@ carbon_fix_map_remove_if_contained(carbon_fix_map_t *map, const void *keys, size
 
     free(bucket_idxs);
 
-    carbon_fix_map_unlock(map);
+    carbon_hashtable_unlock(map);
 
     return true;
 }
 
 CARBON_EXPORT(const void *)
-carbon_fix_map_get_value(carbon_fix_map_t *map, const void *key)
+carbon_hashtable_get_value(carbon_hashtable_t *map, const void *key)
 {
     CARBON_NON_NULL_OR_ERROR(map)
     CARBON_NON_NULL_OR_ERROR(key)
 
     const void *result = NULL;
 
-    carbon_fix_map_lock(map);
+    carbon_hashtable_lock(map);
 
     uint32_t bucket_idx = HASHCODE_OF(map->key_data.elem_size, key) % map->table.num_elems;
     uint32_t actual_idx = bucket_idx;
@@ -393,51 +393,51 @@ carbon_fix_map_get_value(carbon_fix_map_t *map, const void *key)
 
     for (uint32_t k = bucket_idx; !bucket_found && k < map->table.num_elems; k++)
     {
-        const carbon_bucket_t *bucket = CARBON_VECTOR_GET(&map->table, k, carbon_bucket_t);
+        const carbon_hashtable_bucket_t *bucket = CARBON_VECTOR_GET(&map->table, k, carbon_hashtable_bucket_t);
         bucket_found = bucket->in_use_flag && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
         actual_idx = k;
     }
     for (uint32_t k = 0; !bucket_found && k < bucket_idx; k++)
     {
-        const carbon_bucket_t *bucket = CARBON_VECTOR_GET(&map->table, k, carbon_bucket_t);
+        const carbon_hashtable_bucket_t *bucket = CARBON_VECTOR_GET(&map->table, k, carbon_hashtable_bucket_t);
         bucket_found = bucket->in_use_flag && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
         actual_idx = k;
     }
 
     if (bucket_found) {
-        carbon_bucket_t *bucket = CARBON_VECTOR_GET(&map->table, actual_idx, carbon_bucket_t);
+        carbon_hashtable_bucket_t *bucket = CARBON_VECTOR_GET(&map->table, actual_idx, carbon_hashtable_bucket_t);
         result = get_bucket_value(bucket, map);
     }
 
-    carbon_fix_map_unlock(map);
+    carbon_hashtable_unlock(map);
 
     return result;
 }
 
 CARBON_EXPORT(bool)
-carbon_fix_map_get_fload_factor(float *factor, carbon_fix_map_t *map)
+carbon_hashtable_get_fload_factor(float *factor, carbon_hashtable_t *map)
 {
     CARBON_NON_NULL_OR_ERROR(factor)
     CARBON_NON_NULL_OR_ERROR(map)
 
-    carbon_fix_map_lock(map);
+    carbon_hashtable_lock(map);
 
     *factor = map->size / (float) map->table.num_elems;
 
-    carbon_fix_map_unlock(map);
+    carbon_hashtable_unlock(map);
 
     return true;
 }
 
 CARBON_EXPORT(bool)
-carbon_fix_map_rehash(carbon_fix_map_t *map)
+carbon_hashtable_rehash(carbon_hashtable_t *map)
 {
     CARBON_NON_NULL_OR_ERROR(map)
 
-    carbon_fix_map_lock(map);
+    carbon_hashtable_lock(map);
 
-    carbon_fix_map_t *cpy = carbon_fix_map_cpy(map);
-    carbon_fix_map_clear(map);
+    carbon_hashtable_t *cpy = carbon_hashtable_cpy(map);
+    carbon_hashtable_clear(map);
 
     size_t new_cap = (cpy->key_data.cap_elems + 1) * 1.7f;
 
@@ -451,18 +451,18 @@ carbon_fix_map_rehash(carbon_fix_map_t *map)
     assert((map->key_data.num_elems == map->value_data.num_elems) && map->value_data.num_elems <= map->table.num_elems);
 
     for (size_t i = 0; i < cpy->table.num_elems; i++) {
-        carbon_bucket_t *bucket = CARBON_VECTOR_GET(&cpy->table, i, carbon_bucket_t);
+        carbon_hashtable_bucket_t *bucket = CARBON_VECTOR_GET(&cpy->table, i, carbon_hashtable_bucket_t);
         if (bucket->in_use_flag) {
             const void *old_key = get_bucket_key(bucket, cpy);
             const void *old_value = get_bucket_value(bucket, cpy);
-            if (!carbon_fix_map_insert_or_update(map, old_key, old_value, 1)) {
+            if (!carbon_hashtable_insert_or_update(map, old_key, old_value, 1)) {
                 CARBON_ERROR(&map->err, CARBON_ERR_REHASH_NOROLLBACK)
-                carbon_fix_map_unlock(map);
+                carbon_hashtable_unlock(map);
                 return false;
             }
         }
     }
 
-    carbon_fix_map_unlock(map);
+    carbon_hashtable_unlock(map);
     return true;
 }
