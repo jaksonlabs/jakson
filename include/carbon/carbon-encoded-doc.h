@@ -71,6 +71,7 @@ typedef struct carbon_encoded_doc
     carbon_object_id_t                                    object_id;
     carbon_vec_t ofType(carbon_encoded_doc_prop_t)        props;
     carbon_vec_t ofType(carbon_encoded_doc_prop_array_t)  props_arrays;
+    carbon_hashtable_t ofMapping(carbon_string_id_t, uint32_t) prop_array_index; /* maps key to index in prop arrays */
 
     carbon_err_t err;
 
@@ -80,6 +81,8 @@ typedef struct carbon_encoded_doc
 
 typedef struct carbon_encoded_doc_collection
 {
+    carbon_archive_t *archive;
+
     carbon_vec_t ofType(carbon_encoded_doc_t) flat_object_collection;   /* list of objects; also nested ones */
     carbon_hashtable_t ofMapping(carbon_object_id_t, uint32_t) index;   /* maps oid to index in collection */
 
@@ -94,12 +97,11 @@ carbon_encoded_doc_collection_create(carbon_encoded_doc_collection_t *collection
 CARBON_EXPORT(bool)
 carbon_encoded_doc_collection_drop(carbon_encoded_doc_collection_t *collection);
 
-CARBON_EXPORT(bool)
-carbon_encoded_doc_collection_print(FILE *file, carbon_encoded_doc_collection_t *collection);
+CARBON_EXPORT(carbon_encoded_doc_t *)
+encoded_doc_collection_get_or_append(carbon_encoded_doc_collection_t *collection, carbon_object_id_t id);
 
 CARBON_EXPORT(bool)
-carbon_encoded_doc_create(carbon_encoded_doc_t *doc, carbon_err_t err, carbon_object_id_t object_id,
-                          carbon_encoded_doc_collection_t *collection);
+carbon_encoded_doc_collection_print(FILE *file, carbon_encoded_doc_collection_t *collection);
 
 CARBON_EXPORT(bool)
 carbon_encoded_doc_drop(carbon_encoded_doc_t *doc);
@@ -107,153 +109,73 @@ carbon_encoded_doc_drop(carbon_encoded_doc_t *doc);
 CARBON_EXPORT(bool)
 carbon_encoded_doc_get_object_id(carbon_object_id_t *oid, carbon_encoded_doc_t *doc);
 
-CARBON_EXPORT(bool)
-carbon_encoded_doc_add_prop_int8(carbon_encoded_doc_t *doc, carbon_string_id_t key, carbon_int8_t value);
+#define DEFINE_CARBON_ENCODED_DOC_ADD_PROP_BASIC(name, built_in_type)                                                  \
+CARBON_EXPORT(bool)                                                                                                    \
+carbon_encoded_doc_add_prop_##name(carbon_encoded_doc_t *doc, carbon_string_id_t key, built_in_type value);
+
+DEFINE_CARBON_ENCODED_DOC_ADD_PROP_BASIC(int8, carbon_int8_t)
+DEFINE_CARBON_ENCODED_DOC_ADD_PROP_BASIC(int16, carbon_int16_t)
+DEFINE_CARBON_ENCODED_DOC_ADD_PROP_BASIC(int32, carbon_int32_t)
+DEFINE_CARBON_ENCODED_DOC_ADD_PROP_BASIC(int64, carbon_int64_t)
+DEFINE_CARBON_ENCODED_DOC_ADD_PROP_BASIC(uint8, carbon_uint8_t)
+DEFINE_CARBON_ENCODED_DOC_ADD_PROP_BASIC(uint16, carbon_uint16_t)
+DEFINE_CARBON_ENCODED_DOC_ADD_PROP_BASIC(uint32, carbon_uint32_t)
+DEFINE_CARBON_ENCODED_DOC_ADD_PROP_BASIC(uint64, carbon_uint64_t)
+DEFINE_CARBON_ENCODED_DOC_ADD_PROP_BASIC(number, carbon_number_t)
+DEFINE_CARBON_ENCODED_DOC_ADD_PROP_BASIC(boolean, carbon_boolean_t)
+DEFINE_CARBON_ENCODED_DOC_ADD_PROP_BASIC(string, carbon_string_id_t)
 
 CARBON_EXPORT(bool)
-carbon_encoded_doc_add_prop_int16(carbon_encoded_doc_t *doc, carbon_string_id_t key, carbon_int16_t value);
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_add_prop_int32(carbon_encoded_doc_t *doc, carbon_string_id_t key, carbon_int32_t value);
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_add_prop_int64(carbon_encoded_doc_t *doc, carbon_string_id_t key, carbon_int64_t value);
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_add_prop_uint8(carbon_encoded_doc_t *doc, carbon_string_id_t key, carbon_int8_t value);
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_add_prop_uint16(carbon_encoded_doc_t *doc, carbon_string_id_t key, carbon_int16_t value);
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_add_prop_uint32(carbon_encoded_doc_t *doc, carbon_string_id_t key, carbon_int32_t value);
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_add_prop_uint64(carbon_encoded_doc_t *doc, carbon_string_id_t key, carbon_int64_t value);
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_add_prop_number(carbon_encoded_doc_t *doc, carbon_string_id_t key, carbon_number_t value);
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_add_prop_boolean(carbon_encoded_doc_t *doc, carbon_string_id_t key, carbon_boolean_t value);
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_add_prop_string(carbon_encoded_doc_t *doc, carbon_string_id_t key, carbon_string_id_t value);
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_add_prop_null(carbon_encoded_doc_t *doc, carbon_string_id_t key, carbon_string_id_t value);
+carbon_encoded_doc_add_prop_null(carbon_encoded_doc_t *doc, carbon_string_id_t key);
 
 CARBON_EXPORT(bool)
 carbon_encoded_doc_add_prop_object(carbon_encoded_doc_t *doc, carbon_string_id_t key, carbon_encoded_doc_t *value);
 
+#define DEFINE_CARBON_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(name)                                                            \
+CARBON_EXPORT(bool)                                                                                                    \
+carbon_encoded_doc_add_prop_array_##name(carbon_encoded_doc_t *doc, carbon_string_id_t key);
 
+DEFINE_CARBON_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(int8)
+DEFINE_CARBON_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(int16)
+DEFINE_CARBON_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(int32)
+DEFINE_CARBON_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(int64)
+DEFINE_CARBON_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(uint8)
+DEFINE_CARBON_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(uint16)
+DEFINE_CARBON_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(uint32)
+DEFINE_CARBON_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(uint64)
+DEFINE_CARBON_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(number)
+DEFINE_CARBON_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(boolean)
+DEFINE_CARBON_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(string)
+DEFINE_CARBON_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(null)
 
+#define DEFINE_CARBON_ENCODED_DOC_ARRAY_PUSH_TYPE(name, built_in_type)                                                 \
+CARBON_EXPORT(bool)                                                                                                    \
+carbon_encoded_doc_array_push_##name(carbon_encoded_doc_t *doc, carbon_string_id_t key,                                \
+                                     const built_in_type *array, uint32_t array_length);
 
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_add_prop_array_int8(carbon_encoded_doc_prop_array_t *handle, carbon_encoded_doc_t *doc,
-                                       carbon_string_id_t key);
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_add_prop_array_int16(carbon_encoded_doc_prop_array_t *handle, carbon_encoded_doc_t *doc,
-                                       carbon_string_id_t key);
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_add_prop_array_int32(carbon_encoded_doc_prop_array_t *handle, carbon_encoded_doc_t *doc,
-                                        carbon_string_id_t key);
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_add_prop_array_int64(carbon_encoded_doc_prop_array_t *handle, carbon_encoded_doc_t *doc,
-                                        carbon_string_id_t key);
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_add_prop_array_uint8(carbon_encoded_doc_prop_array_t *handle, carbon_encoded_doc_t *doc,
-                                       carbon_string_id_t key);
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_add_prop_array_uint16(carbon_encoded_doc_prop_array_t *handle, carbon_encoded_doc_t *doc,
-                                        carbon_string_id_t key);
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_add_prop_array_uint32(carbon_encoded_doc_prop_array_t *handle, carbon_encoded_doc_t *doc,
-                                        carbon_string_id_t key);
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_add_prop_array_uint64(carbon_encoded_doc_prop_array_t *handle, carbon_encoded_doc_t *doc,
-                                        carbon_string_id_t key);
-
+DEFINE_CARBON_ENCODED_DOC_ARRAY_PUSH_TYPE(int8, carbon_int8_t)
+DEFINE_CARBON_ENCODED_DOC_ARRAY_PUSH_TYPE(int16, carbon_int16_t)
+DEFINE_CARBON_ENCODED_DOC_ARRAY_PUSH_TYPE(int32, carbon_int32_t)
+DEFINE_CARBON_ENCODED_DOC_ARRAY_PUSH_TYPE(int64, carbon_int64_t)
+DEFINE_CARBON_ENCODED_DOC_ARRAY_PUSH_TYPE(uint8, carbon_uint8_t)
+DEFINE_CARBON_ENCODED_DOC_ARRAY_PUSH_TYPE(uint16, carbon_uint16_t)
+DEFINE_CARBON_ENCODED_DOC_ARRAY_PUSH_TYPE(uint32, carbon_uint32_t)
+DEFINE_CARBON_ENCODED_DOC_ARRAY_PUSH_TYPE(uint64, carbon_uint64_t)
+DEFINE_CARBON_ENCODED_DOC_ARRAY_PUSH_TYPE(number, carbon_number_t)
+DEFINE_CARBON_ENCODED_DOC_ARRAY_PUSH_TYPE(boolean, carbon_boolean_t)
+DEFINE_CARBON_ENCODED_DOC_ARRAY_PUSH_TYPE(string, carbon_string_id_t)
 
 CARBON_EXPORT(bool)
-carbon_encoded_doc_add_prop_array_number(carbon_encoded_doc_prop_array_t *handle, carbon_encoded_doc_t *doc,
-                                        carbon_string_id_t key);
+carbon_encoded_doc_array_push_null(carbon_encoded_doc_t *doc, carbon_string_id_t key, uint32_t how_many);
 
 CARBON_EXPORT(bool)
-carbon_encoded_doc_add_prop_array_boolean(carbon_encoded_doc_prop_array_t *handle, carbon_encoded_doc_t *doc,
-                                         carbon_string_id_t key);
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_add_prop_array_string(carbon_encoded_doc_prop_array_t *handle, carbon_encoded_doc_t *doc,
-                                         carbon_string_id_t key);
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_add_prop_array_null(carbon_encoded_doc_prop_array_t *handle, carbon_encoded_doc_t *doc,
-                                       carbon_string_id_t key);
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_array_push_int8(carbon_encoded_doc_prop_array_t *handle, const carbon_int8_t *values,
-                                   uint32_t num_values);
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_array_push_int16(carbon_encoded_doc_prop_array_t *handle, const carbon_int16_t *values,
-                                   uint32_t num_values);
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_array_push_int32(carbon_encoded_doc_prop_array_t *handle, const carbon_int32_t *values,
-                                    uint32_t num_values);
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_array_push_int64(carbon_encoded_doc_prop_array_t *handle, const carbon_int64_t *values,
-                                    uint32_t num_values);
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_array_push_uint8(carbon_encoded_doc_prop_array_t *handle, const carbon_uint8_t *values,
-                                   uint32_t num_values);
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_array_push_uint16(carbon_encoded_doc_prop_array_t *handle, const carbon_uint16_t *values,
-                                    uint32_t num_values);
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_array_push_uint32(carbon_encoded_doc_prop_array_t *handle, const carbon_uint32_t *values,
-                                    uint32_t num_values);
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_array_push_uint64(carbon_encoded_doc_prop_array_t *handle, const carbon_uint64_t *values,
-                                    uint32_t num_values);
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_array_push_number(carbon_encoded_doc_prop_array_t *handle, const carbon_number_t *values,
-                                     uint32_t num_values);
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_array_push_boolean(carbon_encoded_doc_prop_array_t *handle, const carbon_boolean_t *values,
-                                     uint32_t num_values);
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_array_push_string(carbon_encoded_doc_prop_array_t *handle, const carbon_string_id_t *values,
-                                      uint32_t num_values);
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_array_push_null(carbon_encoded_doc_prop_array_t *handle, uint32_t how_many);
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_array_push_object(carbon_encoded_doc_prop_array_t *handle, carbon_object_id_t id);
+carbon_encoded_doc_array_push_object(carbon_encoded_doc_t *doc, carbon_string_id_t key, carbon_object_id_t id);
 
 CARBON_EXPORT(bool)
 carbon_encoded_doc_get_nested_object(carbon_encoded_doc_t *nested, carbon_object_id_t oid, carbon_encoded_doc_t *doc);
 
 CARBON_EXPORT(bool)
-carbon_encoded_doc_print(FILE *file, const carbon_encoded_doc_t *doc);
+carbon_encoded_doc_print(FILE *file, carbon_encoded_doc_t *doc);
 
 
 CARBON_END_DECL

@@ -1,5 +1,11 @@
 ## 0.1.00.07 [2019-XX-XX]
-
+- Add archive visitor framework, see [archive visitor framework](include/carbon/carbon-archive-visitor.h).
+- Add in-memory key-value pair representation of unstructured JSON-like objects 
+  (which still use [object identifiers](include/carbon/carbon-oid.h) and encoded strings) in preparation to 
+  print CARBON files in typical key-value pair structure, see [encoded documents](include/carbon/carbon-encoded-doc.h).
+    - Used [archive visitor framework](include/carbon/carbon-archive-visitor.h) to convert 
+      [CARBON archives](include/carbon/carbon-archive.h) to an
+      [encoded document collection](include/carbon/carbon-encoded-doc.h)
 
 ## 0.1.00.06 [2019-02-23]
 - Completed compressor framework including embedding into carbin archive operations 

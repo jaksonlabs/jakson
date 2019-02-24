@@ -43,40 +43,46 @@ typedef enum
 typedef const carbon_vec_t ofType(carbon_path_entry_t) * path_stack_t;
 
 #define DEFINE_VISIT_BASIC_TYPE_PAIRS(name, built_in_type)                                                             \
-void (*visit_##name##_pairs) (carbon_archive_t *archive, path_stack_t path, const carbon_string_id_t *keys,            \
-                          const built_in_type *values, uint32_t num_pairs, void *capture);
+void (*visit_##name##_pairs) (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,                     \
+                              const carbon_string_id_t *keys, const built_in_type *values, uint32_t num_pairs,         \
+                              void *capture);
 
 #define DEFINE_VISIT_ARRAY_TYPE_PAIRS(name, built_in_type)                                                             \
 carbon_visitor_policy_e (*visit_enter_##name##_array_pairs)(carbon_archive_t *archive, path_stack_t path,              \
-                                                        const carbon_string_id_t *keys, uint32_t num_pairs,            \
+                                                        carbon_object_id_t id, const carbon_string_id_t *keys,         \
+                                                        uint32_t num_pairs,                                            \
                                                         void *capture);                                                \
                                                                                                                        \
-void (*visit_enter_##name##_array_pair)(carbon_archive_t *archive, path_stack_t path, carbon_string_id_t key,          \
-                                    uint32_t entry_idx, uint32_t num_elems, void *capture);                            \
+void (*visit_enter_##name##_array_pair)(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,           \
+                                        carbon_string_id_t key, uint32_t entry_idx, uint32_t num_elems,                \
+                                        void *capture);                                                                \
                                                                                                                        \
-void (*visit_##name##_array_pair) (carbon_archive_t *archive, path_stack_t path, carbon_string_id_t key,               \
-                               uint32_t entry_idx, uint32_t max_entries, const built_in_type *array,                   \
-                               uint32_t array_length, void *capture);                                                  \
+void (*visit_##name##_array_pair) (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,                \
+                                   carbon_string_id_t key, uint32_t entry_idx, uint32_t max_entries,                   \
+                                   const built_in_type *array, uint32_t array_length, void *capture);                  \
                                                                                                                        \
-void (*visit_leave_##name##_array_pair)(carbon_archive_t *archive, path_stack_t path, uint32_t pair_idx,               \
-                                        uint32_t num_pairs, void *capture);                                            \
+void (*visit_leave_##name##_array_pair)(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,           \
+                                        uint32_t pair_idx, uint32_t num_pairs, void *capture);                         \
                                                                                                                        \
-void (*visit_leave_##name##_array_pairs)(carbon_archive_t *archive, path_stack_t path, void *capture);                 \
+void (*visit_leave_##name##_array_pairs)(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,          \
+                                         void *capture);
 
 typedef struct
 {
+    void (*visit_root_object)(carbon_archive_t *archive, carbon_object_id_t id, void *capture);
     void (*before_visit_starts)(carbon_archive_t *archive, void *capture);
     void (*after_visit_ends)(carbon_archive_t *archive, void *capture);
 
-    carbon_visitor_policy_e (*before_object_visit)(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+    carbon_visitor_policy_e (*before_object_visit)(carbon_archive_t *archive, path_stack_t path,
+                                                   carbon_object_id_t parent_id, carbon_object_id_t value_id,
                                                    uint32_t object_idx, uint32_t num_objects, carbon_string_id_t key,
                                                    void *capture);
     void (*after_object_visit)(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                                uint32_t object_idx, uint32_t num_objects, void *capture);
 
-    void (*first_prop_type_group)(carbon_archive_t *archive, path_stack_t path, const carbon_string_id_t *keys,
+    void (*first_prop_type_group)(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id, const carbon_string_id_t *keys,
                                  carbon_basic_type_e type, bool is_array, uint32_t num_pairs, void *capture);
-    void (*next_prop_type_group)(carbon_archive_t *archive, path_stack_t path, const carbon_string_id_t *keys,
+    void (*next_prop_type_group)(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id, const carbon_string_id_t *keys,
                                  carbon_basic_type_e type, bool is_array, uint32_t num_pairs, void *capture);
 
     DEFINE_VISIT_BASIC_TYPE_PAIRS(int8, carbon_int8_t);
@@ -91,7 +97,7 @@ typedef struct
     DEFINE_VISIT_BASIC_TYPE_PAIRS(string, carbon_string_id_t);
     DEFINE_VISIT_BASIC_TYPE_PAIRS(boolean, carbon_boolean_t);
 
-    void (*visit_null_pairs) (carbon_archive_t *archive, path_stack_t path, const carbon_string_id_t *keys,
+    void (*visit_null_pairs) (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id, const carbon_string_id_t *keys,
                               uint32_t num_pairs, void *capture);
 
     DEFINE_VISIT_ARRAY_TYPE_PAIRS(int8, carbon_int8_t);
@@ -107,20 +113,22 @@ typedef struct
     DEFINE_VISIT_ARRAY_TYPE_PAIRS(boolean, carbon_boolean_t);
 
     carbon_visitor_policy_e (*visit_enter_null_array_pairs)(carbon_archive_t *archive, path_stack_t path,
+                                                            carbon_object_id_t id,
                                                             const carbon_string_id_t *keys, uint32_t num_pairs,
                                                             void *capture);
 
-    void (*visit_enter_null_array_pair)(carbon_archive_t *archive, path_stack_t path, carbon_string_id_t key,
-                                        uint32_t entry_idx, uint32_t num_elems, void *capture);
+    void (*visit_enter_null_array_pair)(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+                                        carbon_string_id_t key, uint32_t entry_idx, uint32_t num_elems, void *capture);
 
-    void (*visit_null_array_pair) (carbon_archive_t *archive, path_stack_t path, carbon_string_id_t key,
-                                   uint32_t entry_idx, uint32_t max_entries, carbon_uint32_t num_nulls,
-                                   void *capture);
+    void (*visit_null_array_pair) (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+                                   carbon_string_id_t key, uint32_t entry_idx, uint32_t max_entries,
+                                   carbon_uint32_t num_nulls, void *capture);
 
-    void (*visit_leave_null_array_pair)(carbon_archive_t *archive, path_stack_t path, uint32_t pair_idx,
-                                        uint32_t num_pairs, void *capture);
+    void (*visit_leave_null_array_pair)(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+                                        uint32_t pair_idx, uint32_t num_pairs, void *capture);
 
-    void (*visit_leave_null_array_pairs)(carbon_archive_t *archive, path_stack_t path, void *capture);
+    void (*visit_leave_null_array_pairs)(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+                                         void *capture);
 
 
 

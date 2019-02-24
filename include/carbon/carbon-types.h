@@ -52,6 +52,18 @@ typedef const char *          carbon_cstring_t;
 #define CARBON_NULL_FLOAT                     NAN
 #define CARBON_NULL_OBJECT_MODEL(objectModel) (objectModel->entries.num_elems == 0)
 
+#define CARBON_IS_NULL_STRING(str)   (str == CARBON_NULL_ENCODED_STRING)
+#define CARBON_IS_NULL_BOOLEAN(val)  (val == CARBON_NULL_BOOLEAN)
+#define CARBON_IS_NULL_INT8(val)     (val == CARBON_NULL_INT8)
+#define CARBON_IS_NULL_INT16(val)    (val == CARBON_NULL_INT16)
+#define CARBON_IS_NULL_INT32(val)    (val == CARBON_NULL_INT32)
+#define CARBON_IS_NULL_INT64(val)    (val == CARBON_NULL_INT64)
+#define CARBON_IS_NULL_UINT8(val)    (val == CARBON_NULL_UINT8)
+#define CARBON_IS_NULL_UINT16(val)   (val == CARBON_NULL_UINT16)
+#define CARBON_IS_NULL_UINT32(val)   (val == CARBON_NULL_UINT32)
+#define CARBON_IS_NULL_UINT64(val)   (val == CARBON_NULL_UINT64)
+#define CARBON_IS_NULL_NUMBER(val)   (val == CARBON_NULL_FLOAT)
+
 #define CARBON_LIMITS_INT8_MAX                (CARBON_NULL_INT8 - 1)
 #define CARBON_LIMITS_INT16_MAX               (CARBON_NULL_INT16 - 1)
 #define CARBON_LIMITS_INT32_MAX               (CARBON_NULL_INT32 - 1)

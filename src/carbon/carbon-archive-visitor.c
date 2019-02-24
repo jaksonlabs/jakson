@@ -53,10 +53,12 @@ iterate_objects(carbon_archive_t *archive, const carbon_string_id_t *keys, uint3
 {
     uint32_t vector_length;
     carbon_archive_object_t object;
+    carbon_object_id_t parent_object_id;
     carbon_object_id_t object_id;
     carbon_archive_prop_iter_t  prop_iter;
     carbon_err_t err;
 
+    carbon_archive_value_vector_get_object_id(&parent_object_id, value_iter);
     carbon_archive_value_vector_get_length(&vector_length, value_iter);
     assert(vector_length == num_pairs);
 
@@ -70,7 +72,8 @@ iterate_objects(carbon_archive_t *archive, const carbon_string_id_t *keys, uint3
         if (!is_root_object) {
             carbon_visitor_policy_e visit = CARBON_VISITOR_POLICY_INCLUDE;
             if (visitor->before_object_visit) {
-                visit = visitor->before_object_visit(archive, path_stack, object_id, i, vector_length, keys[i], capture);
+                visit = visitor->before_object_visit(archive, path_stack, parent_object_id, object_id, i,
+                                                     vector_length, keys[i], capture);
             }
             if (visit == CARBON_VISITOR_POLICY_INCLUDE) {
                 push_path(path_stack, keys[i], object_id);
@@ -79,6 +82,7 @@ iterate_objects(carbon_archive_t *archive, const carbon_string_id_t *keys, uint3
                 OPTIONAL_CALL(visitor->after_object_visit, archive, path_stack, object_id, i, vector_length, capture);
             }
         } else {
+            OPTIONAL_CALL(visitor->visit_root_object, archive, object_id, capture);
             iterate_props(archive, &prop_iter, path_stack, visitor, mask, capture, false);
         }
 
@@ -90,7 +94,7 @@ iterate_objects(carbon_archive_t *archive, const carbon_string_id_t *keys, uint3
     if (is_array) {                                                                                                    \
         carbon_visitor_policy_e visit = CARBON_VISITOR_POLICY_INCLUDE;                                                 \
         if (visitor->visit_enter_##name##_array_pairs) {                                                               \
-            visit = visitor->visit_enter_##name##_array_pairs(archive, path_stack, keys, num_pairs, capture);          \
+            visit = visitor->visit_enter_##name##_array_pairs(archive, path_stack, oid, keys, num_pairs, capture);     \
         }                                                                                                              \
         if (visit == CARBON_VISITOR_POLICY_INCLUDE) {                                                                  \
             for (uint32_t prop_idx = 0; prop_idx < num_pairs; prop_idx++)                                              \
@@ -99,20 +103,20 @@ iterate_objects(carbon_archive_t *archive, const carbon_string_id_t *keys, uint3
                 const built_in_type *values = carbon_archive_value_vector_get_##name##_arrays_at(&array_length,        \
                                                                                              prop_idx,                 \
                                                                                              &value_iter);             \
-                OPTIONAL_CALL(visitor->visit_enter_##name##_array_pair, archive, path_stack, keys[prop_idx],           \
+                OPTIONAL_CALL(visitor->visit_enter_##name##_array_pair, archive, path_stack, oid, keys[prop_idx],      \
                               prop_idx, array_length, capture);                                                        \
-                OPTIONAL_CALL(visitor->visit_##name##_array_pair, archive, path_stack, keys[prop_idx],                 \
+                OPTIONAL_CALL(visitor->visit_##name##_array_pair, archive, path_stack, oid, keys[prop_idx],            \
                               prop_idx, num_pairs, values, array_length, capture)                                      \
-                OPTIONAL_CALL(visitor->visit_leave_##name##_array_pair, archive, path_stack, prop_idx, num_pairs,      \
+                OPTIONAL_CALL(visitor->visit_leave_##name##_array_pair, archive, path_stack, oid, prop_idx, num_pairs, \
                                                                         capture);                                      \
             }                                                                                                          \
-            OPTIONAL_CALL(visitor->visit_leave_##name##_array_pairs, archive, path_stack, capture);                    \
+            OPTIONAL_CALL(visitor->visit_leave_##name##_array_pairs, archive, path_stack, oid, capture);               \
         }                                                                                                              \
     } else                                                                                                             \
     {                                                                                                                  \
         if (visitor->visit_##name##_pairs) {                                                                           \
             const built_in_type *values = carbon_archive_value_vector_get_##name##s(NULL, &value_iter);                \
-            visitor->visit_##name##_pairs(archive, path_stack, keys, values, num_pairs, capture);                      \
+            visitor->visit_##name##_pairs(archive, path_stack, oid, keys, values, num_pairs, capture);                 \
         }                                                                                                              \
     }                                                                                                                  \
 }
@@ -147,9 +151,9 @@ iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
             carbon_archive_value_vector_get_object_id(&oid, &value_iter);
 
             if (CARBON_UNLIKELY(first_type_group)) {
-                OPTIONAL_CALL(visitor->first_prop_type_group, archive, path_stack, keys, type, is_array, num_pairs, capture);
+                OPTIONAL_CALL(visitor->first_prop_type_group, archive, path_stack, oid, keys, type, is_array, num_pairs, capture);
             } else {
-                OPTIONAL_CALL(visitor->next_prop_type_group, archive, path_stack, keys, type, is_array, num_pairs, capture);
+                OPTIONAL_CALL(visitor->next_prop_type_group, archive, path_stack, oid, keys, type, is_array, num_pairs, capture);
             }
 
             switch (type) {
@@ -161,25 +165,25 @@ iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
                 if (is_array) {
                     carbon_visitor_policy_e visit = CARBON_VISITOR_POLICY_INCLUDE;
                     if (visitor->visit_enter_null_array_pairs) {
-                        visit = visitor->visit_enter_null_array_pairs(archive, path_stack, keys, num_pairs, capture);
+                        visit = visitor->visit_enter_null_array_pairs(archive, path_stack, oid, keys, num_pairs, capture);
                     }
                     if (visit == CARBON_VISITOR_POLICY_INCLUDE) {
                         const carbon_uint32_t *num_values = carbon_archive_value_vector_get_null_arrays(NULL, &value_iter);
                         for (uint32_t prop_idx = 0; prop_idx < num_pairs; prop_idx++)
                         {
-                            OPTIONAL_CALL(visitor->visit_enter_null_array_pair, archive, path_stack, keys[prop_idx],
+                            OPTIONAL_CALL(visitor->visit_enter_null_array_pair, archive, path_stack, oid, keys[prop_idx],
                                           prop_idx, num_values[prop_idx], capture);
-                            OPTIONAL_CALL(visitor->visit_null_array_pair, archive, path_stack, keys[prop_idx],
+                            OPTIONAL_CALL(visitor->visit_null_array_pair, archive, path_stack, oid, keys[prop_idx],
                                           prop_idx, num_pairs, num_values[prop_idx], capture)
-                            OPTIONAL_CALL(visitor->visit_leave_null_array_pair, archive, path_stack, prop_idx,
+                            OPTIONAL_CALL(visitor->visit_leave_null_array_pair, archive, path_stack, oid, prop_idx,
                                           num_pairs, capture);
                         }
-                        OPTIONAL_CALL(visitor->visit_leave_int8_array_pairs, archive, path_stack, capture);
+                        OPTIONAL_CALL(visitor->visit_leave_int8_array_pairs, archive, path_stack, oid, capture);
                     }
                 }
                 else {
                     if (visitor->visit_null_pairs) {
-                        visitor->visit_null_pairs(archive, path_stack, keys, num_pairs, capture);
+                        visitor->visit_null_pairs(archive, path_stack, oid, keys, num_pairs, capture);
                     }
                 }
                 break;
