@@ -22,12 +22,15 @@
 extern "C" {
 #endif
 
+#include <inttypes.h>
+
 #include "carbon/carbon-common.h"
 #include "carbon/carbon-alloc.h"
 #include "carbon/carbon-bitmap.h"
 #include "carbon/carbon-bloom.h"
 #include "carbon/carbon-archive.h"
 #include "carbon/carbon-archive-iter.h"
+#include "carbon/carbon-archive-visitor.h"
 #include "carbon/carbon-common.h"
 #include "carbon/carbon-convert.h"
 #include "carbon/carbon-columndoc.h"
@@ -49,6 +52,7 @@ extern "C" {
 #include "carbon/carbon-strid-iter.h"
 #include "carbon/carbon-time.h"
 #include "carbon/carbon-types.h"
+#include "carbon/carbon-query.h"
 #include "carbon/carbon-vector.h"
 #include "carbon/alloc/carbon-alloc_tracer.h"
 #include "carbon/strdic/carbon-strdic-async.h"

@@ -1066,7 +1066,7 @@ carbon_archive_value_vector_get_##names(uint32_t *num_values, carbon_archive_val
     if (carbon_archive_value_vector_is_array_type(&is_array, value) &&                                                 \
         carbon_archive_value_vector_is_##name(&type_match, value) && !is_array)                                        \
     {                                                                                                                  \
-        *num_values = value->value_max_idx;                                                                            \
+        CARBON_OPTIONAL_SET(num_values, value->value_max_idx)                                                          \
         return value->data.basic.values.names;                                                                         \
     } else                                                                                                             \
     {                                                                                                                  \
@@ -1099,7 +1099,7 @@ carbon_archive_value_vector_get_null_arrays(uint32_t *num_values, carbon_archive
     if (carbon_archive_value_vector_is_array_type(&is_array, value) &&
         carbon_archive_value_vector_is_null(&type_match, value) && is_array)
     {
-        *num_values = value->value_max_idx;
+        CARBON_OPTIONAL_SET(num_values, value->value_max_idx);
         return value->data.arrays.meta.num_nulls_contained;
     } else
     {

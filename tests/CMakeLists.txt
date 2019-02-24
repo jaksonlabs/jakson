@@ -23,13 +23,18 @@ target_link_libraries(test-fix-map gtest ${TEST_LIBS})
 add_executable(test-archive-iter EXCLUDE_FROM_ALL test-archive-iter.cpp ${LIB_SOURCES})
 target_link_libraries(test-archive-iter gtest ${TEST_LIBS})
 
+add_executable(test-archive-visitor EXCLUDE_FROM_ALL test-archive-visitor.cpp ${LIB_SOURCES})
+target_link_libraries(test-archive-visitor gtest ${TEST_LIBS})
+
 ADD_CUSTOM_TARGET(tests)
 ADD_DEPENDENCIES(tests test-object-ids)
 ADD_DEPENDENCIES(tests test-archive-ops)
 ADD_DEPENDENCIES(tests test-fix-map)
 ADD_DEPENDENCIES(tests test-archive-iter)
+ADD_DEPENDENCIES(tests test-archive-visitor)
 
 add_test(TestObjectIds  ${CMAKE_HOME_DIRECTORY}/build/test-object-ids)
 add_test(TestArchiveOps ${CMAKE_HOME_DIRECTORY}/build/test-archive-ops)
 add_test(TestFixMap ${CMAKE_HOME_DIRECTORY}/build/test-fix-map)
 add_test(TestArchiveIter ${CMAKE_HOME_DIRECTORY}/build/test-archive-iter)
+add_test(TestArchiveVisitor ${CMAKE_HOME_DIRECTORY}/build/test-archive-visitor)
