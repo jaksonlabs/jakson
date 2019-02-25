@@ -251,7 +251,7 @@ bool carbon_archive_from_model(carbon_memblock_t **stream,
     CARBON_NON_NULL_OR_ERROR(stream)
     CARBON_NON_NULL_OR_ERROR(err)
 
-    carbon_memblock_create(stream, 1024);
+    carbon_memblock_create(stream, 1024 * 1024 * 1024);
     carbon_memfile_t memfile;
     carbon_memfile_open(&memfile, *stream, CARBON_MEMFILE_MODE_READWRITE);
 
@@ -269,6 +269,7 @@ bool carbon_archive_from_model(carbon_memblock_t **stream,
     update_record_header(&memfile, record_header_offset, model, record_size);
 
     carbon_memfile_shrink(&memfile);
+
     return true;
 }
 
