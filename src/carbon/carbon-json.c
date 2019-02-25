@@ -345,7 +345,7 @@ bool test_condition_value(carbon_err_t *err, carbon_json_ast_node_value_t *value
 }
 
 CARBON_EXPORT(bool)
-carbon_jest_test_doc(carbon_err_t *err, carbon_json_t *json)
+carbon_json_test_doc(carbon_err_t *err, carbon_json_t *json)
 {
     return (test_condition_value(err, &json->element->value));
 }

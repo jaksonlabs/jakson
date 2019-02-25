@@ -65,7 +65,7 @@ static int convertJs2Model(Js2CabContext *context, FILE *file, bool optimizeForR
 
     CARBON_CONSOLE_WRITE(file, "  - Test document restrictions%s", "");
     carbon_err_t err;
-    status = carbon_jest_test_doc(&err, &jsonAst);
+    status = carbon_json_test_doc(&err, &jsonAst);
     if (!status) {
         CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
         carbon_error_print(&err);

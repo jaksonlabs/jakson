@@ -101,7 +101,7 @@ carbon_json_parse(CARBON_NULLABLE carbon_json_t *json, CARBON_NULLABLE carbon_js
                   carbon_json_parser_t *parser, const char *input);
 
 CARBON_EXPORT(bool)
-carbon_jest_test_doc(carbon_err_t *err, carbon_json_t *json);
+carbon_json_test_doc(carbon_err_t *err, carbon_json_t *json);
 
 typedef enum {
     CARBON_JSON_AST_NODE_ELEMENT_PARENT_TYPE_JSON,

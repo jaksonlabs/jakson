@@ -212,7 +212,7 @@ carbon_archive_stream_from_json(carbon_memblock_t **stream,
         return false;
     }
 
-    if (!carbon_jest_test_doc(err, &json)) {
+    if (!carbon_json_test_doc(err, &json)) {
         return false;
     }
 
@@ -833,7 +833,7 @@ static bool write_object_array_props(carbon_memfile_t *memfile, carbon_err_t *er
 
         for (size_t i = 0; i < object_key_columns->num_elems; i++) {
             carbon_columndoc_columngroup_t *column_group = CARBON_VECTOR_GET(object_key_columns, i, carbon_columndoc_columngroup_t);
-            carbon_off_t this_column_offfset_relative = CARBON_MEMFILE_TELL(memfile) - root_object_header_offset;
+            carbon_off_t this_column_offset_relative = CARBON_MEMFILE_TELL(memfile) - root_object_header_offset;
 
             /* write an object-id for each position number */
             size_t max_pos = 0;
@@ -862,7 +862,7 @@ static bool write_object_array_props(carbon_memfile_t *memfile, carbon_err_t *er
 
             carbon_off_t continue_write = CARBON_MEMFILE_TELL(memfile);
             carbon_memfile_seek(memfile, column_offsets + i * sizeof(carbon_off_t));
-            carbon_memfile_write(memfile, &this_column_offfset_relative, sizeof(carbon_off_t));
+            carbon_memfile_write(memfile, &this_column_offset_relative, sizeof(carbon_off_t));
             carbon_memfile_seek(memfile, continue_write);
 
             carbon_off_t offset_column_to_columns = continue_write;
