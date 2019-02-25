@@ -1937,6 +1937,7 @@ bool carbon_archive_open(carbon_archive_t *out,
 
                 out->info.string_table_size = header.root_object_header_offset - stringDicStart;
                 out->info.record_table_size = fileEnd - header.root_object_header_offset;
+                out->query_index_id_to_offset = NULL;
             }
         }
     }
@@ -1957,15 +1958,43 @@ CARBON_EXPORT(bool)
 carbon_archive_close(carbon_archive_t *archive)
 {
     CARBON_NON_NULL_OR_ERROR(archive);
+    carbon_query_drop_index_id_to_offset(archive->query_index_id_to_offset);
+    archive->query_index_id_to_offset = NULL;
     free(archive->diskFilePath);
     carbon_memblock_drop(archive->record_table.recordDataBase);
     return true;
 }
 
 CARBON_EXPORT(bool)
+carbon_archive_drop_indexes(carbon_archive_t *archive)
+{
+    carbon_query_drop_index_id_to_offset(archive->query_index_id_to_offset);
+    archive->query_index_id_to_offset = NULL;
+    return true;
+}
+
+CARBON_EXPORT(bool)
 carbon_archive_query(carbon_query_t *query, carbon_archive_t *archive)
 {
-    return carbon_query_create(query, archive);;
+    if (carbon_query_create(query, archive)) {
+        bool has_index = false;
+        carbon_archive_has_query_index(&has_index, archive);
+        if (!has_index) {
+            carbon_query_create_index_id_to_offset(&archive->query_index_id_to_offset, query);
+        }
+        return true;
+    } else {
+        return false;
+    }
+}
+
+CARBON_EXPORT(bool)
+carbon_archive_has_query_index(bool *state, carbon_archive_t *archive)
+{
+    CARBON_NON_NULL_OR_ERROR(state)
+    CARBON_NON_NULL_OR_ERROR(archive)
+    *state = (archive->query_index_id_to_offset != NULL);
+    return true;
 }
 
 static bool init_decompressor(carbon_compressor_t *strategy, uint8_t flags)

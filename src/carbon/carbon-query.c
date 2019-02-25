@@ -19,6 +19,19 @@
 #include <carbon/carbon-string-pred.h>
 #include "carbon/carbon-query.h"
 
+typedef struct
+{
+    carbon_off_t       offset;
+    uint32_t           strlen;
+} carbon_id_to_offset_arg_t;
+
+typedef struct carbon_query_index_id_to_offset
+{
+    carbon_hashtable_t ofMapping(carbon_string_id_t, carbon_id_to_offset_arg_t) mapping;
+    FILE *disk_file;
+    size_t disk_file_size;
+
+} carbon_query_index_id_to_offset_t;
 
 #define OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(num_pairs, obj, bit_flag_name, offset_name)                                \
 {                                                                                                                      \
@@ -67,9 +80,80 @@ carbon_query_scan_strids(carbon_strid_iter_t *it, carbon_query_t *query)
     return carbon_strid_iter_open(it, &query->err, query->archive);
 }
 
+CARBON_EXPORT(bool)
+carbon_query_create_index_id_to_offset(carbon_query_index_id_to_offset_t **index,
+                                     carbon_query_t *query)
+{
+    CARBON_NON_NULL_OR_ERROR(index)
+    CARBON_NON_NULL_OR_ERROR(query)
 
-CARBON_EXPORT(char *)
-carbon_query_fetch_string_by_id(carbon_query_t *query, carbon_string_id_t id)
+    carbon_strid_iter_t  strid_iter;
+    carbon_strid_info_t *info;
+    size_t               vector_len;
+    bool                 status;
+    bool                 success;
+
+    carbon_query_index_id_to_offset_t *result = malloc(sizeof(carbon_query_index_id_to_offset_t));
+    carbon_hashtable_create(&result->mapping, &query->err, sizeof(carbon_string_id_t), sizeof(carbon_id_to_offset_arg_t), 5000);
+    result->disk_file = fopen(query->archive->diskFilePath, "r");
+    if (!result->disk_file) {
+        CARBON_ERROR(&query->err, CARBON_ERR_FOPEN_FAILED)
+        return false;
+    } else {
+        fseek(result->disk_file, 0, SEEK_END);
+        result->disk_file_size = ftell(result->disk_file);
+        fseek(result->disk_file, 0, SEEK_SET);
+    }
+
+    status = carbon_query_scan_strids(&strid_iter, query);
+
+    if (status) {
+        while (carbon_strid_iter_next(&success, &info, &query->err, &vector_len, &strid_iter)) {
+            for (size_t i = 0; i < vector_len; i++) {
+                carbon_id_to_offset_arg_t arg = {
+                    .offset = info[i].offset,
+                    .strlen = info[i].strlen
+                };
+                carbon_hashtable_insert_or_update(&result->mapping, &info[i].id, &arg, 1);
+            }
+        }
+        *index = result;
+        return true;
+    } else {
+        CARBON_ERROR(&query->err, CARBON_ERR_SCAN_FAILED);
+        return false;
+    }
+
+
+}
+
+CARBON_EXPORT(void)
+carbon_query_drop_index_id_to_offset(carbon_query_index_id_to_offset_t *index)
+{
+    if (index) {
+        carbon_hashtable_drop(&index->mapping);
+        fclose(index->disk_file);
+        free(index);
+    }
+}
+
+static char *
+fetch_string_from_file(bool *decode_success, FILE *disk_file, size_t offset, size_t string_len, carbon_err_t *err, carbon_archive_t *archive)
+{
+    char *result = malloc(string_len + 1);
+    memset(result, 0, string_len + 1);
+
+    fseek(disk_file, offset, SEEK_SET);
+
+    bool decode_result = carbon_compressor_decode(err, &archive->string_table.compressor,
+                                                  result, string_len, disk_file);
+
+    *decode_success = decode_result;
+    return result;
+}
+
+static char *
+fetch_string_by_id_via_scan(carbon_query_t *query, carbon_string_id_t id)
 {
     assert(query);
 
@@ -85,20 +169,18 @@ carbon_query_fetch_string_by_id(carbon_query_t *query, carbon_string_id_t id)
         while (carbon_strid_iter_next(&success, &info, &query->err, &vector_len, &strid_iter)) {
             for (size_t i = 0; i < vector_len; i++) {
                 if (info[i].id == id) {
-                    char *result = malloc(info[i].strlen + 1);
-                    memset(result, 0, info[i].strlen + 1);
-
-                    fseek(strid_iter.disk_file, info[i].offset, SEEK_SET);
-
-                    bool decode_result = carbon_compressor_decode(&query->err, &query->archive->string_table.compressor,
-                                                                  result, info[i].strlen, strid_iter.disk_file);
+                    bool decode_result;
+                    char *result = fetch_string_from_file(&decode_result, strid_iter.disk_file, info[i].offset,
+                                           info[i].strlen, &query->err, query->archive);
 
                     bool close_iter_result = carbon_strid_iter_close(&strid_iter);
 
-                    if (!decode_result || !close_iter_result) {
-                        free (result);
+                    if (!success || !close_iter_result) {
+                        if (result) {
+                            free (result);
+                        }
                         CARBON_ERROR(&query->err, !decode_result ? CARBON_ERR_DECOMPRESSFAILED :
-                                                    CARBON_ERR_ITERATORNOTCLOSED);
+                                                  CARBON_ERR_ITERATORNOTCLOSED);
                         return NULL;
                     } else {
                         return result;
@@ -111,6 +193,46 @@ carbon_query_fetch_string_by_id(carbon_query_t *query, carbon_string_id_t id)
     } else {
         CARBON_ERROR(&query->err, CARBON_ERR_SCAN_FAILED);
         return NULL;
+    }
+}
+
+static char *
+fetch_string_by_id_via_index(carbon_query_t *query, carbon_query_index_id_to_offset_t *index, carbon_string_id_t id)
+{
+    const carbon_id_to_offset_arg_t *args = carbon_hashtable_get_value(&index->mapping, &id);
+    if (args) {
+        if (args->offset < index->disk_file_size) {
+            bool decode_result;
+            char *result = fetch_string_from_file(&decode_result, index->disk_file, args->offset,
+                                                  args->strlen, &query->err, query->archive);
+            if (decode_result) {
+                return result;
+            } else {
+                CARBON_ERROR(&query->err, CARBON_ERR_DECOMPRESSFAILED);
+                return NULL;
+            }
+
+        } else {
+            CARBON_ERROR(&query->err, CARBON_ERR_INDEXCORRUPTED_OFFSET);
+            return NULL;
+        }
+    } else {
+        CARBON_ERROR(&query->err, CARBON_ERR_NOTFOUND);
+        return NULL;
+    }
+}
+
+CARBON_EXPORT(char *)
+carbon_query_fetch_string_by_id(carbon_query_t *query, carbon_string_id_t id)
+{
+    assert(query);
+
+    bool has_index;
+    carbon_archive_has_query_index(&has_index, query->archive);
+    if (has_index) {
+        return fetch_string_by_id_via_index(query, query->archive->query_index_id_to_offset, id);
+    } else {
+        return fetch_string_by_id_via_scan(query, id);
     }
 }
 

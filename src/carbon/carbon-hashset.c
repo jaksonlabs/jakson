@@ -360,20 +360,17 @@ carbon_hashset_contains_key(carbon_hashset_t *map, const void *key)
     carbon_hashset_lock(map);
 
     uint32_t bucket_idx = HASHCODE_OF(map->key_data.elem_size, key) % map->table.num_elems;
-    uint32_t actual_idx = bucket_idx;
     bool bucket_found = false;
 
     for (uint32_t k = bucket_idx; !bucket_found && k < map->table.num_elems; k++)
     {
         const carbon_hashset_bucket_t *bucket = CARBON_VECTOR_GET(&map->table, k, carbon_hashset_bucket_t);
         bucket_found = bucket->in_use_flag && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
-        actual_idx = k;
     }
     for (uint32_t k = 0; !bucket_found && k < bucket_idx; k++)
     {
         const carbon_hashset_bucket_t *bucket = CARBON_VECTOR_GET(&map->table, k, carbon_hashset_bucket_t);
         bucket_found = bucket->in_use_flag && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
-        actual_idx = k;
     }
 
     result = bucket_found;

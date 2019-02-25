@@ -22,6 +22,7 @@
 #include "carbon-archive.h"
 #include "carbon-strid-iter.h"
 #include "carbon-string-pred.h"
+#include "carbon-hashtable.h"
 
 CARBON_BEGIN_DECL
 
@@ -31,6 +32,8 @@ typedef struct carbon_query
     carbon_io_context_t *context;
     carbon_err_t         err;
 } carbon_query_t;
+
+typedef struct carbon_query_index_id_to_offset carbon_query_index_id_to_offset_t;
 
 CARBON_DEFINE_GET_ERROR_FUNCTION(query, carbon_query_t, query)
 
@@ -42,6 +45,13 @@ carbon_query_drop(carbon_query_t *query);
 
 CARBON_EXPORT(bool)
 carbon_query_scan_strids(carbon_strid_iter_t *it, carbon_query_t *query);
+
+CARBON_EXPORT(bool)
+carbon_query_create_index_id_to_offset(carbon_query_index_id_to_offset_t **index,
+                                       carbon_query_t *query);
+
+CARBON_EXPORT(void)
+carbon_query_drop_index_id_to_offset(carbon_query_index_id_to_offset_t *index);
 
 CARBON_EXPORT(char *)
 carbon_query_fetch_string_by_id(carbon_query_t *query, carbon_string_id_t id);

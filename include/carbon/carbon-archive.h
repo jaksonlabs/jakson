@@ -32,6 +32,8 @@ typedef struct carbon_query carbon_query_t; /* forwarded from 'carbon-query.h' *
 
 typedef union carbon_archive_dic_flags carbon_archive_dic_flags_t;
 
+typedef struct carbon_query_index_id_to_offset carbon_query_index_id_to_offset_t;
+
 typedef struct carbon_archive
 {
     carbon_archive_info_t         info;
@@ -39,6 +41,8 @@ typedef struct carbon_archive
     carbon_archive_string_table_t string_table;
     carbon_archive_record_table_t record_table;
     carbon_err_t                  err;
+
+    carbon_query_index_id_to_offset_t *query_index_id_to_offset;
 } carbon_archive_t;
 
 
@@ -85,7 +89,13 @@ CARBON_EXPORT(bool)
 carbon_archive_close(carbon_archive_t *archive);
 
 CARBON_EXPORT(bool)
+carbon_archive_drop_indexes(carbon_archive_t *archive);
+
+CARBON_EXPORT(bool)
 carbon_archive_query(carbon_query_t *query, carbon_archive_t *archive);
+
+CARBON_EXPORT(bool)
+carbon_archive_has_query_index(bool *state, carbon_archive_t *archive);
 
 
 

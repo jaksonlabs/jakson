@@ -95,6 +95,7 @@ CARBON_BEGIN_DECL
 #define CARBON_ERR_ITER_OBJECT_NEEDED 68      /** Illegal state: iteration over object issued, but collection found */
 #define CARBON_ERR_ITER_COLLECTION_NEEDED 69  /** Illegal state: iteration over collection issued, but object found */
 #define CARBON_ERR_TYPEMISMATCH 70            /** Type mismatch */
+#define CARBON_ERR_INDEXCORRUPTED_OFFSET 71   /** Index is corrupted: requested offset is outside file bounds */
 
 static const char *const _carbon_err_str[] = {
     "No error",
@@ -167,7 +168,8 @@ static const char *const _carbon_err_str[] = {
     "Unable to get value: type is not non-array string",
     "Illegal state: iteration over object issued, but collection found",
     "Illegal state: iteration over collection issued, but object found",
-    "Type mismatch"
+    "Type mismatch",
+    "Index is corrupted: requested offset is outside file bounds"
 };
 
 #define CARBON_ERRSTR_ILLEGAL_CODE "illegal error code"

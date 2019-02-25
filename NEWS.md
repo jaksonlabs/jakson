@@ -6,6 +6,12 @@
     - Used [archive visitor framework](include/carbon/carbon-archive-visitor.h) to convert 
       [CARBON archives](include/carbon/carbon-archive.h) to an
       [encoded document collection](include/carbon/carbon-encoded-doc.h)
+- *Indexed String Fetch*: Add archive-local index that maps from string ids to the offsets in the archive file where 
+  the strings associated with those ids are located. Using this index avoids a *full scan* to find the string offset
+  in the file. However, such an index is automatically created (once) `carbon_archive_query` is called. To
+  avoid creation of this index, the index creation can be bypassed by calling `carbon_query_create` on the
+  desired archive. Additionally, an index can be dropped during the lifetime of an archive by 
+  calling `carbon_archive_drop_indexes`. Once an archive is closed, indexes gets dropped automatically (if any). 
 
 ## 0.1.00.06 [2019-02-23]
 - Completed compressor framework including embedding into carbin archive operations 
