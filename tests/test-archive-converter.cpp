@@ -11,7 +11,7 @@ TEST(ConverterTest, PerformConversion)
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
      * below the projects root directory (e.g., 'build/') */
     //status = carbon_archive_open(&archive, "../tests/assets/test-archive.carbon");
-    status = carbon_archive_open(&archive, "../tests/assets/test-archive.carbon");
+    status = carbon_archive_open(&archive, "../mag_papers_excerpt.carbon");
     ASSERT_TRUE(status);
 
     carbon_archive_converter(&collection, &archive);

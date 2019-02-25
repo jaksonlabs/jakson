@@ -16,6 +16,8 @@
  */
 
 #include <carbon/carbon-archive-visitor.h>
+#include <carbon/carbon-hashtable.h>
+#include <carbon/carbon-hashset.h>
 #include "carbon/carbon-archive-visitor.h"
 #include "carbon/carbon-query.h"
 
@@ -51,6 +53,8 @@ iterate_objects(carbon_archive_t *archive, const carbon_string_id_t *keys, uint3
                 carbon_vec_t ofType(carbon_path_entry_t) *path_stack, carbon_archive_visitor_t *visitor,
                 int mask, void *capture, bool is_root_object)
 {
+    CARBON_UNUSED(num_pairs);
+
     uint32_t vector_length;
     carbon_archive_object_t object;
     carbon_object_id_t parent_object_id;
@@ -94,7 +98,7 @@ iterate_objects(carbon_archive_t *archive, const carbon_string_id_t *keys, uint3
     if (is_array) {                                                                                                    \
         carbon_visitor_policy_e visit = CARBON_VISITOR_POLICY_INCLUDE;                                                 \
         if (visitor->visit_enter_##name##_array_pairs) {                                                               \
-            visit = visitor->visit_enter_##name##_array_pairs(archive, path_stack, oid, keys, num_pairs, capture);     \
+            visit = visitor->visit_enter_##name##_array_pairs(archive, path_stack, this_object_oid, keys, num_pairs, capture);     \
         }                                                                                                              \
         if (visit == CARBON_VISITOR_POLICY_INCLUDE) {                                                                  \
             for (uint32_t prop_idx = 0; prop_idx < num_pairs; prop_idx++)                                              \
@@ -103,22 +107,30 @@ iterate_objects(carbon_archive_t *archive, const carbon_string_id_t *keys, uint3
                 const built_in_type *values = carbon_archive_value_vector_get_##name##_arrays_at(&array_length,        \
                                                                                              prop_idx,                 \
                                                                                              &value_iter);             \
-                OPTIONAL_CALL(visitor->visit_enter_##name##_array_pair, archive, path_stack, oid, keys[prop_idx],      \
+                OPTIONAL_CALL(visitor->visit_enter_##name##_array_pair, archive, path_stack, this_object_oid, keys[prop_idx],      \
                               prop_idx, array_length, capture);                                                        \
-                OPTIONAL_CALL(visitor->visit_##name##_array_pair, archive, path_stack, oid, keys[prop_idx],            \
+                OPTIONAL_CALL(visitor->visit_##name##_array_pair, archive, path_stack, this_object_oid, keys[prop_idx],            \
                               prop_idx, num_pairs, values, array_length, capture)                                      \
-                OPTIONAL_CALL(visitor->visit_leave_##name##_array_pair, archive, path_stack, oid, prop_idx, num_pairs, \
+                OPTIONAL_CALL(visitor->visit_leave_##name##_array_pair, archive, path_stack, this_object_oid, prop_idx, num_pairs, \
                                                                         capture);                                      \
             }                                                                                                          \
-            OPTIONAL_CALL(visitor->visit_leave_##name##_array_pairs, archive, path_stack, oid, capture);               \
+            OPTIONAL_CALL(visitor->visit_leave_##name##_array_pairs, archive, path_stack, this_object_oid, capture);               \
         }                                                                                                              \
     } else                                                                                                             \
     {                                                                                                                  \
         if (visitor->visit_##name##_pairs) {                                                                           \
             const built_in_type *values = carbon_archive_value_vector_get_##name##s(NULL, &value_iter);                \
-            visitor->visit_##name##_pairs(archive, path_stack, oid, keys, values, num_pairs, capture);                 \
+            visitor->visit_##name##_pairs(archive, path_stack, this_object_oid, keys, values, num_pairs, capture);                 \
         }                                                                                                              \
     }                                                                                                                  \
+}
+
+#define SET_NESTED_ARRAY_SWITCH_CASE(name, built_in_type)                                                              \
+{                                                                                                                      \
+    const built_in_type *values = carbon_archive_column_entry_get_##name(&entry_length, &entry_iter);                  \
+    OPTIONAL_CALL(visitor->visit_object_array_object_property_##name,                                                  \
+                  archive, path_stack, this_object_oid, group_key, current_nested_object_id,                           \
+                  current_column_name, values, entry_length, capture);                                                 \
 }
 
 static void
@@ -126,7 +138,7 @@ iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
               carbon_vec_t ofType(carbon_path_entry_t) *path_stack, carbon_archive_visitor_t *visitor,
               int mask, void *capture, bool is_root_object)
 {
-    carbon_object_id_t oid;
+    carbon_object_id_t this_object_oid;
     carbon_archive_value_vector_t value_iter;
     carbon_basic_type_e type;
     bool is_array;
@@ -135,11 +147,8 @@ iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
     carbon_archive_prop_iter_mode_e iter_type;
     carbon_archive_collection_iter_t collection_iter;
     bool first_type_group = true;
-//    uint32_t num_column_groups;
-//    carbon_archive_column_group_iter_t group_iter;
-//    carbon_archive_column_iter_t column_iter;
-//    carbon_archive_column_entry_iter_t entry_iter;
-//    carbon_err_t err;
+
+    carbon_archive_value_vector_get_object_id(&this_object_oid, &value_iter);
 
     while (carbon_archive_prop_iter_next(&iter_type, &value_iter, &collection_iter, prop_iter)) {
 
@@ -148,12 +157,12 @@ iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
             keys = carbon_archive_value_vector_get_keys(&num_pairs, &value_iter);
             carbon_archive_value_vector_is_array_type(&is_array, &value_iter);
             carbon_archive_value_vector_get_basic_type(&type, &value_iter);
-            carbon_archive_value_vector_get_object_id(&oid, &value_iter);
+            carbon_archive_value_vector_get_object_id(&this_object_oid, &value_iter);
 
             if (CARBON_UNLIKELY(first_type_group)) {
-                OPTIONAL_CALL(visitor->first_prop_type_group, archive, path_stack, oid, keys, type, is_array, num_pairs, capture);
+                OPTIONAL_CALL(visitor->first_prop_type_group, archive, path_stack, this_object_oid, keys, type, is_array, num_pairs, capture);
             } else {
-                OPTIONAL_CALL(visitor->next_prop_type_group, archive, path_stack, oid, keys, type, is_array, num_pairs, capture);
+                OPTIONAL_CALL(visitor->next_prop_type_group, archive, path_stack, this_object_oid, keys, type, is_array, num_pairs, capture);
             }
 
             switch (type) {
@@ -165,25 +174,25 @@ iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
                 if (is_array) {
                     carbon_visitor_policy_e visit = CARBON_VISITOR_POLICY_INCLUDE;
                     if (visitor->visit_enter_null_array_pairs) {
-                        visit = visitor->visit_enter_null_array_pairs(archive, path_stack, oid, keys, num_pairs, capture);
+                        visit = visitor->visit_enter_null_array_pairs(archive, path_stack, this_object_oid, keys, num_pairs, capture);
                     }
                     if (visit == CARBON_VISITOR_POLICY_INCLUDE) {
                         const carbon_uint32_t *num_values = carbon_archive_value_vector_get_null_arrays(NULL, &value_iter);
                         for (uint32_t prop_idx = 0; prop_idx < num_pairs; prop_idx++)
                         {
-                            OPTIONAL_CALL(visitor->visit_enter_null_array_pair, archive, path_stack, oid, keys[prop_idx],
+                            OPTIONAL_CALL(visitor->visit_enter_null_array_pair, archive, path_stack, this_object_oid, keys[prop_idx],
                                           prop_idx, num_values[prop_idx], capture);
-                            OPTIONAL_CALL(visitor->visit_null_array_pair, archive, path_stack, oid, keys[prop_idx],
+                            OPTIONAL_CALL(visitor->visit_null_array_pair, archive, path_stack, this_object_oid, keys[prop_idx],
                                           prop_idx, num_pairs, num_values[prop_idx], capture)
-                            OPTIONAL_CALL(visitor->visit_leave_null_array_pair, archive, path_stack, oid, prop_idx,
+                            OPTIONAL_CALL(visitor->visit_leave_null_array_pair, archive, path_stack, this_object_oid, prop_idx,
                                           num_pairs, capture);
                         }
-                        OPTIONAL_CALL(visitor->visit_leave_int8_array_pairs, archive, path_stack, oid, capture);
+                        OPTIONAL_CALL(visitor->visit_leave_int8_array_pairs, archive, path_stack, this_object_oid, capture);
                     }
                 }
                 else {
                     if (visitor->visit_null_pairs) {
-                        visitor->visit_null_pairs(archive, path_stack, oid, keys, num_pairs, capture);
+                        visitor->visit_null_pairs(archive, path_stack, this_object_oid, keys, num_pairs, capture);
                     }
                 }
                 break;
@@ -227,174 +236,162 @@ iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
             pop_path(path_stack);
             first_type_group = false;
         } else {
-            printf(", \"xxx\": { }"); // TODO
+            carbon_archive_column_group_iter_t group_iter;
+            uint32_t num_column_groups;
+            keys = carbon_archive_collection_iter_get_keys(&num_column_groups, &collection_iter);
+
+            bool *skip_groups_by_key = malloc(num_column_groups * sizeof(bool));
+            CARBON_ZERO_MEMORY(skip_groups_by_key, num_column_groups * sizeof(bool));
+
+            if (visitor->before_visit_object_array) {
+                for (uint32_t i = 0; i < num_column_groups; i++) {
+                    carbon_visitor_policy_e policy = visitor->before_visit_object_array(archive, path_stack,
+                                                                                        this_object_oid, keys[i],
+                                                                                        capture);
+                    skip_groups_by_key[i] = policy == CARBON_VISITOR_POLICY_EXCLUDE;
+                }
+            }
+
+            uint32_t current_group_idx = 0;
+            while (carbon_archive_collection_next_column_group(&group_iter, &collection_iter)) {
+                if (!skip_groups_by_key[current_group_idx]) {
+                    uint32_t num_column_group_objs;
+                    carbon_archive_column_iter_t column_iter;
+                    carbon_string_id_t group_key = keys[current_group_idx];
+                    const carbon_object_id_t *column_group_object_ids = carbon_archive_column_group_get_object_ids(&num_column_group_objs, &group_iter);
+                    bool *skip_objects = malloc(num_column_group_objs * sizeof(bool));
+                    CARBON_ZERO_MEMORY(skip_objects, num_column_group_objs * sizeof(bool));
+
+                    if (visitor->before_visit_object_array_objects) {
+                        visitor->before_visit_object_array_objects(skip_objects, archive, path_stack, this_object_oid,
+                                                                   keys[current_group_idx],
+                                                                   column_group_object_ids, num_column_group_objs,
+                                                                   capture);
+                    }
+
+                    uint32_t current_column_group_obj_idx = 0;
+
+                    while(carbon_archive_column_group_next_column(&column_iter, &group_iter))
+                    {
+                        if (!skip_objects[current_column_group_obj_idx])
+                        {
+                            carbon_string_id_t current_column_name;
+                            carbon_basic_type_e current_column_entry_type;
+
+                            carbon_archive_column_get_name(&current_column_name, &current_column_entry_type, &column_iter);
+
+                            bool skip_column = false;
+                            if (visitor->before_visit_object_array_object_property)
+                            {
+                                carbon_visitor_policy_e policy = visitor->before_visit_object_array_object_property(archive, path_stack,
+                                                             this_object_oid, group_key,
+                                                             current_column_name, current_column_entry_type, capture);
+                                skip_column = policy == CARBON_VISITOR_POLICY_EXCLUDE;
+                            }
+
+                            if (!skip_column)
+                            {
+                                uint32_t num_positions;
+                                const uint32_t *entry_positions = carbon_archive_column_get_entry_positions(&num_positions, &column_iter);
+                                carbon_archive_column_entry_iter_t entry_iter;
+
+                                carbon_object_id_t *entry_object_containments = malloc(num_positions * sizeof(carbon_object_id_t));
+                                for (uint32_t m = 0; m < num_positions; m++)
+                                {
+                                    entry_object_containments[m] = column_group_object_ids[entry_positions[m]];
+                                }
+
+                                uint32_t current_entry_idx = 0;
+                                while(carbon_archive_column_next_entry(&entry_iter, &column_iter)) {
+
+                                    carbon_object_id_t current_nested_object_id = entry_object_containments[current_entry_idx];
+                                    uint32_t entry_length;
+
+                                    switch (current_column_entry_type) {
+                                    case CARBON_BASIC_TYPE_INT8: {
+                                        SET_NESTED_ARRAY_SWITCH_CASE(int8s, carbon_int8_t)
+                                    } break;
+                                    case CARBON_BASIC_TYPE_INT16: {
+                                        SET_NESTED_ARRAY_SWITCH_CASE(int16s, carbon_int16_t)
+                                    } break;
+                                    case CARBON_BASIC_TYPE_INT32: {
+                                        SET_NESTED_ARRAY_SWITCH_CASE(int32s, carbon_int32_t)
+                                    } break;
+                                    case CARBON_BASIC_TYPE_INT64: {
+                                        SET_NESTED_ARRAY_SWITCH_CASE(int64s, carbon_int64_t)
+                                    } break;
+                                    case CARBON_BASIC_TYPE_UINT8: {
+                                        SET_NESTED_ARRAY_SWITCH_CASE(uint8s, carbon_uint8_t)
+                                    } break;
+                                    case CARBON_BASIC_TYPE_UINT16: {
+                                        SET_NESTED_ARRAY_SWITCH_CASE(uint16s, carbon_uint16_t)
+                                    } break;
+                                    case CARBON_BASIC_TYPE_UINT32: {
+                                        SET_NESTED_ARRAY_SWITCH_CASE(uint32s, carbon_uint32_t)
+                                    } break;
+                                    case CARBON_BASIC_TYPE_UINT64: {
+                                        SET_NESTED_ARRAY_SWITCH_CASE(uint64s, carbon_uint64_t)
+                                    } break;
+                                    case CARBON_BASIC_TYPE_NUMBER: {
+                                        SET_NESTED_ARRAY_SWITCH_CASE(numbers, carbon_number_t)
+                                    } break;
+                                    case CARBON_BASIC_TYPE_STRING: {
+                                        SET_NESTED_ARRAY_SWITCH_CASE(strings, carbon_string_id_t)
+                                    } break;
+                                    case CARBON_BASIC_TYPE_BOOLEAN: {
+                                        SET_NESTED_ARRAY_SWITCH_CASE(booleans, carbon_boolean_t)
+                                    } break;
+                                    case CARBON_BASIC_TYPE_NULL: {
+                                        SET_NESTED_ARRAY_SWITCH_CASE(nulls, carbon_uint32_t)
+                                    } break;
+                                    case CARBON_BASIC_TYPE_OBJECT: {
+                                        carbon_archive_column_entry_object_iter_t iter;
+                                        const carbon_archive_object_t *archive_object;
+                                        carbon_archive_column_entry_get_objects(&iter, &entry_iter);
+
+                                        while ((archive_object = carbon_archive_column_entry_object_iter_next_object(&iter)) != NULL) {
+                                            carbon_object_id_t id;
+                                            carbon_archive_object_get_object_id(&id, archive_object);
+
+                                            bool skip_object = false;
+                                            if (visitor->before_object_array_object_property_object) {
+                                                carbon_visitor_policy_e policy = visitor->before_object_array_object_property_object(archive,
+                                                path_stack, this_object_oid, group_key, current_nested_object_id, current_column_name, id, capture);
+                                                skip_object = policy == CARBON_VISITOR_POLICY_EXCLUDE;
+                                            }
+
+                                            if(!skip_object)
+                                            {
+                                                carbon_err_t err;
+                                                carbon_archive_prop_iter_t nested_obj_prop_iter;
+                                                carbon_archive_prop_iter_from_object(&nested_obj_prop_iter, mask,
+                                                                                     &err, archive_object);
+                                                iterate_props(archive, &nested_obj_prop_iter, path_stack, visitor, mask, capture, false);
+                                            }
+                                        }
+                                    } break;
+                                    default:
+                                        break;
+                                    }
+
+                                    current_entry_idx++;
+                                }
+
+
+                                free(entry_object_containments);
+                            }
+                        }
+                        current_column_group_obj_idx++;
+                    }
+
+                    free(skip_objects);
+                }
+                current_group_idx++;
+            }
+            free(skip_groups_by_key);
         }
     }
 }
-
-//    else {
-//            keys = carbon_archive_collection_iter_get_keys(&num_column_groups, &collection_iter);
-//            ASSERT_TRUE(keys != NULL);
-//            printf("\t\t{ column groups for keys:");
-//            for (uint32_t i = 0; i < num_column_groups; i++) {
-//                printf("%" PRIu64 " ", keys[i]);
-//            }
-//            printf("}\n");
-//            while (carbon_archive_collection_next_column_group(&group_iter, &collection_iter)) {
-//
-//                uint32_t num_objs;
-//                const carbon_object_id_t *ids = carbon_archive_column_group_get_object_ids(&num_objs, &group_iter);
-//
-//                printf("\t\t{ column groups object ids:");
-//                for (uint32_t i = 0; i < num_objs; i++) {
-//                    printf("%" PRIu64 " ", ids[i]);
-//                }
-//                printf("}\n");
-//
-//                while(carbon_archive_column_group_next_column(&column_iter, &group_iter)) {
-//                    carbon_string_id_t column_name;
-//                    carbon_basic_type_e column_entry_type;
-//                    uint32_t num_entries;
-//                    carbon_archive_column_get_name(&column_name, &column_entry_type, &column_iter);
-//                    const uint32_t *positions = carbon_archive_column_get_entry_positions(&num_entries, &column_iter);
-//                    printf("\t\t{ column-name: %" PRIu64 ", type: %d }\n", column_name, column_entry_type);
-//                    printf("\t\t{ entry positions:");
-//                    for (uint32_t i = 0; i < num_entries; i++) {
-//                        printf("%" PRIu32 " ", positions[i]);
-//                    }
-//                    printf("}\n");
-//
-//                    while(carbon_archive_column_next_entry(&entry_iter, &column_iter)) {
-//
-//                        carbon_basic_type_e entry_type;
-//                        uint32_t entry_length;
-//                        carbon_archive_column_entry_get_type(&entry_type, &entry_iter);
-//
-//                        switch (entry_type) {
-//                        case CARBON_BASIC_TYPE_STRING: {
-//                            const carbon_string_id_t *values = carbon_archive_column_entry_get_strings(&entry_length, &entry_iter);
-//                            printf("\t\t{ strings: [");
-//                            for (uint32_t i = 0; i < entry_length; i++) {
-//                                printf("%" PRIu64 "%s", values[i], i + 1 < entry_length ? ", " : "");
-//                            }
-//                            printf("]\n");
-//                        } break;
-//                        case CARBON_BASIC_TYPE_INT8: {
-//                            const carbon_int8_t *values = carbon_archive_column_entry_get_int8s(&entry_length, &entry_iter);
-//                            printf("\t\t{ int8s: [");
-//                            for (uint32_t i = 0; i < entry_length; i++) {
-//                                printf("% " PRIi8 "%s", values[i], i + 1 < entry_length ? ", " : "");
-//                            }
-//                            printf("]\n");
-//                        } break;
-//                        case CARBON_BASIC_TYPE_INT16: {
-//                            const carbon_int16_t *values = carbon_archive_column_entry_get_int16s(&entry_length, &entry_iter);
-//                            printf("\t\t{ int16s: [");
-//                            for (uint32_t i = 0; i < entry_length; i++) {
-//                                printf("% " PRIi16 "%s", values[i], i + 1 < entry_length ? ", " : "");
-//                            }
-//                            printf("]\n");
-//                        } break;
-//                        case CARBON_BASIC_TYPE_INT32: {
-//                            const carbon_int32_t *values = carbon_archive_column_entry_get_int32s(&entry_length, &entry_iter);
-//                            printf("\t\t{ int32s: [");
-//                            for (uint32_t i = 0; i < entry_length; i++) {
-//                                printf("% " PRIi32 "%s", values[i], i + 1 < entry_length ? ", " : "");
-//                            }
-//                            printf("]\n");
-//                        } break;
-//                        case CARBON_BASIC_TYPE_INT64: {
-//                            const carbon_int64_t *values = carbon_archive_column_entry_get_int64s(&entry_length, &entry_iter);
-//                            printf("\t\t{ int64s: [");
-//                            for (uint32_t i = 0; i < entry_length; i++) {
-//                                printf("% " PRIi64 "%s", values[i], i + 1 < entry_length ? ", " : "");
-//                            }
-//                            printf("]\n");
-//                        } break;
-//                        case CARBON_BASIC_TYPE_UINT8: {
-//                            const carbon_uint8_t *values = carbon_archive_column_entry_get_uint8s(&entry_length, &entry_iter);
-//                            printf("\t\t{ uint8s: [");
-//                            for (uint32_t i = 0; i < entry_length; i++) {
-//                                printf("%" PRIu8 "%s", values[i], i + 1 < entry_length ? ", " : "");
-//                            }
-//                            printf("]\n");
-//                        } break;
-//                        case CARBON_BASIC_TYPE_UINT16: {
-//                            const carbon_uint16_t *values = carbon_archive_column_entry_get_uint16s(&entry_length, &entry_iter);
-//                            printf("\t\t{ uint16s: [");
-//                            for (uint32_t i = 0; i < entry_length; i++) {
-//                                printf("%" PRIu16 "%s", values[i], i + 1 < entry_length ? ", " : "");
-//                            }
-//                            printf("]\n");
-//                        } break;
-//                        case CARBON_BASIC_TYPE_UINT32: {
-//                            const carbon_uint32_t *values = carbon_archive_column_entry_get_uint32s(&entry_length, &entry_iter);
-//                            printf("\t\t{ uint32s: [");
-//                            for (uint32_t i = 0; i < entry_length; i++) {
-//                                printf("%" PRIu32 "%s", values[i], i + 1 < entry_length ? ", " : "");
-//                            }
-//                            printf("]\n");
-//                        } break;
-//                        case CARBON_BASIC_TYPE_UINT64: {
-//                            const carbon_uint64_t *values = carbon_archive_column_entry_get_uint64s(&entry_length, &entry_iter);
-//                            printf("\t\t{ uint64s: [");
-//                            for (uint64_t i = 0; i < entry_length; i++) {
-//                                printf("%" PRIu64 "%s", values[i], i + 1 < entry_length ? ", " : "");
-//                            }
-//                            printf("]\n");
-//                        } break;
-//                        case CARBON_BASIC_TYPE_NUMBER: {
-//                            const carbon_number_t *values = carbon_archive_column_entry_get_numbers(&entry_length, &entry_iter);
-//                            printf("\t\t{ numbers: [");
-//                            for (uint64_t i = 0; i < entry_length; i++) {
-//                                printf("%f%s", values[i], i + 1 < entry_length ? ", " : "");
-//                            }
-//                            printf("]\n");
-//                        } break;
-//                        case CARBON_BASIC_TYPE_BOOLEAN: {
-//                            const carbon_boolean_t *values = carbon_archive_column_entry_get_booleans(&entry_length, &entry_iter);
-//                            printf("\t\t{ booleans: [");
-//                            for (uint64_t i = 0; i < entry_length; i++) {
-//                                printf("%d%s", values[i], i + 1 < entry_length ? ", " : "");
-//                            }
-//                            printf("]\n");
-//                        } break;
-//                        case CARBON_BASIC_TYPE_NULL: {
-//                            const carbon_uint32_t *values = carbon_archive_column_entry_get_nulls(&entry_length, &entry_iter);
-//                            printf("\t\t{ nulls: [");
-//                            for (uint64_t i = 0; i < entry_length; i++) {
-//                                printf("%d%s", values[i], i + 1 < entry_length ? ", " : "");
-//                            }
-//                            printf("]\n");
-//                        } break;
-//                        case CARBON_BASIC_TYPE_OBJECT: {
-//                            carbon_archive_column_entry_object_iter_t iter;
-//                            const carbon_archive_object_t *archive_object;
-//                            carbon_archive_column_entry_get_objects(&iter, &entry_iter);
-//                            printf("\t\t{ << objects >>: [");
-//                            while ((archive_object = carbon_archive_column_entry_object_iter_next_object(&iter)) != NULL) {
-//                                carbon_object_id_t id;
-//                                carbon_archive_object_get_object_id(&id, archive_object);
-//                                printf("{ oid: %" PRIu64 " } \n", id);
-//
-//                                carbon_archive_prop_iter_t nested_obj_prop_iter;
-//                                carbon_archive_prop_iter_from_object(&nested_obj_prop_iter, CARBON_ARCHIVE_ITER_MASK_ANY,
-//                                                                     &err, archive_object);
-//                                iterate_properties(&nested_obj_prop_iter);
-//                            }
-//                            printf("]\n");
-//                        } break;
-//                        default:
-//                            FAIL() << "Unknown type";
-//                        }
-//
-//                    }
-//                }
-//
-//            }
-//        }
-//    }
-//}
 
 CARBON_EXPORT(bool)
 carbon_archive_visit_archive(carbon_archive_t *archive, const carbon_archive_visitor_desc_t *desc,

@@ -67,6 +67,15 @@ void (*visit_leave_##name##_array_pair)(carbon_archive_t *archive, path_stack_t 
 void (*visit_leave_##name##_array_pairs)(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,          \
                                          void *capture);
 
+#define DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(name, built_in_type)                                                     \
+    void (*visit_object_array_object_property_##name)(carbon_archive_t *archive, path_stack_t path,                    \
+                                               carbon_object_id_t parent_id,                                           \
+                                               carbon_string_id_t key,                                                 \
+                                               carbon_object_id_t nested_object_id,                                    \
+                                               carbon_string_id_t nested_key,                                          \
+                                               const built_in_type *nested_values,                                     \
+                                               uint32_t num_nested_values, void *capture);
+
 typedef struct
 {
     void (*visit_root_object)(carbon_archive_t *archive, carbon_object_id_t id, void *capture);
@@ -130,6 +139,44 @@ typedef struct
     void (*visit_leave_null_array_pairs)(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                                          void *capture);
 
+    carbon_visitor_policy_e (*before_visit_object_array)(carbon_archive_t *archive, path_stack_t path,
+                                                         carbon_object_id_t parent_id, carbon_string_id_t key,
+                                                         void *capture);
+
+    void (*before_visit_object_array_objects)(bool *skip_group_object_ids,
+                                              carbon_archive_t *archive, path_stack_t path,
+                                              carbon_object_id_t parent_id,
+                                              carbon_string_id_t key,
+                                              const carbon_object_id_t *group_object_ids,
+                                              uint32_t num_group_object_ids, void *capture);
+
+    carbon_visitor_policy_e (*before_visit_object_array_object_property)(carbon_archive_t *archive, path_stack_t path,
+                                                   carbon_object_id_t parent_id,
+                                                   carbon_string_id_t key,
+                                                   carbon_string_id_t nested_key,
+                                                   carbon_basic_type_e nested_value_type,
+                                                   void *capture);
+
+    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(int8s, carbon_int8_t);
+    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(int16s, carbon_int16_t);
+    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(int32s, carbon_int32_t);
+    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(int64s, carbon_int64_t);
+    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(uint8s, carbon_uint8_t);
+    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(uint16s, carbon_uint16_t);
+    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(uint32s, carbon_uint32_t);
+    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(uint64s, carbon_uint64_t);
+    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(numbers, carbon_number_t);
+    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(strings, carbon_string_id_t);
+    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(booleans, carbon_boolean_t);
+    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(nulls, carbon_uint32_t);
+
+    carbon_visitor_policy_e (*before_object_array_object_property_object)(carbon_archive_t *archive, path_stack_t path,
+                                                    carbon_object_id_t parent_id,
+                                                    carbon_string_id_t key,
+                                                    carbon_object_id_t nested_object_id,
+                                                    carbon_string_id_t nested_key,
+                                                    uint32_t nested_value_object_id,
+                                                    void *capture);
 
 
 } carbon_archive_visitor_t;

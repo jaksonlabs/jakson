@@ -201,8 +201,65 @@ visit_null_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_objec
 
     capture_t *extra = (capture_t *) capture;
     carbon_encoded_doc_t *doc = encoded_doc_collection_get_or_append(extra->collection, id);
-    carbon_encoded_doc_array_push_null(doc, key, num_nulls);
+    carbon_encoded_doc_array_push_null(doc, key, &num_nulls, 1);
 }
+
+static void
+before_visit_object_array_objects(bool *skip_group_object_ids, carbon_archive_t *archive, path_stack_t path,
+                                  carbon_object_id_t parent_id, carbon_string_id_t key, const carbon_object_id_t *group_object_ids,
+                                  uint32_t num_group_object_ids, void *capture)
+{
+    CARBON_UNUSED(archive);
+    CARBON_UNUSED(path);
+    CARBON_UNUSED(parent_id);
+    CARBON_UNUSED(capture);
+    CARBON_UNUSED(group_object_ids);
+    CARBON_UNUSED(skip_group_object_ids);
+    CARBON_UNUSED(num_group_object_ids);
+
+    capture_t *extra = (capture_t *) capture;
+    carbon_encoded_doc_t *doc = encoded_doc_collection_get_or_append(extra->collection, parent_id);
+    carbon_encoded_doc_add_prop_array_object(doc, key);
+    for (uint32_t i = 0; i < num_group_object_ids; i++) {
+        carbon_encoded_doc_array_push_object(doc, key, group_object_ids[i]);
+    }
+}
+
+#define DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(name, built_in_type)                                             \
+static void                                                                                                            \
+visit_object_array_object_property_##name(carbon_archive_t *archive, path_stack_t path,                                \
+                                           carbon_object_id_t parent_id,                                               \
+                                           carbon_string_id_t key,                                                     \
+                                           carbon_object_id_t nested_object_id,                                        \
+                                           carbon_string_id_t nested_key,                                              \
+                                           const built_in_type *nested_values,                                         \
+                                           uint32_t num_nested_values, void *capture)                                  \
+{                                                                                                                      \
+    CARBON_UNUSED(archive);                                                                                            \
+    CARBON_UNUSED(path);                                                                                               \
+    CARBON_UNUSED(parent_id);                                                                                          \
+    CARBON_UNUSED(key);                                                                                                \
+    CARBON_UNUSED(nested_key);                                                                                         \
+    CARBON_UNUSED(nested_values);                                                                                      \
+                                                                                                                       \
+    capture_t *extra = (capture_t *) capture;                                                                          \
+	carbon_encoded_doc_t *doc = encoded_doc_collection_get_or_append(extra->collection, nested_object_id);             \
+	carbon_encoded_doc_add_prop_array_##name(doc, nested_key);          											   \
+	carbon_encoded_doc_array_push_##name(doc, nested_key, nested_values, num_nested_values);                           \
+}
+
+DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(int8, carbon_int8_t);
+DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(int16, carbon_int16_t);
+DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(int32, carbon_int32_t);
+DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(int64, carbon_int64_t);
+DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(uint8, carbon_uint8_t);
+DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(uint16, carbon_uint16_t);
+DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(uint32, carbon_uint32_t);
+DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(uint64, carbon_uint64_t);
+DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(number, carbon_number_t);
+DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(string, carbon_string_id_t);
+DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(boolean, carbon_boolean_t);
+DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(null, carbon_uint32_t);
 
 CARBON_EXPORT(bool)
 carbon_archive_converter(carbon_encoded_doc_collection_t *collection, carbon_archive_t *archive)
@@ -258,7 +315,22 @@ carbon_archive_converter(carbon_encoded_doc_collection_t *collection, carbon_arc
     visitor.visit_null_array_pair = visit_null_array_pair;
     visitor.visit_enter_string_array_pairs = visit_enter_string_array_pairs;
     visitor.visit_string_array_pair = visit_string_array_pair;
-    
+
+    visitor.before_visit_object_array_objects = before_visit_object_array_objects;
+
+    visitor.visit_object_array_object_property_int8s = visit_object_array_object_property_int8;
+    visitor.visit_object_array_object_property_int16s = visit_object_array_object_property_int16;
+    visitor.visit_object_array_object_property_int32s = visit_object_array_object_property_int32;
+    visitor.visit_object_array_object_property_int64s = visit_object_array_object_property_int64;
+    visitor.visit_object_array_object_property_uint8s = visit_object_array_object_property_uint8;
+    visitor.visit_object_array_object_property_uint16s = visit_object_array_object_property_uint16;
+    visitor.visit_object_array_object_property_uint32s = visit_object_array_object_property_uint32;
+    visitor.visit_object_array_object_property_uint64s = visit_object_array_object_property_uint64;
+    visitor.visit_object_array_object_property_numbers = visit_object_array_object_property_number;
+    visitor.visit_object_array_object_property_strings = visit_object_array_object_property_string;
+    visitor.visit_object_array_object_property_booleans = visit_object_array_object_property_boolean;
+    visitor.visit_object_array_object_property_nulls = visit_object_array_object_property_null;
+
     carbon_archive_visit_archive(archive, &desc, &visitor, &capture);
 
     return true;

@@ -162,7 +162,7 @@ carbon_encoded_doc_add_prop_null(carbon_encoded_doc_t *doc, carbon_string_id_t k
     prop->header.context = doc;
     prop->header.key = key;
     prop->header.type = CARBON_BASIC_TYPE_NULL;
-    prop->value.num_nulls = 1;
+    prop->value.null = 1;
     return true;
 }
 
@@ -206,6 +206,7 @@ DECALRE_CARBON_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(number, CARBON_BASIC_TYPE_NUMBER)
 DECALRE_CARBON_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(boolean, CARBON_BASIC_TYPE_BOOLEAN)
 DECALRE_CARBON_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(string, CARBON_BASIC_TYPE_STRING)
 DECALRE_CARBON_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(null, CARBON_BASIC_TYPE_NULL)
+DECALRE_CARBON_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(object, CARBON_BASIC_TYPE_OBJECT)
 
 #define DECLARE_CARBON_ENCODED_DOC_ARRAY_PUSH_TYPE(name, built_in_type, basic_type)                                    \
 CARBON_EXPORT(bool)                                                                                                    \
@@ -238,21 +239,22 @@ DECLARE_CARBON_ENCODED_DOC_ARRAY_PUSH_TYPE(uint64, carbon_uint64_t, CARBON_BASIC
 DECLARE_CARBON_ENCODED_DOC_ARRAY_PUSH_TYPE(number, carbon_number_t, CARBON_BASIC_TYPE_NUMBER)
 DECLARE_CARBON_ENCODED_DOC_ARRAY_PUSH_TYPE(boolean, carbon_boolean_t, CARBON_BASIC_TYPE_BOOLEAN)
 DECLARE_CARBON_ENCODED_DOC_ARRAY_PUSH_TYPE(string, carbon_string_id_t, CARBON_BASIC_TYPE_STRING)
-
-CARBON_EXPORT(bool)
-carbon_encoded_doc_array_push_null(carbon_encoded_doc_t *doc, carbon_string_id_t key, uint32_t how_many)
-{
-    CARBON_NON_NULL_OR_ERROR(doc)
-    const uint32_t *prop_pos = carbon_hashtable_get_value(&doc->prop_array_index, &key);
-    CARBON_ERROR_IF(prop_pos == NULL, &doc->err, CARBON_ERR_NOTFOUND);
-    carbon_encoded_doc_prop_array_t *array = CARBON_VECTOR_GET(&doc->props_arrays, *prop_pos,
-                                                               carbon_encoded_doc_prop_array_t);
-    CARBON_ERROR_IF(array == NULL, &doc->err, CARBON_ERR_INTERNALERR);
-    CARBON_ERROR_IF(array->header.type != CARBON_BASIC_TYPE_NULL, &doc->err, CARBON_ERR_TYPEMISMATCH);
-    carbon_encoded_doc_value_t *value = VECTOR_NEW_AND_GET(&array->values, carbon_encoded_doc_value_t);
-    value->num_nulls = how_many;
-    return true;
-}
+DECLARE_CARBON_ENCODED_DOC_ARRAY_PUSH_TYPE(null, carbon_uint32_t, CARBON_BASIC_TYPE_NULL)
+//
+//CARBON_EXPORT(bool)
+//carbon_encoded_doc_array_push_null(carbon_encoded_doc_t *doc, carbon_string_id_t key, uint32_t how_many)
+//{
+//    CARBON_NON_NULL_OR_ERROR(doc)
+//    const uint32_t *prop_pos = carbon_hashtable_get_value(&doc->prop_array_index, &key);
+//    CARBON_ERROR_IF(prop_pos == NULL, &doc->err, CARBON_ERR_NOTFOUND);
+//    carbon_encoded_doc_prop_array_t *array = CARBON_VECTOR_GET(&doc->props_arrays, *prop_pos,
+//                                                               carbon_encoded_doc_prop_array_t);
+//    CARBON_ERROR_IF(array == NULL, &doc->err, CARBON_ERR_INTERNALERR);
+//    CARBON_ERROR_IF(array->header.type != CARBON_BASIC_TYPE_NULL, &doc->err, CARBON_ERR_TYPEMISMATCH);
+//    carbon_encoded_doc_value_t *value = VECTOR_NEW_AND_GET(&array->values, carbon_encoded_doc_value_t);
+//    value->num_nulls = how_many;
+//    return true;
+//}
 
 
 #include <inttypes.h>
@@ -264,17 +266,17 @@ carbon_encoded_doc_array_push_object(carbon_encoded_doc_t *doc, carbon_string_id
     CARBON_UNUSED(doc);
     CARBON_UNUSED(key);
     CARBON_UNUSED(id);
-//    CARBON_NON_NULL_OR_ERROR(doc)
-//    const uint32_t *prop_pos = carbon_hashtable_get_value(&doc->prop_array_index, &key);
-//    CARBON_ERROR_IF(prop_pos == NULL, &doc->err, CARBON_ERR_NOTFOUND);
-//    carbon_encoded_doc_prop_array_t *array = CARBON_VECTOR_GET(&doc->props_arrays, *prop_pos,
-//                                                               carbon_encoded_doc_prop_array_t);
-//    CARBON_ERROR_IF(array == NULL, &doc->err, CARBON_ERR_INTERNALERR);
-//    CARBON_ERROR_IF(array->header.type != CARBON_BASIC_TYPE_OBJECT, &doc->err, CARBON_ERR_TYPEMISMATCH);
-//    carbon_encoded_doc_value_t *value = VECTOR_NEW_AND_GET(&array->values, carbon_encoded_doc_value_t);
-//    value->object = id;
-//    return true;
-    abort();
+
+    CARBON_NON_NULL_OR_ERROR(doc)
+    const uint32_t *prop_pos = carbon_hashtable_get_value(&doc->prop_array_index, &key);
+    CARBON_ERROR_IF(prop_pos == NULL, &doc->err, CARBON_ERR_NOTFOUND);
+    carbon_encoded_doc_prop_array_t *array = CARBON_VECTOR_GET(&doc->props_arrays, *prop_pos,
+                                                               carbon_encoded_doc_prop_array_t);
+    CARBON_ERROR_IF(array == NULL, &doc->err, CARBON_ERR_INTERNALERR);
+    CARBON_ERROR_IF(array->header.type != CARBON_BASIC_TYPE_OBJECT, &doc->err, CARBON_ERR_TYPEMISMATCH);
+    carbon_encoded_doc_value_t *value = VECTOR_NEW_AND_GET(&array->values, carbon_encoded_doc_value_t);
+    value->object = id;
+    return true;
 }
 
 
@@ -373,7 +375,11 @@ doc_print_pretty(FILE *file, carbon_encoded_doc_t *doc, unsigned level)
             fprintf(file, "   ");
         }
 
-        fprintf(file, "\"%s\": [", key_str);
+        fprintf(file, "\"%s\": ", key_str);
+        if (prop->values.num_elems > 1) {
+            fprintf(file, "[");
+        }
+
         switch (prop->header.type) {
         case CARBON_BASIC_TYPE_INT8:
             for (uint32_t k = 0; k < prop->values.num_elems; k++) {
@@ -496,14 +502,30 @@ doc_print_pretty(FILE *file, carbon_encoded_doc_t *doc, unsigned level)
             break;
         case CARBON_BASIC_TYPE_OBJECT:
         {
-            abort();
+            for (uint32_t k = 0; k < prop->values.num_elems; k++) {
+                carbon_object_id_t nested_oid = (CARBON_VECTOR_GET(&prop->values, k, carbon_encoded_doc_value_t))->object;
+                carbon_encoded_doc_t *nested_doc = encoded_doc_collection_get_or_append(doc->context, nested_oid);
+                fprintf(file, "\n");
+                for (unsigned k = 0; k < level + 1; k++) {
+                    fprintf(file, "   ");
+                }
+                doc_print_pretty(file, nested_doc, level + 2);
+                fprintf(file, "%s", k + 1 < prop->values.num_elems ? "," : "");
+            }
+            fprintf(file, "\n");
+            for (unsigned k = 0; k < level; k++) {
+                fprintf(file, "   ");
+            }
         } break;
         default:
         CARBON_ERROR(&doc->err, CARBON_ERR_INTERNALERR);
             return false;
         }
         free(key_str);
-        fprintf(file, "]%s\n", i + 1 < doc->props_arrays.num_elems ? ", " : "");
+        if (prop->values.num_elems > 1) {
+            fprintf(file, "]");
+        }
+        fprintf(file, "%s\n", i + 1 < doc->props_arrays.num_elems ? ", " : "");
     }
 
     for (unsigned k = 0; k < level - 1; k++) {

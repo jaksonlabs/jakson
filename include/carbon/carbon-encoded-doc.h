@@ -43,7 +43,7 @@ typedef union {
     carbon_boolean_t boolean;
     carbon_string_id_t string;
     carbon_object_id_t object;
-    uint32_t num_nulls;
+    uint32_t null;
 } carbon_encoded_doc_value_t;
 
 typedef struct
@@ -147,6 +147,7 @@ DEFINE_CARBON_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(number)
 DEFINE_CARBON_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(boolean)
 DEFINE_CARBON_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(string)
 DEFINE_CARBON_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(null)
+DEFINE_CARBON_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(object)
 
 #define DEFINE_CARBON_ENCODED_DOC_ARRAY_PUSH_TYPE(name, built_in_type)                                                 \
 CARBON_EXPORT(bool)                                                                                                    \
@@ -164,9 +165,10 @@ DEFINE_CARBON_ENCODED_DOC_ARRAY_PUSH_TYPE(uint64, carbon_uint64_t)
 DEFINE_CARBON_ENCODED_DOC_ARRAY_PUSH_TYPE(number, carbon_number_t)
 DEFINE_CARBON_ENCODED_DOC_ARRAY_PUSH_TYPE(boolean, carbon_boolean_t)
 DEFINE_CARBON_ENCODED_DOC_ARRAY_PUSH_TYPE(string, carbon_string_id_t)
+DEFINE_CARBON_ENCODED_DOC_ARRAY_PUSH_TYPE(null, carbon_uint32_t)
 
-CARBON_EXPORT(bool)
-carbon_encoded_doc_array_push_null(carbon_encoded_doc_t *doc, carbon_string_id_t key, uint32_t how_many);
+//CARBON_EXPORT(bool)
+//carbon_encoded_doc_array_push_null(carbon_encoded_doc_t *doc, carbon_string_id_t key, uint32_t how_many);
 
 CARBON_EXPORT(bool)
 carbon_encoded_doc_array_push_object(carbon_encoded_doc_t *doc, carbon_string_id_t key, carbon_object_id_t id);
