@@ -137,12 +137,51 @@ void slice_linearizeImpl(Hash compressedColumn[], Hash targetColumn[], size_t lo
         // Fill up current node
         size_t i = 0;
 
-        // Black maginc
-        size_t startIndex = level == 0 ? 0 : (factor - 1) + ((factor - 1) * (size_t)pow(factor, level)) + (index * factor);
-        size_t sourceIndex, targetIndex;
-        for(i = 0; i < factor; i++) {
+        // Black magic
+        size_t startIndex = level == 0 ? 0 : 4 + ((size_t)pow(factor, level - 1) + (factor - 1) * index) - 1;
+        int sourceIndex = low - 1;
+        size_t targetIndex;
+        for(i = 0; i < factor - 1; i++) {
+            sourceIndex += factor;
             targetIndex = startIndex + i;
-            sourceIndex = low + index * factor;
+           //  sourceIndex = compressedColumn[sourceIndex];
+            Hash val = compressedColumn[sourceIndex];
+            UNUSED(val);
+
+            targetColumn[targetIndex] = compressedColumn[sourceIndex];
+
+            // Reorder duplicates  and mapping
+            if (duplicates[sourceIndex] > 0) {
+                size_t j;
+                for(j = 0; j < duplicates[sourceIndex]; j++) {
+                    swapHashes(&mapping[sourceIndex + j], &mapping[targetIndex + j]);
+                }
+                swapHashes(&duplicates[sourceIndex], &duplicates[targetIndex]);
+            }
+
+        }
+        size_t begin = low;
+        size_t end = begin + factor - 2;
+        for(i = 0; i < factor; i++) {
+            // begin = low + i * (factor - 1);
+            // end = i + (i + 1) * (factor - 1) > high ? high : i + (i + 1) * (factor - 1);
+            slice_linearizeImpl(compressedColumn, targetColumn, begin, end,
+                    mapping, duplicates, factor, (level + 1), i);
+
+            begin += factor;
+            end += factor;
+        }
+    }
+    else {
+        size_t i = 0;
+
+        // Black magic
+        size_t startIndex = level == 0 ? 0 : 4 + ((size_t)pow(factor, level - 1) + (factor - 1) * index) - 1; //(factor - 1) + ((factor - 1) * (size_t)pow(factor, level - 1)) + (index * factor);
+        size_t sourceIndex, targetIndex;
+
+        for(i = 0; i <= (high-low); i++) {
+            targetIndex = startIndex + i;
+            sourceIndex = low + i;
             targetColumn[targetIndex] = compressedColumn[sourceIndex];
 
             // Reorder duplicates  and mapping
@@ -155,9 +194,6 @@ void slice_linearizeImpl(Hash compressedColumn[], Hash targetColumn[], size_t lo
             }
         }
     }
-    else {
-
-    }
 }
 
 void slice_linearize(Hash compressedColumn[], Hash targetColumn[], size_t low, size_t high, Hash mapping[], Hash duplicates[], size_t factor) {
@@ -166,15 +202,18 @@ void slice_linearize(Hash compressedColumn[], Hash targetColumn[], size_t low, s
 
 int main()
 {
-    size_t mapping[7] = {0,0,0,0,0,0, 0};
-    size_t duplicates[7] = {0,0,0,0,0,0, 0};
-    size_t newHashes[7] = {0,0,0,0,0,0};
-    size_t data[] = { 852 , 850, 851, 851, 847, 851, 850};
-    const char* keyColumn[] = {"A", "B", "C", "D", "E", "F", "G"};
+    size_t mapping[24] = {0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    size_t compressedHashes[24] = {0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    size_t duplicates[24] = {0,0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0};
+    size_t newHashes[24] = {0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0};
+    size_t data[32] = { 14,15,16,17,18,19,20,21,22,23,24,1,2,2,3,3,3,4,5,6,7,8,8,8,9,10,10,11,12,12,12,13};
+    const char* keyColumn[] = {"A1","A2","A3","A4","A5","A6","A7","A8","A9","A10","A11","A12","A13","A14","A15","A16","A17","A18","A19","A20","A21","A22","A23","A24"};
     // const char* stringIdColumn[] = {"A", "B", "C", "D", "E", "F"};
-    selectionSort2(data, 7, mapping);
-    size_t result = removeDuplicates2(data, 7, duplicates, newHashes);
-    slice_linearize(newHashes, result, mapping);
+    selectionSort2(data, 32, mapping);
+    size_t result = removeDuplicates2(data, 32, duplicates, newHashes);
+    UNUSED(result);
+
+    slice_linearize(newHashes,compressedHashes, 0, 24, mapping, duplicates, 5);
     size_t i = 0;
     for(i = 0; i < 7; i++) {
         Hash value = data[i];
