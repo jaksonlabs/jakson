@@ -761,10 +761,10 @@ uint32_t SLICE_RESEARCH_INLINE(Slice *slice, Hash needleHash, const char *needle
 
                         switch (slice->strat) {
                             case SLICE_LOOKUP_SCAN:
-                                pairPosition = SLICE_SCAN(slice, keyHash, needle);
+                                pairPosition = SLICE_SCAN_SIMD_INLINE_3(slice, keyHash, needle);
                                 break;
                             case SLICE_LOOKUP_BESEARCH:
-                                pairPosition = SLICE_SCAN(slice, keyHash, needle);
+                                pairPosition = SLICE_RESEARCH_INLINE(slice, keyHash, needle);
                                 break;
                             default: PANIC("unknown slice find strategy");
                         }

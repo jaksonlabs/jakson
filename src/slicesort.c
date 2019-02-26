@@ -143,8 +143,8 @@ inline static int partition (Hash arr[], int low, int high, const char * keyArr[
     // return left;
 //}
 
-
-/*inline static void quickSort(Hash arr[], int low, int high, const char * keyArr[],  const char * stringIdArr[])
+/*
+inline static void quickSort(Hash arr[], int low, int high, const char * keyArr[],  const char * stringIdArr[])
 {
     if (low < high)
     {
@@ -181,8 +181,8 @@ inline static int partition (Hash arr[], int low, int high, const char * keyArr[
     }
 
 
-}*/
-
+}
+*/
 void bubblesort(Hash arr[], int length, const char * keyArr[],  const char * stringIdArr[])
 {
     int i, j;
@@ -211,3 +211,5 @@ void slicesort2(Hash keyHashColumn[], const char * keyColumn[], const char * str
     // quickSort(keyHashColumn, 0, arraySize, keyColumn, stringIdColumn);
     bubblesort(keyHashColumn, arraySize, keyColumn, stringIdColumn);
 }
+
+
