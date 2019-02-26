@@ -23,7 +23,10 @@ void experiments_hashing()
 {
     printf("chunk_num;sample;num_buckets;time_created_sec;time_inserted_sec;time_bulk_sum_created_inserted;num_strings_chunk;num_strings_total;num_distinct_strings\n");
 
-    const char* path = "/Volumes/PINNECKE EXT/science/cleaned_datasets/dbpedia-cleaned.txt";
+    // const char* path = "./benches/data/test.txt";
+    //const char* path = "./benches/yago1-99pc-stringlist-cleaned.txt";
+     const char* path = "./benches/yago1-short.txt";
+    // const char* path = "./benches/tpch-sf10-cleaned.txt.list";
     //const char* path = "/home/pinnecke/datasets/yago1/stringlists/yago1-15pc-stringlist.txt";
     //const char* path = "/home/pinnecke/mnt/datasets/mag-cleaned.txt";
     //const char* path = "/Users/marcus/temp/file.txt";

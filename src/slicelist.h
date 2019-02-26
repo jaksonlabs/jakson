@@ -107,10 +107,13 @@ typedef struct Slice
      * particular value. However, a remove operation is expensive. */
     const char *keyColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
     Hash keyHashColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
+    Hash keyHashMapping[SLICE_KEY_COLUMN_MAX_ELEMS];
+    Hash duplicates[SLICE_KEY_COLUMN_MAX_ELEMS];
     StringId stringIdColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
 
     /* The number of elements stored in 'key_colum', 'key_hash_column', and 'string_id_column' */
     uint32_t numElems;
+    size_t numElemsAfterCompressing;
 
     uint32_t cacheIdx;
 } Slice;

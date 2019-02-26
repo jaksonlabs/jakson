@@ -201,6 +201,26 @@ void bubblesort(Hash arr[], int length, const char * keyArr[],  const char * str
     }
 }
 
+void selectionSort(Hash arr[], size_t length, Hash mapping[])
+{
+    Hash i, j, min_idx;
+
+    // One by one move boundary of unsorted subarray
+    for (i = 0; i < length-1; i++)
+    {
+        // Find the minimum element in unsorted array
+        min_idx = i;
+        for (j = i+1; j < length; j++)
+            if (arr[j] < arr[min_idx])
+                min_idx = j;
+
+        // Swap the found minimum element with the first element
+        swapHashes(&arr[min_idx], &arr[i]);
+        mapping[i] = min_idx;
+    }
+}
+
+
 // ---------------------------------------------------------------------------------------------------------------------
 //
 //  I N T E R F A C E   I M P L E M E N T A T I O N
@@ -212,4 +232,34 @@ void slicesort2(Hash keyHashColumn[], const char * keyColumn[], const char * str
     bubblesort(keyHashColumn, arraySize, keyColumn, stringIdColumn);
 }
 
+void slicesort3(Hash keyHashColumn[], size_t length, Hash mapping[]) {
+    // quickSort(keyHashColumn, 0, arraySize, keyColumn, stringIdColumn);
+    selectionSort(keyHashColumn, length, mapping);
+}
+
+/*void slicesort3(Hash keyHashColumn[], size_t length, Hash mapping[]) {
+    // quickSort(keyHashColumn, 0, arraySize, keyColumn, stringIdColumn);
+    selectionSort(keyHashColumn, length, mapping);
+}*/
+
+size_t removeDuplicates(Hash keyHashColumn[], size_t arraySize, size_t duplicates[], Hash keyTargetColumn[])
+{
+    size_t elemNumber = 0;
+    size_t i = 0;
+    int targetIndex = -1;
+    for (i = 0; i < arraySize; i++)
+    {
+        if (targetIndex >= 0 && keyHashColumn[i] == keyTargetColumn[targetIndex])
+            duplicates[targetIndex]++;
+        else
+        {
+            elemNumber++;
+            keyTargetColumn[++targetIndex] = keyHashColumn[i];
+            duplicates[targetIndex] = 0;
+
+        }
+    }
+
+    return elemNumber;
+}
 

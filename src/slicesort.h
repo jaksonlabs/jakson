@@ -58,6 +58,8 @@ NG5_BEGIN_DECL
 
 
 void slicesort2(Hash keyHashColumn[], const char * keyColumn[], const char * stringIdColumn[], size_t arraySize);
+void slicesort3(Hash keyHashColumn[], size_t length, Hash mapping[]);
+size_t removeDuplicates(Hash keyHashColumn[], size_t arraySize, size_t duplicates[], Hash keyTargetColumn[]);
 
 NG5_END_DECL
 

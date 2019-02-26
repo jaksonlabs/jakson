@@ -43,15 +43,18 @@ include_directories(${APRUTIL_INCLUDE_DIR})
 set(LIBS ${LIBS} pthread m ${APR_LIBRARIES} ${APRUTIL_LIBRARIES})
 
 aux_source_directory("${CMAKE_SOURCE_DIR}/src" SOURCE_FILES)
+set(SOURCE_FILES ${SOURCE_FILES} src/slicesort.c)
 # aux_source_directory("${CMAKE_SOURCE_DIR}/src" SOURCE_FILES)
 
 add_executable(ng5 main.c ${SOURCE_FILES})
+add_executable(simd_test main_simd_test.c ${SOURCE_FILES})
 
 # Remove this one, because it's broken at the moment
 # add_executable(compare_cpp benches/baseline/compare_cpp_dic.cpp ${SOURCE_FILES})
 # set_property(TARGET compare_cpp PROPERTY CXX_STANDARD 11)
 
 target_link_libraries(ng5 ${LIBS})
+target_link_libraries(simd_test ${LIBS})
 
 # Remove this one, because tests do not compile at the moment
 # enable_testing()

@@ -594,7 +594,54 @@ uint32_t SLICE_RESEARCH_INLINE(Slice *slice, Hash needleHash, const char *needle
         }
         else {
             while(slice->keyHashColumn[low] == needleHash) {
-                keysMatch = slice->keyColumn[low] && (strcmp(slice->keyColumn[low], needleStr) == 0);
+                keysMatch = slice->keyColumn[low] && (strcmp(slice->keyColumn[slice->keyHashMapping[low]], needleStr) == 0);
+                if (keysMatch) {
+                    matchIndex = low;
+                    keysMatch = true;
+                    endReached = false;
+                    break;
+                }
+                low++;
+            }
+        }
+    }
+
+    slice->cacheIdx = !endReached && keysMatch ? matchIndex : slice->cacheIdx;
+
+    return cacheHit ? slice->cacheIdx : (!endReached && keysMatch ? matchIndex : slice->numElems);
+}
+
+uint32_t SLICE_RESEARCH_SIMD(Slice *slice, Hash needleHash, const char *needleStr) {
+    TRACE(NG5_SLICE_LIST_TAG, "SLICE_SCAN_SIMD for '%s' started", needleStr);
+    assert(slice);
+    assert(needleStr);
+
+    register bool keysMatch = false, endReached = true;
+    register bool cacheAvailable = (slice->cacheIdx != (uint32_t) -1);
+    register bool hashsEq = cacheAvailable && (slice->keyHashColumn[slice->cacheIdx] == needleHash);
+    register bool cacheHit = hashsEq && (strcmp(slice->keyColumn[slice->cacheIdx], needleStr) == 0);
+    register int matchIndex = -1;
+    int low = 0;
+
+    if (!cacheHit) {
+
+        int mid;
+        int high = SLICE_KEY_COLUMN_MAX_ELEMS;
+        while (low < high) {
+            mid = low + (high - low) / 2;
+            if (needleHash <= slice->keyHashColumn[mid])
+                high = mid;
+            else
+                low = mid + 1;
+        }
+
+        // No match found
+        if (low != high) {
+            endReached = true;
+        }
+        else {
+            while(slice->keyHashColumn[low] == needleHash) {
+                keysMatch = slice->keyColumn[low] && (strcmp(slice->keyColumn[slice->keyHashMapping[low]], needleStr) == 0);
                 if (keysMatch) {
                     matchIndex = low;
                     keysMatch = true;
@@ -900,16 +947,15 @@ uint32_t SLICE_RESEARCH_INLINE(Slice *slice, Hash needleHash, const char *needle
     static void appenderSeal(Slice *slice, SliceList *list) {
         UNUSED(slice);
         UNUSED(list);
-        const char *keyColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
-        const char *stringIdColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
         Hash keyHashColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
+        Hash compressedColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
 
         memcpy(keyHashColumn, slice->keyHashColumn, sizeof(keyHashColumn));
-        memcpy(keyColumn, slice->keyColumn, sizeof(keyColumn));
-        memcpy(stringIdColumn, slice->stringIdColumn, sizeof(stringIdColumn));
+        // memcpy(keyColumn, slice->keyColumn, sizeof(keyColumn));
+        // memcpy(stringIdColumn, slice->stringIdColumn, sizeof(stringIdColumn));
 
-        slicesort2(keyHashColumn, keyColumn, stringIdColumn, SLICE_KEY_COLUMN_MAX_ELEMS);
-
+        slicesort3(keyHashColumn, SLICE_KEY_COLUMN_MAX_ELEMS, slice->keyHashMapping);
+        slice->numElemsAfterCompressing = removeDuplicates(keyHashColumn, SLICE_KEY_COLUMN_MAX_ELEMS, slice->duplicates, compressedColumn);
         //if(keyHashColumn[14] == 2701) {
         //    UNUSED(list);
         //    assert(slice);
@@ -917,9 +963,9 @@ uint32_t SLICE_RESEARCH_INLINE(Slice *slice, Hash needleHash, const char *needle
 
         lock(list);
 
-        memcpy(slice->keyHashColumn, keyHashColumn, sizeof(keyHashColumn));
-        memcpy(slice->keyColumn, keyColumn, sizeof(keyColumn));
-        memcpy(slice->stringIdColumn, stringIdColumn, sizeof(stringIdColumn));
+        memcpy(slice->keyHashColumn, compressedColumn, sizeof(keyHashColumn));
+        // memcpy(slice->keyColumn, keyColumn, sizeof(keyColumn));
+        //  memcpy(slice->stringIdColumn, stringIdColumn, sizeof(stringIdColumn));
 
         slice->strat = SLICE_LOOKUP_BESEARCH;
 
@@ -930,6 +976,40 @@ uint32_t SLICE_RESEARCH_INLINE(Slice *slice, Hash needleHash, const char *needle
 
         // TODO: sealing means sort and then replace 'find' with bsearch or something. Not yet implemented: sealed slices are also search in a linear fashion
     }
+
+    /*
+     *     static void appenderSeal(Slice *slice, SliceList *list) {
+        UNUSED(slice);
+        UNUSED(list);
+        Hash keyHashColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
+
+        memcpy(keyHashColumn, slice->keyHashColumn, sizeof(keyHashColumn));
+        // memcpy(keyColumn, slice->keyColumn, sizeof(keyColumn));
+        // memcpy(stringIdColumn, slice->stringIdColumn, sizeof(stringIdColumn));
+
+        slicesort3(keyHashColumn, SLICE_KEY_COLUMN_MAX_ELEMS, slice->keyHashMapping);
+
+        //if(keyHashColumn[14] == 2701) {
+        //    UNUSED(list);
+        //    assert(slice);
+        // }
+
+        lock(list);
+
+        memcpy(slice->keyHashColumn, keyHashColumn, sizeof(keyHashColumn));
+        // memcpy(slice->keyColumn, keyColumn, sizeof(keyColumn));
+        //  memcpy(slice->stringIdColumn, stringIdColumn, sizeof(stringIdColumn));
+
+        slice->strat = SLICE_LOOKUP_BESEARCH;
+
+        unlock(list);
+        //  slice->cacheIdx = 0;
+        //  slice_sort(slice);
+        //
+
+        // TODO: sealing means sort and then replace 'find' with bsearch or something. Not yet implemented: sealed slices are also search in a linear fashion
+    }
+     */
 
     static void lock(SliceList *list) {
         SpinlockAcquire(&list->lock);
