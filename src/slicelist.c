@@ -564,8 +564,6 @@ uint32_t SLICE_SCAN_SIMD2(Slice *slice, Hash needleHash, const char *needleStr) 
 })
 
 
-
-
 uint32_t SLICE_RESEARCH_INLINE(Slice *slice, Hash needleHash, const char *needleStr) {
     TRACE(NG5_SLICE_LIST_TAG, "SLICE_SCAN_SIMD for '%s' started", needleStr);
     assert(slice);
@@ -576,35 +574,41 @@ uint32_t SLICE_RESEARCH_INLINE(Slice *slice, Hash needleHash, const char *needle
     register bool hashsEq = cacheAvailable && (slice->keyHashColumn[slice->cacheIdx] == needleHash);
     register bool cacheHit = hashsEq && (strcmp(slice->keyColumn[slice->cacheIdx], needleStr) == 0);
     register int matchIndex = -1;
+    int low = 0;
 
-        if (!cacheHit) {
+    if (!cacheHit) {
 
-            int middle;
-            int low = 0;
-            int high = SLICE_KEY_COLUMN_MAX_ELEMS;
-            while (low <= high)
-            {
-                middle = low + (high - low)/2;
-                if (needleHash > slice->keyHashColumn[middle])
-                    low = middle + 1;
-                else if (needleHash < slice->keyHashColumn[middle])
-                    high = middle - 1;
-                else {
-                    keysMatch =  (strcmp(slice->keyColumn[middle], needleStr) == 0);
-                    if (keysMatch) {
-                        matchIndex = middle;
-                        keysMatch = true;
-                        endReached = false;
-                        break;
-                    }
-                }
-            }
-
-            slice->cacheIdx = !endReached && keysMatch ? matchIndex : slice->cacheIdx;
+        int mid;
+        int high = SLICE_KEY_COLUMN_MAX_ELEMS;
+        while (low < high) {
+            mid = low + (high - low) / 2;
+            if (needleHash <= slice->keyHashColumn[mid])
+                high = mid;
+            else
+                low = mid + 1;
         }
 
-    return cacheHit ? slice->cacheIdx : (!endReached && keysMatch ? matchIndex : slice->numElems);
+        // No match found
+        if (low != high) {
+            endReached = true;
+        }
+        else {
+            while(slice->keyHashColumn[low] == needleHash) {
+                keysMatch = slice->keyColumn[low] && (strcmp(slice->keyColumn[low], needleStr) == 0);
+                if (keysMatch) {
+                    matchIndex = low;
+                    keysMatch = true;
+                    endReached = false;
+                    break;
+                }
+                low++;
+            }
+        }
+    }
 
+    slice->cacheIdx = !endReached && keysMatch ? matchIndex : slice->cacheIdx;
+
+    return cacheHit ? slice->cacheIdx : (!endReached && keysMatch ? matchIndex : slice->numElems);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -613,13 +617,13 @@ uint32_t SLICE_RESEARCH_INLINE(Slice *slice, Hash needleHash, const char *needle
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-static void appenderNew(SliceList *list);
+    static void appenderNew(SliceList *list);
 
-static void appenderSeal(Slice *slice, SliceList* list);
+    static void appenderSeal(Slice *slice, SliceList *list);
 
-static void lock(SliceList *list);
+    static void lock(SliceList *list);
 
-static void unlock(SliceList *list);
+    static void unlock(SliceList *list);
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
@@ -627,181 +631,181 @@ static void unlock(SliceList *list);
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-int SliceListCreate(SliceList *list, const Allocator *alloc, size_t sliceCapacity) {
-    CHECK_NON_NULL(list)
-    CHECK_NON_NULL(sliceCapacity)
+    int SliceListCreate(SliceList *list, const Allocator *alloc, size_t sliceCapacity) {
+        CHECK_NON_NULL(list)
+        CHECK_NON_NULL(sliceCapacity)
 
-    AllocatorThisOrDefault(&list->alloc, alloc);
-    SpinlockCreate(&list->lock);
+        AllocatorThisOrDefault(&list->alloc, alloc);
+        SpinlockCreate(&list->lock);
 
-    VectorCreate(&list->slices, &list->alloc, sizeof(Slice), sliceCapacity);
-    VectorCreate(&list->descriptors, &list->alloc, sizeof(SliceDescriptor), sliceCapacity);
-    VectorCreate(&list->filters, &list->alloc, sizeof(Bloomfilter), sliceCapacity);
-    VectorCreate(&list->bounds, &list->alloc, sizeof(HashBounds), sliceCapacity);
+        VectorCreate(&list->slices, &list->alloc, sizeof(Slice), sliceCapacity);
+        VectorCreate(&list->descriptors, &list->alloc, sizeof(SliceDescriptor), sliceCapacity);
+        VectorCreate(&list->filters, &list->alloc, sizeof(Bloomfilter), sliceCapacity);
+        VectorCreate(&list->bounds, &list->alloc, sizeof(HashBounds), sliceCapacity);
 
-    ZERO_MEMORY(VectorData(&list->slices), sliceCapacity * sizeof(Slice));
-    ZERO_MEMORY(VectorData(&list->descriptors), sliceCapacity * sizeof(SliceDescriptor));
-    ZERO_MEMORY(VectorData(&list->filters), sliceCapacity * sizeof(Bloomfilter));
-    ZERO_MEMORY(VectorData(&list->bounds), sliceCapacity * sizeof(HashBounds));
+        ZERO_MEMORY(VectorData(&list->slices), sliceCapacity * sizeof(Slice));
+        ZERO_MEMORY(VectorData(&list->descriptors), sliceCapacity * sizeof(SliceDescriptor));
+        ZERO_MEMORY(VectorData(&list->filters), sliceCapacity * sizeof(Bloomfilter));
+        ZERO_MEMORY(VectorData(&list->bounds), sliceCapacity * sizeof(HashBounds));
 
-    appenderNew(list);
+        appenderNew(list);
 
-    return STATUS_OK;
-}
-
-int SliceListDrop(SliceList *list) {
-    UNUSED(list);
-//    NOT_YET_IMPLEMENTED
-    // TODO: implement
-    VectorDrop(&list->slices);
-    VectorDrop(&list->descriptors);
-    VectorDrop(&list->bounds);
-    for (size_t i = 0; i < list->filters.numElems; i++) {
-        Bloomfilter *filter = VECTOR_GET(&list->filters, i, Bloomfilter);
-        BloomfilterDrop(filter);
+        return STATUS_OK;
     }
-    VectorDrop(&list->filters);
-    return STATUS_OK;
-}
 
-int SliceListIsEmpty(const SliceList *list) {
-    return (VectorIsEmpty(&list->slices));
-}
+    int SliceListDrop(SliceList *list) {
+        UNUSED(list);
+//    NOT_YET_IMPLEMENTED
+        // TODO: implement
+        VectorDrop(&list->slices);
+        VectorDrop(&list->descriptors);
+        VectorDrop(&list->bounds);
+        for (size_t i = 0; i < list->filters.numElems; i++) {
+            Bloomfilter *filter = VECTOR_GET(&list->filters, i, Bloomfilter);
+            BloomfilterDrop(filter);
+        }
+        VectorDrop(&list->filters);
+        return STATUS_OK;
+    }
 
-int SliceListInsert(SliceList *list, char **strings, StringId *ids, size_t numPairs) {
-    lock(list);
+    int SliceListIsEmpty(const SliceList *list) {
+        return (VectorIsEmpty(&list->slices));
+    }
 
-    while (numPairs--) {
-        const char *key = *strings++;
-        StringId value = *ids++;
-        Hash keyHash = get_hashcode(key);
-        SliceHandle handle;
-        int status;
+    int SliceListInsert(SliceList *list, char **strings, StringId *ids, size_t numPairs) {
+        lock(list);
 
-        assert (key);
+        while (numPairs--) {
+            const char *key = *strings++;
+            StringId value = *ids++;
+            Hash keyHash = get_hashcode(key);
+            SliceHandle handle;
+            int status;
+
+            assert (key);
+
+            /* check whether the key-value pair is already contained in one slice */
+            status = SliceListLookupByKey(&handle, list, key);
+
+            if (status == STATUS_OK) {
+                /* pair was found, do not insert it twice */
+                assert (value == handle.value);
+                continue;
+            } else {
+                /* pair is not found; append it */
+                HashBounds *restrict bounds = VECTOR_ALL(&list->bounds, HashBounds);
+                Bloomfilter *restrict filters = VECTOR_ALL(&list->filters, Bloomfilter);
+                Slice *restrict slices = VECTOR_ALL(&list->slices, Slice);
+
+                if (list->appenderIdx != 0) { ; // TODO: remove
+                }
+
+                Slice *restrict appender = slices + list->appenderIdx;
+                Bloomfilter *restrict appenderFilter = filters + list->appenderIdx;
+                HashBounds *restrict appenderBounds = bounds + list->appenderIdx;
+
+                DEBUG(NG5_SLICE_LIST_TAG,
+                      "appender # of elems: %zu, limit: %zu",
+                      appender->numElems,
+                      SLICE_KEY_COLUMN_MAX_ELEMS);
+                assert(appender->numElems < SLICE_KEY_COLUMN_MAX_ELEMS);
+                appender->keyColumn[appender->numElems] = key;
+                appender->keyHashColumn[appender->numElems] = keyHash;
+                appender->stringIdColumn[appender->numElems] = value;
+                appenderBounds->minHash = appenderBounds->minHash < keyHash ?
+                                          appenderBounds->minHash : keyHash;
+                appenderBounds->maxHash = appenderBounds->maxHash > keyHash ?
+                                          appenderBounds->maxHash : keyHash;
+                BLOOMFILTER_SET(appenderFilter, &keyHash, sizeof(Hash));
+                appender->numElems++;
+                if (BRANCH_UNLIKELY(appender->numElems == SLICE_KEY_COLUMN_MAX_ELEMS)) {
+                    appenderSeal(appender, list);
+                    appenderNew(list);
+                }
+            }
+        }
+
+        unlock(list);
+        return STATUS_OK;
+    }
+
+    int SliceListLookupByKey(SliceHandle *handle, SliceList *list, const char *needle) {
+        UNUSED(list);
+        UNUSED(handle);
+        UNUSED(needle);
+
+        Hash keyHash = get_hashcode(needle);
+        uint32_t numSlices = VectorLength(&list->slices);
 
         /* check whether the key-value pair is already contained in one slice */
-        status = SliceListLookupByKey(&handle, list, key);
+        HashBounds *restrict bounds = VECTOR_ALL(&list->bounds, HashBounds);
+        Bloomfilter *restrict filters = VECTOR_ALL(&list->filters, Bloomfilter);
+        Slice *restrict slices = VECTOR_ALL(&list->slices, Slice);
+        SliceDescriptor *restrict descs = VECTOR_ALL(&list->descriptors, SliceDescriptor);
 
-        if (status == STATUS_OK) {
-            /* pair was found, do not insert it twice */
-            assert (value == handle.value);
-            continue;
-        } else {
-            /* pair is not found; append it */
-            HashBounds *restrict bounds = VECTOR_ALL(&list->bounds, HashBounds);
-            Bloomfilter *restrict filters = VECTOR_ALL(&list->filters, Bloomfilter);
-            Slice *restrict slices = VECTOR_ALL(&list->slices, Slice);
+        for (register uint32_t i = 0; i < numSlices; i++) {
+            SliceDescriptor *restrict desc = descs + i;
+            HashBounds *restrict bound = bounds + i;
+            Slice *restrict slice = slices + i;
 
-            if (list->appenderIdx != 0) { ; // TODO: remove
-            }
+            desc->numReadsAll++;
 
-            Slice *restrict appender = slices + list->appenderIdx;
-            Bloomfilter *restrict appenderFilter = filters + list->appenderIdx;
-            HashBounds *restrict appenderBounds = bounds + list->appenderIdx;
+            if (slice->numElems > 0) {
+                bool keyHashIn = keyHash >= bound->minHash && keyHash <= bound->maxHash;
+                if (keyHashIn) {
+                    Bloomfilter *restrict filter = filters + i;
+                    bool maybeContained = BLOOMFILTER_TEST(filter, &keyHash, sizeof(Hash));
+                    if (maybeContained) {
+                        DEBUG(NG5_SLICE_LIST_TAG, "ng5_slice_list_lookup_by_key key(%s) -> ?", needle);
+                        uint32_t pairPosition;
 
-            DEBUG(NG5_SLICE_LIST_TAG,
-                  "appender # of elems: %zu, limit: %zu",
-                  appender->numElems,
-                  SLICE_KEY_COLUMN_MAX_ELEMS);
-            assert(appender->numElems < SLICE_KEY_COLUMN_MAX_ELEMS);
-            appender->keyColumn[appender->numElems] = key;
-            appender->keyHashColumn[appender->numElems] = keyHash;
-            appender->stringIdColumn[appender->numElems] = value;
-            appenderBounds->minHash = appenderBounds->minHash < keyHash ?
-                                      appenderBounds->minHash : keyHash;
-            appenderBounds->maxHash = appenderBounds->maxHash > keyHash ?
-                                      appenderBounds->maxHash : keyHash;
-            BLOOMFILTER_SET(appenderFilter, &keyHash, sizeof(Hash));
-            appender->numElems++;
-            if (BRANCH_UNLIKELY(appender->numElems == SLICE_KEY_COLUMN_MAX_ELEMS)) {
-                appenderSeal(appender, list);
-                appenderNew(list);
-            }
-        }
-    }
+                        switch (slice->strat) {
+                            case SLICE_LOOKUP_SCAN:
+                                pairPosition = SLICE_SCAN(slice, keyHash, needle);
+                                break;
+                            case SLICE_LOOKUP_BESEARCH:
+                                pairPosition = SLICE_SCAN(slice, keyHash, needle);
+                                break;
+                            default: PANIC("unknown slice find strategy");
+                        }
 
-    unlock(list);
-    return STATUS_OK;
-}
+                        DEBUG(NG5_SLICE_LIST_TAG,
+                              "ng5_slice_list_lookup_by_key key(%s) -> pos(%zu in slice #%zu)",
+                              needle,
+                              pairPosition,
+                              i);
+                        if (pairPosition < slice->numElems) {
+                            /* pair is contained */
+                            desc->numReadsHit++;
+                            handle->isContained = true;
+                            handle->value = slice->stringIdColumn[pairPosition];
+                            handle->key = needle;
+                            handle->container = slice;
 
-int SliceListLookupByKey(SliceHandle *handle, SliceList *list, const char *needle) {
-    UNUSED(list);
-    UNUSED(handle);
-    UNUSED(needle);
-
-    Hash keyHash = get_hashcode(needle);
-    uint32_t numSlices = VectorLength(&list->slices);
-
-    /* check whether the key-value pair is already contained in one slice */
-    HashBounds *restrict bounds = VECTOR_ALL(&list->bounds, HashBounds);
-    Bloomfilter *restrict filters = VECTOR_ALL(&list->filters, Bloomfilter);
-    Slice *restrict slices = VECTOR_ALL(&list->slices, Slice);
-    SliceDescriptor *restrict descs = VECTOR_ALL(&list->descriptors, SliceDescriptor);
-
-    for (register uint32_t i = 0; i < numSlices; i++) {
-        SliceDescriptor *restrict desc = descs + i;
-        HashBounds *restrict bound = bounds + i;
-        Slice *restrict slice = slices + i;
-
-        desc->numReadsAll++;
-
-        if (slice->numElems > 0) {
-            bool keyHashIn = keyHash >= bound->minHash && keyHash <= bound->maxHash;
-            if (keyHashIn) {
-                Bloomfilter *restrict filter = filters + i;
-                bool maybeContained = BLOOMFILTER_TEST(filter, &keyHash, sizeof(Hash));
-                if (maybeContained) {
-                    DEBUG(NG5_SLICE_LIST_TAG, "ng5_slice_list_lookup_by_key key(%s) -> ?", needle);
-                    uint32_t pairPosition;
-
-                    switch (slice->strat) {
-                        case SLICE_LOOKUP_SCAN:
-                            pairPosition = SLICE_SCAN(slice, keyHash, needle);
-                            break;
-                        case SLICE_LOOKUP_BESEARCH:
-                            pairPosition = SLICE_RESEARCH_INLINE(slice, keyHash, needle);
-                            break;
-                        default: PANIC("unknown slice find strategy");
-                    }
-
-                    DEBUG(NG5_SLICE_LIST_TAG,
-                          "ng5_slice_list_lookup_by_key key(%s) -> pos(%zu in slice #%zu)",
-                          needle,
-                          pairPosition,
-                          i);
-                    if (pairPosition < slice->numElems) {
-                        /* pair is contained */
-                        desc->numReadsHit++;
-                        handle->isContained = true;
-                        handle->value = slice->stringIdColumn[pairPosition];
-                        handle->key = needle;
-                        handle->container = slice;
-
-                        desc->numReadsHit++;
-                        return STATUS_OK;
+                            desc->numReadsHit++;
+                            return STATUS_OK;
+                        }
+                    } else {
+                        /* bloomfilter is sure that pair is not contained */
+                        continue;
                     }
                 } else {
-                    /* bloomfilter is sure that pair is not contained */
+                    /* key hash is not inside bounds of hashes in slice */
                     continue;
                 }
-            } else {
-                /* key hash is not inside bounds of hashes in slice */
-                continue;
             }
         }
+
+        handle->isContained = false;
+
+        return STATUS_NOTFOUND;
     }
 
-    handle->isContained = false;
-
-    return STATUS_NOTFOUND;
-}
-
-int SliceListRemove(SliceList *list, SliceHandle *handle) {
-    UNUSED(list);
-    UNUSED(handle);
-    NOT_YET_IMPLEMENTED
-}
+    int SliceListRemove(SliceList *list, SliceHandle *handle) {
+        UNUSED(list);
+        UNUSED(handle);
+        NOT_YET_IMPLEMENTED
+    }
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
@@ -809,114 +813,128 @@ int SliceListRemove(SliceList *list, SliceHandle *handle) {
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-static void appenderNew(SliceList *list) {
-    /* ANTI-OPTIMIZATION: madvising sequential access to columns in slice decrease performance */
+    static void appenderNew(SliceList *list) {
+        /* ANTI-OPTIMIZATION: madvising sequential access to columns in slice decrease performance */
 
-    /* the slice itself */
-    Slice slice = {
-            .strat     = SLICE_LOOKUP_SCAN,
-            .numElems = 0,
-            .cacheIdx = (uint32_t) -1
-    };
+        /* the slice itself */
+        Slice slice = {
+                .strat     = SLICE_LOOKUP_SCAN,
+                .numElems = 0,
+                .cacheIdx = (uint32_t) -1
+        };
 
-    uint32_t numSlices = VectorLength(&list->slices);
-    VectorPush(&list->slices, &slice, 1);
+        uint32_t numSlices = VectorLength(&list->slices);
+        VectorPush(&list->slices, &slice, 1);
 
-    assert(SLICE_KEY_COLUMN_MAX_ELEMS > 0);
+        assert(SLICE_KEY_COLUMN_MAX_ELEMS > 0);
 
-    /* the descriptor */
-    SliceDescriptor desc = {
-            .numReadsHit  = 0,
-            .numReadsAll  = 0,
-    };
+        /* the descriptor */
+        SliceDescriptor desc = {
+                .numReadsHit  = 0,
+                .numReadsAll  = 0,
+        };
 
-    VectorPush(&list->descriptors, &desc, 1);
+        VectorPush(&list->descriptors, &desc, 1);
 
-    /* the lookup guards */
-    assert(sizeof(Bloomfilter) <= NG5_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE);
-    Bloomfilter filter;
+        /* the lookup guards */
+        assert(sizeof(Bloomfilter) <= NG5_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE);
+        Bloomfilter filter;
 
-    /* NOTE: the size of each bloomfilter lead to a false positive probability of 100%, i.e., number of items in the
-     * slice is around 32644 depending on the CPU cache size, the number of actual bits in the filter (Cache line size
-     * in bits minus the header for the bloomfilter) along with the number of used hash functions (4), lead to that
-     * probability. However, the reason a bloomfilter is used is to skip slices whch definitively do NOT contain the
-     * key-value pair - and that still works ;) */
-    BloomfilterCreate(&filter,
-                      (NG5_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE - sizeof(Bloomfilter)) * 8);
-    VectorPush(&list->filters, &filter, 1);
-    HashBounds bounds = {
-            .minHash        = (Hash) -1,
-            .maxHash        = (Hash) 0
-    };
-    VectorPush(&list->bounds, &bounds, 1);
+        /* NOTE: the size of each bloomfilter lead to a false positive probability of 100%, i.e., number of items in the
+         * slice is around 32644 depending on the CPU cache size, the number of actual bits in the filter (Cache line size
+         * in bits minus the header for the bloomfilter) along with the number of used hash functions (4), lead to that
+         * probability. However, the reason a bloomfilter is used is to skip slices whch definitively do NOT contain the
+         * key-value pair - and that still works ;) */
+        BloomfilterCreate(&filter,
+                          (NG5_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE - sizeof(Bloomfilter)) * 8);
+        VectorPush(&list->filters, &filter, 1);
+        HashBounds bounds = {
+                .minHash        = (Hash) -1,
+                .maxHash        = (Hash) 0
+        };
+        VectorPush(&list->bounds, &bounds, 1);
 
-    INFO(NG5_SLICE_LIST_TAG, "created new appender in slice list %p\n\t"
-                             "# of slices (incl. appender) in total...............: %zu\n\t"
-                             "Slice target memory size............................: %zuB (%s)\n\t"
-                             "Bloomfilter target memory size......................: %zuB (%s)\n\t"
-                             "Max # of (key, hash, string) in appender/slice......: %zu\n\t"
-                             "Bits used in per-slice bloomfilter..................: %zu\n\t"
-                             "Prob. of bloomfilter to produce false-positives.....: %f\n\t"
-                             "Single slice type size..............................: %zuB\n\t"
-                             "Total slice-list size...............................: %f MiB",
-         list,
-         list->slices.numElems,
-         (size_t) NG5_SLICE_LIST_TARGET_MEMORY_SIZE_IN_BYTE,
-         NG5_SLICE_LIST_TARGET_MEMORY_NAME,
-         (size_t) NG5_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_0;0;50000;0.642000;101.079002;101.721001;38025251;38025251;18276368
-IN_BYTE,
-         NG5_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_NAME,
-         (size_t) SLICE_KEY_COLUMN_MAX_ELEMS,
-         BitmapNumBits(&filter),
-         (pow(1 - exp(-(double) BitmapNumHashs()
-                      / ((double) BitmapNumBits(&filter) / (double) SLICE_KEY_COLUMN_MAX_ELEMS)),
-              BitmapNumHashs(&filter))),
-         sizeof(Slice),
-         (sizeof(SliceList) + list->slices.numElems
-                              *
-                              (sizeof(Slice) + sizeof(SliceDescriptor) + (sizeof(uint32_t) * list->descriptors.numElems)
-                               + sizeof(Bloomfilter) + BitmapNumBits(&filter) / 8 + sizeof(HashBounds))) / 1024.0
-         / 1024.0
-    );
+        INFO(NG5_SLICE_LIST_TAG, "created new appender in slice list %p\n\t"
+                                 "# of slices (incl. appender) in total...............: %zu\n\t"
+                                 "Slice target memory size............................: %zuB (%s)\n\t"
+                                 "Bloomfilter target memory size......................: %zuB (%s)\n\t"
+                                 "Max # of (key, hash, string) in appender/slice......: %zu\n\t"
+                                 "Bits used in per-slice bloomfilter..................: %zu\n\t"
+                                 "Prob. of bloomfilter to produce false-positives.....: %f\n\t"
+                                 "Single slice type size..............................: %zuB\n\t"
+                                 "Total slice-list size...............................: %f MiB",
+             list,
+             list->slices.numElems,
+             (size_t) NG5_SLICE_LIST_TARGET_MEMORY_SIZE_IN_BYTE,
+             NG5_SLICE_LIST_TARGET_MEMORY_NAME,
+             (size_t) NG5_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_0;
+                     0;
+                     50000;
+                     0.642000;
+                     101.079002;
+                     101.721001;
+                     38025251;
+                     38025251;
+                     18276368
+                     IN_BYTE,
+             NG5_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_NAME,
+             (size_t) SLICE_KEY_COLUMN_MAX_ELEMS,
+             BitmapNumBits(&filter),
+             (pow(1 - exp(-(double) BitmapNumHashs()
+                          / ((double) BitmapNumBits(&filter) / (double) SLICE_KEY_COLUMN_MAX_ELEMS)),
+                  BitmapNumHashs(&filter))),
+             sizeof(Slice),
+             (sizeof(SliceList) + list->slices.numElems
+                                  *
+                                  (sizeof(Slice) + sizeof(SliceDescriptor) +
+                                   (sizeof(uint32_t) * list->descriptors.numElems)
+                                   + sizeof(Bloomfilter) + BitmapNumBits(&filter) / 8 + sizeof(HashBounds))) / 1024.0
+             / 1024.0
+        );
 
-    /* register new slice as the current appender */
-    list->appenderIdx = numSlices;
-}
+        /* register new slice as the current appender */
+        list->appenderIdx = numSlices;
+    }
 
 
-static void appenderSeal(Slice *slice, SliceList* list) {
-    UNUSED(slice);
-    UNUSED(list);
-    const char *keyColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
-    const char *stringIdColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
-    Hash keyHashColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
+    static void appenderSeal(Slice *slice, SliceList *list) {
+        UNUSED(slice);
+        UNUSED(list);
+        const char *keyColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
+        const char *stringIdColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
+        Hash keyHashColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
 
-    memcpy( keyHashColumn, slice->keyHashColumn, sizeof(keyHashColumn) );
-    memcpy( keyColumn, slice->keyColumn, sizeof(keyColumn) );
-    memcpy( stringIdColumn, slice->stringIdColumn, sizeof(stringIdColumn) );
+        memcpy(keyHashColumn, slice->keyHashColumn, sizeof(keyHashColumn));
+        memcpy(keyColumn, slice->keyColumn, sizeof(keyColumn));
+        memcpy(stringIdColumn, slice->stringIdColumn, sizeof(stringIdColumn));
 
-     slicesort2(keyHashColumn, keyColumn, stringIdColumn, SLICE_KEY_COLUMN_MAX_ELEMS);
+        slicesort2(keyHashColumn, keyColumn, stringIdColumn, SLICE_KEY_COLUMN_MAX_ELEMS);
 
-    lock(list);
+        //if(keyHashColumn[14] == 2701) {
+        //    UNUSED(list);
+        //    assert(slice);
+        // }
 
-    memcpy( slice->keyHashColumn, keyHashColumn, sizeof(keyHashColumn) );
-    memcpy(  slice->keyColumn, keyColumn, sizeof(keyColumn) );
-    memcpy( slice->stringIdColumn, stringIdColumn, sizeof(stringIdColumn) );
+        lock(list);
 
-    slice->strat = SLICE_LOOKUP_BESEARCH;
+        memcpy(slice->keyHashColumn, keyHashColumn, sizeof(keyHashColumn));
+        memcpy(slice->keyColumn, keyColumn, sizeof(keyColumn));
+        memcpy(slice->stringIdColumn, stringIdColumn, sizeof(stringIdColumn));
 
-    unlock(list);
-    //  slice->cacheIdx = 0;
-    //  slice_sort(slice);
-    //
+        slice->strat = SLICE_LOOKUP_BESEARCH;
 
-    // TODO: sealing means sort and then replace 'find' with bsearch or something. Not yet implemented: sealed slices are also search in a linear fashion
-}
+        unlock(list);
+        //  slice->cacheIdx = 0;
+        //  slice_sort(slice);
+        //
 
-static void lock(SliceList *list) {
-    SpinlockAcquire(&list->lock);
-}
+        // TODO: sealing means sort and then replace 'find' with bsearch or something. Not yet implemented: sealed slices are also search in a linear fashion
+    }
 
-static void unlock(SliceList *list) {
-    SpinlockRelease(&list->lock);
-}
+    static void lock(SliceList *list) {
+        SpinlockAcquire(&list->lock);
+    }
+
+    static void unlock(SliceList *list) {
+        SpinlockRelease(&list->lock);
+    }

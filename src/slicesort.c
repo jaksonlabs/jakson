@@ -60,7 +60,7 @@ inline static void swapKeys(const char ** a, const char ** b)
 }
 
 
-
+/*
 inline static int partition (Hash arr[], int low, int high, const char * keyArr[], const char * stringIdArr[])
 {
     Hash pivot = arr[high];
@@ -70,10 +70,32 @@ inline static int partition (Hash arr[], int low, int high, const char * keyArr[
     {
         if (arr[j] <= pivot)
         {
+            if (arr[i] == 2701 && i == 0) {
+                Hash value = arr[i];
+                const char* key = keyArr[i];
+
+                assert(value);
+                assert(key);
+            }
             i++;
-            swapHashes(&arr[i], &arr[j]);
-            swapKeys(&keyArr[i], &keyArr[j]);
-            swapKeys(&stringIdArr[i], &stringIdArr[j]);
+            if(i != j){
+                swapHashes(&arr[i], &arr[j]);
+                swapKeys(&keyArr[i], &keyArr[j]);
+                swapKeys(&stringIdArr[i], &stringIdArr[j]);
+            }
+
+
+            Hash value = arr[j];
+            const char* key = keyArr[j];
+
+            assert(value);
+            assert(key);
+
+            value = arr[i];
+            key = keyArr[i];
+
+            assert(value);
+            assert(key);
         }
     }
 
@@ -82,42 +104,47 @@ inline static int partition (Hash arr[], int low, int high, const char * keyArr[
     swapKeys(&stringIdArr[i + 1], &stringIdArr[high]);
     return (i + 1);
 }
+*/
+//inline static int partition (Hash arr[], int low, int high, const char * keyArr[], const char * stringIdArr[])
+//{
 
-/*
- * inline static int partition (Hash arr[], int low, int high, const char * keyArr[], const char * stringIdArr[])
-{
-    Hash pivot = arr[high];
 
-    int leftPointer = low -1;
-    int rightPointer = high;
+   /*
+    *   Hash pivot = arr[high];
 
-    while(true) {
-        while(arr[++leftPointer] < pivot) {
-            //do nothing
+    int left= low -1;
+    int right = high;
+    * while(leftPointer < rightPointer) {
+        while(arr[leftPointer] < pivot && leftPointer < rightPointer) {
+            leftPointer++;
         }
 
-        while(rightPointer > 0 && arr[--rightPointer] > pivot) {
-            //do nothing
+        while(rightPointer > leftPointer && arr[rightPointer] >= pivot) {
+            rightPointer--;
         }
 
-        if(leftPointer >= rightPointer) {
-            break;
-        } else {
+        if (arr[leftPointer] > pivot) {
             swapHashes(&arr[leftPointer], &arr[rightPointer]);
             swapKeys(&keyArr[leftPointer], &keyArr[rightPointer]);
             swapKeys(&stringIdArr[leftPointer], &stringIdArr[rightPointer]);
         }
     }
 
-    swapHashes(&arr[leftPointer], &arr[rightPointer]);
-    swapKeys(&keyArr[leftPointer], &keyArr[rightPointer]);
-    swapKeys(&stringIdArr[leftPointer], &stringIdArr[rightPointer]);
+    // swapHashes(&arr[leftPointer], &arr[rightPointer]);
+    // swapKeys(&keyArr[leftPointer], &keyArr[rightPointer]);
+    // swapKeys(&stringIdArr[leftPointer], &stringIdArr[rightPointer]);
 
-    return leftPointer;
-}
- */
+    return leftPointer; */
 
-inline static void quickSort(Hash arr[], int low, int high, const char * keyArr[],  const char * stringIdArr[])
+
+
+
+
+    // return left;
+//}
+
+
+/*inline static void quickSort(Hash arr[], int low, int high, const char * keyArr[],  const char * stringIdArr[])
 {
     if (low < high)
     {
@@ -125,8 +152,54 @@ inline static void quickSort(Hash arr[], int low, int high, const char * keyArr[
         quickSort(arr, low, pi - 1, keyArr, stringIdArr);
         quickSort(arr, pi + 1, high, keyArr, stringIdArr);
     }
-}
 
+    if (low < high) {
+        Hash pivot = arr[high];
+
+        int left= low -1;
+        int right = high;
+
+        while (left <= right) {
+            while (arr[left] < pivot) {
+                left++;
+            }
+            while (arr[right] > pivot) {
+                right++;
+            }
+
+            if (left <= right) {
+                swapHashes(&arr[left], &arr[right]);
+                swapKeys(&keyArr[left], &keyArr[right]);
+                swapKeys(&stringIdArr[left], &stringIdArr[right]);
+
+                left = left + 1;
+                right = right - 1;
+            }
+        }
+        quickSort(arr, low, right, keyArr, stringIdArr);
+        quickSort(arr, left + 1, high, keyArr, stringIdArr);
+    }
+
+
+}*/
+
+void bubblesort(Hash arr[], int length, const char * keyArr[],  const char * stringIdArr[])
+{
+    int i, j;
+
+    for (i = 1; i < length ; i++)
+    {
+        for (j = 0; j < length - i ; j++)
+        {
+            if (arr[j] > arr[j+1])
+            {
+                swapHashes(&arr[j], &arr[j + 1]);
+                swapKeys(&keyArr[j], &keyArr[j + 1]);
+                swapKeys(&stringIdArr[j], &stringIdArr[j + 1]);
+            }
+        }
+    }
+}
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
@@ -135,5 +208,6 @@ inline static void quickSort(Hash arr[], int low, int high, const char * keyArr[
 // ---------------------------------------------------------------------------------------------------------------------
 
 void slicesort2(Hash keyHashColumn[], const char * keyColumn[], const char * stringIdColumn[], size_t arraySize) {
-    quickSort(keyHashColumn, 0, arraySize, keyColumn, stringIdColumn);
+    // quickSort(keyHashColumn, 0, arraySize, keyColumn, stringIdColumn);
+    bubblesort(keyHashColumn, arraySize, keyColumn, stringIdColumn);
 }
