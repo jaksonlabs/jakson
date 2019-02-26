@@ -138,7 +138,7 @@ void slice_linearizeImpl(Hash compressedColumn[], Hash targetColumn[], size_t lo
         size_t i = 0;
 
         // Black magic
-        size_t startIndex = level == 0 ? 0 : 4 + (((size_t)pow(factor, level) - 1) * index);
+        size_t startIndex = level == 0 ? 0 : (((size_t)pow(factor, level) - 1) + index * (factor - 1));
         int sourceIndex = low - 1;
         size_t targetIndex;
         for(i = 0; i < factor - 1; i++) {
