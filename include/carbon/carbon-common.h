@@ -187,6 +187,8 @@ typedef enum carbon_basic_type
 #define  MARKER_SYMBOL_COLUMN              'x'
 #define  MARKER_SYMBOL_HUFFMAN_DIC_ENTRY   'd'
 #define  MARKER_SYMBOL_RECORD_HEADER       'r'
+#define  MARKER_SYMBOL_HASHTABLE_HEADER    '#'
+#define  MARKER_SYMBOL_VECTOR_HEADER       '|'
 
 #define CARBON_ZERO_MEMORY(dst, len)                                                                                   \
     memset((void *) dst, 0, len);

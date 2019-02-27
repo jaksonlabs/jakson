@@ -23,6 +23,7 @@
 #include <carbon/carbon-int-archive.h>
 #include <carbon/carbon-query.h>
 #include <carbon/carbon-string-id-cache.h>
+#include <err.h>
 
 #include "carbon/carbon-common.h"
 #include "carbon/carbon-memblock.h"
@@ -243,6 +244,82 @@ carbon_archive_stream_from_json(carbon_memblock_t **stream,
     return true;
 }
 
+static bool
+run_string_id_baking(carbon_err_t *err, carbon_memblock_t **stream)
+{
+    carbon_archive_t archive;
+    char tmp_file_name[512];
+    carbon_object_id_t rand_part;
+    carbon_object_id_create(&rand_part);
+    sprintf(tmp_file_name, "/tmp/carbon-tool-temp-%" PRIu64 ".carbon", rand_part);
+    FILE *tmp_file;
+
+
+    if ((tmp_file = fopen(tmp_file_name, "w")) == NULL) {
+        CARBON_ERROR(err, CARBON_ERR_TMP_FOPENWRITE);
+        return false;
+    }
+
+    if (!carbon_archive_write(tmp_file, *stream)) {
+        CARBON_ERROR(err, CARBON_ERR_WRITEARCHIVE);
+        fclose(tmp_file);
+        remove(tmp_file_name);
+        return false;
+    }
+
+    fflush(tmp_file);
+    fclose(tmp_file);
+
+    if (!carbon_archive_open(&archive, tmp_file_name)) {
+        CARBON_ERROR(err, CARBON_ERR_ARCHIVEOPEN);
+        return false;
+    }
+
+    bool has_index;
+    carbon_archive_has_query_index_string_id_to_offset(&has_index, &archive);
+    if (has_index) {
+        CARBON_ERROR(err, CARBON_ERR_INTERNALERR);
+        remove(tmp_file_name);
+        return false;
+    }
+
+    carbon_query_index_id_to_offset_t *index;
+    carbon_query_t query;
+    carbon_query_create(&query, &archive);
+    carbon_query_create_index_string_id_to_offset(&index, &query);
+    carbon_query_drop(&query);
+    carbon_archive_close(&archive);
+
+    if ((tmp_file = fopen(tmp_file_name, "rb+")) == NULL) {
+        CARBON_ERROR(err, CARBON_ERR_TMP_FOPENWRITE);
+        return false;
+    }
+
+    fseek(tmp_file, 0, SEEK_END);
+    carbon_off_t index_pos = ftell(tmp_file);
+    carbon_query_index_id_to_offset_serialize(tmp_file, err, index);
+    carbon_off_t file_length = ftell(tmp_file);
+    fseek(tmp_file, 0, SEEK_SET);
+
+    carbon_file_header_t header;
+    size_t nread = fread(&header, sizeof(carbon_file_header_t), 1, tmp_file);
+    CARBON_ERROR_IF(nread != 1, err, CARBON_ERR_FREAD_FAILED);
+    header.string_id_to_offset_index_offset = index_pos;
+    fseek(tmp_file, 0, SEEK_SET);
+    int nwrite = fwrite(&header, sizeof(carbon_file_header_t), 1, tmp_file);
+    CARBON_ERROR_IF(nwrite != 1, err, CARBON_ERR_FWRITE_FAILED);
+    fseek(tmp_file, 0, SEEK_SET);
+
+    carbon_query_drop_index_string_id_to_offset(index);
+
+    carbon_memblock_drop(*stream);
+    carbon_memblock_from_file(stream, tmp_file, file_length);
+
+    remove(tmp_file_name);
+
+    return true;
+}
+
 bool carbon_archive_from_model(carbon_memblock_t **stream,
                                carbon_err_t *err,
                                carbon_columndoc_t *model,
@@ -275,7 +352,9 @@ bool carbon_archive_from_model(carbon_memblock_t **stream,
     if (bake_string_id_index)
     {
         /* create string id to offset index, and append it to the CARBON file */
-
+        if (!run_string_id_baking(err, stream)) {
+            return false;
+        }
     }
 
     return true;
@@ -1810,8 +1889,8 @@ static bool print_carbon_header_from_memfile(FILE *file, carbon_err_t *err, carb
     }
 
     fprintf(file, "0x%04x ", offset);
-    fprintf(file, "[thread_magic: " CABIN_FILE_MAGIC "] [version: %d] [recordOffset: 0x%04x]\n",
-            header->version, (unsigned) header->root_object_header_offset);
+    fprintf(file, "[magic: " CABIN_FILE_MAGIC "] [version: %d] [recordOffset: 0x%04x] [string-id-offset-index: 0x%04x]\n",
+            header->version, (unsigned) header->root_object_header_offset, (unsigned) header->string_id_to_offset_index_offset);
     return true;
 }
 
@@ -1902,9 +1981,18 @@ static carbon_archive_object_flags_t *get_flags(carbon_archive_object_flags_t *f
     return flags;
 }
 
-static bool init_decompressor(carbon_compressor_t *strategy, uint8_t flags);
-static bool read_stringtable(carbon_archive_string_table_t *table, carbon_err_t *err, FILE *disk_file);
-static bool read_record(carbon_archive_t *archive, FILE *disk_file, carbon_off_t record_header_offset);
+static bool
+init_decompressor(carbon_compressor_t *strategy, uint8_t flags);
+
+static bool
+read_stringtable(carbon_archive_string_table_t *table, carbon_err_t *err, FILE *disk_file);
+
+static bool
+read_record(carbon_record_header_t *header_read, carbon_archive_t *archive, FILE *disk_file, carbon_off_t record_header_offset);
+
+static bool
+read_string_id_to_offset_index(carbon_err_t *err, carbon_archive_t *archive, const char *file_path,
+       carbon_off_t string_id_to_offset_index_offset);
 
 bool carbon_archive_open(carbon_archive_t *out,
                         const char *file_path)
@@ -1930,24 +2018,43 @@ bool carbon_archive_open(carbon_archive_t *out,
                 CARBON_PRINT_ERROR(CARBON_ERR_FORMATVERERR);
                 return false;
             } else {
+                out->query_index_string_id_to_offset = NULL;
+                out->string_id_cache = NULL;
+
+                carbon_record_header_t record_header;
+
                 if ((status = read_stringtable(&out->string_table, &out->err, disk_file)) != true) {
                     return status;
                 }
-                if ((status = read_record(out, disk_file, header.root_object_header_offset)) != true) {
+                if ((status = read_record(&record_header, out, disk_file, header.root_object_header_offset)) != true) {
                     return status;
                 }
 
+                if (header.string_id_to_offset_index_offset != 0) {
+                    carbon_err_t err;
+                    if ((status = read_string_id_to_offset_index(&err, out, file_path, header.string_id_to_offset_index_offset)) != true) {
+                        CARBON_PRINT_ERROR(err.code);
+                        return status;
+                    }
+                }
+
                 fseek(disk_file, sizeof(carbon_file_header_t), SEEK_SET);
-                carbon_off_t stringDicStart = ftell(disk_file);
+
+                carbon_off_t data_start = ftell(disk_file);
                 fseek(disk_file, 0, SEEK_END);
-                carbon_off_t fileEnd = ftell(disk_file);
-                fseek(disk_file, stringDicStart, SEEK_SET);
+                carbon_off_t file_size = ftell(disk_file);
+
                 fclose(disk_file);
 
-                out->info.string_table_size = header.root_object_header_offset - stringDicStart;
-                out->info.record_table_size = fileEnd - header.root_object_header_offset;
-                out->query_index_id_to_offset = NULL;
-                out->string_id_cache = NULL;
+                size_t string_table_size = header.root_object_header_offset - data_start;
+                size_t record_table_size = record_header.record_size - header.root_object_header_offset;
+                size_t string_id_index = file_size - header.string_id_to_offset_index_offset;
+
+                out->info.string_table_size = string_table_size;
+                out->info.record_table_size = record_table_size;
+                out->info.num_embeddded_strings = out->string_table.num_embeddded_strings;
+                out->info.string_id_index_size = string_id_index;
+
             }
         }
     }
@@ -1978,9 +2085,9 @@ carbon_archive_close(carbon_archive_t *archive)
 CARBON_EXPORT(bool)
 carbon_archive_drop_indexes(carbon_archive_t *archive)
 {
-    if (archive->query_index_id_to_offset) {
-        carbon_query_drop_index_id_to_offset(archive->query_index_id_to_offset);
-        archive->query_index_id_to_offset = NULL;
+    if (archive->query_index_string_id_to_offset) {
+        carbon_query_drop_index_string_id_to_offset(archive->query_index_string_id_to_offset);
+        archive->query_index_string_id_to_offset = NULL;
     }
     return true;
 }
@@ -1990,14 +2097,14 @@ carbon_archive_query(carbon_query_t *query, carbon_archive_t *archive)
 {
     if (carbon_query_create(query, archive)) {
         bool has_index = false;
-        carbon_archive_has_query_index(&has_index, archive);
+        carbon_archive_has_query_index_string_id_to_offset(&has_index, archive);
         if (!has_index) {
-            carbon_query_create_index_id_to_offset(&archive->query_index_id_to_offset, 171798600, query);
+            carbon_query_create_index_string_id_to_offset(&archive->query_index_string_id_to_offset, query);
         }
         bool has_cache = false;
         carbon_archive_hash_query_string_id_cache(&has_cache, archive);
         if (!has_cache) {
-            carbon_string_id_cache_create_LRU(&archive->string_id_cache, 1717986918, query);
+            carbon_string_id_cache_create_LRU(&archive->string_id_cache, query);
         }
         return true;
     } else {
@@ -2006,11 +2113,11 @@ carbon_archive_query(carbon_query_t *query, carbon_archive_t *archive)
 }
 
 CARBON_EXPORT(bool)
-carbon_archive_has_query_index(bool *state, carbon_archive_t *archive)
+carbon_archive_has_query_index_string_id_to_offset(bool *state, carbon_archive_t *archive)
 {
     CARBON_NON_NULL_OR_ERROR(state)
     CARBON_NON_NULL_OR_ERROR(archive)
-    *state = (archive->query_index_id_to_offset != NULL);
+    *state = (archive->query_index_string_id_to_offset != NULL);
     return true;
 }
 
@@ -2067,6 +2174,7 @@ static bool read_stringtable(carbon_archive_string_table_t *table, carbon_err_t 
 
     flags.value = header.flags;
     table->first_entry_off = header.first_entry;
+    table->num_embeddded_strings = header.num_entries;
 
     if ((init_decompressor(&table->compressor, flags.value)) != true) {
         return false;
@@ -2074,7 +2182,7 @@ static bool read_stringtable(carbon_archive_string_table_t *table, carbon_err_t 
     return true;
 }
 
-static bool read_record(carbon_archive_t *archive, FILE *disk_file, carbon_off_t record_header_offset)
+static bool read_record(carbon_record_header_t *header_read, carbon_archive_t *archive, FILE *disk_file, carbon_off_t record_header_offset)
 {
     carbon_err_t err;
     fseek(disk_file, record_header_offset, SEEK_SET);
@@ -2101,25 +2209,19 @@ static bool read_record(carbon_archive_t *archive, FILE *disk_file, carbon_off_t
             CARBON_ERROR(&archive->err, CARBON_ERR_CORRUPTED);
             status = false;
         }
+
+        *header_read = header;
         return true;
     }
 }
-// TODO: Delete
-//CARBON_FUNC_UNUSED
-//static void get_object_props(carbon_archive_object_t *object)
-//{
-//    if (object->flags.bits.has_object_props) {
-//        assert(object->props.objects != 0);
-//        carbon_memfile_seek(&object->file, object->props.objects);
-//        carbon_int_reset_cabin_object_mem_file(object);
-//    } else {
-//
-//    }
-//}
-//
-//
-//
 
+static bool
+read_string_id_to_offset_index(carbon_err_t *err, carbon_archive_t *archive, const char *file_path,
+                               carbon_off_t string_id_to_offset_index_offset)
+{
+    return carbon_query_index_id_to_offset_deserialize(&archive->query_index_string_id_to_offset, err,
+                                                       file_path, string_id_to_offset_index_offset);
+}
 
 
 

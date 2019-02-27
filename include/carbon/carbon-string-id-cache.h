@@ -34,7 +34,7 @@ typedef struct
 } carbon_string_id_cache_statistics_t;
 
 CARBON_EXPORT(bool)
-carbon_string_id_cache_create_LRU(carbon_string_id_cache_t **cache, size_t capacity, carbon_query_t *query);
+carbon_string_id_cache_create_LRU(carbon_string_id_cache_t **cache, carbon_query_t *query);
 
 CARBON_EXPORT(bool)
 carbon_string_id_cache_get_error(carbon_err_t *err, const carbon_string_id_cache_t *cache);

@@ -81,29 +81,43 @@ carbon_query_scan_strids(carbon_strid_iter_t *it, carbon_query_t *query)
     return carbon_strid_iter_open(it, &query->err, query->archive);
 }
 
+static bool
+index_string_id_to_offset_open_file(carbon_query_index_id_to_offset_t *index, carbon_err_t *err, const char *file)
+{
+    index->disk_file = fopen(file, "r");
+    if (!index->disk_file) {
+        CARBON_ERROR(err, CARBON_ERR_FOPEN_FAILED)
+        return false;
+    } else {
+        fseek(index->disk_file, 0, SEEK_END);
+        index->disk_file_size = ftell(index->disk_file);
+        fseek(index->disk_file, 0, SEEK_SET);
+        return true;
+    }
+}
+
 CARBON_EXPORT(bool)
-carbon_query_create_index_id_to_offset(carbon_query_index_id_to_offset_t **index, uint32_t capacity,
-                                     carbon_query_t *query)
+carbon_query_create_index_string_id_to_offset(carbon_query_index_id_to_offset_t **index,
+                                              carbon_query_t *query)
 {
     CARBON_NON_NULL_OR_ERROR(index)
     CARBON_NON_NULL_OR_ERROR(query)
 
-    carbon_strid_iter_t  strid_iter;
-    carbon_strid_info_t *info;
-    size_t               vector_len;
-    bool                 status;
-    bool                 success;
+    carbon_strid_iter_t   strid_iter;
+    carbon_strid_info_t  *info;
+    size_t                vector_len;
+    bool                  status;
+    bool                  success;
+    uint32_t              capacity;
+    carbon_archive_info_t archive_info;
+    carbon_archive_get_info(&archive_info, query->archive);
+    capacity = archive_info.num_embeddded_strings;
 
     carbon_query_index_id_to_offset_t *result = malloc(sizeof(carbon_query_index_id_to_offset_t));
     carbon_hashtable_create(&result->mapping, &query->err, sizeof(carbon_string_id_t), sizeof(carbon_id_to_offset_arg_t), capacity);
-    result->disk_file = fopen(query->archive->diskFilePath, "r");
-    if (!result->disk_file) {
-        CARBON_ERROR(&query->err, CARBON_ERR_FOPEN_FAILED)
+
+    if (!index_string_id_to_offset_open_file(result, &query->err, query->archive->diskFilePath)) {
         return false;
-    } else {
-        fseek(result->disk_file, 0, SEEK_END);
-        result->disk_file_size = ftell(result->disk_file);
-        fseek(result->disk_file, 0, SEEK_SET);
     }
 
     status = carbon_query_scan_strids(&strid_iter, query);
@@ -130,12 +144,67 @@ carbon_query_create_index_id_to_offset(carbon_query_index_id_to_offset_t **index
 }
 
 CARBON_EXPORT(void)
-carbon_query_drop_index_id_to_offset(carbon_query_index_id_to_offset_t *index)
+carbon_query_drop_index_string_id_to_offset(carbon_query_index_id_to_offset_t *index)
 {
     if (index) {
         carbon_hashtable_drop(&index->mapping);
         fclose(index->disk_file);
         free(index);
+    }
+}
+
+CARBON_EXPORT(bool)
+carbon_query_index_id_to_offset_serialize(FILE *file, carbon_err_t *err, carbon_query_index_id_to_offset_t *index)
+{
+    CARBON_UNUSED(file);
+    CARBON_UNUSED(err);
+    CARBON_UNUSED(index);
+    return carbon_hashtable_serialize(file, &index->mapping);
+}
+
+CARBON_EXPORT(bool)
+carbon_query_index_id_to_offset_deserialize(carbon_query_index_id_to_offset_t **index, carbon_err_t *err, const char *file_path, carbon_off_t offset)
+{
+    CARBON_NON_NULL_OR_ERROR(index)
+    CARBON_NON_NULL_OR_ERROR(err)
+    CARBON_NON_NULL_OR_ERROR(file_path)
+    CARBON_NON_NULL_OR_ERROR(offset)
+
+    carbon_query_index_id_to_offset_t *result = malloc(sizeof(carbon_query_index_id_to_offset_t));
+    if (!result) {
+        CARBON_ERROR(err, CARBON_ERR_MALLOCERR);
+        return false;
+    }
+
+    if (!index_string_id_to_offset_open_file(result, err, file_path)) {
+        return false;
+    }
+
+    FILE *index_reader_file = fopen(file_path, "r");
+    if (!index_reader_file) {
+        CARBON_ERROR(err, CARBON_ERR_FOPEN_FAILED)
+        return false;
+    } else {
+        fseek(index_reader_file, 0, SEEK_END);
+        carbon_off_t file_size = ftell(index_reader_file);
+
+        if (offset >= file_size) {
+            CARBON_ERROR(err, CARBON_ERR_INTERNALERR)
+            return false;
+        }
+
+        fseek(index_reader_file, offset, SEEK_SET);
+
+        if (!carbon_hashtable_deserialize(&result->mapping, err, index_reader_file)) {
+            CARBON_ERROR(err, CARBON_ERR_HASTABLE_DESERIALERR);
+            fclose(index_reader_file);
+            *index = NULL;
+            return false;
+        }
+
+        fclose(index_reader_file);
+        *index = result;
+        return true;
     }
 }
 
@@ -243,9 +312,9 @@ CARBON_EXPORT(char *)
 carbon_query_fetch_string_by_id_nocache(carbon_query_t *query, carbon_string_id_t id)
 {
     bool has_index;
-    carbon_archive_has_query_index(&has_index, query->archive);
+    carbon_archive_has_query_index_string_id_to_offset(&has_index, query->archive);
     if (has_index) {
-        return fetch_string_by_id_via_index(query, query->archive->query_index_id_to_offset, id);
+        return fetch_string_by_id_via_index(query, query->archive->query_index_string_id_to_offset, id);
     } else {
         return fetch_string_by_id_via_scan(query, id);
     }

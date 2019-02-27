@@ -69,6 +69,80 @@ bool carbon_vec_create(carbon_vec_t *out, const carbon_alloc_t *alloc, size_t el
     return true;
 }
 
+typedef struct
+{
+    char marker;
+    uint32_t elem_size;
+    uint32_t num_elems;
+    uint32_t cap_elems;
+    float grow_factor;
+
+} vec_serialize_header_t;
+
+CARBON_EXPORT(bool)
+carbon_vec_serialize(FILE *file, carbon_vec_t *vec)
+{
+    CARBON_NON_NULL_OR_ERROR(file)
+    CARBON_NON_NULL_OR_ERROR(vec)
+
+    vec_serialize_header_t header = {
+        .marker = MARKER_SYMBOL_VECTOR_HEADER,
+        .elem_size = vec->elem_size,
+        .num_elems = vec->num_elems,
+        .cap_elems = vec->cap_elems,
+        .grow_factor = vec->grow_factor
+    };
+    int nwrite = fwrite(&header, sizeof(vec_serialize_header_t), 1, file);
+    CARBON_ERROR_IF(nwrite != 1, &vec->err, CARBON_ERR_FWRITE_FAILED);
+    nwrite = fwrite(vec->base, vec->elem_size, vec->num_elems, file);
+    CARBON_ERROR_IF(nwrite != (int) vec->num_elems, &vec->err, CARBON_ERR_FWRITE_FAILED);
+
+    return true;
+}
+
+CARBON_EXPORT(bool)
+carbon_vec_deserialize(carbon_vec_t *vec, carbon_err_t *err, FILE *file)
+{
+    CARBON_NON_NULL_OR_ERROR(file)
+    CARBON_NON_NULL_OR_ERROR(err)
+    CARBON_NON_NULL_OR_ERROR(vec)
+
+    carbon_off_t start = ftell(file);
+    int err_code = CARBON_ERR_NOERR;
+
+    vec_serialize_header_t header;
+    if (fread(&header, sizeof(vec_serialize_header_t), 1, file) != 1) {
+        err_code = CARBON_ERR_FREAD_FAILED;
+        goto error_handling;
+    }
+
+    if (header.marker != MARKER_SYMBOL_VECTOR_HEADER) {
+        err_code = CARBON_ERR_CORRUPTED;
+        goto error_handling;
+    }
+
+    vec->allocator = malloc(sizeof(carbon_alloc_t));
+    carbon_alloc_this_or_std(vec->allocator, NULL);
+    vec->base = carbon_malloc(vec->allocator, header.cap_elems * header.elem_size);
+    vec->num_elems = header.num_elems;
+    vec->cap_elems = header.cap_elems;
+    vec->elem_size = header.elem_size;
+    vec->grow_factor = header.grow_factor;
+    carbon_error_init(&vec->err);
+
+    if (fread(vec->base, header.elem_size, vec->num_elems, file) != vec->num_elems) {
+        err_code = CARBON_ERR_FREAD_FAILED;
+        goto error_handling;
+    }
+
+    return true;
+
+error_handling:
+    fseek(file, start, SEEK_SET);
+    CARBON_ERROR(err, err_code);
+    return false;
+}
+
 bool carbon_vec_memadvice(carbon_vec_t *vec, int madviseAdvice)
 {
     CARBON_NON_NULL_OR_ERROR(vec);

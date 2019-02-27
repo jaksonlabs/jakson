@@ -320,6 +320,105 @@ carbon_hashtable_insert_or_update(carbon_hashtable_t *map, const void *keys, con
     return true;
 }
 
+typedef struct
+{
+    char marker;
+    carbon_off_t key_data_off;
+    carbon_off_t value_data_off;
+    carbon_off_t table_off;
+    uint32_t size;
+} hashtable_header_t;
+
+CARBON_EXPORT(bool)
+carbon_hashtable_serialize(FILE *file, carbon_hashtable_t *table)
+{
+    carbon_off_t header_pos = ftell(file);
+    fseek(file, sizeof(hashtable_header_t), SEEK_CUR);
+
+    carbon_off_t key_data_off = ftell(file);
+    if (!carbon_vec_serialize(file, &table->key_data)) {
+        goto error_handling;
+    }
+
+    carbon_off_t value_data_off = ftell(file);
+    if (!carbon_vec_serialize(file, &table->value_data)) {
+        goto error_handling;
+    }
+
+    carbon_off_t table_off = ftell(file);
+    if (!carbon_vec_serialize(file, &table->table)) {
+        goto error_handling;
+    }
+
+    carbon_off_t end = ftell(file);
+
+    fseek(file, header_pos, SEEK_SET);
+    hashtable_header_t header = {
+        .marker = MARKER_SYMBOL_HASHTABLE_HEADER,
+        .size = table->size,
+        .key_data_off = key_data_off,
+        .value_data_off = value_data_off,
+        .table_off = table_off
+    };
+    int nwrite = fwrite(&header, sizeof(hashtable_header_t), 1, file);
+    CARBON_ERROR_IF(nwrite != 1, &table->err, CARBON_ERR_FWRITE_FAILED);
+    fseek(file, end, SEEK_SET);
+    return true;
+
+error_handling:
+    fseek(file, header_pos, SEEK_SET);
+    return false;
+}
+
+CARBON_EXPORT(bool)
+carbon_hashtable_deserialize(carbon_hashtable_t *table, carbon_err_t *err, FILE *file)
+{
+    CARBON_NON_NULL_OR_ERROR(table)
+    CARBON_NON_NULL_OR_ERROR(err)
+    CARBON_NON_NULL_OR_ERROR(file)
+
+    int err_code = CARBON_ERR_NOERR;
+
+    hashtable_header_t header;
+    carbon_off_t start = ftell(file);
+    int nread = fread(&header, sizeof(hashtable_header_t), 1, file);
+    if (nread != 1) {
+        err_code = CARBON_ERR_FREAD_FAILED;
+        goto error_handling;
+    }
+    if (header.marker != MARKER_SYMBOL_HASHTABLE_HEADER) {
+        err_code = CARBON_ERR_CORRUPTED;
+        goto error_handling;
+    }
+
+    fseek(file, header.key_data_off, SEEK_SET);
+    if (!carbon_vec_deserialize(&table->key_data, err, file)) {
+        err_code = err->code;
+        goto error_handling;
+    }
+
+    fseek(file, header.value_data_off, SEEK_SET);
+    if (!carbon_vec_deserialize(&table->value_data, err, file)) {
+        err_code = err->code;
+        goto error_handling;
+    }
+
+    fseek(file, header.table_off, SEEK_SET);
+    if (!carbon_vec_deserialize(&table->table, err, file)) {
+        err_code = err->code;
+        goto error_handling;
+    }
+
+    carbon_spinlock_init(&table->lock);
+    carbon_error_init(&table->err);
+    return true;
+
+error_handling:
+    fseek(file, start, SEEK_SET);
+    CARBON_ERROR(err, err_code);
+    return false;
+}
+
 CARBON_EXPORT(bool)
 carbon_hashtable_remove_if_contained(carbon_hashtable_t *map, const void *keys, size_t num_pairs)
 {

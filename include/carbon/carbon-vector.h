@@ -139,6 +139,11 @@ typedef carbon_vec_t ofType(const char *) carbon_string_ref_vec;
 CARBON_EXPORT(bool)
 carbon_vec_create(carbon_vec_t *out, const carbon_alloc_t *alloc, size_t elem_size, size_t cap_elems);
 
+CARBON_EXPORT(bool)
+carbon_vec_serialize(FILE *file, carbon_vec_t *vec);
+
+CARBON_EXPORT(bool)
+carbon_vec_deserialize(carbon_vec_t *vec, carbon_err_t *err, FILE *file);
 
 /**
  * Provides hints on the OS kernel how to deal with memory inside this vector.

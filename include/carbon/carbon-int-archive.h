@@ -342,6 +342,7 @@ typedef struct
 {
     carbon_compressor_t     compressor;
     carbon_off_t            first_entry_off;
+    uint32_t                num_embeddded_strings;
 } carbon_archive_string_table_t;
 
 typedef struct
@@ -354,6 +355,9 @@ typedef struct
 {
     size_t string_table_size;
     size_t record_table_size;
+    size_t string_id_index_size;
+
+    uint32_t num_embeddded_strings;
 } carbon_archive_info_t;
 
 

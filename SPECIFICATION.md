@@ -14,15 +14,27 @@ In the following, ``u8``, ``u32``, and ``u64`` refer to a 8-bit, 32-bit resp. 64
 Using an EBNF notation, the structure of a CARBON file is:
 
 ```
-archive  ::= archive-header string-table record-header carbon-object
+archive  ::= archive-header string-table record-header carbon-object baked-indexes
 archive-header
-         ::= 'MP/CARBON' version record-offset
+         ::= 'MP/CARBON' version record-offset string-id-offset-index-offset
 record-header
          ::= 'r' record-header-flags record-size
 record-header-flags
          ::= record-header-flags-8-bitmask
 record-header-flags-8-bitmask
          ::= read-optimized-flag reserved-bit+
+baked-indexes         
+         ::= string-id-to-offset?
+string-id-to-offset
+         ::= '#' key-data-offset value-data-offset table-offset num-entries key-data value-data table-data
+key-data
+         ::= vector-data                  
+value-data
+        ::= vector-data
+table-data
+         ::= vector-data
+vector-data
+         ::= '|' element-size-32 num-elements-32 cap-elements-32 grow-factor byte+
 record-size
          ::= u64
 read-optimized-flag
@@ -151,11 +163,27 @@ next-entry-offset
 version  
          ::= u8
 record-offset
-         ::= u8
+         ::= u64
+key-data-offset 
+         ::= u64
+value-data-offset
+         ::= u64 
+table-offset
+         ::= u64
+string-id-offset-index-offset
+         ::= u64         
 prefix-length
          ::= u8
 num-strings
          ::= u32
+num-entries
+         ::= u32
+element-size-32 
+         ::= u32
+num-elements-32 
+         ::= u32
+cap-elements-32 
+         ::= u32       
 string-length
          ::= u32
 data-length

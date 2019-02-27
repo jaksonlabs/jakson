@@ -32,8 +32,28 @@ TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonString)
                                            CARBON_COMPRESSOR_NONE, read_optimized, false);
     ASSERT_TRUE(status);
     bool has_index;
-    carbon_archive_has_query_index(&has_index, &archive);
+    carbon_archive_has_query_index_string_id_to_offset(&has_index, &archive);
     ASSERT_TRUE(has_index == false);
+
+    carbon_archive_close(&archive);
+
+}
+
+TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonStringWithBakedStringIdIndex)
+{
+    carbon_archive_t   archive;
+    carbon_err_t       err;
+
+    const char        *json_string = "{ \"test\": 123 }";
+    const char        *archive_file = "tmp-test-archive.carbon";
+    bool               read_optimized = false;
+
+    bool status = carbon_archive_from_json(&archive, archive_file, &err, json_string,
+                                           CARBON_COMPRESSOR_NONE, read_optimized, true);
+    ASSERT_TRUE(status);
+    bool has_index;
+    carbon_archive_has_query_index_string_id_to_offset(&has_index, &archive);
+    ASSERT_TRUE(has_index == true);
 
     carbon_archive_close(&archive);
 

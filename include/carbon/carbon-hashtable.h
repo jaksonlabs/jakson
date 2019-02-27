@@ -47,7 +47,7 @@ typedef struct
 {
     carbon_vec_t key_data;
     carbon_vec_t value_data;
-    carbon_vec_t ofType(carbon_bucket_t) table;
+    carbon_vec_t ofType(carbon_hashtable_bucket_t) table;
     carbon_spinlock_t lock;
     uint32_t size;
     carbon_err_t err;
@@ -78,6 +78,12 @@ carbon_hashtable_unlock(carbon_hashtable_t *map);
 
 CARBON_EXPORT(bool)
 carbon_hashtable_insert_or_update(carbon_hashtable_t *map, const void *keys, const void *values, uint_fast32_t num_pairs);
+
+CARBON_EXPORT(bool)
+carbon_hashtable_serialize(FILE *file, carbon_hashtable_t *table);
+
+CARBON_EXPORT(bool)
+carbon_hashtable_deserialize(carbon_hashtable_t *table, carbon_err_t *err, FILE *file);
 
 CARBON_EXPORT(bool)
 carbon_hashtable_remove_if_contained(carbon_hashtable_t *map, const void *keys, size_t num_pairs);

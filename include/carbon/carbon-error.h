@@ -96,6 +96,9 @@ CARBON_BEGIN_DECL
 #define CARBON_ERR_ITER_COLLECTION_NEEDED 69  /** Illegal state: iteration over collection issued, but object found */
 #define CARBON_ERR_TYPEMISMATCH 70            /** Type mismatch */
 #define CARBON_ERR_INDEXCORRUPTED_OFFSET 71   /** Index is corrupted: requested offset is outside file bounds */
+#define CARBON_ERR_TMP_FOPENWRITE 72          /** Temporary file cannot be opened for writing */
+#define CARBON_ERR_FWRITE_FAILED 73           /** Unable to write to file */
+#define CARBON_ERR_HASTABLE_DESERIALERR 74    /** Unable to deserialize hash table from file */
 
 static const char *const _carbon_err_str[] = {
     "No error",
@@ -169,7 +172,10 @@ static const char *const _carbon_err_str[] = {
     "Illegal state: iteration over object issued, but collection found",
     "Illegal state: iteration over collection issued, but object found",
     "Type mismatch",
-    "Index is corrupted: requested offset is outside file bounds"
+    "Index is corrupted: requested offset is outside file bounds",
+    "Temporary file cannot be opened for writing",
+    "Unable to write to file",
+    "Unable to deserialize hash table from file"
 };
 
 #define CARBON_ERRSTR_ILLEGAL_CODE "illegal error code"

@@ -44,7 +44,7 @@ typedef struct carbon_archive
     carbon_archive_record_table_t record_table;
     carbon_err_t                  err;
 
-    carbon_query_index_id_to_offset_t *query_index_id_to_offset;
+    carbon_query_index_id_to_offset_t *query_index_string_id_to_offset;
     carbon_string_id_cache_t *string_id_cache;
 } carbon_archive_t;
 
@@ -99,7 +99,7 @@ CARBON_EXPORT(bool)
 carbon_archive_query(carbon_query_t *query, carbon_archive_t *archive);
 
 CARBON_EXPORT(bool)
-carbon_archive_has_query_index(bool *state, carbon_archive_t *archive);
+carbon_archive_has_query_index_string_id_to_offset(bool *state, carbon_archive_t *archive);
 
 CARBON_EXPORT(bool)
 carbon_archive_hash_query_string_id_cache(bool *has_cache, carbon_archive_t *archive);

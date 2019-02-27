@@ -57,11 +57,15 @@ init_list(lru_list_t *list)
 }
 
 CARBON_EXPORT(bool)
-carbon_string_id_cache_create_LRU(carbon_string_id_cache_t **cache, size_t capacity, carbon_query_t *query)
+carbon_string_id_cache_create_LRU(carbon_string_id_cache_t **cache, carbon_query_t *query)
 {
     CARBON_NON_NULL_OR_ERROR(cache)
-    CARBON_NON_NULL_OR_ERROR(capacity)
     CARBON_NON_NULL_OR_ERROR(query)
+
+    uint32_t              capacity;
+    carbon_archive_info_t archive_info;
+    carbon_archive_get_info(&archive_info, query->archive);
+    capacity = archive_info.num_embeddded_strings;
 
     carbon_string_id_cache_t *result = malloc(sizeof(carbon_string_id_cache_t));
 
