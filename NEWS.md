@@ -6,12 +6,27 @@
     - Used [archive visitor framework](include/carbon/carbon-archive-visitor.h) to convert 
       [CARBON archives](include/carbon/carbon-archive.h) to an
       [encoded document collection](include/carbon/carbon-encoded-doc.h)
-- *Indexed String Fetch*: Add archive-local index that maps from string ids to the offsets in the archive file where 
-  the strings associated with those ids are located. Using this index avoids a *full scan* to find the string offset
-  in the file. However, such an index is automatically created (once) `carbon_archive_query` is called. To
-  avoid creation of this index, the index creation can be bypassed by calling `carbon_query_create` on the
-  desired archive. Additionally, an index can be dropped during the lifetime of an archive by 
-  calling `carbon_archive_drop_indexes`. Once an archive is closed, indexes gets dropped automatically (if any). 
+- *I/O Improved String Fetch* To avoid I/O with the file system as much as possible - given a particular
+  amount of memory reserved to hold (uncompressed) string in main memory -, a string fetch by default
+  first accesses a LRU hash-table-based cache (*Cached String Fetch*). In case of a cache miss, the string id is translated in-memory to
+  its corresponding (potentially compressed) string offset in the archive file, and fetched directly avoiding
+  a full scan (*Indexed String Fetch*). In detail:
+    - *Indexed String Fetch*: Add archive-local index that maps from string ids to the offsets in the archive file where 
+       the strings associated with those ids are located. Using this index avoids a *full scan* to find the string offset
+       in the file. However, such an index is automatically created (once) `carbon_archive_query` is called. To
+       avoid creation of this index, the index creation can be bypassed by calling `carbon_query_create` on the
+       desired archive. Additionally, an index can be dropped during the lifetime of an archive by 
+       calling `carbon_archive_drop_indexes`. Once an archive is closed, indexes gets dropped automatically (if any).
+    - *Cached String Fetch*: Add archive-local cache that holds strings associated with string ids uncompressed
+       in memory until those strings get evicted from the cache due to space limitations. As for indexed string
+       fetch, such a cache is automatically generated (once) when `carbon_archive_query` is called but also
+       can be bypassed in the same way as the index creation for indexed string fetches. Depending on the
+       cache size and data access pattern, accesses to the underlying data provider (i.e., the index for string 
+       fetches or a string fetch via a full scan) can be significantly avoided if not completely avoided.  
+       Internally, the cache is organized as a (robin hood) hash table using the bernstein hash function that
+       uses the string id as key to find a fitting bucket. Inside the bucket, an LRU list for entries
+       with string ids that have a collision under the hash function is maintained.
+- Add `$ carbon-tool to_json <input>` to convert a CARBON archive file `<input>` into its JSON representation.  
 
 ## 0.1.00.06 [2019-02-23]
 - Completed compressor framework including embedding into carbin archive operations 

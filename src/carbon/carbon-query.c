@@ -17,6 +17,7 @@
 
 #include <carbon/carbon-int-archive.h>
 #include <carbon/carbon-string-pred.h>
+#include <carbon/carbon-string-id-cache.h>
 #include "carbon/carbon-query.h"
 
 typedef struct
@@ -81,7 +82,7 @@ carbon_query_scan_strids(carbon_strid_iter_t *it, carbon_query_t *query)
 }
 
 CARBON_EXPORT(bool)
-carbon_query_create_index_id_to_offset(carbon_query_index_id_to_offset_t **index,
+carbon_query_create_index_id_to_offset(carbon_query_index_id_to_offset_t **index, uint32_t capacity,
                                      carbon_query_t *query)
 {
     CARBON_NON_NULL_OR_ERROR(index)
@@ -94,7 +95,7 @@ carbon_query_create_index_id_to_offset(carbon_query_index_id_to_offset_t **index
     bool                 success;
 
     carbon_query_index_id_to_offset_t *result = malloc(sizeof(carbon_query_index_id_to_offset_t));
-    carbon_hashtable_create(&result->mapping, &query->err, sizeof(carbon_string_id_t), sizeof(carbon_id_to_offset_arg_t), 5000);
+    carbon_hashtable_create(&result->mapping, &query->err, sizeof(carbon_string_id_t), sizeof(carbon_id_to_offset_arg_t), capacity);
     result->disk_file = fopen(query->archive->diskFilePath, "r");
     if (!result->disk_file) {
         CARBON_ERROR(&query->err, CARBON_ERR_FOPEN_FAILED)
@@ -118,6 +119,7 @@ carbon_query_create_index_id_to_offset(carbon_query_index_id_to_offset_t **index
             }
         }
         *index = result;
+        carbon_strid_iter_close(&strid_iter);
         return true;
     } else {
         CARBON_ERROR(&query->err, CARBON_ERR_SCAN_FAILED);
@@ -188,6 +190,7 @@ fetch_string_by_id_via_scan(carbon_query_t *query, carbon_string_id_t id)
                 }
             }
         }
+        carbon_strid_iter_close(&strid_iter);
         CARBON_ERROR(&query->err, CARBON_ERR_NOTFOUND);
         return NULL;
     } else {
@@ -227,6 +230,18 @@ carbon_query_fetch_string_by_id(carbon_query_t *query, carbon_string_id_t id)
 {
     assert(query);
 
+    bool has_cache = false;
+    carbon_archive_hash_query_string_id_cache(&has_cache, query->archive);
+    if (has_cache) {
+         return carbon_string_id_cache_get(query->archive->string_id_cache, id);
+    } else {
+        return carbon_query_fetch_string_by_id_nocache(query, id);
+    }
+}
+
+CARBON_EXPORT(char *)
+carbon_query_fetch_string_by_id_nocache(carbon_query_t *query, carbon_string_id_t id)
+{
     bool has_index;
     carbon_archive_has_query_index(&has_index, query->archive);
     if (has_index) {

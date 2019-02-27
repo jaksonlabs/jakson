@@ -164,7 +164,7 @@ CARBON_EXPORT(bool)
 carbon_hashtable_lock(carbon_hashtable_t *map)
 {
     CARBON_NON_NULL_OR_ERROR(map)
-    carbon_spinlock_acquire(&map->lock);
+    //carbon_spinlock_acquire(&map->lock);
     return true;
 }
 
@@ -172,7 +172,7 @@ CARBON_EXPORT(bool)
 carbon_hashtable_unlock(carbon_hashtable_t *map)
 {
     CARBON_NON_NULL_OR_ERROR(map)
-    carbon_spinlock_release(&map->lock);
+    //carbon_spinlock_release(&map->lock);
     return true;
 }
 

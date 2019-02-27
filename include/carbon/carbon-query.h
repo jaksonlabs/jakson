@@ -47,7 +47,7 @@ CARBON_EXPORT(bool)
 carbon_query_scan_strids(carbon_strid_iter_t *it, carbon_query_t *query);
 
 CARBON_EXPORT(bool)
-carbon_query_create_index_id_to_offset(carbon_query_index_id_to_offset_t **index,
+carbon_query_create_index_id_to_offset(carbon_query_index_id_to_offset_t **index, uint32_t capacity,
                                        carbon_query_t *query);
 
 CARBON_EXPORT(void)
@@ -55,6 +55,9 @@ carbon_query_drop_index_id_to_offset(carbon_query_index_id_to_offset_t *index);
 
 CARBON_EXPORT(char *)
 carbon_query_fetch_string_by_id(carbon_query_t *query, carbon_string_id_t id);
+
+CARBON_EXPORT(char *)
+carbon_query_fetch_string_by_id_nocache(carbon_query_t *query, carbon_string_id_t id);
 
 CARBON_EXPORT(char **)
 carbon_query_fetch_strings_by_offset(carbon_query_t *query, carbon_off_t *offs, uint32_t *strlens, size_t num_offs);

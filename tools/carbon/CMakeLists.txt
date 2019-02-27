@@ -10,7 +10,7 @@ set(TOOL_SOURCES
         ${CMDOPT_SOURCES}
         ${TOOL_SOURCES}
         modules.h
-        modules.c)
+        modules.c cli.h cli.c)
 
 add_executable(carbon-tool main.c ${TOOL_SOURCES})
 target_link_libraries(carbon-tool ${LIBS})

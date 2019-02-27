@@ -22,6 +22,7 @@
 #include <carbon/carbon-strid-iter.h>
 #include <carbon/carbon-int-archive.h>
 #include <carbon/carbon-query.h>
+#include <carbon/carbon-string-id-cache.h>
 
 #include "carbon/carbon-common.h"
 #include "carbon/carbon-memblock.h"
@@ -1938,6 +1939,7 @@ bool carbon_archive_open(carbon_archive_t *out,
                 out->info.string_table_size = header.root_object_header_offset - stringDicStart;
                 out->info.record_table_size = fileEnd - header.root_object_header_offset;
                 out->query_index_id_to_offset = NULL;
+                out->string_id_cache = NULL;
             }
         }
     }
@@ -1958,8 +1960,8 @@ CARBON_EXPORT(bool)
 carbon_archive_close(carbon_archive_t *archive)
 {
     CARBON_NON_NULL_OR_ERROR(archive);
-    carbon_query_drop_index_id_to_offset(archive->query_index_id_to_offset);
-    archive->query_index_id_to_offset = NULL;
+    carbon_archive_drop_indexes(archive);
+    carbon_archive_drop_query_string_id_cache(archive);
     free(archive->diskFilePath);
     carbon_memblock_drop(archive->record_table.recordDataBase);
     return true;
@@ -1968,8 +1970,10 @@ carbon_archive_close(carbon_archive_t *archive)
 CARBON_EXPORT(bool)
 carbon_archive_drop_indexes(carbon_archive_t *archive)
 {
-    carbon_query_drop_index_id_to_offset(archive->query_index_id_to_offset);
-    archive->query_index_id_to_offset = NULL;
+    if (archive->query_index_id_to_offset) {
+        carbon_query_drop_index_id_to_offset(archive->query_index_id_to_offset);
+        archive->query_index_id_to_offset = NULL;
+    }
     return true;
 }
 
@@ -1980,7 +1984,12 @@ carbon_archive_query(carbon_query_t *query, carbon_archive_t *archive)
         bool has_index = false;
         carbon_archive_has_query_index(&has_index, archive);
         if (!has_index) {
-            carbon_query_create_index_id_to_offset(&archive->query_index_id_to_offset, query);
+            carbon_query_create_index_id_to_offset(&archive->query_index_id_to_offset, 171798600, query);
+        }
+        bool has_cache = false;
+        carbon_archive_hash_query_string_id_cache(&has_cache, archive);
+        if (!has_cache) {
+            carbon_string_id_cache_create_LRU(&archive->string_id_cache, 1717986918, query);
         }
         return true;
     } else {
@@ -1995,6 +2004,32 @@ carbon_archive_has_query_index(bool *state, carbon_archive_t *archive)
     CARBON_NON_NULL_OR_ERROR(archive)
     *state = (archive->query_index_id_to_offset != NULL);
     return true;
+}
+
+CARBON_EXPORT(bool)
+carbon_archive_hash_query_string_id_cache(bool *has_cache, carbon_archive_t *archive)
+{
+    CARBON_NON_NULL_OR_ERROR(has_cache)
+    CARBON_NON_NULL_OR_ERROR(archive)
+    *has_cache = archive->string_id_cache != NULL;
+    return true;
+}
+
+CARBON_EXPORT(bool)
+carbon_archive_drop_query_string_id_cache(carbon_archive_t *archive)
+{
+    CARBON_NON_NULL_OR_ERROR(archive)
+    if (archive->string_id_cache) {
+        carbon_string_id_cache_drop(archive->string_id_cache);
+        archive->string_id_cache = NULL;
+    }
+    return true;
+}
+
+CARBON_EXPORT(carbon_string_id_cache_t *)
+carbon_archive_get_query_string_id_cache(carbon_archive_t *archive)
+{
+    return archive->string_id_cache;
 }
 
 static bool init_decompressor(carbon_compressor_t *strategy, uint8_t flags)

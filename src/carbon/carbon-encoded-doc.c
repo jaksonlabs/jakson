@@ -534,6 +534,8 @@ doc_print_pretty(FILE *file, carbon_encoded_doc_t *doc, unsigned level)
 
     fprintf(file, "}");
 
+    carbon_query_drop(&query);
+
     return true;
 }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 Marcus Pinnecke
+ * Copyright 2019 Marcus Pinnecke
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -15,38 +15,41 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_STRID_ITER_H
-#define CARBON_STRID_ITER_H
+#ifndef CARBON_CACHE_H
+#define CARBON_CACHE_H
 
 #include "carbon-common.h"
 #include "carbon-types.h"
-#include "carbon-archive.h"
+#include "carbon-query.h"
 
 CARBON_BEGIN_DECL
 
-typedef struct carbon_strid_info
+typedef struct carbon_string_id_cache carbon_string_id_cache_t;
+
+typedef struct
 {
-    carbon_string_id_t id;
-    uint32_t           strlen;
-    carbon_off_t       offset;
-} carbon_strid_info_t;
-
-typedef struct carbon_strid_iter
-{
-    FILE *disk_file;
-    bool is_open;
-    carbon_off_t disk_offset;
-    carbon_strid_info_t vector[100000];
-} carbon_strid_iter_t;
+    size_t num_hits;
+    size_t num_misses;
+    size_t num_evicted;
+} carbon_string_id_cache_statistics_t;
 
 CARBON_EXPORT(bool)
-carbon_strid_iter_open(carbon_strid_iter_t *it, carbon_err_t *err, carbon_archive_t *archive);
+carbon_string_id_cache_create_LRU(carbon_string_id_cache_t **cache, size_t capacity, carbon_query_t *query);
 
 CARBON_EXPORT(bool)
-carbon_strid_iter_next(bool *success, carbon_strid_info_t **info, carbon_err_t *err, size_t *info_length, carbon_strid_iter_t *it);
+carbon_string_id_cache_get_error(carbon_err_t *err, const carbon_string_id_cache_t *cache);
+
+CARBON_EXPORT(char *)
+carbon_string_id_cache_get(carbon_string_id_cache_t *cache, carbon_string_id_t id);
 
 CARBON_EXPORT(bool)
-carbon_strid_iter_close(carbon_strid_iter_t *it);
+carbon_string_id_cache_get_statistics(carbon_string_id_cache_statistics_t *statistics, carbon_string_id_cache_t *cache);
+
+CARBON_EXPORT(bool)
+carbon_string_id_cache_reset_statistics(carbon_string_id_cache_t *cache);
+
+CARBON_EXPORT(bool)
+carbon_string_id_cache_drop(carbon_string_id_cache_t *cache);
 
 CARBON_END_DECL
 

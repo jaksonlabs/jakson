@@ -24,8 +24,9 @@ typedef struct carbon_path_entry carbon_path_entry_t;
 
 typedef struct carbon_path_entry
 {
-    carbon_object_id_t   containing_obj;
     carbon_string_id_t   key;
+    uint32_t idx;
+
 } carbon_path_entry_t;
 
 typedef struct

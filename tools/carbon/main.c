@@ -2,6 +2,7 @@
 #include "cmdopt/cmdopt.h"
 
 #include "modules.h"
+#include "cli.h"
 
 #define DESC_CHECK_JS "Test whether JSON input files given as args are suitable for CARBON."
 #define DESC_CHECK_JS_USAGE "Test if input files given via <args> parameter are suitable for CARBON conversion.\n" \
@@ -29,6 +30,11 @@
 #define DESC_CAB_VIEW "Print CARBON file in human readable form to stdout"
 #define DESC_CAB_INFO "Display information about a CARBON file to stdout"
 
+#define DESC_CLI "Runs the (experimental) command line interface"
+#define DESC_CLI_INFO "Executes interactively commands on CARBON file <args>.\n" \
+                      "\nEXAMPLE\n" \
+                      "   $ carbon cli myfile.carbon\n" \
+
 #define DESC_LIST       "List properties and configurations for carbon-tool to stdout"
 #define DESC_LIST_USAGE "The parameter <args> is one of the following constants:\n\n"                                  \
                         "   compressors               Shows available compressors used by `convert` module"
@@ -47,6 +53,7 @@ DEFINE_MODULE(CheckJs, "checkjs", DESC_CHECK_JS_USAGE, moduleCheckJsInvoke);
 DEFINE_MODULE(Js2Cab, "convert", DESC_JS2CAB_USAGE, moduleJs2CabInvoke);
 
 DEFINE_MODULE(ViewCab, "view", DESC_CAB_VIEW, moduleViewCabInvoke);
+DEFINE_MODULE(Cli, "cli", DESC_CLI_INFO, moduleCliInvoke);
 DEFINE_MODULE(Inspect, "inspect", DESC_CAB_INFO, moduleInspectInvoke);
 DEFINE_MODULE(Cab2Js, "to_json", DESC_CAB2JS_USAGE, moduleCab2JsInvoke);
 
@@ -77,6 +84,10 @@ int main (int argc, char **argv)
                                 moduleJs2CabEntry);
 
     carbon_cmdopt_mgr_create_group(&group, "work with CARBON files", &manager);
+    carbon_cmdopt_group_add_cmd(group,
+                                "cli", DESC_CLI,
+                                "manpages/carbon/cli",
+                                moduleCliEntry);
     carbon_cmdopt_group_add_cmd(group,
                                 "view", DESC_CAB_VIEW,
                                 "manpages/carbon/view",
