@@ -24,6 +24,7 @@
 #include <carbon/carbon-query.h>
 #include <carbon/carbon-string-id-cache.h>
 #include <err.h>
+#include <carbon/carbon-archive.h>
 
 #include "carbon/carbon-common.h"
 #include "carbon/carbon-memblock.h"
@@ -139,19 +140,24 @@ carbon_archive_from_json(carbon_archive_t *out,
                          carbon_err_t *err,
                          const char *json_string,
                          carbon_compressor_type_e compressor,
-                         bool read_optimized, bool bake_string_id_index)
+                         bool read_optimized, bool bake_string_id_index,
+                         carbon_archive_callback_t *callback)
 {
     CARBON_NON_NULL_OR_ERROR(out);
     CARBON_NON_NULL_OR_ERROR(file);
     CARBON_NON_NULL_OR_ERROR(err);
     CARBON_NON_NULL_OR_ERROR(json_string);
 
+    OPTIONAL_CALL(callback, begin_create_from_json);
+
     carbon_memblock_t *stream;
     FILE *out_file;
 
-    if (!carbon_archive_stream_from_json(&stream, err, json_string, compressor, read_optimized, bake_string_id_index)) {
+    if (!carbon_archive_stream_from_json(&stream, err, json_string, compressor, read_optimized, bake_string_id_index, callback)) {
         return false;
     }
+
+    OPTIONAL_CALL(callback, begin_write_archive_file_to_disk);
 
     if ((out_file = fopen(file, "w")) == NULL) {
         CARBON_ERROR(err, CARBON_ERR_FOPENWRITE);
@@ -168,13 +174,20 @@ carbon_archive_from_json(carbon_archive_t *out,
 
     fclose(out_file);
 
+    OPTIONAL_CALL(callback, end_write_archive_file_to_disk);
+
+    OPTIONAL_CALL(callback, begin_load_archive);
 
     if (!carbon_archive_open(out, file)) {
         CARBON_ERROR(err, CARBON_ERR_ARCHIVEOPEN);
         return false;
     }
 
+    OPTIONAL_CALL(callback, end_load_archive);
+
     carbon_memblock_drop(stream);
+
+    OPTIONAL_CALL(callback, end_create_from_json);
 
     return true;
 }
@@ -184,7 +197,8 @@ carbon_archive_stream_from_json(carbon_memblock_t **stream,
                                 carbon_err_t *err,
                                 const char *json_string,
                                 carbon_compressor_type_e compressor,
-                                bool read_optimized, bool bake_id_index)
+                                bool read_optimized, bool bake_id_index,
+                                carbon_archive_callback_t *callback)
 {
     CARBON_NON_NULL_OR_ERROR(stream);
     CARBON_NON_NULL_OR_ERROR(err);
@@ -198,7 +212,13 @@ carbon_archive_stream_from_json(carbon_memblock_t **stream,
     carbon_columndoc_t      *columndoc;
     carbon_json_t            json;
 
+    OPTIONAL_CALL(callback, begin_archive_stream_from_json)
+
+    OPTIONAL_CALL(callback, begin_setup_string_dictionary);
     carbon_strdic_create_async(&dic, 1000, 1000, 1000, 8, NULL);
+    OPTIONAL_CALL(callback, end_setup_string_dictionary);
+
+    OPTIONAL_CALL(callback, begin_parse_json);
     carbon_json_parser_create(&parser, &bulk);
     if (!(carbon_json_parse(&json, &error_desc, &parser, json_string))) {
         char buffer[2048];
@@ -213,11 +233,15 @@ carbon_archive_stream_from_json(carbon_memblock_t **stream,
         }
         return false;
     }
+    OPTIONAL_CALL(callback, end_parse_json);
 
+    OPTIONAL_CALL(callback, begin_test_json);
     if (!carbon_json_test_doc(err, &json)) {
         return false;
     }
+    OPTIONAL_CALL(callback, end_test_json);
 
+    OPTIONAL_CALL(callback, begin_import_json);
     if (!carbon_doc_bulk_create(&bulk, &dic)) {
         CARBON_ERROR(err, CARBON_ERR_BULKCREATEFAILED);
         return false;
@@ -227,19 +251,26 @@ carbon_archive_stream_from_json(carbon_memblock_t **stream,
     carbon_doc_bulk_add_json(partition, &json);
 
     carbon_json_drop(&json);
+
     carbon_doc_bulk_shrink(&bulk);
 
     columndoc = carbon_doc_entries_to_columndoc(&bulk, partition, read_optimized);
 
-    if (!carbon_archive_from_model(stream, err, columndoc, compressor, bake_id_index)) {
+    if (!carbon_archive_from_model(stream, err, columndoc, compressor, bake_id_index, callback)) {
         return false;
     }
 
+    OPTIONAL_CALL(callback, end_import_json);
+
+    OPTIONAL_CALL(callback, begin_cleanup);
     carbon_strdic_drop(&dic);
     carbon_doc_bulk_Drop(&bulk);
     carbon_doc_entries_drop(partition);
     carbon_columndoc_free(columndoc);
     free(columndoc);
+    OPTIONAL_CALL(callback, end_cleanup);
+
+    OPTIONAL_CALL(callback, end_archive_stream_from_json)
 
     return true;
 }
@@ -324,20 +355,27 @@ bool carbon_archive_from_model(carbon_memblock_t **stream,
                                carbon_err_t *err,
                                carbon_columndoc_t *model,
                                carbon_compressor_type_e compressor,
-                               bool bake_string_id_index)
+                               bool bake_string_id_index,
+                               carbon_archive_callback_t *callback)
 {
     CARBON_NON_NULL_OR_ERROR(model)
     CARBON_NON_NULL_OR_ERROR(stream)
     CARBON_NON_NULL_OR_ERROR(err)
 
+    OPTIONAL_CALL(callback, begin_create_from_model)
+
     carbon_memblock_create(stream, 1024 * 1024 * 1024);
     carbon_memfile_t memfile;
     carbon_memfile_open(&memfile, *stream, CARBON_MEMFILE_MODE_READWRITE);
 
+    OPTIONAL_CALL(callback, begin_write_string_table);
     skip_carbon_file_header(&memfile);
     if(!serialize_string_dic(&memfile, err, model->bulk, compressor)) {
         return false;
     }
+    OPTIONAL_CALL(callback, end_write_string_table);
+
+    OPTIONAL_CALL(callback, begin_write_record_table);
     carbon_off_t record_header_offset = skip_record_header(&memfile);
     update_carbon_file_header(&memfile, record_header_offset);
     carbon_off_t root_object_header_offset = CARBON_MEMFILE_TELL(&memfile);
@@ -346,16 +384,23 @@ bool carbon_archive_from_model(carbon_memblock_t **stream,
     }
     uint64_t record_size = CARBON_MEMFILE_TELL(&memfile) - (record_header_offset + sizeof(carbon_record_header_t));
     update_record_header(&memfile, record_header_offset, model, record_size);
+    OPTIONAL_CALL(callback, end_write_record_table);
 
     carbon_memfile_shrink(&memfile);
 
     if (bake_string_id_index)
     {
         /* create string id to offset index, and append it to the CARBON file */
+        OPTIONAL_CALL(callback, begin_string_id_index_baking);
         if (!run_string_id_baking(err, stream)) {
             return false;
         }
+        OPTIONAL_CALL(callback, end_string_id_index_baking);
+    } else {
+        OPTIONAL_CALL(callback, skip_string_id_index_baking);
     }
+
+    OPTIONAL_CALL(callback, end_create_from_model)
 
     return true;
 }

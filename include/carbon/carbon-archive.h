@@ -48,6 +48,36 @@ typedef struct carbon_archive
     carbon_string_id_cache_t *string_id_cache;
 } carbon_archive_t;
 
+typedef struct
+{
+    void (*begin_create_from_model)();
+    void (*end_create_from_model)();
+    void (*begin_create_from_json)();
+    void (*end_create_from_json)();
+    void (*begin_archive_stream_from_json)();
+    void (*end_archive_stream_from_json)();
+    void (*begin_write_archive_file_to_disk)();
+    void (*end_write_archive_file_to_disk)();
+    void (*begin_load_archive)();
+    void (*end_load_archive)();
+    void (*begin_setup_string_dictionary)();
+    void (*end_setup_string_dictionary)();
+    void (*begin_parse_json)();
+    void (*end_parse_json)();
+    void (*begin_test_json)();
+    void (*end_test_json)();
+    void (*begin_import_json)();
+    void (*end_import_json)();
+    void (*begin_cleanup)();
+    void (*end_cleanup)();
+    void (*begin_write_string_table)();
+    void (*end_write_string_table)();
+    void (*begin_write_record_table)();
+    void (*end_write_record_table)();
+    void (*skip_string_id_index_baking)();
+    void (*begin_string_id_index_baking)();
+    void (*end_string_id_index_baking)();
+} carbon_archive_callback_t;
 
 CARBON_EXPORT(bool)
 carbon_archive_from_json(carbon_archive_t *out,
@@ -55,21 +85,24 @@ carbon_archive_from_json(carbon_archive_t *out,
                          carbon_err_t *err,
                          const char *json_string,
                          carbon_compressor_type_e compressor,
-                         bool read_optimized, bool bake_string_id_index);
+                         bool read_optimized, bool bake_string_id_index,
+                         carbon_archive_callback_t *callback);
 
 CARBON_EXPORT(bool)
 carbon_archive_stream_from_json(carbon_memblock_t **stream,
                                 carbon_err_t *err,
                                 const char *json_string,
                                 carbon_compressor_type_e compressor,
-                                bool read_optimized, bool bake_id_index);
+                                bool read_optimized, bool bake_id_index,
+                                carbon_archive_callback_t *callback);
 
 CARBON_EXPORT(bool)
 carbon_archive_from_model(carbon_memblock_t **stream,
                           carbon_err_t *err,
                           carbon_columndoc_t *model,
                           carbon_compressor_type_e compressor,
-                          bool bake_string_id_index);
+                          bool bake_string_id_index,
+                          carbon_archive_callback_t *callback);
 
 
 CARBON_EXPORT(bool)

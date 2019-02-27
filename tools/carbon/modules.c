@@ -2,6 +2,7 @@
 #include <inttypes.h>
 #include <carbon/carbon-compressor.h>
 #include <carbon/carbon-query.h>
+#include <carbon/carbon-int-archive.h>
 
 #include "carbon/carbon.h"
 
@@ -38,6 +39,7 @@ static int convertJs2Model(Js2CabContext *context, FILE *file, bool optimizeForR
 
     CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
 
+
     CARBON_CONSOLE_WRITE(file, "  - Setup string dictionary%s", "");
 
     carbon_strdic_create_async(&context->dictionary, 1000, 1000, 1000, 8, NULL);
@@ -53,8 +55,8 @@ static int convertJs2Model(Js2CabContext *context, FILE *file, bool optimizeForR
         CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
         if (error_desc.token) {
             CARBON_CONSOLE_WRITELN(file, "** ERROR ** Parsing failed: %s\nBut token %s was found in line %u column %u",
-                            error_desc.msg, error_desc.token_type_str, error_desc.token->line,
-                            error_desc.token->column);
+                                   error_desc.msg, error_desc.token_type_str, error_desc.token->line,
+                                   error_desc.token->column);
         } else {
             CARBON_CONSOLE_WRITELN(file, "** ERROR ** Parsing failed: %s", error_desc.msg);
         }
@@ -171,11 +173,145 @@ bool moduleCheckJsInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t 
 #define JS_2_CAB_OPTION_USE_COMPRESSOR "--compressor="
 #define JS_2_CAB_OPTION_USE_COMPRESSOR_HUFFMAN "huffman"
 
+static void tracker_begin_create_from_model()
+{
+    CARBON_CONSOLE_WRITELN(stdout, "%s", "  - Create from model started");
+}
+
+static void tracker_end_create_from_model()
+{
+    CARBON_CONSOLE_WRITELN(stdout, "%s", "  - Create from model finished");
+}
+
+static void tracker_begin_create_from_json()
+{
+    CARBON_CONSOLE_WRITELN(stdout, "%s", "  - Create from json started");
+}
+
+static void tracker_end_create_from_json()
+{
+    CARBON_CONSOLE_WRITELN(stdout, "%s", "  - Create from json finished");
+}
+
+static void tracker_begin_archive_stream_from_json()
+{
+    CARBON_CONSOLE_WRITELN(stdout, "%s", "  - Create stream from json started");
+}
+
+static void tracker_end_archive_stream_from_json()
+
+{
+    CARBON_CONSOLE_WRITELN(stdout, "%s", "  - Create stream from json finished");
+}
+static void tracker_begin_write_archive_file_to_disk()
+{
+    CARBON_CONSOLE_WRITELN(stdout, "%s", "  - Write archive to disk started");
+}
+
+static void tracker_end_write_archive_file_to_disk()
+{
+    CARBON_CONSOLE_WRITELN(stdout, "%s", "  - Write archive to disk finished");
+}
+
+static void tracker_begin_load_archive()
+{
+    CARBON_CONSOLE_WRITELN(stdout, "%s", "  - Load archive from disk started");
+}
+
+static void tracker_end_load_archive()
+{
+    CARBON_CONSOLE_WRITELN(stdout, "%s", "  - Load archive from disk finished");
+}
+
+static void tracker_begin_setup_string_dictionary()
+{
+    CARBON_CONSOLE_WRITELN(stdout, "%s", "  - Setup string dictionary started");
+}
+
+static void tracker_end_setup_string_dictionary()
+{
+    CARBON_CONSOLE_WRITELN(stdout, "%s", "  - Setup string dictionary finished");
+}
+
+static void tracker_begin_parse_json()
+{
+    CARBON_CONSOLE_WRITELN(stdout, "%s", "  - Parsing json started");
+}
+
+static void tracker_end_parse_json()
+{
+    CARBON_CONSOLE_WRITELN(stdout, "%s", "  - Parsing json finished");
+}
+
+static void tracker_begin_test_json()
+{
+    CARBON_CONSOLE_WRITELN(stdout, "%s", "  - Test document for restrictions started");
+}
+
+static void tracker_end_test_json()
+{
+    CARBON_CONSOLE_WRITELN(stdout, "%s", "  - Test document for restrictions finished");
+}
+
+static void tracker_begin_import_json()
+{
+    CARBON_CONSOLE_WRITELN(stdout, "%s", "  - Import document started");
+}
+
+static void tracker_end_import_json()
+{
+    CARBON_CONSOLE_WRITELN(stdout, "%s", "  - Import document finished");
+}
+
+static void tracker_begin_cleanup()
+{
+    CARBON_CONSOLE_WRITELN(stdout, "%s", "  - Cleanup started");
+}
+
+static void tracker_end_cleanup()
+{
+    CARBON_CONSOLE_WRITELN(stdout, "%s", "  - Cleanup finished");
+}
+
+static void tracker_begin_write_string_table()
+{
+    CARBON_CONSOLE_WRITELN(stdout, "%s", "  - Writing string table started");
+}
+
+static void tracker_end_write_string_table()
+{
+    CARBON_CONSOLE_WRITELN(stdout, "%s", "  - Writing string table finished");
+}
+
+static void tracker_begin_write_record_table()
+{
+    CARBON_CONSOLE_WRITELN(stdout, "%s", "  - Writing record table started");
+}
+
+static void tracker_end_write_record_table()
+{
+    CARBON_CONSOLE_WRITELN(stdout, "%s", "  - Writing record table finished");
+}
+
+static void tracker_skip_string_id_index_baking()
+{
+    CARBON_CONSOLE_WRITELN(stdout, "%s", "  - Backing indexes skipped");
+}
+
+static void tracker_begin_string_id_index_baking()
+{
+    CARBON_CONSOLE_WRITELN(stdout, "%s", "  - Backing string id to offset index started");
+}
+
+static void tracker_end_string_id_index_baking()
+{
+    CARBON_CONSOLE_WRITELN(stdout, "%s", "  - Backing string id to offset index finished");
+}
+
+
 bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *manager)
 {
     CARBON_UNUSED(manager);
-
-    Js2CabContext cabContext;
 
     if (argc < 2) {
         CARBON_CONSOLE_WRITE(file, "Require at least <output> and <input> parameters for <args>.%s", "");
@@ -252,39 +388,90 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
             return false;
         }
 
-        if (convertJs2Model(&cabContext, file, flagReadOptimized, pathJsonFileIn, 1, 1) != true) {
-            return false;
-        }
+        CARBON_CONSOLE_WRITELN(file, "  - Read contents into memory%s", "");
 
-        carbon_memblock_t *carbonFile;
-        CARBON_CONSOLE_WRITE(file, "  - Convert partition into in-memory CARBON file%s", "");
+        FILE *f = fopen(pathJsonFileIn, "rb");
+        fseek(f, 0, SEEK_END);
+        long fsize = ftell(f);
+        fseek(f, 0, SEEK_SET);
+        char *jsonContent = malloc(fsize + 1);
+        size_t nread = fread(jsonContent, fsize, 1, f);
+        CARBON_UNUSED(nread);
+        fclose(f);
+        jsonContent[fsize] = 0;
+
+        carbon_archive_t archive;
         carbon_err_t err;
-        if (!carbon_archive_from_model(&carbonFile, &err, cabContext.partitionMetaModel, compressor, flagBakeStringIdIndex)) {
+
+        carbon_archive_callback_t progress_tracker = { 0 };
+        progress_tracker.begin_create_from_model = tracker_begin_create_from_model;
+        progress_tracker.end_create_from_model = tracker_end_create_from_model;
+        progress_tracker.begin_create_from_json = tracker_begin_create_from_json;
+        progress_tracker.end_create_from_json = tracker_end_create_from_json;
+        progress_tracker.begin_archive_stream_from_json = tracker_begin_archive_stream_from_json;
+        progress_tracker.end_archive_stream_from_json = tracker_end_archive_stream_from_json;
+        progress_tracker.begin_write_archive_file_to_disk = tracker_begin_write_archive_file_to_disk;
+        progress_tracker.end_write_archive_file_to_disk = tracker_end_write_archive_file_to_disk;
+        progress_tracker.begin_load_archive = tracker_begin_load_archive;
+        progress_tracker.end_load_archive = tracker_end_load_archive;
+        progress_tracker.begin_setup_string_dictionary = tracker_begin_setup_string_dictionary;
+        progress_tracker.end_setup_string_dictionary = tracker_end_setup_string_dictionary;
+        progress_tracker.begin_parse_json = tracker_begin_parse_json;
+        progress_tracker.end_parse_json = tracker_end_parse_json;
+        progress_tracker.begin_test_json = tracker_begin_test_json;
+        progress_tracker.end_test_json = tracker_end_test_json;
+        progress_tracker.begin_import_json = tracker_begin_import_json;
+        progress_tracker.end_import_json = tracker_end_import_json;
+        progress_tracker.begin_cleanup = tracker_begin_cleanup;
+        progress_tracker.end_cleanup = tracker_end_cleanup;
+        progress_tracker.begin_write_string_table = tracker_begin_write_string_table;
+        progress_tracker.end_write_string_table = tracker_end_write_string_table;
+        progress_tracker.begin_write_record_table = tracker_begin_write_record_table;
+        progress_tracker.end_write_record_table = tracker_end_write_record_table;
+        progress_tracker.skip_string_id_index_baking = tracker_skip_string_id_index_baking;
+        progress_tracker.begin_string_id_index_baking = tracker_begin_string_id_index_baking;
+        progress_tracker.end_string_id_index_baking = tracker_end_string_id_index_baking;
+
+        if (!carbon_archive_from_json(&archive, pathCarbonFileOut, &err, jsonContent,
+                                               CARBON_COMPRESSOR_NONE, flagReadOptimized, flagBakeStringIdIndex,
+                                               &progress_tracker)) {
             carbon_error_print_and_abort(&err);
-        }
-        CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
-
-        CARBON_CONSOLE_WRITE(file, "  - Write in-memory CARBON file to disk%s", "");
-        FILE *outputFile = fopen(pathCarbonFileOut, "w");
-        if (!outputFile) {
-            CARBON_CONSOLE_WRITE(file, "Unable to open file for writing: '%s'", pathCarbonFileOut);
-            CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
-            return false;
         } else {
-            if (carbon_archive_write(outputFile, carbonFile) != true) {
-                CARBON_CONSOLE_WRITE(file, "Unable to write to file: '%s'", pathCarbonFileOut);
-                CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
-                return false;
-            }
-            fclose(outputFile);
+            carbon_archive_close(&archive);
         }
-        CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
 
-        CARBON_CONSOLE_WRITE(file, "  - Clean up in-memory CARBON file%s", "");
-        carbon_memblock_drop(carbonFile);
-        CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
 
-        cleanup(file, &cabContext);
+        free(jsonContent);
+
+//        carbon_memblock_t *carbonFile;
+//        CARBON_CONSOLE_WRITE(file, "  - Convert partition into in-memory CARBON file%s", "");
+//        carbon_err_t err;
+//        if (!carbon_archive_from_model(&carbonFile, &err, cabContext.partitionMetaModel, compressor, flagBakeStringIdIndex)) {
+//            carbon_error_print_and_abort(&err);
+//        }
+//        CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
+//
+//        CARBON_CONSOLE_WRITE(file, "  - Write in-memory CARBON file to disk%s", "");
+//        FILE *outputFile = fopen(pathCarbonFileOut, "w");
+//        if (!outputFile) {
+//            CARBON_CONSOLE_WRITE(file, "Unable to open file for writing: '%s'", pathCarbonFileOut);
+//            CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
+//            return false;
+//        } else {
+//            if (carbon_archive_write(outputFile, carbonFile) != true) {
+//                CARBON_CONSOLE_WRITE(file, "Unable to write to file: '%s'", pathCarbonFileOut);
+//                CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
+//                return false;
+//            }
+//            fclose(outputFile);
+//        }
+//        CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
+//
+//        CARBON_CONSOLE_WRITE(file, "  - Clean up in-memory CARBON file%s", "");
+//        carbon_memblock_drop(carbonFile);
+//        CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
+//
+//        cleanup(file, &cabContext);
 
         CARBON_CONSOLE_WRITELN(file, "Conversion successfull%s", "");
 
@@ -358,8 +545,12 @@ bool moduleInspectInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t 
             fseek(f, 0, SEEK_END);
             carbon_off_t fileLength = ftell(f);
             fclose(f);
-            printf("file;carbon_file_size;string_table_size;record_table_size\n");
-            printf("\"%s\";%zu;%zu;%zu\n", pathCarbonFileIn, fileLength, info.string_table_size, info.record_table_size);
+            printf("file:\t\t\t'%s'\n", pathCarbonFileIn);
+            printf("file-size:\t\t%zu B\n", fileLength);
+            printf("string-table-size:\t%zu B\n", info.string_table_size);
+            printf("record-table-size:\t%zu B\n", info.record_table_size);
+            printf("index-size:\t\t%zu B\n", info.string_id_index_size);
+            printf("#-embedded-strings:\t%" PRIu32 "\n", info.num_embeddded_strings);
         }
     }
 

@@ -208,6 +208,8 @@ typedef enum carbon_basic_type
 #define CARBON_NULLABLE /** parameters to functions marked with this tag can be NULL and will be ignored; is attached
                     to a return value (typically a pointer), the this means the function may return NULL. */
 
+#define OPTIONAL_CALL(x, func, ...) if(x && x->func) { x->func(__VA_ARGS__); }
+
 #define CARBON_MAX(a, b)                                                                                               \
     ((b) > (a) ? (b) : (a))
 
@@ -314,6 +316,7 @@ bool GlobalEnableConsoleOutput;
     if (GlobalEnableConsoleOutput) {                                                                                   \
         CARBON_CONSOLE_WRITE(file, msg, __VA_ARGS__)                                                                   \
         CARBON_CONSOLE_WRITE_ENDL(file)                                                                                \
+        fflush(file);                                                                                                  \
     }                                                                                                                  \
 }
 
