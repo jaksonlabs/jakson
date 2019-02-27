@@ -32,6 +32,7 @@ typedef struct __attribute__((packed))
     char magic[9];
     uint8_t version;
     carbon_off_t root_object_header_offset;
+    carbon_off_t string_id_to_offset_index_offset;
 } carbon_file_header_t;
 
 typedef struct __attribute__((packed))

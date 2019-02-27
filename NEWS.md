@@ -1,5 +1,11 @@
 ## 0.2.00.01 [2019-XX-XX]
-- TODO
+- To avoid re-creation of the index used for *Indexed String Fetch* when a archive is loaded into memory, 
+  this index can now be pre-computed an embedded into the archive file itself (which is now the default behavior). 
+  For this, the index is built after archive creation and appended at the end of the archive (if not turned-off). 
+  To turn it off in `carbon-tool`, use flag `--no-string-id-index` for the module `convert`. If turned-off, the 
+  index may be created during runtime depending on whether such an index should be used or not (see below).
+  - Archive specification must be changed for this, see updated [SPECIFICATION.md](SPECIFICATION.md) and 
+    [SPECIFICATION-COMPACT.md](SPECIFICATION-COMPACT.md).
 
 ## 0.2.00.00 [2019-02-27]
 - Add archive visitor framework, see [archive visitor framework](include/carbon/carbon-archive-visitor.h).

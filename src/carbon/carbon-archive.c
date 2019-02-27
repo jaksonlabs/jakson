@@ -138,7 +138,7 @@ carbon_archive_from_json(carbon_archive_t *out,
                          carbon_err_t *err,
                          const char *json_string,
                          carbon_compressor_type_e compressor,
-                         bool read_optimized)
+                         bool read_optimized, bool bake_string_id_index)
 {
     CARBON_NON_NULL_OR_ERROR(out);
     CARBON_NON_NULL_OR_ERROR(file);
@@ -148,7 +148,7 @@ carbon_archive_from_json(carbon_archive_t *out,
     carbon_memblock_t *stream;
     FILE *out_file;
 
-    if (!carbon_archive_stream_from_json(&stream, err, json_string, compressor, read_optimized)) {
+    if (!carbon_archive_stream_from_json(&stream, err, json_string, compressor, read_optimized, bake_string_id_index)) {
         return false;
     }
 
@@ -183,7 +183,7 @@ carbon_archive_stream_from_json(carbon_memblock_t **stream,
                                 carbon_err_t *err,
                                 const char *json_string,
                                 carbon_compressor_type_e compressor,
-                                bool read_optimized)
+                                bool read_optimized, bool bake_id_index)
 {
     CARBON_NON_NULL_OR_ERROR(stream);
     CARBON_NON_NULL_OR_ERROR(err);
@@ -230,7 +230,7 @@ carbon_archive_stream_from_json(carbon_memblock_t **stream,
 
     columndoc = carbon_doc_entries_to_columndoc(&bulk, partition, read_optimized);
 
-    if (!carbon_archive_from_model(stream, err, columndoc, compressor)) {
+    if (!carbon_archive_from_model(stream, err, columndoc, compressor, bake_id_index)) {
         return false;
     }
 
@@ -246,7 +246,8 @@ carbon_archive_stream_from_json(carbon_memblock_t **stream,
 bool carbon_archive_from_model(carbon_memblock_t **stream,
                                carbon_err_t *err,
                                carbon_columndoc_t *model,
-                               carbon_compressor_type_e compressor)
+                               carbon_compressor_type_e compressor,
+                               bool bake_string_id_index)
 {
     CARBON_NON_NULL_OR_ERROR(model)
     CARBON_NON_NULL_OR_ERROR(stream)
@@ -270,6 +271,12 @@ bool carbon_archive_from_model(carbon_memblock_t **stream,
     update_record_header(&memfile, record_header_offset, model, record_size);
 
     carbon_memfile_shrink(&memfile);
+
+    if (bake_string_id_index)
+    {
+        /* create string id to offset index, and append it to the CARBON file */
+
+    }
 
     return true;
 }
@@ -1265,6 +1272,7 @@ static void update_carbon_file_header(carbon_memfile_t *memfile, carbon_off_t re
     carbon_memfile_seek(memfile, 0);
     memcpy(&this_carbon_file_header.magic, CABIN_FILE_MAGIC, strlen(CABIN_FILE_MAGIC));
     this_carbon_file_header.root_object_header_offset = record_header_offset;
+    this_carbon_file_header.string_id_to_offset_index_offset = 0;
     carbon_memfile_write(memfile, &this_carbon_file_header, sizeof(carbon_file_header_t));
     carbon_memfile_seek(memfile, current_pos);
 }

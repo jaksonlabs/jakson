@@ -167,6 +167,7 @@ bool moduleCheckJsInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t 
 #define JS_2_CAB_OPTION_SILENT_OUTPUT "--silent"
 #define JS_2_CAB_OPTION_SIZE_OPTIMIZED "--size-optimized"
 #define JS_2_CAB_OPTION_READ_OPTIMIZED "--read-optimized"
+#define JS_2_CAB_OPTION_NO_STRING_ID_INDEX "--no-string-id-index"
 #define JS_2_CAB_OPTION_USE_COMPRESSOR "--compressor="
 #define JS_2_CAB_OPTION_USE_COMPRESSOR_HUFFMAN "huffman"
 
@@ -185,6 +186,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
         bool flagSizeOptimized = false;
         bool flagReadOptimized = false;
         bool flagForceOverwrite = false;
+        bool flagBakeStringIdIndex = true;
         carbon_compressor_type_e compressor = CARBON_COMPRESSOR_NONE;
 
         int outputIdx = 0, inputIdx = 1;
@@ -198,6 +200,8 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
                     compressor = CARBON_COMPRESSOR_HUFFMAN;
                 } else if (strcmp(opt, JS_2_CAB_OPTION_READ_OPTIMIZED) == 0) {
                     flagReadOptimized = true;
+                } else if (strcmp(opt, JS_2_CAB_OPTION_NO_STRING_ID_INDEX) == 0) {
+                    flagBakeStringIdIndex = false;
                 } else if (strcmp(opt, JS_2_CAB_OPTION_SILENT_OUTPUT) == 0) {
                     CARBON_CONSOLE_OUTPUT_OFF();
                 } else if (strcmp(opt, JS_2_CAB_OPTION_FORCE_OVERWRITE) == 0) {
@@ -255,7 +259,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
         carbon_memblock_t *carbonFile;
         CARBON_CONSOLE_WRITE(file, "  - Convert partition into in-memory CARBON file%s", "");
         carbon_err_t err;
-        if (!carbon_archive_from_model(&carbonFile, &err, cabContext.partitionMetaModel, compressor)) {
+        if (!carbon_archive_from_model(&carbonFile, &err, cabContext.partitionMetaModel, compressor, flagBakeStringIdIndex)) {
             carbon_error_print_and_abort(&err);
         }
         CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");

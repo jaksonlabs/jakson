@@ -15,6 +15,7 @@
                           "   --size-optimized           Compress the embedded string dictionary using a particular compressor\n" \
                           "   --compressor=<compressor>  Use <compressor> as compression technique for size optimization.\n" \
                           "                              Run `carbon-tool list compressors` to see options.\n" \
+                          "   --no-string-id-index       Turn-off pre-computation of string id to offset index.\n" \
                           "   --read-optimized           Sort keys and values during pre-processing for efficient reads\n" \
                           "   --force-overwrite          Overwrite the output file if this file already exists\n" \
                           "   --silent                   Suppresses all outputs to stdout\n" \

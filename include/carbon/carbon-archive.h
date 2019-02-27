@@ -55,20 +55,21 @@ carbon_archive_from_json(carbon_archive_t *out,
                          carbon_err_t *err,
                          const char *json_string,
                          carbon_compressor_type_e compressor,
-                         bool read_optimized);
+                         bool read_optimized, bool bake_string_id_index);
 
 CARBON_EXPORT(bool)
 carbon_archive_stream_from_json(carbon_memblock_t **stream,
                                 carbon_err_t *err,
                                 const char *json_string,
                                 carbon_compressor_type_e compressor,
-                                bool read_optimized);
+                                bool read_optimized, bool bake_id_index);
 
 CARBON_EXPORT(bool)
 carbon_archive_from_model(carbon_memblock_t **stream,
                           carbon_err_t *err,
                           carbon_columndoc_t *model,
-                          carbon_compressor_type_e compressor);
+                          carbon_compressor_type_e compressor,
+                          bool bake_string_id_index);
 
 
 CARBON_EXPORT(bool)
