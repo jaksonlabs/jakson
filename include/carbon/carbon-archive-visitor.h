@@ -189,4 +189,7 @@ carbon_archive_visit_archive(carbon_archive_t *archive, const carbon_archive_vis
 CARBON_EXPORT(bool)
 carbon_archive_visitor_print_path(FILE *file, carbon_archive_t *archive, const carbon_vec_t ofType(carbon_path_entry_t) *path_stack);
 
+CARBON_EXPORT(bool)
+carbon_archive_visitor_path_compare(const carbon_vec_t ofType(carbon_path_entry_t) *lhs, const char *rhs, carbon_archive_t *archive);
+
 #endif

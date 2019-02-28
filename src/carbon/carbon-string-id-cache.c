@@ -39,7 +39,7 @@ typedef struct carbon_string_id_cache
 {
     carbon_vec_t ofType(lru_list_t) list_entries;
     carbon_string_id_cache_statistics_t statistics;
-    carbon_query_t *query;
+    carbon_query_t query;
     carbon_err_t err;
 } carbon_string_id_cache_t;
 
@@ -57,17 +57,20 @@ init_list(lru_list_t *list)
 }
 
 CARBON_EXPORT(bool)
-carbon_string_id_cache_create_LRU(carbon_string_id_cache_t **cache, carbon_query_t *query)
+carbon_string_id_cache_create_LRU(carbon_string_id_cache_t **cache, carbon_archive_t *archive)
 {
     CARBON_NON_NULL_OR_ERROR(cache)
-    CARBON_NON_NULL_OR_ERROR(query)
+    CARBON_NON_NULL_OR_ERROR(archive)
+
+    carbon_string_id_cache_t *result = malloc(sizeof(carbon_string_id_cache_t));
 
     uint32_t              capacity;
     carbon_archive_info_t archive_info;
-    carbon_archive_get_info(&archive_info, query->archive);
+    carbon_query_create(&result->query, archive);
+    carbon_archive_get_info(&archive_info, archive);
     capacity = archive_info.num_embeddded_strings;
 
-    carbon_string_id_cache_t *result = malloc(sizeof(carbon_string_id_cache_t));
+
 
     size_t num_buckets = CARBON_MAX(1, capacity / sizeof(lru_list_t));
     carbon_vec_create(&result->list_entries, NULL, sizeof(lru_list_t), num_buckets);
@@ -78,7 +81,6 @@ carbon_string_id_cache_create_LRU(carbon_string_id_cache_t **cache, carbon_query
     }
 
     carbon_error_init(&result->err);
-    result->query = query;
     carbon_string_id_cache_reset_statistics(result);
     *cache = result;
 
@@ -104,7 +106,7 @@ make_most_recent(lru_list_t *list, cache_entry_t *entry)
             entry->prev->next = entry->next;
         }
         if (entry->next) {
-            entry->next->prev = entry->next;
+            entry->next->prev = entry->prev;
         } else {
             list->lest_recent = entry->prev;
         }
@@ -130,7 +132,7 @@ carbon_string_id_cache_get(carbon_string_id_cache_t *cache, carbon_string_id_t i
         }
         cursor = cursor->next;
     }
-    char *result = carbon_query_fetch_string_by_id_nocache(cache->query, id);
+    char *result = carbon_query_fetch_string_by_id_nocache(&cache->query, id);
     assert(result);
     if (list->lest_recent->string != NULL) {
         cache->statistics.num_evicted++;

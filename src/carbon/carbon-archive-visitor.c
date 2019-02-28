@@ -50,6 +50,9 @@ iterate_objects(carbon_archive_t *archive, const carbon_string_id_t *keys, uint3
         carbon_string_id_t parent_key = keys[i];
         uint32_t parent_key_array_idx = i;
 
+        carbon_path_entry_t e = { .key = parent_key, .idx = 0 };
+        carbon_vec_push(path_stack, &e, 1);
+
         carbon_archive_value_vector_get_object_at(&object, i, value_iter);
         carbon_archive_object_get_object_id(&object_id, &object);
 
@@ -70,6 +73,7 @@ iterate_objects(carbon_archive_t *archive, const carbon_string_id_t *keys, uint3
             iterate_props(archive, &prop_iter, path_stack, visitor, mask, capture, false, parent_key, parent_key_array_idx);
         }
 
+        carbon_vec_pop(path_stack);
     }
 }
 
@@ -128,8 +132,11 @@ iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
     carbon_archive_collection_iter_t collection_iter;
     bool first_type_group = true;
 
-    carbon_path_entry_t e = { .key = parent_key, .idx = parent_key_array_idx };
-    carbon_vec_push(path_stack, &e, 1);
+    CARBON_UNUSED(parent_key);
+    CARBON_UNUSED(parent_key_array_idx);
+
+//    carbon_path_entry_t e = { .key = parent_key, .idx = parent_key_array_idx };
+//    carbon_vec_push(path_stack, &e, 1);
 
     carbon_archive_value_vector_get_object_id(&this_object_oid, &value_iter);
 
@@ -230,9 +237,16 @@ iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
 
             if (visitor->before_visit_object_array) {
                 for (uint32_t i = 0; i < num_column_groups; i++) {
+
+                    carbon_path_entry_t e = { .key = parent_key, .idx = i };
+                    carbon_vec_push(path_stack, &e, 1);
+
                     carbon_visitor_policy_e policy = visitor->before_visit_object_array(archive, path_stack,
                                                                                         this_object_oid, keys[i],
                                                                                         capture);
+
+                    carbon_vec_pop(path_stack);
+
                     skip_groups_by_key[i] = policy == CARBON_VISITOR_POLICY_EXCLUDE;
                 }
             }
@@ -377,7 +391,7 @@ iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
             free(skip_groups_by_key);
         }
     }
-    carbon_vec_pop(path_stack);
+//    carbon_vec_pop(path_stack);
 }
 
 CARBON_EXPORT(bool)
@@ -413,22 +427,54 @@ carbon_archive_visitor_print_path(FILE *file, carbon_archive_t *archive, const c
     CARBON_NON_NULL_OR_ERROR(file)
     CARBON_NON_NULL_OR_ERROR(path_stack)
 
-    carbon_query_t query;
-    carbon_archive_query(&query, archive);
+    carbon_query_t *query = carbon_archive_query_default(archive);
 
-    for (uint32_t i = 1; i < path_stack->num_elems; i++)
+    for (uint32_t i = 0; i < path_stack->num_elems; i++)
     {
         const carbon_path_entry_t *entry = CARBON_VECTOR_GET(path_stack, i, carbon_path_entry_t);
-       // if (entry->key != 0) {
-         //   char *key = carbon_query_fetch_string_by_id(&query, entry->key);
-            fprintf(file, "'%llu'[%d]/", entry->key, entry->idx);
-         //   free(key);
-       // }
+        if (entry->key != 0) {
+            char *key = carbon_query_fetch_string_by_id(query, entry->key);
+            fprintf(file, "%s/%d/", key, entry->idx);
+            free(key);
+        } else {
+            fprintf(file, "/%d/", entry->idx);
+        }
 
     }
     fprintf(file, "\n");
 
-    carbon_query_drop(&query);
+
+
+    if (carbon_archive_visitor_path_compare(path_stack, "/0/address/1/", archive))
+    {
+
+        printf("OK");
+        //exit(1);
+    }
+
 
     return true;
+}
+
+CARBON_EXPORT(bool)
+carbon_archive_visitor_path_compare(const carbon_vec_t ofType(carbon_path_entry_t) *lhs, const char *rhs, carbon_archive_t *archive)
+{
+    char path_buffer[2048];
+    memset(path_buffer, 0, sizeof(path_buffer));
+
+    carbon_query_t *query = carbon_archive_query_default(archive);
+
+    for (uint32_t i = 0; i < lhs->num_elems; i++)
+    {
+        const carbon_path_entry_t *entry = CARBON_VECTOR_GET(lhs, i, carbon_path_entry_t);
+        if (entry->key != 0) {
+            char *key = carbon_query_fetch_string_by_id(query, entry->key);
+            size_t path_len = strlen(path_buffer);
+            sprintf(path_buffer + path_len, "%s%s%d/", key, strcmp(key, "/") == 0 ? "" : "/", entry->idx);
+            free(key);
+        }
+
+    }
+
+    return strcmp(path_buffer, rhs) == 0;
 }

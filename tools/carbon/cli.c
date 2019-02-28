@@ -83,8 +83,9 @@ before_object_visit(carbon_archive_t *archive, path_stack_t path,
     CARBON_UNUSED(key);
     CARBON_UNUSED(capture);
 
-    // TODO: ??? carbon_archive_visitor_print_path(stdout, archive, path); crashes??
-    carbon_archive_visitor_print_path(stdout, archive, path);
+    // TODO: ???   crashes??
+    
+    carbon_archive_visitor_print_path(stderr, archive, path);
 
     return CARBON_VISITOR_POLICY_INCLUDE;
 }
@@ -100,7 +101,7 @@ after_object_visit(carbon_archive_t *archive, path_stack_t path, carbon_object_i
     CARBON_UNUSED(num_objects);
     CARBON_UNUSED(capture);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+    
 }
 
 static void first_prop_type_group(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id, const carbon_string_id_t *keys,
@@ -142,7 +143,7 @@ visit_int8_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_id
     CARBON_UNUSED(capture);
     CARBON_UNUSED(values);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+    
 }
 
 static void
@@ -158,7 +159,7 @@ visit_int16_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_i
     CARBON_UNUSED(capture);
     CARBON_UNUSED(values);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+    
 }
 
 static void
@@ -174,7 +175,7 @@ visit_int32_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_i
     CARBON_UNUSED(capture);
     CARBON_UNUSED(values);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+    
 
 
 }
@@ -192,7 +193,7 @@ visit_int64_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_i
     CARBON_UNUSED(capture);
     CARBON_UNUSED(values);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+    
 }
 
 static void
@@ -208,7 +209,7 @@ visit_uint8_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_i
     CARBON_UNUSED(capture);
     CARBON_UNUSED(values);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+    
 }
 
 static void
@@ -224,7 +225,7 @@ visit_uint16_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_
     CARBON_UNUSED(capture);
     CARBON_UNUSED(values);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+    
 }
 
 static void
@@ -240,7 +241,7 @@ visit_uint32_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_
     CARBON_UNUSED(capture);
     CARBON_UNUSED(values);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+    
 }
 
 static void
@@ -256,7 +257,7 @@ visit_uint64_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_
     CARBON_UNUSED(capture);
     CARBON_UNUSED(values);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+    
 }
 
 static void
@@ -272,7 +273,7 @@ visit_number_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_
     CARBON_UNUSED(capture);
     CARBON_UNUSED(values);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+    
 }
 
 static void
@@ -288,7 +289,8 @@ visit_string_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_
     CARBON_UNUSED(capture);
     CARBON_UNUSED(values);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+
+    
 }
 
 static void
@@ -304,7 +306,7 @@ visit_boolean_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object
     CARBON_UNUSED(capture);
     CARBON_UNUSED(values);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+    
 }
 
 static void visit_null_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id, const carbon_string_id_t *keys,
@@ -317,7 +319,7 @@ static void visit_null_pairs (carbon_archive_t *archive, path_stack_t path, carb
     CARBON_UNUSED(num_pairs);
     CARBON_UNUSED(capture);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+    
 }
 
 
@@ -336,7 +338,7 @@ visit_enter_int8_array_pairs(carbon_archive_t *archive, path_stack_t path,
     CARBON_UNUSED(num_pairs);
     CARBON_UNUSED(capture);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+    
 
     return CARBON_VISITOR_POLICY_INCLUDE;
 }
@@ -354,7 +356,7 @@ visit_enter_int8_array_pair(carbon_archive_t *archive, path_stack_t path, carbon
     CARBON_UNUSED(num_elems);
     CARBON_UNUSED(capture);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 static void
@@ -372,7 +374,7 @@ visit_int8_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_obje
     CARBON_UNUSED(array_length);
     CARBON_UNUSED(capture);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 static void
@@ -386,7 +388,7 @@ visit_leave_int8_array_pair(carbon_archive_t *archive, path_stack_t path, carbon
     CARBON_UNUSED(num_pairs);
     CARBON_UNUSED(capture);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 static void
@@ -398,7 +400,7 @@ visit_leave_int8_array_pairs(carbon_archive_t *archive, path_stack_t path, carbo
     CARBON_UNUSED(id);
     CARBON_UNUSED(capture);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 
@@ -415,7 +417,7 @@ visit_enter_int16_array_pairs(carbon_archive_t *archive, path_stack_t path,
     CARBON_UNUSED(keys);
     CARBON_UNUSED(num_pairs);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 
     return CARBON_VISITOR_POLICY_INCLUDE;
 }
@@ -433,7 +435,7 @@ visit_enter_int16_array_pair(carbon_archive_t *archive, path_stack_t path, carbo
     CARBON_UNUSED(entry_idx);
     CARBON_UNUSED(num_elems);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 static void
@@ -451,7 +453,7 @@ visit_int16_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_obj
     CARBON_UNUSED(array);
     CARBON_UNUSED(array_length);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 static void
@@ -465,7 +467,7 @@ visit_leave_int16_array_pair(carbon_archive_t *archive, path_stack_t path, carbo
     CARBON_UNUSED(pair_idx);
     CARBON_UNUSED(num_pairs);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 static void
@@ -477,7 +479,7 @@ visit_leave_int16_array_pairs(carbon_archive_t *archive, path_stack_t path, carb
     CARBON_UNUSED(id);
     CARBON_UNUSED(capture);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 
@@ -494,7 +496,7 @@ visit_enter_int32_array_pairs(carbon_archive_t *archive, path_stack_t path,
     CARBON_UNUSED(keys);
     CARBON_UNUSED(num_pairs);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 
     return CARBON_VISITOR_POLICY_INCLUDE;
 }
@@ -512,7 +514,7 @@ visit_enter_int32_array_pair(carbon_archive_t *archive, path_stack_t path, carbo
     CARBON_UNUSED(entry_idx);
     CARBON_UNUSED(num_elems);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 static void
@@ -530,7 +532,7 @@ visit_int32_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_obj
     CARBON_UNUSED(array);
     CARBON_UNUSED(array_length);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 static void
@@ -544,7 +546,7 @@ visit_leave_int32_array_pair(carbon_archive_t *archive, path_stack_t path, carbo
     CARBON_UNUSED(pair_idx);
     CARBON_UNUSED(num_pairs);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 static void
@@ -556,7 +558,7 @@ visit_leave_int32_array_pairs(carbon_archive_t *archive, path_stack_t path, carb
     CARBON_UNUSED(id);
     CARBON_UNUSED(capture);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 
@@ -573,7 +575,7 @@ visit_enter_int64_array_pairs(carbon_archive_t *archive, path_stack_t path,
     CARBON_UNUSED(keys);
     CARBON_UNUSED(num_pairs);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 
     return CARBON_VISITOR_POLICY_INCLUDE;
 }
@@ -591,7 +593,7 @@ visit_enter_int64_array_pair(carbon_archive_t *archive, path_stack_t path, carbo
     CARBON_UNUSED(entry_idx);
     CARBON_UNUSED(num_elems);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 
 }
 
@@ -610,7 +612,7 @@ visit_int64_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_obj
     CARBON_UNUSED(array);
     CARBON_UNUSED(array_length);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 static void
@@ -624,7 +626,7 @@ visit_leave_int64_array_pair(carbon_archive_t *archive, path_stack_t path, carbo
     CARBON_UNUSED(pair_idx);
     CARBON_UNUSED(num_pairs);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 
 }
 
@@ -637,7 +639,7 @@ visit_leave_int64_array_pairs(carbon_archive_t *archive, path_stack_t path, carb
     CARBON_UNUSED(id);
     CARBON_UNUSED(capture);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 
@@ -654,7 +656,7 @@ visit_enter_uint8_array_pairs(carbon_archive_t *archive, path_stack_t path,
     CARBON_UNUSED(num_pairs);
     CARBON_UNUSED(keys);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 
     return CARBON_VISITOR_POLICY_INCLUDE;
 }
@@ -672,7 +674,7 @@ visit_enter_uint8_array_pair(carbon_archive_t *archive, path_stack_t path, carbo
     CARBON_UNUSED(entry_idx);
     CARBON_UNUSED(num_elems);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 
 }
 
@@ -692,7 +694,7 @@ visit_uint8_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_obj
     CARBON_UNUSED(array);
     CARBON_UNUSED(array_length);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 static void
@@ -706,7 +708,7 @@ visit_leave_uint8_array_pair(carbon_archive_t *archive, path_stack_t path, carbo
     CARBON_UNUSED(pair_idx);
     CARBON_UNUSED(num_pairs);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 static void
@@ -718,7 +720,7 @@ visit_leave_uint8_array_pairs(carbon_archive_t *archive, path_stack_t path, carb
     CARBON_UNUSED(id);
     CARBON_UNUSED(capture);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 
@@ -735,7 +737,7 @@ visit_enter_uint16_array_pairs(carbon_archive_t *archive, path_stack_t path,
     CARBON_UNUSED(keys);
     CARBON_UNUSED(num_pairs);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 
     return CARBON_VISITOR_POLICY_INCLUDE;
 }
@@ -753,7 +755,7 @@ visit_enter_uint16_array_pair(carbon_archive_t *archive, path_stack_t path, carb
     CARBON_UNUSED(entry_idx);
     CARBON_UNUSED(num_elems);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 static void
@@ -771,7 +773,7 @@ visit_uint16_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_ob
     CARBON_UNUSED(array);
     CARBON_UNUSED(array_length);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 
 }
 
@@ -786,7 +788,7 @@ visit_leave_uint16_array_pair(carbon_archive_t *archive, path_stack_t path, carb
     CARBON_UNUSED(pair_idx);
     CARBON_UNUSED(num_pairs);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 static void
@@ -798,7 +800,7 @@ visit_leave_uint16_array_pairs(carbon_archive_t *archive, path_stack_t path, car
     CARBON_UNUSED(id);
     CARBON_UNUSED(capture);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 
@@ -815,7 +817,7 @@ visit_enter_uint32_array_pairs(carbon_archive_t *archive, path_stack_t path,
     CARBON_UNUSED(keys);
     CARBON_UNUSED(num_pairs);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 
     return CARBON_VISITOR_POLICY_INCLUDE;
 }
@@ -833,7 +835,7 @@ visit_enter_uint32_array_pair(carbon_archive_t *archive, path_stack_t path, carb
     CARBON_UNUSED(entry_idx);
     CARBON_UNUSED(num_elems);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 static void
@@ -851,7 +853,7 @@ visit_uint32_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_ob
     CARBON_UNUSED(array);
     CARBON_UNUSED(array_length);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 static void
@@ -865,7 +867,7 @@ visit_leave_uint32_array_pair(carbon_archive_t *archive, path_stack_t path, carb
     CARBON_UNUSED(pair_idx);
     CARBON_UNUSED(num_pairs);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 static void
@@ -877,7 +879,7 @@ visit_leave_uint32_array_pairs(carbon_archive_t *archive, path_stack_t path, car
     CARBON_UNUSED(id);
     CARBON_UNUSED(capture);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 
@@ -894,7 +896,7 @@ visit_enter_uint64_array_pairs(carbon_archive_t *archive, path_stack_t path,
     CARBON_UNUSED(keys);
     CARBON_UNUSED(num_pairs);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 
     return CARBON_VISITOR_POLICY_INCLUDE;
 }
@@ -913,7 +915,7 @@ visit_enter_uint64_array_pair(carbon_archive_t *archive, path_stack_t path, carb
     CARBON_UNUSED(entry_idx);
     CARBON_UNUSED(num_elems);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 static void
@@ -931,7 +933,7 @@ visit_uint64_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_ob
     CARBON_UNUSED(array);
     CARBON_UNUSED(array_length);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 static void
@@ -945,7 +947,7 @@ visit_leave_uint64_array_pair(carbon_archive_t *archive, path_stack_t path, carb
     CARBON_UNUSED(pair_idx);
     CARBON_UNUSED(num_pairs);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 static void
@@ -957,7 +959,7 @@ visit_leave_uint64_array_pairs(carbon_archive_t *archive, path_stack_t path, car
     CARBON_UNUSED(id);
     CARBON_UNUSED(capture);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 
@@ -974,7 +976,7 @@ visit_enter_number_array_pairs(carbon_archive_t *archive, path_stack_t path,
     CARBON_UNUSED(keys);
     CARBON_UNUSED(num_pairs);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 
     return CARBON_VISITOR_POLICY_INCLUDE;
 }
@@ -993,7 +995,7 @@ visit_enter_number_array_pair(carbon_archive_t *archive, path_stack_t path, carb
     CARBON_UNUSED(entry_idx);
     CARBON_UNUSED(num_elems);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 static void
@@ -1012,7 +1014,7 @@ visit_number_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_ob
     CARBON_UNUSED(array);
     CARBON_UNUSED(array_length);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 static void
@@ -1027,7 +1029,7 @@ visit_leave_number_array_pair(carbon_archive_t *archive, path_stack_t path, carb
     CARBON_UNUSED(pair_idx);
     CARBON_UNUSED(num_pairs);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 static void
@@ -1039,7 +1041,7 @@ visit_leave_number_array_pairs(carbon_archive_t *archive, path_stack_t path, car
     CARBON_UNUSED(id);
     CARBON_UNUSED(capture);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 
 }
 
@@ -1057,7 +1059,7 @@ visit_enter_string_array_pairs(carbon_archive_t *archive, path_stack_t path,
     CARBON_UNUSED(keys);
     CARBON_UNUSED(num_pairs);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 
     return CARBON_VISITOR_POLICY_INCLUDE;
 }
@@ -1075,7 +1077,7 @@ visit_enter_string_array_pair(carbon_archive_t *archive, path_stack_t path, carb
     CARBON_UNUSED(entry_idx);
     CARBON_UNUSED(num_elems);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 static void
@@ -1094,7 +1096,7 @@ visit_string_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_ob
     CARBON_UNUSED(array);
     CARBON_UNUSED(array_length);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 static void
@@ -1109,7 +1111,7 @@ visit_leave_string_array_pair(carbon_archive_t *archive, path_stack_t path, carb
     CARBON_UNUSED(pair_idx);
     CARBON_UNUSED(num_pairs);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 static void
@@ -1121,7 +1123,7 @@ visit_leave_string_array_pairs(carbon_archive_t *archive, path_stack_t path, car
     CARBON_UNUSED(id);
     CARBON_UNUSED(capture);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 
 }
 
@@ -1140,7 +1142,7 @@ visit_enter_boolean_array_pairs(carbon_archive_t *archive, path_stack_t path,
     CARBON_UNUSED(keys);
     CARBON_UNUSED(num_pairs);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 
     return CARBON_VISITOR_POLICY_INCLUDE;
 }
@@ -1159,7 +1161,7 @@ visit_enter_boolean_array_pair(carbon_archive_t *archive, path_stack_t path, car
     CARBON_UNUSED(entry_idx);
     CARBON_UNUSED(num_elems);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 
 }
 
@@ -1180,7 +1182,7 @@ visit_boolean_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_o
     CARBON_UNUSED(array);
     CARBON_UNUSED(array_length);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 
 }
 
@@ -1196,7 +1198,7 @@ visit_leave_boolean_array_pair(carbon_archive_t *archive, path_stack_t path, car
     CARBON_UNUSED(pair_idx);
     CARBON_UNUSED(num_pairs);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 
 }
 
@@ -1209,7 +1211,7 @@ visit_leave_boolean_array_pairs(carbon_archive_t *archive, path_stack_t path, ca
     CARBON_UNUSED(id);
     CARBON_UNUSED(capture);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 
 }
 
@@ -1226,7 +1228,7 @@ visit_enter_null_array_pairs(carbon_archive_t *archive, path_stack_t path,
     CARBON_UNUSED(keys);
     CARBON_UNUSED(num_pairs);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 
     return CARBON_VISITOR_POLICY_INCLUDE;
 
@@ -1245,7 +1247,7 @@ visit_enter_null_array_pair(carbon_archive_t *archive, path_stack_t path, carbon
     CARBON_UNUSED(entry_idx);
     CARBON_UNUSED(num_elems);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 static void
@@ -1264,7 +1266,7 @@ visit_null_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_obje
     CARBON_UNUSED(max_entries);
     CARBON_UNUSED(num_nulls);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 static void
@@ -1279,7 +1281,7 @@ visit_leave_null_array_pair(carbon_archive_t *archive, path_stack_t path, carbon
     CARBON_UNUSED(pair_idx);
     CARBON_UNUSED(num_pairs);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 
 
 }
@@ -1293,7 +1295,7 @@ visit_leave_null_array_pairs(carbon_archive_t *archive, path_stack_t path, carbo
     CARBON_UNUSED(id);
     CARBON_UNUSED(capture);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 
 }
 
@@ -1308,7 +1310,8 @@ before_visit_object_array(carbon_archive_t *archive, path_stack_t path,
     CARBON_UNUSED(parent_id);
     CARBON_UNUSED(key);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+    carbon_archive_visitor_print_path(stderr, archive, path);
+     
 
     return CARBON_VISITOR_POLICY_INCLUDE;
 }
@@ -1330,7 +1333,7 @@ before_visit_object_array_objects(bool *skip_group_object_ids,
     CARBON_UNUSED(group_object_ids);
     CARBON_UNUSED(num_group_object_ids);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 
 }
 
@@ -1350,7 +1353,7 @@ before_visit_object_array_object_property(carbon_archive_t *archive, path_stack_
     CARBON_UNUSED(nested_key);
     CARBON_UNUSED(nested_value_type);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 
     return CARBON_VISITOR_POLICY_INCLUDE;
 }
@@ -1375,7 +1378,7 @@ visit_object_array_object_property_int8(carbon_archive_t *archive, path_stack_t 
     CARBON_UNUSED(nested_values);
     CARBON_UNUSED(num_nested_values);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 static void
@@ -1398,7 +1401,7 @@ visit_object_array_object_property_int16(carbon_archive_t *archive, path_stack_t
     CARBON_UNUSED(nested_values);
     CARBON_UNUSED(num_nested_values);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 static void
@@ -1421,7 +1424,7 @@ visit_object_array_object_property_int32(carbon_archive_t *archive, path_stack_t
     CARBON_UNUSED(nested_values);
     CARBON_UNUSED(num_nested_values);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 
@@ -1445,7 +1448,7 @@ visit_object_array_object_property_int64(carbon_archive_t *archive, path_stack_t
     CARBON_UNUSED(nested_values);
     CARBON_UNUSED(num_nested_values);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 
@@ -1470,7 +1473,7 @@ visit_object_array_object_property_uint8(carbon_archive_t *archive, path_stack_t
     CARBON_UNUSED(nested_values);
     CARBON_UNUSED(num_nested_values);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 
@@ -1494,7 +1497,7 @@ visit_object_array_object_property_uint16(carbon_archive_t *archive, path_stack_
     CARBON_UNUSED(nested_values);
     CARBON_UNUSED(num_nested_values);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 
@@ -1517,7 +1520,7 @@ visit_object_array_object_property_uint32(carbon_archive_t *archive, path_stack_
     CARBON_UNUSED(nested_values);
     CARBON_UNUSED(num_nested_values);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 
@@ -1541,7 +1544,7 @@ visit_object_array_object_property_uint64(carbon_archive_t *archive, path_stack_
     CARBON_UNUSED(nested_values);
     CARBON_UNUSED(num_nested_values);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 
@@ -1565,7 +1568,7 @@ visit_object_array_object_property_numbers(carbon_archive_t *archive, path_stack
     CARBON_UNUSED(nested_values);
     CARBON_UNUSED(num_nested_values);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 
@@ -1589,7 +1592,7 @@ visit_object_array_object_property_strings(carbon_archive_t *archive, path_stack
     CARBON_UNUSED(nested_values);
     CARBON_UNUSED(num_nested_values);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 
@@ -1613,7 +1616,7 @@ visit_object_array_object_property_booleans(carbon_archive_t *archive, path_stac
     CARBON_UNUSED(nested_values);
     CARBON_UNUSED(num_nested_values);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 static void
@@ -1636,7 +1639,7 @@ visit_object_array_object_property_nulls(carbon_archive_t *archive, path_stack_t
     CARBON_UNUSED(nested_values);
     CARBON_UNUSED(num_nested_values);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     
 }
 
 static carbon_visitor_policy_e
@@ -1658,7 +1661,7 @@ before_object_array_object_property_object(carbon_archive_t *archive, path_stack
     CARBON_UNUSED(nested_object_id);
     CARBON_UNUSED(nested_value_object_id);
 
-    carbon_archive_visitor_print_path(stdout, archive, path);
+     carbon_archive_visitor_print_path(stdout, archive, path);
 
     return CARBON_VISITOR_POLICY_INCLUDE;
 }

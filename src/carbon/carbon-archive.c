@@ -2099,6 +2099,8 @@ bool carbon_archive_open(carbon_archive_t *out,
                 out->info.record_table_size = record_table_size;
                 out->info.num_embeddded_strings = out->string_table.num_embeddded_strings;
                 out->info.string_id_index_size = string_id_index;
+                out->default_query = malloc(sizeof(carbon_query_t));
+                carbon_query_create(out->default_query, out);
 
             }
         }
@@ -2124,6 +2126,8 @@ carbon_archive_close(carbon_archive_t *archive)
     carbon_archive_drop_query_string_id_cache(archive);
     free(archive->diskFilePath);
     carbon_memblock_drop(archive->record_table.recordDataBase);
+    carbon_query_drop(archive->default_query);
+    free(archive->default_query);
     return true;
 }
 
@@ -2149,7 +2153,7 @@ carbon_archive_query(carbon_query_t *query, carbon_archive_t *archive)
         bool has_cache = false;
         carbon_archive_hash_query_string_id_cache(&has_cache, archive);
         if (!has_cache) {
-            carbon_string_id_cache_create_LRU(&archive->string_id_cache, query);
+            carbon_string_id_cache_create_LRU(&archive->string_id_cache, archive);
         }
         return true;
     } else {
@@ -2190,6 +2194,12 @@ CARBON_EXPORT(carbon_string_id_cache_t *)
 carbon_archive_get_query_string_id_cache(carbon_archive_t *archive)
 {
     return archive->string_id_cache;
+}
+
+CARBON_EXPORT(carbon_query_t *)
+carbon_archive_query_default(carbon_archive_t *archive)
+{
+    return archive ? archive->default_query : NULL;
 }
 
 static bool init_decompressor(carbon_compressor_t *strategy, uint8_t flags)

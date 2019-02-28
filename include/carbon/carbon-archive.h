@@ -46,6 +46,8 @@ typedef struct carbon_archive
 
     carbon_query_index_id_to_offset_t *query_index_string_id_to_offset;
     carbon_string_id_cache_t *string_id_cache;
+
+    carbon_query_t               *default_query;
 } carbon_archive_t;
 
 typedef struct
@@ -143,6 +145,8 @@ carbon_archive_drop_query_string_id_cache(carbon_archive_t *archive);
 CARBON_EXPORT(carbon_string_id_cache_t *)
 carbon_archive_get_query_string_id_cache(carbon_archive_t *archive);
 
+CARBON_EXPORT(carbon_query_t *)
+carbon_archive_query_default(carbon_archive_t *archive);
 
 
 
