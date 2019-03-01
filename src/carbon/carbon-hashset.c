@@ -76,6 +76,25 @@ carbon_hashset_drop(carbon_hashset_t *map)
     return status;
 }
 
+CARBON_EXPORT(carbon_vec_t *)
+carbon_hashset_keys(carbon_hashset_t *map)
+{
+    if (map) {
+        carbon_vec_t *result = malloc(sizeof(carbon_vec_t));
+        carbon_vec_create(result, NULL, map->key_data.elem_size, map->key_data.num_elems);
+        for (uint32_t i = 0; i < map->table.num_elems; i++) {
+            carbon_hashset_bucket_t *bucket = CARBON_VECTOR_GET(&map->table, i, carbon_hashset_bucket_t);
+            if (bucket->in_use_flag) {
+                const void *data = carbon_vec_at(&map->key_data, bucket->key_idx);
+                carbon_vec_push(result, data, 1);
+            }
+        }
+        return result;
+    } else {
+        return NULL;
+    }
+}
+
 CARBON_EXPORT(carbon_hashset_t *)
 carbon_hashset_cpy(carbon_hashset_t *src)
 {

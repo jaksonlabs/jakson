@@ -79,6 +79,71 @@ typedef enum carbon_basic_type
     CARBON_BASIC_TYPE_OBJECT,
 } carbon_basic_type_e;
 
+#define CARBON_FUNC_UNUSED __attribute__((unused))
+
+CARBON_FUNC_UNUSED static const char *
+carbon_basic_type_to_json_type_str(carbon_basic_type_e t)
+{
+    switch (t) {
+    case CARBON_BASIC_TYPE_INT8:
+    case CARBON_BASIC_TYPE_INT16:
+    case CARBON_BASIC_TYPE_INT32:
+    case CARBON_BASIC_TYPE_INT64:
+    case CARBON_BASIC_TYPE_UINT8:
+    case CARBON_BASIC_TYPE_UINT16:
+    case CARBON_BASIC_TYPE_UINT32:
+    case CARBON_BASIC_TYPE_UINT64:
+        return "integer";
+    case CARBON_BASIC_TYPE_NUMBER:
+        return "number";
+    case CARBON_BASIC_TYPE_STRING:
+        return "string";
+    case CARBON_BASIC_TYPE_BOOLEAN:
+        return "boolean";
+    case CARBON_BASIC_TYPE_NULL:
+        return "null";
+    case CARBON_BASIC_TYPE_OBJECT:
+        return "object";
+    default:
+        return "(unknown)";
+    }
+}
+
+CARBON_FUNC_UNUSED static const char *
+carbon_basic_type_to_system_type_str(carbon_basic_type_e t)
+{
+    switch (t) {
+    case CARBON_BASIC_TYPE_INT8:
+        return "int8";
+    case CARBON_BASIC_TYPE_INT16:
+        return "int16";
+    case CARBON_BASIC_TYPE_INT32:
+        return "int32";
+    case CARBON_BASIC_TYPE_INT64:
+        return "int64";
+    case CARBON_BASIC_TYPE_UINT8:
+        return "uint8";
+    case CARBON_BASIC_TYPE_UINT16:
+        return "uint16";
+    case CARBON_BASIC_TYPE_UINT32:
+        return "uint32";
+    case CARBON_BASIC_TYPE_UINT64:
+        return "uint64";
+    case CARBON_BASIC_TYPE_NUMBER:
+        return "float32";
+    case CARBON_BASIC_TYPE_STRING:
+        return "string64";
+    case CARBON_BASIC_TYPE_BOOLEAN:
+        return "bool8";
+    case CARBON_BASIC_TYPE_NULL:
+        return "void";
+    case CARBON_BASIC_TYPE_OBJECT:
+        return "variable";
+    default:
+        return "(unknown)";
+    }
+}
+
 #define CARBON_NOT_IMPLEMENTED                                                                                         \
 {                                                                                                                      \
     carbon_err_t err;                                                                                                  \
@@ -197,8 +262,6 @@ typedef enum carbon_basic_type
       type name = (type) src
 
 #define CARBON_UNUSED(x)   (void)(x)
-
-#define CARBON_FUNC_UNUSED __attribute__((unused))
 
 #define CARBON_BUILT_IN(x)   CARBON_FUNC_UNUSED x
 

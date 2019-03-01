@@ -2092,7 +2092,7 @@ bool carbon_archive_open(carbon_archive_t *out,
                 fclose(disk_file);
 
                 size_t string_table_size = header.root_object_header_offset - data_start;
-                size_t record_table_size = record_header.record_size - header.root_object_header_offset;
+                size_t record_table_size = record_header.record_size;
                 size_t string_id_index = file_size - header.string_id_to_offset_index_offset;
 
                 out->info.string_table_size = string_table_size;

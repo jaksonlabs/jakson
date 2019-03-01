@@ -50,8 +50,11 @@ iterate_objects(carbon_archive_t *archive, const carbon_string_id_t *keys, uint3
         carbon_string_id_t parent_key = keys[i];
         uint32_t parent_key_array_idx = i;
 
-        carbon_path_entry_t e = { .key = parent_key, .idx = 0 };
-        carbon_vec_push(path_stack, &e, 1);
+//        carbon_path_entry_t e = { .key = parent_key, .idx = 0 };
+//        carbon_vec_push(path_stack, &e, 1);
+
+      //  fprintf(stderr, "XXXX object: ");
+        //  carbon_archive_visitor_print_path(stderr, archive, path_stack);
 
         carbon_archive_value_vector_get_object_at(&object, i, value_iter);
         carbon_archive_object_get_object_id(&object_id, &object);
@@ -73,7 +76,7 @@ iterate_objects(carbon_archive_t *archive, const carbon_string_id_t *keys, uint3
             iterate_props(archive, &prop_iter, path_stack, visitor, mask, capture, false, parent_key, parent_key_array_idx);
         }
 
-        carbon_vec_pop(path_stack);
+      //  carbon_vec_pop(path_stack);
     }
 }
 
@@ -135,8 +138,8 @@ iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
     CARBON_UNUSED(parent_key);
     CARBON_UNUSED(parent_key_array_idx);
 
-//    carbon_path_entry_t e = { .key = parent_key, .idx = parent_key_array_idx };
-//    carbon_vec_push(path_stack, &e, 1);
+    carbon_path_entry_t e = { .key = parent_key, .idx = parent_key_array_idx };
+    carbon_vec_push(path_stack, &e, 1);
 
     carbon_archive_value_vector_get_object_id(&this_object_oid, &value_iter);
 
@@ -148,6 +151,17 @@ iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
             carbon_archive_value_vector_is_array_type(&is_array, &value_iter);
             carbon_archive_value_vector_get_basic_type(&type, &value_iter);
             carbon_archive_value_vector_get_object_id(&this_object_oid, &value_iter);
+
+            for (uint32_t i = 0; i < num_pairs; i++) {
+                OPTIONAL_CALL(visitor, visit_object_property, archive, path_stack, this_object_oid, keys[i], type, is_array, capture);
+
+                carbon_path_entry_t e = { .key = keys[i], .idx = 666 };
+                carbon_vec_push(path_stack, &e, 1);
+                //carbon_archive_visitor_print_path(stderr, archive, path_stack);
+                OPTIONAL_CALL(visitor, visit_object_array_prop, archive, path_stack, this_object_oid, keys[i], type, capture);
+                carbon_vec_pop(path_stack);
+            }
+
 
             if (CARBON_UNLIKELY(first_type_group)) {
                 OPTIONAL_CALL(visitor, first_prop_type_group, archive, path_stack, this_object_oid, keys, type, is_array, num_pairs, capture);
@@ -238,22 +252,27 @@ iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
             if (visitor->before_visit_object_array) {
                 for (uint32_t i = 0; i < num_column_groups; i++) {
 
-                    carbon_path_entry_t e = { .key = parent_key, .idx = i };
-                    carbon_vec_push(path_stack, &e, 1);
+               //     carbon_path_entry_t e = { .key = parent_key, .idx = i };
+                    //carbon_vec_push(path_stack, &e, 1);
+
 
                     carbon_visitor_policy_e policy = visitor->before_visit_object_array(archive, path_stack,
                                                                                         this_object_oid, keys[i],
                                                                                         capture);
 
-                    carbon_vec_pop(path_stack);
+               //     carbon_vec_pop(path_stack);
 
                     skip_groups_by_key[i] = policy == CARBON_VISITOR_POLICY_EXCLUDE;
                 }
             }
 
             uint32_t current_group_idx = 0;
+
+
+
             while (carbon_archive_collection_next_column_group(&group_iter, &collection_iter)) {
                 if (!skip_groups_by_key[current_group_idx]) {
+
                     uint32_t num_column_group_objs;
                     carbon_archive_column_iter_t column_iter;
                     carbon_string_id_t group_key = keys[current_group_idx];
@@ -261,9 +280,10 @@ iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
                     bool *skip_objects = malloc(num_column_group_objs * sizeof(bool));
                     CARBON_ZERO_MEMORY(skip_objects, num_column_group_objs * sizeof(bool));
 
+
                     if (visitor->before_visit_object_array_objects) {
                         visitor->before_visit_object_array_objects(skip_objects, archive, path_stack, this_object_oid,
-                                                                   keys[current_group_idx],
+                                                                   group_key,
                                                                    column_group_object_ids, num_column_group_objs,
                                                                    capture);
                     }
@@ -272,12 +292,30 @@ iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
 
                     while(carbon_archive_column_group_next_column(&column_iter, &group_iter))
                     {
+
                         if (!skip_objects[current_column_group_obj_idx])
                         {
                             carbon_string_id_t current_column_name;
                             carbon_basic_type_e current_column_entry_type;
 
                             carbon_archive_column_get_name(&current_column_name, &current_column_entry_type, &column_iter);
+
+                            carbon_path_entry_t e = { .key = current_column_name, .idx = 0 };
+                            carbon_vec_push(path_stack, &e, 1);
+
+                            /**
+                                0/page_end/0/
+                                /0/doi/0/
+                                /0/page_start/0/
+                                /0/venue/0/
+                                /0/doc_type/0/
+                                /0/n_citation/0/
+                                /0/issue/0/
+                                /0/volume/0/
+                                /0/n_citation/0/
+                             */
+
+                            OPTIONAL_CALL(visitor, visit_object_array_prop, archive, path_stack, this_object_oid, current_column_name, current_column_entry_type, capture);
 
                             bool skip_column = false;
                             if (visitor->before_visit_object_array_object_property)
@@ -298,6 +336,13 @@ iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
                                 for (uint32_t m = 0; m < num_positions; m++)
                                 {
                                     entry_object_containments[m] = column_group_object_ids[entry_positions[m]];
+                                }
+
+                                if (visitor->get_column_entry_count) {
+                                    bool shall_continue = visitor->get_column_entry_count(archive, path_stack, current_column_name, current_column_entry_type, num_positions, capture);
+                                    if (!shall_continue) {
+                                        break;
+                                    }
                                 }
 
                                 uint32_t current_entry_idx = 0;
@@ -352,6 +397,9 @@ iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
                                             carbon_object_id_t id;
                                             carbon_archive_object_get_object_id(&id, archive_object);
 
+
+
+
                                             bool skip_object = false;
                                             if (visitor->before_object_array_object_property_object) {
                                                 carbon_visitor_policy_e policy = visitor->before_object_array_object_property_object(archive,
@@ -361,18 +409,35 @@ iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
 
                                             if(!skip_object)
                                             {
+
+
+                                                //keys[i]
+
+                                                //carbon_path_entry_t e = { .key = current_column_name, .idx = 0 };
+                                                //carbon_vec_push(path_stack, &e, 1);
+
+                                                carbon_vec_pop(path_stack);
+
                                                 carbon_err_t err;
                                                 carbon_archive_prop_iter_t nested_obj_prop_iter;
                                                 carbon_archive_prop_iter_from_object(&nested_obj_prop_iter, mask,
                                                                                      &err, archive_object);
                                                 iterate_props(archive, &nested_obj_prop_iter, path_stack, visitor,
-                                                              mask, capture, false, group_key, current_group_idx);
+                                                              mask, capture, false, current_column_name, current_group_idx);
+
+                                                carbon_path_entry_t e = { .key = current_column_name, .idx = 0 };
+                                                carbon_vec_push(path_stack, &e, 1);
+
                                             }
+
+
                                         }
                                     } break;
                                     default:
                                         break;
                                     }
+
+
 
                                     current_entry_idx++;
                                 }
@@ -380,8 +445,10 @@ iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
 
                                 free(entry_object_containments);
                             }
+                            carbon_vec_pop(path_stack);
                         }
                         current_column_group_obj_idx++;
+
                     }
 
                     free(skip_objects);
@@ -391,7 +458,7 @@ iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
             free(skip_groups_by_key);
         }
     }
-//    carbon_vec_pop(path_stack);
+    carbon_vec_pop(path_stack);
 }
 
 CARBON_EXPORT(bool)
@@ -421,60 +488,87 @@ carbon_archive_visit_archive(carbon_archive_t *archive, const carbon_archive_vis
 
 #include <inttypes.h>
 
-CARBON_EXPORT(bool)
-carbon_archive_visitor_print_path(FILE *file, carbon_archive_t *archive, const carbon_vec_t ofType(carbon_path_entry_t) *path_stack)
+CARBON_EXPORT(void)
+carbon_archive_visitor_path_to_string(char path_buffer[2048], carbon_archive_t *archive, const carbon_vec_t ofType(carbon_path_entry_t) *path_stack)
 {
-    CARBON_NON_NULL_OR_ERROR(file)
-    CARBON_NON_NULL_OR_ERROR(path_stack)
 
     carbon_query_t *query = carbon_archive_query_default(archive);
+
 
     for (uint32_t i = 0; i < path_stack->num_elems; i++)
     {
         const carbon_path_entry_t *entry = CARBON_VECTOR_GET(path_stack, i, carbon_path_entry_t);
         if (entry->key != 0) {
             char *key = carbon_query_fetch_string_by_id(query, entry->key);
-            fprintf(file, "%s/%d/", key, entry->idx);
+            size_t path_len = strlen(path_buffer);
+            sprintf(path_buffer + path_len, "%s%s", key, i + 1 < path_stack->num_elems ? ", " : "");
             free(key);
         } else {
-            fprintf(file, "/%d/", entry->idx);
+            sprintf(path_buffer, "/");
         }
-
     }
-    fprintf(file, "\n");
+}
+
+CARBON_EXPORT(bool)
+carbon_archive_visitor_print_path(FILE *file, carbon_archive_t *archive, const carbon_vec_t ofType(carbon_path_entry_t) *path_stack)
+{
+    CARBON_NON_NULL_OR_ERROR(file)
+    CARBON_NON_NULL_OR_ERROR(path_stack)
+
+//    carbon_query_t *query = carbon_archive_query_default(archive);
+//
+//
+//    for (uint32_t i = 0; i < path_stack->num_elems; i++)
+//    {
+//        const carbon_path_entry_t *entry = CARBON_VECTOR_GET(path_stack, i, carbon_path_entry_t);
+//        if (entry->key != 0) {
+//            char *key = carbon_query_fetch_string_by_id(query, entry->key);
+//            fprintf(file, "%s/", key);
+//            free(key);
+//        } else {
+//            fprintf(file, "/");
+//        }
+//    }
+//    fprintf(file, "\n");
 
 
-
-    if (carbon_archive_visitor_path_compare(path_stack, "/0/address/1/", archive))
-    {
-
-        printf("OK");
-        //exit(1);
-    }
+    char buffer[2048];
+    memset(buffer, 0, sizeof(buffer));
+    carbon_archive_visitor_path_to_string(buffer, archive, path_stack);
+    fprintf(file, "%s\n", buffer);
 
 
     return true;
 }
 
 CARBON_EXPORT(bool)
-carbon_archive_visitor_path_compare(const carbon_vec_t ofType(carbon_path_entry_t) *lhs, const char *rhs, carbon_archive_t *archive)
+carbon_archive_visitor_path_compare(const carbon_vec_t ofType(carbon_path_entry_t) *path, carbon_string_id_t *group_name, const char *path_str, carbon_archive_t *archive)
 {
     char path_buffer[2048];
     memset(path_buffer, 0, sizeof(path_buffer));
+    sprintf(path_buffer, "/");
 
     carbon_query_t *query = carbon_archive_query_default(archive);
 
-    for (uint32_t i = 0; i < lhs->num_elems; i++)
+    for (uint32_t i = 1; i < path->num_elems; i++)
     {
-        const carbon_path_entry_t *entry = CARBON_VECTOR_GET(lhs, i, carbon_path_entry_t);
+        const carbon_path_entry_t *entry = CARBON_VECTOR_GET(path, i, carbon_path_entry_t);
         if (entry->key != 0) {
             char *key = carbon_query_fetch_string_by_id(query, entry->key);
             size_t path_len = strlen(path_buffer);
-            sprintf(path_buffer + path_len, "%s%s%d/", key, strcmp(key, "/") == 0 ? "" : "/", entry->idx);
+            sprintf(path_buffer + path_len, "%s/", key);
             free(key);
         }
-
     }
 
-    return strcmp(path_buffer, rhs) == 0;
+    if(group_name) {
+        char *key = carbon_query_fetch_string_by_id(query, *group_name);
+        size_t path_len = strlen(path_buffer);
+        sprintf(path_buffer + path_len, "%s/", key);
+        free(key);
+    }
+
+    fprintf(stderr, "'%s' <-> needle '%s'\n", path_buffer, path_str);
+
+    return strcmp(path_buffer, path_str) == 0;
 }

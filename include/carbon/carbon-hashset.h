@@ -45,7 +45,7 @@ typedef struct
 typedef struct
 {
     carbon_vec_t key_data;
-    carbon_vec_t ofType(carbon_bucket_t) table;
+    carbon_vec_t ofType(carbon_hashset_bucket_t) table;
     carbon_spinlock_t lock;
     uint32_t size;
     carbon_err_t err;
@@ -61,6 +61,9 @@ carbon_hashset_cpy(carbon_hashset_t *src);
 
 CARBON_EXPORT(bool)
 carbon_hashset_drop(carbon_hashset_t *map);
+
+CARBON_EXPORT(carbon_vec_t *)
+carbon_hashset_keys(carbon_hashset_t *map);
 
 CARBON_EXPORT(bool)
 carbon_hashset_clear(carbon_hashset_t *map);

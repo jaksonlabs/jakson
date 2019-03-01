@@ -179,6 +179,14 @@ typedef struct
                                                     uint32_t nested_value_object_id,
                                                     void *capture);
 
+    void (*visit_object_property)(carbon_archive_t *archive, path_stack_t path,
+                                  carbon_object_id_t parent_id,
+                                  carbon_string_id_t key, carbon_basic_type_e type, bool is_array_type, void *capture);
+
+
+    void (*visit_object_array_prop)(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t parent_id, carbon_string_id_t key, carbon_basic_type_e type, void *capture);
+
+    bool (*get_column_entry_count)(carbon_archive_t *archive, path_stack_t path, carbon_string_id_t key, carbon_basic_type_e type, uint32_t count, void *capture);
 
 } carbon_archive_visitor_t;
 
@@ -189,7 +197,10 @@ carbon_archive_visit_archive(carbon_archive_t *archive, const carbon_archive_vis
 CARBON_EXPORT(bool)
 carbon_archive_visitor_print_path(FILE *file, carbon_archive_t *archive, const carbon_vec_t ofType(carbon_path_entry_t) *path_stack);
 
+CARBON_EXPORT(void)
+carbon_archive_visitor_path_to_string(char path_buffer[2048], carbon_archive_t *archive, const carbon_vec_t ofType(carbon_path_entry_t) *path_stack);
+
 CARBON_EXPORT(bool)
-carbon_archive_visitor_path_compare(const carbon_vec_t ofType(carbon_path_entry_t) *lhs, const char *rhs, carbon_archive_t *archive);
+carbon_archive_visitor_path_compare(const carbon_vec_t ofType(carbon_path_entry_t) *path, carbon_string_id_t *group_name, const char *path_str, carbon_archive_t *archive);
 
 #endif

@@ -1,8 +1,12 @@
+#include <carbon/carbon-int-archive.h>
 #include "carbon/carbon.h"
 
 #include "modules.h"
 
 #include "cli.h"
+#include "ops/ops-show-keys.h"
+#include "ops/ops-count-values.h"
+#include "ops/ops-show-values.h"
 
 
 static int testFileExists(FILE *file, const char *fileName, size_t fileNum, size_t fileMax, bool requireExistence)
@@ -1667,7 +1671,7 @@ before_object_array_object_property_object(carbon_archive_t *archive, path_stack
 }
 
 static void
-run_magic_visitor(int mask, carbon_archive_t *archive)
+__unused run_magic_visitor(int mask, carbon_archive_t *archive)
 {
     carbon_archive_visitor_t visitor = { 0 };
     carbon_archive_visitor_desc_t desc = { .visit_mask = mask };
@@ -1779,13 +1783,191 @@ run_magic_visitor(int mask, carbon_archive_t *archive)
 }
 
 static bool
+run_show_keys( carbon_timestamp_t *duration, carbon_encoded_doc_collection_t *result, const char *path, carbon_archive_t *archive)
+{
+    carbon_vec_t ofType(ops_show_keys_key_type_pair_t) prop_keys;
+    carbon_vec_create(&prop_keys, NULL, sizeof(ops_show_keys_key_type_pair_t), 100);
+    carbon_object_id_t result_oid;
+    carbon_object_id_create(&result_oid);
+
+    ops_show_keys(duration, &prop_keys, path, archive);
+
+    carbon_encoded_doc_collection_create(result, &archive->err, archive);
+
+    carbon_encoded_doc_t *result_doc = encoded_doc_collection_get_or_append(result, result_oid);
+    carbon_encoded_doc_add_prop_array_object_decoded(result_doc, "result");
+
+    for (uint32_t i = 0; i < prop_keys.num_elems; i++) {
+        ops_show_keys_key_type_pair_t *pair = CARBON_VECTOR_GET(&prop_keys, i, ops_show_keys_key_type_pair_t);
+        carbon_object_id_t tmp_obj_id;
+        carbon_object_id_create(&tmp_obj_id);
+        carbon_encoded_doc_array_push_object_decoded(result_doc, "result", tmp_obj_id);
+        carbon_encoded_doc_t *pair_doc = encoded_doc_collection_get_or_append(result, tmp_obj_id);
+        carbon_encoded_doc_add_prop_string_decoded(pair_doc, "name", pair->key);
+        carbon_encoded_doc_add_prop_string_decoded_string_value_decoded(pair_doc, "type", carbon_basic_type_to_json_type_str(pair->type));
+        carbon_encoded_doc_add_prop_string_decoded_string_value_decoded(pair_doc, "sub-type", carbon_basic_type_to_system_type_str(pair->type));
+    }
+
+
+    carbon_vec_drop(&prop_keys);
+    return true;
+}
+
+static bool
+run_count_values( carbon_timestamp_t *duration, carbon_encoded_doc_collection_t *result, const char *path, carbon_archive_t *archive)
+{
+    carbon_vec_t ofType(ops_count_values_result_t) prop_keys;
+    carbon_vec_create(&prop_keys, NULL, sizeof(ops_count_values_result_t), 100);
+    carbon_object_id_t result_oid;
+    carbon_object_id_create(&result_oid);
+
+    ops_count_values(duration, &prop_keys, path, archive);
+
+    carbon_encoded_doc_collection_create(result, &archive->err, archive);
+
+    carbon_encoded_doc_t *result_doc = encoded_doc_collection_get_or_append(result, result_oid);
+    carbon_encoded_doc_add_prop_array_object_decoded(result_doc, "result");
+
+    for (uint32_t i = 0; i < prop_keys.num_elems; i++) {
+        ops_count_values_result_t *entry = CARBON_VECTOR_GET(&prop_keys, i, ops_count_values_result_t);
+        carbon_object_id_t tmp_obj_id;
+        carbon_object_id_create(&tmp_obj_id);
+        carbon_encoded_doc_array_push_object_decoded(result_doc, "result", tmp_obj_id);
+        carbon_encoded_doc_t *doc = encoded_doc_collection_get_or_append(result, tmp_obj_id);
+        carbon_encoded_doc_add_prop_string_decoded(doc, "key", entry->key);
+        carbon_encoded_doc_add_prop_uint32_decoded(doc, "count", entry->count);
+    }
+
+
+    carbon_vec_drop(&prop_keys);
+    return true;
+}
+
+static bool
+run_show_values( carbon_timestamp_t *duration, carbon_encoded_doc_collection_t *result, const char *path, carbon_archive_t *archive, uint32_t limit)
+{
+    carbon_vec_t ofType(ops_show_values_result_t) prop_keys;
+    carbon_vec_create(&prop_keys, NULL, sizeof(ops_show_values_result_t), 100);
+    carbon_object_id_t result_oid;
+    carbon_object_id_create(&result_oid);
+
+    ops_show_values(duration, &prop_keys, path, archive, limit);
+
+    carbon_encoded_doc_collection_create(result, &archive->err, archive);
+
+    carbon_encoded_doc_t *result_doc = encoded_doc_collection_get_or_append(result, result_oid);
+    carbon_encoded_doc_add_prop_array_object_decoded(result_doc, "result");
+
+    for (uint32_t i = 0; i < prop_keys.num_elems; i++) {
+        ops_show_values_result_t *entry = CARBON_VECTOR_GET(&prop_keys, i, ops_show_values_result_t);
+        carbon_object_id_t tmp_obj_id;
+        carbon_object_id_create(&tmp_obj_id);
+        carbon_encoded_doc_array_push_object_decoded(result_doc, "result", tmp_obj_id);
+        carbon_encoded_doc_t *doc = encoded_doc_collection_get_or_append(result, tmp_obj_id);
+        carbon_encoded_doc_add_prop_string_decoded(doc, "key", entry->key);
+        carbon_encoded_doc_add_prop_string_decoded_string_value_decoded(doc, "type", carbon_basic_type_to_system_type_str(entry->type));
+    }
+
+
+    carbon_vec_drop(&prop_keys);
+    return true;
+}
+
+static void
+process_from(carbon_archive_t *archive, const char *line)
+{
+    carbon_timestamp_t duration = 0;
+    char *select = strstr(line, "select");
+    char *show_keys = strstr(line, "show keys");
+    if (select)
+    {
+        char *path = strdup(line + 1);
+        path[select - line - 2] = '\0';
+        char *command = strdup(line + 1 + strlen(path) + 2 + strlen("select"));
+
+        if (strcmp(command, "count(*)") == 0) {
+            carbon_encoded_doc_collection_t result;
+            carbon_timestamp_t duration;
+            run_count_values(&duration, &result, path, archive);
+            carbon_encoded_doc_collection_print(stdout, &result);
+            carbon_encoded_doc_collection_drop(&result);
+            printf("\n");
+            printf("execution time: %" PRIu64"ms\n", duration);
+        } else if (strstr(command, "*") != 0) {
+            int offset_count = 0;
+            int limit_count = INT32_MAX;
+            if (strstr(command, "* offset ") != 0 || strstr(command, "* limit ") != 0) {
+                if (strstr(command, "* offset ")) {
+                    char *offset = strstr(command, "offset ") + strlen("offset ");
+                    char *blank = NULL;
+                    blank = strstr(offset, " ");
+                    if (!blank) {
+                        blank = offset + strlen(offset);
+                    }
+                    if (blank) {
+                        offset[blank - offset] = '\0';
+                        offset_count = atoi(offset);
+                    }
+                    else {
+                        fprintf(stderr, "parsing error for <offset M>: expected <limit N> afterwards");
+                        goto leave;
+                    }
+                }
+
+                if (strstr(select, "limit ") != 0) {
+                    char *limit = strstr(select, "limit ") + strlen("limit ");
+                    limit_count = atoi(limit);
+                }
+
+            }
+
+            printf("offset_count %d\n", offset_count);
+            printf("limit %d\n", limit_count);
+
+            carbon_encoded_doc_collection_t result;
+
+            run_show_values(&duration, &result, path, archive, (uint32_t) limit_count);
+            carbon_encoded_doc_collection_print(stdout, &result);
+            carbon_encoded_doc_collection_drop(&result);
+leave:
+            printf("\n");
+            printf("execution time: %" PRIu64"ms\n", duration);
+
+
+        }
+
+
+
+        free(path);
+        free(command);
+
+    } else if (show_keys)
+    {
+        char *path = strdup(line + 1);
+        path[show_keys - line - 2] = '\0';
+
+        carbon_encoded_doc_collection_t result;
+        carbon_timestamp_t duration;
+        run_show_keys(&duration, &result, path, archive);
+        carbon_encoded_doc_collection_print(stdout, &result);
+        carbon_encoded_doc_collection_drop(&result);
+        printf("\n");
+        printf("execution time: %" PRIu64"ms\n", duration);
+
+        free(path);
+    } else {
+        printf("unexpected token found\n");
+    }
+
+
+}
+
+static bool
 process_command(carbon_archive_t *archive)
 {
     CARBON_UNUSED(archive);
 
-    char path[2048];
-    sprintf(path, "/");
-    fprintf(stdout, "%s $ ", path);
+    fprintf(stdout, "> ");
 
     char *line = NULL;
     size_t size;
@@ -1794,12 +1976,31 @@ process_command(carbon_archive_t *archive)
     } else {
         line[strlen(line) - 1] = '\0';
 
-        run_magic_visitor(CARBON_ARCHIVE_ITER_MASK_ANY, archive);
+        if (strncmp(line, "from", strlen("from")) == 0) {
+            process_from(archive, line + strlen("from"));
+        } else if (strcmp(line, ".help") == 0) {
+            printf("\nUse one of the following statements:\n"
+                       "\tfrom /<path> show keys\t\t\t\t\tto show keys of object(s) behind <path>\n"
+                       "\tfrom /<path>/<key> select count(*)\t\tto count values for objects in <path> having key <key> ");
+            printf("\n\n");
+            printf("Type .examples for examples and .exit to leave this shell.");
+            printf("\n\n");
+        } else if (strcmp(line, ".examples") == 0) {
+            printf("from / show keys\n"
+                   "from /authors show keys\n"
+                   "from /title select count(*)\n"
+                   "from /authors/name select count(*)\n\n");
 
-        if (strcmp(line, "exit") == 0) {
+        } else if (strcmp(line, ".exit") == 0) {
             fprintf(stdout, "%s", "bye");
             return false;
+        } else {
+            fprintf(stdout, "no such command: %s\n", line);
         }
+
+
+
+
 
     }
     return true;
@@ -1827,11 +2028,25 @@ bool moduleCliInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *man
         }
         CARBON_CONSOLE_OUTPUT_ON()
 
+        FILE *f = fopen(pathCarbonFileIn, "r");
+        fseek(f, 0, SEEK_END);
+        size_t file_size = ftell(f);
+        fclose(f);
+
         carbon_archive_t archive;
         int status;
         if ((status = carbon_archive_open(&archive, pathCarbonFileIn))) {
 
-            printf("loaded '%s'\n", pathCarbonFileIn);
+            carbon_archive_info_t info;
+            carbon_archive_get_info(&info, &archive);
+            printf("CARBON file successfully loaded: '%s' (%.2f GiB) \n%.2f MiB record data, %.2f MiB string table (%" PRIu32 " strings), %.2f MiB index data\n",
+                    pathCarbonFileIn, file_size / 1024.0 / 1024.0 / 1024.0,
+                    info.record_table_size / 1024.0 / 1024.0, info.string_table_size / 1024.0 / 1024.0, info.num_embeddded_strings,
+                    info.string_id_index_size / 1024.0 / 1024.0);
+
+
+
+            printf("Type '.help' for usage instructions.\n\n");
 
             while (process_command(&archive))
             { };
