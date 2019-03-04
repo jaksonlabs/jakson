@@ -99,17 +99,16 @@ void selectionSort2(Hash arr[], size_t length, Hash mapping[])
             if (arr[j] < arr[min_idx])
                 min_idx = j;
 
-            if (min_idx != i) {
                 // Swap the found minimum element with the first element
                 swapHashes(&arr[min_idx], &arr[i]);
                 swapHashes(&mapping[min_idx], &mapping[i]);
-            }
+
 
 
     }
 }
 
-size_t removeDuplicates2(Hash keyHashColumn[], size_t arraySize, size_t duplicates[], Hash keyTargetColumn[])
+size_t removeDuplicates2(Hash keyHashColumn[], size_t arraySize, size_t duplicates[], Hash keyTargetColumn[], Hash mapping[])
 {
     size_t elemNumber = 0;
     size_t i = 0;
@@ -122,6 +121,7 @@ size_t removeDuplicates2(Hash keyHashColumn[], size_t arraySize, size_t duplicat
         {
             elemNumber++;
             keyTargetColumn[++targetIndex] = keyHashColumn[i];
+            mapping[targetIndex] = i;
             duplicates[targetIndex] = 0;
 
         }
@@ -131,7 +131,7 @@ size_t removeDuplicates2(Hash keyHashColumn[], size_t arraySize, size_t duplicat
 }
 
 void slice_linearizeImpl(Hash compressedColumn[], Hash targetColumn[], size_t low, size_t high, Hash mapping[], Hash duplicates[], size_t factor,
-    size_t level, size_t index, Hash newMapping[]) {
+    size_t level, size_t index, Hash newMapping[], Hash newDuplicates[]) {
     // Call recursive if enough elements available
     if((high - low) >= 23) {
         // TO BE DONE
@@ -161,9 +161,10 @@ void slice_linearizeImpl(Hash compressedColumn[], Hash targetColumn[], size_t lo
                 size_t j;
                 for(j = 1; j < duplicates[sourceIndex]; j++) {
                     // swapHashes(&mapping[sourceIndex + j], &mapping[targetIndex + j]);
-                    newMapping[sourceIndex + j] = mapping[sourceIndex + j];
+                    newMapping[targetIndex + j] = mapping[sourceIndex + j];
                 }
-                swapHashes(&duplicates[sourceIndex], &duplicates[targetIndex]);
+                // swapHashes(&duplicates[sourceIndex], &duplicates[targetIndex]);
+                newDuplicates[targetIndex] = duplicates[sourceIndex];
             }
 
         }
@@ -173,7 +174,7 @@ void slice_linearizeImpl(Hash compressedColumn[], Hash targetColumn[], size_t lo
             // begin = low + i * (factor - 1);
             // end = i + (i + 1) * (factor - 1) > high ? high : i + (i + 1) * (factor - 1);
             slice_linearizeImpl(compressedColumn, targetColumn, begin, end,
-                    mapping, duplicates, factor, (level + 1), (index * (factor)) + i, newMapping);
+                    mapping, duplicates, factor, (level + 1), (index * (factor)) + i, newMapping, newDuplicates);
 
             begin += ((high - low)  / factor) + 1;
             end += ((high - low)  / factor) + 1;
@@ -198,16 +199,17 @@ void slice_linearizeImpl(Hash compressedColumn[], Hash targetColumn[], size_t lo
             if (duplicates[sourceIndex] > 0) {
                 size_t j;
                 for(j = 1; j < duplicates[sourceIndex]; j++) {
-                    newMapping[sourceIndex + j] = mapping[sourceIndex + j];
+                    newMapping[targetIndex + j] = mapping[sourceIndex + j];
                 }
-                swapHashes(&duplicates[sourceIndex], &duplicates[targetIndex]);
+                // swapHashes(&duplicates[sourceIndex], &duplicates[targetIndex]);
+                newDuplicates[targetIndex] = duplicates[sourceIndex];
             }
         }
     }
 }
 
-void slice_linearize(Hash compressedColumn[], Hash targetColumn[], size_t low, size_t high, Hash mapping[], Hash duplicates[], size_t factor, Hash newMapping[]) {
-    slice_linearizeImpl(compressedColumn, targetColumn, low, high, mapping, duplicates, factor, 0, 0, newMapping);
+void slice_linearize(Hash compressedColumn[], Hash targetColumn[], size_t low, size_t high, Hash mapping[], Hash duplicates[], size_t factor, Hash newMapping[], Hash newDuplicates[]) {
+    slice_linearizeImpl(compressedColumn, targetColumn, low, high, mapping, duplicates, factor, 0, 0, newMapping, newDuplicates);
 }
 
 #define numElems 24
@@ -218,27 +220,31 @@ int main()
     // size_t compressedHashes[24] = {0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     // size_t duplicates[24] = {0,0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0};
     // size_t newHashes[24] = {0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0};
-    // size_t data[32] = { 14,15,16,17,18,19,20,21,22,23,24,1,2,2,3,3,3,4,5,6,7,8,8,8,9,10,10,11,12,12,12,13};
+    size_t data2[32] = { 14,15,16,17,18,19,20,21,22,23,24,1,2,2,3,3,3,4,5,6,7,8,8,8,9,10,10,11,12,12,12,13};
+    UNUSED(data2);
 
-    size_t mapping[numElems];
-    size_t newMapping[numElems];
-    size_t data[numElems];
+    // size_t data[numElems];
     size_t duplicates[numElems];
+    size_t newDuplicates[numElems];
     size_t compressedHashes[numElems];
     size_t newHashes[numElems];
 
-    const char* keyColumn[] = {"A1","A2","A3","A4","A5","A6","A7","A8","A9","A10","A11","A12","A13","A14","A15","A16","A17","A18","A19","A20","A21","A22","A23","A24"};
+    const char* keyColumn[32] = {"A1","A2","A3","A4","A5","A6","A7","A8","A9","A10","A11","A12","A13","A14","A15","A16","A17","A18","A19","A20","A21","A22","A23","A24", "A25", "A26", "A27", "A28", "A29", "A30", "A31", "A32"};
     // const char* stringIdColumn[] = {"A", "B", "C", "D", "E", "F"};
     size_t i = 0;
-    for(i = 0; i < numElems; i++) {
-        data[i] = numElems - i;
+    for(i = 0; i < 32; i++) {
+        // data[i] = numElems - i;
         duplicates[i] = 0;
-        mapping[i] = i;
+        newDuplicates[i] = 0;
+        // mapping[i] = i;
         compressedHashes[i] = 0;
     }
+    size_t mapping[32] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31};
+    size_t data[32] = { 14,15,16,17,18,19,20,21,22,23,24,1,2,2,3,3,3,4,5,6,7,8,8,8,9,10,10,11,12,12,12,13};
+    Hash val = mapping[5];
+    UNUSED(val);
 
-    selectionSort2(data, numElems, mapping);
-
+    selectionSort2(data, 32, mapping);
 
     for(i = 0; i < 7; i++) {
         Hash value = data[i];
@@ -248,16 +254,21 @@ int main()
         assert(key);
     }
 
+    size_t newMapping[32];
+    memcpy(&newMapping, &mapping, sizeof(mapping));
 
-    size_t result = removeDuplicates2(data, numElems, duplicates, newHashes);
+    size_t result = removeDuplicates2(data, 32, duplicates, newHashes, newMapping);
     UNUSED(result);
 
-    slice_linearize(newHashes,compressedHashes, 0, numElems, mapping, duplicates, 5, newMapping);
+    size_t newMapping2[32];
+    memcpy(&newMapping2, &mapping, sizeof(mapping));
+
+    slice_linearize(newHashes,compressedHashes, 0, result, newMapping, duplicates, 5, newMapping2, newDuplicates);
     int a = -5;
     UNUSED(a);
     for(i = 0; i < 7; i++) {
         Hash value = compressedHashes[i];
-        const char* key = keyColumn[mapping[i]];
+        const char* key = keyColumn[mapping[newMapping2[i]]];
 
         assert(value);
         assert(key);
