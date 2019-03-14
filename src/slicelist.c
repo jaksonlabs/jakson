@@ -611,6 +611,70 @@ uint32_t SLICE_RESEARCH_INLINE(Slice *slice, Hash needleHash, const char *needle
     return cacheHit ? slice->cacheIdx : (!endReached && keysMatch ? matchIndex : slice->numElems);
 }
 
+
+
+uint32_t
+SLICE_RESEARCH_SIMD_ADVANCED(Slice* slice, Hash needleHash, const char *needleStr) {
+    __m256i simdSearchValue = _mm256_set1_epi64x(needleHash);
+    register bool continueScan = false, keysMatch = false, endReached = false;
+    register int matchIndex = -1;
+    register size_t index = 0;
+    __m256i simdSearchData;
+    __m256i compareResult;
+    register size_t i = 0;
+    register size_t resultIndex;
+    size_t startLevel = 0;
+
+    size_t levels[] = {4, 24, 124 };
+    size_t levelMult[] =  {4,20, 100};
+
+    do {
+
+
+        while (index < slice->numElemsAfterCompressing) {
+            simdSearchData = _mm256_loadu_si256((__m256i *) (slice->keyHashColumn + index));
+
+            compareResult = _mm256_cmpeq_epi64(simdSearchData, simdSearchValue);
+
+            if (!_mm256_testz_si256(compareResult, compareResult)) {
+                unsigned bitmask = _mm256_movemask_epi8(compareResult);
+                matchIndex = index + _bit_scan_forward(bitmask) / 8;
+                break;
+            }
+
+            compareResult = _mm256_cmpgt_epi64(simdSearchValue, simdSearchData);
+            if (!_mm256_testz_si256(compareResult, compareResult)) {
+                unsigned bitmask = _mm256_movemask_epi8(compareResult);
+                int bitPos = (_bit_scan_reverse(bitmask) / 8) + 1;
+                index = levels[startLevel] + ((bitPos) * levelMult[startLevel]);
+                ++startLevel;
+            }
+            else {
+                index = levels[startLevel];
+                ++startLevel;
+            }
+        }
+
+        if (matchIndex == -1) {
+            endReached = true;
+            break;
+        }
+
+        for (i = 0; i < slice->duplicates[matchIndex]; ++i) {
+            resultIndex = slice->keyHashMapping2[slice->keyHashMapping[matchIndex + i]];
+            if(strcmp(slice->keyColumn[resultIndex], needleStr) == 0) {
+                matchIndex = resultIndex;
+                keysMatch = true;
+                break;
+            }
+        }
+
+    } while (continueScan);
+
+    return !endReached && keysMatch ? matchIndex : slice->numElems;
+
+}
+
 uint32_t SLICE_RESEARCH_SIMD(Slice *slice, Hash needleHash, const char *needleStr) {
     TRACE(NG5_SLICE_LIST_TAG, "SLICE_SCAN_SIMD for '%s' started", needleStr);
     assert(slice);
@@ -811,7 +875,7 @@ uint32_t SLICE_RESEARCH_SIMD(Slice *slice, Hash needleHash, const char *needleSt
                                 pairPosition = SLICE_SCAN_SIMD_INLINE_3(slice, keyHash, needle);
                                 break;
                             case SLICE_LOOKUP_BESEARCH:
-                                pairPosition = SLICE_RESEARCH_INLINE(slice, keyHash, needle);
+                                pairPosition = SLICE_RESEARCH_SIMD_ADVANCED(slice, keyHash, needle);
                                 break;
                             default: PANIC("unknown slice find strategy");
                         }
@@ -945,7 +1009,7 @@ uint32_t SLICE_RESEARCH_SIMD(Slice *slice, Hash needleHash, const char *needleSt
 
 
     static void appenderSeal(Slice *slice, SliceList *list) {
-        UNUSED(slice);
+        /*UNUSED(slice);
         UNUSED(list);
         Hash keyHashColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
         Hash compressedColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
@@ -975,6 +1039,37 @@ uint32_t SLICE_RESEARCH_SIMD(Slice *slice, Hash needleHash, const char *needleSt
         //
 
         // TODO: sealing means sort and then replace 'find' with bsearch or something. Not yet implemented: sealed slices are also search in a linear fashion
+         */
+
+        Hash keyHashColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
+        Hash compressedColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
+        Hash newHashes[SLICE_KEY_COLUMN_MAX_ELEMS];
+        Hash newDuplicates[SLICE_KEY_COLUMN_MAX_ELEMS];
+        Hash newMapping[SLICE_KEY_COLUMN_MAX_ELEMS];
+        memcpy(keyHashColumn, slice->keyHashColumn, sizeof(keyHashColumn));
+
+        size_t i;
+        for(i = 0; i < SLICE_KEY_COLUMN_MAX_ELEMS; ++i) {
+            slice->keyHashMapping[i] = i;
+        }
+
+        selectionSort2(keyHashColumn, SLICE_KEY_COLUMN_MAX_ELEMS, slice->keyHashMapping);
+
+        size_t result = removeDuplicates2(keyHashColumn, SLICE_KEY_COLUMN_MAX_ELEMS, newDuplicates, newHashes, newMapping);
+        slice->numElemsAfterCompressing = result;
+
+        memcpy(&slice->keyHashMapping2, &slice->keyHashMapping, sizeof(slice->keyHashMapping));
+        fillUpCompressedArray(newHashes, result, SLICE_KEY_COLUMN_MAX_ELEMS);
+
+        slice_linearize(newHashes, compressedColumn, 0, result, newMapping,newDuplicates, 5, slice->keyHashMapping2, slice->duplicates);
+
+        lock(list);
+
+        memcpy(slice->keyHashColumn, compressedColumn, sizeof(keyHashColumn));
+
+        slice->strat = SLICE_LOOKUP_BESEARCH;
+
+        unlock(list);
     }
 
     /*

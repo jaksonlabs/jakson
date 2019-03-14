@@ -27,6 +27,7 @@
 // ---------------------------------------------------------------------------------------------------------------------
 #include "hash.h"
 #include "common.h"
+#include <limits.h>
 
 NG5_BEGIN_DECL
 
@@ -59,7 +60,18 @@ NG5_BEGIN_DECL
 
 void slicesort2(Hash keyHashColumn[], const char * keyColumn[], const char * stringIdColumn[], size_t arraySize);
 void slicesort3(Hash keyHashColumn[], size_t length, Hash mapping[]);
-size_t removeDuplicates(Hash keyHashColumn[], size_t arraySize, size_t duplicates[], Hash keyTargetColumn[]);
+// size_t removeDuplicates(Hash keyHashColumn[], size_t arraySize, size_t duplicates[], Hash keyTargetColumn[]);
+
+void selectionSort2(Hash arr[], size_t length, Hash mapping[]);
+size_t removeDuplicates2(Hash keyHashColumn[], size_t arraySize, size_t duplicates[], Hash keyTargetColumn[], Hash mapping[]);
+void slice_linearizeImpl(Hash compressedColumn[], Hash targetColumn[], size_t low, size_t high, Hash mapping[],
+                         Hash duplicates[], size_t factor,
+                         size_t level, size_t index, Hash newMapping[], Hash newDuplicates[]);
+
+void slice_linearize(Hash compressedColumn[], Hash targetColumn[], size_t low, size_t high, Hash mapping[],
+                     Hash duplicates[], size_t factor, Hash newMapping[], Hash newDuplicates[]);
+
+void fillUpCompressedArray(Hash compressedHashes[], size_t currentLength, size_t maxLength);
 
 NG5_END_DECL
 

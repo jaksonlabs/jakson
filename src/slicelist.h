@@ -67,7 +67,7 @@ typedef struct Slice Slice;
 
 #define SLICE_DATA_SIZE (NG5_SLICE_LIST_TARGET_MEMORY_SIZE_IN_BYTE - sizeof(slice_lookup_strat_e) - sizeof(uint32_t))
 
-#define SLICE_KEY_COLUMN_MAX_ELEMS 1000 // /* one array with elements of 64 bits each, 3 of them */
+#define SLICE_KEY_COLUMN_MAX_ELEMS 124 // /* one array with elements of 64 bits each, 3 of them */
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
@@ -108,6 +108,7 @@ typedef struct Slice
     const char *keyColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
     Hash keyHashColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
     Hash keyHashMapping[SLICE_KEY_COLUMN_MAX_ELEMS];
+    Hash keyHashMapping2[SLICE_KEY_COLUMN_MAX_ELEMS];
     Hash duplicates[SLICE_KEY_COLUMN_MAX_ELEMS];
     StringId stringIdColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
 
