@@ -223,6 +223,42 @@ void fillUpCompressedArray(Hash compressedHashes[], size_t currentLength, size_t
 
 #define numElems 24 // 24-124-624
 #define maxElemens 48
+#define levels {4, 28};
+
+
+int sealed_slice_scan(Hash compressedHashes[], Hash needleHash, const char* needleString) {
+    __m256i simdSearchValue = _mm256_set1_epi64x(needleHash);
+    UNUSED(needleString);
+
+    register int matchIndex = -1;
+    register size_t index = 0;
+    __m256i simdSearchData;
+    __m256i compareResult;
+
+    while(index < numElems) {
+        simdSearchData = _mm256_loadu_si256((__m256i *) (compressedHashes + index));
+
+        compareResult = _mm256_cmpeq_epi64(simdSearchData, simdSearchValue);
+
+        if (!_mm256_testz_si256(compareResult, compareResult)) {
+            unsigned bitmask = _mm256_movemask_epi8(compareResult);
+            matchIndex = index + _bit_scan_forward(bitmask) / 8;
+            break;
+        }
+
+        compareResult = _mm256_cmpgt_epi64(simdSearchData, simdSearchValue);
+        if (!_mm256_testz_si256(compareResult, compareResult)) {
+            unsigned bitmask = _mm256_movemask_epi8(compareResult);
+            int bitPos = _bit_scan_forward(bitmask) / 8;
+            index += 4;
+            index = index + (4 * (bitPos));
+        }
+    }
+
+    return matchIndex >= 0 ? matchIndex : numElems;
+
+}
+
 
 int main()
 {
@@ -290,6 +326,9 @@ int main()
         assert(value);
         assert(key);
     }
+
+    int res = sealed_slice_scan(compressedHashes, 14, "A15");
+    assert(res);
 
     return 0;
 }
