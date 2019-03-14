@@ -212,7 +212,17 @@ void slice_linearize(Hash compressedColumn[], Hash targetColumn[], size_t low, s
     slice_linearizeImpl(compressedColumn, targetColumn, low, high, mapping, duplicates, factor, 0, 0, newMapping, newDuplicates);
 }
 
-#define numElems 24
+void fillUpCompressedArray(Hash compressedHashes[], size_t currentLength, size_t maxLength) {
+    size_t i;
+    size_t maxIndexSub = 0;
+    for(i = currentLength; i < maxLength; ++i) {
+        compressedHashes[i] = SIZE_MAX;
+        ++maxIndexSub;
+    }
+}
+
+#define numElems 24 // 24-124-624
+#define maxElemens 48
 
 int main()
 {
@@ -223,28 +233,34 @@ int main()
     size_t data2[32] = { 14,15,16,17,18,19,20,21,22,23,24,1,2,2,3,3,3,4,5,6,7,8,8,8,9,10,10,11,12,12,12,13};
     UNUSED(data2);
 
-    // size_t data[numElems];
+    size_t data[numElems];
+    size_t mapping[numElems];
     size_t duplicates[numElems];
     size_t newDuplicates[numElems];
     size_t compressedHashes[numElems];
     size_t newHashes[numElems];
 
-    const char* keyColumn[32] = {"A1","A2","A3","A4","A5","A6","A7","A8","A9","A10","A11","A12","A13","A14","A15","A16","A17","A18","A19","A20","A21","A22","A23","A24", "A25", "A26", "A27", "A28", "A29", "A30", "A31", "A32"};
+    const char* keyColumn[numElems] = {"A1","A2","A3","A4","A5","A6","A7","A8","A9","A10","A11","A12","A13","A14","A15","A16","A17","A18","A19","A20","A21","A22","A23","A24", };// "A25", "A26", "A27", "A28", "A29", "A30", "A31", "A32", "A33", "A34", "A35", "A36", "A37", "A38", "A39", "A40", "A41", "A42", "A43", "A44", "A45", "A46", "A47", "A48"};
     // const char* stringIdColumn[] = {"A", "B", "C", "D", "E", "F"};
     size_t i = 0;
-    for(i = 0; i < 32; i++) {
-        // data[i] = numElems - i;
+    for(i = 0; i < numElems; i += 2) {
+        data[i] = numElems - i;
+        data[i + 1] = numElems - i;
         duplicates[i] = 0;
+        duplicates[i + 1] = 0;
         newDuplicates[i] = 0;
-        // mapping[i] = i;
+        newDuplicates[i + 1] = 0;
+        mapping[i] = i;
+        mapping[i + 1] = i;
         compressedHashes[i] = 0;
+        compressedHashes[i + 1] = 0;
     }
-    size_t mapping[32] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31};
-    size_t data[32] = { 14,15,16,17,18,19,20,21,22,23,24,1,2,2,3,3,3,4,5,6,7,8,8,8,9,10,10,11,12,12,12,13};
+    // size_t mapping[32] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31};
+    // size_t data[32] = { 14,15,16,17,18,19,20,21,22,23,24,2,2,2,3,3,3,3,5,6,7,8,8,8,9,10,10,11,12,12,12,13};
     Hash val = mapping[5];
     UNUSED(val);
 
-    selectionSort2(data, 32, mapping);
+    selectionSort2(data, numElems, mapping);
 
     for(i = 0; i < 7; i++) {
         Hash value = data[i];
@@ -257,13 +273,14 @@ int main()
     size_t newMapping[32];
     memcpy(&newMapping, &mapping, sizeof(mapping));
 
-    size_t result = removeDuplicates2(data, 32, duplicates, newHashes, newMapping);
+    size_t result = removeDuplicates2(data, numElems, duplicates, newHashes, newMapping);
     UNUSED(result);
 
-    size_t newMapping2[32];
+    size_t newMapping2[numElems];
     memcpy(&newMapping2, &mapping, sizeof(mapping));
+    fillUpCompressedArray(newHashes, result, numElems);
 
-    slice_linearize(newHashes,compressedHashes, 0, result, newMapping, duplicates, 5, newMapping2, newDuplicates);
+    slice_linearize(newHashes,compressedHashes, 0, 24, newMapping, duplicates, 5, newMapping2, newDuplicates);
     int a = -5;
     UNUSED(a);
     for(i = 0; i < 7; i++) {
