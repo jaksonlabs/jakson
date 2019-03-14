@@ -14,8 +14,7 @@
 #include "src/hash.h"
 #include "src/simd.h"
 
-inline static void swapHashes(Hash* a, Hash* b)
-{
+inline static void swapHashes(Hash *a, Hash *b) {
     Hash t = *a;
     *a = *b;
     *b = t;
@@ -67,16 +66,12 @@ inline static void swapKeys(const char ** a, const char ** b)
 }
 */
 
-void bubblesort2(Hash arr[], size_t length, Hash mapping[])
-{
+void bubblesort2(Hash arr[], size_t length, Hash mapping[]) {
     size_t i, j;
 
-    for (i = 1; i < length ; i++)
-    {
-        for (j = 0; j < length - i ; j++)
-        {
-            if (arr[j] > arr[j+1])
-            {
+    for (i = 1; i < length; i++) {
+        for (j = 0; j < length - i; j++) {
+            if (arr[j] > arr[j + 1]) {
                 swapHashes(&arr[j], &arr[j + 1]);
                 mapping[j] = j + 1;
                 mapping[j + 1] = j;
@@ -86,39 +81,34 @@ void bubblesort2(Hash arr[], size_t length, Hash mapping[])
     }
 }
 
-void selectionSort2(Hash arr[], size_t length, Hash mapping[])
-{
+void selectionSort2(Hash arr[], size_t length, Hash mapping[]) {
     Hash i, j, min_idx = 0;
 
     // One by one move boundary of unsorted subarray
-    for (i = 0; i < length-1; i++)
-    {
+    for (i = 0; i < length - 1; i++) {
         // Find the minimum element in unsorted array
         min_idx = i;
-        for (j = i+1; j < length; j++)
+        for (j = i + 1; j < length; j++)
             if (arr[j] < arr[min_idx])
                 min_idx = j;
 
-                // Swap the found minimum element with the first element
-                swapHashes(&arr[min_idx], &arr[i]);
-                swapHashes(&mapping[min_idx], &mapping[i]);
-
+        // Swap the found minimum element with the first element
+        swapHashes(&arr[min_idx], &arr[i]);
+        swapHashes(&mapping[min_idx], &mapping[i]);
 
 
     }
 }
 
-size_t removeDuplicates2(Hash keyHashColumn[], size_t arraySize, size_t duplicates[], Hash keyTargetColumn[], Hash mapping[])
-{
+size_t
+removeDuplicates2(Hash keyHashColumn[], size_t arraySize, size_t duplicates[], Hash keyTargetColumn[], Hash mapping[]) {
     size_t elemNumber = 0;
     size_t i = 0;
     int targetIndex = -1;
-    for (i = 0; i < arraySize; i++)
-    {
+    for (i = 0; i < arraySize; i++) {
         if (targetIndex >= 0 && keyHashColumn[i] == keyTargetColumn[targetIndex])
             duplicates[targetIndex]++;
-        else
-        {
+        else {
             elemNumber++;
             keyTargetColumn[++targetIndex] = keyHashColumn[i];
             mapping[targetIndex] = i;
@@ -130,10 +120,11 @@ size_t removeDuplicates2(Hash keyHashColumn[], size_t arraySize, size_t duplicat
     return elemNumber;
 }
 
-void slice_linearizeImpl(Hash compressedColumn[], Hash targetColumn[], size_t low, size_t high, Hash mapping[], Hash duplicates[], size_t factor,
-    size_t level, size_t index, Hash newMapping[], Hash newDuplicates[]) {
+void slice_linearizeImpl(Hash compressedColumn[], Hash targetColumn[], size_t low, size_t high, Hash mapping[],
+                         Hash duplicates[], size_t factor,
+                         size_t level, size_t index, Hash newMapping[], Hash newDuplicates[]) {
     // Call recursive if enough elements available
-    if((high - low) >= 23) {
+    if ((high - low) >= 23) {
         // TO BE DONE
         UNUSED(level);
         UNUSED(index);
@@ -142,13 +133,13 @@ void slice_linearizeImpl(Hash compressedColumn[], Hash targetColumn[], size_t lo
         size_t i = 0;
 
         // Black magic
-        size_t startIndex = level == 0 ? 0 : (((size_t)pow(factor, level) - 1) + index * (factor - 1));
+        size_t startIndex = level == 0 ? 0 : (((size_t) pow(factor, level) - 1) + index * (factor - 1));
         int sourceIndex = low - 1;
         size_t targetIndex;
-        for(i = 0; i < factor - 1; i++) {
+        for (i = 0; i < factor - 1; i++) {
             sourceIndex += ((high - low) / factor) + 1;
             targetIndex = startIndex + i;
-           //  sourceIndex = compressedColumn[sourceIndex];
+            //  sourceIndex = compressedColumn[sourceIndex];
             Hash val = compressedColumn[sourceIndex];
             UNUSED(val);
 
@@ -159,7 +150,7 @@ void slice_linearizeImpl(Hash compressedColumn[], Hash targetColumn[], size_t lo
             newMapping[targetIndex] = mapping[sourceIndex];
             if (duplicates[sourceIndex] > 0) {
                 size_t j;
-                for(j = 1; j < duplicates[sourceIndex]; j++) {
+                for (j = 1; j < duplicates[sourceIndex]; j++) {
                     // swapHashes(&mapping[sourceIndex + j], &mapping[targetIndex + j]);
                     newMapping[targetIndex + j] = mapping[sourceIndex + j];
                 }
@@ -170,25 +161,25 @@ void slice_linearizeImpl(Hash compressedColumn[], Hash targetColumn[], size_t lo
         }
         size_t begin = low;
         size_t end = begin + ((high - low) / factor) - 1;
-        for(i = 0; i < factor; i++) {
+        for (i = 0; i < factor; i++) {
             // begin = low + i * (factor - 1);
             // end = i + (i + 1) * (factor - 1) > high ? high : i + (i + 1) * (factor - 1);
             slice_linearizeImpl(compressedColumn, targetColumn, begin, end,
-                    mapping, duplicates, factor, (level + 1), (index * (factor)) + i, newMapping, newDuplicates);
+                                mapping, duplicates, factor, (level + 1), (index * (factor)) + i, newMapping,
+                                newDuplicates);
 
-            begin += ((high - low)  / factor) + 1;
-            end += ((high - low)  / factor) + 1;
+            begin += ((high - low) / factor) + 1;
+            end += ((high - low) / factor) + 1;
         }
-    }
-    else {
+    } else {
         size_t i = 0;
 
         // Black magic
         // size_t startIndex = level == 0 ? 0 : 4 + ((size_t)pow(factor, level - 1) + (factor - 1) * index) - 1; //(factor - 1) + ((factor - 1) * (size_t)pow(factor, level - 1)) + (index * factor);
-        size_t startIndex = (((size_t)pow(factor, level) - 1)) + (factor - 1) * index;
+        size_t startIndex = (((size_t) pow(factor, level) - 1)) + (factor - 1) * index;
         size_t sourceIndex, targetIndex;
 
-        for(i = 0; i <= (high-low); i++) {
+        for (i = 0; i <= (high - low); i++) {
             targetIndex = startIndex + i;
             sourceIndex = low + i;
             targetColumn[targetIndex] = compressedColumn[sourceIndex];
@@ -198,7 +189,7 @@ void slice_linearizeImpl(Hash compressedColumn[], Hash targetColumn[], size_t lo
             newMapping[targetIndex] = mapping[sourceIndex];
             if (duplicates[sourceIndex] > 0) {
                 size_t j;
-                for(j = 1; j < duplicates[sourceIndex]; j++) {
+                for (j = 1; j < duplicates[sourceIndex]; j++) {
                     newMapping[targetIndex + j] = mapping[sourceIndex + j];
                 }
                 // swapHashes(&duplicates[sourceIndex], &duplicates[targetIndex]);
@@ -208,14 +199,16 @@ void slice_linearizeImpl(Hash compressedColumn[], Hash targetColumn[], size_t lo
     }
 }
 
-void slice_linearize(Hash compressedColumn[], Hash targetColumn[], size_t low, size_t high, Hash mapping[], Hash duplicates[], size_t factor, Hash newMapping[], Hash newDuplicates[]) {
-    slice_linearizeImpl(compressedColumn, targetColumn, low, high, mapping, duplicates, factor, 0, 0, newMapping, newDuplicates);
+void slice_linearize(Hash compressedColumn[], Hash targetColumn[], size_t low, size_t high, Hash mapping[],
+                     Hash duplicates[], size_t factor, Hash newMapping[], Hash newDuplicates[]) {
+    slice_linearizeImpl(compressedColumn, targetColumn, low, high, mapping, duplicates, factor, 0, 0, newMapping,
+                        newDuplicates);
 }
 
 void fillUpCompressedArray(Hash compressedHashes[], size_t currentLength, size_t maxLength) {
     size_t i;
     size_t maxIndexSub = 0;
-    for(i = currentLength; i < maxLength; ++i) {
+    for (i = currentLength; i < maxLength; ++i) {
         compressedHashes[i] = SIZE_MAX;
         ++maxIndexSub;
     }
@@ -226,47 +219,69 @@ void fillUpCompressedArray(Hash compressedHashes[], size_t currentLength, size_t
 #define levels {4, 28};
 
 
-int sealed_slice_scan(Hash compressedHashes[], Hash needleHash, const char* needleString) {
+int
+sealed_slice_scan(Hash compressedHashes[], Hash needleHash, const char *needleStr, Hash duplicates[], Hash newMapping[],
+                  Hash mapping[], const char *keyColumn[]) {
     __m256i simdSearchValue = _mm256_set1_epi64x(needleHash);
-    UNUSED(needleString);
-
+    register bool continueScan = false, keysMatch = false, endReached = false;
     register int matchIndex = -1;
     register size_t index = 0;
     __m256i simdSearchData;
     __m256i compareResult;
+    register size_t i = 0;
+    register size_t resultIndex;
 
-    while(index < numElems) {
-        simdSearchData = _mm256_loadu_si256((__m256i *) (compressedHashes + index));
+    do {
 
-        compareResult = _mm256_cmpeq_epi64(simdSearchData, simdSearchValue);
 
-        if (!_mm256_testz_si256(compareResult, compareResult)) {
-            unsigned bitmask = _mm256_movemask_epi8(compareResult);
-            matchIndex = index + _bit_scan_forward(bitmask) / 8;
+        while (index < numElems) {
+            simdSearchData = _mm256_loadu_si256((__m256i *) (compressedHashes + index));
+
+            compareResult = _mm256_cmpeq_epi64(simdSearchData, simdSearchValue);
+
+            if (!_mm256_testz_si256(compareResult, compareResult)) {
+                unsigned bitmask = _mm256_movemask_epi8(compareResult);
+                matchIndex = index + _bit_scan_forward(bitmask) / 8;
+                break;
+            }
+
+            compareResult = _mm256_cmpgt_epi64(simdSearchData, simdSearchValue);
+            if (!_mm256_testz_si256(compareResult, compareResult)) {
+                unsigned bitmask = _mm256_movemask_epi8(compareResult);
+                int bitPos = _bit_scan_forward(bitmask) / 8;
+                index += 4;
+                index = index + (4 * (bitPos));
+            }
+        }
+
+        if (matchIndex == -1) {
+            endReached = true;
             break;
         }
 
-        compareResult = _mm256_cmpgt_epi64(simdSearchData, simdSearchValue);
-        if (!_mm256_testz_si256(compareResult, compareResult)) {
-            unsigned bitmask = _mm256_movemask_epi8(compareResult);
-            int bitPos = _bit_scan_forward(bitmask) / 8;
-            index += 4;
-            index = index + (4 * (bitPos));
+        for (i = 0; i < duplicates[matchIndex]; ++i) {
+            resultIndex = mapping[newMapping[matchIndex + i]];
+            if(strcmp(keyColumn[resultIndex], needleStr) == 0) {
+                matchIndex = resultIndex;
+                keysMatch = true;
+                break;
+            }
         }
-    }
 
-    return matchIndex >= 0 ? matchIndex : numElems;
+    } while (continueScan);
+
+    return !endReached && keysMatch ? matchIndex : numElems;
 
 }
 
 
-int main()
-{
+int main() {
     // size_t mapping[24] = {0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     // size_t compressedHashes[24] = {0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     // size_t duplicates[24] = {0,0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0};
     // size_t newHashes[24] = {0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0};
-    size_t data2[32] = { 14,15,16,17,18,19,20,21,22,23,24,1,2,2,3,3,3,4,5,6,7,8,8,8,9,10,10,11,12,12,12,13};
+    size_t data2[32] = {14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 1, 2, 2, 3, 3, 3, 4, 5, 6, 7, 8, 8, 8, 9, 10, 10,
+                        11, 12, 12, 12, 13};
     UNUSED(data2);
 
     size_t data[numElems];
@@ -276,10 +291,12 @@ int main()
     size_t compressedHashes[numElems];
     size_t newHashes[numElems];
 
-    const char* keyColumn[numElems] = {"A1","A2","A3","A4","A5","A6","A7","A8","A9","A10","A11","A12","A13","A14","A15","A16","A17","A18","A19","A20","A21","A22","A23","A24", };// "A25", "A26", "A27", "A28", "A29", "A30", "A31", "A32", "A33", "A34", "A35", "A36", "A37", "A38", "A39", "A40", "A41", "A42", "A43", "A44", "A45", "A46", "A47", "A48"};
+    const char *keyColumn[numElems] = {"A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9", "A10", "A11", "A12", "A13",
+                                       "A14", "A15", "A16", "A17", "A18", "A19", "A20", "A21", "A22", "A23",
+                                       "A24",};// "A25", "A26", "A27", "A28", "A29", "A30", "A31", "A32", "A33", "A34", "A35", "A36", "A37", "A38", "A39", "A40", "A41", "A42", "A43", "A44", "A45", "A46", "A47", "A48"};
     // const char* stringIdColumn[] = {"A", "B", "C", "D", "E", "F"};
     size_t i = 0;
-    for(i = 0; i < numElems; i += 2) {
+    for (i = 0; i < numElems; i += 2) {
         data[i] = numElems - i;
         data[i + 1] = numElems - i;
         duplicates[i] = 0;
@@ -298,9 +315,9 @@ int main()
 
     selectionSort2(data, numElems, mapping);
 
-    for(i = 0; i < 7; i++) {
+    for (i = 0; i < 7; i++) {
         Hash value = data[i];
-        const char* key = keyColumn[mapping[i]];
+        const char *key = keyColumn[mapping[i]];
 
         assert(value);
         assert(key);
@@ -316,18 +333,18 @@ int main()
     memcpy(&newMapping2, &mapping, sizeof(mapping));
     fillUpCompressedArray(newHashes, result, numElems);
 
-    slice_linearize(newHashes,compressedHashes, 0, 24, newMapping, duplicates, 5, newMapping2, newDuplicates);
+    slice_linearize(newHashes, compressedHashes, 0, 24, newMapping, duplicates, 5, newMapping2, newDuplicates);
     int a = -5;
     UNUSED(a);
-    for(i = 0; i < 7; i++) {
+    for (i = 0; i < 7; i++) {
         Hash value = compressedHashes[i];
-        const char* key = keyColumn[mapping[newMapping2[i]]];
+        const char *key = keyColumn[mapping[newMapping2[i]]];
 
         assert(value);
         assert(key);
     }
 
-    int res = sealed_slice_scan(compressedHashes, 14, "A15");
+    int res = sealed_slice_scan(compressedHashes, 14, "A11", newDuplicates, newMapping2, mapping, keyColumn);
     assert(res);
 
     return 0;
