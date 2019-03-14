@@ -625,8 +625,8 @@ SLICE_RESEARCH_SIMD_ADVANCED(Slice* slice, Hash needleHash, const char *needleSt
     register size_t resultIndex;
     size_t startLevel = 0;
 
-    size_t levels[] = {4, 24, 124 };
-    size_t levelMult[] =  {4,20, 100};
+    size_t levels[] = {4, 24, 124, 624 };
+    size_t levelMult[] =  {4,20, 100, 500};
 
     do {
 
@@ -872,10 +872,10 @@ uint32_t SLICE_RESEARCH_SIMD(Slice *slice, Hash needleHash, const char *needleSt
 
                         switch (slice->strat) {
                             case SLICE_LOOKUP_SCAN:
-                                pairPosition = SLICE_SCAN_SIMD_INLINE_3(slice, keyHash, needle);
+                                pairPosition = SLICE_SCAN(slice, keyHash, needle);
                                 break;
                             case SLICE_LOOKUP_BESEARCH:
-                                pairPosition = SLICE_RESEARCH_SIMD_ADVANCED(slice, keyHash, needle);
+                                pairPosition = SLICE_SCAN(slice, keyHash, needle);
                                 break;
                             default: PANIC("unknown slice find strategy");
                         }
@@ -1009,6 +1009,8 @@ uint32_t SLICE_RESEARCH_SIMD(Slice *slice, Hash needleHash, const char *needleSt
 
 
     static void appenderSeal(Slice *slice, SliceList *list) {
+        UNUSED(slice);
+        UNUSED(list);
         /*UNUSED(slice);
         UNUSED(list);
         Hash keyHashColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
@@ -1041,7 +1043,7 @@ uint32_t SLICE_RESEARCH_SIMD(Slice *slice, Hash needleHash, const char *needleSt
         // TODO: sealing means sort and then replace 'find' with bsearch or something. Not yet implemented: sealed slices are also search in a linear fashion
          */
 
-        Hash keyHashColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
+        /*Hash keyHashColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
         Hash compressedColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
         Hash newHashes[SLICE_KEY_COLUMN_MAX_ELEMS];
         Hash newDuplicates[SLICE_KEY_COLUMN_MAX_ELEMS];
@@ -1070,6 +1072,7 @@ uint32_t SLICE_RESEARCH_SIMD(Slice *slice, Hash needleHash, const char *needleSt
         slice->strat = SLICE_LOOKUP_BESEARCH;
 
         unlock(list);
+         */
     }
 
     /*
