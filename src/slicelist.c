@@ -41,169 +41,6 @@
 #define get_hashcode(key)    HashAdditive(strlen(key), key)
 
 
-#define SLICE_SCAN_SIMD_MACRO(slice, needleHash, needleStr) ({ \
-    TRACE(NG5_SLICE_LIST_TAG, "SLICE_SCAN_SIMD for '%s' started", needleStr);                                      \
-    assert(slice);                                                                                                  \
-    assert(needleStr);                                                                                               \
-    register bool continueScan, keysMatch, keyHashsNoMatch, endReached;                                              \
-    register bool cacheAvailable = (slice->cacheIdx != (uint32_t) -1);                                               \
-    register bool hashsEq = cacheAvailable && (slice->keyHashColumn[slice->cacheIdx] == needleHash);                 \
-    register bool cacheHit = hashsEq && (strcmp(slice->keyColumn[slice->cacheIdx], needleStr) == 0);\
-    SIMDScanOperation simdScanOperation;\
-    simdScanOperation.data = slice->keyHashColumn;\
-    simdScanOperation.searchValue = needleHash;\
-    simdScanOperation.elementCount = slice->numElems;\
-    SIMDScanPrepare(&simdScanOperation);\
-    do {\
-        if (!cacheHit) {       \
-            while (!SIMDScanExecuteSingleOperation(&simdScanOperation)) { ; }      \
-            endReached    = simdScanOperation.endReached;             \
-            keyHashsNoMatch = simdScanOperation.matchIndex == -1;\
-            keysMatch      = endReached || (!keyHashsNoMatch && (strcmp(slice->keyColumn[simdScanOperation.matchIndex], needleStr)==0));  \
-            continueScan  = !endReached && !keysMatch;\
-            slice->cacheIdx = !endReached && keysMatch ? simdScanOperation.matchIndex : slice->cacheIdx;    \
-        }\
-    }\
-    while (continueScan);\
-    SIMDScanFree(&simdScanOperation);\
-    cacheHit ? slice->cacheIdx : (!endReached && keysMatch ? simdScanOperation.matchIndex : slice->numElems); \
-})
-
-/* OPTIMIZATION: we have only one item to find. Use branch-less scan instead of branching scan */
-/* OPTIMIZATION: find function as macro */
-uint32_t SLICE_SCAN_SIMD_INLINE(Slice *slice, Hash needleHash, const char *needleStr) {
-
-    TRACE(NG5_SLICE_LIST_TAG, "SLICE_SCAN_SIMD for '%s' started", needleStr);
-    assert(slice);
-    assert(needleStr);
-
-    register bool continueScan, keysMatch, keyHashsNoMatch, endReached = false;
-    register bool cacheAvailable = (slice->cacheIdx != (uint32_t) -1);
-    register bool hashsEq = cacheAvailable && (slice->keyHashColumn[slice->cacheIdx] == needleHash);
-    register bool cacheHit = hashsEq && (strcmp(slice->keyColumn[slice->cacheIdx], needleStr) == 0);
-    register uint32_t index = 0;
-    register int matchIndex = -1;
-
-    /*size_t *searchValueArray = malloc(NG5_SIMD_COMPARE_ELEMENT_COUNT * NG5_SIMD_SIZEOF_SIZET);
-    uint8_t i = 0;
-
-    for (i = 0; i < NG5_SIMD_COMPARE_ELEMENT_COUNT; ++i) {
-        searchValueArray[i] = needleHash;
-    }*/
-
-
-    do {
-        if (!cacheHit) {
-            \
-            while (!endReached && matchIndex < 0) {
-                size_t *currentSearchData = slice->keyHashColumn + index;
-
-                // Check for end of list
-                // int restElements = NG5_SIMD_COMPARE_ELEMENT_COUNT - (slice->numElems - index);
-
-                // If there is a positive rest of elements, that are smaller than the simd size
-                // Move the pointer back to compare the correct amount of elements
-                // Compares the last x < NG5_SIMD_COMPARE_ELEMENT_COUNT twice, but the other solution
-                // Would be to fill up the remaining slots with some static value like MAXINT
-                // if (index > 0 && restElements > 0) {
-                //    endReached = true;
-                //    currentSearchData = slice->keyHashColumn + index - restElements;
-                //}
-
-                __m256i *searchData = (__m256i *) currentSearchData;
-                __m256i simdSearchValue = _mm256_set1_epi64x(needleHash);
-                __m256i simdSearchData = _mm256_loadu_si256(searchData);
-                __m256i compareResult = _mm256_cmpeq_epi64(simdSearchData, simdSearchValue);
-
-                // Check if the result is empty
-                if (!_mm256_testz_si256(compareResult, compareResult)) {
-                    unsigned bitmask = _mm256_movemask_epi8(compareResult);
-                    matchIndex = index + _bit_scan_forward(bitmask) / 8; // TODO: why / 8?
-                }
-                index += slice->numElems >= NG5_SIMD_COMPARE_ELEMENT_COUNT ? NG5_SIMD_COMPARE_ELEMENT_COUNT
-                                                                           : slice->numElems;
-
-            }
-
-
-            keyHashsNoMatch = matchIndex == -1;
-
-            // 2 Branches (|| and &&)
-            keysMatch = endReached || (!keyHashsNoMatch && (strcmp(slice->keyColumn[matchIndex], needleStr) == 0));
-            // 1 Branch
-            continueScan = !endReached && !keysMatch;
-            // 1 Branch
-            slice->cacheIdx = !endReached && keysMatch ? matchIndex : slice->cacheIdx;
-        }
-    } while (continueScan);
-
-    return cacheHit ? slice->cacheIdx : (!endReached && keysMatch ? matchIndex : slice->numElems);
-}
-
-uint32_t SLICE_SCAN_SIMD_INLINE_2(Slice *slice, Hash needleHash, const char *needleStr) {
-
-    TRACE(NG5_SLICE_LIST_TAG, "SLICE_SCAN_SIMD for '%s' started", needleStr);
-    assert(slice);
-    assert(needleStr);
-
-    register bool continueScan = false, keysMatch = false, keyHashsNoMatch, endReached = false;
-    register bool cacheAvailable = (slice->cacheIdx != (uint32_t) -1);
-    register bool hashsEq = cacheAvailable && (slice->keyHashColumn[slice->cacheIdx] == needleHash);
-    register bool cacheHit = hashsEq && (strcmp(slice->keyColumn[slice->cacheIdx], needleStr) == 0);
-    register int matchIndex = -1;
-    register uint32_t index = 0;
-    do {
-        if (!cacheHit) {
-
-            do {
-                matchIndex = -1;
-
-
-                // if(needleHash == 4976461 || strcmp(needleStr, "Tom_Cherones") == 0) {
-                //    assert(needleHash);
-                // }
-
-                int restElements = NG5_SIMD_COMPARE_ELEMENT_COUNT - (slice->numElems - index);
-
-                // If there is a positive rest of elements, that are smaller than the simd size
-                // Move the pointer back to compare the correct amount of elements
-                // Compares the last x < NG5_SIMD_COMPARE_ELEMENT_COUNT twice, but the other solution
-                // Would be to fill up the remaining slots with some static value like MAXINT
-                if (restElements > 0) {
-                    endReached = true;
-                } else
-                    restElements = 0;
-
-                __m256i *searchData = (__m256i *) ((slice->keyHashColumn + index) - restElements);
-                __m256i simdSearchData = _mm256_loadu_si256(searchData);
-                __m256i simdSearchValue = _mm256_set1_epi64x(needleHash);
-                __m256i compareResult = _mm256_cmpeq_epi64(simdSearchData, simdSearchValue);
-
-                // Check if the result is empty
-                if (!_mm256_testz_si256(compareResult, compareResult)) {
-                    unsigned bitmask = _mm256_movemask_epi8(compareResult);
-                    matchIndex = index - restElements + _bit_scan_forward(bitmask) / 8; // TODO: why / 8?
-                }
-                index += NG5_SIMD_COMPARE_ELEMENT_COUNT;
-
-            } while (!(endReached || matchIndex > -1));
-
-            keyHashsNoMatch = matchIndex == -1;
-
-            // 2 Branches (|| and &&)
-            keysMatch = endReached || (!keyHashsNoMatch && (strcmp(slice->keyColumn[matchIndex], needleStr) == 0));
-            // 1 Branch
-            continueScan = !endReached && !keysMatch;
-
-            // 1 Branch
-            slice->cacheIdx = !endReached && keysMatch ? matchIndex : slice->cacheIdx;
-        }
-
-    } while (continueScan);
-
-    return cacheHit ? slice->cacheIdx : (!endReached && keysMatch ? matchIndex : slice->numElems);
-}
-
 
 #define SLICE_SCAN_SIMD_INLINE_MACRO(slice, needleHash, needleStr) ({ \
     \
@@ -295,7 +132,7 @@ uint32_t SLICE_SCAN_SIMD_INLINE_2(Slice *slice, Hash needleHash, const char *nee
     0; \
 })
 
-uint32_t SLICE_SCAN_SIMD_INLINE_3(Slice *slice, Hash needleHash, const char *needleStr) {
+uint32_t SLICE_SCAN_SIMD_INLINE(Slice *slice, Hash needleHash, const char *needleStr) {
     TRACE(NG5_SLICE_LIST_TAG, "SLICE_SCAN_SIMD for '%s' started", needleStr);
     assert(slice);
     assert(needleStr);
@@ -342,65 +179,9 @@ uint32_t SLICE_SCAN_SIMD_INLINE_3(Slice *slice, Hash needleHash, const char *nee
 
     } while (continueScan);
 
-    /*if (!keysMatch && !cacheHit) {
-        int index = SLICE_SCAN(slice, needleHash, needleStr);
-        if(index >= 0) {
-            index = 4;
-        }
-    }*/
-
     return cacheHit ? slice->cacheIdx : (!endReached && keysMatch ? matchIndex : slice->numElems);
 
 }
-/*
-uint32_t SLICE_SCAN_SIMD_INLINE_3(Slice *slice, Hash needleHash, const char *needleStr) {
-
-    TRACE(NG5_SLICE_LIST_TAG, "SLICE_SCAN_SIMD for '%s' started", needleStr);
-    assert(slice);
-    assert(needleStr);
-
-    register bool continueScan = false, keysMatch = false, keyHashsNoMatch, endReached = false;
-    register bool cacheAvailable = (slice->cacheIdx != (uint32_t) -1);
-    register bool hashsEq = cacheAvailable && (slice->keyHashColumn[slice->cacheIdx] == needleHash);
-    register bool cacheHit = hashsEq && (strcmp(slice->keyColumn[slice->cacheIdx], needleStr) == 0);
-    register int matchIndex = -1;
-    register uint32_t index = 0;
-    __m256i simdSearchValue = _mm256_set1_epi64x(needleHash);
-    // restElements = 0;
-
-    if (!cacheHit) {
-
-        do {
-
-            do {
-                matchIndex = -1;
-
-
-                int restElements = NG5_SIMD_COMPARE_ELEMENT_COUNT - (slice->numElems - index);
-                endReached = (restElements > 0);
-
-                __m256i simdSearchData = _mm256_loadu_si256((__m256i *) (slice->keyHashColumn + index));
-
-                __m256i compareResult = _mm256_cmpeq_epi64(simdSearchData, simdSearchValue);
-
-                if (!_mm256_testz_si256(compareResult, compareResult)) {
-                    unsigned bitmask = _mm256_movemask_epi8(compareResult);
-                    matchIndex = index + _bit_scan_forward(bitmask) / 8;
-                }
-                index += NG5_SIMD_COMPARE_ELEMENT_COUNT;
-
-            } while (!(endReached || matchIndex > -1));
-
-            keyHashsNoMatch = matchIndex == -1;
-
-            keysMatch = endReached || (!keyHashsNoMatch && (strcmp(slice->keyColumn[matchIndex], needleStr) == 0));
-            continueScan = !endReached && !keysMatch;
-            slice->cacheIdx = !endReached && keysMatch ? matchIndex : slice->cacheIdx;
-        } while (continueScan);
-    }
-
-    return cacheHit ? slice->cacheIdx : (keysMatch ? matchIndex : slice->numElems);
-}*/
 
 /* OPTIMIZATION: we have only one item to find. Use branch-less scan instead of branching scan */
 /* OPTIMIZATION: find function as macro */
@@ -443,125 +224,6 @@ uint32_t SLICE_SCAN_SIMD(Slice *slice, Hash needleHash, const char *needleStr) {
 
     return cacheHit ? slice->cacheIdx : (!endReached && keysMatch ? simdScanOperation.matchIndex : slice->numElems);
 }
-
-/* OPTIMIZATION: we have only one item to find. Use branch-less scan instead of branching scan */
-/* OPTIMIZATION: find function as macro */
-#define SLICE_SCAN_IMPR_SIMD(slice, needleHash, needleStr)                                                                       \
-({ \
-TRACE(NG5_SLICE_LIST_TAG, "SLICE_SCAN_SIMD for '%s' started", needleStr); \
-    assert(slice); \
-    assert(needleStr);  \
- \
-    register bool continueScan, keysMatch, keyHashsNoMatch, endReached; \
-    register bool cacheAvailable = (slice->cacheIdx != (uint32_t) -1); \
-    register bool hashsEq = cacheAvailable && (slice->keyHashColumn[slice->cacheIdx] == needleHash); \
-    register bool cacheHit = hashsEq && (strcmp(slice->keyColumn[slice->cacheIdx], needleStr) == 0); \
- \
- \
-    SIMDScanOperation simdScanOperation; \
-    simdScanOperation.data = slice->keyHashColumn; \
-    simdScanOperation.searchValue = needleHash; \
-    simdScanOperation.elementCount = slice->numElems; \
-    SIMDScanPrepare(&simdScanOperation); \
- \
-    do { \
-        if (!cacheHit) {       \
-            while (!SIMDScanExecuteSingleOperation(&simdScanOperation)) { ; } \
- \
-            endReached    = simdScanOperation.endReached; \
-            keyHashsNoMatch = simdScanOperation.matchIndex == -1; \
- \
-            \
-            keysMatch      = endReached || (!keyHashsNoMatch && (strcmp(slice->keyColumn[simdScanOperation.matchIndex], needleStr)==0)); \
-            \
-            continueScan  = !endReached && !keysMatch; \
-            \
-            slice->cacheIdx = !endReached && keysMatch ? simdScanOperation.matchIndex : slice->cacheIdx; \
-        } \
-    } \
-    while (continueScan); \
-    SIMDScanFree(&simdScanOperation); \
- \
-    cacheHit ? slice->cacheIdx : (!endReached && keysMatch ? simdScanOperation.matchIndex : slice->numElems); \
-})
-
-uint32_t SLICE_SCAN_SIMD2(Slice *slice, Hash needleHash, const char *needleStr) {
-    \
-    TRACE(NG5_SLICE_LIST_TAG, "SLICE_SCAN_SIMD for '%s' started", needleStr);
-    assert(slice);
-    assert(needleStr);
-
-    register bool keysMatch = false;
-    register bool cacheAvailable = (slice->cacheIdx != (uint32_t) -1);
-    register bool hashsEq = cacheAvailable && (slice->keyHashColumn[slice->cacheIdx] == needleHash);
-    register bool cacheHit = hashsEq && (strcmp(slice->keyColumn[slice->cacheIdx], needleStr) == 0);
-
-    // Create SIMD Scan
-    SIMDScanOperation simdScanOperation;
-    simdScanOperation.data = slice->keyHashColumn;
-    simdScanOperation.searchValue = needleHash;
-    simdScanOperation.elementCount = slice->numElems;
-    if (!cacheHit) {
-        do {
-
-            while (!SIMDScanExecuteSingleOperation(&simdScanOperation)) { ; }
-
-            // 1 Branch
-            if (simdScanOperation.endReached)
-                break;
-
-            keysMatch = strcmp(slice->keyColumn[simdScanOperation.matchIndex], needleStr) == 0;
-        } while (!keysMatch);
-    }
-
-    // 1 Branch
-    slice->cacheIdx = keysMatch ? simdScanOperation.matchIndex : slice->cacheIdx;
-    return cacheHit ? slice->cacheIdx : (!simdScanOperation.endReached && keysMatch ? simdScanOperation.matchIndex
-                                                                                    : slice->numElems);
-}
-
-/* OPTIMIZATION: we have only one item to find. Use branch-less scan instead of branching scan */
-/* OPTIMIZATION: find function as macro */
-#define SLICE_SCAN_IMPR(slice, needleHash, needleStr)                                                                       \
-({                                                                                                                     \
-    TRACE(NG5_SLICE_LIST_TAG, "SLICE_SCAN for '%s' started", needleStr);                                               \
-    assert(slice);                                                                                                     \
-    assert(needleStr);                                                                                                 \
-    \
-    if (slice->numElems > 4) {\
-        TRACE(NG5_SLICE_LIST_TAG, "SLICE_SCAN for '%s' started", needleStr);\
-\
-    }\
-\
-                                                                                                                       \
-    register bool continueScan, keysMatch, keyHashsNoMatch, endReached;                                                \
-    register bool cacheAvailable = (slice->cacheIdx != (uint32_t) -1);                                                 \
-    register bool hashsEq = cacheAvailable && (slice->keyHashColumn[slice->cacheIdx] == needleHash);                   \
-    register bool cacheHit = hashsEq && (strcmp(slice->keyColumn[slice->cacheIdx], needleStr) == 0);                   \
-    register uint_fast32_t i = 0; \
-    SIMDScanOperation simdScanOperation; \
-    simdScanOperation.data = slice->keyHashColumn; \
-    simdScanOperation.searchValue = needleHash; \
-    simdScanOperation.elementCount =  slice->numElems; \
-\
-    if (!cacheHit) {                                                                                                   \
-        do {                                                                                                           \
-            while (!SIMDScanExecuteSingleOperation(&simdScanOperation)) { ; }             \
-            endReached    = simdScanOperation.endReached; \
-            keyHashsNoMatch = simdScanOperation.matchIndex == -1; \
-            keysMatch      = endReached || (!keyHashsNoMatch && (strcmp(slice->keyColumn[simdScanOperation.matchIndex], needleStr)==0)); \
-            continueScan  = !endReached && !keysMatch; \
-            slice->cacheIdx = !endReached && keysMatch ? simdScanOperation.matchIndex : slice->cacheIdx; \
-            endReached    = ((i+1)>slice->numElems);                                                                   \
-            keysMatch      = endReached || (!keyHashsNoMatch && (strcmp(slice->keyColumn[i], needleStr)==0));          \
-            continueScan  = !endReached && !keysMatch;                                                                 \
-            i             += continueScan;                                                                             \
-        }                                                                                                              \
-        while (continueScan);                                                                                          \
-        slice->cacheIdx = !endReached && keysMatch ? simdScanOperation.matchIndex : slice->cacheIdx;                                              \
-    }                                                                                                                  \
-    cacheHit ? slice->cacheIdx : (!endReached && keysMatch ? simdScanOperation.matchIndex : slice->numElems);                                     \
-})
 
 
 uint32_t SLICE_RESEARCH_INLINE(Slice *slice, Hash needleHash, const char *needleStr) {
@@ -614,7 +276,7 @@ uint32_t SLICE_RESEARCH_INLINE(Slice *slice, Hash needleHash, const char *needle
 
 
 uint32_t
-SLICE_RESEARCH_SIMD_ADVANCED(Slice* slice, Hash needleHash, const char *needleStr) {
+SLICE_RESEARCH_SIMD_KARY(Slice* slice, Hash needleHash, const char *needleStr) {
     __m256i simdSearchValue = _mm256_set1_epi64x(needleHash);
     register bool continueScan = false, keysMatch = false, endReached = false;
     register int matchIndex = -1;
@@ -675,7 +337,7 @@ SLICE_RESEARCH_SIMD_ADVANCED(Slice* slice, Hash needleHash, const char *needleSt
 
 }
 
-uint32_t SLICE_RESEARCH_SIMD(Slice *slice, Hash needleHash, const char *needleStr) {
+uint32_t SLICE_RESEARCH_BINARY(Slice *slice, Hash needleHash, const char *needleStr) {
     TRACE(NG5_SLICE_LIST_TAG, "SLICE_SCAN_SIMD for '%s' started", needleStr);
     assert(slice);
     assert(needleStr);
@@ -872,10 +534,34 @@ uint32_t SLICE_RESEARCH_SIMD(Slice *slice, Hash needleHash, const char *needleSt
 
                         switch (slice->strat) {
                             case SLICE_LOOKUP_SCAN:
+
+#ifdef ENABLE_BASELINE
                                 pairPosition = SLICE_SCAN(slice, keyHash, needle);
+#endif
+#ifdef ENABLE_SLICE_SCAN_SIMD
+                                pairPosition = SLICE_SCAN_SIMD(slice, keyHash, needle);
+#endif
+
+#ifdef ENABLE_SLICE_SCAN_SIMD_INLINE
+                                pairPosition = SLICE_SCAN_SIMD_INLINE_3(slice, keyHash, needle);
+#endif
+
+#ifdef ENABLE_SLICE_SCAN_SIMD_MACRO
+                                pairPosition = SLICE_SCAN_SIMD_INLINE_MACRO(slice, keyHash, needle);
+#endif
                                 break;
                             case SLICE_LOOKUP_BESEARCH:
+#ifdef ENABLE_BASELINE
                                 pairPosition = SLICE_SCAN(slice, keyHash, needle);
+#endif
+#ifdef ENABLE_SEALED_KARY_SIIMD_SCAN
+                                pairPosition = SLICE_RESEARCH_SIMD_KARY(slice, keyHash, needle);
+#endif
+
+#ifdef ENABLE_SEALED_BINARY_SCAN
+                                pairPosition = SLICE_RESEARCH_BINARY(slice, keyHash, needle);
+#endif
+
                                 break;
                             default: PANIC("unknown slice find strategy");
                         }
@@ -1011,39 +697,30 @@ uint32_t SLICE_RESEARCH_SIMD(Slice *slice, Hash needleHash, const char *needleSt
     static void appenderSeal(Slice *slice, SliceList *list) {
         UNUSED(slice);
         UNUSED(list);
-        /*UNUSED(slice);
-        UNUSED(list);
-        Hash keyHashColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
-        Hash compressedColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
 
+#ifdef ENABLE_SEALED_BINARY_SCAN
+        Hash keyHashColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
         memcpy(keyHashColumn, slice->keyHashColumn, sizeof(keyHashColumn));
-        // memcpy(keyColumn, slice->keyColumn, sizeof(keyColumn));
-        // memcpy(stringIdColumn, slice->stringIdColumn, sizeof(stringIdColumn));
 
         slicesort3(keyHashColumn, SLICE_KEY_COLUMN_MAX_ELEMS, slice->keyHashMapping);
-        slice->numElemsAfterCompressing = removeDuplicates(keyHashColumn, SLICE_KEY_COLUMN_MAX_ELEMS, slice->duplicates, compressedColumn);
-        //if(keyHashColumn[14] == 2701) {
-        //    UNUSED(list);
-        //    assert(slice);
-        // }
 
         lock(list);
 
-        memcpy(slice->keyHashColumn, compressedColumn, sizeof(keyHashColumn));
-        // memcpy(slice->keyColumn, keyColumn, sizeof(keyColumn));
-        //  memcpy(slice->stringIdColumn, stringIdColumn, sizeof(stringIdColumn));
-
+        memcpy(slice->keyHashColumn, keyHashColumn, sizeof(keyHashColumn));
         slice->strat = SLICE_LOOKUP_BESEARCH;
 
         unlock(list);
-        //  slice->cacheIdx = 0;
-        //  slice_sort(slice);
-        //
 
-        // TODO: sealing means sort and then replace 'find' with bsearch or something. Not yet implemented: sealed slices are also search in a linear fashion
+#endif
+
+#ifdef ENABLE_SEALED_KARY_SIIMD_SCAN
+
+        /**
+         * The construction of the duplicate free k-ary search tree comes with high effort
+         * Here we can surely optimize parts, e.g. creating the mappings/tree in place instead
+         * of using new arrays
          */
-
-        /*Hash keyHashColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
+        Hash keyHashColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
         Hash compressedColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
         Hash newHashes[SLICE_KEY_COLUMN_MAX_ELEMS];
         Hash newDuplicates[SLICE_KEY_COLUMN_MAX_ELEMS];
@@ -1055,59 +732,29 @@ uint32_t SLICE_RESEARCH_SIMD(Slice *slice, Hash needleHash, const char *needleSt
             slice->keyHashMapping[i] = i;
         }
 
+        // Sort and create first mapping
         selectionSort2(keyHashColumn, SLICE_KEY_COLUMN_MAX_ELEMS, slice->keyHashMapping);
 
         size_t result = removeDuplicates2(keyHashColumn, SLICE_KEY_COLUMN_MAX_ELEMS, newDuplicates, newHashes, newMapping);
         slice->numElemsAfterCompressing = result;
 
+        // Fill up to next size for complete k-ary search tree
         memcpy(&slice->keyHashMapping2, &slice->keyHashMapping, sizeof(slice->keyHashMapping));
         fillUpCompressedArray(newHashes, result, SLICE_KEY_COLUMN_MAX_ELEMS);
 
+        // This one does the magic, create a linearized version of the tree
         slice_linearize(newHashes, compressedColumn, 0, result, newMapping,newDuplicates, 5, slice->keyHashMapping2, slice->duplicates);
 
         lock(list);
 
         memcpy(slice->keyHashColumn, compressedColumn, sizeof(keyHashColumn));
-
         slice->strat = SLICE_LOOKUP_BESEARCH;
 
         unlock(list);
-         */
+#endif
+
     }
 
-    /*
-     *     static void appenderSeal(Slice *slice, SliceList *list) {
-        UNUSED(slice);
-        UNUSED(list);
-        Hash keyHashColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
-
-        memcpy(keyHashColumn, slice->keyHashColumn, sizeof(keyHashColumn));
-        // memcpy(keyColumn, slice->keyColumn, sizeof(keyColumn));
-        // memcpy(stringIdColumn, slice->stringIdColumn, sizeof(stringIdColumn));
-
-        slicesort3(keyHashColumn, SLICE_KEY_COLUMN_MAX_ELEMS, slice->keyHashMapping);
-
-        //if(keyHashColumn[14] == 2701) {
-        //    UNUSED(list);
-        //    assert(slice);
-        // }
-
-        lock(list);
-
-        memcpy(slice->keyHashColumn, keyHashColumn, sizeof(keyHashColumn));
-        // memcpy(slice->keyColumn, keyColumn, sizeof(keyColumn));
-        //  memcpy(slice->stringIdColumn, stringIdColumn, sizeof(stringIdColumn));
-
-        slice->strat = SLICE_LOOKUP_BESEARCH;
-
-        unlock(list);
-        //  slice->cacheIdx = 0;
-        //  slice_sort(slice);
-        //
-
-        // TODO: sealing means sort and then replace 'find' with bsearch or something. Not yet implemented: sealed slices are also search in a linear fashion
-    }
-     */
 
     static void lock(SliceList *list) {
         SpinlockAcquire(&list->lock);

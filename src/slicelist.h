@@ -67,7 +67,29 @@ typedef struct Slice Slice;
 
 #define SLICE_DATA_SIZE (NG5_SLICE_LIST_TARGET_MEMORY_SIZE_IN_BYTE - sizeof(slice_lookup_strat_e) - sizeof(uint32_t))
 
-#define SLICE_KEY_COLUMN_MAX_ELEMS 624 // /* one array with elements of 64 bits each, 3 of them */
+#define SLICE_KEY_COLUMN_MAX_ELEMS 1000 // SLICE_DATA_SIZE / 8 / 3) /* one array with elements of 64 bits each, 3 of them */
+
+// ---------------------------------------------------------------------------------------------------------------------
+//
+//  SLICE_SCAN CUSTOM CONFIG
+//
+// ---------------------------------------------------------------------------------------------------------------------
+
+// SIMD Scan with SIMDScanOperation struct
+#define ENABLE_BASELINE 1
+// #define ENABLE_SLICE_SCAN_SIMD 1
+
+// Improved inline SIMD Scan implementation
+// #define ENABLE_SLICE_SCAN_SIMD_INLINE 1
+
+// Improved inline SIMD Scan implementation as macro
+// #define ENABLE_SLICE_SCAN_SIMD_MACRO 1
+
+// Binary search index implementation for sealed slices
+// #define ENABLE_SEALED_BINARY_SCAN 1
+
+// SIMD accelerated k-ary search for sealed slices
+// #define ENABLE_SEALED_KARY_SIIMD_SCAN 1
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
