@@ -554,7 +554,7 @@ uint32_t SLICE_RESEARCH_BINARY(Slice *slice, Hash needleHash, const char *needle
 #ifdef ENABLE_BASELINE
                                 pairPosition = SLICE_SCAN(slice, keyHash, needle);
 #endif
-#ifdef ENABLE_SEALED_KARY_SIIMD_SCAN
+#ifdef ENABLE_SEALED_KARY_SIMD_SCAN
                                 pairPosition = SLICE_RESEARCH_SIMD_KARY(slice, keyHash, needle);
 #endif
 
@@ -701,7 +701,7 @@ uint32_t SLICE_RESEARCH_BINARY(Slice *slice, Hash needleHash, const char *needle
         Hash keyHashColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
         memcpy(keyHashColumn, slice->keyHashColumn, sizeof(keyHashColumn));
 
-        slicesort3(keyHashColumn, SLICE_KEY_COLUMN_MAX_ELEMS, slice->keyHashMapping);
+        selectionSort(keyHashColumn, SLICE_KEY_COLUMN_MAX_ELEMS, slice->keyHashMapping);
 
         lock(list);
 
@@ -712,7 +712,7 @@ uint32_t SLICE_RESEARCH_BINARY(Slice *slice, Hash needleHash, const char *needle
 
 #endif
 
-#ifdef ENABLE_SEALED_KARY_SIIMD_SCAN
+#ifdef ENABLE_SEALED_KARY_SIMD_SCAN
 
         /**
          * The construction of the duplicate free k-ary search tree comes with high effort
@@ -732,7 +732,7 @@ uint32_t SLICE_RESEARCH_BINARY(Slice *slice, Hash needleHash, const char *needle
         }
 
         // Sort and create first mapping
-        selectionSort2(keyHashColumn, SLICE_KEY_COLUMN_MAX_ELEMS, slice->keyHashMapping);
+        selectionSort(keyHashColumn, SLICE_KEY_COLUMN_MAX_ELEMS, slice->keyHashMapping);
 
         size_t result = removeDuplicates2(keyHashColumn, SLICE_KEY_COLUMN_MAX_ELEMS, newDuplicates, newHashes, newMapping);
         slice->numElemsAfterCompressing = result;

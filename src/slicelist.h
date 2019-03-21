@@ -86,10 +86,10 @@ typedef struct Slice Slice;
 // #define ENABLE_SLICE_SCAN_SIMD_MACRO 1
 
 // Binary search index implementation for sealed slices
-// #define ENABLE_SEALED_BINARY_SCAN 1
+ #define ENABLE_SEALED_BINARY_SCAN 1
 
 // SIMD accelerated k-ary search for sealed slices
-#define ENABLE_SEALED_KARY_SIIMD_SCAN 1
+// #define ENABLE_SEALED_KARY_SIMD_SCAN 1
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
