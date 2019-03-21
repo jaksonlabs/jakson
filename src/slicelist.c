@@ -543,7 +543,7 @@ uint32_t SLICE_RESEARCH_BINARY(Slice *slice, Hash needleHash, const char *needle
 #endif
 
 #ifdef ENABLE_SLICE_SCAN_SIMD_INLINE
-                                pairPosition = SLICE_SCAN_SIMD_INLINE_3(slice, keyHash, needle);
+                                pairPosition = SLICE_SCAN_SIMD_INLINE(slice, keyHash, needle);
 #endif
 
 #ifdef ENABLE_SLICE_SCAN_SIMD_MACRO
@@ -561,7 +561,6 @@ uint32_t SLICE_RESEARCH_BINARY(Slice *slice, Hash needleHash, const char *needle
 #ifdef ENABLE_SEALED_BINARY_SCAN
                                 pairPosition = SLICE_RESEARCH_BINARY(slice, keyHash, needle);
 #endif
-
                                 break;
                             default: PANIC("unknown slice find strategy");
                         }
