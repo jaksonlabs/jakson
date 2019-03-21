@@ -433,7 +433,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
         progress_tracker.end_string_id_index_baking = tracker_end_string_id_index_baking;
 
         if (!carbon_archive_from_json(&archive, pathCarbonFileOut, &err, jsonContent,
-                                               CARBON_COMPRESSOR_NONE, flagReadOptimized, flagBakeStringIdIndex,
+                                      compressor, flagReadOptimized, flagBakeStringIdIndex,
                                                &progress_tracker)) {
             carbon_error_print_and_abort(&err);
         } else {
