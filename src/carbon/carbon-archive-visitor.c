@@ -514,22 +514,23 @@ carbon_archive_visitor_print_path(FILE *file, carbon_archive_t *archive, const c
 {
     CARBON_NON_NULL_OR_ERROR(file)
     CARBON_NON_NULL_OR_ERROR(path_stack)
+    CARBON_NON_NULL_OR_ERROR(archive)
 
-//    carbon_query_t *query = carbon_archive_query_default(archive);
-//
-//
-//    for (uint32_t i = 0; i < path_stack->num_elems; i++)
-//    {
-//        const carbon_path_entry_t *entry = CARBON_VECTOR_GET(path_stack, i, carbon_path_entry_t);
-//        if (entry->key != 0) {
-//            char *key = carbon_query_fetch_string_by_id(query, entry->key);
-//            fprintf(file, "%s/", key);
-//            free(key);
-//        } else {
-//            fprintf(file, "/");
-//        }
-//    }
-//    fprintf(file, "\n");
+    carbon_query_t *query = carbon_archive_query_default(archive);
+
+
+    for (uint32_t i = 0; i < path_stack->num_elems; i++)
+    {
+        const carbon_path_entry_t *entry = CARBON_VECTOR_GET(path_stack, i, carbon_path_entry_t);
+        if (entry->key != 0) {
+            char *key = carbon_query_fetch_string_by_id(query, entry->key);
+            fprintf(file, "%s/", key);
+            free(key);
+        } else {
+            fprintf(file, "/");
+        }
+    }
+    fprintf(file, "\n");
 
 
     char buffer[2048];

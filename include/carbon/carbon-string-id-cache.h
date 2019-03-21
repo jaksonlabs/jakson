@@ -37,7 +37,13 @@ CARBON_EXPORT(bool)
 carbon_string_id_cache_create_LRU(carbon_string_id_cache_t **cache, carbon_archive_t *archive);
 
 CARBON_EXPORT(bool)
+carbon_string_id_cache_create_LRU_ex(carbon_string_id_cache_t **cache, carbon_archive_t *archive, size_t capacity);
+
+CARBON_EXPORT(bool)
 carbon_string_id_cache_get_error(carbon_err_t *err, const carbon_string_id_cache_t *cache);
+
+CARBON_EXPORT(bool)
+carbon_string_id_cache_get_size(size_t *size, const carbon_string_id_cache_t *cache);
 
 CARBON_EXPORT(char *)
 carbon_string_id_cache_get(carbon_string_id_cache_t *cache, carbon_string_id_t id);

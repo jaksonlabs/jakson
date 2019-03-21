@@ -338,6 +338,8 @@ carbon_encoded_doc_array_push_##name(carbon_encoded_doc_t *doc, carbon_string_id
     return true;                                                                                                       \
 }
 
+#include <inttypes.h>
+
 #define DECLARE_CARBON_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(name, built_in_type, basic_type)                            \
 CARBON_EXPORT(bool)                                                                                                    \
 carbon_encoded_doc_array_push_##name##_decoded(carbon_encoded_doc_t *doc, const char *key,                             \

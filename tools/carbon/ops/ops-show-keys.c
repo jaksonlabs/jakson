@@ -207,8 +207,6 @@ static void visit_object_array_prop(carbon_archive_t *archive, path_stack_t path
 
 }
 
-
-
 static carbon_visitor_policy_e
 before_visit_object_array_object_property(carbon_archive_t *archive, path_stack_t path,
                                           carbon_object_id_t parent_id,

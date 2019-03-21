@@ -1,4 +1,5 @@
 #include <carbon/carbon-int-archive.h>
+#include <carbon/carbon-string-id-cache.h>
 #include "carbon/carbon.h"
 
 #include "modules.h"
@@ -7,6 +8,7 @@
 #include "ops/ops-show-keys.h"
 #include "ops/ops-count-values.h"
 #include "ops/ops-show-values.h"
+#include "ops/ops-get-citations.h"
 
 
 static int testFileExists(FILE *file, const char *fileName, size_t fileNum, size_t fileMax, bool requireExistence)
@@ -1844,14 +1846,15 @@ run_count_values( carbon_timestamp_t *duration, carbon_encoded_doc_collection_t 
 }
 
 static bool
-run_show_values( carbon_timestamp_t *duration, carbon_encoded_doc_collection_t *result, const char *path, carbon_archive_t *archive, uint32_t limit)
+run_show_values( carbon_timestamp_t *duration, carbon_encoded_doc_collection_t *result, const char *path, carbon_archive_t *archive, uint32_t offset, uint32_t limit, int32_t between_lower_bound,
+                 int32_t between_upper_bound, const char *contains_string)
 {
     carbon_vec_t ofType(ops_show_values_result_t) prop_keys;
     carbon_vec_create(&prop_keys, NULL, sizeof(ops_show_values_result_t), 100);
     carbon_object_id_t result_oid;
     carbon_object_id_create(&result_oid);
 
-    ops_show_values(duration, &prop_keys, path, archive, limit);
+    ops_show_values(duration, &prop_keys, path, archive, offset, limit, between_lower_bound, between_upper_bound, contains_string);
 
     carbon_encoded_doc_collection_create(result, &archive->err, archive);
 
@@ -1865,9 +1868,65 @@ run_show_values( carbon_timestamp_t *duration, carbon_encoded_doc_collection_t *
         carbon_encoded_doc_array_push_object_decoded(result_doc, "result", tmp_obj_id);
         carbon_encoded_doc_t *doc = encoded_doc_collection_get_or_append(result, tmp_obj_id);
         carbon_encoded_doc_add_prop_string_decoded(doc, "key", entry->key);
-        carbon_encoded_doc_add_prop_string_decoded_string_value_decoded(doc, "type", carbon_basic_type_to_system_type_str(entry->type));
+        carbon_encoded_doc_add_prop_string_decoded_string_value_decoded(doc, "type", carbon_basic_type_to_json_type_str(entry->type));
+
+
+        if (entry->type == CARBON_BASIC_TYPE_STRING) {
+            carbon_encoded_doc_add_prop_array_string_decoded(doc, "values");
+            carbon_encoded_doc_array_push_string_decoded(doc, "values",CARBON_VECTOR_ALL(&entry->values.string_values, carbon_string_id_t), entry->values.string_values.num_elems);
+            carbon_vec_drop(&entry->values.string_values);
+        } else if (entry->type == CARBON_BASIC_TYPE_INT8) {
+            carbon_encoded_doc_add_prop_array_int64_decoded(doc, "values");
+            carbon_encoded_doc_array_push_int64_decoded(doc, "values",CARBON_VECTOR_ALL(&entry->values.integer_values, carbon_int64_t), entry->values.integer_values.num_elems);
+            carbon_vec_drop(&entry->values.string_values);
+        } else if (entry->type == CARBON_BASIC_TYPE_INT16) {
+            carbon_encoded_doc_add_prop_array_int64_decoded(doc, "values");
+            carbon_encoded_doc_array_push_int64_decoded(doc, "values",CARBON_VECTOR_ALL(&entry->values.integer_values, carbon_int64_t), entry->values.integer_values.num_elems);
+            carbon_vec_drop(&entry->values.string_values);
+        }
     }
 
+
+    carbon_vec_drop(&prop_keys);
+    return true;
+}
+
+
+static bool
+run_get_citations( carbon_timestamp_t *duration, carbon_encoded_doc_collection_t *result, const char *paper_name, carbon_archive_t *archive)
+{
+    carbon_vec_t ofType(ops_get_citations_result_t) prop_keys;
+    carbon_vec_create(&prop_keys, NULL, sizeof(ops_get_citations_result_entry_t), 100);
+    carbon_object_id_t result_oid;
+    carbon_object_id_create(&result_oid);
+
+    ops_get_citations(duration, &prop_keys, paper_name, archive);
+
+    carbon_encoded_doc_collection_create(result, &archive->err, archive);
+
+    carbon_encoded_doc_t *result_doc = encoded_doc_collection_get_or_append(result, result_oid);
+    carbon_encoded_doc_add_prop_array_object_decoded(result_doc, "result");
+
+    for (uint32_t i = 0; i < prop_keys.num_elems; i++) {
+        ops_get_citations_result_t *result_entry = CARBON_VECTOR_GET(&prop_keys, i, ops_get_citations_result_t);
+        for (uint32_t x = 0; x < result_entry->papers.num_elems; x++) {
+            ops_get_citations_result_entry_t *entry = CARBON_VECTOR_GET(&result_entry->papers, x, ops_get_citations_result_entry_t);
+            carbon_object_id_t tmp_obj_id;
+            carbon_object_id_create(&tmp_obj_id);
+            carbon_encoded_doc_array_push_object_decoded(result_doc, "result", tmp_obj_id);
+            carbon_encoded_doc_t *doc = encoded_doc_collection_get_or_append(result, tmp_obj_id);
+            carbon_encoded_doc_add_prop_string_decoded(doc, "title", entry->paper_title);
+            carbon_encoded_doc_add_prop_string_decoded(doc, "id", entry->paper_id);
+            carbon_encoded_doc_add_prop_array_string_decoded(doc, "authors");
+
+            for (uint32_t k = 0; k < entry->authors.num_elems; k++) {
+                carbon_string_id_t author = *CARBON_VECTOR_GET(&entry->authors, k, carbon_string_id_t);
+                carbon_encoded_doc_array_push_string_decoded(doc, "authors", &author, 1);
+            }
+            carbon_vec_drop(&entry->authors);
+        }
+        carbon_vec_drop(&result_entry->papers);
+    }
 
     carbon_vec_drop(&prop_keys);
     return true;
@@ -1879,11 +1938,48 @@ process_from(carbon_archive_t *archive, const char *line)
     carbon_timestamp_t duration = 0;
     char *select = strstr(line, "select");
     char *show_keys = strstr(line, "show keys");
-    if (select)
+    char *linecpy = strdup(line);
+    char *cites = strstr(line, "use /references) use /title, /id/, /authors");
+    if (cites) {
+        char *name = strstr(line, "\"") + 1;
+        *strstr(name, "\"") = '\0';
+
+        carbon_encoded_doc_collection_t result;
+        carbon_timestamp_t duration;
+        run_get_citations(&duration, &result, name, archive);
+        carbon_encoded_doc_collection_print(stdout, &result);
+        carbon_encoded_doc_collection_drop(&result);
+        printf("\n");
+        printf("execution time: %" PRIu64"ms\n", duration);
+
+    } else if (select)
     {
         char *path = strdup(line + 1);
-        path[select - line - 2] = '\0';
-        char *command = strdup(line + 1 + strlen(path) + 2 + strlen("select"));
+        char *contains_string = NULL;
+        char *lower_str, *upper_str;
+        int32_t between_lower_bound = INT32_MIN;
+        int32_t between_upper_bound = INT32_MAX;
+
+        if (strstr(path, "contains ")) {
+            path[strstr(path, " ") - path] = '\0';
+            contains_string = strdup(path + strlen(path) + 1 + strlen("contains ") + 1);
+            contains_string[strlen(contains_string) - strlen("select") - 4] = '\0';
+        } else  if (strstr(path, "between ") && strstr(path, " and ")) {
+            path[strstr(path, " ") - path] = '\0';
+            lower_str = strdup(path + strlen(path) + 1 + strlen("between "));
+            upper_str = strstr(lower_str, " and ") + strlen(" and ");
+            *strstr(lower_str, " and ") = '\0';
+            *strstr(upper_str, " select") = '\0';
+            between_lower_bound = atoi(lower_str);
+            between_upper_bound = atoi(upper_str);
+        } else {
+            path[select - line - 2] = '\0';
+        }
+
+        char *command = strstr(line, "select") + strlen("select") + 1;
+
+
+
 
         if (strcmp(command, "count(*)") == 0) {
             carbon_encoded_doc_collection_t result;
@@ -1914,19 +2010,17 @@ process_from(carbon_archive_t *archive, const char *line)
                     }
                 }
 
-                if (strstr(select, "limit ") != 0) {
-                    char *limit = strstr(select, "limit ") + strlen("limit ");
+
+                if (strstr(linecpy, "limit ") != 0) {
+                    char *limit = strstr(linecpy, "limit ") + strlen("limit ");
                     limit_count = atoi(limit);
                 }
 
             }
 
-            printf("offset_count %d\n", offset_count);
-            printf("limit %d\n", limit_count);
-
             carbon_encoded_doc_collection_t result;
 
-            run_show_values(&duration, &result, path, archive, (uint32_t) limit_count);
+            run_show_values(&duration, &result, path, archive, (uint32_t) offset_count, (uint32_t) limit_count, between_lower_bound, between_upper_bound, contains_string);
             carbon_encoded_doc_collection_print(stdout, &result);
             carbon_encoded_doc_collection_drop(&result);
 leave:
@@ -1938,8 +2032,8 @@ leave:
 
 
 
-        free(path);
-        free(command);
+       //free(path);
+        // free(command);
 
     } else if (show_keys)
     {
@@ -1980,20 +2074,57 @@ process_command(carbon_archive_t *archive)
             process_from(archive, line + strlen("from"));
         } else if (strcmp(line, ".help") == 0) {
             printf("\nUse one of the following statements:\n"
-                       "\tfrom /<path> show keys\t\t\t\t\tto show keys of object(s) behind <path>\n"
-                       "\tfrom /<path>/<key> select count(*)\t\tto count values for objects in <path> having key <key> ");
+                       "\tfrom /<path> show keys\t\t\t\t\t\t\t\tto show keys of object(s) behind <path>\n"
+                       "\tfrom /<path>/<key> select count(*)\t\t\t\t\tto count values for objects in <path> having key <key>\n"
+                       "\tfrom /<path>/<key> [between <a> and <b> | contains <substring>] select * [offset <m>] [limit <n>]\tto get values for objects in <path> having key <key>");
             printf("\n\n");
-            printf("Type .examples for examples and .exit to leave this shell.");
+            printf("Type .examples for examples and .exit to leave this shell. Use .drop-cache to remove the string cache, .cache-size to get its size, and .create-cache <size>.");
             printf("\n\n");
         } else if (strcmp(line, ".examples") == 0) {
             printf("from / show keys\n"
                    "from /authors show keys\n"
                    "from /title select count(*)\n"
-                   "from /authors/name select count(*)\n\n");
+                   "from /authors/name select count(*)\n"
+                   "from /n_citation select *\n"
+                   "from /title select * offset 5 limit 10\n"
+                   "from /authors/org select * limit 50\n"
+                   "from /n_citation between 60 and 100 select *\n"
+                   "from /title contains \"attack\" select *\n"
+               //    "from /ids in (from /title equals \"<name>\" use /references) use /title, /id/, /authors\n"
+               //        "XXXXXX\n\n"
+                    );
 
         } else if (strcmp(line, ".exit") == 0) {
             fprintf(stdout, "%s", "bye");
             return false;
+        } else if (strcmp(line, ".drop-cache") == 0) {
+            carbon_string_id_cache_t *cache = carbon_archive_get_query_string_id_cache(archive);
+            if (cache) {
+                carbon_archive_drop_query_string_id_cache(archive);
+                printf("cache dropped.\n");
+            } else {
+                fprintf(stderr, "no cache installed.\n");
+            }
+
+        } else if (strstr(line, ".create-cache ") != 0) {
+            int new_cache_size = atoi(line + strlen(".create-cache "));
+            carbon_string_id_cache_t *cache = carbon_archive_get_query_string_id_cache(archive);
+            if (!cache) {
+                carbon_string_id_cache_create_LRU_ex(&archive->string_id_cache, archive, new_cache_size);
+                printf("cache created.\n");
+            } else {
+                fprintf(stderr, "cache already installed, drop it first.\n");
+            }
+
+        } else if (strcmp(line, ".cache-size") == 0) {
+            carbon_string_id_cache_t *cache = carbon_archive_get_query_string_id_cache(archive);
+            if (cache) {
+                size_t cache_size;
+                carbon_string_id_cache_get_size(&cache_size, cache);
+                printf("%zu\n", cache_size);
+            } else {
+                printf("0\n");
+            }
         } else {
             fprintf(stdout, "no such command: %s\n", line);
         }
@@ -2004,6 +2135,72 @@ process_command(carbon_archive_t *archive)
 
     }
     return true;
+}
+
+static void*
+cache_monitor(void * data)
+{
+    carbon_archive_t *archive = data;
+    carbon_string_id_cache_statistics_t statistics;
+
+    FILE *stats_file = fopen("carbon-temp-statistics--cache-monitor.csv", "w");
+
+
+    if (stats_file) {
+        fprintf(stats_file, "timestamp;type;value\n");
+
+        float last_hit = 0;
+        float last_miss = 0;
+        float last_evict = 0;
+
+        while (true) {
+            carbon_string_id_cache_t *cache = carbon_archive_get_query_string_id_cache(archive);
+
+
+            carbon_timestamp_t now = carbon_time_now_wallclock();
+
+            fprintf(stats_file,
+                    "%zu;\"hits\";%.4f\n",
+                    (size_t) now,
+                    last_hit);
+            fprintf(stats_file,
+                    "%zu;\"misses\";%.4f\n",
+                    (size_t) now,
+                    last_miss);
+            fprintf(stats_file,
+                    "%zu;\"evicted\";%.4f\n",
+                    (size_t) now,
+                    last_evict);
+            fflush(stats_file);
+
+            if (cache) {
+
+                carbon_string_id_cache_get_statistics(&statistics, cache);
+
+
+                size_t total = statistics.num_hits + statistics.num_misses;
+
+
+                last_hit = total == 0 ? last_hit : statistics.num_hits / (float) total * 100;
+                last_miss =  total == 0 ? last_miss : statistics.num_misses / (float) total * 100;
+                last_evict = total == 0 ? last_evict: statistics.num_evicted / (float) total * 100;
+
+                carbon_string_id_cache_reset_statistics(cache);
+
+
+            } else {
+                last_hit = 0;
+                last_miss = 0;
+                last_evict = 0;
+            }
+
+            sleep(1);
+
+
+        }
+    }
+
+    return NULL;
 }
 
 bool moduleCliInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *manager)
@@ -2047,6 +2244,9 @@ bool moduleCliInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *man
 
 
             printf("Type '.help' for usage instructions.\n\n");
+
+            pthread_t cache_strat_worker;
+            pthread_create(&cache_strat_worker, NULL, cache_monitor, &archive);
 
             while (process_command(&archive))
             { };

@@ -41,6 +41,7 @@ typedef struct carbon_string_id_cache
     carbon_string_id_cache_statistics_t statistics;
     carbon_query_t query;
     carbon_err_t err;
+    size_t capacity;
 } carbon_string_id_cache_t;
 
 static void
@@ -59,20 +60,26 @@ init_list(lru_list_t *list)
 CARBON_EXPORT(bool)
 carbon_string_id_cache_create_LRU(carbon_string_id_cache_t **cache, carbon_archive_t *archive)
 {
+    carbon_archive_info_t archive_info;
+    carbon_archive_get_info(&archive_info, archive);
+    uint32_t capacity = archive_info.num_embeddded_strings * 0.25f;
+    return carbon_string_id_cache_create_LRU_ex(cache, archive, capacity);
+}
+
+CARBON_EXPORT(bool)
+carbon_string_id_cache_create_LRU_ex(carbon_string_id_cache_t **cache, carbon_archive_t *archive, size_t capacity)
+{
     CARBON_NON_NULL_OR_ERROR(cache)
     CARBON_NON_NULL_OR_ERROR(archive)
 
     carbon_string_id_cache_t *result = malloc(sizeof(carbon_string_id_cache_t));
 
-    uint32_t              capacity;
-    carbon_archive_info_t archive_info;
     carbon_query_create(&result->query, archive);
-    carbon_archive_get_info(&archive_info, archive);
-    capacity = archive_info.num_embeddded_strings;
+    result->capacity = capacity;
 
 
 
-    size_t num_buckets = CARBON_MAX(1, capacity / sizeof(lru_list_t));
+    size_t num_buckets = CARBON_MAX(1, capacity);
     carbon_vec_create(&result->list_entries, NULL, sizeof(lru_list_t), num_buckets);
     for (size_t i = 0; i < num_buckets; i++) {
         lru_list_t *list = VECTOR_NEW_AND_GET(&result->list_entries, lru_list_t);
@@ -93,6 +100,15 @@ carbon_string_id_cache_get_error(carbon_err_t *err, const carbon_string_id_cache
     CARBON_NON_NULL_OR_ERROR(err)
     CARBON_NON_NULL_OR_ERROR(cache)
     *err = cache->err;
+    return true;
+}
+
+CARBON_EXPORT(bool)
+carbon_string_id_cache_get_size(size_t *size, const carbon_string_id_cache_t *cache)
+{
+    CARBON_NON_NULL_OR_ERROR(size)
+    CARBON_NON_NULL_OR_ERROR(cache)
+    *size = cache->capacity;
     return true;
 }
 
