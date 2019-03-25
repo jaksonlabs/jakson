@@ -1,4 +1,4 @@
-## 0.2.00.01 [2019-XX-XX]
+## 0.2.00.01 [2019-03-25]
 - To avoid re-creation of the index used for *Indexed String Fetch* when a archive is loaded into memory, 
   this index can now be pre-computed an embedded into the archive file itself (which is now the default behavior). 
   For this, the index is built after archive creation and appended at the end of the archive (if not turned-off). 
