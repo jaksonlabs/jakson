@@ -227,7 +227,7 @@ if (!global_trace_stats.malloc_sizes) {                                         
 
 #define WRITE_STATS_FILE()                                                                                             \
 {                                                                                                                      \
-    fprintf(global_trace_stats.statistics_file, "%lld;%zu;%zu;%zu;%zu\n",                                              \
+    fprintf(global_trace_stats.statistics_file, "%" PRIu64 ";%zu;%zu;%zu;%zu\n",                                       \
             carbon_time_now_wallclock() - global_trace_stats.startup_timestamp,                                        \
             global_trace_stats.num_malloc_calls,                                                                       \
             global_trace_stats.num_realloc_calls,                                                                      \
