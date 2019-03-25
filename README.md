@@ -22,7 +22,7 @@ tool to work on CARBON files, see [carbon-tool](tools/carbon/).
 ## License
 
 This project is licensed under the terms of the MIT license, see 
-[LICENSE.md](https://github.com/protolabs/libcarbon/blob/master/LICENSE).
+[LICENSE.md](https://github.com/protolabs/libcarbon/blob/master/LICENSE). If [libcarbon](https://github.com/protolabs/libcarbon) is used in an academic context or part of research in general, see additional [agreements for academic](FOR-RESEARCHERS.md). 
 
 
 ## Support
