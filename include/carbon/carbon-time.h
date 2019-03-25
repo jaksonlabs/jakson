@@ -22,7 +22,7 @@
 
 CARBON_BEGIN_DECL
 
-typedef long long carbon_timestamp_t;
+typedef uint64_t carbon_timestamp_t;
 
 CARBON_EXPORT(carbon_timestamp_t)
 carbon_time_now_wallclock();
