@@ -15,6 +15,7 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include <inttypes.h>
 #include "carbon/carbon-vector.h"
 
 #include "carbon/alloc/carbon-alloc_tracer.h"
