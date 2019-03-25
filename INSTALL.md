@@ -6,7 +6,7 @@ cmake . &&
 make  &&
 make tests  &&
 make test  &&
-make install
+sudo make install
 ```
 After installation, link against `libcarbon` and use
  
