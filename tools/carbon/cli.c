@@ -384,7 +384,7 @@ visit_int8_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_obje
 }
 
 static void
-visit_leave_int8_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_leave_int8_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                                         uint32_t pair_idx, uint32_t num_pairs, void *capture)
 {
     CARBON_UNUSED(archive);
@@ -398,7 +398,7 @@ visit_leave_int8_array_pair(carbon_archive_t *archive, path_stack_t path, carbon
 }
 
 static void
-visit_leave_int8_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_leave_int8_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                                          void *capture)
 {
     CARBON_UNUSED(archive);
@@ -412,7 +412,7 @@ visit_leave_int8_array_pairs(carbon_archive_t *archive, path_stack_t path, carbo
 
 
 static carbon_visitor_policy_e
-visit_enter_int16_array_pairs(carbon_archive_t *archive, path_stack_t path,
+CARBON_FUNC_UNUSED visit_enter_int16_array_pairs(carbon_archive_t *archive, path_stack_t path,
                               carbon_object_id_t id, const carbon_string_id_t *keys,
                               uint32_t num_pairs, void *capture)
 {
@@ -429,7 +429,7 @@ visit_enter_int16_array_pairs(carbon_archive_t *archive, path_stack_t path,
 }
 
 static void
-visit_enter_int16_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_enter_int16_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                              carbon_string_id_t key, uint32_t entry_idx, uint32_t num_elems,
                              void *capture)
 {
@@ -445,7 +445,7 @@ visit_enter_int16_array_pair(carbon_archive_t *archive, path_stack_t path, carbo
 }
 
 static void
-visit_int16_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_int16_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                         carbon_string_id_t key, uint32_t entry_idx, uint32_t max_entries,
                         const carbon_int16_t *array, uint32_t array_length, void *capture)
 {
@@ -463,7 +463,7 @@ visit_int16_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_obj
 }
 
 static void
-visit_leave_int16_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_leave_int16_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                              uint32_t pair_idx, uint32_t num_pairs, void *capture)
 {
     CARBON_UNUSED(archive);
@@ -477,7 +477,7 @@ visit_leave_int16_array_pair(carbon_archive_t *archive, path_stack_t path, carbo
 }
 
 static void
-visit_leave_int16_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_leave_int16_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                               void *capture)
 {
     CARBON_UNUSED(archive);
@@ -491,7 +491,7 @@ visit_leave_int16_array_pairs(carbon_archive_t *archive, path_stack_t path, carb
 
 
 static carbon_visitor_policy_e
-visit_enter_int32_array_pairs(carbon_archive_t *archive, path_stack_t path,
+CARBON_FUNC_UNUSED visit_enter_int32_array_pairs(carbon_archive_t *archive, path_stack_t path,
                               carbon_object_id_t id, const carbon_string_id_t *keys,
                               uint32_t num_pairs, void *capture)
 {
@@ -508,7 +508,7 @@ visit_enter_int32_array_pairs(carbon_archive_t *archive, path_stack_t path,
 }
 
 static void
-visit_enter_int32_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_enter_int32_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                              carbon_string_id_t key, uint32_t entry_idx, uint32_t num_elems,
                              void *capture)
 {
@@ -524,7 +524,7 @@ visit_enter_int32_array_pair(carbon_archive_t *archive, path_stack_t path, carbo
 }
 
 static void
-visit_int32_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_int32_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                         carbon_string_id_t key, uint32_t entry_idx, uint32_t max_entries,
                         const carbon_int32_t *array, uint32_t array_length, void *capture)
 {
@@ -542,7 +542,7 @@ visit_int32_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_obj
 }
 
 static void
-visit_leave_int32_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_leave_int32_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                              uint32_t pair_idx, uint32_t num_pairs, void *capture)
 {
     CARBON_UNUSED(archive);
@@ -556,7 +556,7 @@ visit_leave_int32_array_pair(carbon_archive_t *archive, path_stack_t path, carbo
 }
 
 static void
-visit_leave_int32_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_leave_int32_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                               void *capture)
 {
     CARBON_UNUSED(archive);
@@ -570,7 +570,7 @@ visit_leave_int32_array_pairs(carbon_archive_t *archive, path_stack_t path, carb
 
 
 static carbon_visitor_policy_e
-visit_enter_int64_array_pairs(carbon_archive_t *archive, path_stack_t path,
+CARBON_FUNC_UNUSED visit_enter_int64_array_pairs(carbon_archive_t *archive, path_stack_t path,
                               carbon_object_id_t id, const carbon_string_id_t *keys,
                               uint32_t num_pairs, void *capture)
 {
@@ -587,7 +587,7 @@ visit_enter_int64_array_pairs(carbon_archive_t *archive, path_stack_t path,
 }
 
 static void
-visit_enter_int64_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_enter_int64_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                              carbon_string_id_t key, uint32_t entry_idx, uint32_t num_elems,
                              void *capture)
 {
@@ -604,7 +604,7 @@ visit_enter_int64_array_pair(carbon_archive_t *archive, path_stack_t path, carbo
 }
 
 static void
-visit_int64_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_int64_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                         carbon_string_id_t key, uint32_t entry_idx, uint32_t max_entries,
                         const carbon_int64_t *array, uint32_t array_length, void *capture)
 {
@@ -622,7 +622,7 @@ visit_int64_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_obj
 }
 
 static void
-visit_leave_int64_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_leave_int64_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                              uint32_t pair_idx, uint32_t num_pairs, void *capture)
 {
     CARBON_UNUSED(archive);
@@ -637,7 +637,7 @@ visit_leave_int64_array_pair(carbon_archive_t *archive, path_stack_t path, carbo
 }
 
 static void
-visit_leave_int64_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_leave_int64_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                               void *capture)
 {
     CARBON_UNUSED(archive);
@@ -651,7 +651,7 @@ visit_leave_int64_array_pairs(carbon_archive_t *archive, path_stack_t path, carb
 
 
 static carbon_visitor_policy_e
-visit_enter_uint8_array_pairs(carbon_archive_t *archive, path_stack_t path,
+CARBON_FUNC_UNUSED visit_enter_uint8_array_pairs(carbon_archive_t *archive, path_stack_t path,
                               carbon_object_id_t id, const carbon_string_id_t *keys,
                               uint32_t num_pairs, void *capture)
 {
@@ -668,7 +668,7 @@ visit_enter_uint8_array_pairs(carbon_archive_t *archive, path_stack_t path,
 }
 
 static void
-visit_enter_uint8_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_enter_uint8_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                              carbon_string_id_t key, uint32_t entry_idx, uint32_t num_elems,
                              void *capture)
 {
@@ -685,7 +685,7 @@ visit_enter_uint8_array_pair(carbon_archive_t *archive, path_stack_t path, carbo
 }
 
 static void
-visit_uint8_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_uint8_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                         carbon_string_id_t key, uint32_t entry_idx, uint32_t max_entries,
                         const carbon_uint8_t *array, uint32_t array_length, void *capture)
 {
@@ -704,7 +704,7 @@ visit_uint8_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_obj
 }
 
 static void
-visit_leave_uint8_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_leave_uint8_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                              uint32_t pair_idx, uint32_t num_pairs, void *capture)
 {
     CARBON_UNUSED(archive);
@@ -718,7 +718,7 @@ visit_leave_uint8_array_pair(carbon_archive_t *archive, path_stack_t path, carbo
 }
 
 static void
-visit_leave_uint8_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_leave_uint8_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                               void *capture)
 {
     CARBON_UNUSED(archive);
@@ -732,7 +732,7 @@ visit_leave_uint8_array_pairs(carbon_archive_t *archive, path_stack_t path, carb
 
 
 static carbon_visitor_policy_e
-visit_enter_uint16_array_pairs(carbon_archive_t *archive, path_stack_t path,
+CARBON_FUNC_UNUSED visit_enter_uint16_array_pairs(carbon_archive_t *archive, path_stack_t path,
                                carbon_object_id_t id, const carbon_string_id_t *keys,
                                uint32_t num_pairs, void *capture)
 {
@@ -749,7 +749,7 @@ visit_enter_uint16_array_pairs(carbon_archive_t *archive, path_stack_t path,
 }
 
 static void
-visit_enter_uint16_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_enter_uint16_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                               carbon_string_id_t key, uint32_t entry_idx, uint32_t num_elems,
                               void *capture)
 {
@@ -765,7 +765,7 @@ visit_enter_uint16_array_pair(carbon_archive_t *archive, path_stack_t path, carb
 }
 
 static void
-visit_uint16_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_uint16_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                          carbon_string_id_t key, uint32_t entry_idx, uint32_t max_entries,
                          const carbon_uint16_t *array, uint32_t array_length, void *capture)
 {
@@ -784,7 +784,7 @@ visit_uint16_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_ob
 }
 
 static void
-visit_leave_uint16_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_leave_uint16_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                               uint32_t pair_idx, uint32_t num_pairs, void *capture)
 {
     CARBON_UNUSED(archive);
@@ -798,7 +798,7 @@ visit_leave_uint16_array_pair(carbon_archive_t *archive, path_stack_t path, carb
 }
 
 static void
-visit_leave_uint16_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_leave_uint16_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                                void *capture)
 {
     CARBON_UNUSED(archive);
@@ -812,7 +812,7 @@ visit_leave_uint16_array_pairs(carbon_archive_t *archive, path_stack_t path, car
 
 
 static carbon_visitor_policy_e
-visit_enter_uint32_array_pairs(carbon_archive_t *archive, path_stack_t path,
+CARBON_FUNC_UNUSED visit_enter_uint32_array_pairs(carbon_archive_t *archive, path_stack_t path,
                                carbon_object_id_t id, const carbon_string_id_t *keys,
                                uint32_t num_pairs, void *capture)
 {
@@ -829,7 +829,7 @@ visit_enter_uint32_array_pairs(carbon_archive_t *archive, path_stack_t path,
 }
 
 static void
-visit_enter_uint32_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_enter_uint32_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                               carbon_string_id_t key, uint32_t entry_idx, uint32_t num_elems,
                               void *capture)
 {
@@ -845,7 +845,7 @@ visit_enter_uint32_array_pair(carbon_archive_t *archive, path_stack_t path, carb
 }
 
 static void
-visit_uint32_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_uint32_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                          carbon_string_id_t key, uint32_t entry_idx, uint32_t max_entries,
                          const carbon_uint32_t *array, uint32_t array_length, void *capture)
 {
@@ -863,7 +863,7 @@ visit_uint32_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_ob
 }
 
 static void
-visit_leave_uint32_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_leave_uint32_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                               uint32_t pair_idx, uint32_t num_pairs, void *capture)
 {
     CARBON_UNUSED(archive);
@@ -877,7 +877,7 @@ visit_leave_uint32_array_pair(carbon_archive_t *archive, path_stack_t path, carb
 }
 
 static void
-visit_leave_uint32_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_leave_uint32_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                                void *capture)
 {
     CARBON_UNUSED(archive);
@@ -891,7 +891,7 @@ visit_leave_uint32_array_pairs(carbon_archive_t *archive, path_stack_t path, car
 
 
 static carbon_visitor_policy_e
-visit_enter_uint64_array_pairs(carbon_archive_t *archive, path_stack_t path,
+CARBON_FUNC_UNUSED visit_enter_uint64_array_pairs(carbon_archive_t *archive, path_stack_t path,
                                carbon_object_id_t id, const carbon_string_id_t *keys,
                                uint32_t num_pairs, void *capture)
 {
@@ -908,7 +908,7 @@ visit_enter_uint64_array_pairs(carbon_archive_t *archive, path_stack_t path,
 }
 
 static void
-visit_enter_uint64_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_enter_uint64_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                               carbon_string_id_t key, uint32_t entry_idx, uint32_t num_elems,
                               void *capture)
 {
@@ -925,7 +925,7 @@ visit_enter_uint64_array_pair(carbon_archive_t *archive, path_stack_t path, carb
 }
 
 static void
-visit_uint64_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_uint64_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                          carbon_string_id_t key, uint32_t entry_idx, uint32_t max_entries,
                          const carbon_uint64_t *array, uint32_t array_length, void *capture)
 {
@@ -943,7 +943,7 @@ visit_uint64_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_ob
 }
 
 static void
-visit_leave_uint64_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_leave_uint64_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                               uint32_t pair_idx, uint32_t num_pairs, void *capture)
 {
     CARBON_UNUSED(archive);
@@ -957,7 +957,7 @@ visit_leave_uint64_array_pair(carbon_archive_t *archive, path_stack_t path, carb
 }
 
 static void
-visit_leave_uint64_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_leave_uint64_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                                void *capture)
 {
     CARBON_UNUSED(archive);
@@ -971,7 +971,7 @@ visit_leave_uint64_array_pairs(carbon_archive_t *archive, path_stack_t path, car
 
 
 static carbon_visitor_policy_e
-visit_enter_number_array_pairs(carbon_archive_t *archive, path_stack_t path,
+CARBON_FUNC_UNUSED visit_enter_number_array_pairs(carbon_archive_t *archive, path_stack_t path,
                                carbon_object_id_t id, const carbon_string_id_t *keys,
                                uint32_t num_pairs, void *capture)
 {
@@ -988,7 +988,7 @@ visit_enter_number_array_pairs(carbon_archive_t *archive, path_stack_t path,
 }
 
 static void
-visit_enter_number_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_enter_number_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                               carbon_string_id_t key, uint32_t entry_idx, uint32_t num_elems,
                               void *capture)
 {
@@ -1005,7 +1005,7 @@ visit_enter_number_array_pair(carbon_archive_t *archive, path_stack_t path, carb
 }
 
 static void
-visit_number_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_number_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                          carbon_string_id_t key, uint32_t entry_idx, uint32_t max_entries,
                          const carbon_number_t *array, uint32_t array_length, void *capture)
 {
@@ -1024,7 +1024,7 @@ visit_number_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_ob
 }
 
 static void
-visit_leave_number_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_leave_number_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                               uint32_t pair_idx, uint32_t num_pairs, void *capture)
 {
     CARBON_UNUSED(archive);
@@ -1039,7 +1039,7 @@ visit_leave_number_array_pair(carbon_archive_t *archive, path_stack_t path, carb
 }
 
 static void
-visit_leave_number_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_leave_number_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                                void *capture)
 {
     CARBON_UNUSED(archive);
@@ -1054,7 +1054,7 @@ visit_leave_number_array_pairs(carbon_archive_t *archive, path_stack_t path, car
 
 
 static carbon_visitor_policy_e
-visit_enter_string_array_pairs(carbon_archive_t *archive, path_stack_t path,
+CARBON_FUNC_UNUSED visit_enter_string_array_pairs(carbon_archive_t *archive, path_stack_t path,
                                carbon_object_id_t id, const carbon_string_id_t *keys,
                                uint32_t num_pairs, void *capture)
 {
@@ -1071,7 +1071,7 @@ visit_enter_string_array_pairs(carbon_archive_t *archive, path_stack_t path,
 }
 
 static void
-visit_enter_string_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_enter_string_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                               carbon_string_id_t key, uint32_t entry_idx, uint32_t num_elems,
                               void *capture)
 {
@@ -1087,7 +1087,7 @@ visit_enter_string_array_pair(carbon_archive_t *archive, path_stack_t path, carb
 }
 
 static void
-visit_string_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_string_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                          carbon_string_id_t key, uint32_t entry_idx, uint32_t max_entries,
                          const carbon_string_id_t *array, uint32_t array_length, void *capture)
 {
@@ -1106,7 +1106,7 @@ visit_string_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_ob
 }
 
 static void
-visit_leave_string_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_leave_string_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                               uint32_t pair_idx, uint32_t num_pairs, void *capture)
 {
     CARBON_UNUSED(archive);
@@ -1121,7 +1121,7 @@ visit_leave_string_array_pair(carbon_archive_t *archive, path_stack_t path, carb
 }
 
 static void
-visit_leave_string_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_leave_string_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                                void *capture)
 {
     CARBON_UNUSED(archive);
@@ -1136,7 +1136,7 @@ visit_leave_string_array_pairs(carbon_archive_t *archive, path_stack_t path, car
 
 
 static carbon_visitor_policy_e
-visit_enter_boolean_array_pairs(carbon_archive_t *archive, path_stack_t path,
+CARBON_FUNC_UNUSED visit_enter_boolean_array_pairs(carbon_archive_t *archive, path_stack_t path,
                                 carbon_object_id_t id, const carbon_string_id_t *keys,
                                 uint32_t num_pairs, void *capture)
 {
@@ -1154,7 +1154,7 @@ visit_enter_boolean_array_pairs(carbon_archive_t *archive, path_stack_t path,
 }
 
 static void
-visit_enter_boolean_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_enter_boolean_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                                carbon_string_id_t key, uint32_t entry_idx, uint32_t num_elems,
                                void *capture)
 {
@@ -1172,7 +1172,7 @@ visit_enter_boolean_array_pair(carbon_archive_t *archive, path_stack_t path, car
 }
 
 static void
-visit_boolean_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_boolean_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                           carbon_string_id_t key, uint32_t entry_idx, uint32_t max_entries,
                           const carbon_boolean_t *array, uint32_t array_length, void *capture)
 {
@@ -1193,7 +1193,7 @@ visit_boolean_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_o
 }
 
 static void
-visit_leave_boolean_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_leave_boolean_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                                uint32_t pair_idx, uint32_t num_pairs, void *capture)
 {
     CARBON_UNUSED(archive);
@@ -1209,7 +1209,7 @@ visit_leave_boolean_array_pair(carbon_archive_t *archive, path_stack_t path, car
 }
 
 static void
-visit_leave_boolean_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_leave_boolean_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                                 void *capture)
 {
     CARBON_UNUSED(archive);
@@ -1222,7 +1222,7 @@ visit_leave_boolean_array_pairs(carbon_archive_t *archive, path_stack_t path, ca
 }
 
 static carbon_visitor_policy_e
-visit_enter_null_array_pairs(carbon_archive_t *archive, path_stack_t path,
+CARBON_FUNC_UNUSED visit_enter_null_array_pairs(carbon_archive_t *archive, path_stack_t path,
                                                         carbon_object_id_t id,
                                                         const carbon_string_id_t *keys, uint32_t num_pairs,
                                                         void *capture)
@@ -1241,7 +1241,7 @@ visit_enter_null_array_pairs(carbon_archive_t *archive, path_stack_t path,
 }
 
 static void
-visit_enter_null_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_enter_null_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                                     carbon_string_id_t key, uint32_t entry_idx, uint32_t num_elems, void *capture)
 {
     CARBON_UNUSED(archive);
@@ -1257,7 +1257,7 @@ visit_enter_null_array_pair(carbon_archive_t *archive, path_stack_t path, carbon
 }
 
 static void
-visit_null_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_null_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                                carbon_string_id_t key, uint32_t entry_idx, uint32_t max_entries,
                                carbon_uint32_t num_nulls, void *capture)
 {
@@ -1276,7 +1276,7 @@ visit_null_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_obje
 }
 
 static void
-visit_leave_null_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_leave_null_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                                     uint32_t pair_idx, uint32_t num_pairs, void *capture)
 {
     CARBON_UNUSED(archive);
@@ -1293,7 +1293,7 @@ visit_leave_null_array_pair(carbon_archive_t *archive, path_stack_t path, carbon
 }
 
 static void
-visit_leave_null_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+CARBON_FUNC_UNUSED visit_leave_null_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                                      void *capture)
 {
     CARBON_UNUSED(archive);
@@ -1306,7 +1306,7 @@ visit_leave_null_array_pairs(carbon_archive_t *archive, path_stack_t path, carbo
 }
 
 static carbon_visitor_policy_e
-before_visit_object_array(carbon_archive_t *archive, path_stack_t path,
+CARBON_FUNC_UNUSED before_visit_object_array(carbon_archive_t *archive, path_stack_t path,
                                                      carbon_object_id_t parent_id, carbon_string_id_t key,
                                                      void *capture)
 {
@@ -1323,7 +1323,7 @@ before_visit_object_array(carbon_archive_t *archive, path_stack_t path,
 }
 
 static void
-before_visit_object_array_objects(bool *skip_group_object_ids,
+CARBON_FUNC_UNUSED before_visit_object_array_objects(bool *skip_group_object_ids,
                                           carbon_archive_t *archive, path_stack_t path,
                                           carbon_object_id_t parent_id,
                                           carbon_string_id_t key,
@@ -1344,7 +1344,7 @@ before_visit_object_array_objects(bool *skip_group_object_ids,
 }
 
 static carbon_visitor_policy_e
-before_visit_object_array_object_property(carbon_archive_t *archive, path_stack_t path,
+CARBON_FUNC_UNUSED before_visit_object_array_object_property(carbon_archive_t *archive, path_stack_t path,
                                                                      carbon_object_id_t parent_id,
                                                                      carbon_string_id_t key,
                                                                      carbon_string_id_t nested_key,
@@ -1365,7 +1365,7 @@ before_visit_object_array_object_property(carbon_archive_t *archive, path_stack_
 }
 
 static void
-visit_object_array_object_property_int8(carbon_archive_t *archive, path_stack_t path,
+CARBON_FUNC_UNUSED visit_object_array_object_property_int8(carbon_archive_t *archive, path_stack_t path,
                                                carbon_object_id_t parent_id,
                                                carbon_string_id_t key,
                                                carbon_object_id_t nested_object_id,
@@ -1388,7 +1388,7 @@ visit_object_array_object_property_int8(carbon_archive_t *archive, path_stack_t 
 }
 
 static void
-visit_object_array_object_property_int16(carbon_archive_t *archive, path_stack_t path,
+CARBON_FUNC_UNUSED visit_object_array_object_property_int16(carbon_archive_t *archive, path_stack_t path,
                                         carbon_object_id_t parent_id,
                                         carbon_string_id_t key,
                                         carbon_object_id_t nested_object_id,
@@ -1411,7 +1411,7 @@ visit_object_array_object_property_int16(carbon_archive_t *archive, path_stack_t
 }
 
 static void
-visit_object_array_object_property_int32(carbon_archive_t *archive, path_stack_t path,
+CARBON_FUNC_UNUSED visit_object_array_object_property_int32(carbon_archive_t *archive, path_stack_t path,
                                          carbon_object_id_t parent_id,
                                          carbon_string_id_t key,
                                          carbon_object_id_t nested_object_id,
@@ -1435,7 +1435,7 @@ visit_object_array_object_property_int32(carbon_archive_t *archive, path_stack_t
 
 
 static void
-visit_object_array_object_property_int64(carbon_archive_t *archive, path_stack_t path,
+CARBON_FUNC_UNUSED visit_object_array_object_property_int64(carbon_archive_t *archive, path_stack_t path,
                                          carbon_object_id_t parent_id,
                                          carbon_string_id_t key,
                                          carbon_object_id_t nested_object_id,
@@ -1460,7 +1460,7 @@ visit_object_array_object_property_int64(carbon_archive_t *archive, path_stack_t
 
 
 static void
-visit_object_array_object_property_uint8(carbon_archive_t *archive, path_stack_t path,
+CARBON_FUNC_UNUSED visit_object_array_object_property_uint8(carbon_archive_t *archive, path_stack_t path,
                                          carbon_object_id_t parent_id,
                                          carbon_string_id_t key,
                                          carbon_object_id_t nested_object_id,
@@ -1484,7 +1484,7 @@ visit_object_array_object_property_uint8(carbon_archive_t *archive, path_stack_t
 
 
 static void
-visit_object_array_object_property_uint16(carbon_archive_t *archive, path_stack_t path,
+CARBON_FUNC_UNUSED visit_object_array_object_property_uint16(carbon_archive_t *archive, path_stack_t path,
                                         carbon_object_id_t parent_id,
                                         carbon_string_id_t key,
                                         carbon_object_id_t nested_object_id,
@@ -1508,7 +1508,7 @@ visit_object_array_object_property_uint16(carbon_archive_t *archive, path_stack_
 
 
 static void
-visit_object_array_object_property_uint32(carbon_archive_t *archive, path_stack_t path,
+CARBON_FUNC_UNUSED visit_object_array_object_property_uint32(carbon_archive_t *archive, path_stack_t path,
                                          carbon_object_id_t parent_id,
                                          carbon_string_id_t key,
                                          carbon_object_id_t nested_object_id,
@@ -1531,7 +1531,7 @@ visit_object_array_object_property_uint32(carbon_archive_t *archive, path_stack_
 
 
 static void
-visit_object_array_object_property_uint64(carbon_archive_t *archive, path_stack_t path,
+CARBON_FUNC_UNUSED visit_object_array_object_property_uint64(carbon_archive_t *archive, path_stack_t path,
                                          carbon_object_id_t parent_id,
                                          carbon_string_id_t key,
                                          carbon_object_id_t nested_object_id,
@@ -1555,7 +1555,7 @@ visit_object_array_object_property_uint64(carbon_archive_t *archive, path_stack_
 
 
 static void
-visit_object_array_object_property_numbers(carbon_archive_t *archive, path_stack_t path,
+CARBON_FUNC_UNUSED visit_object_array_object_property_numbers(carbon_archive_t *archive, path_stack_t path,
                                          carbon_object_id_t parent_id,
                                          carbon_string_id_t key,
                                          carbon_object_id_t nested_object_id,
@@ -1579,7 +1579,7 @@ visit_object_array_object_property_numbers(carbon_archive_t *archive, path_stack
 
 
 static void
-visit_object_array_object_property_strings(carbon_archive_t *archive, path_stack_t path,
+CARBON_FUNC_UNUSED visit_object_array_object_property_strings(carbon_archive_t *archive, path_stack_t path,
                                           carbon_object_id_t parent_id,
                                           carbon_string_id_t key,
                                           carbon_object_id_t nested_object_id,
@@ -1603,7 +1603,7 @@ visit_object_array_object_property_strings(carbon_archive_t *archive, path_stack
 
 
 static void
-visit_object_array_object_property_booleans(carbon_archive_t *archive, path_stack_t path,
+CARBON_FUNC_UNUSED visit_object_array_object_property_booleans(carbon_archive_t *archive, path_stack_t path,
                                           carbon_object_id_t parent_id,
                                           carbon_string_id_t key,
                                           carbon_object_id_t nested_object_id,
@@ -1626,7 +1626,7 @@ visit_object_array_object_property_booleans(carbon_archive_t *archive, path_stac
 }
 
 static void
-visit_object_array_object_property_nulls(carbon_archive_t *archive, path_stack_t path,
+CARBON_FUNC_UNUSED visit_object_array_object_property_nulls(carbon_archive_t *archive, path_stack_t path,
                                            carbon_object_id_t parent_id,
                                            carbon_string_id_t key,
                                            carbon_object_id_t nested_object_id,
@@ -1649,7 +1649,7 @@ visit_object_array_object_property_nulls(carbon_archive_t *archive, path_stack_t
 }
 
 static carbon_visitor_policy_e
-before_object_array_object_property_object(carbon_archive_t *archive, path_stack_t path,
+CARBON_FUNC_UNUSED before_object_array_object_property_object(carbon_archive_t *archive, path_stack_t path,
                                                                       carbon_object_id_t parent_id,
                                                                       carbon_string_id_t key,
                                                                       carbon_object_id_t nested_object_id,
@@ -1673,7 +1673,7 @@ before_object_array_object_property_object(carbon_archive_t *archive, path_stack
 }
 
 static void
-__unused run_magic_visitor(int mask, carbon_archive_t *archive)
+CARBON_FUNC_UNUSED run_magic_visitor(int mask, carbon_archive_t *archive)
 {
     carbon_archive_visitor_t visitor = { 0 };
     carbon_archive_visitor_desc_t desc = { .visit_mask = mask };
