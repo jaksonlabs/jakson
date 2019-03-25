@@ -25,12 +25,26 @@ This project is licensed under the terms of the MIT license, see
 [LICENSE.md](https://github.com/protolabs/libcarbon/blob/master/LICENSE). If [libcarbon](https://github.com/protolabs/libcarbon) is used in an academic context, or if it is part of research in general, see additional [agreements for researchers](FOR-RESEARCHERS.md). 
 
 
-## Support
+## Donate
 
-If you find tools in this repository helpful, and want to support our research and development with a donation,
-consider a recurrent donation via [Patreon](patreon.com/pinnecke), or a single donation via 
-[PayPal](http://paypal.me/MarcusPinnecke).
+[libcarbon](https://github.com/protolabs/libcarbon) is a not-for-profit, community-driven open source project. It is 
+legally represented by [Marcus Pinnecke](http://www.pinnecke.info). The project lives of the energetic efforts of its 
+contributors and by the donations from the community. 
 
-### States
+Donations help to drive the development forward and to support maintenance. In detail, dontations are used to
+
+* Hiring developers such that they can work on progressing the project faster
+* Hiring testers and students to discover defects and optimization potential
+* Purchasing hardware and software, pay for hostings and services
+* Cover travel and publication costs for important events
+* Design, and produce merchandising for events (cups, T-Shirts,...)
+
+If you want to support [libcarbon](https://github.com/protolabs/libcarbon) with a donation, you can donate monthly via 
+[Patreon](patreon.com/pinnecke), or by a single donation via [PayPal](http://paypal.me/MarcusPinnecke).
+
+See [DONORS](DONORS.md) for our donators list. In case of any questions, feel free to 
+[contact us](mailto:pinnecke@ovgu.de) beforehand.
+
+## States
 
 [![Documentation](https://codedocs.xyz/protolabs/libcarbon.svg)](https://codedocs.xyz/protolabs/libcarbon/)
