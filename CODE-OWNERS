@@ -1,0 +1,16 @@
+# This file shows ownership of particular components of libcarbon.
+# The directory root '/' is the repository directory.
+# If not otherwise stated, the alias 'sources' refers to both # 'include' and 'src'; '*.c' and '*.h' are omitted.
+#
+# Ownership is shows by annotating with @user, @group or via an e-mail address.
+# Lines starting with a '#' symbol are comments.
+
+# Core
+/sources/                                               @pinnecke
+
+# Utilities
+/tools/carbon                                           @pinnecke
+
+# Compression
+/sources/carbon/compressor/carbon-compressor-huffman    @mmmohsen
+
