@@ -1334,13 +1334,14 @@ static bool serialize_string_dic(carbon_memfile_t *memfile, carbon_err_t *err, c
 
     carbon_vec_t ofType (const char *) *strings;
     carbon_vec_t ofType(carbon_string_id_t) *string_ids;
+    carbon_vec_t ofType(carbon_string_id_t) *grouping_key_ids;
 
-    carbon_doc_bulk_get_dic_contents(&strings, &string_ids, context);
+    carbon_doc_bulk_get_dic_contents(&strings, &string_ids, &grouping_key_ids, context);
 
     assert(strings->num_elems == string_ids->num_elems);
 
     flags.value = 0;
-    if(!carbon_compressor_by_type(err, &strategy, compressor)) {
+    if(!carbon_compressor_by_type(err, &strategy, context, compressor)) {
         return false;
     }
     uint8_t flag_bit = carbon_compressor_flagbit_by_type(compressor);
@@ -1363,6 +1364,7 @@ static bool serialize_string_dic(carbon_memfile_t *memfile, carbon_err_t *err, c
 
     for (size_t i = 0; i < strings->num_elems; i++) {
         carbon_string_id_t id = *CARBON_VECTOR_GET(string_ids, i, carbon_string_id_t);
+        carbon_string_id_t grouping_key = *CARBON_VECTOR_GET(grouping_key_ids, i, carbon_string_id_t);
         const char *string = *CARBON_VECTOR_GET(strings, i, char *);
 
         carbon_string_entry_header_t header = {
@@ -1375,7 +1377,7 @@ static bool serialize_string_dic(carbon_memfile_t *memfile, carbon_err_t *err, c
         carbon_off_t header_pos_off = CARBON_MEMFILE_TELL(memfile);
         carbon_memfile_skip(memfile, sizeof(carbon_string_entry_header_t));
 
-        if (!carbon_compressor_encode(err, &strategy, memfile, string)) {
+        if (!carbon_compressor_encode(err, &strategy, memfile, string, grouping_key)) {
             CARBON_PRINT_ERROR(err.code);
             return false;
         }
@@ -1394,8 +1396,10 @@ static bool serialize_string_dic(carbon_memfile_t *memfile, carbon_err_t *err, c
 
     carbon_vec_drop(strings);
     carbon_vec_drop(string_ids);
+    carbon_vec_drop(grouping_key_ids);
     free(strings);
     free(string_ids);
+    free(grouping_key_ids);
 
     return carbon_compressor_drop(err, &strategy);
 }

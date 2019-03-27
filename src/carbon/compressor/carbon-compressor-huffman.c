@@ -25,8 +25,9 @@
 #define  MARKER_SYMBOL_HUFFMAN_DIC_ENTRY   'd'
 
 CARBON_EXPORT(bool)
-carbon_compressor_huffman_init(carbon_compressor_t *self)
+carbon_compressor_huffman_init(carbon_compressor_t *self, carbon_doc_bulk_t const *context)
 {
+    CARBON_UNUSED(context);
     self->extra = malloc(sizeof(carbon_huffman_t));
     if (self->extra != NULL) {
         carbon_huffman_t *encoder = (carbon_huffman_t *) self->extra;
@@ -165,9 +166,10 @@ carbon_compressor_huffman_print_encoded(carbon_compressor_t *self, FILE *file, c
 }
 
 bool carbon_compressor_huffman_encode_string(carbon_compressor_t *self, carbon_memfile_t *dst, carbon_err_t *err,
-                                             const char *string)
+                                             const char *string, carbon_string_id_t grouping_key)
 {
     CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_HUFFMAN);
+    CARBON_UNUSED(grouping_key);
 
     carbon_huffman_t *encoder = (carbon_huffman_t *) self->extra;
     bool status = carbon_huffman_encode_one(dst, encoder, string);

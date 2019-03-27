@@ -46,7 +46,7 @@ carbon_doc_bulk_create(carbon_doc_bulk_t *bulk, carbon_strdic_t *dic)
     CARBON_NON_NULL_OR_ERROR(dic)
     bulk->dic = dic;
     carbon_vec_create(&bulk->keys, NULL, sizeof(char *), 500);
-    carbon_vec_create(&bulk->values, NULL, sizeof(char *), 1000);
+    bulk->values = carbon_hashmap_new();
     carbon_vec_create(&bulk->models, NULL, sizeof(carbon_doc_t), 50);
     return true;
 }
@@ -65,6 +65,7 @@ carbon_doc_obj_t *carbon_doc_bulk_new_obj(carbon_doc_t *model)
 CARBON_EXPORT(bool)
 carbon_doc_bulk_get_dic_contents(carbon_vec_t ofType (const char *) **strings,
                                  carbon_vec_t ofType(carbon_string_id_t) **string_ids,
+                                 carbon_vec_t ofType(carbon_string_id_t) **grouping_key_ids,
                                  const carbon_doc_bulk_t *context)
 {
     CARBON_NON_NULL_OR_ERROR(context)
@@ -73,13 +74,17 @@ carbon_doc_bulk_get_dic_contents(carbon_vec_t ofType (const char *) **strings,
     carbon_strdic_num_distinct(&num_distinct_values, context->dic);
     carbon_vec_t ofType (const char *) *result_strings = malloc(sizeof(carbon_vec_t));
     carbon_vec_t ofType (carbon_string_id_t) *resultcarbon_string_id_ts = malloc(sizeof(carbon_vec_t));
+    carbon_vec_t ofType (carbon_string_id_t) *result_grouping_keys = malloc(sizeof(carbon_vec_t));
+
     carbon_vec_create(result_strings, NULL, sizeof(const char *), num_distinct_values);
     carbon_vec_create(resultcarbon_string_id_ts, NULL, sizeof(carbon_string_id_t), num_distinct_values);
+    carbon_vec_create(result_grouping_keys, NULL, sizeof(carbon_string_id_t), num_distinct_values);
 
-    int status = carbon_strdic_get_contents(result_strings, resultcarbon_string_id_ts, context->dic);
+    int status = carbon_strdic_get_contents(result_strings, resultcarbon_string_id_ts, result_grouping_keys, context->dic);
     CARBON_CHECK_SUCCESS(status);
     *strings = result_strings;
     *string_ids = resultcarbon_string_id_ts;
+    *grouping_key_ids = result_grouping_keys;
 
     return status;
 }
@@ -102,6 +107,18 @@ carbon_doc_t *carbon_doc_bulk_new_doc(carbon_doc_bulk_t *context, carbon_field_t
     return model;
 }
 
+carbon_hashmap_status_t carbon_private_free_string_vector(char const* key, carbon_hashmap_any_t item) {
+    CARBON_UNUSED(key);
+    carbon_vec_t ofType(char *) *values = (carbon_vec_t *)item;
+    for (size_t i = 0; i < values->num_elems; i++) {
+        char *string = *CARBON_VECTOR_GET(values, i, char *);
+        free (string);
+    }
+
+    carbon_vec_drop(values);
+    return carbon_hashmap_status_ok;
+}
+
 CARBON_EXPORT(bool)
 carbon_doc_bulk_Drop(carbon_doc_bulk_t *bulk)
 {
@@ -110,10 +127,7 @@ carbon_doc_bulk_Drop(carbon_doc_bulk_t *bulk)
         char *string = *CARBON_VECTOR_GET(&bulk->keys, i, char *);
         free (string);
     }
-    for (size_t i = 0; i < bulk->values.num_elems; i++) {
-        char *string = *CARBON_VECTOR_GET(&bulk->values, i, char *);
-        free (string);
-    }
+
     for (size_t i = 0; i < bulk->models.num_elems; i++) {
         carbon_doc_t *model = CARBON_VECTOR_GET(&bulk->models, i, carbon_doc_t);
         for (size_t j = 0; j < model->obj_model.num_elems; j++) {
@@ -124,9 +138,31 @@ carbon_doc_bulk_Drop(carbon_doc_bulk_t *bulk)
     }
 
     carbon_vec_drop(&bulk->keys);
-    carbon_vec_drop(&bulk->values);
+
+    for (carbon_hashmap_iterator_t it = carbon_hashmap_begin(bulk->values);it.valid;carbon_hashmap_next(&it)) {
+        carbon_vec_t ofType(char *) *values = (carbon_vec_t *)it.value;
+
+        for (size_t i = 0; i < values->num_elems; i++) {
+            char *string = *CARBON_VECTOR_GET(values, i, char *);
+            free (string);
+        }
+
+        carbon_vec_drop(values);
+        free(values);
+    }
+
+    carbon_hashmap_drop(bulk->values);
+
     carbon_vec_drop(&bulk->models);
+
     return true;
+}
+
+carbon_hashmap_status_t carbon_private_vector_shrink_callback(char const* key, carbon_hashmap_any_t item) {
+    CARBON_UNUSED(key);
+    VectorShrink((carbon_vec_t*)item);
+
+    return carbon_hashmap_status_ok;
 }
 
 CARBON_EXPORT(bool)
@@ -134,9 +170,14 @@ carbon_doc_bulk_shrink(carbon_doc_bulk_t *bulk)
 {
     CARBON_NON_NULL_OR_ERROR(bulk)
     VectorShrink(&bulk->keys);
-    VectorShrink(&bulk->values);
+
+    for (carbon_hashmap_iterator_t it = carbon_hashmap_begin(bulk->values);it.valid;carbon_hashmap_next(&it)) {
+        VectorShrink((carbon_vec_t*)it.value);
+    }
+
     return true;
 }
+
 
 CARBON_EXPORT(bool)
 carbon_doc_bulk_print(FILE *file, carbon_doc_bulk_t *bulk)
@@ -152,12 +193,22 @@ carbon_doc_bulk_print(FILE *file, carbon_doc_bulk_t *bulk)
     }
     fprintf(file, "], ");
 
-    char **valueStrings = CARBON_VECTOR_ALL(&bulk->values, char *);
-    fprintf(file, "\"Value Strings\": [");
-    for (size_t i = 0; i < bulk->values.num_elems; i++) {
-        fprintf(file, "\"%s\"%s", valueStrings[i], i + 1 < bulk->values.num_elems ? ", " : "");
+    fprintf(file, "\"Value Strings\": {");
+
+    for (carbon_hashmap_iterator_t it = carbon_hashmap_begin(bulk->values);it.valid;) {
+        carbon_vec_t * values = (carbon_vec_t *)it.value;
+        char **value_strings = CARBON_VECTOR_ALL(values, char *);
+
+        fprintf(file, "\"%s\": [", it.key);
+        for (size_t i = 0; i < values->num_elems; i++) {
+            fprintf(file, "\"%s\"%s", value_strings[i], i + 1 < values->num_elems ? ", " : "");
+        }
+
+        carbon_hashmap_next(&it);
+        fprintf(file, it.valid ? "]" : "],\n");
     }
-    fprintf(file, "]}");
+
+    fprintf(file, "}}");
 
     return true;
 }
@@ -238,7 +289,7 @@ bool carbon_doc_obj_add_key(carbon_doc_entries_t **out,
     return true;
 }
 
-bool carbon_doc_obj_push_primtive(carbon_doc_entries_t *entry, const void *value)
+bool carbon_doc_obj_push_primtive(carbon_doc_entries_t *entry, const char * key, const void *value)
 {
     CARBON_NON_NULL_OR_ERROR(entry)
     CARBON_NON_NULL_OR_ERROR((entry->type == carbon_field_type_null) || (value != NULL))
@@ -248,8 +299,16 @@ bool carbon_doc_obj_push_primtive(carbon_doc_entries_t *entry, const void *value
             carbon_vec_push(&entry->values, &VALUE_NULL, 1);
         break;
         case carbon_field_type_string: {
-            char *string = value ? strdup((char *) value) : NULL;
-            carbon_vec_push(&entry->context->doc->context->values, &string, 1);
+            char *string = value ? strdup((char const *) value) : NULL;
+
+            carbon_vec_t ofType(char *) *values;
+            if( carbon_hashmap_get(entry->context->doc->context->values, key, (carbon_hashmap_any_t *)&values) == carbon_hashmap_status_missing ) {
+                values = malloc(sizeof(carbon_vec_t ofType(char *)));
+                carbon_vec_create(values, NULL, sizeof(char *), 100);
+                carbon_hashmap_put(entry->context->doc->context->values, key, values);
+            }
+
+            carbon_vec_push(values, &string, 1);
             carbon_vec_push(&entry->values, &string, 1);
         }
         break;
@@ -319,7 +378,7 @@ static void import_json_object_string_prop(carbon_doc_obj_t *target, const char 
 {
     carbon_doc_entries_t *entry;
     carbon_doc_obj_add_key(&entry, target, key, carbon_field_type_string);
-    carbon_doc_obj_push_primtive(entry, string->value);
+    carbon_doc_obj_push_primtive(entry, key, string->value);
 }
 
 static bool import_json_object_number_prop(carbon_doc_obj_t *target, carbon_err_t *err, const char *key, const carbon_json_ast_node_number_t *number)
@@ -331,7 +390,7 @@ static bool import_json_object_number_prop(carbon_doc_obj_t *target, carbon_err_
         return false;
     }
     carbon_doc_obj_add_key(&entry, target, key, number_type);
-    carbon_doc_obj_push_primtive(entry, &number->value);
+    carbon_doc_obj_push_primtive(entry, key, &number->value);
     return true;
 }
 
@@ -339,14 +398,14 @@ static void import_json_object_bool_prop(carbon_doc_obj_t *target, const char *k
 {
     carbon_doc_entries_t *entry;
     carbon_doc_obj_add_key(&entry, target, key, carbon_field_type_bool);
-    carbon_doc_obj_push_primtive(entry, &value);
+    carbon_doc_obj_push_primtive(entry, key, &value);
 }
 
 static void import_json_object_null_prop(carbon_doc_obj_t *target, const char *key)
 {
     carbon_doc_entries_t *entry;
     carbon_doc_obj_add_key(&entry, target, key, carbon_field_type_null);
-    carbon_doc_obj_push_primtive(entry, NULL);
+    carbon_doc_obj_push_primtive(entry, key, NULL);
 }
 
 static bool import_json_object_object_prop(carbon_doc_obj_t *target, carbon_err_t *err, const char *key, const carbon_json_ast_node_object_t *object)
@@ -477,7 +536,7 @@ static bool import_json_object_array_prop(carbon_doc_obj_t *target, carbon_err_t
             } break;
             case carbon_field_type_string: {
                 assert(ast_node_data_type == array_data_type || ast_node_data_type == CARBON_JSON_AST_NODE_VALUE_TYPE_NULL);
-                carbon_doc_obj_push_primtive(entry, ast_node_data_type == CARBON_JSON_AST_NODE_VALUE_TYPE_NULL ?
+                carbon_doc_obj_push_primtive(entry, key, ast_node_data_type == CARBON_JSON_AST_NODE_VALUE_TYPE_NULL ?
                                                     CARBON_NULL_ENCODED_STRING :
                                                     element->value.value.string->value);
             } break;
@@ -495,42 +554,42 @@ static bool import_json_object_array_prop(carbon_doc_obj_t *target, carbon_err_t
                 case carbon_field_type_int8: {
                     carbon_int8_t value = ast_node_data_type == CARBON_JSON_AST_NODE_VALUE_TYPE_NULL ? CARBON_NULL_INT8 :
                                       (carbon_int8_t) element->value.value.number->value.signed_integer;
-                    carbon_doc_obj_push_primtive(entry, &value);
+                    carbon_doc_obj_push_primtive(entry, key, &value);
                 } break;
                 case carbon_field_type_int16: {
                     carbon_int16_t value = ast_node_data_type == CARBON_JSON_AST_NODE_VALUE_TYPE_NULL ? CARBON_NULL_INT16 :
                                        (carbon_int16_t) element->value.value.number->value.signed_integer;
-                    carbon_doc_obj_push_primtive(entry, &value);
+                    carbon_doc_obj_push_primtive(entry, key, &value);
                 } break;
                 case carbon_field_type_int32: {
                     carbon_int32_t value = ast_node_data_type == CARBON_JSON_AST_NODE_VALUE_TYPE_NULL ? CARBON_NULL_INT32 :
                                        (carbon_int32_t) element->value.value.number->value.signed_integer;
-                    carbon_doc_obj_push_primtive(entry, &value);
+                    carbon_doc_obj_push_primtive(entry, key, &value);
                 } break;
                 case carbon_field_type_int64: {
                     carbon_int64_t value = ast_node_data_type == CARBON_JSON_AST_NODE_VALUE_TYPE_NULL ? CARBON_NULL_INT64 :
                                        (carbon_int64_t) element->value.value.number->value.signed_integer;
-                    carbon_doc_obj_push_primtive(entry, &value);
+                    carbon_doc_obj_push_primtive(entry, key, &value);
                 } break;
                 case carbon_field_type_uint8: {
                     carbon_uint8_t value = ast_node_data_type == CARBON_JSON_AST_NODE_VALUE_TYPE_NULL ? CARBON_NULL_UINT8 :
                                        (carbon_uint8_t) element->value.value.number->value.unsigned_integer;
-                    carbon_doc_obj_push_primtive(entry, &value);
+                    carbon_doc_obj_push_primtive(entry, key, &value);
                 } break;
                 case carbon_field_type_uint16: {
                     carbon_uint16_t value = ast_node_data_type == CARBON_JSON_AST_NODE_VALUE_TYPE_NULL ? CARBON_NULL_UINT16 :
                                         (carbon_uint16_t) element->value.value.number->value.unsigned_integer;
-                    carbon_doc_obj_push_primtive(entry, &value);
+                    carbon_doc_obj_push_primtive(entry, key, &value);
                 } break;
                 case carbon_field_type_uint32: {
                     carbon_uint32_t value = ast_node_data_type == CARBON_JSON_AST_NODE_VALUE_TYPE_NULL ? CARBON_NULL_UINT32 :
                                         (carbon_uint32_t) element->value.value.number->value.unsigned_integer;
-                    carbon_doc_obj_push_primtive(entry, &value);
+                    carbon_doc_obj_push_primtive(entry, key, &value);
                 } break;
                 case carbon_field_type_uint64: {
                     carbon_uint64_t value = ast_node_data_type == CARBON_JSON_AST_NODE_VALUE_TYPE_NULL ? CARBON_NULL_UINT64 :
                                         (carbon_uint64_t) element->value.value.number->value.unsigned_integer;
-                    carbon_doc_obj_push_primtive(entry, &value);
+                    carbon_doc_obj_push_primtive(entry, key, &value);
                 } break;
                 case carbon_field_type_float: {
                     carbon_number_t value = CARBON_NULL_FLOAT;
@@ -547,7 +606,7 @@ static bool import_json_object_array_prop(carbon_doc_obj_t *target, carbon_err_t
                             return false;
                         }
                     }
-                    carbon_doc_obj_push_primtive(entry, &value);
+                    carbon_doc_obj_push_primtive(entry, key, &value);
                 } break;
                 default:
                     CARBON_PRINT_ERROR_AND_DIE(CARBON_ERR_INTERNALERR) /** not a number type  */
@@ -559,16 +618,16 @@ static bool import_json_object_array_prop(carbon_doc_obj_t *target, carbon_err_t
                                   ast_node_data_type == CARBON_JSON_AST_NODE_VALUE_TYPE_FALSE)) {
                     carbon_boolean_t value = ast_node_data_type == CARBON_JSON_AST_NODE_VALUE_TYPE_TRUE ?
                                          CARBON_BOOLEAN_TRUE : CARBON_BOOLEAN_FALSE;
-                    carbon_doc_obj_push_primtive(entry, &value);
+                    carbon_doc_obj_push_primtive(entry,key, &value);
                 } else {
                     assert(ast_node_data_type == CARBON_JSON_AST_NODE_VALUE_TYPE_NULL);
                     carbon_boolean_t value = CARBON_NULL_BOOLEAN;
-                    carbon_doc_obj_push_primtive(entry, &value);
+                    carbon_doc_obj_push_primtive(entry, key, &value);
                 }
                 break;
             case carbon_field_type_null:
                 assert(ast_node_data_type == array_data_type);
-                carbon_doc_obj_push_primtive(entry, NULL);
+                carbon_doc_obj_push_primtive(entry, key, NULL);
                 break;
             default:
                 CARBON_ERROR(err, CARBON_ERR_NOTYPE)
@@ -725,11 +784,11 @@ static bool compare_encoded_string_less_eq_func(const void *lhs, const void *rhs
     carbon_strdic_t *dic = (carbon_strdic_t *) args;
     carbon_string_id_t *a = (carbon_string_id_t *) lhs;
     carbon_string_id_t *b = (carbon_string_id_t *) rhs;
-    char **a_string = carbon_strdic_extract(dic, a, 1);
-    char **b_string = carbon_strdic_extract(dic, b, 1);
-    bool lq = strcmp(*a_string, *b_string) <= 0;
-    carbon_strdic_free(dic, a_string);
-    carbon_strdic_free(dic, b_string);
+    carbon_strdic_entry_t *a_entry = carbon_strdic_extract(dic, a, 1);
+    carbon_strdic_entry_t *b_entry = carbon_strdic_extract(dic, b, 1);
+    bool lq = strcmp(a_entry->str, b_entry->str) <= 0;
+    carbon_strdic_free(dic, a_entry);
+    carbon_strdic_free(dic, b_entry);
     return lq;
 }
 
@@ -779,11 +838,11 @@ static bool compare_encoded_string_array_less_eq_func(const void *lhs, const voi
     const carbon_string_id_t *bValues = CARBON_VECTOR_ALL(b, carbon_string_id_t);
     size_t max_compare_idx = a->num_elems < b->num_elems ? a->num_elems : b->num_elems;
     for (size_t i = 0; i < max_compare_idx; i++) {
-        char **aString = carbon_strdic_extract(dic, aValues + i, 1);
-        char **bString = carbon_strdic_extract(dic, bValues + i, 1);
-        bool greater = strcmp(*aString, *bString) > 0;
-        carbon_strdic_free(dic, aString);
-        carbon_strdic_free(dic, bString);
+        carbon_strdic_entry_t *aEntry = carbon_strdic_extract(dic, aValues + i, 1);
+        carbon_strdic_entry_t *bEntry = carbon_strdic_extract(dic, bValues + i, 1);
+        bool greater = strcmp(aEntry->str, bEntry->str) > 0;
+        carbon_strdic_free(dic, aEntry);
+        carbon_strdic_free(dic, bEntry);
         if (greater) {
             return false;
         }
@@ -963,11 +1022,11 @@ static bool compare_object_array_key_columns_less_eq_func(const void *lhs, const
     carbon_strdic_t *dic = (carbon_strdic_t *) args;
     carbon_columndoc_columngroup_t *a = (carbon_columndoc_columngroup_t *) lhs;
     carbon_columndoc_columngroup_t *b = (carbon_columndoc_columngroup_t *) rhs;
-    char **a_column_name = carbon_strdic_extract(dic, &a->key, 1);
-    char **b_column_name = carbon_strdic_extract(dic, &b->key, 1);
-    bool column_name_leq = strcmp(*a_column_name, *b_column_name) <= 0;
-    carbon_strdic_free(dic, a_column_name);
-    carbon_strdic_free(dic, b_column_name);
+    carbon_strdic_entry_t *a_column_name_entry = carbon_strdic_extract(dic, &a->key, 1);
+    carbon_strdic_entry_t *b_column_name_entry = carbon_strdic_extract(dic, &b->key, 1);
+    bool column_name_leq = strcmp(a_column_name_entry->str, b_column_name_entry->str) <= 0;
+    carbon_strdic_free(dic, a_column_name_entry);
+    carbon_strdic_free(dic, b_column_name_entry);
     return column_name_leq;
 }
 
@@ -976,12 +1035,12 @@ static bool compare_object_array_key_column_less_eq_func(const void *lhs, const 
     carbon_strdic_t *dic = (carbon_strdic_t *) args;
     carbon_columndoc_column_t *a = (carbon_columndoc_column_t *) lhs;
     carbon_columndoc_column_t *b = (carbon_columndoc_column_t *) rhs;
-    char **a_column_name = carbon_strdic_extract(dic, &a->key_name, 1);
-    char **b_column_name = carbon_strdic_extract(dic, &b->key_name, 1);
-    int cmpResult = strcmp(*a_column_name, *b_column_name);
+    carbon_strdic_entry_t *a_column_name_entry = carbon_strdic_extract(dic, &a->key_name, 1);
+    carbon_strdic_entry_t *b_column_name_entry = carbon_strdic_extract(dic, &b->key_name, 1);
+    int cmpResult = strcmp(a_column_name_entry->str, b_column_name_entry->str);
     bool column_name_leq = cmpResult < 0 ? true : (cmpResult == 0 ? (a->type <= b->type) : false);
-    carbon_strdic_free(dic, a_column_name);
-    carbon_strdic_free(dic, b_column_name);
+    carbon_strdic_free(dic, a_column_name_entry);
+    carbon_strdic_free(dic, b_column_name_entry);
     return column_name_leq;
 }
 
@@ -1048,11 +1107,11 @@ static bool compare_column_less_eq_func(const void *lhs, const void *rhs, void *
         for (size_t i = 0; i < max_num_elem; i++) {
             carbon_string_id_t o1 = *CARBON_VECTOR_GET(a, i, carbon_string_id_t);
             carbon_string_id_t o2 = *CARBON_VECTOR_GET(b, i, carbon_string_id_t);
-            char **o1_string = carbon_strdic_extract(func_arg->dic, &o1, 1);
-            char **o2_string = carbon_strdic_extract(func_arg->dic, &o2, 1);
-            bool greater = strcmp(*o1_string, *o2_string) > 0;
-            carbon_strdic_free(func_arg->dic, o1_string);
-            carbon_strdic_free(func_arg->dic, o2_string);
+            carbon_strdic_entry_t *o1_entry = carbon_strdic_extract(func_arg->dic, &o1, 1);
+            carbon_strdic_entry_t *o2_entry = carbon_strdic_extract(func_arg->dic, &o2, 1);
+            bool greater = strcmp(o1_entry->str, o2_entry->str) > 0;
+            carbon_strdic_free(func_arg->dic, o1_entry);
+            carbon_strdic_free(func_arg->dic, o2_entry);
             if (greater) {
                 return false;
             }
@@ -1224,10 +1283,59 @@ carbon_columndoc_t *carbon_doc_entries_to_columndoc(const carbon_doc_bulk_t *bul
     }
 
     // Step 1: encode all strings at once in a bulk
-    char *const* key_strings = CARBON_VECTOR_ALL(&bulk->keys, char *);
-    char *const* valueStrings = CARBON_VECTOR_ALL(&bulk->values, char *);
-    carbon_strdic_insert(bulk->dic, NULL, key_strings, carbon_vec_length(&bulk->keys), 0);
-    carbon_strdic_insert(bulk->dic, NULL, valueStrings, carbon_vec_length(&bulk->values), 0);
+    carbon_hashmap_any_t *key_id_map = carbon_hashmap_new();
+    carbon_vec_t ofType(carbon_string_id_t) dic_string_ids;
+
+    {
+        _Static_assert(sizeof(void *) == sizeof(carbon_string_id_t), "Pointer size must be equal to string id type size");
+
+        char *const* key_strings = CARBON_VECTOR_ALL(&bulk->keys, char *);
+        carbon_string_id_t *key_ids;
+        carbon_strdic_insert(bulk->dic, &key_ids, key_strings, 0, carbon_vec_length(&bulk->keys), 0);
+        carbon_strdic_free(bulk->dic, key_ids);
+
+        size_t num_values_in_dic = 0;
+        carbon_strdic_num_distinct(&num_values_in_dic, bulk->dic);
+
+        carbon_vec_t ofType(char *) dic_strings;
+        carbon_vec_t ofType(carbon_string_id_t) dic_grouping_keys;
+
+        carbon_vec_create(&dic_strings, NULL, sizeof(char *), num_values_in_dic);
+        carbon_vec_create(&dic_string_ids, NULL, sizeof(carbon_string_id_t), num_values_in_dic);
+        carbon_vec_create(&dic_grouping_keys, NULL, sizeof(carbon_string_id_t), num_values_in_dic);
+
+        carbon_strdic_get_contents(&dic_strings, &dic_string_ids, &dic_grouping_keys, bulk->dic);
+        for(size_t i = 0; i < dic_strings.num_elems; ++i) {
+            carbon_hashmap_put(
+                key_id_map,
+                *(char **)carbon_vec_at(&dic_strings, i),
+                (void *)carbon_vec_at(&dic_string_ids, i)
+            );
+        }
+
+        carbon_vec_drop(&dic_strings);
+        carbon_vec_drop(&dic_grouping_keys);
+    }
+
+    for (carbon_hashmap_iterator_t it = carbon_hashmap_begin(bulk->values);it.valid;carbon_hashmap_next(&it)) {
+        carbon_string_id_t *key_id;
+
+        {
+            carbon_hashmap_status_t status = carbon_hashmap_get(key_id_map, it.key, (void *)&key_id);
+            CARBON_UNUSED(status);
+            assert(status == carbon_hashmap_status_ok);
+        }
+
+        carbon_strdic_insert(
+                    bulk->dic, NULL,
+                    carbon_vec_data((carbon_vec_t*)it.value), *key_id,
+                    carbon_vec_length((carbon_vec_t*)it.value), 0
+        );
+    }
+
+    carbon_vec_drop(&dic_string_ids);
+    carbon_hashmap_drop(key_id_map);
+
 
     // Step 2: for each document doc, create a meta doc, and construct a binary compressed document
     const carbon_doc_t *models = CARBON_VECTOR_ALL(&bulk->models, carbon_doc_t);

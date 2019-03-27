@@ -10,6 +10,12 @@
 #include "ops/ops-show-values.h"
 #include "ops/ops-get-citations.h"
 
+#ifdef __GNUC__
+#ifdef __linux__
+#undef PRIi64
+#define PRIi64 "lld"
+#endif
+#endif
 
 static int testFileExists(FILE *file, const char *fileName, size_t fileNum, size_t fileMax, bool requireExistence)
 {
@@ -1988,7 +1994,7 @@ process_from(carbon_archive_t *archive, const char *line)
             carbon_encoded_doc_collection_print(stdout, &result);
             carbon_encoded_doc_collection_drop(&result);
             printf("\n");
-            printf("execution time: %" PRIu64"ms\n", duration);
+            printf("execution time: %" PRIi64"ms\n", duration);
         } else if (strstr(command, "*") != 0) {
             int offset_count = 0;
             int limit_count = INT32_MAX;
@@ -2025,7 +2031,7 @@ process_from(carbon_archive_t *archive, const char *line)
             carbon_encoded_doc_collection_drop(&result);
 leave:
             printf("\n");
-            printf("execution time: %" PRIu64"ms\n", duration);
+            printf("execution time: %" PRIi64"ms\n", duration);
 
 
         }
@@ -2046,7 +2052,7 @@ leave:
         carbon_encoded_doc_collection_print(stdout, &result);
         carbon_encoded_doc_collection_drop(&result);
         printf("\n");
-        printf("execution time: %" PRIu64"ms\n", duration);
+        printf("execution time: %" PRIi64"ms\n", duration);
 
         free(path);
     } else {

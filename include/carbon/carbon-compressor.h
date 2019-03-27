@@ -26,6 +26,7 @@
 CARBON_BEGIN_DECL
 
 typedef struct carbon_compressor carbon_compressor_t; /* forwarded */
+typedef struct carbon_doc_bulk carbon_doc_bulk_t; /* forwarded */
 
 /**
  * Unique tag identifying a specific implementation for compressing/decompressing string in a CARBON archives
@@ -61,7 +62,7 @@ typedef struct carbon_compressor
      * @author Marcus Pinnecke
      * @since 0.1.00.05
      */
-    bool (*create)(carbon_compressor_t *self);
+    bool (*create)(carbon_compressor_t *self, carbon_doc_bulk_t const *context);
 
     /**
      * Destructor for implementation-dependent deinitialization of the compressor at hand.
@@ -144,7 +145,7 @@ typedef struct carbon_compressor
      * @since 0.1.00.05
      */
     bool (*encode_string)(carbon_compressor_t *self, carbon_memfile_t *dst, carbon_err_t *err,
-                          const char *string);
+                          const char *string, carbon_string_id_t grouping_key);
 
     bool (*decode_string)(carbon_compressor_t *self, char *dst, size_t strlen, FILE *src);
 
@@ -236,7 +237,7 @@ static struct
 
 
 CARBON_EXPORT(bool)
-carbon_compressor_by_type(carbon_err_t *err, carbon_compressor_t *strategy, carbon_compressor_type_e type);
+carbon_compressor_by_type(carbon_err_t *err, carbon_compressor_t *strategy, carbon_doc_bulk_t const *context, carbon_compressor_type_e type);
 
 CARBON_EXPORT(uint8_t)
 carbon_compressor_flagbit_by_type(carbon_compressor_type_e type);
@@ -263,7 +264,7 @@ carbon_compressor_read_extra(carbon_err_t *err, carbon_compressor_t *self, FILE 
 
 CARBON_EXPORT(bool)
 carbon_compressor_encode(carbon_err_t *err, carbon_compressor_t *self, carbon_memfile_t *dst,
-                         const char *string);
+                         const char *string, carbon_string_id_t grouping_key);
 
 CARBON_EXPORT(bool)
 carbon_compressor_decode(carbon_err_t *err, carbon_compressor_t *self, char *dst, size_t strlen, FILE *src);

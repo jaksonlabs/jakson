@@ -26,9 +26,10 @@
 CARBON_BEGIN_DECL
 
 typedef struct carbon_compressor carbon_compressor_t; /* forwarded from 'carbon-compressor.h' */
+typedef struct carbon_doc_bulk carbon_doc_bulk_t; /* forwarded from 'carbon-doc.h' */
 
 CARBON_EXPORT(bool)
-carbon_compressor_none_init(carbon_compressor_t *self);
+carbon_compressor_none_init(carbon_compressor_t *self, carbon_doc_bulk_t const *context);
 
 CARBON_EXPORT(bool)
 carbon_compressor_none_cpy(const carbon_compressor_t *self, carbon_compressor_t *dst);
@@ -52,7 +53,7 @@ carbon_compressor_none_print_encoded_string(carbon_compressor_t *self, FILE *fil
 
 CARBON_EXPORT(bool)
 carbon_compressor_none_encode_string(carbon_compressor_t *self, carbon_memfile_t *dst, carbon_err_t *err,
-                                          const char *string);
+                                          const char *string, carbon_string_id_t grouping_key);
 
 CARBON_EXPORT(bool)
 carbon_compressor_none_decode_string(carbon_compressor_t *self, char *dst, size_t strlen, FILE *src);

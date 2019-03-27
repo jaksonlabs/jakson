@@ -21,9 +21,10 @@
 #include "carbon/compressor/carbon-compressor-none.h"
 
 CARBON_EXPORT(bool)
-carbon_compressor_none_init(carbon_compressor_t *self)
+carbon_compressor_none_init(carbon_compressor_t *self, carbon_doc_bulk_t const *context)
 {
     CARBON_UNUSED(self);
+    CARBON_UNUSED(context);
     /* nothing to do for uncompressed dictionaries */
     return true;
 }
@@ -109,11 +110,12 @@ carbon_compressor_none_print_encoded_string(carbon_compressor_t *self,
 
 CARBON_EXPORT(bool)
 carbon_compressor_none_encode_string(carbon_compressor_t *self, carbon_memfile_t *dst, carbon_err_t *err,
-                                          const char *string)
+                                          const char *string, carbon_string_id_t grouping_key)
 {
     CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_NONE);
 
     CARBON_UNUSED(self);
+    CARBON_UNUSED(grouping_key);
 
     uint32_t string_length = strlen(string);
 

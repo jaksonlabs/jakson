@@ -19,7 +19,7 @@
 #include "carbon/carbon-compressor.h"
 
 static bool
-create_strategy(size_t i, carbon_compressor_t *strategy)
+create_strategy(size_t i, carbon_compressor_t *strategy, carbon_doc_bulk_t const *context)
 {
     assert(strategy);
     carbon_compressor_strategy_register[i].create(strategy);
@@ -30,15 +30,15 @@ create_strategy(size_t i, carbon_compressor_t *strategy)
     assert (strategy->encode_string);
     assert (strategy->decode_string);
     assert (strategy->print_extra);
-    return strategy->create(strategy);
+    return strategy->create(strategy, context);
 }
 
 CARBON_EXPORT(bool)
-carbon_compressor_by_type(carbon_err_t *err, carbon_compressor_t *strategy, carbon_compressor_type_e type)
+carbon_compressor_by_type(carbon_err_t *err, carbon_compressor_t *strategy, carbon_doc_bulk_t const *context, carbon_compressor_type_e type)
 {
     for (size_t i = 0; i < CARBON_ARRAY_LENGTH(carbon_compressor_strategy_register); i++) {
         if (carbon_compressor_strategy_register[i].type == type) {
-            return create_strategy(i, strategy);
+            return create_strategy(i, strategy, context);
         }
     }
     CARBON_ERROR(err, CARBON_ERR_NOCOMPRESSOR)
@@ -61,7 +61,7 @@ carbon_compressor_by_flags(carbon_compressor_t *strategy, uint8_t flags)
 {
     for (size_t i = 0; i < CARBON_ARRAY_LENGTH(carbon_compressor_strategy_register); i++) {
         if (carbon_compressor_strategy_register[i].flag_bit & flags) {
-            return create_strategy(i, strategy);
+            return create_strategy(i, strategy, NULL);
         }
     }
     return false;
@@ -115,11 +115,11 @@ carbon_compressor_read_extra(carbon_err_t *err, carbon_compressor_t *self, FILE 
 
 CARBON_EXPORT(bool)
 carbon_compressor_encode(carbon_err_t *err, carbon_compressor_t *self, carbon_memfile_t *dst,
-                         const char *string)
+                         const char *string, carbon_string_id_t grouping_key)
 {
     CARBON_NON_NULL_OR_ERROR(self)
     CARBON_IMPLEMENTS_OR_ERROR(err, self, encode_string)
-    return self->encode_string(self, dst, err, string);
+    return self->encode_string(self, dst, err, string, grouping_key);
 }
 
 CARBON_EXPORT(bool)

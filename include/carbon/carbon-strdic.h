@@ -42,6 +42,7 @@ typedef enum
  * Thread-safe string pool implementation
  */
 typedef struct carbon_strdic carbon_strdic_t;
+typedef struct carbon_strdic_entry { char * str; carbon_string_id_t grouping_key; } carbon_strdic_entry_t;
 
 typedef struct carbon_strdic
 {
@@ -73,7 +74,7 @@ typedef struct carbon_strdic
      * Note: Implementation must ensure thread-safeness
     */
     bool (*insert)(carbon_strdic_t *self, carbon_string_id_t **out, char *const *strings,
-                  size_t nstrings, size_t nthreads);
+                   carbon_string_id_t grouping_key, size_t nstrings, size_t nthreads);
 
     /**
      * Removes a particular number of strings from this dictionary by their ids. The caller must ensure that
@@ -104,7 +105,7 @@ typedef struct carbon_strdic
      *
      * Note: Implementation must ensure thread-safeness
      */
-    char **(*extract)(carbon_strdic_t *self, const carbon_string_id_t *ids, size_t num_ids);
+    carbon_strdic_entry_t *(*extract)(carbon_strdic_t *self, const carbon_string_id_t *ids, size_t num_ids);
 
     /**
      * Frees up memory allocated inside a function call via the allocator given in the constructor
@@ -131,8 +132,9 @@ typedef struct carbon_strdic
     /**
      * Returns all contained (unique) strings and their mapped (unique) ids
      */
-    bool (*get_contents)(carbon_strdic_t *self, carbon_vec_t ofType (char *) * strings,
-                       carbon_vec_t ofType(carbon_string_id_t) * string_ids);
+    bool (*get_contents)(carbon_strdic_t *self, carbon_vec_t ofType (carbon_strdic_entry_t) * strings,
+                         carbon_vec_t ofType(carbon_string_id_t) * string_ids,
+                         carbon_vec_t ofType(carbon_string_id_t) * grouping_keys);
 } carbon_strdic_t;
 
 /**
@@ -151,13 +153,13 @@ carbon_strdic_drop(carbon_strdic_t *dic)
 
 CARBON_FUNC_UNUSED
 static bool
-carbon_strdic_insert(carbon_strdic_t *dic, carbon_string_id_t **out, char *const *strings, size_t nstrings,
-                     size_t nthreads)
+carbon_strdic_insert(carbon_strdic_t *dic, carbon_string_id_t **out, char *const *strings,
+                     carbon_string_id_t grouping_key, size_t nstrings, size_t nthreads)
 {
     CARBON_NON_NULL_OR_ERROR(dic);
     CARBON_NON_NULL_OR_ERROR(strings);
     assert(dic->insert);
-    return dic->insert(dic, out, strings, nstrings, nthreads);
+    return dic->insert(dic, out, strings, grouping_key, nstrings, nthreads);
 }
 
 CARBON_FUNC_UNUSED
@@ -214,7 +216,7 @@ carbon_strdic_locate_fast(carbon_string_id_t **out, carbon_strdic_t *dic, char *
 }
 
 CARBON_FUNC_UNUSED
-static char **
+static carbon_strdic_entry_t*
 carbon_strdic_extract(carbon_strdic_t *dic, const carbon_string_id_t *ids, size_t nids)
 {
     return dic->extract(dic, ids, nids);
@@ -247,13 +249,14 @@ CARBON_FUNC_UNUSED
 static bool
 carbon_strdic_get_contents(carbon_vec_t ofType (char *) *strings,
                            carbon_vec_t ofType(carbon_string_id_t) *string_ids,
+                           carbon_vec_t ofType(carbon_string_id_t) *grouping_keys,
                            carbon_strdic_t *dic)
 {
     CARBON_NON_NULL_OR_ERROR(strings)
     CARBON_NON_NULL_OR_ERROR(string_ids)
     CARBON_NON_NULL_OR_ERROR(dic);
     assert(dic->get_contents);
-    return dic->get_contents(dic, strings, string_ids);
+    return dic->get_contents(dic, strings, string_ids, grouping_keys);
 }
 
 CARBON_END_DECL
