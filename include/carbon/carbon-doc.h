@@ -22,6 +22,7 @@
 #include "carbon-vector.h"
 #include "carbon-strdic.h"
 #include "carbon-json.h"
+#include "carbon-hashmap.h"
 
 CARBON_BEGIN_DECL
 
@@ -39,8 +40,8 @@ typedef struct carbon_doc_entries
 typedef struct carbon_doc_bulk
 {
     carbon_strdic_t                          *dic;
-    carbon_vec_t ofType(char *)               keys,
-                                              values;
+    carbon_vec_t ofType(char *)               keys;
+    carbon_hashmap_any_t ofType(char *)       values;
     carbon_vec_t ofType(carbon_doc_t)         models;
 
 } carbon_doc_bulk_t;
@@ -80,6 +81,7 @@ carbon_doc_bulk_new_obj(carbon_doc_t *model);
 CARBON_EXPORT(bool)
 carbon_doc_bulk_get_dic_contents(carbon_vec_t ofType (const char *) **strings,
                                  carbon_vec_t ofType(carbon_string_id_t) **string_ids,
+                                 carbon_vec_t ofType(carbon_string_id_t) **key_ids,
                                  const carbon_doc_bulk_t *context);
 
 CARBON_EXPORT(bool)
@@ -98,7 +100,7 @@ CARBON_EXPORT(bool)
 carbon_doc_obj_add_key(carbon_doc_entries_t **out, carbon_doc_obj_t *obj, const char *key, carbon_field_type_e type);
 
 CARBON_EXPORT(bool)
-carbon_doc_obj_push_primtive(carbon_doc_entries_t *entry, const void *value);
+carbon_doc_obj_push_primtive(carbon_doc_entries_t *entry, const char * key, const void *value);
 
 CARBON_EXPORT(bool)
 carbon_doc_obj_push_object(carbon_doc_obj_t **out, carbon_doc_entries_t *entry);
