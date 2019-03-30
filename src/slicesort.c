@@ -186,7 +186,7 @@ void fillUpCompressedArray(Hash compressedHashes[], size_t currentLength, size_t
     size_t i;
     size_t maxIndexSub = 0;
     for (i = currentLength; i < maxLength; ++i) {
-        compressedHashes[i] = LONG_MAX - i;
+        compressedHashes[i] = LONG_MAX;
         ++maxIndexSub;
     }
 }

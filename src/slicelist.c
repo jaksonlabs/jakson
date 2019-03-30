@@ -592,7 +592,7 @@ uint32_t SLICE_RESEARCH_BINARY(Slice *slice, Hash needleHash, const char *needle
 #endif
                                 break;
                             case SLICE_LOOKUP_BESEARCH:
-#ifdef ENABLE_BASELINE
+#ifdef ENABLE_BASELINE_RESEARCH
                                 pairPosition = SLICE_SCAN(slice, keyHash, needle);
 #endif
 #ifdef ENABLE_SEALED_KARY_SIMD_SCAN
@@ -783,15 +783,23 @@ uint32_t SLICE_RESEARCH_BINARY(Slice *slice, Hash needleHash, const char *needle
 // memcpy(compressedColumn + newResult, newHashes + newResult, result - newResult);
         memcpy(compressedColumn, newHashes, sizeof(keyHashColumn));
 
-        if(result < 124) {
+        if(result < 124 && SLICE_KEY_COLUMN_MAX_ELEMS >= 124) {
+            size_t newResult = 124;
+            fillUpCompressedArray(newHashes, result, 124);
+            slice_linearize(newHashes, compressedColumn, 0, newResult, newMapping, newDuplicates, 5, slice->keyHashMapping2, slice->duplicates);
+            // memcpy(compressedColumn + newResult, newHashes + newResult, result - newResult);
+        }
+        else if(result < 124) {
             size_t newResult = 24;
             slice_linearize(newHashes, compressedColumn, 0, newResult, newMapping, newDuplicates, 5, slice->keyHashMapping2, slice->duplicates);
             // memcpy(compressedColumn + newResult, newHashes + newResult, result - newResult);
         }
-        // else if (result < 124) {
-        //    fillUpCompressedArray(newHashes, result, 124);
-        //    result = 124;
-        //}
+        else if(result < 624 && SLICE_KEY_COLUMN_MAX_ELEMS >= 624) {
+            size_t newResult = 624;
+            fillUpCompressedArray(newHashes, result, 624);
+            slice_linearize(newHashes, compressedColumn, 0, newResult, newMapping, newDuplicates, 5, slice->keyHashMapping2, slice->duplicates);
+            // memcpy(compressedColumn + newResult, newHashes + newResult, result - newResult);
+        }
         else if(result < 624) {
             size_t newResult = 124;
             slice_linearize(newHashes, compressedColumn, 0, newResult, newMapping, newDuplicates, 5, slice->keyHashMapping2, slice->duplicates);
