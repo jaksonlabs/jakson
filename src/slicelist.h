@@ -34,6 +34,8 @@
 #include "hash.h"
 #include "simd.h"
 #include "slicesort.h"
+#include "slice_measure.h"
+#include "time.h"
 
 NG5_BEGIN_DECL
 
@@ -67,7 +69,7 @@ typedef struct Slice Slice;
 
 #define SLICE_DATA_SIZE (NG5_SLICE_LIST_TARGET_MEMORY_SIZE_IN_BYTE - sizeof(slice_lookup_strat_e) - sizeof(uint32_t))
 
-#define SLICE_KEY_COLUMN_MAX_ELEMS 2000 // SLICE_DATA_SIZE / 8 / 3) /* one array with elements of 64 bits each, 3 of them */
+#define SLICE_KEY_COLUMN_MAX_ELEMS 136 // SLICE_DATA_SIZE / 8 / 3) /* one array with elements of 64 bits each, 3 of them */
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
@@ -75,15 +77,17 @@ typedef struct Slice Slice;
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-// SIMD Scan with SIMDScanOperation struct
-//  #define ENABLE_BASELINE 1
 
+// #define ENABLE_BASELINE 1
+
+// SIMD Scan with SIMDScanOperation struct
 // #define ENABLE_SLICE_SCAN_SIMD 1
 
 // Improved inline SIMD Scan implementation
  #define ENABLE_SLICE_SCAN_SIMD_INLINE 1
 
-#define ENABLE_BASELINE_RESEARCH 1
+// Default scan implementation also for research
+// #define ENABLE_BASELINE_RESEARCH 1
 
 // Improved inline SIMD Scan implementation as macro
 // #define ENABLE_SLICE_SCAN_SIMD_MACRO 1
@@ -92,7 +96,7 @@ typedef struct Slice Slice;
 // #define ENABLE_SEALED_BINARY_SCAN 1
 
 // SIMD accelerated k-ary search for sealed slices
-// #define ENABLE_SEALED_KARY_SIMD_SCAN 1
+#define ENABLE_SEALED_KARY_SIMD_SCAN 1
 
 // ---------------------------------------------------------------------------------------------------------------------
 //

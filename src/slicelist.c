@@ -179,6 +179,7 @@ uint32_t SLICE_SCAN_SIMD_INLINE(Slice *slice, Hash needleHash, const char *needl
 
     } while (continueScan);
 
+
     return cacheHit ? slice->cacheIdx : (!endReached && keysMatch ? matchIndex : slice->numElems);
 
 }
@@ -336,7 +337,7 @@ SLICE_RESEARCH_SIMD_KARY(Slice* slice, Hash needleHash, const char *needleStr) {
         }
     } while(true);
 
-    if (!keysMatch) {
+    if (!keysMatch && index < slice->numElems) {
 
         index = slice->numElemsAfterCompressing;
         // Take care of the rest with normal scan
@@ -573,6 +574,9 @@ uint32_t SLICE_RESEARCH_BINARY(Slice *slice, Hash needleHash, const char *needle
                         DEBUG(NG5_SLICE_LIST_TAG, "ng5_slice_list_lookup_by_key key(%s) -> ?", needle);
                         uint32_t pairPosition;
 
+#ifdef ENABLE_MEASURE_TIME_SCANNED
+                        Timestamp scan_begin = TimeCurrentSystemTime();
+#endif
                         switch (slice->strat) {
                             case SLICE_LOOKUP_SCAN:
 
@@ -605,6 +609,12 @@ uint32_t SLICE_RESEARCH_BINARY(Slice *slice, Hash needleHash, const char *needle
                                 break;
                             default: PANIC("unknown slice find strategy");
                         }
+
+
+#ifdef ENABLE_MEASURE_TIME_SCANNED
+                        Timestamp scan_end = TimeCurrentSystemTime();
+                        timeElapsedScanning += (scan_end - scan_begin)/1000.0f;
+#endif
 
                         DEBUG(NG5_SLICE_LIST_TAG,
                               "ng5_slice_list_lookup_by_key key(%s) -> pos(%zu in slice #%zu)",
@@ -738,6 +748,9 @@ uint32_t SLICE_RESEARCH_BINARY(Slice *slice, Hash needleHash, const char *needle
         UNUSED(slice);
         UNUSED(list);
 
+#ifdef ENABLE_MEASURE_TIME_SEALED
+        Timestamp scan_begin = TimeCurrentSystemTime();
+#endif
 #ifdef ENABLE_SEALED_BINARY_SCAN
         Hash keyHashColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
         memcpy(keyHashColumn, slice->keyHashColumn, sizeof(keyHashColumn));
@@ -780,7 +793,6 @@ uint32_t SLICE_RESEARCH_BINARY(Slice *slice, Hash needleHash, const char *needle
 
         // Fill up to next size for complete k-ary search tree
         memcpy(&slice->keyHashMapping2, &slice->keyHashMapping, sizeof(slice->keyHashMapping));
-// memcpy(compressedColumn + newResult, newHashes + newResult, result - newResult);
         memcpy(compressedColumn, newHashes, sizeof(keyHashColumn));
 
         if(result < 124 && SLICE_KEY_COLUMN_MAX_ELEMS >= 124) {
@@ -824,6 +836,10 @@ uint32_t SLICE_RESEARCH_BINARY(Slice *slice, Hash needleHash, const char *needle
         unlock(list);
 #endif
 
+#ifdef ENABLE_MEASURE_TIME_SEALED
+        Timestamp scan_end = TimeCurrentSystemTime();
+        timeElapsedSealing += (scan_end - scan_begin)/1000.0f;
+#endif
     }
 
 

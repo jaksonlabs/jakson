@@ -7,6 +7,8 @@
 #include "src/slicelist.h"
 #include "src/chunkreader.h"
 #include "src/time.h"
+#include "src/slice_measure.h"
+
 //#src <ng5/roadfire/roadfire.h>
 
 #define NUM_SAMPLES 1
@@ -19,13 +21,17 @@
 
 #define NUM_SLICE_INSERT 100000
 
+ float timeElapsedScanning;
+ float timeElapsedSealing;
+
 void experiments_hashing()
 {
-    printf("chunk_num;sample;num_buckets;time_created_sec;time_inserted_sec;time_bulk_sum_created_inserted;num_strings_chunk;num_strings_total;num_distinct_strings\n");
-
+    printf("chunk_num;sample;num_buckets;time_created_sec;time_inserted_sec;time_bulk_sum_created_inserted;num_strings_chunk;num_strings_total;num_distinct_strings;time_scanned;time_sealed\n");
+    timeElapsedScanning = 0;
+    timeElapsedSealing = 0;
     // const char* path = "./benches/data/test.txt";
-    //const char* path = "./benches/yago1-99pc-stringlist-cleaned.txt";
-     const char* path = "./benches/yago1-short.txt";
+     const char* path = "./benches/yago1-99pc-stringlist-cleaned.txt";
+    // const char* path = "./benches/yago1-short.txt";
     // const char* path = "./benches/tpch-sf10-cleaned.txt.list";
     //const char* path = "/home/pinnecke/datasets/yago1/stringlists/yago1-15pc-stringlist.txt";
     //const char* path = "/home/pinnecke/mnt/datasets/mag-cleaned.txt";
@@ -122,9 +128,10 @@ void experiments_hashing()
 
                 total_num += VectorLength(vector);
 
-                printf("%zu;%d;%zu;%f;%f;%f;%zu;%zu;%zu\n", chunk_num++, sample, num_buckets, created_duration,
+                printf("%zu;%d;%zu;%f;%f;%f;%zu;%zu;%zu;%f;%f\n", chunk_num++, sample, num_buckets, created_duration,
                         insert_duration,
-                        (created_duration+insert_duration), VectorLength(vector), total_num, num_distinct);
+                        (created_duration+insert_duration), VectorLength(vector), total_num, num_distinct,
+                       timeElapsedScanning, timeElapsedSealing);
 
                 StringDictionaryFree(&dic, ids);
                 //string_dic_free(&dic, extracted_strings);
