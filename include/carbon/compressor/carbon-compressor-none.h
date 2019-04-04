@@ -41,6 +41,9 @@ carbon_compressor_none_write_extra(carbon_compressor_t *self, carbon_memfile_t *
                                    const carbon_vec_t ofType (const char *) *strings);
 
 CARBON_EXPORT(bool)
+carbon_compressor_none_read_extra(carbon_compressor_t *self, FILE *src, size_t nbytes);
+
+CARBON_EXPORT(bool)
 carbon_compressor_none_print_extra(carbon_compressor_t *self, FILE *file, carbon_memfile_t *src);
 
 CARBON_EXPORT(bool)

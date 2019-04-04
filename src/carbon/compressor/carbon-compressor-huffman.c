@@ -128,6 +128,19 @@ carbon_compressor_huffman_write_extra(carbon_compressor_t *self, carbon_memfile_
 }
 
 CARBON_EXPORT(bool)
+carbon_compressor_huffman_read_extra(carbon_compressor_t *self, FILE *src, size_t nbytes)
+{
+    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_HUFFMAN);
+
+    CARBON_UNUSED(self);
+    CARBON_UNUSED(src);
+    CARBON_UNUSED(nbytes);
+
+    abort(); /* not implemented */
+    return false;
+}
+
+CARBON_EXPORT(bool)
 carbon_compressor_huffman_print_extra(carbon_compressor_t *self, FILE *file, carbon_memfile_t *src)
 {
     CARBON_UNUSED(self);

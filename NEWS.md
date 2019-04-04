@@ -6,6 +6,8 @@
 - Modified command line in module `convert` of `carbon-tool` to select compressor to be used for conversion 
   from JSON to CARBON archives. Until now, `--compressor=<compressor>` was used. Now, it is just 
   `--compressor <compressor>`.
+- In Compressor Framework, add function to read implementation-specific extra data (e.g., in order to reconstruct
+  a coding table). See `read_extra` of `carbon_compressor_t` in [carbon-compressor.h](include/carbon/carbon-compressor.h)  
 - Fix a bug that permits to import empty JSON-objects (e.g., `{ "k": {} }`) in archives 
 
 ## 0.2.00.01 [2019-03-25]

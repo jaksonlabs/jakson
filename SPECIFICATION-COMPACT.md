@@ -16,7 +16,7 @@ archive-header        ::= magic-word version-string record-offset string-id-offs
 record-header         ::= 'r' record-header-flags record-size
 baked-indexes         ::= string-id-to-offset?
 string-id-to-offset   ::= '#' key-data-off value-data-off table-off num-entries key-vec value-vec table-vec 
-string-table          ::= ::= 'D' num-strings table-flags first-entry-offset ( no-compressor | huffman-compressor )
+string-table          ::= 'D' num-strings table-flags first-entry-offset extra-field-size ( no-compressor | huffman-compressor )
 string-entry-header   ::= '-' next-entry-offset string-id string-length 
 no-compressor         ::= (string-entry-header character+)+
 huffman-compressor    ::= huffman-dictionary huffman-string+

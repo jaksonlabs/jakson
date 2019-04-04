@@ -106,6 +106,14 @@ carbon_compressor_write_extra(carbon_err_t *err, carbon_compressor_t *self, carb
 }
 
 CARBON_EXPORT(bool)
+carbon_compressor_read_extra(carbon_err_t *err, carbon_compressor_t *self, FILE *src, size_t nbytes)
+{
+    CARBON_NON_NULL_OR_ERROR(self)
+    CARBON_IMPLEMENTS_OR_ERROR(err, self, read_extra)
+    return self->read_extra(self, src, nbytes);
+}
+
+CARBON_EXPORT(bool)
 carbon_compressor_encode(carbon_err_t *err, carbon_compressor_t *self, carbon_memfile_t *dst,
                          const char *string)
 {

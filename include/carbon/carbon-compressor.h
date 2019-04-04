@@ -100,6 +100,8 @@ typedef struct carbon_compressor
      * serialization of that book-keeping data. After internal construction of this book-keeping data,
      * this data is serialized into the <code>dst</code> parameter.
      *
+     * Reverse function of <code>read_extra</code>.
+     *
      * @note single strings must not be encoded; this is is done when the framework invokes <code>encode_string</code>
      *
      * @param self A pointer to the compressor that is used; maybe accesses <code>extra</code>
@@ -114,6 +116,19 @@ typedef struct carbon_compressor
      * */
     bool (*write_extra)(carbon_compressor_t *self, carbon_memfile_t *dst,
                             const carbon_vec_t ofType (const char *) *strings);
+
+    /**
+     * Function to reconstruct implementation-specific dictionary, book-keeping or extra data by deserialization (
+     * e.g., a code table)
+     *
+     * Reverse function of <code>write_extra</code>.
+     *
+     * @param self A pointer to the compressor that is used; maybe accesses <code>extra</code>
+     * @param src A file where the cursor is moved to the first byte of the extra field previously serialized with 'write_extra'
+     * @param nbytes Number of bytes written when 'write_extra' was called. Intended to read read to restore the extra field.
+     * @return The implementer must return <code>true</code> on success, and <code>false</code> otherwise.
+     */
+    bool (*read_extra)(carbon_compressor_t *self, FILE *src, size_t nbytes);
 
     /**
      * Encodes an input string and writes its encoded version into a memory file.
@@ -178,6 +193,7 @@ static void carbon_compressor_none_create(carbon_compressor_t *strategy)
     strategy->cpy             = carbon_compressor_none_cpy;
     strategy->drop            = carbon_compressor_none_drop;
     strategy->write_extra     = carbon_compressor_none_write_extra;
+    strategy->read_extra      = carbon_compressor_none_read_extra;
     strategy->encode_string   = carbon_compressor_none_encode_string;
     strategy->decode_string   = carbon_compressor_none_decode_string;
     strategy->print_extra     = carbon_compressor_none_print_extra;
@@ -191,6 +207,7 @@ static void carbon_compressor_huffman_create(carbon_compressor_t *strategy)
     strategy->cpy             = carbon_compressor_huffman_cpy;
     strategy->drop            = carbon_compressor_huffman_drop;
     strategy->write_extra     = carbon_compressor_huffman_write_extra;
+    strategy->read_extra      = carbon_compressor_huffman_read_extra;
     strategy->encode_string   = carbon_compressor_huffman_encode_string;
     strategy->decode_string   = carbon_compressor_huffman_decode_string;
     strategy->print_extra     = carbon_compressor_huffman_print_extra;
@@ -240,6 +257,9 @@ carbon_compressor_drop(carbon_err_t *err, carbon_compressor_t *self);
 CARBON_EXPORT(bool)
 carbon_compressor_write_extra(carbon_err_t *err, carbon_compressor_t *self, carbon_memfile_t *dst,
                     const carbon_vec_t ofType (const char *) *strings);
+
+CARBON_EXPORT(bool)
+carbon_compressor_read_extra(carbon_err_t *err, carbon_compressor_t *self, FILE *src, size_t nbytes);
 
 CARBON_EXPORT(bool)
 carbon_compressor_encode(carbon_err_t *err, carbon_compressor_t *self, carbon_memfile_t *dst,

@@ -70,6 +70,7 @@ typedef struct __attribute__((packed))
     uint32_t num_entries;
     uint8_t flags;
     carbon_off_t first_entry;
+    carbon_off_t compressor_extra_size;
 } carbon_string_table_header_t;
 
 typedef struct __attribute__((packed))

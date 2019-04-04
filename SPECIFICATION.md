@@ -44,7 +44,7 @@ reserved-bit
          ::= '1'
            | '0'
 string-table
-         ::= 'D' num-strings table-flags first-entry-offset ( no-compressor | huffman-compressor )
+         ::= 'D' num-strings table-flags first-entry-offset extra-field-size ( no-compressor | huffman-compressor )
 table-flags
          ::= table-flags-8-bitmask
 table-flags-8-bitmask
@@ -134,6 +134,8 @@ object-count
          ::= u32
 object-id-column
          ::= u64
+extra-field-size 
+         ::= u64         
 object-flags
          ::= object-flags-32bitmask
 object-flags-32bitmask

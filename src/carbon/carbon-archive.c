@@ -1349,13 +1349,16 @@ static bool serialize_string_dic(carbon_memfile_t *memfile, carbon_err_t *err, c
     carbon_off_t header_pos = CARBON_MEMFILE_TELL(memfile);
     carbon_memfile_skip(memfile, sizeof(carbon_string_table_header_t));
 
+    carbon_off_t extra_begin_off = CARBON_MEMFILE_TELL(memfile);
     carbon_compressor_write_extra(err, &strategy, memfile, strings);
+    carbon_off_t extra_end_off = CARBON_MEMFILE_TELL(memfile);
 
     header = (carbon_string_table_header_t) {
         .marker = marker_symbols[MARKER_TYPE_EMBEDDED_STR_DIC].symbol,
         .flags = flags.value,
         .num_entries = strings->num_elems,
-        .first_entry = CARBON_MEMFILE_TELL(memfile)
+        .first_entry = CARBON_MEMFILE_TELL(memfile),
+        .compressor_extra_size = (extra_end_off - extra_begin_off)
     };
 
     for (size_t i = 0; i < strings->num_elems; i++) {
@@ -1969,8 +1972,8 @@ static bool print_embedded_dic_from_memfile(FILE *file, carbon_err_t *err, carbo
 
     char *flagsStr = embedded_dic_flags_to_string(&flags);
     fprintf(file, "0x%04x ", offset);
-    fprintf(file, "[marker: %c] [nentries: %d] [flags: %s] [first-entry-off: 0x%04x]\n", header->marker,
-            header->num_entries, flagsStr, (unsigned) header->first_entry);
+    fprintf(file, "[marker: %c] [nentries: %d] [flags: %s] [first-entry-off: 0x%04x] [extra-size: %zu]\n", header->marker,
+            header->num_entries, flagsStr, (unsigned) header->first_entry, header->compressor_extra_size);
     free(flagsStr);
 
     if (carbon_compressor_by_flags(&strategy, flags.value) != true) {
@@ -2245,6 +2248,9 @@ static bool read_stringtable(carbon_archive_string_table_t *table, carbon_err_t 
     table->num_embeddded_strings = header.num_entries;
 
     if ((init_decompressor(&table->compressor, flags.value)) != true) {
+        return false;
+    }
+    if ((carbon_compressor_read_extra(err, &table->compressor, disk_file, header.compressor_extra_size)) != true) {
         return false;
     }
     return true;
