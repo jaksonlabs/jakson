@@ -17,6 +17,7 @@
 
 #include <math.h>
 #include <inttypes.h>
+#include <carbon/carbon-json.h>
 #include "carbon/carbon-doc.h"
 #include "carbon/carbon-columndoc.h"
 #include "carbon/carbon-json.h"

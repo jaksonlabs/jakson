@@ -1,4 +1,12 @@
-## 0.2.00.02 [2019-XX-XX]
+## 0.3.00.00 [2019-XX-XX]
+- In `carbon-tool`, enable the user to set whether a single-threaded (`sync`) or multi-threaded (`async`) string 
+  dictionary should be used when conversion from JSON to CARBON archives is issued (via `convert` module). By
+  default a multi-threaded implementation with 8 threads is used. To change that, `carbon-tool convert` has
+  now to new parameters, `--dic-type` and `--dic-nthreads`. See `carbon-tool` usage instructions for details.
+- Modified command line in module `convert` of `carbon-tool` to select compressor to be used for conversion 
+  from JSON to CARBON archives. Until now, `--compressor=<compressor>` was used. Now, it is just 
+  `--compressor <compressor>`.
+- Fix a bug that permits to import empty JSON-objects (e.g., `{ "k": {} }`) in archives 
 
 ## 0.2.00.01 [2019-03-25]
 - To avoid re-creation of the index used for *Indexed String Fetch* when a archive is loaded into memory, 

@@ -138,7 +138,7 @@ bool carbon_cmdopt_mgr_show_help(FILE *file, carbon_cmdopt_mgr_t *manager)
             }
             fprintf(file, "\n");
         }
-        fprintf(file, "\n'%s help' show this help, and '%s help <command>' open manpage of\nthe specific command.\n",
+        fprintf(file, "\n'%s help' show this help, and '%s help <command>' to open \nmanpage of specific command.\n",
                 manager->module_name, manager->module_name);
     } else {
         fprintf(file, "usage: %s %s\n\n", manager->module_name,

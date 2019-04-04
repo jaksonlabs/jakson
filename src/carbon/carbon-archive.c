@@ -25,6 +25,7 @@
 #include <carbon/carbon-string-id-cache.h>
 #include <err.h>
 #include <carbon/carbon-archive.h>
+#include <carbon/strdic/carbon-strdic-sync.h>
 
 #include "carbon/carbon-common.h"
 #include "carbon/carbon-memblock.h"
@@ -140,6 +141,8 @@ carbon_archive_from_json(carbon_archive_t *out,
                          carbon_err_t *err,
                          const char *json_string,
                          carbon_compressor_type_e compressor,
+                         carbon_strdic_type_e dictionary,
+                         size_t num_async_dic_threads,
                          bool read_optimized, bool bake_string_id_index,
                          carbon_archive_callback_t *callback)
 {
@@ -153,7 +156,8 @@ carbon_archive_from_json(carbon_archive_t *out,
     carbon_memblock_t *stream;
     FILE *out_file;
 
-    if (!carbon_archive_stream_from_json(&stream, err, json_string, compressor, read_optimized, bake_string_id_index, callback)) {
+    if (!carbon_archive_stream_from_json(&stream, err, json_string, compressor, dictionary, num_async_dic_threads,
+                                         read_optimized, bake_string_id_index, callback)) {
         return false;
     }
 
@@ -197,6 +201,8 @@ carbon_archive_stream_from_json(carbon_memblock_t **stream,
                                 carbon_err_t *err,
                                 const char *json_string,
                                 carbon_compressor_type_e compressor,
+                                carbon_strdic_type_e dictionary,
+                                size_t num_async_dic_threads,
                                 bool read_optimized, bool bake_id_index,
                                 carbon_archive_callback_t *callback)
 {
@@ -215,7 +221,14 @@ carbon_archive_stream_from_json(carbon_memblock_t **stream,
     OPTIONAL_CALL(callback, begin_archive_stream_from_json)
 
     OPTIONAL_CALL(callback, begin_setup_string_dictionary);
-    carbon_strdic_create_async(&dic, 1000, 1000, 1000, 8, NULL);
+    if (dictionary == CARBON_STRDIC_TYPE_SYNC) {
+        carbon_strdic_create_sync(&dic, 1000, 1000, 1000, 0, NULL);
+    } else if (dictionary == CARBON_STRDIC_TYPE_ASYNC) {
+        carbon_strdic_create_async(&dic, 1000, 1000, 1000, num_async_dic_threads, NULL);
+    } else {
+        CARBON_ERROR(err, CARBON_ERR_UNKNOWN_DIC_TYPE);
+    }
+
     OPTIONAL_CALL(callback, end_setup_string_dictionary);
 
     OPTIONAL_CALL(callback, begin_parse_json);
@@ -1997,7 +2010,7 @@ static bool print_archive_from_memfile(FILE *file, carbon_err_t *err, carbon_mem
 static carbon_archive_object_flags_t *get_flags(carbon_archive_object_flags_t *flags, carbon_columndoc_obj_t *columndoc) {
     CARBON_ZERO_MEMORY(flags, sizeof(carbon_archive_object_flags_t));
     flags->bits.has_null_props         = (columndoc->null_prop_keys.num_elems > 0);
-    flags->bits.has_bool_props      = (columndoc->bool_prop_keys.num_elems > 0);
+    flags->bits.has_bool_props         = (columndoc->bool_prop_keys.num_elems > 0);
     flags->bits.has_int8_props         = (columndoc->int8_prop_keys.num_elems > 0);
     flags->bits.has_int16_props        = (columndoc->int16_prop_keys.num_elems > 0);
     flags->bits.has_int32_props        = (columndoc->int32_prop_keys.num_elems > 0);
@@ -2022,7 +2035,7 @@ static carbon_archive_object_flags_t *get_flags(carbon_archive_object_flags_t *f
     flags->bits.has_float_array_props    = (columndoc->float_array_prop_keys.num_elems > 0);
     flags->bits.has_string_array_props  = (columndoc->string_array_prop_keys.num_elems > 0);
     flags->bits.has_object_array_props  = (columndoc->obj_array_props.num_elems > 0);
-    assert(flags->value != 0);
+    //assert(flags->value != 0);
     return flags;
 }
 

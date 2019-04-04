@@ -4,24 +4,37 @@
 #include "modules.h"
 #include "cli.h"
 
-#define DESC_CHECK_JS "Test whether JSON input files given as args are suitable for CARBON."
+#define DESC_CHECK_JS "Test if JSON files are suitable for CARBON."
 #define DESC_CHECK_JS_USAGE "Test if input files given via <args> parameter are suitable for CARBON conversion.\n" \
                             "\nEXAMPLE\n\t$ carbon checkjs myjson1.json myjson2.json"
 
 #define DESC_JS2CAB "Convert single JSON file into CARBON format"
 #define DESC_JS2CAB_USAGE "The parameter <args> is split into two parts <output> and <input>.\n" \
-                          "This command converts a single JSON file <input> into CARBON formatted file <output>.\n\n" \
-                          "Optionally, the following options are available that must be defined before <output>:\n\n" \
-                          "   --size-optimized           Compress the embedded string dictionary using a particular compressor\n" \
-                          "   --compressor=<compressor>  Use <compressor> as compression technique for size optimization.\n" \
-                          "                              Run `carbon-tool list compressors` to see options.\n" \
-                          "   --no-string-id-index       Turn-off pre-computation of string id to offset index.\n" \
-                          "   --read-optimized           Sort keys and values during pre-processing for efficient reads\n" \
-                          "   --force-overwrite          Overwrite the output file if this file already exists\n" \
-                          "   --silent                   Suppresses all outputs to stdout\n" \
+                          "This command converts a single JSON file <input> into CARBON formatted\nfile <output>.\n\n" \
+                          "Optionally, the following options are available that must be defined\nbefore <output>:\n\n" \
+                          "   --size-optimized           Compress the embedded string dictionary using a\n" \
+                          "                              particular compressor\n" \
+                          "   --compressor <compressor>  Use <compressor> as compression technique for\n" \
+                          "                              size optimization. Run `list compressors` in\n" \
+                          "                              carbon-tool to see available compressors\n" \
+                          "   --no-string-id-index       Turn-off pre-computation of string id to offset\n" \
+                          "                              index\n" \
+                          "   --read-optimized           Sort keys and values during pre-processing for\n" \
+                          "                              efficient reads (experimental)\n" \
+                          "   --force-overwrite          Overwrite the output file if this file already\n" \
+                          "                              exists\n" \
+                          "   --silent                   Suppress all outputs to stdout\n" \
+                          "   --dic-type <type>          Use <type> as string dictionary implementation to\n" \
+                          "                              be used. Types are 'sync' (single-threaded), and\n" \
+                          "                              'async' (multi-threaded). Default type is 'async'.\n" \
+                          "                              If 'async', see `--dic-nthreads` for options\n" \
+                          "   --dic-nthreads <num>       Use number <num> of threads being spawn for\n" \
+                          "                              string dictionary encoding. Ignored unless\n" \
+                          "                              parameter `--dic-type` is set to `async`.\n" \
+                          "                              By default, 8 threads are spawned\n" \
                           "\nEXAMPLE\n" \
-                          "   $ carbon convert output.carbon input.json\n" \
-                          "   $ carbon convert --size-optimized --read-optimized output.cab input.json" \
+                          "   $ carbon-tool convert out.carbon in.json\n" \
+                          "   $ carbon-tool convert --size-optimized --read-optimized out.carbon in.json" \
 
 #define DESC_CAB2JS_INFO  "Convert single CARBON file into JSON and print it to stdout"
 #define DESC_CAB2JS_USAGE "The parameter <args> is a path to a CARBON file that is converted JSON and printed on stdout.\n" \

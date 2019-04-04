@@ -169,8 +169,10 @@ bool moduleCheckJsInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t 
 #define JS_2_CAB_OPTION_SILENT_OUTPUT "--silent"
 #define JS_2_CAB_OPTION_SIZE_OPTIMIZED "--size-optimized"
 #define JS_2_CAB_OPTION_READ_OPTIMIZED "--read-optimized"
+#define JS_2_CAB_OPTION_DIC_TYPE "--dic-type"
+#define JS_2_CAB_OPTION_DIC_NTHREADS "--dic-nthreads"
 #define JS_2_CAB_OPTION_NO_STRING_ID_INDEX "--no-string-id-index"
-#define JS_2_CAB_OPTION_USE_COMPRESSOR "--compressor="
+#define JS_2_CAB_OPTION_USE_COMPRESSOR "--compressor"
 #define JS_2_CAB_OPTION_USE_COMPRESSOR_HUFFMAN "huffman"
 
 static void tracker_begin_create_from_model()
@@ -324,6 +326,8 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
         bool flagForceOverwrite = false;
         bool flagBakeStringIdIndex = true;
         carbon_compressor_type_e compressor = CARBON_COMPRESSOR_NONE;
+        carbon_strdic_type_e dic_type = CARBON_STRDIC_TYPE_ASYNC;
+        int string_dic_async_nthreads = 8;
 
         int outputIdx = 0, inputIdx = 1;
         int i;
@@ -342,13 +346,38 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
                     CARBON_CONSOLE_OUTPUT_OFF();
                 } else if (strcmp(opt, JS_2_CAB_OPTION_FORCE_OVERWRITE) == 0) {
                     flagForceOverwrite = true;
-                } else if (strncmp(opt, JS_2_CAB_OPTION_USE_COMPRESSOR, strlen(JS_2_CAB_OPTION_USE_COMPRESSOR)) == 0) {
-                    const char *compressor_name = opt + strlen(JS_2_CAB_OPTION_USE_COMPRESSOR);
+                } else if (strcmp(opt, JS_2_CAB_OPTION_USE_COMPRESSOR) == 0 && i++ < argc) {
+                    const char *compressor_name = argv[i];
                     if (!carbon_compressor_by_name(&compressor, compressor_name)) {
                         CARBON_CONSOLE_WRITE(file, "unsupported compressor requested: '%s'",
                                              compressor_name);
                         CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
                         CARBON_CONSOLE_WRITELN(file, "** ERROR ** unsupported operation requested: %s", opt);
+                        return false;
+                    }
+                } else if (strcmp(opt, JS_2_CAB_OPTION_DIC_TYPE) == 0 && i++ < argc) {
+                    const char *dic_type_name = argv[i];
+                    if (strcmp(dic_type_name, "async") == 0) {
+                        dic_type = CARBON_STRDIC_TYPE_ASYNC;
+                    } else if (strcmp(dic_type_name, "sync") == 0) {
+                        dic_type = CARBON_STRDIC_TYPE_SYNC;
+                    } else {
+                        CARBON_CONSOLE_WRITE(file, "unsupported dictionary type requested: '%s'",
+                                             dic_type_name);
+                        CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
+                        CARBON_CONSOLE_WRITELN(file, "** ERROR ** unsupported operation requested: %s", opt);
+                        return false;
+                    }
+                } else if (strcmp(opt, JS_2_CAB_OPTION_DIC_NTHREADS) == 0 && i++ < argc) {
+                    const char *nthreads_str = argv[i];
+                    int nthreads_atoid = atoi(nthreads_str);
+                    if (nthreads_atoid > 0) {
+                        string_dic_async_nthreads = nthreads_atoid;
+                    } else {
+                        CARBON_CONSOLE_WRITE(file, "not a number or zero threads assigned: '%s'",
+                                             nthreads_str);
+                        CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
+                        CARBON_CONSOLE_WRITELN(file, "** ERROR ** thread setting cannot be applied: %s", opt);
                         return false;
                     }
                 } else {
@@ -433,8 +462,8 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
         progress_tracker.end_string_id_index_baking = tracker_end_string_id_index_baking;
 
         if (!carbon_archive_from_json(&archive, pathCarbonFileOut, &err, jsonContent,
-                                      compressor, flagReadOptimized, flagBakeStringIdIndex,
-                                               &progress_tracker)) {
+                                      compressor, dic_type, string_dic_async_nthreads, flagReadOptimized,
+                                      flagBakeStringIdIndex, &progress_tracker)) {
             carbon_error_print_and_abort(&err);
         } else {
             carbon_archive_close(&archive);

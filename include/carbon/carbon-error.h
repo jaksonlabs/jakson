@@ -99,6 +99,7 @@ CARBON_BEGIN_DECL
 #define CARBON_ERR_TMP_FOPENWRITE 72          /** Temporary file cannot be opened for writing */
 #define CARBON_ERR_FWRITE_FAILED 73           /** Unable to write to file */
 #define CARBON_ERR_HASTABLE_DESERIALERR 74    /** Unable to deserialize hash table from file */
+#define CARBON_ERR_UNKNOWN_DIC_TYPE 75        /** Unknown string dictionary implementation requested */
 
 static const char *const _carbon_err_str[] = {
     "No error",
@@ -175,7 +176,8 @@ static const char *const _carbon_err_str[] = {
     "Index is corrupted: requested offset is outside file bounds",
     "Temporary file cannot be opened for writing",
     "Unable to write to file",
-    "Unable to deserialize hash table from file"
+    "Unable to deserialize hash table from file",
+    "Unknown string dictionary implementation requested"
 };
 
 #define CARBON_ERRSTR_ILLEGAL_CODE "illegal error code"

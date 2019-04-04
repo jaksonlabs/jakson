@@ -87,6 +87,8 @@ carbon_archive_from_json(carbon_archive_t *out,
                          carbon_err_t *err,
                          const char *json_string,
                          carbon_compressor_type_e compressor,
+                         carbon_strdic_type_e dictionary,
+                         size_t num_async_dic_threads,
                          bool read_optimized, bool bake_string_id_index,
                          carbon_archive_callback_t *callback);
 
@@ -95,6 +97,8 @@ carbon_archive_stream_from_json(carbon_memblock_t **stream,
                                 carbon_err_t *err,
                                 const char *json_string,
                                 carbon_compressor_type_e compressor,
+                                carbon_strdic_type_e dictionary,
+                                size_t num_async_dic_threads,
                                 bool read_optimized, bool bake_id_index,
                                 carbon_archive_callback_t *callback);
 

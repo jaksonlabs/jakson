@@ -858,6 +858,7 @@ static bool object_array_key_column_push(carbon_columndoc_column_t *col, carbon_
     case carbon_field_type_null: {
         carbon_vec_push(values_for_entry, &num_elements, 1);
     } break;
+    case carbon_field_type_bool:
     case carbon_field_type_int8:
     case carbon_field_type_int16:
     case carbon_field_type_int32:
