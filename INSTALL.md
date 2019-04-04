@@ -28,7 +28,7 @@ The build process is
 cmake .
 make carbon-tool
 ```
-After a successful build, the tool is located in the `build` directory.
+After a successful build, the tool is located in the `build` directory. The tool supports the POSIX standard for its arguments. Type `build/carbon-tool` for usage instructions.
 
 Examples files are located in the `examples` directory, and are build with
 ```
