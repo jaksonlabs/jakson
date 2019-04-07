@@ -97,6 +97,17 @@ carbon_compressor_none_print_encoded_string(carbon_compressor_t *self,
 }
 
 CARBON_EXPORT(bool)
+carbon_compressor_none_prepare_entries(carbon_compressor_t *self,
+                                       carbon_vec_t ofType(carbon_strdic_entry_t) *entries)
+{
+    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_NONE);
+    CARBON_UNUSED(self);
+    CARBON_UNUSED(entries);
+
+    return true;
+}
+
+CARBON_EXPORT(bool)
 carbon_compressor_none_encode_string(carbon_compressor_t *self, carbon_memfile_t *dst, carbon_err_t *err,
                                           const char *string, carbon_string_id_t grouping_key)
 {

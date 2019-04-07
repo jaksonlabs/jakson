@@ -27,6 +27,7 @@ create_strategy(size_t i, carbon_compressor_t *strategy, carbon_doc_bulk_t const
     assert (strategy->cpy);
     assert (strategy->drop);
     assert (strategy->write_extra);
+    assert (strategy->prepare_entries);
     assert (strategy->encode_string);
     assert (strategy->decode_string);
     assert (strategy->print_extra);
@@ -59,7 +60,7 @@ carbon_compressor_flagbit_by_type(carbon_compressor_type_e type)
 CARBON_EXPORT(bool)
 carbon_compressor_by_flags(carbon_compressor_t *strategy, uint8_t flags)
 {
-    for (size_t i = 0; i < CARBON_ARRAY_LENGTH(carbon_compressor_strategy_register); i++) {
+    for (size_t volatile i = 0; i < CARBON_ARRAY_LENGTH(carbon_compressor_strategy_register); i++) {
         if (carbon_compressor_strategy_register[i].flag_bit & flags) {
             return create_strategy(i, strategy, NULL);
         }
@@ -103,6 +104,15 @@ carbon_compressor_write_extra(carbon_err_t *err, carbon_compressor_t *self, carb
     CARBON_NON_NULL_OR_ERROR(self)
     CARBON_IMPLEMENTS_OR_ERROR(err, self, write_extra)
     return self->write_extra(self, dst, strings);
+}
+
+CARBON_EXPORT(bool)
+carbon_compressor_prepare_entries(carbon_err_t *err, carbon_compressor_t *self,
+                                  carbon_vec_t ofType(carbon_strdic_entry_t) *entries)
+{
+    CARBON_NON_NULL_OR_ERROR(self)
+    CARBON_IMPLEMENTS_OR_ERROR(err, self, prepare_entries)
+    return self->prepare_entries(self, entries);
 }
 
 CARBON_EXPORT(bool)

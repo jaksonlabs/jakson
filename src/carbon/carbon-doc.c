@@ -62,28 +62,20 @@ carbon_doc_obj_t *carbon_doc_bulk_new_obj(carbon_doc_t *model)
 }
 
 CARBON_EXPORT(bool)
-carbon_doc_bulk_get_dic_contents(carbon_vec_t ofType (const char *) **strings,
-                                 carbon_vec_t ofType(carbon_string_id_t) **string_ids,
-                                 carbon_vec_t ofType(carbon_string_id_t) **grouping_key_ids,
+carbon_doc_bulk_get_dic_contents(carbon_vec_t ofType (carbon_strdic_entry_t) **results,
                                  const carbon_doc_bulk_t *context)
 {
     CARBON_NON_NULL_OR_ERROR(context)
 
     size_t num_distinct_values;
     carbon_strdic_num_distinct(&num_distinct_values, context->dic);
-    carbon_vec_t ofType (const char *) *result_strings = malloc(sizeof(carbon_vec_t));
-    carbon_vec_t ofType (carbon_string_id_t) *resultcarbon_string_id_ts = malloc(sizeof(carbon_vec_t));
-    carbon_vec_t ofType (carbon_string_id_t) *result_grouping_keys = malloc(sizeof(carbon_vec_t));
+    carbon_vec_t ofType (carbon_strdic_entry_t) *result_vec = malloc(sizeof(carbon_vec_t));
 
-    carbon_vec_create(result_strings, NULL, sizeof(const char *), num_distinct_values);
-    carbon_vec_create(resultcarbon_string_id_ts, NULL, sizeof(carbon_string_id_t), num_distinct_values);
-    carbon_vec_create(result_grouping_keys, NULL, sizeof(carbon_string_id_t), num_distinct_values);
+    carbon_vec_create(result_vec, NULL, sizeof(carbon_strdic_entry_t), num_distinct_values);
 
-    int status = carbon_strdic_get_contents(result_strings, resultcarbon_string_id_ts, result_grouping_keys, context->dic);
+    int status = carbon_strdic_get_contents(result_vec, context->dic);
     CARBON_CHECK_SUCCESS(status);
-    *strings = result_strings;
-    *string_ids = resultcarbon_string_id_ts;
-    *grouping_key_ids = result_grouping_keys;
+    *results = result_vec;
 
     return status;
 }
@@ -783,8 +775,8 @@ static bool compare_encoded_string_less_eq_func(const void *lhs, const void *rhs
     carbon_strdic_t *dic = (carbon_strdic_t *) args;
     carbon_string_id_t *a = (carbon_string_id_t *) lhs;
     carbon_string_id_t *b = (carbon_string_id_t *) rhs;
-    carbon_strdic_entry_t *a_entry = carbon_strdic_extract(dic, a, 1);
-    carbon_strdic_entry_t *b_entry = carbon_strdic_extract(dic, b, 1);
+    carbon_strdic_entry_with_grouping_key_t *a_entry = carbon_strdic_extract(dic, a, 1);
+    carbon_strdic_entry_with_grouping_key_t *b_entry = carbon_strdic_extract(dic, b, 1);
     bool lq = strcmp(a_entry->str, b_entry->str) <= 0;
     carbon_strdic_free(dic, a_entry);
     carbon_strdic_free(dic, b_entry);
@@ -837,8 +829,8 @@ static bool compare_encoded_string_array_less_eq_func(const void *lhs, const voi
     const carbon_string_id_t *bValues = CARBON_VECTOR_ALL(b, carbon_string_id_t);
     size_t max_compare_idx = a->num_elems < b->num_elems ? a->num_elems : b->num_elems;
     for (size_t i = 0; i < max_compare_idx; i++) {
-        carbon_strdic_entry_t *aEntry = carbon_strdic_extract(dic, aValues + i, 1);
-        carbon_strdic_entry_t *bEntry = carbon_strdic_extract(dic, bValues + i, 1);
+        carbon_strdic_entry_with_grouping_key_t *aEntry = carbon_strdic_extract(dic, aValues + i, 1);
+        carbon_strdic_entry_with_grouping_key_t *bEntry = carbon_strdic_extract(dic, bValues + i, 1);
         bool greater = strcmp(aEntry->str, bEntry->str) > 0;
         carbon_strdic_free(dic, aEntry);
         carbon_strdic_free(dic, bEntry);
@@ -1021,8 +1013,8 @@ static bool compare_object_array_key_columns_less_eq_func(const void *lhs, const
     carbon_strdic_t *dic = (carbon_strdic_t *) args;
     carbon_columndoc_columngroup_t *a = (carbon_columndoc_columngroup_t *) lhs;
     carbon_columndoc_columngroup_t *b = (carbon_columndoc_columngroup_t *) rhs;
-    carbon_strdic_entry_t *a_column_name_entry = carbon_strdic_extract(dic, &a->key, 1);
-    carbon_strdic_entry_t *b_column_name_entry = carbon_strdic_extract(dic, &b->key, 1);
+    carbon_strdic_entry_with_grouping_key_t *a_column_name_entry = carbon_strdic_extract(dic, &a->key, 1);
+    carbon_strdic_entry_with_grouping_key_t *b_column_name_entry = carbon_strdic_extract(dic, &b->key, 1);
     bool column_name_leq = strcmp(a_column_name_entry->str, b_column_name_entry->str) <= 0;
     carbon_strdic_free(dic, a_column_name_entry);
     carbon_strdic_free(dic, b_column_name_entry);
@@ -1034,8 +1026,8 @@ static bool compare_object_array_key_column_less_eq_func(const void *lhs, const 
     carbon_strdic_t *dic = (carbon_strdic_t *) args;
     carbon_columndoc_column_t *a = (carbon_columndoc_column_t *) lhs;
     carbon_columndoc_column_t *b = (carbon_columndoc_column_t *) rhs;
-    carbon_strdic_entry_t *a_column_name_entry = carbon_strdic_extract(dic, &a->key_name, 1);
-    carbon_strdic_entry_t *b_column_name_entry = carbon_strdic_extract(dic, &b->key_name, 1);
+    carbon_strdic_entry_with_grouping_key_t *a_column_name_entry = carbon_strdic_extract(dic, &a->key_name, 1);
+    carbon_strdic_entry_with_grouping_key_t *b_column_name_entry = carbon_strdic_extract(dic, &b->key_name, 1);
     int cmpResult = strcmp(a_column_name_entry->str, b_column_name_entry->str);
     bool column_name_leq = cmpResult < 0 ? true : (cmpResult == 0 ? (a->type <= b->type) : false);
     carbon_strdic_free(dic, a_column_name_entry);
@@ -1106,8 +1098,8 @@ static bool compare_column_less_eq_func(const void *lhs, const void *rhs, void *
         for (size_t i = 0; i < max_num_elem; i++) {
             carbon_string_id_t o1 = *CARBON_VECTOR_GET(a, i, carbon_string_id_t);
             carbon_string_id_t o2 = *CARBON_VECTOR_GET(b, i, carbon_string_id_t);
-            carbon_strdic_entry_t *o1_entry = carbon_strdic_extract(func_arg->dic, &o1, 1);
-            carbon_strdic_entry_t *o2_entry = carbon_strdic_extract(func_arg->dic, &o2, 1);
+            carbon_strdic_entry_with_grouping_key_t *o1_entry = carbon_strdic_extract(func_arg->dic, &o1, 1);
+            carbon_strdic_entry_with_grouping_key_t *o2_entry = carbon_strdic_extract(func_arg->dic, &o2, 1);
             bool greater = strcmp(o1_entry->str, o2_entry->str) > 0;
             carbon_strdic_free(func_arg->dic, o1_entry);
             carbon_strdic_free(func_arg->dic, o2_entry);
@@ -1283,7 +1275,6 @@ carbon_columndoc_t *carbon_doc_entries_to_columndoc(const carbon_doc_bulk_t *bul
 
     // Step 1: encode all strings at once in a bulk
     carbon_hashmap_any_t *key_id_map = carbon_hashmap_new();
-    carbon_vec_t ofType(carbon_string_id_t) dic_string_ids;
 
     {
         _Static_assert(sizeof(void *) == sizeof(carbon_string_id_t), "Pointer size must be equal to string id type size");
@@ -1296,28 +1287,23 @@ carbon_columndoc_t *carbon_doc_entries_to_columndoc(const carbon_doc_bulk_t *bul
         size_t num_values_in_dic = 0;
         carbon_strdic_num_distinct(&num_values_in_dic, bulk->dic);
 
-        carbon_vec_t ofType(char *) dic_strings;
-        carbon_vec_t ofType(carbon_string_id_t) dic_grouping_keys;
+        carbon_vec_t ofType(carbon_strdic_entry_t) dic_entries;
 
-        carbon_vec_create(&dic_strings, NULL, sizeof(char *), num_values_in_dic);
-        carbon_vec_create(&dic_string_ids, NULL, sizeof(carbon_string_id_t), num_values_in_dic);
-        carbon_vec_create(&dic_grouping_keys, NULL, sizeof(carbon_string_id_t), num_values_in_dic);
+        carbon_vec_create(&dic_entries, NULL, sizeof(carbon_strdic_entry_t), num_values_in_dic);
 
-        carbon_strdic_get_contents(&dic_strings, &dic_string_ids, &dic_grouping_keys, bulk->dic);
-        for(size_t i = 0; i < dic_strings.num_elems; ++i) {
-            carbon_hashmap_put(
-                key_id_map,
-                *(char **)carbon_vec_at(&dic_strings, i),
-                (void *)carbon_vec_at(&dic_string_ids, i)
-            );
+        carbon_strdic_get_contents(&dic_entries, bulk->dic);
+        for(size_t i = 0; i < dic_entries.num_elems; ++i) {
+            carbon_strdic_entry_t const * entry =
+                    (carbon_strdic_entry_t const *)carbon_vec_at(&dic_entries, i);
+
+            carbon_hashmap_put(key_id_map, entry->string, (void *)(entry->id));
         }
 
-        carbon_vec_drop(&dic_strings);
-        carbon_vec_drop(&dic_grouping_keys);
+        carbon_vec_drop(&dic_entries);
     }
 
     for (carbon_hashmap_iterator_t it = carbon_hashmap_begin(bulk->values);it.valid;carbon_hashmap_next(&it)) {
-        carbon_string_id_t *key_id;
+        carbon_string_id_t key_id;
 
         {
             carbon_hashmap_status_t status = carbon_hashmap_get(key_id_map, it.key, (void *)&key_id);
@@ -1327,12 +1313,11 @@ carbon_columndoc_t *carbon_doc_entries_to_columndoc(const carbon_doc_bulk_t *bul
 
         carbon_strdic_insert(
                     bulk->dic, NULL,
-                    carbon_vec_data((carbon_vec_t*)it.value), *key_id,
+                    carbon_vec_data((carbon_vec_t*)it.value), key_id,
                     carbon_vec_length((carbon_vec_t*)it.value), 0
         );
     }
 
-    carbon_vec_drop(&dic_string_ids);
     carbon_hashmap_drop(key_id_map);
 
 

@@ -292,7 +292,7 @@ bool carbon_columndoc_free(carbon_columndoc_t *doc)
         fprintf(file, "\"Keys Decoded\": [ ");                                                                         \
         for (size_t i = 0; i < (key_vector)->num_elems; i++) {                                                         \
             carbon_string_id_t string_id = *CARBON_VECTOR_GET((key_vector), i, carbon_string_id_t);                    \
-            carbon_strdic_entry_t* entry = carbon_strdic_extract(dic, &string_id, 1);                                  \
+            carbon_strdic_entry_with_grouping_key_t* entry = carbon_strdic_extract(dic, &string_id, 1);                                  \
             fprintf(file, "\"%s\"%s", entry[0].str, i + 1 < (key_vector)->num_elems ? ", " : "");                      \
             carbon_strdic_free(dic, entry);                                                                        \
         }                                                                                                              \
@@ -370,7 +370,7 @@ static bool print_primitive_objects(FILE *file, carbon_err_t *err, const char *t
         fprintf(file, "\"Keys Decoded\": [ ");                                                                         \
         for (size_t i = 0; i < (&key_vector)->num_elems; i++) {                                                        \
             carbon_string_id_t string_id = *CARBON_VECTOR_GET((&key_vector), i, carbon_string_id_t);                   \
-            carbon_strdic_entry_t *entry = carbon_strdic_extract(dic, &string_id, 1);                                              \
+            carbon_strdic_entry_with_grouping_key_t *entry = carbon_strdic_extract(dic, &string_id, 1);                                              \
             fprintf(file, "\"%s\"%s", entry->str, i + 1 < (&key_vector)->num_elems ? ", " : "");                     \
             carbon_strdic_free(dic, entry);                                                                        \
         }                                                                                                              \
@@ -407,7 +407,7 @@ static bool print_primitive_objects(FILE *file, carbon_err_t *err, const char *t
         fprintf(file, "\"Keys Decoded\": [ ");                                                                         \
         for (size_t i = 0; i < (&key_vector)->num_elems; i++) {                                                        \
             carbon_string_id_t string_id = *CARBON_VECTOR_GET((&key_vector), i, carbon_string_id_t);                   \
-            carbon_strdic_entry_t *entry = carbon_strdic_extract(dic, &string_id, 1);                                  \
+            carbon_strdic_entry_with_grouping_key_t *entry = carbon_strdic_extract(dic, &string_id, 1);                                  \
             fprintf(file, "\"%s\"%s", entry->str, i + 1 < (&key_vector)->num_elems ? ", " : "");                       \
             carbon_strdic_free(dic, entry);                                                                            \
         }                                                                                                              \
@@ -441,7 +441,7 @@ static void print_array_null(FILE *file, const char *type_name, const carbon_vec
         fprintf(file, "\"Keys Decoded\": [ ");
         for (size_t i = 0; i < (key_vector)->num_elems; i++) {
             carbon_string_id_t string_id = *CARBON_VECTOR_GET((key_vector), i, carbon_string_id_t);
-            carbon_strdic_entry_t* entry = carbon_strdic_extract(dic, &string_id, 1);
+            carbon_strdic_entry_with_grouping_key_t* entry = carbon_strdic_extract(dic, &string_id, 1);
             fprintf(file, "\"%s\"%s", entry[0].str, i + 1 < (key_vector)->num_elems ? ", " : "");
             carbon_strdic_free(dic, entry);
         }
@@ -470,7 +470,7 @@ static void print_array_strings(FILE *file, const char *type_name, const carbon_
         fprintf(file, "\"Keys Decoded\": [ ");
         for (size_t i = 0; i < (key_vector)->num_elems; i++) {
             carbon_string_id_t string_id_t = *CARBON_VECTOR_GET((key_vector), i, carbon_string_id_t);
-            carbon_strdic_entry_t *entry = carbon_strdic_extract(dic, &string_id_t, 1);
+            carbon_strdic_entry_with_grouping_key_t *entry = carbon_strdic_extract(dic, &string_id_t, 1);
             fprintf(file, "\"%s\"%s", entry[0].str, i + 1 < (key_vector)->num_elems ? ", " : "");
             carbon_strdic_free(dic, entry);
         }
@@ -495,7 +495,7 @@ static void print_array_strings(FILE *file, const char *type_name, const carbon_
                 carbon_string_id_t value = *CARBON_VECTOR_GET(values, j, carbon_string_id_t);
 
                 if (CARBON_LIKELY(value != CARBON_NULL_ENCODED_STRING)) {
-                    carbon_strdic_entry_t *decoded = carbon_strdic_extract(dic, &value, 1);
+                    carbon_strdic_entry_with_grouping_key_t *decoded = carbon_strdic_extract(dic, &value, 1);
                     fprintf(file, "\"%s\"%s", decoded->str, j + 1 < values->num_elems ? ", " : "");
                     carbon_strdic_free(dic, decoded);
                 } else {
@@ -525,7 +525,7 @@ static void print_primitive_strings(FILE *file, const char *type_name, const car
         fprintf(file, "\"Values Decoded\": [ ");
         for (size_t i = 0; i < (value_vector)->num_elems; i++) {
             carbon_string_id_t string_id_t = *CARBON_VECTOR_GET(value_vector, i, carbon_string_id_t);
-            carbon_strdic_entry_t *entries = carbon_strdic_extract(dic, &string_id_t, 1);
+            carbon_strdic_entry_with_grouping_key_t *entries = carbon_strdic_extract(dic, &string_id_t, 1);
             fprintf(file, "\"%s\"%s", (*entries).str, i + 1 < (value_vector)->num_elems ? ", " : "");
             carbon_strdic_free(dic, entries);
         }
@@ -559,7 +559,7 @@ static bool print_array_objects(FILE *file, carbon_err_t *err, const char *type_
     for (size_t array_key_idx = 0; array_key_idx < key_columns->num_elems; array_key_idx++) {
         const carbon_columndoc_columngroup_t *arrayKeyColumns = CARBON_VECTOR_GET(key_columns, array_key_idx, carbon_columndoc_columngroup_t);
         carbon_string_id_t encKeyName = arrayKeyColumns->key;
-        carbon_strdic_entry_t* decKeyName = carbon_strdic_extract(dic, &encKeyName, 1);
+        carbon_strdic_entry_with_grouping_key_t* decKeyName = carbon_strdic_extract(dic, &encKeyName, 1);
         fprintf(file, "\"%s\"%s", (*decKeyName).str, array_key_idx + 1 < key_columns->num_elems ? ", " : "");
         carbon_strdic_free(dic, decKeyName);
     }
@@ -571,7 +571,7 @@ static bool print_array_objects(FILE *file, carbon_err_t *err, const char *type_
         for (size_t columnIdx = 0; columnIdx < arrayKeyColumns->columns.num_elems; columnIdx++) {
             fprintf(file, "{");
             const carbon_columndoc_column_t *columnTable = CARBON_VECTOR_GET(&arrayKeyColumns->columns, columnIdx, carbon_columndoc_column_t);
-            carbon_strdic_entry_t* decColumnKeyName = carbon_strdic_extract(dic, &columnTable->key_name, 1);
+            carbon_strdic_entry_with_grouping_key_t* decColumnKeyName = carbon_strdic_extract(dic, &columnTable->key_name, 1);
 
             const char *column_type_name = get_type_name(err, columnTable->type);
             if (!column_type_name) {
@@ -632,7 +632,7 @@ static bool print_array_objects(FILE *file, carbon_err_t *err, const char *type_
                     fprintf(file, "%s", column->num_elems > 1 ? "[" : "");
                     for (size_t i = 0; i < column->num_elems; i++) {
                         carbon_string_id_t encodedString = *CARBON_VECTOR_GET(column, i, carbon_string_id_t);
-                        carbon_strdic_entry_t* entry = carbon_strdic_extract(dic, &encodedString, 1);
+                        carbon_strdic_entry_with_grouping_key_t* entry = carbon_strdic_extract(dic, &encodedString, 1);
                         fprintf(file, "{\"Encoded\": %"PRIu64", \"Decoded\": \"%s\"}", encodedString, entry->str);
                         fprintf(file, "%s", i + 1 < column->num_elems ? ", " : "");
                         carbon_strdic_free(dic, entry);
@@ -678,7 +678,7 @@ static bool print_array_objects(FILE *file, carbon_err_t *err, const char *type_
 
 static bool print_object(FILE *file, carbon_err_t *err, const carbon_columndoc_obj_t *object, carbon_strdic_t *dic)
 {
-    carbon_strdic_entry_t* parentKey = carbon_strdic_extract(dic, &object->parent_key, 1);
+    carbon_strdic_entry_with_grouping_key_t* parentKey = carbon_strdic_extract(dic, &object->parent_key, 1);
     fprintf(file, "{ ");
     fprintf(file, "\"Parent\": { \"Key\": %"PRIu64", \"Key Decoded\": \"%s\", \"Index\": %zu }, ", object->parent_key, parentKey->str, object->index);
     fprintf(file, "\"Pairs\": { ");

@@ -79,9 +79,7 @@ CARBON_EXPORT(carbon_doc_obj_t *)
 carbon_doc_bulk_new_obj(carbon_doc_t *model);
 
 CARBON_EXPORT(bool)
-carbon_doc_bulk_get_dic_contents(carbon_vec_t ofType (const char *) **strings,
-                                 carbon_vec_t ofType(carbon_string_id_t) **string_ids,
-                                 carbon_vec_t ofType(carbon_string_id_t) **key_ids,
+carbon_doc_bulk_get_dic_contents(carbon_vec_t ofType (carbon_strdic_entry_t) **results,
                                  const carbon_doc_bulk_t *context);
 
 CARBON_EXPORT(bool)

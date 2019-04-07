@@ -42,7 +42,7 @@ static int convertJs2Model(Js2CabContext *context, FILE *file, bool optimizeForR
 
     CARBON_CONSOLE_WRITE(file, "  - Setup string dictionary%s", "");
 
-    carbon_strdic_create_async(&context->dictionary, 1000, 1000, 1000, 8, NULL);
+    carbon_strdic_create_sync(&context->dictionary, 1000, 1000, 1000, 8, NULL);
     CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
 
     CARBON_CONSOLE_WRITE(file, "  - Parse JSON file%s", "");
@@ -433,7 +433,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
         progress_tracker.end_string_id_index_baking = tracker_end_string_id_index_baking;
 
         if (!carbon_archive_from_json(&archive, pathCarbonFileOut, &err, jsonContent,
-                                               CARBON_COMPRESSOR_NONE, flagReadOptimized, flagBakeStringIdIndex,
+                                               compressor, flagReadOptimized, flagBakeStringIdIndex,
                                                &progress_tracker)) {
             carbon_error_print_and_abort(&err);
         } else {

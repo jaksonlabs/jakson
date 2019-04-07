@@ -78,7 +78,7 @@ typedef struct parallel_locate_arg
 typedef struct parallel_extract_arg
 {
     carbon_vec_t ofType(carbon_string_id_t) local_ids_in;
-    carbon_strdic_entry_t *entries_out;
+    carbon_strdic_entry_with_grouping_key_t *entries_out;
     carrier_t *carrier;
     bool did_work;
 } parallel_extract_arg;
@@ -107,13 +107,11 @@ static bool this_locate_safe(carbon_strdic_t *self, carbon_string_id_t **out, bo
                           size_t *num_not_found, char *const *keys, size_t num_keys);
 static bool this_locate_fast(carbon_strdic_t *self, carbon_string_id_t **out, char *const *keys,
                           size_t num_keys);
-static carbon_strdic_entry_t *this_extract(carbon_strdic_t *self, const carbon_string_id_t *ids, size_t num_ids);
+static carbon_strdic_entry_with_grouping_key_t *this_extract(carbon_strdic_t *self, const carbon_string_id_t *ids, size_t num_ids);
 static bool this_free(carbon_strdic_t *self, void *ptr);
 
 static bool this_num_distinct(carbon_strdic_t *self, size_t *num);
-static bool this_get_contents(carbon_strdic_t *self, carbon_vec_t ofType (char *) * strings,
-                              carbon_vec_t ofType(carbon_string_id_t) * string_ids,
-                              carbon_vec_t ofType(carbon_string_id_t) * grouping_keys);
+static bool this_get_contents(carbon_strdic_t *self, carbon_vec_t ofType(carbon_strdic_entry_t) * entries);
 
 static bool this_reset_counters(carbon_strdic_t *self);
 static bool this_counters(carbon_strdic_t *self, carbon_string_hash_counters_t *counters);
@@ -721,7 +719,7 @@ static bool this_locate_fast(carbon_strdic_t *self, carbon_string_id_t **out, ch
     return result;
 }
 
-static carbon_strdic_entry_t *this_extract(carbon_strdic_t *self, const carbon_string_id_t *ids, size_t num_ids)
+static carbon_strdic_entry_with_grouping_key_t *this_extract(carbon_strdic_t *self, const carbon_string_id_t *ids, size_t num_ids)
 {
     carbon_timestamp_t begin = carbon_time_now_wallclock();
     CARBON_INFO(STRING_DIC_ASYNC_TAG, "extract (safe) operation started: %zu strings to extract", num_ids)
@@ -732,7 +730,7 @@ static carbon_strdic_entry_t *this_extract(carbon_strdic_t *self, const carbon_s
 
     this_lock(self);
 
-    CARBON_MALLOC(carbon_strdic_entry_t, globalResult, num_ids, &self->alloc);
+    CARBON_MALLOC(carbon_strdic_entry_with_grouping_key_t, globalResult, num_ids, &self->alloc);
 
     struct async_extra *extra = (struct async_extra *) self->extra;
     uint_fast16_t num_threads = carbon_vec_length(&extra->carriers);
@@ -774,7 +772,7 @@ static carbon_strdic_entry_t *this_extract(carbon_strdic_t *self, const carbon_s
         uint_fast16_t owning_thread_id = owning_thread_ids[i];
         size_t localIdx = local_thread_idx[i];
         parallel_extract_arg *carrier_arg = thread_args + owning_thread_id;
-        carbon_strdic_entry_t extractedString = carrier_arg->entries_out[localIdx];
+        carbon_strdic_entry_with_grouping_key_t extractedString = carrier_arg->entries_out[localIdx];
         globalResult[i] = extractedString;
     }
 
@@ -828,52 +826,39 @@ static bool this_num_distinct(carbon_strdic_t *self, size_t *num)
     return true;
 }
 
-static bool this_get_contents(carbon_strdic_t *self, carbon_vec_t ofType (char *) * strings,
-                              carbon_vec_t ofType(carbon_string_id_t) * string_ids,
-                              carbon_vec_t ofType(carbon_string_id_t) * grouping_keys)
+static bool this_get_contents(carbon_strdic_t *self,
+                              carbon_vec_t ofType(carbon_strdic_entry_t) * entries)
 {
     CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_ASYNC);
     this_lock(self);
     struct async_extra *extra = THIS_EXTRAS(self);
     size_t num_carriers = carbon_vec_length(&extra->carriers);
-    carbon_vec_t ofType (char *) local_string_results;
-    carbon_vec_t ofType (carbon_string_id_t) local_string_id_results;
-    carbon_vec_t ofType (carbon_string_id_t) local_grouping_key_results;
+    carbon_vec_t ofType(carbon_strdic_entry_t) local_entry_results;
     size_t approx_num_distinct_local_values;
     this_num_distinct(self, &approx_num_distinct_local_values);
     approx_num_distinct_local_values = CARBON_MAX(1, approx_num_distinct_local_values / extra->carriers.num_elems);
     approx_num_distinct_local_values *= 1.2f;
 
-    carbon_vec_create(&local_string_results, NULL, sizeof(char *), approx_num_distinct_local_values);
-    carbon_vec_create(&local_string_id_results, NULL, sizeof(carbon_string_id_t), approx_num_distinct_local_values);
-    carbon_vec_create(&local_grouping_key_results, NULL, sizeof(carbon_string_id_t), approx_num_distinct_local_values);
+    carbon_vec_create(&local_entry_results, NULL, sizeof(carbon_strdic_entry_t), approx_num_distinct_local_values);
 
 
     for (size_t thread_id = 0; thread_id < num_carriers; thread_id++)
     {
-        carbon_vec_clear(&local_string_results);
-        carbon_vec_clear(&local_string_id_results);
-        carbon_vec_clear(&local_grouping_key_results);
-
+        carbon_vec_clear(&local_entry_results);
         carrier_t *carrier = CARBON_VECTOR_GET(&extra->carriers, thread_id, carrier_t);
 
-        carbon_strdic_get_contents(&local_string_results, &local_string_id_results, &local_grouping_key_results, &carrier->local_dictionary);
+        carbon_strdic_get_contents(&local_entry_results, &carrier->local_dictionary);
 
-        assert(local_string_id_results.num_elems == local_string_results.num_elems);
-        for (size_t k = 0; k < local_string_results.num_elems; k++) {
-            char *string = *CARBON_VECTOR_GET(&local_string_results, k, char *);
-            carbon_string_id_t grouping_key = *CARBON_VECTOR_GET(&local_grouping_key_results, k, carbon_string_id_t);
-            carbon_string_id_t localcarbon_string_id_t = *CARBON_VECTOR_GET(&local_string_id_results, k, carbon_string_id_t);
-            carbon_string_id_t global_string_id = MAKE_GLOBAL(thread_id, localcarbon_string_id_t);
-            carbon_vec_push(strings, &string, 1);
-            carbon_vec_push(string_ids, &global_string_id, 1);
-            carbon_vec_push(grouping_keys, &grouping_key, 1);
+        for(size_t i = 0; i< local_entry_results.num_elems; ++i) {
+            carbon_strdic_entry_t * entry =
+                    (carbon_strdic_entry_t *)CARBON_VECTOR_GET(&local_entry_results, i, carbon_strdic_entry_t);
+            entry->id = MAKE_GLOBAL(thread_id, entry->id);
         }
+
+        carbon_vec_push(entries, local_entry_results.base, local_entry_results.num_elems);
     }
 
-    carbon_vec_drop(&local_string_results);
-    carbon_vec_drop(&local_string_id_results);
-    carbon_vec_drop(&local_grouping_key_results);
+    carbon_vec_drop(&local_entry_results);
     this_unlock(self);
     return true;
 }
