@@ -26,7 +26,7 @@
 #define STRING_DIC_SYNC_TAG "string-dic-sync"
 
 struct entry {
-    carbon_strdic_entry_t content;
+    carbon_strdic_entry_with_grouping_key_t content;
     bool in_use;
 };
 
@@ -45,7 +45,7 @@ static bool this_locate_safe(carbon_strdic_t *self, carbon_string_id_t **out, bo
                           size_t *num_not_found, char *const *keys, size_t num_keys);
 static bool this_locate_fast(carbon_strdic_t *self, carbon_string_id_t **out, char *const *keys,
                           size_t num_keys);
-static carbon_strdic_entry_t *this_extract(carbon_strdic_t *self, const carbon_string_id_t *ids, size_t num_ids);
+static carbon_strdic_entry_with_grouping_key_t *this_extract(carbon_strdic_t *self, const carbon_string_id_t *ids, size_t num_ids);
 static bool this_free(carbon_strdic_t *self, void *ptr);
 
 static bool this_reset_counters(carbon_strdic_t *self);
@@ -53,9 +53,7 @@ static bool this_counters(carbon_strdic_t *self, carbon_string_hash_counters_t *
 
 static bool this_num_distinct(carbon_strdic_t *self, size_t *num);
 
-static bool this_get_contents(carbon_strdic_t *self, carbon_vec_t ofType (char *) * strings,
-                              carbon_vec_t ofType(carbon_string_id_t) * string_ids,
-                              carbon_vec_t ofType(carbon_string_id_t) * grouping_keys);
+static bool this_get_contents(carbon_strdic_t *self, carbon_vec_t ofType(carbon_strdic_entry_t) * entries);
 
 static void lock(carbon_strdic_t *self);
 static void unlock(carbon_strdic_t *self);
@@ -398,7 +396,7 @@ static bool this_locate_fast(carbon_strdic_t *self, carbon_string_id_t **out, ch
     return result;
 }
 
-static carbon_strdic_entry_t *this_extract(carbon_strdic_t *self, const carbon_string_id_t *ids, size_t num_ids)
+static carbon_strdic_entry_with_grouping_key_t *this_extract(carbon_strdic_t *self, const carbon_string_id_t *ids, size_t num_ids)
 {
     if (CARBON_UNLIKELY(!self || !ids || num_ids == 0 || self->tag != CARBON_STRDIC_TYPE_SYNC)) {
         return NULL;
@@ -414,7 +412,7 @@ static carbon_strdic_entry_t *this_extract(carbon_strdic_t *self, const carbon_s
 #endif
 
     struct sync_extra *extra = this_extra(self);
-    carbon_strdic_entry_t *result = carbon_malloc(&hashtable_alloc, num_ids * sizeof(carbon_strdic_entry_t));
+    carbon_strdic_entry_with_grouping_key_t *result = carbon_malloc(&hashtable_alloc, num_ids * sizeof(carbon_strdic_entry_with_grouping_key_t));
     struct entry *entries = (struct entry *) carbon_vec_data(&extra->contents);
 
     /** Optimization: notify the kernel that the content list is accessed randomly (since hash based access)*/
@@ -470,9 +468,8 @@ static bool this_num_distinct(carbon_strdic_t *self, size_t *num)
     return true;
 }
 
-static bool this_get_contents(carbon_strdic_t *self, carbon_vec_t ofType (char *) * strings,
-                              carbon_vec_t ofType(carbon_string_id_t) * string_ids,
-                              carbon_vec_t ofType(carbon_string_id_t) * grouping_keys)
+static bool this_get_contents(carbon_strdic_t *self,
+                              carbon_vec_t ofType(carbon_strdic_entry_t) * entries)
 {
     CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_SYNC);
     struct sync_extra *extra = this_extra(self);
@@ -480,9 +477,12 @@ static bool this_get_contents(carbon_strdic_t *self, carbon_vec_t ofType (char *
     for (carbon_string_id_t i = 0; i < extra->contents.num_elems; i++) {
         const struct entry *e = CARBON_VECTOR_GET(&extra->contents, i, struct entry);
         if (e->in_use) {
-            carbon_vec_push(strings, &e->content.str, 1);
-            carbon_vec_push(grouping_keys, &e->content.grouping_key, 1);
-            carbon_vec_push(string_ids, &i, 1);
+            carbon_strdic_entry_t entry;
+            entry.id = i;
+            entry.grouping_key = e->content.grouping_key;
+            entry.string = e->content.str;
+
+            carbon_vec_push(entries, &entry, 1);
         }
     }
     return true;

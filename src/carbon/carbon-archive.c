@@ -1332,11 +1332,9 @@ static bool serialize_string_dic(carbon_memfile_t *memfile, carbon_err_t *err, c
     carbon_compressor_t strategy;
     carbon_string_table_header_t header;
 
-    carbon_vec_t ofType (const char *) *strings;
-    carbon_vec_t ofType(carbon_string_id_t) *string_ids;
-    carbon_vec_t ofType(carbon_string_id_t) *grouping_key_ids;
+    carbon_vec_t ofType (carbon_strdic_entry_t) *entries;
 
-    carbon_doc_bulk_get_dic_contents(&strings, &string_ids, &grouping_key_ids, context);
+    carbon_doc_bulk_get_dic_contents(&entries, context);
 
     assert(strings->num_elems == string_ids->num_elems);
 
@@ -1344,6 +1342,9 @@ static bool serialize_string_dic(carbon_memfile_t *memfile, carbon_err_t *err, c
     if(!carbon_compressor_by_type(err, &strategy, context, compressor)) {
         return false;
     }
+
+    carbon_compressor_prepare_entries(err, &strategy, entries);
+
     uint8_t flag_bit = carbon_compressor_flagbit_by_type(compressor);
     CARBON_FIELD_SET(flags.value, flag_bit);
 
@@ -1351,39 +1352,37 @@ static bool serialize_string_dic(carbon_memfile_t *memfile, carbon_err_t *err, c
     carbon_memfile_skip(memfile, sizeof(carbon_string_table_header_t));
 
     carbon_off_t extra_begin_off = CARBON_MEMFILE_TELL(memfile);
-    carbon_compressor_write_extra(err, &strategy, memfile, strings);
+    carbon_compressor_write_extra(err, &strategy, memfile, entries);
     carbon_off_t extra_end_off = CARBON_MEMFILE_TELL(memfile);
 
     header = (carbon_string_table_header_t) {
         .marker = marker_symbols[MARKER_TYPE_EMBEDDED_STR_DIC].symbol,
         .flags = flags.value,
-        .num_entries = strings->num_elems,
+        .num_entries = entries->num_elems,
         .first_entry = CARBON_MEMFILE_TELL(memfile),
         .compressor_extra_size = (extra_end_off - extra_begin_off)
     };
 
-    for (size_t i = 0; i < strings->num_elems; i++) {
-        carbon_string_id_t id = *CARBON_VECTOR_GET(string_ids, i, carbon_string_id_t);
-        carbon_string_id_t grouping_key = *CARBON_VECTOR_GET(grouping_key_ids, i, carbon_string_id_t);
-        const char *string = *CARBON_VECTOR_GET(strings, i, char *);
+    for (size_t i = 0; i < entries->num_elems; i++) {
+        carbon_strdic_entry_t entry = *CARBON_VECTOR_GET(entries, i, carbon_strdic_entry_t);
 
         carbon_string_entry_header_t header = {
             .marker = marker_symbols[MARKER_TYPE_EMBEDDED_UNCOMP_STR].symbol,
             .next_entry_off = 0,
-            .string_id = id,
-            .string_len = strlen(string)
+            .string_id = entry.id,
+            .string_len = strlen(entry.string)
         };
 
         carbon_off_t header_pos_off = CARBON_MEMFILE_TELL(memfile);
         carbon_memfile_skip(memfile, sizeof(carbon_string_entry_header_t));
 
-        if (!carbon_compressor_encode(err, &strategy, memfile, string, grouping_key)) {
+        if (!carbon_compressor_encode(err, &strategy, memfile, entry.string, entry.grouping_key)) {
             CARBON_PRINT_ERROR(err.code);
             return false;
         }
         carbon_off_t continue_off = CARBON_MEMFILE_TELL(memfile);
         carbon_memfile_seek(memfile, header_pos_off);
-        header.next_entry_off = i + 1 < strings->num_elems ? continue_off : 0;
+        header.next_entry_off = i + 1 < entries->num_elems ? continue_off : 0;
         carbon_memfile_write(memfile, &header, sizeof(carbon_string_entry_header_t));
         carbon_memfile_seek(memfile, continue_off);
     }
@@ -1394,12 +1393,8 @@ static bool serialize_string_dic(carbon_memfile_t *memfile, carbon_err_t *err, c
     carbon_memfile_write(memfile, &header, sizeof(carbon_string_table_header_t));
     carbon_memfile_seek(memfile, continue_pos);
 
-    carbon_vec_drop(strings);
-    carbon_vec_drop(string_ids);
-    carbon_vec_drop(grouping_key_ids);
-    free(strings);
-    free(string_ids);
-    free(grouping_key_ids);
+    carbon_vec_drop(entries);
+    free(entries);
 
     return carbon_compressor_drop(err, &strategy);
 }

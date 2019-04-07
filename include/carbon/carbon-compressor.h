@@ -20,6 +20,8 @@
 
 #include <carbon/compressor/carbon-compressor-none.h>
 #include <carbon/compressor/carbon-compressor-huffman.h>
+#include <carbon/compressor/carbon-compressor-prefix.h>
+#include <carbon/compressor/carbon-compressor-incremental.h>
 #include "carbon-common.h"
 #include "carbon-types.h"
 
@@ -35,7 +37,9 @@ typedef struct carbon_doc_bulk carbon_doc_bulk_t; /* forwarded */
 typedef enum carbon_compressor_type
 {
     CARBON_COMPRESSOR_NONE,
-    CARBON_COMPRESSOR_HUFFMAN
+    CARBON_COMPRESSOR_HUFFMAN,
+    CARBON_COMPRESSOR_PREFIX,
+    CARBON_COMPRESSOR_INCREMENTAL
 } carbon_compressor_type_e;
 
 /**
@@ -63,6 +67,8 @@ typedef struct carbon_compressor
      * @since 0.1.00.05
      */
     bool (*create)(carbon_compressor_t *self, carbon_doc_bulk_t const *context);
+
+    bool (*prepare_entries)(carbon_compressor_t *self, carbon_vec_t ofType(carbon_strdic_entry_t) *entries);
 
     /**
      * Destructor for implementation-dependent deinitialization of the compressor at hand.
@@ -195,6 +201,7 @@ static void carbon_compressor_none_create(carbon_compressor_t *strategy)
     strategy->drop            = carbon_compressor_none_drop;
     strategy->write_extra     = carbon_compressor_none_write_extra;
     strategy->read_extra      = carbon_compressor_none_read_extra;
+    strategy->prepare_entries = carbon_compressor_none_prepare_entries;
     strategy->encode_string   = carbon_compressor_none_encode_string;
     strategy->decode_string   = carbon_compressor_none_decode_string;
     strategy->print_extra     = carbon_compressor_none_print_extra;
@@ -209,10 +216,39 @@ static void carbon_compressor_huffman_create(carbon_compressor_t *strategy)
     strategy->drop            = carbon_compressor_huffman_drop;
     strategy->write_extra     = carbon_compressor_huffman_write_extra;
     strategy->read_extra      = carbon_compressor_huffman_read_extra;
+    strategy->prepare_entries = carbon_compressor_huffman_prepare_entries;
     strategy->encode_string   = carbon_compressor_huffman_encode_string;
     strategy->decode_string   = carbon_compressor_huffman_decode_string;
     strategy->print_extra     = carbon_compressor_huffman_print_extra;
     strategy->print_encoded   = carbon_compressor_huffman_print_encoded;
+}
+
+static void carbon_compressor_prefix_create(carbon_compressor_t *strategy)
+{
+    strategy->tag             = CARBON_COMPRESSOR_PREFIX;
+    strategy->create          = carbon_compressor_prefix_init;
+    strategy->cpy             = carbon_compressor_prefix_cpy;
+    strategy->drop            = carbon_compressor_prefix_drop;
+    strategy->write_extra     = carbon_compressor_prefix_write_extra;
+    strategy->prepare_entries = carbon_compressor_prefix_prepare_entries;
+    strategy->encode_string   = carbon_compressor_prefix_encode_string;
+    strategy->decode_string   = carbon_compressor_prefix_decode_string;
+    strategy->print_extra     = carbon_compressor_prefix_print_extra;
+    strategy->print_encoded   = carbon_compressor_prefix_print_encoded_string;
+}
+
+static void carbon_compressor_incremental_create(carbon_compressor_t *strategy)
+{
+    strategy->tag             = CARBON_COMPRESSOR_INCREMENTAL;
+    strategy->create          = carbon_compressor_incremental_init;
+    strategy->cpy             = carbon_compressor_incremental_cpy;
+    strategy->drop            = carbon_compressor_incremental_drop;
+    strategy->write_extra     = carbon_compressor_incremental_write_extra;
+    strategy->prepare_entries = carbon_compressor_incremental_prepare_entries;
+    strategy->encode_string   = carbon_compressor_incremental_encode_string;
+    strategy->decode_string   = carbon_compressor_incremental_decode_string;
+    strategy->print_extra     = carbon_compressor_incremental_print_extra;
+    strategy->print_encoded   = carbon_compressor_incremental_print_encoded_string;
 }
 
 #pragma GCC diagnostic push
@@ -229,7 +265,11 @@ static struct
     { .type = CARBON_COMPRESSOR_NONE, .name = "none",
       .create = carbon_compressor_none_create,                .flag_bit = 1 << 0 },
     { .type = CARBON_COMPRESSOR_HUFFMAN, .name = "huffman",
-       .create = carbon_compressor_huffman_create,            .flag_bit = 1 << 1  }
+      .create = carbon_compressor_huffman_create,             .flag_bit = 1 << 1  },
+    { .type = CARBON_COMPRESSOR_PREFIX, .name = "prefix",
+      .create = carbon_compressor_prefix_create,              .flag_bit = 1 << 2  },
+    { .type = CARBON_COMPRESSOR_INCREMENTAL, .name = "incremental",
+      .create = carbon_compressor_incremental_create,         .flag_bit = 1 << 3  }
 };
 
 #pragma GCC diagnostic pop
@@ -261,6 +301,10 @@ carbon_compressor_write_extra(carbon_err_t *err, carbon_compressor_t *self, carb
 
 CARBON_EXPORT(bool)
 carbon_compressor_read_extra(carbon_err_t *err, carbon_compressor_t *self, FILE *src, size_t nbytes);
+
+CARBON_EXPORT(bool)
+carbon_compressor_prepare_entries(carbon_err_t *err, carbon_compressor_t *self,
+                                  carbon_vec_t ofType(carbon_strdic_entry_t) * entries);
 
 CARBON_EXPORT(bool)
 carbon_compressor_encode(carbon_err_t *err, carbon_compressor_t *self, carbon_memfile_t *dst,
