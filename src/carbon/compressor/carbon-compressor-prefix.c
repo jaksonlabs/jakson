@@ -23,6 +23,7 @@
 #include <carbon/carbon-compressor.h>
 
 #include <carbon/compressor/carbon-compressor-prefix.h>
+#include <carbon/compressor/compressor-utils.h>
 
 #include <carbon/compressor/prefix/prefix_tree_node.h>
 #include <carbon/compressor/prefix/prefix_encoder.h>
@@ -111,7 +112,12 @@ carbon_compressor_prefix_drop(carbon_compressor_t *self)
 {
     CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_PREFIX);
 
-    CARBON_UNUSED(self);
+    if(self->extra) {
+        carbon_compressor_prefix_extra_t *extra = (carbon_compressor_prefix_extra_t *)self->extra;
+        carbon_prefix_table_free(extra->table);
+        carbon_prefix_ro_tree_free(extra->encoder);
+        free(extra);
+    }
     /* nothing to do for uncompressed dictionaries */
     return true;
 }
@@ -127,21 +133,15 @@ carbon_compressor_prefix_write_extra(carbon_compressor_t *self, carbon_memfile_t
 
     carbon_compressor_prefix_extra_t * extra = (carbon_compressor_prefix_extra_t *)self->extra;
 
-    carbon_memfile_write(dst, "p", 1);
     size_t length = carbon_prefix_table_length(extra->table);
 
-    uint8_t high_byte = (uint8_t)((length & 0xFF00) >> 8);
-    uint8_t low_byte  = (uint8_t)(length & 0xFF);
-    carbon_memfile_write(dst, &high_byte, 1);
-    carbon_memfile_write(dst, &low_byte, 1);
-
+    carbon_vlq_encode_to_file(length, dst);
     for(size_t i = 1; i < carbon_prefix_table_length(extra->table); ++i) {
-        uint8_t length = (uint8_t)strlen(extra->table->table[i] + 2);
-        carbon_memfile_write(dst, &length, 1);
+        size_t length = strlen(extra->table->table[i] + 2);
+        carbon_vlq_encode_to_file(length, dst);
         carbon_memfile_write(dst, extra->table->table[i], 2 + (size_t)length);
     }
 
-    /* nothing to do for uncompressed dictionaries */
     return true;
 }
 
@@ -222,10 +222,7 @@ carbon_compressor_prefix_encode_string(carbon_compressor_t *self, carbon_memfile
 
     uint16_t prefix = carbon_prefix_ro_tree_max_prefix(extra->encoder, (char *)string, &num_bytes_saved);
 
-    uint32_t string_length = strlen(string);
-
-    uint8_t length = (uint8_t)(string_length - num_bytes_saved);
-    carbon_memfile_write(dst, &length, 1);
+    size_t length = strlen(string) - num_bytes_saved;
 
     uint8_t high_byte = (uint8_t)((prefix & 0xFF00) >> 8);
     uint8_t low_byte  = (uint8_t)(prefix & 0xFF);
@@ -239,12 +236,73 @@ carbon_compressor_prefix_encode_string(carbon_compressor_t *self, carbon_memfile
 }
 
 CARBON_EXPORT(bool)
-carbon_compressor_prefix_decode_string(carbon_compressor_t *self, char *dst, size_t strlen, FILE *src)
+carbon_compressor_prefix_decode_string(carbon_compressor_t *self, char *dst, size_t orig_length, FILE *src)
 {
     CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_PREFIX);
 
     CARBON_UNUSED(self);
 
-    size_t num_read = fread(dst, sizeof(char), strlen, src);
-    return (num_read == strlen);
+    uint8_t byte_u8[2];
+    uint16_t prefix_id;
+
+    if(fread(&byte_u8, 1, 2, src) != 2)
+        return false;
+
+    prefix_id = (uint16_t)((uint16_t)byte_u8[0] << 8) + byte_u8[1];
+
+    carbon_compressor_prefix_extra_t * extra = (carbon_compressor_prefix_extra_t *)self->extra;
+
+    char * resolve_buffer = malloc(10);
+    size_t resolve_buffer_len = 10;
+    size_t prefix_length = 0;
+
+    carbon_prefix_table_resolve(
+        extra->table, extra->table->table[prefix_id],
+        &resolve_buffer, &resolve_buffer_len, &prefix_length
+    );
+
+    prefix_length = strlen(resolve_buffer);
+    strncpy(dst, resolve_buffer, prefix_length);
+    free(resolve_buffer);
+
+    size_t num_read = fread(dst + prefix_length, sizeof(char), orig_length - prefix_length, src);
+    CARBON_UNUSED(num_read);
+
+    return num_read == orig_length - prefix_length;
+}
+
+CARBON_EXPORT(bool)
+carbon_compressor_prefix_read_extra(carbon_compressor_t *self, FILE *src, size_t nbytes)
+{
+    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_PREFIX);
+    CARBON_UNUSED(nbytes);
+
+    if(!self->extra) {
+        self->extra = malloc(sizeof(carbon_compressor_prefix_extra_t));
+    }
+
+    carbon_compressor_prefix_extra_t * extra = (carbon_compressor_prefix_extra_t *)self->extra;
+
+    bool ok;
+    size_t length = carbon_vlq_decode_from_file(src, &ok);
+
+    if(!ok)
+        return false;
+
+    extra->table = carbon_prefix_table_create();
+    for(size_t i = 1; i < length; ++i) {
+        size_t entry_length = carbon_vlq_decode_from_file(src, &ok) + 2;
+        char * buf = malloc(entry_length + 1);
+
+        if(fread(buf, 1, entry_length, src) != entry_length) {
+            free(buf);
+            return false;
+        }
+
+        buf[entry_length] = 0;
+        carbon_prefix_table_add(extra->table, buf);
+    }
+
+    extra->encoder = carbon_prefix_table_to_encoder_tree(extra->table);
+    return true;
 }

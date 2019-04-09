@@ -22,6 +22,7 @@
 #include <carbon/carbon-doc.h>
 #include <carbon/carbon-compressor.h>
 
+#include <carbon/compressor/compressor-utils.h>
 #include <carbon/compressor/carbon-compressor-incremental.h>
 
 #include <carbon/compressor/prefix/prefix_tree_node.h>
@@ -36,44 +37,6 @@ typedef struct {
 } carbon_compressor_incremental_extra_t;
 
 static size_t const CARBON_COMPRESSOR_INCREMENTAL_SORT_BATCH_SIZE = 100000;
-
-
-/**
-  Helper functions
-  */
-size_t dynamic_size_encode(size_t length, uint8_t *buffer) {
-    size_t num_bytes = 0;
-    do {
-        if(length > 127L) {
-            buffer[num_bytes] = (length & 0x7F) | 0x80;
-        } else {
-            buffer[num_bytes] = length & 0x7F;
-        }
-
-        length >>= 7;
-        ++num_bytes;
-    } while(num_bytes < 10 && length > 0);
-
-    return num_bytes;
-}
-
-size_t dynamic_size_decode(uint8_t *buffer, size_t *num_bytes) {
-    *num_bytes = 0;
-    size_t length = 0;
-    size_t bit_pos = 0;
-    while(*num_bytes < 10) {
-        uint8_t byte = buffer[*num_bytes];
-
-        length = length + (((size_t)(byte & 0x7Fu)) << bit_pos);
-        bit_pos += 7;
-        (*num_bytes)++;
-
-        if((byte & 0x80) == 0)
-            break;
-    }
-
-    return length;
-}
 
 /**
   Compressor implementation
@@ -127,6 +90,9 @@ carbon_compressor_incremental_write_extra(carbon_compressor_t *self, carbon_memf
     CARBON_UNUSED(self);
     CARBON_UNUSED(dst);
     CARBON_UNUSED(strings);
+
+    // TODO: #87 Write if prefix, suffix or both
+
     return true;
 }
 
@@ -227,9 +193,7 @@ carbon_compressor_incremental_encode_string(carbon_compressor_t *self, carbon_me
         ++common_suffix_len
     );
 
-    uint8_t previous_off_diff_buf[10];
-    size_t previous_off_diff_buf_len = dynamic_size_encode(previous_off_diff, previous_off_diff_buf);
-    carbon_memfile_write(dst, previous_off_diff_buf, previous_off_diff_buf_len);
+    carbon_vlq_encode_to_file(previous_off_diff, dst);
 
     uint8_t common_prefix_len_ui8 = (uint8_t)(common_prefix_len);
     uint8_t common_suffix_len_ui8 = (uint8_t)(common_suffix_len);
@@ -265,17 +229,12 @@ carbon_compressor_incremental_decode_string(carbon_compressor_t *self, char *dst
 
     uint8_t common_prefix_len_ui8, common_suffix_len_ui8;
 
-    uint8_t previous_off_diff_buf[10];
-    size_t volatile previous_off_diff_buf_len = 0;
-    size_t volatile previous_off_diff = 0;
-
-    if(fread(previous_off_diff_buf,1, 10, src) < 1)
+    bool ok;
+    size_t diff_to_previous = carbon_vlq_decode_from_file(src, &ok);
+    if(!ok)
         return false;
 
-    previous_off_diff = dynamic_size_decode(previous_off_diff_buf, (size_t *)&previous_off_diff_buf_len);
-    fseek(src, (long)previous_off_diff_buf_len - 10L, SEEK_CUR);
-
-    printf("%zu\n", previous_off_diff);
+    CARBON_UNUSED(diff_to_previous);
 
     if(fread(&common_prefix_len_ui8, sizeof(common_prefix_len_ui8), 1, src) != 1)
         return false;
@@ -297,5 +256,18 @@ carbon_compressor_incremental_decode_string(carbon_compressor_t *self, char *dst
     CARBON_UNUSED(num_read);
 
     printf("%s\n", dst);
+    return true;
+}
+
+CARBON_EXPORT(bool)
+carbon_compressor_incremental_read_extra(carbon_compressor_t *self, FILE *src, size_t nbytes)
+{
+    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_INCREMENTAL);
+    CARBON_UNUSED(self);
+    CARBON_UNUSED(src);
+    CARBON_UNUSED(nbytes);
+
+    // TODO: #87 Load if prefix, suffix or both
+
     return true;
 }

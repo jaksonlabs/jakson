@@ -230,6 +230,7 @@ static void carbon_compressor_prefix_create(carbon_compressor_t *strategy)
     strategy->cpy             = carbon_compressor_prefix_cpy;
     strategy->drop            = carbon_compressor_prefix_drop;
     strategy->write_extra     = carbon_compressor_prefix_write_extra;
+    strategy->read_extra      = carbon_compressor_prefix_read_extra;
     strategy->prepare_entries = carbon_compressor_prefix_prepare_entries;
     strategy->encode_string   = carbon_compressor_prefix_encode_string;
     strategy->decode_string   = carbon_compressor_prefix_decode_string;
@@ -244,6 +245,7 @@ static void carbon_compressor_incremental_create(carbon_compressor_t *strategy)
     strategy->cpy             = carbon_compressor_incremental_cpy;
     strategy->drop            = carbon_compressor_incremental_drop;
     strategy->write_extra     = carbon_compressor_incremental_write_extra;
+    strategy->read_extra      = carbon_compressor_incremental_read_extra;
     strategy->prepare_entries = carbon_compressor_incremental_prepare_entries;
     strategy->encode_string   = carbon_compressor_incremental_encode_string;
     strategy->decode_string   = carbon_compressor_incremental_decode_string;

@@ -17,9 +17,9 @@ endif()
 
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
-file(MAKE_DIRECTORY ${CMAKE_HOME_DIRECTORY}/build)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/build)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/build)
+file(MAKE_DIRECTORY ${CMAKE_HOME_DIRECTORY}/../libcarbon-build)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/../libcarbon-build)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/../libcarbon-build)
 
 include_directories("${CMAKE_SOURCE_DIR}/include")
 
@@ -69,15 +69,15 @@ if (${LOG_WARN} MATCHES "on")
     endif()
 endif()
 
-#set (CMAKE_C_COMPILER             "/usr/bin/clang")
-set (CMAKE_C_FLAGS                "-Wall -std=c11 -Wextra -Werror")
+#set (CMAKE_C_COMPILER             "/usr/bin/clang-7")
+set (CMAKE_C_FLAGS                "-Wall -O3 -DNDEBUG -std=c11 -Wextra -Werror -Wno-unused-function")
 set (CMAKE_C_FLAGS_DEBUG          "-g")
 set (CMAKE_C_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
 set (CMAKE_C_FLAGS_RELEASE        "-O3 -DNDEBUG")
 set (CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
 
-set (CMAKE_CXX_COMPILER             "/usr/bin/clang++")
-set (CMAKE_CXX_FLAGS                "-std=c++11 -Wall")
+#set (CMAKE_CXX_COMPILER             "/usr/bin/clang++")
+set (CMAKE_CXX_FLAGS                "-std=gnu++11 -Wall")
 set (CMAKE_CXX_FLAGS_DEBUG          "-g")
 set (CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
 set (CMAKE_CXX_FLAGS_RELEASE        "-O3 -DNDEBUG")
