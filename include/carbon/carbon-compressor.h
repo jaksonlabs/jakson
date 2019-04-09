@@ -22,6 +22,9 @@
 #include <carbon/compressor/carbon-compressor-huffman.h>
 #include <carbon/compressor/carbon-compressor-prefix.h>
 #include <carbon/compressor/carbon-compressor-incremental.h>
+
+#include <carbon/carbon-hashmap.h>
+
 #include "carbon-common.h"
 #include "carbon-types.h"
 
@@ -53,6 +56,13 @@ typedef struct carbon_compressor
 
     /** Implementation-specific storage */
     void  *extra;
+
+    /** Implementation-specific configuration options
+     *
+     * Maps:
+     *   string -> bool (*set_option_fn)(carbon_err_t *error, carbon_compressor_t *self, char *option)
+     */
+    carbon_hashmap_t *options;
 
     /**
      * Constructor for implementation-dependent initialization of the compressor at hand.
@@ -322,6 +332,10 @@ carbon_compressor_print_extra(carbon_err_t *err, carbon_compressor_t *self, FILE
 CARBON_EXPORT(bool)
 carbon_compressor_print_encoded(carbon_err_t *err, carbon_compressor_t *self, FILE *file, carbon_memfile_t *src,
                       uint32_t decompressed_strlen);
+
+CARBON_EXPORT(bool)
+carbon_compressor_set_option(carbon_err_t *err, carbon_compressor_t *self,
+                             char const * option, char * value);
 
 CARBON_END_DECL
 

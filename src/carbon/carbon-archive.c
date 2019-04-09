@@ -132,7 +132,8 @@ static bool serialize_columndoc(carbon_off_t *offset, carbon_err_t *err, carbon_
 static carbon_archive_object_flags_t *get_flags(carbon_archive_object_flags_t *flags, carbon_columndoc_obj_t *columndoc);
 static void update_carbon_file_header(carbon_memfile_t *memfile, carbon_off_t root_object_header_offset);
 static void skip_carbon_file_header(carbon_memfile_t *memfile);
-static bool serialize_string_dic(carbon_memfile_t *memfile, carbon_err_t *err, const carbon_doc_bulk_t *context, carbon_compressor_type_e compressor);
+static bool serialize_string_dic(carbon_memfile_t *memfile, carbon_err_t *err, const carbon_doc_bulk_t *context,
+                                 carbon_compressor_type_e compressor, carbon_hashmap_t compressor_options);
 static bool print_archive_from_memfile(FILE *file, carbon_err_t *err, carbon_memfile_t *memfile);
 
 CARBON_EXPORT(bool)
@@ -141,6 +142,7 @@ carbon_archive_from_json(carbon_archive_t *out,
                          carbon_err_t *err,
                          const char *json_string,
                          carbon_compressor_type_e compressor,
+                         carbon_hashmap_t compressor_options,
                          carbon_strdic_type_e dictionary,
                          size_t num_async_dic_threads,
                          bool read_optimized, bool bake_string_id_index,
@@ -150,14 +152,15 @@ carbon_archive_from_json(carbon_archive_t *out,
     CARBON_NON_NULL_OR_ERROR(file);
     CARBON_NON_NULL_OR_ERROR(err);
     CARBON_NON_NULL_OR_ERROR(json_string);
+    CARBON_NON_NULL_OR_ERROR(compressor_options);
 
     OPTIONAL_CALL(callback, begin_create_from_json);
 
     carbon_memblock_t *stream;
     FILE *out_file;
 
-    if (!carbon_archive_stream_from_json(&stream, err, json_string, compressor, dictionary, num_async_dic_threads,
-                                         read_optimized, bake_string_id_index, callback)) {
+    if (!carbon_archive_stream_from_json(&stream, err, json_string, compressor, compressor_options, dictionary,
+                                         num_async_dic_threads, read_optimized, bake_string_id_index, callback)) {
         return false;
     }
 
@@ -201,6 +204,7 @@ carbon_archive_stream_from_json(carbon_memblock_t **stream,
                                 carbon_err_t *err,
                                 const char *json_string,
                                 carbon_compressor_type_e compressor,
+                                carbon_hashmap_t compressor_options,
                                 carbon_strdic_type_e dictionary,
                                 size_t num_async_dic_threads,
                                 bool read_optimized, bool bake_id_index,
@@ -269,7 +273,7 @@ carbon_archive_stream_from_json(carbon_memblock_t **stream,
 
     columndoc = carbon_doc_entries_to_columndoc(&bulk, partition, read_optimized);
 
-    if (!carbon_archive_from_model(stream, err, columndoc, compressor, bake_id_index, callback)) {
+    if (!carbon_archive_from_model(stream, err, columndoc, compressor, compressor_options, bake_id_index, callback)) {
         return false;
     }
 
@@ -368,6 +372,7 @@ bool carbon_archive_from_model(carbon_memblock_t **stream,
                                carbon_err_t *err,
                                carbon_columndoc_t *model,
                                carbon_compressor_type_e compressor,
+                               carbon_hashmap_t compressor_options,
                                bool bake_string_id_index,
                                carbon_archive_callback_t *callback)
 {
@@ -383,7 +388,7 @@ bool carbon_archive_from_model(carbon_memblock_t **stream,
 
     OPTIONAL_CALL(callback, begin_write_string_table);
     skip_carbon_file_header(&memfile);
-    if(!serialize_string_dic(&memfile, err, model->bulk, compressor)) {
+    if(!serialize_string_dic(&memfile, err, model->bulk, compressor, compressor_options)) {
         return false;
     }
     OPTIONAL_CALL(callback, end_write_string_table);
@@ -1326,7 +1331,8 @@ static char *record_header_flags_to_string(const carbon_archive_record_flags_t *
     return string;
 }
 
-static bool serialize_string_dic(carbon_memfile_t *memfile, carbon_err_t *err, const carbon_doc_bulk_t *context, carbon_compressor_type_e compressor)
+static bool serialize_string_dic(carbon_memfile_t *memfile, carbon_err_t *err, const carbon_doc_bulk_t *context,
+                                 carbon_compressor_type_e compressor, carbon_hashmap_t compressor_options)
 {
     carbon_archive_dic_flags_t flags;
     carbon_compressor_t strategy;
@@ -1341,6 +1347,13 @@ static bool serialize_string_dic(carbon_memfile_t *memfile, carbon_err_t *err, c
     flags.value = 0;
     if(!carbon_compressor_by_type(err, &strategy, context, compressor)) {
         return false;
+    }
+
+    for(carbon_hashmap_iterator_t it = carbon_hashmap_begin(compressor_options);it.valid;carbon_hashmap_next(&it)) {
+        if(!carbon_compressor_set_option(err, &strategy, it.key, (char *)it.value)) {
+            carbon_compressor_drop(err, &strategy);
+            return false;
+        }
     }
 
     carbon_compressor_prepare_entries(err, &strategy, entries);

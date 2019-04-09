@@ -23,6 +23,8 @@ create_strategy(size_t i, carbon_compressor_t *strategy, carbon_doc_bulk_t const
 {
     assert(strategy);
     carbon_compressor_strategy_register[i].create(strategy);
+    strategy->options = carbon_hashmap_new();
+
     assert (strategy->create);
     assert (strategy->cpy);
     assert (strategy->drop);
@@ -94,7 +96,11 @@ carbon_compressor_drop(carbon_err_t *err, carbon_compressor_t *self)
 {
     CARBON_NON_NULL_OR_ERROR(self)
     CARBON_IMPLEMENTS_OR_ERROR(err, self, drop)
-    return self->drop(self);
+    if(!self->drop(self))
+        return false;
+
+    carbon_hashmap_drop(self->options);
+    return true;
 }
 
 CARBON_EXPORT(bool)
@@ -155,4 +161,17 @@ carbon_compressor_print_encoded(carbon_err_t *err, carbon_compressor_t *self, FI
     CARBON_NON_NULL_OR_ERROR(self)
     CARBON_IMPLEMENTS_OR_ERROR(err, self, print_encoded)
     return self->print_encoded(self, file, src, decompressed_strlen);
+}
+
+CARBON_EXPORT(bool)
+carbon_compressor_set_option(carbon_err_t *err, carbon_compressor_t *self,
+                             char const *option, char *value)
+{
+    bool (*set_option)(carbon_err_t *, carbon_compressor_t *, char *);
+    if(carbon_hashmap_get(self->options, option, (carbon_hashmap_any_t *)&set_option) == carbon_hashmap_status_missing) {
+        CARBON_ERROR(err, CARBON_ERR_UNKNOWN_COMPRESSOR_OPTION);
+        return false;
+    }
+
+    return set_option(err, self, strdup(value));
 }

@@ -173,6 +173,7 @@ bool moduleCheckJsInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t 
 #define JS_2_CAB_OPTION_DIC_NTHREADS "--dic-nthreads"
 #define JS_2_CAB_OPTION_NO_STRING_ID_INDEX "--no-string-id-index"
 #define JS_2_CAB_OPTION_USE_COMPRESSOR "--compressor"
+#define JS_2_CAB_OPTION_COMPRESSOR_OPT "--compressor-opt"
 #define JS_2_CAB_OPTION_USE_COMPRESSOR_HUFFMAN "huffman"
 
 static void tracker_begin_create_from_model()
@@ -329,6 +330,8 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
         carbon_strdic_type_e dic_type = CARBON_STRDIC_TYPE_ASYNC;
         int string_dic_async_nthreads = 8;
 
+        carbon_hashmap_t compressor_options = carbon_hashmap_new();
+
         int outputIdx = 0, inputIdx = 1;
         int i;
 
@@ -346,6 +349,11 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
                     CARBON_CONSOLE_OUTPUT_OFF();
                 } else if (strcmp(opt, JS_2_CAB_OPTION_FORCE_OVERWRITE) == 0) {
                     flagForceOverwrite = true;
+                } else if (strcmp(opt, JS_2_CAB_OPTION_COMPRESSOR_OPT) == 0 && i++ < argc) {
+                    char *option = argv[i++];
+                    char *value  = argv[i];
+
+                    carbon_hashmap_put(compressor_options, option, value);
                 } else if (strcmp(opt, JS_2_CAB_OPTION_USE_COMPRESSOR) == 0 && i++ < argc) {
                     const char *compressor_name = argv[i];
                     if (!carbon_compressor_by_name(&compressor, compressor_name)) {
@@ -462,7 +470,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
         progress_tracker.end_string_id_index_baking = tracker_end_string_id_index_baking;
 
         if (!carbon_archive_from_json(&archive, pathCarbonFileOut, &err, jsonContent,
-                                      compressor, dic_type, string_dic_async_nthreads, flagReadOptimized,
+                                      compressor, compressor_options, dic_type, string_dic_async_nthreads, flagReadOptimized,
                                       flagBakeStringIdIndex, &progress_tracker)) {
             carbon_error_print_and_abort(&err);
         } else {
@@ -471,6 +479,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
 
 
         free(jsonContent);
+        carbon_hashmap_drop(compressor_options);
 
 //        carbon_memblock_t *carbonFile;
 //        CARBON_CONSOLE_WRITE(file, "  - Convert partition into in-memory CARBON file%s", "");

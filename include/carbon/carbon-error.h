@@ -100,6 +100,8 @@ CARBON_BEGIN_DECL
 #define CARBON_ERR_FWRITE_FAILED 73           /** Unable to write to file */
 #define CARBON_ERR_HASTABLE_DESERIALERR 74    /** Unable to deserialize hash table from file */
 #define CARBON_ERR_UNKNOWN_DIC_TYPE 75        /** Unknown string dictionary implementation requested */
+#define CARBON_ERR_UNKNOWN_COMPRESSOR_OPTION  76 /** Unknown option passed to a compressor */
+#define CARBON_ERR_COMPRESSOR_OPT_VAL_INVALID 77 /** The value passed to a compressor option was not accepted by the compressor */
 
 static const char *const _carbon_err_str[] = {
     "No error",
@@ -177,7 +179,9 @@ static const char *const _carbon_err_str[] = {
     "Temporary file cannot be opened for writing",
     "Unable to write to file",
     "Unable to deserialize hash table from file",
-    "Unknown string dictionary implementation requested"
+    "Unknown string dictionary implementation requested",
+    "Unknown compressor option passed",
+    "Invalid compressor option value passed"
 };
 
 #define CARBON_ERRSTR_ILLEGAL_CODE "illegal error code"

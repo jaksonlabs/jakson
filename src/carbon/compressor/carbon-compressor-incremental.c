@@ -34,9 +34,23 @@ typedef struct {
     size_t previous_offset;
     size_t previous_length;
     char const * previous_string;
+    bool compress_prefix;
 } carbon_compressor_incremental_extra_t;
 
 static size_t const CARBON_COMPRESSOR_INCREMENTAL_SORT_BATCH_SIZE = 100000;
+
+bool set_prefix(carbon_err_t *err, carbon_compressor_t *self, char *value) {
+    if(strcmp(value, "true") == 0) {
+        ((carbon_compressor_incremental_extra_t *)self->extra)->compress_prefix = true;
+        return true;
+    } else if(strcmp(value, "false") == 0) {
+        ((carbon_compressor_incremental_extra_t *)self->extra)->compress_prefix = false;
+        return true;
+    } else {
+        CARBON_ERROR(err, CARBON_ERR_COMPRESSOR_OPT_VAL_INVALID);
+        return false;
+    }
+}
 
 /**
   Compressor implementation
@@ -57,6 +71,8 @@ carbon_compressor_incremental_init(carbon_compressor_t *self, carbon_doc_bulk_t 
     extra->previous_offset = 0;
     extra->previous_length = 0;
     extra->previous_string = "";
+
+    carbon_hashmap_put(self->options, "prefix", (carbon_hashmap_any_t)&set_prefix);
 
     return true;
 }
