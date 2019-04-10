@@ -86,9 +86,7 @@ struct json_parser {
 };
 
 enum json_parent {
-        JSON_PARENT_OBJECT,
-        JSON_PARENT_MEMBER,
-        JSON_PARENT_ELEMENTS
+        JSON_PARENT_OBJECT, JSON_PARENT_MEMBER, JSON_PARENT_ELEMENTS
 };
 
 enum json_value_type {
@@ -182,7 +180,7 @@ struct json_number {
 
 NG5_EXPORT(bool) json_tokenizer_init(struct json_tokenizer *tokenizer, const char *input);
 
-NG5_EXPORT(const struct json_token *) json_tokenizer_next(struct json_tokenizer *tokenizer);
+NG5_EXPORT(const struct json_token *)json_tokenizer_next(struct json_tokenizer *tokenizer);
 
 NG5_EXPORT(void) json_token_dup(struct json_token *dst, const struct json_token *src);
 

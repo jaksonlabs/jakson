@@ -108,7 +108,7 @@ NG5_EXPORT (bool) alloc_clone(struct allocator *dst, const struct allocator *src
  * @param size number of bytes requested
  * @return non-null pointer to memory allocated with 'alloc'
  */
-NG5_EXPORT (void *) alloc_malloc(struct allocator *alloc, size_t size);
+NG5_EXPORT (void *)alloc_malloc(struct allocator *alloc, size_t size);
 
 /**
  * Invokes memory re-allocation for pointer 'ptr' (that is managed by 'alloc') to size 'size' in bytes.
@@ -118,7 +118,7 @@ NG5_EXPORT (void *) alloc_malloc(struct allocator *alloc, size_t size);
  * @param size new number of bytes for 'ptr'
  * @return non-null pointer that points to reallocated memory for 'ptr'
  */
-NG5_EXPORT (void *) alloc_realloc(struct allocator *alloc, void *ptr, size_t size);
+NG5_EXPORT (void *)alloc_realloc(struct allocator *alloc, void *ptr, size_t size);
 
 /**
  * Invokes memory freeing for pointer 'ptr' (that is managed by 'alloc').

@@ -514,8 +514,7 @@ static bool this_remove(struct strdic *self, field_sid_t *strings, size_t num_st
         struct async_extra *extra = THIS_EXTRAS(self);
         uint_fast16_t num_threads = vec_length(&extra->carriers);
         size_t approx_num_strings_per_thread = NG5_MAX(1, num_strings / num_threads);
-        struct vector ofType(field_sid_t)
-                *string_map = alloc_malloc(&self->alloc, num_threads * sizeof(struct vector));
+        struct vector ofType(field_sid_t) *string_map = alloc_malloc(&self->alloc, num_threads * sizeof(struct vector));
 
         struct vector ofType(struct parallel_remove_arg) carrier_args;
         vec_create(&carrier_args, &self->alloc, sizeof(struct parallel_remove_arg), num_threads);
@@ -523,10 +522,7 @@ static bool this_remove(struct strdic *self, field_sid_t *strings, size_t num_st
         /** prepare thread-local subset of string ids */
         vec_repeated_push(&carrier_args, &empty, num_threads);
         for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
-                vec_create(string_map + thread_id,
-                        &self->alloc,
-                        sizeof(field_sid_t),
-                        approx_num_strings_per_thread);
+                vec_create(string_map + thread_id, &self->alloc, sizeof(field_sid_t), approx_num_strings_per_thread);
         }
 
         /** compute subset of string ids per thread  */

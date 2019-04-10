@@ -19,145 +19,138 @@
 #include <lzma.h>
 #include "std/bitmap.h"
 
-NG5_EXPORT(bool)
-bitmap_create(struct bitmap *bitmap, u16 num_bits)
+NG5_EXPORT(bool) bitmap_create(struct bitmap *bitmap, u16 num_bits)
 {
-    NG5_NON_NULL_OR_ERROR(bitmap);
+        NG5_NON_NULL_OR_ERROR(bitmap);
 
-    struct allocator alloc;
-    alloc_create_std(&alloc);
-    vec_create(&bitmap->data, &alloc, sizeof(u32), ceil(num_bits / (double) NG5_NUM_BITS(u32)));
-    size_t cap = vec_capacity(&bitmap->data);
-    u32 zero = 0;
-    vec_repeated_push(&bitmap->data, &zero, cap);
-    bitmap->num_bits = num_bits;
+        struct allocator alloc;
+        alloc_create_std(&alloc);
+        vec_create(&bitmap->data, &alloc, sizeof(u32), ceil(num_bits / (double) NG5_NUM_BITS(u32)));
+        size_t cap = vec_capacity(&bitmap->data);
+        u32 zero = 0;
+        vec_repeated_push(&bitmap->data, &zero, cap);
+        bitmap->num_bits = num_bits;
 
-    return true;
+        return true;
 }
 
-NG5_EXPORT(bool)
-bitmap_cpy(struct bitmap *dst, const struct bitmap *src)
+NG5_EXPORT(bool) bitmap_cpy(struct bitmap *dst, const struct bitmap *src)
 {
-    dst->num_bits = src->num_bits;
-    return vec_cpy(&dst->data, &src->data);
+        dst->num_bits = src->num_bits;
+        return vec_cpy(&dst->data, &src->data);
 }
 
-NG5_EXPORT(bool)
-bitmap_drop(struct bitmap *bitset)
+NG5_EXPORT(bool) bitmap_drop(struct bitmap *bitset)
 {
-    return vec_drop(&bitset->data);
+        return vec_drop(&bitset->data);
 }
 
 size_t bitmap_nbits(const struct bitmap *bitset)
 {
-    NG5_NON_NULL_OR_ERROR(bitset);
-    return bitset->num_bits;
+        NG5_NON_NULL_OR_ERROR(bitset);
+        return bitset->num_bits;
 }
 
-NG5_EXPORT(bool)
-bitmap_clear(struct bitmap *bitset)
+NG5_EXPORT(bool) bitmap_clear(struct bitmap *bitset)
 {
-    NG5_NON_NULL_OR_ERROR(bitset);
-    void *data = (void *) vec_data(&bitset->data);
-    memset(data, 0, sizeof(u32) * vec_capacity(&bitset->data));
-    return true;
+        NG5_NON_NULL_OR_ERROR(bitset);
+        void *data = (void *) vec_data(&bitset->data);
+        memset(data, 0, sizeof(u32) * vec_capacity(&bitset->data));
+        return true;
 }
 
-NG5_EXPORT(bool)
-bitmap_set(struct bitmap *bitset, u16 bit_position, bool on)
+NG5_EXPORT(bool) bitmap_set(struct bitmap *bitset, u16 bit_position, bool on)
 {
-    NG5_NON_NULL_OR_ERROR(bitset)
-    size_t block_pos = floor(bit_position / (double) NG5_NUM_BITS(u32));
-    size_t block_bit = bit_position % NG5_NUM_BITS(u32);
-    u32 block = *vec_get(&bitset->data, block_pos, u32);
-    u32 mask = NG5_SET_BIT(block_bit);
-    if (on) {
-        NG5_FIELD_SET(block, mask);
-    }
-    else {
-        NG5_FIELD_CLEAR(block, mask);
-    }
-    vec_set(&bitset->data, block_pos, &block);
-    return true;
+        NG5_NON_NULL_OR_ERROR(bitset)
+        size_t block_pos = floor(bit_position / (double) NG5_NUM_BITS(u32));
+        size_t block_bit = bit_position % NG5_NUM_BITS(u32);
+        u32 block = *vec_get(&bitset->data, block_pos, u32);
+        u32 mask = NG5_SET_BIT(block_bit);
+        if (on) {
+                NG5_FIELD_SET(block, mask);
+        } else {
+                NG5_FIELD_CLEAR(block, mask);
+        }
+        vec_set(&bitset->data, block_pos, &block);
+        return true;
 }
 
 bool bitmap_get(struct bitmap *bitset, u16 bit_position)
 {
-    NG5_NON_NULL_OR_ERROR(bitset)
-    size_t block_pos = floor(bit_position / (double) NG5_NUM_BITS(u32));
-    size_t block_bit = bit_position % NG5_NUM_BITS(u32);
-    u32 block = *vec_get(&bitset->data, block_pos, u32);
-    u32 mask = NG5_SET_BIT(block_bit);
-    return ((mask & block) >> bit_position) == true;
+        NG5_NON_NULL_OR_ERROR(bitset)
+        size_t block_pos = floor(bit_position / (double) NG5_NUM_BITS(u32));
+        size_t block_bit = bit_position % NG5_NUM_BITS(u32);
+        u32 block = *vec_get(&bitset->data, block_pos, u32);
+        u32 mask = NG5_SET_BIT(block_bit);
+        return ((mask & block) >> bit_position) == true;
 }
 
-NG5_EXPORT(bool)
-bitmap_lshift(struct bitmap *map)
+NG5_EXPORT(bool) bitmap_lshift(struct bitmap *map)
 {
-    NG5_NON_NULL_OR_ERROR(map)
-    for (int i = map->num_bits - 1; i >= 0; i--) {
-        bool f = i > 0 ? bitmap_get(map, i - 1) : false;
-        bitmap_set(map, i, f);
-    }
-    return true;
+        NG5_NON_NULL_OR_ERROR(map)
+        for (int i = map->num_bits - 1; i >= 0; i--) {
+                bool f = i > 0 ? bitmap_get(map, i - 1) : false;
+                bitmap_set(map, i, f);
+        }
+        return true;
 }
 
 void bitmap_print_bits(FILE *file, u32 n)
 {
-    for (int i = 31; i >= 0; i--) {
-        u32 mask = 1 << i;
-        u32 k = n & mask;
-        fprintf(file, "%s", k == 0 ? "0" : "1");
-    }
+        for (int i = 31; i >= 0; i--) {
+                u32 mask = 1 << i;
+                u32 k = n & mask;
+                fprintf(file, "%s", k == 0 ? "0" : "1");
+        }
 }
 
 void bitmap_print_bits_in_char(FILE *file, char n)
 {
-    fprintf(file, "0b");
-    for (int i = 7; i >= 0; i--) {
-        char mask = 1 << i;
-        char k = n & mask;
-        fprintf(file, "%s", k == 0 ? "0" : "1");
-    }
+        fprintf(file, "0b");
+        for (int i = 7; i >= 0; i--) {
+                char mask = 1 << i;
+                char k = n & mask;
+                fprintf(file, "%s", k == 0 ? "0" : "1");
+        }
 }
 
 bool bitmap_blocks(u32 **blocks, u32 *num_blocks, const struct bitmap *map)
 {
-    NG5_NON_NULL_OR_ERROR(blocks)
-    NG5_NON_NULL_OR_ERROR(num_blocks)
-    NG5_NON_NULL_OR_ERROR(map)
+        NG5_NON_NULL_OR_ERROR(blocks)
+        NG5_NON_NULL_OR_ERROR(num_blocks)
+        NG5_NON_NULL_OR_ERROR(map)
 
-    u32 *result = malloc(map->data.num_elems * sizeof(u32));
-    i32 k = 0;
-    for (i32 i = map->data.num_elems - 1; i >= 0; i--) {
-        result[k++] = *vec_get(&map->data, i, u32);
-    }
-    *blocks = result;
-    *num_blocks = map->data.num_elems;
+        u32 *result = malloc(map->data.num_elems * sizeof(u32));
+        i32 k = 0;
+        for (i32 i = map->data.num_elems - 1; i >= 0; i--) {
+                result[k++] = *vec_get(&map->data, i, u32);
+        }
+        *blocks = result;
+        *num_blocks = map->data.num_elems;
 
-    return true;
+        return true;
 }
 
 bool bitmap_print(FILE *file, const struct bitmap *map)
 {
-    NG5_NON_NULL_OR_ERROR(map)
+        NG5_NON_NULL_OR_ERROR(map)
 
-    u32 *blocks, num_blocks;
+        u32 *blocks, num_blocks;
 
-    bitmap_blocks(&blocks, &num_blocks, map);
+        bitmap_blocks(&blocks, &num_blocks, map);
 
-    for (u32 i = 0; i < num_blocks; i++) {
-        fprintf(file, " %"PRIu32 " |", blocks[i]);
-    }
+        for (u32 i = 0; i < num_blocks; i++) {
+                fprintf(file, " %"PRIu32 " |", blocks[i]);
+        }
 
-    free(blocks);
+        free(blocks);
 
-    for (i32 i = map->data.num_elems - 1; i >= 0; i--) {
-        u32 block = *vec_get(&map->data, i, u32);
-        bitmap_print_bits(stdout, block);
-        fprintf(file, " |");
-    }
+        for (i32 i = map->data.num_elems - 1; i >= 0; i--) {
+                u32 block = *vec_get(&map->data, i, u32);
+                bitmap_print_bits(stdout, block);
+                fprintf(file, " |");
+        }
 
-    fprintf(file, "\n");
-    return true;
+        fprintf(file, "\n");
+        return true;
 }

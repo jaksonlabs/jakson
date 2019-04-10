@@ -22,9 +22,8 @@
 
 NG5_BEGIN_DECL
 
-NG5_EXPORT (int)
-strdic_create_async(struct strdic *dic, size_t capacity, size_t num_index_buckets,
-                           size_t approx_num_unique_strs, size_t num_threads, const struct allocator *alloc);
+NG5_EXPORT (int) strdic_create_async(struct strdic *dic, size_t capacity, size_t num_index_buckets,
+        size_t approx_num_unique_strs, size_t num_threads, const struct allocator *alloc);
 
 NG5_END_DECL
 

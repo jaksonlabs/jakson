@@ -19,81 +19,75 @@
 #include "core/async/spin.h"
 #include "core/carbon/archive_io.h"
 
-struct io_context
-{
-    struct err err;
-    FILE *file;
-    struct spinlock lock;
-    offset_t last_pos;
+struct io_context {
+        struct err err;
+        FILE *file;
+        struct spinlock lock;
+        offset_t last_pos;
 };
 
-
-NG5_EXPORT(bool)
-io_context_create(struct io_context **context, struct err *err, const char *file_path)
+NG5_EXPORT(bool) io_context_create(struct io_context **context, struct err *err, const char *file_path)
 {
-    NG5_NON_NULL_OR_ERROR(context);
-    NG5_NON_NULL_OR_ERROR(err);
-    NG5_NON_NULL_OR_ERROR(file_path);
+        NG5_NON_NULL_OR_ERROR(context);
+        NG5_NON_NULL_OR_ERROR(err);
+        NG5_NON_NULL_OR_ERROR(file_path);
 
-    struct io_context *result = malloc(sizeof(struct io_context));
+        struct io_context *result = malloc(sizeof(struct io_context));
 
-    if (!result) {
-        error(err, NG5_ERR_MALLOCERR);
-        return false;
-    }
+        if (!result) {
+                error(err, NG5_ERR_MALLOCERR);
+                return false;
+        }
 
-    spinlock_init(&result->lock);
-    error_init(&result->err);
+        spinlock_init(&result->lock);
+        error_init(&result->err);
 
-    result->file = fopen(file_path, "r");
+        result->file = fopen(file_path, "r");
 
-    if (!result->file) {
-        error(err, NG5_ERR_FOPEN_FAILED);
-        result->file = NULL;
-        return false;
-    } else {
-        *context = result;
+        if (!result->file) {
+                error(err, NG5_ERR_FOPEN_FAILED);
+                result->file = NULL;
+                return false;
+        } else {
+                *context = result;
+                return true;
+        }
+}
+
+NG5_EXPORT(struct err *)io_context_get_error(struct io_context *context)
+{
+        return context ? &context->err : NULL;
+}
+
+NG5_EXPORT(FILE *)io_context_lock_and_access(struct io_context *context)
+{
+        if (context) {
+                spinlock_acquire(&context->lock);
+                context->last_pos = ftell(context->file);
+                return context->file;
+        } else {
+                error(&context->err, NG5_ERR_NULLPTR);
+                return NULL;
+        }
+}
+
+NG5_EXPORT(bool) io_context_unlock(struct io_context *context)
+{
+        if (context) {
+                fseek(context->file, context->last_pos, SEEK_SET);
+                spinlock_release(&context->lock);
+                return true;
+        } else {
+                error(&context->err, NG5_ERR_NULLPTR);
+                return false;
+        }
+}
+
+NG5_EXPORT(bool) io_context_drop(struct io_context *context)
+{
+        NG5_NON_NULL_OR_ERROR(context);
+        NG5_OPTIONAL(context->file != NULL, fclose(context->file);
+                context->file = NULL)
+        free(context);
         return true;
-    }
-}
-
-NG5_EXPORT(struct err *)
-io_context_get_error(struct io_context *context)
-{
-    return context ? &context->err : NULL;
-}
-
-NG5_EXPORT(FILE *)
-io_context_lock_and_access(struct io_context *context)
-{
-    if (context) {
-        spinlock_acquire(&context->lock);
-        context->last_pos = ftell(context->file);
-        return context->file;
-    } else {
-        error(&context->err, NG5_ERR_NULLPTR);
-        return NULL;
-    }
-}
-
-NG5_EXPORT(bool)
-io_context_unlock(struct io_context *context)
-{
-    if (context) {
-        fseek(context->file, context->last_pos, SEEK_SET);
-        spinlock_release(&context->lock);
-        return true;
-    } else {
-        error(&context->err, NG5_ERR_NULLPTR);
-        return false;
-    }
-}
-
-NG5_EXPORT(bool)
-io_context_drop(struct io_context *context)
-{
-    NG5_NON_NULL_OR_ERROR(context);
-    NG5_OPTIONAL(context->file != NULL, fclose(context->file); context->file = NULL)
-    free(context);
-    return true;
 }

@@ -17,72 +17,70 @@
 
 #include "core/carbon/archive_strid_iter.h"
 
-NG5_EXPORT(bool)
-strid_iter_open(struct strid_iter *it, struct err *err, struct archive *archive)
+NG5_EXPORT(bool) strid_iter_open(struct strid_iter *it, struct err *err, struct archive *archive)
 {
-    NG5_NON_NULL_OR_ERROR(it)
-    NG5_NON_NULL_OR_ERROR(archive)
+        NG5_NON_NULL_OR_ERROR(it)
+        NG5_NON_NULL_OR_ERROR(archive)
 
-    memset(&it->vector, 0, sizeof(it->vector));
-    it->disk_file = fopen(archive->diskFilePath, "r");
-    if (!it->disk_file) {
-        NG5_OPTIONAL(err, error(err, NG5_ERR_FOPEN_FAILED))
-        it->is_open = false;
-        return false;
-    }
-    fseek(it->disk_file, archive->string_table.first_entry_off, SEEK_SET);
-    it->is_open = true;
-    it->disk_offset = archive->string_table.first_entry_off;
-    return true;
-}
-
-NG5_EXPORT(bool)
-strid_iter_next(bool *success, struct strid_info **info, struct err *err, size_t *info_length,
-                       struct strid_iter *it)
-{
-    NG5_NON_NULL_OR_ERROR(info)
-    NG5_NON_NULL_OR_ERROR(info_length)
-    NG5_NON_NULL_OR_ERROR(it)
-
-    if (it->disk_offset != 0 && it->is_open) {
-        struct string_entry_header header;
-        size_t vec_pos = 0;
-        do {
-            fseek(it->disk_file, it->disk_offset, SEEK_SET);
-            int num_read = fread(&header, sizeof(struct string_entry_header), 1, it->disk_file);
-            if (header.marker != '-') {
-                NG5_PRINT_ERROR(NG5_ERR_INTERNALERR);
+        memset(&it->vector, 0, sizeof(it->vector));
+        it->disk_file = fopen(archive->diskFilePath, "r");
+        if (!it->disk_file) {
+                NG5_OPTIONAL(err, error(err, NG5_ERR_FOPEN_FAILED))
+                it->is_open = false;
                 return false;
-            }
-            if (num_read != 1) {
-                NG5_OPTIONAL(err, error(err, NG5_ERR_FREAD_FAILED))
-                *success = false;
-                return false;
-            } else {
-                it->vector[vec_pos].id = header.string_id;
-                it->vector[vec_pos].offset = ftell(it->disk_file);
-                it->vector[vec_pos].strlen = header.string_len;
-                it->disk_offset = header.next_entry_off;
-                vec_pos++;
-            }
-        } while (header.next_entry_off != 0 && vec_pos < NG5_ARRAY_LENGTH(it->vector));
-
-        *info_length = vec_pos;
-        *success = true;
-        *info = &it->vector[0];
+        }
+        fseek(it->disk_file, archive->string_table.first_entry_off, SEEK_SET);
+        it->is_open = true;
+        it->disk_offset = archive->string_table.first_entry_off;
         return true;
-    } else {
-        return false;
-    }
 }
 
-NG5_EXPORT(bool)
-strid_iter_close(struct strid_iter *it)
+NG5_EXPORT(bool) strid_iter_next(bool *success, struct strid_info **info, struct err *err, size_t *info_length,
+        struct strid_iter *it)
 {
-    NG5_NON_NULL_OR_ERROR(it)
-    if (it->is_open) {
-        fclose(it->disk_file);
-        it->is_open = false;
-    }
-    return true;
+        NG5_NON_NULL_OR_ERROR(info)
+        NG5_NON_NULL_OR_ERROR(info_length)
+        NG5_NON_NULL_OR_ERROR(it)
+
+        if (it->disk_offset != 0 && it->is_open) {
+                struct string_entry_header header;
+                size_t vec_pos = 0;
+                do {
+                        fseek(it->disk_file, it->disk_offset, SEEK_SET);
+                        int num_read = fread(&header, sizeof(struct string_entry_header), 1, it->disk_file);
+                        if (header.marker != '-') {
+                                NG5_PRINT_ERROR(NG5_ERR_INTERNALERR);
+                                return false;
+                        }
+                        if (num_read != 1) {
+                                NG5_OPTIONAL(err, error(err, NG5_ERR_FREAD_FAILED))
+                                *success = false;
+                                return false;
+                        } else {
+                                it->vector[vec_pos].id = header.string_id;
+                                it->vector[vec_pos].offset = ftell(it->disk_file);
+                                it->vector[vec_pos].strlen = header.string_len;
+                                it->disk_offset = header.next_entry_off;
+                                vec_pos++;
+                        }
+                }
+                while (header.next_entry_off != 0 && vec_pos < NG5_ARRAY_LENGTH(it->vector));
+
+                *info_length = vec_pos;
+                *success = true;
+                *info = &it->vector[0];
+                return true;
+        } else {
+                return false;
+        }
+}
+
+NG5_EXPORT(bool) strid_iter_close(struct strid_iter *it)
+{
+        NG5_NON_NULL_OR_ERROR(it)
+        if (it->is_open) {
+                fclose(it->disk_file);
+                it->is_open = false;
+        }
+        return true;
 }

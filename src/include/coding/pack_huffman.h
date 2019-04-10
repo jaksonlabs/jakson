@@ -25,58 +25,45 @@
 
 NG5_BEGIN_DECL
 
-struct pack_huffman
-{
-    struct vector ofType(struct pack_huffman_entry) table;
-    struct err err;
+struct pack_huffman {
+        struct vector ofType(struct pack_huffman_entry) table;
+        struct err err;
 };
 
-struct pack_huffman_entry
-{
-    unsigned char letter;
-    u32 *blocks;
-    u16 nblocks;
+struct pack_huffman_entry {
+        unsigned char letter;
+        u32 *blocks;
+        u16 nblocks;
 };
 
-struct pack_huffman_info
-{
-    unsigned char letter;
-    u8 nbytes_prefix;
-    char *prefix_code;
+struct pack_huffman_info {
+        unsigned char letter;
+        u8 nbytes_prefix;
+        char *prefix_code;
 };
 
-struct pack_huffman_str_info
-{
-    u32 nbytes_encoded;
-    const char *encoded_bytes;
+struct pack_huffman_str_info {
+        u32 nbytes_encoded;
+        const char *encoded_bytes;
 };
 
-NG5_EXPORT(bool)
-huffman_create(struct pack_huffman *dic);
+NG5_EXPORT(bool) huffman_create(struct pack_huffman *dic);
 
-NG5_EXPORT(bool)
-huffman_cpy(struct pack_huffman *dst, struct pack_huffman *src);
+NG5_EXPORT(bool) huffman_cpy(struct pack_huffman *dst, struct pack_huffman *src);
 
-NG5_EXPORT(bool)
-huffman_build(struct pack_huffman *encoder, const string_vector_t *strings);
+NG5_EXPORT(bool) huffman_build(struct pack_huffman *encoder, const string_vector_t *strings);
 
-NG5_EXPORT(bool)
-huffman_get_error(struct err *err, const struct pack_huffman *dic);
+NG5_EXPORT(bool) huffman_get_error(struct err *err, const struct pack_huffman *dic);
 
-NG5_EXPORT(bool)
-huffman_encode_one(struct memfile *file, struct pack_huffman *dic, const char *string);
+NG5_EXPORT(bool) huffman_encode_one(struct memfile *file, struct pack_huffman *dic, const char *string);
 
-NG5_EXPORT(bool)
-huffman_read_string(struct pack_huffman_str_info *info, struct memfile *src);
+NG5_EXPORT(bool) huffman_read_string(struct pack_huffman_str_info *info, struct memfile *src);
 
-NG5_EXPORT(bool)
-huffman_drop(struct pack_huffman *dic);
+NG5_EXPORT(bool) huffman_drop(struct pack_huffman *dic);
 
-NG5_EXPORT(bool)
-huffman_serialize_dic(struct memfile *file, const struct pack_huffman *dic, char marker_symbol);
+NG5_EXPORT(bool) huffman_serialize_dic(struct memfile *file, const struct pack_huffman *dic, char marker_symbol);
 
-NG5_EXPORT(bool)
-huffman_read_dic_entry(struct pack_huffman_info *info, struct memfile *file, char marker_symbol);
+NG5_EXPORT(bool) huffman_read_dic_entry(struct pack_huffman_info *info, struct memfile *file, char marker_symbol);
 
 NG5_END_DECL
 

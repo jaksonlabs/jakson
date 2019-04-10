@@ -23,14 +23,13 @@
 
 NG5_BEGIN_DECL
 
-struct memfile
-{
-    struct memblock *memblock;
-    offset_t pos;
-    bool bit_mode;
-    size_t current_read_bit, current_write_bit, bytes_completed;
-    enum access_mode mode;
-    struct err err;
+struct memfile {
+        struct memblock *memblock;
+        offset_t pos;
+        bool bit_mode;
+        size_t current_read_bit, current_write_bit, bytes_completed;
+        enum access_mode mode;
+        struct err err;
 };
 
 #define NG5_MEMFILE_PEEK(file, type)                                                                                \
@@ -61,53 +60,37 @@ struct memfile
     offset;                                                                                                            \
 })
 
-NG5_EXPORT(bool)
-memfile_open(struct memfile *file, struct memblock *block, enum access_mode mode);
+NG5_EXPORT(bool) memfile_open(struct memfile *file, struct memblock *block, enum access_mode mode);
 
-NG5_EXPORT(bool)
-memfile_seek(struct memfile *file, offset_t pos);
+NG5_EXPORT(bool) memfile_seek(struct memfile *file, offset_t pos);
 
-NG5_EXPORT(bool)
-memfile_rewind(struct memfile *file);
+NG5_EXPORT(bool) memfile_rewind(struct memfile *file);
 
-NG5_EXPORT(bool)
-memfile_get_offset(offset_t *pos, const struct memfile *file);
+NG5_EXPORT(bool) memfile_get_offset(offset_t *pos, const struct memfile *file);
 
-NG5_EXPORT(size_t)
-memfile_size(struct memfile *file);
+NG5_EXPORT(size_t) memfile_size(struct memfile *file);
 
-NG5_EXPORT(size_t)
-memfile_remain_size(struct memfile *file);
+NG5_EXPORT(size_t) memfile_remain_size(struct memfile *file);
 
-NG5_EXPORT(bool)
-memfile_shrink(struct memfile *file);
+NG5_EXPORT(bool) memfile_shrink(struct memfile *file);
 
-NG5_EXPORT(const char *)
-memfile_read(struct memfile *file, offset_t nbytes);
+NG5_EXPORT(const char *)memfile_read(struct memfile *file, offset_t nbytes);
 
-NG5_EXPORT(bool)
-memfile_skip(struct memfile *file, offset_t nbytes);
+NG5_EXPORT(bool) memfile_skip(struct memfile *file, offset_t nbytes);
 
-NG5_EXPORT(const char *)
-memfile_peek(struct memfile *file, offset_t nbytes);
+NG5_EXPORT(const char *)memfile_peek(struct memfile *file, offset_t nbytes);
 
-NG5_EXPORT(bool)
-memfile_write(struct memfile *file, const void *data, offset_t nbytes);
+NG5_EXPORT(bool) memfile_write(struct memfile *file, const void *data, offset_t nbytes);
 
-NG5_EXPORT(bool)
-memfile_begin_bit_mode(struct memfile *file);
+NG5_EXPORT(bool) memfile_begin_bit_mode(struct memfile *file);
 
-NG5_EXPORT(bool)
-memfile_write_bit(struct memfile *file, bool flag);
+NG5_EXPORT(bool) memfile_write_bit(struct memfile *file, bool flag);
 
-NG5_EXPORT(bool)
-memfile_read_bit(struct memfile *file);
+NG5_EXPORT(bool) memfile_read_bit(struct memfile *file);
 
-NG5_EXPORT(bool)
-memfile_end_bit_mode(size_t *num_bytes_written, struct memfile *file);
+NG5_EXPORT(bool) memfile_end_bit_mode(size_t *num_bytes_written, struct memfile *file);
 
-NG5_EXPORT(void *)
-memfile_current_pos(struct memfile *file, offset_t nbytes);
+NG5_EXPORT(void *)memfile_current_pos(struct memfile *file, offset_t nbytes);
 
 NG5_END_DECL
 

@@ -22,42 +22,38 @@
 
 NG5_BEGIN_DECL
 
-typedef bool (*string_pred_func_t)(size_t *idxs_matching, size_t *num_matching,
-                                     char **strings, size_t num_strings, void *capture);
+typedef bool
+(*string_pred_func_t)(size_t *idxs_matching, size_t *num_matching, char **strings, size_t num_strings, void *capture);
 
-struct string_pred_t
-{
-    string_pred_func_t func;
-    i64 limit;
+struct string_pred_t {
+        string_pred_func_t func;
+        i64 limit;
 };
 
-NG5_BUILT_IN(static bool)
-string_pred_validate(struct err *err, const struct string_pred_t *pred)
+NG5_BUILT_IN(static bool) string_pred_validate(struct err *err, const struct string_pred_t *pred)
 {
-    NG5_NON_NULL_OR_ERROR(pred);
-    NG5_IMPLEMENTS_OR_ERROR(err, pred, func)
-    return true;
+        NG5_NON_NULL_OR_ERROR(pred);
+        NG5_IMPLEMENTS_OR_ERROR(err, pred, func)
+        return true;
 }
 
-NG5_BUILT_IN(static bool)
-string_pred_eval(const struct string_pred_t *pred, size_t *idxs_matching, size_t *num_matching,
-                        char **strings, size_t num_strings, void *capture)
+NG5_BUILT_IN(static bool) string_pred_eval(const struct string_pred_t *pred, size_t *idxs_matching,
+        size_t *num_matching, char **strings, size_t num_strings, void *capture)
 {
-    assert(pred);
-    assert(idxs_matching);
-    assert(num_matching);
-    assert(strings);
-    assert(pred->func);
-    return pred->func(idxs_matching, num_matching, strings, num_strings, capture);
+        assert(pred);
+        assert(idxs_matching);
+        assert(num_matching);
+        assert(strings);
+        assert(pred->func);
+        return pred->func(idxs_matching, num_matching, strings, num_strings, capture);
 }
 
-NG5_BUILT_IN(static bool)
-string_pred_get_limit(i64 *limit, const struct string_pred_t *pred)
+NG5_BUILT_IN(static bool) string_pred_get_limit(i64 *limit, const struct string_pred_t *pred)
 {
-    NG5_NON_NULL_OR_ERROR(limit);
-    NG5_NON_NULL_OR_ERROR(pred);
-    *limit = pred->limit;
-    return true;
+        NG5_NON_NULL_OR_ERROR(limit);
+        NG5_NON_NULL_OR_ERROR(pred);
+        *limit = pred->limit;
+        return true;
 }
 
 NG5_END_DECL

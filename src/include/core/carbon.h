@@ -64,8 +64,7 @@ extern "C" {
 #include "core/string-pred/string_pred_contains.h"
 #include "core/string-pred/string_pred_equals.h"
 
-NG5_EXPORT (bool)
-init(void);
+NG5_EXPORT (bool) init(void);
 
 #ifdef __cplusplus
 }

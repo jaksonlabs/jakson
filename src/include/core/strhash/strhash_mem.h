@@ -24,9 +24,8 @@
 
 NG5_BEGIN_DECL
 
-NG5_EXPORT (bool)
-strhash_create_inmemory(struct strhash *parallel_map_exec, const struct allocator *alloc, size_t num_buckets,
-                               size_t cap_buckets);
+NG5_EXPORT (bool) strhash_create_inmemory(struct strhash *parallel_map_exec, const struct allocator *alloc,
+        size_t num_buckets, size_t cap_buckets);
 
 NG5_END_DECL
 

@@ -26,21 +26,15 @@ NG5_BEGIN_DECL
 struct archive; /* forwarded */
 struct io_context; /* forwarded */
 
-NG5_EXPORT(bool)
-io_context_create(struct io_context **context, struct err *err, const char *file_path);
+NG5_EXPORT(bool) io_context_create(struct io_context **context, struct err *err, const char *file_path);
 
-NG5_EXPORT(struct err *)
-io_context_get_error(struct io_context *context);
+NG5_EXPORT(struct err *)io_context_get_error(struct io_context *context);
 
-NG5_EXPORT(FILE *)
-io_context_lock_and_access(struct io_context *context);
+NG5_EXPORT(FILE *)io_context_lock_and_access(struct io_context *context);
 
-NG5_EXPORT(bool)
-io_context_unlock(struct io_context *context);
+NG5_EXPORT(bool) io_context_unlock(struct io_context *context);
 
-NG5_EXPORT(bool)
-io_context_drop(struct io_context *context);
-
+NG5_EXPORT(bool) io_context_drop(struct io_context *context);
 
 NG5_END_DECL
 

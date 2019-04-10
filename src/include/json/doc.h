@@ -89,8 +89,8 @@ NG5_EXPORT(struct doc_obj *)doc_bulk_add_json(struct doc_entries *partition, str
 
 NG5_EXPORT(struct doc_obj *)doc_entries_get_root(const struct doc_entries *partition);
 
-NG5_EXPORT(struct columndoc *)doc_entries_columndoc(const struct doc_bulk *bulk,
-        const struct doc_entries *partition, bool read_optimized);
+NG5_EXPORT(struct columndoc *)doc_entries_columndoc(const struct doc_bulk *bulk, const struct doc_entries *partition,
+        bool read_optimized);
 
 NG5_EXPORT(bool) doc_entries_drop(struct doc_entries *partition);
 

@@ -22,36 +22,36 @@
 
 bool spinlock_init(struct spinlock *spinlock)
 {
-    NG5_NON_NULL_OR_ERROR(spinlock)
-    atomic_flag_clear(&spinlock->lock);
+        NG5_NON_NULL_OR_ERROR(spinlock)
+        atomic_flag_clear(&spinlock->lock);
 
-    memset(&spinlock->owner, 0, sizeof(pthread_t));
+        memset(&spinlock->owner, 0, sizeof(pthread_t));
 
-    return true;
+        return true;
 }
 
 bool spinlock_acquire(struct spinlock *spinlock)
 {
-    timestamp_t begin = time_now_wallclock();
-    NG5_NON_NULL_OR_ERROR(spinlock)
-    if (!pthread_equal(spinlock->owner, pthread_self())) {
-        while (atomic_flag_test_and_set(&spinlock->lock));
-        /** remeber the thread that aquires this lock */
-        spinlock->owner = pthread_self();
-    }
-    timestamp_t end = time_now_wallclock();
-    float duration = (end - begin) / 1000.0f;
-    if (duration > 0.01f) {
-        NG5_WARN(SPINLOCK_TAG, "spin lock acquisition took exceptionally long: %f seconds", duration);
-    }
+        timestamp_t begin = time_now_wallclock();
+        NG5_NON_NULL_OR_ERROR(spinlock)
+        if (!pthread_equal(spinlock->owner, pthread_self())) {
+                while (atomic_flag_test_and_set(&spinlock->lock)) { }
+                /** remeber the thread that aquires this lock */
+                spinlock->owner = pthread_self();
+        }
+        timestamp_t end = time_now_wallclock();
+        float duration = (end - begin) / 1000.0f;
+        if (duration > 0.01f) {
+                NG5_WARN(SPINLOCK_TAG, "spin lock acquisition took exceptionally long: %f seconds", duration);
+        }
 
-    return true;
+        return true;
 }
 
 bool spinlock_release(struct spinlock *spinlock)
 {
-    NG5_NON_NULL_OR_ERROR(spinlock)
-    atomic_flag_clear(&spinlock->lock);
-    memset(&spinlock->owner, 0, sizeof(pthread_t));
-    return true;
+        NG5_NON_NULL_OR_ERROR(spinlock)
+        atomic_flag_clear(&spinlock->lock);
+        memset(&spinlock->owner, 0, sizeof(pthread_t));
+        return true;
 }

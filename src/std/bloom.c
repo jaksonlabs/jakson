@@ -17,32 +17,29 @@
 
 #include "std/bloom.h"
 
-NG5_EXPORT(bool)
-bloom_create(bloom_t *filter, size_t size)
+NG5_EXPORT(bool) bloom_create(bloom_t *filter, size_t size)
 {
-    return bitmap_create(filter, size);
+        return bitmap_create(filter, size);
 }
 
-NG5_EXPORT(bool)
-bloom_drop(bloom_t *filter)
+NG5_EXPORT(bool) bloom_drop(bloom_t *filter)
 {
-    return bitmap_drop(filter);
+        return bitmap_drop(filter);
 }
 
-NG5_EXPORT(bool)
-bloom_clear(bloom_t *filter)
+NG5_EXPORT(bool) bloom_clear(bloom_t *filter)
 {
-    return bitmap_clear(filter);
+        return bitmap_clear(filter);
 }
 
 size_t bloom_nbits(bloom_t *filter)
 {
-    return bitmap_nbits(filter);
+        return bitmap_nbits(filter);
 }
 
 unsigned bloom_nhashs()
 {
-    return 4;
+        return 4;
 }
 
 

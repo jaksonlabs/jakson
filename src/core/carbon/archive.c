@@ -135,10 +135,9 @@ static bool serialize_string_dic(struct memfile *memfile, struct err *err, const
         enum packer_type compressor);
 static bool print_archive_from_memfile(FILE *file, struct err *err, struct memfile *memfile);
 
-NG5_EXPORT(bool) archive_from_json(struct archive *out, const char *file, struct err *err,
-        const char *json_string, enum packer_type compressor, enum strdic_tag dictionary,
-        size_t num_async_dic_threads, bool read_optimized, bool bake_string_id_index,
-        struct archive_callback *callback)
+NG5_EXPORT(bool) archive_from_json(struct archive *out, const char *file, struct err *err, const char *json_string,
+        enum packer_type compressor, enum strdic_tag dictionary, size_t num_async_dic_threads, bool read_optimized,
+        bool bake_string_id_index, struct archive_callback *callback)
 {
         NG5_NON_NULL_OR_ERROR(out);
         NG5_NON_NULL_OR_ERROR(file);
@@ -198,8 +197,8 @@ NG5_EXPORT(bool) archive_from_json(struct archive *out, const char *file, struct
 }
 
 NG5_EXPORT(bool) archive_stream_from_json(struct memblock **stream, struct err *err, const char *json_string,
-        enum packer_type compressor, enum strdic_tag dictionary, size_t num_async_dic_threads,
-        bool read_optimized, bool bake_id_index, struct archive_callback *callback)
+        enum packer_type compressor, enum strdic_tag dictionary, size_t num_async_dic_threads, bool read_optimized,
+        bool bake_id_index, struct archive_callback *callback)
 {
         NG5_NON_NULL_OR_ERROR(stream);
         NG5_NON_NULL_OR_ERROR(err);
@@ -362,8 +361,8 @@ static bool run_string_id_baking(struct err *err, struct memblock **stream)
         return true;
 }
 
-bool archive_from_model(struct memblock **stream, struct err *err, struct columndoc *model,
-        enum packer_type compressor, bool bake_string_id_index, struct archive_callback *callback)
+bool archive_from_model(struct memblock **stream, struct err *err, struct columndoc *model, enum packer_type compressor,
+        bool bake_string_id_index, struct archive_callback *callback)
 {
         NG5_NON_NULL_OR_ERROR(model)
         NG5_NON_NULL_OR_ERROR(stream)
@@ -443,8 +442,8 @@ bool archive_print(FILE *file, struct err *err, struct memblock *stream)
 {
         struct memfile memfile;
         memfile_open(&memfile, stream, READ_ONLY);
-        if (memfile_size(&memfile) < sizeof(struct archive_header) + sizeof(struct string_table_header)
-                + sizeof(struct object_header)) {
+        if (memfile_size(&memfile)
+                < sizeof(struct archive_header) + sizeof(struct string_table_header) + sizeof(struct object_header)) {
                 error(err, NG5_ERR_NOCARBONSTREAM);
                 return false;
         } else {
@@ -552,8 +551,8 @@ static bool write_primitive_fixed_value_column(struct memfile *memfile, struct e
         return true;
 }
 
-static offset_t *__write_primitive_column(struct memfile *memfile, struct err *err, struct vector ofType(struct columndoc_obj) *values_vec,
-        offset_t root_offset)
+static offset_t *__write_primitive_column(struct memfile *memfile, struct err *err,
+        struct vector ofType(struct columndoc_obj) *values_vec, offset_t root_offset)
 {
         offset_t *result = malloc(values_vec->num_elems * sizeof(offset_t));
         struct columndoc_obj *mapped = vec_all(values_vec, struct columndoc_obj);
@@ -567,7 +566,8 @@ static offset_t *__write_primitive_column(struct memfile *memfile, struct err *e
         return result;
 }
 
-static bool __write_array_len_column(struct err *err, struct memfile *memfile, field_e type, struct vector ofType(...) *values)
+static bool __write_array_len_column(struct err *err, struct memfile *memfile, field_e type,
+        struct vector ofType(...) *values)
 {
         switch (type) {
         case FIELD_NULL:
@@ -634,8 +634,9 @@ static bool write_array_value_column(struct memfile *memfile, struct err *err, f
         return true;
 }
 
-static bool write_array_prop(offset_t *offset, struct err *err, struct memfile *memfile, struct vector ofType(field_sid_t) *keys,
-        field_e type, struct vector ofType(...) *values, offset_t root_object_header_offset)
+static bool write_array_prop(offset_t *offset, struct err *err, struct memfile *memfile,
+        struct vector ofType(field_sid_t) *keys, field_e type, struct vector ofType(...) *values,
+        offset_t root_object_header_offset)
 {
         assert(keys->num_elems == values->num_elems);
 
@@ -776,8 +777,8 @@ static bool write_array_props(struct memfile *memfile, struct err *err, struct c
 
 /** Fixed-length property lists; value position can be determined by size of value and position of key in key column.
  * In contrast, variable-length property list require an additional offset column (see 'write_var_props') */
-static bool write_fixed_props(offset_t *offset, struct err *err, struct memfile *memfile, struct vector ofType(field_sid_t) *keys,
-        field_e type, struct vector ofType(T) *values)
+static bool write_fixed_props(offset_t *offset, struct err *err, struct memfile *memfile,
+        struct vector ofType(field_sid_t) *keys, field_e type, struct vector ofType(T) *values)
 {
         assert(!values || keys->num_elems == values->num_elems);
         assert(type != FIELD_OBJECT); /** use 'write_var_props' instead */
@@ -806,8 +807,9 @@ static bool write_fixed_props(offset_t *offset, struct err *err, struct memfile 
  * to a particular property. Due to the move of strings (i.e., variable-length values) to a dedicated string table,
  * the only variable-length value for properties are "JSON objects".
  * In contrast, fixed-length property list doesn't require an additional offset column (see 'write_fixed_props') */
-static bool write_var_props(offset_t *offset, struct err *err, struct memfile *memfile, struct vector ofType(field_sid_t) *keys,
-        struct vector ofType(struct columndoc_obj) *objects, offset_t root_object_header_offset)
+static bool write_var_props(offset_t *offset, struct err *err, struct memfile *memfile,
+        struct vector ofType(field_sid_t) *keys, struct vector ofType(struct columndoc_obj) *objects,
+        offset_t root_object_header_offset)
 {
         assert(!objects || keys->num_elems == objects->num_elems);
 
@@ -837,12 +839,7 @@ static bool write_var_props(offset_t *offset, struct err *err, struct memfile *m
 static bool write_primitive_props(struct memfile *memfile, struct err *err, struct columndoc_obj *columndoc,
         struct archive_prop_offs *offsets, offset_t root_object_header_offset)
 {
-        if (!write_fixed_props(&offsets->nulls,
-                err,
-                memfile,
-                &columndoc->null_prop_keys,
-                FIELD_NULL,
-                NULL)) {
+        if (!write_fixed_props(&offsets->nulls, err, memfile, &columndoc->null_prop_keys, FIELD_NULL, NULL)) {
                 return false;
         }
         if (!write_fixed_props(&offsets->bools,
@@ -958,8 +955,8 @@ static bool write_primitive_props(struct memfile *memfile, struct err *err, stru
         return true;
 }
 
-static bool write_column_entry(struct memfile *memfile, struct err *err, field_e type, struct vector ofType(<T>) *column,
-        offset_t root_object_header_offset)
+static bool write_column_entry(struct memfile *memfile, struct err *err, field_e type,
+        struct vector ofType(<T>) *column, offset_t root_object_header_offset)
 {
         memfile_write(memfile, &column->num_elems, sizeof(u32));
         switch (type) {
@@ -1045,8 +1042,7 @@ static bool write_object_array_props(struct memfile *memfile, struct err *err,
                 memfile_write(memfile, &header, sizeof(struct object_array_header));
 
                 for (size_t i = 0; i < object_key_columns->num_elems; i++) {
-                        struct columndoc_group *column_group =
-                                vec_get(object_key_columns, i, struct columndoc_group);
+                        struct columndoc_group *column_group = vec_get(object_key_columns, i, struct columndoc_group);
                         memfile_write(memfile, &column_group->key, sizeof(field_sid_t));
                 }
 
@@ -1055,15 +1051,14 @@ static bool write_object_array_props(struct memfile *memfile, struct err *err,
                 memfile_skip(memfile, object_key_columns->num_elems * sizeof(offset_t));
 
                 for (size_t i = 0; i < object_key_columns->num_elems; i++) {
-                        struct columndoc_group *column_group =
-                                vec_get(object_key_columns, i, struct columndoc_group);
+                        struct columndoc_group *column_group = vec_get(object_key_columns, i, struct columndoc_group);
                         offset_t this_column_offset_relative = memfile_tell(memfile) - root_object_header_offset;
 
                         /* write an object-id for each position number */
                         size_t max_pos = 0;
                         for (size_t k = 0; k < column_group->columns.num_elems; k++) {
-                                struct columndoc_column *column =
-                                        vec_get(&column_group->columns, k, struct columndoc_column);
+                                struct columndoc_column
+                                        *column = vec_get(&column_group->columns, k, struct columndoc_column);
                                 const u32 *array_pos = vec_all(&column->array_positions, u32);
                                 for (size_t m = 0; m < column->array_positions.num_elems; m++) {
                                         max_pos = NG5_MAX(max_pos, array_pos[m]);
@@ -1092,8 +1087,8 @@ static bool write_object_array_props(struct memfile *memfile, struct err *err,
                         memfile_skip(memfile, column_group->columns.num_elems * sizeof(offset_t));
 
                         for (size_t k = 0; k < column_group->columns.num_elems; k++) {
-                                struct columndoc_column *column =
-                                        vec_get(&column_group->columns, k, struct columndoc_column);
+                                struct columndoc_column
+                                        *column = vec_get(&column_group->columns, k, struct columndoc_column);
                                 offset_t continue_write = memfile_tell(memfile);
                                 offset_t column_off = continue_write - root_object_header_offset;
                                 memfile_seek(memfile, offset_column_to_columns + k * sizeof(offset_t));
@@ -1600,7 +1595,8 @@ static bool print_column_form_memfile(FILE *file, struct err *err, struct memfil
         return true;
 }
 
-static bool print_object_array_from_memfile(FILE *file, struct err *err, struct memfile *memfile, unsigned nesting_level)
+static bool print_object_array_from_memfile(FILE *file, struct err *err, struct memfile *memfile,
+        unsigned nesting_level)
 {
         unsigned offset = (unsigned) memfile_tell(memfile);
         struct object_array_header *header = NG5_MEMFILE_READ_TYPE(memfile, struct object_array_header);
@@ -1651,8 +1647,8 @@ static bool print_object_array_from_memfile(FILE *file, struct err *err, struct 
                         column_group_header->marker,
                         column_group_header->num_columns,
                         column_group_header->num_objects);
-                const object_id_t *oids =
-                        NG5_MEMFILE_READ_TYPE_LIST(memfile, object_id_t, column_group_header->num_objects);
+                const object_id_t
+                        *oids = NG5_MEMFILE_READ_TYPE_LIST(memfile, object_id_t, column_group_header->num_objects);
                 for (size_t k = 0; k < column_group_header->num_objects; k++) {
                         fprintf(file, "%"PRIu64"%s", oids[k], k + 1 < column_group_header->num_objects ? ", " : "");
                 }
@@ -1969,8 +1965,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                         }
                         fprintf(file, "] [");
 
-                        nullArrayLengths =
-                                (u32 *) NG5_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(u32));
+                        nullArrayLengths = (u32 *) NG5_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(u32));
 
                         for (u32 i = 0; i < prop_header->num_entries; i++) {
                                 fprintf(file,
@@ -2001,8 +1996,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                         }
                         fprintf(file, "] [");
 
-                        array_lengths =
-                                (u32 *) NG5_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(u32));
+                        array_lengths = (u32 *) NG5_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(u32));
 
                         for (u32 i = 0; i < prop_header->num_entries; i++) {
                                 fprintf(file,
@@ -2521,8 +2515,7 @@ static bool read_record(struct record_header *header_read, struct archive *archi
                 return false;
         } else {
                 archive->record_table.flags.value = header.flags;
-                bool status =
-                        memblock_from_file(&archive->record_table.recordDataBase, disk_file, header.record_size);
+                bool status = memblock_from_file(&archive->record_table.recordDataBase, disk_file, header.record_size);
                 if (!status) {
                         memblock_get_error(&err, archive->record_table.recordDataBase);
                         error_cpy(&archive->err, &err);
@@ -2530,8 +2523,7 @@ static bool read_record(struct record_header *header_read, struct archive *archi
                 }
 
                 struct memfile memfile;
-                if (memfile_open(&memfile, archive->record_table.recordDataBase, READ_ONLY)
-                        != true) {
+                if (memfile_open(&memfile, archive->record_table.recordDataBase, READ_ONLY) != true) {
                         error(&archive->err, NG5_ERR_CORRUPTED);
                         status = false;
                 }

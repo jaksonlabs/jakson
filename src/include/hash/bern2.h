@@ -33,6 +33,6 @@ NG5_BEGIN_DECL
     hash;                                                                                                              \
 })
 
-NG5_END_DECL
+        NG5_END_DECL
 
 #endif

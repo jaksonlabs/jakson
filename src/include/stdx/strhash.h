@@ -82,105 +82,102 @@ NG5_BEGIN_DECL
 
 struct strhash;
 
-enum strhash_tag
-{
-    MEMORY_RESIDENT
+enum strhash_tag {
+        MEMORY_RESIDENT
 };
 
-struct strhash_counters
-{
-    size_t num_bucket_search_miss;
-    size_t num_bucket_search_hit;
-    size_t num_bucket_cache_search_miss;
-    size_t num_bucket_cache_search_hit;
+struct strhash_counters {
+        size_t num_bucket_search_miss;
+        size_t num_bucket_search_hit;
+        size_t num_bucket_cache_search_miss;
+        size_t num_bucket_cache_search_hit;
 };
 
-struct strhash
-{
-    /**
-     * Implementation-specific values
-     */
-    void *extra;
+struct strhash {
+        /**
+         * Implementation-specific values
+         */
+        void *extra;
 
-    /**
-     * Implementation tag
-     */
-    enum strhash_tag tag;
+        /**
+         * Implementation tag
+         */
+        enum strhash_tag tag;
 
-    /**
-     * Statistics to lookup misses and hits
-     *
-     * <b>Note</b>: Implementation must maintain counters by itself
-     */
-    struct strhash_counters counters;
+        /**
+         * Statistics to lookup misses and hits
+         *
+         * <b>Note</b>: Implementation must maintain counters by itself
+         */
+        struct strhash_counters counters;
 
-    /**
-    *  Memory allocator that is used to get memory for user data
-    */
-    struct allocator allocator;
+        /**
+        *  Memory allocator that is used to get memory for user data
+        */
+        struct allocator allocator;
 
-    /**
-     *  Frees resources bound to <code>self</code> via the allocator specified by the constructor
-     */
-    int (*drop)(struct strhash *self);
+        /**
+         *  Frees resources bound to <code>self</code> via the allocator specified by the constructor
+         */
+        int (*drop)(struct strhash *self);
 
-    /**
-     * Put <code>num_pair</code> objects into this parallel_map_exec maybe updating old objects with the same key.
-     */
-    int (*put_bulk_safe)(struct strhash *self, char *const *keys, const field_sid_t *values, size_t npairs);
+        /**
+         * Put <code>num_pair</code> objects into this parallel_map_exec maybe updating old objects with the same key.
+         */
+        int (*put_bulk_safe)(struct strhash *self, char *const *keys, const field_sid_t *values, size_t npairs);
 
-    /**
-     * Put <code>num_pair</code> objects into this parallel_map_exec maybe without checking for updates.
-     */
-    int (*put_bulk_fast)(struct strhash *self, char *const *keys, const field_sid_t *values, size_t npairs);
+        /**
+         * Put <code>num_pair</code> objects into this parallel_map_exec maybe without checking for updates.
+         */
+        int (*put_bulk_fast)(struct strhash *self, char *const *keys, const field_sid_t *values, size_t npairs);
 
-    /**
-     * Same as 'put_safe_bulk' but specialized for a single element
-     */
-    int (*put_exact_safe)(struct strhash *self, const char *key, field_sid_t value);
+        /**
+         * Same as 'put_safe_bulk' but specialized for a single element
+         */
+        int (*put_exact_safe)(struct strhash *self, const char *key, field_sid_t value);
 
-    /**
-     * Same as 'put_fast_bulk' but specialized for a single element
-     */
-    int (*put_exact_fast)(struct strhash *self, const char *key, field_sid_t value);
+        /**
+         * Same as 'put_fast_bulk' but specialized for a single element
+         */
+        int (*put_exact_fast)(struct strhash *self, const char *key, field_sid_t value);
 
-    /**
-     * Get the values associated with <code>keys</code> in this parallel_map_exec (if any).
-     */
-    int (*get_bulk_safe)(struct strhash *self, field_sid_t **out, bool **found_mask, size_t *nnot_found,
-                         char *const *keys, size_t nkeys);
+        /**
+         * Get the values associated with <code>keys</code> in this parallel_map_exec (if any).
+         */
+        int (*get_bulk_safe)(struct strhash *self, field_sid_t **out, bool **found_mask, size_t *nnot_found,
+                char *const *keys, size_t nkeys);
 
-    /**
-     * The same as 'get_safe_bulk' but optimized for a single element
-     */
-    int (*get_exact_safe)(struct strhash *self, field_sid_t *out, bool *found_mask, const char *key);
+        /**
+         * The same as 'get_safe_bulk' but optimized for a single element
+         */
+        int (*get_exact_safe)(struct strhash *self, field_sid_t *out, bool *found_mask, const char *key);
 
-    /**
-     * Get the values associated with <code>keys</code> in this parallel_map_exec. All keys <u>must</u> exist.
-     */
-    int (*get_fast)(struct strhash *self, field_sid_t **out, char *const *keys, size_t nkeys);
+        /**
+         * Get the values associated with <code>keys</code> in this parallel_map_exec. All keys <u>must</u> exist.
+         */
+        int (*get_fast)(struct strhash *self, field_sid_t **out, char *const *keys, size_t nkeys);
 
-    /**
-     * Updates keys associated with <code>values</code> in this parallel_map_exec. All values <u>must</u> exist, and the
-     * mapping between keys and values must be bidirectional.
-     */
-    int (*update_key_fast)(struct strhash *self, const field_sid_t *values, char *const *keys, size_t nkeys);
+        /**
+         * Updates keys associated with <code>values</code> in this parallel_map_exec. All values <u>must</u> exist, and the
+         * mapping between keys and values must be bidirectional.
+         */
+        int (*update_key_fast)(struct strhash *self, const field_sid_t *values, char *const *keys, size_t nkeys);
 
-    /**
-     * Removes the objects with the gives keys from this parallel_map_exec
-     */
-    int (*remove)(struct strhash *self, char *const *keys, size_t nkeys);
+        /**
+         * Removes the objects with the gives keys from this parallel_map_exec
+         */
+        int (*remove)(struct strhash *self, char *const *keys, size_t nkeys);
 
-    /**
-     * Frees up allocated memory for <code>ptr</code> via the allocator in <code>parallel_map_exec</code> that was specified
-     * by the call to <code>string_id_map_create</code>
-     */
-    int (*free)(struct strhash *self, void *ptr);
+        /**
+         * Frees up allocated memory for <code>ptr</code> via the allocator in <code>parallel_map_exec</code> that was specified
+         * by the call to <code>string_id_map_create</code>
+         */
+        int (*free)(struct strhash *self, void *ptr);
 
-    /**
-     *  Error information
-     */
-    struct err err;
+        /**
+         *  Error information
+         */
+        struct err err;
 
 };
 
@@ -192,13 +189,12 @@ NG5_DEFINE_GET_ERROR_FUNCTION(strhash, struct strhash, table);
  * @param parallel_map_exec a non-null pointer to the parallel_map_exec
  * @return <code>true</code> in case of success, otherwise a value indiciating the error.
  */
-inline static int
-strhash_drop(struct strhash *parallel_map_exec)
+inline static int strhash_drop(struct strhash *parallel_map_exec)
 {
-    NG5_NON_NULL_OR_ERROR(parallel_map_exec);
-    assert(parallel_map_exec->drop);
+        NG5_NON_NULL_OR_ERROR(parallel_map_exec);
+        assert(parallel_map_exec->drop);
 
-    return parallel_map_exec->drop(parallel_map_exec);
+        return parallel_map_exec->drop(parallel_map_exec);
 }
 
 /**
@@ -207,12 +203,11 @@ strhash_drop(struct strhash *parallel_map_exec)
  * @param parallel_map_exec a non-null pointer to the parallel_map_exec
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
-inline static bool
-strhash_reset_counters(struct strhash *parallel_map_exec)
+inline static bool strhash_reset_counters(struct strhash *parallel_map_exec)
 {
-    NG5_NON_NULL_OR_ERROR(parallel_map_exec);
-    memset(&parallel_map_exec->counters, 0, sizeof(struct strhash_counters));
-    return true;
+        NG5_NON_NULL_OR_ERROR(parallel_map_exec);
+        memset(&parallel_map_exec->counters, 0, sizeof(struct strhash_counters));
+        return true;
 }
 
 /**
@@ -221,13 +216,12 @@ strhash_reset_counters(struct strhash *parallel_map_exec)
  * @param parallel_map_exec non-null pointer to the parallel_map_exec
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
-inline static int
-strhash_get_counters(struct strhash_counters *out, const struct strhash *parallel_map_exec)
+inline static int strhash_get_counters(struct strhash_counters *out, const struct strhash *parallel_map_exec)
 {
-    NG5_NON_NULL_OR_ERROR(parallel_map_exec);
-    NG5_NON_NULL_OR_ERROR(out);
-    *out = parallel_map_exec->counters;
-    return true;
+        NG5_NON_NULL_OR_ERROR(parallel_map_exec);
+        NG5_NON_NULL_OR_ERROR(out);
+        *out = parallel_map_exec->counters;
+        return true;
 }
 
 /**
@@ -241,16 +235,15 @@ strhash_get_counters(struct strhash_counters *out, const struct strhash *paralle
  * @param num_pairs the number of pairs that are read via <code>keys</code> and <code>values</code>
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
-inline static int
-strhash_put_safe(struct strhash *parallel_map_exec, char *const *keys, const field_sid_t *values,
-                        size_t npairs)
+inline static int strhash_put_safe(struct strhash *parallel_map_exec, char *const *keys, const field_sid_t *values,
+        size_t npairs)
 {
-    NG5_NON_NULL_OR_ERROR(parallel_map_exec);
-    NG5_NON_NULL_OR_ERROR(keys);
-    NG5_NON_NULL_OR_ERROR(values);
-    assert(parallel_map_exec->put_bulk_safe);
+        NG5_NON_NULL_OR_ERROR(parallel_map_exec);
+        NG5_NON_NULL_OR_ERROR(keys);
+        NG5_NON_NULL_OR_ERROR(values);
+        assert(parallel_map_exec->put_bulk_safe);
 
-    return parallel_map_exec->put_bulk_safe(parallel_map_exec, keys, values, npairs);
+        return parallel_map_exec->put_bulk_safe(parallel_map_exec, keys, values, npairs);
 }
 
 /**
@@ -268,43 +261,40 @@ strhash_put_safe(struct strhash *parallel_map_exec, char *const *keys, const fie
  * @param num_pairs the number of pairs that are read via <code>keys</code> and <code>values</code>
  * @return <code>true</code> in case of success, otherwise a value indiciating the error.
  */
-inline static int
-strhash_put_bulk_fast(struct strhash *parallel_map_exec, char *const *keys, const field_sid_t *values,
-                             size_t npairs)
+inline static int strhash_put_bulk_fast(struct strhash *parallel_map_exec, char *const *keys, const field_sid_t *values,
+        size_t npairs)
 {
-    NG5_NON_NULL_OR_ERROR(parallel_map_exec);
-    NG5_NON_NULL_OR_ERROR(keys);
-    NG5_NON_NULL_OR_ERROR(values);
-    assert(parallel_map_exec->put_bulk_fast);
+        NG5_NON_NULL_OR_ERROR(parallel_map_exec);
+        NG5_NON_NULL_OR_ERROR(keys);
+        NG5_NON_NULL_OR_ERROR(values);
+        assert(parallel_map_exec->put_bulk_fast);
 
-    return parallel_map_exec->put_bulk_fast(parallel_map_exec, keys, values, npairs);
+        return parallel_map_exec->put_bulk_fast(parallel_map_exec, keys, values, npairs);
 }
 
 /**
  * Same as 'string_lookup_put_bulk' but specialized for a single pair
  */
-inline static int
-strhash_put_exact(struct strhash *parallel_map_exec, const char *key, field_sid_t value)
+inline static int strhash_put_exact(struct strhash *parallel_map_exec, const char *key, field_sid_t value)
 {
-    NG5_NON_NULL_OR_ERROR(parallel_map_exec);
-    NG5_NON_NULL_OR_ERROR(key);
-    assert(parallel_map_exec->put_exact_safe);
+        NG5_NON_NULL_OR_ERROR(parallel_map_exec);
+        NG5_NON_NULL_OR_ERROR(key);
+        assert(parallel_map_exec->put_exact_safe);
 
-    return parallel_map_exec->put_exact_safe(parallel_map_exec, key, value);
+        return parallel_map_exec->put_exact_safe(parallel_map_exec, key, value);
 }
 
 /**
  * Same as 'string_lookup_put_fast_bulk' but specialized for a single pair
  */
-inline static int
-strhash_put_exact_fast(struct strhash *parallel_map_exec, const char *key, field_sid_t value)
+inline static int strhash_put_exact_fast(struct strhash *parallel_map_exec, const char *key, field_sid_t value)
 {
-    NG5_NON_NULL_OR_ERROR(parallel_map_exec);
-    NG5_NON_NULL_OR_ERROR(key);
+        NG5_NON_NULL_OR_ERROR(parallel_map_exec);
+        NG5_NON_NULL_OR_ERROR(key);
 
-    assert(parallel_map_exec->put_exact_fast);
+        assert(parallel_map_exec->put_exact_fast);
 
-    return parallel_map_exec->put_exact_fast(parallel_map_exec, key, value);
+        return parallel_map_exec->put_exact_fast(parallel_map_exec, key, value);
 }
 
 /**
@@ -334,41 +324,39 @@ strhash_put_exact_fast(struct strhash *parallel_map_exec, const char *key, field
  * @param num_keys the number of keys
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
-inline static int
-strhash_get_bulk_safe(field_sid_t **out, bool **found_mask, size_t *num_not_found,
-                             struct strhash *parallel_map_exec,
-                             char *const *keys, size_t nkeys)
+inline static int strhash_get_bulk_safe(field_sid_t **out, bool **found_mask, size_t *num_not_found,
+        struct strhash *parallel_map_exec, char *const *keys, size_t nkeys)
 {
-    NG5_NON_NULL_OR_ERROR(out);
-    NG5_NON_NULL_OR_ERROR(found_mask);
-    NG5_NON_NULL_OR_ERROR(num_not_found);
-    NG5_NON_NULL_OR_ERROR(parallel_map_exec);
-    NG5_NON_NULL_OR_ERROR(keys);
-    assert(parallel_map_exec->get_bulk_safe);
+        NG5_NON_NULL_OR_ERROR(out);
+        NG5_NON_NULL_OR_ERROR(found_mask);
+        NG5_NON_NULL_OR_ERROR(num_not_found);
+        NG5_NON_NULL_OR_ERROR(parallel_map_exec);
+        NG5_NON_NULL_OR_ERROR(keys);
+        assert(parallel_map_exec->get_bulk_safe);
 
-    int result = parallel_map_exec->get_bulk_safe(parallel_map_exec, out, found_mask, num_not_found, keys, nkeys);
+        int result = parallel_map_exec->get_bulk_safe(parallel_map_exec, out, found_mask, num_not_found, keys, nkeys);
 
-    assert (out != NULL);
-    assert (found_mask != NULL);
+        assert (out != NULL);
+        assert (found_mask != NULL);
 
-    return result;
+        return result;
 }
 
-inline static int
-strhash_get_bulk_safe_exact(field_sid_t *out, bool *found, struct strhash *parallel_map_exec, const char *key)
+inline static int strhash_get_bulk_safe_exact(field_sid_t *out, bool *found, struct strhash *parallel_map_exec,
+        const char *key)
 {
-    NG5_NON_NULL_OR_ERROR(out);
-    NG5_NON_NULL_OR_ERROR(found);
-    NG5_NON_NULL_OR_ERROR(parallel_map_exec);
-    NG5_NON_NULL_OR_ERROR(key);
-    assert(parallel_map_exec->get_exact_safe);
+        NG5_NON_NULL_OR_ERROR(out);
+        NG5_NON_NULL_OR_ERROR(found);
+        NG5_NON_NULL_OR_ERROR(parallel_map_exec);
+        NG5_NON_NULL_OR_ERROR(key);
+        assert(parallel_map_exec->get_exact_safe);
 
-    int result = parallel_map_exec->get_exact_safe(parallel_map_exec, out, found, key);
+        int result = parallel_map_exec->get_exact_safe(parallel_map_exec, out, found, key);
 
-    assert (out != NULL);
-    assert (found != NULL);
+        assert (out != NULL);
+        assert (found != NULL);
 
-    return result;
+        return result;
 }
 
 /**
@@ -386,16 +374,15 @@ strhash_get_bulk_safe_exact(field_sid_t *out, bool *found, struct strhash *paral
  * @param num_keys the number of keys
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
-inline static int
-strhash_get_bulk_fast(field_sid_t **out, struct strhash *parallel_map_exec,
-                             char *const *keys, size_t nkeys)
+inline static int strhash_get_bulk_fast(field_sid_t **out, struct strhash *parallel_map_exec, char *const *keys,
+        size_t nkeys)
 {
-    NG5_NON_NULL_OR_ERROR(out);
-    NG5_NON_NULL_OR_ERROR(parallel_map_exec);
-    NG5_NON_NULL_OR_ERROR(keys);
-    assert(parallel_map_exec->get_fast);
+        NG5_NON_NULL_OR_ERROR(out);
+        NG5_NON_NULL_OR_ERROR(parallel_map_exec);
+        NG5_NON_NULL_OR_ERROR(keys);
+        assert(parallel_map_exec->get_fast);
 
-    return parallel_map_exec->get_fast(parallel_map_exec, out, keys, nkeys);
+        return parallel_map_exec->get_fast(parallel_map_exec, out, keys, nkeys);
 }
 
 /**
@@ -413,15 +400,14 @@ strhash_get_bulk_fast(field_sid_t **out, struct strhash *parallel_map_exec,
  * @param num_keys the number of keys
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
-inline static int
-strhash_update_fast(struct strhash *parallel_map_exec, const field_sid_t *values,
-                           char *const *keys, size_t nkeys)
+inline static int strhash_update_fast(struct strhash *parallel_map_exec, const field_sid_t *values, char *const *keys,
+        size_t nkeys)
 {
-    NG5_NON_NULL_OR_ERROR(parallel_map_exec);
-    NG5_NON_NULL_OR_ERROR(keys);
-    assert(parallel_map_exec->update_key_fast);
+        NG5_NON_NULL_OR_ERROR(parallel_map_exec);
+        NG5_NON_NULL_OR_ERROR(keys);
+        assert(parallel_map_exec->update_key_fast);
 
-    return parallel_map_exec->update_key_fast(parallel_map_exec, values, keys, nkeys);
+        return parallel_map_exec->update_key_fast(parallel_map_exec, values, keys, nkeys);
 }
 
 /**
@@ -432,14 +418,13 @@ strhash_update_fast(struct strhash *parallel_map_exec, const field_sid_t *values
  * @param num_keys the number of keys
  * @return
  */
-inline static int
-strhash_remove(struct strhash *parallel_map_exec, char *const *keys, size_t nkeys)
+inline static int strhash_remove(struct strhash *parallel_map_exec, char *const *keys, size_t nkeys)
 {
-    NG5_NON_NULL_OR_ERROR(parallel_map_exec);
-    NG5_NON_NULL_OR_ERROR(keys);
-    assert(parallel_map_exec->remove);
+        NG5_NON_NULL_OR_ERROR(parallel_map_exec);
+        NG5_NON_NULL_OR_ERROR(keys);
+        assert(parallel_map_exec->remove);
 
-    return parallel_map_exec->remove(parallel_map_exec, keys, nkeys);
+        return parallel_map_exec->remove(parallel_map_exec, keys, nkeys);
 }
 
 /**
@@ -449,14 +434,13 @@ strhash_remove(struct strhash *parallel_map_exec, char *const *keys, size_t nkey
  * @param values A non-null pointer (potentially resulting from a call to <code>string_id_map_get</code>)
  * @return <code>true</code> in case of success, otherwise a value indiciating the error.
  */
-inline static int
-strhash_free(void *ptr, struct strhash *parallel_map_exec)
+inline static int strhash_free(void *ptr, struct strhash *parallel_map_exec)
 {
-    NG5_NON_NULL_OR_ERROR(ptr);
-    NG5_NON_NULL_OR_ERROR(parallel_map_exec);
-    assert(parallel_map_exec->free);
+        NG5_NON_NULL_OR_ERROR(ptr);
+        NG5_NON_NULL_OR_ERROR(parallel_map_exec);
+        assert(parallel_map_exec->free);
 
-    return parallel_map_exec->free(parallel_map_exec, ptr);
+        return parallel_map_exec->free(parallel_map_exec, ptr);
 }
 
 /**
@@ -465,12 +449,11 @@ strhash_free(void *ptr, struct strhash *parallel_map_exec)
  * @param counters non-null pointer to counter object
  * @return true if everything went normal, otherwise an value indicating the error
  */
-inline static int
-strhash_counters_init(struct strhash_counters *counters)
+inline static int strhash_counters_init(struct strhash_counters *counters)
 {
-    NG5_NON_NULL_OR_ERROR(counters);
-    memset(counters, 0, sizeof(struct strhash_counters));
-    return true;
+        NG5_NON_NULL_OR_ERROR(counters);
+        memset(counters, 0, sizeof(struct strhash_counters));
+        return true;
 }
 
 /**
@@ -480,16 +463,15 @@ strhash_counters_init(struct strhash_counters *counters)
  * @param rhs non-null pointer to counter
  * @return true if everything went normal, otherwise an value indicating the error
  */
-inline static int
-strhash_counters_add(struct strhash_counters *dst_lhs, const struct strhash_counters *rhs)
+inline static int strhash_counters_add(struct strhash_counters *dst_lhs, const struct strhash_counters *rhs)
 {
-    NG5_NON_NULL_OR_ERROR(dst_lhs);
-    NG5_NON_NULL_OR_ERROR(rhs);
-    dst_lhs->num_bucket_search_miss += rhs->num_bucket_search_miss;
-    dst_lhs->num_bucket_search_hit += rhs->num_bucket_search_hit;
-    dst_lhs->num_bucket_cache_search_hit += rhs->num_bucket_cache_search_hit;
-    dst_lhs->num_bucket_cache_search_miss += rhs->num_bucket_cache_search_miss;
-    return true;
+        NG5_NON_NULL_OR_ERROR(dst_lhs);
+        NG5_NON_NULL_OR_ERROR(rhs);
+        dst_lhs->num_bucket_search_miss += rhs->num_bucket_search_miss;
+        dst_lhs->num_bucket_search_hit += rhs->num_bucket_search_hit;
+        dst_lhs->num_bucket_cache_search_hit += rhs->num_bucket_cache_search_hit;
+        dst_lhs->num_bucket_cache_search_miss += rhs->num_bucket_cache_search_miss;
+        return true;
 }
 
 NG5_END_DECL

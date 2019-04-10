@@ -24,12 +24,11 @@
 
 NG5_BEGIN_DECL
 
-struct hashtable_bucket
-{
-    bool     in_use_flag;  /* flag indicating if bucket is in use */
-    i32  displacement; /* difference between intended position during insert, and actual position in table */
-    u32 num_probs;    /* number of probe calls to this bucket */
-    u64 data_idx;      /* position of key element in owning struct hashtable structure */
+struct hashtable_bucket {
+        bool in_use_flag;  /* flag indicating if bucket is in use */
+        i32 displacement; /* difference between intended position during insert, and actual position in table */
+        u32 num_probs;    /* number of probe calls to this bucket */
+        u64 data_idx;      /* position of key element in owning struct hashtable structure */
 };
 
 /**
@@ -43,59 +42,46 @@ struct hashtable_bucket
  * Note: this implementation does not support string or pointer types. The structure is thread-safe by a spinlock
  * lock implementation.
  */
-struct hashtable
-{
-    struct vector key_data;
-    struct vector value_data;
-    struct vector ofType(struct hashtable_bucket) table;
-    struct spinlock lock;
-    u32 size;
-    struct err err;
+struct hashtable {
+        struct vector key_data;
+        struct vector value_data;
+        struct vector ofType(struct hashtable_bucket) table;
+        struct spinlock lock;
+        u32 size;
+        struct err err;
 };
 
 NG5_DEFINE_GET_ERROR_FUNCTION(hashtable, struct hashtable, table);
 
-NG5_EXPORT(bool)
-hashtable_create(struct hashtable *map, struct err *err, size_t key_size, size_t value_size, size_t capacity);
+NG5_EXPORT(bool) hashtable_create(struct hashtable *map, struct err *err, size_t key_size, size_t value_size,
+        size_t capacity);
 
-NG5_EXPORT(struct hashtable *)
-hashtable_cpy(struct hashtable *src);
+NG5_EXPORT(struct hashtable *)hashtable_cpy(struct hashtable *src);
 
-NG5_EXPORT(bool)
-hashtable_drop(struct hashtable *map);
+NG5_EXPORT(bool) hashtable_drop(struct hashtable *map);
 
-NG5_EXPORT(bool)
-hashtable_clear(struct hashtable *map);
+NG5_EXPORT(bool) hashtable_clear(struct hashtable *map);
 
-NG5_EXPORT(bool)
-hashtable_avg_displace(float *displace, const struct hashtable *map);
+NG5_EXPORT(bool) hashtable_avg_displace(float *displace, const struct hashtable *map);
 
-NG5_EXPORT(bool)
-hashtable_lock(struct hashtable *map);
+NG5_EXPORT(bool) hashtable_lock(struct hashtable *map);
 
-NG5_EXPORT(bool)
-hashtable_unlock(struct hashtable *map);
+NG5_EXPORT(bool) hashtable_unlock(struct hashtable *map);
 
-NG5_EXPORT(bool)
-hashtable_insert_or_update(struct hashtable *map, const void *keys, const void *values, uint_fast32_t num_pairs);
+NG5_EXPORT(bool) hashtable_insert_or_update(struct hashtable *map, const void *keys, const void *values,
+        uint_fast32_t num_pairs);
 
-NG5_EXPORT(bool)
-hashtable_serialize(FILE *file, struct hashtable *table);
+NG5_EXPORT(bool) hashtable_serialize(FILE *file, struct hashtable *table);
 
-NG5_EXPORT(bool)
-hashtable_deserialize(struct hashtable *table, struct err *err, FILE *file);
+NG5_EXPORT(bool) hashtable_deserialize(struct hashtable *table, struct err *err, FILE *file);
 
-NG5_EXPORT(bool)
-hashtable_remove_if_contained(struct hashtable *map, const void *keys, size_t num_pairs);
+NG5_EXPORT(bool) hashtable_remove_if_contained(struct hashtable *map, const void *keys, size_t num_pairs);
 
-NG5_EXPORT(const void *)
-hashtable_get_value(struct hashtable *map, const void *key);
+NG5_EXPORT(const void *)hashtable_get_value(struct hashtable *map, const void *key);
 
-NG5_EXPORT(bool)
-hashtable_get_fload_factor(float *factor, struct hashtable *map);
+NG5_EXPORT(bool) hashtable_get_fload_factor(float *factor, struct hashtable *map);
 
-NG5_EXPORT(bool)
-hashtable_rehash(struct hashtable *map);
+NG5_EXPORT(bool) hashtable_rehash(struct hashtable *map);
 
 NG5_END_DECL
 

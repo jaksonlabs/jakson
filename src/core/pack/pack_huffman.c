@@ -24,22 +24,19 @@
 
 #define  MARKER_SYMBOL_HUFFMAN_DIC_ENTRY   'd'
 
-NG5_EXPORT(bool)
-compressor_huffman_init(struct packer *self)
+NG5_EXPORT(bool) compressor_huffman_init(struct packer *self)
 {
         self->extra = malloc(sizeof(struct pack_huffman));
         if (self->extra != NULL) {
                 struct pack_huffman *encoder = (struct pack_huffman *) self->extra;
                 huffman_create(encoder);
                 return true;
-        }
-        else {
+        } else {
                 return false;
         }
 }
 
-NG5_EXPORT(bool)
-compressor_huffman_cpy(const struct packer *self, struct packer *dst)
+NG5_EXPORT(bool) compressor_huffman_cpy(const struct packer *self, struct packer *dst)
 {
         NG5_CHECK_TAG(self->tag, PACK_HUFFMAN);
 
@@ -49,14 +46,12 @@ compressor_huffman_cpy(const struct packer *self, struct packer *dst)
                 struct pack_huffman *self_encoder = (struct pack_huffman *) self->extra;
                 struct pack_huffman *dst_encoder = (struct pack_huffman *) dst->extra;
                 return huffman_cpy(dst_encoder, self_encoder);
-        }
-        else {
+        } else {
                 return false;
         }
 }
 
-NG5_EXPORT(bool)
-compressor_huffman_drop(struct packer *self)
+NG5_EXPORT(bool) compressor_huffman_drop(struct packer *self)
 {
         NG5_CHECK_TAG(self->tag, PACK_HUFFMAN);
 
@@ -76,8 +71,10 @@ bool huffman_dump_dictionary(FILE *file, struct memfile *memfile)
                 huffman_read_dic_entry(&entry_info, memfile, MARKER_SYMBOL_HUFFMAN_DIC_ENTRY);
 
                 fprintf(file, "0x%04x ", (unsigned) offset);
-                fprintf(file, "[marker: %c] [letter: '%c'] [nbytes_prefix: %d] [code: ",
-                        MARKER_SYMBOL_HUFFMAN_DIC_ENTRY, entry_info.letter,
+                fprintf(file,
+                        "[marker: %c] [letter: '%c'] [nbytes_prefix: %d] [code: ",
+                        MARKER_SYMBOL_HUFFMAN_DIC_ENTRY,
+                        entry_info.letter,
                         entry_info.nbytes_prefix);
 
                 if (entry_info.nbytes_prefix > 0) {
@@ -85,8 +82,7 @@ bool huffman_dump_dictionary(FILE *file, struct memfile *memfile)
                                 bitmap_print_bits_in_char(file, entry_info.prefix_code[i]);
                                 fprintf(file, "%s", i + 1 < entry_info.nbytes_prefix ? ", " : "");
                         }
-                }
-                else {
+                } else {
                         fprintf(file, "0b00000000");
                 }
 
@@ -115,9 +111,8 @@ bool huffman_dump_string_table_entry(FILE *file, struct memfile *memfile)
         return true;
 }
 
-NG5_EXPORT(bool)
-compressor_huffman_write_extra(struct packer *self, struct memfile *dst,
-                                      const struct vector ofType (const char *) *strings)
+NG5_EXPORT(bool) compressor_huffman_write_extra(struct packer *self, struct memfile *dst,
+        const struct vector ofType (const char *) *strings)
 {
         NG5_CHECK_TAG(self->tag, PACK_HUFFMAN);
 
@@ -129,8 +124,7 @@ compressor_huffman_write_extra(struct packer *self, struct memfile *dst,
         return true;
 }
 
-NG5_EXPORT(bool)
-compressor_huffman_read_extra(struct packer *self, FILE *src, size_t nbytes)
+NG5_EXPORT(bool) compressor_huffman_read_extra(struct packer *self, FILE *src, size_t nbytes)
 {
         NG5_CHECK_TAG(self->tag, PACK_HUFFMAN);
 
@@ -142,8 +136,7 @@ compressor_huffman_read_extra(struct packer *self, FILE *src, size_t nbytes)
         return false;
 }
 
-NG5_EXPORT(bool)
-compressor_huffman_print_extra(struct packer *self, FILE *file, struct memfile *src)
+NG5_EXPORT(bool) compressor_huffman_print_extra(struct packer *self, FILE *file, struct memfile *src)
 {
         NG5_UNUSED(self);
 
@@ -152,9 +145,8 @@ compressor_huffman_print_extra(struct packer *self, FILE *file, struct memfile *
         return true;
 }
 
-NG5_EXPORT(bool)
-compressor_huffman_print_encoded(struct packer *self, FILE *file, struct memfile *src,
-                                        u32 decompressed_strlen)
+NG5_EXPORT(bool) compressor_huffman_print_encoded(struct packer *self, FILE *file, struct memfile *src,
+        u32 decompressed_strlen)
 {
         NG5_UNUSED(self);
         NG5_UNUSED(file);
@@ -166,8 +158,7 @@ compressor_huffman_print_encoded(struct packer *self, FILE *file, struct memfile
         return true;
 }
 
-bool compressor_huffman_encode_string(struct packer *self, struct memfile *dst, struct err *err,
-                                             const char *string)
+bool compressor_huffman_encode_string(struct packer *self, struct memfile *dst, struct err *err, const char *string)
 {
         NG5_CHECK_TAG(self->tag, PACK_HUFFMAN);
 
@@ -178,8 +169,7 @@ bool compressor_huffman_encode_string(struct packer *self, struct memfile *dst, 
         return status;
 }
 
-NG5_EXPORT(bool)
-compressor_huffman_decode_string(struct packer *self, char *dst, size_t strlen, FILE *src)
+NG5_EXPORT(bool) compressor_huffman_decode_string(struct packer *self, char *dst, size_t strlen, FILE *src)
 {
         NG5_UNUSED(self);
         NG5_UNUSED(dst);

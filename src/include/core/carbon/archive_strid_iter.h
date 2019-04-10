@@ -24,29 +24,25 @@
 
 NG5_BEGIN_DECL
 
-struct strid_info
-{
-    field_sid_t id;
-    u32           strlen;
-    offset_t       offset;
+struct strid_info {
+        field_sid_t id;
+        u32 strlen;
+        offset_t offset;
 };
 
-struct strid_iter
-{
-    FILE *disk_file;
-    bool is_open;
-    offset_t disk_offset;
-    struct strid_info vector[100000];
+struct strid_iter {
+        FILE *disk_file;
+        bool is_open;
+        offset_t disk_offset;
+        struct strid_info vector[100000];
 };
 
-NG5_EXPORT(bool)
-strid_iter_open(struct strid_iter *it, struct err *err, struct archive *archive);
+NG5_EXPORT(bool) strid_iter_open(struct strid_iter *it, struct err *err, struct archive *archive);
 
-NG5_EXPORT(bool)
-strid_iter_next(bool *success, struct strid_info **info, struct err *err, size_t *info_length, struct strid_iter *it);
+NG5_EXPORT(bool) strid_iter_next(bool *success, struct strid_info **info, struct err *err, size_t *info_length,
+        struct strid_iter *it);
 
-NG5_EXPORT(bool)
-strid_iter_close(struct strid_iter *it);
+NG5_EXPORT(bool) strid_iter_close(struct strid_iter *it);
 
 NG5_END_DECL
 

@@ -112,8 +112,7 @@ struct collection_iter_state {
 };
 
 struct archive_value_vector {
-        struct prop_iter
-                *prop_iter;               /* pointer to property iterator that created this iterator */
+        struct prop_iter *prop_iter;               /* pointer to property iterator that created this iterator */
         struct memfile record_table_memfile;    /* iterator-local read-only memfile on archive record table */
         enum field_type prop_type;               /* property basic value type (e.g., int8, or object) */
         bool is_array;                /* flag indicating whether value type is an array or not */
@@ -171,8 +170,7 @@ struct prop_iter {
         struct memfile record_table_memfile;    /* iterator-local read-only memfile on archive record table */
 
         u16 mask;                    /* user-defined mask which properties to include */
-        enum prop_iter_mode
-                mode;               /* determines whether to iterating over object or collection */
+        enum prop_iter_mode mode;               /* determines whether to iterating over object or collection */
         struct err err;                     /* error information */
         enum prop_iter_state prop_cursor;             /* current property type in iteration */
 
@@ -263,30 +261,24 @@ NG5_EXPORT(bool) archive_prop_iter_from_object(struct prop_iter *iter, u16 mask,
 NG5_EXPORT(bool) archive_value_vector_from_prop_iter(struct archive_value_vector *value, struct err *err,
         struct prop_iter *prop_iter);
 
-NG5_EXPORT(bool) archive_prop_iter_next(enum prop_iter_mode *type,
-        struct archive_value_vector *value_vector, archive_collection_iter_t *collection_iter,
-        struct prop_iter *prop_iter);
+NG5_EXPORT(bool) archive_prop_iter_next(enum prop_iter_mode *type, struct archive_value_vector *value_vector,
+        archive_collection_iter_t *collection_iter, struct prop_iter *prop_iter);
 
-NG5_EXPORT(const field_sid_t *)archive_collection_iter_get_keys(u32 *num_keys,
-        archive_collection_iter_t *iter);
+NG5_EXPORT(const field_sid_t *)archive_collection_iter_get_keys(u32 *num_keys, archive_collection_iter_t *iter);
 
 NG5_EXPORT(bool) archive_collection_next_column_group(archive_column_group_iter_t *group_iter,
         archive_collection_iter_t *iter);
 
-NG5_EXPORT(const object_id_t *)archive_column_group_get_object_ids(u32 *num_objects,
-        archive_column_group_iter_t *iter);
+NG5_EXPORT(const object_id_t *)archive_column_group_get_object_ids(u32 *num_objects, archive_column_group_iter_t *iter);
 
 NG5_EXPORT(bool) archive_column_group_next_column(archive_column_iter_t *column_iter,
         archive_column_group_iter_t *iter);
 
-NG5_EXPORT(bool) archive_column_get_name(field_sid_t *name, enum field_type *type,
-        archive_column_iter_t *column_iter);
+NG5_EXPORT(bool) archive_column_get_name(field_sid_t *name, enum field_type *type, archive_column_iter_t *column_iter);
 
-NG5_EXPORT(const u32 *)archive_column_get_entry_positions(u32 *num_entry,
-        archive_column_iter_t *column_iter);
+NG5_EXPORT(const u32 *)archive_column_get_entry_positions(u32 *num_entry, archive_column_iter_t *column_iter);
 
-NG5_EXPORT(bool) archive_column_next_entry(archive_column_entry_iter_t *entry_iter,
-        archive_column_iter_t *iter);
+NG5_EXPORT(bool) archive_column_next_entry(archive_column_entry_iter_t *entry_iter, archive_column_iter_t *iter);
 
 NG5_EXPORT(bool) archive_column_entry_get_type(enum field_type *type, archive_column_entry_iter_t *entry);
 
@@ -307,26 +299,21 @@ DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_number_t, numbers);
 DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(FIELD_BOOLEANean_t, booleans);
 DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_u32_t, nulls);
 
-NG5_EXPORT(bool) archive_column_entry_get_objects(struct column_object_iter *iter,
-        archive_column_entry_iter_t *entry);
+NG5_EXPORT(bool) archive_column_entry_get_objects(struct column_object_iter *iter, archive_column_entry_iter_t *entry);
 
-NG5_EXPORT(const struct archive_object *)archive_column_entry_object_iter_next_object(
-        struct column_object_iter *iter);
+NG5_EXPORT(const struct archive_object *)archive_column_entry_object_iter_next_object(struct column_object_iter *iter);
 
 NG5_EXPORT(bool) archive_object_get_object_id(object_id_t *id, const struct archive_object *object);
 
-NG5_EXPORT(bool) archive_object_get_prop_iter(struct prop_iter *iter,
-        const struct archive_object *object);
+NG5_EXPORT(bool) archive_object_get_prop_iter(struct prop_iter *iter, const struct archive_object *object);
 
-NG5_EXPORT(bool) archive_value_vector_get_object_id(object_id_t *id,
-        const struct archive_value_vector *iter);
+NG5_EXPORT(bool) archive_value_vector_get_object_id(object_id_t *id, const struct archive_value_vector *iter);
 
 NG5_EXPORT(const field_sid_t *)archive_value_vector_get_keys(u32 *num_keys, struct archive_value_vector *iter);
 
 NG5_EXPORT(const field_sid_t *)archive_value_vector_get_keys(u32 *num_keys, struct archive_value_vector *iter);
 
-NG5_EXPORT(bool) archive_value_vector_get_basic_type(enum field_type *type,
-        const struct archive_value_vector *value);
+NG5_EXPORT(bool) archive_value_vector_get_basic_type(enum field_type *type, const struct archive_value_vector *value);
 
 NG5_EXPORT(bool) archive_value_vector_is_array_type(bool *is_array, const struct archive_value_vector *value);
 

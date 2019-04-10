@@ -70,20 +70,15 @@ typedef struct bitmap bloom_t;
     (b0set && b1set && b2set && b3set);                            \
 })
 
-NG5_EXPORT(bool)
-bloom_create(bloom_t *filter, size_t size);
+NG5_EXPORT(bool) bloom_create(bloom_t *filter, size_t size);
 
-NG5_EXPORT(bool)
-bloom_drop(bloom_t *filter);
+NG5_EXPORT(bool) bloom_drop(bloom_t *filter);
 
-NG5_EXPORT(bool)
-bloom_clear(bloom_t *filter);
+NG5_EXPORT(bool) bloom_clear(bloom_t *filter);
 
-NG5_EXPORT(size_t)
-bloom_nbits(bloom_t *filter);
+NG5_EXPORT(size_t) bloom_nbits(bloom_t *filter);
 
-NG5_EXPORT(unsigned)
-bloom_nhashs();
+NG5_EXPORT(unsigned) bloom_nhashs();
 
 NG5_END_DECL
 

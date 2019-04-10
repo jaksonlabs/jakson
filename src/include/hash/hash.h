@@ -25,8 +25,10 @@
 NG5_BEGIN_DECL
 
 typedef u16 hash16_t;
+
 typedef u32 hash32_t;
-typedef u8  hash8_t;
+
+typedef u8 hash8_t;
 
 NG5_END_DECL
 

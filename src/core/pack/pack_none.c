@@ -20,119 +20,109 @@
 #include "core/pack/pack.h"
 #include "core/pack/pack_none.h"
 
-NG5_EXPORT(bool)
-compressor_none_init(struct packer *self)
+NG5_EXPORT(bool) compressor_none_init(struct packer *self)
 {
-    NG5_UNUSED(self);
-    /* nothing to do for uncompressed dictionaries */
-    return true;
+        NG5_UNUSED(self);
+        /* nothing to do for uncompressed dictionaries */
+        return true;
 }
 
-NG5_EXPORT(bool)
-compressor_none_cpy(const struct packer *self, struct packer *dst)
+NG5_EXPORT(bool) compressor_none_cpy(const struct packer *self, struct packer *dst)
 {
-    NG5_CHECK_TAG(self->tag, PACK_NONE);
+        NG5_CHECK_TAG(self->tag, PACK_NONE);
 
-    /* nothing to hard copy but the function pointers */
-    *dst = *self;
-    return true;
+        /* nothing to hard copy but the function pointers */
+        *dst = *self;
+        return true;
 }
 
-NG5_EXPORT(bool)
-compressor_none_drop(struct packer *self)
+NG5_EXPORT(bool) compressor_none_drop(struct packer *self)
 {
-    NG5_CHECK_TAG(self->tag, PACK_NONE);
+        NG5_CHECK_TAG(self->tag, PACK_NONE);
 
-    NG5_UNUSED(self);
-    /* nothing to do for uncompressed dictionaries */
-    return true;
+        NG5_UNUSED(self);
+        /* nothing to do for uncompressed dictionaries */
+        return true;
 }
 
-NG5_EXPORT(bool)
-compressor_none_write_extra(struct packer *self, struct memfile *dst,
-                                        const struct vector ofType (const char *) *strings)
+NG5_EXPORT(bool) compressor_none_write_extra(struct packer *self, struct memfile *dst,
+        const struct vector ofType (const char *) *strings)
 {
-    NG5_CHECK_TAG(self->tag, PACK_NONE);
+        NG5_CHECK_TAG(self->tag, PACK_NONE);
 
-    NG5_UNUSED(self);
-    NG5_UNUSED(dst);
-    NG5_UNUSED(strings);
-    /* nothing to do for uncompressed dictionaries */
-    return true;
+        NG5_UNUSED(self);
+        NG5_UNUSED(dst);
+        NG5_UNUSED(strings);
+        /* nothing to do for uncompressed dictionaries */
+        return true;
 }
 
-NG5_EXPORT(bool)
-compressor_none_read_extra(struct packer *self, FILE *src, size_t nbytes)
+NG5_EXPORT(bool) compressor_none_read_extra(struct packer *self, FILE *src, size_t nbytes)
 {
-    NG5_CHECK_TAG(self->tag, PACK_NONE);
+        NG5_CHECK_TAG(self->tag, PACK_NONE);
 
-    NG5_UNUSED(self);
-    NG5_UNUSED(src);
-    NG5_UNUSED(nbytes);
-    /* nothing to do for uncompressed dictionaries */
-    return true;
+        NG5_UNUSED(self);
+        NG5_UNUSED(src);
+        NG5_UNUSED(nbytes);
+        /* nothing to do for uncompressed dictionaries */
+        return true;
 }
 
 bool compressor_none_print_extra(struct packer *self, FILE *file, struct memfile *src)
 {
-    NG5_CHECK_TAG(self->tag, PACK_NONE);
+        NG5_CHECK_TAG(self->tag, PACK_NONE);
 
-    NG5_UNUSED(self);
-    NG5_UNUSED(file);
-    NG5_UNUSED(src);
-    /* nothing to do for uncompressed dictionaries */
-    return true;
+        NG5_UNUSED(self);
+        NG5_UNUSED(file);
+        NG5_UNUSED(src);
+        /* nothing to do for uncompressed dictionaries */
+        return true;
 }
 
-NG5_EXPORT(bool)
-compressor_none_print_encoded_string(struct packer *self,
-                                                 FILE *file,
-                                                 struct memfile *src,
-                                                 u32 decompressed_strlen)
+NG5_EXPORT(bool) compressor_none_print_encoded_string(struct packer *self, FILE *file, struct memfile *src,
+        u32 decompressed_strlen)
 {
-    NG5_CHECK_TAG(self->tag, PACK_NONE);
+        NG5_CHECK_TAG(self->tag, PACK_NONE);
 
-    NG5_UNUSED(self);
+        NG5_UNUSED(self);
 
-    const char         *string        =  NG5_MEMFILE_READ(src, decompressed_strlen);
+        const char *string = NG5_MEMFILE_READ(src, decompressed_strlen);
 
-    char *printableString = malloc(decompressed_strlen + 1);
-    memcpy(printableString, string, decompressed_strlen);
-    printableString[decompressed_strlen] = '\0';
+        char *printableString = malloc(decompressed_strlen + 1);
+        memcpy(printableString, string, decompressed_strlen);
+        printableString[decompressed_strlen] = '\0';
 
-    fprintf(file, "[string: %s]", printableString);
+        fprintf(file, "[string: %s]", printableString);
 
-    free(printableString);
+        free(printableString);
 
-    return true;
+        return true;
 }
 
-NG5_EXPORT(bool)
-compressor_none_encode_string(struct packer *self, struct memfile *dst, struct err *err,
-                                          const char *string)
+NG5_EXPORT(bool) compressor_none_encode_string(struct packer *self, struct memfile *dst, struct err *err,
+        const char *string)
 {
-    NG5_CHECK_TAG(self->tag, PACK_NONE);
+        NG5_CHECK_TAG(self->tag, PACK_NONE);
 
-    NG5_UNUSED(self);
+        NG5_UNUSED(self);
 
-    u32 string_length = strlen(string);
+        u32 string_length = strlen(string);
 
-    NG5_SUCCESS_OR_JUMP(memfile_write(dst, string, string_length), error_handling)
+        NG5_SUCCESS_OR_JUMP(memfile_write(dst, string, string_length), error_handling)
 
-    return true;
+        return true;
 
-error_handling:
-    error(err, NG5_ERR_IO)
-    return false;
+        error_handling:
+        error(err, NG5_ERR_IO)
+        return false;
 }
 
-NG5_EXPORT(bool)
-compressor_none_decode_string(struct packer *self, char *dst, size_t strlen, FILE *src)
+NG5_EXPORT(bool) compressor_none_decode_string(struct packer *self, char *dst, size_t strlen, FILE *src)
 {
-    NG5_CHECK_TAG(self->tag, PACK_NONE);
+        NG5_CHECK_TAG(self->tag, PACK_NONE);
 
-    NG5_UNUSED(self);
+        NG5_UNUSED(self);
 
-    size_t num_read = fread(dst, sizeof(char), strlen, src);
-    return (num_read == strlen);
+        size_t num_read = fread(dst, sizeof(char), strlen, src);
+        return (num_read == strlen);
 }

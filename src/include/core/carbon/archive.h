@@ -30,8 +30,7 @@ NG5_BEGIN_DECL
 
 struct archive_query; /* forwarded from 'types-query.h' */
 
-struct archive
-{
+struct archive {
         struct archive_info info;
         char *diskFilePath;
         struct string_table string_table;
@@ -44,8 +43,7 @@ struct archive
         struct archive_query *default_query;
 };
 
-struct archive_callback
-{
+struct archive_callback {
         void (*begin_create_from_model)();
         void (*end_create_from_model)();
         void (*begin_create_from_json)();
@@ -75,14 +73,13 @@ struct archive_callback
         void (*end_string_id_index_baking)();
 };
 
-NG5_EXPORT(bool) archive_from_json(struct archive *out, const char *file, struct err *err,
-        const char *json_string, enum packer_type compressor, enum strdic_tag dictionary,
-        size_t num_async_dic_threads, bool read_optimized, bool bake_string_id_index,
-        struct archive_callback *callback);
+NG5_EXPORT(bool) archive_from_json(struct archive *out, const char *file, struct err *err, const char *json_string,
+        enum packer_type compressor, enum strdic_tag dictionary, size_t num_async_dic_threads, bool read_optimized,
+        bool bake_string_id_index, struct archive_callback *callback);
 
 NG5_EXPORT(bool) archive_stream_from_json(struct memblock **stream, struct err *err, const char *json_string,
-        enum packer_type compressor, enum strdic_tag dictionary, size_t num_async_dic_threads,
-        bool read_optimized, bool bake_id_index, struct archive_callback *callback);
+        enum packer_type compressor, enum strdic_tag dictionary, size_t num_async_dic_threads, bool read_optimized,
+        bool bake_id_index, struct archive_callback *callback);
 
 NG5_EXPORT(bool) archive_from_model(struct memblock **stream, struct err *err, struct columndoc *model,
         enum packer_type compressor, bool bake_string_id_index, struct archive_callback *callback);

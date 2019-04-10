@@ -23,29 +23,47 @@
 NG5_BEGIN_DECL
 
 typedef uint8_t u8;
+
 typedef uint16_t u16;
+
 typedef uint32_t u32;
+
 typedef uint64_t u64;
+
 typedef int8_t i8;
+
 typedef int16_t i16;
+
 typedef int32_t i32;
+
 typedef int64_t i64;
 
 struct doc_obj;
 
-typedef u64               field_sid_t;  /* string identifier, resolvable by a string dictionary */
-typedef char              FIELD_NULL_t;
-typedef i8                FIELD_BOOLEANean_t;
-typedef i8                field_i8_t;
-typedef i16               field_i16_t;
-typedef i32               field_i32_t;
-typedef i64               field_i64_t;
-typedef u8                field_u8_t;
-typedef u16               field_u16_t;
-typedef u32               field_u32_t;
-typedef u64               field_u64_t;
-typedef float             field_number_t;
-typedef const char *      FIELD_STRING_t;
+typedef u64 field_sid_t;  /* string identifier, resolvable by a string dictionary */
+typedef char FIELD_NULL_t;
+
+typedef i8 FIELD_BOOLEANean_t;
+
+typedef i8 field_i8_t;
+
+typedef i16 field_i16_t;
+
+typedef i32 field_i32_t;
+
+typedef i64 field_i64_t;
+
+typedef u8 field_u8_t;
+
+typedef u16 field_u16_t;
+
+typedef u32 field_u32_t;
+
+typedef u64 field_u64_t;
+
+typedef float field_number_t;
+
+typedef const char *FIELD_STRING_t;
 
 #define NG5_NULL_ENCODED_STRING            0
 #define NG5_NULL_BOOLEAN                   INT8_MAX
@@ -94,7 +112,6 @@ typedef const char *      FIELD_STRING_t;
 
 #define NG5_BOOLEAN_FALSE 0
 #define NG5_BOOLEAN_TRUE  1
-
 
 #define GET_TYPE_SIZE(value_type)                                                                                       \
 ({                                                                                                                     \

@@ -21,28 +21,28 @@
 
 i64 convert_atoi64(const char *string)
 {
-    i64 number;
-    char character ;
-    int status = sscanf(string, "%" SCNd64 "%c", &number, &character);
-    if (status == 1)
-        return number;
-    else if (status > 1) {
-        return number;
-    } else {
-        return 0;
-    }
+        i64 number;
+        char character;
+        int status = sscanf(string, "%" SCNd64 "%c", &number, &character);
+        if (status == 1) {
+                return number;
+        } else if (status > 1) {
+                return number;
+        } else {
+                return 0;
+        }
 }
 
 u64 convert_atoiu64(const char *string)
 {
-    u64 number;
-    char character ;
-    int status = sscanf(string, "%" SCNu64 "%c", &number, &character);
-    if (status == 1)
-        return number;
-    else if (status > 1) {
-        return number;
-    } else {
-        return 0;
-    }
+        u64 number;
+        char character;
+        int status = sscanf(string, "%" SCNu64 "%c", &number, &character);
+        if (status == 1) {
+                return number;
+        } else if (status > 1) {
+                return number;
+        } else {
+                return 0;
+        }
 }

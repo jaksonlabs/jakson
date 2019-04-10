@@ -75,6 +75,6 @@ NG5_BEGIN_DECL
     c;                                                                                                                 \
 })
 
-NG5_END_DECL
+        NG5_END_DECL
 
 #endif

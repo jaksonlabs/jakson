@@ -25,20 +25,16 @@
 
 NG5_BEGIN_DECL
 
-struct spinlock
-{
-    atomic_flag lock;
-    pthread_t owner;
+struct spinlock {
+        atomic_flag lock;
+        pthread_t owner;
 };
 
-NG5_EXPORT(bool)
-spinlock_init(struct spinlock *spinlock);
+NG5_EXPORT(bool) spinlock_init(struct spinlock *spinlock);
 
-NG5_EXPORT(bool)
-spinlock_acquire(struct spinlock *spinlock);
+NG5_EXPORT(bool) spinlock_acquire(struct spinlock *spinlock);
 
-NG5_EXPORT(bool)
-spinlock_release(struct spinlock *spinlock);
+NG5_EXPORT(bool) spinlock_release(struct spinlock *spinlock);
 
 NG5_END_DECL
 

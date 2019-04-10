@@ -102,121 +102,70 @@ NG5_BEGIN_DECL
 #define NG5_ERR_HASTABLE_DESERIALERR 74    /** Unable to deserialize hash table from file */
 #define NG5_ERR_UNKNOWN_DIC_TYPE 75        /** Unknown string dictionary implementation requested */
 
-static const char *const _err_str[] = {
-    "No error",
-    "Null pointer detected",
-    "Function not implemented",
-    "Index is out of bounds",
-    "Memory allocation failed",
-    "Illegal arguments",
-    "Internal error",
-    "Illegal implementation",
-    "Not found",
-    "Element not in list",
-    "Array index out of bounds",
-    "Illegal JSON array: mixed types",
-    "Reading from file failed",
-    "I/O error",
-    "Unsupported archive format version",
-    "Archive file is corrupted",
-    "Stream is not a types archive",
-    "Not in bit writing mode",
-    "Function is not yet implemented",
-    "Unsupported type found",
-    "Unsupported pack strategy requested",
-    "No string representation for type available",
-    "Marker type cannot be mapped to value type",
-    "Parsing stopped; unknown data type requested",
-    "Unknown token during parsing JSON detected",
-    "Unknown value type for number in JSON property",
-    "Stream is not a valid archive file",
-    "Unsupported strategy requested for key lookup",
-    "Internal error",
-    "No huffman code table entry found for character",
-    "Memory file was opened as read-only but requested a modification",
-    "Unable to import json file: unsupported type",
-    "Mode set to read-only but modification was requested",
-    "Read outside of memory range bounds",
-    "Slot management broken",
-    "Thread run out of object ids: start another one",
-    "JSON parsing error",
-    "Document insertion bulk creation failed",
-    "File cannot be opened for writing",
-    "Archive cannot be serialized into file",
-    "Archive cannot be deserialized form file",
-    "Unable to read from file",
-    "Unable to perform full scan in archive file",
-    "String decompression from archive failed",
-    "Closing iterator failed",
-    "Unable to construct a hard copy of the source object",
-    "Memory reallocation failed",
-    "Predicate evaluation failed",
-    "Initialization failed",
-    "Resource release failed: potentially a memory leak occurred",
-    "Operation failed",
-    "Rehashing hash table failed; rollback is not performed",
-    "Unable to open memory file",
-    "Value iterator cannot be initialized",
-    "Memfile cannot skip desired amount of bytes",
-    "Unable to seek in memory file",
-    "Unable to get value: type is not non-array object",
-    "Unable to get value: type is not non-array boolean",
-    "Unable to get value: type is not non-array int8",
-    "Unable to get value: type is not non-array int16",
-    "Unable to get value: type is not non-array int32",
-    "Unable to get value: type is not non-array int64",
-    "Unable to get value: type is not non-array uint8",
-    "Unable to get value: type is not non-array uint16",
-    "Unable to get value: type is not non-array uint32",
-    "Unable to get value: type is not non-array uint64",
-    "Unable to get value: type is not non-array number",
-    "Unable to get value: type is not non-array string",
-    "Illegal state: iteration over object issued, but collection found",
-    "Illegal state: iteration over collection issued, but object found",
-    "Type mismatch",
-    "Index is corrupted: requested offset is outside file bounds",
-    "Temporary file cannot be opened for writing",
-    "Unable to write to file",
-    "Unable to deserialize hash table from file",
-    "Unknown string dictionary implementation requested"
-};
+static const char *const _err_str[] =
+        {"No error", "Null pointer detected", "Function not implemented", "Index is out of bounds",
+         "Memory allocation failed", "Illegal arguments", "Internal error", "Illegal implementation", "Not found",
+         "Element not in list", "Array index out of bounds", "Illegal JSON array: mixed types",
+         "Reading from file failed", "I/O error", "Unsupported archive format version", "Archive file is corrupted",
+         "Stream is not a types archive", "Not in bit writing mode", "Function is not yet implemented",
+         "Unsupported type found", "Unsupported pack strategy requested", "No string representation for type available",
+         "Marker type cannot be mapped to value type", "Parsing stopped; unknown data type requested",
+         "Unknown token during parsing JSON detected", "Unknown value type for number in JSON property",
+         "Stream is not a valid archive file", "Unsupported strategy requested for key lookup", "Internal error",
+         "No huffman code table entry found for character",
+         "Memory file was opened as read-only but requested a modification",
+         "Unable to import json file: unsupported type", "Mode set to read-only but modification was requested",
+         "Read outside of memory range bounds", "Slot management broken",
+         "Thread run out of object ids: start another one", "JSON parsing error",
+         "Document insertion bulk creation failed", "File cannot be opened for writing",
+         "Archive cannot be serialized into file", "Archive cannot be deserialized form file",
+         "Unable to read from file", "Unable to perform full scan in archive file",
+         "String decompression from archive failed", "Closing iterator failed",
+         "Unable to construct a hard copy of the source object", "Memory reallocation failed",
+         "Predicate evaluation failed", "Initialization failed",
+         "Resource release failed: potentially a memory leak occurred", "Operation failed",
+         "Rehashing hash table failed; rollback is not performed", "Unable to open memory file",
+         "Value iterator cannot be initialized", "Memfile cannot skip desired amount of bytes",
+         "Unable to seek in memory file", "Unable to get value: type is not non-array object",
+         "Unable to get value: type is not non-array boolean", "Unable to get value: type is not non-array int8",
+         "Unable to get value: type is not non-array int16", "Unable to get value: type is not non-array int32",
+         "Unable to get value: type is not non-array int64", "Unable to get value: type is not non-array uint8",
+         "Unable to get value: type is not non-array uint16", "Unable to get value: type is not non-array uint32",
+         "Unable to get value: type is not non-array uint64", "Unable to get value: type is not non-array number",
+         "Unable to get value: type is not non-array string",
+         "Illegal state: iteration over object issued, but collection found",
+         "Illegal state: iteration over collection issued, but object found", "Type mismatch",
+         "Index is corrupted: requested offset is outside file bounds", "Temporary file cannot be opened for writing",
+         "Unable to write to file", "Unable to deserialize hash table from file",
+         "Unknown string dictionary implementation requested"};
 
 #define NG5_ERRSTR_ILLEGAL_CODE "illegal error code"
 
 static const int _nerr_str = NG5_ARRAY_LENGTH(_err_str);
 
-struct err
-{
-    int          code;
-    const char  *file;
-    u32     line;
-    char        *details;
+struct err {
+        int code;
+        const char *file;
+        u32 line;
+        char *details;
 };
 
-NG5_EXPORT(bool)
-error_init(struct err *err);
+NG5_EXPORT(bool) error_init(struct err *err);
 
-NG5_EXPORT(bool)
-error_cpy(struct err *dst, const struct err *src);
+NG5_EXPORT(bool) error_cpy(struct err *dst, const struct err *src);
 
-NG5_EXPORT(bool)
-error_drop(struct err *err);
+NG5_EXPORT(bool) error_drop(struct err *err);
 
-NG5_EXPORT(bool)
-error_set(struct err *err, int code, const char *file, u32 line);
+NG5_EXPORT(bool) error_set(struct err *err, int code, const char *file, u32 line);
 
-NG5_EXPORT(bool)
-error_set_wdetails(struct err *err, int code, const char *file, u32 line, const char *details);
+NG5_EXPORT(bool) error_set_wdetails(struct err *err, int code, const char *file, u32 line, const char *details);
 
-NG5_EXPORT(bool)
-error_str(const char **errstr, const char **file, u32 *line, bool *details, const char **detailsstr,
-                 const struct err *err);
+NG5_EXPORT(bool) error_str(const char **errstr, const char **file, u32 *line, bool *details, const char **detailsstr,
+        const struct err *err);
 
-NG5_EXPORT(bool)
-error_print(const struct err *err);
+NG5_EXPORT(bool) error_print(const struct err *err);
 
-NG5_EXPORT(bool)
-error_print_and_abort(const struct err *err);
+NG5_EXPORT(bool) error_print_and_abort(const struct err *err);
 
 #define error_OCCURRED(x)                   ((x)->err.code != NG5_ERR_NOERR)
 
