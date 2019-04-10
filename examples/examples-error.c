@@ -15,12 +15,12 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "carbon/carbon.h"
+#include "carbon.h"
 
 int main(void) {
-    carbon_err_t err;
+    struct err err;
     carbon_error_init(&err);
-    CARBON_ERROR_WDETAILS(&err, CARBON_ERR_NOTFOUND, "some details");
+    error_WDETAILS(&err, CARBON_ERR_NOTFOUND, "some details");
     carbon_error_print(&err);
     return EXIT_FAILURE;
 }

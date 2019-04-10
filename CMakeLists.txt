@@ -7,13 +7,13 @@ include(GNUInstallDirs)
 
 set (CMAKE_C_STANDARD 11)
 
-if (${BUILD_TYPE} MATCHES Debug)
+#if (${BUILD_TYPE} MATCHES Debug)
     message("-- Debug build is enabled")
     set(CMAKE_BUILD_TYPE Debug)
-else()
-    message("-- Release build is enabled")
-    set(CMAKE_BUILD_TYPE Release)
-endif()
+#else()
+#   message("-- Release build is enabled")
+#    set(CMAKE_BUILD_TYPE Release)
+#endif()
 
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
@@ -21,15 +21,15 @@ file(MAKE_DIRECTORY ${CMAKE_HOME_DIRECTORY}/build)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/build)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/build)
 
-include_directories("${CMAKE_SOURCE_DIR}/include")
+include_directories("${CMAKE_SOURCE_DIR}/src/include")
 
 include_directories("/usr/include")
 include_directories("/usr/local/include")
 
 set(LIBS ${LIBS} pthread m)
 
-file(GLOB_RECURSE LIB_HEADER_FILES include/carbon/*.h )
-file(GLOB_RECURSE LIB_SOURCE_FILES src/carbon/*.c )
+file(GLOB_RECURSE LIB_HEADER_FILES src/include/*.h )
+file(GLOB_RECURSE LIB_SOURCE_FILES src/*.c )
 set(LIB_SOURCES ${LIB_HEADER_FILES} ${LIB_SOURCE_FILES})
 
 if (${LOG_INFO} MATCHES "on")

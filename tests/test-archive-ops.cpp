@@ -1,13 +1,13 @@
 #include <gtest/gtest.h>
 
 #include <inttypes.h>
-#include <carbon/carbon-query.h>
-#include "carbon/carbon.h"
+#include "archive/query.h"
+#include "carbon.h"
 
 TEST(CarbonArchiveOpsTest, CreateStreamFromJsonString)
 {
     carbon_memblock_t *stream;
-    carbon_err_t       err;
+    struct err       err;
 
     const char        *json_string = "{ \"test\": 123 }";
     bool               read_optimized = false;
@@ -22,7 +22,7 @@ TEST(CarbonArchiveOpsTest, CreateStreamFromJsonString)
 TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonString)
 {
     carbon_archive_t   archive;
-    carbon_err_t       err;
+    struct err       err;
 
     const char        *json_string = "{ \"test\": 123 }";
     const char        *archive_file = "tmp-test-archive.carbon";
@@ -42,7 +42,7 @@ TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonString)
 TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonStringWithBakedStringIdIndex)
 {
     carbon_archive_t   archive;
-    carbon_err_t       err;
+    struct err       err;
 
     const char        *json_string = "{ \"test\": 123 }";
     const char        *archive_file = "tmp-test-archive.carbon";
@@ -69,7 +69,7 @@ TEST(CarbonArchiveOpsTest, CreateArchiveStringHandling)
     size_t               vector_len;
     bool                 status;
     bool                 success;
-    carbon_err_t         err;
+    struct err         err;
     carbon_query_t       query;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
@@ -116,7 +116,7 @@ TEST(CarbonArchiveOpsTest, DecodeStringByIdFullScan)
     size_t               vector_len;
     bool                 status;
     bool                 success;
-    carbon_err_t         err;
+    struct err         err;
     carbon_query_t       query;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
@@ -162,7 +162,7 @@ TEST(CarbonArchiveOpsTest, DecodeStringByFastUnsafeAccess)
     size_t                           vector_len;
     bool                             status;
     bool                             success;
-    carbon_err_t                     err;
+    struct err                     err;
     carbon_query_t                   query;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory

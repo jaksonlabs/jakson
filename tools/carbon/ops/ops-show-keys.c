@@ -2,11 +2,12 @@
 // Created by Marcus Pinnecke on 28.02.19.
 //
 
-#include <carbon/carbon-archive-visitor.h>
 #include <inttypes.h>
-#include <carbon/carbon-query.h>
-#include <carbon/carbon-hashset.h>
-#include <carbon/carbon-time.h>
+
+#include "archive/archive_visitor.h"
+#include "archive/query.h"
+#include "hash/hash_set.h"
+#include "utils/time.h"
 #include "ops-show-keys.h"
 
 
@@ -17,7 +18,7 @@ typedef struct
 } ops_show_keys_capture_t;
 
 static void visit_string_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
-                              const carbon_string_id_t *keys, const carbon_string_id_t *values, uint32_t num_pairs,
+                              const carbon_string_id_t *keys, const carbon_string_id_t *values, u32 num_pairs,
                               void *capture)
 {
     CARBON_UNUSED(id);
@@ -58,7 +59,7 @@ before_visit_object_array_objects(bool *skip_group_object_ids,
                                           carbon_object_id_t parent_id,
                                           carbon_string_id_t key,
                                           const carbon_object_id_t *group_object_ids,
-                                          uint32_t num_group_object_ids, void *capture)
+                                          u32 num_group_object_ids, void *capture)
 {
     CARBON_UNUSED(skip_group_object_ids);
     CARBON_UNUSED(archive);
@@ -85,7 +86,7 @@ before_visit_object_array_objects(bool *skip_group_object_ids,
 static carbon_visitor_policy_e
 before_object_visit(carbon_archive_t *archive, path_stack_t path,
                                                carbon_object_id_t parent_id, carbon_object_id_t value_id,
-                                               uint32_t object_idx, uint32_t num_objects, carbon_string_id_t key,
+                                               u32 object_idx, u32 num_objects, carbon_string_id_t key,
                                                void *capture)
 {
     CARBON_UNUSED(archive);
@@ -274,7 +275,7 @@ before_object_array_object_property_object(carbon_archive_t *archive, path_stack
                                            carbon_string_id_t key,
                                            carbon_object_id_t nested_object_id,
                                            carbon_string_id_t nested_key,
-                                           uint32_t nested_value_object_id,
+                                           u32 nested_value_object_id,
                                            void *capture)
 {
     CARBON_UNUSED(archive);
@@ -290,7 +291,7 @@ before_object_array_object_property_object(carbon_archive_t *archive, path_stack
 }
 
 CARBON_EXPORT(bool)
-ops_show_keys(carbon_timestamp_t *duration, carbon_vec_t ofType(ops_show_keys_key_type_pair_t) *result, const char *path, carbon_archive_t *archive)
+ops_show_keys(carbon_timestamp_t *duration, vec_t ofType(ops_show_keys_key_type_pair_t) *result, const char *path, carbon_archive_t *archive)
 {
     CARBON_UNUSED(result);
     CARBON_UNUSED(path);
@@ -320,7 +321,7 @@ ops_show_keys(carbon_timestamp_t *duration, carbon_vec_t ofType(ops_show_keys_ke
     carbon_timestamp_t end = carbon_time_now_wallclock();
     *duration = (end - begin);
 
-    carbon_vec_t ofType(ops_show_keys_key_type_pair_t) *pairs = carbon_hashset_keys(&distinct_key_type_pairs);
+    vec_t ofType(ops_show_keys_key_type_pair_t) *pairs = carbon_hashset_keys(&distinct_key_type_pairs);
     carbon_vec_push(result, pairs->base, pairs->num_elems);
     carbon_vec_drop(pairs);
 

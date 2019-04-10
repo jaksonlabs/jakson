@@ -1,4 +1,4 @@
-#include "carbon/carbon-error.h"
+#include "shared/error.h"
 #include "cmdopt/cmdopt.h"
 
 #include "modules.h"
@@ -83,42 +83,42 @@ int main (int argc, char **argv)
     carbon_cmdopt_mgr_t manager;
     carbon_cmdopt_group_t *group;
 
-    carbon_cmdopt_mgr_create(&manager, "carbon-tool", "A tool to work with CARBON files.\n"
+    carbon_cmdopt_mgr_create(&manager, "types-tool", "A tool to work with CARBON files.\n"
                                  "Copyright (c) 2018-2019 Marcus Pinnecke (pinnecke@ovgu.de)", CARBON_MOD_ARG_MAYBE_REQUIRED,
                              showHelp);
 
     carbon_cmdopt_mgr_create_group(&group, "work with JSON files", &manager);
     carbon_cmdopt_group_add_cmd(group,
                                 "checkjs", DESC_CHECK_JS,
-                                "manpages/carbon/checkjs",
+                                "manpages/types/checkjs",
                                 moduleCheckJsEntry);
     carbon_cmdopt_group_add_cmd(group,
                                 "convert", DESC_JS2CAB,
-                                "manpages/carbon/convert",
+                                "manpages/types/convert",
                                 moduleJs2CabEntry);
 
     carbon_cmdopt_mgr_create_group(&group, "work with CARBON files", &manager);
     carbon_cmdopt_group_add_cmd(group,
                                 "cli", DESC_CLI,
-                                "manpages/carbon/cli",
+                                "manpages/types/cli",
                                 moduleCliEntry);
     carbon_cmdopt_group_add_cmd(group,
                                 "view", DESC_CAB_VIEW,
-                                "manpages/carbon/view",
+                                "manpages/types/view",
                                 moduleViewCabEntry);
     carbon_cmdopt_group_add_cmd(group,
                                 "inspect", DESC_CAB_INFO,
-                                "manpages/carbon/inspect",
+                                "manpages/types/inspect",
                                 moduleInspectEntry);
     carbon_cmdopt_group_add_cmd(group,
                                 "to_json", DESC_CAB2JS_INFO,
-                                "manpages/carbon/to_json",
+                                "manpages/types/to_json",
                                 moduleCab2JsEntry);
 
     carbon_cmdopt_mgr_create_group(&group, "misc and orientation", &manager);
     carbon_cmdopt_group_add_cmd(group,
                                 "list", DESC_LIST,
-                                "manpages/carbon/list",
+                                "manpages/types/list",
                                 moduleListEntry);
 
     int status = carbon_cmdopt_mgr_process(&manager, argc - 1, argv + 1, stdout);

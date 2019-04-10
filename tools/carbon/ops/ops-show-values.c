@@ -1,31 +1,31 @@
-#include <carbon/carbon-archive-visitor.h>
-#include <carbon/carbon-hashset.h>
-#include <carbon/carbon-hashtable.h>
-#include <carbon/carbon-query.h>
+#include "archive/archive_visitor.h"
+#include "hash/hash_set.h"
+#include "hash/hash_table.h"
+#include "archive/query.h"
 #include "ops-show-values.h"
 //
 typedef struct
 {
     const char *path;
-    uint32_t offset;
-    uint32_t limit;
+    u32 offset;
+    u32 limit;
 
-    uint32_t current_off;
-    uint32_t current_num;
+    u32 current_off;
+    u32 current_num;
 
-    int32_t between_lower_bound;
-    int32_t between_upper_bound;
+    i32 between_lower_bound;
+    i32 between_upper_bound;
     const char *contains_string;
 
-    carbon_vec_t ofType(ops_show_values_result_t) *result;
+    vec_t ofType(ops_show_values_result_t) *result;
 
-  //  carbon_hashtable_t ofMapping(carbon_string_id_t, uint32_t) counts;
+  //  carbon_hashtable_t ofMapping(carbon_string_id_t, u32) counts;
   //  carbon_hashset_t ofType(carbon_string_id_t) keys;
 } capture_t;
 ////
 static void
 visit_string_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
-                              const carbon_string_id_t *keys, const carbon_string_id_t *values, uint32_t num_pairs,
+                              const carbon_string_id_t *keys, const carbon_string_id_t *values, u32 num_pairs,
                               void *capture)
 {
     CARBON_UNUSED(archive);
@@ -48,9 +48,9 @@ visit_string_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_
         if (strstr(params->path, keystr) != 0) {
             if (params->current_off >= params->offset) {
                 ops_show_values_result_t *r = NULL;
-                for (uint32_t k = 0; k < params->result->num_elems; k++)
+                for (u32 k = 0; k < params->result->num_elems; k++)
                 {
-                    r = CARBON_VECTOR_GET(params->result, k, ops_show_values_result_t);
+                    r = vec_get(params->result, k, ops_show_values_result_t);
                     if (r->key == keys[i]) {
                         break;
                     }
@@ -164,7 +164,7 @@ visit_object_array_object_property_string(carbon_archive_t *archive, path_stack_
                                                carbon_object_id_t nested_object_id,
                                                carbon_string_id_t nested_key,
                                                const carbon_string_id_t *nested_values,
-                                               uint32_t num_nested_values, void *capture)
+                                               u32 num_nested_values, void *capture)
 {
     CARBON_UNUSED(archive);
     CARBON_UNUSED(path);
@@ -192,9 +192,9 @@ visit_object_array_object_property_string(carbon_archive_t *archive, path_stack_
     if (strcmp(buffer, params->path) == 0) {
         if (params->current_off >= params->offset) {
             ops_show_values_result_t *r = NULL;
-            for (uint32_t k = 0; k < params->result->num_elems; k++)
+            for (u32 k = 0; k < params->result->num_elems; k++)
             {
-                r = CARBON_VECTOR_GET(params->result, k, ops_show_values_result_t);
+                r = vec_get(params->result, k, ops_show_values_result_t);
                 if (r->key == nested_key) {
                     break;
                 }
@@ -213,7 +213,7 @@ visit_object_array_object_property_string(carbon_archive_t *archive, path_stack_
                 params->current_num += num_nested_values;
             } else {
                 carbon_query_t *q = carbon_archive_query_default(archive);
-                for (uint32_t k = 0; k < num_nested_values; k++) {
+                for (u32 k = 0; k < num_nested_values; k++) {
                     char *value = carbon_query_fetch_string_by_id(q, nested_values[k]);
                     if (strstr(value, params->contains_string)) {
                         carbon_vec_push(&r->values.string_values, &nested_values[k], 1);
@@ -239,8 +239,8 @@ visit_object_array_object_property_int8(carbon_archive_t *archive, path_stack_t 
                                           carbon_string_id_t key,
                                           carbon_object_id_t nested_object_id,
                                           carbon_string_id_t nested_key,
-                                          const carbon_int8_t *nested_values,
-                                          uint32_t num_nested_values, void *capture)
+                                          const carbon_i8 *nested_values,
+                                          u32 num_nested_values, void *capture)
 {
     CARBON_UNUSED(archive);
     CARBON_UNUSED(path);
@@ -268,9 +268,9 @@ visit_object_array_object_property_int8(carbon_archive_t *archive, path_stack_t 
     if (strcmp(buffer, params->path) == 0) {
         if (params->current_off >= params->offset) {
             ops_show_values_result_t *r = NULL;
-            for (uint32_t k = 0; k < params->result->num_elems; k++)
+            for (u32 k = 0; k < params->result->num_elems; k++)
             {
-                r = CARBON_VECTOR_GET(params->result, k, ops_show_values_result_t);
+                r = vec_get(params->result, k, ops_show_values_result_t);
                 if (r->key == nested_key) {
                     break;
                 }
@@ -279,11 +279,11 @@ visit_object_array_object_property_int8(carbon_archive_t *archive, path_stack_t 
                 r = VECTOR_NEW_AND_GET(params->result, ops_show_values_result_t);
                 r->key = nested_key;
                 r->type = CARBON_BASIC_TYPE_INT8;
-                carbon_vec_create(&r->values.integer_values, NULL, sizeof(carbon_int64_t), 1000000);
+                carbon_vec_create(&r->values.integer_values, NULL, sizeof(carbon_i64), 1000000);
             }
 
-            for (uint32_t k = 0; k < num_nested_values; k++) {
-                int64_t val = nested_values[k];
+            for (u32 k = 0; k < num_nested_values; k++) {
+                i64 val = nested_values[k];
                 if (val >= params->between_lower_bound && val <= params->between_upper_bound) {
                     carbon_vec_push(&r->values.integer_values, &val, 1);
                 }
@@ -303,8 +303,8 @@ visit_object_array_object_property_int16(carbon_archive_t *archive, path_stack_t
                                         carbon_string_id_t key,
                                         carbon_object_id_t nested_object_id,
                                         carbon_string_id_t nested_key,
-                                        const carbon_int16_t *nested_values,
-                                        uint32_t num_nested_values, void *capture)
+                                        const carbon_i16 *nested_values,
+                                        u32 num_nested_values, void *capture)
 {
     CARBON_UNUSED(archive);
     CARBON_UNUSED(path);
@@ -332,9 +332,9 @@ visit_object_array_object_property_int16(carbon_archive_t *archive, path_stack_t
     if (strcmp(buffer, params->path) == 0) {
         if (params->current_off >= params->offset) {
             ops_show_values_result_t *r = NULL;
-            for (uint32_t k = 0; k < params->result->num_elems; k++)
+            for (u32 k = 0; k < params->result->num_elems; k++)
             {
-                r = CARBON_VECTOR_GET(params->result, k, ops_show_values_result_t);
+                r = vec_get(params->result, k, ops_show_values_result_t);
                 if (r->key == nested_key) {
                     break;
                 }
@@ -343,11 +343,11 @@ visit_object_array_object_property_int16(carbon_archive_t *archive, path_stack_t
                 r = VECTOR_NEW_AND_GET(params->result, ops_show_values_result_t);
                 r->key = nested_key;
                 r->type = CARBON_BASIC_TYPE_INT16;
-                carbon_vec_create(&r->values.integer_values, NULL, sizeof(carbon_int64_t), 1000000);
+                carbon_vec_create(&r->values.integer_values, NULL, sizeof(carbon_i64), 1000000);
             }
 
-            for (uint32_t k = 0; k < num_nested_values; k++) {
-                int64_t val = nested_values[k];
+            for (u32 k = 0; k < num_nested_values; k++) {
+                i64 val = nested_values[k];
                 if (val >= params->between_lower_bound && val <= params->between_upper_bound) {
                     carbon_vec_push(&r->values.integer_values, &val, 1);
                 }
@@ -364,7 +364,7 @@ visit_object_array_object_property_int16(carbon_archive_t *archive, path_stack_t
 
 //
 //static bool
-//get_column_entry_count(carbon_archive_t *archive, path_stack_t path, carbon_string_id_t key, carbon_basic_type_e type, uint32_t count, void *capture)
+//get_column_entry_count(carbon_archive_t *archive, path_stack_t path, carbon_string_id_t key, carbon_basic_type_e type, u32 count, void *capture)
 //{
 //    CARBON_UNUSED(archive);
 //    CARBON_UNUSED(path);
@@ -377,8 +377,8 @@ visit_object_array_object_property_int16(carbon_archive_t *archive, path_stack_t
 //    carbon_archive_visitor_path_to_string(buffer, archive, path);
 //
 //    if (strcmp(buffer, params->path) == 0) {
-//        const uint32_t *count_ptr = carbon_hashtable_get_value(&params->counts, &key);
-//        uint32_t count_val = 0;
+//        const u32 *count_ptr = carbon_hashtable_get_value(&params->counts, &key);
+//        u32 count_val = 0;
 //        if (!count_ptr) {
 //            carbon_hashset_insert_or_update(&params->keys, &key, 1);
 //        } else {
@@ -393,9 +393,9 @@ visit_object_array_object_property_int16(carbon_archive_t *archive, path_stack_t
 //}
 
 CARBON_EXPORT(bool)
-ops_show_values(carbon_timestamp_t *duration, carbon_vec_t ofType(ops_show_values_result_t) *result, const char *path,
-                carbon_archive_t *archive, uint32_t offset, uint32_t limit, int32_t between_lower_bound,
-                int32_t between_upper_bound, const char *contains_string)
+ops_show_values(carbon_timestamp_t *duration, vec_t ofType(ops_show_values_result_t) *result, const char *path,
+                carbon_archive_t *archive, u32 offset, u32 limit, i32 between_lower_bound,
+                i32 between_upper_bound, const char *contains_string)
 {
     CARBON_UNUSED(result);
     CARBON_UNUSED(path);
@@ -420,7 +420,7 @@ ops_show_values(carbon_timestamp_t *duration, carbon_vec_t ofType(ops_show_value
 
 
 
-//    carbon_hashtable_create(&capture.counts, &archive->err, sizeof(carbon_string_id_t), sizeof(uint32_t), 50);
+//    carbon_hashtable_create(&capture.counts, &archive->err, sizeof(carbon_string_id_t), sizeof(u32), 50);
 //    carbon_hashset_create(&capture.keys, &archive->err, sizeof(carbon_string_id_t), 50);
 
   //  visitor.visit_string_pairs = visit_string_pairs;
@@ -440,11 +440,11 @@ ops_show_values(carbon_timestamp_t *duration, carbon_vec_t ofType(ops_show_value
     *duration = (end - begin);
 
 
-//    carbon_vec_t ofType(carbon_string_id_t) *keys = carbon_hashset_keys(&capture.keys);
+//    vec_t ofType(carbon_string_id_t) *keys = carbon_hashset_keys(&capture.keys);
 //
-//    for (uint32_t i = 0; i < keys->num_elems; i++) {
-//        carbon_string_id_t id = *CARBON_VECTOR_GET(keys, i, carbon_string_id_t);
-//        uint32_t count = *(uint32_t *) carbon_hashtable_get_value(&capture.counts, &id);
+//    for (u32 i = 0; i < keys->num_elems; i++) {
+//        carbon_string_id_t id = *vec_get(keys, i, carbon_string_id_t);
+//        u32 count = *(u32 *) carbon_hashtable_get_value(&capture.counts, &id);
 //        ops_count_values_result_t r = {
 //            .key = id,
 //            .count = count

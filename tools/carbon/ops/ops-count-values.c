@@ -1,19 +1,19 @@
-#include <carbon/carbon-archive-visitor.h>
-#include <carbon/carbon-hashset.h>
-#include <carbon/carbon-hashtable.h>
-#include <carbon/carbon-query.h>
+#include "archive/archive_visitor.h"
+#include "hash/hash_set.h"
+#include "hash/hash_table.h"
+#include "archive/query.h"
 #include "ops-count-values.h"
 
 typedef struct
 {
     const char *path;
-    carbon_hashtable_t ofMapping(carbon_string_id_t, uint32_t) counts;
+    carbon_hashtable_t ofMapping(carbon_string_id_t, u32) counts;
     carbon_hashset_t ofType(carbon_string_id_t) keys;
 } capture_t;
 //
 static void
 visit_string_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
-                              const carbon_string_id_t *keys, const carbon_string_id_t *values, uint32_t num_pairs,
+                              const carbon_string_id_t *keys, const carbon_string_id_t *values, u32 num_pairs,
                               void *capture)
 {
     CARBON_UNUSED(archive);
@@ -30,7 +30,7 @@ visit_string_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_
 
 
         carbon_query_t *query = carbon_archive_query_default(archive);
-        for (uint32_t i = 0; i < num_pairs; i++) {
+        for (u32 i = 0; i < num_pairs; i++) {
 
             char *keystr = carbon_query_fetch_string_by_id(query, keys[i]);
             if (strlen(params->path) > strlen(keystr) && strcmp(params->path + strlen(params->path) - strlen(keystr), keystr) == 0) {
@@ -38,8 +38,8 @@ visit_string_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_
 //                printf("visit_string_pairs -- KEY %s, VALUE %s\n", keystr, valuestr);
 //                free(valuestr);
 
-                const uint32_t *count_ptr = carbon_hashtable_get_value(&params->counts, &keys[i]);
-                uint32_t count_val = 0;
+                const u32 *count_ptr = carbon_hashtable_get_value(&params->counts, &keys[i]);
+                u32 count_val = 0;
                 if (!count_ptr) {
                     carbon_hashset_insert_or_update(&params->keys, &keys[i], 1);
                 } else {
@@ -53,8 +53,8 @@ visit_string_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_
 
         }
 
-//        const uint32_t *count_ptr = carbon_hashtable_get_value(&params->counts, &key);
-//        uint32_t count_val = 0;
+//        const u32 *count_ptr = carbon_hashtable_get_value(&params->counts, &key);
+//        u32 count_val = 0;
 //        if (!count_ptr) {
 //            carbon_hashset_insert_or_update(&params->keys, &key, 1);
 //        } else {
@@ -69,8 +69,8 @@ visit_string_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_
 //
 static void
 visit_string_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
-                                   carbon_string_id_t key, uint32_t entry_idx, uint32_t max_entries,
-                                   const carbon_string_id_t *array, uint32_t array_length, void *capture)
+                                   carbon_string_id_t key, u32 entry_idx, u32 max_entries,
+                                   const carbon_string_id_t *array, u32 array_length, void *capture)
 {
     CARBON_UNUSED(archive);
     CARBON_UNUSED(path);
@@ -92,7 +92,7 @@ visit_string_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_ob
 //                                               carbon_object_id_t nested_object_id,
 //                                               carbon_string_id_t nested_key,
 //                                               const carbon_string_id_t *nested_values,
-//                                               uint32_t num_nested_values, void *capture)
+//                                               u32 num_nested_values, void *capture)
 //{
 //    CARBON_UNUSED(archive);
 //    CARBON_UNUSED(path);
@@ -111,7 +111,7 @@ visit_string_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_ob
 //}
 
 static bool
-get_column_entry_count(carbon_archive_t *archive, path_stack_t path, carbon_string_id_t key, carbon_basic_type_e type, uint32_t count, void *capture)
+get_column_entry_count(carbon_archive_t *archive, path_stack_t path, carbon_string_id_t key, carbon_basic_type_e type, u32 count, void *capture)
 {
     CARBON_UNUSED(archive);
     CARBON_UNUSED(path);
@@ -124,8 +124,8 @@ get_column_entry_count(carbon_archive_t *archive, path_stack_t path, carbon_stri
     carbon_archive_visitor_path_to_string(buffer, archive, path);
 
     if (strcmp(buffer, params->path) == 0) {
-        const uint32_t *count_ptr = carbon_hashtable_get_value(&params->counts, &key);
-        uint32_t count_val = 0;
+        const u32 *count_ptr = carbon_hashtable_get_value(&params->counts, &key);
+        u32 count_val = 0;
         if (!count_ptr) {
             carbon_hashset_insert_or_update(&params->keys, &key, 1);
         } else {
@@ -140,7 +140,7 @@ get_column_entry_count(carbon_archive_t *archive, path_stack_t path, carbon_stri
 }
 
 CARBON_EXPORT(bool)
-ops_count_values(carbon_timestamp_t *duration, carbon_vec_t ofType(ops_count_values_result_t) *result, const char *path, carbon_archive_t *archive)
+ops_count_values(carbon_timestamp_t *duration, vec_t ofType(ops_count_values_result_t) *result, const char *path, carbon_archive_t *archive)
 {
     CARBON_UNUSED(result);
     CARBON_UNUSED(path);
@@ -152,7 +152,7 @@ ops_count_values(carbon_timestamp_t *duration, carbon_vec_t ofType(ops_count_val
     capture_t capture = {
         .path = path
     };
-    carbon_hashtable_create(&capture.counts, &archive->err, sizeof(carbon_string_id_t), sizeof(uint32_t), 50);
+    carbon_hashtable_create(&capture.counts, &archive->err, sizeof(carbon_string_id_t), sizeof(u32), 50);
     carbon_hashset_create(&capture.keys, &archive->err, sizeof(carbon_string_id_t), 50);
 
     visitor.visit_string_pairs = visit_string_pairs;
@@ -165,11 +165,11 @@ ops_count_values(carbon_timestamp_t *duration, carbon_vec_t ofType(ops_count_val
     carbon_timestamp_t end = carbon_time_now_wallclock();
     *duration = (end - begin);
 
-    carbon_vec_t ofType(carbon_string_id_t) *keys = carbon_hashset_keys(&capture.keys);
+    vec_t ofType(carbon_string_id_t) *keys = carbon_hashset_keys(&capture.keys);
 //    carbon_vec_push(result, pairs->base, pairs->num_elems);
-    for (uint32_t i = 0; i < keys->num_elems; i++) {
-        carbon_string_id_t id = *CARBON_VECTOR_GET(keys, i, carbon_string_id_t);
-        uint32_t count = *(uint32_t *) carbon_hashtable_get_value(&capture.counts, &id);
+    for (u32 i = 0; i < keys->num_elems; i++) {
+        carbon_string_id_t id = *vec_get(keys, i, carbon_string_id_t);
+        u32 count = *(u32 *) carbon_hashtable_get_value(&capture.counts, &id);
         ops_count_values_result_t r = {
             .key = id,
             .count = count

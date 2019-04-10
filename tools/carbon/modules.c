@@ -1,10 +1,10 @@
 
 #include <inttypes.h>
-#include <carbon/carbon-compressor.h>
-#include <carbon/carbon-query.h>
-#include <carbon/carbon-int-archive.h>
+#include "compressor/compressor.h"
+#include "archive/query.h"
+#include "archive/archive-internal.h"
 
-#include "carbon/carbon.h"
+#include "carbon.h"
 
 #include "modules.h"
 
@@ -47,7 +47,7 @@ static int convertJs2Model(Js2CabContext *context, FILE *file, bool optimizeForR
 
     CARBON_CONSOLE_WRITE(file, "  - Parse JSON file%s", "");
     carbon_json_parser_t parser;
-    carbon_json_parse_err_t error_desc;
+    carbon_json_parse_err error_desc;
     carbon_json_t jsonAst;
     carbon_json_parser_create(&parser, &context->context);
     int status = carbon_json_parse(&jsonAst, &error_desc, &parser, context->jsonContent);
@@ -66,7 +66,7 @@ static int convertJs2Model(Js2CabContext *context, FILE *file, bool optimizeForR
     }
 
     CARBON_CONSOLE_WRITE(file, "  - Test document restrictions%s", "");
-    carbon_err_t err;
+    struct err err;
     status = carbon_json_test_doc(&err, &jsonAst);
     if (!status) {
         CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
@@ -318,7 +318,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
     if (argc < 2) {
         CARBON_CONSOLE_WRITE(file, "Require at least <output> and <input> parameters for <args>.%s", "");
         CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
-        CARBON_CONSOLE_WRITELN(file, "Run '%s' to see an example on the usage.", "$ carbon convert");
+        CARBON_CONSOLE_WRITELN(file, "Run '%s' to see an example on the usage.", "$ types convert");
         return false;
     } else {
         bool flagSizeOptimized = false;
@@ -430,7 +430,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
         jsonContent[fsize] = 0;
 
         carbon_archive_t archive;
-        carbon_err_t err;
+        struct err err;
 
         carbon_archive_callback_t progress_tracker = { 0 };
         progress_tracker.begin_create_from_model = tracker_begin_create_from_model;
@@ -474,7 +474,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
 
 //        carbon_memblock_t *carbonFile;
 //        CARBON_CONSOLE_WRITE(file, "  - Convert partition into in-memory CARBON file%s", "");
-//        carbon_err_t err;
+//        struct err err;
 //        if (!carbon_archive_from_model(&carbonFile, &err, cabContext.partitionMetaModel, compressor, flagBakeStringIdIndex)) {
 //            carbon_error_print_and_abort(&err);
 //        }
@@ -518,7 +518,7 @@ bool moduleViewCabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t 
     CARBON_CONSOLE_OUTPUT_OFF()
 
     if (argc != 1) {
-        CARBON_CONSOLE_WRITE(file, "Require exactly one argument <carbon-file> that is a path to a carbon file.%s", "");
+        CARBON_CONSOLE_WRITE(file, "Require exactly one argument <types-file> that is a path to a types file.%s", "");
     } else {
         const char *carbonFilePath = argv[0];
         if (testFileExists(file, carbonFilePath, 1, 1, true) != true) {
@@ -526,7 +526,7 @@ bool moduleViewCabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t 
             CARBON_CONSOLE_WRITELN(file, "Input file '%s' cannot be found. STOP", carbonFilePath);
             return false;
         }
-        carbon_err_t err;
+        struct err err;
         FILE *inputFile = fopen(carbonFilePath, "r");
         carbon_memblock_t *stream;
         carbon_archive_load(&stream, inputFile);
@@ -549,7 +549,7 @@ bool moduleInspectInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t 
     if (argc < 1) {
         CARBON_CONSOLE_WRITE(file, "Require input file <input> as parameter for <args>.%s", "");
         CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
-        CARBON_CONSOLE_WRITELN(file, "Run '%s' to see an example on the usage.", "$ carbon inspect");
+        CARBON_CONSOLE_WRITELN(file, "Run '%s' to see an example on the usage.", "$ types inspect");
         return false;
     } else {
         const int filePathArgIdx = 0;
@@ -564,7 +564,7 @@ bool moduleInspectInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t 
         CARBON_CONSOLE_OUTPUT_ON()
 
         carbon_archive_t archive;
-        carbon_archive_info_t info;
+        struct archive_info info;
         if ((carbon_archive_open(&archive, pathCarbonFileIn)) != true) {
             CARBON_CONSOLE_WRITE(file, "Cannot open requested CARBON file: %s", pathCarbonFileIn);
             return false;
@@ -572,7 +572,7 @@ bool moduleInspectInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t 
             carbon_archive_get_info(&info, &archive);
             FILE *f = fopen(pathCarbonFileIn, "r");
             fseek(f, 0, SEEK_END);
-            carbon_off_t fileLength = ftell(f);
+            offset_t fileLength = ftell(f);
             fclose(f);
             printf("file:\t\t\t'%s'\n", pathCarbonFileIn);
             printf("file-size:\t\t%zu B\n", fileLength);
@@ -596,7 +596,7 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
     if (argc != 1) {
         CARBON_CONSOLE_WRITE(file, "Require exactly one <input> parameter for <args>.%s", "");
         CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
-        CARBON_CONSOLE_WRITELN(file, "Run '%s' to see an example on the usage.", "$ carbon-tool to_json");
+        CARBON_CONSOLE_WRITELN(file, "Run '%s' to see an example on the usage.", "$ types-tool to_json");
         return false;
     } else {
         const int filePathArgIdx = 0;
@@ -635,7 +635,7 @@ bool moduleListInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *ma
     if (argc != 1) {
         CARBON_CONSOLE_WRITE(file, "Require one constant for <args> parameter.%s", "");
         CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
-        CARBON_CONSOLE_WRITELN(file, "Run '%s' to see an example on the usage.", "$ carbon list");
+        CARBON_CONSOLE_WRITELN(file, "Run '%s' to see an example on the usage.", "$ types list");
         return false;
     } else {
         const char *constant = argv[0];
