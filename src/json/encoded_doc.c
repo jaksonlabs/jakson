@@ -166,29 +166,29 @@ encoded_doc_add_prop_##value_name##_decoded(struct encoded_doc *doc, const char 
 }
 
 
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(field_i8_t, field_int8, int8)
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(field_i16_t, field_int16, int16)
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(field_i32_t, field_int32, int32)
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(field_i64_t, field_int64, int64)
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(field_u8_t, field_uint8, uint8)
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(field_u16_t, field_uint16, uint16)
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(field_u32_t, field_uint32, uint32)
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(field_u64_t, field_uint64, uint64)
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(field_number_t, field_float, number)
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(field_boolean_t, field_bool, boolean)
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(field_sid_t, field_string, string)
+DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(field_i8_t, FIELD_INT8, int8)
+DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(field_i16_t, FIELD_INT16, int16)
+DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(field_i32_t, FIELD_INT32, int32)
+DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(field_i64_t, FIELD_INT64, int64)
+DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(field_u8_t, FIELD_UINT8, uint8)
+DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(field_u16_t, FIELD_UINT16, uint16)
+DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(field_u32_t, FIELD_UINT32, uint32)
+DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(field_u64_t, FIELD_UINT64, uint64)
+DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(field_number_t, FIELD_FLOAT, number)
+DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(FIELD_BOOLEANean_t, FIELD_BOOLEAN, boolean)
+DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(field_sid_t, FIELD_STRING, string)
 
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_i8_t, field_int8, int8)
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_i16_t, field_int16, int16)
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_i32_t, field_int32, int32)
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_i64_t, field_int64, int64)
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_u8_t, field_uint8, uint8)
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_u16_t, field_uint16, uint16)
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_u32_t, field_uint32, uint32)
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_u64_t, field_uint64, uint64)
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_number_t, field_float, number)
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_boolean_t, field_bool, boolean)
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_sid_t, field_string, string)
+DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_i8_t, FIELD_INT8, int8)
+DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_i16_t, FIELD_INT16, int16)
+DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_i32_t, FIELD_INT32, int32)
+DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_i64_t, FIELD_INT64, int64)
+DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_u8_t, FIELD_UINT8, uint8)
+DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_u16_t, FIELD_UINT16, uint16)
+DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_u32_t, FIELD_UINT32, uint32)
+DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_u64_t, FIELD_UINT64, uint64)
+DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_number_t, FIELD_FLOAT, number)
+DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(FIELD_BOOLEANean_t, FIELD_BOOLEAN, boolean)
+DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_sid_t, FIELD_STRING, string)
 
 NG5_EXPORT(bool)
 encoded_doc_add_prop_string_decoded_string_value_decoded(struct encoded_doc *doc, const char *key, const char *value)
@@ -198,7 +198,7 @@ encoded_doc_add_prop_string_decoded_string_value_decoded(struct encoded_doc *doc
     prop->header.context = doc;
     prop->header.key_type = STRING_DECODED;
     prop->header.key.key_str = strdup(key);
-    prop->header.type = field_string;
+    prop->header.type = FIELD_STRING;
     prop->value.string = strdup(value);
     return true;
 }
@@ -211,7 +211,7 @@ encoded_doc_add_prop_null(struct encoded_doc *doc, field_sid_t key)
     prop->header.context = doc;
     prop->header.key_type = STRING_ENCODED;
     prop->header.key.key_id = key;
-    prop->header.type = field_null;
+    prop->header.type = FIELD_NULL;
     prop->value.builtin.null = 1;
     return true;
 }
@@ -224,7 +224,7 @@ encoded_doc_add_prop_null_decoded(struct encoded_doc *doc, const char *key)
     prop->header.context = doc;
     prop->header.key_type = STRING_DECODED;
     prop->header.key.key_str = strdup(key);
-    prop->header.type = field_null;
+    prop->header.type = FIELD_NULL;
     prop->value.builtin.null = 1;
     return true;
 }
@@ -237,7 +237,7 @@ encoded_doc_add_prop_object(struct encoded_doc *doc, field_sid_t key, struct enc
     prop->header.context = doc;
     prop->header.key_type = STRING_ENCODED;
     prop->header.key.key_id = key;
-    prop->header.type = field_object;
+    prop->header.type = FIELD_OBJECT;
     prop->value.builtin.object = value->object_id;
     return true;
 }
@@ -250,7 +250,7 @@ encoded_doc_add_prop_object_decoded(struct encoded_doc *doc, const char *key, st
     prop->header.context = doc;
     prop->header.key_type = STRING_DECODED;
     prop->header.key.key_str = strdup(key);
-    prop->header.type = field_object;
+    prop->header.type = FIELD_OBJECT;
     prop->value.builtin.object = value->object_id;
     return true;
 }
@@ -288,33 +288,33 @@ encoded_doc_add_prop_array_##name##_decoded(struct encoded_doc *doc,            
 }
 
 
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(int8, field_int8)
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(int16, field_int16)
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(int32, field_int32)
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(int64, field_int64)
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(uint8, field_uint8)
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(uint16, field_uint16)
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(uint32, field_uint32)
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(uint64, field_uint64)
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(number, field_float)
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(boolean, field_bool)
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(string, field_string)
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(null, field_null)
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(object, field_object)
+DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(int8, FIELD_INT8)
+DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(int16, FIELD_INT16)
+DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(int32, FIELD_INT32)
+DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(int64, FIELD_INT64)
+DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(uint8, FIELD_UINT8)
+DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(uint16, FIELD_UINT16)
+DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(uint32, FIELD_UINT32)
+DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(uint64, FIELD_UINT64)
+DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(number, FIELD_FLOAT)
+DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(boolean, FIELD_BOOLEAN)
+DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(string, FIELD_STRING)
+DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(null, FIELD_NULL)
+DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(object, FIELD_OBJECT)
 
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(int8, field_int8)
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(int16, field_int16)
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(int32, field_int32)
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(int64, field_int64)
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(uint8, field_uint8)
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(uint16, field_uint16)
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(uint32, field_uint32)
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(uint64, field_uint64)
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(number, field_float)
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(boolean, field_bool)
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(string, field_string)
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(null, field_null)
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(object, field_object)
+DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(int8, FIELD_INT8)
+DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(int16, FIELD_INT16)
+DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(int32, FIELD_INT32)
+DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(int64, FIELD_INT64)
+DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(uint8, FIELD_UINT8)
+DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(uint16, FIELD_UINT16)
+DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(uint32, FIELD_UINT32)
+DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(uint64, FIELD_UINT64)
+DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(number, FIELD_FLOAT)
+DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(boolean, FIELD_BOOLEAN)
+DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(string, FIELD_STRING)
+DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(null, FIELD_NULL)
+DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(object, FIELD_OBJECT)
 
 
 #define DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(name, built_in_type, basic_type)                                    \
@@ -368,31 +368,31 @@ encoded_doc_array_push_##name##_decoded(struct encoded_doc *doc, const char *key
     return true;                                                                                                       \
 }
 
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(int8, field_i8_t, field_int8)
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(int16, field_i16_t, field_int16)
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(int32, field_i32_t, field_int32)
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(int64, field_i64_t, field_int64)
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(uint8, field_u8_t, field_uint8)
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(uint16, field_u16_t, field_uint16)
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(uint32, field_u32_t, field_uint32)
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(uint64, field_u64_t, field_uint64)
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(number, field_number_t, field_float)
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(boolean, field_boolean_t, field_bool)
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(string, field_sid_t, field_string)
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(null, field_u32_t, field_null)
+DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(int8, field_i8_t, FIELD_INT8)
+DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(int16, field_i16_t, FIELD_INT16)
+DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(int32, field_i32_t, FIELD_INT32)
+DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(int64, field_i64_t, FIELD_INT64)
+DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(uint8, field_u8_t, FIELD_UINT8)
+DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(uint16, field_u16_t, FIELD_UINT16)
+DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(uint32, field_u32_t, FIELD_UINT32)
+DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(uint64, field_u64_t, FIELD_UINT64)
+DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(number, field_number_t, FIELD_FLOAT)
+DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(boolean, FIELD_BOOLEANean_t, FIELD_BOOLEAN)
+DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(string, field_sid_t, FIELD_STRING)
+DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(null, field_u32_t, FIELD_NULL)
 
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(int8, field_i8_t, field_int8)
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(int16, field_i16_t, field_int16)
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(int32, field_i32_t, field_int32)
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(int64, field_i64_t, field_int64)
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(uint8, field_u8_t, field_uint8)
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(uint16, field_u16_t, field_uint16)
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(uint32, field_u32_t, field_uint32)
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(uint64, field_u64_t, field_uint64)
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(number, field_number_t, field_float)
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(boolean, field_boolean_t, field_bool)
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(string, field_sid_t, field_string)
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(null, field_u32_t, field_null)
+DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(int8, field_i8_t, FIELD_INT8)
+DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(int16, field_i16_t, FIELD_INT16)
+DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(int32, field_i32_t, FIELD_INT32)
+DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(int64, field_i64_t, FIELD_INT64)
+DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(uint8, field_u8_t, FIELD_UINT8)
+DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(uint16, field_u16_t, FIELD_UINT16)
+DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(uint32, field_u32_t, FIELD_UINT32)
+DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(uint64, field_u64_t, FIELD_UINT64)
+DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(number, field_number_t, FIELD_FLOAT)
+DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(boolean, FIELD_BOOLEANean_t, FIELD_BOOLEAN)
+DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(string, field_sid_t, FIELD_STRING)
+DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(null, field_u32_t, FIELD_NULL)
 //
 //NG5_EXPORT(bool)
 //encoded_doc_array_push_null(struct encoded_doc *doc, field_sid_t key, u32 how_many)
@@ -403,7 +403,7 @@ DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(null, field_u32_t, field_null)
 //    struct encoded_doc_prop_array *array = vec_get(&doc->props_arrays, *prop_pos,
 //                                                               struct encoded_doc_prop_array);
 //    error_IF(array == NULL, &doc->err, NG5_ERR_INTERNALERR);
-//    error_IF(array->header.type != field_null, &doc->err, NG5_ERR_TYPEMISMATCH);
+//    error_IF(array->header.type != FIELD_NULL, &doc->err, NG5_ERR_TYPEMISMATCH);
 //    union encoded_doc_value *value = VECTOR_NEW_AND_GET(&array->values, union encoded_doc_value);
 //    value->num_nulls = how_many;
 //    return true;
@@ -426,7 +426,7 @@ encoded_doc_array_push_object(struct encoded_doc *doc, field_sid_t key, object_i
     struct encoded_doc_prop_array *array = vec_get(&doc->props_arrays, *prop_pos,
                                                                struct encoded_doc_prop_array);
     error_IF(array == NULL, &doc->err, NG5_ERR_INTERNALERR);
-    error_IF(array->header.type != field_object, &doc->err, NG5_ERR_TYPEMISMATCH);
+    error_IF(array->header.type != FIELD_OBJECT, &doc->err, NG5_ERR_TYPEMISMATCH);
     union encoded_doc_value *value = VECTOR_NEW_AND_GET(&array->values, union encoded_doc_value);
     value->object = id;
     return true;
@@ -455,7 +455,7 @@ encoded_doc_array_push_object_decoded(struct encoded_doc *doc, const char *key, 
     struct encoded_doc_prop_array *array = vec_get(&doc->props_arrays, prop_pos,
                                                                struct encoded_doc_prop_array);
     error_IF(array == NULL, &doc->err, NG5_ERR_INTERNALERR);
-    error_IF(array->header.type != field_object, &doc->err, NG5_ERR_TYPEMISMATCH);
+    error_IF(array->header.type != FIELD_OBJECT, &doc->err, NG5_ERR_TYPEMISMATCH);
     union encoded_doc_value *value = VECTOR_NEW_AND_GET(&array->values, union encoded_doc_value);
     value->object = id;
     return true;
@@ -503,34 +503,34 @@ doc_print_pretty(FILE *file, struct encoded_doc *doc, unsigned level)
 
         fprintf(file, "\"%s\": ", key_str);
         switch (prop->header.type) {
-        case field_int8:
+        case FIELD_INT8:
             fprintf(file, "%" PRIi8, prop->value.builtin.int8);
             break;
-        case field_int16:
+        case FIELD_INT16:
             fprintf(file, "%" PRIi16, prop->value.builtin.int16);
             break;
-        case field_int32:
+        case FIELD_INT32:
             fprintf(file, "%" PRIi32, prop->value.builtin.int32);
             break;
-        case field_int64:
+        case FIELD_INT64:
             fprintf(file, "%" PRIi64, prop->value.builtin.int64);
             break;
-        case field_uint8:
+        case FIELD_UINT8:
             fprintf(file, "%" PRIu8, prop->value.builtin.uint8);
             break;
-        case field_uint16:
+        case FIELD_UINT16:
             fprintf(file, "%" PRIu16, prop->value.builtin.uint16);
             break;
-        case field_uint32:
+        case FIELD_UINT32:
             fprintf(file, "%" PRIu32, prop->value.builtin.uint32);
             break;
-        case field_uint64:
+        case FIELD_UINT64:
             fprintf(file, "%" PRIu64, prop->value.builtin.uint64);
             break;
-        case field_float:
+        case FIELD_FLOAT:
             fprintf(file, "%.2f", ceilf(prop->value.builtin.number * 100) / 100);
             break;
-        case field_string: {
+        case FIELD_STRING: {
             if (prop->header.value_type == VALUE_BUILTIN) {
                 char *value_str = query_fetch_string_by_id(&query, prop->value.builtin.string);
                 fprintf(file, "\"%s\"", value_str);
@@ -539,13 +539,13 @@ doc_print_pretty(FILE *file, struct encoded_doc *doc, unsigned level)
                 fprintf(file, "\"%s\"", prop->value.string);
             }
         } break;
-        case field_bool:
+        case FIELD_BOOLEAN:
             fprintf(file, "\"%s\"", prop->value.builtin.boolean ? "true" : "false");
             break;
-        case field_null:
+        case FIELD_NULL:
             fprintf(file, "null");
             break;
-        case field_object:
+        case FIELD_OBJECT:
         {
             struct encoded_doc *nested = encoded_doc_collection_get_or_append(doc->context, prop->value.builtin.object);
             doc_print_pretty(file, nested, level + 1);
@@ -583,7 +583,7 @@ doc_print_pretty(FILE *file, struct encoded_doc *doc, unsigned level)
         }
 
         switch (prop->header.type) {
-        case field_int8:
+        case FIELD_INT8:
             for (u32 k = 0; k < prop->values.num_elems; k++) {
                 field_i8_t value = (vec_get(&prop->values, k, union encoded_doc_value))->int8;
                 if (NG5_IS_NULL_INT8(value)) {
@@ -593,7 +593,7 @@ doc_print_pretty(FILE *file, struct encoded_doc *doc, unsigned level)
                 }
             }
             break;
-        case field_int16:
+        case FIELD_INT16:
             for (u32 k = 0; k < prop->values.num_elems; k++) {
                 field_i16_t value = (vec_get(&prop->values, k, union encoded_doc_value))->int16;
                 if (NG5_IS_NULL_INT16(value)) {
@@ -603,7 +603,7 @@ doc_print_pretty(FILE *file, struct encoded_doc *doc, unsigned level)
                 }
             }
             break;
-        case field_int32:
+        case FIELD_INT32:
             for (u32 k = 0; k < prop->values.num_elems; k++) {
                 field_i32_t value = (vec_get(&prop->values, k, union encoded_doc_value))->int32;
                 if (NG5_IS_NULL_INT32(value)) {
@@ -613,7 +613,7 @@ doc_print_pretty(FILE *file, struct encoded_doc *doc, unsigned level)
                 }
             }
             break;
-        case field_int64:
+        case FIELD_INT64:
             for (u32 k = 0; k < prop->values.num_elems; k++) {
                 field_i64_t value = (vec_get(&prop->values, k, union encoded_doc_value))->int64;
                 if (NG5_IS_NULL_INT64(value)) {
@@ -623,7 +623,7 @@ doc_print_pretty(FILE *file, struct encoded_doc *doc, unsigned level)
                 }
             }
             break;
-        case field_uint8:
+        case FIELD_UINT8:
             for (u32 k = 0; k < prop->values.num_elems; k++) {
                 field_u8_t value = (vec_get(&prop->values, k, union encoded_doc_value))->uint8;
                 if (NG5_IS_NULL_UINT8(value)) {
@@ -633,7 +633,7 @@ doc_print_pretty(FILE *file, struct encoded_doc *doc, unsigned level)
                 }
             }
             break;
-        case field_uint16:
+        case FIELD_UINT16:
             for (u32 k = 0; k < prop->values.num_elems; k++) {
                 field_u16_t value = (vec_get(&prop->values, k, union encoded_doc_value))->uint16;
                 if (NG5_IS_NULL_UINT16(value)) {
@@ -643,7 +643,7 @@ doc_print_pretty(FILE *file, struct encoded_doc *doc, unsigned level)
                 }
             }
             break;
-        case field_uint32:
+        case FIELD_UINT32:
             for (u32 k = 0; k < prop->values.num_elems; k++) {
                 field_u32_t value = (vec_get(&prop->values, k, union encoded_doc_value))->uint32;
                 if (NG5_IS_NULL_UINT32(value)) {
@@ -653,7 +653,7 @@ doc_print_pretty(FILE *file, struct encoded_doc *doc, unsigned level)
                 }
             }
             break;
-        case field_uint64:
+        case FIELD_UINT64:
             for (u32 k = 0; k < prop->values.num_elems; k++) {
                 field_u64_t value = (vec_get(&prop->values, k, union encoded_doc_value))->uint64;
                 if (NG5_IS_NULL_UINT64(value)) {
@@ -663,7 +663,7 @@ doc_print_pretty(FILE *file, struct encoded_doc *doc, unsigned level)
                 }
             }
             break;
-        case field_float:
+        case FIELD_FLOAT:
             for (u32 k = 0; k < prop->values.num_elems; k++) {
                 field_number_t value = (vec_get(&prop->values, k, union encoded_doc_value))->number;
                 if (NG5_IS_NULL_NUMBER(value)) {
@@ -674,7 +674,7 @@ doc_print_pretty(FILE *file, struct encoded_doc *doc, unsigned level)
                 }
             }
             break;
-        case field_string: {
+        case FIELD_STRING: {
             for (u32 k = 0; k < prop->values.num_elems; k++) {
                 field_sid_t value = (vec_get(&prop->values, k, union encoded_doc_value))->string;
                 if (NG5_IS_NULL_STRING(value)) {
@@ -686,9 +686,9 @@ doc_print_pretty(FILE *file, struct encoded_doc *doc, unsigned level)
                 }
             }
         } break;
-        case field_bool:
+        case FIELD_BOOLEAN:
             for (u32 k = 0; k < prop->values.num_elems; k++) {
-                field_boolean_t value = (vec_get(&prop->values, k, union encoded_doc_value))->boolean;
+                FIELD_BOOLEANean_t value = (vec_get(&prop->values, k, union encoded_doc_value))->boolean;
                 if (NG5_IS_NULL_BOOLEAN(value)) {
                     fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                 } else {
@@ -697,12 +697,12 @@ doc_print_pretty(FILE *file, struct encoded_doc *doc, unsigned level)
                 }
             }
             break;
-        case field_null:
+        case FIELD_NULL:
             for (u32 k = 0; k < prop->values.num_elems; k++) {
                 fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
             }
             break;
-        case field_object:
+        case FIELD_OBJECT:
         {
             for (u32 k = 0; k < prop->values.num_elems; k++) {
                 object_id_t nested_oid = (vec_get(&prop->values, k, union encoded_doc_value))->object;

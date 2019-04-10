@@ -140,7 +140,7 @@ struct archive_value_vector {
                                 const field_u64_t *uint64s;
                                 const field_number_t *numbers;
                                 const field_sid_t *strings;
-                                const field_boolean_t *booleans;
+                                const FIELD_BOOLEANean_t *booleans;
                         } values;
                 } basic;
                 struct {
@@ -160,7 +160,7 @@ struct archive_value_vector {
                                 const field_u64_t *uint64s_base;
                                 const field_number_t *numbers_base;
                                 const field_sid_t *strings_base;
-                                const field_boolean_t *booleans_base;
+                                const FIELD_BOOLEANean_t *booleans_base;
                         } values;
                 } arrays;
         } data;
@@ -304,7 +304,7 @@ DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_u32_t, uint32s);
 DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_u64_t, uint64s);
 DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_sid_t, strings);
 DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_number_t, numbers);
-DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_boolean_t, booleans);
+DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(FIELD_BOOLEANean_t, booleans);
 DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_u32_t, nulls);
 
 NG5_EXPORT(bool) archive_column_entry_get_objects(struct column_object_iter *iter,
@@ -368,7 +368,7 @@ DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint32s, field_u32_t)
 DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint64s, field_u64_t)
 DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(strings, field_sid_t)
 DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(numbers, field_number_t)
-DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(booleans, field_boolean_t)
+DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(booleans, FIELD_BOOLEANean_t)
 
 NG5_EXPORT(const field_u32_t *)archive_value_vector_get_null_arrays(u32 *num_values,
         struct archive_value_vector *value);
@@ -388,7 +388,7 @@ DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(uint32, field_u32_t);
 DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(uint64, field_u64_t);
 DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(string, field_sid_t);
 DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(number, field_number_t);
-DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(boolean, field_boolean_t);
+DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(boolean, FIELD_BOOLEANean_t);
 
 void int_reset_cabin_object_mem_file(struct archive_object *object);
 

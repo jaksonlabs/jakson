@@ -150,7 +150,7 @@ int_get_value_type_of_char(char c)
             return value_array_marker_mapping[i].value_type;
         }
     }
-    return field_null;
+    return FIELD_NULL;
 }
 
 field_e // TODO: check whether 'field_e' can be replaced by 'enum field_type'
@@ -159,43 +159,43 @@ int_marker_to_field_type(char symbol)
     switch (symbol) {
     case MARKER_SYMBOL_PROP_NULL:
     case MARKER_SYMBOL_PROP_NULL_ARRAY:
-        return field_null;
+        return FIELD_NULL;
     case MARKER_SYMBOL_PROP_BOOLEAN:
     case MARKER_SYMBOL_PROP_BOOLEAN_ARRAY:
-        return field_bool;
+        return FIELD_BOOLEAN;
     case MARKER_SYMBOL_PROP_INT8:
     case MARKER_SYMBOL_PROP_INT8_ARRAY:
-        return field_int8;
+        return FIELD_INT8;
     case MARKER_SYMBOL_PROP_INT16:
     case MARKER_SYMBOL_PROP_INT16_ARRAY:
-        return field_int16;
+        return FIELD_INT16;
     case MARKER_SYMBOL_PROP_INT32:
     case MARKER_SYMBOL_PROP_INT32_ARRAY:
-        return field_int32;
+        return FIELD_INT32;
     case MARKER_SYMBOL_PROP_INT64:
     case MARKER_SYMBOL_PROP_INT64_ARRAY:
-        return field_int64;
+        return FIELD_INT64;
     case MARKER_SYMBOL_PROP_UINT8:
     case MARKER_SYMBOL_PROP_UINT8_ARRAY:
-        return field_uint8;
+        return FIELD_UINT8;
     case MARKER_SYMBOL_PROP_UINT16:
     case MARKER_SYMBOL_PROP_UINT16_ARRAY:
-        return field_uint16;
+        return FIELD_UINT16;
     case MARKER_SYMBOL_PROP_UINT32:
     case MARKER_SYMBOL_PROP_UINT32_ARRAY:
-        return field_uint32;
+        return FIELD_UINT32;
     case MARKER_SYMBOL_PROP_UINT64:
     case MARKER_SYMBOL_PROP_UINT64_ARRAY:
-        return field_uint64;
+        return FIELD_UINT64;
     case MARKER_SYMBOL_PROP_REAL:
     case MARKER_SYMBOL_PROP_REAL_ARRAY:
-        return field_float;
+        return FIELD_FLOAT;
     case MARKER_SYMBOL_PROP_TEXT:
     case MARKER_SYMBOL_PROP_TEXT_ARRAY:
-        return field_string;
+        return FIELD_STRING;
     case MARKER_SYMBOL_PROP_OBJECT:
     case MARKER_SYMBOL_PROP_OBJECT_ARRAY:
-        return field_object;
+        return FIELD_OBJECT;
     default: {
         print_error_and_die(NG5_ERR_MARKERMAPPING);
     }

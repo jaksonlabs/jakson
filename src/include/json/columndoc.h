@@ -120,7 +120,7 @@ struct columndoc_obj
     struct vector ofType(field_sid_t) null_array_prop_keys;
 
     /** Primitive boolean values associated to keys stored above (sorted by key) */
-    struct vector ofType(field_boolean_t) bool_prop_vals;
+    struct vector ofType(FIELD_BOOLEANean_t) bool_prop_vals;
     /** Primitive int8 number values associated to keys stored above (sorted by key) */
     struct vector ofType(field_i8_t) int8_prop_vals;
     /** Primitive int16 number values associated to keys stored above (sorted by key) */

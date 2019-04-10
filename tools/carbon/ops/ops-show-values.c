@@ -58,7 +58,7 @@ visit_string_pairs (struct archive *archive, path_stack_t path, object_id_t id,
                 if (!r) {
                     r = VECTOR_NEW_AND_GET(params->result, ops_show_values_result_t);
                     r->key = keys[i];
-                    r->type = field_string;
+                    r->type = FIELD_STRING;
                     vec_create(&r->values.string_values, NULL, sizeof(field_sid_t), 1000000);
                 }
 
@@ -202,7 +202,7 @@ visit_object_array_object_property_string(struct archive *archive, path_stack_t 
             if (!r) {
                 r = VECTOR_NEW_AND_GET(params->result, ops_show_values_result_t);
                 r->key = nested_key;
-                r->type = field_string;
+                r->type = FIELD_STRING;
                 vec_create(&r->values.string_values, NULL, sizeof(field_sid_t), 1000000);
             }
 
@@ -278,7 +278,7 @@ visit_object_array_object_property_int8(struct archive *archive, path_stack_t pa
             if (!r) {
                 r = VECTOR_NEW_AND_GET(params->result, ops_show_values_result_t);
                 r->key = nested_key;
-                r->type = field_int8;
+                r->type = FIELD_INT8;
                 vec_create(&r->values.integer_values, NULL, sizeof(field_i64_t), 1000000);
             }
 
@@ -342,7 +342,7 @@ visit_object_array_object_property_int16(struct archive *archive, path_stack_t p
             if (!r) {
                 r = VECTOR_NEW_AND_GET(params->result, ops_show_values_result_t);
                 r->key = nested_key;
-                r->type = field_int16;
+                r->type = FIELD_INT16;
                 vec_create(&r->values.integer_values, NULL, sizeof(field_i64_t), 1000000);
             }
 

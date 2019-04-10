@@ -101,7 +101,7 @@ struct archive_visitor
     DEFINE_VISIT_BASIC_TYPE_PAIRS(uint64, field_u64_t);
     DEFINE_VISIT_BASIC_TYPE_PAIRS(number, field_number_t);
     DEFINE_VISIT_BASIC_TYPE_PAIRS(string, field_sid_t);
-    DEFINE_VISIT_BASIC_TYPE_PAIRS(boolean, field_boolean_t);
+    DEFINE_VISIT_BASIC_TYPE_PAIRS(boolean, FIELD_BOOLEANean_t);
 
     void (*visit_null_pairs) (struct archive *archive, path_stack_t path, object_id_t id, const field_sid_t *keys,
                               u32 num_pairs, void *capture);
@@ -116,7 +116,7 @@ struct archive_visitor
     DEFINE_VISIT_ARRAY_TYPE_PAIRS(uint64, field_u64_t);
     DEFINE_VISIT_ARRAY_TYPE_PAIRS(number, field_number_t);
     DEFINE_VISIT_ARRAY_TYPE_PAIRS(string, field_sid_t);
-    DEFINE_VISIT_ARRAY_TYPE_PAIRS(boolean, field_boolean_t);
+    DEFINE_VISIT_ARRAY_TYPE_PAIRS(boolean, FIELD_BOOLEANean_t);
 
     enum visit_policy (*visit_enter_null_array_pairs)(struct archive *archive, path_stack_t path,
                                                             object_id_t id,
@@ -164,7 +164,7 @@ struct archive_visitor
     DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(uint64s, field_u64_t);
     DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(numbers, field_number_t);
     DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(strings, field_sid_t);
-    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(booleans, field_boolean_t);
+    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(booleans, FIELD_BOOLEANean_t);
     DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(nulls, field_u32_t);
 
     enum visit_policy (*before_object_array_object_property_object)(struct archive *archive, path_stack_t path,

@@ -413,43 +413,43 @@ get_basic_type(enum prop_iter_state state)
     switch (state) {
     case PROP_ITER_NULLS:
     case PROP_ITER_NULL_ARRAYS:
-        return field_null;
+        return FIELD_NULL;
     case PROP_ITER_BOOLS:
     case PROP_ITER_BOOL_ARRAYS:
-        return field_bool;
+        return FIELD_BOOLEAN;
     case PROP_ITER_INT8S:
     case PROP_ITER_INT8_ARRAYS:
-        return field_int8;
+        return FIELD_INT8;
     case PROP_ITER_INT16S:
     case PROP_ITER_INT16_ARRAYS:
-        return field_int16;
+        return FIELD_INT16;
     case PROP_ITER_INT32S:
     case PROP_ITER_INT32_ARRAYS:
-        return field_int32;
+        return FIELD_INT32;
     case PROP_ITER_INT64S:
     case PROP_ITER_INT64_ARRAYS:
-        return field_int64;
+        return FIELD_INT64;
     case PROP_ITER_UINT8S:
     case PROP_ITER_UINT8_ARRAYS:
-        return field_uint8;
+        return FIELD_UINT8;
     case PROP_ITER_UINT16S:
     case PROP_ITER_UINT16_ARRAYS:
-        return field_uint16;
+        return FIELD_UINT16;
     case PROP_ITER_UINT32S:
     case PROP_ITER_UINT32_ARRAYS:
-        return field_uint32;
+        return FIELD_UINT32;
     case PROP_ITER_UINT64S:
     case PROP_ITER_UINT64_ARRAYS:
-        return field_uint64;
+        return FIELD_UINT64;
     case PROP_ITER_FLOATS:
     case PROP_ITER_FLOAT_ARRAYS:
-        return field_float;
+        return FIELD_FLOAT;
     case PROP_ITER_STRINGS:
     case PROP_ITER_STRING_ARRAYS:
-        return field_string;
+        return FIELD_STRING;
     case PROP_ITER_OBJECTS:
     case PROP_ITER_OBJECT_ARRAYS:
-        return field_object;
+        return FIELD_OBJECT;
     default:
         print_error_and_die(NG5_ERR_INTERNALERR);
     }
@@ -674,18 +674,18 @@ archive_column_entry_get_##name(u32 *array_length, archive_column_entry_iter_t *
     }                                                                                                                  \
 }
 
-DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_i8_t, int8s, field_int8);
-DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_i16_t, int16s, field_int16);
-DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_i32_t, int32s, field_int32);
-DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_i64_t, int64s, field_int64);
-DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_u8_t, uint8s, field_uint8);
-DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_u16_t, uint16s, field_uint16);
-DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_u32_t, uint32s, field_uint32);
-DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_u64_t, uint64s, field_uint64);
-DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_sid_t, strings, field_string);
-DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_number_t, numbers, field_float);
-DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_boolean_t, booleans, field_bool);
-DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_u32_t, nulls, field_null);
+DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_i8_t, int8s, FIELD_INT8);
+DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_i16_t, int16s, FIELD_INT16);
+DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_i32_t, int32s, FIELD_INT32);
+DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_i64_t, int64s, FIELD_INT64);
+DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_u8_t, uint8s, FIELD_UINT8);
+DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_u16_t, uint16s, FIELD_UINT16);
+DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_u32_t, uint32s, FIELD_UINT32);
+DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_u64_t, uint64s, FIELD_UINT64);
+DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_sid_t, strings, FIELD_STRING);
+DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_number_t, numbers, FIELD_FLOAT);
+DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(FIELD_BOOLEANean_t, booleans, FIELD_BOOLEAN);
+DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_u32_t, nulls, FIELD_NULL);
 
 NG5_EXPORT(bool)
 archive_column_entry_get_objects(struct column_object_iter *iter,
@@ -784,38 +784,38 @@ value_vector_init_fixed_length_types_basic(struct archive_value_vector *value)
     assert(!value->is_array);
 
     switch (value->prop_type) {
-    case field_int8:
+    case FIELD_INT8:
         value->data.basic.values.int8s = NG5_MEMFILE_PEEK(&value->record_table_memfile, field_i8_t);
         break;
-    case field_int16:
+    case FIELD_INT16:
         value->data.basic.values.int16s = NG5_MEMFILE_PEEK(&value->record_table_memfile, field_i16_t);
         break;
-    case field_int32:
+    case FIELD_INT32:
         value->data.basic.values.int32s = NG5_MEMFILE_PEEK(&value->record_table_memfile, field_i32_t);
         break;
-    case field_int64:
+    case FIELD_INT64:
         value->data.basic.values.int64s = NG5_MEMFILE_PEEK(&value->record_table_memfile, field_i64_t);
         break;
-    case field_uint8:
+    case FIELD_UINT8:
         value->data.basic.values.uint8s = NG5_MEMFILE_PEEK(&value->record_table_memfile, field_u8_t);
         break;
-    case field_uint16:
+    case FIELD_UINT16:
         value->data.basic.values.uint16s = NG5_MEMFILE_PEEK(&value->record_table_memfile, field_u16_t);
         break;
-    case field_uint32:
+    case FIELD_UINT32:
         value->data.basic.values.uint32s = NG5_MEMFILE_PEEK(&value->record_table_memfile, field_u32_t);
         break;
-    case field_uint64:
+    case FIELD_UINT64:
         value->data.basic.values.uint64s = NG5_MEMFILE_PEEK(&value->record_table_memfile, field_u64_t);
         break;
-    case field_float:
+    case FIELD_FLOAT:
         value->data.basic.values.numbers = NG5_MEMFILE_PEEK(&value->record_table_memfile, field_number_t);
         break;
-    case field_string:
+    case FIELD_STRING:
         value->data.basic.values.strings = NG5_MEMFILE_PEEK(&value->record_table_memfile, field_sid_t);
         break;
-    case field_bool:
-        value->data.basic.values.booleans = NG5_MEMFILE_PEEK(&value->record_table_memfile, field_boolean_t);
+    case FIELD_BOOLEAN:
+        value->data.basic.values.booleans = NG5_MEMFILE_PEEK(&value->record_table_memfile, FIELD_BOOLEANean_t);
         break;
     default:
         print_error_and_die(NG5_ERR_INTERNALERR);
@@ -826,7 +826,7 @@ static void
 value_vector_init_fixed_length_types_null_arrays(struct archive_value_vector *value)
 {
     assert(value->is_array);
-    assert(value->prop_type == field_null);
+    assert(value->prop_type == FIELD_NULL);
     value->data.arrays.meta.num_nulls_contained = NG5_MEMFILE_READ_TYPE_LIST(&value->record_table_memfile, u32,
                                                                                 value->value_max_idx);
 }
@@ -840,38 +840,38 @@ value_vector_init_fixed_length_types_non_null_arrays(struct archive_value_vector
                                                                      value->value_max_idx);
 
     switch (value->prop_type) {
-    case field_int8:
+    case FIELD_INT8:
         value->data.arrays.values.int8s_base = NG5_MEMFILE_PEEK(&value->record_table_memfile, field_i8_t);
         break;
-    case field_int16:
+    case FIELD_INT16:
         value->data.arrays.values.int16s_base = NG5_MEMFILE_PEEK(&value->record_table_memfile, field_i16_t);
         break;
-    case field_int32:
+    case FIELD_INT32:
         value->data.arrays.values.int32s_base = NG5_MEMFILE_PEEK(&value->record_table_memfile, field_i32_t);
         break;
-    case field_int64:
+    case FIELD_INT64:
         value->data.arrays.values.int64s_base = NG5_MEMFILE_PEEK(&value->record_table_memfile, field_i64_t);
         break;
-    case field_uint8:
+    case FIELD_UINT8:
         value->data.arrays.values.uint8s_base = NG5_MEMFILE_PEEK(&value->record_table_memfile, field_u8_t);
         break;
-    case field_uint16:
+    case FIELD_UINT16:
         value->data.arrays.values.uint16s_base = NG5_MEMFILE_PEEK(&value->record_table_memfile, field_u16_t);
         break;
-    case field_uint32:
+    case FIELD_UINT32:
         value->data.arrays.values.uint32s_base = NG5_MEMFILE_PEEK(&value->record_table_memfile, field_u32_t);
         break;
-    case field_uint64:
+    case FIELD_UINT64:
         value->data.arrays.values.uint64s_base = NG5_MEMFILE_PEEK(&value->record_table_memfile, field_u64_t);
         break;
-    case field_float:
+    case FIELD_FLOAT:
         value->data.arrays.values.numbers_base = NG5_MEMFILE_PEEK(&value->record_table_memfile, field_number_t);
         break;
-    case field_string:
+    case FIELD_STRING:
         value->data.arrays.values.strings_base = NG5_MEMFILE_PEEK(&value->record_table_memfile, field_sid_t);
         break;
-    case field_bool:
-        value->data.arrays.values.booleans_base = NG5_MEMFILE_PEEK(&value->record_table_memfile, field_boolean_t);
+    case FIELD_BOOLEAN:
+        value->data.arrays.values.booleans_base = NG5_MEMFILE_PEEK(&value->record_table_memfile, FIELD_BOOLEANean_t);
         break;
     default:
     print_error_and_die(NG5_ERR_INTERNALERR);
@@ -936,25 +936,25 @@ archive_value_vector_from_prop_iter(struct archive_value_vector *value,
     value->value_max_idx = prop_iter->mode_object.prop_group_header.header->num_entries;
 
     switch (value->prop_type) {
-    case field_object:
+    case FIELD_OBJECT:
         value_vector_init_object(value);
         break;
-    case field_null:
+    case FIELD_NULL:
         if (value->is_array) {
             value_vector_init_fixed_length_types_null_arrays(value);
         }
         break;
-    case field_int8:
-    case field_int16:
-    case field_int32:
-    case field_int64:
-    case field_uint8:
-    case field_uint16:
-    case field_uint32:
-    case field_uint64:
-    case field_float:
-    case field_string:
-    case field_bool:
+    case FIELD_INT8:
+    case FIELD_INT16:
+    case FIELD_INT32:
+    case FIELD_INT64:
+    case FIELD_UINT8:
+    case FIELD_UINT16:
+    case FIELD_UINT32:
+    case FIELD_UINT64:
+    case FIELD_FLOAT:
+    case FIELD_STRING:
+    case FIELD_BOOLEAN:
         value_vector_init_fixed_length_types(value);
         break;
     default:
@@ -997,7 +997,7 @@ archive_value_vector_is_of_objects(bool *is_object, struct archive_value_vector 
     NG5_NON_NULL_OR_ERROR(is_object)
     NG5_NON_NULL_OR_ERROR(value)
 
-    *is_object = value->prop_type == field_object && !value->is_array;
+    *is_object = value->prop_type == FIELD_OBJECT && !value->is_array;
 
     return true;
 }
@@ -1041,18 +1041,18 @@ archive_value_vector_is_##name(bool *type_match, struct archive_value_vector *va
     return true;                                                                                                       \
 }
 
-DECLARE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(int8, field_int8)
-DECLARE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(int16, field_int16)
-DECLARE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(int32, field_int32)
-DECLARE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(int64, field_int64)
-DECLARE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(uint8, field_uint8)
-DECLARE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(uint16, field_uint16)
-DECLARE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(uint32, field_uint32)
-DECLARE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(uint64, field_uint64)
-DECLARE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(string, field_string)
-DECLARE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(number, field_float)
-DECLARE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(boolean, field_bool)
-DECLARE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(null, field_null)
+DECLARE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(int8, FIELD_INT8)
+DECLARE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(int16, FIELD_INT16)
+DECLARE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(int32, FIELD_INT32)
+DECLARE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(int64, FIELD_INT64)
+DECLARE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(uint8, FIELD_UINT8)
+DECLARE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(uint16, FIELD_UINT16)
+DECLARE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(uint32, FIELD_UINT32)
+DECLARE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(uint64, FIELD_UINT64)
+DECLARE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(string, FIELD_STRING)
+DECLARE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(number, FIELD_FLOAT)
+DECLARE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(boolean, FIELD_BOOLEAN)
+DECLARE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(null, FIELD_NULL)
 
 #define DECLARE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(names, name, built_in_type, err_code)                       \
 NG5_EXPORT(const built_in_type *)                                                                                   \
@@ -1086,7 +1086,7 @@ DECLARE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint32s, uint32, field_u32_t, NG
 DECLARE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint64s, uint64, field_u64_t, NG5_ERR_ITER_NOUINT64)
 DECLARE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(strings, string, field_sid_t, NG5_ERR_ITER_NOSTRING)
 DECLARE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(numbers, number, field_number_t, NG5_ERR_ITER_NONUMBER)
-DECLARE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(booleans, boolean, field_boolean_t, NG5_ERR_ITER_NOBOOL)
+DECLARE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(booleans, boolean, FIELD_BOOLEANean_t, NG5_ERR_ITER_NOBOOL)
 
 NG5_EXPORT(const field_u32_t *)
 archive_value_vector_get_null_arrays(u32 *num_values, struct archive_value_vector *value)
@@ -1142,7 +1142,7 @@ DECLARE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(uint32, field_u32_t, uint32s_
 DECLARE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(uint64, field_u64_t, uint64s_base)
 DECLARE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(string, field_sid_t, strings_base)
 DECLARE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(number, field_number_t, numbers_base)
-DECLARE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(boolean, field_boolean_t, booleans_base)
+DECLARE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(boolean, FIELD_BOOLEANean_t, booleans_base)
 
 
 void

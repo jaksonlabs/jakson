@@ -321,7 +321,7 @@ bool columndoc_free(struct columndoc *doc)
     if(!vec_is_empty((key_vector))) {                                                                           \
         fprintf(file, "\"Values\": [ ");                                                                               \
         for (size_t i = 0; i < (value_vector)->num_elems; i++) {                                                       \
-            field_boolean_t value = *vec_get(value_vector, i, field_boolean_t);                                  \
+            FIELD_BOOLEANean_t value = *vec_get(value_vector, i, FIELD_BOOLEANean_t);                                  \
             fprintf(file, "%s%s", value == 0 ? "false" : "true", i + 1 < (value_vector)->num_elems ? ", " : "");       \
         }                                                                                                              \
         fprintf(file, "]");                                                                                            \
@@ -414,10 +414,10 @@ static bool print_primitive_objects(FILE *file, struct err *err, const char *typ
         fprintf(file, "],");                                                                                           \
         fprintf(file, "\"Values\": [ ");                                                                               \
         for (size_t i = 0; i < (&value_vector)->num_elems; i++) {                                                      \
-            const struct vector ofType(field_boolean_t) *values = vec_get(&value_vector, i, struct vector);      \
+            const struct vector ofType(FIELD_BOOLEANean_t) *values = vec_get(&value_vector, i, struct vector);      \
             fprintf(file, "[ ");                                                                                       \
             for (size_t j = 0; j < values->num_elems; j++) {                                                           \
-                field_boolean_t value = *vec_get(values, j, field_boolean_t);                                    \
+                FIELD_BOOLEANean_t value = *vec_get(values, j, FIELD_BOOLEANean_t);                                    \
                 fprintf(file, "%s%s", value == 0 ? "false" : "true", j + 1 < values->num_elems ? ", " : "");           \
             }                                                                                                          \
             fprintf(file, "]%s ", i + 1 < (&value_vector)->num_elems ? "," : "");                                      \
@@ -591,7 +591,7 @@ static bool print_array_objects(FILE *file, struct err *err, const char *type_na
             fprintf(file, "\"Values\": [");
             for (size_t array_idx = 0; array_idx < columnTable->values.num_elems; array_idx++) {
                 switch (columnTable->type) {
-                case field_null: {
+                case FIELD_NULL: {
                     const struct vector *column = vec_get(&columnTable->values, array_idx, struct vector);
                     fprintf(file, "%s", column->num_elems > 1 ? "[" : "");
                     for (size_t i = 0; i < column->num_elems; i++) {
@@ -600,34 +600,34 @@ static bool print_array_objects(FILE *file, struct err *err, const char *type_na
                     }
                     fprintf(file, "%s", column->num_elems > 1 ? "]" : "");
                 } break;
-                case field_int8:
+                case FIELD_INT8:
                     PRINT_COLUMN(file, columnTable, array_idx, field_i8_t, "%d")
                     break;
-                case field_int16:
+                case FIELD_INT16:
                     PRINT_COLUMN(file, columnTable, array_idx, field_i16_t, "%d")
                     break;
-                case field_int32:
+                case FIELD_INT32:
                     PRINT_COLUMN(file, columnTable, array_idx, field_i32_t, "%d")
                     break;
-                case field_int64:
+                case FIELD_INT64:
                     PRINT_COLUMN(file, columnTable, array_idx, field_i64_t, "%" PRIi64)
                     break;
-                case field_uint8:
+                case FIELD_UINT8:
                     PRINT_COLUMN(file, columnTable, array_idx, field_u8_t, "%d")
                     break;
-                case field_uint16:
+                case FIELD_UINT16:
                     PRINT_COLUMN(file, columnTable, array_idx, field_u16_t, "%d")
                     break;
-                case field_uint32:
+                case FIELD_UINT32:
                     PRINT_COLUMN(file, columnTable, array_idx, field_u32_t, "%d")
                     break;
-                case field_uint64:
+                case FIELD_UINT64:
                     PRINT_COLUMN(file, columnTable, array_idx, field_u64_t, "%" PRIu64)
                     break;
-                case field_float:
+                case FIELD_FLOAT:
                     PRINT_COLUMN(file, columnTable, array_idx, field_number_t , "%f")
                     break;
-                case field_string: {
+                case FIELD_STRING: {
                     const struct vector *column = vec_get(&columnTable->values, array_idx, struct vector);
                     fprintf(file, "%s", column->num_elems > 1 ? "[" : "");
                     for (size_t i = 0; i < column->num_elems; i++) {
@@ -639,7 +639,7 @@ static bool print_array_objects(FILE *file, struct err *err, const char *type_na
                     }
                     fprintf(file, "%s", column->num_elems > 1 ? "]" : "");
                 } break;
-                case field_object: {
+                case FIELD_OBJECT: {
                    // struct columndoc_obj *doc = vec_get(&column->values, valueIdx, struct columndoc_obj);
                   //  print_object(file, doc, encode);
                     const struct vector *column = vec_get(&columnTable->values, array_idx, struct vector);
@@ -757,7 +757,7 @@ static void object_array_key_columns_drop(struct vector ofType(struct columndoc_
             for (size_t k = 0; k < array_indices->num_elems; k++) {
 
                 struct vector ofType(<T>) *values_for_index = vec_get(values_for_indicies, k, struct vector);
-                if (column->type == field_object) {
+                if (column->type == FIELD_OBJECT) {
                     for (size_t l = 0; l < values_for_index->num_elems; l++) {
                         struct columndoc_obj *nested_object = vec_get(values_for_index, l, struct columndoc_obj);
                         object_meta_model_free(nested_object);
@@ -777,18 +777,18 @@ static void object_array_key_columns_drop(struct vector ofType(struct columndoc_
 static const char *get_type_name(struct err *err, field_e type)
 {
     switch (type) {
-        case field_null:return "Null";
-        case field_int8:return "Int8";
-        case field_int16:return "Int16";
-        case field_int32:return "Int32";
-        case field_int64:return "Int64";
-        case field_uint8:return "UInt8";
-        case field_uint16:return "UInt16";
-        case field_uint32:return "UInt32";
-        case field_uint64:return "UInt64";
-        case field_float:return "Real";
-        case field_string:return "String";
-        case field_object:return "Object";
+        case FIELD_NULL:return "Null";
+        case FIELD_INT8:return "Int8";
+        case FIELD_INT16:return "Int16";
+        case FIELD_INT32:return "Int32";
+        case FIELD_INT64:return "Int64";
+        case FIELD_UINT8:return "UInt8";
+        case FIELD_UINT16:return "UInt16";
+        case FIELD_UINT32:return "UInt32";
+        case FIELD_UINT64:return "UInt64";
+        case FIELD_FLOAT:return "Real";
+        case FIELD_STRING:return "String";
+        case FIELD_OBJECT:return "Object";
         default: {
             error(err, NG5_ERR_NOTYPE);
             return NULL;
@@ -851,27 +851,27 @@ static bool object_array_key_column_push(struct columndoc_column *col, struct er
     bool is_null_by_def = entry->values.num_elems == 0;
     u32 num_elements = (u32) entry->values.num_elems;
 
-    field_e entryType = is_null_by_def ? field_null : entry->type;
+    field_e entryType = is_null_by_def ? FIELD_NULL : entry->type;
     num_elements = is_null_by_def ? 1 : num_elements;
 
     switch (entryType) {
-    case field_null: {
+    case FIELD_NULL: {
         vec_push(values_for_entry, &num_elements, 1);
     } break;
-    case field_bool:
-    case field_int8:
-    case field_int16:
-    case field_int32:
-    case field_int64:
-    case field_uint8:
-    case field_uint16:
-    case field_uint32:
-    case field_uint64:
-    case field_float:
+    case FIELD_BOOLEAN:
+    case FIELD_INT8:
+    case FIELD_INT16:
+    case FIELD_INT32:
+    case FIELD_INT64:
+    case FIELD_UINT8:
+    case FIELD_UINT16:
+    case FIELD_UINT32:
+    case FIELD_UINT64:
+    case FIELD_FLOAT:
         assert(!is_null_by_def);
         vec_push(values_for_entry, entry->values.base, num_elements);
         break;
-    case field_string: {
+    case FIELD_STRING: {
         assert(!is_null_by_def);
         char **strings = vec_all(&entry->values, char *);
         field_sid_t *string_ids;
@@ -880,7 +880,7 @@ static bool object_array_key_column_push(struct columndoc_column *col, struct er
         strdic_free(dic, string_ids);
         //strdic_free(encode, strings);
     } break;
-    case field_object:
+    case FIELD_OBJECT:
         assert(!is_null_by_def);
 
         field_sid_t *array_key;
@@ -936,7 +936,7 @@ static void setup_object(struct columndoc_obj *model, struct columndoc *parent, 
     vec_create(&model->float_array_prop_keys, NULL, sizeof(field_sid_t), 10);
     vec_create(&model->null_array_prop_keys, NULL, sizeof(field_sid_t), 10);
 
-    vec_create(&model->bool_prop_vals, NULL, sizeof(field_boolean_t), 10);
+    vec_create(&model->bool_prop_vals, NULL, sizeof(FIELD_BOOLEANean_t), 10);
     vec_create(&model->int8_prop_vals, NULL, sizeof(field_i8_t), 10);
     vec_create(&model->int16_prop_vals, NULL, sizeof(field_i16_t), 10);
     vec_create(&model->int32_prop_vals, NULL, sizeof(field_i32_t), 10);
@@ -994,57 +994,57 @@ static bool object_put_primitive(struct columndoc_obj *columndoc, struct err *er
                                const field_sid_t *key_id)
 {
     switch(entry->type) {
-    case field_null:
+    case FIELD_NULL:
         vec_push(&columndoc->null_prop_keys, key_id, 1);
         break;
-    case field_bool:
+    case FIELD_BOOLEAN:
         vec_push(&columndoc->bool_prop_keys, key_id, 1);
         vec_push(&columndoc->bool_prop_vals, entry->values.base, 1);
         break;
-    case field_int8:
+    case FIELD_INT8:
         vec_push(&columndoc->int8_prop_keys, key_id, 1);
         vec_push(&columndoc->int8_prop_vals, entry->values.base, 1);
         break;
-    case field_int16:
+    case FIELD_INT16:
         vec_push(&columndoc->int16_prop_keys, key_id, 1);
         vec_push(&columndoc->int16_prop_vals, entry->values.base, 1);
         break;
-    case field_int32:
+    case FIELD_INT32:
         vec_push(&columndoc->int32_prop_keys, key_id, 1);
         vec_push(&columndoc->int32_prop_vals, entry->values.base, 1);
         break;
-    case field_int64:
+    case FIELD_INT64:
         vec_push(&columndoc->int64_prop_keys, key_id, 1);
         vec_push(&columndoc->int64_prop_vals, entry->values.base, 1);
         break;
-    case field_uint8:
+    case FIELD_UINT8:
         vec_push(&columndoc->uint8_prop_keys, key_id, 1);
         vec_push(&columndoc->uint8_prop_vals, entry->values.base, 1);
         break;
-    case field_uint16:
+    case FIELD_UINT16:
         vec_push(&columndoc->uint16_prop_keys, key_id, 1);
         vec_push(&columndoc->uint16_prop_vals, entry->values.base, 1);
         break;
-    case field_uint32:
+    case FIELD_UINT32:
         vec_push(&columndoc->uin32_prop_keys, key_id, 1);
         vec_push(&columndoc->uint32_prop_vals, entry->values.base, 1);
         break;
-    case field_uint64:
+    case FIELD_UINT64:
         vec_push(&columndoc->uint64_prop_keys, key_id, 1);
         vec_push(&columndoc->uint64_prop_vals, entry->values.base, 1);
         break;
-    case field_float:
+    case FIELD_FLOAT:
         vec_push(&columndoc->float_prop_keys, key_id, 1);
         vec_push(&columndoc->float_prop_vals, entry->values.base, 1);
         break;
-    case field_string: {
+    case FIELD_STRING: {
         field_sid_t *value;
         strdic_locate_fast(&value, dic, (char *const *) entry->values.base, 1);
         vec_push(&columndoc->string_prop_keys, key_id, 1);
         vec_push(&columndoc->string_prop_vals, value, 1);
         strdic_free(dic, value);
     } break;
-    case field_object: {
+    case FIELD_OBJECT: {
         struct columndoc_obj template, *nested_object;
         size_t position = vec_length(&columndoc->obj_prop_keys);
         vec_push(&columndoc->obj_prop_keys, key_id, 1);
@@ -1080,36 +1080,36 @@ static bool object_put_array(struct columndoc_obj *model, struct err *err, const
     u32 num_elements = (u32) vec_length(&entry->values);
 
     switch(entry->type) {
-    case field_null: {
+    case FIELD_NULL: {
         vec_push(&model->null_array_prop_vals, &num_elements, 1);
         vec_push(&model->null_array_prop_keys, key_id, 1);
     }
         break;
-    case field_bool:
-        object_push_array(&model->bool_array_prop_vals, sizeof(field_boolean_t), num_elements, entry->values.base, *key_id,
+    case FIELD_BOOLEAN:
+        object_push_array(&model->bool_array_prop_vals, sizeof(FIELD_BOOLEANean_t), num_elements, entry->values.base, *key_id,
                         &model->bool_array_prop_keys);
         break;
-    case field_int8:
+    case FIELD_INT8:
         object_push_array(&model->int8_array_prop_vals, sizeof(field_i8_t), num_elements, entry->values.base, *key_id,
                         &model->int8_array_prop_keys);
         break;
-    case field_int16:
+    case FIELD_INT16:
         object_push_array(&model->int16_array_prop_vals, sizeof(field_i16_t), num_elements, entry->values.base, *key_id,
                         &model->int16_array_prop_keys);
         break;
-    case field_int32:
+    case FIELD_INT32:
         object_push_array(&model->int32_array_prop_vals, sizeof(field_i32_t), num_elements, entry->values.base, *key_id,
                         &model->int32_array_prop_keys);
         break;
-    case field_int64:
+    case FIELD_INT64:
         object_push_array(&model->int64_array_prop_vals, sizeof(field_i64_t), num_elements, entry->values.base, *key_id,
                         &model->int64_array_prop_keys);
         break;
-    case field_uint8:
+    case FIELD_UINT8:
         object_push_array(&model->uint8_array_prop_vals, sizeof(field_u8_t), num_elements, entry->values.base, *key_id,
                         &model->uint8_array_prop_keys);
         break;
-    case field_uint16:
+    case FIELD_UINT16:
         object_push_array(&model->uint16_array_prop_vals,
                         sizeof(field_u16_t),
                         num_elements,
@@ -1117,19 +1117,19 @@ static bool object_put_array(struct columndoc_obj *model, struct err *err, const
                         *key_id,
                         &model->uint16_array_prop_keys);
         break;
-    case field_uint32:
+    case FIELD_UINT32:
         object_push_array(&model->uint32_array_prop_vals, sizeof(field_u32_t), num_elements, entry->values.base, *key_id,
                         &model->uint32_array_prop_keys);
         break;
-    case field_uint64:
+    case FIELD_UINT64:
         object_push_array(&model->ui64_array_prop_vals, sizeof(field_u64_t), num_elements, entry->values.base, *key_id,
                         &model->uint64_array_prop_keys);
         break;
-    case field_float:
+    case FIELD_FLOAT:
         object_push_array(&model->float_array_prop_vals, sizeof(field_number_t), num_elements, entry->values.base, *key_id,
                         &model->float_array_prop_keys);
         break;
-    case field_string: {
+    case FIELD_STRING: {
         const char **strings = vec_all(&entry->values, const char *);
         field_sid_t *string_ids;
         strdic_locate_fast(&string_ids, dic, (char *const *) strings, num_elements);
@@ -1142,7 +1142,7 @@ static bool object_put_array(struct columndoc_obj *model, struct err *err, const
         strdic_free(dic, string_ids);
     }
         break;
-    case field_object: {
+    case FIELD_OBJECT: {
         field_sid_t *nested_object_key_name;
         for (u32 array_idx = 0; array_idx < num_elements; array_idx++) {
             const struct doc_obj *object = vec_get(&entry->values, array_idx, struct doc_obj);

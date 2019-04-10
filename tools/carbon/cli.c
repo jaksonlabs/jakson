@@ -301,7 +301,7 @@ visit_string_pairs (struct archive *archive, path_stack_t path, object_id_t id,
 
 static void
 visit_boolean_pairs (struct archive *archive, path_stack_t path, object_id_t id,
-                    const field_sid_t *keys, const field_boolean_t *values, u32 num_pairs,
+                    const field_sid_t *keys, const FIELD_BOOLEANean_t *values, u32 num_pairs,
                     void *capture)
 {
     NG5_UNUSED(archive);
@@ -1174,7 +1174,7 @@ NG5_FUNC_UNUSED visit_enter_boolean_array_pair(struct archive *archive, path_sta
 static void
 NG5_FUNC_UNUSED visit_boolean_array_pair (struct archive *archive, path_stack_t path, object_id_t id,
                           field_sid_t key, u32 entry_idx, u32 max_entries,
-                          const field_boolean_t *array, u32 array_length, void *capture)
+                          const FIELD_BOOLEANean_t *array, u32 array_length, void *capture)
 {
     NG5_UNUSED(archive);
     NG5_UNUSED(path);
@@ -1608,7 +1608,7 @@ NG5_FUNC_UNUSED visit_object_array_object_property_booleans(struct archive *arch
                                           field_sid_t key,
                                           object_id_t nested_object_id,
                                           field_sid_t nested_key,
-                                          const field_boolean_t *nested_values,
+                                          const FIELD_BOOLEANean_t *nested_values,
                                           u32 num_nested_values, void *capture)
 {
     NG5_UNUSED(archive);
@@ -1871,15 +1871,15 @@ run_show_values( timestamp_t *duration, struct encoded_doc_list *result, const c
         encoded_doc_add_prop_string_decoded_string_value_decoded(doc, "type", basic_type_to_json_type_str(entry->type));
 
 
-        if (entry->type == field_string) {
+        if (entry->type == FIELD_STRING) {
             encoded_doc_add_prop_array_string_decoded(doc, "values");
             encoded_doc_array_push_string_decoded(doc, "values",vec_all(&entry->values.string_values, field_sid_t), entry->values.string_values.num_elems);
             vec_drop(&entry->values.string_values);
-        } else if (entry->type == field_int8) {
+        } else if (entry->type == FIELD_INT8) {
             encoded_doc_add_prop_array_int64_decoded(doc, "values");
             encoded_doc_array_push_int64_decoded(doc, "values",vec_all(&entry->values.integer_values, field_i64_t), entry->values.integer_values.num_elems);
             vec_drop(&entry->values.string_values);
-        } else if (entry->type == field_int16) {
+        } else if (entry->type == FIELD_INT16) {
             encoded_doc_add_prop_array_int64_decoded(doc, "values");
             encoded_doc_array_push_int64_decoded(doc, "values",vec_all(&entry->values.integer_values, field_i64_t), entry->values.integer_values.num_elems);
             vec_drop(&entry->values.string_values);

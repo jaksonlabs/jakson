@@ -170,14 +170,14 @@ iterate_props(struct archive *archive, struct prop_iter *prop_iter,
             }
 
             switch (type) {
-            case field_object:
+            case FIELD_OBJECT:
                 assert (!is_array);
                 iterate_objects(archive, keys, num_pairs, &value_iter, path_stack, visitor, mask, capture, is_root_object);
                 //for (size_t i = 0; i < num_pairs; i++) {
                 //    iterate_objects(archive, &keys[i], 1, &value_iter, path_stack, visitor, mask, capture, is_root_object, keys[i], i);
                 //}
              break;
-            case field_null:
+            case FIELD_NULL:
                 if (is_array) {
                     enum visit_policy visit = VISIT_INCLUDE;
                     if (visitor->visit_enter_null_array_pairs) {
@@ -203,38 +203,38 @@ iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                     }
                 }
                 break;
-            case field_int8:
+            case FIELD_INT8:
                 SET_TYPE_SWITCH_CASE(int8, field_i8_t)
                 break;
-            case field_int16:
+            case FIELD_INT16:
                 SET_TYPE_SWITCH_CASE(int16, field_i16_t)
                 break;
-            case field_int32:
+            case FIELD_INT32:
                 SET_TYPE_SWITCH_CASE(int32, field_i32_t)
                 break;
-            case field_int64:
+            case FIELD_INT64:
                 SET_TYPE_SWITCH_CASE(int64, field_i64_t)
                 break;
-            case field_uint8:
+            case FIELD_UINT8:
                 SET_TYPE_SWITCH_CASE(uint8, field_u8_t)
                 break;
-            case field_uint16:
+            case FIELD_UINT16:
                 SET_TYPE_SWITCH_CASE(uint16, field_u16_t)
                 break;
-            case field_uint32:
+            case FIELD_UINT32:
                 SET_TYPE_SWITCH_CASE(uint32, field_u32_t)
                 break;
-            case field_uint64:
+            case FIELD_UINT64:
                 SET_TYPE_SWITCH_CASE(uint64, field_u64_t)
                 break;
-            case field_float:
+            case FIELD_FLOAT:
                 SET_TYPE_SWITCH_CASE(number, field_number_t)
                 break;
-            case field_string:
+            case FIELD_STRING:
                 SET_TYPE_SWITCH_CASE(string, field_sid_t)
                 break;
-            case field_bool:
-                SET_TYPE_SWITCH_CASE(boolean, field_boolean_t)
+            case FIELD_BOOLEAN:
+                SET_TYPE_SWITCH_CASE(boolean, FIELD_BOOLEANean_t)
                 break;
             default:
                 break;
@@ -352,43 +352,43 @@ iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                                     u32 entry_length;
 
                                     switch (current_column_entry_type) {
-                                    case field_int8: {
+                                    case FIELD_INT8: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(int8s, field_i8_t)
                                     } break;
-                                    case field_int16: {
+                                    case FIELD_INT16: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(int16s, field_i16_t)
                                     } break;
-                                    case field_int32: {
+                                    case FIELD_INT32: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(int32s, field_i32_t)
                                     } break;
-                                    case field_int64: {
+                                    case FIELD_INT64: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(int64s, field_i64_t)
                                     } break;
-                                    case field_uint8: {
+                                    case FIELD_UINT8: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(uint8s, field_u8_t)
                                     } break;
-                                    case field_uint16: {
+                                    case FIELD_UINT16: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(uint16s, field_u16_t)
                                     } break;
-                                    case field_uint32: {
+                                    case FIELD_UINT32: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(uint32s, field_u32_t)
                                     } break;
-                                    case field_uint64: {
+                                    case FIELD_UINT64: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(uint64s, field_u64_t)
                                     } break;
-                                    case field_float: {
+                                    case FIELD_FLOAT: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(numbers, field_number_t)
                                     } break;
-                                    case field_string: {
+                                    case FIELD_STRING: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(strings, field_sid_t)
                                     } break;
-                                    case field_bool: {
-                                        SET_NESTED_ARRAY_SWITCH_CASE(booleans, field_boolean_t)
+                                    case FIELD_BOOLEAN: {
+                                        SET_NESTED_ARRAY_SWITCH_CASE(booleans, FIELD_BOOLEANean_t)
                                     } break;
-                                    case field_null: {
+                                    case FIELD_NULL: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(nulls, field_u32_t)
                                     } break;
-                                    case field_object: {
+                                    case FIELD_OBJECT: {
                                         struct column_object_iter iter;
                                         const struct archive_object *archive_object;
                                         archive_column_entry_get_objects(&iter, &entry_iter);

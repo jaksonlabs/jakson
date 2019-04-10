@@ -241,13 +241,13 @@ bool doc_obj_add_key(struct doc_entries **out,
 bool doc_obj_push_primtive(struct doc_entries *entry, const void *value)
 {
     NG5_NON_NULL_OR_ERROR(entry)
-    NG5_NON_NULL_OR_ERROR((entry->type == field_null) || (value != NULL))
+    NG5_NON_NULL_OR_ERROR((entry->type == FIELD_NULL) || (value != NULL))
 
     switch(entry->type) {
-        case field_null:
+        case FIELD_NULL:
             vec_push(&entry->values, &VALUE_NULL, 1);
         break;
-        case field_string: {
+        case FIELD_STRING: {
             char *string = value ? strdup((char *) value) : NULL;
             vec_push(&entry->context->doc->context->values, &string, 1);
             vec_push(&entry->values, &string, 1);
@@ -265,7 +265,7 @@ bool doc_obj_push_object(struct doc_obj **out, struct doc_entries *entry)
     NG5_NON_NULL_OR_ERROR(out);
     NG5_NON_NULL_OR_ERROR(entry);
 
-    assert(entry->type == field_object);
+    assert(entry->type == FIELD_OBJECT);
 
     struct doc_obj objectModel;
 
@@ -283,42 +283,42 @@ static field_e value_type_for_json_number(bool *success, struct err *err, const 
     *success = true;
     switch(number->value_type) {
     case JSON_NUMBER_FLOAT:
-        return field_float;
+        return FIELD_FLOAT;
     case JSON_NUMBER_UNSIGNED: {
         u64 test = number->value.unsigned_integer;
         if (test <= NG5_LIMITS_UINT8_MAX) {
-            return field_uint8;
+            return FIELD_UINT8;
         } else if (test <= NG5_LIMITS_UINT16_MAX) {
-            return field_uint16;
+            return FIELD_UINT16;
         } else if (test <= NG5_LIMITS_UINT32_MAX) {
-            return field_uint32;
+            return FIELD_UINT32;
         } else {
-            return field_uint64;
+            return FIELD_UINT64;
         }
     }
     case JSON_NUMBER_SIGNED: {
         i64 test = number->value.signed_integer;
         if (test >= NG5_LIMITS_INT8_MIN && test <= NG5_LIMITS_INT8_MAX) {
-            return field_int8;
+            return FIELD_INT8;
         } else if (test >= NG5_LIMITS_INT16_MIN && test <= NG5_LIMITS_INT16_MAX) {
-            return field_int16;
+            return FIELD_INT16;
         } else if (test >= NG5_LIMITS_INT32_MIN && test <= NG5_LIMITS_INT32_MAX) {
-            return field_int32;
+            return FIELD_INT32;
         } else {
-            return field_int64;
+            return FIELD_INT64;
         }
     }
     default:
         error(err, NG5_ERR_NOJSONNUMBERT);
         *success = false;
-	return field_int8;
+	return FIELD_INT8;
     }
 }
 
 static void import_json_object_string_prop(struct doc_obj *target, const char *key, const struct json_string *string)
 {
     struct doc_entries *entry;
-    doc_obj_add_key(&entry, target, key, field_string);
+    doc_obj_add_key(&entry, target, key, FIELD_STRING);
     doc_obj_push_primtive(entry, string->value);
 }
 
@@ -335,17 +335,17 @@ static bool import_json_object_number_prop(struct doc_obj *target, struct err *e
     return true;
 }
 
-static void import_json_object_bool_prop(struct doc_obj *target, const char *key, field_boolean_t value)
+static void import_json_object_bool_prop(struct doc_obj *target, const char *key, FIELD_BOOLEANean_t value)
 {
     struct doc_entries *entry;
-    doc_obj_add_key(&entry, target, key, field_bool);
+    doc_obj_add_key(&entry, target, key, FIELD_BOOLEAN);
     doc_obj_push_primtive(entry, &value);
 }
 
 static void import_json_object_null_prop(struct doc_obj *target, const char *key)
 {
     struct doc_entries *entry;
-    doc_obj_add_key(&entry, target, key, field_null);
+    doc_obj_add_key(&entry, target, key, FIELD_NULL);
     doc_obj_push_primtive(entry, NULL);
 }
 
@@ -353,7 +353,7 @@ static bool import_json_object_object_prop(struct doc_obj *target, struct err *e
 {
     struct doc_entries *entry;
     struct doc_obj *nested_object = NULL;
-    doc_obj_add_key(&entry, target, key, field_object);
+    doc_obj_add_key(&entry, target, key, FIELD_OBJECT);
     doc_obj_push_object(&nested_object, entry);
     return import_json_object(nested_object, err, object);
 }
@@ -377,14 +377,14 @@ static bool import_json_object_array_prop(struct doc_obj *target, struct err *er
 
         switch (array_data_type) {
         case JSON_VALUE_OBJECT:
-            field_type = field_object;
+            field_type = FIELD_OBJECT;
             break;
         case JSON_VALUE_STRING:
-            field_type = field_string;
+            field_type = FIELD_STRING;
             break;
         case JSON_VALUE_NUMBER: {
             /** find smallest fitting physical number type */
-            field_e array_number_type = field_null;
+            field_e array_number_type = FIELD_NULL;
             for (size_t i = 0; i < num_elements; i++) {
                 const struct json_element *element = vec_get(&array->elements.elements, i, struct json_element);
                 if (NG5_UNLIKELY(element->value.value_type == JSON_VALUE_NULL)) {
@@ -395,59 +395,59 @@ static bool import_json_object_array_prop(struct doc_obj *target, struct err *er
                     if (!success) {
                         return false;
                     }
-                    assert(element_number_type == field_int8 || element_number_type == field_int16 ||
-                           element_number_type == field_int32 || element_number_type == field_int64 ||
-                           element_number_type == field_uint8 || element_number_type == field_uint16 ||
-                           element_number_type == field_uint32 || element_number_type == field_uint64 ||
-                           element_number_type == field_float);
-                    if (NG5_UNLIKELY(array_number_type == field_null)) {
+                    assert(element_number_type == FIELD_INT8 || element_number_type == FIELD_INT16 ||
+                           element_number_type == FIELD_INT32 || element_number_type == FIELD_INT64 ||
+                           element_number_type == FIELD_UINT8 || element_number_type == FIELD_UINT16 ||
+                           element_number_type == FIELD_UINT32 || element_number_type == FIELD_UINT64 ||
+                           element_number_type == FIELD_FLOAT);
+                    if (NG5_UNLIKELY(array_number_type == FIELD_NULL)) {
                         array_number_type = element_number_type;
                     } else {
-                        if (array_number_type == field_int8) {
+                        if (array_number_type == FIELD_INT8) {
                             array_number_type = element_number_type;
-                        } else if (array_number_type == field_int16) {
-                            if (element_number_type != field_int8) {
+                        } else if (array_number_type == FIELD_INT16) {
+                            if (element_number_type != FIELD_INT8) {
                                 array_number_type = element_number_type;
                             }
-                        } else if (array_number_type == field_int32) {
-                            if (element_number_type != field_int8 && element_number_type != field_int16) {
+                        } else if (array_number_type == FIELD_INT32) {
+                            if (element_number_type != FIELD_INT8 && element_number_type != FIELD_INT16) {
                                 array_number_type = element_number_type;
                             }
-                        } else if (array_number_type == field_int64) {
-                            if (element_number_type != field_int8 && element_number_type != field_int16 &&
-                                element_number_type != field_int32) {
+                        } else if (array_number_type == FIELD_INT64) {
+                            if (element_number_type != FIELD_INT8 && element_number_type != FIELD_INT16 &&
+                                element_number_type != FIELD_INT32) {
                                 array_number_type = element_number_type;
                             }
-                        } else if (array_number_type == field_uint8) {
+                        } else if (array_number_type == FIELD_UINT8) {
                             array_number_type = element_number_type;
-                        } else if (array_number_type == field_uint16) {
-                            if (element_number_type != field_uint16) {
+                        } else if (array_number_type == FIELD_UINT16) {
+                            if (element_number_type != FIELD_UINT16) {
                                 array_number_type = element_number_type;
                             }
-                        } else if (array_number_type == field_uint32) {
-                            if (element_number_type != field_uint8 && element_number_type != field_uint16) {
+                        } else if (array_number_type == FIELD_UINT32) {
+                            if (element_number_type != FIELD_UINT8 && element_number_type != FIELD_UINT16) {
                                 array_number_type = element_number_type;
                             }
-                        } else if (array_number_type == field_uint64) {
-                            if (element_number_type != field_uint8 && element_number_type != field_uint16 &&
-                                element_number_type != field_uint32) {
+                        } else if (array_number_type == FIELD_UINT64) {
+                            if (element_number_type != FIELD_UINT8 && element_number_type != FIELD_UINT16 &&
+                                element_number_type != FIELD_UINT32) {
                                 array_number_type = element_number_type;
                             }
-                        } else if (array_number_type == field_float) {
+                        } else if (array_number_type == FIELD_FLOAT) {
                             break;
                         }
                     }
                 }
             }
-            assert(array_number_type != field_null);
+            assert(array_number_type != FIELD_NULL);
             field_type = array_number_type;
         } break;
         case JSON_VALUE_FALSE:
         case JSON_VALUE_TRUE:
-            field_type = field_bool;
+            field_type = FIELD_BOOLEAN;
             break;
         case JSON_VALUE_NULL:
-            field_type = field_null;
+            field_type = FIELD_NULL;
             break;
         case JSON_VALUE_ARRAY:
             error(err, NG5_ERR_ERRINTERNAL) /** array type is illegal here */
@@ -465,7 +465,7 @@ static bool import_json_object_array_prop(struct doc_obj *target, struct err *er
             enum json_value_type ast_node_data_type = element->value.value_type;
 
             switch (field_type) {
-            case field_object: {
+            case FIELD_OBJECT: {
                 struct doc_obj *nested_object = NULL;
                 doc_obj_push_object(&nested_object, entry);
                 if (ast_node_data_type != JSON_VALUE_NULL) {
@@ -475,64 +475,64 @@ static bool import_json_object_array_prop(struct doc_obj *target, struct err *er
                     }
                 }
             } break;
-            case field_string: {
+            case FIELD_STRING: {
                 assert(ast_node_data_type == array_data_type || ast_node_data_type == JSON_VALUE_NULL);
                 doc_obj_push_primtive(entry, ast_node_data_type == JSON_VALUE_NULL ?
                                                     NG5_NULL_ENCODED_STRING :
                                                     element->value.value.string->value);
             } break;
-            case field_int8:
-            case field_int16:
-            case field_int32:
-            case field_int64:
-            case field_uint8:
-            case field_uint16:
-            case field_uint32:
-            case field_uint64:
-            case field_float: {
+            case FIELD_INT8:
+            case FIELD_INT16:
+            case FIELD_INT32:
+            case FIELD_INT64:
+            case FIELD_UINT8:
+            case FIELD_UINT16:
+            case FIELD_UINT32:
+            case FIELD_UINT64:
+            case FIELD_FLOAT: {
                 assert(ast_node_data_type == array_data_type || ast_node_data_type == JSON_VALUE_NULL);
                 switch(field_type) {
-                case field_int8: {
+                case FIELD_INT8: {
                     field_i8_t value = ast_node_data_type == JSON_VALUE_NULL ? NG5_NULL_INT8 :
                                       (field_i8_t) element->value.value.number->value.signed_integer;
                     doc_obj_push_primtive(entry, &value);
                 } break;
-                case field_int16: {
+                case FIELD_INT16: {
                     field_i16_t value = ast_node_data_type == JSON_VALUE_NULL ? NG5_NULL_INT16 :
                                        (field_i16_t) element->value.value.number->value.signed_integer;
                     doc_obj_push_primtive(entry, &value);
                 } break;
-                case field_int32: {
+                case FIELD_INT32: {
                     field_i32_t value = ast_node_data_type == JSON_VALUE_NULL ? NG5_NULL_INT32 :
                                        (field_i32_t) element->value.value.number->value.signed_integer;
                     doc_obj_push_primtive(entry, &value);
                 } break;
-                case field_int64: {
+                case FIELD_INT64: {
                     field_i64_t value = ast_node_data_type == JSON_VALUE_NULL ? NG5_NULL_INT64 :
                                        (field_i64_t) element->value.value.number->value.signed_integer;
                     doc_obj_push_primtive(entry, &value);
                 } break;
-                case field_uint8: {
+                case FIELD_UINT8: {
                     field_u8_t value = ast_node_data_type == JSON_VALUE_NULL ? NG5_NULL_UINT8 :
                                        (field_u8_t) element->value.value.number->value.unsigned_integer;
                     doc_obj_push_primtive(entry, &value);
                 } break;
-                case field_uint16: {
+                case FIELD_UINT16: {
                     field_u16_t value = ast_node_data_type == JSON_VALUE_NULL ? NG5_NULL_UINT16 :
                                         (field_u16_t) element->value.value.number->value.unsigned_integer;
                     doc_obj_push_primtive(entry, &value);
                 } break;
-                case field_uint32: {
+                case FIELD_UINT32: {
                     field_u32_t value = ast_node_data_type == JSON_VALUE_NULL ? NG5_NULL_UINT32 :
                                         (field_u32_t) element->value.value.number->value.unsigned_integer;
                     doc_obj_push_primtive(entry, &value);
                 } break;
-                case field_uint64: {
+                case FIELD_UINT64: {
                     field_u64_t value = ast_node_data_type == JSON_VALUE_NULL ? NG5_NULL_UINT64 :
                                         (field_u64_t) element->value.value.number->value.unsigned_integer;
                     doc_obj_push_primtive(entry, &value);
                 } break;
-                case field_float: {
+                case FIELD_FLOAT: {
                     field_number_t value = NG5_NULL_FLOAT;
                     if (ast_node_data_type != JSON_VALUE_NULL) {
                         enum json_number_type element_number_type = element->value.value.number->value_type;
@@ -554,19 +554,19 @@ static bool import_json_object_array_prop(struct doc_obj *target, struct err *er
                     return false;
                 }
             } break;
-            case field_bool:
+            case FIELD_BOOLEAN:
                 if (NG5_LIKELY(ast_node_data_type == JSON_VALUE_TRUE ||
                                   ast_node_data_type == JSON_VALUE_FALSE)) {
-                    field_boolean_t value = ast_node_data_type == JSON_VALUE_TRUE ?
+                    FIELD_BOOLEANean_t value = ast_node_data_type == JSON_VALUE_TRUE ?
                                          NG5_BOOLEAN_TRUE : NG5_BOOLEAN_FALSE;
                     doc_obj_push_primtive(entry, &value);
                 } else {
                     assert(ast_node_data_type == JSON_VALUE_NULL);
-                    field_boolean_t value = NG5_NULL_BOOLEAN;
+                    FIELD_BOOLEANean_t value = NG5_NULL_BOOLEAN;
                     doc_obj_push_primtive(entry, &value);
                 }
                 break;
-            case field_null:
+            case FIELD_NULL:
                 assert(ast_node_data_type == array_data_type);
                 doc_obj_push_primtive(entry, NULL);
                 break;
@@ -597,7 +597,7 @@ static bool import_json_object(struct doc_obj *target, struct err *err, const st
             break;
         case JSON_VALUE_TRUE:
         case JSON_VALUE_FALSE: {
-            field_boolean_t value = value_type == JSON_VALUE_TRUE ? NG5_BOOLEAN_TRUE : NG5_BOOLEAN_FALSE;
+            FIELD_BOOLEANean_t value = value_type == JSON_VALUE_TRUE ? NG5_BOOLEAN_TRUE : NG5_BOOLEAN_FALSE;
             import_json_object_bool_prop(target, member->key.value, value);
         } break;
         case JSON_VALUE_NULL:
@@ -695,9 +695,9 @@ struct doc_obj *doc_entries_get_root(const struct doc_entries *partition)
 struct doc_entries *doc_bulk_new_entries(struct doc_bulk *dst)
 {
     struct doc_entries *partition = NULL;
-    struct doc *model = doc_bulk_new_doc(dst, field_object);
+    struct doc *model = doc_bulk_new_doc(dst, FIELD_OBJECT);
     struct doc_obj *object = doc_bulk_new_obj(model);
-    doc_obj_add_key(&partition, object, "/", field_object);
+    doc_obj_add_key(&partition, object, "/", FIELD_OBJECT);
     return partition;
 }
 
@@ -709,7 +709,7 @@ static bool compare_##type##_leq(const void *lhs, const void *rhs)              
     return (a <= b);                                                                                                   \
 }
 
-DEFINE_NG5_TYPE_LQ_FUNC(field_boolean_t)
+DEFINE_NG5_TYPE_LQ_FUNC(FIELD_BOOLEANean_t)
 DEFINE_NG5_TYPE_LQ_FUNC(field_number_t)
 DEFINE_NG5_TYPE_LQ_FUNC(field_i8_t)
 DEFINE_NG5_TYPE_LQ_FUNC(field_i16_t)
@@ -759,7 +759,7 @@ static bool compare_##type##_array_leq(const void *lhs, const void *rhs)        
     return true;                                                                                                       \
 }
 
-DEFINE_NG5_ARRAY_TYPE_LQ_FUNC(field_boolean_t)
+DEFINE_NG5_ARRAY_TYPE_LQ_FUNC(FIELD_BOOLEANean_t)
 DEFINE_NG5_ARRAY_TYPE_LQ_FUNC(field_i8_t)
 DEFINE_NG5_ARRAY_TYPE_LQ_FUNC(field_i16_t)
 DEFINE_NG5_ARRAY_TYPE_LQ_FUNC(field_i32_t)
@@ -804,7 +804,7 @@ static void sorted_nested_array_objects(struct columndoc_obj *columndoc)
 
                 for (size_t k = 0; k < array_indices->num_elems; k++) {
                     struct vector ofType(<T>) *values_for_index = vec_get(values_for_indicies, k, struct vector);
-                    if (column->type == field_object) {
+                    if (column->type == FIELD_OBJECT) {
                         for (size_t l = 0; l < values_for_index->num_elems; l++) {
                             struct columndoc_obj *nested_object = vec_get(values_for_index, l, struct columndoc_obj);
                             sort_columndoc_entries(nested_object);
@@ -1011,40 +1011,40 @@ static bool compare_column_less_eq_func(const void *lhs, const void *rhs, void *
     size_t max_num_elem = NG5_MIN(a->num_elems, b->num_elems);
 
     switch (func_arg->value_type) {
-    case field_null:
+    case FIELD_NULL:
         return (a->num_elems <= b->num_elems);
         break;
-    case field_bool:
-        ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, field_boolean_t, a, b);
+    case FIELD_BOOLEAN:
+        ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, FIELD_BOOLEANean_t, a, b);
         break;
-    case field_int8:
+    case FIELD_INT8:
         ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, field_i8_t, a, b);
         break;
-    case field_int16:
+    case FIELD_INT16:
         ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, field_i16_t, a, b);
         break;
-    case field_int32:
+    case FIELD_INT32:
         ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, field_i32_t, a, b);
         break;
-    case field_int64:
+    case FIELD_INT64:
         ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, field_i64_t, a, b);
         break;
-    case field_uint8:
+    case FIELD_UINT8:
         ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, field_u8_t, a, b);
         break;
-    case field_uint16:
+    case FIELD_UINT16:
         ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, field_u16_t, a, b);
         break;
-    case field_uint32:
+    case FIELD_UINT32:
         ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, field_u32_t, a, b);
         break;
-    case field_uint64:
+    case FIELD_UINT64:
         ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, field_u64_t, a, b);
         break;
-    case field_float:
+    case FIELD_FLOAT:
         ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, field_number_t, a, b);
         break;
-    case field_string:
+    case FIELD_STRING:
         for (size_t i = 0; i < max_num_elem; i++) {
             field_sid_t o1 = *vec_get(a, i, field_sid_t);
             field_sid_t o2 = *vec_get(b, i, field_sid_t);
@@ -1058,7 +1058,7 @@ static bool compare_column_less_eq_func(const void *lhs, const void *rhs, void *
             }
         }
         return true;
-    case field_object:
+    case FIELD_OBJECT:
         return true;
         break;
     default:
@@ -1156,8 +1156,8 @@ static void sort_columndoc_column_arrays(struct columndoc_obj *columndoc)
 static void sort_columndoc_values(struct columndoc_obj *columndoc)
 {
     if (columndoc->parent->read_optimized) {
-        SORT_META_MODEL_VALUES(columndoc->bool_prop_keys, columndoc->bool_prop_vals, field_boolean_t,
-                               compare_field_boolean_t_leq);
+        SORT_META_MODEL_VALUES(columndoc->bool_prop_keys, columndoc->bool_prop_vals, FIELD_BOOLEANean_t,
+                               compare_FIELD_BOOLEANean_t_leq);
         SORT_META_MODEL_VALUES(columndoc->int8_prop_keys, columndoc->int8_prop_vals, field_i8_t,
                 compare_field_i8_t_leq);
         SORT_META_MODEL_VALUES(columndoc->int16_prop_keys, columndoc->int16_prop_vals, field_i16_t,
@@ -1180,7 +1180,7 @@ static void sort_columndoc_values(struct columndoc_obj *columndoc)
                                   columndoc->parent->dic);
 
         SORT_META_MODEL_ARRAYS(columndoc->bool_array_prop_keys, columndoc->bool_array_prop_vals,
-                               compare_field_boolean_t_array_leq);
+                               compare_FIELD_BOOLEANean_t_array_leq);
         SORT_META_MODEL_ARRAYS(columndoc->int8_array_prop_keys, columndoc->int8_array_prop_vals,
                 compare_field_i8_t_array_leq);
         SORT_META_MODEL_ARRAYS(columndoc->int16_array_prop_keys, columndoc->int16_array_prop_vals,
@@ -1275,43 +1275,43 @@ static void create_typed_vector(struct doc_entries *entry)
 {
     size_t size;
     switch (entry->type) {
-    case field_null:
-        size = sizeof(field_null_t);
+    case FIELD_NULL:
+        size = sizeof(FIELD_NULL_t);
         break;
-    case field_bool:
-        size = sizeof(field_boolean_t);
+    case FIELD_BOOLEAN:
+        size = sizeof(FIELD_BOOLEANean_t);
         break;
-    case field_int8:
+    case FIELD_INT8:
         size = sizeof(field_i8_t);
         break;
-    case field_int16:
+    case FIELD_INT16:
         size = sizeof(field_i16_t);
         break;
-    case field_int32:
+    case FIELD_INT32:
         size = sizeof(field_i32_t);
         break;
-    case field_int64:
+    case FIELD_INT64:
         size = sizeof(field_i64_t);
         break;
-    case field_uint8:
+    case FIELD_UINT8:
         size = sizeof(field_u8_t);
         break;
-    case field_uint16:
+    case FIELD_UINT16:
         size = sizeof(field_u16_t);
         break;
-    case field_uint32:
+    case FIELD_UINT32:
         size = sizeof(field_u32_t);
         break;
-    case field_uint64:
+    case FIELD_UINT64:
         size = sizeof(field_u64_t);
         break;
-    case field_float:
+    case FIELD_FLOAT:
         size = sizeof(field_number_t);
         break;
-    case field_string:
-        size = sizeof(field_string_t);
+    case FIELD_STRING:
+        size = sizeof(FIELD_STRING_t);
         break;
-    case field_object:
+    case FIELD_OBJECT:
         size = sizeof(struct doc_obj);
         break;
     default:
@@ -1323,7 +1323,7 @@ static void create_typed_vector(struct doc_entries *entry)
 
 static void entries_drop(struct doc_entries *entry)
 {
-    if (entry->type == field_object) {
+    if (entry->type == FIELD_OBJECT) {
         for (size_t i = 0; i < entry->values.num_elems; i++)
         {
             struct doc_obj *model = vec_get(&entry->values, i, struct doc_obj);
@@ -1344,16 +1344,16 @@ static bool print_value(FILE *file, field_e type, const struct vector ofType(<T>
         fprintf(file, "[");
     }
     switch (type) {
-    case field_null:
+    case FIELD_NULL:
     {
         for (size_t i = 0; i < num_values; i++) {
             fprintf(file, "null%s", i + 1 < num_values ? ", " : "");
         }
     } break;
-    case field_bool:
+    case FIELD_BOOLEAN:
     {
         for (size_t i = 0; i < num_values; i++) {
-            field_boolean_t value = *(vec_get(values, i, field_boolean_t));
+            FIELD_BOOLEANean_t value = *(vec_get(values, i, FIELD_BOOLEANean_t));
             if (value != NG5_NULL_BOOLEAN) {
                 fprintf(file, "%s%s", value == 0 ? "false" : "true", i + 1 < num_values ? ", " : "");
             } else {
@@ -1361,7 +1361,7 @@ static bool print_value(FILE *file, field_e type, const struct vector ofType(<T>
             }
         }
     } break;
-    case field_int8:
+    case FIELD_INT8:
     {
         for (size_t i = 0; i < num_values; i++) {
             field_i8_t value = *(vec_get(values, i, field_i8_t));
@@ -1372,7 +1372,7 @@ static bool print_value(FILE *file, field_e type, const struct vector ofType(<T>
             }
         }
     } break;
-    case field_int16:
+    case FIELD_INT16:
     {
         for (size_t i = 0; i < num_values; i++) {
             field_i16_t value = *(vec_get(values, i, field_i16_t));
@@ -1383,7 +1383,7 @@ static bool print_value(FILE *file, field_e type, const struct vector ofType(<T>
             }
         }
     } break;
-    case field_int32:
+    case FIELD_INT32:
     {
         for (size_t i = 0; i < num_values; i++) {
             field_i32_t value = *(vec_get(values, i, field_i32_t));
@@ -1394,7 +1394,7 @@ static bool print_value(FILE *file, field_e type, const struct vector ofType(<T>
             }
         }
     } break;
-    case field_int64:
+    case FIELD_INT64:
     {
         for (size_t i = 0; i < num_values; i++) {
             field_i64_t value = *(vec_get(values, i, field_i64_t));
@@ -1405,7 +1405,7 @@ static bool print_value(FILE *file, field_e type, const struct vector ofType(<T>
             }
         }
     } break;
-    case field_uint8:
+    case FIELD_UINT8:
     {
         for (size_t i = 0; i < num_values; i++) {
             field_u8_t value = *(vec_get(values, i, field_u8_t));
@@ -1416,7 +1416,7 @@ static bool print_value(FILE *file, field_e type, const struct vector ofType(<T>
             }
         }
     } break;
-    case field_uint16:
+    case FIELD_UINT16:
     {
         for (size_t i = 0; i < num_values; i++) {
             field_u16_t value = *(vec_get(values, i, field_u16_t));
@@ -1427,7 +1427,7 @@ static bool print_value(FILE *file, field_e type, const struct vector ofType(<T>
             }
         }
     } break;
-    case field_uint32:
+    case FIELD_UINT32:
     {
         for (size_t i = 0; i < num_values; i++) {
             field_u32_t value = *(vec_get(values, i, field_u32_t));
@@ -1438,7 +1438,7 @@ static bool print_value(FILE *file, field_e type, const struct vector ofType(<T>
             }
         }
     } break;
-    case field_uint64:
+    case FIELD_UINT64:
     {
         for (size_t i = 0; i < num_values; i++) {
             field_u64_t value = *(vec_get(values, i, field_u64_t));
@@ -1449,7 +1449,7 @@ static bool print_value(FILE *file, field_e type, const struct vector ofType(<T>
             }
         }
     } break;
-    case field_float:
+    case FIELD_FLOAT:
     {
         for (size_t i = 0; i < num_values; i++) {
             field_number_t value = *(vec_get(values, i, field_number_t));
@@ -1460,10 +1460,10 @@ static bool print_value(FILE *file, field_e type, const struct vector ofType(<T>
             }
         }
     } break;
-    case field_string:
+    case FIELD_STRING:
     {
         for (size_t i = 0; i < num_values; i++) {
-            field_string_t value = *(vec_get(values, i, field_string_t));
+            FIELD_STRING_t value = *(vec_get(values, i, FIELD_STRING_t));
             if (value) {
                 fprintf(file, "\"%s\"%s", value, i + 1 < num_values ? ", " : "");
             } else {
@@ -1471,7 +1471,7 @@ static bool print_value(FILE *file, field_e type, const struct vector ofType(<T>
             }
         }
     } break;
-    case field_object:
+    case FIELD_OBJECT:
     {
         for (size_t i = 0; i < num_values; i++) {
             struct doc_obj *obj = vec_get(values, i, struct doc_obj);

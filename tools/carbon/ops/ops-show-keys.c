@@ -74,7 +74,7 @@ before_visit_object_array_objects(bool *skip_group_object_ids,
 //    if (archive_visitor_path_compare(path, NULL, params->path, archive)) {
 //        ops_show_keys_key_type_pair_t pair = {
 //            .key = key,
-//            .type = field_object,
+//            .type = FIELD_OBJECT,
 //            .is_array = true
 //        };
 //        hashset_insert_or_update(params->result, &pair, 1);
@@ -108,7 +108,7 @@ before_object_visit(struct archive *archive, path_stack_t path,
 //    if (archive_visitor_path_compare(path, NULL, params->path, archive)) {
 //        ops_show_keys_key_type_pair_t pair = {
 //            .key = key,
-//            .type = field_object
+//            .type = FIELD_OBJECT
 //        };
 //        hashset_insert_or_update(params->result, &pair, 1);
 //    }
@@ -258,7 +258,7 @@ before_visit_object_array_object_property(struct archive *archive, path_stack_t 
 //    if (archive_visitor_path_compare(path, params->path, archive)) {
 //        ops_show_keys_key_type_pair_t pair = {
 //            .key = nested_key,
-//            .type = field_object
+//            .type = FIELD_OBJECT
 //        };
 //        hashset_insert_or_update(params->result, &pair, 1);
 //    }

@@ -462,31 +462,31 @@ static u32 flags_to_int32(union object_flags *flags)
 static const char *array_value_type_to_string(struct err *err, field_e type)
 {
         switch (type) {
-        case field_null:
+        case FIELD_NULL:
                 return "Null Array";
-        case field_bool:
+        case FIELD_BOOLEAN:
                 return "Boolean Array";
-        case field_int8:
+        case FIELD_INT8:
                 return "Int8 Array";
-        case field_int16:
+        case FIELD_INT16:
                 return "Int16 Array";
-        case field_int32:
+        case FIELD_INT32:
                 return "Int32 Array";
-        case field_int64:
+        case FIELD_INT64:
                 return "Int64 Array";
-        case field_uint8:
+        case FIELD_UINT8:
                 return "UInt8 Array";
-        case field_uint16:
+        case FIELD_UINT16:
                 return "UInt16 Array";
-        case field_uint32:
+        case FIELD_UINT32:
                 return "UInt32 Array";
-        case field_uint64:
+        case FIELD_UINT64:
                 return "UInt64 Array";
-        case field_float:
+        case FIELD_FLOAT:
                 return "UIntFloat Array";
-        case field_string:
+        case FIELD_STRING:
                 return "Text Array";
-        case field_object:
+        case FIELD_OBJECT:
                 return "Object Array";
         default: {
                 error(err, NG5_ERR_NOVALUESTR)
@@ -519,32 +519,32 @@ static void write_var_value_offset_column(struct memfile *file, offset_t where, 
 static bool write_primitive_fixed_value_column(struct memfile *memfile, struct err *err, field_e type,
         struct vector ofType(T) *values_vec)
 {
-        assert (type != field_object); /** use 'write_primitive_var_value_column' instead */
+        assert (type != FIELD_OBJECT); /** use 'write_primitive_var_value_column' instead */
 
         switch (type) {
-        case field_null:
+        case FIELD_NULL:
                 break;
-        case field_bool: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_boolean_t);
+        case FIELD_BOOLEAN: WRITE_PRIMITIVE_VALUES(memfile, values_vec, FIELD_BOOLEANean_t);
                 break;
-        case field_int8: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_i8_t);
+        case FIELD_INT8: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_i8_t);
                 break;
-        case field_int16: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_i16_t);
+        case FIELD_INT16: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_i16_t);
                 break;
-        case field_int32: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_i32_t);
+        case FIELD_INT32: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_i32_t);
                 break;
-        case field_int64: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_i64_t);
+        case FIELD_INT64: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_i64_t);
                 break;
-        case field_uint8: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_u8_t);
+        case FIELD_UINT8: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_u8_t);
                 break;
-        case field_uint16: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_u16_t);
+        case FIELD_UINT16: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_u16_t);
                 break;
-        case field_uint32: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_u32_t);
+        case FIELD_UINT32: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_u32_t);
                 break;
-        case field_uint64: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_u64_t);
+        case FIELD_UINT64: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_u64_t);
                 break;
-        case field_float: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_number_t);
+        case FIELD_FLOAT: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_number_t);
                 break;
-        case field_string: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_sid_t);
+        case FIELD_STRING: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_sid_t);
                 break;
         default: error(err, NG5_ERR_NOTYPE);
                 return false;
@@ -570,25 +570,25 @@ static offset_t *__write_primitive_column(struct memfile *memfile, struct err *e
 static bool __write_array_len_column(struct err *err, struct memfile *memfile, field_e type, struct vector ofType(...) *values)
 {
         switch (type) {
-        case field_null:
+        case FIELD_NULL:
                 break;
-        case field_bool:
-        case field_int8:
-        case field_int16:
-        case field_int32:
-        case field_int64:
-        case field_uint8:
-        case field_uint16:
-        case field_uint32:
-        case field_uint64:
-        case field_float:
-        case field_string:
+        case FIELD_BOOLEAN:
+        case FIELD_INT8:
+        case FIELD_INT16:
+        case FIELD_INT32:
+        case FIELD_INT64:
+        case FIELD_UINT8:
+        case FIELD_UINT16:
+        case FIELD_UINT32:
+        case FIELD_UINT64:
+        case FIELD_FLOAT:
+        case FIELD_STRING:
                 for (u32 i = 0; i < values->num_elems; i++) {
                         struct vector *arrays = vec_get(values, i, struct vector);
                         memfile_write(memfile, &arrays->num_elems, sizeof(u32));
                 }
                 break;
-        case field_object: print_error_and_die(NG5_ERR_ILLEGALIMPL)
+        case FIELD_OBJECT: print_error_and_die(NG5_ERR_ILLEGALIMPL)
                 return false;
                 break;
         default: error(err, NG5_ERR_NOTYPE);
@@ -602,31 +602,31 @@ static bool write_array_value_column(struct memfile *memfile, struct err *err, f
 {
 
         switch (type) {
-        case field_null: WRITE_PRIMITIVE_VALUES(memfile, values_vec, u32);
+        case FIELD_NULL: WRITE_PRIMITIVE_VALUES(memfile, values_vec, u32);
                 break;
-        case field_bool: WRITE_ARRAY_VALUES(memfile, values_vec, field_boolean_t);
+        case FIELD_BOOLEAN: WRITE_ARRAY_VALUES(memfile, values_vec, FIELD_BOOLEANean_t);
                 break;
-        case field_int8: WRITE_ARRAY_VALUES(memfile, values_vec, field_i8_t);
+        case FIELD_INT8: WRITE_ARRAY_VALUES(memfile, values_vec, field_i8_t);
                 break;
-        case field_int16: WRITE_ARRAY_VALUES(memfile, values_vec, field_i16_t);
+        case FIELD_INT16: WRITE_ARRAY_VALUES(memfile, values_vec, field_i16_t);
                 break;
-        case field_int32: WRITE_ARRAY_VALUES(memfile, values_vec, field_i32_t);
+        case FIELD_INT32: WRITE_ARRAY_VALUES(memfile, values_vec, field_i32_t);
                 break;
-        case field_int64: WRITE_ARRAY_VALUES(memfile, values_vec, field_i64_t);
+        case FIELD_INT64: WRITE_ARRAY_VALUES(memfile, values_vec, field_i64_t);
                 break;
-        case field_uint8: WRITE_ARRAY_VALUES(memfile, values_vec, field_u64_t);
+        case FIELD_UINT8: WRITE_ARRAY_VALUES(memfile, values_vec, field_u64_t);
                 break;
-        case field_uint16: WRITE_ARRAY_VALUES(memfile, values_vec, field_u16_t);
+        case FIELD_UINT16: WRITE_ARRAY_VALUES(memfile, values_vec, field_u16_t);
                 break;
-        case field_uint32: WRITE_ARRAY_VALUES(memfile, values_vec, field_u32_t);
+        case FIELD_UINT32: WRITE_ARRAY_VALUES(memfile, values_vec, field_u32_t);
                 break;
-        case field_uint64: WRITE_ARRAY_VALUES(memfile, values_vec, field_u64_t);
+        case FIELD_UINT64: WRITE_ARRAY_VALUES(memfile, values_vec, field_u64_t);
                 break;
-        case field_float: WRITE_ARRAY_VALUES(memfile, values_vec, field_number_t);
+        case FIELD_FLOAT: WRITE_ARRAY_VALUES(memfile, values_vec, field_number_t);
                 break;
-        case field_string: WRITE_ARRAY_VALUES(memfile, values_vec, field_sid_t);
+        case FIELD_STRING: WRITE_ARRAY_VALUES(memfile, values_vec, field_sid_t);
                 break;
-        case field_object: print_error_and_die(NG5_ERR_NOTIMPL)
+        case FIELD_OBJECT: print_error_and_die(NG5_ERR_NOTIMPL)
                 return false;
         default: error(err, NG5_ERR_NOTYPE)
                 return false;
@@ -667,7 +667,7 @@ static bool write_array_props(struct memfile *memfile, struct err *err, struct c
                 err,
                 memfile,
                 &columndoc->null_array_prop_keys,
-                field_null,
+                FIELD_NULL,
                 &columndoc->null_array_prop_vals,
                 root_object_header_offset)) {
                 return false;
@@ -676,7 +676,7 @@ static bool write_array_props(struct memfile *memfile, struct err *err, struct c
                 err,
                 memfile,
                 &columndoc->bool_array_prop_keys,
-                field_bool,
+                FIELD_BOOLEAN,
                 &columndoc->bool_array_prop_vals,
                 root_object_header_offset)) {
                 return false;
@@ -685,7 +685,7 @@ static bool write_array_props(struct memfile *memfile, struct err *err, struct c
                 err,
                 memfile,
                 &columndoc->int8_array_prop_keys,
-                field_int8,
+                FIELD_INT8,
                 &columndoc->int8_array_prop_vals,
                 root_object_header_offset)) {
                 return false;
@@ -694,7 +694,7 @@ static bool write_array_props(struct memfile *memfile, struct err *err, struct c
                 err,
                 memfile,
                 &columndoc->int16_array_prop_keys,
-                field_int16,
+                FIELD_INT16,
                 &columndoc->int16_array_prop_vals,
                 root_object_header_offset)) {
                 return false;
@@ -703,7 +703,7 @@ static bool write_array_props(struct memfile *memfile, struct err *err, struct c
                 err,
                 memfile,
                 &columndoc->int32_array_prop_keys,
-                field_int32,
+                FIELD_INT32,
                 &columndoc->int32_array_prop_vals,
                 root_object_header_offset)) {
                 return false;
@@ -712,7 +712,7 @@ static bool write_array_props(struct memfile *memfile, struct err *err, struct c
                 err,
                 memfile,
                 &columndoc->int64_array_prop_keys,
-                field_int64,
+                FIELD_INT64,
                 &columndoc->int64_array_prop_vals,
                 root_object_header_offset)) {
                 return false;
@@ -721,7 +721,7 @@ static bool write_array_props(struct memfile *memfile, struct err *err, struct c
                 err,
                 memfile,
                 &columndoc->uint8_array_prop_keys,
-                field_uint8,
+                FIELD_UINT8,
                 &columndoc->uint8_array_prop_vals,
                 root_object_header_offset)) {
                 return false;
@@ -730,7 +730,7 @@ static bool write_array_props(struct memfile *memfile, struct err *err, struct c
                 err,
                 memfile,
                 &columndoc->uint16_array_prop_keys,
-                field_uint16,
+                FIELD_UINT16,
                 &columndoc->uint16_array_prop_vals,
                 root_object_header_offset)) {
                 return false;
@@ -739,7 +739,7 @@ static bool write_array_props(struct memfile *memfile, struct err *err, struct c
                 err,
                 memfile,
                 &columndoc->uint32_array_prop_keys,
-                field_uint32,
+                FIELD_UINT32,
                 &columndoc->uint32_array_prop_vals,
                 root_object_header_offset)) {
                 return false;
@@ -748,7 +748,7 @@ static bool write_array_props(struct memfile *memfile, struct err *err, struct c
                 err,
                 memfile,
                 &columndoc->uint64_array_prop_keys,
-                field_uint64,
+                FIELD_UINT64,
                 &columndoc->ui64_array_prop_vals,
                 root_object_header_offset)) {
                 return false;
@@ -757,7 +757,7 @@ static bool write_array_props(struct memfile *memfile, struct err *err, struct c
                 err,
                 memfile,
                 &columndoc->float_array_prop_keys,
-                field_float,
+                FIELD_FLOAT,
                 &columndoc->float_array_prop_vals,
                 root_object_header_offset)) {
                 return false;
@@ -766,7 +766,7 @@ static bool write_array_props(struct memfile *memfile, struct err *err, struct c
                 err,
                 memfile,
                 &columndoc->string_array_prop_keys,
-                field_string,
+                FIELD_STRING,
                 &columndoc->string_array_prop_vals,
                 root_object_header_offset)) {
                 return false;
@@ -780,7 +780,7 @@ static bool write_fixed_props(offset_t *offset, struct err *err, struct memfile 
         field_e type, struct vector ofType(T) *values)
 {
         assert(!values || keys->num_elems == values->num_elems);
-        assert(type != field_object); /** use 'write_var_props' instead */
+        assert(type != FIELD_OBJECT); /** use 'write_var_props' instead */
 
         if (keys->num_elems > 0) {
                 struct prop_header header =
@@ -841,7 +841,7 @@ static bool write_primitive_props(struct memfile *memfile, struct err *err, stru
                 err,
                 memfile,
                 &columndoc->null_prop_keys,
-                field_null,
+                FIELD_NULL,
                 NULL)) {
                 return false;
         }
@@ -849,7 +849,7 @@ static bool write_primitive_props(struct memfile *memfile, struct err *err, stru
                 err,
                 memfile,
                 &columndoc->bool_prop_keys,
-                field_bool,
+                FIELD_BOOLEAN,
                 &columndoc->bool_prop_vals)) {
                 return false;
         }
@@ -857,7 +857,7 @@ static bool write_primitive_props(struct memfile *memfile, struct err *err, stru
                 err,
                 memfile,
                 &columndoc->int8_prop_keys,
-                field_int8,
+                FIELD_INT8,
                 &columndoc->int8_prop_vals)) {
                 return false;
         }
@@ -865,7 +865,7 @@ static bool write_primitive_props(struct memfile *memfile, struct err *err, stru
                 err,
                 memfile,
                 &columndoc->int16_prop_keys,
-                field_int16,
+                FIELD_INT16,
                 &columndoc->int16_prop_vals)) {
                 return false;
         }
@@ -873,7 +873,7 @@ static bool write_primitive_props(struct memfile *memfile, struct err *err, stru
                 err,
                 memfile,
                 &columndoc->int32_prop_keys,
-                field_int32,
+                FIELD_INT32,
                 &columndoc->int32_prop_vals)) {
                 return false;
         }
@@ -881,7 +881,7 @@ static bool write_primitive_props(struct memfile *memfile, struct err *err, stru
                 err,
                 memfile,
                 &columndoc->int64_prop_keys,
-                field_int64,
+                FIELD_INT64,
                 &columndoc->int64_prop_vals)) {
                 return false;
         }
@@ -889,7 +889,7 @@ static bool write_primitive_props(struct memfile *memfile, struct err *err, stru
                 err,
                 memfile,
                 &columndoc->uint8_prop_keys,
-                field_uint8,
+                FIELD_UINT8,
                 &columndoc->uint8_prop_vals)) {
                 return false;
         }
@@ -897,7 +897,7 @@ static bool write_primitive_props(struct memfile *memfile, struct err *err, stru
                 err,
                 memfile,
                 &columndoc->uint16_prop_keys,
-                field_uint16,
+                FIELD_UINT16,
                 &columndoc->uint16_prop_vals)) {
                 return false;
         }
@@ -905,7 +905,7 @@ static bool write_primitive_props(struct memfile *memfile, struct err *err, stru
                 err,
                 memfile,
                 &columndoc->uin32_prop_keys,
-                field_uint32,
+                FIELD_UINT32,
                 &columndoc->uint32_prop_vals)) {
                 return false;
         }
@@ -913,7 +913,7 @@ static bool write_primitive_props(struct memfile *memfile, struct err *err, stru
                 err,
                 memfile,
                 &columndoc->uint64_prop_keys,
-                field_uint64,
+                FIELD_UINT64,
                 &columndoc->uint64_prop_vals)) {
                 return false;
         }
@@ -921,7 +921,7 @@ static bool write_primitive_props(struct memfile *memfile, struct err *err, stru
                 err,
                 memfile,
                 &columndoc->float_prop_keys,
-                field_float,
+                FIELD_FLOAT,
                 &columndoc->float_prop_vals)) {
                 return false;
         }
@@ -929,7 +929,7 @@ static bool write_primitive_props(struct memfile *memfile, struct err *err, stru
                 err,
                 memfile,
                 &columndoc->string_prop_keys,
-                field_string,
+                FIELD_STRING,
                 &columndoc->string_prop_vals)) {
                 return false;
         }
@@ -963,23 +963,23 @@ static bool write_column_entry(struct memfile *memfile, struct err *err, field_e
 {
         memfile_write(memfile, &column->num_elems, sizeof(u32));
         switch (type) {
-        case field_null:
+        case FIELD_NULL:
                 memfile_write(memfile, column->base, column->num_elems * sizeof(u32));
                 break;
-        case field_bool:
-        case field_int8:
-        case field_int16:
-        case field_int32:
-        case field_int64:
-        case field_uint8:
-        case field_uint16:
-        case field_uint32:
-        case field_uint64:
-        case field_float:
-        case field_string:
+        case FIELD_BOOLEAN:
+        case FIELD_INT8:
+        case FIELD_INT16:
+        case FIELD_INT32:
+        case FIELD_INT64:
+        case FIELD_UINT8:
+        case FIELD_UINT16:
+        case FIELD_UINT32:
+        case FIELD_UINT64:
+        case FIELD_FLOAT:
+        case FIELD_STRING:
                 memfile_write(memfile, column->base, column->num_elems * GET_TYPE_SIZE(type));
                 break;
-        case field_object: {
+        case FIELD_OBJECT: {
                 offset_t preObjectNext = 0;
                 for (size_t i = 0; i < column->num_elems; i++) {
                         struct columndoc_obj *object = vec_get(column, i, struct columndoc_obj);
@@ -1528,59 +1528,59 @@ static bool print_column_form_memfile(FILE *file, struct err *err, struct memfil
         //fprintf(file, "[");
         for (size_t i = 0; i < header->num_entries; i++) {
                 switch (data_type) {
-                case field_null: {
+                case FIELD_NULL: {
                         PRINT_VALUE_ARRAY(u32, memfile, header, "%d");
                 }
                         break;
-                case field_bool: {
-                        PRINT_VALUE_ARRAY(field_boolean_t, memfile, header, "%d");
+                case FIELD_BOOLEAN: {
+                        PRINT_VALUE_ARRAY(FIELD_BOOLEANean_t, memfile, header, "%d");
                 }
                         break;
-                case field_int8: {
+                case FIELD_INT8: {
                         PRINT_VALUE_ARRAY(field_i8_t, memfile, header, "%d");
                 }
                         break;
-                case field_int16: {
+                case FIELD_INT16: {
                         PRINT_VALUE_ARRAY(field_i16_t, memfile, header, "%d");
                 }
                         break;
-                case field_int32: {
+                case FIELD_INT32: {
                         PRINT_VALUE_ARRAY(field_i32_t, memfile, header, "%d");
                 }
                         break;
-                case field_int64: {
+                case FIELD_INT64: {
                         PRINT_VALUE_ARRAY(field_i64_t, memfile, header, "%"
                                 PRIi64);
                 }
                         break;
-                case field_uint8: {
+                case FIELD_UINT8: {
                         PRINT_VALUE_ARRAY(field_u8_t, memfile, header, "%d");
                 }
                         break;
-                case field_uint16: {
+                case FIELD_UINT16: {
                         PRINT_VALUE_ARRAY(field_u16_t, memfile, header, "%d");
                 }
                         break;
-                case field_uint32: {
+                case FIELD_UINT32: {
                         PRINT_VALUE_ARRAY(field_u32_t, memfile, header, "%d");
                 }
                         break;
-                case field_uint64: {
+                case FIELD_UINT64: {
                         PRINT_VALUE_ARRAY(field_u64_t, memfile, header, "%"
                                 PRIu64);
                 }
                         break;
-                case field_float: {
+                case FIELD_FLOAT: {
                         PRINT_VALUE_ARRAY(field_number_t, memfile, header, "%f");
                 }
                         break;
-                case field_string: {
+                case FIELD_STRING: {
                         PRINT_VALUE_ARRAY(field_sid_t, memfile, header, "%"
                                 PRIu64
                                 "");
                 }
                         break;
-                case field_object: {
+                case FIELD_OBJECT: {
                         u32 num_elements = *NG5_MEMFILE_READ_TYPE(memfile, u32);
                         INTENT_LINE(nesting_level);
                         fprintf(file, "   [num_elements: %d] [values: [\n", num_elements);
@@ -1816,8 +1816,8 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                         struct prop_header *prop_header = NG5_MEMFILE_READ_TYPE(memfile, struct prop_header);
                         field_sid_t *keys = (field_sid_t *) NG5_MEMFILE_READ(memfile,
                                 prop_header->num_entries * sizeof(field_sid_t));
-                        field_boolean_t *values = (field_boolean_t *) NG5_MEMFILE_READ(memfile,
-                                prop_header->num_entries * sizeof(field_boolean_t));
+                        FIELD_BOOLEANean_t *values = (FIELD_BOOLEANean_t *) NG5_MEMFILE_READ(memfile,
+                                prop_header->num_entries * sizeof(FIELD_BOOLEANean_t));
                         fprintf(file, "0x%04x ", offset);
                         INTENT_LINE(nesting_level)
                         fprintf(file, "[marker: %c (boolean)] [nentries: %d] [", entryMarker, prop_header->num_entries);
@@ -2014,8 +2014,8 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                         fprintf(file, "] [");
 
                         for (u32 array_idx = 0; array_idx < prop_header->num_entries; array_idx++) {
-                                field_boolean_t *values = (field_boolean_t *) NG5_MEMFILE_READ(memfile,
-                                        array_lengths[array_idx] * sizeof(field_boolean_t));
+                                FIELD_BOOLEANean_t *values = (FIELD_BOOLEANean_t *) NG5_MEMFILE_READ(memfile,
+                                        array_lengths[array_idx] * sizeof(FIELD_BOOLEANean_t));
                                 fprintf(file, "[");
                                 for (u32 i = 0; i < array_lengths[array_idx]; i++) {
                                         fprintf(file,
