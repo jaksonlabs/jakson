@@ -35,7 +35,7 @@ struct archive
         struct archive_info info;
         char *diskFilePath;
         struct string_table string_table;
-        carbon_archive_record_table_t record_table;
+        struct record_table record_table;
         struct err err;
 
         struct sid_to_offset *query_index_string_id_to_offset;

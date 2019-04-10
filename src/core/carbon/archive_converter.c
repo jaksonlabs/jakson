@@ -21,10 +21,10 @@
 #include "core/carbon/archive_visitor.h"
 #include "core/carbon/archive_converter.h"
 
-typedef struct
+struct converter_capture
 {
     carbon_encoded_doc_collection_t *collection;
-} capture_t;
+};
 
 
 #define IMPORT_BASIC_PAIR(name)                                                                                        \
@@ -33,7 +33,7 @@ typedef struct
     NG5_UNUSED(path_stack);                                                                                         \
     assert(capture);                                                                                                   \
                                                                                                                        \
-    capture_t *extra = (capture_t *) capture;                                                                          \
+    struct converter_capture *extra = (struct converter_capture *) capture;                                                                          \
     carbon_encoded_doc_t *doc = encoded_doc_collection_get_or_append(extra->collection, oid);                          \
     for (u32 i = 0; i < num_pairs; i++) {                                                                         \
         carbon_encoded_doc_add_prop_##name(doc, keys[i], values[i]);                                                   \
@@ -42,7 +42,7 @@ typedef struct
 
 #define DECLARE_VISIT_BASIC_TYPE_PAIR(name, built_in_type)                                                             \
 static void                                                                                                            \
-visit_##name##_pairs (struct archive *archive, path_stack_t path_stack, carbon_object_id_t oid,                      \
+visit_##name##_pairs (struct archive *archive, path_stack_t path_stack, object_id_t oid,                      \
                   const field_sid_t *keys, const built_in_type *values, u32 num_pairs, void *capture)      \
 {                                                                                                                      \
     IMPORT_BASIC_PAIR(name)                                                                                            \
@@ -50,7 +50,7 @@ visit_##name##_pairs (struct archive *archive, path_stack_t path_stack, carbon_o
 
 #define DECLARE_VISIT_ARRAY_TYPE(name, built_in_type)                                                                  \
 static carbon_visitor_policy_e                                                                                         \
-visit_enter_##name##_array_pairs(struct archive *archive, path_stack_t path, carbon_object_id_t id,                  \
+visit_enter_##name##_array_pairs(struct archive *archive, path_stack_t path, object_id_t id,                  \
                                  const field_sid_t *keys, u32 num_pairs, void *capture)                    \
 {                                                                                                                      \
     NG5_UNUSED(archive);                                                                                            \
@@ -62,7 +62,7 @@ visit_enter_##name##_array_pairs(struct archive *archive, path_stack_t path, car
                                                                                                                        \
     assert(capture);                                                                                                   \
                                                                                                                        \
-    capture_t *extra = (capture_t *) capture;                                                                          \
+    struct converter_capture *extra = (struct converter_capture *) capture;                                                                          \
     carbon_encoded_doc_t *doc = encoded_doc_collection_get_or_append(extra->collection, id);                           \
     for (u32 i = 0; i < num_pairs; i++)                                                                           \
     {                                                                                                                  \
@@ -73,7 +73,7 @@ visit_enter_##name##_array_pairs(struct archive *archive, path_stack_t path, car
 }                                                                                                                      \
                                                                                                                        \
 static void                                                                                                            \
-visit_##name##_array_pair(struct archive *archive, path_stack_t path, carbon_object_id_t id,                         \
+visit_##name##_array_pair(struct archive *archive, path_stack_t path, object_id_t id,                         \
                           const field_sid_t key, u32 entry_idx, u32 max_entries,                      \
                           const built_in_type *array, u32 array_length, void *capture)                            \
 {                                                                                                                      \
@@ -87,19 +87,19 @@ visit_##name##_array_pair(struct archive *archive, path_stack_t path, carbon_obj
                                                                                                                        \
     assert(capture);                                                                                                   \
                                                                                                                        \
-    capture_t *extra = (capture_t *) capture;                                                                          \
+    struct converter_capture *extra = (struct converter_capture *) capture;                                                                          \
     carbon_encoded_doc_t *doc = encoded_doc_collection_get_or_append(extra->collection, id);                           \
     carbon_encoded_doc_array_push_##name(doc, key, array, array_length);                                               \
 }                                                                                                                      \
 
 
 static void
-visit_root_object(struct archive *archive, carbon_object_id_t id, void *capture)
+visit_root_object(struct archive *archive, object_id_t id, void *capture)
 {
     NG5_UNUSED(archive);
     assert(capture);
 
-    capture_t *extra = (capture_t *) capture;
+    struct converter_capture *extra = (struct converter_capture *) capture;
     encoded_doc_collection_get_or_append(extra->collection, id);
 }
 
@@ -116,14 +116,14 @@ DECLARE_VISIT_BASIC_TYPE_PAIR(boolean, field_boolean_t)
 DECLARE_VISIT_BASIC_TYPE_PAIR(string, field_sid_t)
 
 static void
-visit_null_pairs (struct archive *archive, path_stack_t path, carbon_object_id_t oid, const field_sid_t *keys,
+visit_null_pairs (struct archive *archive, path_stack_t path, object_id_t oid, const field_sid_t *keys,
                   u32 num_pairs, void *capture)
 {
     NG5_UNUSED(archive);
     NG5_UNUSED(path);
     assert(capture);
 
-    capture_t *extra = (capture_t *) capture;
+    struct converter_capture *extra = (struct converter_capture *) capture;
     carbon_encoded_doc_t *doc = encoded_doc_collection_get_or_append(extra->collection, oid);
     for (u32 i = 0; i < num_pairs; i++) {
         carbon_encoded_doc_add_prop_null(doc, keys[i]);
@@ -131,8 +131,8 @@ visit_null_pairs (struct archive *archive, path_stack_t path, carbon_object_id_t
 }
 
 static carbon_visitor_policy_e
-before_object_visit(struct archive *archive, path_stack_t path_stack, carbon_object_id_t parent_id,
-                    carbon_object_id_t value_id, u32 object_idx, u32 num_objects, field_sid_t key, void *capture)
+before_object_visit(struct archive *archive, path_stack_t path_stack, object_id_t parent_id,
+                    object_id_t value_id, u32 object_idx, u32 num_objects, field_sid_t key, void *capture)
 {
     NG5_UNUSED(archive);
     NG5_UNUSED(path_stack);
@@ -141,7 +141,7 @@ before_object_visit(struct archive *archive, path_stack_t path_stack, carbon_obj
     NG5_UNUSED(key);
     NG5_UNUSED(capture);
 
-    capture_t *extra = (capture_t *) capture;
+    struct converter_capture *extra = (struct converter_capture *) capture;
     carbon_encoded_doc_t *parent_doc = encoded_doc_collection_get_or_append(extra->collection, parent_id);
     carbon_encoded_doc_t *child_doc = encoded_doc_collection_get_or_append(extra->collection, value_id);
     carbon_encoded_doc_add_prop_object(parent_doc, key, child_doc);
@@ -162,7 +162,7 @@ DECLARE_VISIT_ARRAY_TYPE(boolean, field_boolean_t)
 DECLARE_VISIT_ARRAY_TYPE(string, field_sid_t)
 
 static carbon_visitor_policy_e
-visit_enter_null_array_pairs(struct archive *archive, path_stack_t path, carbon_object_id_t id, const field_sid_t *keys,
+visit_enter_null_array_pairs(struct archive *archive, path_stack_t path, object_id_t id, const field_sid_t *keys,
                              u32 num_pairs, void *capture)
 {
     NG5_UNUSED(archive);
@@ -174,7 +174,7 @@ visit_enter_null_array_pairs(struct archive *archive, path_stack_t path, carbon_
 
     assert(capture);
 
-    capture_t *extra = (capture_t *) capture;
+    struct converter_capture *extra = (struct converter_capture *) capture;
     carbon_encoded_doc_t *doc = encoded_doc_collection_get_or_append(extra->collection, id);
     for (u32 i = 0; i < num_pairs; i++)
     {
@@ -185,7 +185,7 @@ visit_enter_null_array_pairs(struct archive *archive, path_stack_t path, carbon_
 }
 
 static void
-visit_null_array_pair(struct archive *archive, path_stack_t path, carbon_object_id_t id, const field_sid_t key,
+visit_null_array_pair(struct archive *archive, path_stack_t path, object_id_t id, const field_sid_t key,
                       u32 entry_idx, u32 max_entries, u32 num_nulls, void *capture)
 {
     NG5_UNUSED(archive);
@@ -199,14 +199,14 @@ visit_null_array_pair(struct archive *archive, path_stack_t path, carbon_object_
 
     assert(capture);
 
-    capture_t *extra = (capture_t *) capture;
+    struct converter_capture *extra = (struct converter_capture *) capture;
     carbon_encoded_doc_t *doc = encoded_doc_collection_get_or_append(extra->collection, id);
     carbon_encoded_doc_array_push_null(doc, key, &num_nulls, 1);
 }
 
 static void
 before_visit_object_array_objects(bool *skip_group_object_ids, struct archive *archive, path_stack_t path,
-                                  carbon_object_id_t parent_id, field_sid_t key, const carbon_object_id_t *group_object_ids,
+                                  object_id_t parent_id, field_sid_t key, const object_id_t *group_object_ids,
                                   u32 num_group_object_ids, void *capture)
 {
     NG5_UNUSED(archive);
@@ -217,7 +217,7 @@ before_visit_object_array_objects(bool *skip_group_object_ids, struct archive *a
     NG5_UNUSED(skip_group_object_ids);
     NG5_UNUSED(num_group_object_ids);
 
-    capture_t *extra = (capture_t *) capture;
+    struct converter_capture *extra = (struct converter_capture *) capture;
     carbon_encoded_doc_t *doc = encoded_doc_collection_get_or_append(extra->collection, parent_id);
     carbon_encoded_doc_add_prop_array_object(doc, key);
     for (u32 i = 0; i < num_group_object_ids; i++) {
@@ -228,9 +228,9 @@ before_visit_object_array_objects(bool *skip_group_object_ids, struct archive *a
 #define DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(name, built_in_type)                                             \
 static void                                                                                                            \
 visit_object_array_object_property_##name(struct archive *archive, path_stack_t path,                                \
-                                           carbon_object_id_t parent_id,                                               \
+                                           object_id_t parent_id,                                               \
                                            field_sid_t key,                                                     \
-                                           carbon_object_id_t nested_object_id,                                        \
+                                           object_id_t nested_object_id,                                        \
                                            field_sid_t nested_key,                                              \
                                            const built_in_type *nested_values,                                         \
                                            u32 num_nested_values, void *capture)                                  \
@@ -242,7 +242,7 @@ visit_object_array_object_property_##name(struct archive *archive, path_stack_t 
     NG5_UNUSED(nested_key);                                                                                         \
     NG5_UNUSED(nested_values);                                                                                      \
                                                                                                                        \
-    capture_t *extra = (capture_t *) capture;                                                                          \
+    struct converter_capture *extra = (struct converter_capture *) capture;                                                                          \
 	carbon_encoded_doc_t *doc = encoded_doc_collection_get_or_append(extra->collection, nested_object_id);             \
 	carbon_encoded_doc_add_prop_array_##name(doc, nested_key);          											   \
 	carbon_encoded_doc_array_push_##name(doc, nested_key, nested_values, num_nested_values);                           \
@@ -272,7 +272,7 @@ carbon_archive_converter(carbon_encoded_doc_collection_t *collection, struct arc
 
     carbon_archive_visitor_t visitor = { 0 };
     carbon_archive_visitor_desc_t desc = { .visit_mask = NG5_ARCHIVE_ITER_MASK_ANY };
-    capture_t capture = {
+    struct converter_capture capture = {
         .collection = collection
     };
 

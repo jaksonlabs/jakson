@@ -4,7 +4,7 @@
 #include "core/carbon/archive_query.h"
 #include "ops-show-values.h"
 //
-typedef struct
+struct capture
 {
     const char *path;
     u32 offset;
@@ -21,10 +21,10 @@ typedef struct
 
   //  carbon_hashtable_t ofMapping(field_sid_t, u32) counts;
   //  carbon_hashset_t ofType(field_sid_t) keys;
-} capture_t;
+};
 ////
 static void
-visit_string_pairs (struct archive *archive, path_stack_t path, carbon_object_id_t id,
+visit_string_pairs (struct archive *archive, path_stack_t path, object_id_t id,
                               const field_sid_t *keys, const field_sid_t *values, u32 num_pairs,
                               void *capture)
 {
@@ -36,7 +36,7 @@ visit_string_pairs (struct archive *archive, path_stack_t path, carbon_object_id
     NG5_UNUSED(num_pairs);
     NG5_UNUSED(capture);
 
-    capture_t *params = (capture_t *) capture;
+    struct capture *params = (struct capture *) capture;
 
     if (params->current_num > params->limit) {
         return;
@@ -87,7 +87,7 @@ visit_string_pairs (struct archive *archive, path_stack_t path, carbon_object_id
 
 static carbon_visitor_policy_e
 before_visit_object_array(struct archive *archive, path_stack_t path,
-                                                     carbon_object_id_t parent_id, field_sid_t key,
+                                                     object_id_t parent_id, field_sid_t key,
                                                      void *capture)
 {
     NG5_UNUSED(archive);
@@ -103,7 +103,7 @@ before_visit_object_array(struct archive *archive, path_stack_t path,
     carbon_archive_visitor_path_to_string(buffer, archive, path);
 
 
-    capture_t *params = (capture_t *) capture;
+    struct capture *params = (struct capture *) capture;
 
     size_t len_current_path = strlen(buffer);
     size_t len_user_path = strlen(params->path);
@@ -121,7 +121,7 @@ before_visit_object_array(struct archive *archive, path_stack_t path,
 
 static carbon_visitor_policy_e
 before_visit_object_array_object_property(struct archive *archive, path_stack_t path,
-                                          carbon_object_id_t parent_id,
+                                          object_id_t parent_id,
                                           field_sid_t key,
                                           field_sid_t nested_key,
                                           enum field_type nested_value_type,
@@ -142,7 +142,7 @@ before_visit_object_array_object_property(struct archive *archive, path_stack_t 
     carbon_archive_visitor_path_to_string(buffer, archive, path);
 
 
-    capture_t *params = (capture_t *) capture;
+    struct capture *params = (struct capture *) capture;
 
     size_t len_current_path = strlen(buffer);
     size_t len_user_path = strlen(params->path);
@@ -159,9 +159,9 @@ before_visit_object_array_object_property(struct archive *archive, path_stack_t 
 
 static void
 visit_object_array_object_property_string(struct archive *archive, path_stack_t path,
-                                               carbon_object_id_t parent_id,
+                                               object_id_t parent_id,
                                                field_sid_t key,
-                                               carbon_object_id_t nested_object_id,
+                                               object_id_t nested_object_id,
                                                field_sid_t nested_key,
                                                const field_sid_t *nested_values,
                                                u32 num_nested_values, void *capture)
@@ -179,7 +179,7 @@ visit_object_array_object_property_string(struct archive *archive, path_stack_t 
 
 
 
-    capture_t *params = (capture_t *) capture;
+    struct capture *params = (struct capture *) capture;
 
     if (params->current_num > params->limit) {
         return;
@@ -235,9 +235,9 @@ visit_object_array_object_property_string(struct archive *archive, path_stack_t 
 
 static void
 visit_object_array_object_property_int8(struct archive *archive, path_stack_t path,
-                                          carbon_object_id_t parent_id,
+                                          object_id_t parent_id,
                                           field_sid_t key,
-                                          carbon_object_id_t nested_object_id,
+                                          object_id_t nested_object_id,
                                           field_sid_t nested_key,
                                           const field_i8_t *nested_values,
                                           u32 num_nested_values, void *capture)
@@ -255,7 +255,7 @@ visit_object_array_object_property_int8(struct archive *archive, path_stack_t pa
 
 
 
-    capture_t *params = (capture_t *) capture;
+    struct capture *params = (struct capture *) capture;
 
     if (params->current_num > params->limit) {
         return;
@@ -299,9 +299,9 @@ visit_object_array_object_property_int8(struct archive *archive, path_stack_t pa
 
 static void
 visit_object_array_object_property_int16(struct archive *archive, path_stack_t path,
-                                        carbon_object_id_t parent_id,
+                                        object_id_t parent_id,
                                         field_sid_t key,
-                                        carbon_object_id_t nested_object_id,
+                                        object_id_t nested_object_id,
                                         field_sid_t nested_key,
                                         const field_i16_t *nested_values,
                                         u32 num_nested_values, void *capture)
@@ -319,7 +319,7 @@ visit_object_array_object_property_int16(struct archive *archive, path_stack_t p
 
 
 
-    capture_t *params = (capture_t *) capture;
+    struct capture *params = (struct capture *) capture;
 
     if (params->current_num >= params->limit) {
         return;
@@ -371,7 +371,7 @@ visit_object_array_object_property_int16(struct archive *archive, path_stack_t p
 //    NG5_UNUSED(key);
 //    NG5_UNUSED(type);
 //    NG5_UNUSED(count);
-//    capture_t *params = (capture_t *) capture;
+//    struct capture *params = (struct capture *) capture;
 //    char buffer[2048];
 //    memset(buffer, 0, sizeof(buffer));
 //    carbon_archive_visitor_path_to_string(buffer, archive, path);
@@ -406,7 +406,7 @@ ops_show_values(carbon_timestamp_t *duration, struct vector ofType(ops_show_valu
 
     carbon_vec_create(result, NULL, sizeof(ops_show_values_result_t), 10);
 
-    capture_t capture = {
+    struct capture capture = {
         .path = path,
         .limit = limit,
         .offset = offset,

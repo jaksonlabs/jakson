@@ -20,15 +20,15 @@
 #include "core/carbon/archive_sid_cache.h"
 #include "core/carbon/archive_query.h"
 
-typedef struct
+struct sid_to_offset_arg
 {
     offset_t       offset;
     u32           strlen;
-} carbon_id_to_offset_arg_t;
+};
 
 struct sid_to_offset
 {
-    carbon_hashtable_t ofMapping(field_sid_t, carbon_id_to_offset_arg_t) mapping;
+    carbon_hashtable_t ofMapping(field_sid_t, struct sid_to_offset_arg) mapping;
     FILE *disk_file;
     size_t disk_file_size;
 
@@ -43,7 +43,7 @@ struct sid_to_offset
     if (obj->flags.bits.bit_flag_name) {                                                                               \
         assert(obj->props.offset_name != 0);                                                                           \
         carbon_memfile_seek(&obj->file, obj->props.offset_name);                                                       \
-        carbon_fixed_prop_t prop;                                                                                      \
+        struct fixed_prop prop;                                                                                      \
         carbon_int_embedded_fixed_props_read(&prop, &obj->file);                                                       \
         carbon_int_reset_cabin_object_mem_file(obj);                                                                   \
         NG5_OPTIONAL_SET(num_pairs, prop.header->num_entries);                                                      \
@@ -114,7 +114,7 @@ carbon_query_create_index_string_id_to_offset(struct sid_to_offset **index,
     capacity = archive_info.num_embeddded_strings;
 
     struct sid_to_offset *result = malloc(sizeof(struct sid_to_offset));
-    carbon_hashtable_create(&result->mapping, &query->err, sizeof(field_sid_t), sizeof(carbon_id_to_offset_arg_t), capacity);
+    carbon_hashtable_create(&result->mapping, &query->err, sizeof(field_sid_t), sizeof(struct sid_to_offset_arg), capacity);
 
     if (!index_string_id_to_offset_open_file(result, &query->err, query->archive->diskFilePath)) {
         return false;
@@ -125,7 +125,7 @@ carbon_query_create_index_string_id_to_offset(struct sid_to_offset **index,
     if (status) {
         while (carbon_strid_iter_next(&success, &info, &query->err, &vector_len, &strid_iter)) {
             for (size_t i = 0; i < vector_len; i++) {
-                carbon_id_to_offset_arg_t arg = {
+                struct sid_to_offset_arg arg = {
                     .offset = info[i].offset,
                     .strlen = info[i].strlen
                 };
@@ -271,7 +271,7 @@ fetch_string_by_id_via_scan(struct archive_query *query, field_sid_t id)
 static char *
 fetch_string_by_id_via_index(struct archive_query *query, struct sid_to_offset *index, field_sid_t id)
 {
-    const carbon_id_to_offset_arg_t *args = carbon_hashtable_get_value(&index->mapping, &id);
+    const struct sid_to_offset_arg *args = carbon_hashtable_get_value(&index->mapping, &id);
     if (args) {
         if (args->offset < index->disk_file_size) {
             bool decode_result;

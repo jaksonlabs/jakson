@@ -35,12 +35,12 @@ struct entry {
     bool in_use;
 };
 
-typedef struct sync_extra {
+struct sync_extra {
     struct vector ofType(entry) contents;
     struct vector ofType(carbon_string_id_t_t) freelist;
     struct strhash index;
     struct spinlock lock;
-} sync_exta;
+};
 
 static bool this_drop(struct strdic *self);
 static bool this_insert(struct strdic *self, field_sid_t **out, char *const *strings, size_t num_strings,

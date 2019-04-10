@@ -985,10 +985,10 @@ static bool compare_object_array_key_column_less_eq_func(const void *lhs, const 
     return column_name_leq;
 }
 
-typedef struct {
+struct com_column_leq_arg {
     struct strdic *dic;
     field_e value_type;
-} compare_column_less_eq_func_arg;
+};
 
 #define ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, type, valueVectorAPtr, valueVectorBPtr)                                 \
 {                                                                                                                      \
@@ -1006,7 +1006,7 @@ static bool compare_column_less_eq_func(const void *lhs, const void *rhs, void *
 {
     struct vector ofType(<T>) *a = (struct vector *) lhs;
     struct vector ofType(<T>) *b = (struct vector *) rhs;
-    compare_column_less_eq_func_arg *func_arg = (compare_column_less_eq_func_arg *) args;
+    struct com_column_leq_arg *func_arg = (struct com_column_leq_arg *) args;
 
     size_t max_num_elem = NG5_MIN(a->num_elems, b->num_elems);
 
@@ -1085,7 +1085,7 @@ static void sort_columndoc_column(struct columndoc_column *column, struct strdic
         indices[i] = i;
     }
 
-    compare_column_less_eq_func_arg func_arg = {
+    struct com_column_leq_arg func_arg = {
         .dic = dic,
         .value_type = column->type
     };

@@ -36,8 +36,8 @@ iterate_objects(struct archive *archive, const field_sid_t *keys, u32 num_pairs,
 
     u32 vector_length;
     carbon_archive_object_t object;
-    carbon_object_id_t parent_object_id;
-    carbon_object_id_t object_id;
+    object_id_t parent_object_id;
+    object_id_t object_id;
     carbon_archive_prop_iter_t  prop_iter;
     struct err err;
 
@@ -125,7 +125,7 @@ iterate_props(struct archive *archive, carbon_archive_prop_iter_t *prop_iter,
               struct vector ofType(carbon_path_entry_t) *path_stack, carbon_archive_visitor_t *visitor,
               int mask, void *capture, bool is_root_object, field_sid_t parent_key, u32 parent_key_array_idx)
 {
-    carbon_object_id_t this_object_oid;
+    object_id_t this_object_oid;
     carbon_archive_value_vector_t value_iter;
     enum field_type type;
     bool is_array;
@@ -276,7 +276,7 @@ iterate_props(struct archive *archive, carbon_archive_prop_iter_t *prop_iter,
                     u32 num_column_group_objs;
                     carbon_archive_column_iter_t column_iter;
                     field_sid_t group_key = keys[current_group_idx];
-                    const carbon_object_id_t *column_group_object_ids = carbon_archive_column_group_get_object_ids(&num_column_group_objs, &group_iter);
+                    const object_id_t *column_group_object_ids = carbon_archive_column_group_get_object_ids(&num_column_group_objs, &group_iter);
                     bool *skip_objects = malloc(num_column_group_objs * sizeof(bool));
                     NG5_ZERO_MEMORY(skip_objects, num_column_group_objs * sizeof(bool));
 
@@ -332,7 +332,7 @@ iterate_props(struct archive *archive, carbon_archive_prop_iter_t *prop_iter,
                                 const u32 *entry_positions = carbon_archive_column_get_entry_positions(&num_positions, &column_iter);
                                 carbon_archive_column_entry_iter_t entry_iter;
 
-                                carbon_object_id_t *entry_object_containments = malloc(num_positions * sizeof(carbon_object_id_t));
+                                object_id_t *entry_object_containments = malloc(num_positions * sizeof(object_id_t));
                                 for (u32 m = 0; m < num_positions; m++)
                                 {
                                     entry_object_containments[m] = column_group_object_ids[entry_positions[m]];
@@ -348,7 +348,7 @@ iterate_props(struct archive *archive, carbon_archive_prop_iter_t *prop_iter,
                                 u32 current_entry_idx = 0;
                                 while(carbon_archive_column_next_entry(&entry_iter, &column_iter)) {
 
-                                    carbon_object_id_t current_nested_object_id = entry_object_containments[current_entry_idx];
+                                    object_id_t current_nested_object_id = entry_object_containments[current_entry_idx];
                                     u32 entry_length;
 
                                     switch (current_column_entry_type) {
@@ -394,7 +394,7 @@ iterate_props(struct archive *archive, carbon_archive_prop_iter_t *prop_iter,
                                         carbon_archive_column_entry_get_objects(&iter, &entry_iter);
 
                                         while ((archive_object = carbon_archive_column_entry_object_iter_next_object(&iter)) != NULL) {
-                                            carbon_object_id_t id;
+                                            object_id_t id;
                                             carbon_archive_object_get_object_id(&id, archive_object);
 
 

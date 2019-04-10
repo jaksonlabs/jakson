@@ -4,15 +4,15 @@
 #include "core/carbon/archive_query.h"
 #include "ops-count-values.h"
 
-typedef struct
+struct capture
 {
     const char *path;
     carbon_hashtable_t ofMapping(field_sid_t, u32) counts;
     carbon_hashset_t ofType(field_sid_t) keys;
-} capture_t;
+};
 //
 static void
-visit_string_pairs (struct archive *archive, path_stack_t path, carbon_object_id_t id,
+visit_string_pairs (struct archive *archive, path_stack_t path, object_id_t id,
                               const field_sid_t *keys, const field_sid_t *values, u32 num_pairs,
                               void *capture)
 {
@@ -25,7 +25,7 @@ visit_string_pairs (struct archive *archive, path_stack_t path, carbon_object_id
     NG5_UNUSED(capture);
 
 
-    capture_t *params = (capture_t *) capture;
+    struct capture *params = (struct capture *) capture;
 
 
 
@@ -68,7 +68,7 @@ visit_string_pairs (struct archive *archive, path_stack_t path, carbon_object_id
 }
 //
 static void
-visit_string_array_pair (struct archive *archive, path_stack_t path, carbon_object_id_t id,
+visit_string_array_pair (struct archive *archive, path_stack_t path, object_id_t id,
                                    field_sid_t key, u32 entry_idx, u32 max_entries,
                                    const field_sid_t *array, u32 array_length, void *capture)
 {
@@ -87,9 +87,9 @@ visit_string_array_pair (struct archive *archive, path_stack_t path, carbon_obje
 //
 //static void
 //visit_object_array_object_property_string(struct archive *archive, path_stack_t path,
-//                                               carbon_object_id_t parent_id,
+//                                               object_id_t parent_id,
 //                                               field_sid_t key,
-//                                               carbon_object_id_t nested_object_id,
+//                                               object_id_t nested_object_id,
 //                                               field_sid_t nested_key,
 //                                               const field_sid_t *nested_values,
 //                                               u32 num_nested_values, void *capture)
@@ -118,7 +118,7 @@ get_column_entry_count(struct archive *archive, path_stack_t path, field_sid_t k
     NG5_UNUSED(key);
     NG5_UNUSED(type);
     NG5_UNUSED(count);
-    capture_t *params = (capture_t *) capture;
+    struct capture *params = (struct capture *) capture;
     char buffer[2048];
     memset(buffer, 0, sizeof(buffer));
     carbon_archive_visitor_path_to_string(buffer, archive, path);
@@ -149,7 +149,7 @@ ops_count_values(carbon_timestamp_t *duration, struct vector ofType(ops_count_va
     carbon_archive_visitor_t visitor = { 0 };
     carbon_archive_visitor_desc_t desc = { .visit_mask = NG5_ARCHIVE_ITER_MASK_ANY };
 
-    capture_t capture = {
+    struct capture capture = {
         .path = path
     };
     carbon_hashtable_create(&capture.counts, &archive->err, sizeof(field_sid_t), sizeof(u32), 50);

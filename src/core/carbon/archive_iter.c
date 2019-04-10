@@ -23,11 +23,11 @@ init_object_from_memfile(carbon_archive_object_t *obj, struct memfile *memfile)
 {
     assert(obj);
     offset_t                  object_off;
-    carbon_object_header_t       *header;
-    carbon_archive_object_flags_t flags;
+    struct object_header       *header;
+    union object_flags flags;
 
     object_off = memfile_tell(memfile);
-    header = NG5_MEMFILE_READ_TYPE(memfile, carbon_object_header_t);
+    header = NG5_MEMFILE_READ_TYPE(memfile, struct object_header);
     if (NG5_UNLIKELY(header->marker != MARKER_SYMBOL_OBJECT_BEGIN)) {
         return false;
     }
@@ -135,8 +135,8 @@ prop_iter_read_column(carbon_archive_collection_iter_state_t *state, struct memf
     u32     current_idx = state->current_column_group.current_column.idx;
     offset_t column_off  = state->current_column_group.column_offs[current_idx];
     carbon_memfile_seek(memfile, column_off);
-    const carbon_column_header_t *header = NG5_MEMFILE_READ_TYPE(memfile,
-                                                                    carbon_column_header_t);
+    const struct column_header *header = NG5_MEMFILE_READ_TYPE(memfile,
+                                                                    struct column_header);
 
     assert(header->marker == MARKER_SYMBOL_COLUMN);
     state->current_column_group.current_column.name = header->column_name;
@@ -160,13 +160,13 @@ collection_iter_read_next_column_group(carbon_archive_collection_iter_state_t *s
     assert(state->current_column_group_idx < state->num_column_groups);
     carbon_memfile_seek(memfile,
                         state->column_group_offsets[state->current_column_group_idx]);
-    const carbon_column_group_header_t *header = NG5_MEMFILE_READ_TYPE(memfile,
-                                                                          carbon_column_group_header_t);
+    const struct column_group_header *header = NG5_MEMFILE_READ_TYPE(memfile,
+                                                                          struct column_group_header);
     assert(header->marker == MARKER_SYMBOL_COLUMN_GROUP);
     state->current_column_group.num_columns = header->num_columns;
     state->current_column_group.num_objects = header->num_objects;
     state->current_column_group.object_ids  = NG5_MEMFILE_READ_TYPE_LIST(memfile,
-                                                                carbon_object_id_t, header->num_objects);
+                                                                object_id_t, header->num_objects);
     state->current_column_group.column_offs = NG5_MEMFILE_READ_TYPE_LIST(memfile,
                                                                 offset_t, header->num_columns);
     state->current_column_group.current_column.idx = 0;
@@ -210,7 +210,7 @@ prop_iter_cursor_init(carbon_archive_prop_iter_t *iter)
     {
         iter->mode_collection.collection_start_off = offset_by_state(iter);
         carbon_memfile_seek(&iter->record_table_memfile, iter->mode_collection.collection_start_off);
-        const carbon_object_array_header_t *header = NG5_MEMFILE_READ_TYPE(&iter->record_table_memfile, carbon_object_array_header_t);
+        const struct object_array_header *header = NG5_MEMFILE_READ_TYPE(&iter->record_table_memfile, struct object_array_header);
         iter->mode_collection.num_column_groups = header->num_entries;
         iter->mode_collection.current_column_group_idx = 0;
         iter->mode_collection.column_group_keys = NG5_MEMFILE_READ_TYPE_LIST(&iter->record_table_memfile,
@@ -571,7 +571,7 @@ carbon_archive_collection_next_column_group(carbon_archive_column_group_iter_t *
     }
 }
 
-NG5_EXPORT(const carbon_object_id_t *)
+NG5_EXPORT(const object_id_t *)
 carbon_archive_column_group_get_object_ids(u32 *num_objects, carbon_archive_column_group_iter_t *iter)
 {
     if (num_objects && iter) {
@@ -726,7 +726,7 @@ carbon_archive_column_entry_object_iter_next_object(carbon_archive_column_entry_
 }
 
 NG5_EXPORT(bool)
-carbon_archive_object_get_object_id(carbon_object_id_t *id, const carbon_archive_object_t *object)
+carbon_archive_object_get_object_id(object_id_t *id, const carbon_archive_object_t *object)
 {
     NG5_NON_NULL_OR_ERROR(id)
     NG5_NON_NULL_OR_ERROR(object)
@@ -744,7 +744,7 @@ carbon_archive_object_get_prop_iter(carbon_archive_prop_iter_t *iter, const carb
 }
 
 NG5_EXPORT(bool)
-carbon_archive_value_vector_get_object_id(carbon_object_id_t *id, const carbon_archive_value_vector_t *iter)
+carbon_archive_value_vector_get_object_id(object_id_t *id, const carbon_archive_value_vector_t *iter)
 {
     NG5_NON_NULL_OR_ERROR(id)
     NG5_NON_NULL_OR_ERROR(iter)

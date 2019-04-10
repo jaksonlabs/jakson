@@ -28,7 +28,7 @@ carbon_encoded_doc_collection_create(carbon_encoded_doc_collection_t *collection
     NG5_UNUSED(archive);
 
     carbon_vec_create(&collection->flat_object_collection, NULL, sizeof(carbon_encoded_doc_t), 5000000);
-    carbon_hashtable_create(&collection->index, err, sizeof(carbon_object_id_t), sizeof(u32), 5000000);
+    carbon_hashtable_create(&collection->index, err, sizeof(object_id_t), sizeof(u32), 5000000);
     carbon_error_init(&collection->err);
     collection->archive = archive;
 
@@ -50,7 +50,7 @@ carbon_encoded_doc_collection_drop(carbon_encoded_doc_collection_t *collection)
 }
 
 static carbon_encoded_doc_t *
-doc_create(struct err *err, carbon_object_id_t object_id,
+doc_create(struct err *err, object_id_t object_id,
            carbon_encoded_doc_collection_t *collection)
 {
     if (collection) {
@@ -71,7 +71,7 @@ doc_create(struct err *err, carbon_object_id_t object_id,
 }
 
 NG5_EXPORT(carbon_encoded_doc_t *)
-encoded_doc_collection_get_or_append(carbon_encoded_doc_collection_t *collection, carbon_object_id_t id)
+encoded_doc_collection_get_or_append(carbon_encoded_doc_collection_t *collection, object_id_t id)
 {
     NG5_NON_NULL_OR_ERROR(collection);
     const u32 *doc_pos = carbon_hashtable_get_value(&collection->index, &id);
@@ -116,7 +116,7 @@ carbon_encoded_doc_drop(carbon_encoded_doc_t *doc)
     for (u32 i = 0; i < doc->props.num_elems; i++)
     {
         carbon_encoded_doc_prop_t *single = vec_get(&doc->props, i, carbon_encoded_doc_prop_t);
-        if (single->header.value_type == NG5_ENCODED_DOC_PROP_VALUE_TYPE_DECODED_STRING) {
+        if (single->header.value_type == VALUE_DECODED_STRING) {
             free(single->value.string);
         }
     }
@@ -127,7 +127,7 @@ carbon_encoded_doc_drop(carbon_encoded_doc_t *doc)
 }
 
 NG5_EXPORT(bool)
-carbon_encoded_doc_get_object_id(carbon_object_id_t *oid, carbon_encoded_doc_t *doc)
+carbon_encoded_doc_get_object_id(object_id_t *oid, carbon_encoded_doc_t *doc)
 {
     NG5_UNUSED(oid);
     NG5_UNUSED(doc);
@@ -142,9 +142,9 @@ carbon_encoded_doc_add_prop_##value_name(carbon_encoded_doc_t *doc, field_sid_t 
     NG5_NON_NULL_OR_ERROR(doc)                                                                                      \
     carbon_encoded_doc_prop_t *prop = VECTOR_NEW_AND_GET(&doc->props, carbon_encoded_doc_prop_t);                      \
     prop->header.context = doc;                                                                                        \
-    prop->header.key_type = NG5_ENCODED_DOC_PROP_STRING_TYPE_ENCODED_STRING;                                        \
+    prop->header.key_type = STRING_ENCODED;                                        \
     prop->header.key.key_id = key;                                                                                     \
-    prop->header.value_type = NG5_ENCODED_DOC_PROP_VALUE_TYPE_BUILTIN;                                              \
+    prop->header.value_type = VALUE_BUILTIN;                                              \
     prop->header.type = basic_type;                                                                                    \
     prop->value.builtin.value_name = value;                                                                            \
     return true;                                                                                                       \
@@ -157,9 +157,9 @@ carbon_encoded_doc_add_prop_##value_name##_decoded(carbon_encoded_doc_t *doc, co
     NG5_NON_NULL_OR_ERROR(doc)                                                                                      \
     carbon_encoded_doc_prop_t *prop = VECTOR_NEW_AND_GET(&doc->props, carbon_encoded_doc_prop_t);                      \
     prop->header.context = doc;                                                                                        \
-    prop->header.key_type = NG5_ENCODED_DOC_PROP_STRING_TYPE_DECODED_STRING;                                        \
+    prop->header.key_type = STRING_DECODED;                                        \
     prop->header.key.key_str = strdup(key);                                                                            \
-    prop->header.value_type = NG5_ENCODED_DOC_PROP_VALUE_TYPE_BUILTIN;                                              \
+    prop->header.value_type = VALUE_BUILTIN;                                              \
     prop->header.type = basic_type;                                                                                    \
     prop->value.builtin.value_name = value;                                                                            \
     return true;                                                                                                       \
@@ -196,7 +196,7 @@ carbon_encoded_doc_add_prop_string_decoded_string_value_decoded(carbon_encoded_d
     NG5_NON_NULL_OR_ERROR(doc)
     carbon_encoded_doc_prop_t *prop = VECTOR_NEW_AND_GET(&doc->props, carbon_encoded_doc_prop_t);
     prop->header.context = doc;
-    prop->header.key_type = NG5_ENCODED_DOC_PROP_STRING_TYPE_DECODED_STRING;
+    prop->header.key_type = STRING_DECODED;
     prop->header.key.key_str = strdup(key);
     prop->header.type = NG5_BASIC_TYPE_STRING;
     prop->value.string = strdup(value);
@@ -209,7 +209,7 @@ carbon_encoded_doc_add_prop_null(carbon_encoded_doc_t *doc, field_sid_t key)
     NG5_NON_NULL_OR_ERROR(doc)
     carbon_encoded_doc_prop_t *prop = VECTOR_NEW_AND_GET(&doc->props, carbon_encoded_doc_prop_t);
     prop->header.context = doc;
-    prop->header.key_type = NG5_ENCODED_DOC_PROP_STRING_TYPE_ENCODED_STRING;
+    prop->header.key_type = STRING_ENCODED;
     prop->header.key.key_id = key;
     prop->header.type = NG5_BASIC_TYPE_NULL;
     prop->value.builtin.null = 1;
@@ -222,7 +222,7 @@ carbon_encoded_doc_add_prop_null_decoded(carbon_encoded_doc_t *doc, const char *
     NG5_NON_NULL_OR_ERROR(doc)
     carbon_encoded_doc_prop_t *prop = VECTOR_NEW_AND_GET(&doc->props, carbon_encoded_doc_prop_t);
     prop->header.context = doc;
-    prop->header.key_type = NG5_ENCODED_DOC_PROP_STRING_TYPE_DECODED_STRING;
+    prop->header.key_type = STRING_DECODED;
     prop->header.key.key_str = strdup(key);
     prop->header.type = NG5_BASIC_TYPE_NULL;
     prop->value.builtin.null = 1;
@@ -235,7 +235,7 @@ carbon_encoded_doc_add_prop_object(carbon_encoded_doc_t *doc, field_sid_t key, c
     NG5_NON_NULL_OR_ERROR(doc)
     carbon_encoded_doc_prop_t *prop = VECTOR_NEW_AND_GET(&doc->props, carbon_encoded_doc_prop_t);
     prop->header.context = doc;
-    prop->header.key_type = NG5_ENCODED_DOC_PROP_STRING_TYPE_ENCODED_STRING;
+    prop->header.key_type = STRING_ENCODED;
     prop->header.key.key_id = key;
     prop->header.type = NG5_BASIC_TYPE_OBJECT;
     prop->value.builtin.object = value->object_id;
@@ -248,7 +248,7 @@ carbon_encoded_doc_add_prop_object_decoded(carbon_encoded_doc_t *doc, const char
     NG5_NON_NULL_OR_ERROR(doc)
     carbon_encoded_doc_prop_t *prop = VECTOR_NEW_AND_GET(&doc->props, carbon_encoded_doc_prop_t);
     prop->header.context = doc;
-    prop->header.key_type = NG5_ENCODED_DOC_PROP_STRING_TYPE_DECODED_STRING;
+    prop->header.key_type = STRING_DECODED;
     prop->header.key.key_str = strdup(key);
     prop->header.type = NG5_BASIC_TYPE_OBJECT;
     prop->value.builtin.object = value->object_id;
@@ -263,11 +263,11 @@ carbon_encoded_doc_add_prop_array_##name(carbon_encoded_doc_t *doc,             
     NG5_NON_NULL_OR_ERROR(doc)                                                                                      \
     u32 new_array_pos = doc->props_arrays.num_elems;                                                              \
     carbon_encoded_doc_prop_array_t *array = VECTOR_NEW_AND_GET(&doc->props_arrays, carbon_encoded_doc_prop_array_t);  \
-    array->header.key_type = NG5_ENCODED_DOC_PROP_STRING_TYPE_ENCODED_STRING;                                          \
+    array->header.key_type = STRING_ENCODED;                                          \
     array->header.key.key_id = key;                                                                                    \
     array->header.type = basic_type;                                                                                   \
     array->header.context = doc;                                                                                       \
-    carbon_vec_create(&array->values, NULL, sizeof(carbon_encoded_doc_value_t), 10);                                   \
+    carbon_vec_create(&array->values, NULL, sizeof(union encoded_doc_value), 10);                                   \
     carbon_hashtable_insert_or_update(&doc->prop_array_index, &key, &new_array_pos, 1);                                \
     return true;                                                                                                       \
 }
@@ -279,11 +279,11 @@ carbon_encoded_doc_add_prop_array_##name##_decoded(carbon_encoded_doc_t *doc,   
 {                                                                                                                      \
     NG5_NON_NULL_OR_ERROR(doc)                                                                                      \
     carbon_encoded_doc_prop_array_t *array = VECTOR_NEW_AND_GET(&doc->props_arrays, carbon_encoded_doc_prop_array_t);  \
-    array->header.key_type = NG5_ENCODED_DOC_PROP_STRING_TYPE_DECODED_STRING;                                          \
+    array->header.key_type = STRING_DECODED;                                          \
     array->header.key.key_str = strdup(key);                                                                           \
     array->header.type = basic_type;                                                                                   \
     array->header.context = doc;                                                                                       \
-    carbon_vec_create(&array->values, NULL, sizeof(carbon_encoded_doc_value_t), 10);                                   \
+    carbon_vec_create(&array->values, NULL, sizeof(union encoded_doc_value), 10);                                   \
     return true;                                                                                                       \
 }
 
@@ -330,7 +330,7 @@ carbon_encoded_doc_array_push_##name(carbon_encoded_doc_t *doc, field_sid_t key,
     error_IF(array == NULL, &doc->err, NG5_ERR_INTERNALERR);                                                 \
     error_IF(array->header.type != basic_type, &doc->err, NG5_ERR_TYPEMISMATCH);                             \
     for (u32 i = 0; i < values_length; i++) {                                                                     \
-        carbon_encoded_doc_value_t *value = VECTOR_NEW_AND_GET(&array->values, carbon_encoded_doc_value_t);            \
+        union encoded_doc_value *value = VECTOR_NEW_AND_GET(&array->values, union encoded_doc_value);            \
         value->name = values[i];                                                                                       \
     }                                                                                                                  \
                                                                                                                        \
@@ -348,7 +348,7 @@ carbon_encoded_doc_array_push_##name##_decoded(carbon_encoded_doc_t *doc, const 
     for (u32 i = 0; i < doc->props_arrays.num_elems; i++)                                                         \
     {                                                                                                                  \
         carbon_encoded_doc_prop_array_t *prop = vec_get(&doc->props_arrays, i, carbon_encoded_doc_prop_array_t); \
-        if (prop->header.key_type == NG5_ENCODED_DOC_PROP_STRING_TYPE_DECODED_STRING) {                                \
+        if (prop->header.key_type == STRING_DECODED) {                                \
             if (strcmp(prop->header.key.key_str, key) == 0) {                                                          \
                 prop_pos = i;                                                                                          \
                 break;                                                                                                 \
@@ -361,7 +361,7 @@ carbon_encoded_doc_array_push_##name##_decoded(carbon_encoded_doc_t *doc, const 
     error_IF(array == NULL, &doc->err, NG5_ERR_INTERNALERR);                                                 \
     error_IF(array->header.type != basic_type, &doc->err, NG5_ERR_TYPEMISMATCH);                             \
     for (u32 i = 0; i < values_length; i++) {                                                                     \
-        carbon_encoded_doc_value_t *value = VECTOR_NEW_AND_GET(&array->values, carbon_encoded_doc_value_t);            \
+        union encoded_doc_value *value = VECTOR_NEW_AND_GET(&array->values, union encoded_doc_value);            \
         value->name = values[i];                                                                                       \
     }                                                                                                                  \
                                                                                                                        \
@@ -404,7 +404,7 @@ DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(null, field_u32_t, NG5_BASIC_TYP
 //                                                               carbon_encoded_doc_prop_array_t);
 //    error_IF(array == NULL, &doc->err, NG5_ERR_INTERNALERR);
 //    error_IF(array->header.type != NG5_BASIC_TYPE_NULL, &doc->err, NG5_ERR_TYPEMISMATCH);
-//    carbon_encoded_doc_value_t *value = VECTOR_NEW_AND_GET(&array->values, carbon_encoded_doc_value_t);
+//    union encoded_doc_value *value = VECTOR_NEW_AND_GET(&array->values, union encoded_doc_value);
 //    value->num_nulls = how_many;
 //    return true;
 //}
@@ -414,7 +414,7 @@ DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(null, field_u32_t, NG5_BASIC_TYP
 #include "core/carbon/archive_query.h"
 
 NG5_EXPORT(bool)
-carbon_encoded_doc_array_push_object(carbon_encoded_doc_t *doc, field_sid_t key, carbon_object_id_t id)
+carbon_encoded_doc_array_push_object(carbon_encoded_doc_t *doc, field_sid_t key, object_id_t id)
 {
     NG5_UNUSED(doc);
     NG5_UNUSED(key);
@@ -427,13 +427,13 @@ carbon_encoded_doc_array_push_object(carbon_encoded_doc_t *doc, field_sid_t key,
                                                                carbon_encoded_doc_prop_array_t);
     error_IF(array == NULL, &doc->err, NG5_ERR_INTERNALERR);
     error_IF(array->header.type != NG5_BASIC_TYPE_OBJECT, &doc->err, NG5_ERR_TYPEMISMATCH);
-    carbon_encoded_doc_value_t *value = VECTOR_NEW_AND_GET(&array->values, carbon_encoded_doc_value_t);
+    union encoded_doc_value *value = VECTOR_NEW_AND_GET(&array->values, union encoded_doc_value);
     value->object = id;
     return true;
 }
 
 NG5_EXPORT(bool)
-carbon_encoded_doc_array_push_object_decoded(carbon_encoded_doc_t *doc, const char *key, carbon_object_id_t id)
+carbon_encoded_doc_array_push_object_decoded(carbon_encoded_doc_t *doc, const char *key, object_id_t id)
 {
     NG5_UNUSED(doc);
     NG5_UNUSED(key);
@@ -444,7 +444,7 @@ carbon_encoded_doc_array_push_object_decoded(carbon_encoded_doc_t *doc, const ch
     for (u32 i = 0; i < doc->props_arrays.num_elems; i++)
     {
         carbon_encoded_doc_prop_array_t *prop = vec_get(&doc->props_arrays, i, carbon_encoded_doc_prop_array_t);
-        if (prop->header.key_type == NG5_ENCODED_DOC_PROP_STRING_TYPE_DECODED_STRING) {
+        if (prop->header.key_type == STRING_DECODED) {
             if (strcmp(prop->header.key.key_str, key) == 0) {
                 prop_pos = i;
                 break;
@@ -456,7 +456,7 @@ carbon_encoded_doc_array_push_object_decoded(carbon_encoded_doc_t *doc, const ch
                                                                carbon_encoded_doc_prop_array_t);
     error_IF(array == NULL, &doc->err, NG5_ERR_INTERNALERR);
     error_IF(array->header.type != NG5_BASIC_TYPE_OBJECT, &doc->err, NG5_ERR_TYPEMISMATCH);
-    carbon_encoded_doc_value_t *value = VECTOR_NEW_AND_GET(&array->values, carbon_encoded_doc_value_t);
+    union encoded_doc_value *value = VECTOR_NEW_AND_GET(&array->values, union encoded_doc_value);
     value->object = id;
     return true;
 }
@@ -464,7 +464,7 @@ carbon_encoded_doc_array_push_object_decoded(carbon_encoded_doc_t *doc, const ch
 
 
 NG5_EXPORT(bool)
-carbon_encoded_doc_get_nested_object(carbon_encoded_doc_t *nested, carbon_object_id_t oid, carbon_encoded_doc_t *doc)
+carbon_encoded_doc_get_nested_object(carbon_encoded_doc_t *nested, object_id_t oid, carbon_encoded_doc_t *doc)
 {
     NG5_UNUSED(nested);
     NG5_UNUSED(oid);
@@ -491,7 +491,7 @@ doc_print_pretty(FILE *file, carbon_encoded_doc_t *doc, unsigned level)
     for (u32 i = 0; i < doc->props.num_elems; i++) {
         carbon_encoded_doc_prop_t *prop = vec_get(&doc->props, i, carbon_encoded_doc_prop_t);
         char *key_str = NULL;
-        if (prop->header.key_type == NG5_ENCODED_DOC_PROP_STRING_TYPE_ENCODED_STRING) {
+        if (prop->header.key_type == STRING_ENCODED) {
             key_str  = carbon_query_fetch_string_by_id(&query, prop->header.key.key_id);
         } else {
             key_str = strdup(prop->header.key.key_str);
@@ -531,7 +531,7 @@ doc_print_pretty(FILE *file, carbon_encoded_doc_t *doc, unsigned level)
             fprintf(file, "%.2f", ceilf(prop->value.builtin.number * 100) / 100);
             break;
         case NG5_BASIC_TYPE_STRING: {
-            if (prop->header.value_type == NG5_ENCODED_DOC_PROP_VALUE_TYPE_BUILTIN) {
+            if (prop->header.value_type == VALUE_BUILTIN) {
                 char *value_str = carbon_query_fetch_string_by_id(&query, prop->value.builtin.string);
                 fprintf(file, "\"%s\"", value_str);
                 free(value_str);
@@ -561,7 +561,7 @@ doc_print_pretty(FILE *file, carbon_encoded_doc_t *doc, unsigned level)
     for (u32 i = 0; i < doc->props_arrays.num_elems; i++) {
         carbon_encoded_doc_prop_array_t *prop = vec_get(&doc->props_arrays, i, carbon_encoded_doc_prop_array_t);
         char *key_str = NULL;
-        if (prop->header.key_type == NG5_ENCODED_DOC_PROP_STRING_TYPE_ENCODED_STRING) {
+        if (prop->header.key_type == STRING_ENCODED) {
             key_str  = carbon_query_fetch_string_by_id(&query, prop->header.key.key_id);
         } else {
             key_str = strdup(prop->header.key.key_str);
@@ -585,7 +585,7 @@ doc_print_pretty(FILE *file, carbon_encoded_doc_t *doc, unsigned level)
         switch (prop->header.type) {
         case NG5_BASIC_TYPE_INT8:
             for (u32 k = 0; k < prop->values.num_elems; k++) {
-                field_i8_t value = (vec_get(&prop->values, k, carbon_encoded_doc_value_t))->int8;
+                field_i8_t value = (vec_get(&prop->values, k, union encoded_doc_value))->int8;
                 if (NG5_IS_NULL_INT8(value)) {
                     fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                 } else {
@@ -595,7 +595,7 @@ doc_print_pretty(FILE *file, carbon_encoded_doc_t *doc, unsigned level)
             break;
         case NG5_BASIC_TYPE_INT16:
             for (u32 k = 0; k < prop->values.num_elems; k++) {
-                field_i16_t value = (vec_get(&prop->values, k, carbon_encoded_doc_value_t))->int16;
+                field_i16_t value = (vec_get(&prop->values, k, union encoded_doc_value))->int16;
                 if (NG5_IS_NULL_INT16(value)) {
                     fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                 } else {
@@ -605,7 +605,7 @@ doc_print_pretty(FILE *file, carbon_encoded_doc_t *doc, unsigned level)
             break;
         case NG5_BASIC_TYPE_INT32:
             for (u32 k = 0; k < prop->values.num_elems; k++) {
-                field_i32_t value = (vec_get(&prop->values, k, carbon_encoded_doc_value_t))->int32;
+                field_i32_t value = (vec_get(&prop->values, k, union encoded_doc_value))->int32;
                 if (NG5_IS_NULL_INT32(value)) {
                     fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                 } else {
@@ -615,7 +615,7 @@ doc_print_pretty(FILE *file, carbon_encoded_doc_t *doc, unsigned level)
             break;
         case NG5_BASIC_TYPE_INT64:
             for (u32 k = 0; k < prop->values.num_elems; k++) {
-                field_i64_t value = (vec_get(&prop->values, k, carbon_encoded_doc_value_t))->int64;
+                field_i64_t value = (vec_get(&prop->values, k, union encoded_doc_value))->int64;
                 if (NG5_IS_NULL_INT64(value)) {
                     fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                 } else {
@@ -625,7 +625,7 @@ doc_print_pretty(FILE *file, carbon_encoded_doc_t *doc, unsigned level)
             break;
         case NG5_BASIC_TYPE_UINT8:
             for (u32 k = 0; k < prop->values.num_elems; k++) {
-                field_u8_t value = (vec_get(&prop->values, k, carbon_encoded_doc_value_t))->uint8;
+                field_u8_t value = (vec_get(&prop->values, k, union encoded_doc_value))->uint8;
                 if (NG5_IS_NULL_UINT8(value)) {
                     fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                 } else {
@@ -635,7 +635,7 @@ doc_print_pretty(FILE *file, carbon_encoded_doc_t *doc, unsigned level)
             break;
         case NG5_BASIC_TYPE_UINT16:
             for (u32 k = 0; k < prop->values.num_elems; k++) {
-                field_u16_t value = (vec_get(&prop->values, k, carbon_encoded_doc_value_t))->uint16;
+                field_u16_t value = (vec_get(&prop->values, k, union encoded_doc_value))->uint16;
                 if (NG5_IS_NULL_UINT16(value)) {
                     fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                 } else {
@@ -645,7 +645,7 @@ doc_print_pretty(FILE *file, carbon_encoded_doc_t *doc, unsigned level)
             break;
         case NG5_BASIC_TYPE_UINT32:
             for (u32 k = 0; k < prop->values.num_elems; k++) {
-                field_u32_t value = (vec_get(&prop->values, k, carbon_encoded_doc_value_t))->uint32;
+                field_u32_t value = (vec_get(&prop->values, k, union encoded_doc_value))->uint32;
                 if (NG5_IS_NULL_UINT32(value)) {
                     fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                 } else {
@@ -655,7 +655,7 @@ doc_print_pretty(FILE *file, carbon_encoded_doc_t *doc, unsigned level)
             break;
         case NG5_BASIC_TYPE_UINT64:
             for (u32 k = 0; k < prop->values.num_elems; k++) {
-                field_u64_t value = (vec_get(&prop->values, k, carbon_encoded_doc_value_t))->uint64;
+                field_u64_t value = (vec_get(&prop->values, k, union encoded_doc_value))->uint64;
                 if (NG5_IS_NULL_UINT64(value)) {
                     fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                 } else {
@@ -665,7 +665,7 @@ doc_print_pretty(FILE *file, carbon_encoded_doc_t *doc, unsigned level)
             break;
         case NG5_BASIC_TYPE_NUMBER:
             for (u32 k = 0; k < prop->values.num_elems; k++) {
-                field_number_t value = (vec_get(&prop->values, k, carbon_encoded_doc_value_t))->number;
+                field_number_t value = (vec_get(&prop->values, k, union encoded_doc_value))->number;
                 if (NG5_IS_NULL_NUMBER(value)) {
                     fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                 } else {
@@ -676,7 +676,7 @@ doc_print_pretty(FILE *file, carbon_encoded_doc_t *doc, unsigned level)
             break;
         case NG5_BASIC_TYPE_STRING: {
             for (u32 k = 0; k < prop->values.num_elems; k++) {
-                field_sid_t value = (vec_get(&prop->values, k, carbon_encoded_doc_value_t))->string;
+                field_sid_t value = (vec_get(&prop->values, k, union encoded_doc_value))->string;
                 if (NG5_IS_NULL_STRING(value)) {
                     fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                 } else {
@@ -688,7 +688,7 @@ doc_print_pretty(FILE *file, carbon_encoded_doc_t *doc, unsigned level)
         } break;
         case NG5_BASIC_TYPE_BOOLEAN:
             for (u32 k = 0; k < prop->values.num_elems; k++) {
-                field_boolean_t value = (vec_get(&prop->values, k, carbon_encoded_doc_value_t))->boolean;
+                field_boolean_t value = (vec_get(&prop->values, k, union encoded_doc_value))->boolean;
                 if (NG5_IS_NULL_BOOLEAN(value)) {
                     fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                 } else {
@@ -705,7 +705,7 @@ doc_print_pretty(FILE *file, carbon_encoded_doc_t *doc, unsigned level)
         case NG5_BASIC_TYPE_OBJECT:
         {
             for (u32 k = 0; k < prop->values.num_elems; k++) {
-                carbon_object_id_t nested_oid = (vec_get(&prop->values, k, carbon_encoded_doc_value_t))->object;
+                object_id_t nested_oid = (vec_get(&prop->values, k, union encoded_doc_value))->object;
                 carbon_encoded_doc_t *nested_doc = encoded_doc_collection_get_or_append(doc->context, nested_oid);
                 fprintf(file, "\n");
                 for (unsigned k = 0; k < level + 1; k++) {

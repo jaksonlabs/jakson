@@ -26,7 +26,7 @@
 
 #define TO_GIB(x)       (x/1024.0f/1024.0f/1024.0f)
 
-typedef struct trace_stats_t
+struct trace_stats
 {
     size_t num_malloc_calls;
     size_t num_realloc_calls;
@@ -36,7 +36,7 @@ typedef struct trace_stats_t
     struct spinlock *spinlock;
     FILE *statistics_file;
     carbon_timestamp_t startup_timestamp;
-} trace_stats_t;
+};
 
 
 #define DEFINE_PAGE_WITH_SIZE(x)                                                                                       \
@@ -199,7 +199,7 @@ static inline void *alloc_register(size_t size)
     return NULL;
 }
 
-trace_stats_t global_trace_stats = {
+struct trace_stats global_trace_stats = {
     .num_malloc_calls   = 0,
     .num_realloc_calls  = 0,
     .num_free_calls     = 0,

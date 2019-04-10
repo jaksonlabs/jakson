@@ -28,15 +28,15 @@
 
 #define SMART_MAP_TAG "strhash-mem"
 
-typedef struct bucket
+struct bucket
 {
     carbon_slice_list_t slice_list;
-} bucket_t;
+};
 
-typedef struct mem_extra
+struct mem_extra
 {
     struct vector ofType(bucket) buckets;
-} mem_extra_t;
+};
 
 static int this_drop(struct strhash *self);
 static int this_put_safe_bulk(struct strhash *self,
@@ -80,11 +80,11 @@ static int this_fetch_single(struct vector ofType(bucket) *buckets,
                            struct strhash_counters *counter);
 
 static int this_create_extra(struct strhash *self, size_t num_buckets, size_t cap_buckets);
-static mem_extra_t *this_get_exta(struct strhash *self);
-static int bucket_create(bucket_t *buckets, size_t num_buckets, size_t bucket_cap,
+static struct mem_extra *this_get_exta(struct strhash *self);
+static int bucket_create(struct bucket *buckets, size_t num_buckets, size_t bucket_cap,
                         struct allocator *alloc);
-static int bucket_drop(bucket_t *buckets, size_t num_buckets, struct allocator *alloc);
-static int bucket_insert(bucket_t *bucket, const char *restrict key, field_sid_t value,
+static int bucket_drop(struct bucket *buckets, size_t num_buckets, struct allocator *alloc);
+static int bucket_insert(struct bucket *bucket, const char *restrict key, field_sid_t value,
                         struct allocator *alloc, struct strhash_counters *counter);
 
 bool carbon_strhash_create_inmemory(struct strhash *carbon_parallel_map_exec, const struct allocator *alloc, size_t num_buckets,
@@ -117,8 +117,8 @@ bool carbon_strhash_create_inmemory(struct strhash *carbon_parallel_map_exec, co
 static int this_drop(struct strhash *self)
 {
     assert(self->tag == MEMORY_RESIDENT);
-    mem_extra_t *extra = this_get_exta(self);
-    bucket_t *data = (bucket_t *) carbon_vec_data(&extra->buckets);
+    struct mem_extra *extra = this_get_exta(self);
+    struct bucket *data = (struct bucket *) carbon_vec_data(&extra->buckets);
     NG5_CHECK_SUCCESS(bucket_drop(data, extra->buckets.cap_elems, &self->allocator));
     carbon_vec_drop(&extra->buckets);
     carbon_free(&self->allocator, self->extra);
@@ -131,7 +131,7 @@ static int this_put_safe_bulk(struct strhash *self,
                            size_t num_pairs)
 {
     assert(self->tag == MEMORY_RESIDENT);
-    mem_extra_t *extra = this_get_exta(self);
+    struct mem_extra *extra = this_get_exta(self);
     size_t *bucket_idxs = carbon_malloc(&self->allocator, num_pairs * sizeof(size_t));
 
     NG5_PREFETCH_WRITE(bucket_idxs);
@@ -155,7 +155,7 @@ static int this_put_safe_bulk(struct strhash *self,
 static int this_put_safe_exact(struct strhash *self, const char *key, field_sid_t value)
 {
     assert(self->tag == MEMORY_RESIDENT);
-    mem_extra_t *extra = this_get_exta(self);
+    struct mem_extra *extra = this_get_exta(self);
 
     hash32_t hash = strcmp("", key) != 0 ? HASHCODE_OF(key) : 0;
     size_t bucket_idx = hash % extra->buckets.cap_elems;
@@ -191,12 +191,12 @@ static int this_fetch_bulk(struct vector ofType(bucket) *buckets, field_sid_t *v
 
     slice_handle_t result_handle;
     size_t num_not_found = 0;
-    bucket_t *data = (bucket_t *) carbon_vec_data(buckets);
+    struct bucket *data = (struct bucket *) carbon_vec_data(buckets);
 
     NG5_PREFETCH_WRITE(values_out);
 
     for (size_t i = 0; i < num_keys; i++) {
-        bucket_t *bucket = data + bucket_idxs[i];
+        struct bucket *bucket = data + bucket_idxs[i];
         const char *key = keys[i];
         if (NG5_LIKELY(key != NULL)) {
             carbon_slice_list_lookup(&result_handle, &bucket->slice_list, key);
@@ -226,12 +226,12 @@ static int this_fetch_single(struct vector ofType(bucket) *buckets,
     NG5_UNUSED(counter);
 
     slice_handle_t handle;
-    bucket_t *data = (bucket_t *) carbon_vec_data(buckets);
+    struct bucket *data = (struct bucket *) carbon_vec_data(buckets);
 
     NG5_PREFETCH_WRITE(value_out);
     NG5_PREFETCH_WRITE(key_found);
 
-    bucket_t *bucket = data + bucket_idx;
+    struct bucket *bucket = data + bucket_idx;
 
     /** Optimization 1/5: EMPTY GUARD (but before "find" call); if this bucket has no occupied slots, do not perform any lookup and comparison */
     carbon_slice_list_lookup(&handle, &bucket->slice_list, key);
@@ -256,7 +256,7 @@ static int this_get_safe(struct strhash *self, field_sid_t **out, bool **found_m
     NG5_CHECK_SUCCESS(carbon_alloc_this_or_std(&hashtable_alloc, &self->allocator));
 #endif
 
-    mem_extra_t *extra = this_get_exta(self);
+    struct mem_extra *extra = this_get_exta(self);
     size_t *bucket_idxs = carbon_malloc(&self->allocator, num_keys * sizeof(size_t));
     field_sid_t *values_out = carbon_malloc(&self->allocator, num_keys * sizeof(field_sid_t));
     bool *found_mask_out = carbon_malloc(&self->allocator, num_keys * sizeof(bool));
@@ -269,7 +269,7 @@ static int this_get_safe(struct strhash *self, field_sid_t **out, bool **found_m
         const char *key = keys[i];
         hash32_t hash = key && strcmp("", key) != 0 ? HASHCODE_OF(key) : 0;
         bucket_idxs[i] = hash % extra->buckets.cap_elems;
-        NG5_PREFETCH_READ((bucket_t *) carbon_vec_data(&extra->buckets) + bucket_idxs[i]);
+        NG5_PREFETCH_READ((struct bucket *) carbon_vec_data(&extra->buckets) + bucket_idxs[i]);
     }
 
     NG5_TRACE(SMART_MAP_TAG, "'get_safe' function invoke fetch...for %zu strings", num_keys)
@@ -303,11 +303,11 @@ static int this_get_safe_exact(struct strhash *self, field_sid_t *out, bool *fou
     NG5_CHECK_SUCCESS(carbon_alloc_this_or_std(&hashtable_alloc, &self->allocator));
 #endif
 
-    mem_extra_t *extra = this_get_exta(self);
+    struct mem_extra *extra = this_get_exta(self);
 
     hash32_t hash = strcmp("", key) != 0 ? HASHCODE_OF(key) : 0;
     size_t bucket_idx = hash % extra->buckets.cap_elems;
-    NG5_PREFETCH_READ((bucket_t *) carbon_vec_data(&extra->buckets) + bucket_idx);
+    NG5_PREFETCH_READ((struct bucket *) carbon_vec_data(&extra->buckets) + bucket_idx);
 
     NG5_CHECK_SUCCESS(this_fetch_single(&extra->buckets, out, found_mask, bucket_idx, key, &self->counters));
 
@@ -335,17 +335,17 @@ static int this_update_key_fast(struct strhash *self, const field_sid_t *values,
     return false;
 }
 
-static int simple_map_remove(mem_extra_t *extra, size_t *bucket_idxs, char *const *keys, size_t num_keys,
+static int simple_map_remove(struct mem_extra *extra, size_t *bucket_idxs, char *const *keys, size_t num_keys,
                              struct allocator *alloc, struct strhash_counters *counter)
 {
     NG5_UNUSED(counter);
     NG5_UNUSED(alloc);
 
     slice_handle_t handle;
-    bucket_t *data = (bucket_t *) carbon_vec_data(&extra->buckets);
+    struct bucket *data = (struct bucket *) carbon_vec_data(&extra->buckets);
 
     for (register size_t i = 0; i < num_keys; i++) {
-        bucket_t *bucket = data + bucket_idxs[i];
+        struct bucket *bucket = data + bucket_idxs[i];
         const char *key = keys[i];
 
         /** Optimization 1/5: EMPTY GUARD (but before "find" call); if this bucket has no occupied slots, do not perform any lookup and comparison */
@@ -361,7 +361,7 @@ static int this_remove(struct strhash *self, char *const *keys, size_t num_keys)
 {
     assert(self->tag == MEMORY_RESIDENT);
 
-    mem_extra_t *extra = this_get_exta(self);
+    struct mem_extra *extra = this_get_exta(self);
     size_t *bucket_idxs = carbon_malloc(&self->allocator, num_keys * sizeof(size_t));
     for (register size_t i = 0; i < num_keys; i++) {
         const char *key = keys[i];
@@ -384,15 +384,15 @@ static int this_free(struct strhash *self, void *ptr)
 NG5_FUNC_UNUSED
 static int this_create_extra(struct strhash *self, size_t num_buckets, size_t cap_buckets)
 {
-    if ((self->extra = carbon_malloc(&self->allocator, sizeof(mem_extra_t))) != NULL) {
-        mem_extra_t *extra = this_get_exta(self);
-        carbon_vec_create(&extra->buckets, &self->allocator, sizeof(bucket_t), num_buckets);
+    if ((self->extra = carbon_malloc(&self->allocator, sizeof(struct mem_extra))) != NULL) {
+        struct mem_extra *extra = this_get_exta(self);
+        carbon_vec_create(&extra->buckets, &self->allocator, sizeof(struct bucket), num_buckets);
 
         /** Optimization: notify the kernel that the list of buckets are accessed randomly (since hash based access)*/
         carbon_vec_memadvice(&extra->buckets, MADV_RANDOM | MADV_WILLNEED);
 
 
-        bucket_t *data = (bucket_t *) carbon_vec_data(&extra->buckets);
+        struct bucket *data = (struct bucket *) carbon_vec_data(&extra->buckets);
         NG5_CHECK_SUCCESS(bucket_create(data, num_buckets, cap_buckets, &self->allocator));
         return true;
     }
@@ -403,41 +403,41 @@ static int this_create_extra(struct strhash *self, size_t num_buckets, size_t ca
 }
 
 NG5_FUNC_UNUSED
-static mem_extra_t *this_get_exta(struct strhash *self)
+static struct mem_extra *this_get_exta(struct strhash *self)
 {
     assert (self->tag == MEMORY_RESIDENT);
-    return (mem_extra_t *) (self->extra);
+    return (struct mem_extra *) (self->extra);
 }
 
 NG5_FUNC_UNUSED
-static int bucket_create(bucket_t *buckets, size_t num_buckets, size_t bucket_cap,
+static int bucket_create(struct bucket *buckets, size_t num_buckets, size_t bucket_cap,
                         struct allocator *alloc)
 {
     NG5_NON_NULL_OR_ERROR(buckets);
 
     // TODO: parallize this!
     while (num_buckets--) {
-        bucket_t *bucket = buckets++;
+        struct bucket *bucket = buckets++;
         carbon_slice_list_create(&bucket->slice_list, alloc, bucket_cap);
     }
 
     return true;
 }
 
-static int bucket_drop(bucket_t *buckets, size_t num_buckets, struct allocator *alloc)
+static int bucket_drop(struct bucket *buckets, size_t num_buckets, struct allocator *alloc)
 {
     NG5_UNUSED(alloc);
     NG5_NON_NULL_OR_ERROR(buckets);
 
     while (num_buckets--) {
-        bucket_t *bucket = buckets++;
+        struct bucket *bucket = buckets++;
         SliceListDrop(&bucket->slice_list);
     }
 
     return true;
 }
 
-static int bucket_insert(bucket_t *bucket, const char *restrict key, field_sid_t value,
+static int bucket_insert(struct bucket *bucket, const char *restrict key, field_sid_t value,
                         struct allocator *alloc, struct strhash_counters *counter)
 {
     NG5_UNUSED(counter);
@@ -478,14 +478,14 @@ static int this_insert_bulk(struct vector ofType(bucket) *buckets,
     NG5_NON_NULL_OR_ERROR(values)
     NG5_NON_NULL_OR_ERROR(bucket_idxs)
 
-    bucket_t *buckets_data = (bucket_t *) carbon_vec_data(buckets);
+    struct bucket *buckets_data = (struct bucket *) carbon_vec_data(buckets);
     int status = true;
     for (register size_t i = 0; status == true && i < num_pairs; i++) {
         size_t bucket_idx = bucket_idxs[i];
         const char *key = keys[i];
         field_sid_t value = values[i];
 
-        bucket_t *bucket = buckets_data + bucket_idx;
+        struct bucket *bucket = buckets_data + bucket_idx;
         status = bucket_insert(bucket, key, value, alloc, counter);
     }
 
@@ -498,7 +498,7 @@ static int this_insert_exact(struct vector ofType(bucket) *buckets, const char *
     NG5_NON_NULL_OR_ERROR(buckets)
     NG5_NON_NULL_OR_ERROR(key)
 
-    bucket_t *buckets_data = (bucket_t *) carbon_vec_data(buckets);
-    bucket_t *bucket = buckets_data + bucket_idx;
+    struct bucket *buckets_data = (struct bucket *) carbon_vec_data(buckets);
+    struct bucket *bucket = buckets_data + bucket_idx;
     return bucket_insert(bucket, key, value, alloc, counter);
 }

@@ -281,7 +281,7 @@ print_basic_fixed_types(carbon_archive_value_vector_t *value_iter, u32 idx)
 static void
 iterate_properties(carbon_archive_prop_iter_t *prop_iter)
 {
-    carbon_object_id_t                oid;
+    object_id_t                oid;
     carbon_archive_value_vector_t     value_iter;
     enum field_type               type;
     bool                              is_array;
@@ -341,7 +341,7 @@ iterate_properties(carbon_archive_prop_iter_t *prop_iter)
             while (carbon_archive_collection_next_column_group(&group_iter, &collection_iter)) {
 
                 u32 num_objs;
-                const carbon_object_id_t *ids = carbon_archive_column_group_get_object_ids(&num_objs, &group_iter);
+                const object_id_t *ids = carbon_archive_column_group_get_object_ids(&num_objs, &group_iter);
 
                 printf("\t\t{ column groups object ids:");
                 for (u32 i = 0; i < num_objs; i++) {
@@ -471,7 +471,7 @@ iterate_properties(carbon_archive_prop_iter_t *prop_iter)
                             carbon_archive_column_entry_get_objects(&iter, &entry_iter);
                             printf("\t\t{ << objects >>: [");
                             while ((archive_object = carbon_archive_column_entry_object_iter_next_object(&iter)) != NULL) {
-                                carbon_object_id_t id;
+                                object_id_t id;
                                 carbon_archive_object_get_object_id(&id, archive_object);
                                 printf("{ oid: %" PRIu64 " } \n", id);
 

@@ -30,7 +30,7 @@ typedef struct carbon_encoded_doc_collection carbon_encoded_doc_collection_t;
 
 typedef struct carbon_encoded_doc carbon_encoded_doc_t;
 
-typedef union {
+union encoded_doc_value {
     field_i8_t int8;
     field_i16_t int16;
     field_i32_t int32;
@@ -42,33 +42,33 @@ typedef union {
     field_number_t number;
     field_boolean_t boolean;
     field_sid_t string;
-    carbon_object_id_t object;
+    object_id_t object;
     u32 null;
-} carbon_encoded_doc_value_t;
+};
 
-typedef enum
+enum encoded_doc_string_type
 {
-    NG5_ENCODED_DOC_PROP_STRING_TYPE_ENCODED_STRING,
-    NG5_ENCODED_DOC_PROP_STRING_TYPE_DECODED_STRING,
-} carbon_encoded_doc_prop_string_type_e;
+    STRING_ENCODED,
+    STRING_DECODED,
+};
 
-typedef enum
+enum encoded_doc_value_type
 {
-    NG5_ENCODED_DOC_PROP_VALUE_TYPE_BUILTIN,
-    NG5_ENCODED_DOC_PROP_VALUE_TYPE_DECODED_STRING,
-} carbon_encoded_doc_prop_value_type_e;
+    VALUE_BUILTIN,
+    VALUE_DECODED_STRING,
+};
 
 typedef struct
 {
     carbon_encoded_doc_t                  *context;
 
-    carbon_encoded_doc_prop_string_type_e  key_type;
+    enum encoded_doc_string_type  key_type;
     union {
         field_sid_t          key_id;
         char                       *key_str;
     } key;
 
-    carbon_encoded_doc_prop_value_type_e   value_type;
+    enum encoded_doc_value_type   value_type;
     enum field_type                    type;
 
 } carbon_encoded_doc_prop_header_t;
@@ -78,7 +78,7 @@ typedef struct
     carbon_encoded_doc_prop_header_t header;
 
     union {
-        carbon_encoded_doc_value_t       builtin;
+        union encoded_doc_value       builtin;
         char                            *string;
     } value;
 
@@ -87,13 +87,13 @@ typedef struct
 typedef struct
 {
     carbon_encoded_doc_prop_header_t header;
-    struct vector ofType(carbon_encoded_doc_value_t) values;
+    struct vector ofType(union encoded_doc_value) values;
 } carbon_encoded_doc_prop_array_t;
 
 typedef struct carbon_encoded_doc
 {
     carbon_encoded_doc_collection_t                      *context;
-    carbon_object_id_t                                    object_id;
+    object_id_t                                    object_id;
     struct vector ofType(carbon_encoded_doc_prop_t)        props;
     struct vector ofType(carbon_encoded_doc_prop_array_t)  props_arrays;
     carbon_hashtable_t ofMapping(field_sid_t, u32) prop_array_index; /* maps key to index in prop arrays */
@@ -109,7 +109,7 @@ typedef struct carbon_encoded_doc_collection
     struct archive *archive;
 
     struct vector ofType(carbon_encoded_doc_t) flat_object_collection;   /* list of objects; also nested ones */
-    carbon_hashtable_t ofMapping(carbon_object_id_t, u32) index;   /* maps oid to index in collection */
+    carbon_hashtable_t ofMapping(object_id_t, u32) index;   /* maps oid to index in collection */
 
     struct err err;
 
@@ -123,7 +123,7 @@ NG5_EXPORT(bool)
 carbon_encoded_doc_collection_drop(carbon_encoded_doc_collection_t *collection);
 
 NG5_EXPORT(carbon_encoded_doc_t *)
-encoded_doc_collection_get_or_append(carbon_encoded_doc_collection_t *collection, carbon_object_id_t id);
+encoded_doc_collection_get_or_append(carbon_encoded_doc_collection_t *collection, object_id_t id);
 
 NG5_EXPORT(bool)
 carbon_encoded_doc_collection_print(FILE *file, carbon_encoded_doc_collection_t *collection);
@@ -132,7 +132,7 @@ NG5_EXPORT(bool)
 carbon_encoded_doc_drop(carbon_encoded_doc_t *doc);
 
 NG5_EXPORT(bool)
-carbon_encoded_doc_get_object_id(carbon_object_id_t *oid, carbon_encoded_doc_t *doc);
+carbon_encoded_doc_get_object_id(object_id_t *oid, carbon_encoded_doc_t *doc);
 
 #define DEFINE_NG5_ENCODED_DOC_ADD_PROP_BASIC(name, built_in_type)                                                  \
 NG5_EXPORT(bool)                                                                                                    \
@@ -257,13 +257,13 @@ DEFINE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(null, field_u32_t)
 //carbon_encoded_doc_array_push_null(carbon_encoded_doc_t *doc, field_sid_t key, u32 how_many);
 
 NG5_EXPORT(bool)
-carbon_encoded_doc_array_push_object(carbon_encoded_doc_t *doc, field_sid_t key, carbon_object_id_t id);
+carbon_encoded_doc_array_push_object(carbon_encoded_doc_t *doc, field_sid_t key, object_id_t id);
 
 NG5_EXPORT(bool)
-carbon_encoded_doc_array_push_object_decoded(carbon_encoded_doc_t *doc, const char *key, carbon_object_id_t id);
+carbon_encoded_doc_array_push_object_decoded(carbon_encoded_doc_t *doc, const char *key, object_id_t id);
 
 NG5_EXPORT(bool)
-carbon_encoded_doc_get_nested_object(carbon_encoded_doc_t *nested, carbon_object_id_t oid, carbon_encoded_doc_t *doc);
+carbon_encoded_doc_get_nested_object(carbon_encoded_doc_t *nested, object_id_t oid, carbon_encoded_doc_t *doc);
 
 NG5_EXPORT(bool)
 carbon_encoded_doc_print(FILE *file, carbon_encoded_doc_t *doc);

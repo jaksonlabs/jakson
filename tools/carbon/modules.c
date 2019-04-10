@@ -7,17 +7,16 @@
 
 #include "modules.h"
 
-typedef struct
+struct js_to_carbon_context
 {
     struct strdic dictionary;
     struct doc_bulk context;
     struct doc_entries *partition;
     struct columndoc *partitionMetaModel;
     char *jsonContent;
+};
 
-} Js2CabContext;
-
-static int convertJs2Model(Js2CabContext *context, FILE *file, bool optimizeForReads, const char *fileName,
+static int convertJs2Model(struct js_to_carbon_context *context, FILE *file, bool optimizeForReads, const char *fileName,
                            size_t fileNum, size_t fileMax)
 {
 
@@ -98,7 +97,7 @@ static int convertJs2Model(Js2CabContext *context, FILE *file, bool optimizeForR
     return true;
 }
 
-static void cleanup(FILE *file, Js2CabContext *context)
+static void cleanup(FILE *file, struct js_to_carbon_context *context)
 {
     NG5_CONSOLE_WRITE(file, "  - Perform cleanup operations%s", "");
     carbon_strdic_drop(&context->dictionary);
@@ -144,7 +143,7 @@ bool moduleCheckJsInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt
 {
     NG5_UNUSED(manager);
 
-    Js2CabContext cabContext;
+    struct js_to_carbon_context cabContext;
 
     for (int i = 0; i < argc; i++) {
         if (testFileExists(file, argv[i], i + 1, argc, true) != true) {

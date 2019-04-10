@@ -49,7 +49,7 @@
 
 #define PRINT_SIMPLE_PROPS(file, memfile, offset, nesting_level, value_type, type_string, format_string)               \
 {                                                                                                                      \
-    carbon_prop_header_t *prop_header = NG5_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);             \
+    struct prop_header *prop_header = NG5_MEMFILE_READ_TYPE(memfile, struct prop_header);             \
     field_sid_t *keys = (field_sid_t *) NG5_MEMFILE_READ(memfile, prop_header->num_entries *          \
                                    sizeof(field_sid_t));                                                        \
     value_type *values = (value_type *) NG5_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(value_type));   \
@@ -68,7 +68,7 @@
 
 #define PRINT_ARRAY_PROPS(memfile, offset, nesting_level, entryMarker, type, type_string, format_string)               \
 {                                                                                                                      \
-    carbon_prop_header_t *prop_header = NG5_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);             \
+    struct prop_header *prop_header = NG5_MEMFILE_READ_TYPE(memfile, struct prop_header);             \
                                                                                                                        \
     field_sid_t *keys = (field_sid_t *) NG5_MEMFILE_READ(memfile, prop_header->num_entries *          \
                                         sizeof(field_sid_t));                                                   \
@@ -128,7 +128,7 @@ static void update_record_header(struct memfile *memfile, offset_t root_object_h
         u64 record_size);
 static bool __serialize(offset_t *offset, struct err *err, struct memfile *memfile, struct columndoc_obj *columndoc,
         offset_t root_object_header_offset);
-static carbon_archive_object_flags_t *get_flags(carbon_archive_object_flags_t *flags, struct columndoc_obj *columndoc);
+static union object_flags *get_flags(union object_flags *flags, struct columndoc_obj *columndoc);
 static void update_carbon_file_header(struct memfile *memfile, offset_t root_object_header_offset);
 static void skip_carbon_file_header(struct memfile *memfile);
 static bool serialize_string_dic(struct memfile *memfile, struct err *err, const struct doc_bulk *context,
@@ -290,7 +290,7 @@ static bool run_string_id_baking(struct err *err, struct memblock **stream)
 {
         struct archive archive;
         char tmp_file_name[512];
-        carbon_object_id_t rand_part;
+        object_id_t rand_part;
         carbon_object_id_create(&rand_part);
         sprintf(tmp_file_name, "/tmp/types-tool-temp-%"
                 PRIu64
@@ -343,12 +343,12 @@ static bool run_string_id_baking(struct err *err, struct memblock **stream)
         offset_t file_length = ftell(tmp_file);
         fseek(tmp_file, 0, SEEK_SET);
 
-        carbon_file_header_t header;
-        size_t nread = fread(&header, sizeof(carbon_file_header_t), 1, tmp_file);
+        struct archive_header header;
+        size_t nread = fread(&header, sizeof(struct archive_header), 1, tmp_file);
         error_IF(nread != 1, err, NG5_ERR_FREAD_FAILED);
         header.string_id_to_offset_index_offset = index_pos;
         fseek(tmp_file, 0, SEEK_SET);
-        int nwrite = fwrite(&header, sizeof(carbon_file_header_t), 1, tmp_file);
+        int nwrite = fwrite(&header, sizeof(struct archive_header), 1, tmp_file);
         error_IF(nwrite != 1, err, NG5_ERR_FWRITE_FAILED);
         fseek(tmp_file, 0, SEEK_SET);
 
@@ -389,7 +389,7 @@ bool carbon_archive_from_model(struct memblock **stream, struct err *err, struct
         if (!__serialize(NULL, err, &memfile, &model->columndoc, root_object_header_offset)) {
                 return false;
         }
-        u64 record_size = memfile_tell(&memfile) - (record_header_offset + sizeof(carbon_record_header_t));
+        u64 record_size = memfile_tell(&memfile) - (record_header_offset + sizeof(struct record_header));
         update_record_header(&memfile, record_header_offset, model, record_size);
         OPTIONAL_CALL(callback, end_write_record_table);
 
@@ -443,8 +443,8 @@ bool carbon_archive_print(FILE *file, struct err *err, struct memblock *stream)
 {
         struct memfile memfile;
         carbon_memfile_open(&memfile, stream, READ_ONLY);
-        if (carbon_memfile_size(&memfile) < sizeof(carbon_file_header_t) + sizeof(carbon_string_table_header_t)
-                + sizeof(carbon_object_header_t)) {
+        if (carbon_memfile_size(&memfile) < sizeof(struct archive_header) + sizeof(struct string_table_header)
+                + sizeof(struct object_header)) {
                 error(err, NG5_ERR_NOCARBONSTREAM);
                 return false;
         } else {
@@ -454,7 +454,7 @@ bool carbon_archive_print(FILE *file, struct err *err, struct memblock *stream)
 
 bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned nesting_level);
 
-static u32 flags_to_int32(carbon_archive_object_flags_t *flags)
+static u32 flags_to_int32(union object_flags *flags)
 {
         return *((i32 *) flags);
 }
@@ -640,11 +640,11 @@ static bool write_array_prop(offset_t *offset, struct err *err, struct memfile *
         assert(keys->num_elems == values->num_elems);
 
         if (keys->num_elems > 0) {
-                carbon_prop_header_t header =
+                struct prop_header header =
                         {.marker = marker_symbols[value_array_marker_mapping[type].marker].symbol, .num_entries = keys
                                 ->num_elems};
                 offset_t prop_ofOffset = memfile_tell(memfile);
-                memfile_write(memfile, &header, sizeof(carbon_prop_header_t));
+                memfile_write(memfile, &header, sizeof(struct prop_header));
 
                 write_primitive_key_column(memfile, keys);
                 if (!__write_array_len_column(err, memfile, type, values)) {
@@ -661,7 +661,7 @@ static bool write_array_prop(offset_t *offset, struct err *err, struct memfile *
 }
 
 static bool write_array_props(struct memfile *memfile, struct err *err, struct columndoc_obj *columndoc,
-        carbon_archive_prop_offs_t *offsets, offset_t root_object_header_offset)
+        struct archive_prop_offs *offsets, offset_t root_object_header_offset)
 {
         if (!write_array_prop(&offsets->null_arrays,
                 err,
@@ -783,12 +783,12 @@ static bool write_fixed_props(offset_t *offset, struct err *err, struct memfile 
         assert(type != field_object); /** use 'write_var_props' instead */
 
         if (keys->num_elems > 0) {
-                carbon_prop_header_t header =
+                struct prop_header header =
                         {.marker = marker_symbols[valueMarkerMapping[type].marker].symbol, .num_entries = keys
                                 ->num_elems};
 
                 offset_t prop_ofOffset = memfile_tell(memfile);
-                memfile_write(memfile, &header, sizeof(carbon_prop_header_t));
+                memfile_write(memfile, &header, sizeof(struct prop_header));
 
                 write_primitive_key_column(memfile, keys);
                 if (!write_primitive_fixed_value_column(memfile, err, type, values)) {
@@ -812,10 +812,10 @@ static bool write_var_props(offset_t *offset, struct err *err, struct memfile *m
         assert(!objects || keys->num_elems == objects->num_elems);
 
         if (keys->num_elems > 0) {
-                carbon_prop_header_t header = {.marker = MARKER_SYMBOL_PROP_OBJECT, .num_entries = keys->num_elems};
+                struct prop_header header = {.marker = MARKER_SYMBOL_PROP_OBJECT, .num_entries = keys->num_elems};
 
                 offset_t prop_ofOffset = memfile_tell(memfile);
-                memfile_write(memfile, &header, sizeof(carbon_prop_header_t));
+                memfile_write(memfile, &header, sizeof(struct prop_header));
 
                 write_primitive_key_column(memfile, keys);
                 offset_t value_offset = skip_var_value_offset_column(memfile, keys->num_elems);
@@ -835,7 +835,7 @@ static bool write_var_props(offset_t *offset, struct err *err, struct memfile *m
 }
 
 static bool write_primitive_props(struct memfile *memfile, struct err *err, struct columndoc_obj *columndoc,
-        carbon_archive_prop_offs_t *offsets, offset_t root_object_header_offset)
+        struct archive_prop_offs *offsets, offset_t root_object_header_offset)
 {
         if (!write_fixed_props(&offsets->nulls,
                 err,
@@ -1007,11 +1007,11 @@ static bool write_column(struct memfile *memfile, struct err *err, struct column
 {
         assert(column->array_positions.num_elems == column->values.num_elems);
 
-        carbon_column_header_t header = {.marker = marker_symbols[MARKER_TYPE_COLUMN].symbol, .column_name = column
+        struct column_header header = {.marker = marker_symbols[MARKER_TYPE_COLUMN].symbol, .column_name = column
                 ->key_name, .value_type = marker_symbols[value_array_marker_mapping[column->type].marker]
                 .symbol, .num_entries = column->values.num_elems};
 
-        memfile_write(memfile, &header, sizeof(carbon_column_header_t));
+        memfile_write(memfile, &header, sizeof(struct column_header));
 
         /** skip offset column to value entry points */
         offset_t value_entry_offsets = memfile_tell(memfile);
@@ -1034,15 +1034,15 @@ static bool write_column(struct memfile *memfile, struct err *err, struct column
 }
 
 static bool write_object_array_props(struct memfile *memfile, struct err *err,
-        struct vector ofType(struct columndoc_group) *object_key_columns, carbon_archive_prop_offs_t *offsets,
+        struct vector ofType(struct columndoc_group) *object_key_columns, struct archive_prop_offs *offsets,
         offset_t root_object_header_offset)
 {
         if (object_key_columns->num_elems > 0) {
-                carbon_object_array_header_t header = {.marker = marker_symbols[MARKER_TYPE_PROP_OBJECT_ARRAY]
+                struct object_array_header header = {.marker = marker_symbols[MARKER_TYPE_PROP_OBJECT_ARRAY]
                         .symbol, .num_entries = object_key_columns->num_elems};
 
                 offsets->object_arrays = memfile_tell(memfile) - root_object_header_offset;
-                memfile_write(memfile, &header, sizeof(carbon_object_array_header_t));
+                memfile_write(memfile, &header, sizeof(struct object_array_header));
 
                 for (size_t i = 0; i < object_key_columns->num_elems; i++) {
                         struct columndoc_group *column_group =
@@ -1069,18 +1069,18 @@ static bool write_object_array_props(struct memfile *memfile, struct err *err,
                                         max_pos = NG5_MAX(max_pos, array_pos[m]);
                                 }
                         }
-                        carbon_column_group_header_t column_group_header =
+                        struct column_group_header column_group_header =
                                 {.marker = marker_symbols[MARKER_TYPE_COLUMN_GROUP].symbol, .num_columns = column_group
                                         ->columns.num_elems, .num_objects = max_pos + 1};
-                        memfile_write(memfile, &column_group_header, sizeof(carbon_column_group_header_t));
+                        memfile_write(memfile, &column_group_header, sizeof(struct column_group_header));
 
                         for (size_t i = 0; i < column_group_header.num_objects; i++) {
-                                carbon_object_id_t oid;
+                                object_id_t oid;
                                 if (!carbon_object_id_create(&oid)) {
                                         error(err, NG5_ERR_THREADOOOBJIDS);
                                         return false;
                                 }
-                                memfile_write(memfile, &oid, sizeof(carbon_object_id_t));
+                                memfile_write(memfile, &oid, sizeof(object_id_t));
                         }
 
                         offset_t continue_write = memfile_tell(memfile);
@@ -1115,25 +1115,25 @@ static bool write_object_array_props(struct memfile *memfile, struct err *err,
 static offset_t skip_record_header(struct memfile *memfile)
 {
         offset_t offset = memfile_tell(memfile);
-        carbon_memfile_skip(memfile, sizeof(carbon_record_header_t));
+        carbon_memfile_skip(memfile, sizeof(struct record_header));
         return offset;
 }
 
 static void update_record_header(struct memfile *memfile, offset_t root_object_header_offset, struct columndoc *model,
         u64 record_size)
 {
-        carbon_archive_record_flags_t flags = {.bits.is_sorted = model->read_optimized};
-        carbon_record_header_t
+        struct record_flags flags = {.bits.is_sorted = model->read_optimized};
+        struct record_header
                 header = {.marker = MARKER_SYMBOL_RECORD_HEADER, .flags = flags.value, .record_size = record_size};
         offset_t offset;
         carbon_memfile_tell(&offset, memfile);
         carbon_memfile_seek(memfile, root_object_header_offset);
-        memfile_write(memfile, &header, sizeof(carbon_record_header_t));
+        memfile_write(memfile, &header, sizeof(struct record_header));
         carbon_memfile_seek(memfile, offset);
 }
 
-static void propOffsetsWrite(struct memfile *memfile, const carbon_archive_object_flags_t *flags,
-        carbon_archive_prop_offs_t *prop_offsets)
+static void propOffsetsWrite(struct memfile *memfile, const union object_flags *flags,
+        struct archive_prop_offs *prop_offsets)
 {
         if (flags->bits.has_null_props) {
                 memfile_write(memfile, &prop_offsets->nulls, sizeof(offset_t));
@@ -1215,7 +1215,7 @@ static void propOffsetsWrite(struct memfile *memfile, const carbon_archive_objec
         }
 }
 
-static void prop_offsets_skip_write(struct memfile *memfile, const carbon_archive_object_flags_t *flags)
+static void prop_offsets_skip_write(struct memfile *memfile, const union object_flags *flags)
 {
         unsigned num_skip_offset_bytes = 0;
         if (flags->bits.has_null_props) {
@@ -1303,12 +1303,12 @@ static void prop_offsets_skip_write(struct memfile *memfile, const carbon_archiv
 static bool __serialize(offset_t *offset, struct err *err, struct memfile *memfile, struct columndoc_obj *columndoc,
         offset_t root_object_header_offset)
 {
-        carbon_archive_object_flags_t flags;
-        carbon_archive_prop_offs_t prop_offsets;
+        union object_flags flags;
+        struct archive_prop_offs prop_offsets;
         get_flags(&flags, columndoc);
 
         offset_t header_offset = memfile_tell(memfile);
-        carbon_memfile_skip(memfile, sizeof(carbon_object_header_t));
+        carbon_memfile_skip(memfile, sizeof(struct object_header));
 
         prop_offsets_skip_write(memfile, &flags);
         offset_t next_offset = memfile_tell(memfile);
@@ -1334,18 +1334,18 @@ static bool __serialize(offset_t *offset, struct err *err, struct memfile *memfi
         offset_t object_end_offset = memfile_tell(memfile);
         carbon_memfile_seek(memfile, header_offset);
 
-        carbon_object_id_t oid;
+        object_id_t oid;
         if (!carbon_object_id_create(&oid)) {
                 error(err, NG5_ERR_THREADOOOBJIDS);
                 return false;
         }
 
-        carbon_object_header_t header =
+        struct object_header header =
                 {.marker = marker_symbols[MARKER_TYPE_OBJECT_BEGIN].symbol, .oid = oid, .flags = flags_to_int32(&flags),
 
                 };
 
-        memfile_write(memfile, &header, sizeof(carbon_object_header_t));
+        memfile_write(memfile, &header, sizeof(struct object_header));
 
         propOffsetsWrite(memfile, &flags, &prop_offsets);
 
@@ -1379,7 +1379,7 @@ static char *embedded_dic_flags_to_string(const union string_tab_flags *flags)
         return string;
 }
 
-static char *record_header_flags_to_string(const carbon_archive_record_flags_t *flags)
+static char *record_header_flags_to_string(const struct record_flags *flags)
 {
         size_t max = 2048;
         char *string = malloc(max + 1);
@@ -1405,7 +1405,7 @@ static bool serialize_string_dic(struct memfile *memfile, struct err *err, const
 {
         union string_tab_flags flags;
         carbon_compressor_t strategy;
-        carbon_string_table_header_t header;
+        struct string_table_header header;
 
         struct vector ofType (const char *) *strings;
         struct vector ofType(field_sid_t) *string_ids;
@@ -1422,13 +1422,13 @@ static bool serialize_string_dic(struct memfile *memfile, struct err *err, const
         NG5_FIELD_SET(flags.value, flag_bit);
 
         offset_t header_pos = memfile_tell(memfile);
-        carbon_memfile_skip(memfile, sizeof(carbon_string_table_header_t));
+        carbon_memfile_skip(memfile, sizeof(struct string_table_header));
 
         offset_t extra_begin_off = memfile_tell(memfile);
         carbon_compressor_write_extra(err, &strategy, memfile, strings);
         offset_t extra_end_off = memfile_tell(memfile);
 
-        header = (carbon_string_table_header_t) {.marker = marker_symbols[MARKER_TYPE_EMBEDDED_STR_DIC]
+        header = (struct string_table_header) {.marker = marker_symbols[MARKER_TYPE_EMBEDDED_STR_DIC]
                 .symbol, .flags = flags.value, .num_entries = strings
                 ->num_elems, .first_entry = memfile_tell(memfile), .compressor_extra_size = (extra_end_off
                 - extra_begin_off)};
@@ -1437,11 +1437,11 @@ static bool serialize_string_dic(struct memfile *memfile, struct err *err, const
                 field_sid_t id = *vec_get(string_ids, i, field_sid_t);
                 const char *string = *vec_get(strings, i, char *);
 
-                carbon_string_entry_header_t header = {.marker = marker_symbols[MARKER_TYPE_EMBEDDED_UNCOMP_STR]
+                struct string_entry_header header = {.marker = marker_symbols[MARKER_TYPE_EMBEDDED_UNCOMP_STR]
                         .symbol, .next_entry_off = 0, .string_id = id, .string_len = strlen(string)};
 
                 offset_t header_pos_off = memfile_tell(memfile);
-                carbon_memfile_skip(memfile, sizeof(carbon_string_entry_header_t));
+                carbon_memfile_skip(memfile, sizeof(struct string_entry_header));
 
                 if (!carbon_compressor_encode(err, &strategy, memfile, string)) {
                         NG5_PRINT_ERROR(err.code);
@@ -1450,13 +1450,13 @@ static bool serialize_string_dic(struct memfile *memfile, struct err *err, const
                 offset_t continue_off = memfile_tell(memfile);
                 carbon_memfile_seek(memfile, header_pos_off);
                 header.next_entry_off = i + 1 < strings->num_elems ? continue_off : 0;
-                memfile_write(memfile, &header, sizeof(carbon_string_entry_header_t));
+                memfile_write(memfile, &header, sizeof(struct string_entry_header));
                 carbon_memfile_seek(memfile, continue_off);
         }
 
         offset_t continue_pos = memfile_tell(memfile);
         carbon_memfile_seek(memfile, header_pos);
-        memfile_write(memfile, &header, sizeof(carbon_string_table_header_t));
+        memfile_write(memfile, &header, sizeof(struct string_table_header));
         carbon_memfile_seek(memfile, continue_pos);
 
         carbon_vec_drop(strings);
@@ -1469,7 +1469,7 @@ static bool serialize_string_dic(struct memfile *memfile, struct err *err, const
 
 static void skip_carbon_file_header(struct memfile *memfile)
 {
-        carbon_memfile_skip(memfile, sizeof(carbon_file_header_t));
+        carbon_memfile_skip(memfile, sizeof(struct archive_header));
 }
 
 static void update_carbon_file_header(struct memfile *memfile, offset_t record_header_offset)
@@ -1480,7 +1480,7 @@ static void update_carbon_file_header(struct memfile *memfile, offset_t record_h
         memcpy(&this_carbon_file_header.magic, CABIN_FILE_MAGIC, strlen(CABIN_FILE_MAGIC));
         this_carbon_file_header.root_object_header_offset = record_header_offset;
         this_carbon_file_header.string_id_to_offset_index_offset = 0;
-        memfile_write(memfile, &this_carbon_file_header, sizeof(carbon_file_header_t));
+        memfile_write(memfile, &this_carbon_file_header, sizeof(struct archive_header));
         carbon_memfile_seek(memfile, current_pos);
 }
 
@@ -1488,7 +1488,7 @@ static bool print_column_form_memfile(FILE *file, struct err *err, struct memfil
 {
         offset_t offset;
         carbon_memfile_tell(&offset, memfile);
-        carbon_column_header_t *header = NG5_MEMFILE_READ_TYPE(memfile, carbon_column_header_t);
+        struct column_header *header = NG5_MEMFILE_READ_TYPE(memfile, struct column_header);
         if (header->marker != MARKER_SYMBOL_COLUMN) {
                 char buffer[256];
                 sprintf(buffer, "expected marker [%c] but found [%c]", MARKER_SYMBOL_COLUMN, header->marker);
@@ -1603,7 +1603,7 @@ static bool print_column_form_memfile(FILE *file, struct err *err, struct memfil
 static bool print_object_array_from_memfile(FILE *file, struct err *err, struct memfile *memfile, unsigned nesting_level)
 {
         unsigned offset = (unsigned) memfile_tell(memfile);
-        carbon_object_array_header_t *header = NG5_MEMFILE_READ_TYPE(memfile, carbon_object_array_header_t);
+        struct object_array_header *header = NG5_MEMFILE_READ_TYPE(memfile, struct object_array_header);
         if (header->marker != MARKER_SYMBOL_PROP_OBJECT_ARRAY) {
                 char buffer[256];
                 sprintf(buffer, "expected marker [%c] but found [%c]", MARKER_SYMBOL_PROP_OBJECT_ARRAY, header->marker);
@@ -1633,8 +1633,8 @@ static bool print_object_array_from_memfile(FILE *file, struct err *err, struct 
 
         for (size_t i = 0; i < header->num_entries; i++) {
                 offset = memfile_tell(memfile);
-                carbon_column_group_header_t
-                        *column_group_header = NG5_MEMFILE_READ_TYPE(memfile, carbon_column_group_header_t);
+                struct column_group_header
+                        *column_group_header = NG5_MEMFILE_READ_TYPE(memfile, struct column_group_header);
                 if (column_group_header->marker != MARKER_SYMBOL_COLUMN_GROUP) {
                         char buffer[256];
                         sprintf(buffer,
@@ -1651,8 +1651,8 @@ static bool print_object_array_from_memfile(FILE *file, struct err *err, struct 
                         column_group_header->marker,
                         column_group_header->num_columns,
                         column_group_header->num_objects);
-                const carbon_object_id_t *oids =
-                        NG5_MEMFILE_READ_TYPE_LIST(memfile, carbon_object_id_t, column_group_header->num_objects);
+                const object_id_t *oids =
+                        NG5_MEMFILE_READ_TYPE_LIST(memfile, object_id_t, column_group_header->num_objects);
                 for (size_t k = 0; k < column_group_header->num_objects; k++) {
                         fprintf(file, "%"PRIu64"%s", oids[k], k + 1 < column_group_header->num_objects ? ", " : "");
                 }
@@ -1680,8 +1680,8 @@ static bool print_object_array_from_memfile(FILE *file, struct err *err, struct 
         return true;
 }
 
-static void print_prop_offsets(FILE *file, const carbon_archive_object_flags_t *flags,
-        const carbon_archive_prop_offs_t *prop_offsets)
+static void print_prop_offsets(FILE *file, const union object_flags *flags,
+        const struct archive_prop_offs *prop_offsets)
 {
         if (flags->bits.has_null_props) {
                 fprintf(file, " nulls: 0x%04x", (unsigned) prop_offsets->nulls);
@@ -1766,10 +1766,10 @@ static void print_prop_offsets(FILE *file, const carbon_archive_object_flags_t *
 bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned nesting_level)
 {
         unsigned offset = (unsigned) memfile_tell(memfile);
-        carbon_object_header_t *header = NG5_MEMFILE_READ_TYPE(memfile, carbon_object_header_t);
+        struct object_header *header = NG5_MEMFILE_READ_TYPE(memfile, struct object_header);
 
-        carbon_archive_prop_offs_t prop_offsets;
-        carbon_archive_object_flags_t flags = {.value = header->flags};
+        struct archive_prop_offs prop_offsets;
+        union object_flags flags = {.value = header->flags};
 
         carbon_int_read_prop_offsets(&prop_offsets, memfile, &flags);
         offset_t nextObjectOrNil = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
@@ -1799,7 +1799,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
 
                 switch (entryMarker) {
                 case MARKER_SYMBOL_PROP_NULL: {
-                        carbon_prop_header_t *prop_header = NG5_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);
+                        struct prop_header *prop_header = NG5_MEMFILE_READ_TYPE(memfile, struct prop_header);
                         field_sid_t *keys = (field_sid_t *) NG5_MEMFILE_READ(memfile,
                                 prop_header->num_entries * sizeof(field_sid_t));
                         fprintf(file, "0x%04x ", offset);
@@ -1813,7 +1813,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                 }
                         break;
                 case MARKER_SYMBOL_PROP_BOOLEAN: {
-                        carbon_prop_header_t *prop_header = NG5_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);
+                        struct prop_header *prop_header = NG5_MEMFILE_READ_TYPE(memfile, struct prop_header);
                         field_sid_t *keys = (field_sid_t *) NG5_MEMFILE_READ(memfile,
                                 prop_header->num_entries * sizeof(field_sid_t));
                         field_boolean_t *values = (field_boolean_t *) NG5_MEMFILE_READ(memfile,
@@ -1919,7 +1919,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                         "");
                         break;
                 case MARKER_SYMBOL_PROP_OBJECT: {
-                        carbon_var_prop_t prop;
+                        struct var_prop prop;
                         carbon_int_embedded_var_props_read(&prop, memfile);
                         fprintf(file, "0x%04x ", offset);
                         INTENT_LINE(nesting_level)
@@ -1951,7 +1951,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                 }
                         break;
                 case MARKER_SYMBOL_PROP_NULL_ARRAY: {
-                        carbon_prop_header_t *prop_header = NG5_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);
+                        struct prop_header *prop_header = NG5_MEMFILE_READ_TYPE(memfile, struct prop_header);
 
                         field_sid_t *keys = (field_sid_t *) NG5_MEMFILE_READ(memfile,
                                 prop_header->num_entries * sizeof(field_sid_t));
@@ -1983,7 +1983,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                 }
                         break;
                 case MARKER_SYMBOL_PROP_BOOLEAN_ARRAY: {
-                        carbon_prop_header_t *prop_header = NG5_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);
+                        struct prop_header *prop_header = NG5_MEMFILE_READ_TYPE(memfile, struct prop_header);
 
                         field_sid_t *keys = (field_sid_t *) NG5_MEMFILE_READ(memfile,
                                 prop_header->num_entries * sizeof(field_sid_t));
@@ -2146,7 +2146,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
         return true;
 }
 
-static bool is_valid_carbon_file(const carbon_file_header_t *header)
+static bool is_valid_carbon_file(const struct archive_header *header)
 {
         if (NG5_ARRAY_LENGTH(header->magic) != strlen(CABIN_FILE_MAGIC)) {
                 return false;
@@ -2169,9 +2169,9 @@ static bool is_valid_carbon_file(const carbon_file_header_t *header)
 static void print_record_header_from_memfile(FILE *file, struct memfile *memfile)
 {
         unsigned offset = memfile_tell(memfile);
-        carbon_record_header_t *header = NG5_MEMFILE_READ_TYPE(memfile, carbon_record_header_t);
-        carbon_archive_record_flags_t flags;
-        memset(&flags, 0, sizeof(carbon_archive_record_flags_t));
+        struct record_header *header = NG5_MEMFILE_READ_TYPE(memfile, struct record_header);
+        struct record_flags flags;
+        memset(&flags, 0, sizeof(struct record_flags));
         flags.value = header->flags;
         char *flags_string = record_header_flags_to_string(&flags);
         fprintf(file, "0x%04x ", offset);
@@ -2186,8 +2186,8 @@ static void print_record_header_from_memfile(FILE *file, struct memfile *memfile
 static bool print_carbon_header_from_memfile(FILE *file, struct err *err, struct memfile *memfile)
 {
         unsigned offset = memfile_tell(memfile);
-        assert(carbon_memfile_size(memfile) > sizeof(carbon_file_header_t));
-        carbon_file_header_t *header = NG5_MEMFILE_READ_TYPE(memfile, carbon_file_header_t);
+        assert(carbon_memfile_size(memfile) > sizeof(struct archive_header));
+        struct archive_header *header = NG5_MEMFILE_READ_TYPE(memfile, struct archive_header);
         if (!is_valid_carbon_file(header)) {
                 error(err, NG5_ERR_NOARCHIVEFILE)
                 return false;
@@ -2208,7 +2208,7 @@ static bool print_embedded_dic_from_memfile(FILE *file, struct err *err, struct 
         union string_tab_flags flags;
 
         unsigned offset = memfile_tell(memfile);
-        carbon_string_table_header_t *header = NG5_MEMFILE_READ_TYPE(memfile, carbon_string_table_header_t);
+        struct string_table_header *header = NG5_MEMFILE_READ_TYPE(memfile, struct string_table_header);
         if (header->marker != marker_symbols[MARKER_TYPE_EMBEDDED_STR_DIC].symbol) {
                 char buffer[256];
                 sprintf(buffer,
@@ -2240,7 +2240,7 @@ static bool print_embedded_dic_from_memfile(FILE *file, struct err *err, struct 
 
         while ((*NG5_MEMFILE_PEEK(memfile, char)) == marker_symbols[MARKER_TYPE_EMBEDDED_UNCOMP_STR].symbol) {
                 unsigned offset = memfile_tell(memfile);
-                carbon_string_entry_header_t header = *NG5_MEMFILE_READ_TYPE(memfile, carbon_string_entry_header_t);
+                struct string_entry_header header = *NG5_MEMFILE_READ_TYPE(memfile, struct string_entry_header);
                 fprintf(file,
                         "0x%04x    [marker: %c] [next-entry-off: 0x%04zx] [string-id: %"PRIu64"] [string-length: %"PRIu32"]",
                         offset,
@@ -2270,9 +2270,9 @@ static bool print_archive_from_memfile(FILE *file, struct err *err, struct memfi
         return true;
 }
 
-static carbon_archive_object_flags_t *get_flags(carbon_archive_object_flags_t *flags, struct columndoc_obj *columndoc)
+static union object_flags *get_flags(union object_flags *flags, struct columndoc_obj *columndoc)
 {
-        NG5_ZERO_MEMORY(flags, sizeof(carbon_archive_object_flags_t));
+        NG5_ZERO_MEMORY(flags, sizeof(union object_flags));
         flags->bits.has_null_props = (columndoc->null_prop_keys.num_elems > 0);
         flags->bits.has_bool_props = (columndoc->bool_prop_keys.num_elems > 0);
         flags->bits.has_int8_props = (columndoc->int8_prop_keys.num_elems > 0);
@@ -2307,7 +2307,7 @@ static bool init_decompressor(carbon_compressor_t *strategy, u8 flags);
 
 static bool read_stringtable(struct string_table *table, struct err *err, FILE *disk_file);
 
-static bool read_record(carbon_record_header_t *header_read, struct archive *archive, FILE *disk_file,
+static bool read_record(struct record_header *header_read, struct archive *archive, FILE *disk_file,
         offset_t record_header_offset);
 
 static bool read_string_id_to_offset_index(struct err *err, struct archive *archive, const char *file_path,
@@ -2325,8 +2325,8 @@ bool carbon_archive_open(struct archive *out, const char *file_path)
                 NG5_PRINT_ERROR(NG5_ERR_FOPEN_FAILED);
                 return false;
         } else {
-                carbon_file_header_t header;
-                size_t nread = fread(&header, sizeof(carbon_file_header_t), 1, disk_file);
+                struct archive_header header;
+                size_t nread = fread(&header, sizeof(struct archive_header), 1, disk_file);
                 if (nread != 1) {
                         fclose(disk_file);
                         NG5_PRINT_ERROR(NG5_ERR_IO);
@@ -2339,7 +2339,7 @@ bool carbon_archive_open(struct archive *out, const char *file_path)
                                 out->query_index_string_id_to_offset = NULL;
                                 out->string_id_cache = NULL;
 
-                                carbon_record_header_t record_header;
+                                struct record_header record_header;
 
                                 if ((status = read_stringtable(&out->string_table, &out->err, disk_file)) != true) {
                                         return status;
@@ -2362,7 +2362,7 @@ bool carbon_archive_open(struct archive *out, const char *file_path)
                                         }
                                 }
 
-                                fseek(disk_file, sizeof(carbon_file_header_t), SEEK_SET);
+                                fseek(disk_file, sizeof(struct archive_header), SEEK_SET);
 
                                 offset_t data_start = ftell(disk_file);
                                 fseek(disk_file, 0, SEEK_END);
@@ -2484,10 +2484,10 @@ static bool read_stringtable(struct string_table *table, struct err *err, FILE *
 {
         assert(disk_file);
 
-        carbon_string_table_header_t header;
+        struct string_table_header header;
         union string_tab_flags flags;
 
-        size_t num_read = fread(&header, sizeof(carbon_string_table_header_t), 1, disk_file);
+        size_t num_read = fread(&header, sizeof(struct string_table_header), 1, disk_file);
         if (num_read != 1) {
                 error(err, NG5_ERR_IO);
                 return false;
@@ -2510,13 +2510,13 @@ static bool read_stringtable(struct string_table *table, struct err *err, FILE *
         return true;
 }
 
-static bool read_record(carbon_record_header_t *header_read, struct archive *archive, FILE *disk_file,
+static bool read_record(struct record_header *header_read, struct archive *archive, FILE *disk_file,
         offset_t record_header_offset)
 {
         struct err err;
         fseek(disk_file, record_header_offset, SEEK_SET);
-        carbon_record_header_t header;
-        if (fread(&header, sizeof(carbon_record_header_t), 1, disk_file) != 1) {
+        struct record_header header;
+        if (fread(&header, sizeof(struct record_header), 1, disk_file) != 1) {
                 error(&archive->err, NG5_ERR_CORRUPTED);
                 return false;
         } else {

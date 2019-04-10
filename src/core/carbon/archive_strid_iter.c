@@ -45,11 +45,11 @@ carbon_strid_iter_next(bool *success, carbon_strid_info_t **info, struct err *er
     NG5_NON_NULL_OR_ERROR(it)
 
     if (it->disk_offset != 0 && it->is_open) {
-        carbon_string_entry_header_t header;
+        struct string_entry_header header;
         size_t vec_pos = 0;
         do {
             fseek(it->disk_file, it->disk_offset, SEEK_SET);
-            int num_read = fread(&header, sizeof(carbon_string_entry_header_t), 1, it->disk_file);
+            int num_read = fread(&header, sizeof(struct string_entry_header), 1, it->disk_file);
             if (header.marker != '-') {
                 NG5_PRINT_ERROR(NG5_ERR_INTERNALERR);
                 return false;
