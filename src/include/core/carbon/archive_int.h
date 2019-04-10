@@ -141,7 +141,6 @@ union object_flags {
                         : 1;
                 u32 has_object_array_props
                         : 1;
-
                 u32 RESERVED_27
                         : 1;
                 u32 RESERVED_28
@@ -258,7 +257,7 @@ enum marker_type {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
-static struct archive_header this_file_header = {.version = CABIN_FILE_VERSION, .root_object_header_offset = 0};
+static struct archive_header this_file_header = {.version = CARBON_ARCHIVE_VERSION, .root_object_header_offset = 0};
 
 static struct {
         enum marker_type type;
@@ -316,7 +315,6 @@ struct record_flags {
         struct {
                 u8 is_sorted
                         : 1;
-
                 u8 RESERVED_2
                         : 1;
                 u8 RESERVED_3
@@ -350,7 +348,6 @@ struct archive_info {
         size_t string_table_size;
         size_t record_table_size;
         size_t string_id_index_size;
-
         u32 num_embeddded_strings;
 };
 

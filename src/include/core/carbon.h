@@ -40,7 +40,7 @@ extern "C" {
 #include "shared/error.h"
 #include "std/hash_table.h"
 #include "hash/hash.h"
-#include "coding/pack_huffman.h"
+#include "coding/coding_huffman.h"
 #include "json/json.h"
 #include "core/mem/block.h"
 #include "core/mem/file.h"

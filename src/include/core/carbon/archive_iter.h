@@ -26,7 +26,6 @@ NG5_BEGIN_DECL
 
 enum prop_iter_state {
         PROP_ITER_INIT,
-
         PROP_ITER_NULLS,
         PROP_ITER_BOOLS,
         PROP_ITER_INT8S,
@@ -53,32 +52,31 @@ enum prop_iter_state {
         PROP_ITER_FLOAT_ARRAYS,
         PROP_ITER_STRING_ARRAYS,
         PROP_ITER_OBJECT_ARRAYS,
-
         PROP_ITER_DONE
 };
 
 struct archive_object {
-        object_id_t object_id;     /* unique object id */
-        offset_t offset;        /* this objects header offset */
+        object_id_t object_id;                  /* unique object id */
+        offset_t offset;                        /* this objects header offset */
         struct archive_prop_offs prop_offsets;  /* per-property type offset in the record table byte stream */
-        offset_t next_obj_off;  /* offset to next object in list, or NULL if no such exists */
+        offset_t next_obj_off;                  /* offset to next object in list, or NULL if no such exists */
         struct memfile memfile;
         struct err err;
 };
 
 enum prop_iter_mode {
-        PROP_ITER_MODE_OBJECT, PROP_ITER_MODE_COLLECTION,
+        PROP_ITER_MODE_OBJECT,
+        PROP_ITER_MODE_COLLECTION,
 };
 
 struct object_iter_state {
-        offset_t prop_type_off_data;      /* offset of type-dependent data in memfile */
-        struct fixed_prop prop_group_header;       /* type, num props and keys */
+        offset_t prop_type_off_data;            /* offset of type-dependent data in memfile */
+        struct fixed_prop prop_group_header;    /* type, num props and keys */
         offset_t current_prop_group_off;
         offset_t prop_data_off;
-
-        const field_sid_t *keys;                   /* current property key in this iteration */
-        enum field_type type;                    /* property basic value type (e.g., int8, or object) */
-        bool is_array;                /* flag indicating that property is an array type */
+        const field_sid_t *keys;                /* current property key in this iteration */
+        enum field_type type;                   /* property basic value type (e.g., int8, or object) */
+        bool is_array;                          /* flag indicating that property is an array type */
 };
 
 struct collection_iter_state {
@@ -93,7 +91,6 @@ struct collection_iter_state {
                 u32 num_objects;
                 const object_id_t *object_ids;
                 const offset_t *column_offs;
-
                 struct {
                         u32 idx;
                         field_sid_t name;
@@ -101,7 +98,6 @@ struct collection_iter_state {
                         u32 num_elem;
                         const offset_t *elem_offsets;
                         const u32 *elem_positions;
-
                         struct {
                                 u32 idx;
                                 u32 array_length;
@@ -112,16 +108,15 @@ struct collection_iter_state {
 };
 
 struct archive_value_vector {
-        struct prop_iter *prop_iter;               /* pointer to property iterator that created this iterator */
+        struct prop_iter *prop_iter;            /* pointer to property iterator that created this iterator */
         struct memfile record_table_memfile;    /* iterator-local read-only memfile on archive record table */
-        enum field_type prop_type;               /* property basic value type (e.g., int8, or object) */
-        bool is_array;                /* flag indicating whether value type is an array or not */
-        offset_t data_off;                /* offset in memfile where type-dependent data begins */
-        u32 value_max_idx;           /* maximum index of a value callable by 'at' functions */
-        struct err err;                     /* error information */
-        object_id_t object_id;               /* current object id */
+        enum field_type prop_type;              /* property basic value type (e.g., int8, or object) */
+        bool is_array;                          /* flag indicating whether value type is an array or not */
+        offset_t data_off;                      /* offset in memfile where type-dependent data begins */
+        u32 value_max_idx;                      /* maximum index of a value callable by 'at' functions */
+        struct err err;                         /* error information */
+        object_id_t object_id;                  /* current object id */
         const field_sid_t *keys;
-
         union {
                 struct {
                         const offset_t *offsets;
@@ -166,12 +161,12 @@ struct archive_value_vector {
 };
 
 struct prop_iter {
-        struct archive_object object;                  /* current object */
-        struct memfile record_table_memfile;    /* iterator-local read-only memfile on archive record table */
+        struct archive_object object;                 /* current object */
+        struct memfile record_table_memfile;          /* iterator-local read-only memfile on archive record table */
 
-        u16 mask;                    /* user-defined mask which properties to include */
-        enum prop_iter_mode mode;               /* determines whether to iterating over object or collection */
-        struct err err;                     /* error information */
+        u16 mask;                                     /* user-defined mask which properties to include */
+        enum prop_iter_mode mode;                     /* determines whether to iterating over object or collection */
+        struct err err;                               /* error information */
         enum prop_iter_state prop_cursor;             /* current property type in iteration */
 
         struct object_iter_state mode_object;
@@ -180,9 +175,9 @@ struct prop_iter {
 };
 
 struct independent_iter_state {
-        struct memfile record_table_memfile;    /* iterator-local read-only memfile on archive record table */
-        struct collection_iter_state state;                   /* iterator-local state */
-        struct err err;                     /* error information */
+        struct memfile record_table_memfile;           /* iterator-local read-only memfile on archive record table */
+        struct collection_iter_state state;            /* iterator-local state */
+        struct err err;                                /* error information */
 };
 
 typedef struct independent_iter_state archive_collection_iter_t;
@@ -218,22 +213,22 @@ struct column_object_iter {
 #define NG5_ARCHIVE_ITER_MASK_NULL                   (1 << 14)
 #define NG5_ARCHIVE_ITER_MASK_OBJECT                 (1 << 15)
 
-#define NG5_ARCHIVE_ITER_MASK_INTEGER                NG5_ARCHIVE_ITER_MASK_INT8       |                      \
-                                                    NG5_ARCHIVE_ITER_MASK_INT16      |                          \
-                                                    NG5_ARCHIVE_ITER_MASK_INT32      |                          \
-                                                    NG5_ARCHIVE_ITER_MASK_INT64      |                          \
-                                                    NG5_ARCHIVE_ITER_MASK_UINT8      |                          \
-                                                    NG5_ARCHIVE_ITER_MASK_UINT16     |                          \
-                                                    NG5_ARCHIVE_ITER_MASK_UINT32     |                          \
+#define NG5_ARCHIVE_ITER_MASK_INTEGER               NG5_ARCHIVE_ITER_MASK_INT8       |                                 \
+                                                    NG5_ARCHIVE_ITER_MASK_INT16      |                                 \
+                                                    NG5_ARCHIVE_ITER_MASK_INT32      |                                 \
+                                                    NG5_ARCHIVE_ITER_MASK_INT64      |                                 \
+                                                    NG5_ARCHIVE_ITER_MASK_UINT8      |                                 \
+                                                    NG5_ARCHIVE_ITER_MASK_UINT16     |                                 \
+                                                    NG5_ARCHIVE_ITER_MASK_UINT32     |                                 \
                                                     NG5_ARCHIVE_ITER_MASK_UINT64
 
-#define NG5_ARCHIVE_ITER_MASK_ANY                    NG5_ARCHIVE_ITER_MASK_PRIMITIVES |                      \
-                                                    NG5_ARCHIVE_ITER_MASK_ARRAYS     |                          \
-                                                    NG5_ARCHIVE_ITER_MASK_INTEGER    |                          \
-                                                    NG5_ARCHIVE_ITER_MASK_NUMBER     |                          \
-                                                    NG5_ARCHIVE_ITER_MASK_STRING     |                          \
-                                                    NG5_ARCHIVE_ITER_MASK_BOOLEAN    |                          \
-                                                    NG5_ARCHIVE_ITER_MASK_NULL       |                          \
+#define NG5_ARCHIVE_ITER_MASK_ANY                   NG5_ARCHIVE_ITER_MASK_PRIMITIVES |                                 \
+                                                    NG5_ARCHIVE_ITER_MASK_ARRAYS     |                                 \
+                                                    NG5_ARCHIVE_ITER_MASK_INTEGER    |                                 \
+                                                    NG5_ARCHIVE_ITER_MASK_NUMBER     |                                 \
+                                                    NG5_ARCHIVE_ITER_MASK_STRING     |                                 \
+                                                    NG5_ARCHIVE_ITER_MASK_BOOLEAN    |                                 \
+                                                    NG5_ARCHIVE_ITER_MASK_NULL       |                                 \
                                                     NG5_ARCHIVE_ITER_MASK_OBJECT
 
 NG5_DEFINE_GET_ERROR_FUNCTION(archive_value_vector, struct archive_value_vector, iter)
@@ -282,8 +277,8 @@ NG5_EXPORT(bool) archive_column_next_entry(archive_column_entry_iter_t *entry_it
 
 NG5_EXPORT(bool) archive_column_entry_get_type(enum field_type *type, archive_column_entry_iter_t *entry);
 
-#define DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(built_in_type, name)                                         \
-NG5_EXPORT(const built_in_type *)                                                                                   \
+#define DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(built_in_type, name)                                            \
+NG5_EXPORT(const built_in_type *)                                                                                      \
 archive_column_entry_get_##name(u32 *array_length, archive_column_entry_iter_t *entry);
 
 DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_i8_t, int8s);
@@ -324,8 +319,8 @@ NG5_EXPORT(bool) archive_value_vector_is_of_objects(bool *is_object, struct arch
 NG5_EXPORT(bool) archive_value_vector_get_object_at(struct archive_object *object, u32 idx,
         struct archive_value_vector *value);
 
-#define DEFINE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(name)                                                         \
-NG5_EXPORT(bool)                                                                                                    \
+#define DEFINE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(name)                                                            \
+NG5_EXPORT(bool)                                                                                                       \
 archive_value_vector_is_##name(bool *type_match, struct archive_value_vector *value);
 
 DEFINE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(int8);
@@ -341,8 +336,8 @@ DEFINE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(number);
 DEFINE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(boolean);
 DEFINE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(null);
 
-#define DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(name, built_in_type)                                         \
-NG5_EXPORT(const built_in_type *)                                                                                   \
+#define DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(name, built_in_type)                                            \
+NG5_EXPORT(const built_in_type *)                                                                                      \
 archive_value_vector_get_##name(u32 *num_values, struct archive_value_vector *value);
 
 DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int8s, field_i8_t)
@@ -360,10 +355,10 @@ DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(booleans, FIELD_BOOLEANean_t)
 NG5_EXPORT(const field_u32_t *)archive_value_vector_get_null_arrays(u32 *num_values,
         struct archive_value_vector *value);
 
-#define DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(name, built_in_type)                                      \
-NG5_EXPORT(const built_in_type *)                                                                                   \
-archive_value_vector_get_##name##_arrays_at(u32 *array_length, u32 idx,                               \
-                                               struct archive_value_vector *value);                                  \
+#define DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(name, built_in_type)                                         \
+NG5_EXPORT(const built_in_type *)                                                                                      \
+archive_value_vector_get_##name##_arrays_at(u32 *array_length, u32 idx,                                                \
+                                               struct archive_value_vector *value);                                    \
 
 DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(int8, field_i8_t);
 DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(int16, field_i16_t);

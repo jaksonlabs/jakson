@@ -18,15 +18,16 @@
 #ifndef NG5_ELF_H
 #define NG5_ELF_H
 
-#include "hash/hash.h"
+#include "hash.h"
+#include "../shared/common.h"
 
 NG5_BEGIN_DECL
 
-#define NG5_HASH_ELF(key_size, key)                                                                                 \
+#define NG5_HASH_ELF(key_size, key)                                                                                    \
 ({                                                                                                                     \
     assert ((key != NULL) && (key_size > 0));                                                                          \
                                                                                                                        \
-    hash32_t hash = 0, g;                                                                                         \
+    hash32_t hash = 0, g;                                                                                              \
     for (size_t i = 0; i < key_size; i++) {                                                                            \
         hash = (hash << 4) + ((unsigned char* )key)[i];                                                                \
         if ((g = hash & 0xf0000000L) != 0) {                                                                           \
@@ -37,6 +38,6 @@ NG5_BEGIN_DECL
     hash;                                                                                                              \
 })
 
-        NG5_END_DECL
+NG5_END_DECL
 
 #endif

@@ -27,26 +27,26 @@ NG5_BEGIN_DECL
 
 struct packer;
 
-NG5_EXPORT(bool) compressor_none_init(struct packer *self);
+NG5_EXPORT(bool) pack_none_init(struct packer *self);
 
-NG5_EXPORT(bool) compressor_none_cpy(const struct packer *self, struct packer *dst);
+NG5_EXPORT(bool) pack_none_cpy(const struct packer *self, struct packer *dst);
 
-NG5_EXPORT(bool) compressor_none_drop(struct packer *self);
+NG5_EXPORT(bool) pack_none_drop(struct packer *self);
 
-NG5_EXPORT(bool) compressor_none_write_extra(struct packer *self, struct memfile *dst,
+NG5_EXPORT(bool) pack_none_write_extra(struct packer *self, struct memfile *dst,
         const struct vector ofType (const char *) *strings);
 
-NG5_EXPORT(bool) compressor_none_read_extra(struct packer *self, FILE *src, size_t nbytes);
+NG5_EXPORT(bool) pack_none_read_extra(struct packer *self, FILE *src, size_t nbytes);
 
-NG5_EXPORT(bool) compressor_none_print_extra(struct packer *self, FILE *file, struct memfile *src);
+NG5_EXPORT(bool) pack_none_print_extra(struct packer *self, FILE *file, struct memfile *src);
 
-NG5_EXPORT(bool) compressor_none_print_encoded_string(struct packer *self, FILE *file, struct memfile *src,
+NG5_EXPORT(bool) pack_none_print_encoded_string(struct packer *self, FILE *file, struct memfile *src,
         u32 decompressed_strlen);
 
-NG5_EXPORT(bool) compressor_none_encode_string(struct packer *self, struct memfile *dst, struct err *err,
+NG5_EXPORT(bool) pack_none_encode_string(struct packer *self, struct memfile *dst, struct err *err,
         const char *string);
 
-NG5_EXPORT(bool) compressor_none_decode_string(struct packer *self, char *dst, size_t strlen, FILE *src);
+NG5_EXPORT(bool) pack_none_decode_string(struct packer *self, char *dst, size_t strlen, FILE *src);
 
 NG5_END_DECL
 

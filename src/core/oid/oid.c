@@ -108,8 +108,8 @@ NG5_EXPORT(bool) object_id_create(object_id_t *out)
         }
 
         bool capacity_left = (thread_local_counter != thread_local_counter_limit);
-        NG5_PRINT_ERROR_IF(!capacity_left, NG5_ERR_THREADOOOBJIDS)
-        if (NG5_LIKELY(capacity_left)) {
+        error_print_if(!capacity_left, NG5_ERR_THREADOOOBJIDS)
+        if (likely(capacity_left)) {
                 union object_id internal =
                         {.global_wallclock  = time_now_wallclock(), .global_build_date = global_build_date_bit, .global_build_path = global_build_path_bit, .process_id        = process_local_id, .process_magic     = process_magic, .process_counter   = process_counter++, .thread_id         = (u64) thread_local_id, .thread_magic      = thread_local_magic, .thread_counter    = thread_local_counter++, .call_random       = rand()};
                 *out = internal.value;
@@ -121,70 +121,70 @@ NG5_EXPORT(bool) object_id_create(object_id_t *out)
 
 NG5_EXPORT(bool) object_id_get_global_wallclocktime(uint_fast8_t *out, object_id_t id)
 {
-        NG5_NON_NULL_OR_ERROR(out);
+        error_if_null(out);
         *out = ((union object_id *) &id)->global_wallclock;
         return true;
 }
 
 NG5_EXPORT(bool) object_id_get_global_build_path_bit(uint_fast8_t *out, object_id_t id)
 {
-        NG5_NON_NULL_OR_ERROR(out);
+        error_if_null(out);
         *out = ((union object_id *) &id)->global_build_path;
         return true;
 }
 
 NG5_EXPORT(bool) object_id_get_global_build_time_bit(uint_fast8_t *out, object_id_t id)
 {
-        NG5_NON_NULL_OR_ERROR(out);
+        error_if_null(out);
         *out = ((union object_id *) &id)->global_build_date;
         return true;
 }
 
 NG5_EXPORT(bool) object_id_get_process_id(uint_fast8_t *out, object_id_t id)
 {
-        NG5_NON_NULL_OR_ERROR(out);
+        error_if_null(out);
         *out = ((union object_id *) &id)->process_id;
         return true;
 }
 
 NG5_EXPORT(bool) object_id_get_process_magic(uint_fast8_t *out, object_id_t id)
 {
-        NG5_NON_NULL_OR_ERROR(out);
+        error_if_null(out);
         *out = ((union object_id *) &id)->process_magic;
         return true;
 }
 
 NG5_EXPORT(bool) object_id_get_process_counter(uint_fast16_t *out, object_id_t id)
 {
-        NG5_NON_NULL_OR_ERROR(out);
+        error_if_null(out);
         *out = ((union object_id *) &id)->process_counter;
         return true;
 }
 
 NG5_EXPORT(bool) object_id_get_thread_id(uint_fast8_t *out, object_id_t id)
 {
-        NG5_NON_NULL_OR_ERROR(out);
+        error_if_null(out);
         *out = ((union object_id *) &id)->thread_id;
         return true;
 }
 
 NG5_EXPORT(bool) object_id_get_thread_magic(uint_fast8_t *out, object_id_t id)
 {
-        NG5_NON_NULL_OR_ERROR(out);
+        error_if_null(out);
         *out = ((union object_id *) &id)->thread_magic;
         return true;
 }
 
 NG5_EXPORT(bool) object_id_get_thread_counter(uint_fast32_t *out, object_id_t id)
 {
-        NG5_NON_NULL_OR_ERROR(out);
+        error_if_null(out);
         *out = ((union object_id *) &id)->thread_counter;
         return true;
 }
 
 NG5_EXPORT(bool) object_id_get_call_random(uint_fast8_t *out, object_id_t id)
 {
-        NG5_NON_NULL_OR_ERROR(out);
+        error_if_null(out);
         *out = ((union object_id *) &id)->call_random;
         return true;
 }

@@ -115,14 +115,14 @@ static bool this_setup_carriers(struct strdic *self, size_t capacity, size_t num
 
 #define THIS_EXTRAS(self)                                                                                              \
 ({                                                                                                                     \
-    NG5_CHECK_TAG(self->tag, ASYNC);                                                             \
+    ng5_check_tag(self->tag, ASYNC);                                                             \
     (struct async_extra *) self->extra;                                                                                       \
 })
 
-NG5_EXPORT (int) strdic_create_async(struct strdic *dic, size_t capacity, size_t num_index_buckets,
+NG5_EXPORT (int) encode_async_create(struct strdic *dic, size_t capacity, size_t num_index_buckets,
         size_t approx_num_unique_strs, size_t num_threads, const struct allocator *alloc)
 {
-        NG5_CHECK_SUCCESS(alloc_this_or_std(&dic->alloc, alloc));
+        ng5_check_success(alloc_this_or_std(&dic->alloc, alloc));
 
         dic->tag = ASYNC;
         dic->drop = this_drop;
@@ -137,7 +137,7 @@ NG5_EXPORT (int) strdic_create_async(struct strdic *dic, size_t capacity, size_t
         dic->num_distinct = this_num_distinct;
         dic->get_contents = this_get_contents;
 
-        NG5_CHECK_SUCCESS(this_create_extra(dic, capacity, num_index_buckets, approx_num_unique_strs, num_threads));
+        ng5_check_success(this_create_extra(dic, capacity, num_index_buckets, approx_num_unique_strs, num_threads));
         return true;
 }
 
@@ -148,7 +148,7 @@ static bool this_create_extra(struct strdic *self, size_t capacity, size_t num_i
 
         self->extra = alloc_malloc(&self->alloc, sizeof(struct async_extra));
         struct async_extra *extra = THIS_EXTRAS(self);
-        spinlock_init(&extra->lock);
+        spin_init(&extra->lock);
         vec_create(&extra->carriers, &self->alloc, sizeof(struct carrier), num_threads);
         this_setup_carriers(self, capacity, num_index_buckets, approx_num_unique_str, num_threads);
         vec_create(&extra->carrier_mapping, &self->alloc, sizeof(struct carrier *), capacity);
@@ -158,15 +158,15 @@ static bool this_create_extra(struct strdic *self, size_t capacity, size_t num_i
 
 static bool this_drop(struct strdic *self)
 {
-        NG5_CHECK_TAG(self->tag, ASYNC);
+        ng5_check_tag(self->tag, ASYNC);
         struct async_extra *extra = THIS_EXTRAS(self);
         for (size_t i = 0; i < extra->carriers.num_elems; i++) {
                 struct carrier *carrier = vec_get(&extra->carriers, i, struct carrier);
                 strdic_drop(&carrier->local_dictionary);
         }
-        NG5_CHECK_SUCCESS(vec_drop(&extra->carriers));
-        NG5_CHECK_SUCCESS(vec_drop(&extra->carrier_mapping));
-        NG5_CHECK_SUCCESS(alloc_free(&self->alloc, extra));
+        ng5_check_success(vec_drop(&extra->carriers));
+        ng5_check_success(vec_drop(&extra->carrier_mapping));
+        ng5_check_success(alloc_free(&self->alloc, extra));
         return true;
 }
 
@@ -176,7 +176,7 @@ void *parallel_remove_function(void *args)
         field_sid_t len = vec_length(carrier_arg->local_ids);
         carrier_arg->did_work = len > 0;
 
-        NG5_DEBUG(STRING_DIC_ASYNC_TAG,
+        ng5_debug(STRING_DIC_ASYNC_TAG,
                 "thread %zu spawned for remove task (%zu elements)",
                 carrier_arg->carrier->id,
                 vec_length(carrier_arg->local_ids));
@@ -184,10 +184,10 @@ void *parallel_remove_function(void *args)
                 struct strdic *dic = &carrier_arg->carrier->local_dictionary;
                 field_sid_t *ids = vec_all(carrier_arg->local_ids, field_sid_t);
                 carrier_arg->result = strdic_remove(dic, ids, len);
-                NG5_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu task done", carrier_arg->carrier->id);
+                ng5_debug(STRING_DIC_ASYNC_TAG, "thread %zu task done", carrier_arg->carrier->id);
         } else {
                 carrier_arg->result = true;
-                NG5_WARN(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", carrier_arg->carrier->id);
+                ng5_warn(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", carrier_arg->carrier->id);
         }
 
         return NULL;
@@ -198,14 +198,14 @@ void *parallel_insert_function(void *args)
         struct parallel_insert_arg *restrict this_args = (struct parallel_insert_arg *restrict) args;
         this_args->did_work = this_args->strings.num_elems > 0;
 
-        NG5_TRACE(STRING_DIC_ASYNC_TAG, "thread-local insert function started (thread %zu)", this_args->carrier->id);
-        NG5_DEBUG(STRING_DIC_ASYNC_TAG,
+        ng5_trace(STRING_DIC_ASYNC_TAG, "thread-local insert function started (thread %zu)", this_args->carrier->id);
+        ng5_debug(STRING_DIC_ASYNC_TAG,
                 "thread %zu spawned for insert task (%zu elements)",
                 this_args->carrier->id,
                 vec_length(&this_args->strings));
 
         if (this_args->did_work) {
-                NG5_TRACE(STRING_DIC_ASYNC_TAG,
+                ng5_trace(STRING_DIC_ASYNC_TAG,
                         "thread %zu starts insertion of %zu strings",
                         this_args->carrier->id,
                         vec_length(&this_args->strings));
@@ -218,10 +218,10 @@ void *parallel_insert_function(void *args)
                         this_args->insert_num_threads);
 
                 /** internal error during thread-local string dictionary building process */
-                NG5_PRINT_ERROR_AND_DIE_IF(status != true, NG5_ERR_INTERNALERR);
-                NG5_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu done", this_args->carrier->id);
+                error_print_and_die_if(status != true, NG5_ERR_INTERNALERR);
+                ng5_debug(STRING_DIC_ASYNC_TAG, "thread %zu done", this_args->carrier->id);
         } else {
-                NG5_WARN(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", this_args->carrier->id);
+                ng5_warn(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", this_args->carrier->id);
         }
 
         return NULL;
@@ -232,11 +232,11 @@ void *parallel_locate_safe_function(void *args)
         struct parallel_locate_arg *restrict this_args = (struct parallel_locate_arg *restrict) args;
         this_args->did_work = vec_length(&this_args->keys_in) > 0;
 
-        NG5_TRACE(STRING_DIC_ASYNC_TAG,
+        ng5_trace(STRING_DIC_ASYNC_TAG,
                 "thread-local 'locate' function invoked for thread %zu...",
                 this_args->carrier->id)
 
-        NG5_DEBUG(STRING_DIC_ASYNC_TAG,
+        ng5_debug(STRING_DIC_ASYNC_TAG,
                 "thread %zu spawned for locate (safe) task (%zu elements)",
                 this_args->carrier->id,
                 vec_length(&this_args->keys_in));
@@ -249,9 +249,9 @@ void *parallel_locate_safe_function(void *args)
                         vec_all(&this_args->keys_in, char *),
                         vec_length(&this_args->keys_in));
 
-                NG5_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu done", this_args->carrier->id);
+                ng5_debug(STRING_DIC_ASYNC_TAG, "thread %zu done", this_args->carrier->id);
         } else {
-                NG5_WARN(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", this_args->carrier->id);
+                ng5_warn(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", this_args->carrier->id);
         }
 
         return NULL;
@@ -262,7 +262,7 @@ void *parallel_extract_function(void *args)
         struct parallel_extract_arg *restrict this_args = (struct parallel_extract_arg *restrict) args;
         this_args->did_work = vec_length(&this_args->local_ids_in) > 0;
 
-        NG5_DEBUG(STRING_DIC_ASYNC_TAG,
+        ng5_debug(STRING_DIC_ASYNC_TAG,
                 "thread %zu spawned for extract task (%zu elements)",
                 this_args->carrier->id,
                 vec_length(&this_args->local_ids_in));
@@ -271,9 +271,9 @@ void *parallel_extract_function(void *args)
                 this_args->strings_out = strdic_extract(&this_args->carrier->local_dictionary,
                         vec_all(&this_args->local_ids_in, field_sid_t),
                         vec_length(&this_args->local_ids_in));
-                NG5_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu done", this_args->carrier->id);
+                ng5_debug(STRING_DIC_ASYNC_TAG, "thread %zu done", this_args->carrier->id);
         } else {
-                NG5_WARN(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", this_args->carrier->id);
+                ng5_warn(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", this_args->carrier->id);
         }
 
         return NULL;
@@ -281,19 +281,19 @@ void *parallel_extract_function(void *args)
 
 static void synchronize(struct vector ofType(carrier) *carriers, size_t num_threads)
 {
-        NG5_DEBUG(STRING_DIC_ASYNC_TAG, "barrier installed for %d threads", num_threads);
+        ng5_debug(STRING_DIC_ASYNC_TAG, "barrier installed for %d threads", num_threads);
 
         timestamp_t begin = time_now_wallclock();
         for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
                 volatile struct carrier *carrier = vec_get(carriers, thread_id, struct carrier);
                 pthread_join(carrier->thread, NULL);
-                NG5_DEBUG(STRING_DIC_ASYNC_TAG, "thread %d joined", carrier->id);
+                ng5_debug(STRING_DIC_ASYNC_TAG, "thread %d joined", carrier->id);
         }
         timestamp_t end = time_now_wallclock();
         timestamp_t duration = (end - begin);
-        NG5_UNUSED(duration);
+        ng5_unused(duration);
 
-        NG5_DEBUG(STRING_DIC_ASYNC_TAG,
+        ng5_debug(STRING_DIC_ASYNC_TAG,
                 "barrier passed for %d threads after %f seconds",
                 num_threads,
                 duration / 1000.0f);
@@ -334,8 +334,8 @@ struct thread_assign_arg {
 static void parallel_compute_thread_assignment_function(const void *restrict start, size_t width, size_t len,
         void *restrict args, thread_id_t tid)
 {
-        NG5_UNUSED(tid);
-        NG5_UNUSED(width);
+        ng5_unused(tid);
+        ng5_unused(width);
 
         char *const *strings = (char *const *) start;
 
@@ -372,11 +372,11 @@ static bool this_insert(struct strdic *self, field_sid_t **out, char *const *str
         size_t __num_threads)
 {
         timestamp_t begin = time_now_wallclock();
-        NG5_INFO(STRING_DIC_ASYNC_TAG, "insert operation invoked: %zu strings in total", num_strings)
+        ng5_info(STRING_DIC_ASYNC_TAG, "insert operation invoked: %zu strings in total", num_strings)
 
-        NG5_CHECK_TAG(self->tag, ASYNC);
+        ng5_check_tag(self->tag, ASYNC);
         /** parameter 'num_threads' must be set to 0 for async dictionary */
-        NG5_PRINT_ERROR_AND_DIE_IF(__num_threads != 0, NG5_ERR_INTERNALERR);
+        error_print_and_die_if(__num_threads != 0, NG5_ERR_INTERNALERR);
 
         this_lock(self);
 
@@ -406,7 +406,7 @@ static bool this_insert(struct strdic *self, field_sid_t **out, char *const *str
                 entry->carrier = vec_get(&extra->carriers, i, struct carrier);
                 entry->insert_num_threads = num_threads;
 
-                vec_create(&entry->strings, &self->alloc, sizeof(char *), NG5_MAX(1, carrier_num_strings[i]));
+                vec_create(&entry->strings, &self->alloc, sizeof(char *), ng5_max(1, carrier_num_strings[i]));
                 vec_push(&carrier_args, &entry, 1);
                 assert (entry->strings.base != NULL);
 
@@ -430,21 +430,21 @@ static bool this_insert(struct strdic *self, field_sid_t **out, char *const *str
 
 
         /** schedule insert operation per carrier */
-        NG5_TRACE(STRING_DIC_ASYNC_TAG, "schedule insert operation to %zu threads", num_threads)
+        ng5_trace(STRING_DIC_ASYNC_TAG, "schedule insert operation to %zu threads", num_threads)
         for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
                 struct parallel_insert_arg
                         *carrier_arg = *vec_get(&carrier_args, thread_id, struct parallel_insert_arg *);
                 struct carrier *carrier = vec_get(&extra->carriers, thread_id, struct carrier);
-                NG5_TRACE(STRING_DIC_ASYNC_TAG, "create thread %zu...", thread_id)
+                ng5_trace(STRING_DIC_ASYNC_TAG, "create thread %zu...", thread_id)
                 pthread_create(&carrier->thread, NULL, parallel_insert_function, carrier_arg);
-                NG5_TRACE(STRING_DIC_ASYNC_TAG, "thread %zu created", thread_id)
+                ng5_trace(STRING_DIC_ASYNC_TAG, "thread %zu created", thread_id)
         }
-        NG5_TRACE(STRING_DIC_ASYNC_TAG, "scheduling done for %zu threads", num_threads)
+        ng5_trace(STRING_DIC_ASYNC_TAG, "scheduling done for %zu threads", num_threads)
 
         /** synchronize */
-        NG5_TRACE(STRING_DIC_ASYNC_TAG, "start synchronizing %zu threads", num_threads)
+        ng5_trace(STRING_DIC_ASYNC_TAG, "start synchronizing %zu threads", num_threads)
         synchronize(&extra->carriers, num_threads);
-        NG5_TRACE(STRING_DIC_ASYNC_TAG, "%zu threads in sync", num_threads)
+        ng5_trace(STRING_DIC_ASYNC_TAG, "%zu threads in sync", num_threads)
 
         /** compute string ids; the string id produced by this implementation is a compound identifier encoding
          * both the owning thread id and the thread-local string id. For this, the returned (global) string identifier
@@ -458,7 +458,7 @@ static bool this_insert(struct strdic *self, field_sid_t **out, char *const *str
          * none of the carrier threads allocated thread-local 'out's which mean that no cleanup must be done */
 
         /** parallelizing the following block makes no sense but waste of compute power and energy */
-        if (NG5_LIKELY(out != NULL)) {
+        if (likely(out != NULL)) {
                 field_sid_t *total_out = alloc_malloc(&self->alloc, num_strings * sizeof(field_sid_t));
                 size_t currentOut = 0;
 
@@ -494,9 +494,9 @@ static bool this_insert(struct strdic *self, field_sid_t **out, char *const *str
         this_unlock(self);
 
         timestamp_t end = time_now_wallclock();
-        NG5_UNUSED(begin);
-        NG5_UNUSED(end);
-        NG5_INFO(STRING_DIC_ASYNC_TAG, "insertion operation done: %f seconds spent here", (end - begin) / 1000.0f)
+        ng5_unused(begin);
+        ng5_unused(end);
+        ng5_info(STRING_DIC_ASYNC_TAG, "insertion operation done: %f seconds spent here", (end - begin) / 1000.0f)
 
         return true;
 }
@@ -504,16 +504,16 @@ static bool this_insert(struct strdic *self, field_sid_t **out, char *const *str
 static bool this_remove(struct strdic *self, field_sid_t *strings, size_t num_strings)
 {
         timestamp_t begin = time_now_wallclock();
-        NG5_INFO(STRING_DIC_ASYNC_TAG, "remove operation started: %zu strings to remove", num_strings);
+        ng5_info(STRING_DIC_ASYNC_TAG, "remove operation started: %zu strings to remove", num_strings);
 
-        NG5_CHECK_TAG(self->tag, ASYNC);
+        ng5_check_tag(self->tag, ASYNC);
 
         this_lock(self);
 
         struct parallel_remove_arg empty;
         struct async_extra *extra = THIS_EXTRAS(self);
         uint_fast16_t num_threads = vec_length(&extra->carriers);
-        size_t approx_num_strings_per_thread = NG5_MAX(1, num_strings / num_threads);
+        size_t approx_num_strings_per_thread = ng5_max(1, num_strings / num_threads);
         struct vector ofType(field_sid_t) *string_map = alloc_malloc(&self->alloc, num_threads * sizeof(struct vector));
 
         struct vector ofType(struct parallel_remove_arg) carrier_args;
@@ -559,9 +559,9 @@ static bool this_remove(struct strdic *self, field_sid_t *strings, size_t num_st
         this_unlock(self);
 
         timestamp_t end = time_now_wallclock();
-        NG5_UNUSED(begin);
-        NG5_UNUSED(end);
-        NG5_INFO(STRING_DIC_ASYNC_TAG, "remove operation done: %f seconds spent here", (end - begin) / 1000.0f)
+        ng5_unused(begin);
+        ng5_unused(end);
+        ng5_info(STRING_DIC_ASYNC_TAG, "remove operation done: %f seconds spent here", (end - begin) / 1000.0f)
 
         return true;
 }
@@ -570,9 +570,9 @@ static bool this_locate_safe(struct strdic *self, field_sid_t **out, bool **foun
         char *const *keys, size_t num_keys)
 {
         timestamp_t begin = time_now_wallclock();
-        NG5_INFO(STRING_DIC_ASYNC_TAG, "locate (safe) operation started: %zu strings to locate", num_keys)
+        ng5_info(STRING_DIC_ASYNC_TAG, "locate (safe) operation started: %zu strings to locate", num_keys)
 
-        NG5_CHECK_TAG(self->tag, ASYNC);
+        ng5_check_tag(self->tag, ASYNC);
 
         this_lock(self);
 
@@ -580,8 +580,8 @@ static bool this_locate_safe(struct strdic *self, field_sid_t **out, bool **foun
         uint_fast16_t num_threads = vec_length(&extra->carriers);
 
         /** global result output */
-        NG5_MALLOC(field_sid_t, global_out, num_keys, &self->alloc);
-        NG5_MALLOC(bool, global_found_mask, num_keys, &self->alloc);
+        ng5_malloc(field_sid_t, global_out, num_keys, &self->alloc);
+        ng5_malloc(bool, global_found_mask, num_keys, &self->alloc);
 
         size_t global_num_not_found = 0;
 
@@ -608,7 +608,7 @@ static bool this_locate_safe(struct strdic *self, field_sid_t **out, bool **foun
                 assert (&arg->keys_in.base != NULL);
         }
 
-        NG5_TRACE(STRING_DIC_ASYNC_TAG, "computing per-thread string subset for %zu strings", num_keys)
+        ng5_trace(STRING_DIC_ASYNC_TAG, "computing per-thread string subset for %zu strings", num_keys)
         /** create per-carrier string subset */
         for (size_t i = 0; i < num_keys; i++) {
                 /** get thread responsible for this particular string */
@@ -624,7 +624,7 @@ static bool this_locate_safe(struct strdic *self, field_sid_t **out, bool **foun
                 vec_push(&arg->keys_in, &keys[i], 1);
         }
 
-        NG5_TRACE(STRING_DIC_ASYNC_TAG, "schedule operation to threads to %zu threads...", num_threads)
+        ng5_trace(STRING_DIC_ASYNC_TAG, "schedule operation to threads to %zu threads...", num_threads)
         /** schedule operation to threads */
         for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
                 struct carrier *carrier = vec_get(&extra->carriers, thread_id, struct carrier);
@@ -634,12 +634,12 @@ static bool this_locate_safe(struct strdic *self, field_sid_t **out, bool **foun
         }
 
         /** synchronize */
-        NG5_TRACE(STRING_DIC_ASYNC_TAG, "start syncing %zu threads...", num_threads)
+        ng5_trace(STRING_DIC_ASYNC_TAG, "start syncing %zu threads...", num_threads)
         synchronize(&extra->carriers, num_threads);
-        NG5_TRACE(STRING_DIC_ASYNC_TAG, "%zu threads in sync.", num_threads)
+        ng5_trace(STRING_DIC_ASYNC_TAG, "%zu threads in sync.", num_threads)
 
         /** collect and merge results */
-        NG5_TRACE(STRING_DIC_ASYNC_TAG, "merging results of %zu threads", num_threads)
+        ng5_trace(STRING_DIC_ASYNC_TAG, "merging results of %zu threads", num_threads)
         for (size_t i = 0; i < num_keys; i++) {
                 /** get thread responsible for this particular string, and local position of that string inside the
                  * thread storage */
@@ -662,13 +662,13 @@ static bool this_locate_safe(struct strdic *self, field_sid_t **out, bool **foun
                 global_num_not_found += arg->num_not_found_out;
 
                 /** cleanup */
-                if (NG5_LIKELY(arg->did_work)) {
+                if (likely(arg->did_work)) {
                         strdic_free(&arg->carrier->local_dictionary, arg->found_mask_out);
                         strdic_free(&arg->carrier->local_dictionary, arg->ids_out);
                 }
         }
 
-        NG5_TRACE(STRING_DIC_ASYNC_TAG, "cleanup%s", "...")
+        ng5_trace(STRING_DIC_ASYNC_TAG, "cleanup%s", "...")
 
         /** cleanup */
         drop_thread_assignment(&self->alloc, str_carrier_mapping, carrier_num_strings, str_carrier_idx_mapping);
@@ -686,16 +686,16 @@ static bool this_locate_safe(struct strdic *self, field_sid_t **out, bool **foun
         this_unlock(self);
 
         timestamp_t end = time_now_wallclock();
-        NG5_UNUSED(begin);
-        NG5_UNUSED(end);
-        NG5_INFO(STRING_DIC_ASYNC_TAG, "locate (safe) operation done: %f seconds spent here", (end - begin) / 1000.0f)
+        ng5_unused(begin);
+        ng5_unused(end);
+        ng5_info(STRING_DIC_ASYNC_TAG, "locate (safe) operation done: %f seconds spent here", (end - begin) / 1000.0f)
 
         return true;
 }
 
 static bool this_locate_fast(struct strdic *self, field_sid_t **out, char *const *keys, size_t num_keys)
 {
-        NG5_CHECK_TAG(self->tag, ASYNC);
+        ng5_check_tag(self->tag, ASYNC);
 
         this_lock(self);
 
@@ -717,7 +717,7 @@ static bool this_locate_fast(struct strdic *self, field_sid_t **out, char *const
 static char **this_extract(struct strdic *self, const field_sid_t *ids, size_t num_ids)
 {
         timestamp_t begin = time_now_wallclock();
-        NG5_INFO(STRING_DIC_ASYNC_TAG, "extract (safe) operation started: %zu strings to extract", num_ids)
+        ng5_info(STRING_DIC_ASYNC_TAG, "extract (safe) operation started: %zu strings to extract", num_ids)
 
         if (self->tag != ASYNC) {
                 return NULL;
@@ -725,15 +725,15 @@ static char **this_extract(struct strdic *self, const field_sid_t *ids, size_t n
 
         this_lock(self);
 
-        NG5_MALLOC(char *, globalResult, num_ids, &self->alloc);
+        ng5_malloc(char *, globalResult, num_ids, &self->alloc);
 
         struct async_extra *extra = (struct async_extra *) self->extra;
         uint_fast16_t num_threads = vec_length(&extra->carriers);
-        size_t approx_num_strings_per_thread = NG5_MAX(1, num_ids / num_threads);
+        size_t approx_num_strings_per_thread = ng5_max(1, num_ids / num_threads);
 
-        NG5_MALLOC(size_t, local_thread_idx, num_ids, &self->alloc);
-        NG5_MALLOC(uint_fast16_t, owning_thread_ids, num_ids, &self->alloc);
-        NG5_MALLOC(struct parallel_extract_arg, thread_args, num_threads, &self->alloc);
+        ng5_malloc(size_t, local_thread_idx, num_ids, &self->alloc);
+        ng5_malloc(uint_fast16_t, owning_thread_ids, num_ids, &self->alloc);
+        ng5_malloc(struct parallel_extract_arg, thread_args, num_threads, &self->alloc);
 
         for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
                 struct parallel_extract_arg *arg = thread_args + thread_id;
@@ -775,35 +775,35 @@ static char **this_extract(struct strdic *self, const field_sid_t *ids, size_t n
         for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
                 struct parallel_extract_arg *carrier_arg = thread_args + thread_id;
                 vec_drop(&carrier_arg->local_ids_in);
-                if (NG5_LIKELY(carrier_arg->did_work)) {
+                if (likely(carrier_arg->did_work)) {
                         strdic_free(&carrier_arg->carrier->local_dictionary, carrier_arg->strings_out);
                 }
         }
 
-        NG5_FREE(local_thread_idx, &self->alloc);
-        NG5_FREE(owning_thread_ids, &self->alloc);
-        NG5_FREE(thread_args, &self->alloc);
+        ng5_free(local_thread_idx, &self->alloc);
+        ng5_free(owning_thread_ids, &self->alloc);
+        ng5_free(thread_args, &self->alloc);
 
         this_unlock(self);
 
         timestamp_t end = time_now_wallclock();
-        NG5_UNUSED(begin);
-        NG5_UNUSED(end);
-        NG5_INFO(STRING_DIC_ASYNC_TAG, "extract (safe) operation done: %f seconds spent here", (end - begin) / 1000.0f)
+        ng5_unused(begin);
+        ng5_unused(end);
+        ng5_info(STRING_DIC_ASYNC_TAG, "extract (safe) operation done: %f seconds spent here", (end - begin) / 1000.0f)
 
         return globalResult;
 }
 
 static bool this_free(struct strdic *self, void *ptr)
 {
-        NG5_CHECK_TAG(self->tag, ASYNC);
+        ng5_check_tag(self->tag, ASYNC);
         alloc_free(&self->alloc, ptr);
         return true;
 }
 
 static bool this_num_distinct(struct strdic *self, size_t *num)
 {
-        NG5_CHECK_TAG(self->tag, ASYNC);
+        ng5_check_tag(self->tag, ASYNC);
         this_lock(self);
 
         struct async_extra *extra = THIS_EXTRAS(self);
@@ -824,7 +824,7 @@ static bool this_num_distinct(struct strdic *self, size_t *num)
 static bool this_get_contents(struct strdic *self, struct vector ofType (char *) *strings,
         struct vector ofType(field_sid_t) *string_ids)
 {
-        NG5_CHECK_TAG(self->tag, ASYNC);
+        ng5_check_tag(self->tag, ASYNC);
         this_lock(self);
         struct async_extra *extra = THIS_EXTRAS(self);
         size_t num_carriers = vec_length(&extra->carriers);
@@ -832,7 +832,7 @@ static bool this_get_contents(struct strdic *self, struct vector ofType (char *)
         struct vector ofType (field_sid_t) local_string_id_results;
         size_t approx_num_distinct_local_values;
         this_num_distinct(self, &approx_num_distinct_local_values);
-        approx_num_distinct_local_values = NG5_MAX(1, approx_num_distinct_local_values / extra->carriers.num_elems);
+        approx_num_distinct_local_values = ng5_max(1, approx_num_distinct_local_values / extra->carriers.num_elems);
         approx_num_distinct_local_values *= 1.2f;
 
         vec_create(&local_string_results, NULL, sizeof(char *), approx_num_distinct_local_values);
@@ -864,7 +864,7 @@ static bool this_get_contents(struct strdic *self, struct vector ofType (char *)
 
 static bool this_reset_counters(struct strdic *self)
 {
-        NG5_CHECK_TAG(self->tag, ASYNC);
+        ng5_check_tag(self->tag, ASYNC);
 
         this_lock(self);
 
@@ -883,14 +883,14 @@ static bool this_reset_counters(struct strdic *self)
 
 static bool this_counters(struct strdic *self, struct strhash_counters *counters)
 {
-        NG5_CHECK_TAG(self->tag, ASYNC);
+        ng5_check_tag(self->tag, ASYNC);
 
         this_lock(self);
 
         struct async_extra *extra = THIS_EXTRAS(self);
         size_t num_threads = vec_length(&extra->carriers);
 
-        NG5_CHECK_SUCCESS(strhash_counters_init(counters));
+        ng5_check_success(strhash_counters_init(counters));
 
         for (size_t thread_id = 0; thread_id < num_threads; thread_id++) {
                 struct carrier *carrier = vec_get(&extra->carriers, thread_id, struct carrier);
@@ -914,13 +914,13 @@ struct create_carrier_arg {
 static void parallel_create_carrier(const void *restrict start, size_t width, size_t len, void *restrict args,
         thread_id_t tid)
 {
-        NG5_UNUSED(tid);
-        NG5_UNUSED(width);
+        ng5_unused(tid);
+        ng5_unused(width);
 
         struct carrier *carrier = (struct carrier *) start;
         const struct create_carrier_arg *createArgs = (const struct create_carrier_arg *) args;
         while (len--) {
-                strdic_create_sync(&carrier->local_dictionary,
+                encode_sync_create(&carrier->local_dictionary,
                         createArgs->local_capacity,
                         createArgs->local_bucket_num,
                         createArgs->local_bucket_cap,
@@ -935,11 +935,11 @@ static bool this_setup_carriers(struct strdic *self, size_t capacity, size_t num
         size_t approx_num_unique_str, size_t num_threads)
 {
         struct async_extra *extra = THIS_EXTRAS(self);
-        size_t local_bucket_num = NG5_MAX(1, num_index_buckets / num_threads);
+        size_t local_bucket_num = ng5_max(1, num_index_buckets / num_threads);
         struct carrier new_carrier;
 
-        struct create_carrier_arg createArgs = {.local_capacity = NG5_MAX(1,
-                capacity / num_threads), .local_bucket_num = local_bucket_num, .local_bucket_cap = NG5_MAX(1,
+        struct create_carrier_arg createArgs = {.local_capacity = ng5_max(1,
+                capacity / num_threads), .local_bucket_num = local_bucket_num, .local_bucket_cap = ng5_max(1,
                 approx_num_unique_str / num_threads / local_bucket_num / SLICE_KEY_COLUMN_MAX_ELEMS), .alloc = &self
                 ->alloc};
 
@@ -962,13 +962,13 @@ static bool this_setup_carriers(struct strdic *self, size_t capacity, size_t num
 static bool this_lock(struct strdic *self)
 {
         struct async_extra *extra = THIS_EXTRAS(self);
-        NG5_CHECK_SUCCESS(spinlock_acquire(&extra->lock));
+        ng5_check_success(spin_acquire(&extra->lock));
         return true;
 }
 
 static bool this_unlock(struct strdic *self)
 {
         struct async_extra *extra = THIS_EXTRAS(self);
-        NG5_CHECK_SUCCESS(spinlock_release(&extra->lock));
+        ng5_check_success(spin_release(&extra->lock));
         return true;
 }

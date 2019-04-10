@@ -65,22 +65,22 @@ NG5_EXPORT (void *)alloc_realloc(struct allocator *alloc, void *ptr, size_t size
 
 NG5_EXPORT (bool) alloc_free(struct allocator *alloc, void *ptr)
 {
-        NG5_NON_NULL_OR_ERROR(alloc);
-        NG5_NON_NULL_OR_ERROR(ptr);
+        error_if_null(alloc);
+        error_if_null(ptr);
         alloc->free(alloc, ptr);
         return true;
 }
 
 NG5_EXPORT (bool) alloc_clone(struct allocator *dst, const struct allocator *src)
 {
-        NG5_NON_NULL_OR_ERROR(dst && src)
+        error_if_null(dst && src)
         src->clone(dst, src);
         return true;
 }
 
 static void *invoke_malloc(struct allocator *self, size_t size)
 {
-        NG5_UNUSED(self);
+        ng5_unused(self);
         void *result;
 
         errno = 0;
@@ -93,11 +93,11 @@ static void *invoke_malloc(struct allocator *self, size_t size)
 
 static void *invoke_realloc(struct allocator *self, void *ptr, size_t size)
 {
-        NG5_UNUSED(self);
+        ng5_unused(self);
         void *result;
 
         if ((result = realloc(ptr, size)) == NULL) {
-                NG5_PRINT_ERROR(NG5_ERR_MALLOCERR)
+                error_print(NG5_ERR_MALLOCERR)
                 return ptr;
         } else {
                 return result;
@@ -106,7 +106,7 @@ static void *invoke_realloc(struct allocator *self, void *ptr, size_t size)
 
 static void invoke_free(struct allocator *self, void *ptr)
 {
-        NG5_UNUSED(self);
+        ng5_unused(self);
         return free(ptr);
 }
 

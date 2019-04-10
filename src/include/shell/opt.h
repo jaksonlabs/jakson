@@ -52,15 +52,15 @@ struct cmdopt_mgr {
         char *module_desc;
 };
 
-NG5_EXPORT(bool) cmdopt_mgr_create(struct cmdopt_mgr *manager, char *module_name, char *module_desc,
+NG5_EXPORT(bool) opt_mgr_create(struct cmdopt_mgr *manager, char *module_name, char *module_desc,
         enum mod_arg_policy policy, bool (*fallback)(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager));
-NG5_EXPORT(bool) cmdopt_mgr_drop(struct cmdopt_mgr *manager);
+NG5_EXPORT(bool) opt_mgr_drop(struct cmdopt_mgr *manager);
 
-NG5_EXPORT(bool) cmdopt_mgr_process(struct cmdopt_mgr *manager, int argc, char **argv, FILE *file);
+NG5_EXPORT(bool) opt_mgr_process(struct cmdopt_mgr *manager, int argc, char **argv, FILE *file);
 
-NG5_EXPORT(bool) cmdopt_mgr_create_group(struct cmdopt_group **group, const char *desc, struct cmdopt_mgr *manager);
-NG5_EXPORT(bool) cmdopt_group_add_cmd(struct cmdopt_group *group, const char *opt_name, char *opt_desc,
+NG5_EXPORT(bool) opt_mgr_create_group(struct cmdopt_group **group, const char *desc, struct cmdopt_mgr *manager);
+NG5_EXPORT(bool) opt_group_add_cmd(struct cmdopt_group *group, const char *opt_name, char *opt_desc,
         char *opt_manfile, int (*callback)(int argc, char **argv, FILE *file));
-NG5_EXPORT(bool) cmdopt_mgr_show_help(FILE *file, struct cmdopt_mgr *manager);
+NG5_EXPORT(bool) opt_mgr_show_help(FILE *file, struct cmdopt_mgr *manager);
 
 #endif

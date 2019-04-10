@@ -36,10 +36,8 @@ struct archive {
         struct string_table string_table;
         struct record_table record_table;
         struct err err;
-
         struct sid_to_offset *query_index_string_id_to_offset;
         struct string_cache *string_id_cache;
-
         struct archive_query *default_query;
 };
 
@@ -111,8 +109,6 @@ NG5_EXPORT(bool) archive_drop_query_string_id_cache(struct archive *archive);
 NG5_EXPORT(struct string_cache *)archive_get_query_string_id_cache(struct archive *archive);
 
 NG5_EXPORT(struct archive_query *)archive_query_default(struct archive *archive);
-
-
 
 /**
  * Creates a new <code>struct io_context</code> to access the archives underlying file for unsafe operations.

@@ -34,7 +34,7 @@ typedef bool (*eq_func_t)(const void *lhs, const void *rhs);
 
 typedef bool (*less_func_t)(const void *lhs, const void *rhs);
 
-#define NG5_QSORT_INDICES_SWAP(x, y)                                                                                \
+#define NG5_QSORT_INDICES_SWAP(x, y)                                                                                   \
 {                                                                                                                      \
     size_t *a = x;                                                                                                     \
     size_t *b = y;                                                                                                     \
@@ -43,37 +43,37 @@ typedef bool (*less_func_t)(const void *lhs, const void *rhs);
     *b = tmp;                                                                                                          \
 }
 
-#define NG5_QSORT_INDICIES_PARTITION(indices, base, width, comp, l, h)                                              \
+#define NG5_QSORT_INDICIES_PARTITION(indices, base, width, comp, l, h)                                                 \
 ({                                                                                                                     \
     const void   *x       = base + indices[h] * width;                                                                 \
-    i64        i       = (l - 1);                                                                                  \
+    i64        i       = (l - 1);                                                                                      \
                                                                                                                        \
-    for (i64 j = l; j <= h - 1; j++)                                                                               \
+    for (i64 j = l; j <= h - 1; j++)                                                                                   \
     {                                                                                                                  \
         if (comp(base + indices[j] * width, x))                                                                        \
         {                                                                                                              \
             i++;                                                                                                       \
-            NG5_QSORT_INDICES_SWAP (indices + i, indices + j);                                                      \
+            NG5_QSORT_INDICES_SWAP (indices + i, indices + j);                                                         \
         }                                                                                                              \
     }                                                                                                                  \
-    NG5_QSORT_INDICES_SWAP (indices + (i + 1), indices + h);                                                        \
+    NG5_QSORT_INDICES_SWAP (indices + (i + 1), indices + h);                                                           \
     (i + 1);                                                                                                           \
 })
 
-#define NG5_QSORT_INDICIES_PARTITION_WARGS(indices, base, width, comp, l, h, args)                                  \
+#define NG5_QSORT_INDICIES_PARTITION_WARGS(indices, base, width, comp, l, h, args)                                     \
 ({                                                                                                                     \
     const void   *x       = base + indices[h] * width;                                                                 \
-    i64        i       = (l - 1);                                                                                  \
+    i64        i       = (l - 1);                                                                                      \
                                                                                                                        \
-    for (i64 j = l; j <= h - 1; j++)                                                                               \
+    for (i64 j = l; j <= h - 1; j++)                                                                                   \
     {                                                                                                                  \
         if (comp(base + indices[j] * width, x, args))                                                                  \
         {                                                                                                              \
             i++;                                                                                                       \
-            NG5_QSORT_INDICES_SWAP (indices + i, indices + j);                                                      \
+            NG5_QSORT_INDICES_SWAP (indices + i, indices + j);                                                         \
         }                                                                                                              \
     }                                                                                                                  \
-    NG5_QSORT_INDICES_SWAP (indices + (i + 1), indices + h);                                                        \
+    NG5_QSORT_INDICES_SWAP (indices + (i + 1), indices + h);                                                           \
     (i + 1);                                                                                                           \
 })
 

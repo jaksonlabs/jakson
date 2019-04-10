@@ -19,13 +19,13 @@
 
 NG5_EXPORT(bool) strid_iter_open(struct strid_iter *it, struct err *err, struct archive *archive)
 {
-        NG5_NON_NULL_OR_ERROR(it)
-        NG5_NON_NULL_OR_ERROR(archive)
+        error_if_null(it)
+        error_if_null(archive)
 
         memset(&it->vector, 0, sizeof(it->vector));
         it->disk_file = fopen(archive->diskFilePath, "r");
         if (!it->disk_file) {
-                NG5_OPTIONAL(err, error(err, NG5_ERR_FOPEN_FAILED))
+                ng5_optional(err, error(err, NG5_ERR_FOPEN_FAILED))
                 it->is_open = false;
                 return false;
         }
@@ -38,9 +38,9 @@ NG5_EXPORT(bool) strid_iter_open(struct strid_iter *it, struct err *err, struct 
 NG5_EXPORT(bool) strid_iter_next(bool *success, struct strid_info **info, struct err *err, size_t *info_length,
         struct strid_iter *it)
 {
-        NG5_NON_NULL_OR_ERROR(info)
-        NG5_NON_NULL_OR_ERROR(info_length)
-        NG5_NON_NULL_OR_ERROR(it)
+        error_if_null(info)
+        error_if_null(info_length)
+        error_if_null(it)
 
         if (it->disk_offset != 0 && it->is_open) {
                 struct string_entry_header header;
@@ -49,11 +49,11 @@ NG5_EXPORT(bool) strid_iter_next(bool *success, struct strid_info **info, struct
                         fseek(it->disk_file, it->disk_offset, SEEK_SET);
                         int num_read = fread(&header, sizeof(struct string_entry_header), 1, it->disk_file);
                         if (header.marker != '-') {
-                                NG5_PRINT_ERROR(NG5_ERR_INTERNALERR);
+                                error_print(NG5_ERR_INTERNALERR);
                                 return false;
                         }
                         if (num_read != 1) {
-                                NG5_OPTIONAL(err, error(err, NG5_ERR_FREAD_FAILED))
+                                ng5_optional(err, error(err, NG5_ERR_FREAD_FAILED))
                                 *success = false;
                                 return false;
                         } else {
@@ -77,7 +77,7 @@ NG5_EXPORT(bool) strid_iter_next(bool *success, struct strid_info **info, struct
 
 NG5_EXPORT(bool) strid_iter_close(struct strid_iter *it)
 {
-        NG5_NON_NULL_OR_ERROR(it)
+        error_if_null(it)
         if (it->is_open) {
                 fclose(it->disk_file);
                 it->is_open = false;

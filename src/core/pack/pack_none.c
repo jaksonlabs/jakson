@@ -20,71 +20,71 @@
 #include "core/pack/pack.h"
 #include "core/pack/pack_none.h"
 
-NG5_EXPORT(bool) compressor_none_init(struct packer *self)
+NG5_EXPORT(bool) pack_none_init(struct packer *self)
 {
-        NG5_UNUSED(self);
+        ng5_unused(self);
         /* nothing to do for uncompressed dictionaries */
         return true;
 }
 
-NG5_EXPORT(bool) compressor_none_cpy(const struct packer *self, struct packer *dst)
+NG5_EXPORT(bool) pack_none_cpy(const struct packer *self, struct packer *dst)
 {
-        NG5_CHECK_TAG(self->tag, PACK_NONE);
+        ng5_check_tag(self->tag, PACK_NONE);
 
         /* nothing to hard copy but the function pointers */
         *dst = *self;
         return true;
 }
 
-NG5_EXPORT(bool) compressor_none_drop(struct packer *self)
+NG5_EXPORT(bool) pack_none_drop(struct packer *self)
 {
-        NG5_CHECK_TAG(self->tag, PACK_NONE);
+        ng5_check_tag(self->tag, PACK_NONE);
 
-        NG5_UNUSED(self);
+        ng5_unused(self);
         /* nothing to do for uncompressed dictionaries */
         return true;
 }
 
-NG5_EXPORT(bool) compressor_none_write_extra(struct packer *self, struct memfile *dst,
+NG5_EXPORT(bool) pack_none_write_extra(struct packer *self, struct memfile *dst,
         const struct vector ofType (const char *) *strings)
 {
-        NG5_CHECK_TAG(self->tag, PACK_NONE);
+        ng5_check_tag(self->tag, PACK_NONE);
 
-        NG5_UNUSED(self);
-        NG5_UNUSED(dst);
-        NG5_UNUSED(strings);
+        ng5_unused(self);
+        ng5_unused(dst);
+        ng5_unused(strings);
         /* nothing to do for uncompressed dictionaries */
         return true;
 }
 
-NG5_EXPORT(bool) compressor_none_read_extra(struct packer *self, FILE *src, size_t nbytes)
+NG5_EXPORT(bool) pack_none_read_extra(struct packer *self, FILE *src, size_t nbytes)
 {
-        NG5_CHECK_TAG(self->tag, PACK_NONE);
+        ng5_check_tag(self->tag, PACK_NONE);
 
-        NG5_UNUSED(self);
-        NG5_UNUSED(src);
-        NG5_UNUSED(nbytes);
+        ng5_unused(self);
+        ng5_unused(src);
+        ng5_unused(nbytes);
         /* nothing to do for uncompressed dictionaries */
         return true;
 }
 
-bool compressor_none_print_extra(struct packer *self, FILE *file, struct memfile *src)
+bool pack_none_print_extra(struct packer *self, FILE *file, struct memfile *src)
 {
-        NG5_CHECK_TAG(self->tag, PACK_NONE);
+        ng5_check_tag(self->tag, PACK_NONE);
 
-        NG5_UNUSED(self);
-        NG5_UNUSED(file);
-        NG5_UNUSED(src);
+        ng5_unused(self);
+        ng5_unused(file);
+        ng5_unused(src);
         /* nothing to do for uncompressed dictionaries */
         return true;
 }
 
-NG5_EXPORT(bool) compressor_none_print_encoded_string(struct packer *self, FILE *file, struct memfile *src,
+NG5_EXPORT(bool) pack_none_print_encoded_string(struct packer *self, FILE *file, struct memfile *src,
         u32 decompressed_strlen)
 {
-        NG5_CHECK_TAG(self->tag, PACK_NONE);
+        ng5_check_tag(self->tag, PACK_NONE);
 
-        NG5_UNUSED(self);
+        ng5_unused(self);
 
         const char *string = NG5_MEMFILE_READ(src, decompressed_strlen);
 
@@ -99,16 +99,16 @@ NG5_EXPORT(bool) compressor_none_print_encoded_string(struct packer *self, FILE 
         return true;
 }
 
-NG5_EXPORT(bool) compressor_none_encode_string(struct packer *self, struct memfile *dst, struct err *err,
+NG5_EXPORT(bool) pack_none_encode_string(struct packer *self, struct memfile *dst, struct err *err,
         const char *string)
 {
-        NG5_CHECK_TAG(self->tag, PACK_NONE);
+        ng5_check_tag(self->tag, PACK_NONE);
 
-        NG5_UNUSED(self);
+        ng5_unused(self);
 
         u32 string_length = strlen(string);
 
-        NG5_SUCCESS_OR_JUMP(memfile_write(dst, string, string_length), error_handling)
+        ng5_success_or_jump(memfile_write(dst, string, string_length), error_handling)
 
         return true;
 
@@ -117,11 +117,11 @@ NG5_EXPORT(bool) compressor_none_encode_string(struct packer *self, struct memfi
         return false;
 }
 
-NG5_EXPORT(bool) compressor_none_decode_string(struct packer *self, char *dst, size_t strlen, FILE *src)
+NG5_EXPORT(bool) pack_none_decode_string(struct packer *self, char *dst, size_t strlen, FILE *src)
 {
-        NG5_CHECK_TAG(self->tag, PACK_NONE);
+        ng5_check_tag(self->tag, PACK_NONE);
 
-        NG5_UNUSED(self);
+        ng5_unused(self);
 
         size_t num_read = fread(dst, sizeof(char), strlen, src);
         return (num_read == strlen);

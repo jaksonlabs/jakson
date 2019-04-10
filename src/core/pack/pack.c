@@ -32,7 +32,7 @@ static bool create_strategy(size_t i, struct packer *strategy)
         return strategy->create(strategy);
 }
 
-NG5_EXPORT(bool) compressor_by_type(struct err *err, struct packer *strategy, enum packer_type type)
+NG5_EXPORT(bool) pack_by_type(struct err *err, struct packer *strategy, enum packer_type type)
 {
         for (size_t i = 0; i < NG5_ARRAY_LENGTH(compressor_strategy_register); i++) {
                 if (compressor_strategy_register[i].type == type) {
@@ -43,7 +43,7 @@ NG5_EXPORT(bool) compressor_by_type(struct err *err, struct packer *strategy, en
         return false;
 }
 
-NG5_EXPORT(u8) compressor_flagbit_by_type(enum packer_type type)
+NG5_EXPORT(u8) pack_flagbit_by_type(enum packer_type type)
 {
         for (size_t i = 0; i < NG5_ARRAY_LENGTH(compressor_strategy_register); i++) {
                 if (compressor_strategy_register[i].type == type) {
@@ -53,7 +53,7 @@ NG5_EXPORT(u8) compressor_flagbit_by_type(enum packer_type type)
         return 0;
 }
 
-NG5_EXPORT(bool) compressor_by_flags(struct packer *strategy, u8 flags)
+NG5_EXPORT(bool) pack_by_flags(struct packer *strategy, u8 flags)
 {
         for (size_t i = 0; i < NG5_ARRAY_LENGTH(compressor_strategy_register); i++) {
                 if (compressor_strategy_register[i].flag_bit & flags) {
@@ -63,7 +63,7 @@ NG5_EXPORT(bool) compressor_by_flags(struct packer *strategy, u8 flags)
         return false;
 }
 
-NG5_EXPORT(bool) compressor_by_name(enum packer_type *type, const char *name)
+NG5_EXPORT(bool) pack_by_name(enum packer_type *type, const char *name)
 {
         for (size_t i = 0; i < NG5_ARRAY_LENGTH(compressor_strategy_register); i++) {
                 if (strcmp(compressor_strategy_register[i].name, name) == 0) {
@@ -74,61 +74,61 @@ NG5_EXPORT(bool) compressor_by_name(enum packer_type *type, const char *name)
         return false;
 }
 
-NG5_EXPORT(bool) compressor_cpy(struct err *err, struct packer *dst, const struct packer *src)
+NG5_EXPORT(bool) pack_cpy(struct err *err, struct packer *dst, const struct packer *src)
 {
-        NG5_NON_NULL_OR_ERROR(dst)
-        NG5_NON_NULL_OR_ERROR(src)
-        NG5_IMPLEMENTS_OR_ERROR(err, src, cpy)
+        error_if_null(dst)
+        error_if_null(src)
+        ng5_implemented_or_error(err, src, cpy)
         return src->cpy(src, dst);
 }
 
-NG5_EXPORT(bool) compressor_drop(struct err *err, struct packer *self)
+NG5_EXPORT(bool) pack_drop(struct err *err, struct packer *self)
 {
-        NG5_NON_NULL_OR_ERROR(self)
-        NG5_IMPLEMENTS_OR_ERROR(err, self, drop)
+        error_if_null(self)
+        ng5_implemented_or_error(err, self, drop)
         return self->drop(self);
 }
 
-NG5_EXPORT(bool) compressor_write_extra(struct err *err, struct packer *self, struct memfile *dst,
+NG5_EXPORT(bool) pack_write_extra(struct err *err, struct packer *self, struct memfile *dst,
         const struct vector ofType (const char *) *strings)
 {
-        NG5_NON_NULL_OR_ERROR(self)
-        NG5_IMPLEMENTS_OR_ERROR(err, self, write_extra)
+        error_if_null(self)
+        ng5_implemented_or_error(err, self, write_extra)
         return self->write_extra(self, dst, strings);
 }
 
-NG5_EXPORT(bool) compressor_read_extra(struct err *err, struct packer *self, FILE *src, size_t nbytes)
+NG5_EXPORT(bool) pack_read_extra(struct err *err, struct packer *self, FILE *src, size_t nbytes)
 {
-        NG5_NON_NULL_OR_ERROR(self)
-        NG5_IMPLEMENTS_OR_ERROR(err, self, read_extra)
+        error_if_null(self)
+        ng5_implemented_or_error(err, self, read_extra)
         return self->read_extra(self, src, nbytes);
 }
 
-NG5_EXPORT(bool) compressor_encode(struct err *err, struct packer *self, struct memfile *dst, const char *string)
+NG5_EXPORT(bool) pack_encode(struct err *err, struct packer *self, struct memfile *dst, const char *string)
 {
-        NG5_NON_NULL_OR_ERROR(self)
-        NG5_IMPLEMENTS_OR_ERROR(err, self, encode_string)
+        error_if_null(self)
+        ng5_implemented_or_error(err, self, encode_string)
         return self->encode_string(self, dst, err, string);
 }
 
-NG5_EXPORT(bool) compressor_decode(struct err *err, struct packer *self, char *dst, size_t strlen, FILE *src)
+NG5_EXPORT(bool) pack_decode(struct err *err, struct packer *self, char *dst, size_t strlen, FILE *src)
 {
-        NG5_NON_NULL_OR_ERROR(self)
-        NG5_IMPLEMENTS_OR_ERROR(err, self, decode_string)
+        error_if_null(self)
+        ng5_implemented_or_error(err, self, decode_string)
         return self->decode_string(self, dst, strlen, src);
 }
 
-NG5_EXPORT(bool) compressor_print_extra(struct err *err, struct packer *self, FILE *file, struct memfile *src)
+NG5_EXPORT(bool) pack_print_extra(struct err *err, struct packer *self, FILE *file, struct memfile *src)
 {
-        NG5_NON_NULL_OR_ERROR(self)
-        NG5_IMPLEMENTS_OR_ERROR(err, self, print_extra)
+        error_if_null(self)
+        ng5_implemented_or_error(err, self, print_extra)
         return self->print_extra(self, file, src);
 }
 
-NG5_EXPORT(bool) compressor_print_encoded(struct err *err, struct packer *self, FILE *file, struct memfile *src,
+NG5_EXPORT(bool) pack_print_encoded(struct err *err, struct packer *self, FILE *file, struct memfile *src,
         u32 decompressed_strlen)
 {
-        NG5_NON_NULL_OR_ERROR(self)
-        NG5_IMPLEMENTS_OR_ERROR(err, self, print_encoded)
+        error_if_null(self)
+        ng5_implemented_or_error(err, self, print_encoded)
         return self->print_encoded(self, file, src, decompressed_strlen);
 }

@@ -20,7 +20,7 @@
 
 #include "core/pack/pack_none.h"
 #include "core/pack/huffman.h"
-#include "coding/pack_huffman.h"
+#include "coding/coding_huffman.h"
 #include "shared/common.h"
 #include "shared/types.h"
 
@@ -180,32 +180,32 @@ struct packer {
 
 };
 
-static void compressor_none_create(struct packer *strategy)
+static void pack_none_create(struct packer *strategy)
 {
         strategy->tag = PACK_NONE;
-        strategy->create = compressor_none_init;
-        strategy->cpy = compressor_none_cpy;
-        strategy->drop = compressor_none_drop;
-        strategy->write_extra = compressor_none_write_extra;
-        strategy->read_extra = compressor_none_read_extra;
-        strategy->encode_string = compressor_none_encode_string;
-        strategy->decode_string = compressor_none_decode_string;
-        strategy->print_extra = compressor_none_print_extra;
-        strategy->print_encoded = compressor_none_print_encoded_string;
+        strategy->create = pack_none_init;
+        strategy->cpy = pack_none_cpy;
+        strategy->drop = pack_none_drop;
+        strategy->write_extra = pack_none_write_extra;
+        strategy->read_extra = pack_none_read_extra;
+        strategy->encode_string = pack_none_encode_string;
+        strategy->decode_string = pack_none_decode_string;
+        strategy->print_extra = pack_none_print_extra;
+        strategy->print_encoded = pack_none_print_encoded_string;
 }
 
-static void compressor_huffman_create(struct packer *strategy)
+static void pack_huffman_create(struct packer *strategy)
 {
         strategy->tag = PACK_HUFFMAN;
-        strategy->create = compressor_huffman_init;
-        strategy->cpy = compressor_huffman_cpy;
-        strategy->drop = compressor_huffman_drop;
-        strategy->write_extra = compressor_huffman_write_extra;
-        strategy->read_extra = compressor_huffman_read_extra;
-        strategy->encode_string = compressor_huffman_encode_string;
-        strategy->decode_string = compressor_huffman_decode_string;
-        strategy->print_extra = compressor_huffman_print_extra;
-        strategy->print_encoded = compressor_huffman_print_encoded;
+        strategy->create = pack_huffman_init;
+        strategy->cpy = pack_coding_huffman_cpy;
+        strategy->drop = pack_coding_huffman_drop;
+        strategy->write_extra = pack_huffman_write_extra;
+        strategy->read_extra = pack_huffman_read_extra;
+        strategy->encode_string = pack_huffman_encode_string;
+        strategy->decode_string = pack_huffman_decode_string;
+        strategy->print_extra = pack_huffman_print_extra;
+        strategy->print_encoded = pack_huffman_print_encoded;
 }
 
 #pragma GCC diagnostic push
@@ -220,35 +220,35 @@ static struct {
 
         u8 flag_bit;
 } compressor_strategy_register[] =
-        {{.type = PACK_NONE, .name = "none", .create = compressor_none_create, .flag_bit = 1 << 0},
-         {.type = PACK_HUFFMAN, .name = "huffman", .create = compressor_huffman_create, .flag_bit = 1 << 1}};
+        {{.type = PACK_NONE, .name = "none", .create = pack_none_create, .flag_bit = 1 << 0},
+         {.type = PACK_HUFFMAN, .name = "huffman", .create = pack_huffman_create, .flag_bit = 1 << 1}};
 
 #pragma GCC diagnostic pop
 
-NG5_EXPORT(bool) compressor_by_type(struct err *err, struct packer *strategy, enum packer_type type);
+NG5_EXPORT(bool) pack_by_type(struct err *err, struct packer *strategy, enum packer_type type);
 
-NG5_EXPORT(u8) compressor_flagbit_by_type(enum packer_type type);
+NG5_EXPORT(u8) pack_flagbit_by_type(enum packer_type type);
 
-NG5_EXPORT(bool) compressor_by_flags(struct packer *strategy, u8 flags);
+NG5_EXPORT(bool) pack_by_flags(struct packer *strategy, u8 flags);
 
-NG5_EXPORT(bool) compressor_by_name(enum packer_type *type, const char *name);
+NG5_EXPORT(bool) pack_by_name(enum packer_type *type, const char *name);
 
-NG5_EXPORT(bool) compressor_cpy(struct err *err, struct packer *dst, const struct packer *src);
+NG5_EXPORT(bool) pack_cpy(struct err *err, struct packer *dst, const struct packer *src);
 
-NG5_EXPORT(bool) compressor_drop(struct err *err, struct packer *self);
+NG5_EXPORT(bool) pack_drop(struct err *err, struct packer *self);
 
-NG5_EXPORT(bool) compressor_write_extra(struct err *err, struct packer *self, struct memfile *dst,
+NG5_EXPORT(bool) pack_write_extra(struct err *err, struct packer *self, struct memfile *dst,
         const struct vector ofType (const char *) *strings);
 
-NG5_EXPORT(bool) compressor_read_extra(struct err *err, struct packer *self, FILE *src, size_t nbytes);
+NG5_EXPORT(bool) pack_read_extra(struct err *err, struct packer *self, FILE *src, size_t nbytes);
 
-NG5_EXPORT(bool) compressor_encode(struct err *err, struct packer *self, struct memfile *dst, const char *string);
+NG5_EXPORT(bool) pack_encode(struct err *err, struct packer *self, struct memfile *dst, const char *string);
 
-NG5_EXPORT(bool) compressor_decode(struct err *err, struct packer *self, char *dst, size_t strlen, FILE *src);
+NG5_EXPORT(bool) pack_decode(struct err *err, struct packer *self, char *dst, size_t strlen, FILE *src);
 
-NG5_EXPORT(bool) compressor_print_extra(struct err *err, struct packer *self, FILE *file, struct memfile *src);
+NG5_EXPORT(bool) pack_print_extra(struct err *err, struct packer *self, FILE *file, struct memfile *src);
 
-NG5_EXPORT(bool) compressor_print_encoded(struct err *err, struct packer *self, FILE *file, struct memfile *src,
+NG5_EXPORT(bool) pack_print_encoded(struct err *err, struct packer *self, FILE *file, struct memfile *src,
         u32 decompressed_strlen);
 
 NG5_END_DECL

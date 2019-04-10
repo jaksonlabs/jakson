@@ -29,10 +29,10 @@ struct memblock {
 
 bool memblock_create(struct memblock **block, size_t size)
 {
-        NG5_NON_NULL_OR_ERROR(block)
-        NG5_PRINT_ERROR_IF(size == 0, NG5_ERR_ILLEGALARG)
+        error_if_null(block)
+        error_print_if(size == 0, NG5_ERR_ILLEGALARG)
         struct memblock *result = malloc(sizeof(struct memblock));
-        NG5_NON_NULL_OR_ERROR(result)
+        error_if_null(result)
         result->blockLength = size;
         result->lastByte = 0;
         result->base = malloc(size);
@@ -50,7 +50,7 @@ bool memblock_from_file(struct memblock **block, FILE *file, size_t nbytes)
 
 bool memblock_drop(struct memblock *block)
 {
-        NG5_NON_NULL_OR_ERROR(block)
+        error_if_null(block)
         free(block->base);
         free(block);
         return true;
@@ -58,14 +58,14 @@ bool memblock_drop(struct memblock *block)
 
 NG5_EXPORT(bool) memblock_get_error(struct err *out, struct memblock *block)
 {
-        NG5_NON_NULL_OR_ERROR(block);
-        NG5_NON_NULL_OR_ERROR(out);
+        error_if_null(block);
+        error_if_null(out);
         return error_cpy(out, &block->err);
 }
 
 bool memblock_size(offset_t *size, const struct memblock *block)
 {
-        NG5_NON_NULL_OR_ERROR(block)
+        error_if_null(block)
         *size = block->blockLength;
         return true;
 }
@@ -83,8 +83,8 @@ const char *memblock_raw_data(const struct memblock *block)
 
 bool memblock_resize(struct memblock *block, size_t size)
 {
-        NG5_NON_NULL_OR_ERROR(block)
-        NG5_PRINT_ERROR_IF(size == 0, NG5_ERR_ILLEGALARG)
+        error_if_null(block)
+        error_print_if(size == 0, NG5_ERR_ILLEGALARG)
         block->base = realloc(block->base, size);
         block->blockLength = size;
         return true;
@@ -92,11 +92,11 @@ bool memblock_resize(struct memblock *block, size_t size)
 
 bool memblock_write(struct memblock *block, offset_t position, const char *data, offset_t nbytes)
 {
-        NG5_NON_NULL_OR_ERROR(block)
-        NG5_NON_NULL_OR_ERROR(data)
-        if (NG5_LIKELY(position + nbytes < block->blockLength)) {
+        error_if_null(block)
+        error_if_null(data)
+        if (likely(position + nbytes < block->blockLength)) {
                 memcpy(block->base + position, data, nbytes);
-                block->lastByte = NG5_MAX(block->lastByte, position + nbytes);
+                block->lastByte = ng5_max(block->lastByte, position + nbytes);
                 return true;
         } else {
                 return false;
@@ -105,9 +105,9 @@ bool memblock_write(struct memblock *block, offset_t position, const char *data,
 
 bool memblock_cpy(struct memblock **dst, struct memblock *src)
 {
-        NG5_NON_NULL_OR_ERROR(dst)
-        NG5_NON_NULL_OR_ERROR(src)
-        NG5_CHECK_SUCCESS(memblock_create(dst, src->blockLength));
+        error_if_null(dst)
+        error_if_null(src)
+        ng5_check_success(memblock_create(dst, src->blockLength));
         memcpy((*dst)->base, src->base, src->blockLength);
         assert((*dst)->base);
         assert((*dst)->blockLength == src->blockLength);
@@ -117,7 +117,7 @@ bool memblock_cpy(struct memblock **dst, struct memblock *src)
 
 bool memblock_shrink(struct memblock *block)
 {
-        NG5_NON_NULL_OR_ERROR(block)
+        error_if_null(block)
         block->blockLength = block->lastByte;
         block->base = realloc(block->base, block->blockLength);
         return true;

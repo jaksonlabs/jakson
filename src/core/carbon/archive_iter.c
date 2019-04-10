@@ -27,7 +27,7 @@ static bool init_object_from_memfile(struct archive_object *obj, struct memfile 
 
         object_off = memfile_tell(memfile);
         header = NG5_MEMFILE_READ_TYPE(memfile, struct object_header);
-        if (NG5_UNLIKELY(header->marker != MARKER_SYMBOL_OBJECT_BEGIN)) {
+        if (unlikely(header->marker != MARKER_SYMBOL_OBJECT_BEGIN)) {
                 return false;
         }
 
@@ -213,7 +213,7 @@ static void prop_iter_cursor_init(struct prop_iter *iter)
 #define SET_STATE_FOR_FALL_THROUGH(iter, prop_offset_type, mask_group, mask_type, next_state)                          \
 {                                                                                                                      \
     if ((iter->object.prop_offsets.prop_offset_type != 0) &&                                                           \
-        (NG5_MASK_IS_BIT_SET(iter->mask, mask_group | mask_type)))                                                  \
+        (ng5_are_bits_set(iter->mask, mask_group | mask_type)))                                                  \
     {                                                                                                                  \
         iter->prop_cursor = next_state;                                                                                \
         break;                                                                                                         \
@@ -384,9 +384,9 @@ static void prop_iter_state_init(struct prop_iter *iter)
 static bool archive_prop_iter_from_memblock(struct prop_iter *iter, struct err *err, u16 mask,
         struct memblock *memblock, offset_t object_offset)
 {
-        NG5_NON_NULL_OR_ERROR(iter)
-        NG5_NON_NULL_OR_ERROR(err)
-        NG5_NON_NULL_OR_ERROR(memblock)
+        error_if_null(iter)
+        error_if_null(err)
+        error_if_null(memblock)
 
         iter->mask = mask;
         if (!memfile_open(&iter->record_table_memfile, memblock, READ_ONLY)) {
@@ -505,8 +505,8 @@ static bool is_array_type(enum prop_iter_state state)
 NG5_EXPORT(bool) archive_prop_iter_next(enum prop_iter_mode *type, struct archive_value_vector *value_vector,
         archive_collection_iter_t *collection_iter, struct prop_iter *prop_iter)
 {
-        NG5_NON_NULL_OR_ERROR(type);
-        NG5_NON_NULL_OR_ERROR(prop_iter);
+        error_if_null(type);
+        error_if_null(prop_iter);
 
         if (prop_iter->prop_cursor != PROP_ITER_DONE) {
                 switch (prop_iter->mode) {
@@ -560,8 +560,8 @@ NG5_EXPORT(const field_sid_t *)archive_collection_iter_get_keys(u32 *num_keys, a
 NG5_EXPORT(bool) archive_collection_next_column_group(archive_column_group_iter_t *group_iter,
         archive_collection_iter_t *iter)
 {
-        NG5_NON_NULL_OR_ERROR(group_iter)
-        NG5_NON_NULL_OR_ERROR(iter)
+        error_if_null(group_iter)
+        error_if_null(iter)
 
         if (iter->state.current_column_group_idx < iter->state.num_column_groups) {
                 collection_iter_read_next_column_group(&iter->state, &iter->record_table_memfile);
@@ -587,8 +587,8 @@ NG5_EXPORT(const object_id_t *)archive_column_group_get_object_ids(u32 *num_obje
 
 NG5_EXPORT(bool) archive_column_group_next_column(archive_column_iter_t *column_iter, archive_column_group_iter_t *iter)
 {
-        NG5_NON_NULL_OR_ERROR(column_iter)
-        NG5_NON_NULL_OR_ERROR(iter)
+        error_if_null(column_iter)
+        error_if_null(iter)
 
         if (iter->state.current_column_group.current_column.idx < iter->state.current_column_group.num_columns) {
                 prop_iter_read_column(&iter->state, &iter->record_table_memfile);
@@ -603,9 +603,9 @@ NG5_EXPORT(bool) archive_column_group_next_column(archive_column_iter_t *column_
 
 NG5_EXPORT(bool) archive_column_get_name(field_sid_t *name, enum field_type *type, archive_column_iter_t *column_iter)
 {
-        NG5_NON_NULL_OR_ERROR(column_iter)
-        NG5_OPTIONAL_SET(name, column_iter->state.current_column_group.current_column.name)
-        NG5_OPTIONAL_SET(type, column_iter->state.current_column_group.current_column.type)
+        error_if_null(column_iter)
+        ng5_optional_set(name, column_iter->state.current_column_group.current_column.name)
+        ng5_optional_set(type, column_iter->state.current_column_group.current_column.type)
         return true;
 }
 
@@ -622,8 +622,8 @@ NG5_EXPORT(const u32 *)archive_column_get_entry_positions(u32 *num_entry, archiv
 
 NG5_EXPORT(bool) archive_column_next_entry(archive_column_entry_iter_t *entry_iter, archive_column_iter_t *iter)
 {
-        NG5_NON_NULL_OR_ERROR(entry_iter)
-        NG5_NON_NULL_OR_ERROR(iter)
+        error_if_null(entry_iter)
+        error_if_null(iter)
 
         if (iter->state.current_column_group.current_column.current_entry.idx
                 < iter->state.current_column_group.current_column.num_elem) {
@@ -639,8 +639,8 @@ NG5_EXPORT(bool) archive_column_next_entry(archive_column_entry_iter_t *entry_it
 
 NG5_EXPORT(bool) archive_column_entry_get_type(enum field_type *type, archive_column_entry_iter_t *entry)
 {
-        NG5_NON_NULL_OR_ERROR(type)
-        NG5_NON_NULL_OR_ERROR(entry)
+        error_if_null(type)
+        error_if_null(entry)
         *type = entry->state.current_column_group.current_column.type;
         return true;
 }
@@ -690,8 +690,8 @@ DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_u32_t, nulls, FIELD_NULL);
 
 NG5_EXPORT(bool) archive_column_entry_get_objects(struct column_object_iter *iter, archive_column_entry_iter_t *entry)
 {
-        NG5_NON_NULL_OR_ERROR(iter)
-        NG5_NON_NULL_OR_ERROR(entry)
+        error_if_null(iter)
+        error_if_null(entry)
 
         iter->entry_state = entry->state;
         memfile_open(&iter->memfile, entry->record_table_memfile.memblock, READ_ONLY);
@@ -727,8 +727,8 @@ NG5_EXPORT(const struct archive_object *)archive_column_entry_object_iter_next_o
 
 NG5_EXPORT(bool) archive_object_get_object_id(object_id_t *id, const struct archive_object *object)
 {
-        NG5_NON_NULL_OR_ERROR(id)
-        NG5_NON_NULL_OR_ERROR(object)
+        error_if_null(id)
+        error_if_null(object)
         *id = object->object_id;
         return true;
 }
@@ -736,15 +736,15 @@ NG5_EXPORT(bool) archive_object_get_object_id(object_id_t *id, const struct arch
 NG5_EXPORT(bool) archive_object_get_prop_iter(struct prop_iter *iter, const struct archive_object *object)
 {
         // XXXX archive_prop_iter_from_object()
-        NG5_UNUSED(iter);
-        NG5_UNUSED(object);
+        ng5_unused(iter);
+        ng5_unused(object);
         return false;
 }
 
 NG5_EXPORT(bool) archive_value_vector_get_object_id(object_id_t *id, const struct archive_value_vector *iter)
 {
-        NG5_NON_NULL_OR_ERROR(id)
-        NG5_NON_NULL_OR_ERROR(iter)
+        error_if_null(id)
+        error_if_null(iter)
         *id = iter->object_id;
         return true;
 }
@@ -768,7 +768,7 @@ static void value_vector_init_object_basic(struct archive_value_vector *value)
 
 static void value_vector_init_object_array(struct archive_value_vector *value)
 {
-        NG5_UNUSED(value);
+        ng5_unused(value);
         abort(); // TODO: Implement XXX
 }
 
@@ -889,10 +889,10 @@ static void value_vector_init_object(struct archive_value_vector *value)
 NG5_EXPORT(bool) archive_value_vector_from_prop_iter(struct archive_value_vector *value, struct err *err,
         struct prop_iter *prop_iter)
 {
-        NG5_NON_NULL_OR_ERROR(value);
-        NG5_NON_NULL_OR_ERROR(prop_iter);
+        error_if_null(value);
+        error_if_null(prop_iter);
 
-        error_IF_AND_RETURN (prop_iter->mode != PROP_ITER_MODE_OBJECT,
+        error_if_and_return (prop_iter->mode != PROP_ITER_MODE_OBJECT,
                 &prop_iter->err,
                 NG5_ERR_ITER_OBJECT_NEEDED,
                 false)
@@ -946,32 +946,32 @@ NG5_EXPORT(bool) archive_value_vector_from_prop_iter(struct archive_value_vector
 
 NG5_EXPORT(bool) archive_value_vector_get_basic_type(enum field_type *type, const struct archive_value_vector *value)
 {
-        NG5_NON_NULL_OR_ERROR(type)
-        NG5_NON_NULL_OR_ERROR(value)
+        error_if_null(type)
+        error_if_null(value)
         *type = value->prop_type;
         return true;
 }
 
 NG5_EXPORT(bool) archive_value_vector_is_array_type(bool *is_array, const struct archive_value_vector *value)
 {
-        NG5_NON_NULL_OR_ERROR(is_array)
-        NG5_NON_NULL_OR_ERROR(value)
+        error_if_null(is_array)
+        error_if_null(value)
         *is_array = value->is_array;
         return true;
 }
 
 NG5_EXPORT(bool) archive_value_vector_get_length(u32 *length, const struct archive_value_vector *value)
 {
-        NG5_NON_NULL_OR_ERROR(length)
-        NG5_NON_NULL_OR_ERROR(value)
+        error_if_null(length)
+        error_if_null(value)
         *length = value->value_max_idx;
         return true;
 }
 
 NG5_EXPORT(bool) archive_value_vector_is_of_objects(bool *is_object, struct archive_value_vector *value)
 {
-        NG5_NON_NULL_OR_ERROR(is_object)
-        NG5_NON_NULL_OR_ERROR(value)
+        error_if_null(is_object)
+        error_if_null(value)
 
         *is_object = value->prop_type == FIELD_OBJECT && !value->is_array;
 
@@ -981,8 +981,8 @@ NG5_EXPORT(bool) archive_value_vector_is_of_objects(bool *is_object, struct arch
 NG5_EXPORT(bool) archive_value_vector_get_object_at(struct archive_object *object, u32 idx,
         struct archive_value_vector *value)
 {
-        NG5_NON_NULL_OR_ERROR(object)
-        NG5_NON_NULL_OR_ERROR(value)
+        error_if_null(object)
+        error_if_null(value)
 
         if (idx >= value->value_max_idx) {
                 error(&value->err, NG5_ERR_OUTOFBOUNDS);
@@ -1008,8 +1008,8 @@ NG5_EXPORT(bool) archive_value_vector_get_object_at(struct archive_object *objec
 NG5_EXPORT(bool)                                                                                                    \
 archive_value_vector_is_##name(bool *type_match, struct archive_value_vector *value)                          \
 {                                                                                                                      \
-    NG5_NON_NULL_OR_ERROR(type_match)                                                                               \
-    NG5_NON_NULL_OR_ERROR(value)                                                                                    \
+    error_if_null(type_match)                                                                               \
+    error_if_null(value)                                                                                    \
                                                                                                                        \
     *type_match = value->prop_type == basic_type;                                                                      \
                                                                                                                        \
@@ -1044,7 +1044,7 @@ DECLARE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(null, FIELD_NULL)
 NG5_EXPORT(const built_in_type *)                                                                                   \
 archive_value_vector_get_##names(u32 *num_values, struct archive_value_vector *value)                    \
 {                                                                                                                      \
-    NG5_NON_NULL_OR_ERROR(value)                                                                                    \
+    error_if_null(value)                                                                                    \
                                                                                                                        \
     bool is_array;                                                                                                     \
     bool type_match;                                                                                                   \
@@ -1052,7 +1052,7 @@ archive_value_vector_get_##names(u32 *num_values, struct archive_value_vector *v
     if (archive_value_vector_is_array_type(&is_array, value) &&                                                 \
         archive_value_vector_is_##name(&type_match, value) && !is_array)                                        \
     {                                                                                                                  \
-        NG5_OPTIONAL_SET(num_values, value->value_max_idx)                                                          \
+        ng5_optional_set(num_values, value->value_max_idx)                                                          \
         return value->data.basic.values.names;                                                                         \
     } else                                                                                                             \
     {                                                                                                                  \
@@ -1085,14 +1085,14 @@ DECLARE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(booleans, boolean, FIELD_BOOLEAN
 
 NG5_EXPORT(const field_u32_t *)archive_value_vector_get_null_arrays(u32 *num_values, struct archive_value_vector *value)
 {
-        NG5_NON_NULL_OR_ERROR(value)
+        error_if_null(value)
 
         bool is_array;
         bool type_match;
 
         if (archive_value_vector_is_array_type(&is_array, value) && archive_value_vector_is_null(&type_match, value)
                 && is_array) {
-                NG5_OPTIONAL_SET(num_values, value->value_max_idx);
+                ng5_optional_set(num_values, value->value_max_idx);
                 return value->data.arrays.meta.num_nulls_contained;
         } else {
                 return NULL;
@@ -1104,7 +1104,7 @@ NG5_EXPORT(const built_in_type *)                                               
 archive_value_vector_get_##name##_arrays_at(u32 *array_length, u32 idx,                               \
                                                struct archive_value_vector *value)                                   \
 {                                                                                                                      \
-    NG5_NON_NULL_OR_ERROR(value)                                                                                    \
+    error_if_null(value)                                                                                    \
                                                                                                                        \
     bool is_array;                                                                                                     \
     bool type_match;                                                                                                   \
@@ -1148,7 +1148,7 @@ DECLARE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(boolean, FIELD_BOOLEANean_t, 
 
 void int_reset_cabin_object_mem_file(struct archive_object *object)
 {
-        NG5_UNUSED(object);
+        ng5_unused(object);
         //  memfile_seek(&object->file, object->self);
         abort();
 }

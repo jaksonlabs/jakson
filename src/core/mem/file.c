@@ -21,8 +21,8 @@
 
 bool memfile_open(struct memfile *file, struct memblock *block, enum access_mode mode)
 {
-        NG5_NON_NULL_OR_ERROR(file)
-        NG5_NON_NULL_OR_ERROR(block)
+        error_if_null(file)
+        error_if_null(block)
         file->memblock = block;
         file->pos = 0;
         file->bit_mode = false;
@@ -33,10 +33,10 @@ bool memfile_open(struct memfile *file, struct memblock *block, enum access_mode
 
 bool memfile_seek(struct memfile *file, offset_t pos)
 {
-        NG5_NON_NULL_OR_ERROR(file)
+        error_if_null(file)
         offset_t file_size;
         memblock_size(&file_size, file->memblock);
-        if (NG5_UNLIKELY(pos >= file_size)) {
+        if (unlikely(pos >= file_size)) {
                 if (file->mode == READ_WRITE) {
                         offset_t new_size = pos + 1;
                         memblock_resize(file->memblock, new_size);
@@ -51,15 +51,15 @@ bool memfile_seek(struct memfile *file, offset_t pos)
 
 bool memfile_rewind(struct memfile *file)
 {
-        NG5_NON_NULL_OR_ERROR(file)
+        error_if_null(file)
         file->pos = 0;
         return true;
 }
 
 bool memfile_get_offset(offset_t *pos, const struct memfile *file)
 {
-        NG5_NON_NULL_OR_ERROR(pos)
-        NG5_NON_NULL_OR_ERROR(file)
+        error_if_null(pos)
+        error_if_null(file)
         *pos = file->pos;
         return true;
 }
@@ -83,7 +83,7 @@ size_t memfile_remain_size(struct memfile *file)
 
 bool memfile_shrink(struct memfile *file)
 {
-        NG5_NON_NULL_OR_ERROR(file);
+        error_if_null(file);
         if (file->mode == READ_WRITE) {
                 int status = memblock_shrink(file->memblock);
                 u64 size;
@@ -110,7 +110,7 @@ bool memfile_skip(struct memfile *file, offset_t nbytes)
         offset_t file_size;
         memblock_size(&file_size, file->memblock);
 
-        if (NG5_UNLIKELY(required_size >= file_size)) {
+        if (unlikely(required_size >= file_size)) {
                 if (file->mode == READ_WRITE) {
                         memblock_resize(file->memblock, required_size * 1.7f);
                 } else {
@@ -126,7 +126,7 @@ const char *memfile_peek(struct memfile *file, offset_t nbytes)
 {
         offset_t file_size;
         memblock_size(&file_size, file->memblock);
-        if (NG5_UNLIKELY(file->pos + nbytes > file_size)) {
+        if (unlikely(file->pos + nbytes > file_size)) {
                 error(&file->err, NG5_ERR_READOUTOFBOUNDS);
                 return NULL;
         } else {
@@ -137,18 +137,18 @@ const char *memfile_peek(struct memfile *file, offset_t nbytes)
 
 bool memfile_write(struct memfile *file, const void *data, offset_t nbytes)
 {
-        NG5_NON_NULL_OR_ERROR(file)
-        NG5_NON_NULL_OR_ERROR(data)
+        error_if_null(file)
+        error_if_null(data)
         if (file->mode == READ_WRITE) {
-                if (NG5_LIKELY(nbytes != 0)) {
+                if (likely(nbytes != 0)) {
                         offset_t file_size;
                         memblock_size(&file_size, file->memblock);
                         offset_t required_size = file->pos + nbytes;
-                        if (NG5_UNLIKELY(required_size >= file_size)) {
+                        if (unlikely(required_size >= file_size)) {
                                 memblock_resize(file->memblock, required_size * 1.7f);
                         }
 
-                        if (NG5_UNLIKELY(!memblock_write(file->memblock, file->pos, data, nbytes))) {
+                        if (unlikely(!memblock_write(file->memblock, file->pos, data, nbytes))) {
                                 return false;
                         }
                         file->pos += nbytes;
@@ -162,7 +162,7 @@ bool memfile_write(struct memfile *file, const void *data, offset_t nbytes)
 
 bool memfile_begin_bit_mode(struct memfile *file)
 {
-        NG5_NON_NULL_OR_ERROR(file);
+        error_if_null(file);
         if (file->mode == READ_WRITE) {
                 file->bit_mode = true;
                 file->current_read_bit = file->current_write_bit = file->bytes_completed = 0;
@@ -182,7 +182,7 @@ bool memfile_begin_bit_mode(struct memfile *file)
 
 bool memfile_write_bit(struct memfile *file, bool flag)
 {
-        NG5_NON_NULL_OR_ERROR(file);
+        error_if_null(file);
         file->current_read_bit = 0;
 
         if (file->bit_mode) {
@@ -192,9 +192,9 @@ bool memfile_write_bit(struct memfile *file, bool flag)
                         char byte = *memfile_read(file, sizeof(char));
                         char mask = 1 << file->current_write_bit;
                         if (flag) {
-                                NG5_FIELD_SET(byte, mask);
+                                ng5_set_bits(byte, mask);
                         } else {
-                                NG5_FIELD_CLEAR(byte, mask);
+                                ng5_unset_bits(byte, mask);
                         }
                         memfile_seek(file, offset);
                         memfile_write(file, &byte, sizeof(char));
@@ -251,13 +251,13 @@ bool memfile_read_bit(struct memfile *file)
 
 bool memfile_end_bit_mode(size_t *num_bytes_written, struct memfile *file)
 {
-        NG5_NON_NULL_OR_ERROR(file);
+        error_if_null(file);
         file->bit_mode = false;
         if (file->current_write_bit <= 8) {
                 memfile_skip(file, 1);
                 file->bytes_completed++;
         }
-        NG5_OPTIONAL_SET(num_bytes_written, file->bytes_completed);
+        ng5_optional_set(num_bytes_written, file->bytes_completed);
         file->current_write_bit = file->bytes_completed = 0;
         return true;
 }
@@ -268,7 +268,7 @@ void *memfile_current_pos(struct memfile *file, offset_t nbytes)
                 offset_t file_size;
                 memblock_size(&file_size, file->memblock);
                 offset_t required_size = file->pos + nbytes;
-                if (NG5_UNLIKELY(file->pos + nbytes >= file_size)) {
+                if (unlikely(file->pos + nbytes >= file_size)) {
                         if (file->mode == READ_WRITE) {
                                 memblock_resize(file->memblock, required_size * 1.7f);
                         } else {

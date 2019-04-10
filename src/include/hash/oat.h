@@ -18,15 +18,16 @@
 #ifndef NG5_OAT_H
 #define NG5_OAT_H
 
-#include "hash/hash.h"
+#include "hash.h"
+#include "../shared/common.h"
 
 NG5_BEGIN_DECL
 
-#define NG5_HASH_OAT(key_size, key)                                                                                 \
+#define NG5_HASH_OAT(key_size, key)                                                                                    \
 ({                                                                                                                     \
     assert ((key != NULL) && (key_size > 0));                                                                          \
                                                                                                                        \
-    hash32_t hash = 0;                                                                                            \
+    hash32_t hash = 0;                                                                                                 \
     for (size_t i = 0; i < key_size; i++) {                                                                            \
         hash += ((unsigned char* )key)[i];                                                                             \
         hash += (hash << 10);                                                                                          \
@@ -40,6 +41,6 @@ NG5_BEGIN_DECL
     hash;                                                                                                              \
 })
 
-        NG5_END_DECL
+NG5_END_DECL
 
 #endif

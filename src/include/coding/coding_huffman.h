@@ -25,7 +25,7 @@
 
 NG5_BEGIN_DECL
 
-struct pack_huffman {
+struct coding_huffman {
         struct vector ofType(struct pack_huffman_entry) table;
         struct err err;
 };
@@ -47,23 +47,23 @@ struct pack_huffman_str_info {
         const char *encoded_bytes;
 };
 
-NG5_EXPORT(bool) huffman_create(struct pack_huffman *dic);
+NG5_EXPORT(bool) coding_huffman_create(struct coding_huffman *dic);
 
-NG5_EXPORT(bool) huffman_cpy(struct pack_huffman *dst, struct pack_huffman *src);
+NG5_EXPORT(bool) coding_huffman_cpy(struct coding_huffman *dst, struct coding_huffman *src);
 
-NG5_EXPORT(bool) huffman_build(struct pack_huffman *encoder, const string_vector_t *strings);
+NG5_EXPORT(bool) coding_huffman_build(struct coding_huffman *encoder, const string_vector_t *strings);
 
-NG5_EXPORT(bool) huffman_get_error(struct err *err, const struct pack_huffman *dic);
+NG5_EXPORT(bool) coding_huffman_get_error(struct err *err, const struct coding_huffman *dic);
 
-NG5_EXPORT(bool) huffman_encode_one(struct memfile *file, struct pack_huffman *dic, const char *string);
+NG5_EXPORT(bool) coding_huffman_encode(struct memfile *file, struct coding_huffman *dic, const char *string);
 
-NG5_EXPORT(bool) huffman_read_string(struct pack_huffman_str_info *info, struct memfile *src);
+NG5_EXPORT(bool) coding_huffman_read_string(struct pack_huffman_str_info *info, struct memfile *src);
 
-NG5_EXPORT(bool) huffman_drop(struct pack_huffman *dic);
+NG5_EXPORT(bool) coding_huffman_drop(struct coding_huffman *dic);
 
-NG5_EXPORT(bool) huffman_serialize_dic(struct memfile *file, const struct pack_huffman *dic, char marker_symbol);
+NG5_EXPORT(bool) coding_huffman_serialize(struct memfile *file, const struct coding_huffman *dic, char marker_symbol);
 
-NG5_EXPORT(bool) huffman_read_dic_entry(struct pack_huffman_info *info, struct memfile *file, char marker_symbol);
+NG5_EXPORT(bool) coding_huffman_read_entry(struct pack_huffman_info *info, struct memfile *file, char marker_symbol);
 
 NG5_END_DECL
 

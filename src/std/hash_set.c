@@ -23,20 +23,20 @@
 
 NG5_EXPORT(bool) hashset_create(struct hashset *map, struct err *err, size_t key_size, size_t capacity)
 {
-        NG5_NON_NULL_OR_ERROR(map)
-        NG5_NON_NULL_OR_ERROR(key_size)
+        error_if_null(map)
+        error_if_null(key_size)
 
         int err_code = NG5_ERR_INITFAILED;
 
         map->size = 0;
 
-        NG5_SUCCESS_OR_JUMP(vec_create(&map->key_data, NULL, key_size, capacity), error_handling);
-        NG5_SUCCESS_OR_JUMP(vec_create(&map->table, NULL, sizeof(struct hashset_bucket), capacity),
+        ng5_success_or_jump(vec_create(&map->key_data, NULL, key_size, capacity), error_handling);
+        ng5_success_or_jump(vec_create(&map->table, NULL, sizeof(struct hashset_bucket), capacity),
                 cleanup_key_data_and_error);
-        NG5_SUCCESS_OR_JUMP(vec_enlarge_size_to_capacity(&map->table), cleanup_key_value_table_and_error);
-        NG5_SUCCESS_OR_JUMP(vec_zero_memory(&map->table), cleanup_key_value_table_and_error);
-        NG5_SUCCESS_OR_JUMP(spinlock_init(&map->lock), cleanup_key_value_table_and_error);
-        NG5_SUCCESS_OR_JUMP(error_init(&map->err), cleanup_key_value_table_and_error);
+        ng5_success_or_jump(vec_enlarge_size_to_capacity(&map->table), cleanup_key_value_table_and_error);
+        ng5_success_or_jump(vec_zero_memory(&map->table), cleanup_key_value_table_and_error);
+        ng5_success_or_jump(spin_init(&map->lock), cleanup_key_value_table_and_error);
+        ng5_success_or_jump(error_init(&map->err), cleanup_key_value_table_and_error);
 
         return true;
 
@@ -55,7 +55,7 @@ NG5_EXPORT(bool) hashset_create(struct hashset *map, struct err *err, size_t key
 
 NG5_EXPORT(bool) hashset_drop(struct hashset *map)
 {
-        NG5_NON_NULL_OR_ERROR(map)
+        error_if_null(map)
 
         bool status = true;
 
@@ -117,7 +117,7 @@ NG5_EXPORT(struct hashset *)hashset_cpy(struct hashset *src)
 
 NG5_EXPORT(bool) hashset_clear(struct hashset *map)
 {
-        NG5_NON_NULL_OR_ERROR(map)
+        error_if_null(map)
         assert(map->key_data.cap_elems == map->table.cap_elems);
         assert(map->key_data.num_elems <= map->table.num_elems);
 
@@ -141,8 +141,8 @@ NG5_EXPORT(bool) hashset_clear(struct hashset *map)
 
 NG5_EXPORT(bool) hashset_avg_displace(float *displace, const struct hashset *map)
 {
-        NG5_NON_NULL_OR_ERROR(displace);
-        NG5_NON_NULL_OR_ERROR(map);
+        error_if_null(displace);
+        error_if_null(map);
 
         size_t sum_dis = 0;
         for (size_t i = 0; i < map->table.num_elems; i++) {
@@ -156,15 +156,15 @@ NG5_EXPORT(bool) hashset_avg_displace(float *displace, const struct hashset *map
 
 NG5_EXPORT(bool) hashset_lock(struct hashset *map)
 {
-        NG5_NON_NULL_OR_ERROR(map)
-        spinlock_acquire(&map->lock);
+        error_if_null(map)
+        spin_acquire(&map->lock);
         return true;
 }
 
 NG5_EXPORT(bool) hashset_unlock(struct hashset *map)
 {
-        NG5_NON_NULL_OR_ERROR(map)
-        spinlock_release(&map->lock);
+        error_if_null(map)
+        spin_release(&map->lock);
         return true;
 }
 
@@ -176,7 +176,7 @@ static inline const void *get_bucket_key(const struct hashset_bucket *bucket, co
 static void insert(struct hashset_bucket *bucket, struct hashset *map, const void *key, i32 displacement)
 {
         u64 idx = map->key_data.num_elems;
-        void *key_datum = VECTOR_NEW_AND_GET(&map->key_data, void *);
+        void *key_datum = vec_new_and_get(&map->key_data, void *);
         memcpy(key_datum, key, map->key_data.elem_size);
         bucket->key_idx = idx;
         bucket->in_use_flag = true;
@@ -251,8 +251,8 @@ static inline uint_fast32_t insert_or_update(struct hashset *map, const u32 *buc
 
 NG5_EXPORT(bool) hashset_insert_or_update(struct hashset *map, const void *keys, uint_fast32_t num_pairs)
 {
-        NG5_NON_NULL_OR_ERROR(map)
-        NG5_NON_NULL_OR_ERROR(keys)
+        error_if_null(map)
+        error_if_null(keys)
 
         assert(map->key_data.cap_elems == map->table.cap_elems);
         assert(map->key_data.num_elems <= map->table.num_elems);
@@ -295,8 +295,8 @@ NG5_EXPORT(bool) hashset_insert_or_update(struct hashset *map, const void *keys,
 
 NG5_EXPORT(bool) hashset_remove_if_contained(struct hashset *map, const void *keys, size_t num_pairs)
 {
-        NG5_NON_NULL_OR_ERROR(map)
-        NG5_NON_NULL_OR_ERROR(keys)
+        error_if_null(map)
+        error_if_null(keys)
 
         hashset_lock(map);
 
@@ -347,8 +347,8 @@ NG5_EXPORT(bool) hashset_remove_if_contained(struct hashset *map, const void *ke
 
 NG5_EXPORT(bool) hashset_contains_key(struct hashset *map, const void *key)
 {
-        NG5_NON_NULL_OR_ERROR(map)
-        NG5_NON_NULL_OR_ERROR(key)
+        error_if_null(map)
+        error_if_null(key)
 
         bool result = false;
 
@@ -376,8 +376,8 @@ NG5_EXPORT(bool) hashset_contains_key(struct hashset *map, const void *key)
 
 NG5_EXPORT(bool) hashset_get_fload_factor(float *factor, struct hashset *map)
 {
-        NG5_NON_NULL_OR_ERROR(factor)
-        NG5_NON_NULL_OR_ERROR(map)
+        error_if_null(factor)
+        error_if_null(map)
 
         hashset_lock(map);
 
@@ -390,7 +390,7 @@ NG5_EXPORT(bool) hashset_get_fload_factor(float *factor, struct hashset *map)
 
 NG5_EXPORT(bool) hashset_rehash(struct hashset *map)
 {
-        NG5_NON_NULL_OR_ERROR(map)
+        error_if_null(map)
 
         hashset_lock(map);
 

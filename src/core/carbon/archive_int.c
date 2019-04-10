@@ -21,7 +21,7 @@
 void int_read_prop_offsets(struct archive_prop_offs *prop_offsets, struct memfile *memfile,
         const union object_flags *flags)
 {
-        NG5_ZERO_MEMORY(prop_offsets, sizeof(struct archive_prop_offs));
+        ng5_zero_memory(prop_offsets, sizeof(struct archive_prop_offs));
         if (flags->bits.has_null_props) {
                 prop_offsets->nulls = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
         }

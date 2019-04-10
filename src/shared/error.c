@@ -30,15 +30,15 @@ NG5_EXPORT(bool) error_init(struct err *err)
 
 NG5_EXPORT(bool) error_cpy(struct err *dst, const struct err *src)
 {
-        NG5_NON_NULL_OR_ERROR(dst);
-        NG5_NON_NULL_OR_ERROR(src);
+        error_if_null(dst);
+        error_if_null(src);
         *dst = *src;
         return true;
 }
 
 NG5_EXPORT(bool) error_drop(struct err *err)
 {
-        NG5_NON_NULL_OR_ERROR(err);
+        error_if_null(err);
         if (err->details) {
                 free(err->details);
                 err->details = NULL;
@@ -70,20 +70,20 @@ NG5_EXPORT(bool) error_str(const char **errstr, const char **file, u32 *line, bo
 {
         if (err) {
                 if (err->code >= _nerr_str) {
-                        NG5_OPTIONAL_SET(errstr, NG5_ERRSTR_ILLEGAL_CODE)
+                        ng5_optional_set(errstr, NG5_ERRSTR_ILLEGAL_CODE)
                 } else {
-                        NG5_OPTIONAL_SET(errstr, _err_str[err->code])
+                        ng5_optional_set(errstr, _err_str[err->code])
                 }
-                NG5_OPTIONAL_SET(file, err->file)
-                NG5_OPTIONAL_SET(line, err->line)
-                NG5_OPTIONAL_SET(details, err->details != NULL);
-                NG5_OPTIONAL_SET(detailsstr, err->details)
+                ng5_optional_set(file, err->file)
+                ng5_optional_set(line, err->line)
+                ng5_optional_set(details, err->details != NULL);
+                ng5_optional_set(detailsstr, err->details)
                 return true;
         }
         return false;
 }
 
-NG5_EXPORT(bool) error_print(const struct err *err)
+NG5_EXPORT(bool) error_print_to_stderr(const struct err *err)
 {
         if (err) {
                 const char *errstr;
@@ -105,6 +105,6 @@ NG5_EXPORT(bool) error_print(const struct err *err)
 
 NG5_EXPORT(bool) error_print_and_abort(const struct err *err)
 {
-        error_print(err);
+        error_print_to_stderr(err);
         abort();
 }

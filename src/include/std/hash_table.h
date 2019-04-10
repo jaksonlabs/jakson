@@ -56,7 +56,7 @@ NG5_DEFINE_GET_ERROR_FUNCTION(hashtable, struct hashtable, table);
 NG5_EXPORT(bool) hashtable_create(struct hashtable *map, struct err *err, size_t key_size, size_t value_size,
         size_t capacity);
 
-NG5_EXPORT(struct hashtable *)hashtable_cpy(struct hashtable *src);
+NG5_EXPORT(struct hashtable *) hashtable_cpy(struct hashtable *src);
 
 NG5_EXPORT(bool) hashtable_drop(struct hashtable *map);
 
@@ -77,7 +77,7 @@ NG5_EXPORT(bool) hashtable_deserialize(struct hashtable *table, struct err *err,
 
 NG5_EXPORT(bool) hashtable_remove_if_contained(struct hashtable *map, const void *keys, size_t num_pairs);
 
-NG5_EXPORT(const void *)hashtable_get_value(struct hashtable *map, const void *key);
+NG5_EXPORT(const void *) hashtable_get_value(struct hashtable *map, const void *key);
 
 NG5_EXPORT(bool) hashtable_get_fload_factor(float *factor, struct hashtable *map);
 

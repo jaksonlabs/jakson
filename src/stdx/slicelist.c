@@ -32,7 +32,7 @@
 /** OPTIMIZATION: find function as macro */
 #define SLICE_SCAN(slice, needle_hash, needle_str)                                                                     \
 ({                                                                                                                     \
-    NG5_TRACE(NG5_SLICE_LIST_TAG, "SLICE_SCAN for '%s' started", needle_str);                                    \
+    ng5_trace(NG5_SLICE_LIST_TAG, "SLICE_SCAN for '%s' started", needle_str);                                    \
     assert(slice);                                                                                                     \
     assert(needle_str);                                                                                                \
                                                                                                                        \
@@ -68,11 +68,11 @@ static void unlock(slice_list_t *list);
 
 NG5_EXPORT(bool) slice_list_create(slice_list_t *list, const struct allocator *alloc, size_t sliceCapacity)
 {
-        NG5_NON_NULL_OR_ERROR(list)
-        NG5_NON_NULL_OR_ERROR(sliceCapacity)
+        error_if_null(list)
+        error_if_null(sliceCapacity)
 
         alloc_this_or_std(&list->alloc, alloc);
-        spinlock_init(&list->lock);
+        spin_init(&list->lock);
         error_init(&list->err);
 
         vec_create(&list->slices, &list->alloc, sizeof(Slice), sliceCapacity);
@@ -80,10 +80,10 @@ NG5_EXPORT(bool) slice_list_create(slice_list_t *list, const struct allocator *a
         vec_create(&list->filters, &list->alloc, sizeof(bloom_t), sliceCapacity);
         vec_create(&list->bounds, &list->alloc, sizeof(HashBounds), sliceCapacity);
 
-        NG5_ZERO_MEMORY(vec_data(&list->slices), sliceCapacity * sizeof(Slice));
-        NG5_ZERO_MEMORY(vec_data(&list->descriptors), sliceCapacity * sizeof(SliceDescriptor));
-        NG5_ZERO_MEMORY(vec_data(&list->filters), sliceCapacity * sizeof(bloom_t));
-        NG5_ZERO_MEMORY(vec_data(&list->bounds), sliceCapacity * sizeof(HashBounds));
+        ng5_zero_memory(vec_data(&list->slices), sliceCapacity * sizeof(Slice));
+        ng5_zero_memory(vec_data(&list->descriptors), sliceCapacity * sizeof(SliceDescriptor));
+        ng5_zero_memory(vec_data(&list->filters), sliceCapacity * sizeof(bloom_t));
+        ng5_zero_memory(vec_data(&list->bounds), sliceCapacity * sizeof(HashBounds));
 
         appenderNew(list);
 
@@ -92,7 +92,7 @@ NG5_EXPORT(bool) slice_list_create(slice_list_t *list, const struct allocator *a
 
 NG5_EXPORT(bool) SliceListDrop(slice_list_t *list)
 {
-        NG5_UNUSED(list);
+        ng5_unused(list);
 //    NOT_YET_IMPLEMENTED
         // TODO: implement
         vec_drop(&list->slices);
@@ -144,7 +144,7 @@ NG5_EXPORT(bool) slice_list_insert(slice_list_t *list, char **strings, field_sid
                         bloom_t *restrict appenderFilter = filters + list->appender_idx;
                         HashBounds *restrict appenderBounds = bounds + list->appender_idx;
 
-                        NG5_DEBUG(NG5_SLICE_LIST_TAG,
+                        ng5_debug(NG5_SLICE_LIST_TAG,
                                 "appender # of elems: %zu, limit: %zu",
                                 appender->num_elems,
                                 SLICE_KEY_COLUMN_MAX_ELEMS);
@@ -156,7 +156,7 @@ NG5_EXPORT(bool) slice_list_insert(slice_list_t *list, char **strings, field_sid
                         appenderBounds->maxHash = appenderBounds->maxHash > keyHash ? appenderBounds->maxHash : keyHash;
                         NG5_BLOOM_SET(appenderFilter, &keyHash, sizeof(hash32_t));
                         appender->num_elems++;
-                        if (NG5_UNLIKELY(appender->num_elems == SLICE_KEY_COLUMN_MAX_ELEMS)) {
+                        if (unlikely(appender->num_elems == SLICE_KEY_COLUMN_MAX_ELEMS)) {
                                 appenderSeal(appender);
                                 appenderNew(list);
                         }
@@ -169,9 +169,9 @@ NG5_EXPORT(bool) slice_list_insert(slice_list_t *list, char **strings, field_sid
 
 NG5_EXPORT(bool) slice_list_lookup(slice_handle_t *handle, slice_list_t *list, const char *needle)
 {
-        NG5_UNUSED(list);
-        NG5_UNUSED(handle);
-        NG5_UNUSED(needle);
+        ng5_unused(list);
+        ng5_unused(handle);
+        ng5_unused(needle);
 
         hash32_t keyHash = get_hashcode(needle);
         u32 numSlices = vec_length(&list->slices);
@@ -195,7 +195,7 @@ NG5_EXPORT(bool) slice_list_lookup(slice_handle_t *handle, slice_list_t *list, c
                                 bloom_t *restrict filter = filters + i;
                                 bool maybeContained = NG5_BLOOM_TEST(filter, &keyHash, sizeof(hash32_t));
                                 if (maybeContained) {
-                                        NG5_DEBUG(NG5_SLICE_LIST_TAG,
+                                        ng5_debug(NG5_SLICE_LIST_TAG,
                                                 "NG5_slice_list_lookup_by_key keys(%s) -> ?",
                                                 needle);
                                         u32 pairPosition;
@@ -211,7 +211,7 @@ NG5_EXPORT(bool) slice_list_lookup(slice_handle_t *handle, slice_list_t *list, c
                                                 return false;
                                         }
 
-                                        NG5_DEBUG(NG5_SLICE_LIST_TAG,
+                                        ng5_debug(NG5_SLICE_LIST_TAG,
                                                 "NG5_slice_list_lookup_by_key keys(%s) -> pos(%zu in slice #%zu)",
                                                 needle,
                                                 pairPosition,
@@ -245,8 +245,8 @@ NG5_EXPORT(bool) slice_list_lookup(slice_handle_t *handle, slice_list_t *list, c
 
 NG5_EXPORT(bool) SliceListRemove(slice_list_t *list, slice_handle_t *handle)
 {
-        NG5_UNUSED(list);
-        NG5_UNUSED(handle);
+        ng5_unused(list);
+        ng5_unused(handle);
         NG5_NOT_IMPLEMENTED
 }
 
@@ -281,7 +281,7 @@ static void appenderNew(slice_list_t *list)
         HashBounds bounds = {.minHash        = (hash32_t) -1, .maxHash        = (hash32_t) 0};
         vec_push(&list->bounds, &bounds, 1);
 
-        NG5_INFO(NG5_SLICE_LIST_TAG,
+        ng5_info(NG5_SLICE_LIST_TAG,
                 "created new appender in slice list %p\n\t"
                         "# of slices (incl. appender) in total...............: %zu\n\t"
                         "Slice target memory size............................: %zuB (%s)\n\t"
@@ -313,7 +313,7 @@ static void appenderNew(slice_list_t *list)
 
 static void appenderSeal(Slice *slice)
 {
-        NG5_UNUSED(slice);
+        ng5_unused(slice);
         //  slice->cacheIdx = 0;
         //  slice_sort(slice);
         //  slice->strat = SLICE_LOOKUP_BESEARCH;
@@ -323,10 +323,10 @@ static void appenderSeal(Slice *slice)
 
 static void lock(slice_list_t *list)
 {
-        spinlock_acquire(&list->lock);
+        spin_acquire(&list->lock);
 }
 
 static void unlock(slice_list_t *list)
 {
-        spinlock_release(&list->lock);
+        spin_release(&list->lock);
 }

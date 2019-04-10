@@ -45,7 +45,7 @@ typedef struct page_##x##b_t                                                    
     char                          data[x];                                                                             \
 } page_##x##b_t;                                                                                                       \
                                                                                                                        \
-NG5_FUNC_UNUSED static inline void *page_##x##b_new(size_t user_size) {                                             \
+ng5_func_unused static inline void *page_##x##b_new(size_t user_size) {                                             \
     assert (user_size <= x);                                                                                           \
     struct page_##x##b_t *page = malloc(sizeof(struct page_##x##b_t));                                                 \
     page->user_size = user_size;                                                                                       \
@@ -179,7 +179,7 @@ if (!global_trace_stats.malloc_sizes) {                                         
     global_trace_stats.malloc_sizes = malloc(sizeof(struct vector));                                                    \
     vec_create(global_trace_stats.malloc_sizes, &default_alloc, sizeof(size_t), 1000000);                       \
     global_trace_stats.spinlock = alloc_malloc(&default_alloc, sizeof(struct spinlock));                            \
-    spinlock_init(global_trace_stats.spinlock);                                                                 \
+    spin_init(global_trace_stats.spinlock);                                                                 \
     global_trace_stats.statistics_file = fopen("trace-alloc-stats.csv", "a");                                          \
     fprintf(global_trace_stats.statistics_file,                                                                        \
             "system_time;num_alloc_calls;num_realloc_calls;num_free_calls;memory_in_use\n");                           \
@@ -197,9 +197,9 @@ if (!global_trace_stats.malloc_sizes) {                                         
     fflush(global_trace_stats.statistics_file);                                                                        \
 }
 
-int tracer_alloc_create(struct allocator *alloc)
+int trace_alloc_create(struct allocator *alloc)
 {
-        NG5_NON_NULL_OR_ERROR(alloc);
+        error_if_null(alloc);
         struct allocator default_alloc;
         alloc_create_std(&default_alloc);
 
@@ -216,9 +216,9 @@ int tracer_alloc_create(struct allocator *alloc)
 
 static void *invoke_malloc(struct allocator *self, size_t size)
 {
-        NG5_UNUSED(self);
+        ng5_unused(self);
 
-        spinlock_acquire(global_trace_stats.spinlock);
+        spin_acquire(global_trace_stats.spinlock);
 
         struct allocator default_alloc;
         alloc_create_std(&default_alloc);
@@ -239,9 +239,9 @@ static void *invoke_malloc(struct allocator *self, size_t size)
                 vec_length(global_trace_stats.malloc_sizes));
         global_trace_stats.total_size += size;
 
-        NG5_UNUSED(min_alloc_size);
-        NG5_UNUSED(max_alloc_size);
-        NG5_UNUSED(avg_alloc_size);
+        ng5_unused(min_alloc_size);
+        ng5_unused(max_alloc_size);
+        ng5_unused(avg_alloc_size);
 
         //DEBUG(TRACE_ALLOC_TAG, "min/max/avg alloc size: %zu/%zu/%f B (allocator %p)", min_alloc_size, max_alloc_size,
         //      avg_alloc_size, self);
@@ -252,16 +252,16 @@ static void *invoke_malloc(struct allocator *self, size_t size)
 
         WRITE_STATS_FILE();
 
-        spinlock_release(global_trace_stats.spinlock);
+        spin_release(global_trace_stats.spinlock);
 
         return result;
 }
 
 static void *invoke_realloc(struct allocator *self, void *ptr, size_t size)
 {
-        NG5_UNUSED(self);
+        ng5_unused(self);
 
-        spinlock_acquire(global_trace_stats.spinlock);
+        spin_acquire(global_trace_stats.spinlock);
 
         struct allocator default_alloc;
         alloc_create_std(&default_alloc);
@@ -285,22 +285,22 @@ static void *invoke_realloc(struct allocator *self, void *ptr, size_t size)
 
         if (size <= page_capacity) {
                 *(size_t *) (ptr - 2 * sizeof(size_t)) = size;
-                spinlock_release(global_trace_stats.spinlock);
+                spin_release(global_trace_stats.spinlock);
                 return ptr;
         } else {
                 void *page_ptr = ptr - 2 * sizeof(size_t);
                 free(page_ptr);
                 void *result = alloc_register(size);
-                spinlock_release(global_trace_stats.spinlock);
+                spin_release(global_trace_stats.spinlock);
                 return result;
         }
 }
 
 static void invoke_free(struct allocator *self, void *ptr)
 {
-        NG5_UNUSED(self);
+        ng5_unused(self);
 
-        spinlock_acquire(global_trace_stats.spinlock);
+        spin_acquire(global_trace_stats.spinlock);
 
         struct allocator default_alloc;
         alloc_create_std(&default_alloc);
@@ -321,7 +321,7 @@ static void invoke_free(struct allocator *self, void *ptr)
 
         free(page_ptr);
 
-        spinlock_release(global_trace_stats.spinlock);
+        spin_release(global_trace_stats.spinlock);
 }
 
 static void invoke_clone(struct allocator *dst, const struct allocator *self)

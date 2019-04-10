@@ -24,9 +24,9 @@ NG5_BEGIN_DECL
 
 #define NG5_HASH_FNV(key_size, key)              NG5_HASH_FNV_WTYPE(key_size, key, hash32_t)
 #define NG5_HASH16_FNV(key_size, key)            NG5_HASH_FNV_WTYPE(key_size, key, hash16_t)
-#define NG5_HASH8_FNV(key_size, key)            NG5_HASH_FNV_WTYPE(key_size, key, hash8_t)
+#define NG5_HASH8_FNV(key_size, key)             NG5_HASH_FNV_WTYPE(key_size, key, hash8_t)
 
-#define NG5_HASH_FNV_WTYPE(key_size, key, hash_type)                                                                \
+#define NG5_HASH_FNV_WTYPE(key_size, key, hash_type)                                                                   \
 ({                                                                                                                     \
     assert ((key != NULL) && (key_size > 0));                                                                          \
                                                                                                                        \

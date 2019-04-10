@@ -19,7 +19,7 @@
 #include <assert.h>
 #include <inttypes.h>
 
-#include "coding/pack_huffman.h"
+#include "coding/coding_huffman.h"
 #include "std/bitmap.h"
 
 struct huff_node {
@@ -31,9 +31,9 @@ struct huff_node {
 static void huff_tree_create(struct vector ofType(struct pack_huffman_entry) *table,
         const struct vector ofType(u32) *frequencies);
 
-bool huffman_create(struct pack_huffman *dic)
+bool coding_huffman_create(struct coding_huffman *dic)
 {
-        NG5_NON_NULL_OR_ERROR(dic);
+        error_if_null(dic);
 
         vec_create(&dic->table, NULL, sizeof(struct pack_huffman_entry), UCHAR_MAX / 4);
         error_init(&dic->err);
@@ -41,10 +41,10 @@ bool huffman_create(struct pack_huffman *dic)
         return true;
 }
 
-NG5_EXPORT(bool) huffman_cpy(struct pack_huffman *dst, struct pack_huffman *src)
+NG5_EXPORT(bool) coding_huffman_cpy(struct coding_huffman *dst, struct coding_huffman *src)
 {
-        NG5_NON_NULL_OR_ERROR(dst);
-        NG5_NON_NULL_OR_ERROR(src);
+        error_if_null(dst);
+        error_if_null(src);
         if (!vec_cpy(&dst->table, &src->table)) {
                 error(&src->err, NG5_ERR_HARDCOPYFAILED);
                 return false;
@@ -53,17 +53,17 @@ NG5_EXPORT(bool) huffman_cpy(struct pack_huffman *dst, struct pack_huffman *src)
         }
 }
 
-NG5_EXPORT(bool) huffman_build(struct pack_huffman *encoder, const string_vector_t *strings)
+NG5_EXPORT(bool) coding_huffman_build(struct coding_huffman *encoder, const string_vector_t *strings)
 {
-        NG5_NON_NULL_OR_ERROR(encoder);
-        NG5_NON_NULL_OR_ERROR(strings);
+        error_if_null(encoder);
+        error_if_null(strings);
 
         struct vector ofType(u32) frequencies;
         vec_create(&frequencies, NULL, sizeof(u32), UCHAR_MAX);
         vec_enlarge_size_to_capacity(&frequencies);
 
         u32 *freq_data = vec_all(&frequencies, u32);
-        NG5_ZERO_MEMORY(freq_data, UCHAR_MAX * sizeof(u32));
+        ng5_zero_memory(freq_data, UCHAR_MAX * sizeof(u32));
 
         for (size_t i = 0; i < strings->num_elems; i++) {
                 const char *string = *vec_get(strings, i, const char *);
@@ -80,17 +80,17 @@ NG5_EXPORT(bool) huffman_build(struct pack_huffman *encoder, const string_vector
         return true;
 }
 
-NG5_EXPORT(bool) huffman_get_error(struct err *err, const struct pack_huffman *dic)
+NG5_EXPORT(bool) coding_huffman_get_error(struct err *err, const struct coding_huffman *dic)
 {
-        NG5_NON_NULL_OR_ERROR(err)
-        NG5_NON_NULL_OR_ERROR(dic)
+        error_if_null(err)
+        error_if_null(dic)
         error_cpy(err, &dic->err);
         return true;
 }
 
-bool huffman_drop(struct pack_huffman *dic)
+bool coding_huffman_drop(struct coding_huffman *dic)
 {
-        NG5_NON_NULL_OR_ERROR(dic);
+        error_if_null(dic);
 
         for (size_t i = 0; i < dic->table.num_elems; i++) {
                 struct pack_huffman_entry *entry = vec_get(&dic->table, i, struct pack_huffman_entry);
@@ -104,10 +104,10 @@ bool huffman_drop(struct pack_huffman *dic)
         return true;
 }
 
-bool huffman_serialize_dic(struct memfile *file, const struct pack_huffman *dic, char marker_symbol)
+bool coding_huffman_serialize(struct memfile *file, const struct coding_huffman *dic, char marker_symbol)
 {
-        NG5_NON_NULL_OR_ERROR(file)
-        NG5_NON_NULL_OR_ERROR(dic)
+        error_if_null(file)
+        error_if_null(dic)
 
         for (size_t i = 0; i < dic->table.num_elems; i++) {
                 struct pack_huffman_entry *entry = vec_get(&dic->table, i, struct pack_huffman_entry);
@@ -145,7 +145,7 @@ bool huffman_serialize_dic(struct memfile *file, const struct pack_huffman *dic,
         return true;
 }
 
-static struct pack_huffman_entry *find_dic_entry(struct pack_huffman *dic, unsigned char c)
+static struct pack_huffman_entry *find_dic_entry(struct coding_huffman *dic, unsigned char c)
 {
         for (size_t i = 0; i < dic->table.num_elems; i++) {
                 struct pack_huffman_entry *entry = vec_get(&dic->table, i, struct pack_huffman_entry);
@@ -157,7 +157,7 @@ static struct pack_huffman_entry *find_dic_entry(struct pack_huffman *dic, unsig
         return NULL;
 }
 
-static size_t encodeString(struct memfile *file, struct pack_huffman *dic, const char *string)
+static size_t encodeString(struct memfile *file, struct coding_huffman *dic, const char *string)
 {
         memfile_begin_bit_mode(file);
 
@@ -193,11 +193,11 @@ static size_t encodeString(struct memfile *file, struct pack_huffman *dic, const
         return num_written_bytes;
 }
 
-NG5_EXPORT(bool) huffman_encode_one(struct memfile *file, struct pack_huffman *dic, const char *string)
+NG5_EXPORT(bool) coding_huffman_encode(struct memfile *file, struct coding_huffman *dic, const char *string)
 {
-        NG5_NON_NULL_OR_ERROR(file)
-        NG5_NON_NULL_OR_ERROR(dic)
-        NG5_NON_NULL_OR_ERROR(string)
+        error_if_null(file)
+        error_if_null(dic)
+        error_if_null(string)
 
         u32 num_bytes_encoded = 0;
 
@@ -216,14 +216,14 @@ NG5_EXPORT(bool) huffman_encode_one(struct memfile *file, struct pack_huffman *d
         return true;
 }
 
-bool huffman_read_string(struct pack_huffman_str_info *info, struct memfile *src)
+bool coding_huffman_read_string(struct pack_huffman_str_info *info, struct memfile *src)
 {
         info->nbytes_encoded = *NG5_MEMFILE_READ_TYPE(src, u32);
         info->encoded_bytes = NG5_MEMFILE_READ(src, info->nbytes_encoded);
         return true;
 }
 
-bool huffman_read_dic_entry(struct pack_huffman_info *info, struct memfile *file, char marker_symbol)
+bool coding_huffman_read_entry(struct pack_huffman_info *info, struct memfile *file, char marker_symbol)
 {
         char marker = *NG5_MEMFILE_PEEK(file, char);
         if (marker == marker_symbol) {
@@ -281,7 +281,7 @@ static struct huff_node *seek_to_end(struct huff_node *handle)
         return handle;
 }
 
-NG5_FUNC_UNUSED
+ng5_func_unused
 static void __diag_print_insight(struct huff_node *n)
 {
         printf("(");
@@ -300,7 +300,7 @@ static void __diag_print_insight(struct huff_node *n)
         printf(": %"PRIu64"", n->freq);
 }
 
-NG5_FUNC_UNUSED
+ng5_func_unused
 static void __diag_dump_remaining_candidates(struct huff_node *n)
 {
         struct huff_node *it = seek_to_begin(n);
@@ -328,7 +328,7 @@ static void assign_code(struct huff_node *node, const struct bitmap *path,
         struct vector ofType(struct pack_huffman_entry) *table)
 {
         if (!node->left && !node->right) {
-                struct pack_huffman_entry *entry = VECTOR_NEW_AND_GET(table, struct pack_huffman_entry);
+                struct pack_huffman_entry *entry = vec_new_and_get(table, struct pack_huffman_entry);
                 import_into_entry(entry, node, path);
         } else {
                 if (node->left) {
@@ -383,7 +383,7 @@ static void huff_tree_create(struct vector ofType(struct pack_huffman_entry) *ta
         size_t appender_idx = UCHAR_MAX;
 
         for (unsigned char i = 0; i < UCHAR_MAX; i++) {
-                struct huff_node *node = VECTOR_NEW_AND_GET(&candidates, struct huff_node);
+                struct huff_node *node = vec_new_and_get(&candidates, struct huff_node);
                 node->letter = i;
                 node->freq = *vec_get(frequencies, i, u32);
         }
@@ -406,7 +406,7 @@ static void huff_tree_create(struct vector ofType(struct pack_huffman_entry) *ta
                 small = find_smallest(handle, smallest->freq, smallest);
 
                 appender_idx++;
-                new_node = VECTOR_NEW_AND_GET(&candidates, struct huff_node);
+                new_node = vec_new_and_get(&candidates, struct huff_node);
                 new_node->freq = small->freq + smallest->freq;
                 new_node->letter = '\0';
                 new_node->left = small;
@@ -463,7 +463,7 @@ static void huff_tree_create(struct vector ofType(struct pack_huffman_entry) *ta
 
         seek_to_begin(handle);
         if (handle->next) {
-                struct huff_node *finalNode = VECTOR_NEW_AND_GET(&candidates, struct huff_node);
+                struct huff_node *finalNode = vec_new_and_get(&candidates, struct huff_node);
                 finalNode->freq = small->freq + smallest->freq;
                 finalNode->letter = '\0';
                 if (handle->freq > handle->next->freq) {

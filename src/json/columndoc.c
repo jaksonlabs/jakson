@@ -44,10 +44,10 @@ static bool object_array_key_column_push(struct columndoc_column *col, struct er
 bool columndoc_create(struct columndoc *columndoc, struct err *err, const struct doc *doc, const struct doc_bulk *bulk,
         const struct doc_entries *entries, struct strdic *dic)
 {
-        NG5_NON_NULL_OR_ERROR(columndoc)
-        NG5_NON_NULL_OR_ERROR(doc)
-        NG5_NON_NULL_OR_ERROR(dic)
-        NG5_NON_NULL_OR_ERROR(bulk)
+        error_if_null(columndoc)
+        error_if_null(doc)
+        error_if_null(dic)
+        error_if_null(bulk)
 
         columndoc->dic = dic;
         columndoc->doc = doc;
@@ -271,7 +271,7 @@ static void object_meta_model_free(struct columndoc_obj *columndoc)
 
 bool columndoc_free(struct columndoc *doc)
 {
-        NG5_NON_NULL_OR_ERROR(doc);
+        error_if_null(doc);
         object_meta_model_free(&doc->columndoc);
         return true;
 }
@@ -490,7 +490,7 @@ static void print_array_strings(FILE *file, const char *type_name, const struct 
                         for (size_t j = 0; j < values->num_elems; j++) {
                                 field_sid_t value = *vec_get(values, j, field_sid_t);
 
-                                if (NG5_LIKELY(value != NG5_NULL_ENCODED_STRING)) {
+                                if (likely(value != NG5_NULL_ENCODED_STRING)) {
                                         char **decoded = strdic_extract(dic, &value, 1);
                                         fprintf(file, "\"%s\"%s", *decoded, j + 1 < values->num_elems ? ", " : "");
                                         strdic_free(dic, decoded);
@@ -848,14 +848,14 @@ static bool print_object(FILE *file, struct err *err, const struct columndoc_obj
 
 bool columndoc_print(FILE *file, struct columndoc *doc)
 {
-        NG5_NON_NULL_OR_ERROR(file)
-        NG5_NON_NULL_OR_ERROR(doc)
+        error_if_null(file)
+        error_if_null(doc)
         return print_object(file, &doc->err, &doc->columndoc, doc->dic);
 }
 
 bool columndoc_drop(struct columndoc *doc)
 {
-        NG5_UNUSED(doc);
+        ng5_unused(doc);
         NG5_NOT_IMPLEMENTED
 }
 
@@ -961,12 +961,12 @@ static struct columndoc_column *object_array_key_columns_find_or_new(
         }
         /** In this case, the array key is also not known. Create a new one array entry with the fitting key column and
          * return that newly created column */
-        key_columns = VECTOR_NEW_AND_GET(columns, struct columndoc_group);
+        key_columns = vec_new_and_get(columns, struct columndoc_group);
         key_columns->key = array_key;
         vec_create(&key_columns->columns, NULL, sizeof(struct columndoc_column), 10);
 
         objectArrayKeyColumnsNewColumn:
-        new_column = VECTOR_NEW_AND_GET(&key_columns->columns, struct columndoc_column);
+        new_column = vec_new_and_get(&key_columns->columns, struct columndoc_column);
         new_column->key_name = nested_object_entry_key;
         new_column->type = nested_object_entry_type;
         vec_create(&new_column->values, NULL, sizeof(struct vector), 10);
@@ -980,10 +980,10 @@ static bool object_array_key_column_push(struct columndoc_column *col, struct er
 {
         assert(col->type == entry->type);
 
-        u32 *entry_array_idx = VECTOR_NEW_AND_GET(&col->array_positions, u32);
+        u32 *entry_array_idx = vec_new_and_get(&col->array_positions, u32);
         *entry_array_idx = array_idx;
 
-        struct vector ofType(<T>) *values_for_entry = VECTOR_NEW_AND_GET(&col->values, struct vector);
+        struct vector ofType(<T>) *values_for_entry = vec_new_and_get(&col->values, struct vector);
         vec_create(values_for_entry, NULL, GET_TYPE_SIZE(entry->type), entry->values.num_elems);
 
         bool is_null_by_def = entry->values.num_elems == 0;
@@ -1028,7 +1028,7 @@ static bool object_array_key_column_push(struct columndoc_column *col, struct er
 
                 for (size_t array_idx = 0; array_idx < num_elements; array_idx++) {
                         struct columndoc_obj
-                                *nested_object = VECTOR_NEW_AND_GET(values_for_entry, struct columndoc_obj);
+                                *nested_object = vec_new_and_get(values_for_entry, struct columndoc_obj);
                         setup_object(nested_object, model->parent, *array_key, array_idx);
                         if (!import_object(nested_object,
                                 err,
@@ -1222,7 +1222,7 @@ static bool object_put_array(struct columndoc_obj *model, struct err *err, const
         struct strdic *dic, const field_sid_t *key_id)
 {
         // TODO: format for array, sort by keys, sort by values!
-        NG5_UNUSED(dic);
+        ng5_unused(dic);
         u32 num_elements = (u32) vec_length(&entry->values);
 
         switch (entry->type) {

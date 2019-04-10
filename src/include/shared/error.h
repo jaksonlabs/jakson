@@ -163,39 +163,39 @@ NG5_EXPORT(bool) error_set_wdetails(struct err *err, int code, const char *file,
 NG5_EXPORT(bool) error_str(const char **errstr, const char **file, u32 *line, bool *details, const char **detailsstr,
         const struct err *err);
 
-NG5_EXPORT(bool) error_print(const struct err *err);
+NG5_EXPORT(bool) error_print_to_stderr(const struct err *err);
 
 NG5_EXPORT(bool) error_print_and_abort(const struct err *err);
 
-#define error_OCCURRED(x)                   ((x)->err.code != NG5_ERR_NOERR)
+#define error_occurred(x)                   ((x)->err.code != NG5_ERR_NOERR)
 
-#define error(err, code)                     error_IF (true, err, code)
-#define error_IF(expr, err, code)            { if (expr) { error_set(err, code, __FILE__, __LINE__); } }
-#define error_IF_AND_RETURN(expr, err, code, retval) \
-                                                    { if (expr) { error_set(err, code, __FILE__, __LINE__);     \
+#define error(err, code)                     error_if (true, err, code)
+#define error_if(expr, err, code)            { if (expr) { error_set(err, code, __FILE__, __LINE__); } }
+#define error_if_and_return(expr, err, code, retval) \
+                                                    { if (expr) { error_set(err, code, __FILE__, __LINE__);            \
                                                                   return retval; } }
-#define error_WDETAILS(err, code, msg)       error_set_wdetails(err, code, __FILE__, __LINE__, msg);
+#define error_with_details(err, code, msg)       error_set_wdetails(err, code, __FILE__, __LINE__, msg);
 
-#define NG5_PRINT_ERROR(code)                    NG5_PRINT_ERROR_IF(true, code)
-#define print_error_and_die(code)            { NG5_PRINT_ERROR(code); abort(); }
-#define NG5_PRINT_ERROR_AND_DIE_IF(expr, code)   { if(expr) { print_error_and_die(code) } }
-#define NG5_PRINT_ERROR_IF(expr, code)                                                                              \
+#define error_print(code)                    error_print_if(true, code)
+#define print_error_and_die(code)            { error_print(code); abort(); }
+#define error_print_and_die_if(expr, code)   { if(expr) { print_error_and_die(code) } }
+#define error_print_if(expr, code)                                                                                     \
 {                                                                                                                      \
     if (expr) {                                                                                                        \
-        struct err err;                                                                                              \
-        error_init(&err);                                                                                       \
-        error(&err, code);                                                                                      \
-        error_print(&err);                                                                                      \
+        struct err err;                                                                                                \
+        error_init(&err);                                                                                              \
+        error(&err, code);                                                                                             \
+        error_print_to_stderr(&err);                                                                                   \
     }                                                                                                                  \
 }
 
-#define NG5_DEFINE_GET_ERROR_FUNCTION(type_name, type, arg)                                                         \
-NG5_FUNC_UNUSED static bool                                                                                         \
-type_name##_get_error(struct err *err, const type *arg)                                                     \
+#define NG5_DEFINE_GET_ERROR_FUNCTION(type_name, type, arg)                                                            \
+ng5_func_unused static bool                                                                                            \
+type_name##_get_error(struct err *err, const type *arg)                                                                \
 {                                                                                                                      \
-    NG5_NON_NULL_OR_ERROR(err)                                                                                      \
-    NG5_NON_NULL_OR_ERROR(arg)                                                                                      \
-    error_cpy(err, &arg->err);                                                                                  \
+    error_if_null(err)                                                                                                 \
+    error_if_null(arg)                                                                                                 \
+    error_cpy(err, &arg->err);                                                                                         \
     return true;                                                                                                       \
 }
 

@@ -188,14 +188,14 @@ DEFINE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(string)
 DEFINE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(null)
 DEFINE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(object)
 
-#define DEFINE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(name, built_in_type)                                                 \
-NG5_EXPORT(bool)                                                                                                    \
-encoded_doc_array_push_##name(struct encoded_doc *doc, field_sid_t key,                                \
+#define DEFINE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(name, built_in_type)                                                    \
+NG5_EXPORT(bool)                                                                                                       \
+encoded_doc_array_push_##name(struct encoded_doc *doc, field_sid_t key,                                                \
                                      const built_in_type *array, u32 array_length);
 
-#define DEFINE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(name, built_in_type)                                         \
-NG5_EXPORT(bool)                                                                                                    \
-encoded_doc_array_push_##name##_decoded(struct encoded_doc *doc, const char *key,                             \
+#define DEFINE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(name, built_in_type)                                            \
+NG5_EXPORT(bool)                                                                                                       \
+encoded_doc_array_push_##name##_decoded(struct encoded_doc *doc, const char *key,                                      \
                                      const built_in_type *array, u32 array_length);
 
 DEFINE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(int8, field_i8_t)
@@ -223,9 +223,6 @@ DEFINE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(number, field_number_t)
 DEFINE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(boolean, FIELD_BOOLEANean_t)
 DEFINE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(string, field_sid_t)
 DEFINE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(null, field_u32_t)
-
-//NG5_EXPORT(bool)
-//encoded_doc_array_push_null(struct encoded_doc *doc, field_sid_t key, u32 how_many);
 
 NG5_EXPORT(bool) encoded_doc_array_push_object(struct encoded_doc *doc, field_sid_t key, object_id_t id);
 

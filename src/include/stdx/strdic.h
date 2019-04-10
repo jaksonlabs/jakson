@@ -134,81 +134,81 @@ struct strdic {
  * @param dic
  * @return
  */
-NG5_FUNC_UNUSED
+ng5_func_unused
 static bool strdic_drop(struct strdic *dic)
 {
-        NG5_NON_NULL_OR_ERROR(dic);
+        error_if_null(dic);
         assert(dic->drop);
         return dic->drop(dic);
 }
 
-NG5_FUNC_UNUSED
+ng5_func_unused
 static bool strdic_insert(struct strdic *dic, field_sid_t **out, char *const *strings, size_t nstrings, size_t nthreads)
 {
-        NG5_NON_NULL_OR_ERROR(dic);
-        NG5_NON_NULL_OR_ERROR(strings);
+        error_if_null(dic);
+        error_if_null(strings);
         assert(dic->insert);
         return dic->insert(dic, out, strings, nstrings, nthreads);
 }
 
-NG5_FUNC_UNUSED
+ng5_func_unused
 static bool strdic_reset_counters(struct strdic *dic)
 {
-        NG5_NON_NULL_OR_ERROR(dic);
+        error_if_null(dic);
         assert(dic->resetCounters);
         return dic->resetCounters(dic);
 }
 
-NG5_FUNC_UNUSED
+ng5_func_unused
 static bool strdic_get_counters(struct strhash_counters *counters, struct strdic *dic)
 {
-        NG5_NON_NULL_OR_ERROR(dic);
+        error_if_null(dic);
         assert(dic->counters);
         return dic->counters(dic, counters);
 }
 
-NG5_FUNC_UNUSED
+ng5_func_unused
 static bool strdic_remove(struct strdic *dic, field_sid_t *strings, size_t num_strings)
 {
-        NG5_NON_NULL_OR_ERROR(dic);
-        NG5_NON_NULL_OR_ERROR(strings);
+        error_if_null(dic);
+        error_if_null(strings);
         assert(dic->remove);
         return dic->remove(dic, strings, num_strings);
 }
 
-NG5_FUNC_UNUSED
+ng5_func_unused
 static bool strdic_locate_safe(field_sid_t **out, bool **found_mask, size_t *num_not_found, struct strdic *dic,
         char *const *keys, size_t num_keys)
 {
-        NG5_NON_NULL_OR_ERROR(out);
-        NG5_NON_NULL_OR_ERROR(found_mask);
-        NG5_NON_NULL_OR_ERROR(num_not_found);
-        NG5_NON_NULL_OR_ERROR(dic);
-        NG5_NON_NULL_OR_ERROR(keys);
+        error_if_null(out);
+        error_if_null(found_mask);
+        error_if_null(num_not_found);
+        error_if_null(dic);
+        error_if_null(keys);
         assert(dic->locate_safe);
         return dic->locate_safe(dic, out, found_mask, num_not_found, keys, num_keys);
 }
 
-NG5_FUNC_UNUSED
+ng5_func_unused
 static bool strdic_locate_fast(field_sid_t **out, struct strdic *dic, char *const *keys, size_t nkeys)
 {
-        NG5_NON_NULL_OR_ERROR(out);
-        NG5_NON_NULL_OR_ERROR(dic);
-        NG5_NON_NULL_OR_ERROR(keys);
+        error_if_null(out);
+        error_if_null(dic);
+        error_if_null(keys);
         assert(dic->locate_fast);
         return dic->locate_fast(dic, out, keys, nkeys);
 }
 
-NG5_FUNC_UNUSED
+ng5_func_unused
 static char **strdic_extract(struct strdic *dic, const field_sid_t *ids, size_t nids)
 {
         return dic->extract(dic, ids, nids);
 }
 
-NG5_FUNC_UNUSED
+ng5_func_unused
 static bool strdic_free(struct strdic *dic, void *ptr)
 {
-        NG5_NON_NULL_OR_ERROR(dic);
+        error_if_null(dic);
         if (ptr) {
                 assert(dic->free);
                 return dic->free(dic, ptr);
@@ -217,22 +217,22 @@ static bool strdic_free(struct strdic *dic, void *ptr)
         }
 }
 
-NG5_FUNC_UNUSED
+ng5_func_unused
 static bool strdic_num_distinct(size_t *num, struct strdic *dic)
 {
-        NG5_NON_NULL_OR_ERROR(num);
-        NG5_NON_NULL_OR_ERROR(dic);
+        error_if_null(num);
+        error_if_null(dic);
         assert(dic->num_distinct);
         return dic->num_distinct(dic, num);
 }
 
-NG5_FUNC_UNUSED
+ng5_func_unused
 static bool strdic_get_contents(struct vector ofType (char *) *strings, struct vector ofType(field_sid_t) *string_ids,
         struct strdic *dic)
 {
-        NG5_NON_NULL_OR_ERROR(strings)
-        NG5_NON_NULL_OR_ERROR(string_ids)
-        NG5_NON_NULL_OR_ERROR(dic);
+        error_if_null(strings)
+        error_if_null(string_ids)
+        error_if_null(dic);
         assert(dic->get_contents);
         return dic->get_contents(dic, strings, string_ids);
 }

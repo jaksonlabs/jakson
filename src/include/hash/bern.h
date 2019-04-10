@@ -26,7 +26,7 @@ NG5_BEGIN_DECL
 #define NG5_HASH8_BERNSTEIN(key_size, key)       NG5_HASH_BERNSTEIN_WTYPE(key_size, key, hash8_t)
 #define NG5_HASH16_BERNSTEIN(key_size, key)      NG5_HASH_BERNSTEIN_WTYPE(key_size, key, hash16_t)
 
-#define NG5_HASH_BERNSTEIN_WTYPE(key_size, key, hash_type)                                                          \
+#define NG5_HASH_BERNSTEIN_WTYPE(key_size, key, hash_type)                                                             \
 ({                                                                                                                     \
     assert ((key != NULL) && (key_size > 0));                                                                          \
                                                                                                                        \

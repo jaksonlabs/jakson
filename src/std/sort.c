@@ -20,8 +20,8 @@
 NG5_EXPORT(bool) sort_qsort_indicies(size_t *indices, const void *base, size_t width, less_eq_func_t comp,
         size_t nelemns, struct allocator *alloc)
 {
-        NG5_NON_NULL_OR_ERROR(base);
-        NG5_NON_NULL_OR_ERROR(alloc);
+        error_if_null(base);
+        error_if_null(alloc);
 
         if (nelemns <= 1) {
                 return true;
@@ -52,15 +52,15 @@ NG5_EXPORT(bool) sort_qsort_indicies(size_t *indices, const void *base, size_t w
                 }
         }
 
-        NG5_CHECK_SUCCESS(alloc_free(alloc, stack));
+        ng5_check_success(alloc_free(alloc, stack));
         return true;
 }
 
 NG5_EXPORT(int) sort_qsort_indicies_wargs(size_t *indices, const void *base, size_t width, less_eq_wargs_func_t comp,
         size_t nelemens, struct allocator *alloc, void *args)
 {
-        NG5_NON_NULL_OR_ERROR(base);
-        NG5_NON_NULL_OR_ERROR(alloc);
+        error_if_null(base);
+        error_if_null(alloc);
 
         if (nelemens <= 1) {
                 return true;
@@ -93,7 +93,7 @@ NG5_EXPORT(int) sort_qsort_indicies_wargs(size_t *indices, const void *base, siz
                 }
         }
 
-        NG5_CHECK_SUCCESS(alloc_free(alloc, stack));
+        ng5_check_success(alloc_free(alloc, stack));
         return true;
 }
 

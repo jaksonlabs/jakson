@@ -41,8 +41,8 @@ static void sort_columndoc_entries(struct columndoc_obj *columndoc);
 
 NG5_EXPORT(bool) doc_bulk_create(struct doc_bulk *bulk, struct strdic *dic)
 {
-        NG5_NON_NULL_OR_ERROR(bulk)
-        NG5_NON_NULL_OR_ERROR(dic)
+        error_if_null(bulk)
+        error_if_null(dic)
         bulk->dic = dic;
         vec_create(&bulk->keys, NULL, sizeof(char *), 500);
         vec_create(&bulk->values, NULL, sizeof(char *), 1000);
@@ -55,7 +55,7 @@ struct doc_obj *doc_bulk_new_obj(struct doc *model)
         if (!model) {
                 return NULL;
         } else {
-                struct doc_obj *retval = VECTOR_NEW_AND_GET(&model->obj_model, struct doc_obj);
+                struct doc_obj *retval = vec_new_and_get(&model->obj_model, struct doc_obj);
                 create_doc(retval, model);
                 return retval;
         }
@@ -64,7 +64,7 @@ struct doc_obj *doc_bulk_new_obj(struct doc *model)
 NG5_EXPORT(bool) doc_bulk_get_dic_contents(struct vector ofType (const char *) **strings,
         struct vector ofType(field_sid_t) **string_ids, const struct doc_bulk *context)
 {
-        NG5_NON_NULL_OR_ERROR(context)
+        error_if_null(context)
 
         size_t num_distinct_values;
         strdic_num_distinct(&num_distinct_values, context->dic);
@@ -74,7 +74,7 @@ NG5_EXPORT(bool) doc_bulk_get_dic_contents(struct vector ofType (const char *) *
         vec_create(resultstring_id_ts, NULL, sizeof(field_sid_t), num_distinct_values);
 
         int status = strdic_get_contents(result_strings, resultstring_id_ts, context->dic);
-        NG5_CHECK_SUCCESS(status);
+        ng5_check_success(status);
         *strings = result_strings;
         *string_ids = resultstring_id_ts;
 
@@ -101,7 +101,7 @@ struct doc *doc_bulk_new_doc(struct doc_bulk *context, field_e type)
 
 NG5_EXPORT(bool) doc_bulk_Drop(struct doc_bulk *bulk)
 {
-        NG5_NON_NULL_OR_ERROR(bulk)
+        error_if_null(bulk)
         for (size_t i = 0; i < bulk->keys.num_elems; i++) {
                 char *string = *vec_get(&bulk->keys, i, char *);
                 free(string);
@@ -127,16 +127,16 @@ NG5_EXPORT(bool) doc_bulk_Drop(struct doc_bulk *bulk)
 
 NG5_EXPORT(bool) doc_bulk_shrink(struct doc_bulk *bulk)
 {
-        NG5_NON_NULL_OR_ERROR(bulk)
-        VectorShrink(&bulk->keys);
-        VectorShrink(&bulk->values);
+        error_if_null(bulk)
+        vec_shrink(&bulk->keys);
+        vec_shrink(&bulk->values);
         return true;
 }
 
 NG5_EXPORT(bool) doc_bulk_print(FILE *file, struct doc_bulk *bulk)
 {
-        NG5_NON_NULL_OR_ERROR(file)
-        NG5_NON_NULL_OR_ERROR(bulk)
+        error_if_null(file)
+        error_if_null(bulk)
 
         fprintf(file, "{");
         char **key_strings = vec_all(&bulk->keys, char *);
@@ -158,8 +158,8 @@ NG5_EXPORT(bool) doc_bulk_print(FILE *file, struct doc_bulk *bulk)
 
 NG5_EXPORT(bool) doc_print(FILE *file, const struct doc *doc)
 {
-        NG5_NON_NULL_OR_ERROR(file)
-        NG5_NON_NULL_OR_ERROR(doc)
+        error_if_null(file)
+        error_if_null(doc)
 
         if (doc->obj_model.num_elems == 0) {
                 fprintf(file, "{ }");
@@ -203,9 +203,9 @@ void doc_drop(struct doc_obj *model)
 
 bool doc_obj_add_key(struct doc_entries **out, struct doc_obj *obj, const char *key, field_e type)
 {
-        NG5_NON_NULL_OR_ERROR(out)
-        NG5_NON_NULL_OR_ERROR(obj)
-        NG5_NON_NULL_OR_ERROR(key)
+        error_if_null(out)
+        error_if_null(obj)
+        error_if_null(key)
 
         size_t entry_idx;
         char *key_dup = strdup(key);
@@ -225,8 +225,8 @@ bool doc_obj_add_key(struct doc_entries **out, struct doc_obj *obj, const char *
 
 bool doc_obj_push_primtive(struct doc_entries *entry, const void *value)
 {
-        NG5_NON_NULL_OR_ERROR(entry)
-        NG5_NON_NULL_OR_ERROR((entry->type == FIELD_NULL) || (value != NULL))
+        error_if_null(entry)
+        error_if_null((entry->type == FIELD_NULL) || (value != NULL))
 
         switch (entry->type) {
         case FIELD_NULL:
@@ -247,8 +247,8 @@ bool doc_obj_push_primtive(struct doc_entries *entry, const void *value)
 
 bool doc_obj_push_object(struct doc_obj **out, struct doc_entries *entry)
 {
-        NG5_NON_NULL_OR_ERROR(out);
-        NG5_NON_NULL_OR_ERROR(entry);
+        error_if_null(out);
+        error_if_null(entry);
 
         assert(entry->type == FIELD_OBJECT);
 
@@ -374,7 +374,7 @@ static bool import_json_object_array_prop(struct doc_obj *target, struct err *er
                         for (size_t i = 0; i < num_elements; i++) {
                                 const struct json_element
                                         *element = vec_get(&array->elements.elements, i, struct json_element);
-                                if (NG5_UNLIKELY(element->value.value_type == JSON_VALUE_NULL)) {
+                                if (unlikely(element->value.value_type == JSON_VALUE_NULL)) {
                                         continue;
                                 } else {
                                         bool success;
@@ -391,7 +391,7 @@ static bool import_json_object_array_prop(struct doc_obj *target, struct err *er
                                                 || element_number_type == FIELD_UINT32
                                                 || element_number_type == FIELD_UINT64
                                                 || element_number_type == FIELD_FLOAT);
-                                        if (NG5_UNLIKELY(array_number_type == FIELD_NULL)) {
+                                        if (unlikely(array_number_type == FIELD_NULL)) {
                                                 array_number_type = element_number_type;
                                         } else {
                                                 if (array_number_type == FIELD_INT8) {
@@ -568,7 +568,7 @@ static bool import_json_object_array_prop(struct doc_obj *target, struct err *er
                         }
                                 break;
                         case FIELD_BOOLEAN:
-                                if (NG5_LIKELY(ast_node_data_type == JSON_VALUE_TRUE
+                                if (likely(ast_node_data_type == JSON_VALUE_TRUE
                                         || ast_node_data_type == JSON_VALUE_FALSE)) {
                                         FIELD_BOOLEANean_t value =
                                                 ast_node_data_type == JSON_VALUE_TRUE ? NG5_BOOLEAN_TRUE
@@ -1052,7 +1052,7 @@ static bool compare_column_less_eq_func(const void *lhs, const void *rhs, void *
         struct vector ofType(<T>) *b = (struct vector *) rhs;
         struct com_column_leq_arg *func_arg = (struct com_column_leq_arg *) args;
 
-        size_t max_num_elem = NG5_MIN(a->num_elems, b->num_elems);
+        size_t max_num_elem = ng5_min(a->num_elems, b->num_elems);
 
         switch (func_arg->value_type) {
         case FIELD_NULL:
@@ -1326,7 +1326,7 @@ struct columndoc *doc_entries_columndoc(const struct doc_bulk *bulk, const struc
 
 NG5_EXPORT(bool) doc_entries_drop(struct doc_entries *partition)
 {
-        NG5_UNUSED(partition);
+        ng5_unused(partition);
         return true;
 }
 

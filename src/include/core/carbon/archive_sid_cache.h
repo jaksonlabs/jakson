@@ -38,7 +38,7 @@ NG5_EXPORT(bool) string_id_cache_get_error(struct err *err, const struct string_
 
 NG5_EXPORT(bool) string_id_cache_get_size(size_t *size, const struct string_cache *cache);
 
-NG5_EXPORT(char *)string_id_cache_get(struct string_cache *cache, field_sid_t id);
+NG5_EXPORT(char *) string_id_cache_get(struct string_cache *cache, field_sid_t id);
 
 NG5_EXPORT(bool) string_id_cache_get_statistics(struct sid_cache_stats *statistics, struct string_cache *cache);
 

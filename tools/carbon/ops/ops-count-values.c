@@ -16,13 +16,13 @@ visit_string_pairs (struct archive *archive, path_stack_t path, object_id_t id,
                               const field_sid_t *keys, const field_sid_t *values, u32 num_pairs,
                               void *capture)
 {
-    NG5_UNUSED(archive);
-    NG5_UNUSED(path);
-    NG5_UNUSED(id);
-    NG5_UNUSED(keys);
-    NG5_UNUSED(values);
-    NG5_UNUSED(num_pairs);
-    NG5_UNUSED(capture);
+    ng5_unused(archive);
+    ng5_unused(path);
+    ng5_unused(id);
+    ng5_unused(keys);
+    ng5_unused(values);
+    ng5_unused(num_pairs);
+    ng5_unused(capture);
 
 
     struct capture *params = (struct capture *) capture;
@@ -72,15 +72,15 @@ visit_string_array_pair (struct archive *archive, path_stack_t path, object_id_t
                                    field_sid_t key, u32 entry_idx, u32 max_entries,
                                    const field_sid_t *array, u32 array_length, void *capture)
 {
-    NG5_UNUSED(archive);
-    NG5_UNUSED(path);
-    NG5_UNUSED(id);
-    NG5_UNUSED(key);
-    NG5_UNUSED(entry_idx);
-    NG5_UNUSED(max_entries);
-    NG5_UNUSED(array);
-    NG5_UNUSED(array_length);
-    NG5_UNUSED(capture);
+    ng5_unused(archive);
+    ng5_unused(path);
+    ng5_unused(id);
+    ng5_unused(key);
+    ng5_unused(entry_idx);
+    ng5_unused(max_entries);
+    ng5_unused(array);
+    ng5_unused(array_length);
+    ng5_unused(capture);
 
     archive_visitor_print_path(stdout, archive, path);
 }
@@ -94,15 +94,15 @@ visit_string_array_pair (struct archive *archive, path_stack_t path, object_id_t
 //                                               const field_sid_t *nested_values,
 //                                               u32 num_nested_values, void *capture)
 //{
-//    NG5_UNUSED(archive);
-//    NG5_UNUSED(path);
-//    NG5_UNUSED(parent_id);
-//    NG5_UNUSED(key);
-//    NG5_UNUSED(nested_object_id);
-//    NG5_UNUSED(nested_key);
-//    NG5_UNUSED(nested_values);
-//    NG5_UNUSED(num_nested_values);
-//    NG5_UNUSED(capture);
+//    ng5_unused(archive);
+//    ng5_unused(path);
+//    ng5_unused(parent_id);
+//    ng5_unused(key);
+//    ng5_unused(nested_object_id);
+//    ng5_unused(nested_key);
+//    ng5_unused(nested_values);
+//    ng5_unused(num_nested_values);
+//    ng5_unused(capture);
 //
 //
 //
@@ -113,11 +113,11 @@ visit_string_array_pair (struct archive *archive, path_stack_t path, object_id_t
 static bool
 get_column_entry_count(struct archive *archive, path_stack_t path, field_sid_t key, enum field_type type, u32 count, void *capture)
 {
-    NG5_UNUSED(archive);
-    NG5_UNUSED(path);
-    NG5_UNUSED(key);
-    NG5_UNUSED(type);
-    NG5_UNUSED(count);
+    ng5_unused(archive);
+    ng5_unused(path);
+    ng5_unused(key);
+    ng5_unused(type);
+    ng5_unused(count);
     struct capture *params = (struct capture *) capture;
     char buffer[2048];
     memset(buffer, 0, sizeof(buffer));
@@ -142,9 +142,9 @@ get_column_entry_count(struct archive *archive, path_stack_t path, field_sid_t k
 NG5_EXPORT(bool)
 ops_count_values(timestamp_t *duration, struct vector ofType(ops_count_values_result_t) *result, const char *path, struct archive *archive)
 {
-    NG5_UNUSED(result);
-    NG5_UNUSED(path);
-    NG5_UNUSED(archive);
+    ng5_unused(result);
+    ng5_unused(path);
+    ng5_unused(archive);
 
     struct archive_visitor visitor = { 0 };
     struct archive_visitor_desc desc = { .visit_mask = NG5_ARCHIVE_ITER_MASK_ANY };

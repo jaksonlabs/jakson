@@ -22,9 +22,9 @@
 NG5_EXPORT(bool) encoded_doc_collection_create(struct encoded_doc_list *collection, struct err *err,
         struct archive *archive)
 {
-        NG5_UNUSED(collection);
-        NG5_UNUSED(err);
-        NG5_UNUSED(archive);
+        ng5_unused(collection);
+        ng5_unused(err);
+        ng5_unused(archive);
 
         vec_create(&collection->flat_object_collection, NULL, sizeof(struct encoded_doc), 5000000);
         hashtable_create(&collection->index, err, sizeof(object_id_t), sizeof(u32), 5000000);
@@ -36,7 +36,7 @@ NG5_EXPORT(bool) encoded_doc_collection_create(struct encoded_doc_list *collecti
 
 NG5_EXPORT(bool) encoded_doc_collection_drop(struct encoded_doc_list *collection)
 {
-        NG5_UNUSED(collection);
+        ng5_unused(collection);
 
         hashtable_drop(&collection->index);
         for (u32 i = 0; i < collection->flat_object_collection.num_elems; i++) {
@@ -52,7 +52,7 @@ static struct encoded_doc *doc_create(struct err *err, object_id_t object_id, st
         if (collection) {
                 u32 doc_position = collection->flat_object_collection.num_elems;
                 struct encoded_doc
-                        *new_doc = VECTOR_NEW_AND_GET(&collection->flat_object_collection, struct encoded_doc);
+                        *new_doc = vec_new_and_get(&collection->flat_object_collection, struct encoded_doc);
                 new_doc->context = collection;
                 new_doc->object_id = object_id;
                 vec_create(&new_doc->props, NULL, sizeof(struct encoded_doc_prop), 20);
@@ -70,11 +70,11 @@ static struct encoded_doc *doc_create(struct err *err, object_id_t object_id, st
 NG5_EXPORT(struct encoded_doc *)encoded_doc_collection_get_or_append(struct encoded_doc_list *collection,
         object_id_t id)
 {
-        NG5_NON_NULL_OR_ERROR(collection);
+        error_if_null(collection);
         const u32 *doc_pos = hashtable_get_value(&collection->index, &id);
         if (doc_pos) {
                 struct encoded_doc *result = vec_get(&collection->flat_object_collection, *doc_pos, struct encoded_doc);
-                error_IF(result == NULL, &collection->err, NG5_ERR_INTERNALERR);
+                error_if(result == NULL, &collection->err, NG5_ERR_INTERNALERR);
                 return result;
         } else {
                 struct encoded_doc *result = doc_create(&collection->err, id, collection);
@@ -87,8 +87,8 @@ NG5_EXPORT(struct encoded_doc *)encoded_doc_collection_get_or_append(struct enco
 
 NG5_EXPORT(bool) encoded_doc_collection_print(FILE *file, struct encoded_doc_list *collection)
 {
-        NG5_UNUSED(file);
-        NG5_UNUSED(collection);
+        ng5_unused(file);
+        ng5_unused(collection);
 
         if (collection->flat_object_collection.num_elems > 0) {
                 struct encoded_doc *root = vec_get(&collection->flat_object_collection, 0, struct encoded_doc);
@@ -100,7 +100,7 @@ NG5_EXPORT(bool) encoded_doc_collection_print(FILE *file, struct encoded_doc_lis
 
 NG5_EXPORT(bool) encoded_doc_drop(struct encoded_doc *doc)
 {
-        NG5_UNUSED(doc);
+        ng5_unused(doc);
         for (u32 i = 0; i < doc->props_arrays.num_elems; i++) {
                 struct encoded_doc_prop_array *array = vec_get(&doc->props_arrays, i, struct encoded_doc_prop_array);
                 vec_drop(&array->values);
@@ -119,8 +119,8 @@ NG5_EXPORT(bool) encoded_doc_drop(struct encoded_doc *doc)
 
 NG5_EXPORT(bool) encoded_doc_get_object_id(object_id_t *oid, struct encoded_doc *doc)
 {
-        NG5_UNUSED(oid);
-        NG5_UNUSED(doc);
+        ng5_unused(oid);
+        ng5_unused(doc);
         abort(); // TODO: implement
         return false;
 }
@@ -129,8 +129,8 @@ NG5_EXPORT(bool) encoded_doc_get_object_id(object_id_t *oid, struct encoded_doc 
 NG5_EXPORT(bool)                                                                                                    \
 encoded_doc_add_prop_##value_name(struct encoded_doc *doc, field_sid_t key, built_in_type value)       \
 {                                                                                                                      \
-    NG5_NON_NULL_OR_ERROR(doc)                                                                                      \
-    struct encoded_doc_prop *prop = VECTOR_NEW_AND_GET(&doc->props, struct encoded_doc_prop);                      \
+    error_if_null(doc)                                                                                      \
+    struct encoded_doc_prop *prop = vec_new_and_get(&doc->props, struct encoded_doc_prop);                      \
     prop->header.context = doc;                                                                                        \
     prop->header.key_type = STRING_ENCODED;                                        \
     prop->header.key.key_id = key;                                                                                     \
@@ -144,8 +144,8 @@ encoded_doc_add_prop_##value_name(struct encoded_doc *doc, field_sid_t key, buil
 NG5_EXPORT(bool)                                                                                                    \
 encoded_doc_add_prop_##value_name##_decoded(struct encoded_doc *doc, const char *key, built_in_type value)    \
 {                                                                                                                      \
-    NG5_NON_NULL_OR_ERROR(doc)                                                                                      \
-    struct encoded_doc_prop *prop = VECTOR_NEW_AND_GET(&doc->props, struct encoded_doc_prop);                      \
+    error_if_null(doc)                                                                                      \
+    struct encoded_doc_prop *prop = vec_new_and_get(&doc->props, struct encoded_doc_prop);                      \
     prop->header.context = doc;                                                                                        \
     prop->header.key_type = STRING_DECODED;                                        \
     prop->header.key.key_str = strdup(key);                                                                            \
@@ -202,8 +202,8 @@ DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_sid_t, FIELD_STRING, string
 NG5_EXPORT(bool) encoded_doc_add_prop_string_decoded_string_value_decoded(struct encoded_doc *doc, const char *key,
         const char *value)
 {
-        NG5_NON_NULL_OR_ERROR(doc)
-        struct encoded_doc_prop *prop = VECTOR_NEW_AND_GET(&doc->props, struct encoded_doc_prop);
+        error_if_null(doc)
+        struct encoded_doc_prop *prop = vec_new_and_get(&doc->props, struct encoded_doc_prop);
         prop->header.context = doc;
         prop->header.key_type = STRING_DECODED;
         prop->header.key.key_str = strdup(key);
@@ -214,8 +214,8 @@ NG5_EXPORT(bool) encoded_doc_add_prop_string_decoded_string_value_decoded(struct
 
 NG5_EXPORT(bool) encoded_doc_add_prop_null(struct encoded_doc *doc, field_sid_t key)
 {
-        NG5_NON_NULL_OR_ERROR(doc)
-        struct encoded_doc_prop *prop = VECTOR_NEW_AND_GET(&doc->props, struct encoded_doc_prop);
+        error_if_null(doc)
+        struct encoded_doc_prop *prop = vec_new_and_get(&doc->props, struct encoded_doc_prop);
         prop->header.context = doc;
         prop->header.key_type = STRING_ENCODED;
         prop->header.key.key_id = key;
@@ -226,8 +226,8 @@ NG5_EXPORT(bool) encoded_doc_add_prop_null(struct encoded_doc *doc, field_sid_t 
 
 NG5_EXPORT(bool) encoded_doc_add_prop_null_decoded(struct encoded_doc *doc, const char *key)
 {
-        NG5_NON_NULL_OR_ERROR(doc)
-        struct encoded_doc_prop *prop = VECTOR_NEW_AND_GET(&doc->props, struct encoded_doc_prop);
+        error_if_null(doc)
+        struct encoded_doc_prop *prop = vec_new_and_get(&doc->props, struct encoded_doc_prop);
         prop->header.context = doc;
         prop->header.key_type = STRING_DECODED;
         prop->header.key.key_str = strdup(key);
@@ -238,8 +238,8 @@ NG5_EXPORT(bool) encoded_doc_add_prop_null_decoded(struct encoded_doc *doc, cons
 
 NG5_EXPORT(bool) encoded_doc_add_prop_object(struct encoded_doc *doc, field_sid_t key, struct encoded_doc *value)
 {
-        NG5_NON_NULL_OR_ERROR(doc)
-        struct encoded_doc_prop *prop = VECTOR_NEW_AND_GET(&doc->props, struct encoded_doc_prop);
+        error_if_null(doc)
+        struct encoded_doc_prop *prop = vec_new_and_get(&doc->props, struct encoded_doc_prop);
         prop->header.context = doc;
         prop->header.key_type = STRING_ENCODED;
         prop->header.key.key_id = key;
@@ -251,8 +251,8 @@ NG5_EXPORT(bool) encoded_doc_add_prop_object(struct encoded_doc *doc, field_sid_
 NG5_EXPORT(bool) encoded_doc_add_prop_object_decoded(struct encoded_doc *doc, const char *key,
         struct encoded_doc *value)
 {
-        NG5_NON_NULL_OR_ERROR(doc)
-        struct encoded_doc_prop *prop = VECTOR_NEW_AND_GET(&doc->props, struct encoded_doc_prop);
+        error_if_null(doc)
+        struct encoded_doc_prop *prop = vec_new_and_get(&doc->props, struct encoded_doc_prop);
         prop->header.context = doc;
         prop->header.key_type = STRING_DECODED;
         prop->header.key.key_str = strdup(key);
@@ -266,9 +266,9 @@ NG5_EXPORT(bool)                                                                
 encoded_doc_add_prop_array_##name(struct encoded_doc *doc,                                                    \
                                        field_sid_t key)                                                         \
 {                                                                                                                      \
-    NG5_NON_NULL_OR_ERROR(doc)                                                                                      \
+    error_if_null(doc)                                                                                      \
     u32 new_array_pos = doc->props_arrays.num_elems;                                                              \
-    struct encoded_doc_prop_array *array = VECTOR_NEW_AND_GET(&doc->props_arrays, struct encoded_doc_prop_array);  \
+    struct encoded_doc_prop_array *array = vec_new_and_get(&doc->props_arrays, struct encoded_doc_prop_array);  \
     array->header.key_type = STRING_ENCODED;                                          \
     array->header.key.key_id = key;                                                                                    \
     array->header.type = basic_type;                                                                                   \
@@ -283,8 +283,8 @@ NG5_EXPORT(bool)                                                                
 encoded_doc_add_prop_array_##name##_decoded(struct encoded_doc *doc,                                          \
                                        const char *key)                                                                \
 {                                                                                                                      \
-    NG5_NON_NULL_OR_ERROR(doc)                                                                                      \
-    struct encoded_doc_prop_array *array = VECTOR_NEW_AND_GET(&doc->props_arrays, struct encoded_doc_prop_array);  \
+    error_if_null(doc)                                                                                      \
+    struct encoded_doc_prop_array *array = vec_new_and_get(&doc->props_arrays, struct encoded_doc_prop_array);  \
     array->header.key_type = STRING_DECODED;                                          \
     array->header.key.key_str = strdup(key);                                                                           \
     array->header.type = basic_type;                                                                                   \
@@ -350,15 +350,15 @@ NG5_EXPORT(bool)                                                                
 encoded_doc_array_push_##name(struct encoded_doc *doc, field_sid_t key,                                \
                                      const built_in_type *values, u32 values_length)                              \
 {                                                                                                                      \
-    NG5_NON_NULL_OR_ERROR(doc)                                                                                      \
+    error_if_null(doc)                                                                                      \
     const u32 *prop_pos = hashtable_get_value(&doc->prop_array_index, &key);                               \
-    error_IF(prop_pos == NULL, &doc->err, NG5_ERR_NOTFOUND);                                                 \
+    error_if(prop_pos == NULL, &doc->err, NG5_ERR_NOTFOUND);                                                 \
     struct encoded_doc_prop_array *array = vec_get(&doc->props_arrays, *prop_pos,                          \
                                                                struct encoded_doc_prop_array);                       \
-    error_IF(array == NULL, &doc->err, NG5_ERR_INTERNALERR);                                                 \
-    error_IF(array->header.type != basic_type, &doc->err, NG5_ERR_TYPEMISMATCH);                             \
+    error_if(array == NULL, &doc->err, NG5_ERR_INTERNALERR);                                                 \
+    error_if(array->header.type != basic_type, &doc->err, NG5_ERR_TYPEMISMATCH);                             \
     for (u32 i = 0; i < values_length; i++) {                                                                     \
-        union encoded_doc_value *value = VECTOR_NEW_AND_GET(&array->values, union encoded_doc_value);            \
+        union encoded_doc_value *value = vec_new_and_get(&array->values, union encoded_doc_value);            \
         value->name = values[i];                                                                                       \
     }                                                                                                                  \
                                                                                                                        \
@@ -383,13 +383,13 @@ encoded_doc_array_push_##name##_decoded(struct encoded_doc *doc, const char *key
             }                                                                                                          \
         }                                                                                                              \
     }                                                                                                                  \
-    error_IF(prop_pos == (u32) -1, &doc->err, NG5_ERR_NOTFOUND);                                        \
+    error_if(prop_pos == (u32) -1, &doc->err, NG5_ERR_NOTFOUND);                                        \
     struct encoded_doc_prop_array *array = vec_get(&doc->props_arrays, prop_pos,                           \
                                                                    struct encoded_doc_prop_array);                   \
-    error_IF(array == NULL, &doc->err, NG5_ERR_INTERNALERR);                                                 \
-    error_IF(array->header.type != basic_type, &doc->err, NG5_ERR_TYPEMISMATCH);                             \
+    error_if(array == NULL, &doc->err, NG5_ERR_INTERNALERR);                                                 \
+    error_if(array->header.type != basic_type, &doc->err, NG5_ERR_TYPEMISMATCH);                             \
     for (u32 i = 0; i < values_length; i++) {                                                                     \
-        union encoded_doc_value *value = VECTOR_NEW_AND_GET(&array->values, union encoded_doc_value);            \
+        union encoded_doc_value *value = vec_new_and_get(&array->values, union encoded_doc_value);            \
         value->name = values[i];                                                                                       \
     }                                                                                                                  \
                                                                                                                        \
@@ -447,14 +447,14 @@ DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(null, field_u32_t, FIELD_NULL)
 //NG5_EXPORT(bool)
 //encoded_doc_array_push_null(struct encoded_doc *doc, field_sid_t key, u32 how_many)
 //{
-//    NG5_NON_NULL_OR_ERROR(doc)
+//    error_if_null(doc)
 //    const u32 *prop_pos = hashtable_get_value(&doc->prop_array_index, &key);
-//    error_IF(prop_pos == NULL, &doc->err, NG5_ERR_NOTFOUND);
+//    error_if(prop_pos == NULL, &doc->err, NG5_ERR_NOTFOUND);
 //    struct encoded_doc_prop_array *array = vec_get(&doc->props_arrays, *prop_pos,
 //                                                               struct encoded_doc_prop_array);
-//    error_IF(array == NULL, &doc->err, NG5_ERR_INTERNALERR);
-//    error_IF(array->header.type != FIELD_NULL, &doc->err, NG5_ERR_TYPEMISMATCH);
-//    union encoded_doc_value *value = VECTOR_NEW_AND_GET(&array->values, union encoded_doc_value);
+//    error_if(array == NULL, &doc->err, NG5_ERR_INTERNALERR);
+//    error_if(array->header.type != FIELD_NULL, &doc->err, NG5_ERR_TYPEMISMATCH);
+//    union encoded_doc_value *value = vec_new_and_get(&array->values, union encoded_doc_value);
 //    value->num_nulls = how_many;
 //    return true;
 //}
@@ -465,28 +465,28 @@ DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(null, field_u32_t, FIELD_NULL)
 
 NG5_EXPORT(bool) encoded_doc_array_push_object(struct encoded_doc *doc, field_sid_t key, object_id_t id)
 {
-        NG5_UNUSED(doc);
-        NG5_UNUSED(key);
-        NG5_UNUSED(id);
+        ng5_unused(doc);
+        ng5_unused(key);
+        ng5_unused(id);
 
-        NG5_NON_NULL_OR_ERROR(doc)
+        error_if_null(doc)
         const u32 *prop_pos = hashtable_get_value(&doc->prop_array_index, &key);
-        error_IF(prop_pos == NULL, &doc->err, NG5_ERR_NOTFOUND);
+        error_if(prop_pos == NULL, &doc->err, NG5_ERR_NOTFOUND);
         struct encoded_doc_prop_array *array = vec_get(&doc->props_arrays, *prop_pos, struct encoded_doc_prop_array);
-        error_IF(array == NULL, &doc->err, NG5_ERR_INTERNALERR);
-        error_IF(array->header.type != FIELD_OBJECT, &doc->err, NG5_ERR_TYPEMISMATCH);
-        union encoded_doc_value *value = VECTOR_NEW_AND_GET(&array->values, union encoded_doc_value);
+        error_if(array == NULL, &doc->err, NG5_ERR_INTERNALERR);
+        error_if(array->header.type != FIELD_OBJECT, &doc->err, NG5_ERR_TYPEMISMATCH);
+        union encoded_doc_value *value = vec_new_and_get(&array->values, union encoded_doc_value);
         value->object = id;
         return true;
 }
 
 NG5_EXPORT(bool) encoded_doc_array_push_object_decoded(struct encoded_doc *doc, const char *key, object_id_t id)
 {
-        NG5_UNUSED(doc);
-        NG5_UNUSED(key);
-        NG5_UNUSED(id);
+        ng5_unused(doc);
+        ng5_unused(key);
+        ng5_unused(id);
 
-        NG5_NON_NULL_OR_ERROR(doc)
+        error_if_null(doc)
         u32 prop_pos = (u32) -1;
         for (u32 i = 0; i < doc->props_arrays.num_elems; i++) {
                 struct encoded_doc_prop_array *prop = vec_get(&doc->props_arrays, i, struct encoded_doc_prop_array);
@@ -497,20 +497,20 @@ NG5_EXPORT(bool) encoded_doc_array_push_object_decoded(struct encoded_doc *doc, 
                         }
                 }
         }
-        error_IF(prop_pos == (u32) -1, &doc->err, NG5_ERR_NOTFOUND);
+        error_if(prop_pos == (u32) -1, &doc->err, NG5_ERR_NOTFOUND);
         struct encoded_doc_prop_array *array = vec_get(&doc->props_arrays, prop_pos, struct encoded_doc_prop_array);
-        error_IF(array == NULL, &doc->err, NG5_ERR_INTERNALERR);
-        error_IF(array->header.type != FIELD_OBJECT, &doc->err, NG5_ERR_TYPEMISMATCH);
-        union encoded_doc_value *value = VECTOR_NEW_AND_GET(&array->values, union encoded_doc_value);
+        error_if(array == NULL, &doc->err, NG5_ERR_INTERNALERR);
+        error_if(array->header.type != FIELD_OBJECT, &doc->err, NG5_ERR_TYPEMISMATCH);
+        union encoded_doc_value *value = vec_new_and_get(&array->values, union encoded_doc_value);
         value->object = id;
         return true;
 }
 
 NG5_EXPORT(bool) encoded_doc_get_nested_object(struct encoded_doc *nested, object_id_t oid, struct encoded_doc *doc)
 {
-        NG5_UNUSED(nested);
-        NG5_UNUSED(oid);
-        NG5_UNUSED(doc);
+        ng5_unused(nested);
+        ng5_unused(oid);
+        ng5_unused(doc);
         abort(); // TODO: implement
         return false;
 }

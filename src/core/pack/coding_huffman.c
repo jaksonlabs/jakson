@@ -20,43 +20,43 @@
 
 #include "std/bitmap.h"
 #include "core/pack/pack.h"
-#include "coding/pack_huffman.h"
+#include "coding/coding_huffman.h"
 
 #define  MARKER_SYMBOL_HUFFMAN_DIC_ENTRY   'd'
 
-NG5_EXPORT(bool) compressor_huffman_init(struct packer *self)
+NG5_EXPORT(bool) pack_huffman_init(struct packer *self)
 {
-        self->extra = malloc(sizeof(struct pack_huffman));
+        self->extra = malloc(sizeof(struct coding_huffman));
         if (self->extra != NULL) {
-                struct pack_huffman *encoder = (struct pack_huffman *) self->extra;
-                huffman_create(encoder);
+                struct coding_huffman *encoder = (struct coding_huffman *) self->extra;
+                coding_huffman_create(encoder);
                 return true;
         } else {
                 return false;
         }
 }
 
-NG5_EXPORT(bool) compressor_huffman_cpy(const struct packer *self, struct packer *dst)
+NG5_EXPORT(bool) pack_coding_huffman_cpy(const struct packer *self, struct packer *dst)
 {
-        NG5_CHECK_TAG(self->tag, PACK_HUFFMAN);
+        ng5_check_tag(self->tag, PACK_HUFFMAN);
 
         *dst = *self;
-        dst->extra = malloc(sizeof(struct pack_huffman));
+        dst->extra = malloc(sizeof(struct coding_huffman));
         if (dst->extra != NULL) {
-                struct pack_huffman *self_encoder = (struct pack_huffman *) self->extra;
-                struct pack_huffman *dst_encoder = (struct pack_huffman *) dst->extra;
-                return huffman_cpy(dst_encoder, self_encoder);
+                struct coding_huffman *self_encoder = (struct coding_huffman *) self->extra;
+                struct coding_huffman *dst_encoder = (struct coding_huffman *) dst->extra;
+                return coding_huffman_cpy(dst_encoder, self_encoder);
         } else {
                 return false;
         }
 }
 
-NG5_EXPORT(bool) compressor_huffman_drop(struct packer *self)
+NG5_EXPORT(bool) pack_coding_huffman_drop(struct packer *self)
 {
-        NG5_CHECK_TAG(self->tag, PACK_HUFFMAN);
+        ng5_check_tag(self->tag, PACK_HUFFMAN);
 
-        struct pack_huffman *encoder = (struct pack_huffman *) self->extra;
-        huffman_drop(encoder);
+        struct coding_huffman *encoder = (struct coding_huffman *) self->extra;
+        coding_huffman_drop(encoder);
 
         return true;
 }
@@ -68,7 +68,7 @@ bool huffman_dump_dictionary(FILE *file, struct memfile *memfile)
 
         while ((*NG5_MEMFILE_PEEK(memfile, char)) == MARKER_SYMBOL_HUFFMAN_DIC_ENTRY) {
                 memfile_get_offset(&offset, memfile);
-                huffman_read_dic_entry(&entry_info, memfile, MARKER_SYMBOL_HUFFMAN_DIC_ENTRY);
+                coding_huffman_read_entry(&entry_info, memfile, MARKER_SYMBOL_HUFFMAN_DIC_ENTRY);
 
                 fprintf(file, "0x%04x ", (unsigned) offset);
                 fprintf(file,
@@ -93,12 +93,12 @@ bool huffman_dump_dictionary(FILE *file, struct memfile *memfile)
 
 bool huffman_dump_string_table_entry(FILE *file, struct memfile *memfile)
 {
-        NG5_UNUSED(file);
-        NG5_UNUSED(memfile);
+        ng5_unused(file);
+        ng5_unused(memfile);
 
         struct pack_huffman_str_info info;
 
-        huffman_read_string(&info, memfile);
+        coding_huffman_read_string(&info, memfile);
 
         fprintf(file, "[[nbytes_encoded: %d] [bytes: ", info.nbytes_encoded);
         for (size_t i = 0; i < info.nbytes_encoded; i++) {
@@ -111,70 +111,70 @@ bool huffman_dump_string_table_entry(FILE *file, struct memfile *memfile)
         return true;
 }
 
-NG5_EXPORT(bool) compressor_huffman_write_extra(struct packer *self, struct memfile *dst,
+NG5_EXPORT(bool) pack_huffman_write_extra(struct packer *self, struct memfile *dst,
         const struct vector ofType (const char *) *strings)
 {
-        NG5_CHECK_TAG(self->tag, PACK_HUFFMAN);
+        ng5_check_tag(self->tag, PACK_HUFFMAN);
 
-        struct pack_huffman *encoder = (struct pack_huffman *) self->extra;
+        struct coding_huffman *encoder = (struct coding_huffman *) self->extra;
 
-        huffman_build(encoder, strings);
-        huffman_serialize_dic(dst, encoder, MARKER_SYMBOL_HUFFMAN_DIC_ENTRY);
+        coding_huffman_build(encoder, strings);
+        coding_huffman_serialize(dst, encoder, MARKER_SYMBOL_HUFFMAN_DIC_ENTRY);
 
         return true;
 }
 
-NG5_EXPORT(bool) compressor_huffman_read_extra(struct packer *self, FILE *src, size_t nbytes)
+NG5_EXPORT(bool) pack_huffman_read_extra(struct packer *self, FILE *src, size_t nbytes)
 {
-        NG5_CHECK_TAG(self->tag, PACK_HUFFMAN);
+        ng5_check_tag(self->tag, PACK_HUFFMAN);
 
-        NG5_UNUSED(self);
-        NG5_UNUSED(src);
-        NG5_UNUSED(nbytes);
+        ng5_unused(self);
+        ng5_unused(src);
+        ng5_unused(nbytes);
 
         abort(); /* not implemented */
         return false;
 }
 
-NG5_EXPORT(bool) compressor_huffman_print_extra(struct packer *self, FILE *file, struct memfile *src)
+NG5_EXPORT(bool) pack_huffman_print_extra(struct packer *self, FILE *file, struct memfile *src)
 {
-        NG5_UNUSED(self);
+        ng5_unused(self);
 
         huffman_dump_dictionary(file, src);
 
         return true;
 }
 
-NG5_EXPORT(bool) compressor_huffman_print_encoded(struct packer *self, FILE *file, struct memfile *src,
+NG5_EXPORT(bool) pack_huffman_print_encoded(struct packer *self, FILE *file, struct memfile *src,
         u32 decompressed_strlen)
 {
-        NG5_UNUSED(self);
-        NG5_UNUSED(file);
-        NG5_UNUSED(src);
-        NG5_UNUSED(decompressed_strlen);
+        ng5_unused(self);
+        ng5_unused(file);
+        ng5_unused(src);
+        ng5_unused(decompressed_strlen);
 
         huffman_dump_string_table_entry(file, src);
 
         return true;
 }
 
-bool compressor_huffman_encode_string(struct packer *self, struct memfile *dst, struct err *err, const char *string)
+bool pack_huffman_encode_string(struct packer *self, struct memfile *dst, struct err *err, const char *string)
 {
-        NG5_CHECK_TAG(self->tag, PACK_HUFFMAN);
+        ng5_check_tag(self->tag, PACK_HUFFMAN);
 
-        struct pack_huffman *encoder = (struct pack_huffman *) self->extra;
-        bool status = huffman_encode_one(dst, encoder, string);
+        struct coding_huffman *encoder = (struct coding_huffman *) self->extra;
+        bool status = coding_huffman_encode(dst, encoder, string);
         error_cpy(err, &encoder->err);
 
         return status;
 }
 
-NG5_EXPORT(bool) compressor_huffman_decode_string(struct packer *self, char *dst, size_t strlen, FILE *src)
+NG5_EXPORT(bool) pack_huffman_decode_string(struct packer *self, char *dst, size_t strlen, FILE *src)
 {
-        NG5_UNUSED(self);
-        NG5_UNUSED(dst);
-        NG5_UNUSED(strlen);
-        NG5_UNUSED(src);
+        ng5_unused(self);
+        ng5_unused(dst);
+        ng5_unused(strlen);
+        ng5_unused(src);
         abort(); /* not implemented */
         return false;
 }

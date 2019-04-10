@@ -30,7 +30,7 @@ NG5_BEGIN_DECL
  * @param alloc must be non-null
  * @return STATUS_OK in case of non-null parameter alloc, STATUS_NULLPTR otherwise
  */
-NG5_EXPORT (int) tracer_alloc_create(struct allocator *alloc);
+NG5_EXPORT (int) trace_alloc_create(struct allocator *alloc);
 
 NG5_END_DECL
 

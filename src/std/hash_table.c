@@ -24,22 +24,22 @@
 NG5_EXPORT(bool) hashtable_create(struct hashtable *map, struct err *err, size_t key_size, size_t value_size,
         size_t capacity)
 {
-        NG5_NON_NULL_OR_ERROR(map)
-        NG5_NON_NULL_OR_ERROR(key_size)
-        NG5_NON_NULL_OR_ERROR(value_size)
+        error_if_null(map)
+        error_if_null(key_size)
+        error_if_null(value_size)
 
         int err_code = NG5_ERR_INITFAILED;
 
         map->size = 0;
 
-        NG5_SUCCESS_OR_JUMP(vec_create(&map->key_data, NULL, key_size, capacity), error_handling);
-        NG5_SUCCESS_OR_JUMP(vec_create(&map->value_data, NULL, value_size, capacity), cleanup_key_data_and_error);
-        NG5_SUCCESS_OR_JUMP(vec_create(&map->table, NULL, sizeof(struct hashtable_bucket), capacity),
+        ng5_success_or_jump(vec_create(&map->key_data, NULL, key_size, capacity), error_handling);
+        ng5_success_or_jump(vec_create(&map->value_data, NULL, value_size, capacity), cleanup_key_data_and_error);
+        ng5_success_or_jump(vec_create(&map->table, NULL, sizeof(struct hashtable_bucket), capacity),
                 cleanup_value_key_data_and_error);
-        NG5_SUCCESS_OR_JUMP(vec_enlarge_size_to_capacity(&map->table), cleanup_key_value_table_and_error);
-        NG5_SUCCESS_OR_JUMP(vec_zero_memory(&map->table), cleanup_key_value_table_and_error);
-        NG5_SUCCESS_OR_JUMP(spinlock_init(&map->lock), cleanup_key_value_table_and_error);
-        NG5_SUCCESS_OR_JUMP(error_init(&map->err), cleanup_key_value_table_and_error);
+        ng5_success_or_jump(vec_enlarge_size_to_capacity(&map->table), cleanup_key_value_table_and_error);
+        ng5_success_or_jump(vec_zero_memory(&map->table), cleanup_key_value_table_and_error);
+        ng5_success_or_jump(spin_init(&map->lock), cleanup_key_value_table_and_error);
+        ng5_success_or_jump(error_init(&map->err), cleanup_key_value_table_and_error);
 
         return true;
 
@@ -62,7 +62,7 @@ NG5_EXPORT(bool) hashtable_create(struct hashtable *map, struct err *err, size_t
 
 NG5_EXPORT(bool) hashtable_drop(struct hashtable *map)
 {
-        NG5_NON_NULL_OR_ERROR(map)
+        error_if_null(map)
 
         bool status = true;
 
@@ -116,7 +116,7 @@ NG5_EXPORT(struct hashtable *)hashtable_cpy(struct hashtable *src)
 
 NG5_EXPORT(bool) hashtable_clear(struct hashtable *map)
 {
-        NG5_NON_NULL_OR_ERROR(map)
+        error_if_null(map)
         assert(map->key_data.cap_elems == map->value_data.cap_elems
                 && map->value_data.cap_elems == map->table.cap_elems);
         assert((map->key_data.num_elems == map->value_data.num_elems)
@@ -144,8 +144,8 @@ NG5_EXPORT(bool) hashtable_clear(struct hashtable *map)
 
 NG5_EXPORT(bool) hashtable_avg_displace(float *displace, const struct hashtable *map)
 {
-        NG5_NON_NULL_OR_ERROR(displace);
-        NG5_NON_NULL_OR_ERROR(map);
+        error_if_null(displace);
+        error_if_null(map);
 
         size_t sum_dis = 0;
         for (size_t i = 0; i < map->table.num_elems; i++) {
@@ -159,15 +159,15 @@ NG5_EXPORT(bool) hashtable_avg_displace(float *displace, const struct hashtable 
 
 NG5_EXPORT(bool) hashtable_lock(struct hashtable *map)
 {
-        NG5_NON_NULL_OR_ERROR(map)
-        //spinlock_acquire(&map->lock);
+        error_if_null(map)
+        //spin_acquire(&map->lock);
         return true;
 }
 
 NG5_EXPORT(bool) hashtable_unlock(struct hashtable *map)
 {
-        NG5_NON_NULL_OR_ERROR(map)
-        //spinlock_release(&map->lock);
+        error_if_null(map)
+        //spin_release(&map->lock);
         return true;
 }
 
@@ -186,8 +186,8 @@ static void insert(struct hashtable_bucket *bucket, struct hashtable *map, const
 {
         assert(map->key_data.num_elems == map->value_data.num_elems);
         u64 idx = map->key_data.num_elems;
-        void *key_datum = VECTOR_NEW_AND_GET(&map->key_data, void *);
-        void *value_datum = VECTOR_NEW_AND_GET(&map->value_data, void *);
+        void *key_datum = vec_new_and_get(&map->key_data, void *);
+        void *value_datum = vec_new_and_get(&map->value_data, void *);
         memcpy(key_datum, key, map->key_data.elem_size);
         memcpy(value_datum, value, map->value_data.elem_size);
         bucket->data_idx = idx;
@@ -269,9 +269,9 @@ static inline uint_fast32_t insert_or_update(struct hashtable *map, const u32 *b
 NG5_EXPORT(bool) hashtable_insert_or_update(struct hashtable *map, const void *keys, const void *values,
         uint_fast32_t num_pairs)
 {
-        NG5_NON_NULL_OR_ERROR(map)
-        NG5_NON_NULL_OR_ERROR(keys)
-        NG5_NON_NULL_OR_ERROR(values)
+        error_if_null(map)
+        error_if_null(keys)
+        error_if_null(values)
 
         assert(map->key_data.cap_elems == map->value_data.cap_elems
                 && map->value_data.cap_elems == map->table.cap_elems);
@@ -349,7 +349,7 @@ NG5_EXPORT(bool) hashtable_serialize(FILE *file, struct hashtable *table)
         struct hashtable_header header = {.marker = MARKER_SYMBOL_HASHTABLE_HEADER, .size = table
                 ->size, .key_data_off = key_data_off, .value_data_off = value_data_off, .table_off = table_off};
         int nwrite = fwrite(&header, sizeof(struct hashtable_header), 1, file);
-        error_IF(nwrite != 1, &table->err, NG5_ERR_FWRITE_FAILED);
+        error_if(nwrite != 1, &table->err, NG5_ERR_FWRITE_FAILED);
         fseek(file, end, SEEK_SET);
         return true;
 
@@ -360,9 +360,9 @@ NG5_EXPORT(bool) hashtable_serialize(FILE *file, struct hashtable *table)
 
 NG5_EXPORT(bool) hashtable_deserialize(struct hashtable *table, struct err *err, FILE *file)
 {
-        NG5_NON_NULL_OR_ERROR(table)
-        NG5_NON_NULL_OR_ERROR(err)
-        NG5_NON_NULL_OR_ERROR(file)
+        error_if_null(table)
+        error_if_null(err)
+        error_if_null(file)
 
         int err_code = NG5_ERR_NOERR;
 
@@ -396,7 +396,7 @@ NG5_EXPORT(bool) hashtable_deserialize(struct hashtable *table, struct err *err,
                 goto error_handling;
         }
 
-        spinlock_init(&table->lock);
+        spin_init(&table->lock);
         error_init(&table->err);
         return true;
 
@@ -408,8 +408,8 @@ NG5_EXPORT(bool) hashtable_deserialize(struct hashtable *table, struct err *err,
 
 NG5_EXPORT(bool) hashtable_remove_if_contained(struct hashtable *map, const void *keys, size_t num_pairs)
 {
-        NG5_NON_NULL_OR_ERROR(map)
-        NG5_NON_NULL_OR_ERROR(keys)
+        error_if_null(map)
+        error_if_null(keys)
 
         hashtable_lock(map);
 
@@ -461,8 +461,8 @@ NG5_EXPORT(bool) hashtable_remove_if_contained(struct hashtable *map, const void
 
 NG5_EXPORT(const void *)hashtable_get_value(struct hashtable *map, const void *key)
 {
-        NG5_NON_NULL_OR_ERROR(map)
-        NG5_NON_NULL_OR_ERROR(key)
+        error_if_null(map)
+        error_if_null(key)
 
         const void *result = NULL;
 
@@ -497,8 +497,8 @@ NG5_EXPORT(const void *)hashtable_get_value(struct hashtable *map, const void *k
 
 NG5_EXPORT(bool) hashtable_get_fload_factor(float *factor, struct hashtable *map)
 {
-        NG5_NON_NULL_OR_ERROR(factor)
-        NG5_NON_NULL_OR_ERROR(map)
+        error_if_null(factor)
+        error_if_null(map)
 
         hashtable_lock(map);
 
@@ -511,7 +511,7 @@ NG5_EXPORT(bool) hashtable_get_fload_factor(float *factor, struct hashtable *map
 
 NG5_EXPORT(bool) hashtable_rehash(struct hashtable *map)
 {
-        NG5_NON_NULL_OR_ERROR(map)
+        error_if_null(map)
 
         hashtable_lock(map);
 

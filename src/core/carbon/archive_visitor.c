@@ -29,7 +29,7 @@ static void iterate_objects(struct archive *archive, const field_sid_t *keys, u3
         struct archive_value_vector *value_iter, struct vector ofType(struct path_entry) *path_stack,
         struct archive_visitor *visitor, int mask, void *capture, bool is_root_object)
 {
-        NG5_UNUSED(num_pairs);
+        ng5_unused(num_pairs);
 
         u32 vector_length;
         struct archive_object object;
@@ -79,7 +79,7 @@ static void iterate_objects(struct archive *archive, const field_sid_t *keys, u3
                                         false,
                                         parent_key,
                                         parent_key_array_idx);
-                                OPTIONAL_CALL(visitor,
+                                ng5_optional_call(visitor,
                                         after_object_visit,
                                         archive,
                                         path_stack,
@@ -89,7 +89,7 @@ static void iterate_objects(struct archive *archive, const field_sid_t *keys, u3
                                         capture);
                         }
                 } else {
-                        OPTIONAL_CALL(visitor, visit_root_object, archive, object_id, capture);
+                        ng5_optional_call(visitor, visit_root_object, archive, object_id, capture);
                         iterate_props(archive,
                                 &prop_iter,
                                 path_stack,
@@ -119,14 +119,14 @@ static void iterate_objects(struct archive *archive, const field_sid_t *keys, u3
                 const built_in_type *values = archive_value_vector_get_##name##_arrays_at(&array_length,        \
                                                                                              prop_idx,                 \
                                                                                              &value_iter);             \
-                OPTIONAL_CALL(visitor, visit_enter_##name##_array_pair, archive, path_stack, this_object_oid, keys[prop_idx],      \
+                ng5_optional_call(visitor, visit_enter_##name##_array_pair, archive, path_stack, this_object_oid, keys[prop_idx],      \
                               prop_idx, array_length, capture);                                                        \
-                OPTIONAL_CALL(visitor, visit_##name##_array_pair, archive, path_stack, this_object_oid, keys[prop_idx],            \
+                ng5_optional_call(visitor, visit_##name##_array_pair, archive, path_stack, this_object_oid, keys[prop_idx],            \
                               prop_idx, num_pairs, values, array_length, capture)                                      \
-                OPTIONAL_CALL(visitor, visit_leave_##name##_array_pair, archive, path_stack, this_object_oid, prop_idx, num_pairs, \
+                ng5_optional_call(visitor, visit_leave_##name##_array_pair, archive, path_stack, this_object_oid, prop_idx, num_pairs, \
                                                                         capture);                                      \
             }                                                                                                          \
-            OPTIONAL_CALL(visitor, visit_leave_##name##_array_pairs, archive, path_stack, this_object_oid, capture);               \
+            ng5_optional_call(visitor, visit_leave_##name##_array_pairs, archive, path_stack, this_object_oid, capture);               \
         }                                                                                                              \
     } else                                                                                                             \
     {                                                                                                                  \
@@ -140,7 +140,7 @@ static void iterate_objects(struct archive *archive, const field_sid_t *keys, u3
 #define SET_NESTED_ARRAY_SWITCH_CASE(name, built_in_type)                                                              \
 {                                                                                                                      \
     const built_in_type *values = archive_column_entry_get_##name(&entry_length, &entry_iter);                  \
-    OPTIONAL_CALL(visitor, visit_object_array_object_property_##name,                                                  \
+    ng5_optional_call(visitor, visit_object_array_object_property_##name,                                                  \
                   archive, path_stack, this_object_oid, group_key, current_nested_object_id,                           \
                   current_column_name, values, entry_length, capture);                                                 \
 }
@@ -159,8 +159,8 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
         archive_collection_iter_t collection_iter;
         bool first_type_group = true;
 
-        NG5_UNUSED(parent_key);
-        NG5_UNUSED(parent_key_array_idx);
+        ng5_unused(parent_key);
+        ng5_unused(parent_key_array_idx);
 
         struct path_entry e = {.key = parent_key, .idx = parent_key_array_idx};
         vec_push(path_stack, &e, 1);
@@ -177,7 +177,7 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                         archive_value_vector_get_object_id(&this_object_oid, &value_iter);
 
                         for (u32 i = 0; i < num_pairs; i++) {
-                                OPTIONAL_CALL(visitor,
+                                ng5_optional_call(visitor,
                                         visit_object_property,
                                         archive,
                                         path_stack,
@@ -190,7 +190,7 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                                 struct path_entry e = {.key = keys[i], .idx = 666};
                                 vec_push(path_stack, &e, 1);
                                 //archive_visitor_print_path(stderr, archive, path_stack);
-                                OPTIONAL_CALL(visitor,
+                                ng5_optional_call(visitor,
                                         visit_object_array_prop,
                                         archive,
                                         path_stack,
@@ -201,8 +201,8 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                                 vec_pop(path_stack);
                         }
 
-                        if (NG5_UNLIKELY(first_type_group)) {
-                                OPTIONAL_CALL(visitor,
+                        if (unlikely(first_type_group)) {
+                                ng5_optional_call(visitor,
                                         first_prop_type_group,
                                         archive,
                                         path_stack,
@@ -213,7 +213,7 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                                         num_pairs,
                                         capture);
                         } else {
-                                OPTIONAL_CALL(visitor,
+                                ng5_optional_call(visitor,
                                         next_prop_type_group,
                                         archive,
                                         path_stack,
@@ -256,7 +256,7 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                                                 const field_u32_t *num_values =
                                                         archive_value_vector_get_null_arrays(NULL, &value_iter);
                                                 for (u32 prop_idx = 0; prop_idx < num_pairs; prop_idx++) {
-                                                        OPTIONAL_CALL(visitor,
+                                                        ng5_optional_call(visitor,
                                                                 visit_enter_null_array_pair,
                                                                 archive,
                                                                 path_stack,
@@ -265,7 +265,7 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                                                                 prop_idx,
                                                                 num_values[prop_idx],
                                                                 capture);
-                                                        OPTIONAL_CALL(visitor,
+                                                        ng5_optional_call(visitor,
                                                                 visit_null_array_pair,
                                                                 archive,
                                                                 path_stack,
@@ -275,7 +275,7 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                                                                 num_pairs,
                                                                 num_values[prop_idx],
                                                                 capture)
-                                                        OPTIONAL_CALL(visitor,
+                                                        ng5_optional_call(visitor,
                                                                 visit_leave_null_array_pair,
                                                                 archive,
                                                                 path_stack,
@@ -284,7 +284,7 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                                                                 num_pairs,
                                                                 capture);
                                                 }
-                                                OPTIONAL_CALL(visitor,
+                                                ng5_optional_call(visitor,
                                                         visit_leave_int8_array_pairs,
                                                         archive,
                                                         path_stack,
@@ -335,7 +335,7 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                         keys = archive_collection_iter_get_keys(&num_column_groups, &collection_iter);
 
                         bool *skip_groups_by_key = malloc(num_column_groups * sizeof(bool));
-                        NG5_ZERO_MEMORY(skip_groups_by_key, num_column_groups * sizeof(bool));
+                        ng5_zero_memory(skip_groups_by_key, num_column_groups * sizeof(bool));
 
                         if (visitor->before_visit_object_array) {
                                 for (u32 i = 0; i < num_column_groups; i++) {
@@ -368,7 +368,7 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                                                 archive_column_group_get_object_ids(&num_column_group_objs,
                                                         &group_iter);
                                         bool *skip_objects = malloc(num_column_group_objs * sizeof(bool));
-                                        NG5_ZERO_MEMORY(skip_objects, num_column_group_objs * sizeof(bool));
+                                        ng5_zero_memory(skip_objects, num_column_group_objs * sizeof(bool));
 
                                         if (visitor->before_visit_object_array_objects) {
                                                 visitor->before_visit_object_array_objects(skip_objects,
@@ -408,7 +408,7 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                                                             /0/n_citation/0/
                                                          */
 
-                                                        OPTIONAL_CALL(visitor,
+                                                        ng5_optional_call(visitor,
                                                                 visit_object_array_prop,
                                                                 archive,
                                                                 path_stack,
@@ -627,8 +627,8 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
 NG5_EXPORT(bool) archive_visit_archive(struct archive *archive, const struct archive_visitor_desc *desc,
         struct archive_visitor *visitor, void *capture)
 {
-        NG5_NON_NULL_OR_ERROR(archive)
-        NG5_NON_NULL_OR_ERROR(visitor)
+        error_if_null(archive)
+        error_if_null(visitor)
 
         struct prop_iter prop_iter;
         struct vector ofType(path_entry) path_stack;
@@ -637,9 +637,9 @@ NG5_EXPORT(bool) archive_visit_archive(struct archive *archive, const struct arc
 
         if (archive_prop_iter_from_archive(&prop_iter, &archive->err, mask, archive)) {
                 vec_create(&path_stack, NULL, sizeof(struct path_entry), 100);
-                OPTIONAL_CALL(visitor, before_visit_starts, archive, capture);
+                ng5_optional_call(visitor, before_visit_starts, archive, capture);
                 iterate_props(archive, &prop_iter, &path_stack, visitor, mask, capture, true, 0, 0);
-                OPTIONAL_CALL(visitor, after_visit_ends, archive, capture);
+                ng5_optional_call(visitor, after_visit_ends, archive, capture);
                 vec_drop(&path_stack);
                 return true;
         } else {
@@ -671,9 +671,9 @@ NG5_EXPORT(void) archive_visitor_path_to_string(char path_buffer[2048], struct a
 NG5_EXPORT(bool) archive_visitor_print_path(FILE *file, struct archive *archive,
         const struct vector ofType(struct path_entry) *path_stack)
 {
-        NG5_NON_NULL_OR_ERROR(file)
-        NG5_NON_NULL_OR_ERROR(path_stack)
-        NG5_NON_NULL_OR_ERROR(archive)
+        error_if_null(file)
+        error_if_null(path_stack)
+        error_if_null(archive)
 
         struct archive_query *query = archive_query_default(archive);
 

@@ -32,8 +32,8 @@ struct string_pred_t {
 
 NG5_BUILT_IN(static bool) string_pred_validate(struct err *err, const struct string_pred_t *pred)
 {
-        NG5_NON_NULL_OR_ERROR(pred);
-        NG5_IMPLEMENTS_OR_ERROR(err, pred, func)
+        error_if_null(pred);
+        ng5_implemented_or_error(err, pred, func)
         return true;
 }
 
@@ -50,8 +50,8 @@ NG5_BUILT_IN(static bool) string_pred_eval(const struct string_pred_t *pred, siz
 
 NG5_BUILT_IN(static bool) string_pred_get_limit(i64 *limit, const struct string_pred_t *pred)
 {
-        NG5_NON_NULL_OR_ERROR(limit);
-        NG5_NON_NULL_OR_ERROR(pred);
+        error_if_null(limit);
+        error_if_null(pred);
         *limit = pred->limit;
         return true;
 }

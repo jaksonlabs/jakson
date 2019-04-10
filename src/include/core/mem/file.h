@@ -32,31 +32,31 @@ struct memfile {
         struct err err;
 };
 
-#define NG5_MEMFILE_PEEK(file, type)                                                                                \
+#define NG5_MEMFILE_PEEK(file, type)                                                                                   \
 ({                                                                                                                     \
-    assert (memfile_remain_size(file) >= sizeof(type));                                                         \
-    (type*) memfile_peek(file, sizeof(type));                                                                   \
+    assert (memfile_remain_size(file) >= sizeof(type));                                                                \
+    (type*) memfile_peek(file, sizeof(type));                                                                          \
 })
 
-#define NG5_MEMFILE_READ_TYPE(file, type)                                                                           \
+#define NG5_MEMFILE_READ_TYPE(file, type)                                                                              \
 ({                                                                                                                     \
-    assert (memfile_remain_size(file) >= sizeof(type));                                                         \
-    (type*) memfile_read(file, sizeof(type));                                                                   \
+    assert (memfile_remain_size(file) >= sizeof(type));                                                                \
+    (type*) memfile_read(file, sizeof(type));                                                                          \
 })
 
-#define NG5_MEMFILE_READ_TYPE_LIST(file, type, how_many)                                                            \
+#define NG5_MEMFILE_READ_TYPE_LIST(file, type, how_many)                                                               \
     (const type *) NG5_MEMFILE_READ(file, how_many * sizeof(type))
 
-#define NG5_MEMFILE_READ(file, nbytes)                                                                              \
+#define NG5_MEMFILE_READ(file, nbytes)                                                                                 \
 ({                                                                                                                     \
-    assert (memfile_remain_size(file) >= nbytes);                                                               \
-    memfile_read(file, nbytes);                                                                                 \
+    assert (memfile_remain_size(file) >= nbytes);                                                                      \
+    memfile_read(file, nbytes);                                                                                        \
 })
 
-#define memfile_tell(file)                                                                                      \
+#define memfile_tell(file)                                                                                             \
 ({                                                                                                                     \
-    offset_t offset;                                                                                               \
-    memfile_get_offset(&offset, file);                                                                                \
+    offset_t offset;                                                                                                   \
+    memfile_get_offset(&offset, file);                                                                                 \
     offset;                                                                                                            \
 })
 
@@ -90,7 +90,7 @@ NG5_EXPORT(bool) memfile_read_bit(struct memfile *file);
 
 NG5_EXPORT(bool) memfile_end_bit_mode(size_t *num_bytes_written, struct memfile *file);
 
-NG5_EXPORT(void *)memfile_current_pos(struct memfile *file, offset_t nbytes);
+NG5_EXPORT(void *) memfile_current_pos(struct memfile *file, offset_t nbytes);
 
 NG5_END_DECL
 

@@ -22,9 +22,9 @@
 
 NG5_BEGIN_DECL
 
-#define NG5_HASH_SAX(key_size, key)                                                                                 \
+#define NG5_HASH_SAX(key_size, key)                                                                                    \
 ({                                                                                                                     \
-    hash32_t hash = 0;                                                                                            \
+    hash32_t hash = 0;                                                                                                 \
     for (size_t i = 0; i < key_size; i++) {                                                                            \
         hash ^= (hash << 5) + (hash >> 2) + ((unsigned char* )key)[i];                                                 \
     }                                                                                                                  \

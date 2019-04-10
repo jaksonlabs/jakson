@@ -27,13 +27,13 @@ NG5_BEGIN_DECL
  * Allocates <code>num</code> elements of size <code>sizeof(type)</code> using the allocator <code>alloc</code> and
  * creates a new stack variable <code>type *name</code>.
  */
-#define NG5_MALLOC(type, name, num, alloc)                                                                          \
+#define ng5_malloc(type, name, num, alloc)                                                                          \
     type *name = alloc_malloc(alloc, num *sizeof(type))
 
 /**
  * Invokes a free operation in <code>alloc</code> allocator to free up memory assigned to pointer <code>name</code>
  */
-#define NG5_FREE(name, alloc)                                                                                       \
+#define ng5_free(name, alloc)                                                                                       \
     alloc_free(alloc, name)
 
 struct allocator {
@@ -108,7 +108,7 @@ NG5_EXPORT (bool) alloc_clone(struct allocator *dst, const struct allocator *src
  * @param size number of bytes requested
  * @return non-null pointer to memory allocated with 'alloc'
  */
-NG5_EXPORT (void *)alloc_malloc(struct allocator *alloc, size_t size);
+NG5_EXPORT (void *) alloc_malloc(struct allocator *alloc, size_t size);
 
 /**
  * Invokes memory re-allocation for pointer 'ptr' (that is managed by 'alloc') to size 'size' in bytes.
@@ -118,7 +118,7 @@ NG5_EXPORT (void *)alloc_malloc(struct allocator *alloc, size_t size);
  * @param size new number of bytes for 'ptr'
  * @return non-null pointer that points to reallocated memory for 'ptr'
  */
-NG5_EXPORT (void *)alloc_realloc(struct allocator *alloc, void *ptr, size_t size);
+NG5_EXPORT (void *) alloc_realloc(struct allocator *alloc, void *ptr, size_t size);
 
 /**
  * Invokes memory freeing for pointer 'ptr' (that is managed by 'alloc').

@@ -30,7 +30,7 @@
 #include "shared/common.h"
 #include "core/mem/block.h"
 #include "core/mem/file.h"
-#include "coding/pack_huffman.h"
+#include "coding/coding_huffman.h"
 #include "core/carbon/archive.h"
 
 #define WRITE_PRIMITIVE_VALUES(memfile, values_vec, type)                                                              \
@@ -139,12 +139,12 @@ NG5_EXPORT(bool) archive_from_json(struct archive *out, const char *file, struct
         enum packer_type compressor, enum strdic_tag dictionary, size_t num_async_dic_threads, bool read_optimized,
         bool bake_string_id_index, struct archive_callback *callback)
 {
-        NG5_NON_NULL_OR_ERROR(out);
-        NG5_NON_NULL_OR_ERROR(file);
-        NG5_NON_NULL_OR_ERROR(err);
-        NG5_NON_NULL_OR_ERROR(json_string);
+        error_if_null(out);
+        error_if_null(file);
+        error_if_null(err);
+        error_if_null(json_string);
 
-        OPTIONAL_CALL(callback, begin_create_from_json);
+        ng5_optional_call(callback, begin_create_from_json);
 
         struct memblock *stream;
         FILE *out_file;
@@ -161,7 +161,7 @@ NG5_EXPORT(bool) archive_from_json(struct archive *out, const char *file, struct
                 return false;
         }
 
-        OPTIONAL_CALL(callback, begin_write_archive_file_to_disk);
+        ng5_optional_call(callback, begin_write_archive_file_to_disk);
 
         if ((out_file = fopen(file, "w")) == NULL) {
                 error(err, NG5_ERR_FOPENWRITE);
@@ -178,20 +178,20 @@ NG5_EXPORT(bool) archive_from_json(struct archive *out, const char *file, struct
 
         fclose(out_file);
 
-        OPTIONAL_CALL(callback, end_write_archive_file_to_disk);
+        ng5_optional_call(callback, end_write_archive_file_to_disk);
 
-        OPTIONAL_CALL(callback, begin_load_archive);
+        ng5_optional_call(callback, begin_load_archive);
 
         if (!archive_open(out, file)) {
                 error(err, NG5_ERR_ARCHIVEOPEN);
                 return false;
         }
 
-        OPTIONAL_CALL(callback, end_load_archive);
+        ng5_optional_call(callback, end_load_archive);
 
         memblock_drop(stream);
 
-        OPTIONAL_CALL(callback, end_create_from_json);
+        ng5_optional_call(callback, end_create_from_json);
 
         return true;
 }
@@ -200,9 +200,9 @@ NG5_EXPORT(bool) archive_stream_from_json(struct memblock **stream, struct err *
         enum packer_type compressor, enum strdic_tag dictionary, size_t num_async_dic_threads, bool read_optimized,
         bool bake_id_index, struct archive_callback *callback)
 {
-        NG5_NON_NULL_OR_ERROR(stream);
-        NG5_NON_NULL_OR_ERROR(err);
-        NG5_NON_NULL_OR_ERROR(json_string);
+        error_if_null(stream);
+        error_if_null(err);
+        error_if_null(json_string);
 
         struct strdic dic;
         struct json_parser parser;
@@ -212,20 +212,20 @@ NG5_EXPORT(bool) archive_stream_from_json(struct memblock **stream, struct err *
         struct columndoc *columndoc;
         struct json json;
 
-        OPTIONAL_CALL(callback, begin_archive_stream_from_json)
+        ng5_optional_call(callback, begin_archive_stream_from_json)
 
-        OPTIONAL_CALL(callback, begin_setup_string_dictionary);
+        ng5_optional_call(callback, begin_setup_string_dictionary);
         if (dictionary == SYNC) {
-                strdic_create_sync(&dic, 1000, 1000, 1000, 0, NULL);
+                encode_sync_create(&dic, 1000, 1000, 1000, 0, NULL);
         } else if (dictionary == ASYNC) {
-                strdic_create_async(&dic, 1000, 1000, 1000, num_async_dic_threads, NULL);
+                encode_async_create(&dic, 1000, 1000, 1000, num_async_dic_threads, NULL);
         } else {
                 error(err, NG5_ERR_UNKNOWN_DIC_TYPE);
         }
 
-        OPTIONAL_CALL(callback, end_setup_string_dictionary);
+        ng5_optional_call(callback, end_setup_string_dictionary);
 
-        OPTIONAL_CALL(callback, begin_parse_json);
+        ng5_optional_call(callback, begin_parse_json);
         json_parser_create(&parser, &bulk);
         if (!(json_parse(&json, &error_desc, &parser, json_string))) {
                 char buffer[2048];
@@ -236,22 +236,22 @@ NG5_EXPORT(bool) archive_stream_from_json(struct memblock **stream, struct err *
                                 error_desc.token_type_str,
                                 error_desc.token->line,
                                 error_desc.token->column);
-                        error_WDETAILS(err, NG5_ERR_JSONPARSEERR, &buffer[0]);
+                        error_with_details(err, NG5_ERR_JSONPARSEERR, &buffer[0]);
                 } else {
                         sprintf(buffer, "%s", error_desc.msg);
-                        error_WDETAILS(err, NG5_ERR_JSONPARSEERR, &buffer[0]);
+                        error_with_details(err, NG5_ERR_JSONPARSEERR, &buffer[0]);
                 }
                 return false;
         }
-        OPTIONAL_CALL(callback, end_parse_json);
+        ng5_optional_call(callback, end_parse_json);
 
-        OPTIONAL_CALL(callback, begin_test_json);
+        ng5_optional_call(callback, begin_test_json);
         if (!json_test(err, &json)) {
                 return false;
         }
-        OPTIONAL_CALL(callback, end_test_json);
+        ng5_optional_call(callback, end_test_json);
 
-        OPTIONAL_CALL(callback, begin_import_json);
+        ng5_optional_call(callback, begin_import_json);
         if (!doc_bulk_create(&bulk, &dic)) {
                 error(err, NG5_ERR_BULKCREATEFAILED);
                 return false;
@@ -270,17 +270,17 @@ NG5_EXPORT(bool) archive_stream_from_json(struct memblock **stream, struct err *
                 return false;
         }
 
-        OPTIONAL_CALL(callback, end_import_json);
+        ng5_optional_call(callback, end_import_json);
 
-        OPTIONAL_CALL(callback, begin_cleanup);
+        ng5_optional_call(callback, begin_cleanup);
         strdic_drop(&dic);
         doc_bulk_Drop(&bulk);
         doc_entries_drop(partition);
         columndoc_free(columndoc);
         free(columndoc);
-        OPTIONAL_CALL(callback, end_cleanup);
+        ng5_optional_call(callback, end_cleanup);
 
-        OPTIONAL_CALL(callback, end_archive_stream_from_json)
+        ng5_optional_call(callback, end_archive_stream_from_json)
 
         return true;
 }
@@ -344,11 +344,11 @@ static bool run_string_id_baking(struct err *err, struct memblock **stream)
 
         struct archive_header header;
         size_t nread = fread(&header, sizeof(struct archive_header), 1, tmp_file);
-        error_IF(nread != 1, err, NG5_ERR_FREAD_FAILED);
+        error_if(nread != 1, err, NG5_ERR_FREAD_FAILED);
         header.string_id_to_offset_index_offset = index_pos;
         fseek(tmp_file, 0, SEEK_SET);
         int nwrite = fwrite(&header, sizeof(struct archive_header), 1, tmp_file);
-        error_IF(nwrite != 1, err, NG5_ERR_FWRITE_FAILED);
+        error_if(nwrite != 1, err, NG5_ERR_FWRITE_FAILED);
         fseek(tmp_file, 0, SEEK_SET);
 
         query_drop_index_string_id_to_offset(index);
@@ -364,24 +364,24 @@ static bool run_string_id_baking(struct err *err, struct memblock **stream)
 bool archive_from_model(struct memblock **stream, struct err *err, struct columndoc *model, enum packer_type compressor,
         bool bake_string_id_index, struct archive_callback *callback)
 {
-        NG5_NON_NULL_OR_ERROR(model)
-        NG5_NON_NULL_OR_ERROR(stream)
-        NG5_NON_NULL_OR_ERROR(err)
+        error_if_null(model)
+        error_if_null(stream)
+        error_if_null(err)
 
-        OPTIONAL_CALL(callback, begin_create_from_model)
+        ng5_optional_call(callback, begin_create_from_model)
 
         memblock_create(stream, 1024 * 1024 * 1024);
         struct memfile memfile;
         memfile_open(&memfile, *stream, READ_WRITE);
 
-        OPTIONAL_CALL(callback, begin_write_string_table);
+        ng5_optional_call(callback, begin_write_string_table);
         skip_file_header(&memfile);
         if (!serialize_string_dic(&memfile, err, model->bulk, compressor)) {
                 return false;
         }
-        OPTIONAL_CALL(callback, end_write_string_table);
+        ng5_optional_call(callback, end_write_string_table);
 
-        OPTIONAL_CALL(callback, begin_write_record_table);
+        ng5_optional_call(callback, begin_write_record_table);
         offset_t record_header_offset = skip_record_header(&memfile);
         update_file_header(&memfile, record_header_offset);
         offset_t root_object_header_offset = memfile_tell(&memfile);
@@ -390,29 +390,29 @@ bool archive_from_model(struct memblock **stream, struct err *err, struct column
         }
         u64 record_size = memfile_tell(&memfile) - (record_header_offset + sizeof(struct record_header));
         update_record_header(&memfile, record_header_offset, model, record_size);
-        OPTIONAL_CALL(callback, end_write_record_table);
+        ng5_optional_call(callback, end_write_record_table);
 
         memfile_shrink(&memfile);
 
         if (bake_string_id_index) {
                 /* create string id to offset index, and append it to the CARBON file */
-                OPTIONAL_CALL(callback, begin_string_id_index_baking);
+                ng5_optional_call(callback, begin_string_id_index_baking);
                 if (!run_string_id_baking(err, stream)) {
                         return false;
                 }
-                OPTIONAL_CALL(callback, end_string_id_index_baking);
+                ng5_optional_call(callback, end_string_id_index_baking);
         } else {
-                OPTIONAL_CALL(callback, skip_string_id_index_baking);
+                ng5_optional_call(callback, skip_string_id_index_baking);
         }
 
-        OPTIONAL_CALL(callback, end_create_from_model)
+        ng5_optional_call(callback, end_create_from_model)
 
         return true;
 }
 
 NG5_EXPORT(struct io_context *)archive_io_context_create(struct archive *archive)
 {
-        NG5_NON_NULL_OR_ERROR(archive);
+        error_if_null(archive);
         struct io_context *context;
         if (io_context_create(&context, &archive->err, archive->diskFilePath)) {
                 return context;
@@ -980,7 +980,7 @@ static bool write_column_entry(struct memfile *memfile, struct err *err, field_e
                 offset_t preObjectNext = 0;
                 for (size_t i = 0; i < column->num_elems; i++) {
                         struct columndoc_obj *object = vec_get(column, i, struct columndoc_obj);
-                        if (NG5_LIKELY(preObjectNext != 0)) {
+                        if (likely(preObjectNext != 0)) {
                                 offset_t continuePos = memfile_tell(memfile);
                                 offset_t relativeContinuePos = continuePos - root_object_header_offset;
                                 memfile_seek(memfile, preObjectNext);
@@ -1061,7 +1061,7 @@ static bool write_object_array_props(struct memfile *memfile, struct err *err,
                                         *column = vec_get(&column_group->columns, k, struct columndoc_column);
                                 const u32 *array_pos = vec_all(&column->array_positions, u32);
                                 for (size_t m = 0; m < column->array_positions.num_elems; m++) {
-                                        max_pos = NG5_MAX(max_pos, array_pos[m]);
+                                        max_pos = ng5_max(max_pos, array_pos[m]);
                                 }
                         }
                         struct column_group_header column_group_header =
@@ -1345,7 +1345,7 @@ static bool __serialize(offset_t *offset, struct err *err, struct memfile *memfi
         propOffsetsWrite(memfile, &flags, &prop_offsets);
 
         memfile_seek(memfile, object_end_offset);
-        NG5_OPTIONAL_SET(offset, next_offset);
+        ng5_optional_set(offset, next_offset);
         return true;
 }
 
@@ -1410,17 +1410,17 @@ static bool serialize_string_dic(struct memfile *memfile, struct err *err, const
         assert(strings->num_elems == string_ids->num_elems);
 
         flags.value = 0;
-        if (!compressor_by_type(err, &strategy, compressor)) {
+        if (!pack_by_type(err, &strategy, compressor)) {
                 return false;
         }
-        u8 flag_bit = compressor_flagbit_by_type(compressor);
-        NG5_FIELD_SET(flags.value, flag_bit);
+        u8 flag_bit = pack_flagbit_by_type(compressor);
+        ng5_set_bits(flags.value, flag_bit);
 
         offset_t header_pos = memfile_tell(memfile);
         memfile_skip(memfile, sizeof(struct string_table_header));
 
         offset_t extra_begin_off = memfile_tell(memfile);
-        compressor_write_extra(err, &strategy, memfile, strings);
+        pack_write_extra(err, &strategy, memfile, strings);
         offset_t extra_end_off = memfile_tell(memfile);
 
         header = (struct string_table_header) {.marker = marker_symbols[MARKER_TYPE_EMBEDDED_STR_DIC]
@@ -1438,8 +1438,8 @@ static bool serialize_string_dic(struct memfile *memfile, struct err *err, const
                 offset_t header_pos_off = memfile_tell(memfile);
                 memfile_skip(memfile, sizeof(struct string_entry_header));
 
-                if (!compressor_encode(err, &strategy, memfile, string)) {
-                        NG5_PRINT_ERROR(err.code);
+                if (!pack_encode(err, &strategy, memfile, string)) {
+                        error_print(err.code);
                         return false;
                 }
                 offset_t continue_off = memfile_tell(memfile);
@@ -1459,7 +1459,7 @@ static bool serialize_string_dic(struct memfile *memfile, struct err *err, const
         free(strings);
         free(string_ids);
 
-        return compressor_drop(err, &strategy);
+        return pack_drop(err, &strategy);
 }
 
 static void skip_file_header(struct memfile *memfile)
@@ -1472,7 +1472,7 @@ static void update_file_header(struct memfile *memfile, offset_t record_header_o
         offset_t current_pos;
         memfile_get_offset(&current_pos, memfile);
         memfile_seek(memfile, 0);
-        memcpy(&this_file_header.magic, CABIN_FILE_MAGIC, strlen(CABIN_FILE_MAGIC));
+        memcpy(&this_file_header.magic, CARBON_ARCHIVE_MAGIC, strlen(CARBON_ARCHIVE_MAGIC));
         this_file_header.root_object_header_offset = record_header_offset;
         this_file_header.string_id_to_offset_index_offset = 0;
         memfile_write(memfile, &this_file_header, sizeof(struct archive_header));
@@ -1487,7 +1487,7 @@ static bool print_column_form_memfile(FILE *file, struct err *err, struct memfil
         if (header->marker != MARKER_SYMBOL_COLUMN) {
                 char buffer[256];
                 sprintf(buffer, "expected marker [%c] but found [%c]", MARKER_SYMBOL_COLUMN, header->marker);
-                error_WDETAILS(err, NG5_ERR_CORRUPTED, buffer);
+                error_with_details(err, NG5_ERR_CORRUPTED, buffer);
                 return false;
         }
         fprintf(file, "0x%04x ", (unsigned) offset);
@@ -1603,7 +1603,7 @@ static bool print_object_array_from_memfile(FILE *file, struct err *err, struct 
         if (header->marker != MARKER_SYMBOL_PROP_OBJECT_ARRAY) {
                 char buffer[256];
                 sprintf(buffer, "expected marker [%c] but found [%c]", MARKER_SYMBOL_PROP_OBJECT_ARRAY, header->marker);
-                error_WDETAILS(err, NG5_ERR_CORRUPTED, buffer);
+                error_with_details(err, NG5_ERR_CORRUPTED, buffer);
                 return false;
         }
 
@@ -1637,7 +1637,7 @@ static bool print_object_array_from_memfile(FILE *file, struct err *err, struct 
                                 "expected marker [%c] but found [%c]",
                                 MARKER_SYMBOL_COLUMN_GROUP,
                                 column_group_header->marker);
-                        error_WDETAILS(err, NG5_ERR_CORRUPTED, buffer);
+                        error_with_details(err, NG5_ERR_CORRUPTED, buffer);
                         return false;
                 }
                 fprintf(file, "0x%04x ", offset);
@@ -1773,7 +1773,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
         if (header->marker != MARKER_SYMBOL_OBJECT_BEGIN) {
                 char buffer[256];
                 sprintf(buffer, "Parsing error: expected object marker [{] but found [%c]\"", header->marker);
-                error_WDETAILS(err, NG5_ERR_CORRUPTED, buffer);
+                error_with_details(err, NG5_ERR_CORRUPTED, buffer);
                 return false;
         }
 
@@ -2124,7 +2124,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                                 "Parsing error: unexpected marker [%c] was detected in file %p",
                                 entryMarker,
                                 memfile);
-                        error_WDETAILS(err, NG5_ERR_CORRUPTED, buffer);
+                        error_with_details(err, NG5_ERR_CORRUPTED, buffer);
                         return false;
                 }
                 }
@@ -2142,15 +2142,15 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
 
 static bool is_valid_file(const struct archive_header *header)
 {
-        if (NG5_ARRAY_LENGTH(header->magic) != strlen(CABIN_FILE_MAGIC)) {
+        if (NG5_ARRAY_LENGTH(header->magic) != strlen(CARBON_ARCHIVE_MAGIC)) {
                 return false;
         } else {
                 for (size_t i = 0; i < NG5_ARRAY_LENGTH(header->magic); i++) {
-                        if (header->magic[i] != CABIN_FILE_MAGIC[i]) {
+                        if (header->magic[i] != CARBON_ARCHIVE_MAGIC[i]) {
                                 return false;
                         }
                 }
-                if (header->version != CABIN_FILE_VERSION) {
+                if (header->version != CARBON_ARCHIVE_VERSION) {
                         return false;
                 }
                 if (header->root_object_header_offset == 0) {
@@ -2189,7 +2189,7 @@ static bool print_header_from_memfile(FILE *file, struct err *err, struct memfil
 
         fprintf(file, "0x%04x ", offset);
         fprintf(file,
-                "[magic: " CABIN_FILE_MAGIC "] [version: %d] [recordOffset: 0x%04x] [string-id-offset-index: 0x%04x]\n",
+                "[magic: " CARBON_ARCHIVE_MAGIC "] [version: %d] [recordOffset: 0x%04x] [string-id-offset-index: 0x%04x]\n",
                 header->version,
                 (unsigned) header->root_object_header_offset,
                 (unsigned) header->string_id_to_offset_index_offset);
@@ -2209,7 +2209,7 @@ static bool print_embedded_dic_from_memfile(FILE *file, struct err *err, struct 
                         "expected [%c] marker, but found [%c]",
                         marker_symbols[MARKER_TYPE_EMBEDDED_STR_DIC].symbol,
                         header->marker);
-                error_WDETAILS(err, NG5_ERR_CORRUPTED, buffer);
+                error_with_details(err, NG5_ERR_CORRUPTED, buffer);
                 return false;
         }
         flags.value = header->flags;
@@ -2225,12 +2225,12 @@ static bool print_embedded_dic_from_memfile(FILE *file, struct err *err, struct 
                 header->compressor_extra_size);
         free(flagsStr);
 
-        if (compressor_by_flags(&strategy, flags.value) != true) {
+        if (pack_by_flags(&strategy, flags.value) != true) {
                 error(err, NG5_ERR_NOCOMPRESSOR);
                 return false;
         }
 
-        compressor_print_extra(err, &strategy, file, memfile);
+        pack_print_extra(err, &strategy, file, memfile);
 
         while ((*NG5_MEMFILE_PEEK(memfile, char)) == marker_symbols[MARKER_TYPE_EMBEDDED_UNCOMP_STR].symbol) {
                 unsigned offset = memfile_tell(memfile);
@@ -2242,11 +2242,11 @@ static bool print_embedded_dic_from_memfile(FILE *file, struct err *err, struct 
                         (size_t) header.next_entry_off,
                         header.string_id,
                         header.string_len);
-                compressor_print_encoded(err, &strategy, file, memfile, header.string_len);
+                pack_print_encoded(err, &strategy, file, memfile, header.string_len);
                 fprintf(file, "\n");
         }
 
-        return compressor_drop(err, &strategy);
+        return pack_drop(err, &strategy);
 }
 
 static bool print_archive_from_memfile(FILE *file, struct err *err, struct memfile *memfile)
@@ -2266,7 +2266,7 @@ static bool print_archive_from_memfile(FILE *file, struct err *err, struct memfi
 
 static union object_flags *get_flags(union object_flags *flags, struct columndoc_obj *columndoc)
 {
-        NG5_ZERO_MEMORY(flags, sizeof(union object_flags));
+        ng5_zero_memory(flags, sizeof(union object_flags));
         flags->bits.has_null_props = (columndoc->null_prop_keys.num_elems > 0);
         flags->bits.has_bool_props = (columndoc->bool_prop_keys.num_elems > 0);
         flags->bits.has_int8_props = (columndoc->int8_prop_keys.num_elems > 0);
@@ -2316,18 +2316,18 @@ bool archive_open(struct archive *out, const char *file_path)
         out->diskFilePath = strdup(file_path);
         disk_file = fopen(out->diskFilePath, "r");
         if (!disk_file) {
-                NG5_PRINT_ERROR(NG5_ERR_FOPEN_FAILED);
+                error_print(NG5_ERR_FOPEN_FAILED);
                 return false;
         } else {
                 struct archive_header header;
                 size_t nread = fread(&header, sizeof(struct archive_header), 1, disk_file);
                 if (nread != 1) {
                         fclose(disk_file);
-                        NG5_PRINT_ERROR(NG5_ERR_IO);
+                        error_print(NG5_ERR_IO);
                         return false;
                 } else {
                         if (!is_valid_file(&header)) {
-                                NG5_PRINT_ERROR(NG5_ERR_FORMATVERERR);
+                                error_print(NG5_ERR_FORMATVERERR);
                                 return false;
                         } else {
                                 out->query_index_string_id_to_offset = NULL;
@@ -2351,7 +2351,7 @@ bool archive_open(struct archive *out, const char *file_path)
                                                 out,
                                                 file_path,
                                                 header.string_id_to_offset_index_offset)) != true) {
-                                                NG5_PRINT_ERROR(err.code);
+                                                error_print(err.code);
                                                 return status;
                                         }
                                 }
@@ -2384,15 +2384,15 @@ bool archive_open(struct archive *out, const char *file_path)
 
 NG5_EXPORT(bool) archive_get_info(struct archive_info *info, const struct archive *archive)
 {
-        NG5_NON_NULL_OR_ERROR(info);
-        NG5_NON_NULL_OR_ERROR(archive);
+        error_if_null(info);
+        error_if_null(archive);
         *info = archive->info;
         return true;
 }
 
 NG5_EXPORT(bool) archive_close(struct archive *archive)
 {
-        NG5_NON_NULL_OR_ERROR(archive);
+        error_if_null(archive);
         archive_drop_indexes(archive);
         archive_drop_query_string_id_cache(archive);
         free(archive->diskFilePath);
@@ -2432,23 +2432,23 @@ NG5_EXPORT(bool) archive_query(struct archive_query *query, struct archive *arch
 
 NG5_EXPORT(bool) archive_has_query_index_string_id_to_offset(bool *state, struct archive *archive)
 {
-        NG5_NON_NULL_OR_ERROR(state)
-        NG5_NON_NULL_OR_ERROR(archive)
+        error_if_null(state)
+        error_if_null(archive)
         *state = (archive->query_index_string_id_to_offset != NULL);
         return true;
 }
 
 NG5_EXPORT(bool) archive_hash_query_string_id_cache(bool *has_cache, struct archive *archive)
 {
-        NG5_NON_NULL_OR_ERROR(has_cache)
-        NG5_NON_NULL_OR_ERROR(archive)
+        error_if_null(has_cache)
+        error_if_null(archive)
         *has_cache = archive->string_id_cache != NULL;
         return true;
 }
 
 NG5_EXPORT(bool) archive_drop_query_string_id_cache(struct archive *archive)
 {
-        NG5_NON_NULL_OR_ERROR(archive)
+        error_if_null(archive)
         if (archive->string_id_cache) {
                 string_id_cache_drop(archive->string_id_cache);
                 archive->string_id_cache = NULL;
@@ -2468,7 +2468,7 @@ NG5_EXPORT(struct archive_query *)archive_query_default(struct archive *archive)
 
 static bool init_decompressor(struct packer *strategy, u8 flags)
 {
-        if (compressor_by_flags(strategy, flags) != true) {
+        if (pack_by_flags(strategy, flags) != true) {
                 return false;
         }
         return true;
@@ -2498,7 +2498,7 @@ static bool read_stringtable(struct string_table *table, struct err *err, FILE *
         if ((init_decompressor(&table->compressor, flags.value)) != true) {
                 return false;
         }
-        if ((compressor_read_extra(err, &table->compressor, disk_file, header.compressor_extra_size)) != true) {
+        if ((pack_read_extra(err, &table->compressor, disk_file, header.compressor_extra_size)) != true) {
                 return false;
         }
         return true;

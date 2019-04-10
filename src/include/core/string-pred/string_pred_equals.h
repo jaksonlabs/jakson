@@ -23,56 +23,27 @@
 
 NG5_BEGIN_DECL
 
-NG5_BUILT_IN(static bool)
-
-__string_pred_equals_func(size_t
-
-*idxs_matching,
-
-size_t *num_matching,
-
-char **strings, size_t
-
-num_strings,
-
-void *capture
-
-)
+NG5_BUILT_IN(static bool) __string_pred_equals_func(size_t *idxs_matching, size_t *num_matching, char **strings,
+                                                size_t num_strings, void *capture)
 {
-size_t result_size = 0;
+        size_t result_size = 0;
+        const char *needle = (const char *) capture;
 
-const char *needle = (const char *) capture;
+        for (size_t i = 0; i < num_strings; i++) {
+                if (strstr(strings[i], needle) != NULL) {
+                        idxs_matching[result_size++] = i;
+                }
+        }
 
-for (
-
-size_t i = 0;
-
-i<num_strings;
-
-i++)
-{
-if (
-
-strstr(strings[i], needle
-
-) != NULL) {
-idxs_matching[result_size++] =
-
-i;
-
-}}
-*
-
-num_matching = result_size;
-
-return true;
+        *num_matching = result_size;
+        return true;
 }
 
 NG5_BUILT_IN(static bool)
 
 string_pred_equals_init(struct string_pred_t *pred)
 {
-        NG5_NON_NULL_OR_ERROR(pred);
+        error_if_null(pred);
         pred->limit = NG5_QUERY_LIMIT_1;
         pred->func = __string_pred_equals_func;
         return true;

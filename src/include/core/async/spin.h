@@ -30,11 +30,11 @@ struct spinlock {
         pthread_t owner;
 };
 
-NG5_EXPORT(bool) spinlock_init(struct spinlock *spinlock);
+NG5_EXPORT(bool) spin_init(struct spinlock *spinlock);
 
-NG5_EXPORT(bool) spinlock_acquire(struct spinlock *spinlock);
+NG5_EXPORT(bool) spin_acquire(struct spinlock *spinlock);
 
-NG5_EXPORT(bool) spinlock_release(struct spinlock *spinlock);
+NG5_EXPORT(bool) spin_release(struct spinlock *spinlock);
 
 NG5_END_DECL
 

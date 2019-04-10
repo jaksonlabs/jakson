@@ -68,7 +68,7 @@ DEFINE_PRINTER_FUNCTION(size_t, "%zu")
 
 bool vec_create(struct vector *out, const struct allocator *alloc, size_t elem_size, size_t cap_elems)
 {
-        NG5_NON_NULL_OR_ERROR(out)
+        error_if_null(out)
         out->allocator = malloc(sizeof(struct allocator));
         alloc_this_or_std(out->allocator, alloc);
         out->base = alloc_malloc(out->allocator, cap_elems * elem_size);
@@ -90,25 +90,25 @@ struct vector_serialize_header {
 
 NG5_EXPORT(bool) vec_serialize(FILE *file, struct vector *vec)
 {
-        NG5_NON_NULL_OR_ERROR(file)
-        NG5_NON_NULL_OR_ERROR(vec)
+        error_if_null(file)
+        error_if_null(vec)
 
         struct vector_serialize_header header =
                 {.marker = MARKER_SYMBOL_VECTOR_HEADER, .elem_size = vec->elem_size, .num_elems = vec
                         ->num_elems, .cap_elems = vec->cap_elems, .grow_factor = vec->grow_factor};
         int nwrite = fwrite(&header, sizeof(struct vector_serialize_header), 1, file);
-        error_IF(nwrite != 1, &vec->err, NG5_ERR_FWRITE_FAILED);
+        error_if(nwrite != 1, &vec->err, NG5_ERR_FWRITE_FAILED);
         nwrite = fwrite(vec->base, vec->elem_size, vec->num_elems, file);
-        error_IF(nwrite != (int) vec->num_elems, &vec->err, NG5_ERR_FWRITE_FAILED);
+        error_if(nwrite != (int) vec->num_elems, &vec->err, NG5_ERR_FWRITE_FAILED);
 
         return true;
 }
 
 NG5_EXPORT(bool) vec_deserialize(struct vector *vec, struct err *err, FILE *file)
 {
-        NG5_NON_NULL_OR_ERROR(file)
-        NG5_NON_NULL_OR_ERROR(err)
-        NG5_NON_NULL_OR_ERROR(vec)
+        error_if_null(file)
+        error_if_null(err)
+        error_if_null(vec)
 
         offset_t start = ftell(file);
         int err_code = NG5_ERR_NOERR;
@@ -148,24 +148,24 @@ NG5_EXPORT(bool) vec_deserialize(struct vector *vec, struct err *err, FILE *file
 
 bool vec_memadvice(struct vector *vec, int madviseAdvice)
 {
-        NG5_NON_NULL_OR_ERROR(vec);
-        NG5_UNUSED(vec);
-        NG5_UNUSED(madviseAdvice);
+        error_if_null(vec);
+        ng5_unused(vec);
+        ng5_unused(madviseAdvice);
         madvise(vec->base, vec->cap_elems * vec->elem_size, madviseAdvice);
         return true;
 }
 
 bool vec_set_grow_factor(struct vector *vec, float factor)
 {
-        NG5_NON_NULL_OR_ERROR(vec);
-        NG5_PRINT_ERROR_IF(factor <= 1.01f, NG5_ERR_ILLEGALARG)
+        error_if_null(vec);
+        error_print_if(factor <= 1.01f, NG5_ERR_ILLEGALARG)
         vec->grow_factor = factor;
         return true;
 }
 
 bool vec_drop(struct vector *vec)
 {
-        NG5_NON_NULL_OR_ERROR(vec)
+        error_if_null(vec)
         alloc_free(vec->allocator, vec->base);
         free(vec->allocator);
         vec->base = NULL;
@@ -174,13 +174,13 @@ bool vec_drop(struct vector *vec)
 
 bool vec_is_empty(const struct vector *vec)
 {
-        NG5_NON_NULL_OR_ERROR(vec)
+        error_if_null(vec)
         return vec->num_elems == 0 ? true : false;
 }
 
 bool vec_push(struct vector *vec, const void *data, size_t num_elems)
 {
-        NG5_NON_NULL_OR_ERROR(vec && data)
+        error_if_null(vec && data)
         size_t next_num = vec->num_elems + num_elems;
         while (next_num > vec->cap_elems) {
                 size_t more = next_num - vec->cap_elems;
@@ -203,7 +203,7 @@ const void *vec_peek(struct vector *vec)
 
 bool vec_repeated_push(struct vector *vec, const void *data, size_t how_often)
 {
-        NG5_NON_NULL_OR_ERROR(vec && data)
+        error_if_null(vec && data)
         size_t next_num = vec->num_elems + how_often;
         while (next_num > vec->cap_elems) {
                 size_t more = next_num - vec->cap_elems;
@@ -221,7 +221,7 @@ bool vec_repeated_push(struct vector *vec, const void *data, size_t how_often)
 const void *vec_pop(struct vector *vec)
 {
         void *result;
-        if (NG5_LIKELY((result = (vec ? (vec->num_elems > 0 ? vec->base + (vec->num_elems - 1) * vec->elem_size : NULL)
+        if (likely((result = (vec ? (vec->num_elems > 0 ? vec->base + (vec->num_elems - 1) * vec->elem_size : NULL)
                                       : NULL)) != NULL)) {
                 vec->num_elems--;
         }
@@ -230,16 +230,16 @@ const void *vec_pop(struct vector *vec)
 
 bool vec_clear(struct vector *vec)
 {
-        NG5_NON_NULL_OR_ERROR(vec)
+        error_if_null(vec)
         vec->num_elems = 0;
         return true;
 }
 
-bool VectorShrink(struct vector *vec)
+bool vec_shrink(struct vector *vec)
 {
-        NG5_NON_NULL_OR_ERROR(vec);
+        error_if_null(vec);
         if (vec->num_elems < vec->cap_elems) {
-                vec->cap_elems = NG5_MAX(1, vec->num_elems);
+                vec->cap_elems = ng5_max(1, vec->num_elems);
                 vec->base = alloc_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
         }
         return true;
@@ -247,13 +247,13 @@ bool VectorShrink(struct vector *vec)
 
 bool vec_grow(size_t *numNewSlots, struct vector *vec)
 {
-        NG5_NON_NULL_OR_ERROR(vec)
+        error_if_null(vec)
         size_t freeSlotsBefore = vec->cap_elems - vec->num_elems;
 
         vec->cap_elems = (vec->cap_elems * vec->grow_factor) + 1;
         vec->base = alloc_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
         size_t freeSlotsAfter = vec->cap_elems - vec->num_elems;
-        if (NG5_LIKELY(numNewSlots != NULL)) {
+        if (likely(numNewSlots != NULL)) {
                 *numNewSlots = freeSlotsAfter - freeSlotsBefore;
         }
         return true;
@@ -261,15 +261,15 @@ bool vec_grow(size_t *numNewSlots, struct vector *vec)
 
 NG5_EXPORT(bool) vec_grow_to(struct vector *vec, size_t capacity)
 {
-        NG5_NON_NULL_OR_ERROR(vec);
-        vec->cap_elems = NG5_MAX(vec->cap_elems, capacity);
+        error_if_null(vec);
+        vec->cap_elems = ng5_max(vec->cap_elems, capacity);
         vec->base = alloc_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
         return true;
 }
 
 size_t vec_length(const struct vector *vec)
 {
-        NG5_NON_NULL_OR_ERROR(vec)
+        error_if_null(vec)
         return vec->num_elems;
 }
 
@@ -280,36 +280,36 @@ const void *vec_at(const struct vector *vec, size_t pos)
 
 size_t vec_capacity(const struct vector *vec)
 {
-        NG5_NON_NULL_OR_ERROR(vec)
+        error_if_null(vec)
         return vec->cap_elems;
 }
 
 bool vec_enlarge_size_to_capacity(struct vector *vec)
 {
-        NG5_NON_NULL_OR_ERROR(vec);
+        error_if_null(vec);
         vec->num_elems = vec->cap_elems;
         return true;
 }
 
 NG5_EXPORT(bool) vec_zero_memory(struct vector *vec)
 {
-        NG5_NON_NULL_OR_ERROR(vec);
-        NG5_ZERO_MEMORY(vec->base, vec->elem_size * vec->num_elems);
+        error_if_null(vec);
+        ng5_zero_memory(vec->base, vec->elem_size * vec->num_elems);
         return true;
 }
 
 NG5_EXPORT(bool) vec_zero_memory_in_range(struct vector *vec, size_t from, size_t to)
 {
-        NG5_NON_NULL_OR_ERROR(vec);
+        error_if_null(vec);
         assert(from < to);
         assert(to <= vec->cap_elems);
-        NG5_ZERO_MEMORY(vec->base + from * vec->elem_size, vec->elem_size * (to - from));
+        ng5_zero_memory(vec->base + from * vec->elem_size, vec->elem_size * (to - from));
         return true;
 }
 
 bool vec_set(struct vector *vec, size_t pos, const void *data)
 {
-        NG5_NON_NULL_OR_ERROR(vec)
+        error_if_null(vec)
         assert(pos < vec->num_elems);
         memcpy(vec->base + pos * vec->elem_size, data, vec->elem_size);
         return true;
@@ -317,7 +317,7 @@ bool vec_set(struct vector *vec, size_t pos, const void *data)
 
 bool vec_cpy(struct vector *dst, const struct vector *src)
 {
-        NG5_CHECK_SUCCESS(vec_create(dst, NULL, src->elem_size, src->num_elems));
+        ng5_check_success(vec_create(dst, NULL, src->elem_size, src->num_elems));
         dst->num_elems = src->num_elems;
         if (dst->num_elems > 0) {
                 memcpy(dst->base, src->base, src->elem_size * src->num_elems);
@@ -327,8 +327,8 @@ bool vec_cpy(struct vector *dst, const struct vector *src)
 
 NG5_EXPORT(bool) vec_cpy_to(struct vector *dst, struct vector *src)
 {
-        NG5_NON_NULL_OR_ERROR(dst)
-        NG5_NON_NULL_OR_ERROR(src)
+        error_if_null(dst)
+        error_if_null(src)
         void *handle = realloc(dst->base, src->cap_elems * src->elem_size);
         if (handle) {
                 dst->elem_size = src->elem_size;

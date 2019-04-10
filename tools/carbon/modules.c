@@ -31,7 +31,7 @@ static int convertJs2Model(struct js_to_context *context, FILE *file, bool optim
     fseek(f, 0, SEEK_SET);
     context->jsonContent = malloc(fsize + 1);
     size_t nread = fread(context->jsonContent, fsize, 1, f);
-    NG5_UNUSED(nread);
+    ng5_unused(nread);
     fclose(f);
     context->jsonContent[fsize] = 0;
 
@@ -40,7 +40,7 @@ static int convertJs2Model(struct js_to_context *context, FILE *file, bool optim
 
     NG5_CONSOLE_WRITE(file, "  - Setup string dictionary%s", "");
 
-    strdic_create_async(&context->dictionary, 1000, 1000, 1000, 8, NULL);
+    encode_async_create(&context->dictionary, 1000, 1000, 1000, 8, NULL);
     NG5_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
 
     NG5_CONSOLE_WRITE(file, "  - Parse JSON file%s", "");
@@ -68,7 +68,7 @@ static int convertJs2Model(struct js_to_context *context, FILE *file, bool optim
     status = json_test(&err, &jsonAst);
     if (!status) {
         NG5_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
-        error_print(&err);
+        error_print_to_stderr(&err);
         return false;
     } else {
         NG5_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
@@ -141,7 +141,7 @@ success:
 
 bool moduleCheckJsInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
 {
-    NG5_UNUSED(manager);
+    ng5_unused(manager);
 
     struct js_to_context cabContext;
 
@@ -311,7 +311,7 @@ static void tracker_end_string_id_index_baking()
 
 bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
 {
-    NG5_UNUSED(manager);
+    ng5_unused(manager);
 
     if (argc < 2) {
         NG5_CONSOLE_WRITE(file, "Require at least <output> and <input> parameters for <args>.%s", "");
@@ -346,7 +346,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
                     flagForceOverwrite = true;
                 } else if (strcmp(opt, JS_2_CAB_OPTION_USE_COMPRESSOR) == 0 && i++ < argc) {
                     const char *compressor_name = argv[i];
-                    if (!compressor_by_name(&compressor, compressor_name)) {
+                    if (!pack_by_name(&compressor, compressor_name)) {
                         NG5_CONSOLE_WRITE(file, "unsupported pack requested: '%s'",
                                              compressor_name);
                         NG5_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
@@ -423,7 +423,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
         fseek(f, 0, SEEK_SET);
         char *jsonContent = malloc(fsize + 1);
         size_t nread = fread(jsonContent, fsize, 1, f);
-        NG5_UNUSED(nread);
+        ng5_unused(nread);
         fclose(f);
         jsonContent[fsize] = 0;
 
@@ -508,10 +508,10 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
 
 bool moduleViewCabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
 {
-    NG5_UNUSED(argc);
-    NG5_UNUSED(argv);
-    NG5_UNUSED(file);
-    NG5_UNUSED(manager);
+    ng5_unused(argc);
+    ng5_unused(argv);
+    ng5_unused(file);
+    ng5_unused(manager);
 
     NG5_CONSOLE_OUTPUT_OFF()
 
@@ -529,7 +529,7 @@ bool moduleViewCabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *m
         struct memblock *stream;
         archive_load(&stream, inputFile);
         if (!archive_print(stdout, &err, stream)) {
-            error_print(&err);
+            error_print_to_stderr(&err);
             error_drop(&err);
         }
         memblock_drop(stream);
@@ -542,7 +542,7 @@ bool moduleViewCabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *m
 
 bool moduleInspectInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
 {
-    NG5_UNUSED(manager);
+    ng5_unused(manager);
 
     if (argc < 1) {
         NG5_CONSOLE_WRITE(file, "Require input file <input> as parameter for <args>.%s", "");
@@ -586,10 +586,10 @@ bool moduleInspectInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *m
 
 bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
 {
-    NG5_UNUSED(argc);
-    NG5_UNUSED(argv);
-    NG5_UNUSED(file);
-    NG5_UNUSED(manager);
+    ng5_unused(argc);
+    ng5_unused(argv);
+    ng5_unused(file);
+    ng5_unused(manager);
 
     if (argc != 1) {
         NG5_CONSOLE_WRITE(file, "Require exactly one <input> parameter for <args>.%s", "");
@@ -617,7 +617,7 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
             printf("\n");
             encoded_doc_collection_drop(&collection);
         } else {
-            NG5_PRINT_ERROR(archive.err.code);
+            error_print(archive.err.code);
         }
 
         archive_close(&archive);
@@ -628,7 +628,7 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
 
 bool moduleListInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
 {
-    NG5_UNUSED(manager);
+    ng5_unused(manager);
 
     if (argc != 1) {
         NG5_CONSOLE_WRITE(file, "Require one constant for <args> parameter.%s", "");

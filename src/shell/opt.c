@@ -19,23 +19,23 @@
 
 static struct cmdopt *option_by_name(struct cmdopt_mgr *manager, const char *name);
 
-bool cmdopt_mgr_create(struct cmdopt_mgr *manager, char *module_name, char *module_desc, enum mod_arg_policy policy,
+bool opt_mgr_create(struct cmdopt_mgr *manager, char *module_name, char *module_desc, enum mod_arg_policy policy,
         bool (*fallback)(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager))
 {
-        NG5_NON_NULL_OR_ERROR(manager)
-        NG5_NON_NULL_OR_ERROR(module_name)
-        NG5_NON_NULL_OR_ERROR(fallback)
+        error_if_null(manager)
+        error_if_null(module_name)
+        error_if_null(fallback)
         manager->module_name = strdup(module_name);
         manager->module_desc = module_desc ? strdup(module_desc) : NULL;
         manager->policy = policy;
         manager->fallback = fallback;
-        NG5_CHECK_SUCCESS(vec_create(&manager->groups, NULL, sizeof(struct cmdopt_group), 5));
+        ng5_check_success(vec_create(&manager->groups, NULL, sizeof(struct cmdopt_group), 5));
         return true;
 }
 
-bool cmdopt_mgr_drop(struct cmdopt_mgr *manager)
+bool opt_mgr_drop(struct cmdopt_mgr *manager)
 {
-        NG5_NON_NULL_OR_ERROR(manager);
+        error_if_null(manager);
         for (size_t i = 0; i < manager->groups.num_elems; i++) {
                 struct cmdopt_group *cmdGroup = vec_get(&manager->groups, i, struct cmdopt_group);
                 for (size_t j = 0; j < cmdGroup->cmd_options.num_elems; j++) {
@@ -44,11 +44,11 @@ bool cmdopt_mgr_drop(struct cmdopt_mgr *manager)
                         free(option->opt_desc);
                         free(option->opt_manfile);
                 }
-                NG5_CHECK_SUCCESS(vec_drop(&cmdGroup->cmd_options));
+                ng5_check_success(vec_drop(&cmdGroup->cmd_options));
                 free(cmdGroup->desc);
         }
 
-        NG5_CHECK_SUCCESS(vec_drop(&manager->groups));
+        ng5_check_success(vec_drop(&manager->groups));
         free(manager->module_name);
         if (manager->module_desc) {
                 free(manager->module_desc);
@@ -56,15 +56,15 @@ bool cmdopt_mgr_drop(struct cmdopt_mgr *manager)
         return true;
 }
 
-bool cmdopt_mgr_process(struct cmdopt_mgr *manager, int argc, char **argv, FILE *file)
+bool opt_mgr_process(struct cmdopt_mgr *manager, int argc, char **argv, FILE *file)
 {
-        NG5_NON_NULL_OR_ERROR(manager)
-        NG5_NON_NULL_OR_ERROR(argv)
-        NG5_NON_NULL_OR_ERROR(file)
+        error_if_null(manager)
+        error_if_null(argv)
+        error_if_null(file)
 
         if (argc == 0) {
                 if (manager->policy == NG5_MOD_ARG_REQUIRED) {
-                        cmdopt_mgr_show_help(file, manager);
+                        opt_mgr_show_help(file, manager);
                 } else {
                         return manager->fallback(argc, argv, file, manager);
                 }
@@ -81,28 +81,28 @@ bool cmdopt_mgr_process(struct cmdopt_mgr *manager, int argc, char **argv, FILE 
         return true;
 }
 
-bool cmdopt_mgr_create_group(struct cmdopt_group **group, const char *desc, struct cmdopt_mgr *manager)
+bool opt_mgr_create_group(struct cmdopt_group **group, const char *desc, struct cmdopt_mgr *manager)
 {
-        NG5_NON_NULL_OR_ERROR(group)
-        NG5_NON_NULL_OR_ERROR(desc)
-        NG5_NON_NULL_OR_ERROR(manager)
-        struct cmdopt_group *cmdGroup = VECTOR_NEW_AND_GET(&manager->groups, struct cmdopt_group);
+        error_if_null(group)
+        error_if_null(desc)
+        error_if_null(manager)
+        struct cmdopt_group *cmdGroup = vec_new_and_get(&manager->groups, struct cmdopt_group);
         cmdGroup->desc = strdup(desc);
-        NG5_CHECK_SUCCESS(vec_create(&cmdGroup->cmd_options, NULL, sizeof(struct cmdopt), 10));
+        ng5_check_success(vec_create(&cmdGroup->cmd_options, NULL, sizeof(struct cmdopt), 10));
         *group = cmdGroup;
         return true;
 }
 
-bool cmdopt_group_add_cmd(struct cmdopt_group *group, const char *opt_name, char *opt_desc, char *opt_manfile,
+bool opt_group_add_cmd(struct cmdopt_group *group, const char *opt_name, char *opt_desc, char *opt_manfile,
         int (*callback)(int argc, char **argv, FILE *file))
 {
-        NG5_NON_NULL_OR_ERROR(group)
-        NG5_NON_NULL_OR_ERROR(opt_name)
-        NG5_NON_NULL_OR_ERROR(opt_desc)
-        NG5_NON_NULL_OR_ERROR(opt_manfile)
-        NG5_NON_NULL_OR_ERROR(callback)
+        error_if_null(group)
+        error_if_null(opt_name)
+        error_if_null(opt_desc)
+        error_if_null(opt_manfile)
+        error_if_null(callback)
 
-        struct cmdopt *command = VECTOR_NEW_AND_GET(&group->cmd_options, struct cmdopt);
+        struct cmdopt *command = vec_new_and_get(&group->cmd_options, struct cmdopt);
         command->opt_desc = strdup(opt_desc);
         command->opt_manfile = strdup(opt_manfile);
         command->opt_name = strdup(opt_name);
@@ -111,10 +111,10 @@ bool cmdopt_group_add_cmd(struct cmdopt_group *group, const char *opt_name, char
         return true;
 }
 
-bool cmdopt_mgr_show_help(FILE *file, struct cmdopt_mgr *manager)
+bool opt_mgr_show_help(FILE *file, struct cmdopt_mgr *manager)
 {
-        NG5_NON_NULL_OR_ERROR(file)
-        NG5_NON_NULL_OR_ERROR(manager)
+        error_if_null(file)
+        error_if_null(manager)
 
         if (manager->groups.num_elems > 0) {
                 fprintf(file,

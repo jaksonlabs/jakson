@@ -53,7 +53,7 @@ NG5_DEFINE_GET_ERROR_FUNCTION(hashset, struct hashset, set);
 
 NG5_EXPORT(bool) hashset_create(struct hashset *map, struct err *err, size_t key_size, size_t capacity);
 
-NG5_EXPORT(struct hashset *)hashset_cpy(struct hashset *src);
+NG5_EXPORT(struct hashset *) hashset_cpy(struct hashset *src);
 
 NG5_EXPORT(bool) hashset_drop(struct hashset *map);
 

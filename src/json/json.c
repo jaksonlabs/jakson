@@ -47,8 +47,8 @@ static int set_error(struct json_err *error_desc, const struct json_token *token
 
 NG5_EXPORT(bool) json_tokenizer_init(struct json_tokenizer *tokenizer, const char *input)
 {
-        NG5_NON_NULL_OR_ERROR(tokenizer)
-        NG5_NON_NULL_OR_ERROR(input)
+        error_if_null(tokenizer)
+        error_if_null(input)
         tokenizer->cursor = input;
         tokenizer->token =
                 (struct json_token) {.type = JSON_UNKNOWN, .length = 0, .column = 0, .line = 1, .string = NULL};
@@ -58,7 +58,7 @@ NG5_EXPORT(bool) json_tokenizer_init(struct json_tokenizer *tokenizer, const cha
 
 const struct json_token *json_tokenizer_next(struct json_tokenizer *tokenizer)
 {
-        if (NG5_LIKELY(*tokenizer->cursor != '\0')) {
+        if (likely(*tokenizer->cursor != '\0')) {
                 char c = *tokenizer->cursor;
                 tokenizer->token.string = tokenizer->cursor;
                 tokenizer->token.column += tokenizer->token.length;
@@ -100,7 +100,7 @@ const struct json_token *json_tokenizer_next(struct json_tokenizer *tokenizer)
                                 last_2_c = last_1_c;
                                 last_1_c = c;
                                 c = *(++tokenizer->cursor);
-                                if (NG5_UNLIKELY(c == '\\' && last_1_c == '\\')) {
+                                if (unlikely(c == '\\' && last_1_c == '\\')) {
                                         goto next_char;
                                 }
                                 escapeQuote = c == '"' && last_1_c == '\\'
@@ -220,8 +220,8 @@ static bool json_ast_node_element_print(FILE *file, struct err *err, struct json
 
 NG5_EXPORT(bool) json_parser_create(struct json_parser *parser, struct doc_bulk *partition)
 {
-        NG5_NON_NULL_OR_ERROR(parser)
-        NG5_NON_NULL_OR_ERROR(partition)
+        error_if_null(parser)
+        error_if_null(partition)
 
         parser->partition = partition;
         error_init(&parser->err);
@@ -231,8 +231,8 @@ NG5_EXPORT(bool) json_parser_create(struct json_parser *parser, struct doc_bulk 
 
 bool json_parse(struct json *json, struct json_err *error_desc, struct json_parser *parser, const char *input)
 {
-        NG5_NON_NULL_OR_ERROR(parser)
-        NG5_NON_NULL_OR_ERROR(input)
+        error_if_null(parser)
+        error_if_null(input)
 
         struct vector ofType(enum json_token_type) brackets;
         struct vector ofType(struct json_token) token_stream;
@@ -249,9 +249,9 @@ bool json_parse(struct json *json, struct json_err *error_desc, struct json_pars
         struct token_memory token_mem = {.init = true, .type = JSON_UNKNOWN};
 
         while ((token = json_tokenizer_next(&parser->tokenizer))) {
-                if (NG5_LIKELY(
+                if (likely(
                         (status = process_token(&parser->err, error_desc, token, &brackets, &token_mem)) == true)) {
-                        struct json_token *newToken = VECTOR_NEW_AND_GET(&token_stream, struct json_token);
+                        struct json_token *newToken = vec_new_and_get(&token_stream, struct json_token);
                         json_token_dup(newToken, token);
                 } else {
                         goto cleanup;
@@ -272,7 +272,7 @@ bool json_parse(struct json *json, struct json_err *error_desc, struct json_pars
                 return false;
         }
 
-        NG5_OPTIONAL_SET_OR_ELSE(json, retval, json_drop(json));
+        ng5_optional_set_or_else(json, retval, json_drop(json));
         status = true;
 
         cleanup:
@@ -312,7 +312,7 @@ bool test_condition_value(struct err *err, struct json_node_value *value)
                                 char message[] = "JSON file constraint broken: arrays of mixed types detected";
                                 char *result = malloc(strlen(message) + 1);
                                 strcpy(result, &message[0]);
-                                error_WDETAILS(err, NG5_ERR_ARRAYOFMIXEDTYPES, result);
+                                error_with_details(err, NG5_ERR_ARRAYOFMIXEDTYPES, result);
                                 free(result);
                                 return false;
                         }
@@ -333,7 +333,7 @@ bool test_condition_value(struct err *err, struct json_node_value *value)
                                 char message[] = "JSON file constraint broken: arrays of arrays detected";
                                 char *result = malloc(strlen(message) + 1);
                                 strcpy(result, &message[0]);
-                                error_WDETAILS(err, NG5_ERR_ARRAYOFARRAYS, result);
+                                error_with_details(err, NG5_ERR_ARRAYOFARRAYS, result);
                                 free(result);
                                 return false;
                         }
@@ -366,7 +366,7 @@ bool parse_members(struct err *err, struct json_members *members, struct vector 
         struct json_token delimiter_token;
 
         do {
-                struct json_prop *member = VECTOR_NEW_AND_GET(&members->members, struct json_prop);
+                struct json_prop *member = vec_new_and_get(&members->members, struct json_prop);
                 struct json_token keyNameToken = get_token(token_stream, *token_idx);
 
                 member->key.value = malloc(keyNameToken.length + 1);
@@ -453,7 +453,7 @@ static bool parse_array(struct json_array *array, struct err *err,
         struct vector ofType(struct json_token) *token_stream, size_t *token_idx)
 {
         struct json_token token = get_token(token_stream, *token_idx);
-        NG5_UNUSED(token);
+        ng5_unused(token);
         assert(token.type == ARRAY_OPEN);
         NEXT_TOKEN(token_idx); /** Skip '[' */
 
@@ -473,7 +473,7 @@ static void parse_string(struct json_string *string, struct vector ofType(struct
         assert(token.type == LITERAL_STRING);
 
         string->value = malloc(token.length + 1);
-        if (NG5_LIKELY(token.length > 0)) {
+        if (likely(token.length > 0)) {
                 strncpy(string->value, token.string, token.length);
         }
         string->value[token.length] = '\0';
@@ -560,7 +560,7 @@ static bool parse_elements(struct json_elements *elements, struct err *err,
 {
         struct json_token delimiter;
         do {
-                if (!parse_element(VECTOR_NEW_AND_GET(&elements->elements, struct json_element),
+                if (!parse_element(vec_new_and_get(&elements->elements, struct json_element),
                         err,
                         token_stream,
                         token_idx)) {
@@ -948,7 +948,7 @@ static void json_ast_node_string_drop(struct json_string *string)
 
 static void json_ast_node_number_drop(struct json_number *number)
 {
-        NG5_UNUSED(number);
+        ng5_unused(number);
 }
 
 static bool json_ast_node_value_drop(struct json_node_value *value, struct err *err)

@@ -71,7 +71,7 @@ static int bucket_insert(struct bucket *bucket, const char *restrict key, field_
 bool strhash_create_inmemory(struct strhash *parallel_map_exec, const struct allocator *alloc, size_t num_buckets,
         size_t cap_buckets)
 {
-        NG5_CHECK_SUCCESS(alloc_this_or_std(&parallel_map_exec->allocator, alloc));
+        ng5_check_success(alloc_this_or_std(&parallel_map_exec->allocator, alloc));
 
         num_buckets = num_buckets < 1 ? 1 : num_buckets;
         cap_buckets = cap_buckets < 1 ? 1 : cap_buckets;
@@ -91,7 +91,7 @@ bool strhash_create_inmemory(struct strhash *parallel_map_exec, const struct all
         error_init(&parallel_map_exec->err);
 
         strhash_reset_counters(parallel_map_exec);
-        NG5_CHECK_SUCCESS(this_create_extra(parallel_map_exec, num_buckets, cap_buckets));
+        ng5_check_success(this_create_extra(parallel_map_exec, num_buckets, cap_buckets));
         return true;
 }
 
@@ -100,7 +100,7 @@ static int this_drop(struct strhash *self)
         assert(self->tag == MEMORY_RESIDENT);
         struct mem_extra *extra = this_get_exta(self);
         struct bucket *data = (struct bucket *) vec_data(&extra->buckets);
-        NG5_CHECK_SUCCESS(bucket_drop(data, extra->buckets.cap_elems, &self->allocator));
+        ng5_check_success(bucket_drop(data, extra->buckets.cap_elems, &self->allocator));
         vec_drop(&extra->buckets);
         alloc_free(&self->allocator, self->extra);
         return true;
@@ -112,7 +112,7 @@ static int this_put_safe_bulk(struct strhash *self, char *const *keys, const fie
         struct mem_extra *extra = this_get_exta(self);
         size_t *bucket_idxs = alloc_malloc(&self->allocator, num_pairs * sizeof(size_t));
 
-        NG5_PREFETCH_WRITE(bucket_idxs);
+        prefetch_write(bucket_idxs);
 
         for (size_t i = 0; i < num_pairs; i++) {
                 const char *key = keys[i];
@@ -120,18 +120,18 @@ static int this_put_safe_bulk(struct strhash *self, char *const *keys, const fie
                 bucket_idxs[i] = hash % extra->buckets.cap_elems;
         }
 
-        NG5_PREFETCH_READ(bucket_idxs);
-        NG5_PREFETCH_READ(keys);
-        NG5_PREFETCH_READ(values);
+        prefetch_read(bucket_idxs);
+        prefetch_read(keys);
+        prefetch_read(values);
 
-        NG5_CHECK_SUCCESS(this_insert_bulk(&extra->buckets,
+        ng5_check_success(this_insert_bulk(&extra->buckets,
                 keys,
                 values,
                 bucket_idxs,
                 num_pairs,
                 &self->allocator,
                 &self->counters));
-        NG5_CHECK_SUCCESS(alloc_free(&self->allocator, bucket_idxs));
+        ng5_check_success(alloc_free(&self->allocator, bucket_idxs));
         return true;
 }
 
@@ -143,9 +143,9 @@ static int this_put_safe_exact(struct strhash *self, const char *key, field_sid_
         hash32_t hash = strcmp("", key) != 0 ? HASHCODE_OF(key) : 0;
         size_t bucket_idx = hash % extra->buckets.cap_elems;
 
-        NG5_PREFETCH_READ(key);
+        prefetch_read(key);
 
-        NG5_CHECK_SUCCESS(this_insert_exact(&extra->buckets,
+        ng5_check_success(this_insert_exact(&extra->buckets,
                 key,
                 value,
                 bucket_idx,
@@ -169,19 +169,19 @@ static int this_fetch_bulk(struct vector ofType(bucket) *buckets, field_sid_t *v
         size_t *num_keys_not_found, size_t *bucket_idxs, char *const *keys, size_t num_keys, struct allocator *alloc,
         struct strhash_counters *counter)
 {
-        NG5_UNUSED(counter);
-        NG5_UNUSED(alloc);
+        ng5_unused(counter);
+        ng5_unused(alloc);
 
         slice_handle_t result_handle;
         size_t num_not_found = 0;
         struct bucket *data = (struct bucket *) vec_data(buckets);
 
-        NG5_PREFETCH_WRITE(values_out);
+        prefetch_write(values_out);
 
         for (size_t i = 0; i < num_keys; i++) {
                 struct bucket *bucket = data + bucket_idxs[i];
                 const char *key = keys[i];
-                if (NG5_LIKELY(key != NULL)) {
+                if (likely(key != NULL)) {
                         slice_list_lookup(&result_handle, &bucket->slice_list, key);
                 } else {
                         result_handle.is_contained = true;
@@ -200,13 +200,13 @@ static int this_fetch_bulk(struct vector ofType(bucket) *buckets, field_sid_t *v
 static int this_fetch_single(struct vector ofType(bucket) *buckets, field_sid_t *value_out, bool *key_found,
         const size_t bucket_idx, const char *key, struct strhash_counters *counter)
 {
-        NG5_UNUSED(counter);
+        ng5_unused(counter);
 
         slice_handle_t handle;
         struct bucket *data = (struct bucket *) vec_data(buckets);
 
-        NG5_PREFETCH_WRITE(value_out);
-        NG5_PREFETCH_WRITE(key_found);
+        prefetch_write(value_out);
+        prefetch_write(key_found);
 
         struct bucket *bucket = data + bucket_idx;
 
@@ -224,13 +224,13 @@ static int this_get_safe(struct strhash *self, field_sid_t **out, bool **found_m
         assert(self->tag == MEMORY_RESIDENT);
 
         timestamp_t begin = time_now_wallclock();
-        NG5_TRACE(SMART_MAP_TAG, "'get_safe' function invoked for %zu strings", num_keys)
+        ng5_trace(SMART_MAP_TAG, "'get_safe' function invoked for %zu strings", num_keys)
 
         struct allocator hashtable_alloc;
 #if defined(NG5_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
         CHECK_SUCCESS(allocator_TRACE(&hashtable_alloc));
 #else
-        NG5_CHECK_SUCCESS(alloc_this_or_std(&hashtable_alloc, &self->allocator));
+        ng5_check_success(alloc_this_or_std(&hashtable_alloc, &self->allocator));
 #endif
 
         struct mem_extra *extra = this_get_exta(self);
@@ -246,11 +246,11 @@ static int this_get_safe(struct strhash *self, field_sid_t **out, bool **found_m
                 const char *key = keys[i];
                 hash32_t hash = key && strcmp("", key) != 0 ? HASHCODE_OF(key) : 0;
                 bucket_idxs[i] = hash % extra->buckets.cap_elems;
-                NG5_PREFETCH_READ((struct bucket *) vec_data(&extra->buckets) + bucket_idxs[i]);
+                prefetch_read((struct bucket *) vec_data(&extra->buckets) + bucket_idxs[i]);
         }
 
-        NG5_TRACE(SMART_MAP_TAG, "'get_safe' function invoke fetch...for %zu strings", num_keys)
-        NG5_CHECK_SUCCESS(this_fetch_bulk(&extra->buckets,
+        ng5_trace(SMART_MAP_TAG, "'get_safe' function invoke fetch...for %zu strings", num_keys)
+        ng5_check_success(this_fetch_bulk(&extra->buckets,
                 values_out,
                 found_mask_out,
                 num_not_found,
@@ -259,8 +259,8 @@ static int this_get_safe(struct strhash *self, field_sid_t **out, bool **found_m
                 num_keys,
                 &self->allocator,
                 &self->counters));
-        NG5_CHECK_SUCCESS(alloc_free(&self->allocator, bucket_idxs));
-        NG5_TRACE(SMART_MAP_TAG, "'get_safe' function invok fetch: done for %zu strings", num_keys)
+        ng5_check_success(alloc_free(&self->allocator, bucket_idxs));
+        ng5_trace(SMART_MAP_TAG, "'get_safe' function invok fetch: done for %zu strings", num_keys)
 
         assert(values_out != NULL);
         assert(found_mask_out != NULL);
@@ -269,9 +269,9 @@ static int this_get_safe(struct strhash *self, field_sid_t **out, bool **found_m
         *found_mask = found_mask_out;
 
         timestamp_t end = time_now_wallclock();
-        NG5_UNUSED(begin);
-        NG5_UNUSED(end);
-        NG5_TRACE(SMART_MAP_TAG, "'get_safe' function done: %f seconds spent here", (end - begin) / 1000.0f)
+        ng5_unused(begin);
+        ng5_unused(end);
+        ng5_trace(SMART_MAP_TAG, "'get_safe' function done: %f seconds spent here", (end - begin) / 1000.0f)
 
         return true;
 }
@@ -284,16 +284,16 @@ static int this_get_safe_exact(struct strhash *self, field_sid_t *out, bool *fou
 #if defined(NG5_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
         CHECK_SUCCESS(allocator_TRACE(&hashtable_alloc));
 #else
-        NG5_CHECK_SUCCESS(alloc_this_or_std(&hashtable_alloc, &self->allocator));
+        ng5_check_success(alloc_this_or_std(&hashtable_alloc, &self->allocator));
 #endif
 
         struct mem_extra *extra = this_get_exta(self);
 
         hash32_t hash = strcmp("", key) != 0 ? HASHCODE_OF(key) : 0;
         size_t bucket_idx = hash % extra->buckets.cap_elems;
-        NG5_PREFETCH_READ((struct bucket *) vec_data(&extra->buckets) + bucket_idx);
+        prefetch_read((struct bucket *) vec_data(&extra->buckets) + bucket_idx);
 
-        NG5_CHECK_SUCCESS(this_fetch_single(&extra->buckets, out, found_mask, bucket_idx, key, &self->counters));
+        ng5_check_success(this_fetch_single(&extra->buckets, out, found_mask, bucket_idx, key, &self->counters));
 
         return true;
 }
@@ -309,20 +309,20 @@ static int this_get_fast(struct strhash *self, field_sid_t **out, char *const *k
 
 static int this_update_key_fast(struct strhash *self, const field_sid_t *values, char *const *keys, size_t num_keys)
 {
-        NG5_UNUSED(self);
-        NG5_UNUSED(values);
-        NG5_UNUSED(keys);
-        NG5_UNUSED(num_keys);
+        ng5_unused(self);
+        ng5_unused(values);
+        ng5_unused(keys);
+        ng5_unused(num_keys);
         error(&self->err, NG5_ERR_NOTIMPL);
-        error_print(&self->err);
+        error_print_to_stderr(&self->err);
         return false;
 }
 
 static int simple_map_remove(struct mem_extra *extra, size_t *bucket_idxs, char *const *keys, size_t num_keys,
         struct allocator *alloc, struct strhash_counters *counter)
 {
-        NG5_UNUSED(counter);
-        NG5_UNUSED(alloc);
+        ng5_unused(counter);
+        ng5_unused(alloc);
 
         slice_handle_t handle;
         struct bucket *data = (struct bucket *) vec_data(&extra->buckets);
@@ -333,7 +333,7 @@ static int simple_map_remove(struct mem_extra *extra, size_t *bucket_idxs, char 
 
                 /** Optimization 1/5: EMPTY GUARD (but before "find" call); if this bucket has no occupied slots, do not perform any lookup and comparison */
                 slice_list_lookup(&handle, &bucket->slice_list, key);
-                if (NG5_LIKELY(handle.is_contained)) {
+                if (likely(handle.is_contained)) {
                         SliceListRemove(&bucket->slice_list, &handle);
                 }
         }
@@ -352,19 +352,19 @@ static int this_remove(struct strhash *self, char *const *keys, size_t num_keys)
                 bucket_idxs[i] = hash % extra->buckets.cap_elems;
         }
 
-        NG5_CHECK_SUCCESS(simple_map_remove(extra, bucket_idxs, keys, num_keys, &self->allocator, &self->counters));
-        NG5_CHECK_SUCCESS(alloc_free(&self->allocator, bucket_idxs));
+        ng5_check_success(simple_map_remove(extra, bucket_idxs, keys, num_keys, &self->allocator, &self->counters));
+        ng5_check_success(alloc_free(&self->allocator, bucket_idxs));
         return true;
 }
 
 static int this_free(struct strhash *self, void *ptr)
 {
         assert(self->tag == MEMORY_RESIDENT);
-        NG5_CHECK_SUCCESS(alloc_free(&self->allocator, ptr));
+        ng5_check_success(alloc_free(&self->allocator, ptr));
         return true;
 }
 
-NG5_FUNC_UNUSED
+ng5_func_unused
 static int this_create_extra(struct strhash *self, size_t num_buckets, size_t cap_buckets)
 {
         if ((self->extra = alloc_malloc(&self->allocator, sizeof(struct mem_extra))) != NULL) {
@@ -375,7 +375,7 @@ static int this_create_extra(struct strhash *self, size_t num_buckets, size_t ca
                 vec_memadvice(&extra->buckets, MADV_RANDOM | MADV_WILLNEED);
 
                 struct bucket *data = (struct bucket *) vec_data(&extra->buckets);
-                NG5_CHECK_SUCCESS(bucket_create(data, num_buckets, cap_buckets, &self->allocator));
+                ng5_check_success(bucket_create(data, num_buckets, cap_buckets, &self->allocator));
                 return true;
         } else {
                 error(&self->err, NG5_ERR_MALLOCERR);
@@ -383,17 +383,17 @@ static int this_create_extra(struct strhash *self, size_t num_buckets, size_t ca
         }
 }
 
-NG5_FUNC_UNUSED
+ng5_func_unused
 static struct mem_extra *this_get_exta(struct strhash *self)
 {
         assert (self->tag == MEMORY_RESIDENT);
         return (struct mem_extra *) (self->extra);
 }
 
-NG5_FUNC_UNUSED
+ng5_func_unused
 static int bucket_create(struct bucket *buckets, size_t num_buckets, size_t bucket_cap, struct allocator *alloc)
 {
-        NG5_NON_NULL_OR_ERROR(buckets);
+        error_if_null(buckets);
 
         // TODO: parallize this!
         while (num_buckets--) {
@@ -406,8 +406,8 @@ static int bucket_create(struct bucket *buckets, size_t num_buckets, size_t buck
 
 static int bucket_drop(struct bucket *buckets, size_t num_buckets, struct allocator *alloc)
 {
-        NG5_UNUSED(alloc);
-        NG5_NON_NULL_OR_ERROR(buckets);
+        ng5_unused(alloc);
+        error_if_null(buckets);
 
         while (num_buckets--) {
                 struct bucket *bucket = buckets++;
@@ -420,11 +420,11 @@ static int bucket_drop(struct bucket *buckets, size_t num_buckets, struct alloca
 static int bucket_insert(struct bucket *bucket, const char *restrict key, field_sid_t value, struct allocator *alloc,
         struct strhash_counters *counter)
 {
-        NG5_UNUSED(counter);
-        NG5_UNUSED(alloc);
+        ng5_unused(counter);
+        ng5_unused(alloc);
 
-        NG5_NON_NULL_OR_ERROR(bucket);
-        NG5_NON_NULL_OR_ERROR(key);
+        error_if_null(bucket);
+        error_if_null(key);
 
         slice_handle_t handle;
 
@@ -448,10 +448,10 @@ static int this_insert_bulk(struct vector ofType(bucket) *buckets, char *const *
         const field_sid_t *restrict values, size_t *restrict bucket_idxs, size_t num_pairs, struct allocator *alloc,
         struct strhash_counters *counter)
 {
-        NG5_NON_NULL_OR_ERROR(buckets)
-        NG5_NON_NULL_OR_ERROR(keys)
-        NG5_NON_NULL_OR_ERROR(values)
-        NG5_NON_NULL_OR_ERROR(bucket_idxs)
+        error_if_null(buckets)
+        error_if_null(keys)
+        error_if_null(values)
+        error_if_null(bucket_idxs)
 
         struct bucket *buckets_data = (struct bucket *) vec_data(buckets);
         int status = true;
@@ -470,8 +470,8 @@ static int this_insert_bulk(struct vector ofType(bucket) *buckets, char *const *
 static int this_insert_exact(struct vector ofType(bucket) *buckets, const char *restrict key, field_sid_t value,
         size_t bucket_idx, struct allocator *alloc, struct strhash_counters *counter)
 {
-        NG5_NON_NULL_OR_ERROR(buckets)
-        NG5_NON_NULL_OR_ERROR(key)
+        error_if_null(buckets)
+        error_if_null(key)
 
         struct bucket *buckets_data = (struct bucket *) vec_data(buckets);
         struct bucket *bucket = buckets_data + bucket_idx;

@@ -18,11 +18,12 @@
 #ifndef NG5_JENKINS_H
 #define NG5_JENKINS_H
 
-#include "hash/hash.h"
+#include "hash.h"
+#include "../shared/common.h"
 
 NG5_BEGIN_DECL
 
-#define NG5_JENKINS_MIX(a, b, c)                                                                                    \
+#define NG5_JENKINS_MIX(a, b, c)                                                                                       \
 {                                                                                                                      \
     a -= b; a -= c; a ^= (c >> 13);                                                                                    \
     b -= c; b -= a; b ^= (a << 8);                                                                                     \
@@ -36,7 +37,7 @@ NG5_BEGIN_DECL
 }
 
 /** implements: hash32_t hash_jenkins(size_t key_size, const void *key) */
-#define NG5_HASH_JENKINS(keySizeIn, key)                                                                            \
+#define NG5_HASH_JENKINS(keySizeIn, key)                                                                               \
 ({                                                                                                                     \
     size_t key_size = keySizeIn;                                                                                       \
     assert ((key != NULL) && (key_size > 0));                                                                          \
@@ -75,6 +76,6 @@ NG5_BEGIN_DECL
     c;                                                                                                                 \
 })
 
-        NG5_END_DECL
+NG5_END_DECL
 
 #endif

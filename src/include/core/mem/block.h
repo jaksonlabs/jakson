@@ -37,7 +37,7 @@ NG5_EXPORT(bool) memblock_size(offset_t *size, const struct memblock *block);
 
 NG5_EXPORT(bool) memblock_write_to_file(FILE *file, const struct memblock *block);
 
-NG5_EXPORT(const char *)memblock_raw_data(const struct memblock *block);
+NG5_EXPORT(const char *) memblock_raw_data(const struct memblock *block);
 
 NG5_EXPORT(bool) memblock_resize(struct memblock *block, size_t size);
 

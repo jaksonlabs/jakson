@@ -49,11 +49,11 @@ NG5_EXPORT(bool) query_index_id_to_offset_serialize(FILE *file, struct err *err,
 NG5_EXPORT(bool) query_index_id_to_offset_deserialize(struct sid_to_offset **index, struct err *err,
         const char *file_path, offset_t offset);
 
-NG5_EXPORT(char *)query_fetch_string_by_id(struct archive_query *query, field_sid_t id);
+NG5_EXPORT(char *) query_fetch_string_by_id(struct archive_query *query, field_sid_t id);
 
-NG5_EXPORT(char *)query_fetch_string_by_id_nocache(struct archive_query *query, field_sid_t id);
+NG5_EXPORT(char *) query_fetch_string_by_id_nocache(struct archive_query *query, field_sid_t id);
 
-NG5_EXPORT(char **)query_fetch_strings_by_offset(struct archive_query *query, offset_t *offs, u32 *strlens,
+NG5_EXPORT(char **) query_fetch_strings_by_offset(struct archive_query *query, offset_t *offs, u32 *strlens,
         size_t num_offs);
 
 NG5_EXPORT(field_sid_t *)query_find_ids(size_t *num_found, struct archive_query *query,

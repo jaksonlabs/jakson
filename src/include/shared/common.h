@@ -53,7 +53,7 @@
 #define NG5_QUERY_LIMIT_NONE -1
 #define NG5_QUERY_LIMIT_1     1
 
-#define NG5_ARRAY_LENGTH(x)                                                                                         \
+#define NG5_ARRAY_LENGTH(x)                                                                                            \
     sizeof(x)/sizeof(x[0])
 
 typedef uint64_t offset_t;
@@ -77,12 +77,13 @@ typedef enum field_type {
 } field_e;
 
 enum access_mode {
-        READ_WRITE, READ_ONLY
+        READ_WRITE,
+        READ_ONLY
 };
 
-#define NG5_FUNC_UNUSED __attribute__((unused))
+#define ng5_func_unused __attribute__((unused))
 
-NG5_FUNC_UNUSED static const char *basic_type_to_json_type_str(enum field_type t)
+ng5_func_unused static const char *basic_type_to_json_type_str(enum field_type t)
 {
         switch (t) {
         case FIELD_INT8:
@@ -109,7 +110,7 @@ NG5_FUNC_UNUSED static const char *basic_type_to_json_type_str(enum field_type t
         }
 }
 
-NG5_FUNC_UNUSED static const char *basic_type_to_system_type_str(enum field_type t)
+ng5_func_unused static const char *basic_type_to_system_type_str(enum field_type t)
 {
         switch (t) {
         case FIELD_INT8:
@@ -143,31 +144,31 @@ NG5_FUNC_UNUSED static const char *basic_type_to_system_type_str(enum field_type
         }
 }
 
-#define NG5_NOT_IMPLEMENTED                                                                                         \
+#define NG5_NOT_IMPLEMENTED                                                                                            \
 {                                                                                                                      \
-    struct err err;                                                                                                  \
-    error_init(&err);                                                                                           \
-    error(&err, NG5_ERR_NOTIMPLEMENTED)                                                                      \
-    error_print_and_abort(&err);                                                                                \
+    struct err err;                                                                                                    \
+    error_init(&err);                                                                                                  \
+    error(&err, NG5_ERR_NOTIMPLEMENTED)                                                                                \
+    error_print_and_abort(&err);                                                                                       \
     return false;                                                                                                      \
 };
 
 #ifndef NDEBUG
-#define NG5_CHECK_TAG(is, expected)                                                                                 \
+#define ng5_check_tag(is, expected)                                                                                 \
 {                                                                                                                      \
     if (is != expected) {                                                                                              \
-        NG5_PRINT_ERROR(NG5_ERR_ERRINTERNAL)                                                                     \
+        error_print(NG5_ERR_ERRINTERNAL)                                                                     \
         return false;                                                                                                  \
     }                                                                                                                  \
 }
 #else
-#define NG5_CHECK_TAG(is, expected) { }
+#define ng5_check_tag(is, expected) { }
 #endif
 
 #if !defined(NG5_LOG_TRACE) || defined(NDEBUG)
-#define NG5_TRACE(tag, msg, ...) { }
+#define ng5_trace(tag, msg, ...) { }
 #else
-#define NG5_TRACE(tag, msg, ...)                                                                                    \
+#define ng5_trace(tag, msg, ...)                                                                                    \
 {                                                                                                                      \
     char buffer[1024];                                                                                                 \
     sprintf(buffer, "--%d-- [TRACE   : %-10s] %s\n", getpid(), tag, msg);                                              \
@@ -177,9 +178,9 @@ NG5_FUNC_UNUSED static const char *basic_type_to_system_type_str(enum field_type
 #endif
 
 #if !defined(NG5_LOG_INFO) || defined(NDEBUG)
-#define NG5_INFO(tag, msg, ...) { }
+#define ng5_info(tag, msg, ...) { }
 #else
-#define NG5_INFO(tag, msg, ...)                                                                                     \
+#define ng5_info(tag, msg, ...)                                                                                     \
 {                                                                                                                      \
     char buffer[1024];                                                                                                 \
     sprintf(buffer, "--%d-- [INFO    : %-10s] %s\n", getpid(), tag, msg);                                              \
@@ -189,10 +190,10 @@ NG5_FUNC_UNUSED static const char *basic_type_to_system_type_str(enum field_type
 #endif
 
 #if !defined(NG5_LOG_DEBUG) || defined(NDEBUG)
-#define NG5_DEBUG(tag, msg, ...)                                                                                    \
+#define ng5_debug(tag, msg, ...)                                                                                       \
 { }
 #else
-#define NG5_DEBUG(tag, msg, ...)                                                                                    \
+#define ng5_debug(tag, msg, ...)                                                                                    \
 {                                                                                                                      \
     char buffer[1024];                                                                                                 \
     sprintf(buffer, "--%d-- [DEBUG   : %-10s] %s\n", getpid(), tag, msg);                                              \
@@ -202,9 +203,9 @@ NG5_FUNC_UNUSED static const char *basic_type_to_system_type_str(enum field_type
 #endif
 
 #if !defined(NG5_LOG_WARN) || defined(NDEBUG)
-#define NG5_WARN(tag, msg, ...) { }
+#define ng5_warn(tag, msg, ...) { }
 #else
-#define NG5_WARN(tag, msg, ...)                                                                                     \
+#define ng5_warn(tag, msg, ...)                                                                                     \
     {                                                                                                                  \
         char buffer[1024];                                                                                             \
         sprintf(buffer, "--%d-- [WARNING: %-10s] %s\n", getpid(), tag, msg);                                           \
@@ -213,8 +214,8 @@ NG5_FUNC_UNUSED static const char *basic_type_to_system_type_str(enum field_type
     }
 #endif
 
-#define CABIN_FILE_MAGIC                    "MP/CARBON"
-#define CABIN_FILE_VERSION                  1
+#define CARBON_ARCHIVE_MAGIC                "MP/CARBON"
+#define CARBON_ARCHIVE_VERSION               1
 
 #define  MARKER_SYMBOL_OBJECT_BEGIN        '{'
 #define  MARKER_SYMBOL_OBJECT_END          '}'
@@ -253,94 +254,94 @@ NG5_FUNC_UNUSED static const char *basic_type_to_system_type_str(enum field_type
 #define  MARKER_SYMBOL_HASHTABLE_HEADER    '#'
 #define  MARKER_SYMBOL_VECTOR_HEADER       '|'
 
-#define NG5_ZERO_MEMORY(dst, len)                                                                                   \
+#define ng5_zero_memory(dst, len)                                                                                      \
     memset((void *) dst, 0, len);
 
-#define NG5_CAST(type, name, src)                                                                                   \
+#define ng5_cast(type, name, src)                                                                                      \
       type name = (type) src
 
-#define NG5_UNUSED(x)   (void)(x)
+#define ng5_unused(x)   (void)(x)
 
-#define NG5_BUILT_IN(x)   NG5_FUNC_UNUSED x
+#define NG5_BUILT_IN(x)   ng5_func_unused x
 
 #define ofType(x) /** a convenience way to write types for generic containers; no effect than just a visual one */
 #define ofMapping(x, y) /** a convenience way to write types for generic containers; no effect than just a visual one */
 
-#define OPTIONAL_CALL(x, func, ...) if(x && x->func) { x->func(__VA_ARGS__); }
+#define ng5_optional_call(x, func, ...) if(x && x->func) { x->func(__VA_ARGS__); }
 
-#define NG5_MAX(a, b)                                                                                               \
+#define ng5_max(a, b)                                                                                                  \
     ((b) > (a) ? (b) : (a))
 
-#define NG5_MIN(a, b)                                                                                               \
+#define ng5_min(a, b)                                                                                                  \
     ((a) < (b) ? (a) : (b))
 
-#define NG5_NON_NULL_OR_ERROR(x)                                                                                    \
+#define error_if_null(x)                                                                                               \
 {                                                                                                                      \
     if (!(x)) {                                                                                                        \
-        struct err err;                                                                                              \
-        error_init(&err);                                                                                       \
-        error(&err, NG5_ERR_NULLPTR);                                                                        \
-        error_print(&err);                                                                                      \
+        struct err err;                                                                                                \
+        error_init(&err);                                                                                              \
+        error(&err, NG5_ERR_NULLPTR);                                                                                  \
+        error_print_to_stderr(&err);                                                                                   \
         return false;                                                                                                  \
     }                                                                                                                  \
 }
 
-#define NG5_CHECK_SUCCESS(x)                                                                                        \
+#define ng5_check_success(x)                                                                                           \
 {                                                                                                                      \
-    if (NG5_UNLIKELY(!x)) {                                                                                         \
+    if (unlikely(!x)) {                                                                                                \
         return x;                                                                                                      \
     }                                                                                                                  \
 }
 
-#define NG5_SUCCESS_OR_JUMP(expr, label)                                                                            \
+#define ng5_success_or_jump(expr, label)                                                                               \
 {                                                                                                                      \
-    if (NG5_UNLIKELY(!expr)) {                                                                                      \
+    if (unlikely(!expr)) {                                                                                             \
         goto label;                                                                                                    \
     }                                                                                                                  \
 }
 
-#define NG5_LIKELY(x)                                                                                               \
+#define likely(x)                                                                                                      \
     __builtin_expect((x), 1)
-#define NG5_UNLIKELY(x)                                                                                             \
+#define unlikely(x)                                                                                                    \
     __builtin_expect((x), 0)
 
-#define NG5_PREFETCH_READ(adr)                                                                                      \
+#define prefetch_read(adr)                                                                                             \
     __builtin_prefetch(adr, 0, 3)
 
-#define NG5_PREFETCH_WRITE(adr)                                                                                     \
+#define prefetch_write(adr)                                                                                            \
     __builtin_prefetch(adr, 1, 3)
 
 #define NG5_FORWARD_STRUCT_DECL(x) struct x;
 
-#define NG5_NUM_BITS(x)             (sizeof(x) * 8)
-#define NG5_SET_BIT(n)              ( ((u32) 1) << (n) )
-#define NG5_FIELD_SET(x, mask)      ( x |=  (mask) )
-#define NG5_FIELD_CLEAR(x, mask)    ( x &= ~(mask) )
-#define NG5_MASK_IS_BIT_SET(mask, bit)    (((bit) & mask ) == (bit))
+#define ng5_bit_num_of(x)             (sizeof(x) * 8)
+#define ng5_set_bit(n)                ( ((u32) 1) << (n) )
+#define ng5_set_bits(x, mask)         ( x |=  (mask) )
+#define ng5_unset_bits(x, mask)       ( x &= ~(mask) )
+#define ng5_are_bits_set(mask, bit)   (((bit) & mask ) == (bit))
 
-#define NG5_IMPLEMENTS_OR_ERROR(err, x, func)                                                                       \
-    NG5_OPTIONAL(x->func == NULL, error(err, NG5_ERR_NOTIMPLEMENTED))
+#define ng5_implemented_or_error(err, x, func)                                                                         \
+    ng5_optional(x->func == NULL, error(err, NG5_ERR_NOTIMPLEMENTED))
 
-#define NG5_OPTIONAL(expr, stmt)                                                                                    \
+#define ng5_optional(expr, stmt)                                                                                       \
     if (expr) { stmt; }
 
-#define NG5_OPTIONAL_SET(x, y)                                                                                      \
-     NG5_OPTIONAL(x, *x = y)
+#define ng5_optional_set(x, y)                                                                                         \
+     ng5_optional(x, *x = y)
 
-#define NG5_OPTIONAL_SET_OR_ELSE(x, y, stmt)                                                                        \
+#define ng5_optional_set_or_else(x, y, stmt)                                                                           \
     if (x) {                                                                                                           \
         *x = y;                                                                                                        \
     } else { stmt; }
 
 bool GlobalEnableConsoleOutput;
 
-#define NG5_CONSOLE_OUTPUT_ON()                                                                                     \
+#define NG5_CONSOLE_OUTPUT_ON()                                                                                        \
     GlobalEnableConsoleOutput = true;
 
-#define NG5_CONSOLE_OUTPUT_OFF()                                                                                    \
+#define NG5_CONSOLE_OUTPUT_OFF()                                                                                       \
     GlobalEnableConsoleOutput = false;
 
-#define NG5_CONSOLE_WRITE(file, msg, ...)                                                                           \
+#define NG5_CONSOLE_WRITE(file, msg, ...)                                                                              \
 {                                                                                                                      \
     if (GlobalEnableConsoleOutput) {                                                                                   \
         pid_t pid = getpid();                                                                                          \
@@ -355,25 +356,25 @@ bool GlobalEnableConsoleOutput;
     }                                                                                                                  \
 }
 
-#define NG5_CONSOLE_WRITE_ENDL(file)                                                                                \
+#define NG5_CONSOLE_WRITE_ENDL(file)                                                                                   \
 {                                                                                                                      \
     if (GlobalEnableConsoleOutput) {                                                                                   \
         fprintf(file, "\n");                                                                                           \
     }                                                                                                                  \
 }
 
-#define NG5_CONSOLE_WRITE_CONT(file, msg, ...)                                                                      \
+#define NG5_CONSOLE_WRITE_CONT(file, msg, ...)                                                                         \
 {                                                                                                                      \
     if (GlobalEnableConsoleOutput) {                                                                                   \
         fprintf(file, msg, __VA_ARGS__);                                                                               \
     }                                                                                                                  \
 }
 
-#define NG5_CONSOLE_WRITELN(file, msg, ...)                                                                         \
+#define NG5_CONSOLE_WRITELN(file, msg, ...)                                                                            \
 {                                                                                                                      \
     if (GlobalEnableConsoleOutput) {                                                                                   \
-        NG5_CONSOLE_WRITE(file, msg, __VA_ARGS__)                                                                   \
-        NG5_CONSOLE_WRITE_ENDL(file)                                                                                \
+        NG5_CONSOLE_WRITE(file, msg, __VA_ARGS__)                                                                      \
+        NG5_CONSOLE_WRITE_ENDL(file)                                                                                   \
         fflush(file);                                                                                                  \
     }                                                                                                                  \
 }

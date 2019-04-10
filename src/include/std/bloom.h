@@ -25,40 +25,40 @@ NG5_BEGIN_DECL
 
 typedef struct bitmap bloom_t;
 
-#define NG5_BLOOM_SET(filter, key, keySize)                     \
-({                                                                 \
+#define NG5_BLOOM_SET(filter, key, keySize)                 \
+({                                                          \
     size_t nbits = bitmap_nbits(filter);                    \
-    size_t b0 = NG5_HASH_ADDITIVE(keySize, key) % nbits;        \
-    size_t b1 = NG5_HASH_XOR(keySize, key) % nbits;             \
-    size_t b2 = NG5_HASH_ROT(keySize, key) % nbits;             \
-    size_t b3 = NG5_HASH_SAX(keySize, key) % nbits;             \
+    size_t b0 = NG5_HASH_ADDITIVE(keySize, key) % nbits;    \
+    size_t b1 = NG5_HASH_XOR(keySize, key) % nbits;         \
+    size_t b2 = NG5_HASH_ROT(keySize, key) % nbits;         \
+    size_t b3 = NG5_HASH_SAX(keySize, key) % nbits;         \
     bitmap_set(filter, b0, true);                           \
     bitmap_set(filter, b1, true);                           \
     bitmap_set(filter, b2, true);                           \
     bitmap_set(filter, b3, true);                           \
 })
 
-#define NG5_BLOOM_TEST(filter, key, keySize)                    \
-({                                                                 \
+#define NG5_BLOOM_TEST(filter, key, keySize)                \
+({                                                          \
     size_t nbits = bitmap_nbits(filter);                    \
-    size_t b0 = NG5_HASH_ADDITIVE(keySize, key) % nbits;        \
-    size_t b1 = NG5_HASH_XOR(keySize, key) % nbits;             \
-    size_t b2 = NG5_HASH_ROT(keySize, key) % nbits;             \
-    size_t b3 = NG5_HASH_SAX(keySize, key) % nbits;             \
+    size_t b0 = NG5_HASH_ADDITIVE(keySize, key) % nbits;    \
+    size_t b1 = NG5_HASH_XOR(keySize, key) % nbits;         \
+    size_t b2 = NG5_HASH_ROT(keySize, key) % nbits;         \
+    size_t b3 = NG5_HASH_SAX(keySize, key) % nbits;         \
     bool b0set = bitmap_get(filter, b0);                    \
     bool b1set = bitmap_get(filter, b1);                    \
     bool b2set = bitmap_get(filter, b2);                    \
     bool b3set = bitmap_get(filter, b3);                    \
-    (b0set && b1set && b2set && b3set);                            \
+    (b0set && b1set && b2set && b3set);                     \
 })
 
-#define NG5_BLOOM_TEST_AND_SET(filter, key, keySize)            \
-({                                                                 \
+#define NG5_BLOOM_TEST_AND_SET(filter, key, keySize)        \
+({                                                          \
     size_t nbits = bitmap_nbits(filter);                    \
-    size_t b0 = NG5_HASH_ADDITIVE(keySize, key) % nbits;        \
-    size_t b1 = NG5_HASH_XOR(keySize, key) % nbits;             \
-    size_t b2 = NG5_HASH_ROT(keySize, key) % nbits;             \
-    size_t b3 = NG5_HASH_SAX(keySize, key) % nbits;             \
+    size_t b0 = NG5_HASH_ADDITIVE(keySize, key) % nbits;    \
+    size_t b1 = NG5_HASH_XOR(keySize, key) % nbits;         \
+    size_t b2 = NG5_HASH_ROT(keySize, key) % nbits;         \
+    size_t b3 = NG5_HASH_SAX(keySize, key) % nbits;         \
     bool b0set = bitmap_get(filter, b0);                    \
     bool b1set = bitmap_get(filter, b1);                    \
     bool b2set = bitmap_get(filter, b2);                    \
@@ -67,7 +67,7 @@ typedef struct bitmap bloom_t;
     bitmap_set(filter, b1, true);                           \
     bitmap_set(filter, b2, true);                           \
     bitmap_set(filter, b3, true);                           \
-    (b0set && b1set && b2set && b3set);                            \
+    (b0set && b1set && b2set && b3set);                     \
 })
 
 NG5_EXPORT(bool) bloom_create(bloom_t *filter, size_t size);

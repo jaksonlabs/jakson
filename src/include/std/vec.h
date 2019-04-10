@@ -96,33 +96,6 @@ struct vector {
  */
 typedef struct vector ofType(const char *) string_vector_t;
 
-#define STRING_VECTOR_CREATE(vec, alloc, cap_elems)                                                                     \
-    vec_create(vec, alloc, sizeof(char *), cap_elems);
-
-#define STRING_REF_VECTOR_CREATE(vec, alloc, cap_elems)                                                                 \
-    STRING_VECTOR_CREATE(vec, alloc, cap_elems)                                                                         \
-
-#define STRING_VECTOR_DROP(vec)                                                                                        \
-({                                                                                                                     \
-    for (size_t i = 0; i < vec->num_elems; i++) {                                                                      \
-        char *s = *NG5_VECTOR_GET(vec, i, char *);                                                                  \
-        free (s);                                                                                                      \
-    }                                                                                                                  \
-    vec_drop(vec);                                                                                              \
-})
-
-#define STRING_REF_VECTOR_DROP(vec)                                                                                    \
-    vec_drop(vec);
-
-#define STRING_VECTOR_PUSH(vec, string)                                                                                \
-({                                                                                                                     \
-    char *cpy = strdup(string);                                                                                        \
-    vec_push(vec, &cpy, 1);                                                                                     \
-})
-
-#define STRING_REF_VECTOR_PUSH(vec, string)                                                                            \
-    vec_push(vec, &string, 1)
-
 /**
  * Constructs a new vector for elements of size 'elem_size', reserving memory for 'cap_elems' elements using
  * the allocator 'alloc'.
@@ -227,7 +200,7 @@ NG5_EXPORT(bool) vec_clear(struct vector *vec);
  * @param vec
  * @return
  */
-NG5_EXPORT(bool) VectorShrink(struct vector *vec);
+NG5_EXPORT(bool) vec_shrink(struct vector *vec);
 
 /**
  * Increases the capacity of that vector according the internal grow factor
@@ -250,15 +223,15 @@ NG5_EXPORT(size_t) vec_length(const struct vector *vec);
 
 #define vec_get(vec, pos, type) (type *) vec_at(vec, pos)
 
-#define VECTOR_NEW_AND_GET(vec, type)                                                                                  \
+#define vec_new_and_get(vec, type)                                                                                     \
 ({                                                                                                                     \
     type template;                                                                                                     \
-    size_t vectorLength = vec_length(vec);                                                                      \
-    vec_push(vec, &template, 1);                                                                                \
-    vec_get(vec, vectorLength, type);                                                                        \
+    size_t vectorLength = vec_length(vec);                                                                             \
+    vec_push(vec, &template, 1);                                                                                       \
+    vec_get(vec, vectorLength, type);                                                                                  \
 })
 
-NG5_EXPORT(const void *)vec_at(const struct vector *vec, size_t pos);
+NG5_EXPORT(const void *) vec_at(const struct vector *vec, size_t pos);
 
 /**
  * Returns the number of elements for which memory is currently reserved in the vector
@@ -292,7 +265,7 @@ NG5_EXPORT(bool) vec_cpy_to(struct vector *dst, struct vector *src);
  */
 NG5_EXPORT(const void *)vec_data(const struct vector *vec);
 
-NG5_EXPORT(char *)vector_string(const struct vector ofType(T) *vec,
+NG5_EXPORT(char *) vector_string(const struct vector ofType(T) *vec,
         void (*printerFunc)(struct memfile *dst, void ofType(T) *values, size_t num_elems));
 
 #define vec_all(vec, type) (type *) vec_data(vec)

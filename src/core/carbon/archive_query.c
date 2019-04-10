@@ -44,18 +44,18 @@ struct sid_to_offset {
         struct fixed_prop prop;                                                                                      \
         int_embedded_fixed_props_read(&prop, &obj->file);                                                       \
         int_reset_cabin_object_mem_file(obj);                                                                   \
-        NG5_OPTIONAL_SET(num_pairs, prop.header->num_entries);                                                      \
+        ng5_optional_set(num_pairs, prop.header->num_entries);                                                      \
         return prop.keys;                                                                                              \
     } else {                                                                                                           \
-        NG5_OPTIONAL_SET(num_pairs, 0);                                                                             \
+        ng5_optional_set(num_pairs, 0);                                                                             \
         return NULL;                                                                                                   \
     }                                                                                                                  \
 }
 
 NG5_EXPORT(bool) query_create(struct archive_query *query, struct archive *archive)
 {
-        NG5_NON_NULL_OR_ERROR(query)
-        NG5_NON_NULL_OR_ERROR(archive)
+        error_if_null(query)
+        error_if_null(archive)
         query->archive = archive;
         query->context = archive_io_context_create(archive);
         error_init(&query->err);
@@ -64,14 +64,14 @@ NG5_EXPORT(bool) query_create(struct archive_query *query, struct archive *archi
 
 NG5_EXPORT(bool) query_drop(struct archive_query *query)
 {
-        NG5_NON_NULL_OR_ERROR(query)
+        error_if_null(query)
         return io_context_drop(query->context);
 }
 
 NG5_EXPORT(bool) query_scan_strids(struct strid_iter *it, struct archive_query *query)
 {
-        NG5_NON_NULL_OR_ERROR(it)
-        NG5_NON_NULL_OR_ERROR(query)
+        error_if_null(it)
+        error_if_null(query)
         return strid_iter_open(it, &query->err, query->archive);
 }
 
@@ -91,8 +91,8 @@ static bool index_string_id_to_offset_open_file(struct sid_to_offset *index, str
 
 NG5_EXPORT(bool) query_create_index_string_id_to_offset(struct sid_to_offset **index, struct archive_query *query)
 {
-        NG5_NON_NULL_OR_ERROR(index)
-        NG5_NON_NULL_OR_ERROR(query)
+        error_if_null(index)
+        error_if_null(query)
 
         struct strid_iter strid_iter;
         struct strid_info *info;
@@ -145,19 +145,19 @@ NG5_EXPORT(void) query_drop_index_string_id_to_offset(struct sid_to_offset *inde
 
 NG5_EXPORT(bool) query_index_id_to_offset_serialize(FILE *file, struct err *err, struct sid_to_offset *index)
 {
-        NG5_UNUSED(file);
-        NG5_UNUSED(err);
-        NG5_UNUSED(index);
+        ng5_unused(file);
+        ng5_unused(err);
+        ng5_unused(index);
         return hashtable_serialize(file, &index->mapping);
 }
 
 NG5_EXPORT(bool) query_index_id_to_offset_deserialize(struct sid_to_offset **index, struct err *err,
         const char *file_path, offset_t offset)
 {
-        NG5_NON_NULL_OR_ERROR(index)
-        NG5_NON_NULL_OR_ERROR(err)
-        NG5_NON_NULL_OR_ERROR(file_path)
-        NG5_NON_NULL_OR_ERROR(offset)
+        error_if_null(index)
+        error_if_null(err)
+        error_if_null(file_path)
+        error_if_null(offset)
 
         struct sid_to_offset *result = malloc(sizeof(struct sid_to_offset));
         if (!result) {
@@ -205,7 +205,7 @@ static char *fetch_string_from_file(bool *decode_success, FILE *disk_file, size_
 
         fseek(disk_file, offset, SEEK_SET);
 
-        bool decode_result = compressor_decode(err, &archive->string_table.compressor, result, string_len, disk_file);
+        bool decode_result = pack_decode(err, &archive->string_table.compressor, result, string_len, disk_file);
 
         *decode_success = decode_result;
         return result;
@@ -353,7 +353,7 @@ NG5_EXPORT(char **)query_fetch_strings_by_offset(struct archive_query *query, of
 
                 for (size_t i = 0; i < num_offs; i++) {
                         fseek(file, offs[i], SEEK_SET);
-                        if (!compressor_decode(&query->err,
+                        if (!pack_decode(&query->err,
                                 &query->archive->string_table.compressor,
                                 result[i],
                                 strlens[i],
@@ -377,12 +377,12 @@ NG5_EXPORT(char **)query_fetch_strings_by_offset(struct archive_query *query, of
 NG5_EXPORT(field_sid_t *)query_find_ids(size_t *num_found, struct archive_query *query,
         const struct string_pred_t *pred, void *capture, i64 limit)
 {
-        if (NG5_UNLIKELY(string_pred_validate(&query->err, pred) == false)) {
+        if (unlikely(string_pred_validate(&query->err, pred) == false)) {
                 return NULL;
         }
         i64 pred_limit;
         string_pred_get_limit(&pred_limit, pred);
-        pred_limit = pred_limit < 0 ? limit : NG5_MIN(pred_limit, limit);
+        pred_limit = pred_limit < 0 ? limit : ng5_min(pred_limit, limit);
 
         struct strid_iter it;
         struct strid_info *info = NULL;
@@ -400,35 +400,35 @@ NG5_EXPORT(field_sid_t *)query_find_ids(size_t *num_found, struct archive_query 
         size_t result_cap = pred_limit < 0 ? str_cap : (size_t) pred_limit;
         bool success = false;
 
-        if (NG5_UNLIKELY(pred_limit == 0)) {
+        if (unlikely(pred_limit == 0)) {
                 *num_found = 0;
                 return NULL;
         }
 
-        if (NG5_UNLIKELY(!num_found || !query || !pred)) {
+        if (unlikely(!num_found || !query || !pred)) {
                 error(&query->err, NG5_ERR_NULLPTR);
                 return NULL;
         }
 
-        if (NG5_UNLIKELY((step_ids = malloc(str_cap * sizeof(field_sid_t))) == NULL)) {
+        if (unlikely((step_ids = malloc(str_cap * sizeof(field_sid_t))) == NULL)) {
                 error(&query->err, NG5_ERR_MALLOCERR);
                 return NULL;
         }
 
-        if (NG5_UNLIKELY((str_offs = malloc(str_cap * sizeof(offset_t))) == NULL)) {
+        if (unlikely((str_offs = malloc(str_cap * sizeof(offset_t))) == NULL)) {
                 error(&query->err, NG5_ERR_MALLOCERR);
                 goto cleanup_result_and_error;
                 return NULL;
         }
 
-        if (NG5_UNLIKELY((str_lens = malloc(str_cap * sizeof(u32))) == NULL)) {
+        if (unlikely((str_lens = malloc(str_cap * sizeof(u32))) == NULL)) {
                 error(&query->err, NG5_ERR_MALLOCERR);
                 free(str_offs);
                 goto cleanup_result_and_error;
                 return NULL;
         }
 
-        if (NG5_UNLIKELY((idxs_matching = malloc(str_cap * sizeof(size_t))) == NULL)) {
+        if (unlikely((idxs_matching = malloc(str_cap * sizeof(size_t))) == NULL)) {
                 error(&query->err, NG5_ERR_MALLOCERR);
                 free(str_offs);
                 free(str_lens);
@@ -436,14 +436,14 @@ NG5_EXPORT(field_sid_t *)query_find_ids(size_t *num_found, struct archive_query 
                 return NULL;
         }
 
-        if (NG5_UNLIKELY(query_scan_strids(&it, query) == false)) {
+        if (unlikely(query_scan_strids(&it, query) == false)) {
                 free(str_offs);
                 free(str_lens);
                 free(idxs_matching);
                 goto cleanup_result_and_error;
         }
 
-        if (NG5_UNLIKELY((result_ids = malloc(result_cap * sizeof(field_sid_t))) == NULL)) {
+        if (unlikely((result_ids = malloc(result_cap * sizeof(field_sid_t))) == NULL)) {
                 error(&query->err, NG5_ERR_MALLOCERR);
                 free(str_offs);
                 free(str_lens);
@@ -454,19 +454,19 @@ NG5_EXPORT(field_sid_t *)query_find_ids(size_t *num_found, struct archive_query 
         }
 
         while (strid_iter_next(&success, &info, &query->err, &info_len, &it)) {
-                if (NG5_UNLIKELY(info_len > str_cap)) {
+                if (unlikely(info_len > str_cap)) {
                         str_cap = (info_len + 1) * 1.7f;
-                        if (NG5_UNLIKELY((tmp = realloc(str_offs, str_cap * sizeof(offset_t))) == NULL)) {
+                        if (unlikely((tmp = realloc(str_offs, str_cap * sizeof(offset_t))) == NULL)) {
                                 goto realloc_error;
                         } else {
                                 str_offs = tmp;
                         }
-                        if (NG5_UNLIKELY((tmp = realloc(str_lens, str_cap * sizeof(u32))) == NULL)) {
+                        if (unlikely((tmp = realloc(str_lens, str_cap * sizeof(u32))) == NULL)) {
                                 goto realloc_error;
                         } else {
                                 str_lens = tmp;
                         }
-                        if (NG5_UNLIKELY((tmp = realloc(idxs_matching, str_cap * sizeof(size_t))) == NULL)) {
+                        if (unlikely((tmp = realloc(idxs_matching, str_cap * sizeof(size_t))) == NULL)) {
                                 goto realloc_error;
                         } else {
                                 idxs_matching = tmp;
@@ -484,7 +484,7 @@ NG5_EXPORT(field_sid_t *)query_find_ids(size_t *num_found, struct archive_query 
                         str_lens,
                         step_len); // TODO: buffer + cleanup buffer
 
-                if (NG5_UNLIKELY(
+                if (unlikely(
                         string_pred_eval(pred, idxs_matching, &num_matching, strings, step_len, capture) == false)) {
                         error(&query->err, NG5_ERR_PREDEVAL_FAILED);
                         strid_iter_close(&it);
@@ -502,9 +502,9 @@ NG5_EXPORT(field_sid_t *)query_find_ids(size_t *num_found, struct archive_query 
                         if (pred_limit > 0 && result_len == (size_t) pred_limit) {
                                 goto stop_search_and_return;
                         }
-                        if (NG5_UNLIKELY(result_len > result_cap)) {
+                        if (unlikely(result_len > result_cap)) {
                                 result_cap = (result_len + 1) * 1.7f;
-                                if (NG5_UNLIKELY(
+                                if (unlikely(
                                         (tmp = realloc(result_ids, result_cap * sizeof(field_sid_t))) == NULL)) {
                                         strid_iter_close(&it);
                                         goto cleanup_intermediate;
@@ -516,7 +516,7 @@ NG5_EXPORT(field_sid_t *)query_find_ids(size_t *num_found, struct archive_query 
         }
 
         stop_search_and_return:
-        if (NG5_UNLIKELY(success == false)) {
+        if (unlikely(success == false)) {
                 strid_iter_close(&it);
                 goto cleanup_intermediate;
         }

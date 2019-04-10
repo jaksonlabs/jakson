@@ -113,51 +113,51 @@ typedef const char *FIELD_STRING_t;
 #define NG5_BOOLEAN_FALSE 0
 #define NG5_BOOLEAN_TRUE  1
 
-#define GET_TYPE_SIZE(value_type)                                                                                       \
+#define GET_TYPE_SIZE(value_type)                                                                                      \
 ({                                                                                                                     \
     size_t value_size;                                                                                                 \
-    switch (value_type) {                                                                                               \
-        case FIELD_NULL:                                                                                   \
-            value_size = sizeof(u16);                                                                             \
+    switch (value_type) {                                                                                              \
+        case FIELD_NULL:                                                                                               \
+            value_size = sizeof(u16);                                                                                  \
             break;                                                                                                     \
-        case FIELD_BOOLEAN:                                                                                   \
-            value_size = sizeof(FIELD_BOOLEANean_t);                                                                        \
+        case FIELD_BOOLEAN:                                                                                            \
+            value_size = sizeof(FIELD_BOOLEANean_t);                                                                   \
             break;                                                                                                     \
-        case FIELD_INT8:                                                                                   \
-            value_size = sizeof(field_i8_t);                                                                        \
+        case FIELD_INT8:                                                                                               \
+            value_size = sizeof(field_i8_t);                                                                           \
             break;                                                                                                     \
-        case FIELD_INT16:                                                                                  \
-            value_size = sizeof(field_i16_t);                                                                       \
+        case FIELD_INT16:                                                                                              \
+            value_size = sizeof(field_i16_t);                                                                          \
             break;                                                                                                     \
-        case FIELD_INT32:                                                                                  \
-            value_size = sizeof(field_i32_t);                                                                       \
+        case FIELD_INT32:                                                                                              \
+            value_size = sizeof(field_i32_t);                                                                          \
             break;                                                                                                     \
-        case FIELD_INT64:                                                                                  \
-            value_size = sizeof(field_i64_t);                                                                       \
+        case FIELD_INT64:                                                                                              \
+            value_size = sizeof(field_i64_t);                                                                          \
             break;                                                                                                     \
-        case FIELD_UINT8:                                                                                  \
-            value_size = sizeof(field_u8_t);                                                                       \
+        case FIELD_UINT8:                                                                                              \
+            value_size = sizeof(field_u8_t);                                                                           \
             break;                                                                                                     \
-        case FIELD_UINT16:                                                                                 \
-            value_size = sizeof(field_u16_t);                                                                      \
+        case FIELD_UINT16:                                                                                             \
+            value_size = sizeof(field_u16_t);                                                                          \
             break;                                                                                                     \
-        case FIELD_UINT32:                                                                                 \
-            value_size = sizeof(field_u32_t);                                                                       \
+        case FIELD_UINT32:                                                                                             \
+            value_size = sizeof(field_u32_t);                                                                          \
             break;                                                                                                     \
-        case FIELD_UINT64:                                                                                 \
-            value_size = sizeof(field_u64_t);                                                                       \
+        case FIELD_UINT64:                                                                                             \
+            value_size = sizeof(field_u64_t);                                                                          \
             break;                                                                                                     \
-        case FIELD_FLOAT:                                                                                  \
+        case FIELD_FLOAT:                                                                                              \
             value_size = sizeof(field_number_t);                                                                       \
             break;                                                                                                     \
-        case FIELD_STRING:                                                                                 \
-            value_size = sizeof(field_sid_t);                                                                   \
+        case FIELD_STRING:                                                                                             \
+            value_size = sizeof(field_sid_t);                                                                          \
             break;                                                                                                     \
-        case FIELD_OBJECT:                                                                                 \
-            value_size = sizeof(struct columndoc_obj);                                                               \
+        case FIELD_OBJECT:                                                                                             \
+            value_size = sizeof(struct columndoc_obj);                                                                 \
             break;                                                                                                     \
         default:                                                                                                       \
-        print_error_and_die(NG5_ERR_NOTYPE);                                                                 \
+        print_error_and_die(NG5_ERR_NOTYPE);                                                                           \
     }                                                                                                                  \
     value_size;                                                                                                        \
 })

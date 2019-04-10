@@ -70,12 +70,12 @@ static struct sync_extra *this_extra(struct strdic *self);
 static int freelist_pop(field_sid_t *out, struct strdic *self);
 static int freelist_push(struct strdic *self, field_sid_t idx);
 
-int strdic_create_sync(struct strdic *dic, size_t capacity, size_t num_indx_buckets, size_t num_index_bucket_cap,
+int encode_sync_create(struct strdic *dic, size_t capacity, size_t num_indx_buckets, size_t num_index_bucket_cap,
         size_t num_threads, const struct allocator *alloc)
 {
-        NG5_NON_NULL_OR_ERROR(dic);
+        error_if_null(dic);
 
-        NG5_CHECK_SUCCESS(alloc_this_or_std(&dic->alloc, alloc));
+        ng5_check_success(alloc_this_or_std(&dic->alloc, alloc));
 
         dic->tag = SYNC;
         dic->drop = this_drop;
@@ -90,7 +90,7 @@ int strdic_create_sync(struct strdic *dic, size_t capacity, size_t num_indx_buck
         dic->num_distinct = this_num_distinct;
         dic->get_contents = this_get_contents;
 
-        NG5_CHECK_SUCCESS(create_extra(dic, capacity, num_indx_buckets, num_index_bucket_cap, num_threads));
+        ng5_check_success(create_extra(dic, capacity, num_indx_buckets, num_index_bucket_cap, num_threads));
         return true;
 }
 
@@ -98,14 +98,14 @@ static void lock(struct strdic *self)
 {
         assert(self->tag == SYNC);
         struct sync_extra *extra = this_extra(self);
-        spinlock_acquire(&extra->lock);
+        spin_acquire(&extra->lock);
 }
 
 static void unlock(struct strdic *self)
 {
         assert(self->tag == SYNC);
         struct sync_extra *extra = this_extra(self);
-        spinlock_release(&extra->lock);
+        spin_release(&extra->lock);
 }
 
 static int create_extra(struct strdic *self, size_t capacity, size_t num_index_buckets, size_t num_index_bucket_cap,
@@ -113,24 +113,24 @@ static int create_extra(struct strdic *self, size_t capacity, size_t num_index_b
 {
         self->extra = alloc_malloc(&self->alloc, sizeof(struct sync_extra));
         struct sync_extra *extra = this_extra(self);
-        spinlock_init(&extra->lock);
-        NG5_CHECK_SUCCESS(vec_create(&extra->contents, &self->alloc, sizeof(struct entry), capacity));
-        NG5_CHECK_SUCCESS(vec_create(&extra->freelist, &self->alloc, sizeof(field_sid_t), capacity));
+        spin_init(&extra->lock);
+        ng5_check_success(vec_create(&extra->contents, &self->alloc, sizeof(struct entry), capacity));
+        ng5_check_success(vec_create(&extra->freelist, &self->alloc, sizeof(field_sid_t), capacity));
         struct entry empty = {.str    = NULL, .in_use = false};
         for (size_t i = 0; i < capacity; i++) {
-                NG5_CHECK_SUCCESS(vec_push(&extra->contents, &empty, 1));
+                ng5_check_success(vec_push(&extra->contents, &empty, 1));
                 freelist_push(self, i);
         }
-        NG5_UNUSED(num_threads);
+        ng5_unused(num_threads);
 
         struct allocator hashtable_alloc;
 #if defined(NG5_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
         CHECK_SUCCESS(allocatorTrace(&hashtable_alloc));
 #else
-        NG5_CHECK_SUCCESS(alloc_this_or_std(&hashtable_alloc, &self->alloc));
+        ng5_check_success(alloc_this_or_std(&hashtable_alloc, &self->alloc));
 #endif
 
-        NG5_CHECK_SUCCESS(strhash_create_inmemory(&extra->index,
+        ng5_check_success(strhash_create_inmemory(&extra->index,
                 &hashtable_alloc,
                 num_index_buckets,
                 num_index_bucket_cap));
@@ -147,16 +147,16 @@ static int freelist_pop(field_sid_t *out, struct strdic *self)
 {
         assert (self->tag == SYNC);
         struct sync_extra *extra = this_extra(self);
-        if (NG5_UNLIKELY(vec_is_empty(&extra->freelist))) {
+        if (unlikely(vec_is_empty(&extra->freelist))) {
                 size_t num_new_pos;
-                NG5_CHECK_SUCCESS(vec_grow(&num_new_pos, &extra->freelist));
-                NG5_CHECK_SUCCESS(vec_grow(NULL, &extra->contents));
+                ng5_check_success(vec_grow(&num_new_pos, &extra->freelist));
+                ng5_check_success(vec_grow(NULL, &extra->contents));
                 assert (extra->freelist.cap_elems == extra->contents.cap_elems);
                 struct entry empty = {.in_use = false, .str    = NULL};
                 while (num_new_pos--) {
                         size_t new_pos = vec_length(&extra->contents);
-                        NG5_CHECK_SUCCESS(vec_push(&extra->freelist, &new_pos, 1));
-                        NG5_CHECK_SUCCESS(vec_push(&extra->contents, &empty, 1));
+                        ng5_check_success(vec_push(&extra->freelist, &new_pos, 1));
+                        ng5_check_success(vec_push(&extra->contents, &empty, 1));
                 }
         }
         *out = *(field_sid_t *) vec_pop(&extra->freelist);
@@ -167,14 +167,14 @@ static int freelist_push(struct strdic *self, field_sid_t idx)
 {
         assert (self->tag == SYNC);
         struct sync_extra *extra = this_extra(self);
-        NG5_CHECK_SUCCESS(vec_push(&extra->freelist, &idx, 1));
+        ng5_check_success(vec_push(&extra->freelist, &idx, 1));
         assert (extra->freelist.cap_elems == extra->contents.cap_elems);
         return true;
 }
 
 static bool this_drop(struct strdic *self)
 {
-        NG5_CHECK_TAG(self->tag, SYNC)
+        ng5_check_tag(self->tag, SYNC)
 
         struct sync_extra *extra = this_extra(self);
 
@@ -199,12 +199,12 @@ static bool this_drop(struct strdic *self)
 static bool this_insert(struct strdic *self, field_sid_t **out, char *const *strings, size_t num_strings,
         size_t num_threads)
 {
-        NG5_TRACE(STRING_DIC_SYNC_TAG, "local string dictionary insertion invoked for %zu strings", num_strings);
+        ng5_trace(STRING_DIC_SYNC_TAG, "local string dictionary insertion invoked for %zu strings", num_strings);
         timestamp_t begin = time_now_wallclock();
 
-        NG5_UNUSED(num_threads);
+        ng5_unused(num_threads);
 
-        NG5_CHECK_TAG(self->tag, SYNC)
+        ng5_check_tag(self->tag, SYNC)
         lock(self);
 
         struct sync_extra *extra = this_extra(self);
@@ -213,7 +213,7 @@ static bool this_insert(struct strdic *self, field_sid_t **out, char *const *str
 #if defined(NG5_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
         CHECK_SUCCESS(allocatorTrace(&hashtable_alloc));
 #else
-        NG5_CHECK_SUCCESS(alloc_this_or_std(&hashtable_alloc, &self->alloc));
+        ng5_check_success(alloc_this_or_std(&hashtable_alloc, &self->alloc));
 #endif
 
         field_sid_t *ids_out = alloc_malloc(&hashtable_alloc, num_strings * sizeof(field_sid_t));
@@ -224,7 +224,7 @@ static bool this_insert(struct strdic *self, field_sid_t **out, char *const *str
         /** query index for strings to get a boolean mask which strings are new and which must be added */
         /** This is for the case that the string dictionary is not empty to skip processing of those new elements
          * which are already contained */
-        NG5_TRACE(STRING_DIC_SYNC_TAG, "local string dictionary check for new strings in insertion bulk%s", "...");
+        ng5_trace(STRING_DIC_SYNC_TAG, "local string dictionary check for new strings in insertion bulk%s", "...");
 
         /** NOTE: palatalization of the call to this function decreases performance */
         strhash_get_bulk_safe(&values, &found_mask, &num_not_found, &extra->index, strings, num_strings);
@@ -276,7 +276,7 @@ static bool this_insert(struct strdic *self, field_sid_t **out, char *const *str
 
                                 /** register in contents list */
                                 bool pop_result = freelist_pop(&string_id, self);
-                                NG5_PRINT_ERROR_AND_DIE_IF(!pop_result, NG5_ERR_SLOTBROKEN)
+                                error_print_and_die_if(!pop_result, NG5_ERR_SLOTBROKEN)
                                 struct entry *entries = (struct entry *) vec_data(&extra->contents);
                                 struct entry *entry = entries + string_id;
                                 assert (!entry->in_use);
@@ -291,7 +291,7 @@ static bool this_insert(struct strdic *self, field_sid_t **out, char *const *str
         }
 
         /** set potential non-null out parameters */
-        NG5_OPTIONAL_SET_OR_ELSE(out, ids_out, alloc_free(&self->alloc, ids_out));
+        ng5_optional_set_or_else(out, ids_out, alloc_free(&self->alloc, ids_out));
 
         /** cleanup */
         alloc_free(&hashtable_alloc, found_mask);
@@ -301,9 +301,9 @@ static bool this_insert(struct strdic *self, field_sid_t **out, char *const *str
         unlock(self);
 
         timestamp_t end = time_now_wallclock();
-        NG5_UNUSED(begin);
-        NG5_UNUSED(end);
-        NG5_INFO(STRING_DIC_SYNC_TAG, "insertion operation done: %f seconds spent here", (end - begin) / 1000.0f)
+        ng5_unused(begin);
+        ng5_unused(end);
+        ng5_info(STRING_DIC_SYNC_TAG, "insertion operation done: %f seconds spent here", (end - begin) / 1000.0f)
 
         return true;
 
@@ -311,10 +311,10 @@ static bool this_insert(struct strdic *self, field_sid_t **out, char *const *str
 
 static bool this_remove(struct strdic *self, field_sid_t *strings, size_t num_strings)
 {
-        NG5_NON_NULL_OR_ERROR(self);
-        NG5_NON_NULL_OR_ERROR(strings);
-        NG5_NON_NULL_OR_ERROR(num_strings);
-        NG5_CHECK_TAG(self->tag, SYNC)
+        error_if_null(self);
+        error_if_null(strings);
+        error_if_null(num_strings);
+        ng5_check_tag(self->tag, SYNC)
         lock(self);
 
         struct sync_extra *extra = this_extra(self);
@@ -327,18 +327,18 @@ static bool this_remove(struct strdic *self, field_sid_t *strings, size_t num_st
         for (size_t i = 0; i < num_strings; i++) {
                 field_sid_t field_sid_t = strings[i];
                 struct entry *entry = (struct entry *) vec_data(&extra->contents) + field_sid_t;
-                if (NG5_LIKELY(entry->in_use)) {
+                if (likely(entry->in_use)) {
                         string_to_delete[num_strings_to_delete] = entry->str;
                         string_ids_to_delete[num_strings_to_delete] = strings[i];
                         entry->str = NULL;
                         entry->in_use = false;
                         num_strings_to_delete++;
-                        NG5_CHECK_SUCCESS(freelist_push(self, field_sid_t));
+                        ng5_check_success(freelist_push(self, field_sid_t));
                 }
         }
 
         /** remove from index */
-        NG5_CHECK_SUCCESS(strhash_remove(&extra->index, string_to_delete, num_strings_to_delete));
+        ng5_check_success(strhash_remove(&extra->index, string_to_delete, num_strings_to_delete));
 
         /** free up resources for strings that should be removed */
         for (size_t i = 0; i < num_strings_to_delete; i++) {
@@ -357,15 +357,15 @@ static bool this_locate_safe(struct strdic *self, field_sid_t **out, bool **foun
         char *const *keys, size_t num_keys)
 {
         timestamp_t begin = time_now_wallclock();
-        NG5_TRACE(STRING_DIC_SYNC_TAG, "'locate_safe' function invoked for %zu strings", num_keys)
+        ng5_trace(STRING_DIC_SYNC_TAG, "'locate_safe' function invoked for %zu strings", num_keys)
 
-        NG5_NON_NULL_OR_ERROR(self);
-        NG5_NON_NULL_OR_ERROR(out);
-        NG5_NON_NULL_OR_ERROR(found_mask);
-        NG5_NON_NULL_OR_ERROR(num_not_found);
-        NG5_NON_NULL_OR_ERROR(keys);
-        NG5_NON_NULL_OR_ERROR(num_keys);
-        NG5_CHECK_TAG(self->tag, SYNC)
+        error_if_null(self);
+        error_if_null(out);
+        error_if_null(found_mask);
+        error_if_null(num_not_found);
+        error_if_null(keys);
+        error_if_null(num_keys);
+        ng5_check_tag(self->tag, SYNC)
 
         lock(self);
         struct sync_extra *extra = this_extra(self);
@@ -373,16 +373,16 @@ static bool this_locate_safe(struct strdic *self, field_sid_t **out, bool **foun
         unlock(self);
 
         timestamp_t end = time_now_wallclock();
-        NG5_UNUSED(begin);
-        NG5_UNUSED(end);
-        NG5_TRACE(STRING_DIC_SYNC_TAG, "'locate_safe' function done: %f seconds spent here", (end - begin) / 1000.0f)
+        ng5_unused(begin);
+        ng5_unused(end);
+        ng5_trace(STRING_DIC_SYNC_TAG, "'locate_safe' function done: %f seconds spent here", (end - begin) / 1000.0f)
 
         return status;
 }
 
 static bool this_locate_fast(struct strdic *self, field_sid_t **out, char *const *keys, size_t num_keys)
 {
-        NG5_CHECK_TAG(self->tag, SYNC)
+        ng5_check_tag(self->tag, SYNC)
 
         bool *found_mask;
         size_t num_not_found;
@@ -398,7 +398,7 @@ static bool this_locate_fast(struct strdic *self, field_sid_t **out, char *const
 
 static char **this_extract(struct strdic *self, const field_sid_t *ids, size_t num_ids)
 {
-        if (NG5_UNLIKELY(!self || !ids || num_ids == 0 || self->tag != SYNC)) {
+        if (unlikely(!self || !ids || num_ids == 0 || self->tag != SYNC)) {
                 return NULL;
         }
 
@@ -431,13 +431,13 @@ static char **this_extract(struct strdic *self, const field_sid_t *ids, size_t n
 
 static bool this_free(struct strdic *self, void *ptr)
 {
-        NG5_UNUSED(self);
+        ng5_unused(self);
 
         struct allocator hashtable_alloc;
 #if defined(NG5_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
         CHECK_SUCCESS(allocatorTrace(&hashtable_alloc));
 #else
-        NG5_CHECK_SUCCESS(alloc_this_or_std(&hashtable_alloc, &self->alloc));
+        ng5_check_success(alloc_this_or_std(&hashtable_alloc, &self->alloc));
 #endif
 
         return alloc_free(&hashtable_alloc, ptr);
@@ -445,23 +445,23 @@ static bool this_free(struct strdic *self, void *ptr)
 
 static bool this_reset_counters(struct strdic *self)
 {
-        NG5_CHECK_TAG(self->tag, SYNC)
+        ng5_check_tag(self->tag, SYNC)
         struct sync_extra *extra = this_extra(self);
-        NG5_CHECK_SUCCESS(strhash_reset_counters(&extra->index));
+        ng5_check_success(strhash_reset_counters(&extra->index));
         return true;
 }
 
 static bool this_counters(struct strdic *self, struct strhash_counters *counters)
 {
-        NG5_CHECK_TAG(self->tag, SYNC)
+        ng5_check_tag(self->tag, SYNC)
         struct sync_extra *extra = this_extra(self);
-        NG5_CHECK_SUCCESS(strhash_get_counters(counters, &extra->index));
+        ng5_check_success(strhash_get_counters(counters, &extra->index));
         return true;
 }
 
 static bool this_num_distinct(struct strdic *self, size_t *num)
 {
-        NG5_CHECK_TAG(self->tag, SYNC)
+        ng5_check_tag(self->tag, SYNC)
         struct sync_extra *extra = this_extra(self);
         *num = vec_length(&extra->contents);
         return true;
@@ -470,7 +470,7 @@ static bool this_num_distinct(struct strdic *self, size_t *num)
 static bool this_get_contents(struct strdic *self, struct vector ofType (char *) *strings,
         struct vector ofType(field_sid_t) *string_ids)
 {
-        NG5_CHECK_TAG(self->tag, SYNC);
+        ng5_check_tag(self->tag, SYNC);
         struct sync_extra *extra = this_extra(self);
 
         for (field_sid_t i = 0; i < extra->contents.num_elems; i++) {

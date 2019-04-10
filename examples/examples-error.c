@@ -20,7 +20,7 @@
 int main(void) {
     struct err err;
     error_init(&err);
-    error_WDETAILS(&err, NG5_ERR_NOTFOUND, "some details");
+    error_with_details(&err, NG5_ERR_NOTFOUND, "some details");
     error_print(&err);
     return EXIT_FAILURE;
 }

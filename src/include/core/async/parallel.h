@@ -63,19 +63,19 @@ struct filter_arg {
 
 NG5_EXPORT(void *)parallel_for_proxy_function(void *args);
 
-#define NG5_PARALLEL_ERROR(msg, retval)                                                                             \
+#define ng5_parallel_error(msg, retval)                                                                             \
 {                                                                                                                      \
     perror(msg);                                                                                                       \
     return retval;                                                                                                     \
 }
 
-#define PARALLEL_MATCH(forSingle, forMulti)                                                                            \
+#define parallel_match(forSingle, forMulti)                                                                            \
 {                                                                                                                      \
-    if (NG5_LIKELY(hint == THREADING_HINT_MULTI)) {                                             \
+    if (likely(hint == THREADING_HINT_MULTI)) {                                             \
         return (forMulti);                                                                                             \
     } else if (hint == THREADING_HINT_SINGLE) {                                                           \
         return (forSingle);                                                                                            \
-    } else NG5_PARALLEL_ERROR(PARALLEL_MSG_UNKNOWN_HINT, false);                                                    \
+    } else ng5_parallel_error(PARALLEL_MSG_UNKNOWN_HINT, false);                                                    \
 }
 
 NG5_EXPORT(bool) parallel_for(const void *base, size_t width, size_t len, parallel_for_body_func_t f, void *args,
@@ -174,7 +174,7 @@ NG5_EXPORT(bool) parallel_parallel_for(const void *base, size_t width, size_t le
         void *args, uint_fast16_t num_threads);
 
 struct map_args {
-        parallel_map_body_func_t mapFunction;
+        parallel_map_body_func_t map_func;
         void *dst;
         const void *src;
         size_t dst_width;

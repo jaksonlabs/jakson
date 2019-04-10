@@ -28,13 +28,13 @@ visit_string_pairs (struct archive *archive, path_stack_t path, object_id_t id,
                               const field_sid_t *keys, const field_sid_t *values, u32 num_pairs,
                               void *capture)
 {
-    NG5_UNUSED(archive);
-    NG5_UNUSED(path);
-    NG5_UNUSED(id);
-    NG5_UNUSED(keys);
-    NG5_UNUSED(values);
-    NG5_UNUSED(num_pairs);
-    NG5_UNUSED(capture);
+    ng5_unused(archive);
+    ng5_unused(path);
+    ng5_unused(id);
+    ng5_unused(keys);
+    ng5_unused(values);
+    ng5_unused(num_pairs);
+    ng5_unused(capture);
 
     struct capture *params = (struct capture *) capture;
 
@@ -56,7 +56,7 @@ visit_string_pairs (struct archive *archive, path_stack_t path, object_id_t id,
                     }
                 }
                 if (!r) {
-                    r = VECTOR_NEW_AND_GET(params->result, ops_show_values_result_t);
+                    r = vec_new_and_get(params->result, ops_show_values_result_t);
                     r->key = keys[i];
                     r->type = FIELD_STRING;
                     vec_create(&r->values.string_values, NULL, sizeof(field_sid_t), 1000000);
@@ -90,11 +90,11 @@ before_visit_object_array(struct archive *archive, path_stack_t path,
                                                      object_id_t parent_id, field_sid_t key,
                                                      void *capture)
 {
-    NG5_UNUSED(archive);
-    NG5_UNUSED(path);
-    NG5_UNUSED(parent_id);
-    NG5_UNUSED(capture);
-    NG5_UNUSED(key);
+    ng5_unused(archive);
+    ng5_unused(path);
+    ng5_unused(parent_id);
+    ng5_unused(capture);
+    ng5_unused(key);
 
     enum visit_policy follow = VISIT_EXCLUDE;
 
@@ -127,13 +127,13 @@ before_visit_object_array_object_property(struct archive *archive, path_stack_t 
                                           enum field_type nested_value_type,
                                           void *capture)
 {
-    NG5_UNUSED(archive);
-    NG5_UNUSED(path);
-    NG5_UNUSED(parent_id);
-    NG5_UNUSED(key);
-    NG5_UNUSED(nested_key);
-    NG5_UNUSED(nested_value_type);
-    NG5_UNUSED(capture);
+    ng5_unused(archive);
+    ng5_unused(path);
+    ng5_unused(parent_id);
+    ng5_unused(key);
+    ng5_unused(nested_key);
+    ng5_unused(nested_value_type);
+    ng5_unused(capture);
 
     enum visit_policy follow = VISIT_EXCLUDE;
 
@@ -166,15 +166,15 @@ visit_object_array_object_property_string(struct archive *archive, path_stack_t 
                                                const field_sid_t *nested_values,
                                                u32 num_nested_values, void *capture)
 {
-    NG5_UNUSED(archive);
-    NG5_UNUSED(path);
-    NG5_UNUSED(parent_id);
-    NG5_UNUSED(key);
-    NG5_UNUSED(nested_object_id);
-    NG5_UNUSED(nested_key);
-    NG5_UNUSED(nested_values);
-    NG5_UNUSED(num_nested_values);
-    NG5_UNUSED(capture);
+    ng5_unused(archive);
+    ng5_unused(path);
+    ng5_unused(parent_id);
+    ng5_unused(key);
+    ng5_unused(nested_object_id);
+    ng5_unused(nested_key);
+    ng5_unused(nested_values);
+    ng5_unused(num_nested_values);
+    ng5_unused(capture);
 
 
 
@@ -200,7 +200,7 @@ visit_object_array_object_property_string(struct archive *archive, path_stack_t 
                 }
             }
             if (!r) {
-                r = VECTOR_NEW_AND_GET(params->result, ops_show_values_result_t);
+                r = vec_new_and_get(params->result, ops_show_values_result_t);
                 r->key = nested_key;
                 r->type = FIELD_STRING;
                 vec_create(&r->values.string_values, NULL, sizeof(field_sid_t), 1000000);
@@ -242,15 +242,15 @@ visit_object_array_object_property_int8(struct archive *archive, path_stack_t pa
                                           const field_i8_t *nested_values,
                                           u32 num_nested_values, void *capture)
 {
-    NG5_UNUSED(archive);
-    NG5_UNUSED(path);
-    NG5_UNUSED(parent_id);
-    NG5_UNUSED(key);
-    NG5_UNUSED(nested_object_id);
-    NG5_UNUSED(nested_key);
-    NG5_UNUSED(nested_values);
-    NG5_UNUSED(num_nested_values);
-    NG5_UNUSED(capture);
+    ng5_unused(archive);
+    ng5_unused(path);
+    ng5_unused(parent_id);
+    ng5_unused(key);
+    ng5_unused(nested_object_id);
+    ng5_unused(nested_key);
+    ng5_unused(nested_values);
+    ng5_unused(num_nested_values);
+    ng5_unused(capture);
 
 
 
@@ -276,7 +276,7 @@ visit_object_array_object_property_int8(struct archive *archive, path_stack_t pa
                 }
             }
             if (!r) {
-                r = VECTOR_NEW_AND_GET(params->result, ops_show_values_result_t);
+                r = vec_new_and_get(params->result, ops_show_values_result_t);
                 r->key = nested_key;
                 r->type = FIELD_INT8;
                 vec_create(&r->values.integer_values, NULL, sizeof(field_i64_t), 1000000);
@@ -306,15 +306,15 @@ visit_object_array_object_property_int16(struct archive *archive, path_stack_t p
                                         const field_i16_t *nested_values,
                                         u32 num_nested_values, void *capture)
 {
-    NG5_UNUSED(archive);
-    NG5_UNUSED(path);
-    NG5_UNUSED(parent_id);
-    NG5_UNUSED(key);
-    NG5_UNUSED(nested_object_id);
-    NG5_UNUSED(nested_key);
-    NG5_UNUSED(nested_values);
-    NG5_UNUSED(num_nested_values);
-    NG5_UNUSED(capture);
+    ng5_unused(archive);
+    ng5_unused(path);
+    ng5_unused(parent_id);
+    ng5_unused(key);
+    ng5_unused(nested_object_id);
+    ng5_unused(nested_key);
+    ng5_unused(nested_values);
+    ng5_unused(num_nested_values);
+    ng5_unused(capture);
 
 
 
@@ -340,7 +340,7 @@ visit_object_array_object_property_int16(struct archive *archive, path_stack_t p
                 }
             }
             if (!r) {
-                r = VECTOR_NEW_AND_GET(params->result, ops_show_values_result_t);
+                r = vec_new_and_get(params->result, ops_show_values_result_t);
                 r->key = nested_key;
                 r->type = FIELD_INT16;
                 vec_create(&r->values.integer_values, NULL, sizeof(field_i64_t), 1000000);
@@ -366,11 +366,11 @@ visit_object_array_object_property_int16(struct archive *archive, path_stack_t p
 //static bool
 //get_column_entry_count(struct archive *archive, path_stack_t path, field_sid_t key, enum field_type type, u32 count, void *capture)
 //{
-//    NG5_UNUSED(archive);
-//    NG5_UNUSED(path);
-//    NG5_UNUSED(key);
-//    NG5_UNUSED(type);
-//    NG5_UNUSED(count);
+//    ng5_unused(archive);
+//    ng5_unused(path);
+//    ng5_unused(key);
+//    ng5_unused(type);
+//    ng5_unused(count);
 //    struct capture *params = (struct capture *) capture;
 //    char buffer[2048];
 //    memset(buffer, 0, sizeof(buffer));
@@ -397,9 +397,9 @@ ops_show_values(timestamp_t *duration, struct vector ofType(ops_show_values_resu
                 struct archive *archive, u32 offset, u32 limit, i32 between_lower_bound,
                 i32 between_upper_bound, const char *contains_string)
 {
-    NG5_UNUSED(result);
-    NG5_UNUSED(path);
-    NG5_UNUSED(archive);
+    ng5_unused(result);
+    ng5_unused(path);
+    ng5_unused(archive);
 
     struct archive_visitor visitor = { 0 };
     struct archive_visitor_desc desc = { .visit_mask = NG5_ARCHIVE_ITER_MASK_ANY };

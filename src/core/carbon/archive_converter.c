@@ -27,8 +27,8 @@ struct converter_capture {
 
 #define IMPORT_BASIC_PAIR(name)                                                                                        \
 {                                                                                                                      \
-    NG5_UNUSED(archive);                                                                                            \
-    NG5_UNUSED(path_stack);                                                                                         \
+    ng5_unused(archive);                                                                                            \
+    ng5_unused(path_stack);                                                                                         \
     assert(capture);                                                                                                   \
                                                                                                                        \
     struct converter_capture *extra = (struct converter_capture *) capture;                                                                          \
@@ -51,12 +51,12 @@ static enum visit_policy                                                        
 visit_enter_##name##_array_pairs(struct archive *archive, path_stack_t path, object_id_t id,                  \
                                  const field_sid_t *keys, u32 num_pairs, void *capture)                    \
 {                                                                                                                      \
-    NG5_UNUSED(archive);                                                                                            \
-    NG5_UNUSED(path);                                                                                               \
-    NG5_UNUSED(id);                                                                                                 \
-    NG5_UNUSED(keys);                                                                                               \
-    NG5_UNUSED(num_pairs);                                                                                          \
-    NG5_UNUSED(capture);                                                                                            \
+    ng5_unused(archive);                                                                                            \
+    ng5_unused(path);                                                                                               \
+    ng5_unused(id);                                                                                                 \
+    ng5_unused(keys);                                                                                               \
+    ng5_unused(num_pairs);                                                                                          \
+    ng5_unused(capture);                                                                                            \
                                                                                                                        \
     assert(capture);                                                                                                   \
                                                                                                                        \
@@ -75,13 +75,13 @@ visit_##name##_array_pair(struct archive *archive, path_stack_t path, object_id_
                           const field_sid_t key, u32 entry_idx, u32 max_entries,                      \
                           const built_in_type *array, u32 array_length, void *capture)                            \
 {                                                                                                                      \
-    NG5_UNUSED(archive);                                                                                            \
-    NG5_UNUSED(path);                                                                                               \
-    NG5_UNUSED(id);                                                                                                 \
-    NG5_UNUSED(key);                                                                                                \
-    NG5_UNUSED(entry_idx);                                                                                          \
-    NG5_UNUSED(max_entries);                                                                                        \
-    NG5_UNUSED(capture);                                                                                            \
+    ng5_unused(archive);                                                                                            \
+    ng5_unused(path);                                                                                               \
+    ng5_unused(id);                                                                                                 \
+    ng5_unused(key);                                                                                                \
+    ng5_unused(entry_idx);                                                                                          \
+    ng5_unused(max_entries);                                                                                        \
+    ng5_unused(capture);                                                                                            \
                                                                                                                        \
     assert(capture);                                                                                                   \
                                                                                                                        \
@@ -93,7 +93,7 @@ visit_##name##_array_pair(struct archive *archive, path_stack_t path, object_id_
 
 static void visit_root_object(struct archive *archive, object_id_t id, void *capture)
 {
-        NG5_UNUSED(archive);
+        ng5_unused(archive);
         assert(capture);
 
         struct converter_capture *extra = (struct converter_capture *) capture;
@@ -125,8 +125,8 @@ DECLARE_VISIT_BASIC_TYPE_PAIR(string, field_sid_t)
 static void visit_null_pairs(struct archive *archive, path_stack_t path, object_id_t oid, const field_sid_t *keys,
         u32 num_pairs, void *capture)
 {
-        NG5_UNUSED(archive);
-        NG5_UNUSED(path);
+        ng5_unused(archive);
+        ng5_unused(path);
         assert(capture);
 
         struct converter_capture *extra = (struct converter_capture *) capture;
@@ -139,12 +139,12 @@ static void visit_null_pairs(struct archive *archive, path_stack_t path, object_
 static enum visit_policy before_object_visit(struct archive *archive, path_stack_t path_stack, object_id_t parent_id,
         object_id_t value_id, u32 object_idx, u32 num_objects, field_sid_t key, void *capture)
 {
-        NG5_UNUSED(archive);
-        NG5_UNUSED(path_stack);
-        NG5_UNUSED(object_idx);
-        NG5_UNUSED(num_objects);
-        NG5_UNUSED(key);
-        NG5_UNUSED(capture);
+        ng5_unused(archive);
+        ng5_unused(path_stack);
+        ng5_unused(object_idx);
+        ng5_unused(num_objects);
+        ng5_unused(key);
+        ng5_unused(capture);
 
         struct converter_capture *extra = (struct converter_capture *) capture;
         struct encoded_doc *parent_doc = encoded_doc_collection_get_or_append(extra->collection, parent_id);
@@ -179,12 +179,12 @@ DECLARE_VISIT_ARRAY_TYPE(string, field_sid_t)
 static enum visit_policy visit_enter_null_array_pairs(struct archive *archive, path_stack_t path, object_id_t id,
         const field_sid_t *keys, u32 num_pairs, void *capture)
 {
-        NG5_UNUSED(archive);
-        NG5_UNUSED(path);
-        NG5_UNUSED(id);
-        NG5_UNUSED(keys);
-        NG5_UNUSED(num_pairs);
-        NG5_UNUSED(capture);
+        ng5_unused(archive);
+        ng5_unused(path);
+        ng5_unused(id);
+        ng5_unused(keys);
+        ng5_unused(num_pairs);
+        ng5_unused(capture);
 
         assert(capture);
 
@@ -200,14 +200,14 @@ static enum visit_policy visit_enter_null_array_pairs(struct archive *archive, p
 static void visit_null_array_pair(struct archive *archive, path_stack_t path, object_id_t id, const field_sid_t key,
         u32 entry_idx, u32 max_entries, u32 num_nulls, void *capture)
 {
-        NG5_UNUSED(archive);
-        NG5_UNUSED(path);
-        NG5_UNUSED(id);
-        NG5_UNUSED(key);
-        NG5_UNUSED(entry_idx);
-        NG5_UNUSED(max_entries);
-        NG5_UNUSED(num_nulls);
-        NG5_UNUSED(capture);
+        ng5_unused(archive);
+        ng5_unused(path);
+        ng5_unused(id);
+        ng5_unused(key);
+        ng5_unused(entry_idx);
+        ng5_unused(max_entries);
+        ng5_unused(num_nulls);
+        ng5_unused(capture);
 
         assert(capture);
 
@@ -220,13 +220,13 @@ static void before_visit_object_array_objects(bool *skip_group_object_ids, struc
         object_id_t parent_id, field_sid_t key, const object_id_t *group_object_ids, u32 num_group_object_ids,
         void *capture)
 {
-        NG5_UNUSED(archive);
-        NG5_UNUSED(path);
-        NG5_UNUSED(parent_id);
-        NG5_UNUSED(capture);
-        NG5_UNUSED(group_object_ids);
-        NG5_UNUSED(skip_group_object_ids);
-        NG5_UNUSED(num_group_object_ids);
+        ng5_unused(archive);
+        ng5_unused(path);
+        ng5_unused(parent_id);
+        ng5_unused(capture);
+        ng5_unused(group_object_ids);
+        ng5_unused(skip_group_object_ids);
+        ng5_unused(num_group_object_ids);
 
         struct converter_capture *extra = (struct converter_capture *) capture;
         struct encoded_doc *doc = encoded_doc_collection_get_or_append(extra->collection, parent_id);
@@ -246,12 +246,12 @@ visit_object_array_object_property_##name(struct archive *archive, path_stack_t 
                                            const built_in_type *nested_values,                                         \
                                            u32 num_nested_values, void *capture)                                  \
 {                                                                                                                      \
-    NG5_UNUSED(archive);                                                                                            \
-    NG5_UNUSED(path);                                                                                               \
-    NG5_UNUSED(parent_id);                                                                                          \
-    NG5_UNUSED(key);                                                                                                \
-    NG5_UNUSED(nested_key);                                                                                         \
-    NG5_UNUSED(nested_values);                                                                                      \
+    ng5_unused(archive);                                                                                            \
+    ng5_unused(path);                                                                                               \
+    ng5_unused(parent_id);                                                                                          \
+    ng5_unused(key);                                                                                                \
+    ng5_unused(nested_key);                                                                                         \
+    ng5_unused(nested_values);                                                                                      \
                                                                                                                        \
     struct converter_capture *extra = (struct converter_capture *) capture;                                                                          \
         struct encoded_doc *doc = encoded_doc_collection_get_or_append(extra->collection, nested_object_id);             \
@@ -286,8 +286,8 @@ DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(null, field_u32_t);
 NG5_EXPORT(bool) archive_converter(struct encoded_doc_list *collection, struct archive *archive)
 {
 
-        NG5_NON_NULL_OR_ERROR(collection);
-        NG5_NON_NULL_OR_ERROR(archive);
+        error_if_null(collection);
+        error_if_null(archive);
 
         encoded_doc_collection_create(collection, &archive->err, archive);
 

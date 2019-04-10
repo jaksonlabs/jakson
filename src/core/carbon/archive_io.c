@@ -28,9 +28,9 @@ struct io_context {
 
 NG5_EXPORT(bool) io_context_create(struct io_context **context, struct err *err, const char *file_path)
 {
-        NG5_NON_NULL_OR_ERROR(context);
-        NG5_NON_NULL_OR_ERROR(err);
-        NG5_NON_NULL_OR_ERROR(file_path);
+        error_if_null(context);
+        error_if_null(err);
+        error_if_null(file_path);
 
         struct io_context *result = malloc(sizeof(struct io_context));
 
@@ -39,7 +39,7 @@ NG5_EXPORT(bool) io_context_create(struct io_context **context, struct err *err,
                 return false;
         }
 
-        spinlock_init(&result->lock);
+        spin_init(&result->lock);
         error_init(&result->err);
 
         result->file = fopen(file_path, "r");
@@ -62,7 +62,7 @@ NG5_EXPORT(struct err *)io_context_get_error(struct io_context *context)
 NG5_EXPORT(FILE *)io_context_lock_and_access(struct io_context *context)
 {
         if (context) {
-                spinlock_acquire(&context->lock);
+                spin_acquire(&context->lock);
                 context->last_pos = ftell(context->file);
                 return context->file;
         } else {
@@ -75,7 +75,7 @@ NG5_EXPORT(bool) io_context_unlock(struct io_context *context)
 {
         if (context) {
                 fseek(context->file, context->last_pos, SEEK_SET);
-                spinlock_release(&context->lock);
+                spin_release(&context->lock);
                 return true;
         } else {
                 error(&context->err, NG5_ERR_NULLPTR);
@@ -85,8 +85,8 @@ NG5_EXPORT(bool) io_context_unlock(struct io_context *context)
 
 NG5_EXPORT(bool) io_context_drop(struct io_context *context)
 {
-        NG5_NON_NULL_OR_ERROR(context);
-        NG5_OPTIONAL(context->file != NULL, fclose(context->file);
+        error_if_null(context);
+        ng5_optional(context->file != NULL, fclose(context->file);
                 context->file = NULL)
         free(context);
         return true;

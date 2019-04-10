@@ -61,19 +61,19 @@ NG5_EXPORT(bool) string_id_cache_create_LRU(struct string_cache **cache, struct 
 
 NG5_EXPORT(bool) string_id_cache_create_LRU_ex(struct string_cache **cache, struct archive *archive, size_t capacity)
 {
-        NG5_NON_NULL_OR_ERROR(cache)
-        NG5_NON_NULL_OR_ERROR(archive)
+        error_if_null(cache)
+        error_if_null(archive)
 
         struct string_cache *result = malloc(sizeof(struct string_cache));
 
         query_create(&result->query, archive);
         result->capacity = capacity;
 
-        size_t num_buckets = NG5_MAX(1, capacity);
+        size_t num_buckets = ng5_max(1, capacity);
         vec_create(&result->list_entries, NULL, sizeof(struct lru_list), num_buckets);
         for (size_t i = 0; i < num_buckets; i++) {
-                struct lru_list *list = VECTOR_NEW_AND_GET(&result->list_entries, struct lru_list);
-                NG5_ZERO_MEMORY(list, sizeof(struct lru_list));
+                struct lru_list *list = vec_new_and_get(&result->list_entries, struct lru_list);
+                ng5_zero_memory(list, sizeof(struct lru_list));
                 init_list(list);
         }
 
@@ -86,16 +86,16 @@ NG5_EXPORT(bool) string_id_cache_create_LRU_ex(struct string_cache **cache, stru
 
 NG5_EXPORT(bool) string_id_cache_get_error(struct err *err, const struct string_cache *cache)
 {
-        NG5_NON_NULL_OR_ERROR(err)
-        NG5_NON_NULL_OR_ERROR(cache)
+        error_if_null(err)
+        error_if_null(cache)
         *err = cache->err;
         return true;
 }
 
 NG5_EXPORT(bool) string_id_cache_get_size(size_t *size, const struct string_cache *cache)
 {
-        NG5_NON_NULL_OR_ERROR(size)
-        NG5_NON_NULL_OR_ERROR(cache)
+        error_if_null(size)
+        error_if_null(cache)
         *size = cache->capacity;
         return true;
 }
@@ -121,7 +121,7 @@ static void make_most_recent(struct lru_list *list, struct cache_entry *entry)
 
 NG5_EXPORT(char *)string_id_cache_get(struct string_cache *cache, field_sid_t id)
 {
-        NG5_NON_NULL_OR_ERROR(cache)
+        error_if_null(cache)
         hash32_t id_hash = NG5_HASH_BERNSTEIN(sizeof(field_sid_t), &id);
         size_t bucket_pos = id_hash % cache->list_entries.num_elems;
         struct lru_list *list = vec_get(&cache->list_entries, bucket_pos, struct lru_list);
@@ -148,22 +148,22 @@ NG5_EXPORT(char *)string_id_cache_get(struct string_cache *cache, field_sid_t id
 
 NG5_EXPORT(bool) string_id_cache_get_statistics(struct sid_cache_stats *statistics, struct string_cache *cache)
 {
-        NG5_NON_NULL_OR_ERROR(statistics);
-        NG5_NON_NULL_OR_ERROR(cache);
+        error_if_null(statistics);
+        error_if_null(cache);
         *statistics = cache->statistics;
         return true;
 }
 
 NG5_EXPORT(bool) string_id_cache_reset_statistics(struct string_cache *cache)
 {
-        NG5_NON_NULL_OR_ERROR(cache);
-        NG5_ZERO_MEMORY(&cache->statistics, sizeof(struct sid_cache_stats));
+        error_if_null(cache);
+        ng5_zero_memory(&cache->statistics, sizeof(struct sid_cache_stats));
         return true;
 }
 
 NG5_EXPORT(bool) string_id_cache_drop(struct string_cache *cache)
 {
-        NG5_NON_NULL_OR_ERROR(cache);
+        error_if_null(cache);
         for (size_t i = 0; i < cache->list_entries.num_elems; i++) {
                 struct lru_list *entry = vec_get(&cache->list_entries, i, struct lru_list);
                 for (size_t k = 0; k < sizeof(entry->entries) / sizeof(entry->entries[0]); k++) {
