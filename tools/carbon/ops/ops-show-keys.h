@@ -11,7 +11,7 @@
 
 typedef struct
 {
-    carbon_string_id_t key;
+    field_sid_t key;
     carbon_basic_type_e type;
 } ops_show_keys_key_type_pair_t;
 

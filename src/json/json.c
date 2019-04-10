@@ -54,7 +54,7 @@ static int set_error(struct json_err *error_desc, const struct json_token *token
 
 
 NG5_EXPORT(bool)
-carbon_json_tokenizer_init(struct json_tokenizer *tokenizer, const char *input)
+json_tokenizer_init(struct json_tokenizer *tokenizer, const char *input)
 {
     NG5_NON_NULL_OR_ERROR(tokenizer)
     NG5_NON_NULL_OR_ERROR(input)
@@ -70,7 +70,7 @@ carbon_json_tokenizer_init(struct json_tokenizer *tokenizer, const char *input)
     return true;
 }
 
-const struct json_token *carbon_json_tokenizer_next(struct json_tokenizer *tokenizer)
+const struct json_token *json_tokenizer_next(struct json_tokenizer *tokenizer)
 {
     if (NG5_LIKELY(*tokenizer->cursor != '\0')) {
         char c = *tokenizer->cursor;
@@ -81,13 +81,13 @@ const struct json_token *carbon_json_tokenizer_next(struct json_tokenizer *token
             tokenizer->token.line += c == '\n' ? 1 : 0;
             tokenizer->token.column = c == '\n' ? 0 : tokenizer->token.column;
             tokenizer->cursor++;
-            return carbon_json_tokenizer_next(tokenizer);
+            return json_tokenizer_next(tokenizer);
         } else if (isspace(c)) {
             do {
                 tokenizer->cursor++;
                 tokenizer->token.column++;
             } while (isspace(c = *tokenizer->cursor) && c != '\n');
-            return carbon_json_tokenizer_next(tokenizer);
+            return json_tokenizer_next(tokenizer);
         } else if (c == '{' || c == '}' || c == '[' || c == ']' || c == ':' || c == ',') {
             tokenizer->token.type = c == '{' ? OBJECT_OPEN : c == '}' ? OBJECT_CLOSE :
                                     c == '[' ? ARRAY_OPEN : c == ']' ? ARRAY_CLOSE :
@@ -173,14 +173,14 @@ caseTokenUnknown:
     }
 }
 
-void carbon_json_token_dup(struct json_token *dst, const struct json_token *src)
+void json_token_dup(struct json_token *dst, const struct json_token *src)
 {
     assert(dst);
     assert(src);
     memcpy(dst, src, sizeof(struct json_token));
 }
 
-void carbon_json_token_print(FILE *file, const struct json_token *token)
+void json_token_print(FILE *file, const struct json_token *token)
 {
     char *string = malloc(token->length + 1);
     strncpy(string, token->string, token->length);
@@ -216,7 +216,7 @@ static bool json_ast_node_element_print(FILE *file, struct err *err, struct json
 #define PREV_TOKEN(x) { *x = *x - 1; }
 
 NG5_EXPORT(bool)
-carbon_json_parser_create(struct json_parser *parser, struct doc_bulk *partition)
+json_parser_create(struct json_parser *parser, struct doc_bulk *partition)
 {
     NG5_NON_NULL_OR_ERROR(parser)
     NG5_NON_NULL_OR_ERROR(partition)
@@ -227,7 +227,7 @@ carbon_json_parser_create(struct json_parser *parser, struct doc_bulk *partition
     return true;
 }
 
-bool carbon_json_parse(struct json *json, struct json_err *error_desc,
+bool json_parse(struct json *json, struct json_err *error_desc,
                        struct json_parser *parser, const char *input)
 {
     NG5_NON_NULL_OR_ERROR(parser)
@@ -243,7 +243,7 @@ bool carbon_json_parse(struct json *json, struct json_err *error_desc,
     const struct json_token *token;
     int status;
 
-    carbon_json_tokenizer_init(&parser->tokenizer, input);
+    json_tokenizer_init(&parser->tokenizer, input);
     carbon_vec_create(&brackets, NULL, sizeof(enum json_token_type), 15);
     carbon_vec_create(&token_stream, NULL, sizeof(struct json_token), 200);
 
@@ -252,10 +252,10 @@ bool carbon_json_parse(struct json *json, struct json_err *error_desc,
         .type = JSON_UNKNOWN
     };
 
-    while ((token = carbon_json_tokenizer_next(&parser->tokenizer))) {
+    while ((token = json_tokenizer_next(&parser->tokenizer))) {
         if (NG5_LIKELY((status = process_token(&parser->err, error_desc, token, &brackets, &token_mem)) == true)) {
             struct json_token *newToken = VECTOR_NEW_AND_GET(&token_stream, struct json_token);
-            carbon_json_token_dup(newToken, token);
+            json_token_dup(newToken, token);
         } else {
             goto cleanup;
         }
@@ -273,7 +273,7 @@ bool carbon_json_parse(struct json *json, struct json_err *error_desc,
         return false;
     }
 
-    NG5_OPTIONAL_SET_OR_ELSE(json, retval, carbon_json_drop(json));
+    NG5_OPTIONAL_SET_OR_ELSE(json, retval, json_drop(json));
     status = true;
 
     cleanup:
@@ -345,7 +345,7 @@ bool test_condition_value(struct err *err, struct json_node_value *value)
 }
 
 NG5_EXPORT(bool)
-carbon_json_test_doc(struct err *err, struct json *json)
+json_test(struct err *err, struct json *json)
 {
     return (test_condition_value(err, &json->element->value));
 }
@@ -973,7 +973,7 @@ static bool json_ast_node_value_drop(struct json_node_value *value, struct err *
     return true;
 }
 
-bool carbon_json_drop(struct json *json)
+bool json_drop(struct json *json)
 {
     struct json_element *element = json->element;
     if (!json_ast_node_value_drop(&element->value, &json->err)) {
@@ -984,7 +984,7 @@ bool carbon_json_drop(struct json *json)
     }
 }
 
-bool carbon_json_print(FILE *file, struct json *json)
+bool json_print(FILE *file, struct json *json)
 {
     return json_ast_node_element_print(file, &json->err, json->element);
 }

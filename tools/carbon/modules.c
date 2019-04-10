@@ -12,7 +12,7 @@ typedef struct
     struct strdic dictionary;
     struct doc_bulk context;
     struct doc_entries *partition;
-    carbon_columndoc_t *partitionMetaModel;
+    struct columndoc *partitionMetaModel;
     char *jsonContent;
 
 } Js2CabContext;
@@ -48,8 +48,8 @@ static int convertJs2Model(Js2CabContext *context, FILE *file, bool optimizeForR
     struct json_parser parser;
     struct json_err error_desc;
     struct json jsonAst;
-    carbon_json_parser_create(&parser, &context->context);
-    int status = carbon_json_parse(&jsonAst, &error_desc, &parser, context->jsonContent);
+    json_parser_create(&parser, &context->context);
+    int status = json_parse(&jsonAst, &error_desc, &parser, context->jsonContent);
     if (!status) {
         NG5_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
         if (error_desc.token) {
@@ -66,7 +66,7 @@ static int convertJs2Model(Js2CabContext *context, FILE *file, bool optimizeForR
 
     NG5_CONSOLE_WRITE(file, "  - Test document restrictions%s", "");
     struct err err;
-    status = carbon_json_test_doc(&err, &jsonAst);
+    status = json_test(&err, &jsonAst);
     if (!status) {
         NG5_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
         carbon_error_print(&err);
@@ -83,7 +83,7 @@ static int convertJs2Model(Js2CabContext *context, FILE *file, bool optimizeForR
 
     NG5_CONSOLE_WRITE(file, "  - Add file to new partition%s", "");
     carbon_doc_bulk_add_json(context->partition, &jsonAst);
-    carbon_json_drop(&jsonAst);
+    json_drop(&jsonAst);
     NG5_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
 
     NG5_CONSOLE_WRITE(file, "  - Cleanup reserved memory%s", "");

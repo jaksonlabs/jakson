@@ -49,7 +49,7 @@ typedef struct async_extra
 typedef struct parallel_insert_arg
 {
     struct vector ofType(char *) strings;
-    carbon_string_id_t *out;
+    field_sid_t *out;
     carrier_t *carrier;
     bool enable_write_out;
     bool did_work;
@@ -58,7 +58,7 @@ typedef struct parallel_insert_arg
 
 typedef struct parallel_remove_arg
 {
-    struct vector ofType(carbon_string_id_t) *local_ids;
+    struct vector ofType(field_sid_t) *local_ids;
     carrier_t *carrier;
     int result;
     bool did_work;
@@ -67,7 +67,7 @@ typedef struct parallel_remove_arg
 typedef struct parallel_locate_arg
 {
     carrier_t *carrier;
-    carbon_string_id_t *ids_out;
+    field_sid_t *ids_out;
     bool *found_mask_out;
     size_t num_not_found_out;
     struct vector ofType(char *) keys_in;
@@ -77,7 +77,7 @@ typedef struct parallel_locate_arg
 
 typedef struct parallel_extract_arg
 {
-    struct vector ofType(carbon_string_id_t) local_ids_in;
+    struct vector ofType(field_sid_t) local_ids_in;
     char **strings_out;
     carrier_t *carrier;
     bool did_work;
@@ -93,25 +93,25 @@ typedef struct parallel_extract_arg
     (globalId >> 54)
 
 #define GET_carbon_string_id_t(globalId)                                                                               \
-    ((~((carbon_string_id_t) 0)) >> 10 & global_string_id);
+    ((~((field_sid_t) 0)) >> 10 & global_string_id);
 
 static bool this_drop(struct strdic *self);
 static bool this_insert(struct strdic *self,
-                      carbon_string_id_t **out,
+                      field_sid_t **out,
                       char *const *strings,
                       size_t num_strings,
                       size_t __num_threads);
-static bool this_remove(struct strdic *self, carbon_string_id_t *strings, size_t num_strings);
-static bool this_locate_safe(struct strdic *self, carbon_string_id_t **out, bool **found_mask,
+static bool this_remove(struct strdic *self, field_sid_t *strings, size_t num_strings);
+static bool this_locate_safe(struct strdic *self, field_sid_t **out, bool **found_mask,
                           size_t *num_not_found, char *const *keys, size_t num_keys);
-static bool this_locate_fast(struct strdic *self, carbon_string_id_t **out, char *const *keys,
+static bool this_locate_fast(struct strdic *self, field_sid_t **out, char *const *keys,
                           size_t num_keys);
-static char **this_extract(struct strdic *self, const carbon_string_id_t *ids, size_t num_ids);
+static char **this_extract(struct strdic *self, const field_sid_t *ids, size_t num_ids);
 static bool this_free(struct strdic *self, void *ptr);
 
 static bool this_num_distinct(struct strdic *self, size_t *num);
 static bool this_get_contents(struct strdic *self, struct vector ofType (char *) * strings,
-                           struct vector ofType(carbon_string_id_t) * string_ids);
+                           struct vector ofType(field_sid_t) * string_ids);
 
 static bool this_reset_counters(struct strdic *self);
 static bool this_counters(struct strdic *self, struct strhash_counters *counters);
@@ -186,14 +186,14 @@ static bool this_drop(struct strdic *self)
 void *parallel_remove_function(void *args)
 {
     parallel_remove_arg *carrier_arg = (parallel_remove_arg *) args;
-    carbon_string_id_t len = carbon_vec_length(carrier_arg->local_ids);
+    field_sid_t len = carbon_vec_length(carrier_arg->local_ids);
     carrier_arg->did_work = len > 0;
 
     NG5_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu spawned for remove task (%zu elements)", carrier_arg->carrier->id,
           carbon_vec_length(carrier_arg->local_ids));
     if (len > 0) {
         struct strdic *dic = &carrier_arg->carrier->local_dictionary;
-        carbon_string_id_t *ids = vec_all(carrier_arg->local_ids, carbon_string_id_t);
+        field_sid_t *ids = vec_all(carrier_arg->local_ids, field_sid_t);
         carrier_arg->result = carbon_strdic_remove(dic, ids, len);
         NG5_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu task done", carrier_arg->carrier->id);
     }
@@ -273,7 +273,7 @@ void *parallel_extract_function(void *args)
 
     if (this_args->did_work) {
         this_args->strings_out = carbon_strdic_extract(&this_args->carrier->local_dictionary,
-                                                     vec_all(&this_args->local_ids_in, carbon_string_id_t),
+                                                     vec_all(&this_args->local_ids_in, field_sid_t),
                                                      carbon_vec_length(&this_args->local_ids_in));
         NG5_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu done", this_args->carrier->id);
     }
@@ -377,7 +377,7 @@ static void compute_thread_assignment(atomic_uint_fast16_t *str_carrier_mapping,
 }
 
 static bool this_insert(struct strdic *self,
-                      carbon_string_id_t **out,
+                      field_sid_t **out,
                       char *const *strings,
                       size_t num_strings,
                       size_t __num_threads)
@@ -466,16 +466,16 @@ static bool this_insert(struct strdic *self,
 
     /** parallelizing the following block makes no sense but waste of compute power and energy */
     if (NG5_LIKELY(out != NULL)) {
-        carbon_string_id_t *total_out = carbon_malloc(&self->alloc, num_strings * sizeof(carbon_string_id_t));
+        field_sid_t *total_out = carbon_malloc(&self->alloc, num_strings * sizeof(field_sid_t));
         size_t currentOut = 0;
 
         for (size_t string_idx = 0; string_idx < num_strings; string_idx++) {
             uint_fast16_t thread_id = str_carrier_mapping[string_idx];
             size_t localIdx = str_carrier_idx_mapping[string_idx];
             parallel_insert_arg *carrier_arg = *vec_get(&carrier_args, thread_id, parallel_insert_arg *);
-            carbon_string_id_t global_string_owner_id = thread_id;
-            carbon_string_id_t global_string_local_id = carrier_arg->out[localIdx];
-            carbon_string_id_t global_string_id = MAKE_GLOBAL(global_string_owner_id, global_string_local_id);
+            field_sid_t global_string_owner_id = thread_id;
+            field_sid_t global_string_local_id = carrier_arg->out[localIdx];
+            field_sid_t global_string_id = MAKE_GLOBAL(global_string_owner_id, global_string_local_id);
             total_out[currentOut++] = global_string_id;
         }
 
@@ -506,7 +506,7 @@ static bool this_insert(struct strdic *self,
     return true;
 }
 
-static bool this_remove(struct strdic *self, carbon_string_id_t *strings, size_t num_strings)
+static bool this_remove(struct strdic *self, field_sid_t *strings, size_t num_strings)
 {
     carbon_timestamp_t begin = carbon_time_now_wallclock();
     NG5_INFO(STRING_DIC_ASYNC_TAG, "remove operation started: %zu strings to remove", num_strings);
@@ -519,7 +519,7 @@ static bool this_remove(struct strdic *self, carbon_string_id_t *strings, size_t
     struct async_extra *extra = THIS_EXTRAS(self);
     uint_fast16_t num_threads = carbon_vec_length(&extra->carriers);
     size_t approx_num_strings_per_thread = NG5_MAX(1, num_strings / num_threads);
-    struct vector ofType(carbon_string_id_t) *string_map =
+    struct vector ofType(field_sid_t) *string_map =
         carbon_malloc(&self->alloc, num_threads * sizeof(struct vector));
 
     struct vector ofType(parallel_remove_arg) carrier_args;
@@ -528,14 +528,14 @@ static bool this_remove(struct strdic *self, carbon_string_id_t *strings, size_t
     /** prepare thread-local subset of string ids */
     carbon_vec_repeated_push(&carrier_args, &empty, num_threads);
     for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
-        carbon_vec_create(string_map + thread_id, &self->alloc, sizeof(carbon_string_id_t), approx_num_strings_per_thread);
+        carbon_vec_create(string_map + thread_id, &self->alloc, sizeof(field_sid_t), approx_num_strings_per_thread);
     }
 
     /** compute subset of string ids per thread  */
     for (size_t i = 0; i < num_strings; i++) {
-        carbon_string_id_t global_string_id = strings[i];
+        field_sid_t global_string_id = strings[i];
         uint_fast16_t owning_thread_id = GET_OWNER(global_string_id);
-        carbon_string_id_t localcarbon_string_id_t = GET_carbon_string_id_t(global_string_id);
+        field_sid_t localcarbon_string_id_t = GET_carbon_string_id_t(global_string_id);
         assert(owning_thread_id < num_threads);
 
         carbon_vec_push(string_map + owning_thread_id, &localcarbon_string_id_t, 1);
@@ -572,7 +572,7 @@ static bool this_remove(struct strdic *self, carbon_string_id_t *strings, size_t
     return true;
 }
 
-static bool this_locate_safe(struct strdic *self, carbon_string_id_t **out, bool **found_mask,
+static bool this_locate_safe(struct strdic *self, field_sid_t **out, bool **found_mask,
                           size_t *num_not_found, char *const *keys, size_t num_keys)
 {
     carbon_timestamp_t begin = carbon_time_now_wallclock();
@@ -586,7 +586,7 @@ static bool this_locate_safe(struct strdic *self, carbon_string_id_t **out, bool
     uint_fast16_t num_threads = carbon_vec_length(&extra->carriers);
 
     /** global result output */
-    NG5_MALLOC(carbon_string_id_t, global_out, num_keys, &self->alloc);
+    NG5_MALLOC(field_sid_t, global_out, num_keys, &self->alloc);
     NG5_MALLOC(bool, global_found_mask, num_keys, &self->alloc);
 
     size_t global_num_not_found = 0;
@@ -652,9 +652,9 @@ static bool this_locate_safe(struct strdic *self, carbon_string_id_t **out, bool
         parallel_locate_arg *arg = carrier_args + thread_id;
 
         /** merge into global result */
-        carbon_string_id_t string_id_owner = thread_id;
-        carbon_string_id_t string_id_local_idx = arg->ids_out[local_thread_idx];
-        carbon_string_id_t global_string_id = MAKE_GLOBAL(string_id_owner, string_id_local_idx);
+        field_sid_t string_id_owner = thread_id;
+        field_sid_t string_id_local_idx = arg->ids_out[local_thread_idx];
+        field_sid_t global_string_id = MAKE_GLOBAL(string_id_owner, string_id_local_idx);
         global_out[i] = global_string_id;
         global_found_mask[i] = arg->found_mask_out[local_thread_idx];
     }
@@ -695,7 +695,7 @@ static bool this_locate_safe(struct strdic *self, carbon_string_id_t **out, bool
     return true;
 }
 
-static bool this_locate_fast(struct strdic *self, carbon_string_id_t **out, char *const *keys,
+static bool this_locate_fast(struct strdic *self, field_sid_t **out, char *const *keys,
                           size_t num_keys)
 {
     NG5_CHECK_TAG(self->tag, ASYNC);
@@ -717,7 +717,7 @@ static bool this_locate_fast(struct strdic *self, carbon_string_id_t **out, char
     return result;
 }
 
-static char **this_extract(struct strdic *self, const carbon_string_id_t *ids, size_t num_ids)
+static char **this_extract(struct strdic *self, const field_sid_t *ids, size_t num_ids)
 {
     carbon_timestamp_t begin = carbon_time_now_wallclock();
     NG5_INFO(STRING_DIC_ASYNC_TAG, "extract (safe) operation started: %zu strings to extract", num_ids)
@@ -740,14 +740,14 @@ static char **this_extract(struct strdic *self, const carbon_string_id_t *ids, s
 
     for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
         parallel_extract_arg *arg = thread_args + thread_id;
-        carbon_vec_create(&arg->local_ids_in, &self->alloc, sizeof(carbon_string_id_t), approx_num_strings_per_thread);
+        carbon_vec_create(&arg->local_ids_in, &self->alloc, sizeof(field_sid_t), approx_num_strings_per_thread);
     }
 
     /** compute subset of string ids per thread  */
     for (size_t i = 0; i < num_ids; i++) {
-        carbon_string_id_t global_string_id = ids[i];
+        field_sid_t global_string_id = ids[i];
         owning_thread_ids[i] = GET_OWNER(global_string_id);
-        carbon_string_id_t localcarbon_string_id_t = GET_carbon_string_id_t(global_string_id);
+        field_sid_t localcarbon_string_id_t = GET_carbon_string_id_t(global_string_id);
         assert(owning_thread_ids[i] < num_threads);
 
         parallel_extract_arg *arg = thread_args + owning_thread_ids[i];
@@ -825,21 +825,21 @@ static bool this_num_distinct(struct strdic *self, size_t *num)
 }
 
 static bool this_get_contents(struct strdic *self, struct vector ofType (char *) * strings,
-                           struct vector ofType(carbon_string_id_t) * string_ids)
+                           struct vector ofType(field_sid_t) * string_ids)
 {
     NG5_CHECK_TAG(self->tag, ASYNC);
     this_lock(self);
     struct async_extra *extra = THIS_EXTRAS(self);
     size_t num_carriers = carbon_vec_length(&extra->carriers);
     struct vector ofType (char *) local_string_results;
-    struct vector ofType (carbon_string_id_t) local_string_id_results;
+    struct vector ofType (field_sid_t) local_string_id_results;
     size_t approx_num_distinct_local_values;
     this_num_distinct(self, &approx_num_distinct_local_values);
     approx_num_distinct_local_values = NG5_MAX(1, approx_num_distinct_local_values / extra->carriers.num_elems);
     approx_num_distinct_local_values *= 1.2f;
 
     carbon_vec_create(&local_string_results, NULL, sizeof(char *), approx_num_distinct_local_values);
-    carbon_vec_create(&local_string_id_results, NULL, sizeof(carbon_string_id_t), approx_num_distinct_local_values);
+    carbon_vec_create(&local_string_id_results, NULL, sizeof(field_sid_t), approx_num_distinct_local_values);
 
 
     for (size_t thread_id = 0; thread_id < num_carriers; thread_id++)
@@ -854,8 +854,8 @@ static bool this_get_contents(struct strdic *self, struct vector ofType (char *)
         assert(local_string_id_results.num_elems == local_string_results.num_elems);
         for (size_t k = 0; k < local_string_results.num_elems; k++) {
             char *string = *vec_get(&local_string_results, k, char *);
-            carbon_string_id_t localcarbon_string_id_t = *vec_get(&local_string_id_results, k, carbon_string_id_t);
-            carbon_string_id_t global_string_id = MAKE_GLOBAL(thread_id, localcarbon_string_id_t);
+            field_sid_t localcarbon_string_id_t = *vec_get(&local_string_id_results, k, field_sid_t);
+            field_sid_t global_string_id = MAKE_GLOBAL(thread_id, localcarbon_string_id_t);
             carbon_vec_push(strings, &string, 1);
             carbon_vec_push(string_ids, &global_string_id, 1);
         }

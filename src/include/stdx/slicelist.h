@@ -72,7 +72,7 @@ typedef struct Slice
      * particular values. However, a remove operation is expensive. */
     const char *key_column[SLICE_KEY_COLUMN_MAX_ELEMS];
     hash32_t keyHashColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
-    carbon_string_id_t carbon_string_id_tColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
+    field_sid_t carbon_string_id_tColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
 
     /** The number of elements stored in 'key_colum', 'key_hash_column', and 'string_id_column' */
     u32 num_elems;
@@ -117,7 +117,7 @@ typedef struct NG5_slice_handle_t
 {
     Slice *container;
     const char *key;
-    carbon_string_id_t value;
+    field_sid_t value;
     bool is_contained;
 } slice_handle_t;
 
@@ -134,7 +134,7 @@ NG5_EXPORT(bool)
 SliceListIsEmpty(const carbon_slice_list_t *list);
 
 NG5_EXPORT(bool)
-carbon_slice_list_insert(carbon_slice_list_t *list, char **strings, carbon_string_id_t *ids, size_t npairs);
+carbon_slice_list_insert(carbon_slice_list_t *list, char **strings, field_sid_t *ids, size_t npairs);
 
 NG5_EXPORT(bool)
 SliceListRemove(carbon_slice_list_t *list, slice_handle_t *handle);

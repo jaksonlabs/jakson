@@ -18,7 +18,7 @@ typedef struct
 } ops_show_keys_capture_t;
 
 static void visit_string_pairs (struct archive *archive, path_stack_t path, carbon_object_id_t id,
-                              const carbon_string_id_t *keys, const carbon_string_id_t *values, u32 num_pairs,
+                              const field_sid_t *keys, const field_sid_t *values, u32 num_pairs,
                               void *capture)
 {
     NG5_UNUSED(id);
@@ -33,7 +33,7 @@ static void visit_string_pairs (struct archive *archive, path_stack_t path, carb
 
 static carbon_visitor_policy_e
 before_visit_object_array(struct archive *archive, path_stack_t path,
-                                                     carbon_object_id_t parent_id, carbon_string_id_t key,
+                                                     carbon_object_id_t parent_id, field_sid_t key,
                                                      void *capture)
 {
     NG5_UNUSED(archive);
@@ -57,7 +57,7 @@ static void
 before_visit_object_array_objects(bool *skip_group_object_ids,
                                           struct archive *archive, path_stack_t path,
                                           carbon_object_id_t parent_id,
-                                          carbon_string_id_t key,
+                                          field_sid_t key,
                                           const carbon_object_id_t *group_object_ids,
                                           u32 num_group_object_ids, void *capture)
 {
@@ -86,7 +86,7 @@ before_visit_object_array_objects(bool *skip_group_object_ids,
 static carbon_visitor_policy_e
 before_object_visit(struct archive *archive, path_stack_t path,
                                                carbon_object_id_t parent_id, carbon_object_id_t value_id,
-                                               u32 object_idx, u32 num_objects, carbon_string_id_t key,
+                                               u32 object_idx, u32 num_objects, field_sid_t key,
                                                void *capture)
 {
     NG5_UNUSED(archive);
@@ -120,7 +120,7 @@ before_object_visit(struct archive *archive, path_stack_t path,
 static void
 visit_object_property(struct archive *archive, path_stack_t path,
                               carbon_object_id_t parent_id,
-                              carbon_string_id_t key, carbon_basic_type_e type, bool is_array_type, void *capture)
+                              field_sid_t key, carbon_basic_type_e type, bool is_array_type, void *capture)
 {
     NG5_UNUSED(archive);
     NG5_UNUSED(path);
@@ -176,7 +176,7 @@ visit_object_property(struct archive *archive, path_stack_t path,
 
 
 
-static void visit_object_array_prop(struct archive *archive, path_stack_t path, carbon_object_id_t parent_id, carbon_string_id_t key, carbon_basic_type_e type, void *capture)
+static void visit_object_array_prop(struct archive *archive, path_stack_t path, carbon_object_id_t parent_id, field_sid_t key, carbon_basic_type_e type, void *capture)
 {
     NG5_UNUSED(archive);
     NG5_UNUSED(parent_id);
@@ -211,8 +211,8 @@ static void visit_object_array_prop(struct archive *archive, path_stack_t path, 
 static carbon_visitor_policy_e
 before_visit_object_array_object_property(struct archive *archive, path_stack_t path,
                                           carbon_object_id_t parent_id,
-                                          carbon_string_id_t key,
-                                          carbon_string_id_t nested_key,
+                                          field_sid_t key,
+                                          field_sid_t nested_key,
                                           carbon_basic_type_e nested_value_type,
                                           void *capture)
 {
@@ -272,9 +272,9 @@ before_visit_object_array_object_property(struct archive *archive, path_stack_t 
 static carbon_visitor_policy_e
 before_object_array_object_property_object(struct archive *archive, path_stack_t path,
                                            carbon_object_id_t parent_id,
-                                           carbon_string_id_t key,
+                                           field_sid_t key,
                                            carbon_object_id_t nested_object_id,
-                                           carbon_string_id_t nested_key,
+                                           field_sid_t nested_key,
                                            u32 nested_value_object_id,
                                            void *capture)
 {

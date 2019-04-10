@@ -31,20 +31,21 @@ typedef int16_t i16;
 typedef int32_t i32;
 typedef int64_t i64;
 
-typedef struct carbon_doc_obj carbon_doc_obj_t;
-typedef u64              carbon_string_id_t;
-typedef char                  carbon_null_t;
-typedef i8                carbon_boolean_t;
-typedef i8                carbon_i8;
-typedef i16               carbon_i16;
-typedef i32               carbon_i32;
-typedef i64               carbon_i64;
-typedef u8               carbon_u8;
-typedef u16              carbon_u16;
-typedef u32              carbon_u32;
-typedef u64              carbon_u64;
-typedef float                 carbon_number_t;
-typedef const char *          carbon_cstring_t;
+struct doc_obj;
+
+typedef u64               field_sid_t;
+typedef char              field_null_t;
+typedef i8                field_boolean_t;
+typedef i8                field_i8_t;
+typedef i16               field_i16_t;
+typedef i32               field_i32_t;
+typedef i64               field_i64_t;
+typedef u8                field_u8_t;
+typedef u16               field_u16_t;
+typedef u32               field_u32_t;
+typedef u64               field_u64_t;
+typedef float             field_number_t;
+typedef const char *      field_string_t;
 
 #define NG5_NULL_ENCODED_STRING            0
 #define NG5_NULL_BOOLEAN                   INT8_MAX
@@ -119,37 +120,37 @@ typedef enum carbon_field_type
             value_size = sizeof(u16);                                                                             \
             break;                                                                                                     \
         case field_bool:                                                                                   \
-            value_size = sizeof(carbon_boolean_t);                                                                        \
+            value_size = sizeof(field_boolean_t);                                                                        \
             break;                                                                                                     \
         case field_int8:                                                                                   \
-            value_size = sizeof(carbon_i8);                                                                        \
+            value_size = sizeof(field_i8_t);                                                                        \
             break;                                                                                                     \
         case field_int16:                                                                                  \
-            value_size = sizeof(carbon_i16);                                                                       \
+            value_size = sizeof(field_i16_t);                                                                       \
             break;                                                                                                     \
         case field_int32:                                                                                  \
-            value_size = sizeof(carbon_i32);                                                                       \
+            value_size = sizeof(field_i32_t);                                                                       \
             break;                                                                                                     \
         case field_int64:                                                                                  \
-            value_size = sizeof(carbon_i64);                                                                       \
+            value_size = sizeof(field_i64_t);                                                                       \
             break;                                                                                                     \
         case field_uint8:                                                                                  \
-            value_size = sizeof(carbon_u8);                                                                       \
+            value_size = sizeof(field_u8_t);                                                                       \
             break;                                                                                                     \
         case field_uint16:                                                                                 \
-            value_size = sizeof(carbon_u16);                                                                      \
+            value_size = sizeof(field_u16_t);                                                                      \
             break;                                                                                                     \
         case field_uint32:                                                                                 \
-            value_size = sizeof(carbon_u32);                                                                       \
+            value_size = sizeof(field_u32_t);                                                                       \
             break;                                                                                                     \
         case field_uint64:                                                                                 \
-            value_size = sizeof(carbon_u64);                                                                       \
+            value_size = sizeof(field_u64_t);                                                                       \
             break;                                                                                                     \
         case field_float:                                                                                  \
-            value_size = sizeof(carbon_number_t);                                                                       \
+            value_size = sizeof(field_number_t);                                                                       \
             break;                                                                                                     \
         case field_string:                                                                                 \
-            value_size = sizeof(carbon_string_id_t);                                                                   \
+            value_size = sizeof(field_sid_t);                                                                   \
             break;                                                                                                     \
         case field_object:                                                                                 \
             value_size = sizeof(columndoc_obj_t);                                                               \

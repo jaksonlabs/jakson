@@ -12,7 +12,7 @@
 
 typedef struct
 {
-    carbon_string_id_t key;
+    field_sid_t key;
     u32 count;
 } ops_count_values_result_t;
 

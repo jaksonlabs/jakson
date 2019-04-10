@@ -82,7 +82,7 @@ typedef struct archive_object_iterator_state
     offset_t               current_prop_group_off;
     offset_t               prop_data_off;
 
-    const carbon_string_id_t   *keys;                   /* current property key in this iteration */
+    const field_sid_t   *keys;                   /* current property key in this iteration */
     carbon_basic_type_e        type;                    /* property basic value type (e.g., int8, or object) */
     bool                       is_array;                /* flag indicating that property is an array type */
 } carbon_archive_object_iter_state_t;
@@ -92,7 +92,7 @@ typedef struct archive_collection_iterator_state
     offset_t                collection_start_off;
     u32                    num_column_groups;
     u32                    current_column_group_idx;
-    const carbon_string_id_t   *column_group_keys;
+    const field_sid_t   *column_group_keys;
     const offset_t         *column_group_offsets;
 
     struct {
@@ -103,7 +103,7 @@ typedef struct archive_collection_iterator_state
 
         struct {
             u32                    idx;
-            carbon_string_id_t          name;
+            field_sid_t          name;
             carbon_basic_type_e         type;
             u32                    num_elem;
             const offset_t         *elem_offsets;
@@ -130,7 +130,7 @@ typedef struct archive_value_vector
     u32                    value_max_idx;           /* maximum index of a value callable by 'at' functions */
     struct err                err;                     /* error information */
     carbon_object_id_t          object_id;               /* current object id */
-    const carbon_string_id_t   *keys;
+    const field_sid_t   *keys;
 
     union {
         struct {
@@ -139,17 +139,17 @@ typedef struct archive_value_vector
         } object;
         struct {
             union {
-                const carbon_i8 *int8s;
-                const carbon_i16 *int16s;
-                const carbon_i32 *int32s;
-                const carbon_i64 *int64s;
-                const carbon_u8 *uint8s;
-                const carbon_u16 *uint16s;
-                const carbon_u32 *uint32s;
-                const carbon_u64 *uint64s;
-                const carbon_number_t *numbers;
-                const carbon_string_id_t *strings;
-                const carbon_boolean_t *booleans;
+                const field_i8_t *int8s;
+                const field_i16_t *int16s;
+                const field_i32_t *int32s;
+                const field_i64_t *int64s;
+                const field_u8_t *uint8s;
+                const field_u16_t *uint16s;
+                const field_u32_t *uint32s;
+                const field_u64_t *uint64s;
+                const field_number_t *numbers;
+                const field_sid_t *strings;
+                const field_boolean_t *booleans;
             } values;
         } basic;
         struct {
@@ -160,17 +160,17 @@ typedef struct archive_value_vector
 
             union
             {
-                const carbon_i8 *int8s_base;
-                const carbon_i16 *int16s_base;
-                const carbon_i32 *int32s_base;
-                const carbon_i64 *int64s_base;
-                const carbon_u8 *uint8s_base;
-                const carbon_u16 *uint16s_base;
-                const carbon_u32 *uint32s_base;
-                const carbon_u64 *uint64s_base;
-                const carbon_number_t *numbers_base;
-                const carbon_string_id_t *strings_base;
-                const carbon_boolean_t *booleans_base;
+                const field_i8_t *int8s_base;
+                const field_i16_t *int16s_base;
+                const field_i32_t *int32s_base;
+                const field_i64_t *int64s_base;
+                const field_u8_t *uint8s_base;
+                const field_u16_t *uint16s_base;
+                const field_u32_t *uint32s_base;
+                const field_u64_t *uint64s_base;
+                const field_number_t *numbers_base;
+                const field_sid_t *strings_base;
+                const field_boolean_t *booleans_base;
             } values;
         } arrays;
     } data;
@@ -281,7 +281,7 @@ carbon_archive_prop_iter_next(carbon_archive_prop_iter_mode_e *type,
                               carbon_archive_collection_iter_t *collection_iter,
                               carbon_archive_prop_iter_t *prop_iter);
 
-NG5_EXPORT(const carbon_string_id_t *)
+NG5_EXPORT(const field_sid_t *)
 carbon_archive_collection_iter_get_keys(u32 *num_keys, carbon_archive_collection_iter_t *iter);
 
 NG5_EXPORT(bool)
@@ -296,7 +296,7 @@ carbon_archive_column_group_next_column(carbon_archive_column_iter_t *column_ite
                                         carbon_archive_column_group_iter_t *iter);
 
 NG5_EXPORT(bool)
-carbon_archive_column_get_name(carbon_string_id_t *name,
+carbon_archive_column_get_name(field_sid_t *name,
                                carbon_basic_type_e *type,
                                carbon_archive_column_iter_t *column_iter);
 
@@ -313,18 +313,18 @@ carbon_archive_column_entry_get_type(carbon_basic_type_e *type, carbon_archive_c
 NG5_EXPORT(const built_in_type *)                                                                                   \
 carbon_archive_column_entry_get_##name(u32 *array_length, carbon_archive_column_entry_iter_t *entry);
 
-DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(carbon_i8, int8s);
-DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(carbon_i16, int16s);
-DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(carbon_i32, int32s);
-DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(carbon_i64, int64s);
-DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(carbon_u8, uint8s);
-DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(carbon_u16, uint16s);
-DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(carbon_u32, uint32s);
-DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(carbon_u64, uint64s);
-DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(carbon_string_id_t, strings);
-DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(carbon_number_t, numbers);
-DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(carbon_boolean_t, booleans);
-DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(carbon_u32, nulls);
+DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_i8_t, int8s);
+DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_i16_t, int16s);
+DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_i32_t, int32s);
+DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_i64_t, int64s);
+DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_u8_t, uint8s);
+DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_u16_t, uint16s);
+DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_u32_t, uint32s);
+DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_u64_t, uint64s);
+DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_sid_t, strings);
+DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_number_t, numbers);
+DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_boolean_t, booleans);
+DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_u32_t, nulls);
 
 NG5_EXPORT(bool)
 carbon_archive_column_entry_get_objects(carbon_archive_column_entry_object_iter_t *iter,
@@ -342,10 +342,10 @@ carbon_archive_object_get_prop_iter(carbon_archive_prop_iter_t *iter, const carb
 NG5_EXPORT(bool)
 carbon_archive_value_vector_get_object_id(carbon_object_id_t *id, const carbon_archive_value_vector_t *iter);
 
-NG5_EXPORT(const carbon_string_id_t *)
+NG5_EXPORT(const field_sid_t *)
 carbon_archive_value_vector_get_keys(u32 *num_keys, carbon_archive_value_vector_t *iter);
 
-NG5_EXPORT(const carbon_string_id_t *)
+NG5_EXPORT(const field_sid_t *)
 carbon_archive_value_vector_get_keys(u32 *num_keys, carbon_archive_value_vector_t *iter);
 
 NG5_EXPORT(bool)
@@ -388,19 +388,19 @@ DEFINE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(null);
 NG5_EXPORT(const built_in_type *)                                                                                   \
 carbon_archive_value_vector_get_##name(u32 *num_values, carbon_archive_value_vector_t *value);
 
-DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int8s, carbon_i8)
-DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int16s, carbon_i16)
-DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int32s, carbon_i32)
-DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int64s, carbon_i64)
-DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint8s, carbon_u8)
-DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint16s, carbon_u16)
-DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint32s, carbon_u32)
-DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint64s, carbon_u64)
-DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(strings, carbon_string_id_t)
-DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(numbers, carbon_number_t)
-DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(booleans, carbon_boolean_t)
+DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int8s, field_i8_t)
+DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int16s, field_i16_t)
+DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int32s, field_i32_t)
+DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int64s, field_i64_t)
+DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint8s, field_u8_t)
+DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint16s, field_u16_t)
+DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint32s, field_u32_t)
+DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint64s, field_u64_t)
+DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(strings, field_sid_t)
+DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(numbers, field_number_t)
+DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(booleans, field_boolean_t)
 
-NG5_EXPORT(const carbon_u32 *)
+NG5_EXPORT(const field_u32_t *)
 carbon_archive_value_vector_get_null_arrays(u32 *num_values, carbon_archive_value_vector_t *value);
 
 #define DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(name, built_in_type)                                      \
@@ -408,17 +408,17 @@ NG5_EXPORT(const built_in_type *)                                               
 carbon_archive_value_vector_get_##name##_arrays_at(u32 *array_length, u32 idx,                               \
                                                carbon_archive_value_vector_t *value);                                  \
 
-DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(int8, carbon_i8);
-DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(int16, carbon_i16);
-DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(int32, carbon_i32);
-DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(int64, carbon_i64);
-DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(uint8, carbon_u8);
-DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(uint16, carbon_u16);
-DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(uint32, carbon_u32);
-DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(uint64, carbon_u64);
-DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(string, carbon_string_id_t);
-DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(number, carbon_number_t);
-DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(boolean, carbon_boolean_t);
+DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(int8, field_i8_t);
+DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(int16, field_i16_t);
+DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(int32, field_i32_t);
+DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(int64, field_i64_t);
+DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(uint8, field_u8_t);
+DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(uint16, field_u16_t);
+DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(uint32, field_u32_t);
+DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(uint64, field_u64_t);
+DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(string, field_sid_t);
+DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(number, field_number_t);
+DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(boolean, field_boolean_t);
 
 
 void

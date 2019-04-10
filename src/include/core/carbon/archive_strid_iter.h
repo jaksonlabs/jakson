@@ -26,7 +26,7 @@ NG5_BEGIN_DECL
 
 typedef struct carbon_strid_info
 {
-    carbon_string_id_t id;
+    field_sid_t id;
     u32           strlen;
     offset_t       offset;
 } carbon_strid_info_t;

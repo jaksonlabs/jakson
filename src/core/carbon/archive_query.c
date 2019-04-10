@@ -28,7 +28,7 @@ typedef struct
 
 struct sid_to_offset
 {
-    carbon_hashtable_t ofMapping(carbon_string_id_t, carbon_id_to_offset_arg_t) mapping;
+    carbon_hashtable_t ofMapping(field_sid_t, carbon_id_to_offset_arg_t) mapping;
     FILE *disk_file;
     size_t disk_file_size;
 
@@ -114,7 +114,7 @@ carbon_query_create_index_string_id_to_offset(struct sid_to_offset **index,
     capacity = archive_info.num_embeddded_strings;
 
     struct sid_to_offset *result = malloc(sizeof(struct sid_to_offset));
-    carbon_hashtable_create(&result->mapping, &query->err, sizeof(carbon_string_id_t), sizeof(carbon_id_to_offset_arg_t), capacity);
+    carbon_hashtable_create(&result->mapping, &query->err, sizeof(field_sid_t), sizeof(carbon_id_to_offset_arg_t), capacity);
 
     if (!index_string_id_to_offset_open_file(result, &query->err, query->archive->diskFilePath)) {
         return false;
@@ -224,7 +224,7 @@ fetch_string_from_file(bool *decode_success, FILE *disk_file, size_t offset, siz
 }
 
 static char *
-fetch_string_by_id_via_scan(struct archive_query *query, carbon_string_id_t id)
+fetch_string_by_id_via_scan(struct archive_query *query, field_sid_t id)
 {
     assert(query);
 
@@ -269,7 +269,7 @@ fetch_string_by_id_via_scan(struct archive_query *query, carbon_string_id_t id)
 }
 
 static char *
-fetch_string_by_id_via_index(struct archive_query *query, struct sid_to_offset *index, carbon_string_id_t id)
+fetch_string_by_id_via_index(struct archive_query *query, struct sid_to_offset *index, field_sid_t id)
 {
     const carbon_id_to_offset_arg_t *args = carbon_hashtable_get_value(&index->mapping, &id);
     if (args) {
@@ -295,7 +295,7 @@ fetch_string_by_id_via_index(struct archive_query *query, struct sid_to_offset *
 }
 
 NG5_EXPORT(char *)
-carbon_query_fetch_string_by_id(struct archive_query *query, carbon_string_id_t id)
+carbon_query_fetch_string_by_id(struct archive_query *query, field_sid_t id)
 {
     assert(query);
 
@@ -309,7 +309,7 @@ carbon_query_fetch_string_by_id(struct archive_query *query, carbon_string_id_t 
 }
 
 NG5_EXPORT(char *)
-carbon_query_fetch_string_by_id_nocache(struct archive_query *query, carbon_string_id_t id)
+carbon_query_fetch_string_by_id_nocache(struct archive_query *query, field_sid_t id)
 {
     bool has_index;
     carbon_archive_has_query_index_string_id_to_offset(&has_index, query->archive);
@@ -384,7 +384,7 @@ cleanup_and_error:
     return NULL;
 }
 
-NG5_EXPORT(carbon_string_id_t *)
+NG5_EXPORT(field_sid_t *)
 carbon_query_find_ids(size_t *num_found, struct archive_query *query, const carbon_string_pred_t *pred,
                       void *capture, i64 limit)
 {
@@ -405,8 +405,8 @@ carbon_query_find_ids(size_t *num_found, struct archive_query *query, const carb
     size_t               num_matching      = 0;
     void                *tmp               = NULL;
     size_t               str_cap           = 1024;
-    carbon_string_id_t  *step_ids          = NULL;
-    carbon_string_id_t  *result_ids        = NULL;
+    field_sid_t  *step_ids          = NULL;
+    field_sid_t  *result_ids        = NULL;
     size_t               result_len        = 0;
     size_t               result_cap        = pred_limit < 0 ? str_cap : (size_t) pred_limit;
     bool                 success           = false;
@@ -423,7 +423,7 @@ carbon_query_find_ids(size_t *num_found, struct archive_query *query, const carb
         return NULL;
     }
 
-    if (NG5_UNLIKELY((step_ids = malloc(str_cap * sizeof(carbon_string_id_t))) == NULL))
+    if (NG5_UNLIKELY((step_ids = malloc(str_cap * sizeof(field_sid_t))) == NULL))
     {
         error(&query->err, NG5_ERR_MALLOCERR);
         return NULL;
@@ -461,7 +461,7 @@ carbon_query_find_ids(size_t *num_found, struct archive_query *query, const carb
         goto cleanup_result_and_error;
     }
 
-    if (NG5_UNLIKELY((result_ids = malloc(result_cap * sizeof(carbon_string_id_t))) == NULL))
+    if (NG5_UNLIKELY((result_ids = malloc(result_cap * sizeof(field_sid_t))) == NULL))
     {
         error(&query->err, NG5_ERR_MALLOCERR);
         free(str_offs);
@@ -529,7 +529,7 @@ carbon_query_find_ids(size_t *num_found, struct archive_query *query, const carb
             if (NG5_UNLIKELY(result_len > result_cap))
             {
                 result_cap = (result_len + 1) * 1.7f;
-                if (NG5_UNLIKELY((tmp = realloc(result_ids, result_cap * sizeof(carbon_string_id_t))) == NULL))
+                if (NG5_UNLIKELY((tmp = realloc(result_ids, result_cap * sizeof(field_sid_t))) == NULL))
                 {
                     carbon_strid_iter_close(&it);
                     goto cleanup_intermediate;

@@ -24,7 +24,7 @@ typedef struct carbon_path_entry carbon_path_entry_t;
 
 typedef struct carbon_path_entry
 {
-    carbon_string_id_t   key;
+    field_sid_t   key;
     u32 idx;
 
 } carbon_path_entry_t;
@@ -45,21 +45,21 @@ typedef const struct vector ofType(carbon_path_entry_t) * path_stack_t;
 
 #define DEFINE_VISIT_BASIC_TYPE_PAIRS(name, built_in_type)                                                             \
 void (*visit_##name##_pairs) (struct archive *archive, path_stack_t path, carbon_object_id_t id,                     \
-                              const carbon_string_id_t *keys, const built_in_type *values, u32 num_pairs,         \
+                              const field_sid_t *keys, const built_in_type *values, u32 num_pairs,         \
                               void *capture);
 
 #define DEFINE_VISIT_ARRAY_TYPE_PAIRS(name, built_in_type)                                                             \
 carbon_visitor_policy_e (*visit_enter_##name##_array_pairs)(struct archive *archive, path_stack_t path,              \
-                                                        carbon_object_id_t id, const carbon_string_id_t *keys,         \
+                                                        carbon_object_id_t id, const field_sid_t *keys,         \
                                                         u32 num_pairs,                                            \
                                                         void *capture);                                                \
                                                                                                                        \
 void (*visit_enter_##name##_array_pair)(struct archive *archive, path_stack_t path, carbon_object_id_t id,           \
-                                        carbon_string_id_t key, u32 entry_idx, u32 num_elems,                \
+                                        field_sid_t key, u32 entry_idx, u32 num_elems,                \
                                         void *capture);                                                                \
                                                                                                                        \
 void (*visit_##name##_array_pair) (struct archive *archive, path_stack_t path, carbon_object_id_t id,                \
-                                   carbon_string_id_t key, u32 entry_idx, u32 max_entries,                   \
+                                   field_sid_t key, u32 entry_idx, u32 max_entries,                   \
                                    const built_in_type *array, u32 array_length, void *capture);                  \
                                                                                                                        \
 void (*visit_leave_##name##_array_pair)(struct archive *archive, path_stack_t path, carbon_object_id_t id,           \
@@ -71,9 +71,9 @@ void (*visit_leave_##name##_array_pairs)(struct archive *archive, path_stack_t p
 #define DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(name, built_in_type)                                                     \
     void (*visit_object_array_object_property_##name)(struct archive *archive, path_stack_t path,                    \
                                                carbon_object_id_t parent_id,                                           \
-                                               carbon_string_id_t key,                                                 \
+                                               field_sid_t key,                                                 \
                                                carbon_object_id_t nested_object_id,                                    \
-                                               carbon_string_id_t nested_key,                                          \
+                                               field_sid_t nested_key,                                          \
                                                const built_in_type *nested_values,                                     \
                                                u32 num_nested_values, void *capture);
 
@@ -85,54 +85,54 @@ typedef struct
 
     carbon_visitor_policy_e (*before_object_visit)(struct archive *archive, path_stack_t path,
                                                    carbon_object_id_t parent_id, carbon_object_id_t value_id,
-                                                   u32 object_idx, u32 num_objects, carbon_string_id_t key,
+                                                   u32 object_idx, u32 num_objects, field_sid_t key,
                                                    void *capture);
     void (*after_object_visit)(struct archive *archive, path_stack_t path, carbon_object_id_t id,
                                u32 object_idx, u32 num_objects, void *capture);
 
-    void (*first_prop_type_group)(struct archive *archive, path_stack_t path, carbon_object_id_t id, const carbon_string_id_t *keys,
+    void (*first_prop_type_group)(struct archive *archive, path_stack_t path, carbon_object_id_t id, const field_sid_t *keys,
                                  carbon_basic_type_e type, bool is_array, u32 num_pairs, void *capture);
-    void (*next_prop_type_group)(struct archive *archive, path_stack_t path, carbon_object_id_t id, const carbon_string_id_t *keys,
+    void (*next_prop_type_group)(struct archive *archive, path_stack_t path, carbon_object_id_t id, const field_sid_t *keys,
                                  carbon_basic_type_e type, bool is_array, u32 num_pairs, void *capture);
 
-    DEFINE_VISIT_BASIC_TYPE_PAIRS(int8, carbon_i8);
-    DEFINE_VISIT_BASIC_TYPE_PAIRS(int16, carbon_i16);
-    DEFINE_VISIT_BASIC_TYPE_PAIRS(int32, carbon_i32);
-    DEFINE_VISIT_BASIC_TYPE_PAIRS(int64, carbon_i64);
-    DEFINE_VISIT_BASIC_TYPE_PAIRS(uint8, carbon_u8);
-    DEFINE_VISIT_BASIC_TYPE_PAIRS(uint16, carbon_u16);
-    DEFINE_VISIT_BASIC_TYPE_PAIRS(uint32, carbon_u32);
-    DEFINE_VISIT_BASIC_TYPE_PAIRS(uint64, carbon_u64);
-    DEFINE_VISIT_BASIC_TYPE_PAIRS(number, carbon_number_t);
-    DEFINE_VISIT_BASIC_TYPE_PAIRS(string, carbon_string_id_t);
-    DEFINE_VISIT_BASIC_TYPE_PAIRS(boolean, carbon_boolean_t);
+    DEFINE_VISIT_BASIC_TYPE_PAIRS(int8, field_i8_t);
+    DEFINE_VISIT_BASIC_TYPE_PAIRS(int16, field_i16_t);
+    DEFINE_VISIT_BASIC_TYPE_PAIRS(int32, field_i32_t);
+    DEFINE_VISIT_BASIC_TYPE_PAIRS(int64, field_i64_t);
+    DEFINE_VISIT_BASIC_TYPE_PAIRS(uint8, field_u8_t);
+    DEFINE_VISIT_BASIC_TYPE_PAIRS(uint16, field_u16_t);
+    DEFINE_VISIT_BASIC_TYPE_PAIRS(uint32, field_u32_t);
+    DEFINE_VISIT_BASIC_TYPE_PAIRS(uint64, field_u64_t);
+    DEFINE_VISIT_BASIC_TYPE_PAIRS(number, field_number_t);
+    DEFINE_VISIT_BASIC_TYPE_PAIRS(string, field_sid_t);
+    DEFINE_VISIT_BASIC_TYPE_PAIRS(boolean, field_boolean_t);
 
-    void (*visit_null_pairs) (struct archive *archive, path_stack_t path, carbon_object_id_t id, const carbon_string_id_t *keys,
+    void (*visit_null_pairs) (struct archive *archive, path_stack_t path, carbon_object_id_t id, const field_sid_t *keys,
                               u32 num_pairs, void *capture);
 
-    DEFINE_VISIT_ARRAY_TYPE_PAIRS(int8, carbon_i8);
-    DEFINE_VISIT_ARRAY_TYPE_PAIRS(int16, carbon_i16);
-    DEFINE_VISIT_ARRAY_TYPE_PAIRS(int32, carbon_i32);
-    DEFINE_VISIT_ARRAY_TYPE_PAIRS(int64, carbon_i64);
-    DEFINE_VISIT_ARRAY_TYPE_PAIRS(uint8, carbon_u8);
-    DEFINE_VISIT_ARRAY_TYPE_PAIRS(uint16, carbon_u16);
-    DEFINE_VISIT_ARRAY_TYPE_PAIRS(uint32, carbon_u32);
-    DEFINE_VISIT_ARRAY_TYPE_PAIRS(uint64, carbon_u64);
-    DEFINE_VISIT_ARRAY_TYPE_PAIRS(number, carbon_number_t);
-    DEFINE_VISIT_ARRAY_TYPE_PAIRS(string, carbon_string_id_t);
-    DEFINE_VISIT_ARRAY_TYPE_PAIRS(boolean, carbon_boolean_t);
+    DEFINE_VISIT_ARRAY_TYPE_PAIRS(int8, field_i8_t);
+    DEFINE_VISIT_ARRAY_TYPE_PAIRS(int16, field_i16_t);
+    DEFINE_VISIT_ARRAY_TYPE_PAIRS(int32, field_i32_t);
+    DEFINE_VISIT_ARRAY_TYPE_PAIRS(int64, field_i64_t);
+    DEFINE_VISIT_ARRAY_TYPE_PAIRS(uint8, field_u8_t);
+    DEFINE_VISIT_ARRAY_TYPE_PAIRS(uint16, field_u16_t);
+    DEFINE_VISIT_ARRAY_TYPE_PAIRS(uint32, field_u32_t);
+    DEFINE_VISIT_ARRAY_TYPE_PAIRS(uint64, field_u64_t);
+    DEFINE_VISIT_ARRAY_TYPE_PAIRS(number, field_number_t);
+    DEFINE_VISIT_ARRAY_TYPE_PAIRS(string, field_sid_t);
+    DEFINE_VISIT_ARRAY_TYPE_PAIRS(boolean, field_boolean_t);
 
     carbon_visitor_policy_e (*visit_enter_null_array_pairs)(struct archive *archive, path_stack_t path,
                                                             carbon_object_id_t id,
-                                                            const carbon_string_id_t *keys, u32 num_pairs,
+                                                            const field_sid_t *keys, u32 num_pairs,
                                                             void *capture);
 
     void (*visit_enter_null_array_pair)(struct archive *archive, path_stack_t path, carbon_object_id_t id,
-                                        carbon_string_id_t key, u32 entry_idx, u32 num_elems, void *capture);
+                                        field_sid_t key, u32 entry_idx, u32 num_elems, void *capture);
 
     void (*visit_null_array_pair) (struct archive *archive, path_stack_t path, carbon_object_id_t id,
-                                   carbon_string_id_t key, u32 entry_idx, u32 max_entries,
-                                   carbon_u32 num_nulls, void *capture);
+                                   field_sid_t key, u32 entry_idx, u32 max_entries,
+                                   field_u32_t num_nulls, void *capture);
 
     void (*visit_leave_null_array_pair)(struct archive *archive, path_stack_t path, carbon_object_id_t id,
                                         u32 pair_idx, u32 num_pairs, void *capture);
@@ -141,52 +141,52 @@ typedef struct
                                          void *capture);
 
     carbon_visitor_policy_e (*before_visit_object_array)(struct archive *archive, path_stack_t path,
-                                                         carbon_object_id_t parent_id, carbon_string_id_t key,
+                                                         carbon_object_id_t parent_id, field_sid_t key,
                                                          void *capture);
 
     void (*before_visit_object_array_objects)(bool *skip_group_object_ids,
                                               struct archive *archive, path_stack_t path,
                                               carbon_object_id_t parent_id,
-                                              carbon_string_id_t key,
+                                              field_sid_t key,
                                               const carbon_object_id_t *group_object_ids,
                                               u32 num_group_object_ids, void *capture);
 
     carbon_visitor_policy_e (*before_visit_object_array_object_property)(struct archive *archive, path_stack_t path,
                                                    carbon_object_id_t parent_id,
-                                                   carbon_string_id_t key,
-                                                   carbon_string_id_t nested_key,
+                                                   field_sid_t key,
+                                                   field_sid_t nested_key,
                                                    carbon_basic_type_e nested_value_type,
                                                    void *capture);
 
-    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(int8s, carbon_i8);
-    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(int16s, carbon_i16);
-    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(int32s, carbon_i32);
-    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(int64s, carbon_i64);
-    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(uint8s, carbon_u8);
-    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(uint16s, carbon_u16);
-    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(uint32s, carbon_u32);
-    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(uint64s, carbon_u64);
-    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(numbers, carbon_number_t);
-    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(strings, carbon_string_id_t);
-    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(booleans, carbon_boolean_t);
-    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(nulls, carbon_u32);
+    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(int8s, field_i8_t);
+    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(int16s, field_i16_t);
+    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(int32s, field_i32_t);
+    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(int64s, field_i64_t);
+    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(uint8s, field_u8_t);
+    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(uint16s, field_u16_t);
+    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(uint32s, field_u32_t);
+    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(uint64s, field_u64_t);
+    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(numbers, field_number_t);
+    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(strings, field_sid_t);
+    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(booleans, field_boolean_t);
+    DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(nulls, field_u32_t);
 
     carbon_visitor_policy_e (*before_object_array_object_property_object)(struct archive *archive, path_stack_t path,
                                                     carbon_object_id_t parent_id,
-                                                    carbon_string_id_t key,
+                                                    field_sid_t key,
                                                     carbon_object_id_t nested_object_id,
-                                                    carbon_string_id_t nested_key,
+                                                    field_sid_t nested_key,
                                                     u32 nested_value_object_id,
                                                     void *capture);
 
     void (*visit_object_property)(struct archive *archive, path_stack_t path,
                                   carbon_object_id_t parent_id,
-                                  carbon_string_id_t key, carbon_basic_type_e type, bool is_array_type, void *capture);
+                                  field_sid_t key, carbon_basic_type_e type, bool is_array_type, void *capture);
 
 
-    void (*visit_object_array_prop)(struct archive *archive, path_stack_t path, carbon_object_id_t parent_id, carbon_string_id_t key, carbon_basic_type_e type, void *capture);
+    void (*visit_object_array_prop)(struct archive *archive, path_stack_t path, carbon_object_id_t parent_id, field_sid_t key, carbon_basic_type_e type, void *capture);
 
-    bool (*get_column_entry_count)(struct archive *archive, path_stack_t path, carbon_string_id_t key, carbon_basic_type_e type, u32 count, void *capture);
+    bool (*get_column_entry_count)(struct archive *archive, path_stack_t path, field_sid_t key, carbon_basic_type_e type, u32 count, void *capture);
 
 } carbon_archive_visitor_t;
 
@@ -201,6 +201,6 @@ NG5_EXPORT(void)
 carbon_archive_visitor_path_to_string(char path_buffer[2048], struct archive *archive, const struct vector ofType(carbon_path_entry_t) *path_stack);
 
 NG5_EXPORT(bool)
-carbon_archive_visitor_path_compare(const struct vector ofType(carbon_path_entry_t) *path, carbon_string_id_t *group_name, const char *path_str, struct archive *archive);
+carbon_archive_visitor_path_compare(const struct vector ofType(carbon_path_entry_t) *path, field_sid_t *group_name, const char *path_str, struct archive *archive);
 
 #endif

@@ -89,7 +89,7 @@ typedef struct __attribute__((packed))
 typedef struct __attribute__((packed))
 {
     char marker;
-    carbon_string_id_t column_name;
+    field_sid_t column_name;
     char value_type;
     u32 num_entries;
 } carbon_column_header_t;
@@ -167,21 +167,21 @@ typedef struct {
 typedef struct
 {
     carbon_prop_header_t *header;
-    const carbon_string_id_t *keys;
+    const field_sid_t *keys;
     const void *values;
 } carbon_fixed_prop_t;
 
 typedef struct
 {
     carbon_prop_header_t *header;
-    const carbon_string_id_t *keys;
+    const field_sid_t *keys;
     const offset_t *groupOffs;
 } carbon_table_prop_t;
 
 typedef struct
 {
     carbon_prop_header_t *header;
-    const carbon_string_id_t *keys;
+    const field_sid_t *keys;
     const offset_t *offsets;
     const void *values;
 } carbon_var_prop_t;
@@ -189,7 +189,7 @@ typedef struct
 typedef struct
 {
     carbon_prop_header_t *header;
-    const carbon_string_id_t *keys;
+    const field_sid_t *keys;
     const u32 *lengths;
     offset_t values_begin;
 } carbon_array_prop_t;
@@ -197,7 +197,7 @@ typedef struct
 typedef struct
 {
     carbon_prop_header_t *header;
-    const carbon_string_id_t *keys;
+    const field_sid_t *keys;
 } carbon_null_prop_t;
 
 enum marker_type
@@ -366,7 +366,7 @@ typedef struct __attribute__((packed))
 {
     char                          marker;
     offset_t                  next_entry_off;
-    carbon_string_id_t            string_id;
+    field_sid_t            string_id;
     u32                      string_len;
 } carbon_string_entry_header_t;
 

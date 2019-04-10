@@ -41,39 +41,39 @@ typedef struct mem_extra
 static int this_drop(struct strhash *self);
 static int this_put_safe_bulk(struct strhash *self,
                            char *const *keys,
-                           const carbon_string_id_t *values,
+                           const field_sid_t *values,
                            size_t num_pairs);
 static int this_put_fast_bulk(struct strhash *self,
                            char *const *keys,
-                           const carbon_string_id_t *values,
+                           const field_sid_t *values,
                            size_t num_pairs);
-static int this_put_safe_exact(struct strhash *self, const char *key, carbon_string_id_t value);
-static int this_put_fast_exact(struct strhash *self, const char *key, carbon_string_id_t value);
-static int this_get_safe(struct strhash *self, carbon_string_id_t **out, bool **found_mask, size_t *num_not_found,
+static int this_put_safe_exact(struct strhash *self, const char *key, field_sid_t value);
+static int this_put_fast_exact(struct strhash *self, const char *key, field_sid_t value);
+static int this_get_safe(struct strhash *self, field_sid_t **out, bool **found_mask, size_t *num_not_found,
                        char *const *keys, size_t num_keys);
-static int this_get_safe_exact(struct strhash *self, carbon_string_id_t *out, bool *found_mask, const char *key);
-static int this_get_fast(struct strhash *self, carbon_string_id_t **out, char *const *keys, size_t num_keys);
-static int this_update_key_fast(struct strhash *self, const carbon_string_id_t *values, char *const *keys,
+static int this_get_safe_exact(struct strhash *self, field_sid_t *out, bool *found_mask, const char *key);
+static int this_get_fast(struct strhash *self, field_sid_t **out, char *const *keys, size_t num_keys);
+static int this_update_key_fast(struct strhash *self, const field_sid_t *values, char *const *keys,
                              size_t num_keys);
 static int this_remove(struct strhash *self, char *const *keys, size_t num_keys);
 static int this_free(struct strhash *self, void *ptr);
 
 static int this_insert_bulk(struct vector ofType(bucket) *buckets,
                           char *const *restrict keys,
-                          const carbon_string_id_t *restrict values,
+                          const field_sid_t *restrict values,
                           size_t *restrict bucket_idxs,
                           size_t num_pairs,
                           struct allocator *alloc,
                           struct strhash_counters *counter);
 
 static int this_insert_exact(struct vector ofType(bucket) *buckets, const char *restrict key,
-                           carbon_string_id_t value, size_t bucket_idx, struct allocator *alloc, struct strhash_counters *counter);
-static int this_fetch_bulk(struct vector ofType(bucket) *buckets, carbon_string_id_t *values_out,
+                           field_sid_t value, size_t bucket_idx, struct allocator *alloc, struct strhash_counters *counter);
+static int this_fetch_bulk(struct vector ofType(bucket) *buckets, field_sid_t *values_out,
                          bool *key_found_mask,
                          size_t *num_keys_not_found, size_t *bucket_idxs, char *const *keys, size_t num_keys,
                          struct allocator *alloc, struct strhash_counters *counter);
 static int this_fetch_single(struct vector ofType(bucket) *buckets,
-                           carbon_string_id_t *value_out,
+                           field_sid_t *value_out,
                            bool *key_found,
                            const size_t bucket_idx,
                            const char *key,
@@ -84,7 +84,7 @@ static mem_extra_t *this_get_exta(struct strhash *self);
 static int bucket_create(bucket_t *buckets, size_t num_buckets, size_t bucket_cap,
                         struct allocator *alloc);
 static int bucket_drop(bucket_t *buckets, size_t num_buckets, struct allocator *alloc);
-static int bucket_insert(bucket_t *bucket, const char *restrict key, carbon_string_id_t value,
+static int bucket_insert(bucket_t *bucket, const char *restrict key, field_sid_t value,
                         struct allocator *alloc, struct strhash_counters *counter);
 
 bool carbon_strhash_create_inmemory(struct strhash *carbon_parallel_map_exec, const struct allocator *alloc, size_t num_buckets,
@@ -127,7 +127,7 @@ static int this_drop(struct strhash *self)
 
 static int this_put_safe_bulk(struct strhash *self,
                            char *const *keys,
-                           const carbon_string_id_t *values,
+                           const field_sid_t *values,
                            size_t num_pairs)
 {
     assert(self->tag == MEMORY_RESIDENT);
@@ -152,7 +152,7 @@ static int this_put_safe_bulk(struct strhash *self,
     return true;
 }
 
-static int this_put_safe_exact(struct strhash *self, const char *key, carbon_string_id_t value)
+static int this_put_safe_exact(struct strhash *self, const char *key, field_sid_t value)
 {
     assert(self->tag == MEMORY_RESIDENT);
     mem_extra_t *extra = this_get_exta(self);
@@ -168,20 +168,20 @@ static int this_put_safe_exact(struct strhash *self, const char *key, carbon_str
     return true;
 }
 
-static int this_put_fast_exact(struct strhash *self, const char *key, carbon_string_id_t value)
+static int this_put_fast_exact(struct strhash *self, const char *key, field_sid_t value)
 {
     return this_put_safe_exact(self, key, value);
 }
 
 static int this_put_fast_bulk(struct strhash *self,
                            char *const *keys,
-                           const carbon_string_id_t *values,
+                           const field_sid_t *values,
                            size_t num_pairs)
 {
     return this_put_safe_bulk(self, keys, values, num_pairs);
 }
 
-static int this_fetch_bulk(struct vector ofType(bucket) *buckets, carbon_string_id_t *values_out,
+static int this_fetch_bulk(struct vector ofType(bucket) *buckets, field_sid_t *values_out,
                          bool *key_found_mask,
                          size_t *num_keys_not_found, size_t *bucket_idxs, char *const *keys, size_t num_keys,
                          struct allocator *alloc, struct strhash_counters *counter)
@@ -209,7 +209,7 @@ static int this_fetch_bulk(struct vector ofType(bucket) *buckets, carbon_string_
 
         num_not_found += result_handle.is_contained ? 0 : 1;
         key_found_mask[i] = result_handle.is_contained;
-        values_out[i] = result_handle.is_contained ? result_handle.value : ((carbon_string_id_t) -1);
+        values_out[i] = result_handle.is_contained ? result_handle.value : ((field_sid_t) -1);
     }
 
     *num_keys_not_found = num_not_found;
@@ -217,7 +217,7 @@ static int this_fetch_bulk(struct vector ofType(bucket) *buckets, carbon_string_
 }
 
 static int this_fetch_single(struct vector ofType(bucket) *buckets,
-                           carbon_string_id_t *value_out,
+                           field_sid_t *value_out,
                            bool *key_found,
                            const size_t bucket_idx,
                            const char *key,
@@ -236,12 +236,12 @@ static int this_fetch_single(struct vector ofType(bucket) *buckets,
     /** Optimization 1/5: EMPTY GUARD (but before "find" call); if this bucket has no occupied slots, do not perform any lookup and comparison */
     carbon_slice_list_lookup(&handle, &bucket->slice_list, key);
     *key_found = !SliceListIsEmpty(&bucket->slice_list) && handle.is_contained;
-    *value_out = (*key_found) ? handle.value : ((carbon_string_id_t) -1);
+    *value_out = (*key_found) ? handle.value : ((field_sid_t) -1);
 
     return true;
 }
 
-static int this_get_safe(struct strhash *self, carbon_string_id_t **out, bool **found_mask, size_t *num_not_found,
+static int this_get_safe(struct strhash *self, field_sid_t **out, bool **found_mask, size_t *num_not_found,
                        char *const *keys, size_t num_keys)
 {
     assert(self->tag == MEMORY_RESIDENT);
@@ -258,7 +258,7 @@ static int this_get_safe(struct strhash *self, carbon_string_id_t **out, bool **
 
     mem_extra_t *extra = this_get_exta(self);
     size_t *bucket_idxs = carbon_malloc(&self->allocator, num_keys * sizeof(size_t));
-    carbon_string_id_t *values_out = carbon_malloc(&self->allocator, num_keys * sizeof(carbon_string_id_t));
+    field_sid_t *values_out = carbon_malloc(&self->allocator, num_keys * sizeof(field_sid_t));
     bool *found_mask_out = carbon_malloc(&self->allocator, num_keys * sizeof(bool));
 
     assert(bucket_idxs != NULL);
@@ -292,7 +292,7 @@ static int this_get_safe(struct strhash *self, carbon_string_id_t **out, bool **
     return true;
 }
 
-static int this_get_safe_exact(struct strhash *self, carbon_string_id_t *out, bool *found_mask, const char *key)
+static int this_get_safe_exact(struct strhash *self, field_sid_t *out, bool *found_mask, const char *key)
 {
     assert(self->tag == MEMORY_RESIDENT);
 
@@ -314,7 +314,7 @@ static int this_get_safe_exact(struct strhash *self, carbon_string_id_t *out, bo
     return true;
 }
 
-static int this_get_fast(struct strhash *self, carbon_string_id_t **out, char *const *keys, size_t num_keys)
+static int this_get_fast(struct strhash *self, field_sid_t **out, char *const *keys, size_t num_keys)
 {
     bool *found_mask;
     size_t num_not_found;
@@ -323,7 +323,7 @@ static int this_get_fast(struct strhash *self, carbon_string_id_t **out, char *c
     return status;
 }
 
-static int this_update_key_fast(struct strhash *self, const carbon_string_id_t *values, char *const *keys,
+static int this_update_key_fast(struct strhash *self, const field_sid_t *values, char *const *keys,
                              size_t num_keys)
 {
     NG5_UNUSED(self);
@@ -437,7 +437,7 @@ static int bucket_drop(bucket_t *buckets, size_t num_buckets, struct allocator *
     return true;
 }
 
-static int bucket_insert(bucket_t *bucket, const char *restrict key, carbon_string_id_t value,
+static int bucket_insert(bucket_t *bucket, const char *restrict key, field_sid_t value,
                         struct allocator *alloc, struct strhash_counters *counter)
 {
     NG5_UNUSED(counter);
@@ -467,7 +467,7 @@ static int bucket_insert(bucket_t *bucket, const char *restrict key, carbon_stri
 
 static int this_insert_bulk(struct vector ofType(bucket) *buckets,
                           char *const *restrict keys,
-                          const carbon_string_id_t *restrict values,
+                          const field_sid_t *restrict values,
                           size_t *restrict bucket_idxs,
                           size_t num_pairs,
                           struct allocator *alloc,
@@ -483,7 +483,7 @@ static int this_insert_bulk(struct vector ofType(bucket) *buckets,
     for (register size_t i = 0; status == true && i < num_pairs; i++) {
         size_t bucket_idx = bucket_idxs[i];
         const char *key = keys[i];
-        carbon_string_id_t value = values[i];
+        field_sid_t value = values[i];
 
         bucket_t *bucket = buckets_data + bucket_idx;
         status = bucket_insert(bucket, key, value, alloc, counter);
@@ -493,7 +493,7 @@ static int this_insert_bulk(struct vector ofType(bucket) *buckets,
 }
 
 static int this_insert_exact(struct vector ofType(bucket) *buckets, const char *restrict key,
-                           carbon_string_id_t value, size_t bucket_idx, struct allocator *alloc, struct strhash_counters *counter)
+                           field_sid_t value, size_t bucket_idx, struct allocator *alloc, struct strhash_counters *counter)
 {
     NG5_NON_NULL_OR_ERROR(buckets)
     NG5_NON_NULL_OR_ERROR(key)

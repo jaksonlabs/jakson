@@ -21,11 +21,11 @@
 #include "json/columndoc.h"
 #include "json/doc.h"
 
-static void setup_object(columndoc_obj_t *model, carbon_columndoc_t *parent, carbon_string_id_t key, size_t idx);
+static void setup_object(columndoc_obj_t *model, struct columndoc *parent, field_sid_t key, size_t idx);
 
 static bool object_put(columndoc_obj_t *model, struct err *err, const struct doc_entries *entry, struct strdic *dic);
 
-static bool import_object(columndoc_obj_t *dst, struct err *err, const carbon_doc_obj_t *doc, struct strdic *dic);
+static bool import_object(columndoc_obj_t *dst, struct err *err, const struct doc_obj *doc, struct strdic *dic);
 
 static bool print_object(FILE *file, struct err *err, const columndoc_obj_t *object, struct strdic *dic);
 
@@ -34,15 +34,15 @@ static const char *get_type_name(struct err *err, field_e type);
 static void object_array_key_columns_create(struct vector ofType(carbon_columndoc_columngroup_t) *columns);
 
 static carbon_columndoc_column_t *object_array_key_columns_find_or_new(struct vector ofType(carbon_columndoc_columngroup_t) *columns,
-                                                            carbon_string_id_t array_key, carbon_string_id_t nested_object_entry_key,
+                                                            field_sid_t array_key, field_sid_t nested_object_entry_key,
                                                             field_e nested_object_entry_type);
 
 static bool object_array_key_column_push(carbon_columndoc_column_t *col, struct err *err, const struct doc_entries *entry, u32 array_idx,
                                      struct strdic *dic, columndoc_obj_t *model);
 
-bool carbon_columndoc_create(carbon_columndoc_t *columndoc,
+bool carbon_columndoc_create(struct columndoc *columndoc,
                              struct err *err,
-                             const carbon_doc_t *doc,
+                             const struct doc *doc,
                              const struct doc_bulk *bulk,
                              const struct doc_entries *entries,
                              struct strdic *dic)
@@ -58,7 +58,7 @@ bool carbon_columndoc_create(carbon_columndoc_t *columndoc,
     carbon_error_init(&columndoc->err);
 
     const char *root_string = "/";
-    carbon_string_id_t *rootId;
+    field_sid_t *rootId;
 
     carbon_strdic_insert(dic, &rootId, (char *const *) &root_string, 1, 0);
 
@@ -66,7 +66,7 @@ bool carbon_columndoc_create(carbon_columndoc_t *columndoc,
 
     carbon_strdic_free(dic, rootId);
 
-    const carbon_doc_obj_t *root = carbon_doc_entries_get_root(entries);
+    const struct doc_obj *root = carbon_doc_entries_get_root(entries);
     if (!import_object(&columndoc->columndoc, err, root, dic)) {
         return false;
     }
@@ -272,7 +272,7 @@ static void object_meta_model_free(columndoc_obj_t *columndoc)
     object_array_key_columns_drop(&columndoc->obj_array_props);
 }
 
-bool carbon_columndoc_free(carbon_columndoc_t *doc)
+bool carbon_columndoc_free(struct columndoc *doc)
 {
     NG5_NON_NULL_OR_ERROR(doc);
     object_meta_model_free(&doc->columndoc);
@@ -285,13 +285,13 @@ bool carbon_columndoc_free(carbon_columndoc_t *doc)
     if(!carbon_vec_is_empty((key_vector))) {                                                                           \
         fprintf(file, "\"Keys\": [ ");                                                                                 \
         for (size_t i = 0; i < (key_vector)->num_elems; i++) {                                                         \
-            carbon_string_id_t string_id = *vec_get((key_vector), i, carbon_string_id_t);                    \
+            field_sid_t string_id = *vec_get((key_vector), i, field_sid_t);                    \
             fprintf(file, "%"PRIu64"%s", string_id, i + 1 < (key_vector)->num_elems ? ", " : "");                      \
         }                                                                                                              \
         fprintf(file, "], ");                                                                                          \
         fprintf(file, "\"Keys Decoded\": [ ");                                                                         \
         for (size_t i = 0; i < (key_vector)->num_elems; i++) {                                                         \
-            carbon_string_id_t string_id = *vec_get((key_vector), i, carbon_string_id_t);                    \
+            field_sid_t string_id = *vec_get((key_vector), i, field_sid_t);                    \
             char **encString = carbon_strdic_extract(dic, &string_id, 1);                                              \
             fprintf(file, "\"%s\"%s", encString[0], i + 1 < (key_vector)->num_elems ? ", " : "");                      \
             carbon_strdic_free(dic, encString);                                                                        \
@@ -321,7 +321,7 @@ bool carbon_columndoc_free(carbon_columndoc_t *doc)
     if(!carbon_vec_is_empty((key_vector))) {                                                                           \
         fprintf(file, "\"Values\": [ ");                                                                               \
         for (size_t i = 0; i < (value_vector)->num_elems; i++) {                                                       \
-            carbon_boolean_t value = *vec_get(value_vector, i, carbon_boolean_t);                                  \
+            field_boolean_t value = *vec_get(value_vector, i, field_boolean_t);                                  \
             fprintf(file, "%s%s", value == 0 ? "false" : "true", i + 1 < (value_vector)->num_elems ? ", " : "");       \
         }                                                                                                              \
         fprintf(file, "]");                                                                                            \
@@ -329,7 +329,7 @@ bool carbon_columndoc_free(carbon_columndoc_t *doc)
     fprintf(file, "}, ");                                                                                              \
 }
 
-static void print_primitive_null(FILE *file, const char *type_name, const struct vector ofType(carbon_string_id_t) *key_vector,
+static void print_primitive_null(FILE *file, const char *type_name, const struct vector ofType(field_sid_t) *key_vector,
                                struct strdic *dic)
 {
     PRINT_PRIMITIVE_KEY_PART(file, type_name, key_vector, dic, "")
@@ -338,7 +338,7 @@ static void print_primitive_null(FILE *file, const char *type_name, const struct
 
 
 
-static bool print_primitive_objects(FILE *file, struct err *err, const char *type_name, const struct vector ofType(carbon_string_id_t) *key_vector,
+static bool print_primitive_objects(FILE *file, struct err *err, const char *type_name, const struct vector ofType(field_sid_t) *key_vector,
                                   const struct vector ofType(columndoc_obj_t) *value_vector, struct strdic *dic)
 {
     PRINT_PRIMITIVE_KEY_PART(file, type_name, key_vector, dic, ", ")
@@ -363,13 +363,13 @@ static bool print_primitive_objects(FILE *file, struct err *err, const char *typ
     if(!carbon_vec_is_empty((&key_vector))) {                                                                          \
         fprintf(file, "\"Keys\": [ ");                                                                                 \
         for (size_t i = 0; i < (&key_vector)->num_elems; i++) {                                                        \
-            carbon_string_id_t string_id = *vec_get((&key_vector), i, carbon_string_id_t);                   \
+            field_sid_t string_id = *vec_get((&key_vector), i, field_sid_t);                   \
             fprintf(file, "%"PRIu64"%s", string_id, i + 1 < (&key_vector)->num_elems ? ", " : "");                     \
         }                                                                                                              \
         fprintf(file, "], ");                                                                                          \
         fprintf(file, "\"Keys Decoded\": [ ");                                                                         \
         for (size_t i = 0; i < (&key_vector)->num_elems; i++) {                                                        \
-            carbon_string_id_t string_id = *vec_get((&key_vector), i, carbon_string_id_t);                   \
+            field_sid_t string_id = *vec_get((&key_vector), i, field_sid_t);                   \
             char **encString = carbon_strdic_extract(dic, &string_id, 1);                                              \
             fprintf(file, "\"%s\"%s", encString[0], i + 1 < (&key_vector)->num_elems ? ", " : "");                     \
             carbon_strdic_free(dic, encString);                                                                        \
@@ -400,13 +400,13 @@ static bool print_primitive_objects(FILE *file, struct err *err, const char *typ
     if(!carbon_vec_is_empty((&key_vector))) {                                                                          \
         fprintf(file, "\"Keys\": [ ");                                                                                 \
         for (size_t i = 0; i < (&key_vector)->num_elems; i++) {                                                        \
-            carbon_string_id_t string_id = *vec_get((&key_vector), i, carbon_string_id_t);                   \
+            field_sid_t string_id = *vec_get((&key_vector), i, field_sid_t);                   \
             fprintf(file, "%"PRIu64"%s", string_id, i + 1 < (&key_vector)->num_elems ? ", " : "");                     \
         }                                                                                                              \
         fprintf(file, "], ");                                                                                          \
         fprintf(file, "\"Keys Decoded\": [ ");                                                                         \
         for (size_t i = 0; i < (&key_vector)->num_elems; i++) {                                                        \
-            carbon_string_id_t string_id = *vec_get((&key_vector), i, carbon_string_id_t);                   \
+            field_sid_t string_id = *vec_get((&key_vector), i, field_sid_t);                   \
             char **encString = carbon_strdic_extract(dic, &string_id, 1);                                              \
             fprintf(file, "\"%s\"%s", encString[0], i + 1 < (&key_vector)->num_elems ? ", " : "");                     \
             carbon_strdic_free(dic, encString);                                                                        \
@@ -414,10 +414,10 @@ static bool print_primitive_objects(FILE *file, struct err *err, const char *typ
         fprintf(file, "],");                                                                                           \
         fprintf(file, "\"Values\": [ ");                                                                               \
         for (size_t i = 0; i < (&value_vector)->num_elems; i++) {                                                      \
-            const struct vector ofType(carbon_boolean_t) *values = vec_get(&value_vector, i, struct vector);      \
+            const struct vector ofType(field_boolean_t) *values = vec_get(&value_vector, i, struct vector);      \
             fprintf(file, "[ ");                                                                                       \
             for (size_t j = 0; j < values->num_elems; j++) {                                                           \
-                carbon_boolean_t value = *vec_get(values, j, carbon_boolean_t);                                    \
+                field_boolean_t value = *vec_get(values, j, field_boolean_t);                                    \
                 fprintf(file, "%s%s", value == 0 ? "false" : "true", j + 1 < values->num_elems ? ", " : "");           \
             }                                                                                                          \
             fprintf(file, "]%s ", i + 1 < (&value_vector)->num_elems ? "," : "");                                      \
@@ -427,20 +427,20 @@ static bool print_primitive_objects(FILE *file, struct err *err, const char *typ
     fprintf(file, "}, ");                                                                                              \
 }
 
-static void print_array_null(FILE *file, const char *type_name, const struct vector ofType(carbon_string_id_t) *key_vector,
+static void print_array_null(FILE *file, const char *type_name, const struct vector ofType(field_sid_t) *key_vector,
                            const struct vector ofType(u16) *value_vector, struct strdic *dic)
 {
     fprintf(file, "\"%s\": { ", type_name);
     if(!carbon_vec_is_empty((key_vector))) {
         fprintf(file, "\"Keys\": [ ");
         for (size_t i = 0; i < (key_vector)->num_elems; i++) {
-            carbon_string_id_t string_id = *vec_get((key_vector), i, carbon_string_id_t);
+            field_sid_t string_id = *vec_get((key_vector), i, field_sid_t);
             fprintf(file, "%"PRIu64"%s", string_id, i + 1 < (key_vector)->num_elems ? ", " : "");
         }
         fprintf(file, "], ");
         fprintf(file, "\"Keys Decoded\": [ ");
         for (size_t i = 0; i < (key_vector)->num_elems; i++) {
-            carbon_string_id_t string_id = *vec_get((key_vector), i, carbon_string_id_t);
+            field_sid_t string_id = *vec_get((key_vector), i, field_sid_t);
             char **encString = carbon_strdic_extract(dic, &string_id, 1);
             fprintf(file, "\"%s\"%s", encString[0], i + 1 < (key_vector)->num_elems ? ", " : "");
             carbon_strdic_free(dic, encString);
@@ -456,20 +456,20 @@ static void print_array_null(FILE *file, const char *type_name, const struct vec
     fprintf(file, "}, ");
 }
 
-static void print_array_strings(FILE *file, const char *type_name, const struct vector ofType(carbon_string_id_t) *key_vector,
-                           const struct vector ofType(Vector ofType(carbon_string_id_t)) *value_vector, struct strdic *dic)
+static void print_array_strings(FILE *file, const char *type_name, const struct vector ofType(field_sid_t) *key_vector,
+                           const struct vector ofType(Vector ofType(field_sid_t)) *value_vector, struct strdic *dic)
 {
     fprintf(file, "\"%s\": { ", type_name);
     if(!carbon_vec_is_empty((key_vector))) {
         fprintf(file, "\"Keys\": [ ");
         for (size_t i = 0; i < (key_vector)->num_elems; i++) {
-            carbon_string_id_t string_id = *vec_get((key_vector), i, carbon_string_id_t);
+            field_sid_t string_id = *vec_get((key_vector), i, field_sid_t);
             fprintf(file, "%"PRIu64"%s", string_id, i + 1 < (key_vector)->num_elems ? ", " : "");
         }
         fprintf(file, "], ");
         fprintf(file, "\"Keys Decoded\": [ ");
         for (size_t i = 0; i < (key_vector)->num_elems; i++) {
-            carbon_string_id_t string_id_t = *vec_get((key_vector), i, carbon_string_id_t);
+            field_sid_t string_id_t = *vec_get((key_vector), i, field_sid_t);
             char **encString = carbon_strdic_extract(dic, &string_id_t, 1);
             fprintf(file, "\"%s\"%s", encString[0], i + 1 < (key_vector)->num_elems ? ", " : "");
             carbon_strdic_free(dic, encString);
@@ -477,10 +477,10 @@ static void print_array_strings(FILE *file, const char *type_name, const struct 
         fprintf(file, "],");
         fprintf(file, "\"Values\": [ ");
         for (size_t i = 0; i < (value_vector)->num_elems; i++) {
-            const struct vector ofType(carbon_string_id_t) *values = vec_get(value_vector, i, struct vector);
+            const struct vector ofType(field_sid_t) *values = vec_get(value_vector, i, struct vector);
             fprintf(file, "[");
             for (size_t j = 0; j < values->num_elems; j++) {
-                carbon_string_id_t value = *vec_get(values, j, carbon_string_id_t);
+                field_sid_t value = *vec_get(values, j, field_sid_t);
                 fprintf(file, "%"PRIu64"%s", value, j + 1 < values->num_elems ? ", " : "");
             }
             fprintf(file, "]%s", i + 1 < (value_vector)->num_elems ? ", " : "");
@@ -489,10 +489,10 @@ static void print_array_strings(FILE *file, const char *type_name, const struct 
         fprintf(file, "], ");
         fprintf(file, "\"Values Decoded\": [ ");
         for (size_t i = 0; i < (value_vector)->num_elems; i++) {
-            const struct vector ofType(carbon_string_id_t) *values = vec_get(value_vector, i, struct vector);
+            const struct vector ofType(field_sid_t) *values = vec_get(value_vector, i, struct vector);
             fprintf(file, "[");
             for (size_t j = 0; j < values->num_elems; j++) {
-                carbon_string_id_t value = *vec_get(values, j, carbon_string_id_t);
+                field_sid_t value = *vec_get(values, j, field_sid_t);
 
                 if (NG5_LIKELY(value != NG5_NULL_ENCODED_STRING)) {
                     char **decoded = carbon_strdic_extract(dic, &value, 1);
@@ -511,20 +511,20 @@ static void print_array_strings(FILE *file, const char *type_name, const struct 
     fprintf(file, "}, ");
 }
 
-static void print_primitive_strings(FILE *file, const char *type_name, const struct vector ofType(carbon_string_id_t) *key_vector,
-                                  const struct vector ofType(carbon_string_id_t) *value_vector, struct strdic *dic)
+static void print_primitive_strings(FILE *file, const char *type_name, const struct vector ofType(field_sid_t) *key_vector,
+                                  const struct vector ofType(field_sid_t) *value_vector, struct strdic *dic)
 {
     PRINT_PRIMITIVE_KEY_PART(file, type_name, key_vector, dic, ", ")
     if(!carbon_vec_is_empty((key_vector))) {
         fprintf(file, "\"Values\": [ ");
         for (size_t i = 0; i < (value_vector)->num_elems; i++) {
-            carbon_string_id_t string_id_t = *vec_get(value_vector, i, carbon_string_id_t);
+            field_sid_t string_id_t = *vec_get(value_vector, i, field_sid_t);
             fprintf(file, "%"PRIu64"%s", string_id_t, i + 1 < (value_vector)->num_elems ? ", " : "");
         }
         fprintf(file, "], ");
         fprintf(file, "\"Values Decoded\": [ ");
         for (size_t i = 0; i < (value_vector)->num_elems; i++) {
-            carbon_string_id_t string_id_t = *vec_get(value_vector, i, carbon_string_id_t);
+            field_sid_t string_id_t = *vec_get(value_vector, i, field_sid_t);
             char **values = carbon_strdic_extract(dic, &string_id_t, 1);
             fprintf(file, "\"%s\"%s", *values, i + 1 < (value_vector)->num_elems ? ", " : "");
             carbon_strdic_free(dic, values);
@@ -558,7 +558,7 @@ static bool print_array_objects(FILE *file, struct err *err, const char *type_na
     fprintf(file, "], \"Keys Decoded\": [");
     for (size_t array_key_idx = 0; array_key_idx < key_columns->num_elems; array_key_idx++) {
         const carbon_columndoc_columngroup_t *arrayKeyColumns = vec_get(key_columns, array_key_idx, carbon_columndoc_columngroup_t);
-        carbon_string_id_t encKeyName = arrayKeyColumns->key;
+        field_sid_t encKeyName = arrayKeyColumns->key;
         char **decKeyName = carbon_strdic_extract(dic, &encKeyName, 1);
         fprintf(file, "\"%s\"%s", *decKeyName, array_key_idx + 1 < key_columns->num_elems ? ", " : "");
         carbon_strdic_free(dic, decKeyName);
@@ -601,37 +601,37 @@ static bool print_array_objects(FILE *file, struct err *err, const char *type_na
                     fprintf(file, "%s", column->num_elems > 1 ? "]" : "");
                 } break;
                 case field_int8:
-                    PRINT_COLUMN(file, columnTable, array_idx, carbon_i8, "%d")
+                    PRINT_COLUMN(file, columnTable, array_idx, field_i8_t, "%d")
                     break;
                 case field_int16:
-                    PRINT_COLUMN(file, columnTable, array_idx, carbon_i16, "%d")
+                    PRINT_COLUMN(file, columnTable, array_idx, field_i16_t, "%d")
                     break;
                 case field_int32:
-                    PRINT_COLUMN(file, columnTable, array_idx, carbon_i32, "%d")
+                    PRINT_COLUMN(file, columnTable, array_idx, field_i32_t, "%d")
                     break;
                 case field_int64:
-                    PRINT_COLUMN(file, columnTable, array_idx, carbon_i64, "%" PRIi64)
+                    PRINT_COLUMN(file, columnTable, array_idx, field_i64_t, "%" PRIi64)
                     break;
                 case field_uint8:
-                    PRINT_COLUMN(file, columnTable, array_idx, carbon_u8, "%d")
+                    PRINT_COLUMN(file, columnTable, array_idx, field_u8_t, "%d")
                     break;
                 case field_uint16:
-                    PRINT_COLUMN(file, columnTable, array_idx, carbon_u16, "%d")
+                    PRINT_COLUMN(file, columnTable, array_idx, field_u16_t, "%d")
                     break;
                 case field_uint32:
-                    PRINT_COLUMN(file, columnTable, array_idx, carbon_u32, "%d")
+                    PRINT_COLUMN(file, columnTable, array_idx, field_u32_t, "%d")
                     break;
                 case field_uint64:
-                    PRINT_COLUMN(file, columnTable, array_idx, carbon_u64, "%" PRIu64)
+                    PRINT_COLUMN(file, columnTable, array_idx, field_u64_t, "%" PRIu64)
                     break;
                 case field_float:
-                    PRINT_COLUMN(file, columnTable, array_idx, carbon_number_t , "%f")
+                    PRINT_COLUMN(file, columnTable, array_idx, field_number_t , "%f")
                     break;
                 case field_string: {
                     const struct vector *column = vec_get(&columnTable->values, array_idx, struct vector);
                     fprintf(file, "%s", column->num_elems > 1 ? "[" : "");
                     for (size_t i = 0; i < column->num_elems; i++) {
-                        carbon_string_id_t encodedString = *vec_get(column, i, carbon_string_id_t);
+                        field_sid_t encodedString = *vec_get(column, i, field_sid_t);
                         char **decodedString = carbon_strdic_extract(dic, &encodedString, 1);
                         fprintf(file, "{\"Encoded\": %"PRIu64", \"Decoded\": \"%s\"}", encodedString, *decodedString);
                         fprintf(file, "%s", i + 1 < column->num_elems ? ", " : "");
@@ -684,15 +684,15 @@ static bool print_object(FILE *file, struct err *err, const columndoc_obj_t *obj
     fprintf(file, "\"Pairs\": { ");
         fprintf(file, "\"Primitives\": { ");
             PRINT_PRIMITIVE_BOOLEAN_COLUMN(file, "Boolean", &object->bool_prop_keys, &object->bool_prop_vals, dic)
-            PRINT_PRIMITIVE_COLUMN(file, "UInt8", &object->uint8_prop_keys, &object->uint8_prop_vals, &object->uint8_val_idxs, dic, carbon_u8, "%d")
-            PRINT_PRIMITIVE_COLUMN(file, "UInt16", &object->uint16_prop_keys, &object->uint16_prop_vals, &object->uint16_val_idxs, dic, carbon_u16, "%d")
-            PRINT_PRIMITIVE_COLUMN(file, "UInt32", &object->uin32_prop_keys, &object->uint32_prop_vals, &object->uint32_val_idxs, dic, carbon_u32, "%d")
-            PRINT_PRIMITIVE_COLUMN(file, "UInt64", &object->uint64_prop_keys, &object->uint64_prop_vals, &object->uint64_val_idxs, dic, carbon_u64, "%" PRIu64)
-            PRINT_PRIMITIVE_COLUMN(file, "Int8", &object->int8_prop_keys, &object->int8_prop_vals, &object->int8_val_idxs, dic, carbon_i8, "%d")
-            PRINT_PRIMITIVE_COLUMN(file, "Int16", &object->int16_prop_keys, &object->int16_prop_vals, &object->int16_val_idxs, dic, carbon_i16, "%d")
-            PRINT_PRIMITIVE_COLUMN(file, "Int32", &object->int32_prop_keys, &object->int32_prop_vals, &object->int32_val_idxs, dic, carbon_i32, "%d")
-            PRINT_PRIMITIVE_COLUMN(file, "Int64", &object->int64_prop_keys, &object->int64_prop_vals, &object->int64_val_idxs, dic, carbon_i64, "%" PRIi64)
-            PRINT_PRIMITIVE_COLUMN(file, "Real", &object->float_prop_keys, &object->float_prop_vals, &object->float_val_idxs, dic, carbon_number_t, "%f")
+            PRINT_PRIMITIVE_COLUMN(file, "UInt8", &object->uint8_prop_keys, &object->uint8_prop_vals, &object->uint8_val_idxs, dic, field_u8_t, "%d")
+            PRINT_PRIMITIVE_COLUMN(file, "UInt16", &object->uint16_prop_keys, &object->uint16_prop_vals, &object->uint16_val_idxs, dic, field_u16_t, "%d")
+            PRINT_PRIMITIVE_COLUMN(file, "UInt32", &object->uin32_prop_keys, &object->uint32_prop_vals, &object->uint32_val_idxs, dic, field_u32_t, "%d")
+            PRINT_PRIMITIVE_COLUMN(file, "UInt64", &object->uint64_prop_keys, &object->uint64_prop_vals, &object->uint64_val_idxs, dic, field_u64_t, "%" PRIu64)
+            PRINT_PRIMITIVE_COLUMN(file, "Int8", &object->int8_prop_keys, &object->int8_prop_vals, &object->int8_val_idxs, dic, field_i8_t, "%d")
+            PRINT_PRIMITIVE_COLUMN(file, "Int16", &object->int16_prop_keys, &object->int16_prop_vals, &object->int16_val_idxs, dic, field_i16_t, "%d")
+            PRINT_PRIMITIVE_COLUMN(file, "Int32", &object->int32_prop_keys, &object->int32_prop_vals, &object->int32_val_idxs, dic, field_i32_t, "%d")
+            PRINT_PRIMITIVE_COLUMN(file, "Int64", &object->int64_prop_keys, &object->int64_prop_vals, &object->int64_val_idxs, dic, field_i64_t, "%" PRIi64)
+            PRINT_PRIMITIVE_COLUMN(file, "Real", &object->float_prop_keys, &object->float_prop_vals, &object->float_val_idxs, dic, field_number_t, "%f")
             print_primitive_strings(file, "Strings", &object->string_prop_keys, &object->string_prop_vals, dic);
             print_primitive_null(file, "Null", &object->null_prop_keys, dic);
             if(print_primitive_objects(file, err, "Objects", &object->obj_prop_keys, &object->obj_prop_vals, dic)) {
@@ -701,15 +701,15 @@ static bool print_object(FILE *file, struct err *err, const columndoc_obj_t *obj
             fprintf(file, "}, ");
         fprintf(file, "\"Arrays\": { ");
             PRINT_BOOLEAN_ARRAY(file, "Boolean", object->bool_array_prop_keys, object->bool_array_prop_vals);
-            PRINT_ARRAY(file, "UInt8", object->uint8_array_prop_keys, object->uint8_array_prop_vals, carbon_u8, "%d", (value != NG5_NULL_UINT8));
-            PRINT_ARRAY(file, "UInt16", object->uint16_array_prop_keys, object->uint16_array_prop_vals, carbon_u16, "%d", (value !=NG5_NULL_UINT16));
-            PRINT_ARRAY(file, "UInt32", object->uint32_array_prop_keys, object->uint32_array_prop_vals, carbon_u32, "%d", (value !=NG5_NULL_UINT32));
-            PRINT_ARRAY(file, "UInt64", object->uint64_array_prop_keys, object->ui64_array_prop_vals, carbon_u64, "%" PRIu64, (value !=NG5_NULL_UINT64));
-            PRINT_ARRAY(file, "Int8", object->int8_array_prop_keys, object->int8_array_prop_vals, carbon_i8, "%d", (value !=NG5_NULL_INT8));
-            PRINT_ARRAY(file, "Int16", object->int16_array_prop_keys, object->int16_array_prop_vals, carbon_i16, "%d", (value !=NG5_NULL_INT16));
-            PRINT_ARRAY(file, "Int32", object->int32_array_prop_keys, object->int32_array_prop_vals, carbon_i32, "%d", (value !=NG5_NULL_INT32));
-            PRINT_ARRAY(file, "Int64", object->int64_array_prop_keys, object->int64_array_prop_vals, carbon_i64, "%" PRIi64, (value !=NG5_NULL_INT64));
-            PRINT_ARRAY(file, "Real", object->float_array_prop_keys, object->float_array_prop_vals, carbon_number_t, "%f", (!isnan(value)));
+            PRINT_ARRAY(file, "UInt8", object->uint8_array_prop_keys, object->uint8_array_prop_vals, field_u8_t, "%d", (value != NG5_NULL_UINT8));
+            PRINT_ARRAY(file, "UInt16", object->uint16_array_prop_keys, object->uint16_array_prop_vals, field_u16_t, "%d", (value !=NG5_NULL_UINT16));
+            PRINT_ARRAY(file, "UInt32", object->uint32_array_prop_keys, object->uint32_array_prop_vals, field_u32_t, "%d", (value !=NG5_NULL_UINT32));
+            PRINT_ARRAY(file, "UInt64", object->uint64_array_prop_keys, object->ui64_array_prop_vals, field_u64_t, "%" PRIu64, (value !=NG5_NULL_UINT64));
+            PRINT_ARRAY(file, "Int8", object->int8_array_prop_keys, object->int8_array_prop_vals, field_i8_t, "%d", (value !=NG5_NULL_INT8));
+            PRINT_ARRAY(file, "Int16", object->int16_array_prop_keys, object->int16_array_prop_vals, field_i16_t, "%d", (value !=NG5_NULL_INT16));
+            PRINT_ARRAY(file, "Int32", object->int32_array_prop_keys, object->int32_array_prop_vals, field_i32_t, "%d", (value !=NG5_NULL_INT32));
+            PRINT_ARRAY(file, "Int64", object->int64_array_prop_keys, object->int64_array_prop_vals, field_i64_t, "%" PRIi64, (value !=NG5_NULL_INT64));
+            PRINT_ARRAY(file, "Real", object->float_array_prop_keys, object->float_array_prop_vals, field_number_t, "%f", (!isnan(value)));
             print_array_strings(file, "Strings", &object->string_array_prop_keys, &object->string_array_prop_vals, dic);
             print_array_null(file, "Null", &object->null_array_prop_keys, &object->null_array_prop_vals, dic);
             if(!print_array_objects(file, err, "Objects", &object->obj_array_props, dic)) {
@@ -722,14 +722,14 @@ static bool print_object(FILE *file, struct err *err, const columndoc_obj_t *obj
     return true;
 }
 
-bool carbon_columndoc_print(FILE *file, carbon_columndoc_t *doc)
+bool carbon_columndoc_print(FILE *file, struct columndoc *doc)
 {
     NG5_NON_NULL_OR_ERROR(file)
     NG5_NON_NULL_OR_ERROR(doc)
     return print_object(file, &doc->err, &doc->columndoc, doc->dic);
 }
 
-bool carbon_columndoc_drop(carbon_columndoc_t *doc)
+bool carbon_columndoc_drop(struct columndoc *doc)
 {
     NG5_UNUSED(doc);
     NG5_NOT_IMPLEMENTED
@@ -797,7 +797,7 @@ static const char *get_type_name(struct err *err, field_e type)
 }
 
 static carbon_columndoc_column_t *object_array_key_columns_find_or_new(struct vector ofType(carbon_columndoc_columngroup_t) *columns,
-                                                            carbon_string_id_t array_key, carbon_string_id_t nested_object_entry_key,
+                                                            field_sid_t array_key, field_sid_t nested_object_entry_key,
                                                             field_e nested_object_entry_type)
 {
     carbon_columndoc_columngroup_t *key_columns;
@@ -874,7 +874,7 @@ static bool object_array_key_column_push(carbon_columndoc_column_t *col, struct 
     case field_string: {
         assert(!is_null_by_def);
         char **strings = vec_all(&entry->values, char *);
-        carbon_string_id_t *string_ids;
+        field_sid_t *string_ids;
         carbon_strdic_locate_fast(&string_ids, dic, (char *const *) strings, num_elements);
         carbon_vec_push(values_for_entry, string_ids, num_elements);
         carbon_strdic_free(dic, string_ids);
@@ -883,14 +883,14 @@ static bool object_array_key_column_push(carbon_columndoc_column_t *col, struct 
     case field_object:
         assert(!is_null_by_def);
 
-        carbon_string_id_t *array_key;
+        field_sid_t *array_key;
         carbon_strdic_locate_fast(&array_key, dic, (char *const *) &entry->key, 1);
 
         for (size_t array_idx = 0; array_idx < num_elements; array_idx++)
         {
             columndoc_obj_t *nested_object = VECTOR_NEW_AND_GET(values_for_entry, columndoc_obj_t);
             setup_object(nested_object, model->parent, *array_key, array_idx);
-            if (!import_object(nested_object, err, vec_get(&entry->values, array_idx, carbon_doc_obj_t), dic)) {
+            if (!import_object(nested_object, err, vec_get(&entry->values, array_idx, struct doc_obj), dic)) {
                 return false;
             }
         }
@@ -903,50 +903,50 @@ static bool object_array_key_column_push(carbon_columndoc_column_t *col, struct 
     return true;
 }
 
-static void setup_object(columndoc_obj_t *model, carbon_columndoc_t *parent, carbon_string_id_t key, size_t idx)
+static void setup_object(columndoc_obj_t *model, struct columndoc *parent, field_sid_t key, size_t idx)
 {
     model->parent = parent;
     model->parent_key = key;
     model->index = idx;
 
-    carbon_vec_create(&model->bool_prop_keys, NULL, sizeof(carbon_string_id_t), 10);
-    carbon_vec_create(&model->int8_prop_keys, NULL, sizeof(carbon_string_id_t), 10);
-    carbon_vec_create(&model->int16_prop_keys, NULL, sizeof(carbon_string_id_t), 10);
-    carbon_vec_create(&model->int32_prop_keys, NULL, sizeof(carbon_string_id_t), 10);
-    carbon_vec_create(&model->int64_prop_keys, NULL, sizeof(carbon_string_id_t), 10);
-    carbon_vec_create(&model->uint8_prop_keys, NULL, sizeof(carbon_string_id_t), 10);
-    carbon_vec_create(&model->uint16_prop_keys, NULL, sizeof(carbon_string_id_t), 10);
-    carbon_vec_create(&model->uin32_prop_keys, NULL, sizeof(carbon_string_id_t), 10);
-    carbon_vec_create(&model->uint64_prop_keys, NULL, sizeof(carbon_string_id_t), 10);
-    carbon_vec_create(&model->string_prop_keys, NULL, sizeof(carbon_string_id_t), 50);
-    carbon_vec_create(&model->float_prop_keys, NULL, sizeof(carbon_string_id_t), 10);
-    carbon_vec_create(&model->null_prop_keys, NULL, sizeof(carbon_string_id_t), 10);
-    carbon_vec_create(&model->obj_prop_keys, NULL, sizeof(carbon_string_id_t), 10);
+    carbon_vec_create(&model->bool_prop_keys, NULL, sizeof(field_sid_t), 10);
+    carbon_vec_create(&model->int8_prop_keys, NULL, sizeof(field_sid_t), 10);
+    carbon_vec_create(&model->int16_prop_keys, NULL, sizeof(field_sid_t), 10);
+    carbon_vec_create(&model->int32_prop_keys, NULL, sizeof(field_sid_t), 10);
+    carbon_vec_create(&model->int64_prop_keys, NULL, sizeof(field_sid_t), 10);
+    carbon_vec_create(&model->uint8_prop_keys, NULL, sizeof(field_sid_t), 10);
+    carbon_vec_create(&model->uint16_prop_keys, NULL, sizeof(field_sid_t), 10);
+    carbon_vec_create(&model->uin32_prop_keys, NULL, sizeof(field_sid_t), 10);
+    carbon_vec_create(&model->uint64_prop_keys, NULL, sizeof(field_sid_t), 10);
+    carbon_vec_create(&model->string_prop_keys, NULL, sizeof(field_sid_t), 50);
+    carbon_vec_create(&model->float_prop_keys, NULL, sizeof(field_sid_t), 10);
+    carbon_vec_create(&model->null_prop_keys, NULL, sizeof(field_sid_t), 10);
+    carbon_vec_create(&model->obj_prop_keys, NULL, sizeof(field_sid_t), 10);
 
-    carbon_vec_create(&model->bool_array_prop_keys, NULL, sizeof(carbon_string_id_t), 10);
-    carbon_vec_create(&model->int8_array_prop_keys, NULL, sizeof(carbon_string_id_t), 10);
-    carbon_vec_create(&model->int16_array_prop_keys, NULL, sizeof(carbon_string_id_t), 10);
-    carbon_vec_create(&model->int32_array_prop_keys, NULL, sizeof(carbon_string_id_t), 10);
-    carbon_vec_create(&model->int64_array_prop_keys, NULL, sizeof(carbon_string_id_t), 10);
-    carbon_vec_create(&model->uint8_array_prop_keys, NULL, sizeof(carbon_string_id_t), 10);
-    carbon_vec_create(&model->uint16_array_prop_keys, NULL, sizeof(carbon_string_id_t), 10);
-    carbon_vec_create(&model->uint32_array_prop_keys, NULL, sizeof(carbon_string_id_t), 10);
-    carbon_vec_create(&model->uint64_array_prop_keys, NULL, sizeof(carbon_string_id_t), 10);
-    carbon_vec_create(&model->string_array_prop_keys, NULL, sizeof(carbon_string_id_t), 50);
-    carbon_vec_create(&model->float_array_prop_keys, NULL, sizeof(carbon_string_id_t), 10);
-    carbon_vec_create(&model->null_array_prop_keys, NULL, sizeof(carbon_string_id_t), 10);
+    carbon_vec_create(&model->bool_array_prop_keys, NULL, sizeof(field_sid_t), 10);
+    carbon_vec_create(&model->int8_array_prop_keys, NULL, sizeof(field_sid_t), 10);
+    carbon_vec_create(&model->int16_array_prop_keys, NULL, sizeof(field_sid_t), 10);
+    carbon_vec_create(&model->int32_array_prop_keys, NULL, sizeof(field_sid_t), 10);
+    carbon_vec_create(&model->int64_array_prop_keys, NULL, sizeof(field_sid_t), 10);
+    carbon_vec_create(&model->uint8_array_prop_keys, NULL, sizeof(field_sid_t), 10);
+    carbon_vec_create(&model->uint16_array_prop_keys, NULL, sizeof(field_sid_t), 10);
+    carbon_vec_create(&model->uint32_array_prop_keys, NULL, sizeof(field_sid_t), 10);
+    carbon_vec_create(&model->uint64_array_prop_keys, NULL, sizeof(field_sid_t), 10);
+    carbon_vec_create(&model->string_array_prop_keys, NULL, sizeof(field_sid_t), 50);
+    carbon_vec_create(&model->float_array_prop_keys, NULL, sizeof(field_sid_t), 10);
+    carbon_vec_create(&model->null_array_prop_keys, NULL, sizeof(field_sid_t), 10);
 
-    carbon_vec_create(&model->bool_prop_vals, NULL, sizeof(carbon_boolean_t), 10);
-    carbon_vec_create(&model->int8_prop_vals, NULL, sizeof(carbon_i8), 10);
-    carbon_vec_create(&model->int16_prop_vals, NULL, sizeof(carbon_i16), 10);
-    carbon_vec_create(&model->int32_prop_vals, NULL, sizeof(carbon_i32), 10);
-    carbon_vec_create(&model->int64_prop_vals, NULL, sizeof(carbon_i64), 10);
-    carbon_vec_create(&model->uint8_prop_vals, NULL, sizeof(carbon_u8), 10);
-    carbon_vec_create(&model->uint16_prop_vals, NULL, sizeof(carbon_u16), 10);
-    carbon_vec_create(&model->uint32_prop_vals, NULL, sizeof(carbon_u32), 10);
-    carbon_vec_create(&model->uint64_prop_vals, NULL, sizeof(carbon_u64), 10);
-    carbon_vec_create(&model->float_prop_vals, NULL, sizeof(carbon_number_t), 10);
-    carbon_vec_create(&model->string_prop_vals, NULL, sizeof(carbon_string_id_t), 50);
+    carbon_vec_create(&model->bool_prop_vals, NULL, sizeof(field_boolean_t), 10);
+    carbon_vec_create(&model->int8_prop_vals, NULL, sizeof(field_i8_t), 10);
+    carbon_vec_create(&model->int16_prop_vals, NULL, sizeof(field_i16_t), 10);
+    carbon_vec_create(&model->int32_prop_vals, NULL, sizeof(field_i32_t), 10);
+    carbon_vec_create(&model->int64_prop_vals, NULL, sizeof(field_i64_t), 10);
+    carbon_vec_create(&model->uint8_prop_vals, NULL, sizeof(field_u8_t), 10);
+    carbon_vec_create(&model->uint16_prop_vals, NULL, sizeof(field_u16_t), 10);
+    carbon_vec_create(&model->uint32_prop_vals, NULL, sizeof(field_u32_t), 10);
+    carbon_vec_create(&model->uint64_prop_vals, NULL, sizeof(field_u64_t), 10);
+    carbon_vec_create(&model->float_prop_vals, NULL, sizeof(field_number_t), 10);
+    carbon_vec_create(&model->string_prop_vals, NULL, sizeof(field_sid_t), 50);
 
     carbon_vec_create(&model->bool_array_prop_vals, NULL, sizeof(struct vector), 10);
     carbon_vec_create(&model->int8_array_prop_vals, NULL, sizeof(struct vector), 10);
@@ -991,7 +991,7 @@ static void setup_object(columndoc_obj_t *model, carbon_columndoc_t *parent, car
 }
 
 static bool object_put_primitive(columndoc_obj_t *columndoc, struct err *err, const struct doc_entries *entry, struct strdic *dic,
-                               const carbon_string_id_t *key_id)
+                               const field_sid_t *key_id)
 {
     switch(entry->type) {
     case field_null:
@@ -1038,7 +1038,7 @@ static bool object_put_primitive(columndoc_obj_t *columndoc, struct err *err, co
         carbon_vec_push(&columndoc->float_prop_vals, entry->values.base, 1);
         break;
     case field_string: {
-        carbon_string_id_t *value;
+        field_sid_t *value;
         carbon_strdic_locate_fast(&value, dic, (char *const *) entry->values.base, 1);
         carbon_vec_push(&columndoc->string_prop_keys, key_id, 1);
         carbon_vec_push(&columndoc->string_prop_vals, value, 1);
@@ -1051,7 +1051,7 @@ static bool object_put_primitive(columndoc_obj_t *columndoc, struct err *err, co
         carbon_vec_push(&columndoc->obj_prop_vals, &template, 1);
         nested_object = vec_get(&columndoc->obj_prop_vals, position, columndoc_obj_t);
         setup_object(nested_object, columndoc->parent, *key_id, 0);
-        if (!import_object(nested_object, err, vec_get(&entry->values, 0, carbon_doc_obj_t), dic)) {
+        if (!import_object(nested_object, err, vec_get(&entry->values, 0, struct doc_obj), dic)) {
             return false;
         }
     } break;
@@ -1062,7 +1062,7 @@ static bool object_put_primitive(columndoc_obj_t *columndoc, struct err *err, co
 }
 
 static void object_push_array(struct vector ofType(Vector ofType(<T>)) *values, size_t TSize, u32 num_elements,
-                            const void *data, carbon_string_id_t key_id, struct vector ofType(carbon_string_id_t) *key_vector)
+                            const void *data, field_sid_t key_id, struct vector ofType(field_sid_t) *key_vector)
 {
     struct vector ofType(<T>) template, *vector;
     size_t idx = carbon_vec_length(values);
@@ -1073,7 +1073,7 @@ static void object_push_array(struct vector ofType(Vector ofType(<T>)) *values, 
     carbon_vec_push(key_vector, &key_id, 1);
 }
 
-static bool object_put_array(columndoc_obj_t *model, struct err *err, const struct doc_entries *entry, struct strdic *dic, const carbon_string_id_t *key_id)
+static bool object_put_array(columndoc_obj_t *model, struct err *err, const struct doc_entries *entry, struct strdic *dic, const field_sid_t *key_id)
 {
     // TODO: format for array, sort by keys, sort by values!
     NG5_UNUSED(dic);
@@ -1086,55 +1086,55 @@ static bool object_put_array(columndoc_obj_t *model, struct err *err, const stru
     }
         break;
     case field_bool:
-        object_push_array(&model->bool_array_prop_vals, sizeof(carbon_boolean_t), num_elements, entry->values.base, *key_id,
+        object_push_array(&model->bool_array_prop_vals, sizeof(field_boolean_t), num_elements, entry->values.base, *key_id,
                         &model->bool_array_prop_keys);
         break;
     case field_int8:
-        object_push_array(&model->int8_array_prop_vals, sizeof(carbon_i8), num_elements, entry->values.base, *key_id,
+        object_push_array(&model->int8_array_prop_vals, sizeof(field_i8_t), num_elements, entry->values.base, *key_id,
                         &model->int8_array_prop_keys);
         break;
     case field_int16:
-        object_push_array(&model->int16_array_prop_vals, sizeof(carbon_i16), num_elements, entry->values.base, *key_id,
+        object_push_array(&model->int16_array_prop_vals, sizeof(field_i16_t), num_elements, entry->values.base, *key_id,
                         &model->int16_array_prop_keys);
         break;
     case field_int32:
-        object_push_array(&model->int32_array_prop_vals, sizeof(carbon_i32), num_elements, entry->values.base, *key_id,
+        object_push_array(&model->int32_array_prop_vals, sizeof(field_i32_t), num_elements, entry->values.base, *key_id,
                         &model->int32_array_prop_keys);
         break;
     case field_int64:
-        object_push_array(&model->int64_array_prop_vals, sizeof(carbon_i64), num_elements, entry->values.base, *key_id,
+        object_push_array(&model->int64_array_prop_vals, sizeof(field_i64_t), num_elements, entry->values.base, *key_id,
                         &model->int64_array_prop_keys);
         break;
     case field_uint8:
-        object_push_array(&model->uint8_array_prop_vals, sizeof(carbon_u8), num_elements, entry->values.base, *key_id,
+        object_push_array(&model->uint8_array_prop_vals, sizeof(field_u8_t), num_elements, entry->values.base, *key_id,
                         &model->uint8_array_prop_keys);
         break;
     case field_uint16:
         object_push_array(&model->uint16_array_prop_vals,
-                        sizeof(carbon_u16),
+                        sizeof(field_u16_t),
                         num_elements,
                         entry->values.base,
                         *key_id,
                         &model->uint16_array_prop_keys);
         break;
     case field_uint32:
-        object_push_array(&model->uint32_array_prop_vals, sizeof(carbon_u32), num_elements, entry->values.base, *key_id,
+        object_push_array(&model->uint32_array_prop_vals, sizeof(field_u32_t), num_elements, entry->values.base, *key_id,
                         &model->uint32_array_prop_keys);
         break;
     case field_uint64:
-        object_push_array(&model->ui64_array_prop_vals, sizeof(carbon_u64), num_elements, entry->values.base, *key_id,
+        object_push_array(&model->ui64_array_prop_vals, sizeof(field_u64_t), num_elements, entry->values.base, *key_id,
                         &model->uint64_array_prop_keys);
         break;
     case field_float:
-        object_push_array(&model->float_array_prop_vals, sizeof(carbon_number_t), num_elements, entry->values.base, *key_id,
+        object_push_array(&model->float_array_prop_vals, sizeof(field_number_t), num_elements, entry->values.base, *key_id,
                         &model->float_array_prop_keys);
         break;
     case field_string: {
         const char **strings = vec_all(&entry->values, const char *);
-        carbon_string_id_t *string_ids;
+        field_sid_t *string_ids;
         carbon_strdic_locate_fast(&string_ids, dic, (char *const *) strings, num_elements);
         object_push_array(&model->string_array_prop_vals,
-                        sizeof(carbon_string_id_t),
+                        sizeof(field_sid_t),
                         num_elements,
                         string_ids,
                         *key_id,
@@ -1143,9 +1143,9 @@ static bool object_put_array(columndoc_obj_t *model, struct err *err, const stru
     }
         break;
     case field_object: {
-        carbon_string_id_t *nested_object_key_name;
+        field_sid_t *nested_object_key_name;
         for (u32 array_idx = 0; array_idx < num_elements; array_idx++) {
-            const carbon_doc_obj_t *object = vec_get(&entry->values, array_idx, carbon_doc_obj_t);
+            const struct doc_obj *object = vec_get(&entry->values, array_idx, struct doc_obj);
             for (size_t pair_idx = 0; pair_idx < object->entries.num_elems; pair_idx++) {
                 const struct doc_entries *pair = vec_get(&object->entries, pair_idx, struct doc_entries);
                 carbon_strdic_locate_fast(&nested_object_key_name, dic, (char *const *) &pair->key, 1);
@@ -1169,7 +1169,7 @@ static bool object_put_array(columndoc_obj_t *model, struct err *err, const stru
 
 static bool object_put(columndoc_obj_t *model, struct err *err, const struct doc_entries *entry, struct strdic *dic)
 {
-    carbon_string_id_t *key_id;
+    field_sid_t *key_id;
     enum EntryType { ENTRY_TYPE_NULL, ENTRY_TYPE_PRIMITIVE, ENTRY_TYPE_ARRAY } entryType;
 
     carbon_strdic_locate_fast(&key_id, dic, (char *const *) &entry->key, 1);
@@ -1200,7 +1200,7 @@ static bool object_put(columndoc_obj_t *model, struct err *err, const struct doc
     return true;
 }
 
-static bool import_object(columndoc_obj_t *dst, struct err *err, const carbon_doc_obj_t *doc, struct strdic *dic)
+static bool import_object(columndoc_obj_t *dst, struct err *err, const struct doc_obj *doc, struct strdic *dic)
 {
     const struct vector ofType(struct doc_entries) *objectEntries = carbon_doc_get_entries(doc);
     const struct doc_entries *entries = vec_all(objectEntries, struct doc_entries);

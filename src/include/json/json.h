@@ -180,24 +180,24 @@ struct json_number {
         } value;
 };
 
-NG5_EXPORT(bool) carbon_json_tokenizer_init(struct json_tokenizer *tokenizer, const char *input);
+NG5_EXPORT(bool) json_tokenizer_init(struct json_tokenizer *tokenizer, const char *input);
 
-NG5_EXPORT(const struct json_token *)carbon_json_tokenizer_next(struct json_tokenizer *tokenizer);
+NG5_EXPORT(const struct json_token *) json_tokenizer_next(struct json_tokenizer *tokenizer);
 
-NG5_EXPORT(void) carbon_json_token_dup(struct json_token *dst, const struct json_token *src);
+NG5_EXPORT(void) json_token_dup(struct json_token *dst, const struct json_token *src);
 
-NG5_EXPORT(void) carbon_json_token_print(FILE *file, const struct json_token *token);
+NG5_EXPORT(void) json_token_print(FILE *file, const struct json_token *token);
 
-NG5_EXPORT(bool) carbon_json_parser_create(struct json_parser *parser, struct doc_bulk *partition);
+NG5_EXPORT(bool) json_parser_create(struct json_parser *parser, struct doc_bulk *partition);
 
-NG5_EXPORT(bool) carbon_json_parse(struct json *json, struct json_err *error_desc, struct json_parser *parser,
+NG5_EXPORT(bool) json_parse(struct json *json, struct json_err *error_desc, struct json_parser *parser,
         const char *input);
 
-NG5_EXPORT(bool) carbon_json_test_doc(struct err *err, struct json *json);
+NG5_EXPORT(bool) json_test(struct err *err, struct json *json);
 
-NG5_EXPORT(bool) carbon_json_drop(struct json *json);
+NG5_EXPORT(bool) json_drop(struct json *json);
 
-NG5_EXPORT(bool) carbon_json_print(FILE *file, struct json *json);
+NG5_EXPORT(bool) json_print(FILE *file, struct json *json);
 
 NG5_DEFINE_GET_ERROR_FUNCTION(json, struct json, json);
 

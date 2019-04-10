@@ -43,14 +43,14 @@ typedef struct sync_extra {
 } sync_exta;
 
 static bool this_drop(struct strdic *self);
-static bool this_insert(struct strdic *self, carbon_string_id_t **out, char *const *strings, size_t num_strings,
+static bool this_insert(struct strdic *self, field_sid_t **out, char *const *strings, size_t num_strings,
                         size_t num_threads);
-static bool this_remove(struct strdic *self, carbon_string_id_t *strings, size_t num_strings);
-static bool this_locate_safe(struct strdic *self, carbon_string_id_t **out, bool **found_mask,
+static bool this_remove(struct strdic *self, field_sid_t *strings, size_t num_strings);
+static bool this_locate_safe(struct strdic *self, field_sid_t **out, bool **found_mask,
                           size_t *num_not_found, char *const *keys, size_t num_keys);
-static bool this_locate_fast(struct strdic *self, carbon_string_id_t **out, char *const *keys,
+static bool this_locate_fast(struct strdic *self, field_sid_t **out, char *const *keys,
                           size_t num_keys);
-static char **this_extract(struct strdic *self, const carbon_string_id_t *ids, size_t num_ids);
+static char **this_extract(struct strdic *self, const field_sid_t *ids, size_t num_ids);
 static bool this_free(struct strdic *self, void *ptr);
 
 static bool this_reset_counters(struct strdic *self);
@@ -59,7 +59,7 @@ static bool this_counters(struct strdic *self, struct strhash_counters *counters
 static bool this_num_distinct(struct strdic *self, size_t *num);
 
 static bool this_get_contents(struct strdic *self, struct vector ofType (char *) * strings,
-                           struct vector ofType(carbon_string_id_t) * string_ids);
+                           struct vector ofType(field_sid_t) * string_ids);
 
 static void lock(struct strdic *self);
 static void unlock(struct strdic *self);
@@ -68,8 +68,8 @@ static int create_extra(struct strdic *self, size_t capacity, size_t num_index_b
                        size_t num_index_bucket_cap, size_t num_threads);
 static struct sync_extra *this_extra(struct strdic *self);
 
-static int freelist_pop(carbon_string_id_t *out, struct strdic *self);
-static int freelist_push(struct strdic *self, carbon_string_id_t idx);
+static int freelist_pop(field_sid_t *out, struct strdic *self);
+static int freelist_push(struct strdic *self, field_sid_t idx);
 
 int carbon_strdic_create_sync(struct strdic *dic, size_t capacity, size_t num_indx_buckets,
                               size_t num_index_bucket_cap, size_t num_threads, const struct allocator *alloc)
@@ -116,7 +116,7 @@ static int create_extra(struct strdic *self, size_t capacity, size_t num_index_b
     struct sync_extra *extra = this_extra(self);
     carbon_spinlock_init(&extra->lock);
     NG5_CHECK_SUCCESS(carbon_vec_create(&extra->contents, &self->alloc, sizeof(struct entry), capacity));
-    NG5_CHECK_SUCCESS(carbon_vec_create(&extra->freelist, &self->alloc, sizeof(carbon_string_id_t), capacity));
+    NG5_CHECK_SUCCESS(carbon_vec_create(&extra->freelist, &self->alloc, sizeof(field_sid_t), capacity));
     struct entry empty = {
         .str    = NULL,
         .in_use = false
@@ -145,7 +145,7 @@ static struct sync_extra *this_extra(struct strdic *self)
     return (struct sync_extra *) self->extra;
 }
 
-static int freelist_pop(carbon_string_id_t *out, struct strdic *self)
+static int freelist_pop(field_sid_t *out, struct strdic *self)
 {
     assert (self->tag == SYNC);
     struct sync_extra *extra = this_extra(self);
@@ -164,11 +164,11 @@ static int freelist_pop(carbon_string_id_t *out, struct strdic *self)
             NG5_CHECK_SUCCESS(carbon_vec_push(&extra->contents, &empty, 1));
         }
     }
-    *out = *(carbon_string_id_t *) carbon_vec_pop(&extra->freelist);
+    *out = *(field_sid_t *) carbon_vec_pop(&extra->freelist);
     return true;
 }
 
-static int freelist_push(struct strdic *self, carbon_string_id_t idx)
+static int freelist_push(struct strdic *self, field_sid_t idx)
 {
     assert (self->tag == SYNC);
     struct sync_extra *extra = this_extra(self);
@@ -201,7 +201,7 @@ static bool this_drop(struct strdic *self)
     return true;
 }
 
-static bool this_insert(struct strdic *self, carbon_string_id_t **out, char *const *strings, size_t num_strings,
+static bool this_insert(struct strdic *self, field_sid_t **out, char *const *strings, size_t num_strings,
                         size_t num_threads)
 {
     NG5_TRACE(STRING_DIC_SYNC_TAG, "local string dictionary insertion invoked for %zu strings", num_strings);
@@ -222,9 +222,9 @@ static bool this_insert(struct strdic *self, carbon_string_id_t **out, char *con
 #endif
 
 
-    carbon_string_id_t  *ids_out = carbon_malloc(&hashtable_alloc, num_strings * sizeof(carbon_string_id_t));
+    field_sid_t  *ids_out = carbon_malloc(&hashtable_alloc, num_strings * sizeof(field_sid_t));
     bool *found_mask;
-    carbon_string_id_t *values;
+    field_sid_t *values;
     size_t num_not_found;
 
     /** query index for strings to get a boolean mask which strings are new and which must be added */
@@ -251,11 +251,11 @@ static bool this_insert(struct strdic *self, carbon_string_id_t **out, char *con
              * since this insertion batch may contain duplicate string, querying for already inserted strings
              * must be done anyway for each string in the insertion batch that is inserted. */
 
-            carbon_string_id_t string_id = 0;
+            field_sid_t string_id = 0;
             const char *key = (const char *)(strings[i]);
 
             bool found = false;
-            carbon_string_id_t value;
+            field_sid_t value;
 
             /** Query the bloom_t if the keys was already seend. If the filter returns "yes", a lookup
              * is requried since the filter maybe made a mistake. Of the filter returns "no", the
@@ -311,7 +311,7 @@ static bool this_insert(struct strdic *self, carbon_string_id_t **out, char *con
 
 }
 
-static bool this_remove(struct strdic *self, carbon_string_id_t *strings, size_t num_strings)
+static bool this_remove(struct strdic *self, field_sid_t *strings, size_t num_strings)
 {
     NG5_NON_NULL_OR_ERROR(self);
     NG5_NON_NULL_OR_ERROR(strings);
@@ -323,20 +323,20 @@ static bool this_remove(struct strdic *self, carbon_string_id_t *strings, size_t
 
     size_t num_strings_to_delete = 0;
     char **string_to_delete = carbon_malloc(&self->alloc, num_strings * sizeof(char *));
-    carbon_string_id_t *string_ids_to_delete =
-        carbon_malloc(&self->alloc, num_strings * sizeof(carbon_string_id_t));
+    field_sid_t *string_ids_to_delete =
+        carbon_malloc(&self->alloc, num_strings * sizeof(field_sid_t));
 
     /** remove strings from contents NG5_vector, and skip duplicates */
     for (size_t i = 0; i < num_strings; i++) {
-        carbon_string_id_t carbon_string_id_t = strings[i];
-        struct entry *entry   = (struct entry *) carbon_vec_data(&extra->contents) + carbon_string_id_t;
+        field_sid_t field_sid_t = strings[i];
+        struct entry *entry   = (struct entry *) carbon_vec_data(&extra->contents) + field_sid_t;
         if (NG5_LIKELY(entry->in_use)) {
             string_to_delete[num_strings_to_delete]    = entry->str;
             string_ids_to_delete[num_strings_to_delete] = strings[i];
             entry->str    = NULL;
             entry->in_use = false;
             num_strings_to_delete++;
-            NG5_CHECK_SUCCESS(freelist_push(self, carbon_string_id_t));
+            NG5_CHECK_SUCCESS(freelist_push(self, field_sid_t));
         }
     }
 
@@ -356,7 +356,7 @@ static bool this_remove(struct strdic *self, carbon_string_id_t *strings, size_t
     return true;
 }
 
-static bool this_locate_safe(struct strdic *self, carbon_string_id_t **out, bool **found_mask,
+static bool this_locate_safe(struct strdic *self, field_sid_t **out, bool **found_mask,
                           size_t *num_not_found, char *const *keys, size_t num_keys)
 {
     carbon_timestamp_t begin = carbon_time_now_wallclock();
@@ -383,7 +383,7 @@ static bool this_locate_safe(struct strdic *self, carbon_string_id_t **out, bool
     return status;
 }
 
-static bool this_locate_fast(struct strdic *self, carbon_string_id_t **out, char *const *keys,
+static bool this_locate_fast(struct strdic *self, field_sid_t **out, char *const *keys,
                           size_t num_keys)
 {
     NG5_CHECK_TAG(self->tag, SYNC)
@@ -400,7 +400,7 @@ static bool this_locate_fast(struct strdic *self, carbon_string_id_t **out, char
     return result;
 }
 
-static char **this_extract(struct strdic *self, const carbon_string_id_t *ids, size_t num_ids)
+static char **this_extract(struct strdic *self, const field_sid_t *ids, size_t num_ids)
 {
     if (NG5_UNLIKELY(!self || !ids || num_ids == 0 || self->tag != SYNC)) {
         return NULL;
@@ -423,10 +423,10 @@ static char **this_extract(struct strdic *self, const carbon_string_id_t *ids, s
     carbon_vec_memadvice(&extra->contents, MADV_RANDOM | MADV_WILLNEED);
 
     for (size_t i = 0; i < num_ids; i++) {
-        carbon_string_id_t carbon_string_id_t = ids[i];
-        assert(carbon_string_id_t < carbon_vec_length(&extra->contents));
-        assert(carbon_string_id_t == NG5_NULL_ENCODED_STRING || entries[carbon_string_id_t].in_use);
-        result[i] = carbon_string_id_t != NG5_NULL_ENCODED_STRING ? entries[carbon_string_id_t].str : NG5_NULL_TEXT;
+        field_sid_t field_sid_t = ids[i];
+        assert(field_sid_t < carbon_vec_length(&extra->contents));
+        assert(field_sid_t == NG5_NULL_ENCODED_STRING || entries[field_sid_t].in_use);
+        result[i] = field_sid_t != NG5_NULL_ENCODED_STRING ? entries[field_sid_t].str : NG5_NULL_TEXT;
     }
 
     unlock(self);
@@ -472,12 +472,12 @@ static bool this_num_distinct(struct strdic *self, size_t *num)
 }
 
 static bool this_get_contents(struct strdic *self, struct vector ofType (char *) * strings,
-                           struct vector ofType(carbon_string_id_t) * string_ids)
+                           struct vector ofType(field_sid_t) * string_ids)
 {
     NG5_CHECK_TAG(self->tag, SYNC);
     struct sync_extra *extra = this_extra(self);
 
-    for (carbon_string_id_t i = 0; i < extra->contents.num_elems; i++) {
+    for (field_sid_t i = 0; i < extra->contents.num_elems; i++) {
         const struct entry *e = vec_get(&extra->contents, i, struct entry);
         if (e->in_use) {
             carbon_vec_push(strings, &e->str, 1);

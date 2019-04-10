@@ -58,15 +58,15 @@ NG5_EXPORT(bool)
 carbon_query_index_id_to_offset_deserialize(struct sid_to_offset **index, struct err *err, const char *file_path, offset_t offset);
 
 NG5_EXPORT(char *)
-carbon_query_fetch_string_by_id(struct archive_query *query, carbon_string_id_t id);
+carbon_query_fetch_string_by_id(struct archive_query *query, field_sid_t id);
 
 NG5_EXPORT(char *)
-carbon_query_fetch_string_by_id_nocache(struct archive_query *query, carbon_string_id_t id);
+carbon_query_fetch_string_by_id_nocache(struct archive_query *query, field_sid_t id);
 
 NG5_EXPORT(char **)
 carbon_query_fetch_strings_by_offset(struct archive_query *query, offset_t *offs, u32 *strlens, size_t num_offs);
 
-NG5_EXPORT(carbon_string_id_t *)
+NG5_EXPORT(field_sid_t *)
 carbon_query_find_ids(size_t *num_found, struct archive_query *query, const carbon_string_pred_t *pred,
                       void *capture, i64 limit);
 

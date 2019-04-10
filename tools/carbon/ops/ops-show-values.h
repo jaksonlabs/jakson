@@ -12,13 +12,13 @@
 
 typedef struct
 {
-    carbon_string_id_t key;
+    field_sid_t key;
     carbon_basic_type_e type;
 
     union {
-        struct vector ofType(carbon_string_id_t) string_values;
+        struct vector ofType(field_sid_t) string_values;
         u32 num_nulls;
-        struct vector ofType(carbon_i64) integer_values;
+        struct vector ofType(field_i64_t) integer_values;
     } values;
 
 } ops_show_values_result_t;

@@ -115,13 +115,13 @@ SliceListIsEmpty(const carbon_slice_list_t *list)
 }
 
 NG5_EXPORT(bool)
-carbon_slice_list_insert(carbon_slice_list_t *list, char **strings, carbon_string_id_t *ids, size_t num_pairs)
+carbon_slice_list_insert(carbon_slice_list_t *list, char **strings, field_sid_t *ids, size_t num_pairs)
 {
     lock(list);
 
     while (num_pairs--) {
         const char *key = *strings++;
-        carbon_string_id_t value = *ids++;
+        field_sid_t value = *ids++;
         hash32_t keyHash = get_hashcode(key);
         slice_handle_t handle;
         int status;

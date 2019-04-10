@@ -38,7 +38,7 @@ NG5_BEGIN_DECL
 typedef struct carbon_columndoc_column
 {
     /** Key name */
-    carbon_string_id_t key_name;
+    field_sid_t key_name;
     /** Particular key type */
     field_e type;
     /** Positions of objects in the parent array that has this particular key name with this particular value type */
@@ -52,7 +52,7 @@ typedef struct carbon_columndoc_column
 typedef struct carbon_columndoc_columngroup
 {
     /** Key name */
-    carbon_string_id_t key;
+    field_sid_t key;
     /** Key columns as a decomposition of objects stored in that JSON-like array */
     struct vector ofType(carbon_columndoc_column_t) columns;
 
@@ -61,86 +61,86 @@ typedef struct carbon_columndoc_columngroup
 typedef struct carbon_columndoc_obj
 {
     /** Parent document meta doc */
-    carbon_columndoc_t *parent;
+    struct columndoc *parent;
     /** Key in parent document meta doc that maps to this one, or "/" if this is the top-level meta doc */
-    carbon_string_id_t parent_key;
+    field_sid_t parent_key;
     /** Index inside the array of this doc in its parents property, or 0 if this is not an array type or top-level */
     size_t index;
 
     /** Inverted index of keys mapping to primitive boolean types (sorted by key) */
-    struct vector ofType(carbon_string_id_t) bool_prop_keys;
+    struct vector ofType(field_sid_t) bool_prop_keys;
     /** Inverted index of keys mapping to primitive int8 number types (sorted by key) */
-    struct vector ofType(carbon_string_id_t) int8_prop_keys;
+    struct vector ofType(field_sid_t) int8_prop_keys;
     /** Inverted index of keys mapping to primitive int16 number types (sorted by key) */
-    struct vector ofType(carbon_string_id_t) int16_prop_keys;
+    struct vector ofType(field_sid_t) int16_prop_keys;
     /** Inverted index of keys mapping to primitive int32 number types (sorted by key) */
-    struct vector ofType(carbon_string_id_t) int32_prop_keys;
+    struct vector ofType(field_sid_t) int32_prop_keys;
     /** Inverted index of keys mapping to primitive int64 number types (sorted by key) */
-    struct vector ofType(carbon_string_id_t) int64_prop_keys;
+    struct vector ofType(field_sid_t) int64_prop_keys;
     /** Inverted index of keys mapping to primitive uint8 number types (sorted by key) */
-    struct vector ofType(carbon_string_id_t) uint8_prop_keys;
+    struct vector ofType(field_sid_t) uint8_prop_keys;
     /** Inverted index of keys mapping to primitive uint16 number types (sorted by key) */
-    struct vector ofType(carbon_string_id_t) uint16_prop_keys;
+    struct vector ofType(field_sid_t) uint16_prop_keys;
     /** Inverted index of keys mapping to primitive uint32 number types (sorted by key) */
-    struct vector ofType(carbon_string_id_t) uin32_prop_keys;
+    struct vector ofType(field_sid_t) uin32_prop_keys;
     /** Inverted index of keys mapping to primitive uint64 number types (sorted by key) */
-    struct vector ofType(carbon_string_id_t) uint64_prop_keys;
+    struct vector ofType(field_sid_t) uint64_prop_keys;
     /** Inverted index of keys mapping to primitive string types (sorted by key) */
-    struct vector ofType(carbon_string_id_t) string_prop_keys;
+    struct vector ofType(field_sid_t) string_prop_keys;
     /** Inverted index of keys mapping to primitive real types (sorted by key) */
-    struct vector ofType(carbon_string_id_t) float_prop_keys;
+    struct vector ofType(field_sid_t) float_prop_keys;
     /** Inverted index of keys mapping to primitive null values (sorted by key) */
-    struct vector ofType(carbon_string_id_t) null_prop_keys;
+    struct vector ofType(field_sid_t) null_prop_keys;
     /** Inverted index of keys mapping to exactly one nested object value (sorted by key) */
-    struct vector ofType(carbon_string_id_t) obj_prop_keys;
+    struct vector ofType(field_sid_t) obj_prop_keys;
 
     /** Inverted index of keys mapping to array of boolean types (sorted by key)*/
-    struct vector ofType(carbon_string_id_t) bool_array_prop_keys;
+    struct vector ofType(field_sid_t) bool_array_prop_keys;
     /** Inverted index of keys mapping to array of int8 number types (sorted by key)*/
-    struct vector ofType(carbon_string_id_t) int8_array_prop_keys;
+    struct vector ofType(field_sid_t) int8_array_prop_keys;
     /** Inverted index of keys mapping to array of int16 number types (sorted by key) */
-    struct vector ofType(carbon_string_id_t) int16_array_prop_keys;
+    struct vector ofType(field_sid_t) int16_array_prop_keys;
     /** Inverted index of keys mapping to array of int32 number types (sorted by key) */
-    struct vector ofType(carbon_string_id_t) int32_array_prop_keys;
+    struct vector ofType(field_sid_t) int32_array_prop_keys;
     /** Inverted index of keys mapping to array of int64 number types (sorted by key) */
-    struct vector ofType(carbon_string_id_t) int64_array_prop_keys;
+    struct vector ofType(field_sid_t) int64_array_prop_keys;
     /** Inverted index of keys mapping to array of uint8 number types (sorted by key) */
-    struct vector ofType(carbon_string_id_t) uint8_array_prop_keys;
+    struct vector ofType(field_sid_t) uint8_array_prop_keys;
     /** Inverted index of keys mapping to array of uint16 number types (sorted by key) */
-    struct vector ofType(carbon_string_id_t) uint16_array_prop_keys;
+    struct vector ofType(field_sid_t) uint16_array_prop_keys;
     /** Inverted index of keys mapping to array of uint32 number types (sorted by key) */
-    struct vector ofType(carbon_string_id_t) uint32_array_prop_keys;
+    struct vector ofType(field_sid_t) uint32_array_prop_keys;
     /** Inverted index of keys mapping to array of uint64 number types (sorted by key) */
-    struct vector ofType(carbon_string_id_t) uint64_array_prop_keys;
+    struct vector ofType(field_sid_t) uint64_array_prop_keys;
     /** Inverted index of keys mapping array of string types (sorted by key) */
-    struct vector ofType(carbon_string_id_t) string_array_prop_keys;
+    struct vector ofType(field_sid_t) string_array_prop_keys;
     /** Inverted index of keys mapping array of real types (sorted by key) */
-    struct vector ofType(carbon_string_id_t) float_array_prop_keys;
+    struct vector ofType(field_sid_t) float_array_prop_keys;
     /** Inverted index of keys mapping array of null value (sorted by key)s */
-    struct vector ofType(carbon_string_id_t) null_array_prop_keys;
+    struct vector ofType(field_sid_t) null_array_prop_keys;
 
     /** Primitive boolean values associated to keys stored above (sorted by key) */
-    struct vector ofType(carbon_boolean_t) bool_prop_vals;
+    struct vector ofType(field_boolean_t) bool_prop_vals;
     /** Primitive int8 number values associated to keys stored above (sorted by key) */
-    struct vector ofType(carbon_i8) int8_prop_vals;
+    struct vector ofType(field_i8_t) int8_prop_vals;
     /** Primitive int16 number values associated to keys stored above (sorted by key) */
-    struct vector ofType(carbon_i16) int16_prop_vals;
+    struct vector ofType(field_i16_t) int16_prop_vals;
     /** Primitive int32 number values associated to keys stored above (sorted by key) */
-    struct vector ofType(carbon_i32) int32_prop_vals;
+    struct vector ofType(field_i32_t) int32_prop_vals;
     /** Primitive int64 number values associated to keys stored above (sorted by key) */
-    struct vector ofType(carbon_i64) int64_prop_vals;
+    struct vector ofType(field_i64_t) int64_prop_vals;
     /** Primitive uint8 number values associated to keys stored above (sorted by key) */
-    struct vector ofType(carbon_u8) uint8_prop_vals;
+    struct vector ofType(field_u8_t) uint8_prop_vals;
     /** Primitive uint16 number values associated to keys stored above (sorted by key) */
-    struct vector ofType(carbon_u16) uint16_prop_vals;
+    struct vector ofType(field_u16_t) uint16_prop_vals;
     /** Primitive uint32 number values associated to keys stored above (sorted by key) */
-    struct vector ofType(carbon_u32) uint32_prop_vals;
+    struct vector ofType(field_u32_t) uint32_prop_vals;
     /** Primitive uint64 number values associated to keys stored above (sorted by key) */
-    struct vector ofType(carbon_u64) uint64_prop_vals;
+    struct vector ofType(field_u64_t) uint64_prop_vals;
     /** Primitive real number values associated to keys stored above (sorted by key) */
-    struct vector ofType(carbon_number_t) float_prop_vals;
+    struct vector ofType(field_number_t) float_prop_vals;
     /** Primitive string number values associated to keys stored above (sorted by key) */
-    struct vector ofType(carbon_string_id_t) string_prop_vals;
+    struct vector ofType(field_sid_t) string_prop_vals;
 
     /** Array of boolean values associated to keys stored above (sorted by key) */
     struct vector ofType(Vector) bool_array_prop_vals;
@@ -221,31 +221,31 @@ typedef struct carbon_columndoc_obj
 
 } columndoc_obj_t;
 
-typedef struct carbon_columndoc
+struct columndoc
 {
-    const carbon_doc_t *doc;
+    const struct doc *doc;
     struct strdic *dic;
     columndoc_obj_t columndoc;
     const struct doc_bulk *bulk;
     bool read_optimized;
     struct err err;
-} carbon_columndoc_t;
+};
 
 NG5_EXPORT(bool)
-carbon_columndoc_create(carbon_columndoc_t *columndoc, struct err *err, const carbon_doc_t *doc,
+carbon_columndoc_create(struct columndoc *columndoc, struct err *err, const struct doc *doc,
                         const struct doc_bulk *bulk, const struct doc_entries *entries,
                         struct strdic *dic);
 
-NG5_DEFINE_GET_ERROR_FUNCTION(columndoc, carbon_columndoc_t, doc)
+NG5_DEFINE_GET_ERROR_FUNCTION(columndoc, struct columndoc, doc)
 
 NG5_EXPORT(bool)
-carbon_columndoc_free(carbon_columndoc_t *doc);
+carbon_columndoc_free(struct columndoc *doc);
 
 NG5_EXPORT(bool)
-carbon_columndoc_print(FILE *file, carbon_columndoc_t *doc);
+carbon_columndoc_print(FILE *file, struct columndoc *doc);
 
 NG5_EXPORT(bool)
-carbon_columndoc_drop(carbon_columndoc_t *doc);
+carbon_columndoc_drop(struct columndoc *doc);
 
 NG5_END_DECL
 

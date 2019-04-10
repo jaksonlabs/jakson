@@ -242,7 +242,7 @@ carbon_error_print_and_abort(const struct err *err);
 
 #define NG5_DEFINE_GET_ERROR_FUNCTION(type_name, type, arg)                                                         \
 NG5_FUNC_UNUSED static bool                                                                                         \
-carbon_##type_name##_get_error(struct err *err, const type *arg)                                                     \
+type_name##_get_error(struct err *err, const type *arg)                                                     \
 {                                                                                                                      \
     NG5_NON_NULL_OR_ERROR(err)                                                                                      \
     NG5_NON_NULL_OR_ERROR(arg)                                                                                      \

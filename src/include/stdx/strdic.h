@@ -70,7 +70,7 @@ struct strdic
      *
      * Note: Implementation must ensure thread-safeness
     */
-    bool (*insert)(struct strdic *self, carbon_string_id_t **out, char *const *strings,
+    bool (*insert)(struct strdic *self, field_sid_t **out, char *const *strings,
                   size_t nstrings, size_t nthreads);
 
     /**
@@ -79,14 +79,14 @@ struct strdic
      *
      * Note: Implementation must ensure thread-safeness
      */
-    bool (*remove)(struct strdic *self, carbon_string_id_t *strings, size_t nstrings);
+    bool (*remove)(struct strdic *self, field_sid_t *strings, size_t nstrings);
 
     /**
      * Get the string ids associated with <code>keys</code> in this carbon_parallel_map_exec (if any).
      *
      * Note: Implementation must ensure thread-safeness
      */
-    bool (*locate_safe)(struct strdic *self, carbon_string_id_t **out, bool **found_mask,
+    bool (*locate_safe)(struct strdic *self, field_sid_t **out, bool **found_mask,
                        size_t *num_not_found, char *const *keys, size_t num_keys);
 
     /**
@@ -94,7 +94,7 @@ struct strdic
      *
      * Note: Implementation must ensure thread-safeness
     */
-    bool (*locate_fast)(struct strdic *self, carbon_string_id_t **out, char *const *keys,
+    bool (*locate_fast)(struct strdic *self, field_sid_t **out, char *const *keys,
                        size_t num_keys);
 
     /**
@@ -102,7 +102,7 @@ struct strdic
      *
      * Note: Implementation must ensure thread-safeness
      */
-    char **(*extract)(struct strdic *self, const carbon_string_id_t *ids, size_t num_ids);
+    char **(*extract)(struct strdic *self, const field_sid_t *ids, size_t num_ids);
 
     /**
      * Frees up memory allocated inside a function call via the allocator given in the constructor
@@ -130,7 +130,7 @@ struct strdic
      * Returns all contained (unique) strings and their mapped (unique) ids
      */
     bool (*get_contents)(struct strdic *self, struct vector ofType (char *) * strings,
-                       struct vector ofType(carbon_string_id_t) * string_ids);
+                       struct vector ofType(field_sid_t) * string_ids);
 };
 
 /**
@@ -149,7 +149,7 @@ carbon_strdic_drop(struct strdic *dic)
 
 NG5_FUNC_UNUSED
 static bool
-carbon_strdic_insert(struct strdic *dic, carbon_string_id_t **out, char *const *strings, size_t nstrings,
+carbon_strdic_insert(struct strdic *dic, field_sid_t **out, char *const *strings, size_t nstrings,
                      size_t nthreads)
 {
     NG5_NON_NULL_OR_ERROR(dic);
@@ -178,7 +178,7 @@ carbon_strdic_get_counters(struct strhash_counters *counters, struct strdic *dic
 
 NG5_FUNC_UNUSED
 static bool
-carbon_strdic_remove(struct strdic *dic, carbon_string_id_t *strings, size_t num_strings)
+carbon_strdic_remove(struct strdic *dic, field_sid_t *strings, size_t num_strings)
 {
     NG5_NON_NULL_OR_ERROR(dic);
     NG5_NON_NULL_OR_ERROR(strings);
@@ -188,7 +188,7 @@ carbon_strdic_remove(struct strdic *dic, carbon_string_id_t *strings, size_t num
 
 NG5_FUNC_UNUSED
 static bool
-carbon_strdic_locate_safe(carbon_string_id_t **out, bool **found_mask, size_t *num_not_found,
+carbon_strdic_locate_safe(field_sid_t **out, bool **found_mask, size_t *num_not_found,
                           struct strdic *dic, char *const *keys, size_t num_keys)
 {
     NG5_NON_NULL_OR_ERROR(out);
@@ -202,7 +202,7 @@ carbon_strdic_locate_safe(carbon_string_id_t **out, bool **found_mask, size_t *n
 
 NG5_FUNC_UNUSED
 static bool
-carbon_strdic_locate_fast(carbon_string_id_t **out, struct strdic *dic, char *const *keys, size_t nkeys)
+carbon_strdic_locate_fast(field_sid_t **out, struct strdic *dic, char *const *keys, size_t nkeys)
 {
     NG5_NON_NULL_OR_ERROR(out);
     NG5_NON_NULL_OR_ERROR(dic);
@@ -213,7 +213,7 @@ carbon_strdic_locate_fast(carbon_string_id_t **out, struct strdic *dic, char *co
 
 NG5_FUNC_UNUSED
 static char **
-carbon_strdic_extract(struct strdic *dic, const carbon_string_id_t *ids, size_t nids)
+carbon_strdic_extract(struct strdic *dic, const field_sid_t *ids, size_t nids)
 {
     return dic->extract(dic, ids, nids);
 }
@@ -244,7 +244,7 @@ carbon_strdic_num_distinct(size_t *num, struct strdic *dic)
 NG5_FUNC_UNUSED
 static bool
 carbon_strdic_get_contents(struct vector ofType (char *) *strings,
-                           struct vector ofType(carbon_string_id_t) *string_ids,
+                           struct vector ofType(field_sid_t) *string_ids,
                            struct strdic *dic)
 {
     NG5_NON_NULL_OR_ERROR(strings)

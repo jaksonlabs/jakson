@@ -24,7 +24,7 @@ typedef struct cache_entry cache_entry_t;
 typedef struct cache_entry
 {
     cache_entry_t *prev, *next;
-    carbon_string_id_t id;
+    field_sid_t id;
     char *string;
 } cache_entry_t;
 
@@ -133,10 +133,10 @@ make_most_recent(lru_list_t *list, cache_entry_t *entry)
 }
 
 NG5_EXPORT(char *)
-carbon_string_id_cache_get(struct string_cache *cache, carbon_string_id_t id)
+carbon_string_id_cache_get(struct string_cache *cache, field_sid_t id)
 {
     NG5_NON_NULL_OR_ERROR(cache)
-    hash32_t id_hash = NG5_HASH_BERNSTEIN(sizeof(carbon_string_id_t), &id);
+    hash32_t id_hash = NG5_HASH_BERNSTEIN(sizeof(field_sid_t), &id);
     size_t bucket_pos = id_hash % cache->list_entries.num_elems;
     lru_list_t *list = vec_get(&cache->list_entries, bucket_pos, lru_list_t);
     cache_entry_t *cursor = list->most_recent;

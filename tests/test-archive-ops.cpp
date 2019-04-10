@@ -61,7 +61,7 @@ TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonStringWithBakedStringIdIndex)
 
 TEST(CarbonArchiveOpsTest, CreateArchiveStringHandling)
 {
-    std::set<carbon_string_id_t> haystack;
+    std::set<field_sid_t> haystack;
 
     struct archive     archive;
     carbon_strid_iter_t  strid_iter;
@@ -108,7 +108,7 @@ TEST(CarbonArchiveOpsTest, CreateArchiveStringHandling)
 
 TEST(CarbonArchiveOpsTest, DecodeStringByIdFullScan)
 {
-    std::set<carbon_string_id_t> all_str_ids;
+    std::set<field_sid_t> all_str_ids;
 
     struct archive     archive;
     carbon_strid_iter_t  strid_iter;
@@ -139,8 +139,8 @@ TEST(CarbonArchiveOpsTest, DecodeStringByIdFullScan)
     status = carbon_strid_iter_close(&strid_iter);
     ASSERT_TRUE(status);
 
-    for (std::set<carbon_string_id_t>::iterator it = all_str_ids.begin(); it != all_str_ids.end(); it++) {
-        carbon_string_id_t string_id = *it;
+    for (std::set<field_sid_t>::iterator it = all_str_ids.begin(); it != all_str_ids.end(); it++) {
+        field_sid_t string_id = *it;
         char *string = carbon_query_fetch_string_by_id(&query, string_id);
         ASSERT_TRUE(string != NULL);
         printf("DecodeStringByIdFullScan: %" PRIu64 " -> '%s'\n", string_id, string);
@@ -204,7 +204,7 @@ TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateContains)
     bool                  status;
     size_t                num_match;
     carbon_string_pred_t  pred;
-    carbon_string_id_t   *result;
+    field_sid_t   *result;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
      * below the projects root directory (e.g., 'build/') */
@@ -241,7 +241,7 @@ TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateEquals)
     bool                  status;
     size_t                num_match;
     carbon_string_pred_t  pred;
-    carbon_string_id_t   *result;
+    field_sid_t   *result;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
      * below the projects root directory (e.g., 'build/') */

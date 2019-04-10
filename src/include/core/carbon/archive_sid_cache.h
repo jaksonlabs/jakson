@@ -44,7 +44,7 @@ NG5_EXPORT(bool)
 carbon_string_id_cache_get_size(size_t *size, const struct string_cache *cache);
 
 NG5_EXPORT(char *)
-carbon_string_id_cache_get(struct string_cache *cache, carbon_string_id_t id);
+carbon_string_id_cache_get(struct string_cache *cache, field_sid_t id);
 
 NG5_EXPORT(bool)
 carbon_string_id_cache_get_statistics(carbon_string_id_cache_statistics_t *statistics, struct string_cache *cache);

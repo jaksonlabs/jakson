@@ -12,9 +12,9 @@
 
 typedef struct
 {
-    carbon_string_id_t paper_title;
-    carbon_string_id_t paper_id;
-    struct vector ofType(carbon_string_id_t) authors;
+    field_sid_t paper_title;
+    field_sid_t paper_id;
+    struct vector ofType(field_sid_t) authors;
 } ops_get_citations_result_entry_t;
 
 typedef struct

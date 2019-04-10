@@ -50,8 +50,8 @@
 #define PRINT_SIMPLE_PROPS(file, memfile, offset, nesting_level, value_type, type_string, format_string)               \
 {                                                                                                                      \
     carbon_prop_header_t *prop_header = NG5_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);             \
-    carbon_string_id_t *keys = (carbon_string_id_t *) NG5_MEMFILE_READ(memfile, prop_header->num_entries *          \
-                                   sizeof(carbon_string_id_t));                                                        \
+    field_sid_t *keys = (field_sid_t *) NG5_MEMFILE_READ(memfile, prop_header->num_entries *          \
+                                   sizeof(field_sid_t));                                                        \
     value_type *values = (value_type *) NG5_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(value_type));   \
     fprintf(file, "0x%04x ", (unsigned) offset);                                                                       \
     INTENT_LINE(nesting_level)                                                                                         \
@@ -70,8 +70,8 @@
 {                                                                                                                      \
     carbon_prop_header_t *prop_header = NG5_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);             \
                                                                                                                        \
-    carbon_string_id_t *keys = (carbon_string_id_t *) NG5_MEMFILE_READ(memfile, prop_header->num_entries *          \
-                                        sizeof(carbon_string_id_t));                                                   \
+    field_sid_t *keys = (field_sid_t *) NG5_MEMFILE_READ(memfile, prop_header->num_entries *          \
+                                        sizeof(field_sid_t));                                                   \
     u32 *array_lengths;                                                                                           \
                                                                                                                        \
     fprintf(file, "0x%04x ", (unsigned) offset);                                                                       \
@@ -124,7 +124,7 @@
 }
 
 static offset_t skip_record_header(struct memfile *memfile);
-static void update_record_header(struct memfile *memfile, offset_t root_object_header_offset, carbon_columndoc_t *model,
+static void update_record_header(struct memfile *memfile, offset_t root_object_header_offset, struct columndoc *model,
         u64 record_size);
 static bool __serialize(offset_t *offset, struct err *err, struct memfile *memfile, columndoc_obj_t *columndoc,
         offset_t root_object_header_offset);
@@ -210,7 +210,7 @@ NG5_EXPORT(bool) carbon_archive_stream_from_json(struct memblock **stream, struc
         struct json_err error_desc;
         struct doc_bulk bulk;
         struct doc_entries *partition;
-        carbon_columndoc_t *columndoc;
+        struct columndoc *columndoc;
         struct json json;
 
         OPTIONAL_CALL(callback, begin_archive_stream_from_json)
@@ -227,8 +227,8 @@ NG5_EXPORT(bool) carbon_archive_stream_from_json(struct memblock **stream, struc
         OPTIONAL_CALL(callback, end_setup_string_dictionary);
 
         OPTIONAL_CALL(callback, begin_parse_json);
-        carbon_json_parser_create(&parser, &bulk);
-        if (!(carbon_json_parse(&json, &error_desc, &parser, json_string))) {
+        json_parser_create(&parser, &bulk);
+        if (!(json_parse(&json, &error_desc, &parser, json_string))) {
                 char buffer[2048];
                 if (error_desc.token) {
                         sprintf(buffer,
@@ -247,7 +247,7 @@ NG5_EXPORT(bool) carbon_archive_stream_from_json(struct memblock **stream, struc
         OPTIONAL_CALL(callback, end_parse_json);
 
         OPTIONAL_CALL(callback, begin_test_json);
-        if (!carbon_json_test_doc(err, &json)) {
+        if (!json_test(err, &json)) {
                 return false;
         }
         OPTIONAL_CALL(callback, end_test_json);
@@ -261,7 +261,7 @@ NG5_EXPORT(bool) carbon_archive_stream_from_json(struct memblock **stream, struc
         partition = carbon_doc_bulk_new_entries(&bulk);
         carbon_doc_bulk_add_json(partition, &json);
 
-        carbon_json_drop(&json);
+        json_drop(&json);
 
         carbon_doc_bulk_shrink(&bulk);
 
@@ -362,7 +362,7 @@ static bool run_string_id_baking(struct err *err, struct memblock **stream)
         return true;
 }
 
-bool carbon_archive_from_model(struct memblock **stream, struct err *err, carbon_columndoc_t *model,
+bool carbon_archive_from_model(struct memblock **stream, struct err *err, struct columndoc *model,
         carbon_compressor_type_e compressor, bool bake_string_id_index, struct archive_callback *callback)
 {
         NG5_NON_NULL_OR_ERROR(model)
@@ -495,10 +495,10 @@ static const char *array_value_type_to_string(struct err *err, field_e type)
         }
 }
 
-static void write_primitive_key_column(struct memfile *memfile, struct vector ofType(carbon_string_id_t) *keys)
+static void write_primitive_key_column(struct memfile *memfile, struct vector ofType(field_sid_t) *keys)
 {
-        carbon_string_id_t *string_ids = vec_all(keys, carbon_string_id_t);
-        memfile_write(memfile, string_ids, keys->num_elems * sizeof(carbon_string_id_t));
+        field_sid_t *string_ids = vec_all(keys, field_sid_t);
+        memfile_write(memfile, string_ids, keys->num_elems * sizeof(field_sid_t));
 }
 
 static offset_t skip_var_value_offset_column(struct memfile *memfile, size_t num_keys)
@@ -524,27 +524,27 @@ static bool write_primitive_fixed_value_column(struct memfile *memfile, struct e
         switch (type) {
         case field_null:
                 break;
-        case field_bool: WRITE_PRIMITIVE_VALUES(memfile, values_vec, carbon_boolean_t);
+        case field_bool: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_boolean_t);
                 break;
-        case field_int8: WRITE_PRIMITIVE_VALUES(memfile, values_vec, carbon_i8);
+        case field_int8: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_i8_t);
                 break;
-        case field_int16: WRITE_PRIMITIVE_VALUES(memfile, values_vec, carbon_i16);
+        case field_int16: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_i16_t);
                 break;
-        case field_int32: WRITE_PRIMITIVE_VALUES(memfile, values_vec, carbon_i32);
+        case field_int32: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_i32_t);
                 break;
-        case field_int64: WRITE_PRIMITIVE_VALUES(memfile, values_vec, carbon_i64);
+        case field_int64: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_i64_t);
                 break;
-        case field_uint8: WRITE_PRIMITIVE_VALUES(memfile, values_vec, carbon_u8);
+        case field_uint8: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_u8_t);
                 break;
-        case field_uint16: WRITE_PRIMITIVE_VALUES(memfile, values_vec, carbon_u16);
+        case field_uint16: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_u16_t);
                 break;
-        case field_uint32: WRITE_PRIMITIVE_VALUES(memfile, values_vec, carbon_u32);
+        case field_uint32: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_u32_t);
                 break;
-        case field_uint64: WRITE_PRIMITIVE_VALUES(memfile, values_vec, carbon_u64);
+        case field_uint64: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_u64_t);
                 break;
-        case field_float: WRITE_PRIMITIVE_VALUES(memfile, values_vec, carbon_number_t);
+        case field_float: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_number_t);
                 break;
-        case field_string: WRITE_PRIMITIVE_VALUES(memfile, values_vec, carbon_string_id_t);
+        case field_string: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_sid_t);
                 break;
         default: error(err, NG5_ERR_NOTYPE);
                 return false;
@@ -604,27 +604,27 @@ static bool write_array_value_column(struct memfile *memfile, struct err *err, f
         switch (type) {
         case field_null: WRITE_PRIMITIVE_VALUES(memfile, values_vec, u32);
                 break;
-        case field_bool: WRITE_ARRAY_VALUES(memfile, values_vec, carbon_boolean_t);
+        case field_bool: WRITE_ARRAY_VALUES(memfile, values_vec, field_boolean_t);
                 break;
-        case field_int8: WRITE_ARRAY_VALUES(memfile, values_vec, carbon_i8);
+        case field_int8: WRITE_ARRAY_VALUES(memfile, values_vec, field_i8_t);
                 break;
-        case field_int16: WRITE_ARRAY_VALUES(memfile, values_vec, carbon_i16);
+        case field_int16: WRITE_ARRAY_VALUES(memfile, values_vec, field_i16_t);
                 break;
-        case field_int32: WRITE_ARRAY_VALUES(memfile, values_vec, carbon_i32);
+        case field_int32: WRITE_ARRAY_VALUES(memfile, values_vec, field_i32_t);
                 break;
-        case field_int64: WRITE_ARRAY_VALUES(memfile, values_vec, carbon_i64);
+        case field_int64: WRITE_ARRAY_VALUES(memfile, values_vec, field_i64_t);
                 break;
-        case field_uint8: WRITE_ARRAY_VALUES(memfile, values_vec, carbon_u64);
+        case field_uint8: WRITE_ARRAY_VALUES(memfile, values_vec, field_u64_t);
                 break;
-        case field_uint16: WRITE_ARRAY_VALUES(memfile, values_vec, carbon_u16);
+        case field_uint16: WRITE_ARRAY_VALUES(memfile, values_vec, field_u16_t);
                 break;
-        case field_uint32: WRITE_ARRAY_VALUES(memfile, values_vec, carbon_u32);
+        case field_uint32: WRITE_ARRAY_VALUES(memfile, values_vec, field_u32_t);
                 break;
-        case field_uint64: WRITE_ARRAY_VALUES(memfile, values_vec, carbon_u64);
+        case field_uint64: WRITE_ARRAY_VALUES(memfile, values_vec, field_u64_t);
                 break;
-        case field_float: WRITE_ARRAY_VALUES(memfile, values_vec, carbon_number_t);
+        case field_float: WRITE_ARRAY_VALUES(memfile, values_vec, field_number_t);
                 break;
-        case field_string: WRITE_ARRAY_VALUES(memfile, values_vec, carbon_string_id_t);
+        case field_string: WRITE_ARRAY_VALUES(memfile, values_vec, field_sid_t);
                 break;
         case field_object: carbon_print_error_and_die(NG5_ERR_NOTIMPL)
                 return false;
@@ -634,7 +634,7 @@ static bool write_array_value_column(struct memfile *memfile, struct err *err, f
         return true;
 }
 
-static bool write_array_prop(offset_t *offset, struct err *err, struct memfile *memfile, struct vector ofType(carbon_string_id_t) *keys,
+static bool write_array_prop(offset_t *offset, struct err *err, struct memfile *memfile, struct vector ofType(field_sid_t) *keys,
         field_e type, struct vector ofType(...) *values, offset_t root_object_header_offset)
 {
         assert(keys->num_elems == values->num_elems);
@@ -776,7 +776,7 @@ static bool write_array_props(struct memfile *memfile, struct err *err, columndo
 
 /** Fixed-length property lists; value position can be determined by size of value and position of key in key column.
  * In contrast, variable-length property list require an additional offset column (see 'write_var_props') */
-static bool write_fixed_props(offset_t *offset, struct err *err, struct memfile *memfile, struct vector ofType(carbon_string_id_t) *keys,
+static bool write_fixed_props(offset_t *offset, struct err *err, struct memfile *memfile, struct vector ofType(field_sid_t) *keys,
         field_e type, struct vector ofType(T) *values)
 {
         assert(!values || keys->num_elems == values->num_elems);
@@ -806,7 +806,7 @@ static bool write_fixed_props(offset_t *offset, struct err *err, struct memfile 
  * to a particular property. Due to the move of strings (i.e., variable-length values) to a dedicated string table,
  * the only variable-length value for properties are "JSON objects".
  * In contrast, fixed-length property list doesn't require an additional offset column (see 'write_fixed_props') */
-static bool write_var_props(offset_t *offset, struct err *err, struct memfile *memfile, struct vector ofType(carbon_string_id_t) *keys,
+static bool write_var_props(offset_t *offset, struct err *err, struct memfile *memfile, struct vector ofType(field_sid_t) *keys,
         struct vector ofType(columndoc_obj_t) *objects, offset_t root_object_header_offset)
 {
         assert(!objects || keys->num_elems == objects->num_elems);
@@ -1047,7 +1047,7 @@ static bool write_object_array_props(struct memfile *memfile, struct err *err,
                 for (size_t i = 0; i < object_key_columns->num_elems; i++) {
                         carbon_columndoc_columngroup_t *column_group =
                                 vec_get(object_key_columns, i, carbon_columndoc_columngroup_t);
-                        memfile_write(memfile, &column_group->key, sizeof(carbon_string_id_t));
+                        memfile_write(memfile, &column_group->key, sizeof(field_sid_t));
                 }
 
                 // skip offset column to column groups
@@ -1119,7 +1119,7 @@ static offset_t skip_record_header(struct memfile *memfile)
         return offset;
 }
 
-static void update_record_header(struct memfile *memfile, offset_t root_object_header_offset, carbon_columndoc_t *model,
+static void update_record_header(struct memfile *memfile, offset_t root_object_header_offset, struct columndoc *model,
         u64 record_size)
 {
         carbon_archive_record_flags_t flags = {.bits.is_sorted = model->read_optimized};
@@ -1408,7 +1408,7 @@ static bool serialize_string_dic(struct memfile *memfile, struct err *err, const
         carbon_string_table_header_t header;
 
         struct vector ofType (const char *) *strings;
-        struct vector ofType(carbon_string_id_t) *string_ids;
+        struct vector ofType(field_sid_t) *string_ids;
 
         carbon_doc_bulk_get_dic_contents(&strings, &string_ids, context);
 
@@ -1434,7 +1434,7 @@ static bool serialize_string_dic(struct memfile *memfile, struct err *err, const
                 - extra_begin_off)};
 
         for (size_t i = 0; i < strings->num_elems; i++) {
-                carbon_string_id_t id = *vec_get(string_ids, i, carbon_string_id_t);
+                field_sid_t id = *vec_get(string_ids, i, field_sid_t);
                 const char *string = *vec_get(strings, i, char *);
 
                 carbon_string_entry_header_t header = {.marker = marker_symbols[MARKER_TYPE_EMBEDDED_UNCOMP_STR]
@@ -1533,49 +1533,49 @@ static bool print_column_form_memfile(FILE *file, struct err *err, struct memfil
                 }
                         break;
                 case field_bool: {
-                        PRINT_VALUE_ARRAY(carbon_boolean_t, memfile, header, "%d");
+                        PRINT_VALUE_ARRAY(field_boolean_t, memfile, header, "%d");
                 }
                         break;
                 case field_int8: {
-                        PRINT_VALUE_ARRAY(carbon_i8, memfile, header, "%d");
+                        PRINT_VALUE_ARRAY(field_i8_t, memfile, header, "%d");
                 }
                         break;
                 case field_int16: {
-                        PRINT_VALUE_ARRAY(carbon_i16, memfile, header, "%d");
+                        PRINT_VALUE_ARRAY(field_i16_t, memfile, header, "%d");
                 }
                         break;
                 case field_int32: {
-                        PRINT_VALUE_ARRAY(carbon_i32, memfile, header, "%d");
+                        PRINT_VALUE_ARRAY(field_i32_t, memfile, header, "%d");
                 }
                         break;
                 case field_int64: {
-                        PRINT_VALUE_ARRAY(carbon_i64, memfile, header, "%"
+                        PRINT_VALUE_ARRAY(field_i64_t, memfile, header, "%"
                                 PRIi64);
                 }
                         break;
                 case field_uint8: {
-                        PRINT_VALUE_ARRAY(carbon_u8, memfile, header, "%d");
+                        PRINT_VALUE_ARRAY(field_u8_t, memfile, header, "%d");
                 }
                         break;
                 case field_uint16: {
-                        PRINT_VALUE_ARRAY(carbon_u16, memfile, header, "%d");
+                        PRINT_VALUE_ARRAY(field_u16_t, memfile, header, "%d");
                 }
                         break;
                 case field_uint32: {
-                        PRINT_VALUE_ARRAY(carbon_u32, memfile, header, "%d");
+                        PRINT_VALUE_ARRAY(field_u32_t, memfile, header, "%d");
                 }
                         break;
                 case field_uint64: {
-                        PRINT_VALUE_ARRAY(carbon_u64, memfile, header, "%"
+                        PRINT_VALUE_ARRAY(field_u64_t, memfile, header, "%"
                                 PRIu64);
                 }
                         break;
                 case field_float: {
-                        PRINT_VALUE_ARRAY(carbon_number_t, memfile, header, "%f");
+                        PRINT_VALUE_ARRAY(field_number_t, memfile, header, "%f");
                 }
                         break;
                 case field_string: {
-                        PRINT_VALUE_ARRAY(carbon_string_id_t, memfile, header, "%"
+                        PRINT_VALUE_ARRAY(field_sid_t, memfile, header, "%"
                                 PRIu64
                                 "");
                 }
@@ -1616,7 +1616,7 @@ static bool print_object_array_from_memfile(FILE *file, struct err *err, struct 
         fprintf(file, "[marker: %c (Object Array)] [nentries: %d] [", header->marker, header->num_entries);
 
         for (size_t i = 0; i < header->num_entries; i++) {
-                carbon_string_id_t string_id = *NG5_MEMFILE_READ_TYPE(memfile, carbon_string_id_t);
+                field_sid_t string_id = *NG5_MEMFILE_READ_TYPE(memfile, field_sid_t);
                 fprintf(file, "key: %"PRIu64"%s", string_id, i + 1 < header->num_entries ? ", " : "");
         }
         fprintf(file, "] [");
@@ -1800,8 +1800,8 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                 switch (entryMarker) {
                 case MARKER_SYMBOL_PROP_NULL: {
                         carbon_prop_header_t *prop_header = NG5_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);
-                        carbon_string_id_t *keys = (carbon_string_id_t *) NG5_MEMFILE_READ(memfile,
-                                prop_header->num_entries * sizeof(carbon_string_id_t));
+                        field_sid_t *keys = (field_sid_t *) NG5_MEMFILE_READ(memfile,
+                                prop_header->num_entries * sizeof(field_sid_t));
                         fprintf(file, "0x%04x ", offset);
                         INTENT_LINE(nesting_level)
                         fprintf(file, "[marker: %c (null)] [nentries: %d] [", entryMarker, prop_header->num_entries);
@@ -1814,10 +1814,10 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                         break;
                 case MARKER_SYMBOL_PROP_BOOLEAN: {
                         carbon_prop_header_t *prop_header = NG5_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);
-                        carbon_string_id_t *keys = (carbon_string_id_t *) NG5_MEMFILE_READ(memfile,
-                                prop_header->num_entries * sizeof(carbon_string_id_t));
-                        carbon_boolean_t *values = (carbon_boolean_t *) NG5_MEMFILE_READ(memfile,
-                                prop_header->num_entries * sizeof(carbon_boolean_t));
+                        field_sid_t *keys = (field_sid_t *) NG5_MEMFILE_READ(memfile,
+                                prop_header->num_entries * sizeof(field_sid_t));
+                        field_boolean_t *values = (field_boolean_t *) NG5_MEMFILE_READ(memfile,
+                                prop_header->num_entries * sizeof(field_boolean_t));
                         fprintf(file, "0x%04x ", offset);
                         INTENT_LINE(nesting_level)
                         fprintf(file, "[marker: %c (boolean)] [nentries: %d] [", entryMarker, prop_header->num_entries);
@@ -1838,7 +1838,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                         memfile,
                         memfile_tell(memfile),
                         nesting_level,
-                        carbon_i8,
+                        field_i8_t,
                         "Int8",
                         "%d");
                         break;
@@ -1846,7 +1846,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                         memfile,
                         memfile_tell(memfile),
                         nesting_level,
-                        carbon_i16,
+                        field_i16_t,
                         "Int16",
                         "%d");
                         break;
@@ -1854,7 +1854,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                         memfile,
                         memfile_tell(memfile),
                         nesting_level,
-                        carbon_i32,
+                        field_i32_t,
                         "Int32",
                         "%d");
                         break;
@@ -1862,7 +1862,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                         memfile,
                         memfile_tell(memfile),
                         nesting_level,
-                        carbon_i64,
+                        field_i64_t,
                         "Int64",
                         "%"
                         PRIi64);
@@ -1871,7 +1871,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                         memfile,
                         memfile_tell(memfile),
                         nesting_level,
-                        carbon_u8,
+                        field_u8_t,
                         "UInt8",
                         "%d");
                         break;
@@ -1879,7 +1879,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                         memfile,
                         memfile_tell(memfile),
                         nesting_level,
-                        carbon_u16,
+                        field_u16_t,
                         "UInt16",
                         "%d");
                         break;
@@ -1887,7 +1887,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                         memfile,
                         memfile_tell(memfile),
                         nesting_level,
-                        carbon_u32,
+                        field_u32_t,
                         "UInt32",
                         "%d");
                         break;
@@ -1895,7 +1895,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                         memfile,
                         memfile_tell(memfile),
                         nesting_level,
-                        carbon_u64,
+                        field_u64_t,
                         "UInt64",
                         "%"
                         PRIu64);
@@ -1904,7 +1904,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                         memfile,
                         memfile_tell(memfile),
                         nesting_level,
-                        carbon_number_t,
+                        field_number_t,
                         "Float",
                         "%f");
                         break;
@@ -1912,7 +1912,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                         memfile,
                         memfile_tell(memfile),
                         nesting_level,
-                        carbon_string_id_t,
+                        field_sid_t,
                         "Text",
                         "%"
                         PRIu64
@@ -1953,8 +1953,8 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                 case MARKER_SYMBOL_PROP_NULL_ARRAY: {
                         carbon_prop_header_t *prop_header = NG5_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);
 
-                        carbon_string_id_t *keys = (carbon_string_id_t *) NG5_MEMFILE_READ(memfile,
-                                prop_header->num_entries * sizeof(carbon_string_id_t));
+                        field_sid_t *keys = (field_sid_t *) NG5_MEMFILE_READ(memfile,
+                                prop_header->num_entries * sizeof(field_sid_t));
                         u32 *nullArrayLengths;
 
                         fprintf(file, "0x%04x ", offset);
@@ -1985,8 +1985,8 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                 case MARKER_SYMBOL_PROP_BOOLEAN_ARRAY: {
                         carbon_prop_header_t *prop_header = NG5_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);
 
-                        carbon_string_id_t *keys = (carbon_string_id_t *) NG5_MEMFILE_READ(memfile,
-                                prop_header->num_entries * sizeof(carbon_string_id_t));
+                        field_sid_t *keys = (field_sid_t *) NG5_MEMFILE_READ(memfile,
+                                prop_header->num_entries * sizeof(field_sid_t));
                         u32 *array_lengths;
 
                         fprintf(file, "0x%04x ", offset);
@@ -2014,8 +2014,8 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                         fprintf(file, "] [");
 
                         for (u32 array_idx = 0; array_idx < prop_header->num_entries; array_idx++) {
-                                carbon_boolean_t *values = (carbon_boolean_t *) NG5_MEMFILE_READ(memfile,
-                                        array_lengths[array_idx] * sizeof(carbon_boolean_t));
+                                field_boolean_t *values = (field_boolean_t *) NG5_MEMFILE_READ(memfile,
+                                        array_lengths[array_idx] * sizeof(field_boolean_t));
                                 fprintf(file, "[");
                                 for (u32 i = 0; i < array_lengths[array_idx]; i++) {
                                         fprintf(file,
@@ -2035,7 +2035,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                                 memfile_tell(memfile),
                                 nesting_level,
                                 entryMarker,
-                                carbon_i8,
+                                field_i8_t,
                                 "Int8 Array",
                                 "%d");
                 }
@@ -2044,7 +2044,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                         memfile_tell(memfile),
                         nesting_level,
                         entryMarker,
-                        carbon_i16,
+                        field_i16_t,
                         "Int16 Array",
                         "%d");
                         break;
@@ -2052,7 +2052,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                         memfile_tell(memfile),
                         nesting_level,
                         entryMarker,
-                        carbon_i32,
+                        field_i32_t,
                         "Int32 Array",
                         "%d");
                         break;
@@ -2060,7 +2060,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                         memfile_tell(memfile),
                         nesting_level,
                         entryMarker,
-                        carbon_i64,
+                        field_i64_t,
                         "Int64 Array",
                         "%"
                         PRIi64);
@@ -2069,7 +2069,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                         memfile_tell(memfile),
                         nesting_level,
                         entryMarker,
-                        carbon_u8,
+                        field_u8_t,
                         "UInt8 Array",
                         "%d");
                         break;
@@ -2077,7 +2077,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                         memfile_tell(memfile),
                         nesting_level,
                         entryMarker,
-                        carbon_u16,
+                        field_u16_t,
                         "UInt16 Array",
                         "%d");
                         break;
@@ -2085,7 +2085,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                         memfile_tell(memfile),
                         nesting_level,
                         entryMarker,
-                        carbon_u32,
+                        field_u32_t,
                         "UInt32 Array",
                         "%d");
                         break;
@@ -2093,7 +2093,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                         memfile_tell(memfile),
                         nesting_level,
                         entryMarker,
-                        carbon_u64,
+                        field_u64_t,
                         "UInt64 Array",
                         "%"
                         PRIu64);
@@ -2102,7 +2102,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                         memfile_tell(memfile),
                         nesting_level,
                         entryMarker,
-                        carbon_number_t,
+                        field_number_t,
                         "Float Array",
                         "%f");
                         break;
@@ -2110,7 +2110,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                         memfile_tell(memfile),
                         nesting_level,
                         entryMarker,
-                        carbon_string_id_t,
+                        field_sid_t,
                         "Text Array",
                         "%"
                         PRIu64

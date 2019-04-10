@@ -84,7 +84,7 @@ NG5_EXPORT(bool) carbon_archive_stream_from_json(struct memblock **stream, struc
         carbon_compressor_type_e compressor, enum strdic_tag dictionary, size_t num_async_dic_threads,
         bool read_optimized, bool bake_id_index, struct archive_callback *callback);
 
-NG5_EXPORT(bool) carbon_archive_from_model(struct memblock **stream, struct err *err, carbon_columndoc_t *model,
+NG5_EXPORT(bool) carbon_archive_from_model(struct memblock **stream, struct err *err, struct columndoc *model,
         carbon_compressor_type_e compressor, bool bake_string_id_index, struct archive_callback *callback);
 
 NG5_EXPORT(bool) carbon_archive_write(FILE *file, const struct memblock *stream);

@@ -7,13 +7,13 @@
 typedef struct
 {
     const char *path;
-    carbon_hashtable_t ofMapping(carbon_string_id_t, u32) counts;
-    carbon_hashset_t ofType(carbon_string_id_t) keys;
+    carbon_hashtable_t ofMapping(field_sid_t, u32) counts;
+    carbon_hashset_t ofType(field_sid_t) keys;
 } capture_t;
 //
 static void
 visit_string_pairs (struct archive *archive, path_stack_t path, carbon_object_id_t id,
-                              const carbon_string_id_t *keys, const carbon_string_id_t *values, u32 num_pairs,
+                              const field_sid_t *keys, const field_sid_t *values, u32 num_pairs,
                               void *capture)
 {
     NG5_UNUSED(archive);
@@ -69,8 +69,8 @@ visit_string_pairs (struct archive *archive, path_stack_t path, carbon_object_id
 //
 static void
 visit_string_array_pair (struct archive *archive, path_stack_t path, carbon_object_id_t id,
-                                   carbon_string_id_t key, u32 entry_idx, u32 max_entries,
-                                   const carbon_string_id_t *array, u32 array_length, void *capture)
+                                   field_sid_t key, u32 entry_idx, u32 max_entries,
+                                   const field_sid_t *array, u32 array_length, void *capture)
 {
     NG5_UNUSED(archive);
     NG5_UNUSED(path);
@@ -88,10 +88,10 @@ visit_string_array_pair (struct archive *archive, path_stack_t path, carbon_obje
 //static void
 //visit_object_array_object_property_string(struct archive *archive, path_stack_t path,
 //                                               carbon_object_id_t parent_id,
-//                                               carbon_string_id_t key,
+//                                               field_sid_t key,
 //                                               carbon_object_id_t nested_object_id,
-//                                               carbon_string_id_t nested_key,
-//                                               const carbon_string_id_t *nested_values,
+//                                               field_sid_t nested_key,
+//                                               const field_sid_t *nested_values,
 //                                               u32 num_nested_values, void *capture)
 //{
 //    NG5_UNUSED(archive);
@@ -111,7 +111,7 @@ visit_string_array_pair (struct archive *archive, path_stack_t path, carbon_obje
 //}
 
 static bool
-get_column_entry_count(struct archive *archive, path_stack_t path, carbon_string_id_t key, carbon_basic_type_e type, u32 count, void *capture)
+get_column_entry_count(struct archive *archive, path_stack_t path, field_sid_t key, carbon_basic_type_e type, u32 count, void *capture)
 {
     NG5_UNUSED(archive);
     NG5_UNUSED(path);
@@ -152,8 +152,8 @@ ops_count_values(carbon_timestamp_t *duration, struct vector ofType(ops_count_va
     capture_t capture = {
         .path = path
     };
-    carbon_hashtable_create(&capture.counts, &archive->err, sizeof(carbon_string_id_t), sizeof(u32), 50);
-    carbon_hashset_create(&capture.keys, &archive->err, sizeof(carbon_string_id_t), 50);
+    carbon_hashtable_create(&capture.counts, &archive->err, sizeof(field_sid_t), sizeof(u32), 50);
+    carbon_hashset_create(&capture.keys, &archive->err, sizeof(field_sid_t), 50);
 
     visitor.visit_string_pairs = visit_string_pairs;
     visitor.visit_string_array_pair = visit_string_array_pair;
@@ -165,10 +165,10 @@ ops_count_values(carbon_timestamp_t *duration, struct vector ofType(ops_count_va
     carbon_timestamp_t end = carbon_time_now_wallclock();
     *duration = (end - begin);
 
-    struct vector ofType(carbon_string_id_t) *keys = carbon_hashset_keys(&capture.keys);
+    struct vector ofType(field_sid_t) *keys = carbon_hashset_keys(&capture.keys);
 //    carbon_vec_push(result, pairs->base, pairs->num_elems);
     for (u32 i = 0; i < keys->num_elems; i++) {
-        carbon_string_id_t id = *vec_get(keys, i, carbon_string_id_t);
+        field_sid_t id = *vec_get(keys, i, field_sid_t);
         u32 count = *(u32 *) carbon_hashtable_get_value(&capture.counts, &id);
         ops_count_values_result_t r = {
             .key = id,
