@@ -28,7 +28,7 @@ struct sid_to_offset_arg
 
 struct sid_to_offset
 {
-    carbon_hashtable_t ofMapping(field_sid_t, struct sid_to_offset_arg) mapping;
+    struct hashtable ofMapping(field_sid_t, struct sid_to_offset_arg) mapping;
     FILE *disk_file;
     size_t disk_file_size;
 
@@ -74,7 +74,7 @@ carbon_query_drop(struct archive_query *query)
 }
 
 NG5_EXPORT(bool)
-carbon_query_scan_strids(carbon_strid_iter_t *it, struct archive_query *query)
+carbon_query_scan_strids(struct strid_iter *it, struct archive_query *query)
 {
     NG5_NON_NULL_OR_ERROR(it)
     NG5_NON_NULL_OR_ERROR(query)
@@ -103,8 +103,8 @@ carbon_query_create_index_string_id_to_offset(struct sid_to_offset **index,
     NG5_NON_NULL_OR_ERROR(index)
     NG5_NON_NULL_OR_ERROR(query)
 
-    carbon_strid_iter_t   strid_iter;
-    carbon_strid_info_t  *info;
+    struct strid_iter   strid_iter;
+    struct strid_info  *info;
     size_t                vector_len;
     bool                  status;
     bool                  success;
@@ -228,8 +228,8 @@ fetch_string_by_id_via_scan(struct archive_query *query, field_sid_t id)
 {
     assert(query);
 
-    carbon_strid_iter_t  strid_iter;
-    carbon_strid_info_t *info;
+    struct strid_iter  strid_iter;
+    struct strid_info *info;
     size_t               vector_len;
     bool                 status;
     bool                 success;
@@ -385,7 +385,7 @@ cleanup_and_error:
 }
 
 NG5_EXPORT(field_sid_t *)
-carbon_query_find_ids(size_t *num_found, struct archive_query *query, const carbon_string_pred_t *pred,
+carbon_query_find_ids(size_t *num_found, struct archive_query *query, const struct string_pred_t *pred,
                       void *capture, i64 limit)
 {
     if (NG5_UNLIKELY(carbon_string_pred_validate(&query->err, pred) == false)) {
@@ -395,8 +395,8 @@ carbon_query_find_ids(size_t *num_found, struct archive_query *query, const carb
     carbon_string_pred_get_limit(&pred_limit, pred);
     pred_limit = pred_limit < 0 ? limit : NG5_MIN(pred_limit, limit);
 
-    carbon_strid_iter_t  it;
-    carbon_strid_info_t *info              = NULL;
+    struct strid_iter  it;
+    struct strid_info *info              = NULL;
     size_t               info_len          = 0;
     size_t               step_len          = 0;
     offset_t        *str_offs          = NULL;

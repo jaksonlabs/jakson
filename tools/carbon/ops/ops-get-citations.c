@@ -5,7 +5,7 @@
 #include "ops-get-citations.h"
 
 NG5_EXPORT(bool)
-ops_get_citations(carbon_timestamp_t *duration, struct vector ofType(ops_show_values_result_t) *result, const char *paper_title,
+ops_get_citations(timestamp_t *duration, struct vector ofType(ops_show_values_result_t) *result, const char *paper_title,
                   struct archive *archive)
 {
     NG5_UNUSED(duration);

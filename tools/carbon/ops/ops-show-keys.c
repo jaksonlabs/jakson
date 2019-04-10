@@ -13,7 +13,7 @@
 
 typedef struct
 {
-    carbon_hashset_t ofType(ops_show_keys_key_type_pair_t) *result;
+    struct hashset ofType(ops_show_keys_key_type_pair_t) *result;
     const char *path;
 } ops_show_keys_capture_t;
 
@@ -291,7 +291,7 @@ before_object_array_object_property_object(struct archive *archive, path_stack_t
 }
 
 NG5_EXPORT(bool)
-ops_show_keys(carbon_timestamp_t *duration, struct vector ofType(ops_show_keys_key_type_pair_t) *result, const char *path, struct archive *archive)
+ops_show_keys(timestamp_t *duration, struct vector ofType(ops_show_keys_key_type_pair_t) *result, const char *path, struct archive *archive)
 {
     NG5_UNUSED(result);
     NG5_UNUSED(path);
@@ -299,7 +299,7 @@ ops_show_keys(carbon_timestamp_t *duration, struct vector ofType(ops_show_keys_k
 
     carbon_archive_visitor_t visitor = { 0 };
     carbon_archive_visitor_desc_t desc = { .visit_mask = NG5_ARCHIVE_ITER_MASK_ANY };
-    carbon_hashset_t ofType(ops_show_keys_key_type_pair_t) distinct_key_type_pairs;
+    struct hashset ofType(ops_show_keys_key_type_pair_t) distinct_key_type_pairs;
     carbon_hashset_create(&distinct_key_type_pairs, &archive->err, sizeof(ops_show_keys_capture_t), 100);
     ops_show_keys_capture_t capture = {
         .path = path,
@@ -316,9 +316,9 @@ ops_show_keys(carbon_timestamp_t *duration, struct vector ofType(ops_show_keys_k
 
     visitor.visit_object_array_prop = visit_object_array_prop;
 
-    carbon_timestamp_t begin = carbon_time_now_wallclock();
+    timestamp_t begin = carbon_time_now_wallclock();
     carbon_archive_visit_archive(archive, &desc, &visitor, &capture);
-    carbon_timestamp_t end = carbon_time_now_wallclock();
+    timestamp_t end = carbon_time_now_wallclock();
     *duration = (end - begin);
 
     struct vector ofType(ops_show_keys_key_type_pair_t) *pairs = carbon_hashset_keys(&distinct_key_type_pairs);

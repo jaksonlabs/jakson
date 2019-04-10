@@ -32,14 +32,14 @@ bool carbon_spinlock_init(struct spinlock *spinlock)
 
 bool carbon_spinlock_acquire(struct spinlock *spinlock)
 {
-    carbon_timestamp_t begin = carbon_time_now_wallclock();
+    timestamp_t begin = carbon_time_now_wallclock();
     NG5_NON_NULL_OR_ERROR(spinlock)
     if (!pthread_equal(spinlock->owner, pthread_self())) {
         while (atomic_flag_test_and_set(&spinlock->lock));
         /** remeber the thread that aquires this lock */
         spinlock->owner = pthread_self();
     }
-    carbon_timestamp_t end = carbon_time_now_wallclock();
+    timestamp_t end = carbon_time_now_wallclock();
     float duration = (end - begin) / 1000.0f;
     if (duration > 0.01f) {
         NG5_WARN(SPINLOCK_TAG, "spin lock acquisition took exceptionally long: %f seconds", duration);

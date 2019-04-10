@@ -40,7 +40,7 @@ __carbon_string_pred_contains_func(size_t *idxs_matching, size_t *num_matching, 
 }
 
 NG5_BUILT_IN(static bool)
-carbon_string_pred_contains_init(carbon_string_pred_t *pred)
+carbon_string_pred_contains_init(struct string_pred_t *pred)
 {
     NG5_NON_NULL_OR_ERROR(pred);
     pred->limit = NG5_QUERY_LIMIT_NONE;

@@ -5,7 +5,7 @@
 
 TEST(FixMapTest, CreationAndDrop)
 {
-    carbon_hashtable_t map;
+    struct hashtable map;
     struct err     err;
     bool             status;
 
@@ -17,7 +17,7 @@ TEST(FixMapTest, CreationAndDrop)
 
 TEST(FixMapTest, MapAndGetWithoutRehash)
 {
-    carbon_hashtable_t map;
+    struct hashtable map;
     struct err     err;
     bool             status;
 
@@ -41,7 +41,7 @@ TEST(FixMapTest, MapAndGetWithoutRehash)
 
 TEST(FixMapTest, MapAndGetWitRehash)
 {
-    carbon_hashtable_t map;
+    struct hashtable map;
     struct err     err;
     bool             status;
 
@@ -64,7 +64,7 @@ TEST(FixMapTest, MapAndGetWitRehash)
 
 TEST(FixMapTest, DisplaceTest)
 {
-    carbon_hashtable_t map;
+    struct hashtable map;
     struct err     err;
     bool             status;
 
@@ -94,7 +94,7 @@ TEST(FixMapTest, DisplaceTest)
 
 TEST(FixMapTest, MapAndGetNotContainedWithoutRehash)
 {
-    carbon_hashtable_t map;
+    struct hashtable map;
     struct err     err;
     bool             status;
 
@@ -117,7 +117,7 @@ TEST(FixMapTest, MapAndGetNotContainedWithoutRehash)
 
 TEST(FixMapTest, MapAndGetNotContainedWitRehash)
 {
-    carbon_hashtable_t map;
+    struct hashtable map;
     struct err     err;
     bool             status;
 

@@ -19,8 +19,8 @@ struct capture
 
     struct vector ofType(ops_show_values_result_t) *result;
 
-  //  carbon_hashtable_t ofMapping(field_sid_t, u32) counts;
-  //  carbon_hashset_t ofType(field_sid_t) keys;
+  //  struct hashtable ofMapping(field_sid_t, u32) counts;
+  //  struct hashset ofType(field_sid_t) keys;
 };
 ////
 static void
@@ -393,7 +393,7 @@ visit_object_array_object_property_int16(struct archive *archive, path_stack_t p
 //}
 
 NG5_EXPORT(bool)
-ops_show_values(carbon_timestamp_t *duration, struct vector ofType(ops_show_values_result_t) *result, const char *path,
+ops_show_values(timestamp_t *duration, struct vector ofType(ops_show_values_result_t) *result, const char *path,
                 struct archive *archive, u32 offset, u32 limit, i32 between_lower_bound,
                 i32 between_upper_bound, const char *contains_string)
 {
@@ -434,9 +434,9 @@ ops_show_values(carbon_timestamp_t *duration, struct vector ofType(ops_show_valu
     visitor.visit_object_array_object_property_int16s = visit_object_array_object_property_int16;
     visitor.visit_string_pairs = visit_string_pairs;
 
-    carbon_timestamp_t begin = carbon_time_now_wallclock();
+    timestamp_t begin = carbon_time_now_wallclock();
     carbon_archive_visit_archive(archive, &desc, &visitor, &capture);
-    carbon_timestamp_t end = carbon_time_now_wallclock();
+    timestamp_t end = carbon_time_now_wallclock();
     *duration = (end - begin);
 
 

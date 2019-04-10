@@ -23,7 +23,7 @@
 
 struct converter_capture
 {
-    carbon_encoded_doc_collection_t *collection;
+    struct encoded_doc_list *collection;
 };
 
 
@@ -34,7 +34,7 @@ struct converter_capture
     assert(capture);                                                                                                   \
                                                                                                                        \
     struct converter_capture *extra = (struct converter_capture *) capture;                                                                          \
-    carbon_encoded_doc_t *doc = encoded_doc_collection_get_or_append(extra->collection, oid);                          \
+    struct encoded_doc *doc = encoded_doc_collection_get_or_append(extra->collection, oid);                          \
     for (u32 i = 0; i < num_pairs; i++) {                                                                         \
         carbon_encoded_doc_add_prop_##name(doc, keys[i], values[i]);                                                   \
     }                                                                                                                  \
@@ -63,7 +63,7 @@ visit_enter_##name##_array_pairs(struct archive *archive, path_stack_t path, obj
     assert(capture);                                                                                                   \
                                                                                                                        \
     struct converter_capture *extra = (struct converter_capture *) capture;                                                                          \
-    carbon_encoded_doc_t *doc = encoded_doc_collection_get_or_append(extra->collection, id);                           \
+    struct encoded_doc *doc = encoded_doc_collection_get_or_append(extra->collection, id);                           \
     for (u32 i = 0; i < num_pairs; i++)                                                                           \
     {                                                                                                                  \
         carbon_encoded_doc_add_prop_array_##name(doc, keys[i]);                                                        \
@@ -88,7 +88,7 @@ visit_##name##_array_pair(struct archive *archive, path_stack_t path, object_id_
     assert(capture);                                                                                                   \
                                                                                                                        \
     struct converter_capture *extra = (struct converter_capture *) capture;                                                                          \
-    carbon_encoded_doc_t *doc = encoded_doc_collection_get_or_append(extra->collection, id);                           \
+    struct encoded_doc *doc = encoded_doc_collection_get_or_append(extra->collection, id);                           \
     carbon_encoded_doc_array_push_##name(doc, key, array, array_length);                                               \
 }                                                                                                                      \
 
@@ -124,7 +124,7 @@ visit_null_pairs (struct archive *archive, path_stack_t path, object_id_t oid, c
     assert(capture);
 
     struct converter_capture *extra = (struct converter_capture *) capture;
-    carbon_encoded_doc_t *doc = encoded_doc_collection_get_or_append(extra->collection, oid);
+    struct encoded_doc *doc = encoded_doc_collection_get_or_append(extra->collection, oid);
     for (u32 i = 0; i < num_pairs; i++) {
         carbon_encoded_doc_add_prop_null(doc, keys[i]);
     }
@@ -142,8 +142,8 @@ before_object_visit(struct archive *archive, path_stack_t path_stack, object_id_
     NG5_UNUSED(capture);
 
     struct converter_capture *extra = (struct converter_capture *) capture;
-    carbon_encoded_doc_t *parent_doc = encoded_doc_collection_get_or_append(extra->collection, parent_id);
-    carbon_encoded_doc_t *child_doc = encoded_doc_collection_get_or_append(extra->collection, value_id);
+    struct encoded_doc *parent_doc = encoded_doc_collection_get_or_append(extra->collection, parent_id);
+    struct encoded_doc *child_doc = encoded_doc_collection_get_or_append(extra->collection, value_id);
     carbon_encoded_doc_add_prop_object(parent_doc, key, child_doc);
 
     return NG5_VISITOR_POLICY_INCLUDE;
@@ -175,7 +175,7 @@ visit_enter_null_array_pairs(struct archive *archive, path_stack_t path, object_
     assert(capture);
 
     struct converter_capture *extra = (struct converter_capture *) capture;
-    carbon_encoded_doc_t *doc = encoded_doc_collection_get_or_append(extra->collection, id);
+    struct encoded_doc *doc = encoded_doc_collection_get_or_append(extra->collection, id);
     for (u32 i = 0; i < num_pairs; i++)
     {
         carbon_encoded_doc_add_prop_array_null(doc, keys[i]);
@@ -200,7 +200,7 @@ visit_null_array_pair(struct archive *archive, path_stack_t path, object_id_t id
     assert(capture);
 
     struct converter_capture *extra = (struct converter_capture *) capture;
-    carbon_encoded_doc_t *doc = encoded_doc_collection_get_or_append(extra->collection, id);
+    struct encoded_doc *doc = encoded_doc_collection_get_or_append(extra->collection, id);
     carbon_encoded_doc_array_push_null(doc, key, &num_nulls, 1);
 }
 
@@ -218,7 +218,7 @@ before_visit_object_array_objects(bool *skip_group_object_ids, struct archive *a
     NG5_UNUSED(num_group_object_ids);
 
     struct converter_capture *extra = (struct converter_capture *) capture;
-    carbon_encoded_doc_t *doc = encoded_doc_collection_get_or_append(extra->collection, parent_id);
+    struct encoded_doc *doc = encoded_doc_collection_get_or_append(extra->collection, parent_id);
     carbon_encoded_doc_add_prop_array_object(doc, key);
     for (u32 i = 0; i < num_group_object_ids; i++) {
         carbon_encoded_doc_array_push_object(doc, key, group_object_ids[i]);
@@ -243,7 +243,7 @@ visit_object_array_object_property_##name(struct archive *archive, path_stack_t 
     NG5_UNUSED(nested_values);                                                                                      \
                                                                                                                        \
     struct converter_capture *extra = (struct converter_capture *) capture;                                                                          \
-	carbon_encoded_doc_t *doc = encoded_doc_collection_get_or_append(extra->collection, nested_object_id);             \
+	struct encoded_doc *doc = encoded_doc_collection_get_or_append(extra->collection, nested_object_id);             \
 	carbon_encoded_doc_add_prop_array_##name(doc, nested_key);          											   \
 	carbon_encoded_doc_array_push_##name(doc, nested_key, nested_values, num_nested_values);                           \
 }
@@ -262,7 +262,7 @@ DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(boolean, field_boolean_t);
 DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(null, field_u32_t);
 
 NG5_EXPORT(bool)
-carbon_archive_converter(carbon_encoded_doc_collection_t *collection, struct archive *archive)
+carbon_archive_converter(struct encoded_doc_list *collection, struct archive *archive)
 {
 
     NG5_NON_NULL_OR_ERROR(collection);

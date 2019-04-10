@@ -24,12 +24,11 @@
 
 NG5_BEGIN_DECL
 
-typedef struct
-{
-    bool     in_use_flag;  /* flag indicating if bucket is in use */
-    i32  displacement; /* difference between intended position during insert, and actual position in table */
-    u64 key_idx;      /* position of key element in owning carbon_hashset_t structure */
-} carbon_hashset_bucket_t;
+struct hashset_bucket {
+        bool in_use_flag;  /* flag indicating if bucket is in use */
+        i32 displacement; /* difference between intended position during insert, and actual position in table */
+        u64 key_idx;      /* position of key element in owning struct hashset structure */
+};
 
 /**
  * Hashset implementation specialized for key of fixed-length size, and where comparision
@@ -42,55 +41,41 @@ typedef struct
  * Note: this implementation does not support string or pointer types. The structure is thread-safe by a spinlock
  * lock implementation.
  */
-typedef struct
-{
-    struct vector key_data;
-    struct vector ofType(carbon_hashset_bucket_t) table;
-    struct spinlock lock;
-    u32 size;
-    struct err err;
-} carbon_hashset_t;
+struct hashset {
+        struct vector key_data;
+        struct vector ofType(struct hashset_bucket) table;
+        struct spinlock lock;
+        u32 size;
+        struct err err;
+};
 
-NG5_DEFINE_GET_ERROR_FUNCTION(hashset, carbon_hashset_t, set);
+NG5_DEFINE_GET_ERROR_FUNCTION(hashset, struct hashset, set);
 
-NG5_EXPORT(bool)
-carbon_hashset_create(carbon_hashset_t *map, struct err *err, size_t key_size, size_t capacity);
+NG5_EXPORT(bool) carbon_hashset_create(struct hashset *map, struct err *err, size_t key_size, size_t capacity);
 
-NG5_EXPORT(carbon_hashset_t *)
-carbon_hashset_cpy(carbon_hashset_t *src);
+NG5_EXPORT(struct hashset *)carbon_hashset_cpy(struct hashset *src);
 
-NG5_EXPORT(bool)
-carbon_hashset_drop(carbon_hashset_t *map);
+NG5_EXPORT(bool) carbon_hashset_drop(struct hashset *map);
 
-NG5_EXPORT(struct vector *)
-carbon_hashset_keys(carbon_hashset_t *map);
+NG5_EXPORT(struct vector *)carbon_hashset_keys(struct hashset *map);
 
-NG5_EXPORT(bool)
-carbon_hashset_clear(carbon_hashset_t *map);
+NG5_EXPORT(bool) carbon_hashset_clear(struct hashset *map);
 
-NG5_EXPORT(bool)
-carbon_hashset_avg_displace(float *displace, const carbon_hashset_t *map);
+NG5_EXPORT(bool) carbon_hashset_avg_displace(float *displace, const struct hashset *map);
 
-NG5_EXPORT(bool)
-carbon_hashset_lock(carbon_hashset_t *map);
+NG5_EXPORT(bool) carbon_hashset_lock(struct hashset *map);
 
-NG5_EXPORT(bool)
-carbon_hashset_unlock(carbon_hashset_t *map);
+NG5_EXPORT(bool) carbon_hashset_unlock(struct hashset *map);
 
-NG5_EXPORT(bool)
-carbon_hashset_insert_or_update(carbon_hashset_t *map, const void *keys, uint_fast32_t num_pairs);
+NG5_EXPORT(bool) carbon_hashset_insert_or_update(struct hashset *map, const void *keys, uint_fast32_t num_pairs);
 
-NG5_EXPORT(bool)
-carbon_hashset_remove_if_contained(carbon_hashset_t *map, const void *keys, size_t num_pairs);
+NG5_EXPORT(bool) carbon_hashset_remove_if_contained(struct hashset *map, const void *keys, size_t num_pairs);
 
-NG5_EXPORT(bool)
-carbon_hashset_contains_key(carbon_hashset_t *map, const void *key);
+NG5_EXPORT(bool) carbon_hashset_contains_key(struct hashset *map, const void *key);
 
-NG5_EXPORT(bool)
-carbon_hashset_get_fload_factor(float *factor, carbon_hashset_t *map);
+NG5_EXPORT(bool) carbon_hashset_get_fload_factor(float *factor, struct hashset *map);
 
-NG5_EXPORT(bool)
-carbon_hashset_rehash(carbon_hashset_t *map);
+NG5_EXPORT(bool) carbon_hashset_rehash(struct hashset *map);
 
 NG5_END_DECL
 

@@ -19,23 +19,23 @@
 #include "core/async/spin.h"
 #include "core/carbon/archive_io.h"
 
-typedef struct carbon_io_context
+struct io_context
 {
     struct err err;
     FILE *file;
     struct spinlock lock;
     offset_t last_pos;
-} carbon_io_context_t;
+};
 
 
 NG5_EXPORT(bool)
-carbon_io_context_create(carbon_io_context_t **context, struct err *err, const char *file_path)
+carbon_io_context_create(struct io_context **context, struct err *err, const char *file_path)
 {
     NG5_NON_NULL_OR_ERROR(context);
     NG5_NON_NULL_OR_ERROR(err);
     NG5_NON_NULL_OR_ERROR(file_path);
 
-    carbon_io_context_t *result = malloc(sizeof(carbon_io_context_t));
+    struct io_context *result = malloc(sizeof(struct io_context));
 
     if (!result) {
         error(err, NG5_ERR_MALLOCERR);
@@ -58,13 +58,13 @@ carbon_io_context_create(carbon_io_context_t **context, struct err *err, const c
 }
 
 NG5_EXPORT(struct err *)
-carbon_io_context_get_error(carbon_io_context_t *context)
+carbon_io_context_get_error(struct io_context *context)
 {
     return context ? &context->err : NULL;
 }
 
 NG5_EXPORT(FILE *)
-carbon_io_context_lock_and_access(carbon_io_context_t *context)
+carbon_io_context_lock_and_access(struct io_context *context)
 {
     if (context) {
         carbon_spinlock_acquire(&context->lock);
@@ -77,7 +77,7 @@ carbon_io_context_lock_and_access(carbon_io_context_t *context)
 }
 
 NG5_EXPORT(bool)
-carbon_io_context_unlock(carbon_io_context_t *context)
+carbon_io_context_unlock(struct io_context *context)
 {
     if (context) {
         fseek(context->file, context->last_pos, SEEK_SET);
@@ -90,7 +90,7 @@ carbon_io_context_unlock(carbon_io_context_t *context)
 }
 
 NG5_EXPORT(bool)
-carbon_io_context_drop(carbon_io_context_t *context)
+carbon_io_context_drop(struct io_context *context)
 {
     NG5_NON_NULL_OR_ERROR(context);
     NG5_OPTIONAL(context->file != NULL, fclose(context->file); context->file = NULL)

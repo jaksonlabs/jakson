@@ -7,8 +7,8 @@
 struct capture
 {
     const char *path;
-    carbon_hashtable_t ofMapping(field_sid_t, u32) counts;
-    carbon_hashset_t ofType(field_sid_t) keys;
+    struct hashtable ofMapping(field_sid_t, u32) counts;
+    struct hashset ofType(field_sid_t) keys;
 };
 //
 static void
@@ -140,7 +140,7 @@ get_column_entry_count(struct archive *archive, path_stack_t path, field_sid_t k
 }
 
 NG5_EXPORT(bool)
-ops_count_values(carbon_timestamp_t *duration, struct vector ofType(ops_count_values_result_t) *result, const char *path, struct archive *archive)
+ops_count_values(timestamp_t *duration, struct vector ofType(ops_count_values_result_t) *result, const char *path, struct archive *archive)
 {
     NG5_UNUSED(result);
     NG5_UNUSED(path);
@@ -160,9 +160,9 @@ ops_count_values(carbon_timestamp_t *duration, struct vector ofType(ops_count_va
  //   visitor.visit_object_array_object_property_strings = visit_object_array_object_property_string;
     visitor.get_column_entry_count = get_column_entry_count;
 
-    carbon_timestamp_t begin = carbon_time_now_wallclock();
+    timestamp_t begin = carbon_time_now_wallclock();
     carbon_archive_visit_archive(archive, &desc, &visitor, &capture);
-    carbon_timestamp_t end = carbon_time_now_wallclock();
+    timestamp_t end = carbon_time_now_wallclock();
     *duration = (end - begin);
 
     struct vector ofType(field_sid_t) *keys = carbon_hashset_keys(&capture.keys);

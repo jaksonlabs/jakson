@@ -22,7 +22,7 @@
 #define FIX_MAP_AUTO_REHASH_LOADFACTOR 0.9f
 
 NG5_EXPORT(bool)
-carbon_hashset_create(carbon_hashset_t *map, struct err *err, size_t key_size, size_t capacity)
+carbon_hashset_create(struct hashset *map, struct err *err, size_t key_size, size_t capacity)
 {
     NG5_NON_NULL_OR_ERROR(map)
     NG5_NON_NULL_OR_ERROR(key_size)
@@ -33,7 +33,7 @@ carbon_hashset_create(carbon_hashset_t *map, struct err *err, size_t key_size, s
 
     NG5_SUCCESS_OR_JUMP(carbon_vec_create(&map->key_data, NULL, key_size, capacity),
                            error_handling);
-    NG5_SUCCESS_OR_JUMP(carbon_vec_create(&map->table, NULL, sizeof(carbon_hashset_bucket_t), capacity),
+    NG5_SUCCESS_OR_JUMP(carbon_vec_create(&map->table, NULL, sizeof(struct hashset_bucket), capacity),
                            cleanup_key_data_and_error);
     NG5_SUCCESS_OR_JUMP(carbon_vec_enlarge_size_to_capacity(&map->table),
                            cleanup_key_value_table_and_error);
@@ -60,7 +60,7 @@ error_handling:
 }
 
 NG5_EXPORT(bool)
-carbon_hashset_drop(carbon_hashset_t *map)
+carbon_hashset_drop(struct hashset *map)
 {
     NG5_NON_NULL_OR_ERROR(map)
 
@@ -77,13 +77,13 @@ carbon_hashset_drop(carbon_hashset_t *map)
 }
 
 NG5_EXPORT(struct vector *)
-carbon_hashset_keys(carbon_hashset_t *map)
+carbon_hashset_keys(struct hashset *map)
 {
     if (map) {
         struct vector *result = malloc(sizeof(struct vector));
         carbon_vec_create(result, NULL, map->key_data.elem_size, map->key_data.num_elems);
         for (u32 i = 0; i < map->table.num_elems; i++) {
-            carbon_hashset_bucket_t *bucket = vec_get(&map->table, i, carbon_hashset_bucket_t);
+            struct hashset_bucket *bucket = vec_get(&map->table, i, struct hashset_bucket);
             if (bucket->in_use_flag) {
                 const void *data = carbon_vec_at(&map->key_data, bucket->key_idx);
                 carbon_vec_push(result, data, 1);
@@ -95,12 +95,12 @@ carbon_hashset_keys(carbon_hashset_t *map)
     }
 }
 
-NG5_EXPORT(carbon_hashset_t *)
-carbon_hashset_cpy(carbon_hashset_t *src)
+NG5_EXPORT(struct hashset *)
+carbon_hashset_cpy(struct hashset *src)
 {
     if(src)
     {
-        carbon_hashset_t *cpy = malloc(sizeof(carbon_hashset_t));
+        struct hashset *cpy = malloc(sizeof(struct hashset));
 
         carbon_hashset_lock(src);
 
@@ -127,7 +127,7 @@ carbon_hashset_cpy(carbon_hashset_t *src)
 }
 
 NG5_EXPORT(bool)
-carbon_hashset_clear(carbon_hashset_t *map)
+carbon_hashset_clear(struct hashset *map)
 {
     NG5_NON_NULL_OR_ERROR(map)
     assert(map->key_data.cap_elems == map->table.cap_elems);
@@ -153,14 +153,14 @@ carbon_hashset_clear(carbon_hashset_t *map)
 }
 
 NG5_EXPORT(bool)
-carbon_hashset_avg_displace(float *displace, const carbon_hashset_t *map)
+carbon_hashset_avg_displace(float *displace, const struct hashset *map)
 {
     NG5_NON_NULL_OR_ERROR(displace);
     NG5_NON_NULL_OR_ERROR(map);
 
     size_t sum_dis = 0;
     for (size_t i = 0; i < map->table.num_elems; i++) {
-        carbon_hashset_bucket_t *bucket = vec_get(&map->table, i, carbon_hashset_bucket_t);
+        struct hashset_bucket *bucket = vec_get(&map->table, i, struct hashset_bucket);
         sum_dis += abs(bucket->displacement);
     }
     *displace = (sum_dis / (float) map->table.num_elems);
@@ -169,7 +169,7 @@ carbon_hashset_avg_displace(float *displace, const carbon_hashset_t *map)
 }
 
 NG5_EXPORT(bool)
-carbon_hashset_lock(carbon_hashset_t *map)
+carbon_hashset_lock(struct hashset *map)
 {
     NG5_NON_NULL_OR_ERROR(map)
     carbon_spinlock_acquire(&map->lock);
@@ -177,7 +177,7 @@ carbon_hashset_lock(carbon_hashset_t *map)
 }
 
 NG5_EXPORT(bool)
-carbon_hashset_unlock(carbon_hashset_t *map)
+carbon_hashset_unlock(struct hashset *map)
 {
     NG5_NON_NULL_OR_ERROR(map)
     carbon_spinlock_release(&map->lock);
@@ -185,13 +185,13 @@ carbon_hashset_unlock(carbon_hashset_t *map)
 }
 
 static inline const void *
-get_bucket_key(const carbon_hashset_bucket_t *bucket, const carbon_hashset_t *map)
+get_bucket_key(const struct hashset_bucket *bucket, const struct hashset *map)
 {
     return map->key_data.base + bucket->key_idx * map->key_data.elem_size;
 }
 
 static void
-insert(carbon_hashset_bucket_t *bucket, carbon_hashset_t *map, const void *key, i32 displacement)
+insert(struct hashset_bucket *bucket, struct hashset *map, const void *key, i32 displacement)
 {
     u64 idx = map->key_data.num_elems;
     void *key_datum = VECTOR_NEW_AND_GET(&map->key_data, void *);
@@ -203,7 +203,7 @@ insert(carbon_hashset_bucket_t *bucket, carbon_hashset_t *map, const void *key, 
 }
 
 static inline uint_fast32_t
-insert_or_update(carbon_hashset_t *map, const u32 *bucket_idxs, const void *keys,
+insert_or_update(struct hashset *map, const u32 *bucket_idxs, const void *keys,
                  uint_fast32_t num_pairs)
 {
     for (uint_fast32_t i = 0; i < num_pairs; i++)
@@ -213,13 +213,13 @@ insert_or_update(carbon_hashset_t *map, const u32 *bucket_idxs, const void *keys
 
         u32 bucket_idx = intended_bucket_idx;
 
-        carbon_hashset_bucket_t *bucket = vec_get(&map->table, bucket_idx, carbon_hashset_bucket_t);
+        struct hashset_bucket *bucket = vec_get(&map->table, bucket_idx, struct hashset_bucket);
         if (bucket->in_use_flag && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) != 0) {
             bool fitting_bucket_found = false;
             u32 displace_idx;
             for (displace_idx = bucket_idx + 1; displace_idx < map->table.num_elems; displace_idx++)
             {
-                carbon_hashset_bucket_t *bucket = vec_get(&map->table, displace_idx, carbon_hashset_bucket_t);
+                struct hashset_bucket *bucket = vec_get(&map->table, displace_idx, struct hashset_bucket);
                 fitting_bucket_found = !bucket->in_use_flag || (bucket->in_use_flag && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0);
                 if (fitting_bucket_found) {
                     break;
@@ -237,7 +237,7 @@ insert_or_update(carbon_hashset_t *map, const u32 *bucket_idxs, const void *keys
             if (!fitting_bucket_found) {
                 for (displace_idx = 0; displace_idx < bucket_idx - 1; displace_idx++)
                 {
-                    const carbon_hashset_bucket_t *bucket = vec_get(&map->table, displace_idx, carbon_hashset_bucket_t);
+                    const struct hashset_bucket *bucket = vec_get(&map->table, displace_idx, struct hashset_bucket);
                     fitting_bucket_found = !bucket->in_use_flag || (bucket->in_use_flag && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0);
                     if (fitting_bucket_found) {
                         break;
@@ -247,7 +247,7 @@ insert_or_update(carbon_hashset_t *map, const u32 *bucket_idxs, const void *keys
 
             assert(fitting_bucket_found == true);
             bucket_idx = displace_idx;
-            bucket = vec_get(&map->table, bucket_idx, carbon_hashset_bucket_t);
+            bucket = vec_get(&map->table, bucket_idx, struct hashset_bucket);
         }
 
         bool is_update = bucket->in_use_flag && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
@@ -267,7 +267,7 @@ insert_or_update(carbon_hashset_t *map, const u32 *bucket_idxs, const void *keys
 }
 
 NG5_EXPORT(bool)
-carbon_hashset_insert_or_update(carbon_hashset_t *map, const void *keys, uint_fast32_t num_pairs)
+carbon_hashset_insert_or_update(struct hashset *map, const void *keys, uint_fast32_t num_pairs)
 {
     NG5_NON_NULL_OR_ERROR(map)
     NG5_NON_NULL_OR_ERROR(keys)
@@ -313,7 +313,7 @@ carbon_hashset_insert_or_update(carbon_hashset_t *map, const void *keys, uint_fa
 }
 
 NG5_EXPORT(bool)
-carbon_hashset_remove_if_contained(carbon_hashset_t *map, const void *keys, size_t num_pairs)
+carbon_hashset_remove_if_contained(struct hashset *map, const void *keys, size_t num_pairs)
 {
     NG5_NON_NULL_OR_ERROR(map)
     NG5_NON_NULL_OR_ERROR(keys)
@@ -343,19 +343,19 @@ carbon_hashset_remove_if_contained(carbon_hashset_t *map, const void *keys, size
 
         for (u32 k = bucket_idx; !bucket_found && k < map->table.num_elems; k++)
         {
-            const carbon_hashset_bucket_t *bucket = vec_get(&map->table, k, carbon_hashset_bucket_t);
+            const struct hashset_bucket *bucket = vec_get(&map->table, k, struct hashset_bucket);
             bucket_found = bucket->in_use_flag && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
             actual_idx = k;
         }
         for (u32 k = 0; !bucket_found && k < bucket_idx; k++)
         {
-            const carbon_hashset_bucket_t *bucket = vec_get(&map->table, k, carbon_hashset_bucket_t);
+            const struct hashset_bucket *bucket = vec_get(&map->table, k, struct hashset_bucket);
             bucket_found = bucket->in_use_flag && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
             actual_idx = k;
         }
 
         if (bucket_found) {
-            carbon_hashset_bucket_t *bucket = vec_get(&map->table, actual_idx, carbon_hashset_bucket_t);
+            struct hashset_bucket *bucket = vec_get(&map->table, actual_idx, struct hashset_bucket);
             bucket->in_use_flag = false;
             bucket->key_idx = 0;
         }
@@ -369,7 +369,7 @@ carbon_hashset_remove_if_contained(carbon_hashset_t *map, const void *keys, size
 }
 
 NG5_EXPORT(bool)
-carbon_hashset_contains_key(carbon_hashset_t *map, const void *key)
+carbon_hashset_contains_key(struct hashset *map, const void *key)
 {
     NG5_NON_NULL_OR_ERROR(map)
     NG5_NON_NULL_OR_ERROR(key)
@@ -383,12 +383,12 @@ carbon_hashset_contains_key(carbon_hashset_t *map, const void *key)
 
     for (u32 k = bucket_idx; !bucket_found && k < map->table.num_elems; k++)
     {
-        const carbon_hashset_bucket_t *bucket = vec_get(&map->table, k, carbon_hashset_bucket_t);
+        const struct hashset_bucket *bucket = vec_get(&map->table, k, struct hashset_bucket);
         bucket_found = bucket->in_use_flag && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
     }
     for (u32 k = 0; !bucket_found && k < bucket_idx; k++)
     {
-        const carbon_hashset_bucket_t *bucket = vec_get(&map->table, k, carbon_hashset_bucket_t);
+        const struct hashset_bucket *bucket = vec_get(&map->table, k, struct hashset_bucket);
         bucket_found = bucket->in_use_flag && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
     }
 
@@ -399,7 +399,7 @@ carbon_hashset_contains_key(carbon_hashset_t *map, const void *key)
 }
 
 NG5_EXPORT(bool)
-carbon_hashset_get_fload_factor(float *factor, carbon_hashset_t *map)
+carbon_hashset_get_fload_factor(float *factor, struct hashset *map)
 {
     NG5_NON_NULL_OR_ERROR(factor)
     NG5_NON_NULL_OR_ERROR(map)
@@ -414,13 +414,13 @@ carbon_hashset_get_fload_factor(float *factor, carbon_hashset_t *map)
 }
 
 NG5_EXPORT(bool)
-carbon_hashset_rehash(carbon_hashset_t *map)
+carbon_hashset_rehash(struct hashset *map)
 {
     NG5_NON_NULL_OR_ERROR(map)
 
     carbon_hashset_lock(map);
 
-    carbon_hashset_t *cpy = carbon_hashset_cpy(map);
+    struct hashset *cpy = carbon_hashset_cpy(map);
     carbon_hashset_clear(map);
 
     size_t new_cap = (cpy->key_data.cap_elems + 1) * 1.7f;
@@ -434,7 +434,7 @@ carbon_hashset_rehash(carbon_hashset_t *map)
     assert(map->key_data.num_elems <= map->table.num_elems);
 
     for (size_t i = 0; i < cpy->table.num_elems; i++) {
-        carbon_hashset_bucket_t *bucket = vec_get(&cpy->table, i, carbon_hashset_bucket_t);
+        struct hashset_bucket *bucket = vec_get(&cpy->table, i, struct hashset_bucket);
         if (bucket->in_use_flag) {
             const void *old_key = get_bucket_key(bucket, cpy);
             if (!carbon_hashset_insert_or_update(map, old_key, 1)) {

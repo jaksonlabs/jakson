@@ -611,7 +611,7 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_
         struct archive archive;
         int status;
         if ((status = carbon_archive_open(&archive, pathCarbonFileIn))) {
-            carbon_encoded_doc_collection_t collection;
+            struct encoded_doc_list collection;
             carbon_archive_converter(&collection, &archive);
             carbon_encoded_doc_collection_print(stdout, &collection);
             printf("\n");

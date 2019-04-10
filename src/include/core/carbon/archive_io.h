@@ -24,28 +24,22 @@
 NG5_BEGIN_DECL
 
 struct archive; /* forwarded */
-
-/**
- * Thread-safe I/O with an underlying archive file.
- * Locking is implemented using a spinlock. *
- */
-typedef struct carbon_io_context carbon_io_context_t;
-
+struct io_context; /* forwarded */
 
 NG5_EXPORT(bool)
-carbon_io_context_create(carbon_io_context_t **context, struct err *err, const char *file_path);
+carbon_io_context_create(struct io_context **context, struct err *err, const char *file_path);
 
 NG5_EXPORT(struct err *)
-carbon_io_context_get_error(carbon_io_context_t *context);
+carbon_io_context_get_error(struct io_context *context);
 
 NG5_EXPORT(FILE *)
-carbon_io_context_lock_and_access(carbon_io_context_t *context);
+carbon_io_context_lock_and_access(struct io_context *context);
 
 NG5_EXPORT(bool)
-carbon_io_context_unlock(carbon_io_context_t *context);
+carbon_io_context_unlock(struct io_context *context);
 
 NG5_EXPORT(bool)
-carbon_io_context_drop(carbon_io_context_t *context);
+carbon_io_context_drop(struct io_context *context);
 
 
 NG5_END_DECL

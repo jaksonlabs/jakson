@@ -18,7 +18,7 @@
 #include "core/carbon/archive_strid_iter.h"
 
 NG5_EXPORT(bool)
-carbon_strid_iter_open(carbon_strid_iter_t *it, struct err *err, struct archive *archive)
+carbon_strid_iter_open(struct strid_iter *it, struct err *err, struct archive *archive)
 {
     NG5_NON_NULL_OR_ERROR(it)
     NG5_NON_NULL_OR_ERROR(archive)
@@ -37,8 +37,8 @@ carbon_strid_iter_open(carbon_strid_iter_t *it, struct err *err, struct archive 
 }
 
 NG5_EXPORT(bool)
-carbon_strid_iter_next(bool *success, carbon_strid_info_t **info, struct err *err, size_t *info_length,
-                       carbon_strid_iter_t *it)
+carbon_strid_iter_next(bool *success, struct strid_info **info, struct err *err, size_t *info_length,
+                       struct strid_iter *it)
 {
     NG5_NON_NULL_OR_ERROR(info)
     NG5_NON_NULL_OR_ERROR(info_length)
@@ -77,7 +77,7 @@ carbon_strid_iter_next(bool *success, carbon_strid_info_t **info, struct err *er
 }
 
 NG5_EXPORT(bool)
-carbon_strid_iter_close(carbon_strid_iter_t *it)
+carbon_strid_iter_close(struct strid_iter *it)
 {
     NG5_NON_NULL_OR_ERROR(it)
     if (it->is_open) {

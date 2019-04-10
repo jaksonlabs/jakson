@@ -1785,7 +1785,7 @@ NG5_FUNC_UNUSED run_magic_visitor(int mask, struct archive *archive)
 }
 
 static bool
-run_show_keys( carbon_timestamp_t *duration, carbon_encoded_doc_collection_t *result, const char *path, struct archive *archive)
+run_show_keys( timestamp_t *duration, struct encoded_doc_list *result, const char *path, struct archive *archive)
 {
     struct vector ofType(ops_show_keys_key_type_pair_t) prop_keys;
     carbon_vec_create(&prop_keys, NULL, sizeof(ops_show_keys_key_type_pair_t), 100);
@@ -1796,7 +1796,7 @@ run_show_keys( carbon_timestamp_t *duration, carbon_encoded_doc_collection_t *re
 
     carbon_encoded_doc_collection_create(result, &archive->err, archive);
 
-    carbon_encoded_doc_t *result_doc = encoded_doc_collection_get_or_append(result, result_oid);
+    struct encoded_doc *result_doc = encoded_doc_collection_get_or_append(result, result_oid);
     carbon_encoded_doc_add_prop_array_object_decoded(result_doc, "result");
 
     for (u32 i = 0; i < prop_keys.num_elems; i++) {
@@ -1804,7 +1804,7 @@ run_show_keys( carbon_timestamp_t *duration, carbon_encoded_doc_collection_t *re
         object_id_t tmp_obj_id;
         carbon_object_id_create(&tmp_obj_id);
         carbon_encoded_doc_array_push_object_decoded(result_doc, "result", tmp_obj_id);
-        carbon_encoded_doc_t *pair_doc = encoded_doc_collection_get_or_append(result, tmp_obj_id);
+        struct encoded_doc *pair_doc = encoded_doc_collection_get_or_append(result, tmp_obj_id);
         carbon_encoded_doc_add_prop_string_decoded(pair_doc, "name", pair->key);
         carbon_encoded_doc_add_prop_string_decoded_string_value_decoded(pair_doc, "type", carbon_basic_type_to_json_type_str(pair->type));
         carbon_encoded_doc_add_prop_string_decoded_string_value_decoded(pair_doc, "sub-type", carbon_basic_type_to_system_type_str(pair->type));
@@ -1816,7 +1816,7 @@ run_show_keys( carbon_timestamp_t *duration, carbon_encoded_doc_collection_t *re
 }
 
 static bool
-run_count_values( carbon_timestamp_t *duration, carbon_encoded_doc_collection_t *result, const char *path, struct archive *archive)
+run_count_values( timestamp_t *duration, struct encoded_doc_list *result, const char *path, struct archive *archive)
 {
     struct vector ofType(ops_count_values_result_t) prop_keys;
     carbon_vec_create(&prop_keys, NULL, sizeof(ops_count_values_result_t), 100);
@@ -1827,7 +1827,7 @@ run_count_values( carbon_timestamp_t *duration, carbon_encoded_doc_collection_t 
 
     carbon_encoded_doc_collection_create(result, &archive->err, archive);
 
-    carbon_encoded_doc_t *result_doc = encoded_doc_collection_get_or_append(result, result_oid);
+    struct encoded_doc *result_doc = encoded_doc_collection_get_or_append(result, result_oid);
     carbon_encoded_doc_add_prop_array_object_decoded(result_doc, "result");
 
     for (u32 i = 0; i < prop_keys.num_elems; i++) {
@@ -1835,7 +1835,7 @@ run_count_values( carbon_timestamp_t *duration, carbon_encoded_doc_collection_t 
         object_id_t tmp_obj_id;
         carbon_object_id_create(&tmp_obj_id);
         carbon_encoded_doc_array_push_object_decoded(result_doc, "result", tmp_obj_id);
-        carbon_encoded_doc_t *doc = encoded_doc_collection_get_or_append(result, tmp_obj_id);
+        struct encoded_doc *doc = encoded_doc_collection_get_or_append(result, tmp_obj_id);
         carbon_encoded_doc_add_prop_string_decoded(doc, "key", entry->key);
         carbon_encoded_doc_add_prop_uint32_decoded(doc, "count", entry->count);
     }
@@ -1846,7 +1846,7 @@ run_count_values( carbon_timestamp_t *duration, carbon_encoded_doc_collection_t 
 }
 
 static bool
-run_show_values( carbon_timestamp_t *duration, carbon_encoded_doc_collection_t *result, const char *path, struct archive *archive, u32 offset, u32 limit, i32 between_lower_bound,
+run_show_values( timestamp_t *duration, struct encoded_doc_list *result, const char *path, struct archive *archive, u32 offset, u32 limit, i32 between_lower_bound,
                  i32 between_upper_bound, const char *contains_string)
 {
     struct vector ofType(ops_show_values_result_t) prop_keys;
@@ -1858,7 +1858,7 @@ run_show_values( carbon_timestamp_t *duration, carbon_encoded_doc_collection_t *
 
     carbon_encoded_doc_collection_create(result, &archive->err, archive);
 
-    carbon_encoded_doc_t *result_doc = encoded_doc_collection_get_or_append(result, result_oid);
+    struct encoded_doc *result_doc = encoded_doc_collection_get_or_append(result, result_oid);
     carbon_encoded_doc_add_prop_array_object_decoded(result_doc, "result");
 
     for (u32 i = 0; i < prop_keys.num_elems; i++) {
@@ -1866,7 +1866,7 @@ run_show_values( carbon_timestamp_t *duration, carbon_encoded_doc_collection_t *
         object_id_t tmp_obj_id;
         carbon_object_id_create(&tmp_obj_id);
         carbon_encoded_doc_array_push_object_decoded(result_doc, "result", tmp_obj_id);
-        carbon_encoded_doc_t *doc = encoded_doc_collection_get_or_append(result, tmp_obj_id);
+        struct encoded_doc *doc = encoded_doc_collection_get_or_append(result, tmp_obj_id);
         carbon_encoded_doc_add_prop_string_decoded(doc, "key", entry->key);
         carbon_encoded_doc_add_prop_string_decoded_string_value_decoded(doc, "type", carbon_basic_type_to_json_type_str(entry->type));
 
@@ -1893,7 +1893,7 @@ run_show_values( carbon_timestamp_t *duration, carbon_encoded_doc_collection_t *
 
 
 static bool
-run_get_citations( carbon_timestamp_t *duration, carbon_encoded_doc_collection_t *result, const char *paper_name, struct archive *archive)
+run_get_citations( timestamp_t *duration, struct encoded_doc_list *result, const char *paper_name, struct archive *archive)
 {
     struct vector ofType(ops_get_citations_result_t) prop_keys;
     carbon_vec_create(&prop_keys, NULL, sizeof(ops_get_citations_result_entry_t), 100);
@@ -1904,7 +1904,7 @@ run_get_citations( carbon_timestamp_t *duration, carbon_encoded_doc_collection_t
 
     carbon_encoded_doc_collection_create(result, &archive->err, archive);
 
-    carbon_encoded_doc_t *result_doc = encoded_doc_collection_get_or_append(result, result_oid);
+    struct encoded_doc *result_doc = encoded_doc_collection_get_or_append(result, result_oid);
     carbon_encoded_doc_add_prop_array_object_decoded(result_doc, "result");
 
     for (u32 i = 0; i < prop_keys.num_elems; i++) {
@@ -1914,7 +1914,7 @@ run_get_citations( carbon_timestamp_t *duration, carbon_encoded_doc_collection_t
             object_id_t tmp_obj_id;
             carbon_object_id_create(&tmp_obj_id);
             carbon_encoded_doc_array_push_object_decoded(result_doc, "result", tmp_obj_id);
-            carbon_encoded_doc_t *doc = encoded_doc_collection_get_or_append(result, tmp_obj_id);
+            struct encoded_doc *doc = encoded_doc_collection_get_or_append(result, tmp_obj_id);
             carbon_encoded_doc_add_prop_string_decoded(doc, "title", entry->paper_title);
             carbon_encoded_doc_add_prop_string_decoded(doc, "id", entry->paper_id);
             carbon_encoded_doc_add_prop_array_string_decoded(doc, "authors");
@@ -1935,7 +1935,7 @@ run_get_citations( carbon_timestamp_t *duration, carbon_encoded_doc_collection_t
 static void
 process_from(struct archive *archive, const char *line)
 {
-    carbon_timestamp_t duration = 0;
+    timestamp_t duration = 0;
     char *select = strstr(line, "select");
     char *show_keys = strstr(line, "show keys");
     char *linecpy = strdup(line);
@@ -1944,8 +1944,8 @@ process_from(struct archive *archive, const char *line)
         char *name = strstr(line, "\"") + 1;
         *strstr(name, "\"") = '\0';
 
-        carbon_encoded_doc_collection_t result;
-        carbon_timestamp_t duration;
+        struct encoded_doc_list result;
+        timestamp_t duration;
         run_get_citations(&duration, &result, name, archive);
         carbon_encoded_doc_collection_print(stdout, &result);
         carbon_encoded_doc_collection_drop(&result);
@@ -1982,8 +1982,8 @@ process_from(struct archive *archive, const char *line)
 
 
         if (strcmp(command, "count(*)") == 0) {
-            carbon_encoded_doc_collection_t result;
-            carbon_timestamp_t duration;
+            struct encoded_doc_list result;
+            timestamp_t duration;
             run_count_values(&duration, &result, path, archive);
             carbon_encoded_doc_collection_print(stdout, &result);
             carbon_encoded_doc_collection_drop(&result);
@@ -2018,7 +2018,7 @@ process_from(struct archive *archive, const char *line)
 
             }
 
-            carbon_encoded_doc_collection_t result;
+            struct encoded_doc_list result;
 
             run_show_values(&duration, &result, path, archive, (u32) offset_count, (u32) limit_count, between_lower_bound, between_upper_bound, contains_string);
             carbon_encoded_doc_collection_print(stdout, &result);
@@ -2040,8 +2040,8 @@ leave:
         char *path = strdup(line + 1);
         path[show_keys - line - 2] = '\0';
 
-        carbon_encoded_doc_collection_t result;
-        carbon_timestamp_t duration;
+        struct encoded_doc_list result;
+        timestamp_t duration;
         run_show_keys(&duration, &result, path, archive);
         carbon_encoded_doc_collection_print(stdout, &result);
         carbon_encoded_doc_collection_drop(&result);
@@ -2157,7 +2157,7 @@ cache_monitor(void * data)
             struct string_cache *cache = carbon_archive_get_query_string_id_cache(archive);
 
 
-            carbon_timestamp_t now = carbon_time_now_wallclock();
+            timestamp_t now = carbon_time_now_wallclock();
 
             fprintf(stats_file,
                     "%zu;\"hits\";%.4f\n",

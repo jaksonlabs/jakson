@@ -246,7 +246,7 @@ static int this_get_safe(struct strhash *self, field_sid_t **out, bool **found_m
 {
     assert(self->tag == MEMORY_RESIDENT);
 
-    carbon_timestamp_t begin = carbon_time_now_wallclock();
+    timestamp_t begin = carbon_time_now_wallclock();
     NG5_TRACE(SMART_MAP_TAG, "'get_safe' function invoked for %zu strings", num_keys)
 
     struct allocator hashtable_alloc;
@@ -284,7 +284,7 @@ static int this_get_safe(struct strhash *self, field_sid_t **out, bool **found_m
     *out = values_out;
     *found_mask = found_mask_out;
 
-    carbon_timestamp_t end = carbon_time_now_wallclock();
+    timestamp_t end = carbon_time_now_wallclock();
     NG5_UNUSED(begin);
     NG5_UNUSED(end);
     NG5_TRACE(SMART_MAP_TAG, "'get_safe' function done: %f seconds spent here", (end - begin) / 1000.0f)

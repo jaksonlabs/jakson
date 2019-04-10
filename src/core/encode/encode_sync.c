@@ -205,7 +205,7 @@ static bool this_insert(struct strdic *self, field_sid_t **out, char *const *str
                         size_t num_threads)
 {
     NG5_TRACE(STRING_DIC_SYNC_TAG, "local string dictionary insertion invoked for %zu strings", num_strings);
-    carbon_timestamp_t begin = carbon_time_now_wallclock();
+    timestamp_t begin = carbon_time_now_wallclock();
 
     NG5_UNUSED(num_threads);
 
@@ -302,7 +302,7 @@ static bool this_insert(struct strdic *self, field_sid_t **out, char *const *str
 
     unlock(self);
 
-    carbon_timestamp_t end = carbon_time_now_wallclock();
+    timestamp_t end = carbon_time_now_wallclock();
     NG5_UNUSED(begin);
     NG5_UNUSED(end);
     NG5_INFO(STRING_DIC_SYNC_TAG, "insertion operation done: %f seconds spent here", (end - begin)/1000.0f)
@@ -359,7 +359,7 @@ static bool this_remove(struct strdic *self, field_sid_t *strings, size_t num_st
 static bool this_locate_safe(struct strdic *self, field_sid_t **out, bool **found_mask,
                           size_t *num_not_found, char *const *keys, size_t num_keys)
 {
-    carbon_timestamp_t begin = carbon_time_now_wallclock();
+    timestamp_t begin = carbon_time_now_wallclock();
     NG5_TRACE(STRING_DIC_SYNC_TAG, "'locate_safe' function invoked for %zu strings", num_keys)
 
     NG5_NON_NULL_OR_ERROR(self);
@@ -375,7 +375,7 @@ static bool this_locate_safe(struct strdic *self, field_sid_t **out, bool **foun
     int status = carbon_strhash_get_bulk_safe(out, found_mask, num_not_found, &extra->index, keys, num_keys);
     unlock(self);
 
-    carbon_timestamp_t end = carbon_time_now_wallclock();
+    timestamp_t end = carbon_time_now_wallclock();
     NG5_UNUSED(begin);
     NG5_UNUSED(end);
     NG5_TRACE(STRING_DIC_SYNC_TAG, "'locate_safe' function done: %f seconds spent here", (end-begin)/1000.0f)

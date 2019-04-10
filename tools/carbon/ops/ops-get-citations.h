@@ -24,7 +24,7 @@ typedef struct
 } ops_get_citations_result_t;
 
 NG5_EXPORT(bool)
-ops_get_citations(carbon_timestamp_t *duration, struct vector ofType(ops_get_citations_result_t) *result, const char *paper_title,
+ops_get_citations(timestamp_t *duration, struct vector ofType(ops_get_citations_result_t) *result, const char *paper_title,
                 struct archive *archive);
 
 #endif //LIBNG5_OPS_SHOW_KEYS_H

@@ -22,23 +22,23 @@
 #include "core/carbon/archive_query.h"
 
 static void
-iterate_props(struct archive *archive, carbon_archive_prop_iter_t *prop_iter,
+iterate_props(struct archive *archive, struct prop_iter *prop_iter,
               struct vector ofType(carbon_path_entry_t) *path_stack, carbon_archive_visitor_t *visitor,
               int mask, void *capture, bool is_root_object, field_sid_t parent_key, u32 parent_key_array_idx);
 
 static void
 iterate_objects(struct archive *archive, const field_sid_t *keys, u32 num_pairs,
-                carbon_archive_value_vector_t *value_iter,
+                struct archive_value_vector *value_iter,
                 struct vector ofType(carbon_path_entry_t) *path_stack, carbon_archive_visitor_t *visitor,
                 int mask, void *capture, bool is_root_object)
 {
     NG5_UNUSED(num_pairs);
 
     u32 vector_length;
-    carbon_archive_object_t object;
+    struct archive_object object;
     object_id_t parent_object_id;
     object_id_t object_id;
-    carbon_archive_prop_iter_t  prop_iter;
+    struct prop_iter  prop_iter;
     struct err err;
 
     carbon_archive_value_vector_get_object_id(&parent_object_id, value_iter);
@@ -121,18 +121,18 @@ iterate_objects(struct archive *archive, const field_sid_t *keys, u32 num_pairs,
 }
 
 static void
-iterate_props(struct archive *archive, carbon_archive_prop_iter_t *prop_iter,
+iterate_props(struct archive *archive, struct prop_iter *prop_iter,
               struct vector ofType(carbon_path_entry_t) *path_stack, carbon_archive_visitor_t *visitor,
               int mask, void *capture, bool is_root_object, field_sid_t parent_key, u32 parent_key_array_idx)
 {
     object_id_t this_object_oid;
-    carbon_archive_value_vector_t value_iter;
+    struct archive_value_vector value_iter;
     enum field_type type;
     bool is_array;
     const field_sid_t *keys;
     u32 num_pairs;
-    carbon_archive_prop_iter_mode_e iter_type;
-    carbon_archive_collection_iter_t collection_iter;
+    enum prop_iter_mode iter_type;
+    archive_collection_iter_t collection_iter;
     bool first_type_group = true;
 
     NG5_UNUSED(parent_key);
@@ -145,7 +145,7 @@ iterate_props(struct archive *archive, carbon_archive_prop_iter_t *prop_iter,
 
     while (carbon_archive_prop_iter_next(&iter_type, &value_iter, &collection_iter, prop_iter)) {
 
-        if (iter_type == NG5_ARCHIVE_PROP_ITER_MODE_OBJECT) {
+        if (iter_type == PROP_ITER_MODE_OBJECT) {
 
             keys = carbon_archive_value_vector_get_keys(&num_pairs, &value_iter);
             carbon_archive_value_vector_is_array_type(&is_array, &value_iter);
@@ -242,7 +242,7 @@ iterate_props(struct archive *archive, carbon_archive_prop_iter_t *prop_iter,
 
             first_type_group = false;
         } else {
-            carbon_archive_column_group_iter_t group_iter;
+            archive_column_group_iter_t group_iter;
             u32 num_column_groups;
             keys = carbon_archive_collection_iter_get_keys(&num_column_groups, &collection_iter);
 
@@ -274,7 +274,7 @@ iterate_props(struct archive *archive, carbon_archive_prop_iter_t *prop_iter,
                 if (!skip_groups_by_key[current_group_idx]) {
 
                     u32 num_column_group_objs;
-                    carbon_archive_column_iter_t column_iter;
+                    archive_column_iter_t column_iter;
                     field_sid_t group_key = keys[current_group_idx];
                     const object_id_t *column_group_object_ids = carbon_archive_column_group_get_object_ids(&num_column_group_objs, &group_iter);
                     bool *skip_objects = malloc(num_column_group_objs * sizeof(bool));
@@ -330,7 +330,7 @@ iterate_props(struct archive *archive, carbon_archive_prop_iter_t *prop_iter,
                             {
                                 u32 num_positions;
                                 const u32 *entry_positions = carbon_archive_column_get_entry_positions(&num_positions, &column_iter);
-                                carbon_archive_column_entry_iter_t entry_iter;
+                                archive_column_entry_iter_t entry_iter;
 
                                 object_id_t *entry_object_containments = malloc(num_positions * sizeof(object_id_t));
                                 for (u32 m = 0; m < num_positions; m++)
@@ -389,8 +389,8 @@ iterate_props(struct archive *archive, carbon_archive_prop_iter_t *prop_iter,
                                         SET_NESTED_ARRAY_SWITCH_CASE(nulls, field_u32_t)
                                     } break;
                                     case NG5_BASIC_TYPE_OBJECT: {
-                                        carbon_archive_column_entry_object_iter_t iter;
-                                        const carbon_archive_object_t *archive_object;
+                                        struct column_object_iter iter;
+                                        const struct archive_object *archive_object;
                                         carbon_archive_column_entry_get_objects(&iter, &entry_iter);
 
                                         while ((archive_object = carbon_archive_column_entry_object_iter_next_object(&iter)) != NULL) {
@@ -419,7 +419,7 @@ iterate_props(struct archive *archive, carbon_archive_prop_iter_t *prop_iter,
                                                 carbon_vec_pop(path_stack);
 
                                                 struct err err;
-                                                carbon_archive_prop_iter_t nested_obj_prop_iter;
+                                                struct prop_iter nested_obj_prop_iter;
                                                 carbon_archive_prop_iter_from_object(&nested_obj_prop_iter, mask,
                                                                                      &err, archive_object);
                                                 iterate_props(archive, &nested_obj_prop_iter, path_stack, visitor,
@@ -468,7 +468,7 @@ carbon_archive_visit_archive(struct archive *archive, const carbon_archive_visit
     NG5_NON_NULL_OR_ERROR(archive)
     NG5_NON_NULL_OR_ERROR(visitor)
 
-    carbon_archive_prop_iter_t  prop_iter;
+    struct prop_iter  prop_iter;
     struct vector ofType(carbon_path_entry) path_stack;
 
     int mask = desc ? desc->visit_mask : NG5_ARCHIVE_ITER_MASK_ANY;

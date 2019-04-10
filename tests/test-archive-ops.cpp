@@ -64,8 +64,8 @@ TEST(CarbonArchiveOpsTest, CreateArchiveStringHandling)
     std::set<field_sid_t> haystack;
 
     struct archive     archive;
-    carbon_strid_iter_t  strid_iter;
-    carbon_strid_info_t *info;
+    struct strid_iter  strid_iter;
+    struct strid_info *info;
     size_t               vector_len;
     bool                 status;
     bool                 success;
@@ -111,8 +111,8 @@ TEST(CarbonArchiveOpsTest, DecodeStringByIdFullScan)
     std::set<field_sid_t> all_str_ids;
 
     struct archive     archive;
-    carbon_strid_iter_t  strid_iter;
-    carbon_strid_info_t *info;
+    struct strid_iter  strid_iter;
+    struct strid_info *info;
     size_t               vector_len;
     bool                 status;
     bool                 success;
@@ -157,8 +157,8 @@ TEST(CarbonArchiveOpsTest, DecodeStringByIdFullScan)
 TEST(CarbonArchiveOpsTest, DecodeStringByFastUnsafeAccess)
 {
     struct archive                 archive;
-    carbon_strid_iter_t              strid_iter;
-    carbon_strid_info_t             *info;
+    struct strid_iter              strid_iter;
+    struct strid_info             *info;
     size_t                           vector_len;
     bool                             status;
     bool                             success;
@@ -203,7 +203,7 @@ TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateContains)
     struct archive_query        query;
     bool                  status;
     size_t                num_match;
-    carbon_string_pred_t  pred;
+    struct string_pred_t  pred;
     field_sid_t   *result;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
@@ -240,7 +240,7 @@ TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateEquals)
     struct archive_query        query;
     bool                  status;
     size_t                num_match;
-    carbon_string_pred_t  pred;
+    struct string_pred_t  pred;
     field_sid_t   *result;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory

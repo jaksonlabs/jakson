@@ -22,17 +22,17 @@
 
 NG5_BEGIN_DECL
 
-typedef bool (*carbon_string_pred_func_t)(size_t *idxs_matching, size_t *num_matching,
+typedef bool (*string_pred_func_t)(size_t *idxs_matching, size_t *num_matching,
                                      char **strings, size_t num_strings, void *capture);
 
-typedef struct
+struct string_pred_t
 {
-    carbon_string_pred_func_t func;
+    string_pred_func_t func;
     i64 limit;
-} carbon_string_pred_t;
+};
 
 NG5_BUILT_IN(static bool)
-carbon_string_pred_validate(struct err *err, const carbon_string_pred_t *pred)
+carbon_string_pred_validate(struct err *err, const struct string_pred_t *pred)
 {
     NG5_NON_NULL_OR_ERROR(pred);
     NG5_IMPLEMENTS_OR_ERROR(err, pred, func)
@@ -40,7 +40,7 @@ carbon_string_pred_validate(struct err *err, const carbon_string_pred_t *pred)
 }
 
 NG5_BUILT_IN(static bool)
-carbon_string_pred_eval(const carbon_string_pred_t *pred, size_t *idxs_matching, size_t *num_matching,
+carbon_string_pred_eval(const struct string_pred_t *pred, size_t *idxs_matching, size_t *num_matching,
                         char **strings, size_t num_strings, void *capture)
 {
     assert(pred);
@@ -52,7 +52,7 @@ carbon_string_pred_eval(const carbon_string_pred_t *pred, size_t *idxs_matching,
 }
 
 NG5_BUILT_IN(static bool)
-carbon_string_pred_get_limit(i64 *limit, const carbon_string_pred_t *pred)
+carbon_string_pred_get_limit(i64 *limit, const struct string_pred_t *pred)
 {
     NG5_NON_NULL_OR_ERROR(limit);
     NG5_NON_NULL_OR_ERROR(pred);

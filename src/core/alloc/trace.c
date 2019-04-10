@@ -35,7 +35,7 @@ struct trace_stats
     struct vector ofType(size_t) *malloc_sizes;
     struct spinlock *spinlock;
     FILE *statistics_file;
-    carbon_timestamp_t startup_timestamp;
+    timestamp_t startup_timestamp;
 };
 
 

@@ -283,14 +283,14 @@ static void synchronize(struct vector ofType(carrier) *carriers, size_t num_thre
 {
         NG5_DEBUG(STRING_DIC_ASYNC_TAG, "barrier installed for %d threads", num_threads);
 
-        carbon_timestamp_t begin = carbon_time_now_wallclock();
+        timestamp_t begin = carbon_time_now_wallclock();
         for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
                 volatile struct carrier *carrier = vec_get(carriers, thread_id, struct carrier);
                 pthread_join(carrier->thread, NULL);
                 NG5_DEBUG(STRING_DIC_ASYNC_TAG, "thread %d joined", carrier->id);
         }
-        carbon_timestamp_t end = carbon_time_now_wallclock();
-        carbon_timestamp_t duration = (end - begin);
+        timestamp_t end = carbon_time_now_wallclock();
+        timestamp_t duration = (end - begin);
         NG5_UNUSED(duration);
 
         NG5_DEBUG(STRING_DIC_ASYNC_TAG,
@@ -371,7 +371,7 @@ static void compute_thread_assignment(atomic_uint_fast16_t *str_carrier_mapping,
 static bool this_insert(struct strdic *self, field_sid_t **out, char *const *strings, size_t num_strings,
         size_t __num_threads)
 {
-        carbon_timestamp_t begin = carbon_time_now_wallclock();
+        timestamp_t begin = carbon_time_now_wallclock();
         NG5_INFO(STRING_DIC_ASYNC_TAG, "insert operation invoked: %zu strings in total", num_strings)
 
         NG5_CHECK_TAG(self->tag, ASYNC);
@@ -493,7 +493,7 @@ static bool this_insert(struct strdic *self, field_sid_t **out, char *const *str
 
         this_unlock(self);
 
-        carbon_timestamp_t end = carbon_time_now_wallclock();
+        timestamp_t end = carbon_time_now_wallclock();
         NG5_UNUSED(begin);
         NG5_UNUSED(end);
         NG5_INFO(STRING_DIC_ASYNC_TAG, "insertion operation done: %f seconds spent here", (end - begin) / 1000.0f)
@@ -503,7 +503,7 @@ static bool this_insert(struct strdic *self, field_sid_t **out, char *const *str
 
 static bool this_remove(struct strdic *self, field_sid_t *strings, size_t num_strings)
 {
-        carbon_timestamp_t begin = carbon_time_now_wallclock();
+        timestamp_t begin = carbon_time_now_wallclock();
         NG5_INFO(STRING_DIC_ASYNC_TAG, "remove operation started: %zu strings to remove", num_strings);
 
         NG5_CHECK_TAG(self->tag, ASYNC);
@@ -562,7 +562,7 @@ static bool this_remove(struct strdic *self, field_sid_t *strings, size_t num_st
 
         this_unlock(self);
 
-        carbon_timestamp_t end = carbon_time_now_wallclock();
+        timestamp_t end = carbon_time_now_wallclock();
         NG5_UNUSED(begin);
         NG5_UNUSED(end);
         NG5_INFO(STRING_DIC_ASYNC_TAG, "remove operation done: %f seconds spent here", (end - begin) / 1000.0f)
@@ -573,7 +573,7 @@ static bool this_remove(struct strdic *self, field_sid_t *strings, size_t num_st
 static bool this_locate_safe(struct strdic *self, field_sid_t **out, bool **found_mask, size_t *num_not_found,
         char *const *keys, size_t num_keys)
 {
-        carbon_timestamp_t begin = carbon_time_now_wallclock();
+        timestamp_t begin = carbon_time_now_wallclock();
         NG5_INFO(STRING_DIC_ASYNC_TAG, "locate (safe) operation started: %zu strings to locate", num_keys)
 
         NG5_CHECK_TAG(self->tag, ASYNC);
@@ -689,7 +689,7 @@ static bool this_locate_safe(struct strdic *self, field_sid_t **out, bool **foun
 
         this_unlock(self);
 
-        carbon_timestamp_t end = carbon_time_now_wallclock();
+        timestamp_t end = carbon_time_now_wallclock();
         NG5_UNUSED(begin);
         NG5_UNUSED(end);
         NG5_INFO(STRING_DIC_ASYNC_TAG, "locate (safe) operation done: %f seconds spent here", (end - begin) / 1000.0f)
@@ -720,7 +720,7 @@ static bool this_locate_fast(struct strdic *self, field_sid_t **out, char *const
 
 static char **this_extract(struct strdic *self, const field_sid_t *ids, size_t num_ids)
 {
-        carbon_timestamp_t begin = carbon_time_now_wallclock();
+        timestamp_t begin = carbon_time_now_wallclock();
         NG5_INFO(STRING_DIC_ASYNC_TAG, "extract (safe) operation started: %zu strings to extract", num_ids)
 
         if (self->tag != ASYNC) {
@@ -790,7 +790,7 @@ static char **this_extract(struct strdic *self, const field_sid_t *ids, size_t n
 
         this_unlock(self);
 
-        carbon_timestamp_t end = carbon_time_now_wallclock();
+        timestamp_t end = carbon_time_now_wallclock();
         NG5_UNUSED(begin);
         NG5_UNUSED(end);
         NG5_INFO(STRING_DIC_ASYNC_TAG, "extract (safe) operation done: %f seconds spent here", (end - begin) / 1000.0f)

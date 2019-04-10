@@ -19,7 +19,7 @@
 #include "core/carbon/archive_int.h"
 
 static bool
-init_object_from_memfile(carbon_archive_object_t *obj, struct memfile *memfile)
+init_object_from_memfile(struct archive_object *obj, struct memfile *memfile)
 {
     assert(obj);
     offset_t                  object_off;
@@ -47,60 +47,60 @@ init_object_from_memfile(carbon_archive_object_t *obj, struct memfile *memfile)
     (iter->prop_cursor != state || iter->object.property != 0)
 
 inline static offset_t
-offset_by_state(carbon_archive_prop_iter_t *iter)
+offset_by_state(struct prop_iter *iter)
 {
     switch (iter->prop_cursor) {
-    case NG5_PROP_ITER_STATE_NULLS:
+    case PROP_ITER_NULLS:
         return iter->object.prop_offsets.nulls;
-    case NG5_PROP_ITER_STATE_BOOLS:
+    case PROP_ITER_BOOLS:
         return iter->object.prop_offsets.bools;
-    case NG5_PROP_ITER_STATE_INT8S:
+    case PROP_ITER_INT8S:
         return iter->object.prop_offsets.int8s;
-    case NG5_PROP_ITER_STATE_INT16S:
+    case PROP_ITER_INT16S:
         return iter->object.prop_offsets.int16s;
-    case NG5_PROP_ITER_STATE_INT32S:
+    case PROP_ITER_INT32S:
         return iter->object.prop_offsets.int32s;
-    case NG5_PROP_ITER_STATE_INT64S:
+    case PROP_ITER_INT64S:
         return iter->object.prop_offsets.int64s;
-    case NG5_PROP_ITER_STATE_UINT8S:
+    case PROP_ITER_UINT8S:
         return iter->object.prop_offsets.uint8s;
-    case NG5_PROP_ITER_STATE_UINT16S:
+    case PROP_ITER_UINT16S:
         return iter->object.prop_offsets.uint16s;
-    case NG5_PROP_ITER_STATE_UINT32S:
+    case PROP_ITER_UINT32S:
         return iter->object.prop_offsets.uint32s;
-    case NG5_PROP_ITER_STATE_UINT64S:
+    case PROP_ITER_UINT64S:
         return iter->object.prop_offsets.uint64s;
-    case NG5_PROP_ITER_STATE_FLOATS:
+    case PROP_ITER_FLOATS:
         return iter->object.prop_offsets.floats;
-    case NG5_PROP_ITER_STATE_STRINGS:
+    case PROP_ITER_STRINGS:
         return iter->object.prop_offsets.strings;
-    case NG5_PROP_ITER_STATE_OBJECTS:
+    case PROP_ITER_OBJECTS:
         return iter->object.prop_offsets.objects;
-    case NG5_PROP_ITER_STATE_NULL_ARRAYS:
+    case PROP_ITER_NULL_ARRAYS:
         return iter->object.prop_offsets.null_arrays;
-    case NG5_PROP_ITER_STATE_BOOL_ARRAYS:
+    case PROP_ITER_BOOL_ARRAYS:
         return iter->object.prop_offsets.bool_arrays;
-    case NG5_PROP_ITER_STATE_INT8_ARRAYS:
+    case PROP_ITER_INT8_ARRAYS:
         return iter->object.prop_offsets.int8_arrays;
-    case NG5_PROP_ITER_STATE_INT16_ARRAYS:
+    case PROP_ITER_INT16_ARRAYS:
         return iter->object.prop_offsets.int16_arrays;
-    case NG5_PROP_ITER_STATE_INT32_ARRAYS:
+    case PROP_ITER_INT32_ARRAYS:
         return iter->object.prop_offsets.int32_arrays;
-    case NG5_PROP_ITER_STATE_INT64_ARRAYS:
+    case PROP_ITER_INT64_ARRAYS:
         return iter->object.prop_offsets.int64_arrays;
-    case NG5_PROP_ITER_STATE_UINT8_ARRAYS:
+    case PROP_ITER_UINT8_ARRAYS:
         return iter->object.prop_offsets.uint8_arrays;
-    case NG5_PROP_ITER_STATE_UINT16_ARRAYS:
+    case PROP_ITER_UINT16_ARRAYS:
         return iter->object.prop_offsets.uint16_arrays;
-    case NG5_PROP_ITER_STATE_UINT32_ARRAYS:
+    case PROP_ITER_UINT32_ARRAYS:
         return iter->object.prop_offsets.uint32_arrays;
-    case NG5_PROP_ITER_STATE_UINT64_ARRAYS:
+    case PROP_ITER_UINT64_ARRAYS:
         return iter->object.prop_offsets.uint64_arrays;
-    case NG5_PROP_ITER_STATE_FLOAT_ARRAYS:
+    case PROP_ITER_FLOAT_ARRAYS:
         return iter->object.prop_offsets.float_arrays;
-    case NG5_PROP_ITER_STATE_STRING_ARRAYS:
+    case PROP_ITER_STRING_ARRAYS:
         return iter->object.prop_offsets.string_arrays;
-    case NG5_PROP_ITER_STATE_OBJECT_ARRAYS:
+    case PROP_ITER_OBJECT_ARRAYS:
         return iter->object.prop_offsets.object_arrays;
     default:
         carbon_print_error_and_die(NG5_ERR_INTERNALERR)
@@ -108,7 +108,7 @@ offset_by_state(carbon_archive_prop_iter_t *iter)
 }
 
 static bool
-prop_iter_read_colum_entry(carbon_archive_collection_iter_state_t *state, struct memfile *memfile)
+prop_iter_read_colum_entry(struct collection_iter_state *state, struct memfile *memfile)
 {
     assert(state->current_column_group.current_column.current_entry.idx <
         state->current_column_group.current_column.num_elem);
@@ -127,7 +127,7 @@ prop_iter_read_colum_entry(carbon_archive_collection_iter_state_t *state, struct
 }
 
 static bool
-prop_iter_read_column(carbon_archive_collection_iter_state_t *state, struct memfile *memfile)
+prop_iter_read_column(struct collection_iter_state *state, struct memfile *memfile)
 {
     assert(state->current_column_group.current_column.idx <
            state->current_column_group.num_columns);
@@ -155,7 +155,7 @@ prop_iter_read_column(carbon_archive_collection_iter_state_t *state, struct memf
 }
 
 static bool
-collection_iter_read_next_column_group(carbon_archive_collection_iter_state_t *state, struct memfile *memfile)
+collection_iter_read_next_column_group(struct collection_iter_state *state, struct memfile *memfile)
 {
     assert(state->current_column_group_idx < state->num_column_groups);
     carbon_memfile_seek(memfile,
@@ -175,38 +175,38 @@ collection_iter_read_next_column_group(carbon_archive_collection_iter_state_t *s
 }
 
 static void
-prop_iter_cursor_init(carbon_archive_prop_iter_t *iter)
+prop_iter_cursor_init(struct prop_iter *iter)
 {
-    assert(STATE_AND_PROPERTY_EXISTS(NG5_PROP_ITER_STATE_NULLS, prop_offsets.nulls));
-    assert(STATE_AND_PROPERTY_EXISTS(NG5_PROP_ITER_STATE_BOOLS, prop_offsets.bools));
-    assert(STATE_AND_PROPERTY_EXISTS(NG5_PROP_ITER_STATE_INT8S, prop_offsets.int8s));
-    assert(STATE_AND_PROPERTY_EXISTS(NG5_PROP_ITER_STATE_INT16S, prop_offsets.int16s));
-    assert(STATE_AND_PROPERTY_EXISTS(NG5_PROP_ITER_STATE_INT32S, prop_offsets.int32s));
-    assert(STATE_AND_PROPERTY_EXISTS(NG5_PROP_ITER_STATE_INT64S, prop_offsets.int64s));
-    assert(STATE_AND_PROPERTY_EXISTS(NG5_PROP_ITER_STATE_UINT8S, prop_offsets.uint8s));
-    assert(STATE_AND_PROPERTY_EXISTS(NG5_PROP_ITER_STATE_UINT16S, prop_offsets.uint16s));
-    assert(STATE_AND_PROPERTY_EXISTS(NG5_PROP_ITER_STATE_UINT32S, prop_offsets.uint32s));
-    assert(STATE_AND_PROPERTY_EXISTS(NG5_PROP_ITER_STATE_UINT64S, prop_offsets.uint64s));
-    assert(STATE_AND_PROPERTY_EXISTS(NG5_PROP_ITER_STATE_FLOATS, prop_offsets.floats));
-    assert(STATE_AND_PROPERTY_EXISTS(NG5_PROP_ITER_STATE_STRINGS, prop_offsets.strings));
-    assert(STATE_AND_PROPERTY_EXISTS(NG5_PROP_ITER_STATE_OBJECTS, prop_offsets.objects));
-    assert(STATE_AND_PROPERTY_EXISTS(NG5_PROP_ITER_STATE_NULL_ARRAYS, prop_offsets.null_arrays));
-    assert(STATE_AND_PROPERTY_EXISTS(NG5_PROP_ITER_STATE_BOOL_ARRAYS, prop_offsets.bool_arrays));
-    assert(STATE_AND_PROPERTY_EXISTS(NG5_PROP_ITER_STATE_INT8_ARRAYS, prop_offsets.int8_arrays));
-    assert(STATE_AND_PROPERTY_EXISTS(NG5_PROP_ITER_STATE_INT16_ARRAYS, prop_offsets.int16_arrays));
-    assert(STATE_AND_PROPERTY_EXISTS(NG5_PROP_ITER_STATE_INT32_ARRAYS, prop_offsets.int32_arrays));
-    assert(STATE_AND_PROPERTY_EXISTS(NG5_PROP_ITER_STATE_INT64_ARRAYS, prop_offsets.int64_arrays));
-    assert(STATE_AND_PROPERTY_EXISTS(NG5_PROP_ITER_STATE_UINT8_ARRAYS, prop_offsets.uint8_arrays));
-    assert(STATE_AND_PROPERTY_EXISTS(NG5_PROP_ITER_STATE_UINT16_ARRAYS, prop_offsets.uint16_arrays));
-    assert(STATE_AND_PROPERTY_EXISTS(NG5_PROP_ITER_STATE_UINT32_ARRAYS, prop_offsets.uint32_arrays));
-    assert(STATE_AND_PROPERTY_EXISTS(NG5_PROP_ITER_STATE_UINT64_ARRAYS, prop_offsets.uint64_arrays));
-    assert(STATE_AND_PROPERTY_EXISTS(NG5_PROP_ITER_STATE_FLOAT_ARRAYS, prop_offsets.float_arrays));
-    assert(STATE_AND_PROPERTY_EXISTS(NG5_PROP_ITER_STATE_STRING_ARRAYS, prop_offsets.string_arrays));
-    assert(STATE_AND_PROPERTY_EXISTS(NG5_PROP_ITER_STATE_OBJECT_ARRAYS, prop_offsets.object_arrays));
+    assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_NULLS, prop_offsets.nulls));
+    assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_BOOLS, prop_offsets.bools));
+    assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_INT8S, prop_offsets.int8s));
+    assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_INT16S, prop_offsets.int16s));
+    assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_INT32S, prop_offsets.int32s));
+    assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_INT64S, prop_offsets.int64s));
+    assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_UINT8S, prop_offsets.uint8s));
+    assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_UINT16S, prop_offsets.uint16s));
+    assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_UINT32S, prop_offsets.uint32s));
+    assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_UINT64S, prop_offsets.uint64s));
+    assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_FLOATS, prop_offsets.floats));
+    assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_STRINGS, prop_offsets.strings));
+    assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_OBJECTS, prop_offsets.objects));
+    assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_NULL_ARRAYS, prop_offsets.null_arrays));
+    assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_BOOL_ARRAYS, prop_offsets.bool_arrays));
+    assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_INT8_ARRAYS, prop_offsets.int8_arrays));
+    assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_INT16_ARRAYS, prop_offsets.int16_arrays));
+    assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_INT32_ARRAYS, prop_offsets.int32_arrays));
+    assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_INT64_ARRAYS, prop_offsets.int64_arrays));
+    assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_UINT8_ARRAYS, prop_offsets.uint8_arrays));
+    assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_UINT16_ARRAYS, prop_offsets.uint16_arrays));
+    assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_UINT32_ARRAYS, prop_offsets.uint32_arrays));
+    assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_UINT64_ARRAYS, prop_offsets.uint64_arrays));
+    assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_FLOAT_ARRAYS, prop_offsets.float_arrays));
+    assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_STRING_ARRAYS, prop_offsets.string_arrays));
+    assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_OBJECT_ARRAYS, prop_offsets.object_arrays));
 
 
 
-    if (iter->mode == NG5_ARCHIVE_PROP_ITER_MODE_COLLECTION)
+    if (iter->mode == PROP_ITER_MODE_COLLECTION)
     {
         iter->mode_collection.collection_start_off = offset_by_state(iter);
         carbon_memfile_seek(&iter->record_table_memfile, iter->mode_collection.collection_start_off);
@@ -243,102 +243,102 @@ prop_iter_cursor_init(carbon_archive_prop_iter_t *iter)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 
-static carbon_prop_iter_state_e
-prop_iter_state_next(carbon_archive_prop_iter_t *iter)
+static enum prop_iter_state
+prop_iter_state_next(struct prop_iter *iter)
 {
     switch (iter->prop_cursor) {
-    case NG5_PROP_ITER_STATE_INIT:
+    case PROP_ITER_INIT:
         SET_STATE_FOR_FALL_THROUGH(iter, nulls, NG5_ARCHIVE_ITER_MASK_PRIMITIVES,
-                                   NG5_ARCHIVE_ITER_MASK_NULL, NG5_PROP_ITER_STATE_NULLS)
-    case NG5_PROP_ITER_STATE_NULLS:
+                                   NG5_ARCHIVE_ITER_MASK_NULL, PROP_ITER_NULLS)
+    case PROP_ITER_NULLS:
         SET_STATE_FOR_FALL_THROUGH(iter, bools, NG5_ARCHIVE_ITER_MASK_PRIMITIVES,
-                                   NG5_ARCHIVE_ITER_MASK_BOOLEAN, NG5_PROP_ITER_STATE_BOOLS)
-    case NG5_PROP_ITER_STATE_BOOLS:
+                                   NG5_ARCHIVE_ITER_MASK_BOOLEAN, PROP_ITER_BOOLS)
+    case PROP_ITER_BOOLS:
         SET_STATE_FOR_FALL_THROUGH(iter, int8s, NG5_ARCHIVE_ITER_MASK_PRIMITIVES,
-                                   NG5_ARCHIVE_ITER_MASK_INT8, NG5_PROP_ITER_STATE_INT8S)
-    case NG5_PROP_ITER_STATE_INT8S:
+                                   NG5_ARCHIVE_ITER_MASK_INT8, PROP_ITER_INT8S)
+    case PROP_ITER_INT8S:
         SET_STATE_FOR_FALL_THROUGH(iter, int16s, NG5_ARCHIVE_ITER_MASK_PRIMITIVES,
-                               NG5_ARCHIVE_ITER_MASK_INT16, NG5_PROP_ITER_STATE_INT16S)
-    case NG5_PROP_ITER_STATE_INT16S:
+                               NG5_ARCHIVE_ITER_MASK_INT16, PROP_ITER_INT16S)
+    case PROP_ITER_INT16S:
         SET_STATE_FOR_FALL_THROUGH(iter, int32s, NG5_ARCHIVE_ITER_MASK_PRIMITIVES,
-                               NG5_ARCHIVE_ITER_MASK_INT32, NG5_PROP_ITER_STATE_INT32S)
-    case NG5_PROP_ITER_STATE_INT32S:
+                               NG5_ARCHIVE_ITER_MASK_INT32, PROP_ITER_INT32S)
+    case PROP_ITER_INT32S:
         SET_STATE_FOR_FALL_THROUGH(iter, int64s, NG5_ARCHIVE_ITER_MASK_PRIMITIVES,
-                               NG5_ARCHIVE_ITER_MASK_INT64, NG5_PROP_ITER_STATE_INT64S)
-    case NG5_PROP_ITER_STATE_INT64S:
+                               NG5_ARCHIVE_ITER_MASK_INT64, PROP_ITER_INT64S)
+    case PROP_ITER_INT64S:
         SET_STATE_FOR_FALL_THROUGH(iter, uint8s, NG5_ARCHIVE_ITER_MASK_PRIMITIVES,
-                               NG5_ARCHIVE_ITER_MASK_UINT8, NG5_PROP_ITER_STATE_UINT8S)
-    case NG5_PROP_ITER_STATE_UINT8S:
+                               NG5_ARCHIVE_ITER_MASK_UINT8, PROP_ITER_UINT8S)
+    case PROP_ITER_UINT8S:
         SET_STATE_FOR_FALL_THROUGH(iter, uint16s, NG5_ARCHIVE_ITER_MASK_PRIMITIVES,
-                               NG5_ARCHIVE_ITER_MASK_UINT16, NG5_PROP_ITER_STATE_UINT16S)
-    case NG5_PROP_ITER_STATE_UINT16S:
+                               NG5_ARCHIVE_ITER_MASK_UINT16, PROP_ITER_UINT16S)
+    case PROP_ITER_UINT16S:
         SET_STATE_FOR_FALL_THROUGH(iter, uint32s, NG5_ARCHIVE_ITER_MASK_PRIMITIVES,
-                               NG5_ARCHIVE_ITER_MASK_UINT32, NG5_PROP_ITER_STATE_UINT32S)
-    case NG5_PROP_ITER_STATE_UINT32S:
+                               NG5_ARCHIVE_ITER_MASK_UINT32, PROP_ITER_UINT32S)
+    case PROP_ITER_UINT32S:
         SET_STATE_FOR_FALL_THROUGH(iter, uint64s, NG5_ARCHIVE_ITER_MASK_PRIMITIVES,
-                               NG5_ARCHIVE_ITER_MASK_UINT64, NG5_PROP_ITER_STATE_UINT64S)
-    case NG5_PROP_ITER_STATE_UINT64S:
+                               NG5_ARCHIVE_ITER_MASK_UINT64, PROP_ITER_UINT64S)
+    case PROP_ITER_UINT64S:
         SET_STATE_FOR_FALL_THROUGH(iter, floats, NG5_ARCHIVE_ITER_MASK_PRIMITIVES,
-                               NG5_ARCHIVE_ITER_MASK_NUMBER, NG5_PROP_ITER_STATE_FLOATS)
-    case NG5_PROP_ITER_STATE_FLOATS:
+                               NG5_ARCHIVE_ITER_MASK_NUMBER, PROP_ITER_FLOATS)
+    case PROP_ITER_FLOATS:
         SET_STATE_FOR_FALL_THROUGH(iter, strings, NG5_ARCHIVE_ITER_MASK_PRIMITIVES,
-                               NG5_ARCHIVE_ITER_MASK_STRING, NG5_PROP_ITER_STATE_STRINGS)
-    case NG5_PROP_ITER_STATE_STRINGS:
+                               NG5_ARCHIVE_ITER_MASK_STRING, PROP_ITER_STRINGS)
+    case PROP_ITER_STRINGS:
         SET_STATE_FOR_FALL_THROUGH(iter, objects, NG5_ARCHIVE_ITER_MASK_PRIMITIVES,
-                               NG5_ARCHIVE_ITER_MASK_OBJECT, NG5_PROP_ITER_STATE_OBJECTS)
-    case NG5_PROP_ITER_STATE_OBJECTS:
+                               NG5_ARCHIVE_ITER_MASK_OBJECT, PROP_ITER_OBJECTS)
+    case PROP_ITER_OBJECTS:
         SET_STATE_FOR_FALL_THROUGH(iter, null_arrays, NG5_ARCHIVE_ITER_MASK_ARRAYS,
-                               NG5_ARCHIVE_ITER_MASK_NULL, NG5_PROP_ITER_STATE_NULL_ARRAYS)
-    case NG5_PROP_ITER_STATE_NULL_ARRAYS:
+                               NG5_ARCHIVE_ITER_MASK_NULL, PROP_ITER_NULL_ARRAYS)
+    case PROP_ITER_NULL_ARRAYS:
         SET_STATE_FOR_FALL_THROUGH(iter, bool_arrays, NG5_ARCHIVE_ITER_MASK_ARRAYS,
-                               NG5_ARCHIVE_ITER_MASK_BOOLEAN, NG5_PROP_ITER_STATE_BOOL_ARRAYS)
-    case NG5_PROP_ITER_STATE_BOOL_ARRAYS:
+                               NG5_ARCHIVE_ITER_MASK_BOOLEAN, PROP_ITER_BOOL_ARRAYS)
+    case PROP_ITER_BOOL_ARRAYS:
         SET_STATE_FOR_FALL_THROUGH(iter, int8_arrays, NG5_ARCHIVE_ITER_MASK_ARRAYS,
-                               NG5_ARCHIVE_ITER_MASK_INT8, NG5_PROP_ITER_STATE_INT8_ARRAYS)
-    case NG5_PROP_ITER_STATE_INT8_ARRAYS:
+                               NG5_ARCHIVE_ITER_MASK_INT8, PROP_ITER_INT8_ARRAYS)
+    case PROP_ITER_INT8_ARRAYS:
         SET_STATE_FOR_FALL_THROUGH(iter, int16_arrays, NG5_ARCHIVE_ITER_MASK_ARRAYS,
-                               NG5_ARCHIVE_ITER_MASK_INT16, NG5_PROP_ITER_STATE_INT16_ARRAYS)
-    case NG5_PROP_ITER_STATE_INT16_ARRAYS:
+                               NG5_ARCHIVE_ITER_MASK_INT16, PROP_ITER_INT16_ARRAYS)
+    case PROP_ITER_INT16_ARRAYS:
         SET_STATE_FOR_FALL_THROUGH(iter, int32_arrays, NG5_ARCHIVE_ITER_MASK_ARRAYS,
-                               NG5_ARCHIVE_ITER_MASK_INT32, NG5_PROP_ITER_STATE_INT32_ARRAYS)
-    case NG5_PROP_ITER_STATE_INT32_ARRAYS:
+                               NG5_ARCHIVE_ITER_MASK_INT32, PROP_ITER_INT32_ARRAYS)
+    case PROP_ITER_INT32_ARRAYS:
         SET_STATE_FOR_FALL_THROUGH(iter, int64_arrays, NG5_ARCHIVE_ITER_MASK_ARRAYS,
-                               NG5_ARCHIVE_ITER_MASK_INT64, NG5_PROP_ITER_STATE_INT64_ARRAYS)
-    case NG5_PROP_ITER_STATE_INT64_ARRAYS:
+                               NG5_ARCHIVE_ITER_MASK_INT64, PROP_ITER_INT64_ARRAYS)
+    case PROP_ITER_INT64_ARRAYS:
         SET_STATE_FOR_FALL_THROUGH(iter, uint8_arrays, NG5_ARCHIVE_ITER_MASK_ARRAYS,
-                               NG5_ARCHIVE_ITER_MASK_UINT8, NG5_PROP_ITER_STATE_UINT8_ARRAYS)
-    case NG5_PROP_ITER_STATE_UINT8_ARRAYS:
+                               NG5_ARCHIVE_ITER_MASK_UINT8, PROP_ITER_UINT8_ARRAYS)
+    case PROP_ITER_UINT8_ARRAYS:
         SET_STATE_FOR_FALL_THROUGH(iter, uint16_arrays, NG5_ARCHIVE_ITER_MASK_ARRAYS,
-                               NG5_ARCHIVE_ITER_MASK_UINT16, NG5_PROP_ITER_STATE_UINT16_ARRAYS)
-    case NG5_PROP_ITER_STATE_UINT16_ARRAYS:
+                               NG5_ARCHIVE_ITER_MASK_UINT16, PROP_ITER_UINT16_ARRAYS)
+    case PROP_ITER_UINT16_ARRAYS:
         SET_STATE_FOR_FALL_THROUGH(iter, uint32_arrays, NG5_ARCHIVE_ITER_MASK_ARRAYS,
-                               NG5_ARCHIVE_ITER_MASK_UINT32, NG5_PROP_ITER_STATE_UINT32_ARRAYS)
-    case NG5_PROP_ITER_STATE_UINT32_ARRAYS:
+                               NG5_ARCHIVE_ITER_MASK_UINT32, PROP_ITER_UINT32_ARRAYS)
+    case PROP_ITER_UINT32_ARRAYS:
         SET_STATE_FOR_FALL_THROUGH(iter, uint64_arrays, NG5_ARCHIVE_ITER_MASK_ARRAYS,
-                               NG5_ARCHIVE_ITER_MASK_UINT64, NG5_PROP_ITER_STATE_UINT64_ARRAYS)
-    case NG5_PROP_ITER_STATE_UINT64_ARRAYS:
+                               NG5_ARCHIVE_ITER_MASK_UINT64, PROP_ITER_UINT64_ARRAYS)
+    case PROP_ITER_UINT64_ARRAYS:
         SET_STATE_FOR_FALL_THROUGH(iter, float_arrays, NG5_ARCHIVE_ITER_MASK_ARRAYS,
-                               NG5_ARCHIVE_ITER_MASK_NUMBER, NG5_PROP_ITER_STATE_FLOAT_ARRAYS)
-    case NG5_PROP_ITER_STATE_FLOAT_ARRAYS:
+                               NG5_ARCHIVE_ITER_MASK_NUMBER, PROP_ITER_FLOAT_ARRAYS)
+    case PROP_ITER_FLOAT_ARRAYS:
         SET_STATE_FOR_FALL_THROUGH(iter, string_arrays, NG5_ARCHIVE_ITER_MASK_ARRAYS,
-                               NG5_ARCHIVE_ITER_MASK_STRING, NG5_PROP_ITER_STATE_STRING_ARRAYS)
-    case NG5_PROP_ITER_STATE_STRING_ARRAYS:
+                               NG5_ARCHIVE_ITER_MASK_STRING, PROP_ITER_STRING_ARRAYS)
+    case PROP_ITER_STRING_ARRAYS:
     SET_STATE_FOR_FALL_THROUGH(iter, object_arrays, NG5_ARCHIVE_ITER_MASK_ARRAYS,
-                               NG5_ARCHIVE_ITER_MASK_OBJECT, NG5_PROP_ITER_STATE_OBJECT_ARRAYS)
-    case NG5_PROP_ITER_STATE_OBJECT_ARRAYS:
-        iter->prop_cursor = NG5_PROP_ITER_STATE_DONE;
+                               NG5_ARCHIVE_ITER_MASK_OBJECT, PROP_ITER_OBJECT_ARRAYS)
+    case PROP_ITER_OBJECT_ARRAYS:
+        iter->prop_cursor = PROP_ITER_DONE;
         break;
 
-    case NG5_PROP_ITER_STATE_DONE:
+    case PROP_ITER_DONE:
         break;
     default:
         carbon_print_error_and_die(NG5_ERR_INTERNALERR);
     }
 
-    iter->mode = iter->prop_cursor == NG5_PROP_ITER_STATE_OBJECT_ARRAYS ?
-                 NG5_ARCHIVE_PROP_ITER_MODE_COLLECTION : NG5_ARCHIVE_PROP_ITER_MODE_OBJECT;
+    iter->mode = iter->prop_cursor == PROP_ITER_OBJECT_ARRAYS ?
+                 PROP_ITER_MODE_COLLECTION : PROP_ITER_MODE_OBJECT;
 
-    if (iter->prop_cursor != NG5_PROP_ITER_STATE_DONE) {
+    if (iter->prop_cursor != PROP_ITER_DONE) {
         prop_iter_cursor_init(iter);
     }
     return iter->prop_cursor;
@@ -347,15 +347,15 @@ prop_iter_state_next(carbon_archive_prop_iter_t *iter)
 #pragma GCC diagnostic pop
 
 static void
-prop_iter_state_init(carbon_archive_prop_iter_t *iter)
+prop_iter_state_init(struct prop_iter *iter)
 {
-    iter->prop_cursor = NG5_PROP_ITER_STATE_INIT;
-    iter->mode = NG5_ARCHIVE_PROP_ITER_MODE_OBJECT;
+    iter->prop_cursor = PROP_ITER_INIT;
+    iter->mode = PROP_ITER_MODE_OBJECT;
 }
 
 
 static bool
-carbon_archive_prop_iter_from_memblock(carbon_archive_prop_iter_t *iter,
+carbon_archive_prop_iter_from_memblock(struct prop_iter *iter,
                                        struct err *err,
                                        u16 mask,
                                        struct memblock *memblock,
@@ -389,7 +389,7 @@ carbon_archive_prop_iter_from_memblock(carbon_archive_prop_iter_t *iter,
 }
 
 NG5_EXPORT(bool)
-carbon_archive_prop_iter_from_archive(carbon_archive_prop_iter_t *iter,
+carbon_archive_prop_iter_from_archive(struct prop_iter *iter,
                                       struct err *err,
                                       u16 mask,
                                       struct archive *archive)
@@ -398,57 +398,57 @@ carbon_archive_prop_iter_from_archive(carbon_archive_prop_iter_t *iter,
 }
 
 NG5_EXPORT(bool)
-carbon_archive_prop_iter_from_object(carbon_archive_prop_iter_t *iter,
+carbon_archive_prop_iter_from_object(struct prop_iter *iter,
                                      u16 mask,
                                      struct err *err,
-                                     const carbon_archive_object_t *obj)
+                                     const struct archive_object *obj)
 {
     return carbon_archive_prop_iter_from_memblock(iter, err, mask,
                                                   obj->memfile.memblock, obj->offset);
 }
 
 static enum field_type
-get_basic_type(carbon_prop_iter_state_e state)
+get_basic_type(enum prop_iter_state state)
 {
     switch (state) {
-    case NG5_PROP_ITER_STATE_NULLS:
-    case NG5_PROP_ITER_STATE_NULL_ARRAYS:
+    case PROP_ITER_NULLS:
+    case PROP_ITER_NULL_ARRAYS:
         return NG5_BASIC_TYPE_NULL;
-    case NG5_PROP_ITER_STATE_BOOLS:
-    case NG5_PROP_ITER_STATE_BOOL_ARRAYS:
+    case PROP_ITER_BOOLS:
+    case PROP_ITER_BOOL_ARRAYS:
         return NG5_BASIC_TYPE_BOOLEAN;
-    case NG5_PROP_ITER_STATE_INT8S:
-    case NG5_PROP_ITER_STATE_INT8_ARRAYS:
+    case PROP_ITER_INT8S:
+    case PROP_ITER_INT8_ARRAYS:
         return NG5_BASIC_TYPE_INT8;
-    case NG5_PROP_ITER_STATE_INT16S:
-    case NG5_PROP_ITER_STATE_INT16_ARRAYS:
+    case PROP_ITER_INT16S:
+    case PROP_ITER_INT16_ARRAYS:
         return NG5_BASIC_TYPE_INT16;
-    case NG5_PROP_ITER_STATE_INT32S:
-    case NG5_PROP_ITER_STATE_INT32_ARRAYS:
+    case PROP_ITER_INT32S:
+    case PROP_ITER_INT32_ARRAYS:
         return NG5_BASIC_TYPE_INT32;
-    case NG5_PROP_ITER_STATE_INT64S:
-    case NG5_PROP_ITER_STATE_INT64_ARRAYS:
+    case PROP_ITER_INT64S:
+    case PROP_ITER_INT64_ARRAYS:
         return NG5_BASIC_TYPE_INT64;
-    case NG5_PROP_ITER_STATE_UINT8S:
-    case NG5_PROP_ITER_STATE_UINT8_ARRAYS:
+    case PROP_ITER_UINT8S:
+    case PROP_ITER_UINT8_ARRAYS:
         return NG5_BASIC_TYPE_UINT8;
-    case NG5_PROP_ITER_STATE_UINT16S:
-    case NG5_PROP_ITER_STATE_UINT16_ARRAYS:
+    case PROP_ITER_UINT16S:
+    case PROP_ITER_UINT16_ARRAYS:
         return NG5_BASIC_TYPE_UINT16;
-    case NG5_PROP_ITER_STATE_UINT32S:
-    case NG5_PROP_ITER_STATE_UINT32_ARRAYS:
+    case PROP_ITER_UINT32S:
+    case PROP_ITER_UINT32_ARRAYS:
         return NG5_BASIC_TYPE_UINT32;
-    case NG5_PROP_ITER_STATE_UINT64S:
-    case NG5_PROP_ITER_STATE_UINT64_ARRAYS:
+    case PROP_ITER_UINT64S:
+    case PROP_ITER_UINT64_ARRAYS:
         return NG5_BASIC_TYPE_UINT64;
-    case NG5_PROP_ITER_STATE_FLOATS:
-    case NG5_PROP_ITER_STATE_FLOAT_ARRAYS:
+    case PROP_ITER_FLOATS:
+    case PROP_ITER_FLOAT_ARRAYS:
         return NG5_BASIC_TYPE_NUMBER;
-    case NG5_PROP_ITER_STATE_STRINGS:
-    case NG5_PROP_ITER_STATE_STRING_ARRAYS:
+    case PROP_ITER_STRINGS:
+    case PROP_ITER_STRING_ARRAYS:
         return NG5_BASIC_TYPE_STRING;
-    case NG5_PROP_ITER_STATE_OBJECTS:
-    case NG5_PROP_ITER_STATE_OBJECT_ARRAYS:
+    case PROP_ITER_OBJECTS:
+    case PROP_ITER_OBJECT_ARRAYS:
         return NG5_BASIC_TYPE_OBJECT;
     default:
         carbon_print_error_and_die(NG5_ERR_INTERNALERR);
@@ -456,36 +456,36 @@ get_basic_type(carbon_prop_iter_state_e state)
 }
 
 static bool
-is_array_type(carbon_prop_iter_state_e state)
+is_array_type(enum prop_iter_state state)
 {
     switch (state) {
-    case NG5_PROP_ITER_STATE_NULLS:
-    case NG5_PROP_ITER_STATE_BOOLS:
-    case NG5_PROP_ITER_STATE_INT8S:
-    case NG5_PROP_ITER_STATE_INT16S:
-    case NG5_PROP_ITER_STATE_INT32S:
-    case NG5_PROP_ITER_STATE_INT64S:
-    case NG5_PROP_ITER_STATE_UINT8S:
-    case NG5_PROP_ITER_STATE_UINT16S:
-    case NG5_PROP_ITER_STATE_UINT32S:
-    case NG5_PROP_ITER_STATE_UINT64S:
-    case NG5_PROP_ITER_STATE_FLOATS:
-    case NG5_PROP_ITER_STATE_STRINGS:
-    case NG5_PROP_ITER_STATE_OBJECTS:
+    case PROP_ITER_NULLS:
+    case PROP_ITER_BOOLS:
+    case PROP_ITER_INT8S:
+    case PROP_ITER_INT16S:
+    case PROP_ITER_INT32S:
+    case PROP_ITER_INT64S:
+    case PROP_ITER_UINT8S:
+    case PROP_ITER_UINT16S:
+    case PROP_ITER_UINT32S:
+    case PROP_ITER_UINT64S:
+    case PROP_ITER_FLOATS:
+    case PROP_ITER_STRINGS:
+    case PROP_ITER_OBJECTS:
         return false;
-    case NG5_PROP_ITER_STATE_NULL_ARRAYS:
-    case NG5_PROP_ITER_STATE_BOOL_ARRAYS:
-    case NG5_PROP_ITER_STATE_INT8_ARRAYS:
-    case NG5_PROP_ITER_STATE_INT16_ARRAYS:
-    case NG5_PROP_ITER_STATE_INT32_ARRAYS:
-    case NG5_PROP_ITER_STATE_INT64_ARRAYS:
-    case NG5_PROP_ITER_STATE_UINT8_ARRAYS:
-    case NG5_PROP_ITER_STATE_UINT16_ARRAYS:
-    case NG5_PROP_ITER_STATE_UINT32_ARRAYS:
-    case NG5_PROP_ITER_STATE_UINT64_ARRAYS:
-    case NG5_PROP_ITER_STATE_FLOAT_ARRAYS:
-    case NG5_PROP_ITER_STATE_STRING_ARRAYS:
-    case NG5_PROP_ITER_STATE_OBJECT_ARRAYS:
+    case PROP_ITER_NULL_ARRAYS:
+    case PROP_ITER_BOOL_ARRAYS:
+    case PROP_ITER_INT8_ARRAYS:
+    case PROP_ITER_INT16_ARRAYS:
+    case PROP_ITER_INT32_ARRAYS:
+    case PROP_ITER_INT64_ARRAYS:
+    case PROP_ITER_UINT8_ARRAYS:
+    case PROP_ITER_UINT16_ARRAYS:
+    case PROP_ITER_UINT32_ARRAYS:
+    case PROP_ITER_UINT64_ARRAYS:
+    case PROP_ITER_FLOAT_ARRAYS:
+    case PROP_ITER_STRING_ARRAYS:
+    case PROP_ITER_OBJECT_ARRAYS:
         return true;
     default:
         carbon_print_error_and_die(NG5_ERR_INTERNALERR);
@@ -494,18 +494,18 @@ is_array_type(carbon_prop_iter_state_e state)
 
 
 NG5_EXPORT(bool)
-carbon_archive_prop_iter_next(carbon_archive_prop_iter_mode_e *type,
-                              carbon_archive_value_vector_t *value_vector,
-                              carbon_archive_collection_iter_t *collection_iter,
-                              carbon_archive_prop_iter_t *prop_iter)
+carbon_archive_prop_iter_next(enum prop_iter_mode *type,
+                              struct archive_value_vector *value_vector,
+                              archive_collection_iter_t *collection_iter,
+                              struct prop_iter *prop_iter)
 {
     NG5_NON_NULL_OR_ERROR(type);
     NG5_NON_NULL_OR_ERROR(prop_iter);
 
-    if (prop_iter->prop_cursor != NG5_PROP_ITER_STATE_DONE)
+    if (prop_iter->prop_cursor != PROP_ITER_DONE)
     {
         switch (prop_iter->mode) {
-        case NG5_ARCHIVE_PROP_ITER_MODE_OBJECT: {
+        case PROP_ITER_MODE_OBJECT: {
                 value_vector->keys = prop_iter->mode_object.prop_group_header.keys;
 
                 prop_iter->mode_object.type = get_basic_type(prop_iter->prop_cursor);
@@ -521,7 +521,7 @@ carbon_archive_prop_iter_next(carbon_archive_prop_iter_mode_e *type,
                     return false;
                 }
         } break;
-        case NG5_ARCHIVE_PROP_ITER_MODE_COLLECTION: {
+        case PROP_ITER_MODE_COLLECTION: {
             collection_iter->state = prop_iter->mode_collection;
             carbon_memfile_open(&collection_iter->record_table_memfile, prop_iter->record_table_memfile.memblock,
                                 READ_ONLY);
@@ -541,7 +541,7 @@ carbon_archive_prop_iter_next(carbon_archive_prop_iter_mode_e *type,
 }
 
 NG5_EXPORT(const field_sid_t *)
-carbon_archive_collection_iter_get_keys(u32 *num_keys, carbon_archive_collection_iter_t *iter)
+carbon_archive_collection_iter_get_keys(u32 *num_keys, archive_collection_iter_t *iter)
 {
     if (num_keys && iter) {
         *num_keys = iter->state.num_column_groups;
@@ -553,8 +553,8 @@ carbon_archive_collection_iter_get_keys(u32 *num_keys, carbon_archive_collection
 }
 
 NG5_EXPORT(bool)
-carbon_archive_collection_next_column_group(carbon_archive_column_group_iter_t *group_iter,
-                                            carbon_archive_collection_iter_t *iter)
+carbon_archive_collection_next_column_group(archive_column_group_iter_t *group_iter,
+                                            archive_collection_iter_t *iter)
 {
     NG5_NON_NULL_OR_ERROR(group_iter)
     NG5_NON_NULL_OR_ERROR(iter)
@@ -572,7 +572,7 @@ carbon_archive_collection_next_column_group(carbon_archive_column_group_iter_t *
 }
 
 NG5_EXPORT(const object_id_t *)
-carbon_archive_column_group_get_object_ids(u32 *num_objects, carbon_archive_column_group_iter_t *iter)
+carbon_archive_column_group_get_object_ids(u32 *num_objects, archive_column_group_iter_t *iter)
 {
     if (num_objects && iter) {
         *num_objects = iter->state.current_column_group.num_objects;
@@ -585,8 +585,8 @@ carbon_archive_column_group_get_object_ids(u32 *num_objects, carbon_archive_colu
 
 
 NG5_EXPORT(bool)
-carbon_archive_column_group_next_column(carbon_archive_column_iter_t *column_iter,
-                                        carbon_archive_column_group_iter_t *iter)
+carbon_archive_column_group_next_column(archive_column_iter_t *column_iter,
+                                        archive_column_group_iter_t *iter)
 {
     NG5_NON_NULL_OR_ERROR(column_iter)
     NG5_NON_NULL_OR_ERROR(iter)
@@ -606,7 +606,7 @@ carbon_archive_column_group_next_column(carbon_archive_column_iter_t *column_ite
 NG5_EXPORT(bool)
 carbon_archive_column_get_name(field_sid_t *name,
                                enum field_type *type,
-                               carbon_archive_column_iter_t *column_iter)
+                               archive_column_iter_t *column_iter)
 {
     NG5_NON_NULL_OR_ERROR(column_iter)
     NG5_OPTIONAL_SET(name, column_iter->state.current_column_group.current_column.name)
@@ -615,7 +615,7 @@ carbon_archive_column_get_name(field_sid_t *name,
 }
 
 NG5_EXPORT(const u32 *)
-carbon_archive_column_get_entry_positions(u32 *num_entry, carbon_archive_column_iter_t *column_iter)
+carbon_archive_column_get_entry_positions(u32 *num_entry, archive_column_iter_t *column_iter)
 {
     if (num_entry && column_iter) {
         *num_entry = column_iter->state.current_column_group.current_column.num_elem;
@@ -627,7 +627,7 @@ carbon_archive_column_get_entry_positions(u32 *num_entry, carbon_archive_column_
 }
 
 NG5_EXPORT(bool)
-carbon_archive_column_next_entry(carbon_archive_column_entry_iter_t *entry_iter, carbon_archive_column_iter_t *iter)
+carbon_archive_column_next_entry(archive_column_entry_iter_t *entry_iter, archive_column_iter_t *iter)
 {
     NG5_NON_NULL_OR_ERROR(entry_iter)
     NG5_NON_NULL_OR_ERROR(iter)
@@ -647,7 +647,7 @@ carbon_archive_column_next_entry(carbon_archive_column_entry_iter_t *entry_iter,
 }
 
 NG5_EXPORT(bool)
-carbon_archive_column_entry_get_type(enum field_type *type, carbon_archive_column_entry_iter_t *entry)
+carbon_archive_column_entry_get_type(enum field_type *type, archive_column_entry_iter_t *entry)
 {
     NG5_NON_NULL_OR_ERROR(type)
     NG5_NON_NULL_OR_ERROR(entry)
@@ -657,7 +657,7 @@ carbon_archive_column_entry_get_type(enum field_type *type, carbon_archive_colum
 
 #define DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(built_in_type, name, basic_type)                            \
 NG5_EXPORT(const built_in_type *)                                                                                   \
-carbon_archive_column_entry_get_##name(u32 *array_length, carbon_archive_column_entry_iter_t *entry)              \
+carbon_archive_column_entry_get_##name(u32 *array_length, archive_column_entry_iter_t *entry)              \
 {                                                                                                                      \
     if (array_length && entry) {                                                                                       \
         if (entry->state.current_column_group.current_column.type == basic_type)                                       \
@@ -688,8 +688,8 @@ DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_boolean_t, booleans, NG5_B
 DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_u32_t, nulls, NG5_BASIC_TYPE_NULL);
 
 NG5_EXPORT(bool)
-carbon_archive_column_entry_get_objects(carbon_archive_column_entry_object_iter_t *iter,
-                                        carbon_archive_column_entry_iter_t *entry)
+carbon_archive_column_entry_get_objects(struct column_object_iter *iter,
+                                        archive_column_entry_iter_t *entry)
 {
     NG5_NON_NULL_OR_ERROR(iter)
     NG5_NON_NULL_OR_ERROR(entry)
@@ -703,8 +703,8 @@ carbon_archive_column_entry_get_objects(carbon_archive_column_entry_object_iter_
     return true;
 }
 
-NG5_EXPORT(const carbon_archive_object_t *)
-carbon_archive_column_entry_object_iter_next_object(carbon_archive_column_entry_object_iter_t *iter)
+NG5_EXPORT(const struct archive_object *)
+carbon_archive_column_entry_object_iter_next_object(struct column_object_iter *iter)
 {
     if (iter) {
         if (iter->next_obj_off != 0) {
@@ -726,7 +726,7 @@ carbon_archive_column_entry_object_iter_next_object(carbon_archive_column_entry_
 }
 
 NG5_EXPORT(bool)
-carbon_archive_object_get_object_id(object_id_t *id, const carbon_archive_object_t *object)
+carbon_archive_object_get_object_id(object_id_t *id, const struct archive_object *object)
 {
     NG5_NON_NULL_OR_ERROR(id)
     NG5_NON_NULL_OR_ERROR(object)
@@ -735,7 +735,7 @@ carbon_archive_object_get_object_id(object_id_t *id, const carbon_archive_object
 }
 
 NG5_EXPORT(bool)
-carbon_archive_object_get_prop_iter(carbon_archive_prop_iter_t *iter, const carbon_archive_object_t *object)
+carbon_archive_object_get_prop_iter(struct prop_iter *iter, const struct archive_object *object)
 {
     // XXXX carbon_archive_prop_iter_from_object()
     NG5_UNUSED(iter);
@@ -744,7 +744,7 @@ carbon_archive_object_get_prop_iter(carbon_archive_prop_iter_t *iter, const carb
 }
 
 NG5_EXPORT(bool)
-carbon_archive_value_vector_get_object_id(object_id_t *id, const carbon_archive_value_vector_t *iter)
+carbon_archive_value_vector_get_object_id(object_id_t *id, const struct archive_value_vector *iter)
 {
     NG5_NON_NULL_OR_ERROR(id)
     NG5_NON_NULL_OR_ERROR(iter)
@@ -753,7 +753,7 @@ carbon_archive_value_vector_get_object_id(object_id_t *id, const carbon_archive_
 }
 
 NG5_EXPORT(const field_sid_t *)
-carbon_archive_value_vector_get_keys(u32 *num_keys, carbon_archive_value_vector_t *iter)
+carbon_archive_value_vector_get_keys(u32 *num_keys, struct archive_value_vector *iter)
 {
     if (num_keys && iter) {
         *num_keys = iter->value_max_idx;
@@ -765,21 +765,21 @@ carbon_archive_value_vector_get_keys(u32 *num_keys, carbon_archive_value_vector_
 }
 
 static void
-value_vector_init_object_basic(carbon_archive_value_vector_t *value)
+value_vector_init_object_basic(struct archive_value_vector *value)
 {
     value->data.object.offsets = NG5_MEMFILE_READ_TYPE_LIST(&value->record_table_memfile, offset_t,
                                                                value->value_max_idx);
 }
 
 static void
-value_vector_init_object_array(carbon_archive_value_vector_t *value)
+value_vector_init_object_array(struct archive_value_vector *value)
 {
     NG5_UNUSED(value);
     abort(); // TODO: Implement XXX
 }
 
 static void
-value_vector_init_fixed_length_types_basic(carbon_archive_value_vector_t *value)
+value_vector_init_fixed_length_types_basic(struct archive_value_vector *value)
 {
     assert(!value->is_array);
 
@@ -823,7 +823,7 @@ value_vector_init_fixed_length_types_basic(carbon_archive_value_vector_t *value)
 }
 
 static void
-value_vector_init_fixed_length_types_null_arrays(carbon_archive_value_vector_t *value)
+value_vector_init_fixed_length_types_null_arrays(struct archive_value_vector *value)
 {
     assert(value->is_array);
     assert(value->prop_type == NG5_BASIC_TYPE_NULL);
@@ -832,7 +832,7 @@ value_vector_init_fixed_length_types_null_arrays(carbon_archive_value_vector_t *
 }
 
 static void
-value_vector_init_fixed_length_types_non_null_arrays(carbon_archive_value_vector_t *value)
+value_vector_init_fixed_length_types_non_null_arrays(struct archive_value_vector *value)
 {
     assert (value->is_array);
 
@@ -880,7 +880,7 @@ value_vector_init_fixed_length_types_non_null_arrays(carbon_archive_value_vector
 
 
 static void
-value_vector_init_fixed_length_types(carbon_archive_value_vector_t *value)
+value_vector_init_fixed_length_types(struct archive_value_vector *value)
 {
     if (value->is_array)
     {
@@ -893,7 +893,7 @@ value_vector_init_fixed_length_types(carbon_archive_value_vector_t *value)
 
 
 static void
-value_vector_init_object(carbon_archive_value_vector_t *value)
+value_vector_init_object(struct archive_value_vector *value)
 {
     if (value->is_array)
     {
@@ -905,14 +905,14 @@ value_vector_init_object(carbon_archive_value_vector_t *value)
 }
 
 NG5_EXPORT(bool)
-carbon_archive_value_vector_from_prop_iter(carbon_archive_value_vector_t *value,
+carbon_archive_value_vector_from_prop_iter(struct archive_value_vector *value,
                                            struct err *err,
-                                           carbon_archive_prop_iter_t *prop_iter)
+                                           struct prop_iter *prop_iter)
 {
     NG5_NON_NULL_OR_ERROR(value);
     NG5_NON_NULL_OR_ERROR(prop_iter);
 
-    error_IF_AND_RETURN (prop_iter->mode != NG5_ARCHIVE_PROP_ITER_MODE_OBJECT, &prop_iter->err,
+    error_IF_AND_RETURN (prop_iter->mode != PROP_ITER_MODE_OBJECT, &prop_iter->err,
                                 NG5_ERR_ITER_OBJECT_NEEDED, false)
 
     carbon_error_init(&value->err);
@@ -965,7 +965,7 @@ carbon_archive_value_vector_from_prop_iter(carbon_archive_value_vector_t *value,
 }
 
 NG5_EXPORT(bool)
-carbon_archive_value_vector_get_basic_type(enum field_type *type, const carbon_archive_value_vector_t *value)
+carbon_archive_value_vector_get_basic_type(enum field_type *type, const struct archive_value_vector *value)
 {
     NG5_NON_NULL_OR_ERROR(type)
     NG5_NON_NULL_OR_ERROR(value)
@@ -974,7 +974,7 @@ carbon_archive_value_vector_get_basic_type(enum field_type *type, const carbon_a
 }
 
 NG5_EXPORT(bool)
-carbon_archive_value_vector_is_array_type(bool *is_array, const carbon_archive_value_vector_t *value)
+carbon_archive_value_vector_is_array_type(bool *is_array, const struct archive_value_vector *value)
 {
     NG5_NON_NULL_OR_ERROR(is_array)
     NG5_NON_NULL_OR_ERROR(value)
@@ -983,7 +983,7 @@ carbon_archive_value_vector_is_array_type(bool *is_array, const carbon_archive_v
 }
 
 NG5_EXPORT(bool)
-carbon_archive_value_vector_get_length(u32 *length, const carbon_archive_value_vector_t *value)
+carbon_archive_value_vector_get_length(u32 *length, const struct archive_value_vector *value)
 {
     NG5_NON_NULL_OR_ERROR(length)
     NG5_NON_NULL_OR_ERROR(value)
@@ -992,7 +992,7 @@ carbon_archive_value_vector_get_length(u32 *length, const carbon_archive_value_v
 }
 
 NG5_EXPORT(bool)
-carbon_archive_value_vector_is_of_objects(bool *is_object, carbon_archive_value_vector_t *value)
+carbon_archive_value_vector_is_of_objects(bool *is_object, struct archive_value_vector *value)
 {
     NG5_NON_NULL_OR_ERROR(is_object)
     NG5_NON_NULL_OR_ERROR(value)
@@ -1003,8 +1003,8 @@ carbon_archive_value_vector_is_of_objects(bool *is_object, carbon_archive_value_
 }
 
 NG5_EXPORT(bool)
-carbon_archive_value_vector_get_object_at(carbon_archive_object_t *object, u32 idx,
-                                          carbon_archive_value_vector_t *value)
+carbon_archive_value_vector_get_object_at(struct archive_object *object, u32 idx,
+                                          struct archive_value_vector *value)
 {
     NG5_NON_NULL_OR_ERROR(object)
     NG5_NON_NULL_OR_ERROR(value)
@@ -1031,7 +1031,7 @@ carbon_archive_value_vector_get_object_at(carbon_archive_object_t *object, u32 i
 
 #define DECLARE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(name, basic_type)                                            \
 NG5_EXPORT(bool)                                                                                                    \
-carbon_archive_value_vector_is_##name(bool *type_match, carbon_archive_value_vector_t *value)                          \
+carbon_archive_value_vector_is_##name(bool *type_match, struct archive_value_vector *value)                          \
 {                                                                                                                      \
     NG5_NON_NULL_OR_ERROR(type_match)                                                                               \
     NG5_NON_NULL_OR_ERROR(value)                                                                                    \
@@ -1056,7 +1056,7 @@ DECLARE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(null, NG5_BASIC_TYPE_NULL)
 
 #define DECLARE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(names, name, built_in_type, err_code)                       \
 NG5_EXPORT(const built_in_type *)                                                                                   \
-carbon_archive_value_vector_get_##names(u32 *num_values, carbon_archive_value_vector_t *value)                    \
+carbon_archive_value_vector_get_##names(u32 *num_values, struct archive_value_vector *value)                    \
 {                                                                                                                      \
     NG5_NON_NULL_OR_ERROR(value)                                                                                    \
                                                                                                                        \
@@ -1089,7 +1089,7 @@ DECLARE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(numbers, number, field_number_t,
 DECLARE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(booleans, boolean, field_boolean_t, NG5_ERR_ITER_NOBOOL)
 
 NG5_EXPORT(const field_u32_t *)
-carbon_archive_value_vector_get_null_arrays(u32 *num_values, carbon_archive_value_vector_t *value)
+carbon_archive_value_vector_get_null_arrays(u32 *num_values, struct archive_value_vector *value)
 {
     NG5_NON_NULL_OR_ERROR(value)
 
@@ -1110,7 +1110,7 @@ carbon_archive_value_vector_get_null_arrays(u32 *num_values, carbon_archive_valu
 #define DECLARE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(name, built_in_type, base)                               \
 NG5_EXPORT(const built_in_type *)                                                                                   \
 carbon_archive_value_vector_get_##name##_arrays_at(u32 *array_length, u32 idx,                               \
-                                               carbon_archive_value_vector_t *value)                                   \
+                                               struct archive_value_vector *value)                                   \
 {                                                                                                                      \
     NG5_NON_NULL_OR_ERROR(value)                                                                                    \
                                                                                                                        \
@@ -1146,7 +1146,7 @@ DECLARE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(boolean, field_boolean_t, boo
 
 
 void
-carbon_int_reset_cabin_object_mem_file(carbon_archive_object_t *object)
+carbon_int_reset_cabin_object_mem_file(struct archive_object *object)
 {
     NG5_UNUSED(object);
   //  carbon_memfile_seek(&object->file, object->self);

@@ -24,13 +24,13 @@
 
 NG5_BEGIN_DECL
 
-typedef struct
+struct hashtable_bucket
 {
     bool     in_use_flag;  /* flag indicating if bucket is in use */
     i32  displacement; /* difference between intended position during insert, and actual position in table */
     u32 num_probs;    /* number of probe calls to this bucket */
-    u64 data_idx;      /* position of key element in owning carbon_hashtable_t structure */
-} carbon_hashtable_bucket_t;
+    u64 data_idx;      /* position of key element in owning struct hashtable structure */
+};
 
 /**
  * Hash table implementation specialized for key and value types of fixed-length size, and where comparision
@@ -43,59 +43,59 @@ typedef struct
  * Note: this implementation does not support string or pointer types. The structure is thread-safe by a spinlock
  * lock implementation.
  */
-typedef struct
+struct hashtable
 {
     struct vector key_data;
     struct vector value_data;
-    struct vector ofType(carbon_hashtable_bucket_t) table;
+    struct vector ofType(struct hashtable_bucket) table;
     struct spinlock lock;
     u32 size;
     struct err err;
-} carbon_hashtable_t;
+};
 
-NG5_DEFINE_GET_ERROR_FUNCTION(hashtable, carbon_hashtable_t, table);
-
-NG5_EXPORT(bool)
-carbon_hashtable_create(carbon_hashtable_t *map, struct err *err, size_t key_size, size_t value_size, size_t capacity);
-
-NG5_EXPORT(carbon_hashtable_t *)
-carbon_hashtable_cpy(carbon_hashtable_t *src);
+NG5_DEFINE_GET_ERROR_FUNCTION(hashtable, struct hashtable, table);
 
 NG5_EXPORT(bool)
-carbon_hashtable_drop(carbon_hashtable_t *map);
+carbon_hashtable_create(struct hashtable *map, struct err *err, size_t key_size, size_t value_size, size_t capacity);
+
+NG5_EXPORT(struct hashtable *)
+carbon_hashtable_cpy(struct hashtable *src);
 
 NG5_EXPORT(bool)
-carbon_hashtable_clear(carbon_hashtable_t *map);
+carbon_hashtable_drop(struct hashtable *map);
 
 NG5_EXPORT(bool)
-carbon_hashtable_avg_displace(float *displace, const carbon_hashtable_t *map);
+carbon_hashtable_clear(struct hashtable *map);
 
 NG5_EXPORT(bool)
-carbon_hashtable_lock(carbon_hashtable_t *map);
+carbon_hashtable_avg_displace(float *displace, const struct hashtable *map);
 
 NG5_EXPORT(bool)
-carbon_hashtable_unlock(carbon_hashtable_t *map);
+carbon_hashtable_lock(struct hashtable *map);
 
 NG5_EXPORT(bool)
-carbon_hashtable_insert_or_update(carbon_hashtable_t *map, const void *keys, const void *values, uint_fast32_t num_pairs);
+carbon_hashtable_unlock(struct hashtable *map);
 
 NG5_EXPORT(bool)
-carbon_hashtable_serialize(FILE *file, carbon_hashtable_t *table);
+carbon_hashtable_insert_or_update(struct hashtable *map, const void *keys, const void *values, uint_fast32_t num_pairs);
 
 NG5_EXPORT(bool)
-carbon_hashtable_deserialize(carbon_hashtable_t *table, struct err *err, FILE *file);
+carbon_hashtable_serialize(FILE *file, struct hashtable *table);
 
 NG5_EXPORT(bool)
-carbon_hashtable_remove_if_contained(carbon_hashtable_t *map, const void *keys, size_t num_pairs);
+carbon_hashtable_deserialize(struct hashtable *table, struct err *err, FILE *file);
+
+NG5_EXPORT(bool)
+carbon_hashtable_remove_if_contained(struct hashtable *map, const void *keys, size_t num_pairs);
 
 NG5_EXPORT(const void *)
-carbon_hashtable_get_value(carbon_hashtable_t *map, const void *key);
+carbon_hashtable_get_value(struct hashtable *map, const void *key);
 
 NG5_EXPORT(bool)
-carbon_hashtable_get_fload_factor(float *factor, carbon_hashtable_t *map);
+carbon_hashtable_get_fload_factor(float *factor, struct hashtable *map);
 
 NG5_EXPORT(bool)
-carbon_hashtable_rehash(carbon_hashtable_t *map);
+carbon_hashtable_rehash(struct hashtable *map);
 
 NG5_END_DECL
 

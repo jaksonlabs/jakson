@@ -19,7 +19,7 @@
 
 #include "utils/time.h"
 
-carbon_timestamp_t carbon_time_now_wallclock()
+timestamp_t carbon_time_now_wallclock()
 {
     long ms;
     time_t s;

@@ -411,10 +411,10 @@ bool carbon_archive_from_model(struct memblock **stream, struct err *err, struct
         return true;
 }
 
-NG5_EXPORT(carbon_io_context_t *)carbon_archive_io_context_create(struct archive *archive)
+NG5_EXPORT(struct io_context *)carbon_archive_io_context_create(struct archive *archive)
 {
         NG5_NON_NULL_OR_ERROR(archive);
-        carbon_io_context_t *context;
+        struct io_context *context;
         if (carbon_io_context_create(&context, &archive->err, archive->diskFilePath)) {
                 return context;
         } else {

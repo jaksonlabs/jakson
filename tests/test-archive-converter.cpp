@@ -6,7 +6,7 @@ TEST(ConverterTest, PerformConversion)
 {
     bool status;
     struct archive archive;
-    carbon_encoded_doc_collection_t collection;
+    struct encoded_doc_list collection;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
      * below the projects root directory (e.g., 'build/') */

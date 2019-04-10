@@ -6,16 +6,16 @@
 #include "core/carbon.h"
 
 static void
-iterate_properties(carbon_archive_prop_iter_t *prop_iter);
+iterate_properties(struct prop_iter *prop_iter);
 
 static void
-iterate_object_vals(carbon_archive_value_vector_t *value_iter)
+iterate_object_vals(struct archive_value_vector *value_iter)
 {
     bool status;
     bool is_object;
     u32 vector_length;
-    carbon_archive_object_t object;
-    carbon_archive_prop_iter_t  prop_iter;
+    struct archive_object object;
+    struct prop_iter  prop_iter;
     struct err err;
 
     status = carbon_archive_value_vector_is_of_objects(&is_object, value_iter);
@@ -40,14 +40,14 @@ iterate_object_vals(carbon_archive_value_vector_t *value_iter)
 }
 
 static void
-iterate_object(carbon_archive_value_vector_t *value_iter)
+iterate_object(struct archive_value_vector *value_iter)
 {
     ASSERT_TRUE (!value_iter->is_array);
     iterate_object_vals(value_iter);
 }
 
 static void
-print_basic_fixed_types_basic(carbon_archive_value_vector_t *value_iter, u32 idx)
+print_basic_fixed_types_basic(struct archive_value_vector *value_iter, u32 idx)
 {
     u32 num_values;
     switch (value_iter->prop_type) {
@@ -123,7 +123,7 @@ print_basic_fixed_types_basic(carbon_archive_value_vector_t *value_iter, u32 idx
 }
 
 static void
-print_basic_fixed_types_array(carbon_archive_value_vector_t *value_iter, u32 idx)
+print_basic_fixed_types_array(struct archive_value_vector *value_iter, u32 idx)
 {
     u32 array_length;
     switch (value_iter->prop_type) {
@@ -266,7 +266,7 @@ print_basic_fixed_types_array(carbon_archive_value_vector_t *value_iter, u32 idx
 }
 
 static void
-print_basic_fixed_types(carbon_archive_value_vector_t *value_iter, u32 idx)
+print_basic_fixed_types(struct archive_value_vector *value_iter, u32 idx)
 {
     if (value_iter->is_array) {
         print_basic_fixed_types_array(value_iter, idx);
@@ -279,25 +279,25 @@ print_basic_fixed_types(carbon_archive_value_vector_t *value_iter, u32 idx)
 
 
 static void
-iterate_properties(carbon_archive_prop_iter_t *prop_iter)
+iterate_properties(struct prop_iter *prop_iter)
 {
     object_id_t                oid;
-    carbon_archive_value_vector_t     value_iter;
+    struct archive_value_vector     value_iter;
     enum field_type               type;
     bool                              is_array;
     const field_sid_t         *keys;
     u32                          num_pairs;
-    carbon_archive_prop_iter_mode_e   iter_type;
-    carbon_archive_collection_iter_t  collection_iter;
+    enum prop_iter_mode   iter_type;
+    archive_collection_iter_t  collection_iter;
     u32                          num_column_groups;
-    carbon_archive_column_group_iter_t group_iter;
-    carbon_archive_column_iter_t       column_iter;
-    carbon_archive_column_entry_iter_t entry_iter;
+    archive_column_group_iter_t group_iter;
+    archive_column_iter_t       column_iter;
+    archive_column_entry_iter_t entry_iter;
     struct err                       err;
 
     while (carbon_archive_prop_iter_next(&iter_type, &value_iter, &collection_iter, prop_iter))
     {
-        if (iter_type == NG5_ARCHIVE_PROP_ITER_MODE_OBJECT)
+        if (iter_type == PROP_ITER_MODE_OBJECT)
         {
             keys = carbon_archive_value_vector_get_keys(&num_pairs, &value_iter);
             carbon_archive_value_vector_is_array_type(&is_array, &value_iter);
@@ -466,8 +466,8 @@ iterate_properties(carbon_archive_prop_iter_t *prop_iter)
                             printf("]\n");
                         } break;
                         case NG5_BASIC_TYPE_OBJECT: {
-                            carbon_archive_column_entry_object_iter_t iter;
-                            const carbon_archive_object_t *archive_object;
+                            struct column_object_iter iter;
+                            const struct archive_object *archive_object;
                             carbon_archive_column_entry_get_objects(&iter, &entry_iter);
                             printf("\t\t{ << objects >>: [");
                             while ((archive_object = carbon_archive_column_entry_object_iter_next_object(&iter)) != NULL) {
@@ -475,7 +475,7 @@ iterate_properties(carbon_archive_prop_iter_t *prop_iter)
                                 carbon_archive_object_get_object_id(&id, archive_object);
                                 printf("{ oid: %" PRIu64 " } \n", id);
 
-                                carbon_archive_prop_iter_t nested_obj_prop_iter;
+                                struct prop_iter nested_obj_prop_iter;
                                 carbon_archive_prop_iter_from_object(&nested_obj_prop_iter, NG5_ARCHIVE_ITER_MASK_ANY,
                                                                      &err, archive_object);
                                 iterate_properties(&nested_obj_prop_iter);
@@ -498,7 +498,7 @@ TEST(ArchiveIterTest, CreateIterator)
 {
     struct archive            archive;
     struct err                err;
-    carbon_archive_prop_iter_t  prop_iter;
+    struct prop_iter  prop_iter;
     bool                        status;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory

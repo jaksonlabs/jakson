@@ -17,6 +17,6 @@ typedef struct
 } ops_count_values_result_t;
 
 NG5_EXPORT(bool)
-ops_count_values(carbon_timestamp_t *duration, struct vector ofType(ops_count_values_result_t) *result, const char *path, struct archive *archive);
+ops_count_values(timestamp_t *duration, struct vector ofType(ops_count_values_result_t) *result, const char *path, struct archive *archive);
 
 #endif //LIBNG5_OPS_SHOW_KEYS_H

@@ -29,7 +29,7 @@ NG5_BEGIN_DECL
 struct archive_query
 {
     struct archive    *archive;
-    carbon_io_context_t *context;
+    struct io_context *context;
     struct err         err;
 };
 
@@ -42,7 +42,7 @@ NG5_EXPORT(bool)
 carbon_query_drop(struct archive_query *query);
 
 NG5_EXPORT(bool)
-carbon_query_scan_strids(carbon_strid_iter_t *it, struct archive_query *query);
+carbon_query_scan_strids(struct strid_iter *it, struct archive_query *query);
 
 NG5_EXPORT(bool)
 carbon_query_create_index_string_id_to_offset(struct sid_to_offset **index,
@@ -67,7 +67,7 @@ NG5_EXPORT(char **)
 carbon_query_fetch_strings_by_offset(struct archive_query *query, offset_t *offs, u32 *strlens, size_t num_offs);
 
 NG5_EXPORT(field_sid_t *)
-carbon_query_find_ids(size_t *num_found, struct archive_query *query, const carbon_string_pred_t *pred,
+carbon_query_find_ids(size_t *num_found, struct archive_query *query, const struct string_pred_t *pred,
                       void *capture, i64 limit);
 
 NG5_END_DECL
