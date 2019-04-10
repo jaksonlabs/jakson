@@ -23,7 +23,7 @@
 
 static void setup_object(columndoc_obj_t *model, carbon_columndoc_t *parent, carbon_string_id_t key, size_t idx);
 
-static bool object_put(columndoc_obj_t *model, struct err *err, const carbon_doc_entries_t *entry, struct strdic *dic);
+static bool object_put(columndoc_obj_t *model, struct err *err, const struct doc_entries *entry, struct strdic *dic);
 
 static bool import_object(columndoc_obj_t *dst, struct err *err, const carbon_doc_obj_t *doc, struct strdic *dic);
 
@@ -37,14 +37,14 @@ static carbon_columndoc_column_t *object_array_key_columns_find_or_new(struct ve
                                                             carbon_string_id_t array_key, carbon_string_id_t nested_object_entry_key,
                                                             field_e nested_object_entry_type);
 
-static bool object_array_key_column_push(carbon_columndoc_column_t *col, struct err *err, const carbon_doc_entries_t *entry, u32 array_idx,
+static bool object_array_key_column_push(carbon_columndoc_column_t *col, struct err *err, const struct doc_entries *entry, u32 array_idx,
                                      struct strdic *dic, columndoc_obj_t *model);
 
 bool carbon_columndoc_create(carbon_columndoc_t *columndoc,
                              struct err *err,
                              const carbon_doc_t *doc,
-                             const carbon_doc_bulk_t *bulk,
-                             const carbon_doc_entries_t *entries,
+                             const struct doc_bulk *bulk,
+                             const struct doc_entries *entries,
                              struct strdic *dic)
 {
     NG5_NON_NULL_OR_ERROR(columndoc)
@@ -837,7 +837,7 @@ objectArrayKeyColumnsNewColumn:
     return new_column;
 }
 
-static bool object_array_key_column_push(carbon_columndoc_column_t *col, struct err *err, const carbon_doc_entries_t *entry, u32 array_idx,
+static bool object_array_key_column_push(carbon_columndoc_column_t *col, struct err *err, const struct doc_entries *entry, u32 array_idx,
                                      struct strdic *dic, columndoc_obj_t *model)
 {
     assert(col->type == entry->type);
@@ -990,7 +990,7 @@ static void setup_object(columndoc_obj_t *model, carbon_columndoc_t *parent, car
     object_array_key_columns_create(&model->obj_array_props);
 }
 
-static bool object_put_primitive(columndoc_obj_t *columndoc, struct err *err, const carbon_doc_entries_t *entry, struct strdic *dic,
+static bool object_put_primitive(columndoc_obj_t *columndoc, struct err *err, const struct doc_entries *entry, struct strdic *dic,
                                const carbon_string_id_t *key_id)
 {
     switch(entry->type) {
@@ -1073,7 +1073,7 @@ static void object_push_array(struct vector ofType(Vector ofType(<T>)) *values, 
     carbon_vec_push(key_vector, &key_id, 1);
 }
 
-static bool object_put_array(columndoc_obj_t *model, struct err *err, const carbon_doc_entries_t *entry, struct strdic *dic, const carbon_string_id_t *key_id)
+static bool object_put_array(columndoc_obj_t *model, struct err *err, const struct doc_entries *entry, struct strdic *dic, const carbon_string_id_t *key_id)
 {
     // TODO: format for array, sort by keys, sort by values!
     NG5_UNUSED(dic);
@@ -1147,7 +1147,7 @@ static bool object_put_array(columndoc_obj_t *model, struct err *err, const carb
         for (u32 array_idx = 0; array_idx < num_elements; array_idx++) {
             const carbon_doc_obj_t *object = vec_get(&entry->values, array_idx, carbon_doc_obj_t);
             for (size_t pair_idx = 0; pair_idx < object->entries.num_elems; pair_idx++) {
-                const carbon_doc_entries_t *pair = vec_get(&object->entries, pair_idx, carbon_doc_entries_t);
+                const struct doc_entries *pair = vec_get(&object->entries, pair_idx, struct doc_entries);
                 carbon_strdic_locate_fast(&nested_object_key_name, dic, (char *const *) &pair->key, 1);
                 carbon_columndoc_column_t *key_column = object_array_key_columns_find_or_new(&model->obj_array_props, *key_id,
                                                                                       *nested_object_key_name, pair->type);
@@ -1167,7 +1167,7 @@ static bool object_put_array(columndoc_obj_t *model, struct err *err, const carb
     return true;
 }
 
-static bool object_put(columndoc_obj_t *model, struct err *err, const carbon_doc_entries_t *entry, struct strdic *dic)
+static bool object_put(columndoc_obj_t *model, struct err *err, const struct doc_entries *entry, struct strdic *dic)
 {
     carbon_string_id_t *key_id;
     enum EntryType { ENTRY_TYPE_NULL, ENTRY_TYPE_PRIMITIVE, ENTRY_TYPE_ARRAY } entryType;
@@ -1202,10 +1202,10 @@ static bool object_put(columndoc_obj_t *model, struct err *err, const carbon_doc
 
 static bool import_object(columndoc_obj_t *dst, struct err *err, const carbon_doc_obj_t *doc, struct strdic *dic)
 {
-    const struct vector ofType(carbon_doc_entries_t) *objectEntries = carbon_doc_get_entries(doc);
-    const carbon_doc_entries_t *entries = vec_all(objectEntries, carbon_doc_entries_t);
+    const struct vector ofType(struct doc_entries) *objectEntries = carbon_doc_get_entries(doc);
+    const struct doc_entries *entries = vec_all(objectEntries, struct doc_entries);
     for (size_t i = 0; i < objectEntries->num_elems; i++) {
-        const carbon_doc_entries_t *entry = entries + i;
+        const struct doc_entries *entry = entries + i;
         if (!object_put(dst, err, entry, dic)) {
             return false;
         }

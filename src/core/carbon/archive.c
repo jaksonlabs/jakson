@@ -131,7 +131,7 @@ static bool __serialize(offset_t *offset, struct err *err, struct memfile *memfi
 static carbon_archive_object_flags_t *get_flags(carbon_archive_object_flags_t *flags, columndoc_obj_t *columndoc);
 static void update_carbon_file_header(struct memfile *memfile, offset_t root_object_header_offset);
 static void skip_carbon_file_header(struct memfile *memfile);
-static bool serialize_string_dic(struct memfile *memfile, struct err *err, const carbon_doc_bulk_t *context,
+static bool serialize_string_dic(struct memfile *memfile, struct err *err, const struct doc_bulk *context,
         carbon_compressor_type_e compressor);
 static bool print_archive_from_memfile(FILE *file, struct err *err, struct memfile *memfile);
 
@@ -206,10 +206,10 @@ NG5_EXPORT(bool) carbon_archive_stream_from_json(struct memblock **stream, struc
         NG5_NON_NULL_OR_ERROR(json_string);
 
         struct strdic dic;
-        carbon_json_parser_t parser;
-        carbon_json_parse_err error_desc;
-        carbon_doc_bulk_t bulk;
-        carbon_doc_entries_t *partition;
+        struct json_parser parser;
+        struct json_err error_desc;
+        struct doc_bulk bulk;
+        struct doc_entries *partition;
         carbon_columndoc_t *columndoc;
         carbon_json_t json;
 
@@ -265,7 +265,7 @@ NG5_EXPORT(bool) carbon_archive_stream_from_json(struct memblock **stream, struc
 
         carbon_doc_bulk_shrink(&bulk);
 
-        columndoc = carbon_doc_entries_to_columndoc(&bulk, partition, read_optimized);
+        columndoc = carbon_doc_entries_columndoc(&bulk, partition, read_optimized);
 
         if (!carbon_archive_from_model(stream, err, columndoc, compressor, bake_id_index, callback)) {
                 return false;
@@ -1400,7 +1400,7 @@ static char *record_header_flags_to_string(const carbon_archive_record_flags_t *
         return string;
 }
 
-static bool serialize_string_dic(struct memfile *memfile, struct err *err, const carbon_doc_bulk_t *context,
+static bool serialize_string_dic(struct memfile *memfile, struct err *err, const struct doc_bulk *context,
         carbon_compressor_type_e compressor)
 {
         union string_tab_flags flags;

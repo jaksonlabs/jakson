@@ -10,8 +10,8 @@
 typedef struct
 {
     struct strdic dictionary;
-    carbon_doc_bulk_t context;
-    carbon_doc_entries_t *partition;
+    struct doc_bulk context;
+    struct doc_entries *partition;
     carbon_columndoc_t *partitionMetaModel;
     char *jsonContent;
 
@@ -45,8 +45,8 @@ static int convertJs2Model(Js2CabContext *context, FILE *file, bool optimizeForR
     NG5_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
 
     NG5_CONSOLE_WRITE(file, "  - Parse JSON file%s", "");
-    carbon_json_parser_t parser;
-    carbon_json_parse_err error_desc;
+    struct json_parser parser;
+    struct json_err error_desc;
     carbon_json_t jsonAst;
     carbon_json_parser_create(&parser, &context->context);
     int status = carbon_json_parse(&jsonAst, &error_desc, &parser, context->jsonContent);
@@ -92,7 +92,7 @@ static int convertJs2Model(Js2CabContext *context, FILE *file, bool optimizeForR
 
     NG5_CONSOLE_WRITE(file, "  - Finalize partition%s", "");
     context->partitionMetaModel =
-        carbon_doc_entries_to_columndoc(&context->context, context->partition, optimizeForReads);
+        carbon_doc_entries_columndoc(&context->context, context->partition, optimizeForReads);
     NG5_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
 
     return true;

@@ -27,9 +27,9 @@ char VALUE_NULL = '\0';
 
 static void create_doc(carbon_doc_obj_t *model, carbon_doc_t *doc);
 
-static void create_typed_vector(carbon_doc_entries_t *entry);
+static void create_typed_vector(struct doc_entries *entry);
 
-static void entries_drop(carbon_doc_entries_t *entry);
+static void entries_drop(struct doc_entries *entry);
 
 static bool print_value(FILE *file, field_e type, const struct vector ofType(<T>) *values);
 
@@ -40,7 +40,7 @@ static bool import_json_object(carbon_doc_obj_t *target, struct err *err, const 
 static void sort_columndoc_entries(columndoc_obj_t *columndoc);
 
 NG5_EXPORT(bool)
-carbon_doc_bulk_create(carbon_doc_bulk_t *bulk, struct strdic *dic)
+carbon_doc_bulk_create(struct doc_bulk *bulk, struct strdic *dic)
 {
     NG5_NON_NULL_OR_ERROR(bulk)
     NG5_NON_NULL_OR_ERROR(dic)
@@ -65,7 +65,7 @@ carbon_doc_obj_t *carbon_doc_bulk_new_obj(carbon_doc_t *model)
 NG5_EXPORT(bool)
 carbon_doc_bulk_get_dic_contents(struct vector ofType (const char *) **strings,
                                  struct vector ofType(carbon_string_id_t) **string_ids,
-                                 const carbon_doc_bulk_t *context)
+                                 const struct doc_bulk *context)
 {
     NG5_NON_NULL_OR_ERROR(context)
 
@@ -84,7 +84,7 @@ carbon_doc_bulk_get_dic_contents(struct vector ofType (const char *) **strings,
     return status;
 }
 
-carbon_doc_t *carbon_doc_bulk_new_doc(carbon_doc_bulk_t *context, field_e type)
+carbon_doc_t *carbon_doc_bulk_new_doc(struct doc_bulk *context, field_e type)
 {
     if (!context) {
         return NULL;
@@ -103,7 +103,7 @@ carbon_doc_t *carbon_doc_bulk_new_doc(carbon_doc_bulk_t *context, field_e type)
 }
 
 NG5_EXPORT(bool)
-carbon_doc_bulk_Drop(carbon_doc_bulk_t *bulk)
+carbon_doc_bulk_Drop(struct doc_bulk *bulk)
 {
     NG5_NON_NULL_OR_ERROR(bulk)
     for (size_t i = 0; i < bulk->keys.num_elems; i++) {
@@ -130,7 +130,7 @@ carbon_doc_bulk_Drop(carbon_doc_bulk_t *bulk)
 }
 
 NG5_EXPORT(bool)
-carbon_doc_bulk_shrink(carbon_doc_bulk_t *bulk)
+carbon_doc_bulk_shrink(struct doc_bulk *bulk)
 {
     NG5_NON_NULL_OR_ERROR(bulk)
     VectorShrink(&bulk->keys);
@@ -139,7 +139,7 @@ carbon_doc_bulk_shrink(carbon_doc_bulk_t *bulk)
 }
 
 NG5_EXPORT(bool)
-carbon_doc_bulk_print(FILE *file, carbon_doc_bulk_t *bulk)
+carbon_doc_bulk_print(FILE *file, struct doc_bulk *bulk)
 {
     NG5_NON_NULL_OR_ERROR(file)
     NG5_NON_NULL_OR_ERROR(bulk)
@@ -190,12 +190,12 @@ carbon_doc_print(FILE *file, const carbon_doc_t *doc)
     return true;
 }
 
-const struct vector ofType(carbon_doc_entries_t) *carbon_doc_get_entries(const carbon_doc_obj_t *model)
+const struct vector ofType(struct doc_entries) *carbon_doc_get_entries(const carbon_doc_obj_t *model)
 {
     return &model->entries;
 }
 
-void carbon_doc_print_entries(FILE *file, const carbon_doc_entries_t *entries)
+void carbon_doc_print_entries(FILE *file, const struct doc_entries *entries)
 {
     fprintf(file, "{\"Key\": \"%s\"", entries->key);
 }
@@ -203,13 +203,13 @@ void carbon_doc_print_entries(FILE *file, const carbon_doc_entries_t *entries)
 void carbon_doc_drop(carbon_doc_obj_t *model)
 {
     for (size_t i = 0; i < model->entries.num_elems; i++) {
-        carbon_doc_entries_t *entry = vec_get(&model->entries, i, carbon_doc_entries_t);
+        struct doc_entries *entry = vec_get(&model->entries, i, struct doc_entries);
         entries_drop(entry);
     }
     carbon_vec_drop(&model->entries);
 }
 
-bool carbon_doc_obj_add_key(carbon_doc_entries_t **out,
+bool carbon_doc_obj_add_key(struct doc_entries **out,
                             carbon_doc_obj_t *obj,
                             const char *key,
                             field_e type)
@@ -221,7 +221,7 @@ bool carbon_doc_obj_add_key(carbon_doc_entries_t **out,
     size_t entry_idx;
     char *key_dup = strdup(key);
 
-    carbon_doc_entries_t entry_model = {
+    struct doc_entries entry_model = {
         .type = type,
         .key = key_dup,
         .context = obj
@@ -233,12 +233,12 @@ bool carbon_doc_obj_add_key(carbon_doc_entries_t **out,
     entry_idx = carbon_vec_length(&obj->entries);
     carbon_vec_push(&obj->entries, &entry_model, 1);
 
-    *out = vec_get(&obj->entries, entry_idx, carbon_doc_entries_t);
+    *out = vec_get(&obj->entries, entry_idx, struct doc_entries);
 
     return true;
 }
 
-bool carbon_doc_obj_push_primtive(carbon_doc_entries_t *entry, const void *value)
+bool carbon_doc_obj_push_primtive(struct doc_entries *entry, const void *value)
 {
     NG5_NON_NULL_OR_ERROR(entry)
     NG5_NON_NULL_OR_ERROR((entry->type == field_null) || (value != NULL))
@@ -260,7 +260,7 @@ bool carbon_doc_obj_push_primtive(carbon_doc_entries_t *entry, const void *value
     return true;
 }
 
-bool carbon_doc_obj_push_object(carbon_doc_obj_t **out, carbon_doc_entries_t *entry)
+bool carbon_doc_obj_push_object(carbon_doc_obj_t **out, struct doc_entries *entry)
 {
     NG5_NON_NULL_OR_ERROR(out);
     NG5_NON_NULL_OR_ERROR(entry);
@@ -317,14 +317,14 @@ static field_e value_type_for_json_number(bool *success, struct err *err, const 
 
 static void import_json_object_string_prop(carbon_doc_obj_t *target, const char *key, const carbon_json_ast_node_string_t *string)
 {
-    carbon_doc_entries_t *entry;
+    struct doc_entries *entry;
     carbon_doc_obj_add_key(&entry, target, key, field_string);
     carbon_doc_obj_push_primtive(entry, string->value);
 }
 
 static bool import_json_object_number_prop(carbon_doc_obj_t *target, struct err *err, const char *key, const carbon_json_ast_node_number_t *number)
 {
-    carbon_doc_entries_t *entry;
+    struct doc_entries *entry;
     bool success;
     field_e number_type = value_type_for_json_number(&success, err, number);
     if (!success) {
@@ -337,21 +337,21 @@ static bool import_json_object_number_prop(carbon_doc_obj_t *target, struct err 
 
 static void import_json_object_bool_prop(carbon_doc_obj_t *target, const char *key, carbon_boolean_t value)
 {
-    carbon_doc_entries_t *entry;
+    struct doc_entries *entry;
     carbon_doc_obj_add_key(&entry, target, key, field_bool);
     carbon_doc_obj_push_primtive(entry, &value);
 }
 
 static void import_json_object_null_prop(carbon_doc_obj_t *target, const char *key)
 {
-    carbon_doc_entries_t *entry;
+    struct doc_entries *entry;
     carbon_doc_obj_add_key(&entry, target, key, field_null);
     carbon_doc_obj_push_primtive(entry, NULL);
 }
 
 static bool import_json_object_object_prop(carbon_doc_obj_t *target, struct err *err, const char *key, const carbon_json_ast_node_object_t *object)
 {
-    carbon_doc_entries_t *entry;
+    struct doc_entries *entry;
     carbon_doc_obj_t *nested_object = NULL;
     carbon_doc_obj_add_key(&entry, target, key, field_object);
     carbon_doc_obj_push_object(&nested_object, entry);
@@ -360,34 +360,34 @@ static bool import_json_object_object_prop(carbon_doc_obj_t *target, struct err 
 
 static bool import_json_object_array_prop(carbon_doc_obj_t *target, struct err *err, const char *key, const carbon_json_ast_node_array_t *array)
 {
-    carbon_doc_entries_t *entry;
+    struct doc_entries *entry;
 
     if (!carbon_vec_is_empty(&array->elements.elements))
     {
         size_t num_elements = array->elements.elements.num_elems;
 
         /** Find first type that is not null unless the entire array is of type null */
-        carbon_json_ast_node_value_type_e array_data_type = NG5_JSON_AST_NODE_VALUE_TYPE_NULL;
+        enum json_value_type array_data_type = JSON_VALUE_NULL;
         field_e field_type;
 
-        for (size_t i = 0; i < num_elements && array_data_type == NG5_JSON_AST_NODE_VALUE_TYPE_NULL; i++) {
+        for (size_t i = 0; i < num_elements && array_data_type == JSON_VALUE_NULL; i++) {
             const carbon_json_ast_node_element_t *element = vec_get(&array->elements.elements, i, carbon_json_ast_node_element_t);
             array_data_type = element->value.value_type;
         }
 
         switch (array_data_type) {
-        case NG5_JSON_AST_NODE_VALUE_TYPE_OBJECT:
+        case JSON_VALUE_OBJECT:
             field_type = field_object;
             break;
-        case NG5_JSON_AST_NODE_VALUE_TYPE_STRING:
+        case JSON_VALUE_STRING:
             field_type = field_string;
             break;
-        case NG5_JSON_AST_NODE_VALUE_TYPE_NUMBER: {
+        case JSON_VALUE_NUMBER: {
             /** find smallest fitting physical number type */
             field_e array_number_type = field_null;
             for (size_t i = 0; i < num_elements; i++) {
                 const carbon_json_ast_node_element_t *element = vec_get(&array->elements.elements, i, carbon_json_ast_node_element_t);
-                if (NG5_UNLIKELY(element->value.value_type == NG5_JSON_AST_NODE_VALUE_TYPE_NULL)) {
+                if (NG5_UNLIKELY(element->value.value_type == JSON_VALUE_NULL)) {
                     continue;
                 } else {
                     bool success;
@@ -442,14 +442,14 @@ static bool import_json_object_array_prop(carbon_doc_obj_t *target, struct err *
             assert(array_number_type != field_null);
             field_type = array_number_type;
         } break;
-        case NG5_JSON_AST_NODE_VALUE_TYPE_FALSE:
-        case NG5_JSON_AST_NODE_VALUE_TYPE_TRUE:
+        case JSON_VALUE_FALSE:
+        case JSON_VALUE_TRUE:
             field_type = field_bool;
             break;
-        case NG5_JSON_AST_NODE_VALUE_TYPE_NULL:
+        case JSON_VALUE_NULL:
             field_type = field_null;
             break;
-        case NG5_JSON_AST_NODE_VALUE_TYPE_ARRAY:
+        case JSON_VALUE_ARRAY:
             error(err, NG5_ERR_ERRINTERNAL) /** array type is illegal here */
             return false;
         default:
@@ -462,13 +462,13 @@ static bool import_json_object_array_prop(carbon_doc_obj_t *target, struct err *
         for (size_t i = 0; i < num_elements; i++)
         {
             const carbon_json_ast_node_element_t *element = vec_get(&array->elements.elements, i, carbon_json_ast_node_element_t);
-            carbon_json_ast_node_value_type_e ast_node_data_type = element->value.value_type;
+            enum json_value_type ast_node_data_type = element->value.value_type;
 
             switch (field_type) {
             case field_object: {
                 carbon_doc_obj_t *nested_object = NULL;
                 carbon_doc_obj_push_object(&nested_object, entry);
-                if (ast_node_data_type != NG5_JSON_AST_NODE_VALUE_TYPE_NULL) {
+                if (ast_node_data_type != JSON_VALUE_NULL) {
                     /** the object is null by definition, if no entries are contained */
                     if (!import_json_object(nested_object, err, element->value.value.object)) {
                         return false;
@@ -476,8 +476,8 @@ static bool import_json_object_array_prop(carbon_doc_obj_t *target, struct err *
                 }
             } break;
             case field_string: {
-                assert(ast_node_data_type == array_data_type || ast_node_data_type == NG5_JSON_AST_NODE_VALUE_TYPE_NULL);
-                carbon_doc_obj_push_primtive(entry, ast_node_data_type == NG5_JSON_AST_NODE_VALUE_TYPE_NULL ?
+                assert(ast_node_data_type == array_data_type || ast_node_data_type == JSON_VALUE_NULL);
+                carbon_doc_obj_push_primtive(entry, ast_node_data_type == JSON_VALUE_NULL ?
                                                     NG5_NULL_ENCODED_STRING :
                                                     element->value.value.string->value);
             } break;
@@ -490,51 +490,51 @@ static bool import_json_object_array_prop(carbon_doc_obj_t *target, struct err *
             case field_uint32:
             case field_uint64:
             case field_float: {
-                assert(ast_node_data_type == array_data_type || ast_node_data_type == NG5_JSON_AST_NODE_VALUE_TYPE_NULL);
+                assert(ast_node_data_type == array_data_type || ast_node_data_type == JSON_VALUE_NULL);
                 switch(field_type) {
                 case field_int8: {
-                    carbon_i8 value = ast_node_data_type == NG5_JSON_AST_NODE_VALUE_TYPE_NULL ? NG5_NULL_INT8 :
+                    carbon_i8 value = ast_node_data_type == JSON_VALUE_NULL ? NG5_NULL_INT8 :
                                       (carbon_i8) element->value.value.number->value.signed_integer;
                     carbon_doc_obj_push_primtive(entry, &value);
                 } break;
                 case field_int16: {
-                    carbon_i16 value = ast_node_data_type == NG5_JSON_AST_NODE_VALUE_TYPE_NULL ? NG5_NULL_INT16 :
+                    carbon_i16 value = ast_node_data_type == JSON_VALUE_NULL ? NG5_NULL_INT16 :
                                        (carbon_i16) element->value.value.number->value.signed_integer;
                     carbon_doc_obj_push_primtive(entry, &value);
                 } break;
                 case field_int32: {
-                    carbon_i32 value = ast_node_data_type == NG5_JSON_AST_NODE_VALUE_TYPE_NULL ? NG5_NULL_INT32 :
+                    carbon_i32 value = ast_node_data_type == JSON_VALUE_NULL ? NG5_NULL_INT32 :
                                        (carbon_i32) element->value.value.number->value.signed_integer;
                     carbon_doc_obj_push_primtive(entry, &value);
                 } break;
                 case field_int64: {
-                    carbon_i64 value = ast_node_data_type == NG5_JSON_AST_NODE_VALUE_TYPE_NULL ? NG5_NULL_INT64 :
+                    carbon_i64 value = ast_node_data_type == JSON_VALUE_NULL ? NG5_NULL_INT64 :
                                        (carbon_i64) element->value.value.number->value.signed_integer;
                     carbon_doc_obj_push_primtive(entry, &value);
                 } break;
                 case field_uint8: {
-                    carbon_u8 value = ast_node_data_type == NG5_JSON_AST_NODE_VALUE_TYPE_NULL ? NG5_NULL_UINT8 :
+                    carbon_u8 value = ast_node_data_type == JSON_VALUE_NULL ? NG5_NULL_UINT8 :
                                        (carbon_u8) element->value.value.number->value.unsigned_integer;
                     carbon_doc_obj_push_primtive(entry, &value);
                 } break;
                 case field_uint16: {
-                    carbon_u16 value = ast_node_data_type == NG5_JSON_AST_NODE_VALUE_TYPE_NULL ? NG5_NULL_UINT16 :
+                    carbon_u16 value = ast_node_data_type == JSON_VALUE_NULL ? NG5_NULL_UINT16 :
                                         (carbon_u16) element->value.value.number->value.unsigned_integer;
                     carbon_doc_obj_push_primtive(entry, &value);
                 } break;
                 case field_uint32: {
-                    carbon_u32 value = ast_node_data_type == NG5_JSON_AST_NODE_VALUE_TYPE_NULL ? NG5_NULL_UINT32 :
+                    carbon_u32 value = ast_node_data_type == JSON_VALUE_NULL ? NG5_NULL_UINT32 :
                                         (carbon_u32) element->value.value.number->value.unsigned_integer;
                     carbon_doc_obj_push_primtive(entry, &value);
                 } break;
                 case field_uint64: {
-                    carbon_u64 value = ast_node_data_type == NG5_JSON_AST_NODE_VALUE_TYPE_NULL ? NG5_NULL_UINT64 :
+                    carbon_u64 value = ast_node_data_type == JSON_VALUE_NULL ? NG5_NULL_UINT64 :
                                         (carbon_u64) element->value.value.number->value.unsigned_integer;
                     carbon_doc_obj_push_primtive(entry, &value);
                 } break;
                 case field_float: {
                     carbon_number_t value = NG5_NULL_FLOAT;
-                    if (ast_node_data_type != NG5_JSON_AST_NODE_VALUE_TYPE_NULL) {
+                    if (ast_node_data_type != JSON_VALUE_NULL) {
                         carbon_json_ast_node_number_value_type_e element_number_type = element->value.value.number->value_type;
                         if (element_number_type == NG5_JSON_AST_NODE_NUMBER_VALUE_TYPE_REAL_NUMBER) {
                             value = element->value.value.number->value.float_number;
@@ -555,13 +555,13 @@ static bool import_json_object_array_prop(carbon_doc_obj_t *target, struct err *
                 }
             } break;
             case field_bool:
-                if (NG5_LIKELY(ast_node_data_type == NG5_JSON_AST_NODE_VALUE_TYPE_TRUE ||
-                                  ast_node_data_type == NG5_JSON_AST_NODE_VALUE_TYPE_FALSE)) {
-                    carbon_boolean_t value = ast_node_data_type == NG5_JSON_AST_NODE_VALUE_TYPE_TRUE ?
+                if (NG5_LIKELY(ast_node_data_type == JSON_VALUE_TRUE ||
+                                  ast_node_data_type == JSON_VALUE_FALSE)) {
+                    carbon_boolean_t value = ast_node_data_type == JSON_VALUE_TRUE ?
                                          NG5_BOOLEAN_TRUE : NG5_BOOLEAN_FALSE;
                     carbon_doc_obj_push_primtive(entry, &value);
                 } else {
-                    assert(ast_node_data_type == NG5_JSON_AST_NODE_VALUE_TYPE_NULL);
+                    assert(ast_node_data_type == JSON_VALUE_NULL);
                     carbon_boolean_t value = NG5_NULL_BOOLEAN;
                     carbon_doc_obj_push_primtive(entry, &value);
                 }
@@ -585,30 +585,30 @@ static bool import_json_object(carbon_doc_obj_t *target, struct err *err, const 
 {
     for (size_t i = 0; i < json_obj->value->members.num_elems; i++) {
         carbon_json_ast_node_member_t *member = vec_get(&json_obj->value->members, i, carbon_json_ast_node_member_t);
-        carbon_json_ast_node_value_type_e value_type = member->value.value.value_type;
+        enum json_value_type value_type = member->value.value.value_type;
         switch (value_type) {
-        case NG5_JSON_AST_NODE_VALUE_TYPE_STRING:
+        case JSON_VALUE_STRING:
             import_json_object_string_prop(target, member->key.value, member->value.value.value.string);
             break;
-        case NG5_JSON_AST_NODE_VALUE_TYPE_NUMBER:
+        case JSON_VALUE_NUMBER:
             if (!import_json_object_number_prop(target, err, member->key.value, member->value.value.value.number)) {
                 return false;
             }
             break;
-        case NG5_JSON_AST_NODE_VALUE_TYPE_TRUE:
-        case NG5_JSON_AST_NODE_VALUE_TYPE_FALSE: {
-            carbon_boolean_t value = value_type == NG5_JSON_AST_NODE_VALUE_TYPE_TRUE ? NG5_BOOLEAN_TRUE : NG5_BOOLEAN_FALSE;
+        case JSON_VALUE_TRUE:
+        case JSON_VALUE_FALSE: {
+            carbon_boolean_t value = value_type == JSON_VALUE_TRUE ? NG5_BOOLEAN_TRUE : NG5_BOOLEAN_FALSE;
             import_json_object_bool_prop(target, member->key.value, value);
         } break;
-        case NG5_JSON_AST_NODE_VALUE_TYPE_NULL:
+        case JSON_VALUE_NULL:
             import_json_object_null_prop(target, member->key.value);
             break;
-        case NG5_JSON_AST_NODE_VALUE_TYPE_OBJECT:
+        case JSON_VALUE_OBJECT:
             if (!import_json_object_object_prop(target, err, member->key.value, member->value.value.value.object)) {
                 return false;
             }
             break;
-        case NG5_JSON_AST_NODE_VALUE_TYPE_ARRAY:
+        case JSON_VALUE_ARRAY:
             if (!import_json_object_array_prop(target, err, member->key.value, member->value.value.value.array)) {
                 return false;
             }
@@ -621,21 +621,21 @@ static bool import_json_object(carbon_doc_obj_t *target, struct err *err, const 
     return true;
 }
 
-static bool import_json(carbon_doc_obj_t *target, struct err *err, const carbon_json_t *json, carbon_doc_entries_t *partition)
+static bool import_json(carbon_doc_obj_t *target, struct err *err, const carbon_json_t *json, struct doc_entries *partition)
 {
-    carbon_json_ast_node_value_type_e value_type = json->element->value.value_type;
+    enum json_value_type value_type = json->element->value.value_type;
     switch (value_type) {
-    case NG5_JSON_AST_NODE_VALUE_TYPE_OBJECT:
+    case JSON_VALUE_OBJECT:
         if (!import_json_object(target, err, json->element->value.value.object)) {
             return false;
         }
         break;
-    case NG5_JSON_AST_NODE_VALUE_TYPE_ARRAY: {
+    case JSON_VALUE_ARRAY: {
         const struct vector ofType(carbon_json_ast_node_element_t) *arrayContent = &json->element->value.value.array->elements.elements;
         if (!carbon_vec_is_empty(arrayContent)) {
             const carbon_json_ast_node_element_t *first = vec_get(arrayContent, 0, carbon_json_ast_node_element_t);
             switch (first->value.value_type) {
-            case NG5_JSON_AST_NODE_VALUE_TYPE_OBJECT:
+            case JSON_VALUE_OBJECT:
                 if (!import_json_object(target, err, first->value.value.object)) {
                     return false;
                 }
@@ -648,23 +648,23 @@ static bool import_json(carbon_doc_obj_t *target, struct err *err, const carbon_
                     }
                 }
                 break;
-            case NG5_JSON_AST_NODE_VALUE_TYPE_ARRAY:
-            case NG5_JSON_AST_NODE_VALUE_TYPE_STRING:
-            case NG5_JSON_AST_NODE_VALUE_TYPE_NUMBER:
-            case NG5_JSON_AST_NODE_VALUE_TYPE_TRUE:
-            case NG5_JSON_AST_NODE_VALUE_TYPE_FALSE:
-            case NG5_JSON_AST_NODE_VALUE_TYPE_NULL:
+            case JSON_VALUE_ARRAY:
+            case JSON_VALUE_STRING:
+            case JSON_VALUE_NUMBER:
+            case JSON_VALUE_TRUE:
+            case JSON_VALUE_FALSE:
+            case JSON_VALUE_NULL:
             default:
                 carbon_print_error_and_die(NG5_ERR_INTERNALERR) /** Unsupported operation in arrays */
                 break;
             }
         }
     } break;
-    case NG5_JSON_AST_NODE_VALUE_TYPE_STRING:
-    case NG5_JSON_AST_NODE_VALUE_TYPE_NUMBER:
-    case NG5_JSON_AST_NODE_VALUE_TYPE_TRUE:
-    case NG5_JSON_AST_NODE_VALUE_TYPE_FALSE:
-    case NG5_JSON_AST_NODE_VALUE_TYPE_NULL:
+    case JSON_VALUE_STRING:
+    case JSON_VALUE_NUMBER:
+    case JSON_VALUE_TRUE:
+    case JSON_VALUE_FALSE:
+    case JSON_VALUE_NULL:
     default:
         error(err, NG5_ERR_JSONTYPE);
         return false;
@@ -672,7 +672,7 @@ static bool import_json(carbon_doc_obj_t *target, struct err *err, const carbon_
     return true;
 }
 
-carbon_doc_obj_t *carbon_doc_bulk_add_json(carbon_doc_entries_t *partition, carbon_json_t *json)
+carbon_doc_obj_t *carbon_doc_bulk_add_json(struct doc_entries *partition, carbon_json_t *json)
 {
     if (!partition || !json) {
         return NULL;
@@ -687,14 +687,14 @@ carbon_doc_obj_t *carbon_doc_bulk_add_json(carbon_doc_entries_t *partition, carb
     return converted_json;
 }
 
-carbon_doc_obj_t *carbon_doc_entries_get_root(const carbon_doc_entries_t *partition)
+carbon_doc_obj_t *carbon_doc_entries_get_root(const struct doc_entries *partition)
 {
     return partition ? partition->context : NULL;
 }
 
-carbon_doc_entries_t *carbon_doc_bulk_new_entries(carbon_doc_bulk_t *dst)
+struct doc_entries *carbon_doc_bulk_new_entries(struct doc_bulk *dst)
 {
-    carbon_doc_entries_t *partition = NULL;
+    struct doc_entries *partition = NULL;
     carbon_doc_t *model = carbon_doc_bulk_new_doc(dst, field_object);
     carbon_doc_obj_t *object = carbon_doc_bulk_new_obj(model);
     carbon_doc_obj_add_key(&partition, object, "/", field_object);
@@ -1215,8 +1215,8 @@ static void sort_columndoc_entries(columndoc_obj_t *columndoc)
     }
 }
 
-carbon_columndoc_t *carbon_doc_entries_to_columndoc(const carbon_doc_bulk_t *bulk,
-                                                          const carbon_doc_entries_t *partition,
+carbon_columndoc_t *carbon_doc_entries_columndoc(const struct doc_bulk *bulk,
+                                                          const struct doc_entries *partition,
                                                           bool read_optimized)
 {
     if (!bulk || !partition) {
@@ -1259,7 +1259,7 @@ carbon_columndoc_t *carbon_doc_entries_to_columndoc(const carbon_doc_bulk_t *bul
 }
 
 NG5_EXPORT(bool)
-carbon_doc_entries_drop(carbon_doc_entries_t *partition)
+carbon_doc_entries_drop(struct doc_entries *partition)
 {
     NG5_UNUSED(partition);
     return true;
@@ -1267,11 +1267,11 @@ carbon_doc_entries_drop(carbon_doc_entries_t *partition)
 
 static void create_doc(carbon_doc_obj_t *model, carbon_doc_t *doc)
 {
-    carbon_vec_create(&model->entries, NULL, sizeof(carbon_doc_entries_t), 50);
+    carbon_vec_create(&model->entries, NULL, sizeof(struct doc_entries), 50);
     model->doc = doc;
 }
 
-static void create_typed_vector(carbon_doc_entries_t *entry)
+static void create_typed_vector(struct doc_entries *entry)
 {
     size_t size;
     switch (entry->type) {
@@ -1321,7 +1321,7 @@ static void create_typed_vector(carbon_doc_entries_t *entry)
     carbon_vec_create(&entry->values, NULL, size, 50);
 }
 
-static void entries_drop(carbon_doc_entries_t *entry)
+static void entries_drop(struct doc_entries *entry)
 {
     if (entry->type == field_object) {
         for (size_t i = 0; i < entry->values.num_elems; i++)
@@ -1496,7 +1496,7 @@ static void print_object(FILE *file, const carbon_doc_obj_t *model)
 {
     fprintf(file, "{");
     for (size_t i = 0; i < model->entries.num_elems; i++) {
-        carbon_doc_entries_t *entry = vec_get(&model->entries, i, carbon_doc_entries_t);
+        struct doc_entries *entry = vec_get(&model->entries, i, struct doc_entries);
         fprintf(file, "\"%s\": ", entry->key);
         print_value(file, entry->type, &entry->values);
         fprintf(file, "%s", i + 1 < model->entries.num_elems ? ", " : "");
