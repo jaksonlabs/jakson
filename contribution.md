@@ -38,7 +38,8 @@ As best practice:
 
 #### Code style:
 
-* case is snake case
+* Please follow guide line from the [linux kernel](https://www.kernel.org/doc/html/v4.10/process/coding-style.html)
+.
 
 ## Communicating with developers
 
