@@ -17,16 +17,16 @@
 
 #include "core/carbon/archive_strid_iter.h"
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_strid_iter_open(carbon_strid_iter_t *it, struct err *err, carbon_archive_t *archive)
 {
-    CARBON_NON_NULL_OR_ERROR(it)
-    CARBON_NON_NULL_OR_ERROR(archive)
+    NG5_NON_NULL_OR_ERROR(it)
+    NG5_NON_NULL_OR_ERROR(archive)
 
     memset(&it->vector, 0, sizeof(it->vector));
     it->disk_file = fopen(archive->diskFilePath, "r");
     if (!it->disk_file) {
-        CARBON_OPTIONAL(err, error(err, CARBON_ERR_FOPEN_FAILED))
+        NG5_OPTIONAL(err, error(err, NG5_ERR_FOPEN_FAILED))
         it->is_open = false;
         return false;
     }
@@ -36,13 +36,13 @@ carbon_strid_iter_open(carbon_strid_iter_t *it, struct err *err, carbon_archive_
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_strid_iter_next(bool *success, carbon_strid_info_t **info, struct err *err, size_t *info_length,
                        carbon_strid_iter_t *it)
 {
-    CARBON_NON_NULL_OR_ERROR(info)
-    CARBON_NON_NULL_OR_ERROR(info_length)
-    CARBON_NON_NULL_OR_ERROR(it)
+    NG5_NON_NULL_OR_ERROR(info)
+    NG5_NON_NULL_OR_ERROR(info_length)
+    NG5_NON_NULL_OR_ERROR(it)
 
     if (it->disk_offset != 0 && it->is_open) {
         carbon_string_entry_header_t header;
@@ -51,11 +51,11 @@ carbon_strid_iter_next(bool *success, carbon_strid_info_t **info, struct err *er
             fseek(it->disk_file, it->disk_offset, SEEK_SET);
             int num_read = fread(&header, sizeof(carbon_string_entry_header_t), 1, it->disk_file);
             if (header.marker != '-') {
-                CARBON_PRINT_ERROR(CARBON_ERR_INTERNALERR);
+                NG5_PRINT_ERROR(NG5_ERR_INTERNALERR);
                 return false;
             }
             if (num_read != 1) {
-                CARBON_OPTIONAL(err, error(err, CARBON_ERR_FREAD_FAILED))
+                NG5_OPTIONAL(err, error(err, NG5_ERR_FREAD_FAILED))
                 *success = false;
                 return false;
             } else {
@@ -65,7 +65,7 @@ carbon_strid_iter_next(bool *success, carbon_strid_info_t **info, struct err *er
                 it->disk_offset = header.next_entry_off;
                 vec_pos++;
             }
-        } while (header.next_entry_off != 0 && vec_pos < CARBON_ARRAY_LENGTH(it->vector));
+        } while (header.next_entry_off != 0 && vec_pos < NG5_ARRAY_LENGTH(it->vector));
 
         *info_length = vec_pos;
         *success = true;
@@ -76,10 +76,10 @@ carbon_strid_iter_next(bool *success, carbon_strid_info_t **info, struct err *er
     }
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_strid_iter_close(carbon_strid_iter_t *it)
 {
-    CARBON_NON_NULL_OR_ERROR(it)
+    NG5_NON_NULL_OR_ERROR(it)
     if (it->is_open) {
         fclose(it->disk_file);
         it->is_open = false;

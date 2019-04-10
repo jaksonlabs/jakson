@@ -15,12 +15,12 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_STRING_PRED_H
-#define CARBON_STRING_PRED_H
+#ifndef NG5_STRING_PRED_H
+#define NG5_STRING_PRED_H
 
 #include "shared/common.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
 typedef bool (*carbon_string_pred_func_t)(size_t *idxs_matching, size_t *num_matching,
                                      char **strings, size_t num_strings, void *capture);
@@ -31,15 +31,15 @@ typedef struct
     i64 limit;
 } carbon_string_pred_t;
 
-CARBON_BUILT_IN(static bool)
+NG5_BUILT_IN(static bool)
 carbon_string_pred_validate(struct err *err, const carbon_string_pred_t *pred)
 {
-    CARBON_NON_NULL_OR_ERROR(pred);
-    CARBON_IMPLEMENTS_OR_ERROR(err, pred, func)
+    NG5_NON_NULL_OR_ERROR(pred);
+    NG5_IMPLEMENTS_OR_ERROR(err, pred, func)
     return true;
 }
 
-CARBON_BUILT_IN(static bool)
+NG5_BUILT_IN(static bool)
 carbon_string_pred_eval(const carbon_string_pred_t *pred, size_t *idxs_matching, size_t *num_matching,
                         char **strings, size_t num_strings, void *capture)
 {
@@ -51,15 +51,15 @@ carbon_string_pred_eval(const carbon_string_pred_t *pred, size_t *idxs_matching,
     return pred->func(idxs_matching, num_matching, strings, num_strings, capture);
 }
 
-CARBON_BUILT_IN(static bool)
+NG5_BUILT_IN(static bool)
 carbon_string_pred_get_limit(i64 *limit, const carbon_string_pred_t *pred)
 {
-    CARBON_NON_NULL_OR_ERROR(limit);
-    CARBON_NON_NULL_OR_ERROR(pred);
+    NG5_NON_NULL_OR_ERROR(limit);
+    NG5_NON_NULL_OR_ERROR(pred);
     *limit = pred->limit;
     return true;
 }
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif

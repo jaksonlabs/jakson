@@ -15,14 +15,14 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_HASH_H
-#define CARBON_HASH_H
+#ifndef NG5_HASH_H
+#define NG5_HASH_H
 
 #include <assert.h>
 #include "shared/common.h"
 #include "shared/types.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
 typedef u16 carbon_hash16_t;
 typedef u32 carbon_hash32_t;
@@ -30,6 +30,6 @@ typedef u8  carbon_hash8_t;
 
 typedef carbon_hash32_t   carbon_hash_t;
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif

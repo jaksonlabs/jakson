@@ -19,14 +19,14 @@
 #include <lzma.h>
 #include "std/bitmap.h"
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_bitmap_create(carbon_bitmap_t *bitmap, u16 num_bits)
 {
-    CARBON_NON_NULL_OR_ERROR(bitmap);
+    NG5_NON_NULL_OR_ERROR(bitmap);
 
     struct allocator alloc;
     carbon_alloc_create_std(&alloc);
-    carbon_vec_create(&bitmap->data, &alloc, sizeof(u32), ceil(num_bits / (double) CARBON_NUM_BITS(u32)));
+    carbon_vec_create(&bitmap->data, &alloc, sizeof(u32), ceil(num_bits / (double) NG5_NUM_BITS(u32)));
     size_t cap = carbon_vec_capacity(&bitmap->data);
     u32 zero = 0;
     carbon_vec_repeated_push(&bitmap->data, &zero, cap);
@@ -35,14 +35,14 @@ carbon_bitmap_create(carbon_bitmap_t *bitmap, u16 num_bits)
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_bitmap_cpy(carbon_bitmap_t *dst, const carbon_bitmap_t *src)
 {
     dst->num_bits = src->num_bits;
     return carbon_vec_cpy(&dst->data, &src->data);
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_bitmap_drop(carbon_bitmap_t *bitset)
 {
     return carbon_vec_drop(&bitset->data);
@@ -50,32 +50,32 @@ carbon_bitmap_drop(carbon_bitmap_t *bitset)
 
 size_t carbon_bitmap_nbits(const carbon_bitmap_t *bitset)
 {
-    CARBON_NON_NULL_OR_ERROR(bitset);
+    NG5_NON_NULL_OR_ERROR(bitset);
     return bitset->num_bits;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_bitmap_clear(carbon_bitmap_t *bitset)
 {
-    CARBON_NON_NULL_OR_ERROR(bitset);
+    NG5_NON_NULL_OR_ERROR(bitset);
     void *data = (void *) carbon_vec_data(&bitset->data);
     memset(data, 0, sizeof(u32) * carbon_vec_capacity(&bitset->data));
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_bitmap_set(carbon_bitmap_t *bitset, u16 bit_position, bool on)
 {
-    CARBON_NON_NULL_OR_ERROR(bitset)
-    size_t block_pos = floor(bit_position / (double) CARBON_NUM_BITS(u32));
-    size_t block_bit = bit_position % CARBON_NUM_BITS(u32);
+    NG5_NON_NULL_OR_ERROR(bitset)
+    size_t block_pos = floor(bit_position / (double) NG5_NUM_BITS(u32));
+    size_t block_bit = bit_position % NG5_NUM_BITS(u32);
     u32 block = *vec_get(&bitset->data, block_pos, u32);
-    u32 mask = CARBON_SET_BIT(block_bit);
+    u32 mask = NG5_SET_BIT(block_bit);
     if (on) {
-        CARBON_FIELD_SET(block, mask);
+        NG5_FIELD_SET(block, mask);
     }
     else {
-        CARBON_FIELD_CLEAR(block, mask);
+        NG5_FIELD_CLEAR(block, mask);
     }
     carbon_vec_set(&bitset->data, block_pos, &block);
     return true;
@@ -83,18 +83,18 @@ carbon_bitmap_set(carbon_bitmap_t *bitset, u16 bit_position, bool on)
 
 bool carbon_bitmap_get(carbon_bitmap_t *bitset, u16 bit_position)
 {
-    CARBON_NON_NULL_OR_ERROR(bitset)
-    size_t block_pos = floor(bit_position / (double) CARBON_NUM_BITS(u32));
-    size_t block_bit = bit_position % CARBON_NUM_BITS(u32);
+    NG5_NON_NULL_OR_ERROR(bitset)
+    size_t block_pos = floor(bit_position / (double) NG5_NUM_BITS(u32));
+    size_t block_bit = bit_position % NG5_NUM_BITS(u32);
     u32 block = *vec_get(&bitset->data, block_pos, u32);
-    u32 mask = CARBON_SET_BIT(block_bit);
+    u32 mask = NG5_SET_BIT(block_bit);
     return ((mask & block) >> bit_position) == true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_bitmap_lshift(carbon_bitmap_t *carbon_bitmap_t)
 {
-    CARBON_NON_NULL_OR_ERROR(carbon_bitmap_t)
+    NG5_NON_NULL_OR_ERROR(carbon_bitmap_t)
     for (int i = carbon_bitmap_t->num_bits - 1; i >= 0; i--) {
         bool f = i > 0 ? carbon_bitmap_get(carbon_bitmap_t, i - 1) : false;
         carbon_bitmap_set(carbon_bitmap_t, i, f);
@@ -123,9 +123,9 @@ void carbon_bitmap_print_bits_in_char(FILE *file, char n)
 
 bool carbon_bitmap_blocks(u32 **blocks, u32 *num_blocks, const carbon_bitmap_t *carbon_bitmap_t)
 {
-    CARBON_NON_NULL_OR_ERROR(blocks)
-    CARBON_NON_NULL_OR_ERROR(num_blocks)
-    CARBON_NON_NULL_OR_ERROR(carbon_bitmap_t)
+    NG5_NON_NULL_OR_ERROR(blocks)
+    NG5_NON_NULL_OR_ERROR(num_blocks)
+    NG5_NON_NULL_OR_ERROR(carbon_bitmap_t)
 
     u32 *result = malloc(carbon_bitmap_t->data.num_elems * sizeof(u32));
     i32 k = 0;
@@ -140,7 +140,7 @@ bool carbon_bitmap_blocks(u32 **blocks, u32 *num_blocks, const carbon_bitmap_t *
 
 bool carbon_bitmap_print(FILE *file, const carbon_bitmap_t *carbon_bitmap_t)
 {
-    CARBON_NON_NULL_OR_ERROR(carbon_bitmap_t)
+    NG5_NON_NULL_OR_ERROR(carbon_bitmap_t)
 
     u32 *blocks, num_blocks;
 

@@ -22,21 +22,18 @@
 #include "coding/pack_huffman.h"
 #include "std/bitmap.h"
 
-
-typedef struct huff_node huff_node_t;
-
-typedef struct huff_node
+struct huff_node
 {
-    huff_node_t *prev, *next, *left, *right;
+    struct huff_node *prev, *next, *left, *right;
     u64 freq;
     unsigned char letter;
-} huff_node_t;
+};
 
 static void huff_tree_create(vec_t ofType(carbon_huffman_entry_t) *table, const vec_t ofType(u32) *frequencies);
 
 bool carbon_huffman_create(carbon_huffman_t *dic)
 {
-    CARBON_NON_NULL_OR_ERROR(dic);
+    NG5_NON_NULL_OR_ERROR(dic);
 
     carbon_vec_create(&dic->table, NULL, sizeof(carbon_huffman_entry_t), UCHAR_MAX / 4);
     carbon_error_init(&dic->err);
@@ -44,31 +41,31 @@ bool carbon_huffman_create(carbon_huffman_t *dic)
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_huffman_cpy(carbon_huffman_t *dst, carbon_huffman_t *src)
 {
-    CARBON_NON_NULL_OR_ERROR(dst);
-    CARBON_NON_NULL_OR_ERROR(src);
+    NG5_NON_NULL_OR_ERROR(dst);
+    NG5_NON_NULL_OR_ERROR(src);
     if (!carbon_vec_cpy(&dst->table, &src->table)) {
-        error(&src->err, CARBON_ERR_HARDCOPYFAILED);
+        error(&src->err, NG5_ERR_HARDCOPYFAILED);
         return false;
     } else {
         return carbon_error_cpy(&dst->err, &src->err);
     }
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_huffman_build(carbon_huffman_t *encoder, const carbon_string_ref_vec *strings)
 {
-    CARBON_NON_NULL_OR_ERROR(encoder);
-    CARBON_NON_NULL_OR_ERROR(strings);
+    NG5_NON_NULL_OR_ERROR(encoder);
+    NG5_NON_NULL_OR_ERROR(strings);
 
     vec_t ofType(u32) frequencies;
     carbon_vec_create(&frequencies, NULL, sizeof(u32), UCHAR_MAX);
     carbon_vec_enlarge_size_to_capacity(&frequencies);
 
     u32 *freq_data = vec_all(&frequencies, u32);
-    CARBON_ZERO_MEMORY(freq_data, UCHAR_MAX * sizeof(u32));
+    NG5_ZERO_MEMORY(freq_data, UCHAR_MAX * sizeof(u32));
 
     for (size_t i = 0; i < strings->num_elems; i++) {
         const char *string = *vec_get(strings, i, const char *);
@@ -85,18 +82,18 @@ carbon_huffman_build(carbon_huffman_t *encoder, const carbon_string_ref_vec *str
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_huffman_get_error(struct err *err, const carbon_huffman_t *dic)
 {
-    CARBON_NON_NULL_OR_ERROR(err)
-    CARBON_NON_NULL_OR_ERROR(dic)
+    NG5_NON_NULL_OR_ERROR(err)
+    NG5_NON_NULL_OR_ERROR(dic)
     carbon_error_cpy(err, &dic->err);
     return true;
 }
 
 bool carbon_huffman_drop(carbon_huffman_t *dic)
 {
-    CARBON_NON_NULL_OR_ERROR(dic);
+    NG5_NON_NULL_OR_ERROR(dic);
 
     for (size_t i = 0; i < dic->table.num_elems; i++) {
         carbon_huffman_entry_t *entry = vec_get(&dic->table, i, carbon_huffman_entry_t);
@@ -112,8 +109,8 @@ bool carbon_huffman_drop(carbon_huffman_t *dic)
 
 bool carbon_huffman_serialize_dic(memfile_t *file, const carbon_huffman_t *dic, char marker_symbol)
 {
-    CARBON_NON_NULL_OR_ERROR(file)
-    CARBON_NON_NULL_OR_ERROR(dic)
+    NG5_NON_NULL_OR_ERROR(file)
+    NG5_NON_NULL_OR_ERROR(dic)
 
     for (size_t i = 0; i < dic->table.num_elems; i++) {
         carbon_huffman_entry_t *entry = vec_get(&dic->table, i, carbon_huffman_entry_t);
@@ -159,7 +156,7 @@ static carbon_huffman_entry_t *find_dic_entry(carbon_huffman_t *dic, unsigned ch
             return entry;
         }
     }
-    error(&dic->err, CARBON_ERR_HUFFERR)
+    error(&dic->err, NG5_ERR_HUFFERR)
     return NULL;
 }
 
@@ -199,14 +196,14 @@ static size_t encodeString(memfile_t *file, carbon_huffman_t *dic, const char *s
     return num_written_bytes;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_huffman_encode_one(memfile_t *file,
                           carbon_huffman_t *dic,
                           const char *string)
 {
-    CARBON_NON_NULL_OR_ERROR(file)
-    CARBON_NON_NULL_OR_ERROR(dic)
-    CARBON_NON_NULL_OR_ERROR(string)
+    NG5_NON_NULL_OR_ERROR(file)
+    NG5_NON_NULL_OR_ERROR(dic)
+    NG5_NON_NULL_OR_ERROR(string)
 
     u32 num_bytes_encoded = 0;
 
@@ -227,19 +224,19 @@ carbon_huffman_encode_one(memfile_t *file,
 
 bool carbon_huffman_read_string(carbon_huffman_encoded_str_info_t *info, memfile_t *src)
 {
-    info->nbytes_encoded = *CARBON_MEMFILE_READ_TYPE(src, u32);
-    info->encoded_bytes = CARBON_MEMFILE_READ(src, info->nbytes_encoded);
+    info->nbytes_encoded = *NG5_MEMFILE_READ_TYPE(src, u32);
+    info->encoded_bytes = NG5_MEMFILE_READ(src, info->nbytes_encoded);
     return true;
 }
 
 bool carbon_huffman_read_dic_entry(carbon_huffman_entry_info_t *info, memfile_t *file, char marker_symbol)
 {
-    char marker = *CARBON_MEMFILE_PEEK(file, char);
+    char marker = *NG5_MEMFILE_PEEK(file, char);
     if (marker == marker_symbol) {
         carbon_memfile_skip(file, sizeof(char));
-        info->letter = *CARBON_MEMFILE_READ_TYPE(file, unsigned char);
-        info->nbytes_prefix = *CARBON_MEMFILE_READ_TYPE(file, u8);
-        info->prefix_code = CARBON_MEMFILE_PEEK(file, char);
+        info->letter = *NG5_MEMFILE_READ_TYPE(file, unsigned char);
+        info->nbytes_prefix = *NG5_MEMFILE_READ_TYPE(file, u8);
+        info->prefix_code = NG5_MEMFILE_PEEK(file, char);
 
         carbon_memfile_skip(file, info->nbytes_prefix);
 
@@ -262,7 +259,7 @@ static const u32 *get_num_used_blocks(u16 *numUsedBlocks, carbon_huffman_entry_t
     return NULL;
 }
 
-static void import_into_entry(carbon_huffman_entry_t *entry, const huff_node_t *node, const carbon_bitmap_t *carbon_bitmap_t)
+static void import_into_entry(carbon_huffman_entry_t *entry, const struct huff_node *node, const carbon_bitmap_t *carbon_bitmap_t)
 {
     entry->letter = node->letter;
     u32 *blocks, num_blocks;
@@ -278,20 +275,20 @@ static void import_into_entry(carbon_huffman_entry_t *entry, const huff_node_t *
     free(blocks);
 }
 
-static huff_node_t *seek_to_begin(huff_node_t *handle) {
+static struct huff_node *seek_to_begin(struct huff_node *handle) {
     for (; handle->prev != NULL; handle = handle->prev)
         ;
     return handle;
 }
 
-static huff_node_t *seek_to_end(huff_node_t *handle) {
+static struct huff_node *seek_to_end(struct huff_node *handle) {
     for (; handle->next != NULL; handle = handle->next)
         ;
     return handle;
 }
 
-CARBON_FUNC_UNUSED
-static void __diag_print_insight(huff_node_t *n)
+NG5_FUNC_UNUSED
+static void __diag_print_insight(struct huff_node *n)
 {
     printf("(");
     if (!n->left && !n->right) {
@@ -309,10 +306,10 @@ static void __diag_print_insight(huff_node_t *n)
     printf(": %"PRIu64"",n->freq);
 }
 
-CARBON_FUNC_UNUSED
-static void __diag_dump_remaining_candidates(huff_node_t *n)
+NG5_FUNC_UNUSED
+static void __diag_dump_remaining_candidates(struct huff_node *n)
 {
-    huff_node_t *it = seek_to_begin(n);
+    struct huff_node *it = seek_to_begin(n);
     while (it->next != NULL) {
         __diag_print_insight(it);
         printf(" | ");
@@ -320,11 +317,11 @@ static void __diag_dump_remaining_candidates(huff_node_t *n)
     }
 }
 
-static huff_node_t *find_smallest(huff_node_t *begin, u64 lowerBound, huff_node_t *skip)
+static struct huff_node *find_smallest(struct huff_node *begin, u64 lowerBound, struct huff_node *skip)
 {
     u64 smallest = UINT64_MAX;
-    huff_node_t *result = NULL;
-    for (huff_node_t *it = begin; it != NULL; it = it->next) {
+    struct huff_node *result = NULL;
+    for (struct huff_node *it = begin; it != NULL; it = it->next) {
         if (it != skip && it->freq >= lowerBound && it->freq <= smallest) {
             smallest = it->freq;
             result = it;
@@ -334,7 +331,7 @@ static huff_node_t *find_smallest(huff_node_t *begin, u64 lowerBound, huff_node_
 }
 
 
-static void assign_code(huff_node_t *node, const carbon_bitmap_t *path, vec_t ofType(carbon_huffman_entry_t) *table)
+static void assign_code(struct huff_node *node, const carbon_bitmap_t *path, vec_t ofType(carbon_huffman_entry_t) *table)
 {
     if (!node->left && !node->right) {
             carbon_huffman_entry_t *entry = VECTOR_NEW_AND_GET(table, carbon_huffman_entry_t);
@@ -359,10 +356,10 @@ static void assign_code(huff_node_t *node, const carbon_bitmap_t *path, vec_t of
     }
 }
 
-static huff_node_t *trim_and_begin(vec_t ofType(HuffNode) *candidates)
+static struct huff_node *trim_and_begin(vec_t ofType(HuffNode) *candidates)
 {
-    huff_node_t *begin = NULL;
-    for (huff_node_t *it = vec_get(candidates, 0, huff_node_t); ; it++) {
+    struct huff_node *begin = NULL;
+    for (struct huff_node *it = vec_get(candidates, 0, struct huff_node); ; it++) {
         if (it->freq == 0) {
             if (it->prev) {
                 it->prev->next = it->next;
@@ -387,28 +384,28 @@ static void huff_tree_create(vec_t ofType(carbon_huffman_entry_t) *table, const 
     assert(UCHAR_MAX == frequencies->num_elems);
 
     vec_t ofType(HuffNode) candidates;
-    carbon_vec_create(&candidates, NULL, sizeof(huff_node_t), UCHAR_MAX * UCHAR_MAX);
+    carbon_vec_create(&candidates, NULL, sizeof(struct huff_node), UCHAR_MAX * UCHAR_MAX);
     size_t appender_idx = UCHAR_MAX;
 
     for (unsigned char i = 0; i < UCHAR_MAX; i++) {
-        huff_node_t *node = VECTOR_NEW_AND_GET(&candidates, huff_node_t);
+        struct huff_node *node = VECTOR_NEW_AND_GET(&candidates, struct huff_node);
         node->letter = i;
         node->freq = *vec_get(frequencies, i, u32);
     }
 
     for (unsigned char i = 0; i < UCHAR_MAX; i++) {
-        huff_node_t *node = vec_get(&candidates, i, huff_node_t);
-        huff_node_t *prev = i > 0 ? vec_get(&candidates, i - 1, huff_node_t) : NULL;
-        huff_node_t *next = i + 1 < UCHAR_MAX ? vec_get(&candidates, i + 1, huff_node_t) : NULL;
+        struct huff_node *node = vec_get(&candidates, i, struct huff_node);
+        struct huff_node *prev = i > 0 ? vec_get(&candidates, i - 1, struct huff_node) : NULL;
+        struct huff_node *next = i + 1 < UCHAR_MAX ? vec_get(&candidates, i + 1, struct huff_node) : NULL;
         node->next = next;
         node->prev = prev;
         node->left = node->right = NULL;
     }
 
 
-    huff_node_t *smallest, *small;
-    huff_node_t *handle = trim_and_begin(&candidates);
-    huff_node_t *new_node = NULL;
+    struct huff_node *smallest, *small;
+    struct huff_node *handle = trim_and_begin(&candidates);
+    struct huff_node *new_node = NULL;
 
 
     while (handle->next != NULL) {
@@ -416,7 +413,7 @@ static void huff_tree_create(vec_t ofType(carbon_huffman_entry_t) *table, const 
         small = find_smallest(handle, smallest->freq, smallest);
 
         appender_idx++;
-        new_node = VECTOR_NEW_AND_GET(&candidates, huff_node_t);
+        new_node = VECTOR_NEW_AND_GET(&candidates, struct huff_node);
         new_node->freq = small->freq + smallest->freq;
         new_node->letter = '\0';
         new_node->left = small;
@@ -451,11 +448,11 @@ static void huff_tree_create(vec_t ofType(carbon_huffman_entry_t) *table, const 
         } else if (smallest->next) {
             handle = seek_to_begin(smallest->next);
         } else {
-            carbon_print_error_and_die(CARBON_ERR_INTERNALERR);
+            carbon_print_error_and_die(NG5_ERR_INTERNALERR);
         }
 
         assert (!handle->prev);
-        huff_node_t *end = seek_to_end(handle);
+        struct huff_node *end = seek_to_end(handle);
         assert(!end->next);
         end->next = new_node;
         new_node->prev = end;
@@ -473,7 +470,7 @@ static void huff_tree_create(vec_t ofType(carbon_huffman_entry_t) *table, const 
 
     seek_to_begin(handle);
     if(handle->next) {
-        huff_node_t *finalNode = VECTOR_NEW_AND_GET(&candidates, huff_node_t);
+        struct huff_node *finalNode = VECTOR_NEW_AND_GET(&candidates, struct huff_node);
         finalNode->freq = small->freq + smallest->freq;
         finalNode->letter = '\0';
         if (handle->freq > handle->next->freq) {

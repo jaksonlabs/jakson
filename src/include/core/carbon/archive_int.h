@@ -15,8 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_INTERNALS_ARCHIVE_H
-#define CARBON_INTERNALS_ARCHIVE_H
+#ifndef NG5_INTERNALS_ARCHIVE_H
+#define NG5_INTERNALS_ARCHIVE_H
 
 #include "shared/common.h"
 #include "core/mem/file.h"
@@ -24,7 +24,7 @@
 #include "core/oid/oid.h"
 #include "core/pack/pack.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
 
 typedef struct __attribute__((packed))
@@ -399,6 +399,6 @@ carbon_int_marker_to_field_type(char symbol);
 carbon_basic_type_e
 carbon_int_field_type_to_basic_type(field_e type);
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif

@@ -15,14 +15,14 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_CACHE_H
-#define CARBON_CACHE_H
+#ifndef NG5_CACHE_H
+#define NG5_CACHE_H
 
 #include "shared/common.h"
 #include "shared/types.h"
 #include "archive_query.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
 typedef struct carbon_string_id_cache carbon_string_id_cache_t;
 
@@ -33,30 +33,30 @@ typedef struct
     size_t num_evicted;
 } carbon_string_id_cache_statistics_t;
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_string_id_cache_create_LRU(carbon_string_id_cache_t **cache, carbon_archive_t *archive);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_string_id_cache_create_LRU_ex(carbon_string_id_cache_t **cache, carbon_archive_t *archive, size_t capacity);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_string_id_cache_get_error(struct err *err, const carbon_string_id_cache_t *cache);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_string_id_cache_get_size(size_t *size, const carbon_string_id_cache_t *cache);
 
-CARBON_EXPORT(char *)
+NG5_EXPORT(char *)
 carbon_string_id_cache_get(carbon_string_id_cache_t *cache, carbon_string_id_t id);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_string_id_cache_get_statistics(carbon_string_id_cache_statistics_t *statistics, carbon_string_id_cache_t *cache);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_string_id_cache_reset_statistics(carbon_string_id_cache_t *cache);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_string_id_cache_drop(carbon_string_id_cache_t *cache);
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif

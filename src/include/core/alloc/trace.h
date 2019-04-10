@@ -15,12 +15,12 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_ALLOC_TRACER_H
-#define CARBON_ALLOC_TRACER_H
+#ifndef NG5_ALLOC_TRACER_H
+#define NG5_ALLOC_TRACER_H
 
 #include "alloc.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
 /**
  * Returns standard c-lib allocator (malloc, realloc, free) that collects some statistics
@@ -30,9 +30,9 @@ CARBON_BEGIN_DECL
  * @param alloc must be non-null
  * @return STATUS_OK in case of non-null parameter alloc, STATUS_NULLPTR otherwise
  */
-CARBON_EXPORT (int)
+NG5_EXPORT (int)
 carbon_tracer_alloc_create(struct allocator *alloc);
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif

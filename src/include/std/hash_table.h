@@ -15,14 +15,14 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_FIX_MAP_H
-#define CARBON_FIX_MAP_H
+#ifndef NG5_FIX_MAP_H
+#define NG5_FIX_MAP_H
 
 #include "shared/common.h"
 #include "std/vec.h"
 #include "core/async/spin.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
 typedef struct
 {
@@ -53,50 +53,50 @@ typedef struct
     struct err err;
 } carbon_hashtable_t;
 
-CARBON_DEFINE_GET_ERROR_FUNCTION(hashtable, carbon_hashtable_t, table);
+NG5_DEFINE_GET_ERROR_FUNCTION(hashtable, carbon_hashtable_t, table);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_hashtable_create(carbon_hashtable_t *map, struct err *err, size_t key_size, size_t value_size, size_t capacity);
 
-CARBON_EXPORT(carbon_hashtable_t *)
+NG5_EXPORT(carbon_hashtable_t *)
 carbon_hashtable_cpy(carbon_hashtable_t *src);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_hashtable_drop(carbon_hashtable_t *map);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_hashtable_clear(carbon_hashtable_t *map);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_hashtable_avg_displace(float *displace, const carbon_hashtable_t *map);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_hashtable_lock(carbon_hashtable_t *map);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_hashtable_unlock(carbon_hashtable_t *map);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_hashtable_insert_or_update(carbon_hashtable_t *map, const void *keys, const void *values, uint_fast32_t num_pairs);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_hashtable_serialize(FILE *file, carbon_hashtable_t *table);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_hashtable_deserialize(carbon_hashtable_t *table, struct err *err, FILE *file);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_hashtable_remove_if_contained(carbon_hashtable_t *map, const void *keys, size_t num_pairs);
 
-CARBON_EXPORT(const void *)
+NG5_EXPORT(const void *)
 carbon_hashtable_get_value(carbon_hashtable_t *map, const void *key);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_hashtable_get_fload_factor(float *factor, carbon_hashtable_t *map);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_hashtable_rehash(carbon_hashtable_t *map);
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif

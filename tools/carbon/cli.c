@@ -13,8 +13,8 @@
 
 static int testFileExists(FILE *file, const char *fileName, size_t fileNum, size_t fileMax, bool requireExistence)
 {
-    CARBON_UNUSED(fileNum);
-    CARBON_UNUSED(fileMax);
+    NG5_UNUSED(fileNum);
+    NG5_UNUSED(fileMax);
 
     if (access( fileName, F_OK ) == 0) {
         if (requireExistence) {
@@ -31,7 +31,7 @@ static int testFileExists(FILE *file, const char *fileName, size_t fileNum, size
     }
 
     fail:
-    CARBON_CONSOLE_WRITELN(file, "** ERROR ** file I/O error for file '%s'", fileName);
+    NG5_CONSOLE_WRITELN(file, "** ERROR ** file I/O error for file '%s'", fileName);
     return false;
 
     success:
@@ -55,23 +55,23 @@ typedef struct
 static void
 visit_root_object(carbon_archive_t *archive, carbon_object_id_t id, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
 }
 
 static void
 before_visit_starts(carbon_archive_t *archive, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(capture);
 }
 
 static void
 after_visit_ends(carbon_archive_t *archive, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(capture);
 }
 
 static carbon_visitor_policy_e
@@ -80,32 +80,32 @@ before_object_visit(carbon_archive_t *archive, path_stack_t path,
                                                u32 object_idx, u32 num_objects, carbon_string_id_t key,
                                                void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(parent_id);
-    CARBON_UNUSED(value_id);
-    CARBON_UNUSED(object_idx);
-    CARBON_UNUSED(num_objects);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(parent_id);
+    NG5_UNUSED(value_id);
+    NG5_UNUSED(object_idx);
+    NG5_UNUSED(num_objects);
+    NG5_UNUSED(key);
+    NG5_UNUSED(capture);
 
     // TODO: ???   crashes??
     
     carbon_archive_visitor_print_path(stderr, archive, path);
 
-    return CARBON_VISITOR_POLICY_INCLUDE;
+    return NG5_VISITOR_POLICY_INCLUDE;
 }
 
 static void
 after_object_visit(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                            u32 object_idx, u32 num_objects, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(object_idx);
-    CARBON_UNUSED(num_objects);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(object_idx);
+    NG5_UNUSED(num_objects);
+    NG5_UNUSED(capture);
 
     
 }
@@ -113,27 +113,27 @@ after_object_visit(carbon_archive_t *archive, path_stack_t path, carbon_object_i
 static void first_prop_type_group(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id, const carbon_string_id_t *keys,
                               carbon_basic_type_e type, bool is_array, u32 num_pairs, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(keys);
-    CARBON_UNUSED(type);
-    CARBON_UNUSED(is_array);
-    CARBON_UNUSED(num_pairs);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(keys);
+    NG5_UNUSED(type);
+    NG5_UNUSED(is_array);
+    NG5_UNUSED(num_pairs);
+    NG5_UNUSED(capture);
 }
 
 static void next_prop_type_group(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id, const carbon_string_id_t *keys,
                              carbon_basic_type_e type, bool is_array, u32 num_pairs, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(keys);
-    CARBON_UNUSED(type);
-    CARBON_UNUSED(is_array);
-    CARBON_UNUSED(num_pairs);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(keys);
+    NG5_UNUSED(type);
+    NG5_UNUSED(is_array);
+    NG5_UNUSED(num_pairs);
+    NG5_UNUSED(capture);
 }
 
 static void
@@ -141,13 +141,13 @@ visit_int8_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_id
                               const carbon_string_id_t *keys, const carbon_i8 *values, u32 num_pairs,
                               void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(keys);
-    CARBON_UNUSED(num_pairs);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(values);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(keys);
+    NG5_UNUSED(num_pairs);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(values);
 
     
 }
@@ -157,13 +157,13 @@ visit_int16_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_i
                   const carbon_string_id_t *keys, const carbon_i16 *values, u32 num_pairs,
                   void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(keys);
-    CARBON_UNUSED(num_pairs);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(values);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(keys);
+    NG5_UNUSED(num_pairs);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(values);
 
     
 }
@@ -173,13 +173,13 @@ visit_int32_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_i
                    const carbon_string_id_t *keys, const carbon_i32 *values, u32 num_pairs,
                    void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(keys);
-    CARBON_UNUSED(num_pairs);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(values);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(keys);
+    NG5_UNUSED(num_pairs);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(values);
 
     
 
@@ -191,13 +191,13 @@ visit_int64_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_i
                    const carbon_string_id_t *keys, const carbon_i64 *values, u32 num_pairs,
                    void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(keys);
-    CARBON_UNUSED(num_pairs);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(values);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(keys);
+    NG5_UNUSED(num_pairs);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(values);
 
     
 }
@@ -207,13 +207,13 @@ visit_uint8_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_i
                   const carbon_string_id_t *keys, const carbon_u8 *values, u32 num_pairs,
                   void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(keys);
-    CARBON_UNUSED(num_pairs);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(values);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(keys);
+    NG5_UNUSED(num_pairs);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(values);
 
     
 }
@@ -223,13 +223,13 @@ visit_uint16_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_
                    const carbon_string_id_t *keys, const carbon_u16 *values, u32 num_pairs,
                    void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(keys);
-    CARBON_UNUSED(num_pairs);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(values);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(keys);
+    NG5_UNUSED(num_pairs);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(values);
 
     
 }
@@ -239,13 +239,13 @@ visit_uint32_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_
                    const carbon_string_id_t *keys, const carbon_u32 *values, u32 num_pairs,
                    void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(keys);
-    CARBON_UNUSED(num_pairs);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(values);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(keys);
+    NG5_UNUSED(num_pairs);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(values);
 
     
 }
@@ -255,13 +255,13 @@ visit_uint64_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_
                    const carbon_string_id_t *keys, const carbon_u64 *values, u32 num_pairs,
                    void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(keys);
-    CARBON_UNUSED(num_pairs);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(values);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(keys);
+    NG5_UNUSED(num_pairs);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(values);
 
     
 }
@@ -271,13 +271,13 @@ visit_number_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_
                    const carbon_string_id_t *keys, const carbon_number_t *values, u32 num_pairs,
                    void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(keys);
-    CARBON_UNUSED(num_pairs);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(values);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(keys);
+    NG5_UNUSED(num_pairs);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(values);
 
     
 }
@@ -287,13 +287,13 @@ visit_string_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_
                     const carbon_string_id_t *keys, const carbon_string_id_t *values, u32 num_pairs,
                     void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(keys);
-    CARBON_UNUSED(num_pairs);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(values);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(keys);
+    NG5_UNUSED(num_pairs);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(values);
 
 
     
@@ -304,13 +304,13 @@ visit_boolean_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object
                     const carbon_string_id_t *keys, const carbon_boolean_t *values, u32 num_pairs,
                     void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(keys);
-    CARBON_UNUSED(num_pairs);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(values);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(keys);
+    NG5_UNUSED(num_pairs);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(values);
 
     
 }
@@ -318,12 +318,12 @@ visit_boolean_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object
 static void visit_null_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id, const carbon_string_id_t *keys,
                           u32 num_pairs, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(keys);
-    CARBON_UNUSED(num_pairs);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(keys);
+    NG5_UNUSED(num_pairs);
+    NG5_UNUSED(capture);
 
     
 }
@@ -337,16 +337,16 @@ visit_enter_int8_array_pairs(carbon_archive_t *archive, path_stack_t path,
                              carbon_object_id_t id, const carbon_string_id_t *keys,
                              u32 num_pairs, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(keys);
-    CARBON_UNUSED(num_pairs);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(keys);
+    NG5_UNUSED(num_pairs);
+    NG5_UNUSED(capture);
 
     
 
-    return CARBON_VISITOR_POLICY_INCLUDE;
+    return NG5_VISITOR_POLICY_INCLUDE;
 }
 
 static void
@@ -354,13 +354,13 @@ visit_enter_int8_array_pair(carbon_archive_t *archive, path_stack_t path, carbon
                                         carbon_string_id_t key, u32 entry_idx, u32 num_elems,
                                         void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(entry_idx);
-    CARBON_UNUSED(num_elems);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(key);
+    NG5_UNUSED(entry_idx);
+    NG5_UNUSED(num_elems);
+    NG5_UNUSED(capture);
 
      
 }
@@ -370,41 +370,41 @@ visit_int8_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_obje
                                    carbon_string_id_t key, u32 entry_idx, u32 max_entries,
                                    const carbon_i8 *array, u32 array_length, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(entry_idx);
-    CARBON_UNUSED(max_entries);
-    CARBON_UNUSED(array);
-    CARBON_UNUSED(array_length);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(key);
+    NG5_UNUSED(entry_idx);
+    NG5_UNUSED(max_entries);
+    NG5_UNUSED(array);
+    NG5_UNUSED(array_length);
+    NG5_UNUSED(capture);
 
      
 }
 
 static void
-CARBON_FUNC_UNUSED visit_leave_int8_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_leave_int8_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                                         u32 pair_idx, u32 num_pairs, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(pair_idx);
-    CARBON_UNUSED(num_pairs);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(pair_idx);
+    NG5_UNUSED(num_pairs);
+    NG5_UNUSED(capture);
 
      
 }
 
 static void
-CARBON_FUNC_UNUSED visit_leave_int8_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_leave_int8_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                                          void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
 
      
 }
@@ -412,78 +412,78 @@ CARBON_FUNC_UNUSED visit_leave_int8_array_pairs(carbon_archive_t *archive, path_
 
 
 static carbon_visitor_policy_e
-CARBON_FUNC_UNUSED visit_enter_int16_array_pairs(carbon_archive_t *archive, path_stack_t path,
+NG5_FUNC_UNUSED visit_enter_int16_array_pairs(carbon_archive_t *archive, path_stack_t path,
                               carbon_object_id_t id, const carbon_string_id_t *keys,
                               u32 num_pairs, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(keys);
-    CARBON_UNUSED(num_pairs);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(keys);
+    NG5_UNUSED(num_pairs);
 
      
 
-    return CARBON_VISITOR_POLICY_INCLUDE;
+    return NG5_VISITOR_POLICY_INCLUDE;
 }
 
 static void
-CARBON_FUNC_UNUSED visit_enter_int16_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_enter_int16_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                              carbon_string_id_t key, u32 entry_idx, u32 num_elems,
                              void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(entry_idx);
-    CARBON_UNUSED(num_elems);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(key);
+    NG5_UNUSED(entry_idx);
+    NG5_UNUSED(num_elems);
 
      
 }
 
 static void
-CARBON_FUNC_UNUSED visit_int16_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_int16_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                         carbon_string_id_t key, u32 entry_idx, u32 max_entries,
                         const carbon_i16 *array, u32 array_length, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(entry_idx);
-    CARBON_UNUSED(max_entries);
-    CARBON_UNUSED(array);
-    CARBON_UNUSED(array_length);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(key);
+    NG5_UNUSED(entry_idx);
+    NG5_UNUSED(max_entries);
+    NG5_UNUSED(array);
+    NG5_UNUSED(array_length);
 
      
 }
 
 static void
-CARBON_FUNC_UNUSED visit_leave_int16_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_leave_int16_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                              u32 pair_idx, u32 num_pairs, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(pair_idx);
-    CARBON_UNUSED(num_pairs);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(pair_idx);
+    NG5_UNUSED(num_pairs);
 
      
 }
 
 static void
-CARBON_FUNC_UNUSED visit_leave_int16_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_leave_int16_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                               void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
 
      
 }
@@ -491,78 +491,78 @@ CARBON_FUNC_UNUSED visit_leave_int16_array_pairs(carbon_archive_t *archive, path
 
 
 static carbon_visitor_policy_e
-CARBON_FUNC_UNUSED visit_enter_int32_array_pairs(carbon_archive_t *archive, path_stack_t path,
+NG5_FUNC_UNUSED visit_enter_int32_array_pairs(carbon_archive_t *archive, path_stack_t path,
                               carbon_object_id_t id, const carbon_string_id_t *keys,
                               u32 num_pairs, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(keys);
-    CARBON_UNUSED(num_pairs);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(keys);
+    NG5_UNUSED(num_pairs);
 
      
 
-    return CARBON_VISITOR_POLICY_INCLUDE;
+    return NG5_VISITOR_POLICY_INCLUDE;
 }
 
 static void
-CARBON_FUNC_UNUSED visit_enter_int32_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_enter_int32_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                              carbon_string_id_t key, u32 entry_idx, u32 num_elems,
                              void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(entry_idx);
-    CARBON_UNUSED(num_elems);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(key);
+    NG5_UNUSED(entry_idx);
+    NG5_UNUSED(num_elems);
 
      
 }
 
 static void
-CARBON_FUNC_UNUSED visit_int32_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_int32_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                         carbon_string_id_t key, u32 entry_idx, u32 max_entries,
                         const carbon_i32 *array, u32 array_length, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(entry_idx);
-    CARBON_UNUSED(max_entries);
-    CARBON_UNUSED(array);
-    CARBON_UNUSED(array_length);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(key);
+    NG5_UNUSED(entry_idx);
+    NG5_UNUSED(max_entries);
+    NG5_UNUSED(array);
+    NG5_UNUSED(array_length);
 
      
 }
 
 static void
-CARBON_FUNC_UNUSED visit_leave_int32_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_leave_int32_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                              u32 pair_idx, u32 num_pairs, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(pair_idx);
-    CARBON_UNUSED(num_pairs);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(pair_idx);
+    NG5_UNUSED(num_pairs);
 
      
 }
 
 static void
-CARBON_FUNC_UNUSED visit_leave_int32_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_leave_int32_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                               void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
 
      
 }
@@ -570,80 +570,80 @@ CARBON_FUNC_UNUSED visit_leave_int32_array_pairs(carbon_archive_t *archive, path
 
 
 static carbon_visitor_policy_e
-CARBON_FUNC_UNUSED visit_enter_int64_array_pairs(carbon_archive_t *archive, path_stack_t path,
+NG5_FUNC_UNUSED visit_enter_int64_array_pairs(carbon_archive_t *archive, path_stack_t path,
                               carbon_object_id_t id, const carbon_string_id_t *keys,
                               u32 num_pairs, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(keys);
-    CARBON_UNUSED(num_pairs);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(keys);
+    NG5_UNUSED(num_pairs);
 
      
 
-    return CARBON_VISITOR_POLICY_INCLUDE;
+    return NG5_VISITOR_POLICY_INCLUDE;
 }
 
 static void
-CARBON_FUNC_UNUSED visit_enter_int64_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_enter_int64_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                              carbon_string_id_t key, u32 entry_idx, u32 num_elems,
                              void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(entry_idx);
-    CARBON_UNUSED(num_elems);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(key);
+    NG5_UNUSED(entry_idx);
+    NG5_UNUSED(num_elems);
 
      
 
 }
 
 static void
-CARBON_FUNC_UNUSED visit_int64_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_int64_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                         carbon_string_id_t key, u32 entry_idx, u32 max_entries,
                         const carbon_i64 *array, u32 array_length, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(entry_idx);
-    CARBON_UNUSED(max_entries);
-    CARBON_UNUSED(array);
-    CARBON_UNUSED(array_length);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(key);
+    NG5_UNUSED(entry_idx);
+    NG5_UNUSED(max_entries);
+    NG5_UNUSED(array);
+    NG5_UNUSED(array_length);
 
      
 }
 
 static void
-CARBON_FUNC_UNUSED visit_leave_int64_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_leave_int64_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                              u32 pair_idx, u32 num_pairs, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(pair_idx);
-    CARBON_UNUSED(num_pairs);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(pair_idx);
+    NG5_UNUSED(num_pairs);
 
      
 
 }
 
 static void
-CARBON_FUNC_UNUSED visit_leave_int64_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_leave_int64_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                               void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
 
      
 }
@@ -651,80 +651,80 @@ CARBON_FUNC_UNUSED visit_leave_int64_array_pairs(carbon_archive_t *archive, path
 
 
 static carbon_visitor_policy_e
-CARBON_FUNC_UNUSED visit_enter_uint8_array_pairs(carbon_archive_t *archive, path_stack_t path,
+NG5_FUNC_UNUSED visit_enter_uint8_array_pairs(carbon_archive_t *archive, path_stack_t path,
                               carbon_object_id_t id, const carbon_string_id_t *keys,
                               u32 num_pairs, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(num_pairs);
-    CARBON_UNUSED(keys);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(num_pairs);
+    NG5_UNUSED(keys);
 
      
 
-    return CARBON_VISITOR_POLICY_INCLUDE;
+    return NG5_VISITOR_POLICY_INCLUDE;
 }
 
 static void
-CARBON_FUNC_UNUSED visit_enter_uint8_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_enter_uint8_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                              carbon_string_id_t key, u32 entry_idx, u32 num_elems,
                              void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(entry_idx);
-    CARBON_UNUSED(num_elems);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(key);
+    NG5_UNUSED(entry_idx);
+    NG5_UNUSED(num_elems);
 
      
 
 }
 
 static void
-CARBON_FUNC_UNUSED visit_uint8_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_uint8_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                         carbon_string_id_t key, u32 entry_idx, u32 max_entries,
                         const carbon_u8 *array, u32 array_length, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(entry_idx);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(key);
+    NG5_UNUSED(entry_idx);
 
-    CARBON_UNUSED(max_entries);
-    CARBON_UNUSED(array);
-    CARBON_UNUSED(array_length);
+    NG5_UNUSED(max_entries);
+    NG5_UNUSED(array);
+    NG5_UNUSED(array_length);
 
      
 }
 
 static void
-CARBON_FUNC_UNUSED visit_leave_uint8_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_leave_uint8_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                              u32 pair_idx, u32 num_pairs, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(pair_idx);
-    CARBON_UNUSED(num_pairs);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(pair_idx);
+    NG5_UNUSED(num_pairs);
 
      
 }
 
 static void
-CARBON_FUNC_UNUSED visit_leave_uint8_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_leave_uint8_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                               void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
 
      
 }
@@ -732,79 +732,79 @@ CARBON_FUNC_UNUSED visit_leave_uint8_array_pairs(carbon_archive_t *archive, path
 
 
 static carbon_visitor_policy_e
-CARBON_FUNC_UNUSED visit_enter_uint16_array_pairs(carbon_archive_t *archive, path_stack_t path,
+NG5_FUNC_UNUSED visit_enter_uint16_array_pairs(carbon_archive_t *archive, path_stack_t path,
                                carbon_object_id_t id, const carbon_string_id_t *keys,
                                u32 num_pairs, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(keys);
-    CARBON_UNUSED(num_pairs);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(keys);
+    NG5_UNUSED(num_pairs);
 
      
 
-    return CARBON_VISITOR_POLICY_INCLUDE;
+    return NG5_VISITOR_POLICY_INCLUDE;
 }
 
 static void
-CARBON_FUNC_UNUSED visit_enter_uint16_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_enter_uint16_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                               carbon_string_id_t key, u32 entry_idx, u32 num_elems,
                               void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(entry_idx);
-    CARBON_UNUSED(num_elems);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(key);
+    NG5_UNUSED(entry_idx);
+    NG5_UNUSED(num_elems);
 
      
 }
 
 static void
-CARBON_FUNC_UNUSED visit_uint16_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_uint16_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                          carbon_string_id_t key, u32 entry_idx, u32 max_entries,
                          const carbon_u16 *array, u32 array_length, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(entry_idx);
-    CARBON_UNUSED(max_entries);
-    CARBON_UNUSED(array);
-    CARBON_UNUSED(array_length);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(key);
+    NG5_UNUSED(entry_idx);
+    NG5_UNUSED(max_entries);
+    NG5_UNUSED(array);
+    NG5_UNUSED(array_length);
 
      
 
 }
 
 static void
-CARBON_FUNC_UNUSED visit_leave_uint16_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_leave_uint16_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                               u32 pair_idx, u32 num_pairs, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(pair_idx);
-    CARBON_UNUSED(num_pairs);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(pair_idx);
+    NG5_UNUSED(num_pairs);
 
      
 }
 
 static void
-CARBON_FUNC_UNUSED visit_leave_uint16_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_leave_uint16_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                                void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
 
      
 }
@@ -812,78 +812,78 @@ CARBON_FUNC_UNUSED visit_leave_uint16_array_pairs(carbon_archive_t *archive, pat
 
 
 static carbon_visitor_policy_e
-CARBON_FUNC_UNUSED visit_enter_uint32_array_pairs(carbon_archive_t *archive, path_stack_t path,
+NG5_FUNC_UNUSED visit_enter_uint32_array_pairs(carbon_archive_t *archive, path_stack_t path,
                                carbon_object_id_t id, const carbon_string_id_t *keys,
                                u32 num_pairs, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(keys);
-    CARBON_UNUSED(num_pairs);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(keys);
+    NG5_UNUSED(num_pairs);
 
      
 
-    return CARBON_VISITOR_POLICY_INCLUDE;
+    return NG5_VISITOR_POLICY_INCLUDE;
 }
 
 static void
-CARBON_FUNC_UNUSED visit_enter_uint32_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_enter_uint32_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                               carbon_string_id_t key, u32 entry_idx, u32 num_elems,
                               void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(entry_idx);
-    CARBON_UNUSED(num_elems);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(key);
+    NG5_UNUSED(entry_idx);
+    NG5_UNUSED(num_elems);
 
      
 }
 
 static void
-CARBON_FUNC_UNUSED visit_uint32_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_uint32_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                          carbon_string_id_t key, u32 entry_idx, u32 max_entries,
                          const carbon_u32 *array, u32 array_length, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(entry_idx);
-    CARBON_UNUSED(max_entries);
-    CARBON_UNUSED(array);
-    CARBON_UNUSED(array_length);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(key);
+    NG5_UNUSED(entry_idx);
+    NG5_UNUSED(max_entries);
+    NG5_UNUSED(array);
+    NG5_UNUSED(array_length);
 
      
 }
 
 static void
-CARBON_FUNC_UNUSED visit_leave_uint32_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_leave_uint32_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                               u32 pair_idx, u32 num_pairs, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(pair_idx);
-    CARBON_UNUSED(num_pairs);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(pair_idx);
+    NG5_UNUSED(num_pairs);
 
      
 }
 
 static void
-CARBON_FUNC_UNUSED visit_leave_uint32_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_leave_uint32_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                                void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
 
      
 }
@@ -891,79 +891,79 @@ CARBON_FUNC_UNUSED visit_leave_uint32_array_pairs(carbon_archive_t *archive, pat
 
 
 static carbon_visitor_policy_e
-CARBON_FUNC_UNUSED visit_enter_uint64_array_pairs(carbon_archive_t *archive, path_stack_t path,
+NG5_FUNC_UNUSED visit_enter_uint64_array_pairs(carbon_archive_t *archive, path_stack_t path,
                                carbon_object_id_t id, const carbon_string_id_t *keys,
                                u32 num_pairs, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(keys);
-    CARBON_UNUSED(num_pairs);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(keys);
+    NG5_UNUSED(num_pairs);
 
      
 
-    return CARBON_VISITOR_POLICY_INCLUDE;
+    return NG5_VISITOR_POLICY_INCLUDE;
 }
 
 static void
-CARBON_FUNC_UNUSED visit_enter_uint64_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_enter_uint64_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                               carbon_string_id_t key, u32 entry_idx, u32 num_elems,
                               void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
 
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(entry_idx);
-    CARBON_UNUSED(num_elems);
+    NG5_UNUSED(key);
+    NG5_UNUSED(entry_idx);
+    NG5_UNUSED(num_elems);
 
      
 }
 
 static void
-CARBON_FUNC_UNUSED visit_uint64_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_uint64_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                          carbon_string_id_t key, u32 entry_idx, u32 max_entries,
                          const carbon_u64 *array, u32 array_length, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(entry_idx);
-    CARBON_UNUSED(max_entries);
-    CARBON_UNUSED(array);
-    CARBON_UNUSED(array_length);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(key);
+    NG5_UNUSED(entry_idx);
+    NG5_UNUSED(max_entries);
+    NG5_UNUSED(array);
+    NG5_UNUSED(array_length);
 
      
 }
 
 static void
-CARBON_FUNC_UNUSED visit_leave_uint64_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_leave_uint64_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                               u32 pair_idx, u32 num_pairs, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(pair_idx);
-    CARBON_UNUSED(num_pairs);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(pair_idx);
+    NG5_UNUSED(num_pairs);
 
      
 }
 
 static void
-CARBON_FUNC_UNUSED visit_leave_uint64_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_leave_uint64_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                                void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
 
      
 }
@@ -971,81 +971,81 @@ CARBON_FUNC_UNUSED visit_leave_uint64_array_pairs(carbon_archive_t *archive, pat
 
 
 static carbon_visitor_policy_e
-CARBON_FUNC_UNUSED visit_enter_number_array_pairs(carbon_archive_t *archive, path_stack_t path,
+NG5_FUNC_UNUSED visit_enter_number_array_pairs(carbon_archive_t *archive, path_stack_t path,
                                carbon_object_id_t id, const carbon_string_id_t *keys,
                                u32 num_pairs, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(keys);
-    CARBON_UNUSED(num_pairs);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(keys);
+    NG5_UNUSED(num_pairs);
 
      
 
-    return CARBON_VISITOR_POLICY_INCLUDE;
+    return NG5_VISITOR_POLICY_INCLUDE;
 }
 
 static void
-CARBON_FUNC_UNUSED visit_enter_number_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_enter_number_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                               carbon_string_id_t key, u32 entry_idx, u32 num_elems,
                               void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
 
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(entry_idx);
-    CARBON_UNUSED(num_elems);
+    NG5_UNUSED(key);
+    NG5_UNUSED(entry_idx);
+    NG5_UNUSED(num_elems);
 
      
 }
 
 static void
-CARBON_FUNC_UNUSED visit_number_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_number_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                          carbon_string_id_t key, u32 entry_idx, u32 max_entries,
                          const carbon_number_t *array, u32 array_length, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
 
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(entry_idx);
-    CARBON_UNUSED(max_entries);
-    CARBON_UNUSED(array);
-    CARBON_UNUSED(array_length);
+    NG5_UNUSED(key);
+    NG5_UNUSED(entry_idx);
+    NG5_UNUSED(max_entries);
+    NG5_UNUSED(array);
+    NG5_UNUSED(array_length);
 
      
 }
 
 static void
-CARBON_FUNC_UNUSED visit_leave_number_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_leave_number_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                               u32 pair_idx, u32 num_pairs, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
 
-    CARBON_UNUSED(pair_idx);
-    CARBON_UNUSED(num_pairs);
+    NG5_UNUSED(pair_idx);
+    NG5_UNUSED(num_pairs);
 
      
 }
 
 static void
-CARBON_FUNC_UNUSED visit_leave_number_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_leave_number_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                                void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
 
      
 
@@ -1054,80 +1054,80 @@ CARBON_FUNC_UNUSED visit_leave_number_array_pairs(carbon_archive_t *archive, pat
 
 
 static carbon_visitor_policy_e
-CARBON_FUNC_UNUSED visit_enter_string_array_pairs(carbon_archive_t *archive, path_stack_t path,
+NG5_FUNC_UNUSED visit_enter_string_array_pairs(carbon_archive_t *archive, path_stack_t path,
                                carbon_object_id_t id, const carbon_string_id_t *keys,
                                u32 num_pairs, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(keys);
-    CARBON_UNUSED(num_pairs);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(keys);
+    NG5_UNUSED(num_pairs);
 
      
 
-    return CARBON_VISITOR_POLICY_INCLUDE;
+    return NG5_VISITOR_POLICY_INCLUDE;
 }
 
 static void
-CARBON_FUNC_UNUSED visit_enter_string_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_enter_string_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                               carbon_string_id_t key, u32 entry_idx, u32 num_elems,
                               void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(entry_idx);
-    CARBON_UNUSED(num_elems);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(key);
+    NG5_UNUSED(entry_idx);
+    NG5_UNUSED(num_elems);
 
      
 }
 
 static void
-CARBON_FUNC_UNUSED visit_string_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_string_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                          carbon_string_id_t key, u32 entry_idx, u32 max_entries,
                          const carbon_string_id_t *array, u32 array_length, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(entry_idx);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(key);
+    NG5_UNUSED(entry_idx);
 
-    CARBON_UNUSED(max_entries);
-    CARBON_UNUSED(array);
-    CARBON_UNUSED(array_length);
+    NG5_UNUSED(max_entries);
+    NG5_UNUSED(array);
+    NG5_UNUSED(array_length);
 
      
 }
 
 static void
-CARBON_FUNC_UNUSED visit_leave_string_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_leave_string_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                               u32 pair_idx, u32 num_pairs, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
 
-    CARBON_UNUSED(pair_idx);
-    CARBON_UNUSED(num_pairs);
+    NG5_UNUSED(pair_idx);
+    NG5_UNUSED(num_pairs);
 
      
 }
 
 static void
-CARBON_FUNC_UNUSED visit_leave_string_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_leave_string_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                                void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
 
      
 
@@ -1136,156 +1136,156 @@ CARBON_FUNC_UNUSED visit_leave_string_array_pairs(carbon_archive_t *archive, pat
 
 
 static carbon_visitor_policy_e
-CARBON_FUNC_UNUSED visit_enter_boolean_array_pairs(carbon_archive_t *archive, path_stack_t path,
+NG5_FUNC_UNUSED visit_enter_boolean_array_pairs(carbon_archive_t *archive, path_stack_t path,
                                 carbon_object_id_t id, const carbon_string_id_t *keys,
                                 u32 num_pairs, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
 
-    CARBON_UNUSED(keys);
-    CARBON_UNUSED(num_pairs);
+    NG5_UNUSED(keys);
+    NG5_UNUSED(num_pairs);
 
      
 
-    return CARBON_VISITOR_POLICY_INCLUDE;
+    return NG5_VISITOR_POLICY_INCLUDE;
 }
 
 static void
-CARBON_FUNC_UNUSED visit_enter_boolean_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_enter_boolean_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                                carbon_string_id_t key, u32 entry_idx, u32 num_elems,
                                void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
 
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(entry_idx);
-    CARBON_UNUSED(num_elems);
+    NG5_UNUSED(key);
+    NG5_UNUSED(entry_idx);
+    NG5_UNUSED(num_elems);
 
      
 
 }
 
 static void
-CARBON_FUNC_UNUSED visit_boolean_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_boolean_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                           carbon_string_id_t key, u32 entry_idx, u32 max_entries,
                           const carbon_boolean_t *array, u32 array_length, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
 
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(entry_idx);
+    NG5_UNUSED(key);
+    NG5_UNUSED(entry_idx);
 
-    CARBON_UNUSED(max_entries);
-    CARBON_UNUSED(array);
-    CARBON_UNUSED(array_length);
+    NG5_UNUSED(max_entries);
+    NG5_UNUSED(array);
+    NG5_UNUSED(array_length);
 
      
 
 }
 
 static void
-CARBON_FUNC_UNUSED visit_leave_boolean_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_leave_boolean_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                                u32 pair_idx, u32 num_pairs, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
 
-    CARBON_UNUSED(pair_idx);
-    CARBON_UNUSED(num_pairs);
+    NG5_UNUSED(pair_idx);
+    NG5_UNUSED(num_pairs);
 
      
 
 }
 
 static void
-CARBON_FUNC_UNUSED visit_leave_boolean_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_leave_boolean_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                                 void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
 
      
 
 }
 
 static carbon_visitor_policy_e
-CARBON_FUNC_UNUSED visit_enter_null_array_pairs(carbon_archive_t *archive, path_stack_t path,
+NG5_FUNC_UNUSED visit_enter_null_array_pairs(carbon_archive_t *archive, path_stack_t path,
                                                         carbon_object_id_t id,
                                                         const carbon_string_id_t *keys, u32 num_pairs,
                                                         void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(keys);
-    CARBON_UNUSED(num_pairs);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(keys);
+    NG5_UNUSED(num_pairs);
 
      
 
-    return CARBON_VISITOR_POLICY_INCLUDE;
+    return NG5_VISITOR_POLICY_INCLUDE;
 
 }
 
 static void
-CARBON_FUNC_UNUSED visit_enter_null_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_enter_null_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                                     carbon_string_id_t key, u32 entry_idx, u32 num_elems, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
 
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(entry_idx);
-    CARBON_UNUSED(num_elems);
+    NG5_UNUSED(key);
+    NG5_UNUSED(entry_idx);
+    NG5_UNUSED(num_elems);
 
      
 }
 
 static void
-CARBON_FUNC_UNUSED visit_null_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_null_array_pair (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                                carbon_string_id_t key, u32 entry_idx, u32 max_entries,
                                carbon_u32 num_nulls, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
 
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(entry_idx);
+    NG5_UNUSED(key);
+    NG5_UNUSED(entry_idx);
 
-    CARBON_UNUSED(max_entries);
-    CARBON_UNUSED(num_nulls);
+    NG5_UNUSED(max_entries);
+    NG5_UNUSED(num_nulls);
 
      
 }
 
 static void
-CARBON_FUNC_UNUSED visit_leave_null_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_leave_null_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                                     u32 pair_idx, u32 num_pairs, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
 
-    CARBON_UNUSED(pair_idx);
-    CARBON_UNUSED(num_pairs);
+    NG5_UNUSED(pair_idx);
+    NG5_UNUSED(num_pairs);
 
      
 
@@ -1293,79 +1293,79 @@ CARBON_FUNC_UNUSED visit_leave_null_array_pair(carbon_archive_t *archive, path_s
 }
 
 static void
-CARBON_FUNC_UNUSED visit_leave_null_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+NG5_FUNC_UNUSED visit_leave_null_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
                                      void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(capture);
 
      
 
 }
 
 static carbon_visitor_policy_e
-CARBON_FUNC_UNUSED before_visit_object_array(carbon_archive_t *archive, path_stack_t path,
+NG5_FUNC_UNUSED before_visit_object_array(carbon_archive_t *archive, path_stack_t path,
                                                      carbon_object_id_t parent_id, carbon_string_id_t key,
                                                      void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(parent_id);
-    CARBON_UNUSED(key);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(parent_id);
+    NG5_UNUSED(key);
 
     carbon_archive_visitor_print_path(stderr, archive, path);
      
 
-    return CARBON_VISITOR_POLICY_INCLUDE;
+    return NG5_VISITOR_POLICY_INCLUDE;
 }
 
 static void
-CARBON_FUNC_UNUSED before_visit_object_array_objects(bool *skip_group_object_ids,
+NG5_FUNC_UNUSED before_visit_object_array_objects(bool *skip_group_object_ids,
                                           carbon_archive_t *archive, path_stack_t path,
                                           carbon_object_id_t parent_id,
                                           carbon_string_id_t key,
                                           const carbon_object_id_t *group_object_ids,
                                           u32 num_group_object_ids, void *capture)
 {
-    CARBON_UNUSED(skip_group_object_ids);
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(parent_id);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(group_object_ids);
-    CARBON_UNUSED(num_group_object_ids);
+    NG5_UNUSED(skip_group_object_ids);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(parent_id);
+    NG5_UNUSED(key);
+    NG5_UNUSED(group_object_ids);
+    NG5_UNUSED(num_group_object_ids);
 
      
 
 }
 
 static carbon_visitor_policy_e
-CARBON_FUNC_UNUSED before_visit_object_array_object_property(carbon_archive_t *archive, path_stack_t path,
+NG5_FUNC_UNUSED before_visit_object_array_object_property(carbon_archive_t *archive, path_stack_t path,
                                                                      carbon_object_id_t parent_id,
                                                                      carbon_string_id_t key,
                                                                      carbon_string_id_t nested_key,
                                                                      carbon_basic_type_e nested_value_type,
                                                                      void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(parent_id);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(nested_key);
-    CARBON_UNUSED(nested_value_type);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(parent_id);
+    NG5_UNUSED(key);
+    NG5_UNUSED(nested_key);
+    NG5_UNUSED(nested_value_type);
 
      
 
-    return CARBON_VISITOR_POLICY_INCLUDE;
+    return NG5_VISITOR_POLICY_INCLUDE;
 }
 
 static void
-CARBON_FUNC_UNUSED visit_object_array_object_property_int8(carbon_archive_t *archive, path_stack_t path,
+NG5_FUNC_UNUSED visit_object_array_object_property_int8(carbon_archive_t *archive, path_stack_t path,
                                                carbon_object_id_t parent_id,
                                                carbon_string_id_t key,
                                                carbon_object_id_t nested_object_id,
@@ -1373,22 +1373,22 @@ CARBON_FUNC_UNUSED visit_object_array_object_property_int8(carbon_archive_t *arc
                                                const carbon_i8 *nested_values,
                                                u32 num_nested_values, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(parent_id);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(nested_key);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(parent_id);
+    NG5_UNUSED(key);
+    NG5_UNUSED(nested_key);
 
-    CARBON_UNUSED(nested_object_id);
-    CARBON_UNUSED(nested_values);
-    CARBON_UNUSED(num_nested_values);
+    NG5_UNUSED(nested_object_id);
+    NG5_UNUSED(nested_values);
+    NG5_UNUSED(num_nested_values);
 
      
 }
 
 static void
-CARBON_FUNC_UNUSED visit_object_array_object_property_int16(carbon_archive_t *archive, path_stack_t path,
+NG5_FUNC_UNUSED visit_object_array_object_property_int16(carbon_archive_t *archive, path_stack_t path,
                                         carbon_object_id_t parent_id,
                                         carbon_string_id_t key,
                                         carbon_object_id_t nested_object_id,
@@ -1396,22 +1396,22 @@ CARBON_FUNC_UNUSED visit_object_array_object_property_int16(carbon_archive_t *ar
                                         const carbon_i16 *nested_values,
                                         u32 num_nested_values, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(parent_id);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(nested_key);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(parent_id);
+    NG5_UNUSED(key);
+    NG5_UNUSED(nested_key);
 
-    CARBON_UNUSED(nested_object_id);
-    CARBON_UNUSED(nested_values);
-    CARBON_UNUSED(num_nested_values);
+    NG5_UNUSED(nested_object_id);
+    NG5_UNUSED(nested_values);
+    NG5_UNUSED(num_nested_values);
 
      
 }
 
 static void
-CARBON_FUNC_UNUSED visit_object_array_object_property_int32(carbon_archive_t *archive, path_stack_t path,
+NG5_FUNC_UNUSED visit_object_array_object_property_int32(carbon_archive_t *archive, path_stack_t path,
                                          carbon_object_id_t parent_id,
                                          carbon_string_id_t key,
                                          carbon_object_id_t nested_object_id,
@@ -1419,23 +1419,23 @@ CARBON_FUNC_UNUSED visit_object_array_object_property_int32(carbon_archive_t *ar
                                          const carbon_i32 *nested_values,
                                          u32 num_nested_values, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(parent_id);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(nested_key);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(parent_id);
+    NG5_UNUSED(key);
+    NG5_UNUSED(nested_key);
 
-    CARBON_UNUSED(nested_object_id);
-    CARBON_UNUSED(nested_values);
-    CARBON_UNUSED(num_nested_values);
+    NG5_UNUSED(nested_object_id);
+    NG5_UNUSED(nested_values);
+    NG5_UNUSED(num_nested_values);
 
      
 }
 
 
 static void
-CARBON_FUNC_UNUSED visit_object_array_object_property_int64(carbon_archive_t *archive, path_stack_t path,
+NG5_FUNC_UNUSED visit_object_array_object_property_int64(carbon_archive_t *archive, path_stack_t path,
                                          carbon_object_id_t parent_id,
                                          carbon_string_id_t key,
                                          carbon_object_id_t nested_object_id,
@@ -1443,16 +1443,16 @@ CARBON_FUNC_UNUSED visit_object_array_object_property_int64(carbon_archive_t *ar
                                          const carbon_i64 *nested_values,
                                          u32 num_nested_values, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(parent_id);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(nested_key);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(parent_id);
+    NG5_UNUSED(key);
+    NG5_UNUSED(nested_key);
 
-    CARBON_UNUSED(nested_object_id);
-    CARBON_UNUSED(nested_values);
-    CARBON_UNUSED(num_nested_values);
+    NG5_UNUSED(nested_object_id);
+    NG5_UNUSED(nested_values);
+    NG5_UNUSED(num_nested_values);
 
      
 }
@@ -1460,7 +1460,7 @@ CARBON_FUNC_UNUSED visit_object_array_object_property_int64(carbon_archive_t *ar
 
 
 static void
-CARBON_FUNC_UNUSED visit_object_array_object_property_uint8(carbon_archive_t *archive, path_stack_t path,
+NG5_FUNC_UNUSED visit_object_array_object_property_uint8(carbon_archive_t *archive, path_stack_t path,
                                          carbon_object_id_t parent_id,
                                          carbon_string_id_t key,
                                          carbon_object_id_t nested_object_id,
@@ -1468,23 +1468,23 @@ CARBON_FUNC_UNUSED visit_object_array_object_property_uint8(carbon_archive_t *ar
                                          const carbon_u8 *nested_values,
                                          u32 num_nested_values, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(parent_id);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(nested_key);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(parent_id);
+    NG5_UNUSED(key);
+    NG5_UNUSED(nested_key);
 
-    CARBON_UNUSED(nested_object_id);
-    CARBON_UNUSED(nested_values);
-    CARBON_UNUSED(num_nested_values);
+    NG5_UNUSED(nested_object_id);
+    NG5_UNUSED(nested_values);
+    NG5_UNUSED(num_nested_values);
 
      
 }
 
 
 static void
-CARBON_FUNC_UNUSED visit_object_array_object_property_uint16(carbon_archive_t *archive, path_stack_t path,
+NG5_FUNC_UNUSED visit_object_array_object_property_uint16(carbon_archive_t *archive, path_stack_t path,
                                         carbon_object_id_t parent_id,
                                         carbon_string_id_t key,
                                         carbon_object_id_t nested_object_id,
@@ -1492,23 +1492,23 @@ CARBON_FUNC_UNUSED visit_object_array_object_property_uint16(carbon_archive_t *a
                                         const carbon_u16 *nested_values,
                                         u32 num_nested_values, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(parent_id);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(nested_key);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(parent_id);
+    NG5_UNUSED(key);
+    NG5_UNUSED(nested_key);
 
-    CARBON_UNUSED(nested_object_id);
-    CARBON_UNUSED(nested_values);
-    CARBON_UNUSED(num_nested_values);
+    NG5_UNUSED(nested_object_id);
+    NG5_UNUSED(nested_values);
+    NG5_UNUSED(num_nested_values);
 
      
 }
 
 
 static void
-CARBON_FUNC_UNUSED visit_object_array_object_property_uint32(carbon_archive_t *archive, path_stack_t path,
+NG5_FUNC_UNUSED visit_object_array_object_property_uint32(carbon_archive_t *archive, path_stack_t path,
                                          carbon_object_id_t parent_id,
                                          carbon_string_id_t key,
                                          carbon_object_id_t nested_object_id,
@@ -1516,22 +1516,22 @@ CARBON_FUNC_UNUSED visit_object_array_object_property_uint32(carbon_archive_t *a
                                          const carbon_u32 *nested_values,
                                          u32 num_nested_values, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(parent_id);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(nested_key);
-    CARBON_UNUSED(nested_object_id);
-    CARBON_UNUSED(nested_values);
-    CARBON_UNUSED(num_nested_values);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(parent_id);
+    NG5_UNUSED(key);
+    NG5_UNUSED(nested_key);
+    NG5_UNUSED(nested_object_id);
+    NG5_UNUSED(nested_values);
+    NG5_UNUSED(num_nested_values);
 
      
 }
 
 
 static void
-CARBON_FUNC_UNUSED visit_object_array_object_property_uint64(carbon_archive_t *archive, path_stack_t path,
+NG5_FUNC_UNUSED visit_object_array_object_property_uint64(carbon_archive_t *archive, path_stack_t path,
                                          carbon_object_id_t parent_id,
                                          carbon_string_id_t key,
                                          carbon_object_id_t nested_object_id,
@@ -1539,23 +1539,23 @@ CARBON_FUNC_UNUSED visit_object_array_object_property_uint64(carbon_archive_t *a
                                          const carbon_u64 *nested_values,
                                          u32 num_nested_values, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(parent_id);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(nested_key);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(parent_id);
+    NG5_UNUSED(key);
+    NG5_UNUSED(nested_key);
 
-    CARBON_UNUSED(nested_object_id);
-    CARBON_UNUSED(nested_values);
-    CARBON_UNUSED(num_nested_values);
+    NG5_UNUSED(nested_object_id);
+    NG5_UNUSED(nested_values);
+    NG5_UNUSED(num_nested_values);
 
      
 }
 
 
 static void
-CARBON_FUNC_UNUSED visit_object_array_object_property_numbers(carbon_archive_t *archive, path_stack_t path,
+NG5_FUNC_UNUSED visit_object_array_object_property_numbers(carbon_archive_t *archive, path_stack_t path,
                                          carbon_object_id_t parent_id,
                                          carbon_string_id_t key,
                                          carbon_object_id_t nested_object_id,
@@ -1563,23 +1563,23 @@ CARBON_FUNC_UNUSED visit_object_array_object_property_numbers(carbon_archive_t *
                                          const carbon_number_t *nested_values,
                                          u32 num_nested_values, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(parent_id);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(nested_key);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(parent_id);
+    NG5_UNUSED(key);
+    NG5_UNUSED(nested_key);
 
-    CARBON_UNUSED(nested_object_id);
-    CARBON_UNUSED(nested_values);
-    CARBON_UNUSED(num_nested_values);
+    NG5_UNUSED(nested_object_id);
+    NG5_UNUSED(nested_values);
+    NG5_UNUSED(num_nested_values);
 
      
 }
 
 
 static void
-CARBON_FUNC_UNUSED visit_object_array_object_property_strings(carbon_archive_t *archive, path_stack_t path,
+NG5_FUNC_UNUSED visit_object_array_object_property_strings(carbon_archive_t *archive, path_stack_t path,
                                           carbon_object_id_t parent_id,
                                           carbon_string_id_t key,
                                           carbon_object_id_t nested_object_id,
@@ -1587,23 +1587,23 @@ CARBON_FUNC_UNUSED visit_object_array_object_property_strings(carbon_archive_t *
                                           const carbon_string_id_t *nested_values,
                                           u32 num_nested_values, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(parent_id);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(nested_key);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(parent_id);
+    NG5_UNUSED(key);
+    NG5_UNUSED(nested_key);
 
-    CARBON_UNUSED(nested_object_id);
-    CARBON_UNUSED(nested_values);
-    CARBON_UNUSED(num_nested_values);
+    NG5_UNUSED(nested_object_id);
+    NG5_UNUSED(nested_values);
+    NG5_UNUSED(num_nested_values);
 
      
 }
 
 
 static void
-CARBON_FUNC_UNUSED visit_object_array_object_property_booleans(carbon_archive_t *archive, path_stack_t path,
+NG5_FUNC_UNUSED visit_object_array_object_property_booleans(carbon_archive_t *archive, path_stack_t path,
                                           carbon_object_id_t parent_id,
                                           carbon_string_id_t key,
                                           carbon_object_id_t nested_object_id,
@@ -1611,22 +1611,22 @@ CARBON_FUNC_UNUSED visit_object_array_object_property_booleans(carbon_archive_t 
                                           const carbon_boolean_t *nested_values,
                                           u32 num_nested_values, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(parent_id);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(nested_key);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(parent_id);
+    NG5_UNUSED(key);
+    NG5_UNUSED(nested_key);
 
-    CARBON_UNUSED(nested_object_id);
-    CARBON_UNUSED(nested_values);
-    CARBON_UNUSED(num_nested_values);
+    NG5_UNUSED(nested_object_id);
+    NG5_UNUSED(nested_values);
+    NG5_UNUSED(num_nested_values);
 
      
 }
 
 static void
-CARBON_FUNC_UNUSED visit_object_array_object_property_nulls(carbon_archive_t *archive, path_stack_t path,
+NG5_FUNC_UNUSED visit_object_array_object_property_nulls(carbon_archive_t *archive, path_stack_t path,
                                            carbon_object_id_t parent_id,
                                            carbon_string_id_t key,
                                            carbon_object_id_t nested_object_id,
@@ -1634,22 +1634,22 @@ CARBON_FUNC_UNUSED visit_object_array_object_property_nulls(carbon_archive_t *ar
                                            const carbon_u32 *nested_values,
                                            u32 num_nested_values, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(parent_id);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(nested_key);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(parent_id);
+    NG5_UNUSED(key);
+    NG5_UNUSED(nested_key);
 
-    CARBON_UNUSED(nested_object_id);
-    CARBON_UNUSED(nested_values);
-    CARBON_UNUSED(num_nested_values);
+    NG5_UNUSED(nested_object_id);
+    NG5_UNUSED(nested_values);
+    NG5_UNUSED(num_nested_values);
 
      
 }
 
 static carbon_visitor_policy_e
-CARBON_FUNC_UNUSED before_object_array_object_property_object(carbon_archive_t *archive, path_stack_t path,
+NG5_FUNC_UNUSED before_object_array_object_property_object(carbon_archive_t *archive, path_stack_t path,
                                                                       carbon_object_id_t parent_id,
                                                                       carbon_string_id_t key,
                                                                       carbon_object_id_t nested_object_id,
@@ -1657,23 +1657,23 @@ CARBON_FUNC_UNUSED before_object_array_object_property_object(carbon_archive_t *
                                                                       u32 nested_value_object_id,
                                                                       void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(parent_id);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(nested_key);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(parent_id);
+    NG5_UNUSED(key);
+    NG5_UNUSED(nested_key);
 
-    CARBON_UNUSED(nested_object_id);
-    CARBON_UNUSED(nested_value_object_id);
+    NG5_UNUSED(nested_object_id);
+    NG5_UNUSED(nested_value_object_id);
 
      carbon_archive_visitor_print_path(stdout, archive, path);
 
-    return CARBON_VISITOR_POLICY_INCLUDE;
+    return NG5_VISITOR_POLICY_INCLUDE;
 }
 
 static void
-CARBON_FUNC_UNUSED run_magic_visitor(int mask, carbon_archive_t *archive)
+NG5_FUNC_UNUSED run_magic_visitor(int mask, carbon_archive_t *archive)
 {
     carbon_archive_visitor_t visitor = { 0 };
     carbon_archive_visitor_desc_t desc = { .visit_mask = mask };
@@ -1871,15 +1871,15 @@ run_show_values( carbon_timestamp_t *duration, carbon_encoded_doc_collection_t *
         carbon_encoded_doc_add_prop_string_decoded_string_value_decoded(doc, "type", carbon_basic_type_to_json_type_str(entry->type));
 
 
-        if (entry->type == CARBON_BASIC_TYPE_STRING) {
+        if (entry->type == NG5_BASIC_TYPE_STRING) {
             carbon_encoded_doc_add_prop_array_string_decoded(doc, "values");
             carbon_encoded_doc_array_push_string_decoded(doc, "values",vec_all(&entry->values.string_values, carbon_string_id_t), entry->values.string_values.num_elems);
             carbon_vec_drop(&entry->values.string_values);
-        } else if (entry->type == CARBON_BASIC_TYPE_INT8) {
+        } else if (entry->type == NG5_BASIC_TYPE_INT8) {
             carbon_encoded_doc_add_prop_array_int64_decoded(doc, "values");
             carbon_encoded_doc_array_push_int64_decoded(doc, "values",vec_all(&entry->values.integer_values, carbon_i64), entry->values.integer_values.num_elems);
             carbon_vec_drop(&entry->values.string_values);
-        } else if (entry->type == CARBON_BASIC_TYPE_INT16) {
+        } else if (entry->type == NG5_BASIC_TYPE_INT16) {
             carbon_encoded_doc_add_prop_array_int64_decoded(doc, "values");
             carbon_encoded_doc_array_push_int64_decoded(doc, "values",vec_all(&entry->values.integer_values, carbon_i64), entry->values.integer_values.num_elems);
             carbon_vec_drop(&entry->values.string_values);
@@ -2059,7 +2059,7 @@ leave:
 static bool
 process_command(carbon_archive_t *archive)
 {
-    CARBON_UNUSED(archive);
+    NG5_UNUSED(archive);
 
     fprintf(stdout, "> ");
 
@@ -2205,25 +2205,25 @@ cache_monitor(void * data)
 
 bool moduleCliInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *manager)
 {
-    CARBON_UNUSED(manager);
-    CARBON_UNUSED(argv);
-    CARBON_UNUSED(argc);
-    CARBON_UNUSED(file);
+    NG5_UNUSED(manager);
+    NG5_UNUSED(argv);
+    NG5_UNUSED(argc);
+    NG5_UNUSED(file);
 
     if (argc != 1) {
-        CARBON_CONSOLE_WRITELN(file, "Run '%s' to see usage.", "$ types-tool cli");
+        NG5_CONSOLE_WRITELN(file, "Run '%s' to see usage.", "$ types-tool cli");
         return false;
     } else {
         const int filePathArgIdx = 0;
         const char *pathCarbonFileIn = argv[filePathArgIdx];
 
-        CARBON_CONSOLE_OUTPUT_OFF()
+        NG5_CONSOLE_OUTPUT_OFF()
         if (testFileExists(file, pathCarbonFileIn, 1, 1, true) != true) {
-            CARBON_CONSOLE_OUTPUT_ON()
-            CARBON_CONSOLE_WRITELN(file, "Input file cannot be found. %s", "STOP.");
+            NG5_CONSOLE_OUTPUT_ON()
+            NG5_CONSOLE_WRITELN(file, "Input file cannot be found. %s", "STOP.");
             return false;
         }
-        CARBON_CONSOLE_OUTPUT_ON()
+        NG5_CONSOLE_OUTPUT_ON()
 
         FILE *f = fopen(pathCarbonFileIn, "r");
         fseek(f, 0, SEEK_END);
@@ -2253,7 +2253,7 @@ bool moduleCliInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *man
 
             carbon_archive_close(&archive);
         } else {
-            CARBON_PRINT_ERROR(archive.err.code);
+            NG5_PRINT_ERROR(archive.err.code);
         }
 
 

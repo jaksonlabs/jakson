@@ -21,13 +21,13 @@ static void visit_string_pairs (carbon_archive_t *archive, path_stack_t path, ca
                               const carbon_string_id_t *keys, const carbon_string_id_t *values, u32 num_pairs,
                               void *capture)
 {
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(keys);
-    CARBON_UNUSED(values);
-    CARBON_UNUSED(num_pairs);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(keys);
+    NG5_UNUSED(values);
+    NG5_UNUSED(num_pairs);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
 
 }
 
@@ -36,11 +36,11 @@ before_visit_object_array(carbon_archive_t *archive, path_stack_t path,
                                                      carbon_object_id_t parent_id, carbon_string_id_t key,
                                                      void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(parent_id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(key);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(parent_id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(key);
 
 //        carbon_archive_visitor_print_path(stdout, archive, path);
 //
@@ -50,7 +50,7 @@ before_visit_object_array(carbon_archive_t *archive, path_stack_t path,
 //    free(keystr);
 
 
-    return CARBON_VISITOR_POLICY_INCLUDE;
+    return NG5_VISITOR_POLICY_INCLUDE;
 }
 
 static void
@@ -61,20 +61,20 @@ before_visit_object_array_objects(bool *skip_group_object_ids,
                                           const carbon_object_id_t *group_object_ids,
                                           u32 num_group_object_ids, void *capture)
 {
-    CARBON_UNUSED(skip_group_object_ids);
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(parent_id);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(group_object_ids);
-    CARBON_UNUSED(num_group_object_ids);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(skip_group_object_ids);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(parent_id);
+    NG5_UNUSED(key);
+    NG5_UNUSED(group_object_ids);
+    NG5_UNUSED(num_group_object_ids);
+    NG5_UNUSED(capture);
 
 //    ops_show_keys_capture_t *params = (ops_show_keys_capture_t *) capture;
 //    if (carbon_archive_visitor_path_compare(path, NULL, params->path, archive)) {
 //        ops_show_keys_key_type_pair_t pair = {
 //            .key = key,
-//            .type = CARBON_BASIC_TYPE_OBJECT,
+//            .type = NG5_BASIC_TYPE_OBJECT,
 //            .is_array = true
 //        };
 //        carbon_hashset_insert_or_update(params->result, &pair, 1);
@@ -89,14 +89,14 @@ before_object_visit(carbon_archive_t *archive, path_stack_t path,
                                                u32 object_idx, u32 num_objects, carbon_string_id_t key,
                                                void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(parent_id);
-    CARBON_UNUSED(value_id);
-    CARBON_UNUSED(object_idx);
-    CARBON_UNUSED(num_objects);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(parent_id);
+    NG5_UNUSED(value_id);
+    NG5_UNUSED(object_idx);
+    NG5_UNUSED(num_objects);
+    NG5_UNUSED(key);
+    NG5_UNUSED(capture);
 
 //    carbon_query_t *query = carbon_archive_query_default(archive);
 //    char *keystr = carbon_query_fetch_string_by_id(query, key);
@@ -108,13 +108,13 @@ before_object_visit(carbon_archive_t *archive, path_stack_t path,
 //    if (carbon_archive_visitor_path_compare(path, NULL, params->path, archive)) {
 //        ops_show_keys_key_type_pair_t pair = {
 //            .key = key,
-//            .type = CARBON_BASIC_TYPE_OBJECT
+//            .type = NG5_BASIC_TYPE_OBJECT
 //        };
 //        carbon_hashset_insert_or_update(params->result, &pair, 1);
 //    }
 
 
-    return CARBON_VISITOR_POLICY_INCLUDE;
+    return NG5_VISITOR_POLICY_INCLUDE;
 }
 
 static void
@@ -122,13 +122,13 @@ visit_object_property(carbon_archive_t *archive, path_stack_t path,
                               carbon_object_id_t parent_id,
                               carbon_string_id_t key, carbon_basic_type_e type, bool is_array_type, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(parent_id);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(type);
-    CARBON_UNUSED(is_array_type);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(parent_id);
+    NG5_UNUSED(key);
+    NG5_UNUSED(type);
+    NG5_UNUSED(is_array_type);
+    NG5_UNUSED(capture);
 
 //    ops_show_keys_capture_t *params = (ops_show_keys_capture_t *) capture;
 //    if (carbon_archive_visitor_path_compare(path, NULL, params->path, archive)) {
@@ -178,11 +178,11 @@ visit_object_property(carbon_archive_t *archive, path_stack_t path,
 
 static void visit_object_array_prop(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t parent_id, carbon_string_id_t key, carbon_basic_type_e type, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(parent_id);
-    CARBON_UNUSED(type);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(path);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(parent_id);
+    NG5_UNUSED(type);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(path);
 
     ops_show_keys_capture_t *params = (ops_show_keys_capture_t *) capture;
 
@@ -216,15 +216,15 @@ before_visit_object_array_object_property(carbon_archive_t *archive, path_stack_
                                           carbon_basic_type_e nested_value_type,
                                           void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(parent_id);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(nested_key);
-    CARBON_UNUSED(nested_value_type);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(parent_id);
+    NG5_UNUSED(key);
+    NG5_UNUSED(nested_key);
+    NG5_UNUSED(nested_value_type);
+    NG5_UNUSED(capture);
 
-    carbon_visitor_policy_e follow = CARBON_VISITOR_POLICY_EXCLUDE;
+    carbon_visitor_policy_e follow = NG5_VISITOR_POLICY_EXCLUDE;
 
     char buffer[2048];
     memset(buffer, 0, sizeof(buffer));
@@ -239,12 +239,12 @@ before_visit_object_array_object_property(carbon_archive_t *archive, path_stack_
 
 
     if (len_user_path >= len_current_path && strncmp(buffer, params->path, len_current_path) == 0) {
-        follow = CARBON_VISITOR_POLICY_INCLUDE;
+        follow = NG5_VISITOR_POLICY_INCLUDE;
     }
 
     //if (strlen(buffer) > strlen(nested_keystr) && strcmp(buffer + (strlen(buffer) - strlen(nested_keystr)), nested_keystr) == 0)
     //{
-    //     follow = CARBON_VISITOR_POLICY_INCLUDE;
+    //     follow = NG5_VISITOR_POLICY_INCLUDE;
     //  }
 
  //   printf("USER PATH: '%s', current path: '%s', follow?\n", params->path, buffer);
@@ -258,7 +258,7 @@ before_visit_object_array_object_property(carbon_archive_t *archive, path_stack_
 //    if (carbon_archive_visitor_path_compare(path, params->path, archive)) {
 //        ops_show_keys_key_type_pair_t pair = {
 //            .key = nested_key,
-//            .type = CARBON_BASIC_TYPE_OBJECT
+//            .type = NG5_BASIC_TYPE_OBJECT
 //        };
 //        carbon_hashset_insert_or_update(params->result, &pair, 1);
 //    }
@@ -278,27 +278,27 @@ before_object_array_object_property_object(carbon_archive_t *archive, path_stack
                                            u32 nested_value_object_id,
                                            void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(parent_id);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(nested_key);
-    CARBON_UNUSED(nested_object_id);
-    CARBON_UNUSED(nested_value_object_id);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(parent_id);
+    NG5_UNUSED(key);
+    NG5_UNUSED(nested_key);
+    NG5_UNUSED(nested_object_id);
+    NG5_UNUSED(nested_value_object_id);
+    NG5_UNUSED(capture);
 
-    return CARBON_VISITOR_POLICY_INCLUDE;
+    return NG5_VISITOR_POLICY_INCLUDE;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 ops_show_keys(carbon_timestamp_t *duration, vec_t ofType(ops_show_keys_key_type_pair_t) *result, const char *path, carbon_archive_t *archive)
 {
-    CARBON_UNUSED(result);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(archive);
+    NG5_UNUSED(result);
+    NG5_UNUSED(path);
+    NG5_UNUSED(archive);
 
     carbon_archive_visitor_t visitor = { 0 };
-    carbon_archive_visitor_desc_t desc = { .visit_mask = CARBON_ARCHIVE_ITER_MASK_ANY };
+    carbon_archive_visitor_desc_t desc = { .visit_mask = NG5_ARCHIVE_ITER_MASK_ANY };
     carbon_hashset_t ofType(ops_show_keys_key_type_pair_t) distinct_key_type_pairs;
     carbon_hashset_create(&distinct_key_type_pairs, &archive->err, sizeof(ops_show_keys_capture_t), 100);
     ops_show_keys_capture_t capture = {

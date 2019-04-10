@@ -15,17 +15,17 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_STRDIC_SYNC_H
-#define CARBON_STRDIC_SYNC_H
+#ifndef NG5_STRDIC_SYNC_H
+#define NG5_STRDIC_SYNC_H
 
 #include "stdx/strdic.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
-CARBON_EXPORT (int)
+NG5_EXPORT (int)
 carbon_strdic_create_sync(carbon_strdic_t *dic, size_t capacity, size_t num_indx_buckets,
                           size_t num_index_bucket_cap, size_t num_threads, const struct allocator *alloc);
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif

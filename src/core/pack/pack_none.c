@@ -20,81 +20,81 @@
 #include "core/pack/pack.h"
 #include "core/pack/pack_none.h"
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_none_init(carbon_compressor_t *self)
 {
-    CARBON_UNUSED(self);
+    NG5_UNUSED(self);
     /* nothing to do for uncompressed dictionaries */
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_none_cpy(const carbon_compressor_t *self, carbon_compressor_t *dst)
 {
-    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_NONE);
+    NG5_CHECK_TAG(self->tag, NG5_COMPRESSOR_NONE);
 
     /* nothing to hard copy but the function pointers */
     *dst = *self;
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_none_drop(carbon_compressor_t *self)
 {
-    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_NONE);
+    NG5_CHECK_TAG(self->tag, NG5_COMPRESSOR_NONE);
 
-    CARBON_UNUSED(self);
+    NG5_UNUSED(self);
     /* nothing to do for uncompressed dictionaries */
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_none_write_extra(carbon_compressor_t *self, memfile_t *dst,
                                         const vec_t ofType (const char *) *strings)
 {
-    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_NONE);
+    NG5_CHECK_TAG(self->tag, NG5_COMPRESSOR_NONE);
 
-    CARBON_UNUSED(self);
-    CARBON_UNUSED(dst);
-    CARBON_UNUSED(strings);
+    NG5_UNUSED(self);
+    NG5_UNUSED(dst);
+    NG5_UNUSED(strings);
     /* nothing to do for uncompressed dictionaries */
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_none_read_extra(carbon_compressor_t *self, FILE *src, size_t nbytes)
 {
-    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_NONE);
+    NG5_CHECK_TAG(self->tag, NG5_COMPRESSOR_NONE);
 
-    CARBON_UNUSED(self);
-    CARBON_UNUSED(src);
-    CARBON_UNUSED(nbytes);
+    NG5_UNUSED(self);
+    NG5_UNUSED(src);
+    NG5_UNUSED(nbytes);
     /* nothing to do for uncompressed dictionaries */
     return true;
 }
 
 bool carbon_compressor_none_print_extra(carbon_compressor_t *self, FILE *file, memfile_t *src)
 {
-    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_NONE);
+    NG5_CHECK_TAG(self->tag, NG5_COMPRESSOR_NONE);
 
-    CARBON_UNUSED(self);
-    CARBON_UNUSED(file);
-    CARBON_UNUSED(src);
+    NG5_UNUSED(self);
+    NG5_UNUSED(file);
+    NG5_UNUSED(src);
     /* nothing to do for uncompressed dictionaries */
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_none_print_encoded_string(carbon_compressor_t *self,
                                                  FILE *file,
                                                  memfile_t *src,
                                                  u32 decompressed_strlen)
 {
-    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_NONE);
+    NG5_CHECK_TAG(self->tag, NG5_COMPRESSOR_NONE);
 
-    CARBON_UNUSED(self);
+    NG5_UNUSED(self);
 
-    const char         *string        =  CARBON_MEMFILE_READ(src, decompressed_strlen);
+    const char         *string        =  NG5_MEMFILE_READ(src, decompressed_strlen);
 
     char *printableString = malloc(decompressed_strlen + 1);
     memcpy(printableString, string, decompressed_strlen);
@@ -107,31 +107,31 @@ carbon_compressor_none_print_encoded_string(carbon_compressor_t *self,
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_none_encode_string(carbon_compressor_t *self, memfile_t *dst, struct err *err,
                                           const char *string)
 {
-    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_NONE);
+    NG5_CHECK_TAG(self->tag, NG5_COMPRESSOR_NONE);
 
-    CARBON_UNUSED(self);
+    NG5_UNUSED(self);
 
     u32 string_length = strlen(string);
 
-    CARBON_SUCCESS_OR_JUMP(memfile_write(dst, string, string_length), error_handling)
+    NG5_SUCCESS_OR_JUMP(memfile_write(dst, string, string_length), error_handling)
 
     return true;
 
 error_handling:
-    error(err, CARBON_ERR_IO)
+    error(err, NG5_ERR_IO)
     return false;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_none_decode_string(carbon_compressor_t *self, char *dst, size_t strlen, FILE *src)
 {
-    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_NONE);
+    NG5_CHECK_TAG(self->tag, NG5_COMPRESSOR_NONE);
 
-    CARBON_UNUSED(self);
+    NG5_UNUSED(self);
 
     size_t num_read = fread(dst, sizeof(char), strlen, src);
     return (num_read == strlen);

@@ -28,7 +28,7 @@
 
 #define STRING_DIC_ASYNC_TAG "strdic_async"
 
-#define HASH_FUNCTION                  CARBON_HASH_SAX
+#define HASH_FUNCTION                  NG5_HASH_SAX
 
 typedef struct async_extra async_extra;
 
@@ -127,17 +127,17 @@ static bool this_setup_carriers(carbon_strdic_t *self, size_t capacity, size_t n
 
 #define THIS_EXTRAS(self)                                                                                              \
 ({                                                                                                                     \
-    CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_ASYNC);                                                             \
+    NG5_CHECK_TAG(self->tag, NG5_STRDIC_TYPE_ASYNC);                                                             \
     (async_extra *) self->extra;                                                                                       \
 })
 
-CARBON_EXPORT (int)
+NG5_EXPORT (int)
 carbon_strdic_create_async(carbon_strdic_t *dic, size_t capacity, size_t num_index_buckets,
                                size_t approx_num_unique_strs, size_t num_threads, const struct allocator *alloc)
 {
-    CARBON_CHECK_SUCCESS(carbon_alloc_this_or_std(&dic->alloc, alloc));
+    NG5_CHECK_SUCCESS(carbon_alloc_this_or_std(&dic->alloc, alloc));
 
-    dic->tag = CARBON_STRDIC_TYPE_ASYNC;
+    dic->tag = NG5_STRDIC_TYPE_ASYNC;
     dic->drop = this_drop;
     dic->insert = this_insert;
     dic->remove = this_remove;
@@ -150,7 +150,7 @@ carbon_strdic_create_async(carbon_strdic_t *dic, size_t capacity, size_t num_ind
     dic->num_distinct = this_num_distinct;
     dic->get_contents = this_get_contents;
 
-    CARBON_CHECK_SUCCESS(this_create_extra(dic, capacity, num_index_buckets, approx_num_unique_strs, num_threads));
+    NG5_CHECK_SUCCESS(this_create_extra(dic, capacity, num_index_buckets, approx_num_unique_strs, num_threads));
     return true;
 }
 
@@ -171,15 +171,15 @@ static bool this_create_extra(carbon_strdic_t *self, size_t capacity, size_t num
 
 static bool this_drop(carbon_strdic_t *self)
 {
-    CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_ASYNC);
+    NG5_CHECK_TAG(self->tag, NG5_STRDIC_TYPE_ASYNC);
     async_extra *extra = THIS_EXTRAS(self);
     for (size_t i = 0; i < extra->carriers.num_elems; i++) {
         carrier_t *carrier = vec_get(&extra->carriers, i, carrier_t);
         carbon_strdic_drop(&carrier->local_dictionary);
     }
-    CARBON_CHECK_SUCCESS(carbon_vec_drop(&extra->carriers));
-    CARBON_CHECK_SUCCESS(carbon_vec_drop(&extra->carrier_mapping));
-    CARBON_CHECK_SUCCESS(carbon_free(&self->alloc, extra));
+    NG5_CHECK_SUCCESS(carbon_vec_drop(&extra->carriers));
+    NG5_CHECK_SUCCESS(carbon_vec_drop(&extra->carrier_mapping));
+    NG5_CHECK_SUCCESS(carbon_free(&self->alloc, extra));
     return true;
 }
 
@@ -189,17 +189,17 @@ void *parallel_remove_function(void *args)
     carbon_string_id_t len = carbon_vec_length(carrier_arg->local_ids);
     carrier_arg->did_work = len > 0;
 
-    CARBON_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu spawned for remove task (%zu elements)", carrier_arg->carrier->id,
+    NG5_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu spawned for remove task (%zu elements)", carrier_arg->carrier->id,
           carbon_vec_length(carrier_arg->local_ids));
     if (len > 0) {
         carbon_strdic_t *dic = &carrier_arg->carrier->local_dictionary;
         carbon_string_id_t *ids = vec_all(carrier_arg->local_ids, carbon_string_id_t);
         carrier_arg->result = carbon_strdic_remove(dic, ids, len);
-        CARBON_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu task done", carrier_arg->carrier->id);
+        NG5_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu task done", carrier_arg->carrier->id);
     }
     else {
         carrier_arg->result = true;
-        CARBON_WARN(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", carrier_arg->carrier->id);
+        NG5_WARN(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", carrier_arg->carrier->id);
     }
 
     return NULL;
@@ -210,12 +210,12 @@ void *parallel_insert_function(void *args)
     parallel_insert_arg *restrict this_args = (parallel_insert_arg *restrict) args;
     this_args->did_work = this_args->strings.num_elems > 0;
 
-    CARBON_TRACE(STRING_DIC_ASYNC_TAG, "thread-local insert function started (thread %zu)", this_args->carrier->id);
-    CARBON_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu spawned for insert task (%zu elements)", this_args->carrier->id,
+    NG5_TRACE(STRING_DIC_ASYNC_TAG, "thread-local insert function started (thread %zu)", this_args->carrier->id);
+    NG5_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu spawned for insert task (%zu elements)", this_args->carrier->id,
           carbon_vec_length(&this_args->strings));
 
     if (this_args->did_work) {
-        CARBON_TRACE(STRING_DIC_ASYNC_TAG,
+        NG5_TRACE(STRING_DIC_ASYNC_TAG,
               "thread %zu starts insertion of %zu strings",
               this_args->carrier->id,
               carbon_vec_length(&this_args->strings));
@@ -226,11 +226,11 @@ void *parallel_insert_function(void *args)
                                           data, carbon_vec_length(&this_args->strings), this_args->insert_num_threads);
 
         /** internal error during thread-local string dictionary building process */
-        CARBON_PRINT_ERROR_AND_DIE_IF(status != true, CARBON_ERR_INTERNALERR);
-        CARBON_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu done", this_args->carrier->id);
+        NG5_PRINT_ERROR_AND_DIE_IF(status != true, NG5_ERR_INTERNALERR);
+        NG5_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu done", this_args->carrier->id);
     }
     else {
-        CARBON_WARN(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", this_args->carrier->id);
+        NG5_WARN(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", this_args->carrier->id);
     }
 
     return NULL;
@@ -241,9 +241,9 @@ void *parallel_locate_safe_function(void *args)
     parallel_locate_arg *restrict this_args = (parallel_locate_arg *restrict) args;
     this_args->did_work = carbon_vec_length(&this_args->keys_in) > 0;
 
-    CARBON_TRACE(STRING_DIC_ASYNC_TAG, "thread-local 'locate' function invoked for thread %zu...", this_args->carrier->id)
+    NG5_TRACE(STRING_DIC_ASYNC_TAG, "thread-local 'locate' function invoked for thread %zu...", this_args->carrier->id)
 
-    CARBON_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu spawned for locate (safe) task (%zu elements)", this_args->carrier->id,
+    NG5_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu spawned for locate (safe) task (%zu elements)", this_args->carrier->id,
           carbon_vec_length(&this_args->keys_in));
 
     if (this_args->did_work) {
@@ -254,10 +254,10 @@ void *parallel_locate_safe_function(void *args)
                                                      vec_all(&this_args->keys_in, char *),
                                                      carbon_vec_length(&this_args->keys_in));
 
-        CARBON_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu done", this_args->carrier->id);
+        NG5_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu done", this_args->carrier->id);
     }
     else {
-        CARBON_WARN(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", this_args->carrier->id);
+        NG5_WARN(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", this_args->carrier->id);
     }
 
     return NULL;
@@ -268,17 +268,17 @@ void *parallel_extract_function(void *args)
     parallel_extract_arg *restrict this_args = (parallel_extract_arg *restrict) args;
     this_args->did_work = carbon_vec_length(&this_args->local_ids_in) > 0;
 
-    CARBON_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu spawned for extract task (%zu elements)", this_args->carrier->id,
+    NG5_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu spawned for extract task (%zu elements)", this_args->carrier->id,
           carbon_vec_length(&this_args->local_ids_in));
 
     if (this_args->did_work) {
         this_args->strings_out = carbon_strdic_extract(&this_args->carrier->local_dictionary,
                                                      vec_all(&this_args->local_ids_in, carbon_string_id_t),
                                                      carbon_vec_length(&this_args->local_ids_in));
-        CARBON_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu done", this_args->carrier->id);
+        NG5_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu done", this_args->carrier->id);
     }
     else {
-        CARBON_WARN(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", this_args->carrier->id);
+        NG5_WARN(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", this_args->carrier->id);
     }
 
     return NULL;
@@ -286,19 +286,19 @@ void *parallel_extract_function(void *args)
 
 static void synchronize(vec_t ofType(carrier) *carriers, size_t num_threads)
 {
-    CARBON_DEBUG(STRING_DIC_ASYNC_TAG, "barrier installed for %d threads", num_threads);
+    NG5_DEBUG(STRING_DIC_ASYNC_TAG, "barrier installed for %d threads", num_threads);
 
     carbon_timestamp_t begin = carbon_time_now_wallclock();
     for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
         volatile carrier_t *carrier = vec_get(carriers, thread_id, carrier_t);
         pthread_join(carrier->thread, NULL);
-        CARBON_DEBUG(STRING_DIC_ASYNC_TAG, "thread %d joined", carrier->id);
+        NG5_DEBUG(STRING_DIC_ASYNC_TAG, "thread %d joined", carrier->id);
     }
     carbon_timestamp_t end = carbon_time_now_wallclock();
     carbon_timestamp_t duration = (end - begin);
-    CARBON_UNUSED(duration);
+    NG5_UNUSED(duration);
 
-    CARBON_DEBUG(STRING_DIC_ASYNC_TAG, "barrier passed for %d threads after %f seconds", num_threads, duration / 1000.0f);
+    NG5_DEBUG(STRING_DIC_ASYNC_TAG, "barrier passed for %d threads after %f seconds", num_threads, duration / 1000.0f);
 }
 
 static void create_thread_assignment(atomic_uint_fast16_t **str_carrier_mapping, atomic_size_t **carrier_num_strings,
@@ -338,8 +338,8 @@ typedef struct parallel_compute_thread_assignment_arg
 static void parallel_compute_thread_assignment_function(const void *restrict start, size_t width, size_t len,
                                                     void *restrict args, thread_id_t tid)
 {
-    CARBON_UNUSED(tid);
-    CARBON_UNUSED(width);
+    NG5_UNUSED(tid);
+    NG5_UNUSED(width);
 
     char *const *strings = (char *const *) start;
 
@@ -371,7 +371,7 @@ static void compute_thread_assignment(atomic_uint_fast16_t *str_carrier_mapping,
                 num_strings,
                 parallel_compute_thread_assignment_function,
                 &args,
-                CARBON_PARALLEL_THREAD_HINT_MULTI,
+                NG5_PARALLEL_THREAD_HINT_MULTI,
                 num_threads);
 
 }
@@ -383,12 +383,12 @@ static bool this_insert(carbon_strdic_t *self,
                       size_t __num_threads)
 {
     carbon_timestamp_t begin = carbon_time_now_wallclock();
-    CARBON_INFO(STRING_DIC_ASYNC_TAG, "insert operation invoked: %zu strings in total", num_strings)
+    NG5_INFO(STRING_DIC_ASYNC_TAG, "insert operation invoked: %zu strings in total", num_strings)
 
 
-    CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_ASYNC);
+    NG5_CHECK_TAG(self->tag, NG5_STRDIC_TYPE_ASYNC);
     /** parameter 'num_threads' must be set to 0 for async dictionary */
-    CARBON_PRINT_ERROR_AND_DIE_IF(__num_threads != 0, CARBON_ERR_INTERNALERR);
+    NG5_PRINT_ERROR_AND_DIE_IF(__num_threads != 0, NG5_ERR_INTERNALERR);
 
     this_lock(self);
 
@@ -415,7 +415,7 @@ static bool this_insert(carbon_strdic_t *self,
         entry->carrier = vec_get(&extra->carriers, i, carrier_t);
         entry->insert_num_threads = num_threads;
 
-        carbon_vec_create(&entry->strings, &self->alloc, sizeof(char *), CARBON_MAX(1, carrier_num_strings[i]));
+        carbon_vec_create(&entry->strings, &self->alloc, sizeof(char *), NG5_MAX(1, carrier_num_strings[i]));
         carbon_vec_push(&carrier_args, &entry, 1);
         assert (entry->strings.base != NULL);
 
@@ -438,20 +438,20 @@ static bool this_insert(carbon_strdic_t *self,
 
 
     /** schedule insert operation per carrier */
-    CARBON_TRACE(STRING_DIC_ASYNC_TAG, "schedule insert operation to %zu threads", num_threads)
+    NG5_TRACE(STRING_DIC_ASYNC_TAG, "schedule insert operation to %zu threads", num_threads)
     for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
         parallel_insert_arg *carrier_arg = *vec_get(&carrier_args, thread_id, parallel_insert_arg *);
         carrier_t *carrier = vec_get(&extra->carriers, thread_id, carrier_t);
-        CARBON_TRACE(STRING_DIC_ASYNC_TAG, "create thread %zu...", thread_id)
+        NG5_TRACE(STRING_DIC_ASYNC_TAG, "create thread %zu...", thread_id)
         pthread_create(&carrier->thread, NULL, parallel_insert_function, carrier_arg);
-        CARBON_TRACE(STRING_DIC_ASYNC_TAG, "thread %zu created", thread_id)
+        NG5_TRACE(STRING_DIC_ASYNC_TAG, "thread %zu created", thread_id)
     }
-    CARBON_TRACE(STRING_DIC_ASYNC_TAG, "scheduling done for %zu threads", num_threads)
+    NG5_TRACE(STRING_DIC_ASYNC_TAG, "scheduling done for %zu threads", num_threads)
 
     /** synchronize */
-    CARBON_TRACE(STRING_DIC_ASYNC_TAG, "start synchronizing %zu threads", num_threads)
+    NG5_TRACE(STRING_DIC_ASYNC_TAG, "start synchronizing %zu threads", num_threads)
     synchronize(&extra->carriers, num_threads);
-    CARBON_TRACE(STRING_DIC_ASYNC_TAG, "%zu threads in sync", num_threads)
+    NG5_TRACE(STRING_DIC_ASYNC_TAG, "%zu threads in sync", num_threads)
 
     /** compute string ids; the string id produced by this implementation is a compound identifier encoding
      * both the owning thread id and the thread-local string id. For this, the returned (global) string identifier
@@ -465,7 +465,7 @@ static bool this_insert(carbon_strdic_t *self,
      * none of the carrier threads allocated thread-local 'out's which mean that no cleanup must be done */
 
     /** parallelizing the following block makes no sense but waste of compute power and energy */
-    if (CARBON_LIKELY(out != NULL)) {
+    if (NG5_LIKELY(out != NULL)) {
         carbon_string_id_t *total_out = carbon_malloc(&self->alloc, num_strings * sizeof(carbon_string_id_t));
         size_t currentOut = 0;
 
@@ -499,9 +499,9 @@ static bool this_insert(carbon_strdic_t *self,
     this_unlock(self);
 
     carbon_timestamp_t end = carbon_time_now_wallclock();
-    CARBON_UNUSED(begin);
-    CARBON_UNUSED(end);
-    CARBON_INFO(STRING_DIC_ASYNC_TAG, "insertion operation done: %f seconds spent here", (end - begin) / 1000.0f)
+    NG5_UNUSED(begin);
+    NG5_UNUSED(end);
+    NG5_INFO(STRING_DIC_ASYNC_TAG, "insertion operation done: %f seconds spent here", (end - begin) / 1000.0f)
 
     return true;
 }
@@ -509,16 +509,16 @@ static bool this_insert(carbon_strdic_t *self,
 static bool this_remove(carbon_strdic_t *self, carbon_string_id_t *strings, size_t num_strings)
 {
     carbon_timestamp_t begin = carbon_time_now_wallclock();
-    CARBON_INFO(STRING_DIC_ASYNC_TAG, "remove operation started: %zu strings to remove", num_strings);
+    NG5_INFO(STRING_DIC_ASYNC_TAG, "remove operation started: %zu strings to remove", num_strings);
 
-    CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_ASYNC);
+    NG5_CHECK_TAG(self->tag, NG5_STRDIC_TYPE_ASYNC);
 
     this_lock(self);
 
     parallel_remove_arg empty;
     struct async_extra *extra = THIS_EXTRAS(self);
     uint_fast16_t num_threads = carbon_vec_length(&extra->carriers);
-    size_t approx_num_strings_per_thread = CARBON_MAX(1, num_strings / num_threads);
+    size_t approx_num_strings_per_thread = NG5_MAX(1, num_strings / num_threads);
     vec_t ofType(carbon_string_id_t) *string_map =
         carbon_malloc(&self->alloc, num_threads * sizeof(vec_t));
 
@@ -565,9 +565,9 @@ static bool this_remove(carbon_strdic_t *self, carbon_string_id_t *strings, size
     this_unlock(self);
 
     carbon_timestamp_t end = carbon_time_now_wallclock();
-    CARBON_UNUSED(begin);
-    CARBON_UNUSED(end);
-    CARBON_INFO(STRING_DIC_ASYNC_TAG, "remove operation done: %f seconds spent here", (end - begin) / 1000.0f)
+    NG5_UNUSED(begin);
+    NG5_UNUSED(end);
+    NG5_INFO(STRING_DIC_ASYNC_TAG, "remove operation done: %f seconds spent here", (end - begin) / 1000.0f)
 
     return true;
 }
@@ -576,9 +576,9 @@ static bool this_locate_safe(carbon_strdic_t *self, carbon_string_id_t **out, bo
                           size_t *num_not_found, char *const *keys, size_t num_keys)
 {
     carbon_timestamp_t begin = carbon_time_now_wallclock();
-    CARBON_INFO(STRING_DIC_ASYNC_TAG, "locate (safe) operation started: %zu strings to locate", num_keys)
+    NG5_INFO(STRING_DIC_ASYNC_TAG, "locate (safe) operation started: %zu strings to locate", num_keys)
 
-    CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_ASYNC);
+    NG5_CHECK_TAG(self->tag, NG5_STRDIC_TYPE_ASYNC);
 
     this_lock(self);
 
@@ -586,8 +586,8 @@ static bool this_locate_safe(carbon_strdic_t *self, carbon_string_id_t **out, bo
     uint_fast16_t num_threads = carbon_vec_length(&extra->carriers);
 
     /** global result output */
-    CARBON_MALLOC(carbon_string_id_t, global_out, num_keys, &self->alloc);
-    CARBON_MALLOC(bool, global_found_mask, num_keys, &self->alloc);
+    NG5_MALLOC(carbon_string_id_t, global_out, num_keys, &self->alloc);
+    NG5_MALLOC(bool, global_found_mask, num_keys, &self->alloc);
 
     size_t global_num_not_found = 0;
 
@@ -610,7 +610,7 @@ static bool this_locate_safe(carbon_strdic_t *self, carbon_string_id_t **out, bo
         assert (&arg->keys_in.base != NULL);
     }
 
-    CARBON_TRACE(STRING_DIC_ASYNC_TAG, "computing per-thread string subset for %zu strings", num_keys)
+    NG5_TRACE(STRING_DIC_ASYNC_TAG, "computing per-thread string subset for %zu strings", num_keys)
     /** create per-carrier string subset */
     for (size_t i = 0; i < num_keys; i++) {
         /** get thread responsible for this particular string */
@@ -626,7 +626,7 @@ static bool this_locate_safe(carbon_strdic_t *self, carbon_string_id_t **out, bo
         carbon_vec_push(&arg->keys_in, &keys[i], 1);
     }
 
-    CARBON_TRACE(STRING_DIC_ASYNC_TAG, "schedule operation to threads to %zu threads...", num_threads)
+    NG5_TRACE(STRING_DIC_ASYNC_TAG, "schedule operation to threads to %zu threads...", num_threads)
     /** schedule operation to threads */
     for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
         carrier_t *carrier = vec_get(&extra->carriers, thread_id, carrier_t);
@@ -636,12 +636,12 @@ static bool this_locate_safe(carbon_strdic_t *self, carbon_string_id_t **out, bo
     }
 
     /** synchronize */
-    CARBON_TRACE(STRING_DIC_ASYNC_TAG, "start syncing %zu threads...", num_threads)
+    NG5_TRACE(STRING_DIC_ASYNC_TAG, "start syncing %zu threads...", num_threads)
     synchronize(&extra->carriers, num_threads);
-    CARBON_TRACE(STRING_DIC_ASYNC_TAG, "%zu threads in sync.", num_threads)
+    NG5_TRACE(STRING_DIC_ASYNC_TAG, "%zu threads in sync.", num_threads)
 
     /** collect and merge results */
-    CARBON_TRACE(STRING_DIC_ASYNC_TAG, "merging results of %zu threads", num_threads)
+    NG5_TRACE(STRING_DIC_ASYNC_TAG, "merging results of %zu threads", num_threads)
     for (size_t i = 0; i < num_keys; i++) {
         /** get thread responsible for this particular string, and local position of that string inside the
          * thread storage */
@@ -664,13 +664,13 @@ static bool this_locate_safe(carbon_strdic_t *self, carbon_string_id_t **out, bo
         global_num_not_found += arg->num_not_found_out;
 
         /** cleanup */
-        if (CARBON_LIKELY(arg->did_work)) {
+        if (NG5_LIKELY(arg->did_work)) {
             carbon_strdic_free(&arg->carrier->local_dictionary, arg->found_mask_out);
             carbon_strdic_free(&arg->carrier->local_dictionary, arg->ids_out);
         }
     }
 
-    CARBON_TRACE(STRING_DIC_ASYNC_TAG, "cleanup%s", "...")
+    NG5_TRACE(STRING_DIC_ASYNC_TAG, "cleanup%s", "...")
 
     /** cleanup */
     drop_thread_assignment(&self->alloc, str_carrier_mapping, carrier_num_strings, str_carrier_idx_mapping);
@@ -688,9 +688,9 @@ static bool this_locate_safe(carbon_strdic_t *self, carbon_string_id_t **out, bo
     this_unlock(self);
 
     carbon_timestamp_t end = carbon_time_now_wallclock();
-    CARBON_UNUSED(begin);
-    CARBON_UNUSED(end);
-    CARBON_INFO(STRING_DIC_ASYNC_TAG, "locate (safe) operation done: %f seconds spent here", (end - begin) / 1000.0f)
+    NG5_UNUSED(begin);
+    NG5_UNUSED(end);
+    NG5_INFO(STRING_DIC_ASYNC_TAG, "locate (safe) operation done: %f seconds spent here", (end - begin) / 1000.0f)
 
     return true;
 }
@@ -698,7 +698,7 @@ static bool this_locate_safe(carbon_strdic_t *self, carbon_string_id_t **out, bo
 static bool this_locate_fast(carbon_strdic_t *self, carbon_string_id_t **out, char *const *keys,
                           size_t num_keys)
 {
-    CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_ASYNC);
+    NG5_CHECK_TAG(self->tag, NG5_STRDIC_TYPE_ASYNC);
 
     this_lock(self);
 
@@ -720,23 +720,23 @@ static bool this_locate_fast(carbon_strdic_t *self, carbon_string_id_t **out, ch
 static char **this_extract(carbon_strdic_t *self, const carbon_string_id_t *ids, size_t num_ids)
 {
     carbon_timestamp_t begin = carbon_time_now_wallclock();
-    CARBON_INFO(STRING_DIC_ASYNC_TAG, "extract (safe) operation started: %zu strings to extract", num_ids)
+    NG5_INFO(STRING_DIC_ASYNC_TAG, "extract (safe) operation started: %zu strings to extract", num_ids)
 
-    if (self->tag != CARBON_STRDIC_TYPE_ASYNC) {
+    if (self->tag != NG5_STRDIC_TYPE_ASYNC) {
         return NULL;
     }
 
     this_lock(self);
 
-    CARBON_MALLOC(char *, globalResult, num_ids, &self->alloc);
+    NG5_MALLOC(char *, globalResult, num_ids, &self->alloc);
 
     struct async_extra *extra = (struct async_extra *) self->extra;
     uint_fast16_t num_threads = carbon_vec_length(&extra->carriers);
-    size_t approx_num_strings_per_thread = CARBON_MAX(1, num_ids / num_threads);
+    size_t approx_num_strings_per_thread = NG5_MAX(1, num_ids / num_threads);
 
-    CARBON_MALLOC(size_t, local_thread_idx, num_ids, &self->alloc);
-    CARBON_MALLOC(uint_fast16_t, owning_thread_ids, num_ids, &self->alloc);
-    CARBON_MALLOC(parallel_extract_arg, thread_args, num_threads, &self->alloc);
+    NG5_MALLOC(size_t, local_thread_idx, num_ids, &self->alloc);
+    NG5_MALLOC(uint_fast16_t, owning_thread_ids, num_ids, &self->alloc);
+    NG5_MALLOC(parallel_extract_arg, thread_args, num_threads, &self->alloc);
 
     for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
         parallel_extract_arg *arg = thread_args + thread_id;
@@ -778,35 +778,35 @@ static char **this_extract(carbon_strdic_t *self, const carbon_string_id_t *ids,
     for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
         parallel_extract_arg *carrier_arg = thread_args + thread_id;
         carbon_vec_drop(&carrier_arg->local_ids_in);
-        if (CARBON_LIKELY(carrier_arg->did_work)) {
+        if (NG5_LIKELY(carrier_arg->did_work)) {
             carbon_strdic_free(&carrier_arg->carrier->local_dictionary, carrier_arg->strings_out);
         }
     }
 
-    CARBON_FREE(local_thread_idx, &self->alloc);
-    CARBON_FREE(owning_thread_ids, &self->alloc);
-    CARBON_FREE(thread_args, &self->alloc);
+    NG5_FREE(local_thread_idx, &self->alloc);
+    NG5_FREE(owning_thread_ids, &self->alloc);
+    NG5_FREE(thread_args, &self->alloc);
 
     this_unlock(self);
 
     carbon_timestamp_t end = carbon_time_now_wallclock();
-    CARBON_UNUSED(begin);
-    CARBON_UNUSED(end);
-    CARBON_INFO(STRING_DIC_ASYNC_TAG, "extract (safe) operation done: %f seconds spent here", (end - begin) / 1000.0f)
+    NG5_UNUSED(begin);
+    NG5_UNUSED(end);
+    NG5_INFO(STRING_DIC_ASYNC_TAG, "extract (safe) operation done: %f seconds spent here", (end - begin) / 1000.0f)
 
     return globalResult;
 }
 
 static bool this_free(carbon_strdic_t *self, void *ptr)
 {
-    CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_ASYNC);
+    NG5_CHECK_TAG(self->tag, NG5_STRDIC_TYPE_ASYNC);
     carbon_free(&self->alloc, ptr);
     return true;
 }
 
 static bool this_num_distinct(carbon_strdic_t *self, size_t *num)
 {
-    CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_ASYNC);
+    NG5_CHECK_TAG(self->tag, NG5_STRDIC_TYPE_ASYNC);
     this_lock(self);
 
     struct async_extra *extra = THIS_EXTRAS(self);
@@ -827,7 +827,7 @@ static bool this_num_distinct(carbon_strdic_t *self, size_t *num)
 static bool this_get_contents(carbon_strdic_t *self, vec_t ofType (char *) * strings,
                            vec_t ofType(carbon_string_id_t) * string_ids)
 {
-    CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_ASYNC);
+    NG5_CHECK_TAG(self->tag, NG5_STRDIC_TYPE_ASYNC);
     this_lock(self);
     struct async_extra *extra = THIS_EXTRAS(self);
     size_t num_carriers = carbon_vec_length(&extra->carriers);
@@ -835,7 +835,7 @@ static bool this_get_contents(carbon_strdic_t *self, vec_t ofType (char *) * str
     vec_t ofType (carbon_string_id_t) local_string_id_results;
     size_t approx_num_distinct_local_values;
     this_num_distinct(self, &approx_num_distinct_local_values);
-    approx_num_distinct_local_values = CARBON_MAX(1, approx_num_distinct_local_values / extra->carriers.num_elems);
+    approx_num_distinct_local_values = NG5_MAX(1, approx_num_distinct_local_values / extra->carriers.num_elems);
     approx_num_distinct_local_values *= 1.2f;
 
     carbon_vec_create(&local_string_results, NULL, sizeof(char *), approx_num_distinct_local_values);
@@ -869,7 +869,7 @@ static bool this_get_contents(carbon_strdic_t *self, vec_t ofType (char *) * str
 
 static bool this_reset_counters(carbon_strdic_t *self)
 {
-    CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_ASYNC);
+    NG5_CHECK_TAG(self->tag, NG5_STRDIC_TYPE_ASYNC);
 
     this_lock(self);
 
@@ -888,14 +888,14 @@ static bool this_reset_counters(carbon_strdic_t *self)
 
 static bool this_counters(carbon_strdic_t *self, carbon_string_hash_counters_t *counters)
 {
-    CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_ASYNC);
+    NG5_CHECK_TAG(self->tag, NG5_STRDIC_TYPE_ASYNC);
 
     this_lock(self);
 
     struct async_extra *extra = THIS_EXTRAS(self);
     size_t num_threads = carbon_vec_length(&extra->carriers);
 
-    CARBON_CHECK_SUCCESS(carbon_strhash_counters_init(counters));
+    NG5_CHECK_SUCCESS(carbon_strhash_counters_init(counters));
 
     for (size_t thread_id = 0; thread_id < num_threads; thread_id++) {
         carrier_t *carrier = vec_get(&extra->carriers, thread_id, carrier_t);
@@ -920,8 +920,8 @@ typedef struct parallel_create_carrier_arg
 static void parallel_create_carrier(const void *restrict start, size_t width, size_t len, void *restrict args,
                                   thread_id_t tid)
 {
-    CARBON_UNUSED(tid);
-    CARBON_UNUSED(width);
+    NG5_UNUSED(tid);
+    NG5_UNUSED(width);
 
     carrier_t *carrier = (carrier_t *) start;
     const parallel_create_carrier_arg_t *createArgs = (const parallel_create_carrier_arg_t *) args;
@@ -937,13 +937,13 @@ static bool this_setup_carriers(carbon_strdic_t *self, size_t capacity, size_t n
                              size_t approx_num_unique_str, size_t num_threads)
 {
     async_extra *extra = THIS_EXTRAS(self);
-    size_t local_bucket_num = CARBON_MAX(1, num_index_buckets / num_threads);
+    size_t local_bucket_num = NG5_MAX(1, num_index_buckets / num_threads);
     carrier_t new_carrier;
 
     parallel_create_carrier_arg_t createArgs = {
-        .local_capacity = CARBON_MAX(1, capacity / num_threads),
+        .local_capacity = NG5_MAX(1, capacity / num_threads),
         .local_bucket_num = local_bucket_num,
-        .local_bucket_cap = CARBON_MAX(1, approx_num_unique_str / num_threads / local_bucket_num / SLICE_KEY_COLUMN_MAX_ELEMS),
+        .local_bucket_cap = NG5_MAX(1, approx_num_unique_str / num_threads / local_bucket_num / SLICE_KEY_COLUMN_MAX_ELEMS),
         .alloc = &self->alloc
     };
 
@@ -953,7 +953,7 @@ static bool this_setup_carriers(carbon_strdic_t *self, size_t capacity, size_t n
     }
 
     carbon_parallel_for(vec_all(&extra->carriers, carrier_t), sizeof(carrier_t), num_threads, parallel_create_carrier,
-                &createArgs, CARBON_PARALLEL_THREAD_HINT_MULTI, num_threads);
+                &createArgs, NG5_PARALLEL_THREAD_HINT_MULTI, num_threads);
 
     return true;
 }
@@ -961,13 +961,13 @@ static bool this_setup_carriers(carbon_strdic_t *self, size_t capacity, size_t n
 static bool this_lock(carbon_strdic_t *self)
 {
     async_extra *extra = THIS_EXTRAS(self);
-    CARBON_CHECK_SUCCESS(carbon_spinlock_acquire(&extra->lock));
+    NG5_CHECK_SUCCESS(carbon_spinlock_acquire(&extra->lock));
     return true;
 }
 
 static bool this_unlock(carbon_strdic_t *self)
 {
     async_extra *extra = THIS_EXTRAS(self);
-    CARBON_CHECK_SUCCESS(carbon_spinlock_release(&extra->lock));
+    NG5_CHECK_SUCCESS(carbon_spinlock_release(&extra->lock));
     return true;
 }

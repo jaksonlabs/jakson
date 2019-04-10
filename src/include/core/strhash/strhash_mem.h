@@ -15,19 +15,19 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_STRHASH_MEM_H
-#define CARBON_STRHASH_MEM_H
+#ifndef NG5_STRHASH_MEM_H
+#define NG5_STRHASH_MEM_H
 
 #include "shared/common.h"
 #include "core/alloc/alloc.h"
 #include "stdx/strhash.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
-CARBON_EXPORT (bool)
+NG5_EXPORT (bool)
 carbon_strhash_create_inmemory(carbon_strhash_t *carbon_parallel_map_exec, const struct allocator *alloc, size_t num_buckets,
                                size_t cap_buckets);
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif

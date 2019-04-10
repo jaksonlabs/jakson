@@ -15,8 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_SLICELIST_H
-#define CARBON_SLICELIST_H
+#ifndef NG5_SLICELIST_H
+#define NG5_SLICELIST_H
 
 #include "shared/common.h"
 #include "std/vec.h"
@@ -26,25 +26,25 @@
 #include "hash/hash.h"
 #include "shared/types.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
-CARBON_FORWARD_STRUCT_DECL(Slice)
+NG5_FORWARD_STRUCT_DECL(Slice)
 
-#ifndef CARBON_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_NAME
-#define CARBON_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_NAME "1 of 100 in CPU L1"
+#ifndef NG5_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_NAME
+#define NG5_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_NAME "1 of 100 in CPU L1"
 #endif
-#ifndef CARBON_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE
-#define CARBON_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE (32768/100)
-#endif
-
-#ifndef CARBON_SLICE_LIST_TARGET_MEMORY_NAME
-#define CARBON_SLICE_LIST_TARGET_MEMORY_NAME "10 of 100 in CPU L1"
-#endif
-#ifndef CARBON_SLICE_LIST_TARGET_MEMORY_SIZE_IN_BYTE
-#define CARBON_SLICE_LIST_TARGET_MEMORY_SIZE_IN_BYTE (32768/10)
+#ifndef NG5_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE
+#define NG5_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE (32768/100)
 #endif
 
-#define SLICE_DATA_SIZE (CARBON_SLICE_LIST_TARGET_MEMORY_SIZE_IN_BYTE - sizeof(slice_lookup_strat_e) - sizeof(u32))
+#ifndef NG5_SLICE_LIST_TARGET_MEMORY_NAME
+#define NG5_SLICE_LIST_TARGET_MEMORY_NAME "10 of 100 in CPU L1"
+#endif
+#ifndef NG5_SLICE_LIST_TARGET_MEMORY_SIZE_IN_BYTE
+#define NG5_SLICE_LIST_TARGET_MEMORY_SIZE_IN_BYTE (32768/10)
+#endif
+
+#define SLICE_DATA_SIZE (NG5_SLICE_LIST_TARGET_MEMORY_SIZE_IN_BYTE - sizeof(slice_lookup_strat_e) - sizeof(u32))
 
 #define SLICE_KEY_COLUMN_MAX_ELEMS (SLICE_DATA_SIZE / 8 / 3) /** one array with elements of 64 bits each, 3 of them */
 
@@ -61,9 +61,9 @@ typedef struct Slice
     /** Enumeration to determine which strategy for 'find' is currently applied */
     slice_lookup_strat_e strat;
 
-    /** Data stored inside this slice. By setting 'CARBON_SLICE_LIST_CPU_L3_SIZE_IN_BYTE' statically to the target
-     * CPU L3 size, it is intended that one entire 'CARBON_slice_t' structure fits into the L3 cache of the CPU.
-     * It is assumed that at least one element can be inserted into a 'CARBON_slice_t' object (which means that
+    /** Data stored inside this slice. By setting 'NG5_SLICE_LIST_CPU_L3_SIZE_IN_BYTE' statically to the target
+     * CPU L3 size, it is intended that one entire 'NG5_slice_t' structure fits into the L3 cache of the CPU.
+     * It is assumed that at least one element can be inserted into a 'NG5_slice_t' object (which means that
      * the type of elements to be inserted must be less or equal to SLICE_DATA_SIZE. In case an element is
      * removed from this list, data is physically moved to avoid a "sparse" list, i.e., it is alwalys
      * guaranteeed that 'data' contains continously elements without any gabs until 'num_elems' limit. This
@@ -80,7 +80,7 @@ typedef struct Slice
     u32 cacheIdx;
 } Slice;
 
-typedef struct CARBON_hash_bounds_t
+typedef struct NG5_hash_bounds_t
 {
     /** Min and max values inside this slice. Used to skip the lookup in the per-slice carbon_bloom_t during search */
     carbon_hash_t minHash,
@@ -98,22 +98,22 @@ typedef struct SliceDescriptor
 
 } SliceDescriptor;
 
-typedef struct CARBON_slice_list_t
+typedef struct NG5_slice_list_t
 {
     struct allocator alloc;
     carbon_spinlock_t lock;
 
-    vec_t ofType(CARBON_slice_t) slices;
-    vec_t ofType(CARBON_slice_desc_t) descriptors;
-    vec_t ofType(CARBON_bloomfilter_t) filters;
-    vec_t ofType(CARBON_hash_bounds_t) bounds;
+    vec_t ofType(NG5_slice_t) slices;
+    vec_t ofType(NG5_slice_desc_t) descriptors;
+    vec_t ofType(NG5_bloomfilter_t) filters;
+    vec_t ofType(NG5_hash_bounds_t) bounds;
 
     u32 appender_idx;
 
     struct err err;
 } carbon_slice_list_t;
 
-typedef struct CARBON_slice_handle_t
+typedef struct NG5_slice_handle_t
 {
     Slice *container;
     const char *key;
@@ -121,24 +121,24 @@ typedef struct CARBON_slice_handle_t
     bool is_contained;
 } slice_handle_t;
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_slice_list_create(carbon_slice_list_t *list, const struct allocator *alloc, size_t sliceCapacity);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 SliceListDrop(carbon_slice_list_t *list);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_slice_list_lookup(slice_handle_t *handle, carbon_slice_list_t *list, const char *needle);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 SliceListIsEmpty(const carbon_slice_list_t *list);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_slice_list_insert(carbon_slice_list_t *list, char **strings, carbon_string_id_t *ids, size_t npairs);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 SliceListRemove(carbon_slice_list_t *list, slice_handle_t *handle);
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif

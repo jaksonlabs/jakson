@@ -15,15 +15,15 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_VECTOR_H
-#define CARBON_VECTOR_H
+#ifndef NG5_VECTOR_H
+#define NG5_VECTOR_H
 
 #include <sys/mman.h>
 
 #include "shared/common.h"
 #include "core/alloc/alloc.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
 typedef struct carbon_memfile memfile_t;
 
@@ -108,7 +108,7 @@ typedef vec_t ofType(const char *) carbon_string_ref_vec;
 #define STRING_VECTOR_DROP(vec)                                                                                        \
 ({                                                                                                                     \
     for (size_t i = 0; i < vec->num_elems; i++) {                                                                      \
-        char *s = *CARBON_VECTOR_GET(vec, i, char *);                                                                  \
+        char *s = *NG5_VECTOR_GET(vec, i, char *);                                                                  \
         free (s);                                                                                                      \
     }                                                                                                                  \
     carbon_vec_drop(vec);                                                                                              \
@@ -136,13 +136,13 @@ typedef vec_t ofType(const char *) carbon_string_ref_vec;
  * @param cap_elems number of elements for which memory should be reserved
  * @return STATUS_OK if success, and STATUS_NULLPTR in case of NULL pointer parameters
  */
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_vec_create(vec_t *out, const struct allocator *alloc, size_t elem_size, size_t cap_elems);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_vec_serialize(FILE *file, vec_t *vec);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_vec_deserialize(vec_t *vec, struct err *err, FILE *file);
 
 /**
@@ -153,7 +153,7 @@ carbon_vec_deserialize(vec_t *vec, struct err *err, FILE *file);
  * of <code>madvise</code>
  * @return STATUS_OK if success, otherwise a value indicating the error
  */
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_vec_memadvice(vec_t *vec, int madviseAdvice);
 
 /**
@@ -165,7 +165,7 @@ carbon_vec_memadvice(vec_t *vec, int madviseAdvice);
  * @param factor a positive real number larger than 1
  * @return STATUS_OK if success, otherwise a value indicating the error
  */
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_vec_set_grow_factor(vec_t *vec, float factor);
 
 /**
@@ -177,7 +177,7 @@ carbon_vec_set_grow_factor(vec_t *vec, float factor);
  * @param vec vector to be freed
  * @return STATUS_OK if success, and STATUS_NULL_PTR in case of NULL pointer to 'vec'
  */
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_vec_drop(vec_t *vec);
 
 /**
@@ -187,7 +187,7 @@ carbon_vec_drop(vec_t *vec);
  *         an error occurs. In case an error is occured, the return value is neither <code>STATUS_TRUE</code> nor
  *         <code>STATUS_FALSE</code> but an value indicating that error.
  */
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_vec_is_empty(const vec_t *vec);
 
 /**
@@ -201,12 +201,12 @@ carbon_vec_is_empty(const vec_t *vec);
  * @param num_elems number of elements stored in data
  * @return STATUS_OK if success, and STATUS_NULLPTR in case of NULL pointer parameters
  */
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_vec_push(vec_t *vec,
                const void *data,
                size_t num_elems);
 
-CARBON_EXPORT(const void *)
+NG5_EXPORT(const void *)
 carbon_vec_peek(vec_t *vec);
 
 #define VECTOR_PEEK(vec, type) (type *)(carbon_vec_peek(vec))
@@ -222,7 +222,7 @@ carbon_vec_peek(vec_t *vec);
  * @param num_elems number of elements stored in data
  * @return STATUS_OK if success, and STATUS_NULLPTR in case of NULL pointer parameters
  */
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_vec_repeated_push(vec_t *vec, const void *data, size_t how_often);
 
 /**
@@ -232,10 +232,10 @@ carbon_vec_repeated_push(vec_t *vec, const void *data, size_t how_often);
  * @param vec non-null pointer to the vector
  * @return Pointer to last element, or <code>NULL</code> if vector is empty
  */
-CARBON_EXPORT(const void *)
+NG5_EXPORT(const void *)
 carbon_vec_pop(vec_t *vec);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_vec_clear(vec_t *vec);
 
 /**
@@ -244,7 +244,7 @@ carbon_vec_clear(vec_t *vec);
  * @param vec
  * @return
  */
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 VectorShrink(vec_t *vec);
 
 /**
@@ -254,10 +254,10 @@ VectorShrink(vec_t *vec);
  * @param vec non-null pointer to the vector that should be grown
  * @return STATUS_OK in case of success, and another value indicating an error otherwise.
  */
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_vec_grow(size_t *numNewSlots, vec_t *vec);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_vec_grow_to(vec_t *vec, size_t capacity);
 
 /**
@@ -266,7 +266,7 @@ carbon_vec_grow_to(vec_t *vec, size_t capacity);
  * @param vec the vector for which the operation is started
  * @return 0 in case of NULL pointer to 'vec', or the number of elements otherwise.
  */
-CARBON_EXPORT(size_t)
+NG5_EXPORT(size_t)
 carbon_vec_length(const vec_t *vec);
 
 #define vec_get(vec, pos, type) (type *) carbon_vec_at(vec, pos)
@@ -279,7 +279,7 @@ carbon_vec_length(const vec_t *vec);
     vec_get(vec, vectorLength, type);                                                                        \
 })
 
-CARBON_EXPORT(const void *)
+NG5_EXPORT(const void *)
 carbon_vec_at(const vec_t *vec, size_t pos);
 
 /**
@@ -288,28 +288,28 @@ carbon_vec_at(const vec_t *vec, size_t pos);
  * @param vec the vector for which the operation is started
  * @return 0 in case of NULL pointer to 'vec', or the number of elements otherwise.
  */
-CARBON_EXPORT(size_t)
+NG5_EXPORT(size_t)
 carbon_vec_capacity(const vec_t *vec);
 
 /**
  * Set the internal size of <code>vec</code> to its capacity.
  */
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_vec_enlarge_size_to_capacity(vec_t *vec);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_vec_zero_memory(vec_t *vec);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_vec_zero_memory_in_range(vec_t *vec, size_t from, size_t to);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_vec_set(vec_t *vec, size_t pos, const void *data);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_vec_cpy(vec_t *dst, const vec_t *src);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_vec_cpy_to(vec_t *dst, vec_t *src);
 
 /**
@@ -319,15 +319,15 @@ carbon_vec_cpy_to(vec_t *dst, vec_t *src);
  * @param vec the vector for which the operation is started
  * @return pointer to user-data managed by this vector
  */
-CARBON_EXPORT(const void *)
+NG5_EXPORT(const void *)
 carbon_vec_data(const vec_t *vec);
 
-CARBON_EXPORT(char *)
+NG5_EXPORT(char *)
 vec_to_string(const vec_t ofType(T) *vec,
         void (*printerFunc)(memfile_t *dst, void ofType(T) *values, size_t num_elems));
 
 #define vec_all(vec, type) (type *) carbon_vec_data(vec)
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif

@@ -15,15 +15,15 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_STRING_PRED_EQUALS_H
-#define CARBON_STRING_PRED_EQUALS_H
+#ifndef NG5_STRING_PRED_EQUALS_H
+#define NG5_STRING_PRED_EQUALS_H
 
 #include "shared/common.h"
 #include "core/carbon/archive_string_pred.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
-CARBON_BUILT_IN(static bool)
+NG5_BUILT_IN(static bool)
 __carbon_string_pred_equals_func(size_t *idxs_matching, size_t *num_matching, char **strings, size_t num_strings,
                                    void *capture)
 {
@@ -39,15 +39,15 @@ __carbon_string_pred_equals_func(size_t *idxs_matching, size_t *num_matching, ch
     return true;
 }
 
-CARBON_BUILT_IN(static bool)
+NG5_BUILT_IN(static bool)
 carbon_string_pred_equals_init(carbon_string_pred_t *pred)
 {
-    CARBON_NON_NULL_OR_ERROR(pred);
-    pred->limit = CARBON_QUERY_LIMIT_1;
+    NG5_NON_NULL_OR_ERROR(pred);
+    pred->limit = NG5_QUERY_LIMIT_1;
     pred->func  = __carbon_string_pred_equals_func;
     return true;
 }
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif

@@ -15,14 +15,14 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_ROT_H
-#define CARBON_ROT_H
+#ifndef NG5_ROT_H
+#define NG5_ROT_H
 
 #include "hash.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
-#define CARBON_HASH_ROT(key_size, key)                                                                                 \
+#define NG5_HASH_ROT(key_size, key)                                                                                 \
 ({                                                                                                                     \
     carbon_hash_t hash = 0;                                                                                            \
     for (size_t i = 0; i < key_size; i++) {                                                                            \
@@ -32,6 +32,6 @@ CARBON_BEGIN_DECL
 })
 
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif

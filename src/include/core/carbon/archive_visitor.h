@@ -15,8 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_CARBON_ARCHIVE_VISITOR_H
-#define CARBON_CARBON_ARCHIVE_VISITOR_H
+#ifndef NG5_NG5_ARCHIVE_VISITOR_H
+#define NG5_NG5_ARCHIVE_VISITOR_H
 
 #include "archive_iter.h"
 
@@ -31,14 +31,14 @@ typedef struct carbon_path_entry
 
 typedef struct
 {
-    int visit_mask;                 /** bitmask of 'CARBON_ARCHIVE_ITER_MASK_XXX' */
+    int visit_mask;                 /** bitmask of 'NG5_ARCHIVE_ITER_MASK_XXX' */
 
 } carbon_archive_visitor_desc_t;
 
 typedef enum
 {
-    CARBON_VISITOR_POLICY_INCLUDE,
-    CARBON_VISITOR_POLICY_EXCLUDE,
+    NG5_VISITOR_POLICY_INCLUDE,
+    NG5_VISITOR_POLICY_EXCLUDE,
 } carbon_visitor_policy_e;
 
 typedef const vec_t ofType(carbon_path_entry_t) * path_stack_t;
@@ -190,17 +190,17 @@ typedef struct
 
 } carbon_archive_visitor_t;
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_archive_visit_archive(carbon_archive_t *archive, const carbon_archive_visitor_desc_t *desc,
                              carbon_archive_visitor_t *visitor, void *capture);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_archive_visitor_print_path(FILE *file, carbon_archive_t *archive, const vec_t ofType(carbon_path_entry_t) *path_stack);
 
-CARBON_EXPORT(void)
+NG5_EXPORT(void)
 carbon_archive_visitor_path_to_string(char path_buffer[2048], carbon_archive_t *archive, const vec_t ofType(carbon_path_entry_t) *path_stack);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_archive_visitor_path_compare(const vec_t ofType(carbon_path_entry_t) *path, carbon_string_id_t *group_name, const char *path_str, carbon_archive_t *archive);
 
 #endif

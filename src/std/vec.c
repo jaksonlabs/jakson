@@ -57,7 +57,7 @@ DEFINE_PRINTER_FUNCTION(size_t, "%zu")
 
 bool carbon_vec_create(vec_t *out, const struct allocator *alloc, size_t elem_size, size_t cap_elems)
 {
-    CARBON_NON_NULL_OR_ERROR(out)
+    NG5_NON_NULL_OR_ERROR(out)
     out->allocator = malloc(sizeof(struct allocator));
     carbon_alloc_this_or_std(out->allocator, alloc);
     out->base = carbon_malloc(out->allocator, cap_elems * elem_size);
@@ -79,11 +79,11 @@ typedef struct
 
 } vec_serialize_header_t;
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_vec_serialize(FILE *file, vec_t *vec)
 {
-    CARBON_NON_NULL_OR_ERROR(file)
-    CARBON_NON_NULL_OR_ERROR(vec)
+    NG5_NON_NULL_OR_ERROR(file)
+    NG5_NON_NULL_OR_ERROR(vec)
 
     vec_serialize_header_t header = {
         .marker = MARKER_SYMBOL_VECTOR_HEADER,
@@ -93,31 +93,31 @@ carbon_vec_serialize(FILE *file, vec_t *vec)
         .grow_factor = vec->grow_factor
     };
     int nwrite = fwrite(&header, sizeof(vec_serialize_header_t), 1, file);
-    error_IF(nwrite != 1, &vec->err, CARBON_ERR_FWRITE_FAILED);
+    error_IF(nwrite != 1, &vec->err, NG5_ERR_FWRITE_FAILED);
     nwrite = fwrite(vec->base, vec->elem_size, vec->num_elems, file);
-    error_IF(nwrite != (int) vec->num_elems, &vec->err, CARBON_ERR_FWRITE_FAILED);
+    error_IF(nwrite != (int) vec->num_elems, &vec->err, NG5_ERR_FWRITE_FAILED);
 
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_vec_deserialize(vec_t *vec, struct err *err, FILE *file)
 {
-    CARBON_NON_NULL_OR_ERROR(file)
-    CARBON_NON_NULL_OR_ERROR(err)
-    CARBON_NON_NULL_OR_ERROR(vec)
+    NG5_NON_NULL_OR_ERROR(file)
+    NG5_NON_NULL_OR_ERROR(err)
+    NG5_NON_NULL_OR_ERROR(vec)
 
     offset_t start = ftell(file);
-    int err_code = CARBON_ERR_NOERR;
+    int err_code = NG5_ERR_NOERR;
 
     vec_serialize_header_t header;
     if (fread(&header, sizeof(vec_serialize_header_t), 1, file) != 1) {
-        err_code = CARBON_ERR_FREAD_FAILED;
+        err_code = NG5_ERR_FREAD_FAILED;
         goto error_handling;
     }
 
     if (header.marker != MARKER_SYMBOL_VECTOR_HEADER) {
-        err_code = CARBON_ERR_CORRUPTED;
+        err_code = NG5_ERR_CORRUPTED;
         goto error_handling;
     }
 
@@ -131,7 +131,7 @@ carbon_vec_deserialize(vec_t *vec, struct err *err, FILE *file)
     carbon_error_init(&vec->err);
 
     if (fread(vec->base, header.elem_size, vec->num_elems, file) != vec->num_elems) {
-        err_code = CARBON_ERR_FREAD_FAILED;
+        err_code = NG5_ERR_FREAD_FAILED;
         goto error_handling;
     }
 
@@ -145,24 +145,24 @@ error_handling:
 
 bool carbon_vec_memadvice(vec_t *vec, int madviseAdvice)
 {
-    CARBON_NON_NULL_OR_ERROR(vec);
-    CARBON_UNUSED(vec);
-    CARBON_UNUSED(madviseAdvice);
+    NG5_NON_NULL_OR_ERROR(vec);
+    NG5_UNUSED(vec);
+    NG5_UNUSED(madviseAdvice);
     madvise(vec->base, vec->cap_elems * vec->elem_size, madviseAdvice);
     return true;
 }
 
 bool carbon_vec_set_grow_factor(vec_t *vec, float factor)
 {
-    CARBON_NON_NULL_OR_ERROR(vec);
-    CARBON_PRINT_ERROR_IF(factor <= 1.01f, CARBON_ERR_ILLEGALARG)
+    NG5_NON_NULL_OR_ERROR(vec);
+    NG5_PRINT_ERROR_IF(factor <= 1.01f, NG5_ERR_ILLEGALARG)
     vec->grow_factor = factor;
     return true;
 }
 
 bool carbon_vec_drop(vec_t *vec)
 {
-    CARBON_NON_NULL_OR_ERROR(vec)
+    NG5_NON_NULL_OR_ERROR(vec)
     carbon_free(vec->allocator, vec->base);
     free(vec->allocator);
     vec->base = NULL;
@@ -171,13 +171,13 @@ bool carbon_vec_drop(vec_t *vec)
 
 bool carbon_vec_is_empty(const vec_t *vec)
 {
-    CARBON_NON_NULL_OR_ERROR(vec)
+    NG5_NON_NULL_OR_ERROR(vec)
     return vec->num_elems == 0 ? true : false;
 }
 
 bool carbon_vec_push(vec_t *vec, const void *data, size_t num_elems)
 {
-    CARBON_NON_NULL_OR_ERROR(vec && data)
+    NG5_NON_NULL_OR_ERROR(vec && data)
     size_t next_num = vec->num_elems + num_elems;
     while (next_num > vec->cap_elems) {
         size_t more = next_num - vec->cap_elems;
@@ -200,7 +200,7 @@ const void *carbon_vec_peek(vec_t *vec)
 
 bool carbon_vec_repeated_push(vec_t *vec, const void *data, size_t how_often)
 {
-    CARBON_NON_NULL_OR_ERROR(vec && data)
+    NG5_NON_NULL_OR_ERROR(vec && data)
     size_t next_num = vec->num_elems + how_often;
     while (next_num > vec->cap_elems) {
         size_t more = next_num - vec->cap_elems;
@@ -218,7 +218,7 @@ bool carbon_vec_repeated_push(vec_t *vec, const void *data, size_t how_often)
 const void *carbon_vec_pop(vec_t *vec)
 {
     void *result;
-    if (CARBON_LIKELY((result = (vec ? (vec->num_elems > 0 ? vec->base + (vec->num_elems - 1) * vec->elem_size : NULL) : NULL))
+    if (NG5_LIKELY((result = (vec ? (vec->num_elems > 0 ? vec->base + (vec->num_elems - 1) * vec->elem_size : NULL) : NULL))
                    != NULL)) {
         vec->num_elems--;
     }
@@ -227,16 +227,16 @@ const void *carbon_vec_pop(vec_t *vec)
 
 bool carbon_vec_clear(vec_t *vec)
 {
-    CARBON_NON_NULL_OR_ERROR(vec)
+    NG5_NON_NULL_OR_ERROR(vec)
     vec->num_elems = 0;
     return true;
 }
 
 bool VectorShrink(vec_t *vec)
 {
-    CARBON_NON_NULL_OR_ERROR(vec);
+    NG5_NON_NULL_OR_ERROR(vec);
     if (vec->num_elems < vec->cap_elems) {
-        vec->cap_elems = CARBON_MAX(1, vec->num_elems);
+        vec->cap_elems = NG5_MAX(1, vec->num_elems);
         vec->base = carbon_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
     }
     return true;
@@ -244,30 +244,30 @@ bool VectorShrink(vec_t *vec)
 
 bool carbon_vec_grow(size_t *numNewSlots, vec_t *vec)
 {
-    CARBON_NON_NULL_OR_ERROR(vec)
+    NG5_NON_NULL_OR_ERROR(vec)
     size_t freeSlotsBefore = vec->cap_elems - vec->num_elems;
 
     vec->cap_elems = (vec->cap_elems * vec->grow_factor) + 1;
     vec->base = carbon_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
     size_t freeSlotsAfter = vec->cap_elems - vec->num_elems;
-    if (CARBON_LIKELY(numNewSlots != NULL)) {
+    if (NG5_LIKELY(numNewSlots != NULL)) {
         *numNewSlots = freeSlotsAfter - freeSlotsBefore;
     }
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_vec_grow_to(vec_t *vec, size_t capacity)
 {
-    CARBON_NON_NULL_OR_ERROR(vec);
-    vec->cap_elems = CARBON_MAX(vec->cap_elems, capacity);
+    NG5_NON_NULL_OR_ERROR(vec);
+    vec->cap_elems = NG5_MAX(vec->cap_elems, capacity);
     vec->base = carbon_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
     return true;
 }
 
 size_t carbon_vec_length(const vec_t *vec)
 {
-    CARBON_NON_NULL_OR_ERROR(vec)
+    NG5_NON_NULL_OR_ERROR(vec)
     return vec->num_elems;
 }
 
@@ -278,38 +278,38 @@ const void *carbon_vec_at(const vec_t *vec, size_t pos)
 
 size_t carbon_vec_capacity(const vec_t *vec)
 {
-    CARBON_NON_NULL_OR_ERROR(vec)
+    NG5_NON_NULL_OR_ERROR(vec)
     return vec->cap_elems;
 }
 
 bool carbon_vec_enlarge_size_to_capacity(vec_t *vec)
 {
-    CARBON_NON_NULL_OR_ERROR(vec);
+    NG5_NON_NULL_OR_ERROR(vec);
     vec->num_elems = vec->cap_elems;
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_vec_zero_memory(vec_t *vec)
 {
-    CARBON_NON_NULL_OR_ERROR(vec);
-    CARBON_ZERO_MEMORY(vec->base, vec->elem_size * vec->num_elems);
+    NG5_NON_NULL_OR_ERROR(vec);
+    NG5_ZERO_MEMORY(vec->base, vec->elem_size * vec->num_elems);
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_vec_zero_memory_in_range(vec_t *vec, size_t from, size_t to)
 {
-    CARBON_NON_NULL_OR_ERROR(vec);
+    NG5_NON_NULL_OR_ERROR(vec);
     assert(from < to);
     assert(to <= vec->cap_elems);
-    CARBON_ZERO_MEMORY(vec->base + from * vec->elem_size, vec->elem_size * (to -from));
+    NG5_ZERO_MEMORY(vec->base + from * vec->elem_size, vec->elem_size * (to -from));
     return true;
 }
 
 bool carbon_vec_set(vec_t *vec, size_t pos, const void *data)
 {
-    CARBON_NON_NULL_OR_ERROR(vec)
+    NG5_NON_NULL_OR_ERROR(vec)
     assert(pos < vec->num_elems);
     memcpy(vec->base + pos * vec->elem_size, data, vec->elem_size);
     return true;
@@ -317,7 +317,7 @@ bool carbon_vec_set(vec_t *vec, size_t pos, const void *data)
 
 bool carbon_vec_cpy(vec_t *dst, const vec_t *src)
 {
-    CARBON_CHECK_SUCCESS(carbon_vec_create(dst, NULL, src->elem_size, src->num_elems));
+    NG5_CHECK_SUCCESS(carbon_vec_create(dst, NULL, src->elem_size, src->num_elems));
     dst->num_elems = src->num_elems;
     if (dst->num_elems > 0) {
         memcpy(dst->base, src->base, src->elem_size * src->num_elems);
@@ -325,11 +325,11 @@ bool carbon_vec_cpy(vec_t *dst, const vec_t *src)
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_vec_cpy_to(vec_t *dst, vec_t *src)
 {
-    CARBON_NON_NULL_OR_ERROR(dst)
-    CARBON_NON_NULL_OR_ERROR(src)
+    NG5_NON_NULL_OR_ERROR(dst)
+    NG5_NON_NULL_OR_ERROR(src)
     void *handle = realloc(dst->base, src->cap_elems * src->elem_size);
     if (handle) {
         dst->elem_size = src->elem_size;
@@ -341,7 +341,7 @@ carbon_vec_cpy_to(vec_t *dst, vec_t *src)
         carbon_error_cpy(&dst->err, &src->err);
         return true;
     } else {
-        error(&src->err, CARBON_ERR_HARDCOPYFAILED)
+        error(&src->err, NG5_ERR_HARDCOPYFAILED)
         return false;
     }
 }
@@ -357,7 +357,7 @@ char *vec_to_string(const vec_t ofType(T) *vec,
     carbon_memblock_t *block;
     memfile_t file;
     carbon_memblock_create(&block, vec->num_elems * vec->elem_size);
-    carbon_memfile_open(&file, block, CARBON_MEMFILE_MODE_READWRITE);
+    carbon_memfile_open(&file, block, NG5_MEMFILE_MODE_READWRITE);
     printerFunc(&file, vec->base, vec->num_elems);
     return carbon_memblock_move_contents_and_drop(block);
 }

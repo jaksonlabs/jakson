@@ -60,7 +60,7 @@ typedef union
     u64 value;
 } internal_object_id_t;
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_object_id_create(carbon_object_id_t *out)
 {
     assert(out);
@@ -82,8 +82,8 @@ carbon_object_id_create(carbon_object_id_t *out)
         const char *file = __FILE__;
         const char *time = __TIME__;
 
-        global_build_path_bit = CARBON_HASH_BERNSTEIN(strlen(file), file) % 2;
-        global_build_date_bit = CARBON_HASH_BERNSTEIN(strlen(time), time) % 2;
+        global_build_path_bit = NG5_HASH_BERNSTEIN(strlen(file), file) % 2;
+        global_build_date_bit = NG5_HASH_BERNSTEIN(strlen(time), time) % 2;
     }
 
     if (!thread_local_init) {
@@ -96,8 +96,8 @@ carbon_object_id_create(carbon_object_id_t *out)
     }
 
     bool capacity_left = (thread_local_counter != thread_local_counter_limit);
-    CARBON_PRINT_ERROR_IF(!capacity_left, CARBON_ERR_THREADOOOBJIDS)
-    if (CARBON_LIKELY(capacity_left)) {
+    NG5_PRINT_ERROR_IF(!capacity_left, NG5_ERR_THREADOOOBJIDS)
+    if (NG5_LIKELY(capacity_left)) {
         internal_object_id_t internal = {
             .global_wallclock  = carbon_time_now_wallclock(),
             .global_build_date = global_build_date_bit,
@@ -117,82 +117,82 @@ carbon_object_id_create(carbon_object_id_t *out)
     return capacity_left;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_object_id_get_global_wallclocktime(uint_fast8_t *out, carbon_object_id_t id)
 {
-    CARBON_NON_NULL_OR_ERROR(out);
+    NG5_NON_NULL_OR_ERROR(out);
     *out = ((internal_object_id_t *) &id)->global_wallclock;
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_object_id_get_global_build_path_bit(uint_fast8_t *out, carbon_object_id_t id)
 {
-    CARBON_NON_NULL_OR_ERROR(out);
+    NG5_NON_NULL_OR_ERROR(out);
     *out = ((internal_object_id_t *) &id)->global_build_path;
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_object_id_get_global_build_time_bit(uint_fast8_t *out, carbon_object_id_t id)
 {
-    CARBON_NON_NULL_OR_ERROR(out);
+    NG5_NON_NULL_OR_ERROR(out);
     *out = ((internal_object_id_t *) &id)->global_build_date;
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_object_id_get_process_id(uint_fast8_t *out, carbon_object_id_t id)
 {
-    CARBON_NON_NULL_OR_ERROR(out);
+    NG5_NON_NULL_OR_ERROR(out);
     *out = ((internal_object_id_t *) &id)->process_id;
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_object_id_get_process_magic(uint_fast8_t *out, carbon_object_id_t id)
 {
-    CARBON_NON_NULL_OR_ERROR(out);
+    NG5_NON_NULL_OR_ERROR(out);
     *out = ((internal_object_id_t *) &id)->process_magic;
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_object_id_get_process_counter(uint_fast16_t *out, carbon_object_id_t id)
 {
-    CARBON_NON_NULL_OR_ERROR(out);
+    NG5_NON_NULL_OR_ERROR(out);
     *out = ((internal_object_id_t *) &id)->process_counter;
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_object_id_get_thread_id(uint_fast8_t *out, carbon_object_id_t id)
 {
-    CARBON_NON_NULL_OR_ERROR(out);
+    NG5_NON_NULL_OR_ERROR(out);
     *out = ((internal_object_id_t *) &id)->thread_id;
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_object_id_get_thread_magic(uint_fast8_t *out, carbon_object_id_t id)
 {
-    CARBON_NON_NULL_OR_ERROR(out);
+    NG5_NON_NULL_OR_ERROR(out);
     *out = ((internal_object_id_t *) &id)->thread_magic;
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_object_id_get_thread_counter(uint_fast32_t *out, carbon_object_id_t id)
 {
-    CARBON_NON_NULL_OR_ERROR(out);
+    NG5_NON_NULL_OR_ERROR(out);
     *out = ((internal_object_id_t *) &id)->thread_counter;
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_object_id_get_call_random(uint_fast8_t *out, carbon_object_id_t id)
 {
-    CARBON_NON_NULL_OR_ERROR(out);
+    NG5_NON_NULL_OR_ERROR(out);
     *out = ((internal_object_id_t *) &id)->call_random;
     return true;
 }

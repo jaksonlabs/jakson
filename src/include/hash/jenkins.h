@@ -15,14 +15,14 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_JENKINS_H
-#define CARBON_JENKINS_H
+#ifndef NG5_JENKINS_H
+#define NG5_JENKINS_H
 
 #include "hash/hash.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
-#define CARBON_JENKINS_MIX(a, b, c)                                                                                    \
+#define NG5_JENKINS_MIX(a, b, c)                                                                                    \
 {                                                                                                                      \
     a -= b; a -= c; a ^= (c >> 13);                                                                                    \
     b -= c; b -= a; b ^= (a << 8);                                                                                     \
@@ -36,7 +36,7 @@ CARBON_BEGIN_DECL
 }
 
 /** implements: carbon_hash_t hash_jenkins(size_t key_size, const void *key) */
-#define CARBON_HASH_JENKINS(keySizeIn, key)                                                                            \
+#define NG5_HASH_JENKINS(keySizeIn, key)                                                                            \
 ({                                                                                                                     \
     size_t key_size = keySizeIn;                                                                                       \
     assert ((key != NULL) && (key_size > 0));                                                                          \
@@ -75,6 +75,6 @@ CARBON_BEGIN_DECL
     c;                                                                                                                 \
 })
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif

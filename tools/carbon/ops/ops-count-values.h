@@ -2,8 +2,8 @@
 // Created by Marcus Pinnecke on 28.02.19.
 //
 
-#ifndef LIBCARBON_OPS_COUNT_VALUES_H
-#define LIBCARBON_OPS_COUNT_VALUES_H
+#ifndef LIBNG5_OPS_COUNT_VALUES_H
+#define LIBNG5_OPS_COUNT_VALUES_H
 
 #include "shared/common.h"
 #include "std/vec.h"
@@ -16,7 +16,7 @@ typedef struct
     u32 count;
 } ops_count_values_result_t;
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 ops_count_values(carbon_timestamp_t *duration, vec_t ofType(ops_count_values_result_t) *result, const char *path, carbon_archive_t *archive);
 
-#endif //LIBCARBON_OPS_SHOW_KEYS_H
+#endif //LIBNG5_OPS_SHOW_KEYS_H

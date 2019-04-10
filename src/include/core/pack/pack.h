@@ -15,8 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_ARCHIVE_COMPR_H
-#define CARBON_ARCHIVE_COMPR_H
+#ifndef NG5_ARCHIVE_COMPR_H
+#define NG5_ARCHIVE_COMPR_H
 
 #include "core/pack/pack_none.h"
 #include "core/pack/huffman.h"
@@ -24,7 +24,7 @@
 #include "shared/common.h"
 #include "shared/types.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
 typedef struct carbon_compressor carbon_compressor_t; /* forwarded */
 
@@ -34,8 +34,8 @@ typedef struct carbon_compressor carbon_compressor_t; /* forwarded */
  */
 typedef enum carbon_compressor_type
 {
-    CARBON_COMPRESSOR_NONE,
-    CARBON_COMPRESSOR_HUFFMAN
+    NG5_COMPRESSOR_NONE,
+    NG5_COMPRESSOR_HUFFMAN
 } carbon_compressor_type_e;
 
 /**
@@ -189,7 +189,7 @@ typedef struct carbon_compressor
 
 static void carbon_compressor_none_create(carbon_compressor_t *strategy)
 {
-    strategy->tag             = CARBON_COMPRESSOR_NONE;
+    strategy->tag             = NG5_COMPRESSOR_NONE;
     strategy->create          = carbon_compressor_none_init;
     strategy->cpy             = carbon_compressor_none_cpy;
     strategy->drop            = carbon_compressor_none_drop;
@@ -203,7 +203,7 @@ static void carbon_compressor_none_create(carbon_compressor_t *strategy)
 
 static void carbon_compressor_huffman_create(carbon_compressor_t *strategy)
 {
-    strategy->tag             = CARBON_COMPRESSOR_HUFFMAN;
+    strategy->tag             = NG5_COMPRESSOR_HUFFMAN;
     strategy->create          = carbon_compressor_huffman_init;
     strategy->cpy             = carbon_compressor_huffman_cpy;
     strategy->drop            = carbon_compressor_huffman_drop;
@@ -226,9 +226,9 @@ static struct
     u8                              flag_bit;
 } carbon_compressor_strategy_register[] =
 {
-    { .type = CARBON_COMPRESSOR_NONE, .name = "none",
+    { .type = NG5_COMPRESSOR_NONE, .name = "none",
       .create = carbon_compressor_none_create,                .flag_bit = 1 << 0 },
-    { .type = CARBON_COMPRESSOR_HUFFMAN, .name = "huffman",
+    { .type = NG5_COMPRESSOR_HUFFMAN, .name = "huffman",
        .create = carbon_compressor_huffman_create,            .flag_bit = 1 << 1  }
 };
 
@@ -236,47 +236,47 @@ static struct
 
 
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_by_type(struct err *err, carbon_compressor_t *strategy, carbon_compressor_type_e type);
 
-CARBON_EXPORT(u8)
+NG5_EXPORT(u8)
 carbon_compressor_flagbit_by_type(carbon_compressor_type_e type);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_by_flags(carbon_compressor_t *strategy, u8 flags);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_by_name(carbon_compressor_type_e *type, const char *name);
 
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_cpy(struct err *err, carbon_compressor_t *dst, const carbon_compressor_t *src);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_drop(struct err *err, carbon_compressor_t *self);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_write_extra(struct err *err, carbon_compressor_t *self, memfile_t *dst,
                     const vec_t ofType (const char *) *strings);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_read_extra(struct err *err, carbon_compressor_t *self, FILE *src, size_t nbytes);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_encode(struct err *err, carbon_compressor_t *self, memfile_t *dst,
                          const char *string);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_decode(struct err *err, carbon_compressor_t *self, char *dst, size_t strlen, FILE *src);
 
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_print_extra(struct err *err, carbon_compressor_t *self, FILE *file, memfile_t *src);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_print_encoded(struct err *err, carbon_compressor_t *self, FILE *file, memfile_t *src,
                       u32 decompressed_strlen);
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif

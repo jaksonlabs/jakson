@@ -17,19 +17,19 @@
 
 #include "std/bloom.h"
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_bloom_create(carbon_bloom_t *filter, size_t size)
 {
     return carbon_bitmap_create(filter, size);
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_bloom_drop(carbon_bloom_t *filter)
 {
     return carbon_bitmap_drop(filter);
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_bloom_clear(carbon_bloom_t *filter)
 {
     return carbon_bitmap_clear(filter);

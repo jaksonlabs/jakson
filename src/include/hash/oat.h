@@ -15,14 +15,14 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_OAT_H
-#define CARBON_OAT_H
+#ifndef NG5_OAT_H
+#define NG5_OAT_H
 
 #include "hash/hash.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
-#define CARBON_HASH_OAT(key_size, key)                                                                                 \
+#define NG5_HASH_OAT(key_size, key)                                                                                 \
 ({                                                                                                                     \
     assert ((key != NULL) && (key_size > 0));                                                                          \
                                                                                                                        \
@@ -40,6 +40,6 @@ CARBON_BEGIN_DECL
     hash;                                                                                                              \
 })
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif

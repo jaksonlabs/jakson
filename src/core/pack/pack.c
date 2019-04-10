@@ -33,22 +33,22 @@ create_strategy(size_t i, carbon_compressor_t *strategy)
     return strategy->create(strategy);
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_by_type(struct err *err, carbon_compressor_t *strategy, carbon_compressor_type_e type)
 {
-    for (size_t i = 0; i < CARBON_ARRAY_LENGTH(carbon_compressor_strategy_register); i++) {
+    for (size_t i = 0; i < NG5_ARRAY_LENGTH(carbon_compressor_strategy_register); i++) {
         if (carbon_compressor_strategy_register[i].type == type) {
             return create_strategy(i, strategy);
         }
     }
-    error(err, CARBON_ERR_NOCOMPRESSOR)
+    error(err, NG5_ERR_NOCOMPRESSOR)
     return false;
 }
 
-CARBON_EXPORT(u8)
+NG5_EXPORT(u8)
 carbon_compressor_flagbit_by_type(carbon_compressor_type_e type)
 {
-    for (size_t i = 0; i < CARBON_ARRAY_LENGTH(carbon_compressor_strategy_register); i++) {
+    for (size_t i = 0; i < NG5_ARRAY_LENGTH(carbon_compressor_strategy_register); i++) {
         if (carbon_compressor_strategy_register[i].type == type) {
             return carbon_compressor_strategy_register[i].flag_bit;
         }
@@ -56,10 +56,10 @@ carbon_compressor_flagbit_by_type(carbon_compressor_type_e type)
     return 0;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_by_flags(carbon_compressor_t *strategy, u8 flags)
 {
-    for (size_t i = 0; i < CARBON_ARRAY_LENGTH(carbon_compressor_strategy_register); i++) {
+    for (size_t i = 0; i < NG5_ARRAY_LENGTH(carbon_compressor_strategy_register); i++) {
         if (carbon_compressor_strategy_register[i].flag_bit & flags) {
             return create_strategy(i, strategy);
         }
@@ -67,10 +67,10 @@ carbon_compressor_by_flags(carbon_compressor_t *strategy, u8 flags)
     return false;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_by_name(carbon_compressor_type_e *type, const char *name)
 {
-    for (size_t i = 0; i < CARBON_ARRAY_LENGTH(carbon_compressor_strategy_register); i++) {
+    for (size_t i = 0; i < NG5_ARRAY_LENGTH(carbon_compressor_strategy_register); i++) {
         if (strcmp(carbon_compressor_strategy_register[i].name, name) == 0) {
             *type = carbon_compressor_strategy_register[i].type;
             return true;
@@ -79,70 +79,70 @@ carbon_compressor_by_name(carbon_compressor_type_e *type, const char *name)
     return false;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_cpy(struct err *err, carbon_compressor_t *dst, const carbon_compressor_t *src)
 {
-    CARBON_NON_NULL_OR_ERROR(dst)
-    CARBON_NON_NULL_OR_ERROR(src)
-    CARBON_IMPLEMENTS_OR_ERROR(err, src, cpy)
+    NG5_NON_NULL_OR_ERROR(dst)
+    NG5_NON_NULL_OR_ERROR(src)
+    NG5_IMPLEMENTS_OR_ERROR(err, src, cpy)
     return src->cpy(src, dst);
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_drop(struct err *err, carbon_compressor_t *self)
 {
-    CARBON_NON_NULL_OR_ERROR(self)
-    CARBON_IMPLEMENTS_OR_ERROR(err, self, drop)
+    NG5_NON_NULL_OR_ERROR(self)
+    NG5_IMPLEMENTS_OR_ERROR(err, self, drop)
     return self->drop(self);
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_write_extra(struct err *err, carbon_compressor_t *self, memfile_t *dst,
                               const vec_t ofType (const char *) *strings)
 {
-    CARBON_NON_NULL_OR_ERROR(self)
-    CARBON_IMPLEMENTS_OR_ERROR(err, self, write_extra)
+    NG5_NON_NULL_OR_ERROR(self)
+    NG5_IMPLEMENTS_OR_ERROR(err, self, write_extra)
     return self->write_extra(self, dst, strings);
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_read_extra(struct err *err, carbon_compressor_t *self, FILE *src, size_t nbytes)
 {
-    CARBON_NON_NULL_OR_ERROR(self)
-    CARBON_IMPLEMENTS_OR_ERROR(err, self, read_extra)
+    NG5_NON_NULL_OR_ERROR(self)
+    NG5_IMPLEMENTS_OR_ERROR(err, self, read_extra)
     return self->read_extra(self, src, nbytes);
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_encode(struct err *err, carbon_compressor_t *self, memfile_t *dst,
                          const char *string)
 {
-    CARBON_NON_NULL_OR_ERROR(self)
-    CARBON_IMPLEMENTS_OR_ERROR(err, self, encode_string)
+    NG5_NON_NULL_OR_ERROR(self)
+    NG5_IMPLEMENTS_OR_ERROR(err, self, encode_string)
     return self->encode_string(self, dst, err, string);
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_decode(struct err *err, carbon_compressor_t *self, char *dst, size_t strlen, FILE *src)
 {
-    CARBON_NON_NULL_OR_ERROR(self)
-    CARBON_IMPLEMENTS_OR_ERROR(err, self, decode_string)
+    NG5_NON_NULL_OR_ERROR(self)
+    NG5_IMPLEMENTS_OR_ERROR(err, self, decode_string)
     return self->decode_string(self, dst, strlen, src);
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_print_extra(struct err *err, carbon_compressor_t *self, FILE *file, memfile_t *src)
 {
-    CARBON_NON_NULL_OR_ERROR(self)
-    CARBON_IMPLEMENTS_OR_ERROR(err, self, print_extra)
+    NG5_NON_NULL_OR_ERROR(self)
+    NG5_IMPLEMENTS_OR_ERROR(err, self, print_extra)
     return self->print_extra(self, file, src);
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_print_encoded(struct err *err, carbon_compressor_t *self, FILE *file, memfile_t *src,
                                 u32 decompressed_strlen)
 {
-    CARBON_NON_NULL_OR_ERROR(self)
-    CARBON_IMPLEMENTS_OR_ERROR(err, self, print_encoded)
+    NG5_NON_NULL_OR_ERROR(self)
+    NG5_IMPLEMENTS_OR_ERROR(err, self, print_encoded)
     return self->print_encoded(self, file, src, decompressed_strlen);
 }

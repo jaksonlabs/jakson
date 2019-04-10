@@ -13,7 +13,7 @@ TEST(CarbonArchiveOpsTest, CreateStreamFromJsonString)
     bool               read_optimized = false;
 
     bool status = carbon_archive_stream_from_json(&stream, &err, json_string,
-                                                  CARBON_COMPRESSOR_NONE, CARBON_STRDIC_TYPE_SYNC, 0, read_optimized, false, NULL);
+                                                  NG5_COMPRESSOR_NONE, NG5_STRDIC_TYPE_SYNC, 0, read_optimized, false, NULL);
 
     carbon_memblock_drop(stream);
     ASSERT_TRUE(status);
@@ -29,7 +29,7 @@ TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonString)
     bool               read_optimized = false;
 
     bool status = carbon_archive_from_json(&archive, archive_file, &err, json_string,
-                                           CARBON_COMPRESSOR_NONE, CARBON_STRDIC_TYPE_SYNC, 0, read_optimized, false, NULL);
+                                           NG5_COMPRESSOR_NONE, NG5_STRDIC_TYPE_SYNC, 0, read_optimized, false, NULL);
     ASSERT_TRUE(status);
     bool has_index;
     carbon_archive_has_query_index_string_id_to_offset(&has_index, &archive);
@@ -49,7 +49,7 @@ TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonStringWithBakedStringIdIndex)
     bool               read_optimized = false;
 
     bool status = carbon_archive_from_json(&archive, archive_file, &err, json_string,
-                                           CARBON_COMPRESSOR_NONE, CARBON_STRDIC_TYPE_SYNC, 0, read_optimized, true, NULL);
+                                           NG5_COMPRESSOR_NONE, NG5_STRDIC_TYPE_SYNC, 0, read_optimized, true, NULL);
     ASSERT_TRUE(status);
     bool has_index;
     carbon_archive_has_query_index_string_id_to_offset(&has_index, &archive);
@@ -217,7 +217,7 @@ TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateContains)
     const char *needle = "arg";
 
     carbon_string_pred_contains_init(&pred);
-    result = carbon_query_find_ids(&num_match, &query, &pred, (void *) needle, CARBON_QUERY_LIMIT_NONE);
+    result = carbon_query_find_ids(&num_match, &query, &pred, (void *) needle, NG5_QUERY_LIMIT_NONE);
     ASSERT_TRUE(result != NULL);
     ASSERT_TRUE(num_match == 4);
 
@@ -254,7 +254,7 @@ TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateEquals)
     const char *needle = "phoneNumbers";
 
     carbon_string_pred_equals_init(&pred);
-    result = carbon_query_find_ids(&num_match, &query, &pred, (void *) needle, CARBON_QUERY_LIMIT_NONE);
+    result = carbon_query_find_ids(&num_match, &query, &pred, (void *) needle, NG5_QUERY_LIMIT_NONE);
     ASSERT_TRUE(result != NULL);
 
     ASSERT_TRUE(num_match == 1);

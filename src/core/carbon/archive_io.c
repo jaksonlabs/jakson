@@ -28,17 +28,17 @@ typedef struct carbon_io_context
 } carbon_io_context_t;
 
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_io_context_create(carbon_io_context_t **context, struct err *err, const char *file_path)
 {
-    CARBON_NON_NULL_OR_ERROR(context);
-    CARBON_NON_NULL_OR_ERROR(err);
-    CARBON_NON_NULL_OR_ERROR(file_path);
+    NG5_NON_NULL_OR_ERROR(context);
+    NG5_NON_NULL_OR_ERROR(err);
+    NG5_NON_NULL_OR_ERROR(file_path);
 
     carbon_io_context_t *result = malloc(sizeof(carbon_io_context_t));
 
     if (!result) {
-        error(err, CARBON_ERR_MALLOCERR);
+        error(err, NG5_ERR_MALLOCERR);
         return false;
     }
 
@@ -48,7 +48,7 @@ carbon_io_context_create(carbon_io_context_t **context, struct err *err, const c
     result->file = fopen(file_path, "r");
 
     if (!result->file) {
-        error(err, CARBON_ERR_FOPEN_FAILED);
+        error(err, NG5_ERR_FOPEN_FAILED);
         result->file = NULL;
         return false;
     } else {
@@ -57,13 +57,13 @@ carbon_io_context_create(carbon_io_context_t **context, struct err *err, const c
     }
 }
 
-CARBON_EXPORT(struct err *)
+NG5_EXPORT(struct err *)
 carbon_io_context_get_error(carbon_io_context_t *context)
 {
     return context ? &context->err : NULL;
 }
 
-CARBON_EXPORT(FILE *)
+NG5_EXPORT(FILE *)
 carbon_io_context_lock_and_access(carbon_io_context_t *context)
 {
     if (context) {
@@ -71,12 +71,12 @@ carbon_io_context_lock_and_access(carbon_io_context_t *context)
         context->last_pos = ftell(context->file);
         return context->file;
     } else {
-        error(&context->err, CARBON_ERR_NULLPTR);
+        error(&context->err, NG5_ERR_NULLPTR);
         return NULL;
     }
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_io_context_unlock(carbon_io_context_t *context)
 {
     if (context) {
@@ -84,16 +84,16 @@ carbon_io_context_unlock(carbon_io_context_t *context)
         carbon_spinlock_release(&context->lock);
         return true;
     } else {
-        error(&context->err, CARBON_ERR_NULLPTR);
+        error(&context->err, NG5_ERR_NULLPTR);
         return false;
     }
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_io_context_drop(carbon_io_context_t *context)
 {
-    CARBON_NON_NULL_OR_ERROR(context);
-    CARBON_OPTIONAL(context->file != NULL, fclose(context->file); context->file = NULL)
+    NG5_NON_NULL_OR_ERROR(context);
+    NG5_OPTIONAL(context->file != NULL, fclose(context->file); context->file = NULL)
     free(context);
     return true;
 }

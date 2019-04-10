@@ -47,10 +47,10 @@ bool carbon_columndoc_create(carbon_columndoc_t *columndoc,
                              const carbon_doc_entries_t *entries,
                              carbon_strdic_t *dic)
 {
-    CARBON_NON_NULL_OR_ERROR(columndoc)
-    CARBON_NON_NULL_OR_ERROR(doc)
-    CARBON_NON_NULL_OR_ERROR(dic)
-    CARBON_NON_NULL_OR_ERROR(bulk)
+    NG5_NON_NULL_OR_ERROR(columndoc)
+    NG5_NON_NULL_OR_ERROR(doc)
+    NG5_NON_NULL_OR_ERROR(dic)
+    NG5_NON_NULL_OR_ERROR(bulk)
 
     columndoc->dic = dic;
     columndoc->doc = doc;
@@ -274,7 +274,7 @@ static void object_meta_model_free(columndoc_obj_t *columndoc)
 
 bool carbon_columndoc_free(carbon_columndoc_t *doc)
 {
-    CARBON_NON_NULL_OR_ERROR(doc);
+    NG5_NON_NULL_OR_ERROR(doc);
     object_meta_model_free(&doc->columndoc);
     return true;
 }
@@ -384,7 +384,7 @@ static bool print_primitive_objects(FILE *file, struct err *err, const char *typ
                 if (nonnull_expr) {                                                                                    \
                     fprintf(file, "" TYPE_FORMAT "%s", value, j + 1 < values->num_elems ? ", " : "");                  \
                 } else {                                                                                               \
-                    fprintf(file, CARBON_NULL_TEXT "%s", j + 1 < values->num_elems ? ", " : "");                       \
+                    fprintf(file, NG5_NULL_TEXT "%s", j + 1 < values->num_elems ? ", " : "");                       \
                 }                                                                                                      \
             }                                                                                                          \
             fprintf(file, "]%s ", i + 1 < (&value_vector)->num_elems ? "," : "");                                      \
@@ -494,7 +494,7 @@ static void print_array_strings(FILE *file, const char *type_name, const vec_t o
             for (size_t j = 0; j < values->num_elems; j++) {
                 carbon_string_id_t value = *vec_get(values, j, carbon_string_id_t);
 
-                if (CARBON_LIKELY(value != CARBON_NULL_ENCODED_STRING)) {
+                if (NG5_LIKELY(value != NG5_NULL_ENCODED_STRING)) {
                     char **decoded = carbon_strdic_extract(dic, &value, 1);
                     fprintf(file, "\"%s\"%s", *decoded, j + 1 < values->num_elems ? ", " : "");
                     carbon_strdic_free(dic, decoded);
@@ -654,7 +654,7 @@ static bool print_array_objects(FILE *file, struct err *err, const char *type_na
                     fprintf(file, "%s", column->num_elems > 1 ? "]" : "");
                 } break;
                 default:
-                    error(err, CARBON_ERR_NOTYPE)
+                    error(err, NG5_ERR_NOTYPE)
                     return false;
                 }
                 fprintf(file, array_idx + 1 < columnTable->values.num_elems ? ", " : "");
@@ -701,14 +701,14 @@ static bool print_object(FILE *file, struct err *err, const columndoc_obj_t *obj
             fprintf(file, "}, ");
         fprintf(file, "\"Arrays\": { ");
             PRINT_BOOLEAN_ARRAY(file, "Boolean", object->bool_array_prop_keys, object->bool_array_prop_vals);
-            PRINT_ARRAY(file, "UInt8", object->uint8_array_prop_keys, object->uint8_array_prop_vals, carbon_u8, "%d", (value != CARBON_NULL_UINT8));
-            PRINT_ARRAY(file, "UInt16", object->uint16_array_prop_keys, object->uint16_array_prop_vals, carbon_u16, "%d", (value !=CARBON_NULL_UINT16));
-            PRINT_ARRAY(file, "UInt32", object->uint32_array_prop_keys, object->uint32_array_prop_vals, carbon_u32, "%d", (value !=CARBON_NULL_UINT32));
-            PRINT_ARRAY(file, "UInt64", object->uint64_array_prop_keys, object->ui64_array_prop_vals, carbon_u64, "%" PRIu64, (value !=CARBON_NULL_UINT64));
-            PRINT_ARRAY(file, "Int8", object->int8_array_prop_keys, object->int8_array_prop_vals, carbon_i8, "%d", (value !=CARBON_NULL_INT8));
-            PRINT_ARRAY(file, "Int16", object->int16_array_prop_keys, object->int16_array_prop_vals, carbon_i16, "%d", (value !=CARBON_NULL_INT16));
-            PRINT_ARRAY(file, "Int32", object->int32_array_prop_keys, object->int32_array_prop_vals, carbon_i32, "%d", (value !=CARBON_NULL_INT32));
-            PRINT_ARRAY(file, "Int64", object->int64_array_prop_keys, object->int64_array_prop_vals, carbon_i64, "%" PRIi64, (value !=CARBON_NULL_INT64));
+            PRINT_ARRAY(file, "UInt8", object->uint8_array_prop_keys, object->uint8_array_prop_vals, carbon_u8, "%d", (value != NG5_NULL_UINT8));
+            PRINT_ARRAY(file, "UInt16", object->uint16_array_prop_keys, object->uint16_array_prop_vals, carbon_u16, "%d", (value !=NG5_NULL_UINT16));
+            PRINT_ARRAY(file, "UInt32", object->uint32_array_prop_keys, object->uint32_array_prop_vals, carbon_u32, "%d", (value !=NG5_NULL_UINT32));
+            PRINT_ARRAY(file, "UInt64", object->uint64_array_prop_keys, object->ui64_array_prop_vals, carbon_u64, "%" PRIu64, (value !=NG5_NULL_UINT64));
+            PRINT_ARRAY(file, "Int8", object->int8_array_prop_keys, object->int8_array_prop_vals, carbon_i8, "%d", (value !=NG5_NULL_INT8));
+            PRINT_ARRAY(file, "Int16", object->int16_array_prop_keys, object->int16_array_prop_vals, carbon_i16, "%d", (value !=NG5_NULL_INT16));
+            PRINT_ARRAY(file, "Int32", object->int32_array_prop_keys, object->int32_array_prop_vals, carbon_i32, "%d", (value !=NG5_NULL_INT32));
+            PRINT_ARRAY(file, "Int64", object->int64_array_prop_keys, object->int64_array_prop_vals, carbon_i64, "%" PRIi64, (value !=NG5_NULL_INT64));
             PRINT_ARRAY(file, "Real", object->float_array_prop_keys, object->float_array_prop_vals, carbon_number_t, "%f", (!isnan(value)));
             print_array_strings(file, "Strings", &object->string_array_prop_keys, &object->string_array_prop_vals, dic);
             print_array_null(file, "Null", &object->null_array_prop_keys, &object->null_array_prop_vals, dic);
@@ -724,15 +724,15 @@ static bool print_object(FILE *file, struct err *err, const columndoc_obj_t *obj
 
 bool carbon_columndoc_print(FILE *file, carbon_columndoc_t *doc)
 {
-    CARBON_NON_NULL_OR_ERROR(file)
-    CARBON_NON_NULL_OR_ERROR(doc)
+    NG5_NON_NULL_OR_ERROR(file)
+    NG5_NON_NULL_OR_ERROR(doc)
     return print_object(file, &doc->err, &doc->columndoc, doc->dic);
 }
 
 bool carbon_columndoc_drop(carbon_columndoc_t *doc)
 {
-    CARBON_UNUSED(doc);
-    CARBON_NOT_IMPLEMENTED
+    NG5_UNUSED(doc);
+    NG5_NOT_IMPLEMENTED
 }
 
 static void object_array_key_columns_create(vec_t ofType(carbon_columndoc_columngroup_t) *columns)
@@ -790,7 +790,7 @@ static const char *get_type_name(struct err *err, field_e type)
         case field_string:return "String";
         case field_object:return "Object";
         default: {
-            error(err, CARBON_ERR_NOTYPE);
+            error(err, NG5_ERR_NOTYPE);
             return NULL;
         }
     }
@@ -897,7 +897,7 @@ static bool object_array_key_column_push(carbon_columndoc_column_t *col, struct 
         carbon_strdic_free(dic, array_key);
         break;
     default:
-        error(err, CARBON_ERR_NOTYPE);
+        error(err, NG5_ERR_NOTYPE);
         return false;
     }
     return true;
@@ -1055,7 +1055,7 @@ static bool object_put_primitive(columndoc_obj_t *columndoc, struct err *err, co
             return false;
         }
     } break;
-        error(err, CARBON_ERR_NOTYPE)
+        error(err, NG5_ERR_NOTYPE)
         return false;
     }
     return true;
@@ -1076,7 +1076,7 @@ static void object_push_array(vec_t ofType(Vector ofType(<T>)) *values, size_t T
 static bool object_put_array(columndoc_obj_t *model, struct err *err, const carbon_doc_entries_t *entry, carbon_strdic_t *dic, const carbon_string_id_t *key_id)
 {
     // TODO: format for array, sort by keys, sort by values!
-    CARBON_UNUSED(dic);
+    NG5_UNUSED(dic);
     u32 num_elements = (u32) carbon_vec_length(&entry->values);
 
     switch(entry->type) {
@@ -1160,7 +1160,7 @@ static bool object_put_array(columndoc_obj_t *model, struct err *err, const carb
     }
         break;
     default: {
-        error(err, CARBON_ERR_NOTYPE)
+        error(err, NG5_ERR_NOTYPE)
         return false;
     } break;
     }
@@ -1192,7 +1192,7 @@ static bool object_put(columndoc_obj_t *model, struct err *err, const carbon_doc
         }
         break;
     default:
-        error(err, CARBON_ERR_NOTYPE)
+        error(err, NG5_ERR_NOTYPE)
         return false;
     }
 

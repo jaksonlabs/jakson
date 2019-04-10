@@ -15,19 +15,19 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_TIME_H
-#define CARBON_TIME_H
+#ifndef NG5_TIME_H
+#define NG5_TIME_H
 
 #include "shared/common.h"
 #include "shared/types.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
 typedef u64 carbon_timestamp_t;
 
-CARBON_EXPORT(carbon_timestamp_t)
+NG5_EXPORT(carbon_timestamp_t)
 carbon_time_now_wallclock();
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif

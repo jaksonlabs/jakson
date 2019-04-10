@@ -15,15 +15,15 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_HUFFMAN_H
-#define CARBON_HUFFMAN_H
+#ifndef NG5_HUFFMAN_H
+#define NG5_HUFFMAN_H
 
 #include "shared/common.h"
 #include "std/vec.h"
 #include "core/mem/file.h"
 #include "shared/types.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
 typedef struct carbon_huffman
 {
@@ -51,33 +51,33 @@ typedef struct
     const char *encoded_bytes;
 } carbon_huffman_encoded_str_info_t;
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_huffman_create(carbon_huffman_t *dic);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_huffman_cpy(carbon_huffman_t *dst, carbon_huffman_t *src);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_huffman_build(carbon_huffman_t *encoder, const carbon_string_ref_vec *strings);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_huffman_get_error(struct err *err, const carbon_huffman_t *dic);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_huffman_encode_one(memfile_t *file, carbon_huffman_t *dic, const char *string);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_huffman_read_string(carbon_huffman_encoded_str_info_t *info, memfile_t *src);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_huffman_drop(carbon_huffman_t *dic);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_huffman_serialize_dic(memfile_t *file, const carbon_huffman_t *dic, char marker_symbol);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_huffman_read_dic_entry(carbon_huffman_entry_info_t *info, memfile_t *file, char marker_symbol);
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif

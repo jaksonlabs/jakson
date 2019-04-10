@@ -15,48 +15,48 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_COMPRESSOR_NONE_H
-#define CARBON_COMPRESSOR_NONE_H
+#ifndef NG5_COMPRESSOR_NONE_H
+#define NG5_COMPRESSOR_NONE_H
 
 #include "shared/types.h"
 #include "shared/common.h"
 #include "std/vec.h"
 #include "core/mem/file.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
 typedef struct carbon_compressor carbon_compressor_t; /* forwarded from 'types-pack.h' */
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_none_init(carbon_compressor_t *self);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_none_cpy(const carbon_compressor_t *self, carbon_compressor_t *dst);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_none_drop(carbon_compressor_t *self);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_none_write_extra(carbon_compressor_t *self, memfile_t *dst,
                                    const vec_t ofType (const char *) *strings);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_none_read_extra(carbon_compressor_t *self, FILE *src, size_t nbytes);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_none_print_extra(carbon_compressor_t *self, FILE *file, memfile_t *src);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_none_print_encoded_string(carbon_compressor_t *self, FILE *file, memfile_t *src,
                                             u32 decompressed_strlen);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_none_encode_string(carbon_compressor_t *self, memfile_t *dst, struct err *err,
                                           const char *string);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_none_decode_string(carbon_compressor_t *self, char *dst, size_t strlen, FILE *src);
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif

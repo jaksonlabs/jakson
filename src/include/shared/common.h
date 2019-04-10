@@ -15,8 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_COMMON_H
-#define CARBON_COMMON_H
+#ifndef NG5_COMMON_H
+#define NG5_COMMON_H
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -29,31 +29,31 @@
 #include <assert.h>
 
 #ifdef __cplusplus
-#define CARBON_BEGIN_DECL  extern "C" {
-#define CARBON_END_DECL    }
+#define NG5_BEGIN_DECL  extern "C" {
+#define NG5_END_DECL    }
 #else
-#define CARBON_BEGIN_DECL
-#define CARBON_END_DECL
+#define NG5_BEGIN_DECL
+#define NG5_END_DECL
 #endif
 
-#ifndef CARBON_EXPORT
-#ifndef CARBON_STATIC
+#ifndef NG5_EXPORT
+#ifndef NG5_STATIC
 #ifdef _WIN32
-#define CARBON_EXPORT(x) __declspec(dllimport) x
+#define NG5_EXPORT(x) __declspec(dllimport) x
 #elif defined(__GNUC__) && __GNUC__ >= 4
-#define CARBON_EXPORT(x) __attribute__((visibility("default"))) x
+#define NG5_EXPORT(x) __attribute__((visibility("default"))) x
 #else
-#define CARBON_EXPORT(x) x
+#define NG5_EXPORT(x) x
 #endif
 #else
-#define CARBON_EXPORT(x) x
+#define NG5_EXPORT(x) x
 #endif
 #endif
 
-#define CARBON_QUERY_LIMIT_NONE -1
-#define CARBON_QUERY_LIMIT_1     1
+#define NG5_QUERY_LIMIT_NONE -1
+#define NG5_QUERY_LIMIT_1     1
 
-#define CARBON_ARRAY_LENGTH(x)                                                                                         \
+#define NG5_ARRAY_LENGTH(x)                                                                                         \
     sizeof(x)/sizeof(x[0])
 
 typedef char            carbon_byte_t;
@@ -64,111 +64,111 @@ typedef unsigned char   u_char;
 
 typedef enum carbon_basic_type
 {
-    CARBON_BASIC_TYPE_INT8,
-    CARBON_BASIC_TYPE_INT16,
-    CARBON_BASIC_TYPE_INT32,
-    CARBON_BASIC_TYPE_INT64,
-    CARBON_BASIC_TYPE_UINT8,
-    CARBON_BASIC_TYPE_UINT16,
-    CARBON_BASIC_TYPE_UINT32,
-    CARBON_BASIC_TYPE_UINT64,
-    CARBON_BASIC_TYPE_NUMBER,
-    CARBON_BASIC_TYPE_STRING,
-    CARBON_BASIC_TYPE_BOOLEAN,
-    CARBON_BASIC_TYPE_NULL,
-    CARBON_BASIC_TYPE_OBJECT,
+    NG5_BASIC_TYPE_INT8,
+    NG5_BASIC_TYPE_INT16,
+    NG5_BASIC_TYPE_INT32,
+    NG5_BASIC_TYPE_INT64,
+    NG5_BASIC_TYPE_UINT8,
+    NG5_BASIC_TYPE_UINT16,
+    NG5_BASIC_TYPE_UINT32,
+    NG5_BASIC_TYPE_UINT64,
+    NG5_BASIC_TYPE_NUMBER,
+    NG5_BASIC_TYPE_STRING,
+    NG5_BASIC_TYPE_BOOLEAN,
+    NG5_BASIC_TYPE_NULL,
+    NG5_BASIC_TYPE_OBJECT,
 } carbon_basic_type_e;
 
-#define CARBON_FUNC_UNUSED __attribute__((unused))
+#define NG5_FUNC_UNUSED __attribute__((unused))
 
-CARBON_FUNC_UNUSED static const char *
+NG5_FUNC_UNUSED static const char *
 carbon_basic_type_to_json_type_str(carbon_basic_type_e t)
 {
     switch (t) {
-    case CARBON_BASIC_TYPE_INT8:
-    case CARBON_BASIC_TYPE_INT16:
-    case CARBON_BASIC_TYPE_INT32:
-    case CARBON_BASIC_TYPE_INT64:
-    case CARBON_BASIC_TYPE_UINT8:
-    case CARBON_BASIC_TYPE_UINT16:
-    case CARBON_BASIC_TYPE_UINT32:
-    case CARBON_BASIC_TYPE_UINT64:
+    case NG5_BASIC_TYPE_INT8:
+    case NG5_BASIC_TYPE_INT16:
+    case NG5_BASIC_TYPE_INT32:
+    case NG5_BASIC_TYPE_INT64:
+    case NG5_BASIC_TYPE_UINT8:
+    case NG5_BASIC_TYPE_UINT16:
+    case NG5_BASIC_TYPE_UINT32:
+    case NG5_BASIC_TYPE_UINT64:
         return "integer";
-    case CARBON_BASIC_TYPE_NUMBER:
+    case NG5_BASIC_TYPE_NUMBER:
         return "number";
-    case CARBON_BASIC_TYPE_STRING:
+    case NG5_BASIC_TYPE_STRING:
         return "string";
-    case CARBON_BASIC_TYPE_BOOLEAN:
+    case NG5_BASIC_TYPE_BOOLEAN:
         return "boolean";
-    case CARBON_BASIC_TYPE_NULL:
+    case NG5_BASIC_TYPE_NULL:
         return "null";
-    case CARBON_BASIC_TYPE_OBJECT:
+    case NG5_BASIC_TYPE_OBJECT:
         return "object";
     default:
         return "(unknown)";
     }
 }
 
-CARBON_FUNC_UNUSED static const char *
+NG5_FUNC_UNUSED static const char *
 carbon_basic_type_to_system_type_str(carbon_basic_type_e t)
 {
     switch (t) {
-    case CARBON_BASIC_TYPE_INT8:
+    case NG5_BASIC_TYPE_INT8:
         return "int8";
-    case CARBON_BASIC_TYPE_INT16:
+    case NG5_BASIC_TYPE_INT16:
         return "int16";
-    case CARBON_BASIC_TYPE_INT32:
+    case NG5_BASIC_TYPE_INT32:
         return "int32";
-    case CARBON_BASIC_TYPE_INT64:
+    case NG5_BASIC_TYPE_INT64:
         return "int64";
-    case CARBON_BASIC_TYPE_UINT8:
+    case NG5_BASIC_TYPE_UINT8:
         return "uint8";
-    case CARBON_BASIC_TYPE_UINT16:
+    case NG5_BASIC_TYPE_UINT16:
         return "uint16";
-    case CARBON_BASIC_TYPE_UINT32:
+    case NG5_BASIC_TYPE_UINT32:
         return "uint32";
-    case CARBON_BASIC_TYPE_UINT64:
+    case NG5_BASIC_TYPE_UINT64:
         return "uint64";
-    case CARBON_BASIC_TYPE_NUMBER:
+    case NG5_BASIC_TYPE_NUMBER:
         return "float32";
-    case CARBON_BASIC_TYPE_STRING:
+    case NG5_BASIC_TYPE_STRING:
         return "string64";
-    case CARBON_BASIC_TYPE_BOOLEAN:
+    case NG5_BASIC_TYPE_BOOLEAN:
         return "bool8";
-    case CARBON_BASIC_TYPE_NULL:
+    case NG5_BASIC_TYPE_NULL:
         return "void";
-    case CARBON_BASIC_TYPE_OBJECT:
+    case NG5_BASIC_TYPE_OBJECT:
         return "variable";
     default:
         return "(unknown)";
     }
 }
 
-#define CARBON_NOT_IMPLEMENTED                                                                                         \
+#define NG5_NOT_IMPLEMENTED                                                                                         \
 {                                                                                                                      \
     struct err err;                                                                                                  \
     carbon_error_init(&err);                                                                                           \
-    error(&err, CARBON_ERR_NOTIMPLEMENTED)                                                                      \
+    error(&err, NG5_ERR_NOTIMPLEMENTED)                                                                      \
     carbon_error_print_and_abort(&err);                                                                                \
     return false;                                                                                                      \
 };
 
 #ifndef NDEBUG
-#define CARBON_CHECK_TAG(is, expected)                                                                                 \
+#define NG5_CHECK_TAG(is, expected)                                                                                 \
 {                                                                                                                      \
     if (is != expected) {                                                                                              \
-        CARBON_PRINT_ERROR(CARBON_ERR_ERRINTERNAL)                                                                     \
+        NG5_PRINT_ERROR(NG5_ERR_ERRINTERNAL)                                                                     \
         return false;                                                                                                  \
     }                                                                                                                  \
 }
 #else
-#define CARBON_CHECK_TAG(is, expected) { }
+#define NG5_CHECK_TAG(is, expected) { }
 #endif
 
-#if !defined(CARBON_LOG_TRACE) || defined(NDEBUG)
-#define CARBON_TRACE(tag, msg, ...) { }
+#if !defined(NG5_LOG_TRACE) || defined(NDEBUG)
+#define NG5_TRACE(tag, msg, ...) { }
 #else
-#define CARBON_TRACE(tag, msg, ...)                                                                                    \
+#define NG5_TRACE(tag, msg, ...)                                                                                    \
 {                                                                                                                      \
     char buffer[1024];                                                                                                 \
     sprintf(buffer, "--%d-- [TRACE   : %-10s] %s\n", getpid(), tag, msg);                                              \
@@ -177,10 +177,10 @@ carbon_basic_type_to_system_type_str(carbon_basic_type_e t)
 }
 #endif
 
-#if !defined(CARBON_LOG_INFO) || defined(NDEBUG)
-#define CARBON_INFO(tag, msg, ...) { }
+#if !defined(NG5_LOG_INFO) || defined(NDEBUG)
+#define NG5_INFO(tag, msg, ...) { }
 #else
-#define CARBON_INFO(tag, msg, ...)                                                                                     \
+#define NG5_INFO(tag, msg, ...)                                                                                     \
 {                                                                                                                      \
     char buffer[1024];                                                                                                 \
     sprintf(buffer, "--%d-- [INFO    : %-10s] %s\n", getpid(), tag, msg);                                              \
@@ -189,11 +189,11 @@ carbon_basic_type_to_system_type_str(carbon_basic_type_e t)
 }
 #endif
 
-#if !defined(CARBON_LOG_DEBUG) || defined(NDEBUG)
-#define CARBON_DEBUG(tag, msg, ...)                                                                                    \
+#if !defined(NG5_LOG_DEBUG) || defined(NDEBUG)
+#define NG5_DEBUG(tag, msg, ...)                                                                                    \
 { }
 #else
-#define CARBON_DEBUG(tag, msg, ...)                                                                                    \
+#define NG5_DEBUG(tag, msg, ...)                                                                                    \
 {                                                                                                                      \
     char buffer[1024];                                                                                                 \
     sprintf(buffer, "--%d-- [DEBUG   : %-10s] %s\n", getpid(), tag, msg);                                              \
@@ -202,10 +202,10 @@ carbon_basic_type_to_system_type_str(carbon_basic_type_e t)
 }
 #endif
 
-#if !defined(CARBON_LOG_WARN) || defined(NDEBUG)
-#define CARBON_WARN(tag, msg, ...) { }
+#if !defined(NG5_LOG_WARN) || defined(NDEBUG)
+#define NG5_WARN(tag, msg, ...) { }
 #else
-#define CARBON_WARN(tag, msg, ...)                                                                                     \
+#define NG5_WARN(tag, msg, ...)                                                                                     \
     {                                                                                                                  \
         char buffer[1024];                                                                                             \
         sprintf(buffer, "--%d-- [WARNING: %-10s] %s\n", getpid(), tag, msg);                                           \
@@ -255,97 +255,97 @@ carbon_basic_type_to_system_type_str(carbon_basic_type_e t)
 #define  MARKER_SYMBOL_HASHTABLE_HEADER    '#'
 #define  MARKER_SYMBOL_VECTOR_HEADER       '|'
 
-#define CARBON_ZERO_MEMORY(dst, len)                                                                                   \
+#define NG5_ZERO_MEMORY(dst, len)                                                                                   \
     memset((void *) dst, 0, len);
 
-#define CARBON_CAST(type, name, src)                                                                                   \
+#define NG5_CAST(type, name, src)                                                                                   \
       type name = (type) src
 
-#define CARBON_UNUSED(x)   (void)(x)
+#define NG5_UNUSED(x)   (void)(x)
 
-#define CARBON_BUILT_IN(x)   CARBON_FUNC_UNUSED x
+#define NG5_BUILT_IN(x)   NG5_FUNC_UNUSED x
 
 #define ofType(x) /** a convenience way to write types for generic containers; no effect than just a visual one */
 #define ofMapping(x, y) /** a convenience way to write types for generic containers; no effect than just a visual one */
 
-#define CARBON_NULLABLE /** parameters to functions marked with this tag can be NULL and will be ignored; is attached
+#define NG5_NULLABLE /** parameters to functions marked with this tag can be NULL and will be ignored; is attached
                     to a return value (typically a pointer), the this means the function may return NULL. */
 
 #define OPTIONAL_CALL(x, func, ...) if(x && x->func) { x->func(__VA_ARGS__); }
 
-#define CARBON_MAX(a, b)                                                                                               \
+#define NG5_MAX(a, b)                                                                                               \
     ((b) > (a) ? (b) : (a))
 
-#define CARBON_MIN(a, b)                                                                                               \
+#define NG5_MIN(a, b)                                                                                               \
     ((a) < (b) ? (a) : (b))
 
-#define CARBON_NON_NULL_OR_ERROR(x)                                                                                    \
+#define NG5_NON_NULL_OR_ERROR(x)                                                                                    \
 {                                                                                                                      \
     if (!(x)) {                                                                                                        \
         struct err err;                                                                                              \
         carbon_error_init(&err);                                                                                       \
-        error(&err, CARBON_ERR_NULLPTR);                                                                        \
+        error(&err, NG5_ERR_NULLPTR);                                                                        \
         carbon_error_print(&err);                                                                                      \
         return false;                                                                                                  \
     }                                                                                                                  \
 }
 
-#define CARBON_CHECK_SUCCESS(x)                                                                                        \
+#define NG5_CHECK_SUCCESS(x)                                                                                        \
 {                                                                                                                      \
-    if (CARBON_UNLIKELY(!x)) {                                                                                         \
+    if (NG5_UNLIKELY(!x)) {                                                                                         \
         return x;                                                                                                      \
     }                                                                                                                  \
 }
 
-#define CARBON_SUCCESS_OR_JUMP(expr, label)                                                                            \
+#define NG5_SUCCESS_OR_JUMP(expr, label)                                                                            \
 {                                                                                                                      \
-    if (CARBON_UNLIKELY(!expr)) {                                                                                      \
+    if (NG5_UNLIKELY(!expr)) {                                                                                      \
         goto label;                                                                                                    \
     }                                                                                                                  \
 }
 
-#define CARBON_LIKELY(x)                                                                                               \
+#define NG5_LIKELY(x)                                                                                               \
     __builtin_expect((x), 1)
-#define CARBON_UNLIKELY(x)                                                                                             \
+#define NG5_UNLIKELY(x)                                                                                             \
     __builtin_expect((x), 0)
 
-#define CARBON_PREFETCH_READ(adr)                                                                                      \
+#define NG5_PREFETCH_READ(adr)                                                                                      \
     __builtin_prefetch(adr, 0, 3)
 
-#define CARBON_PREFETCH_WRITE(adr)                                                                                     \
+#define NG5_PREFETCH_WRITE(adr)                                                                                     \
     __builtin_prefetch(adr, 1, 3)
 
-#define CARBON_FORWARD_STRUCT_DECL(x) struct x;
+#define NG5_FORWARD_STRUCT_DECL(x) struct x;
 
-#define CARBON_NUM_BITS(x)             (sizeof(x) * 8)
-#define CARBON_SET_BIT(n)              ( ((u32) 1) << (n) )
-#define CARBON_FIELD_SET(x, mask)      ( x |=  (mask) )
-#define CARBON_FIELD_CLEAR(x, mask)    ( x &= ~(mask) )
-#define CARBON_MASK_IS_BIT_SET(mask, bit)    (((bit) & mask ) == (bit))
+#define NG5_NUM_BITS(x)             (sizeof(x) * 8)
+#define NG5_SET_BIT(n)              ( ((u32) 1) << (n) )
+#define NG5_FIELD_SET(x, mask)      ( x |=  (mask) )
+#define NG5_FIELD_CLEAR(x, mask)    ( x &= ~(mask) )
+#define NG5_MASK_IS_BIT_SET(mask, bit)    (((bit) & mask ) == (bit))
 
-#define CARBON_IMPLEMENTS_OR_ERROR(err, x, func)                                                                       \
-    CARBON_OPTIONAL(x->func == NULL, error(err, CARBON_ERR_NOTIMPLEMENTED))
+#define NG5_IMPLEMENTS_OR_ERROR(err, x, func)                                                                       \
+    NG5_OPTIONAL(x->func == NULL, error(err, NG5_ERR_NOTIMPLEMENTED))
 
-#define CARBON_OPTIONAL(expr, stmt)                                                                                    \
+#define NG5_OPTIONAL(expr, stmt)                                                                                    \
     if (expr) { stmt; }
 
-#define CARBON_OPTIONAL_SET(x, y)                                                                                      \
-     CARBON_OPTIONAL(x, *x = y)
+#define NG5_OPTIONAL_SET(x, y)                                                                                      \
+     NG5_OPTIONAL(x, *x = y)
 
-#define CARBON_OPTIONAL_SET_OR_ELSE(x, y, stmt)                                                                        \
+#define NG5_OPTIONAL_SET_OR_ELSE(x, y, stmt)                                                                        \
     if (x) {                                                                                                           \
         *x = y;                                                                                                        \
     } else { stmt; }
 
 bool GlobalEnableConsoleOutput;
 
-#define CARBON_CONSOLE_OUTPUT_ON()                                                                                     \
+#define NG5_CONSOLE_OUTPUT_ON()                                                                                     \
     GlobalEnableConsoleOutput = true;
 
-#define CARBON_CONSOLE_OUTPUT_OFF()                                                                                    \
+#define NG5_CONSOLE_OUTPUT_OFF()                                                                                    \
     GlobalEnableConsoleOutput = false;
 
-#define CARBON_CONSOLE_WRITE(file, msg, ...)                                                                           \
+#define NG5_CONSOLE_WRITE(file, msg, ...)                                                                           \
 {                                                                                                                      \
     if (GlobalEnableConsoleOutput) {                                                                                   \
         pid_t pid = getpid();                                                                                          \
@@ -360,25 +360,25 @@ bool GlobalEnableConsoleOutput;
     }                                                                                                                  \
 }
 
-#define CARBON_CONSOLE_WRITE_ENDL(file)                                                                                \
+#define NG5_CONSOLE_WRITE_ENDL(file)                                                                                \
 {                                                                                                                      \
     if (GlobalEnableConsoleOutput) {                                                                                   \
         fprintf(file, "\n");                                                                                           \
     }                                                                                                                  \
 }
 
-#define CARBON_CONSOLE_WRITE_CONT(file, msg, ...)                                                                      \
+#define NG5_CONSOLE_WRITE_CONT(file, msg, ...)                                                                      \
 {                                                                                                                      \
     if (GlobalEnableConsoleOutput) {                                                                                   \
         fprintf(file, msg, __VA_ARGS__);                                                                               \
     }                                                                                                                  \
 }
 
-#define CARBON_CONSOLE_WRITELN(file, msg, ...)                                                                         \
+#define NG5_CONSOLE_WRITELN(file, msg, ...)                                                                         \
 {                                                                                                                      \
     if (GlobalEnableConsoleOutput) {                                                                                   \
-        CARBON_CONSOLE_WRITE(file, msg, __VA_ARGS__)                                                                   \
-        CARBON_CONSOLE_WRITE_ENDL(file)                                                                                \
+        NG5_CONSOLE_WRITE(file, msg, __VA_ARGS__)                                                                   \
+        NG5_CONSOLE_WRITE_ENDL(file)                                                                                \
         fflush(file);                                                                                                  \
     }                                                                                                                  \
 }

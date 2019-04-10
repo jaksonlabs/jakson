@@ -15,36 +15,36 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_BLOOM_H
-#define CARBON_BLOOM_H
+#ifndef NG5_BLOOM_H
+#define NG5_BLOOM_H
 
 #include "shared/common.h"
 #include "bitmap.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
 typedef carbon_bitmap_t carbon_bloom_t;
 
-#define CARBON_BLOOM_SET(filter, key, keySize)                     \
+#define NG5_BLOOM_SET(filter, key, keySize)                     \
 ({                                                                 \
     size_t nbits = carbon_bitmap_nbits(filter);                    \
-    size_t b0 = CARBON_HASH_ADDITIVE(keySize, key) % nbits;        \
-    size_t b1 = CARBON_HASH_XOR(keySize, key) % nbits;             \
-    size_t b2 = CARBON_HASH_ROT(keySize, key) % nbits;             \
-    size_t b3 = CARBON_HASH_SAX(keySize, key) % nbits;             \
+    size_t b0 = NG5_HASH_ADDITIVE(keySize, key) % nbits;        \
+    size_t b1 = NG5_HASH_XOR(keySize, key) % nbits;             \
+    size_t b2 = NG5_HASH_ROT(keySize, key) % nbits;             \
+    size_t b3 = NG5_HASH_SAX(keySize, key) % nbits;             \
     carbon_bitmap_set(filter, b0, true);                           \
     carbon_bitmap_set(filter, b1, true);                           \
     carbon_bitmap_set(filter, b2, true);                           \
     carbon_bitmap_set(filter, b3, true);                           \
 })
 
-#define CARBON_BLOOM_TEST(filter, key, keySize)                    \
+#define NG5_BLOOM_TEST(filter, key, keySize)                    \
 ({                                                                 \
     size_t nbits = carbon_bitmap_nbits(filter);                    \
-    size_t b0 = CARBON_HASH_ADDITIVE(keySize, key) % nbits;        \
-    size_t b1 = CARBON_HASH_XOR(keySize, key) % nbits;             \
-    size_t b2 = CARBON_HASH_ROT(keySize, key) % nbits;             \
-    size_t b3 = CARBON_HASH_SAX(keySize, key) % nbits;             \
+    size_t b0 = NG5_HASH_ADDITIVE(keySize, key) % nbits;        \
+    size_t b1 = NG5_HASH_XOR(keySize, key) % nbits;             \
+    size_t b2 = NG5_HASH_ROT(keySize, key) % nbits;             \
+    size_t b3 = NG5_HASH_SAX(keySize, key) % nbits;             \
     bool b0set = carbon_bitmap_get(filter, b0);                    \
     bool b1set = carbon_bitmap_get(filter, b1);                    \
     bool b2set = carbon_bitmap_get(filter, b2);                    \
@@ -52,13 +52,13 @@ typedef carbon_bitmap_t carbon_bloom_t;
     (b0set && b1set && b2set && b3set);                            \
 })
 
-#define CARBON_BLOOM_TEST_AND_SET(filter, key, keySize)            \
+#define NG5_BLOOM_TEST_AND_SET(filter, key, keySize)            \
 ({                                                                 \
     size_t nbits = carbon_bitmap_nbits(filter);                    \
-    size_t b0 = CARBON_HASH_ADDITIVE(keySize, key) % nbits;        \
-    size_t b1 = CARBON_HASH_XOR(keySize, key) % nbits;             \
-    size_t b2 = CARBON_HASH_ROT(keySize, key) % nbits;             \
-    size_t b3 = CARBON_HASH_SAX(keySize, key) % nbits;             \
+    size_t b0 = NG5_HASH_ADDITIVE(keySize, key) % nbits;        \
+    size_t b1 = NG5_HASH_XOR(keySize, key) % nbits;             \
+    size_t b2 = NG5_HASH_ROT(keySize, key) % nbits;             \
+    size_t b3 = NG5_HASH_SAX(keySize, key) % nbits;             \
     bool b0set = carbon_bitmap_get(filter, b0);                    \
     bool b1set = carbon_bitmap_get(filter, b1);                    \
     bool b2set = carbon_bitmap_get(filter, b2);                    \
@@ -70,21 +70,21 @@ typedef carbon_bitmap_t carbon_bloom_t;
     (b0set && b1set && b2set && b3set);                            \
 })
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_bloom_create(carbon_bloom_t *filter, size_t size);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_bloom_drop(carbon_bloom_t *filter);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_bloom_clear(carbon_bloom_t *filter);
 
-CARBON_EXPORT(size_t)
+NG5_EXPORT(size_t)
 carbon_bloom_nbits(carbon_bloom_t *filter);
 
-CARBON_EXPORT(unsigned)
+NG5_EXPORT(unsigned)
 carbon_bloom_nhashs();
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif

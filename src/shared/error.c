@@ -17,11 +17,11 @@
 
 #include "shared/error.h"
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_error_init(struct err *err)
 {
     if (err) {
-        err->code = CARBON_ERR_NOERR;
+        err->code = NG5_ERR_NOERR;
         err->details = NULL;
         err->file = NULL;
         err->line = 0;
@@ -29,19 +29,19 @@ carbon_error_init(struct err *err)
     return (err != NULL);
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_error_cpy(struct err *dst, const struct err *src)
 {
-    CARBON_NON_NULL_OR_ERROR(dst);
-    CARBON_NON_NULL_OR_ERROR(src);
+    NG5_NON_NULL_OR_ERROR(dst);
+    NG5_NON_NULL_OR_ERROR(src);
     *dst = *src;
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_error_drop(struct err *err)
 {
-    CARBON_NON_NULL_OR_ERROR(err);
+    NG5_NON_NULL_OR_ERROR(err);
     if (err->details) {
         free(err->details);
         err->details = NULL;
@@ -49,13 +49,13 @@ carbon_error_drop(struct err *err)
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_error_set(struct err *err, int code, const char *file, u32 line)
 {
     return carbon_error_set_wdetails(err, code, file, line, NULL);
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_error_set_wdetails(struct err *err, int code, const char *file, u32 line, const char *details)
 {
     if (err) {
@@ -70,26 +70,26 @@ carbon_error_set_wdetails(struct err *err, int code, const char *file, u32 line,
     return (err != NULL);
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_error_str(const char **errstr, const char **file, u32 *line, bool *details, const char **detailsstr,
                  const struct err *err)
 {
     if (err) {
         if (err->code >= _carbon_nerr_str) {
-            CARBON_OPTIONAL_SET(errstr, CARBON_ERRSTR_ILLEGAL_CODE)
+            NG5_OPTIONAL_SET(errstr, NG5_ERRSTR_ILLEGAL_CODE)
         } else {
-            CARBON_OPTIONAL_SET(errstr, _carbon_err_str[err->code])
+            NG5_OPTIONAL_SET(errstr, _carbon_err_str[err->code])
         }
-        CARBON_OPTIONAL_SET(file, err->file)
-        CARBON_OPTIONAL_SET(line, err->line)
-        CARBON_OPTIONAL_SET(details, err->details != NULL);
-        CARBON_OPTIONAL_SET(detailsstr, err->details)
+        NG5_OPTIONAL_SET(file, err->file)
+        NG5_OPTIONAL_SET(line, err->line)
+        NG5_OPTIONAL_SET(details, err->details != NULL);
+        NG5_OPTIONAL_SET(detailsstr, err->details)
         return true;
     }
     return false;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_error_print(const struct err *err)
 {
     if (err) {
@@ -110,7 +110,7 @@ carbon_error_print(const struct err *err)
     return (err != NULL);
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_error_print_and_abort(const struct err *err)
 {
     carbon_error_print(err);

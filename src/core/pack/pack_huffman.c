@@ -24,7 +24,7 @@
 
 #define  MARKER_SYMBOL_HUFFMAN_DIC_ENTRY   'd'
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_huffman_init(carbon_compressor_t *self)
 {
         self->extra = malloc(sizeof(carbon_huffman_t));
@@ -38,10 +38,10 @@ carbon_compressor_huffman_init(carbon_compressor_t *self)
         }
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_huffman_cpy(const carbon_compressor_t *self, carbon_compressor_t *dst)
 {
-        CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_HUFFMAN);
+        NG5_CHECK_TAG(self->tag, NG5_COMPRESSOR_HUFFMAN);
 
         *dst = *self;
         dst->extra = malloc(sizeof(carbon_huffman_t));
@@ -55,10 +55,10 @@ carbon_compressor_huffman_cpy(const carbon_compressor_t *self, carbon_compressor
         }
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_huffman_drop(carbon_compressor_t *self)
 {
-        CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_HUFFMAN);
+        NG5_CHECK_TAG(self->tag, NG5_COMPRESSOR_HUFFMAN);
 
         carbon_huffman_t *encoder = (carbon_huffman_t *) self->extra;
         carbon_huffman_drop(encoder);
@@ -71,7 +71,7 @@ bool huffman_dump_dictionary(FILE *file, memfile_t *memfile)
         carbon_huffman_entry_info_t entry_info;
         offset_t offset;
 
-        while ((*CARBON_MEMFILE_PEEK(memfile, char)) == MARKER_SYMBOL_HUFFMAN_DIC_ENTRY) {
+        while ((*NG5_MEMFILE_PEEK(memfile, char)) == MARKER_SYMBOL_HUFFMAN_DIC_ENTRY) {
                 carbon_memfile_tell(&offset, memfile);
                 carbon_huffman_read_dic_entry(&entry_info, memfile, MARKER_SYMBOL_HUFFMAN_DIC_ENTRY);
 
@@ -97,8 +97,8 @@ bool huffman_dump_dictionary(FILE *file, memfile_t *memfile)
 
 bool huffman_dump_string_table_entry(FILE *file, memfile_t *memfile)
 {
-        CARBON_UNUSED(file);
-        CARBON_UNUSED(memfile);
+        NG5_UNUSED(file);
+        NG5_UNUSED(memfile);
 
         carbon_huffman_encoded_str_info_t info;
 
@@ -115,11 +115,11 @@ bool huffman_dump_string_table_entry(FILE *file, memfile_t *memfile)
         return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_huffman_write_extra(carbon_compressor_t *self, memfile_t *dst,
                                       const vec_t ofType (const char *) *strings)
 {
-        CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_HUFFMAN);
+        NG5_CHECK_TAG(self->tag, NG5_COMPRESSOR_HUFFMAN);
 
         carbon_huffman_t *encoder = (carbon_huffman_t *) self->extra;
 
@@ -129,37 +129,37 @@ carbon_compressor_huffman_write_extra(carbon_compressor_t *self, memfile_t *dst,
         return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_huffman_read_extra(carbon_compressor_t *self, FILE *src, size_t nbytes)
 {
-        CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_HUFFMAN);
+        NG5_CHECK_TAG(self->tag, NG5_COMPRESSOR_HUFFMAN);
 
-        CARBON_UNUSED(self);
-        CARBON_UNUSED(src);
-        CARBON_UNUSED(nbytes);
+        NG5_UNUSED(self);
+        NG5_UNUSED(src);
+        NG5_UNUSED(nbytes);
 
         abort(); /* not implemented */
         return false;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_huffman_print_extra(carbon_compressor_t *self, FILE *file, memfile_t *src)
 {
-        CARBON_UNUSED(self);
+        NG5_UNUSED(self);
 
         huffman_dump_dictionary(file, src);
 
         return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_huffman_print_encoded(carbon_compressor_t *self, FILE *file, memfile_t *src,
                                         u32 decompressed_strlen)
 {
-        CARBON_UNUSED(self);
-        CARBON_UNUSED(file);
-        CARBON_UNUSED(src);
-        CARBON_UNUSED(decompressed_strlen);
+        NG5_UNUSED(self);
+        NG5_UNUSED(file);
+        NG5_UNUSED(src);
+        NG5_UNUSED(decompressed_strlen);
 
         huffman_dump_string_table_entry(file, src);
 
@@ -169,7 +169,7 @@ carbon_compressor_huffman_print_encoded(carbon_compressor_t *self, FILE *file, m
 bool carbon_compressor_huffman_encode_string(carbon_compressor_t *self, memfile_t *dst, struct err *err,
                                              const char *string)
 {
-        CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_HUFFMAN);
+        NG5_CHECK_TAG(self->tag, NG5_COMPRESSOR_HUFFMAN);
 
         carbon_huffman_t *encoder = (carbon_huffman_t *) self->extra;
         bool status = carbon_huffman_encode_one(dst, encoder, string);
@@ -178,13 +178,13 @@ bool carbon_compressor_huffman_encode_string(carbon_compressor_t *self, memfile_
         return status;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_compressor_huffman_decode_string(carbon_compressor_t *self, char *dst, size_t strlen, FILE *src)
 {
-        CARBON_UNUSED(self);
-        CARBON_UNUSED(dst);
-        CARBON_UNUSED(strlen);
-        CARBON_UNUSED(src);
+        NG5_UNUSED(self);
+        NG5_UNUSED(dst);
+        NG5_UNUSED(strlen);
+        NG5_UNUSED(src);
         abort(); /* not implemented */
         return false;
 }

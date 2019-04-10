@@ -21,8 +21,8 @@
 
 bool carbon_memfile_open(memfile_t *file, carbon_memblock_t *block, carbon_memfile_mode_e mode)
 {
-    CARBON_NON_NULL_OR_ERROR(file)
-    CARBON_NON_NULL_OR_ERROR(block)
+    NG5_NON_NULL_OR_ERROR(file)
+    NG5_NON_NULL_OR_ERROR(block)
     file->memblock = block;
     file->pos = 0;
     file->bit_mode = false;
@@ -33,15 +33,15 @@ bool carbon_memfile_open(memfile_t *file, carbon_memblock_t *block, carbon_memfi
 
 bool carbon_memfile_seek(memfile_t *file, offset_t pos)
 {
-    CARBON_NON_NULL_OR_ERROR(file)
+    NG5_NON_NULL_OR_ERROR(file)
     offset_t file_size;
     carbon_memblock_size(&file_size, file->memblock);
-    if (CARBON_UNLIKELY(pos >= file_size)) {
-        if (file->mode == CARBON_MEMFILE_MODE_READWRITE) {
+    if (NG5_UNLIKELY(pos >= file_size)) {
+        if (file->mode == NG5_MEMFILE_MODE_READWRITE) {
             offset_t new_size = pos + 1;
             carbon_memblock_resize(file->memblock, new_size);
         } else {
-            error(&file->err, CARBON_ERR_MEMSTATE)
+            error(&file->err, NG5_ERR_MEMSTATE)
             return false;
         }
     }
@@ -51,15 +51,15 @@ bool carbon_memfile_seek(memfile_t *file, offset_t pos)
 
 bool carbon_memfile_rewind(memfile_t *file)
 {
-    CARBON_NON_NULL_OR_ERROR(file)
+    NG5_NON_NULL_OR_ERROR(file)
     file->pos = 0;
     return true;
 }
 
 bool carbon_memfile_tell(offset_t *pos, const memfile_t *file)
 {
-    CARBON_NON_NULL_OR_ERROR(pos)
-    CARBON_NON_NULL_OR_ERROR(file)
+    NG5_NON_NULL_OR_ERROR(pos)
+    NG5_NON_NULL_OR_ERROR(file)
     *pos = file->pos;
     return true;
 }
@@ -83,15 +83,15 @@ size_t carbon_memfile_remain_size(memfile_t *file)
 
 bool carbon_memfile_shrink(memfile_t *file)
 {
-    CARBON_NON_NULL_OR_ERROR(file);
-    if (file->mode == CARBON_MEMFILE_MODE_READWRITE) {
+    NG5_NON_NULL_OR_ERROR(file);
+    if (file->mode == NG5_MEMFILE_MODE_READWRITE) {
         int status = carbon_memblock_shrink(file->memblock);
         size_t size;
         carbon_memblock_size(&size, file->memblock);
         assert(size == file->pos);
         return status;
     } else {
-        error(&file->err, CARBON_ERR_WRITEPROT)
+        error(&file->err, NG5_ERR_WRITEPROT)
         return false;
     }
 }
@@ -110,11 +110,11 @@ bool carbon_memfile_skip(memfile_t *file, offset_t nbytes)
     offset_t file_size;
     carbon_memblock_size(&file_size, file->memblock);
 
-    if (CARBON_UNLIKELY(required_size >= file_size)) {
-        if (file->mode == CARBON_MEMFILE_MODE_READWRITE) {
+    if (NG5_UNLIKELY(required_size >= file_size)) {
+        if (file->mode == NG5_MEMFILE_MODE_READWRITE) {
             carbon_memblock_resize(file->memblock, required_size * 1.7f);
         } else {
-            error(&file->err, CARBON_ERR_WRITEPROT);
+            error(&file->err, NG5_ERR_WRITEPROT);
             return false;
         }
     }
@@ -126,8 +126,8 @@ const carbon_byte_t *carbon_memfile_peek(memfile_t *file, offset_t nbytes)
 {
     offset_t file_size;
     carbon_memblock_size(&file_size, file->memblock);
-    if (CARBON_UNLIKELY(file->pos + nbytes > file_size)) {
-        error(&file->err, CARBON_ERR_READOUTOFBOUNDS);
+    if (NG5_UNLIKELY(file->pos + nbytes > file_size)) {
+        error(&file->err, NG5_ERR_READOUTOFBOUNDS);
         return NULL;
     } else {
         const carbon_byte_t *result = carbon_memblock_raw_data(file->memblock) + file->pos;
@@ -137,33 +137,33 @@ const carbon_byte_t *carbon_memfile_peek(memfile_t *file, offset_t nbytes)
 
 bool memfile_write(memfile_t *file, const void *data, offset_t nbytes)
 {
-    CARBON_NON_NULL_OR_ERROR(file)
-    CARBON_NON_NULL_OR_ERROR(data)
-    if (file->mode == CARBON_MEMFILE_MODE_READWRITE) {
-        if (CARBON_LIKELY(nbytes != 0)) {
+    NG5_NON_NULL_OR_ERROR(file)
+    NG5_NON_NULL_OR_ERROR(data)
+    if (file->mode == NG5_MEMFILE_MODE_READWRITE) {
+        if (NG5_LIKELY(nbytes != 0)) {
             offset_t file_size;
             carbon_memblock_size(&file_size, file->memblock);
             offset_t required_size = file->pos + nbytes;
-            if (CARBON_UNLIKELY(required_size >= file_size)) {
+            if (NG5_UNLIKELY(required_size >= file_size)) {
                 carbon_memblock_resize(file->memblock, required_size * 1.7f);
             }
 
-            if (CARBON_UNLIKELY(!carbon_memblock_write(file->memblock, file->pos, data, nbytes))) {
+            if (NG5_UNLIKELY(!carbon_memblock_write(file->memblock, file->pos, data, nbytes))) {
                 return false;
             }
             file->pos += nbytes;
         }
         return true;
     } else {
-        error(&file->err, CARBON_ERR_WRITEPROT);
+        error(&file->err, NG5_ERR_WRITEPROT);
         return false;
     }
 }
 
 bool carbon_memfile_begin_bit_mode(memfile_t *file)
 {
-    CARBON_NON_NULL_OR_ERROR(file);
-    if (file->mode == CARBON_MEMFILE_MODE_READWRITE) {
+    NG5_NON_NULL_OR_ERROR(file);
+    if (file->mode == NG5_MEMFILE_MODE_READWRITE) {
         file->bit_mode = true;
         file->current_read_bit = file->current_write_bit = file->bytes_completed = 0;
         file->bytes_completed = 0;
@@ -173,7 +173,7 @@ bool carbon_memfile_begin_bit_mode(memfile_t *file)
             memfile_write(file, &empty, sizeof(char));
         carbon_memfile_seek(file, offset);
     } else {
-        error(&file->err, CARBON_ERR_WRITEPROT);
+        error(&file->err, NG5_ERR_WRITEPROT);
         return false;
     }
 
@@ -182,7 +182,7 @@ bool carbon_memfile_begin_bit_mode(memfile_t *file)
 
 bool memfile_write_bit(memfile_t *file, bool flag)
 {
-    CARBON_NON_NULL_OR_ERROR(file);
+    NG5_NON_NULL_OR_ERROR(file);
     file->current_read_bit = 0;
 
     if (file->bit_mode) {
@@ -192,9 +192,9 @@ bool memfile_write_bit(memfile_t *file, bool flag)
             char byte = *carbon_memfile_read(file, sizeof(char));
             char mask = 1 << file->current_write_bit;
             if (flag) {
-                CARBON_FIELD_SET(byte, mask);
+                NG5_FIELD_SET(byte, mask);
             } else {
-                CARBON_FIELD_CLEAR(byte, mask);
+                NG5_FIELD_CLEAR(byte, mask);
             }
             carbon_memfile_seek(file, offset);
                 memfile_write(file, &byte, sizeof(char));
@@ -214,7 +214,7 @@ bool memfile_write_bit(memfile_t *file, bool flag)
         }
         return true;
     } else {
-        error(&file->err, CARBON_ERR_NOBITMODE);
+        error(&file->err, NG5_ERR_NOBITMODE);
         return false;
     }
 }
@@ -244,20 +244,20 @@ bool carbon_memfile_read_bit(memfile_t *file)
             return carbon_memfile_read_bit(file);
         }
     } else {
-        error(&file->err, CARBON_ERR_NOBITMODE);
+        error(&file->err, NG5_ERR_NOBITMODE);
         return false;
     }
 }
 
-bool carbon_memfile_end_bit_mode(CARBON_NULLABLE size_t *num_bytes_written, memfile_t *file)
+bool carbon_memfile_end_bit_mode(NG5_NULLABLE size_t *num_bytes_written, memfile_t *file)
 {
-    CARBON_NON_NULL_OR_ERROR(file);
+    NG5_NON_NULL_OR_ERROR(file);
     file->bit_mode = false;
     if (file->current_write_bit <= 8) {
         carbon_memfile_skip(file, 1);
         file->bytes_completed++;
     }
-    CARBON_OPTIONAL_SET(num_bytes_written, file->bytes_completed);
+    NG5_OPTIONAL_SET(num_bytes_written, file->bytes_completed);
     file->current_write_bit = file->bytes_completed = 0;
     return true;
 }
@@ -268,11 +268,11 @@ void *carbon_memfile_current_pos(memfile_t *file, offset_t nbytes)
         offset_t file_size;
         carbon_memblock_size(&file_size, file->memblock);
         offset_t required_size = file->pos + nbytes;
-        if (CARBON_UNLIKELY(file->pos + nbytes >= file_size)) {
-            if (file->mode == CARBON_MEMFILE_MODE_READWRITE) {
+        if (NG5_UNLIKELY(file->pos + nbytes >= file_size)) {
+            if (file->mode == NG5_MEMFILE_MODE_READWRITE) {
                 carbon_memblock_resize(file->memblock, required_size * 1.7f);
             } else {
-                error(&file->err, CARBON_ERR_WRITEPROT);
+                error(&file->err, NG5_ERR_WRITEPROT);
                 return NULL;
             }
         }

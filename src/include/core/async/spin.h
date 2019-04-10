@@ -15,15 +15,15 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_SPINLOCK_H
-#define CARBON_SPINLOCK_H
+#ifndef NG5_SPINLOCK_H
+#define NG5_SPINLOCK_H
 
 #include <stdatomic.h>
 
 #include "shared/common.h"
 #include "std/vec.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
 typedef struct carbon_spinlock
 {
@@ -31,15 +31,15 @@ typedef struct carbon_spinlock
     pthread_t owner;
 } carbon_spinlock_t;
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_spinlock_init(carbon_spinlock_t *spinlock);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_spinlock_acquire(carbon_spinlock_t *spinlock);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_spinlock_release(carbon_spinlock_t *spinlock);
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif

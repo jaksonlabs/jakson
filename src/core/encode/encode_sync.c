@@ -74,11 +74,11 @@ static int freelist_push(carbon_strdic_t *self, carbon_string_id_t idx);
 int carbon_strdic_create_sync(carbon_strdic_t *dic, size_t capacity, size_t num_indx_buckets,
                               size_t num_index_bucket_cap, size_t num_threads, const struct allocator *alloc)
 {
-    CARBON_NON_NULL_OR_ERROR(dic);
+    NG5_NON_NULL_OR_ERROR(dic);
 
-    CARBON_CHECK_SUCCESS(carbon_alloc_this_or_std(&dic->alloc, alloc));
+    NG5_CHECK_SUCCESS(carbon_alloc_this_or_std(&dic->alloc, alloc));
 
-    dic->tag = CARBON_STRDIC_TYPE_SYNC;
+    dic->tag = NG5_STRDIC_TYPE_SYNC;
     dic->drop = this_drop;
     dic->insert = this_insert;
     dic->remove = this_remove;
@@ -91,20 +91,20 @@ int carbon_strdic_create_sync(carbon_strdic_t *dic, size_t capacity, size_t num_
     dic->num_distinct = this_num_distinct;
     dic->get_contents = this_get_contents;
 
-    CARBON_CHECK_SUCCESS(create_extra(dic, capacity, num_indx_buckets, num_index_bucket_cap, num_threads));
+    NG5_CHECK_SUCCESS(create_extra(dic, capacity, num_indx_buckets, num_index_bucket_cap, num_threads));
     return true;
 }
 
 static void lock(carbon_strdic_t *self)
 {
-    assert(self->tag == CARBON_STRDIC_TYPE_SYNC);
+    assert(self->tag == NG5_STRDIC_TYPE_SYNC);
     struct sync_extra *extra = this_extra(self);
     carbon_spinlock_acquire(&extra->lock);
 }
 
 static void unlock(carbon_strdic_t *self)
 {
-    assert(self->tag == CARBON_STRDIC_TYPE_SYNC);
+    assert(self->tag == NG5_STRDIC_TYPE_SYNC);
     struct sync_extra *extra = this_extra(self);
     carbon_spinlock_release(&extra->lock);
 }
@@ -115,44 +115,44 @@ static int create_extra(carbon_strdic_t *self, size_t capacity, size_t num_index
     self->extra = carbon_malloc(&self->alloc, sizeof(struct sync_extra));
     struct sync_extra *extra = this_extra(self);
     carbon_spinlock_init(&extra->lock);
-    CARBON_CHECK_SUCCESS(carbon_vec_create(&extra->contents, &self->alloc, sizeof(struct entry), capacity));
-    CARBON_CHECK_SUCCESS(carbon_vec_create(&extra->freelist, &self->alloc, sizeof(carbon_string_id_t), capacity));
+    NG5_CHECK_SUCCESS(carbon_vec_create(&extra->contents, &self->alloc, sizeof(struct entry), capacity));
+    NG5_CHECK_SUCCESS(carbon_vec_create(&extra->freelist, &self->alloc, sizeof(carbon_string_id_t), capacity));
     struct entry empty = {
         .str    = NULL,
         .in_use = false
     };
     for (size_t i = 0; i < capacity; i++) {
-        CARBON_CHECK_SUCCESS(carbon_vec_push(&extra->contents, &empty, 1));
+        NG5_CHECK_SUCCESS(carbon_vec_push(&extra->contents, &empty, 1));
         freelist_push(self, i);
     }
-    CARBON_UNUSED(num_threads);
+    NG5_UNUSED(num_threads);
 
     struct allocator hashtable_alloc;
-#if defined(CARBON_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
+#if defined(NG5_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
     CHECK_SUCCESS(allocatorTrace(&hashtable_alloc));
 #else
-    CARBON_CHECK_SUCCESS(carbon_alloc_this_or_std(&hashtable_alloc, &self->alloc));
+    NG5_CHECK_SUCCESS(carbon_alloc_this_or_std(&hashtable_alloc, &self->alloc));
 #endif
 
-    CARBON_CHECK_SUCCESS(carbon_strhash_create_inmemory(&extra->index, &hashtable_alloc, num_index_buckets,
+    NG5_CHECK_SUCCESS(carbon_strhash_create_inmemory(&extra->index, &hashtable_alloc, num_index_buckets,
                                                         num_index_bucket_cap));
     return true;
 }
 
 static struct sync_extra *this_extra(carbon_strdic_t *self)
 {
-    assert (self->tag == CARBON_STRDIC_TYPE_SYNC);
+    assert (self->tag == NG5_STRDIC_TYPE_SYNC);
     return (struct sync_extra *) self->extra;
 }
 
 static int freelist_pop(carbon_string_id_t *out, carbon_strdic_t *self)
 {
-    assert (self->tag == CARBON_STRDIC_TYPE_SYNC);
+    assert (self->tag == NG5_STRDIC_TYPE_SYNC);
     struct sync_extra *extra = this_extra(self);
-    if (CARBON_UNLIKELY(carbon_vec_is_empty(&extra->freelist))) {
+    if (NG5_UNLIKELY(carbon_vec_is_empty(&extra->freelist))) {
         size_t num_new_pos;
-        CARBON_CHECK_SUCCESS(carbon_vec_grow(&num_new_pos, &extra->freelist));
-        CARBON_CHECK_SUCCESS(carbon_vec_grow(NULL, &extra->contents));
+        NG5_CHECK_SUCCESS(carbon_vec_grow(&num_new_pos, &extra->freelist));
+        NG5_CHECK_SUCCESS(carbon_vec_grow(NULL, &extra->contents));
         assert (extra->freelist.cap_elems == extra->contents.cap_elems);
         struct entry empty = {
             .in_use = false,
@@ -160,8 +160,8 @@ static int freelist_pop(carbon_string_id_t *out, carbon_strdic_t *self)
         };
         while (num_new_pos--) {
             size_t new_pos = carbon_vec_length(&extra->contents);
-            CARBON_CHECK_SUCCESS(carbon_vec_push(&extra->freelist, &new_pos, 1));
-            CARBON_CHECK_SUCCESS(carbon_vec_push(&extra->contents, &empty, 1));
+            NG5_CHECK_SUCCESS(carbon_vec_push(&extra->freelist, &new_pos, 1));
+            NG5_CHECK_SUCCESS(carbon_vec_push(&extra->contents, &empty, 1));
         }
     }
     *out = *(carbon_string_id_t *) carbon_vec_pop(&extra->freelist);
@@ -170,16 +170,16 @@ static int freelist_pop(carbon_string_id_t *out, carbon_strdic_t *self)
 
 static int freelist_push(carbon_strdic_t *self, carbon_string_id_t idx)
 {
-    assert (self->tag == CARBON_STRDIC_TYPE_SYNC);
+    assert (self->tag == NG5_STRDIC_TYPE_SYNC);
     struct sync_extra *extra = this_extra(self);
-    CARBON_CHECK_SUCCESS(carbon_vec_push(&extra->freelist, &idx, 1));
+    NG5_CHECK_SUCCESS(carbon_vec_push(&extra->freelist, &idx, 1));
     assert (extra->freelist.cap_elems == extra->contents.cap_elems);
     return true;
 }
 
 static bool this_drop(carbon_strdic_t *self)
 {
-    CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_SYNC)
+    NG5_CHECK_TAG(self->tag, NG5_STRDIC_TYPE_SYNC)
 
     struct sync_extra *extra = this_extra(self);
 
@@ -204,21 +204,21 @@ static bool this_drop(carbon_strdic_t *self)
 static bool this_insert(carbon_strdic_t *self, carbon_string_id_t **out, char *const *strings, size_t num_strings,
                         size_t num_threads)
 {
-    CARBON_TRACE(STRING_DIC_SYNC_TAG, "local string dictionary insertion invoked for %zu strings", num_strings);
+    NG5_TRACE(STRING_DIC_SYNC_TAG, "local string dictionary insertion invoked for %zu strings", num_strings);
     carbon_timestamp_t begin = carbon_time_now_wallclock();
 
-    CARBON_UNUSED(num_threads);
+    NG5_UNUSED(num_threads);
 
-    CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_SYNC)
+    NG5_CHECK_TAG(self->tag, NG5_STRDIC_TYPE_SYNC)
     lock(self);
 
     struct sync_extra *extra          = this_extra(self);
 
     struct allocator hashtable_alloc;
-#if defined(CARBON_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
+#if defined(NG5_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
     CHECK_SUCCESS(allocatorTrace(&hashtable_alloc));
 #else
-    CARBON_CHECK_SUCCESS(carbon_alloc_this_or_std(&hashtable_alloc, &self->alloc));
+    NG5_CHECK_SUCCESS(carbon_alloc_this_or_std(&hashtable_alloc, &self->alloc));
 #endif
 
 
@@ -230,7 +230,7 @@ static bool this_insert(carbon_strdic_t *self, carbon_string_id_t **out, char *c
     /** query index for strings to get a boolean mask which strings are new and which must be added */
     /** This is for the case that the string dictionary is not empty to skip processing of those new elements
      * which are already contained */
-    CARBON_TRACE(STRING_DIC_SYNC_TAG, "local string dictionary check for new strings in insertion bulk%s", "...");
+    NG5_TRACE(STRING_DIC_SYNC_TAG, "local string dictionary check for new strings in insertion bulk%s", "...");
 
     /** NOTE: palatalization of the call to this function decreases performance */
     carbon_strhash_get_bulk_safe(&values, &found_mask, &num_not_found, &extra->index, strings, num_strings);
@@ -261,8 +261,8 @@ static bool this_insert(carbon_strdic_t *self, carbon_string_id_t **out, char *c
              * is requried since the filter maybe made a mistake. Of the filter returns "no", the
              * keys is new for sure. In this case, one can skip the lookup into the buckets. */
             size_t key_length = strlen(key);
-            carbon_hash_t bloom_key = key_length > 0 ? CARBON_HASH_FNV(strlen(key), key) : 0; /** using a hash of a keys instead of the string keys itself avoids reading the entire string for computing k hashes inside the carbon_bloom_t */
-            if (CARBON_BLOOM_TEST_AND_SET(&carbon_bloom_t, &bloom_key, sizeof(carbon_hash_t))) {
+            carbon_hash_t bloom_key = key_length > 0 ? NG5_HASH_FNV(strlen(key), key) : 0; /** using a hash of a keys instead of the string keys itself avoids reading the entire string for computing k hashes inside the carbon_bloom_t */
+            if (NG5_BLOOM_TEST_AND_SET(&carbon_bloom_t, &bloom_key, sizeof(carbon_hash_t))) {
                 /** ensure that the string really was seen (due to collisions in the bloom filter the keys might not
                  * been actually seen) */
 
@@ -278,7 +278,7 @@ static bool this_insert(carbon_strdic_t *self, carbon_string_id_t **out, char *c
 
                 /** register in contents list */
                 bool pop_result = freelist_pop(&string_id, self);
-                CARBON_PRINT_ERROR_AND_DIE_IF(!pop_result, CARBON_ERR_SLOTBROKEN)
+                NG5_PRINT_ERROR_AND_DIE_IF(!pop_result, NG5_ERR_SLOTBROKEN)
                 struct entry *entries = (struct entry *) carbon_vec_data(&extra->contents);
                 struct entry *entry   = entries + string_id;
                 assert (!entry->in_use);
@@ -293,7 +293,7 @@ static bool this_insert(carbon_strdic_t *self, carbon_string_id_t **out, char *c
     }
 
     /** set potential non-null out parameters */
-    CARBON_OPTIONAL_SET_OR_ELSE(out, ids_out, carbon_free(&self->alloc, ids_out));
+    NG5_OPTIONAL_SET_OR_ELSE(out, ids_out, carbon_free(&self->alloc, ids_out));
 
     /** cleanup */
     carbon_free(&hashtable_alloc, found_mask);
@@ -303,9 +303,9 @@ static bool this_insert(carbon_strdic_t *self, carbon_string_id_t **out, char *c
     unlock(self);
 
     carbon_timestamp_t end = carbon_time_now_wallclock();
-    CARBON_UNUSED(begin);
-    CARBON_UNUSED(end);
-    CARBON_INFO(STRING_DIC_SYNC_TAG, "insertion operation done: %f seconds spent here", (end - begin)/1000.0f)
+    NG5_UNUSED(begin);
+    NG5_UNUSED(end);
+    NG5_INFO(STRING_DIC_SYNC_TAG, "insertion operation done: %f seconds spent here", (end - begin)/1000.0f)
 
     return true;
 
@@ -313,10 +313,10 @@ static bool this_insert(carbon_strdic_t *self, carbon_string_id_t **out, char *c
 
 static bool this_remove(carbon_strdic_t *self, carbon_string_id_t *strings, size_t num_strings)
 {
-    CARBON_NON_NULL_OR_ERROR(self);
-    CARBON_NON_NULL_OR_ERROR(strings);
-    CARBON_NON_NULL_OR_ERROR(num_strings);
-    CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_SYNC)
+    NG5_NON_NULL_OR_ERROR(self);
+    NG5_NON_NULL_OR_ERROR(strings);
+    NG5_NON_NULL_OR_ERROR(num_strings);
+    NG5_CHECK_TAG(self->tag, NG5_STRDIC_TYPE_SYNC)
     lock(self);
 
     struct sync_extra *extra = this_extra(self);
@@ -326,22 +326,22 @@ static bool this_remove(carbon_strdic_t *self, carbon_string_id_t *strings, size
     carbon_string_id_t *string_ids_to_delete =
         carbon_malloc(&self->alloc, num_strings * sizeof(carbon_string_id_t));
 
-    /** remove strings from contents CARBON_vector, and skip duplicates */
+    /** remove strings from contents NG5_vector, and skip duplicates */
     for (size_t i = 0; i < num_strings; i++) {
         carbon_string_id_t carbon_string_id_t = strings[i];
         struct entry *entry   = (struct entry *) carbon_vec_data(&extra->contents) + carbon_string_id_t;
-        if (CARBON_LIKELY(entry->in_use)) {
+        if (NG5_LIKELY(entry->in_use)) {
             string_to_delete[num_strings_to_delete]    = entry->str;
             string_ids_to_delete[num_strings_to_delete] = strings[i];
             entry->str    = NULL;
             entry->in_use = false;
             num_strings_to_delete++;
-            CARBON_CHECK_SUCCESS(freelist_push(self, carbon_string_id_t));
+            NG5_CHECK_SUCCESS(freelist_push(self, carbon_string_id_t));
         }
     }
 
     /** remove from index */
-    CARBON_CHECK_SUCCESS(carbon_strhash_remove(&extra->index, string_to_delete, num_strings_to_delete));
+    NG5_CHECK_SUCCESS(carbon_strhash_remove(&extra->index, string_to_delete, num_strings_to_delete));
 
     /** free up resources for strings that should be removed */
     for (size_t i = 0; i < num_strings_to_delete; i++) {
@@ -360,15 +360,15 @@ static bool this_locate_safe(carbon_strdic_t *self, carbon_string_id_t **out, bo
                           size_t *num_not_found, char *const *keys, size_t num_keys)
 {
     carbon_timestamp_t begin = carbon_time_now_wallclock();
-    CARBON_TRACE(STRING_DIC_SYNC_TAG, "'locate_safe' function invoked for %zu strings", num_keys)
+    NG5_TRACE(STRING_DIC_SYNC_TAG, "'locate_safe' function invoked for %zu strings", num_keys)
 
-    CARBON_NON_NULL_OR_ERROR(self);
-    CARBON_NON_NULL_OR_ERROR(out);
-    CARBON_NON_NULL_OR_ERROR(found_mask);
-    CARBON_NON_NULL_OR_ERROR(num_not_found);
-    CARBON_NON_NULL_OR_ERROR(keys);
-    CARBON_NON_NULL_OR_ERROR(num_keys);
-    CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_SYNC)
+    NG5_NON_NULL_OR_ERROR(self);
+    NG5_NON_NULL_OR_ERROR(out);
+    NG5_NON_NULL_OR_ERROR(found_mask);
+    NG5_NON_NULL_OR_ERROR(num_not_found);
+    NG5_NON_NULL_OR_ERROR(keys);
+    NG5_NON_NULL_OR_ERROR(num_keys);
+    NG5_CHECK_TAG(self->tag, NG5_STRDIC_TYPE_SYNC)
 
     lock(self);
     struct sync_extra *extra = this_extra(self);
@@ -376,9 +376,9 @@ static bool this_locate_safe(carbon_strdic_t *self, carbon_string_id_t **out, bo
     unlock(self);
 
     carbon_timestamp_t end = carbon_time_now_wallclock();
-    CARBON_UNUSED(begin);
-    CARBON_UNUSED(end);
-    CARBON_TRACE(STRING_DIC_SYNC_TAG, "'locate_safe' function done: %f seconds spent here", (end-begin)/1000.0f)
+    NG5_UNUSED(begin);
+    NG5_UNUSED(end);
+    NG5_TRACE(STRING_DIC_SYNC_TAG, "'locate_safe' function done: %f seconds spent here", (end-begin)/1000.0f)
 
     return status;
 }
@@ -386,7 +386,7 @@ static bool this_locate_safe(carbon_strdic_t *self, carbon_string_id_t **out, bo
 static bool this_locate_fast(carbon_strdic_t *self, carbon_string_id_t **out, char *const *keys,
                           size_t num_keys)
 {
-    CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_SYNC)
+    NG5_CHECK_TAG(self->tag, NG5_STRDIC_TYPE_SYNC)
 
     bool   *found_mask;
     size_t  num_not_found;
@@ -402,14 +402,14 @@ static bool this_locate_fast(carbon_strdic_t *self, carbon_string_id_t **out, ch
 
 static char **this_extract(carbon_strdic_t *self, const carbon_string_id_t *ids, size_t num_ids)
 {
-    if (CARBON_UNLIKELY(!self || !ids || num_ids == 0 || self->tag != CARBON_STRDIC_TYPE_SYNC)) {
+    if (NG5_UNLIKELY(!self || !ids || num_ids == 0 || self->tag != NG5_STRDIC_TYPE_SYNC)) {
         return NULL;
     }
 
     lock(self);
 
     struct allocator hashtable_alloc;
-#if defined(CARBON_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
+#if defined(NG5_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
     allocatorTrace(&hashtable_alloc);
 #else
     carbon_alloc_this_or_std(&hashtable_alloc, &self->alloc);
@@ -425,8 +425,8 @@ static char **this_extract(carbon_strdic_t *self, const carbon_string_id_t *ids,
     for (size_t i = 0; i < num_ids; i++) {
         carbon_string_id_t carbon_string_id_t = ids[i];
         assert(carbon_string_id_t < carbon_vec_length(&extra->contents));
-        assert(carbon_string_id_t == CARBON_NULL_ENCODED_STRING || entries[carbon_string_id_t].in_use);
-        result[i] = carbon_string_id_t != CARBON_NULL_ENCODED_STRING ? entries[carbon_string_id_t].str : CARBON_NULL_TEXT;
+        assert(carbon_string_id_t == NG5_NULL_ENCODED_STRING || entries[carbon_string_id_t].in_use);
+        result[i] = carbon_string_id_t != NG5_NULL_ENCODED_STRING ? entries[carbon_string_id_t].str : NG5_NULL_TEXT;
     }
 
     unlock(self);
@@ -435,13 +435,13 @@ static char **this_extract(carbon_strdic_t *self, const carbon_string_id_t *ids,
 
 static bool this_free(carbon_strdic_t *self, void *ptr)
 {
-    CARBON_UNUSED(self);
+    NG5_UNUSED(self);
 
     struct allocator hashtable_alloc;
-#if defined(CARBON_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
+#if defined(NG5_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
     CHECK_SUCCESS(allocatorTrace(&hashtable_alloc));
 #else
-    CARBON_CHECK_SUCCESS(carbon_alloc_this_or_std(&hashtable_alloc, &self->alloc));
+    NG5_CHECK_SUCCESS(carbon_alloc_this_or_std(&hashtable_alloc, &self->alloc));
 #endif
 
     return carbon_free(&hashtable_alloc, ptr);
@@ -449,23 +449,23 @@ static bool this_free(carbon_strdic_t *self, void *ptr)
 
 static bool this_reset_counters(carbon_strdic_t *self)
 {
-    CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_SYNC)
+    NG5_CHECK_TAG(self->tag, NG5_STRDIC_TYPE_SYNC)
     struct sync_extra *extra = this_extra(self);
-    CARBON_CHECK_SUCCESS(carbon_strhash_reset_counters(&extra->index));
+    NG5_CHECK_SUCCESS(carbon_strhash_reset_counters(&extra->index));
     return true;
 }
 
 static bool this_counters(carbon_strdic_t *self, carbon_string_hash_counters_t *counters)
 {
-    CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_SYNC)
+    NG5_CHECK_TAG(self->tag, NG5_STRDIC_TYPE_SYNC)
     struct sync_extra *extra = this_extra(self);
-    CARBON_CHECK_SUCCESS(carbon_strhash_get_counters(counters, &extra->index));
+    NG5_CHECK_SUCCESS(carbon_strhash_get_counters(counters, &extra->index));
     return true;
 }
 
 static bool this_num_distinct(carbon_strdic_t *self, size_t *num)
 {
-    CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_SYNC)
+    NG5_CHECK_TAG(self->tag, NG5_STRDIC_TYPE_SYNC)
     struct sync_extra *extra = this_extra(self);
     *num = carbon_vec_length(&extra->contents);
     return true;
@@ -474,7 +474,7 @@ static bool this_num_distinct(carbon_strdic_t *self, size_t *num)
 static bool this_get_contents(carbon_strdic_t *self, vec_t ofType (char *) * strings,
                            vec_t ofType(carbon_string_id_t) * string_ids)
 {
-    CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_SYNC);
+    NG5_CHECK_TAG(self->tag, NG5_STRDIC_TYPE_SYNC);
     struct sync_extra *extra = this_extra(self);
 
     for (carbon_string_id_t i = 0; i < extra->contents.num_elems; i++) {

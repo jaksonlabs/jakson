@@ -29,8 +29,8 @@ typedef struct
 
 #define IMPORT_BASIC_PAIR(name)                                                                                        \
 {                                                                                                                      \
-    CARBON_UNUSED(archive);                                                                                            \
-    CARBON_UNUSED(path_stack);                                                                                         \
+    NG5_UNUSED(archive);                                                                                            \
+    NG5_UNUSED(path_stack);                                                                                         \
     assert(capture);                                                                                                   \
                                                                                                                        \
     capture_t *extra = (capture_t *) capture;                                                                          \
@@ -53,12 +53,12 @@ static carbon_visitor_policy_e                                                  
 visit_enter_##name##_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,                  \
                                  const carbon_string_id_t *keys, u32 num_pairs, void *capture)                    \
 {                                                                                                                      \
-    CARBON_UNUSED(archive);                                                                                            \
-    CARBON_UNUSED(path);                                                                                               \
-    CARBON_UNUSED(id);                                                                                                 \
-    CARBON_UNUSED(keys);                                                                                               \
-    CARBON_UNUSED(num_pairs);                                                                                          \
-    CARBON_UNUSED(capture);                                                                                            \
+    NG5_UNUSED(archive);                                                                                            \
+    NG5_UNUSED(path);                                                                                               \
+    NG5_UNUSED(id);                                                                                                 \
+    NG5_UNUSED(keys);                                                                                               \
+    NG5_UNUSED(num_pairs);                                                                                          \
+    NG5_UNUSED(capture);                                                                                            \
                                                                                                                        \
     assert(capture);                                                                                                   \
                                                                                                                        \
@@ -69,7 +69,7 @@ visit_enter_##name##_array_pairs(carbon_archive_t *archive, path_stack_t path, c
         carbon_encoded_doc_add_prop_array_##name(doc, keys[i]);                                                        \
     }                                                                                                                  \
                                                                                                                        \
-    return CARBON_VISITOR_POLICY_INCLUDE;                                                                              \
+    return NG5_VISITOR_POLICY_INCLUDE;                                                                              \
 }                                                                                                                      \
                                                                                                                        \
 static void                                                                                                            \
@@ -77,13 +77,13 @@ visit_##name##_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_o
                           const carbon_string_id_t key, u32 entry_idx, u32 max_entries,                      \
                           const built_in_type *array, u32 array_length, void *capture)                            \
 {                                                                                                                      \
-    CARBON_UNUSED(archive);                                                                                            \
-    CARBON_UNUSED(path);                                                                                               \
-    CARBON_UNUSED(id);                                                                                                 \
-    CARBON_UNUSED(key);                                                                                                \
-    CARBON_UNUSED(entry_idx);                                                                                          \
-    CARBON_UNUSED(max_entries);                                                                                        \
-    CARBON_UNUSED(capture);                                                                                            \
+    NG5_UNUSED(archive);                                                                                            \
+    NG5_UNUSED(path);                                                                                               \
+    NG5_UNUSED(id);                                                                                                 \
+    NG5_UNUSED(key);                                                                                                \
+    NG5_UNUSED(entry_idx);                                                                                          \
+    NG5_UNUSED(max_entries);                                                                                        \
+    NG5_UNUSED(capture);                                                                                            \
                                                                                                                        \
     assert(capture);                                                                                                   \
                                                                                                                        \
@@ -96,7 +96,7 @@ visit_##name##_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_o
 static void
 visit_root_object(carbon_archive_t *archive, carbon_object_id_t id, void *capture)
 {
-    CARBON_UNUSED(archive);
+    NG5_UNUSED(archive);
     assert(capture);
 
     capture_t *extra = (capture_t *) capture;
@@ -119,8 +119,8 @@ static void
 visit_null_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t oid, const carbon_string_id_t *keys,
                   u32 num_pairs, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
     assert(capture);
 
     capture_t *extra = (capture_t *) capture;
@@ -134,19 +134,19 @@ static carbon_visitor_policy_e
 before_object_visit(carbon_archive_t *archive, path_stack_t path_stack, carbon_object_id_t parent_id,
                     carbon_object_id_t value_id, u32 object_idx, u32 num_objects, carbon_string_id_t key, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path_stack);
-    CARBON_UNUSED(object_idx);
-    CARBON_UNUSED(num_objects);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path_stack);
+    NG5_UNUSED(object_idx);
+    NG5_UNUSED(num_objects);
+    NG5_UNUSED(key);
+    NG5_UNUSED(capture);
 
     capture_t *extra = (capture_t *) capture;
     carbon_encoded_doc_t *parent_doc = encoded_doc_collection_get_or_append(extra->collection, parent_id);
     carbon_encoded_doc_t *child_doc = encoded_doc_collection_get_or_append(extra->collection, value_id);
     carbon_encoded_doc_add_prop_object(parent_doc, key, child_doc);
 
-    return CARBON_VISITOR_POLICY_INCLUDE;
+    return NG5_VISITOR_POLICY_INCLUDE;
 }
 
 DECLARE_VISIT_ARRAY_TYPE(int8, carbon_i8)
@@ -165,12 +165,12 @@ static carbon_visitor_policy_e
 visit_enter_null_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id, const carbon_string_id_t *keys,
                              u32 num_pairs, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(keys);
-    CARBON_UNUSED(num_pairs);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(keys);
+    NG5_UNUSED(num_pairs);
+    NG5_UNUSED(capture);
 
     assert(capture);
 
@@ -181,21 +181,21 @@ visit_enter_null_array_pairs(carbon_archive_t *archive, path_stack_t path, carbo
         carbon_encoded_doc_add_prop_array_null(doc, keys[i]);
     }
 
-    return CARBON_VISITOR_POLICY_INCLUDE;
+    return NG5_VISITOR_POLICY_INCLUDE;
 }
 
 static void
 visit_null_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id, const carbon_string_id_t key,
                       u32 entry_idx, u32 max_entries, u32 num_nulls, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(entry_idx);
-    CARBON_UNUSED(max_entries);
-    CARBON_UNUSED(num_nulls);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(key);
+    NG5_UNUSED(entry_idx);
+    NG5_UNUSED(max_entries);
+    NG5_UNUSED(num_nulls);
+    NG5_UNUSED(capture);
 
     assert(capture);
 
@@ -209,13 +209,13 @@ before_visit_object_array_objects(bool *skip_group_object_ids, carbon_archive_t 
                                   carbon_object_id_t parent_id, carbon_string_id_t key, const carbon_object_id_t *group_object_ids,
                                   u32 num_group_object_ids, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(parent_id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(group_object_ids);
-    CARBON_UNUSED(skip_group_object_ids);
-    CARBON_UNUSED(num_group_object_ids);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(parent_id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(group_object_ids);
+    NG5_UNUSED(skip_group_object_ids);
+    NG5_UNUSED(num_group_object_ids);
 
     capture_t *extra = (capture_t *) capture;
     carbon_encoded_doc_t *doc = encoded_doc_collection_get_or_append(extra->collection, parent_id);
@@ -235,12 +235,12 @@ visit_object_array_object_property_##name(carbon_archive_t *archive, path_stack_
                                            const built_in_type *nested_values,                                         \
                                            u32 num_nested_values, void *capture)                                  \
 {                                                                                                                      \
-    CARBON_UNUSED(archive);                                                                                            \
-    CARBON_UNUSED(path);                                                                                               \
-    CARBON_UNUSED(parent_id);                                                                                          \
-    CARBON_UNUSED(key);                                                                                                \
-    CARBON_UNUSED(nested_key);                                                                                         \
-    CARBON_UNUSED(nested_values);                                                                                      \
+    NG5_UNUSED(archive);                                                                                            \
+    NG5_UNUSED(path);                                                                                               \
+    NG5_UNUSED(parent_id);                                                                                          \
+    NG5_UNUSED(key);                                                                                                \
+    NG5_UNUSED(nested_key);                                                                                         \
+    NG5_UNUSED(nested_values);                                                                                      \
                                                                                                                        \
     capture_t *extra = (capture_t *) capture;                                                                          \
 	carbon_encoded_doc_t *doc = encoded_doc_collection_get_or_append(extra->collection, nested_object_id);             \
@@ -261,17 +261,17 @@ DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(string, carbon_string_id_t);
 DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(boolean, carbon_boolean_t);
 DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(null, carbon_u32);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_archive_converter(carbon_encoded_doc_collection_t *collection, carbon_archive_t *archive)
 {
 
-    CARBON_NON_NULL_OR_ERROR(collection);
-    CARBON_NON_NULL_OR_ERROR(archive);
+    NG5_NON_NULL_OR_ERROR(collection);
+    NG5_NON_NULL_OR_ERROR(archive);
 
     carbon_encoded_doc_collection_create(collection, &archive->err, archive);
 
     carbon_archive_visitor_t visitor = { 0 };
-    carbon_archive_visitor_desc_t desc = { .visit_mask = CARBON_ARCHIVE_ITER_MASK_ANY };
+    carbon_archive_visitor_desc_t desc = { .visit_mask = NG5_ARCHIVE_ITER_MASK_ANY };
     capture_t capture = {
         .collection = collection
     };

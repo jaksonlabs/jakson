@@ -41,8 +41,8 @@
  * The underlying hashing function is the Jenkins hash function.
  */
 
-#ifndef CARBON_STRHASH_H
-#define CARBON_STRHASH_H
+#ifndef NG5_STRHASH_H
+#define NG5_STRHASH_H
 
 #include <assert.h>
 
@@ -53,38 +53,38 @@
 #include "hash/hash.h"
 #include "shared/types.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
 /**
  * Enables or disabled packing of entries inside a bucket. By default, packing is disabled.
- * To turn on packing, set 'CARBON_CONFIG_PACK_BUCKETS' symbol
+ * To turn on packing, set 'NG5_CONFIG_PACK_BUCKETS' symbol
  */
-#ifdef CARBON_CONFIG_PACK_BUCKETS
+#ifdef NG5_CONFIG_PACK_BUCKETS
 #define
-#define CARBON_BUCKET_PACKING __attribute__((__packed__))
+#define NG5_BUCKET_PACKING __attribute__((__packed__))
 #else
-#define CARBON_BUCKET_PACKING
+#define NG5_BUCKET_PACKING
 #endif
 
 /**
  * Number of elements stored in the per-bucket cache (Tier 2, see below)
  */
-#ifndef CARBON_CONFIG_BUCKET_CACHE_SIZE
-#define CARBON_CONFIG_BUCKET_CACHE_SIZE  16
+#ifndef NG5_CONFIG_BUCKET_CACHE_SIZE
+#define NG5_CONFIG_BUCKET_CACHE_SIZE  16
 #endif
 
 /**
  * Maximum number of elements stored per bucket (Tier 3, see below)
  */
-#ifndef CARBON_CONFIG_BUCKET_CAPACITY
-#define CARBON_CONFIG_BUCKET_CAPACITY  1024
+#ifndef NG5_CONFIG_BUCKET_CAPACITY
+#define NG5_CONFIG_BUCKET_CAPACITY  1024
 #endif
 
 typedef struct carbon_strhash carbon_strhash_t;
 
 typedef enum
 {
-    CARBON_STRHASH_INMEMORY
+    NG5_STRHASH_INMEMORY
 } carbon_strhash_tag_e;
 
 typedef struct carbon_string_hash_counters
@@ -184,7 +184,7 @@ typedef struct carbon_strhash
 
 } carbon_strhash_t;
 
-CARBON_DEFINE_GET_ERROR_FUNCTION(carbon_strhash_t, carbon_strhash_t, table);
+NG5_DEFINE_GET_ERROR_FUNCTION(carbon_strhash_t, carbon_strhash_t, table);
 
 /**
  * Frees resources bound to <code>carbon_parallel_map_exec</code> via the allocator specified by the call to <code>string_id_map_create</code>.
@@ -195,7 +195,7 @@ CARBON_DEFINE_GET_ERROR_FUNCTION(carbon_strhash_t, carbon_strhash_t, table);
 inline static int
 carbon_strhash_drop(carbon_strhash_t *carbon_parallel_map_exec)
 {
-    CARBON_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
+    NG5_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
     assert(carbon_parallel_map_exec->drop);
 
     return carbon_parallel_map_exec->drop(carbon_parallel_map_exec);
@@ -210,7 +210,7 @@ carbon_strhash_drop(carbon_strhash_t *carbon_parallel_map_exec)
 inline static bool
 carbon_strhash_reset_counters(carbon_strhash_t *carbon_parallel_map_exec)
 {
-    CARBON_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
+    NG5_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
     memset(&carbon_parallel_map_exec->counters, 0, sizeof(carbon_string_hash_counters_t));
     return true;
 }
@@ -224,8 +224,8 @@ carbon_strhash_reset_counters(carbon_strhash_t *carbon_parallel_map_exec)
 inline static int
 carbon_strhash_get_counters(carbon_string_hash_counters_t *out, const carbon_strhash_t *carbon_parallel_map_exec)
 {
-    CARBON_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
-    CARBON_NON_NULL_OR_ERROR(out);
+    NG5_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
+    NG5_NON_NULL_OR_ERROR(out);
     *out = carbon_parallel_map_exec->counters;
     return true;
 }
@@ -245,9 +245,9 @@ inline static int
 carbon_strhash_put_safe(carbon_strhash_t *carbon_parallel_map_exec, char *const *keys, const carbon_string_id_t *values,
                         size_t npairs)
 {
-    CARBON_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
-    CARBON_NON_NULL_OR_ERROR(keys);
-    CARBON_NON_NULL_OR_ERROR(values);
+    NG5_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
+    NG5_NON_NULL_OR_ERROR(keys);
+    NG5_NON_NULL_OR_ERROR(values);
     assert(carbon_parallel_map_exec->put_bulk_safe);
 
     return carbon_parallel_map_exec->put_bulk_safe(carbon_parallel_map_exec, keys, values, npairs);
@@ -272,9 +272,9 @@ inline static int
 carbon_strhash_put_bulk_fast(carbon_strhash_t *carbon_parallel_map_exec, char *const *keys, const carbon_string_id_t *values,
                              size_t npairs)
 {
-    CARBON_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
-    CARBON_NON_NULL_OR_ERROR(keys);
-    CARBON_NON_NULL_OR_ERROR(values);
+    NG5_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
+    NG5_NON_NULL_OR_ERROR(keys);
+    NG5_NON_NULL_OR_ERROR(values);
     assert(carbon_parallel_map_exec->put_bulk_fast);
 
     return carbon_parallel_map_exec->put_bulk_fast(carbon_parallel_map_exec, keys, values, npairs);
@@ -286,8 +286,8 @@ carbon_strhash_put_bulk_fast(carbon_strhash_t *carbon_parallel_map_exec, char *c
 inline static int
 carbon_strhash_put_exact(carbon_strhash_t *carbon_parallel_map_exec, const char *key, carbon_string_id_t value)
 {
-    CARBON_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
-    CARBON_NON_NULL_OR_ERROR(key);
+    NG5_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
+    NG5_NON_NULL_OR_ERROR(key);
     assert(carbon_parallel_map_exec->put_exact_safe);
 
     return carbon_parallel_map_exec->put_exact_safe(carbon_parallel_map_exec, key, value);
@@ -299,8 +299,8 @@ carbon_strhash_put_exact(carbon_strhash_t *carbon_parallel_map_exec, const char 
 inline static int
 carbon_strhash_put_exact_fast(carbon_strhash_t *carbon_parallel_map_exec, const char *key, carbon_string_id_t value)
 {
-    CARBON_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
-    CARBON_NON_NULL_OR_ERROR(key);
+    NG5_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
+    NG5_NON_NULL_OR_ERROR(key);
 
     assert(carbon_parallel_map_exec->put_exact_fast);
 
@@ -339,11 +339,11 @@ carbon_strhash_get_bulk_safe(carbon_string_id_t **out, bool **found_mask, size_t
                              carbon_strhash_t *carbon_parallel_map_exec,
                              char *const *keys, size_t nkeys)
 {
-    CARBON_NON_NULL_OR_ERROR(out);
-    CARBON_NON_NULL_OR_ERROR(found_mask);
-    CARBON_NON_NULL_OR_ERROR(num_not_found);
-    CARBON_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
-    CARBON_NON_NULL_OR_ERROR(keys);
+    NG5_NON_NULL_OR_ERROR(out);
+    NG5_NON_NULL_OR_ERROR(found_mask);
+    NG5_NON_NULL_OR_ERROR(num_not_found);
+    NG5_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
+    NG5_NON_NULL_OR_ERROR(keys);
     assert(carbon_parallel_map_exec->get_bulk_safe);
 
     int result = carbon_parallel_map_exec->get_bulk_safe(carbon_parallel_map_exec, out, found_mask, num_not_found, keys, nkeys);
@@ -357,10 +357,10 @@ carbon_strhash_get_bulk_safe(carbon_string_id_t **out, bool **found_mask, size_t
 inline static int
 carbon_strhash_get_bulk_safe_exact(carbon_string_id_t *out, bool *found, carbon_strhash_t *carbon_parallel_map_exec, const char *key)
 {
-    CARBON_NON_NULL_OR_ERROR(out);
-    CARBON_NON_NULL_OR_ERROR(found);
-    CARBON_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
-    CARBON_NON_NULL_OR_ERROR(key);
+    NG5_NON_NULL_OR_ERROR(out);
+    NG5_NON_NULL_OR_ERROR(found);
+    NG5_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
+    NG5_NON_NULL_OR_ERROR(key);
     assert(carbon_parallel_map_exec->get_exact_safe);
 
     int result = carbon_parallel_map_exec->get_exact_safe(carbon_parallel_map_exec, out, found, key);
@@ -390,9 +390,9 @@ inline static int
 carbon_strhash_get_bulk_fast(carbon_string_id_t **out, carbon_strhash_t *carbon_parallel_map_exec,
                              char *const *keys, size_t nkeys)
 {
-    CARBON_NON_NULL_OR_ERROR(out);
-    CARBON_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
-    CARBON_NON_NULL_OR_ERROR(keys);
+    NG5_NON_NULL_OR_ERROR(out);
+    NG5_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
+    NG5_NON_NULL_OR_ERROR(keys);
     assert(carbon_parallel_map_exec->get_fast);
 
     return carbon_parallel_map_exec->get_fast(carbon_parallel_map_exec, out, keys, nkeys);
@@ -417,8 +417,8 @@ inline static int
 carbon_strhash_update_fast(carbon_strhash_t *carbon_parallel_map_exec, const carbon_string_id_t *values,
                            char *const *keys, size_t nkeys)
 {
-    CARBON_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
-    CARBON_NON_NULL_OR_ERROR(keys);
+    NG5_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
+    NG5_NON_NULL_OR_ERROR(keys);
     assert(carbon_parallel_map_exec->update_key_fast);
 
     return carbon_parallel_map_exec->update_key_fast(carbon_parallel_map_exec, values, keys, nkeys);
@@ -435,8 +435,8 @@ carbon_strhash_update_fast(carbon_strhash_t *carbon_parallel_map_exec, const car
 inline static int
 carbon_strhash_remove(carbon_strhash_t *carbon_parallel_map_exec, char *const *keys, size_t nkeys)
 {
-    CARBON_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
-    CARBON_NON_NULL_OR_ERROR(keys);
+    NG5_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
+    NG5_NON_NULL_OR_ERROR(keys);
     assert(carbon_parallel_map_exec->remove);
 
     return carbon_parallel_map_exec->remove(carbon_parallel_map_exec, keys, nkeys);
@@ -452,8 +452,8 @@ carbon_strhash_remove(carbon_strhash_t *carbon_parallel_map_exec, char *const *k
 inline static int
 carbon_strhash_free(void *ptr, carbon_strhash_t *carbon_parallel_map_exec)
 {
-    CARBON_NON_NULL_OR_ERROR(ptr);
-    CARBON_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
+    NG5_NON_NULL_OR_ERROR(ptr);
+    NG5_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
     assert(carbon_parallel_map_exec->free);
 
     return carbon_parallel_map_exec->free(carbon_parallel_map_exec, ptr);
@@ -468,7 +468,7 @@ carbon_strhash_free(void *ptr, carbon_strhash_t *carbon_parallel_map_exec)
 inline static int
 carbon_strhash_counters_init(carbon_string_hash_counters_t *counters)
 {
-    CARBON_NON_NULL_OR_ERROR(counters);
+    NG5_NON_NULL_OR_ERROR(counters);
     memset(counters, 0, sizeof(carbon_string_hash_counters_t));
     return true;
 }
@@ -483,8 +483,8 @@ carbon_strhash_counters_init(carbon_string_hash_counters_t *counters)
 inline static int
 carbon_strhash_counters_add(carbon_string_hash_counters_t *dst_lhs, const carbon_string_hash_counters_t *rhs)
 {
-    CARBON_NON_NULL_OR_ERROR(dst_lhs);
-    CARBON_NON_NULL_OR_ERROR(rhs);
+    NG5_NON_NULL_OR_ERROR(dst_lhs);
+    NG5_NON_NULL_OR_ERROR(rhs);
     dst_lhs->num_bucket_search_miss += rhs->num_bucket_search_miss;
     dst_lhs->num_bucket_search_hit += rhs->num_bucket_search_hit;
     dst_lhs->num_bucket_cache_search_hit += rhs->num_bucket_cache_search_hit;
@@ -492,6 +492,6 @@ carbon_strhash_counters_add(carbon_string_hash_counters_t *dst_lhs, const carbon
     return true;
 }
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif

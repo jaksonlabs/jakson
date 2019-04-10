@@ -37,7 +37,7 @@ typedef struct carbon_query_index_id_to_offset
 #define OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(num_pairs, obj, bit_flag_name, offset_name)                                \
 {                                                                                                                      \
     if (!obj) {                                                                                                        \
-        carbon_print_error_and_die(CARBON_ERR_NULLPTR)                                                                 \
+        carbon_print_error_and_die(NG5_ERR_NULLPTR)                                                                 \
     }                                                                                                                  \
                                                                                                                        \
     if (obj->flags.bits.bit_flag_name) {                                                                               \
@@ -46,38 +46,38 @@ typedef struct carbon_query_index_id_to_offset
         carbon_fixed_prop_t prop;                                                                                      \
         carbon_int_embedded_fixed_props_read(&prop, &obj->file);                                                       \
         carbon_int_reset_cabin_object_mem_file(obj);                                                                   \
-        CARBON_OPTIONAL_SET(num_pairs, prop.header->num_entries);                                                      \
+        NG5_OPTIONAL_SET(num_pairs, prop.header->num_entries);                                                      \
         return prop.keys;                                                                                              \
     } else {                                                                                                           \
-        CARBON_OPTIONAL_SET(num_pairs, 0);                                                                             \
+        NG5_OPTIONAL_SET(num_pairs, 0);                                                                             \
         return NULL;                                                                                                   \
     }                                                                                                                  \
 }
 
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_query_create(carbon_query_t *query, carbon_archive_t *archive)
 {
-    CARBON_NON_NULL_OR_ERROR(query)
-    CARBON_NON_NULL_OR_ERROR(archive)
+    NG5_NON_NULL_OR_ERROR(query)
+    NG5_NON_NULL_OR_ERROR(archive)
     query->archive = archive;
     query->context = carbon_archive_io_context_create(archive);
     carbon_error_init(&query->err);
     return query->context != NULL;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_query_drop(carbon_query_t *query)
 {
-    CARBON_NON_NULL_OR_ERROR(query)
+    NG5_NON_NULL_OR_ERROR(query)
     return carbon_io_context_drop(query->context);
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_query_scan_strids(carbon_strid_iter_t *it, carbon_query_t *query)
 {
-    CARBON_NON_NULL_OR_ERROR(it)
-    CARBON_NON_NULL_OR_ERROR(query)
+    NG5_NON_NULL_OR_ERROR(it)
+    NG5_NON_NULL_OR_ERROR(query)
     return carbon_strid_iter_open(it, &query->err, query->archive);
 }
 
@@ -86,7 +86,7 @@ index_string_id_to_offset_open_file(carbon_query_index_id_to_offset_t *index, st
 {
     index->disk_file = fopen(file, "r");
     if (!index->disk_file) {
-        error(err, CARBON_ERR_FOPEN_FAILED)
+        error(err, NG5_ERR_FOPEN_FAILED)
         return false;
     } else {
         fseek(index->disk_file, 0, SEEK_END);
@@ -96,12 +96,12 @@ index_string_id_to_offset_open_file(carbon_query_index_id_to_offset_t *index, st
     }
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_query_create_index_string_id_to_offset(carbon_query_index_id_to_offset_t **index,
                                               carbon_query_t *query)
 {
-    CARBON_NON_NULL_OR_ERROR(index)
-    CARBON_NON_NULL_OR_ERROR(query)
+    NG5_NON_NULL_OR_ERROR(index)
+    NG5_NON_NULL_OR_ERROR(query)
 
     carbon_strid_iter_t   strid_iter;
     carbon_strid_info_t  *info;
@@ -136,14 +136,14 @@ carbon_query_create_index_string_id_to_offset(carbon_query_index_id_to_offset_t 
         carbon_strid_iter_close(&strid_iter);
         return true;
     } else {
-        error(&query->err, CARBON_ERR_SCAN_FAILED);
+        error(&query->err, NG5_ERR_SCAN_FAILED);
         return false;
     }
 
 
 }
 
-CARBON_EXPORT(void)
+NG5_EXPORT(void)
 carbon_query_drop_index_string_id_to_offset(carbon_query_index_id_to_offset_t *index)
 {
     if (index) {
@@ -153,26 +153,26 @@ carbon_query_drop_index_string_id_to_offset(carbon_query_index_id_to_offset_t *i
     }
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_query_index_id_to_offset_serialize(FILE *file, struct err *err, carbon_query_index_id_to_offset_t *index)
 {
-    CARBON_UNUSED(file);
-    CARBON_UNUSED(err);
-    CARBON_UNUSED(index);
+    NG5_UNUSED(file);
+    NG5_UNUSED(err);
+    NG5_UNUSED(index);
     return carbon_hashtable_serialize(file, &index->mapping);
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_query_index_id_to_offset_deserialize(carbon_query_index_id_to_offset_t **index, struct err *err, const char *file_path, offset_t offset)
 {
-    CARBON_NON_NULL_OR_ERROR(index)
-    CARBON_NON_NULL_OR_ERROR(err)
-    CARBON_NON_NULL_OR_ERROR(file_path)
-    CARBON_NON_NULL_OR_ERROR(offset)
+    NG5_NON_NULL_OR_ERROR(index)
+    NG5_NON_NULL_OR_ERROR(err)
+    NG5_NON_NULL_OR_ERROR(file_path)
+    NG5_NON_NULL_OR_ERROR(offset)
 
     carbon_query_index_id_to_offset_t *result = malloc(sizeof(carbon_query_index_id_to_offset_t));
     if (!result) {
-        error(err, CARBON_ERR_MALLOCERR);
+        error(err, NG5_ERR_MALLOCERR);
         return false;
     }
 
@@ -182,21 +182,21 @@ carbon_query_index_id_to_offset_deserialize(carbon_query_index_id_to_offset_t **
 
     FILE *index_reader_file = fopen(file_path, "r");
     if (!index_reader_file) {
-        error(err, CARBON_ERR_FOPEN_FAILED)
+        error(err, NG5_ERR_FOPEN_FAILED)
         return false;
     } else {
         fseek(index_reader_file, 0, SEEK_END);
         offset_t file_size = ftell(index_reader_file);
 
         if (offset >= file_size) {
-            error(err, CARBON_ERR_INTERNALERR)
+            error(err, NG5_ERR_INTERNALERR)
             return false;
         }
 
         fseek(index_reader_file, offset, SEEK_SET);
 
         if (!carbon_hashtable_deserialize(&result->mapping, err, index_reader_file)) {
-            error(err, CARBON_ERR_HASTABLE_DESERIALERR);
+            error(err, NG5_ERR_HASTABLE_DESERIALERR);
             fclose(index_reader_file);
             *index = NULL;
             return false;
@@ -250,8 +250,8 @@ fetch_string_by_id_via_scan(carbon_query_t *query, carbon_string_id_t id)
                         if (result) {
                             free (result);
                         }
-                        error(&query->err, !decode_result ? CARBON_ERR_DECOMPRESSFAILED :
-                                                  CARBON_ERR_ITERATORNOTCLOSED);
+                        error(&query->err, !decode_result ? NG5_ERR_DECOMPRESSFAILED :
+                                                  NG5_ERR_ITERATORNOTCLOSED);
                         return NULL;
                     } else {
                         return result;
@@ -260,10 +260,10 @@ fetch_string_by_id_via_scan(carbon_query_t *query, carbon_string_id_t id)
             }
         }
         carbon_strid_iter_close(&strid_iter);
-        error(&query->err, CARBON_ERR_NOTFOUND);
+        error(&query->err, NG5_ERR_NOTFOUND);
         return NULL;
     } else {
-        error(&query->err, CARBON_ERR_SCAN_FAILED);
+        error(&query->err, NG5_ERR_SCAN_FAILED);
         return NULL;
     }
 }
@@ -280,21 +280,21 @@ fetch_string_by_id_via_index(carbon_query_t *query, carbon_query_index_id_to_off
             if (decode_result) {
                 return result;
             } else {
-                error(&query->err, CARBON_ERR_DECOMPRESSFAILED);
+                error(&query->err, NG5_ERR_DECOMPRESSFAILED);
                 return NULL;
             }
 
         } else {
-            error(&query->err, CARBON_ERR_INDEXCORRUPTED_OFFSET);
+            error(&query->err, NG5_ERR_INDEXCORRUPTED_OFFSET);
             return NULL;
         }
     } else {
-        error(&query->err, CARBON_ERR_NOTFOUND);
+        error(&query->err, NG5_ERR_NOTFOUND);
         return NULL;
     }
 }
 
-CARBON_EXPORT(char *)
+NG5_EXPORT(char *)
 carbon_query_fetch_string_by_id(carbon_query_t *query, carbon_string_id_t id)
 {
     assert(query);
@@ -308,7 +308,7 @@ carbon_query_fetch_string_by_id(carbon_query_t *query, carbon_string_id_t id)
     }
 }
 
-CARBON_EXPORT(char *)
+NG5_EXPORT(char *)
 carbon_query_fetch_string_by_id_nocache(carbon_query_t *query, carbon_string_id_t id)
 {
     bool has_index;
@@ -320,7 +320,7 @@ carbon_query_fetch_string_by_id_nocache(carbon_query_t *query, carbon_string_id_
     }
 }
 
-CARBON_EXPORT(char **)
+NG5_EXPORT(char **)
 carbon_query_fetch_strings_by_offset(carbon_query_t *query, offset_t *offs, u32 *strlens, size_t num_offs)
 {
     assert(query);
@@ -336,7 +336,7 @@ carbon_query_fetch_strings_by_offset(carbon_query_t *query, offset_t *offs, u32 
 
     char **result = malloc(num_offs * sizeof(char*));
     if (!result) {
-        error(&query->err, CARBON_ERR_MALLOCERR);
+        error(&query->err, NG5_ERR_MALLOCERR);
         return NULL;
     }
     for (size_t i = 0; i < num_offs; i++)
@@ -353,7 +353,7 @@ carbon_query_fetch_strings_by_offset(carbon_query_t *query, offset_t *offs, u32 
 
     if (!result)
     {
-        error(carbon_io_context_get_error(query->context), CARBON_ERR_MALLOCERR);
+        error(carbon_io_context_get_error(query->context), NG5_ERR_MALLOCERR);
         return NULL;
     } else {
         if (!(file = carbon_io_context_lock_and_access(query->context)))
@@ -384,16 +384,16 @@ cleanup_and_error:
     return NULL;
 }
 
-CARBON_EXPORT(carbon_string_id_t *)
+NG5_EXPORT(carbon_string_id_t *)
 carbon_query_find_ids(size_t *num_found, carbon_query_t *query, const carbon_string_pred_t *pred,
                       void *capture, i64 limit)
 {
-    if (CARBON_UNLIKELY(carbon_string_pred_validate(&query->err, pred) == false)) {
+    if (NG5_UNLIKELY(carbon_string_pred_validate(&query->err, pred) == false)) {
         return NULL;
     }
     i64              pred_limit;
     carbon_string_pred_get_limit(&pred_limit, pred);
-    pred_limit = pred_limit < 0 ? limit : CARBON_MIN(pred_limit, limit);
+    pred_limit = pred_limit < 0 ? limit : NG5_MIN(pred_limit, limit);
 
     carbon_strid_iter_t  it;
     carbon_strid_info_t *info              = NULL;
@@ -411,49 +411,49 @@ carbon_query_find_ids(size_t *num_found, carbon_query_t *query, const carbon_str
     size_t               result_cap        = pred_limit < 0 ? str_cap : (size_t) pred_limit;
     bool                 success           = false;
 
-    if (CARBON_UNLIKELY(pred_limit == 0))
+    if (NG5_UNLIKELY(pred_limit == 0))
     {
         *num_found = 0;
         return NULL;
     }
 
-    if (CARBON_UNLIKELY(!num_found || !query || !pred))
+    if (NG5_UNLIKELY(!num_found || !query || !pred))
     {
-        error(&query->err, CARBON_ERR_NULLPTR);
+        error(&query->err, NG5_ERR_NULLPTR);
         return NULL;
     }
 
-    if (CARBON_UNLIKELY((step_ids = malloc(str_cap * sizeof(carbon_string_id_t))) == NULL))
+    if (NG5_UNLIKELY((step_ids = malloc(str_cap * sizeof(carbon_string_id_t))) == NULL))
     {
-        error(&query->err, CARBON_ERR_MALLOCERR);
+        error(&query->err, NG5_ERR_MALLOCERR);
         return NULL;
     }
 
-    if (CARBON_UNLIKELY((str_offs = malloc(str_cap * sizeof(offset_t))) == NULL))
+    if (NG5_UNLIKELY((str_offs = malloc(str_cap * sizeof(offset_t))) == NULL))
     {
-        error(&query->err, CARBON_ERR_MALLOCERR);
+        error(&query->err, NG5_ERR_MALLOCERR);
         goto cleanup_result_and_error;
         return NULL;
     }
 
-    if (CARBON_UNLIKELY((str_lens = malloc(str_cap * sizeof(u32))) == NULL))
+    if (NG5_UNLIKELY((str_lens = malloc(str_cap * sizeof(u32))) == NULL))
     {
-        error(&query->err, CARBON_ERR_MALLOCERR);
+        error(&query->err, NG5_ERR_MALLOCERR);
         free(str_offs);
         goto cleanup_result_and_error;
         return NULL;
     }
 
-    if (CARBON_UNLIKELY((idxs_matching = malloc(str_cap * sizeof(size_t))) == NULL))
+    if (NG5_UNLIKELY((idxs_matching = malloc(str_cap * sizeof(size_t))) == NULL))
     {
-        error(&query->err, CARBON_ERR_MALLOCERR);
+        error(&query->err, NG5_ERR_MALLOCERR);
         free(str_offs);
         free(str_lens);
         goto cleanup_result_and_error;
         return NULL;
     }
 
-    if (CARBON_UNLIKELY(carbon_query_scan_strids(&it, query) == false))
+    if (NG5_UNLIKELY(carbon_query_scan_strids(&it, query) == false))
     {
         free(str_offs);
         free(str_lens);
@@ -461,9 +461,9 @@ carbon_query_find_ids(size_t *num_found, carbon_query_t *query, const carbon_str
         goto cleanup_result_and_error;
     }
 
-    if (CARBON_UNLIKELY((result_ids = malloc(result_cap * sizeof(carbon_string_id_t))) == NULL))
+    if (NG5_UNLIKELY((result_ids = malloc(result_cap * sizeof(carbon_string_id_t))) == NULL))
     {
-        error(&query->err, CARBON_ERR_MALLOCERR);
+        error(&query->err, NG5_ERR_MALLOCERR);
         free(str_offs);
         free(str_lens);
         free(idxs_matching);
@@ -474,22 +474,22 @@ carbon_query_find_ids(size_t *num_found, carbon_query_t *query, const carbon_str
 
     while (carbon_strid_iter_next(&success, &info, &query->err, &info_len, &it))
     {
-        if (CARBON_UNLIKELY(info_len > str_cap))
+        if (NG5_UNLIKELY(info_len > str_cap))
         {
             str_cap = (info_len + 1) * 1.7f;
-            if (CARBON_UNLIKELY((tmp = realloc(str_offs, str_cap * sizeof(offset_t))) == NULL))
+            if (NG5_UNLIKELY((tmp = realloc(str_offs, str_cap * sizeof(offset_t))) == NULL))
             {
                 goto realloc_error;
             } else {
                 str_offs = tmp;
             }
-            if (CARBON_UNLIKELY((tmp = realloc(str_lens, str_cap * sizeof(u32))) == NULL))
+            if (NG5_UNLIKELY((tmp = realloc(str_lens, str_cap * sizeof(u32))) == NULL))
             {
                 goto realloc_error;
             } else {
                 str_lens = tmp;
             }
-            if (CARBON_UNLIKELY((tmp = realloc(idxs_matching, str_cap * sizeof(size_t))) == NULL))
+            if (NG5_UNLIKELY((tmp = realloc(idxs_matching, str_cap * sizeof(size_t))) == NULL))
             {
                 goto realloc_error;
             } else {
@@ -506,10 +506,10 @@ carbon_query_find_ids(size_t *num_found, carbon_query_t *query, const carbon_str
 
         char **strings = carbon_query_fetch_strings_by_offset(query, str_offs, str_lens, step_len); // TODO: buffer + cleanup buffer
 
-        if (CARBON_UNLIKELY(carbon_string_pred_eval(pred, idxs_matching, &num_matching,
+        if (NG5_UNLIKELY(carbon_string_pred_eval(pred, idxs_matching, &num_matching,
                                                     strings, step_len, capture) == false))
         {
-            error(&query->err, CARBON_ERR_PREDEVAL_FAILED);
+            error(&query->err, NG5_ERR_PREDEVAL_FAILED);
             carbon_strid_iter_close(&it);
             goto cleanup_intermediate;
         }
@@ -526,10 +526,10 @@ carbon_query_find_ids(size_t *num_found, carbon_query_t *query, const carbon_str
             if (pred_limit > 0 && result_len == (size_t) pred_limit) {
                 goto stop_search_and_return;
             }
-            if (CARBON_UNLIKELY(result_len > result_cap))
+            if (NG5_UNLIKELY(result_len > result_cap))
             {
                 result_cap = (result_len + 1) * 1.7f;
-                if (CARBON_UNLIKELY((tmp = realloc(result_ids, result_cap * sizeof(carbon_string_id_t))) == NULL))
+                if (NG5_UNLIKELY((tmp = realloc(result_ids, result_cap * sizeof(carbon_string_id_t))) == NULL))
                 {
                     carbon_strid_iter_close(&it);
                     goto cleanup_intermediate;
@@ -541,7 +541,7 @@ carbon_query_find_ids(size_t *num_found, carbon_query_t *query, const carbon_str
     }
 
 stop_search_and_return:
-    if (CARBON_UNLIKELY(success == false)) {
+    if (NG5_UNLIKELY(success == false)) {
         carbon_strid_iter_close(&it);
         goto cleanup_intermediate;
     }
@@ -550,7 +550,7 @@ stop_search_and_return:
     return result_ids;
 
 realloc_error:
-    error(&query->err, CARBON_ERR_REALLOCERR);
+    error(&query->err, NG5_ERR_REALLOCERR);
 
 cleanup_intermediate:
     free(str_offs);

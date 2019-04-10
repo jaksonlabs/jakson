@@ -15,18 +15,18 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_FNV_H
-#define CARBON_FNV_H
+#ifndef NG5_FNV_H
+#define NG5_FNV_H
 
 #include "hash.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
-#define CARBON_HASH_FNV(key_size, key)              CARBON_HASH_FNV_WTYPE(key_size, key, carbon_hash_t)
-#define CARBON_HASH16_FNV(key_size, key)            CARBON_HASH_FNV_WTYPE(key_size, key, carbon_hash16_t)
-#define CARBON_HASH8_FNV(key_size, key)            CARBON_HASH_FNV_WTYPE(key_size, key, carbon_hash8_t)
+#define NG5_HASH_FNV(key_size, key)              NG5_HASH_FNV_WTYPE(key_size, key, carbon_hash_t)
+#define NG5_HASH16_FNV(key_size, key)            NG5_HASH_FNV_WTYPE(key_size, key, carbon_hash16_t)
+#define NG5_HASH8_FNV(key_size, key)            NG5_HASH_FNV_WTYPE(key_size, key, carbon_hash8_t)
 
-#define CARBON_HASH_FNV_WTYPE(key_size, key, hash_type)                                                                \
+#define NG5_HASH_FNV_WTYPE(key_size, key, hash_type)                                                                \
 ({                                                                                                                     \
     assert ((key != NULL) && (key_size > 0));                                                                          \
                                                                                                                        \
@@ -37,6 +37,6 @@ CARBON_BEGIN_DECL
     hash;                                                                                                              \
 })
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif

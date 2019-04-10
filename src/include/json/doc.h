@@ -15,15 +15,15 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_DOC_H
-#define CARBON_DOC_H
+#ifndef NG5_DOC_H
+#define NG5_DOC_H
 
 #include "shared/common.h"
 #include "std/vec.h"
 #include "stdx/strdic.h"
 #include "json.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
 typedef struct carbon_doc_obj carbon_doc_obj_t;
 typedef struct carbon_columndoc carbon_columndoc_t;
@@ -59,66 +59,66 @@ typedef struct carbon_doc_obj
 } carbon_doc_obj_t;
 
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_doc_bulk_create(carbon_doc_bulk_t *bulk, carbon_strdic_t *dic);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_doc_bulk_Drop(carbon_doc_bulk_t *bulk);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_doc_bulk_shrink(carbon_doc_bulk_t *bulk);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_doc_bulk_print(FILE *file, carbon_doc_bulk_t *bulk);
 
-CARBON_EXPORT(carbon_doc_t *)
+NG5_EXPORT(carbon_doc_t *)
 carbon_doc_bulk_new_doc(carbon_doc_bulk_t *context, field_e type);
 
-CARBON_EXPORT(carbon_doc_obj_t *)
+NG5_EXPORT(carbon_doc_obj_t *)
 carbon_doc_bulk_new_obj(carbon_doc_t *model);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_doc_bulk_get_dic_contents(vec_t ofType (const char *) **strings,
                                  vec_t ofType(carbon_string_id_t) **string_ids,
                                  const carbon_doc_bulk_t *context);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_doc_print(FILE *file, const carbon_doc_t *doc);
 
-CARBON_EXPORT(const vec_t ofType(carbon_doc_entries_t) *)
+NG5_EXPORT(const vec_t ofType(carbon_doc_entries_t) *)
 carbon_doc_get_entries(const carbon_doc_obj_t *model);
 
-CARBON_EXPORT(void)
+NG5_EXPORT(void)
 carbon_doc_print_entries(FILE *file, const carbon_doc_entries_t *entries);
 
-CARBON_EXPORT(void)
+NG5_EXPORT(void)
 carbon_doc_drop(carbon_doc_obj_t *model);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_doc_obj_add_key(carbon_doc_entries_t **out, carbon_doc_obj_t *obj, const char *key, field_e type);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_doc_obj_push_primtive(carbon_doc_entries_t *entry, const void *value);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_doc_obj_push_object(carbon_doc_obj_t **out, carbon_doc_entries_t *entry);
 
-CARBON_EXPORT(carbon_doc_entries_t *)
+NG5_EXPORT(carbon_doc_entries_t *)
 carbon_doc_bulk_new_entries(carbon_doc_bulk_t *dst);
 
-CARBON_EXPORT(carbon_doc_obj_t *)
+NG5_EXPORT(carbon_doc_obj_t *)
 carbon_doc_bulk_add_json(carbon_doc_entries_t *partition, carbon_json_t *json);
 
-CARBON_EXPORT(carbon_doc_obj_t *)
+NG5_EXPORT(carbon_doc_obj_t *)
 carbon_doc_entries_get_root(const carbon_doc_entries_t *partition);
 
-CARBON_EXPORT(carbon_columndoc_t *)
+NG5_EXPORT(carbon_columndoc_t *)
 carbon_doc_entries_to_columndoc(const carbon_doc_bulk_t *bulk,
                                 const carbon_doc_entries_t *partition, bool read_optimized);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_doc_entries_drop(carbon_doc_entries_t *partition);
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif

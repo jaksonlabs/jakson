@@ -28,13 +28,13 @@ visit_string_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_
                               const carbon_string_id_t *keys, const carbon_string_id_t *values, u32 num_pairs,
                               void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(id);
-    CARBON_UNUSED(keys);
-    CARBON_UNUSED(values);
-    CARBON_UNUSED(num_pairs);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(id);
+    NG5_UNUSED(keys);
+    NG5_UNUSED(values);
+    NG5_UNUSED(num_pairs);
+    NG5_UNUSED(capture);
 
     capture_t *params = (capture_t *) capture;
 
@@ -58,7 +58,7 @@ visit_string_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_
                 if (!r) {
                     r = VECTOR_NEW_AND_GET(params->result, ops_show_values_result_t);
                     r->key = keys[i];
-                    r->type = CARBON_BASIC_TYPE_STRING;
+                    r->type = NG5_BASIC_TYPE_STRING;
                     carbon_vec_create(&r->values.string_values, NULL, sizeof(carbon_string_id_t), 1000000);
                 }
 
@@ -90,13 +90,13 @@ before_visit_object_array(carbon_archive_t *archive, path_stack_t path,
                                                      carbon_object_id_t parent_id, carbon_string_id_t key,
                                                      void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(parent_id);
-    CARBON_UNUSED(capture);
-    CARBON_UNUSED(key);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(parent_id);
+    NG5_UNUSED(capture);
+    NG5_UNUSED(key);
 
-    carbon_visitor_policy_e follow = CARBON_VISITOR_POLICY_EXCLUDE;
+    carbon_visitor_policy_e follow = NG5_VISITOR_POLICY_EXCLUDE;
 
     char buffer[2048];
     memset(buffer, 0, sizeof(buffer));
@@ -110,7 +110,7 @@ before_visit_object_array(carbon_archive_t *archive, path_stack_t path,
 
 
     if (len_user_path >= len_current_path && strncmp(buffer, params->path, len_current_path) == 0) {
-        follow = CARBON_VISITOR_POLICY_INCLUDE;
+        follow = NG5_VISITOR_POLICY_INCLUDE;
     }
 
 
@@ -127,15 +127,15 @@ before_visit_object_array_object_property(carbon_archive_t *archive, path_stack_
                                           carbon_basic_type_e nested_value_type,
                                           void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(parent_id);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(nested_key);
-    CARBON_UNUSED(nested_value_type);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(parent_id);
+    NG5_UNUSED(key);
+    NG5_UNUSED(nested_key);
+    NG5_UNUSED(nested_value_type);
+    NG5_UNUSED(capture);
 
-    carbon_visitor_policy_e follow = CARBON_VISITOR_POLICY_EXCLUDE;
+    carbon_visitor_policy_e follow = NG5_VISITOR_POLICY_EXCLUDE;
 
     char buffer[2048];
     memset(buffer, 0, sizeof(buffer));
@@ -149,7 +149,7 @@ before_visit_object_array_object_property(carbon_archive_t *archive, path_stack_
 
 
     if (len_user_path >= len_current_path && strncmp(buffer, params->path, len_current_path) == 0) {
-        follow = CARBON_VISITOR_POLICY_INCLUDE;
+        follow = NG5_VISITOR_POLICY_INCLUDE;
     }
 
 
@@ -166,15 +166,15 @@ visit_object_array_object_property_string(carbon_archive_t *archive, path_stack_
                                                const carbon_string_id_t *nested_values,
                                                u32 num_nested_values, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(parent_id);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(nested_object_id);
-    CARBON_UNUSED(nested_key);
-    CARBON_UNUSED(nested_values);
-    CARBON_UNUSED(num_nested_values);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(parent_id);
+    NG5_UNUSED(key);
+    NG5_UNUSED(nested_object_id);
+    NG5_UNUSED(nested_key);
+    NG5_UNUSED(nested_values);
+    NG5_UNUSED(num_nested_values);
+    NG5_UNUSED(capture);
 
 
 
@@ -202,7 +202,7 @@ visit_object_array_object_property_string(carbon_archive_t *archive, path_stack_
             if (!r) {
                 r = VECTOR_NEW_AND_GET(params->result, ops_show_values_result_t);
                 r->key = nested_key;
-                r->type = CARBON_BASIC_TYPE_STRING;
+                r->type = NG5_BASIC_TYPE_STRING;
                 carbon_vec_create(&r->values.string_values, NULL, sizeof(carbon_string_id_t), 1000000);
             }
 
@@ -242,15 +242,15 @@ visit_object_array_object_property_int8(carbon_archive_t *archive, path_stack_t 
                                           const carbon_i8 *nested_values,
                                           u32 num_nested_values, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(parent_id);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(nested_object_id);
-    CARBON_UNUSED(nested_key);
-    CARBON_UNUSED(nested_values);
-    CARBON_UNUSED(num_nested_values);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(parent_id);
+    NG5_UNUSED(key);
+    NG5_UNUSED(nested_object_id);
+    NG5_UNUSED(nested_key);
+    NG5_UNUSED(nested_values);
+    NG5_UNUSED(num_nested_values);
+    NG5_UNUSED(capture);
 
 
 
@@ -278,7 +278,7 @@ visit_object_array_object_property_int8(carbon_archive_t *archive, path_stack_t 
             if (!r) {
                 r = VECTOR_NEW_AND_GET(params->result, ops_show_values_result_t);
                 r->key = nested_key;
-                r->type = CARBON_BASIC_TYPE_INT8;
+                r->type = NG5_BASIC_TYPE_INT8;
                 carbon_vec_create(&r->values.integer_values, NULL, sizeof(carbon_i64), 1000000);
             }
 
@@ -306,15 +306,15 @@ visit_object_array_object_property_int16(carbon_archive_t *archive, path_stack_t
                                         const carbon_i16 *nested_values,
                                         u32 num_nested_values, void *capture)
 {
-    CARBON_UNUSED(archive);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(parent_id);
-    CARBON_UNUSED(key);
-    CARBON_UNUSED(nested_object_id);
-    CARBON_UNUSED(nested_key);
-    CARBON_UNUSED(nested_values);
-    CARBON_UNUSED(num_nested_values);
-    CARBON_UNUSED(capture);
+    NG5_UNUSED(archive);
+    NG5_UNUSED(path);
+    NG5_UNUSED(parent_id);
+    NG5_UNUSED(key);
+    NG5_UNUSED(nested_object_id);
+    NG5_UNUSED(nested_key);
+    NG5_UNUSED(nested_values);
+    NG5_UNUSED(num_nested_values);
+    NG5_UNUSED(capture);
 
 
 
@@ -342,7 +342,7 @@ visit_object_array_object_property_int16(carbon_archive_t *archive, path_stack_t
             if (!r) {
                 r = VECTOR_NEW_AND_GET(params->result, ops_show_values_result_t);
                 r->key = nested_key;
-                r->type = CARBON_BASIC_TYPE_INT16;
+                r->type = NG5_BASIC_TYPE_INT16;
                 carbon_vec_create(&r->values.integer_values, NULL, sizeof(carbon_i64), 1000000);
             }
 
@@ -366,11 +366,11 @@ visit_object_array_object_property_int16(carbon_archive_t *archive, path_stack_t
 //static bool
 //get_column_entry_count(carbon_archive_t *archive, path_stack_t path, carbon_string_id_t key, carbon_basic_type_e type, u32 count, void *capture)
 //{
-//    CARBON_UNUSED(archive);
-//    CARBON_UNUSED(path);
-//    CARBON_UNUSED(key);
-//    CARBON_UNUSED(type);
-//    CARBON_UNUSED(count);
+//    NG5_UNUSED(archive);
+//    NG5_UNUSED(path);
+//    NG5_UNUSED(key);
+//    NG5_UNUSED(type);
+//    NG5_UNUSED(count);
 //    capture_t *params = (capture_t *) capture;
 //    char buffer[2048];
 //    memset(buffer, 0, sizeof(buffer));
@@ -392,17 +392,17 @@ visit_object_array_object_property_int16(carbon_archive_t *archive, path_stack_t
 //
 //}
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 ops_show_values(carbon_timestamp_t *duration, vec_t ofType(ops_show_values_result_t) *result, const char *path,
                 carbon_archive_t *archive, u32 offset, u32 limit, i32 between_lower_bound,
                 i32 between_upper_bound, const char *contains_string)
 {
-    CARBON_UNUSED(result);
-    CARBON_UNUSED(path);
-    CARBON_UNUSED(archive);
+    NG5_UNUSED(result);
+    NG5_UNUSED(path);
+    NG5_UNUSED(archive);
 
     carbon_archive_visitor_t visitor = { 0 };
-    carbon_archive_visitor_desc_t desc = { .visit_mask = CARBON_ARCHIVE_ITER_MASK_ANY };
+    carbon_archive_visitor_desc_t desc = { .visit_mask = NG5_ARCHIVE_ITER_MASK_ANY };
 
     carbon_vec_create(result, NULL, sizeof(ops_show_values_result_t), 10);
 

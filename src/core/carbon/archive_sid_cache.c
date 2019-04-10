@@ -57,7 +57,7 @@ init_list(lru_list_t *list)
     }
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_string_id_cache_create_LRU(carbon_string_id_cache_t **cache, carbon_archive_t *archive)
 {
     struct archive_info archive_info;
@@ -66,11 +66,11 @@ carbon_string_id_cache_create_LRU(carbon_string_id_cache_t **cache, carbon_archi
     return carbon_string_id_cache_create_LRU_ex(cache, archive, capacity);
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_string_id_cache_create_LRU_ex(carbon_string_id_cache_t **cache, carbon_archive_t *archive, size_t capacity)
 {
-    CARBON_NON_NULL_OR_ERROR(cache)
-    CARBON_NON_NULL_OR_ERROR(archive)
+    NG5_NON_NULL_OR_ERROR(cache)
+    NG5_NON_NULL_OR_ERROR(archive)
 
     carbon_string_id_cache_t *result = malloc(sizeof(carbon_string_id_cache_t));
 
@@ -79,11 +79,11 @@ carbon_string_id_cache_create_LRU_ex(carbon_string_id_cache_t **cache, carbon_ar
 
 
 
-    size_t num_buckets = CARBON_MAX(1, capacity);
+    size_t num_buckets = NG5_MAX(1, capacity);
     carbon_vec_create(&result->list_entries, NULL, sizeof(lru_list_t), num_buckets);
     for (size_t i = 0; i < num_buckets; i++) {
         lru_list_t *list = VECTOR_NEW_AND_GET(&result->list_entries, lru_list_t);
-        CARBON_ZERO_MEMORY(list, sizeof(lru_list_t));
+        NG5_ZERO_MEMORY(list, sizeof(lru_list_t));
         init_list(list);
     }
 
@@ -94,20 +94,20 @@ carbon_string_id_cache_create_LRU_ex(carbon_string_id_cache_t **cache, carbon_ar
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_string_id_cache_get_error(struct err *err, const carbon_string_id_cache_t *cache)
 {
-    CARBON_NON_NULL_OR_ERROR(err)
-    CARBON_NON_NULL_OR_ERROR(cache)
+    NG5_NON_NULL_OR_ERROR(err)
+    NG5_NON_NULL_OR_ERROR(cache)
     *err = cache->err;
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_string_id_cache_get_size(size_t *size, const carbon_string_id_cache_t *cache)
 {
-    CARBON_NON_NULL_OR_ERROR(size)
-    CARBON_NON_NULL_OR_ERROR(cache)
+    NG5_NON_NULL_OR_ERROR(size)
+    NG5_NON_NULL_OR_ERROR(cache)
     *size = cache->capacity;
     return true;
 }
@@ -132,11 +132,11 @@ make_most_recent(lru_list_t *list, cache_entry_t *entry)
     }
 }
 
-CARBON_EXPORT(char *)
+NG5_EXPORT(char *)
 carbon_string_id_cache_get(carbon_string_id_cache_t *cache, carbon_string_id_t id)
 {
-    CARBON_NON_NULL_OR_ERROR(cache)
-    carbon_hash_t id_hash = CARBON_HASH_BERNSTEIN(sizeof(carbon_string_id_t), &id);
+    NG5_NON_NULL_OR_ERROR(cache)
+    carbon_hash_t id_hash = NG5_HASH_BERNSTEIN(sizeof(carbon_string_id_t), &id);
     size_t bucket_pos = id_hash % cache->list_entries.num_elems;
     lru_list_t *list = vec_get(&cache->list_entries, bucket_pos, lru_list_t);
     cache_entry_t *cursor = list->most_recent;
@@ -160,27 +160,27 @@ carbon_string_id_cache_get(carbon_string_id_cache_t *cache, carbon_string_id_t i
     return strdup(result);
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_string_id_cache_get_statistics(carbon_string_id_cache_statistics_t *statistics, carbon_string_id_cache_t *cache)
 {
-    CARBON_NON_NULL_OR_ERROR(statistics);
-    CARBON_NON_NULL_OR_ERROR(cache);
+    NG5_NON_NULL_OR_ERROR(statistics);
+    NG5_NON_NULL_OR_ERROR(cache);
     *statistics = cache->statistics;
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_string_id_cache_reset_statistics(carbon_string_id_cache_t *cache)
 {
-    CARBON_NON_NULL_OR_ERROR(cache);
-    CARBON_ZERO_MEMORY(&cache->statistics, sizeof(carbon_string_id_cache_statistics_t));
+    NG5_NON_NULL_OR_ERROR(cache);
+    NG5_ZERO_MEMORY(&cache->statistics, sizeof(carbon_string_id_cache_statistics_t));
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_string_id_cache_drop(carbon_string_id_cache_t *cache)
 {
-    CARBON_NON_NULL_OR_ERROR(cache);
+    NG5_NON_NULL_OR_ERROR(cache);
     for (size_t i = 0; i < cache->list_entries.num_elems; i++) {
         lru_list_t *entry = vec_get(&cache->list_entries, i, lru_list_t);
         for (size_t k = 0; k < sizeof(entry->entries)/ sizeof(entry->entries[0]); k++)

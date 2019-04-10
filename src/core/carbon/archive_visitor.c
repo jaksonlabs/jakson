@@ -32,7 +32,7 @@ iterate_objects(carbon_archive_t *archive, const carbon_string_id_t *keys, u32 n
                 vec_t ofType(carbon_path_entry_t) *path_stack, carbon_archive_visitor_t *visitor,
                 int mask, void *capture, bool is_root_object)
 {
-    CARBON_UNUSED(num_pairs);
+    NG5_UNUSED(num_pairs);
 
     u32 vector_length;
     carbon_archive_object_t object;
@@ -62,12 +62,12 @@ iterate_objects(carbon_archive_t *archive, const carbon_string_id_t *keys, u32 n
         carbon_archive_prop_iter_from_object(&prop_iter, mask, &err, &object);
 
         if (!is_root_object) {
-            carbon_visitor_policy_e visit = CARBON_VISITOR_POLICY_INCLUDE;
+            carbon_visitor_policy_e visit = NG5_VISITOR_POLICY_INCLUDE;
             if (visitor->before_object_visit) {
                 visit = visitor->before_object_visit(archive, path_stack, parent_object_id, object_id, i,
                                                      vector_length, keys[i], capture);
             }
-            if (visit == CARBON_VISITOR_POLICY_INCLUDE) {
+            if (visit == NG5_VISITOR_POLICY_INCLUDE) {
                 iterate_props(archive, &prop_iter, path_stack, visitor, mask, capture, false, parent_key, parent_key_array_idx);
                 OPTIONAL_CALL(visitor, after_object_visit, archive, path_stack, object_id, i, vector_length, capture);
             }
@@ -83,11 +83,11 @@ iterate_objects(carbon_archive_t *archive, const carbon_string_id_t *keys, u32 n
 #define SET_TYPE_SWITCH_CASE(name, built_in_type)                                                                      \
 {                                                                                                                      \
     if (is_array) {                                                                                                    \
-        carbon_visitor_policy_e visit = CARBON_VISITOR_POLICY_INCLUDE;                                                 \
+        carbon_visitor_policy_e visit = NG5_VISITOR_POLICY_INCLUDE;                                                 \
         if (visitor->visit_enter_##name##_array_pairs) {                                                               \
             visit = visitor->visit_enter_##name##_array_pairs(archive, path_stack, this_object_oid, keys, num_pairs, capture);     \
         }                                                                                                              \
-        if (visit == CARBON_VISITOR_POLICY_INCLUDE) {                                                                  \
+        if (visit == NG5_VISITOR_POLICY_INCLUDE) {                                                                  \
             for (u32 prop_idx = 0; prop_idx < num_pairs; prop_idx++)                                              \
             {                                                                                                          \
                 u32 array_length;                                                                                 \
@@ -135,8 +135,8 @@ iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
     carbon_archive_collection_iter_t collection_iter;
     bool first_type_group = true;
 
-    CARBON_UNUSED(parent_key);
-    CARBON_UNUSED(parent_key_array_idx);
+    NG5_UNUSED(parent_key);
+    NG5_UNUSED(parent_key_array_idx);
 
     carbon_path_entry_t e = { .key = parent_key, .idx = parent_key_array_idx };
     carbon_vec_push(path_stack, &e, 1);
@@ -145,7 +145,7 @@ iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
 
     while (carbon_archive_prop_iter_next(&iter_type, &value_iter, &collection_iter, prop_iter)) {
 
-        if (iter_type == CARBON_ARCHIVE_PROP_ITER_MODE_OBJECT) {
+        if (iter_type == NG5_ARCHIVE_PROP_ITER_MODE_OBJECT) {
 
             keys = carbon_archive_value_vector_get_keys(&num_pairs, &value_iter);
             carbon_archive_value_vector_is_array_type(&is_array, &value_iter);
@@ -163,27 +163,27 @@ iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
             }
 
 
-            if (CARBON_UNLIKELY(first_type_group)) {
+            if (NG5_UNLIKELY(first_type_group)) {
                 OPTIONAL_CALL(visitor, first_prop_type_group, archive, path_stack, this_object_oid, keys, type, is_array, num_pairs, capture);
             } else {
                 OPTIONAL_CALL(visitor, next_prop_type_group, archive, path_stack, this_object_oid, keys, type, is_array, num_pairs, capture);
             }
 
             switch (type) {
-            case CARBON_BASIC_TYPE_OBJECT:
+            case NG5_BASIC_TYPE_OBJECT:
                 assert (!is_array);
                 iterate_objects(archive, keys, num_pairs, &value_iter, path_stack, visitor, mask, capture, is_root_object);
                 //for (size_t i = 0; i < num_pairs; i++) {
                 //    iterate_objects(archive, &keys[i], 1, &value_iter, path_stack, visitor, mask, capture, is_root_object, keys[i], i);
                 //}
              break;
-            case CARBON_BASIC_TYPE_NULL:
+            case NG5_BASIC_TYPE_NULL:
                 if (is_array) {
-                    carbon_visitor_policy_e visit = CARBON_VISITOR_POLICY_INCLUDE;
+                    carbon_visitor_policy_e visit = NG5_VISITOR_POLICY_INCLUDE;
                     if (visitor->visit_enter_null_array_pairs) {
                         visit = visitor->visit_enter_null_array_pairs(archive, path_stack, this_object_oid, keys, num_pairs, capture);
                     }
-                    if (visit == CARBON_VISITOR_POLICY_INCLUDE) {
+                    if (visit == NG5_VISITOR_POLICY_INCLUDE) {
                         const carbon_u32 *num_values = carbon_archive_value_vector_get_null_arrays(NULL, &value_iter);
                         for (u32 prop_idx = 0; prop_idx < num_pairs; prop_idx++)
                         {
@@ -203,37 +203,37 @@ iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
                     }
                 }
                 break;
-            case CARBON_BASIC_TYPE_INT8:
+            case NG5_BASIC_TYPE_INT8:
                 SET_TYPE_SWITCH_CASE(int8, carbon_i8)
                 break;
-            case CARBON_BASIC_TYPE_INT16:
+            case NG5_BASIC_TYPE_INT16:
                 SET_TYPE_SWITCH_CASE(int16, carbon_i16)
                 break;
-            case CARBON_BASIC_TYPE_INT32:
+            case NG5_BASIC_TYPE_INT32:
                 SET_TYPE_SWITCH_CASE(int32, carbon_i32)
                 break;
-            case CARBON_BASIC_TYPE_INT64:
+            case NG5_BASIC_TYPE_INT64:
                 SET_TYPE_SWITCH_CASE(int64, carbon_i64)
                 break;
-            case CARBON_BASIC_TYPE_UINT8:
+            case NG5_BASIC_TYPE_UINT8:
                 SET_TYPE_SWITCH_CASE(uint8, carbon_u8)
                 break;
-            case CARBON_BASIC_TYPE_UINT16:
+            case NG5_BASIC_TYPE_UINT16:
                 SET_TYPE_SWITCH_CASE(uint16, carbon_u16)
                 break;
-            case CARBON_BASIC_TYPE_UINT32:
+            case NG5_BASIC_TYPE_UINT32:
                 SET_TYPE_SWITCH_CASE(uint32, carbon_u32)
                 break;
-            case CARBON_BASIC_TYPE_UINT64:
+            case NG5_BASIC_TYPE_UINT64:
                 SET_TYPE_SWITCH_CASE(uint64, carbon_u64)
                 break;
-            case CARBON_BASIC_TYPE_NUMBER:
+            case NG5_BASIC_TYPE_NUMBER:
                 SET_TYPE_SWITCH_CASE(number, carbon_number_t)
                 break;
-            case CARBON_BASIC_TYPE_STRING:
+            case NG5_BASIC_TYPE_STRING:
                 SET_TYPE_SWITCH_CASE(string, carbon_string_id_t)
                 break;
-            case CARBON_BASIC_TYPE_BOOLEAN:
+            case NG5_BASIC_TYPE_BOOLEAN:
                 SET_TYPE_SWITCH_CASE(boolean, carbon_boolean_t)
                 break;
             default:
@@ -247,7 +247,7 @@ iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
             keys = carbon_archive_collection_iter_get_keys(&num_column_groups, &collection_iter);
 
             bool *skip_groups_by_key = malloc(num_column_groups * sizeof(bool));
-            CARBON_ZERO_MEMORY(skip_groups_by_key, num_column_groups * sizeof(bool));
+            NG5_ZERO_MEMORY(skip_groups_by_key, num_column_groups * sizeof(bool));
 
             if (visitor->before_visit_object_array) {
                 for (u32 i = 0; i < num_column_groups; i++) {
@@ -262,7 +262,7 @@ iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
 
                //     carbon_vec_pop(path_stack);
 
-                    skip_groups_by_key[i] = policy == CARBON_VISITOR_POLICY_EXCLUDE;
+                    skip_groups_by_key[i] = policy == NG5_VISITOR_POLICY_EXCLUDE;
                 }
             }
 
@@ -278,7 +278,7 @@ iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
                     carbon_string_id_t group_key = keys[current_group_idx];
                     const carbon_object_id_t *column_group_object_ids = carbon_archive_column_group_get_object_ids(&num_column_group_objs, &group_iter);
                     bool *skip_objects = malloc(num_column_group_objs * sizeof(bool));
-                    CARBON_ZERO_MEMORY(skip_objects, num_column_group_objs * sizeof(bool));
+                    NG5_ZERO_MEMORY(skip_objects, num_column_group_objs * sizeof(bool));
 
 
                     if (visitor->before_visit_object_array_objects) {
@@ -323,7 +323,7 @@ iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
                                 carbon_visitor_policy_e policy = visitor->before_visit_object_array_object_property(archive, path_stack,
                                                              this_object_oid, group_key,
                                                              current_column_name, current_column_entry_type, capture);
-                                skip_column = policy == CARBON_VISITOR_POLICY_EXCLUDE;
+                                skip_column = policy == NG5_VISITOR_POLICY_EXCLUDE;
                             }
 
                             if (!skip_column)
@@ -352,43 +352,43 @@ iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
                                     u32 entry_length;
 
                                     switch (current_column_entry_type) {
-                                    case CARBON_BASIC_TYPE_INT8: {
+                                    case NG5_BASIC_TYPE_INT8: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(int8s, carbon_i8)
                                     } break;
-                                    case CARBON_BASIC_TYPE_INT16: {
+                                    case NG5_BASIC_TYPE_INT16: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(int16s, carbon_i16)
                                     } break;
-                                    case CARBON_BASIC_TYPE_INT32: {
+                                    case NG5_BASIC_TYPE_INT32: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(int32s, carbon_i32)
                                     } break;
-                                    case CARBON_BASIC_TYPE_INT64: {
+                                    case NG5_BASIC_TYPE_INT64: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(int64s, carbon_i64)
                                     } break;
-                                    case CARBON_BASIC_TYPE_UINT8: {
+                                    case NG5_BASIC_TYPE_UINT8: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(uint8s, carbon_u8)
                                     } break;
-                                    case CARBON_BASIC_TYPE_UINT16: {
+                                    case NG5_BASIC_TYPE_UINT16: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(uint16s, carbon_u16)
                                     } break;
-                                    case CARBON_BASIC_TYPE_UINT32: {
+                                    case NG5_BASIC_TYPE_UINT32: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(uint32s, carbon_u32)
                                     } break;
-                                    case CARBON_BASIC_TYPE_UINT64: {
+                                    case NG5_BASIC_TYPE_UINT64: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(uint64s, carbon_u64)
                                     } break;
-                                    case CARBON_BASIC_TYPE_NUMBER: {
+                                    case NG5_BASIC_TYPE_NUMBER: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(numbers, carbon_number_t)
                                     } break;
-                                    case CARBON_BASIC_TYPE_STRING: {
+                                    case NG5_BASIC_TYPE_STRING: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(strings, carbon_string_id_t)
                                     } break;
-                                    case CARBON_BASIC_TYPE_BOOLEAN: {
+                                    case NG5_BASIC_TYPE_BOOLEAN: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(booleans, carbon_boolean_t)
                                     } break;
-                                    case CARBON_BASIC_TYPE_NULL: {
+                                    case NG5_BASIC_TYPE_NULL: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(nulls, carbon_u32)
                                     } break;
-                                    case CARBON_BASIC_TYPE_OBJECT: {
+                                    case NG5_BASIC_TYPE_OBJECT: {
                                         carbon_archive_column_entry_object_iter_t iter;
                                         const carbon_archive_object_t *archive_object;
                                         carbon_archive_column_entry_get_objects(&iter, &entry_iter);
@@ -404,7 +404,7 @@ iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
                                             if (visitor->before_object_array_object_property_object) {
                                                 carbon_visitor_policy_e policy = visitor->before_object_array_object_property_object(archive,
                                                 path_stack, this_object_oid, group_key, current_nested_object_id, current_column_name, id, capture);
-                                                skip_object = policy == CARBON_VISITOR_POLICY_EXCLUDE;
+                                                skip_object = policy == NG5_VISITOR_POLICY_EXCLUDE;
                                             }
 
                                             if(!skip_object)
@@ -461,17 +461,17 @@ iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
     carbon_vec_pop(path_stack);
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_archive_visit_archive(carbon_archive_t *archive, const carbon_archive_visitor_desc_t *desc,
                              carbon_archive_visitor_t *visitor, void *capture)
 {
-    CARBON_NON_NULL_OR_ERROR(archive)
-    CARBON_NON_NULL_OR_ERROR(visitor)
+    NG5_NON_NULL_OR_ERROR(archive)
+    NG5_NON_NULL_OR_ERROR(visitor)
 
     carbon_archive_prop_iter_t  prop_iter;
     vec_t ofType(carbon_path_entry) path_stack;
 
-    int mask = desc ? desc->visit_mask : CARBON_ARCHIVE_ITER_MASK_ANY;
+    int mask = desc ? desc->visit_mask : NG5_ARCHIVE_ITER_MASK_ANY;
 
     if (carbon_archive_prop_iter_from_archive(&prop_iter, &archive->err, mask, archive))
     {
@@ -488,7 +488,7 @@ carbon_archive_visit_archive(carbon_archive_t *archive, const carbon_archive_vis
 
 #include <inttypes.h>
 
-CARBON_EXPORT(void)
+NG5_EXPORT(void)
 carbon_archive_visitor_path_to_string(char path_buffer[2048], carbon_archive_t *archive, const vec_t ofType(carbon_path_entry_t) *path_stack)
 {
 
@@ -509,12 +509,12 @@ carbon_archive_visitor_path_to_string(char path_buffer[2048], carbon_archive_t *
     }
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_archive_visitor_print_path(FILE *file, carbon_archive_t *archive, const vec_t ofType(carbon_path_entry_t) *path_stack)
 {
-    CARBON_NON_NULL_OR_ERROR(file)
-    CARBON_NON_NULL_OR_ERROR(path_stack)
-    CARBON_NON_NULL_OR_ERROR(archive)
+    NG5_NON_NULL_OR_ERROR(file)
+    NG5_NON_NULL_OR_ERROR(path_stack)
+    NG5_NON_NULL_OR_ERROR(archive)
 
     carbon_query_t *query = carbon_archive_query_default(archive);
 
@@ -542,7 +542,7 @@ carbon_archive_visitor_print_path(FILE *file, carbon_archive_t *archive, const v
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_archive_visitor_path_compare(const vec_t ofType(carbon_path_entry_t) *path, carbon_string_id_t *group_name, const char *path_str, carbon_archive_t *archive)
 {
     char path_buffer[2048];

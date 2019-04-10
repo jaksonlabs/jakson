@@ -17,8 +17,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CARBON_TOOLS_CARBON_MODULES
-#define CARBON_TOOLS_CARBON_MODULES
+#ifndef NG5_TOOLS_NG5_MODULES
+#define NG5_TOOLS_NG5_MODULES
 
 #include "shell/opt.h"
 

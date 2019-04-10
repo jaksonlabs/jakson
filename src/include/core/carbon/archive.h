@@ -15,8 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_ARCHIVE_H
-#define CARBON_ARCHIVE_H
+#ifndef NG5_ARCHIVE_H
+#define NG5_ARCHIVE_H
 
 #include "shared/common.h"
 #include "core/mem/block.h"
@@ -26,7 +26,7 @@
 #include "archive_io.h"
 #include "archive_int.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
 typedef struct carbon_query carbon_query_t; /* forwarded from 'types-query.h' */
 
@@ -81,45 +81,45 @@ typedef struct
         void (*end_string_id_index_baking)();
 } carbon_archive_callback_t;
 
-CARBON_EXPORT(bool) carbon_archive_from_json(carbon_archive_t *out, const char *file, struct err *err,
+NG5_EXPORT(bool) carbon_archive_from_json(carbon_archive_t *out, const char *file, struct err *err,
         const char *json_string, carbon_compressor_type_e compressor, carbon_strdic_type_e dictionary,
         size_t num_async_dic_threads, bool read_optimized, bool bake_string_id_index,
         carbon_archive_callback_t *callback);
 
-CARBON_EXPORT(bool) carbon_archive_stream_from_json(carbon_memblock_t **stream, struct err *err, const char *json_string,
+NG5_EXPORT(bool) carbon_archive_stream_from_json(carbon_memblock_t **stream, struct err *err, const char *json_string,
         carbon_compressor_type_e compressor, carbon_strdic_type_e dictionary, size_t num_async_dic_threads,
         bool read_optimized, bool bake_id_index, carbon_archive_callback_t *callback);
 
-CARBON_EXPORT(bool) carbon_archive_from_model(carbon_memblock_t **stream, struct err *err, carbon_columndoc_t *model,
+NG5_EXPORT(bool) carbon_archive_from_model(carbon_memblock_t **stream, struct err *err, carbon_columndoc_t *model,
         carbon_compressor_type_e compressor, bool bake_string_id_index, carbon_archive_callback_t *callback);
 
-CARBON_EXPORT(bool) carbon_archive_write(FILE *file, const carbon_memblock_t *stream);
+NG5_EXPORT(bool) carbon_archive_write(FILE *file, const carbon_memblock_t *stream);
 
-CARBON_EXPORT(bool) carbon_archive_load(carbon_memblock_t **stream, FILE *file);
+NG5_EXPORT(bool) carbon_archive_load(carbon_memblock_t **stream, FILE *file);
 
-CARBON_EXPORT(bool) carbon_archive_print(FILE *file, struct err *err, carbon_memblock_t *stream);
+NG5_EXPORT(bool) carbon_archive_print(FILE *file, struct err *err, carbon_memblock_t *stream);
 
-CARBON_EXPORT(bool) carbon_archive_open(carbon_archive_t *out, const char *file_path);
+NG5_EXPORT(bool) carbon_archive_open(carbon_archive_t *out, const char *file_path);
 
-CARBON_EXPORT(bool) carbon_archive_get_info(struct archive_info *info, const struct carbon_archive *archive);
+NG5_EXPORT(bool) carbon_archive_get_info(struct archive_info *info, const struct carbon_archive *archive);
 
-CARBON_DEFINE_GET_ERROR_FUNCTION(archive, carbon_archive_t, archive);
+NG5_DEFINE_GET_ERROR_FUNCTION(archive, carbon_archive_t, archive);
 
-CARBON_EXPORT(bool) carbon_archive_close(carbon_archive_t *archive);
+NG5_EXPORT(bool) carbon_archive_close(carbon_archive_t *archive);
 
-CARBON_EXPORT(bool) carbon_archive_drop_indexes(carbon_archive_t *archive);
+NG5_EXPORT(bool) carbon_archive_drop_indexes(carbon_archive_t *archive);
 
-CARBON_EXPORT(bool) carbon_archive_query(carbon_query_t *query, carbon_archive_t *archive);
+NG5_EXPORT(bool) carbon_archive_query(carbon_query_t *query, carbon_archive_t *archive);
 
-CARBON_EXPORT(bool) carbon_archive_has_query_index_string_id_to_offset(bool *state, carbon_archive_t *archive);
+NG5_EXPORT(bool) carbon_archive_has_query_index_string_id_to_offset(bool *state, carbon_archive_t *archive);
 
-CARBON_EXPORT(bool) carbon_archive_hash_query_string_id_cache(bool *has_cache, carbon_archive_t *archive);
+NG5_EXPORT(bool) carbon_archive_hash_query_string_id_cache(bool *has_cache, carbon_archive_t *archive);
 
-CARBON_EXPORT(bool) carbon_archive_drop_query_string_id_cache(carbon_archive_t *archive);
+NG5_EXPORT(bool) carbon_archive_drop_query_string_id_cache(carbon_archive_t *archive);
 
-CARBON_EXPORT(carbon_string_id_cache_t *)carbon_archive_get_query_string_id_cache(carbon_archive_t *archive);
+NG5_EXPORT(carbon_string_id_cache_t *)carbon_archive_get_query_string_id_cache(carbon_archive_t *archive);
 
-CARBON_EXPORT(carbon_query_t *)carbon_archive_query_default(carbon_archive_t *archive);
+NG5_EXPORT(carbon_query_t *)carbon_archive_query_default(carbon_archive_t *archive);
 
 
 
@@ -133,8 +133,8 @@ CARBON_EXPORT(carbon_query_t *)carbon_archive_query_default(carbon_archive_t *ar
  * @param archive The archive
  * @return a heap-allocated instance of <code>carbon_io_context_t</code>, or NULL if not successful
  */
-CARBON_EXPORT(carbon_io_context_t *)carbon_archive_io_context_create(carbon_archive_t *archive);
+NG5_EXPORT(carbon_io_context_t *)carbon_archive_io_context_create(carbon_archive_t *archive);
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif

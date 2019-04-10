@@ -39,9 +39,9 @@ typedef struct
 
 typedef enum
 {
-    CARBON_MOD_ARG_REQUIRED,
-    CARBON_MOD_ARG_NOT_REQUIRED,
-    CARBON_MOD_ARG_MAYBE_REQUIRED,
+    NG5_MOD_ARG_REQUIRED,
+    NG5_MOD_ARG_NOT_REQUIRED,
+    NG5_MOD_ARG_MAYBE_REQUIRED,
 } carbon_mod_arg_policy_e;
 
 typedef struct carbon_cmdopt_mgr
@@ -54,24 +54,24 @@ typedef struct carbon_cmdopt_mgr
     char *module_desc;
 } carbon_cmdopt_mgr_t;
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_cmdopt_mgr_create(carbon_cmdopt_mgr_t *manager, char *module_name, char *module_desc,
                          carbon_mod_arg_policy_e policy, bool (*fallback)(int argc, char **argv, FILE *file,
                                                                           carbon_cmdopt_mgr_t *manager));
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_cmdopt_mgr_drop(carbon_cmdopt_mgr_t *manager);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_cmdopt_mgr_process(carbon_cmdopt_mgr_t *manager, int argc, char **argv, FILE *file);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_cmdopt_mgr_create_group(carbon_cmdopt_group_t **group,
                                const char *desc,
                                carbon_cmdopt_mgr_t *manager);
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_cmdopt_group_add_cmd(carbon_cmdopt_group_t *group, const char *opt_name, char *opt_desc, char *opt_manfile,
                             int (*callback)(int argc, char **argv, FILE *file));
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_cmdopt_mgr_show_help(FILE *file, carbon_cmdopt_mgr_t *manager);
 
 #endif

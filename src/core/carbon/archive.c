@@ -49,10 +49,10 @@
 
 #define PRINT_SIMPLE_PROPS(file, memfile, offset, nesting_level, value_type, type_string, format_string)               \
 {                                                                                                                      \
-    carbon_prop_header_t *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);             \
-    carbon_string_id_t *keys = (carbon_string_id_t *) CARBON_MEMFILE_READ(memfile, prop_header->num_entries *          \
+    carbon_prop_header_t *prop_header = NG5_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);             \
+    carbon_string_id_t *keys = (carbon_string_id_t *) NG5_MEMFILE_READ(memfile, prop_header->num_entries *          \
                                    sizeof(carbon_string_id_t));                                                        \
-    value_type *values = (value_type *) CARBON_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(value_type));   \
+    value_type *values = (value_type *) NG5_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(value_type));   \
     fprintf(file, "0x%04x ", (unsigned) offset);                                                                       \
     INTENT_LINE(nesting_level)                                                                                         \
     fprintf(file, "[marker: %c (" type_string ")] [num_entries: %d] [", entryMarker, prop_header->num_entries);        \
@@ -68,9 +68,9 @@
 
 #define PRINT_ARRAY_PROPS(memfile, offset, nesting_level, entryMarker, type, type_string, format_string)               \
 {                                                                                                                      \
-    carbon_prop_header_t *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);             \
+    carbon_prop_header_t *prop_header = NG5_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);             \
                                                                                                                        \
-    carbon_string_id_t *keys = (carbon_string_id_t *) CARBON_MEMFILE_READ(memfile, prop_header->num_entries *          \
+    carbon_string_id_t *keys = (carbon_string_id_t *) NG5_MEMFILE_READ(memfile, prop_header->num_entries *          \
                                         sizeof(carbon_string_id_t));                                                   \
     u32 *array_lengths;                                                                                           \
                                                                                                                        \
@@ -83,7 +83,7 @@
     }                                                                                                                  \
     fprintf(file, "] [");                                                                                              \
                                                                                                                        \
-    array_lengths = (u32 *) CARBON_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(u32));            \
+    array_lengths = (u32 *) NG5_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(u32));            \
                                                                                                                        \
     for (u32 i = 0; i < prop_header->num_entries; i++) {                                                          \
         fprintf(file, "num_entries: %d%s", array_lengths[i], i + 1 < prop_header->num_entries ? ", " : "");            \
@@ -92,7 +92,7 @@
     fprintf(file, "] [");                                                                                              \
                                                                                                                        \
     for (u32 array_idx = 0; array_idx < prop_header->num_entries; array_idx++) {                                  \
-        type *values = (type *) CARBON_MEMFILE_READ(memfile, array_lengths[array_idx] * sizeof(type));                 \
+        type *values = (type *) NG5_MEMFILE_READ(memfile, array_lengths[array_idx] * sizeof(type));                 \
         fprintf(file, "[");                                                                                            \
         for (u32 i = 0; i < array_lengths[array_idx]; i++) {                                                      \
             fprintf(file, "value: "format_string"%s", values[i], i + 1 < array_lengths[array_idx] ? ", " : "");        \
@@ -112,8 +112,8 @@
 
 #define PRINT_VALUE_ARRAY(type, memfile, header, format_string)                                                        \
 {                                                                                                                      \
-    u32 num_elements = *CARBON_MEMFILE_READ_TYPE(memfile, u32);                                              \
-    const type *values = (const type *) CARBON_MEMFILE_READ(memfile, num_elements * sizeof(type));                     \
+    u32 num_elements = *NG5_MEMFILE_READ_TYPE(memfile, u32);                                              \
+    const type *values = (const type *) NG5_MEMFILE_READ(memfile, num_elements * sizeof(type));                     \
     fprintf(file, "0x%04x ", (unsigned) offset);                                                                       \
     INTENT_LINE(nesting_level);                                                                                        \
     fprintf(file, "   [num_elements: %d] [values: [", num_elements);                                                   \
@@ -135,15 +135,15 @@ static bool serialize_string_dic(memfile_t *memfile, struct err *err, const carb
         carbon_compressor_type_e compressor);
 static bool print_archive_from_memfile(FILE *file, struct err *err, memfile_t *memfile);
 
-CARBON_EXPORT(bool) carbon_archive_from_json(carbon_archive_t *out, const char *file, struct err *err,
+NG5_EXPORT(bool) carbon_archive_from_json(carbon_archive_t *out, const char *file, struct err *err,
         const char *json_string, carbon_compressor_type_e compressor, carbon_strdic_type_e dictionary,
         size_t num_async_dic_threads, bool read_optimized, bool bake_string_id_index,
         carbon_archive_callback_t *callback)
 {
-        CARBON_NON_NULL_OR_ERROR(out);
-        CARBON_NON_NULL_OR_ERROR(file);
-        CARBON_NON_NULL_OR_ERROR(err);
-        CARBON_NON_NULL_OR_ERROR(json_string);
+        NG5_NON_NULL_OR_ERROR(out);
+        NG5_NON_NULL_OR_ERROR(file);
+        NG5_NON_NULL_OR_ERROR(err);
+        NG5_NON_NULL_OR_ERROR(json_string);
 
         OPTIONAL_CALL(callback, begin_create_from_json);
 
@@ -165,13 +165,13 @@ CARBON_EXPORT(bool) carbon_archive_from_json(carbon_archive_t *out, const char *
         OPTIONAL_CALL(callback, begin_write_archive_file_to_disk);
 
         if ((out_file = fopen(file, "w")) == NULL) {
-                error(err, CARBON_ERR_FOPENWRITE);
+                error(err, NG5_ERR_FOPENWRITE);
                 carbon_memblock_drop(stream);
                 return false;
         }
 
         if (!carbon_archive_write(out_file, stream)) {
-                error(err, CARBON_ERR_WRITEARCHIVE);
+                error(err, NG5_ERR_WRITEARCHIVE);
                 fclose(out_file);
                 carbon_memblock_drop(stream);
                 return false;
@@ -184,7 +184,7 @@ CARBON_EXPORT(bool) carbon_archive_from_json(carbon_archive_t *out, const char *
         OPTIONAL_CALL(callback, begin_load_archive);
 
         if (!carbon_archive_open(out, file)) {
-                error(err, CARBON_ERR_ARCHIVEOPEN);
+                error(err, NG5_ERR_ARCHIVEOPEN);
                 return false;
         }
 
@@ -197,13 +197,13 @@ CARBON_EXPORT(bool) carbon_archive_from_json(carbon_archive_t *out, const char *
         return true;
 }
 
-CARBON_EXPORT(bool) carbon_archive_stream_from_json(carbon_memblock_t **stream, struct err *err, const char *json_string,
+NG5_EXPORT(bool) carbon_archive_stream_from_json(carbon_memblock_t **stream, struct err *err, const char *json_string,
         carbon_compressor_type_e compressor, carbon_strdic_type_e dictionary, size_t num_async_dic_threads,
         bool read_optimized, bool bake_id_index, carbon_archive_callback_t *callback)
 {
-        CARBON_NON_NULL_OR_ERROR(stream);
-        CARBON_NON_NULL_OR_ERROR(err);
-        CARBON_NON_NULL_OR_ERROR(json_string);
+        NG5_NON_NULL_OR_ERROR(stream);
+        NG5_NON_NULL_OR_ERROR(err);
+        NG5_NON_NULL_OR_ERROR(json_string);
 
         carbon_strdic_t dic;
         carbon_json_parser_t parser;
@@ -216,12 +216,12 @@ CARBON_EXPORT(bool) carbon_archive_stream_from_json(carbon_memblock_t **stream, 
         OPTIONAL_CALL(callback, begin_archive_stream_from_json)
 
         OPTIONAL_CALL(callback, begin_setup_string_dictionary);
-        if (dictionary == CARBON_STRDIC_TYPE_SYNC) {
+        if (dictionary == NG5_STRDIC_TYPE_SYNC) {
                 carbon_strdic_create_sync(&dic, 1000, 1000, 1000, 0, NULL);
-        } else if (dictionary == CARBON_STRDIC_TYPE_ASYNC) {
+        } else if (dictionary == NG5_STRDIC_TYPE_ASYNC) {
                 carbon_strdic_create_async(&dic, 1000, 1000, 1000, num_async_dic_threads, NULL);
         } else {
-                error(err, CARBON_ERR_UNKNOWN_DIC_TYPE);
+                error(err, NG5_ERR_UNKNOWN_DIC_TYPE);
         }
 
         OPTIONAL_CALL(callback, end_setup_string_dictionary);
@@ -237,10 +237,10 @@ CARBON_EXPORT(bool) carbon_archive_stream_from_json(carbon_memblock_t **stream, 
                                 error_desc.token_type_str,
                                 error_desc.token->line,
                                 error_desc.token->column);
-                        error_WDETAILS(err, CARBON_ERR_JSONPARSEERR, &buffer[0]);
+                        error_WDETAILS(err, NG5_ERR_JSONPARSEERR, &buffer[0]);
                 } else {
                         sprintf(buffer, "%s", error_desc.msg);
-                        error_WDETAILS(err, CARBON_ERR_JSONPARSEERR, &buffer[0]);
+                        error_WDETAILS(err, NG5_ERR_JSONPARSEERR, &buffer[0]);
                 }
                 return false;
         }
@@ -254,7 +254,7 @@ CARBON_EXPORT(bool) carbon_archive_stream_from_json(carbon_memblock_t **stream, 
 
         OPTIONAL_CALL(callback, begin_import_json);
         if (!carbon_doc_bulk_create(&bulk, &dic)) {
-                error(err, CARBON_ERR_BULKCREATEFAILED);
+                error(err, NG5_ERR_BULKCREATEFAILED);
                 return false;
         }
 
@@ -298,12 +298,12 @@ static bool run_string_id_baking(struct err *err, carbon_memblock_t **stream)
         FILE *tmp_file;
 
         if ((tmp_file = fopen(tmp_file_name, "w")) == NULL) {
-                error(err, CARBON_ERR_TMP_FOPENWRITE);
+                error(err, NG5_ERR_TMP_FOPENWRITE);
                 return false;
         }
 
         if (!carbon_archive_write(tmp_file, *stream)) {
-                error(err, CARBON_ERR_WRITEARCHIVE);
+                error(err, NG5_ERR_WRITEARCHIVE);
                 fclose(tmp_file);
                 remove(tmp_file_name);
                 return false;
@@ -313,14 +313,14 @@ static bool run_string_id_baking(struct err *err, carbon_memblock_t **stream)
         fclose(tmp_file);
 
         if (!carbon_archive_open(&archive, tmp_file_name)) {
-                error(err, CARBON_ERR_ARCHIVEOPEN);
+                error(err, NG5_ERR_ARCHIVEOPEN);
                 return false;
         }
 
         bool has_index;
         carbon_archive_has_query_index_string_id_to_offset(&has_index, &archive);
         if (has_index) {
-                error(err, CARBON_ERR_INTERNALERR);
+                error(err, NG5_ERR_INTERNALERR);
                 remove(tmp_file_name);
                 return false;
         }
@@ -333,7 +333,7 @@ static bool run_string_id_baking(struct err *err, carbon_memblock_t **stream)
         carbon_archive_close(&archive);
 
         if ((tmp_file = fopen(tmp_file_name, "rb+")) == NULL) {
-                error(err, CARBON_ERR_TMP_FOPENWRITE);
+                error(err, NG5_ERR_TMP_FOPENWRITE);
                 return false;
         }
 
@@ -345,11 +345,11 @@ static bool run_string_id_baking(struct err *err, carbon_memblock_t **stream)
 
         carbon_file_header_t header;
         size_t nread = fread(&header, sizeof(carbon_file_header_t), 1, tmp_file);
-        error_IF(nread != 1, err, CARBON_ERR_FREAD_FAILED);
+        error_IF(nread != 1, err, NG5_ERR_FREAD_FAILED);
         header.string_id_to_offset_index_offset = index_pos;
         fseek(tmp_file, 0, SEEK_SET);
         int nwrite = fwrite(&header, sizeof(carbon_file_header_t), 1, tmp_file);
-        error_IF(nwrite != 1, err, CARBON_ERR_FWRITE_FAILED);
+        error_IF(nwrite != 1, err, NG5_ERR_FWRITE_FAILED);
         fseek(tmp_file, 0, SEEK_SET);
 
         carbon_query_drop_index_string_id_to_offset(index);
@@ -365,15 +365,15 @@ static bool run_string_id_baking(struct err *err, carbon_memblock_t **stream)
 bool carbon_archive_from_model(carbon_memblock_t **stream, struct err *err, carbon_columndoc_t *model,
         carbon_compressor_type_e compressor, bool bake_string_id_index, carbon_archive_callback_t *callback)
 {
-        CARBON_NON_NULL_OR_ERROR(model)
-        CARBON_NON_NULL_OR_ERROR(stream)
-        CARBON_NON_NULL_OR_ERROR(err)
+        NG5_NON_NULL_OR_ERROR(model)
+        NG5_NON_NULL_OR_ERROR(stream)
+        NG5_NON_NULL_OR_ERROR(err)
 
         OPTIONAL_CALL(callback, begin_create_from_model)
 
         carbon_memblock_create(stream, 1024 * 1024 * 1024);
         memfile_t memfile;
-        carbon_memfile_open(&memfile, *stream, CARBON_MEMFILE_MODE_READWRITE);
+        carbon_memfile_open(&memfile, *stream, NG5_MEMFILE_MODE_READWRITE);
 
         OPTIONAL_CALL(callback, begin_write_string_table);
         skip_carbon_file_header(&memfile);
@@ -411,14 +411,14 @@ bool carbon_archive_from_model(carbon_memblock_t **stream, struct err *err, carb
         return true;
 }
 
-CARBON_EXPORT(carbon_io_context_t *)carbon_archive_io_context_create(carbon_archive_t *archive)
+NG5_EXPORT(carbon_io_context_t *)carbon_archive_io_context_create(carbon_archive_t *archive)
 {
-        CARBON_NON_NULL_OR_ERROR(archive);
+        NG5_NON_NULL_OR_ERROR(archive);
         carbon_io_context_t *context;
         if (carbon_io_context_create(&context, &archive->err, archive->diskFilePath)) {
                 return context;
         } else {
-                error(&archive->err, CARBON_ERR_IO)
+                error(&archive->err, NG5_ERR_IO)
                 return NULL;
         }
 }
@@ -442,10 +442,10 @@ bool carbon_archive_load(carbon_memblock_t **stream, FILE *file)
 bool carbon_archive_print(FILE *file, struct err *err, carbon_memblock_t *stream)
 {
         memfile_t memfile;
-        carbon_memfile_open(&memfile, stream, CARBON_MEMFILE_MODE_READONLY);
+        carbon_memfile_open(&memfile, stream, NG5_MEMFILE_MODE_READONLY);
         if (carbon_memfile_size(&memfile) < sizeof(carbon_file_header_t) + sizeof(carbon_string_table_header_t)
                 + sizeof(carbon_object_header_t)) {
-                error(err, CARBON_ERR_NOCARBONSTREAM);
+                error(err, NG5_ERR_NOCARBONSTREAM);
                 return false;
         } else {
                 return print_archive_from_memfile(file, err, &memfile);
@@ -489,7 +489,7 @@ static const char *array_value_type_to_string(struct err *err, field_e type)
         case field_object:
                 return "Object Array";
         default: {
-                error(err, CARBON_ERR_NOVALUESTR)
+                error(err, NG5_ERR_NOVALUESTR)
                 return NULL;
         }
         }
@@ -546,7 +546,7 @@ static bool write_primitive_fixed_value_column(memfile_t *memfile, struct err *e
                 break;
         case field_string: WRITE_PRIMITIVE_VALUES(memfile, values_vec, carbon_string_id_t);
                 break;
-        default: error(err, CARBON_ERR_NOTYPE);
+        default: error(err, NG5_ERR_NOTYPE);
                 return false;
         }
         return true;
@@ -588,10 +588,10 @@ static bool __write_array_len_column(struct err *err, memfile_t *memfile, field_
                         memfile_write(memfile, &arrays->num_elems, sizeof(u32));
                 }
                 break;
-        case field_object: carbon_print_error_and_die(CARBON_ERR_ILLEGALIMPL)
+        case field_object: carbon_print_error_and_die(NG5_ERR_ILLEGALIMPL)
                 return false;
                 break;
-        default: error(err, CARBON_ERR_NOTYPE);
+        default: error(err, NG5_ERR_NOTYPE);
                 return false;
         }
         return true;
@@ -626,9 +626,9 @@ static bool write_array_value_column(memfile_t *memfile, struct err *err, field_
                 break;
         case field_string: WRITE_ARRAY_VALUES(memfile, values_vec, carbon_string_id_t);
                 break;
-        case field_object: carbon_print_error_and_die(CARBON_ERR_NOTIMPL)
+        case field_object: carbon_print_error_and_die(NG5_ERR_NOTIMPL)
                 return false;
-        default: error(err, CARBON_ERR_NOTYPE)
+        default: error(err, NG5_ERR_NOTYPE)
                 return false;
         }
         return true;
@@ -983,7 +983,7 @@ static bool write_column_entry(memfile_t *memfile, struct err *err, field_e type
                 offset_t preObjectNext = 0;
                 for (size_t i = 0; i < column->num_elems; i++) {
                         columndoc_obj_t *object = vec_get(column, i, columndoc_obj_t);
-                        if (CARBON_LIKELY(preObjectNext != 0)) {
+                        if (NG5_LIKELY(preObjectNext != 0)) {
                                 offset_t continuePos = memfile_tell(memfile);
                                 offset_t relativeContinuePos = continuePos - root_object_header_offset;
                                 carbon_memfile_seek(memfile, preObjectNext);
@@ -996,7 +996,7 @@ static bool write_column_entry(memfile_t *memfile, struct err *err, field_e type
                 }
         }
                 break;
-        default: error(err, CARBON_ERR_NOTYPE)
+        default: error(err, NG5_ERR_NOTYPE)
                 return false;
         }
         return true;
@@ -1066,7 +1066,7 @@ static bool write_object_array_props(memfile_t *memfile, struct err *err,
                                         vec_get(&column_group->columns, k, carbon_columndoc_column_t);
                                 const u32 *array_pos = vec_all(&column->array_positions, u32);
                                 for (size_t m = 0; m < column->array_positions.num_elems; m++) {
-                                        max_pos = CARBON_MAX(max_pos, array_pos[m]);
+                                        max_pos = NG5_MAX(max_pos, array_pos[m]);
                                 }
                         }
                         carbon_column_group_header_t column_group_header =
@@ -1077,7 +1077,7 @@ static bool write_object_array_props(memfile_t *memfile, struct err *err,
                         for (size_t i = 0; i < column_group_header.num_objects; i++) {
                                 carbon_object_id_t oid;
                                 if (!carbon_object_id_create(&oid)) {
-                                        error(err, CARBON_ERR_THREADOOOBJIDS);
+                                        error(err, NG5_ERR_THREADOOOBJIDS);
                                         return false;
                                 }
                                 memfile_write(memfile, &oid, sizeof(carbon_object_id_t));
@@ -1336,7 +1336,7 @@ static bool __serialize(offset_t *offset, struct err *err, memfile_t *memfile, c
 
         carbon_object_id_t oid;
         if (!carbon_object_id_create(&oid)) {
-                error(err, CARBON_ERR_THREADOOOBJIDS);
+                error(err, NG5_ERR_THREADOOOBJIDS);
                 return false;
         }
 
@@ -1350,7 +1350,7 @@ static bool __serialize(offset_t *offset, struct err *err, memfile_t *memfile, c
         propOffsetsWrite(memfile, &flags, &prop_offsets);
 
         carbon_memfile_seek(memfile, object_end_offset);
-        CARBON_OPTIONAL_SET(offset, next_offset);
+        NG5_OPTIONAL_SET(offset, next_offset);
         return true;
 }
 
@@ -1366,7 +1366,7 @@ static char *embedded_dic_flags_to_string(const carbon_archive_dic_flags_t *flag
                 assert(length <= max);
         } else {
 
-                for (size_t i = 0; i < CARBON_ARRAY_LENGTH(carbon_compressor_strategy_register); i++) {
+                for (size_t i = 0; i < NG5_ARRAY_LENGTH(carbon_compressor_strategy_register); i++) {
                         if (flags->value & carbon_compressor_strategy_register[i].flag_bit) {
                                 strcpy(string + length, carbon_compressor_strategy_register[i].name);
                                 length = strlen(string);
@@ -1419,7 +1419,7 @@ static bool serialize_string_dic(memfile_t *memfile, struct err *err, const carb
                 return false;
         }
         u8 flag_bit = carbon_compressor_flagbit_by_type(compressor);
-        CARBON_FIELD_SET(flags.value, flag_bit);
+        NG5_FIELD_SET(flags.value, flag_bit);
 
         offset_t header_pos = memfile_tell(memfile);
         carbon_memfile_skip(memfile, sizeof(carbon_string_table_header_t));
@@ -1444,7 +1444,7 @@ static bool serialize_string_dic(memfile_t *memfile, struct err *err, const carb
                 carbon_memfile_skip(memfile, sizeof(carbon_string_entry_header_t));
 
                 if (!carbon_compressor_encode(err, &strategy, memfile, string)) {
-                        CARBON_PRINT_ERROR(err.code);
+                        NG5_PRINT_ERROR(err.code);
                         return false;
                 }
                 offset_t continue_off = memfile_tell(memfile);
@@ -1488,11 +1488,11 @@ static bool print_column_form_memfile(FILE *file, struct err *err, memfile_t *me
 {
         offset_t offset;
         carbon_memfile_tell(&offset, memfile);
-        carbon_column_header_t *header = CARBON_MEMFILE_READ_TYPE(memfile, carbon_column_header_t);
+        carbon_column_header_t *header = NG5_MEMFILE_READ_TYPE(memfile, carbon_column_header_t);
         if (header->marker != MARKER_SYMBOL_COLUMN) {
                 char buffer[256];
                 sprintf(buffer, "expected marker [%c] but found [%c]", MARKER_SYMBOL_COLUMN, header->marker);
-                error_WDETAILS(err, CARBON_ERR_CORRUPTED, buffer);
+                error_WDETAILS(err, NG5_ERR_CORRUPTED, buffer);
                 return false;
         }
         fprintf(file, "0x%04x ", (unsigned) offset);
@@ -1511,11 +1511,11 @@ static bool print_column_form_memfile(FILE *file, struct err *err, memfile_t *me
                 header->num_entries);
 
         for (size_t i = 0; i < header->num_entries; i++) {
-                offset_t entry_off = *CARBON_MEMFILE_READ_TYPE(memfile, offset_t);
+                offset_t entry_off = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
                 fprintf(file, "offset: 0x%04x%s", (unsigned) entry_off, i + 1 < header->num_entries ? ", " : "");
         }
 
-        u32 *positions = (u32 *) CARBON_MEMFILE_READ(memfile, header->num_entries * sizeof(u32));
+        u32 *positions = (u32 *) NG5_MEMFILE_READ(memfile, header->num_entries * sizeof(u32));
         fprintf(file, "] [positions: [");
         for (size_t i = 0; i < header->num_entries; i++) {
                 fprintf(file, "%d%s", positions[i], i + 1 < header->num_entries ? ", " : "");
@@ -1581,7 +1581,7 @@ static bool print_column_form_memfile(FILE *file, struct err *err, memfile_t *me
                 }
                         break;
                 case field_object: {
-                        u32 num_elements = *CARBON_MEMFILE_READ_TYPE(memfile, u32);
+                        u32 num_elements = *NG5_MEMFILE_READ_TYPE(memfile, u32);
                         INTENT_LINE(nesting_level);
                         fprintf(file, "   [num_elements: %d] [values: [\n", num_elements);
                         for (size_t i = 0; i < num_elements; i++) {
@@ -1593,7 +1593,7 @@ static bool print_column_form_memfile(FILE *file, struct err *err, memfile_t *me
                         fprintf(file, "   ]\n");
                 }
                         break;
-                default: error(err, CARBON_ERR_NOTYPE)
+                default: error(err, NG5_ERR_NOTYPE)
                         return false;
                 }
         }
@@ -1603,11 +1603,11 @@ static bool print_column_form_memfile(FILE *file, struct err *err, memfile_t *me
 static bool print_object_array_from_memfile(FILE *file, struct err *err, memfile_t *memfile, unsigned nesting_level)
 {
         unsigned offset = (unsigned) memfile_tell(memfile);
-        carbon_object_array_header_t *header = CARBON_MEMFILE_READ_TYPE(memfile, carbon_object_array_header_t);
+        carbon_object_array_header_t *header = NG5_MEMFILE_READ_TYPE(memfile, carbon_object_array_header_t);
         if (header->marker != MARKER_SYMBOL_PROP_OBJECT_ARRAY) {
                 char buffer[256];
                 sprintf(buffer, "expected marker [%c] but found [%c]", MARKER_SYMBOL_PROP_OBJECT_ARRAY, header->marker);
-                error_WDETAILS(err, CARBON_ERR_CORRUPTED, buffer);
+                error_WDETAILS(err, NG5_ERR_CORRUPTED, buffer);
                 return false;
         }
 
@@ -1616,12 +1616,12 @@ static bool print_object_array_from_memfile(FILE *file, struct err *err, memfile
         fprintf(file, "[marker: %c (Object Array)] [nentries: %d] [", header->marker, header->num_entries);
 
         for (size_t i = 0; i < header->num_entries; i++) {
-                carbon_string_id_t string_id = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_string_id_t);
+                carbon_string_id_t string_id = *NG5_MEMFILE_READ_TYPE(memfile, carbon_string_id_t);
                 fprintf(file, "key: %"PRIu64"%s", string_id, i + 1 < header->num_entries ? ", " : "");
         }
         fprintf(file, "] [");
         for (size_t i = 0; i < header->num_entries; i++) {
-                offset_t columnGroupOffset = *CARBON_MEMFILE_READ_TYPE(memfile, offset_t);
+                offset_t columnGroupOffset = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
                 fprintf(file,
                         "offset: 0x%04x%s",
                         (unsigned) columnGroupOffset,
@@ -1634,14 +1634,14 @@ static bool print_object_array_from_memfile(FILE *file, struct err *err, memfile
         for (size_t i = 0; i < header->num_entries; i++) {
                 offset = memfile_tell(memfile);
                 carbon_column_group_header_t
-                        *column_group_header = CARBON_MEMFILE_READ_TYPE(memfile, carbon_column_group_header_t);
+                        *column_group_header = NG5_MEMFILE_READ_TYPE(memfile, carbon_column_group_header_t);
                 if (column_group_header->marker != MARKER_SYMBOL_COLUMN_GROUP) {
                         char buffer[256];
                         sprintf(buffer,
                                 "expected marker [%c] but found [%c]",
                                 MARKER_SYMBOL_COLUMN_GROUP,
                                 column_group_header->marker);
-                        error_WDETAILS(err, CARBON_ERR_CORRUPTED, buffer);
+                        error_WDETAILS(err, NG5_ERR_CORRUPTED, buffer);
                         return false;
                 }
                 fprintf(file, "0x%04x ", offset);
@@ -1652,13 +1652,13 @@ static bool print_object_array_from_memfile(FILE *file, struct err *err, memfile
                         column_group_header->num_columns,
                         column_group_header->num_objects);
                 const carbon_object_id_t *oids =
-                        CARBON_MEMFILE_READ_TYPE_LIST(memfile, carbon_object_id_t, column_group_header->num_objects);
+                        NG5_MEMFILE_READ_TYPE_LIST(memfile, carbon_object_id_t, column_group_header->num_objects);
                 for (size_t k = 0; k < column_group_header->num_objects; k++) {
                         fprintf(file, "%"PRIu64"%s", oids[k], k + 1 < column_group_header->num_objects ? ", " : "");
                 }
                 fprintf(file, "] [offsets: ");
                 for (size_t k = 0; k < column_group_header->num_columns; k++) {
-                        offset_t column_off = *CARBON_MEMFILE_READ_TYPE(memfile, offset_t);
+                        offset_t column_off = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
                         fprintf(file,
                                 "0x%04x%s",
                                 (unsigned) column_off,
@@ -1766,18 +1766,18 @@ static void print_prop_offsets(FILE *file, const carbon_archive_object_flags_t *
 bool print_object(FILE *file, struct err *err, memfile_t *memfile, unsigned nesting_level)
 {
         unsigned offset = (unsigned) memfile_tell(memfile);
-        carbon_object_header_t *header = CARBON_MEMFILE_READ_TYPE(memfile, carbon_object_header_t);
+        carbon_object_header_t *header = NG5_MEMFILE_READ_TYPE(memfile, carbon_object_header_t);
 
         carbon_archive_prop_offs_t prop_offsets;
         carbon_archive_object_flags_t flags = {.value = header->flags};
 
         carbon_int_read_prop_offsets(&prop_offsets, memfile, &flags);
-        offset_t nextObjectOrNil = *CARBON_MEMFILE_READ_TYPE(memfile, offset_t);
+        offset_t nextObjectOrNil = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
 
         if (header->marker != MARKER_SYMBOL_OBJECT_BEGIN) {
                 char buffer[256];
                 sprintf(buffer, "Parsing error: expected object marker [{] but found [%c]\"", header->marker);
-                error_WDETAILS(err, CARBON_ERR_CORRUPTED, buffer);
+                error_WDETAILS(err, NG5_ERR_CORRUPTED, buffer);
                 return false;
         }
 
@@ -1795,12 +1795,12 @@ bool print_object(FILE *file, struct err *err, memfile_t *memfile, unsigned nest
         bool continue_read = true;
         while (continue_read) {
                 offset = memfile_tell(memfile);
-                char entryMarker = *CARBON_MEMFILE_PEEK(memfile, char);
+                char entryMarker = *NG5_MEMFILE_PEEK(memfile, char);
 
                 switch (entryMarker) {
                 case MARKER_SYMBOL_PROP_NULL: {
-                        carbon_prop_header_t *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);
-                        carbon_string_id_t *keys = (carbon_string_id_t *) CARBON_MEMFILE_READ(memfile,
+                        carbon_prop_header_t *prop_header = NG5_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);
+                        carbon_string_id_t *keys = (carbon_string_id_t *) NG5_MEMFILE_READ(memfile,
                                 prop_header->num_entries * sizeof(carbon_string_id_t));
                         fprintf(file, "0x%04x ", offset);
                         INTENT_LINE(nesting_level)
@@ -1813,10 +1813,10 @@ bool print_object(FILE *file, struct err *err, memfile_t *memfile, unsigned nest
                 }
                         break;
                 case MARKER_SYMBOL_PROP_BOOLEAN: {
-                        carbon_prop_header_t *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);
-                        carbon_string_id_t *keys = (carbon_string_id_t *) CARBON_MEMFILE_READ(memfile,
+                        carbon_prop_header_t *prop_header = NG5_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);
+                        carbon_string_id_t *keys = (carbon_string_id_t *) NG5_MEMFILE_READ(memfile,
                                 prop_header->num_entries * sizeof(carbon_string_id_t));
-                        carbon_boolean_t *values = (carbon_boolean_t *) CARBON_MEMFILE_READ(memfile,
+                        carbon_boolean_t *values = (carbon_boolean_t *) NG5_MEMFILE_READ(memfile,
                                 prop_header->num_entries * sizeof(carbon_boolean_t));
                         fprintf(file, "0x%04x ", offset);
                         INTENT_LINE(nesting_level)
@@ -1944,16 +1944,16 @@ bool print_object(FILE *file, struct err *err, memfile_t *memfile, unsigned nest
                                 if (!print_object(file, err, memfile, nesting_level + 1)) {
                                         return false;
                                 }
-                                nextEntryMarker = *CARBON_MEMFILE_PEEK(memfile, char);
+                                nextEntryMarker = *NG5_MEMFILE_PEEK(memfile, char);
                         }
                         while (nextEntryMarker == MARKER_SYMBOL_OBJECT_BEGIN);
 
                 }
                         break;
                 case MARKER_SYMBOL_PROP_NULL_ARRAY: {
-                        carbon_prop_header_t *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);
+                        carbon_prop_header_t *prop_header = NG5_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);
 
-                        carbon_string_id_t *keys = (carbon_string_id_t *) CARBON_MEMFILE_READ(memfile,
+                        carbon_string_id_t *keys = (carbon_string_id_t *) NG5_MEMFILE_READ(memfile,
                                 prop_header->num_entries * sizeof(carbon_string_id_t));
                         u32 *nullArrayLengths;
 
@@ -1970,7 +1970,7 @@ bool print_object(FILE *file, struct err *err, memfile_t *memfile, unsigned nest
                         fprintf(file, "] [");
 
                         nullArrayLengths =
-                                (u32 *) CARBON_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(u32));
+                                (u32 *) NG5_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(u32));
 
                         for (u32 i = 0; i < prop_header->num_entries; i++) {
                                 fprintf(file,
@@ -1983,9 +1983,9 @@ bool print_object(FILE *file, struct err *err, memfile_t *memfile, unsigned nest
                 }
                         break;
                 case MARKER_SYMBOL_PROP_BOOLEAN_ARRAY: {
-                        carbon_prop_header_t *prop_header = CARBON_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);
+                        carbon_prop_header_t *prop_header = NG5_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);
 
-                        carbon_string_id_t *keys = (carbon_string_id_t *) CARBON_MEMFILE_READ(memfile,
+                        carbon_string_id_t *keys = (carbon_string_id_t *) NG5_MEMFILE_READ(memfile,
                                 prop_header->num_entries * sizeof(carbon_string_id_t));
                         u32 *array_lengths;
 
@@ -2002,7 +2002,7 @@ bool print_object(FILE *file, struct err *err, memfile_t *memfile, unsigned nest
                         fprintf(file, "] [");
 
                         array_lengths =
-                                (u32 *) CARBON_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(u32));
+                                (u32 *) NG5_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(u32));
 
                         for (u32 i = 0; i < prop_header->num_entries; i++) {
                                 fprintf(file,
@@ -2014,7 +2014,7 @@ bool print_object(FILE *file, struct err *err, memfile_t *memfile, unsigned nest
                         fprintf(file, "] [");
 
                         for (u32 array_idx = 0; array_idx < prop_header->num_entries; array_idx++) {
-                                carbon_boolean_t *values = (carbon_boolean_t *) CARBON_MEMFILE_READ(memfile,
+                                carbon_boolean_t *values = (carbon_boolean_t *) NG5_MEMFILE_READ(memfile,
                                         array_lengths[array_idx] * sizeof(carbon_boolean_t));
                                 fprintf(file, "[");
                                 for (u32 i = 0; i < array_lengths[array_idx]; i++) {
@@ -2130,14 +2130,14 @@ bool print_object(FILE *file, struct err *err, memfile_t *memfile, unsigned nest
                                 "Parsing error: unexpected marker [%c] was detected in file %p",
                                 entryMarker,
                                 memfile);
-                        error_WDETAILS(err, CARBON_ERR_CORRUPTED, buffer);
+                        error_WDETAILS(err, NG5_ERR_CORRUPTED, buffer);
                         return false;
                 }
                 }
         }
 
         offset = memfile_tell(memfile);
-        char end_marker = *CARBON_MEMFILE_READ_TYPE(memfile, char);
+        char end_marker = *NG5_MEMFILE_READ_TYPE(memfile, char);
         assert (end_marker == MARKER_SYMBOL_OBJECT_END);
         nesting_level--;
         fprintf(file, "0x%04x ", offset);
@@ -2148,10 +2148,10 @@ bool print_object(FILE *file, struct err *err, memfile_t *memfile, unsigned nest
 
 static bool is_valid_carbon_file(const carbon_file_header_t *header)
 {
-        if (CARBON_ARRAY_LENGTH(header->magic) != strlen(CABIN_FILE_MAGIC)) {
+        if (NG5_ARRAY_LENGTH(header->magic) != strlen(CABIN_FILE_MAGIC)) {
                 return false;
         } else {
-                for (size_t i = 0; i < CARBON_ARRAY_LENGTH(header->magic); i++) {
+                for (size_t i = 0; i < NG5_ARRAY_LENGTH(header->magic); i++) {
                         if (header->magic[i] != CABIN_FILE_MAGIC[i]) {
                                 return false;
                         }
@@ -2169,7 +2169,7 @@ static bool is_valid_carbon_file(const carbon_file_header_t *header)
 static void print_record_header_from_memfile(FILE *file, memfile_t *memfile)
 {
         unsigned offset = memfile_tell(memfile);
-        carbon_record_header_t *header = CARBON_MEMFILE_READ_TYPE(memfile, carbon_record_header_t);
+        carbon_record_header_t *header = NG5_MEMFILE_READ_TYPE(memfile, carbon_record_header_t);
         carbon_archive_record_flags_t flags;
         memset(&flags, 0, sizeof(carbon_archive_record_flags_t));
         flags.value = header->flags;
@@ -2187,9 +2187,9 @@ static bool print_carbon_header_from_memfile(FILE *file, struct err *err, memfil
 {
         unsigned offset = memfile_tell(memfile);
         assert(carbon_memfile_size(memfile) > sizeof(carbon_file_header_t));
-        carbon_file_header_t *header = CARBON_MEMFILE_READ_TYPE(memfile, carbon_file_header_t);
+        carbon_file_header_t *header = NG5_MEMFILE_READ_TYPE(memfile, carbon_file_header_t);
         if (!is_valid_carbon_file(header)) {
-                error(err, CARBON_ERR_NOARCHIVEFILE)
+                error(err, NG5_ERR_NOARCHIVEFILE)
                 return false;
         }
 
@@ -2208,14 +2208,14 @@ static bool print_embedded_dic_from_memfile(FILE *file, struct err *err, memfile
         carbon_archive_dic_flags_t flags;
 
         unsigned offset = memfile_tell(memfile);
-        carbon_string_table_header_t *header = CARBON_MEMFILE_READ_TYPE(memfile, carbon_string_table_header_t);
+        carbon_string_table_header_t *header = NG5_MEMFILE_READ_TYPE(memfile, carbon_string_table_header_t);
         if (header->marker != marker_symbols[MARKER_TYPE_EMBEDDED_STR_DIC].symbol) {
                 char buffer[256];
                 sprintf(buffer,
                         "expected [%c] marker, but found [%c]",
                         marker_symbols[MARKER_TYPE_EMBEDDED_STR_DIC].symbol,
                         header->marker);
-                error_WDETAILS(err, CARBON_ERR_CORRUPTED, buffer);
+                error_WDETAILS(err, NG5_ERR_CORRUPTED, buffer);
                 return false;
         }
         flags.value = header->flags;
@@ -2232,15 +2232,15 @@ static bool print_embedded_dic_from_memfile(FILE *file, struct err *err, memfile
         free(flagsStr);
 
         if (carbon_compressor_by_flags(&strategy, flags.value) != true) {
-                error(err, CARBON_ERR_NOCOMPRESSOR);
+                error(err, NG5_ERR_NOCOMPRESSOR);
                 return false;
         }
 
         carbon_compressor_print_extra(err, &strategy, file, memfile);
 
-        while ((*CARBON_MEMFILE_PEEK(memfile, char)) == marker_symbols[MARKER_TYPE_EMBEDDED_UNCOMP_STR].symbol) {
+        while ((*NG5_MEMFILE_PEEK(memfile, char)) == marker_symbols[MARKER_TYPE_EMBEDDED_UNCOMP_STR].symbol) {
                 unsigned offset = memfile_tell(memfile);
-                carbon_string_entry_header_t header = *CARBON_MEMFILE_READ_TYPE(memfile, carbon_string_entry_header_t);
+                carbon_string_entry_header_t header = *NG5_MEMFILE_READ_TYPE(memfile, carbon_string_entry_header_t);
                 fprintf(file,
                         "0x%04x    [marker: %c] [next-entry-off: 0x%04zx] [string-id: %"PRIu64"] [string-length: %"PRIu32"]",
                         offset,
@@ -2272,7 +2272,7 @@ static bool print_archive_from_memfile(FILE *file, struct err *err, memfile_t *m
 
 static carbon_archive_object_flags_t *get_flags(carbon_archive_object_flags_t *flags, columndoc_obj_t *columndoc)
 {
-        CARBON_ZERO_MEMORY(flags, sizeof(carbon_archive_object_flags_t));
+        NG5_ZERO_MEMORY(flags, sizeof(carbon_archive_object_flags_t));
         flags->bits.has_null_props = (columndoc->null_prop_keys.num_elems > 0);
         flags->bits.has_bool_props = (columndoc->bool_prop_keys.num_elems > 0);
         flags->bits.has_int8_props = (columndoc->int8_prop_keys.num_elems > 0);
@@ -2322,18 +2322,18 @@ bool carbon_archive_open(carbon_archive_t *out, const char *file_path)
         out->diskFilePath = strdup(file_path);
         disk_file = fopen(out->diskFilePath, "r");
         if (!disk_file) {
-                CARBON_PRINT_ERROR(CARBON_ERR_FOPEN_FAILED);
+                NG5_PRINT_ERROR(NG5_ERR_FOPEN_FAILED);
                 return false;
         } else {
                 carbon_file_header_t header;
                 size_t nread = fread(&header, sizeof(carbon_file_header_t), 1, disk_file);
                 if (nread != 1) {
                         fclose(disk_file);
-                        CARBON_PRINT_ERROR(CARBON_ERR_IO);
+                        NG5_PRINT_ERROR(NG5_ERR_IO);
                         return false;
                 } else {
                         if (!is_valid_carbon_file(&header)) {
-                                CARBON_PRINT_ERROR(CARBON_ERR_FORMATVERERR);
+                                NG5_PRINT_ERROR(NG5_ERR_FORMATVERERR);
                                 return false;
                         } else {
                                 out->query_index_string_id_to_offset = NULL;
@@ -2357,7 +2357,7 @@ bool carbon_archive_open(carbon_archive_t *out, const char *file_path)
                                                 out,
                                                 file_path,
                                                 header.string_id_to_offset_index_offset)) != true) {
-                                                CARBON_PRINT_ERROR(err.code);
+                                                NG5_PRINT_ERROR(err.code);
                                                 return status;
                                         }
                                 }
@@ -2388,17 +2388,17 @@ bool carbon_archive_open(carbon_archive_t *out, const char *file_path)
         return true;
 }
 
-CARBON_EXPORT(bool) carbon_archive_get_info(struct archive_info *info, const struct carbon_archive *archive)
+NG5_EXPORT(bool) carbon_archive_get_info(struct archive_info *info, const struct carbon_archive *archive)
 {
-        CARBON_NON_NULL_OR_ERROR(info);
-        CARBON_NON_NULL_OR_ERROR(archive);
+        NG5_NON_NULL_OR_ERROR(info);
+        NG5_NON_NULL_OR_ERROR(archive);
         *info = archive->info;
         return true;
 }
 
-CARBON_EXPORT(bool) carbon_archive_close(carbon_archive_t *archive)
+NG5_EXPORT(bool) carbon_archive_close(carbon_archive_t *archive)
 {
-        CARBON_NON_NULL_OR_ERROR(archive);
+        NG5_NON_NULL_OR_ERROR(archive);
         carbon_archive_drop_indexes(archive);
         carbon_archive_drop_query_string_id_cache(archive);
         free(archive->diskFilePath);
@@ -2408,7 +2408,7 @@ CARBON_EXPORT(bool) carbon_archive_close(carbon_archive_t *archive)
         return true;
 }
 
-CARBON_EXPORT(bool) carbon_archive_drop_indexes(carbon_archive_t *archive)
+NG5_EXPORT(bool) carbon_archive_drop_indexes(carbon_archive_t *archive)
 {
         if (archive->query_index_string_id_to_offset) {
                 carbon_query_drop_index_string_id_to_offset(archive->query_index_string_id_to_offset);
@@ -2417,7 +2417,7 @@ CARBON_EXPORT(bool) carbon_archive_drop_indexes(carbon_archive_t *archive)
         return true;
 }
 
-CARBON_EXPORT(bool) carbon_archive_query(carbon_query_t *query, carbon_archive_t *archive)
+NG5_EXPORT(bool) carbon_archive_query(carbon_query_t *query, carbon_archive_t *archive)
 {
         if (carbon_query_create(query, archive)) {
                 bool has_index = false;
@@ -2436,25 +2436,25 @@ CARBON_EXPORT(bool) carbon_archive_query(carbon_query_t *query, carbon_archive_t
         }
 }
 
-CARBON_EXPORT(bool) carbon_archive_has_query_index_string_id_to_offset(bool *state, carbon_archive_t *archive)
+NG5_EXPORT(bool) carbon_archive_has_query_index_string_id_to_offset(bool *state, carbon_archive_t *archive)
 {
-        CARBON_NON_NULL_OR_ERROR(state)
-        CARBON_NON_NULL_OR_ERROR(archive)
+        NG5_NON_NULL_OR_ERROR(state)
+        NG5_NON_NULL_OR_ERROR(archive)
         *state = (archive->query_index_string_id_to_offset != NULL);
         return true;
 }
 
-CARBON_EXPORT(bool) carbon_archive_hash_query_string_id_cache(bool *has_cache, carbon_archive_t *archive)
+NG5_EXPORT(bool) carbon_archive_hash_query_string_id_cache(bool *has_cache, carbon_archive_t *archive)
 {
-        CARBON_NON_NULL_OR_ERROR(has_cache)
-        CARBON_NON_NULL_OR_ERROR(archive)
+        NG5_NON_NULL_OR_ERROR(has_cache)
+        NG5_NON_NULL_OR_ERROR(archive)
         *has_cache = archive->string_id_cache != NULL;
         return true;
 }
 
-CARBON_EXPORT(bool) carbon_archive_drop_query_string_id_cache(carbon_archive_t *archive)
+NG5_EXPORT(bool) carbon_archive_drop_query_string_id_cache(carbon_archive_t *archive)
 {
-        CARBON_NON_NULL_OR_ERROR(archive)
+        NG5_NON_NULL_OR_ERROR(archive)
         if (archive->string_id_cache) {
                 carbon_string_id_cache_drop(archive->string_id_cache);
                 archive->string_id_cache = NULL;
@@ -2462,12 +2462,12 @@ CARBON_EXPORT(bool) carbon_archive_drop_query_string_id_cache(carbon_archive_t *
         return true;
 }
 
-CARBON_EXPORT(carbon_string_id_cache_t *)carbon_archive_get_query_string_id_cache(carbon_archive_t *archive)
+NG5_EXPORT(carbon_string_id_cache_t *)carbon_archive_get_query_string_id_cache(carbon_archive_t *archive)
 {
         return archive->string_id_cache;
 }
 
-CARBON_EXPORT(carbon_query_t *)carbon_archive_query_default(carbon_archive_t *archive)
+NG5_EXPORT(carbon_query_t *)carbon_archive_query_default(carbon_archive_t *archive)
 {
         return archive ? archive->default_query : NULL;
 }
@@ -2489,11 +2489,11 @@ static bool read_stringtable(struct string_table *table, struct err *err, FILE *
 
         size_t num_read = fread(&header, sizeof(carbon_string_table_header_t), 1, disk_file);
         if (num_read != 1) {
-                error(err, CARBON_ERR_IO);
+                error(err, NG5_ERR_IO);
                 return false;
         }
         if (header.marker != marker_symbols[MARKER_TYPE_EMBEDDED_STR_DIC].symbol) {
-                error(err, CARBON_ERR_CORRUPTED);
+                error(err, NG5_ERR_CORRUPTED);
                 return false;
         }
 
@@ -2517,7 +2517,7 @@ static bool read_record(carbon_record_header_t *header_read, carbon_archive_t *a
         fseek(disk_file, record_header_offset, SEEK_SET);
         carbon_record_header_t header;
         if (fread(&header, sizeof(carbon_record_header_t), 1, disk_file) != 1) {
-                error(&archive->err, CARBON_ERR_CORRUPTED);
+                error(&archive->err, NG5_ERR_CORRUPTED);
                 return false;
         } else {
                 archive->record_table.flags.value = header.flags;
@@ -2530,13 +2530,13 @@ static bool read_record(carbon_record_header_t *header_read, carbon_archive_t *a
                 }
 
                 memfile_t memfile;
-                if (carbon_memfile_open(&memfile, archive->record_table.recordDataBase, CARBON_MEMFILE_MODE_READONLY)
+                if (carbon_memfile_open(&memfile, archive->record_table.recordDataBase, NG5_MEMFILE_MODE_READONLY)
                         != true) {
-                        error(&archive->err, CARBON_ERR_CORRUPTED);
+                        error(&archive->err, NG5_ERR_CORRUPTED);
                         status = false;
                 }
-                if (*CARBON_MEMFILE_PEEK(&memfile, char) != MARKER_SYMBOL_OBJECT_BEGIN) {
-                        error(&archive->err, CARBON_ERR_CORRUPTED);
+                if (*NG5_MEMFILE_PEEK(&memfile, char) != MARKER_SYMBOL_OBJECT_BEGIN) {
+                        error(&archive->err, NG5_ERR_CORRUPTED);
                         status = false;
                 }
 

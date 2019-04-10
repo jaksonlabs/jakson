@@ -15,14 +15,14 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_STRID_ITER_H
-#define CARBON_STRID_ITER_H
+#ifndef NG5_STRID_ITER_H
+#define NG5_STRID_ITER_H
 
 #include "shared/common.h"
 #include "shared/types.h"
 #include "archive.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
 typedef struct carbon_strid_info
 {
@@ -39,15 +39,15 @@ typedef struct carbon_strid_iter
     carbon_strid_info_t vector[100000];
 } carbon_strid_iter_t;
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_strid_iter_open(carbon_strid_iter_t *it, struct err *err, carbon_archive_t *archive);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_strid_iter_next(bool *success, carbon_strid_info_t **info, struct err *err, size_t *info_length, carbon_strid_iter_t *it);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_strid_iter_close(carbon_strid_iter_t *it);
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif

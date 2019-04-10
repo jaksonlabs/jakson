@@ -15,20 +15,20 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_CONVERT_H
-#define CARBON_CONVERT_H
+#ifndef NG5_CONVERT_H
+#define NG5_CONVERT_H
 
 #include "shared/common.h"
 #include "shared/types.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
-CARBON_EXPORT(i64)
+NG5_EXPORT(i64)
 carbon_convert_atoi64(const char *string);
 
-CARBON_EXPORT(u64)
+NG5_EXPORT(u64)
 carbon_convert_atoiu64(const char *string);
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif

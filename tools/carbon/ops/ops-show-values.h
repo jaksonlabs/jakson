@@ -2,8 +2,8 @@
 // Created by Marcus Pinnecke on 28.02.19.
 //
 
-#ifndef LIBCARBON_OPS_SHOW_VALUES_H
-#define LIBCARBON_OPS_SHOW_VALUES_H
+#ifndef LIBNG5_OPS_SHOW_VALUES_H
+#define LIBNG5_OPS_SHOW_VALUES_H
 
 #include "shared/common.h"
 #include "std/vec.h"
@@ -23,9 +23,9 @@ typedef struct
 
 } ops_show_values_result_t;
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 ops_show_values(carbon_timestamp_t *duration, vec_t ofType(ops_show_values_result_t) *result, const char *path,
                 carbon_archive_t *archive, u32 offset, u32 limit, i32 between_lower_bound,
                 i32 between_upper_bound, const char *contains_string);
 
-#endif //LIBCARBON_OPS_SHOW_KEYS_H
+#endif //LIBNG5_OPS_SHOW_KEYS_H

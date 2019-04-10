@@ -15,14 +15,14 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_HASHTEST_H
-#define CARBON_HASHTEST_H
+#ifndef NG5_HASHTEST_H
+#define NG5_HASHTEST_H
 
 #include "shared/common.h"
 #include "std/vec.h"
 #include "core/async/spin.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
 typedef struct
 {
@@ -51,47 +51,47 @@ typedef struct
     struct err err;
 } carbon_hashset_t;
 
-CARBON_DEFINE_GET_ERROR_FUNCTION(hashset, carbon_hashset_t, set);
+NG5_DEFINE_GET_ERROR_FUNCTION(hashset, carbon_hashset_t, set);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_hashset_create(carbon_hashset_t *map, struct err *err, size_t key_size, size_t capacity);
 
-CARBON_EXPORT(carbon_hashset_t *)
+NG5_EXPORT(carbon_hashset_t *)
 carbon_hashset_cpy(carbon_hashset_t *src);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_hashset_drop(carbon_hashset_t *map);
 
-CARBON_EXPORT(vec_t *)
+NG5_EXPORT(vec_t *)
 carbon_hashset_keys(carbon_hashset_t *map);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_hashset_clear(carbon_hashset_t *map);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_hashset_avg_displace(float *displace, const carbon_hashset_t *map);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_hashset_lock(carbon_hashset_t *map);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_hashset_unlock(carbon_hashset_t *map);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_hashset_insert_or_update(carbon_hashset_t *map, const void *keys, uint_fast32_t num_pairs);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_hashset_remove_if_contained(carbon_hashset_t *map, const void *keys, size_t num_pairs);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_hashset_contains_key(carbon_hashset_t *map, const void *key);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_hashset_get_fload_factor(float *factor, carbon_hashset_t *map);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_hashset_rehash(carbon_hashset_t *map);
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif

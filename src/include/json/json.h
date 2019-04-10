@@ -15,13 +15,13 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_JSON_H
-#define CARBON_JSON_H
+#ifndef NG5_JSON_H
+#define NG5_JSON_H
 
 #include "shared/common.h"
 #include "std/vec.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
 /** forwarded */
 typedef struct carbon_json carbon_json_t;
@@ -37,19 +37,19 @@ typedef struct carbon_json_ast_node_elements carbon_json_ast_node_elements_t;
 
 typedef enum
 {
-    CARBON_JSON_TOKEN_SCOPE_OPEN,
-    CARBON_JSON_TOKEN_SCOPE_CLOSE,
-    CARBON_JSON_TOKEN_STRING_LITERAL,
-    CARBON_JSON_TOKEN_INT_NUMBER,
-    CARBON_JSON_TOKEN_REAL_NUMBER,
-    CARBON_JSON_TOKEN_LITERAL_TRUE,
-    CARBON_JSON_TOKEN_LITERAL_FALSE,
-    CARBON_JSON_TOKEN_LITERAL_NULL,
-    CARBON_JSON_TOKEN_COMMA,
-    CARBON_JSON_TOKEN_ASSIGNMENT,
-    CARBON_JSON_TOKEN_ARRAY_BEGIN,
-    CARBON_JSON_TOKEN_ARRAY_END,
-    CARBON_JSON_TOKEN_UNKNOWN
+    NG5_JSON_TOKEN_SCOPE_OPEN,
+    NG5_JSON_TOKEN_SCOPE_CLOSE,
+    NG5_JSON_TOKEN_STRING_LITERAL,
+    NG5_JSON_TOKEN_INT_NUMBER,
+    NG5_JSON_TOKEN_REAL_NUMBER,
+    NG5_JSON_TOKEN_LITERAL_TRUE,
+    NG5_JSON_TOKEN_LITERAL_FALSE,
+    NG5_JSON_TOKEN_LITERAL_NULL,
+    NG5_JSON_TOKEN_COMMA,
+    NG5_JSON_TOKEN_ASSIGNMENT,
+    NG5_JSON_TOKEN_ARRAY_BEGIN,
+    NG5_JSON_TOKEN_ARRAY_END,
+    NG5_JSON_TOKEN_UNKNOWN
 } carbon_json_token_type_e;
 
 typedef struct {
@@ -81,42 +81,42 @@ typedef struct
     struct err err;
 } carbon_json_parser_t;
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_json_tokenizer_init(carbon_json_tokenizer_t *tokenizer, const char *input);
 
-CARBON_EXPORT(const carbon_json_token_t *)
+NG5_EXPORT(const carbon_json_token_t *)
 carbon_json_tokenizer_next(carbon_json_tokenizer_t *tokenizer);
 
-CARBON_EXPORT(void)
+NG5_EXPORT(void)
 carbon_json_token_dup(carbon_json_token_t *dst, const carbon_json_token_t *src);
 
-CARBON_EXPORT(void)
+NG5_EXPORT(void)
 carbon_json_token_print(FILE *file, const carbon_json_token_t *token);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_json_parser_create(carbon_json_parser_t *parser, carbon_doc_bulk_t *partition);
 
-CARBON_EXPORT(bool)
-carbon_json_parse(CARBON_NULLABLE carbon_json_t *json, CARBON_NULLABLE carbon_json_parse_err *error_desc,
+NG5_EXPORT(bool)
+carbon_json_parse(NG5_NULLABLE carbon_json_t *json, NG5_NULLABLE carbon_json_parse_err *error_desc,
                   carbon_json_parser_t *parser, const char *input);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_json_test_doc(struct err *err, carbon_json_t *json);
 
 typedef enum {
-    CARBON_JSON_AST_NODE_ELEMENT_PARENT_TYPE_JSON,
-    CARBON_JSON_AST_NODE_ELEMENT_PARENT_TYPE_MEMBER,
-    CARBON_JSON_AST_NODE_ELEMENT_PARENT_TYPE_ELEMENTS
+    NG5_JSON_AST_NODE_ELEMENT_PARENT_TYPE_JSON,
+    NG5_JSON_AST_NODE_ELEMENT_PARENT_TYPE_MEMBER,
+    NG5_JSON_AST_NODE_ELEMENT_PARENT_TYPE_ELEMENTS
 } carbon_json_ast_node_elem_parent_type_e;
 
 typedef enum {
-    CARBON_JSON_AST_NODE_VALUE_TYPE_OBJECT,
-    CARBON_JSON_AST_NODE_VALUE_TYPE_ARRAY,
-    CARBON_JSON_AST_NODE_VALUE_TYPE_STRING,
-    CARBON_JSON_AST_NODE_VALUE_TYPE_NUMBER,
-    CARBON_JSON_AST_NODE_VALUE_TYPE_TRUE,
-    CARBON_JSON_AST_NODE_VALUE_TYPE_FALSE,
-    CARBON_JSON_AST_NODE_VALUE_TYPE_NULL
+    NG5_JSON_AST_NODE_VALUE_TYPE_OBJECT,
+    NG5_JSON_AST_NODE_VALUE_TYPE_ARRAY,
+    NG5_JSON_AST_NODE_VALUE_TYPE_STRING,
+    NG5_JSON_AST_NODE_VALUE_TYPE_NUMBER,
+    NG5_JSON_AST_NODE_VALUE_TYPE_TRUE,
+    NG5_JSON_AST_NODE_VALUE_TYPE_FALSE,
+    NG5_JSON_AST_NODE_VALUE_TYPE_NULL
 } carbon_json_ast_node_value_type_e;
 
 typedef struct carbon_json
@@ -194,9 +194,9 @@ typedef struct carbon_json_ast_node_array
 
 typedef enum
 {
-    CARBON_JSON_AST_NODE_NUMBER_VALUE_TYPE_REAL_NUMBER,
-    CARBON_JSON_AST_NODE_NUMBER_VALUE_TYPE_UNSIGNED_INTEGER,
-    CARBON_JSON_AST_NODE_NUMBER_VALUE_TYPE_SIGNED_INTEGER
+    NG5_JSON_AST_NODE_NUMBER_VALUE_TYPE_REAL_NUMBER,
+    NG5_JSON_AST_NODE_NUMBER_VALUE_TYPE_UNSIGNED_INTEGER,
+    NG5_JSON_AST_NODE_NUMBER_VALUE_TYPE_SIGNED_INTEGER
 } carbon_json_ast_node_number_value_type_e;
 
 typedef struct carbon_json_ast_node_number
@@ -211,14 +211,14 @@ typedef struct carbon_json_ast_node_number
     } value;
 } carbon_json_ast_node_number_t;
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_json_drop(carbon_json_t *json);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_json_print(FILE *file, carbon_json_t *json);
 
-CARBON_DEFINE_GET_ERROR_FUNCTION(json, carbon_json_t, json);
+NG5_DEFINE_GET_ERROR_FUNCTION(json, carbon_json_t, json);
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif

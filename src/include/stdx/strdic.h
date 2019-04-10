@@ -15,8 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_STRDIC_H
-#define CARBON_STRDIC_H
+#ifndef NG5_STRDIC_H
+#define NG5_STRDIC_H
 
 #include <assert.h>
 
@@ -26,16 +26,16 @@
 #include "hash/hash.h"
 #include "std/vec.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
-CARBON_FORWARD_STRUCT_DECL(StringDictionary)
-CARBON_FORWARD_STRUCT_DECL(Vector)
+NG5_FORWARD_STRUCT_DECL(StringDictionary)
+NG5_FORWARD_STRUCT_DECL(Vector)
 
 typedef struct carbon_string_hash_counters carbon_string_hash_counters_t;
 
 typedef enum
 {
-    CARBON_STRDIC_TYPE_SYNC, CARBON_STRDIC_TYPE_ASYNC
+    NG5_STRDIC_TYPE_SYNC, NG5_STRDIC_TYPE_ASYNC
 } carbon_strdic_type_e;
 
 /**
@@ -140,91 +140,91 @@ typedef struct carbon_strdic
  * @param dic
  * @return
  */
-CARBON_FUNC_UNUSED
+NG5_FUNC_UNUSED
 static bool
 carbon_strdic_drop(carbon_strdic_t *dic)
 {
-    CARBON_NON_NULL_OR_ERROR(dic);
+    NG5_NON_NULL_OR_ERROR(dic);
     assert(dic->drop);
     return dic->drop(dic);
 }
 
-CARBON_FUNC_UNUSED
+NG5_FUNC_UNUSED
 static bool
 carbon_strdic_insert(carbon_strdic_t *dic, carbon_string_id_t **out, char *const *strings, size_t nstrings,
                      size_t nthreads)
 {
-    CARBON_NON_NULL_OR_ERROR(dic);
-    CARBON_NON_NULL_OR_ERROR(strings);
+    NG5_NON_NULL_OR_ERROR(dic);
+    NG5_NON_NULL_OR_ERROR(strings);
     assert(dic->insert);
     return dic->insert(dic, out, strings, nstrings, nthreads);
 }
 
-CARBON_FUNC_UNUSED
+NG5_FUNC_UNUSED
 static bool
 carbon_strdic_reset_counters(carbon_strdic_t *dic)
 {
-    CARBON_NON_NULL_OR_ERROR(dic);
+    NG5_NON_NULL_OR_ERROR(dic);
     assert(dic->resetCounters);
     return dic->resetCounters(dic);
 }
 
-CARBON_FUNC_UNUSED
+NG5_FUNC_UNUSED
 static bool
 carbon_strdic_get_counters(carbon_string_hash_counters_t *counters, carbon_strdic_t *dic)
 {
-    CARBON_NON_NULL_OR_ERROR(dic);
+    NG5_NON_NULL_OR_ERROR(dic);
     assert(dic->counters);
     return dic->counters(dic, counters);
 }
 
-CARBON_FUNC_UNUSED
+NG5_FUNC_UNUSED
 static bool
 carbon_strdic_remove(carbon_strdic_t *dic, carbon_string_id_t *strings, size_t num_strings)
 {
-    CARBON_NON_NULL_OR_ERROR(dic);
-    CARBON_NON_NULL_OR_ERROR(strings);
+    NG5_NON_NULL_OR_ERROR(dic);
+    NG5_NON_NULL_OR_ERROR(strings);
     assert(dic->remove);
     return dic->remove(dic, strings, num_strings);
 }
 
-CARBON_FUNC_UNUSED
+NG5_FUNC_UNUSED
 static bool
 carbon_strdic_locate_safe(carbon_string_id_t **out, bool **found_mask, size_t *num_not_found,
                           carbon_strdic_t *dic, char *const *keys, size_t num_keys)
 {
-    CARBON_NON_NULL_OR_ERROR(out);
-    CARBON_NON_NULL_OR_ERROR(found_mask);
-    CARBON_NON_NULL_OR_ERROR(num_not_found);
-    CARBON_NON_NULL_OR_ERROR(dic);
-    CARBON_NON_NULL_OR_ERROR(keys);
+    NG5_NON_NULL_OR_ERROR(out);
+    NG5_NON_NULL_OR_ERROR(found_mask);
+    NG5_NON_NULL_OR_ERROR(num_not_found);
+    NG5_NON_NULL_OR_ERROR(dic);
+    NG5_NON_NULL_OR_ERROR(keys);
     assert(dic->locate_safe);
     return dic->locate_safe(dic, out, found_mask, num_not_found, keys, num_keys);
 }
 
-CARBON_FUNC_UNUSED
+NG5_FUNC_UNUSED
 static bool
 carbon_strdic_locate_fast(carbon_string_id_t **out, carbon_strdic_t *dic, char *const *keys, size_t nkeys)
 {
-    CARBON_NON_NULL_OR_ERROR(out);
-    CARBON_NON_NULL_OR_ERROR(dic);
-    CARBON_NON_NULL_OR_ERROR(keys);
+    NG5_NON_NULL_OR_ERROR(out);
+    NG5_NON_NULL_OR_ERROR(dic);
+    NG5_NON_NULL_OR_ERROR(keys);
     assert(dic->locate_fast);
     return dic->locate_fast(dic, out, keys, nkeys);
 }
 
-CARBON_FUNC_UNUSED
+NG5_FUNC_UNUSED
 static char **
 carbon_strdic_extract(carbon_strdic_t *dic, const carbon_string_id_t *ids, size_t nids)
 {
     return dic->extract(dic, ids, nids);
 }
 
-CARBON_FUNC_UNUSED
+NG5_FUNC_UNUSED
 static bool
 carbon_strdic_free(carbon_strdic_t *dic, void *ptr)
 {
-    CARBON_NON_NULL_OR_ERROR(dic);
+    NG5_NON_NULL_OR_ERROR(dic);
     if (ptr) {
         assert(dic->free);
         return dic->free(dic, ptr);
@@ -233,29 +233,29 @@ carbon_strdic_free(carbon_strdic_t *dic, void *ptr)
     }
 }
 
-CARBON_FUNC_UNUSED
+NG5_FUNC_UNUSED
 static bool
 carbon_strdic_num_distinct(size_t *num, carbon_strdic_t *dic)
 {
-    CARBON_NON_NULL_OR_ERROR(num);
-    CARBON_NON_NULL_OR_ERROR(dic);
+    NG5_NON_NULL_OR_ERROR(num);
+    NG5_NON_NULL_OR_ERROR(dic);
     assert(dic->num_distinct);
     return dic->num_distinct(dic, num);
 }
 
-CARBON_FUNC_UNUSED
+NG5_FUNC_UNUSED
 static bool
 carbon_strdic_get_contents(vec_t ofType (char *) *strings,
                            vec_t ofType(carbon_string_id_t) *string_ids,
                            carbon_strdic_t *dic)
 {
-    CARBON_NON_NULL_OR_ERROR(strings)
-    CARBON_NON_NULL_OR_ERROR(string_ids)
-    CARBON_NON_NULL_OR_ERROR(dic);
+    NG5_NON_NULL_OR_ERROR(strings)
+    NG5_NON_NULL_OR_ERROR(string_ids)
+    NG5_NON_NULL_OR_ERROR(dic);
     assert(dic->get_contents);
     return dic->get_contents(dic, strings, string_ids);
 }
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif

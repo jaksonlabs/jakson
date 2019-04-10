@@ -22,7 +22,7 @@
 
 bool carbon_spinlock_init(carbon_spinlock_t *spinlock)
 {
-    CARBON_NON_NULL_OR_ERROR(spinlock)
+    NG5_NON_NULL_OR_ERROR(spinlock)
     atomic_flag_clear(&spinlock->lock);
 
     memset(&spinlock->owner, 0, sizeof(pthread_t));
@@ -33,7 +33,7 @@ bool carbon_spinlock_init(carbon_spinlock_t *spinlock)
 bool carbon_spinlock_acquire(carbon_spinlock_t *spinlock)
 {
     carbon_timestamp_t begin = carbon_time_now_wallclock();
-    CARBON_NON_NULL_OR_ERROR(spinlock)
+    NG5_NON_NULL_OR_ERROR(spinlock)
     if (!pthread_equal(spinlock->owner, pthread_self())) {
         while (atomic_flag_test_and_set(&spinlock->lock));
         /** remeber the thread that aquires this lock */
@@ -42,7 +42,7 @@ bool carbon_spinlock_acquire(carbon_spinlock_t *spinlock)
     carbon_timestamp_t end = carbon_time_now_wallclock();
     float duration = (end - begin) / 1000.0f;
     if (duration > 0.01f) {
-        CARBON_WARN(SPINLOCK_TAG, "spin lock acquisition took exceptionally long: %f seconds", duration);
+        NG5_WARN(SPINLOCK_TAG, "spin lock acquisition took exceptionally long: %f seconds", duration);
     }
 
     return true;
@@ -50,7 +50,7 @@ bool carbon_spinlock_acquire(carbon_spinlock_t *spinlock)
 
 bool carbon_spinlock_release(carbon_spinlock_t *spinlock)
 {
-    CARBON_NON_NULL_OR_ERROR(spinlock)
+    NG5_NON_NULL_OR_ERROR(spinlock)
     atomic_flag_clear(&spinlock->lock);
     memset(&spinlock->owner, 0, sizeof(pthread_t));
     return true;

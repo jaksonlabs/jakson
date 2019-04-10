@@ -57,7 +57,7 @@
 static int module##module_name##Entry(int argc, char **argv, FILE *file)                                         \
 {                                                                                                               \
     carbon_cmdopt_mgr_t manager;                                                                        \
-    carbon_cmdopt_mgr_create(&manager, moduleCommand, desc, CARBON_MOD_ARG_REQUIRED, invokeFunc);            \
+    carbon_cmdopt_mgr_create(&manager, moduleCommand, desc, NG5_MOD_ARG_REQUIRED, invokeFunc);            \
     int status = carbon_cmdopt_mgr_process(&manager, argc, argv, file);                                       \
     carbon_cmdopt_mgr_drop(&manager);                                                                         \
     return status;                                                                                              \
@@ -78,13 +78,13 @@ static bool showHelp(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *man
 
 int main (int argc, char **argv)
 {
-    CARBON_CONSOLE_OUTPUT_ON();
+    NG5_CONSOLE_OUTPUT_ON();
 
     carbon_cmdopt_mgr_t manager;
     carbon_cmdopt_group_t *group;
 
     carbon_cmdopt_mgr_create(&manager, "types-tool", "A tool to work with CARBON files.\n"
-                                 "Copyright (c) 2018-2019 Marcus Pinnecke (pinnecke@ovgu.de)", CARBON_MOD_ARG_MAYBE_REQUIRED,
+                                 "Copyright (c) 2018-2019 Marcus Pinnecke (pinnecke@ovgu.de)", NG5_MOD_ARG_MAYBE_REQUIRED,
                              showHelp);
 
     carbon_cmdopt_mgr_create_group(&group, "work with JSON files", &manager);
@@ -128,8 +128,8 @@ int main (int argc, char **argv)
 
 static bool showHelp(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *manager)
 {
-    CARBON_UNUSED(argc);
-    CARBON_UNUSED(argv);
+    NG5_UNUSED(argc);
+    NG5_UNUSED(argv);
     carbon_cmdopt_mgr_show_help(file, manager);
     return true;
 }

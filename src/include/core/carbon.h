@@ -15,8 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_H
-#define CARBON_H
+#ifndef NG5_H
+#define NG5_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -69,7 +69,7 @@ typedef struct types
 
 } carbon_t;
 
-CARBON_EXPORT (bool)
+NG5_EXPORT (bool)
 carbon_init(void);
 
 #ifdef __cplusplus

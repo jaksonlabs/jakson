@@ -15,18 +15,18 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_ARCHIVE_DOC_CONVERTER_H
-#define CARBON_ARCHIVE_DOC_CONVERTER_H
+#ifndef NG5_ARCHIVE_DOC_CONVERTER_H
+#define NG5_ARCHIVE_DOC_CONVERTER_H
 
 #include "shared/common.h"
 #include "json/encoded_doc.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_archive_converter(carbon_encoded_doc_collection_t *collection, carbon_archive_t *archive);
 
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif

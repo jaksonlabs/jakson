@@ -47,7 +47,7 @@ typedef struct page_##x##b_t                                                    
     char                          data[x];                                                                             \
 } page_##x##b_t;                                                                                                       \
                                                                                                                        \
-CARBON_FUNC_UNUSED static inline void *page_##x##b_new(size_t user_size) {                                             \
+NG5_FUNC_UNUSED static inline void *page_##x##b_new(size_t user_size) {                                             \
     assert (user_size <= x);                                                                                           \
     struct page_##x##b_t *page = malloc(sizeof(struct page_##x##b_t));                                                 \
     page->user_size = user_size;                                                                                       \
@@ -188,14 +188,14 @@ struct page_template_entry
 
 static inline void *alloc_register(size_t size)
 {
-    size_t num_options = CARBON_ARRAY_LENGTH(page_template_register);
+    size_t num_options = NG5_ARRAY_LENGTH(page_template_register);
     for (size_t i = 0; i < num_options; i++) {
         struct page_template_entry *entry = page_template_register + i;
         if (size <= entry->size) {
             return entry->new_ptr_func(size);
         }
     }
-    carbon_print_error_and_die(CARBON_ERR_MALLOCERR)
+    carbon_print_error_and_die(NG5_ERR_MALLOCERR)
     return NULL;
 }
 
@@ -238,7 +238,7 @@ if (!global_trace_stats.malloc_sizes) {                                         
 
 int carbon_tracer_alloc_create(struct allocator *alloc)
 {
-    CARBON_NON_NULL_OR_ERROR(alloc);
+    NG5_NON_NULL_OR_ERROR(alloc);
     struct allocator default_alloc;
     carbon_alloc_create_std(&default_alloc);
 
@@ -255,7 +255,7 @@ int carbon_tracer_alloc_create(struct allocator *alloc)
 
 static void *invoke_malloc(struct allocator *self, size_t size)
 {
-    CARBON_UNUSED(self);
+    NG5_UNUSED(self);
 
     carbon_spinlock_acquire(global_trace_stats.spinlock);
 
@@ -278,9 +278,9 @@ static void *invoke_malloc(struct allocator *self, size_t size)
                                                 carbon_vec_length(global_trace_stats.malloc_sizes));
     global_trace_stats.total_size += size;
 
-    CARBON_UNUSED(min_alloc_size);
-    CARBON_UNUSED(max_alloc_size);
-    CARBON_UNUSED(avg_alloc_size);
+    NG5_UNUSED(min_alloc_size);
+    NG5_UNUSED(max_alloc_size);
+    NG5_UNUSED(avg_alloc_size);
 
     //DEBUG(TRACE_ALLOC_TAG, "min/max/avg alloc size: %zu/%zu/%f B (allocator %p)", min_alloc_size, max_alloc_size,
     //      avg_alloc_size, self);
@@ -299,7 +299,7 @@ static void *invoke_malloc(struct allocator *self, size_t size)
 
 static void *invoke_realloc(struct allocator *self, void *ptr, size_t size)
 {
-    CARBON_UNUSED(self);
+    NG5_UNUSED(self);
 
     carbon_spinlock_acquire(global_trace_stats.spinlock);
 
@@ -339,7 +339,7 @@ static void *invoke_realloc(struct allocator *self, void *ptr, size_t size)
 
 static void invoke_free(struct allocator *self, void *ptr)
 {
-    CARBON_UNUSED(self);
+    NG5_UNUSED(self);
 
     carbon_spinlock_acquire(global_trace_stats.spinlock);
 

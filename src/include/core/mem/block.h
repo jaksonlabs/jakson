@@ -15,52 +15,52 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_MEMBLOCK_H
-#define CARBON_MEMBLOCK_H
+#ifndef NG5_MEMBLOCK_H
+#define NG5_MEMBLOCK_H
 
 #include "shared/common.h"
 #include "shared/error.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
 typedef struct carbon_memblock carbon_memblock_t;
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_memblock_create(carbon_memblock_t **block, size_t size);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_memblock_from_file(carbon_memblock_t **block, FILE *file, size_t nbytes);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_memblock_drop(carbon_memblock_t *block);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_memblock_get_error(struct err *out, carbon_memblock_t *block);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_memblock_size(offset_t *size, const carbon_memblock_t *block);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_memblock_write_to_file(FILE *file, const carbon_memblock_t *block);
 
-CARBON_EXPORT(const carbon_byte_t *)
+NG5_EXPORT(const carbon_byte_t *)
 carbon_memblock_raw_data(const carbon_memblock_t *block);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_memblock_resize(carbon_memblock_t *block, size_t size);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_memblock_write(carbon_memblock_t *block, offset_t position, const carbon_byte_t *data, offset_t nbytes);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_memblock_cpy(carbon_memblock_t **dst, carbon_memblock_t *src);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_memblock_shrink(carbon_memblock_t *block);
 
-CARBON_EXPORT(void *)
+NG5_EXPORT(void *)
 carbon_memblock_move_contents_and_drop(carbon_memblock_t *block);
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif

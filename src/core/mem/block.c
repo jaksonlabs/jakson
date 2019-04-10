@@ -30,10 +30,10 @@ typedef struct carbon_memblock
 
 bool carbon_memblock_create(carbon_memblock_t **block, size_t size)
 {
-    CARBON_NON_NULL_OR_ERROR(block)
-    CARBON_PRINT_ERROR_IF(size == 0, CARBON_ERR_ILLEGALARG)
+    NG5_NON_NULL_OR_ERROR(block)
+    NG5_PRINT_ERROR_IF(size == 0, NG5_ERR_ILLEGALARG)
     carbon_memblock_t *result = malloc(sizeof(carbon_memblock_t));
-    CARBON_NON_NULL_OR_ERROR(result)
+    NG5_NON_NULL_OR_ERROR(result)
     result->blockLength = size;
     result->lastByte = 0;
     result->base = malloc(size);
@@ -51,23 +51,23 @@ bool carbon_memblock_from_file(carbon_memblock_t **block, FILE *file, size_t nby
 
 bool carbon_memblock_drop(carbon_memblock_t *block)
 {
-    CARBON_NON_NULL_OR_ERROR(block)
+    NG5_NON_NULL_OR_ERROR(block)
     free(block->base);
     free(block);
     return true;
 }
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_memblock_get_error(struct err *out, carbon_memblock_t *block)
 {
-    CARBON_NON_NULL_OR_ERROR(block);
-    CARBON_NON_NULL_OR_ERROR(out);
+    NG5_NON_NULL_OR_ERROR(block);
+    NG5_NON_NULL_OR_ERROR(out);
     return carbon_error_cpy(out, &block->err);
 }
 
 bool carbon_memblock_size(offset_t *size, const carbon_memblock_t *block)
 {
-    CARBON_NON_NULL_OR_ERROR(block)
+    NG5_NON_NULL_OR_ERROR(block)
     *size = block->blockLength;
     return true;
 }
@@ -85,8 +85,8 @@ const carbon_byte_t *carbon_memblock_raw_data(const carbon_memblock_t *block)
 
 bool carbon_memblock_resize(carbon_memblock_t *block, size_t size)
 {
-    CARBON_NON_NULL_OR_ERROR(block)
-    CARBON_PRINT_ERROR_IF(size == 0, CARBON_ERR_ILLEGALARG)
+    NG5_NON_NULL_OR_ERROR(block)
+    NG5_PRINT_ERROR_IF(size == 0, NG5_ERR_ILLEGALARG)
     block->base = realloc(block->base, size);
     block->blockLength = size;
     return true;
@@ -97,11 +97,11 @@ bool carbon_memblock_write(carbon_memblock_t *block,
                            const carbon_byte_t *data,
                            offset_t nbytes)
 {
-    CARBON_NON_NULL_OR_ERROR(block)
-    CARBON_NON_NULL_OR_ERROR(data)
-    if (CARBON_LIKELY(position + nbytes < block->blockLength)) {
+    NG5_NON_NULL_OR_ERROR(block)
+    NG5_NON_NULL_OR_ERROR(data)
+    if (NG5_LIKELY(position + nbytes < block->blockLength)) {
         memcpy(block->base + position, data, nbytes);
-        block->lastByte = CARBON_MAX(block->lastByte, position + nbytes);
+        block->lastByte = NG5_MAX(block->lastByte, position + nbytes);
         return true;
     } else {
         return false;
@@ -110,9 +110,9 @@ bool carbon_memblock_write(carbon_memblock_t *block,
 
 bool carbon_memblock_cpy(carbon_memblock_t **dst, carbon_memblock_t *src)
 {
-    CARBON_NON_NULL_OR_ERROR(dst)
-    CARBON_NON_NULL_OR_ERROR(src)
-    CARBON_CHECK_SUCCESS(carbon_memblock_create(dst, src->blockLength));
+    NG5_NON_NULL_OR_ERROR(dst)
+    NG5_NON_NULL_OR_ERROR(src)
+    NG5_CHECK_SUCCESS(carbon_memblock_create(dst, src->blockLength));
     memcpy((*dst)->base, src->base, src->blockLength);
     assert((*dst)->base);
     assert((*dst)->blockLength == src->blockLength);
@@ -122,7 +122,7 @@ bool carbon_memblock_cpy(carbon_memblock_t **dst, carbon_memblock_t *src)
 
 bool carbon_memblock_shrink(carbon_memblock_t *block)
 {
-    CARBON_NON_NULL_OR_ERROR(block)
+    NG5_NON_NULL_OR_ERROR(block)
     block->blockLength = block->lastByte;
     block->base = realloc(block->base, block->blockLength);
     return true;

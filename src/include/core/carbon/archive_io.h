@@ -15,13 +15,13 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_IO_CONTEXT_H
-#define CARBON_IO_CONTEXT_H
+#ifndef NG5_IO_CONTEXT_H
+#define NG5_IO_CONTEXT_H
 
 #include "shared/common.h"
 #include "shared/error.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
 typedef struct carbon_archive carbon_archive_t; /* forwarded from 'types-archive.h' */
 
@@ -32,22 +32,22 @@ typedef struct carbon_archive carbon_archive_t; /* forwarded from 'types-archive
 typedef struct carbon_io_context carbon_io_context_t;
 
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_io_context_create(carbon_io_context_t **context, struct err *err, const char *file_path);
 
-CARBON_EXPORT(struct err *)
+NG5_EXPORT(struct err *)
 carbon_io_context_get_error(carbon_io_context_t *context);
 
-CARBON_EXPORT(FILE *)
+NG5_EXPORT(FILE *)
 carbon_io_context_lock_and_access(carbon_io_context_t *context);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_io_context_unlock(carbon_io_context_t *context);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_io_context_drop(carbon_io_context_t *context);
 
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif

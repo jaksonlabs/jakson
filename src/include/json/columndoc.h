@@ -15,8 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_COLUMNDOC_H
-#define CARBON_COLUMNDOC_H
+#ifndef NG5_COLUMNDOC_H
+#define NG5_COLUMNDOC_H
 
 #include "shared/common.h"
 #include "std/vec.h"
@@ -24,7 +24,7 @@
 #include "stdx/strdic.h"
 #include "doc.h"
 
-CARBON_BEGIN_DECL
+NG5_BEGIN_DECL
 
 /**
  * Transformation of an JSON-like array of objects to a columnar representation of key values.
@@ -231,22 +231,22 @@ typedef struct carbon_columndoc
     struct err err;
 } carbon_columndoc_t;
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_columndoc_create(carbon_columndoc_t *columndoc, struct err *err, const carbon_doc_t *doc,
                         const carbon_doc_bulk_t *bulk, const carbon_doc_entries_t *entries,
                         carbon_strdic_t *dic);
 
-CARBON_DEFINE_GET_ERROR_FUNCTION(columndoc, carbon_columndoc_t, doc)
+NG5_DEFINE_GET_ERROR_FUNCTION(columndoc, carbon_columndoc_t, doc)
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_columndoc_free(carbon_columndoc_t *doc);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_columndoc_print(FILE *file, carbon_columndoc_t *doc);
 
-CARBON_EXPORT(bool)
+NG5_EXPORT(bool)
 carbon_columndoc_drop(carbon_columndoc_t *doc);
 
-CARBON_END_DECL
+NG5_END_DECL
 
 #endif
