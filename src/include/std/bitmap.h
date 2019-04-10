@@ -23,41 +23,41 @@
 
 NG5_BEGIN_DECL
 
-typedef struct carbon_bitmap
+struct bitmap
 {
     struct vector ofType(u64) data;
     u16 num_bits;
-} carbon_bitmap_t;
+};
 
 NG5_EXPORT(bool)
-carbon_bitmap_create(carbon_bitmap_t *bitmap, u16 num_bits);
+carbon_bitmap_create(struct bitmap *bitmap, u16 num_bits);
 
 NG5_EXPORT(bool)
-carbon_bitmap_cpy(carbon_bitmap_t *dst, const carbon_bitmap_t *src);
+carbon_bitmap_cpy(struct bitmap *dst, const struct bitmap *src);
 
 NG5_EXPORT(bool)
-carbon_bitmap_drop(carbon_bitmap_t *carbon_bitmap_t);
+carbon_bitmap_drop(struct bitmap *map);
 
 NG5_EXPORT(size_t)
-carbon_bitmap_nbits(const carbon_bitmap_t *carbon_bitmap_t);
+carbon_bitmap_nbits(const struct bitmap *map);
 
 NG5_EXPORT(bool)
-carbon_bitmap_clear(carbon_bitmap_t *carbon_bitmap_t);
+carbon_bitmap_clear(struct bitmap *map);
 
 NG5_EXPORT(bool)
-carbon_bitmap_set(carbon_bitmap_t *carbon_bitmap_t, u16 bit_position, bool on);
+carbon_bitmap_set(struct bitmap *map, u16 bit_position, bool on);
 
 NG5_EXPORT(bool)
-carbon_bitmap_get(carbon_bitmap_t *carbon_bitmap_t, u16 bit_position);
+carbon_bitmap_get(struct bitmap *map, u16 bit_position);
 
 NG5_EXPORT(bool)
-carbon_bitmap_lshift(carbon_bitmap_t *carbon_bitmap_t);
+carbon_bitmap_lshift(struct bitmap *map);
 
 NG5_EXPORT(bool)
-carbon_bitmap_print(FILE *file, const carbon_bitmap_t *carbon_bitmap_t);
+carbon_bitmap_print(FILE *file, const struct bitmap *map);
 
 NG5_EXPORT(bool)
-carbon_bitmap_blocks(u32 **blocks, u32 *num_blocks, const carbon_bitmap_t *carbon_bitmap_t);
+carbon_bitmap_blocks(u32 **blocks, u32 *num_blocks, const struct bitmap *map);
 
 NG5_EXPORT(void)
 carbon_bitmap_print_bits(FILE *file, u32 n);

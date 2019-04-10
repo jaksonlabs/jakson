@@ -23,43 +23,43 @@
 
 NG5_BEGIN_DECL
 
-typedef struct carbon_memblock carbon_memblock_t;
+struct memblock;
 
 NG5_EXPORT(bool)
-carbon_memblock_create(carbon_memblock_t **block, size_t size);
+carbon_memblock_create(struct memblock **block, size_t size);
 
 NG5_EXPORT(bool)
-carbon_memblock_from_file(carbon_memblock_t **block, FILE *file, size_t nbytes);
+carbon_memblock_from_file(struct memblock **block, FILE *file, size_t nbytes);
 
 NG5_EXPORT(bool)
-carbon_memblock_drop(carbon_memblock_t *block);
+carbon_memblock_drop(struct memblock *block);
 
 NG5_EXPORT(bool)
-carbon_memblock_get_error(struct err *out, carbon_memblock_t *block);
+carbon_memblock_get_error(struct err *out, struct memblock *block);
 
 NG5_EXPORT(bool)
-carbon_memblock_size(offset_t *size, const carbon_memblock_t *block);
+carbon_memblock_size(offset_t *size, const struct memblock *block);
 
 NG5_EXPORT(bool)
-carbon_memblock_write_to_file(FILE *file, const carbon_memblock_t *block);
+carbon_memblock_write_to_file(FILE *file, const struct memblock *block);
 
 NG5_EXPORT(const carbon_byte_t *)
-carbon_memblock_raw_data(const carbon_memblock_t *block);
+carbon_memblock_raw_data(const struct memblock *block);
 
 NG5_EXPORT(bool)
-carbon_memblock_resize(carbon_memblock_t *block, size_t size);
+carbon_memblock_resize(struct memblock *block, size_t size);
 
 NG5_EXPORT(bool)
-carbon_memblock_write(carbon_memblock_t *block, offset_t position, const carbon_byte_t *data, offset_t nbytes);
+carbon_memblock_write(struct memblock *block, offset_t position, const carbon_byte_t *data, offset_t nbytes);
 
 NG5_EXPORT(bool)
-carbon_memblock_cpy(carbon_memblock_t **dst, carbon_memblock_t *src);
+carbon_memblock_cpy(struct memblock **dst, struct memblock *src);
 
 NG5_EXPORT(bool)
-carbon_memblock_shrink(carbon_memblock_t *block);
+carbon_memblock_shrink(struct memblock *block);
 
 NG5_EXPORT(void *)
-carbon_memblock_move_contents_and_drop(carbon_memblock_t *block);
+carbon_memblock_move_contents_and_drop(struct memblock *block);
 
 NG5_END_DECL
 

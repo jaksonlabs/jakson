@@ -44,7 +44,7 @@ struct archive
         struct archive_query *default_query;
 };
 
-typedef struct
+struct archive_callback
 {
         void (*begin_create_from_model)();
         void (*end_create_from_model)();
@@ -73,25 +73,25 @@ typedef struct
         void (*skip_string_id_index_baking)();
         void (*begin_string_id_index_baking)();
         void (*end_string_id_index_baking)();
-} carbon_archive_callback_t;
+};
 
 NG5_EXPORT(bool) carbon_archive_from_json(struct archive *out, const char *file, struct err *err,
-        const char *json_string, carbon_compressor_type_e compressor, carbon_strdic_type_e dictionary,
+        const char *json_string, carbon_compressor_type_e compressor, enum strdic_tag dictionary,
         size_t num_async_dic_threads, bool read_optimized, bool bake_string_id_index,
-        carbon_archive_callback_t *callback);
+        struct archive_callback *callback);
 
-NG5_EXPORT(bool) carbon_archive_stream_from_json(carbon_memblock_t **stream, struct err *err, const char *json_string,
-        carbon_compressor_type_e compressor, carbon_strdic_type_e dictionary, size_t num_async_dic_threads,
-        bool read_optimized, bool bake_id_index, carbon_archive_callback_t *callback);
+NG5_EXPORT(bool) carbon_archive_stream_from_json(struct memblock **stream, struct err *err, const char *json_string,
+        carbon_compressor_type_e compressor, enum strdic_tag dictionary, size_t num_async_dic_threads,
+        bool read_optimized, bool bake_id_index, struct archive_callback *callback);
 
-NG5_EXPORT(bool) carbon_archive_from_model(carbon_memblock_t **stream, struct err *err, carbon_columndoc_t *model,
-        carbon_compressor_type_e compressor, bool bake_string_id_index, carbon_archive_callback_t *callback);
+NG5_EXPORT(bool) carbon_archive_from_model(struct memblock **stream, struct err *err, carbon_columndoc_t *model,
+        carbon_compressor_type_e compressor, bool bake_string_id_index, struct archive_callback *callback);
 
-NG5_EXPORT(bool) carbon_archive_write(FILE *file, const carbon_memblock_t *stream);
+NG5_EXPORT(bool) carbon_archive_write(FILE *file, const struct memblock *stream);
 
-NG5_EXPORT(bool) carbon_archive_load(carbon_memblock_t **stream, FILE *file);
+NG5_EXPORT(bool) carbon_archive_load(struct memblock **stream, FILE *file);
 
-NG5_EXPORT(bool) carbon_archive_print(FILE *file, struct err *err, carbon_memblock_t *stream);
+NG5_EXPORT(bool) carbon_archive_print(FILE *file, struct err *err, struct memblock *stream);
 
 NG5_EXPORT(bool) carbon_archive_open(struct archive *out, const char *file_path);
 

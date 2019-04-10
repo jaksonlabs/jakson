@@ -259,12 +259,12 @@ static const u32 *get_num_used_blocks(u16 *numUsedBlocks, carbon_huffman_entry_t
     return NULL;
 }
 
-static void import_into_entry(carbon_huffman_entry_t *entry, const struct huff_node *node, const carbon_bitmap_t *carbon_bitmap_t)
+static void import_into_entry(carbon_huffman_entry_t *entry, const struct huff_node *node, const struct bitmap *map)
 {
     entry->letter = node->letter;
     u32 *blocks, num_blocks;
     const u32 *used_blocks;
-    carbon_bitmap_blocks(&blocks, &num_blocks, carbon_bitmap_t);
+    carbon_bitmap_blocks(&blocks, &num_blocks, map);
     used_blocks = get_num_used_blocks(&entry->nblocks, entry, num_blocks, blocks);
     entry->blocks = malloc(entry->nblocks * sizeof(u32));
     if (num_blocks > 0) {
@@ -331,14 +331,14 @@ static struct huff_node *find_smallest(struct huff_node *begin, u64 lowerBound, 
 }
 
 
-static void assign_code(struct huff_node *node, const carbon_bitmap_t *path, struct vector ofType(carbon_huffman_entry_t) *table)
+static void assign_code(struct huff_node *node, const struct bitmap *path, struct vector ofType(carbon_huffman_entry_t) *table)
 {
     if (!node->left && !node->right) {
             carbon_huffman_entry_t *entry = VECTOR_NEW_AND_GET(table, carbon_huffman_entry_t);
             import_into_entry(entry, node, path);
     } else {
         if (node->left) {
-            carbon_bitmap_t left;
+            struct bitmap left;
             carbon_bitmap_cpy(&left, path);
             carbon_bitmap_lshift(&left);
             carbon_bitmap_set(&left, 0, false);
@@ -346,7 +346,7 @@ static void assign_code(struct huff_node *node, const carbon_bitmap_t *path, str
             carbon_bitmap_drop(&left);
         }
         if (node->right) {
-            carbon_bitmap_t right;
+            struct bitmap right;
             carbon_bitmap_cpy(&right, path);
             carbon_bitmap_lshift(&right);
             carbon_bitmap_set(&right, 0, true);
@@ -489,7 +489,7 @@ static void huff_tree_create(struct vector ofType(carbon_huffman_entry_t) *table
     printf("\n");
 #endif
 
-    carbon_bitmap_t root_path;
+    struct bitmap root_path;
     carbon_bitmap_create(&root_path, UCHAR_MAX);
     carbon_bitmap_set(&root_path, 0, true);
     assign_code(new_node, &root_path, table);

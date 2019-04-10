@@ -25,7 +25,7 @@ NG5_BEGIN_DECL
 
 struct memfile
 {
-    carbon_memblock_t *memblock;
+    struct memblock *memblock;
     offset_t pos;
     bool bit_mode;
     size_t current_read_bit, current_write_bit, bytes_completed;
@@ -62,7 +62,7 @@ struct memfile
 })
 
 NG5_EXPORT(bool)
-carbon_memfile_open(struct memfile *file, carbon_memblock_t *block, enum access_mode mode);
+carbon_memfile_open(struct memfile *file, struct memblock *block, enum access_mode mode);
 
 NG5_EXPORT(bool)
 carbon_memfile_seek(struct memfile *file, offset_t pos);

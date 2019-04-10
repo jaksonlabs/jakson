@@ -38,47 +38,47 @@ struct entry {
 typedef struct sync_extra {
     struct vector ofType(entry) contents;
     struct vector ofType(carbon_string_id_t_t) freelist;
-    carbon_strhash_t index;
+    struct strhash index;
     struct spinlock lock;
 } sync_exta;
 
-static bool this_drop(carbon_strdic_t *self);
-static bool this_insert(carbon_strdic_t *self, carbon_string_id_t **out, char *const *strings, size_t num_strings,
+static bool this_drop(struct strdic *self);
+static bool this_insert(struct strdic *self, carbon_string_id_t **out, char *const *strings, size_t num_strings,
                         size_t num_threads);
-static bool this_remove(carbon_strdic_t *self, carbon_string_id_t *strings, size_t num_strings);
-static bool this_locate_safe(carbon_strdic_t *self, carbon_string_id_t **out, bool **found_mask,
+static bool this_remove(struct strdic *self, carbon_string_id_t *strings, size_t num_strings);
+static bool this_locate_safe(struct strdic *self, carbon_string_id_t **out, bool **found_mask,
                           size_t *num_not_found, char *const *keys, size_t num_keys);
-static bool this_locate_fast(carbon_strdic_t *self, carbon_string_id_t **out, char *const *keys,
+static bool this_locate_fast(struct strdic *self, carbon_string_id_t **out, char *const *keys,
                           size_t num_keys);
-static char **this_extract(carbon_strdic_t *self, const carbon_string_id_t *ids, size_t num_ids);
-static bool this_free(carbon_strdic_t *self, void *ptr);
+static char **this_extract(struct strdic *self, const carbon_string_id_t *ids, size_t num_ids);
+static bool this_free(struct strdic *self, void *ptr);
 
-static bool this_reset_counters(carbon_strdic_t *self);
-static bool this_counters(carbon_strdic_t *self, carbon_string_hash_counters_t *counters);
+static bool this_reset_counters(struct strdic *self);
+static bool this_counters(struct strdic *self, struct strhash_counters *counters);
 
-static bool this_num_distinct(carbon_strdic_t *self, size_t *num);
+static bool this_num_distinct(struct strdic *self, size_t *num);
 
-static bool this_get_contents(carbon_strdic_t *self, struct vector ofType (char *) * strings,
+static bool this_get_contents(struct strdic *self, struct vector ofType (char *) * strings,
                            struct vector ofType(carbon_string_id_t) * string_ids);
 
-static void lock(carbon_strdic_t *self);
-static void unlock(carbon_strdic_t *self);
+static void lock(struct strdic *self);
+static void unlock(struct strdic *self);
 
-static int create_extra(carbon_strdic_t *self, size_t capacity, size_t num_index_buckets,
+static int create_extra(struct strdic *self, size_t capacity, size_t num_index_buckets,
                        size_t num_index_bucket_cap, size_t num_threads);
-static struct sync_extra *this_extra(carbon_strdic_t *self);
+static struct sync_extra *this_extra(struct strdic *self);
 
-static int freelist_pop(carbon_string_id_t *out, carbon_strdic_t *self);
-static int freelist_push(carbon_strdic_t *self, carbon_string_id_t idx);
+static int freelist_pop(carbon_string_id_t *out, struct strdic *self);
+static int freelist_push(struct strdic *self, carbon_string_id_t idx);
 
-int carbon_strdic_create_sync(carbon_strdic_t *dic, size_t capacity, size_t num_indx_buckets,
+int carbon_strdic_create_sync(struct strdic *dic, size_t capacity, size_t num_indx_buckets,
                               size_t num_index_bucket_cap, size_t num_threads, const struct allocator *alloc)
 {
     NG5_NON_NULL_OR_ERROR(dic);
 
     NG5_CHECK_SUCCESS(carbon_alloc_this_or_std(&dic->alloc, alloc));
 
-    dic->tag = NG5_STRDIC_TYPE_SYNC;
+    dic->tag = SYNC;
     dic->drop = this_drop;
     dic->insert = this_insert;
     dic->remove = this_remove;
@@ -95,21 +95,21 @@ int carbon_strdic_create_sync(carbon_strdic_t *dic, size_t capacity, size_t num_
     return true;
 }
 
-static void lock(carbon_strdic_t *self)
+static void lock(struct strdic *self)
 {
-    assert(self->tag == NG5_STRDIC_TYPE_SYNC);
+    assert(self->tag == SYNC);
     struct sync_extra *extra = this_extra(self);
     carbon_spinlock_acquire(&extra->lock);
 }
 
-static void unlock(carbon_strdic_t *self)
+static void unlock(struct strdic *self)
 {
-    assert(self->tag == NG5_STRDIC_TYPE_SYNC);
+    assert(self->tag == SYNC);
     struct sync_extra *extra = this_extra(self);
     carbon_spinlock_release(&extra->lock);
 }
 
-static int create_extra(carbon_strdic_t *self, size_t capacity, size_t num_index_buckets,
+static int create_extra(struct strdic *self, size_t capacity, size_t num_index_buckets,
                        size_t num_index_bucket_cap, size_t num_threads)
 {
     self->extra = carbon_malloc(&self->alloc, sizeof(struct sync_extra));
@@ -139,15 +139,15 @@ static int create_extra(carbon_strdic_t *self, size_t capacity, size_t num_index
     return true;
 }
 
-static struct sync_extra *this_extra(carbon_strdic_t *self)
+static struct sync_extra *this_extra(struct strdic *self)
 {
-    assert (self->tag == NG5_STRDIC_TYPE_SYNC);
+    assert (self->tag == SYNC);
     return (struct sync_extra *) self->extra;
 }
 
-static int freelist_pop(carbon_string_id_t *out, carbon_strdic_t *self)
+static int freelist_pop(carbon_string_id_t *out, struct strdic *self)
 {
-    assert (self->tag == NG5_STRDIC_TYPE_SYNC);
+    assert (self->tag == SYNC);
     struct sync_extra *extra = this_extra(self);
     if (NG5_UNLIKELY(carbon_vec_is_empty(&extra->freelist))) {
         size_t num_new_pos;
@@ -168,18 +168,18 @@ static int freelist_pop(carbon_string_id_t *out, carbon_strdic_t *self)
     return true;
 }
 
-static int freelist_push(carbon_strdic_t *self, carbon_string_id_t idx)
+static int freelist_push(struct strdic *self, carbon_string_id_t idx)
 {
-    assert (self->tag == NG5_STRDIC_TYPE_SYNC);
+    assert (self->tag == SYNC);
     struct sync_extra *extra = this_extra(self);
     NG5_CHECK_SUCCESS(carbon_vec_push(&extra->freelist, &idx, 1));
     assert (extra->freelist.cap_elems == extra->contents.cap_elems);
     return true;
 }
 
-static bool this_drop(carbon_strdic_t *self)
+static bool this_drop(struct strdic *self)
 {
-    NG5_CHECK_TAG(self->tag, NG5_STRDIC_TYPE_SYNC)
+    NG5_CHECK_TAG(self->tag, SYNC)
 
     struct sync_extra *extra = this_extra(self);
 
@@ -201,7 +201,7 @@ static bool this_drop(carbon_strdic_t *self)
     return true;
 }
 
-static bool this_insert(carbon_strdic_t *self, carbon_string_id_t **out, char *const *strings, size_t num_strings,
+static bool this_insert(struct strdic *self, carbon_string_id_t **out, char *const *strings, size_t num_strings,
                         size_t num_threads)
 {
     NG5_TRACE(STRING_DIC_SYNC_TAG, "local string dictionary insertion invoked for %zu strings", num_strings);
@@ -209,7 +209,7 @@ static bool this_insert(carbon_strdic_t *self, carbon_string_id_t **out, char *c
 
     NG5_UNUSED(num_threads);
 
-    NG5_CHECK_TAG(self->tag, NG5_STRDIC_TYPE_SYNC)
+    NG5_CHECK_TAG(self->tag, SYNC)
     lock(self);
 
     struct sync_extra *extra          = this_extra(self);
@@ -235,11 +235,11 @@ static bool this_insert(carbon_strdic_t *self, carbon_string_id_t **out, char *c
     /** NOTE: palatalization of the call to this function decreases performance */
     carbon_strhash_get_bulk_safe(&values, &found_mask, &num_not_found, &extra->index, strings, num_strings);
 
-    /** OPTIMIZATION: use a carbon_bloom_t to check whether a string (which has not appeared in the
+    /** OPTIMIZATION: use a bloom_t to check whether a string (which has not appeared in the
      * dictionary before this batch but might occur multiple times in the current batch) was seen
      * before (with a slight prob. of doing too much work) */
-    carbon_bloom_t carbon_bloom_t;
-    carbon_bloom_create(&carbon_bloom_t, 22 * num_not_found);
+    bloom_t bloom_t;
+    carbon_bloom_create(&bloom_t, 22 * num_not_found);
 
     /** copy string ids for already known strings to their result position resp. add those which are new */
     for (size_t i = 0; i < num_strings; i++) {
@@ -257,12 +257,12 @@ static bool this_insert(carbon_strdic_t *self, carbon_string_id_t **out, char *c
             bool found = false;
             carbon_string_id_t value;
 
-            /** Query the carbon_bloom_t if the keys was already seend. If the filter returns "yes", a lookup
+            /** Query the bloom_t if the keys was already seend. If the filter returns "yes", a lookup
              * is requried since the filter maybe made a mistake. Of the filter returns "no", the
              * keys is new for sure. In this case, one can skip the lookup into the buckets. */
             size_t key_length = strlen(key);
-            carbon_hash_t bloom_key = key_length > 0 ? NG5_HASH_FNV(strlen(key), key) : 0; /** using a hash of a keys instead of the string keys itself avoids reading the entire string for computing k hashes inside the carbon_bloom_t */
-            if (NG5_BLOOM_TEST_AND_SET(&carbon_bloom_t, &bloom_key, sizeof(carbon_hash_t))) {
+            hash32_t bloom_key = key_length > 0 ? NG5_HASH_FNV(strlen(key), key) : 0; /** using a hash of a keys instead of the string keys itself avoids reading the entire string for computing k hashes inside the bloom_t */
+            if (NG5_BLOOM_TEST_AND_SET(&bloom_t, &bloom_key, sizeof(hash32_t))) {
                 /** ensure that the string really was seen (due to collisions in the bloom filter the keys might not
                  * been actually seen) */
 
@@ -298,7 +298,7 @@ static bool this_insert(carbon_strdic_t *self, carbon_string_id_t **out, char *c
     /** cleanup */
     carbon_free(&hashtable_alloc, found_mask);
     carbon_free(&hashtable_alloc, values);
-    carbon_bloom_drop(&carbon_bloom_t);
+    carbon_bloom_drop(&bloom_t);
 
     unlock(self);
 
@@ -311,12 +311,12 @@ static bool this_insert(carbon_strdic_t *self, carbon_string_id_t **out, char *c
 
 }
 
-static bool this_remove(carbon_strdic_t *self, carbon_string_id_t *strings, size_t num_strings)
+static bool this_remove(struct strdic *self, carbon_string_id_t *strings, size_t num_strings)
 {
     NG5_NON_NULL_OR_ERROR(self);
     NG5_NON_NULL_OR_ERROR(strings);
     NG5_NON_NULL_OR_ERROR(num_strings);
-    NG5_CHECK_TAG(self->tag, NG5_STRDIC_TYPE_SYNC)
+    NG5_CHECK_TAG(self->tag, SYNC)
     lock(self);
 
     struct sync_extra *extra = this_extra(self);
@@ -356,7 +356,7 @@ static bool this_remove(carbon_strdic_t *self, carbon_string_id_t *strings, size
     return true;
 }
 
-static bool this_locate_safe(carbon_strdic_t *self, carbon_string_id_t **out, bool **found_mask,
+static bool this_locate_safe(struct strdic *self, carbon_string_id_t **out, bool **found_mask,
                           size_t *num_not_found, char *const *keys, size_t num_keys)
 {
     carbon_timestamp_t begin = carbon_time_now_wallclock();
@@ -368,7 +368,7 @@ static bool this_locate_safe(carbon_strdic_t *self, carbon_string_id_t **out, bo
     NG5_NON_NULL_OR_ERROR(num_not_found);
     NG5_NON_NULL_OR_ERROR(keys);
     NG5_NON_NULL_OR_ERROR(num_keys);
-    NG5_CHECK_TAG(self->tag, NG5_STRDIC_TYPE_SYNC)
+    NG5_CHECK_TAG(self->tag, SYNC)
 
     lock(self);
     struct sync_extra *extra = this_extra(self);
@@ -383,10 +383,10 @@ static bool this_locate_safe(carbon_strdic_t *self, carbon_string_id_t **out, bo
     return status;
 }
 
-static bool this_locate_fast(carbon_strdic_t *self, carbon_string_id_t **out, char *const *keys,
+static bool this_locate_fast(struct strdic *self, carbon_string_id_t **out, char *const *keys,
                           size_t num_keys)
 {
-    NG5_CHECK_TAG(self->tag, NG5_STRDIC_TYPE_SYNC)
+    NG5_CHECK_TAG(self->tag, SYNC)
 
     bool   *found_mask;
     size_t  num_not_found;
@@ -400,9 +400,9 @@ static bool this_locate_fast(carbon_strdic_t *self, carbon_string_id_t **out, ch
     return result;
 }
 
-static char **this_extract(carbon_strdic_t *self, const carbon_string_id_t *ids, size_t num_ids)
+static char **this_extract(struct strdic *self, const carbon_string_id_t *ids, size_t num_ids)
 {
-    if (NG5_UNLIKELY(!self || !ids || num_ids == 0 || self->tag != NG5_STRDIC_TYPE_SYNC)) {
+    if (NG5_UNLIKELY(!self || !ids || num_ids == 0 || self->tag != SYNC)) {
         return NULL;
     }
 
@@ -433,7 +433,7 @@ static char **this_extract(carbon_strdic_t *self, const carbon_string_id_t *ids,
     return result;
 }
 
-static bool this_free(carbon_strdic_t *self, void *ptr)
+static bool this_free(struct strdic *self, void *ptr)
 {
     NG5_UNUSED(self);
 
@@ -447,34 +447,34 @@ static bool this_free(carbon_strdic_t *self, void *ptr)
     return carbon_free(&hashtable_alloc, ptr);
 }
 
-static bool this_reset_counters(carbon_strdic_t *self)
+static bool this_reset_counters(struct strdic *self)
 {
-    NG5_CHECK_TAG(self->tag, NG5_STRDIC_TYPE_SYNC)
+    NG5_CHECK_TAG(self->tag, SYNC)
     struct sync_extra *extra = this_extra(self);
     NG5_CHECK_SUCCESS(carbon_strhash_reset_counters(&extra->index));
     return true;
 }
 
-static bool this_counters(carbon_strdic_t *self, carbon_string_hash_counters_t *counters)
+static bool this_counters(struct strdic *self, struct strhash_counters *counters)
 {
-    NG5_CHECK_TAG(self->tag, NG5_STRDIC_TYPE_SYNC)
+    NG5_CHECK_TAG(self->tag, SYNC)
     struct sync_extra *extra = this_extra(self);
     NG5_CHECK_SUCCESS(carbon_strhash_get_counters(counters, &extra->index));
     return true;
 }
 
-static bool this_num_distinct(carbon_strdic_t *self, size_t *num)
+static bool this_num_distinct(struct strdic *self, size_t *num)
 {
-    NG5_CHECK_TAG(self->tag, NG5_STRDIC_TYPE_SYNC)
+    NG5_CHECK_TAG(self->tag, SYNC)
     struct sync_extra *extra = this_extra(self);
     *num = carbon_vec_length(&extra->contents);
     return true;
 }
 
-static bool this_get_contents(carbon_strdic_t *self, struct vector ofType (char *) * strings,
+static bool this_get_contents(struct strdic *self, struct vector ofType (char *) * strings,
                            struct vector ofType(carbon_string_id_t) * string_ids)
 {
-    NG5_CHECK_TAG(self->tag, NG5_STRDIC_TYPE_SYNC);
+    NG5_CHECK_TAG(self->tag, SYNC);
     struct sync_extra *extra = this_extra(self);
 
     for (carbon_string_id_t i = 0; i < extra->contents.num_elems; i++) {

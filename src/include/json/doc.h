@@ -38,7 +38,7 @@ typedef struct carbon_doc_entries
 
 typedef struct carbon_doc_bulk
 {
-    carbon_strdic_t                          *dic;
+    struct strdic                          *dic;
     struct vector ofType(char *)               keys,
                                               values;
     struct vector ofType(carbon_doc_t)         models;
@@ -60,7 +60,7 @@ typedef struct carbon_doc_obj
 
 
 NG5_EXPORT(bool)
-carbon_doc_bulk_create(carbon_doc_bulk_t *bulk, carbon_strdic_t *dic);
+carbon_doc_bulk_create(carbon_doc_bulk_t *bulk, struct strdic *dic);
 
 NG5_EXPORT(bool)
 carbon_doc_bulk_Drop(carbon_doc_bulk_t *bulk);

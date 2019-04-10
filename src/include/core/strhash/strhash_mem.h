@@ -25,7 +25,7 @@
 NG5_BEGIN_DECL
 
 NG5_EXPORT (bool)
-carbon_strhash_create_inmemory(carbon_strhash_t *carbon_parallel_map_exec, const struct allocator *alloc, size_t num_buckets,
+carbon_strhash_create_inmemory(struct strhash *carbon_parallel_map_exec, const struct allocator *alloc, size_t num_buckets,
                                size_t cap_buckets);
 
 NG5_END_DECL

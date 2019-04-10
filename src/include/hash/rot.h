@@ -24,7 +24,7 @@ NG5_BEGIN_DECL
 
 #define NG5_HASH_ROT(key_size, key)                                                                                 \
 ({                                                                                                                     \
-    carbon_hash_t hash = 0;                                                                                            \
+    hash32_t hash = 0;                                                                                            \
     for (size_t i = 0; i < key_size; i++) {                                                                            \
         hash ^= (hash << 4) ^ (hash >> 28) ^ ((unsigned char* )key)[i];                                                \
     }                                                                                                                  \

@@ -35,7 +35,7 @@ NG5_BEGIN_DECL
     c -= a; c -= b; c ^= (b >> 15);                                                                                    \
 }
 
-/** implements: carbon_hash_t hash_jenkins(size_t key_size, const void *key) */
+/** implements: hash32_t hash_jenkins(size_t key_size, const void *key) */
 #define NG5_HASH_JENKINS(keySizeIn, key)                                                                            \
 ({                                                                                                                     \
     size_t key_size = keySizeIn;                                                                                       \

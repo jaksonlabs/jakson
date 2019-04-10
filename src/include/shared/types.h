@@ -22,8 +22,6 @@
 
 NG5_BEGIN_DECL
 
-typedef struct types carbon_t; /* forwarded from 'types.h' */
-
 typedef uint8_t u8;
 typedef uint16_t u16;
 typedef uint32_t u32;
@@ -161,8 +159,6 @@ typedef enum carbon_field_type
     }                                                                                                                  \
     value_size;                                                                                                        \
 })
-
-typedef bool (*carbon_predicate_string_t)(carbon_string_id_t id, const void *capture, carbon_t *context);
 
 NG5_END_DECL
 

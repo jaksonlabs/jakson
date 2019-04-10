@@ -358,7 +358,7 @@ static bool
 carbon_archive_prop_iter_from_memblock(carbon_archive_prop_iter_t *iter,
                                        struct err *err,
                                        u16 mask,
-                                       carbon_memblock_t *memblock,
+                                       struct memblock *memblock,
                                        offset_t object_offset)
 {
     NG5_NON_NULL_OR_ERROR(iter)

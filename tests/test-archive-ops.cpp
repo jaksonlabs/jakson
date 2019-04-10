@@ -6,14 +6,14 @@
 
 TEST(CarbonArchiveOpsTest, CreateStreamFromJsonString)
 {
-    carbon_memblock_t *stream;
+    struct memblock *stream;
     struct err       err;
 
     const char        *json_string = "{ \"test\": 123 }";
     bool               read_optimized = false;
 
     bool status = carbon_archive_stream_from_json(&stream, &err, json_string,
-                                                  NG5_COMPRESSOR_NONE, NG5_STRDIC_TYPE_SYNC, 0, read_optimized, false, NULL);
+                                                  NG5_COMPRESSOR_NONE, SYNC, 0, read_optimized, false, NULL);
 
     carbon_memblock_drop(stream);
     ASSERT_TRUE(status);
@@ -29,7 +29,7 @@ TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonString)
     bool               read_optimized = false;
 
     bool status = carbon_archive_from_json(&archive, archive_file, &err, json_string,
-                                           NG5_COMPRESSOR_NONE, NG5_STRDIC_TYPE_SYNC, 0, read_optimized, false, NULL);
+                                           NG5_COMPRESSOR_NONE, SYNC, 0, read_optimized, false, NULL);
     ASSERT_TRUE(status);
     bool has_index;
     carbon_archive_has_query_index_string_id_to_offset(&has_index, &archive);
@@ -49,7 +49,7 @@ TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonStringWithBakedStringIdIndex)
     bool               read_optimized = false;
 
     bool status = carbon_archive_from_json(&archive, archive_file, &err, json_string,
-                                           NG5_COMPRESSOR_NONE, NG5_STRDIC_TYPE_SYNC, 0, read_optimized, true, NULL);
+                                           NG5_COMPRESSOR_NONE, SYNC, 0, read_optimized, true, NULL);
     ASSERT_TRUE(status);
     bool has_index;
     carbon_archive_has_query_index_string_id_to_offset(&has_index, &archive);

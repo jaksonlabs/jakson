@@ -19,7 +19,7 @@
 
 #include "core/mem/file.h"
 
-bool carbon_memfile_open(struct memfile *file, carbon_memblock_t *block, enum access_mode mode)
+bool carbon_memfile_open(struct memfile *file, struct memblock *block, enum access_mode mode)
 {
     NG5_NON_NULL_OR_ERROR(file)
     NG5_NON_NULL_OR_ERROR(block)

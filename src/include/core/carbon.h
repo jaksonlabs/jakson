@@ -64,11 +64,6 @@ extern "C" {
 #include "core/string-pred/string_pred_contains.h"
 #include "core/string-pred/string_pred_equals.h"
 
-typedef struct types
-{
-
-} carbon_t;
-
 NG5_EXPORT (bool)
 carbon_init(void);
 

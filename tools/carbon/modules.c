@@ -9,7 +9,7 @@
 
 typedef struct
 {
-    carbon_strdic_t dictionary;
+    struct strdic dictionary;
     carbon_doc_bulk_t context;
     carbon_doc_entries_t *partition;
     carbon_columndoc_t *partitionMetaModel;
@@ -325,7 +325,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_
         bool flagForceOverwrite = false;
         bool flagBakeStringIdIndex = true;
         carbon_compressor_type_e compressor = NG5_COMPRESSOR_NONE;
-        carbon_strdic_type_e dic_type = NG5_STRDIC_TYPE_ASYNC;
+        enum strdic_tag dic_type = ASYNC;
         int string_dic_async_nthreads = 8;
 
         int outputIdx = 0, inputIdx = 1;
@@ -357,9 +357,9 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_
                 } else if (strcmp(opt, JS_2_CAB_OPTION_DIC_TYPE) == 0 && i++ < argc) {
                     const char *dic_type_name = argv[i];
                     if (strcmp(dic_type_name, "async") == 0) {
-                        dic_type = NG5_STRDIC_TYPE_ASYNC;
+                        dic_type = ASYNC;
                     } else if (strcmp(dic_type_name, "sync") == 0) {
-                        dic_type = NG5_STRDIC_TYPE_SYNC;
+                        dic_type = SYNC;
                     } else {
                         NG5_CONSOLE_WRITE(file, "unsupported dictionary type requested: '%s'",
                                              dic_type_name);
@@ -431,7 +431,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_
         struct archive archive;
         struct err err;
 
-        carbon_archive_callback_t progress_tracker = { 0 };
+        struct archive_callback progress_tracker = { 0 };
         progress_tracker.begin_create_from_model = tracker_begin_create_from_model;
         progress_tracker.end_create_from_model = tracker_end_create_from_model;
         progress_tracker.begin_create_from_json = tracker_begin_create_from_json;
@@ -471,7 +471,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_
 
         free(jsonContent);
 
-//        carbon_memblock_t *carbonFile;
+//        struct memblock *carbonFile;
 //        NG5_CONSOLE_WRITE(file, "  - Convert partition into in-memory CARBON file%s", "");
 //        struct err err;
 //        if (!carbon_archive_from_model(&carbonFile, &err, cabContext.partitionMetaModel, pack, flagBakeStringIdIndex)) {
@@ -527,7 +527,7 @@ bool moduleViewCabInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt
         }
         struct err err;
         FILE *inputFile = fopen(carbonFilePath, "r");
-        carbon_memblock_t *stream;
+        struct memblock *stream;
         carbon_archive_load(&stream, inputFile);
         if (!carbon_archive_print(stdout, &err, stream)) {
             carbon_error_print(&err);

@@ -224,7 +224,7 @@ typedef struct carbon_columndoc_obj
 typedef struct carbon_columndoc
 {
     const carbon_doc_t *doc;
-    carbon_strdic_t *dic;
+    struct strdic *dic;
     columndoc_obj_t columndoc;
     const carbon_doc_bulk_t *bulk;
     bool read_optimized;
@@ -234,7 +234,7 @@ typedef struct carbon_columndoc
 NG5_EXPORT(bool)
 carbon_columndoc_create(carbon_columndoc_t *columndoc, struct err *err, const carbon_doc_t *doc,
                         const carbon_doc_bulk_t *bulk, const carbon_doc_entries_t *entries,
-                        carbon_strdic_t *dic);
+                        struct strdic *dic);
 
 NG5_DEFINE_GET_ERROR_FUNCTION(columndoc, carbon_columndoc_t, doc)
 

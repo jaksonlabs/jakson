@@ -24,11 +24,9 @@
 
 NG5_BEGIN_DECL
 
-typedef u16 carbon_hash16_t;
-typedef u32 carbon_hash32_t;
-typedef u8  carbon_hash8_t;
-
-typedef carbon_hash32_t   carbon_hash_t;
+typedef u16 hash16_t;
+typedef u32 hash32_t;
+typedef u8  hash8_t;
 
 NG5_END_DECL
 

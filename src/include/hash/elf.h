@@ -26,7 +26,7 @@ NG5_BEGIN_DECL
 ({                                                                                                                     \
     assert ((key != NULL) && (key_size > 0));                                                                          \
                                                                                                                        \
-    carbon_hash_t hash = 0, g;                                                                                         \
+    hash32_t hash = 0, g;                                                                                         \
     for (size_t i = 0; i < key_size; i++) {                                                                            \
         hash = (hash << 4) + ((unsigned char* )key)[i];                                                                \
         if ((g = hash & 0xf0000000L) != 0) {                                                                           \

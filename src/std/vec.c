@@ -354,7 +354,7 @@ const void *carbon_vec_data(const struct vector *vec)
 char *vector_string(const struct vector ofType(T) *vec,
                      void (*printerFunc)(struct memfile *dst, void ofType(T) *values, size_t num_elems))
 {
-    carbon_memblock_t *block;
+    struct memblock *block;
     struct memfile file;
     carbon_memblock_create(&block, vec->num_elems * vec->elem_size);
     carbon_memfile_open(&file, block, READ_WRITE);

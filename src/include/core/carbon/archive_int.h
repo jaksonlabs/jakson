@@ -349,7 +349,7 @@ struct string_table
 typedef struct
 {
     carbon_archive_record_flags_t   flags;
-    carbon_memblock_t              *recordDataBase;
+    struct memblock              *recordDataBase;
 } carbon_archive_record_table_t;
 
 struct archive_info

@@ -78,12 +78,12 @@ carbon_slice_list_create(carbon_slice_list_t *list, const struct allocator *allo
 
     carbon_vec_create(&list->slices, &list->alloc, sizeof(Slice), sliceCapacity);
     carbon_vec_create(&list->descriptors, &list->alloc, sizeof(SliceDescriptor), sliceCapacity);
-    carbon_vec_create(&list->filters, &list->alloc, sizeof(carbon_bloom_t), sliceCapacity);
+    carbon_vec_create(&list->filters, &list->alloc, sizeof(bloom_t), sliceCapacity);
     carbon_vec_create(&list->bounds, &list->alloc, sizeof(HashBounds), sliceCapacity);
 
     NG5_ZERO_MEMORY(carbon_vec_data(&list->slices), sliceCapacity * sizeof(Slice));
     NG5_ZERO_MEMORY(carbon_vec_data(&list->descriptors), sliceCapacity * sizeof(SliceDescriptor));
-    NG5_ZERO_MEMORY(carbon_vec_data(&list->filters), sliceCapacity * sizeof(carbon_bloom_t));
+    NG5_ZERO_MEMORY(carbon_vec_data(&list->filters), sliceCapacity * sizeof(bloom_t));
     NG5_ZERO_MEMORY(carbon_vec_data(&list->bounds), sliceCapacity * sizeof(HashBounds));
 
     appenderNew(list);
@@ -101,7 +101,7 @@ SliceListDrop(carbon_slice_list_t *list)
     carbon_vec_drop(&list->descriptors);
     carbon_vec_drop(&list->bounds);
     for (size_t i = 0; i < list->filters.num_elems; i++) {
-        carbon_bloom_t *filter = vec_get(&list->filters, i, carbon_bloom_t);
+        bloom_t *filter = vec_get(&list->filters, i, bloom_t);
         carbon_bloom_drop(filter);
     }
     carbon_vec_drop(&list->filters);
@@ -122,7 +122,7 @@ carbon_slice_list_insert(carbon_slice_list_t *list, char **strings, carbon_strin
     while (num_pairs--) {
         const char *key = *strings++;
         carbon_string_id_t value = *ids++;
-        carbon_hash_t keyHash = get_hashcode(key);
+        hash32_t keyHash = get_hashcode(key);
         slice_handle_t handle;
         int status;
 
@@ -139,14 +139,14 @@ carbon_slice_list_insert(carbon_slice_list_t *list, char **strings, carbon_strin
         else {
             /** pair is not found; append it */
             HashBounds *restrict bounds = vec_all(&list->bounds, HashBounds);
-            carbon_bloom_t *restrict filters = vec_all(&list->filters, carbon_bloom_t);
+            bloom_t *restrict filters = vec_all(&list->filters, bloom_t);
             Slice *restrict slices = vec_all(&list->slices, Slice);
 
             if (list->appender_idx != 0) { ; // TODO: remove
             }
 
             Slice *restrict appender = slices + list->appender_idx;
-            carbon_bloom_t *restrict appenderFilter = filters + list->appender_idx;
+            bloom_t *restrict appenderFilter = filters + list->appender_idx;
             HashBounds *restrict appenderBounds = bounds + list->appender_idx;
 
             NG5_DEBUG(NG5_SLICE_LIST_TAG,
@@ -161,7 +161,7 @@ carbon_slice_list_insert(carbon_slice_list_t *list, char **strings, carbon_strin
                                        appenderBounds->minHash : keyHash;
             appenderBounds->maxHash = appenderBounds->maxHash > keyHash ?
                                        appenderBounds->maxHash : keyHash;
-            NG5_BLOOM_SET(appenderFilter, &keyHash, sizeof(carbon_hash_t));
+            NG5_BLOOM_SET(appenderFilter, &keyHash, sizeof(hash32_t));
             appender->num_elems++;
             if (NG5_UNLIKELY(appender->num_elems == SLICE_KEY_COLUMN_MAX_ELEMS)) {
                 appenderSeal(appender);
@@ -181,12 +181,12 @@ carbon_slice_list_lookup(slice_handle_t *handle, carbon_slice_list_t *list, cons
     NG5_UNUSED(handle);
     NG5_UNUSED(needle);
 
-    carbon_hash_t keyHash = get_hashcode(needle);
+    hash32_t keyHash = get_hashcode(needle);
     u32 numSlices = carbon_vec_length(&list->slices);
 
     /** check whether the keys-values pair is already contained in one slice */
     HashBounds *restrict bounds = vec_all(&list->bounds, HashBounds);
-    carbon_bloom_t *restrict filters = vec_all(&list->filters, carbon_bloom_t);
+    bloom_t *restrict filters = vec_all(&list->filters, bloom_t);
     Slice *restrict slices = vec_all(&list->slices, Slice);
     SliceDescriptor *restrict descs = vec_all(&list->descriptors, SliceDescriptor);
 
@@ -200,8 +200,8 @@ carbon_slice_list_lookup(slice_handle_t *handle, carbon_slice_list_t *list, cons
         if (slice->num_elems > 0) {
             bool keyHashIn = keyHash >= bound->minHash && keyHash <= bound->maxHash;
             if (keyHashIn) {
-                carbon_bloom_t *restrict filter = filters + i;
-                bool maybeContained = NG5_BLOOM_TEST(filter, &keyHash, sizeof(carbon_hash_t));
+                bloom_t *restrict filter = filters + i;
+                bool maybeContained = NG5_BLOOM_TEST(filter, &keyHash, sizeof(hash32_t));
                 if (maybeContained) {
                     NG5_DEBUG(NG5_SLICE_LIST_TAG, "NG5_slice_list_lookup_by_key keys(%s) -> ?", needle);
                     u32 pairPosition;
@@ -236,7 +236,7 @@ carbon_slice_list_lookup(slice_handle_t *handle, carbon_slice_list_t *list, cons
                     }
                 }
                 else {
-                    /** carbon_bloom_t is sure that pair is not contained */
+                    /** bloom_t is sure that pair is not contained */
                     continue;
                 }
             }
@@ -285,30 +285,30 @@ static void appenderNew(carbon_slice_list_t *list)
     carbon_vec_push(&list->descriptors, &desc, 1);
 
     /** the lookup guards */
-    assert(sizeof(carbon_bloom_t) <= NG5_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE);
-    carbon_bloom_t filter;
+    assert(sizeof(bloom_t) <= NG5_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE);
+    bloom_t filter;
 
-    /** NOTE: the size of each carbon_bloom_t lead to a false positive probability of 100%, i.e., number of items in the
+    /** NOTE: the size of each bloom_t lead to a false positive probability of 100%, i.e., number of items in the
      * slice is around 32644 depending on the CPU cache size, the number of actual bits in the filter (Cache line size
-     * in bits minus the header for the carbon_bloom_t) along with the number of used hash functions (4), lead to that
-     * probability. However, the reason a carbon_bloom_t is used is to skip slices whch definitively do NOT contain the
+     * in bits minus the header for the bloom_t) along with the number of used hash functions (4), lead to that
+     * probability. However, the reason a bloom_t is used is to skip slices whch definitively do NOT contain the
      * keys-values pair - and that still works ;) */
     carbon_bloom_create(&filter,
-                        (NG5_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE - sizeof(carbon_bloom_t)) * 8);
+                        (NG5_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE - sizeof(bloom_t)) * 8);
     carbon_vec_push(&list->filters, &filter, 1);
     HashBounds bounds = {
-        .minHash        = (carbon_hash_t) -1,
-        .maxHash        = (carbon_hash_t) 0
+        .minHash        = (hash32_t) -1,
+        .maxHash        = (hash32_t) 0
     };
     carbon_vec_push(&list->bounds, &bounds, 1);
 
     NG5_INFO(NG5_SLICE_LIST_TAG, "created new appender in slice list %p\n\t"
         "# of slices (incl. appender) in total...............: %zu\n\t"
         "Slice target memory size............................: %zuB (%s)\n\t"
-        "carbon_bloom_t target memory size......................: %zuB (%s)\n\t"
+        "bloom_t target memory size......................: %zuB (%s)\n\t"
         "Max # of (keys, hash, string) in appender/slice......: %zu\n\t"
-        "Bits used in per-slice carbon_bloom_t..................: %zu\n\t"
-        "Prob. of carbon_bloom_t to produce false-positives.....: %f\n\t"
+        "Bits used in per-slice bloom_t..................: %zu\n\t"
+        "Prob. of bloom_t to produce false-positives.....: %f\n\t"
         "Single slice type size..............................: %zuB\n\t"
         "Total slice-list size...............................: %f MiB",
          list,
@@ -325,7 +325,7 @@ static void appenderNew(carbon_slice_list_t *list)
          sizeof(Slice),
          (sizeof(carbon_slice_list_t) + list->slices.num_elems
              * (sizeof(Slice) + sizeof(SliceDescriptor) + (sizeof(u32) * list->descriptors.num_elems)
-                 + sizeof(carbon_bloom_t) + carbon_bitmap_nbits(&filter) / 8 + sizeof(HashBounds))) / 1024.0
+                 + sizeof(bloom_t) + carbon_bitmap_nbits(&filter) / 8 + sizeof(HashBounds))) / 1024.0
              / 1024.0
     );
 

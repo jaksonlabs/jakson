@@ -80,22 +80,22 @@ NG5_BEGIN_DECL
 #define NG5_CONFIG_BUCKET_CAPACITY  1024
 #endif
 
-typedef struct carbon_strhash carbon_strhash_t;
+struct strhash;
 
-typedef enum
+enum strhash_tag
 {
-    NG5_STRHASH_INMEMORY
-} carbon_strhash_tag_e;
+    MEMORY_RESIDENT
+};
 
-typedef struct carbon_string_hash_counters
+struct strhash_counters
 {
     size_t num_bucket_search_miss;
     size_t num_bucket_search_hit;
     size_t num_bucket_cache_search_miss;
     size_t num_bucket_cache_search_hit;
-} carbon_string_hash_counters_t;
+};
 
-typedef struct carbon_strhash
+struct strhash
 {
     /**
      * Implementation-specific values
@@ -105,14 +105,14 @@ typedef struct carbon_strhash
     /**
      * Implementation tag
      */
-    carbon_strhash_tag_e tag;
+    enum strhash_tag tag;
 
     /**
      * Statistics to lookup misses and hits
      *
      * <b>Note</b>: Implementation must maintain counters by itself
      */
-    carbon_string_hash_counters_t counters;
+    struct strhash_counters counters;
 
     /**
     *  Memory allocator that is used to get memory for user data
@@ -122,69 +122,69 @@ typedef struct carbon_strhash
     /**
      *  Frees resources bound to <code>self</code> via the allocator specified by the constructor
      */
-    int (*drop)(carbon_strhash_t *self);
+    int (*drop)(struct strhash *self);
 
     /**
      * Put <code>num_pair</code> objects into this carbon_parallel_map_exec maybe updating old objects with the same key.
      */
-    int (*put_bulk_safe)(carbon_strhash_t *self, char *const *keys, const carbon_string_id_t *values, size_t npairs);
+    int (*put_bulk_safe)(struct strhash *self, char *const *keys, const carbon_string_id_t *values, size_t npairs);
 
     /**
      * Put <code>num_pair</code> objects into this carbon_parallel_map_exec maybe without checking for updates.
      */
-    int (*put_bulk_fast)(carbon_strhash_t *self, char *const *keys, const carbon_string_id_t *values, size_t npairs);
+    int (*put_bulk_fast)(struct strhash *self, char *const *keys, const carbon_string_id_t *values, size_t npairs);
 
     /**
      * Same as 'put_safe_bulk' but specialized for a single element
      */
-    int (*put_exact_safe)(carbon_strhash_t *self, const char *key, carbon_string_id_t value);
+    int (*put_exact_safe)(struct strhash *self, const char *key, carbon_string_id_t value);
 
     /**
      * Same as 'put_fast_bulk' but specialized for a single element
      */
-    int (*put_exact_fast)(carbon_strhash_t *self, const char *key, carbon_string_id_t value);
+    int (*put_exact_fast)(struct strhash *self, const char *key, carbon_string_id_t value);
 
     /**
      * Get the values associated with <code>keys</code> in this carbon_parallel_map_exec (if any).
      */
-    int (*get_bulk_safe)(carbon_strhash_t *self, carbon_string_id_t **out, bool **found_mask, size_t *nnot_found,
+    int (*get_bulk_safe)(struct strhash *self, carbon_string_id_t **out, bool **found_mask, size_t *nnot_found,
                          char *const *keys, size_t nkeys);
 
     /**
      * The same as 'get_safe_bulk' but optimized for a single element
      */
-    int (*get_exact_safe)(carbon_strhash_t *self, carbon_string_id_t *out, bool *found_mask, const char *key);
+    int (*get_exact_safe)(struct strhash *self, carbon_string_id_t *out, bool *found_mask, const char *key);
 
     /**
      * Get the values associated with <code>keys</code> in this carbon_parallel_map_exec. All keys <u>must</u> exist.
      */
-    int (*get_fast)(carbon_strhash_t *self, carbon_string_id_t **out, char *const *keys, size_t nkeys);
+    int (*get_fast)(struct strhash *self, carbon_string_id_t **out, char *const *keys, size_t nkeys);
 
     /**
      * Updates keys associated with <code>values</code> in this carbon_parallel_map_exec. All values <u>must</u> exist, and the
      * mapping between keys and values must be bidirectional.
      */
-    int (*update_key_fast)(carbon_strhash_t *self, const carbon_string_id_t *values, char *const *keys, size_t nkeys);
+    int (*update_key_fast)(struct strhash *self, const carbon_string_id_t *values, char *const *keys, size_t nkeys);
 
     /**
      * Removes the objects with the gives keys from this carbon_parallel_map_exec
      */
-    int (*remove)(carbon_strhash_t *self, char *const *keys, size_t nkeys);
+    int (*remove)(struct strhash *self, char *const *keys, size_t nkeys);
 
     /**
      * Frees up allocated memory for <code>ptr</code> via the allocator in <code>carbon_parallel_map_exec</code> that was specified
      * by the call to <code>string_id_map_create</code>
      */
-    int (*free)(carbon_strhash_t *self, void *ptr);
+    int (*free)(struct strhash *self, void *ptr);
 
     /**
      *  Error information
      */
     struct err err;
 
-} carbon_strhash_t;
+};
 
-NG5_DEFINE_GET_ERROR_FUNCTION(carbon_strhash_t, carbon_strhash_t, table);
+NG5_DEFINE_GET_ERROR_FUNCTION(strhash, struct strhash, table);
 
 /**
  * Frees resources bound to <code>carbon_parallel_map_exec</code> via the allocator specified by the call to <code>string_id_map_create</code>.
@@ -193,7 +193,7 @@ NG5_DEFINE_GET_ERROR_FUNCTION(carbon_strhash_t, carbon_strhash_t, table);
  * @return <code>true</code> in case of success, otherwise a value indiciating the error.
  */
 inline static int
-carbon_strhash_drop(carbon_strhash_t *carbon_parallel_map_exec)
+carbon_strhash_drop(struct strhash *carbon_parallel_map_exec)
 {
     NG5_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
     assert(carbon_parallel_map_exec->drop);
@@ -208,10 +208,10 @@ carbon_strhash_drop(carbon_strhash_t *carbon_parallel_map_exec)
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
 inline static bool
-carbon_strhash_reset_counters(carbon_strhash_t *carbon_parallel_map_exec)
+carbon_strhash_reset_counters(struct strhash *carbon_parallel_map_exec)
 {
     NG5_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
-    memset(&carbon_parallel_map_exec->counters, 0, sizeof(carbon_string_hash_counters_t));
+    memset(&carbon_parallel_map_exec->counters, 0, sizeof(struct strhash_counters));
     return true;
 }
 
@@ -222,7 +222,7 @@ carbon_strhash_reset_counters(carbon_strhash_t *carbon_parallel_map_exec)
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
 inline static int
-carbon_strhash_get_counters(carbon_string_hash_counters_t *out, const carbon_strhash_t *carbon_parallel_map_exec)
+carbon_strhash_get_counters(struct strhash_counters *out, const struct strhash *carbon_parallel_map_exec)
 {
     NG5_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
     NG5_NON_NULL_OR_ERROR(out);
@@ -242,7 +242,7 @@ carbon_strhash_get_counters(carbon_string_hash_counters_t *out, const carbon_str
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
 inline static int
-carbon_strhash_put_safe(carbon_strhash_t *carbon_parallel_map_exec, char *const *keys, const carbon_string_id_t *values,
+carbon_strhash_put_safe(struct strhash *carbon_parallel_map_exec, char *const *keys, const carbon_string_id_t *values,
                         size_t npairs)
 {
     NG5_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
@@ -269,7 +269,7 @@ carbon_strhash_put_safe(carbon_strhash_t *carbon_parallel_map_exec, char *const 
  * @return <code>true</code> in case of success, otherwise a value indiciating the error.
  */
 inline static int
-carbon_strhash_put_bulk_fast(carbon_strhash_t *carbon_parallel_map_exec, char *const *keys, const carbon_string_id_t *values,
+carbon_strhash_put_bulk_fast(struct strhash *carbon_parallel_map_exec, char *const *keys, const carbon_string_id_t *values,
                              size_t npairs)
 {
     NG5_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
@@ -284,7 +284,7 @@ carbon_strhash_put_bulk_fast(carbon_strhash_t *carbon_parallel_map_exec, char *c
  * Same as 'string_lookup_put_bulk' but specialized for a single pair
  */
 inline static int
-carbon_strhash_put_exact(carbon_strhash_t *carbon_parallel_map_exec, const char *key, carbon_string_id_t value)
+carbon_strhash_put_exact(struct strhash *carbon_parallel_map_exec, const char *key, carbon_string_id_t value)
 {
     NG5_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
     NG5_NON_NULL_OR_ERROR(key);
@@ -297,7 +297,7 @@ carbon_strhash_put_exact(carbon_strhash_t *carbon_parallel_map_exec, const char 
  * Same as 'string_lookup_put_fast_bulk' but specialized for a single pair
  */
 inline static int
-carbon_strhash_put_exact_fast(carbon_strhash_t *carbon_parallel_map_exec, const char *key, carbon_string_id_t value)
+carbon_strhash_put_exact_fast(struct strhash *carbon_parallel_map_exec, const char *key, carbon_string_id_t value)
 {
     NG5_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
     NG5_NON_NULL_OR_ERROR(key);
@@ -336,7 +336,7 @@ carbon_strhash_put_exact_fast(carbon_strhash_t *carbon_parallel_map_exec, const 
  */
 inline static int
 carbon_strhash_get_bulk_safe(carbon_string_id_t **out, bool **found_mask, size_t *num_not_found,
-                             carbon_strhash_t *carbon_parallel_map_exec,
+                             struct strhash *carbon_parallel_map_exec,
                              char *const *keys, size_t nkeys)
 {
     NG5_NON_NULL_OR_ERROR(out);
@@ -355,7 +355,7 @@ carbon_strhash_get_bulk_safe(carbon_string_id_t **out, bool **found_mask, size_t
 }
 
 inline static int
-carbon_strhash_get_bulk_safe_exact(carbon_string_id_t *out, bool *found, carbon_strhash_t *carbon_parallel_map_exec, const char *key)
+carbon_strhash_get_bulk_safe_exact(carbon_string_id_t *out, bool *found, struct strhash *carbon_parallel_map_exec, const char *key)
 {
     NG5_NON_NULL_OR_ERROR(out);
     NG5_NON_NULL_OR_ERROR(found);
@@ -387,7 +387,7 @@ carbon_strhash_get_bulk_safe_exact(carbon_string_id_t *out, bool *found, carbon_
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
 inline static int
-carbon_strhash_get_bulk_fast(carbon_string_id_t **out, carbon_strhash_t *carbon_parallel_map_exec,
+carbon_strhash_get_bulk_fast(carbon_string_id_t **out, struct strhash *carbon_parallel_map_exec,
                              char *const *keys, size_t nkeys)
 {
     NG5_NON_NULL_OR_ERROR(out);
@@ -414,7 +414,7 @@ carbon_strhash_get_bulk_fast(carbon_string_id_t **out, carbon_strhash_t *carbon_
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
 inline static int
-carbon_strhash_update_fast(carbon_strhash_t *carbon_parallel_map_exec, const carbon_string_id_t *values,
+carbon_strhash_update_fast(struct strhash *carbon_parallel_map_exec, const carbon_string_id_t *values,
                            char *const *keys, size_t nkeys)
 {
     NG5_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
@@ -433,7 +433,7 @@ carbon_strhash_update_fast(carbon_strhash_t *carbon_parallel_map_exec, const car
  * @return
  */
 inline static int
-carbon_strhash_remove(carbon_strhash_t *carbon_parallel_map_exec, char *const *keys, size_t nkeys)
+carbon_strhash_remove(struct strhash *carbon_parallel_map_exec, char *const *keys, size_t nkeys)
 {
     NG5_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
     NG5_NON_NULL_OR_ERROR(keys);
@@ -450,7 +450,7 @@ carbon_strhash_remove(carbon_strhash_t *carbon_parallel_map_exec, char *const *k
  * @return <code>true</code> in case of success, otherwise a value indiciating the error.
  */
 inline static int
-carbon_strhash_free(void *ptr, carbon_strhash_t *carbon_parallel_map_exec)
+carbon_strhash_free(void *ptr, struct strhash *carbon_parallel_map_exec)
 {
     NG5_NON_NULL_OR_ERROR(ptr);
     NG5_NON_NULL_OR_ERROR(carbon_parallel_map_exec);
@@ -466,10 +466,10 @@ carbon_strhash_free(void *ptr, carbon_strhash_t *carbon_parallel_map_exec)
  * @return true if everything went normal, otherwise an value indicating the error
  */
 inline static int
-carbon_strhash_counters_init(carbon_string_hash_counters_t *counters)
+carbon_strhash_counters_init(struct strhash_counters *counters)
 {
     NG5_NON_NULL_OR_ERROR(counters);
-    memset(counters, 0, sizeof(carbon_string_hash_counters_t));
+    memset(counters, 0, sizeof(struct strhash_counters));
     return true;
 }
 
@@ -481,7 +481,7 @@ carbon_strhash_counters_init(carbon_string_hash_counters_t *counters)
  * @return true if everything went normal, otherwise an value indicating the error
  */
 inline static int
-carbon_strhash_counters_add(carbon_string_hash_counters_t *dst_lhs, const carbon_string_hash_counters_t *rhs)
+carbon_strhash_counters_add(struct strhash_counters *dst_lhs, const struct strhash_counters *rhs)
 {
     NG5_NON_NULL_OR_ERROR(dst_lhs);
     NG5_NON_NULL_OR_ERROR(rhs);

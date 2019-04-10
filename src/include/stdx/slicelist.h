@@ -67,11 +67,11 @@ typedef struct Slice
      * the type of elements to be inserted must be less or equal to SLICE_DATA_SIZE. In case an element is
      * removed from this list, data is physically moved to avoid a "sparse" list, i.e., it is alwalys
      * guaranteeed that 'data' contains continously elements without any gabs until 'num_elems' limit. This
-     * avoids to lookup in a carbon_bitmap_t or other structure whether a particular element is removed or not; also
+     * avoids to lookup in a struct bitmap or other structure whether a particular element is removed or not; also
      * this does not steal an element from the domain of the used data type to encode 'not present' with a
      * particular values. However, a remove operation is expensive. */
     const char *key_column[SLICE_KEY_COLUMN_MAX_ELEMS];
-    carbon_hash_t keyHashColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
+    hash32_t keyHashColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
     carbon_string_id_t carbon_string_id_tColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
 
     /** The number of elements stored in 'key_colum', 'key_hash_column', and 'string_id_column' */
@@ -82,8 +82,8 @@ typedef struct Slice
 
 typedef struct NG5_hash_bounds_t
 {
-    /** Min and max values inside this slice. Used to skip the lookup in the per-slice carbon_bloom_t during search */
-    carbon_hash_t minHash,
+    /** Min and max values inside this slice. Used to skip the lookup in the per-slice bloom_t during search */
+    hash32_t minHash,
          maxHash;
 } HashBounds;
 

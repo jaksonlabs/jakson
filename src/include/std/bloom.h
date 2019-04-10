@@ -23,7 +23,7 @@
 
 NG5_BEGIN_DECL
 
-typedef carbon_bitmap_t carbon_bloom_t;
+typedef struct bitmap bloom_t;
 
 #define NG5_BLOOM_SET(filter, key, keySize)                     \
 ({                                                                 \
@@ -71,16 +71,16 @@ typedef carbon_bitmap_t carbon_bloom_t;
 })
 
 NG5_EXPORT(bool)
-carbon_bloom_create(carbon_bloom_t *filter, size_t size);
+carbon_bloom_create(bloom_t *filter, size_t size);
 
 NG5_EXPORT(bool)
-carbon_bloom_drop(carbon_bloom_t *filter);
+carbon_bloom_drop(bloom_t *filter);
 
 NG5_EXPORT(bool)
-carbon_bloom_clear(carbon_bloom_t *filter);
+carbon_bloom_clear(bloom_t *filter);
 
 NG5_EXPORT(size_t)
-carbon_bloom_nbits(carbon_bloom_t *filter);
+carbon_bloom_nbits(bloom_t *filter);
 
 NG5_EXPORT(unsigned)
 carbon_bloom_nhashs();

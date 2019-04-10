@@ -287,7 +287,7 @@ carbon_hashset_insert_or_update(carbon_hashset_t *map, const void *keys, uint_fa
     for (uint_fast32_t i = 0; i < num_pairs; i++)
     {
         const void *key = keys + i * map->key_data.elem_size;
-        carbon_hash32_t hash = HASHCODE_OF(map->key_data.elem_size, key);
+        hash32_t hash = HASHCODE_OF(map->key_data.elem_size, key);
         bucket_idxs[i] = hash % map->table.num_elems;
     }
 

@@ -136,9 +136,9 @@ static bool serialize_string_dic(struct memfile *memfile, struct err *err, const
 static bool print_archive_from_memfile(FILE *file, struct err *err, struct memfile *memfile);
 
 NG5_EXPORT(bool) carbon_archive_from_json(struct archive *out, const char *file, struct err *err,
-        const char *json_string, carbon_compressor_type_e compressor, carbon_strdic_type_e dictionary,
+        const char *json_string, carbon_compressor_type_e compressor, enum strdic_tag dictionary,
         size_t num_async_dic_threads, bool read_optimized, bool bake_string_id_index,
-        carbon_archive_callback_t *callback)
+        struct archive_callback *callback)
 {
         NG5_NON_NULL_OR_ERROR(out);
         NG5_NON_NULL_OR_ERROR(file);
@@ -147,7 +147,7 @@ NG5_EXPORT(bool) carbon_archive_from_json(struct archive *out, const char *file,
 
         OPTIONAL_CALL(callback, begin_create_from_json);
 
-        carbon_memblock_t *stream;
+        struct memblock *stream;
         FILE *out_file;
 
         if (!carbon_archive_stream_from_json(&stream,
@@ -197,15 +197,15 @@ NG5_EXPORT(bool) carbon_archive_from_json(struct archive *out, const char *file,
         return true;
 }
 
-NG5_EXPORT(bool) carbon_archive_stream_from_json(carbon_memblock_t **stream, struct err *err, const char *json_string,
-        carbon_compressor_type_e compressor, carbon_strdic_type_e dictionary, size_t num_async_dic_threads,
-        bool read_optimized, bool bake_id_index, carbon_archive_callback_t *callback)
+NG5_EXPORT(bool) carbon_archive_stream_from_json(struct memblock **stream, struct err *err, const char *json_string,
+        carbon_compressor_type_e compressor, enum strdic_tag dictionary, size_t num_async_dic_threads,
+        bool read_optimized, bool bake_id_index, struct archive_callback *callback)
 {
         NG5_NON_NULL_OR_ERROR(stream);
         NG5_NON_NULL_OR_ERROR(err);
         NG5_NON_NULL_OR_ERROR(json_string);
 
-        carbon_strdic_t dic;
+        struct strdic dic;
         carbon_json_parser_t parser;
         carbon_json_parse_err error_desc;
         carbon_doc_bulk_t bulk;
@@ -216,9 +216,9 @@ NG5_EXPORT(bool) carbon_archive_stream_from_json(carbon_memblock_t **stream, str
         OPTIONAL_CALL(callback, begin_archive_stream_from_json)
 
         OPTIONAL_CALL(callback, begin_setup_string_dictionary);
-        if (dictionary == NG5_STRDIC_TYPE_SYNC) {
+        if (dictionary == SYNC) {
                 carbon_strdic_create_sync(&dic, 1000, 1000, 1000, 0, NULL);
-        } else if (dictionary == NG5_STRDIC_TYPE_ASYNC) {
+        } else if (dictionary == ASYNC) {
                 carbon_strdic_create_async(&dic, 1000, 1000, 1000, num_async_dic_threads, NULL);
         } else {
                 error(err, NG5_ERR_UNKNOWN_DIC_TYPE);
@@ -286,7 +286,7 @@ NG5_EXPORT(bool) carbon_archive_stream_from_json(carbon_memblock_t **stream, str
         return true;
 }
 
-static bool run_string_id_baking(struct err *err, carbon_memblock_t **stream)
+static bool run_string_id_baking(struct err *err, struct memblock **stream)
 {
         struct archive archive;
         char tmp_file_name[512];
@@ -362,8 +362,8 @@ static bool run_string_id_baking(struct err *err, carbon_memblock_t **stream)
         return true;
 }
 
-bool carbon_archive_from_model(carbon_memblock_t **stream, struct err *err, carbon_columndoc_t *model,
-        carbon_compressor_type_e compressor, bool bake_string_id_index, carbon_archive_callback_t *callback)
+bool carbon_archive_from_model(struct memblock **stream, struct err *err, carbon_columndoc_t *model,
+        carbon_compressor_type_e compressor, bool bake_string_id_index, struct archive_callback *callback)
 {
         NG5_NON_NULL_OR_ERROR(model)
         NG5_NON_NULL_OR_ERROR(stream)
@@ -423,12 +423,12 @@ NG5_EXPORT(carbon_io_context_t *)carbon_archive_io_context_create(struct archive
         }
 }
 
-bool carbon_archive_write(FILE *file, const carbon_memblock_t *stream)
+bool carbon_archive_write(FILE *file, const struct memblock *stream)
 {
         return carbon_memblock_write_to_file(file, stream);
 }
 
-bool carbon_archive_load(carbon_memblock_t **stream, FILE *file)
+bool carbon_archive_load(struct memblock **stream, FILE *file)
 {
         long start = ftell(file);
         fseek(file, 0, SEEK_END);
@@ -439,7 +439,7 @@ bool carbon_archive_load(carbon_memblock_t **stream, FILE *file)
         return carbon_memblock_from_file(stream, file, fileSize);
 }
 
-bool carbon_archive_print(FILE *file, struct err *err, carbon_memblock_t *stream)
+bool carbon_archive_print(FILE *file, struct err *err, struct memblock *stream)
 {
         struct memfile memfile;
         carbon_memfile_open(&memfile, stream, READ_ONLY);

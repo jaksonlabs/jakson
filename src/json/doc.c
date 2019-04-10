@@ -40,7 +40,7 @@ static bool import_json_object(carbon_doc_obj_t *target, struct err *err, const 
 static void sort_columndoc_entries(columndoc_obj_t *columndoc);
 
 NG5_EXPORT(bool)
-carbon_doc_bulk_create(carbon_doc_bulk_t *bulk, carbon_strdic_t *dic)
+carbon_doc_bulk_create(carbon_doc_bulk_t *bulk, struct strdic *dic)
 {
     NG5_NON_NULL_OR_ERROR(bulk)
     NG5_NON_NULL_OR_ERROR(dic)
@@ -722,7 +722,7 @@ DEFINE_NG5_TYPE_LQ_FUNC(carbon_u64)
 
 static bool compare_encoded_string_less_eq_func(const void *lhs, const void *rhs, void *args)
 {
-    carbon_strdic_t *dic = (carbon_strdic_t *) args;
+    struct strdic *dic = (struct strdic *) args;
     carbon_string_id_t *a = (carbon_string_id_t *) lhs;
     carbon_string_id_t *b = (carbon_string_id_t *) rhs;
     char **a_string = carbon_strdic_extract(dic, a, 1);
@@ -772,7 +772,7 @@ DEFINE_NG5_ARRAY_TYPE_LQ_FUNC(carbon_number_t)
 
 static bool compare_encoded_string_array_less_eq_func(const void *lhs, const void *rhs, void *args)
 {
-    carbon_strdic_t *dic = (carbon_strdic_t *) args;
+    struct strdic *dic = (struct strdic *) args;
     struct vector ofType(carbon_string_id_t) *a = (struct vector *) lhs;
     struct vector ofType(carbon_string_id_t) *b = (struct vector *) rhs;
     const carbon_string_id_t *aValues = vec_all(a, carbon_string_id_t);
@@ -850,7 +850,7 @@ static void sorted_nested_array_objects(columndoc_obj_t *columndoc)
 }
 
 static void sort_meta_model_string_values(struct vector ofType(carbon_string_id_t) *key_vector, struct vector ofType(carbon_string_id_t) *value_vector,
-                                      carbon_strdic_t *dic)
+                                      struct strdic *dic)
 {
     size_t num_elements = carbon_vec_length(key_vector);
 
@@ -920,7 +920,7 @@ static void sort_meta_model_string_values(struct vector ofType(carbon_string_id_
 }
 
 static void sort_columndoc_strings_arrays(struct vector ofType(carbon_string_id_t) *key_vector, struct vector ofType(carbon_string_id_t) *value_array_vector,
-                                      carbon_strdic_t *dic)
+                                      struct strdic *dic)
 {
     size_t num_elements = carbon_vec_length(key_vector);
 
@@ -960,7 +960,7 @@ static void sort_columndoc_strings_arrays(struct vector ofType(carbon_string_id_
 
 static bool compare_object_array_key_columns_less_eq_func(const void *lhs, const void *rhs, void *args)
 {
-    carbon_strdic_t *dic = (carbon_strdic_t *) args;
+    struct strdic *dic = (struct strdic *) args;
     carbon_columndoc_columngroup_t *a = (carbon_columndoc_columngroup_t *) lhs;
     carbon_columndoc_columngroup_t *b = (carbon_columndoc_columngroup_t *) rhs;
     char **a_column_name = carbon_strdic_extract(dic, &a->key, 1);
@@ -973,7 +973,7 @@ static bool compare_object_array_key_columns_less_eq_func(const void *lhs, const
 
 static bool compare_object_array_key_column_less_eq_func(const void *lhs, const void *rhs, void *args)
 {
-    carbon_strdic_t *dic = (carbon_strdic_t *) args;
+    struct strdic *dic = (struct strdic *) args;
     carbon_columndoc_column_t *a = (carbon_columndoc_column_t *) lhs;
     carbon_columndoc_column_t *b = (carbon_columndoc_column_t *) rhs;
     char **a_column_name = carbon_strdic_extract(dic, &a->key_name, 1);
@@ -986,7 +986,7 @@ static bool compare_object_array_key_column_less_eq_func(const void *lhs, const 
 }
 
 typedef struct {
-    carbon_strdic_t *dic;
+    struct strdic *dic;
     field_e value_type;
 } compare_column_less_eq_func_arg;
 
@@ -1067,7 +1067,7 @@ static bool compare_column_less_eq_func(const void *lhs, const void *rhs, void *
     }
 }
 
-static void sort_columndoc_column(carbon_columndoc_column_t *column, carbon_strdic_t *dic)
+static void sort_columndoc_column(carbon_columndoc_column_t *column, struct strdic *dic)
 {
     /** Sort column by its value, and re-arrange the array position list according this new order */
     struct vector ofType(u32) array_position_cpy;

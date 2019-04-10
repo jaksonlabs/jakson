@@ -38,25 +38,25 @@ typedef struct mem_extra
     struct vector ofType(bucket) buckets;
 } mem_extra_t;
 
-static int this_drop(carbon_strhash_t *self);
-static int this_put_safe_bulk(carbon_strhash_t *self,
+static int this_drop(struct strhash *self);
+static int this_put_safe_bulk(struct strhash *self,
                            char *const *keys,
                            const carbon_string_id_t *values,
                            size_t num_pairs);
-static int this_put_fast_bulk(carbon_strhash_t *self,
+static int this_put_fast_bulk(struct strhash *self,
                            char *const *keys,
                            const carbon_string_id_t *values,
                            size_t num_pairs);
-static int this_put_safe_exact(carbon_strhash_t *self, const char *key, carbon_string_id_t value);
-static int this_put_fast_exact(carbon_strhash_t *self, const char *key, carbon_string_id_t value);
-static int this_get_safe(carbon_strhash_t *self, carbon_string_id_t **out, bool **found_mask, size_t *num_not_found,
+static int this_put_safe_exact(struct strhash *self, const char *key, carbon_string_id_t value);
+static int this_put_fast_exact(struct strhash *self, const char *key, carbon_string_id_t value);
+static int this_get_safe(struct strhash *self, carbon_string_id_t **out, bool **found_mask, size_t *num_not_found,
                        char *const *keys, size_t num_keys);
-static int this_get_safe_exact(carbon_strhash_t *self, carbon_string_id_t *out, bool *found_mask, const char *key);
-static int this_get_fast(carbon_strhash_t *self, carbon_string_id_t **out, char *const *keys, size_t num_keys);
-static int this_update_key_fast(carbon_strhash_t *self, const carbon_string_id_t *values, char *const *keys,
+static int this_get_safe_exact(struct strhash *self, carbon_string_id_t *out, bool *found_mask, const char *key);
+static int this_get_fast(struct strhash *self, carbon_string_id_t **out, char *const *keys, size_t num_keys);
+static int this_update_key_fast(struct strhash *self, const carbon_string_id_t *values, char *const *keys,
                              size_t num_keys);
-static int this_remove(carbon_strhash_t *self, char *const *keys, size_t num_keys);
-static int this_free(carbon_strhash_t *self, void *ptr);
+static int this_remove(struct strhash *self, char *const *keys, size_t num_keys);
+static int this_free(struct strhash *self, void *ptr);
 
 static int this_insert_bulk(struct vector ofType(bucket) *buckets,
                           char *const *restrict keys,
@@ -64,30 +64,30 @@ static int this_insert_bulk(struct vector ofType(bucket) *buckets,
                           size_t *restrict bucket_idxs,
                           size_t num_pairs,
                           struct allocator *alloc,
-                          carbon_string_hash_counters_t *counter);
+                          struct strhash_counters *counter);
 
 static int this_insert_exact(struct vector ofType(bucket) *buckets, const char *restrict key,
-                           carbon_string_id_t value, size_t bucket_idx, struct allocator *alloc, carbon_string_hash_counters_t *counter);
+                           carbon_string_id_t value, size_t bucket_idx, struct allocator *alloc, struct strhash_counters *counter);
 static int this_fetch_bulk(struct vector ofType(bucket) *buckets, carbon_string_id_t *values_out,
                          bool *key_found_mask,
                          size_t *num_keys_not_found, size_t *bucket_idxs, char *const *keys, size_t num_keys,
-                         struct allocator *alloc, carbon_string_hash_counters_t *counter);
+                         struct allocator *alloc, struct strhash_counters *counter);
 static int this_fetch_single(struct vector ofType(bucket) *buckets,
                            carbon_string_id_t *value_out,
                            bool *key_found,
                            const size_t bucket_idx,
                            const char *key,
-                           carbon_string_hash_counters_t *counter);
+                           struct strhash_counters *counter);
 
-static int this_create_extra(carbon_strhash_t *self, size_t num_buckets, size_t cap_buckets);
-static mem_extra_t *this_get_exta(carbon_strhash_t *self);
+static int this_create_extra(struct strhash *self, size_t num_buckets, size_t cap_buckets);
+static mem_extra_t *this_get_exta(struct strhash *self);
 static int bucket_create(bucket_t *buckets, size_t num_buckets, size_t bucket_cap,
                         struct allocator *alloc);
 static int bucket_drop(bucket_t *buckets, size_t num_buckets, struct allocator *alloc);
 static int bucket_insert(bucket_t *bucket, const char *restrict key, carbon_string_id_t value,
-                        struct allocator *alloc, carbon_string_hash_counters_t *counter);
+                        struct allocator *alloc, struct strhash_counters *counter);
 
-bool carbon_strhash_create_inmemory(carbon_strhash_t *carbon_parallel_map_exec, const struct allocator *alloc, size_t num_buckets,
+bool carbon_strhash_create_inmemory(struct strhash *carbon_parallel_map_exec, const struct allocator *alloc, size_t num_buckets,
                                     size_t cap_buckets)
 {
     NG5_CHECK_SUCCESS(carbon_alloc_this_or_std(&carbon_parallel_map_exec->allocator, alloc));
@@ -95,7 +95,7 @@ bool carbon_strhash_create_inmemory(carbon_strhash_t *carbon_parallel_map_exec, 
     num_buckets = num_buckets < 1 ? 1 : num_buckets;
     cap_buckets = cap_buckets < 1 ? 1 : cap_buckets;
 
-    carbon_parallel_map_exec->tag = NG5_STRHASH_INMEMORY;
+    carbon_parallel_map_exec->tag = MEMORY_RESIDENT;
     carbon_parallel_map_exec->drop = this_drop;
     carbon_parallel_map_exec->put_bulk_safe = this_put_safe_bulk;
     carbon_parallel_map_exec->put_bulk_fast = this_put_fast_bulk;
@@ -114,9 +114,9 @@ bool carbon_strhash_create_inmemory(carbon_strhash_t *carbon_parallel_map_exec, 
     return true;
 }
 
-static int this_drop(carbon_strhash_t *self)
+static int this_drop(struct strhash *self)
 {
-    assert(self->tag == NG5_STRHASH_INMEMORY);
+    assert(self->tag == MEMORY_RESIDENT);
     mem_extra_t *extra = this_get_exta(self);
     bucket_t *data = (bucket_t *) carbon_vec_data(&extra->buckets);
     NG5_CHECK_SUCCESS(bucket_drop(data, extra->buckets.cap_elems, &self->allocator));
@@ -125,12 +125,12 @@ static int this_drop(carbon_strhash_t *self)
     return true;
 }
 
-static int this_put_safe_bulk(carbon_strhash_t *self,
+static int this_put_safe_bulk(struct strhash *self,
                            char *const *keys,
                            const carbon_string_id_t *values,
                            size_t num_pairs)
 {
-    assert(self->tag == NG5_STRHASH_INMEMORY);
+    assert(self->tag == MEMORY_RESIDENT);
     mem_extra_t *extra = this_get_exta(self);
     size_t *bucket_idxs = carbon_malloc(&self->allocator, num_pairs * sizeof(size_t));
 
@@ -138,7 +138,7 @@ static int this_put_safe_bulk(carbon_strhash_t *self,
 
     for (size_t i = 0; i < num_pairs; i++) {
         const char *key = keys[i];
-        carbon_hash_t hash = HASHCODE_OF(key);
+        hash32_t hash = HASHCODE_OF(key);
         bucket_idxs[i] = hash % extra->buckets.cap_elems;
     }
 
@@ -152,12 +152,12 @@ static int this_put_safe_bulk(carbon_strhash_t *self,
     return true;
 }
 
-static int this_put_safe_exact(carbon_strhash_t *self, const char *key, carbon_string_id_t value)
+static int this_put_safe_exact(struct strhash *self, const char *key, carbon_string_id_t value)
 {
-    assert(self->tag == NG5_STRHASH_INMEMORY);
+    assert(self->tag == MEMORY_RESIDENT);
     mem_extra_t *extra = this_get_exta(self);
 
-    carbon_hash_t hash = strcmp("", key) != 0 ? HASHCODE_OF(key) : 0;
+    hash32_t hash = strcmp("", key) != 0 ? HASHCODE_OF(key) : 0;
     size_t bucket_idx = hash % extra->buckets.cap_elems;
 
     NG5_PREFETCH_READ(key);
@@ -168,12 +168,12 @@ static int this_put_safe_exact(carbon_strhash_t *self, const char *key, carbon_s
     return true;
 }
 
-static int this_put_fast_exact(carbon_strhash_t *self, const char *key, carbon_string_id_t value)
+static int this_put_fast_exact(struct strhash *self, const char *key, carbon_string_id_t value)
 {
     return this_put_safe_exact(self, key, value);
 }
 
-static int this_put_fast_bulk(carbon_strhash_t *self,
+static int this_put_fast_bulk(struct strhash *self,
                            char *const *keys,
                            const carbon_string_id_t *values,
                            size_t num_pairs)
@@ -184,7 +184,7 @@ static int this_put_fast_bulk(carbon_strhash_t *self,
 static int this_fetch_bulk(struct vector ofType(bucket) *buckets, carbon_string_id_t *values_out,
                          bool *key_found_mask,
                          size_t *num_keys_not_found, size_t *bucket_idxs, char *const *keys, size_t num_keys,
-                         struct allocator *alloc, carbon_string_hash_counters_t *counter)
+                         struct allocator *alloc, struct strhash_counters *counter)
 {
     NG5_UNUSED(counter);
     NG5_UNUSED(alloc);
@@ -221,7 +221,7 @@ static int this_fetch_single(struct vector ofType(bucket) *buckets,
                            bool *key_found,
                            const size_t bucket_idx,
                            const char *key,
-                           carbon_string_hash_counters_t *counter)
+                           struct strhash_counters *counter)
 {
     NG5_UNUSED(counter);
 
@@ -241,10 +241,10 @@ static int this_fetch_single(struct vector ofType(bucket) *buckets,
     return true;
 }
 
-static int this_get_safe(carbon_strhash_t *self, carbon_string_id_t **out, bool **found_mask, size_t *num_not_found,
+static int this_get_safe(struct strhash *self, carbon_string_id_t **out, bool **found_mask, size_t *num_not_found,
                        char *const *keys, size_t num_keys)
 {
-    assert(self->tag == NG5_STRHASH_INMEMORY);
+    assert(self->tag == MEMORY_RESIDENT);
 
     carbon_timestamp_t begin = carbon_time_now_wallclock();
     NG5_TRACE(SMART_MAP_TAG, "'get_safe' function invoked for %zu strings", num_keys)
@@ -267,7 +267,7 @@ static int this_get_safe(carbon_strhash_t *self, carbon_string_id_t **out, bool 
 
     for (register size_t i = 0; i < num_keys; i++) {
         const char *key = keys[i];
-        carbon_hash_t hash = key && strcmp("", key) != 0 ? HASHCODE_OF(key) : 0;
+        hash32_t hash = key && strcmp("", key) != 0 ? HASHCODE_OF(key) : 0;
         bucket_idxs[i] = hash % extra->buckets.cap_elems;
         NG5_PREFETCH_READ((bucket_t *) carbon_vec_data(&extra->buckets) + bucket_idxs[i]);
     }
@@ -292,9 +292,9 @@ static int this_get_safe(carbon_strhash_t *self, carbon_string_id_t **out, bool 
     return true;
 }
 
-static int this_get_safe_exact(carbon_strhash_t *self, carbon_string_id_t *out, bool *found_mask, const char *key)
+static int this_get_safe_exact(struct strhash *self, carbon_string_id_t *out, bool *found_mask, const char *key)
 {
-    assert(self->tag == NG5_STRHASH_INMEMORY);
+    assert(self->tag == MEMORY_RESIDENT);
 
     struct allocator hashtable_alloc;
 #if defined(NG5_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
@@ -305,7 +305,7 @@ static int this_get_safe_exact(carbon_strhash_t *self, carbon_string_id_t *out, 
 
     mem_extra_t *extra = this_get_exta(self);
 
-    carbon_hash_t hash = strcmp("", key) != 0 ? HASHCODE_OF(key) : 0;
+    hash32_t hash = strcmp("", key) != 0 ? HASHCODE_OF(key) : 0;
     size_t bucket_idx = hash % extra->buckets.cap_elems;
     NG5_PREFETCH_READ((bucket_t *) carbon_vec_data(&extra->buckets) + bucket_idx);
 
@@ -314,7 +314,7 @@ static int this_get_safe_exact(carbon_strhash_t *self, carbon_string_id_t *out, 
     return true;
 }
 
-static int this_get_fast(carbon_strhash_t *self, carbon_string_id_t **out, char *const *keys, size_t num_keys)
+static int this_get_fast(struct strhash *self, carbon_string_id_t **out, char *const *keys, size_t num_keys)
 {
     bool *found_mask;
     size_t num_not_found;
@@ -323,7 +323,7 @@ static int this_get_fast(carbon_strhash_t *self, carbon_string_id_t **out, char 
     return status;
 }
 
-static int this_update_key_fast(carbon_strhash_t *self, const carbon_string_id_t *values, char *const *keys,
+static int this_update_key_fast(struct strhash *self, const carbon_string_id_t *values, char *const *keys,
                              size_t num_keys)
 {
     NG5_UNUSED(self);
@@ -336,7 +336,7 @@ static int this_update_key_fast(carbon_strhash_t *self, const carbon_string_id_t
 }
 
 static int simple_map_remove(mem_extra_t *extra, size_t *bucket_idxs, char *const *keys, size_t num_keys,
-                             struct allocator *alloc, carbon_string_hash_counters_t *counter)
+                             struct allocator *alloc, struct strhash_counters *counter)
 {
     NG5_UNUSED(counter);
     NG5_UNUSED(alloc);
@@ -357,15 +357,15 @@ static int simple_map_remove(mem_extra_t *extra, size_t *bucket_idxs, char *cons
     return true;
 }
 
-static int this_remove(carbon_strhash_t *self, char *const *keys, size_t num_keys)
+static int this_remove(struct strhash *self, char *const *keys, size_t num_keys)
 {
-    assert(self->tag == NG5_STRHASH_INMEMORY);
+    assert(self->tag == MEMORY_RESIDENT);
 
     mem_extra_t *extra = this_get_exta(self);
     size_t *bucket_idxs = carbon_malloc(&self->allocator, num_keys * sizeof(size_t));
     for (register size_t i = 0; i < num_keys; i++) {
         const char *key = keys[i];
-        carbon_hash_t hash = HASHCODE_OF(key);
+        hash32_t hash = HASHCODE_OF(key);
         bucket_idxs[i] = hash % extra->buckets.cap_elems;
     }
 
@@ -374,15 +374,15 @@ static int this_remove(carbon_strhash_t *self, char *const *keys, size_t num_key
     return true;
 }
 
-static int this_free(carbon_strhash_t *self, void *ptr)
+static int this_free(struct strhash *self, void *ptr)
 {
-    assert(self->tag == NG5_STRHASH_INMEMORY);
+    assert(self->tag == MEMORY_RESIDENT);
     NG5_CHECK_SUCCESS(carbon_free(&self->allocator, ptr));
     return true;
 }
 
 NG5_FUNC_UNUSED
-static int this_create_extra(carbon_strhash_t *self, size_t num_buckets, size_t cap_buckets)
+static int this_create_extra(struct strhash *self, size_t num_buckets, size_t cap_buckets)
 {
     if ((self->extra = carbon_malloc(&self->allocator, sizeof(mem_extra_t))) != NULL) {
         mem_extra_t *extra = this_get_exta(self);
@@ -403,9 +403,9 @@ static int this_create_extra(carbon_strhash_t *self, size_t num_buckets, size_t 
 }
 
 NG5_FUNC_UNUSED
-static mem_extra_t *this_get_exta(carbon_strhash_t *self)
+static mem_extra_t *this_get_exta(struct strhash *self)
 {
-    assert (self->tag == NG5_STRHASH_INMEMORY);
+    assert (self->tag == MEMORY_RESIDENT);
     return (mem_extra_t *) (self->extra);
 }
 
@@ -438,7 +438,7 @@ static int bucket_drop(bucket_t *buckets, size_t num_buckets, struct allocator *
 }
 
 static int bucket_insert(bucket_t *bucket, const char *restrict key, carbon_string_id_t value,
-                        struct allocator *alloc, carbon_string_hash_counters_t *counter)
+                        struct allocator *alloc, struct strhash_counters *counter)
 {
     NG5_UNUSED(counter);
     NG5_UNUSED(alloc);
@@ -471,7 +471,7 @@ static int this_insert_bulk(struct vector ofType(bucket) *buckets,
                           size_t *restrict bucket_idxs,
                           size_t num_pairs,
                           struct allocator *alloc,
-                          carbon_string_hash_counters_t *counter)
+                          struct strhash_counters *counter)
 {
     NG5_NON_NULL_OR_ERROR(buckets)
     NG5_NON_NULL_OR_ERROR(keys)
@@ -493,7 +493,7 @@ static int this_insert_bulk(struct vector ofType(bucket) *buckets,
 }
 
 static int this_insert_exact(struct vector ofType(bucket) *buckets, const char *restrict key,
-                           carbon_string_id_t value, size_t bucket_idx, struct allocator *alloc, carbon_string_hash_counters_t *counter)
+                           carbon_string_id_t value, size_t bucket_idx, struct allocator *alloc, struct strhash_counters *counter)
 {
     NG5_NON_NULL_OR_ERROR(buckets)
     NG5_NON_NULL_OR_ERROR(key)
