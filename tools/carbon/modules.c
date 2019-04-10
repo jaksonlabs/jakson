@@ -1,10 +1,9 @@
 
 #include <inttypes.h>
-#include "compressor/compressor.h"
-#include "archive/query.h"
-#include "archive/archive-internal.h"
-
-#include "carbon.h"
+#include "core/compressor/compressor.h"
+#include "core/carbon/archive/query.h"
+#include "core/carbon/archive/archive-internal.h"
+#include "core/carbon.h"
 
 #include "modules.h"
 

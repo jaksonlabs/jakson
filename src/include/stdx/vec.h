@@ -21,7 +21,7 @@
 #include <sys/mman.h>
 
 #include "shared/common.h"
-#include "alloc/alloc.h"
+#include "core/alloc/alloc.h"
 
 CARBON_BEGIN_DECL
 

@@ -19,7 +19,7 @@
 #define CARBON_SORT_H
 
 #include "shared/common.h"
-#include "alloc/alloc.h"
+#include "core/alloc/alloc.h"
 
 #include "stdlib.h"
 #include <assert.h>

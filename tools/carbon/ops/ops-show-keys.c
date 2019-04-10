@@ -4,9 +4,9 @@
 
 #include <inttypes.h>
 
-#include "archive/archive_visitor.h"
-#include "archive/query.h"
-#include "hash/hash_set.h"
+#include "core/carbon/archive/archive_visitor.h"
+#include "core/carbon/archive/query.h"
+#include "stdx/hash_set.h"
 #include "utils/time.h"
 #include "ops-show-keys.h"
 

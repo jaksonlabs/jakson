@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <printf.h>
 
-#include "carbon.h"
+#include "core/carbon.h"
 
 TEST(ObjectIdTest, CreateId) {
     carbon_object_id_t id;

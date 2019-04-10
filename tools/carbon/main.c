@@ -1,5 +1,5 @@
 #include "shared/error.h"
-#include "cmdopt/cmdopt.h"
+#include "shell/cmdopt/cmdopt.h"
 
 #include "modules.h"
 #include "cli.h"

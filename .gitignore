@@ -7,3 +7,6 @@ build
 cmake-build-debug
 CTestTestfile.cmake
 Testing/Temporary
+carbon-temp-statistics--cache-monitor.csv
+*.csv
+examples/json

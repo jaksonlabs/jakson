@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "carbon.h"
+#include "core/carbon.h"
 
 TEST(ConverterTest, PerformConversion)
 {

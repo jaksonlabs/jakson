@@ -7,13 +7,13 @@ include(GNUInstallDirs)
 
 set (CMAKE_C_STANDARD 11)
 
-#if (${BUILD_TYPE} MATCHES Debug)
-    message("-- Debug build is enabled")
-    set(CMAKE_BUILD_TYPE Debug)
-#else()
-#   message("-- Release build is enabled")
-#    set(CMAKE_BUILD_TYPE Release)
-#endif()
+if (${BUILD_TYPE} MATCHES Debug)
+        message("-- Debug build is enabled")
+        set(CMAKE_BUILD_TYPE Debug)
+else()
+        message("-- Release build is enabled")
+        set(CMAKE_BUILD_TYPE Release)
+endif()
 
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 

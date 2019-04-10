@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 #include <stdio.h>
 #include <inttypes.h>
-#include "archive/archive_iter.h"
 
-#include "carbon.h"
+#include "core/carbon/archive/archive_iter.h"
+#include "core/carbon.h"
 
 static void
 iterate_properties(carbon_archive_prop_iter_t *prop_iter);

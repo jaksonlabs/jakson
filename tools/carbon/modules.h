@@ -20,7 +20,7 @@
 #ifndef CARBON_TOOLS_CARBON_MODULES
 #define CARBON_TOOLS_CARBON_MODULES
 
-#include "cmdopt/cmdopt.h"
+#include "shell/cmdopt/cmdopt.h"
 
 bool moduleCheckJsInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *manager);
 bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *manager);
