@@ -12,7 +12,7 @@
 typedef struct
 {
     field_sid_t key;
-    carbon_basic_type_e type;
+    enum field_type type;
 } ops_show_keys_key_type_pair_t;
 
 NG5_EXPORT(bool)

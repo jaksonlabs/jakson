@@ -124,7 +124,7 @@ before_visit_object_array_object_property(struct archive *archive, path_stack_t 
                                           carbon_object_id_t parent_id,
                                           field_sid_t key,
                                           field_sid_t nested_key,
-                                          carbon_basic_type_e nested_value_type,
+                                          enum field_type nested_value_type,
                                           void *capture)
 {
     NG5_UNUSED(archive);
@@ -364,7 +364,7 @@ visit_object_array_object_property_int16(struct archive *archive, path_stack_t p
 
 //
 //static bool
-//get_column_entry_count(struct archive *archive, path_stack_t path, field_sid_t key, carbon_basic_type_e type, u32 count, void *capture)
+//get_column_entry_count(struct archive *archive, path_stack_t path, field_sid_t key, enum field_type type, u32 count, void *capture)
 //{
 //    NG5_UNUSED(archive);
 //    NG5_UNUSED(path);

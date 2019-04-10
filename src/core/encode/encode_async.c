@@ -371,7 +371,7 @@ static void compute_thread_assignment(atomic_uint_fast16_t *str_carrier_mapping,
                 num_strings,
                 parallel_compute_thread_assignment_function,
                 &args,
-                NG5_PARALLEL_THREAD_HINT_MULTI,
+                THREADING_HINT_MULTI,
                 num_threads);
 
 }
@@ -953,7 +953,7 @@ static bool this_setup_carriers(struct strdic *self, size_t capacity, size_t num
     }
 
     carbon_parallel_for(vec_all(&extra->carriers, carrier_t), sizeof(carrier_t), num_threads, parallel_create_carrier,
-                &createArgs, NG5_PARALLEL_THREAD_HINT_MULTI, num_threads);
+                &createArgs, THREADING_HINT_MULTI, num_threads);
 
     return true;
 }

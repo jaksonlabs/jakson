@@ -91,9 +91,9 @@ typedef struct
                                u32 object_idx, u32 num_objects, void *capture);
 
     void (*first_prop_type_group)(struct archive *archive, path_stack_t path, carbon_object_id_t id, const field_sid_t *keys,
-                                 carbon_basic_type_e type, bool is_array, u32 num_pairs, void *capture);
+                                 enum field_type type, bool is_array, u32 num_pairs, void *capture);
     void (*next_prop_type_group)(struct archive *archive, path_stack_t path, carbon_object_id_t id, const field_sid_t *keys,
-                                 carbon_basic_type_e type, bool is_array, u32 num_pairs, void *capture);
+                                 enum field_type type, bool is_array, u32 num_pairs, void *capture);
 
     DEFINE_VISIT_BASIC_TYPE_PAIRS(int8, field_i8_t);
     DEFINE_VISIT_BASIC_TYPE_PAIRS(int16, field_i16_t);
@@ -155,7 +155,7 @@ typedef struct
                                                    carbon_object_id_t parent_id,
                                                    field_sid_t key,
                                                    field_sid_t nested_key,
-                                                   carbon_basic_type_e nested_value_type,
+                                                   enum field_type nested_value_type,
                                                    void *capture);
 
     DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(int8s, field_i8_t);
@@ -181,12 +181,12 @@ typedef struct
 
     void (*visit_object_property)(struct archive *archive, path_stack_t path,
                                   carbon_object_id_t parent_id,
-                                  field_sid_t key, carbon_basic_type_e type, bool is_array_type, void *capture);
+                                  field_sid_t key, enum field_type type, bool is_array_type, void *capture);
 
 
-    void (*visit_object_array_prop)(struct archive *archive, path_stack_t path, carbon_object_id_t parent_id, field_sid_t key, carbon_basic_type_e type, void *capture);
+    void (*visit_object_array_prop)(struct archive *archive, path_stack_t path, carbon_object_id_t parent_id, field_sid_t key, enum field_type type, void *capture);
 
-    bool (*get_column_entry_count)(struct archive *archive, path_stack_t path, field_sid_t key, carbon_basic_type_e type, u32 count, void *capture);
+    bool (*get_column_entry_count)(struct archive *archive, path_stack_t path, field_sid_t key, enum field_type type, u32 count, void *capture);
 
 } carbon_archive_visitor_t;
 

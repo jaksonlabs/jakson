@@ -574,7 +574,7 @@ bool moduleInspectInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt
             offset_t fileLength = ftell(f);
             fclose(f);
             printf("file:\t\t\t'%s'\n", pathCarbonFileIn);
-            printf("file-size:\t\t%zu B\n", fileLength);
+            printf("file-size:\t\t%" PRIu64 " B\n", fileLength);
             printf("string-table-size:\t%zu B\n", info.string_table_size);
             printf("record-table-size:\t%zu B\n", info.record_table_size);
             printf("index-size:\t\t%zu B\n", info.string_id_index_size);

@@ -69,7 +69,7 @@ typedef struct
     } key;
 
     carbon_encoded_doc_prop_value_type_e   value_type;
-    carbon_basic_type_e                    type;
+    enum field_type                    type;
 
 } carbon_encoded_doc_prop_header_t;
 

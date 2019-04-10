@@ -37,7 +37,7 @@ static void print_object(FILE *file, const struct doc_obj *model);
 
 static bool import_json_object(struct doc_obj *target, struct err *err, const struct json_object_t *json_obj);
 
-static void sort_columndoc_entries(columndoc_obj_t *columndoc);
+static void sort_columndoc_entries(struct columndoc_obj *columndoc);
 
 NG5_EXPORT(bool)
 carbon_doc_bulk_create(struct doc_bulk *bulk, struct strdic *dic)
@@ -733,11 +733,11 @@ static bool compare_encoded_string_less_eq_func(const void *lhs, const void *rhs
     return lq;
 }
 
-static void sort_nested_primitive_object(columndoc_obj_t *columndoc)
+static void sort_nested_primitive_object(struct columndoc_obj *columndoc)
 {
     if (columndoc->parent->read_optimized) {
         for (size_t i = 0; i < columndoc->obj_prop_vals.num_elems; i++) {
-            columndoc_obj_t *nestedModel = vec_get(&columndoc->obj_prop_vals, i, columndoc_obj_t);
+            struct columndoc_obj *nestedModel = vec_get(&columndoc->obj_prop_vals, i, struct columndoc_obj);
             sort_columndoc_entries(nestedModel);
         }
     }
@@ -791,13 +791,13 @@ static bool compare_encoded_string_array_less_eq_func(const void *lhs, const voi
     return true;
 }
 
-static void sorted_nested_array_objects(columndoc_obj_t *columndoc)
+static void sorted_nested_array_objects(struct columndoc_obj *columndoc)
 {
     if (columndoc->parent->read_optimized) {
         for (size_t i = 0; i < columndoc->obj_array_props.num_elems; i++) {
-            carbon_columndoc_columngroup_t *array_columns = vec_get(&columndoc->obj_array_props, i, carbon_columndoc_columngroup_t);
+            struct columndoc_group *array_columns = vec_get(&columndoc->obj_array_props, i, struct columndoc_group);
             for (size_t j = 0; j < array_columns->columns.num_elems; j++) {
-                carbon_columndoc_column_t *column = vec_get(&array_columns->columns, j, carbon_columndoc_column_t);
+                struct columndoc_column *column = vec_get(&array_columns->columns, j, struct columndoc_column);
                 struct vector ofType(u32) *array_indices = &column->array_positions;
                 struct vector ofType(struct vector ofType(<T>)) *values_for_indicies = &column->values;
                 assert (array_indices->num_elems == values_for_indicies->num_elems);
@@ -806,7 +806,7 @@ static void sorted_nested_array_objects(columndoc_obj_t *columndoc)
                     struct vector ofType(<T>) *values_for_index = vec_get(values_for_indicies, k, struct vector);
                     if (column->type == field_object) {
                         for (size_t l = 0; l < values_for_index->num_elems; l++) {
-                            columndoc_obj_t *nested_object = vec_get(values_for_index, l, columndoc_obj_t);
+                            struct columndoc_obj *nested_object = vec_get(values_for_index, l, struct columndoc_obj);
                             sort_columndoc_entries(nested_object);
                         }
                     }
@@ -961,8 +961,8 @@ static void sort_columndoc_strings_arrays(struct vector ofType(field_sid_t) *key
 static bool compare_object_array_key_columns_less_eq_func(const void *lhs, const void *rhs, void *args)
 {
     struct strdic *dic = (struct strdic *) args;
-    carbon_columndoc_columngroup_t *a = (carbon_columndoc_columngroup_t *) lhs;
-    carbon_columndoc_columngroup_t *b = (carbon_columndoc_columngroup_t *) rhs;
+    struct columndoc_group *a = (struct columndoc_group *) lhs;
+    struct columndoc_group *b = (struct columndoc_group *) rhs;
     char **a_column_name = carbon_strdic_extract(dic, &a->key, 1);
     char **b_column_name = carbon_strdic_extract(dic, &b->key, 1);
     bool column_name_leq = strcmp(*a_column_name, *b_column_name) <= 0;
@@ -974,8 +974,8 @@ static bool compare_object_array_key_columns_less_eq_func(const void *lhs, const
 static bool compare_object_array_key_column_less_eq_func(const void *lhs, const void *rhs, void *args)
 {
     struct strdic *dic = (struct strdic *) args;
-    carbon_columndoc_column_t *a = (carbon_columndoc_column_t *) lhs;
-    carbon_columndoc_column_t *b = (carbon_columndoc_column_t *) rhs;
+    struct columndoc_column *a = (struct columndoc_column *) lhs;
+    struct columndoc_column *b = (struct columndoc_column *) rhs;
     char **a_column_name = carbon_strdic_extract(dic, &a->key_name, 1);
     char **b_column_name = carbon_strdic_extract(dic, &b->key_name, 1);
     int cmpResult = strcmp(*a_column_name, *b_column_name);
@@ -1067,7 +1067,7 @@ static bool compare_column_less_eq_func(const void *lhs, const void *rhs, void *
     }
 }
 
-static void sort_columndoc_column(carbon_columndoc_column_t *column, struct strdic *dic)
+static void sort_columndoc_column(struct columndoc_column *column, struct strdic *dic)
 {
     /** Sort column by its value, and re-arrange the array position list according this new order */
     struct vector ofType(u32) array_position_cpy;
@@ -1108,9 +1108,9 @@ static void sort_columndoc_column(carbon_columndoc_column_t *column, struct strd
     carbon_vec_drop(&values_cpy);
 }
 
-static void sort_columndoc_column_arrays(columndoc_obj_t *columndoc)
+static void sort_columndoc_column_arrays(struct columndoc_obj *columndoc)
 {
-    struct vector ofType(carbon_columndoc_columngroup_t) cpy;
+    struct vector ofType(struct columndoc_group) cpy;
     carbon_vec_cpy(&cpy, &columndoc->obj_array_props);
     size_t *indices = malloc(cpy.num_elems * sizeof(size_t));
     for (size_t i = 0; i < cpy.num_elems; i++) {
@@ -1118,32 +1118,32 @@ static void sort_columndoc_column_arrays(columndoc_obj_t *columndoc)
     }
     carbon_sort_qsort_indicies_wargs(indices,
                                      cpy.base,
-                                     sizeof(carbon_columndoc_columngroup_t),
+                                     sizeof(struct columndoc_group),
                                      compare_object_array_key_columns_less_eq_func,
                                      cpy.num_elems,
                                      cpy.allocator,
                                      columndoc->parent->dic);
     for (size_t i = 0; i < cpy.num_elems; i++) {
-        carbon_vec_set(&columndoc->obj_array_props, i, vec_get(&cpy, indices[i], carbon_columndoc_columngroup_t));
+        carbon_vec_set(&columndoc->obj_array_props, i, vec_get(&cpy, indices[i], struct columndoc_group));
     }
     free(indices);
 
     for (size_t i = 0; i < cpy.num_elems; i++) {
-        carbon_columndoc_columngroup_t *key_columns = vec_get(&columndoc->obj_array_props, i, carbon_columndoc_columngroup_t);
+        struct columndoc_group *key_columns = vec_get(&columndoc->obj_array_props, i, struct columndoc_group);
         size_t *columnIndices = malloc(key_columns->columns.num_elems * sizeof(size_t));
-        struct vector ofType(carbon_columndoc_column_t) columnCpy;
+        struct vector ofType(struct columndoc_column) columnCpy;
         carbon_vec_cpy(&columnCpy, &key_columns->columns);
         for (size_t i = 0; i < key_columns->columns.num_elems; i++) {
             columnIndices[i] = i;
         }
 
         /** First, sort by column name; Then, sort by columns with same name by type */
-        carbon_sort_qsort_indicies_wargs(columnIndices, columnCpy.base, sizeof(carbon_columndoc_column_t),
+        carbon_sort_qsort_indicies_wargs(columnIndices, columnCpy.base, sizeof(struct columndoc_column),
                                          compare_object_array_key_column_less_eq_func, key_columns->columns.num_elems,
                                          key_columns->columns.allocator, columndoc->parent->dic);
         for (size_t i = 0; i < key_columns->columns.num_elems; i++) {
-            carbon_vec_set(&key_columns->columns, i, vec_get(&columnCpy, columnIndices[i], carbon_columndoc_column_t));
-            carbon_columndoc_column_t *column = vec_get(&key_columns->columns, i, carbon_columndoc_column_t);
+            carbon_vec_set(&key_columns->columns, i, vec_get(&columnCpy, columnIndices[i], struct columndoc_column));
+            struct columndoc_column *column = vec_get(&key_columns->columns, i, struct columndoc_column);
             sort_columndoc_column(column, columndoc->parent->dic);
         }
 
@@ -1153,7 +1153,7 @@ static void sort_columndoc_column_arrays(columndoc_obj_t *columndoc)
     carbon_vec_drop(&cpy);
 }
 
-static void sort_columndoc_values(columndoc_obj_t *columndoc)
+static void sort_columndoc_values(struct columndoc_obj *columndoc)
 {
     if (columndoc->parent->read_optimized) {
         SORT_META_MODEL_VALUES(columndoc->bool_prop_keys, columndoc->bool_prop_vals, field_boolean_t,
@@ -1206,7 +1206,7 @@ static void sort_columndoc_values(columndoc_obj_t *columndoc)
     }
 }
 
-static void sort_columndoc_entries(columndoc_obj_t *columndoc)
+static void sort_columndoc_entries(struct columndoc_obj *columndoc)
 {
     if (columndoc->parent->read_optimized) {
         sort_columndoc_values(columndoc);

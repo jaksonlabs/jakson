@@ -82,13 +82,13 @@ carbon_memfile_remain_size(struct memfile *file);
 NG5_EXPORT(bool)
 carbon_memfile_shrink(struct memfile *file);
 
-NG5_EXPORT(const carbon_byte_t *)
+NG5_EXPORT(const char *)
 carbon_memfile_read(struct memfile *file, offset_t nbytes);
 
 NG5_EXPORT(bool)
 carbon_memfile_skip(struct memfile *file, offset_t nbytes);
 
-NG5_EXPORT(const carbon_byte_t *)
+NG5_EXPORT(const char *)
 carbon_memfile_peek(struct memfile *file, offset_t nbytes);
 
 NG5_EXPORT(bool)

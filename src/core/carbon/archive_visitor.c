@@ -127,7 +127,7 @@ iterate_props(struct archive *archive, carbon_archive_prop_iter_t *prop_iter,
 {
     carbon_object_id_t this_object_oid;
     carbon_archive_value_vector_t value_iter;
-    carbon_basic_type_e type;
+    enum field_type type;
     bool is_array;
     const field_sid_t *keys;
     u32 num_pairs;
@@ -296,7 +296,7 @@ iterate_props(struct archive *archive, carbon_archive_prop_iter_t *prop_iter,
                         if (!skip_objects[current_column_group_obj_idx])
                         {
                             field_sid_t current_column_name;
-                            carbon_basic_type_e current_column_entry_type;
+                            enum field_type current_column_entry_type;
 
                             carbon_archive_column_get_name(&current_column_name, &current_column_entry_type, &column_iter);
 

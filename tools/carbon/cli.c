@@ -111,7 +111,7 @@ after_object_visit(struct archive *archive, path_stack_t path, carbon_object_id_
 }
 
 static void first_prop_type_group(struct archive *archive, path_stack_t path, carbon_object_id_t id, const field_sid_t *keys,
-                              carbon_basic_type_e type, bool is_array, u32 num_pairs, void *capture)
+                              enum field_type type, bool is_array, u32 num_pairs, void *capture)
 {
     NG5_UNUSED(archive);
     NG5_UNUSED(path);
@@ -124,7 +124,7 @@ static void first_prop_type_group(struct archive *archive, path_stack_t path, ca
 }
 
 static void next_prop_type_group(struct archive *archive, path_stack_t path, carbon_object_id_t id, const field_sid_t *keys,
-                             carbon_basic_type_e type, bool is_array, u32 num_pairs, void *capture)
+                             enum field_type type, bool is_array, u32 num_pairs, void *capture)
 {
     NG5_UNUSED(archive);
     NG5_UNUSED(path);
@@ -1348,7 +1348,7 @@ NG5_FUNC_UNUSED before_visit_object_array_object_property(struct archive *archiv
                                                                      carbon_object_id_t parent_id,
                                                                      field_sid_t key,
                                                                      field_sid_t nested_key,
-                                                                     carbon_basic_type_e nested_value_type,
+                                                                     enum field_type nested_value_type,
                                                                      void *capture)
 {
     NG5_UNUSED(archive);

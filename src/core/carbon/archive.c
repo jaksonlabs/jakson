@@ -126,9 +126,9 @@
 static offset_t skip_record_header(struct memfile *memfile);
 static void update_record_header(struct memfile *memfile, offset_t root_object_header_offset, struct columndoc *model,
         u64 record_size);
-static bool __serialize(offset_t *offset, struct err *err, struct memfile *memfile, columndoc_obj_t *columndoc,
+static bool __serialize(offset_t *offset, struct err *err, struct memfile *memfile, struct columndoc_obj *columndoc,
         offset_t root_object_header_offset);
-static carbon_archive_object_flags_t *get_flags(carbon_archive_object_flags_t *flags, columndoc_obj_t *columndoc);
+static carbon_archive_object_flags_t *get_flags(carbon_archive_object_flags_t *flags, struct columndoc_obj *columndoc);
 static void update_carbon_file_header(struct memfile *memfile, offset_t root_object_header_offset);
 static void skip_carbon_file_header(struct memfile *memfile);
 static bool serialize_string_dic(struct memfile *memfile, struct err *err, const struct doc_bulk *context,
@@ -552,13 +552,13 @@ static bool write_primitive_fixed_value_column(struct memfile *memfile, struct e
         return true;
 }
 
-static offset_t *__write_primitive_column(struct memfile *memfile, struct err *err, struct vector ofType(columndoc_obj_t) *values_vec,
+static offset_t *__write_primitive_column(struct memfile *memfile, struct err *err, struct vector ofType(struct columndoc_obj) *values_vec,
         offset_t root_offset)
 {
         offset_t *result = malloc(values_vec->num_elems * sizeof(offset_t));
-        columndoc_obj_t *mapped = vec_all(values_vec, columndoc_obj_t);
+        struct columndoc_obj *mapped = vec_all(values_vec, struct columndoc_obj);
         for (u32 i = 0; i < values_vec->num_elems; i++) {
-                columndoc_obj_t *obj = mapped + i;
+                struct columndoc_obj *obj = mapped + i;
                 result[i] = memfile_tell(memfile) - root_offset;
                 if (!__serialize(NULL, err, memfile, obj, root_offset)) {
                         return NULL;
@@ -660,7 +660,7 @@ static bool write_array_prop(offset_t *offset, struct err *err, struct memfile *
         return true;
 }
 
-static bool write_array_props(struct memfile *memfile, struct err *err, columndoc_obj_t *columndoc,
+static bool write_array_props(struct memfile *memfile, struct err *err, struct columndoc_obj *columndoc,
         carbon_archive_prop_offs_t *offsets, offset_t root_object_header_offset)
 {
         if (!write_array_prop(&offsets->null_arrays,
@@ -807,7 +807,7 @@ static bool write_fixed_props(offset_t *offset, struct err *err, struct memfile 
  * the only variable-length value for properties are "JSON objects".
  * In contrast, fixed-length property list doesn't require an additional offset column (see 'write_fixed_props') */
 static bool write_var_props(offset_t *offset, struct err *err, struct memfile *memfile, struct vector ofType(field_sid_t) *keys,
-        struct vector ofType(columndoc_obj_t) *objects, offset_t root_object_header_offset)
+        struct vector ofType(struct columndoc_obj) *objects, offset_t root_object_header_offset)
 {
         assert(!objects || keys->num_elems == objects->num_elems);
 
@@ -834,7 +834,7 @@ static bool write_var_props(offset_t *offset, struct err *err, struct memfile *m
         return true;
 }
 
-static bool write_primitive_props(struct memfile *memfile, struct err *err, columndoc_obj_t *columndoc,
+static bool write_primitive_props(struct memfile *memfile, struct err *err, struct columndoc_obj *columndoc,
         carbon_archive_prop_offs_t *offsets, offset_t root_object_header_offset)
 {
         if (!write_fixed_props(&offsets->nulls,
@@ -982,7 +982,7 @@ static bool write_column_entry(struct memfile *memfile, struct err *err, field_e
         case field_object: {
                 offset_t preObjectNext = 0;
                 for (size_t i = 0; i < column->num_elems; i++) {
-                        columndoc_obj_t *object = vec_get(column, i, columndoc_obj_t);
+                        struct columndoc_obj *object = vec_get(column, i, struct columndoc_obj);
                         if (NG5_LIKELY(preObjectNext != 0)) {
                                 offset_t continuePos = memfile_tell(memfile);
                                 offset_t relativeContinuePos = continuePos - root_object_header_offset;
@@ -1002,7 +1002,7 @@ static bool write_column_entry(struct memfile *memfile, struct err *err, field_e
         return true;
 }
 
-static bool write_column(struct memfile *memfile, struct err *err, carbon_columndoc_column_t *column,
+static bool write_column(struct memfile *memfile, struct err *err, struct columndoc_column *column,
         offset_t root_object_header_offset)
 {
         assert(column->array_positions.num_elems == column->values.num_elems);
@@ -1034,7 +1034,7 @@ static bool write_column(struct memfile *memfile, struct err *err, carbon_column
 }
 
 static bool write_object_array_props(struct memfile *memfile, struct err *err,
-        struct vector ofType(carbon_columndoc_columngroup_t) *object_key_columns, carbon_archive_prop_offs_t *offsets,
+        struct vector ofType(struct columndoc_group) *object_key_columns, carbon_archive_prop_offs_t *offsets,
         offset_t root_object_header_offset)
 {
         if (object_key_columns->num_elems > 0) {
@@ -1045,8 +1045,8 @@ static bool write_object_array_props(struct memfile *memfile, struct err *err,
                 memfile_write(memfile, &header, sizeof(carbon_object_array_header_t));
 
                 for (size_t i = 0; i < object_key_columns->num_elems; i++) {
-                        carbon_columndoc_columngroup_t *column_group =
-                                vec_get(object_key_columns, i, carbon_columndoc_columngroup_t);
+                        struct columndoc_group *column_group =
+                                vec_get(object_key_columns, i, struct columndoc_group);
                         memfile_write(memfile, &column_group->key, sizeof(field_sid_t));
                 }
 
@@ -1055,15 +1055,15 @@ static bool write_object_array_props(struct memfile *memfile, struct err *err,
                 carbon_memfile_skip(memfile, object_key_columns->num_elems * sizeof(offset_t));
 
                 for (size_t i = 0; i < object_key_columns->num_elems; i++) {
-                        carbon_columndoc_columngroup_t *column_group =
-                                vec_get(object_key_columns, i, carbon_columndoc_columngroup_t);
+                        struct columndoc_group *column_group =
+                                vec_get(object_key_columns, i, struct columndoc_group);
                         offset_t this_column_offset_relative = memfile_tell(memfile) - root_object_header_offset;
 
                         /* write an object-id for each position number */
                         size_t max_pos = 0;
                         for (size_t k = 0; k < column_group->columns.num_elems; k++) {
-                                carbon_columndoc_column_t *column =
-                                        vec_get(&column_group->columns, k, carbon_columndoc_column_t);
+                                struct columndoc_column *column =
+                                        vec_get(&column_group->columns, k, struct columndoc_column);
                                 const u32 *array_pos = vec_all(&column->array_positions, u32);
                                 for (size_t m = 0; m < column->array_positions.num_elems; m++) {
                                         max_pos = NG5_MAX(max_pos, array_pos[m]);
@@ -1092,8 +1092,8 @@ static bool write_object_array_props(struct memfile *memfile, struct err *err,
                         carbon_memfile_skip(memfile, column_group->columns.num_elems * sizeof(offset_t));
 
                         for (size_t k = 0; k < column_group->columns.num_elems; k++) {
-                                carbon_columndoc_column_t *column =
-                                        vec_get(&column_group->columns, k, carbon_columndoc_column_t);
+                                struct columndoc_column *column =
+                                        vec_get(&column_group->columns, k, struct columndoc_column);
                                 offset_t continue_write = memfile_tell(memfile);
                                 offset_t column_off = continue_write - root_object_header_offset;
                                 carbon_memfile_seek(memfile, offset_column_to_columns + k * sizeof(offset_t));
@@ -1300,7 +1300,7 @@ static void prop_offsets_skip_write(struct memfile *memfile, const carbon_archiv
         carbon_memfile_skip(memfile, num_skip_offset_bytes * sizeof(offset_t));
 }
 
-static bool __serialize(offset_t *offset, struct err *err, struct memfile *memfile, columndoc_obj_t *columndoc,
+static bool __serialize(offset_t *offset, struct err *err, struct memfile *memfile, struct columndoc_obj *columndoc,
         offset_t root_object_header_offset)
 {
         carbon_archive_object_flags_t flags;
@@ -2223,7 +2223,7 @@ static bool print_embedded_dic_from_memfile(FILE *file, struct err *err, struct 
         char *flagsStr = embedded_dic_flags_to_string(&flags);
         fprintf(file, "0x%04x ", offset);
         fprintf(file,
-                "[marker: %c] [nentries: %d] [flags: %s] [first-entry-off: 0x%04x] [extra-size: %zu]\n",
+                "[marker: %c] [nentries: %d] [flags: %s] [first-entry-off: 0x%04x] [extra-size: %" PRIu64 "]\n",
                 header->marker,
                 header->num_entries,
                 flagsStr,
@@ -2245,7 +2245,7 @@ static bool print_embedded_dic_from_memfile(FILE *file, struct err *err, struct 
                         "0x%04x    [marker: %c] [next-entry-off: 0x%04zx] [string-id: %"PRIu64"] [string-length: %"PRIu32"]",
                         offset,
                         header.marker,
-                        header.next_entry_off,
+                        (size_t) header.next_entry_off,
                         header.string_id,
                         header.string_len);
                 carbon_compressor_print_encoded(err, &strategy, file, memfile, header.string_len);
@@ -2270,7 +2270,7 @@ static bool print_archive_from_memfile(FILE *file, struct err *err, struct memfi
         return true;
 }
 
-static carbon_archive_object_flags_t *get_flags(carbon_archive_object_flags_t *flags, columndoc_obj_t *columndoc)
+static carbon_archive_object_flags_t *get_flags(carbon_archive_object_flags_t *flags, struct columndoc_obj *columndoc)
 {
         NG5_ZERO_MEMORY(flags, sizeof(carbon_archive_object_flags_t));
         flags->bits.has_null_props = (columndoc->null_prop_keys.num_elems > 0);

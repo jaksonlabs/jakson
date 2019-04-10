@@ -29,20 +29,20 @@ struct huff_node
     unsigned char letter;
 };
 
-static void huff_tree_create(struct vector ofType(carbon_huffman_entry_t) *table, const struct vector ofType(u32) *frequencies);
+static void huff_tree_create(struct vector ofType(struct pack_huffman_entry) *table, const struct vector ofType(u32) *frequencies);
 
-bool carbon_huffman_create(carbon_huffman_t *dic)
+bool carbon_huffman_create(struct pack_huffman *dic)
 {
     NG5_NON_NULL_OR_ERROR(dic);
 
-    carbon_vec_create(&dic->table, NULL, sizeof(carbon_huffman_entry_t), UCHAR_MAX / 4);
+    carbon_vec_create(&dic->table, NULL, sizeof(struct pack_huffman_entry), UCHAR_MAX / 4);
     carbon_error_init(&dic->err);
 
     return true;
 }
 
 NG5_EXPORT(bool)
-carbon_huffman_cpy(carbon_huffman_t *dst, carbon_huffman_t *src)
+carbon_huffman_cpy(struct pack_huffman *dst, struct pack_huffman *src)
 {
     NG5_NON_NULL_OR_ERROR(dst);
     NG5_NON_NULL_OR_ERROR(src);
@@ -55,7 +55,7 @@ carbon_huffman_cpy(carbon_huffman_t *dst, carbon_huffman_t *src)
 }
 
 NG5_EXPORT(bool)
-carbon_huffman_build(carbon_huffman_t *encoder, const string_vector_t *strings)
+carbon_huffman_build(struct pack_huffman *encoder, const string_vector_t *strings)
 {
     NG5_NON_NULL_OR_ERROR(encoder);
     NG5_NON_NULL_OR_ERROR(strings);
@@ -83,7 +83,7 @@ carbon_huffman_build(carbon_huffman_t *encoder, const string_vector_t *strings)
 }
 
 NG5_EXPORT(bool)
-carbon_huffman_get_error(struct err *err, const carbon_huffman_t *dic)
+carbon_huffman_get_error(struct err *err, const struct pack_huffman *dic)
 {
     NG5_NON_NULL_OR_ERROR(err)
     NG5_NON_NULL_OR_ERROR(dic)
@@ -91,12 +91,12 @@ carbon_huffman_get_error(struct err *err, const carbon_huffman_t *dic)
     return true;
 }
 
-bool carbon_huffman_drop(carbon_huffman_t *dic)
+bool carbon_huffman_drop(struct pack_huffman *dic)
 {
     NG5_NON_NULL_OR_ERROR(dic);
 
     for (size_t i = 0; i < dic->table.num_elems; i++) {
-        carbon_huffman_entry_t *entry = vec_get(&dic->table, i, carbon_huffman_entry_t);
+        struct pack_huffman_entry *entry = vec_get(&dic->table, i, struct pack_huffman_entry);
         free(entry->blocks);
     }
 
@@ -107,13 +107,13 @@ bool carbon_huffman_drop(carbon_huffman_t *dic)
     return true;
 }
 
-bool carbon_huffman_serialize_dic(struct memfile *file, const carbon_huffman_t *dic, char marker_symbol)
+bool carbon_huffman_serialize_dic(struct memfile *file, const struct pack_huffman *dic, char marker_symbol)
 {
     NG5_NON_NULL_OR_ERROR(file)
     NG5_NON_NULL_OR_ERROR(dic)
 
     for (size_t i = 0; i < dic->table.num_elems; i++) {
-        carbon_huffman_entry_t *entry = vec_get(&dic->table, i, carbon_huffman_entry_t);
+        struct pack_huffman_entry *entry = vec_get(&dic->table, i, struct pack_huffman_entry);
             memfile_write(file, &marker_symbol, sizeof(char));
             memfile_write(file, &entry->letter, sizeof(unsigned char));
 
@@ -148,10 +148,10 @@ bool carbon_huffman_serialize_dic(struct memfile *file, const carbon_huffman_t *
     return true;
 }
 
-static carbon_huffman_entry_t *find_dic_entry(carbon_huffman_t *dic, unsigned char c)
+static struct pack_huffman_entry *find_dic_entry(struct pack_huffman *dic, unsigned char c)
 {
     for (size_t i = 0; i < dic->table.num_elems; i++) {
-        carbon_huffman_entry_t *entry = vec_get(&dic->table, i, carbon_huffman_entry_t);
+        struct pack_huffman_entry *entry = vec_get(&dic->table, i, struct pack_huffman_entry);
         if (entry->letter == c) {
             return entry;
         }
@@ -160,12 +160,12 @@ static carbon_huffman_entry_t *find_dic_entry(carbon_huffman_t *dic, unsigned ch
     return NULL;
 }
 
-static size_t encodeString(struct memfile *file, carbon_huffman_t *dic, const char *string)
+static size_t encodeString(struct memfile *file, struct pack_huffman *dic, const char *string)
 {
     carbon_memfile_begin_bit_mode(file);
 
     for (const char *c = string; *c != '\0'; c++) {
-        carbon_huffman_entry_t *entry = find_dic_entry(dic, (unsigned char) *c);
+        struct pack_huffman_entry *entry = find_dic_entry(dic, (unsigned char) *c);
         if (!entry) {
             return 0;
         }
@@ -198,7 +198,7 @@ static size_t encodeString(struct memfile *file, carbon_huffman_t *dic, const ch
 
 NG5_EXPORT(bool)
 carbon_huffman_encode_one(struct memfile *file,
-                          carbon_huffman_t *dic,
+                          struct pack_huffman *dic,
                           const char *string)
 {
     NG5_NON_NULL_OR_ERROR(file)
@@ -222,14 +222,14 @@ carbon_huffman_encode_one(struct memfile *file,
     return true;
 }
 
-bool carbon_huffman_read_string(carbon_huffman_encoded_str_info_t *info, struct memfile *src)
+bool carbon_huffman_read_string(struct pack_huffman_str_info *info, struct memfile *src)
 {
     info->nbytes_encoded = *NG5_MEMFILE_READ_TYPE(src, u32);
     info->encoded_bytes = NG5_MEMFILE_READ(src, info->nbytes_encoded);
     return true;
 }
 
-bool carbon_huffman_read_dic_entry(carbon_huffman_entry_info_t *info, struct memfile *file, char marker_symbol)
+bool carbon_huffman_read_dic_entry(struct pack_huffman_info *info, struct memfile *file, char marker_symbol)
 {
     char marker = *NG5_MEMFILE_PEEK(file, char);
     if (marker == marker_symbol) {
@@ -246,7 +246,7 @@ bool carbon_huffman_read_dic_entry(carbon_huffman_entry_info_t *info, struct mem
     }
 }
 
-static const u32 *get_num_used_blocks(u16 *numUsedBlocks, carbon_huffman_entry_t *entry, u16 num_blocks,
+static const u32 *get_num_used_blocks(u16 *numUsedBlocks, struct pack_huffman_entry *entry, u16 num_blocks,
                                         const u32 *blocks)
 {
     for (entry->nblocks = 0; entry->nblocks < num_blocks; entry->nblocks++) {
@@ -259,7 +259,7 @@ static const u32 *get_num_used_blocks(u16 *numUsedBlocks, carbon_huffman_entry_t
     return NULL;
 }
 
-static void import_into_entry(carbon_huffman_entry_t *entry, const struct huff_node *node, const struct bitmap *map)
+static void import_into_entry(struct pack_huffman_entry *entry, const struct huff_node *node, const struct bitmap *map)
 {
     entry->letter = node->letter;
     u32 *blocks, num_blocks;
@@ -331,10 +331,10 @@ static struct huff_node *find_smallest(struct huff_node *begin, u64 lowerBound, 
 }
 
 
-static void assign_code(struct huff_node *node, const struct bitmap *path, struct vector ofType(carbon_huffman_entry_t) *table)
+static void assign_code(struct huff_node *node, const struct bitmap *path, struct vector ofType(struct pack_huffman_entry) *table)
 {
     if (!node->left && !node->right) {
-            carbon_huffman_entry_t *entry = VECTOR_NEW_AND_GET(table, carbon_huffman_entry_t);
+            struct pack_huffman_entry *entry = VECTOR_NEW_AND_GET(table, struct pack_huffman_entry);
             import_into_entry(entry, node, path);
     } else {
         if (node->left) {
@@ -379,7 +379,7 @@ static struct huff_node *trim_and_begin(struct vector ofType(HuffNode) *candidat
     return begin;
 }
 
-static void huff_tree_create(struct vector ofType(carbon_huffman_entry_t) *table, const struct vector ofType(u32) *frequencies)
+static void huff_tree_create(struct vector ofType(struct pack_huffman_entry) *table, const struct vector ofType(u32) *frequencies)
 {
     assert(UCHAR_MAX == frequencies->num_elems);
 

@@ -120,7 +120,7 @@ before_object_visit(struct archive *archive, path_stack_t path,
 static void
 visit_object_property(struct archive *archive, path_stack_t path,
                               carbon_object_id_t parent_id,
-                              field_sid_t key, carbon_basic_type_e type, bool is_array_type, void *capture)
+                              field_sid_t key, enum field_type type, bool is_array_type, void *capture)
 {
     NG5_UNUSED(archive);
     NG5_UNUSED(path);
@@ -176,7 +176,7 @@ visit_object_property(struct archive *archive, path_stack_t path,
 
 
 
-static void visit_object_array_prop(struct archive *archive, path_stack_t path, carbon_object_id_t parent_id, field_sid_t key, carbon_basic_type_e type, void *capture)
+static void visit_object_array_prop(struct archive *archive, path_stack_t path, carbon_object_id_t parent_id, field_sid_t key, enum field_type type, void *capture)
 {
     NG5_UNUSED(archive);
     NG5_UNUSED(parent_id);
@@ -213,7 +213,7 @@ before_visit_object_array_object_property(struct archive *archive, path_stack_t 
                                           carbon_object_id_t parent_id,
                                           field_sid_t key,
                                           field_sid_t nested_key,
-                                          carbon_basic_type_e nested_value_type,
+                                          enum field_type nested_value_type,
                                           void *capture)
 {
     NG5_UNUSED(archive);

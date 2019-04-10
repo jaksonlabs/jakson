@@ -18,7 +18,7 @@
 #include "std/sort.h"
 
 NG5_EXPORT(bool)
-carbon_sort_qsort_indicies(size_t *indices, const void *base, size_t width, carbon_less_eq_func_t comp, size_t nelemns,
+carbon_sort_qsort_indicies(size_t *indices, const void *base, size_t width, less_eq_func_t comp, size_t nelemns,
                            struct allocator *alloc)
 {
     NG5_NON_NULL_OR_ERROR(base);
@@ -60,7 +60,7 @@ carbon_sort_qsort_indicies(size_t *indices, const void *base, size_t width, carb
 }
 
 NG5_EXPORT(int)
-carbon_sort_qsort_indicies_wargs(size_t *indices, const void *base, size_t width, carbon_less_eq_wargs_func_t comp,
+carbon_sort_qsort_indicies_wargs(size_t *indices, const void *base, size_t width, less_eq_wargs_func_t comp,
                                  size_t nelemens, struct allocator *alloc, void *args)
 {
     NG5_NON_NULL_OR_ERROR(base);
@@ -105,7 +105,7 @@ carbon_sort_qsort_indicies_wargs(size_t *indices, const void *base, size_t width
 
 NG5_EXPORT(size_t)
 carbon_sort_bsearch_indicies(const size_t *indicies, const void *base, size_t width, size_t nelemens,
-                             const void *neelde, carbon_eq_func_t compEq, carbon_less_func_t compLess)
+                             const void *neelde, eq_func_t compEq, less_func_t compLess)
 {
     size_t l = 0;
     size_t r = nelemens - 1;

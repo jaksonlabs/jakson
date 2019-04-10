@@ -56,13 +56,11 @@
 #define NG5_ARRAY_LENGTH(x)                                                                                         \
     sizeof(x)/sizeof(x[0])
 
-typedef char            carbon_byte_t;
-
-typedef size_t          offset_t;
+typedef uint64_t          offset_t;
 
 typedef unsigned char   u_char;
 
-typedef enum carbon_basic_type
+enum field_type
 {
     NG5_BASIC_TYPE_INT8,
     NG5_BASIC_TYPE_INT16,
@@ -77,7 +75,7 @@ typedef enum carbon_basic_type
     NG5_BASIC_TYPE_BOOLEAN,
     NG5_BASIC_TYPE_NULL,
     NG5_BASIC_TYPE_OBJECT,
-} carbon_basic_type_e;
+};
 
 
 enum access_mode
@@ -90,7 +88,7 @@ enum access_mode
 #define NG5_FUNC_UNUSED __attribute__((unused))
 
 NG5_FUNC_UNUSED static const char *
-carbon_basic_type_to_json_type_str(carbon_basic_type_e t)
+carbon_basic_type_to_json_type_str(enum field_type t)
 {
     switch (t) {
     case NG5_BASIC_TYPE_INT8:
@@ -118,7 +116,7 @@ carbon_basic_type_to_json_type_str(carbon_basic_type_e t)
 }
 
 NG5_FUNC_UNUSED static const char *
-carbon_basic_type_to_system_type_str(carbon_basic_type_e t)
+carbon_basic_type_to_system_type_str(enum field_type t)
 {
     switch (t) {
     case NG5_BASIC_TYPE_INT8:

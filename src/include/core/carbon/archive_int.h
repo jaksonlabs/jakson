@@ -396,7 +396,7 @@ carbon_int_get_value_type_of_char(char c);
 field_e
 carbon_int_marker_to_field_type(char symbol);
 
-carbon_basic_type_e
+enum field_type
 carbon_int_field_type_to_basic_type(field_e type);
 
 NG5_END_DECL

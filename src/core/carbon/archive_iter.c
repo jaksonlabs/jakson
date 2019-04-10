@@ -407,7 +407,7 @@ carbon_archive_prop_iter_from_object(carbon_archive_prop_iter_t *iter,
                                                   obj->memfile.memblock, obj->offset);
 }
 
-static carbon_basic_type_e
+static enum field_type
 get_basic_type(carbon_prop_iter_state_e state)
 {
     switch (state) {
@@ -605,7 +605,7 @@ carbon_archive_column_group_next_column(carbon_archive_column_iter_t *column_ite
 
 NG5_EXPORT(bool)
 carbon_archive_column_get_name(field_sid_t *name,
-                               carbon_basic_type_e *type,
+                               enum field_type *type,
                                carbon_archive_column_iter_t *column_iter)
 {
     NG5_NON_NULL_OR_ERROR(column_iter)
@@ -647,7 +647,7 @@ carbon_archive_column_next_entry(carbon_archive_column_entry_iter_t *entry_iter,
 }
 
 NG5_EXPORT(bool)
-carbon_archive_column_entry_get_type(carbon_basic_type_e *type, carbon_archive_column_entry_iter_t *entry)
+carbon_archive_column_entry_get_type(enum field_type *type, carbon_archive_column_entry_iter_t *entry)
 {
     NG5_NON_NULL_OR_ERROR(type)
     NG5_NON_NULL_OR_ERROR(entry)
@@ -965,7 +965,7 @@ carbon_archive_value_vector_from_prop_iter(carbon_archive_value_vector_t *value,
 }
 
 NG5_EXPORT(bool)
-carbon_archive_value_vector_get_basic_type(carbon_basic_type_e *type, const carbon_archive_value_vector_t *value)
+carbon_archive_value_vector_get_basic_type(enum field_type *type, const carbon_archive_value_vector_t *value)
 {
     NG5_NON_NULL_OR_ERROR(type)
     NG5_NON_NULL_OR_ERROR(value)

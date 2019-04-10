@@ -33,7 +33,7 @@ typedef int64_t i64;
 
 struct doc_obj;
 
-typedef u64               field_sid_t;
+typedef u64               field_sid_t;  /* string identifier, resolvable by a string dictionary */
 typedef char              field_null_t;
 typedef i8                field_boolean_t;
 typedef i8                field_i8_t;
@@ -153,7 +153,7 @@ typedef enum carbon_field_type
             value_size = sizeof(field_sid_t);                                                                   \
             break;                                                                                                     \
         case field_object:                                                                                 \
-            value_size = sizeof(columndoc_obj_t);                                                               \
+            value_size = sizeof(struct columndoc_obj);                                                               \
             break;                                                                                                     \
         default:                                                                                                       \
         carbon_print_error_and_die(NG5_ERR_NOTYPE);                                                                 \

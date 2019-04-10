@@ -69,7 +69,7 @@ size_t carbon_memfile_size(struct memfile *file)
     if (!file || !file->memblock) {
         return 0;
     } else {
-        size_t size;
+        u64 size;
         carbon_memblock_size(&size, file->memblock);
         return size;
     }
@@ -86,7 +86,7 @@ bool carbon_memfile_shrink(struct memfile *file)
     NG5_NON_NULL_OR_ERROR(file);
     if (file->mode == READ_WRITE) {
         int status = carbon_memblock_shrink(file->memblock);
-        size_t size;
+        u64 size;
         carbon_memblock_size(&size, file->memblock);
         assert(size == file->pos);
         return status;
@@ -96,9 +96,9 @@ bool carbon_memfile_shrink(struct memfile *file)
     }
 }
 
-const carbon_byte_t *carbon_memfile_read(struct memfile *file, offset_t nbytes)
+const char *carbon_memfile_read(struct memfile *file, offset_t nbytes)
 {
-    const carbon_byte_t *result = carbon_memfile_peek(file, nbytes);
+    const char *result = carbon_memfile_peek(file, nbytes);
     file->pos += nbytes;
     return result;
 }
@@ -122,7 +122,7 @@ bool carbon_memfile_skip(struct memfile *file, offset_t nbytes)
     return true;
 }
 
-const carbon_byte_t *carbon_memfile_peek(struct memfile *file, offset_t nbytes)
+const char *carbon_memfile_peek(struct memfile *file, offset_t nbytes)
 {
     offset_t file_size;
     carbon_memblock_size(&file_size, file->memblock);
@@ -130,7 +130,7 @@ const carbon_byte_t *carbon_memfile_peek(struct memfile *file, offset_t nbytes)
         error(&file->err, NG5_ERR_READOUTOFBOUNDS);
         return NULL;
     } else {
-        const carbon_byte_t *result = carbon_memblock_raw_data(file->memblock) + file->pos;
+        const char *result = carbon_memblock_raw_data(file->memblock) + file->pos;
         return result;
     }
 }

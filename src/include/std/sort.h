@@ -26,13 +26,13 @@
 
 NG5_BEGIN_DECL
 
-typedef bool (*carbon_less_eq_func_t)(const void *lhs, const void *rhs);
+typedef bool (*less_eq_func_t)(const void *lhs, const void *rhs);
 
-typedef bool (*carbon_less_eq_wargs_func_t)(const void *lhs, const void *rhs, void *args);
+typedef bool (*less_eq_wargs_func_t)(const void *lhs, const void *rhs, void *args);
 
-typedef bool (*carbon_eq_func_t)(const void *lhs, const void *rhs);
+typedef bool (*eq_func_t)(const void *lhs, const void *rhs);
 
-typedef bool (*carbon_less_func_t)(const void *lhs, const void *rhs);
+typedef bool (*less_func_t)(const void *lhs, const void *rhs);
 
 #define NG5_QSORT_INDICES_SWAP(x, y)                                                                                \
 {                                                                                                                      \
@@ -78,16 +78,16 @@ typedef bool (*carbon_less_func_t)(const void *lhs, const void *rhs);
 })
 
 NG5_EXPORT(bool)
-carbon_sort_qsort_indicies(size_t *indices, const void *base, size_t width, carbon_less_eq_func_t comp, size_t nelemns,
+carbon_sort_qsort_indicies(size_t *indices, const void *base, size_t width, less_eq_func_t comp, size_t nelemns,
                            struct allocator *alloc);
 
 NG5_EXPORT(int)
-carbon_sort_qsort_indicies_wargs(size_t *indices, const void *base, size_t width, carbon_less_eq_wargs_func_t comp,
+carbon_sort_qsort_indicies_wargs(size_t *indices, const void *base, size_t width, less_eq_wargs_func_t comp,
                                  size_t nelemens, struct allocator *alloc, void *args);
 
 NG5_EXPORT(size_t)
 carbon_sort_bsearch_indicies(const size_t *indicies, const void *base, size_t width, size_t nelemens,
-                             const void *neelde, carbon_eq_func_t compEq, carbon_less_func_t compLess);
+                             const void *neelde, eq_func_t compEq, less_func_t compLess);
 
 NG5_EXPORT(size_t)
 carbon_sort_get_min(const size_t *elements, size_t nelemens);

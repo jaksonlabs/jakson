@@ -283,7 +283,7 @@ iterate_properties(carbon_archive_prop_iter_t *prop_iter)
 {
     carbon_object_id_t                oid;
     carbon_archive_value_vector_t     value_iter;
-    carbon_basic_type_e               type;
+    enum field_type               type;
     bool                              is_array;
     const field_sid_t         *keys;
     u32                          num_pairs;
@@ -351,7 +351,7 @@ iterate_properties(carbon_archive_prop_iter_t *prop_iter)
 
                 while(carbon_archive_column_group_next_column(&column_iter, &group_iter)) {
                     field_sid_t column_name;
-                    carbon_basic_type_e column_entry_type;
+                    enum field_type column_entry_type;
                     u32 num_entries;
                     carbon_archive_column_get_name(&column_name, &column_entry_type, &column_iter);
                     const u32 *positions = carbon_archive_column_get_entry_positions(&num_entries, &column_iter);
@@ -364,7 +364,7 @@ iterate_properties(carbon_archive_prop_iter_t *prop_iter)
 
                     while(carbon_archive_column_next_entry(&entry_iter, &column_iter)) {
 
-                        carbon_basic_type_e entry_type;
+                        enum field_type entry_type;
                         u32 entry_length;
                         carbon_archive_column_entry_get_type(&entry_type, &entry_iter);
 

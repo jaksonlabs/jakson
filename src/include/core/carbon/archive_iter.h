@@ -83,7 +83,7 @@ typedef struct archive_object_iterator_state
     offset_t               prop_data_off;
 
     const field_sid_t   *keys;                   /* current property key in this iteration */
-    carbon_basic_type_e        type;                    /* property basic value type (e.g., int8, or object) */
+    enum field_type        type;                    /* property basic value type (e.g., int8, or object) */
     bool                       is_array;                /* flag indicating that property is an array type */
 } carbon_archive_object_iter_state_t;
 
@@ -104,7 +104,7 @@ typedef struct archive_collection_iterator_state
         struct {
             u32                    idx;
             field_sid_t          name;
-            carbon_basic_type_e         type;
+            enum field_type         type;
             u32                    num_elem;
             const offset_t         *elem_offsets;
             const u32             *elem_positions;
@@ -124,7 +124,7 @@ typedef struct archive_value_vector
 {
     carbon_archive_prop_iter_t *prop_iter;               /* pointer to property iterator that created this iterator */
     struct memfile            record_table_memfile;    /* iterator-local read-only memfile on archive record table */
-    carbon_basic_type_e         prop_type;               /* property basic value type (e.g., int8, or object) */
+    enum field_type         prop_type;               /* property basic value type (e.g., int8, or object) */
     bool                        is_array;                /* flag indicating whether value type is an array or not */
     offset_t                data_off;                /* offset in memfile where type-dependent data begins */
     u32                    value_max_idx;           /* maximum index of a value callable by 'at' functions */
@@ -297,7 +297,7 @@ carbon_archive_column_group_next_column(carbon_archive_column_iter_t *column_ite
 
 NG5_EXPORT(bool)
 carbon_archive_column_get_name(field_sid_t *name,
-                               carbon_basic_type_e *type,
+                               enum field_type *type,
                                carbon_archive_column_iter_t *column_iter);
 
 NG5_EXPORT(const u32 *)
@@ -307,7 +307,7 @@ NG5_EXPORT(bool)
 carbon_archive_column_next_entry(carbon_archive_column_entry_iter_t *entry_iter, carbon_archive_column_iter_t *iter);
 
 NG5_EXPORT(bool)
-carbon_archive_column_entry_get_type(carbon_basic_type_e *type, carbon_archive_column_entry_iter_t *entry);
+carbon_archive_column_entry_get_type(enum field_type *type, carbon_archive_column_entry_iter_t *entry);
 
 #define DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(built_in_type, name)                                         \
 NG5_EXPORT(const built_in_type *)                                                                                   \
@@ -349,7 +349,7 @@ NG5_EXPORT(const field_sid_t *)
 carbon_archive_value_vector_get_keys(u32 *num_keys, carbon_archive_value_vector_t *iter);
 
 NG5_EXPORT(bool)
-carbon_archive_value_vector_get_basic_type(carbon_basic_type_e *type, const carbon_archive_value_vector_t *value);
+carbon_archive_value_vector_get_basic_type(enum field_type *type, const carbon_archive_value_vector_t *value);
 
 NG5_EXPORT(bool)
 carbon_archive_value_vector_is_array_type(bool *is_array, const carbon_archive_value_vector_t *value);

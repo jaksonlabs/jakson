@@ -35,7 +35,7 @@ NG5_BEGIN_DECL
  * occurs. Note that a keys name might have different data types inside objects embedded in arrays, and a key is not
  * guaranteed to occur in all objects embedded in the array.
  */
-typedef struct carbon_columndoc_column
+struct columndoc_column
 {
     /** Key name */
     field_sid_t key_name;
@@ -47,18 +47,18 @@ typedef struct carbon_columndoc_column
      * i-th value) is associated to the i-th element in `arrayPosition` which holds the position of the object inside
      * the array from which this pair was taken. */
     struct vector ofType(Vector ofType(<T>)) values;
-} carbon_columndoc_column_t;
+};
 
-typedef struct carbon_columndoc_columngroup
+struct columndoc_group
 {
     /** Key name */
     field_sid_t key;
     /** Key columns as a decomposition of objects stored in that JSON-like array */
-    struct vector ofType(carbon_columndoc_column_t) columns;
+    struct vector ofType(struct columndoc_column) columns;
 
-} carbon_columndoc_columngroup_t;
+};
 
-typedef struct carbon_columndoc_obj
+struct columndoc_obj
 {
     /** Parent document meta doc */
     struct columndoc *parent;
@@ -168,7 +168,7 @@ typedef struct carbon_columndoc_obj
      * multiplicity of nulls for the associated key. */
     struct vector ofType(u16) null_array_prop_vals;
     /** Primitive objects associated to keys stored above (sorted by key) */
-    struct vector ofType(columndoc_obj_t) obj_prop_vals;
+    struct vector ofType(struct columndoc_obj) obj_prop_vals;
 
     /** Index of primitive boolean values associated to keys stored above (sorted by value) */
     struct vector ofType(u32) bool_val_idxs;
@@ -217,15 +217,15 @@ typedef struct carbon_columndoc_obj
     struct vector ofType(Vector) string_array_idxs;
 
     /** Array of objects associated to keys stored above (sorted by key) */
-    struct vector ofType(carbon_columndoc_columngroup_t) obj_array_props;
+    struct vector ofType(struct columndoc_group) obj_array_props;
 
-} columndoc_obj_t;
+};
 
 struct columndoc
 {
     const struct doc *doc;
     struct strdic *dic;
-    columndoc_obj_t columndoc;
+    struct columndoc_obj columndoc;
     const struct doc_bulk *bulk;
     bool read_optimized;
     struct err err;

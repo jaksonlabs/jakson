@@ -78,7 +78,7 @@ bool carbon_memblock_write_to_file(FILE *file, const struct memblock *block)
     return nwritten == 1 ? true : false;
 }
 
-const carbon_byte_t *carbon_memblock_raw_data(const struct memblock *block)
+const char *carbon_memblock_raw_data(const struct memblock *block)
 {
     return (block && block->base ? block->base : NULL);
 }
@@ -94,7 +94,7 @@ bool carbon_memblock_resize(struct memblock *block, size_t size)
 
 bool carbon_memblock_write(struct memblock *block,
                            offset_t position,
-                           const carbon_byte_t *data,
+                           const char *data,
                            offset_t nbytes)
 {
     NG5_NON_NULL_OR_ERROR(block)

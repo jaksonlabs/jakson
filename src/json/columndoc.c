@@ -21,24 +21,24 @@
 #include "json/columndoc.h"
 #include "json/doc.h"
 
-static void setup_object(columndoc_obj_t *model, struct columndoc *parent, field_sid_t key, size_t idx);
+static void setup_object(struct columndoc_obj *model, struct columndoc *parent, field_sid_t key, size_t idx);
 
-static bool object_put(columndoc_obj_t *model, struct err *err, const struct doc_entries *entry, struct strdic *dic);
+static bool object_put(struct columndoc_obj *model, struct err *err, const struct doc_entries *entry, struct strdic *dic);
 
-static bool import_object(columndoc_obj_t *dst, struct err *err, const struct doc_obj *doc, struct strdic *dic);
+static bool import_object(struct columndoc_obj *dst, struct err *err, const struct doc_obj *doc, struct strdic *dic);
 
-static bool print_object(FILE *file, struct err *err, const columndoc_obj_t *object, struct strdic *dic);
+static bool print_object(FILE *file, struct err *err, const struct columndoc_obj *object, struct strdic *dic);
 
 static const char *get_type_name(struct err *err, field_e type);
 
-static void object_array_key_columns_create(struct vector ofType(carbon_columndoc_columngroup_t) *columns);
+static void object_array_key_columns_create(struct vector ofType(struct columndoc_group) *columns);
 
-static carbon_columndoc_column_t *object_array_key_columns_find_or_new(struct vector ofType(carbon_columndoc_columngroup_t) *columns,
+static struct columndoc_column *object_array_key_columns_find_or_new(struct vector ofType(struct columndoc_group) *columns,
                                                             field_sid_t array_key, field_sid_t nested_object_entry_key,
                                                             field_e nested_object_entry_type);
 
-static bool object_array_key_column_push(carbon_columndoc_column_t *col, struct err *err, const struct doc_entries *entry, u32 array_idx,
-                                     struct strdic *dic, columndoc_obj_t *model);
+static bool object_array_key_column_push(struct columndoc_column *col, struct err *err, const struct doc_entries *entry, u32 array_idx,
+                                     struct strdic *dic, struct columndoc_obj *model);
 
 bool carbon_columndoc_create(struct columndoc *columndoc,
                              struct err *err,
@@ -74,9 +74,9 @@ bool carbon_columndoc_create(struct columndoc *columndoc,
     return true;
 }
 
-static void object_array_key_columns_drop(struct vector ofType(carbon_columndoc_columngroup_t) *columns);
+static void object_array_key_columns_drop(struct vector ofType(struct columndoc_group) *columns);
 
-static void object_meta_model_free(columndoc_obj_t *columndoc)
+static void object_meta_model_free(struct columndoc_obj *columndoc)
 {
     carbon_vec_drop(&columndoc->bool_prop_keys);
     carbon_vec_drop(&columndoc->int8_prop_keys);
@@ -264,7 +264,7 @@ static void object_meta_model_free(columndoc_obj_t *columndoc)
     carbon_vec_drop(&columndoc->string_array_idxs);
 
     for (size_t i = 0; i < columndoc->obj_prop_vals.num_elems; i++) {
-        columndoc_obj_t *object = vec_get(&columndoc->obj_prop_vals, i, columndoc_obj_t);
+        struct columndoc_obj *object = vec_get(&columndoc->obj_prop_vals, i, struct columndoc_obj);
         object_meta_model_free(object);
     }
     carbon_vec_drop(&columndoc->obj_prop_vals);
@@ -339,13 +339,13 @@ static void print_primitive_null(FILE *file, const char *type_name, const struct
 
 
 static bool print_primitive_objects(FILE *file, struct err *err, const char *type_name, const struct vector ofType(field_sid_t) *key_vector,
-                                  const struct vector ofType(columndoc_obj_t) *value_vector, struct strdic *dic)
+                                  const struct vector ofType(struct columndoc_obj) *value_vector, struct strdic *dic)
 {
     PRINT_PRIMITIVE_KEY_PART(file, type_name, key_vector, dic, ", ")
     if(!carbon_vec_is_empty((key_vector))) {
         fprintf(file, "\"Values\": [ ");
         for (size_t i = 0; i < (value_vector)->num_elems; i++) {
-            const columndoc_obj_t *object = vec_get(value_vector, i, columndoc_obj_t);
+            const struct columndoc_obj *object = vec_get(value_vector, i, struct columndoc_obj);
             if(!print_object(file, err, object, dic)) {
                 return false;
             }
@@ -546,18 +546,18 @@ static void print_primitive_strings(FILE *file, const char *type_name, const str
     fprintf(file, "%s", column->num_elems > 1 ? "]" : "");                                                             \
 }
 
-static bool print_array_objects(FILE *file, struct err *err, const char *type_name, const struct vector ofType(carbon_columndoc_columngroup_t) *key_columns,
+static bool print_array_objects(FILE *file, struct err *err, const char *type_name, const struct vector ofType(struct columndoc_group) *key_columns,
                               struct strdic *dic)
 {
     fprintf(file, "\"%s\": {", type_name);
     fprintf(file, "\"Keys\": [");
     for (size_t array_key_idx = 0; array_key_idx < key_columns->num_elems; array_key_idx++) {
-        const carbon_columndoc_columngroup_t *arrayKeyColumns = vec_get(key_columns, array_key_idx, carbon_columndoc_columngroup_t);
+        const struct columndoc_group *arrayKeyColumns = vec_get(key_columns, array_key_idx, struct columndoc_group);
         fprintf(file, "%"PRIu64"%s", arrayKeyColumns->key, array_key_idx + 1 < key_columns->num_elems ? ", " : "");
     }
     fprintf(file, "], \"Keys Decoded\": [");
     for (size_t array_key_idx = 0; array_key_idx < key_columns->num_elems; array_key_idx++) {
-        const carbon_columndoc_columngroup_t *arrayKeyColumns = vec_get(key_columns, array_key_idx, carbon_columndoc_columngroup_t);
+        const struct columndoc_group *arrayKeyColumns = vec_get(key_columns, array_key_idx, struct columndoc_group);
         field_sid_t encKeyName = arrayKeyColumns->key;
         char **decKeyName = carbon_strdic_extract(dic, &encKeyName, 1);
         fprintf(file, "\"%s\"%s", *decKeyName, array_key_idx + 1 < key_columns->num_elems ? ", " : "");
@@ -567,10 +567,10 @@ static bool print_array_objects(FILE *file, struct err *err, const char *type_na
     fprintf(file, "\"Tables\": [");
     for (size_t array_key_idx = 0; array_key_idx < key_columns->num_elems; array_key_idx++) {
         fprintf(file, "[");
-        const carbon_columndoc_columngroup_t *arrayKeyColumns = vec_get(key_columns, array_key_idx, carbon_columndoc_columngroup_t);
+        const struct columndoc_group *arrayKeyColumns = vec_get(key_columns, array_key_idx, struct columndoc_group);
         for (size_t columnIdx = 0; columnIdx < arrayKeyColumns->columns.num_elems; columnIdx++) {
             fprintf(file, "{");
-            const carbon_columndoc_column_t *columnTable = vec_get(&arrayKeyColumns->columns, columnIdx, carbon_columndoc_column_t);
+            const struct columndoc_column *columnTable = vec_get(&arrayKeyColumns->columns, columnIdx, struct columndoc_column);
             char **decColumnKeyName = carbon_strdic_extract(dic, &columnTable->key_name, 1);
 
             const char *column_type_name = get_type_name(err, columnTable->type);
@@ -640,12 +640,12 @@ static bool print_array_objects(FILE *file, struct err *err, const char *type_na
                     fprintf(file, "%s", column->num_elems > 1 ? "]" : "");
                 } break;
                 case field_object: {
-                   // columndoc_obj_t *doc = vec_get(&column->values, valueIdx, columndoc_obj_t);
+                   // struct columndoc_obj *doc = vec_get(&column->values, valueIdx, struct columndoc_obj);
                   //  print_object(file, doc, encode);
                     const struct vector *column = vec_get(&columnTable->values, array_idx, struct vector);
                     fprintf(file, "%s", column->num_elems > 1 ? "[" : "");
                     for (size_t i = 0; i < column->num_elems; i++) {
-                        const columndoc_obj_t *object = vec_get(column, i, columndoc_obj_t);
+                        const struct columndoc_obj *object = vec_get(column, i, struct columndoc_obj);
                         if(!print_object(file, err, object, dic)) {
                             return false;
                         }
@@ -676,7 +676,7 @@ static bool print_array_objects(FILE *file, struct err *err, const char *type_na
     return true;
 }
 
-static bool print_object(FILE *file, struct err *err, const columndoc_obj_t *object, struct strdic *dic)
+static bool print_object(FILE *file, struct err *err, const struct columndoc_obj *object, struct strdic *dic)
 {
     char **parentKey = carbon_strdic_extract(dic, &object->parent_key, 1);
     fprintf(file, "{ ");
@@ -735,19 +735,19 @@ bool carbon_columndoc_drop(struct columndoc *doc)
     NG5_NOT_IMPLEMENTED
 }
 
-static void object_array_key_columns_create(struct vector ofType(carbon_columndoc_columngroup_t) *columns)
+static void object_array_key_columns_create(struct vector ofType(struct columndoc_group) *columns)
 {
-    carbon_vec_create(columns, NULL, sizeof(carbon_columndoc_columngroup_t), 20000);
+    carbon_vec_create(columns, NULL, sizeof(struct columndoc_group), 20000);
 }
 
-static void object_array_key_columns_drop(struct vector ofType(carbon_columndoc_columngroup_t) *columns)
+static void object_array_key_columns_drop(struct vector ofType(struct columndoc_group) *columns)
 {
     for (size_t i = 0; i < columns->num_elems; i++) {
-        carbon_columndoc_columngroup_t *array_columns = vec_get(columns, i, carbon_columndoc_columngroup_t);
+        struct columndoc_group *array_columns = vec_get(columns, i, struct columndoc_group);
         for (size_t j = 0; j < array_columns->columns.num_elems; j++) {
 
 
-            carbon_columndoc_column_t *column = vec_get(&array_columns->columns, j, carbon_columndoc_column_t);
+            struct columndoc_column *column = vec_get(&array_columns->columns, j, struct columndoc_column);
 
             struct vector ofType(u32) *array_indices = &column->array_positions;
             struct vector ofType(struct vector ofType(<T>)) *values_for_indicies = &column->values;
@@ -759,7 +759,7 @@ static void object_array_key_columns_drop(struct vector ofType(carbon_columndoc_
                 struct vector ofType(<T>) *values_for_index = vec_get(values_for_indicies, k, struct vector);
                 if (column->type == field_object) {
                     for (size_t l = 0; l < values_for_index->num_elems; l++) {
-                        columndoc_obj_t *nested_object = vec_get(values_for_index, l, columndoc_obj_t);
+                        struct columndoc_obj *nested_object = vec_get(values_for_index, l, struct columndoc_obj);
                         object_meta_model_free(nested_object);
                     }
                 }
@@ -796,20 +796,20 @@ static const char *get_type_name(struct err *err, field_e type)
     }
 }
 
-static carbon_columndoc_column_t *object_array_key_columns_find_or_new(struct vector ofType(carbon_columndoc_columngroup_t) *columns,
+static struct columndoc_column *object_array_key_columns_find_or_new(struct vector ofType(struct columndoc_group) *columns,
                                                             field_sid_t array_key, field_sid_t nested_object_entry_key,
                                                             field_e nested_object_entry_type)
 {
-    carbon_columndoc_columngroup_t *key_columns;
-    carbon_columndoc_column_t *key_column, *new_column;
+    struct columndoc_group *key_columns;
+    struct columndoc_column *key_column, *new_column;
 
     for (size_t i = 0; i < columns->num_elems; i++) {
         /** Find object array pair having the key `key` */
-        key_columns = vec_get(columns, i, carbon_columndoc_columngroup_t);
+        key_columns = vec_get(columns, i, struct columndoc_group);
         if (key_columns->key == array_key) {
             /** In case such a pair is found, find column that matches the desired type */
             for (size_t j = 0; j < key_columns->columns.num_elems; j++) {
-                key_column = vec_get(&key_columns->columns, j, carbon_columndoc_column_t);
+                key_column = vec_get(&key_columns->columns, j, struct columndoc_column);
                 if (key_column->key_name == nested_object_entry_key && key_column->type == nested_object_entry_type) {
                     /** Column for the object array with the desired key, the nested object entry with the desired key
                      * and a matching type is found */
@@ -823,12 +823,12 @@ static carbon_columndoc_column_t *object_array_key_columns_find_or_new(struct ve
     }
     /** In this case, the array key is also not known. Create a new one array entry with the fitting key column and
      * return that newly created column */
-    key_columns = VECTOR_NEW_AND_GET(columns, carbon_columndoc_columngroup_t);
+    key_columns = VECTOR_NEW_AND_GET(columns, struct columndoc_group);
     key_columns->key = array_key;
-    carbon_vec_create(&key_columns->columns, NULL, sizeof(carbon_columndoc_column_t), 10);
+    carbon_vec_create(&key_columns->columns, NULL, sizeof(struct columndoc_column), 10);
 
 objectArrayKeyColumnsNewColumn:
-    new_column = VECTOR_NEW_AND_GET(&key_columns->columns, carbon_columndoc_column_t);
+    new_column = VECTOR_NEW_AND_GET(&key_columns->columns, struct columndoc_column);
     new_column->key_name = nested_object_entry_key;
     new_column->type = nested_object_entry_type;
     carbon_vec_create(&new_column->values, NULL, sizeof(struct vector), 10);
@@ -837,8 +837,8 @@ objectArrayKeyColumnsNewColumn:
     return new_column;
 }
 
-static bool object_array_key_column_push(carbon_columndoc_column_t *col, struct err *err, const struct doc_entries *entry, u32 array_idx,
-                                     struct strdic *dic, columndoc_obj_t *model)
+static bool object_array_key_column_push(struct columndoc_column *col, struct err *err, const struct doc_entries *entry, u32 array_idx,
+                                     struct strdic *dic, struct columndoc_obj *model)
 {
     assert(col->type == entry->type);
 
@@ -888,7 +888,7 @@ static bool object_array_key_column_push(carbon_columndoc_column_t *col, struct 
 
         for (size_t array_idx = 0; array_idx < num_elements; array_idx++)
         {
-            columndoc_obj_t *nested_object = VECTOR_NEW_AND_GET(values_for_entry, columndoc_obj_t);
+            struct columndoc_obj *nested_object = VECTOR_NEW_AND_GET(values_for_entry, struct columndoc_obj);
             setup_object(nested_object, model->parent, *array_key, array_idx);
             if (!import_object(nested_object, err, vec_get(&entry->values, array_idx, struct doc_obj), dic)) {
                 return false;
@@ -903,7 +903,7 @@ static bool object_array_key_column_push(carbon_columndoc_column_t *col, struct 
     return true;
 }
 
-static void setup_object(columndoc_obj_t *model, struct columndoc *parent, field_sid_t key, size_t idx)
+static void setup_object(struct columndoc_obj *model, struct columndoc *parent, field_sid_t key, size_t idx)
 {
     model->parent = parent;
     model->parent_key = key;
@@ -985,12 +985,12 @@ static void setup_object(columndoc_obj_t *model, struct columndoc *parent, field
     carbon_vec_create(&model->float_array_idxs, NULL, sizeof(struct vector), 10);
     carbon_vec_create(&model->string_array_idxs, NULL, sizeof(struct vector), 50);
 
-    carbon_vec_create(&model->obj_prop_vals, NULL, sizeof(columndoc_obj_t), 10);
+    carbon_vec_create(&model->obj_prop_vals, NULL, sizeof(struct columndoc_obj), 10);
 
     object_array_key_columns_create(&model->obj_array_props);
 }
 
-static bool object_put_primitive(columndoc_obj_t *columndoc, struct err *err, const struct doc_entries *entry, struct strdic *dic,
+static bool object_put_primitive(struct columndoc_obj *columndoc, struct err *err, const struct doc_entries *entry, struct strdic *dic,
                                const field_sid_t *key_id)
 {
     switch(entry->type) {
@@ -1045,11 +1045,11 @@ static bool object_put_primitive(columndoc_obj_t *columndoc, struct err *err, co
         carbon_strdic_free(dic, value);
     } break;
     case field_object: {
-        columndoc_obj_t template, *nested_object;
+        struct columndoc_obj template, *nested_object;
         size_t position = carbon_vec_length(&columndoc->obj_prop_keys);
         carbon_vec_push(&columndoc->obj_prop_keys, key_id, 1);
         carbon_vec_push(&columndoc->obj_prop_vals, &template, 1);
-        nested_object = vec_get(&columndoc->obj_prop_vals, position, columndoc_obj_t);
+        nested_object = vec_get(&columndoc->obj_prop_vals, position, struct columndoc_obj);
         setup_object(nested_object, columndoc->parent, *key_id, 0);
         if (!import_object(nested_object, err, vec_get(&entry->values, 0, struct doc_obj), dic)) {
             return false;
@@ -1073,7 +1073,7 @@ static void object_push_array(struct vector ofType(Vector ofType(<T>)) *values, 
     carbon_vec_push(key_vector, &key_id, 1);
 }
 
-static bool object_put_array(columndoc_obj_t *model, struct err *err, const struct doc_entries *entry, struct strdic *dic, const field_sid_t *key_id)
+static bool object_put_array(struct columndoc_obj *model, struct err *err, const struct doc_entries *entry, struct strdic *dic, const field_sid_t *key_id)
 {
     // TODO: format for array, sort by keys, sort by values!
     NG5_UNUSED(dic);
@@ -1149,7 +1149,7 @@ static bool object_put_array(columndoc_obj_t *model, struct err *err, const stru
             for (size_t pair_idx = 0; pair_idx < object->entries.num_elems; pair_idx++) {
                 const struct doc_entries *pair = vec_get(&object->entries, pair_idx, struct doc_entries);
                 carbon_strdic_locate_fast(&nested_object_key_name, dic, (char *const *) &pair->key, 1);
-                carbon_columndoc_column_t *key_column = object_array_key_columns_find_or_new(&model->obj_array_props, *key_id,
+                struct columndoc_column *key_column = object_array_key_columns_find_or_new(&model->obj_array_props, *key_id,
                                                                                       *nested_object_key_name, pair->type);
                 if (!object_array_key_column_push(key_column, err, pair, array_idx, dic, model)) {
                     return false;
@@ -1167,7 +1167,7 @@ static bool object_put_array(columndoc_obj_t *model, struct err *err, const stru
     return true;
 }
 
-static bool object_put(columndoc_obj_t *model, struct err *err, const struct doc_entries *entry, struct strdic *dic)
+static bool object_put(struct columndoc_obj *model, struct err *err, const struct doc_entries *entry, struct strdic *dic)
 {
     field_sid_t *key_id;
     enum EntryType { ENTRY_TYPE_NULL, ENTRY_TYPE_PRIMITIVE, ENTRY_TYPE_ARRAY } entryType;
@@ -1200,7 +1200,7 @@ static bool object_put(columndoc_obj_t *model, struct err *err, const struct doc
     return true;
 }
 
-static bool import_object(columndoc_obj_t *dst, struct err *err, const struct doc_obj *doc, struct strdic *dic)
+static bool import_object(struct columndoc_obj *dst, struct err *err, const struct doc_obj *doc, struct strdic *dic)
 {
     const struct vector ofType(struct doc_entries) *objectEntries = carbon_doc_get_entries(doc);
     const struct doc_entries *entries = vec_all(objectEntries, struct doc_entries);

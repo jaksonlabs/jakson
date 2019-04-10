@@ -27,9 +27,9 @@
 NG5_EXPORT(bool)
 carbon_compressor_huffman_init(carbon_compressor_t *self)
 {
-        self->extra = malloc(sizeof(carbon_huffman_t));
+        self->extra = malloc(sizeof(struct pack_huffman));
         if (self->extra != NULL) {
-                carbon_huffman_t *encoder = (carbon_huffman_t *) self->extra;
+                struct pack_huffman *encoder = (struct pack_huffman *) self->extra;
                 carbon_huffman_create(encoder);
                 return true;
         }
@@ -44,10 +44,10 @@ carbon_compressor_huffman_cpy(const carbon_compressor_t *self, carbon_compressor
         NG5_CHECK_TAG(self->tag, NG5_COMPRESSOR_HUFFMAN);
 
         *dst = *self;
-        dst->extra = malloc(sizeof(carbon_huffman_t));
+        dst->extra = malloc(sizeof(struct pack_huffman));
         if (dst->extra != NULL) {
-                carbon_huffman_t *self_encoder = (carbon_huffman_t *) self->extra;
-                carbon_huffman_t *dst_encoder = (carbon_huffman_t *) dst->extra;
+                struct pack_huffman *self_encoder = (struct pack_huffman *) self->extra;
+                struct pack_huffman *dst_encoder = (struct pack_huffman *) dst->extra;
                 return carbon_huffman_cpy(dst_encoder, self_encoder);
         }
         else {
@@ -60,7 +60,7 @@ carbon_compressor_huffman_drop(carbon_compressor_t *self)
 {
         NG5_CHECK_TAG(self->tag, NG5_COMPRESSOR_HUFFMAN);
 
-        carbon_huffman_t *encoder = (carbon_huffman_t *) self->extra;
+        struct pack_huffman *encoder = (struct pack_huffman *) self->extra;
         carbon_huffman_drop(encoder);
 
         return true;
@@ -68,7 +68,7 @@ carbon_compressor_huffman_drop(carbon_compressor_t *self)
 
 bool huffman_dump_dictionary(FILE *file, struct memfile *memfile)
 {
-        carbon_huffman_entry_info_t entry_info;
+        struct pack_huffman_info entry_info;
         offset_t offset;
 
         while ((*NG5_MEMFILE_PEEK(memfile, char)) == MARKER_SYMBOL_HUFFMAN_DIC_ENTRY) {
@@ -100,7 +100,7 @@ bool huffman_dump_string_table_entry(FILE *file, struct memfile *memfile)
         NG5_UNUSED(file);
         NG5_UNUSED(memfile);
 
-        carbon_huffman_encoded_str_info_t info;
+        struct pack_huffman_str_info info;
 
         carbon_huffman_read_string(&info, memfile);
 
@@ -121,7 +121,7 @@ carbon_compressor_huffman_write_extra(carbon_compressor_t *self, struct memfile 
 {
         NG5_CHECK_TAG(self->tag, NG5_COMPRESSOR_HUFFMAN);
 
-        carbon_huffman_t *encoder = (carbon_huffman_t *) self->extra;
+        struct pack_huffman *encoder = (struct pack_huffman *) self->extra;
 
         carbon_huffman_build(encoder, strings);
         carbon_huffman_serialize_dic(dst, encoder, MARKER_SYMBOL_HUFFMAN_DIC_ENTRY);
@@ -171,7 +171,7 @@ bool carbon_compressor_huffman_encode_string(carbon_compressor_t *self, struct m
 {
         NG5_CHECK_TAG(self->tag, NG5_COMPRESSOR_HUFFMAN);
 
-        carbon_huffman_t *encoder = (carbon_huffman_t *) self->extra;
+        struct pack_huffman *encoder = (struct pack_huffman *) self->extra;
         bool status = carbon_huffman_encode_one(dst, encoder, string);
         carbon_error_cpy(err, &encoder->err);
 

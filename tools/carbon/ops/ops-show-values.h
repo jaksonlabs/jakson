@@ -13,7 +13,7 @@
 typedef struct
 {
     field_sid_t key;
-    carbon_basic_type_e type;
+    enum field_type type;
 
     union {
         struct vector ofType(field_sid_t) string_values;

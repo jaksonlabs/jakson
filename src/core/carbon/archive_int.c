@@ -153,7 +153,7 @@ carbon_int_get_value_type_of_char(char c)
     return field_null;
 }
 
-field_e // TODO: check whether 'field_e' can be replaced by 'carbon_basic_type_e'
+field_e // TODO: check whether 'field_e' can be replaced by 'enum field_type'
 carbon_int_marker_to_field_type(char symbol)
 {
     switch (symbol) {
@@ -202,7 +202,7 @@ carbon_int_marker_to_field_type(char symbol)
     }
 }
 
-carbon_basic_type_e
+enum field_type
 carbon_int_field_type_to_basic_type(field_e type)
 {
     switch (type) {
