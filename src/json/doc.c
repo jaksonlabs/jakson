@@ -35,7 +35,7 @@ static bool print_value(FILE *file, field_e type, const struct vector ofType(<T>
 
 static void print_object(FILE *file, const carbon_doc_obj_t *model);
 
-static bool import_json_object(carbon_doc_obj_t *target, struct err *err, const carbon_json_ast_node_object_t *json_obj);
+static bool import_json_object(carbon_doc_obj_t *target, struct err *err, const struct json_object_t *json_obj);
 
 static void sort_columndoc_entries(columndoc_obj_t *columndoc);
 
@@ -278,13 +278,13 @@ bool carbon_doc_obj_push_object(carbon_doc_obj_t **out, struct doc_entries *entr
     return true;
 }
 
-static field_e value_type_for_json_number(bool *success, struct err *err, const carbon_json_ast_node_number_t *number)
+static field_e value_type_for_json_number(bool *success, struct err *err, const struct json_number *number)
 {
     *success = true;
     switch(number->value_type) {
-    case NG5_JSON_AST_NODE_NUMBER_VALUE_TYPE_REAL_NUMBER:
+    case JSON_NUMBER_FLOAT:
         return field_float;
-    case NG5_JSON_AST_NODE_NUMBER_VALUE_TYPE_UNSIGNED_INTEGER: {
+    case JSON_NUMBER_UNSIGNED: {
         u64 test = number->value.unsigned_integer;
         if (test <= NG5_LIMITS_UINT8_MAX) {
             return field_uint8;
@@ -296,7 +296,7 @@ static field_e value_type_for_json_number(bool *success, struct err *err, const 
             return field_uint64;
         }
     }
-    case NG5_JSON_AST_NODE_NUMBER_VALUE_TYPE_SIGNED_INTEGER: {
+    case JSON_NUMBER_SIGNED: {
         i64 test = number->value.signed_integer;
         if (test >= NG5_LIMITS_INT8_MIN && test <= NG5_LIMITS_INT8_MAX) {
             return field_int8;
@@ -315,14 +315,14 @@ static field_e value_type_for_json_number(bool *success, struct err *err, const 
     }
 }
 
-static void import_json_object_string_prop(carbon_doc_obj_t *target, const char *key, const carbon_json_ast_node_string_t *string)
+static void import_json_object_string_prop(carbon_doc_obj_t *target, const char *key, const struct json_string *string)
 {
     struct doc_entries *entry;
     carbon_doc_obj_add_key(&entry, target, key, field_string);
     carbon_doc_obj_push_primtive(entry, string->value);
 }
 
-static bool import_json_object_number_prop(carbon_doc_obj_t *target, struct err *err, const char *key, const carbon_json_ast_node_number_t *number)
+static bool import_json_object_number_prop(carbon_doc_obj_t *target, struct err *err, const char *key, const struct json_number *number)
 {
     struct doc_entries *entry;
     bool success;
@@ -349,7 +349,7 @@ static void import_json_object_null_prop(carbon_doc_obj_t *target, const char *k
     carbon_doc_obj_push_primtive(entry, NULL);
 }
 
-static bool import_json_object_object_prop(carbon_doc_obj_t *target, struct err *err, const char *key, const carbon_json_ast_node_object_t *object)
+static bool import_json_object_object_prop(carbon_doc_obj_t *target, struct err *err, const char *key, const struct json_object_t *object)
 {
     struct doc_entries *entry;
     carbon_doc_obj_t *nested_object = NULL;
@@ -358,7 +358,7 @@ static bool import_json_object_object_prop(carbon_doc_obj_t *target, struct err 
     return import_json_object(nested_object, err, object);
 }
 
-static bool import_json_object_array_prop(carbon_doc_obj_t *target, struct err *err, const char *key, const carbon_json_ast_node_array_t *array)
+static bool import_json_object_array_prop(carbon_doc_obj_t *target, struct err *err, const char *key, const struct json_array *array)
 {
     struct doc_entries *entry;
 
@@ -371,7 +371,7 @@ static bool import_json_object_array_prop(carbon_doc_obj_t *target, struct err *
         field_e field_type;
 
         for (size_t i = 0; i < num_elements && array_data_type == JSON_VALUE_NULL; i++) {
-            const carbon_json_ast_node_element_t *element = vec_get(&array->elements.elements, i, carbon_json_ast_node_element_t);
+            const struct json_element *element = vec_get(&array->elements.elements, i, struct json_element);
             array_data_type = element->value.value_type;
         }
 
@@ -386,7 +386,7 @@ static bool import_json_object_array_prop(carbon_doc_obj_t *target, struct err *
             /** find smallest fitting physical number type */
             field_e array_number_type = field_null;
             for (size_t i = 0; i < num_elements; i++) {
-                const carbon_json_ast_node_element_t *element = vec_get(&array->elements.elements, i, carbon_json_ast_node_element_t);
+                const struct json_element *element = vec_get(&array->elements.elements, i, struct json_element);
                 if (NG5_UNLIKELY(element->value.value_type == JSON_VALUE_NULL)) {
                     continue;
                 } else {
@@ -461,7 +461,7 @@ static bool import_json_object_array_prop(carbon_doc_obj_t *target, struct err *
 
         for (size_t i = 0; i < num_elements; i++)
         {
-            const carbon_json_ast_node_element_t *element = vec_get(&array->elements.elements, i, carbon_json_ast_node_element_t);
+            const struct json_element *element = vec_get(&array->elements.elements, i, struct json_element);
             enum json_value_type ast_node_data_type = element->value.value_type;
 
             switch (field_type) {
@@ -535,12 +535,12 @@ static bool import_json_object_array_prop(carbon_doc_obj_t *target, struct err *
                 case field_float: {
                     carbon_number_t value = NG5_NULL_FLOAT;
                     if (ast_node_data_type != JSON_VALUE_NULL) {
-                        carbon_json_ast_node_number_value_type_e element_number_type = element->value.value.number->value_type;
-                        if (element_number_type == NG5_JSON_AST_NODE_NUMBER_VALUE_TYPE_REAL_NUMBER) {
+                        enum json_number_type element_number_type = element->value.value.number->value_type;
+                        if (element_number_type == JSON_NUMBER_FLOAT) {
                             value = element->value.value.number->value.float_number;
-                        } else if (element_number_type == NG5_JSON_AST_NODE_NUMBER_VALUE_TYPE_UNSIGNED_INTEGER) {
+                        } else if (element_number_type == JSON_NUMBER_UNSIGNED) {
                             value = element->value.value.number->value.unsigned_integer;
-                        } else if (element_number_type == NG5_JSON_AST_NODE_NUMBER_VALUE_TYPE_SIGNED_INTEGER) {
+                        } else if (element_number_type == JSON_NUMBER_SIGNED) {
                             value = element->value.value.number->value.signed_integer;
                         } else {
                             carbon_print_error_and_die(NG5_ERR_INTERNALERR) /** type mismatch */
@@ -581,10 +581,10 @@ static bool import_json_object_array_prop(carbon_doc_obj_t *target, struct err *
     return true;
 }
 
-static bool import_json_object(carbon_doc_obj_t *target, struct err *err, const carbon_json_ast_node_object_t *json_obj)
+static bool import_json_object(carbon_doc_obj_t *target, struct err *err, const struct json_object_t *json_obj)
 {
     for (size_t i = 0; i < json_obj->value->members.num_elems; i++) {
-        carbon_json_ast_node_member_t *member = vec_get(&json_obj->value->members, i, carbon_json_ast_node_member_t);
+        struct json_prop *member = vec_get(&json_obj->value->members, i, struct json_prop);
         enum json_value_type value_type = member->value.value.value_type;
         switch (value_type) {
         case JSON_VALUE_STRING:
@@ -621,7 +621,7 @@ static bool import_json_object(carbon_doc_obj_t *target, struct err *err, const 
     return true;
 }
 
-static bool import_json(carbon_doc_obj_t *target, struct err *err, const carbon_json_t *json, struct doc_entries *partition)
+static bool import_json(carbon_doc_obj_t *target, struct err *err, const struct json *json, struct doc_entries *partition)
 {
     enum json_value_type value_type = json->element->value.value_type;
     switch (value_type) {
@@ -631,16 +631,16 @@ static bool import_json(carbon_doc_obj_t *target, struct err *err, const carbon_
         }
         break;
     case JSON_VALUE_ARRAY: {
-        const struct vector ofType(carbon_json_ast_node_element_t) *arrayContent = &json->element->value.value.array->elements.elements;
+        const struct vector ofType(struct json_element) *arrayContent = &json->element->value.value.array->elements.elements;
         if (!carbon_vec_is_empty(arrayContent)) {
-            const carbon_json_ast_node_element_t *first = vec_get(arrayContent, 0, carbon_json_ast_node_element_t);
+            const struct json_element *first = vec_get(arrayContent, 0, struct json_element);
             switch (first->value.value_type) {
             case JSON_VALUE_OBJECT:
                 if (!import_json_object(target, err, first->value.value.object)) {
                     return false;
                 }
                 for (size_t i = 1; i < arrayContent->num_elems; i++) {
-                    const carbon_json_ast_node_element_t *element = vec_get(arrayContent, i, carbon_json_ast_node_element_t);
+                    const struct json_element *element = vec_get(arrayContent, i, struct json_element);
                     carbon_doc_obj_t *nested;
                     carbon_doc_obj_push_object(&nested, partition);
                     if (!import_json_object(nested, err, element->value.value.object)) {
@@ -672,7 +672,7 @@ static bool import_json(carbon_doc_obj_t *target, struct err *err, const carbon_
     return true;
 }
 
-carbon_doc_obj_t *carbon_doc_bulk_add_json(struct doc_entries *partition, carbon_json_t *json)
+carbon_doc_obj_t *carbon_doc_bulk_add_json(struct doc_entries *partition, struct json *json)
 {
     if (!partition || !json) {
         return NULL;

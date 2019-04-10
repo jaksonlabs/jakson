@@ -104,7 +104,7 @@ NG5_EXPORT(bool)
 carbon_memfile_read_bit(struct memfile *file);
 
 NG5_EXPORT(bool)
-carbon_memfile_end_bit_mode(NG5_NULLABLE size_t *num_bytes_written, struct memfile *file);
+carbon_memfile_end_bit_mode(size_t *num_bytes_written, struct memfile *file);
 
 NG5_EXPORT(void *)
 carbon_memfile_current_pos(struct memfile *file, offset_t nbytes);

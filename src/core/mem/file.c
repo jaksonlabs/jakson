@@ -249,7 +249,7 @@ bool carbon_memfile_read_bit(struct memfile *file)
     }
 }
 
-bool carbon_memfile_end_bit_mode(NG5_NULLABLE size_t *num_bytes_written, struct memfile *file)
+bool carbon_memfile_end_bit_mode(size_t *num_bytes_written, struct memfile *file)
 {
     NG5_NON_NULL_OR_ERROR(file);
     file->bit_mode = false;

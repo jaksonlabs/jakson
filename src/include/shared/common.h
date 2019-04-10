@@ -276,9 +276,6 @@ carbon_basic_type_to_system_type_str(carbon_basic_type_e t)
 #define ofType(x) /** a convenience way to write types for generic containers; no effect than just a visual one */
 #define ofMapping(x, y) /** a convenience way to write types for generic containers; no effect than just a visual one */
 
-#define NG5_NULLABLE /** parameters to functions marked with this tag can be NULL and will be ignored; is attached
-                    to a return value (typically a pointer), the this means the function may return NULL. */
-
 #define OPTIONAL_CALL(x, func, ...) if(x && x->func) { x->func(__VA_ARGS__); }
 
 #define NG5_MAX(a, b)                                                                                               \

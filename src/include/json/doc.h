@@ -85,7 +85,7 @@ NG5_EXPORT(bool) carbon_doc_obj_push_object(carbon_doc_obj_t **out, struct doc_e
 
 NG5_EXPORT(struct doc_entries *)carbon_doc_bulk_new_entries(struct doc_bulk *dst);
 
-NG5_EXPORT(carbon_doc_obj_t *)carbon_doc_bulk_add_json(struct doc_entries *partition, carbon_json_t *json);
+NG5_EXPORT(carbon_doc_obj_t *)carbon_doc_bulk_add_json(struct doc_entries *partition, struct json *json);
 
 NG5_EXPORT(carbon_doc_obj_t *)carbon_doc_entries_get_root(const struct doc_entries *partition);
 

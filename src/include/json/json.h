@@ -24,23 +24,24 @@
 NG5_BEGIN_DECL
 
 /** forwarded */
-typedef struct carbon_json carbon_json_t;
 
-typedef struct carbon_json_ast_node_element carbon_json_ast_node_element_t;
+struct json;
 
-typedef struct carbon_json_ast_node_object carbon_json_ast_node_object_t;
+struct json_element;
 
-typedef struct carbon_json_ast_node_array carbon_json_ast_node_array_t;
+struct json_object_t;
 
-typedef struct carbon_json_ast_node_string carbon_json_ast_node_string_t;
+struct json_array;
 
-typedef struct carbon_json_ast_node_number carbon_json_ast_node_number_t;
+struct json_string;
 
-typedef struct carbon_json_ast_node_members carbon_json_ast_node_members_t;
+struct json_number;
 
-typedef struct carbon_json_ast_node_member carbon_json_ast_node_member_t;
+struct json_members;
 
-typedef struct carbon_json_ast_node_elements carbon_json_ast_node_elements_t;
+struct json_prop;
+
+struct json_elements;
 
 enum json_token_type {
         OBJECT_OPEN,
@@ -84,21 +85,6 @@ struct json_parser {
         struct err err;
 };
 
-NG5_EXPORT(bool) carbon_json_tokenizer_init(struct json_tokenizer *tokenizer, const char *input);
-
-NG5_EXPORT(const struct json_token *)carbon_json_tokenizer_next(struct json_tokenizer *tokenizer);
-
-NG5_EXPORT(void) carbon_json_token_dup(struct json_token *dst, const struct json_token *src);
-
-NG5_EXPORT(void) carbon_json_token_print(FILE *file, const struct json_token *token);
-
-NG5_EXPORT(bool) carbon_json_parser_create(struct json_parser *parser, struct doc_bulk *partition);
-
-NG5_EXPORT(bool) carbon_json_parse(NG5_NULLABLE carbon_json_t *json, NG5_NULLABLE struct json_err *error_desc,
-        struct json_parser *parser, const char *input);
-
-NG5_EXPORT(bool) carbon_json_test_doc(struct err *err, carbon_json_t *json);
-
 enum json_parent {
         JSON_PARENT_OBJECT,
         JSON_PARENT_MEMBER,
@@ -115,92 +101,105 @@ enum json_value_type {
         JSON_VALUE_NULL
 };
 
-typedef struct carbon_json {
-        carbon_json_ast_node_element_t *element;
+struct json {
+        struct json_element *element;
         struct err err;
-} carbon_json_t;
+};
 
-typedef struct carbon_json_ast_node_value {
-        carbon_json_ast_node_element_t *parent;
+struct json_node_value {
+        struct json_element *parent;
 
         enum json_value_type value_type;
 
         union {
-                carbon_json_ast_node_object_t *object;
-                carbon_json_ast_node_array_t *array;
-                carbon_json_ast_node_string_t *string;
-                carbon_json_ast_node_number_t *number;
+                struct json_object_t *object;
+                struct json_array *array;
+                struct json_string *string;
+                struct json_number *number;
                 void *ptr;
         } value;
-} carbon_json_ast_node_value_t;
+};
 
-typedef struct carbon_json_ast_node_object {
-        carbon_json_ast_node_value_t *parent;
-        carbon_json_ast_node_members_t *value;
-} carbon_json_ast_node_object_t;
+struct json_object_t {
+        struct json_node_value *parent;
+        struct json_members *value;
+};
 
-typedef struct carbon_json_ast_node_element {
+struct json_element {
         enum json_parent parent_type;
 
         union {
-                carbon_json_t *json;
-                carbon_json_ast_node_member_t *member;
-                carbon_json_ast_node_elements_t *elements;
+                struct json *json;
+                struct json_prop *member;
+                struct json_elements *elements;
                 void *ptr;
         } parent;
 
-        carbon_json_ast_node_value_t value;
+        struct json_node_value value;
 
-} carbon_json_ast_node_element_t;
+};
 
-typedef struct carbon_json_ast_node_string {
-        carbon_json_ast_node_member_t *parent;
+struct json_string {
+        struct json_prop *parent;
         char *value;
-} carbon_json_ast_node_string_t;
+};
 
-typedef struct carbon_json_ast_node_member {
-        carbon_json_ast_node_members_t *parent;
-        carbon_json_ast_node_string_t key;
-        carbon_json_ast_node_element_t value;
-} carbon_json_ast_node_member_t;
+struct json_prop {
+        struct json_members *parent;
+        struct json_string key;
+        struct json_element value;
+};
 
-typedef struct carbon_json_ast_node_members {
-        carbon_json_ast_node_object_t *parent;
-        struct vector ofType(carbon_json_ast_node_member_t) members;
-} carbon_json_ast_node_members_t;
+struct json_members {
+        struct json_object_t *parent;
+        struct vector ofType(struct json_prop) members;
+};
 
-typedef struct carbon_json_ast_node_elements {
-        carbon_json_ast_node_array_t *parent;
-        struct vector ofType(carbon_json_ast_node_element_t) elements;
-} carbon_json_ast_node_elements_t;
+struct json_elements {
+        struct json_array *parent;
+        struct vector ofType(struct json_element) elements;
+};
 
-typedef struct carbon_json_ast_node_array {
-        carbon_json_ast_node_value_t *parent;
-        carbon_json_ast_node_elements_t elements;
-} carbon_json_ast_node_array_t;
+struct json_array {
+        struct json_node_value *parent;
+        struct json_elements elements;
+};
 
-typedef enum {
-        NG5_JSON_AST_NODE_NUMBER_VALUE_TYPE_REAL_NUMBER,
-        NG5_JSON_AST_NODE_NUMBER_VALUE_TYPE_UNSIGNED_INTEGER,
-        NG5_JSON_AST_NODE_NUMBER_VALUE_TYPE_SIGNED_INTEGER
-} carbon_json_ast_node_number_value_type_e;
+enum json_number_type {
+        JSON_NUMBER_FLOAT, JSON_NUMBER_UNSIGNED, JSON_NUMBER_SIGNED
+};
 
-typedef struct carbon_json_ast_node_number {
-        carbon_json_ast_node_value_t *parent;
-        carbon_json_ast_node_number_value_type_e value_type;
+struct json_number {
+        struct json_node_value *parent;
+        enum json_number_type value_type;
 
         union {
                 float float_number;
                 i64 signed_integer;
                 u64 unsigned_integer;
         } value;
-} carbon_json_ast_node_number_t;
+};
 
-NG5_EXPORT(bool) carbon_json_drop(carbon_json_t *json);
+NG5_EXPORT(bool) carbon_json_tokenizer_init(struct json_tokenizer *tokenizer, const char *input);
 
-NG5_EXPORT(bool) carbon_json_print(FILE *file, carbon_json_t *json);
+NG5_EXPORT(const struct json_token *)carbon_json_tokenizer_next(struct json_tokenizer *tokenizer);
 
-NG5_DEFINE_GET_ERROR_FUNCTION(json, carbon_json_t, json);
+NG5_EXPORT(void) carbon_json_token_dup(struct json_token *dst, const struct json_token *src);
+
+NG5_EXPORT(void) carbon_json_token_print(FILE *file, const struct json_token *token);
+
+NG5_EXPORT(bool) carbon_json_parser_create(struct json_parser *parser, struct doc_bulk *partition);
+
+NG5_EXPORT(bool) carbon_json_parse(struct json *json, struct json_err *error_desc, struct json_parser *parser,
+        const char *input);
+
+NG5_EXPORT(bool) carbon_json_test_doc(struct err *err, struct json *json);
+
+NG5_EXPORT(bool) carbon_json_drop(struct json *json);
+
+NG5_EXPORT(bool) carbon_json_print(FILE *file, struct json *json);
+
+NG5_DEFINE_GET_ERROR_FUNCTION(json, struct json, json);
 
 NG5_END_DECL
 

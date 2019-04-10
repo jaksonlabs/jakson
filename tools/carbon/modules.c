@@ -47,7 +47,7 @@ static int convertJs2Model(Js2CabContext *context, FILE *file, bool optimizeForR
     NG5_CONSOLE_WRITE(file, "  - Parse JSON file%s", "");
     struct json_parser parser;
     struct json_err error_desc;
-    carbon_json_t jsonAst;
+    struct json jsonAst;
     carbon_json_parser_create(&parser, &context->context);
     int status = carbon_json_parse(&jsonAst, &error_desc, &parser, context->jsonContent);
     if (!status) {

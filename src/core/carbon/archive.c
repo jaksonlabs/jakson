@@ -211,7 +211,7 @@ NG5_EXPORT(bool) carbon_archive_stream_from_json(struct memblock **stream, struc
         struct doc_bulk bulk;
         struct doc_entries *partition;
         carbon_columndoc_t *columndoc;
-        carbon_json_t json;
+        struct json json;
 
         OPTIONAL_CALL(callback, begin_archive_stream_from_json)
 
