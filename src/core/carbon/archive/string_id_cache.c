@@ -17,7 +17,7 @@
 
 #include "hash/bernstein.h"
 #include "shared/error.h"
-#include "core/carbon/archive/string-id-cache.h"
+#include "core/carbon/archive/string_id_cache.h"
 
 typedef struct cache_entry cache_entry_t;
 

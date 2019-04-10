@@ -20,7 +20,7 @@
 
 #include "shared/common.h"
 #include "archive.h"
-#include "strid-iter.h"
+#include "strid_iter.h"
 #include "string-pred.h"
 #include "stdx/hash_table.h"
 

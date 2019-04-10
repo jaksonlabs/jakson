@@ -16,7 +16,7 @@
  */
 
 #include "core/carbon/archive/archive_iter.h"
-#include "core/carbon/archive/archive-internal.h"
+#include "core/carbon/archive/archive_internal.h"
 
 static bool
 init_object_from_memfile(carbon_archive_object_t *obj, memfile_t *memfile)

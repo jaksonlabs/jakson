@@ -16,7 +16,7 @@
  */
 
 #include <assert.h>
-#include "core/carbon/archive/archive-internal.h"
+#include "core/carbon/archive/archive_internal.h"
 
 void
 carbon_int_read_prop_offsets(carbon_archive_prop_offs_t *prop_offsets,

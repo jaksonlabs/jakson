@@ -1,5 +1,5 @@
-#include "core/carbon/archive/archive-internal.h"
-#include "core/carbon/archive/string-id-cache.h"
+#include "core/carbon/archive/archive_internal.h"
+#include "core/carbon/archive/string_id_cache.h"
 #include "core/carbon.h"
 
 #include "modules.h"

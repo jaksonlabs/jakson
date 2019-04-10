@@ -24,7 +24,7 @@
 #include "core/compressor/compressor.h"
 #include "core/json/columndoc.h"
 #include "io_context.h"
-#include "archive-internal.h"
+#include "archive_internal.h"
 
 CARBON_BEGIN_DECL
 

@@ -15,9 +15,9 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "core/carbon/archive/archive-internal.h"
+#include "core/carbon/archive/archive_internal.h"
 #include "core/carbon/archive/string-pred.h"
-#include "core/carbon/archive/string-id-cache.h"
+#include "core/carbon/archive/string_id_cache.h"
 #include "core/carbon/archive/query.h"
 
 typedef struct

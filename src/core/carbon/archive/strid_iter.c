@@ -15,7 +15,7 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "core/carbon/archive/strid-iter.h"
+#include "core/carbon/archive/strid_iter.h"
 
 CARBON_EXPORT(bool)
 carbon_strid_iter_open(carbon_strid_iter_t *it, struct err *err, carbon_archive_t *archive)
