@@ -32,13 +32,13 @@ struct spinlock
 };
 
 NG5_EXPORT(bool)
-carbon_spinlock_init(struct spinlock *spinlock);
+spinlock_init(struct spinlock *spinlock);
 
 NG5_EXPORT(bool)
-carbon_spinlock_acquire(struct spinlock *spinlock);
+spinlock_acquire(struct spinlock *spinlock);
 
 NG5_EXPORT(bool)
-carbon_spinlock_release(struct spinlock *spinlock);
+spinlock_release(struct spinlock *spinlock);
 
 NG5_END_DECL
 

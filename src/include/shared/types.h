@@ -95,22 +95,6 @@ typedef const char *      field_string_t;
 #define NG5_BOOLEAN_FALSE 0
 #define NG5_BOOLEAN_TRUE  1
 
-typedef enum carbon_field_type
-{
-    field_null          = 0,
-    field_bool          = 1,
-    field_int8          = 2,
-    field_int16         = 3,
-    field_int32         = 4,
-    field_int64         = 5,
-    field_uint8         = 6,
-    field_uint16        = 7,
-    field_uint32        = 8,
-    field_uint64        = 9,
-    field_float         = 10,
-    field_string        = 11,
-    field_object        = 12
-} field_e;
 
 #define GET_TYPE_SIZE(value_type)                                                                                       \
 ({                                                                                                                     \
@@ -156,7 +140,7 @@ typedef enum carbon_field_type
             value_size = sizeof(struct columndoc_obj);                                                               \
             break;                                                                                                     \
         default:                                                                                                       \
-        carbon_print_error_and_die(NG5_ERR_NOTYPE);                                                                 \
+        print_error_and_die(NG5_ERR_NOTYPE);                                                                 \
     }                                                                                                                  \
     value_size;                                                                                                        \
 })

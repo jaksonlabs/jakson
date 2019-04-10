@@ -25,34 +25,34 @@
 NG5_BEGIN_DECL
 
 NG5_EXPORT(bool)
-carbon_compressor_huffman_init(struct packer *self);
+compressor_huffman_init(struct packer *self);
 
 NG5_EXPORT(bool)
-carbon_compressor_huffman_cpy(const struct packer *self, struct packer *dst);
+compressor_huffman_cpy(const struct packer *self, struct packer *dst);
 
 NG5_EXPORT(bool)
-carbon_compressor_huffman_drop(struct packer *self);
+compressor_huffman_drop(struct packer *self);
 
 NG5_EXPORT(bool)
-carbon_compressor_huffman_write_extra(struct packer *self, struct memfile *dst,
+compressor_huffman_write_extra(struct packer *self, struct memfile *dst,
                                       const struct vector ofType (const char *) *strings);
 
 NG5_EXPORT(bool)
-carbon_compressor_huffman_read_extra(struct packer *self, FILE *src, size_t nbytes);
+compressor_huffman_read_extra(struct packer *self, FILE *src, size_t nbytes);
 
 NG5_EXPORT(bool)
-carbon_compressor_huffman_print_extra(struct packer *self, FILE *file, struct memfile *src);
+compressor_huffman_print_extra(struct packer *self, FILE *file, struct memfile *src);
 
 NG5_EXPORT(bool)
-carbon_compressor_huffman_print_encoded(struct packer *self, FILE *file, struct memfile *src,
+compressor_huffman_print_encoded(struct packer *self, FILE *file, struct memfile *src,
                                         u32 decompressed_strlen);
 
 NG5_EXPORT(bool)
-carbon_compressor_huffman_encode_string(struct packer *self, struct memfile *dst, struct err *err,
+compressor_huffman_encode_string(struct packer *self, struct memfile *dst, struct err *err,
                                         const char *string);
 
 NG5_EXPORT(bool)
-carbon_compressor_huffman_decode_string(struct packer *self, char *dst, size_t strlen, FILE *src);
+compressor_huffman_decode_string(struct packer *self, char *dst, size_t strlen, FILE *src);
 
 
 NG5_END_DECL

@@ -60,23 +60,22 @@ typedef uint64_t          offset_t;
 
 typedef unsigned char   u_char;
 
-enum field_type
+typedef enum field_type
 {
-    NG5_BASIC_TYPE_INT8,
-    NG5_BASIC_TYPE_INT16,
-    NG5_BASIC_TYPE_INT32,
-    NG5_BASIC_TYPE_INT64,
-    NG5_BASIC_TYPE_UINT8,
-    NG5_BASIC_TYPE_UINT16,
-    NG5_BASIC_TYPE_UINT32,
-    NG5_BASIC_TYPE_UINT64,
-    NG5_BASIC_TYPE_NUMBER,
-    NG5_BASIC_TYPE_STRING,
-    NG5_BASIC_TYPE_BOOLEAN,
-    NG5_BASIC_TYPE_NULL,
-    NG5_BASIC_TYPE_OBJECT,
-};
-
+        field_null          = 0,
+        field_bool          = 1,
+        field_int8          = 2,
+        field_int16         = 3,
+        field_int32         = 4,
+        field_int64         = 5,
+        field_uint8         = 6,
+        field_uint16        = 7,
+        field_uint32        = 8,
+        field_uint64        = 9,
+        field_float         = 10,
+        field_string        = 11,
+        field_object        = 12
+} field_e;
 
 enum access_mode
 {
@@ -88,27 +87,27 @@ enum access_mode
 #define NG5_FUNC_UNUSED __attribute__((unused))
 
 NG5_FUNC_UNUSED static const char *
-carbon_basic_type_to_json_type_str(enum field_type t)
+basic_type_to_json_type_str(enum field_type t)
 {
     switch (t) {
-    case NG5_BASIC_TYPE_INT8:
-    case NG5_BASIC_TYPE_INT16:
-    case NG5_BASIC_TYPE_INT32:
-    case NG5_BASIC_TYPE_INT64:
-    case NG5_BASIC_TYPE_UINT8:
-    case NG5_BASIC_TYPE_UINT16:
-    case NG5_BASIC_TYPE_UINT32:
-    case NG5_BASIC_TYPE_UINT64:
+    case field_int8:
+    case field_int16:
+    case field_int32:
+    case field_int64:
+    case field_uint8:
+    case field_uint16:
+    case field_uint32:
+    case field_uint64:
         return "integer";
-    case NG5_BASIC_TYPE_NUMBER:
-        return "number";
-    case NG5_BASIC_TYPE_STRING:
+    case field_float:
+        return "float";
+    case field_string:
         return "string";
-    case NG5_BASIC_TYPE_BOOLEAN:
+    case field_bool:
         return "boolean";
-    case NG5_BASIC_TYPE_NULL:
+    case field_null:
         return "null";
-    case NG5_BASIC_TYPE_OBJECT:
+    case field_object:
         return "object";
     default:
         return "(unknown)";
@@ -116,34 +115,34 @@ carbon_basic_type_to_json_type_str(enum field_type t)
 }
 
 NG5_FUNC_UNUSED static const char *
-carbon_basic_type_to_system_type_str(enum field_type t)
+basic_type_to_system_type_str(enum field_type t)
 {
     switch (t) {
-    case NG5_BASIC_TYPE_INT8:
+    case field_int8:
         return "int8";
-    case NG5_BASIC_TYPE_INT16:
+    case field_int16:
         return "int16";
-    case NG5_BASIC_TYPE_INT32:
+    case field_int32:
         return "int32";
-    case NG5_BASIC_TYPE_INT64:
+    case field_int64:
         return "int64";
-    case NG5_BASIC_TYPE_UINT8:
+    case field_uint8:
         return "uint8";
-    case NG5_BASIC_TYPE_UINT16:
+    case field_uint16:
         return "uint16";
-    case NG5_BASIC_TYPE_UINT32:
+    case field_uint32:
         return "uint32";
-    case NG5_BASIC_TYPE_UINT64:
+    case field_uint64:
         return "uint64";
-    case NG5_BASIC_TYPE_NUMBER:
+    case field_float:
         return "float32";
-    case NG5_BASIC_TYPE_STRING:
+    case field_string:
         return "string64";
-    case NG5_BASIC_TYPE_BOOLEAN:
+    case field_bool:
         return "bool8";
-    case NG5_BASIC_TYPE_NULL:
+    case field_null:
         return "void";
-    case NG5_BASIC_TYPE_OBJECT:
+    case field_object:
         return "variable";
     default:
         return "(unknown)";
@@ -153,9 +152,9 @@ carbon_basic_type_to_system_type_str(enum field_type t)
 #define NG5_NOT_IMPLEMENTED                                                                                         \
 {                                                                                                                      \
     struct err err;                                                                                                  \
-    carbon_error_init(&err);                                                                                           \
+    error_init(&err);                                                                                           \
     error(&err, NG5_ERR_NOTIMPLEMENTED)                                                                      \
-    carbon_error_print_and_abort(&err);                                                                                \
+    error_print_and_abort(&err);                                                                                \
     return false;                                                                                                      \
 };
 
@@ -286,9 +285,9 @@ carbon_basic_type_to_system_type_str(enum field_type t)
 {                                                                                                                      \
     if (!(x)) {                                                                                                        \
         struct err err;                                                                                              \
-        carbon_error_init(&err);                                                                                       \
+        error_init(&err);                                                                                       \
         error(&err, NG5_ERR_NULLPTR);                                                                        \
-        carbon_error_print(&err);                                                                                      \
+        error_print(&err);                                                                                      \
         return false;                                                                                                  \
     }                                                                                                                  \
 }

@@ -29,7 +29,7 @@ struct io_context
 
 
 NG5_EXPORT(bool)
-carbon_io_context_create(struct io_context **context, struct err *err, const char *file_path)
+io_context_create(struct io_context **context, struct err *err, const char *file_path)
 {
     NG5_NON_NULL_OR_ERROR(context);
     NG5_NON_NULL_OR_ERROR(err);
@@ -42,8 +42,8 @@ carbon_io_context_create(struct io_context **context, struct err *err, const cha
         return false;
     }
 
-    carbon_spinlock_init(&result->lock);
-    carbon_error_init(&result->err);
+    spinlock_init(&result->lock);
+    error_init(&result->err);
 
     result->file = fopen(file_path, "r");
 
@@ -58,16 +58,16 @@ carbon_io_context_create(struct io_context **context, struct err *err, const cha
 }
 
 NG5_EXPORT(struct err *)
-carbon_io_context_get_error(struct io_context *context)
+io_context_get_error(struct io_context *context)
 {
     return context ? &context->err : NULL;
 }
 
 NG5_EXPORT(FILE *)
-carbon_io_context_lock_and_access(struct io_context *context)
+io_context_lock_and_access(struct io_context *context)
 {
     if (context) {
-        carbon_spinlock_acquire(&context->lock);
+        spinlock_acquire(&context->lock);
         context->last_pos = ftell(context->file);
         return context->file;
     } else {
@@ -77,11 +77,11 @@ carbon_io_context_lock_and_access(struct io_context *context)
 }
 
 NG5_EXPORT(bool)
-carbon_io_context_unlock(struct io_context *context)
+io_context_unlock(struct io_context *context)
 {
     if (context) {
         fseek(context->file, context->last_pos, SEEK_SET);
-        carbon_spinlock_release(&context->lock);
+        spinlock_release(&context->lock);
         return true;
     } else {
         error(&context->err, NG5_ERR_NULLPTR);
@@ -90,7 +90,7 @@ carbon_io_context_unlock(struct io_context *context)
 }
 
 NG5_EXPORT(bool)
-carbon_io_context_drop(struct io_context *context)
+io_context_drop(struct io_context *context)
 {
     NG5_NON_NULL_OR_ERROR(context);
     NG5_OPTIONAL(context->file != NULL, fclose(context->file); context->file = NULL)

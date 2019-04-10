@@ -102,7 +102,7 @@ NG5_BEGIN_DECL
 #define NG5_ERR_HASTABLE_DESERIALERR 74    /** Unable to deserialize hash table from file */
 #define NG5_ERR_UNKNOWN_DIC_TYPE 75        /** Unknown string dictionary implementation requested */
 
-static const char *const _carbon_err_str[] = {
+static const char *const _err_str[] = {
     "No error",
     "Null pointer detected",
     "Function not implemented",
@@ -183,7 +183,7 @@ static const char *const _carbon_err_str[] = {
 
 #define NG5_ERRSTR_ILLEGAL_CODE "illegal error code"
 
-static const int _carbon_nerr_str = NG5_ARRAY_LENGTH(_carbon_err_str);
+static const int _nerr_str = NG5_ARRAY_LENGTH(_err_str);
 
 struct err
 {
@@ -194,49 +194,49 @@ struct err
 };
 
 NG5_EXPORT(bool)
-carbon_error_init(struct err *err);
+error_init(struct err *err);
 
 NG5_EXPORT(bool)
-carbon_error_cpy(struct err *dst, const struct err *src);
+error_cpy(struct err *dst, const struct err *src);
 
 NG5_EXPORT(bool)
-carbon_error_drop(struct err *err);
+error_drop(struct err *err);
 
 NG5_EXPORT(bool)
-carbon_error_set(struct err *err, int code, const char *file, u32 line);
+error_set(struct err *err, int code, const char *file, u32 line);
 
 NG5_EXPORT(bool)
-carbon_error_set_wdetails(struct err *err, int code, const char *file, u32 line, const char *details);
+error_set_wdetails(struct err *err, int code, const char *file, u32 line, const char *details);
 
 NG5_EXPORT(bool)
-carbon_error_str(const char **errstr, const char **file, u32 *line, bool *details, const char **detailsstr,
+error_str(const char **errstr, const char **file, u32 *line, bool *details, const char **detailsstr,
                  const struct err *err);
 
 NG5_EXPORT(bool)
-carbon_error_print(const struct err *err);
+error_print(const struct err *err);
 
 NG5_EXPORT(bool)
-carbon_error_print_and_abort(const struct err *err);
+error_print_and_abort(const struct err *err);
 
 #define error_OCCURRED(x)                   ((x)->err.code != NG5_ERR_NOERR)
 
 #define error(err, code)                     error_IF (true, err, code)
-#define error_IF(expr, err, code)            { if (expr) { carbon_error_set(err, code, __FILE__, __LINE__); } }
+#define error_IF(expr, err, code)            { if (expr) { error_set(err, code, __FILE__, __LINE__); } }
 #define error_IF_AND_RETURN(expr, err, code, retval) \
-                                                    { if (expr) { carbon_error_set(err, code, __FILE__, __LINE__);     \
+                                                    { if (expr) { error_set(err, code, __FILE__, __LINE__);     \
                                                                   return retval; } }
-#define error_WDETAILS(err, code, msg)       carbon_error_set_wdetails(err, code, __FILE__, __LINE__, msg);
+#define error_WDETAILS(err, code, msg)       error_set_wdetails(err, code, __FILE__, __LINE__, msg);
 
 #define NG5_PRINT_ERROR(code)                    NG5_PRINT_ERROR_IF(true, code)
-#define carbon_print_error_and_die(code)            { NG5_PRINT_ERROR(code); abort(); }
-#define NG5_PRINT_ERROR_AND_DIE_IF(expr, code)   { if(expr) { carbon_print_error_and_die(code) } }
+#define print_error_and_die(code)            { NG5_PRINT_ERROR(code); abort(); }
+#define NG5_PRINT_ERROR_AND_DIE_IF(expr, code)   { if(expr) { print_error_and_die(code) } }
 #define NG5_PRINT_ERROR_IF(expr, code)                                                                              \
 {                                                                                                                      \
     if (expr) {                                                                                                        \
         struct err err;                                                                                              \
-        carbon_error_init(&err);                                                                                       \
+        error_init(&err);                                                                                       \
         error(&err, code);                                                                                      \
-        carbon_error_print(&err);                                                                                      \
+        error_print(&err);                                                                                      \
     }                                                                                                                  \
 }
 
@@ -246,7 +246,7 @@ type_name##_get_error(struct err *err, const type *arg)                         
 {                                                                                                                      \
     NG5_NON_NULL_OR_ERROR(err)                                                                                      \
     NG5_NON_NULL_OR_ERROR(arg)                                                                                      \
-    carbon_error_cpy(err, &arg->err);                                                                                  \
+    error_cpy(err, &arg->err);                                                                                  \
     return true;                                                                                                       \
 }
 

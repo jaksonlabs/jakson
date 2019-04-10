@@ -18,21 +18,21 @@ iterate_object_vals(struct archive_value_vector *value_iter)
     struct prop_iter  prop_iter;
     struct err err;
 
-    status = carbon_archive_value_vector_is_of_objects(&is_object, value_iter);
+    status = archive_value_vector_is_of_objects(&is_object, value_iter);
     ASSERT_TRUE(status);
     ASSERT_TRUE(is_object);
 
-    status = carbon_archive_value_vector_get_length(&vector_length, value_iter);
+    status = archive_value_vector_get_length(&vector_length, value_iter);
     ASSERT_TRUE(status);
 
     for (u32 i = 0; i < vector_length; i++)
     {
-        status = carbon_archive_value_vector_get_object_at(&object, i, value_iter);
+        status = archive_value_vector_get_object_at(&object, i, value_iter);
         ASSERT_TRUE(status);
         printf("\t\t{type: object, id: %" PRIu64 "}\n", object.object_id);
 
 
-        status = carbon_archive_prop_iter_from_object(&prop_iter, NG5_ARCHIVE_ITER_MASK_ANY, &err, &object);
+        status = archive_prop_iter_from_object(&prop_iter, NG5_ARCHIVE_ITER_MASK_ANY, &err, &object);
         ASSERT_TRUE(status);
 
         iterate_properties(&prop_iter);
@@ -51,68 +51,68 @@ print_basic_fixed_types_basic(struct archive_value_vector *value_iter, u32 idx)
 {
     u32 num_values;
     switch (value_iter->prop_type) {
-    case NG5_BASIC_TYPE_INT8: {
-        const field_i8_t *values = carbon_archive_value_vector_get_int8s(&num_values, value_iter);
+    case field_int8: {
+        const field_i8_t *values = archive_value_vector_get_int8s(&num_values, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(idx < num_values);
         printf("\t\t{ type: int8, value: %" PRIi8 " }\n", values[idx]);
     } break;
-    case NG5_BASIC_TYPE_INT16: {
-        const field_i16_t *values = carbon_archive_value_vector_get_int16s(&num_values, value_iter);
+    case field_int16: {
+        const field_i16_t *values = archive_value_vector_get_int16s(&num_values, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(idx < num_values);
         printf("\t\t{ type: int16, value: %" PRIi16 " }\n", values[idx]);
     } break;
-    case NG5_BASIC_TYPE_INT32: {
-        const field_i32_t *values = carbon_archive_value_vector_get_int32s(&num_values, value_iter);
+    case field_int32: {
+        const field_i32_t *values = archive_value_vector_get_int32s(&num_values, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(idx < num_values);
         printf("\t\t{ type: int32, value: %" PRIi32 " }\n", values[idx]);
     } break;
-    case NG5_BASIC_TYPE_INT64: {
-        const field_i64_t *values = carbon_archive_value_vector_get_int64s(&num_values, value_iter);
+    case field_int64: {
+        const field_i64_t *values = archive_value_vector_get_int64s(&num_values, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(idx < num_values);
         printf("\t\t{ type: int64, value: %" PRIi64 " }\n", values[idx]);
     } break;
-    case NG5_BASIC_TYPE_UINT8: {
-        const field_u8_t *values = carbon_archive_value_vector_get_uint8s(&num_values, value_iter);
+    case field_uint8: {
+        const field_u8_t *values = archive_value_vector_get_uint8s(&num_values, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(idx < num_values);
         printf("\t\t{ type: uint8, value: %" PRIu8 " }\n", values[idx]);
     } break;
-    case NG5_BASIC_TYPE_UINT16: {
-        const field_u16_t *values = carbon_archive_value_vector_get_uint16s(&num_values, value_iter);
+    case field_uint16: {
+        const field_u16_t *values = archive_value_vector_get_uint16s(&num_values, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(idx < num_values);
         printf("\t\t{ type: uint16, value: %" PRIu16 " }\n", values[idx]);
     } break;
-    case NG5_BASIC_TYPE_UINT32: {
-        const field_u32_t *values = carbon_archive_value_vector_get_uint32s(&num_values, value_iter);
+    case field_uint32: {
+        const field_u32_t *values = archive_value_vector_get_uint32s(&num_values, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(idx < num_values);
         printf("\t\t{ type: uint32, value: %" PRIu32 " }\n", values[idx]);
     } break;
-    case NG5_BASIC_TYPE_UINT64: {
-        const field_u64_t *values = carbon_archive_value_vector_get_uint64s(&num_values, value_iter);
+    case field_uint64: {
+        const field_u64_t *values = archive_value_vector_get_uint64s(&num_values, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(idx < num_values);
         printf("\t\t{ type: uint64, value: %" PRIu64 " }\n", values[idx]);
     } break;
-    case NG5_BASIC_TYPE_NUMBER: {
-        const field_number_t *values = carbon_archive_value_vector_get_numbers(&num_values, value_iter);
+    case field_float: {
+        const field_number_t *values = archive_value_vector_get_numbers(&num_values, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(idx < num_values);
         printf("\t\t{ type: number, value: %f }\n", values[idx]);
     } break;
-    case NG5_BASIC_TYPE_STRING: {
-            const field_sid_t *values = carbon_archive_value_vector_get_strings(&num_values, value_iter);
+    case field_string: {
+            const field_sid_t *values = archive_value_vector_get_strings(&num_values, value_iter);
             ASSERT_TRUE(values != NULL);
             ASSERT_TRUE(idx < num_values);
             printf("\t\t{ type: string, value: %" PRIu64 " }\n", values[idx]);
         } break;
-    case NG5_BASIC_TYPE_BOOLEAN: {
-        const field_boolean_t *values = carbon_archive_value_vector_get_booleans(&num_values, value_iter);
+    case field_bool: {
+        const field_boolean_t *values = archive_value_vector_get_booleans(&num_values, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(idx < num_values);
         printf("\t\t{ type: boolean, value: %d }\n", values[idx]);
@@ -127,8 +127,8 @@ print_basic_fixed_types_array(struct archive_value_vector *value_iter, u32 idx)
 {
     u32 array_length;
     switch (value_iter->prop_type) {
-    case NG5_BASIC_TYPE_NULL: {
-        const field_u32_t *number_contained = carbon_archive_value_vector_get_null_arrays(&array_length, value_iter);
+    case field_null: {
+        const field_u32_t *number_contained = archive_value_vector_get_null_arrays(&array_length, value_iter);
         ASSERT_TRUE(number_contained != NULL);
         ASSERT_TRUE(array_length != 0);
         printf("\t\t{ type: null_array, values: [");
@@ -138,8 +138,8 @@ print_basic_fixed_types_array(struct archive_value_vector *value_iter, u32 idx)
         }
         printf("]\n");
     } break;
-    case NG5_BASIC_TYPE_INT8: {
-        const field_i8_t *values = carbon_archive_value_vector_get_int8_arrays_at(&array_length, idx, value_iter);
+    case field_int8: {
+        const field_i8_t *values = archive_value_vector_get_int8_arrays_at(&array_length, idx, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(array_length != 0);
         printf("\t\t{ type: int8_array, values: [");
@@ -149,8 +149,8 @@ print_basic_fixed_types_array(struct archive_value_vector *value_iter, u32 idx)
         }
         printf("]\n");
     } break;
-    case NG5_BASIC_TYPE_INT16: {
-        const field_i16_t *values = carbon_archive_value_vector_get_int16_arrays_at(&array_length, idx, value_iter);
+    case field_int16: {
+        const field_i16_t *values = archive_value_vector_get_int16_arrays_at(&array_length, idx, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(array_length != 0);
         printf("\t\t{ type: int16_array, values: [");
@@ -160,8 +160,8 @@ print_basic_fixed_types_array(struct archive_value_vector *value_iter, u32 idx)
         }
         printf("]\n");
     } break;
-    case NG5_BASIC_TYPE_INT32: {
-        const field_i32_t *values = carbon_archive_value_vector_get_int32_arrays_at(&array_length, idx, value_iter);
+    case field_int32: {
+        const field_i32_t *values = archive_value_vector_get_int32_arrays_at(&array_length, idx, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(array_length != 0);
         printf("\t\t{ type: int32_array, values: [");
@@ -171,8 +171,8 @@ print_basic_fixed_types_array(struct archive_value_vector *value_iter, u32 idx)
         }
         printf("]\n");
     } break;
-    case NG5_BASIC_TYPE_INT64: {
-        const field_i64_t *values = carbon_archive_value_vector_get_int64_arrays_at(&array_length, idx, value_iter);
+    case field_int64: {
+        const field_i64_t *values = archive_value_vector_get_int64_arrays_at(&array_length, idx, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(array_length != 0);
         printf("\t\t{ type: int64_array, values: [");
@@ -182,8 +182,8 @@ print_basic_fixed_types_array(struct archive_value_vector *value_iter, u32 idx)
         }
         printf("]\n");
     } break;
-    case NG5_BASIC_TYPE_UINT8: {
-        const field_u8_t *values = carbon_archive_value_vector_get_uint8_arrays_at(&array_length, idx, value_iter);
+    case field_uint8: {
+        const field_u8_t *values = archive_value_vector_get_uint8_arrays_at(&array_length, idx, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(array_length != 0);
         printf("\t\t{ type: uint8_array, values: [");
@@ -193,8 +193,8 @@ print_basic_fixed_types_array(struct archive_value_vector *value_iter, u32 idx)
         }
         printf("]\n");
     } break;
-    case NG5_BASIC_TYPE_UINT16: {
-        const field_u16_t *values = carbon_archive_value_vector_get_uint16_arrays_at(&array_length, idx, value_iter);
+    case field_uint16: {
+        const field_u16_t *values = archive_value_vector_get_uint16_arrays_at(&array_length, idx, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(array_length != 0);
         printf("\t\t{ type: uint16_array, values: [");
@@ -204,8 +204,8 @@ print_basic_fixed_types_array(struct archive_value_vector *value_iter, u32 idx)
         }
         printf("]\n");
     } break;
-    case NG5_BASIC_TYPE_UINT32: {
-        const field_u32_t *values = carbon_archive_value_vector_get_uint32_arrays_at(&array_length, idx, value_iter);
+    case field_uint32: {
+        const field_u32_t *values = archive_value_vector_get_uint32_arrays_at(&array_length, idx, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(array_length != 0);
         printf("\t\t{ type: uint32_array, values: [");
@@ -215,8 +215,8 @@ print_basic_fixed_types_array(struct archive_value_vector *value_iter, u32 idx)
         }
         printf("]\n");
     } break;
-    case NG5_BASIC_TYPE_UINT64: {
-        const field_u64_t *values = carbon_archive_value_vector_get_uint64_arrays_at(&array_length, idx, value_iter);
+    case field_uint64: {
+        const field_u64_t *values = archive_value_vector_get_uint64_arrays_at(&array_length, idx, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(array_length != 0);
         printf("\t\t{ type: uint64_array, values: [");
@@ -226,8 +226,8 @@ print_basic_fixed_types_array(struct archive_value_vector *value_iter, u32 idx)
         }
         printf("]\n");
     } break;
-    case NG5_BASIC_TYPE_NUMBER: {
-        const field_number_t *values = carbon_archive_value_vector_get_number_arrays_at(&array_length, idx, value_iter);
+    case field_float: {
+        const field_number_t *values = archive_value_vector_get_number_arrays_at(&array_length, idx, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(array_length != 0);
         printf("\t\t{ type: numbers_array, values: [");
@@ -237,8 +237,8 @@ print_basic_fixed_types_array(struct archive_value_vector *value_iter, u32 idx)
         }
         printf("]\n");
     } break;
-    case NG5_BASIC_TYPE_STRING: {
-        const field_sid_t *values = carbon_archive_value_vector_get_string_arrays_at(&array_length, idx, value_iter);
+    case field_string: {
+        const field_sid_t *values = archive_value_vector_get_string_arrays_at(&array_length, idx, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(array_length != 0);
         printf("\t\t{ type: string_array, values: [");
@@ -248,8 +248,8 @@ print_basic_fixed_types_array(struct archive_value_vector *value_iter, u32 idx)
         }
         printf("]\n");
     } break;
-    case NG5_BASIC_TYPE_BOOLEAN: {
-        const field_boolean_t *values = carbon_archive_value_vector_get_boolean_arrays_at(&array_length, idx, value_iter);
+    case field_bool: {
+        const field_boolean_t *values = archive_value_vector_get_boolean_arrays_at(&array_length, idx, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(array_length != 0);
         printf("\t\t{ type: boolean_array, values: [");
@@ -295,35 +295,35 @@ iterate_properties(struct prop_iter *prop_iter)
     archive_column_entry_iter_t entry_iter;
     struct err                       err;
 
-    while (carbon_archive_prop_iter_next(&iter_type, &value_iter, &collection_iter, prop_iter))
+    while (archive_prop_iter_next(&iter_type, &value_iter, &collection_iter, prop_iter))
     {
         if (iter_type == PROP_ITER_MODE_OBJECT)
         {
-            keys = carbon_archive_value_vector_get_keys(&num_pairs, &value_iter);
-            carbon_archive_value_vector_is_array_type(&is_array, &value_iter);
-            carbon_archive_value_vector_get_basic_type(&type, &value_iter);
-            carbon_archive_value_vector_get_object_id(&oid, &value_iter);
+            keys = archive_value_vector_get_keys(&num_pairs, &value_iter);
+            archive_value_vector_is_array_type(&is_array, &value_iter);
+            archive_value_vector_get_basic_type(&type, &value_iter);
+            archive_value_vector_get_object_id(&oid, &value_iter);
             for (u32 i = 0; i < num_pairs; i++) {
                 printf("Key %" PRIu64 ", type: %d, is-array: %d\n", keys[i], type, is_array);
 
                 switch (type) {
-                case NG5_BASIC_TYPE_OBJECT:
+                case field_object:
                     iterate_object(&value_iter);
                     break;
-                case NG5_BASIC_TYPE_NULL:
+                case field_null:
                     printf("\t\t{ type: null }\n");
                     break;
-                case NG5_BASIC_TYPE_INT8:
-                case NG5_BASIC_TYPE_INT16:
-                case NG5_BASIC_TYPE_INT32:
-                case NG5_BASIC_TYPE_INT64:
-                case NG5_BASIC_TYPE_UINT8:
-                case NG5_BASIC_TYPE_UINT16:
-                case NG5_BASIC_TYPE_UINT32:
-                case NG5_BASIC_TYPE_UINT64:
-                case NG5_BASIC_TYPE_NUMBER:
-                case NG5_BASIC_TYPE_STRING:
-                case NG5_BASIC_TYPE_BOOLEAN:
+                case field_int8:
+                case field_int16:
+                case field_int32:
+                case field_int64:
+                case field_uint8:
+                case field_uint16:
+                case field_uint32:
+                case field_uint64:
+                case field_float:
+                case field_string:
+                case field_bool:
                     print_basic_fixed_types(&value_iter, i);
                     break;
                 default:
@@ -331,17 +331,17 @@ iterate_properties(struct prop_iter *prop_iter)
                 }
             }
         } else {
-            keys = carbon_archive_collection_iter_get_keys(&num_column_groups, &collection_iter);
+            keys = archive_collection_iter_get_keys(&num_column_groups, &collection_iter);
             ASSERT_TRUE(keys != NULL);
             printf("\t\t{ column groups for keys:");
             for (u32 i = 0; i < num_column_groups; i++) {
                 printf("%" PRIu64 " ", keys[i]);
             }
             printf("}\n");
-            while (carbon_archive_collection_next_column_group(&group_iter, &collection_iter)) {
+            while (archive_collection_next_column_group(&group_iter, &collection_iter)) {
 
                 u32 num_objs;
-                const object_id_t *ids = carbon_archive_column_group_get_object_ids(&num_objs, &group_iter);
+                const object_id_t *ids = archive_column_group_get_object_ids(&num_objs, &group_iter);
 
                 printf("\t\t{ column groups object ids:");
                 for (u32 i = 0; i < num_objs; i++) {
@@ -349,12 +349,12 @@ iterate_properties(struct prop_iter *prop_iter)
                 }
                 printf("}\n");
 
-                while(carbon_archive_column_group_next_column(&column_iter, &group_iter)) {
+                while(archive_column_group_next_column(&column_iter, &group_iter)) {
                     field_sid_t column_name;
                     enum field_type column_entry_type;
                     u32 num_entries;
-                    carbon_archive_column_get_name(&column_name, &column_entry_type, &column_iter);
-                    const u32 *positions = carbon_archive_column_get_entry_positions(&num_entries, &column_iter);
+                    archive_column_get_name(&column_name, &column_entry_type, &column_iter);
+                    const u32 *positions = archive_column_get_entry_positions(&num_entries, &column_iter);
                     printf("\t\t{ column-name: %" PRIu64 ", type: %d }\n", column_name, column_entry_type);
                     printf("\t\t{ entry positions:");
                     for (u32 i = 0; i < num_entries; i++) {
@@ -362,121 +362,121 @@ iterate_properties(struct prop_iter *prop_iter)
                     }
                     printf("}\n");
 
-                    while(carbon_archive_column_next_entry(&entry_iter, &column_iter)) {
+                    while(archive_column_next_entry(&entry_iter, &column_iter)) {
 
                         enum field_type entry_type;
                         u32 entry_length;
-                        carbon_archive_column_entry_get_type(&entry_type, &entry_iter);
+                        archive_column_entry_get_type(&entry_type, &entry_iter);
 
                         switch (entry_type) {
-                        case NG5_BASIC_TYPE_STRING: {
-                            const field_sid_t *values = carbon_archive_column_entry_get_strings(&entry_length, &entry_iter);
+                        case field_string: {
+                            const field_sid_t *values = archive_column_entry_get_strings(&entry_length, &entry_iter);
                             printf("\t\t{ strings: [");
                             for (u32 i = 0; i < entry_length; i++) {
                                 printf("%" PRIu64 "%s", values[i], i + 1 < entry_length ? ", " : "");
                             }
                             printf("]\n");
                         } break;
-                        case NG5_BASIC_TYPE_INT8: {
-                            const field_i8_t *values = carbon_archive_column_entry_get_int8s(&entry_length, &entry_iter);
+                        case field_int8: {
+                            const field_i8_t *values = archive_column_entry_get_int8s(&entry_length, &entry_iter);
                             printf("\t\t{ int8s: [");
                             for (u32 i = 0; i < entry_length; i++) {
                                 printf("% " PRIi8 "%s", values[i], i + 1 < entry_length ? ", " : "");
                             }
                             printf("]\n");
                         } break;
-                        case NG5_BASIC_TYPE_INT16: {
-                            const field_i16_t *values = carbon_archive_column_entry_get_int16s(&entry_length, &entry_iter);
+                        case field_int16: {
+                            const field_i16_t *values = archive_column_entry_get_int16s(&entry_length, &entry_iter);
                             printf("\t\t{ int16s: [");
                             for (u32 i = 0; i < entry_length; i++) {
                                 printf("% " PRIi16 "%s", values[i], i + 1 < entry_length ? ", " : "");
                             }
                             printf("]\n");
                         } break;
-                        case NG5_BASIC_TYPE_INT32: {
-                            const field_i32_t *values = carbon_archive_column_entry_get_int32s(&entry_length, &entry_iter);
+                        case field_int32: {
+                            const field_i32_t *values = archive_column_entry_get_int32s(&entry_length, &entry_iter);
                             printf("\t\t{ int32s: [");
                             for (u32 i = 0; i < entry_length; i++) {
                                 printf("% " PRIi32 "%s", values[i], i + 1 < entry_length ? ", " : "");
                             }
                             printf("]\n");
                         } break;
-                        case NG5_BASIC_TYPE_INT64: {
-                            const field_i64_t *values = carbon_archive_column_entry_get_int64s(&entry_length, &entry_iter);
+                        case field_int64: {
+                            const field_i64_t *values = archive_column_entry_get_int64s(&entry_length, &entry_iter);
                             printf("\t\t{ int64s: [");
                             for (u32 i = 0; i < entry_length; i++) {
                                 printf("% " PRIi64 "%s", values[i], i + 1 < entry_length ? ", " : "");
                             }
                             printf("]\n");
                         } break;
-                        case NG5_BASIC_TYPE_UINT8: {
-                            const field_u8_t *values = carbon_archive_column_entry_get_uint8s(&entry_length, &entry_iter);
+                        case field_uint8: {
+                            const field_u8_t *values = archive_column_entry_get_uint8s(&entry_length, &entry_iter);
                             printf("\t\t{ uint8s: [");
                             for (u32 i = 0; i < entry_length; i++) {
                                 printf("%" PRIu8 "%s", values[i], i + 1 < entry_length ? ", " : "");
                             }
                             printf("]\n");
                         } break;
-                        case NG5_BASIC_TYPE_UINT16: {
-                            const field_u16_t *values = carbon_archive_column_entry_get_uint16s(&entry_length, &entry_iter);
+                        case field_uint16: {
+                            const field_u16_t *values = archive_column_entry_get_uint16s(&entry_length, &entry_iter);
                             printf("\t\t{ uint16s: [");
                             for (u32 i = 0; i < entry_length; i++) {
                                 printf("%" PRIu16 "%s", values[i], i + 1 < entry_length ? ", " : "");
                             }
                             printf("]\n");
                         } break;
-                        case NG5_BASIC_TYPE_UINT32: {
-                            const field_u32_t *values = carbon_archive_column_entry_get_uint32s(&entry_length, &entry_iter);
+                        case field_uint32: {
+                            const field_u32_t *values = archive_column_entry_get_uint32s(&entry_length, &entry_iter);
                             printf("\t\t{ uint32s: [");
                             for (u32 i = 0; i < entry_length; i++) {
                                 printf("%" PRIu32 "%s", values[i], i + 1 < entry_length ? ", " : "");
                             }
                             printf("]\n");
                         } break;
-                        case NG5_BASIC_TYPE_UINT64: {
-                            const field_u64_t *values = carbon_archive_column_entry_get_uint64s(&entry_length, &entry_iter);
+                        case field_uint64: {
+                            const field_u64_t *values = archive_column_entry_get_uint64s(&entry_length, &entry_iter);
                             printf("\t\t{ uint64s: [");
                             for (u64 i = 0; i < entry_length; i++) {
                                 printf("%" PRIu64 "%s", values[i], i + 1 < entry_length ? ", " : "");
                             }
                             printf("]\n");
                         } break;
-                        case NG5_BASIC_TYPE_NUMBER: {
-                            const field_number_t *values = carbon_archive_column_entry_get_numbers(&entry_length, &entry_iter);
+                        case field_float: {
+                            const field_number_t *values = archive_column_entry_get_numbers(&entry_length, &entry_iter);
                             printf("\t\t{ numbers: [");
                             for (u64 i = 0; i < entry_length; i++) {
                                 printf("%f%s", values[i], i + 1 < entry_length ? ", " : "");
                             }
                             printf("]\n");
                         } break;
-                        case NG5_BASIC_TYPE_BOOLEAN: {
-                            const field_boolean_t *values = carbon_archive_column_entry_get_booleans(&entry_length, &entry_iter);
+                        case field_bool: {
+                            const field_boolean_t *values = archive_column_entry_get_booleans(&entry_length, &entry_iter);
                             printf("\t\t{ booleans: [");
                             for (u64 i = 0; i < entry_length; i++) {
                                 printf("%d%s", values[i], i + 1 < entry_length ? ", " : "");
                             }
                             printf("]\n");
                         } break;
-                        case NG5_BASIC_TYPE_NULL: {
-                            const field_u32_t *values = carbon_archive_column_entry_get_nulls(&entry_length, &entry_iter);
+                        case field_null: {
+                            const field_u32_t *values = archive_column_entry_get_nulls(&entry_length, &entry_iter);
                             printf("\t\t{ nulls: [");
                             for (u64 i = 0; i < entry_length; i++) {
                                 printf("%d%s", values[i], i + 1 < entry_length ? ", " : "");
                             }
                             printf("]\n");
                         } break;
-                        case NG5_BASIC_TYPE_OBJECT: {
+                        case field_object: {
                             struct column_object_iter iter;
                             const struct archive_object *archive_object;
-                            carbon_archive_column_entry_get_objects(&iter, &entry_iter);
+                            archive_column_entry_get_objects(&iter, &entry_iter);
                             printf("\t\t{ << objects >>: [");
-                            while ((archive_object = carbon_archive_column_entry_object_iter_next_object(&iter)) != NULL) {
+                            while ((archive_object = archive_column_entry_object_iter_next_object(&iter)) != NULL) {
                                 object_id_t id;
-                                carbon_archive_object_get_object_id(&id, archive_object);
+                                archive_object_get_object_id(&id, archive_object);
                                 printf("{ oid: %" PRIu64 " } \n", id);
 
                                 struct prop_iter nested_obj_prop_iter;
-                                carbon_archive_prop_iter_from_object(&nested_obj_prop_iter, NG5_ARCHIVE_ITER_MASK_ANY,
+                                archive_prop_iter_from_object(&nested_obj_prop_iter, NG5_ARCHIVE_ITER_MASK_ANY,
                                                                      &err, archive_object);
                                 iterate_properties(&nested_obj_prop_iter);
                             }
@@ -503,15 +503,15 @@ TEST(ArchiveIterTest, CreateIterator)
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
      * below the projects root directory (e.g., 'build/') */
-    status = carbon_archive_open(&archive, "../tests/assets/test-archive.carbon");
+    status = archive_open(&archive, "../tests/assets/test-archive.carbon");
     ASSERT_TRUE(status);
 
-    status = carbon_archive_prop_iter_from_archive(&prop_iter, &err, NG5_ARCHIVE_ITER_MASK_ANY, &archive);
+    status = archive_prop_iter_from_archive(&prop_iter, &err, NG5_ARCHIVE_ITER_MASK_ANY, &archive);
     ASSERT_TRUE(status);
 
     iterate_properties(&prop_iter);
 
-    carbon_archive_close(&archive);
+    archive_close(&archive);
     ASSERT_TRUE(status);
 }
 

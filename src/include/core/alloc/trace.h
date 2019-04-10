@@ -31,7 +31,7 @@ NG5_BEGIN_DECL
  * @return STATUS_OK in case of non-null parameter alloc, STATUS_NULLPTR otherwise
  */
 NG5_EXPORT (int)
-carbon_tracer_alloc_create(struct allocator *alloc);
+tracer_alloc_create(struct allocator *alloc);
 
 NG5_END_DECL
 

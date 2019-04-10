@@ -26,7 +26,7 @@ NG5_BEGIN_DECL
 typedef u64 timestamp_t;
 
 NG5_EXPORT(timestamp_t)
-carbon_time_now_wallclock();
+time_now_wallclock();
 
 NG5_END_DECL
 

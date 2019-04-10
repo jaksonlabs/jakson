@@ -32,28 +32,28 @@ struct sid_cache_stats
 };
 
 NG5_EXPORT(bool)
-carbon_string_id_cache_create_LRU(struct string_cache **cache, struct archive *archive);
+string_id_cache_create_LRU(struct string_cache **cache, struct archive *archive);
 
 NG5_EXPORT(bool)
-carbon_string_id_cache_create_LRU_ex(struct string_cache **cache, struct archive *archive, size_t capacity);
+string_id_cache_create_LRU_ex(struct string_cache **cache, struct archive *archive, size_t capacity);
 
 NG5_EXPORT(bool)
-carbon_string_id_cache_get_error(struct err *err, const struct string_cache *cache);
+string_id_cache_get_error(struct err *err, const struct string_cache *cache);
 
 NG5_EXPORT(bool)
-carbon_string_id_cache_get_size(size_t *size, const struct string_cache *cache);
+string_id_cache_get_size(size_t *size, const struct string_cache *cache);
 
 NG5_EXPORT(char *)
-carbon_string_id_cache_get(struct string_cache *cache, field_sid_t id);
+string_id_cache_get(struct string_cache *cache, field_sid_t id);
 
 NG5_EXPORT(bool)
-carbon_string_id_cache_get_statistics(struct sid_cache_stats *statistics, struct string_cache *cache);
+string_id_cache_get_statistics(struct sid_cache_stats *statistics, struct string_cache *cache);
 
 NG5_EXPORT(bool)
-carbon_string_id_cache_reset_statistics(struct string_cache *cache);
+string_id_cache_reset_statistics(struct string_cache *cache);
 
 NG5_EXPORT(bool)
-carbon_string_id_cache_drop(struct string_cache *cache);
+string_id_cache_drop(struct string_cache *cache);
 
 NG5_END_DECL
 

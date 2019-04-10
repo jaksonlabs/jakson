@@ -24,10 +24,10 @@
 NG5_BEGIN_DECL
 
 NG5_EXPORT(i64)
-carbon_convert_atoi64(const char *string);
+convert_atoi64(const char *string);
 
 NG5_EXPORT(u64)
-carbon_convert_atoiu64(const char *string);
+convert_atoiu64(const char *string);
 
 NG5_END_DECL
 

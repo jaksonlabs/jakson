@@ -19,7 +19,7 @@
 
 
 NG5_EXPORT(void *)
-carbon_parallel_for_proxy_function(void * args)
+parallel_for_proxy_function(void * args)
 {
     NG5_CAST(struct parallel_func_proxy *, proxy_arg, args);
     proxy_arg->function(proxy_arg->start, proxy_arg->width, proxy_arg->len, proxy_arg->args, proxy_arg->tid);
@@ -42,11 +42,11 @@ carbon_parallel_for_proxy_function(void * args)
 }
 
 NG5_EXPORT(bool)
-carbon_parallel_for(const void * base, size_t width, size_t len, parallel_for_body_func_t f,
+parallel_for(const void * base, size_t width, size_t len, parallel_for_body_func_t f,
                     void * args, enum threading_hint hint, uint_fast16_t num_threads);
 
 NG5_EXPORT(bool)
-carbon_parallel_map(void * dst,
+parallel_map(void * dst,
                     const void * src,
                     size_t src_width,
                     size_t len,
@@ -57,7 +57,7 @@ carbon_parallel_map(void * dst,
                     uint_fast16_t num_threads);
 
 NG5_EXPORT(bool)
-carbon_parallel_gather(void * dst,
+parallel_gather(void * dst,
                        const void * src,
                        size_t width,
                        const size_t * idx,
@@ -66,7 +66,7 @@ carbon_parallel_gather(void * dst,
                        uint_fast16_t num_threads);
 
 NG5_EXPORT(bool)
-carbon_parallel_gather_adr(void * dst,
+parallel_gather_adr(void * dst,
                            const void * src,
                            size_t src_width,
                            const size_t * idx,
@@ -75,7 +75,7 @@ carbon_parallel_gather_adr(void * dst,
                            uint_fast16_t num_threads);
 
 NG5_EXPORT(bool)
-carbon_parallel_scatter(void * dst,
+parallel_scatter(void * dst,
                         const void * src,
                         size_t width,
                         const size_t * idx,
@@ -84,30 +84,30 @@ carbon_parallel_scatter(void * dst,
                         uint_fast16_t num_threads);
 
 NG5_EXPORT(bool)
-carbon_parallel_shuffle(void * dst, const void * src, size_t width,
+parallel_shuffle(void * dst, const void * src, size_t width,
                         const size_t * dst_idx, const size_t * src_idx,
                         size_t idxLen, enum threading_hint hint);
 
 NG5_EXPORT(bool)
-carbon_parallel_filter_early(void * result, size_t * result_size,
+parallel_filter_early(void * result, size_t * result_size,
                              const void * src,
                              size_t width, size_t len, parallel_predicate_func_t pred, void * args,
                              enum threading_hint hint, uint_fast16_t num_threads);
 
 NG5_EXPORT(bool)
-carbon_parallel_filter_late(size_t * pos, size_t * num_pos, const void * src,
+parallel_filter_late(size_t * pos, size_t * num_pos, const void * src,
                             size_t width, size_t len, parallel_predicate_func_t pred, void * args,
                             enum threading_hint hint, size_t num_threads);
 
 NG5_EXPORT(bool)
-carbon_parallel_sequential_for(const void * base, size_t width, size_t len, parallel_for_body_func_t f,
+parallel_sequential_for(const void * base, size_t width, size_t len, parallel_for_body_func_t f,
                                void * args);
 NG5_EXPORT(bool)
-carbon_parallel_parallel_for(const void * base, size_t width, size_t len, parallel_for_body_func_t f,
+parallel_parallel_for(const void * base, size_t width, size_t len, parallel_for_body_func_t f,
                              void * args, uint_fast16_t num_threads);
 
 NG5_EXPORT(bool)
-carbon_parallel_map_exec(void * dst,
+parallel_map_exec(void * dst,
                          const void * src,
                          size_t src_width,
                          size_t len,
@@ -118,66 +118,66 @@ carbon_parallel_map_exec(void * dst,
                          uint_fast16_t num_threads);
 
 NG5_EXPORT(bool)
-carbon_parallel_sequential_gather(void * dst, const void * src, size_t width,
+parallel_sequential_gather(void * dst, const void * src, size_t width,
                                   const size_t * idx, size_t dstSrcLen);
 NG5_EXPORT(bool)
-carbon_parallel_parallel_gather(void * dst, const void * src, size_t width,
+parallel_parallel_gather(void * dst, const void * src, size_t width,
                                 const size_t * idx, size_t dstSrcLen, uint_fast16_t num_threads);
 
 NG5_EXPORT(bool)
-carbon_parallel_sequential_gather_adr(void * dst, const void * src, size_t src_width,
+parallel_sequential_gather_adr(void * dst, const void * src, size_t src_width,
                                       const size_t * idx, size_t num);
 NG5_EXPORT(bool)
-carbon_parallel_parallel_gather_adr_func(void * dst, const void * src, size_t src_width,
+parallel_parallel_gather_adr_func(void * dst, const void * src, size_t src_width,
                                          const size_t * idx, size_t num, uint_fast16_t num_threads);
 
 NG5_EXPORT(bool)
-carbon_parallel_sequential_scatter_func(void * dst, const void * src, size_t width,
+parallel_sequential_scatter_func(void * dst, const void * src, size_t width,
                                         const size_t * idx, size_t num);
 NG5_EXPORT(bool)
-carbon_parallel_parallel_scatter_func(void * dst, const void * src, size_t width,
+parallel_parallel_scatter_func(void * dst, const void * src, size_t width,
                                       const size_t * idx, size_t num, uint_fast16_t num_threads);
 
 NG5_EXPORT(bool)
-carbon_parallel_sequential_shuffle(void * dst, const void * src, size_t width,
+parallel_sequential_shuffle(void * dst, const void * src, size_t width,
                                    const size_t * dst_idx, const size_t * src_idx,
                                    size_t idx_len);
 
 NG5_EXPORT(bool)
-carbon_parallel_parallel_shuffle(void * dst, const void * src, size_t width,
+parallel_parallel_shuffle(void * dst, const void * src, size_t width,
                                  const size_t * dst_idx, const size_t * src_idx,
                                  size_t idx_len);
 
 NG5_EXPORT(bool)
-carbon_parallel_sequential_filter_early(void * result, size_t * result_size,
+parallel_sequential_filter_early(void * result, size_t * result_size,
                                         const void * src, size_t width, size_t len, parallel_predicate_func_t pred,
                                         void * args);
 
 NG5_EXPORT(bool)
-carbon_parallel_parallel_filter_early(void * result, size_t * result_size,
+parallel_parallel_filter_early(void * result, size_t * result_size,
                                       const void * src, size_t width, size_t len, parallel_predicate_func_t pred,
                                       void * args, uint_fast16_t num_threads);
 
 NG5_EXPORT(bool)
-carbon_parallel_sequential_filter_late(size_t * pos, size_t * num_pos,
+parallel_sequential_filter_late(size_t * pos, size_t * num_pos,
                                        const void * src, size_t width, size_t len, parallel_predicate_func_t pred,
                                        void * args);
 
 NG5_EXPORT(bool)
-carbon_parallel_parallel_filter_late(size_t * pos, size_t * num_pos,
+parallel_parallel_filter_late(size_t * pos, size_t * num_pos,
                                      const void * src, size_t width, size_t len, parallel_predicate_func_t pred,
                                      void * args, size_t num_threads);
 
 NG5_EXPORT(bool)
-carbon_parallel_for(const void * base, size_t width, size_t len, parallel_for_body_func_t f,
+parallel_for(const void * base, size_t width, size_t len, parallel_for_body_func_t f,
                     void * args, enum threading_hint hint, uint_fast16_t num_threads)
 {
-    PARALLEL_MATCH(carbon_parallel_sequential_for(base, width, len, f, args),
-                   carbon_parallel_parallel_for(base, width, len, f, args, num_threads))
+    PARALLEL_MATCH(parallel_sequential_for(base, width, len, f, args),
+                   parallel_parallel_for(base, width, len, f, args, num_threads))
 }
 
 NG5_EXPORT(bool)
-carbon_parallel_map(void * dst,
+parallel_map(void * dst,
                     const void * src,
                     size_t src_width,
                     size_t len,
@@ -187,11 +187,11 @@ carbon_parallel_map(void * dst,
                     enum threading_hint hint,
                     uint_fast16_t num_threads)
 {
-    return carbon_parallel_map_exec(dst, src, src_width, len, dst_width, f, args, hint, num_threads);
+    return parallel_map_exec(dst, src, src_width, len, dst_width, f, args, hint, num_threads);
 }
 
 NG5_EXPORT(bool)
-carbon_parallel_gather(void * dst,
+parallel_gather(void * dst,
                        const void * src,
                        size_t width,
                        const size_t * idx,
@@ -199,12 +199,12 @@ carbon_parallel_gather(void * dst,
                        enum threading_hint hint,
                        uint_fast16_t num_threads)
 {
-    PARALLEL_MATCH(carbon_parallel_sequential_gather(dst, src, width, idx, dst_src_len),
-                   carbon_parallel_parallel_gather(dst, src, width, idx, dst_src_len, num_threads))
+    PARALLEL_MATCH(parallel_sequential_gather(dst, src, width, idx, dst_src_len),
+                   parallel_parallel_gather(dst, src, width, idx, dst_src_len, num_threads))
 }
 
 NG5_EXPORT(bool)
-carbon_parallel_gather_adr(void * dst,
+parallel_gather_adr(void * dst,
                            const void * src,
                            size_t src_width,
                            const size_t * idx,
@@ -212,48 +212,48 @@ carbon_parallel_gather_adr(void * dst,
                            enum threading_hint hint,
                            uint_fast16_t num_threads)
 {
-    PARALLEL_MATCH(carbon_parallel_sequential_gather_adr(dst, src, src_width, idx, num),
-                   carbon_parallel_parallel_gather_adr_func(dst, src, src_width, idx, num, num_threads))
+    PARALLEL_MATCH(parallel_sequential_gather_adr(dst, src, src_width, idx, num),
+                   parallel_parallel_gather_adr_func(dst, src, src_width, idx, num, num_threads))
 }
 
 NG5_EXPORT(bool)
-carbon_parallel_scatter(void * dst, const void * src, size_t width,
+parallel_scatter(void * dst, const void * src, size_t width,
                         const size_t * idx, size_t num, enum threading_hint hint, uint_fast16_t num_threads)
 {
-    PARALLEL_MATCH(carbon_parallel_sequential_scatter_func(dst, src, width, idx, num),
-                   carbon_parallel_parallel_scatter_func(dst, src, width, idx, num, num_threads))
+    PARALLEL_MATCH(parallel_sequential_scatter_func(dst, src, width, idx, num),
+                   parallel_parallel_scatter_func(dst, src, width, idx, num, num_threads))
 }
 
 NG5_EXPORT(bool)
-carbon_parallel_shuffle(void * dst, const void * src, size_t width,
+parallel_shuffle(void * dst, const void * src, size_t width,
                         const size_t * dst_idx, const size_t * src_idx,
                         size_t idx_len, enum threading_hint hint)
 {
-    PARALLEL_MATCH(carbon_parallel_sequential_shuffle(dst, src, width, dst_idx, src_idx, idx_len),
-                   carbon_parallel_parallel_shuffle(dst, src, width, dst_idx, src_idx, idx_len))
+    PARALLEL_MATCH(parallel_sequential_shuffle(dst, src, width, dst_idx, src_idx, idx_len),
+                   parallel_parallel_shuffle(dst, src, width, dst_idx, src_idx, idx_len))
 }
 
 NG5_EXPORT(bool)
-carbon_parallel_filter_early(void * result, size_t * result_size,
+parallel_filter_early(void * result, size_t * result_size,
                              const void * src,
                              size_t width, size_t len, parallel_predicate_func_t pred, void * args,
                              enum threading_hint hint, uint_fast16_t num_threads)
 {
-    PARALLEL_MATCH(carbon_parallel_sequential_filter_early(result, result_size, src, width, len, pred, args),
-                   carbon_parallel_parallel_filter_early(result, result_size, src, width, len, pred, args, num_threads))
+    PARALLEL_MATCH(parallel_sequential_filter_early(result, result_size, src, width, len, pred, args),
+                   parallel_parallel_filter_early(result, result_size, src, width, len, pred, args, num_threads))
 }
 
 NG5_EXPORT(bool)
-carbon_parallel_filter_late(size_t * pos, size_t * num_pos, const void * src,
+parallel_filter_late(size_t * pos, size_t * num_pos, const void * src,
                             size_t width, size_t len, parallel_predicate_func_t pred, void * args,
                             enum threading_hint hint, size_t num_threads)
 {
-    PARALLEL_MATCH(carbon_parallel_sequential_filter_late(pos, num_pos, src, width, len, pred, args),
-                   carbon_parallel_parallel_filter_late(pos, num_pos, src, width, len, pred, args, num_threads))
+    PARALLEL_MATCH(parallel_sequential_filter_late(pos, num_pos, src, width, len, pred, args),
+                   parallel_parallel_filter_late(pos, num_pos, src, width, len, pred, args, num_threads))
 }
 
 NG5_EXPORT(bool)
-carbon_parallel_sequential_for(const void * base, size_t width, size_t len, parallel_for_body_func_t f,
+parallel_sequential_for(const void * base, size_t width, size_t len, parallel_for_body_func_t f,
                                void * args)
 {
     NG5_NON_NULL_OR_ERROR(base)
@@ -264,7 +264,7 @@ carbon_parallel_sequential_for(const void * base, size_t width, size_t len, para
 }
 
 NG5_EXPORT(bool)
-carbon_parallel_parallel_for(const void * base, size_t width, size_t len, parallel_for_body_func_t f,
+parallel_parallel_for(const void * base, size_t width, size_t len, parallel_for_body_func_t f,
                              void * args, uint_fast16_t num_threads)
 {
     NG5_NON_NULL_OR_ERROR(base)
@@ -292,7 +292,7 @@ carbon_parallel_parallel_for(const void * base, size_t width, size_t len, parall
             proxy_arg->function = f;
 
             NG5_PREFETCH_READ(proxy_arg->start);
-            pthread_create(threads + tid, NULL, carbon_parallel_for_proxy_function, proxyArgs + tid);
+            pthread_create(threads + tid, NULL, parallel_for_proxy_function, proxyArgs + tid);
         }
         /** run f on this thread */
         NG5_PREFETCH_READ(main_thread_base);
@@ -321,7 +321,7 @@ mapProxy(const void * src, size_t src_width, size_t len, void * args,
 }
 
 NG5_EXPORT(bool)
-carbon_parallel_map_exec(void * dst, const void * src, size_t src_width, size_t len, size_t
+parallel_map_exec(void * dst, const void * src, size_t src_width, size_t len, size_t
 dst_width, parallel_map_body_func_t f, void * args, enum threading_hint hint, uint_fast16_t num_threads)
 {
     NG5_NON_NULL_OR_ERROR(src)
@@ -340,11 +340,11 @@ dst_width, parallel_map_body_func_t f, void * args, enum threading_hint hint, ui
         .src = src
     };
 
-    return carbon_parallel_for((void *) src, src_width, len, &mapProxy, &mapArgs, hint, num_threads);
+    return parallel_for((void *) src, src_width, len, &mapProxy, &mapArgs, hint, num_threads);
 }
 
 void
-carbon_gather_function(const void * start, size_t width, size_t len, void * args,
+gather_function(const void * start, size_t width, size_t len, void * args,
                        thread_id_t tid)
 {
     NG5_UNUSED(tid);
@@ -370,7 +370,7 @@ carbon_gather_function(const void * start, size_t width, size_t len, void * args
 }
 
 NG5_EXPORT(bool)
-carbon_parallel_sequential_gather(void * dst, const void * src, size_t width,
+parallel_sequential_gather(void * dst, const void * src, size_t width,
                                   const size_t * idx, size_t dst_src_len)
 {
     NG5_NON_NULL_OR_ERROR(dst)
@@ -399,7 +399,7 @@ carbon_parallel_sequential_gather(void * dst, const void * src, size_t width,
 }
 
 NG5_EXPORT(bool)
-carbon_parallel_parallel_gather(void * dst, const void * src, size_t width,
+parallel_parallel_gather(void * dst, const void * src, size_t width,
                                 const size_t * idx, size_t dst_src_len, uint_fast16_t num_threads)
 {
     NG5_NON_NULL_OR_ERROR(dst)
@@ -416,11 +416,11 @@ carbon_parallel_parallel_gather(void * dst, const void * src, size_t width,
         .src           = src,
         .dst           = dst,
     };
-    return carbon_parallel_parallel_for(dst, width, dst_src_len, carbon_gather_function, &args, num_threads);
+    return parallel_parallel_for(dst, width, dst_src_len, gather_function, &args, num_threads);
 }
 
 NG5_EXPORT(bool)
-carbon_parallel_sequential_gather_adr(void * dst, const void * src, size_t src_width,
+parallel_sequential_gather_adr(void * dst, const void * src, size_t src_width,
                                       const size_t * idx, size_t num)
 {
     NG5_NON_NULL_OR_ERROR(dst)
@@ -450,7 +450,7 @@ carbon_parallel_sequential_gather_adr(void * dst, const void * src, size_t src_w
 }
 
  void
-carbon_parallel_gather_adr_func(const void * start, size_t width, size_t len, void * args,
+parallel_gather_adr_func(const void * start, size_t width, size_t len, void * args,
                                 thread_id_t tid)
 {
     NG5_UNUSED(tid);
@@ -476,7 +476,7 @@ carbon_parallel_gather_adr_func(const void * start, size_t width, size_t len, vo
 }
 
 NG5_EXPORT(bool)
-carbon_parallel_parallel_gather_adr_func(void * dst, const void * src, size_t src_width,
+parallel_parallel_gather_adr_func(void * dst, const void * src, size_t src_width,
                                          const size_t * idx, size_t num, uint_fast16_t num_threads)
 {
     NG5_NON_NULL_OR_ERROR(dst)
@@ -493,11 +493,11 @@ carbon_parallel_parallel_gather_adr_func(void * dst, const void * src, size_t sr
         .src = src,
         .dst = dst
     };
-    return carbon_parallel_parallel_for(dst, src_width, num, carbon_parallel_gather_adr_func, &args, num_threads);
+    return parallel_parallel_for(dst, src_width, num, parallel_gather_adr_func, &args, num_threads);
 }
 
  void
-carbon_parallel_scatter_func(const void * start, size_t width, size_t len, void * args,
+parallel_scatter_func(const void * start, size_t width, size_t len, void * args,
                              thread_id_t tid)
 {
     NG5_UNUSED(tid);
@@ -524,7 +524,7 @@ carbon_parallel_scatter_func(const void * start, size_t width, size_t len, void 
 }
 
 NG5_EXPORT(bool)
-carbon_parallel_sequential_scatter_func(void * dst, const void * src, size_t width,
+parallel_sequential_scatter_func(void * dst, const void * src, size_t width,
                                         const size_t * idx, size_t num)
 {
     NG5_NON_NULL_OR_ERROR(dst)
@@ -548,7 +548,7 @@ carbon_parallel_sequential_scatter_func(void * dst, const void * src, size_t wid
 }
 
 NG5_EXPORT(bool)
-carbon_parallel_parallel_scatter_func(void * dst, const void * src, size_t width,
+parallel_parallel_scatter_func(void * dst, const void * src, size_t width,
                                       const size_t * idx, size_t num, uint_fast16_t num_threads)
 {
     NG5_NON_NULL_OR_ERROR(dst)
@@ -565,11 +565,11 @@ carbon_parallel_parallel_scatter_func(void * dst, const void * src, size_t width
         .src = src,
         .dst = dst
     };
-    return carbon_parallel_parallel_for(dst, width, num, carbon_parallel_scatter_func, &args, num_threads);
+    return parallel_parallel_for(dst, width, num, parallel_scatter_func, &args, num_threads);
 }
 
 NG5_EXPORT(bool)
-carbon_parallel_sequential_shuffle(void * dst, const void * src, size_t width,
+parallel_sequential_shuffle(void * dst, const void * src, size_t width,
                                    const size_t * dst_idx, const size_t * src_idx,
                                    size_t idx_len)
 {
@@ -599,7 +599,7 @@ carbon_parallel_sequential_shuffle(void * dst, const void * src, size_t width,
 }
 
 NG5_EXPORT(bool)
-carbon_parallel_parallel_shuffle(void * dst, const void * src, size_t width,
+parallel_parallel_shuffle(void * dst, const void * src, size_t width,
                                  const size_t * dst_idx, const size_t * src_idx,
                                  size_t idx_len)
 {
@@ -613,7 +613,7 @@ carbon_parallel_parallel_shuffle(void * dst, const void * src, size_t width,
 }
 
 NG5_EXPORT(bool)
-carbon_parallel_sequential_filter_late(size_t * positions, size_t * num_positions,
+parallel_sequential_filter_late(size_t * positions, size_t * num_positions,
                                        const void * source, size_t width, size_t length, parallel_predicate_func_t predicate,
                                        void * arguments)
 {
@@ -630,7 +630,7 @@ carbon_parallel_sequential_filter_late(size_t * positions, size_t * num_position
 }
 
  void *
-carbon_parallel_filter_proxy_func(void * args)
+parallel_filter_proxy_func(void * args)
 {
     NG5_CAST(struct filter_arg *, proxy_arg, args);
     proxy_arg->pred(proxy_arg->src_positions, &proxy_arg->num_positions,
@@ -640,7 +640,7 @@ carbon_parallel_filter_proxy_func(void * args)
 }
 
 NG5_EXPORT(bool)
-carbon_parallel_parallel_filter_late(size_t * pos, size_t * num_pos,
+parallel_parallel_filter_late(size_t * pos, size_t * num_pos,
                                      const void * src, size_t width, size_t len, parallel_predicate_func_t pred,
                                      void * args, size_t num_threads)
 {
@@ -682,7 +682,7 @@ carbon_parallel_parallel_filter_late(size_t * pos, size_t * num_pos,
             arg->pred = pred;
 
             NG5_PREFETCH_READ(arg->start);
-            pthread_create(threads + tid, NULL, carbon_parallel_filter_proxy_func, arg);
+            pthread_create(threads + tid, NULL, parallel_filter_proxy_func, arg);
         }
     }
     /** run f on this thread */
@@ -727,7 +727,7 @@ carbon_parallel_parallel_filter_late(size_t * pos, size_t * num_pos,
 }
 
 NG5_EXPORT(bool)
-carbon_parallel_sequential_filter_early(void * result, size_t * result_size,
+parallel_sequential_filter_early(void * result, size_t * result_size,
                                         const void * src, size_t width, size_t len, parallel_predicate_func_t pred,
                                         void * args)
 {
@@ -743,7 +743,7 @@ carbon_parallel_sequential_filter_early(void * result, size_t * result_size,
 
     pred(matching_positions, &num_matching_positions, src, width, len, args, 0);
 
-    carbon_parallel_gather(result, src, width, matching_positions, num_matching_positions, THREADING_HINT_SINGLE, 0);
+    parallel_gather(result, src, width, matching_positions, num_matching_positions, THREADING_HINT_SINGLE, 0);
     *result_size = num_matching_positions;
 
     free(matching_positions);
@@ -752,7 +752,7 @@ carbon_parallel_sequential_filter_early(void * result, size_t * result_size,
 }
 
 NG5_EXPORT(bool)
-carbon_parallel_parallel_filter_early(void * result, size_t * result_size,
+parallel_parallel_filter_early(void * result, size_t * result_size,
                                       const void * src, size_t width, size_t len, parallel_predicate_func_t pred,
                                       void * args, uint_fast16_t num_threads)
 {
@@ -789,7 +789,7 @@ carbon_parallel_parallel_filter_early(void * result, size_t * result_size,
         arg->pred = pred;
 
         NG5_PREFETCH_READ(arg->start);
-        pthread_create(threads + tid, NULL, carbon_parallel_filter_proxy_func, arg);
+        pthread_create(threads + tid, NULL, parallel_filter_proxy_func, arg);
     }
     /** run f on this thread */
     NG5_PREFETCH_READ(main_thread_base);
@@ -815,7 +815,7 @@ carbon_parallel_parallel_filter_early(void * result, size_t * result_size,
         const struct filter_arg * thread_arg = (thread_args + tid);
 
         if (NG5_LIKELY(thread_arg->num_positions > 0)) {
-            carbon_parallel_gather(result + partial_num_matching_positions * width, src, width, thread_arg->src_positions,
+            parallel_gather(result + partial_num_matching_positions * width, src, width, thread_arg->src_positions,
                                    thread_arg->num_positions,
                                    THREADING_HINT_MULTI, num_threads);
         }
@@ -825,7 +825,7 @@ carbon_parallel_parallel_filter_early(void * result, size_t * result_size,
     }
 
     if (NG5_LIKELY(main_num_positions > 0)) {
-        carbon_parallel_gather(result + partial_num_matching_positions * width, src, width, main_src_positions,
+        parallel_gather(result + partial_num_matching_positions * width, src, width, main_src_positions,
                                main_num_positions, THREADING_HINT_MULTI, num_threads);
     }
     free(main_src_positions);

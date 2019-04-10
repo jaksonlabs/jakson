@@ -22,7 +22,7 @@
 #define FIX_MAP_AUTO_REHASH_LOADFACTOR 0.9f
 
 NG5_EXPORT(bool)
-carbon_hashtable_create(struct hashtable *map, struct err *err, size_t key_size, size_t value_size, size_t capacity)
+hashtable_create(struct hashtable *map, struct err *err, size_t key_size, size_t value_size, size_t capacity)
 {
     NG5_NON_NULL_OR_ERROR(map)
     NG5_NON_NULL_OR_ERROR(key_size)
@@ -32,33 +32,33 @@ carbon_hashtable_create(struct hashtable *map, struct err *err, size_t key_size,
 
     map->size = 0;
 
-    NG5_SUCCESS_OR_JUMP(carbon_vec_create(&map->key_data, NULL, key_size, capacity),
+    NG5_SUCCESS_OR_JUMP(vec_create(&map->key_data, NULL, key_size, capacity),
                            error_handling);
-    NG5_SUCCESS_OR_JUMP(carbon_vec_create(&map->value_data, NULL, value_size, capacity),
+    NG5_SUCCESS_OR_JUMP(vec_create(&map->value_data, NULL, value_size, capacity),
                            cleanup_key_data_and_error);
-    NG5_SUCCESS_OR_JUMP(carbon_vec_create(&map->table, NULL, sizeof(struct hashtable_bucket), capacity),
+    NG5_SUCCESS_OR_JUMP(vec_create(&map->table, NULL, sizeof(struct hashtable_bucket), capacity),
                            cleanup_value_key_data_and_error);
-    NG5_SUCCESS_OR_JUMP(carbon_vec_enlarge_size_to_capacity(&map->table),
+    NG5_SUCCESS_OR_JUMP(vec_enlarge_size_to_capacity(&map->table),
                            cleanup_key_value_table_and_error);
-    NG5_SUCCESS_OR_JUMP(carbon_vec_zero_memory(&map->table),
+    NG5_SUCCESS_OR_JUMP(vec_zero_memory(&map->table),
                            cleanup_key_value_table_and_error);
-    NG5_SUCCESS_OR_JUMP(carbon_spinlock_init(&map->lock),
+    NG5_SUCCESS_OR_JUMP(spinlock_init(&map->lock),
                            cleanup_key_value_table_and_error);
-    NG5_SUCCESS_OR_JUMP(carbon_error_init(&map->err),
+    NG5_SUCCESS_OR_JUMP(error_init(&map->err),
                            cleanup_key_value_table_and_error);
 
     return true;
 
 cleanup_key_value_table_and_error:
-    if (!carbon_vec_drop(&map->table)) {
+    if (!vec_drop(&map->table)) {
         err_code = NG5_ERR_DROPFAILED;
     }
 cleanup_value_key_data_and_error:
-    if (!carbon_vec_drop(&map->value_data)) {
+    if (!vec_drop(&map->value_data)) {
         err_code = NG5_ERR_DROPFAILED;
     }
 cleanup_key_data_and_error:
-    if (!carbon_vec_drop(&map->key_data)) {
+    if (!vec_drop(&map->key_data)) {
         err_code = NG5_ERR_DROPFAILED;
     }
 error_handling:
@@ -67,15 +67,15 @@ error_handling:
 }
 
 NG5_EXPORT(bool)
-carbon_hashtable_drop(struct hashtable *map)
+hashtable_drop(struct hashtable *map)
 {
     NG5_NON_NULL_OR_ERROR(map)
 
     bool status = true;
 
-    status &= carbon_vec_drop(&map->table);
-    status &= carbon_vec_drop(&map->value_data);
-    status &= carbon_vec_drop(&map->key_data);
+    status &= vec_drop(&map->table);
+    status &= vec_drop(&map->value_data);
+    status &= vec_drop(&map->key_data);
 
     if (!status) {
         error(&map->err, NG5_ERR_DROPFAILED);
@@ -85,30 +85,30 @@ carbon_hashtable_drop(struct hashtable *map)
 }
 
 NG5_EXPORT(struct hashtable *)
-carbon_hashtable_cpy(struct hashtable *src)
+hashtable_cpy(struct hashtable *src)
 {
     if(src)
     {
         struct hashtable *cpy = malloc(sizeof(struct hashtable));
 
-        carbon_hashtable_lock(src);
+        hashtable_lock(src);
 
-        carbon_hashtable_create(cpy, &src->err, src->key_data.elem_size, src->value_data.elem_size,
+        hashtable_create(cpy, &src->err, src->key_data.elem_size, src->value_data.elem_size,
                                 src->table.cap_elems);
 
         assert(src->key_data.cap_elems == src->value_data.cap_elems && src->value_data.cap_elems == src->table.cap_elems);
         assert((src->key_data.num_elems == src->value_data.num_elems) && src->value_data.num_elems <= src->table.num_elems);
 
-        carbon_vec_cpy_to(&cpy->key_data, &src->key_data);
-        carbon_vec_cpy_to(&cpy->value_data, &src->value_data);
-        carbon_vec_cpy_to(&cpy->table, &src->table);
+        vec_cpy_to(&cpy->key_data, &src->key_data);
+        vec_cpy_to(&cpy->value_data, &src->value_data);
+        vec_cpy_to(&cpy->table, &src->table);
         cpy->size = src->size;
-        carbon_error_cpy(&cpy->err, &src->err);
+        error_cpy(&cpy->err, &src->err);
 
         assert(cpy->key_data.cap_elems == src->value_data.cap_elems && src->value_data.cap_elems == cpy->table.cap_elems);
         assert((cpy->key_data.num_elems == src->value_data.num_elems) && src->value_data.num_elems <= cpy->table.num_elems);
 
-        carbon_hashtable_unlock(src);
+        hashtable_unlock(src);
         return cpy;
     } else
     {
@@ -118,17 +118,17 @@ carbon_hashtable_cpy(struct hashtable *src)
 }
 
 NG5_EXPORT(bool)
-carbon_hashtable_clear(struct hashtable *map)
+hashtable_clear(struct hashtable *map)
 {
     NG5_NON_NULL_OR_ERROR(map)
     assert(map->key_data.cap_elems == map->value_data.cap_elems && map->value_data.cap_elems == map->table.cap_elems);
     assert((map->key_data.num_elems == map->value_data.num_elems) && map->value_data.num_elems <= map->table.num_elems);
 
-    carbon_hashtable_lock(map);
+    hashtable_lock(map);
 
-    bool     status   = carbon_vec_clear(&map->key_data) &&
-                        carbon_vec_clear(&map->value_data) &&
-                        carbon_vec_zero_memory(&map->table);
+    bool     status   = vec_clear(&map->key_data) &&
+                        vec_clear(&map->value_data) &&
+                        vec_zero_memory(&map->table);
 
     map->size = 0;
 
@@ -139,13 +139,13 @@ carbon_hashtable_clear(struct hashtable *map)
         error(&map->err, NG5_ERR_OPPFAILED);
     }
 
-    carbon_hashtable_unlock(map);
+    hashtable_unlock(map);
 
     return status;
 }
 
 NG5_EXPORT(bool)
-carbon_hashtable_avg_displace(float *displace, const struct hashtable *map)
+hashtable_avg_displace(float *displace, const struct hashtable *map)
 {
     NG5_NON_NULL_OR_ERROR(displace);
     NG5_NON_NULL_OR_ERROR(map);
@@ -161,18 +161,18 @@ carbon_hashtable_avg_displace(float *displace, const struct hashtable *map)
 }
 
 NG5_EXPORT(bool)
-carbon_hashtable_lock(struct hashtable *map)
+hashtable_lock(struct hashtable *map)
 {
     NG5_NON_NULL_OR_ERROR(map)
-    //carbon_spinlock_acquire(&map->lock);
+    //spinlock_acquire(&map->lock);
     return true;
 }
 
 NG5_EXPORT(bool)
-carbon_hashtable_unlock(struct hashtable *map)
+hashtable_unlock(struct hashtable *map)
 {
     NG5_NON_NULL_OR_ERROR(map)
-    //carbon_spinlock_release(&map->lock);
+    //spinlock_release(&map->lock);
     return true;
 }
 
@@ -273,7 +273,7 @@ insert_or_update(struct hashtable *map, const u32 *bucket_idxs, const void *keys
 }
 
 NG5_EXPORT(bool)
-carbon_hashtable_insert_or_update(struct hashtable *map, const void *keys, const void *values, uint_fast32_t num_pairs)
+hashtable_insert_or_update(struct hashtable *map, const void *keys, const void *values, uint_fast32_t num_pairs)
 {
     NG5_NON_NULL_OR_ERROR(map)
     NG5_NON_NULL_OR_ERROR(keys)
@@ -282,7 +282,7 @@ carbon_hashtable_insert_or_update(struct hashtable *map, const void *keys, const
     assert(map->key_data.cap_elems == map->value_data.cap_elems && map->value_data.cap_elems == map->table.cap_elems);
     assert((map->key_data.num_elems == map->value_data.num_elems) && map->value_data.num_elems <= map->table.num_elems);
 
-    carbon_hashtable_lock(map);
+    hashtable_lock(map);
 
     u32 *bucket_idxs = malloc(num_pairs * sizeof(u32));
     if (!bucket_idxs)
@@ -307,15 +307,15 @@ carbon_hashtable_insert_or_update(struct hashtable *map, const void *keys, const
                                     num_pairs - cont_idx);
         if (cont_idx != 0) {
             /* rehashing is required, and [status, num_pairs) are left to be inserted */
-            if (!carbon_hashtable_rehash(map)) {
-                carbon_hashtable_unlock(map);
+            if (!hashtable_rehash(map)) {
+                hashtable_unlock(map);
                 return false;
             }
         }
     } while (cont_idx != 0);
 
     free(bucket_idxs);
-    carbon_hashtable_unlock(map);
+    hashtable_unlock(map);
 
     return true;
 }
@@ -330,23 +330,23 @@ struct hashtable_header
 };
 
 NG5_EXPORT(bool)
-carbon_hashtable_serialize(FILE *file, struct hashtable *table)
+hashtable_serialize(FILE *file, struct hashtable *table)
 {
     offset_t header_pos = ftell(file);
     fseek(file, sizeof(struct hashtable_header), SEEK_CUR);
 
     offset_t key_data_off = ftell(file);
-    if (!carbon_vec_serialize(file, &table->key_data)) {
+    if (!vec_serialize(file, &table->key_data)) {
         goto error_handling;
     }
 
     offset_t value_data_off = ftell(file);
-    if (!carbon_vec_serialize(file, &table->value_data)) {
+    if (!vec_serialize(file, &table->value_data)) {
         goto error_handling;
     }
 
     offset_t table_off = ftell(file);
-    if (!carbon_vec_serialize(file, &table->table)) {
+    if (!vec_serialize(file, &table->table)) {
         goto error_handling;
     }
 
@@ -371,7 +371,7 @@ error_handling:
 }
 
 NG5_EXPORT(bool)
-carbon_hashtable_deserialize(struct hashtable *table, struct err *err, FILE *file)
+hashtable_deserialize(struct hashtable *table, struct err *err, FILE *file)
 {
     NG5_NON_NULL_OR_ERROR(table)
     NG5_NON_NULL_OR_ERROR(err)
@@ -392,25 +392,25 @@ carbon_hashtable_deserialize(struct hashtable *table, struct err *err, FILE *fil
     }
 
     fseek(file, header.key_data_off, SEEK_SET);
-    if (!carbon_vec_deserialize(&table->key_data, err, file)) {
+    if (!vec_deserialize(&table->key_data, err, file)) {
         err_code = err->code;
         goto error_handling;
     }
 
     fseek(file, header.value_data_off, SEEK_SET);
-    if (!carbon_vec_deserialize(&table->value_data, err, file)) {
+    if (!vec_deserialize(&table->value_data, err, file)) {
         err_code = err->code;
         goto error_handling;
     }
 
     fseek(file, header.table_off, SEEK_SET);
-    if (!carbon_vec_deserialize(&table->table, err, file)) {
+    if (!vec_deserialize(&table->table, err, file)) {
         err_code = err->code;
         goto error_handling;
     }
 
-    carbon_spinlock_init(&table->lock);
-    carbon_error_init(&table->err);
+    spinlock_init(&table->lock);
+    error_init(&table->err);
     return true;
 
 error_handling:
@@ -420,18 +420,18 @@ error_handling:
 }
 
 NG5_EXPORT(bool)
-carbon_hashtable_remove_if_contained(struct hashtable *map, const void *keys, size_t num_pairs)
+hashtable_remove_if_contained(struct hashtable *map, const void *keys, size_t num_pairs)
 {
     NG5_NON_NULL_OR_ERROR(map)
     NG5_NON_NULL_OR_ERROR(keys)
 
-    carbon_hashtable_lock(map);
+    hashtable_lock(map);
 
     u32 *bucket_idxs = malloc(num_pairs * sizeof(u32));
     if (!bucket_idxs)
     {
         error(&map->err, NG5_ERR_MALLOCERR);
-        carbon_hashtable_unlock(map);
+        hashtable_unlock(map);
         return false;
     }
 
@@ -471,20 +471,20 @@ carbon_hashtable_remove_if_contained(struct hashtable *map, const void *keys, si
 
     free(bucket_idxs);
 
-    carbon_hashtable_unlock(map);
+    hashtable_unlock(map);
 
     return true;
 }
 
 NG5_EXPORT(const void *)
-carbon_hashtable_get_value(struct hashtable *map, const void *key)
+hashtable_get_value(struct hashtable *map, const void *key)
 {
     NG5_NON_NULL_OR_ERROR(map)
     NG5_NON_NULL_OR_ERROR(key)
 
     const void *result = NULL;
 
-    carbon_hashtable_lock(map);
+    hashtable_lock(map);
 
     u32 bucket_idx = HASHCODE_OF(map->key_data.elem_size, key) % map->table.num_elems;
     u32 actual_idx = bucket_idx;
@@ -508,43 +508,43 @@ carbon_hashtable_get_value(struct hashtable *map, const void *key)
         result = get_bucket_value(bucket, map);
     }
 
-    carbon_hashtable_unlock(map);
+    hashtable_unlock(map);
 
     return result;
 }
 
 NG5_EXPORT(bool)
-carbon_hashtable_get_fload_factor(float *factor, struct hashtable *map)
+hashtable_get_fload_factor(float *factor, struct hashtable *map)
 {
     NG5_NON_NULL_OR_ERROR(factor)
     NG5_NON_NULL_OR_ERROR(map)
 
-    carbon_hashtable_lock(map);
+    hashtable_lock(map);
 
     *factor = map->size / (float) map->table.num_elems;
 
-    carbon_hashtable_unlock(map);
+    hashtable_unlock(map);
 
     return true;
 }
 
 NG5_EXPORT(bool)
-carbon_hashtable_rehash(struct hashtable *map)
+hashtable_rehash(struct hashtable *map)
 {
     NG5_NON_NULL_OR_ERROR(map)
 
-    carbon_hashtable_lock(map);
+    hashtable_lock(map);
 
-    struct hashtable *cpy = carbon_hashtable_cpy(map);
-    carbon_hashtable_clear(map);
+    struct hashtable *cpy = hashtable_cpy(map);
+    hashtable_clear(map);
 
     size_t new_cap = (cpy->key_data.cap_elems + 1) * 1.7f;
 
-    carbon_vec_grow_to(&map->key_data, new_cap);
-    carbon_vec_grow_to(&map->value_data, new_cap);
-    carbon_vec_grow_to(&map->table, new_cap);
-    carbon_vec_enlarge_size_to_capacity(&map->table);
-    carbon_vec_zero_memory(&map->table);
+    vec_grow_to(&map->key_data, new_cap);
+    vec_grow_to(&map->value_data, new_cap);
+    vec_grow_to(&map->table, new_cap);
+    vec_enlarge_size_to_capacity(&map->table);
+    vec_zero_memory(&map->table);
 
     assert(map->key_data.cap_elems == map->value_data.cap_elems && map->value_data.cap_elems == map->table.cap_elems);
     assert((map->key_data.num_elems == map->value_data.num_elems) && map->value_data.num_elems <= map->table.num_elems);
@@ -554,14 +554,14 @@ carbon_hashtable_rehash(struct hashtable *map)
         if (bucket->in_use_flag) {
             const void *old_key = get_bucket_key(bucket, cpy);
             const void *old_value = get_bucket_value(bucket, cpy);
-            if (!carbon_hashtable_insert_or_update(map, old_key, old_value, 1)) {
+            if (!hashtable_insert_or_update(map, old_key, old_value, 1)) {
                 error(&map->err, NG5_ERR_REHASH_NOROLLBACK)
-                carbon_hashtable_unlock(map);
+                hashtable_unlock(map);
                 return false;
             }
         }
     }
 
-    carbon_hashtable_unlock(map);
+    hashtable_unlock(map);
     return true;
 }

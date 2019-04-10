@@ -18,7 +18,7 @@
 #include "std/sort.h"
 
 NG5_EXPORT(bool)
-carbon_sort_qsort_indicies(size_t *indices, const void *base, size_t width, less_eq_func_t comp, size_t nelemns,
+sort_qsort_indicies(size_t *indices, const void *base, size_t width, less_eq_func_t comp, size_t nelemns,
                            struct allocator *alloc)
 {
     NG5_NON_NULL_OR_ERROR(base);
@@ -29,7 +29,7 @@ carbon_sort_qsort_indicies(size_t *indices, const void *base, size_t width, less
     }
 
     i64 h      = nelemns - 1;
-    i64 *stack = (i64 *) carbon_malloc(alloc, (h + 1) *sizeof(i64));
+    i64 *stack = (i64 *) alloc_malloc(alloc, (h + 1) *sizeof(i64));
     i64 top   = -1;
     i64 l      = 0;
 
@@ -55,12 +55,12 @@ carbon_sort_qsort_indicies(size_t *indices, const void *base, size_t width, less
         }
     }
 
-    NG5_CHECK_SUCCESS(carbon_free(alloc, stack));
+    NG5_CHECK_SUCCESS(alloc_free(alloc, stack));
     return true;
 }
 
 NG5_EXPORT(int)
-carbon_sort_qsort_indicies_wargs(size_t *indices, const void *base, size_t width, less_eq_wargs_func_t comp,
+sort_qsort_indicies_wargs(size_t *indices, const void *base, size_t width, less_eq_wargs_func_t comp,
                                  size_t nelemens, struct allocator *alloc, void *args)
 {
     NG5_NON_NULL_OR_ERROR(base);
@@ -71,7 +71,7 @@ carbon_sort_qsort_indicies_wargs(size_t *indices, const void *base, size_t width
     }
 
     i64 h      = nelemens - 1;
-    i64 *stack = carbon_malloc(alloc, (h + 1) *sizeof(i64));
+    i64 *stack = alloc_malloc(alloc, (h + 1) *sizeof(i64));
     assert (stack);
 
     i64 top   = -1;
@@ -99,12 +99,12 @@ carbon_sort_qsort_indicies_wargs(size_t *indices, const void *base, size_t width
         }
     }
 
-    NG5_CHECK_SUCCESS(carbon_free(alloc, stack));
+    NG5_CHECK_SUCCESS(alloc_free(alloc, stack));
     return true;
 }
 
 NG5_EXPORT(size_t)
-carbon_sort_bsearch_indicies(const size_t *indicies, const void *base, size_t width, size_t nelemens,
+sort_bsearch_indicies(const size_t *indicies, const void *base, size_t width, size_t nelemens,
                              const void *neelde, eq_func_t compEq, less_func_t compLess)
 {
     size_t l = 0;
@@ -132,7 +132,7 @@ carbon_sort_bsearch_indicies(const size_t *indicies, const void *base, size_t wi
 }
 
 NG5_EXPORT(size_t)
-carbon_sort_get_min(const size_t *elements, size_t nelemens)
+sort_get_min(const size_t *elements, size_t nelemens)
 {
     size_t min = (size_t) -1;
     while (nelemens--) {
@@ -143,7 +143,7 @@ carbon_sort_get_min(const size_t *elements, size_t nelemens)
 }
 
 NG5_EXPORT(size_t)
-carbon_sort_get_max(const size_t *elements, size_t nelemens)
+sort_get_max(const size_t *elements, size_t nelemens)
 {
     size_t max = 0;
     while (nelemens--) {
@@ -154,7 +154,7 @@ carbon_sort_get_max(const size_t *elements, size_t nelemens)
 }
 
 NG5_EXPORT(double)
-carbon_sort_get_sum(const size_t *elements, size_t nelemens)
+sort_get_sum(const size_t *elements, size_t nelemens)
 {
     double sum = 0;
     while (nelemens--) {
@@ -165,7 +165,7 @@ carbon_sort_get_sum(const size_t *elements, size_t nelemens)
 }
 
 NG5_EXPORT(double)
-carbon_sort_get_avg(const size_t *elements, size_t nelemens)
+sort_get_avg(const size_t *elements, size_t nelemens)
 {
-    return carbon_sort_get_sum(elements, nelemens) / (double) nelemens;
+    return sort_get_sum(elements, nelemens) / (double) nelemens;
 }

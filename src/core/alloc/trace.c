@@ -195,7 +195,7 @@ static inline void *alloc_register(size_t size)
             return entry->new_ptr_func(size);
         }
     }
-    carbon_print_error_and_die(NG5_ERR_MALLOCERR)
+    print_error_and_die(NG5_ERR_MALLOCERR)
     return NULL;
 }
 
@@ -216,19 +216,19 @@ static void invoke_clone(struct allocator *dst, const struct allocator *self);
 #define LAZY_INIT()                                                                                                    \
 if (!global_trace_stats.malloc_sizes) {                                                                                \
     global_trace_stats.malloc_sizes = malloc(sizeof(struct vector));                                                    \
-    carbon_vec_create(global_trace_stats.malloc_sizes, &default_alloc, sizeof(size_t), 1000000);                       \
-    global_trace_stats.spinlock = carbon_malloc(&default_alloc, sizeof(struct spinlock));                            \
-    carbon_spinlock_init(global_trace_stats.spinlock);                                                                 \
+    vec_create(global_trace_stats.malloc_sizes, &default_alloc, sizeof(size_t), 1000000);                       \
+    global_trace_stats.spinlock = alloc_malloc(&default_alloc, sizeof(struct spinlock));                            \
+    spinlock_init(global_trace_stats.spinlock);                                                                 \
     global_trace_stats.statistics_file = fopen("trace-alloc-stats.csv", "a");                                          \
     fprintf(global_trace_stats.statistics_file,                                                                        \
             "system_time;num_alloc_calls;num_realloc_calls;num_free_calls;memory_in_use\n");                           \
-    global_trace_stats.startup_timestamp = carbon_time_now_wallclock();                                                \
+    global_trace_stats.startup_timestamp = time_now_wallclock();                                                \
 }
 
 #define WRITE_STATS_FILE()                                                                                             \
 {                                                                                                                      \
     fprintf(global_trace_stats.statistics_file, "%" PRIu64 ";%zu;%zu;%zu;%zu\n",                                       \
-            carbon_time_now_wallclock() - global_trace_stats.startup_timestamp,                                        \
+            time_now_wallclock() - global_trace_stats.startup_timestamp,                                        \
             global_trace_stats.num_malloc_calls,                                                                       \
             global_trace_stats.num_realloc_calls,                                                                      \
             global_trace_stats.num_free_calls,                                                                         \
@@ -236,11 +236,11 @@ if (!global_trace_stats.malloc_sizes) {                                         
     fflush(global_trace_stats.statistics_file);                                                                        \
 }
 
-int carbon_tracer_alloc_create(struct allocator *alloc)
+int tracer_alloc_create(struct allocator *alloc)
 {
     NG5_NON_NULL_OR_ERROR(alloc);
     struct allocator default_alloc;
-    carbon_alloc_create_std(&default_alloc);
+    alloc_create_std(&default_alloc);
 
     alloc->extra = NULL;
     LAZY_INIT();
@@ -257,10 +257,10 @@ static void *invoke_malloc(struct allocator *self, size_t size)
 {
     NG5_UNUSED(self);
 
-    carbon_spinlock_acquire(global_trace_stats.spinlock);
+    spinlock_acquire(global_trace_stats.spinlock);
 
     struct allocator default_alloc;
-    carbon_alloc_create_std(&default_alloc);
+    alloc_create_std(&default_alloc);
 
     LAZY_INIT();
 
@@ -268,14 +268,14 @@ static void *invoke_malloc(struct allocator *self, size_t size)
 
     //DEBUG(TRACE_ALLOC_TAG, "malloc %zu B, call to malloc: %zu so far (allocator %p)", size,
     //      global_trace_stats.num_malloc_calls, self);
-    carbon_vec_push(global_trace_stats.malloc_sizes, &size, 1);
+    vec_push(global_trace_stats.malloc_sizes, &size, 1);
 
-    size_t min_alloc_size = carbon_sort_get_min(vec_all(global_trace_stats.malloc_sizes, size_t),
-                                                carbon_vec_length(global_trace_stats.malloc_sizes));
-    size_t max_alloc_size = carbon_sort_get_max(vec_all(global_trace_stats.malloc_sizes, size_t),
-                                                carbon_vec_length(global_trace_stats.malloc_sizes));
-    double avg_alloc_size = carbon_sort_get_avg(vec_all(global_trace_stats.malloc_sizes, size_t),
-                                                carbon_vec_length(global_trace_stats.malloc_sizes));
+    size_t min_alloc_size = sort_get_min(vec_all(global_trace_stats.malloc_sizes, size_t),
+                                                vec_length(global_trace_stats.malloc_sizes));
+    size_t max_alloc_size = sort_get_max(vec_all(global_trace_stats.malloc_sizes, size_t),
+                                                vec_length(global_trace_stats.malloc_sizes));
+    double avg_alloc_size = sort_get_avg(vec_all(global_trace_stats.malloc_sizes, size_t),
+                                                vec_length(global_trace_stats.malloc_sizes));
     global_trace_stats.total_size += size;
 
     NG5_UNUSED(min_alloc_size);
@@ -291,7 +291,7 @@ static void *invoke_malloc(struct allocator *self, size_t size)
 
     WRITE_STATS_FILE();
 
-    carbon_spinlock_release(global_trace_stats.spinlock);
+    spinlock_release(global_trace_stats.spinlock);
 
 
     return result;
@@ -301,10 +301,10 @@ static void *invoke_realloc(struct allocator *self, void *ptr, size_t size)
 {
     NG5_UNUSED(self);
 
-    carbon_spinlock_acquire(global_trace_stats.spinlock);
+    spinlock_acquire(global_trace_stats.spinlock);
 
     struct allocator default_alloc;
-    carbon_alloc_create_std(&default_alloc);
+    alloc_create_std(&default_alloc);
 
     LAZY_INIT();
 
@@ -325,14 +325,14 @@ static void *invoke_realloc(struct allocator *self, void *ptr, size_t size)
 
     if (size <= page_capacity) {
         *(size_t *) (ptr - 2 * sizeof(size_t)) = size;
-        carbon_spinlock_release(global_trace_stats.spinlock);
+        spinlock_release(global_trace_stats.spinlock);
         return ptr;
     }
     else {
         void *page_ptr = ptr - 2 * sizeof(size_t);
         free(page_ptr);
         void *result = alloc_register(size);
-        carbon_spinlock_release(global_trace_stats.spinlock);
+        spinlock_release(global_trace_stats.spinlock);
         return result;
     }
 }
@@ -341,10 +341,10 @@ static void invoke_free(struct allocator *self, void *ptr)
 {
     NG5_UNUSED(self);
 
-    carbon_spinlock_acquire(global_trace_stats.spinlock);
+    spinlock_acquire(global_trace_stats.spinlock);
 
     struct allocator default_alloc;
-    carbon_alloc_create_std(&default_alloc);
+    alloc_create_std(&default_alloc);
 
     void *page_ptr = ptr - 2 * sizeof(size_t);
 
@@ -362,7 +362,7 @@ static void invoke_free(struct allocator *self, void *ptr)
 
     free(page_ptr);
 
-    carbon_spinlock_release(global_trace_stats.spinlock);
+    spinlock_release(global_trace_stats.spinlock);
 }
 
 static void invoke_clone(struct allocator *dst, const struct allocator *self)

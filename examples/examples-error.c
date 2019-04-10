@@ -19,8 +19,8 @@
 
 int main(void) {
     struct err err;
-    carbon_error_init(&err);
+    error_init(&err);
     error_WDETAILS(&err, NG5_ERR_NOTFOUND, "some details");
-    carbon_error_print(&err);
+    error_print(&err);
     return EXIT_FAILURE;
 }

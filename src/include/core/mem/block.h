@@ -26,40 +26,40 @@ NG5_BEGIN_DECL
 struct memblock;
 
 NG5_EXPORT(bool)
-carbon_memblock_create(struct memblock **block, size_t size);
+memblock_create(struct memblock **block, size_t size);
 
 NG5_EXPORT(bool)
-carbon_memblock_from_file(struct memblock **block, FILE *file, size_t nbytes);
+memblock_from_file(struct memblock **block, FILE *file, size_t nbytes);
 
 NG5_EXPORT(bool)
-carbon_memblock_drop(struct memblock *block);
+memblock_drop(struct memblock *block);
 
 NG5_EXPORT(bool)
-carbon_memblock_get_error(struct err *out, struct memblock *block);
+memblock_get_error(struct err *out, struct memblock *block);
 
 NG5_EXPORT(bool)
-carbon_memblock_size(offset_t *size, const struct memblock *block);
+memblock_size(offset_t *size, const struct memblock *block);
 
 NG5_EXPORT(bool)
-carbon_memblock_write_to_file(FILE *file, const struct memblock *block);
+memblock_write_to_file(FILE *file, const struct memblock *block);
 
 NG5_EXPORT(const char *)
-carbon_memblock_raw_data(const struct memblock *block);
+memblock_raw_data(const struct memblock *block);
 
 NG5_EXPORT(bool)
-carbon_memblock_resize(struct memblock *block, size_t size);
+memblock_resize(struct memblock *block, size_t size);
 
 NG5_EXPORT(bool)
-carbon_memblock_write(struct memblock *block, offset_t position, const char *data, offset_t nbytes);
+memblock_write(struct memblock *block, offset_t position, const char *data, offset_t nbytes);
 
 NG5_EXPORT(bool)
-carbon_memblock_cpy(struct memblock **dst, struct memblock *src);
+memblock_cpy(struct memblock **dst, struct memblock *src);
 
 NG5_EXPORT(bool)
-carbon_memblock_shrink(struct memblock *block);
+memblock_shrink(struct memblock *block);
 
 NG5_EXPORT(void *)
-carbon_memblock_move_contents_and_drop(struct memblock *block);
+memblock_move_contents_and_drop(struct memblock *block);
 
 NG5_END_DECL
 

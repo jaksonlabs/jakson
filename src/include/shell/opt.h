@@ -21,7 +21,7 @@
 #include "shared/common.h"
 #include "std/vec.h"
 
-struct carbon_cmdopt
+struct cmdopt
 {
     char *opt_name;
     char *opt_desc;
@@ -29,47 +29,47 @@ struct carbon_cmdopt
     int (*callback)(int argc, char **argv, FILE *file);
 };
 
-struct carbon_cmdopt_group
+struct cmdopt_group
 {
-    struct vector ofType(struct carbon_cmdopt) cmd_options;
+    struct vector ofType(struct cmdopt) cmd_options;
     char *desc;
 };
 
-enum carbon_mod_arg_policy
+enum mod_arg_policy
 {
     NG5_MOD_ARG_REQUIRED,
     NG5_MOD_ARG_NOT_REQUIRED,
     NG5_MOD_ARG_MAYBE_REQUIRED,
 };
 
-struct carbon_cmdopt_mgr
+struct cmdopt_mgr
 {
-    struct vector ofType(struct carbon_cmdopt_group) groups;
-    enum carbon_mod_arg_policy policy;
-    bool (*fallback)(int argc, char **argv, FILE *file, struct carbon_cmdopt_mgr *manager);
+    struct vector ofType(struct cmdopt_group) groups;
+    enum mod_arg_policy policy;
+    bool (*fallback)(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager);
 
     char *module_name;
     char *module_desc;
 };
 
 NG5_EXPORT(bool)
-carbon_cmdopt_mgr_create(struct carbon_cmdopt_mgr *manager, char *module_name, char *module_desc,
-                         enum carbon_mod_arg_policy policy, bool (*fallback)(int argc, char **argv, FILE *file,
-                                                                          struct carbon_cmdopt_mgr *manager));
+cmdopt_mgr_create(struct cmdopt_mgr *manager, char *module_name, char *module_desc,
+                         enum mod_arg_policy policy, bool (*fallback)(int argc, char **argv, FILE *file,
+                                                                          struct cmdopt_mgr *manager));
 NG5_EXPORT(bool)
-carbon_cmdopt_mgr_drop(struct carbon_cmdopt_mgr *manager);
+cmdopt_mgr_drop(struct cmdopt_mgr *manager);
 
 NG5_EXPORT(bool)
-carbon_cmdopt_mgr_process(struct carbon_cmdopt_mgr *manager, int argc, char **argv, FILE *file);
+cmdopt_mgr_process(struct cmdopt_mgr *manager, int argc, char **argv, FILE *file);
 
 NG5_EXPORT(bool)
-carbon_cmdopt_mgr_create_group(struct carbon_cmdopt_group **group,
+cmdopt_mgr_create_group(struct cmdopt_group **group,
                                const char *desc,
-                               struct carbon_cmdopt_mgr *manager);
+                               struct cmdopt_mgr *manager);
 NG5_EXPORT(bool)
-carbon_cmdopt_group_add_cmd(struct carbon_cmdopt_group *group, const char *opt_name, char *opt_desc, char *opt_manfile,
+cmdopt_group_add_cmd(struct cmdopt_group *group, const char *opt_name, char *opt_desc, char *opt_manfile,
                             int (*callback)(int argc, char **argv, FILE *file));
 NG5_EXPORT(bool)
-carbon_cmdopt_mgr_show_help(FILE *file, struct carbon_cmdopt_mgr *manager);
+cmdopt_mgr_show_help(FILE *file, struct cmdopt_mgr *manager);
 
 #endif

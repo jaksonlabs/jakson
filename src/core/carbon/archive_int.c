@@ -19,7 +19,7 @@
 #include "core/carbon/archive_int.h"
 
 void
-carbon_int_read_prop_offsets(struct archive_prop_offs *prop_offsets,
+int_read_prop_offsets(struct archive_prop_offs *prop_offsets,
                              struct memfile *memfile,
                              const union object_flags *flags)
 {
@@ -105,28 +105,28 @@ carbon_int_read_prop_offsets(struct archive_prop_offs *prop_offsets,
 }
 
 void
-carbon_int_embedded_fixed_props_read(struct fixed_prop *prop, struct memfile *memfile) {
+int_embedded_fixed_props_read(struct fixed_prop *prop, struct memfile *memfile) {
     prop->header = NG5_MEMFILE_READ_TYPE(memfile, struct prop_header);
     prop->keys = (field_sid_t *) NG5_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(field_sid_t));
-    prop->values = carbon_memfile_peek(memfile, 1);
+    prop->values = memfile_peek(memfile, 1);
 }
 
 void
-carbon_int_embedded_var_props_read(struct var_prop *prop, struct memfile *memfile) {
+int_embedded_var_props_read(struct var_prop *prop, struct memfile *memfile) {
     prop->header = NG5_MEMFILE_READ_TYPE(memfile, struct prop_header);
     prop->keys = (field_sid_t *) NG5_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(field_sid_t));
     prop->offsets = (offset_t *) NG5_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(offset_t));
-    prop->values = carbon_memfile_peek(memfile, 1);
+    prop->values = memfile_peek(memfile, 1);
 }
 
 void
-carbon_int_embedded_null_props_read(struct null_prop *prop, struct memfile *memfile) {
+int_embedded_null_props_read(struct null_prop *prop, struct memfile *memfile) {
     prop->header = NG5_MEMFILE_READ_TYPE(memfile, struct prop_header);
     prop->keys = (field_sid_t *) NG5_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(field_sid_t));
 }
 
 void
-carbon_int_embedded_array_props_read(struct array_prop *prop, struct memfile *memfile) {
+int_embedded_array_props_read(struct array_prop *prop, struct memfile *memfile) {
     prop->header = NG5_MEMFILE_READ_TYPE(memfile, struct prop_header);
     prop->keys = (field_sid_t *) NG5_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(field_sid_t));
     prop->lengths = (u32 *) NG5_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(u32));
@@ -134,7 +134,7 @@ carbon_int_embedded_array_props_read(struct array_prop *prop, struct memfile *me
 }
 
 void
-carbon_int_embedded_table_props_read(struct table_prop *prop, struct memfile *memfile) {
+int_embedded_table_props_read(struct table_prop *prop, struct memfile *memfile) {
     prop->header->marker = *NG5_MEMFILE_READ_TYPE(memfile, char);
     prop->header->num_entries = *NG5_MEMFILE_READ_TYPE(memfile, u8);
     prop->keys = (field_sid_t *) NG5_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(field_sid_t));
@@ -142,7 +142,7 @@ carbon_int_embedded_table_props_read(struct table_prop *prop, struct memfile *me
 }
 
 field_e
-carbon_int_get_value_type_of_char(char c)
+int_get_value_type_of_char(char c)
 {
     size_t len = sizeof(value_array_marker_mapping)/ sizeof(value_array_marker_mapping[0]);
     for (size_t i = 0; i < len; i++) {
@@ -154,7 +154,7 @@ carbon_int_get_value_type_of_char(char c)
 }
 
 field_e // TODO: check whether 'field_e' can be replaced by 'enum field_type'
-carbon_int_marker_to_field_type(char symbol)
+int_marker_to_field_type(char symbol)
 {
     switch (symbol) {
     case MARKER_SYMBOL_PROP_NULL:
@@ -197,42 +197,7 @@ carbon_int_marker_to_field_type(char symbol)
     case MARKER_SYMBOL_PROP_OBJECT_ARRAY:
         return field_object;
     default: {
-        carbon_print_error_and_die(NG5_ERR_MARKERMAPPING);
+        print_error_and_die(NG5_ERR_MARKERMAPPING);
     }
-    }
-}
-
-enum field_type
-carbon_int_field_type_to_basic_type(field_e type)
-{
-    switch (type) {
-    case field_null:
-        return NG5_BASIC_TYPE_NULL;
-    case field_bool:
-        return NG5_BASIC_TYPE_BOOLEAN;
-    case field_int8:
-        return NG5_BASIC_TYPE_INT8;
-    case field_int16:
-        return NG5_BASIC_TYPE_INT16;
-    case field_int32:
-        return NG5_BASIC_TYPE_INT32;
-    case field_int64:
-        return NG5_BASIC_TYPE_INT64;
-    case field_uint8:
-        return NG5_BASIC_TYPE_UINT8;
-    case field_uint16:
-        return NG5_BASIC_TYPE_UINT16;
-    case field_uint32:
-        return NG5_BASIC_TYPE_UINT32;
-    case field_uint64:
-        return NG5_BASIC_TYPE_UINT64;
-    case field_float:
-        return NG5_BASIC_TYPE_NUMBER;
-    case field_string:
-        return NG5_BASIC_TYPE_STRING;
-    case field_object:
-        return NG5_BASIC_TYPE_OBJECT;
-    default:
-        carbon_print_error_and_die(NG5_ERR_INTERNALERR);
     }
 }

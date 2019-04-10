@@ -26,37 +26,37 @@ NG5_BEGIN_DECL
 typedef u64 object_id_t;
 
 NG5_EXPORT(bool)
-carbon_object_id_create(object_id_t *out);
+object_id_create(object_id_t *out);
 
 NG5_EXPORT(bool)
-carbon_object_id_get_global_wallclocktime(uint_fast8_t *out, object_id_t id);
+object_id_get_global_wallclocktime(uint_fast8_t *out, object_id_t id);
 
 NG5_EXPORT(bool)
-carbon_object_id_get_global_build_path_bit(uint_fast8_t *out, object_id_t id);
+object_id_get_global_build_path_bit(uint_fast8_t *out, object_id_t id);
 
 NG5_EXPORT(bool)
-carbon_object_id_get_global_build_time_bit(uint_fast8_t *out, object_id_t id);
+object_id_get_global_build_time_bit(uint_fast8_t *out, object_id_t id);
 
 NG5_EXPORT(bool)
-carbon_object_id_get_process_id(uint_fast8_t *out, object_id_t id);
+object_id_get_process_id(uint_fast8_t *out, object_id_t id);
 
 NG5_EXPORT(bool)
-carbon_object_id_get_process_magic(uint_fast8_t *out, object_id_t id);
+object_id_get_process_magic(uint_fast8_t *out, object_id_t id);
 
 NG5_EXPORT(bool)
-carbon_object_id_get_process_counter(uint_fast16_t *out, object_id_t id);
+object_id_get_process_counter(uint_fast16_t *out, object_id_t id);
 
 NG5_EXPORT(bool)
-carbon_object_id_get_thread_id(uint_fast8_t *out, object_id_t id);
+object_id_get_thread_id(uint_fast8_t *out, object_id_t id);
 
 NG5_EXPORT(bool)
-carbon_object_id_get_thread_magic(uint_fast8_t *out, object_id_t id);
+object_id_get_thread_magic(uint_fast8_t *out, object_id_t id);
 
 NG5_EXPORT(bool)
-carbon_object_id_get_thread_counter(uint_fast32_t *out, object_id_t id);
+object_id_get_thread_counter(uint_fast32_t *out, object_id_t id);
 
 NG5_EXPORT(bool)
-carbon_object_id_get_call_random(uint_fast8_t *out, object_id_t id);
+object_id_get_call_random(uint_fast8_t *out, object_id_t id);
 
 
 NG5_END_DECL

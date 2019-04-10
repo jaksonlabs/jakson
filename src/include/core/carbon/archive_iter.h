@@ -254,45 +254,45 @@ NG5_DEFINE_GET_ERROR_FUNCTION(archive_column_entry_object_iter, struct column_ob
 
 NG5_DEFINE_GET_ERROR_FUNCTION(archive_object, struct archive_object, obj)
 
-NG5_EXPORT(bool) carbon_archive_prop_iter_from_archive(struct prop_iter *iter, struct err *err, u16 mask,
+NG5_EXPORT(bool) archive_prop_iter_from_archive(struct prop_iter *iter, struct err *err, u16 mask,
         struct archive *archive);
 
-NG5_EXPORT(bool) carbon_archive_prop_iter_from_object(struct prop_iter *iter, u16 mask, struct err *err,
+NG5_EXPORT(bool) archive_prop_iter_from_object(struct prop_iter *iter, u16 mask, struct err *err,
         const struct archive_object *obj);
 
-NG5_EXPORT(bool) carbon_archive_value_vector_from_prop_iter(struct archive_value_vector *value, struct err *err,
+NG5_EXPORT(bool) archive_value_vector_from_prop_iter(struct archive_value_vector *value, struct err *err,
         struct prop_iter *prop_iter);
 
-NG5_EXPORT(bool) carbon_archive_prop_iter_next(enum prop_iter_mode *type,
+NG5_EXPORT(bool) archive_prop_iter_next(enum prop_iter_mode *type,
         struct archive_value_vector *value_vector, archive_collection_iter_t *collection_iter,
         struct prop_iter *prop_iter);
 
-NG5_EXPORT(const field_sid_t *)carbon_archive_collection_iter_get_keys(u32 *num_keys,
+NG5_EXPORT(const field_sid_t *)archive_collection_iter_get_keys(u32 *num_keys,
         archive_collection_iter_t *iter);
 
-NG5_EXPORT(bool) carbon_archive_collection_next_column_group(archive_column_group_iter_t *group_iter,
+NG5_EXPORT(bool) archive_collection_next_column_group(archive_column_group_iter_t *group_iter,
         archive_collection_iter_t *iter);
 
-NG5_EXPORT(const object_id_t *)carbon_archive_column_group_get_object_ids(u32 *num_objects,
+NG5_EXPORT(const object_id_t *)archive_column_group_get_object_ids(u32 *num_objects,
         archive_column_group_iter_t *iter);
 
-NG5_EXPORT(bool) carbon_archive_column_group_next_column(archive_column_iter_t *column_iter,
+NG5_EXPORT(bool) archive_column_group_next_column(archive_column_iter_t *column_iter,
         archive_column_group_iter_t *iter);
 
-NG5_EXPORT(bool) carbon_archive_column_get_name(field_sid_t *name, enum field_type *type,
+NG5_EXPORT(bool) archive_column_get_name(field_sid_t *name, enum field_type *type,
         archive_column_iter_t *column_iter);
 
-NG5_EXPORT(const u32 *)carbon_archive_column_get_entry_positions(u32 *num_entry,
+NG5_EXPORT(const u32 *)archive_column_get_entry_positions(u32 *num_entry,
         archive_column_iter_t *column_iter);
 
-NG5_EXPORT(bool) carbon_archive_column_next_entry(archive_column_entry_iter_t *entry_iter,
+NG5_EXPORT(bool) archive_column_next_entry(archive_column_entry_iter_t *entry_iter,
         archive_column_iter_t *iter);
 
-NG5_EXPORT(bool) carbon_archive_column_entry_get_type(enum field_type *type, archive_column_entry_iter_t *entry);
+NG5_EXPORT(bool) archive_column_entry_get_type(enum field_type *type, archive_column_entry_iter_t *entry);
 
 #define DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(built_in_type, name)                                         \
 NG5_EXPORT(const built_in_type *)                                                                                   \
-carbon_archive_column_entry_get_##name(u32 *array_length, archive_column_entry_iter_t *entry);
+archive_column_entry_get_##name(u32 *array_length, archive_column_entry_iter_t *entry);
 
 DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_i8_t, int8s);
 DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_i16_t, int16s);
@@ -307,39 +307,39 @@ DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_number_t, numbers);
 DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_boolean_t, booleans);
 DEFINE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_u32_t, nulls);
 
-NG5_EXPORT(bool) carbon_archive_column_entry_get_objects(struct column_object_iter *iter,
+NG5_EXPORT(bool) archive_column_entry_get_objects(struct column_object_iter *iter,
         archive_column_entry_iter_t *entry);
 
-NG5_EXPORT(const struct archive_object *)carbon_archive_column_entry_object_iter_next_object(
+NG5_EXPORT(const struct archive_object *)archive_column_entry_object_iter_next_object(
         struct column_object_iter *iter);
 
-NG5_EXPORT(bool) carbon_archive_object_get_object_id(object_id_t *id, const struct archive_object *object);
+NG5_EXPORT(bool) archive_object_get_object_id(object_id_t *id, const struct archive_object *object);
 
-NG5_EXPORT(bool) carbon_archive_object_get_prop_iter(struct prop_iter *iter,
+NG5_EXPORT(bool) archive_object_get_prop_iter(struct prop_iter *iter,
         const struct archive_object *object);
 
-NG5_EXPORT(bool) carbon_archive_value_vector_get_object_id(object_id_t *id,
+NG5_EXPORT(bool) archive_value_vector_get_object_id(object_id_t *id,
         const struct archive_value_vector *iter);
 
-NG5_EXPORT(const field_sid_t *)carbon_archive_value_vector_get_keys(u32 *num_keys, struct archive_value_vector *iter);
+NG5_EXPORT(const field_sid_t *)archive_value_vector_get_keys(u32 *num_keys, struct archive_value_vector *iter);
 
-NG5_EXPORT(const field_sid_t *)carbon_archive_value_vector_get_keys(u32 *num_keys, struct archive_value_vector *iter);
+NG5_EXPORT(const field_sid_t *)archive_value_vector_get_keys(u32 *num_keys, struct archive_value_vector *iter);
 
-NG5_EXPORT(bool) carbon_archive_value_vector_get_basic_type(enum field_type *type,
+NG5_EXPORT(bool) archive_value_vector_get_basic_type(enum field_type *type,
         const struct archive_value_vector *value);
 
-NG5_EXPORT(bool) carbon_archive_value_vector_is_array_type(bool *is_array, const struct archive_value_vector *value);
+NG5_EXPORT(bool) archive_value_vector_is_array_type(bool *is_array, const struct archive_value_vector *value);
 
-NG5_EXPORT(bool) carbon_archive_value_vector_get_length(u32 *length, const struct archive_value_vector *value);
+NG5_EXPORT(bool) archive_value_vector_get_length(u32 *length, const struct archive_value_vector *value);
 
-NG5_EXPORT(bool) carbon_archive_value_vector_is_of_objects(bool *is_object, struct archive_value_vector *value);
+NG5_EXPORT(bool) archive_value_vector_is_of_objects(bool *is_object, struct archive_value_vector *value);
 
-NG5_EXPORT(bool) carbon_archive_value_vector_get_object_at(struct archive_object *object, u32 idx,
+NG5_EXPORT(bool) archive_value_vector_get_object_at(struct archive_object *object, u32 idx,
         struct archive_value_vector *value);
 
 #define DEFINE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(name)                                                         \
 NG5_EXPORT(bool)                                                                                                    \
-carbon_archive_value_vector_is_##name(bool *type_match, struct archive_value_vector *value);
+archive_value_vector_is_##name(bool *type_match, struct archive_value_vector *value);
 
 DEFINE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(int8);
 DEFINE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(int16);
@@ -356,7 +356,7 @@ DEFINE_NG5_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(null);
 
 #define DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(name, built_in_type)                                         \
 NG5_EXPORT(const built_in_type *)                                                                                   \
-carbon_archive_value_vector_get_##name(u32 *num_values, struct archive_value_vector *value);
+archive_value_vector_get_##name(u32 *num_values, struct archive_value_vector *value);
 
 DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int8s, field_i8_t)
 DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int16s, field_i16_t)
@@ -370,12 +370,12 @@ DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(strings, field_sid_t)
 DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(numbers, field_number_t)
 DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(booleans, field_boolean_t)
 
-NG5_EXPORT(const field_u32_t *)carbon_archive_value_vector_get_null_arrays(u32 *num_values,
+NG5_EXPORT(const field_u32_t *)archive_value_vector_get_null_arrays(u32 *num_values,
         struct archive_value_vector *value);
 
 #define DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(name, built_in_type)                                      \
 NG5_EXPORT(const built_in_type *)                                                                                   \
-carbon_archive_value_vector_get_##name##_arrays_at(u32 *array_length, u32 idx,                               \
+archive_value_vector_get_##name##_arrays_at(u32 *array_length, u32 idx,                               \
                                                struct archive_value_vector *value);                                  \
 
 DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(int8, field_i8_t);
@@ -390,7 +390,7 @@ DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(string, field_sid_t);
 DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(number, field_number_t);
 DEFINE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(boolean, field_boolean_t);
 
-void carbon_int_reset_cabin_object_mem_file(struct archive_object *object);
+void int_reset_cabin_object_mem_file(struct archive_object *object);
 
 NG5_END_DECL
 

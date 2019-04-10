@@ -19,7 +19,7 @@
 
 #include "utils/convert.h"
 
-i64 carbon_convert_atoi64(const char *string)
+i64 convert_atoi64(const char *string)
 {
     i64 number;
     char character ;
@@ -33,7 +33,7 @@ i64 carbon_convert_atoi64(const char *string)
     }
 }
 
-u64 carbon_convert_atoiu64(const char *string)
+u64 convert_atoiu64(const char *string)
 {
     u64 number;
     char character ;

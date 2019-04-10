@@ -56,46 +56,46 @@ struct hashtable
 NG5_DEFINE_GET_ERROR_FUNCTION(hashtable, struct hashtable, table);
 
 NG5_EXPORT(bool)
-carbon_hashtable_create(struct hashtable *map, struct err *err, size_t key_size, size_t value_size, size_t capacity);
+hashtable_create(struct hashtable *map, struct err *err, size_t key_size, size_t value_size, size_t capacity);
 
 NG5_EXPORT(struct hashtable *)
-carbon_hashtable_cpy(struct hashtable *src);
+hashtable_cpy(struct hashtable *src);
 
 NG5_EXPORT(bool)
-carbon_hashtable_drop(struct hashtable *map);
+hashtable_drop(struct hashtable *map);
 
 NG5_EXPORT(bool)
-carbon_hashtable_clear(struct hashtable *map);
+hashtable_clear(struct hashtable *map);
 
 NG5_EXPORT(bool)
-carbon_hashtable_avg_displace(float *displace, const struct hashtable *map);
+hashtable_avg_displace(float *displace, const struct hashtable *map);
 
 NG5_EXPORT(bool)
-carbon_hashtable_lock(struct hashtable *map);
+hashtable_lock(struct hashtable *map);
 
 NG5_EXPORT(bool)
-carbon_hashtable_unlock(struct hashtable *map);
+hashtable_unlock(struct hashtable *map);
 
 NG5_EXPORT(bool)
-carbon_hashtable_insert_or_update(struct hashtable *map, const void *keys, const void *values, uint_fast32_t num_pairs);
+hashtable_insert_or_update(struct hashtable *map, const void *keys, const void *values, uint_fast32_t num_pairs);
 
 NG5_EXPORT(bool)
-carbon_hashtable_serialize(FILE *file, struct hashtable *table);
+hashtable_serialize(FILE *file, struct hashtable *table);
 
 NG5_EXPORT(bool)
-carbon_hashtable_deserialize(struct hashtable *table, struct err *err, FILE *file);
+hashtable_deserialize(struct hashtable *table, struct err *err, FILE *file);
 
 NG5_EXPORT(bool)
-carbon_hashtable_remove_if_contained(struct hashtable *map, const void *keys, size_t num_pairs);
+hashtable_remove_if_contained(struct hashtable *map, const void *keys, size_t num_pairs);
 
 NG5_EXPORT(const void *)
-carbon_hashtable_get_value(struct hashtable *map, const void *key);
+hashtable_get_value(struct hashtable *map, const void *key);
 
 NG5_EXPORT(bool)
-carbon_hashtable_get_fload_factor(float *factor, struct hashtable *map);
+hashtable_get_fload_factor(float *factor, struct hashtable *map);
 
 NG5_EXPORT(bool)
-carbon_hashtable_rehash(struct hashtable *map);
+hashtable_rehash(struct hashtable *map);
 
 NG5_END_DECL
 

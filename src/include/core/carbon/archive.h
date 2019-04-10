@@ -75,45 +75,45 @@ struct archive_callback
         void (*end_string_id_index_baking)();
 };
 
-NG5_EXPORT(bool) carbon_archive_from_json(struct archive *out, const char *file, struct err *err,
+NG5_EXPORT(bool) archive_from_json(struct archive *out, const char *file, struct err *err,
         const char *json_string, enum packer_type compressor, enum strdic_tag dictionary,
         size_t num_async_dic_threads, bool read_optimized, bool bake_string_id_index,
         struct archive_callback *callback);
 
-NG5_EXPORT(bool) carbon_archive_stream_from_json(struct memblock **stream, struct err *err, const char *json_string,
+NG5_EXPORT(bool) archive_stream_from_json(struct memblock **stream, struct err *err, const char *json_string,
         enum packer_type compressor, enum strdic_tag dictionary, size_t num_async_dic_threads,
         bool read_optimized, bool bake_id_index, struct archive_callback *callback);
 
-NG5_EXPORT(bool) carbon_archive_from_model(struct memblock **stream, struct err *err, struct columndoc *model,
+NG5_EXPORT(bool) archive_from_model(struct memblock **stream, struct err *err, struct columndoc *model,
         enum packer_type compressor, bool bake_string_id_index, struct archive_callback *callback);
 
-NG5_EXPORT(bool) carbon_archive_write(FILE *file, const struct memblock *stream);
+NG5_EXPORT(bool) archive_write(FILE *file, const struct memblock *stream);
 
-NG5_EXPORT(bool) carbon_archive_load(struct memblock **stream, FILE *file);
+NG5_EXPORT(bool) archive_load(struct memblock **stream, FILE *file);
 
-NG5_EXPORT(bool) carbon_archive_print(FILE *file, struct err *err, struct memblock *stream);
+NG5_EXPORT(bool) archive_print(FILE *file, struct err *err, struct memblock *stream);
 
-NG5_EXPORT(bool) carbon_archive_open(struct archive *out, const char *file_path);
+NG5_EXPORT(bool) archive_open(struct archive *out, const char *file_path);
 
-NG5_EXPORT(bool) carbon_archive_get_info(struct archive_info *info, const struct archive *archive);
+NG5_EXPORT(bool) archive_get_info(struct archive_info *info, const struct archive *archive);
 
 NG5_DEFINE_GET_ERROR_FUNCTION(archive, struct archive, archive);
 
-NG5_EXPORT(bool) carbon_archive_close(struct archive *archive);
+NG5_EXPORT(bool) archive_close(struct archive *archive);
 
-NG5_EXPORT(bool) carbon_archive_drop_indexes(struct archive *archive);
+NG5_EXPORT(bool) archive_drop_indexes(struct archive *archive);
 
-NG5_EXPORT(bool) carbon_archive_query(struct archive_query *query, struct archive *archive);
+NG5_EXPORT(bool) archive_query(struct archive_query *query, struct archive *archive);
 
-NG5_EXPORT(bool) carbon_archive_has_query_index_string_id_to_offset(bool *state, struct archive *archive);
+NG5_EXPORT(bool) archive_has_query_index_string_id_to_offset(bool *state, struct archive *archive);
 
-NG5_EXPORT(bool) carbon_archive_hash_query_string_id_cache(bool *has_cache, struct archive *archive);
+NG5_EXPORT(bool) archive_hash_query_string_id_cache(bool *has_cache, struct archive *archive);
 
-NG5_EXPORT(bool) carbon_archive_drop_query_string_id_cache(struct archive *archive);
+NG5_EXPORT(bool) archive_drop_query_string_id_cache(struct archive *archive);
 
-NG5_EXPORT(struct string_cache *)carbon_archive_get_query_string_id_cache(struct archive *archive);
+NG5_EXPORT(struct string_cache *)archive_get_query_string_id_cache(struct archive *archive);
 
-NG5_EXPORT(struct archive_query *)carbon_archive_query_default(struct archive *archive);
+NG5_EXPORT(struct archive_query *)archive_query_default(struct archive *archive);
 
 
 
@@ -127,7 +127,7 @@ NG5_EXPORT(struct archive_query *)carbon_archive_query_default(struct archive *a
  * @param archive The archive
  * @return a heap-allocated instance of <code>struct io_context</code>, or NULL if not successful
  */
-NG5_EXPORT(struct io_context *)carbon_archive_io_context_create(struct archive *archive);
+NG5_EXPORT(struct io_context *)archive_io_context_create(struct archive *archive);
 
 NG5_END_DECL
 

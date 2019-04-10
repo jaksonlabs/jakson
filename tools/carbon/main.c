@@ -56,10 +56,10 @@
 #define DEFINE_MODULE(module_name, moduleCommand, desc, invokeFunc)                                              \
 static int module##module_name##Entry(int argc, char **argv, FILE *file)                                         \
 {                                                                                                               \
-    struct carbon_cmdopt_mgr manager;                                                                        \
-    carbon_cmdopt_mgr_create(&manager, moduleCommand, desc, NG5_MOD_ARG_REQUIRED, invokeFunc);            \
-    int status = carbon_cmdopt_mgr_process(&manager, argc, argv, file);                                       \
-    carbon_cmdopt_mgr_drop(&manager);                                                                         \
+    struct cmdopt_mgr manager;                                                                        \
+    cmdopt_mgr_create(&manager, moduleCommand, desc, NG5_MOD_ARG_REQUIRED, invokeFunc);            \
+    int status = cmdopt_mgr_process(&manager, argc, argv, file);                                       \
+    cmdopt_mgr_drop(&manager);                                                                         \
     return status;                                                                                              \
 }
 
@@ -74,62 +74,62 @@ DEFINE_MODULE(Cab2Js, "to_json", DESC_CAB2JS_USAGE, moduleCab2JsInvoke);
 DEFINE_MODULE(List, "list", DESC_LIST_USAGE, moduleListInvoke);
 
 
-static bool showHelp(int argc, char **argv, FILE *file, struct carbon_cmdopt_mgr *manager);
+static bool showHelp(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager);
 
 int main (int argc, char **argv)
 {
     NG5_CONSOLE_OUTPUT_ON();
 
-    struct carbon_cmdopt_mgr manager;
-    struct carbon_cmdopt_group *group;
+    struct cmdopt_mgr manager;
+    struct cmdopt_group *group;
 
-    carbon_cmdopt_mgr_create(&manager, "types-tool", "A tool to work with CARBON files.\n"
+    cmdopt_mgr_create(&manager, "types-tool", "A tool to work with CARBON files.\n"
                                  "Copyright (c) 2018-2019 Marcus Pinnecke (pinnecke@ovgu.de)", NG5_MOD_ARG_MAYBE_REQUIRED,
                              showHelp);
 
-    carbon_cmdopt_mgr_create_group(&group, "work with JSON files", &manager);
-    carbon_cmdopt_group_add_cmd(group,
+    cmdopt_mgr_create_group(&group, "work with JSON files", &manager);
+    cmdopt_group_add_cmd(group,
                                 "checkjs", DESC_CHECK_JS,
                                 "manpages/types/checkjs",
                                 moduleCheckJsEntry);
-    carbon_cmdopt_group_add_cmd(group,
+    cmdopt_group_add_cmd(group,
                                 "convert", DESC_JS2CAB,
                                 "manpages/types/convert",
                                 moduleJs2CabEntry);
 
-    carbon_cmdopt_mgr_create_group(&group, "work with CARBON files", &manager);
-    carbon_cmdopt_group_add_cmd(group,
+    cmdopt_mgr_create_group(&group, "work with CARBON files", &manager);
+    cmdopt_group_add_cmd(group,
                                 "cli", DESC_CLI,
                                 "manpages/types/cli",
                                 moduleCliEntry);
-    carbon_cmdopt_group_add_cmd(group,
+    cmdopt_group_add_cmd(group,
                                 "view", DESC_CAB_VIEW,
                                 "manpages/types/view",
                                 moduleViewCabEntry);
-    carbon_cmdopt_group_add_cmd(group,
+    cmdopt_group_add_cmd(group,
                                 "inspect", DESC_CAB_INFO,
                                 "manpages/types/inspect",
                                 moduleInspectEntry);
-    carbon_cmdopt_group_add_cmd(group,
+    cmdopt_group_add_cmd(group,
                                 "to_json", DESC_CAB2JS_INFO,
                                 "manpages/types/to_json",
                                 moduleCab2JsEntry);
 
-    carbon_cmdopt_mgr_create_group(&group, "misc and orientation", &manager);
-    carbon_cmdopt_group_add_cmd(group,
+    cmdopt_mgr_create_group(&group, "misc and orientation", &manager);
+    cmdopt_group_add_cmd(group,
                                 "list", DESC_LIST,
                                 "manpages/types/list",
                                 moduleListEntry);
 
-    int status = carbon_cmdopt_mgr_process(&manager, argc - 1, argv + 1, stdout);
-    carbon_cmdopt_mgr_drop(&manager);
+    int status = cmdopt_mgr_process(&manager, argc - 1, argv + 1, stdout);
+    cmdopt_mgr_drop(&manager);
     return status ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
-static bool showHelp(int argc, char **argv, FILE *file, struct carbon_cmdopt_mgr *manager)
+static bool showHelp(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
 {
     NG5_UNUSED(argc);
     NG5_UNUSED(argv);
-    carbon_cmdopt_mgr_show_help(file, manager);
+    cmdopt_mgr_show_help(file, manager);
     return true;
 }

@@ -7,7 +7,7 @@
 
 #include "modules.h"
 
-struct js_to_carbon_context
+struct js_to_context
 {
     struct strdic dictionary;
     struct doc_bulk context;
@@ -16,7 +16,7 @@ struct js_to_carbon_context
     char *jsonContent;
 };
 
-static int convertJs2Model(struct js_to_carbon_context *context, FILE *file, bool optimizeForReads, const char *fileName,
+static int convertJs2Model(struct js_to_context *context, FILE *file, bool optimizeForReads, const char *fileName,
                            size_t fileNum, size_t fileMax)
 {
 
@@ -40,7 +40,7 @@ static int convertJs2Model(struct js_to_carbon_context *context, FILE *file, boo
 
     NG5_CONSOLE_WRITE(file, "  - Setup string dictionary%s", "");
 
-    carbon_strdic_create_async(&context->dictionary, 1000, 1000, 1000, 8, NULL);
+    strdic_create_async(&context->dictionary, 1000, 1000, 1000, 8, NULL);
     NG5_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
 
     NG5_CONSOLE_WRITE(file, "  - Parse JSON file%s", "");
@@ -68,42 +68,42 @@ static int convertJs2Model(struct js_to_carbon_context *context, FILE *file, boo
     status = json_test(&err, &jsonAst);
     if (!status) {
         NG5_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
-        carbon_error_print(&err);
+        error_print(&err);
         return false;
     } else {
         NG5_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
     }
 
     NG5_CONSOLE_WRITE(file, "  - Create bulk insertion bulk%s", "");
-    carbon_doc_bulk_create(&context->context, &context->dictionary);
+    doc_bulk_create(&context->context, &context->dictionary);
     NG5_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
 
-    context->partition = carbon_doc_bulk_new_entries(&context->context);
+    context->partition = doc_bulk_new_entries(&context->context);
 
     NG5_CONSOLE_WRITE(file, "  - Add file to new partition%s", "");
-    carbon_doc_bulk_add_json(context->partition, &jsonAst);
+    doc_bulk_add_json(context->partition, &jsonAst);
     json_drop(&jsonAst);
     NG5_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
 
     NG5_CONSOLE_WRITE(file, "  - Cleanup reserved memory%s", "");
-    carbon_doc_bulk_shrink(&context->context);
+    doc_bulk_shrink(&context->context);
     NG5_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
 
     NG5_CONSOLE_WRITE(file, "  - Finalize partition%s", "");
     context->partitionMetaModel =
-        carbon_doc_entries_columndoc(&context->context, context->partition, optimizeForReads);
+        doc_entries_columndoc(&context->context, context->partition, optimizeForReads);
     NG5_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
 
     return true;
 }
 
-static void cleanup(FILE *file, struct js_to_carbon_context *context)
+static void cleanup(FILE *file, struct js_to_context *context)
 {
     NG5_CONSOLE_WRITE(file, "  - Perform cleanup operations%s", "");
-    carbon_strdic_drop(&context->dictionary);
-    carbon_doc_bulk_Drop(&context->context);
-    carbon_doc_entries_drop(context->partition);
-    carbon_columndoc_free(context->partitionMetaModel);
+    strdic_drop(&context->dictionary);
+    doc_bulk_Drop(&context->context);
+    doc_entries_drop(context->partition);
+    columndoc_free(context->partitionMetaModel);
     free(context->jsonContent);
     free(context->partitionMetaModel);
     NG5_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
@@ -139,11 +139,11 @@ success:
 
 }
 
-bool moduleCheckJsInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_mgr *manager)
+bool moduleCheckJsInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
 {
     NG5_UNUSED(manager);
 
-    struct js_to_carbon_context cabContext;
+    struct js_to_context cabContext;
 
     for (int i = 0; i < argc; i++) {
         if (testFileExists(file, argv[i], i + 1, argc, true) != true) {
@@ -309,7 +309,7 @@ static void tracker_end_string_id_index_baking()
 }
 
 
-bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_mgr *manager)
+bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
 {
     NG5_UNUSED(manager);
 
@@ -346,7 +346,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_
                     flagForceOverwrite = true;
                 } else if (strcmp(opt, JS_2_CAB_OPTION_USE_COMPRESSOR) == 0 && i++ < argc) {
                     const char *compressor_name = argv[i];
-                    if (!carbon_compressor_by_name(&compressor, compressor_name)) {
+                    if (!compressor_by_name(&compressor, compressor_name)) {
                         NG5_CONSOLE_WRITE(file, "unsupported pack requested: '%s'",
                                              compressor_name);
                         NG5_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
@@ -459,12 +459,12 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_
         progress_tracker.begin_string_id_index_baking = tracker_begin_string_id_index_baking;
         progress_tracker.end_string_id_index_baking = tracker_end_string_id_index_baking;
 
-        if (!carbon_archive_from_json(&archive, pathCarbonFileOut, &err, jsonContent,
+        if (!archive_from_json(&archive, pathCarbonFileOut, &err, jsonContent,
                                       compressor, dic_type, string_dic_async_nthreads, flagReadOptimized,
                                       flagBakeStringIdIndex, &progress_tracker)) {
-            carbon_error_print_and_abort(&err);
+            error_print_and_abort(&err);
         } else {
-            carbon_archive_close(&archive);
+            archive_close(&archive);
         }
 
 
@@ -473,8 +473,8 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_
 //        struct memblock *carbonFile;
 //        NG5_CONSOLE_WRITE(file, "  - Convert partition into in-memory CARBON file%s", "");
 //        struct err err;
-//        if (!carbon_archive_from_model(&carbonFile, &err, cabContext.partitionMetaModel, pack, flagBakeStringIdIndex)) {
-//            carbon_error_print_and_abort(&err);
+//        if (!archive_from_model(&carbonFile, &err, cabContext.partitionMetaModel, pack, flagBakeStringIdIndex)) {
+//            error_print_and_abort(&err);
 //        }
 //        NG5_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
 //
@@ -485,7 +485,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_
 //            NG5_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
 //            return false;
 //        } else {
-//            if (carbon_archive_write(outputFile, carbonFile) != true) {
+//            if (archive_write(outputFile, carbonFile) != true) {
 //                NG5_CONSOLE_WRITE(file, "Unable to write to file: '%s'", pathCarbonFileOut);
 //                NG5_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
 //                return false;
@@ -495,7 +495,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_
 //        NG5_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
 //
 //        NG5_CONSOLE_WRITE(file, "  - Clean up in-memory CARBON file%s", "");
-//        carbon_memblock_drop(carbonFile);
+//        memblock_drop(carbonFile);
 //        NG5_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
 //
 //        cleanup(file, &cabContext);
@@ -506,7 +506,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_
     }
 }
 
-bool moduleViewCabInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_mgr *manager)
+bool moduleViewCabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
 {
     NG5_UNUSED(argc);
     NG5_UNUSED(argv);
@@ -527,12 +527,12 @@ bool moduleViewCabInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt
         struct err err;
         FILE *inputFile = fopen(carbonFilePath, "r");
         struct memblock *stream;
-        carbon_archive_load(&stream, inputFile);
-        if (!carbon_archive_print(stdout, &err, stream)) {
-            carbon_error_print(&err);
-            carbon_error_drop(&err);
+        archive_load(&stream, inputFile);
+        if (!archive_print(stdout, &err, stream)) {
+            error_print(&err);
+            error_drop(&err);
         }
-        carbon_memblock_drop(stream);
+        memblock_drop(stream);
         fclose(inputFile);
 
     }
@@ -540,7 +540,7 @@ bool moduleViewCabInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt
     return true;
 }
 
-bool moduleInspectInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_mgr *manager)
+bool moduleInspectInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
 {
     NG5_UNUSED(manager);
 
@@ -563,11 +563,11 @@ bool moduleInspectInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt
 
         struct archive archive;
         struct archive_info info;
-        if ((carbon_archive_open(&archive, pathCarbonFileIn)) != true) {
+        if ((archive_open(&archive, pathCarbonFileIn)) != true) {
             NG5_CONSOLE_WRITE(file, "Cannot open requested CARBON file: %s", pathCarbonFileIn);
             return false;
         } else {
-            carbon_archive_get_info(&info, &archive);
+            archive_get_info(&info, &archive);
             FILE *f = fopen(pathCarbonFileIn, "r");
             fseek(f, 0, SEEK_END);
             offset_t fileLength = ftell(f);
@@ -584,7 +584,7 @@ bool moduleInspectInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt
     return true;
 }
 
-bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_mgr *manager)
+bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
 {
     NG5_UNUSED(argc);
     NG5_UNUSED(argv);
@@ -610,23 +610,23 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_
 
         struct archive archive;
         int status;
-        if ((status = carbon_archive_open(&archive, pathCarbonFileIn))) {
+        if ((status = archive_open(&archive, pathCarbonFileIn))) {
             struct encoded_doc_list collection;
-            carbon_archive_converter(&collection, &archive);
-            carbon_encoded_doc_collection_print(stdout, &collection);
+            archive_converter(&collection, &archive);
+            encoded_doc_collection_print(stdout, &collection);
             printf("\n");
-            carbon_encoded_doc_collection_drop(&collection);
+            encoded_doc_collection_drop(&collection);
         } else {
             NG5_PRINT_ERROR(archive.err.code);
         }
 
-        carbon_archive_close(&archive);
+        archive_close(&archive);
 
         return true;
     }
 }
 
-bool moduleListInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_mgr *manager)
+bool moduleListInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
 {
     NG5_UNUSED(manager);
 
@@ -638,8 +638,8 @@ bool moduleListInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_mg
     } else {
         const char *constant = argv[0];
         if (strcmp(constant, "compressors") == 0) {
-            for (size_t i = 0; i < NG5_ARRAY_LENGTH(carbon_compressor_strategy_register); i++) {
-                NG5_CONSOLE_WRITELN(file, "%s", carbon_compressor_strategy_register[i].name);
+            for (size_t i = 0; i < NG5_ARRAY_LENGTH(compressor_strategy_register); i++) {
+                NG5_CONSOLE_WRITELN(file, "%s", compressor_strategy_register[i].name);
             }
         } else {
             NG5_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");

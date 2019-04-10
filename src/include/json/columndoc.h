@@ -232,20 +232,20 @@ struct columndoc
 };
 
 NG5_EXPORT(bool)
-carbon_columndoc_create(struct columndoc *columndoc, struct err *err, const struct doc *doc,
+columndoc_create(struct columndoc *columndoc, struct err *err, const struct doc *doc,
                         const struct doc_bulk *bulk, const struct doc_entries *entries,
                         struct strdic *dic);
 
 NG5_DEFINE_GET_ERROR_FUNCTION(columndoc, struct columndoc, doc)
 
 NG5_EXPORT(bool)
-carbon_columndoc_free(struct columndoc *doc);
+columndoc_free(struct columndoc *doc);
 
 NG5_EXPORT(bool)
-carbon_columndoc_print(FILE *file, struct columndoc *doc);
+columndoc_print(FILE *file, struct columndoc *doc);
 
 NG5_EXPORT(bool)
-carbon_columndoc_drop(struct columndoc *doc);
+columndoc_drop(struct columndoc *doc);
 
 NG5_END_DECL
 

@@ -40,18 +40,18 @@ static bool import_json_object(struct doc_obj *target, struct err *err, const st
 static void sort_columndoc_entries(struct columndoc_obj *columndoc);
 
 NG5_EXPORT(bool)
-carbon_doc_bulk_create(struct doc_bulk *bulk, struct strdic *dic)
+doc_bulk_create(struct doc_bulk *bulk, struct strdic *dic)
 {
     NG5_NON_NULL_OR_ERROR(bulk)
     NG5_NON_NULL_OR_ERROR(dic)
     bulk->dic = dic;
-    carbon_vec_create(&bulk->keys, NULL, sizeof(char *), 500);
-    carbon_vec_create(&bulk->values, NULL, sizeof(char *), 1000);
-    carbon_vec_create(&bulk->models, NULL, sizeof(struct doc), 50);
+    vec_create(&bulk->keys, NULL, sizeof(char *), 500);
+    vec_create(&bulk->values, NULL, sizeof(char *), 1000);
+    vec_create(&bulk->models, NULL, sizeof(struct doc), 50);
     return true;
 }
 
-struct doc_obj *carbon_doc_bulk_new_obj(struct doc *model)
+struct doc_obj *doc_bulk_new_obj(struct doc *model)
 {
     if (!model) {
         return NULL;
@@ -63,47 +63,47 @@ struct doc_obj *carbon_doc_bulk_new_obj(struct doc *model)
 }
 
 NG5_EXPORT(bool)
-carbon_doc_bulk_get_dic_contents(struct vector ofType (const char *) **strings,
+doc_bulk_get_dic_contents(struct vector ofType (const char *) **strings,
                                  struct vector ofType(field_sid_t) **string_ids,
                                  const struct doc_bulk *context)
 {
     NG5_NON_NULL_OR_ERROR(context)
 
     size_t num_distinct_values;
-    carbon_strdic_num_distinct(&num_distinct_values, context->dic);
+    strdic_num_distinct(&num_distinct_values, context->dic);
     struct vector ofType (const char *) *result_strings = malloc(sizeof(struct vector));
-    struct vector ofType (field_sid_t) *resultcarbon_string_id_ts = malloc(sizeof(struct vector));
-    carbon_vec_create(result_strings, NULL, sizeof(const char *), num_distinct_values);
-    carbon_vec_create(resultcarbon_string_id_ts, NULL, sizeof(field_sid_t), num_distinct_values);
+    struct vector ofType (field_sid_t) *resultstring_id_ts = malloc(sizeof(struct vector));
+    vec_create(result_strings, NULL, sizeof(const char *), num_distinct_values);
+    vec_create(resultstring_id_ts, NULL, sizeof(field_sid_t), num_distinct_values);
 
-    int status = carbon_strdic_get_contents(result_strings, resultcarbon_string_id_ts, context->dic);
+    int status = strdic_get_contents(result_strings, resultstring_id_ts, context->dic);
     NG5_CHECK_SUCCESS(status);
     *strings = result_strings;
-    *string_ids = resultcarbon_string_id_ts;
+    *string_ids = resultstring_id_ts;
 
     return status;
 }
 
-struct doc *carbon_doc_bulk_new_doc(struct doc_bulk *context, field_e type)
+struct doc *doc_bulk_new_doc(struct doc_bulk *context, field_e type)
 {
     if (!context) {
         return NULL;
     }
 
     struct doc template, *model;
-    size_t idx = carbon_vec_length(&context->models);
-    carbon_vec_push(&context->models, &template, 1);
+    size_t idx = vec_length(&context->models);
+    vec_push(&context->models, &template, 1);
     model = vec_get(&context->models, idx, struct doc);
     model->context = context;
     model->type = type;
 
-    carbon_vec_create(&model->obj_model, NULL, sizeof(struct doc_obj), 500);
+    vec_create(&model->obj_model, NULL, sizeof(struct doc_obj), 500);
 
     return model;
 }
 
 NG5_EXPORT(bool)
-carbon_doc_bulk_Drop(struct doc_bulk *bulk)
+doc_bulk_Drop(struct doc_bulk *bulk)
 {
     NG5_NON_NULL_OR_ERROR(bulk)
     for (size_t i = 0; i < bulk->keys.num_elems; i++) {
@@ -118,19 +118,19 @@ carbon_doc_bulk_Drop(struct doc_bulk *bulk)
         struct doc *model = vec_get(&bulk->models, i, struct doc);
         for (size_t j = 0; j < model->obj_model.num_elems; j++) {
             struct doc_obj *doc = vec_get(&model->obj_model, j, struct doc_obj);
-            carbon_doc_drop(doc);
+            doc_drop(doc);
         }
-        carbon_vec_drop(&model->obj_model);
+        vec_drop(&model->obj_model);
     }
 
-    carbon_vec_drop(&bulk->keys);
-    carbon_vec_drop(&bulk->values);
-    carbon_vec_drop(&bulk->models);
+    vec_drop(&bulk->keys);
+    vec_drop(&bulk->values);
+    vec_drop(&bulk->models);
     return true;
 }
 
 NG5_EXPORT(bool)
-carbon_doc_bulk_shrink(struct doc_bulk *bulk)
+doc_bulk_shrink(struct doc_bulk *bulk)
 {
     NG5_NON_NULL_OR_ERROR(bulk)
     VectorShrink(&bulk->keys);
@@ -139,7 +139,7 @@ carbon_doc_bulk_shrink(struct doc_bulk *bulk)
 }
 
 NG5_EXPORT(bool)
-carbon_doc_bulk_print(FILE *file, struct doc_bulk *bulk)
+doc_bulk_print(FILE *file, struct doc_bulk *bulk)
 {
     NG5_NON_NULL_OR_ERROR(file)
     NG5_NON_NULL_OR_ERROR(bulk)
@@ -163,7 +163,7 @@ carbon_doc_bulk_print(FILE *file, struct doc_bulk *bulk)
 }
 
 NG5_EXPORT(bool)
-carbon_doc_print(FILE *file, const struct doc *doc)
+doc_print(FILE *file, const struct doc *doc)
 {
     NG5_NON_NULL_OR_ERROR(file)
     NG5_NON_NULL_OR_ERROR(doc)
@@ -190,26 +190,26 @@ carbon_doc_print(FILE *file, const struct doc *doc)
     return true;
 }
 
-const struct vector ofType(struct doc_entries) *carbon_doc_get_entries(const struct doc_obj *model)
+const struct vector ofType(struct doc_entries) *doc_get_entries(const struct doc_obj *model)
 {
     return &model->entries;
 }
 
-void carbon_doc_print_entries(FILE *file, const struct doc_entries *entries)
+void doc_print_entries(FILE *file, const struct doc_entries *entries)
 {
     fprintf(file, "{\"Key\": \"%s\"", entries->key);
 }
 
-void carbon_doc_drop(struct doc_obj *model)
+void doc_drop(struct doc_obj *model)
 {
     for (size_t i = 0; i < model->entries.num_elems; i++) {
         struct doc_entries *entry = vec_get(&model->entries, i, struct doc_entries);
         entries_drop(entry);
     }
-    carbon_vec_drop(&model->entries);
+    vec_drop(&model->entries);
 }
 
-bool carbon_doc_obj_add_key(struct doc_entries **out,
+bool doc_obj_add_key(struct doc_entries **out,
                             struct doc_obj *obj,
                             const char *key,
                             field_e type)
@@ -228,39 +228,39 @@ bool carbon_doc_obj_add_key(struct doc_entries **out,
     };
 
     create_typed_vector(&entry_model);
-    carbon_vec_push(&obj->doc->context->keys, &key_dup, 1);
+    vec_push(&obj->doc->context->keys, &key_dup, 1);
 
-    entry_idx = carbon_vec_length(&obj->entries);
-    carbon_vec_push(&obj->entries, &entry_model, 1);
+    entry_idx = vec_length(&obj->entries);
+    vec_push(&obj->entries, &entry_model, 1);
 
     *out = vec_get(&obj->entries, entry_idx, struct doc_entries);
 
     return true;
 }
 
-bool carbon_doc_obj_push_primtive(struct doc_entries *entry, const void *value)
+bool doc_obj_push_primtive(struct doc_entries *entry, const void *value)
 {
     NG5_NON_NULL_OR_ERROR(entry)
     NG5_NON_NULL_OR_ERROR((entry->type == field_null) || (value != NULL))
 
     switch(entry->type) {
         case field_null:
-            carbon_vec_push(&entry->values, &VALUE_NULL, 1);
+            vec_push(&entry->values, &VALUE_NULL, 1);
         break;
         case field_string: {
             char *string = value ? strdup((char *) value) : NULL;
-            carbon_vec_push(&entry->context->doc->context->values, &string, 1);
-            carbon_vec_push(&entry->values, &string, 1);
+            vec_push(&entry->context->doc->context->values, &string, 1);
+            vec_push(&entry->values, &string, 1);
         }
         break;
     default:
-            carbon_vec_push(&entry->values, value, 1);
+            vec_push(&entry->values, value, 1);
         break;
     }
     return true;
 }
 
-bool carbon_doc_obj_push_object(struct doc_obj **out, struct doc_entries *entry)
+bool doc_obj_push_object(struct doc_obj **out, struct doc_entries *entry)
 {
     NG5_NON_NULL_OR_ERROR(out);
     NG5_NON_NULL_OR_ERROR(entry);
@@ -270,8 +270,8 @@ bool carbon_doc_obj_push_object(struct doc_obj **out, struct doc_entries *entry)
     struct doc_obj objectModel;
 
     create_doc(&objectModel, entry->context->doc);
-    size_t length = carbon_vec_length(&entry->values);
-    carbon_vec_push(&entry->values, &objectModel, 1);
+    size_t length = vec_length(&entry->values);
+    vec_push(&entry->values, &objectModel, 1);
 
     *out = vec_get(&entry->values, length, struct doc_obj);
 
@@ -318,8 +318,8 @@ static field_e value_type_for_json_number(bool *success, struct err *err, const 
 static void import_json_object_string_prop(struct doc_obj *target, const char *key, const struct json_string *string)
 {
     struct doc_entries *entry;
-    carbon_doc_obj_add_key(&entry, target, key, field_string);
-    carbon_doc_obj_push_primtive(entry, string->value);
+    doc_obj_add_key(&entry, target, key, field_string);
+    doc_obj_push_primtive(entry, string->value);
 }
 
 static bool import_json_object_number_prop(struct doc_obj *target, struct err *err, const char *key, const struct json_number *number)
@@ -330,31 +330,31 @@ static bool import_json_object_number_prop(struct doc_obj *target, struct err *e
     if (!success) {
         return false;
     }
-    carbon_doc_obj_add_key(&entry, target, key, number_type);
-    carbon_doc_obj_push_primtive(entry, &number->value);
+    doc_obj_add_key(&entry, target, key, number_type);
+    doc_obj_push_primtive(entry, &number->value);
     return true;
 }
 
 static void import_json_object_bool_prop(struct doc_obj *target, const char *key, field_boolean_t value)
 {
     struct doc_entries *entry;
-    carbon_doc_obj_add_key(&entry, target, key, field_bool);
-    carbon_doc_obj_push_primtive(entry, &value);
+    doc_obj_add_key(&entry, target, key, field_bool);
+    doc_obj_push_primtive(entry, &value);
 }
 
 static void import_json_object_null_prop(struct doc_obj *target, const char *key)
 {
     struct doc_entries *entry;
-    carbon_doc_obj_add_key(&entry, target, key, field_null);
-    carbon_doc_obj_push_primtive(entry, NULL);
+    doc_obj_add_key(&entry, target, key, field_null);
+    doc_obj_push_primtive(entry, NULL);
 }
 
 static bool import_json_object_object_prop(struct doc_obj *target, struct err *err, const char *key, const struct json_object_t *object)
 {
     struct doc_entries *entry;
     struct doc_obj *nested_object = NULL;
-    carbon_doc_obj_add_key(&entry, target, key, field_object);
-    carbon_doc_obj_push_object(&nested_object, entry);
+    doc_obj_add_key(&entry, target, key, field_object);
+    doc_obj_push_object(&nested_object, entry);
     return import_json_object(nested_object, err, object);
 }
 
@@ -362,7 +362,7 @@ static bool import_json_object_array_prop(struct doc_obj *target, struct err *er
 {
     struct doc_entries *entry;
 
-    if (!carbon_vec_is_empty(&array->elements.elements))
+    if (!vec_is_empty(&array->elements.elements))
     {
         size_t num_elements = array->elements.elements.num_elems;
 
@@ -457,7 +457,7 @@ static bool import_json_object_array_prop(struct doc_obj *target, struct err *er
             return false;
         }
 
-        carbon_doc_obj_add_key(&entry, target, key, field_type);
+        doc_obj_add_key(&entry, target, key, field_type);
 
         for (size_t i = 0; i < num_elements; i++)
         {
@@ -467,7 +467,7 @@ static bool import_json_object_array_prop(struct doc_obj *target, struct err *er
             switch (field_type) {
             case field_object: {
                 struct doc_obj *nested_object = NULL;
-                carbon_doc_obj_push_object(&nested_object, entry);
+                doc_obj_push_object(&nested_object, entry);
                 if (ast_node_data_type != JSON_VALUE_NULL) {
                     /** the object is null by definition, if no entries are contained */
                     if (!import_json_object(nested_object, err, element->value.value.object)) {
@@ -477,7 +477,7 @@ static bool import_json_object_array_prop(struct doc_obj *target, struct err *er
             } break;
             case field_string: {
                 assert(ast_node_data_type == array_data_type || ast_node_data_type == JSON_VALUE_NULL);
-                carbon_doc_obj_push_primtive(entry, ast_node_data_type == JSON_VALUE_NULL ?
+                doc_obj_push_primtive(entry, ast_node_data_type == JSON_VALUE_NULL ?
                                                     NG5_NULL_ENCODED_STRING :
                                                     element->value.value.string->value);
             } break;
@@ -495,42 +495,42 @@ static bool import_json_object_array_prop(struct doc_obj *target, struct err *er
                 case field_int8: {
                     field_i8_t value = ast_node_data_type == JSON_VALUE_NULL ? NG5_NULL_INT8 :
                                       (field_i8_t) element->value.value.number->value.signed_integer;
-                    carbon_doc_obj_push_primtive(entry, &value);
+                    doc_obj_push_primtive(entry, &value);
                 } break;
                 case field_int16: {
                     field_i16_t value = ast_node_data_type == JSON_VALUE_NULL ? NG5_NULL_INT16 :
                                        (field_i16_t) element->value.value.number->value.signed_integer;
-                    carbon_doc_obj_push_primtive(entry, &value);
+                    doc_obj_push_primtive(entry, &value);
                 } break;
                 case field_int32: {
                     field_i32_t value = ast_node_data_type == JSON_VALUE_NULL ? NG5_NULL_INT32 :
                                        (field_i32_t) element->value.value.number->value.signed_integer;
-                    carbon_doc_obj_push_primtive(entry, &value);
+                    doc_obj_push_primtive(entry, &value);
                 } break;
                 case field_int64: {
                     field_i64_t value = ast_node_data_type == JSON_VALUE_NULL ? NG5_NULL_INT64 :
                                        (field_i64_t) element->value.value.number->value.signed_integer;
-                    carbon_doc_obj_push_primtive(entry, &value);
+                    doc_obj_push_primtive(entry, &value);
                 } break;
                 case field_uint8: {
                     field_u8_t value = ast_node_data_type == JSON_VALUE_NULL ? NG5_NULL_UINT8 :
                                        (field_u8_t) element->value.value.number->value.unsigned_integer;
-                    carbon_doc_obj_push_primtive(entry, &value);
+                    doc_obj_push_primtive(entry, &value);
                 } break;
                 case field_uint16: {
                     field_u16_t value = ast_node_data_type == JSON_VALUE_NULL ? NG5_NULL_UINT16 :
                                         (field_u16_t) element->value.value.number->value.unsigned_integer;
-                    carbon_doc_obj_push_primtive(entry, &value);
+                    doc_obj_push_primtive(entry, &value);
                 } break;
                 case field_uint32: {
                     field_u32_t value = ast_node_data_type == JSON_VALUE_NULL ? NG5_NULL_UINT32 :
                                         (field_u32_t) element->value.value.number->value.unsigned_integer;
-                    carbon_doc_obj_push_primtive(entry, &value);
+                    doc_obj_push_primtive(entry, &value);
                 } break;
                 case field_uint64: {
                     field_u64_t value = ast_node_data_type == JSON_VALUE_NULL ? NG5_NULL_UINT64 :
                                         (field_u64_t) element->value.value.number->value.unsigned_integer;
-                    carbon_doc_obj_push_primtive(entry, &value);
+                    doc_obj_push_primtive(entry, &value);
                 } break;
                 case field_float: {
                     field_number_t value = NG5_NULL_FLOAT;
@@ -543,14 +543,14 @@ static bool import_json_object_array_prop(struct doc_obj *target, struct err *er
                         } else if (element_number_type == JSON_NUMBER_SIGNED) {
                             value = element->value.value.number->value.signed_integer;
                         } else {
-                            carbon_print_error_and_die(NG5_ERR_INTERNALERR) /** type mismatch */
+                            print_error_and_die(NG5_ERR_INTERNALERR) /** type mismatch */
                             return false;
                         }
                     }
-                    carbon_doc_obj_push_primtive(entry, &value);
+                    doc_obj_push_primtive(entry, &value);
                 } break;
                 default:
-                    carbon_print_error_and_die(NG5_ERR_INTERNALERR) /** not a number type  */
+                    print_error_and_die(NG5_ERR_INTERNALERR) /** not a number type  */
                     return false;
                 }
             } break;
@@ -559,16 +559,16 @@ static bool import_json_object_array_prop(struct doc_obj *target, struct err *er
                                   ast_node_data_type == JSON_VALUE_FALSE)) {
                     field_boolean_t value = ast_node_data_type == JSON_VALUE_TRUE ?
                                          NG5_BOOLEAN_TRUE : NG5_BOOLEAN_FALSE;
-                    carbon_doc_obj_push_primtive(entry, &value);
+                    doc_obj_push_primtive(entry, &value);
                 } else {
                     assert(ast_node_data_type == JSON_VALUE_NULL);
                     field_boolean_t value = NG5_NULL_BOOLEAN;
-                    carbon_doc_obj_push_primtive(entry, &value);
+                    doc_obj_push_primtive(entry, &value);
                 }
                 break;
             case field_null:
                 assert(ast_node_data_type == array_data_type);
-                carbon_doc_obj_push_primtive(entry, NULL);
+                doc_obj_push_primtive(entry, NULL);
                 break;
             default:
                 error(err, NG5_ERR_NOTYPE)
@@ -632,7 +632,7 @@ static bool import_json(struct doc_obj *target, struct err *err, const struct js
         break;
     case JSON_VALUE_ARRAY: {
         const struct vector ofType(struct json_element) *arrayContent = &json->element->value.value.array->elements.elements;
-        if (!carbon_vec_is_empty(arrayContent)) {
+        if (!vec_is_empty(arrayContent)) {
             const struct json_element *first = vec_get(arrayContent, 0, struct json_element);
             switch (first->value.value_type) {
             case JSON_VALUE_OBJECT:
@@ -642,7 +642,7 @@ static bool import_json(struct doc_obj *target, struct err *err, const struct js
                 for (size_t i = 1; i < arrayContent->num_elems; i++) {
                     const struct json_element *element = vec_get(arrayContent, i, struct json_element);
                     struct doc_obj *nested;
-                    carbon_doc_obj_push_object(&nested, partition);
+                    doc_obj_push_object(&nested, partition);
                     if (!import_json_object(nested, err, element->value.value.object)) {
                         return false;
                     }
@@ -655,7 +655,7 @@ static bool import_json(struct doc_obj *target, struct err *err, const struct js
             case JSON_VALUE_FALSE:
             case JSON_VALUE_NULL:
             default:
-                carbon_print_error_and_die(NG5_ERR_INTERNALERR) /** Unsupported operation in arrays */
+                print_error_and_die(NG5_ERR_INTERNALERR) /** Unsupported operation in arrays */
                 break;
             }
         }
@@ -672,14 +672,14 @@ static bool import_json(struct doc_obj *target, struct err *err, const struct js
     return true;
 }
 
-struct doc_obj *carbon_doc_bulk_add_json(struct doc_entries *partition, struct json *json)
+struct doc_obj *doc_bulk_add_json(struct doc_entries *partition, struct json *json)
 {
     if (!partition || !json) {
         return NULL;
     }
 
     struct doc_obj *converted_json;
-    carbon_doc_obj_push_object(&converted_json, partition);
+    doc_obj_push_object(&converted_json, partition);
     if (!import_json(converted_json, &json->err, json, partition)) {
         return NULL;
     }
@@ -687,17 +687,17 @@ struct doc_obj *carbon_doc_bulk_add_json(struct doc_entries *partition, struct j
     return converted_json;
 }
 
-struct doc_obj *carbon_doc_entries_get_root(const struct doc_entries *partition)
+struct doc_obj *doc_entries_get_root(const struct doc_entries *partition)
 {
     return partition ? partition->context : NULL;
 }
 
-struct doc_entries *carbon_doc_bulk_new_entries(struct doc_bulk *dst)
+struct doc_entries *doc_bulk_new_entries(struct doc_bulk *dst)
 {
     struct doc_entries *partition = NULL;
-    struct doc *model = carbon_doc_bulk_new_doc(dst, field_object);
-    struct doc_obj *object = carbon_doc_bulk_new_obj(model);
-    carbon_doc_obj_add_key(&partition, object, "/", field_object);
+    struct doc *model = doc_bulk_new_doc(dst, field_object);
+    struct doc_obj *object = doc_bulk_new_obj(model);
+    doc_obj_add_key(&partition, object, "/", field_object);
     return partition;
 }
 
@@ -725,11 +725,11 @@ static bool compare_encoded_string_less_eq_func(const void *lhs, const void *rhs
     struct strdic *dic = (struct strdic *) args;
     field_sid_t *a = (field_sid_t *) lhs;
     field_sid_t *b = (field_sid_t *) rhs;
-    char **a_string = carbon_strdic_extract(dic, a, 1);
-    char **b_string = carbon_strdic_extract(dic, b, 1);
+    char **a_string = strdic_extract(dic, a, 1);
+    char **b_string = strdic_extract(dic, b, 1);
     bool lq = strcmp(*a_string, *b_string) <= 0;
-    carbon_strdic_free(dic, a_string);
-    carbon_strdic_free(dic, b_string);
+    strdic_free(dic, a_string);
+    strdic_free(dic, b_string);
     return lq;
 }
 
@@ -779,11 +779,11 @@ static bool compare_encoded_string_array_less_eq_func(const void *lhs, const voi
     const field_sid_t *bValues = vec_all(b, field_sid_t);
     size_t max_compare_idx = a->num_elems < b->num_elems ? a->num_elems : b->num_elems;
     for (size_t i = 0; i < max_compare_idx; i++) {
-        char **aString = carbon_strdic_extract(dic, aValues + i, 1);
-        char **bString = carbon_strdic_extract(dic, bValues + i, 1);
+        char **aString = strdic_extract(dic, aValues + i, 1);
+        char **bString = strdic_extract(dic, bValues + i, 1);
         bool greater = strcmp(*aString, *bString) > 0;
-        carbon_strdic_free(dic, aString);
-        carbon_strdic_free(dic, bString);
+        strdic_free(dic, aString);
+        strdic_free(dic, bString);
         if (greater) {
             return false;
         }
@@ -818,7 +818,7 @@ static void sorted_nested_array_objects(struct columndoc_obj *columndoc)
 
 #define SORT_META_MODEL_VALUES(key_vector, value_vector, value_type, compareValueFunc)                                 \
 {                                                                                                                      \
-    size_t num_elements = carbon_vec_length(&key_vector);                                                              \
+    size_t num_elements = vec_length(&key_vector);                                                              \
                                                                                                                        \
     if (num_elements > 0) {                                                                                            \
         size_t *value_indicies = malloc(sizeof(size_t) * num_elements);                                                \
@@ -829,30 +829,30 @@ static void sorted_nested_array_objects(struct columndoc_obj *columndoc)
         struct vector ofType(field_sid_t) key_cpy;                                                               \
         struct vector ofType(value_type) value_cpy;                                                                     \
                                                                                                                        \
-        carbon_vec_cpy(&key_cpy, &key_vector);                                                                         \
-        carbon_vec_cpy(&value_cpy, &value_vector);                                                                     \
+        vec_cpy(&key_cpy, &key_vector);                                                                         \
+        vec_cpy(&value_cpy, &value_vector);                                                                     \
                                                                                                                        \
         value_type *values = vec_all(&value_cpy, value_type);                                                \
                                                                                                                        \
-        carbon_sort_qsort_indicies(value_indicies, values, sizeof(value_type), compareValueFunc, num_elements,         \
+        sort_qsort_indicies(value_indicies, values, sizeof(value_type), compareValueFunc, num_elements,         \
                       key_vector.allocator);                                                                           \
                                                                                                                        \
         for (size_t i = 0; i < num_elements; i++) {                                                                    \
-            carbon_vec_set(&key_vector, i, vec_get(&key_cpy, value_indicies[i], field_sid_t));        \
-            carbon_vec_set(&value_vector, i, vec_get(&value_cpy, value_indicies[i], value_type));            \
+            vec_set(&key_vector, i, vec_get(&key_cpy, value_indicies[i], field_sid_t));        \
+            vec_set(&value_vector, i, vec_get(&value_cpy, value_indicies[i], value_type));            \
         }                                                                                                              \
                                                                                                                        \
                                                                                                                        \
         free(value_indicies);                                                                                          \
-        carbon_vec_drop(&key_cpy);                                                                                     \
-        carbon_vec_drop(&value_cpy);                                                                                   \
+        vec_drop(&key_cpy);                                                                                     \
+        vec_drop(&value_cpy);                                                                                   \
     }                                                                                                                  \
 }
 
 static void sort_meta_model_string_values(struct vector ofType(field_sid_t) *key_vector, struct vector ofType(field_sid_t) *value_vector,
                                       struct strdic *dic)
 {
-    size_t num_elements = carbon_vec_length(key_vector);
+    size_t num_elements = vec_length(key_vector);
 
     if (num_elements > 0) {
         size_t *value_indicies = malloc(sizeof(size_t) * num_elements);
@@ -863,12 +863,12 @@ static void sort_meta_model_string_values(struct vector ofType(field_sid_t) *key
         struct vector ofType(field_sid_t) key_cpy;
         struct vector ofType(field_sid_t) value_cpy;
 
-        carbon_vec_cpy(&key_cpy, key_vector);
-        carbon_vec_cpy(&value_cpy, value_vector);
+        vec_cpy(&key_cpy, key_vector);
+        vec_cpy(&value_cpy, value_vector);
 
         field_sid_t *values = vec_all(&value_cpy, field_sid_t);
 
-        carbon_sort_qsort_indicies_wargs(value_indicies,
+        sort_qsort_indicies_wargs(value_indicies,
                                          values,
                                          sizeof(field_sid_t),
                                          compare_encoded_string_less_eq_func,
@@ -877,19 +877,19 @@ static void sort_meta_model_string_values(struct vector ofType(field_sid_t) *key
                                          dic);
 
         for (size_t i = 0; i < num_elements; i++) {
-            carbon_vec_set(key_vector, i, vec_get(&key_cpy, value_indicies[i], field_sid_t));
-            carbon_vec_set(value_vector, i, vec_get(&value_cpy, value_indicies[i], field_sid_t));
+            vec_set(key_vector, i, vec_get(&key_cpy, value_indicies[i], field_sid_t));
+            vec_set(value_vector, i, vec_get(&value_cpy, value_indicies[i], field_sid_t));
         }
 
         free(value_indicies);
-        carbon_vec_drop(&key_cpy);
-        carbon_vec_drop(&value_cpy);
+        vec_drop(&key_cpy);
+        vec_drop(&value_cpy);
     }
 }
 
 #define SORT_META_MODEL_ARRAYS(key_vector, value_array_vector, compare_func)                                           \
 {                                                                                                                      \
-    size_t num_elements = carbon_vec_length(&key_vector);                                                              \
+    size_t num_elements = vec_length(&key_vector);                                                              \
                                                                                                                        \
     if (num_elements > 0) {                                                                                            \
         size_t *value_indicies = malloc(sizeof(size_t) * num_elements);                                                \
@@ -900,29 +900,29 @@ static void sort_meta_model_string_values(struct vector ofType(field_sid_t) *key
         struct vector ofType(field_sid_t) key_cpy;                                                               \
         struct vector ofType(struct vector) value_cpy;                                                                   \
                                                                                                                        \
-        carbon_vec_cpy(&key_cpy, &key_vector);                                                                         \
-        carbon_vec_cpy(&value_cpy, &value_array_vector);                                                               \
+        vec_cpy(&key_cpy, &key_vector);                                                                         \
+        vec_cpy(&value_cpy, &value_array_vector);                                                               \
                                                                                                                        \
         const struct vector *values = vec_all(&value_array_vector, struct vector);                             \
                                                                                                                        \
-        carbon_sort_qsort_indicies(value_indicies, values, sizeof(struct vector), compare_func, num_elements,           \
+        sort_qsort_indicies(value_indicies, values, sizeof(struct vector), compare_func, num_elements,           \
                       key_vector.allocator);                                                                           \
                                                                                                                        \
         for (size_t i = 0; i < num_elements; i++) {                                                                    \
-            carbon_vec_set(&key_vector, i, vec_get(&key_cpy, value_indicies[i], field_sid_t));        \
-            carbon_vec_set(&value_array_vector, i, vec_get(&value_cpy, value_indicies[i], struct vector));    \
+            vec_set(&key_vector, i, vec_get(&key_cpy, value_indicies[i], field_sid_t));        \
+            vec_set(&value_array_vector, i, vec_get(&value_cpy, value_indicies[i], struct vector));    \
         }                                                                                                              \
                                                                                                                        \
         free(value_indicies);                                                                                          \
-        carbon_vec_drop(&key_cpy);                                                                                     \
-        carbon_vec_drop(&value_cpy);                                                                                   \
+        vec_drop(&key_cpy);                                                                                     \
+        vec_drop(&value_cpy);                                                                                   \
     }                                                                                                                  \
 }
 
 static void sort_columndoc_strings_arrays(struct vector ofType(field_sid_t) *key_vector, struct vector ofType(field_sid_t) *value_array_vector,
                                       struct strdic *dic)
 {
-    size_t num_elements = carbon_vec_length(key_vector);
+    size_t num_elements = vec_length(key_vector);
 
     if (num_elements > 0) {
         size_t *value_indicies = malloc(sizeof(size_t) * num_elements);
@@ -933,12 +933,12 @@ static void sort_columndoc_strings_arrays(struct vector ofType(field_sid_t) *key
         struct vector ofType(field_sid_t) key_cpy;
         struct vector ofType(struct vector) value_cpy;
 
-        carbon_vec_cpy(&key_cpy, key_vector);
-        carbon_vec_cpy(&value_cpy, value_array_vector);
+        vec_cpy(&key_cpy, key_vector);
+        vec_cpy(&value_cpy, value_array_vector);
 
         const struct vector *values = vec_all(value_array_vector, struct vector);
 
-        carbon_sort_qsort_indicies_wargs(value_indicies,
+        sort_qsort_indicies_wargs(value_indicies,
                                          values,
                                          sizeof(struct vector),
                                          compare_encoded_string_array_less_eq_func,
@@ -947,13 +947,13 @@ static void sort_columndoc_strings_arrays(struct vector ofType(field_sid_t) *key
                                          dic);
 
         for (size_t i = 0; i < num_elements; i++) {
-            carbon_vec_set(key_vector, i, vec_get(&key_cpy, value_indicies[i], field_sid_t));
-            carbon_vec_set(value_array_vector, i, vec_get(&value_cpy, value_indicies[i], struct vector));
+            vec_set(key_vector, i, vec_get(&key_cpy, value_indicies[i], field_sid_t));
+            vec_set(value_array_vector, i, vec_get(&value_cpy, value_indicies[i], struct vector));
         }
 
         free(value_indicies);
-        carbon_vec_drop(&key_cpy);
-        carbon_vec_drop(&value_cpy);
+        vec_drop(&key_cpy);
+        vec_drop(&value_cpy);
     }
 }
 
@@ -963,11 +963,11 @@ static bool compare_object_array_key_columns_less_eq_func(const void *lhs, const
     struct strdic *dic = (struct strdic *) args;
     struct columndoc_group *a = (struct columndoc_group *) lhs;
     struct columndoc_group *b = (struct columndoc_group *) rhs;
-    char **a_column_name = carbon_strdic_extract(dic, &a->key, 1);
-    char **b_column_name = carbon_strdic_extract(dic, &b->key, 1);
+    char **a_column_name = strdic_extract(dic, &a->key, 1);
+    char **b_column_name = strdic_extract(dic, &b->key, 1);
     bool column_name_leq = strcmp(*a_column_name, *b_column_name) <= 0;
-    carbon_strdic_free(dic, a_column_name);
-    carbon_strdic_free(dic, b_column_name);
+    strdic_free(dic, a_column_name);
+    strdic_free(dic, b_column_name);
     return column_name_leq;
 }
 
@@ -976,12 +976,12 @@ static bool compare_object_array_key_column_less_eq_func(const void *lhs, const 
     struct strdic *dic = (struct strdic *) args;
     struct columndoc_column *a = (struct columndoc_column *) lhs;
     struct columndoc_column *b = (struct columndoc_column *) rhs;
-    char **a_column_name = carbon_strdic_extract(dic, &a->key_name, 1);
-    char **b_column_name = carbon_strdic_extract(dic, &b->key_name, 1);
+    char **a_column_name = strdic_extract(dic, &a->key_name, 1);
+    char **b_column_name = strdic_extract(dic, &b->key_name, 1);
     int cmpResult = strcmp(*a_column_name, *b_column_name);
     bool column_name_leq = cmpResult < 0 ? true : (cmpResult == 0 ? (a->type <= b->type) : false);
-    carbon_strdic_free(dic, a_column_name);
-    carbon_strdic_free(dic, b_column_name);
+    strdic_free(dic, a_column_name);
+    strdic_free(dic, b_column_name);
     return column_name_leq;
 }
 
@@ -1048,11 +1048,11 @@ static bool compare_column_less_eq_func(const void *lhs, const void *rhs, void *
         for (size_t i = 0; i < max_num_elem; i++) {
             field_sid_t o1 = *vec_get(a, i, field_sid_t);
             field_sid_t o2 = *vec_get(b, i, field_sid_t);
-            char **o1_string = carbon_strdic_extract(func_arg->dic, &o1, 1);
-            char **o2_string = carbon_strdic_extract(func_arg->dic, &o2, 1);
+            char **o1_string = strdic_extract(func_arg->dic, &o1, 1);
+            char **o2_string = strdic_extract(func_arg->dic, &o2, 1);
             bool greater = strcmp(*o1_string, *o2_string) > 0;
-            carbon_strdic_free(func_arg->dic, o1_string);
-            carbon_strdic_free(func_arg->dic, o2_string);
+            strdic_free(func_arg->dic, o1_string);
+            strdic_free(func_arg->dic, o2_string);
             if (greater) {
                 return false;
             }
@@ -1062,7 +1062,7 @@ static bool compare_column_less_eq_func(const void *lhs, const void *rhs, void *
         return true;
         break;
     default:
-        carbon_print_error_and_die(NG5_ERR_NOTYPE)
+        print_error_and_die(NG5_ERR_NOTYPE)
         return false;
     }
 }
@@ -1073,8 +1073,8 @@ static void sort_columndoc_column(struct columndoc_column *column, struct strdic
     struct vector ofType(u32) array_position_cpy;
     struct vector ofType(struct vector ofType(<T>)) values_cpy;
 
-    carbon_vec_cpy(&array_position_cpy, &column->array_positions);
-    carbon_vec_cpy(&values_cpy, &column->values);
+    vec_cpy(&array_position_cpy, &column->array_positions);
+    vec_cpy(&values_cpy, &column->values);
 
     assert(column->array_positions.num_elems == column->values.num_elems);
     assert(array_position_cpy.num_elems == values_cpy.num_elems);
@@ -1090,7 +1090,7 @@ static void sort_columndoc_column(struct columndoc_column *column, struct strdic
         .value_type = column->type
     };
 
-    carbon_sort_qsort_indicies_wargs(indices,
+    sort_qsort_indicies_wargs(indices,
                                      values_cpy.base,
                                      values_cpy.elem_size,
                                      compare_column_less_eq_func,
@@ -1099,24 +1099,24 @@ static void sort_columndoc_column(struct columndoc_column *column, struct strdic
                                      &func_arg);
 
     for (size_t i = 0; i < values_cpy.num_elems; i++) {
-        carbon_vec_set(&column->values, i, carbon_vec_at(&values_cpy, indices[i]));
-        carbon_vec_set(&column->array_positions, i, carbon_vec_at(&array_position_cpy, indices[i]));
+        vec_set(&column->values, i, vec_at(&values_cpy, indices[i]));
+        vec_set(&column->array_positions, i, vec_at(&array_position_cpy, indices[i]));
     }
 
     free (indices);
-    carbon_vec_drop(&array_position_cpy);
-    carbon_vec_drop(&values_cpy);
+    vec_drop(&array_position_cpy);
+    vec_drop(&values_cpy);
 }
 
 static void sort_columndoc_column_arrays(struct columndoc_obj *columndoc)
 {
     struct vector ofType(struct columndoc_group) cpy;
-    carbon_vec_cpy(&cpy, &columndoc->obj_array_props);
+    vec_cpy(&cpy, &columndoc->obj_array_props);
     size_t *indices = malloc(cpy.num_elems * sizeof(size_t));
     for (size_t i = 0; i < cpy.num_elems; i++) {
         indices[i] = i;
     }
-    carbon_sort_qsort_indicies_wargs(indices,
+    sort_qsort_indicies_wargs(indices,
                                      cpy.base,
                                      sizeof(struct columndoc_group),
                                      compare_object_array_key_columns_less_eq_func,
@@ -1124,7 +1124,7 @@ static void sort_columndoc_column_arrays(struct columndoc_obj *columndoc)
                                      cpy.allocator,
                                      columndoc->parent->dic);
     for (size_t i = 0; i < cpy.num_elems; i++) {
-        carbon_vec_set(&columndoc->obj_array_props, i, vec_get(&cpy, indices[i], struct columndoc_group));
+        vec_set(&columndoc->obj_array_props, i, vec_get(&cpy, indices[i], struct columndoc_group));
     }
     free(indices);
 
@@ -1132,25 +1132,25 @@ static void sort_columndoc_column_arrays(struct columndoc_obj *columndoc)
         struct columndoc_group *key_columns = vec_get(&columndoc->obj_array_props, i, struct columndoc_group);
         size_t *columnIndices = malloc(key_columns->columns.num_elems * sizeof(size_t));
         struct vector ofType(struct columndoc_column) columnCpy;
-        carbon_vec_cpy(&columnCpy, &key_columns->columns);
+        vec_cpy(&columnCpy, &key_columns->columns);
         for (size_t i = 0; i < key_columns->columns.num_elems; i++) {
             columnIndices[i] = i;
         }
 
         /** First, sort by column name; Then, sort by columns with same name by type */
-        carbon_sort_qsort_indicies_wargs(columnIndices, columnCpy.base, sizeof(struct columndoc_column),
+        sort_qsort_indicies_wargs(columnIndices, columnCpy.base, sizeof(struct columndoc_column),
                                          compare_object_array_key_column_less_eq_func, key_columns->columns.num_elems,
                                          key_columns->columns.allocator, columndoc->parent->dic);
         for (size_t i = 0; i < key_columns->columns.num_elems; i++) {
-            carbon_vec_set(&key_columns->columns, i, vec_get(&columnCpy, columnIndices[i], struct columndoc_column));
+            vec_set(&key_columns->columns, i, vec_get(&columnCpy, columnIndices[i], struct columndoc_column));
             struct columndoc_column *column = vec_get(&key_columns->columns, i, struct columndoc_column);
             sort_columndoc_column(column, columndoc->parent->dic);
         }
 
-        carbon_vec_drop(&columnCpy);
+        vec_drop(&columnCpy);
         free(columnIndices);
     }
-    carbon_vec_drop(&cpy);
+    vec_drop(&cpy);
 }
 
 static void sort_columndoc_values(struct columndoc_obj *columndoc)
@@ -1215,7 +1215,7 @@ static void sort_columndoc_entries(struct columndoc_obj *columndoc)
     }
 }
 
-struct columndoc *carbon_doc_entries_columndoc(const struct doc_bulk *bulk,
+struct columndoc *doc_entries_columndoc(const struct doc_bulk *bulk,
                                                           const struct doc_entries *partition,
                                                           bool read_optimized)
 {
@@ -1226,8 +1226,8 @@ struct columndoc *carbon_doc_entries_columndoc(const struct doc_bulk *bulk,
     // Step 1: encode all strings at once in a bulk
     char *const* key_strings = vec_all(&bulk->keys, char *);
     char *const* valueStrings = vec_all(&bulk->values, char *);
-    carbon_strdic_insert(bulk->dic, NULL, key_strings, carbon_vec_length(&bulk->keys), 0);
-    carbon_strdic_insert(bulk->dic, NULL, valueStrings, carbon_vec_length(&bulk->values), 0);
+    strdic_insert(bulk->dic, NULL, key_strings, vec_length(&bulk->keys), 0);
+    strdic_insert(bulk->dic, NULL, valueStrings, vec_length(&bulk->values), 0);
 
     // Step 2: for each document doc, create a meta doc, and construct a binary compressed document
     const struct doc *models = vec_all(&bulk->models, struct doc);
@@ -1242,8 +1242,8 @@ struct columndoc *carbon_doc_entries_columndoc(const struct doc_bulk *bulk,
     struct columndoc *columndoc = malloc(sizeof(struct columndoc));
     columndoc->read_optimized = read_optimized;
     struct err err;
-    if (!carbon_columndoc_create(columndoc, &err, model, bulk, partition, bulk->dic)) {
-        carbon_error_print_and_abort(&err);
+    if (!columndoc_create(columndoc, &err, model, bulk, partition, bulk->dic)) {
+        error_print_and_abort(&err);
     }
 
 
@@ -1259,7 +1259,7 @@ struct columndoc *carbon_doc_entries_columndoc(const struct doc_bulk *bulk,
 }
 
 NG5_EXPORT(bool)
-carbon_doc_entries_drop(struct doc_entries *partition)
+doc_entries_drop(struct doc_entries *partition)
 {
     NG5_UNUSED(partition);
     return true;
@@ -1267,7 +1267,7 @@ carbon_doc_entries_drop(struct doc_entries *partition)
 
 static void create_doc(struct doc_obj *model, struct doc *doc)
 {
-    carbon_vec_create(&model->entries, NULL, sizeof(struct doc_entries), 50);
+    vec_create(&model->entries, NULL, sizeof(struct doc_entries), 50);
     model->doc = doc;
 }
 
@@ -1315,10 +1315,10 @@ static void create_typed_vector(struct doc_entries *entry)
         size = sizeof(struct doc_obj);
         break;
     default:
-        carbon_print_error_and_die(NG5_ERR_INTERNALERR) /** unknown type */
+        print_error_and_die(NG5_ERR_INTERNALERR) /** unknown type */
         return;
     }
-    carbon_vec_create(&entry->values, NULL, size, 50);
+    vec_create(&entry->values, NULL, size, 50);
 }
 
 static void entries_drop(struct doc_entries *entry)
@@ -1327,10 +1327,10 @@ static void entries_drop(struct doc_entries *entry)
         for (size_t i = 0; i < entry->values.num_elems; i++)
         {
             struct doc_obj *model = vec_get(&entry->values, i, struct doc_obj);
-            carbon_doc_drop(model);
+            doc_drop(model);
         }
     }
-    carbon_vec_drop(&entry->values);
+    vec_drop(&entry->values);
 }
 
 static bool print_value(FILE *file, field_e type, const struct vector ofType(<T>) *values)

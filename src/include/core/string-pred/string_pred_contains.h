@@ -24,7 +24,7 @@
 NG5_BEGIN_DECL
 
 NG5_BUILT_IN(static bool)
-__carbon_string_pred_contains_func(size_t *idxs_matching, size_t *num_matching, char **strings, size_t num_strings,
+__string_pred_contains_func(size_t *idxs_matching, size_t *num_matching, char **strings, size_t num_strings,
                                    void *capture)
 {
     size_t result_size = 0;
@@ -40,11 +40,11 @@ __carbon_string_pred_contains_func(size_t *idxs_matching, size_t *num_matching, 
 }
 
 NG5_BUILT_IN(static bool)
-carbon_string_pred_contains_init(struct string_pred_t *pred)
+string_pred_contains_init(struct string_pred_t *pred)
 {
     NG5_NON_NULL_OR_ERROR(pred);
     pred->limit = NG5_QUERY_LIMIT_NONE;
-    pred->func  = __carbon_string_pred_contains_func;
+    pred->func  = __string_pred_contains_func;
     return true;
 }
 

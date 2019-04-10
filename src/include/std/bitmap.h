@@ -30,40 +30,40 @@ struct bitmap
 };
 
 NG5_EXPORT(bool)
-carbon_bitmap_create(struct bitmap *bitmap, u16 num_bits);
+bitmap_create(struct bitmap *bitmap, u16 num_bits);
 
 NG5_EXPORT(bool)
-carbon_bitmap_cpy(struct bitmap *dst, const struct bitmap *src);
+bitmap_cpy(struct bitmap *dst, const struct bitmap *src);
 
 NG5_EXPORT(bool)
-carbon_bitmap_drop(struct bitmap *map);
+bitmap_drop(struct bitmap *map);
 
 NG5_EXPORT(size_t)
-carbon_bitmap_nbits(const struct bitmap *map);
+bitmap_nbits(const struct bitmap *map);
 
 NG5_EXPORT(bool)
-carbon_bitmap_clear(struct bitmap *map);
+bitmap_clear(struct bitmap *map);
 
 NG5_EXPORT(bool)
-carbon_bitmap_set(struct bitmap *map, u16 bit_position, bool on);
+bitmap_set(struct bitmap *map, u16 bit_position, bool on);
 
 NG5_EXPORT(bool)
-carbon_bitmap_get(struct bitmap *map, u16 bit_position);
+bitmap_get(struct bitmap *map, u16 bit_position);
 
 NG5_EXPORT(bool)
-carbon_bitmap_lshift(struct bitmap *map);
+bitmap_lshift(struct bitmap *map);
 
 NG5_EXPORT(bool)
-carbon_bitmap_print(FILE *file, const struct bitmap *map);
+bitmap_print(FILE *file, const struct bitmap *map);
 
 NG5_EXPORT(bool)
-carbon_bitmap_blocks(u32 **blocks, u32 *num_blocks, const struct bitmap *map);
+bitmap_blocks(u32 **blocks, u32 *num_blocks, const struct bitmap *map);
 
 NG5_EXPORT(void)
-carbon_bitmap_print_bits(FILE *file, u32 n);
+bitmap_print_bits(FILE *file, u32 n);
 
 NG5_EXPORT(void)
-carbon_bitmap_print_bits_in_char(FILE *file, char n);
+bitmap_print_bits_in_char(FILE *file, char n);
 
 NG5_END_DECL
 

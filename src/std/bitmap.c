@@ -20,51 +20,51 @@
 #include "std/bitmap.h"
 
 NG5_EXPORT(bool)
-carbon_bitmap_create(struct bitmap *bitmap, u16 num_bits)
+bitmap_create(struct bitmap *bitmap, u16 num_bits)
 {
     NG5_NON_NULL_OR_ERROR(bitmap);
 
     struct allocator alloc;
-    carbon_alloc_create_std(&alloc);
-    carbon_vec_create(&bitmap->data, &alloc, sizeof(u32), ceil(num_bits / (double) NG5_NUM_BITS(u32)));
-    size_t cap = carbon_vec_capacity(&bitmap->data);
+    alloc_create_std(&alloc);
+    vec_create(&bitmap->data, &alloc, sizeof(u32), ceil(num_bits / (double) NG5_NUM_BITS(u32)));
+    size_t cap = vec_capacity(&bitmap->data);
     u32 zero = 0;
-    carbon_vec_repeated_push(&bitmap->data, &zero, cap);
+    vec_repeated_push(&bitmap->data, &zero, cap);
     bitmap->num_bits = num_bits;
 
     return true;
 }
 
 NG5_EXPORT(bool)
-carbon_bitmap_cpy(struct bitmap *dst, const struct bitmap *src)
+bitmap_cpy(struct bitmap *dst, const struct bitmap *src)
 {
     dst->num_bits = src->num_bits;
-    return carbon_vec_cpy(&dst->data, &src->data);
+    return vec_cpy(&dst->data, &src->data);
 }
 
 NG5_EXPORT(bool)
-carbon_bitmap_drop(struct bitmap *bitset)
+bitmap_drop(struct bitmap *bitset)
 {
-    return carbon_vec_drop(&bitset->data);
+    return vec_drop(&bitset->data);
 }
 
-size_t carbon_bitmap_nbits(const struct bitmap *bitset)
+size_t bitmap_nbits(const struct bitmap *bitset)
 {
     NG5_NON_NULL_OR_ERROR(bitset);
     return bitset->num_bits;
 }
 
 NG5_EXPORT(bool)
-carbon_bitmap_clear(struct bitmap *bitset)
+bitmap_clear(struct bitmap *bitset)
 {
     NG5_NON_NULL_OR_ERROR(bitset);
-    void *data = (void *) carbon_vec_data(&bitset->data);
-    memset(data, 0, sizeof(u32) * carbon_vec_capacity(&bitset->data));
+    void *data = (void *) vec_data(&bitset->data);
+    memset(data, 0, sizeof(u32) * vec_capacity(&bitset->data));
     return true;
 }
 
 NG5_EXPORT(bool)
-carbon_bitmap_set(struct bitmap *bitset, u16 bit_position, bool on)
+bitmap_set(struct bitmap *bitset, u16 bit_position, bool on)
 {
     NG5_NON_NULL_OR_ERROR(bitset)
     size_t block_pos = floor(bit_position / (double) NG5_NUM_BITS(u32));
@@ -77,11 +77,11 @@ carbon_bitmap_set(struct bitmap *bitset, u16 bit_position, bool on)
     else {
         NG5_FIELD_CLEAR(block, mask);
     }
-    carbon_vec_set(&bitset->data, block_pos, &block);
+    vec_set(&bitset->data, block_pos, &block);
     return true;
 }
 
-bool carbon_bitmap_get(struct bitmap *bitset, u16 bit_position)
+bool bitmap_get(struct bitmap *bitset, u16 bit_position)
 {
     NG5_NON_NULL_OR_ERROR(bitset)
     size_t block_pos = floor(bit_position / (double) NG5_NUM_BITS(u32));
@@ -92,17 +92,17 @@ bool carbon_bitmap_get(struct bitmap *bitset, u16 bit_position)
 }
 
 NG5_EXPORT(bool)
-carbon_bitmap_lshift(struct bitmap *map)
+bitmap_lshift(struct bitmap *map)
 {
     NG5_NON_NULL_OR_ERROR(map)
     for (int i = map->num_bits - 1; i >= 0; i--) {
-        bool f = i > 0 ? carbon_bitmap_get(map, i - 1) : false;
-        carbon_bitmap_set(map, i, f);
+        bool f = i > 0 ? bitmap_get(map, i - 1) : false;
+        bitmap_set(map, i, f);
     }
     return true;
 }
 
-void carbon_bitmap_print_bits(FILE *file, u32 n)
+void bitmap_print_bits(FILE *file, u32 n)
 {
     for (int i = 31; i >= 0; i--) {
         u32 mask = 1 << i;
@@ -111,7 +111,7 @@ void carbon_bitmap_print_bits(FILE *file, u32 n)
     }
 }
 
-void carbon_bitmap_print_bits_in_char(FILE *file, char n)
+void bitmap_print_bits_in_char(FILE *file, char n)
 {
     fprintf(file, "0b");
     for (int i = 7; i >= 0; i--) {
@@ -121,7 +121,7 @@ void carbon_bitmap_print_bits_in_char(FILE *file, char n)
     }
 }
 
-bool carbon_bitmap_blocks(u32 **blocks, u32 *num_blocks, const struct bitmap *map)
+bool bitmap_blocks(u32 **blocks, u32 *num_blocks, const struct bitmap *map)
 {
     NG5_NON_NULL_OR_ERROR(blocks)
     NG5_NON_NULL_OR_ERROR(num_blocks)
@@ -138,13 +138,13 @@ bool carbon_bitmap_blocks(u32 **blocks, u32 *num_blocks, const struct bitmap *ma
     return true;
 }
 
-bool carbon_bitmap_print(FILE *file, const struct bitmap *map)
+bool bitmap_print(FILE *file, const struct bitmap *map)
 {
     NG5_NON_NULL_OR_ERROR(map)
 
     u32 *blocks, num_blocks;
 
-    carbon_bitmap_blocks(&blocks, &num_blocks, map);
+    bitmap_blocks(&blocks, &num_blocks, map);
 
     for (u32 i = 0; i < num_blocks; i++) {
         fprintf(file, " %"PRIu32 " |", blocks[i]);
@@ -154,7 +154,7 @@ bool carbon_bitmap_print(FILE *file, const struct bitmap *map)
 
     for (i32 i = map->data.num_elems - 1; i >= 0; i--) {
         u32 block = *vec_get(&map->data, i, u32);
-        carbon_bitmap_print_bits(stdout, block);
+        bitmap_print_bits(stdout, block);
         fprintf(file, " |");
     }
 

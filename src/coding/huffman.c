@@ -31,38 +31,38 @@ struct huff_node
 
 static void huff_tree_create(struct vector ofType(struct pack_huffman_entry) *table, const struct vector ofType(u32) *frequencies);
 
-bool carbon_huffman_create(struct pack_huffman *dic)
+bool huffman_create(struct pack_huffman *dic)
 {
     NG5_NON_NULL_OR_ERROR(dic);
 
-    carbon_vec_create(&dic->table, NULL, sizeof(struct pack_huffman_entry), UCHAR_MAX / 4);
-    carbon_error_init(&dic->err);
+    vec_create(&dic->table, NULL, sizeof(struct pack_huffman_entry), UCHAR_MAX / 4);
+    error_init(&dic->err);
 
     return true;
 }
 
 NG5_EXPORT(bool)
-carbon_huffman_cpy(struct pack_huffman *dst, struct pack_huffman *src)
+huffman_cpy(struct pack_huffman *dst, struct pack_huffman *src)
 {
     NG5_NON_NULL_OR_ERROR(dst);
     NG5_NON_NULL_OR_ERROR(src);
-    if (!carbon_vec_cpy(&dst->table, &src->table)) {
+    if (!vec_cpy(&dst->table, &src->table)) {
         error(&src->err, NG5_ERR_HARDCOPYFAILED);
         return false;
     } else {
-        return carbon_error_cpy(&dst->err, &src->err);
+        return error_cpy(&dst->err, &src->err);
     }
 }
 
 NG5_EXPORT(bool)
-carbon_huffman_build(struct pack_huffman *encoder, const string_vector_t *strings)
+huffman_build(struct pack_huffman *encoder, const string_vector_t *strings)
 {
     NG5_NON_NULL_OR_ERROR(encoder);
     NG5_NON_NULL_OR_ERROR(strings);
 
     struct vector ofType(u32) frequencies;
-    carbon_vec_create(&frequencies, NULL, sizeof(u32), UCHAR_MAX);
-    carbon_vec_enlarge_size_to_capacity(&frequencies);
+    vec_create(&frequencies, NULL, sizeof(u32), UCHAR_MAX);
+    vec_enlarge_size_to_capacity(&frequencies);
 
     u32 *freq_data = vec_all(&frequencies, u32);
     NG5_ZERO_MEMORY(freq_data, UCHAR_MAX * sizeof(u32));
@@ -77,21 +77,21 @@ carbon_huffman_build(struct pack_huffman *encoder, const string_vector_t *string
     }
 
     huff_tree_create(&encoder->table, &frequencies);
-    carbon_vec_drop(&frequencies);
+    vec_drop(&frequencies);
 
     return true;
 }
 
 NG5_EXPORT(bool)
-carbon_huffman_get_error(struct err *err, const struct pack_huffman *dic)
+huffman_get_error(struct err *err, const struct pack_huffman *dic)
 {
     NG5_NON_NULL_OR_ERROR(err)
     NG5_NON_NULL_OR_ERROR(dic)
-    carbon_error_cpy(err, &dic->err);
+    error_cpy(err, &dic->err);
     return true;
 }
 
-bool carbon_huffman_drop(struct pack_huffman *dic)
+bool huffman_drop(struct pack_huffman *dic)
 {
     NG5_NON_NULL_OR_ERROR(dic);
 
@@ -100,14 +100,14 @@ bool carbon_huffman_drop(struct pack_huffman *dic)
         free(entry->blocks);
     }
 
-    carbon_vec_drop(&dic->table);
+    vec_drop(&dic->table);
 
     free(dic);
 
     return true;
 }
 
-bool carbon_huffman_serialize_dic(struct memfile *file, const struct pack_huffman *dic, char marker_symbol)
+bool huffman_serialize_dic(struct memfile *file, const struct pack_huffman *dic, char marker_symbol)
 {
     NG5_NON_NULL_OR_ERROR(file)
     NG5_NON_NULL_OR_ERROR(dic)
@@ -119,11 +119,11 @@ bool carbon_huffman_serialize_dic(struct memfile *file, const struct pack_huffma
 
         /** block one is the block that holds the significant part of the prefix code */
         offset_t offset_meta, offset_continue;
-        carbon_memfile_tell(&offset_meta, file);
+        memfile_get_offset(&offset_meta, file);
         /** this will be the number of bytes used to encode the significant part of the prefix code */
-        carbon_memfile_skip(file, sizeof(u8));
+        memfile_skip(file, sizeof(u8));
 
-        carbon_memfile_begin_bit_mode(file);
+        memfile_begin_bit_mode(file);
         bool first_bit_found = false;
         for (int i = 31; entry->blocks && i >= 0; i--) {
             u32 mask = 1 << i;
@@ -136,13 +136,13 @@ bool carbon_huffman_serialize_dic(struct memfile *file, const struct pack_huffma
             }
         }
         size_t num_bytes_written;
-        carbon_memfile_end_bit_mode(&num_bytes_written, file);
-        carbon_memfile_tell(&offset_continue, file);
-        carbon_memfile_seek(file, offset_meta);
+        memfile_end_bit_mode(&num_bytes_written, file);
+        memfile_get_offset(&offset_continue, file);
+        memfile_seek(file, offset_meta);
         u8 num_bytes_written_uint8 = (u8) num_bytes_written;
             memfile_write(file, &num_bytes_written_uint8, sizeof(u8));
 
-        carbon_memfile_seek(file, offset_continue);
+        memfile_seek(file, offset_continue);
     }
 
     return true;
@@ -162,7 +162,7 @@ static struct pack_huffman_entry *find_dic_entry(struct pack_huffman *dic, unsig
 
 static size_t encodeString(struct memfile *file, struct pack_huffman *dic, const char *string)
 {
-    carbon_memfile_begin_bit_mode(file);
+    memfile_begin_bit_mode(file);
 
     for (const char *c = string; *c != '\0'; c++) {
         struct pack_huffman_entry *entry = find_dic_entry(dic, (unsigned char) *c);
@@ -192,12 +192,12 @@ static size_t encodeString(struct memfile *file, struct pack_huffman *dic, const
     }
 
     size_t num_written_bytes;
-    carbon_memfile_end_bit_mode(&num_written_bytes, file);
+    memfile_end_bit_mode(&num_written_bytes, file);
     return num_written_bytes;
 }
 
 NG5_EXPORT(bool)
-carbon_huffman_encode_one(struct memfile *file,
+huffman_encode_one(struct memfile *file,
                           struct pack_huffman *dic,
                           const char *string)
 {
@@ -208,37 +208,37 @@ carbon_huffman_encode_one(struct memfile *file,
     u32 num_bytes_encoded = 0;
 
     offset_t num_bytes_encoded_off = memfile_tell(file);
-    carbon_memfile_skip(file, sizeof(u32));
+    memfile_skip(file, sizeof(u32));
 
     if ((num_bytes_encoded = (u32) encodeString(file, dic, string)) == 0) {
         return false;
     }
 
     offset_t continue_off = memfile_tell(file);
-    carbon_memfile_seek(file, num_bytes_encoded_off);
+    memfile_seek(file, num_bytes_encoded_off);
         memfile_write(file, &num_bytes_encoded, sizeof(u32));
-    carbon_memfile_seek(file, continue_off);
+    memfile_seek(file, continue_off);
 
     return true;
 }
 
-bool carbon_huffman_read_string(struct pack_huffman_str_info *info, struct memfile *src)
+bool huffman_read_string(struct pack_huffman_str_info *info, struct memfile *src)
 {
     info->nbytes_encoded = *NG5_MEMFILE_READ_TYPE(src, u32);
     info->encoded_bytes = NG5_MEMFILE_READ(src, info->nbytes_encoded);
     return true;
 }
 
-bool carbon_huffman_read_dic_entry(struct pack_huffman_info *info, struct memfile *file, char marker_symbol)
+bool huffman_read_dic_entry(struct pack_huffman_info *info, struct memfile *file, char marker_symbol)
 {
     char marker = *NG5_MEMFILE_PEEK(file, char);
     if (marker == marker_symbol) {
-        carbon_memfile_skip(file, sizeof(char));
+        memfile_skip(file, sizeof(char));
         info->letter = *NG5_MEMFILE_READ_TYPE(file, unsigned char);
         info->nbytes_prefix = *NG5_MEMFILE_READ_TYPE(file, u8);
         info->prefix_code = NG5_MEMFILE_PEEK(file, char);
 
-        carbon_memfile_skip(file, info->nbytes_prefix);
+        memfile_skip(file, info->nbytes_prefix);
 
         return true;
     } else {
@@ -264,7 +264,7 @@ static void import_into_entry(struct pack_huffman_entry *entry, const struct huf
     entry->letter = node->letter;
     u32 *blocks, num_blocks;
     const u32 *used_blocks;
-    carbon_bitmap_blocks(&blocks, &num_blocks, map);
+    bitmap_blocks(&blocks, &num_blocks, map);
     used_blocks = get_num_used_blocks(&entry->nblocks, entry, num_blocks, blocks);
     entry->blocks = malloc(entry->nblocks * sizeof(u32));
     if (num_blocks > 0) {
@@ -339,19 +339,19 @@ static void assign_code(struct huff_node *node, const struct bitmap *path, struc
     } else {
         if (node->left) {
             struct bitmap left;
-            carbon_bitmap_cpy(&left, path);
-            carbon_bitmap_lshift(&left);
-            carbon_bitmap_set(&left, 0, false);
+            bitmap_cpy(&left, path);
+            bitmap_lshift(&left);
+            bitmap_set(&left, 0, false);
             assign_code(node->left, &left, table);
-            carbon_bitmap_drop(&left);
+            bitmap_drop(&left);
         }
         if (node->right) {
             struct bitmap right;
-            carbon_bitmap_cpy(&right, path);
-            carbon_bitmap_lshift(&right);
-            carbon_bitmap_set(&right, 0, true);
+            bitmap_cpy(&right, path);
+            bitmap_lshift(&right);
+            bitmap_set(&right, 0, true);
             assign_code(node->right, &right, table);
-            carbon_bitmap_drop(&right);
+            bitmap_drop(&right);
         }
     }
 }
@@ -384,7 +384,7 @@ static void huff_tree_create(struct vector ofType(struct pack_huffman_entry) *ta
     assert(UCHAR_MAX == frequencies->num_elems);
 
     struct vector ofType(HuffNode) candidates;
-    carbon_vec_create(&candidates, NULL, sizeof(struct huff_node), UCHAR_MAX * UCHAR_MAX);
+    vec_create(&candidates, NULL, sizeof(struct huff_node), UCHAR_MAX * UCHAR_MAX);
     size_t appender_idx = UCHAR_MAX;
 
     for (unsigned char i = 0; i < UCHAR_MAX; i++) {
@@ -448,7 +448,7 @@ static void huff_tree_create(struct vector ofType(struct pack_huffman_entry) *ta
         } else if (smallest->next) {
             handle = seek_to_begin(smallest->next);
         } else {
-            carbon_print_error_and_die(NG5_ERR_INTERNALERR);
+            print_error_and_die(NG5_ERR_INTERNALERR);
         }
 
         assert (!handle->prev);
@@ -490,10 +490,10 @@ static void huff_tree_create(struct vector ofType(struct pack_huffman_entry) *ta
 #endif
 
     struct bitmap root_path;
-    carbon_bitmap_create(&root_path, UCHAR_MAX);
-    carbon_bitmap_set(&root_path, 0, true);
+    bitmap_create(&root_path, UCHAR_MAX);
+    bitmap_set(&root_path, 0, true);
     assign_code(new_node, &root_path, table);
-    carbon_bitmap_drop(&root_path);
+    bitmap_drop(&root_path);
 
-    carbon_vec_drop(&candidates);
+    vec_drop(&candidates);
 }

@@ -34,7 +34,7 @@ invoke_clone(struct allocator *dst, const struct allocator *self);
 
 
 NG5_EXPORT (bool)
-carbon_alloc_create_std(struct allocator *alloc)
+alloc_create_std(struct allocator *alloc)
 {
     if (alloc) {
         alloc->extra = NULL;
@@ -42,7 +42,7 @@ carbon_alloc_create_std(struct allocator *alloc)
         alloc->realloc = invoke_realloc;
         alloc->free = invoke_free;
         alloc->clone = invoke_clone;
-        carbon_error_init(&alloc->err);
+        error_init(&alloc->err);
         return true;
     }
     else {
@@ -51,31 +51,31 @@ carbon_alloc_create_std(struct allocator *alloc)
 }
 
 NG5_EXPORT (bool)
-carbon_alloc_this_or_std(struct allocator *dst, const struct allocator *self)
+alloc_this_or_std(struct allocator *dst, const struct allocator *self)
 {
     if (!self) {
-        return carbon_alloc_create_std(dst);
+        return alloc_create_std(dst);
     }
     else {
-        return carbon_alloc_clone(dst, self);
+        return alloc_clone(dst, self);
     }
 }
 
 NG5_EXPORT (void *)
-carbon_malloc(struct allocator *alloc, size_t size)
+alloc_malloc(struct allocator *alloc, size_t size)
 {
     assert(alloc);
     return alloc->malloc(alloc, size);
 }
 
 NG5_EXPORT (void *)
-carbon_realloc(struct allocator *alloc, void *ptr, size_t size)
+alloc_realloc(struct allocator *alloc, void *ptr, size_t size)
 {
     return alloc->realloc(alloc, ptr, size);
 }
 
 NG5_EXPORT (bool)
-carbon_free(struct allocator *alloc, void *ptr)
+alloc_free(struct allocator *alloc, void *ptr)
 {
     NG5_NON_NULL_OR_ERROR(alloc);
     NG5_NON_NULL_OR_ERROR(ptr);
@@ -84,7 +84,7 @@ carbon_free(struct allocator *alloc, void *ptr)
 }
 
 NG5_EXPORT (bool)
-carbon_alloc_clone(struct allocator *dst, const struct allocator *src)
+alloc_clone(struct allocator *dst, const struct allocator *src)
 {
     NG5_NON_NULL_OR_ERROR(dst && src)
     src->clone(dst, src);
@@ -99,7 +99,7 @@ invoke_malloc(struct allocator *self, size_t size)
 
     errno = 0;
     if ((result = malloc(size)) == NULL) {
-        carbon_print_error_and_die(NG5_ERR_MALLOCERR)
+        print_error_and_die(NG5_ERR_MALLOCERR)
     }
     else {
         return result;

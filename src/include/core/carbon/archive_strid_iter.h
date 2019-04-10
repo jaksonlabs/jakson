@@ -40,13 +40,13 @@ struct strid_iter
 };
 
 NG5_EXPORT(bool)
-carbon_strid_iter_open(struct strid_iter *it, struct err *err, struct archive *archive);
+strid_iter_open(struct strid_iter *it, struct err *err, struct archive *archive);
 
 NG5_EXPORT(bool)
-carbon_strid_iter_next(bool *success, struct strid_info **info, struct err *err, size_t *info_length, struct strid_iter *it);
+strid_iter_next(bool *success, struct strid_info **info, struct err *err, size_t *info_length, struct strid_iter *it);
 
 NG5_EXPORT(bool)
-carbon_strid_iter_close(struct strid_iter *it);
+strid_iter_close(struct strid_iter *it);
 
 NG5_END_DECL
 

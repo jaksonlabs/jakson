@@ -104,31 +104,31 @@ struct encoded_doc_list
 };
 
 NG5_EXPORT(bool)
-carbon_encoded_doc_collection_create(struct encoded_doc_list *collection, struct err *err,
+encoded_doc_collection_create(struct encoded_doc_list *collection, struct err *err,
                                      struct archive *archive);
 
 NG5_EXPORT(bool)
-carbon_encoded_doc_collection_drop(struct encoded_doc_list *collection);
+encoded_doc_collection_drop(struct encoded_doc_list *collection);
 
 NG5_EXPORT(struct encoded_doc *)
 encoded_doc_collection_get_or_append(struct encoded_doc_list *collection, object_id_t id);
 
 NG5_EXPORT(bool)
-carbon_encoded_doc_collection_print(FILE *file, struct encoded_doc_list *collection);
+encoded_doc_collection_print(FILE *file, struct encoded_doc_list *collection);
 
 NG5_EXPORT(bool)
-carbon_encoded_doc_drop(struct encoded_doc *doc);
+encoded_doc_drop(struct encoded_doc *doc);
 
 NG5_EXPORT(bool)
-carbon_encoded_doc_get_object_id(object_id_t *oid, struct encoded_doc *doc);
+encoded_doc_get_object_id(object_id_t *oid, struct encoded_doc *doc);
 
 #define DEFINE_NG5_ENCODED_DOC_ADD_PROP_BASIC(name, built_in_type)                                                  \
 NG5_EXPORT(bool)                                                                                                    \
-carbon_encoded_doc_add_prop_##name(struct encoded_doc *doc, field_sid_t key, built_in_type value);
+encoded_doc_add_prop_##name(struct encoded_doc *doc, field_sid_t key, built_in_type value);
 
 #define DEFINE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(name, built_in_type)                                          \
 NG5_EXPORT(bool)                                                                                                    \
-carbon_encoded_doc_add_prop_##name##_decoded(struct encoded_doc *doc, const char *key, built_in_type value);
+encoded_doc_add_prop_##name##_decoded(struct encoded_doc *doc, const char *key, built_in_type value);
 
 DEFINE_NG5_ENCODED_DOC_ADD_PROP_BASIC(int8, field_i8_t)
 DEFINE_NG5_ENCODED_DOC_ADD_PROP_BASIC(int16, field_i16_t)
@@ -155,27 +155,27 @@ DEFINE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(boolean, field_boolean_t)
 DEFINE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(string, field_sid_t)
 
 NG5_EXPORT(bool)
-carbon_encoded_doc_add_prop_string_decoded_string_value_decoded(struct encoded_doc *doc, const char *key, const char *value);
+encoded_doc_add_prop_string_decoded_string_value_decoded(struct encoded_doc *doc, const char *key, const char *value);
 
 NG5_EXPORT(bool)
-carbon_encoded_doc_add_prop_null(struct encoded_doc *doc, field_sid_t key);
+encoded_doc_add_prop_null(struct encoded_doc *doc, field_sid_t key);
 
 NG5_EXPORT(bool)
-carbon_encoded_doc_add_prop_null_decoded(struct encoded_doc *doc, const char *key);
+encoded_doc_add_prop_null_decoded(struct encoded_doc *doc, const char *key);
 
 NG5_EXPORT(bool)
-carbon_encoded_doc_add_prop_object(struct encoded_doc *doc, field_sid_t key, struct encoded_doc *value);
+encoded_doc_add_prop_object(struct encoded_doc *doc, field_sid_t key, struct encoded_doc *value);
 
 NG5_EXPORT(bool)
-carbon_encoded_doc_add_prop_object_decoded(struct encoded_doc *doc, const char *key, struct encoded_doc *value);
+encoded_doc_add_prop_object_decoded(struct encoded_doc *doc, const char *key, struct encoded_doc *value);
 
 #define DEFINE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(name)                                                            \
 NG5_EXPORT(bool)                                                                                                    \
-carbon_encoded_doc_add_prop_array_##name(struct encoded_doc *doc, field_sid_t key);
+encoded_doc_add_prop_array_##name(struct encoded_doc *doc, field_sid_t key);
 
 #define DEFINE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(name)                                                    \
 NG5_EXPORT(bool)                                                                                                    \
-carbon_encoded_doc_add_prop_array_##name##_decoded(struct encoded_doc *doc, const char *key);
+encoded_doc_add_prop_array_##name##_decoded(struct encoded_doc *doc, const char *key);
 
 DEFINE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(int8)
 DEFINE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(int16)
@@ -207,12 +207,12 @@ DEFINE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(object)
 
 #define DEFINE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(name, built_in_type)                                                 \
 NG5_EXPORT(bool)                                                                                                    \
-carbon_encoded_doc_array_push_##name(struct encoded_doc *doc, field_sid_t key,                                \
+encoded_doc_array_push_##name(struct encoded_doc *doc, field_sid_t key,                                \
                                      const built_in_type *array, u32 array_length);
 
 #define DEFINE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(name, built_in_type)                                         \
 NG5_EXPORT(bool)                                                                                                    \
-carbon_encoded_doc_array_push_##name##_decoded(struct encoded_doc *doc, const char *key,                             \
+encoded_doc_array_push_##name##_decoded(struct encoded_doc *doc, const char *key,                             \
                                      const built_in_type *array, u32 array_length);
 
 DEFINE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(int8, field_i8_t)
@@ -242,19 +242,19 @@ DEFINE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(string, field_sid_t)
 DEFINE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(null, field_u32_t)
 
 //NG5_EXPORT(bool)
-//carbon_encoded_doc_array_push_null(struct encoded_doc *doc, field_sid_t key, u32 how_many);
+//encoded_doc_array_push_null(struct encoded_doc *doc, field_sid_t key, u32 how_many);
 
 NG5_EXPORT(bool)
-carbon_encoded_doc_array_push_object(struct encoded_doc *doc, field_sid_t key, object_id_t id);
+encoded_doc_array_push_object(struct encoded_doc *doc, field_sid_t key, object_id_t id);
 
 NG5_EXPORT(bool)
-carbon_encoded_doc_array_push_object_decoded(struct encoded_doc *doc, const char *key, object_id_t id);
+encoded_doc_array_push_object_decoded(struct encoded_doc *doc, const char *key, object_id_t id);
 
 NG5_EXPORT(bool)
-carbon_encoded_doc_get_nested_object(struct encoded_doc *nested, object_id_t oid, struct encoded_doc *doc);
+encoded_doc_get_nested_object(struct encoded_doc *nested, object_id_t oid, struct encoded_doc *doc);
 
 NG5_EXPORT(bool)
-carbon_encoded_doc_print(FILE *file, struct encoded_doc *doc);
+encoded_doc_print(FILE *file, struct encoded_doc *doc);
 
 
 NG5_END_DECL

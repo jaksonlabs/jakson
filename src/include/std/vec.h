@@ -98,7 +98,7 @@ struct vector
 typedef struct vector ofType(const char *) string_vector_t;
 
 #define STRING_VECTOR_CREATE(vec, alloc, cap_elems)                                                                     \
-    carbon_vec_create(vec, alloc, sizeof(char *), cap_elems);
+    vec_create(vec, alloc, sizeof(char *), cap_elems);
 
 #define STRING_REF_VECTOR_CREATE(vec, alloc, cap_elems)                                                                 \
     STRING_VECTOR_CREATE(vec, alloc, cap_elems)                                                                         \
@@ -109,20 +109,20 @@ typedef struct vector ofType(const char *) string_vector_t;
         char *s = *NG5_VECTOR_GET(vec, i, char *);                                                                  \
         free (s);                                                                                                      \
     }                                                                                                                  \
-    carbon_vec_drop(vec);                                                                                              \
+    vec_drop(vec);                                                                                              \
 })
 
 #define STRING_REF_VECTOR_DROP(vec)                                                                                    \
-    carbon_vec_drop(vec);
+    vec_drop(vec);
 
 #define STRING_VECTOR_PUSH(vec, string)                                                                                \
 ({                                                                                                                     \
     char *cpy = strdup(string);                                                                                        \
-    carbon_vec_push(vec, &cpy, 1);                                                                                     \
+    vec_push(vec, &cpy, 1);                                                                                     \
 })
 
 #define STRING_REF_VECTOR_PUSH(vec, string)                                                                            \
-    carbon_vec_push(vec, &string, 1)
+    vec_push(vec, &string, 1)
 
 /**
  * Constructs a new vector for elements of size 'elem_size', reserving memory for 'cap_elems' elements using
@@ -135,13 +135,13 @@ typedef struct vector ofType(const char *) string_vector_t;
  * @return STATUS_OK if success, and STATUS_NULLPTR in case of NULL pointer parameters
  */
 NG5_EXPORT(bool)
-carbon_vec_create(struct vector *out, const struct allocator *alloc, size_t elem_size, size_t cap_elems);
+vec_create(struct vector *out, const struct allocator *alloc, size_t elem_size, size_t cap_elems);
 
 NG5_EXPORT(bool)
-carbon_vec_serialize(FILE *file, struct vector *vec);
+vec_serialize(FILE *file, struct vector *vec);
 
 NG5_EXPORT(bool)
-carbon_vec_deserialize(struct vector *vec, struct err *err, FILE *file);
+vec_deserialize(struct vector *vec, struct err *err, FILE *file);
 
 /**
  * Provides hints on the OS kernel how to deal with memory inside this vector.
@@ -152,7 +152,7 @@ carbon_vec_deserialize(struct vector *vec, struct err *err, FILE *file);
  * @return STATUS_OK if success, otherwise a value indicating the error
  */
 NG5_EXPORT(bool)
-carbon_vec_memadvice(struct vector *vec, int madviseAdvice);
+vec_memadvice(struct vector *vec, int madviseAdvice);
 
 /**
  * Sets the factor for determining the reallocation size in case of a resizing operation.
@@ -164,7 +164,7 @@ carbon_vec_memadvice(struct vector *vec, int madviseAdvice);
  * @return STATUS_OK if success, otherwise a value indicating the error
  */
 NG5_EXPORT(bool)
-carbon_vec_set_grow_factor(struct vector *vec, float factor);
+vec_set_grow_factor(struct vector *vec, float factor);
 
 /**
  * Frees up memory requested via the allocator.
@@ -176,7 +176,7 @@ carbon_vec_set_grow_factor(struct vector *vec, float factor);
  * @return STATUS_OK if success, and STATUS_NULL_PTR in case of NULL pointer to 'vec'
  */
 NG5_EXPORT(bool)
-carbon_vec_drop(struct vector *vec);
+vec_drop(struct vector *vec);
 
 /**
  * Returns information on whether elements are stored in this vector or not.
@@ -186,7 +186,7 @@ carbon_vec_drop(struct vector *vec);
  *         <code>STATUS_FALSE</code> but an value indicating that error.
  */
 NG5_EXPORT(bool)
-carbon_vec_is_empty(const struct vector *vec);
+vec_is_empty(const struct vector *vec);
 
 /**
  * Appends 'num_elems' elements stored in 'data' into the vector by copying num_elems * vec->elem_size into the
@@ -200,14 +200,14 @@ carbon_vec_is_empty(const struct vector *vec);
  * @return STATUS_OK if success, and STATUS_NULLPTR in case of NULL pointer parameters
  */
 NG5_EXPORT(bool)
-carbon_vec_push(struct vector *vec,
+vec_push(struct vector *vec,
                const void *data,
                size_t num_elems);
 
 NG5_EXPORT(const void *)
-carbon_vec_peek(struct vector *vec);
+vec_peek(struct vector *vec);
 
-#define VECTOR_PEEK(vec, type) (type *)(carbon_vec_peek(vec))
+#define VECTOR_PEEK(vec, type) (type *)(vec_peek(vec))
 
 /**
  * Appends 'how_many' elements of the same source stored in 'data' into the vector by copying how_many * vec->elem_size
@@ -221,7 +221,7 @@ carbon_vec_peek(struct vector *vec);
  * @return STATUS_OK if success, and STATUS_NULLPTR in case of NULL pointer parameters
  */
 NG5_EXPORT(bool)
-carbon_vec_repeated_push(struct vector *vec, const void *data, size_t how_often);
+vec_repeated_push(struct vector *vec, const void *data, size_t how_often);
 
 /**
  * Returns a pointer to the last element in this vector, or <code>NULL</code> is the vector is already empty.
@@ -231,10 +231,10 @@ carbon_vec_repeated_push(struct vector *vec, const void *data, size_t how_often)
  * @return Pointer to last element, or <code>NULL</code> if vector is empty
  */
 NG5_EXPORT(const void *)
-carbon_vec_pop(struct vector *vec);
+vec_pop(struct vector *vec);
 
 NG5_EXPORT(bool)
-carbon_vec_clear(struct vector *vec);
+vec_clear(struct vector *vec);
 
 /**
  * Shinks the vector's internal data block to fits its real size, i.e., remove reserved memory
@@ -253,10 +253,10 @@ VectorShrink(struct vector *vec);
  * @return STATUS_OK in case of success, and another value indicating an error otherwise.
  */
 NG5_EXPORT(bool)
-carbon_vec_grow(size_t *numNewSlots, struct vector *vec);
+vec_grow(size_t *numNewSlots, struct vector *vec);
 
 NG5_EXPORT(bool)
-carbon_vec_grow_to(struct vector *vec, size_t capacity);
+vec_grow_to(struct vector *vec, size_t capacity);
 
 /**
  * Returns the number of elements currently stored in the vector
@@ -265,20 +265,20 @@ carbon_vec_grow_to(struct vector *vec, size_t capacity);
  * @return 0 in case of NULL pointer to 'vec', or the number of elements otherwise.
  */
 NG5_EXPORT(size_t)
-carbon_vec_length(const struct vector *vec);
+vec_length(const struct vector *vec);
 
-#define vec_get(vec, pos, type) (type *) carbon_vec_at(vec, pos)
+#define vec_get(vec, pos, type) (type *) vec_at(vec, pos)
 
 #define VECTOR_NEW_AND_GET(vec, type)                                                                                  \
 ({                                                                                                                     \
     type template;                                                                                                     \
-    size_t vectorLength = carbon_vec_length(vec);                                                                      \
-    carbon_vec_push(vec, &template, 1);                                                                                \
+    size_t vectorLength = vec_length(vec);                                                                      \
+    vec_push(vec, &template, 1);                                                                                \
     vec_get(vec, vectorLength, type);                                                                        \
 })
 
 NG5_EXPORT(const void *)
-carbon_vec_at(const struct vector *vec, size_t pos);
+vec_at(const struct vector *vec, size_t pos);
 
 /**
  * Returns the number of elements for which memory is currently reserved in the vector
@@ -287,28 +287,28 @@ carbon_vec_at(const struct vector *vec, size_t pos);
  * @return 0 in case of NULL pointer to 'vec', or the number of elements otherwise.
  */
 NG5_EXPORT(size_t)
-carbon_vec_capacity(const struct vector *vec);
+vec_capacity(const struct vector *vec);
 
 /**
  * Set the internal size of <code>vec</code> to its capacity.
  */
 NG5_EXPORT(bool)
-carbon_vec_enlarge_size_to_capacity(struct vector *vec);
+vec_enlarge_size_to_capacity(struct vector *vec);
 
 NG5_EXPORT(bool)
-carbon_vec_zero_memory(struct vector *vec);
+vec_zero_memory(struct vector *vec);
 
 NG5_EXPORT(bool)
-carbon_vec_zero_memory_in_range(struct vector *vec, size_t from, size_t to);
+vec_zero_memory_in_range(struct vector *vec, size_t from, size_t to);
 
 NG5_EXPORT(bool)
-carbon_vec_set(struct vector *vec, size_t pos, const void *data);
+vec_set(struct vector *vec, size_t pos, const void *data);
 
 NG5_EXPORT(bool)
-carbon_vec_cpy(struct vector *dst, const struct vector *src);
+vec_cpy(struct vector *dst, const struct vector *src);
 
 NG5_EXPORT(bool)
-carbon_vec_cpy_to(struct vector *dst, struct vector *src);
+vec_cpy_to(struct vector *dst, struct vector *src);
 
 /**
  * Gives raw data access to data stored in the vector; do not manipulate this data since otherwise the vector
@@ -318,13 +318,13 @@ carbon_vec_cpy_to(struct vector *dst, struct vector *src);
  * @return pointer to user-data managed by this vector
  */
 NG5_EXPORT(const void *)
-carbon_vec_data(const struct vector *vec);
+vec_data(const struct vector *vec);
 
 NG5_EXPORT(char *)
 vector_string(const struct vector ofType(T) *vec,
         void (*printerFunc)(struct memfile *dst, void ofType(T) *values, size_t num_elems));
 
-#define vec_all(vec, type) (type *) carbon_vec_data(vec)
+#define vec_all(vec, type) (type *) vec_data(vec)
 
 NG5_END_DECL
 

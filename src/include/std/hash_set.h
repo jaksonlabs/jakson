@@ -51,31 +51,31 @@ struct hashset {
 
 NG5_DEFINE_GET_ERROR_FUNCTION(hashset, struct hashset, set);
 
-NG5_EXPORT(bool) carbon_hashset_create(struct hashset *map, struct err *err, size_t key_size, size_t capacity);
+NG5_EXPORT(bool) hashset_create(struct hashset *map, struct err *err, size_t key_size, size_t capacity);
 
-NG5_EXPORT(struct hashset *)carbon_hashset_cpy(struct hashset *src);
+NG5_EXPORT(struct hashset *)hashset_cpy(struct hashset *src);
 
-NG5_EXPORT(bool) carbon_hashset_drop(struct hashset *map);
+NG5_EXPORT(bool) hashset_drop(struct hashset *map);
 
-NG5_EXPORT(struct vector *)carbon_hashset_keys(struct hashset *map);
+NG5_EXPORT(struct vector *)hashset_keys(struct hashset *map);
 
-NG5_EXPORT(bool) carbon_hashset_clear(struct hashset *map);
+NG5_EXPORT(bool) hashset_clear(struct hashset *map);
 
-NG5_EXPORT(bool) carbon_hashset_avg_displace(float *displace, const struct hashset *map);
+NG5_EXPORT(bool) hashset_avg_displace(float *displace, const struct hashset *map);
 
-NG5_EXPORT(bool) carbon_hashset_lock(struct hashset *map);
+NG5_EXPORT(bool) hashset_lock(struct hashset *map);
 
-NG5_EXPORT(bool) carbon_hashset_unlock(struct hashset *map);
+NG5_EXPORT(bool) hashset_unlock(struct hashset *map);
 
-NG5_EXPORT(bool) carbon_hashset_insert_or_update(struct hashset *map, const void *keys, uint_fast32_t num_pairs);
+NG5_EXPORT(bool) hashset_insert_or_update(struct hashset *map, const void *keys, uint_fast32_t num_pairs);
 
-NG5_EXPORT(bool) carbon_hashset_remove_if_contained(struct hashset *map, const void *keys, size_t num_pairs);
+NG5_EXPORT(bool) hashset_remove_if_contained(struct hashset *map, const void *keys, size_t num_pairs);
 
-NG5_EXPORT(bool) carbon_hashset_contains_key(struct hashset *map, const void *key);
+NG5_EXPORT(bool) hashset_contains_key(struct hashset *map, const void *key);
 
-NG5_EXPORT(bool) carbon_hashset_get_fload_factor(float *factor, struct hashset *map);
+NG5_EXPORT(bool) hashset_get_fload_factor(float *factor, struct hashset *map);
 
-NG5_EXPORT(bool) carbon_hashset_rehash(struct hashset *map);
+NG5_EXPORT(bool) hashset_rehash(struct hashset *map);
 
 NG5_END_DECL
 

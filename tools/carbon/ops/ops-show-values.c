@@ -42,9 +42,9 @@ visit_string_pairs (struct archive *archive, path_stack_t path, object_id_t id,
         return;
     }
 
-    struct archive_query *query = carbon_archive_query_default(archive);
+    struct archive_query *query = archive_query_default(archive);
     for (size_t i = 0; i < num_pairs; i++) {
-        char *keystr = carbon_query_fetch_string_by_id(query, keys[i]);
+        char *keystr = query_fetch_string_by_id(query, keys[i]);
         if (strstr(params->path, keystr) != 0) {
             if (params->current_off >= params->offset) {
                 ops_show_values_result_t *r = NULL;
@@ -58,18 +58,18 @@ visit_string_pairs (struct archive *archive, path_stack_t path, object_id_t id,
                 if (!r) {
                     r = VECTOR_NEW_AND_GET(params->result, ops_show_values_result_t);
                     r->key = keys[i];
-                    r->type = NG5_BASIC_TYPE_STRING;
-                    carbon_vec_create(&r->values.string_values, NULL, sizeof(field_sid_t), 1000000);
+                    r->type = field_string;
+                    vec_create(&r->values.string_values, NULL, sizeof(field_sid_t), 1000000);
                 }
 
                 if (!params->contains_string) {
-                    carbon_vec_push(&r->values.string_values, &values[i], 1);
+                    vec_push(&r->values.string_values, &values[i], 1);
                     params->current_num += 1;
                 } else {
-                    struct archive_query *q = carbon_archive_query_default(archive);
-                    char *value = carbon_query_fetch_string_by_id(q, values[i]);
+                    struct archive_query *q = archive_query_default(archive);
+                    char *value = query_fetch_string_by_id(q, values[i]);
                     if (strstr(value, params->contains_string)) {
-                        carbon_vec_push(&r->values.string_values, &values[i], 1);
+                        vec_push(&r->values.string_values, &values[i], 1);
                         params->current_num += 1;
                     }
                     free(value);
@@ -100,7 +100,7 @@ before_visit_object_array(struct archive *archive, path_stack_t path,
 
     char buffer[2048];
     memset(buffer, 0, sizeof(buffer));
-    carbon_archive_visitor_path_to_string(buffer, archive, path);
+    archive_visitor_path_to_string(buffer, archive, path);
 
 
     struct capture *params = (struct capture *) capture;
@@ -139,7 +139,7 @@ before_visit_object_array_object_property(struct archive *archive, path_stack_t 
 
     char buffer[2048];
     memset(buffer, 0, sizeof(buffer));
-    carbon_archive_visitor_path_to_string(buffer, archive, path);
+    archive_visitor_path_to_string(buffer, archive, path);
 
 
     struct capture *params = (struct capture *) capture;
@@ -187,7 +187,7 @@ visit_object_array_object_property_string(struct archive *archive, path_stack_t 
 
     char buffer[2048];
     memset(buffer, 0, sizeof(buffer));
-    carbon_archive_visitor_path_to_string(buffer, archive, path);
+    archive_visitor_path_to_string(buffer, archive, path);
 
     if (strcmp(buffer, params->path) == 0) {
         if (params->current_off >= params->offset) {
@@ -202,21 +202,21 @@ visit_object_array_object_property_string(struct archive *archive, path_stack_t 
             if (!r) {
                 r = VECTOR_NEW_AND_GET(params->result, ops_show_values_result_t);
                 r->key = nested_key;
-                r->type = NG5_BASIC_TYPE_STRING;
-                carbon_vec_create(&r->values.string_values, NULL, sizeof(field_sid_t), 1000000);
+                r->type = field_string;
+                vec_create(&r->values.string_values, NULL, sizeof(field_sid_t), 1000000);
             }
 
 
 
             if (!params->contains_string) {
-                carbon_vec_push(&r->values.string_values, nested_values, num_nested_values);
+                vec_push(&r->values.string_values, nested_values, num_nested_values);
                 params->current_num += num_nested_values;
             } else {
-                struct archive_query *q = carbon_archive_query_default(archive);
+                struct archive_query *q = archive_query_default(archive);
                 for (u32 k = 0; k < num_nested_values; k++) {
-                    char *value = carbon_query_fetch_string_by_id(q, nested_values[k]);
+                    char *value = query_fetch_string_by_id(q, nested_values[k]);
                     if (strstr(value, params->contains_string)) {
-                        carbon_vec_push(&r->values.string_values, &nested_values[k], 1);
+                        vec_push(&r->values.string_values, &nested_values[k], 1);
                         params->current_num += 1;
                     }
                     free(value);
@@ -263,7 +263,7 @@ visit_object_array_object_property_int8(struct archive *archive, path_stack_t pa
 
     char buffer[2048];
     memset(buffer, 0, sizeof(buffer));
-    carbon_archive_visitor_path_to_string(buffer, archive, path);
+    archive_visitor_path_to_string(buffer, archive, path);
 
     if (strcmp(buffer, params->path) == 0) {
         if (params->current_off >= params->offset) {
@@ -278,14 +278,14 @@ visit_object_array_object_property_int8(struct archive *archive, path_stack_t pa
             if (!r) {
                 r = VECTOR_NEW_AND_GET(params->result, ops_show_values_result_t);
                 r->key = nested_key;
-                r->type = NG5_BASIC_TYPE_INT8;
-                carbon_vec_create(&r->values.integer_values, NULL, sizeof(field_i64_t), 1000000);
+                r->type = field_int8;
+                vec_create(&r->values.integer_values, NULL, sizeof(field_i64_t), 1000000);
             }
 
             for (u32 k = 0; k < num_nested_values; k++) {
                 i64 val = nested_values[k];
                 if (val >= params->between_lower_bound && val <= params->between_upper_bound) {
-                    carbon_vec_push(&r->values.integer_values, &val, 1);
+                    vec_push(&r->values.integer_values, &val, 1);
                 }
             }
 
@@ -327,7 +327,7 @@ visit_object_array_object_property_int16(struct archive *archive, path_stack_t p
 
     char buffer[2048];
     memset(buffer, 0, sizeof(buffer));
-    carbon_archive_visitor_path_to_string(buffer, archive, path);
+    archive_visitor_path_to_string(buffer, archive, path);
 
     if (strcmp(buffer, params->path) == 0) {
         if (params->current_off >= params->offset) {
@@ -342,14 +342,14 @@ visit_object_array_object_property_int16(struct archive *archive, path_stack_t p
             if (!r) {
                 r = VECTOR_NEW_AND_GET(params->result, ops_show_values_result_t);
                 r->key = nested_key;
-                r->type = NG5_BASIC_TYPE_INT16;
-                carbon_vec_create(&r->values.integer_values, NULL, sizeof(field_i64_t), 1000000);
+                r->type = field_int16;
+                vec_create(&r->values.integer_values, NULL, sizeof(field_i64_t), 1000000);
             }
 
             for (u32 k = 0; k < num_nested_values; k++) {
                 i64 val = nested_values[k];
                 if (val >= params->between_lower_bound && val <= params->between_upper_bound) {
-                    carbon_vec_push(&r->values.integer_values, &val, 1);
+                    vec_push(&r->values.integer_values, &val, 1);
                 }
 
             }
@@ -374,18 +374,18 @@ visit_object_array_object_property_int16(struct archive *archive, path_stack_t p
 //    struct capture *params = (struct capture *) capture;
 //    char buffer[2048];
 //    memset(buffer, 0, sizeof(buffer));
-//    carbon_archive_visitor_path_to_string(buffer, archive, path);
+//    archive_visitor_path_to_string(buffer, archive, path);
 //
 //    if (strcmp(buffer, params->path) == 0) {
-//        const u32 *count_ptr = carbon_hashtable_get_value(&params->counts, &key);
+//        const u32 *count_ptr = hashtable_get_value(&params->counts, &key);
 //        u32 count_val = 0;
 //        if (!count_ptr) {
-//            carbon_hashset_insert_or_update(&params->keys, &key, 1);
+//            hashset_insert_or_update(&params->keys, &key, 1);
 //        } else {
 //            count_val = *count_ptr;
 //        }
 //        count_val += count;
-//        carbon_hashtable_insert_or_update(&params->counts, &key, &count_val, 1);
+//        hashtable_insert_or_update(&params->counts, &key, &count_val, 1);
 //
 //    }
 //    return true;
@@ -404,7 +404,7 @@ ops_show_values(timestamp_t *duration, struct vector ofType(ops_show_values_resu
     struct archive_visitor visitor = { 0 };
     struct archive_visitor_desc desc = { .visit_mask = NG5_ARCHIVE_ITER_MASK_ANY };
 
-    carbon_vec_create(result, NULL, sizeof(ops_show_values_result_t), 10);
+    vec_create(result, NULL, sizeof(ops_show_values_result_t), 10);
 
     struct capture capture = {
         .path = path,
@@ -420,8 +420,8 @@ ops_show_values(timestamp_t *duration, struct vector ofType(ops_show_values_resu
 
 
 
-//    carbon_hashtable_create(&capture.counts, &archive->err, sizeof(field_sid_t), sizeof(u32), 50);
-//    carbon_hashset_create(&capture.keys, &archive->err, sizeof(field_sid_t), 50);
+//    hashtable_create(&capture.counts, &archive->err, sizeof(field_sid_t), sizeof(u32), 50);
+//    hashset_create(&capture.keys, &archive->err, sizeof(field_sid_t), 50);
 
   //  visitor.visit_string_pairs = visit_string_pairs;
  //   visitor.visit_string_array_pair = visit_string_array_pair;
@@ -434,28 +434,28 @@ ops_show_values(timestamp_t *duration, struct vector ofType(ops_show_values_resu
     visitor.visit_object_array_object_property_int16s = visit_object_array_object_property_int16;
     visitor.visit_string_pairs = visit_string_pairs;
 
-    timestamp_t begin = carbon_time_now_wallclock();
-    carbon_archive_visit_archive(archive, &desc, &visitor, &capture);
-    timestamp_t end = carbon_time_now_wallclock();
+    timestamp_t begin = time_now_wallclock();
+    archive_visit_archive(archive, &desc, &visitor, &capture);
+    timestamp_t end = time_now_wallclock();
     *duration = (end - begin);
 
 
-//    struct vector ofType(field_sid_t) *keys = carbon_hashset_keys(&capture.keys);
+//    struct vector ofType(field_sid_t) *keys = hashset_keys(&capture.keys);
 //
 //    for (u32 i = 0; i < keys->num_elems; i++) {
 //        field_sid_t id = *vec_get(keys, i, field_sid_t);
-//        u32 count = *(u32 *) carbon_hashtable_get_value(&capture.counts, &id);
+//        u32 count = *(u32 *) hashtable_get_value(&capture.counts, &id);
 //        ops_count_values_result_t r = {
 //            .key = id,
 //            .count = count
 //        };
-//        carbon_vec_push(result, &r, 1);
+//        vec_push(result, &r, 1);
 //    }
-//    carbon_vec_drop(keys);
+//    vec_drop(keys);
 //
 //
-//    carbon_hashtable_drop(&capture.counts);
-//    carbon_hashset_drop(&capture.keys);
+//    hashtable_drop(&capture.counts);
+//    hashset_drop(&capture.keys);
 
 
     return true;

@@ -65,7 +65,7 @@ extern "C" {
 #include "core/string-pred/string_pred_equals.h"
 
 NG5_EXPORT (bool)
-carbon_init(void);
+init(void);
 
 #ifdef __cplusplus
 }

@@ -28,7 +28,7 @@ struct memblock
     struct err  err;
 };
 
-bool carbon_memblock_create(struct memblock **block, size_t size)
+bool memblock_create(struct memblock **block, size_t size)
 {
     NG5_NON_NULL_OR_ERROR(block)
     NG5_PRINT_ERROR_IF(size == 0, NG5_ERR_ILLEGALARG)
@@ -37,19 +37,19 @@ bool carbon_memblock_create(struct memblock **block, size_t size)
     result->blockLength = size;
     result->lastByte = 0;
     result->base = malloc(size);
-    carbon_error_init(&result->err);
+    error_init(&result->err);
     *block = result;
     return true;
 }
 
-bool carbon_memblock_from_file(struct memblock **block, FILE *file, size_t nbytes)
+bool memblock_from_file(struct memblock **block, FILE *file, size_t nbytes)
 {
-    carbon_memblock_create(block, nbytes);
+    memblock_create(block, nbytes);
     size_t numRead = fread((*block)->base, 1, nbytes, file);
     return numRead == nbytes ? true : false;
 }
 
-bool carbon_memblock_drop(struct memblock *block)
+bool memblock_drop(struct memblock *block)
 {
     NG5_NON_NULL_OR_ERROR(block)
     free(block->base);
@@ -58,32 +58,32 @@ bool carbon_memblock_drop(struct memblock *block)
 }
 
 NG5_EXPORT(bool)
-carbon_memblock_get_error(struct err *out, struct memblock *block)
+memblock_get_error(struct err *out, struct memblock *block)
 {
     NG5_NON_NULL_OR_ERROR(block);
     NG5_NON_NULL_OR_ERROR(out);
-    return carbon_error_cpy(out, &block->err);
+    return error_cpy(out, &block->err);
 }
 
-bool carbon_memblock_size(offset_t *size, const struct memblock *block)
+bool memblock_size(offset_t *size, const struct memblock *block)
 {
     NG5_NON_NULL_OR_ERROR(block)
     *size = block->blockLength;
     return true;
 }
 
-bool carbon_memblock_write_to_file(FILE *file, const struct memblock *block)
+bool memblock_write_to_file(FILE *file, const struct memblock *block)
 {
     size_t nwritten = fwrite(block->base, block->blockLength, 1, file);
     return nwritten == 1 ? true : false;
 }
 
-const char *carbon_memblock_raw_data(const struct memblock *block)
+const char *memblock_raw_data(const struct memblock *block)
 {
     return (block && block->base ? block->base : NULL);
 }
 
-bool carbon_memblock_resize(struct memblock *block, size_t size)
+bool memblock_resize(struct memblock *block, size_t size)
 {
     NG5_NON_NULL_OR_ERROR(block)
     NG5_PRINT_ERROR_IF(size == 0, NG5_ERR_ILLEGALARG)
@@ -92,7 +92,7 @@ bool carbon_memblock_resize(struct memblock *block, size_t size)
     return true;
 }
 
-bool carbon_memblock_write(struct memblock *block,
+bool memblock_write(struct memblock *block,
                            offset_t position,
                            const char *data,
                            offset_t nbytes)
@@ -108,11 +108,11 @@ bool carbon_memblock_write(struct memblock *block,
     }
 }
 
-bool carbon_memblock_cpy(struct memblock **dst, struct memblock *src)
+bool memblock_cpy(struct memblock **dst, struct memblock *src)
 {
     NG5_NON_NULL_OR_ERROR(dst)
     NG5_NON_NULL_OR_ERROR(src)
-    NG5_CHECK_SUCCESS(carbon_memblock_create(dst, src->blockLength));
+    NG5_CHECK_SUCCESS(memblock_create(dst, src->blockLength));
     memcpy((*dst)->base, src->base, src->blockLength);
     assert((*dst)->base);
     assert((*dst)->blockLength == src->blockLength);
@@ -120,7 +120,7 @@ bool carbon_memblock_cpy(struct memblock **dst, struct memblock *src)
     return true;
 }
 
-bool carbon_memblock_shrink(struct memblock *block)
+bool memblock_shrink(struct memblock *block)
 {
     NG5_NON_NULL_OR_ERROR(block)
     block->blockLength = block->lastByte;
@@ -128,7 +128,7 @@ bool carbon_memblock_shrink(struct memblock *block)
     return true;
 }
 
-void *carbon_memblock_move_contents_and_drop(struct memblock *block)
+void *memblock_move_contents_and_drop(struct memblock *block)
 {
     void *result = block->base;
     block->base = NULL;

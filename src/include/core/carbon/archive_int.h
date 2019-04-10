@@ -240,7 +240,7 @@ enum marker_type
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
-static struct archive_header this_carbon_file_header = {
+static struct archive_header this_file_header = {
     .version = CABIN_FILE_VERSION,
     .root_object_header_offset = 0
 };
@@ -369,33 +369,30 @@ struct __attribute__((packed)) string_entry_header
 };
 
 void
-carbon_int_read_prop_offsets(struct archive_prop_offs *prop_offsets,
+int_read_prop_offsets(struct archive_prop_offs *prop_offsets,
                              struct memfile *memfile,
                              const union object_flags *flags);
 
 void
-carbon_int_embedded_fixed_props_read(struct fixed_prop *prop, struct memfile *memfile);
+int_embedded_fixed_props_read(struct fixed_prop *prop, struct memfile *memfile);
 
 void
-carbon_int_embedded_var_props_read(struct var_prop *prop, struct memfile *memfile);
+int_embedded_var_props_read(struct var_prop *prop, struct memfile *memfile);
 
 void
-carbon_int_embedded_null_props_read(struct null_prop *prop, struct memfile *memfile);
+int_embedded_null_props_read(struct null_prop *prop, struct memfile *memfile);
 
 void
-carbon_int_embedded_array_props_read(struct array_prop *prop, struct memfile *memfile);
+int_embedded_array_props_read(struct array_prop *prop, struct memfile *memfile);
 
 void
-carbon_int_embedded_table_props_read(struct table_prop *prop, struct memfile *memfile);
+int_embedded_table_props_read(struct table_prop *prop, struct memfile *memfile);
 
 field_e
-carbon_int_get_value_type_of_char(char c);
+int_get_value_type_of_char(char c);
 
 field_e
-carbon_int_marker_to_field_type(char symbol);
-
-enum field_type
-carbon_int_field_type_to_basic_type(field_e type);
+int_marker_to_field_type(char symbol);
 
 NG5_END_DECL
 

@@ -82,7 +82,7 @@ struct strdic
     bool (*remove)(struct strdic *self, field_sid_t *strings, size_t nstrings);
 
     /**
-     * Get the string ids associated with <code>keys</code> in this carbon_parallel_map_exec (if any).
+     * Get the string ids associated with <code>keys</code> in this parallel_map_exec (if any).
      *
      * Note: Implementation must ensure thread-safeness
      */
@@ -140,7 +140,7 @@ struct strdic
  */
 NG5_FUNC_UNUSED
 static bool
-carbon_strdic_drop(struct strdic *dic)
+strdic_drop(struct strdic *dic)
 {
     NG5_NON_NULL_OR_ERROR(dic);
     assert(dic->drop);
@@ -149,7 +149,7 @@ carbon_strdic_drop(struct strdic *dic)
 
 NG5_FUNC_UNUSED
 static bool
-carbon_strdic_insert(struct strdic *dic, field_sid_t **out, char *const *strings, size_t nstrings,
+strdic_insert(struct strdic *dic, field_sid_t **out, char *const *strings, size_t nstrings,
                      size_t nthreads)
 {
     NG5_NON_NULL_OR_ERROR(dic);
@@ -160,7 +160,7 @@ carbon_strdic_insert(struct strdic *dic, field_sid_t **out, char *const *strings
 
 NG5_FUNC_UNUSED
 static bool
-carbon_strdic_reset_counters(struct strdic *dic)
+strdic_reset_counters(struct strdic *dic)
 {
     NG5_NON_NULL_OR_ERROR(dic);
     assert(dic->resetCounters);
@@ -169,7 +169,7 @@ carbon_strdic_reset_counters(struct strdic *dic)
 
 NG5_FUNC_UNUSED
 static bool
-carbon_strdic_get_counters(struct strhash_counters *counters, struct strdic *dic)
+strdic_get_counters(struct strhash_counters *counters, struct strdic *dic)
 {
     NG5_NON_NULL_OR_ERROR(dic);
     assert(dic->counters);
@@ -178,7 +178,7 @@ carbon_strdic_get_counters(struct strhash_counters *counters, struct strdic *dic
 
 NG5_FUNC_UNUSED
 static bool
-carbon_strdic_remove(struct strdic *dic, field_sid_t *strings, size_t num_strings)
+strdic_remove(struct strdic *dic, field_sid_t *strings, size_t num_strings)
 {
     NG5_NON_NULL_OR_ERROR(dic);
     NG5_NON_NULL_OR_ERROR(strings);
@@ -188,7 +188,7 @@ carbon_strdic_remove(struct strdic *dic, field_sid_t *strings, size_t num_string
 
 NG5_FUNC_UNUSED
 static bool
-carbon_strdic_locate_safe(field_sid_t **out, bool **found_mask, size_t *num_not_found,
+strdic_locate_safe(field_sid_t **out, bool **found_mask, size_t *num_not_found,
                           struct strdic *dic, char *const *keys, size_t num_keys)
 {
     NG5_NON_NULL_OR_ERROR(out);
@@ -202,7 +202,7 @@ carbon_strdic_locate_safe(field_sid_t **out, bool **found_mask, size_t *num_not_
 
 NG5_FUNC_UNUSED
 static bool
-carbon_strdic_locate_fast(field_sid_t **out, struct strdic *dic, char *const *keys, size_t nkeys)
+strdic_locate_fast(field_sid_t **out, struct strdic *dic, char *const *keys, size_t nkeys)
 {
     NG5_NON_NULL_OR_ERROR(out);
     NG5_NON_NULL_OR_ERROR(dic);
@@ -213,14 +213,14 @@ carbon_strdic_locate_fast(field_sid_t **out, struct strdic *dic, char *const *ke
 
 NG5_FUNC_UNUSED
 static char **
-carbon_strdic_extract(struct strdic *dic, const field_sid_t *ids, size_t nids)
+strdic_extract(struct strdic *dic, const field_sid_t *ids, size_t nids)
 {
     return dic->extract(dic, ids, nids);
 }
 
 NG5_FUNC_UNUSED
 static bool
-carbon_strdic_free(struct strdic *dic, void *ptr)
+strdic_free(struct strdic *dic, void *ptr)
 {
     NG5_NON_NULL_OR_ERROR(dic);
     if (ptr) {
@@ -233,7 +233,7 @@ carbon_strdic_free(struct strdic *dic, void *ptr)
 
 NG5_FUNC_UNUSED
 static bool
-carbon_strdic_num_distinct(size_t *num, struct strdic *dic)
+strdic_num_distinct(size_t *num, struct strdic *dic)
 {
     NG5_NON_NULL_OR_ERROR(num);
     NG5_NON_NULL_OR_ERROR(dic);
@@ -243,7 +243,7 @@ carbon_strdic_num_distinct(size_t *num, struct strdic *dic)
 
 NG5_FUNC_UNUSED
 static bool
-carbon_strdic_get_contents(struct vector ofType (char *) *strings,
+strdic_get_contents(struct vector ofType (char *) *strings,
                            struct vector ofType(field_sid_t) *string_ids,
                            struct strdic *dic)
 {

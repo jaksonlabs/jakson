@@ -52,31 +52,31 @@ struct pack_huffman_str_info
 };
 
 NG5_EXPORT(bool)
-carbon_huffman_create(struct pack_huffman *dic);
+huffman_create(struct pack_huffman *dic);
 
 NG5_EXPORT(bool)
-carbon_huffman_cpy(struct pack_huffman *dst, struct pack_huffman *src);
+huffman_cpy(struct pack_huffman *dst, struct pack_huffman *src);
 
 NG5_EXPORT(bool)
-carbon_huffman_build(struct pack_huffman *encoder, const string_vector_t *strings);
+huffman_build(struct pack_huffman *encoder, const string_vector_t *strings);
 
 NG5_EXPORT(bool)
-carbon_huffman_get_error(struct err *err, const struct pack_huffman *dic);
+huffman_get_error(struct err *err, const struct pack_huffman *dic);
 
 NG5_EXPORT(bool)
-carbon_huffman_encode_one(struct memfile *file, struct pack_huffman *dic, const char *string);
+huffman_encode_one(struct memfile *file, struct pack_huffman *dic, const char *string);
 
 NG5_EXPORT(bool)
-carbon_huffman_read_string(struct pack_huffman_str_info *info, struct memfile *src);
+huffman_read_string(struct pack_huffman_str_info *info, struct memfile *src);
 
 NG5_EXPORT(bool)
-carbon_huffman_drop(struct pack_huffman *dic);
+huffman_drop(struct pack_huffman *dic);
 
 NG5_EXPORT(bool)
-carbon_huffman_serialize_dic(struct memfile *file, const struct pack_huffman *dic, char marker_symbol);
+huffman_serialize_dic(struct memfile *file, const struct pack_huffman *dic, char marker_symbol);
 
 NG5_EXPORT(bool)
-carbon_huffman_read_dic_entry(struct pack_huffman_info *info, struct memfile *file, char marker_symbol);
+huffman_read_dic_entry(struct pack_huffman_info *info, struct memfile *file, char marker_symbol);
 
 NG5_END_DECL
 

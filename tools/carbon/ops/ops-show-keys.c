@@ -42,10 +42,10 @@ before_visit_object_array(struct archive *archive, path_stack_t path,
     NG5_UNUSED(capture);
     NG5_UNUSED(key);
 
-//        carbon_archive_visitor_print_path(stdout, archive, path);
+//        archive_visitor_print_path(stdout, archive, path);
 //
-//    struct archive_query *query = carbon_archive_query_default(archive);
-//    char *keystr = carbon_query_fetch_string_by_id(query, key);
+//    struct archive_query *query = archive_query_default(archive);
+//    char *keystr = query_fetch_string_by_id(query, key);
 //    printf("before_visit_object_array -- KEY %s\n", keystr);
 //    free(keystr);
 
@@ -71,13 +71,13 @@ before_visit_object_array_objects(bool *skip_group_object_ids,
     NG5_UNUSED(capture);
 
 //    ops_show_keys_capture_t *params = (ops_show_keys_capture_t *) capture;
-//    if (carbon_archive_visitor_path_compare(path, NULL, params->path, archive)) {
+//    if (archive_visitor_path_compare(path, NULL, params->path, archive)) {
 //        ops_show_keys_key_type_pair_t pair = {
 //            .key = key,
-//            .type = NG5_BASIC_TYPE_OBJECT,
+//            .type = field_object,
 //            .is_array = true
 //        };
-//        carbon_hashset_insert_or_update(params->result, &pair, 1);
+//        hashset_insert_or_update(params->result, &pair, 1);
 //    }
 }
 
@@ -98,19 +98,19 @@ before_object_visit(struct archive *archive, path_stack_t path,
     NG5_UNUSED(key);
     NG5_UNUSED(capture);
 
-//    struct archive_query *query = carbon_archive_query_default(archive);
-//    char *keystr = carbon_query_fetch_string_by_id(query, key);
+//    struct archive_query *query = archive_query_default(archive);
+//    char *keystr = query_fetch_string_by_id(query, key);
 //    printf("before_object_visit -- KEY %s\n", keystr);
 //    free(keystr);
-//    carbon_archive_visitor_print_path(stdout, archive, path);
+//    archive_visitor_print_path(stdout, archive, path);
 
 //    ops_show_keys_capture_t *params = (ops_show_keys_capture_t *) capture;
-//    if (carbon_archive_visitor_path_compare(path, NULL, params->path, archive)) {
+//    if (archive_visitor_path_compare(path, NULL, params->path, archive)) {
 //        ops_show_keys_key_type_pair_t pair = {
 //            .key = key,
-//            .type = NG5_BASIC_TYPE_OBJECT
+//            .type = field_object
 //        };
-//        carbon_hashset_insert_or_update(params->result, &pair, 1);
+//        hashset_insert_or_update(params->result, &pair, 1);
 //    }
 
 
@@ -131,13 +131,13 @@ visit_object_property(struct archive *archive, path_stack_t path,
     NG5_UNUSED(capture);
 
 //    ops_show_keys_capture_t *params = (ops_show_keys_capture_t *) capture;
-//    if (carbon_archive_visitor_path_compare(path, NULL, params->path, archive)) {
+//    if (archive_visitor_path_compare(path, NULL, params->path, archive)) {
 //        ops_show_keys_key_type_pair_t pair = {
 //            .key = key,
 //            .type = type,
 //            .is_array = is_array_type
 //        };
-//        carbon_hashset_insert_or_update(params->result, &pair, 1);
+//        hashset_insert_or_update(params->result, &pair, 1);
 //    }
 
 }
@@ -186,13 +186,13 @@ static void visit_object_array_prop(struct archive *archive, path_stack_t path, 
 
     ops_show_keys_capture_t *params = (ops_show_keys_capture_t *) capture;
 
-    //carbon_archive_visitor_print_path(stderr, archive, path);
-    //fprintf(stderr, "---> type: %s\n", carbon_basic_type_to_system_type_str(type));
+    //archive_visitor_print_path(stderr, archive, path);
+    //fprintf(stderr, "---> type: %s\n", basic_type_to_system_type_str(type));
     //fprintf(stderr, "===> path: %s\n", params->path);
 
     char buffer[2048];
     memset(buffer, 0, sizeof(buffer));
-    carbon_archive_visitor_path_to_string(buffer, archive, path);
+    archive_visitor_path_to_string(buffer, archive, path);
 
 
     size_t len_current_path = strlen(buffer);
@@ -203,7 +203,7 @@ static void visit_object_array_prop(struct archive *archive, path_stack_t path, 
             .key = key,
             .type = type
         };
-        carbon_hashset_insert_or_update(params->result, &pair, 1);
+        hashset_insert_or_update(params->result, &pair, 1);
     }
 
 }
@@ -228,11 +228,11 @@ before_visit_object_array_object_property(struct archive *archive, path_stack_t 
 
     char buffer[2048];
     memset(buffer, 0, sizeof(buffer));
-    carbon_archive_visitor_path_to_string(buffer, archive, path);
+    archive_visitor_path_to_string(buffer, archive, path);
 
 
     ops_show_keys_capture_t *params = (ops_show_keys_capture_t *) capture;
-//    char *nested_keystr = carbon_query_fetch_string_by_id(query, nested_key);
+//    char *nested_keystr = query_fetch_string_by_id(query, nested_key);
 
     size_t len_current_path = strlen(buffer);
     size_t len_user_path = strlen(params->path);
@@ -255,12 +255,12 @@ before_visit_object_array_object_property(struct archive *archive, path_stack_t 
     //
 //
 //    ops_show_keys_capture_t *params = (ops_show_keys_capture_t *) capture;
-//    if (carbon_archive_visitor_path_compare(path, params->path, archive)) {
+//    if (archive_visitor_path_compare(path, params->path, archive)) {
 //        ops_show_keys_key_type_pair_t pair = {
 //            .key = nested_key,
-//            .type = NG5_BASIC_TYPE_OBJECT
+//            .type = field_object
 //        };
-//        carbon_hashset_insert_or_update(params->result, &pair, 1);
+//        hashset_insert_or_update(params->result, &pair, 1);
 //    }
 
 
@@ -300,7 +300,7 @@ ops_show_keys(timestamp_t *duration, struct vector ofType(ops_show_keys_key_type
     struct archive_visitor visitor = { 0 };
     struct archive_visitor_desc desc = { .visit_mask = NG5_ARCHIVE_ITER_MASK_ANY };
     struct hashset ofType(ops_show_keys_key_type_pair_t) distinct_key_type_pairs;
-    carbon_hashset_create(&distinct_key_type_pairs, &archive->err, sizeof(ops_show_keys_capture_t), 100);
+    hashset_create(&distinct_key_type_pairs, &archive->err, sizeof(ops_show_keys_capture_t), 100);
     ops_show_keys_capture_t capture = {
         .path = path,
         .result = &distinct_key_type_pairs
@@ -316,16 +316,16 @@ ops_show_keys(timestamp_t *duration, struct vector ofType(ops_show_keys_key_type
 
     visitor.visit_object_array_prop = visit_object_array_prop;
 
-    timestamp_t begin = carbon_time_now_wallclock();
-    carbon_archive_visit_archive(archive, &desc, &visitor, &capture);
-    timestamp_t end = carbon_time_now_wallclock();
+    timestamp_t begin = time_now_wallclock();
+    archive_visit_archive(archive, &desc, &visitor, &capture);
+    timestamp_t end = time_now_wallclock();
     *duration = (end - begin);
 
-    struct vector ofType(ops_show_keys_key_type_pair_t) *pairs = carbon_hashset_keys(&distinct_key_type_pairs);
-    carbon_vec_push(result, pairs->base, pairs->num_elems);
-    carbon_vec_drop(pairs);
+    struct vector ofType(ops_show_keys_key_type_pair_t) *pairs = hashset_keys(&distinct_key_type_pairs);
+    vec_push(result, pairs->base, pairs->num_elems);
+    vec_drop(pairs);
 
-    carbon_hashset_drop(&distinct_key_type_pairs);
+    hashset_drop(&distinct_key_type_pairs);
 
     return true;
 }

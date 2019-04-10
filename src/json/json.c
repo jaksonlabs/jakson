@@ -52,7 +52,7 @@ NG5_EXPORT(bool) json_tokenizer_init(struct json_tokenizer *tokenizer, const cha
         tokenizer->cursor = input;
         tokenizer->token =
                 (struct json_token) {.type = JSON_UNKNOWN, .length = 0, .column = 0, .line = 1, .string = NULL};
-        carbon_error_init(&tokenizer->err);
+        error_init(&tokenizer->err);
         return true;
 }
 
@@ -224,7 +224,7 @@ NG5_EXPORT(bool) json_parser_create(struct json_parser *parser, struct doc_bulk 
         NG5_NON_NULL_OR_ERROR(partition)
 
         parser->partition = partition;
-        carbon_error_init(&parser->err);
+        error_init(&parser->err);
 
         return true;
 }
@@ -238,13 +238,13 @@ bool json_parse(struct json *json, struct json_err *error_desc, struct json_pars
         struct vector ofType(struct json_token) token_stream;
 
         struct json retval = {.element = malloc(sizeof(struct json_element))};
-        carbon_error_init(&retval.err);
+        error_init(&retval.err);
         const struct json_token *token;
         int status;
 
         json_tokenizer_init(&parser->tokenizer, input);
-        carbon_vec_create(&brackets, NULL, sizeof(enum json_token_type), 15);
-        carbon_vec_create(&token_stream, NULL, sizeof(struct json_token), 200);
+        vec_create(&brackets, NULL, sizeof(enum json_token_type), 15);
+        vec_create(&token_stream, NULL, sizeof(struct json_token), 200);
 
         struct token_memory token_mem = {.init = true, .type = JSON_UNKNOWN};
 
@@ -257,7 +257,7 @@ bool json_parse(struct json *json, struct json_err *error_desc, struct json_pars
                         goto cleanup;
                 }
         }
-        if (!carbon_vec_is_empty(&brackets)) {
+        if (!vec_is_empty(&brackets)) {
                 enum json_token_type type = *VECTOR_PEEK(&brackets, enum json_token_type);
                 char buffer[1024];
                 sprintf(&buffer[0],
@@ -276,8 +276,8 @@ bool json_parse(struct json *json, struct json_err *error_desc, struct json_pars
         status = true;
 
         cleanup:
-        carbon_vec_drop(&brackets);
-        carbon_vec_drop(&token_stream);
+        vec_drop(&brackets);
+        vec_drop(&token_stream);
         return status;
 }
 
@@ -356,13 +356,13 @@ NG5_EXPORT(bool) json_test(struct err *err, struct json *json)
 
 static struct json_token get_token(struct vector ofType(struct json_token) *token_stream, size_t token_idx)
 {
-        return *(struct json_token *) carbon_vec_at(token_stream, token_idx);
+        return *(struct json_token *) vec_at(token_stream, token_idx);
 }
 
 bool parse_members(struct err *err, struct json_members *members, struct vector ofType(struct json_token) *token_stream,
         size_t *token_idx)
 {
-        carbon_vec_create(&members->members, NULL, sizeof(struct json_prop), 20);
+        vec_create(&members->members, NULL, sizeof(struct json_prop), 20);
         struct json_token delimiter_token;
 
         do {
@@ -442,7 +442,7 @@ static bool parse_object(struct json_object_t *object, struct err *err,
                         return false;
                 }
         } else {
-                carbon_vec_create(&object->value->members, NULL, sizeof(struct json_prop), 20);
+                vec_create(&object->value->members, NULL, sizeof(struct json_prop), 20);
         }
 
         NEXT_TOKEN(token_idx);  /** Skip '}' */
@@ -457,7 +457,7 @@ static bool parse_array(struct json_array *array, struct err *err,
         assert(token.type == ARRAY_OPEN);
         NEXT_TOKEN(token_idx); /** Skip '[' */
 
-        carbon_vec_create(&array->elements.elements, NULL, sizeof(struct json_element), 250);
+        vec_create(&array->elements.elements, NULL, sizeof(struct json_element), 250);
         if (!parse_elements(&array->elements, err, token_stream, token_idx)) {
                 return false;
         }
@@ -491,12 +491,12 @@ static void parse_number(struct json_number *number, struct vector ofType(struct
         value[token.length] = '\0';
 
         if (token.type == LITERAL_INT) {
-                i64 assumeSigned = carbon_convert_atoi64(value);
+                i64 assumeSigned = convert_atoi64(value);
                 if (value[0] == '-') {
                         number->value_type = JSON_NUMBER_SIGNED;
                         number->value.signed_integer = assumeSigned;
                 } else {
-                        u64 assumeUnsigned = carbon_convert_atoiu64(value);
+                        u64 assumeUnsigned = convert_atoiu64(value);
                         if (assumeUnsigned > (u64) assumeSigned) {
                                 number->value_type = JSON_NUMBER_UNSIGNED;
                                 number->value.unsigned_integer = assumeUnsigned;
@@ -656,21 +656,21 @@ static int process_token(struct err *err, struct json_err *error_desc, const str
         switch (token->type) {
         case OBJECT_OPEN:
         case ARRAY_OPEN:
-                carbon_vec_push(brackets, &token->type, 1);
+                vec_push(brackets, &token->type, 1);
                 break;
         case OBJECT_CLOSE:
         case ARRAY_CLOSE: {
-                if (!carbon_vec_is_empty(brackets)) {
+                if (!vec_is_empty(brackets)) {
                         enum json_token_type bracket = *VECTOR_PEEK(brackets, enum json_token_type);
                         if ((token->type == ARRAY_CLOSE && bracket == ARRAY_OPEN)
                                 || (token->type == OBJECT_CLOSE && bracket == OBJECT_OPEN)) {
-                                carbon_vec_pop(brackets);
+                                vec_pop(brackets);
                         } else {
                                 goto pushEntry;
                         }
                 } else {
                         pushEntry:
-                        carbon_vec_push(brackets, &token->type, 1);
+                        vec_push(brackets, &token->type, 1);
                 }
         }
                 break;
@@ -910,7 +910,7 @@ static bool json_ast_node_members_drop(struct json_members *members, struct err 
                         return false;
                 }
         }
-        carbon_vec_drop(&members->members);
+        vec_drop(&members->members);
         return true;
 }
 
@@ -922,7 +922,7 @@ static bool json_ast_node_elements_drop(struct json_elements *elements, struct e
                         return false;
                 }
         }
-        carbon_vec_drop(&elements->elements);
+        vec_drop(&elements->elements);
         return true;
 }
 

@@ -187,16 +187,16 @@ struct archive_visitor
 };
 
 NG5_EXPORT(bool)
-carbon_archive_visit_archive(struct archive *archive, const struct archive_visitor_desc *desc,
+archive_visit_archive(struct archive *archive, const struct archive_visitor_desc *desc,
                              struct archive_visitor *visitor, void *capture);
 
 NG5_EXPORT(bool)
-carbon_archive_visitor_print_path(FILE *file, struct archive *archive, const struct vector ofType(struct path_entry) *path_stack);
+archive_visitor_print_path(FILE *file, struct archive *archive, const struct vector ofType(struct path_entry) *path_stack);
 
 NG5_EXPORT(void)
-carbon_archive_visitor_path_to_string(char path_buffer[2048], struct archive *archive, const struct vector ofType(struct path_entry) *path_stack);
+archive_visitor_path_to_string(char path_buffer[2048], struct archive *archive, const struct vector ofType(struct path_entry) *path_stack);
 
 NG5_EXPORT(bool)
-carbon_archive_visitor_path_compare(const struct vector ofType(struct path_entry) *path, field_sid_t *group_name, const char *path_str, struct archive *archive);
+archive_visitor_path_compare(const struct vector ofType(struct path_entry) *path, field_sid_t *group_name, const char *path_str, struct archive *archive);
 
 #endif

@@ -5,7 +5,7 @@
 
 TEST(ObjectIdTest, CreateId) {
     object_id_t id;
-    bool result = carbon_object_id_create(&id);
+    bool result = object_id_create(&id);
     EXPECT_TRUE(result);
     EXPECT_NE(id, 0);
 }
@@ -14,7 +14,7 @@ TEST(ObjectIdTest, CreateUniqueIds) {
     std::set<object_id_t> haystack;
     for (size_t i = 0; i < 1000000; i++) {
         object_id_t id;
-        bool result = carbon_object_id_create(&id);
+        bool result = object_id_create(&id);
         if (!result) {
             printf("NO CAPACITY LEFT %zu\n", i);
         } else {

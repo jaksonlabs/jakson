@@ -36,38 +36,38 @@ struct archive_query
 NG5_DEFINE_GET_ERROR_FUNCTION(query, struct archive_query, query)
 
 NG5_EXPORT(bool)
-carbon_query_create(struct archive_query *query, struct archive *archive);
+query_create(struct archive_query *query, struct archive *archive);
 
 NG5_EXPORT(bool)
-carbon_query_drop(struct archive_query *query);
+query_drop(struct archive_query *query);
 
 NG5_EXPORT(bool)
-carbon_query_scan_strids(struct strid_iter *it, struct archive_query *query);
+query_scan_strids(struct strid_iter *it, struct archive_query *query);
 
 NG5_EXPORT(bool)
-carbon_query_create_index_string_id_to_offset(struct sid_to_offset **index,
+query_create_index_string_id_to_offset(struct sid_to_offset **index,
                                               struct archive_query *query);
 
 NG5_EXPORT(void)
-carbon_query_drop_index_string_id_to_offset(struct sid_to_offset *index);
+query_drop_index_string_id_to_offset(struct sid_to_offset *index);
 
 NG5_EXPORT(bool)
-carbon_query_index_id_to_offset_serialize(FILE *file, struct err *err, struct sid_to_offset *index);
+query_index_id_to_offset_serialize(FILE *file, struct err *err, struct sid_to_offset *index);
 
 NG5_EXPORT(bool)
-carbon_query_index_id_to_offset_deserialize(struct sid_to_offset **index, struct err *err, const char *file_path, offset_t offset);
+query_index_id_to_offset_deserialize(struct sid_to_offset **index, struct err *err, const char *file_path, offset_t offset);
 
 NG5_EXPORT(char *)
-carbon_query_fetch_string_by_id(struct archive_query *query, field_sid_t id);
+query_fetch_string_by_id(struct archive_query *query, field_sid_t id);
 
 NG5_EXPORT(char *)
-carbon_query_fetch_string_by_id_nocache(struct archive_query *query, field_sid_t id);
+query_fetch_string_by_id_nocache(struct archive_query *query, field_sid_t id);
 
 NG5_EXPORT(char **)
-carbon_query_fetch_strings_by_offset(struct archive_query *query, offset_t *offs, u32 *strlens, size_t num_offs);
+query_fetch_strings_by_offset(struct archive_query *query, offset_t *offs, u32 *strlens, size_t num_offs);
 
 NG5_EXPORT(field_sid_t *)
-carbon_query_find_ids(size_t *num_found, struct archive_query *query, const struct string_pred_t *pred,
+query_find_ids(size_t *num_found, struct archive_query *query, const struct string_pred_t *pred,
                       void *capture, i64 limit);
 
 NG5_END_DECL

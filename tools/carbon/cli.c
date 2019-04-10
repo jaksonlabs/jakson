@@ -91,7 +91,7 @@ before_object_visit(struct archive *archive, path_stack_t path,
 
     // TODO: ???   crashes??
     
-    carbon_archive_visitor_print_path(stderr, archive, path);
+    archive_visitor_print_path(stderr, archive, path);
 
     return VISIT_INCLUDE;
 }
@@ -1316,7 +1316,7 @@ NG5_FUNC_UNUSED before_visit_object_array(struct archive *archive, path_stack_t 
     NG5_UNUSED(parent_id);
     NG5_UNUSED(key);
 
-    carbon_archive_visitor_print_path(stderr, archive, path);
+    archive_visitor_print_path(stderr, archive, path);
      
 
     return VISIT_INCLUDE;
@@ -1667,7 +1667,7 @@ NG5_FUNC_UNUSED before_object_array_object_property_object(struct archive *archi
     NG5_UNUSED(nested_object_id);
     NG5_UNUSED(nested_value_object_id);
 
-     carbon_archive_visitor_print_path(stdout, archive, path);
+     archive_visitor_print_path(stdout, archive, path);
 
     return VISIT_INCLUDE;
 }
@@ -1781,37 +1781,37 @@ NG5_FUNC_UNUSED run_magic_visitor(int mask, struct archive *archive)
     visitor.before_visit_object_array_object_property = before_visit_object_array_object_property;
     visitor.before_object_array_object_property_object = before_object_array_object_property_object;
 
-    carbon_archive_visit_archive(archive, &desc, &visitor, &capture);
+    archive_visit_archive(archive, &desc, &visitor, &capture);
 }
 
 static bool
 run_show_keys( timestamp_t *duration, struct encoded_doc_list *result, const char *path, struct archive *archive)
 {
     struct vector ofType(ops_show_keys_key_type_pair_t) prop_keys;
-    carbon_vec_create(&prop_keys, NULL, sizeof(ops_show_keys_key_type_pair_t), 100);
+    vec_create(&prop_keys, NULL, sizeof(ops_show_keys_key_type_pair_t), 100);
     object_id_t result_oid;
-    carbon_object_id_create(&result_oid);
+    object_id_create(&result_oid);
 
     ops_show_keys(duration, &prop_keys, path, archive);
 
-    carbon_encoded_doc_collection_create(result, &archive->err, archive);
+    encoded_doc_collection_create(result, &archive->err, archive);
 
     struct encoded_doc *result_doc = encoded_doc_collection_get_or_append(result, result_oid);
-    carbon_encoded_doc_add_prop_array_object_decoded(result_doc, "result");
+    encoded_doc_add_prop_array_object_decoded(result_doc, "result");
 
     for (u32 i = 0; i < prop_keys.num_elems; i++) {
         ops_show_keys_key_type_pair_t *pair = vec_get(&prop_keys, i, ops_show_keys_key_type_pair_t);
         object_id_t tmp_obj_id;
-        carbon_object_id_create(&tmp_obj_id);
-        carbon_encoded_doc_array_push_object_decoded(result_doc, "result", tmp_obj_id);
+        object_id_create(&tmp_obj_id);
+        encoded_doc_array_push_object_decoded(result_doc, "result", tmp_obj_id);
         struct encoded_doc *pair_doc = encoded_doc_collection_get_or_append(result, tmp_obj_id);
-        carbon_encoded_doc_add_prop_string_decoded(pair_doc, "name", pair->key);
-        carbon_encoded_doc_add_prop_string_decoded_string_value_decoded(pair_doc, "type", carbon_basic_type_to_json_type_str(pair->type));
-        carbon_encoded_doc_add_prop_string_decoded_string_value_decoded(pair_doc, "sub-type", carbon_basic_type_to_system_type_str(pair->type));
+        encoded_doc_add_prop_string_decoded(pair_doc, "name", pair->key);
+        encoded_doc_add_prop_string_decoded_string_value_decoded(pair_doc, "type", basic_type_to_json_type_str(pair->type));
+        encoded_doc_add_prop_string_decoded_string_value_decoded(pair_doc, "sub-type", basic_type_to_system_type_str(pair->type));
     }
 
 
-    carbon_vec_drop(&prop_keys);
+    vec_drop(&prop_keys);
     return true;
 }
 
@@ -1819,29 +1819,29 @@ static bool
 run_count_values( timestamp_t *duration, struct encoded_doc_list *result, const char *path, struct archive *archive)
 {
     struct vector ofType(ops_count_values_result_t) prop_keys;
-    carbon_vec_create(&prop_keys, NULL, sizeof(ops_count_values_result_t), 100);
+    vec_create(&prop_keys, NULL, sizeof(ops_count_values_result_t), 100);
     object_id_t result_oid;
-    carbon_object_id_create(&result_oid);
+    object_id_create(&result_oid);
 
     ops_count_values(duration, &prop_keys, path, archive);
 
-    carbon_encoded_doc_collection_create(result, &archive->err, archive);
+    encoded_doc_collection_create(result, &archive->err, archive);
 
     struct encoded_doc *result_doc = encoded_doc_collection_get_or_append(result, result_oid);
-    carbon_encoded_doc_add_prop_array_object_decoded(result_doc, "result");
+    encoded_doc_add_prop_array_object_decoded(result_doc, "result");
 
     for (u32 i = 0; i < prop_keys.num_elems; i++) {
         ops_count_values_result_t *entry = vec_get(&prop_keys, i, ops_count_values_result_t);
         object_id_t tmp_obj_id;
-        carbon_object_id_create(&tmp_obj_id);
-        carbon_encoded_doc_array_push_object_decoded(result_doc, "result", tmp_obj_id);
+        object_id_create(&tmp_obj_id);
+        encoded_doc_array_push_object_decoded(result_doc, "result", tmp_obj_id);
         struct encoded_doc *doc = encoded_doc_collection_get_or_append(result, tmp_obj_id);
-        carbon_encoded_doc_add_prop_string_decoded(doc, "key", entry->key);
-        carbon_encoded_doc_add_prop_uint32_decoded(doc, "count", entry->count);
+        encoded_doc_add_prop_string_decoded(doc, "key", entry->key);
+        encoded_doc_add_prop_uint32_decoded(doc, "count", entry->count);
     }
 
 
-    carbon_vec_drop(&prop_keys);
+    vec_drop(&prop_keys);
     return true;
 }
 
@@ -1850,44 +1850,44 @@ run_show_values( timestamp_t *duration, struct encoded_doc_list *result, const c
                  i32 between_upper_bound, const char *contains_string)
 {
     struct vector ofType(ops_show_values_result_t) prop_keys;
-    carbon_vec_create(&prop_keys, NULL, sizeof(ops_show_values_result_t), 100);
+    vec_create(&prop_keys, NULL, sizeof(ops_show_values_result_t), 100);
     object_id_t result_oid;
-    carbon_object_id_create(&result_oid);
+    object_id_create(&result_oid);
 
     ops_show_values(duration, &prop_keys, path, archive, offset, limit, between_lower_bound, between_upper_bound, contains_string);
 
-    carbon_encoded_doc_collection_create(result, &archive->err, archive);
+    encoded_doc_collection_create(result, &archive->err, archive);
 
     struct encoded_doc *result_doc = encoded_doc_collection_get_or_append(result, result_oid);
-    carbon_encoded_doc_add_prop_array_object_decoded(result_doc, "result");
+    encoded_doc_add_prop_array_object_decoded(result_doc, "result");
 
     for (u32 i = 0; i < prop_keys.num_elems; i++) {
         ops_show_values_result_t *entry = vec_get(&prop_keys, i, ops_show_values_result_t);
         object_id_t tmp_obj_id;
-        carbon_object_id_create(&tmp_obj_id);
-        carbon_encoded_doc_array_push_object_decoded(result_doc, "result", tmp_obj_id);
+        object_id_create(&tmp_obj_id);
+        encoded_doc_array_push_object_decoded(result_doc, "result", tmp_obj_id);
         struct encoded_doc *doc = encoded_doc_collection_get_or_append(result, tmp_obj_id);
-        carbon_encoded_doc_add_prop_string_decoded(doc, "key", entry->key);
-        carbon_encoded_doc_add_prop_string_decoded_string_value_decoded(doc, "type", carbon_basic_type_to_json_type_str(entry->type));
+        encoded_doc_add_prop_string_decoded(doc, "key", entry->key);
+        encoded_doc_add_prop_string_decoded_string_value_decoded(doc, "type", basic_type_to_json_type_str(entry->type));
 
 
-        if (entry->type == NG5_BASIC_TYPE_STRING) {
-            carbon_encoded_doc_add_prop_array_string_decoded(doc, "values");
-            carbon_encoded_doc_array_push_string_decoded(doc, "values",vec_all(&entry->values.string_values, field_sid_t), entry->values.string_values.num_elems);
-            carbon_vec_drop(&entry->values.string_values);
-        } else if (entry->type == NG5_BASIC_TYPE_INT8) {
-            carbon_encoded_doc_add_prop_array_int64_decoded(doc, "values");
-            carbon_encoded_doc_array_push_int64_decoded(doc, "values",vec_all(&entry->values.integer_values, field_i64_t), entry->values.integer_values.num_elems);
-            carbon_vec_drop(&entry->values.string_values);
-        } else if (entry->type == NG5_BASIC_TYPE_INT16) {
-            carbon_encoded_doc_add_prop_array_int64_decoded(doc, "values");
-            carbon_encoded_doc_array_push_int64_decoded(doc, "values",vec_all(&entry->values.integer_values, field_i64_t), entry->values.integer_values.num_elems);
-            carbon_vec_drop(&entry->values.string_values);
+        if (entry->type == field_string) {
+            encoded_doc_add_prop_array_string_decoded(doc, "values");
+            encoded_doc_array_push_string_decoded(doc, "values",vec_all(&entry->values.string_values, field_sid_t), entry->values.string_values.num_elems);
+            vec_drop(&entry->values.string_values);
+        } else if (entry->type == field_int8) {
+            encoded_doc_add_prop_array_int64_decoded(doc, "values");
+            encoded_doc_array_push_int64_decoded(doc, "values",vec_all(&entry->values.integer_values, field_i64_t), entry->values.integer_values.num_elems);
+            vec_drop(&entry->values.string_values);
+        } else if (entry->type == field_int16) {
+            encoded_doc_add_prop_array_int64_decoded(doc, "values");
+            encoded_doc_array_push_int64_decoded(doc, "values",vec_all(&entry->values.integer_values, field_i64_t), entry->values.integer_values.num_elems);
+            vec_drop(&entry->values.string_values);
         }
     }
 
 
-    carbon_vec_drop(&prop_keys);
+    vec_drop(&prop_keys);
     return true;
 }
 
@@ -1896,39 +1896,39 @@ static bool
 run_get_citations( timestamp_t *duration, struct encoded_doc_list *result, const char *paper_name, struct archive *archive)
 {
     struct vector ofType(ops_get_citations_result_t) prop_keys;
-    carbon_vec_create(&prop_keys, NULL, sizeof(ops_get_citations_result_entry_t), 100);
+    vec_create(&prop_keys, NULL, sizeof(ops_get_citations_result_entry_t), 100);
     object_id_t result_oid;
-    carbon_object_id_create(&result_oid);
+    object_id_create(&result_oid);
 
     ops_get_citations(duration, &prop_keys, paper_name, archive);
 
-    carbon_encoded_doc_collection_create(result, &archive->err, archive);
+    encoded_doc_collection_create(result, &archive->err, archive);
 
     struct encoded_doc *result_doc = encoded_doc_collection_get_or_append(result, result_oid);
-    carbon_encoded_doc_add_prop_array_object_decoded(result_doc, "result");
+    encoded_doc_add_prop_array_object_decoded(result_doc, "result");
 
     for (u32 i = 0; i < prop_keys.num_elems; i++) {
         ops_get_citations_result_t *result_entry = vec_get(&prop_keys, i, ops_get_citations_result_t);
         for (u32 x = 0; x < result_entry->papers.num_elems; x++) {
             ops_get_citations_result_entry_t *entry = vec_get(&result_entry->papers, x, ops_get_citations_result_entry_t);
             object_id_t tmp_obj_id;
-            carbon_object_id_create(&tmp_obj_id);
-            carbon_encoded_doc_array_push_object_decoded(result_doc, "result", tmp_obj_id);
+            object_id_create(&tmp_obj_id);
+            encoded_doc_array_push_object_decoded(result_doc, "result", tmp_obj_id);
             struct encoded_doc *doc = encoded_doc_collection_get_or_append(result, tmp_obj_id);
-            carbon_encoded_doc_add_prop_string_decoded(doc, "title", entry->paper_title);
-            carbon_encoded_doc_add_prop_string_decoded(doc, "id", entry->paper_id);
-            carbon_encoded_doc_add_prop_array_string_decoded(doc, "authors");
+            encoded_doc_add_prop_string_decoded(doc, "title", entry->paper_title);
+            encoded_doc_add_prop_string_decoded(doc, "id", entry->paper_id);
+            encoded_doc_add_prop_array_string_decoded(doc, "authors");
 
             for (u32 k = 0; k < entry->authors.num_elems; k++) {
                 field_sid_t author = *vec_get(&entry->authors, k, field_sid_t);
-                carbon_encoded_doc_array_push_string_decoded(doc, "authors", &author, 1);
+                encoded_doc_array_push_string_decoded(doc, "authors", &author, 1);
             }
-            carbon_vec_drop(&entry->authors);
+            vec_drop(&entry->authors);
         }
-        carbon_vec_drop(&result_entry->papers);
+        vec_drop(&result_entry->papers);
     }
 
-    carbon_vec_drop(&prop_keys);
+    vec_drop(&prop_keys);
     return true;
 }
 
@@ -1947,8 +1947,8 @@ process_from(struct archive *archive, const char *line)
         struct encoded_doc_list result;
         timestamp_t duration;
         run_get_citations(&duration, &result, name, archive);
-        carbon_encoded_doc_collection_print(stdout, &result);
-        carbon_encoded_doc_collection_drop(&result);
+        encoded_doc_collection_print(stdout, &result);
+        encoded_doc_collection_drop(&result);
         printf("\n");
         printf("execution time: %" PRIu64"ms\n", duration);
 
@@ -1985,8 +1985,8 @@ process_from(struct archive *archive, const char *line)
             struct encoded_doc_list result;
             timestamp_t duration;
             run_count_values(&duration, &result, path, archive);
-            carbon_encoded_doc_collection_print(stdout, &result);
-            carbon_encoded_doc_collection_drop(&result);
+            encoded_doc_collection_print(stdout, &result);
+            encoded_doc_collection_drop(&result);
             printf("\n");
             printf("execution time: %" PRIu64"ms\n", duration);
         } else if (strstr(command, "*") != 0) {
@@ -2021,8 +2021,8 @@ process_from(struct archive *archive, const char *line)
             struct encoded_doc_list result;
 
             run_show_values(&duration, &result, path, archive, (u32) offset_count, (u32) limit_count, between_lower_bound, between_upper_bound, contains_string);
-            carbon_encoded_doc_collection_print(stdout, &result);
-            carbon_encoded_doc_collection_drop(&result);
+            encoded_doc_collection_print(stdout, &result);
+            encoded_doc_collection_drop(&result);
 leave:
             printf("\n");
             printf("execution time: %" PRIu64"ms\n", duration);
@@ -2043,8 +2043,8 @@ leave:
         struct encoded_doc_list result;
         timestamp_t duration;
         run_show_keys(&duration, &result, path, archive);
-        carbon_encoded_doc_collection_print(stdout, &result);
-        carbon_encoded_doc_collection_drop(&result);
+        encoded_doc_collection_print(stdout, &result);
+        encoded_doc_collection_drop(&result);
         printf("\n");
         printf("execution time: %" PRIu64"ms\n", duration);
 
@@ -2098,9 +2098,9 @@ process_command(struct archive *archive)
             fprintf(stdout, "%s", "bye");
             return false;
         } else if (strcmp(line, ".drop-cache") == 0) {
-            struct string_cache *cache = carbon_archive_get_query_string_id_cache(archive);
+            struct string_cache *cache = archive_get_query_string_id_cache(archive);
             if (cache) {
-                carbon_archive_drop_query_string_id_cache(archive);
+                archive_drop_query_string_id_cache(archive);
                 printf("cache dropped.\n");
             } else {
                 fprintf(stderr, "no cache installed.\n");
@@ -2108,19 +2108,19 @@ process_command(struct archive *archive)
 
         } else if (strstr(line, ".create-cache ") != 0) {
             int new_cache_size = atoi(line + strlen(".create-cache "));
-            struct string_cache *cache = carbon_archive_get_query_string_id_cache(archive);
+            struct string_cache *cache = archive_get_query_string_id_cache(archive);
             if (!cache) {
-                carbon_string_id_cache_create_LRU_ex(&archive->string_id_cache, archive, new_cache_size);
+                string_id_cache_create_LRU_ex(&archive->string_id_cache, archive, new_cache_size);
                 printf("cache created.\n");
             } else {
                 fprintf(stderr, "cache already installed, drop it first.\n");
             }
 
         } else if (strcmp(line, ".cache-size") == 0) {
-            struct string_cache *cache = carbon_archive_get_query_string_id_cache(archive);
+            struct string_cache *cache = archive_get_query_string_id_cache(archive);
             if (cache) {
                 size_t cache_size;
-                carbon_string_id_cache_get_size(&cache_size, cache);
+                string_id_cache_get_size(&cache_size, cache);
                 printf("%zu\n", cache_size);
             } else {
                 printf("0\n");
@@ -2154,10 +2154,10 @@ cache_monitor(void * data)
         float last_evict = 0;
 
         while (true) {
-            struct string_cache *cache = carbon_archive_get_query_string_id_cache(archive);
+            struct string_cache *cache = archive_get_query_string_id_cache(archive);
 
 
-            timestamp_t now = carbon_time_now_wallclock();
+            timestamp_t now = time_now_wallclock();
 
             fprintf(stats_file,
                     "%zu;\"hits\";%.4f\n",
@@ -2175,7 +2175,7 @@ cache_monitor(void * data)
 
             if (cache) {
 
-                carbon_string_id_cache_get_statistics(&statistics, cache);
+                string_id_cache_get_statistics(&statistics, cache);
 
 
                 size_t total = statistics.num_hits + statistics.num_misses;
@@ -2185,7 +2185,7 @@ cache_monitor(void * data)
                 last_miss =  total == 0 ? last_miss : statistics.num_misses / (float) total * 100;
                 last_evict = total == 0 ? last_evict: statistics.num_evicted / (float) total * 100;
 
-                carbon_string_id_cache_reset_statistics(cache);
+                string_id_cache_reset_statistics(cache);
 
 
             } else {
@@ -2203,7 +2203,7 @@ cache_monitor(void * data)
     return NULL;
 }
 
-bool moduleCliInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_mgr *manager)
+bool moduleCliInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
 {
     NG5_UNUSED(manager);
     NG5_UNUSED(argv);
@@ -2232,10 +2232,10 @@ bool moduleCliInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_mgr
 
         struct archive archive;
         int status;
-        if ((status = carbon_archive_open(&archive, pathCarbonFileIn))) {
+        if ((status = archive_open(&archive, pathCarbonFileIn))) {
 
             struct archive_info info;
-            carbon_archive_get_info(&info, &archive);
+            archive_get_info(&info, &archive);
             printf("CARBON file successfully loaded: '%s' (%.2f GiB) \n%.2f MiB record data, %.2f MiB string table (%" PRIu32 " strings), %.2f MiB index data\n",
                     pathCarbonFileIn, file_size / 1024.0 / 1024.0 / 1024.0,
                     info.record_table_size / 1024.0 / 1024.0, info.string_table_size / 1024.0 / 1024.0, info.num_embeddded_strings,
@@ -2251,7 +2251,7 @@ bool moduleCliInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_mgr
             while (process_command(&archive))
             { };
 
-            carbon_archive_close(&archive);
+            archive_close(&archive);
         } else {
             NG5_PRINT_ERROR(archive.err.code);
         }

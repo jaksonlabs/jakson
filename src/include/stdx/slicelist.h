@@ -72,7 +72,7 @@ typedef struct Slice
      * particular values. However, a remove operation is expensive. */
     const char *key_column[SLICE_KEY_COLUMN_MAX_ELEMS];
     hash32_t keyHashColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
-    field_sid_t carbon_string_id_tColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
+    field_sid_t string_id_tColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
 
     /** The number of elements stored in 'key_colum', 'key_hash_column', and 'string_id_column' */
     u32 num_elems;
@@ -111,7 +111,7 @@ typedef struct NG5_slice_list_t
     u32 appender_idx;
 
     struct err err;
-} carbon_slice_list_t;
+} slice_list_t;
 
 typedef struct NG5_slice_handle_t
 {
@@ -122,22 +122,22 @@ typedef struct NG5_slice_handle_t
 } slice_handle_t;
 
 NG5_EXPORT(bool)
-carbon_slice_list_create(carbon_slice_list_t *list, const struct allocator *alloc, size_t sliceCapacity);
+slice_list_create(slice_list_t *list, const struct allocator *alloc, size_t sliceCapacity);
 
 NG5_EXPORT(bool)
-SliceListDrop(carbon_slice_list_t *list);
+SliceListDrop(slice_list_t *list);
 
 NG5_EXPORT(bool)
-carbon_slice_list_lookup(slice_handle_t *handle, carbon_slice_list_t *list, const char *needle);
+slice_list_lookup(slice_handle_t *handle, slice_list_t *list, const char *needle);
 
 NG5_EXPORT(bool)
-SliceListIsEmpty(const carbon_slice_list_t *list);
+SliceListIsEmpty(const slice_list_t *list);
 
 NG5_EXPORT(bool)
-carbon_slice_list_insert(carbon_slice_list_t *list, char **strings, field_sid_t *ids, size_t npairs);
+slice_list_insert(slice_list_t *list, char **strings, field_sid_t *ids, size_t npairs);
 
 NG5_EXPORT(bool)
-SliceListRemove(carbon_slice_list_t *list, slice_handle_t *handle);
+SliceListRemove(slice_list_t *list, slice_handle_t *handle);
 
 NG5_END_DECL
 

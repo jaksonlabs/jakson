@@ -27,63 +27,63 @@ typedef struct bitmap bloom_t;
 
 #define NG5_BLOOM_SET(filter, key, keySize)                     \
 ({                                                                 \
-    size_t nbits = carbon_bitmap_nbits(filter);                    \
+    size_t nbits = bitmap_nbits(filter);                    \
     size_t b0 = NG5_HASH_ADDITIVE(keySize, key) % nbits;        \
     size_t b1 = NG5_HASH_XOR(keySize, key) % nbits;             \
     size_t b2 = NG5_HASH_ROT(keySize, key) % nbits;             \
     size_t b3 = NG5_HASH_SAX(keySize, key) % nbits;             \
-    carbon_bitmap_set(filter, b0, true);                           \
-    carbon_bitmap_set(filter, b1, true);                           \
-    carbon_bitmap_set(filter, b2, true);                           \
-    carbon_bitmap_set(filter, b3, true);                           \
+    bitmap_set(filter, b0, true);                           \
+    bitmap_set(filter, b1, true);                           \
+    bitmap_set(filter, b2, true);                           \
+    bitmap_set(filter, b3, true);                           \
 })
 
 #define NG5_BLOOM_TEST(filter, key, keySize)                    \
 ({                                                                 \
-    size_t nbits = carbon_bitmap_nbits(filter);                    \
+    size_t nbits = bitmap_nbits(filter);                    \
     size_t b0 = NG5_HASH_ADDITIVE(keySize, key) % nbits;        \
     size_t b1 = NG5_HASH_XOR(keySize, key) % nbits;             \
     size_t b2 = NG5_HASH_ROT(keySize, key) % nbits;             \
     size_t b3 = NG5_HASH_SAX(keySize, key) % nbits;             \
-    bool b0set = carbon_bitmap_get(filter, b0);                    \
-    bool b1set = carbon_bitmap_get(filter, b1);                    \
-    bool b2set = carbon_bitmap_get(filter, b2);                    \
-    bool b3set = carbon_bitmap_get(filter, b3);                    \
+    bool b0set = bitmap_get(filter, b0);                    \
+    bool b1set = bitmap_get(filter, b1);                    \
+    bool b2set = bitmap_get(filter, b2);                    \
+    bool b3set = bitmap_get(filter, b3);                    \
     (b0set && b1set && b2set && b3set);                            \
 })
 
 #define NG5_BLOOM_TEST_AND_SET(filter, key, keySize)            \
 ({                                                                 \
-    size_t nbits = carbon_bitmap_nbits(filter);                    \
+    size_t nbits = bitmap_nbits(filter);                    \
     size_t b0 = NG5_HASH_ADDITIVE(keySize, key) % nbits;        \
     size_t b1 = NG5_HASH_XOR(keySize, key) % nbits;             \
     size_t b2 = NG5_HASH_ROT(keySize, key) % nbits;             \
     size_t b3 = NG5_HASH_SAX(keySize, key) % nbits;             \
-    bool b0set = carbon_bitmap_get(filter, b0);                    \
-    bool b1set = carbon_bitmap_get(filter, b1);                    \
-    bool b2set = carbon_bitmap_get(filter, b2);                    \
-    bool b3set = carbon_bitmap_get(filter, b3);                    \
-    carbon_bitmap_set(filter, b0, true);                           \
-    carbon_bitmap_set(filter, b1, true);                           \
-    carbon_bitmap_set(filter, b2, true);                           \
-    carbon_bitmap_set(filter, b3, true);                           \
+    bool b0set = bitmap_get(filter, b0);                    \
+    bool b1set = bitmap_get(filter, b1);                    \
+    bool b2set = bitmap_get(filter, b2);                    \
+    bool b3set = bitmap_get(filter, b3);                    \
+    bitmap_set(filter, b0, true);                           \
+    bitmap_set(filter, b1, true);                           \
+    bitmap_set(filter, b2, true);                           \
+    bitmap_set(filter, b3, true);                           \
     (b0set && b1set && b2set && b3set);                            \
 })
 
 NG5_EXPORT(bool)
-carbon_bloom_create(bloom_t *filter, size_t size);
+bloom_create(bloom_t *filter, size_t size);
 
 NG5_EXPORT(bool)
-carbon_bloom_drop(bloom_t *filter);
+bloom_drop(bloom_t *filter);
 
 NG5_EXPORT(bool)
-carbon_bloom_clear(bloom_t *filter);
+bloom_clear(bloom_t *filter);
 
 NG5_EXPORT(size_t)
-carbon_bloom_nbits(bloom_t *filter);
+bloom_nbits(bloom_t *filter);
 
 NG5_EXPORT(unsigned)
-carbon_bloom_nhashs();
+bloom_nhashs();
 
 NG5_END_DECL
 

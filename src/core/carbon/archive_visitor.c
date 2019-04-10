@@ -41,8 +41,8 @@ iterate_objects(struct archive *archive, const field_sid_t *keys, u32 num_pairs,
     struct prop_iter  prop_iter;
     struct err err;
 
-    carbon_archive_value_vector_get_object_id(&parent_object_id, value_iter);
-    carbon_archive_value_vector_get_length(&vector_length, value_iter);
+    archive_value_vector_get_object_id(&parent_object_id, value_iter);
+    archive_value_vector_get_length(&vector_length, value_iter);
     assert(num_pairs == vector_length);
 
     for (u32 i = 0; i < vector_length; i++)
@@ -51,15 +51,15 @@ iterate_objects(struct archive *archive, const field_sid_t *keys, u32 num_pairs,
         u32 parent_key_array_idx = i;
 
 //        struct path_entry e = { .key = parent_key, .idx = 0 };
-//        carbon_vec_push(path_stack, &e, 1);
+//        vec_push(path_stack, &e, 1);
 
       //  fprintf(stderr, "XXXX object: ");
-        //  carbon_archive_visitor_print_path(stderr, archive, path_stack);
+        //  archive_visitor_print_path(stderr, archive, path_stack);
 
-        carbon_archive_value_vector_get_object_at(&object, i, value_iter);
-        carbon_archive_object_get_object_id(&object_id, &object);
+        archive_value_vector_get_object_at(&object, i, value_iter);
+        archive_object_get_object_id(&object_id, &object);
 
-        carbon_archive_prop_iter_from_object(&prop_iter, mask, &err, &object);
+        archive_prop_iter_from_object(&prop_iter, mask, &err, &object);
 
         if (!is_root_object) {
             enum visit_policy visit = VISIT_INCLUDE;
@@ -76,7 +76,7 @@ iterate_objects(struct archive *archive, const field_sid_t *keys, u32 num_pairs,
             iterate_props(archive, &prop_iter, path_stack, visitor, mask, capture, false, parent_key, parent_key_array_idx);
         }
 
-      //  carbon_vec_pop(path_stack);
+      //  vec_pop(path_stack);
     }
 }
 
@@ -91,7 +91,7 @@ iterate_objects(struct archive *archive, const field_sid_t *keys, u32 num_pairs,
             for (u32 prop_idx = 0; prop_idx < num_pairs; prop_idx++)                                              \
             {                                                                                                          \
                 u32 array_length;                                                                                 \
-                const built_in_type *values = carbon_archive_value_vector_get_##name##_arrays_at(&array_length,        \
+                const built_in_type *values = archive_value_vector_get_##name##_arrays_at(&array_length,        \
                                                                                              prop_idx,                 \
                                                                                              &value_iter);             \
                 OPTIONAL_CALL(visitor, visit_enter_##name##_array_pair, archive, path_stack, this_object_oid, keys[prop_idx],      \
@@ -106,7 +106,7 @@ iterate_objects(struct archive *archive, const field_sid_t *keys, u32 num_pairs,
     } else                                                                                                             \
     {                                                                                                                  \
         if (visitor->visit_##name##_pairs) {                                                                           \
-            const built_in_type *values = carbon_archive_value_vector_get_##name##s(NULL, &value_iter);                \
+            const built_in_type *values = archive_value_vector_get_##name##s(NULL, &value_iter);                \
             visitor->visit_##name##_pairs(archive, path_stack, this_object_oid, keys, values, num_pairs, capture);                 \
         }                                                                                                              \
     }                                                                                                                  \
@@ -114,7 +114,7 @@ iterate_objects(struct archive *archive, const field_sid_t *keys, u32 num_pairs,
 
 #define SET_NESTED_ARRAY_SWITCH_CASE(name, built_in_type)                                                              \
 {                                                                                                                      \
-    const built_in_type *values = carbon_archive_column_entry_get_##name(&entry_length, &entry_iter);                  \
+    const built_in_type *values = archive_column_entry_get_##name(&entry_length, &entry_iter);                  \
     OPTIONAL_CALL(visitor, visit_object_array_object_property_##name,                                                  \
                   archive, path_stack, this_object_oid, group_key, current_nested_object_id,                           \
                   current_column_name, values, entry_length, capture);                                                 \
@@ -139,27 +139,27 @@ iterate_props(struct archive *archive, struct prop_iter *prop_iter,
     NG5_UNUSED(parent_key_array_idx);
 
     struct path_entry e = { .key = parent_key, .idx = parent_key_array_idx };
-    carbon_vec_push(path_stack, &e, 1);
+    vec_push(path_stack, &e, 1);
 
-    carbon_archive_value_vector_get_object_id(&this_object_oid, &value_iter);
+    archive_value_vector_get_object_id(&this_object_oid, &value_iter);
 
-    while (carbon_archive_prop_iter_next(&iter_type, &value_iter, &collection_iter, prop_iter)) {
+    while (archive_prop_iter_next(&iter_type, &value_iter, &collection_iter, prop_iter)) {
 
         if (iter_type == PROP_ITER_MODE_OBJECT) {
 
-            keys = carbon_archive_value_vector_get_keys(&num_pairs, &value_iter);
-            carbon_archive_value_vector_is_array_type(&is_array, &value_iter);
-            carbon_archive_value_vector_get_basic_type(&type, &value_iter);
-            carbon_archive_value_vector_get_object_id(&this_object_oid, &value_iter);
+            keys = archive_value_vector_get_keys(&num_pairs, &value_iter);
+            archive_value_vector_is_array_type(&is_array, &value_iter);
+            archive_value_vector_get_basic_type(&type, &value_iter);
+            archive_value_vector_get_object_id(&this_object_oid, &value_iter);
 
             for (u32 i = 0; i < num_pairs; i++) {
                 OPTIONAL_CALL(visitor, visit_object_property, archive, path_stack, this_object_oid, keys[i], type, is_array, capture);
 
                 struct path_entry e = { .key = keys[i], .idx = 666 };
-                carbon_vec_push(path_stack, &e, 1);
-                //carbon_archive_visitor_print_path(stderr, archive, path_stack);
+                vec_push(path_stack, &e, 1);
+                //archive_visitor_print_path(stderr, archive, path_stack);
                 OPTIONAL_CALL(visitor, visit_object_array_prop, archive, path_stack, this_object_oid, keys[i], type, capture);
-                carbon_vec_pop(path_stack);
+                vec_pop(path_stack);
             }
 
 
@@ -170,21 +170,21 @@ iterate_props(struct archive *archive, struct prop_iter *prop_iter,
             }
 
             switch (type) {
-            case NG5_BASIC_TYPE_OBJECT:
+            case field_object:
                 assert (!is_array);
                 iterate_objects(archive, keys, num_pairs, &value_iter, path_stack, visitor, mask, capture, is_root_object);
                 //for (size_t i = 0; i < num_pairs; i++) {
                 //    iterate_objects(archive, &keys[i], 1, &value_iter, path_stack, visitor, mask, capture, is_root_object, keys[i], i);
                 //}
              break;
-            case NG5_BASIC_TYPE_NULL:
+            case field_null:
                 if (is_array) {
                     enum visit_policy visit = VISIT_INCLUDE;
                     if (visitor->visit_enter_null_array_pairs) {
                         visit = visitor->visit_enter_null_array_pairs(archive, path_stack, this_object_oid, keys, num_pairs, capture);
                     }
                     if (visit == VISIT_INCLUDE) {
-                        const field_u32_t *num_values = carbon_archive_value_vector_get_null_arrays(NULL, &value_iter);
+                        const field_u32_t *num_values = archive_value_vector_get_null_arrays(NULL, &value_iter);
                         for (u32 prop_idx = 0; prop_idx < num_pairs; prop_idx++)
                         {
                             OPTIONAL_CALL(visitor, visit_enter_null_array_pair, archive, path_stack, this_object_oid, keys[prop_idx],
@@ -203,37 +203,37 @@ iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                     }
                 }
                 break;
-            case NG5_BASIC_TYPE_INT8:
+            case field_int8:
                 SET_TYPE_SWITCH_CASE(int8, field_i8_t)
                 break;
-            case NG5_BASIC_TYPE_INT16:
+            case field_int16:
                 SET_TYPE_SWITCH_CASE(int16, field_i16_t)
                 break;
-            case NG5_BASIC_TYPE_INT32:
+            case field_int32:
                 SET_TYPE_SWITCH_CASE(int32, field_i32_t)
                 break;
-            case NG5_BASIC_TYPE_INT64:
+            case field_int64:
                 SET_TYPE_SWITCH_CASE(int64, field_i64_t)
                 break;
-            case NG5_BASIC_TYPE_UINT8:
+            case field_uint8:
                 SET_TYPE_SWITCH_CASE(uint8, field_u8_t)
                 break;
-            case NG5_BASIC_TYPE_UINT16:
+            case field_uint16:
                 SET_TYPE_SWITCH_CASE(uint16, field_u16_t)
                 break;
-            case NG5_BASIC_TYPE_UINT32:
+            case field_uint32:
                 SET_TYPE_SWITCH_CASE(uint32, field_u32_t)
                 break;
-            case NG5_BASIC_TYPE_UINT64:
+            case field_uint64:
                 SET_TYPE_SWITCH_CASE(uint64, field_u64_t)
                 break;
-            case NG5_BASIC_TYPE_NUMBER:
+            case field_float:
                 SET_TYPE_SWITCH_CASE(number, field_number_t)
                 break;
-            case NG5_BASIC_TYPE_STRING:
+            case field_string:
                 SET_TYPE_SWITCH_CASE(string, field_sid_t)
                 break;
-            case NG5_BASIC_TYPE_BOOLEAN:
+            case field_bool:
                 SET_TYPE_SWITCH_CASE(boolean, field_boolean_t)
                 break;
             default:
@@ -244,7 +244,7 @@ iterate_props(struct archive *archive, struct prop_iter *prop_iter,
         } else {
             archive_column_group_iter_t group_iter;
             u32 num_column_groups;
-            keys = carbon_archive_collection_iter_get_keys(&num_column_groups, &collection_iter);
+            keys = archive_collection_iter_get_keys(&num_column_groups, &collection_iter);
 
             bool *skip_groups_by_key = malloc(num_column_groups * sizeof(bool));
             NG5_ZERO_MEMORY(skip_groups_by_key, num_column_groups * sizeof(bool));
@@ -253,14 +253,14 @@ iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                 for (u32 i = 0; i < num_column_groups; i++) {
 
                //     struct path_entry e = { .key = parent_key, .idx = i };
-                    //carbon_vec_push(path_stack, &e, 1);
+                    //vec_push(path_stack, &e, 1);
 
 
                     enum visit_policy policy = visitor->before_visit_object_array(archive, path_stack,
                                                                                         this_object_oid, keys[i],
                                                                                         capture);
 
-               //     carbon_vec_pop(path_stack);
+               //     vec_pop(path_stack);
 
                     skip_groups_by_key[i] = policy == VISIT_EXCLUDE;
                 }
@@ -270,13 +270,13 @@ iterate_props(struct archive *archive, struct prop_iter *prop_iter,
 
 
 
-            while (carbon_archive_collection_next_column_group(&group_iter, &collection_iter)) {
+            while (archive_collection_next_column_group(&group_iter, &collection_iter)) {
                 if (!skip_groups_by_key[current_group_idx]) {
 
                     u32 num_column_group_objs;
                     archive_column_iter_t column_iter;
                     field_sid_t group_key = keys[current_group_idx];
-                    const object_id_t *column_group_object_ids = carbon_archive_column_group_get_object_ids(&num_column_group_objs, &group_iter);
+                    const object_id_t *column_group_object_ids = archive_column_group_get_object_ids(&num_column_group_objs, &group_iter);
                     bool *skip_objects = malloc(num_column_group_objs * sizeof(bool));
                     NG5_ZERO_MEMORY(skip_objects, num_column_group_objs * sizeof(bool));
 
@@ -290,7 +290,7 @@ iterate_props(struct archive *archive, struct prop_iter *prop_iter,
 
                     u32 current_column_group_obj_idx = 0;
 
-                    while(carbon_archive_column_group_next_column(&column_iter, &group_iter))
+                    while(archive_column_group_next_column(&column_iter, &group_iter))
                     {
 
                         if (!skip_objects[current_column_group_obj_idx])
@@ -298,10 +298,10 @@ iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                             field_sid_t current_column_name;
                             enum field_type current_column_entry_type;
 
-                            carbon_archive_column_get_name(&current_column_name, &current_column_entry_type, &column_iter);
+                            archive_column_get_name(&current_column_name, &current_column_entry_type, &column_iter);
 
                             struct path_entry e = { .key = current_column_name, .idx = 0 };
-                            carbon_vec_push(path_stack, &e, 1);
+                            vec_push(path_stack, &e, 1);
 
                             /**
                                 0/page_end/0/
@@ -329,7 +329,7 @@ iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                             if (!skip_column)
                             {
                                 u32 num_positions;
-                                const u32 *entry_positions = carbon_archive_column_get_entry_positions(&num_positions, &column_iter);
+                                const u32 *entry_positions = archive_column_get_entry_positions(&num_positions, &column_iter);
                                 archive_column_entry_iter_t entry_iter;
 
                                 object_id_t *entry_object_containments = malloc(num_positions * sizeof(object_id_t));
@@ -346,56 +346,56 @@ iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                                 }
 
                                 u32 current_entry_idx = 0;
-                                while(carbon_archive_column_next_entry(&entry_iter, &column_iter)) {
+                                while(archive_column_next_entry(&entry_iter, &column_iter)) {
 
                                     object_id_t current_nested_object_id = entry_object_containments[current_entry_idx];
                                     u32 entry_length;
 
                                     switch (current_column_entry_type) {
-                                    case NG5_BASIC_TYPE_INT8: {
+                                    case field_int8: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(int8s, field_i8_t)
                                     } break;
-                                    case NG5_BASIC_TYPE_INT16: {
+                                    case field_int16: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(int16s, field_i16_t)
                                     } break;
-                                    case NG5_BASIC_TYPE_INT32: {
+                                    case field_int32: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(int32s, field_i32_t)
                                     } break;
-                                    case NG5_BASIC_TYPE_INT64: {
+                                    case field_int64: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(int64s, field_i64_t)
                                     } break;
-                                    case NG5_BASIC_TYPE_UINT8: {
+                                    case field_uint8: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(uint8s, field_u8_t)
                                     } break;
-                                    case NG5_BASIC_TYPE_UINT16: {
+                                    case field_uint16: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(uint16s, field_u16_t)
                                     } break;
-                                    case NG5_BASIC_TYPE_UINT32: {
+                                    case field_uint32: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(uint32s, field_u32_t)
                                     } break;
-                                    case NG5_BASIC_TYPE_UINT64: {
+                                    case field_uint64: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(uint64s, field_u64_t)
                                     } break;
-                                    case NG5_BASIC_TYPE_NUMBER: {
+                                    case field_float: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(numbers, field_number_t)
                                     } break;
-                                    case NG5_BASIC_TYPE_STRING: {
+                                    case field_string: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(strings, field_sid_t)
                                     } break;
-                                    case NG5_BASIC_TYPE_BOOLEAN: {
+                                    case field_bool: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(booleans, field_boolean_t)
                                     } break;
-                                    case NG5_BASIC_TYPE_NULL: {
+                                    case field_null: {
                                         SET_NESTED_ARRAY_SWITCH_CASE(nulls, field_u32_t)
                                     } break;
-                                    case NG5_BASIC_TYPE_OBJECT: {
+                                    case field_object: {
                                         struct column_object_iter iter;
                                         const struct archive_object *archive_object;
-                                        carbon_archive_column_entry_get_objects(&iter, &entry_iter);
+                                        archive_column_entry_get_objects(&iter, &entry_iter);
 
-                                        while ((archive_object = carbon_archive_column_entry_object_iter_next_object(&iter)) != NULL) {
+                                        while ((archive_object = archive_column_entry_object_iter_next_object(&iter)) != NULL) {
                                             object_id_t id;
-                                            carbon_archive_object_get_object_id(&id, archive_object);
+                                            archive_object_get_object_id(&id, archive_object);
 
 
 
@@ -414,19 +414,19 @@ iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                                                 //keys[i]
 
                                                 //struct path_entry e = { .key = current_column_name, .idx = 0 };
-                                                //carbon_vec_push(path_stack, &e, 1);
+                                                //vec_push(path_stack, &e, 1);
 
-                                                carbon_vec_pop(path_stack);
+                                                vec_pop(path_stack);
 
                                                 struct err err;
                                                 struct prop_iter nested_obj_prop_iter;
-                                                carbon_archive_prop_iter_from_object(&nested_obj_prop_iter, mask,
+                                                archive_prop_iter_from_object(&nested_obj_prop_iter, mask,
                                                                                      &err, archive_object);
                                                 iterate_props(archive, &nested_obj_prop_iter, path_stack, visitor,
                                                               mask, capture, false, current_column_name, current_group_idx);
 
                                                 struct path_entry e = { .key = current_column_name, .idx = 0 };
-                                                carbon_vec_push(path_stack, &e, 1);
+                                                vec_push(path_stack, &e, 1);
 
                                             }
 
@@ -445,7 +445,7 @@ iterate_props(struct archive *archive, struct prop_iter *prop_iter,
 
                                 free(entry_object_containments);
                             }
-                            carbon_vec_pop(path_stack);
+                            vec_pop(path_stack);
                         }
                         current_column_group_obj_idx++;
 
@@ -458,28 +458,28 @@ iterate_props(struct archive *archive, struct prop_iter *prop_iter,
             free(skip_groups_by_key);
         }
     }
-    carbon_vec_pop(path_stack);
+    vec_pop(path_stack);
 }
 
 NG5_EXPORT(bool)
-carbon_archive_visit_archive(struct archive *archive, const struct archive_visitor_desc *desc,
+archive_visit_archive(struct archive *archive, const struct archive_visitor_desc *desc,
                              struct archive_visitor *visitor, void *capture)
 {
     NG5_NON_NULL_OR_ERROR(archive)
     NG5_NON_NULL_OR_ERROR(visitor)
 
     struct prop_iter  prop_iter;
-    struct vector ofType(carbon_path_entry) path_stack;
+    struct vector ofType(path_entry) path_stack;
 
     int mask = desc ? desc->visit_mask : NG5_ARCHIVE_ITER_MASK_ANY;
 
-    if (carbon_archive_prop_iter_from_archive(&prop_iter, &archive->err, mask, archive))
+    if (archive_prop_iter_from_archive(&prop_iter, &archive->err, mask, archive))
     {
-        carbon_vec_create(&path_stack, NULL, sizeof(struct path_entry), 100);
+        vec_create(&path_stack, NULL, sizeof(struct path_entry), 100);
         OPTIONAL_CALL(visitor, before_visit_starts, archive, capture);
         iterate_props(archive, &prop_iter, &path_stack, visitor, mask, capture, true, 0, 0);
         OPTIONAL_CALL(visitor, after_visit_ends, archive, capture);
-        carbon_vec_drop(&path_stack);
+        vec_drop(&path_stack);
         return true;
     } else {
         return false;
@@ -489,17 +489,17 @@ carbon_archive_visit_archive(struct archive *archive, const struct archive_visit
 #include <inttypes.h>
 
 NG5_EXPORT(void)
-carbon_archive_visitor_path_to_string(char path_buffer[2048], struct archive *archive, const struct vector ofType(struct path_entry) *path_stack)
+archive_visitor_path_to_string(char path_buffer[2048], struct archive *archive, const struct vector ofType(struct path_entry) *path_stack)
 {
 
-    struct archive_query *query = carbon_archive_query_default(archive);
+    struct archive_query *query = archive_query_default(archive);
 
 
     for (u32 i = 0; i < path_stack->num_elems; i++)
     {
         const struct path_entry *entry = vec_get(path_stack, i, struct path_entry);
         if (entry->key != 0) {
-            char *key = carbon_query_fetch_string_by_id(query, entry->key);
+            char *key = query_fetch_string_by_id(query, entry->key);
             size_t path_len = strlen(path_buffer);
             sprintf(path_buffer + path_len, "%s%s", key, i + 1 < path_stack->num_elems ? ", " : "");
             free(key);
@@ -510,20 +510,20 @@ carbon_archive_visitor_path_to_string(char path_buffer[2048], struct archive *ar
 }
 
 NG5_EXPORT(bool)
-carbon_archive_visitor_print_path(FILE *file, struct archive *archive, const struct vector ofType(struct path_entry) *path_stack)
+archive_visitor_print_path(FILE *file, struct archive *archive, const struct vector ofType(struct path_entry) *path_stack)
 {
     NG5_NON_NULL_OR_ERROR(file)
     NG5_NON_NULL_OR_ERROR(path_stack)
     NG5_NON_NULL_OR_ERROR(archive)
 
-    struct archive_query *query = carbon_archive_query_default(archive);
+    struct archive_query *query = archive_query_default(archive);
 
 
     for (u32 i = 0; i < path_stack->num_elems; i++)
     {
         const struct path_entry *entry = vec_get(path_stack, i, struct path_entry);
         if (entry->key != 0) {
-            char *key = carbon_query_fetch_string_by_id(query, entry->key);
+            char *key = query_fetch_string_by_id(query, entry->key);
             fprintf(file, "%s/", key);
             free(key);
         } else {
@@ -535,7 +535,7 @@ carbon_archive_visitor_print_path(FILE *file, struct archive *archive, const str
 
     char buffer[2048];
     memset(buffer, 0, sizeof(buffer));
-    carbon_archive_visitor_path_to_string(buffer, archive, path_stack);
+    archive_visitor_path_to_string(buffer, archive, path_stack);
     fprintf(file, "%s\n", buffer);
 
 
@@ -543,19 +543,19 @@ carbon_archive_visitor_print_path(FILE *file, struct archive *archive, const str
 }
 
 NG5_EXPORT(bool)
-carbon_archive_visitor_path_compare(const struct vector ofType(struct path_entry) *path, field_sid_t *group_name, const char *path_str, struct archive *archive)
+archive_visitor_path_compare(const struct vector ofType(struct path_entry) *path, field_sid_t *group_name, const char *path_str, struct archive *archive)
 {
     char path_buffer[2048];
     memset(path_buffer, 0, sizeof(path_buffer));
     sprintf(path_buffer, "/");
 
-    struct archive_query *query = carbon_archive_query_default(archive);
+    struct archive_query *query = archive_query_default(archive);
 
     for (u32 i = 1; i < path->num_elems; i++)
     {
         const struct path_entry *entry = vec_get(path, i, struct path_entry);
         if (entry->key != 0) {
-            char *key = carbon_query_fetch_string_by_id(query, entry->key);
+            char *key = query_fetch_string_by_id(query, entry->key);
             size_t path_len = strlen(path_buffer);
             sprintf(path_buffer + path_len, "%s/", key);
             free(key);
@@ -563,7 +563,7 @@ carbon_archive_visitor_path_compare(const struct vector ofType(struct path_entry
     }
 
     if(group_name) {
-        char *key = carbon_query_fetch_string_by_id(query, *group_name);
+        char *key = query_fetch_string_by_id(query, *group_name);
         size_t path_len = strlen(path_buffer);
         sprintf(path_buffer + path_len, "%s/", key);
         free(key);

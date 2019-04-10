@@ -24,7 +24,7 @@
 NG5_BEGIN_DECL
 
 NG5_EXPORT(bool)
-carbon_archive_converter(struct encoded_doc_list *collection, struct archive *archive);
+archive_converter(struct encoded_doc_list *collection, struct archive *archive);
 
 
 NG5_END_DECL

@@ -185,32 +185,32 @@ struct packer
 
 };
 
-static void carbon_compressor_none_create(struct packer *strategy)
+static void compressor_none_create(struct packer *strategy)
 {
     strategy->tag             = PACK_NONE;
-    strategy->create          = carbon_compressor_none_init;
-    strategy->cpy             = carbon_compressor_none_cpy;
-    strategy->drop            = carbon_compressor_none_drop;
-    strategy->write_extra     = carbon_compressor_none_write_extra;
-    strategy->read_extra      = carbon_compressor_none_read_extra;
-    strategy->encode_string   = carbon_compressor_none_encode_string;
-    strategy->decode_string   = carbon_compressor_none_decode_string;
-    strategy->print_extra     = carbon_compressor_none_print_extra;
-    strategy->print_encoded   = carbon_compressor_none_print_encoded_string;
+    strategy->create          = compressor_none_init;
+    strategy->cpy             = compressor_none_cpy;
+    strategy->drop            = compressor_none_drop;
+    strategy->write_extra     = compressor_none_write_extra;
+    strategy->read_extra      = compressor_none_read_extra;
+    strategy->encode_string   = compressor_none_encode_string;
+    strategy->decode_string   = compressor_none_decode_string;
+    strategy->print_extra     = compressor_none_print_extra;
+    strategy->print_encoded   = compressor_none_print_encoded_string;
 }
 
-static void carbon_compressor_huffman_create(struct packer *strategy)
+static void compressor_huffman_create(struct packer *strategy)
 {
     strategy->tag             = PACK_HUFFMAN;
-    strategy->create          = carbon_compressor_huffman_init;
-    strategy->cpy             = carbon_compressor_huffman_cpy;
-    strategy->drop            = carbon_compressor_huffman_drop;
-    strategy->write_extra     = carbon_compressor_huffman_write_extra;
-    strategy->read_extra      = carbon_compressor_huffman_read_extra;
-    strategy->encode_string   = carbon_compressor_huffman_encode_string;
-    strategy->decode_string   = carbon_compressor_huffman_decode_string;
-    strategy->print_extra     = carbon_compressor_huffman_print_extra;
-    strategy->print_encoded   = carbon_compressor_huffman_print_encoded;
+    strategy->create          = compressor_huffman_init;
+    strategy->cpy             = compressor_huffman_cpy;
+    strategy->drop            = compressor_huffman_drop;
+    strategy->write_extra     = compressor_huffman_write_extra;
+    strategy->read_extra      = compressor_huffman_read_extra;
+    strategy->encode_string   = compressor_huffman_encode_string;
+    strategy->decode_string   = compressor_huffman_decode_string;
+    strategy->print_extra     = compressor_huffman_print_extra;
+    strategy->print_encoded   = compressor_huffman_print_encoded;
 }
 
 #pragma GCC diagnostic push
@@ -222,12 +222,12 @@ static struct
     const char                          *name;
     void (*create) (struct packer *strategy);
     u8                              flag_bit;
-} carbon_compressor_strategy_register[] =
+} compressor_strategy_register[] =
 {
     { .type = PACK_NONE, .name = "none",
-      .create = carbon_compressor_none_create,                .flag_bit = 1 << 0 },
+      .create = compressor_none_create,                .flag_bit = 1 << 0 },
     { .type = PACK_HUFFMAN, .name = "huffman",
-       .create = carbon_compressor_huffman_create,            .flag_bit = 1 << 1  }
+       .create = compressor_huffman_create,            .flag_bit = 1 << 1  }
 };
 
 #pragma GCC diagnostic pop
@@ -235,44 +235,44 @@ static struct
 
 
 NG5_EXPORT(bool)
-carbon_compressor_by_type(struct err *err, struct packer *strategy, enum packer_type type);
+compressor_by_type(struct err *err, struct packer *strategy, enum packer_type type);
 
 NG5_EXPORT(u8)
-carbon_compressor_flagbit_by_type(enum packer_type type);
+compressor_flagbit_by_type(enum packer_type type);
 
 NG5_EXPORT(bool)
-carbon_compressor_by_flags(struct packer *strategy, u8 flags);
+compressor_by_flags(struct packer *strategy, u8 flags);
 
 NG5_EXPORT(bool)
-carbon_compressor_by_name(enum packer_type *type, const char *name);
+compressor_by_name(enum packer_type *type, const char *name);
 
 
 NG5_EXPORT(bool)
-carbon_compressor_cpy(struct err *err, struct packer *dst, const struct packer *src);
+compressor_cpy(struct err *err, struct packer *dst, const struct packer *src);
 
 NG5_EXPORT(bool)
-carbon_compressor_drop(struct err *err, struct packer *self);
+compressor_drop(struct err *err, struct packer *self);
 
 NG5_EXPORT(bool)
-carbon_compressor_write_extra(struct err *err, struct packer *self, struct memfile *dst,
+compressor_write_extra(struct err *err, struct packer *self, struct memfile *dst,
                     const struct vector ofType (const char *) *strings);
 
 NG5_EXPORT(bool)
-carbon_compressor_read_extra(struct err *err, struct packer *self, FILE *src, size_t nbytes);
+compressor_read_extra(struct err *err, struct packer *self, FILE *src, size_t nbytes);
 
 NG5_EXPORT(bool)
-carbon_compressor_encode(struct err *err, struct packer *self, struct memfile *dst,
+compressor_encode(struct err *err, struct packer *self, struct memfile *dst,
                          const char *string);
 
 NG5_EXPORT(bool)
-carbon_compressor_decode(struct err *err, struct packer *self, char *dst, size_t strlen, FILE *src);
+compressor_decode(struct err *err, struct packer *self, char *dst, size_t strlen, FILE *src);
 
 
 NG5_EXPORT(bool)
-carbon_compressor_print_extra(struct err *err, struct packer *self, FILE *file, struct memfile *src);
+compressor_print_extra(struct err *err, struct packer *self, FILE *file, struct memfile *src);
 
 NG5_EXPORT(bool)
-carbon_compressor_print_encoded(struct err *err, struct packer *self, FILE *file, struct memfile *src,
+compressor_print_encoded(struct err *err, struct packer *self, FILE *file, struct memfile *src,
                       u32 decompressed_strlen);
 
 NG5_END_DECL

@@ -28,17 +28,17 @@ void vector_##type##_PrinterFunc(struct memfile *dst, void ofType(T) *values, si
     char *data;                                                                                                        \
     type *typedValues = (type *) values;                                                                               \
                                                                                                                        \
-    data = carbon_memfile_current_pos(dst, sizeof(char));                                                              \
+    data = memfile_current_pos(dst, sizeof(char));                                                              \
     int nchars = sprintf(data, "[");                                                                                   \
-    carbon_memfile_skip(dst, nchars);                                                                                  \
+    memfile_skip(dst, nchars);                                                                                  \
     for (size_t i = 0; i < num_elems; i++) {                                                                           \
-        data = carbon_memfile_current_pos(dst, sizeof(type));                                                          \
+        data = memfile_current_pos(dst, sizeof(type));                                                          \
         nchars = sprintf(data, format_string"%s", (castType) typedValues[i], i + 1 < num_elems ? ", " : "");           \
-        carbon_memfile_skip(dst, nchars);                                                                              \
+        memfile_skip(dst, nchars);                                                                              \
     }                                                                                                                  \
-    data = carbon_memfile_current_pos(dst, sizeof(char));                                                              \
+    data = memfile_current_pos(dst, sizeof(char));                                                              \
     nchars = sprintf(data, "]");                                                                                       \
-    carbon_memfile_skip(dst, nchars);                                                                                  \
+    memfile_skip(dst, nchars);                                                                                  \
 }
 
 #define DEFINE_PRINTER_FUNCTION(type, format_string)                                                                   \
@@ -66,17 +66,17 @@ DEFINE_PRINTER_FUNCTION(u64, "%"
 
 DEFINE_PRINTER_FUNCTION(size_t, "%zu")
 
-bool carbon_vec_create(struct vector *out, const struct allocator *alloc, size_t elem_size, size_t cap_elems)
+bool vec_create(struct vector *out, const struct allocator *alloc, size_t elem_size, size_t cap_elems)
 {
         NG5_NON_NULL_OR_ERROR(out)
         out->allocator = malloc(sizeof(struct allocator));
-        carbon_alloc_this_or_std(out->allocator, alloc);
-        out->base = carbon_malloc(out->allocator, cap_elems * elem_size);
+        alloc_this_or_std(out->allocator, alloc);
+        out->base = alloc_malloc(out->allocator, cap_elems * elem_size);
         out->num_elems = 0;
         out->cap_elems = cap_elems;
         out->elem_size = elem_size;
         out->grow_factor = 1.7f;
-        carbon_error_init(&out->err);
+        error_init(&out->err);
         return true;
 }
 
@@ -88,7 +88,7 @@ struct vector_serialize_header {
         float grow_factor;
 };
 
-NG5_EXPORT(bool) carbon_vec_serialize(FILE *file, struct vector *vec)
+NG5_EXPORT(bool) vec_serialize(FILE *file, struct vector *vec)
 {
         NG5_NON_NULL_OR_ERROR(file)
         NG5_NON_NULL_OR_ERROR(vec)
@@ -104,7 +104,7 @@ NG5_EXPORT(bool) carbon_vec_serialize(FILE *file, struct vector *vec)
         return true;
 }
 
-NG5_EXPORT(bool) carbon_vec_deserialize(struct vector *vec, struct err *err, FILE *file)
+NG5_EXPORT(bool) vec_deserialize(struct vector *vec, struct err *err, FILE *file)
 {
         NG5_NON_NULL_OR_ERROR(file)
         NG5_NON_NULL_OR_ERROR(err)
@@ -125,13 +125,13 @@ NG5_EXPORT(bool) carbon_vec_deserialize(struct vector *vec, struct err *err, FIL
         }
 
         vec->allocator = malloc(sizeof(struct allocator));
-        carbon_alloc_this_or_std(vec->allocator, NULL);
-        vec->base = carbon_malloc(vec->allocator, header.cap_elems * header.elem_size);
+        alloc_this_or_std(vec->allocator, NULL);
+        vec->base = alloc_malloc(vec->allocator, header.cap_elems * header.elem_size);
         vec->num_elems = header.num_elems;
         vec->cap_elems = header.cap_elems;
         vec->elem_size = header.elem_size;
         vec->grow_factor = header.grow_factor;
-        carbon_error_init(&vec->err);
+        error_init(&vec->err);
 
         if (fread(vec->base, header.elem_size, vec->num_elems, file) != vec->num_elems) {
                 err_code = NG5_ERR_FREAD_FAILED;
@@ -146,7 +146,7 @@ NG5_EXPORT(bool) carbon_vec_deserialize(struct vector *vec, struct err *err, FIL
         return false;
 }
 
-bool carbon_vec_memadvice(struct vector *vec, int madviseAdvice)
+bool vec_memadvice(struct vector *vec, int madviseAdvice)
 {
         NG5_NON_NULL_OR_ERROR(vec);
         NG5_UNUSED(vec);
@@ -155,7 +155,7 @@ bool carbon_vec_memadvice(struct vector *vec, int madviseAdvice)
         return true;
 }
 
-bool carbon_vec_set_grow_factor(struct vector *vec, float factor)
+bool vec_set_grow_factor(struct vector *vec, float factor)
 {
         NG5_NON_NULL_OR_ERROR(vec);
         NG5_PRINT_ERROR_IF(factor <= 1.01f, NG5_ERR_ILLEGALARG)
@@ -163,52 +163,52 @@ bool carbon_vec_set_grow_factor(struct vector *vec, float factor)
         return true;
 }
 
-bool carbon_vec_drop(struct vector *vec)
+bool vec_drop(struct vector *vec)
 {
         NG5_NON_NULL_OR_ERROR(vec)
-        carbon_free(vec->allocator, vec->base);
+        alloc_free(vec->allocator, vec->base);
         free(vec->allocator);
         vec->base = NULL;
         return true;
 }
 
-bool carbon_vec_is_empty(const struct vector *vec)
+bool vec_is_empty(const struct vector *vec)
 {
         NG5_NON_NULL_OR_ERROR(vec)
         return vec->num_elems == 0 ? true : false;
 }
 
-bool carbon_vec_push(struct vector *vec, const void *data, size_t num_elems)
+bool vec_push(struct vector *vec, const void *data, size_t num_elems)
 {
         NG5_NON_NULL_OR_ERROR(vec && data)
         size_t next_num = vec->num_elems + num_elems;
         while (next_num > vec->cap_elems) {
                 size_t more = next_num - vec->cap_elems;
                 vec->cap_elems = (vec->cap_elems + more) * vec->grow_factor;
-                vec->base = carbon_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
+                vec->base = alloc_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
         }
         memcpy(vec->base + vec->num_elems * vec->elem_size, data, num_elems * vec->elem_size);
         vec->num_elems += num_elems;
         return true;
 }
 
-const void *carbon_vec_peek(struct vector *vec)
+const void *vec_peek(struct vector *vec)
 {
         if (!vec) {
                 return NULL;
         } else {
-                return (vec->num_elems > 0) ? carbon_vec_at(vec, vec->num_elems - 1) : NULL;
+                return (vec->num_elems > 0) ? vec_at(vec, vec->num_elems - 1) : NULL;
         }
 }
 
-bool carbon_vec_repeated_push(struct vector *vec, const void *data, size_t how_often)
+bool vec_repeated_push(struct vector *vec, const void *data, size_t how_often)
 {
         NG5_NON_NULL_OR_ERROR(vec && data)
         size_t next_num = vec->num_elems + how_often;
         while (next_num > vec->cap_elems) {
                 size_t more = next_num - vec->cap_elems;
                 vec->cap_elems = (vec->cap_elems + more) * vec->grow_factor;
-                vec->base = carbon_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
+                vec->base = alloc_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
         }
         for (size_t i = 0; i < how_often; i++) {
                 memcpy(vec->base + (vec->num_elems + i) * vec->elem_size, data, vec->elem_size);
@@ -218,7 +218,7 @@ bool carbon_vec_repeated_push(struct vector *vec, const void *data, size_t how_o
         return true;
 }
 
-const void *carbon_vec_pop(struct vector *vec)
+const void *vec_pop(struct vector *vec)
 {
         void *result;
         if (NG5_LIKELY((result = (vec ? (vec->num_elems > 0 ? vec->base + (vec->num_elems - 1) * vec->elem_size : NULL)
@@ -228,7 +228,7 @@ const void *carbon_vec_pop(struct vector *vec)
         return result;
 }
 
-bool carbon_vec_clear(struct vector *vec)
+bool vec_clear(struct vector *vec)
 {
         NG5_NON_NULL_OR_ERROR(vec)
         vec->num_elems = 0;
@@ -240,18 +240,18 @@ bool VectorShrink(struct vector *vec)
         NG5_NON_NULL_OR_ERROR(vec);
         if (vec->num_elems < vec->cap_elems) {
                 vec->cap_elems = NG5_MAX(1, vec->num_elems);
-                vec->base = carbon_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
+                vec->base = alloc_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
         }
         return true;
 }
 
-bool carbon_vec_grow(size_t *numNewSlots, struct vector *vec)
+bool vec_grow(size_t *numNewSlots, struct vector *vec)
 {
         NG5_NON_NULL_OR_ERROR(vec)
         size_t freeSlotsBefore = vec->cap_elems - vec->num_elems;
 
         vec->cap_elems = (vec->cap_elems * vec->grow_factor) + 1;
-        vec->base = carbon_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
+        vec->base = alloc_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
         size_t freeSlotsAfter = vec->cap_elems - vec->num_elems;
         if (NG5_LIKELY(numNewSlots != NULL)) {
                 *numNewSlots = freeSlotsAfter - freeSlotsBefore;
@@ -259,46 +259,46 @@ bool carbon_vec_grow(size_t *numNewSlots, struct vector *vec)
         return true;
 }
 
-NG5_EXPORT(bool) carbon_vec_grow_to(struct vector *vec, size_t capacity)
+NG5_EXPORT(bool) vec_grow_to(struct vector *vec, size_t capacity)
 {
         NG5_NON_NULL_OR_ERROR(vec);
         vec->cap_elems = NG5_MAX(vec->cap_elems, capacity);
-        vec->base = carbon_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
+        vec->base = alloc_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
         return true;
 }
 
-size_t carbon_vec_length(const struct vector *vec)
+size_t vec_length(const struct vector *vec)
 {
         NG5_NON_NULL_OR_ERROR(vec)
         return vec->num_elems;
 }
 
-const void *carbon_vec_at(const struct vector *vec, size_t pos)
+const void *vec_at(const struct vector *vec, size_t pos)
 {
         return (vec && pos < vec->num_elems) ? vec->base + pos * vec->elem_size : NULL;
 }
 
-size_t carbon_vec_capacity(const struct vector *vec)
+size_t vec_capacity(const struct vector *vec)
 {
         NG5_NON_NULL_OR_ERROR(vec)
         return vec->cap_elems;
 }
 
-bool carbon_vec_enlarge_size_to_capacity(struct vector *vec)
+bool vec_enlarge_size_to_capacity(struct vector *vec)
 {
         NG5_NON_NULL_OR_ERROR(vec);
         vec->num_elems = vec->cap_elems;
         return true;
 }
 
-NG5_EXPORT(bool) carbon_vec_zero_memory(struct vector *vec)
+NG5_EXPORT(bool) vec_zero_memory(struct vector *vec)
 {
         NG5_NON_NULL_OR_ERROR(vec);
         NG5_ZERO_MEMORY(vec->base, vec->elem_size * vec->num_elems);
         return true;
 }
 
-NG5_EXPORT(bool) carbon_vec_zero_memory_in_range(struct vector *vec, size_t from, size_t to)
+NG5_EXPORT(bool) vec_zero_memory_in_range(struct vector *vec, size_t from, size_t to)
 {
         NG5_NON_NULL_OR_ERROR(vec);
         assert(from < to);
@@ -307,7 +307,7 @@ NG5_EXPORT(bool) carbon_vec_zero_memory_in_range(struct vector *vec, size_t from
         return true;
 }
 
-bool carbon_vec_set(struct vector *vec, size_t pos, const void *data)
+bool vec_set(struct vector *vec, size_t pos, const void *data)
 {
         NG5_NON_NULL_OR_ERROR(vec)
         assert(pos < vec->num_elems);
@@ -315,9 +315,9 @@ bool carbon_vec_set(struct vector *vec, size_t pos, const void *data)
         return true;
 }
 
-bool carbon_vec_cpy(struct vector *dst, const struct vector *src)
+bool vec_cpy(struct vector *dst, const struct vector *src)
 {
-        NG5_CHECK_SUCCESS(carbon_vec_create(dst, NULL, src->elem_size, src->num_elems));
+        NG5_CHECK_SUCCESS(vec_create(dst, NULL, src->elem_size, src->num_elems));
         dst->num_elems = src->num_elems;
         if (dst->num_elems > 0) {
                 memcpy(dst->base, src->base, src->elem_size * src->num_elems);
@@ -325,7 +325,7 @@ bool carbon_vec_cpy(struct vector *dst, const struct vector *src)
         return true;
 }
 
-NG5_EXPORT(bool) carbon_vec_cpy_to(struct vector *dst, struct vector *src)
+NG5_EXPORT(bool) vec_cpy_to(struct vector *dst, struct vector *src)
 {
         NG5_NON_NULL_OR_ERROR(dst)
         NG5_NON_NULL_OR_ERROR(src)
@@ -337,7 +337,7 @@ NG5_EXPORT(bool) carbon_vec_cpy_to(struct vector *dst, struct vector *src)
                 dst->grow_factor = src->grow_factor;
                 dst->base = handle;
                 memcpy(dst->base, src->base, src->cap_elems * src->elem_size);
-                carbon_error_cpy(&dst->err, &src->err);
+                error_cpy(&dst->err, &src->err);
                 return true;
         } else {
                 error(&src->err, NG5_ERR_HARDCOPYFAILED)
@@ -345,7 +345,7 @@ NG5_EXPORT(bool) carbon_vec_cpy_to(struct vector *dst, struct vector *src)
         }
 }
 
-const void *carbon_vec_data(const struct vector *vec)
+const void *vec_data(const struct vector *vec)
 {
         return vec ? vec->base : NULL;
 }
@@ -355,8 +355,8 @@ char *vector_string(const struct vector ofType(T) *vec,
 {
         struct memblock *block;
         struct memfile file;
-        carbon_memblock_create(&block, vec->num_elems * vec->elem_size);
-        carbon_memfile_open(&file, block, READ_WRITE);
+        memblock_create(&block, vec->num_elems * vec->elem_size);
+        memfile_open(&file, block, READ_WRITE);
         printerFunc(&file, vec->base, vec->num_elems);
-        return carbon_memblock_move_contents_and_drop(block);
+        return memblock_move_contents_and_drop(block);
 }
