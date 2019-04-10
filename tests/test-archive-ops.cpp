@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <inttypes.h>
-#include "core/carbon/archive/query.h"
+#include "core/carbon/archive_query.h"
 #include "core/carbon.h"
 
 TEST(CarbonArchiveOpsTest, CreateStreamFromJsonString)

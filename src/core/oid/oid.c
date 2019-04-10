@@ -18,7 +18,7 @@
 #include "core/oid/oid.h"
 #include "utils/time.h"
 #include "shared/error.h"
-#include "hash/bernstein.h"
+#include "hash/bern.h"
 
 _Thread_local bool     thread_local_init;
 _Thread_local u64 thread_local_id;

@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <inttypes.h>
 
-#include "core/carbon/archive/archive_iter.h"
+#include "core/carbon/archive_iter.h"
 #include "core/carbon.h"
 
 static void

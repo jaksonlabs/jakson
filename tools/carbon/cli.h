@@ -5,7 +5,7 @@
 #ifndef LIBCARBON_CLI_H
 #define LIBCARBON_CLI_H
 
-#include "shell/cmdopt/cmdopt.h"
+#include "shell/opt.h"
 
 bool moduleCliInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *manager);
 

@@ -123,7 +123,7 @@ static const char *const _carbon_err_str[] = {
     "Not in bit writing mode",
     "Function is not yet implemented",
     "Unsupported type found",
-    "Unsupported compressor strategy requested",
+    "Unsupported pack strategy requested",
     "No string representation for type available",
     "Marker type cannot be mapped to value type",
     "Parsing stopped; unknown data type requested",

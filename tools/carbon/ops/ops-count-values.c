@@ -1,7 +1,7 @@
-#include "core/carbon/archive/archive_visitor.h"
-#include "stdx/hash_set.h"
-#include "stdx/hash_table.h"
-#include "core/carbon/archive/query.h"
+#include "core/carbon/archive_visitor.h"
+#include "std/hash_set.h"
+#include "std/hash_table.h"
+#include "core/carbon/archive_query.h"
 #include "ops-count-values.h"
 
 typedef struct

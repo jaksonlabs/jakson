@@ -6,8 +6,8 @@
 #define LIBCARBON_OPS_SHOW_KEYS_H
 
 #include "shared/common.h"
-#include "stdx/vec.h"
-#include "core/carbon/archive/archive.h"
+#include "std/vec.h"
+#include "core/carbon/archive.h"
 
 typedef struct
 {

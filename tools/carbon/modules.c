@@ -1,8 +1,8 @@
 
 #include <inttypes.h>
-#include "core/compressor/compressor.h"
-#include "core/carbon/archive/query.h"
-#include "core/carbon/archive/archive_internal.h"
+#include "core/pack/pack.h"
+#include "core/carbon/archive_query.h"
+#include "core/carbon/archive_int.h"
 #include "core/carbon.h"
 
 #include "modules.h"
@@ -348,7 +348,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
                 } else if (strcmp(opt, JS_2_CAB_OPTION_USE_COMPRESSOR) == 0 && i++ < argc) {
                     const char *compressor_name = argv[i];
                     if (!carbon_compressor_by_name(&compressor, compressor_name)) {
-                        CARBON_CONSOLE_WRITE(file, "unsupported compressor requested: '%s'",
+                        CARBON_CONSOLE_WRITE(file, "unsupported pack requested: '%s'",
                                              compressor_name);
                         CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
                         CARBON_CONSOLE_WRITELN(file, "** ERROR ** unsupported operation requested: %s", opt);
@@ -389,8 +389,8 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
         }
 
         if (!flagSizeOptimized && compressor != CARBON_COMPRESSOR_NONE) {
-            CARBON_CONSOLE_WRITELN(file, "** WARNING ** a compressor was specified but will be ignored because size "
-                "optimization is turned off. Use '--size-optimized' such that a compressor has any effect%s", "");
+            CARBON_CONSOLE_WRITELN(file, "** WARNING ** a pack was specified but will be ignored because size "
+                "optimization is turned off. Use '--size-optimized' such that a pack has any effect%s", "");
         }
 
         if (i + 1 >= argc) {
@@ -474,7 +474,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
 //        carbon_memblock_t *carbonFile;
 //        CARBON_CONSOLE_WRITE(file, "  - Convert partition into in-memory CARBON file%s", "");
 //        struct err err;
-//        if (!carbon_archive_from_model(&carbonFile, &err, cabContext.partitionMetaModel, compressor, flagBakeStringIdIndex)) {
+//        if (!carbon_archive_from_model(&carbonFile, &err, cabContext.partitionMetaModel, pack, flagBakeStringIdIndex)) {
 //            carbon_error_print_and_abort(&err);
 //        }
 //        CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
