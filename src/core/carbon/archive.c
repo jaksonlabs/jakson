@@ -132,11 +132,11 @@ static union object_flags *get_flags(union object_flags *flags, struct columndoc
 static void update_carbon_file_header(struct memfile *memfile, offset_t root_object_header_offset);
 static void skip_carbon_file_header(struct memfile *memfile);
 static bool serialize_string_dic(struct memfile *memfile, struct err *err, const struct doc_bulk *context,
-        carbon_compressor_type_e compressor);
+        enum packer_type compressor);
 static bool print_archive_from_memfile(FILE *file, struct err *err, struct memfile *memfile);
 
 NG5_EXPORT(bool) carbon_archive_from_json(struct archive *out, const char *file, struct err *err,
-        const char *json_string, carbon_compressor_type_e compressor, enum strdic_tag dictionary,
+        const char *json_string, enum packer_type compressor, enum strdic_tag dictionary,
         size_t num_async_dic_threads, bool read_optimized, bool bake_string_id_index,
         struct archive_callback *callback)
 {
@@ -198,7 +198,7 @@ NG5_EXPORT(bool) carbon_archive_from_json(struct archive *out, const char *file,
 }
 
 NG5_EXPORT(bool) carbon_archive_stream_from_json(struct memblock **stream, struct err *err, const char *json_string,
-        carbon_compressor_type_e compressor, enum strdic_tag dictionary, size_t num_async_dic_threads,
+        enum packer_type compressor, enum strdic_tag dictionary, size_t num_async_dic_threads,
         bool read_optimized, bool bake_id_index, struct archive_callback *callback)
 {
         NG5_NON_NULL_OR_ERROR(stream);
@@ -363,7 +363,7 @@ static bool run_string_id_baking(struct err *err, struct memblock **stream)
 }
 
 bool carbon_archive_from_model(struct memblock **stream, struct err *err, struct columndoc *model,
-        carbon_compressor_type_e compressor, bool bake_string_id_index, struct archive_callback *callback)
+        enum packer_type compressor, bool bake_string_id_index, struct archive_callback *callback)
 {
         NG5_NON_NULL_OR_ERROR(model)
         NG5_NON_NULL_OR_ERROR(stream)
@@ -1401,10 +1401,10 @@ static char *record_header_flags_to_string(const struct record_flags *flags)
 }
 
 static bool serialize_string_dic(struct memfile *memfile, struct err *err, const struct doc_bulk *context,
-        carbon_compressor_type_e compressor)
+        enum packer_type compressor)
 {
         union string_tab_flags flags;
-        carbon_compressor_t strategy;
+        struct packer strategy;
         struct string_table_header header;
 
         struct vector ofType (const char *) *strings;
@@ -2204,7 +2204,7 @@ static bool print_carbon_header_from_memfile(FILE *file, struct err *err, struct
 
 static bool print_embedded_dic_from_memfile(FILE *file, struct err *err, struct memfile *memfile)
 {
-        carbon_compressor_t strategy;
+        struct packer strategy;
         union string_tab_flags flags;
 
         unsigned offset = memfile_tell(memfile);
@@ -2303,7 +2303,7 @@ static union object_flags *get_flags(union object_flags *flags, struct columndoc
         return flags;
 }
 
-static bool init_decompressor(carbon_compressor_t *strategy, u8 flags);
+static bool init_decompressor(struct packer *strategy, u8 flags);
 
 static bool read_stringtable(struct string_table *table, struct err *err, FILE *disk_file);
 
@@ -2472,7 +2472,7 @@ NG5_EXPORT(struct archive_query *)carbon_archive_query_default(struct archive *a
         return archive ? archive->default_query : NULL;
 }
 
-static bool init_decompressor(carbon_compressor_t *strategy, u8 flags)
+static bool init_decompressor(struct packer *strategy, u8 flags)
 {
         if (carbon_compressor_by_flags(strategy, flags) != true) {
                 return false;

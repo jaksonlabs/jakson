@@ -24,12 +24,12 @@
 
 NG5_BEGIN_DECL
 
-typedef struct
+struct sid_cache_stats
 {
     size_t num_hits;
     size_t num_misses;
     size_t num_evicted;
-} carbon_string_id_cache_statistics_t;
+};
 
 NG5_EXPORT(bool)
 carbon_string_id_cache_create_LRU(struct string_cache **cache, struct archive *archive);
@@ -47,7 +47,7 @@ NG5_EXPORT(char *)
 carbon_string_id_cache_get(struct string_cache *cache, field_sid_t id);
 
 NG5_EXPORT(bool)
-carbon_string_id_cache_get_statistics(carbon_string_id_cache_statistics_t *statistics, struct string_cache *cache);
+carbon_string_id_cache_get_statistics(struct sid_cache_stats *statistics, struct string_cache *cache);
 
 NG5_EXPORT(bool)
 carbon_string_id_cache_reset_statistics(struct string_cache *cache);

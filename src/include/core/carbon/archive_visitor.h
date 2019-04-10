@@ -20,28 +20,24 @@
 
 #include "archive_iter.h"
 
-typedef struct carbon_path_entry carbon_path_entry_t;
-
-typedef struct carbon_path_entry
+struct path_entry
 {
     field_sid_t   key;
     u32 idx;
+};
 
-} carbon_path_entry_t;
-
-typedef struct
+struct archive_visitor_desc
 {
     int visit_mask;                 /** bitmask of 'NG5_ARCHIVE_ITER_MASK_XXX' */
+};
 
-} carbon_archive_visitor_desc_t;
-
-typedef enum
+enum visit_policy
 {
-    NG5_VISITOR_POLICY_INCLUDE,
-    NG5_VISITOR_POLICY_EXCLUDE,
-} carbon_visitor_policy_e;
+    VISIT_INCLUDE,
+    VISIT_EXCLUDE,
+};
 
-typedef const struct vector ofType(carbon_path_entry_t) * path_stack_t;
+typedef const struct vector ofType(struct path_entry) * path_stack_t;
 
 #define DEFINE_VISIT_BASIC_TYPE_PAIRS(name, built_in_type)                                                             \
 void (*visit_##name##_pairs) (struct archive *archive, path_stack_t path, object_id_t id,                     \
@@ -49,7 +45,7 @@ void (*visit_##name##_pairs) (struct archive *archive, path_stack_t path, object
                               void *capture);
 
 #define DEFINE_VISIT_ARRAY_TYPE_PAIRS(name, built_in_type)                                                             \
-carbon_visitor_policy_e (*visit_enter_##name##_array_pairs)(struct archive *archive, path_stack_t path,              \
+enum visit_policy (*visit_enter_##name##_array_pairs)(struct archive *archive, path_stack_t path,              \
                                                         object_id_t id, const field_sid_t *keys,         \
                                                         u32 num_pairs,                                            \
                                                         void *capture);                                                \
@@ -77,13 +73,13 @@ void (*visit_leave_##name##_array_pairs)(struct archive *archive, path_stack_t p
                                                const built_in_type *nested_values,                                     \
                                                u32 num_nested_values, void *capture);
 
-typedef struct
+struct archive_visitor
 {
     void (*visit_root_object)(struct archive *archive, object_id_t id, void *capture);
     void (*before_visit_starts)(struct archive *archive, void *capture);
     void (*after_visit_ends)(struct archive *archive, void *capture);
 
-    carbon_visitor_policy_e (*before_object_visit)(struct archive *archive, path_stack_t path,
+    enum visit_policy (*before_object_visit)(struct archive *archive, path_stack_t path,
                                                    object_id_t parent_id, object_id_t value_id,
                                                    u32 object_idx, u32 num_objects, field_sid_t key,
                                                    void *capture);
@@ -122,7 +118,7 @@ typedef struct
     DEFINE_VISIT_ARRAY_TYPE_PAIRS(string, field_sid_t);
     DEFINE_VISIT_ARRAY_TYPE_PAIRS(boolean, field_boolean_t);
 
-    carbon_visitor_policy_e (*visit_enter_null_array_pairs)(struct archive *archive, path_stack_t path,
+    enum visit_policy (*visit_enter_null_array_pairs)(struct archive *archive, path_stack_t path,
                                                             object_id_t id,
                                                             const field_sid_t *keys, u32 num_pairs,
                                                             void *capture);
@@ -140,7 +136,7 @@ typedef struct
     void (*visit_leave_null_array_pairs)(struct archive *archive, path_stack_t path, object_id_t id,
                                          void *capture);
 
-    carbon_visitor_policy_e (*before_visit_object_array)(struct archive *archive, path_stack_t path,
+    enum visit_policy (*before_visit_object_array)(struct archive *archive, path_stack_t path,
                                                          object_id_t parent_id, field_sid_t key,
                                                          void *capture);
 
@@ -151,7 +147,7 @@ typedef struct
                                               const object_id_t *group_object_ids,
                                               u32 num_group_object_ids, void *capture);
 
-    carbon_visitor_policy_e (*before_visit_object_array_object_property)(struct archive *archive, path_stack_t path,
+    enum visit_policy (*before_visit_object_array_object_property)(struct archive *archive, path_stack_t path,
                                                    object_id_t parent_id,
                                                    field_sid_t key,
                                                    field_sid_t nested_key,
@@ -171,7 +167,7 @@ typedef struct
     DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(booleans, field_boolean_t);
     DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(nulls, field_u32_t);
 
-    carbon_visitor_policy_e (*before_object_array_object_property_object)(struct archive *archive, path_stack_t path,
+    enum visit_policy (*before_object_array_object_property_object)(struct archive *archive, path_stack_t path,
                                                     object_id_t parent_id,
                                                     field_sid_t key,
                                                     object_id_t nested_object_id,
@@ -188,19 +184,19 @@ typedef struct
 
     bool (*get_column_entry_count)(struct archive *archive, path_stack_t path, field_sid_t key, enum field_type type, u32 count, void *capture);
 
-} carbon_archive_visitor_t;
+};
 
 NG5_EXPORT(bool)
-carbon_archive_visit_archive(struct archive *archive, const carbon_archive_visitor_desc_t *desc,
-                             carbon_archive_visitor_t *visitor, void *capture);
+carbon_archive_visit_archive(struct archive *archive, const struct archive_visitor_desc *desc,
+                             struct archive_visitor *visitor, void *capture);
 
 NG5_EXPORT(bool)
-carbon_archive_visitor_print_path(FILE *file, struct archive *archive, const struct vector ofType(carbon_path_entry_t) *path_stack);
+carbon_archive_visitor_print_path(FILE *file, struct archive *archive, const struct vector ofType(struct path_entry) *path_stack);
 
 NG5_EXPORT(void)
-carbon_archive_visitor_path_to_string(char path_buffer[2048], struct archive *archive, const struct vector ofType(carbon_path_entry_t) *path_stack);
+carbon_archive_visitor_path_to_string(char path_buffer[2048], struct archive *archive, const struct vector ofType(struct path_entry) *path_stack);
 
 NG5_EXPORT(bool)
-carbon_archive_visitor_path_compare(const struct vector ofType(carbon_path_entry_t) *path, field_sid_t *group_name, const char *path_str, struct archive *archive);
+carbon_archive_visitor_path_compare(const struct vector ofType(struct path_entry) *path, field_sid_t *group_name, const char *path_str, struct archive *archive);
 
 #endif

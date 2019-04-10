@@ -26,26 +26,24 @@
 
 NG5_BEGIN_DECL
 
-typedef struct carbon_compressor carbon_compressor_t; /* forwarded */
-
 /**
  * Unique tag identifying a specific implementation for compressing/decompressing string in a CARBON archives
  * string table.
  */
-typedef enum carbon_compressor_type
+enum packer_type
 {
-    NG5_COMPRESSOR_NONE,
-    NG5_COMPRESSOR_HUFFMAN
-} carbon_compressor_type_e;
+    PACK_NONE,
+    PACK_HUFFMAN
+};
 
 /**
  * Main interface for the compressor framework. A compressor is used to encode/decode strings stored in a
  * CARBON archive.
  */
-typedef struct carbon_compressor
+struct packer
 {
     /** Tag identifying the implementation of this compressor */
-    carbon_compressor_type_e  tag;
+    enum packer_type  tag;
 
     /** Implementation-specific storage */
     void  *extra;
@@ -62,7 +60,7 @@ typedef struct carbon_compressor
      * @author Marcus Pinnecke
      * @since 0.1.00.05
      */
-    bool (*create)(carbon_compressor_t *self);
+    bool (*create)(struct packer *self);
 
     /**
      * Destructor for implementation-dependent deinitialization of the compressor at hand.
@@ -76,7 +74,7 @@ typedef struct carbon_compressor
      * @author Marcus Pinnecke
      * @since 0.1.00.05
      */
-    bool (*drop)(carbon_compressor_t *self);
+    bool (*drop)(struct packer *self);
 
     /**
      * Perform a hard-copy of this compressor to dst
@@ -89,7 +87,7 @@ typedef struct carbon_compressor
      * @author Marcus Pinnecke
      * @since 0.1.00.05
      */
-    bool (*cpy)(const carbon_compressor_t *self, carbon_compressor_t *dst);
+    bool (*cpy)(const struct packer *self, struct packer *dst);
 
     /**
      * Function to construct and serialize an implementation-specific dictionary, book-keeping data, or extra data
@@ -115,7 +113,7 @@ typedef struct carbon_compressor
      * @author Marcus Pinnecke
      * @since 0.1.00.05
      * */
-    bool (*write_extra)(carbon_compressor_t *self, struct memfile *dst,
+    bool (*write_extra)(struct packer *self, struct memfile *dst,
                             const struct vector ofType (const char *) *strings);
 
     /**
@@ -129,7 +127,7 @@ typedef struct carbon_compressor
      * @param nbytes Number of bytes written when 'write_extra' was called. Intended to read read to restore the extra field.
      * @return The implementer must return <code>true</code> on success, and <code>false</code> otherwise.
      */
-    bool (*read_extra)(carbon_compressor_t *self, FILE *src, size_t nbytes);
+    bool (*read_extra)(struct packer *self, FILE *src, size_t nbytes);
 
     /**
      * Encodes an input string and writes its encoded version into a memory file.
@@ -144,10 +142,10 @@ typedef struct carbon_compressor
      * @author Marcus Pinnecke
      * @since 0.1.00.05
      */
-    bool (*encode_string)(carbon_compressor_t *self, struct memfile *dst, struct err *err,
+    bool (*encode_string)(struct packer *self, struct memfile *dst, struct err *err,
                           const char *string);
 
-    bool (*decode_string)(carbon_compressor_t *self, char *dst, size_t strlen, FILE *src);
+    bool (*decode_string)(struct packer *self, char *dst, size_t strlen, FILE *src);
 
     /**
      * Reads implementation-specific book-keeping, meta or extra data from the input memory file and
@@ -164,7 +162,7 @@ typedef struct carbon_compressor
      * @author Marcus Pinnecke
      * @since 0.1.00.05
      */
-    bool (*print_extra)(carbon_compressor_t *self, FILE *file, struct memfile *src);
+    bool (*print_extra)(struct packer *self, FILE *file, struct memfile *src);
 
     /**
      * Reads an implementation-specific encoded string from a memory file <code>src</code>, and prints
@@ -182,14 +180,14 @@ typedef struct carbon_compressor
      * @author Marcus Pinnecke
      * @since 0.1.00.05
      */
-    bool (*print_encoded)(carbon_compressor_t *self, FILE *file, struct memfile *src,
+    bool (*print_encoded)(struct packer *self, FILE *file, struct memfile *src,
                                  u32 decompressed_strlen);
 
-} carbon_compressor_t;
+};
 
-static void carbon_compressor_none_create(carbon_compressor_t *strategy)
+static void carbon_compressor_none_create(struct packer *strategy)
 {
-    strategy->tag             = NG5_COMPRESSOR_NONE;
+    strategy->tag             = PACK_NONE;
     strategy->create          = carbon_compressor_none_init;
     strategy->cpy             = carbon_compressor_none_cpy;
     strategy->drop            = carbon_compressor_none_drop;
@@ -201,9 +199,9 @@ static void carbon_compressor_none_create(carbon_compressor_t *strategy)
     strategy->print_encoded   = carbon_compressor_none_print_encoded_string;
 }
 
-static void carbon_compressor_huffman_create(carbon_compressor_t *strategy)
+static void carbon_compressor_huffman_create(struct packer *strategy)
 {
-    strategy->tag             = NG5_COMPRESSOR_HUFFMAN;
+    strategy->tag             = PACK_HUFFMAN;
     strategy->create          = carbon_compressor_huffman_init;
     strategy->cpy             = carbon_compressor_huffman_cpy;
     strategy->drop            = carbon_compressor_huffman_drop;
@@ -220,15 +218,15 @@ static void carbon_compressor_huffman_create(carbon_compressor_t *strategy)
 
 static struct
 {
-    carbon_compressor_type_e             type;
+    enum packer_type             type;
     const char                          *name;
-    void (*create) (carbon_compressor_t *strategy);
+    void (*create) (struct packer *strategy);
     u8                              flag_bit;
 } carbon_compressor_strategy_register[] =
 {
-    { .type = NG5_COMPRESSOR_NONE, .name = "none",
+    { .type = PACK_NONE, .name = "none",
       .create = carbon_compressor_none_create,                .flag_bit = 1 << 0 },
-    { .type = NG5_COMPRESSOR_HUFFMAN, .name = "huffman",
+    { .type = PACK_HUFFMAN, .name = "huffman",
        .create = carbon_compressor_huffman_create,            .flag_bit = 1 << 1  }
 };
 
@@ -237,44 +235,44 @@ static struct
 
 
 NG5_EXPORT(bool)
-carbon_compressor_by_type(struct err *err, carbon_compressor_t *strategy, carbon_compressor_type_e type);
+carbon_compressor_by_type(struct err *err, struct packer *strategy, enum packer_type type);
 
 NG5_EXPORT(u8)
-carbon_compressor_flagbit_by_type(carbon_compressor_type_e type);
+carbon_compressor_flagbit_by_type(enum packer_type type);
 
 NG5_EXPORT(bool)
-carbon_compressor_by_flags(carbon_compressor_t *strategy, u8 flags);
+carbon_compressor_by_flags(struct packer *strategy, u8 flags);
 
 NG5_EXPORT(bool)
-carbon_compressor_by_name(carbon_compressor_type_e *type, const char *name);
+carbon_compressor_by_name(enum packer_type *type, const char *name);
 
 
 NG5_EXPORT(bool)
-carbon_compressor_cpy(struct err *err, carbon_compressor_t *dst, const carbon_compressor_t *src);
+carbon_compressor_cpy(struct err *err, struct packer *dst, const struct packer *src);
 
 NG5_EXPORT(bool)
-carbon_compressor_drop(struct err *err, carbon_compressor_t *self);
+carbon_compressor_drop(struct err *err, struct packer *self);
 
 NG5_EXPORT(bool)
-carbon_compressor_write_extra(struct err *err, carbon_compressor_t *self, struct memfile *dst,
+carbon_compressor_write_extra(struct err *err, struct packer *self, struct memfile *dst,
                     const struct vector ofType (const char *) *strings);
 
 NG5_EXPORT(bool)
-carbon_compressor_read_extra(struct err *err, carbon_compressor_t *self, FILE *src, size_t nbytes);
+carbon_compressor_read_extra(struct err *err, struct packer *self, FILE *src, size_t nbytes);
 
 NG5_EXPORT(bool)
-carbon_compressor_encode(struct err *err, carbon_compressor_t *self, struct memfile *dst,
+carbon_compressor_encode(struct err *err, struct packer *self, struct memfile *dst,
                          const char *string);
 
 NG5_EXPORT(bool)
-carbon_compressor_decode(struct err *err, carbon_compressor_t *self, char *dst, size_t strlen, FILE *src);
+carbon_compressor_decode(struct err *err, struct packer *self, char *dst, size_t strlen, FILE *src);
 
 
 NG5_EXPORT(bool)
-carbon_compressor_print_extra(struct err *err, carbon_compressor_t *self, FILE *file, struct memfile *src);
+carbon_compressor_print_extra(struct err *err, struct packer *self, FILE *file, struct memfile *src);
 
 NG5_EXPORT(bool)
-carbon_compressor_print_encoded(struct err *err, carbon_compressor_t *self, FILE *file, struct memfile *src,
+carbon_compressor_print_encoded(struct err *err, struct packer *self, FILE *file, struct memfile *src,
                       u32 decompressed_strlen);
 
 NG5_END_DECL

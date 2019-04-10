@@ -74,7 +74,7 @@ after_visit_ends(struct archive *archive, void *capture)
     NG5_UNUSED(capture);
 }
 
-static carbon_visitor_policy_e
+static enum visit_policy
 before_object_visit(struct archive *archive, path_stack_t path,
                                                object_id_t parent_id, object_id_t value_id,
                                                u32 object_idx, u32 num_objects, field_sid_t key,
@@ -93,7 +93,7 @@ before_object_visit(struct archive *archive, path_stack_t path,
     
     carbon_archive_visitor_print_path(stderr, archive, path);
 
-    return NG5_VISITOR_POLICY_INCLUDE;
+    return VISIT_INCLUDE;
 }
 
 static void
@@ -332,7 +332,7 @@ static void visit_null_pairs (struct archive *archive, path_stack_t path, object
 
 
 
-static carbon_visitor_policy_e
+static enum visit_policy
 visit_enter_int8_array_pairs(struct archive *archive, path_stack_t path,
                              object_id_t id, const field_sid_t *keys,
                              u32 num_pairs, void *capture)
@@ -346,7 +346,7 @@ visit_enter_int8_array_pairs(struct archive *archive, path_stack_t path,
 
     
 
-    return NG5_VISITOR_POLICY_INCLUDE;
+    return VISIT_INCLUDE;
 }
 
 static void
@@ -411,7 +411,7 @@ NG5_FUNC_UNUSED visit_leave_int8_array_pairs(struct archive *archive, path_stack
 
 
 
-static carbon_visitor_policy_e
+static enum visit_policy
 NG5_FUNC_UNUSED visit_enter_int16_array_pairs(struct archive *archive, path_stack_t path,
                               object_id_t id, const field_sid_t *keys,
                               u32 num_pairs, void *capture)
@@ -425,7 +425,7 @@ NG5_FUNC_UNUSED visit_enter_int16_array_pairs(struct archive *archive, path_stac
 
      
 
-    return NG5_VISITOR_POLICY_INCLUDE;
+    return VISIT_INCLUDE;
 }
 
 static void
@@ -490,7 +490,7 @@ NG5_FUNC_UNUSED visit_leave_int16_array_pairs(struct archive *archive, path_stac
 
 
 
-static carbon_visitor_policy_e
+static enum visit_policy
 NG5_FUNC_UNUSED visit_enter_int32_array_pairs(struct archive *archive, path_stack_t path,
                               object_id_t id, const field_sid_t *keys,
                               u32 num_pairs, void *capture)
@@ -504,7 +504,7 @@ NG5_FUNC_UNUSED visit_enter_int32_array_pairs(struct archive *archive, path_stac
 
      
 
-    return NG5_VISITOR_POLICY_INCLUDE;
+    return VISIT_INCLUDE;
 }
 
 static void
@@ -569,7 +569,7 @@ NG5_FUNC_UNUSED visit_leave_int32_array_pairs(struct archive *archive, path_stac
 
 
 
-static carbon_visitor_policy_e
+static enum visit_policy
 NG5_FUNC_UNUSED visit_enter_int64_array_pairs(struct archive *archive, path_stack_t path,
                               object_id_t id, const field_sid_t *keys,
                               u32 num_pairs, void *capture)
@@ -583,7 +583,7 @@ NG5_FUNC_UNUSED visit_enter_int64_array_pairs(struct archive *archive, path_stac
 
      
 
-    return NG5_VISITOR_POLICY_INCLUDE;
+    return VISIT_INCLUDE;
 }
 
 static void
@@ -650,7 +650,7 @@ NG5_FUNC_UNUSED visit_leave_int64_array_pairs(struct archive *archive, path_stac
 
 
 
-static carbon_visitor_policy_e
+static enum visit_policy
 NG5_FUNC_UNUSED visit_enter_uint8_array_pairs(struct archive *archive, path_stack_t path,
                               object_id_t id, const field_sid_t *keys,
                               u32 num_pairs, void *capture)
@@ -664,7 +664,7 @@ NG5_FUNC_UNUSED visit_enter_uint8_array_pairs(struct archive *archive, path_stac
 
      
 
-    return NG5_VISITOR_POLICY_INCLUDE;
+    return VISIT_INCLUDE;
 }
 
 static void
@@ -731,7 +731,7 @@ NG5_FUNC_UNUSED visit_leave_uint8_array_pairs(struct archive *archive, path_stac
 
 
 
-static carbon_visitor_policy_e
+static enum visit_policy
 NG5_FUNC_UNUSED visit_enter_uint16_array_pairs(struct archive *archive, path_stack_t path,
                                object_id_t id, const field_sid_t *keys,
                                u32 num_pairs, void *capture)
@@ -745,7 +745,7 @@ NG5_FUNC_UNUSED visit_enter_uint16_array_pairs(struct archive *archive, path_sta
 
      
 
-    return NG5_VISITOR_POLICY_INCLUDE;
+    return VISIT_INCLUDE;
 }
 
 static void
@@ -811,7 +811,7 @@ NG5_FUNC_UNUSED visit_leave_uint16_array_pairs(struct archive *archive, path_sta
 
 
 
-static carbon_visitor_policy_e
+static enum visit_policy
 NG5_FUNC_UNUSED visit_enter_uint32_array_pairs(struct archive *archive, path_stack_t path,
                                object_id_t id, const field_sid_t *keys,
                                u32 num_pairs, void *capture)
@@ -825,7 +825,7 @@ NG5_FUNC_UNUSED visit_enter_uint32_array_pairs(struct archive *archive, path_sta
 
      
 
-    return NG5_VISITOR_POLICY_INCLUDE;
+    return VISIT_INCLUDE;
 }
 
 static void
@@ -890,7 +890,7 @@ NG5_FUNC_UNUSED visit_leave_uint32_array_pairs(struct archive *archive, path_sta
 
 
 
-static carbon_visitor_policy_e
+static enum visit_policy
 NG5_FUNC_UNUSED visit_enter_uint64_array_pairs(struct archive *archive, path_stack_t path,
                                object_id_t id, const field_sid_t *keys,
                                u32 num_pairs, void *capture)
@@ -904,7 +904,7 @@ NG5_FUNC_UNUSED visit_enter_uint64_array_pairs(struct archive *archive, path_sta
 
      
 
-    return NG5_VISITOR_POLICY_INCLUDE;
+    return VISIT_INCLUDE;
 }
 
 static void
@@ -970,7 +970,7 @@ NG5_FUNC_UNUSED visit_leave_uint64_array_pairs(struct archive *archive, path_sta
 
 
 
-static carbon_visitor_policy_e
+static enum visit_policy
 NG5_FUNC_UNUSED visit_enter_number_array_pairs(struct archive *archive, path_stack_t path,
                                object_id_t id, const field_sid_t *keys,
                                u32 num_pairs, void *capture)
@@ -984,7 +984,7 @@ NG5_FUNC_UNUSED visit_enter_number_array_pairs(struct archive *archive, path_sta
 
      
 
-    return NG5_VISITOR_POLICY_INCLUDE;
+    return VISIT_INCLUDE;
 }
 
 static void
@@ -1053,7 +1053,7 @@ NG5_FUNC_UNUSED visit_leave_number_array_pairs(struct archive *archive, path_sta
 
 
 
-static carbon_visitor_policy_e
+static enum visit_policy
 NG5_FUNC_UNUSED visit_enter_string_array_pairs(struct archive *archive, path_stack_t path,
                                object_id_t id, const field_sid_t *keys,
                                u32 num_pairs, void *capture)
@@ -1067,7 +1067,7 @@ NG5_FUNC_UNUSED visit_enter_string_array_pairs(struct archive *archive, path_sta
 
      
 
-    return NG5_VISITOR_POLICY_INCLUDE;
+    return VISIT_INCLUDE;
 }
 
 static void
@@ -1135,7 +1135,7 @@ NG5_FUNC_UNUSED visit_leave_string_array_pairs(struct archive *archive, path_sta
 
 
 
-static carbon_visitor_policy_e
+static enum visit_policy
 NG5_FUNC_UNUSED visit_enter_boolean_array_pairs(struct archive *archive, path_stack_t path,
                                 object_id_t id, const field_sid_t *keys,
                                 u32 num_pairs, void *capture)
@@ -1150,7 +1150,7 @@ NG5_FUNC_UNUSED visit_enter_boolean_array_pairs(struct archive *archive, path_st
 
      
 
-    return NG5_VISITOR_POLICY_INCLUDE;
+    return VISIT_INCLUDE;
 }
 
 static void
@@ -1221,7 +1221,7 @@ NG5_FUNC_UNUSED visit_leave_boolean_array_pairs(struct archive *archive, path_st
 
 }
 
-static carbon_visitor_policy_e
+static enum visit_policy
 NG5_FUNC_UNUSED visit_enter_null_array_pairs(struct archive *archive, path_stack_t path,
                                                         object_id_t id,
                                                         const field_sid_t *keys, u32 num_pairs,
@@ -1236,7 +1236,7 @@ NG5_FUNC_UNUSED visit_enter_null_array_pairs(struct archive *archive, path_stack
 
      
 
-    return NG5_VISITOR_POLICY_INCLUDE;
+    return VISIT_INCLUDE;
 
 }
 
@@ -1305,7 +1305,7 @@ NG5_FUNC_UNUSED visit_leave_null_array_pairs(struct archive *archive, path_stack
 
 }
 
-static carbon_visitor_policy_e
+static enum visit_policy
 NG5_FUNC_UNUSED before_visit_object_array(struct archive *archive, path_stack_t path,
                                                      object_id_t parent_id, field_sid_t key,
                                                      void *capture)
@@ -1319,7 +1319,7 @@ NG5_FUNC_UNUSED before_visit_object_array(struct archive *archive, path_stack_t 
     carbon_archive_visitor_print_path(stderr, archive, path);
      
 
-    return NG5_VISITOR_POLICY_INCLUDE;
+    return VISIT_INCLUDE;
 }
 
 static void
@@ -1343,7 +1343,7 @@ NG5_FUNC_UNUSED before_visit_object_array_objects(bool *skip_group_object_ids,
 
 }
 
-static carbon_visitor_policy_e
+static enum visit_policy
 NG5_FUNC_UNUSED before_visit_object_array_object_property(struct archive *archive, path_stack_t path,
                                                                      object_id_t parent_id,
                                                                      field_sid_t key,
@@ -1361,7 +1361,7 @@ NG5_FUNC_UNUSED before_visit_object_array_object_property(struct archive *archiv
 
      
 
-    return NG5_VISITOR_POLICY_INCLUDE;
+    return VISIT_INCLUDE;
 }
 
 static void
@@ -1648,7 +1648,7 @@ NG5_FUNC_UNUSED visit_object_array_object_property_nulls(struct archive *archive
      
 }
 
-static carbon_visitor_policy_e
+static enum visit_policy
 NG5_FUNC_UNUSED before_object_array_object_property_object(struct archive *archive, path_stack_t path,
                                                                       object_id_t parent_id,
                                                                       field_sid_t key,
@@ -1669,14 +1669,14 @@ NG5_FUNC_UNUSED before_object_array_object_property_object(struct archive *archi
 
      carbon_archive_visitor_print_path(stdout, archive, path);
 
-    return NG5_VISITOR_POLICY_INCLUDE;
+    return VISIT_INCLUDE;
 }
 
 static void
 NG5_FUNC_UNUSED run_magic_visitor(int mask, struct archive *archive)
 {
-    carbon_archive_visitor_t visitor = { 0 };
-    carbon_archive_visitor_desc_t desc = { .visit_mask = mask };
+    struct archive_visitor visitor = { 0 };
+    struct archive_visitor_desc desc = { .visit_mask = mask };
     struct capture capture = {
 
     };
@@ -2141,7 +2141,7 @@ static void*
 cache_monitor(void * data)
 {
     struct archive *archive = data;
-    carbon_string_id_cache_statistics_t statistics;
+    struct sid_cache_stats statistics;
 
     FILE *stats_file = fopen("types-temp-statistics--cache-monitor.csv", "w");
 

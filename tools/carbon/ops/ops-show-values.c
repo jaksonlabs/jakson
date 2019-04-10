@@ -85,7 +85,7 @@ visit_string_pairs (struct archive *archive, path_stack_t path, object_id_t id,
 
 }
 
-static carbon_visitor_policy_e
+static enum visit_policy
 before_visit_object_array(struct archive *archive, path_stack_t path,
                                                      object_id_t parent_id, field_sid_t key,
                                                      void *capture)
@@ -96,7 +96,7 @@ before_visit_object_array(struct archive *archive, path_stack_t path,
     NG5_UNUSED(capture);
     NG5_UNUSED(key);
 
-    carbon_visitor_policy_e follow = NG5_VISITOR_POLICY_EXCLUDE;
+    enum visit_policy follow = VISIT_EXCLUDE;
 
     char buffer[2048];
     memset(buffer, 0, sizeof(buffer));
@@ -110,7 +110,7 @@ before_visit_object_array(struct archive *archive, path_stack_t path,
 
 
     if (len_user_path >= len_current_path && strncmp(buffer, params->path, len_current_path) == 0) {
-        follow = NG5_VISITOR_POLICY_INCLUDE;
+        follow = VISIT_INCLUDE;
     }
 
 
@@ -119,7 +119,7 @@ before_visit_object_array(struct archive *archive, path_stack_t path,
 }
 
 
-static carbon_visitor_policy_e
+static enum visit_policy
 before_visit_object_array_object_property(struct archive *archive, path_stack_t path,
                                           object_id_t parent_id,
                                           field_sid_t key,
@@ -135,7 +135,7 @@ before_visit_object_array_object_property(struct archive *archive, path_stack_t 
     NG5_UNUSED(nested_value_type);
     NG5_UNUSED(capture);
 
-    carbon_visitor_policy_e follow = NG5_VISITOR_POLICY_EXCLUDE;
+    enum visit_policy follow = VISIT_EXCLUDE;
 
     char buffer[2048];
     memset(buffer, 0, sizeof(buffer));
@@ -149,7 +149,7 @@ before_visit_object_array_object_property(struct archive *archive, path_stack_t 
 
 
     if (len_user_path >= len_current_path && strncmp(buffer, params->path, len_current_path) == 0) {
-        follow = NG5_VISITOR_POLICY_INCLUDE;
+        follow = VISIT_INCLUDE;
     }
 
 
@@ -401,8 +401,8 @@ ops_show_values(timestamp_t *duration, struct vector ofType(ops_show_values_resu
     NG5_UNUSED(path);
     NG5_UNUSED(archive);
 
-    carbon_archive_visitor_t visitor = { 0 };
-    carbon_archive_visitor_desc_t desc = { .visit_mask = NG5_ARCHIVE_ITER_MASK_ANY };
+    struct archive_visitor visitor = { 0 };
+    struct archive_visitor_desc desc = { .visit_mask = NG5_ARCHIVE_ITER_MASK_ANY };
 
     carbon_vec_create(result, NULL, sizeof(ops_show_values_result_t), 10);
 

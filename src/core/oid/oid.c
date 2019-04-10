@@ -20,10 +20,14 @@
 #include "shared/error.h"
 #include "hash/bern.h"
 
-_Thread_local bool     thread_local_init;
+_Thread_local bool thread_local_init;
+
 _Thread_local u64 thread_local_id;
-_Thread_local u8  thread_local_magic;
+
+_Thread_local u8 thread_local_magic;
+
 _Thread_local u32 thread_local_counter;
+
 _Thread_local u32 thread_local_counter_limit;
 
 /**
@@ -35,166 +39,154 @@ _Thread_local u32 thread_local_counter_limit;
  * component is added to minimize the risk of producing two equal identifier across multiple
  * machines.
  */
-typedef union
-{
-    struct {
-        /* global */
-        u64 global_wallclock  : 5;   /* increasing wall clock time (ms) */
-        u64 global_build_date : 1;   /* fix bit dependent on compilation time */
-        u64 global_build_path : 1;   /* fix bit dependent on compilation path */
+union object_id {
+        struct {
+                /* global */
+                u64 global_wallclock
+                        : 5;   /* increasing wall clock time (ms) */
+                u64 global_build_date
+                        : 1;   /* fix bit dependent on compilation time */
+                u64 global_build_path
+                        : 1;   /* fix bit dependent on compilation path */
 
-        /* per-process */
-        u64 process_id        : 7;   /* fix id */
-        u64 process_magic     : 2;   /* random fix value */
-        u64 process_counter   : 8;   /* increasing counter */
+                /* per-process */
+                u64 process_id
+                        : 7;   /* fix id */
+                u64 process_magic
+                        : 2;   /* random fix value */
+                u64 process_counter
+                        : 8;   /* increasing counter */
 
-        /* per-thread  */
-        u64 thread_id         : 7;   /* fix id */
-        u64 thread_magic      : 2;   /* random fix value */
-        u64 thread_counter    : 29;  /* increasing counter (< 536mio ids per thread) */
+                /* per-thread  */
+                u64 thread_id
+                        : 7;   /* fix id */
+                u64 thread_magic
+                        : 2;   /* random fix value */
+                u64 thread_counter
+                        : 29;  /* increasing counter (< 536mio ids per thread) */
 
-        /* per-call */
-        u64 call_random       :  2;  /* random value */
-    };
-
-    u64 value;
-} internal_object_id_t;
-
-NG5_EXPORT(bool)
-carbon_object_id_create(object_id_t *out)
-{
-    assert(out);
-
-    static bool     process_init;
-    static u64 process_local_id;
-    static u8  process_magic;
-    static u64 process_counter;
-
-    static u8  global_build_date_bit;
-    static u8  global_build_path_bit;
-
-    if (!process_init) {
-        srand(time(NULL));
-        process_magic = rand();
-        process_init = true;
-        process_counter = rand();
-
-        const char *file = __FILE__;
-        const char *time = __TIME__;
-
-        global_build_path_bit = NG5_HASH_BERNSTEIN(strlen(file), file) % 2;
-        global_build_date_bit = NG5_HASH_BERNSTEIN(strlen(time), time) % 2;
-    }
-
-    if (!thread_local_init) {
-        thread_local_counter = rand();
-        thread_local_counter_limit = thread_local_counter++;
-        thread_local_id = (u64) pthread_self();
-        process_local_id = getpid();
-        thread_local_magic = rand();
-        thread_local_init = true;
-    }
-
-    bool capacity_left = (thread_local_counter != thread_local_counter_limit);
-    NG5_PRINT_ERROR_IF(!capacity_left, NG5_ERR_THREADOOOBJIDS)
-    if (NG5_LIKELY(capacity_left)) {
-        internal_object_id_t internal = {
-            .global_wallclock  = carbon_time_now_wallclock(),
-            .global_build_date = global_build_date_bit,
-            .global_build_path = global_build_path_bit,
-            .process_id        = process_local_id,
-            .process_magic     = process_magic,
-            .process_counter   = process_counter++,
-            .thread_id         = (u64) thread_local_id,
-            .thread_magic      = thread_local_magic,
-            .thread_counter    = thread_local_counter++,
-            .call_random       = rand()
+                /* per-call */
+                u64 call_random
+                        :  2;  /* random value */
         };
-        *out = internal.value;
-    } else {
-        *out = 0;
-    }
-    return capacity_left;
+
+        u64 value;
+};
+
+NG5_EXPORT(bool) carbon_object_id_create(object_id_t *out)
+{
+        assert(out);
+
+        static bool process_init;
+        static u64 process_local_id;
+        static u8 process_magic;
+        static u64 process_counter;
+
+        static u8 global_build_date_bit;
+        static u8 global_build_path_bit;
+
+        if (!process_init) {
+                srand(time(NULL));
+                process_magic = rand();
+                process_init = true;
+                process_counter = rand();
+
+                const char *file = __FILE__;
+                const char *time = __TIME__;
+
+                global_build_path_bit = NG5_HASH_BERNSTEIN(strlen(file), file) % 2;
+                global_build_date_bit = NG5_HASH_BERNSTEIN(strlen(time), time) % 2;
+        }
+
+        if (!thread_local_init) {
+                thread_local_counter = rand();
+                thread_local_counter_limit = thread_local_counter++;
+                thread_local_id = (u64) pthread_self();
+                process_local_id = getpid();
+                thread_local_magic = rand();
+                thread_local_init = true;
+        }
+
+        bool capacity_left = (thread_local_counter != thread_local_counter_limit);
+        NG5_PRINT_ERROR_IF(!capacity_left, NG5_ERR_THREADOOOBJIDS)
+        if (NG5_LIKELY(capacity_left)) {
+                union object_id internal =
+                        {.global_wallclock  = carbon_time_now_wallclock(), .global_build_date = global_build_date_bit, .global_build_path = global_build_path_bit, .process_id        = process_local_id, .process_magic     = process_magic, .process_counter   = process_counter++, .thread_id         = (u64) thread_local_id, .thread_magic      = thread_local_magic, .thread_counter    = thread_local_counter++, .call_random       = rand()};
+                *out = internal.value;
+        } else {
+                *out = 0;
+        }
+        return capacity_left;
 }
 
-NG5_EXPORT(bool)
-carbon_object_id_get_global_wallclocktime(uint_fast8_t *out, object_id_t id)
+NG5_EXPORT(bool) carbon_object_id_get_global_wallclocktime(uint_fast8_t *out, object_id_t id)
 {
-    NG5_NON_NULL_OR_ERROR(out);
-    *out = ((internal_object_id_t *) &id)->global_wallclock;
-    return true;
+        NG5_NON_NULL_OR_ERROR(out);
+        *out = ((union object_id *) &id)->global_wallclock;
+        return true;
 }
 
-NG5_EXPORT(bool)
-carbon_object_id_get_global_build_path_bit(uint_fast8_t *out, object_id_t id)
+NG5_EXPORT(bool) carbon_object_id_get_global_build_path_bit(uint_fast8_t *out, object_id_t id)
 {
-    NG5_NON_NULL_OR_ERROR(out);
-    *out = ((internal_object_id_t *) &id)->global_build_path;
-    return true;
+        NG5_NON_NULL_OR_ERROR(out);
+        *out = ((union object_id *) &id)->global_build_path;
+        return true;
 }
 
-NG5_EXPORT(bool)
-carbon_object_id_get_global_build_time_bit(uint_fast8_t *out, object_id_t id)
+NG5_EXPORT(bool) carbon_object_id_get_global_build_time_bit(uint_fast8_t *out, object_id_t id)
 {
-    NG5_NON_NULL_OR_ERROR(out);
-    *out = ((internal_object_id_t *) &id)->global_build_date;
-    return true;
+        NG5_NON_NULL_OR_ERROR(out);
+        *out = ((union object_id *) &id)->global_build_date;
+        return true;
 }
 
-NG5_EXPORT(bool)
-carbon_object_id_get_process_id(uint_fast8_t *out, object_id_t id)
+NG5_EXPORT(bool) carbon_object_id_get_process_id(uint_fast8_t *out, object_id_t id)
 {
-    NG5_NON_NULL_OR_ERROR(out);
-    *out = ((internal_object_id_t *) &id)->process_id;
-    return true;
+        NG5_NON_NULL_OR_ERROR(out);
+        *out = ((union object_id *) &id)->process_id;
+        return true;
 }
 
-NG5_EXPORT(bool)
-carbon_object_id_get_process_magic(uint_fast8_t *out, object_id_t id)
+NG5_EXPORT(bool) carbon_object_id_get_process_magic(uint_fast8_t *out, object_id_t id)
 {
-    NG5_NON_NULL_OR_ERROR(out);
-    *out = ((internal_object_id_t *) &id)->process_magic;
-    return true;
+        NG5_NON_NULL_OR_ERROR(out);
+        *out = ((union object_id *) &id)->process_magic;
+        return true;
 }
 
-NG5_EXPORT(bool)
-carbon_object_id_get_process_counter(uint_fast16_t *out, object_id_t id)
+NG5_EXPORT(bool) carbon_object_id_get_process_counter(uint_fast16_t *out, object_id_t id)
 {
-    NG5_NON_NULL_OR_ERROR(out);
-    *out = ((internal_object_id_t *) &id)->process_counter;
-    return true;
+        NG5_NON_NULL_OR_ERROR(out);
+        *out = ((union object_id *) &id)->process_counter;
+        return true;
 }
 
-NG5_EXPORT(bool)
-carbon_object_id_get_thread_id(uint_fast8_t *out, object_id_t id)
+NG5_EXPORT(bool) carbon_object_id_get_thread_id(uint_fast8_t *out, object_id_t id)
 {
-    NG5_NON_NULL_OR_ERROR(out);
-    *out = ((internal_object_id_t *) &id)->thread_id;
-    return true;
+        NG5_NON_NULL_OR_ERROR(out);
+        *out = ((union object_id *) &id)->thread_id;
+        return true;
 }
 
-NG5_EXPORT(bool)
-carbon_object_id_get_thread_magic(uint_fast8_t *out, object_id_t id)
+NG5_EXPORT(bool) carbon_object_id_get_thread_magic(uint_fast8_t *out, object_id_t id)
 {
-    NG5_NON_NULL_OR_ERROR(out);
-    *out = ((internal_object_id_t *) &id)->thread_magic;
-    return true;
+        NG5_NON_NULL_OR_ERROR(out);
+        *out = ((union object_id *) &id)->thread_magic;
+        return true;
 }
 
-NG5_EXPORT(bool)
-carbon_object_id_get_thread_counter(uint_fast32_t *out, object_id_t id)
+NG5_EXPORT(bool) carbon_object_id_get_thread_counter(uint_fast32_t *out, object_id_t id)
 {
-    NG5_NON_NULL_OR_ERROR(out);
-    *out = ((internal_object_id_t *) &id)->thread_counter;
-    return true;
+        NG5_NON_NULL_OR_ERROR(out);
+        *out = ((union object_id *) &id)->thread_counter;
+        return true;
 }
 
-NG5_EXPORT(bool)
-carbon_object_id_get_call_random(uint_fast8_t *out, object_id_t id)
+NG5_EXPORT(bool) carbon_object_id_get_call_random(uint_fast8_t *out, object_id_t id)
 {
-    NG5_NON_NULL_OR_ERROR(out);
-    *out = ((internal_object_id_t *) &id)->call_random;
-    return true;
+        NG5_NON_NULL_OR_ERROR(out);
+        *out = ((union object_id *) &id)->call_random;
+        return true;
 }
 
 

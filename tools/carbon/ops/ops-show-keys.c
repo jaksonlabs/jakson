@@ -31,7 +31,7 @@ static void visit_string_pairs (struct archive *archive, path_stack_t path, obje
 
 }
 
-static carbon_visitor_policy_e
+static enum visit_policy
 before_visit_object_array(struct archive *archive, path_stack_t path,
                                                      object_id_t parent_id, field_sid_t key,
                                                      void *capture)
@@ -50,7 +50,7 @@ before_visit_object_array(struct archive *archive, path_stack_t path,
 //    free(keystr);
 
 
-    return NG5_VISITOR_POLICY_INCLUDE;
+    return VISIT_INCLUDE;
 }
 
 static void
@@ -83,7 +83,7 @@ before_visit_object_array_objects(bool *skip_group_object_ids,
 
 
 
-static carbon_visitor_policy_e
+static enum visit_policy
 before_object_visit(struct archive *archive, path_stack_t path,
                                                object_id_t parent_id, object_id_t value_id,
                                                u32 object_idx, u32 num_objects, field_sid_t key,
@@ -114,7 +114,7 @@ before_object_visit(struct archive *archive, path_stack_t path,
 //    }
 
 
-    return NG5_VISITOR_POLICY_INCLUDE;
+    return VISIT_INCLUDE;
 }
 
 static void
@@ -208,7 +208,7 @@ static void visit_object_array_prop(struct archive *archive, path_stack_t path, 
 
 }
 
-static carbon_visitor_policy_e
+static enum visit_policy
 before_visit_object_array_object_property(struct archive *archive, path_stack_t path,
                                           object_id_t parent_id,
                                           field_sid_t key,
@@ -224,7 +224,7 @@ before_visit_object_array_object_property(struct archive *archive, path_stack_t 
     NG5_UNUSED(nested_value_type);
     NG5_UNUSED(capture);
 
-    carbon_visitor_policy_e follow = NG5_VISITOR_POLICY_EXCLUDE;
+    enum visit_policy follow = VISIT_EXCLUDE;
 
     char buffer[2048];
     memset(buffer, 0, sizeof(buffer));
@@ -239,12 +239,12 @@ before_visit_object_array_object_property(struct archive *archive, path_stack_t 
 
 
     if (len_user_path >= len_current_path && strncmp(buffer, params->path, len_current_path) == 0) {
-        follow = NG5_VISITOR_POLICY_INCLUDE;
+        follow = VISIT_INCLUDE;
     }
 
     //if (strlen(buffer) > strlen(nested_keystr) && strcmp(buffer + (strlen(buffer) - strlen(nested_keystr)), nested_keystr) == 0)
     //{
-    //     follow = NG5_VISITOR_POLICY_INCLUDE;
+    //     follow = VISIT_INCLUDE;
     //  }
 
  //   printf("USER PATH: '%s', current path: '%s', follow?\n", params->path, buffer);
@@ -269,7 +269,7 @@ before_visit_object_array_object_property(struct archive *archive, path_stack_t 
 
 
 
-static carbon_visitor_policy_e
+static enum visit_policy
 before_object_array_object_property_object(struct archive *archive, path_stack_t path,
                                            object_id_t parent_id,
                                            field_sid_t key,
@@ -287,7 +287,7 @@ before_object_array_object_property_object(struct archive *archive, path_stack_t
     NG5_UNUSED(nested_value_object_id);
     NG5_UNUSED(capture);
 
-    return NG5_VISITOR_POLICY_INCLUDE;
+    return VISIT_INCLUDE;
 }
 
 NG5_EXPORT(bool)
@@ -297,8 +297,8 @@ ops_show_keys(timestamp_t *duration, struct vector ofType(ops_show_keys_key_type
     NG5_UNUSED(path);
     NG5_UNUSED(archive);
 
-    carbon_archive_visitor_t visitor = { 0 };
-    carbon_archive_visitor_desc_t desc = { .visit_mask = NG5_ARCHIVE_ITER_MASK_ANY };
+    struct archive_visitor visitor = { 0 };
+    struct archive_visitor_desc desc = { .visit_mask = NG5_ARCHIVE_ITER_MASK_ANY };
     struct hashset ofType(ops_show_keys_key_type_pair_t) distinct_key_type_pairs;
     carbon_hashset_create(&distinct_key_type_pairs, &archive->err, sizeof(ops_show_keys_capture_t), 100);
     ops_show_keys_capture_t capture = {

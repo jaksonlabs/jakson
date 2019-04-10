@@ -340,7 +340,7 @@ struct record_flags
 
 struct string_table
 {
-    carbon_compressor_t     compressor;
+    struct packer     compressor;
     offset_t            first_entry_off;
     u32                num_embeddded_strings;
 };

@@ -19,39 +19,37 @@
 #include "shared/error.h"
 #include "core/carbon/archive_sid_cache.h"
 
-typedef struct cache_entry cache_entry_t;
-
-typedef struct cache_entry
+struct cache_entry
 {
-    cache_entry_t *prev, *next;
+    struct cache_entry *prev, *next;
     field_sid_t id;
     char *string;
-} cache_entry_t;
+};
 
-typedef struct
+struct lru_list
 {
-    cache_entry_t *most_recent;
-    cache_entry_t *lest_recent;
-    cache_entry_t entries[1024];
-} lru_list_t;
+    struct cache_entry *most_recent;
+    struct cache_entry *lest_recent;
+    struct cache_entry entries[1024];
+};
 
 struct string_cache
 {
-    struct vector ofType(lru_list_t) list_entries;
-    carbon_string_id_cache_statistics_t statistics;
+    struct vector ofType(struct lru_list) list_entries;
+    struct sid_cache_stats statistics;
     struct archive_query query;
     struct err err;
     size_t capacity;
 };
 
 static void
-init_list(lru_list_t *list)
+init_list(struct lru_list *list)
 {
     size_t num_entries = sizeof(list->entries)/sizeof(list->entries[0]);
     list->most_recent = list->entries + 0;
     list->lest_recent = list->entries + num_entries - 1;
     for (size_t i = 0; i < num_entries; i++) {
-        cache_entry_t *entry = list->entries + i;
+        struct cache_entry *entry = list->entries + i;
         entry->prev = i == 0 ? NULL : &list->entries[i - 1];
         entry->next = i + 1 < num_entries ? &list->entries[i + 1] : NULL;
     }
@@ -80,10 +78,10 @@ carbon_string_id_cache_create_LRU_ex(struct string_cache **cache, struct archive
 
 
     size_t num_buckets = NG5_MAX(1, capacity);
-    carbon_vec_create(&result->list_entries, NULL, sizeof(lru_list_t), num_buckets);
+    carbon_vec_create(&result->list_entries, NULL, sizeof(struct lru_list), num_buckets);
     for (size_t i = 0; i < num_buckets; i++) {
-        lru_list_t *list = VECTOR_NEW_AND_GET(&result->list_entries, lru_list_t);
-        NG5_ZERO_MEMORY(list, sizeof(lru_list_t));
+        struct lru_list *list = VECTOR_NEW_AND_GET(&result->list_entries, struct lru_list);
+        NG5_ZERO_MEMORY(list, sizeof(struct lru_list));
         init_list(list);
     }
 
@@ -113,7 +111,7 @@ carbon_string_id_cache_get_size(size_t *size, const struct string_cache *cache)
 }
 
 static void
-make_most_recent(lru_list_t *list, cache_entry_t *entry)
+make_most_recent(struct lru_list *list, struct cache_entry *entry)
 {
     if (list->most_recent == entry) {
         return;
@@ -138,8 +136,8 @@ carbon_string_id_cache_get(struct string_cache *cache, field_sid_t id)
     NG5_NON_NULL_OR_ERROR(cache)
     hash32_t id_hash = NG5_HASH_BERNSTEIN(sizeof(field_sid_t), &id);
     size_t bucket_pos = id_hash % cache->list_entries.num_elems;
-    lru_list_t *list = vec_get(&cache->list_entries, bucket_pos, lru_list_t);
-    cache_entry_t *cursor = list->most_recent;
+    struct lru_list *list = vec_get(&cache->list_entries, bucket_pos, struct lru_list);
+    struct cache_entry *cursor = list->most_recent;
     while (cursor != NULL) {
         if (id == cursor->id) {
             make_most_recent(list, cursor);
@@ -161,7 +159,7 @@ carbon_string_id_cache_get(struct string_cache *cache, field_sid_t id)
 }
 
 NG5_EXPORT(bool)
-carbon_string_id_cache_get_statistics(carbon_string_id_cache_statistics_t *statistics, struct string_cache *cache)
+carbon_string_id_cache_get_statistics(struct sid_cache_stats *statistics, struct string_cache *cache)
 {
     NG5_NON_NULL_OR_ERROR(statistics);
     NG5_NON_NULL_OR_ERROR(cache);
@@ -173,7 +171,7 @@ NG5_EXPORT(bool)
 carbon_string_id_cache_reset_statistics(struct string_cache *cache)
 {
     NG5_NON_NULL_OR_ERROR(cache);
-    NG5_ZERO_MEMORY(&cache->statistics, sizeof(carbon_string_id_cache_statistics_t));
+    NG5_ZERO_MEMORY(&cache->statistics, sizeof(struct sid_cache_stats));
     return true;
 }
 
@@ -182,10 +180,10 @@ carbon_string_id_cache_drop(struct string_cache *cache)
 {
     NG5_NON_NULL_OR_ERROR(cache);
     for (size_t i = 0; i < cache->list_entries.num_elems; i++) {
-        lru_list_t *entry = vec_get(&cache->list_entries, i, lru_list_t);
+        struct lru_list *entry = vec_get(&cache->list_entries, i, struct lru_list);
         for (size_t k = 0; k < sizeof(entry->entries)/ sizeof(entry->entries[0]); k++)
         {
-            cache_entry_t *it = &entry->entries[k];
+            struct cache_entry *it = &entry->entries[k];
             if (it->string) {
                 free(it->string);
             }

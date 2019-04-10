@@ -146,8 +146,8 @@ ops_count_values(timestamp_t *duration, struct vector ofType(ops_count_values_re
     NG5_UNUSED(path);
     NG5_UNUSED(archive);
 
-    carbon_archive_visitor_t visitor = { 0 };
-    carbon_archive_visitor_desc_t desc = { .visit_mask = NG5_ARCHIVE_ITER_MASK_ANY };
+    struct archive_visitor visitor = { 0 };
+    struct archive_visitor_desc desc = { .visit_mask = NG5_ARCHIVE_ITER_MASK_ANY };
 
     struct capture capture = {
         .path = path

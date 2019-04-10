@@ -76,16 +76,16 @@ struct archive_callback
 };
 
 NG5_EXPORT(bool) carbon_archive_from_json(struct archive *out, const char *file, struct err *err,
-        const char *json_string, carbon_compressor_type_e compressor, enum strdic_tag dictionary,
+        const char *json_string, enum packer_type compressor, enum strdic_tag dictionary,
         size_t num_async_dic_threads, bool read_optimized, bool bake_string_id_index,
         struct archive_callback *callback);
 
 NG5_EXPORT(bool) carbon_archive_stream_from_json(struct memblock **stream, struct err *err, const char *json_string,
-        carbon_compressor_type_e compressor, enum strdic_tag dictionary, size_t num_async_dic_threads,
+        enum packer_type compressor, enum strdic_tag dictionary, size_t num_async_dic_threads,
         bool read_optimized, bool bake_id_index, struct archive_callback *callback);
 
 NG5_EXPORT(bool) carbon_archive_from_model(struct memblock **stream, struct err *err, struct columndoc *model,
-        carbon_compressor_type_e compressor, bool bake_string_id_index, struct archive_callback *callback);
+        enum packer_type compressor, bool bake_string_id_index, struct archive_callback *callback);
 
 NG5_EXPORT(bool) carbon_archive_write(FILE *file, const struct memblock *stream);
 

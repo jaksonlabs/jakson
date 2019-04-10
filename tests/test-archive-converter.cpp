@@ -23,7 +23,7 @@ TEST(ConverterTest, PerformConversion)
 
 
         struct string_cache *cache = carbon_archive_get_query_string_id_cache(&archive);
-        carbon_string_id_cache_statistics_t statistics;
+        struct sid_cache_stats statistics;
         carbon_string_id_cache_get_statistics(&statistics, cache);
         fprintf(stderr, "string_id_cache_info hits: %zu   misses: %zu   hit ratio: %.4f   num evicted: %zu\n",
                 statistics.num_hits, statistics.num_misses,

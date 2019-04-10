@@ -323,7 +323,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_
         bool flagReadOptimized = false;
         bool flagForceOverwrite = false;
         bool flagBakeStringIdIndex = true;
-        carbon_compressor_type_e compressor = NG5_COMPRESSOR_NONE;
+        enum packer_type compressor = PACK_NONE;
         enum strdic_tag dic_type = ASYNC;
         int string_dic_async_nthreads = 8;
 
@@ -335,7 +335,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_
             if (strncmp(opt, "--", 2) == 0) {
                 if (strcmp(opt, JS_2_CAB_OPTION_SIZE_OPTIMIZED) == 0) {
                     flagSizeOptimized = true;
-                    compressor = NG5_COMPRESSOR_HUFFMAN;
+                    compressor = PACK_HUFFMAN;
                 } else if (strcmp(opt, JS_2_CAB_OPTION_READ_OPTIMIZED) == 0) {
                     flagReadOptimized = true;
                 } else if (strcmp(opt, JS_2_CAB_OPTION_NO_STRING_ID_INDEX) == 0) {
@@ -387,7 +387,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_
             }
         }
 
-        if (!flagSizeOptimized && compressor != NG5_COMPRESSOR_NONE) {
+        if (!flagSizeOptimized && compressor != PACK_NONE) {
             NG5_CONSOLE_WRITELN(file, "** WARNING ** a pack was specified but will be ignored because size "
                 "optimization is turned off. Use '--size-optimized' such that a pack has any effect%s", "");
         }

@@ -49,7 +49,7 @@ visit_##name##_pairs (struct archive *archive, path_stack_t path_stack, object_i
 }
 
 #define DECLARE_VISIT_ARRAY_TYPE(name, built_in_type)                                                                  \
-static carbon_visitor_policy_e                                                                                         \
+static enum visit_policy                                                                                         \
 visit_enter_##name##_array_pairs(struct archive *archive, path_stack_t path, object_id_t id,                  \
                                  const field_sid_t *keys, u32 num_pairs, void *capture)                    \
 {                                                                                                                      \
@@ -69,7 +69,7 @@ visit_enter_##name##_array_pairs(struct archive *archive, path_stack_t path, obj
         carbon_encoded_doc_add_prop_array_##name(doc, keys[i]);                                                        \
     }                                                                                                                  \
                                                                                                                        \
-    return NG5_VISITOR_POLICY_INCLUDE;                                                                              \
+    return VISIT_INCLUDE;                                                                              \
 }                                                                                                                      \
                                                                                                                        \
 static void                                                                                                            \
@@ -130,7 +130,7 @@ visit_null_pairs (struct archive *archive, path_stack_t path, object_id_t oid, c
     }
 }
 
-static carbon_visitor_policy_e
+static enum visit_policy
 before_object_visit(struct archive *archive, path_stack_t path_stack, object_id_t parent_id,
                     object_id_t value_id, u32 object_idx, u32 num_objects, field_sid_t key, void *capture)
 {
@@ -146,7 +146,7 @@ before_object_visit(struct archive *archive, path_stack_t path_stack, object_id_
     struct encoded_doc *child_doc = encoded_doc_collection_get_or_append(extra->collection, value_id);
     carbon_encoded_doc_add_prop_object(parent_doc, key, child_doc);
 
-    return NG5_VISITOR_POLICY_INCLUDE;
+    return VISIT_INCLUDE;
 }
 
 DECLARE_VISIT_ARRAY_TYPE(int8, field_i8_t)
@@ -161,7 +161,7 @@ DECLARE_VISIT_ARRAY_TYPE(number, field_number_t)
 DECLARE_VISIT_ARRAY_TYPE(boolean, field_boolean_t)
 DECLARE_VISIT_ARRAY_TYPE(string, field_sid_t)
 
-static carbon_visitor_policy_e
+static enum visit_policy
 visit_enter_null_array_pairs(struct archive *archive, path_stack_t path, object_id_t id, const field_sid_t *keys,
                              u32 num_pairs, void *capture)
 {
@@ -181,7 +181,7 @@ visit_enter_null_array_pairs(struct archive *archive, path_stack_t path, object_
         carbon_encoded_doc_add_prop_array_null(doc, keys[i]);
     }
 
-    return NG5_VISITOR_POLICY_INCLUDE;
+    return VISIT_INCLUDE;
 }
 
 static void
@@ -270,8 +270,8 @@ carbon_archive_converter(struct encoded_doc_list *collection, struct archive *ar
 
     carbon_encoded_doc_collection_create(collection, &archive->err, archive);
 
-    carbon_archive_visitor_t visitor = { 0 };
-    carbon_archive_visitor_desc_t desc = { .visit_mask = NG5_ARCHIVE_ITER_MASK_ANY };
+    struct archive_visitor visitor = { 0 };
+    struct archive_visitor_desc desc = { .visit_mask = NG5_ARCHIVE_ITER_MASK_ANY };
     struct converter_capture capture = {
         .collection = collection
     };
