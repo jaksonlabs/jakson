@@ -20,7 +20,7 @@
 
 #define SPINLOCK_TAG "spinlock"
 
-bool carbon_spinlock_init(carbon_spinlock_t *spinlock)
+bool carbon_spinlock_init(struct spinlock *spinlock)
 {
     NG5_NON_NULL_OR_ERROR(spinlock)
     atomic_flag_clear(&spinlock->lock);
@@ -30,7 +30,7 @@ bool carbon_spinlock_init(carbon_spinlock_t *spinlock)
     return true;
 }
 
-bool carbon_spinlock_acquire(carbon_spinlock_t *spinlock)
+bool carbon_spinlock_acquire(struct spinlock *spinlock)
 {
     carbon_timestamp_t begin = carbon_time_now_wallclock();
     NG5_NON_NULL_OR_ERROR(spinlock)
@@ -48,7 +48,7 @@ bool carbon_spinlock_acquire(carbon_spinlock_t *spinlock)
     return true;
 }
 
-bool carbon_spinlock_release(carbon_spinlock_t *spinlock)
+bool carbon_spinlock_release(struct spinlock *spinlock)
 {
     NG5_NON_NULL_OR_ERROR(spinlock)
     atomic_flag_clear(&spinlock->lock);

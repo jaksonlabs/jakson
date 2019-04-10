@@ -22,12 +22,12 @@
 
 #include "shell/opt.h"
 
-bool moduleCheckJsInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *manager);
-bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *manager);
-bool moduleViewCabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *manager);
-bool moduleInspectInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *manager);
-bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *manager);
-bool moduleListInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *manager);
+bool moduleCheckJsInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_mgr *manager);
+bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_mgr *manager);
+bool moduleViewCabInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_mgr *manager);
+bool moduleInspectInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_mgr *manager);
+bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_mgr *manager);
+bool moduleListInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_mgr *manager);
 
 
 #endif

@@ -47,7 +47,7 @@ typedef struct
     bool init;
 } token_memory_t;
 
-static int process_token(struct err *err, carbon_json_parse_err *error_desc, const carbon_json_token_t *token, vec_t ofType(carbon_json_token_type_e) *brackets,
+static int process_token(struct err *err, carbon_json_parse_err *error_desc, const carbon_json_token_t *token, struct vector ofType(carbon_json_token_type_e) *brackets,
                         token_memory_t *token_mem);
 
 static int set_error(carbon_json_parse_err *error_desc, const carbon_json_token_t *token, const char *msg);
@@ -190,14 +190,14 @@ void carbon_json_token_print(FILE *file, const carbon_json_token_t *token)
     free(string);
 }
 
-static bool parse_object(carbon_json_ast_node_object_t *object, struct err *err, vec_t ofType(carbon_json_token_t) *token_stream, size_t *token_idx);
-static bool parse_array(carbon_json_ast_node_array_t *array, struct err *err, vec_t ofType(carbon_json_token_t) *token_stream, size_t *token_idx);
-static void parse_string(carbon_json_ast_node_string_t *string, vec_t ofType(carbon_json_token_t) *token_stream, size_t *token_idx);
-static void parse_number(carbon_json_ast_node_number_t *number, vec_t ofType(carbon_json_token_t) *token_stream, size_t *token_idx);
-static bool parse_element(carbon_json_ast_node_element_t *element, struct err *err, vec_t ofType(carbon_json_token_t) *token_stream, size_t *token_idx);
-static bool parse_elements(carbon_json_ast_node_elements_t *elements, struct err *err, vec_t ofType(carbon_json_token_t) *token_stream, size_t *token_idx);
-static bool parse_token_stream(carbon_json_t *json, struct err *err, vec_t ofType(carbon_json_token_t) *token_stream);
-static carbon_json_token_t get_token(vec_t ofType(carbon_json_token_t) *token_stream, size_t token_idx);
+static bool parse_object(carbon_json_ast_node_object_t *object, struct err *err, struct vector ofType(carbon_json_token_t) *token_stream, size_t *token_idx);
+static bool parse_array(carbon_json_ast_node_array_t *array, struct err *err, struct vector ofType(carbon_json_token_t) *token_stream, size_t *token_idx);
+static void parse_string(carbon_json_ast_node_string_t *string, struct vector ofType(carbon_json_token_t) *token_stream, size_t *token_idx);
+static void parse_number(carbon_json_ast_node_number_t *number, struct vector ofType(carbon_json_token_t) *token_stream, size_t *token_idx);
+static bool parse_element(carbon_json_ast_node_element_t *element, struct err *err, struct vector ofType(carbon_json_token_t) *token_stream, size_t *token_idx);
+static bool parse_elements(carbon_json_ast_node_elements_t *elements, struct err *err, struct vector ofType(carbon_json_token_t) *token_stream, size_t *token_idx);
+static bool parse_token_stream(carbon_json_t *json, struct err *err, struct vector ofType(carbon_json_token_t) *token_stream);
+static carbon_json_token_t get_token(struct vector ofType(carbon_json_token_t) *token_stream, size_t token_idx);
 static void connect_child_and_parents_member(carbon_json_ast_node_member_t *member);
 static void connect_child_and_parents_object(carbon_json_ast_node_object_t *object);
 static void connect_child_and_parents_array(carbon_json_ast_node_array_t *array);
@@ -233,8 +233,8 @@ bool carbon_json_parse(NG5_NULLABLE carbon_json_t *json, NG5_NULLABLE carbon_jso
     NG5_NON_NULL_OR_ERROR(parser)
     NG5_NON_NULL_OR_ERROR(input)
 
-    vec_t ofType(carbon_json_token_type_e) brackets;
-    vec_t ofType(carbon_json_token_t) token_stream;
+    struct vector ofType(carbon_json_token_type_e) brackets;
+    struct vector ofType(carbon_json_token_t) token_stream;
 
     carbon_json_t retval = {
         .element = malloc(sizeof(carbon_json_ast_node_element_t))
@@ -350,12 +350,12 @@ carbon_json_test_doc(struct err *err, carbon_json_t *json)
     return (test_condition_value(err, &json->element->value));
 }
 
-static carbon_json_token_t get_token(vec_t ofType(carbon_json_token_t) *token_stream, size_t token_idx)
+static carbon_json_token_t get_token(struct vector ofType(carbon_json_token_t) *token_stream, size_t token_idx)
 {
     return *(carbon_json_token_t *) carbon_vec_at(token_stream, token_idx);
 }
 
-bool parse_members(struct err *err, carbon_json_ast_node_members_t *members, vec_t ofType(carbon_json_token_t) *token_stream, size_t *token_idx)
+bool parse_members(struct err *err, carbon_json_ast_node_members_t *members, struct vector ofType(carbon_json_token_t) *token_stream, size_t *token_idx)
 {
     carbon_vec_create(&members->members, NULL, sizeof(carbon_json_ast_node_member_t), 20);
     carbon_json_token_t delimiter_token;
@@ -422,7 +422,7 @@ bool parse_members(struct err *err, carbon_json_ast_node_members_t *members, vec
     return true;
 }
 
-static bool parse_object(carbon_json_ast_node_object_t *object, struct err *err, vec_t ofType(carbon_json_token_t) *token_stream, size_t *token_idx)
+static bool parse_object(carbon_json_ast_node_object_t *object, struct err *err, struct vector ofType(carbon_json_token_t) *token_stream, size_t *token_idx)
 {
     assert(get_token(token_stream, *token_idx).type == NG5_JSON_TOKEN_SCOPE_OPEN);
     NEXT_TOKEN(token_idx);  /** Skip '{' */
@@ -443,7 +443,7 @@ static bool parse_object(carbon_json_ast_node_object_t *object, struct err *err,
     return true;
 }
 
-static bool parse_array(carbon_json_ast_node_array_t *array, struct err *err, vec_t ofType(carbon_json_token_t) *token_stream, size_t *token_idx)
+static bool parse_array(carbon_json_ast_node_array_t *array, struct err *err, struct vector ofType(carbon_json_token_t) *token_stream, size_t *token_idx)
 {
     carbon_json_token_t token = get_token(token_stream, *token_idx);
     NG5_UNUSED(token);
@@ -459,7 +459,7 @@ static bool parse_array(carbon_json_ast_node_array_t *array, struct err *err, ve
     return true;
 }
 
-static void parse_string(carbon_json_ast_node_string_t *string, vec_t ofType(carbon_json_token_t) *token_stream, size_t *token_idx)
+static void parse_string(carbon_json_ast_node_string_t *string, struct vector ofType(carbon_json_token_t) *token_stream, size_t *token_idx)
 {
     carbon_json_token_t token = get_token(token_stream, *token_idx);
     assert(token.type == NG5_JSON_TOKEN_STRING_LITERAL);
@@ -472,7 +472,7 @@ static void parse_string(carbon_json_ast_node_string_t *string, vec_t ofType(car
     NEXT_TOKEN(token_idx);
 }
 
-static void parse_number(carbon_json_ast_node_number_t *number, vec_t ofType(carbon_json_token_t) *token_stream, size_t *token_idx)
+static void parse_number(carbon_json_ast_node_number_t *number, struct vector ofType(carbon_json_token_t) *token_stream, size_t *token_idx)
 {
     carbon_json_token_t token = get_token(token_stream, *token_idx);
     assert(token.type == NG5_JSON_TOKEN_REAL_NUMBER || token.type == NG5_JSON_TOKEN_INT_NUMBER);
@@ -506,7 +506,7 @@ static void parse_number(carbon_json_ast_node_number_t *number, vec_t ofType(car
     NEXT_TOKEN(token_idx);
 }
 
-static bool parse_element(carbon_json_ast_node_element_t *element, struct err *err, vec_t ofType(carbon_json_token_t) *token_stream, size_t *token_idx)
+static bool parse_element(carbon_json_ast_node_element_t *element, struct err *err, struct vector ofType(carbon_json_token_t) *token_stream, size_t *token_idx)
 {
     carbon_json_token_t token = get_token(token_stream, *token_idx);
 
@@ -545,7 +545,7 @@ static bool parse_element(carbon_json_ast_node_element_t *element, struct err *e
     return true;
 }
 
-static bool parse_elements(carbon_json_ast_node_elements_t *elements, struct err *err, vec_t ofType(carbon_json_token_t) *token_stream, size_t *token_idx)
+static bool parse_elements(carbon_json_ast_node_elements_t *elements, struct err *err, struct vector ofType(carbon_json_token_t) *token_stream, size_t *token_idx)
 {
     carbon_json_token_t delimiter;
     do {
@@ -560,7 +560,7 @@ static bool parse_elements(carbon_json_ast_node_elements_t *elements, struct err
     return true;
 }
 
-static bool parse_token_stream(carbon_json_t *json, struct err *err, vec_t ofType(carbon_json_token_t) *token_stream)
+static bool parse_token_stream(carbon_json_t *json, struct err *err, struct vector ofType(carbon_json_token_t) *token_stream)
 {
     size_t token_idx = 0;
     if (!parse_element(json->element, err, token_stream, &token_idx)) {
@@ -635,7 +635,7 @@ static bool isValue(carbon_json_token_type_e token) {
         token == NG5_JSON_TOKEN_LITERAL_TRUE || token == NG5_JSON_TOKEN_LITERAL_FALSE || token == NG5_JSON_TOKEN_LITERAL_NULL );
 }
 
-static int process_token(struct err *err, carbon_json_parse_err *error_desc, const carbon_json_token_t *token, vec_t ofType(carbon_json_token_type_e) *brackets,
+static int process_token(struct err *err, carbon_json_parse_err *error_desc, const carbon_json_token_t *token, struct vector ofType(carbon_json_token_type_e) *brackets,
                         token_memory_t *token_mem)
 {
     switch (token->type) {

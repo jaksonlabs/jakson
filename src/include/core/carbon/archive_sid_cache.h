@@ -24,8 +24,6 @@
 
 NG5_BEGIN_DECL
 
-typedef struct carbon_string_id_cache carbon_string_id_cache_t;
-
 typedef struct
 {
     size_t num_hits;
@@ -34,28 +32,28 @@ typedef struct
 } carbon_string_id_cache_statistics_t;
 
 NG5_EXPORT(bool)
-carbon_string_id_cache_create_LRU(carbon_string_id_cache_t **cache, carbon_archive_t *archive);
+carbon_string_id_cache_create_LRU(struct string_cache **cache, struct archive *archive);
 
 NG5_EXPORT(bool)
-carbon_string_id_cache_create_LRU_ex(carbon_string_id_cache_t **cache, carbon_archive_t *archive, size_t capacity);
+carbon_string_id_cache_create_LRU_ex(struct string_cache **cache, struct archive *archive, size_t capacity);
 
 NG5_EXPORT(bool)
-carbon_string_id_cache_get_error(struct err *err, const carbon_string_id_cache_t *cache);
+carbon_string_id_cache_get_error(struct err *err, const struct string_cache *cache);
 
 NG5_EXPORT(bool)
-carbon_string_id_cache_get_size(size_t *size, const carbon_string_id_cache_t *cache);
+carbon_string_id_cache_get_size(size_t *size, const struct string_cache *cache);
 
 NG5_EXPORT(char *)
-carbon_string_id_cache_get(carbon_string_id_cache_t *cache, carbon_string_id_t id);
+carbon_string_id_cache_get(struct string_cache *cache, carbon_string_id_t id);
 
 NG5_EXPORT(bool)
-carbon_string_id_cache_get_statistics(carbon_string_id_cache_statistics_t *statistics, carbon_string_id_cache_t *cache);
+carbon_string_id_cache_get_statistics(carbon_string_id_cache_statistics_t *statistics, struct string_cache *cache);
 
 NG5_EXPORT(bool)
-carbon_string_id_cache_reset_statistics(carbon_string_id_cache_t *cache);
+carbon_string_id_cache_reset_statistics(struct string_cache *cache);
 
 NG5_EXPORT(bool)
-carbon_string_id_cache_drop(carbon_string_id_cache_t *cache);
+carbon_string_id_cache_drop(struct string_cache *cache);
 
 NG5_END_DECL
 

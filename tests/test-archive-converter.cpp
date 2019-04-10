@@ -5,7 +5,7 @@
 TEST(ConverterTest, PerformConversion)
 {
     bool status;
-    carbon_archive_t archive;
+    struct archive archive;
     carbon_encoded_doc_collection_t collection;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
@@ -22,7 +22,7 @@ TEST(ConverterTest, PerformConversion)
         carbon_encoded_doc_collection_print(stdout, &collection);
 
 
-        carbon_string_id_cache_t *cache = carbon_archive_get_query_string_id_cache(&archive);
+        struct string_cache *cache = carbon_archive_get_query_string_id_cache(&archive);
         carbon_string_id_cache_statistics_t statistics;
         carbon_string_id_cache_get_statistics(&statistics, cache);
         fprintf(stderr, "string_id_cache_info hits: %zu   misses: %zu   hit ratio: %.4f   num evicted: %zu\n",

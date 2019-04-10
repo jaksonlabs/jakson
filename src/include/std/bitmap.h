@@ -25,7 +25,7 @@ NG5_BEGIN_DECL
 
 typedef struct carbon_bitmap
 {
-    vec_t ofType(u64) data;
+    struct vector ofType(u64) data;
     u16 num_bits;
 } carbon_bitmap_t;
 

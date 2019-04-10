@@ -42,7 +42,7 @@ typedef struct
 
 #define DECLARE_VISIT_BASIC_TYPE_PAIR(name, built_in_type)                                                             \
 static void                                                                                                            \
-visit_##name##_pairs (carbon_archive_t *archive, path_stack_t path_stack, carbon_object_id_t oid,                      \
+visit_##name##_pairs (struct archive *archive, path_stack_t path_stack, carbon_object_id_t oid,                      \
                   const carbon_string_id_t *keys, const built_in_type *values, u32 num_pairs, void *capture)      \
 {                                                                                                                      \
     IMPORT_BASIC_PAIR(name)                                                                                            \
@@ -50,7 +50,7 @@ visit_##name##_pairs (carbon_archive_t *archive, path_stack_t path_stack, carbon
 
 #define DECLARE_VISIT_ARRAY_TYPE(name, built_in_type)                                                                  \
 static carbon_visitor_policy_e                                                                                         \
-visit_enter_##name##_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,                  \
+visit_enter_##name##_array_pairs(struct archive *archive, path_stack_t path, carbon_object_id_t id,                  \
                                  const carbon_string_id_t *keys, u32 num_pairs, void *capture)                    \
 {                                                                                                                      \
     NG5_UNUSED(archive);                                                                                            \
@@ -73,7 +73,7 @@ visit_enter_##name##_array_pairs(carbon_archive_t *archive, path_stack_t path, c
 }                                                                                                                      \
                                                                                                                        \
 static void                                                                                                            \
-visit_##name##_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,                         \
+visit_##name##_array_pair(struct archive *archive, path_stack_t path, carbon_object_id_t id,                         \
                           const carbon_string_id_t key, u32 entry_idx, u32 max_entries,                      \
                           const built_in_type *array, u32 array_length, void *capture)                            \
 {                                                                                                                      \
@@ -94,7 +94,7 @@ visit_##name##_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_o
 
 
 static void
-visit_root_object(carbon_archive_t *archive, carbon_object_id_t id, void *capture)
+visit_root_object(struct archive *archive, carbon_object_id_t id, void *capture)
 {
     NG5_UNUSED(archive);
     assert(capture);
@@ -116,7 +116,7 @@ DECLARE_VISIT_BASIC_TYPE_PAIR(boolean, carbon_boolean_t)
 DECLARE_VISIT_BASIC_TYPE_PAIR(string, carbon_string_id_t)
 
 static void
-visit_null_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t oid, const carbon_string_id_t *keys,
+visit_null_pairs (struct archive *archive, path_stack_t path, carbon_object_id_t oid, const carbon_string_id_t *keys,
                   u32 num_pairs, void *capture)
 {
     NG5_UNUSED(archive);
@@ -131,7 +131,7 @@ visit_null_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_id
 }
 
 static carbon_visitor_policy_e
-before_object_visit(carbon_archive_t *archive, path_stack_t path_stack, carbon_object_id_t parent_id,
+before_object_visit(struct archive *archive, path_stack_t path_stack, carbon_object_id_t parent_id,
                     carbon_object_id_t value_id, u32 object_idx, u32 num_objects, carbon_string_id_t key, void *capture)
 {
     NG5_UNUSED(archive);
@@ -162,7 +162,7 @@ DECLARE_VISIT_ARRAY_TYPE(boolean, carbon_boolean_t)
 DECLARE_VISIT_ARRAY_TYPE(string, carbon_string_id_t)
 
 static carbon_visitor_policy_e
-visit_enter_null_array_pairs(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id, const carbon_string_id_t *keys,
+visit_enter_null_array_pairs(struct archive *archive, path_stack_t path, carbon_object_id_t id, const carbon_string_id_t *keys,
                              u32 num_pairs, void *capture)
 {
     NG5_UNUSED(archive);
@@ -185,7 +185,7 @@ visit_enter_null_array_pairs(carbon_archive_t *archive, path_stack_t path, carbo
 }
 
 static void
-visit_null_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id, const carbon_string_id_t key,
+visit_null_array_pair(struct archive *archive, path_stack_t path, carbon_object_id_t id, const carbon_string_id_t key,
                       u32 entry_idx, u32 max_entries, u32 num_nulls, void *capture)
 {
     NG5_UNUSED(archive);
@@ -205,7 +205,7 @@ visit_null_array_pair(carbon_archive_t *archive, path_stack_t path, carbon_objec
 }
 
 static void
-before_visit_object_array_objects(bool *skip_group_object_ids, carbon_archive_t *archive, path_stack_t path,
+before_visit_object_array_objects(bool *skip_group_object_ids, struct archive *archive, path_stack_t path,
                                   carbon_object_id_t parent_id, carbon_string_id_t key, const carbon_object_id_t *group_object_ids,
                                   u32 num_group_object_ids, void *capture)
 {
@@ -227,7 +227,7 @@ before_visit_object_array_objects(bool *skip_group_object_ids, carbon_archive_t 
 
 #define DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(name, built_in_type)                                             \
 static void                                                                                                            \
-visit_object_array_object_property_##name(carbon_archive_t *archive, path_stack_t path,                                \
+visit_object_array_object_property_##name(struct archive *archive, path_stack_t path,                                \
                                            carbon_object_id_t parent_id,                                               \
                                            carbon_string_id_t key,                                                     \
                                            carbon_object_id_t nested_object_id,                                        \
@@ -262,7 +262,7 @@ DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(boolean, carbon_boolean_t);
 DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(null, carbon_u32);
 
 NG5_EXPORT(bool)
-carbon_archive_converter(carbon_encoded_doc_collection_t *collection, carbon_archive_t *archive)
+carbon_archive_converter(carbon_encoded_doc_collection_t *collection, struct archive *archive)
 {
 
     NG5_NON_NULL_OR_ERROR(collection);

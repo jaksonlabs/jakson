@@ -23,7 +23,7 @@
 
 NG5_BEGIN_DECL
 
-typedef struct carbon_archive carbon_archive_t; /* forwarded from 'types-archive.h' */
+struct archive; /* forwarded */
 
 /**
  * Thread-safe I/O with an underlying archive file.

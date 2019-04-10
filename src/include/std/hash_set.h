@@ -44,9 +44,9 @@ typedef struct
  */
 typedef struct
 {
-    vec_t key_data;
-    vec_t ofType(carbon_hashset_bucket_t) table;
-    carbon_spinlock_t lock;
+    struct vector key_data;
+    struct vector ofType(carbon_hashset_bucket_t) table;
+    struct spinlock lock;
     u32 size;
     struct err err;
 } carbon_hashset_t;
@@ -62,7 +62,7 @@ carbon_hashset_cpy(carbon_hashset_t *src);
 NG5_EXPORT(bool)
 carbon_hashset_drop(carbon_hashset_t *map);
 
-NG5_EXPORT(vec_t *)
+NG5_EXPORT(struct vector *)
 carbon_hashset_keys(carbon_hashset_t *map);
 
 NG5_EXPORT(bool)

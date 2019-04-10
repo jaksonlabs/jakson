@@ -45,10 +45,10 @@ typedef struct
  */
 typedef struct
 {
-    vec_t key_data;
-    vec_t value_data;
-    vec_t ofType(carbon_hashtable_bucket_t) table;
-    carbon_spinlock_t lock;
+    struct vector key_data;
+    struct vector value_data;
+    struct vector ofType(carbon_hashtable_bucket_t) table;
+    struct spinlock lock;
     u32 size;
     struct err err;
 } carbon_hashtable_t;

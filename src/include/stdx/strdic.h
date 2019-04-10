@@ -131,8 +131,8 @@ typedef struct carbon_strdic
     /**
      * Returns all contained (unique) strings and their mapped (unique) ids
      */
-    bool (*get_contents)(carbon_strdic_t *self, vec_t ofType (char *) * strings,
-                       vec_t ofType(carbon_string_id_t) * string_ids);
+    bool (*get_contents)(carbon_strdic_t *self, struct vector ofType (char *) * strings,
+                       struct vector ofType(carbon_string_id_t) * string_ids);
 } carbon_strdic_t;
 
 /**
@@ -245,8 +245,8 @@ carbon_strdic_num_distinct(size_t *num, carbon_strdic_t *dic)
 
 NG5_FUNC_UNUSED
 static bool
-carbon_strdic_get_contents(vec_t ofType (char *) *strings,
-                           vec_t ofType(carbon_string_id_t) *string_ids,
+carbon_strdic_get_contents(struct vector ofType (char *) *strings,
+                           struct vector ofType(carbon_string_id_t) *string_ids,
                            carbon_strdic_t *dic)
 {
     NG5_NON_NULL_OR_ERROR(strings)

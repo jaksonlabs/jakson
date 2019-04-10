@@ -19,7 +19,7 @@
 
 #include "core/mem/file.h"
 
-bool carbon_memfile_open(memfile_t *file, carbon_memblock_t *block, carbon_memfile_mode_e mode)
+bool carbon_memfile_open(struct memfile *file, carbon_memblock_t *block, enum access_mode mode)
 {
     NG5_NON_NULL_OR_ERROR(file)
     NG5_NON_NULL_OR_ERROR(block)
@@ -31,13 +31,13 @@ bool carbon_memfile_open(memfile_t *file, carbon_memblock_t *block, carbon_memfi
     return true;
 }
 
-bool carbon_memfile_seek(memfile_t *file, offset_t pos)
+bool carbon_memfile_seek(struct memfile *file, offset_t pos)
 {
     NG5_NON_NULL_OR_ERROR(file)
     offset_t file_size;
     carbon_memblock_size(&file_size, file->memblock);
     if (NG5_UNLIKELY(pos >= file_size)) {
-        if (file->mode == NG5_MEMFILE_MODE_READWRITE) {
+        if (file->mode == READ_WRITE) {
             offset_t new_size = pos + 1;
             carbon_memblock_resize(file->memblock, new_size);
         } else {
@@ -49,14 +49,14 @@ bool carbon_memfile_seek(memfile_t *file, offset_t pos)
     return true;
 }
 
-bool carbon_memfile_rewind(memfile_t *file)
+bool carbon_memfile_rewind(struct memfile *file)
 {
     NG5_NON_NULL_OR_ERROR(file)
     file->pos = 0;
     return true;
 }
 
-bool carbon_memfile_tell(offset_t *pos, const memfile_t *file)
+bool carbon_memfile_tell(offset_t *pos, const struct memfile *file)
 {
     NG5_NON_NULL_OR_ERROR(pos)
     NG5_NON_NULL_OR_ERROR(file)
@@ -64,7 +64,7 @@ bool carbon_memfile_tell(offset_t *pos, const memfile_t *file)
     return true;
 }
 
-size_t carbon_memfile_size(memfile_t *file)
+size_t carbon_memfile_size(struct memfile *file)
 {
     if (!file || !file->memblock) {
         return 0;
@@ -75,16 +75,16 @@ size_t carbon_memfile_size(memfile_t *file)
     }
 }
 
-size_t carbon_memfile_remain_size(memfile_t *file)
+size_t carbon_memfile_remain_size(struct memfile *file)
 {
     assert(file->pos <= carbon_memfile_size(file));
     return carbon_memfile_size(file) - file->pos;
 }
 
-bool carbon_memfile_shrink(memfile_t *file)
+bool carbon_memfile_shrink(struct memfile *file)
 {
     NG5_NON_NULL_OR_ERROR(file);
-    if (file->mode == NG5_MEMFILE_MODE_READWRITE) {
+    if (file->mode == READ_WRITE) {
         int status = carbon_memblock_shrink(file->memblock);
         size_t size;
         carbon_memblock_size(&size, file->memblock);
@@ -96,14 +96,14 @@ bool carbon_memfile_shrink(memfile_t *file)
     }
 }
 
-const carbon_byte_t *carbon_memfile_read(memfile_t *file, offset_t nbytes)
+const carbon_byte_t *carbon_memfile_read(struct memfile *file, offset_t nbytes)
 {
     const carbon_byte_t *result = carbon_memfile_peek(file, nbytes);
     file->pos += nbytes;
     return result;
 }
 
-bool carbon_memfile_skip(memfile_t *file, offset_t nbytes)
+bool carbon_memfile_skip(struct memfile *file, offset_t nbytes)
 {
     offset_t required_size = file->pos + nbytes;
     file->pos += nbytes;
@@ -111,7 +111,7 @@ bool carbon_memfile_skip(memfile_t *file, offset_t nbytes)
     carbon_memblock_size(&file_size, file->memblock);
 
     if (NG5_UNLIKELY(required_size >= file_size)) {
-        if (file->mode == NG5_MEMFILE_MODE_READWRITE) {
+        if (file->mode == READ_WRITE) {
             carbon_memblock_resize(file->memblock, required_size * 1.7f);
         } else {
             error(&file->err, NG5_ERR_WRITEPROT);
@@ -122,7 +122,7 @@ bool carbon_memfile_skip(memfile_t *file, offset_t nbytes)
     return true;
 }
 
-const carbon_byte_t *carbon_memfile_peek(memfile_t *file, offset_t nbytes)
+const carbon_byte_t *carbon_memfile_peek(struct memfile *file, offset_t nbytes)
 {
     offset_t file_size;
     carbon_memblock_size(&file_size, file->memblock);
@@ -135,11 +135,11 @@ const carbon_byte_t *carbon_memfile_peek(memfile_t *file, offset_t nbytes)
     }
 }
 
-bool memfile_write(memfile_t *file, const void *data, offset_t nbytes)
+bool memfile_write(struct memfile *file, const void *data, offset_t nbytes)
 {
     NG5_NON_NULL_OR_ERROR(file)
     NG5_NON_NULL_OR_ERROR(data)
-    if (file->mode == NG5_MEMFILE_MODE_READWRITE) {
+    if (file->mode == READ_WRITE) {
         if (NG5_LIKELY(nbytes != 0)) {
             offset_t file_size;
             carbon_memblock_size(&file_size, file->memblock);
@@ -160,10 +160,10 @@ bool memfile_write(memfile_t *file, const void *data, offset_t nbytes)
     }
 }
 
-bool carbon_memfile_begin_bit_mode(memfile_t *file)
+bool carbon_memfile_begin_bit_mode(struct memfile *file)
 {
     NG5_NON_NULL_OR_ERROR(file);
-    if (file->mode == NG5_MEMFILE_MODE_READWRITE) {
+    if (file->mode == READ_WRITE) {
         file->bit_mode = true;
         file->current_read_bit = file->current_write_bit = file->bytes_completed = 0;
         file->bytes_completed = 0;
@@ -180,7 +180,7 @@ bool carbon_memfile_begin_bit_mode(memfile_t *file)
     return true;
 }
 
-bool memfile_write_bit(memfile_t *file, bool flag)
+bool memfile_write_bit(struct memfile *file, bool flag)
 {
     NG5_NON_NULL_OR_ERROR(file);
     file->current_read_bit = 0;
@@ -219,7 +219,7 @@ bool memfile_write_bit(memfile_t *file, bool flag)
     }
 }
 
-bool carbon_memfile_read_bit(memfile_t *file)
+bool carbon_memfile_read_bit(struct memfile *file)
 {
     if (!file) {
         return false;
@@ -249,7 +249,7 @@ bool carbon_memfile_read_bit(memfile_t *file)
     }
 }
 
-bool carbon_memfile_end_bit_mode(NG5_NULLABLE size_t *num_bytes_written, memfile_t *file)
+bool carbon_memfile_end_bit_mode(NG5_NULLABLE size_t *num_bytes_written, struct memfile *file)
 {
     NG5_NON_NULL_OR_ERROR(file);
     file->bit_mode = false;
@@ -262,14 +262,14 @@ bool carbon_memfile_end_bit_mode(NG5_NULLABLE size_t *num_bytes_written, memfile
     return true;
 }
 
-void *carbon_memfile_current_pos(memfile_t *file, offset_t nbytes)
+void *carbon_memfile_current_pos(struct memfile *file, offset_t nbytes)
 {
     if (file && nbytes > 0) {
         offset_t file_size;
         carbon_memblock_size(&file_size, file->memblock);
         offset_t required_size = file->pos + nbytes;
         if (NG5_UNLIKELY(file->pos + nbytes >= file_size)) {
-            if (file->mode == NG5_MEMFILE_MODE_READWRITE) {
+            if (file->mode == READ_WRITE) {
                 carbon_memblock_resize(file->memblock, required_size * 1.7f);
             } else {
                 error(&file->err, NG5_ERR_WRITEPROT);

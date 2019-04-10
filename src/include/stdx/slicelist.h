@@ -101,12 +101,12 @@ typedef struct SliceDescriptor
 typedef struct NG5_slice_list_t
 {
     struct allocator alloc;
-    carbon_spinlock_t lock;
+    struct spinlock lock;
 
-    vec_t ofType(NG5_slice_t) slices;
-    vec_t ofType(NG5_slice_desc_t) descriptors;
-    vec_t ofType(NG5_bloomfilter_t) filters;
-    vec_t ofType(NG5_hash_bounds_t) bounds;
+    struct vector ofType(NG5_slice_t) slices;
+    struct vector ofType(NG5_slice_desc_t) descriptors;
+    struct vector ofType(NG5_bloomfilter_t) filters;
+    struct vector ofType(NG5_hash_bounds_t) bounds;
 
     u32 appender_idx;
 

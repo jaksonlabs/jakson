@@ -20,7 +20,7 @@
 
 void
 carbon_int_read_prop_offsets(carbon_archive_prop_offs_t *prop_offsets,
-                             memfile_t *memfile,
+                             struct memfile *memfile,
                              const carbon_archive_object_flags_t *flags)
 {
     NG5_ZERO_MEMORY(prop_offsets, sizeof(carbon_archive_prop_offs_t));
@@ -105,14 +105,14 @@ carbon_int_read_prop_offsets(carbon_archive_prop_offs_t *prop_offsets,
 }
 
 void
-carbon_int_embedded_fixed_props_read(carbon_fixed_prop_t *prop, memfile_t *memfile) {
+carbon_int_embedded_fixed_props_read(carbon_fixed_prop_t *prop, struct memfile *memfile) {
     prop->header = NG5_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);
     prop->keys = (carbon_string_id_t *) NG5_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(carbon_string_id_t));
     prop->values = carbon_memfile_peek(memfile, 1);
 }
 
 void
-carbon_int_embedded_var_props_read(carbon_var_prop_t *prop, memfile_t *memfile) {
+carbon_int_embedded_var_props_read(carbon_var_prop_t *prop, struct memfile *memfile) {
     prop->header = NG5_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);
     prop->keys = (carbon_string_id_t *) NG5_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(carbon_string_id_t));
     prop->offsets = (offset_t *) NG5_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(offset_t));
@@ -120,13 +120,13 @@ carbon_int_embedded_var_props_read(carbon_var_prop_t *prop, memfile_t *memfile) 
 }
 
 void
-carbon_int_embedded_null_props_read(carbon_null_prop_t *prop, memfile_t *memfile) {
+carbon_int_embedded_null_props_read(carbon_null_prop_t *prop, struct memfile *memfile) {
     prop->header = NG5_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);
     prop->keys = (carbon_string_id_t *) NG5_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(carbon_string_id_t));
 }
 
 void
-carbon_int_embedded_array_props_read(carbon_array_prop_t *prop, memfile_t *memfile) {
+carbon_int_embedded_array_props_read(carbon_array_prop_t *prop, struct memfile *memfile) {
     prop->header = NG5_MEMFILE_READ_TYPE(memfile, carbon_prop_header_t);
     prop->keys = (carbon_string_id_t *) NG5_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(carbon_string_id_t));
     prop->lengths = (u32 *) NG5_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(u32));
@@ -134,7 +134,7 @@ carbon_int_embedded_array_props_read(carbon_array_prop_t *prop, memfile_t *memfi
 }
 
 void
-carbon_int_embedded_table_props_read(carbon_table_prop_t *prop, memfile_t *memfile) {
+carbon_int_embedded_table_props_read(carbon_table_prop_t *prop, struct memfile *memfile) {
     prop->header->marker = *NG5_MEMFILE_READ_TYPE(memfile, char);
     prop->header->num_entries = *NG5_MEMFILE_READ_TYPE(memfile, u8);
     prop->keys = (carbon_string_id_t *) NG5_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(carbon_string_id_t));

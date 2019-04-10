@@ -17,7 +17,7 @@ typedef struct
     const char *path;
 } ops_show_keys_capture_t;
 
-static void visit_string_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+static void visit_string_pairs (struct archive *archive, path_stack_t path, carbon_object_id_t id,
                               const carbon_string_id_t *keys, const carbon_string_id_t *values, u32 num_pairs,
                               void *capture)
 {
@@ -32,7 +32,7 @@ static void visit_string_pairs (carbon_archive_t *archive, path_stack_t path, ca
 }
 
 static carbon_visitor_policy_e
-before_visit_object_array(carbon_archive_t *archive, path_stack_t path,
+before_visit_object_array(struct archive *archive, path_stack_t path,
                                                      carbon_object_id_t parent_id, carbon_string_id_t key,
                                                      void *capture)
 {
@@ -44,7 +44,7 @@ before_visit_object_array(carbon_archive_t *archive, path_stack_t path,
 
 //        carbon_archive_visitor_print_path(stdout, archive, path);
 //
-//    carbon_query_t *query = carbon_archive_query_default(archive);
+//    struct archive_query *query = carbon_archive_query_default(archive);
 //    char *keystr = carbon_query_fetch_string_by_id(query, key);
 //    printf("before_visit_object_array -- KEY %s\n", keystr);
 //    free(keystr);
@@ -55,7 +55,7 @@ before_visit_object_array(carbon_archive_t *archive, path_stack_t path,
 
 static void
 before_visit_object_array_objects(bool *skip_group_object_ids,
-                                          carbon_archive_t *archive, path_stack_t path,
+                                          struct archive *archive, path_stack_t path,
                                           carbon_object_id_t parent_id,
                                           carbon_string_id_t key,
                                           const carbon_object_id_t *group_object_ids,
@@ -84,7 +84,7 @@ before_visit_object_array_objects(bool *skip_group_object_ids,
 
 
 static carbon_visitor_policy_e
-before_object_visit(carbon_archive_t *archive, path_stack_t path,
+before_object_visit(struct archive *archive, path_stack_t path,
                                                carbon_object_id_t parent_id, carbon_object_id_t value_id,
                                                u32 object_idx, u32 num_objects, carbon_string_id_t key,
                                                void *capture)
@@ -98,7 +98,7 @@ before_object_visit(carbon_archive_t *archive, path_stack_t path,
     NG5_UNUSED(key);
     NG5_UNUSED(capture);
 
-//    carbon_query_t *query = carbon_archive_query_default(archive);
+//    struct archive_query *query = carbon_archive_query_default(archive);
 //    char *keystr = carbon_query_fetch_string_by_id(query, key);
 //    printf("before_object_visit -- KEY %s\n", keystr);
 //    free(keystr);
@@ -118,7 +118,7 @@ before_object_visit(carbon_archive_t *archive, path_stack_t path,
 }
 
 static void
-visit_object_property(carbon_archive_t *archive, path_stack_t path,
+visit_object_property(struct archive *archive, path_stack_t path,
                               carbon_object_id_t parent_id,
                               carbon_string_id_t key, carbon_basic_type_e type, bool is_array_type, void *capture)
 {
@@ -176,7 +176,7 @@ visit_object_property(carbon_archive_t *archive, path_stack_t path,
 
 
 
-static void visit_object_array_prop(carbon_archive_t *archive, path_stack_t path, carbon_object_id_t parent_id, carbon_string_id_t key, carbon_basic_type_e type, void *capture)
+static void visit_object_array_prop(struct archive *archive, path_stack_t path, carbon_object_id_t parent_id, carbon_string_id_t key, carbon_basic_type_e type, void *capture)
 {
     NG5_UNUSED(archive);
     NG5_UNUSED(parent_id);
@@ -209,7 +209,7 @@ static void visit_object_array_prop(carbon_archive_t *archive, path_stack_t path
 }
 
 static carbon_visitor_policy_e
-before_visit_object_array_object_property(carbon_archive_t *archive, path_stack_t path,
+before_visit_object_array_object_property(struct archive *archive, path_stack_t path,
                                           carbon_object_id_t parent_id,
                                           carbon_string_id_t key,
                                           carbon_string_id_t nested_key,
@@ -270,7 +270,7 @@ before_visit_object_array_object_property(carbon_archive_t *archive, path_stack_
 
 
 static carbon_visitor_policy_e
-before_object_array_object_property_object(carbon_archive_t *archive, path_stack_t path,
+before_object_array_object_property_object(struct archive *archive, path_stack_t path,
                                            carbon_object_id_t parent_id,
                                            carbon_string_id_t key,
                                            carbon_object_id_t nested_object_id,
@@ -291,7 +291,7 @@ before_object_array_object_property_object(carbon_archive_t *archive, path_stack
 }
 
 NG5_EXPORT(bool)
-ops_show_keys(carbon_timestamp_t *duration, vec_t ofType(ops_show_keys_key_type_pair_t) *result, const char *path, carbon_archive_t *archive)
+ops_show_keys(carbon_timestamp_t *duration, struct vector ofType(ops_show_keys_key_type_pair_t) *result, const char *path, struct archive *archive)
 {
     NG5_UNUSED(result);
     NG5_UNUSED(path);
@@ -321,7 +321,7 @@ ops_show_keys(carbon_timestamp_t *duration, vec_t ofType(ops_show_keys_key_type_
     carbon_timestamp_t end = carbon_time_now_wallclock();
     *duration = (end - begin);
 
-    vec_t ofType(ops_show_keys_key_type_pair_t) *pairs = carbon_hashset_keys(&distinct_key_type_pairs);
+    struct vector ofType(ops_show_keys_key_type_pair_t) *pairs = carbon_hashset_keys(&distinct_key_type_pairs);
     carbon_vec_push(result, pairs->base, pairs->num_elems);
     carbon_vec_drop(pairs);
 

@@ -79,6 +79,14 @@ typedef enum carbon_basic_type
     NG5_BASIC_TYPE_OBJECT,
 } carbon_basic_type_e;
 
+
+enum access_mode
+{
+        READ_WRITE,
+        READ_ONLY
+};
+
+
 #define NG5_FUNC_UNUSED __attribute__((unused))
 
 NG5_FUNC_UNUSED static const char *

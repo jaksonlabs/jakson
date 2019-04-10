@@ -17,11 +17,11 @@
 
 #include "shell/opt.h"
 
-static carbon_cmdopt_t *option_by_name(carbon_cmdopt_mgr_t *manager, const char *name);
+static struct carbon_cmdopt *option_by_name(struct carbon_cmdopt_mgr *manager, const char *name);
 
-bool carbon_cmdopt_mgr_create(carbon_cmdopt_mgr_t *manager, char *module_name, char *module_desc,
-                              carbon_mod_arg_policy_e policy, bool (*fallback)(int argc, char **argv, FILE *file,
-                                                                               carbon_cmdopt_mgr_t *manager))
+bool carbon_cmdopt_mgr_create(struct carbon_cmdopt_mgr *manager, char *module_name, char *module_desc,
+                              enum carbon_mod_arg_policy policy, bool (*fallback)(int argc, char **argv, FILE *file,
+                                                                               struct carbon_cmdopt_mgr *manager))
 {
     NG5_NON_NULL_OR_ERROR(manager)
     NG5_NON_NULL_OR_ERROR(module_name)
@@ -30,17 +30,17 @@ bool carbon_cmdopt_mgr_create(carbon_cmdopt_mgr_t *manager, char *module_name, c
     manager->module_desc = module_desc ? strdup(module_desc) : NULL;
     manager->policy = policy;
     manager->fallback = fallback;
-    NG5_CHECK_SUCCESS(carbon_vec_create(&manager->groups, NULL, sizeof(carbon_cmdopt_group_t), 5));
+    NG5_CHECK_SUCCESS(carbon_vec_create(&manager->groups, NULL, sizeof(struct carbon_cmdopt_group), 5));
     return true;
 }
 
-bool carbon_cmdopt_mgr_drop(carbon_cmdopt_mgr_t *manager)
+bool carbon_cmdopt_mgr_drop(struct carbon_cmdopt_mgr *manager)
 {
     NG5_NON_NULL_OR_ERROR(manager);
     for (size_t i = 0; i < manager->groups.num_elems; i++) {
-        carbon_cmdopt_group_t *cmdGroup = vec_get(&manager->groups, i, carbon_cmdopt_group_t);
+        struct carbon_cmdopt_group *cmdGroup = vec_get(&manager->groups, i, struct carbon_cmdopt_group);
         for (size_t j = 0; j < cmdGroup->cmd_options.num_elems; j++) {
-            carbon_cmdopt_t *option = vec_get(&cmdGroup->cmd_options, j, carbon_cmdopt_t);
+            struct carbon_cmdopt *option = vec_get(&cmdGroup->cmd_options, j, struct carbon_cmdopt);
             free(option->opt_name);
             free(option->opt_desc);
             free(option->opt_manfile);
@@ -57,7 +57,7 @@ bool carbon_cmdopt_mgr_drop(carbon_cmdopt_mgr_t *manager)
     return true;
 }
 
-bool carbon_cmdopt_mgr_process(carbon_cmdopt_mgr_t *manager, int argc, char **argv, FILE *file)
+bool carbon_cmdopt_mgr_process(struct carbon_cmdopt_mgr *manager, int argc, char **argv, FILE *file)
 {
     NG5_NON_NULL_OR_ERROR(manager)
     NG5_NON_NULL_OR_ERROR(argv)
@@ -71,7 +71,7 @@ bool carbon_cmdopt_mgr_process(carbon_cmdopt_mgr_t *manager, int argc, char **ar
         }
     } else {
         const char *arg = argv[0];
-        carbon_cmdopt_t *option = option_by_name(manager, arg);
+        struct carbon_cmdopt *option = option_by_name(manager, arg);
         if (option) {
             return option->callback(argc - 1, argv + 1, file);
         } else {
@@ -82,21 +82,21 @@ bool carbon_cmdopt_mgr_process(carbon_cmdopt_mgr_t *manager, int argc, char **ar
     return true;
 }
 
-bool carbon_cmdopt_mgr_create_group(carbon_cmdopt_group_t **group,
+bool carbon_cmdopt_mgr_create_group(struct carbon_cmdopt_group **group,
                                     const char *desc,
-                                    carbon_cmdopt_mgr_t *manager)
+                                    struct carbon_cmdopt_mgr *manager)
 {
     NG5_NON_NULL_OR_ERROR(group)
     NG5_NON_NULL_OR_ERROR(desc)
     NG5_NON_NULL_OR_ERROR(manager)
-    carbon_cmdopt_group_t *cmdGroup = VECTOR_NEW_AND_GET(&manager->groups, carbon_cmdopt_group_t);
+    struct carbon_cmdopt_group *cmdGroup = VECTOR_NEW_AND_GET(&manager->groups, struct carbon_cmdopt_group);
     cmdGroup->desc = strdup(desc);
-    NG5_CHECK_SUCCESS(carbon_vec_create(&cmdGroup->cmd_options, NULL, sizeof(carbon_cmdopt_t), 10));
+    NG5_CHECK_SUCCESS(carbon_vec_create(&cmdGroup->cmd_options, NULL, sizeof(struct carbon_cmdopt), 10));
     *group = cmdGroup;
     return true;
 }
 
-bool carbon_cmdopt_group_add_cmd(carbon_cmdopt_group_t *group, const char *opt_name, char *opt_desc, char *opt_manfile,
+bool carbon_cmdopt_group_add_cmd(struct carbon_cmdopt_group *group, const char *opt_name, char *opt_desc, char *opt_manfile,
                                  int (*callback)(int argc, char **argv, FILE *file))
 {
     NG5_NON_NULL_OR_ERROR(group)
@@ -105,7 +105,7 @@ bool carbon_cmdopt_group_add_cmd(carbon_cmdopt_group_t *group, const char *opt_n
     NG5_NON_NULL_OR_ERROR(opt_manfile)
     NG5_NON_NULL_OR_ERROR(callback)
 
-    carbon_cmdopt_t *command = VECTOR_NEW_AND_GET(&group->cmd_options, carbon_cmdopt_t);
+    struct carbon_cmdopt *command = VECTOR_NEW_AND_GET(&group->cmd_options, struct carbon_cmdopt);
     command->opt_desc = strdup(opt_desc);
     command->opt_manfile = strdup(opt_manfile);
     command->opt_name = strdup(opt_name);
@@ -114,7 +114,7 @@ bool carbon_cmdopt_group_add_cmd(carbon_cmdopt_group_t *group, const char *opt_n
     return true;
 }
 
-bool carbon_cmdopt_mgr_show_help(FILE *file, carbon_cmdopt_mgr_t *manager)
+bool carbon_cmdopt_mgr_show_help(FILE *file, struct carbon_cmdopt_mgr *manager)
 {
     NG5_NON_NULL_OR_ERROR(file)
     NG5_NON_NULL_OR_ERROR(manager)
@@ -130,10 +130,10 @@ bool carbon_cmdopt_mgr_show_help(FILE *file, carbon_cmdopt_mgr_t *manager)
         }
         fprintf(file, "These are common commands used in various situations:\n\n");
         for (size_t i = 0; i < manager->groups.num_elems; i++) {
-            carbon_cmdopt_group_t *cmdGroup = vec_get(&manager->groups, i, carbon_cmdopt_group_t);
+            struct carbon_cmdopt_group *cmdGroup = vec_get(&manager->groups, i, struct carbon_cmdopt_group);
             fprintf(file, "%s\n", cmdGroup->desc);
             for (size_t j = 0; j < cmdGroup->cmd_options.num_elems; j++) {
-                carbon_cmdopt_t *option = vec_get(&cmdGroup->cmd_options, j, carbon_cmdopt_t);
+                struct carbon_cmdopt *option = vec_get(&cmdGroup->cmd_options, j, struct carbon_cmdopt);
                 fprintf(file, "   %-15s%s\n", option->opt_name, option->opt_desc);
             }
             fprintf(file, "\n");
@@ -152,12 +152,12 @@ bool carbon_cmdopt_mgr_show_help(FILE *file, carbon_cmdopt_mgr_t *manager)
     return true;
 }
 
-static carbon_cmdopt_t *option_by_name(carbon_cmdopt_mgr_t *manager, const char *name)
+static struct carbon_cmdopt *option_by_name(struct carbon_cmdopt_mgr *manager, const char *name)
 {
     for (size_t i = 0; i < manager->groups.num_elems; i++) {
-        carbon_cmdopt_group_t *cmdGroup = vec_get(&manager->groups, i, carbon_cmdopt_group_t);
+        struct carbon_cmdopt_group *cmdGroup = vec_get(&manager->groups, i, struct carbon_cmdopt_group);
         for (size_t j = 0; j < cmdGroup->cmd_options.num_elems; j++) {
-            carbon_cmdopt_t *option = vec_get(&cmdGroup->cmd_options, j, carbon_cmdopt_t);
+            struct carbon_cmdopt *option = vec_get(&cmdGroup->cmd_options, j, struct carbon_cmdopt);
             if (strcmp(option->opt_name, name) == 0) {
                 return option;
             }

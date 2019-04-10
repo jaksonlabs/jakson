@@ -22,14 +22,14 @@
 #include "core/carbon/archive_query.h"
 
 static void
-iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
-              vec_t ofType(carbon_path_entry_t) *path_stack, carbon_archive_visitor_t *visitor,
+iterate_props(struct archive *archive, carbon_archive_prop_iter_t *prop_iter,
+              struct vector ofType(carbon_path_entry_t) *path_stack, carbon_archive_visitor_t *visitor,
               int mask, void *capture, bool is_root_object, carbon_string_id_t parent_key, u32 parent_key_array_idx);
 
 static void
-iterate_objects(carbon_archive_t *archive, const carbon_string_id_t *keys, u32 num_pairs,
+iterate_objects(struct archive *archive, const carbon_string_id_t *keys, u32 num_pairs,
                 carbon_archive_value_vector_t *value_iter,
-                vec_t ofType(carbon_path_entry_t) *path_stack, carbon_archive_visitor_t *visitor,
+                struct vector ofType(carbon_path_entry_t) *path_stack, carbon_archive_visitor_t *visitor,
                 int mask, void *capture, bool is_root_object)
 {
     NG5_UNUSED(num_pairs);
@@ -121,8 +121,8 @@ iterate_objects(carbon_archive_t *archive, const carbon_string_id_t *keys, u32 n
 }
 
 static void
-iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
-              vec_t ofType(carbon_path_entry_t) *path_stack, carbon_archive_visitor_t *visitor,
+iterate_props(struct archive *archive, carbon_archive_prop_iter_t *prop_iter,
+              struct vector ofType(carbon_path_entry_t) *path_stack, carbon_archive_visitor_t *visitor,
               int mask, void *capture, bool is_root_object, carbon_string_id_t parent_key, u32 parent_key_array_idx)
 {
     carbon_object_id_t this_object_oid;
@@ -462,14 +462,14 @@ iterate_props(carbon_archive_t *archive, carbon_archive_prop_iter_t *prop_iter,
 }
 
 NG5_EXPORT(bool)
-carbon_archive_visit_archive(carbon_archive_t *archive, const carbon_archive_visitor_desc_t *desc,
+carbon_archive_visit_archive(struct archive *archive, const carbon_archive_visitor_desc_t *desc,
                              carbon_archive_visitor_t *visitor, void *capture)
 {
     NG5_NON_NULL_OR_ERROR(archive)
     NG5_NON_NULL_OR_ERROR(visitor)
 
     carbon_archive_prop_iter_t  prop_iter;
-    vec_t ofType(carbon_path_entry) path_stack;
+    struct vector ofType(carbon_path_entry) path_stack;
 
     int mask = desc ? desc->visit_mask : NG5_ARCHIVE_ITER_MASK_ANY;
 
@@ -489,10 +489,10 @@ carbon_archive_visit_archive(carbon_archive_t *archive, const carbon_archive_vis
 #include <inttypes.h>
 
 NG5_EXPORT(void)
-carbon_archive_visitor_path_to_string(char path_buffer[2048], carbon_archive_t *archive, const vec_t ofType(carbon_path_entry_t) *path_stack)
+carbon_archive_visitor_path_to_string(char path_buffer[2048], struct archive *archive, const struct vector ofType(carbon_path_entry_t) *path_stack)
 {
 
-    carbon_query_t *query = carbon_archive_query_default(archive);
+    struct archive_query *query = carbon_archive_query_default(archive);
 
 
     for (u32 i = 0; i < path_stack->num_elems; i++)
@@ -510,13 +510,13 @@ carbon_archive_visitor_path_to_string(char path_buffer[2048], carbon_archive_t *
 }
 
 NG5_EXPORT(bool)
-carbon_archive_visitor_print_path(FILE *file, carbon_archive_t *archive, const vec_t ofType(carbon_path_entry_t) *path_stack)
+carbon_archive_visitor_print_path(FILE *file, struct archive *archive, const struct vector ofType(carbon_path_entry_t) *path_stack)
 {
     NG5_NON_NULL_OR_ERROR(file)
     NG5_NON_NULL_OR_ERROR(path_stack)
     NG5_NON_NULL_OR_ERROR(archive)
 
-    carbon_query_t *query = carbon_archive_query_default(archive);
+    struct archive_query *query = carbon_archive_query_default(archive);
 
 
     for (u32 i = 0; i < path_stack->num_elems; i++)
@@ -543,13 +543,13 @@ carbon_archive_visitor_print_path(FILE *file, carbon_archive_t *archive, const v
 }
 
 NG5_EXPORT(bool)
-carbon_archive_visitor_path_compare(const vec_t ofType(carbon_path_entry_t) *path, carbon_string_id_t *group_name, const char *path_str, carbon_archive_t *archive)
+carbon_archive_visitor_path_compare(const struct vector ofType(carbon_path_entry_t) *path, carbon_string_id_t *group_name, const char *path_str, struct archive *archive)
 {
     char path_buffer[2048];
     memset(path_buffer, 0, sizeof(path_buffer));
     sprintf(path_buffer, "/");
 
-    carbon_query_t *query = carbon_archive_query_default(archive);
+    struct archive_query *query = carbon_archive_query_default(archive);
 
     for (u32 i = 1; i < path->num_elems; i++)
     {

@@ -37,21 +37,21 @@ NG5_EXPORT(bool)
 carbon_compressor_none_drop(carbon_compressor_t *self);
 
 NG5_EXPORT(bool)
-carbon_compressor_none_write_extra(carbon_compressor_t *self, memfile_t *dst,
-                                   const vec_t ofType (const char *) *strings);
+carbon_compressor_none_write_extra(carbon_compressor_t *self, struct memfile *dst,
+                                   const struct vector ofType (const char *) *strings);
 
 NG5_EXPORT(bool)
 carbon_compressor_none_read_extra(carbon_compressor_t *self, FILE *src, size_t nbytes);
 
 NG5_EXPORT(bool)
-carbon_compressor_none_print_extra(carbon_compressor_t *self, FILE *file, memfile_t *src);
+carbon_compressor_none_print_extra(carbon_compressor_t *self, FILE *file, struct memfile *src);
 
 NG5_EXPORT(bool)
-carbon_compressor_none_print_encoded_string(carbon_compressor_t *self, FILE *file, memfile_t *src,
+carbon_compressor_none_print_encoded_string(carbon_compressor_t *self, FILE *file, struct memfile *src,
                                             u32 decompressed_strlen);
 
 NG5_EXPORT(bool)
-carbon_compressor_none_encode_string(carbon_compressor_t *self, memfile_t *dst, struct err *err,
+carbon_compressor_none_encode_string(carbon_compressor_t *self, struct memfile *dst, struct err *err,
                                           const char *string);
 
 NG5_EXPORT(bool)

@@ -76,11 +76,11 @@ carbon_hashset_drop(carbon_hashset_t *map)
     return status;
 }
 
-NG5_EXPORT(vec_t *)
+NG5_EXPORT(struct vector *)
 carbon_hashset_keys(carbon_hashset_t *map)
 {
     if (map) {
-        vec_t *result = malloc(sizeof(vec_t));
+        struct vector *result = malloc(sizeof(struct vector));
         carbon_vec_create(result, NULL, map->key_data.elem_size, map->key_data.num_elems);
         for (u32 i = 0; i < map->table.num_elems; i++) {
             carbon_hashset_bucket_t *bucket = vec_get(&map->table, i, carbon_hashset_bucket_t);

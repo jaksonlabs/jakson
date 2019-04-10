@@ -33,28 +33,28 @@ typedef struct carbon_doc_entries
     carbon_doc_obj_t                         *context;
     const char                               *key;
     field_e                       type;
-    vec_t ofType(<T>)                  values;
+    struct vector ofType(<T>)                  values;
 } carbon_doc_entries_t;
 
 typedef struct carbon_doc_bulk
 {
     carbon_strdic_t                          *dic;
-    vec_t ofType(char *)               keys,
+    struct vector ofType(char *)               keys,
                                               values;
-    vec_t ofType(carbon_doc_t)         models;
+    struct vector ofType(carbon_doc_t)         models;
 
 } carbon_doc_bulk_t;
 
 typedef struct carbon_doc
 {
     carbon_doc_bulk_t                        *context;
-    vec_t ofType(carbon_doc_obj_t)     obj_model;
+    struct vector ofType(carbon_doc_obj_t)     obj_model;
     field_e                       type;
 } carbon_doc_t;
 
 typedef struct carbon_doc_obj
 {
-    vec_t ofType(carbon_doc_entries_t) entries;
+    struct vector ofType(carbon_doc_entries_t) entries;
     carbon_doc_t                             *doc;
 } carbon_doc_obj_t;
 
@@ -78,14 +78,14 @@ NG5_EXPORT(carbon_doc_obj_t *)
 carbon_doc_bulk_new_obj(carbon_doc_t *model);
 
 NG5_EXPORT(bool)
-carbon_doc_bulk_get_dic_contents(vec_t ofType (const char *) **strings,
-                                 vec_t ofType(carbon_string_id_t) **string_ids,
+carbon_doc_bulk_get_dic_contents(struct vector ofType (const char *) **strings,
+                                 struct vector ofType(carbon_string_id_t) **string_ids,
                                  const carbon_doc_bulk_t *context);
 
 NG5_EXPORT(bool)
 carbon_doc_print(FILE *file, const carbon_doc_t *doc);
 
-NG5_EXPORT(const vec_t ofType(carbon_doc_entries_t) *)
+NG5_EXPORT(const struct vector ofType(carbon_doc_entries_t) *)
 carbon_doc_get_entries(const carbon_doc_obj_t *model);
 
 NG5_EXPORT(void)

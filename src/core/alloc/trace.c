@@ -32,8 +32,8 @@ typedef struct trace_stats_t
     size_t num_realloc_calls;
     size_t num_free_calls;
     size_t total_size;
-    vec_t ofType(size_t) *malloc_sizes;
-    carbon_spinlock_t *spinlock;
+    struct vector ofType(size_t) *malloc_sizes;
+    struct spinlock *spinlock;
     FILE *statistics_file;
     carbon_timestamp_t startup_timestamp;
 } trace_stats_t;
@@ -215,9 +215,9 @@ static void invoke_clone(struct allocator *dst, const struct allocator *self);
 
 #define LAZY_INIT()                                                                                                    \
 if (!global_trace_stats.malloc_sizes) {                                                                                \
-    global_trace_stats.malloc_sizes = malloc(sizeof(vec_t));                                                    \
+    global_trace_stats.malloc_sizes = malloc(sizeof(struct vector));                                                    \
     carbon_vec_create(global_trace_stats.malloc_sizes, &default_alloc, sizeof(size_t), 1000000);                       \
-    global_trace_stats.spinlock = carbon_malloc(&default_alloc, sizeof(carbon_spinlock_t));                            \
+    global_trace_stats.spinlock = carbon_malloc(&default_alloc, sizeof(struct spinlock));                            \
     carbon_spinlock_init(global_trace_stats.spinlock);                                                                 \
     global_trace_stats.statistics_file = fopen("trace-alloc-stats.csv", "a");                                          \
     fprintf(global_trace_stats.statistics_file,                                                                        \

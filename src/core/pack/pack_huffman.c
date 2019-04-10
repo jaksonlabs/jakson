@@ -66,7 +66,7 @@ carbon_compressor_huffman_drop(carbon_compressor_t *self)
         return true;
 }
 
-bool huffman_dump_dictionary(FILE *file, memfile_t *memfile)
+bool huffman_dump_dictionary(FILE *file, struct memfile *memfile)
 {
         carbon_huffman_entry_info_t entry_info;
         offset_t offset;
@@ -95,7 +95,7 @@ bool huffman_dump_dictionary(FILE *file, memfile_t *memfile)
         return true;
 }
 
-bool huffman_dump_string_table_entry(FILE *file, memfile_t *memfile)
+bool huffman_dump_string_table_entry(FILE *file, struct memfile *memfile)
 {
         NG5_UNUSED(file);
         NG5_UNUSED(memfile);
@@ -116,8 +116,8 @@ bool huffman_dump_string_table_entry(FILE *file, memfile_t *memfile)
 }
 
 NG5_EXPORT(bool)
-carbon_compressor_huffman_write_extra(carbon_compressor_t *self, memfile_t *dst,
-                                      const vec_t ofType (const char *) *strings)
+carbon_compressor_huffman_write_extra(carbon_compressor_t *self, struct memfile *dst,
+                                      const struct vector ofType (const char *) *strings)
 {
         NG5_CHECK_TAG(self->tag, NG5_COMPRESSOR_HUFFMAN);
 
@@ -143,7 +143,7 @@ carbon_compressor_huffman_read_extra(carbon_compressor_t *self, FILE *src, size_
 }
 
 NG5_EXPORT(bool)
-carbon_compressor_huffman_print_extra(carbon_compressor_t *self, FILE *file, memfile_t *src)
+carbon_compressor_huffman_print_extra(carbon_compressor_t *self, FILE *file, struct memfile *src)
 {
         NG5_UNUSED(self);
 
@@ -153,7 +153,7 @@ carbon_compressor_huffman_print_extra(carbon_compressor_t *self, FILE *file, mem
 }
 
 NG5_EXPORT(bool)
-carbon_compressor_huffman_print_encoded(carbon_compressor_t *self, FILE *file, memfile_t *src,
+carbon_compressor_huffman_print_encoded(carbon_compressor_t *self, FILE *file, struct memfile *src,
                                         u32 decompressed_strlen)
 {
         NG5_UNUSED(self);
@@ -166,7 +166,7 @@ carbon_compressor_huffman_print_encoded(carbon_compressor_t *self, FILE *file, m
         return true;
 }
 
-bool carbon_compressor_huffman_encode_string(carbon_compressor_t *self, memfile_t *dst, struct err *err,
+bool carbon_compressor_huffman_encode_string(carbon_compressor_t *self, struct memfile *dst, struct err *err,
                                              const char *string)
 {
         NG5_CHECK_TAG(self->tag, NG5_COMPRESSOR_HUFFMAN);

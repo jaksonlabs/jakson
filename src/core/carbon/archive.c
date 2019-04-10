@@ -42,7 +42,7 @@
 #define WRITE_ARRAY_VALUES(memfile, values_vec, type)                                                                  \
 {                                                                                                                      \
     for (u32 i = 0; i < values_vec->num_elems; i++) {                                                             \
-        vec_t ofType(type) *nested_values = vec_get(values_vec, i, vec_t);                     \
+        struct vector ofType(type) *nested_values = vec_get(values_vec, i, struct vector);                     \
         WRITE_PRIMITIVE_VALUES(memfile, nested_values, type);                                                          \
     }                                                                                                                  \
 }
@@ -123,19 +123,19 @@
     fprintf(file, "]\n");                                                                                              \
 }
 
-static offset_t skip_record_header(memfile_t *memfile);
-static void update_record_header(memfile_t *memfile, offset_t root_object_header_offset, carbon_columndoc_t *model,
+static offset_t skip_record_header(struct memfile *memfile);
+static void update_record_header(struct memfile *memfile, offset_t root_object_header_offset, carbon_columndoc_t *model,
         u64 record_size);
-static bool __serialize(offset_t *offset, struct err *err, memfile_t *memfile, columndoc_obj_t *columndoc,
+static bool __serialize(offset_t *offset, struct err *err, struct memfile *memfile, columndoc_obj_t *columndoc,
         offset_t root_object_header_offset);
 static carbon_archive_object_flags_t *get_flags(carbon_archive_object_flags_t *flags, columndoc_obj_t *columndoc);
-static void update_carbon_file_header(memfile_t *memfile, offset_t root_object_header_offset);
-static void skip_carbon_file_header(memfile_t *memfile);
-static bool serialize_string_dic(memfile_t *memfile, struct err *err, const carbon_doc_bulk_t *context,
+static void update_carbon_file_header(struct memfile *memfile, offset_t root_object_header_offset);
+static void skip_carbon_file_header(struct memfile *memfile);
+static bool serialize_string_dic(struct memfile *memfile, struct err *err, const carbon_doc_bulk_t *context,
         carbon_compressor_type_e compressor);
-static bool print_archive_from_memfile(FILE *file, struct err *err, memfile_t *memfile);
+static bool print_archive_from_memfile(FILE *file, struct err *err, struct memfile *memfile);
 
-NG5_EXPORT(bool) carbon_archive_from_json(carbon_archive_t *out, const char *file, struct err *err,
+NG5_EXPORT(bool) carbon_archive_from_json(struct archive *out, const char *file, struct err *err,
         const char *json_string, carbon_compressor_type_e compressor, carbon_strdic_type_e dictionary,
         size_t num_async_dic_threads, bool read_optimized, bool bake_string_id_index,
         carbon_archive_callback_t *callback)
@@ -288,7 +288,7 @@ NG5_EXPORT(bool) carbon_archive_stream_from_json(carbon_memblock_t **stream, str
 
 static bool run_string_id_baking(struct err *err, carbon_memblock_t **stream)
 {
-        carbon_archive_t archive;
+        struct archive archive;
         char tmp_file_name[512];
         carbon_object_id_t rand_part;
         carbon_object_id_create(&rand_part);
@@ -325,8 +325,8 @@ static bool run_string_id_baking(struct err *err, carbon_memblock_t **stream)
                 return false;
         }
 
-        carbon_query_index_id_to_offset_t *index;
-        carbon_query_t query;
+        struct sid_to_offset *index;
+        struct archive_query query;
         carbon_query_create(&query, &archive);
         carbon_query_create_index_string_id_to_offset(&index, &query);
         carbon_query_drop(&query);
@@ -372,8 +372,8 @@ bool carbon_archive_from_model(carbon_memblock_t **stream, struct err *err, carb
         OPTIONAL_CALL(callback, begin_create_from_model)
 
         carbon_memblock_create(stream, 1024 * 1024 * 1024);
-        memfile_t memfile;
-        carbon_memfile_open(&memfile, *stream, NG5_MEMFILE_MODE_READWRITE);
+        struct memfile memfile;
+        carbon_memfile_open(&memfile, *stream, READ_WRITE);
 
         OPTIONAL_CALL(callback, begin_write_string_table);
         skip_carbon_file_header(&memfile);
@@ -411,7 +411,7 @@ bool carbon_archive_from_model(carbon_memblock_t **stream, struct err *err, carb
         return true;
 }
 
-NG5_EXPORT(carbon_io_context_t *)carbon_archive_io_context_create(carbon_archive_t *archive)
+NG5_EXPORT(carbon_io_context_t *)carbon_archive_io_context_create(struct archive *archive)
 {
         NG5_NON_NULL_OR_ERROR(archive);
         carbon_io_context_t *context;
@@ -441,8 +441,8 @@ bool carbon_archive_load(carbon_memblock_t **stream, FILE *file)
 
 bool carbon_archive_print(FILE *file, struct err *err, carbon_memblock_t *stream)
 {
-        memfile_t memfile;
-        carbon_memfile_open(&memfile, stream, NG5_MEMFILE_MODE_READONLY);
+        struct memfile memfile;
+        carbon_memfile_open(&memfile, stream, READ_ONLY);
         if (carbon_memfile_size(&memfile) < sizeof(carbon_file_header_t) + sizeof(carbon_string_table_header_t)
                 + sizeof(carbon_object_header_t)) {
                 error(err, NG5_ERR_NOCARBONSTREAM);
@@ -452,7 +452,7 @@ bool carbon_archive_print(FILE *file, struct err *err, carbon_memblock_t *stream
         }
 }
 
-bool print_object(FILE *file, struct err *err, memfile_t *memfile, unsigned nesting_level);
+bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned nesting_level);
 
 static u32 flags_to_int32(carbon_archive_object_flags_t *flags)
 {
@@ -495,20 +495,20 @@ static const char *array_value_type_to_string(struct err *err, field_e type)
         }
 }
 
-static void write_primitive_key_column(memfile_t *memfile, vec_t ofType(carbon_string_id_t) *keys)
+static void write_primitive_key_column(struct memfile *memfile, struct vector ofType(carbon_string_id_t) *keys)
 {
         carbon_string_id_t *string_ids = vec_all(keys, carbon_string_id_t);
         memfile_write(memfile, string_ids, keys->num_elems * sizeof(carbon_string_id_t));
 }
 
-static offset_t skip_var_value_offset_column(memfile_t *memfile, size_t num_keys)
+static offset_t skip_var_value_offset_column(struct memfile *memfile, size_t num_keys)
 {
         offset_t result = memfile_tell(memfile);
         carbon_memfile_skip(memfile, num_keys * sizeof(offset_t));
         return result;
 }
 
-static void write_var_value_offset_column(memfile_t *file, offset_t where, offset_t after, const offset_t *values,
+static void write_var_value_offset_column(struct memfile *file, offset_t where, offset_t after, const offset_t *values,
         size_t n)
 {
         carbon_memfile_seek(file, where);
@@ -516,8 +516,8 @@ static void write_var_value_offset_column(memfile_t *file, offset_t where, offse
         carbon_memfile_seek(file, after);
 }
 
-static bool write_primitive_fixed_value_column(memfile_t *memfile, struct err *err, field_e type,
-        vec_t ofType(T) *values_vec)
+static bool write_primitive_fixed_value_column(struct memfile *memfile, struct err *err, field_e type,
+        struct vector ofType(T) *values_vec)
 {
         assert (type != field_object); /** use 'write_primitive_var_value_column' instead */
 
@@ -552,7 +552,7 @@ static bool write_primitive_fixed_value_column(memfile_t *memfile, struct err *e
         return true;
 }
 
-static offset_t *__write_primitive_column(memfile_t *memfile, struct err *err, vec_t ofType(columndoc_obj_t) *values_vec,
+static offset_t *__write_primitive_column(struct memfile *memfile, struct err *err, struct vector ofType(columndoc_obj_t) *values_vec,
         offset_t root_offset)
 {
         offset_t *result = malloc(values_vec->num_elems * sizeof(offset_t));
@@ -567,7 +567,7 @@ static offset_t *__write_primitive_column(memfile_t *memfile, struct err *err, v
         return result;
 }
 
-static bool __write_array_len_column(struct err *err, memfile_t *memfile, field_e type, vec_t ofType(...) *values)
+static bool __write_array_len_column(struct err *err, struct memfile *memfile, field_e type, struct vector ofType(...) *values)
 {
         switch (type) {
         case field_null:
@@ -584,7 +584,7 @@ static bool __write_array_len_column(struct err *err, memfile_t *memfile, field_
         case field_float:
         case field_string:
                 for (u32 i = 0; i < values->num_elems; i++) {
-                        vec_t *arrays = vec_get(values, i, vec_t);
+                        struct vector *arrays = vec_get(values, i, struct vector);
                         memfile_write(memfile, &arrays->num_elems, sizeof(u32));
                 }
                 break;
@@ -597,8 +597,8 @@ static bool __write_array_len_column(struct err *err, memfile_t *memfile, field_
         return true;
 }
 
-static bool write_array_value_column(memfile_t *memfile, struct err *err, field_e type,
-        vec_t ofType(...) *values_vec)
+static bool write_array_value_column(struct memfile *memfile, struct err *err, field_e type,
+        struct vector ofType(...) *values_vec)
 {
 
         switch (type) {
@@ -634,8 +634,8 @@ static bool write_array_value_column(memfile_t *memfile, struct err *err, field_
         return true;
 }
 
-static bool write_array_prop(offset_t *offset, struct err *err, memfile_t *memfile, vec_t ofType(carbon_string_id_t) *keys,
-        field_e type, vec_t ofType(...) *values, offset_t root_object_header_offset)
+static bool write_array_prop(offset_t *offset, struct err *err, struct memfile *memfile, struct vector ofType(carbon_string_id_t) *keys,
+        field_e type, struct vector ofType(...) *values, offset_t root_object_header_offset)
 {
         assert(keys->num_elems == values->num_elems);
 
@@ -660,7 +660,7 @@ static bool write_array_prop(offset_t *offset, struct err *err, memfile_t *memfi
         return true;
 }
 
-static bool write_array_props(memfile_t *memfile, struct err *err, columndoc_obj_t *columndoc,
+static bool write_array_props(struct memfile *memfile, struct err *err, columndoc_obj_t *columndoc,
         carbon_archive_prop_offs_t *offsets, offset_t root_object_header_offset)
 {
         if (!write_array_prop(&offsets->null_arrays,
@@ -776,8 +776,8 @@ static bool write_array_props(memfile_t *memfile, struct err *err, columndoc_obj
 
 /** Fixed-length property lists; value position can be determined by size of value and position of key in key column.
  * In contrast, variable-length property list require an additional offset column (see 'write_var_props') */
-static bool write_fixed_props(offset_t *offset, struct err *err, memfile_t *memfile, vec_t ofType(carbon_string_id_t) *keys,
-        field_e type, vec_t ofType(T) *values)
+static bool write_fixed_props(offset_t *offset, struct err *err, struct memfile *memfile, struct vector ofType(carbon_string_id_t) *keys,
+        field_e type, struct vector ofType(T) *values)
 {
         assert(!values || keys->num_elems == values->num_elems);
         assert(type != field_object); /** use 'write_var_props' instead */
@@ -806,8 +806,8 @@ static bool write_fixed_props(offset_t *offset, struct err *err, memfile_t *memf
  * to a particular property. Due to the move of strings (i.e., variable-length values) to a dedicated string table,
  * the only variable-length value for properties are "JSON objects".
  * In contrast, fixed-length property list doesn't require an additional offset column (see 'write_fixed_props') */
-static bool write_var_props(offset_t *offset, struct err *err, memfile_t *memfile, vec_t ofType(carbon_string_id_t) *keys,
-        vec_t ofType(columndoc_obj_t) *objects, offset_t root_object_header_offset)
+static bool write_var_props(offset_t *offset, struct err *err, struct memfile *memfile, struct vector ofType(carbon_string_id_t) *keys,
+        struct vector ofType(columndoc_obj_t) *objects, offset_t root_object_header_offset)
 {
         assert(!objects || keys->num_elems == objects->num_elems);
 
@@ -834,7 +834,7 @@ static bool write_var_props(offset_t *offset, struct err *err, memfile_t *memfil
         return true;
 }
 
-static bool write_primitive_props(memfile_t *memfile, struct err *err, columndoc_obj_t *columndoc,
+static bool write_primitive_props(struct memfile *memfile, struct err *err, columndoc_obj_t *columndoc,
         carbon_archive_prop_offs_t *offsets, offset_t root_object_header_offset)
 {
         if (!write_fixed_props(&offsets->nulls,
@@ -958,7 +958,7 @@ static bool write_primitive_props(memfile_t *memfile, struct err *err, columndoc
         return true;
 }
 
-static bool write_column_entry(memfile_t *memfile, struct err *err, field_e type, vec_t ofType(<T>) *column,
+static bool write_column_entry(struct memfile *memfile, struct err *err, field_e type, struct vector ofType(<T>) *column,
         offset_t root_object_header_offset)
 {
         memfile_write(memfile, &column->num_elems, sizeof(u32));
@@ -1002,7 +1002,7 @@ static bool write_column_entry(memfile_t *memfile, struct err *err, field_e type
         return true;
 }
 
-static bool write_column(memfile_t *memfile, struct err *err, carbon_columndoc_column_t *column,
+static bool write_column(struct memfile *memfile, struct err *err, carbon_columndoc_column_t *column,
         offset_t root_object_header_offset)
 {
         assert(column->array_positions.num_elems == column->values.num_elems);
@@ -1020,7 +1020,7 @@ static bool write_column(memfile_t *memfile, struct err *err, carbon_columndoc_c
         memfile_write(memfile, column->array_positions.base, column->array_positions.num_elems * sizeof(u32));
 
         for (size_t i = 0; i < column->values.num_elems; i++) {
-                vec_t ofType(<T>) *column_data = vec_get(&column->values, i, vec_t);
+                struct vector ofType(<T>) *column_data = vec_get(&column->values, i, struct vector);
                 offset_t column_entry_offset = memfile_tell(memfile);
                 offset_t relative_entry_offset = column_entry_offset - root_object_header_offset;
                 carbon_memfile_seek(memfile, value_entry_offsets + i * sizeof(offset_t));
@@ -1033,8 +1033,8 @@ static bool write_column(memfile_t *memfile, struct err *err, carbon_columndoc_c
         return true;
 }
 
-static bool write_object_array_props(memfile_t *memfile, struct err *err,
-        vec_t ofType(carbon_columndoc_columngroup_t) *object_key_columns, carbon_archive_prop_offs_t *offsets,
+static bool write_object_array_props(struct memfile *memfile, struct err *err,
+        struct vector ofType(carbon_columndoc_columngroup_t) *object_key_columns, carbon_archive_prop_offs_t *offsets,
         offset_t root_object_header_offset)
 {
         if (object_key_columns->num_elems > 0) {
@@ -1112,14 +1112,14 @@ static bool write_object_array_props(memfile_t *memfile, struct err *err,
         return true;
 }
 
-static offset_t skip_record_header(memfile_t *memfile)
+static offset_t skip_record_header(struct memfile *memfile)
 {
         offset_t offset = memfile_tell(memfile);
         carbon_memfile_skip(memfile, sizeof(carbon_record_header_t));
         return offset;
 }
 
-static void update_record_header(memfile_t *memfile, offset_t root_object_header_offset, carbon_columndoc_t *model,
+static void update_record_header(struct memfile *memfile, offset_t root_object_header_offset, carbon_columndoc_t *model,
         u64 record_size)
 {
         carbon_archive_record_flags_t flags = {.bits.is_sorted = model->read_optimized};
@@ -1132,7 +1132,7 @@ static void update_record_header(memfile_t *memfile, offset_t root_object_header
         carbon_memfile_seek(memfile, offset);
 }
 
-static void propOffsetsWrite(memfile_t *memfile, const carbon_archive_object_flags_t *flags,
+static void propOffsetsWrite(struct memfile *memfile, const carbon_archive_object_flags_t *flags,
         carbon_archive_prop_offs_t *prop_offsets)
 {
         if (flags->bits.has_null_props) {
@@ -1215,7 +1215,7 @@ static void propOffsetsWrite(memfile_t *memfile, const carbon_archive_object_fla
         }
 }
 
-static void prop_offsets_skip_write(memfile_t *memfile, const carbon_archive_object_flags_t *flags)
+static void prop_offsets_skip_write(struct memfile *memfile, const carbon_archive_object_flags_t *flags)
 {
         unsigned num_skip_offset_bytes = 0;
         if (flags->bits.has_null_props) {
@@ -1300,7 +1300,7 @@ static void prop_offsets_skip_write(memfile_t *memfile, const carbon_archive_obj
         carbon_memfile_skip(memfile, num_skip_offset_bytes * sizeof(offset_t));
 }
 
-static bool __serialize(offset_t *offset, struct err *err, memfile_t *memfile, columndoc_obj_t *columndoc,
+static bool __serialize(offset_t *offset, struct err *err, struct memfile *memfile, columndoc_obj_t *columndoc,
         offset_t root_object_header_offset)
 {
         carbon_archive_object_flags_t flags;
@@ -1354,7 +1354,7 @@ static bool __serialize(offset_t *offset, struct err *err, memfile_t *memfile, c
         return true;
 }
 
-static char *embedded_dic_flags_to_string(const carbon_archive_dic_flags_t *flags)
+static char *embedded_dic_flags_to_string(const union string_tab_flags *flags)
 {
         size_t max = 2048;
         char *string = malloc(max + 1);
@@ -1400,15 +1400,15 @@ static char *record_header_flags_to_string(const carbon_archive_record_flags_t *
         return string;
 }
 
-static bool serialize_string_dic(memfile_t *memfile, struct err *err, const carbon_doc_bulk_t *context,
+static bool serialize_string_dic(struct memfile *memfile, struct err *err, const carbon_doc_bulk_t *context,
         carbon_compressor_type_e compressor)
 {
-        carbon_archive_dic_flags_t flags;
+        union string_tab_flags flags;
         carbon_compressor_t strategy;
         carbon_string_table_header_t header;
 
-        vec_t ofType (const char *) *strings;
-        vec_t ofType(carbon_string_id_t) *string_ids;
+        struct vector ofType (const char *) *strings;
+        struct vector ofType(carbon_string_id_t) *string_ids;
 
         carbon_doc_bulk_get_dic_contents(&strings, &string_ids, context);
 
@@ -1467,12 +1467,12 @@ static bool serialize_string_dic(memfile_t *memfile, struct err *err, const carb
         return carbon_compressor_drop(err, &strategy);
 }
 
-static void skip_carbon_file_header(memfile_t *memfile)
+static void skip_carbon_file_header(struct memfile *memfile)
 {
         carbon_memfile_skip(memfile, sizeof(carbon_file_header_t));
 }
 
-static void update_carbon_file_header(memfile_t *memfile, offset_t record_header_offset)
+static void update_carbon_file_header(struct memfile *memfile, offset_t record_header_offset)
 {
         offset_t current_pos;
         carbon_memfile_tell(&current_pos, memfile);
@@ -1484,7 +1484,7 @@ static void update_carbon_file_header(memfile_t *memfile, offset_t record_header
         carbon_memfile_seek(memfile, current_pos);
 }
 
-static bool print_column_form_memfile(FILE *file, struct err *err, memfile_t *memfile, unsigned nesting_level)
+static bool print_column_form_memfile(FILE *file, struct err *err, struct memfile *memfile, unsigned nesting_level)
 {
         offset_t offset;
         carbon_memfile_tell(&offset, memfile);
@@ -1600,7 +1600,7 @@ static bool print_column_form_memfile(FILE *file, struct err *err, memfile_t *me
         return true;
 }
 
-static bool print_object_array_from_memfile(FILE *file, struct err *err, memfile_t *memfile, unsigned nesting_level)
+static bool print_object_array_from_memfile(FILE *file, struct err *err, struct memfile *memfile, unsigned nesting_level)
 {
         unsigned offset = (unsigned) memfile_tell(memfile);
         carbon_object_array_header_t *header = NG5_MEMFILE_READ_TYPE(memfile, carbon_object_array_header_t);
@@ -1763,7 +1763,7 @@ static void print_prop_offsets(FILE *file, const carbon_archive_object_flags_t *
         }
 }
 
-bool print_object(FILE *file, struct err *err, memfile_t *memfile, unsigned nesting_level)
+bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned nesting_level)
 {
         unsigned offset = (unsigned) memfile_tell(memfile);
         carbon_object_header_t *header = NG5_MEMFILE_READ_TYPE(memfile, carbon_object_header_t);
@@ -2166,7 +2166,7 @@ static bool is_valid_carbon_file(const carbon_file_header_t *header)
         }
 }
 
-static void print_record_header_from_memfile(FILE *file, memfile_t *memfile)
+static void print_record_header_from_memfile(FILE *file, struct memfile *memfile)
 {
         unsigned offset = memfile_tell(memfile);
         carbon_record_header_t *header = NG5_MEMFILE_READ_TYPE(memfile, carbon_record_header_t);
@@ -2183,7 +2183,7 @@ static void print_record_header_from_memfile(FILE *file, memfile_t *memfile)
         free(flags_string);
 }
 
-static bool print_carbon_header_from_memfile(FILE *file, struct err *err, memfile_t *memfile)
+static bool print_carbon_header_from_memfile(FILE *file, struct err *err, struct memfile *memfile)
 {
         unsigned offset = memfile_tell(memfile);
         assert(carbon_memfile_size(memfile) > sizeof(carbon_file_header_t));
@@ -2202,10 +2202,10 @@ static bool print_carbon_header_from_memfile(FILE *file, struct err *err, memfil
         return true;
 }
 
-static bool print_embedded_dic_from_memfile(FILE *file, struct err *err, memfile_t *memfile)
+static bool print_embedded_dic_from_memfile(FILE *file, struct err *err, struct memfile *memfile)
 {
         carbon_compressor_t strategy;
-        carbon_archive_dic_flags_t flags;
+        union string_tab_flags flags;
 
         unsigned offset = memfile_tell(memfile);
         carbon_string_table_header_t *header = NG5_MEMFILE_READ_TYPE(memfile, carbon_string_table_header_t);
@@ -2255,7 +2255,7 @@ static bool print_embedded_dic_from_memfile(FILE *file, struct err *err, memfile
         return carbon_compressor_drop(err, &strategy);
 }
 
-static bool print_archive_from_memfile(FILE *file, struct err *err, memfile_t *memfile)
+static bool print_archive_from_memfile(FILE *file, struct err *err, struct memfile *memfile)
 {
         if (!print_carbon_header_from_memfile(file, err, memfile)) {
                 return false;
@@ -2307,13 +2307,13 @@ static bool init_decompressor(carbon_compressor_t *strategy, u8 flags);
 
 static bool read_stringtable(struct string_table *table, struct err *err, FILE *disk_file);
 
-static bool read_record(carbon_record_header_t *header_read, carbon_archive_t *archive, FILE *disk_file,
+static bool read_record(carbon_record_header_t *header_read, struct archive *archive, FILE *disk_file,
         offset_t record_header_offset);
 
-static bool read_string_id_to_offset_index(struct err *err, carbon_archive_t *archive, const char *file_path,
+static bool read_string_id_to_offset_index(struct err *err, struct archive *archive, const char *file_path,
         offset_t string_id_to_offset_index_offset);
 
-bool carbon_archive_open(carbon_archive_t *out, const char *file_path)
+bool carbon_archive_open(struct archive *out, const char *file_path)
 {
         int status;
         FILE *disk_file;
@@ -2378,7 +2378,7 @@ bool carbon_archive_open(carbon_archive_t *out, const char *file_path)
                                 out->info.record_table_size = record_table_size;
                                 out->info.num_embeddded_strings = out->string_table.num_embeddded_strings;
                                 out->info.string_id_index_size = string_id_index;
-                                out->default_query = malloc(sizeof(carbon_query_t));
+                                out->default_query = malloc(sizeof(struct archive_query));
                                 carbon_query_create(out->default_query, out);
 
                         }
@@ -2388,7 +2388,7 @@ bool carbon_archive_open(carbon_archive_t *out, const char *file_path)
         return true;
 }
 
-NG5_EXPORT(bool) carbon_archive_get_info(struct archive_info *info, const struct carbon_archive *archive)
+NG5_EXPORT(bool) carbon_archive_get_info(struct archive_info *info, const struct archive *archive)
 {
         NG5_NON_NULL_OR_ERROR(info);
         NG5_NON_NULL_OR_ERROR(archive);
@@ -2396,7 +2396,7 @@ NG5_EXPORT(bool) carbon_archive_get_info(struct archive_info *info, const struct
         return true;
 }
 
-NG5_EXPORT(bool) carbon_archive_close(carbon_archive_t *archive)
+NG5_EXPORT(bool) carbon_archive_close(struct archive *archive)
 {
         NG5_NON_NULL_OR_ERROR(archive);
         carbon_archive_drop_indexes(archive);
@@ -2408,7 +2408,7 @@ NG5_EXPORT(bool) carbon_archive_close(carbon_archive_t *archive)
         return true;
 }
 
-NG5_EXPORT(bool) carbon_archive_drop_indexes(carbon_archive_t *archive)
+NG5_EXPORT(bool) carbon_archive_drop_indexes(struct archive *archive)
 {
         if (archive->query_index_string_id_to_offset) {
                 carbon_query_drop_index_string_id_to_offset(archive->query_index_string_id_to_offset);
@@ -2417,7 +2417,7 @@ NG5_EXPORT(bool) carbon_archive_drop_indexes(carbon_archive_t *archive)
         return true;
 }
 
-NG5_EXPORT(bool) carbon_archive_query(carbon_query_t *query, carbon_archive_t *archive)
+NG5_EXPORT(bool) carbon_archive_query(struct archive_query *query, struct archive *archive)
 {
         if (carbon_query_create(query, archive)) {
                 bool has_index = false;
@@ -2436,7 +2436,7 @@ NG5_EXPORT(bool) carbon_archive_query(carbon_query_t *query, carbon_archive_t *a
         }
 }
 
-NG5_EXPORT(bool) carbon_archive_has_query_index_string_id_to_offset(bool *state, carbon_archive_t *archive)
+NG5_EXPORT(bool) carbon_archive_has_query_index_string_id_to_offset(bool *state, struct archive *archive)
 {
         NG5_NON_NULL_OR_ERROR(state)
         NG5_NON_NULL_OR_ERROR(archive)
@@ -2444,7 +2444,7 @@ NG5_EXPORT(bool) carbon_archive_has_query_index_string_id_to_offset(bool *state,
         return true;
 }
 
-NG5_EXPORT(bool) carbon_archive_hash_query_string_id_cache(bool *has_cache, carbon_archive_t *archive)
+NG5_EXPORT(bool) carbon_archive_hash_query_string_id_cache(bool *has_cache, struct archive *archive)
 {
         NG5_NON_NULL_OR_ERROR(has_cache)
         NG5_NON_NULL_OR_ERROR(archive)
@@ -2452,7 +2452,7 @@ NG5_EXPORT(bool) carbon_archive_hash_query_string_id_cache(bool *has_cache, carb
         return true;
 }
 
-NG5_EXPORT(bool) carbon_archive_drop_query_string_id_cache(carbon_archive_t *archive)
+NG5_EXPORT(bool) carbon_archive_drop_query_string_id_cache(struct archive *archive)
 {
         NG5_NON_NULL_OR_ERROR(archive)
         if (archive->string_id_cache) {
@@ -2462,12 +2462,12 @@ NG5_EXPORT(bool) carbon_archive_drop_query_string_id_cache(carbon_archive_t *arc
         return true;
 }
 
-NG5_EXPORT(carbon_string_id_cache_t *)carbon_archive_get_query_string_id_cache(carbon_archive_t *archive)
+NG5_EXPORT(struct string_cache *)carbon_archive_get_query_string_id_cache(struct archive *archive)
 {
         return archive->string_id_cache;
 }
 
-NG5_EXPORT(carbon_query_t *)carbon_archive_query_default(carbon_archive_t *archive)
+NG5_EXPORT(struct archive_query *)carbon_archive_query_default(struct archive *archive)
 {
         return archive ? archive->default_query : NULL;
 }
@@ -2485,7 +2485,7 @@ static bool read_stringtable(struct string_table *table, struct err *err, FILE *
         assert(disk_file);
 
         carbon_string_table_header_t header;
-        carbon_archive_dic_flags_t flags;
+        union string_tab_flags flags;
 
         size_t num_read = fread(&header, sizeof(carbon_string_table_header_t), 1, disk_file);
         if (num_read != 1) {
@@ -2510,7 +2510,7 @@ static bool read_stringtable(struct string_table *table, struct err *err, FILE *
         return true;
 }
 
-static bool read_record(carbon_record_header_t *header_read, carbon_archive_t *archive, FILE *disk_file,
+static bool read_record(carbon_record_header_t *header_read, struct archive *archive, FILE *disk_file,
         offset_t record_header_offset)
 {
         struct err err;
@@ -2529,8 +2529,8 @@ static bool read_record(carbon_record_header_t *header_read, carbon_archive_t *a
                         return false;
                 }
 
-                memfile_t memfile;
-                if (carbon_memfile_open(&memfile, archive->record_table.recordDataBase, NG5_MEMFILE_MODE_READONLY)
+                struct memfile memfile;
+                if (carbon_memfile_open(&memfile, archive->record_table.recordDataBase, READ_ONLY)
                         != true) {
                         error(&archive->err, NG5_ERR_CORRUPTED);
                         status = false;
@@ -2545,7 +2545,7 @@ static bool read_record(carbon_record_header_t *header_read, carbon_archive_t *a
         }
 }
 
-static bool read_string_id_to_offset_index(struct err *err, carbon_archive_t *archive, const char *file_path,
+static bool read_string_id_to_offset_index(struct err *err, struct archive *archive, const char *file_path,
         offset_t string_id_to_offset_index_offset)
 {
         return carbon_query_index_id_to_offset_deserialize(&archive->query_index_string_id_to_offset,

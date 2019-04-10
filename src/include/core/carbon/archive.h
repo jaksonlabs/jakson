@@ -28,15 +28,9 @@
 
 NG5_BEGIN_DECL
 
-typedef struct carbon_query carbon_query_t; /* forwarded from 'types-query.h' */
+struct archive_query; /* forwarded from 'types-query.h' */
 
-typedef union carbon_archive_dic_flags carbon_archive_dic_flags_t;
-
-typedef struct carbon_query_index_id_to_offset carbon_query_index_id_to_offset_t;
-
-typedef struct carbon_string_id_cache carbon_string_id_cache_t;
-
-typedef struct carbon_archive
+struct archive
 {
         struct archive_info info;
         char *diskFilePath;
@@ -44,11 +38,11 @@ typedef struct carbon_archive
         carbon_archive_record_table_t record_table;
         struct err err;
 
-        carbon_query_index_id_to_offset_t *query_index_string_id_to_offset;
-        carbon_string_id_cache_t *string_id_cache;
+        struct sid_to_offset *query_index_string_id_to_offset;
+        struct string_cache *string_id_cache;
 
-        carbon_query_t *default_query;
-} carbon_archive_t;
+        struct archive_query *default_query;
+};
 
 typedef struct
 {
@@ -81,7 +75,7 @@ typedef struct
         void (*end_string_id_index_baking)();
 } carbon_archive_callback_t;
 
-NG5_EXPORT(bool) carbon_archive_from_json(carbon_archive_t *out, const char *file, struct err *err,
+NG5_EXPORT(bool) carbon_archive_from_json(struct archive *out, const char *file, struct err *err,
         const char *json_string, carbon_compressor_type_e compressor, carbon_strdic_type_e dictionary,
         size_t num_async_dic_threads, bool read_optimized, bool bake_string_id_index,
         carbon_archive_callback_t *callback);
@@ -99,27 +93,27 @@ NG5_EXPORT(bool) carbon_archive_load(carbon_memblock_t **stream, FILE *file);
 
 NG5_EXPORT(bool) carbon_archive_print(FILE *file, struct err *err, carbon_memblock_t *stream);
 
-NG5_EXPORT(bool) carbon_archive_open(carbon_archive_t *out, const char *file_path);
+NG5_EXPORT(bool) carbon_archive_open(struct archive *out, const char *file_path);
 
-NG5_EXPORT(bool) carbon_archive_get_info(struct archive_info *info, const struct carbon_archive *archive);
+NG5_EXPORT(bool) carbon_archive_get_info(struct archive_info *info, const struct archive *archive);
 
-NG5_DEFINE_GET_ERROR_FUNCTION(archive, carbon_archive_t, archive);
+NG5_DEFINE_GET_ERROR_FUNCTION(archive, struct archive, archive);
 
-NG5_EXPORT(bool) carbon_archive_close(carbon_archive_t *archive);
+NG5_EXPORT(bool) carbon_archive_close(struct archive *archive);
 
-NG5_EXPORT(bool) carbon_archive_drop_indexes(carbon_archive_t *archive);
+NG5_EXPORT(bool) carbon_archive_drop_indexes(struct archive *archive);
 
-NG5_EXPORT(bool) carbon_archive_query(carbon_query_t *query, carbon_archive_t *archive);
+NG5_EXPORT(bool) carbon_archive_query(struct archive_query *query, struct archive *archive);
 
-NG5_EXPORT(bool) carbon_archive_has_query_index_string_id_to_offset(bool *state, carbon_archive_t *archive);
+NG5_EXPORT(bool) carbon_archive_has_query_index_string_id_to_offset(bool *state, struct archive *archive);
 
-NG5_EXPORT(bool) carbon_archive_hash_query_string_id_cache(bool *has_cache, carbon_archive_t *archive);
+NG5_EXPORT(bool) carbon_archive_hash_query_string_id_cache(bool *has_cache, struct archive *archive);
 
-NG5_EXPORT(bool) carbon_archive_drop_query_string_id_cache(carbon_archive_t *archive);
+NG5_EXPORT(bool) carbon_archive_drop_query_string_id_cache(struct archive *archive);
 
-NG5_EXPORT(carbon_string_id_cache_t *)carbon_archive_get_query_string_id_cache(carbon_archive_t *archive);
+NG5_EXPORT(struct string_cache *)carbon_archive_get_query_string_id_cache(struct archive *archive);
 
-NG5_EXPORT(carbon_query_t *)carbon_archive_query_default(carbon_archive_t *archive);
+NG5_EXPORT(struct archive_query *)carbon_archive_query_default(struct archive *archive);
 
 
 
@@ -133,7 +127,7 @@ NG5_EXPORT(carbon_query_t *)carbon_archive_query_default(carbon_archive_t *archi
  * @param archive The archive
  * @return a heap-allocated instance of <code>carbon_io_context_t</code>, or NULL if not successful
  */
-NG5_EXPORT(carbon_io_context_t *)carbon_archive_io_context_create(carbon_archive_t *archive);
+NG5_EXPORT(carbon_io_context_t *)carbon_archive_io_context_create(struct archive *archive);
 
 NG5_END_DECL
 

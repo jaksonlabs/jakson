@@ -19,7 +19,7 @@
 #include "core/carbon/archive_int.h"
 
 static bool
-init_object_from_memfile(carbon_archive_object_t *obj, memfile_t *memfile)
+init_object_from_memfile(carbon_archive_object_t *obj, struct memfile *memfile)
 {
     assert(obj);
     offset_t                  object_off;
@@ -38,7 +38,7 @@ init_object_from_memfile(carbon_archive_object_t *obj, memfile_t *memfile)
     obj->object_id = header->oid;
     obj->offset = object_off;
     obj->next_obj_off = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
-    carbon_memfile_open(&obj->memfile, memfile->memblock, NG5_MEMFILE_MODE_READONLY);
+    carbon_memfile_open(&obj->memfile, memfile->memblock, READ_ONLY);
 
     return true;
 }
@@ -108,7 +108,7 @@ offset_by_state(carbon_archive_prop_iter_t *iter)
 }
 
 static bool
-prop_iter_read_colum_entry(carbon_archive_collection_iter_state_t *state, memfile_t *memfile)
+prop_iter_read_colum_entry(carbon_archive_collection_iter_state_t *state, struct memfile *memfile)
 {
     assert(state->current_column_group.current_column.current_entry.idx <
         state->current_column_group.current_column.num_elem);
@@ -127,7 +127,7 @@ prop_iter_read_colum_entry(carbon_archive_collection_iter_state_t *state, memfil
 }
 
 static bool
-prop_iter_read_column(carbon_archive_collection_iter_state_t *state, memfile_t *memfile)
+prop_iter_read_column(carbon_archive_collection_iter_state_t *state, struct memfile *memfile)
 {
     assert(state->current_column_group.current_column.idx <
            state->current_column_group.num_columns);
@@ -155,7 +155,7 @@ prop_iter_read_column(carbon_archive_collection_iter_state_t *state, memfile_t *
 }
 
 static bool
-collection_iter_read_next_column_group(carbon_archive_collection_iter_state_t *state, memfile_t *memfile)
+collection_iter_read_next_column_group(carbon_archive_collection_iter_state_t *state, struct memfile *memfile)
 {
     assert(state->current_column_group_idx < state->num_column_groups);
     carbon_memfile_seek(memfile,
@@ -367,7 +367,7 @@ carbon_archive_prop_iter_from_memblock(carbon_archive_prop_iter_t *iter,
 
     iter->mask = mask;
     if (!carbon_memfile_open(&iter->record_table_memfile, memblock,
-                             NG5_MEMFILE_MODE_READONLY)) {
+                             READ_ONLY)) {
         error(err, NG5_ERR_MEMFILEOPEN_FAILED)
         return false;
     }
@@ -392,7 +392,7 @@ NG5_EXPORT(bool)
 carbon_archive_prop_iter_from_archive(carbon_archive_prop_iter_t *iter,
                                       struct err *err,
                                       u16 mask,
-                                      carbon_archive_t *archive)
+                                      struct archive *archive)
 {
     return carbon_archive_prop_iter_from_memblock(iter, err, mask, archive->record_table.recordDataBase, 0);
 }
@@ -524,7 +524,7 @@ carbon_archive_prop_iter_next(carbon_archive_prop_iter_mode_e *type,
         case NG5_ARCHIVE_PROP_ITER_MODE_COLLECTION: {
             collection_iter->state = prop_iter->mode_collection;
             carbon_memfile_open(&collection_iter->record_table_memfile, prop_iter->record_table_memfile.memblock,
-                                NG5_MEMFILE_MODE_READONLY);
+                                READ_ONLY);
             carbon_error_init(&collection_iter->err);
         } break;
         default:
@@ -562,7 +562,7 @@ carbon_archive_collection_next_column_group(carbon_archive_column_group_iter_t *
     if (iter->state.current_column_group_idx < iter->state.num_column_groups) {
         collection_iter_read_next_column_group(&iter->state, &iter->record_table_memfile);
         carbon_memfile_open(&group_iter->record_table_memfile, iter->record_table_memfile.memblock,
-                            NG5_MEMFILE_MODE_READONLY);
+                            READ_ONLY);
         group_iter->state = iter->state;
         carbon_error_init(&group_iter->err);
         return true;
@@ -594,7 +594,7 @@ carbon_archive_column_group_next_column(carbon_archive_column_iter_t *column_ite
     if (iter->state.current_column_group.current_column.idx < iter->state.current_column_group.num_columns) {
         prop_iter_read_column(&iter->state, &iter->record_table_memfile);
         carbon_memfile_open(&column_iter->record_table_memfile, iter->record_table_memfile.memblock,
-                            NG5_MEMFILE_MODE_READONLY);
+                            READ_ONLY);
         column_iter->state = iter->state;
         carbon_error_init(&column_iter->err);
         return true;
@@ -637,7 +637,7 @@ carbon_archive_column_next_entry(carbon_archive_column_entry_iter_t *entry_iter,
     {
         prop_iter_read_colum_entry(&iter->state, &iter->record_table_memfile);
         carbon_memfile_open(&entry_iter->record_table_memfile, iter->record_table_memfile.memblock,
-                            NG5_MEMFILE_MODE_READONLY);
+                            READ_ONLY);
         entry_iter->state = iter->state;
         carbon_error_init(&entry_iter->err);
         return true;
@@ -695,7 +695,7 @@ carbon_archive_column_entry_get_objects(carbon_archive_column_entry_object_iter_
     NG5_NON_NULL_OR_ERROR(entry)
 
     iter->entry_state = entry->state;
-    carbon_memfile_open(&iter->memfile, entry->record_table_memfile.memblock, NG5_MEMFILE_MODE_READONLY);
+    carbon_memfile_open(&iter->memfile, entry->record_table_memfile.memblock, READ_ONLY);
     carbon_memfile_seek(&iter->memfile, entry->state.current_column_group.current_column.elem_offsets[entry->state.current_column_group.current_column.current_entry.idx - 1] + sizeof(u32));
     iter->next_obj_off = memfile_tell(&iter->memfile);
     carbon_error_init(&iter->err);
@@ -922,7 +922,7 @@ carbon_archive_value_vector_from_prop_iter(carbon_archive_value_vector_t *value,
     value->object_id = prop_iter->object.object_id;
 
     if (!carbon_memfile_open(&value->record_table_memfile, prop_iter->record_table_memfile.memblock,
-                        NG5_MEMFILE_MODE_READONLY)) {
+                        READ_ONLY)) {
         error(err, NG5_ERR_MEMFILEOPEN_FAILED);
         return false;
     }

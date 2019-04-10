@@ -21,7 +21,7 @@
 
 NG5_EXPORT(bool)
 carbon_encoded_doc_collection_create(carbon_encoded_doc_collection_t *collection, struct err *err,
-                                     carbon_archive_t *archive)
+                                     struct archive *archive)
 {
     NG5_UNUSED(collection);
     NG5_UNUSED(err);
@@ -476,7 +476,7 @@ carbon_encoded_doc_get_nested_object(carbon_encoded_doc_t *nested, carbon_object
 static bool
 doc_print_pretty(FILE *file, carbon_encoded_doc_t *doc, unsigned level)
 {
-    carbon_query_t query;
+    struct archive_query query;
     carbon_archive_query(&query, doc->context->archive);
 
     fprintf(file, "{\n");

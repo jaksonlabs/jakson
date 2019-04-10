@@ -26,13 +26,13 @@ typedef struct
     u32           strlen;
 } carbon_id_to_offset_arg_t;
 
-typedef struct carbon_query_index_id_to_offset
+struct sid_to_offset
 {
     carbon_hashtable_t ofMapping(carbon_string_id_t, carbon_id_to_offset_arg_t) mapping;
     FILE *disk_file;
     size_t disk_file_size;
 
-} carbon_query_index_id_to_offset_t;
+};
 
 #define OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(num_pairs, obj, bit_flag_name, offset_name)                                \
 {                                                                                                                      \
@@ -56,7 +56,7 @@ typedef struct carbon_query_index_id_to_offset
 
 
 NG5_EXPORT(bool)
-carbon_query_create(carbon_query_t *query, carbon_archive_t *archive)
+carbon_query_create(struct archive_query *query, struct archive *archive)
 {
     NG5_NON_NULL_OR_ERROR(query)
     NG5_NON_NULL_OR_ERROR(archive)
@@ -67,14 +67,14 @@ carbon_query_create(carbon_query_t *query, carbon_archive_t *archive)
 }
 
 NG5_EXPORT(bool)
-carbon_query_drop(carbon_query_t *query)
+carbon_query_drop(struct archive_query *query)
 {
     NG5_NON_NULL_OR_ERROR(query)
     return carbon_io_context_drop(query->context);
 }
 
 NG5_EXPORT(bool)
-carbon_query_scan_strids(carbon_strid_iter_t *it, carbon_query_t *query)
+carbon_query_scan_strids(carbon_strid_iter_t *it, struct archive_query *query)
 {
     NG5_NON_NULL_OR_ERROR(it)
     NG5_NON_NULL_OR_ERROR(query)
@@ -82,7 +82,7 @@ carbon_query_scan_strids(carbon_strid_iter_t *it, carbon_query_t *query)
 }
 
 static bool
-index_string_id_to_offset_open_file(carbon_query_index_id_to_offset_t *index, struct err *err, const char *file)
+index_string_id_to_offset_open_file(struct sid_to_offset *index, struct err *err, const char *file)
 {
     index->disk_file = fopen(file, "r");
     if (!index->disk_file) {
@@ -97,8 +97,8 @@ index_string_id_to_offset_open_file(carbon_query_index_id_to_offset_t *index, st
 }
 
 NG5_EXPORT(bool)
-carbon_query_create_index_string_id_to_offset(carbon_query_index_id_to_offset_t **index,
-                                              carbon_query_t *query)
+carbon_query_create_index_string_id_to_offset(struct sid_to_offset **index,
+                                              struct archive_query *query)
 {
     NG5_NON_NULL_OR_ERROR(index)
     NG5_NON_NULL_OR_ERROR(query)
@@ -113,7 +113,7 @@ carbon_query_create_index_string_id_to_offset(carbon_query_index_id_to_offset_t 
     carbon_archive_get_info(&archive_info, query->archive);
     capacity = archive_info.num_embeddded_strings;
 
-    carbon_query_index_id_to_offset_t *result = malloc(sizeof(carbon_query_index_id_to_offset_t));
+    struct sid_to_offset *result = malloc(sizeof(struct sid_to_offset));
     carbon_hashtable_create(&result->mapping, &query->err, sizeof(carbon_string_id_t), sizeof(carbon_id_to_offset_arg_t), capacity);
 
     if (!index_string_id_to_offset_open_file(result, &query->err, query->archive->diskFilePath)) {
@@ -144,7 +144,7 @@ carbon_query_create_index_string_id_to_offset(carbon_query_index_id_to_offset_t 
 }
 
 NG5_EXPORT(void)
-carbon_query_drop_index_string_id_to_offset(carbon_query_index_id_to_offset_t *index)
+carbon_query_drop_index_string_id_to_offset(struct sid_to_offset *index)
 {
     if (index) {
         carbon_hashtable_drop(&index->mapping);
@@ -154,7 +154,7 @@ carbon_query_drop_index_string_id_to_offset(carbon_query_index_id_to_offset_t *i
 }
 
 NG5_EXPORT(bool)
-carbon_query_index_id_to_offset_serialize(FILE *file, struct err *err, carbon_query_index_id_to_offset_t *index)
+carbon_query_index_id_to_offset_serialize(FILE *file, struct err *err, struct sid_to_offset *index)
 {
     NG5_UNUSED(file);
     NG5_UNUSED(err);
@@ -163,14 +163,14 @@ carbon_query_index_id_to_offset_serialize(FILE *file, struct err *err, carbon_qu
 }
 
 NG5_EXPORT(bool)
-carbon_query_index_id_to_offset_deserialize(carbon_query_index_id_to_offset_t **index, struct err *err, const char *file_path, offset_t offset)
+carbon_query_index_id_to_offset_deserialize(struct sid_to_offset **index, struct err *err, const char *file_path, offset_t offset)
 {
     NG5_NON_NULL_OR_ERROR(index)
     NG5_NON_NULL_OR_ERROR(err)
     NG5_NON_NULL_OR_ERROR(file_path)
     NG5_NON_NULL_OR_ERROR(offset)
 
-    carbon_query_index_id_to_offset_t *result = malloc(sizeof(carbon_query_index_id_to_offset_t));
+    struct sid_to_offset *result = malloc(sizeof(struct sid_to_offset));
     if (!result) {
         error(err, NG5_ERR_MALLOCERR);
         return false;
@@ -209,7 +209,7 @@ carbon_query_index_id_to_offset_deserialize(carbon_query_index_id_to_offset_t **
 }
 
 static char *
-fetch_string_from_file(bool *decode_success, FILE *disk_file, size_t offset, size_t string_len, struct err *err, carbon_archive_t *archive)
+fetch_string_from_file(bool *decode_success, FILE *disk_file, size_t offset, size_t string_len, struct err *err, struct archive *archive)
 {
     char *result = malloc(string_len + 1);
     memset(result, 0, string_len + 1);
@@ -224,7 +224,7 @@ fetch_string_from_file(bool *decode_success, FILE *disk_file, size_t offset, siz
 }
 
 static char *
-fetch_string_by_id_via_scan(carbon_query_t *query, carbon_string_id_t id)
+fetch_string_by_id_via_scan(struct archive_query *query, carbon_string_id_t id)
 {
     assert(query);
 
@@ -269,7 +269,7 @@ fetch_string_by_id_via_scan(carbon_query_t *query, carbon_string_id_t id)
 }
 
 static char *
-fetch_string_by_id_via_index(carbon_query_t *query, carbon_query_index_id_to_offset_t *index, carbon_string_id_t id)
+fetch_string_by_id_via_index(struct archive_query *query, struct sid_to_offset *index, carbon_string_id_t id)
 {
     const carbon_id_to_offset_arg_t *args = carbon_hashtable_get_value(&index->mapping, &id);
     if (args) {
@@ -295,7 +295,7 @@ fetch_string_by_id_via_index(carbon_query_t *query, carbon_query_index_id_to_off
 }
 
 NG5_EXPORT(char *)
-carbon_query_fetch_string_by_id(carbon_query_t *query, carbon_string_id_t id)
+carbon_query_fetch_string_by_id(struct archive_query *query, carbon_string_id_t id)
 {
     assert(query);
 
@@ -309,7 +309,7 @@ carbon_query_fetch_string_by_id(carbon_query_t *query, carbon_string_id_t id)
 }
 
 NG5_EXPORT(char *)
-carbon_query_fetch_string_by_id_nocache(carbon_query_t *query, carbon_string_id_t id)
+carbon_query_fetch_string_by_id_nocache(struct archive_query *query, carbon_string_id_t id)
 {
     bool has_index;
     carbon_archive_has_query_index_string_id_to_offset(&has_index, query->archive);
@@ -321,7 +321,7 @@ carbon_query_fetch_string_by_id_nocache(carbon_query_t *query, carbon_string_id_
 }
 
 NG5_EXPORT(char **)
-carbon_query_fetch_strings_by_offset(carbon_query_t *query, offset_t *offs, u32 *strlens, size_t num_offs)
+carbon_query_fetch_strings_by_offset(struct archive_query *query, offset_t *offs, u32 *strlens, size_t num_offs)
 {
     assert(query);
     assert(offs);
@@ -385,7 +385,7 @@ cleanup_and_error:
 }
 
 NG5_EXPORT(carbon_string_id_t *)
-carbon_query_find_ids(size_t *num_found, carbon_query_t *query, const carbon_string_pred_t *pred,
+carbon_query_find_ids(size_t *num_found, struct archive_query *query, const carbon_string_pred_t *pred,
                       void *capture, i64 limit)
 {
     if (NG5_UNLIKELY(carbon_string_pred_validate(&query->err, pred) == false)) {

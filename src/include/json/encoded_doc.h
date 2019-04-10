@@ -87,15 +87,15 @@ typedef struct
 typedef struct
 {
     carbon_encoded_doc_prop_header_t header;
-    vec_t ofType(carbon_encoded_doc_value_t) values;
+    struct vector ofType(carbon_encoded_doc_value_t) values;
 } carbon_encoded_doc_prop_array_t;
 
 typedef struct carbon_encoded_doc
 {
     carbon_encoded_doc_collection_t                      *context;
     carbon_object_id_t                                    object_id;
-    vec_t ofType(carbon_encoded_doc_prop_t)        props;
-    vec_t ofType(carbon_encoded_doc_prop_array_t)  props_arrays;
+    struct vector ofType(carbon_encoded_doc_prop_t)        props;
+    struct vector ofType(carbon_encoded_doc_prop_array_t)  props_arrays;
     carbon_hashtable_t ofMapping(carbon_string_id_t, u32) prop_array_index; /* maps key to index in prop arrays */
 
     struct err err;
@@ -106,9 +106,9 @@ typedef struct carbon_encoded_doc
 
 typedef struct carbon_encoded_doc_collection
 {
-    carbon_archive_t *archive;
+    struct archive *archive;
 
-    vec_t ofType(carbon_encoded_doc_t) flat_object_collection;   /* list of objects; also nested ones */
+    struct vector ofType(carbon_encoded_doc_t) flat_object_collection;   /* list of objects; also nested ones */
     carbon_hashtable_t ofMapping(carbon_object_id_t, u32) index;   /* maps oid to index in collection */
 
     struct err err;
@@ -117,7 +117,7 @@ typedef struct carbon_encoded_doc_collection
 
 NG5_EXPORT(bool)
 carbon_encoded_doc_collection_create(carbon_encoded_doc_collection_t *collection, struct err *err,
-                                     carbon_archive_t *archive);
+                                     struct archive *archive);
 
 NG5_EXPORT(bool)
 carbon_encoded_doc_collection_drop(carbon_encoded_doc_collection_t *collection);

@@ -35,14 +35,14 @@ typedef struct
     cache_entry_t entries[1024];
 } lru_list_t;
 
-typedef struct carbon_string_id_cache
+struct string_cache
 {
-    vec_t ofType(lru_list_t) list_entries;
+    struct vector ofType(lru_list_t) list_entries;
     carbon_string_id_cache_statistics_t statistics;
-    carbon_query_t query;
+    struct archive_query query;
     struct err err;
     size_t capacity;
-} carbon_string_id_cache_t;
+};
 
 static void
 init_list(lru_list_t *list)
@@ -58,7 +58,7 @@ init_list(lru_list_t *list)
 }
 
 NG5_EXPORT(bool)
-carbon_string_id_cache_create_LRU(carbon_string_id_cache_t **cache, carbon_archive_t *archive)
+carbon_string_id_cache_create_LRU(struct string_cache **cache, struct archive *archive)
 {
     struct archive_info archive_info;
     carbon_archive_get_info(&archive_info, archive);
@@ -67,12 +67,12 @@ carbon_string_id_cache_create_LRU(carbon_string_id_cache_t **cache, carbon_archi
 }
 
 NG5_EXPORT(bool)
-carbon_string_id_cache_create_LRU_ex(carbon_string_id_cache_t **cache, carbon_archive_t *archive, size_t capacity)
+carbon_string_id_cache_create_LRU_ex(struct string_cache **cache, struct archive *archive, size_t capacity)
 {
     NG5_NON_NULL_OR_ERROR(cache)
     NG5_NON_NULL_OR_ERROR(archive)
 
-    carbon_string_id_cache_t *result = malloc(sizeof(carbon_string_id_cache_t));
+    struct string_cache *result = malloc(sizeof(struct string_cache));
 
     carbon_query_create(&result->query, archive);
     result->capacity = capacity;
@@ -95,7 +95,7 @@ carbon_string_id_cache_create_LRU_ex(carbon_string_id_cache_t **cache, carbon_ar
 }
 
 NG5_EXPORT(bool)
-carbon_string_id_cache_get_error(struct err *err, const carbon_string_id_cache_t *cache)
+carbon_string_id_cache_get_error(struct err *err, const struct string_cache *cache)
 {
     NG5_NON_NULL_OR_ERROR(err)
     NG5_NON_NULL_OR_ERROR(cache)
@@ -104,7 +104,7 @@ carbon_string_id_cache_get_error(struct err *err, const carbon_string_id_cache_t
 }
 
 NG5_EXPORT(bool)
-carbon_string_id_cache_get_size(size_t *size, const carbon_string_id_cache_t *cache)
+carbon_string_id_cache_get_size(size_t *size, const struct string_cache *cache)
 {
     NG5_NON_NULL_OR_ERROR(size)
     NG5_NON_NULL_OR_ERROR(cache)
@@ -133,7 +133,7 @@ make_most_recent(lru_list_t *list, cache_entry_t *entry)
 }
 
 NG5_EXPORT(char *)
-carbon_string_id_cache_get(carbon_string_id_cache_t *cache, carbon_string_id_t id)
+carbon_string_id_cache_get(struct string_cache *cache, carbon_string_id_t id)
 {
     NG5_NON_NULL_OR_ERROR(cache)
     carbon_hash_t id_hash = NG5_HASH_BERNSTEIN(sizeof(carbon_string_id_t), &id);
@@ -161,7 +161,7 @@ carbon_string_id_cache_get(carbon_string_id_cache_t *cache, carbon_string_id_t i
 }
 
 NG5_EXPORT(bool)
-carbon_string_id_cache_get_statistics(carbon_string_id_cache_statistics_t *statistics, carbon_string_id_cache_t *cache)
+carbon_string_id_cache_get_statistics(carbon_string_id_cache_statistics_t *statistics, struct string_cache *cache)
 {
     NG5_NON_NULL_OR_ERROR(statistics);
     NG5_NON_NULL_OR_ERROR(cache);
@@ -170,7 +170,7 @@ carbon_string_id_cache_get_statistics(carbon_string_id_cache_statistics_t *stati
 }
 
 NG5_EXPORT(bool)
-carbon_string_id_cache_reset_statistics(carbon_string_id_cache_t *cache)
+carbon_string_id_cache_reset_statistics(struct string_cache *cache)
 {
     NG5_NON_NULL_OR_ERROR(cache);
     NG5_ZERO_MEMORY(&cache->statistics, sizeof(carbon_string_id_cache_statistics_t));
@@ -178,7 +178,7 @@ carbon_string_id_cache_reset_statistics(carbon_string_id_cache_t *cache)
 }
 
 NG5_EXPORT(bool)
-carbon_string_id_cache_drop(carbon_string_id_cache_t *cache)
+carbon_string_id_cache_drop(struct string_cache *cache)
 {
     NG5_NON_NULL_OR_ERROR(cache);
     for (size_t i = 0; i < cache->list_entries.num_elems; i++) {

@@ -21,7 +21,7 @@ TEST(CarbonArchiveOpsTest, CreateStreamFromJsonString)
 
 TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonString)
 {
-    carbon_archive_t   archive;
+    struct archive   archive;
     struct err       err;
 
     const char        *json_string = "{ \"test\": 123 }";
@@ -41,7 +41,7 @@ TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonString)
 
 TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonStringWithBakedStringIdIndex)
 {
-    carbon_archive_t   archive;
+    struct archive   archive;
     struct err       err;
 
     const char        *json_string = "{ \"test\": 123 }";
@@ -63,14 +63,14 @@ TEST(CarbonArchiveOpsTest, CreateArchiveStringHandling)
 {
     std::set<carbon_string_id_t> haystack;
 
-    carbon_archive_t     archive;
+    struct archive     archive;
     carbon_strid_iter_t  strid_iter;
     carbon_strid_info_t *info;
     size_t               vector_len;
     bool                 status;
     bool                 success;
     struct err         err;
-    carbon_query_t       query;
+    struct archive_query       query;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
      * below the projects root directory (e.g., 'build/') */
@@ -110,14 +110,14 @@ TEST(CarbonArchiveOpsTest, DecodeStringByIdFullScan)
 {
     std::set<carbon_string_id_t> all_str_ids;
 
-    carbon_archive_t     archive;
+    struct archive     archive;
     carbon_strid_iter_t  strid_iter;
     carbon_strid_info_t *info;
     size_t               vector_len;
     bool                 status;
     bool                 success;
     struct err         err;
-    carbon_query_t       query;
+    struct archive_query       query;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
      * below the projects root directory (e.g., 'build/') */
@@ -156,14 +156,14 @@ TEST(CarbonArchiveOpsTest, DecodeStringByIdFullScan)
 
 TEST(CarbonArchiveOpsTest, DecodeStringByFastUnsafeAccess)
 {
-    carbon_archive_t                 archive;
+    struct archive                 archive;
     carbon_strid_iter_t              strid_iter;
     carbon_strid_info_t             *info;
     size_t                           vector_len;
     bool                             status;
     bool                             success;
     struct err                     err;
-    carbon_query_t                   query;
+    struct archive_query                   query;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
      * below the projects root directory (e.g., 'build/') */
@@ -199,8 +199,8 @@ TEST(CarbonArchiveOpsTest, DecodeStringByFastUnsafeAccess)
 
 TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateContains)
 {
-    carbon_archive_t      archive;
-    carbon_query_t        query;
+    struct archive      archive;
+    struct archive_query        query;
     bool                  status;
     size_t                num_match;
     carbon_string_pred_t  pred;
@@ -236,8 +236,8 @@ TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateContains)
 
 TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateEquals)
 {
-    carbon_archive_t      archive;
-    carbon_query_t        query;
+    struct archive      archive;
+    struct archive_query        query;
     bool                  status;
     size_t                num_match;
     carbon_string_pred_t  pred;

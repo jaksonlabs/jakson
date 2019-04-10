@@ -41,14 +41,14 @@ typedef struct carrier
 
 typedef struct async_extra
 {
-    vec_t ofType(carrier) carriers;
-    vec_t ofType(carrier_t *) carrier_mapping;
-    carbon_spinlock_t lock;
+    struct vector ofType(carrier) carriers;
+    struct vector ofType(carrier_t *) carrier_mapping;
+    struct spinlock lock;
 } async_extra;
 
 typedef struct parallel_insert_arg
 {
-    vec_t ofType(char *) strings;
+    struct vector ofType(char *) strings;
     carbon_string_id_t *out;
     carrier_t *carrier;
     bool enable_write_out;
@@ -58,7 +58,7 @@ typedef struct parallel_insert_arg
 
 typedef struct parallel_remove_arg
 {
-    vec_t ofType(carbon_string_id_t) *local_ids;
+    struct vector ofType(carbon_string_id_t) *local_ids;
     carrier_t *carrier;
     int result;
     bool did_work;
@@ -70,14 +70,14 @@ typedef struct parallel_locate_arg
     carbon_string_id_t *ids_out;
     bool *found_mask_out;
     size_t num_not_found_out;
-    vec_t ofType(char *) keys_in;
+    struct vector ofType(char *) keys_in;
     int result;
     bool did_work;
 } parallel_locate_arg;
 
 typedef struct parallel_extract_arg
 {
-    vec_t ofType(carbon_string_id_t) local_ids_in;
+    struct vector ofType(carbon_string_id_t) local_ids_in;
     char **strings_out;
     carrier_t *carrier;
     bool did_work;
@@ -110,8 +110,8 @@ static char **this_extract(carbon_strdic_t *self, const carbon_string_id_t *ids,
 static bool this_free(carbon_strdic_t *self, void *ptr);
 
 static bool this_num_distinct(carbon_strdic_t *self, size_t *num);
-static bool this_get_contents(carbon_strdic_t *self, vec_t ofType (char *) * strings,
-                           vec_t ofType(carbon_string_id_t) * string_ids);
+static bool this_get_contents(carbon_strdic_t *self, struct vector ofType (char *) * strings,
+                           struct vector ofType(carbon_string_id_t) * string_ids);
 
 static bool this_reset_counters(carbon_strdic_t *self);
 static bool this_counters(carbon_strdic_t *self, carbon_string_hash_counters_t *counters);
@@ -284,7 +284,7 @@ void *parallel_extract_function(void *args)
     return NULL;
 }
 
-static void synchronize(vec_t ofType(carrier) *carriers, size_t num_threads)
+static void synchronize(struct vector ofType(carrier) *carriers, size_t num_threads)
 {
     NG5_DEBUG(STRING_DIC_ASYNC_TAG, "barrier installed for %d threads", num_threads);
 
@@ -403,7 +403,7 @@ static bool this_insert(carbon_strdic_t *self,
     create_thread_assignment(&str_carrier_mapping, &carrier_num_strings, &str_carrier_idx_mapping,
                            &self->alloc, num_strings, num_threads);
 
-    vec_t ofType(parallel_insert_arg *) carrier_args;
+    struct vector ofType(parallel_insert_arg *) carrier_args;
     carbon_vec_create(&carrier_args, &self->alloc, sizeof(parallel_insert_arg *), num_threads);
 
     /** compute which carrier is responsible for which string */
@@ -519,10 +519,10 @@ static bool this_remove(carbon_strdic_t *self, carbon_string_id_t *strings, size
     struct async_extra *extra = THIS_EXTRAS(self);
     uint_fast16_t num_threads = carbon_vec_length(&extra->carriers);
     size_t approx_num_strings_per_thread = NG5_MAX(1, num_strings / num_threads);
-    vec_t ofType(carbon_string_id_t) *string_map =
-        carbon_malloc(&self->alloc, num_threads * sizeof(vec_t));
+    struct vector ofType(carbon_string_id_t) *string_map =
+        carbon_malloc(&self->alloc, num_threads * sizeof(struct vector));
 
-    vec_t ofType(parallel_remove_arg) carrier_args;
+    struct vector ofType(parallel_remove_arg) carrier_args;
     carbon_vec_create(&carrier_args, &self->alloc, sizeof(parallel_remove_arg), num_threads);
 
     /** prepare thread-local subset of string ids */
@@ -824,15 +824,15 @@ static bool this_num_distinct(carbon_strdic_t *self, size_t *num)
     return true;
 }
 
-static bool this_get_contents(carbon_strdic_t *self, vec_t ofType (char *) * strings,
-                           vec_t ofType(carbon_string_id_t) * string_ids)
+static bool this_get_contents(carbon_strdic_t *self, struct vector ofType (char *) * strings,
+                           struct vector ofType(carbon_string_id_t) * string_ids)
 {
     NG5_CHECK_TAG(self->tag, NG5_STRDIC_TYPE_ASYNC);
     this_lock(self);
     struct async_extra *extra = THIS_EXTRAS(self);
     size_t num_carriers = carbon_vec_length(&extra->carriers);
-    vec_t ofType (char *) local_string_results;
-    vec_t ofType (carbon_string_id_t) local_string_id_results;
+    struct vector ofType (char *) local_string_results;
+    struct vector ofType (carbon_string_id_t) local_string_id_results;
     size_t approx_num_distinct_local_values;
     this_num_distinct(self, &approx_num_distinct_local_values);
     approx_num_distinct_local_values = NG5_MAX(1, approx_num_distinct_local_values / extra->carriers.num_elems);

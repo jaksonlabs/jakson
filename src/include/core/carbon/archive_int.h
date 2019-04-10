@@ -55,14 +55,14 @@ typedef struct __attribute__((packed))
     u32 num_entries;
 } carbon_prop_header_t;
 
-typedef union __attribute__((packed)) carbon_archive_dic_flags
+union __attribute__((packed)) string_tab_flags
 {
     struct {
         u8 compressor_none           : 1;
         u8 compressed_huffman        : 1;
     } bits;
     u8 value;
-} carbon_archive_dic_flags_t;
+};
 
 typedef struct __attribute__((packed))
 {
@@ -372,23 +372,23 @@ typedef struct __attribute__((packed))
 
 void
 carbon_int_read_prop_offsets(carbon_archive_prop_offs_t *prop_offsets,
-                             memfile_t *memfile,
+                             struct memfile *memfile,
                              const carbon_archive_object_flags_t *flags);
 
 void
-carbon_int_embedded_fixed_props_read(carbon_fixed_prop_t *prop, memfile_t *memfile);
+carbon_int_embedded_fixed_props_read(carbon_fixed_prop_t *prop, struct memfile *memfile);
 
 void
-carbon_int_embedded_var_props_read(carbon_var_prop_t *prop, memfile_t *memfile);
+carbon_int_embedded_var_props_read(carbon_var_prop_t *prop, struct memfile *memfile);
 
 void
-carbon_int_embedded_null_props_read(carbon_null_prop_t *prop, memfile_t *memfile);
+carbon_int_embedded_null_props_read(carbon_null_prop_t *prop, struct memfile *memfile);
 
 void
-carbon_int_embedded_array_props_read(carbon_array_prop_t *prop, memfile_t *memfile);
+carbon_int_embedded_array_props_read(carbon_array_prop_t *prop, struct memfile *memfile);
 
 void
-carbon_int_embedded_table_props_read(carbon_table_prop_t *prop, memfile_t *memfile);
+carbon_int_embedded_table_props_read(carbon_table_prop_t *prop, struct memfile *memfile);
 
 field_e
 carbon_int_get_value_type_of_char(char c);

@@ -29,7 +29,7 @@ struct huff_node
     unsigned char letter;
 };
 
-static void huff_tree_create(vec_t ofType(carbon_huffman_entry_t) *table, const vec_t ofType(u32) *frequencies);
+static void huff_tree_create(struct vector ofType(carbon_huffman_entry_t) *table, const struct vector ofType(u32) *frequencies);
 
 bool carbon_huffman_create(carbon_huffman_t *dic)
 {
@@ -55,12 +55,12 @@ carbon_huffman_cpy(carbon_huffman_t *dst, carbon_huffman_t *src)
 }
 
 NG5_EXPORT(bool)
-carbon_huffman_build(carbon_huffman_t *encoder, const carbon_string_ref_vec *strings)
+carbon_huffman_build(carbon_huffman_t *encoder, const string_vector_t *strings)
 {
     NG5_NON_NULL_OR_ERROR(encoder);
     NG5_NON_NULL_OR_ERROR(strings);
 
-    vec_t ofType(u32) frequencies;
+    struct vector ofType(u32) frequencies;
     carbon_vec_create(&frequencies, NULL, sizeof(u32), UCHAR_MAX);
     carbon_vec_enlarge_size_to_capacity(&frequencies);
 
@@ -107,7 +107,7 @@ bool carbon_huffman_drop(carbon_huffman_t *dic)
     return true;
 }
 
-bool carbon_huffman_serialize_dic(memfile_t *file, const carbon_huffman_t *dic, char marker_symbol)
+bool carbon_huffman_serialize_dic(struct memfile *file, const carbon_huffman_t *dic, char marker_symbol)
 {
     NG5_NON_NULL_OR_ERROR(file)
     NG5_NON_NULL_OR_ERROR(dic)
@@ -160,7 +160,7 @@ static carbon_huffman_entry_t *find_dic_entry(carbon_huffman_t *dic, unsigned ch
     return NULL;
 }
 
-static size_t encodeString(memfile_t *file, carbon_huffman_t *dic, const char *string)
+static size_t encodeString(struct memfile *file, carbon_huffman_t *dic, const char *string)
 {
     carbon_memfile_begin_bit_mode(file);
 
@@ -197,7 +197,7 @@ static size_t encodeString(memfile_t *file, carbon_huffman_t *dic, const char *s
 }
 
 NG5_EXPORT(bool)
-carbon_huffman_encode_one(memfile_t *file,
+carbon_huffman_encode_one(struct memfile *file,
                           carbon_huffman_t *dic,
                           const char *string)
 {
@@ -222,14 +222,14 @@ carbon_huffman_encode_one(memfile_t *file,
     return true;
 }
 
-bool carbon_huffman_read_string(carbon_huffman_encoded_str_info_t *info, memfile_t *src)
+bool carbon_huffman_read_string(carbon_huffman_encoded_str_info_t *info, struct memfile *src)
 {
     info->nbytes_encoded = *NG5_MEMFILE_READ_TYPE(src, u32);
     info->encoded_bytes = NG5_MEMFILE_READ(src, info->nbytes_encoded);
     return true;
 }
 
-bool carbon_huffman_read_dic_entry(carbon_huffman_entry_info_t *info, memfile_t *file, char marker_symbol)
+bool carbon_huffman_read_dic_entry(carbon_huffman_entry_info_t *info, struct memfile *file, char marker_symbol)
 {
     char marker = *NG5_MEMFILE_PEEK(file, char);
     if (marker == marker_symbol) {
@@ -331,7 +331,7 @@ static struct huff_node *find_smallest(struct huff_node *begin, u64 lowerBound, 
 }
 
 
-static void assign_code(struct huff_node *node, const carbon_bitmap_t *path, vec_t ofType(carbon_huffman_entry_t) *table)
+static void assign_code(struct huff_node *node, const carbon_bitmap_t *path, struct vector ofType(carbon_huffman_entry_t) *table)
 {
     if (!node->left && !node->right) {
             carbon_huffman_entry_t *entry = VECTOR_NEW_AND_GET(table, carbon_huffman_entry_t);
@@ -356,7 +356,7 @@ static void assign_code(struct huff_node *node, const carbon_bitmap_t *path, vec
     }
 }
 
-static struct huff_node *trim_and_begin(vec_t ofType(HuffNode) *candidates)
+static struct huff_node *trim_and_begin(struct vector ofType(HuffNode) *candidates)
 {
     struct huff_node *begin = NULL;
     for (struct huff_node *it = vec_get(candidates, 0, struct huff_node); ; it++) {
@@ -379,11 +379,11 @@ static struct huff_node *trim_and_begin(vec_t ofType(HuffNode) *candidates)
     return begin;
 }
 
-static void huff_tree_create(vec_t ofType(carbon_huffman_entry_t) *table, const vec_t ofType(u32) *frequencies)
+static void huff_tree_create(struct vector ofType(carbon_huffman_entry_t) *table, const struct vector ofType(u32) *frequencies)
 {
     assert(UCHAR_MAX == frequencies->num_elems);
 
-    vec_t ofType(HuffNode) candidates;
+    struct vector ofType(HuffNode) candidates;
     carbon_vec_create(&candidates, NULL, sizeof(struct huff_node), UCHAR_MAX * UCHAR_MAX);
     size_t appender_idx = UCHAR_MAX;
 

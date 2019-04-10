@@ -40,7 +40,7 @@ typedef struct carbon_strid_iter
 } carbon_strid_iter_t;
 
 NG5_EXPORT(bool)
-carbon_strid_iter_open(carbon_strid_iter_t *it, struct err *err, carbon_archive_t *archive);
+carbon_strid_iter_open(carbon_strid_iter_t *it, struct err *err, struct archive *archive);
 
 NG5_EXPORT(bool)
 carbon_strid_iter_next(bool *success, carbon_strid_info_t **info, struct err *err, size_t *info_length, carbon_strid_iter_t *it);

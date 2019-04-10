@@ -36,10 +36,10 @@ struct entry {
 };
 
 typedef struct sync_extra {
-    vec_t ofType(entry) contents;
-    vec_t ofType(carbon_string_id_t_t) freelist;
+    struct vector ofType(entry) contents;
+    struct vector ofType(carbon_string_id_t_t) freelist;
     carbon_strhash_t index;
-    carbon_spinlock_t lock;
+    struct spinlock lock;
 } sync_exta;
 
 static bool this_drop(carbon_strdic_t *self);
@@ -58,8 +58,8 @@ static bool this_counters(carbon_strdic_t *self, carbon_string_hash_counters_t *
 
 static bool this_num_distinct(carbon_strdic_t *self, size_t *num);
 
-static bool this_get_contents(carbon_strdic_t *self, vec_t ofType (char *) * strings,
-                           vec_t ofType(carbon_string_id_t) * string_ids);
+static bool this_get_contents(carbon_strdic_t *self, struct vector ofType (char *) * strings,
+                           struct vector ofType(carbon_string_id_t) * string_ids);
 
 static void lock(carbon_strdic_t *self);
 static void unlock(carbon_strdic_t *self);
@@ -471,8 +471,8 @@ static bool this_num_distinct(carbon_strdic_t *self, size_t *num)
     return true;
 }
 
-static bool this_get_contents(carbon_strdic_t *self, vec_t ofType (char *) * strings,
-                           vec_t ofType(carbon_string_id_t) * string_ids)
+static bool this_get_contents(carbon_strdic_t *self, struct vector ofType (char *) * strings,
+                           struct vector ofType(carbon_string_id_t) * string_ids)
 {
     NG5_CHECK_TAG(self->tag, NG5_STRDIC_TYPE_SYNC);
     struct sync_extra *extra = this_extra(self);

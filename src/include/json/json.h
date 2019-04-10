@@ -177,13 +177,13 @@ typedef struct carbon_json_ast_node_member
 typedef struct carbon_json_ast_node_members
 {
     carbon_json_ast_node_object_t *parent;
-    vec_t ofType(carbon_json_ast_node_member_t) members;
+    struct vector ofType(carbon_json_ast_node_member_t) members;
 } carbon_json_ast_node_members_t;
 
 typedef struct carbon_json_ast_node_elements
 {
     carbon_json_ast_node_array_t *parent;
-    vec_t ofType(carbon_json_ast_node_element_t) elements;
+    struct vector ofType(carbon_json_ast_node_element_t) elements;
 } carbon_json_ast_node_elements_t;
 
 typedef struct carbon_json_ast_node_array

@@ -31,9 +31,9 @@ static bool print_object(FILE *file, struct err *err, const columndoc_obj_t *obj
 
 static const char *get_type_name(struct err *err, field_e type);
 
-static void object_array_key_columns_create(vec_t ofType(carbon_columndoc_columngroup_t) *columns);
+static void object_array_key_columns_create(struct vector ofType(carbon_columndoc_columngroup_t) *columns);
 
-static carbon_columndoc_column_t *object_array_key_columns_find_or_new(vec_t ofType(carbon_columndoc_columngroup_t) *columns,
+static carbon_columndoc_column_t *object_array_key_columns_find_or_new(struct vector ofType(carbon_columndoc_columngroup_t) *columns,
                                                             carbon_string_id_t array_key, carbon_string_id_t nested_object_entry_key,
                                                             field_e nested_object_entry_type);
 
@@ -74,7 +74,7 @@ bool carbon_columndoc_create(carbon_columndoc_t *columndoc,
     return true;
 }
 
-static void object_array_key_columns_drop(vec_t ofType(carbon_columndoc_columngroup_t) *columns);
+static void object_array_key_columns_drop(struct vector ofType(carbon_columndoc_columngroup_t) *columns);
 
 static void object_meta_model_free(columndoc_obj_t *columndoc)
 {
@@ -118,67 +118,67 @@ static void object_meta_model_free(columndoc_obj_t *columndoc)
     carbon_vec_drop(&columndoc->string_prop_vals);
 
     for (size_t i = 0; i < columndoc->bool_array_prop_vals.num_elems; i++) {
-        vec_t *vec = vec_get(&columndoc->bool_array_prop_vals, i, vec_t);
+        struct vector *vec = vec_get(&columndoc->bool_array_prop_vals, i, struct vector);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->bool_array_prop_vals);
 
     for (size_t i = 0; i < columndoc->int8_array_prop_vals.num_elems; i++) {
-        vec_t *vec = vec_get(&columndoc->int8_array_prop_vals, i, vec_t);
+        struct vector *vec = vec_get(&columndoc->int8_array_prop_vals, i, struct vector);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->int8_array_prop_vals);
 
     for (size_t i = 0; i < columndoc->int16_array_prop_vals.num_elems; i++) {
-        vec_t *vec = vec_get(&columndoc->int16_array_prop_vals, i, vec_t);
+        struct vector *vec = vec_get(&columndoc->int16_array_prop_vals, i, struct vector);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->int16_array_prop_vals);
 
     for (size_t i = 0; i < columndoc->int32_array_prop_vals.num_elems; i++) {
-        vec_t *vec = vec_get(&columndoc->int32_array_prop_vals, i, vec_t);
+        struct vector *vec = vec_get(&columndoc->int32_array_prop_vals, i, struct vector);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->int32_array_prop_vals);
 
     for (size_t i = 0; i < columndoc->int64_array_prop_vals.num_elems; i++) {
-        vec_t *vec = vec_get(&columndoc->int64_array_prop_vals, i, vec_t);
+        struct vector *vec = vec_get(&columndoc->int64_array_prop_vals, i, struct vector);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->int64_array_prop_vals);
 
     for (size_t i = 0; i < columndoc->uint8_array_prop_vals.num_elems; i++) {
-        vec_t *vec = vec_get(&columndoc->uint8_array_prop_vals, i, vec_t);
+        struct vector *vec = vec_get(&columndoc->uint8_array_prop_vals, i, struct vector);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->uint8_array_prop_vals);
 
     for (size_t i = 0; i < columndoc->uint16_array_prop_vals.num_elems; i++) {
-        vec_t *vec = vec_get(&columndoc->uint16_array_prop_vals, i, vec_t);
+        struct vector *vec = vec_get(&columndoc->uint16_array_prop_vals, i, struct vector);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->uint16_array_prop_vals);
 
     for (size_t i = 0; i < columndoc->uint32_array_prop_vals.num_elems; i++) {
-        vec_t *vec = vec_get(&columndoc->uint32_array_prop_vals, i, vec_t);
+        struct vector *vec = vec_get(&columndoc->uint32_array_prop_vals, i, struct vector);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->uint32_array_prop_vals);
 
     for (size_t i = 0; i < columndoc->ui64_array_prop_vals.num_elems; i++) {
-        vec_t *vec = vec_get(&columndoc->ui64_array_prop_vals, i, vec_t);
+        struct vector *vec = vec_get(&columndoc->ui64_array_prop_vals, i, struct vector);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->ui64_array_prop_vals);
 
     for (size_t i = 0; i < columndoc->float_array_prop_vals.num_elems; i++) {
-        vec_t *vec = vec_get(&columndoc->float_array_prop_vals, i, vec_t);
+        struct vector *vec = vec_get(&columndoc->float_array_prop_vals, i, struct vector);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->float_array_prop_vals);
 
     for (size_t i = 0; i < columndoc->string_array_prop_vals.num_elems; i++) {
-        vec_t *vec = vec_get(&columndoc->string_array_prop_vals, i, vec_t);
+        struct vector *vec = vec_get(&columndoc->string_array_prop_vals, i, struct vector);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->string_array_prop_vals);
@@ -198,67 +198,67 @@ static void object_meta_model_free(columndoc_obj_t *columndoc)
     carbon_vec_drop(&columndoc->string_val_idxs);
 
     for (size_t i = 0; i < columndoc->bool_array_idxs.num_elems; i++) {
-        vec_t *vec = vec_get(&columndoc->bool_array_idxs, i, vec_t);
+        struct vector *vec = vec_get(&columndoc->bool_array_idxs, i, struct vector);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->bool_array_idxs);
 
     for (size_t i = 0; i < columndoc->int8_array_idxs.num_elems; i++) {
-        vec_t *vec = vec_get(&columndoc->int8_array_idxs, i, vec_t);
+        struct vector *vec = vec_get(&columndoc->int8_array_idxs, i, struct vector);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->int8_array_idxs);
 
     for (size_t i = 0; i < columndoc->int16_array_idxs.num_elems; i++) {
-        vec_t *vec = vec_get(&columndoc->int16_array_idxs, i, vec_t);
+        struct vector *vec = vec_get(&columndoc->int16_array_idxs, i, struct vector);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->int16_array_idxs);
 
     for (size_t i = 0; i < columndoc->int32_array_idxs.num_elems; i++) {
-        vec_t *vec = vec_get(&columndoc->int32_array_idxs, i, vec_t);
+        struct vector *vec = vec_get(&columndoc->int32_array_idxs, i, struct vector);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->int32_array_idxs);
 
     for (size_t i = 0; i < columndoc->int64_array_idxs.num_elems; i++) {
-        vec_t *vec = vec_get(&columndoc->int64_array_idxs, i, vec_t);
+        struct vector *vec = vec_get(&columndoc->int64_array_idxs, i, struct vector);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->int64_array_idxs);
 
     for (size_t i = 0; i < columndoc->uint8_array_idxs.num_elems; i++) {
-        vec_t *vec = vec_get(&columndoc->uint8_array_idxs, i, vec_t);
+        struct vector *vec = vec_get(&columndoc->uint8_array_idxs, i, struct vector);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->uint8_array_idxs);
 
     for (size_t i = 0; i < columndoc->uint16_array_idxs.num_elems; i++) {
-        vec_t *vec = vec_get(&columndoc->uint16_array_idxs, i, vec_t);
+        struct vector *vec = vec_get(&columndoc->uint16_array_idxs, i, struct vector);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->uint16_array_idxs);
 
     for (size_t i = 0; i < columndoc->uint32_array_idxs.num_elems; i++) {
-        vec_t *vec = vec_get(&columndoc->uint32_array_idxs, i, vec_t);
+        struct vector *vec = vec_get(&columndoc->uint32_array_idxs, i, struct vector);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->uint32_array_idxs);
 
     for (size_t i = 0; i < columndoc->uint64_array_idxs.num_elems; i++) {
-        vec_t *vec = vec_get(&columndoc->uint64_array_idxs, i, vec_t);
+        struct vector *vec = vec_get(&columndoc->uint64_array_idxs, i, struct vector);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->uint64_array_idxs);
 
     for (size_t i = 0; i < columndoc->float_array_idxs.num_elems; i++) {
-        vec_t *vec = vec_get(&columndoc->float_array_idxs, i, vec_t);
+        struct vector *vec = vec_get(&columndoc->float_array_idxs, i, struct vector);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->float_array_idxs);
 
     for (size_t i = 0; i < columndoc->string_array_idxs.num_elems; i++) {
-        vec_t *vec = vec_get(&columndoc->string_array_idxs, i, vec_t);
+        struct vector *vec = vec_get(&columndoc->string_array_idxs, i, struct vector);
         carbon_vec_drop(vec);
     }
     carbon_vec_drop(&columndoc->string_array_idxs);
@@ -329,7 +329,7 @@ bool carbon_columndoc_free(carbon_columndoc_t *doc)
     fprintf(file, "}, ");                                                                                              \
 }
 
-static void print_primitive_null(FILE *file, const char *type_name, const vec_t ofType(carbon_string_id_t) *key_vector,
+static void print_primitive_null(FILE *file, const char *type_name, const struct vector ofType(carbon_string_id_t) *key_vector,
                                carbon_strdic_t *dic)
 {
     PRINT_PRIMITIVE_KEY_PART(file, type_name, key_vector, dic, "")
@@ -338,8 +338,8 @@ static void print_primitive_null(FILE *file, const char *type_name, const vec_t 
 
 
 
-static bool print_primitive_objects(FILE *file, struct err *err, const char *type_name, const vec_t ofType(carbon_string_id_t) *key_vector,
-                                  const vec_t ofType(columndoc_obj_t) *value_vector, carbon_strdic_t *dic)
+static bool print_primitive_objects(FILE *file, struct err *err, const char *type_name, const struct vector ofType(carbon_string_id_t) *key_vector,
+                                  const struct vector ofType(columndoc_obj_t) *value_vector, carbon_strdic_t *dic)
 {
     PRINT_PRIMITIVE_KEY_PART(file, type_name, key_vector, dic, ", ")
     if(!carbon_vec_is_empty((key_vector))) {
@@ -377,7 +377,7 @@ static bool print_primitive_objects(FILE *file, struct err *err, const char *typ
         fprintf(file, "],");                                                                                           \
         fprintf(file, "\"Values\": [ ");                                                                               \
         for (size_t i = 0; i < (&value_vector)->num_elems; i++) {                                                      \
-            const vec_t ofType(TYPE) *values = vec_get(&value_vector, i, vec_t);               \
+            const struct vector ofType(TYPE) *values = vec_get(&value_vector, i, struct vector);               \
             fprintf(file, "[ ");                                                                                       \
             for (size_t j = 0; j < values->num_elems; j++) {                                                           \
                 TYPE value = *vec_get(values, j, TYPE);                                                      \
@@ -414,7 +414,7 @@ static bool print_primitive_objects(FILE *file, struct err *err, const char *typ
         fprintf(file, "],");                                                                                           \
         fprintf(file, "\"Values\": [ ");                                                                               \
         for (size_t i = 0; i < (&value_vector)->num_elems; i++) {                                                      \
-            const vec_t ofType(carbon_boolean_t) *values = vec_get(&value_vector, i, vec_t);      \
+            const struct vector ofType(carbon_boolean_t) *values = vec_get(&value_vector, i, struct vector);      \
             fprintf(file, "[ ");                                                                                       \
             for (size_t j = 0; j < values->num_elems; j++) {                                                           \
                 carbon_boolean_t value = *vec_get(values, j, carbon_boolean_t);                                    \
@@ -427,8 +427,8 @@ static bool print_primitive_objects(FILE *file, struct err *err, const char *typ
     fprintf(file, "}, ");                                                                                              \
 }
 
-static void print_array_null(FILE *file, const char *type_name, const vec_t ofType(carbon_string_id_t) *key_vector,
-                           const vec_t ofType(u16) *value_vector, carbon_strdic_t *dic)
+static void print_array_null(FILE *file, const char *type_name, const struct vector ofType(carbon_string_id_t) *key_vector,
+                           const struct vector ofType(u16) *value_vector, carbon_strdic_t *dic)
 {
     fprintf(file, "\"%s\": { ", type_name);
     if(!carbon_vec_is_empty((key_vector))) {
@@ -456,8 +456,8 @@ static void print_array_null(FILE *file, const char *type_name, const vec_t ofTy
     fprintf(file, "}, ");
 }
 
-static void print_array_strings(FILE *file, const char *type_name, const vec_t ofType(carbon_string_id_t) *key_vector,
-                           const vec_t ofType(Vector ofType(carbon_string_id_t)) *value_vector, carbon_strdic_t *dic)
+static void print_array_strings(FILE *file, const char *type_name, const struct vector ofType(carbon_string_id_t) *key_vector,
+                           const struct vector ofType(Vector ofType(carbon_string_id_t)) *value_vector, carbon_strdic_t *dic)
 {
     fprintf(file, "\"%s\": { ", type_name);
     if(!carbon_vec_is_empty((key_vector))) {
@@ -477,7 +477,7 @@ static void print_array_strings(FILE *file, const char *type_name, const vec_t o
         fprintf(file, "],");
         fprintf(file, "\"Values\": [ ");
         for (size_t i = 0; i < (value_vector)->num_elems; i++) {
-            const vec_t ofType(carbon_string_id_t) *values = vec_get(value_vector, i, vec_t);
+            const struct vector ofType(carbon_string_id_t) *values = vec_get(value_vector, i, struct vector);
             fprintf(file, "[");
             for (size_t j = 0; j < values->num_elems; j++) {
                 carbon_string_id_t value = *vec_get(values, j, carbon_string_id_t);
@@ -489,7 +489,7 @@ static void print_array_strings(FILE *file, const char *type_name, const vec_t o
         fprintf(file, "], ");
         fprintf(file, "\"Values Decoded\": [ ");
         for (size_t i = 0; i < (value_vector)->num_elems; i++) {
-            const vec_t ofType(carbon_string_id_t) *values = vec_get(value_vector, i, vec_t);
+            const struct vector ofType(carbon_string_id_t) *values = vec_get(value_vector, i, struct vector);
             fprintf(file, "[");
             for (size_t j = 0; j < values->num_elems; j++) {
                 carbon_string_id_t value = *vec_get(values, j, carbon_string_id_t);
@@ -511,8 +511,8 @@ static void print_array_strings(FILE *file, const char *type_name, const vec_t o
     fprintf(file, "}, ");
 }
 
-static void print_primitive_strings(FILE *file, const char *type_name, const vec_t ofType(carbon_string_id_t) *key_vector,
-                                  const vec_t ofType(carbon_string_id_t) *value_vector, carbon_strdic_t *dic)
+static void print_primitive_strings(FILE *file, const char *type_name, const struct vector ofType(carbon_string_id_t) *key_vector,
+                                  const struct vector ofType(carbon_string_id_t) *value_vector, carbon_strdic_t *dic)
 {
     PRINT_PRIMITIVE_KEY_PART(file, type_name, key_vector, dic, ", ")
     if(!carbon_vec_is_empty((key_vector))) {
@@ -537,7 +537,7 @@ static void print_primitive_strings(FILE *file, const char *type_name, const vec
 
 #define PRINT_COLUMN(file, columnTable, array_idx, type, format_string)                                                \
 {                                                                                                                      \
-    const vec_t *column = vec_get(&columnTable->values, array_idx, vec_t);                     \
+    const struct vector *column = vec_get(&columnTable->values, array_idx, struct vector);                     \
     fprintf(file, "%s", column->num_elems > 1 ? "[" : "");                                                             \
     for (size_t i = 0; i < column->num_elems; i++) {                                                                   \
         fprintf(file, format_string, *vec_get(column, i, type));                                             \
@@ -546,7 +546,7 @@ static void print_primitive_strings(FILE *file, const char *type_name, const vec
     fprintf(file, "%s", column->num_elems > 1 ? "]" : "");                                                             \
 }
 
-static bool print_array_objects(FILE *file, struct err *err, const char *type_name, const vec_t ofType(carbon_columndoc_columngroup_t) *key_columns,
+static bool print_array_objects(FILE *file, struct err *err, const char *type_name, const struct vector ofType(carbon_columndoc_columngroup_t) *key_columns,
                               carbon_strdic_t *dic)
 {
     fprintf(file, "\"%s\": {", type_name);
@@ -592,7 +592,7 @@ static bool print_array_objects(FILE *file, struct err *err, const char *type_na
             for (size_t array_idx = 0; array_idx < columnTable->values.num_elems; array_idx++) {
                 switch (columnTable->type) {
                 case field_null: {
-                    const vec_t *column = vec_get(&columnTable->values, array_idx, vec_t);
+                    const struct vector *column = vec_get(&columnTable->values, array_idx, struct vector);
                     fprintf(file, "%s", column->num_elems > 1 ? "[" : "");
                     for (size_t i = 0; i < column->num_elems; i++) {
                         fprintf(file, "null");
@@ -628,7 +628,7 @@ static bool print_array_objects(FILE *file, struct err *err, const char *type_na
                     PRINT_COLUMN(file, columnTable, array_idx, carbon_number_t , "%f")
                     break;
                 case field_string: {
-                    const vec_t *column = vec_get(&columnTable->values, array_idx, vec_t);
+                    const struct vector *column = vec_get(&columnTable->values, array_idx, struct vector);
                     fprintf(file, "%s", column->num_elems > 1 ? "[" : "");
                     for (size_t i = 0; i < column->num_elems; i++) {
                         carbon_string_id_t encodedString = *vec_get(column, i, carbon_string_id_t);
@@ -642,7 +642,7 @@ static bool print_array_objects(FILE *file, struct err *err, const char *type_na
                 case field_object: {
                    // columndoc_obj_t *doc = vec_get(&column->values, valueIdx, columndoc_obj_t);
                   //  print_object(file, doc, encode);
-                    const vec_t *column = vec_get(&columnTable->values, array_idx, vec_t);
+                    const struct vector *column = vec_get(&columnTable->values, array_idx, struct vector);
                     fprintf(file, "%s", column->num_elems > 1 ? "[" : "");
                     for (size_t i = 0; i < column->num_elems; i++) {
                         const columndoc_obj_t *object = vec_get(column, i, columndoc_obj_t);
@@ -735,12 +735,12 @@ bool carbon_columndoc_drop(carbon_columndoc_t *doc)
     NG5_NOT_IMPLEMENTED
 }
 
-static void object_array_key_columns_create(vec_t ofType(carbon_columndoc_columngroup_t) *columns)
+static void object_array_key_columns_create(struct vector ofType(carbon_columndoc_columngroup_t) *columns)
 {
     carbon_vec_create(columns, NULL, sizeof(carbon_columndoc_columngroup_t), 20000);
 }
 
-static void object_array_key_columns_drop(vec_t ofType(carbon_columndoc_columngroup_t) *columns)
+static void object_array_key_columns_drop(struct vector ofType(carbon_columndoc_columngroup_t) *columns)
 {
     for (size_t i = 0; i < columns->num_elems; i++) {
         carbon_columndoc_columngroup_t *array_columns = vec_get(columns, i, carbon_columndoc_columngroup_t);
@@ -749,14 +749,14 @@ static void object_array_key_columns_drop(vec_t ofType(carbon_columndoc_columngr
 
             carbon_columndoc_column_t *column = vec_get(&array_columns->columns, j, carbon_columndoc_column_t);
 
-            vec_t ofType(u32) *array_indices = &column->array_positions;
-            vec_t ofType(vec_t ofType(<T>)) *values_for_indicies = &column->values;
+            struct vector ofType(u32) *array_indices = &column->array_positions;
+            struct vector ofType(struct vector ofType(<T>)) *values_for_indicies = &column->values;
 
             assert (array_indices->num_elems == values_for_indicies->num_elems);
 
             for (size_t k = 0; k < array_indices->num_elems; k++) {
 
-                vec_t ofType(<T>) *values_for_index = vec_get(values_for_indicies, k, vec_t);
+                struct vector ofType(<T>) *values_for_index = vec_get(values_for_indicies, k, struct vector);
                 if (column->type == field_object) {
                     for (size_t l = 0; l < values_for_index->num_elems; l++) {
                         columndoc_obj_t *nested_object = vec_get(values_for_index, l, columndoc_obj_t);
@@ -796,7 +796,7 @@ static const char *get_type_name(struct err *err, field_e type)
     }
 }
 
-static carbon_columndoc_column_t *object_array_key_columns_find_or_new(vec_t ofType(carbon_columndoc_columngroup_t) *columns,
+static carbon_columndoc_column_t *object_array_key_columns_find_or_new(struct vector ofType(carbon_columndoc_columngroup_t) *columns,
                                                             carbon_string_id_t array_key, carbon_string_id_t nested_object_entry_key,
                                                             field_e nested_object_entry_type)
 {
@@ -831,7 +831,7 @@ objectArrayKeyColumnsNewColumn:
     new_column = VECTOR_NEW_AND_GET(&key_columns->columns, carbon_columndoc_column_t);
     new_column->key_name = nested_object_entry_key;
     new_column->type = nested_object_entry_type;
-    carbon_vec_create(&new_column->values, NULL, sizeof(vec_t), 10);
+    carbon_vec_create(&new_column->values, NULL, sizeof(struct vector), 10);
     carbon_vec_create(&new_column->array_positions, NULL, sizeof(u32), 10);
 
     return new_column;
@@ -845,7 +845,7 @@ static bool object_array_key_column_push(carbon_columndoc_column_t *col, struct 
     u32 *entry_array_idx = VECTOR_NEW_AND_GET(&col->array_positions, u32);
     *entry_array_idx = array_idx;
 
-    vec_t ofType(<T>) *values_for_entry = VECTOR_NEW_AND_GET(&col->values, vec_t);
+    struct vector ofType(<T>) *values_for_entry = VECTOR_NEW_AND_GET(&col->values, struct vector);
     carbon_vec_create(values_for_entry, NULL, GET_TYPE_SIZE(entry->type), entry->values.num_elems);
 
     bool is_null_by_def = entry->values.num_elems == 0;
@@ -948,17 +948,17 @@ static void setup_object(columndoc_obj_t *model, carbon_columndoc_t *parent, car
     carbon_vec_create(&model->float_prop_vals, NULL, sizeof(carbon_number_t), 10);
     carbon_vec_create(&model->string_prop_vals, NULL, sizeof(carbon_string_id_t), 50);
 
-    carbon_vec_create(&model->bool_array_prop_vals, NULL, sizeof(vec_t), 10);
-    carbon_vec_create(&model->int8_array_prop_vals, NULL, sizeof(vec_t), 10);
-    carbon_vec_create(&model->int16_array_prop_vals, NULL, sizeof(vec_t), 10);
-    carbon_vec_create(&model->int32_array_prop_vals, NULL, sizeof(vec_t), 10);
-    carbon_vec_create(&model->int64_array_prop_vals, NULL, sizeof(vec_t), 10);
-    carbon_vec_create(&model->uint8_array_prop_vals, NULL, sizeof(vec_t), 10);
-    carbon_vec_create(&model->uint16_array_prop_vals, NULL, sizeof(vec_t), 10);
-    carbon_vec_create(&model->uint32_array_prop_vals, NULL, sizeof(vec_t), 10);
-    carbon_vec_create(&model->ui64_array_prop_vals, NULL, sizeof(vec_t), 10);
-    carbon_vec_create(&model->float_array_prop_vals, NULL, sizeof(vec_t), 10);
-    carbon_vec_create(&model->string_array_prop_vals, NULL, sizeof(vec_t), 50);
+    carbon_vec_create(&model->bool_array_prop_vals, NULL, sizeof(struct vector), 10);
+    carbon_vec_create(&model->int8_array_prop_vals, NULL, sizeof(struct vector), 10);
+    carbon_vec_create(&model->int16_array_prop_vals, NULL, sizeof(struct vector), 10);
+    carbon_vec_create(&model->int32_array_prop_vals, NULL, sizeof(struct vector), 10);
+    carbon_vec_create(&model->int64_array_prop_vals, NULL, sizeof(struct vector), 10);
+    carbon_vec_create(&model->uint8_array_prop_vals, NULL, sizeof(struct vector), 10);
+    carbon_vec_create(&model->uint16_array_prop_vals, NULL, sizeof(struct vector), 10);
+    carbon_vec_create(&model->uint32_array_prop_vals, NULL, sizeof(struct vector), 10);
+    carbon_vec_create(&model->ui64_array_prop_vals, NULL, sizeof(struct vector), 10);
+    carbon_vec_create(&model->float_array_prop_vals, NULL, sizeof(struct vector), 10);
+    carbon_vec_create(&model->string_array_prop_vals, NULL, sizeof(struct vector), 50);
     carbon_vec_create(&model->null_array_prop_vals, NULL, sizeof(u16), 10);
 
     carbon_vec_create(&model->bool_val_idxs, NULL, sizeof(u32), 10);
@@ -973,17 +973,17 @@ static void setup_object(columndoc_obj_t *model, carbon_columndoc_t *parent, car
     carbon_vec_create(&model->float_val_idxs, NULL, sizeof(u32), 10);
     carbon_vec_create(&model->string_val_idxs, NULL, sizeof(u32), 50);
 
-    carbon_vec_create(&model->bool_array_idxs, NULL, sizeof(vec_t), 10);
-    carbon_vec_create(&model->int8_array_idxs, NULL, sizeof(vec_t), 10);
-    carbon_vec_create(&model->int16_array_idxs, NULL, sizeof(vec_t), 10);
-    carbon_vec_create(&model->int32_array_idxs, NULL, sizeof(vec_t), 10);
-    carbon_vec_create(&model->int64_array_idxs, NULL, sizeof(vec_t), 10);
-    carbon_vec_create(&model->uint8_array_idxs, NULL, sizeof(vec_t), 10);
-    carbon_vec_create(&model->uint16_array_idxs, NULL, sizeof(vec_t), 10);
-    carbon_vec_create(&model->uint32_array_idxs, NULL, sizeof(vec_t), 10);
-    carbon_vec_create(&model->uint64_array_idxs, NULL, sizeof(vec_t), 10);
-    carbon_vec_create(&model->float_array_idxs, NULL, sizeof(vec_t), 10);
-    carbon_vec_create(&model->string_array_idxs, NULL, sizeof(vec_t), 50);
+    carbon_vec_create(&model->bool_array_idxs, NULL, sizeof(struct vector), 10);
+    carbon_vec_create(&model->int8_array_idxs, NULL, sizeof(struct vector), 10);
+    carbon_vec_create(&model->int16_array_idxs, NULL, sizeof(struct vector), 10);
+    carbon_vec_create(&model->int32_array_idxs, NULL, sizeof(struct vector), 10);
+    carbon_vec_create(&model->int64_array_idxs, NULL, sizeof(struct vector), 10);
+    carbon_vec_create(&model->uint8_array_idxs, NULL, sizeof(struct vector), 10);
+    carbon_vec_create(&model->uint16_array_idxs, NULL, sizeof(struct vector), 10);
+    carbon_vec_create(&model->uint32_array_idxs, NULL, sizeof(struct vector), 10);
+    carbon_vec_create(&model->uint64_array_idxs, NULL, sizeof(struct vector), 10);
+    carbon_vec_create(&model->float_array_idxs, NULL, sizeof(struct vector), 10);
+    carbon_vec_create(&model->string_array_idxs, NULL, sizeof(struct vector), 50);
 
     carbon_vec_create(&model->obj_prop_vals, NULL, sizeof(columndoc_obj_t), 10);
 
@@ -1061,13 +1061,13 @@ static bool object_put_primitive(columndoc_obj_t *columndoc, struct err *err, co
     return true;
 }
 
-static void object_push_array(vec_t ofType(Vector ofType(<T>)) *values, size_t TSize, u32 num_elements,
-                            const void *data, carbon_string_id_t key_id, vec_t ofType(carbon_string_id_t) *key_vector)
+static void object_push_array(struct vector ofType(Vector ofType(<T>)) *values, size_t TSize, u32 num_elements,
+                            const void *data, carbon_string_id_t key_id, struct vector ofType(carbon_string_id_t) *key_vector)
 {
-    vec_t ofType(<T>) template, *vector;
+    struct vector ofType(<T>) template, *vector;
     size_t idx = carbon_vec_length(values);
     carbon_vec_push(values, &template, 1);
-    vector = vec_get(values, idx, vec_t);
+    vector = vec_get(values, idx, struct vector);
     carbon_vec_create(vector, NULL, TSize, num_elements);
     carbon_vec_push(vector, data, num_elements);
     carbon_vec_push(key_vector, &key_id, 1);
@@ -1202,7 +1202,7 @@ static bool object_put(columndoc_obj_t *model, struct err *err, const carbon_doc
 
 static bool import_object(columndoc_obj_t *dst, struct err *err, const carbon_doc_obj_t *doc, carbon_strdic_t *dic)
 {
-    const vec_t ofType(carbon_doc_entries_t) *objectEntries = carbon_doc_get_entries(doc);
+    const struct vector ofType(carbon_doc_entries_t) *objectEntries = carbon_doc_get_entries(doc);
     const carbon_doc_entries_t *entries = vec_all(objectEntries, carbon_doc_entries_t);
     for (size_t i = 0; i < objectEntries->num_elems; i++) {
         const carbon_doc_entries_t *entry = entries + i;

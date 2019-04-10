@@ -25,20 +25,20 @@
 
 NG5_BEGIN_DECL
 
-typedef struct carbon_spinlock
+struct spinlock
 {
     atomic_flag lock;
     pthread_t owner;
-} carbon_spinlock_t;
+};
 
 NG5_EXPORT(bool)
-carbon_spinlock_init(carbon_spinlock_t *spinlock);
+carbon_spinlock_init(struct spinlock *spinlock);
 
 NG5_EXPORT(bool)
-carbon_spinlock_acquire(carbon_spinlock_t *spinlock);
+carbon_spinlock_acquire(struct spinlock *spinlock);
 
 NG5_EXPORT(bool)
-carbon_spinlock_release(carbon_spinlock_t *spinlock);
+carbon_spinlock_release(struct spinlock *spinlock);
 
 NG5_END_DECL
 

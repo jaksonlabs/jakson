@@ -140,7 +140,7 @@ success:
 
 }
 
-bool moduleCheckJsInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *manager)
+bool moduleCheckJsInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_mgr *manager)
 {
     NG5_UNUSED(manager);
 
@@ -310,7 +310,7 @@ static void tracker_end_string_id_index_baking()
 }
 
 
-bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *manager)
+bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_mgr *manager)
 {
     NG5_UNUSED(manager);
 
@@ -428,7 +428,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
         fclose(f);
         jsonContent[fsize] = 0;
 
-        carbon_archive_t archive;
+        struct archive archive;
         struct err err;
 
         carbon_archive_callback_t progress_tracker = { 0 };
@@ -507,7 +507,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
     }
 }
 
-bool moduleViewCabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *manager)
+bool moduleViewCabInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_mgr *manager)
 {
     NG5_UNUSED(argc);
     NG5_UNUSED(argv);
@@ -541,7 +541,7 @@ bool moduleViewCabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t 
     return true;
 }
 
-bool moduleInspectInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *manager)
+bool moduleInspectInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_mgr *manager)
 {
     NG5_UNUSED(manager);
 
@@ -562,7 +562,7 @@ bool moduleInspectInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t 
         }
         NG5_CONSOLE_OUTPUT_ON()
 
-        carbon_archive_t archive;
+        struct archive archive;
         struct archive_info info;
         if ((carbon_archive_open(&archive, pathCarbonFileIn)) != true) {
             NG5_CONSOLE_WRITE(file, "Cannot open requested CARBON file: %s", pathCarbonFileIn);
@@ -585,7 +585,7 @@ bool moduleInspectInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t 
     return true;
 }
 
-bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *manager)
+bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_mgr *manager)
 {
     NG5_UNUSED(argc);
     NG5_UNUSED(argv);
@@ -609,7 +609,7 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
         }
         NG5_CONSOLE_OUTPUT_ON()
 
-        carbon_archive_t archive;
+        struct archive archive;
         int status;
         if ((status = carbon_archive_open(&archive, pathCarbonFileIn))) {
             carbon_encoded_doc_collection_t collection;
@@ -627,7 +627,7 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
     }
 }
 
-bool moduleListInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *manager)
+bool moduleListInvoke(int argc, char **argv, FILE *file, struct carbon_cmdopt_mgr *manager)
 {
     NG5_UNUSED(manager);
 

@@ -27,7 +27,7 @@ NG5_BEGIN_DECL
 
 typedef struct carbon_huffman
 {
-    vec_t ofType(carbon_huffman_entry_t) table;
+    struct vector ofType(carbon_huffman_entry_t) table;
     struct err err;
 } carbon_huffman_t;
 
@@ -58,25 +58,25 @@ NG5_EXPORT(bool)
 carbon_huffman_cpy(carbon_huffman_t *dst, carbon_huffman_t *src);
 
 NG5_EXPORT(bool)
-carbon_huffman_build(carbon_huffman_t *encoder, const carbon_string_ref_vec *strings);
+carbon_huffman_build(carbon_huffman_t *encoder, const string_vector_t *strings);
 
 NG5_EXPORT(bool)
 carbon_huffman_get_error(struct err *err, const carbon_huffman_t *dic);
 
 NG5_EXPORT(bool)
-carbon_huffman_encode_one(memfile_t *file, carbon_huffman_t *dic, const char *string);
+carbon_huffman_encode_one(struct memfile *file, carbon_huffman_t *dic, const char *string);
 
 NG5_EXPORT(bool)
-carbon_huffman_read_string(carbon_huffman_encoded_str_info_t *info, memfile_t *src);
+carbon_huffman_read_string(carbon_huffman_encoded_str_info_t *info, struct memfile *src);
 
 NG5_EXPORT(bool)
 carbon_huffman_drop(carbon_huffman_t *dic);
 
 NG5_EXPORT(bool)
-carbon_huffman_serialize_dic(memfile_t *file, const carbon_huffman_t *dic, char marker_symbol);
+carbon_huffman_serialize_dic(struct memfile *file, const carbon_huffman_t *dic, char marker_symbol);
 
 NG5_EXPORT(bool)
-carbon_huffman_read_dic_entry(carbon_huffman_entry_info_t *info, memfile_t *file, char marker_symbol);
+carbon_huffman_read_dic_entry(carbon_huffman_entry_info_t *info, struct memfile *file, char marker_symbol);
 
 NG5_END_DECL
 

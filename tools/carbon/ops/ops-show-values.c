@@ -17,14 +17,14 @@ typedef struct
     i32 between_upper_bound;
     const char *contains_string;
 
-    vec_t ofType(ops_show_values_result_t) *result;
+    struct vector ofType(ops_show_values_result_t) *result;
 
   //  carbon_hashtable_t ofMapping(carbon_string_id_t, u32) counts;
   //  carbon_hashset_t ofType(carbon_string_id_t) keys;
 } capture_t;
 ////
 static void
-visit_string_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_id_t id,
+visit_string_pairs (struct archive *archive, path_stack_t path, carbon_object_id_t id,
                               const carbon_string_id_t *keys, const carbon_string_id_t *values, u32 num_pairs,
                               void *capture)
 {
@@ -42,7 +42,7 @@ visit_string_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_
         return;
     }
 
-    carbon_query_t *query = carbon_archive_query_default(archive);
+    struct archive_query *query = carbon_archive_query_default(archive);
     for (size_t i = 0; i < num_pairs; i++) {
         char *keystr = carbon_query_fetch_string_by_id(query, keys[i]);
         if (strstr(params->path, keystr) != 0) {
@@ -66,7 +66,7 @@ visit_string_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_
                     carbon_vec_push(&r->values.string_values, &values[i], 1);
                     params->current_num += 1;
                 } else {
-                    carbon_query_t *q = carbon_archive_query_default(archive);
+                    struct archive_query *q = carbon_archive_query_default(archive);
                     char *value = carbon_query_fetch_string_by_id(q, values[i]);
                     if (strstr(value, params->contains_string)) {
                         carbon_vec_push(&r->values.string_values, &values[i], 1);
@@ -86,7 +86,7 @@ visit_string_pairs (carbon_archive_t *archive, path_stack_t path, carbon_object_
 }
 
 static carbon_visitor_policy_e
-before_visit_object_array(carbon_archive_t *archive, path_stack_t path,
+before_visit_object_array(struct archive *archive, path_stack_t path,
                                                      carbon_object_id_t parent_id, carbon_string_id_t key,
                                                      void *capture)
 {
@@ -120,7 +120,7 @@ before_visit_object_array(carbon_archive_t *archive, path_stack_t path,
 
 
 static carbon_visitor_policy_e
-before_visit_object_array_object_property(carbon_archive_t *archive, path_stack_t path,
+before_visit_object_array_object_property(struct archive *archive, path_stack_t path,
                                           carbon_object_id_t parent_id,
                                           carbon_string_id_t key,
                                           carbon_string_id_t nested_key,
@@ -158,7 +158,7 @@ before_visit_object_array_object_property(carbon_archive_t *archive, path_stack_
 
 
 static void
-visit_object_array_object_property_string(carbon_archive_t *archive, path_stack_t path,
+visit_object_array_object_property_string(struct archive *archive, path_stack_t path,
                                                carbon_object_id_t parent_id,
                                                carbon_string_id_t key,
                                                carbon_object_id_t nested_object_id,
@@ -212,7 +212,7 @@ visit_object_array_object_property_string(carbon_archive_t *archive, path_stack_
                 carbon_vec_push(&r->values.string_values, nested_values, num_nested_values);
                 params->current_num += num_nested_values;
             } else {
-                carbon_query_t *q = carbon_archive_query_default(archive);
+                struct archive_query *q = carbon_archive_query_default(archive);
                 for (u32 k = 0; k < num_nested_values; k++) {
                     char *value = carbon_query_fetch_string_by_id(q, nested_values[k]);
                     if (strstr(value, params->contains_string)) {
@@ -234,7 +234,7 @@ visit_object_array_object_property_string(carbon_archive_t *archive, path_stack_
 
 
 static void
-visit_object_array_object_property_int8(carbon_archive_t *archive, path_stack_t path,
+visit_object_array_object_property_int8(struct archive *archive, path_stack_t path,
                                           carbon_object_id_t parent_id,
                                           carbon_string_id_t key,
                                           carbon_object_id_t nested_object_id,
@@ -298,7 +298,7 @@ visit_object_array_object_property_int8(carbon_archive_t *archive, path_stack_t 
 
 
 static void
-visit_object_array_object_property_int16(carbon_archive_t *archive, path_stack_t path,
+visit_object_array_object_property_int16(struct archive *archive, path_stack_t path,
                                         carbon_object_id_t parent_id,
                                         carbon_string_id_t key,
                                         carbon_object_id_t nested_object_id,
@@ -364,7 +364,7 @@ visit_object_array_object_property_int16(carbon_archive_t *archive, path_stack_t
 
 //
 //static bool
-//get_column_entry_count(carbon_archive_t *archive, path_stack_t path, carbon_string_id_t key, carbon_basic_type_e type, u32 count, void *capture)
+//get_column_entry_count(struct archive *archive, path_stack_t path, carbon_string_id_t key, carbon_basic_type_e type, u32 count, void *capture)
 //{
 //    NG5_UNUSED(archive);
 //    NG5_UNUSED(path);
@@ -393,8 +393,8 @@ visit_object_array_object_property_int16(carbon_archive_t *archive, path_stack_t
 //}
 
 NG5_EXPORT(bool)
-ops_show_values(carbon_timestamp_t *duration, vec_t ofType(ops_show_values_result_t) *result, const char *path,
-                carbon_archive_t *archive, u32 offset, u32 limit, i32 between_lower_bound,
+ops_show_values(carbon_timestamp_t *duration, struct vector ofType(ops_show_values_result_t) *result, const char *path,
+                struct archive *archive, u32 offset, u32 limit, i32 between_lower_bound,
                 i32 between_upper_bound, const char *contains_string)
 {
     NG5_UNUSED(result);
@@ -440,7 +440,7 @@ ops_show_values(carbon_timestamp_t *duration, vec_t ofType(ops_show_values_resul
     *duration = (end - begin);
 
 
-//    vec_t ofType(carbon_string_id_t) *keys = carbon_hashset_keys(&capture.keys);
+//    struct vector ofType(carbon_string_id_t) *keys = carbon_hashset_keys(&capture.keys);
 //
 //    for (u32 i = 0; i < keys->num_elems; i++) {
 //        carbon_string_id_t id = *vec_get(keys, i, carbon_string_id_t);

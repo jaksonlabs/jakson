@@ -56,7 +56,7 @@
 #define DEFINE_MODULE(module_name, moduleCommand, desc, invokeFunc)                                              \
 static int module##module_name##Entry(int argc, char **argv, FILE *file)                                         \
 {                                                                                                               \
-    carbon_cmdopt_mgr_t manager;                                                                        \
+    struct carbon_cmdopt_mgr manager;                                                                        \
     carbon_cmdopt_mgr_create(&manager, moduleCommand, desc, NG5_MOD_ARG_REQUIRED, invokeFunc);            \
     int status = carbon_cmdopt_mgr_process(&manager, argc, argv, file);                                       \
     carbon_cmdopt_mgr_drop(&manager);                                                                         \
@@ -74,14 +74,14 @@ DEFINE_MODULE(Cab2Js, "to_json", DESC_CAB2JS_USAGE, moduleCab2JsInvoke);
 DEFINE_MODULE(List, "list", DESC_LIST_USAGE, moduleListInvoke);
 
 
-static bool showHelp(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *manager);
+static bool showHelp(int argc, char **argv, FILE *file, struct carbon_cmdopt_mgr *manager);
 
 int main (int argc, char **argv)
 {
     NG5_CONSOLE_OUTPUT_ON();
 
-    carbon_cmdopt_mgr_t manager;
-    carbon_cmdopt_group_t *group;
+    struct carbon_cmdopt_mgr manager;
+    struct carbon_cmdopt_group *group;
 
     carbon_cmdopt_mgr_create(&manager, "types-tool", "A tool to work with CARBON files.\n"
                                  "Copyright (c) 2018-2019 Marcus Pinnecke (pinnecke@ovgu.de)", NG5_MOD_ARG_MAYBE_REQUIRED,
@@ -126,7 +126,7 @@ int main (int argc, char **argv)
     return status ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
-static bool showHelp(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *manager)
+static bool showHelp(int argc, char **argv, FILE *file, struct carbon_cmdopt_mgr *manager)
 {
     NG5_UNUSED(argc);
     NG5_UNUSED(argv);

@@ -23,7 +23,7 @@ typedef struct carbon_io_context
 {
     struct err err;
     FILE *file;
-    carbon_spinlock_t lock;
+    struct spinlock lock;
     offset_t last_pos;
 } carbon_io_context_t;
 

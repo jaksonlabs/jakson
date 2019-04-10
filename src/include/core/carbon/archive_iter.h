@@ -65,7 +65,7 @@ typedef struct
     offset_t                  offset;        /* this objects header offset */
     carbon_archive_prop_offs_t    prop_offsets;  /* per-property type offset in the record table byte stream */
     offset_t                  next_obj_off;  /* offset to next object in list, or NULL if no such exists */
-    memfile_t              memfile;
+    struct memfile              memfile;
     struct err                  err;
 } carbon_archive_object_t;
 
@@ -75,7 +75,7 @@ typedef enum
     NG5_ARCHIVE_PROP_ITER_MODE_COLLECTION,
 } carbon_archive_prop_iter_mode_e;
 
-typedef struct carbon_archive_object_iterator_state
+typedef struct archive_object_iterator_state
 {
     offset_t               prop_type_off_data;      /* offset of type-dependent data in memfile */
     carbon_fixed_prop_t        prop_group_header;       /* type, num props and keys */
@@ -87,7 +87,7 @@ typedef struct carbon_archive_object_iterator_state
     bool                       is_array;                /* flag indicating that property is an array type */
 } carbon_archive_object_iter_state_t;
 
-typedef struct carbon_archive_collection_iterator_state
+typedef struct archive_collection_iterator_state
 {
     offset_t                collection_start_off;
     u32                    num_column_groups;
@@ -118,12 +118,12 @@ typedef struct carbon_archive_collection_iterator_state
     } current_column_group;
 } carbon_archive_collection_iter_state_t;
 
-typedef struct carbon_archive_prop_iter carbon_archive_prop_iter_t;
+typedef struct archive_prop_iter carbon_archive_prop_iter_t;
 
-typedef struct carbon_archive_value_vector
+typedef struct archive_value_vector
 {
     carbon_archive_prop_iter_t *prop_iter;               /* pointer to property iterator that created this iterator */
-    memfile_t            record_table_memfile;    /* iterator-local read-only memfile on archive record table */
+    struct memfile            record_table_memfile;    /* iterator-local read-only memfile on archive record table */
     carbon_basic_type_e         prop_type;               /* property basic value type (e.g., int8, or object) */
     bool                        is_array;                /* flag indicating whether value type is an array or not */
     offset_t                data_off;                /* offset in memfile where type-dependent data begins */
@@ -176,10 +176,10 @@ typedef struct carbon_archive_value_vector
     } data;
 } carbon_archive_value_vector_t;
 
-typedef struct carbon_archive_prop_iter
+typedef struct archive_prop_iter
 {
     carbon_archive_object_t         object;                  /* current object */
-    memfile_t                record_table_memfile;    /* iterator-local read-only memfile on archive record table */
+    struct memfile                record_table_memfile;    /* iterator-local read-only memfile on archive record table */
 
     u16                        mask;                    /* user-defined mask which properties to include */
     carbon_archive_prop_iter_mode_e mode;               /* determines whether to iterating over object or collection */
@@ -193,7 +193,7 @@ typedef struct carbon_archive_prop_iter
 
 typedef struct
 {
-    memfile_t                       record_table_memfile;    /* iterator-local read-only memfile on archive record table */
+    struct memfile                       record_table_memfile;    /* iterator-local read-only memfile on archive record table */
     carbon_archive_collection_iter_state_t state;                   /* iterator-local state */
     struct err                           err;                     /* error information */
 } carbon_independent_iterator_state_t;
@@ -205,7 +205,7 @@ typedef carbon_independent_iterator_state_t carbon_archive_column_entry_iter_t;
 
 typedef struct
 {
-    memfile_t memfile;
+    struct memfile memfile;
     carbon_archive_collection_iter_state_t entry_state;
     carbon_archive_object_t obj;
     offset_t next_obj_off;
@@ -262,7 +262,7 @@ NG5_EXPORT(bool)
 carbon_archive_prop_iter_from_archive(carbon_archive_prop_iter_t *iter,
                                   struct err *err,
                                   u16 mask,
-                                  carbon_archive_t *archive);
+                                  struct archive *archive);
 
 NG5_EXPORT(bool)
 carbon_archive_prop_iter_from_object(carbon_archive_prop_iter_t *iter,

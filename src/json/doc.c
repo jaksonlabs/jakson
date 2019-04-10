@@ -31,7 +31,7 @@ static void create_typed_vector(carbon_doc_entries_t *entry);
 
 static void entries_drop(carbon_doc_entries_t *entry);
 
-static bool print_value(FILE *file, field_e type, const vec_t ofType(<T>) *values);
+static bool print_value(FILE *file, field_e type, const struct vector ofType(<T>) *values);
 
 static void print_object(FILE *file, const carbon_doc_obj_t *model);
 
@@ -63,16 +63,16 @@ carbon_doc_obj_t *carbon_doc_bulk_new_obj(carbon_doc_t *model)
 }
 
 NG5_EXPORT(bool)
-carbon_doc_bulk_get_dic_contents(vec_t ofType (const char *) **strings,
-                                 vec_t ofType(carbon_string_id_t) **string_ids,
+carbon_doc_bulk_get_dic_contents(struct vector ofType (const char *) **strings,
+                                 struct vector ofType(carbon_string_id_t) **string_ids,
                                  const carbon_doc_bulk_t *context)
 {
     NG5_NON_NULL_OR_ERROR(context)
 
     size_t num_distinct_values;
     carbon_strdic_num_distinct(&num_distinct_values, context->dic);
-    vec_t ofType (const char *) *result_strings = malloc(sizeof(vec_t));
-    vec_t ofType (carbon_string_id_t) *resultcarbon_string_id_ts = malloc(sizeof(vec_t));
+    struct vector ofType (const char *) *result_strings = malloc(sizeof(struct vector));
+    struct vector ofType (carbon_string_id_t) *resultcarbon_string_id_ts = malloc(sizeof(struct vector));
     carbon_vec_create(result_strings, NULL, sizeof(const char *), num_distinct_values);
     carbon_vec_create(resultcarbon_string_id_ts, NULL, sizeof(carbon_string_id_t), num_distinct_values);
 
@@ -190,7 +190,7 @@ carbon_doc_print(FILE *file, const carbon_doc_t *doc)
     return true;
 }
 
-const vec_t ofType(carbon_doc_entries_t) *carbon_doc_get_entries(const carbon_doc_obj_t *model)
+const struct vector ofType(carbon_doc_entries_t) *carbon_doc_get_entries(const carbon_doc_obj_t *model)
 {
     return &model->entries;
 }
@@ -631,7 +631,7 @@ static bool import_json(carbon_doc_obj_t *target, struct err *err, const carbon_
         }
         break;
     case NG5_JSON_AST_NODE_VALUE_TYPE_ARRAY: {
-        const vec_t ofType(carbon_json_ast_node_element_t) *arrayContent = &json->element->value.value.array->elements.elements;
+        const struct vector ofType(carbon_json_ast_node_element_t) *arrayContent = &json->element->value.value.array->elements.elements;
         if (!carbon_vec_is_empty(arrayContent)) {
             const carbon_json_ast_node_element_t *first = vec_get(arrayContent, 0, carbon_json_ast_node_element_t);
             switch (first->value.value_type) {
@@ -746,8 +746,8 @@ static void sort_nested_primitive_object(columndoc_obj_t *columndoc)
 #define DEFINE_NG5_ARRAY_TYPE_LQ_FUNC(type)                                                                         \
 static bool compare##type##ArrayLessEqFunc(const void *lhs, const void *rhs)                                           \
 {                                                                                                                      \
-    vec_t ofType(type) *a = (vec_t *) lhs;                                                               \
-    vec_t ofType(type) *b = (vec_t *) rhs;                                                               \
+    struct vector ofType(type) *a = (struct vector *) lhs;                                                               \
+    struct vector ofType(type) *b = (struct vector *) rhs;                                                               \
     const type *aValues = vec_all(a, type);                                                                  \
     const type *bValues = vec_all(b, type);                                                                  \
     size_t max_compare_idx = a->num_elems < b->num_elems ? a->num_elems : b->num_elems;                                \
@@ -773,8 +773,8 @@ DEFINE_NG5_ARRAY_TYPE_LQ_FUNC(carbon_number_t)
 static bool compare_encoded_string_array_less_eq_func(const void *lhs, const void *rhs, void *args)
 {
     carbon_strdic_t *dic = (carbon_strdic_t *) args;
-    vec_t ofType(carbon_string_id_t) *a = (vec_t *) lhs;
-    vec_t ofType(carbon_string_id_t) *b = (vec_t *) rhs;
+    struct vector ofType(carbon_string_id_t) *a = (struct vector *) lhs;
+    struct vector ofType(carbon_string_id_t) *b = (struct vector *) rhs;
     const carbon_string_id_t *aValues = vec_all(a, carbon_string_id_t);
     const carbon_string_id_t *bValues = vec_all(b, carbon_string_id_t);
     size_t max_compare_idx = a->num_elems < b->num_elems ? a->num_elems : b->num_elems;
@@ -798,12 +798,12 @@ static void sorted_nested_array_objects(columndoc_obj_t *columndoc)
             carbon_columndoc_columngroup_t *array_columns = vec_get(&columndoc->obj_array_props, i, carbon_columndoc_columngroup_t);
             for (size_t j = 0; j < array_columns->columns.num_elems; j++) {
                 carbon_columndoc_column_t *column = vec_get(&array_columns->columns, j, carbon_columndoc_column_t);
-                vec_t ofType(u32) *array_indices = &column->array_positions;
-                vec_t ofType(vec_t ofType(<T>)) *values_for_indicies = &column->values;
+                struct vector ofType(u32) *array_indices = &column->array_positions;
+                struct vector ofType(struct vector ofType(<T>)) *values_for_indicies = &column->values;
                 assert (array_indices->num_elems == values_for_indicies->num_elems);
 
                 for (size_t k = 0; k < array_indices->num_elems; k++) {
-                    vec_t ofType(<T>) *values_for_index = vec_get(values_for_indicies, k, vec_t);
+                    struct vector ofType(<T>) *values_for_index = vec_get(values_for_indicies, k, struct vector);
                     if (column->type == field_object) {
                         for (size_t l = 0; l < values_for_index->num_elems; l++) {
                             columndoc_obj_t *nested_object = vec_get(values_for_index, l, columndoc_obj_t);
@@ -826,8 +826,8 @@ static void sorted_nested_array_objects(columndoc_obj_t *columndoc)
             value_indicies[i] = i;                                                                                     \
         }                                                                                                              \
                                                                                                                        \
-        vec_t ofType(carbon_string_id_t) key_cpy;                                                               \
-        vec_t ofType(value_type) value_cpy;                                                                     \
+        struct vector ofType(carbon_string_id_t) key_cpy;                                                               \
+        struct vector ofType(value_type) value_cpy;                                                                     \
                                                                                                                        \
         carbon_vec_cpy(&key_cpy, &key_vector);                                                                         \
         carbon_vec_cpy(&value_cpy, &value_vector);                                                                     \
@@ -849,7 +849,7 @@ static void sorted_nested_array_objects(columndoc_obj_t *columndoc)
     }                                                                                                                  \
 }
 
-static void sort_meta_model_string_values(vec_t ofType(carbon_string_id_t) *key_vector, vec_t ofType(carbon_string_id_t) *value_vector,
+static void sort_meta_model_string_values(struct vector ofType(carbon_string_id_t) *key_vector, struct vector ofType(carbon_string_id_t) *value_vector,
                                       carbon_strdic_t *dic)
 {
     size_t num_elements = carbon_vec_length(key_vector);
@@ -860,8 +860,8 @@ static void sort_meta_model_string_values(vec_t ofType(carbon_string_id_t) *key_
             value_indicies[i] = i;
         }
 
-        vec_t ofType(carbon_string_id_t) key_cpy;
-        vec_t ofType(carbon_string_id_t) value_cpy;
+        struct vector ofType(carbon_string_id_t) key_cpy;
+        struct vector ofType(carbon_string_id_t) value_cpy;
 
         carbon_vec_cpy(&key_cpy, key_vector);
         carbon_vec_cpy(&value_cpy, value_vector);
@@ -897,20 +897,20 @@ static void sort_meta_model_string_values(vec_t ofType(carbon_string_id_t) *key_
             value_indicies[i] = i;                                                                                     \
         }                                                                                                              \
                                                                                                                        \
-        vec_t ofType(carbon_string_id_t) key_cpy;                                                               \
-        vec_t ofType(vec_t) value_cpy;                                                                   \
+        struct vector ofType(carbon_string_id_t) key_cpy;                                                               \
+        struct vector ofType(struct vector) value_cpy;                                                                   \
                                                                                                                        \
         carbon_vec_cpy(&key_cpy, &key_vector);                                                                         \
         carbon_vec_cpy(&value_cpy, &value_array_vector);                                                               \
                                                                                                                        \
-        const vec_t *values = vec_all(&value_array_vector, vec_t);                             \
+        const struct vector *values = vec_all(&value_array_vector, struct vector);                             \
                                                                                                                        \
-        carbon_sort_qsort_indicies(value_indicies, values, sizeof(vec_t), compare_func, num_elements,           \
+        carbon_sort_qsort_indicies(value_indicies, values, sizeof(struct vector), compare_func, num_elements,           \
                       key_vector.allocator);                                                                           \
                                                                                                                        \
         for (size_t i = 0; i < num_elements; i++) {                                                                    \
             carbon_vec_set(&key_vector, i, vec_get(&key_cpy, value_indicies[i], carbon_string_id_t));        \
-            carbon_vec_set(&value_array_vector, i, vec_get(&value_cpy, value_indicies[i], vec_t));    \
+            carbon_vec_set(&value_array_vector, i, vec_get(&value_cpy, value_indicies[i], struct vector));    \
         }                                                                                                              \
                                                                                                                        \
         free(value_indicies);                                                                                          \
@@ -919,7 +919,7 @@ static void sort_meta_model_string_values(vec_t ofType(carbon_string_id_t) *key_
     }                                                                                                                  \
 }
 
-static void sort_columndoc_strings_arrays(vec_t ofType(carbon_string_id_t) *key_vector, vec_t ofType(carbon_string_id_t) *value_array_vector,
+static void sort_columndoc_strings_arrays(struct vector ofType(carbon_string_id_t) *key_vector, struct vector ofType(carbon_string_id_t) *value_array_vector,
                                       carbon_strdic_t *dic)
 {
     size_t num_elements = carbon_vec_length(key_vector);
@@ -930,17 +930,17 @@ static void sort_columndoc_strings_arrays(vec_t ofType(carbon_string_id_t) *key_
             value_indicies[i] = i;
         }
 
-        vec_t ofType(carbon_string_id_t) key_cpy;
-        vec_t ofType(vec_t) value_cpy;
+        struct vector ofType(carbon_string_id_t) key_cpy;
+        struct vector ofType(struct vector) value_cpy;
 
         carbon_vec_cpy(&key_cpy, key_vector);
         carbon_vec_cpy(&value_cpy, value_array_vector);
 
-        const vec_t *values = vec_all(value_array_vector, vec_t);
+        const struct vector *values = vec_all(value_array_vector, struct vector);
 
         carbon_sort_qsort_indicies_wargs(value_indicies,
                                          values,
-                                         sizeof(vec_t),
+                                         sizeof(struct vector),
                                          compare_encoded_string_array_less_eq_func,
                                          num_elements,
                                          key_vector->allocator,
@@ -948,7 +948,7 @@ static void sort_columndoc_strings_arrays(vec_t ofType(carbon_string_id_t) *key_
 
         for (size_t i = 0; i < num_elements; i++) {
             carbon_vec_set(key_vector, i, vec_get(&key_cpy, value_indicies[i], carbon_string_id_t));
-            carbon_vec_set(value_array_vector, i, vec_get(&value_cpy, value_indicies[i], vec_t));
+            carbon_vec_set(value_array_vector, i, vec_get(&value_cpy, value_indicies[i], struct vector));
         }
 
         free(value_indicies);
@@ -1004,8 +1004,8 @@ typedef struct {
 
 static bool compare_column_less_eq_func(const void *lhs, const void *rhs, void *args)
 {
-    vec_t ofType(<T>) *a = (vec_t *) lhs;
-    vec_t ofType(<T>) *b = (vec_t *) rhs;
+    struct vector ofType(<T>) *a = (struct vector *) lhs;
+    struct vector ofType(<T>) *b = (struct vector *) rhs;
     compare_column_less_eq_func_arg *func_arg = (compare_column_less_eq_func_arg *) args;
 
     size_t max_num_elem = NG5_MIN(a->num_elems, b->num_elems);
@@ -1070,8 +1070,8 @@ static bool compare_column_less_eq_func(const void *lhs, const void *rhs, void *
 static void sort_columndoc_column(carbon_columndoc_column_t *column, carbon_strdic_t *dic)
 {
     /** Sort column by its value, and re-arrange the array position list according this new order */
-    vec_t ofType(u32) array_position_cpy;
-    vec_t ofType(vec_t ofType(<T>)) values_cpy;
+    struct vector ofType(u32) array_position_cpy;
+    struct vector ofType(struct vector ofType(<T>)) values_cpy;
 
     carbon_vec_cpy(&array_position_cpy, &column->array_positions);
     carbon_vec_cpy(&values_cpy, &column->values);
@@ -1110,7 +1110,7 @@ static void sort_columndoc_column(carbon_columndoc_column_t *column, carbon_strd
 
 static void sort_columndoc_column_arrays(columndoc_obj_t *columndoc)
 {
-    vec_t ofType(carbon_columndoc_columngroup_t) cpy;
+    struct vector ofType(carbon_columndoc_columngroup_t) cpy;
     carbon_vec_cpy(&cpy, &columndoc->obj_array_props);
     size_t *indices = malloc(cpy.num_elems * sizeof(size_t));
     for (size_t i = 0; i < cpy.num_elems; i++) {
@@ -1131,7 +1131,7 @@ static void sort_columndoc_column_arrays(columndoc_obj_t *columndoc)
     for (size_t i = 0; i < cpy.num_elems; i++) {
         carbon_columndoc_columngroup_t *key_columns = vec_get(&columndoc->obj_array_props, i, carbon_columndoc_columngroup_t);
         size_t *columnIndices = malloc(key_columns->columns.num_elems * sizeof(size_t));
-        vec_t ofType(carbon_columndoc_column_t) columnCpy;
+        struct vector ofType(carbon_columndoc_column_t) columnCpy;
         carbon_vec_cpy(&columnCpy, &key_columns->columns);
         for (size_t i = 0; i < key_columns->columns.num_elems; i++) {
             columnIndices[i] = i;
@@ -1333,7 +1333,7 @@ static void entries_drop(carbon_doc_entries_t *entry)
     carbon_vec_drop(&entry->values);
 }
 
-static bool print_value(FILE *file, field_e type, const vec_t ofType(<T>) *values)
+static bool print_value(FILE *file, field_e type, const struct vector ofType(<T>) *values)
 {
     size_t num_values = values->num_elems;
     if (num_values == 0) {

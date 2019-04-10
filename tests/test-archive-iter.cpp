@@ -496,7 +496,7 @@ iterate_properties(carbon_archive_prop_iter_t *prop_iter)
 
 TEST(ArchiveIterTest, CreateIterator)
 {
-    carbon_archive_t            archive;
+    struct archive            archive;
     struct err                err;
     carbon_archive_prop_iter_t  prop_iter;
     bool                        status;

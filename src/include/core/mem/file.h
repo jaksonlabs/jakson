@@ -18,25 +18,20 @@
 #ifndef NG5_MEMFILE_H
 #define NG5_MEMFILE_H
 
+#include "shared/common.h"
 #include "block.h"
 
 NG5_BEGIN_DECL
 
-typedef enum
-{
-    NG5_MEMFILE_MODE_READWRITE,
-    NG5_MEMFILE_MODE_READONLY
-} carbon_memfile_mode_e;
-
-typedef struct carbon_memfile
+struct memfile
 {
     carbon_memblock_t *memblock;
     offset_t pos;
     bool bit_mode;
     size_t current_read_bit, current_write_bit, bytes_completed;
-    carbon_memfile_mode_e mode;
+    enum access_mode mode;
     struct err err;
-} memfile_t;
+};
 
 #define NG5_MEMFILE_PEEK(file, type)                                                                                \
 ({                                                                                                                     \
@@ -67,52 +62,52 @@ typedef struct carbon_memfile
 })
 
 NG5_EXPORT(bool)
-carbon_memfile_open(memfile_t *file, carbon_memblock_t *block, carbon_memfile_mode_e mode);
+carbon_memfile_open(struct memfile *file, carbon_memblock_t *block, enum access_mode mode);
 
 NG5_EXPORT(bool)
-carbon_memfile_seek(memfile_t *file, offset_t pos);
+carbon_memfile_seek(struct memfile *file, offset_t pos);
 
 NG5_EXPORT(bool)
-carbon_memfile_rewind(memfile_t *file);
+carbon_memfile_rewind(struct memfile *file);
 
 NG5_EXPORT(bool)
-carbon_memfile_tell(offset_t *pos, const memfile_t *file);
+carbon_memfile_tell(offset_t *pos, const struct memfile *file);
 
 NG5_EXPORT(size_t)
-carbon_memfile_size(memfile_t *file);
+carbon_memfile_size(struct memfile *file);
 
 NG5_EXPORT(size_t)
-carbon_memfile_remain_size(memfile_t *file);
+carbon_memfile_remain_size(struct memfile *file);
 
 NG5_EXPORT(bool)
-carbon_memfile_shrink(memfile_t *file);
+carbon_memfile_shrink(struct memfile *file);
 
 NG5_EXPORT(const carbon_byte_t *)
-carbon_memfile_read(memfile_t *file, offset_t nbytes);
+carbon_memfile_read(struct memfile *file, offset_t nbytes);
 
 NG5_EXPORT(bool)
-carbon_memfile_skip(memfile_t *file, offset_t nbytes);
+carbon_memfile_skip(struct memfile *file, offset_t nbytes);
 
 NG5_EXPORT(const carbon_byte_t *)
-carbon_memfile_peek(memfile_t *file, offset_t nbytes);
+carbon_memfile_peek(struct memfile *file, offset_t nbytes);
 
 NG5_EXPORT(bool)
-memfile_write(memfile_t *file, const void *data, offset_t nbytes);
+memfile_write(struct memfile *file, const void *data, offset_t nbytes);
 
 NG5_EXPORT(bool)
-carbon_memfile_begin_bit_mode(memfile_t *file);
+carbon_memfile_begin_bit_mode(struct memfile *file);
 
 NG5_EXPORT(bool)
-memfile_write_bit(memfile_t *file, bool flag);
+memfile_write_bit(struct memfile *file, bool flag);
 
 NG5_EXPORT(bool)
-carbon_memfile_read_bit(memfile_t *file);
+carbon_memfile_read_bit(struct memfile *file);
 
 NG5_EXPORT(bool)
-carbon_memfile_end_bit_mode(NG5_NULLABLE size_t *num_bytes_written, memfile_t *file);
+carbon_memfile_end_bit_mode(NG5_NULLABLE size_t *num_bytes_written, struct memfile *file);
 
 NG5_EXPORT(void *)
-carbon_memfile_current_pos(memfile_t *file, offset_t nbytes);
+carbon_memfile_current_pos(struct memfile *file, offset_t nbytes);
 
 NG5_END_DECL
 

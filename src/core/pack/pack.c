@@ -97,8 +97,8 @@ carbon_compressor_drop(struct err *err, carbon_compressor_t *self)
 }
 
 NG5_EXPORT(bool)
-carbon_compressor_write_extra(struct err *err, carbon_compressor_t *self, memfile_t *dst,
-                              const vec_t ofType (const char *) *strings)
+carbon_compressor_write_extra(struct err *err, carbon_compressor_t *self, struct memfile *dst,
+                              const struct vector ofType (const char *) *strings)
 {
     NG5_NON_NULL_OR_ERROR(self)
     NG5_IMPLEMENTS_OR_ERROR(err, self, write_extra)
@@ -114,7 +114,7 @@ carbon_compressor_read_extra(struct err *err, carbon_compressor_t *self, FILE *s
 }
 
 NG5_EXPORT(bool)
-carbon_compressor_encode(struct err *err, carbon_compressor_t *self, memfile_t *dst,
+carbon_compressor_encode(struct err *err, carbon_compressor_t *self, struct memfile *dst,
                          const char *string)
 {
     NG5_NON_NULL_OR_ERROR(self)
@@ -131,7 +131,7 @@ carbon_compressor_decode(struct err *err, carbon_compressor_t *self, char *dst, 
 }
 
 NG5_EXPORT(bool)
-carbon_compressor_print_extra(struct err *err, carbon_compressor_t *self, FILE *file, memfile_t *src)
+carbon_compressor_print_extra(struct err *err, carbon_compressor_t *self, FILE *file, struct memfile *src)
 {
     NG5_NON_NULL_OR_ERROR(self)
     NG5_IMPLEMENTS_OR_ERROR(err, self, print_extra)
@@ -139,7 +139,7 @@ carbon_compressor_print_extra(struct err *err, carbon_compressor_t *self, FILE *
 }
 
 NG5_EXPORT(bool)
-carbon_compressor_print_encoded(struct err *err, carbon_compressor_t *self, FILE *file, memfile_t *src,
+carbon_compressor_print_encoded(struct err *err, carbon_compressor_t *self, FILE *file, struct memfile *src,
                                 u32 decompressed_strlen)
 {
     NG5_NON_NULL_OR_ERROR(self)
