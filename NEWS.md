@@ -9,6 +9,7 @@
 - In Compressor Framework, add function to read implementation-specific extra data (e.g., in order to reconstruct
   a coding table). See `read_extra` of `carbon_compressor_t` in [carbon-compressor.h](include/carbon/compressor/compressor.h)  
 - Fix a bug that permits to import empty JSON-objects (e.g., `{ "k": {} }`) in archives 
+- Refactoring and cleanup
 
 ## 0.2.00.01 [2019-03-25]
 - To avoid re-creation of the index used for *Indexed String Fetch* when a archive is loaded into memory, 
