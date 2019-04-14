@@ -1,4 +1,5 @@
 #include <carbon/compressor/compressor-utils.h>
+#include <carbon/carbon-io-device.h>
 
 size_t carbon_vlq_encode(size_t length, uint8_t *buffer) {
     size_t num_bytes = 0;
@@ -16,7 +17,7 @@ size_t carbon_vlq_encode(size_t length, uint8_t *buffer) {
     return num_bytes;
 }
 
-size_t carbon_vlq_decode(uint8_t *buffer, size_t *num_bytes) {
+size_t carbon_vlq_decode(uint8_t const *buffer, size_t *num_bytes) {
     *num_bytes = 0;
     size_t length = 0;
     size_t bit_pos = 0;
@@ -34,26 +35,26 @@ size_t carbon_vlq_decode(uint8_t *buffer, size_t *num_bytes) {
     return length;
 }
 
-void carbon_vlq_encode_to_file(size_t length, carbon_memfile_t *dst)
+void carbon_vlq_encode_to_io(size_t length, carbon_io_device_t *dst)
 {
     uint8_t buf[10];
     size_t len = carbon_vlq_encode(length, buf);
-    carbon_memfile_write(dst, buf, len);
+    carbon_io_device_write(dst, buf, 1, len);
 }
 
-size_t carbon_vlq_decode_from_file(FILE *src, bool *ok)
+size_t carbon_vlq_decode_from_io(carbon_io_device_t *src, bool *ok)
 {
     uint8_t buf[10];
     size_t len = 0;
     size_t value = 0;
 
-    if(fread(buf,1, 10, src) < 1) {
+    if(carbon_io_device_read(src, buf, 1, 10) < 1) {
         *ok = false;
         return 0;
     }
 
     value = carbon_vlq_decode(buf, (size_t *)&len);
-    fseek(src, (long)len - 10L, SEEK_CUR);
+    carbon_io_device_seek(src, (size_t)((ssize_t)carbon_io_device_tell(src) - 10L + (ssize_t)len));
 
     *ok = true;
     return value;

@@ -28,7 +28,7 @@ CARBON_EXPORT(bool)
 carbon_compressor_incremental_read_extra(carbon_compressor_t *self, FILE *src, size_t nbytes);
 
 CARBON_EXPORT(bool)
-carbon_compressor_incremental_print_extra(carbon_compressor_t *self, FILE *file, carbon_memfile_t *src);
+carbon_compressor_incremental_print_extra(carbon_compressor_t *self, FILE *file, carbon_memfile_t *src, size_t nbytes);
 
 CARBON_EXPORT(bool)
 carbon_compressor_incremental_prepare_entries(carbon_compressor_t *self,

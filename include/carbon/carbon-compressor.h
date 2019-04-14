@@ -174,13 +174,14 @@ typedef struct carbon_compressor
      * @param src A memory file which cursor is positioned at the begin of the serialized extra field. After
      *            a call to this function, the memory file cursor must be positioned after the serialized extra
      *            field (i.e., the entire entry must be read (if any))
+     * @param nbytes Number of bytes written when 'write_extra' was called. Intended to read read to restore the extra field.
      *
      * @return <b>true</b> in case of success, or <b>false</b> otherwise.
      *
      * @author Marcus Pinnecke
      * @since 0.1.00.05
      */
-    bool (*print_extra)(carbon_compressor_t *self, FILE *file, carbon_memfile_t *src);
+    bool (*print_extra)(carbon_compressor_t *self, FILE *file, carbon_memfile_t *src, size_t nbytes);
 
     /**
      * Reads an implementation-specific encoded string from a memory file <code>src</code>, and prints
@@ -327,7 +328,7 @@ carbon_compressor_decode(carbon_err_t *err, carbon_compressor_t *self, char *dst
 
 
 CARBON_EXPORT(bool)
-carbon_compressor_print_extra(carbon_err_t *err, carbon_compressor_t *self, FILE *file, carbon_memfile_t *src);
+carbon_compressor_print_extra(carbon_err_t *err, carbon_compressor_t *self, FILE *file, carbon_memfile_t *src, size_t nbytes);
 
 CARBON_EXPORT(bool)
 carbon_compressor_print_encoded(carbon_err_t *err, carbon_compressor_t *self, FILE *file, carbon_memfile_t *src,

@@ -1993,7 +1993,7 @@ static bool print_embedded_dic_from_memfile(FILE *file, carbon_err_t *err, carbo
         return false;
     }
 
-    carbon_compressor_print_extra(err, &strategy, file, memfile);
+    carbon_compressor_print_extra(err, &strategy, file, memfile, header->compressor_extra_size);
 
     while ((*CARBON_MEMFILE_PEEK(memfile, char)) == marker_symbols[MARKER_TYPE_EMBEDDED_UNCOMP_STR].symbol) {
         unsigned offset = CARBON_MEMFILE_TELL(memfile);

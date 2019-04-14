@@ -147,11 +147,11 @@ carbon_compressor_decode(carbon_err_t *err, carbon_compressor_t *self, char *dst
 }
 
 CARBON_EXPORT(bool)
-carbon_compressor_print_extra(carbon_err_t *err, carbon_compressor_t *self, FILE *file, carbon_memfile_t *src)
+carbon_compressor_print_extra(carbon_err_t *err, carbon_compressor_t *self, FILE *file, carbon_memfile_t *src, size_t nbytes)
 {
     CARBON_NON_NULL_OR_ERROR(self)
     CARBON_IMPLEMENTS_OR_ERROR(err, self, print_extra)
-    return self->print_extra(self, file, src);
+    return self->print_extra(self, file, src, nbytes);
 }
 
 CARBON_EXPORT(bool)
