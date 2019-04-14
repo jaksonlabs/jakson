@@ -74,13 +74,14 @@ carbon_compressor_none_read_extra(carbon_compressor_t *self, FILE *src, size_t n
     return true;
 }
 
-bool carbon_compressor_none_print_extra(carbon_compressor_t *self, FILE *file, carbon_memfile_t *src)
+bool carbon_compressor_none_print_extra(carbon_compressor_t *self, FILE *file, carbon_memfile_t *src, size_t nbytes)
 {
     CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_NONE);
 
     CARBON_UNUSED(self);
     CARBON_UNUSED(file);
     CARBON_UNUSED(src);
+    CARBON_UNUSED(nbytes);
     /* nothing to do for uncompressed dictionaries */
     return true;
 }
