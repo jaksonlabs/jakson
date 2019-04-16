@@ -53,7 +53,7 @@ void carbon_huffman_encoder_create(
 
 void carbon_huffman_encoder_learn_frequencies(
         carbon_huffman_encoder_t *encoder,
-        char *data
+        char const *data
     )
 {
     while(*data) {
@@ -296,4 +296,38 @@ void carbon_huffman_decoder_drop(
     carbon_huffman_decoder_t *decoder
     ) {
     this_recursive_clean_huffman_tree(decoder->tree);
+}
+
+void carbon_huffman_adaptive_update(
+    carbon_huffman_encoder_t *encoder,
+    char const **entries,
+    size_t num_entries,
+    size_t fade
+    ) {
+
+    // The frequency array is not touched as it was not allocated dynamically.
+    carbon_huffman_encoder_drop(encoder);
+
+    for(size_t i = 0; i < UCHAR_MAX; ++i) {
+        if(encoder->frequencies[i] > fade + 1)
+            encoder->frequencies[i] -= fade;
+        else
+            encoder->frequencies[i] = 1;
+    }
+
+    for(size_t i = 0; i < num_entries; ++i) {
+        carbon_huffman_encoder_learn_frequencies(encoder, entries[i]);
+    }
+
+    carbon_huffman_encoder_bake_code(encoder);
+}
+
+void carbon_huffman_create_all_eq_encoder(
+        carbon_huffman_encoder_t *encoder
+    ) {
+    for(size_t i = 0; i < UCHAR_MAX; ++i) {
+        encoder->frequencies[i] = 1;
+    }
+
+    carbon_huffman_encoder_bake_code(encoder);
 }

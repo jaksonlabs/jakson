@@ -74,11 +74,15 @@ void carbon_huffman_bitstream_drop(carbon_huffman_bitstream_t *stream);
 
 void carbon_huffman_encoder_create(carbon_huffman_encoder_t *encoder);
 
-void carbon_huffman_encoder_learn_frequencies(carbon_huffman_encoder_t *encoder, char *data);
+void carbon_huffman_encoder_learn_frequencies(carbon_huffman_encoder_t *encoder, char const *data);
 
 void carbon_huffman_encoder_bake_code(carbon_huffman_encoder_t *encoder);
 
 void carbon_huffman_encoder_drop(carbon_huffman_encoder_t *encoder);
+
+void carbon_huffman_adaptive_update(carbon_huffman_encoder_t *encoder, char const **entries, size_t num_entries, size_t fade);
+
+void carbon_huffman_create_all_eq_encoder(carbon_huffman_encoder_t *encoder);
 
 
 void carbon_huffman_decoder_create(carbon_huffman_decoder_t *decoder, carbon_huffman_dictionary_t dictionary);
