@@ -100,7 +100,6 @@ carbon_compressor_prefix_init(carbon_compressor_t *self, carbon_doc_bulk_t const
     CARBON_UNUSED(self);
     CARBON_UNUSED(context);
     /* nothing to do for uncompressed dictionaries */
-    printf("USING PREFIX ENCODER\n");
 
 
     self->extra = malloc(sizeof(carbon_compressor_prefix_extra_t));
@@ -109,51 +108,6 @@ carbon_compressor_prefix_init(carbon_compressor_t *self, carbon_doc_bulk_t const
 
     if(!context)
         return true;
-
-    size_t num_values_in_dic = 0;
-    carbon_strdic_num_distinct(&num_values_in_dic, context->dic);
-
-    carbon_vec_t ofType(carbon_strdic_entry_t) dic_entries;
-
-    carbon_vec_create(&dic_entries, NULL, sizeof(carbon_strdic_entry_t), num_values_in_dic);
-
-    carbon_strdic_get_contents(&dic_entries, context->dic);
-
-    carbon_prefix_encoder_config * cfg = carbon_prefix_encoder_auto_config(dic_entries.num_elems, 5.0);
-    carbon_prefix_tree_node * root = carbon_prefix_tree_node_create(0);
-
-    size_t num_bytes = 0;
-    for(size_t i = 0; i < dic_entries.num_elems; ++i) {
-        carbon_strdic_entry_t const * entry = carbon_vec_at(&dic_entries, i);
-
-        num_bytes += strlen(entry->string);
-        carbon_prefix_tree_node_add_string(root, entry->string, cfg->max_new_children_per_entry);
-
-        if(i % (1 + cfg->num_iterations_between_prunes) == cfg->num_iterations_between_prunes)
-            carbon_prefix_tree_node_prune(root, cfg->prune_min_support);
-    }
-
-    carbon_prefix_tree_node_prune(root, cfg->prune_min_support);
-
-    printf("Savings indicator: %zu\n", carbon_prefix_tree_node_sum(root) * 100 / num_bytes);
-    carbon_prefix_tree_calculate_savings(root, 5);
-
-    carbon_prefix_table * prefix_table = carbon_prefix_table_create();
-    carbon_prefix_tree_encode_all_with_queue(root, prefix_table);
-
-    printf("Table length: %zu\n", carbon_prefix_table_length(prefix_table));
-
-
-    free(cfg);
-    carbon_prefix_tree_node_free(&root);
-
-
-    carbon_compressor_prefix_extra_t *extra = (carbon_compressor_prefix_extra_t *)self->extra;
-    extra->table   = prefix_table;
-    extra->encoder = carbon_prefix_table_to_encoder_tree(prefix_table);
-
-
-    carbon_vec_drop(&dic_entries);
 
     return true;
 }
@@ -175,8 +129,12 @@ carbon_compressor_prefix_drop(carbon_compressor_t *self)
 
     if(self->extra) {
         carbon_compressor_prefix_extra_t *extra = (carbon_compressor_prefix_extra_t *)self->extra;
-        carbon_prefix_table_free(extra->table);
-        carbon_prefix_ro_tree_free(extra->encoder);
+
+        if(extra->table)
+            carbon_prefix_table_free(extra->table);
+
+        if(extra->encoder)
+            carbon_prefix_ro_tree_free(extra->encoder);
         free(extra);
     }
     /* nothing to do for uncompressed dictionaries */
@@ -188,13 +146,12 @@ carbon_compressor_prefix_write_extra(carbon_compressor_t *self, carbon_memfile_t
                                         const carbon_vec_t ofType (const char *) *strings)
 {
     CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_PREFIX);
-
     CARBON_UNUSED(strings);
+
+    carbon_compressor_prefix_extra_t *extra = (carbon_compressor_prefix_extra_t *)self->extra;
 
     carbon_io_device_t io;
     carbon_io_device_from_memfile(&io, fp);
-
-    carbon_compressor_prefix_extra_t * extra = (carbon_compressor_prefix_extra_t *)self->extra;
 
     size_t length = carbon_prefix_table_length(extra->table);
 
@@ -284,8 +241,39 @@ carbon_compressor_prefix_prepare_entries(carbon_compressor_t *self,
                                          carbon_vec_t ofType(carbon_strdic_entry_t) *entries)
 {
     CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_PREFIX);
-    CARBON_UNUSED(self);
-    CARBON_UNUSED(entries);
+
+    carbon_prefix_encoder_config * cfg = carbon_prefix_encoder_auto_config(entries->num_elems, 5.0);
+    carbon_prefix_tree_node * root = carbon_prefix_tree_node_create(0);
+
+    size_t num_bytes = 0;
+    for(size_t i = 0; i < entries->num_elems; ++i) {
+        carbon_strdic_entry_t const * entry = carbon_vec_at(entries, i);
+
+        num_bytes += strlen(entry->string);
+        carbon_prefix_tree_node_add_string(root, entry->string, cfg->max_new_children_per_entry);
+
+        if(i % (1 + cfg->num_iterations_between_prunes) == cfg->num_iterations_between_prunes)
+            carbon_prefix_tree_node_prune(root, cfg->prune_min_support);
+    }
+
+    carbon_prefix_tree_node_prune(root, cfg->prune_min_support);
+
+//    printf("Savings indicator: %zu\n", carbon_prefix_tree_node_sum(root) * 100 / num_bytes);
+    carbon_prefix_tree_calculate_savings(root, 5);
+
+    carbon_prefix_table * prefix_table = carbon_prefix_table_create();
+    carbon_prefix_tree_encode_all_with_queue(root, prefix_table);
+
+//    printf("Table length: %zu\n", carbon_prefix_table_length(prefix_table));
+
+
+    free(cfg);
+    carbon_prefix_tree_node_free(&root);
+
+
+    carbon_compressor_prefix_extra_t *extra = (carbon_compressor_prefix_extra_t *)self->extra;
+    extra->table   = prefix_table;
+    extra->encoder = carbon_prefix_table_to_encoder_tree(prefix_table);
 
     return true;
 }
