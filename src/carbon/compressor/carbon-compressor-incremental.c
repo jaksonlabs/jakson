@@ -25,10 +25,8 @@
 #include <carbon/compressor/compressor-utils.h>
 #include <carbon/compressor/carbon-compressor-incremental.h>
 
-#include <carbon/compressor/prefix/prefix_tree_node.h>
-#include <carbon/compressor/prefix/prefix_encoder.h>
-#include <carbon/compressor/prefix/prefix_table.h>
-#include <carbon/compressor/prefix/prefix_read_only_tree.h>
+#include <carbon/compressor/huffman/huffman.h>
+#include <carbon/compressor/huffman/priority-queue.h>
 
 #include <carbon/carbon-archive.h>
 #include <carbon/carbon-io-device.h>
@@ -39,16 +37,28 @@ typedef struct {
 
     bool prefix;
     bool suffix;
+
+    bool huffman;
 } carbon_compressor_incremental_config_t;
 
 typedef struct {
     size_t previous_offset;
     size_t previous_length;
     size_t strings_since_last_base;
+    size_t strings_since_last_huffman_update;
     char const * previous_string;
+
+    carbon_huffman_encoder_t huffman_encoder;
+    carbon_huffman_decoder_t huffman_decoder;
 
     carbon_compressor_incremental_config_t config;
 } carbon_compressor_incremental_extra_t;
+
+typedef struct {
+    uint8_t byte;
+    size_t  bitpos;
+    carbon_io_device_t *device;
+} carbon_bitstream_ro_t;
 
 bool option_set_bool(carbon_err_t *err, bool *target, char *value) {
     if(strcmp(value, "true") == 0) {
@@ -63,6 +73,16 @@ bool option_set_bool(carbon_err_t *err, bool *target, char *value) {
     }
 }
 
+bool option_set_sizet(carbon_err_t *err, size_t *target, char *value) {
+    long long length = atol(value);
+
+    if(length <= 0) { CARBON_ERROR(err, CARBON_ERR_COMPRESSOR_OPT_VAL_INVALID); return false; }
+    *target = (size_t)length;
+
+    return true;
+}
+
+
 bool set_prefix(carbon_err_t *err, carbon_compressor_t *self, char *value) {
     return option_set_bool(err, &((carbon_compressor_incremental_extra_t *)self->extra)->config.prefix, value);
 }
@@ -71,22 +91,16 @@ bool set_suffix(carbon_err_t *err, carbon_compressor_t *self, char *value) {
     return option_set_bool(err, &((carbon_compressor_incremental_extra_t *)self->extra)->config.suffix, value);
 }
 
+bool set_huffman(carbon_err_t *err, carbon_compressor_t *self, char *value) {
+    return option_set_bool(err, &((carbon_compressor_incremental_extra_t *)self->extra)->config.huffman, value);
+}
+
 bool set_sort_chunk_length(carbon_err_t *err, carbon_compressor_t *self, char *value) {
-    long long length = atol(value);
-
-    if(length <= 0) { CARBON_ERROR(err, CARBON_ERR_COMPRESSOR_OPT_VAL_INVALID); return false; }
-    ((carbon_compressor_incremental_extra_t *)self->extra)->config.sort_chunk_length = (size_t)length;
-
-    return true;
+    return option_set_sizet(err, &((carbon_compressor_incremental_extra_t *)self->extra)->config.sort_chunk_length, value);
 }
 
 bool set_delta_chunk_length(carbon_err_t *err, carbon_compressor_t *self, char *value) {
-    long long length = atol(value);
-
-    if(length <= 0) { CARBON_ERROR(err, CARBON_ERR_COMPRESSOR_OPT_VAL_INVALID); return false; }
-    ((carbon_compressor_incremental_extra_t *)self->extra)->config.delta_chunk_length = (size_t)length;
-
-    return true;
+    return option_set_sizet(err, &((carbon_compressor_incremental_extra_t *)self->extra)->config.delta_chunk_length, value);
 }
 
 
@@ -139,14 +153,23 @@ bool this_read_string_from_io_device(carbon_compressor_t *self, carbon_io_device
 
         entry.common_prefix_length = common_prefix_len_ui8;
         entry.common_suffix_length = common_suffix_len_ui8;
-        entry.str = malloc(entry.strlen + 1);
-        entry.str[entry.strlen] = 0;
 
-        carbon_io_device_read(
-                    src,
-                    entry.str + common_prefix_len_ui8, sizeof(char),
-                    entry.strlen - common_prefix_len_ui8 - common_suffix_len_ui8
-        );
+        if(extra->config.huffman) {
+            entry.str = malloc(entry.strlen + 1);
+            entry.str[entry.strlen] = 0;
+
+            char *tmp = carbon_huffman_decode_io(&extra->huffman_decoder, src, entry.strlen - common_prefix_len_ui8 - common_suffix_len_ui8);
+            strncpy(entry.str + common_prefix_len_ui8, tmp, entry.strlen - common_prefix_len_ui8 - common_suffix_len_ui8);
+            free(tmp);
+        } else {
+            entry.str = malloc(entry.strlen + 1);
+            entry.str[entry.strlen] = 0;
+            carbon_io_device_read(
+                        src,
+                        entry.str + common_prefix_len_ui8, sizeof(char),
+                        entry.strlen - common_prefix_len_ui8 - common_suffix_len_ui8
+            );
+        }
 
         entry.end_pos = carbon_io_device_tell(src);
 
@@ -187,6 +210,60 @@ void this_read_config_from_io_device(carbon_compressor_t *self, carbon_io_device
 
     config->prefix = flags & 1;
     config->suffix = flags & 2;
+    config->huffman = flags & 4;
+}
+
+size_t this_read_next_bit_from_io(carbon_bitstream_ro_t *stream) {
+    if((stream->bitpos & 7) == 0) {
+        carbon_io_device_read(stream->device, &stream->byte, 1, 1);
+    }
+
+    size_t bit = (stream->byte & (1 << (stream->bitpos & 7))) ? 1 : 0;
+    ++stream->bitpos;
+    return bit;
+}
+
+void this_read_huffman_table_from_io_device(
+        carbon_io_device_t *src,
+        carbon_compressor_incremental_extra_t *extra
+    ) {
+
+    bool ok;
+    size_t num_entries = carbon_vlq_decode_from_io(src, &ok);
+
+    carbon_huffman_dictionary_t dictionary;
+    carbon_bitstream_ro_t stream;
+    stream.device = src;
+    stream.byte = 0;
+    stream.bitpos = 0;
+
+    for(size_t i = 0; i < UCHAR_MAX; ++i)
+        carbon_huffman_bitstream_create(&dictionary[i]);
+
+    for(size_t i = 0; i < num_entries;) {
+
+        size_t bitlen = 0;
+        for(size_t j = 0; j < 8; ++j)
+            bitlen |= this_read_next_bit_from_io(&stream) << j;
+
+
+        size_t entry_count = 0;
+        for(size_t j = 0; j < 8; ++j)
+            entry_count |= this_read_next_bit_from_io(&stream) << j;
+
+        for(size_t j = 0; j < entry_count; ++j) {
+            uint8_t symbol = 0;
+            for(size_t j = 0; j < 8; ++j)
+                symbol |= this_read_next_bit_from_io(&stream) << j;
+
+            for(size_t j = 0; j < bitlen; ++j)
+                carbon_huffman_bitstream_write(&dictionary[symbol], this_read_next_bit_from_io(&stream));
+
+            ++i;
+        }
+    }
+
+    carbon_huffman_decoder_create(&extra->huffman_decoder, dictionary);
 }
 
 
@@ -199,25 +276,32 @@ carbon_compressor_incremental_init(carbon_compressor_t *self, carbon_doc_bulk_t 
     CARBON_UNUSED(self);
     CARBON_UNUSED(context);
     /* nothing to do for uncompressed dictionaries */
-    printf("USING INCREMENTAL ENCODER\n");
 
 
     self->extra = malloc(sizeof(carbon_compressor_incremental_extra_t));
 
     carbon_compressor_incremental_extra_t *extra =
             (carbon_compressor_incremental_extra_t *)self->extra;
+
+    carbon_huffman_encoder_create(&extra->huffman_encoder);
+    extra->huffman_decoder.tree = NULL;
+
     extra->previous_offset = 0;
     extra->previous_length = 0;
     extra->strings_since_last_base = 0;
+    extra->strings_since_last_huffman_update = 0;
     extra->previous_string = "";
+
 
     extra->config.prefix = true;
     extra->config.suffix = false;
+    extra->config.huffman = false;
     extra->config.sort_chunk_length = 100000;
     extra->config.delta_chunk_length = 100;
 
     carbon_hashmap_put(self->options, "prefix", (carbon_hashmap_any_t)&set_prefix);
     carbon_hashmap_put(self->options, "suffix", (carbon_hashmap_any_t)&set_suffix);
+    carbon_hashmap_put(self->options, "huffman", (carbon_hashmap_any_t)&set_huffman);
     carbon_hashmap_put(self->options, "sort_chunk_length", (carbon_hashmap_any_t)&set_sort_chunk_length);
     carbon_hashmap_put(self->options, "delta_chunk_length", (carbon_hashmap_any_t)&set_delta_chunk_length);
 
@@ -239,6 +323,14 @@ carbon_compressor_incremental_drop(carbon_compressor_t *self)
 {
     CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_INCREMENTAL);
 
+    carbon_compressor_incremental_extra_t *extra =
+            (carbon_compressor_incremental_extra_t *)self->extra;
+
+    carbon_huffman_encoder_drop(&extra->huffman_encoder);
+
+    if(extra->huffman_decoder.tree)
+        carbon_huffman_decoder_drop(&extra->huffman_decoder);
+
     free(self->extra);
     /* nothing to do for uncompressed dictionaries */
     return true;
@@ -252,6 +344,11 @@ carbon_compressor_incremental_write_extra(carbon_compressor_t *self, carbon_memf
 
     CARBON_UNUSED(strings);
 
+    typedef struct local_huffman_table_entry {
+        carbon_huffman_bitstream_t *stream;
+        char symbol;
+    } local_huffman_table_entry_t;
+
     carbon_compressor_incremental_extra_t * extra =
             (carbon_compressor_incremental_extra_t *)self->extra;
 
@@ -259,8 +356,78 @@ carbon_compressor_incremental_write_extra(carbon_compressor_t *self, carbon_memf
     uint8_t flags = 0;
     flags |= (extra->config.prefix ? 1 : 0) << 0;
     flags |= (extra->config.suffix ? 1 : 0) << 1;
+    flags |= (extra->config.huffman ? 1 : 0) << 2;
 
     carbon_memfile_write(dst, &flags, 1);
+
+    if(extra->config.huffman) {
+        carbon_priority_queue_t *queue = carbon_priority_queue_create(UCHAR_MAX);
+
+        carbon_huffman_bitstream_t stream;
+        carbon_huffman_bitstream_create(&stream);
+
+        for(size_t i = 0; i < UCHAR_MAX; ++i) {
+            if(extra->huffman_encoder.frequencies[i] == 0)
+                continue;
+
+            local_huffman_table_entry_t *entry = malloc(sizeof(local_huffman_table_entry_t));
+            entry->stream = &extra->huffman_encoder.codes[i];
+            entry->symbol = (char)i;
+
+            carbon_priority_queue_push(queue, entry, entry->stream->num_bits);
+        }
+
+        // Write total number of entries
+        {
+            carbon_io_device_t io;
+            carbon_io_device_from_memfile(&io, dst);
+            carbon_vlq_encode_to_io(queue->count, &io);
+            carbon_io_device_drop(&io);
+        }
+
+        size_t last_bit_length = 0;
+        size_t last_count_bit_pos = 0;
+        uint8_t num_symbols_for_bitlen = 0;
+        while(queue->count > 0) {
+            local_huffman_table_entry_t *entry = (local_huffman_table_entry_t*)carbon_priority_queue_pop(queue);
+
+            if(entry->stream->num_bits != last_bit_length) {
+                if(last_bit_length > 0) {
+                    size_t tmp_bit_pos = stream.num_bits;
+                    stream.num_bits = last_count_bit_pos;
+                    carbon_huffman_bitstream_write_byte(&stream, num_symbols_for_bitlen);
+                    stream.num_bits = tmp_bit_pos;
+                }
+
+                num_symbols_for_bitlen = 0;
+                last_bit_length = entry->stream->num_bits;
+
+                carbon_huffman_bitstream_write_byte(&stream, (uint8_t)entry->stream->num_bits);
+                last_count_bit_pos = stream.num_bits;
+                carbon_huffman_bitstream_write_byte(&stream, 0);
+            }
+
+            carbon_huffman_bitstream_write_byte(&stream, (uint8_t)entry->symbol);
+            carbon_huffman_bitstream_concat(&stream, entry->stream);
+
+
+            ++num_symbols_for_bitlen;
+
+            free(entry);
+        }
+
+        // Update last entry, too
+        {
+            size_t tmp_bit_pos = stream.num_bits;
+            stream.num_bits = last_count_bit_pos;
+            carbon_huffman_bitstream_write_byte(&stream, num_symbols_for_bitlen);
+            stream.num_bits = tmp_bit_pos;
+        }
+
+        carbon_memfile_write(dst, stream.data, (stream.num_bits + 7) >> 3);
+        carbon_huffman_bitstream_drop(&stream);
+    }
+
     return true;
 }
 
@@ -272,17 +439,39 @@ bool carbon_compressor_incremental_print_extra(carbon_compressor_t *self, FILE *
     CARBON_UNUSED(file);
     CARBON_UNUSED(nbytes);
 
-    carbon_compressor_incremental_config_t config;
+    carbon_compressor_incremental_extra_t *extra =
+            (carbon_compressor_incremental_extra_t *)self->extra;
 
     carbon_io_device_t io;
     carbon_io_device_from_memfile(&io, src);
-    this_read_config_from_io_device(self, &io, &config);
+    this_read_config_from_io_device(self, &io, &extra->config);
 
-    fprintf(file, "0x%04x [config:%s%s]\n",
+    fprintf(file, "0x%04x [config:%s%s%s]\n",
             (unsigned int)carbon_io_device_tell(&io),
-            config.prefix ? " prefix" : "",
-            config.suffix ? " suffix" : ""
+            extra->config.prefix ? " prefix" : "",
+            extra->config.suffix ? " suffix" : "",
+            extra->config.huffman ? " huffman" : ""
     );
+
+    if(extra->config.huffman) {
+        fprintf(file, "0x%04x [huffman-table]\n", (unsigned int)carbon_io_device_tell(&io));
+        this_read_huffman_table_from_io_device(&io, extra);
+
+        for(size_t i = 0; i < UCHAR_MAX; ++i) {
+            carbon_huffman_bitstream_t *code = &extra->huffman_decoder.codes[i];
+            if(code->num_bits == 0)
+                continue;
+
+            fprintf(file, "       [huffman-table-entry][symbol %zu ('%c')][code 0b", i, (char)i);
+            for(size_t j = 0; j < code->num_bits; ++j)
+                fprintf(file, "%c", code->data[j >> 3] & (1 << (j & 7)) ? '1' : '0');
+
+            fprintf(file, "]\n");
+        }
+
+        fprintf(file, "0x%04x [End (huffman-table)]\n", (unsigned int)carbon_io_device_tell(&io));
+    }
+
     return true;
 }
 
@@ -333,6 +522,30 @@ carbon_compressor_incremental_prepare_entries(carbon_compressor_t *self,
         qsort((carbon_strdic_entry_t *)entries->base + i, this_batch_size, sizeof(carbon_strdic_entry_t), compare_entries_by_str);
     }
 
+    if(extra->config.huffman) {
+        char const *previous_string = "";
+        size_t previous_length = 0;
+        for(size_t i = 0; i < entries->num_elems; ++i) {
+            carbon_strdic_entry_t *entry = ((carbon_strdic_entry_t *)entries->base + i);
+
+            size_t string_length = strlen(entry->string);
+
+            size_t pref_len = 0, suf_len = 0;
+            size_t max_common_len = min(255, min(previous_length, string_length));
+
+            if(extra->config.prefix)
+                for(pref_len = 0; pref_len < max_common_len && entry->string[pref_len] == previous_string[pref_len]; ++pref_len);
+
+            if(extra->config.suffix)
+                for(suf_len = 0;suf_len + pref_len < max_common_len && entry->string[string_length - 1 - suf_len] == previous_string[previous_length - 1 - suf_len];++suf_len);
+
+            carbon_huffman_encoder_learn_frequencies(&extra->huffman_encoder, entry->string + pref_len, string_length  - pref_len - suf_len);
+            previous_string = entry->string;
+            previous_length = string_length;
+        }
+
+        carbon_huffman_encoder_bake_code(&extra->huffman_encoder);
+    }
     return true;
 }
 
@@ -386,7 +599,21 @@ carbon_compressor_incremental_encode_string(carbon_compressor_t *self, carbon_me
     }
 
     size_t remaining_len = string_length - common_prefix_len - common_suffix_len;
-    carbon_io_device_write(&io, (void *)(string + common_prefix_len), 1, (size_t)remaining_len);
+    if(extra->config.huffman) {
+        char  *remaining_str = strdup(string + common_prefix_len);
+        remaining_str[remaining_len] = 0;
+
+        carbon_huffman_bitstream_t stream;
+        carbon_huffman_bitstream_create(&stream);
+        carbon_huffman_encode(&extra->huffman_encoder, &stream, remaining_str);
+
+        carbon_io_device_write(&io, (void *)stream.data, 1, (stream.num_bits + 7) >> 3);
+        carbon_huffman_bitstream_drop(&stream);
+
+        free(remaining_str);
+    } else {
+        carbon_io_device_write(&io, (void *)(string + common_prefix_len), 1, remaining_len);
+    }
 
     extra->previous_offset = current_off;
     extra->previous_length = string_length;
@@ -431,5 +658,8 @@ carbon_compressor_incremental_read_extra(carbon_compressor_t *self, FILE *src, s
             (carbon_compressor_incremental_extra_t *)self->extra;
 
     this_read_config_from_io_device(self, &io, &extra->config);
+
+    if(extra->config.huffman)
+        this_read_huffman_table_from_io_device(&io, extra);
     return true;
 }
