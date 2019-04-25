@@ -36,6 +36,8 @@
     carbon_huffman_encoder_drop(&encoder);
   */
 
+struct carbon_io_device;
+typedef struct carbon_io_device carbon_io_device_t;
 
 typedef struct carbon_huffman_bitstream {
     size_t num_bits;
@@ -66,6 +68,8 @@ void carbon_huffman_bitstream_create(carbon_huffman_bitstream_t *stream);
 
 void carbon_huffman_bitstream_write(carbon_huffman_bitstream_t *stream, bool bit);
 
+void carbon_huffman_bitstream_write_byte(carbon_huffman_bitstream_t *stream, uint8_t byte);
+
 void carbon_huffman_bitstream_concat(carbon_huffman_bitstream_t *stream, carbon_huffman_bitstream_t *other);
 
 void carbon_huffman_bitstream_dump(carbon_huffman_bitstream_t *stream);
@@ -74,7 +78,7 @@ void carbon_huffman_bitstream_drop(carbon_huffman_bitstream_t *stream);
 
 void carbon_huffman_encoder_create(carbon_huffman_encoder_t *encoder);
 
-void carbon_huffman_encoder_learn_frequencies(carbon_huffman_encoder_t *encoder, char const *data);
+void carbon_huffman_encoder_learn_frequencies(carbon_huffman_encoder_t *encoder, char const *data, size_t length);
 
 void carbon_huffman_encoder_bake_code(carbon_huffman_encoder_t *encoder);
 
@@ -92,5 +96,7 @@ void carbon_huffman_decoder_drop(carbon_huffman_decoder_t *decoder);
 void carbon_huffman_encode(carbon_huffman_encoder_t *encoder, carbon_huffman_bitstream_t *stream, char *data);
 
 char *carbon_huffman_decode(carbon_huffman_decoder_t *decoder, carbon_huffman_bitstream_t *stream);
+
+char *carbon_huffman_decode_io(carbon_huffman_decoder_t *decoder, carbon_io_device_t *io, size_t nsymbols);
 
 #endif

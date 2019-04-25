@@ -1,6 +1,8 @@
 #include <carbon/compressor/huffman/huffman.h>
 #include <carbon/compressor/huffman/priority-queue.h>
 
+#include <carbon/carbon-io-device.h>
+
 void this_recursive_clean_huffman_tree(
         carbon_huffman_tree_node_t *node
     ) {
@@ -48,18 +50,18 @@ void carbon_huffman_encoder_create(
 {
     for(size_t i = 0;i < 256;++i) {
         tree->frequencies[i] = 0;
+        tree->codes[i].num_bits = 0;
     }
 }
 
 void carbon_huffman_encoder_learn_frequencies(
         carbon_huffman_encoder_t *encoder,
-        char const *data
+        char const *data,
+        size_t length
     )
 {
-    while(*data) {
-        encoder->frequencies[*((uint8_t *)data)]++;
-        ++data;
-    }
+    for(size_t i = 0; i < length;++i)
+        encoder->frequencies[(uint8_t)data[i]]++;
 }
 
 void carbon_huffman_encoder_bake_code(
@@ -68,11 +70,7 @@ void carbon_huffman_encoder_bake_code(
 {
     carbon_priority_queue_t *queue = carbon_priority_queue_create(UCHAR_MAX);
 
-    size_t max_frequency = 0;
-    for(size_t i = 0; i < UCHAR_MAX; ++i) {
-        if(encoder->frequencies[i] > max_frequency)
-            max_frequency = encoder->frequencies[i];
-    }
+    size_t max_frequency = SIZE_MAX;
 
     for(size_t i = 0; i < UCHAR_MAX; ++i) {
         if(encoder->frequencies[i]) {
@@ -96,7 +94,7 @@ void carbon_huffman_encoder_bake_code(
         parent->symbol = 0;
         parent->frequency = node_a->frequency + node_b->frequency;
 
-        carbon_priority_queue_push(queue, parent, parent->frequency);
+        carbon_priority_queue_push(queue, parent, max_frequency - parent->frequency);
     }
 
     carbon_huffman_tree_node_t *root = (carbon_huffman_tree_node_t *)carbon_priority_queue_pop(queue);
@@ -231,6 +229,8 @@ void carbon_huffman_decoder_create(
 
     for(size_t i = 0; i < UCHAR_MAX; ++i) {
         carbon_huffman_bitstream_t *stream = &dictionary[i];
+        if(stream->num_bits == 0)
+            continue;
 
         carbon_huffman_tree_node_t *node = decoder->tree;
         for(size_t j = 0; j < stream->num_bits; ++j) {
@@ -316,7 +316,7 @@ void carbon_huffman_adaptive_update(
     }
 
     for(size_t i = 0; i < num_entries; ++i) {
-        carbon_huffman_encoder_learn_frequencies(encoder, entries[i]);
+        carbon_huffman_encoder_learn_frequencies(encoder, entries[i], strlen(entries[i]));
     }
 
     carbon_huffman_encoder_bake_code(encoder);
@@ -330,4 +330,49 @@ void carbon_huffman_create_all_eq_encoder(
     }
 
     carbon_huffman_encoder_bake_code(encoder);
+}
+
+char *carbon_huffman_decode_io(
+        carbon_huffman_decoder_t *decoder,
+        carbon_io_device_t *io,
+        size_t nsymbols
+    ) {
+    size_t length = 0;
+    char  *dst = malloc(nsymbols + 1);
+    dst[nsymbols] = 0;
+
+    size_t  bitpos = 0;
+    uint8_t current_byte = 0;
+    for(size_t i = 0; i < nsymbols; ++i) {
+        carbon_huffman_tree_node_t *node = decoder->tree;
+        while(node->left != 0 && node->right != 0) {
+            if((bitpos & 7) == 0)
+                carbon_io_device_read(io, &current_byte, 1, 1);
+
+            if(current_byte & 1 << (bitpos & 7)) {
+                node = node->right;
+            } else {
+                node = node->left;
+            }
+
+            ++bitpos;
+        }
+
+        if(node->left == 0 && node->right == 0) {
+            dst[length++] = node->symbol;
+        } else {
+            free(dst);
+            return 0;
+        }
+    }
+
+    return dst;
+}
+
+void carbon_huffman_bitstream_write_byte(
+        carbon_huffman_bitstream_t *stream,
+        uint8_t byte
+    ) {
+    for(size_t i = 0; i < 8; ++i)
+        carbon_huffman_bitstream_write(stream, (byte & (1 << i)) > 0);
 }
