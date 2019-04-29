@@ -495,6 +495,12 @@ NG5_EXPORT(const void *)hashtable_get_value(struct hashtable *map, const void *k
         return result;
 }
 
+NG5_EXPORT(const void *) hashtable_get_value_or_default(struct hashtable *map, const void *key, const void *value)
+{
+        const void *result = hashtable_get_value(map, key);
+        return result ? result : value;
+}
+
 NG5_EXPORT(bool) hashtable_get_fload_factor(float *factor, struct hashtable *map)
 {
         error_if_null(factor)

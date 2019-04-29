@@ -123,6 +123,7 @@ int main (int argc, char **argv)
 
     int status = opt_mgr_process(&manager, argc - 1, argv + 1, stdout);
     opt_mgr_drop(&manager);
+    
     return status ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 

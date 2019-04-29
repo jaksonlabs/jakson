@@ -275,6 +275,9 @@ ng5_func_unused static const char *basic_type_to_system_type_str(enum field_type
 #define ng5_min(a, b)                                                                                                  \
     ((a) < (b) ? (a) : (b))
 
+#define ng5_span(a, b)                                                                                                 \
+     (a < b ? b - a : a - b)
+
 #define error_if_null(x)                                                                                               \
 {                                                                                                                      \
     if (!(x)) {                                                                                                        \

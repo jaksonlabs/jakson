@@ -63,6 +63,7 @@ extern "C" {
 #include "core/strhash/strhash_mem.h"
 #include "core/string-pred/string_pred_contains.h"
 #include "core/string-pred/string_pred_equals.h"
+#include "std/histogram.h"
 
 NG5_EXPORT (bool) init(void);
 
