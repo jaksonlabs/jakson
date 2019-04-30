@@ -53,6 +53,9 @@ enum pool_impl_tag
         POOL_IMPL_NONE
 };
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
 static struct pool_register_entry
 {
         struct {
@@ -94,6 +97,8 @@ static struct pool_register_entry
                 ._drop = NULL
         }
 };
+
+#pragma GCC diagnostic pop
 
 struct pool_counters
 {
