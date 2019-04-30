@@ -19,7 +19,10 @@
 #define NG5_POOL_H
 
 #include "shared/common.h"
+
 #include "core/mem/pools/none.h"
+#include "core/mem/pools/managed-realloc.h"
+
 #include "std/vec.h"
 #include "std/histogram.h"
 #include "shared/error.h"
@@ -50,7 +53,8 @@ enum pool_options
 
 enum pool_impl_tag
 {
-        POOL_IMPL_NONE
+        POOL_IMPL_NONE,
+        POOL_IMPL_MANAGED_REALLOC
 };
 
 #pragma GCC diagnostic push
@@ -94,6 +98,24 @@ static struct pool_register_entry
                 .ops.simd       = false,
                 .ops.dedup      = false,
                 ._create = pool_strategy_none_create,
+                ._drop = NULL
+        },
+        {
+                .ops.pooled     = true,
+                .ops.gc_sync    = false,
+                .ops.gc_async   = false,
+                .ops.pressure   = false,
+                .ops.linear     = true,
+                .ops.chunked    = false,
+                .ops.balanced   = false,
+                .ops.first_fit  = false,
+                .ops.best_fit   = false,
+                .ops.random_fit = false,
+                .ops.cracked    = false,
+                .ops.parallel   = false,
+                .ops.simd       = false,
+                .ops.dedup      = false,
+                ._create = pool_strategy_managed_realloc_create,
                 ._drop = NULL
         }
 };

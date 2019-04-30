@@ -138,6 +138,8 @@ static void bench_pool_realloc_free_ratio(const char *impl_name)
                                                 call_end = time_now_wallclock();
                                         }
                                         call_duration = (call_end - call_start)/(float) CALL_SAMPLES;
+
+
                                         struct pool_counters counters;
                                         pool_get_counters(&counters, &pool);
                                         pool_reset_counters(&pool);
