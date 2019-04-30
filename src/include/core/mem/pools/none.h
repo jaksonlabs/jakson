@@ -15,27 +15,19 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_MEMPOOL_H
-#define NG5_MEMPOOL_H
+#ifndef NG5_POOL_NONE_H
+#define NG5_POOL_NONE_H
 
-#include <shared/error.h>
-#include <std/vec.h>
+#include "shared/common.h"
 
-struct mempool
-{
-        struct err        err;
-        struct vector     in_used;
-        struct vector     freelist_qe_8B;
-};
+NG5_BEGIN_DECL
 
-NG5_EXPORT(bool) mempool_create(struct mempool *pool);
-NG5_EXPORT(bool) mempool_drop(struct mempool *pool);
-NG5_EXPORT(void *) mempool_alloc(struct mempool *pool, u64 nbytes);
-NG5_EXPORT(void *) mempool_alloc_array(u32 how_many, u64 nbytes);
-NG5_EXPORT(bool) mempool_free(struct mempool *pool, void *ptr);
-NG5_EXPORT(bool) mempool_free_all(struct mempool *pool);
-NG5_EXPORT(void *) mempool_realloc(struct mempool *pool, void *ptr, u64 nbytes);
-NG5_EXPORT(bool) mempool_gc(struct mempool *pool);
+#define POOL_STRATEGY_NONE_NAME "mempool/none"
 
+struct pool_strategy; /* forwared from "core/mem/pool.h" */
+
+void pool_strategy_none_create(struct pool_strategy *dst);
+
+NG5_END_DECL
 
 #endif

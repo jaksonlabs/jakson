@@ -27,6 +27,7 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <assert.h>
+#include <inttypes.h>
 
 #ifdef __cplusplus
 #define NG5_BEGIN_DECL  extern "C" {
@@ -292,6 +293,10 @@ ng5_func_unused static const char *basic_type_to_system_type_str(enum field_type
 #define ng5_check_success(x)                                                                                           \
 {                                                                                                                      \
     if (unlikely(!x)) {                                                                                                \
+        struct err err;                                                                                                \
+        error_init(&err);                                                                                              \
+        error(&err, NG5_ERR_SUB_FAILED);                                                                               \
+        error_print_to_stderr(&err);                                                                                   \
         return x;                                                                                                      \
     }                                                                                                                  \
 }
@@ -320,7 +325,7 @@ ng5_func_unused static const char *basic_type_to_system_type_str(enum field_type
 #define ng5_set_bit(n)                ( ((u32) 1) << (n) )
 #define ng5_set_bits(x, mask)         ( x |=  (mask) )
 #define ng5_unset_bits(x, mask)       ( x &= ~(mask) )
-#define ng5_are_bits_set(mask, bit)   (((bit) & mask ) == (bit))
+#define ng5_are_bits_set(value, bit)   (((bit) & value ) == (bit))
 
 #define ng5_implemented_or_error(err, x, func)                                                                         \
     ng5_optional(x->func == NULL, error(err, NG5_ERR_NOTIMPLEMENTED))

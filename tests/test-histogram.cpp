@@ -4,7 +4,7 @@
 
 #include "std/histogram.h"
 
-TEST(ObjectIdTest, SimpleTetst) {
+TEST(HistogramTest, SimpleTetst) {
         struct histogram_builder builder;
         struct histogram hist;
         u32 n;
@@ -36,7 +36,7 @@ TEST(ObjectIdTest, SimpleTetst) {
 
 }
 
-TEST(ObjectIdTest, EqualDistBucketNumLarger) {
+TEST(HistogramTest, EqualDistBucketNumLarger) {
         struct histogram_builder builder;
         struct histogram hist;
         u32 n;
@@ -64,7 +64,7 @@ TEST(ObjectIdTest, EqualDistBucketNumLarger) {
         EXPECT_TRUE(histogram_builder_drop(&builder));
 }
 
-TEST(ObjectIdTest, EqualDistBucketNumEq) {
+TEST(HistogramTest, EqualDistBucketNumEq) {
         struct histogram_builder builder;
         struct histogram hist;
         u32 n;
@@ -92,7 +92,7 @@ TEST(ObjectIdTest, EqualDistBucketNumEq) {
         EXPECT_TRUE(histogram_builder_drop(&builder));
 }
 
-TEST(ObjectIdTest, EqualDistBucketNumSmaller) {
+TEST(HistogramTest, EqualDistBucketNumSmaller) {
         struct histogram_builder builder;
         struct histogram hist;
         u32 n;
@@ -120,7 +120,7 @@ TEST(ObjectIdTest, EqualDistBucketNumSmaller) {
         EXPECT_TRUE(histogram_builder_drop(&builder));
 }
 
-TEST(ObjectIdTest, OneDistBucketNumLarger) {
+TEST(HistogramTest, OneDistBucketNumLarger) {
         struct histogram_builder builder;
         struct histogram hist;
         u32 n;
@@ -148,7 +148,7 @@ TEST(ObjectIdTest, OneDistBucketNumLarger) {
         EXPECT_TRUE(histogram_builder_drop(&builder));
 }
 
-TEST(ObjectIdTest, StressTest) {
+TEST(HistogramTest, StressTest) {
         struct histogram_builder builder;
         struct histogram hist;
         u32 n;

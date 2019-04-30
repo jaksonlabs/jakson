@@ -101,6 +101,8 @@ NG5_BEGIN_DECL
 #define NG5_ERR_FWRITE_FAILED 73           /** Unable to write to file */
 #define NG5_ERR_HASTABLE_DESERIALERR 74    /** Unable to deserialize hash table from file */
 #define NG5_ERR_UNKNOWN_DIC_TYPE 75        /** Unknown string dictionary implementation requested */
+#define NG5_ERR_SUB_FAILED 76              /** Sub process failed */
+#define NG5_ERR_FREE_FAILED 77             /** Freeing up memory failed */
 
 static const char *const _err_str[] =
         {"No error", "Null pointer detected", "Function not implemented", "Index is out of bounds",
@@ -137,7 +139,7 @@ static const char *const _err_str[] =
          "Illegal state: iteration over collection issued, but object found", "Type mismatch",
          "Index is corrupted: requested offset is outside file bounds", "Temporary file cannot be opened for writing",
          "Unable to write to file", "Unable to deserialize hash table from file",
-         "Unknown string dictionary implementation requested"};
+         "Unknown string dictionary implementation requested", "Sub process failed", "Freeing up memory failed"};
 
 #define NG5_ERRSTR_ILLEGAL_CODE "illegal error code"
 
@@ -178,6 +180,18 @@ NG5_EXPORT(bool) error_print_and_abort(const struct err *err);
 
 #define error_print(code)                    error_print_if(true, code)
 #define print_error_and_die(code)            { error_print(code); abort(); }
+#define print_error_with_details_and_die(code, msg, ...)                                                               \
+{                                                                                                                      \
+        struct err err;                                                                                                \
+        error_init(&err);                                                                                              \
+        char buffer[2048];                                                                                             \
+        sprintf(buffer, msg, __VA_ARGS__);                                                                             \
+        error_with_details(&err, code, buffer);                                                                        \
+        error_print_to_stderr(&err);                                                                                   \
+        abort();                                                                                                       \
+}
+
+
 #define error_print_and_die_if(expr, code)   { if(expr) { print_error_and_die(code) } }
 #define error_print_if(expr, code)                                                                                     \
 {                                                                                                                      \

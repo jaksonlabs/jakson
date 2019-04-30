@@ -7,13 +7,13 @@ include(GNUInstallDirs)
 
 set (CMAKE_C_STANDARD 11)
 
-if (${BUILD_TYPE} MATCHES Debug)
-        message("-- Debug build is enabled")
-        set(CMAKE_BUILD_TYPE Debug)
-else()
+#if (${BUILD_TYPE} MATCHES Debug)
+#        message("-- Debug build is enabled")
+#        set(CMAKE_BUILD_TYPE Debug)
+#else()
         message("-- Release build is enabled")
         set(CMAKE_BUILD_TYPE Release)
-endif()
+#endif()
 
 file(MAKE_DIRECTORY ${CMAKE_HOME_DIRECTORY}/build)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/build)
@@ -29,6 +29,9 @@ set(LIBS ${LIBS} pthread m)
 file(GLOB_RECURSE LIB_HEADER_FILES src/include/*.h )
 file(GLOB_RECURSE LIB_SOURCE_FILES src/*.c )
 set(LIB_SOURCES ${LIB_HEADER_FILES} ${LIB_SOURCE_FILES})
+
+message("header files: ${LIB_HEADER_FILES}")
+message("source files: ${LIB_SOURCE_FILES}")
 
 if (${LOG_INFO} MATCHES "on")
     if (${BUILD_TYPE} MATCHES Debug)
@@ -101,6 +104,7 @@ install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/carbon DESTINATION ${CMAKE_INSTALL
         FILES_MATCHING PATTERN "*.h*")
 
 add_subdirectory("${CMAKE_SOURCE_DIR}/tools/carbon")
+add_subdirectory("${CMAKE_SOURCE_DIR}/benches")
 add_subdirectory("${CMAKE_SOURCE_DIR}/examples")
 
 enable_testing()
