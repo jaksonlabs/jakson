@@ -22,6 +22,8 @@
 
 NG5_BEGIN_DECL
 
+typedef uint8_t u3; /* an 8 bit unsigned integer from which only 3 bits are used (see 'tagged_ptr.h') */
+
 typedef uint8_t u8;
 
 typedef uint16_t u16;
