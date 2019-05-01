@@ -19,18 +19,17 @@
 #define NG5_POOL_H
 
 #include "shared/common.h"
+#include "shared/types.h"
 
 #include "core/mem/pools/none.h"
-#include "core/mem/pools/managed-realloc.h"
+
+#include "core/ptrs/data_ptr.h"
 
 #include "std/vec.h"
 #include "std/histogram.h"
 #include "shared/error.h"
 
 NG5_BEGIN_DECL
-
-#define TO_C_PTR(pool_ptr)      (((void *)pool_ptr) + sizeof(struct pool_ptr_header))
-#define FROM_C_PTR(c_ptr)       ((struct pool_ptr *) ((void *) c_ptr - sizeof(struct pool_ptr_header)))
 
 enum pool_options
 {
@@ -99,24 +98,6 @@ static struct pool_register_entry
                 .ops.dedup      = false,
                 ._create = pool_strategy_none_create,
                 ._drop = NULL
-        },
-        {
-                .ops.pooled     = true,
-                .ops.gc_sync    = false,
-                .ops.gc_async   = false,
-                .ops.pressure   = false,
-                .ops.linear     = true,
-                .ops.chunked    = false,
-                .ops.balanced   = false,
-                .ops.first_fit  = false,
-                .ops.best_fit   = false,
-                .ops.random_fit = false,
-                .ops.cracked    = false,
-                .ops.parallel   = false,
-                .ops.simd       = false,
-                .ops.dedup      = false,
-                ._create = pool_strategy_managed_realloc_create,
-                ._drop = NULL
         }
 };
 
@@ -161,39 +142,29 @@ struct pool_strategy
         void *extra;
         struct pool *context;
 
-        void *(*_alloc)(struct pool_strategy *self, u64 nbytes);
-        void *(*_realloc)(struct pool_strategy *self, void *ptr, u64 nbytes);
-        bool (*_free)(struct pool_strategy *self, void *ptr);
+        data_ptr_t (*_alloc)(struct pool_strategy *self, u64 nbytes);
+        data_ptr_t (*_realloc)(struct pool_strategy *self, data_ptr_t ptr, u64 nbytes);
+        bool (*_free)(struct pool_strategy *self, data_ptr_t ptr);
         bool (*_gc)(struct pool_strategy *self);
         bool (*_update_counters)(struct pool_strategy *self);
         bool (*_reset_counters)(struct pool_strategy *self);
 };
 
+struct pool_ptr_info {
+        u64 is_free     : 1;
+        u64 bytes_used  : 31;
+        u64 bytes_total : 32;
+        data_ptr_t ptr;
+};
+
 struct pool
 {
-        struct err                        err;
-        struct vector ofType(pool_ptr)    in_used;
-        struct vector ofType(u32)         in_used_pos_freelist;
-        struct spinlock                   lock;
-        struct pool_strategy              strategy;
+        struct err                          err;
+        struct vector ofType(pool_ptr_info) in_use;
+        struct vector ofType(u16)           in_use_pos_freelist;
+        struct spinlock                     lock;
+        struct pool_strategy                strategy;
 };
-
-struct pool_ptr_header {
-        struct {
-                u64 is_free     : 1;
-                u64 bytes_used  : 32;
-                u64 bytes_total : 31;
-        } meta;
-        u32 list_position;
-};
-
-
-struct pool_ptr
-{
-        struct pool_ptr_header header;
-        void *ptr;
-};
-
 
 
 NG5_DEFINE_GET_ERROR_FUNCTION(pool, struct pool, p);
@@ -203,17 +174,42 @@ NG5_EXPORT(bool) pool_create_by_name(struct pool *pool, const char *name);
 NG5_EXPORT(bool) pool_drop(struct pool *pool);
 NG5_EXPORT(bool) pool_reset_counters(struct pool *pool);
 NG5_EXPORT(bool) pool_get_counters(struct pool_counters *counters, struct pool *pool);
-NG5_EXPORT(void *) pool_alloc(struct pool *pool, u64 nbytes);
-NG5_EXPORT(void *) pool_alloc_array(struct pool *pool, u32 how_many, u64 nbytes);
-NG5_EXPORT(void *) pool_realloc(struct pool *pool, void *ptr, u64 nbytes);
+NG5_EXPORT(data_ptr_t) pool_alloc(struct pool *pool, u64 nbytes);
+NG5_EXPORT(data_ptr_t) pool_alloc_array(struct pool *pool, u32 how_many, u64 nbytes);
+NG5_EXPORT(data_ptr_t) pool_realloc(struct pool *pool, data_ptr_t ptr, u64 nbytes);
 NG5_EXPORT(const char*) pool_impl_name(struct pool *pool);
 NG5_EXPORT(bool) pool_gc(struct pool *pool);
-NG5_EXPORT(bool) pool_free(struct pool *pool, void *ptr);
+NG5_EXPORT(bool) pool_free(struct pool *pool, data_ptr_t ptr);
 NG5_EXPORT(bool) pool_free_all(struct pool *pool);
 
-NG5_EXPORT(struct pool_ptr *) pool_internal_register(struct pool *pool, void *ptr, u32 bytes_used, u32 bytes_total);
+NG5_EXPORT(bool) pool_internal_register(data_ptr_t *dst, struct pool *pool, const void *ptr, u32 bytes_used, u32 bytes_total);
 
-NG5_EXPORT(void) pool_internal_unregister(struct pool *pool, struct pool_ptr *ptr);
+NG5_EXPORT(void) pool_internal_unregister(struct pool *pool, data_ptr_t ptr);
+
+#define pool_internal_new(pool_strategy, c_ptr, c_ptr_length)                                                          \
+({                                                                                                                     \
+        data_ptr_t result;                                                                                             \
+        if (unlikely(!pool_internal_register(&result, (pool_strategy)->context, c_ptr, c_ptr_length, c_ptr_length))) { \
+        error_with_details(&(pool_strategy)->context->err, NG5_ERR_OUTOFBOUNDS,                                        \
+                "maximum number of pooled pointers reached");                                                          \
+        }                                                                                                              \
+        result;                                                                                                        \
+})
+
+#define pool_internal_delete(pool_strategy, data_ptr)                                                                  \
+        pool_internal_unregister(pool_strategy->context, data_ptr)
+
+#define pool_internal_get_info(pool_strategy, data_ptr)                                                                \
+({                                                                                                                     \
+        u16 pos;                                                                                                       \
+        struct pool_ptr_info *info;                                                                                    \
+        data_ptr_get_data(&pos, data_ptr);                                                                             \
+        assert(pos < pool_strategy->context->in_use.num_elems);                                                        \
+        info = vec_get(&pool_strategy->context->in_use, pos, struct pool_ptr_info);                                    \
+        assert(!info->is_free);                                                                                        \
+        assert(data_ptr_get_pointer(data_ptr) == data_ptr_get_pointer(info->ptr));                                     \
+        info;                                                                                                          \
+})
 
 NG5_END_DECL
 

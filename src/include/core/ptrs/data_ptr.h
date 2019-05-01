@@ -37,13 +37,13 @@ NG5_EXPORT(bool) data_ptr_create(data_ptr_t *dst, const void *adr);
 
 NG5_EXPORT(bool) data_ptr_update(data_ptr_t *dst, const void *adr);
 
-NG5_EXPORT(bool) data_ptr_get_data(u16 *data, const data_ptr_t *ptr);
+NG5_EXPORT(bool) data_ptr_get_data(u16 *data, const data_ptr_t ptr);
 
 NG5_EXPORT(bool) data_ptr_set_data(data_ptr_t *ptr, u16 data);
 
-NG5_EXPORT(bool) data_ptr_has_data(const data_ptr_t *ptr);
+NG5_EXPORT(bool) data_ptr_has_data(data_ptr_t ptr);
 
-NG5_EXPORT(void *) data_ptr_get_pointer(const data_ptr_t *ptr);
+NG5_EXPORT(void *) data_ptr_get_pointer(const data_ptr_t ptr);
 
 #define data_ptr_deref(type, ptr) ((type *) data_ptr_get_pointer(ptr))
 

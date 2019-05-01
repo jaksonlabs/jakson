@@ -15,6 +15,7 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include <execinfo.h>
 #include "shared/error.h"
 
 NG5_EXPORT(bool) error_init(struct err *err)
@@ -92,9 +93,16 @@ NG5_EXPORT(bool) error_print_to_stderr(const struct err *err)
                 bool has_details;
                 const char *details;
                 if (error_str(&errstr, &file, &line, &has_details, &details, err)) {
-                        fprintf(stderr, "*** ERROR ***   %s\n", errstr);
-                        fprintf(stderr, "                details: %s\n", has_details ? details : "no details");
-                        fprintf(stderr, "                source.: %s(%d)\n", file, line);
+                        fprintf(stderr, "*** ERROR ***   ERROR %d: %s\n", err->code, errstr);
+                        fprintf(stderr, "                %s:%d\n", file, line);
+                        fprintf(stderr, "                %s\n\n", has_details ? details : "(no further details)");
+                        void* callstack[128];
+                        int i, frames = backtrace(callstack, 128);
+                        char** strs = backtrace_symbols(callstack, frames);
+                        for (i = 0; i < frames; ++i) {
+                                fprintf(stderr, "                %s\n", strs[i]);
+                        }
+                        free(strs);
                 } else {
                         fprintf(stderr, "*** ERROR ***   internal error during error information fetch");
                 }

@@ -63,7 +63,7 @@ ng5_func_unused
 static void bench_pool_realloc_free_ratio(const char *impl_name)
 {
         struct pool pool;
-        struct vector ofType(void *) data;
+        struct vector ofType(data_ptr_t) data;
 
         timestamp_t call_start,
                     call_end;
@@ -80,21 +80,24 @@ static void bench_pool_realloc_free_ratio(const char *impl_name)
                 for (float alpha = 0.0f; alpha <= 1.0f; alpha += 0.04f) {
 
                         pool_create_by_name(&pool, impl_name);
-                        vec_create(&data, NULL, sizeof(void *), 100000);
+                        vec_create(&data, NULL, sizeof(data_ptr_t), 100000);
 
-                        /* allocate around 100 MB */
-                        for (int i = 0; i < 100000; i++) {
-                                void *ptr = pool_alloc(&pool, 1 + rand() % 2048);
+
+                        data_ptr_t ptr;
+                        for (int i = 0; i < 65000; i++) {
+                                ptr = pool_alloc(&pool, 1 + rand() % 2048);
                                 vec_push(&data, &ptr, 1);
                         }
 
-                        /* meassure realloc/free ratio impact */
+                        /* measure realloc/free ratio impact */
                         {
                                 u32 realloc_calls = 100 * alpha;
                                 u32 free_calls = 100 * (1 - alpha);
                                 pool_reset_counters(&pool);
 
+                                int xxx = 0;
                                 while (realloc_calls + free_calls > 0) {
+                                        printf("%d\n", xxx++);
                                         enum call_function { CALL_REALLOC, CALL_FREE } call;
                                         bool b = rand() % 2 == 0;
                                         if (b && realloc_calls > 0) {
@@ -116,12 +119,12 @@ static void bench_pool_realloc_free_ratio(const char *impl_name)
                                         }
 
                                         assert(!vec_is_empty(&data));
-                                        void *ptr = *(void **) vec_pop(&data);
+                                        data_ptr_t ptr = *(data_ptr_t *) vec_pop(&data);
 
                                         if (call == CALL_REALLOC) {
                                                 call_start = time_now_wallclock();
-                                                void *ptr_to_realloc = ptr;
-                                                void *ptr_reallod = NULL;
+                                                data_ptr_t ptr_to_realloc = ptr;
+                                                data_ptr_t ptr_reallod = NULL;
                                                 for (u32 x = 0; x < CALL_SAMPLES; x++) {
                                                         ptr_reallod = pool_realloc(&pool, ptr_to_realloc, 1 + rand() % 2048);
                                                         ptr_to_realloc = ptr_reallod;
@@ -130,12 +133,16 @@ static void bench_pool_realloc_free_ratio(const char *impl_name)
                                                 vec_push(&data, &ptr_reallod, 1);
                                         } else {
                                                 call_start = time_now_wallclock();
-                                                void *ptr_to_free = ptr;
+                                                data_ptr_t ptr_to_free = ptr;
                                                 for (u32 x = 0; x < CALL_SAMPLES; x++) {
                                                         pool_free(&pool, ptr_to_free);
                                                         ptr_to_free = pool_alloc(&pool, 1 + rand() % 2048);
+
+                                                        //ptrs++;
                                                 }
                                                 call_end = time_now_wallclock();
+                                                vec_push(&data, &ptr_to_free, 1);
+
                                         }
                                         call_duration = (call_end - call_start)/(float) CALL_SAMPLES;
 
@@ -191,8 +198,8 @@ static void bench_clib_realloc_free_ratio()
 
                         vec_create(&data, NULL, sizeof(void *), 100000);
 
-                        /* allocate around 100 MB */
-                        for (int i = 0; i < 100000; i++) {
+
+                        for (int i = 0; i < 65000; i++) {
                                 void *ptr = malloc(1 + rand() % 2048);
                                 vec_push(&data, &ptr, 1);
                         }

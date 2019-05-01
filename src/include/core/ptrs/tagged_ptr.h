@@ -34,11 +34,11 @@ NG5_EXPORT(bool) tagged_ptr_update(tagged_ptr_t *dst, const void *adr);
 
 NG5_EXPORT(bool) tagged_ptr_set_tag(tagged_ptr_t *dst, u3 tag);
 
-NG5_EXPORT(bool) tagged_ptr_get_tag(u3 *tag, const tagged_ptr_t *ptr);
+NG5_EXPORT(bool) tagged_ptr_get_tag(u3 *tag, tagged_ptr_t ptr);
 
-NG5_EXPORT(bool) tagged_ptr_is_tagged(const tagged_ptr_t *ptr);
+NG5_EXPORT(bool) tagged_ptr_is_tagged(tagged_ptr_t ptr);
 
-NG5_EXPORT(void *) tagged_ptr_get_pointer(const tagged_ptr_t *ptr);
+NG5_EXPORT(void *) tagged_ptr_get_pointer(tagged_ptr_t ptr);
 
 #define tagged_ptr_deref(type, ptr) ((type *) tagged_ptr_get_pointer(ptr))
 

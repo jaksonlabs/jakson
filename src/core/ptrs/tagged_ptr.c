@@ -34,7 +34,7 @@ NG5_EXPORT(bool) tagged_ptr_update(tagged_ptr_t *dst, const void *adr)
         error_if_null(dst);
         error_if_null(adr);
         u3 tag;
-        tagged_ptr_get_tag(&tag, dst);
+        tagged_ptr_get_tag(&tag, *dst);
         tagged_ptr_create(dst, adr);
         tagged_ptr_set_tag(dst, tag);
         return true;
@@ -47,22 +47,22 @@ NG5_EXPORT(bool) tagged_ptr_set_tag(tagged_ptr_t *dst, u3 tag)
         return true;
 }
 
-NG5_EXPORT(bool) tagged_ptr_get_tag(u3 *tag, const tagged_ptr_t *ptr)
+NG5_EXPORT(bool) tagged_ptr_get_tag(u3 *tag, const tagged_ptr_t ptr)
 {
         error_if_null(tag);
         error_if_null(ptr);
-        *tag = (uintptr_t) *ptr & 0x03;
+        *tag = (uintptr_t) ptr & 0x03;
         return true;
 }
 
-NG5_EXPORT(bool) tagged_ptr_is_tagged(const tagged_ptr_t *ptr)
+NG5_EXPORT(bool) tagged_ptr_is_tagged(tagged_ptr_t ptr)
 {
         u3 tag;
         return tagged_ptr_get_tag(&tag, ptr) ? tag != 0 : 0;
 }
 
-NG5_EXPORT(void *) tagged_ptr_get_pointer(const tagged_ptr_t *ptr)
+NG5_EXPORT(void *) tagged_ptr_get_pointer(const tagged_ptr_t ptr)
 {
         error_if_null(ptr);
-        return (void *) ((uintptr_t) *ptr & addr_mask);
+        return (void *) ((uintptr_t) ptr & addr_mask);
 }

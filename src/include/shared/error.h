@@ -103,6 +103,7 @@ NG5_BEGIN_DECL
 #define NG5_ERR_UNKNOWN_DIC_TYPE 75        /** Unknown string dictionary implementation requested */
 #define NG5_ERR_SUB_FAILED 76              /** Sub process failed */
 #define NG5_ERR_FREE_FAILED 77             /** Freeing up memory failed */
+#define NG5_ERR_MEMPOOL_LIMIT 78           /** Maximum number of pointers actively managed in a memory pool is reached*/
 
 static const char *const _err_str[] =
         {"No error", "Null pointer detected", "Function not implemented", "Index is out of bounds",
@@ -139,7 +140,8 @@ static const char *const _err_str[] =
          "Illegal state: iteration over collection issued, but object found", "Type mismatch",
          "Index is corrupted: requested offset is outside file bounds", "Temporary file cannot be opened for writing",
          "Unable to write to file", "Unable to deserialize hash table from file",
-         "Unknown string dictionary implementation requested", "Sub process failed", "Freeing up memory failed"};
+         "Unknown string dictionary implementation requested", "Sub process failed", "Freeing up memory failed",
+         "Maximum number of pointers actively managed in a memory pool is reached"};
 
 #define NG5_ERRSTR_ILLEGAL_CODE "illegal error code"
 

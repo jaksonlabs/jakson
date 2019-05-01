@@ -34,17 +34,17 @@ NG5_EXPORT(bool) data_ptr_update(data_ptr_t *dst, const void *adr)
         error_if_null(dst);
         error_if_null(adr);
         u16 data;
-        data_ptr_get_data(&data, dst);
+        data_ptr_get_data(&data, *dst);
         data_ptr_create(dst, adr);
         data_ptr_set_data(dst, data);
         return true;
 }
 
-NG5_EXPORT(bool) data_ptr_get_data(u16 *data, const data_ptr_t *ptr)
+NG5_EXPORT(bool) data_ptr_get_data(u16 *data, const data_ptr_t ptr)
 {
         error_if_null(data);
         error_if_null(ptr);
-        *data = (uintptr_t) *ptr >> 48;
+        *data = (uintptr_t) ptr >> 48;
         return true;
 }
 
@@ -56,13 +56,13 @@ NG5_EXPORT(bool) data_ptr_set_data(data_ptr_t *ptr, u16 data)
         return true;
 }
 
-NG5_EXPORT(bool) data_ptr_has_data(const data_ptr_t *ptr)
+NG5_EXPORT(bool) data_ptr_has_data(const data_ptr_t ptr)
 {
         u16 data;
         return data_ptr_get_data(&data, ptr) ? data != 0 : 0;
 }
 
-NG5_EXPORT(void *) data_ptr_get_pointer(const data_ptr_t *ptr)
+NG5_EXPORT(void *) data_ptr_get_pointer(const data_ptr_t ptr)
 {
-        return ptr ? (void *)(((uintptr_t) *ptr << 16) >> 16) : NULL;
+        return ptr ? (void *)(((uintptr_t) ptr << 16) >> 16) : NULL;
 }
