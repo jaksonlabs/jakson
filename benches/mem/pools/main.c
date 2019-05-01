@@ -76,7 +76,7 @@ static void bench_pool_realloc_free_ratio(const char *impl_name)
                 "num_bytes_alloc_cache, num_bytes_realloc_cache, num_bytes_free_cache, num_bytes_alloc_blocked,"
                 "num_bytes_realloc_blocked, num_bytes_free_blocked\n");
 
-        for (u32 rerun = 0; rerun < 15; rerun++) {
+        for (u32 rerun = 0; rerun < 5; rerun++) {
                 for (float alpha = 0.0f; alpha <= 1.0f; alpha += 0.04f) {
 
                         pool_create_by_name(&pool, impl_name);
@@ -189,7 +189,7 @@ static void bench_clib_realloc_free_ratio()
 
         printf("impl_name, rerun, alpha, realloc_calls, free_calls, called, call_duration_ms, num_allocd\n");
 
-        for (u32 rerun = 0; rerun < 15; rerun++) {
+        for (u32 rerun = 0; rerun < 5; rerun++) {
                 for (float alpha = 0.0f; alpha <= 1.0f; alpha += 0.04f) {
 
                         vec_create(&data, NULL, sizeof(void *), 100000);

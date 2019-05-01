@@ -279,6 +279,7 @@ ng5_func_unused static const char *basic_type_to_system_type_str(enum field_type
 #define ng5_span(a, b)                                                                                                 \
      (a < b ? b - a : a - b)
 
+#ifndef NDEBUG
 #define error_if_null(x)                                                                                               \
 {                                                                                                                      \
     if (!(x)) {                                                                                                        \
@@ -289,6 +290,9 @@ ng5_func_unused static const char *basic_type_to_system_type_str(enum field_type
         return false;                                                                                                  \
     }                                                                                                                  \
 }
+#else
+#define error_if_null(x) ng5_unused(x);
+#endif
 
 #define ng5_check_success(x)                                                                                           \
 {                                                                                                                      \
@@ -327,8 +331,12 @@ ng5_func_unused static const char *basic_type_to_system_type_str(enum field_type
 #define ng5_unset_bits(x, mask)       ( x &= ~(mask) )
 #define ng5_are_bits_set(value, bit)   (((bit) & value ) == (bit))
 
+#ifndef NDEBUG
 #define ng5_implemented_or_error(err, x, func)                                                                         \
     ng5_optional(x->func == NULL, error(err, NG5_ERR_NOTIMPLEMENTED))
+#else
+#define ng5_implemented_or_error(err, x, func) ng5_unused(err);
+#endif
 
 #define ng5_optional(expr, stmt)                                                                                       \
     if (expr) { stmt; }
