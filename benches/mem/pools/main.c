@@ -24,7 +24,7 @@
 
 #include "core/mem/pools/none.h"
 
-#define CALL_SAMPLES 100000
+#define CALL_SAMPLES 10000
 
 static void bench_pool_realloc_free_ratio(const char *impl_name);
 static void bench_clib_realloc_free_ratio();
@@ -83,9 +83,8 @@ static void bench_pool_realloc_free_ratio(const char *impl_name)
                         vec_create(&data, NULL, sizeof(data_ptr_t), 100000);
 
 
-                        data_ptr_t ptr;
                         for (int i = 0; i < 65000; i++) {
-                                ptr = pool_alloc(&pool, 1 + rand() % 2048);
+                                data_ptr_t ptr = pool_alloc(&pool, 1 + rand() % 2048);
                                 vec_push(&data, &ptr, 1);
                         }
 
@@ -95,9 +94,7 @@ static void bench_pool_realloc_free_ratio(const char *impl_name)
                                 u32 free_calls = 100 * (1 - alpha);
                                 pool_reset_counters(&pool);
 
-                                int xxx = 0;
                                 while (realloc_calls + free_calls > 0) {
-                                        printf("%d\n", xxx++);
                                         enum call_function { CALL_REALLOC, CALL_FREE } call;
                                         bool b = rand() % 2 == 0;
                                         if (b && realloc_calls > 0) {
@@ -119,30 +116,29 @@ static void bench_pool_realloc_free_ratio(const char *impl_name)
                                         }
 
                                         assert(!vec_is_empty(&data));
-                                        data_ptr_t ptr = *(data_ptr_t *) vec_pop(&data);
+                                        data_ptr_t *ptrs = (data_ptr_t *) vec_data(&data);
+                                        data_ptr_t *ptrs_start = ptrs;
 
                                         if (call == CALL_REALLOC) {
                                                 call_start = time_now_wallclock();
-                                                data_ptr_t ptr_to_realloc = ptr;
-                                                data_ptr_t ptr_reallod = NULL;
                                                 for (u32 x = 0; x < CALL_SAMPLES; x++) {
-                                                        ptr_reallod = pool_realloc(&pool, ptr_to_realloc, 1 + rand() % 2048);
-                                                        ptr_to_realloc = ptr_reallod;
+                                                        *ptrs = pool_realloc(&pool, *ptrs, 1 + rand() % 2048);
+                                                        ptrs++;
                                                 }
                                                 call_end = time_now_wallclock();
-                                                vec_push(&data, &ptr_reallod, 1);
+
                                         } else {
                                                 call_start = time_now_wallclock();
-                                                data_ptr_t ptr_to_free = ptr;
                                                 for (u32 x = 0; x < CALL_SAMPLES; x++) {
-                                                        pool_free(&pool, ptr_to_free);
-                                                        ptr_to_free = pool_alloc(&pool, 1 + rand() % 2048);
-
-                                                        //ptrs++;
+                                                        pool_free(&pool, *ptrs);
+                                                        ptrs++;
                                                 }
                                                 call_end = time_now_wallclock();
-                                                vec_push(&data, &ptr_to_free, 1);
 
+                                                for (u32 x = 0; x < CALL_SAMPLES; x++) {
+                                                        *ptrs_start = pool_alloc(&pool, 1 + rand() % 2048);
+                                                        ptrs_start++;
+                                                }
                                         }
                                         call_duration = (call_end - call_start)/(float) CALL_SAMPLES;
 
