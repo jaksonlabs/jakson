@@ -33,7 +33,7 @@ NG5_EXPORT(bool) tagged_ptr_update(tagged_ptr_t *dst, const void *adr)
 {
         error_if_null(dst);
         error_if_null(adr);
-        u3 tag;
+        u3 tag = 0;
         tagged_ptr_get_tag(&tag, *dst);
         tagged_ptr_create(dst, adr);
         tagged_ptr_set_tag(dst, tag);
