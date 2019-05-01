@@ -16,10 +16,11 @@
  */
 
 #include "core/mem/pool.h"
+#include "core/mem/pools/realloc-early-return.h"
 
 /* A handy macro to check whether an object used as parameter to internal functions (i.e., 'this_*' functions) is
  * actually an instance of this pool strategy */
-#define REQUIRE_INSTANCE_OF_THIS() ng5_check_tag(self->tag, POOL_IMPL_NONE);
+#define REQUIRE_INSTANCE_OF_THIS() ng5_check_tag(self->tag, POOL_IMPL_REALLOC_EARLY_RETURN);
 
 /* Prototype functions, see comments below */
 static data_ptr_t this_alloc(struct pool_strategy *self, u64 nbytes);
@@ -31,7 +32,7 @@ static bool this_reset_counters(struct pool_strategy *self);
 
 /* This functions just binds functions to "the interface" of the pool strategy, such that a call to "the interface"'s
  * function is delegated to 'this_*' functions. */
-void pool_strategy_none_create(struct pool_strategy *dst)
+void pool_strategy_realloc_early_return_create(struct pool_strategy *dst)
 {
         /* Assert is fine in this case, since 'dst' must be non-null here (check is performed in "the interface") */
         assert(dst);
@@ -46,10 +47,10 @@ void pool_strategy_none_create(struct pool_strategy *dst)
 
         /* Setting a 'tag' (an unique identifier) to perform a error checking that implementation-specific functions
          * (i.e., 'this_*' functions) are called on an "instance" of this pool strategy */
-        dst->tag = POOL_IMPL_NONE;
+        dst->tag = POOL_IMPL_REALLOC_EARLY_RETURN;
 
         /* Set the name constant; required */
-        dst->impl_name = POOL_STRATEGY_NONE_NAME;
+        dst->impl_name = POOL_STRATEGY_REALLOC_EARLY_RETURN_NAME;
 }
 
 /* Implementation of 'alloc' of the pool strategy. Allocation in this strategy is done by just calling 'malloc' from
@@ -103,28 +104,39 @@ static data_ptr_t this_realloc(struct pool_strategy *self, data_ptr_t ptr, u64 n
         self->counters.num_bytes_allocd += ng5_span(info->bytes_total, nbytes);
 
         /* This is the actual reallocation logic. In principle, it just calls a 'realloc' and updated the
-         * 'data pointer' and the memory pool info with the new address provided by 'realloc'. */
-
-        /* Retrieve the memory address managed by clibs allocator that is stored in the 'data pointer',
-         * and perform a reallocation */
-        stored_adr = data_ptr_get_pointer(ptr);
-        new_adr = realloc(stored_adr, nbytes);
-
-        if (unlikely(!new_adr)) {
-                /* In this unlikely case, reallocation failed. */
-                error_print(NG5_ERR_REALLOCERR);
-        } else {
-                /* In this case, reallocation was successful. The 'data pointer' and the memory pool is
-                 * updated, and some statistics are done. */
-                data_ptr_update(&ptr, new_adr);
-                data_ptr_update(&info->ptr, new_adr);
+         * 'data pointer' and the memory pool info with the new address provided by 'realloc'. As a simple
+         * optimization avoiding unnecessary calls to 'realloc' in case the caller just shrinks the required
+         * memory space, the 'data pointer' and the memory pool info is just updated with the new size info.
+         * Note that this optimization does not release memory for shrinking, and - since reallocation in this
+         * implementation does not re-use freed pointers - the amount of allocated memory only decreases by
+         * calls to 'free' and never by calls to 'realloc'. */
+        if (nbytes < info->bytes_total) {
+                /* The case of 'just shrinking' the memory block. Actually, the memory block remains the same size. */
                 info->bytes_used = nbytes;
-                info->bytes_total = nbytes;
-                self->counters.num_realloc_calls++;
-        }
+                self->counters.num_managed_realloc_calls++;
+                return ptr;
+        } else {
+                /* Retrieve the memory address managed by clibs allocator that is stored in the 'data pointer',
+                 * and perform a reallocation */
+                stored_adr = data_ptr_get_pointer(ptr);
+                new_adr = realloc(stored_adr, nbytes);
 
-        /* Return the (potentially updated) 'data pointer' */
-        return ptr;
+                if (unlikely(!new_adr)) {
+                        /* In this unlikely case, reallocation failed. */
+                        error_print(NG5_ERR_REALLOCERR);
+                } else {
+                        /* In this case, reallocation was successful. The 'data pointer' and the memory pool is
+                         * updated, and some statistics are done. */
+                        data_ptr_update(&ptr, new_adr);
+                        data_ptr_update(&info->ptr, new_adr);
+                        info->bytes_used = nbytes;
+                        info->bytes_total = nbytes;
+                        self->counters.num_realloc_calls++;
+                }
+
+                /* Return the (potentially updated) 'data pointer' */
+                return ptr;
+        }
 }
 
 /* Perform the actual 'free' function in this pool strategy by just calling clibs 'free' function. For this,
