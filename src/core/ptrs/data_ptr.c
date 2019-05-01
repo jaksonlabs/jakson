@@ -33,7 +33,7 @@ NG5_EXPORT(bool) data_ptr_update(data_ptr_t *dst, const void *adr)
 {
         error_if_null(dst);
         error_if_null(adr);
-        u16 data;
+        u16 data = 0;
         data_ptr_get_data(&data, *dst);
         data_ptr_create(dst, adr);
         data_ptr_set_data(dst, data);
