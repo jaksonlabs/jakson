@@ -24,7 +24,7 @@
 
 #include "core/mem/pools/none.h"
 
-#define CALL_SAMPLES 10000
+#define CALL_SAMPLES 60000
 
 static void bench_pool_realloc_free_ratio(const char *impl_name);
 static void bench_clib_realloc_free_ratio();
