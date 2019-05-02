@@ -42,4 +42,4 @@ ggplot(data=df, aes(x=ratio, y=ops_per_sec, group=label)) +
   theme(plot.margin=unit(c(1,1,1.5,1.2),"cm"), plot.title = element_text(size=12), legend.position="top", legend.title=element_blank(), legend.justification = c(0, 0),
         legend.direction = "horizontal", axis.title.y=element_blank(), axis.title.x=element_text(size=10)) + scale_y_continuous(breaks=breaks, labels = unit_format(unit = "mio ops/sec", scale = 1e-6, sep = " ", digits = 0)) +
   scale_x_continuous(breaks=c(0,0.25,0.50,0.75,1.0), labels=c("free\nonly", "75% free\n25% realloc", "50% free\n50% realloc", "25% free\n75% realloc", "realloc\nonly")) +
-  ggtitle("Memory Pool Overhead")
+  ggtitle("Magic Memory Pool Performance")
