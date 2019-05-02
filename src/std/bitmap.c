@@ -16,7 +16,6 @@
  */
 
 #include <math.h>
-#include <lzma.h>
 #include "std/bitmap.h"
 
 NG5_EXPORT(bool) bitmap_create(struct bitmap *bitmap, u16 num_bits)
