@@ -66,20 +66,33 @@ static data_ptr_t this_realloc(struct pool_strategy *self, data_ptr_t ptr, u64 n
         self->counters.num_bytes_reallocd = nbytes;
         self->counters.num_bytes_allocd += ng5_span(info->bytes_total, nbytes);
 
-        stored_adr = data_ptr_get_pointer(ptr);
-        new_adr = realloc(stored_adr, nbytes);
-
-        if (unlikely(!new_adr)) {
-                error_print(NG5_ERR_REALLOCERR);
-        } else {
-                data_ptr_update(&ptr, new_adr);
-                data_ptr_update(&info->ptr, new_adr);
+        if (nbytes < info->bytes_total) {
+                /* The case of 'just shrinking' the memory block. Actually, the memory block remains the same size. */
                 info->bytes_used = nbytes;
-                info->bytes_total = nbytes;
-                self->counters.num_realloc_calls++;
-        }
+                self->counters.num_managed_realloc_calls++;
+                return ptr;
+        } else {
+                /* Retrieve the memory address managed by clibs allocator that is stored in the 'data pointer',
+                 * and perform a reallocation */
+                stored_adr = data_ptr_get_pointer(ptr);
+                new_adr = realloc(stored_adr, nbytes);
 
-        return ptr;
+                if (unlikely(!new_adr)) {
+                        /* In this unlikely case, reallocation failed. */
+                        error_print(NG5_ERR_REALLOCERR);
+                } else {
+                        /* In this case, reallocation was successful. The 'data pointer' and the memory pool is
+                         * updated, and some statistics are done. */
+                        data_ptr_update(&ptr, new_adr);
+                        data_ptr_update(&info->ptr, new_adr);
+                        info->bytes_used = nbytes;
+                        info->bytes_total = nbytes;
+                        self->counters.num_realloc_calls++;
+                }
+
+                /* Return the (potentially updated) 'data pointer' */
+                return ptr;
+        }
 }
 
 static bool this_free(struct pool_strategy *self, data_ptr_t ptr)
