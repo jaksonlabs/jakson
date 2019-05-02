@@ -16,7 +16,6 @@
  */
 
 #include <math.h>
-#include <lzma.h>
 #include "std/histogram.h"
 
 NG5_EXPORT(bool) histogram_builder_create(struct histogram_builder *builder)
