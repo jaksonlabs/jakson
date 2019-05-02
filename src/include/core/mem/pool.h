@@ -22,7 +22,7 @@
 #include "shared/types.h"
 
 #include "core/mem/pools/none.h"
-#include "core/mem/pools/realloc-early-return.h"
+#include "core/mem/pools/magic.h"
 
 #include "core/ptrs/data_ptr.h"
 
@@ -54,7 +54,7 @@ enum pool_options
 enum pool_impl_tag
 {
         POOL_IMPL_NONE,
-        POOL_IMPL_REALLOC_EARLY_RETURN
+        POOL_IMPL_MAGIC
 };
 
 #pragma GCC diagnostic push
@@ -115,7 +115,7 @@ static struct pool_register_entry
                 .ops.parallel   = false,
                 .ops.simd       = false,
                 .ops.dedup      = false,
-                ._create = pool_strategy_realloc_early_return_create,
+                ._create = pool_strategy_magic_create,
                 ._drop = NULL
         }
 };

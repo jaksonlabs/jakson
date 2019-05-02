@@ -16,8 +16,8 @@
  */
 
 /* Inclusion guard; required to avoid multiple inclusions of the same header */
-#ifndef NG5_POOL_REALLOC_EARLY_RETURN_H
-#define NG5_POOL_REALLOC_EARLY_RETURN_H
+#ifndef NG5_POOL_MAGIC_H
+#define NG5_POOL_MAGIC_H
 
 /**
  * This implementation of a memory pool is actually a template, since it does not manage memory by itself
@@ -31,13 +31,13 @@
 NG5_BEGIN_DECL
 
 /* A constant to provide an unique name for the implementation */
-#define POOL_STRATEGY_REALLOC_EARLY_RETURN_NAME "mempool/realloc-early-return"
+#define POOL_STRATEGY_MAGIC_NAME "mempool/magic"
 
 /* Forwarded struct tag from "core/mem/pool.h"; that's just how it must be done to avoid cyclic inclusions of headers */
 struct pool_strategy;
 
 /* The constructor function that bind implementation-specific functionallity to "the interface" of a pool strategy */
-void pool_strategy_realloc_early_return_create(struct pool_strategy *dst);
+void pool_strategy_magic_create(struct pool_strategy *dst);
 
 /* End of macro that allows to call this C code from C++ */
 NG5_END_DECL
