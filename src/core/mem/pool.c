@@ -218,7 +218,7 @@ NG5_EXPORT(bool) pool_internal_register(data_ptr_t *dst, struct pool *pool, cons
         data_ptr_set_data(&pool_ptr_info->ptr, pos);
 
         assert(!((struct pool_ptr_info *) vec_at(&pool->in_use, pos))->is_free);
-        assert(data_ptr_deref(void *, ((struct pool_ptr_info *) vec_at(&pool->in_use, pos))->ptr) == ptr);
+        assert(data_ptr_get(void *, ((struct pool_ptr_info *) vec_at(&pool->in_use, pos))->ptr) == ptr);
 
         *dst = pool_ptr_info->ptr;
         return true;
@@ -234,7 +234,7 @@ NG5_EXPORT(void) pool_internal_unregister(struct pool *pool, data_ptr_t ptr)
         assert(pos < pool->in_use.num_elems);
 
         struct pool_ptr_info *pool_ptr_info = (struct pool_ptr_info *) vec_at(&pool->in_use, pos);
-        assert(data_ptr_deref(void *, pool_ptr_info->ptr) == data_ptr_deref(void *, ptr));
+        assert(data_ptr_get(void *, pool_ptr_info->ptr) == data_ptr_get(void *, ptr));
         assert(!pool_ptr_info->is_free);
 
         pool_ptr_info->is_free = true;

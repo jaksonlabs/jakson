@@ -19,7 +19,7 @@ TEST(DataPointerTest, TestPointerUpdate) {
         int my_ptr_to_int_2 = 43;
         data_ptr_create(&data_ptr, &my_ptr_to_int);
         data_ptr_update(&data_ptr, &my_ptr_to_int_2);
-        int *deref = data_ptr_deref(int, data_ptr);
+        int *deref = data_ptr_get(int, data_ptr);
         EXPECT_EQ(&my_ptr_to_int_2, deref);
         EXPECT_EQ(my_ptr_to_int_2, *deref);
 }
