@@ -18,6 +18,45 @@
 #include <core/mem/pool.h>
 #include "core/mem/pool.h"
 
+struct pool_register_entry pool_register[] = {
+        {
+                .ops.pooled     = false,
+                .ops.gc_sync    = false,
+                .ops.gc_async   = false,
+                .ops.pressure   = false,
+                .ops.linear     = false,
+                .ops.chunked    = false,
+                .ops.balanced   = false,
+                .ops.first_fit  = false,
+                .ops.best_fit   = false,
+                .ops.random_fit = false,
+                .ops.cracked    = false,
+                .ops.parallel   = false,
+                .ops.simd       = false,
+                .ops.dedup      = false,
+                ._create = pool_strategy_none_create,
+                ._drop = NULL
+        },
+        {
+                .ops.pooled     = true,
+                .ops.gc_sync    = false,
+                .ops.gc_async   = false,
+                .ops.pressure   = false,
+                .ops.linear     = false,
+                .ops.chunked    = false,
+                .ops.balanced   = false,
+                .ops.first_fit  = false,
+                .ops.best_fit   = false,
+                .ops.random_fit = false,
+                .ops.cracked    = false,
+                .ops.parallel   = false,
+                .ops.simd       = false,
+                .ops.dedup      = false,
+                ._create = pool_strategy_magic_create,
+                ._drop = NULL
+        }
+};
+
 static void lock(struct pool *pool);
 static void unlock(struct pool *pool);
 static bool strategy_by_options(struct pool *pool, struct pool_strategy *strategy, enum pool_options options);
@@ -36,6 +75,11 @@ static bool pool_setup(struct pool *pool)
         ng5_check_success(vec_create(&pool->in_use_pos_freelist, NULL, sizeof(u16), 100));
         ng5_check_success(spin_init(&pool->lock));
         return true;
+}
+
+NG5_EXPORT(size_t) pool_get_num_registered_strategies()
+{
+        return NG5_ARRAY_LENGTH(pool_register);
 }
 
 NG5_EXPORT(bool) pool_create(struct pool *pool, enum pool_options options)

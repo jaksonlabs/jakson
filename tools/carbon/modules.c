@@ -638,7 +638,7 @@ bool moduleListInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *mana
     } else {
         const char *constant = argv[0];
         if (strcmp(constant, "compressors") == 0) {
-            for (size_t i = 0; i < NG5_ARRAY_LENGTH(compressor_strategy_register); i++) {
+            for (size_t i = 0; i < pack_get_num_registered_strategies(); i++) {
                 NG5_CONSOLE_WRITELN(file, "%s", compressor_strategy_register[i].name);
             }
         } else {

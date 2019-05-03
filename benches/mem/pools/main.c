@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
                         "Use 'clib/allocator' to benchmark clibs allocator, and <mem pool names>\n"
                         "to bench those implementations.\n\n");
                 printf("The following <mem pool names> are registered:\n");
-                for (u32 i = 0; i < NG5_ARRAY_LENGTH(pool_register); i++) {
+                for (u32 i = 0; i < pool_get_num_registered_strategies(); i++) {
                         struct pool_register_entry *e = pool_register + i;
                         struct pool_strategy s;
                         e->_create(&s);

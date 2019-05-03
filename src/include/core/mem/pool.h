@@ -57,10 +57,7 @@ enum pool_impl_tag
         POOL_IMPL_MAGIC
 };
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-variable"
-
-static struct pool_register_entry
+extern struct pool_register_entry
 {
         struct {
                 u16 pooled     : 1;
@@ -81,46 +78,7 @@ static struct pool_register_entry
 
         void (*_create)(struct pool_strategy *dst);
         void (*_drop)(struct pool_strategy *dst);
-} pool_register[] = {
-        {
-                .ops.pooled     = false,
-                .ops.gc_sync    = false,
-                .ops.gc_async   = false,
-                .ops.pressure   = false,
-                .ops.linear     = false,
-                .ops.chunked    = false,
-                .ops.balanced   = false,
-                .ops.first_fit  = false,
-                .ops.best_fit   = false,
-                .ops.random_fit = false,
-                .ops.cracked    = false,
-                .ops.parallel   = false,
-                .ops.simd       = false,
-                .ops.dedup      = false,
-                ._create = pool_strategy_none_create,
-                ._drop = NULL
-        },
-        {
-                .ops.pooled     = true,
-                .ops.gc_sync    = false,
-                .ops.gc_async   = false,
-                .ops.pressure   = false,
-                .ops.linear     = false,
-                .ops.chunked    = false,
-                .ops.balanced   = false,
-                .ops.first_fit  = false,
-                .ops.best_fit   = false,
-                .ops.random_fit = false,
-                .ops.cracked    = false,
-                .ops.parallel   = false,
-                .ops.simd       = false,
-                .ops.dedup      = false,
-                ._create = pool_strategy_magic_create,
-                ._drop = NULL
-        }
-};
-
-#pragma GCC diagnostic pop
+} pool_register[];
 
 struct pool_counters
 {
@@ -188,6 +146,7 @@ struct pool
 
 NG5_DEFINE_GET_ERROR_FUNCTION(pool, struct pool, p);
 
+NG5_EXPORT(size_t) pool_get_num_registered_strategies();
 NG5_EXPORT(bool) pool_create(struct pool *pool, enum pool_options options);
 NG5_EXPORT(bool) pool_create_by_name(struct pool *pool, const char *name);
 NG5_EXPORT(bool) pool_drop(struct pool *pool);

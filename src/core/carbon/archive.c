@@ -1361,7 +1361,7 @@ static char *embedded_dic_flags_to_string(const union string_tab_flags *flags)
                 assert(length <= max);
         } else {
 
-                for (size_t i = 0; i < NG5_ARRAY_LENGTH(compressor_strategy_register); i++) {
+                for (size_t i = 0; i < pack_get_num_registered_strategies(); i++) {
                         if (flags->value & compressor_strategy_register[i].flag_bit) {
                                 strcpy(string + length, compressor_strategy_register[i].name);
                                 length = strlen(string);
