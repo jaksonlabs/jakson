@@ -213,15 +213,12 @@ static void prop_iter_cursor_init(struct prop_iter *iter)
 #define SET_STATE_FOR_FALL_THROUGH(iter, prop_offset_type, mask_group, mask_type, next_state)                          \
 {                                                                                                                      \
     if ((iter->object.prop_offsets.prop_offset_type != 0) &&                                                           \
-        (ng5_are_bits_set(iter->mask, mask_group | mask_type)))                                                  \
+        (ng5_are_bits_set(iter->mask, mask_group | mask_type)))                                                        \
     {                                                                                                                  \
         iter->prop_cursor = next_state;                                                                                \
         break;                                                                                                         \
     }                                                                                                                  \
 }
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 
 static enum prop_iter_state prop_iter_state_next(struct prop_iter *iter)
 {
@@ -372,8 +369,6 @@ static enum prop_iter_state prop_iter_state_next(struct prop_iter *iter)
         }
         return iter->prop_cursor;
 }
-
-#pragma GCC diagnostic pop
 
 static void prop_iter_state_init(struct prop_iter *iter)
 {
