@@ -7,10 +7,10 @@
 #define NG5_SLICE_MEASURE_H
 
 // Time elapsed spend on scanning slices
-extern float timeElapsedScanning;
+extern _Atomic u_int32_t timeElapsedScanning;
 
 // Time elapsed spend on sealing slices
-extern float timeElapsedSealing;
+extern _Atomic u_int32_t  timeElapsedSealing;
 
 #define ENABLE_MEASURE_TIME_SCANNED 1
 

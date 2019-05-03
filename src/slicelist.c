@@ -613,7 +613,7 @@ uint32_t SLICE_RESEARCH_BINARY(Slice *slice, Hash needleHash, const char *needle
 
 #ifdef ENABLE_MEASURE_TIME_SCANNED
                         Timestamp scan_end = TimeCurrentSystemTime();
-                        timeElapsedScanning += (scan_end - scan_begin)/1000.0f;
+                        timeElapsedScanning += (scan_end - scan_begin);
 #endif
 
                         DEBUG(NG5_SLICE_LIST_TAG,
@@ -838,7 +838,7 @@ uint32_t SLICE_RESEARCH_BINARY(Slice *slice, Hash needleHash, const char *needle
 
 #ifdef ENABLE_MEASURE_TIME_SEALED
         Timestamp scan_end = TimeCurrentSystemTime();
-        timeElapsedSealing += (scan_end - scan_begin)/1000.0f;
+        timeElapsedSealing += (scan_end - scan_begin);
 #endif
     }
 

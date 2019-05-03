@@ -12,7 +12,7 @@
 //#src <ng5/roadfire/roadfire.h>
 
 #define NUM_SAMPLES 1
-#define NTHREADS    (1)
+#define NTHREADS    (8)
 
 /*void roadfire_test() {
     struct storage_engine engine;
@@ -21,8 +21,8 @@
 
 #define NUM_SLICE_INSERT 100000
 
- float timeElapsedScanning;
- float timeElapsedSealing;
+_Atomic u_int32_t  timeElapsedScanning;
+_Atomic u_int32_t  timeElapsedSealing;
 
 void experiments_hashing()
 {
@@ -128,7 +128,7 @@ void experiments_hashing()
 
                 total_num += VectorLength(vector);
 
-                printf("%zu;%d;%zu;%f;%f;%f;%zu;%zu;%zu;%f;%f\n", chunk_num++, sample, num_buckets, created_duration,
+                printf("%zu;%d;%zu;%f;%f;%f;%zu;%zu;%zu;%d;%d\n", chunk_num++, sample, num_buckets, created_duration,
                         insert_duration,
                         (created_duration+insert_duration), VectorLength(vector), total_num, num_distinct,
                        timeElapsedScanning, timeElapsedSealing);
