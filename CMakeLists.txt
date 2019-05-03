@@ -71,7 +71,7 @@ if (${LOG_WARN} MATCHES "on")
 endif()
 
 #set (CMAKE_C_COMPILER             "/usr/bin/clang")
-set (CMAKE_C_FLAGS                "-Wall -std=c11 -Wextra -Werror")
+set (CMAKE_C_FLAGS                "-Wall -std=c11 -Wextra -Werror -Wno-implicit-fallthrough")
 set (CMAKE_C_FLAGS_DEBUG          "-g")
 set (CMAKE_C_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
 set (CMAKE_C_FLAGS_RELEASE        "-O3 -DNDEBUG")
