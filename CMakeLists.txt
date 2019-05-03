@@ -30,8 +30,8 @@ file(GLOB_RECURSE LIB_HEADER_FILES src/include/*.h )
 file(GLOB_RECURSE LIB_SOURCE_FILES src/*.c )
 set(LIB_SOURCES ${LIB_HEADER_FILES} ${LIB_SOURCE_FILES})
 
-message("header files: ${LIB_HEADER_FILES}")
-message("source files: ${LIB_SOURCE_FILES}")
+# message("header files: ${LIB_HEADER_FILES}")
+# message("source files: ${LIB_SOURCE_FILES}")
 
 if (${LOG_INFO} MATCHES "on")
     if (${BUILD_TYPE} MATCHES Debug)
