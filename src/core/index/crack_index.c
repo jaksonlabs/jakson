@@ -116,7 +116,7 @@ static const void *crack_item_pop(struct crack_item *item, u32 key)
         if (likely(!vec_is_empty(&item->values_uselist))) {
 
                 const void *result = crack_value_find_fist(item, key);
-                assert(result != NULL);
+//                assert(result != NULL);
                 return result;
         } else {
                 return NULL;
