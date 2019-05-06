@@ -67,9 +67,6 @@ bool this_auto_read_extra(
         return false;
 
     carbon_err_t err;
-    carbon_vec_create(&extra->ranges, NULL, sizeof(carbon_compressor_auto_range_t), num_compressors);
-    carbon_vec_create(&extra->range_begin_table, NULL, sizeof(carbon_off_t), num_compressors);
-
     for(size_t i = 0; i < num_compressors;++i) {
         carbon_off_t range_begin;
         carbon_io_device_read(src, &range_begin, sizeof(range_begin), 1);
@@ -119,6 +116,7 @@ carbon_compressor_auto_init(carbon_compressor_t *self, carbon_doc_bulk_t const *
             (carbon_compressor_auto_extra_t *)self->extra;
     extra->compressors = carbon_hashmap_new();
 
+
     if(context) {
         extra->context = context;
 
@@ -154,6 +152,7 @@ carbon_compressor_auto_init(carbon_compressor_t *self, carbon_doc_bulk_t const *
     extra->current_range_idx = 0;
     extra->current_range_compressor = NULL;
     carbon_vec_create(&extra->ranges, NULL, sizeof(carbon_compressor_auto_range_t), context ? carbon_hashmap_length(context->values) : 10);
+    carbon_vec_create(&extra->range_begin_table, NULL, sizeof(carbon_off_t), 10);
 
     return true;
 }
