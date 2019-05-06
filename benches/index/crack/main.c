@@ -96,4 +96,7 @@ int main(int argc, char *argv[])
 
 
         crack_index_drop(&index);
+        free(values);
+
+        return EXIT_SUCCESS;
 }
