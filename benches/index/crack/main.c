@@ -69,8 +69,8 @@ int main(int argc, char *argv[])
 
                                                 for (u32 i = 0; i < (1 - alpha) * 1000; i++) {
                                                         u32 key = 1 + (rand() % KEY_RAND_MAX);
-                                                        u32 *value = values + ((1 + rand()) % ITEM_MAX) - 1;
-                                                        crack_index_push(&index, key, value);
+                                                        u32 value = *(values + ((1 + rand()) % (ITEM_MAX - 10)));
+                                                        crack_index_push(&index, key, &value);
                                                         num_ops_push++;
                                                 }
                                         }

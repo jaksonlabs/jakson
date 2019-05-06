@@ -19,9 +19,19 @@
 
 #define POSITION_UNUSED UINT32_MAX
 
+#ifndef NDEBUG
+#define assert_order(index)                                                             \
+        for (struct crack_item *it = index->lowest; it != NULL; it = it->next) {        \
+                assert(!it->next || it->less_than_key < it->next->less_than_key);       \
+        }
+#else
+#define assert_order(index)  { }
+#endif
+
 static void crack_item_split(struct crack_item **lhs, struct crack_item **rhs, u32 pivot, struct crack_item *item, struct crack_index *index);
 static void crack_item_drop(struct crack_item *item, struct crack_index *index);
 
+ng5_func_unused
 static u32 mean_key(struct crack_item *item)
 {
         assert(item->values_uselist.num_elems);
@@ -45,30 +55,32 @@ static struct crack_item *crack_item_find(struct crack_index *index, u32 key)
 {
         struct crack_item *item;
 
-        for (item = index->lowest; item->next != NULL; item = item->next) {
-                if (key < item->less_than_key) {
-                        break;
-                }
-        }
+        assert_order(index);
+
+        for (item = index->lowest; key >= item->less_than_key; item = item->next)
+                {}
 
         assert(item);
+        assert(!item->prev || key >= item->prev->less_than_key);
         assert(key < item->less_than_key);
-        assert(!item->prev || (key >= item->prev->less_than_key));
 
         if (item->values_uselist.num_elems > 25500) {
                 struct crack_item *lhs, *rhs;
                 u32 pivot = mean_key(item);
                 assert(pivot < item->less_than_key);
                 crack_item_split(&lhs, &rhs, pivot, item, index);
-                return key < pivot ? lhs : rhs;
-
-        } else {
-                return item;
+                item = key < pivot ? lhs : rhs;
         }
+
+        assert(key < item->less_than_key);
+        assert_order(index);
+        return item;
 }
 
 static void crack_value_update(struct crack_value *value, u32 actual_key, const void *data)
 {
+        assert(value);
+        assert(data);
         value->actual_key = actual_key;
         value->value = data;
 }
@@ -102,7 +114,7 @@ static const void *crack_value_find_fist(struct crack_item *item, u32 key)
                                 *positions = POSITION_UNUSED;
                                 const void *result = value->value;
                                 vec_push(&item->values_freelist, &pos, 1);
-                                ng5_zero_memory(value, sizeof(struct crack_value));
+                                //ng5_zero_memory(value, sizeof(struct crack_value));
                                 return result;
                         }
                 }
@@ -125,6 +137,7 @@ static const void *crack_item_pop(struct crack_item *item, u32 key)
 
 static struct crack_item *crack_item_new(struct crack_index *index)
 {
+        assert_order(index);
         struct crack_item *item;
        // if (vec_is_empty(&index->crack_items_freelist)) {
                 item = vec_new_and_get(&index->crack_items, struct crack_item);
@@ -137,45 +150,58 @@ static struct crack_item *crack_item_new(struct crack_index *index)
         vec_create(&item->values_freelist, NULL, sizeof(u32), 100);
         vec_create(&item->values_uselist, NULL, sizeof(u32), 100);
         vec_create(&item->values, NULL, sizeof(struct crack_value), 100);
+        assert_order(index);
         return item;
 }
 
+ng5_func_unused
 static void crack_item_split(struct crack_item **lhs, struct crack_item **rhs, u32 pivot, struct crack_item *item, struct crack_index *index)
 {
-        *lhs = crack_item_new(index);
-        *rhs = crack_item_new(index);
+        assert_order(index);
+
+        struct crack_item *lower = crack_item_new(index);
+        struct crack_item *upper = crack_item_new(index);
+
+        assert(item->values.num_elems <= item->values.cap_elems);
+        assert(lower->values.num_elems <= lower->values.cap_elems);
+        assert(upper->values.num_elems <= upper->values.cap_elems);
 
         u32 *positions = vec_all(&item->values_uselist, u32);
         u32 num_positions = item->values_uselist.num_elems;
         while (num_positions--) {
                 u32 pos = *positions;
+                assert(pos == POSITION_UNUSED || pos < item->values.num_elems);
                 if (pos != POSITION_UNUSED) {
                         const struct crack_value *value = vec_get(&item->values, pos, struct crack_value);
-                        if (value->actual_key < pivot) {
-                                crack_item_add(*lhs, value->value, value->actual_key);
-                        } else {
-                                crack_item_add(*rhs, value->value, value->actual_key);
-                        }
+                        struct crack_item *dst = value->actual_key < pivot ? lower : upper;
+                        crack_item_add(dst, value->value, value->actual_key);
                 }
                 positions++;
         }
 
-        (*lhs)->less_than_key = pivot;
-        (*rhs)->less_than_key = item->less_than_key;
-        (*lhs)->next = (*rhs);
-        (*lhs)->prev = item->prev;
-        (*rhs)->prev = (*lhs);
-        (*rhs)->next = item->next;
+        assert_order(index);
+
+        lower->less_than_key = pivot;
+        upper->less_than_key = item->less_than_key;
+        lower->next = upper;
+        lower->prev = item->prev;
+        upper->prev = lower;
+        upper->next = item->next;
         if (item->prev) {
-                item->prev->next = (*lhs);
+                item->prev->next = lower;
         }
         if (item->next) {
-                item->next->prev = (*rhs);
+                item->next->prev = upper;
         }
         if (index->lowest == item) {
-                index->lowest = *lhs;
+                index->lowest = lower;
         }
-        //crack_item_drop(item, index);
+       // crack_item_drop(item, index);
+
+        assert_order(index);
+
+        *lhs = lower;
+        *rhs = upper;
 }
 
 static void crack_item_drop(struct crack_item *item, struct crack_index *index)
@@ -186,7 +212,7 @@ static void crack_item_drop(struct crack_item *item, struct crack_index *index)
 
         ng5_unused(index);
         //vec_push(&index->crack_items_freelist, &item, 1);
-        ng5_zero_memory(item, sizeof(struct crack_item));
+        //ng5_zero_memory(item, sizeof(struct crack_item));
 }
 
 
@@ -225,8 +251,10 @@ NG5_EXPORT(bool) crack_index_push(struct crack_index *index, u32 key, const void
         error_if_null(index)
         error_if_null(value)
 
+        assert_order(index);
         struct crack_item *item = crack_item_find(index, key);
         crack_item_add(item, value, key);
+        assert_order(index);
 
         return true;
 }
@@ -234,7 +262,9 @@ NG5_EXPORT(bool) crack_index_push(struct crack_index *index, u32 key, const void
 NG5_EXPORT(const void *) crack_index_pop(struct crack_index *index, u32 key)
 {
         error_if_null(index)
+        assert_order(index);
         struct crack_item *item = crack_item_find(index, key);
         const void *result = crack_item_pop(item, key);
+        assert_order(index);
         return result;
 }
