@@ -20,7 +20,7 @@
 #include <utils/env.h>
 #include "core/index/crack_index.h"
 
-#define ITEM_MAX 650000
+#define ITEM_MAX 65000
 #define KEY_RAND_MAX 2048
 
 int main(int argc, char *argv[])
@@ -37,16 +37,20 @@ int main(int argc, char *argv[])
                 values[i] = i;
         }
 
+        u64 total_pushed = 0;
+
         for (u32 i = 0; i < ITEM_MAX; i++) {
                 u32 key = 1 + (rand() % KEY_RAND_MAX);
                 crack_index_push(&index, key, values + i);
+                total_pushed++;
         }
+
 
         u16 num_reruns = 0;
         timestamp_t acc;
         printf("rerun;alpha;num_sec;num_ops_pop;num_ops_push;duration_ms;ops_per_sec;mem_usage;mem_usage_peak\n");
 
-        while (num_reruns++ < 1) {
+        while (num_reruns++ < 100) {
                 for (float alpha = 0; alpha <= 1.0f; alpha += 1.0f) {
                         for (u16 num_sec = 0; num_sec < 5; num_sec++) {
                                 acc = 0;
@@ -68,6 +72,12 @@ int main(int argc, char *argv[])
                                         } else {
 
                                                 for (u32 i = 0; i < (1 - alpha) * 1000; i++) {
+                                                        total_pushed++;
+                                                        if (total_pushed == 8655116) {
+
+                                                        }
+                                                        assert(total_pushed < UINT32_MAX);
+
                                                         u32 key = 1 + (rand() % KEY_RAND_MAX);
                                                         u32 value = *(values + ((1 + rand()) % (ITEM_MAX - 10)));
                                                         crack_index_push(&index, key, &value);
@@ -78,6 +88,7 @@ int main(int argc, char *argv[])
                                         acc += (end - begin);
                                 }
 
+                                printf("%0.02f%%\n", total_pushed * 100 / 8655116.0);
                                 printf("%d;%0.2f;%d;%" PRIu64 ";%" PRIu64 ";%" PRIu64 ";%f;%zu;%zu\n",
                                         num_reruns,
                                         alpha,

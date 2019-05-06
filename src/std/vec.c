@@ -188,6 +188,7 @@ bool vec_push(struct vector *vec, const void *data, size_t num_elems)
                 vec->base = alloc_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
         }
         memcpy(vec->base + vec->num_elems * vec->elem_size, data, num_elems * vec->elem_size);
+        assert(vec->num_elems + num_elems < UINT32_MAX);
         vec->num_elems += num_elems;
         return true;
 }
