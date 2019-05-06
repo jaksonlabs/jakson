@@ -166,8 +166,8 @@ static void crack_item_split(struct crack_item **lhs, struct crack_item **rhs, u
                 positions++;
         }
 
-        assert(lower->values_uselist.num_elems);
-        assert(upper->values_uselist.num_elems);
+        //assert(lower->values_uselist.num_elems);
+        //assert(upper->values_uselist.num_elems);
 
         lower->less_than_key = pivot;
         upper->less_than_key = item->less_than_key;
