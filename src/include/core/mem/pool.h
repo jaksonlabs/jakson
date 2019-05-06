@@ -125,6 +125,7 @@ struct pool_strategy
         bool (*_gc)(struct pool_strategy *self);
         bool (*_update_counters)(struct pool_strategy *self);
         bool (*_reset_counters)(struct pool_strategy *self);
+        bool (*_drop)(struct pool_strategy *self);
 };
 
 struct pool_ptr_info {

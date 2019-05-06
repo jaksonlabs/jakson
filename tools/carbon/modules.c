@@ -295,7 +295,7 @@ static void tracker_end_write_record_table()
 
 static void tracker_skip_string_id_index_baking()
 {
-    NG5_CONSOLE_WRITELN(stdout, "%s", "  - Backing indexes skipped");
+    NG5_CONSOLE_WRITELN(stdout, "%s", "  - Backing index skipped");
 }
 
 static void tracker_begin_string_id_index_baking()

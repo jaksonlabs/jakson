@@ -119,6 +119,7 @@ NG5_EXPORT(bool) pool_drop(struct pool *pool)
         error_if_null(pool)
         lock(pool);
 
+        ng5_optional_call((&pool->strategy), _drop, &pool->strategy);
         pool_free_all(pool);
         vec_drop(&pool->in_use);
         vec_drop(&pool->in_use_pos_freelist);

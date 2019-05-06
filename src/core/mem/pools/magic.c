@@ -20,26 +20,46 @@
 
 #define REQUIRE_INSTANCE_OF_THIS() ng5_check_tag(self->tag, POOL_IMPL_MAGIC);
 
+struct magic_extra
+{
+
+};
+
+static bool this_drop(struct pool_strategy *self);
 static data_ptr_t this_alloc(struct pool_strategy *self, u64 nbytes);
 static data_ptr_t this_realloc(struct pool_strategy *self, data_ptr_t ptr, u64 nbytes);
 static bool this_free(struct pool_strategy *self, data_ptr_t ptr);
 static bool this_gc(struct pool_strategy *self);
 static bool this_update_counters(struct pool_strategy *self);
 static bool this_reset_counters(struct pool_strategy *self);
+static void init_extra(struct magic_extra *extra);
+static void drop_extra(struct magic_extra *extra);
 
 void pool_strategy_magic_create(struct pool_strategy *dst)
 {
         assert(dst);
 
+        dst->_drop = this_drop;
         dst->_alloc = this_alloc;
         dst->_realloc = this_realloc;
         dst->_free = this_free;
         dst->_gc = this_gc;
         dst->_update_counters = this_update_counters;
         dst->_reset_counters = this_reset_counters;
+        dst->extra = malloc(sizeof(struct magic_extra));
+        init_extra((struct magic_extra *) dst->extra);
 
         dst->tag = POOL_IMPL_MAGIC;
         dst->impl_name = POOL_STRATEGY_MAGIC_NAME;
+}
+
+static bool this_drop(struct pool_strategy *self)
+{
+        REQUIRE_INSTANCE_OF_THIS()
+        struct magic_extra *extra = (struct magic_extra *) self->extra;
+        drop_extra(extra);
+        free(extra);
+        return true;
 }
 
 static data_ptr_t this_alloc(struct pool_strategy *self, u64 nbytes)
@@ -65,6 +85,14 @@ static data_ptr_t this_realloc(struct pool_strategy *self, data_ptr_t ptr, u64 n
 
         self->counters.num_bytes_reallocd = nbytes;
         self->counters.num_bytes_allocd += ng5_span(info->bytes_total, nbytes);
+
+        /* avoid a reallocation, if realloc'd block is larger than 50% of already allocated memory (i.e., waste
+         * at most 50%) */
+        if (nbytes < info->bytes_total && (info->bytes_total - nbytes)/(float) info->bytes_total < 0.5f) {
+                info->bytes_used = nbytes;
+                self->counters.num_managed_realloc_calls++;
+                return ptr;
+        }
 
         stored_adr = data_ptr_get_pointer(ptr);
         new_adr = realloc(stored_adr, nbytes);
@@ -116,4 +144,14 @@ static bool this_reset_counters(struct pool_strategy *self)
 {
         ng5_zero_memory(&self->counters, sizeof(struct pool_counters));
         return true;
+}
+
+static void init_extra(struct magic_extra *extra)
+{
+        ng5_unused(extra);
+}
+
+static void drop_extra(struct magic_extra *extra)
+{
+        ng5_unused(extra);
 }
