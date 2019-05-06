@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
         timestamp_t acc;
         printf("rerun;alpha;num_sec;num_ops_pop;num_ops_push;duration_ms;ops_per_sec;mem_usage;mem_usage_peak\n");
 
-        while (num_reruns < 1) {
+        while (num_reruns++ < 1) {
                 for (float alpha = 0; alpha <= 1.0f; alpha += 0.2f) {
                         for (u16 num_sec = 0; num_sec < 1; num_sec++) {
                                 acc = 0;
