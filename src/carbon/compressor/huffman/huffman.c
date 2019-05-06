@@ -72,6 +72,17 @@ void carbon_huffman_encoder_bake_code(
 
     size_t max_frequency = SIZE_MAX;
 
+    bool all_zero = true;
+    for(size_t i = 0; i < UCHAR_MAX; ++i) {
+        if(encoder->frequencies[i]) {
+            all_zero = false;
+            break;
+        }
+    }
+
+    if(all_zero)
+        encoder->frequencies[0] = 1;
+
     for(size_t i = 0; i < UCHAR_MAX; ++i) {
         if(encoder->frequencies[i]) {
             carbon_huffman_tree_node_t *node = malloc(sizeof(carbon_huffman_tree_node_t));
