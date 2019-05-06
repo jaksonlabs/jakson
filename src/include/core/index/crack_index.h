@@ -30,7 +30,7 @@ struct crack_value
 
 struct crack_item
 {
-        struct crack_item *prev, *next;
+        u32 self_idx, prev_idx, next_idx;
         u32 less_than_key;
 
         struct vector ofType(struct crack_value) values;

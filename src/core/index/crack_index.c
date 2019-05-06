@@ -46,11 +46,11 @@ static struct crack_item *crack_item_find(struct crack_index *index, u32 key)
 {
         struct crack_item *item;
 
-        for (item = index->lowest; key >= item->less_than_key; item = item->next)
+        for (item = index->lowest; key >= item->less_than_key; item = (vec_get(&index->crack_items, item->next_idx, struct crack_item)))
                 {}
 
         assert(item);
-        assert(!item->prev || key >= item->prev->less_than_key);
+        //assert(!item->prev || key >= item->prev->less_than_key);
         assert(key < item->less_than_key);
 
         if (item->values_uselist.num_elems > 25500) {
@@ -127,14 +127,17 @@ static const void *crack_item_pop(struct crack_item *item, u32 key)
 static struct crack_item *crack_item_new(struct crack_index *index)
 {
         assert(index->crack_items.num_elems + 1 < UINT32_MAX);
+        u32 self_index;
         struct crack_item *item;
        // if (vec_is_empty(&index->crack_items_freelist)) {
+                self_index = index->crack_items.num_elems;
                 item = vec_new_and_get(&index->crack_items, struct crack_item);
         // } else {
         //      item = *(struct crack_item **) vec_pop(&index->crack_items_freelist);
         //}
 
-        item->next = item->prev = NULL;
+        item->self_idx = self_index;
+        item->next_idx = item->prev_idx = UINT32_MAX;
         item->less_than_key = UINT32_MAX;
         vec_create(&item->values_freelist, NULL, sizeof(u32), 100);
         vec_create(&item->values_uselist, NULL, sizeof(u32), 100);
@@ -171,16 +174,16 @@ static void crack_item_split(struct crack_item **lhs, struct crack_item **rhs, u
 
         lower->less_than_key = pivot;
         upper->less_than_key = item->less_than_key;
-        lower->next = upper;
-        lower->prev = item->prev;
-        upper->prev = lower;
-        upper->next = item->next;
+        lower->next_idx = upper->self_idx;
+        lower->prev_idx = item->prev_idx;
+        upper->prev_idx = lower->self_idx;
+        upper->next_idx = item->next_idx;
 
-        if (item->prev) {
-                item->prev->next = lower;
+        if (item->prev_idx != UINT32_MAX) {
+                (vec_get(&index->crack_items, item->prev_idx, struct crack_item))->next_idx = lower->self_idx;
         }
-        if (item->next) {
-                item->next->prev = upper;
+        if (item->next_idx != UINT32_MAX) {
+                (vec_get(&index->crack_items, item->next_idx, struct crack_item))->prev_idx = upper->self_idx;
         }
         if (index->lowest == item) {
                 index->lowest = lower;
