@@ -19,7 +19,7 @@
 
 #define POSITION_UNUSED UINT32_MAX
 
-static void crack_item_split(struct crack_item **lhs, struct crack_item **rhs, u32 pivot, struct crack_item *item, struct crack_index *index);
+static void crack_item_split(struct crack_item **lhs, struct crack_item **rhs, u32 pivot, u32 item_idx, struct crack_index *index);
 static void crack_item_drop(struct crack_item *item, struct crack_index *index);
 
 ng5_func_unused
@@ -57,7 +57,7 @@ static struct crack_item *crack_item_find(struct crack_index *index, u32 key)
                 struct crack_item *lhs, *rhs;
                 u32 pivot = mean_key(item);
                 assert(pivot < item->less_than_key);
-                crack_item_split(&lhs, &rhs, pivot, item, index);
+                crack_item_split(&lhs, &rhs, pivot, item->self_idx, index);
                 item = key < pivot ? lhs : rhs;
         }
 
@@ -147,10 +147,11 @@ static struct crack_item *crack_item_new(struct crack_index *index)
 }
 
 ng5_func_unused
-static void crack_item_split(struct crack_item **lhs, struct crack_item **rhs, u32 pivot, struct crack_item *item, struct crack_index *index)
+static void crack_item_split(struct crack_item **lhs, struct crack_item **rhs, u32 pivot, u32 item_idx, struct crack_index *index)
 {
         struct crack_item *lower = crack_item_new(index);
         struct crack_item *upper = crack_item_new(index);
+        struct crack_item *item = vec_get(&index->crack_items, item_idx, struct crack_item);
 
         assert(item->values.num_elems <= item->values.cap_elems);
         assert(lower->values.num_elems <= lower->values.cap_elems);
