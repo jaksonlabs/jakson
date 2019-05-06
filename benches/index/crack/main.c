@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
                                         acc += (end - begin);
                                 }
 
-                                printf("%d;%0.2f;%d;%llu;%llu;%" PRIu64 ";%f;%zu;%zu\n",
+                                printf("%d;%0.2f;%d;%" PRIu64 ";%" PRIu64 ";%" PRIu64 ";%f;%zu;%zu\n",
                                         num_reruns,
                                         alpha,
                                         num_sec,
