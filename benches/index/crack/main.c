@@ -47,8 +47,8 @@ int main(int argc, char *argv[])
         printf("rerun;alpha;num_sec;num_ops_pop;num_ops_push;duration_ms;ops_per_sec;mem_usage;mem_usage_peak\n");
 
         while (num_reruns++ < 1) {
-                for (float alpha = 0; alpha <= 1.0f; alpha += 0.2f) {
-                        for (u16 num_sec = 0; num_sec < 1; num_sec++) {
+                for (float alpha = 0; alpha <= 1.0f; alpha += 1.0f) {
+                        for (u16 num_sec = 0; num_sec < 5; num_sec++) {
                                 acc = 0;
 
                                 u64 num_ops_pop = 0;
