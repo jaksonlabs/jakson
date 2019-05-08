@@ -47,6 +47,14 @@ struct crack_index
         struct err err;
 };
 
+struct crack_index_counters
+{
+        u32 index_first_level_items;
+        u32 index_min_2nd_level_items;
+        u32 index_max_2nd_level_items;
+        float index_avg_2nd_level_items;
+};
+
 NG5_DEFINE_GET_ERROR_FUNCTION(crack_index, struct crack_index, index);
 
 NG5_EXPORT(bool) crack_index_create(struct crack_index *index, struct err *err, u64 capacity);
@@ -54,6 +62,8 @@ NG5_EXPORT(bool) crack_index_create(struct crack_index *index, struct err *err, 
 NG5_EXPORT(bool) crack_index_drop(struct crack_index *index);
 
 NG5_EXPORT(bool) crack_index_push(struct crack_index *index, u32 key, const void *value);
+
+NG5_EXPORT(bool) crack_index_get_counters(struct crack_index_counters *counters, const struct crack_index *index);
 
 NG5_EXPORT(const void *) crack_index_pop(struct crack_index *index, u32 key);
 

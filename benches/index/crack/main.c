@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 
         u16 num_reruns = 0;
         timestamp_t acc;
-        printf("rerun;alpha;num_sec;num_ops_pop;num_ops_push;duration_ms;ops_per_sec;mem_usage;mem_usage_peak\n");
+        printf("rerun;alpha;num_sec;num_ops_pop;num_ops_push;duration_ms;ops_per_sec;mem_usage;mem_usage_peak;index_first_level_items;index_min_2nd_level_items;index_max_2nd_level_items;index_avg_2nd_level_items\n");
 
         while (num_reruns++ < 10) {
                 for (float alpha = 0; alpha <= 1.0f; alpha += 0.04f) {
@@ -79,7 +79,10 @@ int main(int argc, char *argv[])
                                         acc += (end - begin);
                                 }
 
-                                printf("%d;%0.2f;%d;%" PRIu64 ";%" PRIu64 ";%" PRIu64 ";%f;%zu;%zu\n",
+                                struct crack_index_counters counters;
+                                crack_index_get_counters(&counters, &index);
+
+                                printf("%d;%0.2f;%d;%" PRIu64 ";%" PRIu64 ";%" PRIu64 ";%f;%zu;%zu;%d;%d;%d;%0.2f\n",
                                         num_reruns,
                                         alpha,
                                         num_sec,
@@ -88,7 +91,11 @@ int main(int argc, char *argv[])
                                         acc,
                                         ((num_ops_pop + num_ops_push) / (float) (acc / 1000.0f)),
                                         env_get_process_memory_usage(),
-                                        env_get_process_peak_memory_usage());
+                                        env_get_process_peak_memory_usage(),
+                                        counters.index_first_level_items,
+                                        counters.index_min_2nd_level_items,
+                                        counters.index_max_2nd_level_items,
+                                        counters.index_avg_2nd_level_items);
                                 fflush(stdout);
                         }
                 }

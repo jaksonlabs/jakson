@@ -19,6 +19,7 @@
 #define NG5_VECTOR_H
 
 #include <sys/mman.h>
+#include <inttypes.h>
 
 #include "shared/common.h"
 #include "core/alloc/alloc.h"
@@ -153,6 +154,9 @@ NG5_EXPORT(bool) vec_drop(struct vector *vec);
  */
 NG5_EXPORT(bool) vec_is_empty(const struct vector *vec);
 
+#define vec_is_empty_unsafe(vec)                                                                                       \
+        ((vec)->num_elems == 0)
+
 /**
  * Appends 'num_elems' elements stored in 'data' into the vector by copying num_elems * vec->elem_size into the
  * vectors memory block.
@@ -165,6 +169,19 @@ NG5_EXPORT(bool) vec_is_empty(const struct vector *vec);
  * @return STATUS_OK if success, and STATUS_NULLPTR in case of NULL pointer parameters
  */
 NG5_EXPORT(bool) vec_push(struct vector *vec, const void *data, size_t num_elems);
+
+#define vec_push_inline(vec, data, num_elem)                                                                           \
+{                                                                                                                      \
+        size_t next_num = (vec)->num_elems + num_elem;                                                                 \
+        while (next_num > (vec)->cap_elems) {                                                                          \
+                size_t more = next_num - (vec)->cap_elems;                                                             \
+                (vec)->cap_elems = ((vec)->cap_elems + more) * (vec)->grow_factor;                                     \
+                (vec)->base = alloc_realloc((vec)->allocator, (vec)->base, (vec)->cap_elems * (vec)->elem_size);       \
+        }                                                                                                              \
+        memcpy((vec)->base + (vec)->num_elems * (vec)->elem_size, (data), num_elem * (vec)->elem_size);                \
+        assert((vec)->num_elems + num_elem < UINT32_MAX);                                                              \
+        (vec)->num_elems += num_elem;                                                                                  \
+}
 
 NG5_EXPORT(const void *)vec_peek(struct vector *vec);
 
@@ -191,6 +208,9 @@ NG5_EXPORT(bool) vec_repeated_push(struct vector *vec, const void *data, size_t 
  * @return Pointer to last element, or <code>NULL</code> if vector is empty
  */
 NG5_EXPORT(const void *)vec_pop(struct vector *vec);
+
+#define vec_pop_unsafe(vec)                                                                                            \
+        ((vec)->base + (--(vec)->num_elems) * (vec)->elem_size)
 
 NG5_EXPORT(bool) vec_clear(struct vector *vec);
 
@@ -221,6 +241,9 @@ NG5_EXPORT(bool) vec_grow_to(struct vector *vec, size_t capacity);
  */
 NG5_EXPORT(size_t) vec_length(const struct vector *vec);
 
+#define vec_length_unsafe(vec)                                                                                         \
+        ((vec)->num_elems)
+
 #define vec_get(vec, pos, type) (type *) vec_at(vec, pos)
 
 #define vec_new_and_get(vec, type)                                                                                     \
@@ -231,7 +254,21 @@ NG5_EXPORT(size_t) vec_length(const struct vector *vec);
     vec_get(vec, vectorLength, type);                                                                                  \
 })
 
+#define vec_new_and_get_unsafe(vec, type)                                                                              \
+({                                                                                                                     \
+    type template;                                                                                                     \
+    size_t vectorLength = vec_length_unsafe(vec);                                                                      \
+    vec_push_inline(vec, &template, 1);                                                                                \
+    vec_get_unsafe(vec, vectorLength, type);                                                                           \
+})
+
 NG5_EXPORT(const void *) vec_at(const struct vector *vec, size_t pos);
+
+#define vec_get_unsafe(vec, pos, type)                                                                                 \
+        (type *) vec_at_unsafe((vec), pos)
+
+#define vec_at_unsafe(vec, pos)                                                                                        \
+        ((vec)->base + pos * (vec)->elem_size)
 
 /**
  * Returns the number of elements for which memory is currently reserved in the vector
