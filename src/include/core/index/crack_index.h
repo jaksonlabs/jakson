@@ -42,8 +42,8 @@ struct crack_item
 struct crack_index
 {
         struct vector ofType(struct crack_item) crack_items;
-        struct vector ofType(struct crack_item *) crack_items_freelist;
-        struct crack_item *lowest;
+        struct vector ofType(u32) crack_items_freelist;
+        u32 lowest_item_id;
         struct err err;
 };
 

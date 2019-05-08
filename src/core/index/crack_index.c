@@ -20,7 +20,7 @@
 #define POSITION_UNUSED UINT32_MAX
 
 static void crack_item_split(struct crack_item **lhs, struct crack_item **rhs, u32 pivot, u32 item_idx, struct crack_index *index);
-static void crack_item_drop(struct crack_item *item, struct crack_index *index);
+static void crack_item_drop(struct crack_item *item, u32 item_idx, struct crack_index *index);
 
 ng5_func_unused
 static u32 mean_key(struct crack_item *item)
@@ -46,7 +46,7 @@ static struct crack_item *crack_item_find(struct crack_index *index, u32 key)
 {
         struct crack_item *item;
 
-        for (item = index->lowest; key >= item->less_than_key; item = (vec_get(&index->crack_items, item->next_idx, struct crack_item)))
+        for (item = (vec_get(&index->crack_items, index->lowest_item_id, struct crack_item)); key >= item->less_than_key; item = (vec_get(&index->crack_items, item->next_idx, struct crack_item)))
                 {}
 
         assert(item);
@@ -129,12 +129,13 @@ static struct crack_item *crack_item_new(struct crack_index *index)
         assert(index->crack_items.num_elems + 1 < UINT32_MAX);
         u32 self_index;
         struct crack_item *item;
-       // if (vec_is_empty(&index->crack_items_freelist)) {
+        if (vec_is_empty(&index->crack_items_freelist)) {
                 self_index = index->crack_items.num_elems;
                 item = vec_new_and_get(&index->crack_items, struct crack_item);
-        // } else {
-        //      item = *(struct crack_item **) vec_pop(&index->crack_items_freelist);
-        //}
+        } else {
+                self_index = *(u32 *) vec_pop(&index->crack_items_freelist);
+                item = vec_get(&index->crack_items, self_index, struct crack_item);
+        }
 
         item->self_idx = self_index;
         item->next_idx = item->prev_idx = UINT32_MAX;
@@ -187,22 +188,24 @@ static void crack_item_split(struct crack_item **lhs, struct crack_item **rhs, u
         if (item->next_idx != UINT32_MAX) {
                 (vec_get(&index->crack_items, item->next_idx, struct crack_item))->prev_idx = upper->self_idx;
         }
-        if (index->lowest == item) {
-                index->lowest = lower;
+        if (index->lowest_item_id == item_idx) {
+                index->lowest_item_id = lower_idx;
         }
 
         *lhs = lower;
         *rhs = upper;
+
+        crack_item_drop(item, item_idx, index);
 }
 
-static void crack_item_drop(struct crack_item *item, struct crack_index *index)
+static void crack_item_drop(struct crack_item *item, u32 item_idx, struct crack_index *index)
 {
         vec_drop(&item->values);
         vec_drop(&item->values_uselist);
         vec_drop(&item->values_freelist);
 
         ng5_unused(index);
-        //vec_push(&index->crack_items_freelist, &item, 1);
+        vec_push(&index->crack_items_freelist, &item_idx, 1);
         //ng5_zero_memory(item, sizeof(struct crack_item));
 }
 
@@ -214,9 +217,9 @@ NG5_EXPORT(bool) crack_index_create(struct crack_index *index, struct err *err, 
         error_if_null(capacity)
         error_init(&index->err);
         vec_create(&index->crack_items, NULL, sizeof(struct crack_item), 1000);
-        //vec_create(&index->crack_items_freelist, NULL, sizeof(struct crack_item *), 1000);
+        vec_create(&index->crack_items_freelist, NULL, sizeof(u32), 1000);
         crack_item_new(index);
-        index->lowest = vec_get(&index->crack_items, 0, struct crack_item);
+        index->lowest_item_id = 0;//vec_get(&index->crack_items, 0, struct crack_item);
 
         return true;
 }
@@ -226,13 +229,13 @@ NG5_EXPORT(bool) crack_index_drop(struct crack_index *index)
         error_if_null(index)
 
         struct crack_item *items = vec_all(&index->crack_items, struct crack_item);
-        u32 num_items = index->crack_items.num_elems;
-        while (num_items--) {
-                crack_item_drop(items, index);
+
+        for (u32 item_idx = 0; item_idx < index->crack_items.num_elems; item_idx++) {
+                crack_item_drop(items, item_idx, index);
                 items++;
         }
         vec_drop(&index->crack_items);
-        //vec_drop(&index->crack_items_freelist);
+        vec_drop(&index->crack_items_freelist);
 
         return true;
 }
