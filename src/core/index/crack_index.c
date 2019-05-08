@@ -21,6 +21,7 @@
 
 static void crack_item_split(struct crack_item **lhs, struct crack_item **rhs, u32 pivot, u32 item_idx, struct crack_index *index);
 static void crack_item_drop(struct crack_item *item, u32 item_idx, struct crack_index *index);
+static void crack_item_clear(struct crack_item *item, u32 item_idx, struct crack_index *index);
 
 ng5_func_unused
 static u32 mean_key(struct crack_item *item)
@@ -64,6 +65,7 @@ static struct crack_item *crack_item_find(struct crack_index *index, u32 key)
              key >= item->less_than_key;
              item = (vec_get_unsafe(&index->crack_items, item->next_idx, struct crack_item)))
                 {}
+        
 
         assert(item);
         //assert(!item->prev || key >= item->prev->less_than_key);
@@ -206,18 +208,23 @@ static void crack_item_split(struct crack_item **lhs, struct crack_item **rhs, u
         *lhs = lower;
         *rhs = upper;
 
-        crack_item_drop(item, item_idx, index);
+        crack_item_clear(item, item_idx, index);
 }
+
+static void crack_item_clear(struct crack_item *item, u32 item_idx, struct crack_index *index)
+{
+        vec_clear(&item->values);
+        vec_clear(&item->values_uselist);
+        vec_clear(&item->values_freelist);
+        vec_push_inline(&index->crack_items_freelist, &item_idx, 1);
+};
 
 static void crack_item_drop(struct crack_item *item, u32 item_idx, struct crack_index *index)
 {
         vec_drop(&item->values);
         vec_drop(&item->values_uselist);
         vec_drop(&item->values_freelist);
-
-        ng5_unused(index);
         vec_push_inline(&index->crack_items_freelist, &item_idx, 1);
-        //ng5_zero_memory(item, sizeof(struct crack_item));
 }
 
 
