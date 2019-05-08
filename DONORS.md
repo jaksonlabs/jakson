@@ -49,6 +49,8 @@ great thanks in the following list.
 
 ### Gold
 
+Mahmoud Mohsen
+
 [Become a gold donor now!](mailto:pinnecke@ovgu.de)
 
 ### Silver
