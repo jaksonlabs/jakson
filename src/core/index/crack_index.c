@@ -15,7 +15,7 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <std/sort.h>
+#include "std/sort.h"
 #include "core/index/crack_index.h"
 
 #define POSITION_UNUSED UINT32_MAX
@@ -79,33 +79,26 @@ static struct crack_item *crack_item_search(const struct crack_item *begin, cons
 static inline void crack_item_try_split(struct crack_item **item, u32 item_pos, u32 key, struct crack_index *index)
 {
         struct crack_item *victim = *item;
-        if (victim->values_uselist.num_elems > 2000) {
+
+
+        u32 victim_geq = victim->greater_eq_key;
+        u32 victim_ls = victim->less_than_key;
+        u32 range_diff = (victim_ls - victim_geq) / 2;
+        u32 pivot = victim_geq + range_diff;
+
+        if (range_diff > 1 && victim->values_uselist.num_elems > 2000) {
                 struct crack_item *lhs, *rhs;
-                u32 pivot = mean_key(victim);
+                 //mean_key(victim);
+
                 assert(pivot < victim->less_than_key);
 
                 crack_item_split(&lhs, &rhs, pivot, item_pos, index);
 
+                assert(victim_geq == lhs->greater_eq_key);
+                assert(victim_ls == rhs->less_than_key);
                 assert(key < lhs->less_than_key || key < rhs->less_than_key);
                 assert(lhs->less_than_key < rhs->less_than_key);
                 *item = key < pivot ? lhs : rhs;
-
-#ifndef NDEBUG
-                u32 num_broken = 0;
-                for (u32 i = 0; i < ((i64) index->crack_items.num_elems) - 1; i++) {
-                        struct crack_item *a = vec_get(&index->crack_items, i, struct crack_item);
-                        struct crack_item *b = vec_get(&index->crack_items, i + 1, struct crack_item);
-                        //assert(a->less_than_key <= b->less_than_key || b->less_than_key == UINT32_MAX);
-                        if (!(a->less_than_key <= b->less_than_key)) {
-                                ++num_broken;
-                        }
-
-                }
-                if (num_broken > 0) {
-                        fprintf(stderr, "(%0.4f%%)\n", (100*num_broken)/(float)index->crack_items.num_elems);
-                }
-
-#endif
         }
 }
 
@@ -244,6 +237,7 @@ static struct crack_item *crack_item_new(struct crack_index *index)
         struct crack_item *item;
         item = vec_new_and_get_unsafe(&index->crack_items, struct crack_item);
         item->less_than_key = UINT32_MAX;
+        item->greater_eq_key = 0;
         vec_create(&item->values_freelist, NULL, sizeof(u32), 100);
         vec_create(&item->values_uselist, NULL, sizeof(u32), INIT_CRACK_ITEM_VALUEs_USELIST_CAP);
         vec_create(&item->values, NULL, sizeof(struct crack_value), INIT_CRACK_ITEM_VALUE_CAP);
@@ -278,7 +272,9 @@ static void crack_item_split(struct crack_item **lhs, struct crack_item **rhs, u
 
 
 
+        lower->greater_eq_key = item->greater_eq_key;
         lower->less_than_key = pivot;
+        upper->greater_eq_key = pivot;
         upper->less_than_key = item->less_than_key;
         assert(lower->less_than_key < upper->less_than_key);
 
@@ -294,14 +290,41 @@ static void crack_item_split(struct crack_item **lhs, struct crack_item **rhs, u
         vec_set(&index->crack_items, upper_pos, upper);
         vec_clear_start_from(&index->crack_items, vec_length_unsafe(&index->crack_items) - 2);
 
-#ifndef NDEBUG
         lower = vec_get(&index->crack_items, lower_pos, struct crack_item);
         upper = vec_get(&index->crack_items, upper_pos, struct crack_item);
+
+        assert(lower->greater_eq_key < lower->less_than_key);
+        assert(upper->greater_eq_key < upper->less_than_key);
+        assert(lower->greater_eq_key < upper->greater_eq_key);
         assert(lower->less_than_key < upper->less_than_key);
+
+
+
+
+#ifndef NDEBUG
+        u32 num_broken = 0;
+        for (u32 i = 0; i < ((i64) index->crack_items.num_elems) - 1; i++) {
+                struct crack_item *a = vec_get(&index->crack_items, i, struct crack_item);
+                struct crack_item *b = vec_get(&index->crack_items, i + 1, struct crack_item);
+                //assert(a->less_than_key <= b->less_than_key || b->less_than_key == UINT32_MAX);
+                if (a->less_than_key > b->less_than_key) {
+                        ++num_broken;
+                }
+
+        }
+        if (num_broken > 0) {
+                fprintf(stderr, "(%0.4f%%)\n", (100*num_broken)/(float)index->crack_items.num_elems);
+        }
+
 #endif
 
-        *lhs = vec_get(&index->crack_items, lower_pos, struct crack_item);
-        *rhs = vec_get(&index->crack_items, upper_pos, struct crack_item);
+
+
+
+
+
+        *lhs = lower;
+        *rhs = upper;
 
 }
 
@@ -387,6 +410,7 @@ NG5_EXPORT(const void *) crack_index_pop(struct crack_index *index, u32 key)
                 struct crack_item *b = vec_get(&index->crack_items, i + 1, struct crack_item);
                 if (a->less_than_key > b->less_than_key) {
                         qsort(index->crack_items.base, index->crack_items.num_elems - 1, sizeof(struct crack_item), crack_item_cmp);
+                        fprintf(stderr, "SORT BROKEN\n");
                         break;
                 }
         }

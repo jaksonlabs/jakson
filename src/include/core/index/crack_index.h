@@ -30,6 +30,7 @@ struct crack_value
 
 struct crack_item
 {
+        u32 greater_eq_key;
         u32 less_than_key;
 
         struct vector ofType(struct crack_value) values;
