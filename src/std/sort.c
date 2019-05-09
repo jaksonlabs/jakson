@@ -125,6 +125,44 @@ NG5_EXPORT(size_t) sort_bsearch_indicies(const size_t *indicies, const void *bas
         return nelemens;
 }
 
+NG5_EXPORT(void *) sort_lower_bound_search(const void *begin, const void *end, size_t width, const void *needle, int (*comp)(const void *a, const void *b))
+{
+        intptr_t count = end - begin;
+        intptr_t step;
+        const void *it;
+        while (count > 0) {
+                it = begin;
+                step = count / 2;
+                it += step * width;
+                if (comp(it, needle)) {
+                        begin = ++it;
+                        count -= step + 1;
+                }
+                else
+                        count = step;
+        }
+        return (void *) begin;
+}
+
+NG5_EXPORT(void *) sort_upper_bound_search(const void *begin, const void *end, size_t width, const void *needle, int (*comp)(const void *a, const void *b))
+{
+        intptr_t count = end - begin;
+        intptr_t step;
+        const void *it;
+        while (count > 0) {
+                it = begin;
+                step = count / 2;
+                it += step * width;
+                if (!comp(needle, it)) {
+                        begin = ++it;
+                        count -= step + 1;
+                }
+                else
+                        count = step;
+        }
+        return (void *) begin;
+}
+
 NG5_EXPORT(size_t) sort_get_min(const size_t *elements, size_t nelemens)
 {
         size_t min = (size_t) -1;

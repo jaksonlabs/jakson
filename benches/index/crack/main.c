@@ -30,17 +30,14 @@ int main(int argc, char *argv[])
 
         struct crack_index index;
         struct err default_err;
-        crack_index_create(&index, &default_err, ITEM_MAX);
+
 
         u32 *values = malloc(ITEM_MAX * sizeof(u32));
         for (u32 i = 0; i < ITEM_MAX; i++) {
                 values[i] = i;
         }
 
-        for (u32 i = 0; i < ITEM_MAX; i++) {
-                u32 key = 1 + (rand() % KEY_RAND_MAX);
-                crack_index_push(&index, key, values + i);
-        }
+
 
 
         u16 num_reruns = 0;
@@ -49,7 +46,13 @@ int main(int argc, char *argv[])
 
         while (num_reruns++ < 10) {
                 for (float alpha = 0; alpha <= 1.0f; alpha += 0.04f) {
-                        for (u16 num_sec = 0; num_sec < 5; num_sec++) {
+                        crack_index_create(&index, &default_err, ITEM_MAX);
+                        for (u32 i = 0; i < ITEM_MAX; i++) {
+                                u32 key = 1 + (rand() % KEY_RAND_MAX);
+                                crack_index_push(&index, key, values + i);
+                        }
+
+                        for (u16 num_sec = 0; num_sec < 10; num_sec++) {
                                 acc = 0;
 
                                 u64 num_ops_pop = 0;
@@ -98,12 +101,12 @@ int main(int argc, char *argv[])
                                         counters.index_avg_2nd_level_items);
                                 fflush(stdout);
                         }
+                        crack_index_drop(&index);
                 }
 
         }
 
 
-        crack_index_drop(&index);
         free(values);
 
         return EXIT_SUCCESS;

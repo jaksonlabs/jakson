@@ -86,6 +86,10 @@ NG5_EXPORT(int) sort_qsort_indicies_wargs(size_t *indices, const void *base, siz
 NG5_EXPORT(size_t) sort_bsearch_indicies(const size_t *indicies, const void *base, size_t width, size_t nelemens,
         const void *neelde, eq_func_t compEq, less_func_t compLess);
 
+NG5_EXPORT(void *) sort_lower_bound_search(const void *begin, const void *end, size_t width, const void *needle, int (*comp)(const void *a, const void *b));
+
+NG5_EXPORT(void *) sort_upper_bound_search(const void *begin, const void *end, size_t width, const void *needle, int (*comp)(const void *a, const void *b));
+
 NG5_EXPORT(size_t) sort_get_min(const size_t *elements, size_t nelemens);
 
 NG5_EXPORT(size_t) sort_get_max(const size_t *elements, size_t nelemens);

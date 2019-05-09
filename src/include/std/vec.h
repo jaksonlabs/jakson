@@ -214,6 +214,8 @@ NG5_EXPORT(const void *)vec_pop(struct vector *vec);
 
 NG5_EXPORT(bool) vec_clear(struct vector *vec);
 
+NG5_EXPORT(bool) vec_clear_start_from(struct vector *vec, u32 pos);
+
 /**
  * Shinks the vector's internal data block to fits its real size, i.e., remove reserved memory
  *
@@ -244,7 +246,7 @@ NG5_EXPORT(size_t) vec_length(const struct vector *vec);
 #define vec_length_unsafe(vec)                                                                                         \
         ((vec)->num_elems)
 
-#define vec_get(vec, pos, type) (type *) vec_at(vec, pos)
+#define vec_get(vec, pos, type) ((type *) vec_at(vec, pos))
 
 #define vec_new_and_get(vec, type)                                                                                     \
 ({                                                                                                                     \
@@ -259,16 +261,16 @@ NG5_EXPORT(size_t) vec_length(const struct vector *vec);
     type template;                                                                                                     \
     size_t vectorLength = vec_length_unsafe(vec);                                                                      \
     vec_push_inline(vec, &template, 1);                                                                                \
-    vec_get_unsafe(vec, vectorLength, type);                                                                           \
+    vec_get(vec, vectorLength, type);                                                                                  \
 })
 
 NG5_EXPORT(const void *) vec_at(const struct vector *vec, size_t pos);
 
-#define vec_get_unsafe(vec, pos, type)                                                                                 \
-        (type *) vec_at_unsafe((vec), pos)
+//#define vec_get_unsafe(vec, pos, type)                                                                                 \
+//        (type *) vec_at_unsafe((vec), pos)
 
-#define vec_at_unsafe(vec, pos)                                                                                        \
-        ((vec)->base + pos * (vec)->elem_size)
+//#define vec_at_unsafe(vec, pos)                                                                                        \
+//        ((vec)->base + pos * (vec)->elem_size)
 
 /**
  * Returns the number of elements for which memory is currently reserved in the vector
@@ -288,6 +290,8 @@ NG5_EXPORT(bool) vec_zero_memory(struct vector *vec);
 NG5_EXPORT(bool) vec_zero_memory_in_range(struct vector *vec, size_t from, size_t to);
 
 NG5_EXPORT(bool) vec_set(struct vector *vec, size_t pos, const void *data);
+
+NG5_EXPORT(bool) vec_make_space(struct vector *vec, size_t pos, size_t num_slots);
 
 NG5_EXPORT(bool) vec_cpy(struct vector *dst, const struct vector *src);
 

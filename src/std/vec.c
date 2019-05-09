@@ -236,6 +236,14 @@ bool vec_clear(struct vector *vec)
         return true;
 }
 
+NG5_EXPORT(bool) vec_clear_start_from(struct vector *vec, u32 pos)
+{
+        error_if_null(vec);
+        error_if(pos >= vec->num_elems,&vec->err, NG5_ERR_OUTOFBOUNDS);
+        vec->num_elems = pos;
+        return true;
+}
+
 bool vec_shrink(struct vector *vec)
 {
         error_if_null(vec);
@@ -313,6 +321,22 @@ bool vec_set(struct vector *vec, size_t pos, const void *data)
         error_if_null(vec)
         assert(pos < vec->num_elems);
         memcpy(vec->base + pos * vec->elem_size, data, vec->elem_size);
+        return true;
+}
+
+NG5_EXPORT(bool) vec_make_space(struct vector *vec, size_t pos, size_t num_slots)
+{
+        error_if_null(vec)
+        error_if(pos >= vec->num_elems, &vec->err, NG5_ERR_OUTOFBOUNDS);
+        if ((vec->num_elems + num_slots) >= vec->cap_elems) {
+                vec->cap_elems = (vec->num_elems + num_slots) * 1.7f;
+                vec->base = realloc(vec->base, vec->cap_elems * vec->elem_size);
+                error_if(!vec->base, &vec->err, NG5_ERR_REALLOCERR);
+        }
+        memmove(vec->base + (pos + num_slots) * vec->elem_size,
+                vec->base + pos * vec->elem_size,
+                (vec->num_elems - pos) * vec->elem_size);
+        vec->num_elems += num_slots;
         return true;
 }
 

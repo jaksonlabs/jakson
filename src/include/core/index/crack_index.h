@@ -30,7 +30,6 @@ struct crack_value
 
 struct crack_item
 {
-        u32 self_idx, prev_idx, next_idx;
         u32 less_than_key;
 
         struct vector ofType(struct crack_value) values;
@@ -42,8 +41,6 @@ struct crack_item
 struct crack_index
 {
         struct vector ofType(struct crack_item) crack_items;
-        struct vector ofType(u32) crack_items_freelist;
-        u32 lowest_item_id;
         struct err err;
 };
 
