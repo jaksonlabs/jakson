@@ -28,15 +28,27 @@
 #include <carbon/compressor/huffman/huffman.h>
 #include <carbon/compressor/huffman/priority-queue.h>
 
+
+#include <carbon/compressor/prefix/prefix_encoder.h>
+#include <carbon/compressor/prefix/prefix_tree_node.h>
+#include <carbon/compressor/prefix/prefix_read_only_tree.h>
+#include <carbon/compressor/prefix/prefix_table.h>
+
 #include <carbon/carbon-archive.h>
 #include <carbon/carbon-io-device.h>
+
+typedef enum prefix_type {
+    prefix_type_none,
+    prefix_type_incremental,
+    prefix_type_table
+} prefix_type_e;
 
 typedef struct {
     size_t sort_chunk_length;
     size_t delta_chunk_length;
 
-    bool prefix;
-    bool suffix;
+    prefix_type_e suffix;
+    prefix_type_e prefix;
 
     bool huffman;
 } carbon_compressor_incremental_config_t;
@@ -50,6 +62,9 @@ typedef struct {
 
     carbon_huffman_encoder_t huffman_encoder;
     carbon_huffman_decoder_t huffman_decoder;
+
+    carbon_prefix_table   * prefix_tbl_table;
+    carbon_prefix_ro_tree * prefix_tbl_encoder;
 
     carbon_compressor_incremental_config_t config;
 } carbon_compressor_incremental_extra_t;
@@ -73,6 +88,22 @@ bool option_set_bool(carbon_err_t *err, bool *target, char *value) {
     }
 }
 
+bool option_set_type(carbon_err_t *err, prefix_type_e *target, char *value) {
+    if(strcmp(value, "none") == 0) {
+        *target = prefix_type_none;
+        return true;
+    } else if(strcmp(value, "incremental") == 0) {
+        *target = prefix_type_incremental;
+        return true;
+    } else if(strcmp(value, "table") == 0) {
+        *target = prefix_type_table;
+        return true;
+    } else {
+        CARBON_ERROR(err, CARBON_ERR_COMPRESSOR_OPT_VAL_INVALID);
+        return false;
+    }
+}
+
 bool option_set_sizet(carbon_err_t *err, size_t *target, char *value) {
     long long length = atol(value);
 
@@ -84,11 +115,11 @@ bool option_set_sizet(carbon_err_t *err, size_t *target, char *value) {
 
 
 bool set_prefix(carbon_err_t *err, carbon_compressor_t *self, char *value) {
-    return option_set_bool(err, &((carbon_compressor_incremental_extra_t *)self->extra)->config.prefix, value);
+    return option_set_type(err, &((carbon_compressor_incremental_extra_t *)self->extra)->config.prefix, value);
 }
 
 bool set_suffix(carbon_err_t *err, carbon_compressor_t *self, char *value) {
-    return option_set_bool(err, &((carbon_compressor_incremental_extra_t *)self->extra)->config.suffix, value);
+    return option_set_type(err, &((carbon_compressor_incremental_extra_t *)self->extra)->config.suffix, value);
 }
 
 bool set_huffman(carbon_err_t *err, carbon_compressor_t *self, char *value) {
@@ -103,14 +134,36 @@ bool set_delta_chunk_length(carbon_err_t *err, carbon_compressor_t *self, char *
     return option_set_sizet(err, &((carbon_compressor_incremental_extra_t *)self->extra)->config.delta_chunk_length, value);
 }
 
+char const * this_resolve_string_with_prefix_table(
+        char *in,
+        carbon_compressor_incremental_extra_t *extra
+    ) {
+    uint8_t byte_u8[2] = { ((uint8_t const *)in)[0], ((uint8_t const *)in)[1] };
+    uint16_t prefix_id;
 
-bool this_read_string_from_io_device(carbon_compressor_t *self, carbon_io_device_t *src, char *dst, size_t strlen) {
+    prefix_id = (uint16_t)((uint16_t)byte_u8[0] << 8) + byte_u8[1];
+
+    char * resolve_buffer = malloc(10);
+    size_t resolve_buffer_len = 10;
+    size_t prefix_length = 0;
+
+    carbon_prefix_table_resolve(
+        extra->prefix_tbl_table, in,
+        &resolve_buffer, &resolve_buffer_len, &prefix_length
+    );
+
+    return resolve_buffer;
+}
+
+bool this_read_string_from_io_device(carbon_compressor_t *self, carbon_io_device_t *src, char *dst, size_t string_len) {
     typedef struct local_entry {
         size_t strlen;
         char * str;
+        char const * prefix_table_prefix;
         size_t  end_pos;
         uint8_t common_prefix_length;
         uint8_t common_suffix_length;
+        uint16_t prefix_table_id;
     } local_entry_t;
 
     carbon_compressor_incremental_extra_t * extra =
@@ -118,6 +171,7 @@ bool this_read_string_from_io_device(carbon_compressor_t *self, carbon_io_device
 
     carbon_vec_t ofType(local_entry_t) dependencies;
     carbon_vec_create(&dependencies, NULL, sizeof(local_entry_t), 10);
+
 
     size_t  previous_offset_diff = 0;
     uint8_t common_prefix_len_ui8 = 0, common_suffix_len_ui8 = 0;
@@ -141,12 +195,23 @@ bool this_read_string_from_io_device(carbon_compressor_t *self, carbon_io_device
             return false;
 
 
-        if(extra->config.prefix) {
+        if(extra->config.prefix == prefix_type_incremental) {
             if(carbon_io_device_read(src, &common_prefix_len_ui8, 1, 1) != 1)
                 return false;
         }
 
-        if(extra->config.suffix) {
+        size_t table_prefix_length = 0;
+        if(extra->config.prefix == prefix_type_table) {
+            entry.prefix_table_id = carbon_vlq_decode_from_io(src, &ok);
+
+            // Resolve prefix length
+            char buf[] = { (entry.prefix_table_id >> 8) & 0xFF, entry.prefix_table_id & 0xFF, 0 };
+            entry.prefix_table_prefix = this_resolve_string_with_prefix_table(buf, extra);
+
+            table_prefix_length = strlen(entry.prefix_table_prefix);
+        }
+
+        if(extra->config.suffix == prefix_type_incremental) {
             if(carbon_io_device_read(src, &common_suffix_len_ui8, 1, 1) != 1)
                 return false;
         }
@@ -158,16 +223,16 @@ bool this_read_string_from_io_device(carbon_compressor_t *self, carbon_io_device
             entry.str = malloc(entry.strlen + 1);
             entry.str[entry.strlen] = 0;
 
-            char *tmp = carbon_huffman_decode_io(&extra->huffman_decoder, src, entry.strlen - common_prefix_len_ui8 - common_suffix_len_ui8);
-            strncpy(entry.str + common_prefix_len_ui8, tmp, entry.strlen - common_prefix_len_ui8 - common_suffix_len_ui8);
+            char *tmp = carbon_huffman_decode_io(&extra->huffman_decoder, src, entry.strlen - common_prefix_len_ui8 - common_suffix_len_ui8 - table_prefix_length);
+            strncpy(entry.str + common_prefix_len_ui8 + table_prefix_length, tmp, entry.strlen - common_prefix_len_ui8 - common_suffix_len_ui8 - table_prefix_length);
             free(tmp);
         } else {
             entry.str = malloc(entry.strlen + 1);
             entry.str[entry.strlen] = 0;
             carbon_io_device_read(
                         src,
-                        entry.str + common_prefix_len_ui8, sizeof(char),
-                        entry.strlen - common_prefix_len_ui8 - common_suffix_len_ui8
+                        entry.str + common_prefix_len_ui8 + table_prefix_length, sizeof(char),
+                        entry.strlen - common_prefix_len_ui8 - common_suffix_len_ui8  - table_prefix_length
             );
         }
 
@@ -178,25 +243,34 @@ bool this_read_string_from_io_device(carbon_compressor_t *self, carbon_io_device
     } while(common_prefix_len_ui8 != 0 || common_suffix_len_ui8 != 0);
 
 
+    if(extra->config.prefix == prefix_type_table) {
+        for(size_t i = 0; i < dependencies.num_elems; ++i) {
+            local_entry_t const *current  = (local_entry_t const *)carbon_vec_at(&dependencies, i);
+            strncpy(current->str, current->prefix_table_prefix, strlen(current->prefix_table_prefix));
+        }
+    }
 
-    // Dependencies now contains all entries in reverse order -> reconstruct them
-    for(ssize_t i = (ssize_t)dependencies.num_elems - 2;i >= 0;--i) {
-        local_entry_t const *current  = (local_entry_t const *)carbon_vec_at(&dependencies, (size_t)i);
-        local_entry_t const *previous = (local_entry_t const *)carbon_vec_at(&dependencies, (size_t)i + 1);
+    if(extra->config.prefix == prefix_type_incremental || extra->config.suffix == prefix_type_incremental) {
+        // Dependencies now contains all entries in reverse order -> reconstruct them
+        for(ssize_t i = (ssize_t)dependencies.num_elems - 2;i >= 0;--i) {
+            local_entry_t const *current  = (local_entry_t const *)carbon_vec_at(&dependencies, (size_t)i);
+            local_entry_t const *previous = (local_entry_t const *)carbon_vec_at(&dependencies, (size_t)i + 1);
 
-        strncpy(current->str, previous->str, current->common_prefix_length);
-        strncpy(
-            current->str + current->strlen - current->common_suffix_length,
-            previous->str + previous->strlen - current->common_suffix_length,
-            current->common_suffix_length
-        );
+            if(extra->config.prefix == prefix_type_incremental)
+                strncpy(current->str, previous->str, current->common_prefix_length);
+            strncpy(
+                current->str + current->strlen - current->common_suffix_length,
+                previous->str + previous->strlen - current->common_suffix_length,
+                current->common_suffix_length
+            );
+        }
     }
 
     carbon_io_device_seek(src, ((local_entry_t const *)carbon_vec_at(&dependencies, 0))->end_pos);
 
-    strncpy(dst, ((local_entry_t const *)carbon_vec_at(&dependencies, 0))->str, strlen + 1);
-    carbon_vec_drop(&dependencies);
+    strncpy(dst, ((local_entry_t const *)carbon_vec_at(&dependencies, 0))->str, string_len + 1);
 
+    carbon_vec_drop(&dependencies);
     return true;
 }
 
@@ -208,9 +282,9 @@ void this_read_config_from_io_device(carbon_compressor_t *self, carbon_io_device
     uint8_t flags = 0;
     carbon_io_device_read(src, &flags, 1, 1);
 
-    config->prefix = flags & 1;
-    config->suffix = flags & 2;
-    config->huffman = flags & 4;
+    config->prefix = flags & 1 ? (flags & 2 ? prefix_type_table : prefix_type_incremental) : prefix_type_none;
+    config->suffix = flags & 4 ? (flags & 8 ? prefix_type_table : prefix_type_incremental) : prefix_type_none;
+    config->huffman = flags & 16;
 }
 
 size_t this_read_next_bit_from_io(carbon_bitstream_ro_t *stream) {
@@ -266,6 +340,33 @@ void this_read_huffman_table_from_io_device(
     carbon_huffman_decoder_create(&extra->huffman_decoder, dictionary);
 }
 
+void this_read_prefix_table_from_io_device(
+        carbon_io_device_t *src,
+        carbon_compressor_incremental_extra_t *extra
+    ) {
+    bool ok;
+    size_t length = carbon_vlq_decode_from_io(src, &ok);
+
+    extra->prefix_tbl_table = carbon_prefix_table_create();
+    for(size_t i = 1; i < length; ++i) {
+        size_t entry_length = carbon_vlq_decode_from_io(src, &ok) + 2;
+        char * buf = malloc(entry_length + 1);
+
+
+
+        if(carbon_io_device_read(src, buf, 1, entry_length) != entry_length) {
+            free(buf);
+            return;
+        }
+
+        buf[entry_length] = 0;
+        carbon_prefix_table_add(extra->prefix_tbl_table, buf);
+        free(buf);
+    }
+
+    extra->prefix_tbl_encoder = carbon_prefix_table_to_encoder_tree(extra->prefix_tbl_table);
+}
+
 
 /**
   Compressor implementation
@@ -286,6 +387,9 @@ carbon_compressor_incremental_init(carbon_compressor_t *self, carbon_doc_bulk_t 
     carbon_huffman_encoder_create(&extra->huffman_encoder);
     extra->huffman_decoder.tree = NULL;
 
+    extra->prefix_tbl_table = NULL;
+    extra->prefix_tbl_encoder = NULL;
+
     extra->previous_offset = 0;
     extra->previous_length = 0;
     extra->strings_since_last_base = 0;
@@ -293,8 +397,8 @@ carbon_compressor_incremental_init(carbon_compressor_t *self, carbon_doc_bulk_t 
     extra->previous_string = "";
 
 
-    extra->config.prefix = true;
-    extra->config.suffix = false;
+    extra->config.prefix = prefix_type_incremental;
+    extra->config.suffix = prefix_type_none;
     extra->config.huffman = false;
     extra->config.sort_chunk_length = 100000;
     extra->config.delta_chunk_length = 100;
@@ -331,6 +435,12 @@ carbon_compressor_incremental_drop(carbon_compressor_t *self)
     if(extra->huffman_decoder.tree)
         carbon_huffman_decoder_drop(&extra->huffman_decoder);
 
+    if(extra->prefix_tbl_table)
+        carbon_prefix_table_free(extra->prefix_tbl_table);
+
+    if(extra->prefix_tbl_encoder)
+        carbon_prefix_ro_tree_free(extra->prefix_tbl_encoder);
+
     free(self->extra);
     /* nothing to do for uncompressed dictionaries */
     return true;
@@ -352,13 +462,29 @@ carbon_compressor_incremental_write_extra(carbon_compressor_t *self, carbon_memf
     carbon_compressor_incremental_extra_t * extra =
             (carbon_compressor_incremental_extra_t *)self->extra;
 
-    // TODO: #87 Write if prefix, suffix or both
     uint8_t flags = 0;
-    flags |= (extra->config.prefix ? 1 : 0) << 0;
-    flags |= (extra->config.suffix ? 1 : 0) << 1;
-    flags |= (extra->config.huffman ? 1 : 0) << 2;
+    flags |= (extra->config.prefix != prefix_type_none ? 1 : 0 ) << 0;
+    flags |= (extra->config.prefix != prefix_type_incremental ? 1 : 0 ) << 1;
+    flags |= (extra->config.suffix != prefix_type_none ? 1 : 0 ) << 2;
+    flags |= (extra->config.suffix != prefix_type_incremental ? 1 : 0 ) << 3;
+    flags |= (extra->config.huffman ? 1 : 0) << 4;
 
     carbon_memfile_write(dst, &flags, 1);
+
+
+    if(extra->config.prefix == prefix_type_table) {
+        carbon_io_device_t io;
+        carbon_io_device_from_memfile(&io, dst);
+
+        size_t length = carbon_prefix_table_length(extra->prefix_tbl_table);
+        carbon_vlq_encode_to_io(length, &io);
+        for(size_t i = 1; i < carbon_prefix_table_length(extra->prefix_tbl_table); ++i) {
+            size_t length = strlen(extra->prefix_tbl_table->table[i] + 2);
+            carbon_vlq_encode_to_io(length, &io);
+            carbon_io_device_write(&io, extra->prefix_tbl_table->table[i], 1, 2 + (size_t)length);
+        }        
+    }
+
 
     if(extra->config.huffman) {
         carbon_priority_queue_t *queue = carbon_priority_queue_create(UCHAR_MAX);
@@ -373,7 +499,6 @@ carbon_compressor_incremental_write_extra(carbon_compressor_t *self, carbon_memf
             local_huffman_table_entry_t *entry = malloc(sizeof(local_huffman_table_entry_t));
             entry->stream = &extra->huffman_encoder.codes[i];
             entry->symbol = (char)i;
-
             carbon_priority_queue_push(queue, entry, entry->stream->num_bits);
         }
 
@@ -446,12 +571,40 @@ bool carbon_compressor_incremental_print_extra(carbon_compressor_t *self, FILE *
     carbon_io_device_from_memfile(&io, src);
     this_read_config_from_io_device(self, &io, &extra->config);
 
-    fprintf(file, "0x%04x [config:%s%s%s]\n",
+    fprintf(file, "0x%04x [config: prefix=%s, suffix=%s, remaining=%s]\n",
             (unsigned int)carbon_io_device_tell(&io),
-            extra->config.prefix ? " prefix" : "",
-            extra->config.suffix ? " suffix" : "",
-            extra->config.huffman ? " huffman" : ""
+            extra->config.prefix == prefix_type_incremental ? "incremental" : (extra->config.prefix == prefix_type_table ? "table" : "none"),
+            extra->config.suffix == prefix_type_incremental ? "incremental" : (extra->config.suffix == prefix_type_table ? "table" : "none"),
+            extra->config.huffman ? "huffman" : "uncompressed"
     );
+
+
+    if(extra->config.prefix == prefix_type_table) {
+        carbon_off_t file_position = carbon_io_device_tell(&io);
+
+        fprintf(file, "0x%04x [prefix-table]\n", (unsigned int)file_position);
+        this_read_prefix_table_from_io_device(&io, extra);
+
+        file_position += carbon_vlq_encoded_length(carbon_prefix_table_length(extra->prefix_tbl_table));
+
+        char * resolve_buffer = malloc(10);
+        size_t resolve_buffer_len = 10;
+        for(unsigned int i = 1; i < carbon_prefix_table_length(extra->prefix_tbl_table); ++i ) {
+            size_t position = 0;
+
+            carbon_prefix_table_resolve(extra->prefix_tbl_table, extra->prefix_tbl_table->table[ i ], &resolve_buffer, &resolve_buffer_len, &position);
+            fprintf(
+                file, "0x%04x    [entry: 0x%04x][depends_on: 0x%04x][resolves_to: %s]\n",
+                (unsigned int)file_position, i, (uint8_t)*extra->prefix_tbl_table->table[ i ] * 256 + (uint8_t)*(extra->prefix_tbl_table->table[ i ] + 1), resolve_buffer
+            );
+
+            file_position += 2 + strlen(extra->prefix_tbl_table->table[ i ] + 2);
+        }
+
+        free(resolve_buffer);
+        fprintf(file, "0x%04x [End (prefix-table)]\n", (unsigned int)carbon_io_device_tell(&io));
+    }
+
 
     if(extra->config.huffman) {
         fprintf(file, "0x%04x [huffman-table]\n", (unsigned int)carbon_io_device_tell(&io));
@@ -499,7 +652,7 @@ carbon_compressor_incremental_print_encoded_string(carbon_compressor_t *self,
     return false;
 }
 
-int compare_entries_by_str(void const *a, void const *b) {
+int compare_entries_by_str_fwd(void const *a, void const *b) {
     carbon_strdic_entry_t const * e_a = ((carbon_strdic_entry_t const *)a);
     carbon_strdic_entry_t const * e_b = ((carbon_strdic_entry_t const *)b);
 
@@ -519,8 +672,42 @@ carbon_compressor_incremental_prepare_entries(carbon_compressor_t *self,
 
     for(size_t i = 0; i < entries->num_elems; i += extra->config.sort_chunk_length) {
         size_t this_batch_size = min(entries->num_elems - i, extra->config.sort_chunk_length);
-        qsort((carbon_strdic_entry_t *)entries->base + i, this_batch_size, sizeof(carbon_strdic_entry_t), compare_entries_by_str);
+        qsort((carbon_strdic_entry_t *) entries->base + i, this_batch_size, sizeof(carbon_strdic_entry_t),
+              compare_entries_by_str_fwd);
     }
+
+
+    if(extra->config.prefix == prefix_type_table) {
+        carbon_prefix_encoder_config * cfg = carbon_prefix_encoder_auto_config(entries->num_elems, 5.0);
+        carbon_prefix_tree_node * root = carbon_prefix_tree_node_create(0);
+
+        size_t num_bytes = 0;
+        for(size_t i = 0; i < entries->num_elems; ++i) {
+            carbon_strdic_entry_t const * entry = carbon_vec_at(entries, i);
+
+            num_bytes += strlen(entry->string);
+
+            carbon_prefix_tree_node_add_string(root, entry->string, cfg->max_new_children_per_entry);
+
+            if(i % (1 + cfg->num_iterations_between_prunes) == cfg->num_iterations_between_prunes)
+                carbon_prefix_tree_node_prune(root, cfg->prune_min_support);
+        }
+
+        carbon_prefix_tree_node_prune(root, cfg->prune_min_support);
+
+        carbon_prefix_tree_calculate_savings(root, 5);
+
+        carbon_prefix_table * prefix_table = carbon_prefix_table_create();
+        carbon_prefix_tree_encode_all_with_queue(root, prefix_table);
+
+        free(cfg);
+        carbon_prefix_tree_node_free(&root);
+
+
+        extra->prefix_tbl_table   = prefix_table;
+        extra->prefix_tbl_encoder = carbon_prefix_table_to_encoder_tree(prefix_table);
+    }
+
 
     if(extra->config.huffman) {
         char const *previous_string = "";
@@ -533,10 +720,13 @@ carbon_compressor_incremental_prepare_entries(carbon_compressor_t *self,
             size_t pref_len = 0, suf_len = 0;
             size_t max_common_len = min(255, min(previous_length, string_length));
 
-            if(extra->config.prefix)
+            if(extra->config.prefix == prefix_type_incremental) {
                 for(pref_len = 0; pref_len < max_common_len && entry->string[pref_len] == previous_string[pref_len]; ++pref_len);
+            } else if(extra->config.prefix == prefix_type_table) {
+                carbon_prefix_ro_tree_max_prefix(extra->prefix_tbl_encoder, entry->string, &pref_len);
+            }
 
-            if(extra->config.suffix)
+            if(extra->config.suffix == prefix_type_incremental)
                 for(suf_len = 0;suf_len + pref_len < max_common_len && entry->string[string_length - 1 - suf_len] == previous_string[previous_length - 1 - suf_len];++suf_len);
 
             carbon_huffman_encoder_learn_frequencies(&extra->huffman_encoder, entry->string + pref_len, string_length  - pref_len - suf_len);
@@ -546,6 +736,7 @@ carbon_compressor_incremental_prepare_entries(carbon_compressor_t *self,
 
         carbon_huffman_encoder_bake_code(&extra->huffman_encoder);
     }
+
     return true;
 }
 
@@ -578,7 +769,7 @@ carbon_compressor_incremental_encode_string(carbon_compressor_t *self, carbon_me
     size_t common_suffix_len = 0;
     size_t max_common_len = min(255, min(extra->previous_length, string_length));
 
-    if(extra->config.prefix) {
+    if(extra->config.prefix == prefix_type_incremental) {
         for(
             common_prefix_len = 0;
             common_prefix_len < max_common_len && string[common_prefix_len] == extra->previous_string[common_prefix_len];
@@ -588,7 +779,12 @@ carbon_compressor_incremental_encode_string(carbon_compressor_t *self, carbon_me
         carbon_io_device_write(&io, &common_prefix_len_ui8, 1, 1);
     }
 
-    if(extra->config.suffix) {
+    if(extra->config.prefix == prefix_type_table) {
+        uint16_t prefix = carbon_prefix_ro_tree_max_prefix(extra->prefix_tbl_encoder, string, &common_prefix_len);
+        carbon_vlq_encode_to_io(prefix, &io);
+    }
+
+    if(extra->config.suffix == prefix_type_incremental) {
         for(
             common_suffix_len = 0;
             common_suffix_len + common_prefix_len < max_common_len && string[string_length - 1 - common_suffix_len] == extra->previous_string[extra->previous_length - 1 - common_suffix_len];
@@ -658,6 +854,9 @@ carbon_compressor_incremental_read_extra(carbon_compressor_t *self, FILE *src, s
             (carbon_compressor_incremental_extra_t *)self->extra;
 
     this_read_config_from_io_device(self, &io, &extra->config);
+
+    if(extra->config.prefix == prefix_type_table)
+        this_read_prefix_table_from_io_device(&io, extra);
 
     if(extra->config.huffman)
         this_read_huffman_table_from_io_device(&io, extra);

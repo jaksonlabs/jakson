@@ -33,8 +33,6 @@ carbon_compressor_t *this_compressor_for(
         carbon_doc_bulk_t const *context,
         carbon_vec_t ofType(char *) *values
     ) {
-    CARBON_UNUSED(values);
-
     return carbon_compressor_find_by_strings(values, context);
 }
 
@@ -103,6 +101,22 @@ bool this_auto_read_extra(
 
     return true;
 }
+
+
+carbon_compressor_t *this_find_compressor_for_position(carbon_compressor_auto_extra_t *extra, carbon_off_t position)
+{
+    size_t range_idx = 0;
+    while(
+        range_idx + 1 < extra->ranges.num_elems &&
+        *CARBON_VECTOR_GET(&extra->range_begin_table, range_idx + 1, carbon_off_t const) <= position
+    )
+        ++range_idx;
+
+    carbon_compressor_auto_range_t const *range =
+            (carbon_compressor_auto_range_t const *)carbon_vec_at(&extra->ranges, range_idx);
+    return range->compressor;
+}
+
 
 CARBON_EXPORT(bool)
 carbon_compressor_auto_init(carbon_compressor_t *self, carbon_doc_bulk_t const *context)
@@ -298,19 +312,11 @@ carbon_compressor_auto_print_encoded_string(carbon_compressor_t *self,
 {
     CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_AUTO);
 
-    carbon_compressor_auto_extra_t *extra =
-            (carbon_compressor_auto_extra_t *)self->extra;
-
-    carbon_compressor_auto_range_t const *range =
-            carbon_vec_at(&extra->ranges, extra->current_range_idx);
-
-    if(range->length == ++extra->current_position) {
-        extra->current_position = 0;
-        extra->current_range_idx++;
-    }
+    carbon_compressor_t *compressor =
+            this_find_compressor_for_position((carbon_compressor_auto_extra_t *)self->extra, CARBON_MEMFILE_TELL(src));
 
     carbon_err_t err;
-    return carbon_compressor_print_encoded(&err, range->compressor, file, src, decompressed_strlen);
+    return carbon_compressor_print_encoded(&err, compressor, file, src, decompressed_strlen);
 }
 
 CARBON_EXPORT(bool)
@@ -431,21 +437,9 @@ carbon_compressor_auto_decode_string(carbon_compressor_t *self, char *dst, size_
 {
     CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_AUTO);
 
-    carbon_compressor_auto_extra_t *extra =
-            (carbon_compressor_auto_extra_t *)self->extra;
-
-    carbon_off_t current_position = (carbon_off_t)ftell(src);
-
-    size_t range_idx = 0;
-    while(
-        range_idx + 1 < extra->ranges.num_elems &&
-        *CARBON_VECTOR_GET(&extra->range_begin_table, range_idx + 1, carbon_off_t const) <= current_position
-    )
-        ++range_idx;
-
-    carbon_compressor_auto_range_t const *range =
-            (carbon_compressor_auto_range_t const *)carbon_vec_at(&extra->ranges, range_idx);
+    carbon_compressor_t *compressor =
+            this_find_compressor_for_position((carbon_compressor_auto_extra_t *)self->extra, (carbon_off_t)ftell(src));
 
     carbon_err_t err;
-    return carbon_compressor_decode(&err, range->compressor, dst, strlen, src);
+    return carbon_compressor_decode(&err, compressor, dst, strlen, src);
 }

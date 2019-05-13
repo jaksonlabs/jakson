@@ -1,6 +1,6 @@
 #include <carbon/compressor/auto/selector.h>
 
-#define NUM_BLOCKS 8
+#define NUM_BLOCKS 32
 #define BLOCK_LENGTH 4
 
 typedef bool (*char_compare_fn_t)(size_t current_length, size_t previous_length, char const *current, char const *previous, size_t idx);
@@ -20,7 +20,7 @@ static int sort_cmp_desc(void const *a, void const *b) {
     char const * ptr_a = s_a + len_a;
     char const * ptr_b = s_b + len_b;
 
-    while(ptr_a != s_a && ptr_b != s_b && *(--s_a) == *(--s_b));
+    while(ptr_a != s_a && ptr_b != s_b && *(--ptr_a) == *(--ptr_b));
 
     if(ptr_a == s_a && ptr_b == s_b)
         return 0;
@@ -31,7 +31,7 @@ static int sort_cmp_desc(void const *a, void const *b) {
     if(ptr_b == s_b && ptr_a != s_a)
         return 1;
 
-    return (int)*(uint8_t *)ptr_a - (int)*(uint8_t *)ptr_b;
+    return (int)*(uint8_t const *)ptr_a - (int)*(uint8_t const *)ptr_b;
 }
 
 static bool char_cmp_prefix(size_t current_length, size_t previous_length, char const *current, char const *previous, size_t idx) {
@@ -59,20 +59,28 @@ carbon_compressor_t *carbon_compressor_find_by_strings(
     CARBON_UNUSED(strings);
     carbon_compressor_t *compressor = malloc(sizeof(carbon_compressor_t));
 
-    size_t avg_prefix_len = carbon_common_prefix_length((char **)strings->base, strings->num_elems, char_cmp_prefix, sort_cmp_asc);
-    size_t avg_suffix_len = carbon_common_prefix_length((char **)strings->base, strings->num_elems, char_cmp_suffix, sort_cmp_asc);
+    size_t avg_pre_pre_len = carbon_common_prefix_length((char **)strings->base, strings->num_elems, char_cmp_prefix, sort_cmp_asc);
+    size_t avg_pre_suf_len = carbon_common_prefix_length((char **)strings->base, strings->num_elems, char_cmp_suffix, NULL);
+    size_t avg_suf_pre_len = carbon_common_prefix_length((char **)strings->base, strings->num_elems, char_cmp_prefix, sort_cmp_desc);
+    size_t avg_suf_suf_len = carbon_common_prefix_length((char **)strings->base, strings->num_elems, char_cmp_suffix, NULL);
 
     carbon_err_t err;
     carbon_compressor_by_type(&err, compressor, context, CARBON_COMPRESSOR_INCREMENTAL);
-    carbon_compressor_set_option(&err, compressor, "prefix", avg_prefix_len > 2 ? "true" : "false");
-    carbon_compressor_set_option(&err, compressor, "suffix", avg_suffix_len > 2 ? "true" : "false");
+    carbon_compressor_set_option(&err, compressor, "prefix", avg_pre_pre_len >= 1 ? "table" : "none");
+    carbon_compressor_set_option(&err, compressor, "suffix", avg_pre_suf_len >= 1 ? "incremental" : "none");
     carbon_compressor_set_option(&err, compressor, "huffman", "true");
+    carbon_compressor_set_option(&err, compressor, "delta_chunk_length", "20");
+    carbon_compressor_set_option(&err, compressor, "sort_chunk_length", "10000000");
 
+    printf(
+        "pp = %zu, ps = %zu, sp = %zu, ss = %zu\n",
+        avg_pre_pre_len, avg_pre_suf_len, avg_suf_pre_len, avg_suf_suf_len
+    );
     CARBON_CONSOLE_WRITELN(
                 stdout,
                 "            Detected settings: prefix = %s (avg %zu), suffix = %s (avg %zu), huffman: %s",
-                (avg_prefix_len > 2 ? "true" : "false"), avg_prefix_len,
-                (avg_suffix_len > 2 ? "true" : "false"), avg_suffix_len,
+                (avg_pre_pre_len >= 1 ? "incremental" : "none"), avg_pre_pre_len,
+                (avg_suf_suf_len >= 1 ? "incremental" : "none"), avg_pre_suf_len,
                 "true"
     );
     return compressor;
@@ -89,10 +97,16 @@ size_t carbon_common_prefix_length(
     if(length < BLOCK_LENGTH)
         return 0;
 
-    char **cpy = malloc(sizeof(char *) * length);
-    memcpy(cpy, strings, sizeof(char *) * length);
+    char **cpy = NULL;
 
-    qsort(cpy, length, sizeof(char *), sort_cmp);
+    if(sort_cmp) {
+        cpy = malloc(sizeof(char *) * length);
+        memcpy(cpy, strings, sizeof(char *) * length);
+
+        qsort(cpy, length, sizeof(char *), sort_cmp);
+    } else {
+        cpy = strings;
+    }
 
     size_t prefix_length_sum = 0;
     for(size_t i = 0; i < NUM_BLOCKS; ++i) {
@@ -115,6 +129,8 @@ size_t carbon_common_prefix_length(
         }
     }
 
-    free(cpy);
+    if(sort_cmp) {
+        free(cpy);
+    }
     return prefix_length_sum / (NUM_BLOCKS * (BLOCK_LENGTH - 1));
 }
