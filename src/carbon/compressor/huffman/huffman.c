@@ -71,17 +71,30 @@ void carbon_huffman_encoder_bake_code(
     carbon_priority_queue_t *queue = carbon_priority_queue_create(UCHAR_MAX);
 
     size_t max_frequency = SIZE_MAX;
+    size_t num_codes = 0;
 
-    bool all_zero = true;
     for(size_t i = 0; i < UCHAR_MAX; ++i) {
         if(encoder->frequencies[i]) {
-            all_zero = false;
-            break;
+            ++num_codes;
         }
     }
 
-    if(all_zero)
-        encoder->frequencies[0] = 1;
+    // Fixes for "no data given" and "always the same symbol"
+    {
+        if (num_codes == 0) {
+            encoder->frequencies[0] = 1;
+            ++num_codes;
+        }
+
+        if (num_codes == 1) {
+            for (size_t i = 0; i < UCHAR_MAX; ++i) {
+                if (encoder->frequencies[i] == 0) {
+                    encoder->frequencies[i] = 1;
+                    break;
+                }
+            }
+        }
+    }
 
     for(size_t i = 0; i < UCHAR_MAX; ++i) {
         if(encoder->frequencies[i]) {

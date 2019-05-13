@@ -39,7 +39,7 @@ void carbon_prefix_ro_tree_add_prefix(
 
 uint16_t carbon_prefix_ro_tree_max_prefix(
     carbon_prefix_ro_tree * tree,
-    char * string,
+    char const * string,
     size_t * prefix_length
 );
 

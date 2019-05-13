@@ -59,3 +59,26 @@ size_t carbon_vlq_decode_from_io(carbon_io_device_t *src, bool *ok)
     *ok = true;
     return value;
 }
+
+char const *carbon_str_reverse(char const *str)
+{
+    size_t length = strlen(str);
+    char *cpy = malloc(length + 1);
+
+    for(size_t i = 0; i < length; ++i) {
+        cpy[i] = str[length - 1 -i ];
+    }
+
+    return cpy;
+}
+
+size_t carbon_vlq_encoded_length(size_t length)
+{
+    size_t num_bytes = 0;
+    do {
+        length >>= 7;
+        ++num_bytes;
+    } while(num_bytes < 10 && length > 0);
+
+    return num_bytes;
+}
