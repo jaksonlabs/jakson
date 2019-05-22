@@ -43,35 +43,69 @@ static u32 mean_key(struct crack_item *item)
         return (u32) mean;
 }
 
-static int crack_item_cmp(const void *a, const void *b)
-{
-        struct crack_item *lhs = (struct crack_item *) a;
-        struct crack_item *rhs = (struct crack_item *) b;
-        if (rhs->less_than_key != UINT32_MAX) {
-                return ((i64) lhs->less_than_key) - rhs->less_than_key;
-        } else {
-                return -1;
-        }
-
-}
+//static int crack_item_cmp(const void *a, const void *b)
+//{
+//        struct crack_item *lhs = (struct crack_item *) a;
+//        struct crack_item *rhs = (struct crack_item *) b;
+//        if (rhs->less_than_key != UINT32_MAX) {
+//                return ((i64) lhs->less_than_key) - rhs->less_than_key;
+//        } else {
+//                return -1;
+//        }
+//
+//}
 
 ng5_func_unused
 static struct crack_item *crack_item_search(const struct crack_item *begin, const struct crack_item *end,
         u32 key)
 {
+//        const struct crack_item *it = begin;
+//        while (it >= begin && it <= end) {
+//                if (unlikely(key >= it->greater_eq_key && key < it->less_than_key)) {
+//                        /* found */
+//                        break;
+//                }
+//                intptr_t diff = it - begin;
+//                intptr_t step = ng5_max(1, diff / 2);
+//                if (key < it->greater_eq_key) {
+//                        /* search in lower range */
+//                        it -= step;
+//                } else {
+//                        /* search in upper range */
+//                        it += step;
+//                }
+//        }
+//        return (struct crack_item *) it;
         intptr_t count = end - begin;
-        intptr_t step;
         const struct crack_item *it;
+        intptr_t step;
         while (count > 0) {
                 it = begin;
+
+                if (unlikely(key >= it->greater_eq_key && key < it->less_than_key)) {
+                        /* found */
+                        break;
+                }
+                if (unlikely(it < end && key >= (it + 1)->greater_eq_key && key < (it + 1)->less_than_key)) {
+                        /* found */
+                        begin++;
+                        break;
+                }
+
                 step = count / 2;
                 it += step;
-                if (key + 1 >= it->less_than_key) {
+                prefetch_read(it);
+
+                if (key < it->greater_eq_key) {
                         begin = ++it;
                         count -= step + 1;
                 }
-                else
+                else {
                         count = step;
+                }
+        }
+        if (key > begin->less_than_key) {
+                begin++;
         }
         return (struct crack_item *) begin;
 }
@@ -80,13 +114,12 @@ static inline void crack_item_try_split(struct crack_item **item, u32 item_pos, 
 {
         struct crack_item *victim = *item;
 
-
         u32 victim_geq = victim->greater_eq_key;
-        u32 victim_ls = victim->less_than_key;
+        u32 victim_ls  = victim->less_than_key;
         u32 range_diff = (victim_ls - victim_geq) / 2;
-        u32 pivot = victim_geq + range_diff;
+        u32 pivot      = victim_geq + range_diff;
 
-        if (range_diff > 1 && victim->values_uselist.num_elems > 2000) {
+        if (range_diff >= 1 && victim->values_uselist.num_elems > index->split_threshold) {
                 struct crack_item *lhs, *rhs;
                  //mean_key(victim);
 
@@ -102,67 +135,83 @@ static inline void crack_item_try_split(struct crack_item **item, u32 item_pos, 
         }
 }
 
-static struct crack_item *crack_item_find(struct crack_index *index, u32 key)
+static struct crack_item *crack_item_find(struct crack_index *index, u32 key, bool reorganize)
 {
         u32 item_pos = 0;
         struct crack_item *all_items = vec_all(&index->crack_items, struct crack_item);
         struct crack_item *item;
         prefetch_read(all_items);
 
-        for (; item_pos < index->crack_items.num_elems; item_pos++) {
-                item = all_items + item_pos;
-                if (unlikely(key < item->less_than_key)) {
-                        break;
-                }
-        }
-//
-//        xxxxx++;
-
-//        struct crack_item *found = crack_item_search(index->crack_items.base,
-//                index->crack_items.base + (index->crack_items.num_elems - 1) * index->crack_items.elem_size,
-//                key - 1);
-//
-//        i32 found_pos = found - all_items;
-//        if (found_pos > 0) {
-//                struct crack_item *x = vec_get(&index->crack_items, found_pos - 1, struct crack_item);
-//                assert(x->less_than_key < found->less_than_key);
-//                assert(key >= x->less_than_key);
-//        }
-//        if ((u32) found_pos < index->crack_items.num_elems - 1) {
-//                struct crack_item *x = vec_get(&index->crack_items, found_pos + 1, struct crack_item);
-//                assert(found->less_than_key < x->less_than_key);
-//                assert(key < x->less_than_key);
-//        }
-
-//        while (key > found->less_than_key) {
-//                found--;
-//                found_pos--;
-//                if (found_pos < 0) {
-//                        found = vec_get(&index->crack_items, 1, struct crack_item);
-//
-//                        u32 item_pos = 0;
-//                        for (; item_pos < index->crack_items.num_elems; item_pos++) {
-//                                found = all_items + item_pos;
-//                                if (unlikely(key < found->less_than_key)) {
-//
-//                                        break;
-//                                }
-//                        }
-//
+//        for (; item_pos < index->crack_items.num_elems; item_pos++) {
+//                item = all_items + item_pos;
+//                if (unlikely(key < item->less_than_key)) {
 //                        break;
 //                }
 //        }
-//        ng5_unused(found);
-        //item = found;
 
+
+
+
+
+        item = crack_item_search(index->crack_items.base,
+                index->crack_items.base + index->crack_items.num_elems * index->crack_items.elem_size,
+                key);
+
+        item_pos = item - all_items;
+
+        if (unlikely(item_pos >= index->crack_items.num_elems) || key >= item->less_than_key) {
+                /* this is a fallback case if 'crack_item_search' failed */
+                for (item_pos = 0; item_pos < index->crack_items.num_elems; item_pos++) {
+                        item = all_items + item_pos;
+                        if (unlikely(key < item->less_than_key)) {
+                                break;
+                        }
+                }
+                assert(key >= item->greater_eq_key);
+                assert(key < item->less_than_key);
+        }
+
+        assert((void *) item >= index->crack_items.base);
+        assert((void *) item < index->crack_items.base + index->crack_items.num_elems * index->crack_items.elem_size);
+
+
+
+
+
+
+//
+//#ifndef NDEBUG
+//        u32 num_broken = 0;
+//        for (u32 i = 0; i < ((i64) index->crack_items.num_elems) - 1; i++) {
+//                struct crack_item *a = vec_get(&index->crack_items, i, struct crack_item);
+//                struct crack_item *b = vec_get(&index->crack_items, i + 1, struct crack_item);
+//                //assert(a->less_than_key <= b->less_than_key || b->less_than_key == UINT32_MAX);
+//                if (a->less_than_key > b->less_than_key) {
+//                        ++num_broken;
+//                }
+//
+//        }
+//        if (num_broken > 0) {
+//                fprintf(stderr, "(%0.4f%%)\n", (100*num_broken)/(float)index->crack_items.num_elems);
+//        }
+//
+//#endif
+
+
+
+
+        assert(key >= item->greater_eq_key);
         assert(key < item->less_than_key);
 
         assert(item);
         assert(key < item->less_than_key);
-        assert(item <= all_items || (item - 1)->less_than_key < item->less_than_key );
+      //  assert(item <= all_items || (item - 1)->less_than_key < item->less_than_key );
      //   assert(item->less_than_key == UINT32_MAX || index->crack_items.num_elems < 1 || item->less_than_key < (item + 1)->less_than_key );
 
-        crack_item_try_split(&item, item_pos, key, index);
+        if (reorganize) {
+                crack_item_try_split(&item, item_pos, key, index);
+        }
+
 
         return item;
 }
@@ -228,9 +277,6 @@ static const void *crack_item_pop(struct crack_item *item, u32 key)
         }
 }
 
-#define INIT_CRACK_ITEM_VALUE_CAP 25500
-#define INIT_CRACK_ITEM_VALUEs_USELIST_CAP 25500
-
 static struct crack_item *crack_item_new(struct crack_index *index)
 {
         assert(index->crack_items.num_elems + 1 < UINT32_MAX);
@@ -239,8 +285,8 @@ static struct crack_item *crack_item_new(struct crack_index *index)
         item->less_than_key = UINT32_MAX;
         item->greater_eq_key = 0;
         vec_create(&item->values_freelist, NULL, sizeof(u32), 100);
-        vec_create(&item->values_uselist, NULL, sizeof(u32), INIT_CRACK_ITEM_VALUEs_USELIST_CAP);
-        vec_create(&item->values, NULL, sizeof(struct crack_value), INIT_CRACK_ITEM_VALUE_CAP);
+        vec_create(&item->values_uselist, NULL, sizeof(u32), index->split_threshold);
+        vec_create(&item->values, NULL, sizeof(struct crack_value), index->split_threshold);
 
         return item;
 }
@@ -248,10 +294,17 @@ static struct crack_item *crack_item_new(struct crack_index *index)
 ng5_func_unused
 static void crack_item_split(struct crack_item **lhs, struct crack_item **rhs, u32 pivot, u32 victim_pos, struct crack_index *index)
 {
+#ifndef NDEBUG
+        u32 old_length = index->crack_items.num_elems;
+#endif
+
+
         struct crack_item *item = vec_get(&index->crack_items, victim_pos, struct crack_item);
         struct crack_item *lower = crack_item_new(index);       /* added at the end of the list */
         struct crack_item *upper = crack_item_new(index);       /* added at the end of the list */
 
+        assert(item->greater_eq_key < pivot);
+        assert(pivot < item->less_than_key);
 
         assert(item->values.num_elems <= item->values.cap_elems);
         assert(lower->values.num_elems <= lower->values.cap_elems);
@@ -300,27 +353,26 @@ static void crack_item_split(struct crack_item **lhs, struct crack_item **rhs, u
 
 
 
-
-#ifndef NDEBUG
-        u32 num_broken = 0;
-        for (u32 i = 0; i < ((i64) index->crack_items.num_elems) - 1; i++) {
-                struct crack_item *a = vec_get(&index->crack_items, i, struct crack_item);
-                struct crack_item *b = vec_get(&index->crack_items, i + 1, struct crack_item);
-                //assert(a->less_than_key <= b->less_than_key || b->less_than_key == UINT32_MAX);
-                if (a->less_than_key > b->less_than_key) {
-                        ++num_broken;
-                }
-
-        }
-        if (num_broken > 0) {
-                fprintf(stderr, "(%0.4f%%)\n", (100*num_broken)/(float)index->crack_items.num_elems);
-        }
-
-#endif
-
-
+//
+//#ifndef NDEBUG
+//        u32 num_broken = 0;
+//        for (u32 i = 0; i < ((i64) index->crack_items.num_elems) - 1; i++) {
+//                struct crack_item *a = vec_get(&index->crack_items, i, struct crack_item);
+//                struct crack_item *b = vec_get(&index->crack_items, i + 1, struct crack_item);
+//                //assert(a->less_than_key <= b->less_than_key || b->less_than_key == UINT32_MAX);
+//                if (a->less_than_key > b->less_than_key) {
+//                        ++num_broken;
+//                }
+//
+//        }
+//        if (num_broken > 0) {
+//                fprintf(stderr, "(%0.4f%%)\n", (100*num_broken)/(float)index->crack_items.num_elems);
+//        }
+//
+//#endif
 
 
+        assert(old_length + 1 == index->crack_items.num_elems);
 
 
         *lhs = lower;
@@ -336,13 +388,14 @@ static void crack_item_drop(struct crack_item *item)
 }
 
 
-NG5_EXPORT(bool) crack_index_create(struct crack_index *index, struct err *err, u64 capacity)
+NG5_EXPORT(bool) crack_index_create(struct crack_index *index, struct err *err, u64 capacity, u32 split_threshold)
 {
         error_if_null(index)
         error_if_null(err)
         error_if_null(capacity)
         error_init(&index->err);
         vec_create(&index->crack_items, NULL, sizeof(struct crack_item), 1000);
+        index->split_threshold = split_threshold;
         crack_item_new(index);
 
         return true;
@@ -368,7 +421,7 @@ NG5_EXPORT(bool) crack_index_push(struct crack_index *index, u32 key, const void
         error_if_null(index)
         error_if_null(value)
 
-        struct crack_item *item = crack_item_find(index, key);
+        struct crack_item *item = crack_item_find(index, key, true);
         assert(key < item->less_than_key);
         crack_item_add(item, value, key);
 
@@ -400,22 +453,22 @@ NG5_EXPORT(const void *) crack_index_pop(struct crack_index *index, u32 key)
 {
         error_if_null(index)
 
+//
+//        /* A 'pop' operation may remove elements from a crack item such that the pivot computation leads
+//         * to a number that destroys the order just rebuilt within 'crack_item_split'. Scan for this
+//         * case and adjust it if needed. */
+//
+//        for (u32 i = 0; index->crack_items.num_elems > 2 && i < ((i64) index->crack_items.num_elems) - 1; i++) {
+//                struct crack_item *a = vec_get(&index->crack_items, i, struct crack_item);
+//                struct crack_item *b = vec_get(&index->crack_items, i + 1, struct crack_item);
+//                if (a->less_than_key > b->less_than_key) {
+//                        qsort(index->crack_items.base, index->crack_items.num_elems - 1, sizeof(struct crack_item), crack_item_cmp);
+//                        fprintf(stderr, "SORT BROKEN\n");
+//                        break;
+//                }
+//        }
 
-        /* A 'pop' operation may remove elements from a crack item such that the pivot computation leads
-         * to a number that destroys the order just rebuilt within 'crack_item_split'. Scan for this
-         * case and adjust it if needed. */
-
-        for (u32 i = 0; index->crack_items.num_elems > 2 && i < ((i64) index->crack_items.num_elems) - 1; i++) {
-                struct crack_item *a = vec_get(&index->crack_items, i, struct crack_item);
-                struct crack_item *b = vec_get(&index->crack_items, i + 1, struct crack_item);
-                if (a->less_than_key > b->less_than_key) {
-                        qsort(index->crack_items.base, index->crack_items.num_elems - 1, sizeof(struct crack_item), crack_item_cmp);
-                        fprintf(stderr, "SORT BROKEN\n");
-                        break;
-                }
-        }
-
-        struct crack_item *item = crack_item_find(index, key);
+        struct crack_item *item = crack_item_find(index, key, true);
         const void *result = crack_item_pop(item, key);
 
         return result;

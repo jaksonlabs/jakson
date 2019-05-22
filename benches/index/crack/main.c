@@ -21,38 +21,132 @@
 #include "core/index/crack_index.h"
 
 #define ITEM_MAX 65000
-#define KEY_RAND_MAX 2048
+#define KEY_RAND_MAX (15 * 1024) /* 15 KB */
+
+ng5_func_unused static void bench_scaneffect();
+ng5_func_unused static void bench_timeeffect();
 
 int main(int argc, char *argv[])
 {
         ng5_unused(argc);
         ng5_unused(argv);
 
+        bench_timeeffect();
+        //bench_scaneffect();
+
+        return EXIT_SUCCESS;
+}
+
+static void bench_scaneffect()
+{
         struct crack_index index;
         struct err default_err;
-
 
         u32 *values = malloc(ITEM_MAX * sizeof(u32));
         for (u32 i = 0; i < ITEM_MAX; i++) {
                 values[i] = i;
         }
 
+        u16 num_reruns = 0;
+        timestamp_t acc;
+        printf("x;split_threshold;rerun;alpha;num_sec;num_ops_pop;num_ops_push;duration_ms;ops_per_sec;mem_usage;mem_usage_peak;index_first_level_items;index_min_2nd_level_items;index_max_2nd_level_items;index_avg_2nd_level_items\n");
+
+        while (num_reruns++ < 10) {
+                for (float alpha = 0; alpha <= 1.0f; alpha += 1.00f) {
+                        for (u32 split_threshold = 100; split_threshold < 100000000; split_threshold += 400000) {
+                                crack_index_create(&index, &default_err, ITEM_MAX, split_threshold);
+                                for (u32 i = 0; i < ITEM_MAX; i++) {
+                                        u32 key = 1 + (rand() % KEY_RAND_MAX);
+                                        crack_index_push(&index, key, values + i);
+                                }
+
+                                for (u16 num_sec = 0; num_sec < 30; num_sec++) {
+
+                                        acc = 0;
+
+                                        u64 num_ops_pop = 0;
+                                        u64 num_ops_push = 0;
+                                        while (acc < 2000) {
+                                                bool coin = (rand() % 2) == 0;
+                                                timestamp_t begin = time_now_wallclock();
+                                                if (coin) {
+
+                                                        for (u32 i = 0; i < alpha * 1000; i++) {
+                                                                u32 key = 1 + (rand() % KEY_RAND_MAX);
+                                                                u32 *data = (u32 *) crack_index_pop(&index, key);
+                                                                ng5_unused(data);
+                                                                num_ops_pop++;
+                                                        }
+
+                                                } else {
+
+                                                        for (u32 i = 0; i < (1 - alpha) * 1000; i++) {
+                                                                u32 key = 1 + (rand() % KEY_RAND_MAX);
+                                                                u32 value =
+                                                                        *(values + ((1 + rand()) % (ITEM_MAX - 10)));
+                                                                crack_index_push(&index, key, &value);
+                                                                num_ops_push++;
+                                                        }
+                                                }
+                                                timestamp_t end = time_now_wallclock();
+                                                acc += (end - begin);
+                                        }
+
+                                        struct crack_index_counters counters;
+                                        crack_index_get_counters(&counters, &index);
+
+                                        printf("\"scan-size and push only\";%d;%d;%0.2f;%d;%" PRIu64 ";%" PRIu64 ";%" PRIu64 ";%f;%zu;%zu;%d;%d;%d;%0.2f\n",
+                                                split_threshold,
+                                                num_reruns,
+                                                alpha,
+                                                num_sec,
+                                                num_ops_pop,
+                                                num_ops_push,
+                                                acc,
+                                                ((num_ops_pop + num_ops_push) / (float) (acc / 1000.0f)),
+                                                env_get_process_memory_usage(),
+                                                env_get_process_peak_memory_usage(),
+                                                counters.index_first_level_items,
+                                                counters.index_min_2nd_level_items,
+                                                counters.index_max_2nd_level_items,
+                                                counters.index_avg_2nd_level_items);
+                                        fflush(stdout);
+                                }
+                                crack_index_drop(&index);
+                        }
+                }
+
+        }
 
 
+        free(values);
+}
+
+#define FIXED_SPLIT_THRESHOLD 32000000
+
+static void bench_timeeffect()
+{
+        struct crack_index index;
+        struct err default_err;
+
+        u32 *values = malloc(ITEM_MAX * sizeof(u32));
+        for (u32 i = 0; i < ITEM_MAX; i++) {
+                values[i] = i;
+        }
 
         u16 num_reruns = 0;
         timestamp_t acc;
-        printf("rerun;alpha;num_sec;num_ops_pop;num_ops_push;duration_ms;ops_per_sec;mem_usage;mem_usage_peak;index_first_level_items;index_min_2nd_level_items;index_max_2nd_level_items;index_avg_2nd_level_items\n");
+        printf("x;split_threshold;rerun;alpha;num_sec;num_ops_pop;num_ops_push;duration_ms;ops_per_sec;mem_usage;mem_usage_peak;index_first_level_items;index_min_2nd_level_items;index_max_2nd_level_items;index_avg_2nd_level_items\n");
 
         while (num_reruns++ < 10) {
                 for (float alpha = 0; alpha <= 1.0f; alpha += 0.04f) {
-                        crack_index_create(&index, &default_err, ITEM_MAX);
+                        crack_index_create(&index, &default_err, ITEM_MAX, FIXED_SPLIT_THRESHOLD);
                         for (u32 i = 0; i < ITEM_MAX; i++) {
                                 u32 key = 1 + (rand() % KEY_RAND_MAX);
                                 crack_index_push(&index, key, values + i);
                         }
 
-                        for (u16 num_sec = 0; num_sec < 10; num_sec++) {
+                        for (u16 num_sec = 0; num_sec < 30; num_sec++) {
                                 acc = 0;
 
                                 u64 num_ops_pop = 0;
@@ -85,7 +179,8 @@ int main(int argc, char *argv[])
                                 struct crack_index_counters counters;
                                 crack_index_get_counters(&counters, &index);
 
-                                printf("%d;%0.2f;%d;%" PRIu64 ";%" PRIu64 ";%" PRIu64 ";%f;%zu;%zu;%d;%d;%d;%0.2f\n",
+                                printf("\"time and push/pop mix\";%d;%d;%0.2f;%d;%" PRIu64 ";%" PRIu64 ";%" PRIu64 ";%f;%zu;%zu;%d;%d;%d;%0.2f\n",
+                                        FIXED_SPLIT_THRESHOLD,
                                         num_reruns,
                                         alpha,
                                         num_sec,
@@ -108,6 +203,4 @@ int main(int argc, char *argv[])
 
 
         free(values);
-
-        return EXIT_SUCCESS;
 }

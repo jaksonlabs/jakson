@@ -42,6 +42,7 @@ struct crack_item
 struct crack_index
 {
         struct vector ofType(struct crack_item) crack_items;
+        u32 split_threshold;
         struct err err;
 };
 
@@ -55,7 +56,7 @@ struct crack_index_counters
 
 NG5_DEFINE_GET_ERROR_FUNCTION(crack_index, struct crack_index, index);
 
-NG5_EXPORT(bool) crack_index_create(struct crack_index *index, struct err *err, u64 capacity);
+NG5_EXPORT(bool) crack_index_create(struct crack_index *index, struct err *err, u64 capacity, u32 split_threshold);
 
 NG5_EXPORT(bool) crack_index_drop(struct crack_index *index);
 
