@@ -1,6 +1,6 @@
 #include <carbon/compressor/prefix/prefix_read_only_tree.h>
 
-#include <malloc.h>
+#include <stdlib.h>
 #include <string.h>
 
 carbon_prefix_ro_tree * carbon_prefix_ro_tree_create(size_t max_children) {

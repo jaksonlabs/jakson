@@ -1,4 +1,4 @@
-#include <malloc.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <carbon/compressor/prefix/prefix_table.h>
