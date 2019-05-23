@@ -1,38 +1,11 @@
 #include <carbon/compressor/auto/selector.h>
+#include <carbon/compressor/compressor-utils.h>
 
 #define NUM_BLOCKS 32
 #define BLOCK_LENGTH 4
 
 typedef bool (*char_compare_fn_t)(size_t current_length, size_t previous_length, char const *current, char const *previous, size_t idx);
 typedef int  (*sort_compare_fn_t)(void const *a, void const *b);
-
-static int sort_cmp_asc(void const *a, void const *b) {
-    return strcmp(*(char * const *)a, *(char * const *)b);
-}
-
-static int sort_cmp_desc(void const *a, void const *b) {
-    char const *s_a = *(char const * const *)a;
-    char const *s_b = *(char const * const *)b;
-
-    size_t len_a = strlen(s_a);
-    size_t len_b = strlen(s_b);
-
-    char const * ptr_a = s_a + len_a;
-    char const * ptr_b = s_b + len_b;
-
-    while(ptr_a != s_a && ptr_b != s_b && *(--ptr_a) == *(--ptr_b));
-
-    if(ptr_a == s_a && ptr_b == s_b)
-        return 0;
-
-    if(ptr_a == s_a && ptr_b != s_b)
-        return -1;
-
-    if(ptr_b == s_b && ptr_a != s_a)
-        return 1;
-
-    return (int)*(uint8_t const *)ptr_a - (int)*(uint8_t const *)ptr_b;
-}
 
 static bool char_cmp_prefix(size_t current_length, size_t previous_length, char const *current, char const *previous, size_t idx) {
     CARBON_UNUSED(current_length);
@@ -59,14 +32,14 @@ carbon_compressor_t *carbon_compressor_find_by_strings(
     CARBON_UNUSED(strings);
     carbon_compressor_t *compressor = malloc(sizeof(carbon_compressor_t));
 
-    size_t avg_pre_pre_len = carbon_common_prefix_length((char **)strings->base, strings->num_elems, char_cmp_prefix, sort_cmp_asc);
+    size_t avg_pre_pre_len = carbon_common_prefix_length((char **)strings->base, strings->num_elems, char_cmp_prefix, carbon_sort_cmp_fwd);
     size_t avg_pre_suf_len = carbon_common_prefix_length((char **)strings->base, strings->num_elems, char_cmp_suffix, NULL);
-    size_t avg_suf_pre_len = carbon_common_prefix_length((char **)strings->base, strings->num_elems, char_cmp_prefix, sort_cmp_desc);
+    size_t avg_suf_pre_len = carbon_common_prefix_length((char **)strings->base, strings->num_elems, char_cmp_prefix, carbon_sort_cmp_rwd);
     size_t avg_suf_suf_len = carbon_common_prefix_length((char **)strings->base, strings->num_elems, char_cmp_suffix, NULL);
 
     carbon_err_t err;
     carbon_compressor_by_type(&err, compressor, context, CARBON_COMPRESSOR_INCREMENTAL);
-    carbon_compressor_set_option(&err, compressor, "prefix", avg_pre_pre_len >= 1 ? "table" : "none");
+    carbon_compressor_set_option(&err, compressor, "prefix", avg_pre_pre_len >= 1 ? "incremental" : "none");
     carbon_compressor_set_option(&err, compressor, "suffix", avg_pre_suf_len >= 1 ? "incremental" : "none");
     carbon_compressor_set_option(&err, compressor, "huffman", "true");
     carbon_compressor_set_option(&err, compressor, "delta_chunk_length", "20");

@@ -17,6 +17,9 @@ size_t carbon_vlq_encoded_length(size_t length);
 void carbon_vlq_encode_to_io(size_t length, carbon_io_device_t *dst);
 size_t carbon_vlq_decode_from_io(carbon_io_device_t *src, bool *ok);
 
-char const * carbon_str_reverse(const char * str);
+void carbon_str_reverse(char * str);
+
+int carbon_sort_cmp_fwd(void const *a, void const *b);
+int carbon_sort_cmp_rwd(void const *a, void const *b);
 
 #endif
