@@ -76,7 +76,7 @@ void carbon_prefix_ro_tree_add_prefix(
 
 uint16_t carbon_prefix_ro_tree_max_prefix(
     carbon_prefix_ro_tree *tree,
-    char *string,
+    char const *string,
     size_t *prefix_length
 ) {
     *prefix_length = 0;
@@ -84,7 +84,7 @@ uint16_t carbon_prefix_ro_tree_max_prefix(
     uint16_t max_prefix = 0;
     size_t   input_length = strlen(string);
     size_t   num_chars_processed = 0;
-    char * c = string;
+    char const * c = string;
 
     carbon_prefix_ro_tree * current_node = tree;
 

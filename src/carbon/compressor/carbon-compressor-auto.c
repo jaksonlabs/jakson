@@ -19,10 +19,12 @@ typedef struct {
     // Maps key -> compressor
     carbon_hashmap_t ofType(carbon_compressor_t *) compressors;
     carbon_vec_t ofType(carbon_compressor_auto_range_t) ranges;
+    carbon_vec_t ofType(carbon_off_t) range_begin_table;
     carbon_doc_bulk_t const *context;
 
     size_t current_range_idx;
     size_t current_position;
+    carbon_off_t range_begin_table_offset;
     carbon_compressor_t *current_range_compressor;
 } carbon_compressor_auto_extra_t;
 
@@ -31,8 +33,6 @@ carbon_compressor_t *this_compressor_for(
         carbon_doc_bulk_t const *context,
         carbon_vec_t ofType(char *) *values
     ) {
-    CARBON_UNUSED(values);
-
     return carbon_compressor_find_by_strings(values, context);
 }
 
@@ -65,7 +65,13 @@ bool this_auto_read_extra(
         return false;
 
     carbon_err_t err;
-    carbon_vec_create(&extra->ranges, NULL, sizeof(carbon_compressor_auto_range_t), num_compressors);
+    for(size_t i = 0; i < num_compressors;++i) {
+        carbon_off_t range_begin;
+        carbon_io_device_read(src, &range_begin, sizeof(range_begin), 1);
+        carbon_vec_push(&extra->range_begin_table, &range_begin, 1);
+    }
+
+
     for(size_t i = 0; i < num_compressors; ++i) {
         carbon_compressor_t *compressor = malloc(sizeof(carbon_compressor_t));
         compressor->options = carbon_hashmap_new();
@@ -96,6 +102,22 @@ bool this_auto_read_extra(
     return true;
 }
 
+
+carbon_compressor_t *this_find_compressor_for_position(carbon_compressor_auto_extra_t *extra, carbon_off_t position)
+{
+    size_t range_idx = 0;
+    while(
+        range_idx + 1 < extra->ranges.num_elems &&
+        *CARBON_VECTOR_GET(&extra->range_begin_table, range_idx + 1, carbon_off_t const) <= position
+    )
+        ++range_idx;
+
+    carbon_compressor_auto_range_t const *range =
+            (carbon_compressor_auto_range_t const *)carbon_vec_at(&extra->ranges, range_idx);
+    return range->compressor;
+}
+
+
 CARBON_EXPORT(bool)
 carbon_compressor_auto_init(carbon_compressor_t *self, carbon_doc_bulk_t const *context)
 {
@@ -107,6 +129,7 @@ carbon_compressor_auto_init(carbon_compressor_t *self, carbon_doc_bulk_t const *
     carbon_compressor_auto_extra_t *extra =
             (carbon_compressor_auto_extra_t *)self->extra;
     extra->compressors = carbon_hashmap_new();
+
 
     if(context) {
         extra->context = context;
@@ -143,6 +166,7 @@ carbon_compressor_auto_init(carbon_compressor_t *self, carbon_doc_bulk_t const *
     extra->current_range_idx = 0;
     extra->current_range_compressor = NULL;
     carbon_vec_create(&extra->ranges, NULL, sizeof(carbon_compressor_auto_range_t), context ? carbon_hashmap_length(context->values) : 10);
+    carbon_vec_create(&extra->range_begin_table, NULL, sizeof(carbon_off_t), 10);
 
     return true;
 }
@@ -173,6 +197,7 @@ carbon_compressor_auto_drop(carbon_compressor_t *self)
 
     carbon_hashmap_drop(extra->compressors);
     carbon_vec_drop(&extra->ranges);
+    carbon_vec_drop(&extra->range_begin_table);
 
     free(extra);
     return true;
@@ -193,6 +218,12 @@ carbon_compressor_auto_write_extra(carbon_compressor_t *self, carbon_memfile_t *
             (carbon_compressor_auto_extra_t *)self->extra;
 
     carbon_vlq_encode_to_io(extra->ranges.num_elems, &io);
+    extra->range_begin_table_offset = carbon_io_device_tell(&io);
+
+    for(size_t i = 0; i < extra->ranges.num_elems;++i) {
+        carbon_string_id_t id = 0;
+        carbon_io_device_write(&io, &id, sizeof(carbon_string_id_t), 1);
+    }
 
     for(size_t i = 0; i < extra->ranges.num_elems;++i) {
         carbon_compressor_auto_range_t const *range = carbon_vec_at(&extra->ranges, i);
@@ -281,19 +312,11 @@ carbon_compressor_auto_print_encoded_string(carbon_compressor_t *self,
 {
     CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_AUTO);
 
-    carbon_compressor_auto_extra_t *extra =
-            (carbon_compressor_auto_extra_t *)self->extra;
-
-    carbon_compressor_auto_range_t const *range =
-            carbon_vec_at(&extra->ranges, extra->current_range_idx);
-
-    if(range->length == ++extra->current_position) {
-        extra->current_position = 0;
-        extra->current_range_idx++;
-    }
+    carbon_compressor_t *compressor =
+            this_find_compressor_for_position((carbon_compressor_auto_extra_t *)self->extra, CARBON_MEMFILE_TELL(src));
 
     carbon_err_t err;
-    return carbon_compressor_print_encoded(&err, range->compressor, file, src, decompressed_strlen);
+    return carbon_compressor_print_encoded(&err, compressor, file, src, decompressed_strlen);
 }
 
 CARBON_EXPORT(bool)
@@ -391,6 +414,11 @@ carbon_compressor_auto_encode_string(carbon_compressor_t *self, carbon_memfile_t
     }
 
     if(extra->current_range_compressor == NULL) {
+        carbon_off_t current_file_pos = CARBON_MEMFILE_TELL(dst);
+        carbon_memfile_seek(dst, extra->range_begin_table_offset + extra->current_range_idx * sizeof(carbon_off_t));
+        carbon_memfile_write(dst, &current_file_pos, sizeof(current_file_pos));
+        carbon_memfile_seek(dst, current_file_pos);
+
         carbon_hashmap_get(extra->compressors, range->key, (void **)&extra->current_range_compressor);
     }
 
@@ -409,17 +437,9 @@ carbon_compressor_auto_decode_string(carbon_compressor_t *self, char *dst, size_
 {
     CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_AUTO);
 
-    carbon_compressor_auto_extra_t *extra =
-            (carbon_compressor_auto_extra_t *)self->extra;
-
-    carbon_compressor_auto_range_t const *range =
-            carbon_vec_at(&extra->ranges, extra->current_range_idx);
-
-    if(range->length == ++extra->current_position) {
-        extra->current_position = 0;
-        extra->current_range_idx++;
-    }
+    carbon_compressor_t *compressor =
+            this_find_compressor_for_position((carbon_compressor_auto_extra_t *)self->extra, (carbon_off_t)ftell(src));
 
     carbon_err_t err;
-    return carbon_compressor_decode(&err, range->compressor, dst, strlen, src);
+    return carbon_compressor_decode(&err, compressor, dst, strlen, src);
 }
