@@ -60,16 +60,15 @@ size_t carbon_vlq_decode_from_io(carbon_io_device_t *src, bool *ok)
     return value;
 }
 
-char const *carbon_str_reverse(char const *str)
+void carbon_str_reverse(char *str)
 {
     size_t length = strlen(str);
-    char *cpy = malloc(length + 1);
 
-    for(size_t i = 0; i < length; ++i) {
-        cpy[i] = str[length - 1 -i ];
+    for(size_t i = 0; i < length / 2; ++i) {
+        char tmp = str[length - 1 - i ];
+        str[length - 1 - i] = str[i];
+        str[i] = tmp;
     }
-
-    return cpy;
 }
 
 size_t carbon_vlq_encoded_length(size_t length)
@@ -81,4 +80,32 @@ size_t carbon_vlq_encoded_length(size_t length)
     } while(num_bytes < 10 && length > 0);
 
     return num_bytes;
+}
+
+int carbon_sort_cmp_fwd(void const *a, void const *b) {
+    return strcmp(*(char * const *)a, *(char * const *)b);
+}
+
+int carbon_sort_cmp_rwd(void const *a, void const *b) {
+    char const *s_a = *(char const * const *)a;
+    char const *s_b = *(char const * const *)b;
+
+    size_t len_a = strlen(s_a);
+    size_t len_b = strlen(s_b);
+
+    char const * ptr_a = s_a + len_a;
+    char const * ptr_b = s_b + len_b;
+
+    while(ptr_a != s_a && ptr_b != s_b && *(--ptr_a) == *(--ptr_b));
+
+    if(ptr_a == s_a && ptr_b == s_b)
+        return 0;
+
+    if(ptr_a == s_a && ptr_b != s_b)
+        return -1;
+
+    if(ptr_b == s_b && ptr_a != s_a)
+        return 1;
+
+    return (int)*(uint8_t const *)ptr_a - (int)*(uint8_t const *)ptr_b;
 }
