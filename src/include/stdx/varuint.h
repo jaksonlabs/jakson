@@ -24,6 +24,38 @@
 
 NG5_BEGIN_DECL
 
+/**
+ * This type is for variable-length unsigned integer types.
+ *
+ * The encoding uses the most significant bit (MSB) for each byte in sequence of bytes (called blocks) to determine the
+ * number of bytes required to express the unsigned integer value. The MSB is 1 if there is at least one further byte to
+ * be read, and 0 if the end of the sequence is reached. The remaining 7 bits per block contain the actual bits for
+ * integer value encoding.
+ *
+ * This implementation supports variable-length encoding of the maximum value up to unsigned integer of 64bit (fixed-
+ * length) in at most 10 blocks.
+ *
+ * Example: Given the unsigned integer 16389, its fixed-length representation is
+ *                  01000000 00000101
+ *          Using the varuint type, the representation is
+ *                  (1)0000001 (1)0000000 (0)0000101
+ *
+ *
+ *      # required |      min value      |      max value
+ *        blocks   |       (incl.)       |       (incl.)
+ *      -----------+---------------------+----------------------
+ *               1 |                   0 |                  127
+ *               2 |                 128 |                16383
+ *               3 |               16384 |              2097151
+ *               4 |             2097152 |            268435455
+ *               5 |           268435456 |          34359738367
+ *               6 |         34359738368 |        4398046511103
+ *               7 |       4398046511104 |      562949953421311
+ *               8 |     562949953421312 |    72057594037927935
+ *               9 |   72057594037927936 |  9223372036854775807
+ *              10 | 9223372036854775808 | 18446744073709551615
+ */
+
 typedef void *varuint_t;
 
 NG5_EXPORT(u8) varuint_write(varuint_t dst, u64 value);
