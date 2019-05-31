@@ -22,49 +22,55 @@ static const char byte_selection = (0b01111111);
 static const char forward_bit    = (char) (1u << 7);
 static const char norforward_bit = (char) (0u << 7);
 
-NG5_EXPORT(u8) varuint_write(void *dst, u64 value)
-{
-        u8 nbytes = 0;
-        char datum = 0;
-
-        if (likely(dst != NULL)) {
-                if (value < 128) {
-                        nbytes = 1;
-                        datum = (char) value;
-                        *(char *) dst = datum;
-                } else if (value < 16384) {
-                        nbytes = 2;
-                        datum = forward_bit | (byte_selection & (value >> 7));
-                        printf("!!!! Value write %d\n", datum);
-                        *(char *) dst = datum;
-                        dst++;
-                        datum = norforward_bit | (byte_selection & value);
-                        printf("!!!! Value write %d\n", datum);
-                        *(char *) dst = datum;
-                        dst--;
-                        printf("!!!! >>> NUMBER written %llu\n", value);
-                }
-        }
-        return nbytes;
+static char *write_forward_chunk(char *dst, u64 value, unsigned short byte_num) {
+        *dst = (char) (forward_bit | (byte_selection & (value >> (byte_num * 7))));
+        return ++dst;
 }
 
-NG5_EXPORT(u64) varuint_read(u8 *nbytes, const void *src)
+static char *write_nonforward_chunk(char *dst, u64 value) {
+        *dst = (char) (norforward_bit | (byte_selection & value));
+        return ++dst;
+}
+
+
+NG5_EXPORT(u8) varuint_write(void *dst, u64 value)
 {
-        char chunk = *(char *) src;
-        u64 value = 0;
-        if ((forward_bit & chunk) == norforward_bit) {
-                *nbytes = 1;
-                value = chunk & byte_selection;
+        if (likely(dst != NULL)) {
+                if (likely(value < 128)) {
+                        write_nonforward_chunk(dst, value);
+                        return 1;
+                } else if (likely(value < 16384)) {
+                        dst = write_forward_chunk(dst, value, 1);
+                        write_nonforward_chunk(dst, value);
+                        return 2;
+                } else if (unlikely(value < 536870912)) {
+                        dst = write_forward_chunk(dst, value, 2);
+                        dst = write_forward_chunk(dst, value, 1);
+                        write_nonforward_chunk(dst, value);
+                        return 3;
+                } else {
+                        return 0;
+                }
         } else {
-                *nbytes = 2;
-                value = chunk & byte_selection;
-                printf("!!!! Value read %d\n", chunk);
-                value <<= 7;
-                src++;
-                chunk = *(char *) src;
-                printf("!!!! Value read %d\n", chunk);
-                value |= chunk & byte_selection;
-                printf("!!!! >>> NUMBER read %llu\n", value);
+                return 0;
         }
+}
+
+static inline void *read_chunk(bool *has_next, u64 *dst, char *src)
+{
+        char chunk = *src;
+        *has_next = (forward_bit & chunk) == forward_bit;
+        *dst = (*dst + (chunk & byte_selection)) << (*has_next ? 7 : 0);
+        return ++src;
+}
+
+NG5_EXPORT(u64) varuint_read(u8 *nbytes, void *src)
+{
+        u64 value = 0;
+        bool has_next = true;
+
+        for (*nbytes = 0; has_next; src = read_chunk(&has_next, &value, src), *nbytes = ++(*nbytes))
+                { }
+
         return value;
 }

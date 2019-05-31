@@ -23,6 +23,28 @@ TEST(VarUintTest, ReadWrite2Bytes) {
         ASSERT_TRUE(read_value == value);
 }
 
+TEST(VarUintTest, ReadWrite3Bytes) {
+        u64 value = 20000;
+        char dst[5];
+        u8 nbytes = varuint_write(&dst, value);
+        ASSERT_TRUE(nbytes == 3);
+        u64 read_value = varuint_read(&nbytes, &dst);
+        ASSERT_TRUE(nbytes == 3);
+        ASSERT_TRUE(read_value == value);
+}
+
+TEST(VarUintTest, ReadWrite4Bytes) {
+        u64 value = 536870920;
+        char dst[5];
+        u8 nbytes = varuint_write(&dst, value);
+        ASSERT_TRUE(nbytes == 4);
+        u64 read_value = varuint_read(&nbytes, &dst);
+        ASSERT_TRUE(nbytes == 4);
+        ASSERT_TRUE(read_value == value);
+}
+
+
+
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

@@ -26,7 +26,7 @@ NG5_BEGIN_DECL
 
 NG5_EXPORT(u8) varuint_write(void *dst, u64 value);
 
-NG5_EXPORT(u64) varuint_read(u8 *nbytes, const void *src);
+NG5_EXPORT(u64) varuint_read(u8 *nbytes, void *src);
 
 NG5_END_DECL
 
