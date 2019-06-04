@@ -4,8 +4,8 @@
 #include <fstream>
 
 #include "std/priority_queue.h"
-#include "core/async/thread-pool/thread_pool.h"
-#include "core/async/thread-pool/thread_pool_monitor.h"
+#include "core/async/thread-pool.h"
+#include "core/async/thread-pool-monitor.h"
 
 // Test if push and isEmpty works correkt
 TEST(PriorityQueue, IsEmpty)

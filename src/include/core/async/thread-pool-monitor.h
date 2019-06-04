@@ -22,7 +22,7 @@
 
 NG5_BEGIN_DECL
 
-#include "thread_pool.h"
+#include "thread-pool.h"
 
 // Returns the average fraction of time the active threads have been working.
 NG5_EXPORT(double) thread_pool_get_time_working(thread_pool_t *pool);

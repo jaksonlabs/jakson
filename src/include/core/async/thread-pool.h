@@ -19,10 +19,10 @@
 #define NG5_THREAD_POOL_H
 
 #include "shared/common.h"
-
 #include "std/priority_queue.h"
-#include "core/async/thread-pool/thread_status.h"
-#include "core/async/thread-pool/thread_pool_statistics.h"
+
+#include "thread-pool-status.h"
+#include "thread-pool-stats.h"
 
 NG5_BEGIN_DECL
 

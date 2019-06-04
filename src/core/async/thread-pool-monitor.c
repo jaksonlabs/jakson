@@ -17,7 +17,7 @@
 
 #include <stdio.h>
 
-#include "core/async/thread-pool/thread_pool_monitoring.h"
+#include "core/async/thread-pool-monitor.h"
 
 NG5_EXPORT(thread_pool_stats) thread_pool_get_stats(thread_pool_t *pool)
 {
