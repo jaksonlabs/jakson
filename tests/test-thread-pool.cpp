@@ -49,7 +49,7 @@ TEST(PriorityQueue, PushPrio)
 // Test the creation of thread pools
 TEST(ThreadPool, CREATE)
 {
-        thread_pool_t *pool = thread_pool_create(2, 0);
+        struct thread_pool *pool = thread_pool_create(2, 0);
         EXPECT_TRUE(pool);
 
         thread_pool_free(pool);
@@ -58,7 +58,7 @@ TEST(ThreadPool, CREATE)
 // Test the creation of group Ids of thread pools
 TEST(ThreadPool, NAME)
 {
-        thread_pool_t *pool = thread_pool_create_named(2, "ThreadPool", 0);
+        struct thread_pool *pool = thread_pool_create_named(2, "ThreadPool", 0);
 
         EXPECT_TRUE(pool);
         ASSERT_STREQ(pool->name, "ThreadPool");
@@ -84,7 +84,7 @@ void work(void *args)
 
 TEST(ThreadPool, RESIZE)
 {
-        thread_pool_t *pool = thread_pool_create(4, 0);
+        struct thread_pool *pool = thread_pool_create(4, 0);
         EXPECT_TRUE(pool);
 
         bool status = thread_pool_resize(pool, 6);
@@ -98,8 +98,8 @@ TEST(ThreadPool, RESIZE)
 TEST(ThreadPool, WAIT)
 {
         int test[] = {1000000, 1000000, 1000000, 1000000, 1000000, 1000000};
-        thread_pool_t *pool = thread_pool_create(2, 0);
-        thread_task_t tasks[6];
+        struct thread_pool *pool = thread_pool_create(2, 0);
+        struct thread_task tasks[6];
 
         for (int i = 0; i < 6; i++) {
                 tasks[i].args = (void *) &test[i];
@@ -120,8 +120,8 @@ TEST(ThreadPool, WAIT)
 TEST(ThreadPool, WAIT_FOR_ALL)
 {
         int test[] = {1000000, 1000000, 1000000, 1000000, 1000000, 1000000};
-        thread_pool_t *pool = thread_pool_create(2, 0);
-        thread_task_t tasks[6];
+        struct thread_pool *pool = thread_pool_create(2, 0);
+        struct thread_task tasks[6];
 
         for (int i = 0; i < 6; i++) {
                 tasks[i].args = (void *) &test[i];
@@ -152,10 +152,10 @@ void LIVE_RESIZE_work(void *args)
 
 TEST(ThreadPool, LIVE_RESIZE)
 {
-        thread_pool_t *pool = thread_pool_create(2, 0);
-        task_handle_t hndl;
+        struct thread_pool *pool = thread_pool_create(2, 0);
+        struct task_handle hndl;
         const int numThreads = 1 << 11;
-        thread_task_t tasks[numThreads];
+        struct thread_task tasks[numThreads];
         int results[numThreads];
         for (int i = numThreads - 1; i >= 0; --i) {
                 results[i] = i;
@@ -196,8 +196,8 @@ TEST(ThreadPool, LIVE_RESIZE)
 TEST(ThreadPool, TASK_STATISTICS)
 {
         int test[] = {1000000, 1000000, 1000000, 1000000, 1000000, 1000000};
-        thread_pool_t *pool = thread_pool_create(2, 1);
-        thread_task_t tasks[6];
+        struct thread_pool *pool = thread_pool_create(2, 1);
+        struct thread_task tasks[6];
 
         for (int i = 0; i < 6; i++) {
                 tasks[i].args = (void *) &test[i];
@@ -217,9 +217,9 @@ TEST(ThreadPool, TASK_STATISTICS)
 //        for (size_t counter = 2; counter < 32; ++counter) {
 //                counter = 32;
 //                int test[] = {1000000, 1000000, 1000000, 1000000, 1000000, 1000000};
-//                thread_pool_t *pool = thread_pool_create(counter, 1);
-//                thread_task_t tasks[number_task];
-//                thread_pool_stats pool_stats;
+//                struct thread_pool *pool = thread_pool_create(counter, 1);
+//                struct thread_task tasks[number_task];
+//                struct thread_pool_stats pool_stats;
 //
 //                for (int i = 0; i < number_task; i++) {
 //                        tasks[i].args = (void *) &test[i];
@@ -243,8 +243,8 @@ TEST(ThreadPool, TASK_STATISTICS)
 TEST(ThreadPool, THREAD_STATISTICS)
 {
         int test[] = {1000000, 1000000, 1000000, 1000000, 1000000, 1000000};
-        thread_pool_t *pool = thread_pool_create(2, 1);
-        thread_task_t tasks[6];
+        struct thread_pool *pool = thread_pool_create(2, 1);
+        struct thread_task tasks[6];
         thread_stats thread_stats;
 
         for (int i = 0; i < 6; i++) {

@@ -24,31 +24,31 @@
 
 static inline void __execute_task();
 
-NG5_EXPORT(thread_pool_t *) thread_pool_create(size_t num_threads, int enable_monitoring)
+NG5_EXPORT(struct thread_pool *) thread_pool_create(size_t num_threads, int enable_monitoring)
 {
-        thread_pool_t *pool = malloc(sizeof(thread_pool_t));
+        struct thread_pool *pool = malloc(sizeof(struct thread_pool));
 
         pool->name = NULL;
         pool->size = num_threads;
         pool->capacity = num_threads * 2;
         priority_queue_init(&pool->waiting_tasks);
 
-        pool->thread_tasks = calloc(num_threads, sizeof(thread_task_t *));
-        pool->thread_infos = calloc(sizeof(__thread_information_t *) * pool->capacity, 1);
+        pool->thread_tasks = calloc(num_threads, sizeof(struct thread_task *));
+        pool->thread_infos = calloc(sizeof(struct thread_info *) * pool->capacity, 1);
         pool->task_state_capacity = MAX_NUM_TASKS;
-        pool->task_group_states = calloc(pool->task_state_capacity, sizeof(__task_state_t));
+        pool->task_group_states = calloc(pool->task_state_capacity, sizeof(struct task_state));
         pool->enable_monitoring = enable_monitoring;
 
         pthread_t *threads = malloc(sizeof(pthread_t) * pool->capacity);
         pool->pool = threads;
 
         if (enable_monitoring) {
-                pool->statistics = calloc(1, sizeof(thread_pool_stats));
+                pool->statistics = calloc(1, sizeof(struct thread_pool_stats));
         }
 
         for (size_t i = 0; i < pool->capacity; i++) {
                 // one block per thread to reduce risk of two threads sharing the same cache line
-                __thread_information_t *thread_info = malloc(sizeof(__thread_information_t));
+                struct thread_info *thread_info = malloc(sizeof(struct thread_info));
                 pool->thread_infos[i] = thread_info;
                 thread_info->pool = pool;
                 thread_info->id = i;
@@ -56,7 +56,7 @@ NG5_EXPORT(thread_pool_t *) thread_pool_create(size_t num_threads, int enable_mo
                 sprintf(thread_info->name, "worker-%zu", i); // "worker%I64d" lead to segfault on linux
 
                 if (enable_monitoring) {
-                        thread_info->statistics = calloc(1, sizeof(thread_stats));
+                        thread_info->statistics = calloc(1, sizeof(struct thread_stats));
                 }
 
         }
@@ -67,9 +67,9 @@ NG5_EXPORT(thread_pool_t *) thread_pool_create(size_t num_threads, int enable_mo
         return pool;
 }
 
-NG5_EXPORT(thread_pool_t *) thread_pool_create_named(size_t num_threads, const char *name, int enable_monitoring)
+NG5_EXPORT(struct thread_pool *) thread_pool_create_named(size_t num_threads, const char *name, int enable_monitoring)
 {
-        thread_pool_t *pool = thread_pool_create(num_threads, enable_monitoring);
+        struct thread_pool *pool = thread_pool_create(num_threads, enable_monitoring);
 
         if (name) {
                 thread_pool_set_name(pool, name);
@@ -78,7 +78,7 @@ NG5_EXPORT(thread_pool_t *) thread_pool_create_named(size_t num_threads, const c
         return pool;
 }
 
-NG5_EXPORT(void) thread_pool_free(thread_pool_t *pool)
+NG5_EXPORT(void) thread_pool_free(struct thread_pool *pool)
 {
         // Update all status
         for (size_t i = 0; i < pool->size; ++i) {
@@ -115,7 +115,7 @@ NG5_EXPORT(void) thread_pool_free(thread_pool_t *pool)
         free(pool);
 }
 
-NG5_EXPORT(void) thread_pool_set_name(thread_pool_t *pool, const char *name)
+NG5_EXPORT(void) thread_pool_set_name(struct thread_pool *pool, const char *name)
 {
         if (pool->name) {
                 free(pool->name);
@@ -127,7 +127,7 @@ NG5_EXPORT(void) thread_pool_set_name(thread_pool_t *pool, const char *name)
         pool->name = str;
 }
 
-NG5_EXPORT(bool) thread_pool_resize(thread_pool_t *pool, size_t num_threads)
+NG5_EXPORT(bool) thread_pool_resize(struct thread_pool *pool, size_t num_threads)
 {
         if (num_threads > pool->size) {
                 if (num_threads > pool->capacity) {
@@ -143,7 +143,7 @@ NG5_EXPORT(bool) thread_pool_resize(thread_pool_t *pool, size_t num_threads)
                         else {
                                 // create a new
                                 if (pool->enable_monitoring && !pool->thread_infos[i]->statistics) {
-                                        pool->thread_infos[i]->statistics = calloc(1, sizeof(thread_stats));
+                                        pool->thread_infos[i]->statistics = calloc(1, sizeof(struct thread_stats));
                                 }
                                 __create_thread(pool->thread_infos[i], &pool->pool[i]);
                         }
@@ -160,7 +160,7 @@ NG5_EXPORT(bool) thread_pool_resize(thread_pool_t *pool, size_t num_threads)
         return true;
 }
 
-NG5_EXPORT(bool) thread_pool_enqueue_tasks(thread_task_t *tasks, thread_pool_t *pool, size_t num_tasks, task_handle_t *hndl)
+NG5_EXPORT(bool) thread_pool_enqueue_tasks(struct thread_task *tasks, struct thread_pool *pool, size_t num_tasks, struct task_handle *hndl)
 {
         // find unused slot
         size_t ind = 0;
@@ -192,19 +192,19 @@ NG5_EXPORT(bool) thread_pool_enqueue_tasks(thread_task_t *tasks, thread_pool_t *
         return true;
 }
 
-NG5_EXPORT(bool) thread_pool_enqueue_task(thread_task_t *task, thread_pool_t *pool, task_handle_t *hndl)
+NG5_EXPORT(bool) thread_pool_enqueue_task(struct thread_task *task, struct thread_pool *pool, struct task_handle *hndl)
 {
         return thread_pool_enqueue_tasks(task, pool, 1, hndl);
 }
 
-NG5_EXPORT(bool) thread_pool_enqueue_tasks_wait(thread_task_t *tasks, thread_pool_t *pool, size_t num_tasks)
+NG5_EXPORT(bool) thread_pool_enqueue_tasks_wait(struct thread_task *tasks, struct thread_pool *pool, size_t num_tasks)
 {
         // Pass all tasks except the last one to the queue
-        task_handle_t hndl;
+        struct task_handle hndl;
         thread_pool_enqueue_tasks(tasks, pool, num_tasks - 1, &hndl);
 
         // Execute the last tasks in the calling thread
-        thread_task_t *main_task = &tasks[num_tasks - 1];
+        struct thread_task *main_task = &tasks[num_tasks - 1];
 
         if (pool->enable_monitoring) {
                 pool->statistics->task_enqueued_count++;
@@ -224,16 +224,16 @@ NG5_EXPORT(bool) thread_pool_enqueue_tasks_wait(thread_task_t *tasks, thread_poo
         return thread_pool_wait_for_task(pool, &hndl);
 }
 
-NG5_EXPORT(bool) thread_pool_wait_for_task(thread_pool_t *pool, task_handle_t *hndl)
+NG5_EXPORT(bool) thread_pool_wait_for_task(struct thread_pool *pool, struct task_handle *hndl)
 {
         volatile unsigned *gen = &pool->task_group_states[hndl->index].generation;
         while (*gen == hndl->generation && pool->task_group_states[hndl->index].task_count) { }
         return true;
 }
 
-NG5_EXPORT(bool) thread_pool_wait_for_all(thread_pool_t *pool)
+NG5_EXPORT(bool) thread_pool_wait_for_all(struct thread_pool *pool)
 {
-        thread_task_t *next_task;
+        struct thread_task *next_task;
         while ((next_task = __get_next_task(pool))) {
 
                 if (pool->enable_monitoring) {
@@ -264,7 +264,7 @@ NG5_EXPORT(bool) thread_pool_wait_for_all(thread_pool_t *pool)
 
 NG5_EXPORT(void *) __thread_main(void *args)
 {
-        __thread_information_t *thread_info = (__thread_information_t *) args;
+        struct thread_info *thread_info = (struct thread_info *) args;
 
         // Fill statistics if available
         struct timespec begin;
@@ -274,7 +274,7 @@ NG5_EXPORT(void *) __thread_main(void *args)
         }
 
         while (1) {
-                thread_task_t *next_task = __get_next_task(thread_info->pool);
+                struct thread_task *next_task = __get_next_task(thread_info->pool);
                 // the task has to be executed since it has been taken out of the queue
                 if (next_task) {
 
@@ -325,13 +325,13 @@ NG5_EXPORT(void *) __thread_main(void *args)
         return (void *) 0;
 }
 
-NG5_EXPORT(thread_task_t *) __get_next_task(thread_pool_t *pool)
+NG5_EXPORT(struct thread_task *) __get_next_task(struct thread_pool *pool)
 {
-        thread_task_t *next_task = priority_queue_pop(&pool->waiting_tasks);
+        struct thread_task *next_task = priority_queue_pop(&pool->waiting_tasks);
         return next_task;
 }
 
-NG5_EXPORT(bool) __create_thread(__thread_information_t *thread_info, pthread_t *pp)
+NG5_EXPORT(bool) __create_thread(struct thread_info *thread_info, pthread_t *pp)
 {
         thread_info->status = thread_status_created;
         pthread_create(pp, NULL, &__thread_main, thread_info);
@@ -343,7 +343,7 @@ void *faulty;
 
 size_t num;
 
-void __execute_task(thread_pool_t *pool, thread_task_t *task)
+void __execute_task(struct thread_pool *pool, struct thread_task *task)
 {
         faulty = task->routine;
         num++;

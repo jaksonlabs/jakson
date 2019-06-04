@@ -25,7 +25,7 @@ NG5_BEGIN_DECL
 #include <time.h>
 #include <stdio.h>
 
-typedef struct thread_pool_stats {
+struct thread_pool_stats {
         struct timespec creation_time;
         unsigned int task_enqueued_count;
         unsigned int task_complete_count;
@@ -33,20 +33,20 @@ typedef struct thread_pool_stats {
         long long wait_time;
         long long avg_complete_time;
         long long avg_wait_time;
-} thread_pool_stats;
+};
 
-typedef struct thread_stats {
+struct thread_stats {
         struct timespec creation_time;
         long long idle_time;
         long long busy_time;
         size_t task_count;
-} thread_stats;
+};
 
-typedef struct task_stats {
+struct task_stats {
         struct timespec enqueue_time;
         struct timespec execution_time;
         struct timespec complete_time;
-} task_stats;
+};
 
 static inline long long __get_time_diff(struct timespec *begin, struct timespec *end)
 {

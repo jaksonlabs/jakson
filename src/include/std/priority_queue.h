@@ -42,4 +42,4 @@ NG5_EXPORT(int) priority_queue_is_empty(struct priority_queue *queue);
 
 NG5_END_DECL
 
-#endif //GECKO_PRIORITY_QUEUE_H
+#endif

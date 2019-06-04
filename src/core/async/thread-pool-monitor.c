@@ -19,7 +19,7 @@
 
 #include "core/async/thread-pool-monitor.h"
 
-NG5_EXPORT(thread_pool_stats) thread_pool_get_stats(thread_pool_t *pool)
+NG5_EXPORT(struct thread_pool_stats) thread_pool_get_stats(struct thread_pool *pool)
 {
         // In case no tasks care completed, no averages can be calculated
         if (pool->statistics->task_complete_count) {
@@ -30,9 +30,9 @@ NG5_EXPORT(thread_pool_stats) thread_pool_get_stats(thread_pool_t *pool)
         return *pool->statistics;
 }
 
-NG5_EXPORT(thread_stats) thread_pool_get_thread_stats(thread_pool_t *pool, size_t id)
+NG5_EXPORT(struct thread_stats) thread_pool_get_thread_stats(struct thread_pool *pool, size_t id)
 {
-        thread_stats *thread_stats = pool->thread_infos[id]->statistics;
+        struct thread_stats *thread_stats = pool->thread_infos[id]->statistics;
 
         // busy_time = running_time - idle_time
         struct timespec current;
@@ -41,7 +41,7 @@ NG5_EXPORT(thread_stats) thread_pool_get_thread_stats(thread_pool_t *pool, size_
         return *thread_stats;
 }
 
-NG5_EXPORT(double) thread_pool_get_time_working(thread_pool_t *pool)
+NG5_EXPORT(double) thread_pool_get_time_working(struct thread_pool *pool)
 {
         struct timespec end;
 
