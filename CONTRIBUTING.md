@@ -3,6 +3,7 @@
 Contribution can be done by the following forms:
 
 * [Report bugs or suggest features](#Reporting-bugs)
+* Fork the project, and/or add features
 
 ## Reporting bugs
 
@@ -14,10 +15,9 @@ to reproduce the bug or the feature.
 
 Please take sometime and search to check to see if the issue has been opened before.
 
-#### Code style:
+## Code style
 
-* Please follow guide line from the [linux kernel](https://www.kernel.org/doc/html/v4.10/process/coding-style.html)
-.
+* Please follow guide line for the [Linux Kernel](https://www.kernel.org/doc/html/v4.10/process/coding-style.html).
 
 ## Communicating with developers
 
