@@ -1,3 +1,6 @@
+## 0.3.00.01 [2019-XX-XX]
+- Add thread pool implementation (`struct thread_pool`)
+
 ## 0.3.00.00 [2019-04-11]
 - In `carbon-tool`, enable the user to set whether a single-threaded (`sync`) or multi-threaded (`async`) string 
   dictionary should be used when conversion from JSON to CARBON archives is issued (via `convert` module). By
