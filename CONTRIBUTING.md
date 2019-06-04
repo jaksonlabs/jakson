@@ -3,7 +3,6 @@
 Contribution can be done by the following forms:
 
 * [Report bugs or suggest features](#Reporting-bugs)
-* [Contribute pull requests](#contributing-pull-requests)
 
 ## Reporting bugs
 
