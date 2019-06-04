@@ -102,6 +102,7 @@ install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/carbon DESTINATION ${CMAKE_INSTALL
 
 add_subdirectory("${CMAKE_SOURCE_DIR}/tools/carbon")
 add_subdirectory("${CMAKE_SOURCE_DIR}/examples")
+add_subdirectory("${CMAKE_SOURCE_DIR}/misc")
 
 enable_testing()
 add_subdirectory("${CMAKE_SOURCE_DIR}/tests")

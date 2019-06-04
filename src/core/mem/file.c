@@ -27,6 +27,7 @@ bool memfile_open(struct memfile *file, struct memblock *block, enum access_mode
         file->pos = 0;
         file->bit_mode = false;
         file->mode = mode;
+        file->saved_pos_ptr = -1;
         error_init(&file->err);
         return true;
 }
@@ -160,6 +161,17 @@ bool memfile_write(struct memfile *file, const void *data, offset_t nbytes)
         }
 }
 
+NG5_EXPORT(bool) memfile_write_zero(struct memfile *file, size_t how_many)
+{
+        error_if_null(file);
+        error_if_null(how_many);
+        char empty = 0;
+        while (how_many--) {
+                memfile_write(file, &empty, sizeof(char));
+        }
+        return true;
+}
+
 bool memfile_begin_bit_mode(struct memfile *file)
 {
         error_if_null(file);
@@ -245,6 +257,33 @@ bool memfile_read_bit(struct memfile *file)
                 }
         } else {
                 error(&file->err, NG5_ERR_NOBITMODE);
+                return false;
+        }
+}
+
+NG5_EXPORT(bool) memfile_save_position(struct memfile *file)
+{
+        error_if_null(file);
+        offset_t pos = memfile_tell(file);
+        if (likely(file->saved_pos_ptr < (i8) (NG5_ARRAY_LENGTH(file->saved_pos)))) {
+                file->saved_pos[file->saved_pos_ptr++] = pos;
+                return true;
+        } else {
+                error(&file->err, NG5_ERR_STACK_OVERFLOW)
+                return false;
+        }
+
+}
+
+NG5_EXPORT(bool) memfile_restore_position(struct memfile *file)
+{
+        error_if_null(file);
+        if (likely(file->saved_pos_ptr >= 0)) {
+                offset_t pos = file->saved_pos[--file->saved_pos_ptr];
+                memfile_seek(file, pos);
+                return true;
+        } else {
+                error(&file->err, NG5_ERR_STACK_UNDERFLOW)
                 return false;
         }
 }

@@ -27,6 +27,8 @@ struct memblock;
 
 NG5_EXPORT(bool) memblock_create(struct memblock **block, size_t size);
 
+NG5_EXPORT(bool) memblock_zero_out(struct memblock *block);
+
 NG5_EXPORT(bool) memblock_from_file(struct memblock **block, FILE *file, size_t nbytes);
 
 NG5_EXPORT(bool) memblock_drop(struct memblock *block);

@@ -26,6 +26,8 @@ NG5_BEGIN_DECL
 struct memfile {
         struct memblock *memblock;
         offset_t pos;
+        offset_t saved_pos[10];
+        i8 saved_pos_ptr;
         bool bit_mode;
         size_t current_read_bit, current_write_bit, bytes_completed;
         enum access_mode mode;
@@ -82,11 +84,17 @@ NG5_EXPORT(const char *)memfile_peek(struct memfile *file, offset_t nbytes);
 
 NG5_EXPORT(bool) memfile_write(struct memfile *file, const void *data, offset_t nbytes);
 
+NG5_EXPORT(bool) memfile_write_zero(struct memfile *file, size_t how_many);
+
 NG5_EXPORT(bool) memfile_begin_bit_mode(struct memfile *file);
 
 NG5_EXPORT(bool) memfile_write_bit(struct memfile *file, bool flag);
 
 NG5_EXPORT(bool) memfile_read_bit(struct memfile *file);
+
+NG5_EXPORT(bool) memfile_save_position(struct memfile *file);
+
+NG5_EXPORT(bool) memfile_restore_position(struct memfile *file);
 
 NG5_EXPORT(bool) memfile_end_bit_mode(size_t *num_bytes_written, struct memfile *file);
 

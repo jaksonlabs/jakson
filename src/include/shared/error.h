@@ -40,7 +40,7 @@ NG5_BEGIN_DECL
 #define NG5_ERR_FOPEN_FAILED 12            /** Reading from file failed */
 #define NG5_ERR_IO 13                      /** I/O error */
 #define NG5_ERR_FORMATVERERR 14            /** Unsupported archive format version */
-#define NG5_ERR_CORRUPTED 15               /** Archive file is corrupted */
+#define NG5_ERR_CORRUPTED 15               /** Format is corrupted */
 #define NG5_ERR_NOCARBONSTREAM 16          /** Stream is not a carbon archive */
 #define NG5_ERR_NOBITMODE 17               /** Not in bit writing mode */
 #define NG5_ERR_NOTIMPLEMENTED 18          /** Function is not yet implemented */
@@ -101,12 +101,16 @@ NG5_BEGIN_DECL
 #define NG5_ERR_FWRITE_FAILED 73           /** Unable to write to file */
 #define NG5_ERR_HASTABLE_DESERIALERR 74    /** Unable to deserialize hash table from file */
 #define NG5_ERR_UNKNOWN_DIC_TYPE 75        /** Unknown string dictionary implementation requested */
+#define NG5_ERR_STACK_OVERFLOW 76          /** Stack overflow */
+#define NG5_ERR_STACK_UNDERFLOW 77         /** Stack underflow */
+#define NG5_ERR_OUTDATED 78                /** Object was modified and is out of date */
+#define NG5_ERR_NOTREADABLE 79             /** Object is currently being updated; no read allowed */
 
 static const char *const _err_str[] =
         {"No error", "Null pointer detected", "Function not implemented", "Index is out of bounds",
          "Memory allocation failed", "Illegal arguments", "Internal error", "Illegal implementation", "Not found",
          "Element not in list", "Array index out of bounds", "Illegal JSON array: mixed types",
-         "Reading from file failed", "I/O error", "Unsupported archive format version", "Archive file is corrupted",
+         "Reading from file failed", "I/O error", "Unsupported archive format version", "Format is corrupted",
          "Stream is not a types archive", "Not in bit writing mode", "Function is not yet implemented",
          "Unsupported type found", "Unsupported pack strategy requested", "No string representation for type available",
          "Marker type cannot be mapped to value type", "Parsing stopped; unknown data type requested",
@@ -137,7 +141,8 @@ static const char *const _err_str[] =
          "Illegal state: iteration over collection issued, but object found", "Type mismatch",
          "Index is corrupted: requested offset is outside file bounds", "Temporary file cannot be opened for writing",
          "Unable to write to file", "Unable to deserialize hash table from file",
-         "Unknown string dictionary implementation requested"};
+         "Unknown string dictionary implementation requested", "Stack overflow", "Stack underflow",
+         "Object was modified and is out of date", "Object is currently being updated; no read allowed"};
 
 #define NG5_ERRSTR_ILLEGAL_CODE "illegal error code"
 

@@ -41,6 +41,13 @@ bool memblock_create(struct memblock **block, size_t size)
         return true;
 }
 
+NG5_EXPORT(bool) memblock_zero_out(struct memblock *block)
+{
+        error_if_null(block);
+        ng5_zero_memory(block->base, block->blockLength);
+        return true;
+}
+
 bool memblock_from_file(struct memblock **block, FILE *file, size_t nbytes)
 {
         memblock_create(block, nbytes);

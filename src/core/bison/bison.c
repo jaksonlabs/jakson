@@ -1,5 +1,5 @@
 /**
- * BISON Binary Universal Document -- Copyright 2019 Marcus Pinnecke
+ * BISON Adaptive Binary JSON -- Copyright 2019 Marcus Pinnecke
  * This file implements the document format itself
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,3 +15,464 @@
  * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
+#include <inttypes.h>
+#include <core/bison/bison.h>
+
+#include "core/bison/bison.h"
+#include "stdx/varuint.h"
+#include "core/bison/bison_printers.h"
+
+struct bison_header
+{
+        object_id_t oid;
+};
+
+struct bison_obj_header
+{
+        varuint_t obj_len;
+};
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+#define is_readable_or_return(doc)                      \
+if (!doc->versioning.is_readable) {                     \
+        error(&doc->err, NG5_ERR_NOTREADABLE)           \
+        return false;                                   \
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+#define event_promote(doc, event, ...)                                                                                 \
+for (u32 i = 0; i < doc->handler.num_elems; i++) {                                                                     \
+        struct bison_handler *handler = vec_get(&doc->handler, i, struct bison_handler);                               \
+        assert(handler);                                                                                               \
+        if (handler->in_use && handler->listener.event) {                                                              \
+        handler->listener.event(&handler->listener, __VA_ARGS__);                                                      \
+        }                                                                                                              \
+}
+
+#define fire_revision_begin(doc)        event_promote(doc, on_revision_begin, doc);
+#define fire_revision_end(doc)          event_promote(doc, on_revision_end, doc);
+#define fire_revision_abort(doc)        event_promote(doc, on_revision_abort, doc);
+#define fire_new_revision(doc)          event_promote(doc, on_new_revision, doc);
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+static bool printer_drop(struct bison_printer *printer);
+static bool printer_bison_begin(struct bison_printer *printer, struct string_builder *builder);
+static bool printer_bison_end(struct bison_printer *printer, struct string_builder *builder);
+static bool printer_bison_header_begin(struct bison_printer *printer, struct string_builder *builder);
+static bool printer_bison_header_contents(struct bison_printer *printer, struct string_builder *builder, object_id_t oid, u64 rev);
+static bool printer_bison_header_end(struct bison_printer *printer, struct string_builder *builder);
+static bool printer_bison_payload_begin(struct bison_printer *printer, struct string_builder *builder);
+static bool printer_bison_payload_end(struct bison_printer *printer, struct string_builder *builder);
+
+static bool internal_drop(struct bison *doc);
+static bool internal_revision_inc(struct bison *doc);
+
+static void bison_header_init(struct bison *doc);
+static u64 bison_header_get_rev(struct bison *doc);
+static bool bison_header_rev_inc(struct bison *doc);
+static u64 bison_header_get_oid(struct bison *doc);
+
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+NG5_EXPORT(bool) bison_create(struct bison *doc)
+{
+        error_if_null(doc);
+        error_init(&doc->err);
+        memblock_create(&doc->memblock, 1024);
+        memblock_zero_out(doc->memblock);
+        memfile_open(&doc->memfile, doc->memblock, READ_WRITE);
+        vec_create(&doc->handler, NULL, sizeof(struct bison_handler), 1);
+
+        spin_init(&doc->versioning.write_lock);
+
+        doc->versioning.revision_lock = false;
+        doc->versioning.is_latest = true;
+        doc->versioning.is_readable = true;
+
+        bison_header_init(doc);
+
+        return true;
+}
+
+NG5_EXPORT(bool) bison_drop(struct bison *doc)
+{
+        error_if_null(doc);
+        is_readable_or_return(doc);
+        return internal_drop(doc);
+}
+
+NG5_EXPORT(bool) bison_register_listener(listener_handle_t *handle, struct bison_event_listener *listener, struct bison *doc)
+{
+        error_if_null(listener);
+        error_if_null(doc);
+
+        u32 pos = 0;
+        struct bison_handler *handler;
+
+        for (u32 pos = 0; pos < doc->handler.num_elems; pos++) {
+                handler = vec_get(&doc->handler, pos, struct bison_handler);
+                if (!handler->in_use) {
+                        break;
+                }
+        }
+
+        if (pos == doc->handler.num_elems) {
+                /* append new handler */
+                handler = vec_new_and_get(&doc->handler, struct bison_handler);
+        }
+
+        handler->in_use = true;
+        handler->listener = *listener;
+        ng5_optional_call(listener, clone, &handler->listener, listener);
+        ng5_optional_set(handle, pos);
+        return true;
+}
+
+NG5_EXPORT(bool) bison_unregister_listener(struct bison *doc, listener_handle_t handle)
+{
+        error_if_null(doc);
+        if (likely(handle < doc->handler.num_elems)) {
+                struct bison_handler *handler = vec_get(&doc->handler, handle, struct bison_handler);
+                if (likely(handler->in_use)) {
+                        handler->in_use = false;
+                        ng5_optional_call(&handler->listener, drop, &handler->listener);
+                        return true;
+                } else {
+                        error(&doc->err, NG5_ERR_NOTFOUND);
+                        return false;
+                }
+        } else {
+                error(&doc->err, NG5_ERR_OUTOFBOUNDS);
+                return false;
+        }
+}
+
+NG5_EXPORT(bool) bison_clone(struct bison *clone, struct bison *doc)
+{
+        error_if_null(clone);
+        error_if_null(doc);
+        ng5_check_success(memblock_cpy(&clone->memblock, doc->memblock));
+        ng5_check_success(memfile_open(&clone->memfile, clone->memblock, READ_WRITE));
+        ng5_check_success(error_init(&clone->err));
+
+        vec_create(&clone->handler, NULL, sizeof(struct bison_handler), doc->handler.num_elems);
+        for (u32 i = 0; i < doc->handler.num_elems; i++) {
+                struct bison_handler *original = vec_get(&doc->handler, i, struct bison_handler);
+                struct bison_handler *copy = vec_new_and_get(&clone->handler, struct bison_handler);
+                copy->in_use = original->in_use;
+                if (original->in_use) {
+                        copy->listener = original->listener;
+                        ng5_optional_call(&original->listener, clone, &copy->listener, &original->listener);
+                }
+        }
+
+        spin_init(&clone->versioning.write_lock);
+        clone->versioning.revision_lock = false;
+        clone->versioning.is_latest = true;
+        clone->versioning.is_readable = true;
+
+        return true;
+}
+
+NG5_EXPORT(bool) bison_revision(u64 *rev, struct bison *doc)
+{
+        error_if_null(doc);
+        *rev = bison_header_get_rev(doc);
+        return true;
+}
+
+NG5_EXPORT(bool) bison_object_id(object_id_t *oid, struct bison *doc)
+{
+        error_if_null(doc);
+        error_if_null(oid);
+        *oid = bison_header_get_oid(doc);
+        return true;
+}
+
+NG5_EXPORT(bool) bison_to_str(struct string_builder *dst, enum bison_printer_impl printer, struct bison *doc)
+{
+        error_if_null(doc);
+
+        struct bison_printer p;
+        struct string_builder b;
+        object_id_t oid;
+        u64 rev;
+
+        memfile_save_position(&doc->memfile);
+
+        ng5_zero_memory(&p, sizeof(struct bison_printer));
+        string_builder_create(&b);
+        bison_object_id(&oid, doc);
+        bison_revision(&rev, doc);
+
+        switch (printer) {
+        case JSON_FORMATTER:
+                bison_json_formatter_create(&p);
+                break;
+        default:
+                error(&doc->err, NG5_ERR_NOTFOUND);
+        }
+
+        printer_bison_begin(&p, &b);
+        printer_bison_header_begin(&p, &b);
+        printer_bison_header_contents(&p, &b, oid, rev);
+        printer_bison_header_end(&p, &b);
+        printer_bison_payload_begin(&p, &b);
+        printer_bison_payload_end(&p, &b);
+        printer_bison_end(&p, &b);
+
+        printer_drop(&p);
+        string_builder_append(dst, string_builder_cstr(&b));
+        string_builder_drop(&b);
+
+        memfile_restore_position(&doc->memfile);
+        return true;
+}
+
+NG5_EXPORT(bool) bison_revise_try_begin(struct bison_revise *context, struct bison *doc)
+{
+        error_if_null(context)
+        error_if_null(doc)
+        if (!doc->versioning.revision_lock) {
+                return bison_revise_begin(context, doc);
+        } else {
+                return false;
+        }
+}
+
+NG5_EXPORT(bool) bison_revise_begin(struct bison_revise *context, struct bison *doc)
+{
+        error_if_null(context)
+        error_if_null(doc)
+
+        if (likely(doc->versioning.is_latest)) {
+                spin_acquire(&doc->versioning.write_lock);
+                doc->versioning.revision_lock = true;
+                context->original = doc;
+                bison_clone(&context->revised_doc, context->original);
+                fire_revision_begin(doc);
+                return true;
+        } else {
+                error(&doc->err, NG5_ERR_OUTOFBOUNDS)
+                return false;
+        }
+}
+
+NG5_EXPORT(bool) bison_revise_end(struct bison_revise *context)
+{
+        error_if_null(context)
+
+        internal_drop(context->original);
+        bison_clone(context->original, &context->revised_doc);
+        internal_revision_inc(context->original);
+
+        context->original->versioning.is_latest = false;
+        context->original->versioning.revision_lock = false;
+
+        fire_new_revision(context->original);
+        fire_revision_end(context->original);
+
+        spin_release(&context->original->versioning.write_lock);
+
+        return true;
+}
+
+NG5_EXPORT(bool) bison_revise_abort(struct bison_revise *context)
+{
+        error_if_null(context)
+
+        bison_drop(&context->revised_doc);
+        context->original->versioning.is_latest = true;
+        context->original->versioning.revision_lock = false;
+        fire_revision_abort(context->original);
+        fire_revision_end(context->original);
+        spin_release(&context->original->versioning.write_lock);
+
+        return true;
+}
+
+NG5_EXPORT(const char *) bison_field_type_str(struct err *err, enum bison_field_type type)
+{
+        switch (type) {
+        case BISON_FIELD_TYPE_NULL: return BISON_FIELD_TYPE_NULL_STR;
+        case BISON_FIELD_TYPE_TRUE: return BISON_FIELD_TYPE_TRUE_STR;
+        case BISON_FIELD_TYPE_FALSE: return BISON_FIELD_TYPE_FALSE_STR;
+        case BISON_FIELD_TYPE_OBJECT: return BISON_FIELD_TYPE_OBJECT_STR;
+        case BISON_FIELD_TYPE_ARRAY: return BISON_FIELD_TYPE_ARRAY_STR;
+        case BISON_FIELD_TYPE_STRING: return BISON_FIELD_TYPE_STRING_STR;
+        case BISON_FIELD_TYPE_NUMBER_U8: return BISON_FIELD_TYPE_NUMBER_U8_STR;
+        case BISON_FIELD_TYPE_NUMBER_U16: return BISON_FIELD_TYPE_NUMBER_U16_STR;
+        case BISON_FIELD_TYPE_NUMBER_U32: return BISON_FIELD_TYPE_NUMBER_U32_STR;
+        case BISON_FIELD_TYPE_NUMBER_U64: return BISON_FIELD_TYPE_NUMBER_U64_STR;
+        case BISON_FIELD_TYPE_NUMBER_I8: return BISON_FIELD_TYPE_NUMBER_I8_STR;
+        case BISON_FIELD_TYPE_NUMBER_I16: return BISON_FIELD_TYPE_NUMBER_I16_STR;
+        case BISON_FIELD_TYPE_NUMBER_I32: return BISON_FIELD_TYPE_NUMBER_I32_STR;
+        case BISON_FIELD_TYPE_NUMBER_I64: return BISON_FIELD_TYPE_NUMBER_I64_STR;
+        case BISON_FIELD_TYPE_NUMBER_FLOAT: return BISON_FIELD_TYPE_NUMBER_FLOAT_STR;
+        case BISON_FIELD_TYPE_NUMBER_U8_COLUMN: return BISON_FIELD_TYPE_NUMBER_U8_COLUMN_STR;
+        case BISON_FIELD_TYPE_NUMBER_U16_COLUMN: return BISON_FIELD_TYPE_NUMBER_U16_COLUMN_STR;
+        case BISON_FIELD_TYPE_NUMBER_U32_COLUMN: return BISON_FIELD_TYPE_NUMBER_U32_COLUMN_STR;
+        case BISON_FIELD_TYPE_NUMBER_U64_COLUMN: return BISON_FIELD_TYPE_NUMBER_U64_COLUMN_STR;
+        case BISON_FIELD_TYPE_NUMBER_I8_COLUMN: return BISON_FIELD_TYPE_NUMBER_I8_COLUMN_STR;
+        case BISON_FIELD_TYPE_NUMBER_I16_COLUMN: return BISON_FIELD_TYPE_NUMBER_I16_COLUMN_STR;
+        case BISON_FIELD_TYPE_NUMBER_I32_COLUMN: return BISON_FIELD_TYPE_NUMBER_I32_COLUMN_STR;
+        case BISON_FIELD_TYPE_NUMBER_I64_COLUMN: return BISON_FIELD_TYPE_NUMBER_I64_COLUMN_STR;
+        case BISON_FIELD_TYPE_NUMBER_FLOAT_COLUMN: return BISON_FIELD_TYPE_NUMBER_FLOAT_COLUMN_STR;
+        case BISON_FIELD_TYPE_NUMBER_NCHAR_COLUMN: return BISON_FIELD_TYPE_NUMBER_NCHAR_COLUMN_STR;
+        case BISON_FIELD_TYPE_NUMBER_BINARY: return BISON_FIELD_TYPE_NUMBER_BINARY_STR;
+        case BISON_FIELD_TYPE_NUMBER_NBINARY_COLUMN: return BISON_FIELD_TYPE_NUMBER_NBINARY_COLUMN_STR;
+        default:
+                error(err, NG5_ERR_NOTFOUND);
+                return NULL;
+        }
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+static bool internal_drop(struct bison *doc)
+{
+        assert(doc);
+        memblock_drop(doc->memblock);
+        for (u32 i = 0; i < doc->handler.num_elems; i++) {
+                struct bison_handler *handler = vec_get(&doc->handler, i, struct bison_handler);
+                if (handler->in_use) {
+                        ng5_optional_call(&handler->listener, drop, &handler->listener);
+                }
+
+        }
+        vec_drop(&doc->handler);
+        return true;
+}
+
+static bool internal_revision_inc(struct bison *doc)
+{
+        assert(doc);
+        return bison_header_rev_inc(doc);
+}
+
+static void bison_header_init(struct bison *doc)
+{
+        assert(doc);
+
+        struct bison_header header = {
+                .oid = 0
+        };
+
+        memfile_seek(&doc->memfile, 0);
+        memfile_write(&doc->memfile, &header, sizeof(struct bison_header));
+
+        varuint_t revision = NG5_MEMFILE_PEEK(&doc->memfile, varuint_t);
+
+        /* in case not enough space is available for writing revision (variable-length) number, enlarge */
+        size_t remain = memfile_remain_size(&doc->memfile);
+        offset_t rev_off = memfile_tell(&doc->memfile);
+        if (unlikely(remain < varuint_max_blocks())) {
+                memfile_write_zero(&doc->memfile, varuint_max_blocks());
+                memfile_seek(&doc->memfile, rev_off);
+        }
+
+        u8 bytes_written = varuint_write(revision, 0);
+        memfile_skip(&doc->memfile, bytes_written);
+        assert (bison_header_get_rev(doc) == 0);
+}
+
+static u64 bison_header_get_rev(struct bison *doc)
+{
+        assert(doc);
+        u64 rev;
+        memfile_save_position(&doc->memfile);
+        memfile_seek(&doc->memfile, 0);
+        memfile_skip(&doc->memfile, sizeof(struct bison_header));
+        error_if(memfile_remain_size(&doc->memfile) < varuint_max_blocks(), &doc->err, NG5_ERR_CORRUPTED);
+        varuint_t revision = NG5_MEMFILE_PEEK(&doc->memfile, varuint_t);
+        rev = varuint_read(NULL, revision);
+        memfile_restore_position(&doc->memfile);
+        return rev;
+}
+
+static bool bison_header_rev_inc(struct bison *doc)
+{
+        assert(doc);
+        u64 rev = bison_header_get_rev(doc);
+
+        memfile_save_position(&doc->memfile);
+        memfile_seek(&doc->memfile, 0);
+        memfile_skip(&doc->memfile, sizeof(struct bison_header));
+        error_if(memfile_remain_size(&doc->memfile) < varuint_max_blocks(), &doc->err, NG5_ERR_CORRUPTED);
+        varuint_t revision = NG5_MEMFILE_PEEK(&doc->memfile, varuint_t);
+        varuint_write(revision, ++rev);
+
+        memfile_restore_position(&doc->memfile);
+        return true;
+}
+
+static u64 bison_header_get_oid(struct bison *doc)
+{
+        assert(doc);
+        memfile_save_position(&doc->memfile);
+        memfile_seek(&doc->memfile, 0);
+        const struct bison_header *header = NG5_MEMFILE_READ_TYPE(&doc->memfile, struct bison_header);
+        memfile_restore_position(&doc->memfile);
+        return header->oid;
+}
+
+static bool printer_drop(struct bison_printer *printer)
+{
+        error_if_null(printer->drop);
+        printer->drop(printer);
+        return true;
+}
+
+static bool printer_bison_begin(struct bison_printer *printer, struct string_builder *builder)
+{
+        error_if_null(printer->print_bison_begin);
+        printer->print_bison_begin(printer, builder);
+        return true;
+}
+
+static bool printer_bison_end(struct bison_printer *printer, struct string_builder *builder)
+{
+        error_if_null(printer->print_bison_end);
+        printer->print_bison_end(printer, builder);
+        return true;
+}
+
+static bool printer_bison_header_begin(struct bison_printer *printer, struct string_builder *builder)
+{
+        error_if_null(printer->print_bison_header_begin);
+        printer->print_bison_header_begin(printer, builder);
+        return true;
+}
+
+static bool printer_bison_header_contents(struct bison_printer *printer, struct string_builder *builder, object_id_t oid, u64 rev)
+{
+        error_if_null(printer->drop);
+        printer->print_bison_header_contents(printer, builder, oid, rev);
+        return true;
+}
+
+static bool printer_bison_header_end(struct bison_printer *printer, struct string_builder *builder)
+{
+        error_if_null(printer->print_bison_header_end);
+        printer->print_bison_header_end(printer, builder);
+        return true;
+}
+
+static bool printer_bison_payload_begin(struct bison_printer *printer, struct string_builder *builder)
+{
+        error_if_null(printer->print_bison_payload_begin);
+        printer->print_bison_payload_begin(printer, builder);
+        return true;
+}
+
+static bool printer_bison_payload_end(struct bison_printer *printer, struct string_builder *builder)
+{
+        error_if_null(printer->print_bison_payload_end);
+        printer->print_bison_payload_end(printer, builder);
+        return true;
+}

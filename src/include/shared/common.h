@@ -267,7 +267,7 @@ ng5_func_unused static const char *basic_type_to_system_type_str(enum field_type
 #define ofType(x) /** a convenience way to write types for generic containers; no effect than just a visual one */
 #define ofMapping(x, y) /** a convenience way to write types for generic containers; no effect than just a visual one */
 
-#define ng5_optional_call(x, func, ...) if(x && x->func) { x->func(__VA_ARGS__); }
+#define ng5_optional_call(x, func, ...) if((x) && (x)->func) { (x)->func(__VA_ARGS__); }
 
 #define ng5_max(a, b)                                                                                                  \
     ((b) > (a) ? (b) : (a))
