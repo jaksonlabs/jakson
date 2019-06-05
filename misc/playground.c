@@ -5,7 +5,7 @@
 int main(void)
 {
 
-        struct bison doc;
+        struct bison doc, rev_doc;
         u64 rev;
         struct string_builder builder;
         bool status;
@@ -18,7 +18,7 @@ int main(void)
         status = bison_revision(&rev, &doc);
 
         struct bison_revise revise;
-        bison_revise_begin(&revise, &doc);
+        bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_end(&revise);
 
         status = bison_revision(&rev, &doc);

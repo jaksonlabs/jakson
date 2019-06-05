@@ -62,6 +62,33 @@ typedef void *varuint_t;
 
 NG5_EXPORT(u8) varuint_write(varuint_t dst, u64 value);
 
+#define varuint_required_blocks(value)                  \
+({                                                      \
+        u8 num_blocks_required;                         \
+        if (value < 128u) {                             \
+                num_blocks_required = 1;                \
+        } else if (value < 16384u) {                    \
+                num_blocks_required = 2;                \
+        } else if (value < 2097152u) {                  \
+                num_blocks_required = 3;                \
+        } else if (value < 268435456u) {                \
+                num_blocks_required = 4;                \
+        } else if (value < 34359738368u) {              \
+                num_blocks_required = 5;                \
+        } else if (value < 4398046511104u) {            \
+                num_blocks_required = 6;                \
+        } else if (value < 562949953421312u) {          \
+                num_blocks_required = 7;                \
+        } else if (value < 72057594037927936u) {        \
+                num_blocks_required = 8;                \
+        } else if (value < 9223372036854775808u) {      \
+                num_blocks_required = 9;                \
+        } else {                                        \
+                num_blocks_required = 10;               \
+        }                                               \
+        num_blocks_required;                            \
+})
+
 NG5_EXPORT(u64) varuint_read(u8 *nbytes, varuint_t src);
 
 NG5_END_DECL

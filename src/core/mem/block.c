@@ -119,6 +119,7 @@ bool memblock_cpy(struct memblock **dst, struct memblock *src)
         assert((*dst)->base);
         assert((*dst)->blockLength == src->blockLength);
         assert(memcmp((*dst)->base, src->base, src->blockLength) == 0);
+        (*dst)->lastByte = src->lastByte;
         return true;
 }
 
@@ -127,6 +128,25 @@ bool memblock_shrink(struct memblock *block)
         error_if_null(block)
         block->blockLength = block->lastByte;
         block->base = realloc(block->base, block->blockLength);
+        return true;
+}
+
+NG5_EXPORT(bool) memblock_move(struct memblock *block, offset_t where, size_t nbytes)
+{
+        error_if_null(block)
+        error_if(where >= block->blockLength, &block->err, NG5_ERR_OUTOFBOUNDS);
+        error_if(nbytes == 0, &block->err, NG5_ERR_ILLEGALARG);
+
+        /* resize (if needed) */
+        if (block->lastByte + nbytes > block->blockLength) {
+                size_t new_length = (block->lastByte + nbytes) * 1.7f;
+                block->base = realloc(block->base, new_length);
+                error_if(!block->base, &block->err, NG5_ERR_REALLOCERR);
+                block->blockLength = new_length;
+        }
+
+        memmove(block->base + where + nbytes, block->base + where, block->lastByte - where);
+        ng5_zero_memory(block->base + where, nbytes);
         return true;
 }
 

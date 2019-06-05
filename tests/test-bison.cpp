@@ -32,7 +32,7 @@ TEST(BisonTest, CreateBison) {
 }
 
 TEST(BisonTest, CreateBisonRevisionNumbering) {
-        struct bison doc;
+        struct bison doc, rev_doc;
         u64 rev;
         struct string_builder builder;
         bool status;
@@ -47,12 +47,22 @@ TEST(BisonTest, CreateBisonRevisionNumbering) {
         EXPECT_EQ(rev, 0);
 
         struct bison_revise revise;
-        bison_revise_begin(&revise, &doc);
+        bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_end(&revise);
 
         status = bison_revision(&rev, &doc);
         EXPECT_TRUE(status);
+        EXPECT_EQ(rev, 0);
+
+        status = bison_revision(&rev, &rev_doc);
+        EXPECT_TRUE(status);
         EXPECT_EQ(rev, 1);
+
+        status = bison_is_up_to_date(&doc);
+        EXPECT_FALSE(status);
+
+        status = bison_is_up_to_date(&rev_doc);
+        EXPECT_TRUE(status);
 
         bison_to_str(&builder, JSON_FORMATTER, &doc);
         printf("%s\n", string_builder_cstr(&builder));
@@ -62,7 +72,7 @@ TEST(BisonTest, CreateBisonRevisionNumbering) {
 }
 
 TEST(BisonTest, CreateBisonRevisionAbort) {
-        struct bison doc;
+        struct bison doc, rev_doc;
         u64 rev;
         struct string_builder builder;
         bool status;
@@ -77,7 +87,7 @@ TEST(BisonTest, CreateBisonRevisionAbort) {
         EXPECT_EQ(rev, 0);
 
         struct bison_revise revise;
-        bison_revise_begin(&revise, &doc);
+        bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_abort(&revise);
 
         status = bison_revision(&rev, &doc);
@@ -92,7 +102,7 @@ TEST(BisonTest, CreateBisonRevisionAbort) {
 }
 
 TEST(BisonTest, CreateBisonRevisionAsyncReading) {
-        struct bison doc;
+        struct bison doc, rev_doc;
         u64 rev;
         struct string_builder builder;
         bool status;
@@ -107,7 +117,7 @@ TEST(BisonTest, CreateBisonRevisionAsyncReading) {
         EXPECT_EQ(rev, 0);
 
         struct bison_revise revise;
-        bison_revise_begin(&revise, &doc);
+        bison_revise_begin(&revise, &rev_doc, &doc);
 
         status = bison_revision(&rev, &doc);
         EXPECT_TRUE(status);
@@ -117,7 +127,7 @@ TEST(BisonTest, CreateBisonRevisionAsyncReading) {
 
         status = bison_revision(&rev, &doc);
         EXPECT_TRUE(status);
-        EXPECT_EQ(rev, 1);
+        EXPECT_EQ(rev, 0);
 
         bison_to_str(&builder, JSON_FORMATTER, &doc);
         printf("%s\n", string_builder_cstr(&builder));
@@ -147,15 +157,17 @@ static void print_on_revision_abort(struct bison_event_listener *self, struct bi
         printf("revision aborted\n");
 }
 
-static void print_on_new_revision(struct bison_event_listener *self, struct bison *doc)
+static void print_on_new_revision(struct bison_event_listener *self, struct bison *revised, struct bison *original)
 {
         ng5_unused(self);
-        ng5_unused(doc);
+        ng5_unused(revised);
+        ng5_unused(original);
         printf("revision complete\n");
 }
 
 TEST(BisonTest, CreateBisonRevisionListening) {
         struct bison doc;
+        struct bison rev_doc;
         u64 rev;
         struct string_builder builder;
         bool status;
@@ -175,7 +187,7 @@ TEST(BisonTest, CreateBisonRevisionListening) {
         bison_register_listener(&handle, &listener, &doc);
 
         struct bison_revise revise;
-        bison_revise_begin(&revise, &doc);
+        bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_abort(&revise);
 
         status = bison_revision(&rev, &doc);
@@ -185,6 +197,39 @@ TEST(BisonTest, CreateBisonRevisionListening) {
         bison_to_str(&builder, JSON_FORMATTER, &doc);
         printf("%s\n", string_builder_cstr(&builder));
         string_builder_drop(&builder);
+
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, ForceBisonRevisionVarLengthIncrease) {
+        struct bison doc, rev_doc;
+        u64 old_rev;
+        u64 new_rev;
+        bool status;
+        struct bison_revise revise;
+
+        bison_create(&doc);
+
+        for (u32 i = 0; i < 20000; i++) {
+                status = bison_revision(&old_rev, &doc);
+                bison_revise_begin(&revise, &rev_doc, &doc);
+                bison_revise_end(&revise);
+
+                status = bison_revision(&new_rev, &doc);
+                EXPECT_TRUE(status);
+                EXPECT_EQ(new_rev, old_rev);
+
+                status = bison_revision(&new_rev, &rev_doc);
+                EXPECT_TRUE(status);
+                EXPECT_EQ(new_rev, old_rev + 1);
+
+                bison_print(stdout, &rev_doc);
+
+                bison_drop(&doc);
+                bison_clone(&doc, &rev_doc);
+                bison_drop(&rev_doc);
+        }
+
 
         bison_drop(&doc);
 }

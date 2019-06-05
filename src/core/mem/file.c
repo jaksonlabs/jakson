@@ -288,6 +288,12 @@ NG5_EXPORT(bool) memfile_restore_position(struct memfile *file)
         }
 }
 
+NG5_EXPORT(bool) memfile_move(struct memfile *file, size_t nbytes)
+{
+        error_if_null(file);
+        return memblock_move(file->memblock, file->pos, nbytes);
+}
+
 bool memfile_end_bit_mode(size_t *num_bytes_written, struct memfile *file)
 {
         error_if_null(file);

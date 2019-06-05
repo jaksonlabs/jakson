@@ -41,7 +41,7 @@ struct bison_event_listener
         void (*on_revision_begin)(struct bison_event_listener *self, struct bison *doc);
         void (*on_revision_end)(struct bison_event_listener *self, struct bison *doc);
         void (*on_revision_abort)(struct bison_event_listener *self, struct bison *doc);
-        void (*on_new_revision)(struct bison_event_listener *self, struct bison *doc);
+        void (*on_new_revision)(struct bison_event_listener *self, struct bison *revised, struct bison *original);
 };
 
 struct bison_handler
@@ -64,7 +64,6 @@ struct bison
                 struct spinlock write_lock;
                 bool revision_lock;
                 bool is_latest;
-                bool is_readable;
         } versioning;
 
         struct err err;
@@ -73,7 +72,7 @@ struct bison
 struct bison_revise
 {
         struct bison *original;
-        struct bison revised_doc;
+        struct bison *revised_doc;
 };
 
 enum bison_field_type
@@ -176,6 +175,8 @@ NG5_EXPORT(bool) bison_create(struct bison *doc);
 
 NG5_EXPORT(bool) bison_drop(struct bison *doc);
 
+NG5_EXPORT(bool) bison_is_up_to_date(struct bison *doc);
+
 NG5_EXPORT(bool) bison_register_listener(listener_handle_t *handle, struct bison_event_listener *listener, struct bison *doc);
 
 NG5_EXPORT(bool) bison_unregister_listener(struct bison *doc, listener_handle_t handle);
@@ -199,15 +200,17 @@ NG5_EXPORT(bool) bison_to_str(struct string_builder *dst, enum bison_printer_imp
  * @return <code>false</code> in case of an already running revision. Otherwise returns value of
  *                            <code>bison_revise_begin</code>
  */
-NG5_EXPORT(bool) bison_revise_try_begin(struct bison_revise *context, struct bison *doc);
+NG5_EXPORT(bool) bison_revise_try_begin(struct bison_revise *context, struct bison *revised_doc, struct bison *doc);
 
-NG5_EXPORT(bool) bison_revise_begin(struct bison_revise *context, struct bison *doc);
+NG5_EXPORT(bool) bison_revise_begin(struct bison_revise *context, struct bison *revised_doc, struct bison *original);
 
-NG5_EXPORT(bool) bison_revise_end(struct bison_revise *context);
+NG5_EXPORT(const struct bison *) bison_revise_end(struct bison_revise *context);
 
 NG5_EXPORT(bool) bison_revise_abort(struct bison_revise *context);
 
 NG5_EXPORT(const char *) bison_field_type_str(struct err *err, enum bison_field_type type);
+
+NG5_EXPORT(bool) bison_print(FILE *file, struct bison *doc);
 
 NG5_END_DECL;
 

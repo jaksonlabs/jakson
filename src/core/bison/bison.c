@@ -35,14 +35,6 @@ struct bison_obj_header
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-#define is_readable_or_return(doc)                      \
-if (!doc->versioning.is_readable) {                     \
-        error(&doc->err, NG5_ERR_NOTREADABLE)           \
-        return false;                                   \
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
 #define event_promote(doc, event, ...)                                                                                 \
 for (u32 i = 0; i < doc->handler.num_elems; i++) {                                                                     \
         struct bison_handler *handler = vec_get(&doc->handler, i, struct bison_handler);                               \
@@ -52,10 +44,10 @@ for (u32 i = 0; i < doc->handler.num_elems; i++) {                              
         }                                                                                                              \
 }
 
-#define fire_revision_begin(doc)        event_promote(doc, on_revision_begin, doc);
-#define fire_revision_end(doc)          event_promote(doc, on_revision_end, doc);
-#define fire_revision_abort(doc)        event_promote(doc, on_revision_abort, doc);
-#define fire_new_revision(doc)          event_promote(doc, on_new_revision, doc);
+#define fire_revision_begin(doc)                      event_promote(doc, on_revision_begin, doc);
+#define fire_revision_end(doc)                        event_promote(doc, on_revision_end, doc);
+#define fire_revision_abort(doc)                      event_promote(doc, on_revision_abort, doc);
+#define fire_new_revision(revised, original)          event_promote(original, on_new_revision, revised, original);
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -92,7 +84,6 @@ NG5_EXPORT(bool) bison_create(struct bison *doc)
 
         doc->versioning.revision_lock = false;
         doc->versioning.is_latest = true;
-        doc->versioning.is_readable = true;
 
         bison_header_init(doc);
 
@@ -102,8 +93,13 @@ NG5_EXPORT(bool) bison_create(struct bison *doc)
 NG5_EXPORT(bool) bison_drop(struct bison *doc)
 {
         error_if_null(doc);
-        is_readable_or_return(doc);
         return internal_drop(doc);
+}
+
+NG5_EXPORT(bool) bison_is_up_to_date(struct bison *doc)
+{
+        error_if_null(doc);
+        return doc->versioning.is_latest;
 }
 
 NG5_EXPORT(bool) bison_register_listener(listener_handle_t *handle, struct bison_event_listener *listener, struct bison *doc)
@@ -174,7 +170,6 @@ NG5_EXPORT(bool) bison_clone(struct bison *clone, struct bison *doc)
         spin_init(&clone->versioning.write_lock);
         clone->versioning.revision_lock = false;
         clone->versioning.is_latest = true;
-        clone->versioning.is_readable = true;
 
         return true;
 }
@@ -234,59 +229,61 @@ NG5_EXPORT(bool) bison_to_str(struct string_builder *dst, enum bison_printer_imp
         return true;
 }
 
-NG5_EXPORT(bool) bison_revise_try_begin(struct bison_revise *context, struct bison *doc)
+NG5_EXPORT(bool) bison_revise_try_begin(struct bison_revise *context, struct bison *revised_doc, struct bison *doc)
 {
         error_if_null(context)
         error_if_null(doc)
         if (!doc->versioning.revision_lock) {
-                return bison_revise_begin(context, doc);
+                return bison_revise_begin(context, revised_doc, doc);
         } else {
                 return false;
         }
 }
 
-NG5_EXPORT(bool) bison_revise_begin(struct bison_revise *context, struct bison *doc)
+NG5_EXPORT(bool) bison_revise_begin(struct bison_revise *context, struct bison *revised_doc, struct bison *original)
 {
         error_if_null(context)
-        error_if_null(doc)
+        error_if_null(original)
 
-        if (likely(doc->versioning.is_latest)) {
-                spin_acquire(&doc->versioning.write_lock);
-                doc->versioning.revision_lock = true;
-                context->original = doc;
-                bison_clone(&context->revised_doc, context->original);
-                fire_revision_begin(doc);
+        if (likely(original->versioning.is_latest)) {
+                spin_acquire(&original->versioning.write_lock);
+                original->versioning.revision_lock = true;
+                context->original = original;
+                context->revised_doc = revised_doc;
+                bison_clone(context->revised_doc, context->original);
+                fire_revision_begin(original);
                 return true;
         } else {
-                error(&doc->err, NG5_ERR_OUTOFBOUNDS)
+                error(&original->err, NG5_ERR_OUTOFBOUNDS)
                 return false;
         }
 }
 
-NG5_EXPORT(bool) bison_revise_end(struct bison_revise *context)
+NG5_EXPORT(const struct bison *) bison_revise_end(struct bison_revise *context)
 {
-        error_if_null(context)
+        if (likely(context != NULL)) {
+                internal_revision_inc(context->revised_doc);
 
-        internal_drop(context->original);
-        bison_clone(context->original, &context->revised_doc);
-        internal_revision_inc(context->original);
+                context->original->versioning.is_latest = false;
+                context->original->versioning.revision_lock = false;
 
-        context->original->versioning.is_latest = false;
-        context->original->versioning.revision_lock = false;
+                fire_new_revision(context->revised_doc, context->original);
+                fire_revision_end(context->original);
 
-        fire_new_revision(context->original);
-        fire_revision_end(context->original);
+                spin_release(&context->original->versioning.write_lock);
 
-        spin_release(&context->original->versioning.write_lock);
-
-        return true;
+                return context->revised_doc;
+        } else {
+                error_print(NG5_ERR_NULLPTR);
+                return NULL;
+        }
 }
 
 NG5_EXPORT(bool) bison_revise_abort(struct bison_revise *context)
 {
         error_if_null(context)
 
-        bison_drop(&context->revised_doc);
+        bison_drop(context->revised_doc);
         context->original->versioning.is_latest = true;
         context->original->versioning.revision_lock = false;
         fire_revision_abort(context->original);
@@ -330,6 +327,20 @@ NG5_EXPORT(const char *) bison_field_type_str(struct err *err, enum bison_field_
                 error(err, NG5_ERR_NOTFOUND);
                 return NULL;
         }
+}
+
+NG5_EXPORT(bool) bison_print(FILE *file, struct bison *doc)
+{
+        error_if_null(file);
+        error_if_null(doc);
+
+        struct string_builder builder;
+        string_builder_create(&builder);
+        bison_to_str(&builder, JSON_FORMATTER, doc);
+        printf("%s\n", string_builder_cstr(&builder));
+        string_builder_drop(&builder);
+
+        return true;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -399,14 +410,27 @@ static bool bison_header_rev_inc(struct bison *doc)
 {
         assert(doc);
         u64 rev = bison_header_get_rev(doc);
+        u64 new_rev = rev + 1;
+
+        u8 nblocks_rev = varuint_required_blocks(rev);
+        u8 nblocks_new_rev = varuint_required_blocks(new_rev);
 
         memfile_save_position(&doc->memfile);
         memfile_seek(&doc->memfile, 0);
         memfile_skip(&doc->memfile, sizeof(struct bison_header));
         error_if(memfile_remain_size(&doc->memfile) < varuint_max_blocks(), &doc->err, NG5_ERR_CORRUPTED);
         varuint_t revision = NG5_MEMFILE_PEEK(&doc->memfile, varuint_t);
-        varuint_write(revision, ++rev);
 
+        assert (nblocks_rev <= nblocks_new_rev);
+        assert (nblocks_rev == nblocks_new_rev ||
+                (nblocks_new_rev - nblocks_rev) == 1 );
+
+        if (nblocks_new_rev > nblocks_rev) {
+                /* variable-length revision number requires more space; move remainders */
+                memfile_move(&doc->memfile, (nblocks_new_rev - nblocks_rev));
+        }
+
+        varuint_write(revision, new_rev);
         memfile_restore_position(&doc->memfile);
         return true;
 }

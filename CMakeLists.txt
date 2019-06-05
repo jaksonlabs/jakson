@@ -7,13 +7,13 @@ include(GNUInstallDirs)
 
 set (CMAKE_C_STANDARD 11)
 
-if (${BUILD_TYPE} MATCHES Debug)
+#if (${BUILD_TYPE} MATCHES Debug)
         message("-- Debug build is enabled")
         set(CMAKE_BUILD_TYPE Debug)
-else()
+#else()
 #        message("-- Release build is enabled")
 #        set(CMAKE_BUILD_TYPE Release)
-endif()
+#endif()
 
 file(MAKE_DIRECTORY ${CMAKE_HOME_DIRECTORY}/build)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/build)

@@ -96,6 +96,13 @@ NG5_EXPORT(bool) memfile_save_position(struct memfile *file);
 
 NG5_EXPORT(bool) memfile_restore_position(struct memfile *file);
 
+/**
+ * Moves the contents of the underlying memory block <code>nbytes</code> towards the end of the file.
+ * The offset in the memory block from where this move is done is the current position stored in this file.
+ * In case of not enough space, the underlying memory block is resized.
+ */
+NG5_EXPORT(bool) memfile_move(struct memfile *file, size_t nbytes);
+
 NG5_EXPORT(bool) memfile_end_bit_mode(size_t *num_bytes_written, struct memfile *file);
 
 NG5_EXPORT(void *) memfile_current_pos(struct memfile *file, offset_t nbytes);
