@@ -1,8 +1,7 @@
 #include <gtest/gtest.h>
-#include <printf.h>
 
 #include "core/bison/bison.h"
-#include "std/string_builder.h"
+#include "core/bison/bison_array_it.h"
 
 TEST(BisonTest, CreateBison) {
         struct bison doc;
@@ -260,6 +259,26 @@ TEST(BisonTest, ModifyBisonObjectId) {
         EXPECT_EQ(oid, new_oid);
 
         bison_print(stdout, &rev_doc);
+
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonArrayIteratorOpenAfterNew) {
+        struct bison doc, rev_doc;
+        struct bison_revise revise;
+        struct bison_array_it it;
+
+        bison_create(&doc);
+
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_gen_object_id(NULL, &revise);
+        bison_revise_access(&it, &revise);
+        bool has_next = bison_array_it_has_next(&it);
+       // EXPECT_EQ(has_next, false);
+        bison_revise_end(&revise);
+
+        bison_print(stdout, &rev_doc);
+        bison_hexdump_print(stdout, &rev_doc);
 
         bison_drop(&doc);
 }

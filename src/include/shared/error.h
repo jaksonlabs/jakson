@@ -194,6 +194,8 @@ NG5_EXPORT(bool) error_print_and_abort(const struct err *err);
     }                                                                                                                  \
 }
 
+#define NG5_DEFINE_ERROR_GETTER(type_tag_name)  NG5_DEFINE_GET_ERROR_FUNCTION(type_tag_name, struct type_tag_name, e)
+
 #define NG5_DEFINE_GET_ERROR_FUNCTION(type_name, type, arg)                                                            \
 ng5_func_unused static bool                                                                                            \
 type_name##_get_error(struct err *err, const type *arg)                                                                \

@@ -58,6 +58,15 @@ NG5_EXPORT(bool) string_builder_append(struct string_builder *builder, const cha
         return true;
 }
 
+NG5_EXPORT(bool) string_builder_append_char(struct string_builder *builder, char c)
+{
+        error_if_null(builder)
+        char buffer[2];
+        sprintf(buffer, "%c", c);
+        return string_builder_append(builder, buffer);
+        return true;
+}
+
 NG5_EXPORT(bool) string_builder_append_u64(struct string_builder *builder, u64 value)
 {
         char buffer[21];

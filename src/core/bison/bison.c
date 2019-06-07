@@ -17,11 +17,12 @@
  */
 
 #include <inttypes.h>
-#include <core/bison/bison.h>
 
 #include "core/bison/bison.h"
-#include "stdx/varuint.h"
+#include "core/bison/bison_array_it.h"
 #include "core/bison/bison_printers.h"
+#include "stdx/varuint.h"
+#include "utils/hexdump.h"
 
 struct bison_header
 {
@@ -62,6 +63,7 @@ static bool printer_bison_payload_end(struct bison_printer *printer, struct stri
 
 static bool internal_drop(struct bison *doc);
 static bool internal_revision_inc(struct bison *doc);
+static offset_t internal_payload_after_header(struct bison *doc);
 
 static void bison_header_init(struct bison *doc);
 static u64 bison_header_get_rev(struct bison *doc);
@@ -270,6 +272,14 @@ NG5_EXPORT(bool) bison_revise_gen_object_id(object_id_t *out, struct bison_revis
         return true;
 }
 
+NG5_EXPORT(bool) bison_revise_access(struct bison_array_it *it, struct bison_revise *context)
+{
+        error_if_null(it);
+        error_if_null(context);
+        offset_t payload_start = internal_payload_after_header(context->revised_doc);
+        return bison_array_it_create(it, context->revised_doc, payload_start);
+}
+
 NG5_EXPORT(const struct bison *) bison_revise_end(struct bison_revise *context)
 {
         if (likely(context != NULL)) {
@@ -354,6 +364,17 @@ NG5_EXPORT(bool) bison_print(FILE *file, struct bison *doc)
         return true;
 }
 
+NG5_EXPORT(bool) bison_hexdump_print(FILE *file, struct bison *doc)
+{
+        error_if_null(file);
+        error_if_null(doc);
+        memfile_save_position(&doc->memfile);
+        memfile_seek(&doc->memfile, 0);
+        bool status = hexdump_print(file, memfile_peek(&doc->memfile, 1), memfile_size(&doc->memfile));
+        memfile_restore_position(&doc->memfile);
+        return status;
+}
+
 // ---------------------------------------------------------------------------------------------------------------------
 
 static bool internal_drop(struct bison *doc)
@@ -375,6 +396,22 @@ static bool internal_revision_inc(struct bison *doc)
 {
         assert(doc);
         return bison_header_rev_inc(doc);
+}
+
+static offset_t internal_payload_after_header(struct bison *doc)
+{
+        u8 rev_nbytes;
+        offset_t result;
+
+        memfile_save_position(&doc->memfile);
+        memfile_seek(&doc->memfile, 0);
+        memfile_skip(&doc->memfile, sizeof(struct bison_header));
+        varuint_t revision = NG5_MEMFILE_PEEK(&doc->memfile, varuint_t);
+        varuint_read(&rev_nbytes, revision);
+        memfile_skip(&doc->memfile, rev_nbytes);
+        result = memfile_tell(&doc->memfile);
+        memfile_restore_position(&doc->memfile);
+        return result;
 }
 
 static void bison_header_init(struct bison *doc)
