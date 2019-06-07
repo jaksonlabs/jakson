@@ -234,6 +234,35 @@ TEST(BisonTest, ForceBisonRevisionVarLengthIncrease) {
         bison_drop(&doc);
 }
 
+TEST(BisonTest, ModifyBisonObjectId) {
+        struct bison doc, rev_doc;
+        object_id_t oid;
+        object_id_t new_oid;
+        struct bison_revise revise;
+        u64 rev;
+
+        bison_create(&doc);
+
+        bison_object_id(&oid, &doc);
+        EXPECT_EQ(oid, 0);
+
+        bison_revision(&rev, &doc);
+        EXPECT_EQ(rev, 0);
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_gen_object_id(&new_oid, &revise);
+        EXPECT_NE(oid, new_oid);
+        bison_revise_end(&revise);
+
+        bison_revision(&rev, &rev_doc);
+        EXPECT_NE(rev, 0);
+
+        bison_object_id(&oid, &rev_doc);
+        EXPECT_EQ(oid, new_oid);
+
+        bison_print(stdout, &rev_doc);
+
+        bison_drop(&doc);
+}
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);

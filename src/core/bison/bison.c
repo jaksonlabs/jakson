@@ -67,6 +67,7 @@ static void bison_header_init(struct bison *doc);
 static u64 bison_header_get_rev(struct bison *doc);
 static bool bison_header_rev_inc(struct bison *doc);
 static u64 bison_header_get_oid(struct bison *doc);
+static u64 bison_header_set_oid(struct bison *doc, object_id_t oid);
 
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -259,6 +260,16 @@ NG5_EXPORT(bool) bison_revise_begin(struct bison_revise *context, struct bison *
         }
 }
 
+NG5_EXPORT(bool) bison_revise_gen_object_id(object_id_t *out, struct bison_revise *context)
+{
+        error_if_null(context);
+        object_id_t oid;
+        object_id_create(&oid);
+        bison_header_set_oid(context->revised_doc, oid);
+        ng5_optional_set(out, oid);
+        return true;
+}
+
 NG5_EXPORT(const struct bison *) bison_revise_end(struct bison_revise *context)
 {
         if (likely(context != NULL)) {
@@ -441,6 +452,19 @@ static u64 bison_header_get_oid(struct bison *doc)
         memfile_save_position(&doc->memfile);
         memfile_seek(&doc->memfile, 0);
         const struct bison_header *header = NG5_MEMFILE_READ_TYPE(&doc->memfile, struct bison_header);
+        memfile_restore_position(&doc->memfile);
+        return header->oid;
+}
+
+static u64 bison_header_set_oid(struct bison *doc, object_id_t oid)
+{
+        assert(doc);
+        memfile_save_position(&doc->memfile);
+        memfile_seek(&doc->memfile, 0);
+        struct bison_header *header = NG5_MEMFILE_READ_TYPE(&doc->memfile, struct bison_header);
+        header->oid = oid;
+        memfile_seek(&doc->memfile, 0);
+        memfile_write(&doc->memfile, header, sizeof(struct bison_header));
         memfile_restore_position(&doc->memfile);
         return header->oid;
 }

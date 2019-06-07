@@ -204,6 +204,8 @@ NG5_EXPORT(bool) bison_revise_try_begin(struct bison_revise *context, struct bis
 
 NG5_EXPORT(bool) bison_revise_begin(struct bison_revise *context, struct bison *revised_doc, struct bison *original);
 
+NG5_EXPORT(bool) bison_revise_gen_object_id(object_id_t *out, struct bison_revise *context);
+
 NG5_EXPORT(const struct bison *) bison_revise_end(struct bison_revise *context);
 
 NG5_EXPORT(bool) bison_revise_abort(struct bison_revise *context);
