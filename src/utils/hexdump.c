@@ -24,10 +24,6 @@ NG5_EXPORT(bool) hexdump(struct string_builder *dst, const void *base, u64 nbyte
         error_if_null(base);
         char buffer[11];
 
-        nbytes = 1023;
-
-        printf("size: %llu\n", nbytes);
-
         sprintf(buffer, "%08x  ", 0);
         string_builder_append(dst, buffer);
 
@@ -52,8 +48,8 @@ NG5_EXPORT(bool) hexdump(struct string_builder *dst, const void *base, u64 nbyte
 
                 for (u64 i = 0; i < step; i++) {
                         char c = *((const char *) (base + hex_block_id + i));
-                        if (isalpha(c)) {
-                                sprintf(buffer, "%d ", c);
+                        if (isgraph(c)) {
+                                sprintf(buffer, "%c ", c);
                         } else {
                                 sprintf(buffer, ". ");
                         }

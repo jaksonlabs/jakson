@@ -19,8 +19,8 @@
 #include <inttypes.h>
 
 #include "core/bison/bison.h"
-#include "core/bison/bison_array_it.h"
-#include "core/bison/bison_printers.h"
+#include "core/bison/bison-array-it.h"
+#include "core/bison/bison-printers.h"
 #include "stdx/varuint.h"
 #include "utils/hexdump.h"
 
@@ -60,6 +60,14 @@ static bool printer_bison_header_contents(struct bison_printer *printer, struct 
 static bool printer_bison_header_end(struct bison_printer *printer, struct string_builder *builder);
 static bool printer_bison_payload_begin(struct bison_printer *printer, struct string_builder *builder);
 static bool printer_bison_payload_end(struct bison_printer *printer, struct string_builder *builder);
+static bool printer_bison_array_begin(struct bison_printer *printer, struct string_builder *builder);
+static bool printer_bison_array_end(struct bison_printer *printer, struct string_builder *builder);
+static bool printer_bison_null(struct bison_printer *printer, struct string_builder *builder);
+static bool printer_bison_true(struct bison_printer *printer, struct string_builder *builder);
+static bool printer_bison_false(struct bison_printer *printer, struct string_builder *builder);
+static bool printer_bison_comma(struct bison_printer *printer, struct string_builder *builder);
+
+static bool print_array(struct bison_array_it *it, struct bison_printer *printer, struct string_builder *builder);
 
 static bool internal_drop(struct bison *doc);
 static bool internal_revision_inc(struct bison *doc);
@@ -71,14 +79,22 @@ static bool bison_header_rev_inc(struct bison *doc);
 static u64 bison_header_get_oid(struct bison *doc);
 static u64 bison_header_set_oid(struct bison *doc, object_id_t oid);
 
+static void marker_insert(struct memfile *memfile, u8 marker);
+static void array_insert(struct bison *doc, size_t nbytes);
+
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 NG5_EXPORT(bool) bison_create(struct bison *doc)
 {
+        return bison_create_ex(doc, 1024, 1);
+}
+
+NG5_EXPORT(bool) bison_create_ex(struct bison *doc, u64 doc_cap_byte, u64 array_cap_byte)
+{
         error_if_null(doc);
         error_init(&doc->err);
-        memblock_create(&doc->memblock, 1024);
+        memblock_create(&doc->memblock, doc_cap_byte);
         memblock_zero_out(doc->memblock);
         memfile_open(&doc->memfile, doc->memblock, READ_WRITE);
         vec_create(&doc->handler, NULL, sizeof(struct bison_handler), 1);
@@ -89,6 +105,7 @@ NG5_EXPORT(bool) bison_create(struct bison *doc)
         doc->versioning.is_latest = true;
 
         bison_header_init(doc);
+        array_insert(doc, array_cap_byte);
 
         return true;
 }
@@ -221,6 +238,11 @@ NG5_EXPORT(bool) bison_to_str(struct string_builder *dst, enum bison_printer_imp
         printer_bison_header_contents(&p, &b, oid, rev);
         printer_bison_header_end(&p, &b);
         printer_bison_payload_begin(&p, &b);
+
+        struct bison_array_it it;
+        bison_access(&it, doc);
+        print_array(&it, &p, &b);
+
         printer_bison_payload_end(&p, &b);
         printer_bison_end(&p, &b);
 
@@ -277,7 +299,7 @@ NG5_EXPORT(bool) bison_revise_access(struct bison_array_it *it, struct bison_rev
         error_if_null(it);
         error_if_null(context);
         offset_t payload_start = internal_payload_after_header(context->revised_doc);
-        return bison_array_it_create(it, context->revised_doc, payload_start);
+        return bison_array_it_create(it, context->revised_doc, payload_start, READ_WRITE);
 }
 
 NG5_EXPORT(const struct bison *) bison_revise_end(struct bison_revise *context)
@@ -314,6 +336,14 @@ NG5_EXPORT(bool) bison_revise_abort(struct bison_revise *context)
         return true;
 }
 
+NG5_EXPORT(bool) bison_access(struct bison_array_it *it, struct bison *doc)
+{
+        error_if_null(it);
+        error_if_null(doc);
+        offset_t payload_start = internal_payload_after_header(doc);
+        return bison_array_it_create(it, doc, payload_start, READ_ONLY);
+}
+
 NG5_EXPORT(const char *) bison_field_type_str(struct err *err, enum bison_field_type type)
 {
         switch (type) {
@@ -341,9 +371,9 @@ NG5_EXPORT(const char *) bison_field_type_str(struct err *err, enum bison_field_
         case BISON_FIELD_TYPE_NUMBER_I32_COLUMN: return BISON_FIELD_TYPE_NUMBER_I32_COLUMN_STR;
         case BISON_FIELD_TYPE_NUMBER_I64_COLUMN: return BISON_FIELD_TYPE_NUMBER_I64_COLUMN_STR;
         case BISON_FIELD_TYPE_NUMBER_FLOAT_COLUMN: return BISON_FIELD_TYPE_NUMBER_FLOAT_COLUMN_STR;
-        case BISON_FIELD_TYPE_NUMBER_NCHAR_COLUMN: return BISON_FIELD_TYPE_NUMBER_NCHAR_COLUMN_STR;
-        case BISON_FIELD_TYPE_NUMBER_BINARY: return BISON_FIELD_TYPE_NUMBER_BINARY_STR;
-        case BISON_FIELD_TYPE_NUMBER_NBINARY_COLUMN: return BISON_FIELD_TYPE_NUMBER_NBINARY_COLUMN_STR;
+        case BISON_FIELD_TYPE_NCHAR_COLUMN: return BISON_FIELD_TYPE_NUMBER_NCHAR_COLUMN_STR;
+        case BISON_FIELD_TYPE_BINARY: return BISON_FIELD_TYPE_NUMBER_BINARY_STR;
+        case BISON_FIELD_TYPE_NBINARY_COLUMN: return BISON_FIELD_TYPE_NUMBER_NBINARY_COLUMN_STR;
         default:
                 error(err, NG5_ERR_NOTFOUND);
                 return NULL;
@@ -506,6 +536,58 @@ static u64 bison_header_set_oid(struct bison *doc, object_id_t oid)
         return header->oid;
 }
 
+static void marker_insert(struct memfile *memfile, u8 marker)
+{
+        /* check whether marker can be written, otherwise make space for it */
+        char c = *memfile_peek(memfile, sizeof(u8));
+        if (c != 0) {
+                memfile_move(memfile, sizeof(u8));
+        }
+        memfile_write(memfile, &marker, sizeof(u8));
+}
+
+static void array_insert(struct bison *doc, size_t nbytes)
+{
+        assert(doc);
+        u8 array_begin_marker = BISON_MARKER_ARRAY_BEGIN;
+        u8 array_end_marker = BISON_MARKER_ARRAY_END;
+
+        marker_insert(&doc->memfile, array_begin_marker);
+
+        offset_t payload_begin = memfile_tell(&doc->memfile);
+        size_t remain = memfile_remain_size(&doc->memfile);
+        size_t span = ng5_max(nbytes, remain) - ng5_min(nbytes, remain);
+
+        /* array may fit into memory if memory does not contain any (non-null) data */
+        size_t upper = ng5_min(span, nbytes);
+        size_t non_null_pos = 0;
+        const char *data = memfile_read(&doc->memfile, upper);
+        for (; non_null_pos < upper; non_null_pos++) {
+                if (data[non_null_pos] != 0) {
+                        break;
+                }
+        }
+        if (non_null_pos != nbytes) {
+                /* array does fit only partially into memory since some non-null data was read */
+                size_t required = nbytes - non_null_pos;
+                if (non_null_pos > 0) {
+                        /* re-use some null data */
+                        memfile_seek(&doc->memfile, payload_begin + non_null_pos - 1);
+                        memfile_move(&doc->memfile, required);
+                } else {
+                        /* no null data was available at all */
+                        memfile_move(&doc->memfile, nbytes);
+                }
+        } else {
+                /* nothing to do: n bytes of null data was read */
+        }
+
+        marker_insert(&doc->memfile, array_end_marker);
+
+        /* seek to first entry in array */
+        memfile_seek(&doc->memfile, payload_begin);
+}
+
 static bool printer_drop(struct bison_printer *printer)
 {
         error_if_null(printer->drop);
@@ -559,5 +641,106 @@ static bool printer_bison_payload_end(struct bison_printer *printer, struct stri
 {
         error_if_null(printer->print_bison_payload_end);
         printer->print_bison_payload_end(printer, builder);
+        return true;
+}
+
+static bool printer_bison_array_begin(struct bison_printer *printer, struct string_builder *builder)
+{
+        error_if_null(printer->print_bison_array_begin);
+        printer->print_bison_array_begin(printer, builder);
+        return true;
+}
+
+static bool printer_bison_array_end(struct bison_printer *printer, struct string_builder *builder)
+{
+        error_if_null(printer->print_bison_array_end);
+        printer->print_bison_array_end(printer, builder);
+        return true;
+}
+
+static bool printer_bison_null(struct bison_printer *printer, struct string_builder *builder)
+{
+        error_if_null(printer->print_bison_null);
+        printer->print_bison_null(printer, builder);
+        return true;
+}
+
+static bool printer_bison_true(struct bison_printer *printer, struct string_builder *builder)
+{
+        error_if_null(printer->print_bison_true);
+        printer->print_bison_true(printer, builder);
+        return true;
+}
+
+static bool printer_bison_false(struct bison_printer *printer, struct string_builder *builder)
+{
+        error_if_null(printer->print_bison_false);
+        printer->print_bison_false(printer, builder);
+        return true;
+}
+
+static bool printer_bison_comma(struct bison_printer *printer, struct string_builder *builder)
+{
+        error_if_null(printer->print_bison_comma);
+        printer->print_bison_comma(printer, builder);
+        return true;
+}
+
+static bool print_array(struct bison_array_it *it, struct bison_printer *printer, struct string_builder *builder)
+{
+        assert(it);
+        assert(printer);
+        assert(builder);
+        bool first_entry = true;
+        printer_bison_array_begin(printer, builder);
+        while (bison_array_it_next(it)) {
+                if (likely(!first_entry)) {
+                        printer_bison_comma(printer, builder);
+                }
+                enum bison_field_type type;
+                bison_array_it_field_type(&type, it);
+                switch (type) {
+                case BISON_FIELD_TYPE_NULL:
+                        printer_bison_null(printer, builder);
+                        break;
+                case BISON_FIELD_TYPE_TRUE:
+                        printer_bison_true(printer, builder);
+                        break;
+                case BISON_FIELD_TYPE_FALSE:
+                        printer_bison_false(printer, builder);
+                        break;
+                case BISON_FIELD_TYPE_OBJECT:
+                case BISON_FIELD_TYPE_ARRAY:
+                case BISON_FIELD_TYPE_STRING:
+                case BISON_FIELD_TYPE_NUMBER_U8:
+                case BISON_FIELD_TYPE_NUMBER_U16:
+                case BISON_FIELD_TYPE_NUMBER_U32:
+                case BISON_FIELD_TYPE_NUMBER_U64:
+                case BISON_FIELD_TYPE_NUMBER_I8:
+                case BISON_FIELD_TYPE_NUMBER_I16:
+                case BISON_FIELD_TYPE_NUMBER_I32:
+                case BISON_FIELD_TYPE_NUMBER_I64:
+                case BISON_FIELD_TYPE_NUMBER_FLOAT:
+                case BISON_FIELD_TYPE_NUMBER_U8_COLUMN:
+                case BISON_FIELD_TYPE_NUMBER_U16_COLUMN:
+                case BISON_FIELD_TYPE_NUMBER_U32_COLUMN:
+                case BISON_FIELD_TYPE_NUMBER_U64_COLUMN:
+                case BISON_FIELD_TYPE_NUMBER_I8_COLUMN:
+                case BISON_FIELD_TYPE_NUMBER_I16_COLUMN:
+                case BISON_FIELD_TYPE_NUMBER_I32_COLUMN:
+                case BISON_FIELD_TYPE_NUMBER_I64_COLUMN:
+                case BISON_FIELD_TYPE_NUMBER_FLOAT_COLUMN:
+                case BISON_FIELD_TYPE_NCHAR_COLUMN:
+                case BISON_FIELD_TYPE_BINARY:
+                case BISON_FIELD_TYPE_NBINARY_COLUMN:
+                default:
+                        printer_bison_array_end(printer, builder);
+                        error(&it->err, NG5_ERR_CORRUPTED);
+                        return false;
+                }
+                first_entry = false;
+        }
+
+        printer_bison_array_end(printer, builder);
         return true;
 }

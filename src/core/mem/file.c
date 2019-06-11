@@ -27,8 +27,17 @@ bool memfile_open(struct memfile *file, struct memblock *block, enum access_mode
         file->pos = 0;
         file->bit_mode = false;
         file->mode = mode;
-        file->saved_pos_ptr = -1;
+        file->saved_pos_ptr = 0;
         error_init(&file->err);
+        return true;
+}
+
+NG5_EXPORT(bool) memfile_dup(struct memfile *dst, struct memfile *src)
+{
+        error_if_null(dst)
+        error_if_null(src)
+        memfile_open(dst, src->memblock, src->mode);
+        memfile_seek(dst, memfile_tell(src));
         return true;
 }
 

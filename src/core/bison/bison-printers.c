@@ -15,7 +15,7 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "core/bison/bison_printers.h"
+#include "core/bison/bison-printers.h"
 
 struct json_formatter_extra
 {
@@ -38,6 +38,15 @@ static void json_formatter_bison_header_end(struct bison_printer *self, struct s
 static void json_formatter_bison_payload_begin(struct bison_printer *self, struct string_builder *builder);
 static void json_formatter_bison_payload_end(struct bison_printer *self, struct string_builder *builder);
 
+static void json_formatter_bison_array_begin(struct bison_printer *self, struct string_builder *builder);
+static void json_formatter_bison_array_end(struct bison_printer *self, struct string_builder *builder);
+
+static void json_formatter_bison_null(struct bison_printer *self, struct string_builder *builder);
+static void json_formatter_bison_true(struct bison_printer *self, struct string_builder *builder);
+static void json_formatter_bison_false(struct bison_printer *self, struct string_builder *builder);
+
+static void json_formatter_bison_comma(struct bison_printer *self, struct string_builder *builder);
+
 NG5_EXPORT(bool) bison_json_formatter_create(struct bison_printer *printer)
 {
         error_if_null(printer);
@@ -52,6 +61,15 @@ NG5_EXPORT(bool) bison_json_formatter_create(struct bison_printer *printer)
 
         printer->print_bison_payload_begin = json_formatter_bison_payload_begin;
         printer->print_bison_payload_end = json_formatter_bison_payload_end;
+
+        printer->print_bison_array_begin = json_formatter_bison_array_begin;
+        printer->print_bison_array_end = json_formatter_bison_array_end;
+
+        printer->print_bison_null = json_formatter_bison_null;
+        printer->print_bison_true = json_formatter_bison_true;
+        printer->print_bison_false = json_formatter_bison_false;
+
+        printer->print_bison_comma = json_formatter_bison_comma;
 
         printer->extra = malloc(sizeof(struct json_formatter_extra));
         *((struct json_formatter_extra *) printer->extra) = (struct json_formatter_extra) {
@@ -150,3 +168,38 @@ static void json_formatter_bison_payload_end(struct bison_printer *self, struct 
         string_builder_append(builder, "}");
 }
 
+static void json_formatter_bison_array_begin(struct bison_printer *self, struct string_builder *builder)
+{
+        ng5_unused(self);
+        string_builder_append(builder, "[");
+}
+
+static void json_formatter_bison_array_end(struct bison_printer *self, struct string_builder *builder)
+{
+        ng5_unused(self);
+        string_builder_append(builder, "]");
+}
+
+static void json_formatter_bison_null(struct bison_printer *self, struct string_builder *builder)
+{
+        ng5_unused(self);
+        string_builder_append(builder, "null");
+}
+
+static void json_formatter_bison_true(struct bison_printer *self, struct string_builder *builder)
+{
+        ng5_unused(self);
+        string_builder_append(builder, "true");
+}
+
+static void json_formatter_bison_false(struct bison_printer *self, struct string_builder *builder)
+{
+        ng5_unused(self);
+        string_builder_append(builder, "false");
+}
+
+static void json_formatter_bison_comma(struct bison_printer *self, struct string_builder *builder)
+{
+        ng5_unused(self);
+        string_builder_append(builder, ", ");
+}

@@ -16,44 +16,12 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef BISON_ARRAY_IT_H
-#define BISON_ARRAY_IT_H
+#include "core/bison/bison-media.h"
 
-#include "shared/common.h"
-#include "shared/error.h"
-
-NG5_BEGIN_DECL
-
-struct bison; /* forwarded from bison.h */
-
-struct bison_array_it {
-        struct bison *doc;
-        offset_t payload_start;
-        struct err err;
-};
-
-NG5_DEFINE_ERROR_GETTER(bison_array_it);
-
-NG5_EXPORT(bool) bison_array_it_create(struct bison_array_it *it, struct bison *doc, offset_t payload_start);
-
-NG5_EXPORT(bool) bison_array_it_drop(struct bison_array_it *it, struct bison *doc);
-
-NG5_EXPORT(bool) bison_array_it_rewind(struct bison_array_it *it);
-
-NG5_EXPORT(bool) bison_array_it_has_next(struct bison_array_it *it);
-
-NG5_EXPORT(bool) bison_array_it_next(struct bison_array_it *it);
-
-NG5_EXPORT(bool) bison_array_it_prev(struct bison_array_it *it);
-
-NG5_EXPORT(bool) bison_array_it_swap(struct bison_array_it *lhs, struct bison_array_it *rhs);
-
-NG5_EXPORT(bool) bison_array_it_push_back(struct bison_array_it *it);
-
-NG5_EXPORT(bool) bison_array_it_remove(struct bison_array_it *it);
-
-NG5_EXPORT(bool) bison_array_it_update(struct bison_array_it *it);
-
-NG5_END_DECL
-
-#endif
+NG5_EXPORT(bool) bison_media_write(struct memfile *dst, enum bison_field_type type)
+{
+        error_if_null(dst);
+        media_type_t t = type;
+        memfile_write(dst, &t, sizeof(media_type_t));
+        return true;
+}

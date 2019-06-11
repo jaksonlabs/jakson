@@ -105,6 +105,7 @@ NG5_BEGIN_DECL
 #define NG5_ERR_STACK_UNDERFLOW 77         /** Stack underflow */
 #define NG5_ERR_OUTDATED 78                /** Object was modified and is out of date */
 #define NG5_ERR_NOTREADABLE 79             /** Object is currently being updated; no read allowed */
+#define NG5_ERR_ILLEGALOP 80               /** Illegal operation */
 
 static const char *const _err_str[] =
         {"No error", "Null pointer detected", "Function not implemented", "Index is out of bounds",
@@ -142,7 +143,8 @@ static const char *const _err_str[] =
          "Index is corrupted: requested offset is outside file bounds", "Temporary file cannot be opened for writing",
          "Unable to write to file", "Unable to deserialize hash table from file",
          "Unknown string dictionary implementation requested", "Stack overflow", "Stack underflow",
-         "Object was modified and is out of date", "Object is currently being updated; no read allowed"};
+         "Object was modified and is out of date", "Object is currently being updated; no read allowed",
+         "Illegal operation"};
 
 #define NG5_ERRSTR_ILLEGAL_CODE "illegal error code"
 
@@ -179,7 +181,9 @@ NG5_EXPORT(bool) error_print_and_abort(const struct err *err);
 #define error_if_and_return(expr, err, code, retval) \
                                                     { if (expr) { error_set(err, code, __FILE__, __LINE__);            \
                                                                   return retval; } }
-#define error_with_details(err, code, msg)       error_set_wdetails(err, code, __FILE__, __LINE__, msg);
+
+#define error_if_with_details(expr, err, code, msg)            { if (expr) { error_with_details(err, code, msg); } }
+#define error_with_details(err, code, msg)                     error_set_wdetails(err, code, __FILE__, __LINE__, msg);
 
 #define error_print(code)                    error_print_if(true, code)
 #define print_error_and_die(code)            { error_print(code); abort(); }

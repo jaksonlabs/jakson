@@ -31,7 +31,7 @@
 NG5_BEGIN_DECL
 
 struct bison; /* forwarded */
-struct bison_array_it; /* forwarded fron bison_array_it.h */
+struct bison_array_it; /* forwarded fron bison-array-it.h */
 
 struct bison_event_listener
 {
@@ -79,25 +79,25 @@ struct bison_revise
 enum bison_field_type
 {
         /* constants */
-        BISON_FIELD_TYPE_NULL = 0, /* null */
-        BISON_FIELD_TYPE_TRUE = 1, /* true */
-        BISON_FIELD_TYPE_FALSE = 2, /* false */
+        BISON_FIELD_TYPE_NULL = 'n', /* null */
+        BISON_FIELD_TYPE_TRUE = 't', /* true */
+        BISON_FIELD_TYPE_FALSE = 'f', /* false */
 
         /* JSON typing */
-        BISON_FIELD_TYPE_OBJECT = 3, /* object */
-        BISON_FIELD_TYPE_ARRAY = 4, /* variable-type array */
-        BISON_FIELD_TYPE_STRING = 5, /* UTF-8 string */
+        BISON_FIELD_TYPE_OBJECT = 'o', /* object */
+        BISON_FIELD_TYPE_ARRAY = 'a', /* variable-type array */
+        BISON_FIELD_TYPE_STRING = 's', /* UTF-8 string */
 
         /* JSON numbers */
-        BISON_FIELD_TYPE_NUMBER_U8 = 6, /* 8bit unsigned integer */
-        BISON_FIELD_TYPE_NUMBER_U16 = 7, /* 16bit unsigned integer */
-        BISON_FIELD_TYPE_NUMBER_U32 = 8, /* 32bit unsigned integer */
-        BISON_FIELD_TYPE_NUMBER_U64 = 9, /* 64bit unsigned integer */
-        BISON_FIELD_TYPE_NUMBER_I8 = 10, /* 8bit signed integer */
-        BISON_FIELD_TYPE_NUMBER_I16 = 11, /* 16bit signed integer */
-        BISON_FIELD_TYPE_NUMBER_I32 = 12, /* 32bit signed integer */
-        BISON_FIELD_TYPE_NUMBER_I64 = 13, /* 64bit signed integer */
-        BISON_FIELD_TYPE_NUMBER_FLOAT = 14, /* 32bit float */
+        BISON_FIELD_TYPE_NUMBER_U8 = 'c', /* 8bit unsigned integer */
+        BISON_FIELD_TYPE_NUMBER_U16 = 'd', /* 16bit unsigned integer */
+        BISON_FIELD_TYPE_NUMBER_U32 = 'i', /* 32bit unsigned integer */
+        BISON_FIELD_TYPE_NUMBER_U64 = 'l', /* 64bit unsigned integer */
+        BISON_FIELD_TYPE_NUMBER_I8 = 'C', /* 8bit signed integer */
+        BISON_FIELD_TYPE_NUMBER_I16 = 'D', /* 16bit signed integer */
+        BISON_FIELD_TYPE_NUMBER_I32 = 'I', /* 32bit signed integer */
+        BISON_FIELD_TYPE_NUMBER_I64 = 'L', /* 64bit signed integer */
+        BISON_FIELD_TYPE_NUMBER_FLOAT = 'r', /* 32bit float */
 
         /* fixed-type number arrays */
         BISON_FIELD_TYPE_NUMBER_U8_COLUMN = 15, /* 8bit unsigned integer */
@@ -111,13 +111,13 @@ enum bison_field_type
         BISON_FIELD_TYPE_NUMBER_FLOAT_COLUMN = 23, /* 32bit float */
 
         /* fixed-type string array */
-        BISON_FIELD_TYPE_NUMBER_NCHAR_COLUMN = 24, /* maximum n characters per string */
+        BISON_FIELD_TYPE_NCHAR_COLUMN = 24, /* maximum n characters per string */
 
         /* user-defined binary data */
-        BISON_FIELD_TYPE_NUMBER_BINARY = 25, /* arbitrary binary object */
+        BISON_FIELD_TYPE_BINARY = 25, /* arbitrary binary object */
 
         /* user-defined binary data */
-        BISON_FIELD_TYPE_NUMBER_NBINARY_COLUMN = 26 /* maximum n byte per datum */
+        BISON_FIELD_TYPE_NBINARY_COLUMN = 26 /* maximum n byte per datum */
 };
 
 struct bison_printer
@@ -135,6 +135,15 @@ struct bison_printer
 
         void (*print_bison_payload_begin)(struct bison_printer *self, struct string_builder *builder);
         void (*print_bison_payload_end)(struct bison_printer *self, struct string_builder *builder);
+
+        void (*print_bison_array_begin)(struct bison_printer *self, struct string_builder *builder);
+        void (*print_bison_array_end)(struct bison_printer *self, struct string_builder *builder);
+
+        void (*print_bison_null)(struct bison_printer *self, struct string_builder *builder);
+        void (*print_bison_true)(struct bison_printer *self, struct string_builder *builder);
+        void (*print_bison_false)(struct bison_printer *self, struct string_builder *builder);
+
+        void (*print_bison_comma)(struct bison_printer *self, struct string_builder *builder);
 };
 
 enum bison_printer_impl
@@ -170,9 +179,14 @@ enum bison_printer_impl
 #define BISON_FIELD_TYPE_NUMBER_BINARY_STR "binary"
 #define BISON_FIELD_TYPE_NUMBER_NBINARY_COLUMN_STR "binary column (nbinary)"
 
+#define BISON_MARKER_ARRAY_BEGIN '['
+#define BISON_MARKER_ARRAY_END ']'
+
 NG5_DEFINE_GET_ERROR_FUNCTION(bison, struct bison, doc);
 
 NG5_EXPORT(bool) bison_create(struct bison *doc);
+
+NG5_EXPORT(bool) bison_create_ex(struct bison *doc, u64 doc_cap_byte, u64 array_cap_byte);
 
 NG5_EXPORT(bool) bison_drop(struct bison *doc);
 
@@ -213,13 +227,14 @@ NG5_EXPORT(const struct bison *) bison_revise_end(struct bison_revise *context);
 
 NG5_EXPORT(bool) bison_revise_abort(struct bison_revise *context);
 
+NG5_EXPORT(bool) bison_access(struct bison_array_it *it, struct bison *doc);
+
 NG5_EXPORT(const char *) bison_field_type_str(struct err *err, enum bison_field_type type);
 
 NG5_EXPORT(bool) bison_print(FILE *file, struct bison *doc);
 
 NG5_EXPORT(bool) bison_hexdump_print(FILE *file, struct bison *doc);
 
-NG5_END_DECL;
-
+NG5_END_DECL
 
 #endif

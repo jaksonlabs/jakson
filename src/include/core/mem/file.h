@@ -64,6 +64,8 @@ struct memfile {
 
 NG5_EXPORT(bool) memfile_open(struct memfile *file, struct memblock *block, enum access_mode mode);
 
+NG5_EXPORT(bool) memfile_dup(struct memfile *dst, struct memfile *src);
+
 NG5_EXPORT(bool) memfile_seek(struct memfile *file, offset_t pos);
 
 NG5_EXPORT(bool) memfile_rewind(struct memfile *file);

@@ -1,7 +1,8 @@
 #include <gtest/gtest.h>
 
 #include "core/bison/bison.h"
-#include "core/bison/bison_array_it.h"
+#include "core/bison/bison-array-it.h"
+#include "core/bison/bison-insert.h"
 
 TEST(BisonTest, CreateBison) {
         struct bison doc;
@@ -14,6 +15,8 @@ TEST(BisonTest, CreateBison) {
 
         status = bison_create(&doc);
         EXPECT_TRUE(status);
+
+        bison_hexdump_print(stderr, &doc);
 
         status = bison_object_id(&oid, &doc);
         EXPECT_TRUE(status);
@@ -211,6 +214,7 @@ TEST(BisonTest, ForceBisonRevisionVarLengthIncrease) {
 
         for (u32 i = 0; i < 20000; i++) {
                 status = bison_revision(&old_rev, &doc);
+
                 bison_revise_begin(&revise, &rev_doc, &doc);
                 bison_revise_end(&revise);
 
@@ -273,12 +277,162 @@ TEST(BisonTest, BisonArrayIteratorOpenAfterNew) {
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_gen_object_id(NULL, &revise);
         bison_revise_access(&it, &revise);
-        bool has_next = bison_array_it_has_next(&it);
-       // EXPECT_EQ(has_next, false);
+        bool has_next = bison_array_it_next(&it);
+        EXPECT_EQ(has_next, false);
         bison_revise_end(&revise);
 
         bison_print(stdout, &rev_doc);
         bison_hexdump_print(stdout, &rev_doc);
+
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonArrayIteratorInsertNullAfterNew) {
+        struct bison doc, rev_doc;
+        struct bison_revise revise;
+        struct bison_array_it it;
+        struct bison_insert inserter;
+
+        bison_create(&doc);
+
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_access(&it, &revise);
+        bison_revise_gen_object_id(NULL, &revise);
+        bison_array_it_insert(&inserter, &it);
+        bison_insert_null(&inserter);
+        bison_insert_drop(&inserter);
+        bison_revise_end(&revise);
+
+        bison_print(stdout, &rev_doc);
+        bison_hexdump_print(stdout, &rev_doc);
+
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonArrayIteratorInsertMultipleLiteralsAfterNewNoOverflow) {
+        struct bison doc, rev_doc;
+        struct bison_revise revise;
+        struct bison_array_it it;
+        struct bison_insert inserter;
+
+        bison_create(&doc);
+
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_access(&it, &revise);
+        bison_array_it_insert(&inserter, &it);
+        for (i32 i = 0; i < 10; i++) {
+                fprintf(stdout, "before:\n");
+                bison_hexdump_print(stdout, &rev_doc);
+                bool status;
+                if (i % 3 == 0) {
+                        status = bison_insert_null(&inserter);
+                } else if (i % 3 == 1) {
+                        status = bison_insert_true(&inserter);
+                } else {
+                        status = bison_insert_false(&inserter);
+                }
+                ASSERT_TRUE(status);
+                fprintf(stdout, "after:\n");
+                bison_hexdump_print(stdout, &rev_doc);
+                fprintf(stdout, "\n\n");
+        }
+        bison_insert_drop(&inserter);
+        bison_revise_end(&revise);
+
+        bison_print(stdout, &rev_doc);
+        bison_hexdump_print(stdout, &rev_doc);
+
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonArrayIteratorOverwriteLiterals) {
+        struct bison doc, rev_doc, rev_doc2;
+        struct bison_revise revise;
+        struct bison_array_it it;
+        struct bison_insert inserter;
+
+        bison_create(&doc);
+
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_access(&it, &revise);
+        bison_array_it_insert(&inserter, &it);
+        for (i32 i = 0; i < 3; i++) {
+                if (i % 3 == 0) {
+                        bison_insert_null(&inserter);
+                } else if (i % 3 == 1) {
+                        bison_insert_true(&inserter);
+                } else {
+                        bison_insert_false(&inserter);
+                }
+        }
+        bison_insert_drop(&inserter);
+        bison_revise_end(&revise);
+
+        bison_revise_begin(&revise, &rev_doc2, &rev_doc);
+        bison_revise_access(&it, &revise);
+        bison_array_it_insert(&inserter, &it);
+        for (i32 i = 0; i < 2; i++) {
+                fprintf(stdout, "before:\n");
+                bison_hexdump_print(stdout, &rev_doc2);
+                bison_insert_true(&inserter);
+                fprintf(stdout, "after:\n");
+                bison_hexdump_print(stdout, &rev_doc2);
+        }
+        bison_insert_drop(&inserter);
+        bison_revise_end(&revise);
+
+
+
+
+
+        bison_print(stdout, &rev_doc2);
+
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonArrayIteratorOverwriteLiteralsWithDocOverflow) {
+        struct bison doc, rev_doc, rev_doc2;
+        struct bison_revise revise;
+        struct bison_array_it it;
+        struct bison_insert inserter;
+
+        bison_create_ex(&doc, 20, 1);
+
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_access(&it, &revise);
+        bison_array_it_insert(&inserter, &it);
+        for (i32 i = 0; i < 22; i++) {
+                if (i % 3 == 0) {
+                        bison_insert_null(&inserter);
+                } else if (i % 3 == 1) {
+                        bison_insert_true(&inserter);
+                } else {
+                        bison_insert_false(&inserter);
+                }
+                fprintf(stdout, "after initial push:\n");
+                bison_hexdump_print(stdout, &rev_doc);
+        }
+        bison_insert_drop(&inserter);
+        bison_revise_end(&revise);
+
+        bison_revise_begin(&revise, &rev_doc2, &rev_doc);
+        bison_revise_access(&it, &revise);
+        bison_array_it_insert(&inserter, &it);
+        for (i32 i = 0; i < 2; i++) {
+                fprintf(stdout, "before:\n");
+                bison_hexdump_print(stdout, &rev_doc2);
+                bison_insert_true(&inserter);
+                fprintf(stdout, "after:\n");
+                bison_hexdump_print(stdout, &rev_doc2);
+        }
+        bison_insert_drop(&inserter);
+        bison_revise_end(&revise);
+
+
+
+
+
+        bison_print(stdout, &rev_doc2);
 
         bison_drop(&doc);
 }
