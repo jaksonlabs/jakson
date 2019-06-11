@@ -49,7 +49,11 @@ NG5_EXPORT(bool) bison_insert_unsigned(struct bison_insert *inserter, u64 value)
 
 NG5_EXPORT(bool) bison_insert_signed(struct bison_insert *inserter, i64 value);
 
-NG5_EXPORT(bool) bison_insert_float(struct bison_insert *inserter, i64 value);
+NG5_EXPORT(bool) bison_insert_float(struct bison_insert *inserter, float value);
+
+NG5_EXPORT(bool) bison_insert_string(struct bison_insert *inserter, const char *value);
+
+NG5_EXPORT(bool) bison_insert_binary(struct bison_insert *inserter, const void *value, size_t nbytes);
 
 NG5_EXPORT(bool) bison_insert_drop(struct bison_insert *inserter);
 

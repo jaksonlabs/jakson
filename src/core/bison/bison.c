@@ -66,6 +66,10 @@ static bool printer_bison_null(struct bison_printer *printer, struct string_buil
 static bool printer_bison_true(struct bison_printer *printer, struct string_builder *builder);
 static bool printer_bison_false(struct bison_printer *printer, struct string_builder *builder);
 static bool printer_bison_comma(struct bison_printer *printer, struct string_builder *builder);
+static bool printer_bison_signed(struct bison_printer *printer, struct string_builder *builder, i64 value);
+static bool printer_bison_unsigned(struct bison_printer *printer, struct string_builder *builder, u64 value);
+static bool printer_bison_float(struct bison_printer *printer, struct string_builder *builder, float value);
+static bool printer_bison_string(struct bison_printer *printer, struct string_builder *builder, const char *value, u64 strlen);
 
 static bool print_array(struct bison_array_it *it, struct bison_printer *printer, struct string_builder *builder);
 
@@ -686,6 +690,34 @@ static bool printer_bison_comma(struct bison_printer *printer, struct string_bui
         return true;
 }
 
+static bool printer_bison_signed(struct bison_printer *printer, struct string_builder *builder, i64 value)
+{
+        error_if_null(printer->print_bison_signed);
+        printer->print_bison_signed(printer, builder, value);
+        return true;
+}
+
+static bool printer_bison_unsigned(struct bison_printer *printer, struct string_builder *builder, u64 value)
+{
+        error_if_null(printer->print_bison_unsigned);
+        printer->print_bison_unsigned(printer, builder, value);
+        return true;
+}
+
+static bool printer_bison_float(struct bison_printer *printer, struct string_builder *builder, float value)
+{
+        error_if_null(printer->print_bison_float);
+        printer->print_bison_float(printer, builder, value);
+        return true;
+}
+
+static bool printer_bison_string(struct bison_printer *printer, struct string_builder *builder, const char *value, u64 strlen)
+{
+        error_if_null(printer->print_bison_string);
+        printer->print_bison_string(printer, builder, value, strlen);
+        return true;
+}
+
 static bool print_array(struct bison_array_it *it, struct bison_printer *printer, struct string_builder *builder)
 {
         assert(it);
@@ -709,18 +741,34 @@ static bool print_array(struct bison_array_it *it, struct bison_printer *printer
                 case BISON_FIELD_TYPE_FALSE:
                         printer_bison_false(printer, builder);
                         break;
-                case BISON_FIELD_TYPE_OBJECT:
-                case BISON_FIELD_TYPE_ARRAY:
-                case BISON_FIELD_TYPE_STRING:
                 case BISON_FIELD_TYPE_NUMBER_U8:
                 case BISON_FIELD_TYPE_NUMBER_U16:
                 case BISON_FIELD_TYPE_NUMBER_U32:
-                case BISON_FIELD_TYPE_NUMBER_U64:
+                case BISON_FIELD_TYPE_NUMBER_U64: {
+                        u64 value;
+                        bison_array_it_unsigned_value(&value, it);
+                        printer_bison_unsigned(printer, builder, value);
+                } break;
                 case BISON_FIELD_TYPE_NUMBER_I8:
                 case BISON_FIELD_TYPE_NUMBER_I16:
                 case BISON_FIELD_TYPE_NUMBER_I32:
-                case BISON_FIELD_TYPE_NUMBER_I64:
-                case BISON_FIELD_TYPE_NUMBER_FLOAT:
+                case BISON_FIELD_TYPE_NUMBER_I64: {
+                        i64 value;
+                        bison_array_it_signed_value(&value, it);
+                        printer_bison_signed(printer, builder, value);
+                } break;
+                case BISON_FIELD_TYPE_NUMBER_FLOAT: {
+                        float value;
+                        bison_array_it_float_value(&value, it);
+                        printer_bison_float(printer, builder, value);
+                } break;
+                case BISON_FIELD_TYPE_STRING: {
+                        u64 strlen;
+                        const char *value = bison_array_it_string_value(&strlen, it);
+                        printer_bison_string(printer, builder, value, strlen);
+                } break;
+                case BISON_FIELD_TYPE_OBJECT:
+                case BISON_FIELD_TYPE_ARRAY:
                 case BISON_FIELD_TYPE_NUMBER_U8_COLUMN:
                 case BISON_FIELD_TYPE_NUMBER_U16_COLUMN:
                 case BISON_FIELD_TYPE_NUMBER_U32_COLUMN:

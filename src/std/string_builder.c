@@ -40,11 +40,18 @@ NG5_EXPORT(bool) string_builder_append(struct string_builder *builder, const cha
 {
         error_if_null(builder)
         error_if_null(str)
-        size_t len = strlen(str);
+        u64 len = strlen(str);
+        return string_builder_append_nchar(builder, str, len);
+}
+
+NG5_EXPORT(bool) string_builder_append_nchar(struct string_builder *builder, const char *str, u64 strlen)
+{
+        error_if_null(builder)
+        error_if_null(str)
 
         /* resize if needed */
-        if (unlikely(builder->end + len >= builder->cap)) {
-                size_t new_cap = (builder->end + len) * 1.7f;
+        if (unlikely(builder->end + strlen >= builder->cap)) {
+                size_t new_cap = (builder->end + strlen) * 1.7f;
                 builder->data = realloc(builder->data, new_cap);
                 error_if_and_return(!builder->data, &builder->err, NG5_ERR_REALLOCERR, false);
                 ng5_zero_memory(builder->data + builder->cap, (new_cap - builder->cap));
@@ -52,8 +59,8 @@ NG5_EXPORT(bool) string_builder_append(struct string_builder *builder, const cha
         }
 
         /* append string */
-        memcpy(builder->data + builder->end, str, len);
-        builder->end += len;
+        memcpy(builder->data + builder->end, str, strlen);
+        builder->end += strlen;
 
         return true;
 }
@@ -71,6 +78,20 @@ NG5_EXPORT(bool) string_builder_append_u64(struct string_builder *builder, u64 v
 {
         char buffer[21];
         sprintf(buffer, "%" PRIu64, value);
+        return string_builder_append(builder, buffer);
+}
+
+NG5_EXPORT(bool) string_builder_append_i64(struct string_builder *builder, i64 value)
+{
+        char buffer[21];
+        sprintf(buffer, "%" PRIi64, value);
+        return string_builder_append(builder, buffer);
+}
+
+NG5_EXPORT(bool) string_builder_append_float(struct string_builder *builder, float value)
+{
+        char buffer[2046];
+        sprintf(buffer, "%0.2f", value);
         return string_builder_append(builder, buffer);
 }
 

@@ -34,6 +34,10 @@ struct bison_array_it
         offset_t payload_start;
         struct spinlock lock;
         struct err err;
+
+        enum bison_field_type it_field_type;
+        const void *it_field_data;
+        u64 it_field_len;
 };
 
 NG5_DEFINE_ERROR_GETTER(bison_array_it);
@@ -78,6 +82,30 @@ NG5_EXPORT(bool) bison_array_it_fast_forward(struct bison_array_it *it);
 NG5_EXPORT(bool) bison_array_it_next(struct bison_array_it *it);
 
 NG5_EXPORT(bool) bison_array_it_field_type(enum bison_field_type *type, struct bison_array_it *it);
+
+NG5_EXPORT(bool) bison_array_it_u8_value(u8 *value, struct bison_array_it *it);
+
+NG5_EXPORT(bool) bison_array_it_u16_value(u16 *value, struct bison_array_it *it);
+
+NG5_EXPORT(bool) bison_array_it_u32_value(u32 *value, struct bison_array_it *it);
+
+NG5_EXPORT(bool) bison_array_it_u64_value(u64 *value, struct bison_array_it *it);
+
+NG5_EXPORT(bool) bison_array_it_i8_value(i8 *value, struct bison_array_it *it);
+
+NG5_EXPORT(bool) bison_array_it_i16_value(i16 *value, struct bison_array_it *it);
+
+NG5_EXPORT(bool) bison_array_it_i32_value(i32 *value, struct bison_array_it *it);
+
+NG5_EXPORT(bool) bison_array_it_i64_value(i64 *value, struct bison_array_it *it);
+
+NG5_EXPORT(bool) bison_array_it_float_value(float *value, struct bison_array_it *it);
+
+NG5_EXPORT(bool) bison_array_it_signed_value(i64 *value, struct bison_array_it *it);
+
+NG5_EXPORT(bool) bison_array_it_unsigned_value(u64 *value, struct bison_array_it *it);
+
+NG5_EXPORT(const char *) bison_array_it_string_value(u64 *strlen, struct bison_array_it *it);
 
 /**
  * Checks whether the slot before the current element is in use.

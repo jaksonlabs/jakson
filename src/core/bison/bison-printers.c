@@ -45,6 +45,12 @@ static void json_formatter_bison_null(struct bison_printer *self, struct string_
 static void json_formatter_bison_true(struct bison_printer *self, struct string_builder *builder);
 static void json_formatter_bison_false(struct bison_printer *self, struct string_builder *builder);
 
+static void json_formatter_bison_signed(struct bison_printer *self, struct string_builder *builder, i64 value);
+static void json_formatter_bison_unsigned(struct bison_printer *self, struct string_builder *builder, u64 value);
+static void json_formatter_bison_float(struct bison_printer *self, struct string_builder *builder, float value);
+
+static void json_formatter_bison_string(struct bison_printer *self, struct string_builder *builder, const char *value, u64 strlen);
+
 static void json_formatter_bison_comma(struct bison_printer *self, struct string_builder *builder);
 
 NG5_EXPORT(bool) bison_json_formatter_create(struct bison_printer *printer)
@@ -68,6 +74,11 @@ NG5_EXPORT(bool) bison_json_formatter_create(struct bison_printer *printer)
         printer->print_bison_null = json_formatter_bison_null;
         printer->print_bison_true = json_formatter_bison_true;
         printer->print_bison_false = json_formatter_bison_false;
+
+        printer->print_bison_signed = json_formatter_bison_signed;
+        printer->print_bison_unsigned = json_formatter_bison_unsigned;
+        printer->print_bison_float = json_formatter_bison_float;
+        printer->print_bison_string = json_formatter_bison_string;
 
         printer->print_bison_comma = json_formatter_bison_comma;
 
@@ -156,16 +167,16 @@ static void json_formatter_bison_header_end(struct bison_printer *self, struct s
 static void json_formatter_bison_payload_begin(struct bison_printer *self, struct string_builder *builder)
 {
         if (json_formatter_is_strict(self)) {
-                string_builder_append(builder, "\"doc\": {");
+                string_builder_append(builder, "\"doc\": ");
         } else {
-                string_builder_append(builder, "doc: {");
+                string_builder_append(builder, "doc: ");
         }
 }
 
 static void json_formatter_bison_payload_end(struct bison_printer *self, struct string_builder *builder)
 {
         ng5_unused(self);
-        string_builder_append(builder, "}");
+        ng5_unused(builder);
 }
 
 static void json_formatter_bison_array_begin(struct bison_printer *self, struct string_builder *builder)
@@ -196,6 +207,32 @@ static void json_formatter_bison_false(struct bison_printer *self, struct string
 {
         ng5_unused(self);
         string_builder_append(builder, "false");
+}
+
+static void json_formatter_bison_signed(struct bison_printer *self, struct string_builder *builder, i64 value)
+{
+        ng5_unused(self);
+        string_builder_append_i64(builder, value);
+}
+
+static void json_formatter_bison_unsigned(struct bison_printer *self, struct string_builder *builder, u64 value)
+{
+        ng5_unused(self);
+        string_builder_append_u64(builder, value);
+}
+
+static void json_formatter_bison_float(struct bison_printer *self, struct string_builder *builder, float value)
+{
+        ng5_unused(self);
+        string_builder_append_float(builder, value);
+}
+
+static void json_formatter_bison_string(struct bison_printer *self, struct string_builder *builder, const char *value, u64 strlen)
+{
+        ng5_unused(self);
+        string_builder_append_char(builder, '"');
+        string_builder_append_nchar(builder, value, strlen);
+        string_builder_append_char(builder, '"');
 }
 
 static void json_formatter_bison_comma(struct bison_printer *self, struct string_builder *builder)

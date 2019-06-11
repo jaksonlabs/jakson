@@ -144,7 +144,7 @@ static const char *const _err_str[] =
          "Unable to write to file", "Unable to deserialize hash table from file",
          "Unknown string dictionary implementation requested", "Stack overflow", "Stack underflow",
          "Object was modified and is out of date", "Object is currently being updated; no read allowed",
-         "Illegal operation"};
+         "Illegal operation" };
 
 #define NG5_ERRSTR_ILLEGAL_CODE "illegal error code"
 

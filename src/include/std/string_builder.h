@@ -39,9 +39,15 @@ NG5_EXPORT(bool) string_builder_create_ex(struct string_builder *builder, size_t
 
 NG5_EXPORT(bool) string_builder_append(struct string_builder *builder, const char *str);
 
+NG5_EXPORT(bool) string_builder_append_nchar(struct string_builder *builder, const char *str, u64 strlen);
+
 NG5_EXPORT(bool) string_builder_append_char(struct string_builder *builder, char c);
 
 NG5_EXPORT(bool) string_builder_append_u64(struct string_builder *builder, u64 value);
+
+NG5_EXPORT(bool) string_builder_append_i64(struct string_builder *builder, i64 value);
+
+NG5_EXPORT(bool) string_builder_append_float(struct string_builder *builder, float value);
 
 NG5_EXPORT(bool) string_builder_clear(struct string_builder *builder);
 

@@ -427,12 +427,77 @@ TEST(BisonTest, BisonArrayIteratorOverwriteLiteralsWithDocOverflow) {
         }
         bison_insert_drop(&inserter);
         bison_revise_end(&revise);
-
-
-
-
-
         bison_print(stdout, &rev_doc2);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonArrayIteratorUnsignedAndConstants) {
+        struct bison doc, rev_doc;
+        struct bison_revise revise;
+        struct bison_array_it it;
+        struct bison_insert inserter;
+
+        bison_create_ex(&doc, 20, 1);
+
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_access(&it, &revise);
+        bison_array_it_insert(&inserter, &it);
+        for (i32 i = 0; i < 500; i++) {
+                if (i % 6 == 0) {
+                        bison_insert_null(&inserter);
+                } else if (i % 6 == 1) {
+                        bison_insert_true(&inserter);
+                } else if (i % 6 == 2) {
+                        bison_insert_false(&inserter);
+                } else if (i % 6 == 3) {
+                        u64 rand_value = random();
+                        bison_insert_unsigned(&inserter, rand_value);
+                } else if (i % 6 == 4) {
+                        i64 rand_value = random();
+                        bison_insert_signed(&inserter, rand_value);
+                } else {
+                        float rand_value = (float)rand()/(float)(RAND_MAX/INT32_MAX);
+                        bison_insert_float(&inserter, rand_value);
+                }
+                fprintf(stdout, "after initial push:\n");
+                bison_hexdump_print(stdout, &rev_doc);
+        }
+        bison_insert_drop(&inserter);
+        bison_revise_end(&revise);
+
+        bison_print(stdout, &rev_doc);
+
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonArrayIteratorStrings) {
+        struct bison doc, rev_doc;
+        struct bison_revise revise;
+        struct bison_array_it it;
+        struct bison_insert inserter;
+
+        bison_create_ex(&doc, 20, 1);
+
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_access(&it, &revise);
+        bison_array_it_insert(&inserter, &it);
+        for (i32 i = 0; i < 10; i++) {
+                u64 strlen = rand() % (100 + 1 - 4) + 4;
+                char buffer[strlen];
+                for (i32 j = 0; j < strlen; j++) {
+                        buffer[j] = 65 + (rand() % 25);
+                }
+                buffer[0] = '!';
+                buffer[strlen - 2] = '!';
+                buffer[strlen - 1] = '\0';
+                bison_insert_string(&inserter, buffer);
+                fprintf(stdout, "after initial push:\n");
+                bison_hexdump_print(stdout, &rev_doc);
+        }
+        bison_insert_drop(&inserter);
+        bison_revise_end(&revise);
+
+        bison_print(stdout, &rev_doc);
 
         bison_drop(&doc);
 }
