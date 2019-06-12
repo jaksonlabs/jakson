@@ -729,8 +729,11 @@ static bool print_array(struct bison_array_it *it, struct bison_printer *printer
                         bison_array_it_binary_value(&binary, it);
                         printer_bison_binary(printer, builder, &binary);
                 } break;
+                case BISON_FIELD_TYPE_ARRAY: {
+                        struct bison_array_it *nested_array = bison_array_it_array_value(it);
+                        print_array(nested_array, printer, builder);
+                } break;
                 case BISON_FIELD_TYPE_OBJECT:
-                case BISON_FIELD_TYPE_ARRAY:
                 case BISON_FIELD_TYPE_NUMBER_U8_COLUMN:
                 case BISON_FIELD_TYPE_NUMBER_U16_COLUMN:
                 case BISON_FIELD_TYPE_NUMBER_U32_COLUMN:

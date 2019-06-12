@@ -202,15 +202,42 @@ NG5_EXPORT(bool) bison_insert_binary(struct bison_insert *inserter, const void *
         return true;
 }
 
-NG5_EXPORT(bool) bison_insert_array(struct bison_array_it *it_out, struct bison_insert *inserter_in)
+NG5_EXPORT(struct bison_insert *) bison_insert_array_begin(struct bison_insert_array_state *state_out,
+        struct bison_insert *inserter_in, u64 array_capacity)
 {
-        error_if_null(it_out)
-        error_if_null(inserter_in)
+        error_if_and_return(!state_out, &inserter_in->err, NG5_ERR_NULLPTR, NULL);
+        error_if_and_return(!inserter_in, &inserter_in->err, NG5_ERR_NULLPTR, NULL);
 
-        bison_int_insert_array(&inserter_in->memfile, 8);
+        *state_out = (struct bison_insert_array_state) {
+                .parent_inserter = inserter_in,
+                .nested_array = malloc(sizeof(struct bison_array_it))
+        };
+
+        bison_int_insert_array(&inserter_in->memfile, array_capacity);
         u64 payload_start = memfile_tell(&inserter_in->memfile) - 1;
-        return bison_array_it_create(it_out, &inserter_in->memfile, &inserter_in->err, payload_start, READ_WRITE);
 
+        bison_array_it_create(state_out->nested_array, &inserter_in->memfile, &inserter_in->err, payload_start,
+                inserter_in->memfile.mode);
+        bison_array_it_insert(&state_out->nested_inserter, state_out->nested_array);
+
+        return &state_out->nested_inserter;
+}
+
+NG5_EXPORT(bool) bison_insert_array_end(struct bison_insert_array_state *state_in)
+{
+        error_if_null(state_in);
+
+        struct bison_array_it scan;
+        bison_array_it_create(&scan, &state_in->parent_inserter->memfile, &state_in->parent_inserter->err,
+                memfile_tell(&state_in->parent_inserter->memfile) - 1, state_in->parent_inserter->memfile.mode);
+        while (bison_array_it_next(&scan))
+                { }
+
+        memfile_seek(&state_in->parent_inserter->memfile, memfile_tell(&scan.memfile));
+        bison_array_it_drop(&scan);
+
+        free(state_in->nested_array);
+        bison_insert_drop(&state_in->nested_inserter);
         return true;
 }
 

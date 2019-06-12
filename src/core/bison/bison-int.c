@@ -32,28 +32,9 @@ NG5_EXPORT(bool) bison_int_insert_array(struct memfile *memfile, size_t nbytes)
 
         bison_int_ensure_space(memfile, sizeof(u8));
 
-        // --- DEBUG
-        offset_t block_size;
-        memblock_size(&block_size, memfile->memblock);
-        printf("step1:\n");
-        hexdump_print(stdout, memblock_raw_data(memfile->memblock), block_size);
-        // --- DEBUG
-
         marker_insert(memfile, array_begin_marker);
 
-        // --- DEBUG
-        memblock_size(&block_size, memfile->memblock);
-        printf("step2:\n");
-        hexdump_print(stdout, memblock_raw_data(memfile->memblock), block_size);
-        // --- DEBUG
-
         bison_int_ensure_space(memfile, nbytes + sizeof(u8));
-
-        // --- DEBUG
-        memblock_size(&block_size, memfile->memblock);
-        printf("step3:\n");
-        hexdump_print(stdout, memblock_raw_data(memfile->memblock), block_size);
-        // --- DEBUG
 
         offset_t payload_begin = memfile_tell(memfile);
         size_t remain = memfile_remain_size(memfile);

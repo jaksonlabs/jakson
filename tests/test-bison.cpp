@@ -409,8 +409,8 @@ TEST(BisonTest, BisonArrayIteratorOverwriteLiteralsWithDocOverflow) {
                 } else {
                         bison_insert_false(&inserter);
                 }
-                fprintf(stdout, "after initial push:\n");
-                bison_hexdump_print(stdout, &rev_doc);
+               // fprintf(stdout, "after initial push:\n");
+               // bison_hexdump_print(stdout, &rev_doc);
         }
         bison_insert_drop(&inserter);
         bison_revise_end(&revise);
@@ -459,8 +459,8 @@ TEST(BisonTest, BisonArrayIteratorUnsignedAndConstants) {
                         float rand_value = (float)rand()/(float)(RAND_MAX/INT32_MAX);
                         bison_insert_float(&inserter, rand_value);
                 }
-                fprintf(stdout, "after initial push:\n");
-                bison_hexdump_print(stdout, &rev_doc);
+                //fprintf(stdout, "after initial push:\n");
+                //bison_hexdump_print(stdout, &rev_doc);
         }
         bison_insert_drop(&inserter);
         bison_revise_end(&revise);
@@ -491,8 +491,8 @@ TEST(BisonTest, BisonArrayIteratorStrings) {
                 buffer[strlen - 2] = '!';
                 buffer[strlen - 1] = '\0';
                 bison_insert_string(&inserter, buffer);
-                fprintf(stdout, "after initial push:\n");
-                bison_hexdump_print(stdout, &rev_doc);
+                //fprintf(stdout, "after initial push:\n");
+                //bison_hexdump_print(stdout, &rev_doc);
         }
         bison_insert_drop(&inserter);
         bison_revise_end(&revise);
@@ -516,7 +516,7 @@ TEST(BisonTest, BisonInsertMimeTypedBlob) {
         const char *data = "{ \"Message\": \"Hello World\" }";
         bool status = bison_insert_binary(&inserter, data, strlen(data), "json", NULL);
         ASSERT_TRUE(status);
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
         bison_insert_drop(&inserter);
         bison_revise_end(&revise);
 
@@ -539,7 +539,7 @@ TEST(BisonTest, BisonInsertCustomTypedBlob) {
         const char *data = "{ \"Message\": \"Hello World\" }";
         bool status = bison_insert_binary(&inserter, data, strlen(data), NULL, "my data");
         ASSERT_TRUE(status);
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
         bison_insert_drop(&inserter);
         bison_revise_end(&revise);
 
@@ -565,7 +565,7 @@ TEST(BisonTest, BisonInsertTwoMimeTypedBlob) {
         ASSERT_TRUE(status);
         status = bison_insert_binary(&inserter, data2, strlen(data2), "txt", NULL);
         ASSERT_TRUE(status);
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
         bison_insert_drop(&inserter);
         bison_revise_end(&revise);
 
@@ -592,7 +592,7 @@ TEST(BisonTest, BisonInsertMimeTypedBlobsWithOverflow) {
                         strlen(i % 2 == 0 ? data1 : data2), "json", NULL);
                 ASSERT_TRUE(status);
         }
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
         bison_insert_drop(&inserter);
         bison_revise_end(&revise);
 
@@ -619,7 +619,7 @@ TEST(BisonTest, BisonInsertMixedTypedBlobsWithOverflow) {
                         strlen(i % 2 == 0 ? data1 : data2), i % 3 == 0 ? "json" : NULL, i % 5 == 0 ? "user/app" : NULL);
                 ASSERT_TRUE(status);
         }
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
         bison_insert_drop(&inserter);
         bison_revise_end(&revise);
 
@@ -628,28 +628,207 @@ TEST(BisonTest, BisonInsertMixedTypedBlobsWithOverflow) {
         bison_drop(&doc);
 }
 
-//TEST(BisonTest, BisonInsertArrayWithNoOverflow) {
+TEST(BisonTest, BisonInsertArrayWithNoOverflow) {
+        struct bison doc, rev_doc;
+        struct bison_revise revise;
+        struct bison_array_it it;
+        struct bison_insert inserter;
+        struct bison_insert_array_state array_state;
+
+        bison_create_ex(&doc, 20, 1);
+
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_access(&it, &revise);
+        bison_array_it_insert(&inserter, &it);
+        bison_hexdump_print(stdout, &rev_doc);
+
+        struct bison_insert *nested_inserter = bison_insert_array_begin(&array_state, &inserter, 10);
+        ASSERT_TRUE(nested_inserter != NULL);
+        bison_insert_array_end(&array_state);
+
+        bison_hexdump_print(stdout, &rev_doc);
+        bison_insert_drop(&inserter);
+        bison_array_it_drop(&it);
+        bison_revise_end(&revise);
+
+        bison_hexdump_print(stdout, &rev_doc);
+        bison_print(stdout, &rev_doc);
+
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonInsertValuesIntoNestedArrayWithNoOverflow) {
+        struct bison doc, rev_doc;
+        struct bison_revise revise;
+        struct bison_array_it it;
+        struct bison_insert inserter;
+        struct bison_insert_array_state array_state;
+
+        bison_create_ex(&doc, 20, 1);
+
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_access(&it, &revise);
+        bison_array_it_insert(&inserter, &it);
+
+        bison_insert_null(&inserter);
+        bison_insert_null(&inserter);
+        bison_insert_null(&inserter);
+
+        struct bison_insert *nested_inserter = bison_insert_array_begin(&array_state, &inserter, 10);
+        ASSERT_TRUE(nested_inserter != NULL);
+        bison_insert_true(nested_inserter);
+        bison_insert_true(nested_inserter);
+        bison_insert_true(nested_inserter);
+        bison_insert_array_end(&array_state);
+
+        bison_insert_false(&inserter);
+        bison_insert_false(&inserter);
+        bison_insert_false(&inserter);
+
+
+        bison_hexdump_print(stdout, &rev_doc);
+        bison_insert_drop(&inserter);
+        bison_array_it_drop(&it);
+        bison_revise_end(&revise);
+
+        bison_print(stdout, &rev_doc);
+
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonInsert2xNestedArrayWithNoOverflow) {
+        struct bison doc, rev_doc;
+        struct bison_revise revise;
+        struct bison_array_it it;
+        struct bison_insert inserter;
+        struct bison_insert_array_state array_state_l1, array_state_l2;
+
+        bison_create_ex(&doc, 20, 1);
+
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_access(&it, &revise);
+        bison_array_it_insert(&inserter, &it);
+
+        bison_insert_null(&inserter);
+        bison_insert_null(&inserter);
+        bison_insert_null(&inserter);
+
+        struct bison_insert *nested_inserter_l1 = bison_insert_array_begin(&array_state_l1, &inserter, 10);
+        ASSERT_TRUE(nested_inserter_l1 != NULL);
+        bison_insert_true(nested_inserter_l1);
+        bison_insert_true(nested_inserter_l1);
+        bison_insert_true(nested_inserter_l1);
+
+        struct bison_insert *nested_inserter_l2 = bison_insert_array_begin(&array_state_l2, nested_inserter_l1, 10);
+        ASSERT_TRUE(nested_inserter_l2 != NULL);
+        bison_insert_true(nested_inserter_l2);
+        bison_insert_false(nested_inserter_l2);
+        bison_insert_null(nested_inserter_l2);
+        bison_insert_array_end(&array_state_l2);
+
+        bison_insert_array_end(&array_state_l1);
+
+        bison_insert_false(&inserter);
+        bison_insert_false(&inserter);
+        bison_insert_false(&inserter);
+
+
+        bison_hexdump_print(stdout, &rev_doc);
+        bison_insert_drop(&inserter);
+        bison_array_it_drop(&it);
+        bison_revise_end(&revise);
+
+        bison_print(stdout, &rev_doc);
+
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonInsertXxNestedArrayWithoutOverflow) {
+        struct bison doc, rev_doc;
+        struct bison_revise revise;
+        struct bison_array_it it;
+        struct bison_insert inserter;
+        struct bison_insert_array_state array_state_l1;
+
+        bison_create_ex(&doc, 20, 1);
+
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_access(&it, &revise);
+        bison_array_it_insert(&inserter, &it);
+
+        bison_insert_null(&inserter);
+        bison_insert_null(&inserter);
+        bison_insert_null(&inserter);
+
+        for (int i = 0; i < 10; i++) {
+                struct bison_insert *nested_inserter_l1 = bison_insert_array_begin(&array_state_l1, &inserter, 10);
+                ASSERT_TRUE(nested_inserter_l1 != NULL);
+                bison_insert_true(nested_inserter_l1);
+                bison_insert_true(nested_inserter_l1);
+                bison_insert_true(nested_inserter_l1);
+                bison_insert_array_end(&array_state_l1);
+        }
+
+        bison_insert_false(&inserter);
+        bison_insert_false(&inserter);
+        bison_insert_false(&inserter);
+
+        bison_hexdump_print(stdout, &rev_doc);
+        bison_insert_drop(&inserter);
+        bison_array_it_drop(&it);
+        bison_revise_end(&revise);
+
+        bison_print(stdout, &rev_doc);
+        struct string_builder sb;
+        string_builder_create(&sb);
+        bison_to_str(&sb, JSON_FORMATTER, &rev_doc);
+        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"record\": [null, null, null, [true, true, true], [true, true, true], [true, true, true], [true, true, true, [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], false, false, false]]}"));
+        string_builder_drop(&sb);
+
+        bison_drop(&doc);
+}
+
+//TEST(BisonTest, BisonInsertXxNestedArrayWithOverflow) {
 //        struct bison doc, rev_doc;
 //        struct bison_revise revise;
 //        struct bison_array_it it;
-//        struct bison_array_it sub_it;
 //        struct bison_insert inserter;
+//        struct bison_insert_array_state array_state_l1;
 //
 //        bison_create_ex(&doc, 20, 1);
 //
 //        bison_revise_begin(&revise, &rev_doc, &doc);
 //        bison_revise_access(&it, &revise);
 //        bison_array_it_insert(&inserter, &it);
-//        bison_hexdump_print(stdout, &rev_doc);
-//        bool status = bison_insert_array(&sub_it, &inserter);
-//        bison_array_it_drop(&sub_it);
-//        ASSERT_TRUE(status);
+//
+//        bison_insert_null(&inserter);
+//        bison_insert_null(&inserter);
+//        bison_insert_null(&inserter);
+//
+//        for (int i = 0; i < 10; i++) {
+//                struct bison_insert *nested_inserter_l1 = bison_insert_array_begin(&array_state_l1, &inserter, 1);
+//                ASSERT_TRUE(nested_inserter_l1 != NULL);
+//                bison_insert_true(nested_inserter_l1);
+//                bison_insert_true(nested_inserter_l1);
+//                bison_insert_true(nested_inserter_l1);
+//                bison_insert_array_end(&array_state_l1);
+//        }
+//
+//        bison_insert_false(&inserter);
+//        bison_insert_false(&inserter);
+//        bison_insert_false(&inserter);
+//
 //        bison_hexdump_print(stdout, &rev_doc);
 //        bison_insert_drop(&inserter);
 //        bison_array_it_drop(&it);
 //        bison_revise_end(&revise);
 //
 //        bison_print(stdout, &rev_doc);
+//        struct string_builder sb;
+//        string_builder_create(&sb);
+//        bison_to_str(&sb, JSON_FORMATTER, &rev_doc);
+//        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"record\": [null, null, null, [true, true, true], [true, true, true], [true, true, true], [true, true, true, [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], false, false, false]]}"));
+//        string_builder_drop(&sb);
 //
 //        bison_drop(&doc);
 //}

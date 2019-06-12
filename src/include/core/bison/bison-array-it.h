@@ -115,6 +115,9 @@ NG5_EXPORT(const char *) bison_array_it_string_value(u64 *strlen, struct bison_a
 
 NG5_EXPORT(bool) bison_array_it_binary_value(struct bison_binary *out, struct bison_array_it *it);
 
+NG5_EXPORT(struct bison_array_it *) bison_array_it_array_value(struct bison_array_it *it_in);
+
+
 /**
  * Checks whether the slot before the current element is in use.
  */

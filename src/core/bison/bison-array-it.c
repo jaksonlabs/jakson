@@ -22,6 +22,14 @@
 #include "core/bison/bison-insert.h"
 #include "core/bison/bison-media.h"
 
+static void auto_close_nested_array_it(struct bison_array_it *it)
+{
+        if (((char *) it->nested_array_it)[0] != 0) {
+                bison_array_it_drop(it->nested_array_it);
+                ng5_zero_memory(it->nested_array_it, sizeof(struct bison_array_it));
+        }
+}
+
 static bool field_type_read(struct bison_array_it *it)
 {
         error_if_null(it)
@@ -190,8 +198,16 @@ static bool field_skip(struct bison_array_it *it)
 
                 memfile_skip(&it->memfile, blob_len_nbytes + blob_len);
         } break;
+        case BISON_FIELD_TYPE_ARRAY: {
+                struct bison_array_it skip_it;
+                bison_array_it_create(&skip_it, &it->memfile, &it->err, memfile_tell(&it->memfile) - 1,
+                        it->memfile.mode);
+                while (bison_array_it_next(&skip_it))
+                        { }
+                memfile_seek(&it->memfile, memfile_tell(&skip_it.memfile));
+                bison_array_it_drop(&skip_it);
+        } break;
         case BISON_FIELD_TYPE_OBJECT:
-        case BISON_FIELD_TYPE_ARRAY:
         case BISON_FIELD_TYPE_NUMBER_U8_COLUMN:
         case BISON_FIELD_TYPE_NUMBER_U16_COLUMN:
         case BISON_FIELD_TYPE_NUMBER_U32_COLUMN:
@@ -232,6 +248,7 @@ NG5_EXPORT(bool) bison_array_it_create(struct bison_array_it *it, struct memfile
 
         it->payload_start += sizeof(u8);
         it->nested_array_it = malloc(sizeof(struct bison_array_it));
+        ng5_zero_memory(it->nested_array_it, sizeof(struct bison_array_it))
         bison_array_it_rewind(it);
 
         return true;
@@ -239,6 +256,7 @@ NG5_EXPORT(bool) bison_array_it_create(struct bison_array_it *it, struct memfile
 
 NG5_EXPORT(bool) bison_array_it_drop(struct bison_array_it *it)
 {
+        auto_close_nested_array_it(it);
         free (it->nested_array_it);
         return true;
 }
@@ -273,6 +291,7 @@ NG5_EXPORT(bool) bison_array_it_rewind(struct bison_array_it *it)
 NG5_EXPORT(bool) bison_array_it_next(struct bison_array_it *it)
 {
         error_if_null(it);
+        auto_close_nested_array_it(it);
         char c = *memfile_peek(&it->memfile, 1);
         bool is_empty_slot = c == 0;
         bool is_array_end = c == BISON_MARKER_ARRAY_END;
@@ -469,6 +488,13 @@ NG5_EXPORT(bool) bison_array_it_binary_value(struct bison_binary *out, struct bi
         out->mime_type = it->it_mime_type;
         out->mime_type_strlen = it->it_mime_type_strlen;
         return true;
+}
+
+NG5_EXPORT(struct bison_array_it *) bison_array_it_array_value(struct bison_array_it *it_in)
+{
+        error_if_and_return(!it_in, &it_in->err, NG5_ERR_NULLPTR, NULL);
+        error_if(it_in->it_field_type != BISON_FIELD_TYPE_ARRAY, &it_in->err, NG5_ERR_TYPEMISMATCH);
+        return it_in->nested_array_it;
 }
 
 NG5_EXPORT(bool) bison_array_it_prev(struct bison_array_it *it)
