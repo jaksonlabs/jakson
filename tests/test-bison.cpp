@@ -628,6 +628,32 @@ TEST(BisonTest, BisonInsertMixedTypedBlobsWithOverflow) {
         bison_drop(&doc);
 }
 
+//TEST(BisonTest, BisonInsertArrayWithNoOverflow) {
+//        struct bison doc, rev_doc;
+//        struct bison_revise revise;
+//        struct bison_array_it it;
+//        struct bison_array_it sub_it;
+//        struct bison_insert inserter;
+//
+//        bison_create_ex(&doc, 20, 1);
+//
+//        bison_revise_begin(&revise, &rev_doc, &doc);
+//        bison_revise_access(&it, &revise);
+//        bison_array_it_insert(&inserter, &it);
+//        bison_hexdump_print(stdout, &rev_doc);
+//        bool status = bison_insert_array(&sub_it, &inserter);
+//        bison_array_it_drop(&sub_it);
+//        ASSERT_TRUE(status);
+//        bison_hexdump_print(stdout, &rev_doc);
+//        bison_insert_drop(&inserter);
+//        bison_array_it_drop(&it);
+//        bison_revise_end(&revise);
+//
+//        bison_print(stdout, &rev_doc);
+//
+//        bison_drop(&doc);
+//}
+
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

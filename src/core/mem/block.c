@@ -88,11 +88,19 @@ const char *memblock_raw_data(const struct memblock *block)
         return (block && block->base ? block->base : NULL);
 }
 
-bool memblock_resize(struct memblock *block, size_t size)
+NG5_EXPORT(bool) memblock_resize(struct memblock *block, size_t size)
+{
+        return memblock_resize_ex(block, size, false);
+}
+
+bool memblock_resize_ex(struct memblock *block, size_t size, bool zero_out)
 {
         error_if_null(block)
         error_print_if(size == 0, NG5_ERR_ILLEGALARG)
         block->base = realloc(block->base, size);
+        if (zero_out) {
+                ng5_zero_memory(block->base + block->blockLength, (size - block->blockLength));
+        }
         block->blockLength = size;
         return true;
 }

@@ -66,6 +66,17 @@ bool memfile_rewind(struct memfile *file)
         return true;
 }
 
+NG5_EXPORT(bool) memfile_grow(struct memfile *file_in, size_t grow_by_bytes, bool zero_out)
+{
+        error_if_null(file_in)
+        if (likely(grow_by_bytes > 0)) {
+                offset_t block_size;
+                memblock_size(&block_size, file_in->memblock);
+                memblock_resize_ex(file_in->memblock, (block_size + grow_by_bytes) * 1.7f, zero_out);
+        }
+        return true;
+}
+
 bool memfile_get_offset(offset_t *pos, const struct memfile *file)
 {
         error_if_null(pos)

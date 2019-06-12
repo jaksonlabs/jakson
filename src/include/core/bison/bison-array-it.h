@@ -42,6 +42,8 @@ struct bison_array_it
 
         const char *it_mime_type;
         u64 it_mime_type_strlen;
+
+        struct bison_array_it *nested_array_it;
 };
 
 NG5_DEFINE_ERROR_GETTER(bison_array_it);
@@ -51,13 +53,13 @@ NG5_DEFINE_ERROR_GETTER(bison_array_it);
  * that starts with the first (potentially empty) array entry. If there is some data before the array contents
  * (e.g., a header), <code>payload_start</code> must not include this data.
  */
-NG5_EXPORT(bool) bison_array_it_create(struct bison_array_it *it, struct bison *doc, offset_t payload_start,
-        enum access_mode mode);
+NG5_EXPORT(bool) bison_array_it_create(struct bison_array_it *it, struct memfile *memfile, struct err *err,
+        offset_t payload_start, enum access_mode mode);
 
 /**
  * Drops the iterator.
  */
-NG5_EXPORT(bool) bison_array_it_drop(struct bison_array_it *it, struct bison *doc);
+NG5_EXPORT(bool) bison_array_it_drop(struct bison_array_it *it);
 
 /**
  * Locks the iterator with a spinlock. A call to <code>bison_array_it_unlock</code> is required for unlocking.

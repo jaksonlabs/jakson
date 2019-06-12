@@ -70,6 +70,8 @@ NG5_EXPORT(bool) memfile_seek(struct memfile *file, offset_t pos);
 
 NG5_EXPORT(bool) memfile_rewind(struct memfile *file);
 
+NG5_EXPORT(bool) memfile_grow(struct memfile *file_in, size_t grow_by_bytes, bool zero_out);
+
 NG5_EXPORT(bool) memfile_get_offset(offset_t *pos, const struct memfile *file);
 
 NG5_EXPORT(size_t) memfile_size(struct memfile *file);

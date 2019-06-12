@@ -21,6 +21,7 @@
 #include "core/bison/bison.h"
 #include "core/bison/bison-array-it.h"
 #include "core/bison/bison-printers.h"
+#include "core/bison/bison-int.h"
 #include "stdx/varuint.h"
 #include "utils/hexdump.h"
 
@@ -84,10 +85,6 @@ static bool bison_header_rev_inc(struct bison *doc);
 static u64 bison_header_get_oid(struct bison *doc);
 static u64 bison_header_set_oid(struct bison *doc, object_id_t oid);
 
-static void marker_insert(struct memfile *memfile, u8 marker);
-static void array_insert(struct bison *doc, size_t nbytes);
-
-
 // ---------------------------------------------------------------------------------------------------------------------
 
 NG5_EXPORT(bool) bison_create(struct bison *doc)
@@ -110,7 +107,7 @@ NG5_EXPORT(bool) bison_create_ex(struct bison *doc, u64 doc_cap_byte, u64 array_
         doc->versioning.is_latest = true;
 
         bison_header_init(doc);
-        array_insert(doc, array_cap_byte);
+        bison_int_insert_array(&doc->memfile, array_cap_byte);
 
         return true;
 }
@@ -304,7 +301,8 @@ NG5_EXPORT(bool) bison_revise_access(struct bison_array_it *it, struct bison_rev
         error_if_null(it);
         error_if_null(context);
         offset_t payload_start = internal_payload_after_header(context->revised_doc);
-        return bison_array_it_create(it, context->revised_doc, payload_start, READ_WRITE);
+        return bison_array_it_create(it, &context->revised_doc->memfile, &context->original->err,
+                payload_start, READ_WRITE);
 }
 
 NG5_EXPORT(const struct bison *) bison_revise_end(struct bison_revise *context)
@@ -346,7 +344,7 @@ NG5_EXPORT(bool) bison_access(struct bison_array_it *it, struct bison *doc)
         error_if_null(it);
         error_if_null(doc);
         offset_t payload_start = internal_payload_after_header(doc);
-        return bison_array_it_create(it, doc, payload_start, READ_ONLY);
+        return bison_array_it_create(it, &doc->memfile, &doc->err, payload_start, READ_ONLY);
 }
 
 NG5_EXPORT(const char *) bison_field_type_str(struct err *err, enum bison_field_type type)
@@ -541,58 +539,6 @@ static u64 bison_header_set_oid(struct bison *doc, object_id_t oid)
         memfile_write(&doc->memfile, header, sizeof(struct bison_header));
         memfile_restore_position(&doc->memfile);
         return header->oid;
-}
-
-static void marker_insert(struct memfile *memfile, u8 marker)
-{
-        /* check whether marker can be written, otherwise make space for it */
-        char c = *memfile_peek(memfile, sizeof(u8));
-        if (c != 0) {
-                memfile_move(memfile, sizeof(u8));
-        }
-        memfile_write(memfile, &marker, sizeof(u8));
-}
-
-static void array_insert(struct bison *doc, size_t nbytes)
-{
-        assert(doc);
-        u8 array_begin_marker = BISON_MARKER_ARRAY_BEGIN;
-        u8 array_end_marker = BISON_MARKER_ARRAY_END;
-
-        marker_insert(&doc->memfile, array_begin_marker);
-
-        offset_t payload_begin = memfile_tell(&doc->memfile);
-        size_t remain = memfile_remain_size(&doc->memfile);
-        size_t span = ng5_max(nbytes, remain) - ng5_min(nbytes, remain);
-
-        /* array may fit into memory if memory does not contain any (non-null) data */
-        size_t upper = ng5_min(span, nbytes);
-        size_t non_null_pos = 0;
-        const char *data = memfile_read(&doc->memfile, upper);
-        for (; non_null_pos < upper; non_null_pos++) {
-                if (data[non_null_pos] != 0) {
-                        break;
-                }
-        }
-        if (non_null_pos != nbytes) {
-                /* array does fit only partially into memory since some non-null data was read */
-                size_t required = nbytes - non_null_pos;
-                if (non_null_pos > 0) {
-                        /* re-use some null data */
-                        memfile_seek(&doc->memfile, payload_begin + non_null_pos - 1);
-                        memfile_move(&doc->memfile, required);
-                } else {
-                        /* no null data was available at all */
-                        memfile_move(&doc->memfile, nbytes);
-                }
-        } else {
-                /* nothing to do: n bytes of null data was read */
-        }
-
-        marker_insert(&doc->memfile, array_end_marker);
-
-        /* seek to first entry in array */
-        memfile_seek(&doc->memfile, payload_begin);
 }
 
 static bool printer_drop(struct bison_printer *printer)

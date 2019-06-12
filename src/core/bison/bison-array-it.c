@@ -93,8 +93,11 @@ static bool field_data_access(struct bison_array_it *it)
 
                 memfile_skip(&it->memfile, blob_len_nbytes);
         } break;
-        case BISON_FIELD_TYPE_OBJECT:
         case BISON_FIELD_TYPE_ARRAY:
+                bison_array_it_create(it->nested_array_it, &it->memfile, &it->err,
+                        memfile_tell(&it->memfile) - sizeof(u8), it->memfile.mode);
+                break;
+        case BISON_FIELD_TYPE_OBJECT:
         case BISON_FIELD_TYPE_NUMBER_U8_COLUMN:
         case BISON_FIELD_TYPE_NUMBER_U16_COLUMN:
         case BISON_FIELD_TYPE_NUMBER_U32_COLUMN:
@@ -208,35 +211,36 @@ static bool field_skip(struct bison_array_it *it)
         return true;
 }
 
-NG5_EXPORT(bool) bison_array_it_create(struct bison_array_it *it, struct bison *doc, offset_t payload_start,
-        enum access_mode mode)
+NG5_EXPORT(bool) bison_array_it_create(struct bison_array_it *it, struct memfile *memfile, struct err *err,
+                                       offset_t payload_start, enum access_mode mode)
 {
         error_if_null(it);
-        error_if_null(doc);
+        error_if_null(memfile);
+        error_if_null(err);
 
         it->payload_start = payload_start;
         error_init(&it->err);
         spin_init(&it->lock);
-        memfile_open(&it->memfile, doc->memblock, mode);
+        memfile_open(&it->memfile, memfile->memblock, mode);
         memfile_seek(&it->memfile, payload_start);
 
-        error_if(memfile_remain_size(&it->memfile) < sizeof(u8), &doc->err, NG5_ERR_CORRUPTED);
+        error_if(memfile_remain_size(&it->memfile) < sizeof(u8), err, NG5_ERR_CORRUPTED);
 
         u8 marker = *memfile_read(&it->memfile, sizeof(u8));
-        error_if_with_details(marker != BISON_MARKER_ARRAY_BEGIN, &doc->err, NG5_ERR_ILLEGALOP,
+        error_if_with_details(marker != BISON_MARKER_ARRAY_BEGIN, err, NG5_ERR_ILLEGALOP,
                 "array begin marker ('[') not found");
 
         it->payload_start += sizeof(u8);
+        it->nested_array_it = malloc(sizeof(struct bison_array_it));
         bison_array_it_rewind(it);
 
         return true;
 }
 
-NG5_EXPORT(bool) bison_array_it_drop(struct bison_array_it *it, struct bison *doc)
+NG5_EXPORT(bool) bison_array_it_drop(struct bison_array_it *it)
 {
-        ng5_unused(it);
-        ng5_unused(doc);
-        return false;
+        free (it->nested_array_it);
+        return true;
 }
 
 /**

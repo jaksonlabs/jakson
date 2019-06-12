@@ -85,7 +85,7 @@ enum bison_field_type
 
         /* JSON typing */
         BISON_FIELD_TYPE_OBJECT = 'o', /* object */
-        BISON_FIELD_TYPE_ARRAY = 'a', /* variable-type array */
+        BISON_FIELD_TYPE_ARRAY = '[', /* variable-type array */
         BISON_FIELD_TYPE_STRING = 's', /* UTF-8 string */
 
         /* JSON numbers */

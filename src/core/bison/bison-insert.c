@@ -20,27 +20,17 @@
 #include "core/bison/bison-array-it.h"
 #include "core/bison/bison-insert.h"
 #include "core/bison/bison-media.h"
-
-static bool ensure_space(struct bison_insert *inserter, u64 nbytes)
-{
-        error_if_null(inserter)
-        char c = *memfile_peek(&inserter->memfile, 1);
-        if (unlikely(c != 0)) {
-                /* not enough space; enlarge container */
-                memfile_move(&inserter->memfile, nbytes);
-        }
-        return true;
-}
+#include "core/bison/bison-int.h"
 
 static bool push(struct bison_insert *inserter, const void *base, u64 nbytes)
 {
-        ensure_space(inserter, nbytes);
+        bison_int_ensure_space(&inserter->memfile, nbytes);
         return memfile_write(&inserter->memfile, base, nbytes);
 }
 
 static bool push_media_type(struct bison_insert *inserter, enum bison_field_type type)
 {
-        ensure_space(inserter, sizeof(media_type_t));
+        bison_int_ensure_space(&inserter->memfile, sizeof(media_type_t));
         return bison_media_write(&inserter->memfile, type);
 }
 
@@ -143,7 +133,7 @@ static bool insert_byte_sequence(struct bison_insert *inserter, const void *data
 
         push_media_type(inserter, type);
 
-        ensure_space(inserter, varuint_required_blocks(nbytes) + nbytes);
+        bison_int_ensure_space(&inserter->memfile, varuint_required_blocks(nbytes) + nbytes);
         varuint_t enc_len = (varuint_t) memfile_peek(&inserter->memfile, sizeof(varuint_t));
         u8 varuin_nbytes = varuint_write(enc_len, nbytes);
         memfile_skip(&inserter->memfile, varuin_nbytes);
@@ -160,7 +150,7 @@ static void write_binary_blob(struct bison_insert *inserter, const void *value, 
 {
         /* write binary blob length with variable-length integer type */
         u8 required_blocks = varuint_required_blocks(nbytes);
-        ensure_space(inserter, required_blocks + nbytes);
+        bison_int_ensure_space(&inserter->memfile, required_blocks + nbytes);
 
         varuint_t num_bytes = (varuint_t) memfile_peek(&inserter->memfile, 1);
         varuint_write(num_bytes, nbytes);
@@ -180,7 +170,7 @@ NG5_EXPORT(bool) bison_insert_binary(struct bison_insert *inserter, const void *
                 /* write length of 'user_type' string with variable-length integer type */
                 u64 user_type_strlen = strlen(user_type);
                 u8 required_blocks = varuint_required_blocks(user_type_strlen);
-                ensure_space(inserter, required_blocks + user_type_strlen);
+                bison_int_ensure_space(&inserter->memfile, required_blocks + user_type_strlen);
                 varuint_t user_type_strlen_data = (varuint_t) memfile_peek(&inserter->memfile, 1);
                 varuint_write(user_type_strlen_data, user_type_strlen);
                 memfile_skip(&inserter->memfile, required_blocks);
@@ -199,7 +189,7 @@ NG5_EXPORT(bool) bison_insert_binary(struct bison_insert *inserter, const void *
                 u64 mime_type_id = bison_media_mime_type_by_ext(file_ext);
                 u8 required_blocks = varuint_required_blocks(mime_type_id);
 
-                ensure_space(inserter, required_blocks);
+                bison_int_ensure_space(&inserter->memfile, required_blocks);
 
                 varuint_t mime_type = (varuint_t) memfile_peek(&inserter->memfile, 1);
                 varuint_write(mime_type, mime_type_id);
@@ -217,7 +207,9 @@ NG5_EXPORT(bool) bison_insert_array(struct bison_array_it *it_out, struct bison_
         error_if_null(it_out)
         error_if_null(inserter_in)
 
-
+        bison_int_insert_array(&inserter_in->memfile, 8);
+        u64 payload_start = memfile_tell(&inserter_in->memfile) - 1;
+        return bison_array_it_create(it_out, &inserter_in->memfile, &inserter_in->err, payload_start, READ_WRITE);
 
         return true;
 }
