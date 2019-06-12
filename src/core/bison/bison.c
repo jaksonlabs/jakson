@@ -70,6 +70,7 @@ static bool printer_bison_signed(struct bison_printer *printer, struct string_bu
 static bool printer_bison_unsigned(struct bison_printer *printer, struct string_builder *builder, u64 value);
 static bool printer_bison_float(struct bison_printer *printer, struct string_builder *builder, float value);
 static bool printer_bison_string(struct bison_printer *printer, struct string_builder *builder, const char *value, u64 strlen);
+static bool printer_bison_binary(struct bison_printer *printer, struct string_builder *builder, const struct bison_binary *binary);
 
 static bool print_array(struct bison_array_it *it, struct bison_printer *printer, struct string_builder *builder);
 
@@ -376,7 +377,9 @@ NG5_EXPORT(const char *) bison_field_type_str(struct err *err, enum bison_field_
         case BISON_FIELD_TYPE_NUMBER_I64_COLUMN: return BISON_FIELD_TYPE_NUMBER_I64_COLUMN_STR;
         case BISON_FIELD_TYPE_NUMBER_FLOAT_COLUMN: return BISON_FIELD_TYPE_NUMBER_FLOAT_COLUMN_STR;
         case BISON_FIELD_TYPE_NCHAR_COLUMN: return BISON_FIELD_TYPE_NUMBER_NCHAR_COLUMN_STR;
-        case BISON_FIELD_TYPE_BINARY: return BISON_FIELD_TYPE_NUMBER_BINARY_STR;
+        case BISON_FIELD_TYPE_BINARY_CUSTOM:
+        case BISON_FIELD_TYPE_BINARY:
+                return BISON_FIELD_TYPE_NUMBER_BINARY_STR;
         case BISON_FIELD_TYPE_NBINARY_COLUMN: return BISON_FIELD_TYPE_NUMBER_NBINARY_COLUMN_STR;
         default:
                 error(err, NG5_ERR_NOTFOUND);
@@ -718,6 +721,13 @@ static bool printer_bison_string(struct bison_printer *printer, struct string_bu
         return true;
 }
 
+static bool printer_bison_binary(struct bison_printer *printer, struct string_builder *builder, const struct bison_binary *binary)
+{
+        error_if_null(printer->print_bison_binary);
+        printer->print_bison_binary(printer, builder, binary);
+        return true;
+}
+
 static bool print_array(struct bison_array_it *it, struct bison_printer *printer, struct string_builder *builder)
 {
         assert(it);
@@ -767,6 +777,12 @@ static bool print_array(struct bison_array_it *it, struct bison_printer *printer
                         const char *value = bison_array_it_string_value(&strlen, it);
                         printer_bison_string(printer, builder, value, strlen);
                 } break;
+                case BISON_FIELD_TYPE_BINARY:
+                case BISON_FIELD_TYPE_BINARY_CUSTOM: {
+                        struct bison_binary binary;
+                        bison_array_it_binary_value(&binary, it);
+                        printer_bison_binary(printer, builder, &binary);
+                } break;
                 case BISON_FIELD_TYPE_OBJECT:
                 case BISON_FIELD_TYPE_ARRAY:
                 case BISON_FIELD_TYPE_NUMBER_U8_COLUMN:
@@ -779,7 +795,6 @@ static bool print_array(struct bison_array_it *it, struct bison_printer *printer
                 case BISON_FIELD_TYPE_NUMBER_I64_COLUMN:
                 case BISON_FIELD_TYPE_NUMBER_FLOAT_COLUMN:
                 case BISON_FIELD_TYPE_NCHAR_COLUMN:
-                case BISON_FIELD_TYPE_BINARY:
                 case BISON_FIELD_TYPE_NBINARY_COLUMN:
                 default:
                         printer_bison_array_end(printer, builder);

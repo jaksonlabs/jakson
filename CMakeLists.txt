@@ -20,6 +20,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/build)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/build)
 
 include_directories("${CMAKE_SOURCE_DIR}/src/include")
+include_directories("${CMAKE_SOURCE_DIR}")
 
 include_directories("/usr/include")
 include_directories("/usr/local/include")
@@ -28,7 +29,9 @@ set(LIBS ${LIBS} pthread m)
 
 file(GLOB_RECURSE LIB_HEADER_FILES src/include/*.h )
 file(GLOB_RECURSE LIB_SOURCE_FILES src/*.c )
-set(LIB_SOURCES ${LIB_HEADER_FILES} ${LIB_SOURCE_FILES})
+file(GLOB_RECURSE LIB_LIBS_HEADER_FILES libs/*.h )
+file(GLOB_RECURSE LIB_LIBS_SOURCE_FILES libs/*.c )
+set(LIB_SOURCES ${LIB_HEADER_FILES} ${LIB_SOURCE_FILES} ${LIB_LIBS_HEADER_FILES} ${LIB_LIBS_SOURCE_FILES})
 
 if (${LOG_INFO} MATCHES "on")
     if (${BUILD_TYPE} MATCHES Debug)

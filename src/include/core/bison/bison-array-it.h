@@ -36,8 +36,12 @@ struct bison_array_it
         struct err err;
 
         enum bison_field_type it_field_type;
+
         const void *it_field_data;
         u64 it_field_len;
+
+        const char *it_mime_type;
+        u64 it_mime_type_strlen;
 };
 
 NG5_DEFINE_ERROR_GETTER(bison_array_it);
@@ -106,6 +110,8 @@ NG5_EXPORT(bool) bison_array_it_signed_value(i64 *value, struct bison_array_it *
 NG5_EXPORT(bool) bison_array_it_unsigned_value(u64 *value, struct bison_array_it *it);
 
 NG5_EXPORT(const char *) bison_array_it_string_value(u64 *strlen, struct bison_array_it *it);
+
+NG5_EXPORT(bool) bison_array_it_binary_value(struct bison_binary *out, struct bison_array_it *it);
 
 /**
  * Checks whether the slot before the current element is in use.

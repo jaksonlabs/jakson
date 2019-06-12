@@ -502,6 +502,132 @@ TEST(BisonTest, BisonArrayIteratorStrings) {
         bison_drop(&doc);
 }
 
+TEST(BisonTest, BisonInsertMimeTypedBlob) {
+        struct bison doc, rev_doc;
+        struct bison_revise revise;
+        struct bison_array_it it;
+        struct bison_insert inserter;
+
+        bison_create_ex(&doc, 20, 1);
+
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_access(&it, &revise);
+        bison_array_it_insert(&inserter, &it);
+        const char *data = "{ \"Message\": \"Hello World\" }";
+        bool status = bison_insert_binary(&inserter, data, strlen(data), "json", NULL);
+        ASSERT_TRUE(status);
+        bison_hexdump_print(stdout, &rev_doc);
+        bison_insert_drop(&inserter);
+        bison_revise_end(&revise);
+
+        bison_print(stdout, &rev_doc);
+
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonInsertCustomTypedBlob) {
+        struct bison doc, rev_doc;
+        struct bison_revise revise;
+        struct bison_array_it it;
+        struct bison_insert inserter;
+
+        bison_create_ex(&doc, 20, 1);
+
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_access(&it, &revise);
+        bison_array_it_insert(&inserter, &it);
+        const char *data = "{ \"Message\": \"Hello World\" }";
+        bool status = bison_insert_binary(&inserter, data, strlen(data), NULL, "my data");
+        ASSERT_TRUE(status);
+        bison_hexdump_print(stdout, &rev_doc);
+        bison_insert_drop(&inserter);
+        bison_revise_end(&revise);
+
+        bison_print(stdout, &rev_doc);
+
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonInsertTwoMimeTypedBlob) {
+        struct bison doc, rev_doc;
+        struct bison_revise revise;
+        struct bison_array_it it;
+        struct bison_insert inserter;
+
+        bison_create_ex(&doc, 20, 1);
+
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_access(&it, &revise);
+        bison_array_it_insert(&inserter, &it);
+        const char *data1 = "{ \"Message\": \"Hello World\" }";
+        const char *data2 = "{ \"Blog-Header\": \"My Fancy Blog\" }";
+        bool status = bison_insert_binary(&inserter, data1, strlen(data1), "json", NULL);
+        ASSERT_TRUE(status);
+        status = bison_insert_binary(&inserter, data2, strlen(data2), "txt", NULL);
+        ASSERT_TRUE(status);
+        bison_hexdump_print(stdout, &rev_doc);
+        bison_insert_drop(&inserter);
+        bison_revise_end(&revise);
+
+        bison_print(stdout, &rev_doc);
+
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonInsertMimeTypedBlobsWithOverflow) {
+        struct bison doc, rev_doc;
+        struct bison_revise revise;
+        struct bison_array_it it;
+        struct bison_insert inserter;
+
+        bison_create_ex(&doc, 20, 1);
+
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_access(&it, &revise);
+        bison_array_it_insert(&inserter, &it);
+        const char *data1 = "{ \"Message\": \"Hello World\" }";
+        const char *data2 = "{ \"Blog-Header\": \"My Fancy Blog\" }";
+        for (u32 i = 0; i < 100; i++) {
+                bool status = bison_insert_binary(&inserter, i % 2 == 0 ? data1 : data2,
+                        strlen(i % 2 == 0 ? data1 : data2), "json", NULL);
+                ASSERT_TRUE(status);
+        }
+        bison_hexdump_print(stdout, &rev_doc);
+        bison_insert_drop(&inserter);
+        bison_revise_end(&revise);
+
+        bison_print(stdout, &rev_doc);
+
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonInsertMixedTypedBlobsWithOverflow) {
+        struct bison doc, rev_doc;
+        struct bison_revise revise;
+        struct bison_array_it it;
+        struct bison_insert inserter;
+
+        bison_create_ex(&doc, 20, 1);
+
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_access(&it, &revise);
+        bison_array_it_insert(&inserter, &it);
+        const char *data1 = "{ \"Message\": \"Hello World\" }";
+        const char *data2 = "{ \"Blog-Header\": \"My Fancy Blog\" }";
+        for (u32 i = 0; i < 100; i++) {
+                bool status = bison_insert_binary(&inserter, i % 2 == 0 ? data1 : data2,
+                        strlen(i % 2 == 0 ? data1 : data2), i % 3 == 0 ? "json" : NULL, i % 5 == 0 ? "user/app" : NULL);
+                ASSERT_TRUE(status);
+        }
+        bison_hexdump_print(stdout, &rev_doc);
+        bison_insert_drop(&inserter);
+        bison_revise_end(&revise);
+
+        bison_print(stdout, &rev_doc);
+
+        bison_drop(&doc);
+}
+
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

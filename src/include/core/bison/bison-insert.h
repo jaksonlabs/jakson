@@ -53,7 +53,17 @@ NG5_EXPORT(bool) bison_insert_float(struct bison_insert *inserter, float value);
 
 NG5_EXPORT(bool) bison_insert_string(struct bison_insert *inserter, const char *value);
 
-NG5_EXPORT(bool) bison_insert_binary(struct bison_insert *inserter, const void *value, size_t nbytes);
+/**
+ * Inserts a user-defined binary string <code>value</code> of <code>nbytes</code> bytes along with a (mime) type annotation.
+ * The type annotation is automatically found if <code>file_ext</code> is non-null and known to the system. If it is
+ * not known or null, the non-empty <code>user_type</code> string is used to encode the mime annotation. In case
+ * <code>user_type</code> is null (or empty) and <code>file_ext</code> is null (or not known), the mime type is set to
+ * <code>application/octet-stream</code>, which encodes arbitrary binary data.
+ */
+NG5_EXPORT(bool) bison_insert_binary(struct bison_insert *inserter, const void *value, size_t nbytes,
+        const char *file_ext, const char *user_type);
+
+NG5_EXPORT(bool) bison_insert_array(struct bison_array_it *it_out, struct bison_insert *inserter_in);
 
 NG5_EXPORT(bool) bison_insert_drop(struct bison_insert *inserter);
 

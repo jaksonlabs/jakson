@@ -114,10 +114,20 @@ enum bison_field_type
         BISON_FIELD_TYPE_NCHAR_COLUMN = 24, /* maximum n characters per string */
 
         /* user-defined binary data */
-        BISON_FIELD_TYPE_BINARY = 'b', /* arbitrary binary object */
+        BISON_FIELD_TYPE_BINARY = 'b', /* arbitrary binary object with known mime type */
+        BISON_FIELD_TYPE_BINARY_CUSTOM = 'x', /* arbitrary binary object with unknown mime type*/
 
         /* user-defined binary data */
         BISON_FIELD_TYPE_NBINARY_COLUMN = 26 /* maximum n byte per datum */
+};
+
+struct bison_binary
+{
+        const char *mime_type;
+        u64 mime_type_strlen;
+
+        const void *blob;
+        u64 blob_len;
 };
 
 struct bison_printer
@@ -148,6 +158,7 @@ struct bison_printer
         void (*print_bison_float)(struct bison_printer *self, struct string_builder *builder, float value);
 
         void (*print_bison_string)(struct bison_printer *self, struct string_builder *builder, const char *value, u64 strlen);
+        void (*print_bison_binary)(struct bison_printer *self, struct string_builder *builder, const struct bison_binary *binary);
 
         void (*print_bison_comma)(struct bison_printer *self, struct string_builder *builder);
 };

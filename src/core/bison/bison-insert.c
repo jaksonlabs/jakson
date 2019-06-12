@@ -156,9 +156,70 @@ NG5_EXPORT(bool) bison_insert_string(struct bison_insert *inserter, const char *
         return insert_byte_sequence(inserter, value, strlen(value), BISON_FIELD_TYPE_STRING);
 }
 
-NG5_EXPORT(bool) bison_insert_binary(struct bison_insert *inserter, const void *value, size_t nbytes)
+static void write_binary_blob(struct bison_insert *inserter, const void *value, size_t nbytes)
 {
-        return insert_byte_sequence(inserter, value, nbytes, BISON_FIELD_TYPE_BINARY);
+        /* write binary blob length with variable-length integer type */
+        u8 required_blocks = varuint_required_blocks(nbytes);
+        ensure_space(inserter, required_blocks + nbytes);
+
+        varuint_t num_bytes = (varuint_t) memfile_peek(&inserter->memfile, 1);
+        varuint_write(num_bytes, nbytes);
+        memfile_skip(&inserter->memfile, required_blocks);
+
+        /* write binary blob */
+        memfile_write(&inserter->memfile, value, nbytes);
+}
+
+NG5_EXPORT(bool) bison_insert_binary(struct bison_insert *inserter, const void *value, size_t nbytes,
+        const char *file_ext, const char *user_type)
+{
+        if (user_type && strlen(user_type) > 0) {
+                /* write media type 'user binary' */
+                push_media_type(inserter, BISON_FIELD_TYPE_BINARY_CUSTOM);
+
+                /* write length of 'user_type' string with variable-length integer type */
+                u64 user_type_strlen = strlen(user_type);
+                u8 required_blocks = varuint_required_blocks(user_type_strlen);
+                ensure_space(inserter, required_blocks + user_type_strlen);
+                varuint_t user_type_strlen_data = (varuint_t) memfile_peek(&inserter->memfile, 1);
+                varuint_write(user_type_strlen_data, user_type_strlen);
+                memfile_skip(&inserter->memfile, required_blocks);
+
+                /* write 'user_type' string */
+                memfile_write(&inserter->memfile, user_type, user_type_strlen);
+
+                /* write binary blob */
+                write_binary_blob(inserter, value, nbytes);
+
+        } else {
+                /* write media type 'binary' */
+                push_media_type(inserter, BISON_FIELD_TYPE_BINARY);
+
+                /* write mime type with variable-length integer type */
+                u64 mime_type_id = bison_media_mime_type_by_ext(file_ext);
+                u8 required_blocks = varuint_required_blocks(mime_type_id);
+
+                ensure_space(inserter, required_blocks);
+
+                varuint_t mime_type = (varuint_t) memfile_peek(&inserter->memfile, 1);
+                varuint_write(mime_type, mime_type_id);
+                memfile_skip(&inserter->memfile, required_blocks);
+
+                /* write binary blob */
+                write_binary_blob(inserter, value, nbytes);
+        }
+
+        return true;
+}
+
+NG5_EXPORT(bool) bison_insert_array(struct bison_array_it *it_out, struct bison_insert *inserter_in)
+{
+        error_if_null(it_out)
+        error_if_null(inserter_in)
+
+
+
+        return true;
 }
 
 NG5_EXPORT(bool) bison_insert_drop(struct bison_insert *inserter)
