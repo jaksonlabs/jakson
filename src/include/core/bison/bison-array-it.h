@@ -27,6 +27,7 @@ NG5_BEGIN_DECL
 
 struct bison; /* forwarded from bison.h */
 struct bison_insert; /* forwarded from bison-literal-inserter.h */
+struct bison_column_it; /* forwarded from bison-column-it.h */
 
 struct bison_array_it
 {
@@ -44,6 +45,7 @@ struct bison_array_it
         u64 it_mime_type_strlen;
 
         struct bison_array_it *nested_array_it;
+        struct bison_column_it *nested_column_it;
 };
 
 NG5_DEFINE_ERROR_GETTER(bison_array_it);
@@ -54,7 +56,9 @@ NG5_DEFINE_ERROR_GETTER(bison_array_it);
  * (e.g., a header), <code>payload_start</code> must not include this data.
  */
 NG5_EXPORT(bool) bison_array_it_create(struct bison_array_it *it, struct memfile *memfile, struct err *err,
-        offset_t payload_start, enum access_mode mode);
+        offset_t payload_start);
+
+NG5_EXPORT(bool) bison_array_it_readonly(struct bison_array_it *it);
 
 /**
  * Drops the iterator.
@@ -75,11 +79,6 @@ NG5_EXPORT(bool) bison_array_it_unlock(struct bison_array_it *it);
  * Positions the iterator at the beginning of this array.
  */
 NG5_EXPORT(bool) bison_array_it_rewind(struct bison_array_it *it);
-
-/**
- * Positions the iterator to the last element of this array.
- */
-NG5_EXPORT(bool) bison_array_it_fast_forward(struct bison_array_it *it);
 
 /**
  * Positions the iterator to the slot after the current element, potentially pointing to next element.
@@ -117,16 +116,7 @@ NG5_EXPORT(bool) bison_array_it_binary_value(struct bison_binary *out, struct bi
 
 NG5_EXPORT(struct bison_array_it *) bison_array_it_array_value(struct bison_array_it *it_in);
 
-
-/**
- * Checks whether the slot before the current element is in use.
- */
-NG5_EXPORT(bool) bison_array_it_has_prev(struct bison_array_it *it);
-
-/**
- * Positions the iterator to the element before the current one.
- */
-NG5_EXPORT(bool) bison_array_it_prev(struct bison_array_it *it);
+NG5_EXPORT(struct bison_column_it *) bison_array_it_column_value(struct bison_array_it *it_in);
 
 /**
  * Inserts a new element at the current position of the iterator. In any case, <code>bison_insert_drop</code>

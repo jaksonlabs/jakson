@@ -1,0 +1,69 @@
+/**
+ * BISON Adaptive Binary JSON -- Copyright 2019 Marcus Pinnecke
+ * This file implements an (read-/write) iterator for (JSON) arrays in BISON
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+ * the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+#ifndef BISON_COLUMN_IT_H
+#define BISON_COLUMN_IT_H
+
+#include "shared/common.h"
+#include "shared/error.h"
+#include "core/async/spin.h"
+#include "bison.h"
+
+NG5_BEGIN_DECL
+
+struct bison; /* forwarded from bison.h */
+struct bison_insert; /* forwarded from bison-literal-inserter.h */
+
+struct bison_column_it
+{
+        struct memfile memfile;
+        offset_t payload_start;
+        struct err err;
+        enum bison_field_type type;
+
+        struct spinlock lock;
+};
+
+NG5_EXPORT(bool) bison_column_it_create(struct bison_column_it *it, struct memfile *memfile, struct err *err,
+        offset_t payload_start);
+
+NG5_EXPORT(bool) bison_column_it_insert(struct bison_insert *inserter, struct bison_column_it *it);
+
+NG5_EXPORT(bool) bison_column_it_fast_forward(struct bison_column_it *it);
+
+NG5_EXPORT(const void *) bison_column_it_values(enum bison_field_type *type, u64 *nvalues, struct bison_column_it *it);
+
+
+/**
+ * Locks the iterator with a spinlock. A call to <code>bison_column_it_unlock</code> is required for unlocking.
+ */
+NG5_EXPORT(bool) bison_column_it_lock(struct bison_column_it *it);
+
+/**
+ * Unlocks the iterator
+ */
+NG5_EXPORT(bool) bison_column_it_unlock(struct bison_column_it *it);
+
+/**
+ * Positions the iterator at the beginning of this array.
+ */
+NG5_EXPORT(bool) bison_column_it_rewind(struct bison_column_it *it);
+
+NG5_END_DECL
+
+#endif

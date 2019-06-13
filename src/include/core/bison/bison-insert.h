@@ -24,14 +24,23 @@
 #include "core/mem/block.h"
 #include "core/mem/file.h"
 #include "core/async/spin.h"
+#include "core/bison/bison.h"
 
 NG5_BEGIN_DECL
 
 struct bison_array_it; /* forwarded from bison-array-it.h */
+struct bison_column_it; /* forwarded from bison-column-it.h */
+
+enum bison_container_type { BISON_ARRAY, BISON_COLUMN };
 
 struct bison_insert
 {
-        struct bison_array_it *context;
+        enum bison_container_type context_type;
+        union {
+                struct bison_array_it *array;
+                struct bison_column_it *column;
+        } context;
+
         struct memfile memfile;
         offset_t position;
         struct err err;
@@ -45,7 +54,20 @@ struct bison_insert_array_state
         struct bison_insert nested_inserter;
 };
 
-NG5_EXPORT(bool) bison_insert_create(struct bison_insert *inserter, struct bison_array_it *context);
+struct bison_insert_column_state
+{
+        struct bison_insert *parent_inserter;
+
+        enum bison_field_type type;
+        struct bison_column_it *nested_column;
+        struct bison_insert nested_inserter;
+
+};
+
+NG5_EXPORT(bool) bison_insert_create_for_array(struct bison_insert *inserter, struct bison_array_it *context);
+
+NG5_EXPORT(bool) bison_insert_create_for_column(struct bison_insert *inserter, struct bison_column_it *context);
+
 
 NG5_EXPORT(bool) bison_insert_null(struct bison_insert *inserter);
 
@@ -75,6 +97,11 @@ NG5_EXPORT(struct bison_insert *) bison_insert_array_begin(struct bison_insert_a
         struct bison_insert *inserter_in, u64 array_capacity);
 
 NG5_EXPORT(bool) bison_insert_array_end(struct bison_insert_array_state *state_in);
+
+NG5_EXPORT(struct bison_insert *) bison_insert_column_begin(struct bison_insert_column_state *state_out,
+        struct bison_insert *inserter_in, enum bison_field_type type, u64 column_capacity);
+
+NG5_EXPORT(bool) bison_insert_column_end(struct bison_insert_column_state *state_in);
 
 NG5_EXPORT(bool) bison_insert_drop(struct bison_insert *inserter);
 

@@ -20,6 +20,7 @@
 
 #include "core/bison/bison.h"
 #include "core/bison/bison-array-it.h"
+#include "core/bison/bison-column-it.h"
 #include "core/bison/bison-printers.h"
 #include "core/bison/bison-int.h"
 #include "stdx/varuint.h"
@@ -74,6 +75,7 @@ static bool printer_bison_string(struct bison_printer *printer, struct string_bu
 static bool printer_bison_binary(struct bison_printer *printer, struct string_builder *builder, const struct bison_binary *binary);
 
 static bool print_array(struct bison_array_it *it, struct bison_printer *printer, struct string_builder *builder);
+static bool print_column(struct bison_column_it *it, struct bison_printer *printer, struct string_builder *builder);
 
 static bool internal_drop(struct bison *doc);
 static bool internal_revision_inc(struct bison *doc);
@@ -301,8 +303,8 @@ NG5_EXPORT(bool) bison_revise_access(struct bison_array_it *it, struct bison_rev
         error_if_null(it);
         error_if_null(context);
         offset_t payload_start = internal_payload_after_header(context->revised_doc);
-        return bison_array_it_create(it, &context->revised_doc->memfile, &context->original->err,
-                payload_start, READ_WRITE);
+        error_if(context->revised_doc->memfile.mode != READ_WRITE, &context->original->err, NG5_ERR_INTERNALERR)
+        return bison_array_it_create(it, &context->revised_doc->memfile, &context->original->err, payload_start);
 }
 
 NG5_EXPORT(const struct bison *) bison_revise_end(struct bison_revise *context)
@@ -344,7 +346,9 @@ NG5_EXPORT(bool) bison_access(struct bison_array_it *it, struct bison *doc)
         error_if_null(it);
         error_if_null(doc);
         offset_t payload_start = internal_payload_after_header(doc);
-        return bison_array_it_create(it, &doc->memfile, &doc->err, payload_start, READ_ONLY);
+        bison_array_it_create(it, &doc->memfile, &doc->err, payload_start);
+        bison_array_it_readonly(it);
+        return true;
 }
 
 NG5_EXPORT(const char *) bison_field_type_str(struct err *err, enum bison_field_type type)
@@ -365,20 +369,9 @@ NG5_EXPORT(const char *) bison_field_type_str(struct err *err, enum bison_field_
         case BISON_FIELD_TYPE_NUMBER_I32: return BISON_FIELD_TYPE_NUMBER_I32_STR;
         case BISON_FIELD_TYPE_NUMBER_I64: return BISON_FIELD_TYPE_NUMBER_I64_STR;
         case BISON_FIELD_TYPE_NUMBER_FLOAT: return BISON_FIELD_TYPE_NUMBER_FLOAT_STR;
-        case BISON_FIELD_TYPE_NUMBER_U8_COLUMN: return BISON_FIELD_TYPE_NUMBER_U8_COLUMN_STR;
-        case BISON_FIELD_TYPE_NUMBER_U16_COLUMN: return BISON_FIELD_TYPE_NUMBER_U16_COLUMN_STR;
-        case BISON_FIELD_TYPE_NUMBER_U32_COLUMN: return BISON_FIELD_TYPE_NUMBER_U32_COLUMN_STR;
-        case BISON_FIELD_TYPE_NUMBER_U64_COLUMN: return BISON_FIELD_TYPE_NUMBER_U64_COLUMN_STR;
-        case BISON_FIELD_TYPE_NUMBER_I8_COLUMN: return BISON_FIELD_TYPE_NUMBER_I8_COLUMN_STR;
-        case BISON_FIELD_TYPE_NUMBER_I16_COLUMN: return BISON_FIELD_TYPE_NUMBER_I16_COLUMN_STR;
-        case BISON_FIELD_TYPE_NUMBER_I32_COLUMN: return BISON_FIELD_TYPE_NUMBER_I32_COLUMN_STR;
-        case BISON_FIELD_TYPE_NUMBER_I64_COLUMN: return BISON_FIELD_TYPE_NUMBER_I64_COLUMN_STR;
-        case BISON_FIELD_TYPE_NUMBER_FLOAT_COLUMN: return BISON_FIELD_TYPE_NUMBER_FLOAT_COLUMN_STR;
-        case BISON_FIELD_TYPE_NCHAR_COLUMN: return BISON_FIELD_TYPE_NUMBER_NCHAR_COLUMN_STR;
         case BISON_FIELD_TYPE_BINARY_CUSTOM:
         case BISON_FIELD_TYPE_BINARY:
-                return BISON_FIELD_TYPE_NUMBER_BINARY_STR;
-        case BISON_FIELD_TYPE_NBINARY_COLUMN: return BISON_FIELD_TYPE_NUMBER_NBINARY_COLUMN_STR;
+                return BISON_FIELD_TYPE_BINARY_STR;
         default:
                 error(err, NG5_ERR_NOTFOUND);
                 return NULL;
@@ -681,6 +674,17 @@ static bool print_array(struct bison_array_it *it, struct bison_printer *printer
         assert(builder);
         bool first_entry = true;
         printer_bison_array_begin(printer, builder);
+
+
+        // -- DEBUG
+        // offset_t size;
+        // memblock_size(&size, it->memfile.memblock);
+        // hexdump_print(stdout, memblock_raw_data(it->memfile.memblock), size);
+        // -- DEBUG
+
+
+
+
         while (bison_array_it_next(it)) {
                 if (likely(!first_entry)) {
                         printer_bison_comma(printer, builder);
@@ -730,21 +734,14 @@ static bool print_array(struct bison_array_it *it, struct bison_printer *printer
                         printer_bison_binary(printer, builder, &binary);
                 } break;
                 case BISON_FIELD_TYPE_ARRAY: {
-                        struct bison_array_it *nested_array = bison_array_it_array_value(it);
-                        print_array(nested_array, printer, builder);
+                        struct bison_array_it *array = bison_array_it_array_value(it);
+                        print_array(array, printer, builder);
+                } break;
+                case BISON_FIELD_TYPE_COLUMN: {
+                        struct bison_column_it *column = bison_array_it_column_value(it);
+                        print_column(column, printer, builder);
                 } break;
                 case BISON_FIELD_TYPE_OBJECT:
-                case BISON_FIELD_TYPE_NUMBER_U8_COLUMN:
-                case BISON_FIELD_TYPE_NUMBER_U16_COLUMN:
-                case BISON_FIELD_TYPE_NUMBER_U32_COLUMN:
-                case BISON_FIELD_TYPE_NUMBER_U64_COLUMN:
-                case BISON_FIELD_TYPE_NUMBER_I8_COLUMN:
-                case BISON_FIELD_TYPE_NUMBER_I16_COLUMN:
-                case BISON_FIELD_TYPE_NUMBER_I32_COLUMN:
-                case BISON_FIELD_TYPE_NUMBER_I64_COLUMN:
-                case BISON_FIELD_TYPE_NUMBER_FLOAT_COLUMN:
-                case BISON_FIELD_TYPE_NCHAR_COLUMN:
-                case BISON_FIELD_TYPE_NBINARY_COLUMN:
                 default:
                         printer_bison_array_end(printer, builder);
                         error(&it->err, NG5_ERR_CORRUPTED);
@@ -754,5 +751,77 @@ static bool print_array(struct bison_array_it *it, struct bison_printer *printer
         }
 
         printer_bison_array_end(printer, builder);
+        return true;
+}
+
+static bool print_column(struct bison_column_it *it, struct bison_printer *printer, struct string_builder *builder)
+{
+        error_if_null(it)
+        error_if_null(printer)
+        error_if_null(builder)
+
+        enum bison_field_type type;
+        u64 nvalues;
+        const void *values = bison_column_it_values(&type, &nvalues, it);
+
+        printer_bison_array_begin(printer, builder);
+        for (u64 i = 0; i < nvalues; i++) {
+                switch (type) {
+                case BISON_FIELD_TYPE_NULL:
+                        printer_bison_null(printer, builder);
+                        break;
+                case BISON_FIELD_TYPE_TRUE:
+                        printer_bison_true(printer, builder);
+                        break;
+                case BISON_FIELD_TYPE_FALSE:
+                        printer_bison_false(printer, builder);
+                        break;
+                case BISON_FIELD_TYPE_NUMBER_U8: {
+                        u64 number = ((u8*) values)[i];
+                        printer_bison_unsigned(printer, builder, number);
+                } break;
+                case BISON_FIELD_TYPE_NUMBER_U16: {
+                        u64 number = ((u16*) values)[i];
+                        printer_bison_unsigned(printer, builder, number);
+                } break;
+                case BISON_FIELD_TYPE_NUMBER_U32: {
+                        u64 number = ((u32*) values)[i];
+                        printer_bison_unsigned(printer, builder, number);
+                } break;
+                case BISON_FIELD_TYPE_NUMBER_U64: {
+                        u64 number = ((u64*) values)[i];
+                        printer_bison_unsigned(printer, builder, number);
+                } break;
+                case BISON_FIELD_TYPE_NUMBER_I8: {
+                        i64 number = ((i8*) values)[i];
+                        printer_bison_signed(printer, builder, number);
+                } break;
+                case BISON_FIELD_TYPE_NUMBER_I16: {
+                        i64 number = ((i16*) values)[i];
+                        printer_bison_signed(printer, builder, number);
+                } break;
+                case BISON_FIELD_TYPE_NUMBER_I32: {
+                        i64 number = ((i32*) values)[i];
+                        printer_bison_signed(printer, builder, number);
+                } break;
+                case BISON_FIELD_TYPE_NUMBER_I64: {
+                        i64 number = ((i64*) values)[i];
+                        printer_bison_signed(printer, builder, number);
+                } break;
+                case BISON_FIELD_TYPE_NUMBER_FLOAT: {
+                        float number = ((float*) values)[i];
+                        printer_bison_float(printer, builder, number);
+                } break;
+                default:
+                        printer_bison_array_end(printer, builder);
+                        error(&it->err, NG5_ERR_CORRUPTED);
+                        return false;
+                }
+                if (i + 1 < nvalues) {
+                        printer_bison_comma(printer, builder);
+                }
+        }
+        printer_bison_array_end(printer, builder);
+
         return true;
 }

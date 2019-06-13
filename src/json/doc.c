@@ -1302,10 +1302,6 @@ struct columndoc *doc_entries_columndoc(const struct doc_bulk *bulk, const struc
 
         const struct doc *model = models;
 
-        // TODO: DEBUG remove these lines
-        // fprintf(stdout, "\nDocument Model:\n");
-        // DocumentModelPrint(stdout, doc);
-
         struct columndoc *columndoc = malloc(sizeof(struct columndoc));
         columndoc->read_optimized = read_optimized;
         struct err err;
@@ -1316,10 +1312,6 @@ struct columndoc *doc_entries_columndoc(const struct doc_bulk *bulk, const struc
         if (columndoc->read_optimized) {
                 sort_columndoc_entries(&columndoc->columndoc);
         }
-
-
-        //  fprintf(stdout, "\nDocument Meta Model:\n");
-        //  DocumentMetaModelPrint(stdout, columndoc);
 
         return columndoc;
 }

@@ -28,6 +28,8 @@ struct bison_insert; /* forwarded from 'bison-insert.h' */
 
 NG5_EXPORT(bool) bison_int_insert_array(struct memfile *memfile, size_t nbytes);
 
+NG5_EXPORT(bool) bison_int_insert_column(struct memfile *memfile_in, struct err *err_in, enum bison_field_type type, size_t capactity);
+
 NG5_EXPORT(bool) bison_int_ensure_space(struct memfile *memfile, u64 nbytes);
 
 NG5_END_DECL

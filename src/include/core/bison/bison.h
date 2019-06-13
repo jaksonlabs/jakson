@@ -85,7 +85,8 @@ enum bison_field_type
 
         /* JSON typing */
         BISON_FIELD_TYPE_OBJECT = 'o', /* object */
-        BISON_FIELD_TYPE_ARRAY = '[', /* variable-type array */
+        BISON_FIELD_TYPE_ARRAY = '[', /* variable-type array of elements of varying type */
+        BISON_FIELD_TYPE_COLUMN = '(', /* fixed-type array of elements of particular type */
         BISON_FIELD_TYPE_STRING = 's', /* UTF-8 string */
 
         /* JSON numbers */
@@ -99,26 +100,9 @@ enum bison_field_type
         BISON_FIELD_TYPE_NUMBER_I64 = 'L', /* 64bit signed integer */
         BISON_FIELD_TYPE_NUMBER_FLOAT = 'r', /* 32bit float */
 
-        /* fixed-type number arrays */
-        BISON_FIELD_TYPE_NUMBER_U8_COLUMN = 15, /* 8bit unsigned integer */
-        BISON_FIELD_TYPE_NUMBER_U16_COLUMN = 16, /* 16bit unsigned integer */
-        BISON_FIELD_TYPE_NUMBER_U32_COLUMN = 17, /* 32bit unsigned integer */
-        BISON_FIELD_TYPE_NUMBER_U64_COLUMN = 18, /* 64bit unsigned integer */
-        BISON_FIELD_TYPE_NUMBER_I8_COLUMN = 19, /* 8bit signed integer */
-        BISON_FIELD_TYPE_NUMBER_I16_COLUMN = 20, /* 16bit signed integer */
-        BISON_FIELD_TYPE_NUMBER_I32_COLUMN = 21, /* 32bit signed integer */
-        BISON_FIELD_TYPE_NUMBER_I64_COLUMN = 22, /* 64bit signed integer */
-        BISON_FIELD_TYPE_NUMBER_FLOAT_COLUMN = 23, /* 32bit float */
-
-        /* fixed-type string array */
-        BISON_FIELD_TYPE_NCHAR_COLUMN = 24, /* maximum n characters per string */
-
         /* user-defined binary data */
         BISON_FIELD_TYPE_BINARY = 'b', /* arbitrary binary object with known mime type */
         BISON_FIELD_TYPE_BINARY_CUSTOM = 'x', /* arbitrary binary object with unknown mime type*/
-
-        /* user-defined binary data */
-        BISON_FIELD_TYPE_NBINARY_COLUMN = 26 /* maximum n byte per datum */
 };
 
 struct bison_binary
@@ -174,6 +158,7 @@ enum bison_printer_impl
 #define BISON_FIELD_TYPE_OBJECT_STR "object"
 #define BISON_FIELD_TYPE_ARRAY_STR "array"
 #define BISON_FIELD_TYPE_STRING_STR "string"
+#define BISON_FIELD_TYPE_BINARY_STR "binary"
 #define BISON_FIELD_TYPE_NUMBER_U8_STR "number (u8)"
 #define BISON_FIELD_TYPE_NUMBER_U16_STR "number (u16)"
 #define BISON_FIELD_TYPE_NUMBER_U32_STR "number (u32)"
@@ -183,21 +168,12 @@ enum bison_printer_impl
 #define BISON_FIELD_TYPE_NUMBER_I32_STR "number (i32)"
 #define BISON_FIELD_TYPE_NUMBER_I64_STR "number (i64)"
 #define BISON_FIELD_TYPE_NUMBER_FLOAT_STR "number (float)"
-#define BISON_FIELD_TYPE_NUMBER_U8_COLUMN_STR "number column (u8)"
-#define BISON_FIELD_TYPE_NUMBER_U16_COLUMN_STR "number column (u16)"
-#define BISON_FIELD_TYPE_NUMBER_U32_COLUMN_STR "number column (u32)"
-#define BISON_FIELD_TYPE_NUMBER_U64_COLUMN_STR "number column (u64)"
-#define BISON_FIELD_TYPE_NUMBER_I8_COLUMN_STR "number column (i8)"
-#define BISON_FIELD_TYPE_NUMBER_I16_COLUMN_STR "number column (i16)"
-#define BISON_FIELD_TYPE_NUMBER_I32_COLUMN_STR "number column (i32)"
-#define BISON_FIELD_TYPE_NUMBER_I64_COLUMN_STR "number column (i64)"
-#define BISON_FIELD_TYPE_NUMBER_FLOAT_COLUMN_STR "number column (float)"
-#define BISON_FIELD_TYPE_NUMBER_NCHAR_COLUMN_STR "string column (nchar)"
-#define BISON_FIELD_TYPE_NUMBER_BINARY_STR "binary"
-#define BISON_FIELD_TYPE_NUMBER_NBINARY_COLUMN_STR "binary column (nbinary)"
 
 #define BISON_MARKER_ARRAY_BEGIN '['
 #define BISON_MARKER_ARRAY_END ']'
+
+#define BISON_MARKER_COLUMN_BEGIN '('
+#define BISON_MARKER_COLUMN_END ')'
 
 NG5_DEFINE_GET_ERROR_FUNCTION(bison, struct bison, doc);
 

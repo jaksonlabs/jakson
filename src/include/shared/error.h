@@ -95,7 +95,7 @@ NG5_BEGIN_DECL
 #define NG5_ERR_ITER_NOSTRING 67           /** Unable to get value: type is not non-array string */
 #define NG5_ERR_ITER_OBJECT_NEEDED 68      /** Illegal state: iteration over object issued, but collection found */
 #define NG5_ERR_ITER_COLLECTION_NEEDED 69  /** Illegal state: iteration over collection issued, but object found */
-#define NG5_ERR_TYPEMISMATCH 70            /** Type mismatch */
+#define NG5_ERR_TYPEMISMATCH 70            /** Type mismatch detected */
 #define NG5_ERR_INDEXCORRUPTED_OFFSET 71   /** Index is corrupted: requested offset is outside file bounds */
 #define NG5_ERR_TMP_FOPENWRITE 72          /** Temporary file cannot be opened for writing */
 #define NG5_ERR_FWRITE_FAILED 73           /** Unable to write to file */
@@ -106,6 +106,7 @@ NG5_BEGIN_DECL
 #define NG5_ERR_OUTDATED 78                /** Object was modified and is out of date */
 #define NG5_ERR_NOTREADABLE 79             /** Object is currently being updated; no read allowed */
 #define NG5_ERR_ILLEGALOP 80               /** Illegal operation */
+#define NG5_ERR_BADTYPE 81                 /** Unsupported type */
 
 static const char *const _err_str[] =
         {"No error", "Null pointer detected", "Function not implemented", "Index is out of bounds",
@@ -139,12 +140,12 @@ static const char *const _err_str[] =
          "Unable to get value: type is not non-array uint64", "Unable to get value: type is not non-array number",
          "Unable to get value: type is not non-array string",
          "Illegal state: iteration over object issued, but collection found",
-         "Illegal state: iteration over collection issued, but object found", "Type mismatch",
+         "Illegal state: iteration over collection issued, but object found", "Type mismatch detected",
          "Index is corrupted: requested offset is outside file bounds", "Temporary file cannot be opened for writing",
          "Unable to write to file", "Unable to deserialize hash table from file",
          "Unknown string dictionary implementation requested", "Stack overflow", "Stack underflow",
          "Object was modified and is out of date", "Object is currently being updated; no read allowed",
-         "Illegal operation" };
+         "Illegal operation", "Unsupported type" };
 
 #define NG5_ERRSTR_ILLEGAL_CODE "illegal error code"
 

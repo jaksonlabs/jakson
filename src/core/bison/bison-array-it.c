@@ -19,16 +19,12 @@
 #include "stdx/varuint.h"
 #include "core/bison/bison.h"
 #include "core/bison/bison-array-it.h"
+#include "core/bison/bison-column-it.h"
 #include "core/bison/bison-insert.h"
 #include "core/bison/bison-media.h"
 
-static void auto_close_nested_array_it(struct bison_array_it *it)
-{
-        if (((char *) it->nested_array_it)[0] != 0) {
-                bison_array_it_drop(it->nested_array_it);
-                ng5_zero_memory(it->nested_array_it, sizeof(struct bison_array_it));
-        }
-}
+static void auto_close_nested_array_it(struct bison_array_it *it);
+static void auto_close_nested_column_it(struct bison_array_it *it);
 
 static bool field_type_read(struct bison_array_it *it)
 {
@@ -103,21 +99,13 @@ static bool field_data_access(struct bison_array_it *it)
         } break;
         case BISON_FIELD_TYPE_ARRAY:
                 bison_array_it_create(it->nested_array_it, &it->memfile, &it->err,
-                        memfile_tell(&it->memfile) - sizeof(u8), it->memfile.mode);
+                        memfile_tell(&it->memfile) - sizeof(u8));
                 break;
+        case BISON_FIELD_TYPE_COLUMN: {
+                bison_column_it_create(it->nested_column_it, &it->memfile, &it->err,
+                        memfile_tell(&it->memfile) - sizeof(u8));
+        } break;
         case BISON_FIELD_TYPE_OBJECT:
-        case BISON_FIELD_TYPE_NUMBER_U8_COLUMN:
-        case BISON_FIELD_TYPE_NUMBER_U16_COLUMN:
-        case BISON_FIELD_TYPE_NUMBER_U32_COLUMN:
-        case BISON_FIELD_TYPE_NUMBER_U64_COLUMN:
-        case BISON_FIELD_TYPE_NUMBER_I8_COLUMN:
-        case BISON_FIELD_TYPE_NUMBER_I16_COLUMN:
-        case BISON_FIELD_TYPE_NUMBER_I32_COLUMN:
-        case BISON_FIELD_TYPE_NUMBER_I64_COLUMN:
-        case BISON_FIELD_TYPE_NUMBER_FLOAT_COLUMN:
-        case BISON_FIELD_TYPE_NCHAR_COLUMN:
-
-        case BISON_FIELD_TYPE_NBINARY_COLUMN:
                 print_error_and_die(NG5_ERR_NOTIMPLEMENTED)
                 break;
         default:
@@ -200,25 +188,21 @@ static bool field_skip(struct bison_array_it *it)
         } break;
         case BISON_FIELD_TYPE_ARRAY: {
                 struct bison_array_it skip_it;
-                bison_array_it_create(&skip_it, &it->memfile, &it->err, memfile_tell(&it->memfile) - 1,
-                        it->memfile.mode);
+                bison_array_it_create(&skip_it, &it->memfile, &it->err, memfile_tell(&it->memfile) - sizeof(u8));
                 while (bison_array_it_next(&skip_it))
                         { }
                 memfile_seek(&it->memfile, memfile_tell(&skip_it.memfile) + 1);
                 bison_array_it_drop(&skip_it);
         } break;
+        case BISON_FIELD_TYPE_COLUMN: {
+                struct bison_column_it skip_it;
+                bison_column_it_create(&skip_it, &it->memfile, &it->err,
+                        memfile_tell(&it->memfile) - sizeof(media_type_t));
+                bison_column_it_fast_forward(&skip_it);
+                memfile_seek(&it->memfile, memfile_tell(&skip_it.memfile) + 1);
+
+        } break;
         case BISON_FIELD_TYPE_OBJECT:
-        case BISON_FIELD_TYPE_NUMBER_U8_COLUMN:
-        case BISON_FIELD_TYPE_NUMBER_U16_COLUMN:
-        case BISON_FIELD_TYPE_NUMBER_U32_COLUMN:
-        case BISON_FIELD_TYPE_NUMBER_U64_COLUMN:
-        case BISON_FIELD_TYPE_NUMBER_I8_COLUMN:
-        case BISON_FIELD_TYPE_NUMBER_I16_COLUMN:
-        case BISON_FIELD_TYPE_NUMBER_I32_COLUMN:
-        case BISON_FIELD_TYPE_NUMBER_I64_COLUMN:
-        case BISON_FIELD_TYPE_NUMBER_FLOAT_COLUMN:
-        case BISON_FIELD_TYPE_NCHAR_COLUMN:
-        case BISON_FIELD_TYPE_NBINARY_COLUMN:
         default:
                 error(&it->err, NG5_ERR_CORRUPTED);
                 return false;
@@ -228,7 +212,7 @@ static bool field_skip(struct bison_array_it *it)
 }
 
 NG5_EXPORT(bool) bison_array_it_create(struct bison_array_it *it, struct memfile *memfile, struct err *err,
-                                       offset_t payload_start, enum access_mode mode)
+                                       offset_t payload_start)
 {
         error_if_null(it);
         error_if_null(memfile);
@@ -237,7 +221,7 @@ NG5_EXPORT(bool) bison_array_it_create(struct bison_array_it *it, struct memfile
         it->payload_start = payload_start;
         error_init(&it->err);
         spin_init(&it->lock);
-        memfile_open(&it->memfile, memfile->memblock, mode);
+        memfile_open(&it->memfile, memfile->memblock, memfile->mode);
         memfile_seek(&it->memfile, payload_start);
 
         error_if(memfile_remain_size(&it->memfile) < sizeof(u8), err, NG5_ERR_CORRUPTED);
@@ -248,16 +232,27 @@ NG5_EXPORT(bool) bison_array_it_create(struct bison_array_it *it, struct memfile
 
         it->payload_start += sizeof(u8);
         it->nested_array_it = malloc(sizeof(struct bison_array_it));
+        it->nested_column_it = malloc(sizeof(struct bison_column_it));
         ng5_zero_memory(it->nested_array_it, sizeof(struct bison_array_it))
+        ng5_zero_memory(it->nested_column_it, sizeof(struct bison_column_it))
         bison_array_it_rewind(it);
 
+        return true;
+}
+
+NG5_EXPORT(bool) bison_array_it_readonly(struct bison_array_it *it)
+{
+        error_if_null(it);
+        it->memfile.mode = READ_ONLY;
         return true;
 }
 
 NG5_EXPORT(bool) bison_array_it_drop(struct bison_array_it *it)
 {
         auto_close_nested_array_it(it);
+        auto_close_nested_column_it(it);
         free (it->nested_array_it);
+        free (it->nested_column_it);
         return true;
 }
 
@@ -496,17 +491,18 @@ NG5_EXPORT(struct bison_array_it *) bison_array_it_array_value(struct bison_arra
         return it_in->nested_array_it;
 }
 
-NG5_EXPORT(bool) bison_array_it_prev(struct bison_array_it *it)
+NG5_EXPORT(struct bison_column_it *) bison_array_it_column_value(struct bison_array_it *it_in)
 {
-        ng5_unused(it);
-        return false;
+        error_if_and_return(!it_in, &it_in->err, NG5_ERR_NULLPTR, NULL);
+        error_if(it_in->it_field_type != BISON_FIELD_TYPE_COLUMN, &it_in->err, NG5_ERR_TYPEMISMATCH);
+        return it_in->nested_column_it;
 }
 
 NG5_EXPORT(bool) bison_array_it_insert(struct bison_insert *inserter, struct bison_array_it *it)
 {
         error_if_null(inserter)
         error_if_null(it)
-        return bison_insert_create(inserter, it);
+        return bison_insert_create_for_array(inserter, it);
 }
 
 NG5_EXPORT(bool) bison_array_it_remove(struct bison_array_it *it)
@@ -519,4 +515,19 @@ NG5_EXPORT(bool) bison_array_it_update(struct bison_array_it *it)
 {
         ng5_unused(it);
         return false;
+}
+
+static void auto_close_nested_array_it(struct bison_array_it *it)
+{
+        if (((char *) it->nested_array_it)[0] != 0) {
+                bison_array_it_drop(it->nested_array_it);
+                ng5_zero_memory(it->nested_array_it, sizeof(struct bison_array_it));
+        }
+}
+
+static void auto_close_nested_column_it(struct bison_array_it *it)
+{
+        if (((char *) it->nested_column_it)[0] != 0) {
+                ng5_zero_memory(it->nested_column_it, sizeof(struct bison_column_it));
+        }
 }
