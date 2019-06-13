@@ -204,7 +204,7 @@ static bool field_skip(struct bison_array_it *it)
                         it->memfile.mode);
                 while (bison_array_it_next(&skip_it))
                         { }
-                memfile_seek(&it->memfile, memfile_tell(&skip_it.memfile));
+                memfile_seek(&it->memfile, memfile_tell(&skip_it.memfile) + 1);
                 bison_array_it_drop(&skip_it);
         } break;
         case BISON_FIELD_TYPE_OBJECT:
@@ -302,15 +302,14 @@ NG5_EXPORT(bool) bison_array_it_next(struct bison_array_it *it)
                 return true;
         } else {
                 if (!is_array_end) {
-                        bool null_found;
-                        u8 byte;
-                        do {
-                                byte = *memfile_read(&it->memfile, sizeof(u8));
-                                null_found = byte == 0;
-                        } while (null_found);
-                        assert(byte == BISON_MARKER_ARRAY_END);
-                }
+                        error_if(!is_empty_slot, &it->err, NG5_ERR_CORRUPTED);
 
+                        while (*memfile_peek(&it->memfile, 1) == 0) {
+                                memfile_skip(&it->memfile, 1);
+                        }
+                }
+                char final = *memfile_peek(&it->memfile, sizeof(char));
+                assert( final == BISON_MARKER_ARRAY_END);
                 return false;
         }
 }

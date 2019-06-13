@@ -31,39 +31,12 @@ NG5_EXPORT(bool) bison_int_insert_array(struct memfile *memfile, size_t nbytes)
         u8 array_end_marker = BISON_MARKER_ARRAY_END;
 
         bison_int_ensure_space(memfile, sizeof(u8));
-
         marker_insert(memfile, array_begin_marker);
 
         bison_int_ensure_space(memfile, nbytes + sizeof(u8));
 
         offset_t payload_begin = memfile_tell(memfile);
-        size_t remain = memfile_remain_size(memfile);
-        size_t span = ng5_max(nbytes, remain) - ng5_min(nbytes, remain);
-
-        /* array may fit into memory if memory does not contain any (non-null) data */
-        size_t upper = ng5_min(span, nbytes);
-        size_t non_null_pos = 0;
-        const char *data = memfile_read(memfile, upper);
-        for (; non_null_pos < upper; non_null_pos++) {
-                if (data[non_null_pos] != 0) {
-                        break;
-                }
-        }
-        if (non_null_pos != nbytes) {
-                /* array does fit only partially into memory since some non-null data was read */
-                size_t required = nbytes - non_null_pos;
-                if (non_null_pos > 0) {
-                        /* re-use some null data */
-                        memfile_seek(memfile, payload_begin + non_null_pos - 1);
-                        memfile_move(memfile, required);
-                } else {
-                        /* no null data was available at all */
-                        memfile_move(memfile, nbytes);
-                }
-        } else {
-                /* nothing to do: n bytes of null data was read */
-        }
-
+        memfile_seek(memfile, payload_begin + nbytes);
         marker_insert(memfile, array_end_marker);
 
         /* seek to first entry in array */
