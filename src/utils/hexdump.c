@@ -69,7 +69,7 @@ NG5_EXPORT(bool) hexdump(struct string_builder *dst, const void *base, u64 nbyte
 
                 if (likely(hex_block_id + step < nbytes)) {
                         string_builder_append(dst, "\n");
-                        sprintf(buffer, "%08llx  ", (hex_block_id + 16));
+                        sprintf(buffer, "%08x  ", ((u32)hex_block_id + 16));
                         string_builder_append(dst, buffer);
                 }
 
