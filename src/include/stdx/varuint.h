@@ -62,6 +62,13 @@ typedef void *varuint_t;
 
 NG5_EXPORT(u8) varuint_write(varuint_t dst, u64 value);
 
+#define varuint_sizeof(value)                                                                                   \
+({                                                                                                              \
+        size_t num_blocks_strlen = varuint_required_blocks(value);                                              \
+        num_blocks_strlen = num_blocks_strlen < sizeof(varuint_t) ? sizeof(varuint_t) : num_blocks_strlen;      \
+        num_blocks_strlen;                                                                                      \
+})
+
 #define varuint_required_blocks(value)                  \
 ({                                                      \
         u8 num_blocks_required;                         \
