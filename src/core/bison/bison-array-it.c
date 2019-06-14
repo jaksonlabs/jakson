@@ -304,6 +304,7 @@ NG5_EXPORT(bool) bison_array_it_next(struct bison_array_it *it)
                         }
                 }
                 char final = *memfile_peek(&it->memfile, sizeof(char));
+                auto_close_nested_array_it(it);
                 assert( final == BISON_MARKER_ARRAY_END);
                 return false;
         }
