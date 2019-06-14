@@ -83,6 +83,9 @@ static bool internal_drop(struct bison *doc);
 static bool internal_revision_inc(struct bison *doc);
 static offset_t internal_payload_after_header(struct bison *doc);
 
+static bool internal_pack_array(struct bison_array_it *it);
+static bool internal_pack_column(struct bison_column_it *it);
+
 static void bison_header_init(struct bison *doc);
 static u64 bison_header_get_rev(struct bison *doc);
 static bool bison_header_rev_inc(struct bison *doc);
@@ -249,7 +252,10 @@ NG5_EXPORT(bool) bison_to_str(struct string_builder *dst, enum bison_printer_imp
         printer_bison_payload_begin(&p, &b);
 
         struct bison_array_it it;
-        bison_access(&it, doc);
+        bison_iterator_open(&it, doc);
+
+        bison_hexdump_print(stdout, doc); // TODO: REMOVE DEBUG
+
         print_array(&it, &p, &b);
         bison_array_it_drop(&it);
 
@@ -304,13 +310,46 @@ NG5_EXPORT(bool) bison_revise_gen_object_id(object_id_t *out, struct bison_revis
         return true;
 }
 
-NG5_EXPORT(bool) bison_revise_access(struct bison_array_it *it, struct bison_revise *context)
+NG5_EXPORT(bool) bison_revise_iterator_open(struct bison_array_it *it, struct bison_revise *context)
 {
         error_if_null(it);
         error_if_null(context);
         offset_t payload_start = internal_payload_after_header(context->revised_doc);
         error_if(context->revised_doc->memfile.mode != READ_WRITE, &context->original->err, NG5_ERR_INTERNALERR)
         return bison_array_it_create(it, &context->revised_doc->memfile, &context->original->err, payload_start);
+}
+
+NG5_EXPORT(bool) bison_revise_iterator_close(struct bison_array_it *it)
+{
+        error_if_null(it);
+        return bison_array_it_drop(it);
+}
+
+NG5_EXPORT(bool) bison_revise_pack(struct bison_revise *context)
+{
+        error_if_null(context);
+        struct bison_array_it it;
+        bison_revise_iterator_open(&it, context);
+        internal_pack_array(&it);
+        bison_revise_iterator_close(&it);
+        return true;
+}
+
+NG5_EXPORT(bool) bison_revise_shrink(struct bison_revise *context)
+{
+        bison_revise_pack(context);
+        struct bison_array_it it;
+        bison_revise_iterator_open(&it, context);
+        bison_array_it_fast_forward(&it);
+        if (memfile_remain_size(&it.memfile) > 0) {
+                offset_t first_empty_slot = memfile_tell(&it.memfile);
+                assert(memfile_size(&it.memfile) > first_empty_slot);
+                offset_t shrink_size = memfile_size(&it.memfile) - first_empty_slot;
+                memfile_cut(&it.memfile, shrink_size);
+        }
+
+        bison_revise_iterator_close(&it);
+        return true;
 }
 
 NG5_EXPORT(const struct bison *) bison_revise_end(struct bison_revise *context)
@@ -347,7 +386,7 @@ NG5_EXPORT(bool) bison_revise_abort(struct bison_revise *context)
         return true;
 }
 
-NG5_EXPORT(bool) bison_access(struct bison_array_it *it, struct bison *doc)
+NG5_EXPORT(bool) bison_iterator_open(struct bison_array_it *it, struct bison *doc)
 {
         error_if_null(it);
         error_if_null(doc);
@@ -355,6 +394,12 @@ NG5_EXPORT(bool) bison_access(struct bison_array_it *it, struct bison *doc)
         bison_array_it_create(it, &doc->memfile, &doc->err, payload_start);
         bison_array_it_readonly(it);
         return true;
+}
+
+NG5_EXPORT(bool) bison_iterator_close(struct bison_array_it *it)
+{
+        error_if_null(it);
+        return bison_array_it_drop(it);
 }
 
 NG5_EXPORT(const char *) bison_field_type_str(struct err *err, enum bison_field_type type)
@@ -448,6 +493,126 @@ static offset_t internal_payload_after_header(struct bison *doc)
         return result;
 }
 
+static bool internal_pack_array(struct bison_array_it *it)
+{
+        assert(it);
+
+        /* shrink this array */
+        {
+                struct bison_array_it this_array_it;
+                bool is_empty_slot, is_array_end;
+
+                bison_array_it_clone(&this_array_it, it);
+                while (bison_int_array_it_next(&is_empty_slot, &is_array_end, &this_array_it))
+                { }
+
+                if (!is_array_end) {
+
+                        memfile_hexdump_print(&this_array_it.memfile); // TODO: DEBUG REMOVE
+
+                        error_if(!is_empty_slot, &it->err, NG5_ERR_CORRUPTED);
+                        offset_t first_empty_slot_offset = memfile_tell(&this_array_it.memfile);
+                        char final;
+                        while ((final = *memfile_read(&this_array_it.memfile, sizeof(char))) == 0)
+                        { }
+                        assert(final == BISON_MARKER_ARRAY_END);
+                        offset_t last_empty_slot_offset = memfile_tell(&this_array_it.memfile) - sizeof(char);
+                        memfile_seek(&this_array_it.memfile, first_empty_slot_offset);
+                        assert(last_empty_slot_offset > first_empty_slot_offset);
+
+                        memfile_hexdump_print(&this_array_it.memfile); // TODO: DEBUG REMOVE
+
+                        memfile_move_left(&this_array_it.memfile, last_empty_slot_offset - first_empty_slot_offset);
+
+                        memfile_hexdump_print(&this_array_it.memfile); // TODO: DEBUG REMOVE
+
+                        final = *memfile_read(&this_array_it.memfile, sizeof(char));
+                        assert(final == BISON_MARKER_ARRAY_END);
+                }
+
+                bison_array_it_drop(&this_array_it);
+        }
+
+        /* shrink contained containers */
+        {
+                while (bison_array_it_next(it)) {
+                        enum bison_field_type type;
+                        bison_array_it_field_type(&type, it);
+                        switch (type) {
+                        case BISON_FIELD_TYPE_NULL:
+                        case BISON_FIELD_TYPE_TRUE:
+                        case BISON_FIELD_TYPE_FALSE:
+                        case BISON_FIELD_TYPE_STRING:
+                        case BISON_FIELD_TYPE_NUMBER_U8:
+                        case BISON_FIELD_TYPE_NUMBER_U16:
+                        case BISON_FIELD_TYPE_NUMBER_U32:
+                        case BISON_FIELD_TYPE_NUMBER_U64:
+                        case BISON_FIELD_TYPE_NUMBER_I8:
+                        case BISON_FIELD_TYPE_NUMBER_I16:
+                        case BISON_FIELD_TYPE_NUMBER_I32:
+                        case BISON_FIELD_TYPE_NUMBER_I64:
+                        case BISON_FIELD_TYPE_NUMBER_FLOAT:
+                        case BISON_FIELD_TYPE_BINARY:
+                        case BISON_FIELD_TYPE_BINARY_CUSTOM:
+                                /* nothing to shrink, because there are no padded zeros here */
+                                break;
+                        case BISON_FIELD_TYPE_ARRAY: {
+                                struct bison_array_it nested_array_it;
+                                bison_array_it_create(&nested_array_it, &it->memfile, &it->err,
+                                        memfile_tell(&it->memfile) - sizeof(u8));
+                                internal_pack_array(&nested_array_it);
+                                memfile_seek(&it->memfile, memfile_tell(&it->nested_array_it->memfile));
+                                bison_array_it_drop(&nested_array_it);
+                        } break;
+                        case BISON_FIELD_TYPE_COLUMN:
+                                bison_column_it_rewind(it->nested_column_it);
+                                internal_pack_column(it->nested_column_it);
+                                memfile_seek(&it->memfile, memfile_tell(&it->nested_column_it->memfile));
+                                break;
+                        case BISON_FIELD_TYPE_OBJECT:
+                        error(&it->err, NG5_ERR_NOTIMPLEMENTED);
+                                return false;
+                        default:
+                        error(&it->err, NG5_ERR_INTERNALERR);
+                                return false;
+                        }
+                }
+        }
+
+        return true;
+}
+
+static bool internal_pack_column(struct bison_column_it *it)
+{
+        assert(it);
+
+        printf("\n"); // TODO: DEBUG REMOVE
+        memfile_hexdump_print(&it->memfile); // TODO: DEBUG REMOVE
+
+        u32 free_space = (it->column_capacity - it->column_num_elements) * bison_int_get_type_value_size(it->type);
+        if (free_space > 0) {
+                memfile_seek(&it->memfile, it->column_capacity_offset);
+                memfile_write(&it->memfile, &it->column_num_elements, sizeof(u64));
+                memfile_seek(&it->memfile, it->payload_start);
+                memfile_skip(&it->memfile, it->column_num_elements * bison_int_get_type_value_size(it->type));
+
+
+                printf("\n"); // TODO: DEBUG REMOVE
+                memfile_hexdump_print(&it->memfile); // TODO: DEBUG REMOVE
+
+                memfile_move_left(&it->memfile, free_space);
+
+                printf("after pack \n"); // TODO: DEBUG REMOVE
+                memfile_hexdump_print(&it->memfile); // TODO: DEBUG REMOVE
+
+                char final = *memfile_read(&it->memfile, sizeof(char));
+                assert(final == BISON_MARKER_COLUMN_END);
+                return true;
+        } else {
+                return false;
+        }
+}
+
 static void bison_header_init(struct bison *doc)
 {
         assert(doc);
@@ -509,7 +674,7 @@ static bool bison_header_rev_inc(struct bison *doc)
 
         if (nblocks_new_rev > nblocks_rev) {
                 /* variable-length revision number requires more space; move remainders */
-                memfile_move(&doc->memfile, (nblocks_new_rev - nblocks_rev));
+                memfile_move_right(&doc->memfile, (nblocks_new_rev - nblocks_rev));
         }
 
         varuint_write(revision, new_rev);

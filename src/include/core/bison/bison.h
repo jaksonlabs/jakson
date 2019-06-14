@@ -217,13 +217,21 @@ NG5_EXPORT(bool) bison_revise_begin(struct bison_revise *context, struct bison *
 
 NG5_EXPORT(bool) bison_revise_gen_object_id(object_id_t *out, struct bison_revise *context);
 
-NG5_EXPORT(bool) bison_revise_access(struct bison_array_it *it, struct bison_revise *context);
+NG5_EXPORT(bool) bison_revise_iterator_open(struct bison_array_it *it, struct bison_revise *context);
+
+NG5_EXPORT(bool) bison_revise_iterator_close(struct bison_array_it *it);
+
+NG5_EXPORT(bool) bison_revise_pack(struct bison_revise *context);
+
+NG5_EXPORT(bool) bison_revise_shrink(struct bison_revise *context);
 
 NG5_EXPORT(const struct bison *) bison_revise_end(struct bison_revise *context);
 
 NG5_EXPORT(bool) bison_revise_abort(struct bison_revise *context);
 
-NG5_EXPORT(bool) bison_access(struct bison_array_it *it, struct bison *doc);
+NG5_EXPORT(bool) bison_iterator_open(struct bison_array_it *it, struct bison *doc);
+
+NG5_EXPORT(bool) bison_iterator_close(struct bison_array_it *it);
 
 NG5_EXPORT(const char *) bison_field_type_str(struct err *err, enum bison_field_type type);
 

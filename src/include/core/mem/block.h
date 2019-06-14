@@ -51,7 +51,9 @@ NG5_EXPORT(bool) memblock_cpy(struct memblock **dst, struct memblock *src);
 
 NG5_EXPORT(bool) memblock_shrink(struct memblock *block);
 
-NG5_EXPORT(bool) memblock_move(struct memblock *block, offset_t where, size_t nbytes);
+NG5_EXPORT(bool) memblock_move_right(struct memblock *block, offset_t where, size_t nbytes);
+
+NG5_EXPORT(bool) memblock_move_left(struct memblock *block, offset_t where, size_t nbytes);
 
 NG5_EXPORT(bool) memblock_move_ex(struct memblock *block, offset_t where, size_t nbytes, bool zero_out);
 

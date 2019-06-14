@@ -279,7 +279,7 @@ TEST(BisonTest, BisonArrayIteratorOpenAfterNew) {
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_gen_object_id(NULL, &revise);
-        bison_revise_access(&it, &revise);
+        bison_revise_iterator_open(&it, &revise);
         bool has_next = bison_array_it_next(&it);
         EXPECT_EQ(has_next, false);
         bison_revise_end(&revise);
@@ -301,7 +301,7 @@ TEST(BisonTest, BisonArrayIteratorInsertNullAfterNew) {
         bison_create(&doc);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
-        bison_revise_access(&it, &revise);
+        bison_revise_iterator_open(&it, &revise);
         bison_revise_gen_object_id(NULL, &revise);
         bison_array_it_insert(&inserter, &it);
         bison_insert_null(&inserter);
@@ -325,7 +325,7 @@ TEST(BisonTest, BisonArrayIteratorInsertMultipleLiteralsAfterNewNoOverflow) {
         bison_create(&doc);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
-        bison_revise_access(&it, &revise);
+        bison_revise_iterator_open(&it, &revise);
         bison_array_it_insert(&inserter, &it);
         for (i32 i = 0; i < 10; i++) {
                 fprintf(stdout, "before:\n");
@@ -363,7 +363,7 @@ TEST(BisonTest, BisonArrayIteratorOverwriteLiterals) {
         bison_create(&doc);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
-        bison_revise_access(&it, &revise);
+        bison_revise_iterator_open(&it, &revise);
         bison_array_it_insert(&inserter, &it);
         for (i32 i = 0; i < 3; i++) {
                 if (i % 3 == 0) {
@@ -379,7 +379,7 @@ TEST(BisonTest, BisonArrayIteratorOverwriteLiterals) {
         bison_revise_end(&revise);
 
         bison_revise_begin(&revise, &rev_doc2, &rev_doc);
-        bison_revise_access(&it, &revise);
+        bison_revise_iterator_open(&it, &revise);
         bison_array_it_insert(&inserter, &it);
         for (i32 i = 0; i < 2; i++) {
                 bison_insert_true(&inserter);
@@ -404,7 +404,7 @@ TEST(BisonTest, BisonArrayIteratorOverwriteLiteralsWithDocOverflow) {
         bison_create_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
-        bison_revise_access(&it, &revise);
+        bison_revise_iterator_open(&it, &revise);
         bison_array_it_insert(&inserter, &it);
         for (i32 i = 0; i < 22; i++) {
                 if (i % 3 == 0) {
@@ -422,7 +422,7 @@ TEST(BisonTest, BisonArrayIteratorOverwriteLiteralsWithDocOverflow) {
         bison_revise_end(&revise);
 
         bison_revise_begin(&revise, &rev_doc2, &rev_doc);
-        bison_revise_access(&it, &revise);
+        bison_revise_iterator_open(&it, &revise);
         bison_array_it_insert(&inserter, &it);
         for (i32 i = 0; i < 2; i++) {
                 fprintf(stdout, "before:\n");
@@ -449,7 +449,7 @@ TEST(BisonTest, BisonArrayIteratorUnsignedAndConstants) {
         bison_create_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
-        bison_revise_access(&it, &revise);
+        bison_revise_iterator_open(&it, &revise);
         bison_array_it_insert(&inserter, &it);
         for (i32 i = 0; i < 500; i++) {
                 if (i % 6 == 0) {
@@ -490,7 +490,7 @@ TEST(BisonTest, BisonArrayIteratorStrings) {
         bison_create_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
-        bison_revise_access(&it, &revise);
+        bison_revise_iterator_open(&it, &revise);
         bison_array_it_insert(&inserter, &it);
         for (i32 i = 0; i < 10; i++) {
                 u64 strlen = rand() % (100 + 1 - 4) + 4;
@@ -524,7 +524,7 @@ TEST(BisonTest, BisonInsertMimeTypedBlob) {
         bison_create_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
-        bison_revise_access(&it, &revise);
+        bison_revise_iterator_open(&it, &revise);
         bison_array_it_insert(&inserter, &it);
         const char *data = "{ \"Message\": \"Hello World\" }";
         bool status = bison_insert_binary(&inserter, data, strlen(data), "json", NULL);
@@ -549,7 +549,7 @@ TEST(BisonTest, BisonInsertCustomTypedBlob) {
         bison_create_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
-        bison_revise_access(&it, &revise);
+        bison_revise_iterator_open(&it, &revise);
         bison_array_it_insert(&inserter, &it);
         const char *data = "{ \"Message\": \"Hello World\" }";
         bool status = bison_insert_binary(&inserter, data, strlen(data), NULL, "my data");
@@ -574,7 +574,7 @@ TEST(BisonTest, BisonInsertTwoMimeTypedBlob) {
         bison_create_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
-        bison_revise_access(&it, &revise);
+        bison_revise_iterator_open(&it, &revise);
         bison_array_it_insert(&inserter, &it);
         const char *data1 = "{ \"Message\": \"Hello World\" }";
         const char *data2 = "{ \"Blog-Header\": \"My Fancy Blog\" }";
@@ -602,7 +602,7 @@ TEST(BisonTest, BisonInsertMimeTypedBlobsWithOverflow) {
         bison_create_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
-        bison_revise_access(&it, &revise);
+        bison_revise_iterator_open(&it, &revise);
         bison_array_it_insert(&inserter, &it);
         const char *data1 = "{ \"Message\": \"Hello World\" }";
         const char *data2 = "{ \"Blog-Header\": \"My Fancy Blog\" }";
@@ -631,7 +631,7 @@ TEST(BisonTest, BisonInsertMixedTypedBlobsWithOverflow) {
         bison_create_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
-        bison_revise_access(&it, &revise);
+        bison_revise_iterator_open(&it, &revise);
         bison_array_it_insert(&inserter, &it);
         const char *data1 = "{ \"Message\": \"Hello World\" }";
         const char *data2 = "{ \"Blog-Header\": \"My Fancy Blog\" }";
@@ -661,7 +661,7 @@ TEST(BisonTest, BisonInsertArrayWithNoOverflow) {
         bison_create_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
-        bison_revise_access(&it, &revise);
+        bison_revise_iterator_open(&it, &revise);
         bison_array_it_insert(&inserter, &it);
         bison_hexdump_print(stdout, &rev_doc);
 
@@ -691,7 +691,7 @@ TEST(BisonTest, BisonInsertValuesIntoNestedArrayWithNoOverflow) {
         bison_create_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
-        bison_revise_access(&it, &revise);
+        bison_revise_iterator_open(&it, &revise);
         bison_array_it_insert(&inserter, &it);
 
         bison_insert_null(&inserter);
@@ -731,7 +731,7 @@ TEST(BisonTest, BisonInsert2xNestedArrayWithNoOverflow) {
         bison_create_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
-        bison_revise_access(&it, &revise);
+        bison_revise_iterator_open(&it, &revise);
         bison_array_it_insert(&inserter, &it);
 
         bison_insert_null(&inserter);
@@ -779,7 +779,7 @@ TEST(BisonTest, BisonInsertXxNestedArrayWithoutOverflow) {
         bison_create_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
-        bison_revise_access(&it, &revise);
+        bison_revise_iterator_open(&it, &revise);
         bison_array_it_insert(&inserter, &it);
 
         bison_insert_null(&inserter);
@@ -825,7 +825,7 @@ TEST(BisonTest, BisonInsertXxNestedArrayWithOverflow) {
         bison_create_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
-        bison_revise_access(&it, &revise);
+        bison_revise_iterator_open(&it, &revise);
         bison_array_it_insert(&inserter, &it);
 
         bison_hexdump_print(stdout, &rev_doc);
@@ -880,7 +880,7 @@ TEST(BisonTest, BisonInsertInsertColumnWithoutOverflow) {
         bison_create_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
-        bison_revise_access(&it, &revise);
+        bison_revise_iterator_open(&it, &revise);
         bison_array_it_insert(&inserter, &it);
 
         struct bison_insert *nested_inserter_l1 = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NULL, 10);
@@ -920,7 +920,7 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersWithoutOverflow) {
         bison_create_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
-        bison_revise_access(&it, &revise);
+        bison_revise_iterator_open(&it, &revise);
         bison_array_it_insert(&inserter, &it);
 
         struct bison_insert *nested_inserter_l1 = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NUMBER_U8, 10);
@@ -958,7 +958,7 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersZeroWithoutOverflow) {
         bison_create_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
-        bison_revise_access(&it, &revise);
+        bison_revise_iterator_open(&it, &revise);
         bison_array_it_insert(&inserter, &it);
 
         struct bison_insert *nested_inserter_l1 = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NUMBER_U8, 10);
@@ -997,7 +997,7 @@ TEST(BisonTest, BisonInsertInsertMultileTypedColumnsWithoutOverflow) {
         bison_create_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
-        bison_revise_access(&it, &revise);
+        bison_revise_iterator_open(&it, &revise);
         bison_array_it_insert(&inserter, &it);
 
         ins = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NULL, 10);
@@ -1100,7 +1100,7 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersZeroWithOverflow) {
         bison_create_ex(&doc, 16, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
-        bison_revise_access(&it, &revise);
+        bison_revise_iterator_open(&it, &revise);
         bison_array_it_insert(&inserter, &it);
 
         struct bison_insert *nested_inserter_l1 = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NUMBER_U8, 1);
@@ -1141,7 +1141,7 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersWithHighOverflow) {
         bison_create_ex(&doc, 16, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
-        bison_revise_access(&it, &revise);
+        bison_revise_iterator_open(&it, &revise);
         bison_array_it_insert(&inserter, &it);
 
         struct bison_insert *nested_inserter_l1 = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NUMBER_U32, 1);
@@ -1185,7 +1185,7 @@ TEST(BisonTest, BisonInsertInsertMultipleColumnsNumbersWithHighOverflow) {
         bison_create_ex(&doc, 16, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
-        bison_revise_access(&it, &revise);
+        bison_revise_iterator_open(&it, &revise);
         bison_array_it_insert(&inserter, &it);
 
         for (u32 k = 0; k < 3; k++) {
@@ -1231,7 +1231,7 @@ TEST(BisonTest, BisonInsertNullTest) {
         bison_create_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
-        bison_revise_access(&it, &revise);
+        bison_revise_iterator_open(&it, &revise);
         bison_array_it_insert(&inserter, &it);
 
         ins = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NULL, 10);
@@ -1322,6 +1322,105 @@ TEST(BisonTest, BisonInsertNullTest) {
         bison_drop(&doc);
         bison_drop(&rev_doc);
 }
+
+//TEST(BisonTest, BisonShrinkTest) {
+//        struct bison doc, rev_doc;
+//        struct bison_revise revise;
+//        struct bison_array_it it;
+//        struct bison_insert inserter;
+//        struct bison_insert_column_state column_state;
+//        struct bison_insert *ins;
+//
+//        bison_create_ex(&doc, 20, 1);
+//
+//        bison_revise_begin(&revise, &rev_doc, &doc);
+//        bison_revise_iterator_open(&it, &revise);
+//        bison_array_it_insert(&inserter, &it);
+//
+//        ins = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NULL, 10);
+//        bison_insert_null(ins);
+//        bison_insert_null(ins);
+//        bison_insert_null(ins);
+//        bison_insert_column_end(&column_state);
+//
+//        ins = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_TRUE, 10);
+//        bison_insert_true(ins);
+//        bison_insert_true(ins);
+//        bison_insert_true(ins);
+//        bison_insert_column_end(&column_state);
+//
+//        ins = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_FALSE, 10);
+//        bison_insert_false(ins);
+//        bison_insert_false(ins);
+//        bison_insert_false(ins);
+//        bison_insert_column_end(&column_state);
+//
+//        ins = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NUMBER_U8, 10);
+//        bison_insert_u8(ins, 1);
+//        bison_insert_u8(ins, U8_NULL);
+//        bison_insert_u8(ins, 2);
+//        bison_insert_column_end(&column_state);
+//
+//        ins = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NUMBER_U16, 10);
+//        bison_insert_u16(ins, 3);
+//        bison_insert_u16(ins, U16_NULL);
+//        bison_insert_u16(ins, 4);
+//        bison_insert_column_end(&column_state);
+//
+//        ins = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NUMBER_U32, 10);
+//        bison_insert_u32(ins, 5);
+//        bison_insert_u32(ins, U32_NULL);
+//        bison_insert_u32(ins, 6);
+//        bison_insert_column_end(&column_state);
+//
+//        ins = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NUMBER_U64, 10);
+//        bison_insert_u64(ins, 7);
+//        bison_insert_u64(ins, U64_NULL);
+//        bison_insert_u64(ins, 8);
+//        bison_insert_column_end(&column_state);
+//
+//        ins = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NUMBER_I8, 10);
+//        bison_insert_i8(ins, 9);
+//        bison_insert_i8(ins, I8_NULL);
+//        bison_insert_i8(ins, 10);
+//        bison_insert_column_end(&column_state);
+//
+//        ins = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NUMBER_I16, 10);
+//        bison_insert_i16(ins, 11);
+//        bison_insert_i16(ins, I16_NULL);
+//        bison_insert_i16(ins, 12);
+//        bison_insert_column_end(&column_state);
+//
+//        ins = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NUMBER_I32, 10);
+//        bison_insert_i32(ins, 13);
+//        bison_insert_i32(ins, I32_NULL);
+//        bison_insert_i32(ins, 14);
+//        bison_insert_column_end(&column_state);
+//
+//        ins = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NUMBER_I64, 10);
+//        bison_insert_i64(ins, 15);
+//        bison_insert_i64(ins, I64_NULL);
+//        bison_insert_i64(ins, 16);
+//        bison_insert_column_end(&column_state);
+//
+//        bison_revise_shrink(&revise);
+//
+//        bison_insert_drop(&inserter);
+//        bison_array_it_drop(&it);
+//        bison_revise_end(&revise);
+//
+//        bison_hexdump_print(stdout, &rev_doc);
+//
+//        bison_print(stdout, &rev_doc);
+//        struct string_builder sb;
+//        string_builder_create(&sb);
+//        bison_to_str(&sb, JSON_FORMATTER, &rev_doc);
+//        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [[null, null, null], [true, true, true], [false, false, false], [1, null, 3], [4, null, 6], [7, null, 9], [10, null, 12], [-1, null, -3], [-4, null, -6], [-7, null, -9], [-10, null, -12], [42.00, null, 23.42]]}"));
+//        string_builder_drop(&sb);
+//
+//        bison_drop(&doc);
+//        bison_drop(&rev_doc);
+//}
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);

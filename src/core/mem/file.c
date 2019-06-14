@@ -96,6 +96,23 @@ size_t memfile_size(struct memfile *file)
         }
 }
 
+NG5_EXPORT(bool) memfile_cut(struct memfile *file, size_t how_many_bytes)
+{
+        error_if_null(file);
+        offset_t block_size;
+        memblock_size(&block_size, file->memblock);
+
+        if (how_many_bytes > 0 && block_size > how_many_bytes) {
+                size_t new_block_size = block_size - how_many_bytes;
+                memblock_resize(file->memblock, new_block_size);
+                file->pos = ng5_min(file->pos, new_block_size);
+                return true;
+        } else {
+                error(&file->err, NG5_ERR_ILLEGALARG);
+                return false;
+        }
+}
+
 size_t memfile_remain_size(struct memfile *file)
 {
         assert(file->pos <= memfile_size(file));
@@ -308,10 +325,16 @@ NG5_EXPORT(bool) memfile_restore_position(struct memfile *file)
         }
 }
 
-NG5_EXPORT(bool) memfile_move(struct memfile *file, size_t nbytes)
+NG5_EXPORT(bool) memfile_move_right(struct memfile *file, size_t nbytes)
 {
         error_if_null(file);
-        return memblock_move(file->memblock, file->pos, nbytes);
+        return memblock_move_right(file->memblock, file->pos, nbytes);
+}
+
+NG5_EXPORT(bool) memfile_move_left(struct memfile *file, size_t nbytes_from_here)
+{
+        error_if_null(file);
+        return memblock_move_left(file->memblock, file->pos, nbytes_from_here);
 }
 
 bool memfile_end_bit_mode(size_t *num_bytes_written, struct memfile *file)

@@ -22,197 +22,10 @@
 #include "core/bison/bison-column-it.h"
 #include "core/bison/bison-insert.h"
 #include "core/bison/bison-media.h"
+#include "core/bison/bison-int.h"
 
 static void auto_close_nested_array_it(struct bison_array_it *it);
 static void auto_close_nested_column_it(struct bison_array_it *it);
-static void auto_close(struct bison_array_it *it);
-
-static bool field_type_read(struct bison_array_it *it)
-{
-        error_if_null(it)
-        error_if(memfile_remain_size(&it->memfile) < 1, &it->err, NG5_ERR_ILLEGALOP);
-        memfile_save_position(&it->memfile);
-        u8 media_type = *memfile_read(&it->memfile, 1);
-        error_if(media_type == 0, &it->err, NG5_ERR_NOTFOUND)
-        error_if(media_type == BISON_MARKER_ARRAY_END, &it->err, NG5_ERR_OUTOFBOUNDS)
-        it->it_field_type = media_type;
-        memfile_restore_position(&it->memfile);
-        return true;
-}
-
-static bool field_data_access(struct bison_array_it *it)
-{
-        error_if_null(it)
-        memfile_save_position(&it->memfile);
-        memfile_skip(&it->memfile, sizeof(media_type_t));
-
-        switch (it->it_field_type) {
-        case BISON_FIELD_TYPE_NULL:
-        case BISON_FIELD_TYPE_TRUE:
-        case BISON_FIELD_TYPE_FALSE:
-        case BISON_FIELD_TYPE_NUMBER_U8:
-        case BISON_FIELD_TYPE_NUMBER_U16:
-        case BISON_FIELD_TYPE_NUMBER_U32:
-        case BISON_FIELD_TYPE_NUMBER_U64:
-        case BISON_FIELD_TYPE_NUMBER_I8:
-        case BISON_FIELD_TYPE_NUMBER_I16:
-        case BISON_FIELD_TYPE_NUMBER_I32:
-        case BISON_FIELD_TYPE_NUMBER_I64:
-        case BISON_FIELD_TYPE_NUMBER_FLOAT:
-                break;
-        case BISON_FIELD_TYPE_STRING: {
-                u8 nbytes;
-                varuint_t len = (varuint_t) memfile_peek(&it->memfile, 1);
-                it->it_field_len = varuint_read(&nbytes, len);
-
-                memfile_skip(&it->memfile, nbytes);
-        } break;
-        case BISON_FIELD_TYPE_BINARY: {
-                /* read mime type with variable-length integer type */
-                u8 mime_type_nbytes;
-                varuint_t len = (varuint_t) memfile_peek(&it->memfile, 1);
-                it->it_mime_type = bison_media_mime_type_by_id(varuint_read(&mime_type_nbytes, len));
-                it->it_mime_type_strlen = strlen(it->it_mime_type);
-                memfile_skip(&it->memfile, mime_type_nbytes);
-
-                /* read blob length */
-                u8 blob_len_nbytes;
-                len = (varuint_t) memfile_peek(&it->memfile, 1);
-                it->it_field_len = varuint_read(&blob_len_nbytes, len);
-
-                memfile_skip(&it->memfile, blob_len_nbytes);
-        } break;
-        case BISON_FIELD_TYPE_BINARY_CUSTOM: {
-                /* read custom type length with variable-length integer type */
-                u8 type_name_nbytes;
-                varuint_t type_name_varuint = (varuint_t) memfile_peek(&it->memfile, 1);
-                it->it_mime_type_strlen = varuint_read(&type_name_nbytes, type_name_varuint);
-                memfile_skip(&it->memfile, type_name_nbytes);
-                it->it_mime_type = memfile_peek(&it->memfile, 1);
-                memfile_skip(&it->memfile, it->it_mime_type_strlen);
-
-                /* read blob length */
-                u8 blob_len_nbytes;
-                varuint_t blob_len_varuint = (varuint_t) memfile_peek(&it->memfile, 1);
-                it->it_field_len = varuint_read(&blob_len_nbytes, blob_len_varuint);
-
-                memfile_skip(&it->memfile, blob_len_nbytes);
-        } break;
-        case BISON_FIELD_TYPE_ARRAY:
-                it->nested_array_it_opened = true;
-                it->nested_array_it_accessed = false;
-                bison_array_it_create(it->nested_array_it, &it->memfile, &it->err,
-                        memfile_tell(&it->memfile) - sizeof(u8));
-                break;
-        case BISON_FIELD_TYPE_COLUMN: {
-                bison_column_it_create(it->nested_column_it, &it->memfile, &it->err,
-                        memfile_tell(&it->memfile) - sizeof(u8));
-        } break;
-        case BISON_FIELD_TYPE_OBJECT:
-                print_error_and_die(NG5_ERR_NOTIMPLEMENTED)
-                break;
-        default:
-                error(&it->err, NG5_ERR_CORRUPTED)
-                return false;
-        }
-
-        it->it_field_data = memfile_peek(&it->memfile, 1);
-        memfile_restore_position(&it->memfile);
-        return true;
-}
-
-static bool field_skip(struct bison_array_it *it)
-{
-        error_if_null(it)
-        memfile_skip(&it->memfile, sizeof(media_type_t));
-
-        switch (it->it_field_type) {
-        case BISON_FIELD_TYPE_NULL:
-        case BISON_FIELD_TYPE_TRUE:
-        case BISON_FIELD_TYPE_FALSE:
-                break;
-        case BISON_FIELD_TYPE_NUMBER_U8:
-        case BISON_FIELD_TYPE_NUMBER_I8:
-                assert(sizeof(u8) == sizeof(i8));
-                memfile_skip(&it->memfile, sizeof(u8));
-                break;
-        case BISON_FIELD_TYPE_NUMBER_U16:
-        case BISON_FIELD_TYPE_NUMBER_I16:
-                assert(sizeof(u16) == sizeof(i16));
-                memfile_skip(&it->memfile, sizeof(u16));
-                break;
-        case BISON_FIELD_TYPE_NUMBER_U32:
-        case BISON_FIELD_TYPE_NUMBER_I32:
-                assert(sizeof(u32) == sizeof(i32));
-                memfile_skip(&it->memfile, sizeof(u32));
-                break;
-        case BISON_FIELD_TYPE_NUMBER_U64:
-        case BISON_FIELD_TYPE_NUMBER_I64:
-                assert(sizeof(u64) == sizeof(i64));
-                memfile_skip(&it->memfile, sizeof(u64));
-                break;
-        case BISON_FIELD_TYPE_NUMBER_FLOAT:
-                memfile_skip(&it->memfile, sizeof(float));
-                break;
-        case BISON_FIELD_TYPE_STRING: {
-                u8 nbytes;
-                varuint_t varlen = (varuint_t) memfile_peek(&it->memfile, sizeof(varuint_t));
-                u64 strlen = varuint_read(&nbytes, varlen);
-                memfile_skip(&it->memfile, nbytes + strlen);
-        } break;
-        case BISON_FIELD_TYPE_BINARY: {
-                /* read mime type with variable-length integer type */
-                u8 mime_type_nbytes;
-                varuint_t varuint = (varuint_t) memfile_peek(&it->memfile, 1);
-                varuint_read(&mime_type_nbytes, varuint);
-                memfile_skip(&it->memfile, mime_type_nbytes);
-
-                /* read blob length */
-                u8 nbytes;
-                varuint = (varuint_t) memfile_peek(&it->memfile, 1);
-                u64 blob_len = varuint_read(&nbytes, varuint);
-
-                /* skip everything */
-                memfile_skip(&it->memfile, nbytes + blob_len);
-        } break;
-        case BISON_FIELD_TYPE_BINARY_CUSTOM: {
-                /* read custom type length with variable-length integer type */
-                u8 type_name_nbytes;
-                varuint_t type_name_varuint = (varuint_t) memfile_peek(&it->memfile, 1);
-                u64 type_name_len = varuint_read(&type_name_nbytes, type_name_varuint);
-                memfile_skip(&it->memfile, type_name_nbytes + type_name_len);
-
-                /* read blob length */
-                u8 blob_len_nbytes;
-                varuint_t blob_len_varuint = (varuint_t) memfile_peek(&it->memfile, 1);
-                u64 blob_len = varuint_read(&blob_len_nbytes, blob_len_varuint);
-
-                memfile_skip(&it->memfile, blob_len_nbytes + blob_len);
-        } break;
-        case BISON_FIELD_TYPE_ARRAY: {
-                struct bison_array_it skip_it;
-                bison_array_it_create(&skip_it, &it->memfile, &it->err, memfile_tell(&it->memfile) - sizeof(u8));
-                while (bison_array_it_next(&skip_it))
-                        { }
-                memfile_seek(&it->memfile, memfile_tell(&skip_it.memfile) + 1);
-                bison_array_it_drop(&skip_it);
-        } break;
-        case BISON_FIELD_TYPE_COLUMN: {
-                struct bison_column_it skip_it;
-                bison_column_it_create(&skip_it, &it->memfile, &it->err,
-                        memfile_tell(&it->memfile) - sizeof(media_type_t));
-                bison_column_it_fast_forward(&skip_it);
-                memfile_seek(&it->memfile, memfile_tell(&skip_it.memfile));
-
-        } break;
-        case BISON_FIELD_TYPE_OBJECT:
-        default:
-                error(&it->err, NG5_ERR_CORRUPTED);
-                return false;
-        }
-
-        return true;
-}
 
 NG5_EXPORT(bool) bison_array_it_create(struct bison_array_it *it, struct memfile *memfile, struct err *err,
                                        offset_t payload_start)
@@ -245,6 +58,14 @@ NG5_EXPORT(bool) bison_array_it_create(struct bison_array_it *it, struct memfile
         return true;
 }
 
+NG5_EXPORT(bool) bison_array_it_clone(struct bison_array_it *dst, struct bison_array_it *src)
+{
+        error_if_null(dst);
+        error_if_null(src);
+        bison_array_it_create(dst, &src->memfile, &src->err, src->payload_start - sizeof(u8));
+        return true;
+}
+
 NG5_EXPORT(bool) bison_array_it_readonly(struct bison_array_it *it)
 {
         error_if_null(it);
@@ -254,7 +75,7 @@ NG5_EXPORT(bool) bison_array_it_readonly(struct bison_array_it *it)
 
 NG5_EXPORT(bool) bison_array_it_drop(struct bison_array_it *it)
 {
-        auto_close(it);
+        bison_int_array_it_auto_close(it);
         free (it->nested_array_it);
         free (it->nested_column_it);
         return true;
@@ -289,17 +110,11 @@ NG5_EXPORT(bool) bison_array_it_rewind(struct bison_array_it *it)
 
 NG5_EXPORT(bool) bison_array_it_next(struct bison_array_it *it)
 {
-        error_if_null(it);
-        auto_close(it);
-        char c = *memfile_peek(&it->memfile, 1);
-        bool is_empty_slot = c == 0;
-        bool is_array_end = c == BISON_MARKER_ARRAY_END;
-        if (!is_empty_slot && !is_array_end) {
-                field_type_read(it);
-                field_data_access(it);
-                field_skip(it);
+        bool is_empty_slot, is_array_end;
+        if (bison_int_array_it_next(&is_empty_slot, &is_array_end, it)) {
                 return true;
         } else {
+                /* skip remaining zeros until end of array is reached */
                 if (!is_array_end) {
                         error_if(!is_empty_slot, &it->err, NG5_ERR_CORRUPTED);
 
@@ -309,9 +124,20 @@ NG5_EXPORT(bool) bison_array_it_next(struct bison_array_it *it)
                 }
                 char final = *memfile_peek(&it->memfile, sizeof(char));
                 assert( final == BISON_MARKER_ARRAY_END);
-                auto_close(it);
+                bison_int_array_it_auto_close(it);
                 return false;
         }
+}
+
+NG5_EXPORT(bool) bison_array_it_fast_forward(struct bison_array_it *it)
+{
+        error_if_null(it);
+        while (bison_array_it_next(it))
+                { }
+        char last = *memfile_peek(&it->memfile, sizeof(char));
+        assert(last == BISON_MARKER_ARRAY_END);
+        memfile_skip(&it->memfile, sizeof(char));
+        return true;
 }
 
 NG5_EXPORT(bool) bison_array_it_field_type(enum bison_field_type *type, struct bison_array_it *it)
@@ -531,14 +357,16 @@ NG5_EXPORT(bool) bison_array_it_update(struct bison_array_it *it)
         return false;
 }
 
-ng5_func_unused static void auto_close(struct bison_array_it *it)
+NG5_EXPORT(bool) bison_int_array_it_auto_close(struct bison_array_it *it)
 {
+        error_if_null(it)
         if (it->nested_array_it_opened && !it->nested_array_it_accessed) {
                 auto_close_nested_array_it(it);
                 it->nested_array_it_opened = false;
                 it->nested_array_it_accessed = false;
         }
         auto_close_nested_column_it(it);
+        return true;
 }
 
 static void auto_close_nested_array_it(struct bison_array_it *it)

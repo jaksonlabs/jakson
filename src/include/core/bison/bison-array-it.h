@@ -62,6 +62,8 @@ NG5_DEFINE_ERROR_GETTER(bison_array_it);
 NG5_EXPORT(bool) bison_array_it_create(struct bison_array_it *it, struct memfile *memfile, struct err *err,
         offset_t payload_start);
 
+NG5_EXPORT(bool) bison_array_it_clone(struct bison_array_it *dst, struct bison_array_it *src);
+
 NG5_EXPORT(bool) bison_array_it_readonly(struct bison_array_it *it);
 
 /**
@@ -89,6 +91,8 @@ NG5_EXPORT(bool) bison_array_it_rewind(struct bison_array_it *it);
  * The function returns true, if the slot is non-empty, and false otherwise.
  */
 NG5_EXPORT(bool) bison_array_it_next(struct bison_array_it *it);
+
+NG5_EXPORT(bool) bison_array_it_fast_forward(struct bison_array_it *it);
 
 NG5_EXPORT(bool) bison_array_it_field_type(enum bison_field_type *type, struct bison_array_it *it);
 
@@ -131,6 +135,8 @@ NG5_EXPORT(bool) bison_array_it_insert(struct bison_insert *inserter, struct bis
 NG5_EXPORT(bool) bison_array_it_remove(struct bison_array_it *it);
 
 NG5_EXPORT(bool) bison_array_it_update(struct bison_array_it *it);
+
+NG5_EXPORT(bool) bison_int_array_it_auto_close(struct bison_array_it *it);
 
 NG5_END_DECL
 

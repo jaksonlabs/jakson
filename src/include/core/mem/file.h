@@ -78,6 +78,8 @@ NG5_EXPORT(bool) memfile_get_offset(offset_t *pos, const struct memfile *file);
 
 NG5_EXPORT(size_t) memfile_size(struct memfile *file);
 
+NG5_EXPORT(bool) memfile_cut(struct memfile *file, size_t how_many_bytes);
+
 NG5_EXPORT(size_t) memfile_remain_size(struct memfile *file);
 
 NG5_EXPORT(bool) memfile_shrink(struct memfile *file);
@@ -107,7 +109,9 @@ NG5_EXPORT(bool) memfile_restore_position(struct memfile *file);
  * The offset in the memory block from where this move is done is the current position stored in this file.
  * In case of not enough space, the underlying memory block is resized.
  */
-NG5_EXPORT(bool) memfile_move(struct memfile *file, size_t nbytes);
+NG5_EXPORT(bool) memfile_move_right(struct memfile *file, size_t nbytes);
+
+NG5_EXPORT(bool) memfile_move_left(struct memfile *file, size_t nbytes_from_here);
 
 NG5_EXPORT(bool) memfile_end_bit_mode(size_t *num_bytes_written, struct memfile *file);
 

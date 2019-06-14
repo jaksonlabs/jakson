@@ -139,9 +139,25 @@ bool memblock_shrink(struct memblock *block)
         return true;
 }
 
-NG5_EXPORT(bool) memblock_move(struct memblock *block, offset_t where, size_t nbytes)
+NG5_EXPORT(bool) memblock_move_right(struct memblock *block, offset_t where, size_t nbytes)
 {
         return memblock_move_ex(block, where, nbytes, true);
+}
+
+NG5_EXPORT(bool) memblock_move_left(struct memblock *block, offset_t where, size_t nbytes)
+{
+        error_if_null(block)
+        error_if(where + nbytes >= block->blockLength, &block->err, NG5_ERR_OUTOFBOUNDS)
+        size_t remainder = block->blockLength - where - nbytes;
+        if (remainder > 0) {
+                memmove(block->base + where, block->base + where + nbytes, remainder);
+                assert(block->lastByte >= nbytes);
+                block->lastByte -= nbytes;
+                ng5_zero_memory(block->base + block->blockLength - nbytes, nbytes)
+                return true;
+        } else {
+                return false;
+        }
 }
 
 NG5_EXPORT(bool) memblock_move_ex(struct memblock *block, offset_t where, size_t nbytes, bool zero_out)
