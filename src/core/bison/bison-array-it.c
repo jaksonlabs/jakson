@@ -250,8 +250,7 @@ NG5_EXPORT(bool) bison_array_it_readonly(struct bison_array_it *it)
 
 NG5_EXPORT(bool) bison_array_it_drop(struct bison_array_it *it)
 {
-        auto_close_nested_array_it(it);
-        auto_close_nested_column_it(it);
+        //cleanup(it);
         free (it->nested_array_it);
         free (it->nested_column_it);
         return true;
@@ -287,7 +286,7 @@ NG5_EXPORT(bool) bison_array_it_rewind(struct bison_array_it *it)
 NG5_EXPORT(bool) bison_array_it_next(struct bison_array_it *it)
 {
         error_if_null(it);
-        cleanup(it);
+        //cleanup(it);
         char c = *memfile_peek(&it->memfile, 1);
         bool is_empty_slot = c == 0;
         bool is_array_end = c == BISON_MARKER_ARRAY_END;
@@ -305,8 +304,8 @@ NG5_EXPORT(bool) bison_array_it_next(struct bison_array_it *it)
                         }
                 }
                 char final = *memfile_peek(&it->memfile, sizeof(char));
-                cleanup(it);
                 assert( final == BISON_MARKER_ARRAY_END);
+                //cleanup(it);
                 return false;
         }
 }
@@ -527,7 +526,7 @@ NG5_EXPORT(bool) bison_array_it_update(struct bison_array_it *it)
         return false;
 }
 
-static void cleanup(struct bison_array_it *it)
+ng5_func_unused static void cleanup(struct bison_array_it *it)
 {
         auto_close_nested_array_it(it);
         auto_close_nested_column_it(it);

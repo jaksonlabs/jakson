@@ -733,6 +733,7 @@ static bool print_array(struct bison_array_it *it, struct bison_printer *printer
                 case BISON_FIELD_TYPE_ARRAY: {
                         struct bison_array_it *array = bison_array_it_array_value(it);
                         print_array(array, printer, builder);
+                        bison_array_it_drop(array);
                 } break;
                 case BISON_FIELD_TYPE_COLUMN: {
                         struct bison_column_it *column = bison_array_it_column_value(it);
