@@ -25,6 +25,7 @@
 
 static void auto_close_nested_array_it(struct bison_array_it *it);
 static void auto_close_nested_column_it(struct bison_array_it *it);
+static void cleanup(struct bison_array_it *it);
 
 static bool field_type_read(struct bison_array_it *it)
 {
@@ -286,7 +287,7 @@ NG5_EXPORT(bool) bison_array_it_rewind(struct bison_array_it *it)
 NG5_EXPORT(bool) bison_array_it_next(struct bison_array_it *it)
 {
         error_if_null(it);
-        auto_close_nested_array_it(it);
+        cleanup(it);
         char c = *memfile_peek(&it->memfile, 1);
         bool is_empty_slot = c == 0;
         bool is_array_end = c == BISON_MARKER_ARRAY_END;
@@ -304,7 +305,7 @@ NG5_EXPORT(bool) bison_array_it_next(struct bison_array_it *it)
                         }
                 }
                 char final = *memfile_peek(&it->memfile, sizeof(char));
-                auto_close_nested_array_it(it);
+                cleanup(it);
                 assert( final == BISON_MARKER_ARRAY_END);
                 return false;
         }
@@ -524,6 +525,12 @@ NG5_EXPORT(bool) bison_array_it_update(struct bison_array_it *it)
 {
         ng5_unused(it);
         return false;
+}
+
+static void cleanup(struct bison_array_it *it)
+{
+        auto_close_nested_array_it(it);
+        auto_close_nested_column_it(it);
 }
 
 static void auto_close_nested_array_it(struct bison_array_it *it)
