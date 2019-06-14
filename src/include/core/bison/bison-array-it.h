@@ -45,6 +45,9 @@ struct bison_array_it
         const char *it_mime_type;
         u64 it_mime_type_strlen;
 
+        bool nested_array_it_opened;
+        bool nested_array_it_accessed;
+
         struct bison_array_it *nested_array_it;
         struct bison_column_it *nested_column_it;
 };

@@ -25,7 +25,7 @@
 
 static void auto_close_nested_array_it(struct bison_array_it *it);
 static void auto_close_nested_column_it(struct bison_array_it *it);
-static void cleanup(struct bison_array_it *it);
+static void auto_close(struct bison_array_it *it);
 
 static bool field_type_read(struct bison_array_it *it)
 {
@@ -99,6 +99,8 @@ static bool field_data_access(struct bison_array_it *it)
                 memfile_skip(&it->memfile, blob_len_nbytes);
         } break;
         case BISON_FIELD_TYPE_ARRAY:
+                it->nested_array_it_opened = true;
+                it->nested_array_it_accessed = false;
                 bison_array_it_create(it->nested_array_it, &it->memfile, &it->err,
                         memfile_tell(&it->memfile) - sizeof(u8));
                 break;
@@ -220,6 +222,8 @@ NG5_EXPORT(bool) bison_array_it_create(struct bison_array_it *it, struct memfile
         error_if_null(err);
 
         it->payload_start = payload_start;
+        it->nested_array_it_opened = false;
+        it->nested_array_it_accessed = false;
         error_init(&it->err);
         spin_init(&it->lock);
         memfile_open(&it->memfile, memfile->memblock, memfile->mode);
@@ -250,7 +254,7 @@ NG5_EXPORT(bool) bison_array_it_readonly(struct bison_array_it *it)
 
 NG5_EXPORT(bool) bison_array_it_drop(struct bison_array_it *it)
 {
-        //cleanup(it);
+        auto_close(it);
         free (it->nested_array_it);
         free (it->nested_column_it);
         return true;
@@ -286,7 +290,7 @@ NG5_EXPORT(bool) bison_array_it_rewind(struct bison_array_it *it)
 NG5_EXPORT(bool) bison_array_it_next(struct bison_array_it *it)
 {
         error_if_null(it);
-        //cleanup(it);
+        auto_close(it);
         char c = *memfile_peek(&it->memfile, 1);
         bool is_empty_slot = c == 0;
         bool is_array_end = c == BISON_MARKER_ARRAY_END;
@@ -305,7 +309,7 @@ NG5_EXPORT(bool) bison_array_it_next(struct bison_array_it *it)
                 }
                 char final = *memfile_peek(&it->memfile, sizeof(char));
                 assert( final == BISON_MARKER_ARRAY_END);
-                //cleanup(it);
+                auto_close(it);
                 return false;
         }
 }
@@ -497,6 +501,7 @@ NG5_EXPORT(struct bison_array_it *) bison_array_it_array_value(struct bison_arra
 {
         error_if_and_return(!it_in, &it_in->err, NG5_ERR_NULLPTR, NULL);
         error_if(it_in->it_field_type != BISON_FIELD_TYPE_ARRAY, &it_in->err, NG5_ERR_TYPEMISMATCH);
+        it_in->nested_array_it_accessed = true;
         return it_in->nested_array_it;
 }
 
@@ -526,9 +531,13 @@ NG5_EXPORT(bool) bison_array_it_update(struct bison_array_it *it)
         return false;
 }
 
-ng5_func_unused static void cleanup(struct bison_array_it *it)
+ng5_func_unused static void auto_close(struct bison_array_it *it)
 {
-        auto_close_nested_array_it(it);
+        if (it->nested_array_it_opened && !it->nested_array_it_accessed) {
+                auto_close_nested_array_it(it);
+                it->nested_array_it_opened = false;
+                it->nested_array_it_accessed = false;
+        }
         auto_close_nested_column_it(it);
 }
 
