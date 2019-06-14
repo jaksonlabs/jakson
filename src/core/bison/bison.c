@@ -251,6 +251,7 @@ NG5_EXPORT(bool) bison_to_str(struct string_builder *dst, enum bison_printer_imp
         struct bison_array_it it;
         bison_access(&it, doc);
         print_array(&it, &p, &b);
+        bison_array_it_drop(&it);
 
         printer_bison_payload_end(&p, &b);
         printer_bison_end(&p, &b);
