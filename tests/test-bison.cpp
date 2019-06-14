@@ -283,6 +283,7 @@ TEST(BisonTest, BisonArrayIteratorOpenAfterNew) {
         bool has_next = bison_array_it_next(&it);
         EXPECT_EQ(has_next, false);
         bison_revise_end(&revise);
+        bison_array_it_drop(&it);
 
         bison_print(stdout, &rev_doc);
         bison_hexdump_print(stdout, &rev_doc);
@@ -306,6 +307,7 @@ TEST(BisonTest, BisonArrayIteratorInsertNullAfterNew) {
         bison_insert_null(&inserter);
         bison_insert_drop(&inserter);
         bison_revise_end(&revise);
+        bison_array_it_drop(&it);
 
         bison_print(stdout, &rev_doc);
         bison_hexdump_print(stdout, &rev_doc);
@@ -342,6 +344,7 @@ TEST(BisonTest, BisonArrayIteratorInsertMultipleLiteralsAfterNewNoOverflow) {
                 fprintf(stdout, "\n\n");
         }
         bison_insert_drop(&inserter);
+        bison_array_it_drop(&it);
         bison_revise_end(&revise);
 
         bison_print(stdout, &rev_doc);
@@ -372,6 +375,7 @@ TEST(BisonTest, BisonArrayIteratorOverwriteLiterals) {
                 }
         }
         bison_insert_drop(&inserter);
+        bison_array_it_drop(&it);
         bison_revise_end(&revise);
 
         bison_revise_begin(&revise, &rev_doc2, &rev_doc);
@@ -381,6 +385,7 @@ TEST(BisonTest, BisonArrayIteratorOverwriteLiterals) {
                 bison_insert_true(&inserter);
         }
         bison_insert_drop(&inserter);
+        bison_array_it_drop(&it);
         bison_revise_end(&revise);
 
         bison_print(stdout, &rev_doc2);
@@ -413,6 +418,7 @@ TEST(BisonTest, BisonArrayIteratorOverwriteLiteralsWithDocOverflow) {
                // bison_hexdump_print(stdout, &rev_doc);
         }
         bison_insert_drop(&inserter);
+        bison_array_it_drop(&it);
         bison_revise_end(&revise);
 
         bison_revise_begin(&revise, &rev_doc2, &rev_doc);
@@ -426,6 +432,7 @@ TEST(BisonTest, BisonArrayIteratorOverwriteLiteralsWithDocOverflow) {
                 bison_hexdump_print(stdout, &rev_doc2);
         }
         bison_insert_drop(&inserter);
+        bison_array_it_drop(&it);
         bison_revise_end(&revise);
         bison_print(stdout, &rev_doc2);
         bison_drop(&doc);
@@ -464,6 +471,7 @@ TEST(BisonTest, BisonArrayIteratorUnsignedAndConstants) {
                 //bison_hexdump_print(stdout, &rev_doc);
         }
         bison_insert_drop(&inserter);
+        bison_array_it_drop(&it);
         bison_revise_end(&revise);
 
         bison_print(stdout, &rev_doc);
@@ -497,6 +505,7 @@ TEST(BisonTest, BisonArrayIteratorStrings) {
                 //bison_hexdump_print(stdout, &rev_doc);
         }
         bison_insert_drop(&inserter);
+        bison_array_it_drop(&it);
         bison_revise_end(&revise);
 
         bison_print(stdout, &rev_doc);
@@ -521,6 +530,7 @@ TEST(BisonTest, BisonInsertMimeTypedBlob) {
         ASSERT_TRUE(status);
         //bison_hexdump_print(stdout, &rev_doc);
         bison_insert_drop(&inserter);
+        bison_array_it_drop(&it);
         bison_revise_end(&revise);
 
         bison_print(stdout, &rev_doc);
@@ -545,6 +555,7 @@ TEST(BisonTest, BisonInsertCustomTypedBlob) {
         ASSERT_TRUE(status);
         //bison_hexdump_print(stdout, &rev_doc);
         bison_insert_drop(&inserter);
+        bison_array_it_drop(&it);
         bison_revise_end(&revise);
 
         bison_print(stdout, &rev_doc);
@@ -572,6 +583,7 @@ TEST(BisonTest, BisonInsertTwoMimeTypedBlob) {
         ASSERT_TRUE(status);
         //bison_hexdump_print(stdout, &rev_doc);
         bison_insert_drop(&inserter);
+        bison_array_it_drop(&it);
         bison_revise_end(&revise);
 
         bison_print(stdout, &rev_doc);
@@ -600,6 +612,7 @@ TEST(BisonTest, BisonInsertMimeTypedBlobsWithOverflow) {
         }
         //bison_hexdump_print(stdout, &rev_doc);
         bison_insert_drop(&inserter);
+        bison_array_it_drop(&it);
         bison_revise_end(&revise);
 
         bison_print(stdout, &rev_doc);
@@ -628,6 +641,7 @@ TEST(BisonTest, BisonInsertMixedTypedBlobsWithOverflow) {
         }
         //bison_hexdump_print(stdout, &rev_doc);
         bison_insert_drop(&inserter);
+        bison_array_it_drop(&it);
         bison_revise_end(&revise);
 
         bison_print(stdout, &rev_doc);
