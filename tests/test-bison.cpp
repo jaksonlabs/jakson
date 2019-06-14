@@ -437,6 +437,7 @@ TEST(BisonTest, BisonArrayIteratorOverwriteLiteralsWithDocOverflow) {
         bison_print(stdout, &rev_doc2);
         bison_drop(&doc);
         bison_drop(&rev_doc);
+        bison_drop(&rev_doc2);
 }
 
 TEST(BisonTest, BisonArrayIteratorUnsignedAndConstants) {
