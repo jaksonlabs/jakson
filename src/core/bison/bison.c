@@ -70,9 +70,9 @@ static bool printer_bison_null(struct bison_printer *printer, struct string_buil
 static bool printer_bison_true(struct bison_printer *printer, struct string_builder *builder);
 static bool printer_bison_false(struct bison_printer *printer, struct string_builder *builder);
 static bool printer_bison_comma(struct bison_printer *printer, struct string_builder *builder);
-static bool printer_bison_signed(struct bison_printer *printer, struct string_builder *builder, i64 value);
-static bool printer_bison_unsigned(struct bison_printer *printer, struct string_builder *builder, u64 value);
-static bool printer_bison_float(struct bison_printer *printer, struct string_builder *builder, float value);
+static bool printer_bison_signed(struct bison_printer *printer, struct string_builder *builder, const i64 *value);
+static bool printer_bison_unsigned(struct bison_printer *printer, struct string_builder *builder, const u64 *value);
+static bool printer_bison_float(struct bison_printer *printer, struct string_builder *builder, const float *value);
 static bool printer_bison_string(struct bison_printer *printer, struct string_builder *builder, const char *value, u64 strlen);
 static bool printer_bison_binary(struct bison_printer *printer, struct string_builder *builder, const struct bison_binary *binary);
 
@@ -637,21 +637,21 @@ static bool printer_bison_comma(struct bison_printer *printer, struct string_bui
         return true;
 }
 
-static bool printer_bison_signed(struct bison_printer *printer, struct string_builder *builder, i64 value)
+static bool printer_bison_signed(struct bison_printer *printer, struct string_builder *builder, const i64 *value)
 {
         error_if_null(printer->print_bison_signed);
         printer->print_bison_signed(printer, builder, value);
         return true;
 }
 
-static bool printer_bison_unsigned(struct bison_printer *printer, struct string_builder *builder, u64 value)
+static bool printer_bison_unsigned(struct bison_printer *printer, struct string_builder *builder, const u64 *value)
 {
         error_if_null(printer->print_bison_unsigned);
         printer->print_bison_unsigned(printer, builder, value);
         return true;
 }
 
-static bool printer_bison_float(struct bison_printer *printer, struct string_builder *builder, float value)
+static bool printer_bison_float(struct bison_printer *printer, struct string_builder *builder, const float *value)
 {
         error_if_null(printer->print_bison_float);
         printer->print_bison_float(printer, builder, value);
@@ -677,6 +677,7 @@ static bool print_array(struct bison_array_it *it, struct bison_printer *printer
         assert(it);
         assert(printer);
         assert(builder);
+        bool is_null_value;
         bool first_entry = true;
         printer_bison_array_begin(printer, builder);
 
@@ -701,21 +702,21 @@ static bool print_array(struct bison_array_it *it, struct bison_printer *printer
                 case BISON_FIELD_TYPE_NUMBER_U32:
                 case BISON_FIELD_TYPE_NUMBER_U64: {
                         u64 value;
-                        bison_array_it_unsigned_value(&value, it);
-                        printer_bison_unsigned(printer, builder, value);
+                        bison_array_it_unsigned_value(&is_null_value, &value, it);
+                        printer_bison_unsigned(printer, builder, is_null_value ? NULL : &value);
                 } break;
                 case BISON_FIELD_TYPE_NUMBER_I8:
                 case BISON_FIELD_TYPE_NUMBER_I16:
                 case BISON_FIELD_TYPE_NUMBER_I32:
                 case BISON_FIELD_TYPE_NUMBER_I64: {
                         i64 value;
-                        bison_array_it_signed_value(&value, it);
-                        printer_bison_signed(printer, builder, value);
+                        bison_array_it_signed_value(&is_null_value, &value, it);
+                        printer_bison_signed(printer, builder, is_null_value ? NULL : &value);
                 } break;
                 case BISON_FIELD_TYPE_NUMBER_FLOAT: {
                         float value;
-                        bison_array_it_float_value(&value, it);
-                        printer_bison_float(printer, builder, value);
+                        bison_array_it_float_value(&is_null_value, &value, it);
+                        printer_bison_float(printer, builder, is_null_value ? NULL : &value);
                 } break;
                 case BISON_FIELD_TYPE_STRING: {
                         u64 strlen;
@@ -773,39 +774,39 @@ static bool print_column(struct bison_column_it *it, struct bison_printer *print
                         break;
                 case BISON_FIELD_TYPE_NUMBER_U8: {
                         u64 number = ((u8*) values)[i];
-                        printer_bison_unsigned(printer, builder, number);
+                        printer_bison_unsigned(printer, builder, is_null_u8(number) ? NULL : &number);
                 } break;
                 case BISON_FIELD_TYPE_NUMBER_U16: {
                         u64 number = ((u16*) values)[i];
-                        printer_bison_unsigned(printer, builder, number);
+                        printer_bison_unsigned(printer, builder, is_null_u16(number) ? NULL : &number);
                 } break;
                 case BISON_FIELD_TYPE_NUMBER_U32: {
                         u64 number = ((u32*) values)[i];
-                        printer_bison_unsigned(printer, builder, number);
+                        printer_bison_unsigned(printer, builder, is_null_u32(number) ? NULL : &number);
                 } break;
                 case BISON_FIELD_TYPE_NUMBER_U64: {
                         u64 number = ((u64*) values)[i];
-                        printer_bison_unsigned(printer, builder, number);
+                        printer_bison_unsigned(printer, builder, is_null_u64(number) ? NULL : &number);
                 } break;
                 case BISON_FIELD_TYPE_NUMBER_I8: {
                         i64 number = ((i8*) values)[i];
-                        printer_bison_signed(printer, builder, number);
+                        printer_bison_signed(printer, builder, is_null_i8(number) ? NULL : &number);
                 } break;
                 case BISON_FIELD_TYPE_NUMBER_I16: {
                         i64 number = ((i16*) values)[i];
-                        printer_bison_signed(printer, builder, number);
+                        printer_bison_signed(printer, builder, is_null_i16(number) ? NULL : &number);
                 } break;
                 case BISON_FIELD_TYPE_NUMBER_I32: {
                         i64 number = ((i32*) values)[i];
-                        printer_bison_signed(printer, builder, number);
+                        printer_bison_signed(printer, builder, is_null_i32(number) ? NULL : &number);
                 } break;
                 case BISON_FIELD_TYPE_NUMBER_I64: {
                         i64 number = ((i64*) values)[i];
-                        printer_bison_signed(printer, builder, number);
+                        printer_bison_signed(printer, builder, is_null_i64(number) ? NULL : &number);
                 } break;
                 case BISON_FIELD_TYPE_NUMBER_FLOAT: {
                         float number = ((float*) values)[i];
-                        printer_bison_float(printer, builder, number);
+                        printer_bison_float(printer, builder, is_null_float(number) ? NULL : &number);
                 } break;
                 default:
                         printer_bison_array_end(printer, builder);

@@ -88,6 +88,7 @@ NG5_EXPORT(const void *) bison_column_it_values(enum bison_field_type *type, u32
         memfile_seek(&it->memfile, it->payload_start + skip);
 
         char end = *memfile_read(&it->memfile, sizeof(u8));
+
         error_if_and_return(end != BISON_MARKER_COLUMN_END, &it->err, NG5_ERR_CORRUPTED, NULL);
 
         return result;

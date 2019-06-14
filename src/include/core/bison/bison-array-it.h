@@ -105,11 +105,11 @@ NG5_EXPORT(bool) bison_array_it_i32_value(i32 *value, struct bison_array_it *it)
 
 NG5_EXPORT(bool) bison_array_it_i64_value(i64 *value, struct bison_array_it *it);
 
-NG5_EXPORT(bool) bison_array_it_float_value(float *value, struct bison_array_it *it);
+NG5_EXPORT(bool) bison_array_it_float_value(bool *is_null_in, float *value, struct bison_array_it *it);
 
-NG5_EXPORT(bool) bison_array_it_signed_value(i64 *value, struct bison_array_it *it);
+NG5_EXPORT(bool) bison_array_it_signed_value(bool *is_null_in, i64 *value, struct bison_array_it *it);
 
-NG5_EXPORT(bool) bison_array_it_unsigned_value(u64 *value, struct bison_array_it *it);
+NG5_EXPORT(bool) bison_array_it_unsigned_value(bool *is_null_in, u64 *value, struct bison_array_it *it);
 
 NG5_EXPORT(const char *) bison_array_it_string_value(u64 *strlen, struct bison_array_it *it);
 

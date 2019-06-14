@@ -72,7 +72,7 @@ NG5_EXPORT(bool) memfile_grow(struct memfile *file_in, size_t grow_by_bytes, boo
         if (likely(grow_by_bytes > 0)) {
                 offset_t block_size;
                 memblock_size(&block_size, file_in->memblock);
-                memblock_resize_ex(file_in->memblock, (block_size + grow_by_bytes) * 1.7f, zero_out);
+                memblock_resize_ex(file_in->memblock, (block_size + grow_by_bytes), zero_out);
         }
         return true;
 }

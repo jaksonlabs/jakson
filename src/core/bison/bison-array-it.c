@@ -389,39 +389,44 @@ NG5_EXPORT(bool) bison_array_it_i64_value(i64 *value, struct bison_array_it *it)
         return true;
 }
 
-NG5_EXPORT(bool) bison_array_it_float_value(float *value, struct bison_array_it *it)
+NG5_EXPORT(bool) bison_array_it_float_value(bool *is_null_in, float *value, struct bison_array_it *it)
 {
-        error_if_null(value)
         error_if_null(it)
         error_if(it->it_field_type != BISON_FIELD_TYPE_NUMBER_FLOAT, &it->err, NG5_ERR_TYPEMISMATCH);
-        *value = *(float *) it->it_field_data;
+        float read_value = *(float *) it->it_field_data;
+        ng5_optional_set(value, read_value);
+        ng5_optional_set(is_null_in, is_null_float(read_value));
+
         return true;
 }
 
-NG5_EXPORT(bool) bison_array_it_signed_value(i64 *value, struct bison_array_it *it)
+NG5_EXPORT(bool) bison_array_it_signed_value(bool *is_null_in, i64 *value, struct bison_array_it *it)
 {
-        error_if_null(value)
         error_if_null(it)
         switch (it->it_field_type) {
         case BISON_FIELD_TYPE_NUMBER_I8: {
                 i8 read_value;
                 bison_array_it_i8_value(&read_value, it);
-                *value = read_value;
+                ng5_optional_set(value, read_value);
+                ng5_optional_set(is_null_in, is_null_i8(read_value));
         } break;
         case BISON_FIELD_TYPE_NUMBER_I16: {
                 i16 read_value;
                 bison_array_it_i16_value(&read_value, it);
-                *value = read_value;
+                ng5_optional_set(value, read_value);
+                ng5_optional_set(is_null_in, is_null_i16(read_value));
         } break;
         case BISON_FIELD_TYPE_NUMBER_I32: {
                 i32 read_value;
                 bison_array_it_i32_value(&read_value, it);
-                *value = read_value;
+                ng5_optional_set(value, read_value);
+                ng5_optional_set(is_null_in, is_null_i32(read_value));
         } break;
         case BISON_FIELD_TYPE_NUMBER_I64: {
                 i64 read_value;
                 bison_array_it_i64_value(&read_value, it);
-                *value = read_value;
+                ng5_optional_set(value, read_value);
+                ng5_optional_set(is_null_in, is_null_i64(read_value));
         } break;
         default:
                 error(&it->err, NG5_ERR_TYPEMISMATCH);
@@ -430,30 +435,33 @@ NG5_EXPORT(bool) bison_array_it_signed_value(i64 *value, struct bison_array_it *
         return true;
 }
 
-NG5_EXPORT(bool) bison_array_it_unsigned_value(u64 *value, struct bison_array_it *it)
+NG5_EXPORT(bool) bison_array_it_unsigned_value(bool *is_null_in, u64 *value, struct bison_array_it *it)
 {
-        error_if_null(value)
         error_if_null(it)
         switch (it->it_field_type) {
         case BISON_FIELD_TYPE_NUMBER_U8: {
                 u8 read_value;
                 bison_array_it_u8_value(&read_value, it);
-                *value = read_value;
+                ng5_optional_set(value, read_value);
+                ng5_optional_set(is_null_in, is_null_u8(read_value));
         } break;
         case BISON_FIELD_TYPE_NUMBER_U16: {
                 u16 read_value;
                 bison_array_it_u16_value(&read_value, it);
-                *value = read_value;
+                ng5_optional_set(value, read_value);
+                ng5_optional_set(is_null_in, is_null_u16(read_value));
         } break;
         case BISON_FIELD_TYPE_NUMBER_U32: {
                 u32 read_value;
                 bison_array_it_u32_value(&read_value, it);
-                *value = read_value;
+                ng5_optional_set(value, read_value);
+                ng5_optional_set(is_null_in, is_null_u32(read_value));
         } break;
         case BISON_FIELD_TYPE_NUMBER_U64: {
                 u64 read_value;
                 bison_array_it_u64_value(&read_value, it);
-                *value = read_value;
+                ng5_optional_set(value, read_value);
+                ng5_optional_set(is_null_in, is_null_u64(read_value));
         } break;
         default:
         error(&it->err, NG5_ERR_TYPEMISMATCH);

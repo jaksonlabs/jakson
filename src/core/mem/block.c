@@ -152,7 +152,7 @@ NG5_EXPORT(bool) memblock_move_ex(struct memblock *block, offset_t where, size_t
 
         /* resize (if needed) */
         if (block->lastByte + nbytes > block->blockLength) {
-                size_t new_length = (block->lastByte + nbytes) * 1.7f;
+                size_t new_length = (block->lastByte + nbytes);
                 block->base = realloc(block->base, new_length);
                 error_if(!block->base, &block->err, NG5_ERR_REALLOCERR);
                 if (zero_out) {

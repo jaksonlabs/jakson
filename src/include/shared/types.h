@@ -18,6 +18,8 @@
 #ifndef NG5_TYPES_H
 #define NG5_TYPES_H
 
+#include <limits.h>
+#include <math.h>
 #include "shared/common.h"
 
 NG5_BEGIN_DECL
@@ -37,6 +39,26 @@ typedef int16_t i16;
 typedef int32_t i32;
 
 typedef int64_t i64;
+
+#define U8_NULL         UINT8_MAX
+#define U16_NULL        UINT16_MAX
+#define U32_NULL        UINT32_MAX
+#define U64_NULL        UINT64_MAX
+#define I8_NULL         INT8_MAX
+#define I16_NULL        INT16_MAX
+#define I32_NULL        INT32_MAX
+#define I64_NULL        INT64_MAX
+#define FLOAT_NULL      NAN
+
+#define is_null_u8(x)           (x == U8_NULL)
+#define is_null_u16(x)          (x == U16_NULL)
+#define is_null_u32(x)          (x == U32_NULL)
+#define is_null_u64(x)          (x == U64_NULL)
+#define is_null_i8(x)           (x == I8_NULL)
+#define is_null_i16(x)          (x == I16_NULL)
+#define is_null_i32(x)          (x == I32_NULL)
+#define is_null_i64(x)          (x == I64_NULL)
+#define is_null_float(x)        (isnan(x))
 
 struct doc_obj;
 

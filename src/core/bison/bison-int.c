@@ -122,7 +122,7 @@ NG5_EXPORT(bool) bison_int_ensure_space(struct memfile *memfile, u64 nbytes)
                 if (unlikely(c != 0)) {
                         /* not enough space; enlarge container */
                         memfile_seek(memfile, current_off);
-                        memfile_move(memfile, nbytes);
+                        memfile_move(memfile, nbytes - i);
                         break;
                 }
         }

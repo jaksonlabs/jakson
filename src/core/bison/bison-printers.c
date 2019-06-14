@@ -21,6 +21,8 @@
 
 #define INIT_BUFFER_LEN 1024
 
+#define NULL_STR "null"
+
 struct json_formatter_extra
 {
         bool intent;
@@ -51,9 +53,9 @@ static void json_formatter_bison_null(struct bison_printer *self, struct string_
 static void json_formatter_bison_true(struct bison_printer *self, struct string_builder *builder);
 static void json_formatter_bison_false(struct bison_printer *self, struct string_builder *builder);
 
-static void json_formatter_bison_signed(struct bison_printer *self, struct string_builder *builder, i64 value);
-static void json_formatter_bison_unsigned(struct bison_printer *self, struct string_builder *builder, u64 value);
-static void json_formatter_bison_float(struct bison_printer *self, struct string_builder *builder, float value);
+static void json_formatter_bison_signed(struct bison_printer *self, struct string_builder *builder, const i64 *value);
+static void json_formatter_bison_unsigned(struct bison_printer *self, struct string_builder *builder, const u64 *value);
+static void json_formatter_bison_float(struct bison_printer *self, struct string_builder *builder, const float *value);
 
 static void json_formatter_bison_string(struct bison_printer *self, struct string_builder *builder, const char *value, u64 strlen);
 static void json_formatter_bison_binary(struct bison_printer *self, struct string_builder *builder, const struct bison_binary *binary);
@@ -223,22 +225,35 @@ static void json_formatter_bison_false(struct bison_printer *self, struct string
         string_builder_append(builder, "false");
 }
 
-static void json_formatter_bison_signed(struct bison_printer *self, struct string_builder *builder, i64 value)
+static void json_formatter_bison_signed(struct bison_printer *self, struct string_builder *builder, const i64 *value)
 {
         ng5_unused(self);
-        string_builder_append_i64(builder, value);
+        if (likely(value != NULL)) {
+                string_builder_append_i64(builder, *value);
+        } else {
+                string_builder_append(builder, NULL_STR);
+        }
+
 }
 
-static void json_formatter_bison_unsigned(struct bison_printer *self, struct string_builder *builder, u64 value)
+static void json_formatter_bison_unsigned(struct bison_printer *self, struct string_builder *builder, const u64 *value)
 {
         ng5_unused(self);
-        string_builder_append_u64(builder, value);
+        if (likely(value != NULL)) {
+                string_builder_append_u64(builder, *value);
+        } else {
+                string_builder_append(builder, NULL_STR);
+        }
 }
 
-static void json_formatter_bison_float(struct bison_printer *self, struct string_builder *builder, float value)
+static void json_formatter_bison_float(struct bison_printer *self, struct string_builder *builder, const float *value)
 {
         ng5_unused(self);
-        string_builder_append_float(builder, value);
+        if (likely(value != NULL)) {
+                string_builder_append_float(builder, *value);
+        } else {
+                string_builder_append(builder, NULL_STR);
+        }
 }
 
 static void json_formatter_bison_string(struct bison_printer *self, struct string_builder *builder, const char *value, u64 strlen)

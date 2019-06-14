@@ -441,9 +441,6 @@ NG5_EXPORT(bool) bison_insert_column_end(struct bison_insert_column_state *state
                 state_in->nested_column->column_start_offset);
         bison_column_it_fast_forward(&scan);
 
-        //memfile_skip(&scan.memfile, 1);
-        memfile_hexdump_print(&scan.memfile);
-
         memfile_seek(&state_in->parent_inserter->memfile, memfile_tell(&scan.memfile));
 
         free(state_in->nested_column);
@@ -497,7 +494,7 @@ static bool push_in_column(struct bison_insert *inserter, const void *base, enum
 
                 u32 new_capacity = (capacity + 1) * 1.7f;
 
-                bison_int_ensure_space(&inserter->memfile, (new_capacity * type_size) - capacity);
+                bison_int_ensure_space(&inserter->memfile, (new_capacity - capacity) * type_size);
                 memfile_seek(&inserter->memfile, inserter->context.column->column_capacity_offset);
                 memfile_write(&inserter->memfile, &new_capacity, sizeof(u32));
 
