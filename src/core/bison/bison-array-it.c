@@ -199,7 +199,7 @@ static bool field_skip(struct bison_array_it *it)
                 bison_column_it_create(&skip_it, &it->memfile, &it->err,
                         memfile_tell(&it->memfile) - sizeof(media_type_t));
                 bison_column_it_fast_forward(&skip_it);
-                memfile_seek(&it->memfile, memfile_tell(&skip_it.memfile) + 1);
+                memfile_seek(&it->memfile, memfile_tell(&skip_it.memfile));
 
         } break;
         case BISON_FIELD_TYPE_OBJECT:
@@ -375,7 +375,7 @@ NG5_EXPORT(bool) bison_array_it_i32_value(i32 *value, struct bison_array_it *it)
 {
         error_if_null(value)
         error_if_null(it)
-        error_if(it->it_field_type != BISON_FIELD_TYPE_NUMBER_I64, &it->err, NG5_ERR_TYPEMISMATCH);
+        error_if(it->it_field_type != BISON_FIELD_TYPE_NUMBER_I32, &it->err, NG5_ERR_TYPEMISMATCH);
         *value = *(i32 *) it->it_field_data;
         return true;
 }

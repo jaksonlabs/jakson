@@ -19,6 +19,8 @@
 #define NG5_MEMFILE_H
 
 #include "shared/common.h"
+#include "std/string_builder.h"
+#include "utils/hexdump.h"
 #include "block.h"
 
 NG5_BEGIN_DECL
@@ -110,6 +112,12 @@ NG5_EXPORT(bool) memfile_move(struct memfile *file, size_t nbytes);
 NG5_EXPORT(bool) memfile_end_bit_mode(size_t *num_bytes_written, struct memfile *file);
 
 NG5_EXPORT(void *) memfile_current_pos(struct memfile *file, offset_t nbytes);
+
+NG5_EXPORT(bool) memfile_hexdump(struct string_builder *sb, struct memfile *file);
+
+NG5_EXPORT(bool) memfile_hexdump_printf(FILE *file, struct memfile *memfile);
+
+NG5_EXPORT(bool) memfile_hexdump_print(struct memfile *memfile);
 
 NG5_END_DECL
 

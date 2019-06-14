@@ -32,6 +32,16 @@ NG5_EXPORT(bool) bison_int_insert_column(struct memfile *memfile_in, struct err 
 
 NG5_EXPORT(bool) bison_int_ensure_space(struct memfile *memfile, u64 nbytes);
 
+/**
+ * Returns the number of bytes required to store a field type including its type marker in a byte sequence.
+ */
+NG5_EXPORT(size_t) bison_int_get_type_size_encoded(enum bison_field_type type);
+
+/**
+ * Returns the number of bytes required to store a field value of a particular type exclusing its type marker.
+ */
+NG5_EXPORT(size_t) bison_int_get_type_value_size(enum bison_field_type type);
+
 NG5_END_DECL
 
 #endif

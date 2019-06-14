@@ -107,6 +107,14 @@ NG5_BEGIN_DECL
 #define NG5_ERR_NOTREADABLE 79             /** Object is currently being updated; no read allowed */
 #define NG5_ERR_ILLEGALOP 80               /** Illegal operation */
 #define NG5_ERR_BADTYPE 81                 /** Unsupported type */
+#define NG5_ERR_UNSUPPCONTAINER 82         /** Unsupported container for data type */
+#define NG5_ERR_INSERT_TOO_DANGEROUS 83    /** Adding integers with this function will perform an auto casting to
+                                             * the smallest type required to store the integer value. Since you push
+                                             * integers with this function into an column container that is bound
+                                             * to a specific type, any insertion function call will fail once the
+                                             * integer value requires a larger (or smaller) type than the fist value
+                                             * added to the container. Use '*_insert_X' instead, where X is u8, u16,...
+                                             * , u32 resp. i8, i16,..., i32. */
 
 static const char *const _err_str[] =
         {"No error", "Null pointer detected", "Function not implemented", "Index is out of bounds",
@@ -145,7 +153,12 @@ static const char *const _err_str[] =
          "Unable to write to file", "Unable to deserialize hash table from file",
          "Unknown string dictionary implementation requested", "Stack overflow", "Stack underflow",
          "Object was modified and is out of date", "Object is currently being updated; no read allowed",
-         "Illegal operation", "Unsupported type" };
+         "Illegal operation", "Unsupported type", "Unsupported container for data type",
+         "Adding integers with this function will perform an auto casting to the smallest type required to store "
+                 "the integer value. Since you push integers with this function into an column container that is bound "
+                 "to a specific type, any insertion function call will fail once the integer value requires a larger "
+                 "(or smaller) type than the fist value added to the container. Use '*_insert_X' instead, where X is "
+                 "u8, u16,..., u32 resp. i8, i16,..., i32. "};
 
 #define NG5_ERRSTR_ILLEGAL_CODE "illegal error code"
 

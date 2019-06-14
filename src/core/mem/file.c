@@ -347,3 +347,28 @@ void *memfile_current_pos(struct memfile *file, offset_t nbytes)
                 return NULL;
         }
 }
+
+NG5_EXPORT(bool) memfile_hexdump(struct string_builder *sb, struct memfile *file)
+{
+        error_if_null(sb);
+        error_if_null(file);
+        offset_t block_size;
+        memblock_size(&block_size, file->memblock);
+        hexdump(sb, memblock_raw_data(file->memblock), block_size);
+        return true;
+}
+
+NG5_EXPORT(bool) memfile_hexdump_printf(FILE *file, struct memfile *memfile)
+{
+        error_if_null(file)
+        error_if_null(memfile)
+        offset_t block_size;
+        memblock_size(&block_size, memfile->memblock);
+        hexdump_print(file, memblock_raw_data(memfile->memblock), block_size);
+        return true;
+}
+
+NG5_EXPORT(bool) memfile_hexdump_print(struct memfile *memfile)
+{
+        return memfile_hexdump_printf(stdout, memfile);
+}

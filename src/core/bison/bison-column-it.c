@@ -19,19 +19,20 @@
 #include "core/bison/bison-column-it.h"
 #include "core/bison/bison-media.h"
 #include "core/bison/bison-insert.h"
+#include "core/bison/bison-int.h"
 
 NG5_EXPORT(bool) bison_column_it_create(struct bison_column_it *it, struct memfile *memfile, struct err *err,
-        offset_t payload_start)
+        offset_t column_start_offset)
 {
         error_if_null(it);
         error_if_null(memfile);
         error_if_null(err);
 
-        it->payload_start = payload_start;
+        it->column_start_offset = column_start_offset;
         error_init(&it->err);
         spin_init(&it->lock);
         memfile_open(&it->memfile, memfile->memblock, memfile->mode);
-        memfile_seek(&it->memfile, payload_start);
+        memfile_seek(&it->memfile, column_start_offset);
 
         error_if(memfile_remain_size(&it->memfile) < sizeof(u8) + sizeof(media_type_t), err, NG5_ERR_CORRUPTED);
 
@@ -42,8 +43,13 @@ NG5_EXPORT(bool) bison_column_it_create(struct bison_column_it *it, struct memfi
         enum bison_field_type type = (enum bison_field_type) *memfile_read(&it->memfile, sizeof(media_type_t));
         it->type = type;
 
+        it->column_num_elements_offset = memfile_tell(&it->memfile);
+        it->column_num_elements = *memfile_read(&it->memfile, sizeof(u32));
+        it->column_capacity_offset = memfile_tell(&it->memfile);
+        it->column_capacity = *memfile_read(&it->memfile, sizeof(u32));
+
         /* header consists of column begin marker and contained element type */
-        it->payload_start += sizeof(u8) + sizeof(media_type_t);
+        it->payload_start = memfile_tell(&it->memfile);
         bison_column_it_rewind(it);
 
         return true;
@@ -63,64 +69,27 @@ NG5_EXPORT(bool) bison_column_it_fast_forward(struct bison_column_it *it)
         return true;
 }
 
-NG5_EXPORT(const void *) bison_column_it_values(enum bison_field_type *type, u64 *nvalues, struct bison_column_it *it)
+NG5_EXPORT(const void *) bison_column_it_values(enum bison_field_type *type, u32 *nvalues, struct bison_column_it *it)
 {
         error_if_null(it);
+        memfile_seek(&it->memfile, it->column_num_elements_offset);
+        u32 num_elements = *NG5_MEMFILE_READ_TYPE(&it->memfile, u32);
+
+        memfile_seek(&it->memfile, it->column_capacity_offset);
+        u32 cap_elements = *NG5_MEMFILE_READ_TYPE(&it->memfile, u32);
+
         memfile_seek(&it->memfile, it->payload_start);
         const void *result = memfile_peek(&it->memfile, sizeof(void));
+
         ng5_optional_set(type, it->type);
-        char c = *(const char *) result;
-        u64 contained_values = 0;
-        while (c != BISON_MARKER_COLUMN_END) {
+        ng5_optional_set(nvalues, num_elements);
 
-                if (c != 0) {
-                        contained_values++;
+        u32 skip = cap_elements * bison_int_get_type_value_size(it->type);
+        memfile_seek(&it->memfile, it->payload_start + skip);
 
-                        switch (it->type) {
-                        case BISON_FIELD_TYPE_NULL:
-                        case BISON_FIELD_TYPE_TRUE:
-                        case BISON_FIELD_TYPE_FALSE:
-                                /* nothing to do; no payload */
-                                memfile_skip(&it->memfile, sizeof(media_type_t));
-                                break;
-                        case BISON_FIELD_TYPE_NUMBER_U8:
-                        case BISON_FIELD_TYPE_NUMBER_I8:
-                                /* skip value */
-                                memfile_skip(&it->memfile, sizeof(u8));
-                                break;
-                        case BISON_FIELD_TYPE_NUMBER_U16:
-                        case BISON_FIELD_TYPE_NUMBER_I16:
-                                /* skip value */
-                                memfile_skip(&it->memfile, sizeof(u16));
-                                break;
-                        case BISON_FIELD_TYPE_NUMBER_U32:
-                        case BISON_FIELD_TYPE_NUMBER_I32:
-                                /* skip value */
-                                memfile_skip(&it->memfile, sizeof(u32));
-                                break;
-                        case BISON_FIELD_TYPE_NUMBER_U64:
-                        case BISON_FIELD_TYPE_NUMBER_I64:
-                                /* skip value */
-                                memfile_skip(&it->memfile, sizeof(u64));
-                                break;
-                        case BISON_FIELD_TYPE_NUMBER_FLOAT:
-                                /* skip value */
-                                memfile_skip(&it->memfile, sizeof(float));
-                                break;
-                        default:
-                        error(&it->err, NG5_ERR_INTERNALERR);
-                        }
-                        c = *memfile_peek(&it->memfile, sizeof(char));
+        char end = *memfile_read(&it->memfile, sizeof(u8));
+        error_if_and_return(end != BISON_MARKER_COLUMN_END, &it->err, NG5_ERR_CORRUPTED, NULL);
 
-                } else {
-                        while ((c = *memfile_peek(&it->memfile, sizeof(char))) == 0)
-                        {
-                                memfile_skip(&it->memfile, sizeof(char));
-                        }
-                }
-        }
-        assert(c == BISON_MARKER_COLUMN_END);
-        ng5_optional_set(nvalues, contained_values);
         return result;
 }
 

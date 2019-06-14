@@ -75,6 +75,22 @@ NG5_EXPORT(bool) bison_insert_true(struct bison_insert *inserter);
 
 NG5_EXPORT(bool) bison_insert_false(struct bison_insert *inserter);
 
+NG5_EXPORT(bool) bison_insert_u8(struct bison_insert *inserter, u8 value);
+
+NG5_EXPORT(bool) bison_insert_u16(struct bison_insert *inserter, u16 value);
+
+NG5_EXPORT(bool) bison_insert_u32(struct bison_insert *inserter, u32 value);
+
+NG5_EXPORT(bool) bison_insert_u64(struct bison_insert *inserter, u64 value);
+
+NG5_EXPORT(bool) bison_insert_i8(struct bison_insert *inserter, i8 value);
+
+NG5_EXPORT(bool) bison_insert_i16(struct bison_insert *inserter, i16 value);
+
+NG5_EXPORT(bool) bison_insert_i32(struct bison_insert *inserter, i32 value);
+
+NG5_EXPORT(bool) bison_insert_i64(struct bison_insert *inserter, i64 value);
+
 NG5_EXPORT(bool) bison_insert_unsigned(struct bison_insert *inserter, u64 value);
 
 NG5_EXPORT(bool) bison_insert_signed(struct bison_insert *inserter, i64 value);

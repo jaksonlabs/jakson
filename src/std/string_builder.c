@@ -74,10 +74,53 @@ NG5_EXPORT(bool) string_builder_append_char(struct string_builder *builder, char
         return true;
 }
 
+NG5_EXPORT(bool) string_builder_append_u8(struct string_builder *builder, u8 value)
+{
+        char buffer[21];
+        ng5_zero_memory(buffer, NG5_ARRAY_LENGTH(buffer));
+        sprintf(buffer, "%u", value);
+        return string_builder_append(builder, buffer);
+}
+
+NG5_EXPORT(bool) string_builder_append_u16(struct string_builder *builder, u16 value)
+{
+        char buffer[21];
+        sprintf(buffer, "%u", value);
+        return string_builder_append(builder, buffer);
+}
+
+NG5_EXPORT(bool) string_builder_append_u32(struct string_builder *builder, u32 value)
+{
+        char buffer[21];
+        sprintf(buffer, "%u", value);
+        return string_builder_append(builder, buffer);
+}
+
 NG5_EXPORT(bool) string_builder_append_u64(struct string_builder *builder, u64 value)
 {
         char buffer[21];
         sprintf(buffer, "%" PRIu64, value);
+        return string_builder_append(builder, buffer);
+}
+
+NG5_EXPORT(bool) string_builder_append_i8(struct string_builder *builder, i8 value)
+{
+        char buffer[21];
+        sprintf(buffer, "%d", value);
+        return string_builder_append(builder, buffer);
+}
+
+NG5_EXPORT(bool) string_builder_append_i16(struct string_builder *builder, i16 value)
+{
+        char buffer[21];
+        sprintf(buffer, "%d", value);
+        return string_builder_append(builder, buffer);
+}
+
+NG5_EXPORT(bool) string_builder_append_i32(struct string_builder *builder, i32 value)
+{
+        char buffer[21];
+        sprintf(buffer, "%d", value);
         return string_builder_append(builder, buffer);
 }
 
@@ -113,6 +156,19 @@ NG5_EXPORT(bool) string_builder_drop(struct string_builder *builder)
 {
         error_if_null(builder)
         free (builder->data);
+        return true;
+}
+
+NG5_EXPORT(bool) string_builder_print(struct string_builder *builder)
+{
+        return string_builder_printf(stdout, builder);
+}
+
+NG5_EXPORT(bool) string_builder_printf(FILE *file, struct string_builder *builder)
+{
+        error_if_null(file)
+        error_if_null(builder)
+        fprintf(file, "%s\n", string_builder_cstr(builder));
         return true;
 }
 

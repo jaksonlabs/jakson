@@ -43,7 +43,19 @@ NG5_EXPORT(bool) string_builder_append_nchar(struct string_builder *builder, con
 
 NG5_EXPORT(bool) string_builder_append_char(struct string_builder *builder, char c);
 
+NG5_EXPORT(bool) string_builder_append_u8(struct string_builder *builder, u8 value);
+
+NG5_EXPORT(bool) string_builder_append_u16(struct string_builder *builder, u16 value);
+
+NG5_EXPORT(bool) string_builder_append_u32(struct string_builder *builder, u32 value);
+
 NG5_EXPORT(bool) string_builder_append_u64(struct string_builder *builder, u64 value);
+
+NG5_EXPORT(bool) string_builder_append_i8(struct string_builder *builder, i8 value);
+
+NG5_EXPORT(bool) string_builder_append_i16(struct string_builder *builder, i16 value);
+
+NG5_EXPORT(bool) string_builder_append_i32(struct string_builder *builder, i32 value);
 
 NG5_EXPORT(bool) string_builder_append_i64(struct string_builder *builder, i64 value);
 
@@ -54,6 +66,10 @@ NG5_EXPORT(bool) string_builder_clear(struct string_builder *builder);
 NG5_EXPORT(size_t) string_builder_length(struct string_builder *builder);
 
 NG5_EXPORT(bool) string_builder_drop(struct string_builder *builder);
+
+NG5_EXPORT(bool) string_builder_print(struct string_builder *builder);
+
+NG5_EXPORT(bool) string_builder_printf(FILE *file, struct string_builder *builder);
 
 NG5_EXPORT(const char *) string_builder_cstr(struct string_builder *builder);
 

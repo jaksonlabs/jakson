@@ -78,8 +78,62 @@ NG5_EXPORT(bool) bison_int_insert_column(struct memfile *memfile_in, struct err 
         marker_insert(memfile_in, column_begin_marker);
         bison_int_ensure_space(memfile_in, sizeof(media_type_t));
         bison_media_write(memfile_in, type);
+
+        u32 num_elements = 0;
+        u32 cap_elements = capactity;
+
+        bison_int_ensure_space(memfile_in, sizeof(u32));
+        memfile_write(memfile_in, &num_elements, sizeof(u32));
+        bison_int_ensure_space(memfile_in, sizeof(u32));
+        memfile_write(memfile_in, &cap_elements, sizeof(u32));
+
         offset_t payload_begin = memfile_tell(memfile_in);
 
+        size_t type_size = bison_int_get_type_value_size(type);
+
+        size_t nbytes = capactity * type_size;
+        bison_int_ensure_space(memfile_in, nbytes + sizeof(u8) + 2 * sizeof(u32));
+
+        memfile_seek(memfile_in, payload_begin + nbytes);
+        marker_insert(memfile_in, column_end_marker);
+
+        /* seek to first entry in column */
+        memfile_seek(memfile_in, payload_begin);
+
+        return true;
+}
+
+NG5_EXPORT(bool) bison_int_ensure_space(struct memfile *memfile, u64 nbytes)
+{
+        error_if_null(memfile)
+
+        offset_t block_size;
+        memblock_size(&block_size, memfile->memblock);
+        assert(memfile->pos < block_size);
+        size_t diff = block_size - memfile->pos;
+        if (diff < nbytes) {
+                memfile_grow(memfile, nbytes - diff, true);
+        }
+
+        memfile_save_position(memfile);
+        offset_t current_off = memfile_tell(memfile);
+        for (u32 i = 0; i < nbytes; i++) {
+                char c = *memfile_read(memfile, 1);
+                if (unlikely(c != 0)) {
+                        /* not enough space; enlarge container */
+                        memfile_seek(memfile, current_off);
+                        memfile_move(memfile, nbytes);
+                        break;
+                }
+        }
+        memfile_restore_position(memfile);
+
+
+        return true;
+}
+
+NG5_EXPORT(size_t) bison_int_get_type_size_encoded(enum bison_field_type type)
+{
         size_t type_size = sizeof(media_type_t); /* at least the media type marker is required */
         switch (type) {
         case BISON_FIELD_TYPE_NULL:
@@ -107,40 +161,37 @@ NG5_EXPORT(bool) bison_int_insert_column(struct memfile *memfile_in, struct err 
                 type_size += sizeof(float);
                 break;
         default:
-                error(err_in, NG5_ERR_INTERNALERR);
+                error_print(NG5_ERR_INTERNALERR);
+                return 0;
         }
-
-        size_t nbytes = capactity * type_size;
-        bison_int_ensure_space(memfile_in, nbytes + sizeof(u8));
-
-
-        memfile_seek(memfile_in, payload_begin + nbytes);
-        marker_insert(memfile_in, column_end_marker);
-
-        /* seek to first entry in column */
-        memfile_seek(memfile_in, payload_begin);
-
-        return true;
+        return type_size;
 }
 
-NG5_EXPORT(bool) bison_int_ensure_space(struct memfile *memfile, u64 nbytes)
+NG5_EXPORT(size_t) bison_int_get_type_value_size(enum bison_field_type type)
 {
-        error_if_null(memfile)
-
-        offset_t block_size;
-        memblock_size(&block_size, memfile->memblock);
-        assert(memfile->pos < block_size);
-        size_t diff = block_size - memfile->pos;
-        if (diff < nbytes) {
-                memfile_grow(memfile, nbytes - diff, true);
+        switch (type) {
+        case BISON_FIELD_TYPE_NULL:
+        case BISON_FIELD_TYPE_TRUE:
+        case BISON_FIELD_TYPE_FALSE:
+                return sizeof(media_type_t); /* these constant values are determined by their media type markers */
+        case BISON_FIELD_TYPE_NUMBER_U8:
+        case BISON_FIELD_TYPE_NUMBER_I8:
+                return sizeof(u8);
+        case BISON_FIELD_TYPE_NUMBER_U16:
+        case BISON_FIELD_TYPE_NUMBER_I16:
+                return sizeof(u16);
+        case BISON_FIELD_TYPE_NUMBER_U32:
+        case BISON_FIELD_TYPE_NUMBER_I32:
+                return sizeof(u32);
+        case BISON_FIELD_TYPE_NUMBER_U64:
+        case BISON_FIELD_TYPE_NUMBER_I64:
+                return sizeof(u64);
+        case BISON_FIELD_TYPE_NUMBER_FLOAT:
+                return sizeof(float);
+        default:
+        error_print(NG5_ERR_INTERNALERR);
+                return 0;
         }
-
-        char c = *memfile_peek(memfile, 1);
-        if (unlikely(c != 0)) {
-                /* not enough space; enlarge container */
-                memfile_move(memfile, nbytes);
-        }
-        return true;
 }
 
 

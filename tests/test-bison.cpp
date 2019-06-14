@@ -897,9 +897,9 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersWithoutOverflow) {
         struct bison_insert *nested_inserter_l1 = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NUMBER_U8, 10);
 
         ASSERT_TRUE(nested_inserter_l1 != NULL);
-        bison_insert_unsigned(nested_inserter_l1, 42);
-        bison_insert_unsigned(nested_inserter_l1, 43);
-        bison_insert_unsigned(nested_inserter_l1, 44);
+        bison_insert_u8(nested_inserter_l1, 42);
+        bison_insert_u8(nested_inserter_l1, 43);
+        bison_insert_u8(nested_inserter_l1, 44);
         bison_insert_column_end(&column_state);
 
         bison_insert_drop(&inserter);
@@ -918,25 +918,208 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersWithoutOverflow) {
         bison_drop(&doc);
 }
 
-//TEST(BisonTest, BisonInsertInsertColumnNumbersZeroWithoutOverflow) {
+TEST(BisonTest, BisonInsertInsertColumnNumbersZeroWithoutOverflow) {
+        struct bison doc, rev_doc;
+        struct bison_revise revise;
+        struct bison_array_it it;
+        struct bison_insert inserter;
+        struct bison_insert_column_state column_state;
+
+        bison_create_ex(&doc, 20, 1);
+
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_access(&it, &revise);
+        bison_array_it_insert(&inserter, &it);
+
+        struct bison_insert *nested_inserter_l1 = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NUMBER_U8, 10);
+
+        ASSERT_TRUE(nested_inserter_l1 != NULL);
+        bison_insert_u8(nested_inserter_l1, 0);
+        bison_insert_u8(nested_inserter_l1, 0);
+        bison_insert_u8(nested_inserter_l1, 0);
+        bison_insert_column_end(&column_state);
+
+        bison_insert_drop(&inserter);
+        bison_array_it_drop(&it);
+        bison_revise_end(&revise);
+
+        bison_hexdump_print(stdout, &rev_doc);
+
+        bison_print(stdout, &rev_doc);
+        struct string_builder sb;
+        string_builder_create(&sb);
+        bison_to_str(&sb, JSON_FORMATTER, &rev_doc);
+        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [[0, 0, 0]]}"));
+        string_builder_drop(&sb);
+
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonInsertInsertMultileTypedColumnsWithoutOverflow) {
+        struct bison doc, rev_doc;
+        struct bison_revise revise;
+        struct bison_array_it it;
+        struct bison_insert inserter;
+        struct bison_insert_column_state column_state;
+        struct bison_insert *ins;
+
+        bison_create_ex(&doc, 20, 1);
+
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_access(&it, &revise);
+        bison_array_it_insert(&inserter, &it);
+
+        ins = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NULL, 10);
+        bison_insert_null(ins);
+        bison_insert_null(ins);
+        bison_insert_null(ins);
+        bison_insert_column_end(&column_state);
+
+        ins = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_TRUE, 10);
+        bison_insert_true(ins);
+        bison_insert_true(ins);
+        bison_insert_true(ins);
+        bison_insert_column_end(&column_state);
+
+        ins = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_FALSE, 10);
+        bison_insert_false(ins);
+        bison_insert_false(ins);
+        bison_insert_false(ins);
+        bison_insert_column_end(&column_state);
+
+        ins = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NUMBER_U8, 10);
+        bison_insert_u8(ins, 1);
+        bison_insert_u8(ins, 2);
+        bison_insert_u8(ins, 3);
+        bison_insert_column_end(&column_state);
+
+        ins = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NUMBER_U16, 10);
+        bison_insert_u16(ins, 4);
+        bison_insert_u16(ins, 5);
+        bison_insert_u16(ins, 6);
+        bison_insert_column_end(&column_state);
+
+        ins = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NUMBER_U32, 10);
+        bison_insert_u32(ins, 7);
+        bison_insert_u32(ins, 8);
+        bison_insert_u32(ins, 9);
+        bison_insert_column_end(&column_state);
+
+        ins = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NUMBER_U64, 10);
+        bison_insert_u64(ins, 10);
+        bison_insert_u64(ins, 11);
+        bison_insert_u64(ins, 12);
+        bison_insert_column_end(&column_state);
+
+        ins = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NUMBER_I8, 10);
+        bison_insert_i8(ins, -1);
+        bison_insert_i8(ins, -2);
+        bison_insert_i8(ins, -3);
+        bison_insert_column_end(&column_state);
+
+        ins = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NUMBER_I16, 10);
+        bison_insert_i16(ins, -4);
+        bison_insert_i16(ins, -5);
+        bison_insert_i16(ins, -6);
+        bison_insert_column_end(&column_state);
+
+        ins = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NUMBER_I32, 10);
+        bison_insert_i32(ins, -7);
+        bison_insert_i32(ins, -8);
+        bison_insert_i32(ins, -9);
+        bison_insert_column_end(&column_state);
+
+        ins = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NUMBER_I64, 10);
+        bison_insert_i64(ins, -10);
+        bison_insert_i64(ins, -11);
+        bison_insert_i64(ins, -12);
+        bison_insert_column_end(&column_state);
+
+        ins = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NUMBER_FLOAT, 10);
+        bison_insert_float(ins, 42.0f);
+        bison_insert_float(ins, 21.0f);
+        bison_insert_float(ins, 23.4221f);
+        bison_insert_column_end(&column_state);
+
+        bison_insert_drop(&inserter);
+        bison_array_it_drop(&it);
+        bison_revise_end(&revise);
+
+        bison_hexdump_print(stdout, &rev_doc);
+
+        bison_print(stdout, &rev_doc);
+        struct string_builder sb;
+        string_builder_create(&sb);
+        bison_to_str(&sb, JSON_FORMATTER, &rev_doc);
+        string_builder_print(&sb);
+        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [[null, null, null], [true, true, true], [false, false, false], [1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12], [-1, -2, -3], [-4, -5, -6], [-7, -8, -9], [-10, -11, -12], [42.00, 21.00, 23.42]]}"));
+        string_builder_drop(&sb);
+
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonInsertInsertColumnNumbersZeroWithOverflow) {
+        struct bison doc, rev_doc;
+        struct bison_revise revise;
+        struct bison_array_it it;
+        struct bison_insert inserter;
+        struct bison_insert_column_state column_state;
+
+        bison_create_ex(&doc, 16, 1);
+
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_access(&it, &revise);
+        bison_array_it_insert(&inserter, &it);
+
+        struct bison_insert *nested_inserter_l1 = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NUMBER_U8, 1);
+
+        ASSERT_TRUE(nested_inserter_l1 != NULL);
+        bison_insert_u8(nested_inserter_l1, 1);
+        bison_insert_u8(nested_inserter_l1, 2);
+        bison_insert_u8(nested_inserter_l1, 3);
+        bison_insert_column_end(&column_state);
+
+        bison_insert_drop(&inserter);
+        bison_array_it_drop(&it);
+        bison_revise_end(&revise);
+
+        bison_hexdump_print(stdout, &rev_doc);
+
+        printf("BISON DOC PRINT:");
+        bison_print(stdout, &rev_doc);
+        fflush(stdout);
+        struct string_builder sb;
+        string_builder_create(&sb);
+        bison_to_str(&sb, JSON_FORMATTER, &rev_doc);
+        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [[1, 2, 3]]}"));
+        string_builder_drop(&sb);
+
+        bison_drop(&doc);
+}
+
+//
+//TEST(BisonTest, BisonInsertInsertColumnNumbersZeroWithHighOverflow) {
 //        struct bison doc, rev_doc;
 //        struct bison_revise revise;
 //        struct bison_array_it it;
 //        struct bison_insert inserter;
 //        struct bison_insert_column_state column_state;
 //
-//        bison_create_ex(&doc, 20, 1);
+//        bison_create_ex(&doc, 16, 1);
 //
 //        bison_revise_begin(&revise, &rev_doc, &doc);
 //        bison_revise_access(&it, &revise);
 //        bison_array_it_insert(&inserter, &it);
 //
-//        struct bison_insert *nested_inserter_l1 = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NUMBER_U8, 10);
+//        struct bison_insert *nested_inserter_l1 = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NUMBER_U32, 1);
 //
 //        ASSERT_TRUE(nested_inserter_l1 != NULL);
-//        bison_insert_unsigned(nested_inserter_l1, 0);
-//        bison_insert_unsigned(nested_inserter_l1, 0);
-//        bison_insert_unsigned(nested_inserter_l1, 0);
+//        for (u32 i = 0; i < 100; i++) {
+//                bison_insert_u32(nested_inserter_l1, i);
+//                bison_insert_u32(nested_inserter_l1, i);
+//                bison_insert_u32(nested_inserter_l1, i);
+//        }
+//
 //        bison_insert_column_end(&column_state);
 //
 //        bison_insert_drop(&inserter);
@@ -945,15 +1128,18 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersWithoutOverflow) {
 //
 //        bison_hexdump_print(stdout, &rev_doc);
 //
+//        printf("BISON DOC PRINT:");
 //        bison_print(stdout, &rev_doc);
+//        fflush(stdout);
 //        struct string_builder sb;
 //        string_builder_create(&sb);
 //        bison_to_str(&sb, JSON_FORMATTER, &rev_doc);
-//        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [[0, 0, 0]]}"));
+//        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [[1, 2, 3]]}"));
 //        string_builder_drop(&sb);
 //
 //        bison_drop(&doc);
 //}
+
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);

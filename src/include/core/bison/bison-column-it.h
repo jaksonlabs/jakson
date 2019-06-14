@@ -32,21 +32,28 @@ struct bison_insert; /* forwarded from bison-literal-inserter.h */
 struct bison_column_it
 {
         struct memfile memfile;
+
+        offset_t column_start_offset;
+        offset_t column_num_elements_offset;
+        offset_t column_capacity_offset;
         offset_t payload_start;
+
         struct err err;
         enum bison_field_type type;
+        u32 column_capacity;
+        u32 column_num_elements;
 
         struct spinlock lock;
 };
 
 NG5_EXPORT(bool) bison_column_it_create(struct bison_column_it *it, struct memfile *memfile, struct err *err,
-        offset_t payload_start);
+        offset_t column_start_offset);
 
 NG5_EXPORT(bool) bison_column_it_insert(struct bison_insert *inserter, struct bison_column_it *it);
 
 NG5_EXPORT(bool) bison_column_it_fast_forward(struct bison_column_it *it);
 
-NG5_EXPORT(const void *) bison_column_it_values(enum bison_field_type *type, u64 *nvalues, struct bison_column_it *it);
+NG5_EXPORT(const void *) bison_column_it_values(enum bison_field_type *type, u32 *nvalues, struct bison_column_it *it);
 
 
 /**

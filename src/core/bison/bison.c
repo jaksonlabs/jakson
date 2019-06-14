@@ -26,6 +26,8 @@
 #include "stdx/varuint.h"
 #include "utils/hexdump.h"
 
+#define MIN_DOC_CAPACITY 16 /* minimum number of bytes required to store header and empty document array */
+
 struct bison_header
 {
         object_id_t oid;
@@ -97,6 +99,9 @@ NG5_EXPORT(bool) bison_create(struct bison *doc)
 NG5_EXPORT(bool) bison_create_ex(struct bison *doc, u64 doc_cap_byte, u64 array_cap_byte)
 {
         error_if_null(doc);
+
+        doc_cap_byte = ng5_max(MIN_DOC_CAPACITY, doc_cap_byte);
+
         error_init(&doc->err);
         memblock_create(&doc->memblock, doc_cap_byte);
         memblock_zero_out(doc->memblock);
@@ -675,16 +680,6 @@ static bool print_array(struct bison_array_it *it, struct bison_printer *printer
         bool first_entry = true;
         printer_bison_array_begin(printer, builder);
 
-
-        // -- DEBUG
-        // offset_t size;
-        // memblock_size(&size, it->memfile.memblock);
-        // hexdump_print(stdout, memblock_raw_data(it->memfile.memblock), size);
-        // -- DEBUG
-
-
-
-
         while (bison_array_it_next(it)) {
                 if (likely(!first_entry)) {
                         printer_bison_comma(printer, builder);
@@ -761,11 +756,11 @@ static bool print_column(struct bison_column_it *it, struct bison_printer *print
         error_if_null(builder)
 
         enum bison_field_type type;
-        u64 nvalues;
+        u32 nvalues;
         const void *values = bison_column_it_values(&type, &nvalues, it);
 
         printer_bison_array_begin(printer, builder);
-        for (u64 i = 0; i < nvalues; i++) {
+        for (u32 i = 0; i < nvalues; i++) {
                 switch (type) {
                 case BISON_FIELD_TYPE_NULL:
                         printer_bison_null(printer, builder);
