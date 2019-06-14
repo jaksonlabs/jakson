@@ -378,11 +378,7 @@ TEST(BisonTest, BisonArrayIteratorOverwriteLiterals) {
         bison_revise_access(&it, &revise);
         bison_array_it_insert(&inserter, &it);
         for (i32 i = 0; i < 2; i++) {
-                fprintf(stdout, "before:\n");
-                bison_hexdump_print(stdout, &rev_doc2);
                 bison_insert_true(&inserter);
-                fprintf(stdout, "after:\n");
-                bison_hexdump_print(stdout, &rev_doc2);
         }
         bison_insert_drop(&inserter);
         bison_revise_end(&revise);
@@ -391,6 +387,7 @@ TEST(BisonTest, BisonArrayIteratorOverwriteLiterals) {
 
         bison_drop(&doc);
         bison_drop(&rev_doc);
+        bison_drop(&rev_doc2);
 }
 
 TEST(BisonTest, BisonArrayIteratorOverwriteLiteralsWithDocOverflow) {
