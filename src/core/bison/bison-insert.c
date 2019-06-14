@@ -442,8 +442,8 @@ NG5_EXPORT(bool) bison_insert_column_end(struct bison_insert_column_state *state
 
         memfile_seek(&state_in->parent_inserter->memfile, memfile_tell(&scan.memfile));
 
-        free(state_in->nested_column);
         bison_insert_drop(&state_in->nested_inserter);
+        free(state_in->nested_column);
         return true;
 }
 
