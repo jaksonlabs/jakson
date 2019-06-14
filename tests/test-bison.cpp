@@ -71,6 +71,7 @@ TEST(BisonTest, CreateBisonRevisionNumbering) {
         string_builder_drop(&builder);
 
         bison_drop(&doc);
+        bison_drop(&rev_doc);
 }
 
 TEST(BisonTest, CreateBisonRevisionAbort) {
@@ -136,6 +137,7 @@ TEST(BisonTest, CreateBisonRevisionAsyncReading) {
         string_builder_drop(&builder);
 
         bison_drop(&doc);
+        bison_drop(&rev_doc);
 }
 
 static void print_on_revision_begin(struct bison_event_listener *self, struct bison *doc)
@@ -265,6 +267,7 @@ TEST(BisonTest, ModifyBisonObjectId) {
         bison_print(stdout, &rev_doc);
 
         bison_drop(&doc);
+        bison_drop(&rev_doc);
 }
 
 TEST(BisonTest, BisonArrayIteratorOpenAfterNew) {
@@ -285,6 +288,7 @@ TEST(BisonTest, BisonArrayIteratorOpenAfterNew) {
         bison_hexdump_print(stdout, &rev_doc);
 
         bison_drop(&doc);
+        bison_drop(&rev_doc);
 }
 
 TEST(BisonTest, BisonArrayIteratorInsertNullAfterNew) {
@@ -307,6 +311,7 @@ TEST(BisonTest, BisonArrayIteratorInsertNullAfterNew) {
         bison_hexdump_print(stdout, &rev_doc);
 
         bison_drop(&doc);
+        bison_drop(&rev_doc);
 }
 
 TEST(BisonTest, BisonArrayIteratorInsertMultipleLiteralsAfterNewNoOverflow) {
@@ -343,6 +348,7 @@ TEST(BisonTest, BisonArrayIteratorInsertMultipleLiteralsAfterNewNoOverflow) {
         bison_hexdump_print(stdout, &rev_doc);
 
         bison_drop(&doc);
+        bison_drop(&rev_doc);
 }
 
 TEST(BisonTest, BisonArrayIteratorOverwriteLiterals) {
@@ -381,13 +387,10 @@ TEST(BisonTest, BisonArrayIteratorOverwriteLiterals) {
         bison_insert_drop(&inserter);
         bison_revise_end(&revise);
 
-
-
-
-
         bison_print(stdout, &rev_doc2);
 
         bison_drop(&doc);
+        bison_drop(&rev_doc);
 }
 
 TEST(BisonTest, BisonArrayIteratorOverwriteLiteralsWithDocOverflow) {
@@ -429,6 +432,7 @@ TEST(BisonTest, BisonArrayIteratorOverwriteLiteralsWithDocOverflow) {
         bison_revise_end(&revise);
         bison_print(stdout, &rev_doc2);
         bison_drop(&doc);
+        bison_drop(&rev_doc);
 }
 
 TEST(BisonTest, BisonArrayIteratorUnsignedAndConstants) {
@@ -468,6 +472,7 @@ TEST(BisonTest, BisonArrayIteratorUnsignedAndConstants) {
         bison_print(stdout, &rev_doc);
 
         bison_drop(&doc);
+        bison_drop(&rev_doc);
 }
 
 TEST(BisonTest, BisonArrayIteratorStrings) {
@@ -500,6 +505,7 @@ TEST(BisonTest, BisonArrayIteratorStrings) {
         bison_print(stdout, &rev_doc);
 
         bison_drop(&doc);
+        bison_drop(&rev_doc);
 }
 
 TEST(BisonTest, BisonInsertMimeTypedBlob) {
@@ -523,6 +529,7 @@ TEST(BisonTest, BisonInsertMimeTypedBlob) {
         bison_print(stdout, &rev_doc);
 
         bison_drop(&doc);
+        bison_drop(&rev_doc);
 }
 
 TEST(BisonTest, BisonInsertCustomTypedBlob) {
@@ -546,6 +553,7 @@ TEST(BisonTest, BisonInsertCustomTypedBlob) {
         bison_print(stdout, &rev_doc);
 
         bison_drop(&doc);
+        bison_drop(&rev_doc);
 }
 
 TEST(BisonTest, BisonInsertTwoMimeTypedBlob) {
@@ -572,6 +580,7 @@ TEST(BisonTest, BisonInsertTwoMimeTypedBlob) {
         bison_print(stdout, &rev_doc);
 
         bison_drop(&doc);
+        bison_drop(&rev_doc);
 }
 
 TEST(BisonTest, BisonInsertMimeTypedBlobsWithOverflow) {
@@ -599,6 +608,7 @@ TEST(BisonTest, BisonInsertMimeTypedBlobsWithOverflow) {
         bison_print(stdout, &rev_doc);
 
         bison_drop(&doc);
+        bison_drop(&rev_doc);
 }
 
 TEST(BisonTest, BisonInsertMixedTypedBlobsWithOverflow) {
@@ -626,6 +636,7 @@ TEST(BisonTest, BisonInsertMixedTypedBlobsWithOverflow) {
         bison_print(stdout, &rev_doc);
 
         bison_drop(&doc);
+        bison_drop(&rev_doc);
 }
 
 TEST(BisonTest, BisonInsertArrayWithNoOverflow) {
@@ -655,6 +666,7 @@ TEST(BisonTest, BisonInsertArrayWithNoOverflow) {
         bison_print(stdout, &rev_doc);
 
         bison_drop(&doc);
+        bison_drop(&rev_doc);
 }
 
 TEST(BisonTest, BisonInsertValuesIntoNestedArrayWithNoOverflow) {
@@ -694,6 +706,7 @@ TEST(BisonTest, BisonInsertValuesIntoNestedArrayWithNoOverflow) {
         bison_print(stdout, &rev_doc);
 
         bison_drop(&doc);
+        bison_drop(&rev_doc);
 }
 
 TEST(BisonTest, BisonInsert2xNestedArrayWithNoOverflow) {
@@ -741,6 +754,7 @@ TEST(BisonTest, BisonInsert2xNestedArrayWithNoOverflow) {
         bison_print(stdout, &rev_doc);
 
         bison_drop(&doc);
+        bison_drop(&rev_doc);
 }
 
 TEST(BisonTest, BisonInsertXxNestedArrayWithoutOverflow) {
@@ -786,6 +800,7 @@ TEST(BisonTest, BisonInsertXxNestedArrayWithoutOverflow) {
         string_builder_drop(&sb);
 
         bison_drop(&doc);
+        bison_drop(&rev_doc);
 }
 
 TEST(BisonTest, BisonInsertXxNestedArrayWithOverflow) {
@@ -840,6 +855,7 @@ TEST(BisonTest, BisonInsertXxNestedArrayWithOverflow) {
         ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [null, null, null, [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], false, false, false]}"));        string_builder_drop(&sb);
 
         bison_drop(&doc);
+        bison_drop(&rev_doc);
 }
 
 TEST(BisonTest, BisonInsertInsertColumnWithoutOverflow) {
@@ -879,6 +895,7 @@ TEST(BisonTest, BisonInsertInsertColumnWithoutOverflow) {
         string_builder_drop(&sb);
 
         bison_drop(&doc);
+        bison_drop(&rev_doc);
 }
 
 TEST(BisonTest, BisonInsertInsertColumnNumbersWithoutOverflow) {
@@ -916,6 +933,7 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersWithoutOverflow) {
         string_builder_drop(&sb);
 
         bison_drop(&doc);
+        bison_drop(&rev_doc);
 }
 
 TEST(BisonTest, BisonInsertInsertColumnNumbersZeroWithoutOverflow) {
@@ -953,6 +971,7 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersZeroWithoutOverflow) {
         string_builder_drop(&sb);
 
         bison_drop(&doc);
+        bison_drop(&rev_doc);
 }
 
 TEST(BisonTest, BisonInsertInsertMultileTypedColumnsWithoutOverflow) {
@@ -1056,6 +1075,7 @@ TEST(BisonTest, BisonInsertInsertMultileTypedColumnsWithoutOverflow) {
         string_builder_drop(&sb);
 
         bison_drop(&doc);
+        bison_drop(&rev_doc);
 }
 
 TEST(BisonTest, BisonInsertInsertColumnNumbersZeroWithOverflow) {
@@ -1095,6 +1115,7 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersZeroWithOverflow) {
         string_builder_drop(&sb);
 
         bison_drop(&doc);
+        bison_drop(&rev_doc);
 }
 
 
@@ -1138,6 +1159,7 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersWithHighOverflow) {
         string_builder_drop(&sb);
 
         bison_drop(&doc);
+        bison_drop(&rev_doc);
 }
 
 
@@ -1183,6 +1205,7 @@ TEST(BisonTest, BisonInsertInsertMultipleColumnsNumbersWithHighOverflow) {
         string_builder_drop(&sb);
 
         bison_drop(&doc);
+        bison_drop(&rev_doc);
 }
 
 TEST(BisonTest, BisonInsertNullTest) {
@@ -1285,6 +1308,7 @@ TEST(BisonTest, BisonInsertNullTest) {
         string_builder_drop(&sb);
 
         bison_drop(&doc);
+        bison_drop(&rev_doc);
 }
 
 int main(int argc, char **argv) {
