@@ -402,10 +402,9 @@ NG5_EXPORT(bool) bison_insert_array_end(struct bison_insert_array_state *state_i
 
         memfile_seek(&state_in->parent_inserter->memfile, memfile_tell(&scan.memfile));
         bison_array_it_drop(&scan);
-        bison_array_it_drop(state_in->nested_array);
-
-        free(state_in->nested_array);
         bison_insert_drop(&state_in->nested_inserter);
+        bison_array_it_drop(state_in->nested_array);
+        free(state_in->nested_array);
         return true;
 }
 
