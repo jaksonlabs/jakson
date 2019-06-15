@@ -56,6 +56,8 @@ carbon_hashmap_t carbon_hashmap_new();
 
 carbon_hashmap_iterator_t carbon_hashmap_begin(carbon_hashmap_t *map);
 carbon_hashmap_iterator_status_t carbon_hashmap_next(carbon_hashmap_iterator_t *it);
+void carbon_hashmap_replace(carbon_hashmap_iterator_t *it, carbon_hashmap_any_t new_value);
+void carbon_hashmap_remove_inplace(carbon_hashmap_iterator_t *it);
 
 /*
  * Add an element to the hashmap. Return MAP_OK or MAP_OMEM.

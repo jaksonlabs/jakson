@@ -1,6 +1,10 @@
 #include <carbon/compressor/compressor-utils.h>
 #include <carbon/carbon-io-device.h>
 
+static size_t min(size_t a, size_t b) {
+    return a < b ? a : b;
+}
+
 size_t carbon_vlq_encode(size_t length, uint8_t *buffer) {
     size_t num_bytes = 0;
     do {
@@ -108,4 +112,30 @@ int carbon_sort_cmp_rwd(void const *a, void const *b) {
         return 1;
 
     return (int)*(uint8_t const *)ptr_a - (int)*(uint8_t const *)ptr_b;
+}
+
+const char *carbon_remove_common_prefix_and_suffix(
+        const char *current, size_t current_length,
+        const char *previous, size_t previous_length,
+        size_t *length, bool prefix, bool suffix
+    )
+{
+    size_t max_length = min(min(previous_length, current_length), 255);
+    size_t prefix_length = 0;
+    size_t suffix_length = 0;
+
+    if(prefix) {
+        for(;prefix_length < max_length && current[prefix_length] == previous[prefix_length];
+            ++prefix_length);
+    }
+
+    if(suffix) {
+        max_length = min(min(previous_length - prefix_length, current_length - prefix_length), 255);
+        for(;suffix_length < max_length && current[current_length - suffix_length - 1] == previous[previous_length - suffix_length - 1];
+            ++suffix_length);
+
+    }
+
+    *length = current_length - prefix_length - suffix_length;
+    return current + prefix_length;
 }

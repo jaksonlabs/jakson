@@ -111,7 +111,7 @@ static carbon_strdic_entry_with_grouping_key_t *this_extract(carbon_strdic_t *se
 static bool this_free(carbon_strdic_t *self, void *ptr);
 
 static bool this_num_distinct(carbon_strdic_t *self, size_t *num);
-static bool this_get_contents(carbon_strdic_t *self, carbon_vec_t ofType(carbon_strdic_entry_t) * entries);
+static bool this_get_contents(carbon_strdic_t *self, carbon_vec_t ofType(carbon_strdic_entry_t) * entries, carbon_string_id_t *grouping_key_filter);
 
 static bool this_reset_counters(carbon_strdic_t *self);
 static bool this_counters(carbon_strdic_t *self, carbon_string_hash_counters_t *counters);
@@ -827,7 +827,8 @@ static bool this_num_distinct(carbon_strdic_t *self, size_t *num)
 }
 
 static bool this_get_contents(carbon_strdic_t *self,
-                              carbon_vec_t ofType(carbon_strdic_entry_t) * entries)
+                              carbon_vec_t ofType(carbon_strdic_entry_t) * entries,
+                              carbon_string_id_t *grouping_key_filter)
 {
     CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_ASYNC);
     this_lock(self);
@@ -847,7 +848,7 @@ static bool this_get_contents(carbon_strdic_t *self,
         carbon_vec_clear(&local_entry_results);
         carrier_t *carrier = CARBON_VECTOR_GET(&extra->carriers, thread_id, carrier_t);
 
-        carbon_strdic_get_contents(&local_entry_results, &carrier->local_dictionary);
+        carbon_strdic_get_contents(&local_entry_results, &carrier->local_dictionary, grouping_key_filter);
 
         for(size_t i = 0; i< local_entry_results.num_elems; ++i) {
             carbon_strdic_entry_t * entry =
