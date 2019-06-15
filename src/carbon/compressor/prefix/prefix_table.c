@@ -212,3 +212,23 @@ void carbon_prefix_tree_encode_all_with_queue(
 
     carbon_prefix_node_priority_queue_free(queue);
 }
+
+size_t carbon_prefix_table_num_bytes(
+        carbon_prefix_table *table
+    )
+{
+    size_t num_bytes = 0;
+    for(size_t i = 0; i < carbon_prefix_table_length(table);++i) {
+        size_t const len = strlen(table->table[i] + 2);
+        num_bytes += len;
+
+        if(len >= 128)
+            num_bytes += 1;
+        else if (len >= 128 * 128)
+            num_bytes += 2;
+        else
+            num_bytes += 3;
+    }
+
+    return num_bytes;
+}

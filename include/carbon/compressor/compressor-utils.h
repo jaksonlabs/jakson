@@ -22,4 +22,10 @@ void carbon_str_reverse(char * str);
 int carbon_sort_cmp_fwd(void const *a, void const *b);
 int carbon_sort_cmp_rwd(void const *a, void const *b);
 
+char const *carbon_remove_common_prefix_and_suffix(
+    char const *current, size_t current_length,
+    char const *previous, size_t previous_length,
+    size_t *length, bool prefix, bool suffix
+);
+
 #endif

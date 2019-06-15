@@ -5,7 +5,8 @@
 #include <carbon/carbon-io-device.h>
 
 #include <carbon/compressor/compressor-utils.h>
-#include <carbon/compressor/auto/selector.h>
+#include <carbon/compressor/auto/selector-cost-based.h>
+#include <carbon/compressor/auto/selector-brute-force.h>
 #include <carbon/compressor/carbon-compressor-auto.h>
 
 typedef struct {
@@ -33,7 +34,7 @@ carbon_compressor_t *this_compressor_for(
         carbon_doc_bulk_t const *context,
         carbon_vec_t ofType(char *) *values
     ) {
-    return carbon_compressor_find_by_strings(values, context);
+    return carbon_compressor_find_by_strings_brute_force(values, context);
 }
 
 int this_sort_strdic_entries_by_key_id(void const *a, void const *b) {
@@ -44,13 +45,13 @@ int this_sort_strdic_entries_by_key_id(void const *a, void const *b) {
 }
 
 int this_sort_strings(void const *a, void const *b) {
-    char const * const str_a = (char const * const)a;
-    char const * const str_b = (char const * const)b;
+    char const * const str_a = *(char const * const *)a;
+    char const * const str_b = *(char const * const *)b;
 
     return strcmp(str_a, str_b);
 }
 
-typedef bool (*carbon_compressor_auto_extra_processor_t)(carbon_compressor_t *compressor, carbon_io_device_t *src, void *callback_extra);
+typedef bool (*carbon_compressor_auto_extra_processor_t)(carbon_compressor_t *compressor, carbon_io_device_t *src, size_t num_entries, void *callback_extra);
 
 bool this_auto_read_extra(
         carbon_io_device_t *src,
@@ -96,7 +97,7 @@ bool this_auto_read_extra(
         carbon_compressor_auto_range_t const *range =
                 (carbon_compressor_auto_range_t const *)carbon_vec_at(&extra->ranges, i);
 
-        callback(range->compressor, src, callback_extra);
+        callback(range->compressor, src, range->length, callback_extra);
     }
 
     return true;
@@ -251,17 +252,19 @@ carbon_compressor_auto_write_extra(carbon_compressor_t *self, carbon_memfile_t *
         current.cap_elems = strings->cap_elems - offset;
 
         offset += range->length;
+
         carbon_compressor_write_extra(&err, compressor, dst, &current);
     }
     return true;
 }
 
 bool this_compressor_auto_fwd_args_to_read_extra(
-        carbon_compressor_t *compressor, carbon_io_device_t *src, void *extra
+        carbon_compressor_t *compressor, carbon_io_device_t *src, size_t num_entries, void *extra
         ) {
     carbon_err_t err;
 
     CARBON_UNUSED(extra);
+    CARBON_UNUSED(num_entries);
 
     // uses knowledge about internals of carbon_io_device_t
     return carbon_compressor_read_extra(&err, compressor, (FILE *)src->extra, 0);
@@ -281,12 +284,16 @@ carbon_compressor_auto_read_extra(carbon_compressor_t *self, FILE *src, size_t n
 }
 
 bool this_compressor_auto_fwd_args_to_print_extra(
-        carbon_compressor_t *compressor, carbon_io_device_t *src, void *extra
+        carbon_compressor_t *compressor, carbon_io_device_t *src, size_t num_entries, void *extra
         ) {
     carbon_err_t err;
 
+    fprintf((FILE *)extra, "0x%04x [compressor-extra valid-from-offset=%zu]\n", (unsigned int)CARBON_MEMFILE_TELL((carbon_memfile_t *)src->extra), num_entries);
     // uses knowledge about internals of carbon_io_device_t
-    return carbon_compressor_print_extra(&err, compressor, (FILE *)extra, (carbon_memfile_t *)src->extra, 0);
+    bool success = carbon_compressor_print_extra(&err, compressor, (FILE *)extra, (carbon_memfile_t *)src->extra, 0);
+    fprintf((FILE *)extra, "0x%04x [End(compressor-extra)]\n", (unsigned int)CARBON_MEMFILE_TELL((carbon_memfile_t *)src->extra));
+
+    return success;
 }
 
 bool carbon_compressor_auto_print_extra(carbon_compressor_t *self, FILE *file, carbon_memfile_t *src, size_t nbytes)

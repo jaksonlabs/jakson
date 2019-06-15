@@ -53,7 +53,7 @@ static bool this_counters(carbon_strdic_t *self, carbon_string_hash_counters_t *
 
 static bool this_num_distinct(carbon_strdic_t *self, size_t *num);
 
-static bool this_get_contents(carbon_strdic_t *self, carbon_vec_t ofType(carbon_strdic_entry_t) * entries);
+static bool this_get_contents(carbon_strdic_t *self, carbon_vec_t ofType(carbon_strdic_entry_t) * entries, carbon_string_id_t *grouping_key_filter);
 
 static void lock(carbon_strdic_t *self);
 static void unlock(carbon_strdic_t *self);
@@ -469,7 +469,8 @@ static bool this_num_distinct(carbon_strdic_t *self, size_t *num)
 }
 
 static bool this_get_contents(carbon_strdic_t *self,
-                              carbon_vec_t ofType(carbon_strdic_entry_t) * entries)
+                              carbon_vec_t ofType(carbon_strdic_entry_t) * entries,
+                              carbon_string_id_t *grouping_key_filter)
 {
     CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_SYNC);
     struct sync_extra *extra = this_extra(self);
@@ -477,6 +478,9 @@ static bool this_get_contents(carbon_strdic_t *self,
     for (carbon_string_id_t i = 0; i < extra->contents.num_elems; i++) {
         const struct entry *e = CARBON_VECTOR_GET(&extra->contents, i, struct entry);
         if (e->in_use) {
+            if(grouping_key_filter && e->content.grouping_key != *grouping_key_filter)
+                continue;
+
             carbon_strdic_entry_t entry;
             entry.id = i;
             entry.grouping_key = e->content.grouping_key;

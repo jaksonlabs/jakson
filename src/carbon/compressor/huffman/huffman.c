@@ -48,7 +48,7 @@ void carbon_huffman_encoder_create(
         carbon_huffman_encoder_t *tree
     )
 {
-    for(size_t i = 0;i < 256;++i) {
+    for(size_t i = 0;i < UCHAR_MAX + 1;++i) {
         tree->frequencies[i] = 0;
         tree->codes[i].num_bits = 0;
     }
@@ -60,20 +60,22 @@ void carbon_huffman_encoder_learn_frequencies(
         size_t length
     )
 {
-    for(size_t i = 0; i < length;++i)
-        encoder->frequencies[(uint8_t)data[i]]++;
+    for(size_t i = 0; i < length;++i) {
+        uint8_t symbol = ((uint8_t const *)data)[i];
+        encoder->frequencies[symbol]++;
+    }
 }
 
 void carbon_huffman_encoder_bake_code(
         carbon_huffman_encoder_t *encoder
     )
 {
-    carbon_priority_queue_t *queue = carbon_priority_queue_create(UCHAR_MAX);
+    carbon_priority_queue_t *queue = carbon_priority_queue_create(UCHAR_MAX + 1);
 
     size_t max_frequency = SIZE_MAX;
     size_t num_codes = 0;
 
-    for(size_t i = 0; i < UCHAR_MAX; ++i) {
+    for(size_t i = 0; i < UCHAR_MAX + 1; ++i) {
         if(encoder->frequencies[i]) {
             ++num_codes;
         }
@@ -87,7 +89,7 @@ void carbon_huffman_encoder_bake_code(
         }
 
         if (num_codes == 1) {
-            for (size_t i = 0; i < UCHAR_MAX; ++i) {
+            for (size_t i = 0; i < UCHAR_MAX + 1; ++i) {
                 if (encoder->frequencies[i] == 0) {
                     encoder->frequencies[i] = 1;
                     break;
@@ -96,7 +98,7 @@ void carbon_huffman_encoder_bake_code(
         }
     }
 
-    for(size_t i = 0; i < UCHAR_MAX; ++i) {
+    for(size_t i = 0; i < UCHAR_MAX + 1; ++i) {
         if(encoder->frequencies[i]) {
             carbon_huffman_tree_node_t *node = malloc(sizeof(carbon_huffman_tree_node_t));
             node->left = 0;
@@ -176,7 +178,7 @@ void carbon_huffman_bitstream_dump(carbon_huffman_bitstream_t *stream)
 
 void carbon_huffman_encoder_drop(carbon_huffman_encoder_t *encoder)
 {
-    for(size_t i = 0; i < UCHAR_MAX; ++i) {
+    for(size_t i = 0; i < UCHAR_MAX + 1; ++i) {
         if(encoder->frequencies[i])
             carbon_huffman_bitstream_drop(&encoder->codes[i]);
     }
@@ -244,14 +246,14 @@ void carbon_huffman_decoder_create(
         carbon_huffman_decoder_t *decoder,
         carbon_huffman_dictionary_t dictionary
     ) {
-    memcpy(decoder->codes, dictionary, sizeof(*dictionary) * UCHAR_MAX);
+    memcpy(decoder->codes, dictionary, sizeof(*dictionary) * (UCHAR_MAX + 1));
 
     decoder->tree = malloc(sizeof(carbon_huffman_tree_node_t));
     decoder->tree->left = 0;
     decoder->tree->right = 0;
     decoder->tree->symbol = 0;
 
-    for(size_t i = 0; i < UCHAR_MAX; ++i) {
+    for(size_t i = 0; i < UCHAR_MAX + 1; ++i) {
         carbon_huffman_bitstream_t *stream = &dictionary[i];
         if(stream->num_bits == 0)
             continue;
@@ -332,7 +334,7 @@ void carbon_huffman_adaptive_update(
     // The frequency array is not touched as it was not allocated dynamically.
     carbon_huffman_encoder_drop(encoder);
 
-    for(size_t i = 0; i < UCHAR_MAX; ++i) {
+    for(size_t i = 0; i < UCHAR_MAX + 1; ++i) {
         if(encoder->frequencies[i] > fade + 1)
             encoder->frequencies[i] -= fade;
         else
@@ -349,7 +351,7 @@ void carbon_huffman_adaptive_update(
 void carbon_huffman_create_all_eq_encoder(
         carbon_huffman_encoder_t *encoder
     ) {
-    for(size_t i = 0; i < UCHAR_MAX; ++i) {
+    for(size_t i = 0; i < UCHAR_MAX + 1; ++i) {
         encoder->frequencies[i] = 1;
     }
 
@@ -399,4 +401,22 @@ void carbon_huffman_bitstream_write_byte(
     ) {
     for(size_t i = 0; i < 8; ++i)
         carbon_huffman_bitstream_write(stream, (byte & (1 << i)) > 0);
+}
+
+double carbon_huffman_avg_bit_length(
+        carbon_huffman_encoder_t *code_table, size_t frequencies[UCHAR_MAX + 1]
+    ) {
+    size_t total_num_bits = 0;
+    size_t total_msg_length = 0;
+    for(size_t i = 0; i < UCHAR_MAX + 1; ++i) {
+        if(frequencies[i] > 0) {
+            total_num_bits += code_table->codes[i].num_bits * frequencies[i];
+            total_msg_length += frequencies[i];
+        }
+    }
+
+    if(total_msg_length == 0)
+        return 0.0;
+
+    return ((double)total_num_bits) / total_msg_length;
 }

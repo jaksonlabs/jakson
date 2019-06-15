@@ -45,7 +45,7 @@ typedef struct carbon_huffman_bitstream {
     uint8_t *data;
 } carbon_huffman_bitstream_t;
 
-typedef carbon_huffman_bitstream_t carbon_huffman_dictionary_t[UCHAR_MAX];
+typedef carbon_huffman_bitstream_t carbon_huffman_dictionary_t[UCHAR_MAX + 1];
 
 typedef struct carbon_huffman_tree_node {
     struct carbon_huffman_tree_node *left;
@@ -55,7 +55,7 @@ typedef struct carbon_huffman_tree_node {
 } carbon_huffman_tree_node_t;
 
 typedef struct carbon_huffman_encoder {
-    size_t frequencies[UCHAR_MAX];
+    size_t frequencies[UCHAR_MAX + 1];
     carbon_huffman_dictionary_t codes;
 } carbon_huffman_encoder_t;
 
@@ -88,6 +88,7 @@ void carbon_huffman_adaptive_update(carbon_huffman_encoder_t *encoder, char cons
 
 void carbon_huffman_create_all_eq_encoder(carbon_huffman_encoder_t *encoder);
 
+double carbon_huffman_avg_bit_length(carbon_huffman_encoder_t *code_table, size_t frequencies[UCHAR_MAX + 1]);
 
 void carbon_huffman_decoder_create(carbon_huffman_decoder_t *decoder, carbon_huffman_dictionary_t dictionary);
 

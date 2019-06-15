@@ -305,7 +305,7 @@ carbon_hashmap_status_t carbon_hashmap_get(
 ) {
         int curr;
         int i;
-        carbon_hashmap_private_t volatile* m;
+        carbon_hashmap_private_t * m;
 
         /* Cast the hashmap */
         m = (carbon_hashmap_private_t *) in;
@@ -401,9 +401,9 @@ size_t carbon_hashmap_length(
 
 carbon_hashmap_iterator_t carbon_hashmap_begin(carbon_hashmap_any_t *map)
 {
-    carbon_hashmap_iterator_t volatile it;
+    carbon_hashmap_iterator_t it;
     it.__it.map = map;
-    it.__it.internal_index = 0;
+    it.__it.internal_index = -1;
 
     it.valid = carbon_hashmap_iterator_status_valid;
     carbon_hashmap_next((carbon_hashmap_iterator_t*)&it);
@@ -414,15 +414,14 @@ carbon_hashmap_iterator_t carbon_hashmap_begin(carbon_hashmap_any_t *map)
 carbon_hashmap_iterator_status_t carbon_hashmap_next(carbon_hashmap_iterator_t *it) {
     carbon_hashmap_private_t *map = (carbon_hashmap_private_t*)it->__it.map;
 
-    for(; it->__it.internal_index < map->table_size; it->__it.internal_index++) {
+    for(++it->__it.internal_index; it->__it.internal_index < map->table_size; it->__it.internal_index++) {
         if(map->data[it->__it.internal_index].in_use != 0) {
             it->index++;
 
-            carbon_hashmap_private_element_t volatile entry = map->data[it->__it.internal_index];
+            carbon_hashmap_private_element_t entry = map->data[it->__it.internal_index];
             it->key = entry.key;
             it->value = entry.data;
 
-            it->__it.internal_index++;
             return carbon_hashmap_iterator_status_valid;
         }
     }
@@ -430,4 +429,24 @@ carbon_hashmap_iterator_status_t carbon_hashmap_next(carbon_hashmap_iterator_t *
     it->key = NULL;
     it->value = NULL;
     return it->valid = carbon_hashmap_iterator_status_invalid;
+}
+
+void carbon_hashmap_replace(
+        carbon_hashmap_iterator_t *it,
+        carbon_hashmap_any_t new_value
+    )
+{
+    carbon_hashmap_private_t *map = (carbon_hashmap_private_t*)it->__it.map;
+
+    map->data[it->__it.internal_index].data = new_value;
+}
+
+void carbon_hashmap_remove_inplace(
+        carbon_hashmap_iterator_t *it
+    )
+{
+    carbon_hashmap_private_t *map = (carbon_hashmap_private_t*)it->__it.map;
+    map->data[it->__it.internal_index].in_use = 0;
+    map->data[it->__it.internal_index].data = NULL;
+    free((void *)map->data[it->__it.internal_index].key);
 }

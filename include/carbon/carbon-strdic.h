@@ -141,7 +141,7 @@ typedef struct carbon_strdic
     /**
      * Returns all contained (unique) strings and their mapped (unique) ids
      */
-    bool (*get_contents)(carbon_strdic_t *self, carbon_vec_t ofType(carbon_strdic_entry_t) *entries);
+    bool (*get_contents)(carbon_strdic_t *self, carbon_vec_t ofType(carbon_strdic_entry_t) *entries, carbon_string_id_t *grouping_key_filter);
 } carbon_strdic_t;
 
 /**
@@ -255,12 +255,12 @@ carbon_strdic_num_distinct(size_t *num, carbon_strdic_t *dic)
 CARBON_FUNC_UNUSED
 static bool
 carbon_strdic_get_contents(carbon_vec_t ofType(carbon_strdic_entry_t) *entries,
-                           carbon_strdic_t *dic)
+                           carbon_strdic_t *dic, carbon_string_id_t *grouping_key_filter)
 {
     CARBON_NON_NULL_OR_ERROR(entries)
     CARBON_NON_NULL_OR_ERROR(dic);
     assert(dic->get_contents);
-    return dic->get_contents(dic, entries);
+    return dic->get_contents(dic, entries, grouping_key_filter);
 }
 
 CARBON_END_DECL

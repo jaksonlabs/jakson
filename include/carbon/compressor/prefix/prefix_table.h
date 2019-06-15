@@ -18,6 +18,7 @@ typedef struct carbon_prefix_table_t {
 
 carbon_prefix_table * carbon_prefix_table_create();
 size_t carbon_prefix_table_length(carbon_prefix_table * table);
+size_t carbon_prefix_table_num_bytes(carbon_prefix_table * table);
 void carbon_prefix_table_free(carbon_prefix_table * table);
 
 uint16_t carbon_prefix_table_add(
