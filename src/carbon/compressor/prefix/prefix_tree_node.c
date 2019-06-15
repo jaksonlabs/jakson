@@ -1,4 +1,5 @@
-#include <malloc.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #include <carbon/compressor/prefix/prefix_tree_node.h>
 
