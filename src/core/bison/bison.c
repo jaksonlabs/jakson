@@ -254,8 +254,6 @@ NG5_EXPORT(bool) bison_to_str(struct string_builder *dst, enum bison_printer_imp
         struct bison_array_it it;
         bison_iterator_open(&it, doc);
 
-        bison_hexdump_print(stdout, doc); // TODO: REMOVE DEBUG
-
         print_array(&it, &p, &b);
         bison_array_it_drop(&it);
 
@@ -485,7 +483,7 @@ static offset_t internal_payload_after_header(struct bison *doc)
         memfile_save_position(&doc->memfile);
         memfile_seek(&doc->memfile, 0);
         memfile_skip(&doc->memfile, sizeof(struct bison_header));
-        varuint_t revision = NG5_MEMFILE_PEEK(&doc->memfile, varuint_t);
+        varuint_t revision = (varuint_t) memfile_peek(&doc->memfile, sizeof(char));
         varuint_read(&rev_nbytes, revision);
         memfile_skip(&doc->memfile, rev_nbytes);
         result = memfile_tell(&doc->memfile);
@@ -508,8 +506,6 @@ static bool internal_pack_array(struct bison_array_it *it)
 
                 if (!is_array_end) {
 
-                        memfile_hexdump_print(&this_array_it.memfile); // TODO: DEBUG REMOVE
-
                         error_if(!is_empty_slot, &it->err, NG5_ERR_CORRUPTED);
                         offset_t first_empty_slot_offset = memfile_tell(&this_array_it.memfile);
                         char final;
@@ -520,11 +516,7 @@ static bool internal_pack_array(struct bison_array_it *it)
                         memfile_seek(&this_array_it.memfile, first_empty_slot_offset);
                         assert(last_empty_slot_offset > first_empty_slot_offset);
 
-                        memfile_hexdump_print(&this_array_it.memfile); // TODO: DEBUG REMOVE
-
                         memfile_move_left(&this_array_it.memfile, last_empty_slot_offset - first_empty_slot_offset);
-
-                        memfile_hexdump_print(&this_array_it.memfile); // TODO: DEBUG REMOVE
 
                         final = *memfile_read(&this_array_it.memfile, sizeof(char));
                         assert(final == BISON_MARKER_ARRAY_END);
@@ -559,9 +551,12 @@ static bool internal_pack_array(struct bison_array_it *it)
                         case BISON_FIELD_TYPE_ARRAY: {
                                 struct bison_array_it nested_array_it;
                                 bison_array_it_create(&nested_array_it, &it->memfile, &it->err,
-                                        memfile_tell(&it->memfile) - sizeof(u8));
+                                        it->nested_array_it->payload_start - sizeof(u8));
                                 internal_pack_array(&nested_array_it);
-                                memfile_seek(&it->memfile, memfile_tell(&it->nested_array_it->memfile));
+                                char last = *memfile_peek(&nested_array_it.memfile, sizeof(char));
+                                assert(last == BISON_MARKER_ARRAY_END);
+                                memfile_skip(&nested_array_it.memfile, sizeof(char));
+                                memfile_seek(&it->memfile, memfile_tell(&nested_array_it.memfile));
                                 bison_array_it_drop(&nested_array_it);
                         } break;
                         case BISON_FIELD_TYPE_COLUMN:
@@ -579,6 +574,9 @@ static bool internal_pack_array(struct bison_array_it *it)
                 }
         }
 
+        char last = *memfile_peek(&it->memfile, sizeof(char));
+        assert(last == BISON_MARKER_ARRAY_END);
+
         return true;
 }
 
@@ -586,24 +584,14 @@ static bool internal_pack_column(struct bison_column_it *it)
 {
         assert(it);
 
-        printf("\n"); // TODO: DEBUG REMOVE
-        memfile_hexdump_print(&it->memfile); // TODO: DEBUG REMOVE
-
         u32 free_space = (it->column_capacity - it->column_num_elements) * bison_int_get_type_value_size(it->type);
         if (free_space > 0) {
                 memfile_seek(&it->memfile, it->column_capacity_offset);
-                memfile_write(&it->memfile, &it->column_num_elements, sizeof(u64));
+                memfile_write(&it->memfile, &it->column_num_elements, sizeof(u32));
                 memfile_seek(&it->memfile, it->payload_start);
                 memfile_skip(&it->memfile, it->column_num_elements * bison_int_get_type_value_size(it->type));
 
-
-                printf("\n"); // TODO: DEBUG REMOVE
-                memfile_hexdump_print(&it->memfile); // TODO: DEBUG REMOVE
-
                 memfile_move_left(&it->memfile, free_space);
-
-                printf("after pack \n"); // TODO: DEBUG REMOVE
-                memfile_hexdump_print(&it->memfile); // TODO: DEBUG REMOVE
 
                 char final = *memfile_read(&it->memfile, sizeof(char));
                 assert(final == BISON_MARKER_COLUMN_END);
@@ -647,7 +635,7 @@ static u64 bison_header_get_rev(struct bison *doc)
         memfile_seek(&doc->memfile, 0);
         memfile_skip(&doc->memfile, sizeof(struct bison_header));
         error_if(memfile_remain_size(&doc->memfile) < varuint_max_blocks(), &doc->err, NG5_ERR_CORRUPTED);
-        varuint_t revision = NG5_MEMFILE_PEEK(&doc->memfile, varuint_t);
+        varuint_t revision = (varuint_t) memfile_peek(&doc->memfile, sizeof(char));
         rev = varuint_read(NULL, revision);
         memfile_restore_position(&doc->memfile);
         return rev;
@@ -666,7 +654,7 @@ static bool bison_header_rev_inc(struct bison *doc)
         memfile_seek(&doc->memfile, 0);
         memfile_skip(&doc->memfile, sizeof(struct bison_header));
         error_if(memfile_remain_size(&doc->memfile) < varuint_max_blocks(), &doc->err, NG5_ERR_CORRUPTED);
-        varuint_t revision = NG5_MEMFILE_PEEK(&doc->memfile, varuint_t);
+        varuint_t revision = (varuint_t) memfile_peek(&doc->memfile, sizeof(char));
 
         assert (nblocks_rev <= nblocks_new_rev);
         assert (nblocks_rev == nblocks_new_rev ||

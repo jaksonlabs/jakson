@@ -42,6 +42,7 @@ NG5_EXPORT(bool) bison_int_insert_array(struct memfile *memfile, size_t nbytes)
 
         offset_t payload_begin = memfile_tell(memfile);
         memfile_seek(memfile, payload_begin + nbytes);
+
         marker_insert(memfile, array_end_marker);
 
         /* seek to first entry in array */
@@ -382,7 +383,9 @@ NG5_EXPORT(bool) bison_int_array_it_field_skip(struct bison_array_it *it)
                 bison_array_it_create(&skip_it, &it->memfile, &it->err, memfile_tell(&it->memfile) - sizeof(u8));
                 while (bison_array_it_next(&skip_it))
                 { }
-                memfile_seek(&it->memfile, memfile_tell(&skip_it.memfile) + 1);
+                char last = *memfile_read(&skip_it.memfile, sizeof(char));
+                assert(last == BISON_MARKER_ARRAY_END);
+                memfile_seek(&it->memfile, memfile_tell(&skip_it.memfile));
                 bison_array_it_drop(&skip_it);
         } break;
         case BISON_FIELD_TYPE_COLUMN: {

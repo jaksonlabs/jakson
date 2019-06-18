@@ -398,9 +398,11 @@ NG5_EXPORT(bool) bison_insert_array_end(struct bison_insert_array_state *state_i
         while (bison_array_it_next(&scan))
                 { }
 
+        char final = *memfile_read(&scan.memfile, sizeof(char));
+        assert(final == BISON_MARKER_ARRAY_END);
         memfile_skip(&scan.memfile, 1);
 
-        memfile_seek(&state_in->parent_inserter->memfile, memfile_tell(&scan.memfile));
+        memfile_seek(&state_in->parent_inserter->memfile, memfile_tell(&scan.memfile) - 1);
         bison_array_it_drop(&scan);
         bison_insert_drop(&state_in->nested_inserter);
         bison_array_it_drop(state_in->nested_array);
