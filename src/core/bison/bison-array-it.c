@@ -338,11 +338,17 @@ NG5_EXPORT(struct bison_column_it *) bison_array_it_column_value(struct bison_ar
         return it_in->nested_column_it;
 }
 
-NG5_EXPORT(bool) bison_array_it_insert(struct bison_insert *inserter, struct bison_array_it *it)
+NG5_EXPORT(bool) bison_array_it_insert_begin(struct bison_insert *inserter, struct bison_array_it *it)
 {
         error_if_null(inserter)
         error_if_null(it)
-        return bison_insert_create_for_array(inserter, it);
+        return bison_int_insert_create_for_array(inserter, it);
+}
+
+NG5_EXPORT(bool) bison_array_it_insert_end(struct bison_insert *inserter)
+{
+        error_if_null(inserter)
+        return bison_insert_drop(inserter);
 }
 
 NG5_EXPORT(bool) bison_array_it_remove(struct bison_array_it *it)

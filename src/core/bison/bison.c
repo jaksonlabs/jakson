@@ -18,13 +18,15 @@
 
 #include <inttypes.h>
 
+#include "stdx/varuint.h"
+
 #include "core/bison/bison.h"
 #include "core/bison/bison-array-it.h"
 #include "core/bison/bison-column-it.h"
 #include "core/bison/bison-printers.h"
 #include "core/bison/bison-int.h"
-#include "stdx/varuint.h"
-#include "utils/hexdump.h"
+#include "core/bison/bison-dot.h"
+#include "core/bison/bison-find.h"
 
 #define MIN_DOC_CAPACITY 16 /* minimum number of bytes required to store header and empty document array */
 
@@ -268,6 +270,24 @@ NG5_EXPORT(bool) bison_to_str(struct string_builder *dst, enum bison_printer_imp
         return true;
 }
 
+NG5_EXPORT(bool) bison_find_open(struct bison_find *out, const char *dot_path, struct bison *doc)
+{
+        error_if_null(out)
+        error_if_null(dot_path)
+        error_if_null(doc)
+        struct bison_dot_path path;
+        bison_dot_path_from_string(&path, dot_path);
+        bool status = bison_find_create(out, &path, doc);
+        bison_dot_path_drop(&path);
+        return status;
+}
+
+NG5_EXPORT(bool) bison_find_close(struct bison_find *find)
+{
+        error_if_null(find)
+        return bison_find_drop(find);
+}
+
 NG5_EXPORT(bool) bison_revise_try_begin(struct bison_revise *context, struct bison *revised_doc, struct bison *doc)
 {
         error_if_null(context)
@@ -293,7 +313,7 @@ NG5_EXPORT(bool) bison_revise_begin(struct bison_revise *context, struct bison *
                 fire_revision_begin(original);
                 return true;
         } else {
-                error(&original->err, NG5_ERR_OUTOFBOUNDS)
+                error(&original->err, NG5_ERR_OUTDATED)
                 return false;
         }
 }
@@ -321,6 +341,24 @@ NG5_EXPORT(bool) bison_revise_iterator_close(struct bison_array_it *it)
 {
         error_if_null(it);
         return bison_array_it_drop(it);
+}
+
+NG5_EXPORT(bool) bison_revise_find_open(struct bison_find *out, const char *dot_path, struct bison_revise *context)
+{
+        error_if_null(out)
+        error_if_null(dot_path)
+        error_if_null(context)
+        struct bison_dot_path path;
+        bison_dot_path_from_string(&path, dot_path);
+        bool status = bison_find_create(out, &path, context->revised_doc);
+        bison_dot_path_drop(&path);
+        return status;
+}
+
+NG5_EXPORT(bool) bison_revise_find_close(struct bison_find *find)
+{
+        error_if_null(find)
+        return bison_find_drop(find);
 }
 
 NG5_EXPORT(bool) bison_revise_pack(struct bison_revise *context)
@@ -408,6 +446,7 @@ NG5_EXPORT(const char *) bison_field_type_str(struct err *err, enum bison_field_
         case BISON_FIELD_TYPE_FALSE: return BISON_FIELD_TYPE_FALSE_STR;
         case BISON_FIELD_TYPE_OBJECT: return BISON_FIELD_TYPE_OBJECT_STR;
         case BISON_FIELD_TYPE_ARRAY: return BISON_FIELD_TYPE_ARRAY_STR;
+        case BISON_FIELD_TYPE_COLUMN: return BISON_FIELD_TYPE_COLUMN_STR;
         case BISON_FIELD_TYPE_STRING: return BISON_FIELD_TYPE_STRING_STR;
         case BISON_FIELD_TYPE_NUMBER_U8: return BISON_FIELD_TYPE_NUMBER_U8_STR;
         case BISON_FIELD_TYPE_NUMBER_U16: return BISON_FIELD_TYPE_NUMBER_U16_STR;
@@ -425,6 +464,55 @@ NG5_EXPORT(const char *) bison_field_type_str(struct err *err, enum bison_field_
                 error(err, NG5_ERR_NOTFOUND);
                 return NULL;
         }
+}
+
+NG5_EXPORT(bool) bison_field_type_is_traversable(enum bison_field_type type)
+{
+        switch (type) {
+        case BISON_FIELD_TYPE_OBJECT:
+        case BISON_FIELD_TYPE_ARRAY:
+        case BISON_FIELD_TYPE_COLUMN:
+                return true;
+        default:
+                return false;
+        }
+}
+
+NG5_EXPORT(bool) bison_field_type_is_signed_integer(enum bison_field_type type)
+{
+        return (type == BISON_FIELD_TYPE_NUMBER_I8 || type == BISON_FIELD_TYPE_NUMBER_I16 ||
+                type == BISON_FIELD_TYPE_NUMBER_I32 || type == BISON_FIELD_TYPE_NUMBER_I64);
+}
+
+NG5_EXPORT(bool) bison_field_type_is_unsigned_integer(enum bison_field_type type)
+{
+        return (type == BISON_FIELD_TYPE_NUMBER_U8 || type == BISON_FIELD_TYPE_NUMBER_U16 ||
+                type == BISON_FIELD_TYPE_NUMBER_U32 || type == BISON_FIELD_TYPE_NUMBER_U64);
+}
+
+NG5_EXPORT(bool) bison_field_type_is_floating_number(enum bison_field_type type)
+{
+        return (type == BISON_FIELD_TYPE_NUMBER_FLOAT);
+}
+
+NG5_EXPORT(bool) bison_field_type_is_number(enum bison_field_type type)
+{
+        return bison_field_type_is_integer(type) || bison_field_type_is_floating_number(type);
+}
+
+NG5_EXPORT(bool) bison_field_type_is_integer(enum bison_field_type type)
+{
+        return bison_field_type_is_signed_integer(type) || bison_field_type_is_unsigned_integer(type);
+}
+
+NG5_EXPORT(bool) bison_field_type_is_binary(enum bison_field_type type)
+{
+        return (type == BISON_FIELD_TYPE_BINARY || type == BISON_FIELD_TYPE_BINARY_CUSTOM);
+}
+
+NG5_EXPORT(bool) bison_field_type_is_boolean(enum bison_field_type type)
+{
+        return (type == BISON_FIELD_TYPE_TRUE || type == BISON_FIELD_TYPE_FALSE);
 }
 
 NG5_EXPORT(bool) bison_print(FILE *file, struct bison *doc)

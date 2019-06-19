@@ -103,7 +103,7 @@ NG5_BEGIN_DECL
 #define NG5_ERR_UNKNOWN_DIC_TYPE 75        /** Unknown string dictionary implementation requested */
 #define NG5_ERR_STACK_OVERFLOW 76          /** Stack overflow */
 #define NG5_ERR_STACK_UNDERFLOW 77         /** Stack underflow */
-#define NG5_ERR_OUTDATED 78                /** Object was modified and is out of date */
+#define NG5_ERR_OUTDATED 78                /** Object was modified but is out of date */
 #define NG5_ERR_NOTREADABLE 79             /** Object is currently being updated; no read allowed */
 #define NG5_ERR_ILLEGALOP 80               /** Illegal operation */
 #define NG5_ERR_BADTYPE 81                 /** Unsupported type */
@@ -115,6 +115,12 @@ NG5_BEGIN_DECL
                                              * integer value requires a larger (or smaller) type than the fist value
                                              * added to the container. Use '*_insert_X' instead, where X is u8, u16,...
                                              * , u32 resp. i8, i16,..., i32. */
+#define NG5_ERR_PARSE_DOT_EXPECTED 84       /** parsing error: dot ('.') expected */
+#define NG5_ERR_PARSE_ENTRY_EXPECTED 85     /** parsing error: key name or array index expected */
+#define NG5_ERR_PARSE_UNKNOWN_TOKEN 86      /** parsing error: unknown token */
+#define NG5_ERR_DOT_PATH_PARSERR 87         /** dot-notated path could not be parsed */
+#define NG5_ERR_ILLEGALSTATE 88             /** Illegal state */
+#define NG5_ERR_UNSUPPORTEDTYPE 89          /** Unsupported data type */
 
 static const char *const _err_str[] =
         {"No error", "Null pointer detected", "Function not implemented", "Index is out of bounds",
@@ -152,13 +158,15 @@ static const char *const _err_str[] =
          "Index is corrupted: requested offset is outside file bounds", "Temporary file cannot be opened for writing",
          "Unable to write to file", "Unable to deserialize hash table from file",
          "Unknown string dictionary implementation requested", "Stack overflow", "Stack underflow",
-         "Object was modified and is out of date", "Object is currently being updated; no read allowed",
+         "Object was modified but is out of date", "Object is currently being updated; no read allowed",
          "Illegal operation", "Unsupported type", "Unsupported container for data type",
          "Adding integers with this function will perform an auto casting to the smallest type required to store "
                  "the integer value. Since you push integers with this function into an column container that is bound "
                  "to a specific type, any insertion function call will fail once the integer value requires a larger "
                  "(or smaller) type than the fist value added to the container. Use '*_insert_X' instead, where X is "
-                 "u8, u16,..., u32 resp. i8, i16,..., i32. "};
+                 "u8, u16,..., u32 resp. i8, i16,..., i32. ", "parsing error dot ('.') expected",
+        "parsing error key name or array index expected", "parsing error: unknown token",
+        "dot-notated path could not be parsed", "Illegal state", "Unsupported data type"};
 
 #define NG5_ERRSTR_ILLEGAL_CODE "illegal error code"
 
@@ -181,6 +189,10 @@ NG5_EXPORT(bool) error_set(struct err *err, int code, const char *file, u32 line
 
 NG5_EXPORT(bool) error_set_wdetails(struct err *err, int code, const char *file, u32 line, const char *details);
 
+NG5_EXPORT(bool) error_set_no_abort(struct err *err, int code, const char *file, u32 line);
+
+NG5_EXPORT(bool) error_set_wdetails_no_abort(struct err *err, int code, const char *file, u32 line, const char *details);
+
 NG5_EXPORT(bool) error_str(const char **errstr, const char **file, u32 *line, bool *details, const char **detailsstr,
         const struct err *err);
 
@@ -191,6 +203,7 @@ NG5_EXPORT(bool) error_print_and_abort(const struct err *err);
 #define error_occurred(x)                   ((x)->err.code != NG5_ERR_NOERR)
 
 #define error(err, code)                     error_if (true, err, code)
+#define error_no_abort(err, code)            error_if (true, err, code)
 #define error_if(expr, err, code)            { if (expr) { error_set(err, code, __FILE__, __LINE__); } }
 #define error_if_and_return(expr, err, code, retval) \
                                                     { if (expr) { error_set(err, code, __FILE__, __LINE__);            \

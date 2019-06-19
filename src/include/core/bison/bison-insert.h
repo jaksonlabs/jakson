@@ -31,8 +31,6 @@ NG5_BEGIN_DECL
 struct bison_array_it; /* forwarded from bison-array-it.h */
 struct bison_column_it; /* forwarded from bison-column-it.h */
 
-enum bison_container_type { BISON_ARRAY, BISON_COLUMN };
-
 struct bison_insert
 {
         enum bison_container_type context_type;
@@ -64,9 +62,9 @@ struct bison_insert_column_state
 
 };
 
-NG5_EXPORT(bool) bison_insert_create_for_array(struct bison_insert *inserter, struct bison_array_it *context);
+NG5_EXPORT(bool) bison_int_insert_create_for_array(struct bison_insert *inserter, struct bison_array_it *context);
 
-NG5_EXPORT(bool) bison_insert_create_for_column(struct bison_insert *inserter, struct bison_column_it *context);
+NG5_EXPORT(bool) bison_int_insert_create_for_column(struct bison_insert *inserter, struct bison_column_it *context);
 
 
 NG5_EXPORT(bool) bison_insert_null(struct bison_insert *inserter);

@@ -65,6 +65,25 @@ NG5_EXPORT(bool) error_set_wdetails(struct err *err, int code, const char *file,
         return (err != NULL);
 }
 
+NG5_EXPORT(bool) error_set_no_abort(struct err *err, int code, const char *file, u32 line)
+{
+        return error_set_wdetails_no_abort(err, code, file, line, NULL);
+}
+
+NG5_EXPORT(bool) error_set_wdetails_no_abort(struct err *err, int code, const char *file, u32 line, const char *details)
+{
+        if (err) {
+                err->code = code;
+                err->file = file;
+                err->line = line;
+                err->details = details ? strdup(details) : NULL;
+#ifndef NDEBUG
+                error_print(code);
+#endif
+        }
+        return (err != NULL);
+}
+
 NG5_EXPORT(bool) error_str(const char **errstr, const char **file, u32 *line, bool *details, const char **detailsstr,
         const struct err *err)
 {

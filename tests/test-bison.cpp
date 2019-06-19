@@ -1,8 +1,10 @@
 #include <gtest/gtest.h>
 
 #include "core/bison/bison.h"
+#include "core/bison/bison-dot.h"
 #include "core/bison/bison-array-it.h"
 #include "core/bison/bison-insert.h"
+#include "core/bison/bison-find.h"
 
 TEST(BisonTest, CreateBison) {
         struct bison doc;
@@ -303,7 +305,7 @@ TEST(BisonTest, BisonArrayIteratorInsertNullAfterNew) {
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
         bison_revise_gen_object_id(NULL, &revise);
-        bison_array_it_insert(&inserter, &it);
+        bison_array_it_insert_begin(&inserter, &it);
         bison_insert_null(&inserter);
         bison_insert_drop(&inserter);
         bison_revise_end(&revise);
@@ -326,7 +328,7 @@ TEST(BisonTest, BisonArrayIteratorInsertMultipleLiteralsAfterNewNoOverflow) {
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
-        bison_array_it_insert(&inserter, &it);
+        bison_array_it_insert_begin(&inserter, &it);
         for (i32 i = 0; i < 10; i++) {
                 fprintf(stdout, "before:\n");
                 bison_hexdump_print(stdout, &rev_doc);
@@ -364,7 +366,7 @@ TEST(BisonTest, BisonArrayIteratorOverwriteLiterals) {
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
-        bison_array_it_insert(&inserter, &it);
+        bison_array_it_insert_begin(&inserter, &it);
         for (i32 i = 0; i < 3; i++) {
                 if (i % 3 == 0) {
                         bison_insert_null(&inserter);
@@ -380,7 +382,7 @@ TEST(BisonTest, BisonArrayIteratorOverwriteLiterals) {
 
         bison_revise_begin(&revise, &rev_doc2, &rev_doc);
         bison_revise_iterator_open(&it, &revise);
-        bison_array_it_insert(&inserter, &it);
+        bison_array_it_insert_begin(&inserter, &it);
         for (i32 i = 0; i < 2; i++) {
                 bison_insert_true(&inserter);
         }
@@ -405,7 +407,7 @@ TEST(BisonTest, BisonArrayIteratorOverwriteLiteralsWithDocOverflow) {
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
-        bison_array_it_insert(&inserter, &it);
+        bison_array_it_insert_begin(&inserter, &it);
         for (i32 i = 0; i < 22; i++) {
                 if (i % 3 == 0) {
                         bison_insert_null(&inserter);
@@ -423,7 +425,7 @@ TEST(BisonTest, BisonArrayIteratorOverwriteLiteralsWithDocOverflow) {
 
         bison_revise_begin(&revise, &rev_doc2, &rev_doc);
         bison_revise_iterator_open(&it, &revise);
-        bison_array_it_insert(&inserter, &it);
+        bison_array_it_insert_begin(&inserter, &it);
         for (i32 i = 0; i < 2; i++) {
                 fprintf(stdout, "before:\n");
                 bison_hexdump_print(stdout, &rev_doc2);
@@ -450,7 +452,7 @@ TEST(BisonTest, BisonArrayIteratorUnsignedAndConstants) {
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
-        bison_array_it_insert(&inserter, &it);
+        bison_array_it_insert_begin(&inserter, &it);
         for (i32 i = 0; i < 500; i++) {
                 if (i % 6 == 0) {
                         bison_insert_null(&inserter);
@@ -491,7 +493,7 @@ TEST(BisonTest, BisonArrayIteratorStrings) {
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
-        bison_array_it_insert(&inserter, &it);
+        bison_array_it_insert_begin(&inserter, &it);
         for (i32 i = 0; i < 10; i++) {
                 u64 strlen = rand() % (100 + 1 - 4) + 4;
                 char buffer[strlen];
@@ -525,7 +527,7 @@ TEST(BisonTest, BisonInsertMimeTypedBlob) {
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
-        bison_array_it_insert(&inserter, &it);
+        bison_array_it_insert_begin(&inserter, &it);
         const char *data = "{ \"Message\": \"Hello World\" }";
         bool status = bison_insert_binary(&inserter, data, strlen(data), "json", NULL);
         ASSERT_TRUE(status);
@@ -550,7 +552,7 @@ TEST(BisonTest, BisonInsertCustomTypedBlob) {
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
-        bison_array_it_insert(&inserter, &it);
+        bison_array_it_insert_begin(&inserter, &it);
         const char *data = "{ \"Message\": \"Hello World\" }";
         bool status = bison_insert_binary(&inserter, data, strlen(data), NULL, "my data");
         ASSERT_TRUE(status);
@@ -575,7 +577,7 @@ TEST(BisonTest, BisonInsertTwoMimeTypedBlob) {
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
-        bison_array_it_insert(&inserter, &it);
+        bison_array_it_insert_begin(&inserter, &it);
         const char *data1 = "{ \"Message\": \"Hello World\" }";
         const char *data2 = "{ \"Blog-Header\": \"My Fancy Blog\" }";
         bool status = bison_insert_binary(&inserter, data1, strlen(data1), "json", NULL);
@@ -603,7 +605,7 @@ TEST(BisonTest, BisonInsertMimeTypedBlobsWithOverflow) {
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
-        bison_array_it_insert(&inserter, &it);
+        bison_array_it_insert_begin(&inserter, &it);
         const char *data1 = "{ \"Message\": \"Hello World\" }";
         const char *data2 = "{ \"Blog-Header\": \"My Fancy Blog\" }";
         for (u32 i = 0; i < 100; i++) {
@@ -632,7 +634,7 @@ TEST(BisonTest, BisonInsertMixedTypedBlobsWithOverflow) {
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
-        bison_array_it_insert(&inserter, &it);
+        bison_array_it_insert_begin(&inserter, &it);
         const char *data1 = "{ \"Message\": \"Hello World\" }";
         const char *data2 = "{ \"Blog-Header\": \"My Fancy Blog\" }";
         for (u32 i = 0; i < 100; i++) {
@@ -662,7 +664,7 @@ TEST(BisonTest, BisonInsertArrayWithNoOverflow) {
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
-        bison_array_it_insert(&inserter, &it);
+        bison_array_it_insert_begin(&inserter, &it);
         bison_hexdump_print(stdout, &rev_doc);
 
         struct bison_insert *nested_inserter = bison_insert_array_begin(&array_state, &inserter, 10);
@@ -692,7 +694,7 @@ TEST(BisonTest, BisonInsertValuesIntoNestedArrayWithNoOverflow) {
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
-        bison_array_it_insert(&inserter, &it);
+        bison_array_it_insert_begin(&inserter, &it);
 
         bison_insert_null(&inserter);
         bison_insert_null(&inserter);
@@ -732,7 +734,7 @@ TEST(BisonTest, BisonInsert2xNestedArrayWithNoOverflow) {
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
-        bison_array_it_insert(&inserter, &it);
+        bison_array_it_insert_begin(&inserter, &it);
 
         bison_insert_null(&inserter);
         bison_insert_null(&inserter);
@@ -780,7 +782,7 @@ TEST(BisonTest, BisonInsertXxNestedArrayWithoutOverflow) {
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
-        bison_array_it_insert(&inserter, &it);
+        bison_array_it_insert_begin(&inserter, &it);
 
         bison_insert_null(&inserter);
         bison_insert_null(&inserter);
@@ -826,7 +828,7 @@ TEST(BisonTest, BisonInsertXxNestedArrayWithOverflow) {
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
-        bison_array_it_insert(&inserter, &it);
+        bison_array_it_insert_begin(&inserter, &it);
 
         bison_hexdump_print(stdout, &rev_doc);
         printf("\n");
@@ -881,7 +883,7 @@ TEST(BisonTest, BisonInsertInsertColumnWithoutOverflow) {
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
-        bison_array_it_insert(&inserter, &it);
+        bison_array_it_insert_begin(&inserter, &it);
 
         struct bison_insert *nested_inserter_l1 = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NULL, 10);
 
@@ -921,7 +923,7 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersWithoutOverflow) {
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
-        bison_array_it_insert(&inserter, &it);
+        bison_array_it_insert_begin(&inserter, &it);
 
         struct bison_insert *nested_inserter_l1 = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NUMBER_U8, 10);
 
@@ -959,7 +961,7 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersZeroWithoutOverflow) {
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
-        bison_array_it_insert(&inserter, &it);
+        bison_array_it_insert_begin(&inserter, &it);
 
         struct bison_insert *nested_inserter_l1 = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NUMBER_U8, 10);
 
@@ -998,7 +1000,7 @@ TEST(BisonTest, BisonInsertInsertMultileTypedColumnsWithoutOverflow) {
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
-        bison_array_it_insert(&inserter, &it);
+        bison_array_it_insert_begin(&inserter, &it);
 
         ins = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NULL, 10);
         bison_insert_null(ins);
@@ -1101,7 +1103,7 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersZeroWithOverflow) {
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
-        bison_array_it_insert(&inserter, &it);
+        bison_array_it_insert_begin(&inserter, &it);
 
         struct bison_insert *nested_inserter_l1 = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NUMBER_U8, 1);
 
@@ -1142,7 +1144,7 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersWithHighOverflow) {
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
-        bison_array_it_insert(&inserter, &it);
+        bison_array_it_insert_begin(&inserter, &it);
 
         struct bison_insert *nested_inserter_l1 = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NUMBER_U32, 1);
 
@@ -1186,7 +1188,7 @@ TEST(BisonTest, BisonInsertInsertMultipleColumnsNumbersWithHighOverflow) {
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
-        bison_array_it_insert(&inserter, &it);
+        bison_array_it_insert_begin(&inserter, &it);
 
         for (u32 k = 0; k < 3; k++) {
                 struct bison_insert *nested_inserter_l1 = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NUMBER_U32, 1);
@@ -1232,7 +1234,7 @@ TEST(BisonTest, BisonInsertNullTest) {
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
-        bison_array_it_insert(&inserter, &it);
+        bison_array_it_insert_begin(&inserter, &it);
 
         ins = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NULL, 10);
         bison_insert_null(ins);
@@ -1335,7 +1337,7 @@ TEST(BisonTest, BisonShrinkColumnListTest) {
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
-        bison_array_it_insert(&inserter, &it);
+        bison_array_it_insert_begin(&inserter, &it);
 
         ins = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NULL, 10);
         bison_insert_null(ins);
@@ -1436,7 +1438,7 @@ TEST(BisonTest, BisonShrinkArrayListTest) {
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
-        bison_array_it_insert(&inserter, &it);
+        bison_array_it_insert_begin(&inserter, &it);
 
         ins = bison_insert_array_begin(&array_state, &inserter, 10);
         bison_insert_u8(ins, 1);
@@ -1489,7 +1491,7 @@ TEST(BisonTest, BisonShrinkNestedArrayListTest) {
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
-        bison_array_it_insert(&inserter, &it);
+        bison_array_it_insert_begin(&inserter, &it);
 
         ins = bison_insert_array_begin(&array_state, &inserter, 10);
         nested_ins = bison_insert_array_begin(&nested_array_state, ins, 10);
@@ -1565,7 +1567,7 @@ TEST(BisonTest, BisonShrinkNestedArrayListAndColumnListTest) {
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
-        bison_array_it_insert(&inserter, &it);
+        bison_array_it_insert_begin(&inserter, &it);
 
         bison_insert_u64(&inserter, 4223);
         ins = bison_insert_array_begin(&array_state, &inserter, 10);
@@ -1617,6 +1619,474 @@ TEST(BisonTest, BisonShrinkNestedArrayListAndColumnListTest) {
 
         bison_drop(&doc);
         bison_drop(&rev_doc);
+}
+
+TEST(BisonTest, BisonDotNotation) {
+        struct bison_dot_path path;
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_dot_path_create(&path);
+
+        bison_dot_path_to_str(&sb, &path);
+        ASSERT_TRUE(strcmp(string_builder_cstr(&sb), "") == 0);
+        string_builder_clear(&sb);
+
+        bison_dot_path_add_key(&path, "name");
+        bison_dot_path_to_str(&sb, &path);
+        ASSERT_TRUE(strcmp(string_builder_cstr(&sb), "name") == 0);
+        string_builder_clear(&sb);
+
+        bison_dot_path_add_key(&path, "my name");
+        bison_dot_path_to_str(&sb, &path);
+        ASSERT_TRUE(strcmp(string_builder_cstr(&sb), "name.\"my name\"") == 0);
+        string_builder_clear(&sb);
+
+        bison_dot_path_add_key(&path, "");
+        bison_dot_path_to_str(&sb, &path);
+        ASSERT_TRUE(strcmp(string_builder_cstr(&sb), "name.\"my name\".\"\"") == 0);
+        string_builder_clear(&sb);
+
+        bison_dot_path_add_idx(&path, 42);
+        bison_dot_path_to_str(&sb, &path);
+        ASSERT_TRUE(strcmp(string_builder_cstr(&sb), "name.\"my name\".\"\".42") == 0);
+        string_builder_clear(&sb);
+
+        bison_dot_path_add_idx(&path, 23);
+        bison_dot_path_to_str(&sb, &path);
+        ASSERT_TRUE(strcmp(string_builder_cstr(&sb), "name.\"my name\".\"\".42.23") == 0);
+        string_builder_clear(&sb);
+
+        bison_dot_path_add_key(&path, "\"already quotes\"");
+        bison_dot_path_to_str(&sb, &path);
+        ASSERT_TRUE(strcmp(string_builder_cstr(&sb), "name.\"my name\".\"\".42.23.\"already quotes\"") == 0);
+        string_builder_clear(&sb);
+
+        bison_dot_path_drop(&path);
+        string_builder_drop(&sb);
+}
+
+TEST(BisonTest, BisonDotNotationParsing) {
+        struct bison_dot_path path;
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_dot_path_from_string(&path, "name");
+        bison_dot_path_to_str(&sb, &path);
+        ASSERT_TRUE(strcmp(string_builder_cstr(&sb), "name") == 0);
+        string_builder_clear(&sb);
+        bison_dot_path_drop(&path);
+
+        bison_dot_path_from_string(&path, "   name");
+        bison_dot_path_to_str(&sb, &path);
+        ASSERT_TRUE(strcmp(string_builder_cstr(&sb), "name") == 0);
+        string_builder_clear(&sb);
+        bison_dot_path_drop(&path);
+
+        bison_dot_path_from_string(&path, "   name    ");
+        bison_dot_path_to_str(&sb, &path);
+        ASSERT_TRUE(strcmp(string_builder_cstr(&sb), "name") == 0);
+        string_builder_clear(&sb);
+        bison_dot_path_drop(&path);
+
+        bison_dot_path_from_string(&path, "");
+        bison_dot_path_to_str(&sb, &path);
+        ASSERT_TRUE(strcmp(string_builder_cstr(&sb), "") == 0);
+        string_builder_clear(&sb);
+        bison_dot_path_drop(&path);
+
+        bison_dot_path_from_string(&path, "\"name\"");
+        bison_dot_path_to_str(&sb, &path);
+        ASSERT_TRUE(strcmp(string_builder_cstr(&sb), "name") == 0);
+        string_builder_clear(&sb);
+        bison_dot_path_drop(&path);
+
+        bison_dot_path_from_string(&path, "\"nam e\"");
+        bison_dot_path_to_str(&sb, &path);
+        ASSERT_TRUE(strcmp(string_builder_cstr(&sb), "\"nam e\"") == 0);
+        string_builder_clear(&sb);
+        bison_dot_path_drop(&path);
+
+        bison_dot_path_from_string(&path, "nam e");
+        bison_dot_path_to_str(&sb, &path);
+        ASSERT_TRUE(strcmp(string_builder_cstr(&sb), "nam.e") == 0);
+        string_builder_clear(&sb);
+        bison_dot_path_drop(&path);
+
+        bison_dot_path_from_string(&path, "\"My Doc\" names 5 age");
+        bison_dot_path_to_str(&sb, &path);
+        ASSERT_TRUE(strcmp(string_builder_cstr(&sb), "\"My Doc\".names.5.age") == 0);
+        string_builder_clear(&sb);
+        bison_dot_path_drop(&path);
+
+        bison_dot_path_from_string(&path, "23.authors.3.name");
+        bison_dot_path_to_str(&sb, &path);
+        ASSERT_TRUE(strcmp(string_builder_cstr(&sb), "23.authors.3.name") == 0);
+        string_builder_clear(&sb);
+        bison_dot_path_drop(&path);
+
+        string_builder_drop(&sb);
+}
+
+TEST(BisonTest, BisonFind) {
+        struct bison doc, rev_doc;
+        struct bison_revise revise;
+        struct bison_array_it it;
+        struct bison_insert ins;
+        struct bison_find finder;
+        u64 result_unsigned;
+        enum bison_field_type type;
+        bison_create(&doc);
+
+        bison_revise_begin(&revise, &rev_doc, &doc);
+
+        bison_revise_iterator_open(&it, &revise);
+        bison_array_it_insert_begin(&ins, &it);
+        bison_insert_u8(&ins, 'a');
+        bison_insert_u8(&ins, 'b');
+        bison_insert_u8(&ins, 'c');
+        bison_array_it_insert_end(&ins);
+        bison_revise_iterator_close(&it);
+        bison_revise_end(&revise);
+
+        {
+                bison_find_open(&finder, "0", &rev_doc);
+
+                ASSERT_TRUE(bison_find_has_result(&finder));
+
+                bison_find_result_type(&type, &finder);
+                ASSERT_EQ(type, BISON_FIELD_TYPE_NUMBER_U8);
+
+                bison_find_result_unsigned(&result_unsigned, &finder);
+                ASSERT_EQ(result_unsigned, 'a');
+
+                bison_find_close(&finder);
+        }
+
+        {
+                bison_find_open(&finder, "1", &rev_doc);
+
+                ASSERT_TRUE(bison_find_has_result(&finder));
+
+                bison_find_result_type(&type, &finder);
+                ASSERT_EQ(type, BISON_FIELD_TYPE_NUMBER_U8);
+
+                bison_find_result_unsigned(&result_unsigned, &finder);
+                ASSERT_EQ(result_unsigned, 'b');
+
+                bison_find_close(&finder);
+        }
+
+        {
+                bison_find_open(&finder, "2", &rev_doc);
+
+                ASSERT_TRUE(bison_find_has_result(&finder));
+
+                bison_find_result_type(&type, &finder);
+                ASSERT_EQ(type, BISON_FIELD_TYPE_NUMBER_U8);
+
+                bison_find_result_unsigned(&result_unsigned, &finder);
+                ASSERT_EQ(result_unsigned, 'c');
+
+                bison_find_close(&finder);
+        }
+
+        {
+                bison_find_open(&finder, "3", &rev_doc);
+
+                ASSERT_FALSE(bison_find_has_result(&finder));
+
+                bison_find_close(&finder);
+        }
+
+        bison_print(stdout, &rev_doc);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonFindTypes) {
+        struct bison doc, rev_doc;
+        struct bison_revise revise;
+        struct bison_array_it it;
+        struct bison_insert inserter, *ins, *nested_ins, *column_ins;
+        struct bison_insert_column_state column_state;
+        struct bison_insert_array_state array_state, nested_array_state;
+        struct bison_find finder;
+        u64 result_unsigned;
+        enum bison_field_type type;
+        bison_create(&doc);
+
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_iterator_open(&it, &revise);
+        bison_array_it_insert_begin(&inserter, &it);
+
+        bison_insert_u64(&inserter, 4223);
+        ins = bison_insert_array_begin(&array_state, &inserter, 10);
+        column_ins = bison_insert_column_begin(&column_state, ins, BISON_FIELD_TYPE_NUMBER_U32, 10);
+        bison_insert_u32(column_ins, 'X');
+        bison_insert_u32(column_ins, 'Y');
+        bison_insert_u32(column_ins, 'Z');
+        bison_insert_column_end(&column_state);
+        nested_ins = bison_insert_array_begin(&nested_array_state, ins, 10);
+        bison_insert_string(nested_ins, "Hello");
+        column_ins = bison_insert_column_begin(&column_state, nested_ins, BISON_FIELD_TYPE_NUMBER_U32, 10);
+        bison_insert_u32(column_ins, 'A');
+        bison_insert_u32(column_ins, 'B');
+        bison_insert_u32(column_ins, 'C');
+        bison_insert_column_end(&column_state);
+        bison_insert_string(nested_ins, "World");
+        bison_insert_array_end(&nested_array_state);
+        bison_insert_u8(ins, 1);
+        bison_insert_u8(ins, 1);
+        column_ins = bison_insert_column_begin(&column_state, ins, BISON_FIELD_TYPE_NUMBER_U32, 10);
+        bison_insert_u32(column_ins, 23);
+        bison_insert_u32(column_ins, 24);
+        bison_insert_u32(column_ins, 25);
+        bison_insert_column_end(&column_state);
+        bison_insert_u8(ins, 1);
+        bison_insert_array_end(&array_state);
+
+        bison_revise_shrink(&revise);
+
+        {
+                bison_find_open(&finder, "0", &rev_doc);
+                ASSERT_TRUE(bison_find_has_result(&finder));
+                bison_find_result_type(&type, &finder);
+                ASSERT_EQ(type, BISON_FIELD_TYPE_NUMBER_U64);
+                bison_find_result_unsigned(&result_unsigned, &finder);
+                ASSERT_EQ(result_unsigned, 4223);
+                bison_find_close(&finder);
+        }
+
+        {
+                bison_find_open(&finder, "1", &rev_doc);
+                ASSERT_TRUE(bison_find_has_result(&finder));
+                bison_find_result_type(&type, &finder);
+                ASSERT_EQ(type, BISON_FIELD_TYPE_ARRAY);
+                struct bison_array_it *retval = bison_find_result_array(&finder);
+                ASSERT_TRUE(retval != NULL);
+                bison_find_close(&finder);
+        }
+
+        {
+                bison_find_open(&finder, "1.0", &rev_doc);
+                ASSERT_TRUE(bison_find_has_result(&finder));
+                bison_find_result_type(&type, &finder);
+                ASSERT_EQ(type, BISON_FIELD_TYPE_COLUMN);
+                struct bison_column_it *retval = bison_find_result_column(&finder);
+                ASSERT_TRUE(retval != NULL);
+                bison_find_close(&finder);
+        }
+
+        {
+                bison_find_open(&finder, "1.0.0", &rev_doc);
+                ASSERT_TRUE(bison_find_has_result(&finder));
+                bison_find_result_type(&type, &finder);
+                ASSERT_EQ(type, BISON_FIELD_TYPE_NUMBER_U32);
+                bison_find_result_unsigned(&result_unsigned, &finder);
+                ASSERT_EQ(result_unsigned, 88);
+                bison_find_close(&finder);
+        }
+
+        {
+                bison_find_open(&finder, "1.0.1", &rev_doc);
+                ASSERT_TRUE(bison_find_has_result(&finder));
+                bison_find_result_type(&type, &finder);
+                ASSERT_EQ(type, BISON_FIELD_TYPE_NUMBER_U32);
+                bison_find_result_unsigned(&result_unsigned, &finder);
+                ASSERT_EQ(result_unsigned, 89);
+                bison_find_close(&finder);
+        }
+
+        {
+                bison_find_open(&finder, "1.0.2", &rev_doc);
+                ASSERT_TRUE(bison_find_has_result(&finder));
+                bison_find_result_type(&type, &finder);
+                ASSERT_EQ(type, BISON_FIELD_TYPE_NUMBER_U32);
+                bison_find_result_unsigned(&result_unsigned, &finder);
+                ASSERT_EQ(result_unsigned, 90);
+                bison_find_close(&finder);
+        }
+
+        {
+                bison_find_open(&finder, "1.0.3", &rev_doc);
+                ASSERT_FALSE(bison_find_has_result(&finder));
+                bison_find_close(&finder);
+        }
+
+        {
+                bison_find_open(&finder, "1.1", &rev_doc);
+                ASSERT_TRUE(bison_find_has_result(&finder));
+                bison_find_result_type(&type, &finder);
+                ASSERT_EQ(type, BISON_FIELD_TYPE_ARRAY);
+                struct bison_array_it *retval = bison_find_result_array(&finder);
+                ASSERT_TRUE(retval != NULL);
+                bison_find_close(&finder);
+        }
+
+        {
+                bison_find_open(&finder, "1.1.0", &rev_doc);
+                ASSERT_TRUE(bison_find_has_result(&finder));
+                bison_find_result_type(&type, &finder);
+                ASSERT_EQ(type, BISON_FIELD_TYPE_STRING);
+                u64 str_len;
+                const char *retval = bison_find_result_string(&str_len, &finder);
+                ASSERT_TRUE(strncmp(retval, "Hello", str_len) == 0);
+                bison_find_close(&finder);
+        }
+
+        {
+                bison_find_open(&finder, "1.1.1", &rev_doc);
+                ASSERT_TRUE(bison_find_has_result(&finder));
+                bison_find_result_type(&type, &finder);
+                ASSERT_EQ(type, BISON_FIELD_TYPE_COLUMN);
+                struct bison_column_it *retval = bison_find_result_column(&finder);
+                ASSERT_TRUE(retval != NULL);
+                bison_find_close(&finder);
+        }
+
+        {
+                bison_find_open(&finder, "1.1.1.0", &rev_doc);
+                ASSERT_TRUE(bison_find_has_result(&finder));
+                bison_find_result_type(&type, &finder);
+                ASSERT_EQ(type, BISON_FIELD_TYPE_NUMBER_U32);
+                bison_find_result_unsigned(&result_unsigned, &finder);
+                ASSERT_EQ(result_unsigned, 65);
+                bison_find_close(&finder);
+        }
+
+        {
+                bison_find_open(&finder, "1.1.1.1", &rev_doc);
+                ASSERT_TRUE(bison_find_has_result(&finder));
+                bison_find_result_type(&type, &finder);
+                ASSERT_EQ(type, BISON_FIELD_TYPE_NUMBER_U32);
+                bison_find_result_unsigned(&result_unsigned, &finder);
+                ASSERT_EQ(result_unsigned, 66);
+                bison_find_close(&finder);
+        }
+
+        {
+                bison_find_open(&finder, "1.1.1.2", &rev_doc);
+                ASSERT_TRUE(bison_find_has_result(&finder));
+                bison_find_result_type(&type, &finder);
+                ASSERT_EQ(type, BISON_FIELD_TYPE_NUMBER_U32);
+                bison_find_result_unsigned(&result_unsigned, &finder);
+                ASSERT_EQ(result_unsigned, 67);
+                bison_find_close(&finder);
+        }
+
+        {
+                bison_find_open(&finder, "1.1.1.3", &rev_doc);
+                ASSERT_FALSE(bison_find_has_result(&finder));
+        }
+
+        {
+                bison_find_open(&finder, "1.1.2", &rev_doc);
+                ASSERT_TRUE(bison_find_has_result(&finder));
+                bison_find_result_type(&type, &finder);
+                ASSERT_EQ(type, BISON_FIELD_TYPE_STRING);
+                u64 str_len;
+                const char *retval = bison_find_result_string(&str_len, &finder);
+                ASSERT_TRUE(strncmp(retval, "World", str_len) == 0);
+                bison_find_close(&finder);
+        }
+
+        {
+                bison_find_open(&finder, "1.1.3", &rev_doc);
+                ASSERT_FALSE(bison_find_has_result(&finder));
+                bison_find_close(&finder);
+        }
+
+        {
+                bison_find_open(&finder, "1.2", &rev_doc);
+                ASSERT_TRUE(bison_find_has_result(&finder));
+                bison_find_result_type(&type, &finder);
+                ASSERT_EQ(type, BISON_FIELD_TYPE_NUMBER_U8);
+                bison_find_result_unsigned(&result_unsigned, &finder);
+                ASSERT_EQ(result_unsigned, 1);
+                bison_find_close(&finder);
+        }
+
+        {
+                bison_find_open(&finder, "1.3", &rev_doc);
+                ASSERT_TRUE(bison_find_has_result(&finder));
+                bison_find_result_type(&type, &finder);
+                ASSERT_EQ(type, BISON_FIELD_TYPE_NUMBER_U8);
+                bison_find_result_unsigned(&result_unsigned, &finder);
+                ASSERT_EQ(result_unsigned, 1);
+                bison_find_close(&finder);
+        }
+
+        {
+                bison_find_open(&finder, "1.4", &rev_doc);
+                ASSERT_TRUE(bison_find_has_result(&finder));
+                bison_find_result_type(&type, &finder);
+                ASSERT_EQ(type, BISON_FIELD_TYPE_COLUMN);
+                struct bison_column_it *retval = bison_find_result_column(&finder);
+                ASSERT_TRUE(retval != NULL);
+                bison_find_close(&finder);
+        }
+
+        {
+                bison_find_open(&finder, "1.4.0", &rev_doc);
+                ASSERT_TRUE(bison_find_has_result(&finder));
+                bison_find_result_type(&type, &finder);
+                ASSERT_EQ(type, BISON_FIELD_TYPE_NUMBER_U32);
+                bison_find_result_unsigned(&result_unsigned, &finder);
+                ASSERT_EQ(result_unsigned, 23);
+                bison_find_close(&finder);
+        }
+
+        {
+                bison_find_open(&finder, "1.4.1", &rev_doc);
+                ASSERT_TRUE(bison_find_has_result(&finder));
+                bison_find_result_type(&type, &finder);
+                ASSERT_EQ(type, BISON_FIELD_TYPE_NUMBER_U32);
+                bison_find_result_unsigned(&result_unsigned, &finder);
+                ASSERT_EQ(result_unsigned, 24);
+                bison_find_close(&finder);
+        }
+
+        {
+                bison_find_open(&finder, "1.4.2", &rev_doc);
+                ASSERT_TRUE(bison_find_has_result(&finder));
+                bison_find_result_type(&type, &finder);
+                ASSERT_EQ(type, BISON_FIELD_TYPE_NUMBER_U32);
+                bison_find_result_unsigned(&result_unsigned, &finder);
+                ASSERT_EQ(result_unsigned, 25);
+                bison_find_close(&finder);
+        }
+
+        {
+                bison_find_open(&finder, "1.4.3", &rev_doc);
+                ASSERT_FALSE(bison_find_has_result(&finder));
+                bison_find_close(&finder);
+        }
+
+        {
+                bison_find_open(&finder, "1.5", &rev_doc);
+                ASSERT_TRUE(bison_find_has_result(&finder));
+                bison_find_result_type(&type, &finder);
+                ASSERT_EQ(type, BISON_FIELD_TYPE_NUMBER_U8);
+                bison_find_result_unsigned(&result_unsigned, &finder);
+                ASSERT_EQ(result_unsigned, 1);
+                bison_find_close(&finder);
+        }
+
+        {
+                bison_find_open(&finder, "1.6", &rev_doc);
+                ASSERT_FALSE(bison_find_has_result(&finder));
+                bison_find_close(&finder);
+        }
+
+        bison_insert_drop(&inserter);
+        bison_array_it_drop(&it);
+        bison_revise_end(&revise);
+
+        bison_hexdump_print(stdout, &rev_doc);
+
+        bison_print(stdout, &rev_doc);
+        bison_drop(&rev_doc);
+        bison_drop(&doc);
 }
 
 int main(int argc, char **argv) {

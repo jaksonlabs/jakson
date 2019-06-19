@@ -21,6 +21,14 @@
 #include "core/bison/bison-insert.h"
 #include "core/bison/bison-int.h"
 
+#define safe_cast(builtin_type, nvalues, it, field_type_expr)                                                          \
+({                                                                                                                     \
+        enum bison_field_type type;                                                                                    \
+        const void *raw = bison_column_it_values(&type, nvalues, it);                                                  \
+        error_if(!(field_type_expr), &it->err, NG5_ERR_TYPEMISMATCH);                                                  \
+        (const builtin_type *) raw;                                                                                    \
+})
+
 NG5_EXPORT(bool) bison_column_it_create(struct bison_column_it *it, struct memfile *memfile, struct err *err,
         offset_t column_start_offset)
 {
@@ -59,7 +67,7 @@ NG5_EXPORT(bool) bison_column_it_insert(struct bison_insert *inserter, struct bi
 {
         error_if_null(inserter)
         error_if_null(it)
-        return bison_insert_create_for_column(inserter, it);
+        return bison_int_insert_create_for_column(inserter, it);
 }
 
 NG5_EXPORT(bool) bison_column_it_fast_forward(struct bison_column_it *it)
@@ -92,6 +100,56 @@ NG5_EXPORT(const void *) bison_column_it_values(enum bison_field_type *type, u32
         error_if_and_return(end != BISON_MARKER_COLUMN_END, &it->err, NG5_ERR_CORRUPTED, NULL);
 
         return result;
+}
+
+NG5_EXPORT(const u8 *) bison_column_it_boolean_values(u32 *nvalues, struct bison_column_it *it)
+{
+        return safe_cast(u8, nvalues, it, (type == BISON_FIELD_TYPE_TRUE || type == BISON_FIELD_TYPE_FALSE));
+}
+
+NG5_EXPORT(const u8 *) bison_column_it_u8_values(u32 *nvalues, struct bison_column_it *it)
+{
+        return safe_cast(u8, nvalues, it, (type == BISON_FIELD_TYPE_NUMBER_U8));
+}
+
+NG5_EXPORT(const u16 *) bison_column_it_u16_values(u32 *nvalues, struct bison_column_it *it)
+{
+        return safe_cast(u16, nvalues, it, (type == BISON_FIELD_TYPE_NUMBER_U16));
+}
+
+NG5_EXPORT(const u32 *) bison_column_it_u32_values(u32 *nvalues, struct bison_column_it *it)
+{
+        return safe_cast(u32, nvalues, it, (type == BISON_FIELD_TYPE_NUMBER_U32));
+}
+
+NG5_EXPORT(const u64 *) bison_column_it_u64_values(u32 *nvalues, struct bison_column_it *it)
+{
+        return safe_cast(u64, nvalues, it, (type == BISON_FIELD_TYPE_NUMBER_U64));
+}
+
+NG5_EXPORT(const i8 *) bison_column_it_i8_values(u32 *nvalues, struct bison_column_it *it)
+{
+        return safe_cast(i8, nvalues, it, (type == BISON_FIELD_TYPE_NUMBER_I8));
+}
+
+NG5_EXPORT(const i16 *) bison_column_it_i16_values(u32 *nvalues, struct bison_column_it *it)
+{
+        return safe_cast(i16, nvalues, it, (type == BISON_FIELD_TYPE_NUMBER_I16));
+}
+
+NG5_EXPORT(const i32 *) bison_column_it_i32_values(u32 *nvalues, struct bison_column_it *it)
+{
+        return safe_cast(i32, nvalues, it, (type == BISON_FIELD_TYPE_NUMBER_I32));
+}
+
+NG5_EXPORT(const i64 *) bison_column_it_i64_values(u32 *nvalues, struct bison_column_it *it)
+{
+        return safe_cast(i64, nvalues, it, (type == BISON_FIELD_TYPE_NUMBER_I64));
+}
+
+NG5_EXPORT(const float *) bison_column_it_float_values(u32 *nvalues, struct bison_column_it *it)
+{
+        return safe_cast(float, nvalues, it, (type == BISON_FIELD_TYPE_NUMBER_FLOAT));
 }
 
 /**

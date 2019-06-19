@@ -34,7 +34,7 @@ static bool push_media_type_for_array(struct bison_insert *inserter, enum bison_
 static void internal_create(struct bison_insert *inserter, struct memfile *src);
 static void write_binary_blob(struct bison_insert *inserter, const void *value, size_t nbytes);
 
-NG5_EXPORT(bool) bison_insert_create_for_array(struct bison_insert *inserter, struct bison_array_it *context)
+NG5_EXPORT(bool) bison_int_insert_create_for_array(struct bison_insert *inserter, struct bison_array_it *context)
 {
         error_if_null(inserter)
         error_if_null(context)
@@ -45,7 +45,7 @@ NG5_EXPORT(bool) bison_insert_create_for_array(struct bison_insert *inserter, st
         return true;
 }
 
-NG5_EXPORT(bool) bison_insert_create_for_column(struct bison_insert *inserter, struct bison_column_it *context)
+NG5_EXPORT(bool) bison_int_insert_create_for_column(struct bison_insert *inserter, struct bison_column_it *context)
 {
         error_if_null(inserter)
         error_if_null(context)
@@ -383,7 +383,7 @@ NG5_EXPORT(struct bison_insert *) bison_insert_array_begin(struct bison_insert_a
         u64 payload_start = memfile_tell(&inserter_in->memfile) - 1;
 
         bison_array_it_create(state_out->nested_array, &inserter_in->memfile, &inserter_in->err, payload_start);
-        bison_array_it_insert(&state_out->nested_inserter, state_out->nested_array);
+        bison_array_it_insert_begin(&state_out->nested_inserter, state_out->nested_array);
 
         return &state_out->nested_inserter;
 }

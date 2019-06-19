@@ -127,10 +127,11 @@ NG5_EXPORT(struct bison_array_it *) bison_array_it_array_value(struct bison_arra
 NG5_EXPORT(struct bison_column_it *) bison_array_it_column_value(struct bison_array_it *it_in);
 
 /**
- * Inserts a new element at the current position of the iterator. In any case, <code>bison_insert_drop</code>
- * must be called to complete the process (even if no-op).
+ * Inserts a new element at the current position of the iterator.
  */
-NG5_EXPORT(bool) bison_array_it_insert(struct bison_insert *inserter, struct bison_array_it *it);
+NG5_EXPORT(bool) bison_array_it_insert_begin(struct bison_insert *inserter, struct bison_array_it *it);
+
+NG5_EXPORT(bool) bison_array_it_insert_end(struct bison_insert *inserter);
 
 NG5_EXPORT(bool) bison_array_it_remove(struct bison_array_it *it);
 
