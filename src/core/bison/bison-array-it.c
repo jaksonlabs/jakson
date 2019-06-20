@@ -58,11 +58,20 @@ NG5_EXPORT(bool) bison_array_it_create(struct bison_array_it *it, struct memfile
         return true;
 }
 
+NG5_EXPORT(bool) bison_array_it_copy(struct bison_array_it *dst, struct bison_array_it *src)
+{
+        error_if_null(dst);
+        error_if_null(src);
+        bison_array_it_create(dst, &src->memfile, &src->err, src->payload_start - sizeof(u8));
+        return true;
+}
+
 NG5_EXPORT(bool) bison_array_it_clone(struct bison_array_it *dst, struct bison_array_it *src)
 {
         error_if_null(dst);
         error_if_null(src);
         bison_array_it_create(dst, &src->memfile, &src->err, src->payload_start - sizeof(u8));
+        memfile_seek(&dst->memfile, memfile_tell(&src->memfile));
         return true;
 }
 

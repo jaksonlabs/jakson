@@ -63,6 +63,16 @@ NG5_EXPORT(bool) bison_column_it_create(struct bison_column_it *it, struct memfi
         return true;
 }
 
+NG5_EXPORT(bool) bison_column_it_clone(struct bison_column_it *dst, struct bison_column_it *src)
+{
+        error_if_null(dst)
+        error_if_null(src)
+
+        bison_column_it_create(dst, &src->memfile, &src->err, src->column_start_offset);
+
+        return true;
+}
+
 NG5_EXPORT(bool) bison_column_it_insert(struct bison_insert *inserter, struct bison_column_it *it)
 {
         error_if_null(inserter)
@@ -74,6 +84,21 @@ NG5_EXPORT(bool) bison_column_it_fast_forward(struct bison_column_it *it)
 {
         error_if_null(it);
         bison_column_it_values(NULL, NULL, it);
+        return true;
+}
+
+NG5_EXPORT(bool) bison_column_it_values_info(enum bison_field_type *type, u32 *nvalues, struct bison_column_it *it)
+{
+        error_if_null(it);
+
+        if (nvalues) {
+                memfile_seek(&it->memfile, it->column_num_elements_offset);
+                u32 num_elements = *NG5_MEMFILE_PEEK(&it->memfile, u32);
+                *nvalues = num_elements;
+        }
+
+        ng5_optional_set(type, it->type);
+
         return true;
 }
 

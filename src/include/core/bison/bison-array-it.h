@@ -64,6 +64,8 @@ NG5_EXPORT(bool) bison_array_it_create(struct bison_array_it *it, struct memfile
 
 NG5_EXPORT(bool) bison_array_it_clone(struct bison_array_it *dst, struct bison_array_it *src);
 
+NG5_EXPORT(bool) bison_array_it_copy(struct bison_array_it *dst, struct bison_array_it *src);
+
 NG5_EXPORT(bool) bison_array_it_readonly(struct bison_array_it *it);
 
 /**

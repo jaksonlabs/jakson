@@ -23,8 +23,12 @@
 #include "shared/error.h"
 #include "shared/types.h"
 #include "std/string_builder.h"
+#include "core/bison/bison-array-it.h"
+#include "core/bison/bison-column-it.h"
 
 NG5_BEGIN_DECL
+
+struct bison; /* forwarded from bison.h */
 
 enum bison_dot_node_type
 {
@@ -46,6 +50,18 @@ struct bison_dot_path
         struct bison_dot_node nodes[256];
         u32 path_len;
         struct err err;
+};
+
+enum bison_path_status
+{
+        BISON_PATH_RESOLVED,
+        BISON_PATH_EMPTY_DOC,
+        BISON_PATH_NOSUCHINDEX,
+        BISON_PATH_NOTTRAVERSABLE,
+        BISON_PATH_NOCONTAINER,
+        BISON_PATH_NOTANOBJECT,
+        BISON_PATH_NONESTING,
+        BISON_PATH_INTERNAL
 };
 
 NG5_DEFINE_ERROR_GETTER(bison_dot_path)

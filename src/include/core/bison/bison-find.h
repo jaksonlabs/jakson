@@ -24,6 +24,7 @@
 #include "core/bison/bison-column-it.h"
 #include "core/bison/bison-array-it.h"
 #include "core/bison/bison-dot.h"
+#include "core/bison/bison-path.h"
 
 NG5_BEGIN_DECL
 
@@ -32,10 +33,7 @@ struct bison_find
         struct bison *doc;
         enum bison_field_type type;
         struct err err;
-        bool has_result;
-        bool cleanup_needed;
-
-        struct bison_array_it root_it;
+        struct bison_path_evaluator path_evaluater;
 
         bool number_is_nulled;
 
