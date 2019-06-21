@@ -848,8 +848,7 @@ static bool internal_pack_array(struct bison_array_it *it)
                 bool is_empty_slot, is_array_end;
 
                 bison_array_it_copy(&this_array_it, it);
-                while (bison_int_array_it_next(&is_empty_slot, &is_array_end, &this_array_it))
-                { }
+                bison_int_array_skip_contents(&is_empty_slot, &is_array_end, &this_array_it);
 
                 if (!is_array_end) {
 

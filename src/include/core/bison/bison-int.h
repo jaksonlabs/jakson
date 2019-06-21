@@ -44,6 +44,8 @@ NG5_EXPORT(size_t) bison_int_get_type_value_size(enum bison_field_type type);
 
 NG5_EXPORT(bool) bison_int_array_it_next(bool *is_empty_slot, bool *is_array_end, struct bison_array_it *it);
 
+NG5_EXPORT(bool) bison_int_array_skip_contents(bool *is_empty_slot, bool *is_array_end, struct bison_array_it *it);
+
 NG5_EXPORT(bool) bison_int_array_it_refresh(bool *is_empty_slot, bool *is_array_end, struct bison_array_it *it);
 
 NG5_EXPORT(bool) bison_int_array_it_field_type_read(struct bison_array_it *it);

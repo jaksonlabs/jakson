@@ -28,6 +28,10 @@
 
 static void marker_insert(struct memfile *memfile, u8 marker);
 
+static bool array_it_is_slot_occupied(bool *is_empty_slot, bool *is_array_end, struct bison_array_it *it);
+
+static bool array_it_next_no_load(bool *is_empty_slot, bool *is_array_end, struct bison_array_it *it);
+
 NG5_EXPORT(bool) bison_int_insert_array(struct memfile *memfile, size_t nbytes)
 {
         error_if_null(memfile);
@@ -209,14 +213,17 @@ NG5_EXPORT(bool) bison_int_array_it_next(bool *is_empty_slot, bool *is_array_end
         }
 }
 
+NG5_EXPORT(bool) bison_int_array_skip_contents(bool *is_empty_slot, bool *is_array_end, struct bison_array_it *it)
+{
+        while (array_it_next_no_load(is_empty_slot, is_array_end, it))
+        { }
+        return true;
+}
+
 NG5_EXPORT(bool) bison_int_array_it_refresh(bool *is_empty_slot, bool *is_array_end, struct bison_array_it *it)
 {
         error_if_null(it);
-        bison_int_array_it_auto_close(it);
-        char c = *memfile_peek(&it->memfile, 1);
-        ng5_optional_set(is_empty_slot, c == 0)
-        ng5_optional_set(is_array_end, c == BISON_MARKER_ARRAY_END)
-        if (!*is_empty_slot && !*is_array_end) {
+        if (array_it_is_slot_occupied(is_empty_slot, is_array_end, it)) {
                 bison_int_array_it_field_type_read(it);
                 bison_int_array_it_field_data_access(it);
                 return true;
@@ -390,10 +397,7 @@ NG5_EXPORT(bool) bison_int_array_it_field_skip(struct bison_array_it *it)
         case BISON_FIELD_TYPE_ARRAY: {
                 struct bison_array_it skip_it;
                 bison_array_it_create(&skip_it, &it->memfile, &it->err, memfile_tell(&it->memfile) - sizeof(u8));
-                while (bison_array_it_next(&skip_it))
-                { }
-                char last = *memfile_read(&skip_it.memfile, sizeof(char));
-                assert(last == BISON_MARKER_ARRAY_END);
+                bison_array_it_fast_forward(&skip_it);
                 memfile_seek(&it->memfile, memfile_tell(&skip_it.memfile));
                 bison_array_it_drop(&skip_it);
         } break;
@@ -414,8 +418,6 @@ NG5_EXPORT(bool) bison_int_array_it_field_skip(struct bison_array_it *it)
         return true;
 }
 
-
-
 static void marker_insert(struct memfile *memfile, u8 marker)
 {
         /* check whether marker can be written, otherwise make space for it */
@@ -424,4 +426,29 @@ static void marker_insert(struct memfile *memfile, u8 marker)
                 memfile_move_right(memfile, sizeof(u8));
         }
         memfile_write(memfile, &marker, sizeof(u8));
+}
+
+static bool array_it_is_slot_occupied(bool *is_empty_slot, bool *is_array_end, struct bison_array_it *it)
+{
+        error_if_null(it);
+        bison_int_array_it_auto_close(it);
+        char c = *memfile_peek(&it->memfile, 1);
+        ng5_optional_set(is_empty_slot, c == 0)
+        ng5_optional_set(is_array_end, c == BISON_MARKER_ARRAY_END)
+        if (!*is_empty_slot && !*is_array_end) {
+                return true;
+        } else {
+                return false;
+        }
+}
+
+static bool array_it_next_no_load(bool *is_empty_slot, bool *is_array_end, struct bison_array_it *it)
+{
+        if (array_it_is_slot_occupied(is_empty_slot, is_array_end, it)) {
+                bison_int_array_it_field_type_read(it);
+                bison_int_array_it_field_skip(it);
+                return true;
+        } else {
+                return false;
+        }
 }
