@@ -27,6 +27,40 @@
 static void auto_close_nested_array_it(struct bison_array_it *it);
 static void auto_close_nested_column_it(struct bison_array_it *it);
 
+static inline void history_clear(struct bison_array_it *it);
+static inline void push_to_history(struct bison_array_it *it, offset_t off);
+static inline offset_t peek_from_history(struct bison_array_it *it);
+static inline offset_t prop_from_history(struct bison_array_it *it);
+static inline bool has_history(struct bison_array_it *it);
+
+#define DEFINE_IN_PLACE_UPDATE_FUNCTION(type_name, field_type)                                                         \
+NG5_EXPORT(bool) bison_array_it_update_in_place_##type_name(struct bison_array_it *it, type_name value)                \
+{                                                                                                                      \
+        offset_t datum;                                                                                                \
+        error_if_null(it);                                                                                             \
+        if (likely(it->it_field_type == field_type)) {                                                                 \
+                memfile_save_position(&it->memfile);                                                                   \
+                bison_int_array_it_offset(&datum, it);                                                                 \
+                memfile_seek(&it->memfile, datum + sizeof(u8));                                                        \
+                memfile_write(&it->memfile, &value, sizeof(type_name));                                                \
+                memfile_restore_position(&it->memfile);                                                                \
+                return true;                                                                                           \
+        } else {                                                                                                       \
+                error(&it->err, NG5_ERR_TYPEMISMATCH);                                                                 \
+                return false;                                                                                          \
+        }                                                                                                              \
+}
+
+DEFINE_IN_PLACE_UPDATE_FUNCTION(u8, BISON_FIELD_TYPE_NUMBER_U8)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(u16, BISON_FIELD_TYPE_NUMBER_U16)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(u32, BISON_FIELD_TYPE_NUMBER_U32)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(u64, BISON_FIELD_TYPE_NUMBER_U64)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(i8, BISON_FIELD_TYPE_NUMBER_I8)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(i16, BISON_FIELD_TYPE_NUMBER_I16)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(i32, BISON_FIELD_TYPE_NUMBER_I32)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(i64, BISON_FIELD_TYPE_NUMBER_I64)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(float, BISON_FIELD_TYPE_NUMBER_FLOAT)
+
 NG5_EXPORT(bool) bison_array_it_create(struct bison_array_it *it, struct memfile *memfile, struct err *err,
                                        offset_t payload_start)
 {
@@ -39,6 +73,7 @@ NG5_EXPORT(bool) bison_array_it_create(struct bison_array_it *it, struct memfile
         it->nested_array_it_accessed = false;
         error_init(&it->err);
         spin_init(&it->lock);
+        vec_create(&it->history, NULL, sizeof(offset_t), 40);
         memfile_open(&it->memfile, memfile->memblock, memfile->mode);
         memfile_seek(&it->memfile, payload_start);
 
@@ -66,15 +101,6 @@ NG5_EXPORT(bool) bison_array_it_copy(struct bison_array_it *dst, struct bison_ar
         return true;
 }
 
-NG5_EXPORT(bool) bison_array_it_clone(struct bison_array_it *dst, struct bison_array_it *src)
-{
-        error_if_null(dst);
-        error_if_null(src);
-        bison_array_it_create(dst, &src->memfile, &src->err, src->payload_start - sizeof(u8));
-        memfile_seek(&dst->memfile, memfile_tell(&src->memfile));
-        return true;
-}
-
 NG5_EXPORT(bool) bison_array_it_readonly(struct bison_array_it *it)
 {
         error_if_null(it);
@@ -85,6 +111,7 @@ NG5_EXPORT(bool) bison_array_it_readonly(struct bison_array_it *it)
 NG5_EXPORT(bool) bison_array_it_drop(struct bison_array_it *it)
 {
         bison_int_array_it_auto_close(it);
+        vec_drop(&it->history);
         free (it->nested_array_it);
         free (it->nested_column_it);
         return true;
@@ -114,13 +141,17 @@ NG5_EXPORT(bool) bison_array_it_rewind(struct bison_array_it *it)
 {
         error_if_null(it);
         error_if(it->payload_start >= memfile_size(&it->memfile), &it->err, NG5_ERR_OUTOFBOUNDS);
+        history_clear(it);
         return memfile_seek(&it->memfile, it->payload_start);
 }
 
 NG5_EXPORT(bool) bison_array_it_next(struct bison_array_it *it)
 {
+        error_if_null(it);
         bool is_empty_slot, is_array_end;
+        offset_t last_off = memfile_tell(&it->memfile);
         if (bison_int_array_it_next(&is_empty_slot, &is_array_end, it)) {
+                push_to_history(it, last_off);
                 return true;
         } else {
                 /* skip remaining zeros until end of array is reached */
@@ -136,6 +167,29 @@ NG5_EXPORT(bool) bison_array_it_next(struct bison_array_it *it)
                 bison_int_array_it_auto_close(it);
                 return false;
         }
+}
+
+NG5_EXPORT(bool) bison_array_it_prev(struct bison_array_it *it)
+{
+        error_if_null(it);
+        if (has_history(it)) {
+                offset_t prev_off = prop_from_history(it);
+                memfile_seek(&it->memfile, prev_off);
+                return bison_int_array_it_refresh(NULL, NULL, it);
+        } else {
+                return false;
+        }
+}
+
+NG5_EXPORT(bool) bison_int_array_it_offset(offset_t *off, struct bison_array_it *it)
+{
+        error_if_null(off)
+        error_if_null(it)
+        if (has_history(it)) {
+                *off = peek_from_history(it);
+                return true;
+        }
+        return false;
 }
 
 NG5_EXPORT(bool) bison_array_it_fast_forward(struct bison_array_it *it)
@@ -363,6 +417,7 @@ NG5_EXPORT(bool) bison_array_it_insert_end(struct bison_insert *inserter)
 NG5_EXPORT(bool) bison_array_it_remove(struct bison_array_it *it)
 {
         ng5_unused(it);
+        error_print(NG5_ERR_NOTIMPLEMENTED)
         return false;
 }
 
@@ -397,4 +452,36 @@ static void auto_close_nested_column_it(struct bison_array_it *it)
         if (((char *) it->nested_column_it)[0] != 0) {
                 ng5_zero_memory(it->nested_column_it, sizeof(struct bison_column_it));
         }
+}
+
+static inline void history_clear(struct bison_array_it *it)
+{
+        assert(it);
+        vec_clear(&it->history);
+}
+
+static inline void push_to_history(struct bison_array_it *it, offset_t off)
+{
+        assert(it);
+        vec_push(&it->history, &off, sizeof(offset_t));
+}
+
+static inline offset_t prop_from_history(struct bison_array_it *it)
+{
+        assert(it);
+        assert(has_history(it));
+        return *(offset_t *) vec_pop(&it->history);
+}
+
+static inline offset_t peek_from_history(struct bison_array_it *it)
+{
+        assert(it);
+        assert(has_history(it));
+        return *(offset_t *) vec_peek(&it->history);
+}
+
+static inline bool has_history(struct bison_array_it *it)
+{
+        assert(it);
+        return !vec_is_empty(&it->history);
 }

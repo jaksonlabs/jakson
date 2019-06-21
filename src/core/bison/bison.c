@@ -232,6 +232,8 @@ NG5_EXPORT(bool) bison_to_str(struct string_builder *dst, enum bison_printer_imp
         object_id_t oid;
         u64 rev;
 
+        string_builder_clear(dst);
+
         memfile_save_position(&doc->memfile);
 
         ng5_zero_memory(&p, sizeof(struct bison_printer));
@@ -270,6 +272,14 @@ NG5_EXPORT(bool) bison_to_str(struct string_builder *dst, enum bison_printer_imp
         return true;
 }
 
+NG5_EXPORT(const char *) bison_to_json(struct string_builder *dst, struct bison *doc)
+{
+        error_if_null(dst)
+        error_if_null(doc)
+        bison_to_str(dst, JSON_FORMATTER, doc);
+        return string_builder_cstr(dst);
+}
+
 NG5_EXPORT(bool) bison_find_open(struct bison_find *out, const char *dot_path, struct bison *doc)
 {
         error_if_null(out)
@@ -286,6 +296,230 @@ NG5_EXPORT(bool) bison_find_close(struct bison_find *find)
 {
         error_if_null(find)
         return bison_find_drop(find);
+}
+
+#define get_or_default(doc, path, type_name, default_val, test_fn, get_fn)                                             \
+({                                                                                                                     \
+        struct bison_find find;                                                                                        \
+        enum bison_field_type field_type;                                                                              \
+        type_name result = default_val;                                                                                \
+                                                                                                                       \
+        if (bison_find_open(&find, path, doc)) {                                                                       \
+                bison_find_result_type(&field_type, &find);                                                            \
+                if (test_fn(field_type)) {                                                                             \
+                        get_fn(&result, &find);                                                                        \
+                }                                                                                                      \
+        }                                                                                                              \
+                                                                                                                       \
+        bison_find_close(&find);                                                                                       \
+        result;                                                                                                        \
+})
+
+NG5_EXPORT(u64) bison_get_or_default_unsigned(struct bison *doc, const char *path, u64 default_val)
+{
+        return get_or_default(doc, path, u64, default_val, bison_field_type_is_unsigned_integer, bison_find_result_unsigned);
+}
+
+NG5_EXPORT(i64) bison_get_or_default_signed(struct bison *doc, const char *path, i64 default_val)
+{
+        return get_or_default(doc, path, i64, default_val, bison_field_type_is_signed_integer, bison_find_result_signed);
+}
+
+NG5_EXPORT(float) bison_get_or_default_float(struct bison *doc, const char *path, float default_val)
+{
+        return get_or_default(doc, path, float, default_val, bison_field_type_is_floating_number, bison_find_result_float);
+}
+
+NG5_EXPORT(bool) bison_get_or_default_boolean(struct bison *doc, const char *path, bool default_val)
+{
+        return get_or_default(doc, path, bool, default_val, bison_field_type_is_boolean, bison_find_result_boolean);
+}
+
+NG5_EXPORT(const char *) bison_get_or_default_string(u64 *len_out, struct bison *doc, const char *path, const char *default_val)
+{
+        struct bison_find find;
+        enum bison_field_type field_type;
+        const char *result = default_val;
+        *len_out = result ? strlen(default_val) : 0;
+
+        if (bison_find_open(&find, path, doc)) {
+                bison_find_result_type(&field_type, &find);
+                if (bison_field_type_is_string(field_type)) {
+                        result = bison_find_result_string(len_out, &find);
+                }
+        }
+
+        bison_find_close(&find);
+        return result;
+}
+
+NG5_EXPORT(struct bison_binary *) bison_get_or_default_binary(struct bison *doc, const char *path, struct bison_binary *default_val)
+{
+        struct bison_find find;
+        enum bison_field_type field_type;
+        struct bison_binary *result = default_val;
+
+        if (bison_find_open(&find, path, doc)) {
+                bison_find_result_type(&field_type, &find);
+                if (bison_field_type_is_binary(field_type)) {
+                        result = bison_find_result_binary(&find);
+                }
+        }
+
+        bison_find_close(&find);
+        return result;
+}
+
+NG5_EXPORT(struct bison_array_it *) bison_get_array_or_null(struct bison *doc, const char *path)
+{
+        struct bison_find find;
+        enum bison_field_type field_type;
+        struct bison_array_it *result = NULL;
+
+        if (bison_find_open(&find, path, doc)) {
+                bison_find_result_type(&field_type, &find);
+                if (bison_field_type_is_array(field_type)) {
+                        result = bison_find_result_array(&find);
+                }
+        }
+
+        bison_find_close(&find);
+        return result;
+}
+
+NG5_EXPORT(struct bison_column_it *) bison_get_column_or_null(struct bison *doc, const char *path)
+{
+        struct bison_find find;
+        enum bison_field_type field_type;
+        struct bison_column_it *result = NULL;
+
+        if (bison_find_open(&find, path, doc)) {
+                bison_find_result_type(&field_type, &find);
+                if (bison_field_type_is_column(field_type)) {
+                        result = bison_find_result_column(&find);
+                }
+        }
+
+        bison_find_close(&find);
+        return result;
+}
+
+NG5_EXPORT(bool) bison_path_exists(struct bison *doc, const char *path)
+{
+        struct bison_find find;
+        bool result = bison_find_open(&find, path, doc);
+        bison_find_close(&find);
+        return result;
+}
+
+NG5_EXPORT(bool) bison_path_is_array(struct bison *doc, const char *path)
+{
+        struct bison_find find;
+        enum bison_field_type field_type;
+        bool result = false;
+
+        if (bison_find_open(&find, path, doc)) {
+                bison_find_result_type(&field_type, &find);
+                result = bison_field_type_is_array(field_type);
+        }
+
+        bison_find_close(&find);
+        return result;
+}
+
+NG5_EXPORT(bool) bison_path_is_column(struct bison *doc, const char *path)
+{
+        struct bison_find find;
+        enum bison_field_type field_type;
+        bool result = false;
+
+        if (bison_find_open(&find, path, doc)) {
+                bison_find_result_type(&field_type, &find);
+                result = bison_field_type_is_column(field_type);
+        }
+
+        bison_find_close(&find);
+        return result;
+}
+
+NG5_EXPORT(bool) bison_path_is_object(struct bison *doc, const char *path)
+{
+        struct bison_find find;
+        enum bison_field_type field_type;
+        bool result = false;
+
+        if (bison_find_open(&find, path, doc)) {
+                bison_find_result_type(&field_type, &find);
+                result = bison_field_type_is_object(field_type);
+        }
+
+        bison_find_close(&find);
+        return result;
+}
+
+NG5_EXPORT(bool) bison_path_is_container(struct bison *doc, const char *path)
+{
+        return (bison_path_is_array(doc, path) || bison_path_is_column(doc, path) || bison_path_is_object(doc, path));
+}
+
+NG5_EXPORT(bool) bison_path_is_null(struct bison *doc, const char *path)
+{
+        struct bison_find find;
+        enum bison_field_type field_type;
+        bool result = false;
+
+        if (bison_find_open(&find, path, doc)) {
+                bison_find_result_type(&field_type, &find);
+                result = bison_field_type_is_null(field_type);
+        }
+
+        bison_find_close(&find);
+        return result;
+}
+
+NG5_EXPORT(bool) bison_path_is_number(struct bison *doc, const char *path)
+{
+        struct bison_find find;
+        enum bison_field_type field_type;
+        bool result = false;
+
+        if (bison_find_open(&find, path, doc)) {
+                bison_find_result_type(&field_type, &find);
+                result = bison_field_type_is_number(field_type);
+        }
+
+        bison_find_close(&find);
+        return result;
+}
+
+NG5_EXPORT(bool) bison_path_is_boolean(struct bison *doc, const char *path)
+{
+        struct bison_find find;
+        enum bison_field_type field_type;
+        bool result = false;
+
+        if (bison_find_open(&find, path, doc)) {
+                bison_find_result_type(&field_type, &find);
+                result = bison_field_type_is_boolean(field_type);
+        }
+
+        bison_find_close(&find);
+        return result;
+}
+
+NG5_EXPORT(bool) bison_path_is_string(struct bison *doc, const char *path)
+{
+        struct bison_find find;
+        enum bison_field_type field_type;
+        bool result = false;
+
+        if (bison_find_open(&find, path, doc)) {
+                bison_find_result_type(&field_type, &find);
+                result = bison_field_type_is_string(field_type);
+        }
+
+        bison_find_close(&find);
+        return result;
 }
 
 NG5_EXPORT(bool) bison_revise_try_begin(struct bison_revise *context, struct bison *revised_doc, struct bison *doc)
@@ -513,6 +747,31 @@ NG5_EXPORT(bool) bison_field_type_is_binary(enum bison_field_type type)
 NG5_EXPORT(bool) bison_field_type_is_boolean(enum bison_field_type type)
 {
         return (type == BISON_FIELD_TYPE_TRUE || type == BISON_FIELD_TYPE_FALSE);
+}
+
+NG5_EXPORT(bool) bison_field_type_is_string(enum bison_field_type type)
+{
+        return (type == BISON_FIELD_TYPE_STRING);
+}
+
+NG5_EXPORT(bool) bison_field_type_is_array(enum bison_field_type type)
+{
+        return (type == BISON_FIELD_TYPE_ARRAY);
+}
+
+NG5_EXPORT(bool) bison_field_type_is_column(enum bison_field_type type)
+{
+        return (type == BISON_FIELD_TYPE_COLUMN);
+}
+
+NG5_EXPORT(bool) bison_field_type_is_object(enum bison_field_type type)
+{
+        return (type == BISON_FIELD_TYPE_OBJECT);
+}
+
+NG5_EXPORT(bool) bison_field_type_is_null(enum bison_field_type type)
+{
+        return (type == BISON_FIELD_TYPE_NULL);
 }
 
 NG5_EXPORT(bool) bison_print(FILE *file, struct bison *doc)

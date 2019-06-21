@@ -204,9 +204,46 @@ NG5_EXPORT(bool) bison_object_id(object_id_t *oid, struct bison *doc);
 
 NG5_EXPORT(bool) bison_to_str(struct string_builder *dst, enum bison_printer_impl printer, struct bison *doc);
 
+NG5_EXPORT(const char *) bison_to_json(struct string_builder *dst, struct bison *doc);
+
 NG5_EXPORT(bool) bison_find_open(struct bison_find *out, const char *dot_path, struct bison *doc);
 
 NG5_EXPORT(bool) bison_find_close(struct bison_find *find);
+
+
+NG5_EXPORT(u64) bison_get_or_default_unsigned(struct bison *doc, const char *path, u64 default_val);
+
+NG5_EXPORT(i64) bison_get_or_default_signed(struct bison *doc, const char *path, i64 default_val);
+
+NG5_EXPORT(float) bison_get_or_default_float(struct bison *doc, const char *path, float default_val);
+
+NG5_EXPORT(bool) bison_get_or_default_boolean(struct bison *doc, const char *path, bool default_val);
+
+NG5_EXPORT(const char *) bison_get_or_default_string(u64 *len_out, struct bison *doc, const char *path, const char *default_val);
+
+NG5_EXPORT(struct bison_binary *) bison_get_or_default_binary(struct bison *doc, const char *path, struct bison_binary *default_val);
+
+NG5_EXPORT(struct bison_array_it *) bison_get_array_or_null(struct bison *doc, const char *path);
+
+NG5_EXPORT(struct bison_column_it *) bison_get_column_or_null(struct bison *doc, const char *path);
+
+NG5_EXPORT(bool) bison_path_exists(struct bison *doc, const char *path);
+
+NG5_EXPORT(bool) bison_path_is_array(struct bison *doc, const char *path);
+
+NG5_EXPORT(bool) bison_path_is_column(struct bison *doc, const char *path);
+
+NG5_EXPORT(bool) bison_path_is_object(struct bison *doc, const char *path);
+
+NG5_EXPORT(bool) bison_path_is_container(struct bison *doc, const char *path);
+
+NG5_EXPORT(bool) bison_path_is_null(struct bison *doc, const char *path);
+
+NG5_EXPORT(bool) bison_path_is_number(struct bison *doc, const char *path);
+
+NG5_EXPORT(bool) bison_path_is_boolean(struct bison *doc, const char *path);
+
+NG5_EXPORT(bool) bison_path_is_string(struct bison *doc, const char *path);
 
 /**
  * Acquires a new revision context for the bison document.
@@ -271,6 +308,16 @@ NG5_EXPORT(bool) bison_field_type_is_integer(enum bison_field_type type);
 NG5_EXPORT(bool) bison_field_type_is_binary(enum bison_field_type type);
 
 NG5_EXPORT(bool) bison_field_type_is_boolean(enum bison_field_type type);
+
+NG5_EXPORT(bool) bison_field_type_is_array(enum bison_field_type type);
+
+NG5_EXPORT(bool) bison_field_type_is_column(enum bison_field_type type);
+
+NG5_EXPORT(bool) bison_field_type_is_object(enum bison_field_type type);
+
+NG5_EXPORT(bool) bison_field_type_is_null(enum bison_field_type type);
+
+NG5_EXPORT(bool) bison_field_type_is_string(enum bison_field_type type);
 
 NG5_EXPORT(bool) bison_print(FILE *file, struct bison *doc);
 

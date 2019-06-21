@@ -23,7 +23,6 @@ static inline enum bison_path_status traverse_column(struct bison_path_evaluator
 static inline enum bison_path_status traverse_array(struct bison_path_evaluator *state, struct bison_dot_path *path, u32 current_path_pos,
         struct bison_array_it *it);
 
-
 NG5_EXPORT(bool) bison_path_evaluator_begin(struct bison_path_evaluator *eval, struct bison_dot_path *path,
         struct bison *doc)
 {
@@ -36,7 +35,20 @@ NG5_EXPORT(bool) bison_path_evaluator_begin(struct bison_path_evaluator *eval, s
         ng5_check_success(bison_iterator_open(&eval->root_it, eval->doc));
         eval->status = traverse_array(eval, path, 0, &eval->root_it);
         return true;
+}
 
+NG5_EXPORT(bool) bison_path_evaluator_begin_mutable(struct bison_path_evaluator *eval, struct bison_dot_path *path,
+        struct bison_revise *context)
+{
+        error_if_null(eval)
+        error_if_null(path)
+        error_if_null(context)
+
+        eval->doc = context->revised_doc;
+        ng5_check_success(error_init(&eval->err));
+        ng5_check_success(bison_revise_iterator_open(&eval->root_it, context));
+        eval->status = traverse_array(eval, path, 0, &eval->root_it);
+        return true;
 }
 
 NG5_EXPORT(bool) bison_path_evaluator_status(enum bison_path_status *status, struct bison_path_evaluator *state)

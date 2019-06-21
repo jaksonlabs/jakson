@@ -201,15 +201,24 @@ NG5_EXPORT(size_t) bison_int_get_type_value_size(enum bison_field_type type)
 
 NG5_EXPORT(bool) bison_int_array_it_next(bool *is_empty_slot, bool *is_array_end, struct bison_array_it *it)
 {
+        if (bison_int_array_it_refresh(is_empty_slot, is_array_end, it)) {
+                bison_int_array_it_field_skip(it);
+                return true;
+        } else {
+                return false;
+        }
+}
+
+NG5_EXPORT(bool) bison_int_array_it_refresh(bool *is_empty_slot, bool *is_array_end, struct bison_array_it *it)
+{
         error_if_null(it);
         bison_int_array_it_auto_close(it);
         char c = *memfile_peek(&it->memfile, 1);
-        *is_empty_slot = c == 0;
-        *is_array_end = c == BISON_MARKER_ARRAY_END;
+        ng5_optional_set(is_empty_slot, c == 0)
+        ng5_optional_set(is_array_end, c == BISON_MARKER_ARRAY_END)
         if (!*is_empty_slot && !*is_array_end) {
                 bison_int_array_it_field_type_read(it);
                 bison_int_array_it_field_data_access(it);
-                bison_int_array_it_field_skip(it);
                 return true;
         } else {
                 return false;

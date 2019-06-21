@@ -50,6 +50,9 @@ struct bison_path_evaluator
 NG5_EXPORT(bool) bison_path_evaluator_begin(struct bison_path_evaluator *eval, struct bison_dot_path *path,
         struct bison *doc);
 
+NG5_EXPORT(bool) bison_path_evaluator_begin_mutable(struct bison_path_evaluator *eval, struct bison_dot_path *path,
+        struct bison_revise *context);
+
 NG5_EXPORT(bool) bison_path_evaluator_status(enum bison_path_status *status, struct bison_path_evaluator *state);
 
 NG5_EXPORT(bool) bison_path_evaluator_has_result(struct bison_path_evaluator *state);

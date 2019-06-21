@@ -53,7 +53,7 @@ NG5_EXPORT(bool) bison_find_create(struct bison_find *find, struct bison_dot_pat
 NG5_EXPORT(bool) bison_find_has_result(struct bison_find *find)
 {
         error_if_null(find)
-        return find->path_evaluater.status == BISON_PATH_RESOLVED;
+        return bison_path_evaluator_has_result(&find->path_evaluater);
 }
 
 NG5_EXPORT(bool) bison_find_result_type(enum bison_field_type *type, struct bison_find *find)

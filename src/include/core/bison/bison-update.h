@@ -26,57 +26,60 @@
 #include "core/mem/file.h"
 #include "core/async/spin.h"
 #include "core/bison/bison.h"
+#include "core/bison/bison-dot.h"
+#include "core/bison/bison-path.h"
 
 NG5_BEGIN_DECL
 
-struct bison_array_it; /* forwarded from bison-array-it.h */
-struct bison_column_it; /* forwarded from bison-column-it.h */
-
 struct bison_update
 {
-        enum bison_container_type context_type;
-        union {
-                struct bison_array_it *array;
-                struct bison_column_it *column;
-        } context;
-
-        struct memfile memfile;
-        offset_t position;
+        struct bison_revise *context;
+        struct bison_path_evaluator path_evaluater;
+        struct bison_dot_path path;
         struct err err;
+        bool is_found;
 };
 
-NG5_EXPORT(bool) bison_update_true_negate(struct bison_update *updater);
+NG5_DEFINE_ERROR_GETTER(bison_update)
 
-NG5_EXPORT(bool) bison_update_false_negate(struct bison_update *updater);
+NG5_EXPORT(bool) bison_update_null(struct bison_revise *context, const char *path);
 
-NG5_EXPORT(bool) bison_update_u8(struct bison_update *updater, u8 value);
+NG5_EXPORT(bool) bison_update_true(struct bison_revise *context, const char *path);
 
-NG5_EXPORT(bool) bison_update_u16(struct bison_update *updater, u16 value);
+NG5_EXPORT(bool) bison_update_false(struct bison_revise *context, const char *path);
 
-NG5_EXPORT(bool) bison_update_u32(struct bison_update *updater, u32 value);
+NG5_EXPORT(bool) bison_update_u8(struct bison_revise *context, const char *path, u8 value);
 
-NG5_EXPORT(bool) bison_update_u64(struct bison_update *updater, u64 value);
+NG5_EXPORT(bool) bison_update_u16(struct bison_revise *context, const char *path, u16 value);
 
-NG5_EXPORT(bool) bison_update_i8(struct bison_update *updater, i8 value);
+NG5_EXPORT(bool) bison_update_u32(struct bison_revise *context, const char *path, u32 value);
 
-NG5_EXPORT(bool) bison_update_i16(struct bison_update *updater, i16 value);
+NG5_EXPORT(bool) bison_update_u64(struct bison_revise *context, const char *path, u64 value);
 
-NG5_EXPORT(bool) bison_update_i32(struct bison_update *updater, i32 value);
+NG5_EXPORT(bool) bison_update_i8(struct bison_revise *context, const char *path, i8 value);
 
-NG5_EXPORT(bool) bison_update_i64(struct bison_update *updater, i64 value);
+NG5_EXPORT(bool) bison_update_i16(struct bison_revise *context, const char *path, i16 value);
+
+NG5_EXPORT(bool) bison_update_i32(struct bison_revise *context, const char *path, i32 value);
+
+NG5_EXPORT(bool) bison_update_i64(struct bison_revise *context, const char *path, i64 value);
+
+NG5_EXPORT(bool) bison_update_float(struct bison_revise *context, const char *path, float value);
+
+
+
+
 
 NG5_EXPORT(bool) bison_update_unsigned(struct bison_update *updater, u64 value);
 
 NG5_EXPORT(bool) bison_update_signed(struct bison_update *updater, i64 value);
 
-NG5_EXPORT(bool) bison_update_float(struct bison_update *updater, float value);
+
 
 NG5_EXPORT(bool) bison_update_string(struct bison_update *updater, const char *value);
 
 NG5_EXPORT(bool) bison_update_binary(struct bison_update *updater, const void *value, size_t nbytes,
         const char *file_ext, const char *user_type);
-
-NG5_EXPORT(bool) bison_update_drop(struct bison_update *updater);
 
 NG5_END_DECL
 

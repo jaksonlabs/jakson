@@ -21,6 +21,7 @@
 
 #include "shared/common.h"
 #include "shared/error.h"
+#include "std/vec.h"
 #include "core/async/spin.h"
 #include "core/bison/bison.h"
 
@@ -36,6 +37,8 @@ struct bison_array_it
         offset_t payload_start;
         struct spinlock lock;
         struct err err;
+
+        struct vector ofType(offset_t) history;
 
         enum bison_field_type it_field_type;
 
@@ -54,6 +57,19 @@ struct bison_array_it
 
 NG5_DEFINE_ERROR_GETTER(bison_array_it);
 
+#define DECLARE_IN_PLACE_UPDATE_FUNCTION(type_name)                                                                    \
+NG5_EXPORT(bool) bison_array_it_update_in_place_##type_name(struct bison_array_it *it, type_name value);
+
+DECLARE_IN_PLACE_UPDATE_FUNCTION(u8)
+DECLARE_IN_PLACE_UPDATE_FUNCTION(u16)
+DECLARE_IN_PLACE_UPDATE_FUNCTION(u32)
+DECLARE_IN_PLACE_UPDATE_FUNCTION(u64)
+DECLARE_IN_PLACE_UPDATE_FUNCTION(i8)
+DECLARE_IN_PLACE_UPDATE_FUNCTION(i16)
+DECLARE_IN_PLACE_UPDATE_FUNCTION(i32)
+DECLARE_IN_PLACE_UPDATE_FUNCTION(i64)
+DECLARE_IN_PLACE_UPDATE_FUNCTION(float)
+
 /**
  * Constructs a new array iterator in a BISON document, where <code>payload_start</code> is a memory offset
  * that starts with the first (potentially empty) array entry. If there is some data before the array contents
@@ -61,8 +77,6 @@ NG5_DEFINE_ERROR_GETTER(bison_array_it);
  */
 NG5_EXPORT(bool) bison_array_it_create(struct bison_array_it *it, struct memfile *memfile, struct err *err,
         offset_t payload_start);
-
-NG5_EXPORT(bool) bison_array_it_clone(struct bison_array_it *dst, struct bison_array_it *src);
 
 NG5_EXPORT(bool) bison_array_it_copy(struct bison_array_it *dst, struct bison_array_it *src);
 
@@ -93,6 +107,10 @@ NG5_EXPORT(bool) bison_array_it_rewind(struct bison_array_it *it);
  * The function returns true, if the slot is non-empty, and false otherwise.
  */
 NG5_EXPORT(bool) bison_array_it_next(struct bison_array_it *it);
+
+NG5_EXPORT(bool) bison_array_it_prev(struct bison_array_it *it);
+
+NG5_EXPORT(bool) bison_int_array_it_offset(offset_t *off, struct bison_array_it *it);
 
 NG5_EXPORT(bool) bison_array_it_fast_forward(struct bison_array_it *it);
 
@@ -137,7 +155,9 @@ NG5_EXPORT(bool) bison_array_it_insert_end(struct bison_insert *inserter);
 
 NG5_EXPORT(bool) bison_array_it_remove(struct bison_array_it *it);
 
-NG5_EXPORT(bool) bison_array_it_update(struct bison_array_it *it);
+
+NG5_EXPORT(bool) bison_array_it_update_in_place_u8(struct bison_array_it *it, u8 value);
+
 
 NG5_EXPORT(bool) bison_int_array_it_auto_close(struct bison_array_it *it);
 

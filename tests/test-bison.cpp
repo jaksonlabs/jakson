@@ -5,6 +5,7 @@
 #include "core/bison/bison-array-it.h"
 #include "core/bison/bison-insert.h"
 #include "core/bison/bison-find.h"
+#include "core/bison/bison-update.h"
 
 TEST(BisonTest, CreateBison) {
         struct bison doc;
@@ -2089,6 +2090,229 @@ TEST(BisonTest, BisonFindTypes) {
         bison_drop(&doc);
 }
 
+TEST(BisonTest, BisonUpdateU8Simple)
+{
+        struct bison doc, rev_doc, rev_doc2, rev_doc3, rev_doc4;
+        struct bison_revise revise;
+        struct bison_array_it it;
+        struct bison_insert inserter;
+        struct bison_update updater;
+        struct string_builder sb;
+        const char *json;
+
+        string_builder_create(&sb);
+        bison_create(&doc);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_iterator_open(&it, &revise);
+        bison_array_it_insert_begin(&inserter, &it);
+
+        bison_insert_u8(&inserter, 'X');
+
+        bison_array_it_insert_end(&inserter);
+        bison_revise_iterator_close(&it);
+        bison_revise_end(&revise);
+
+
+        json = bison_to_json(&sb, &rev_doc);
+        printf("JSON (rev1): %s\n", json);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        bison_revise_begin(&revise, &rev_doc2, &rev_doc);
+        bison_revise_iterator_open(&it, &revise);
+        bison_array_it_insert_begin(&inserter, &it);
+
+        bison_update_u8(&revise, "0", 'Y');
+
+        bison_array_it_insert_end(&inserter);
+        bison_revise_iterator_close(&it);
+        bison_revise_end(&revise);
+
+
+        json = bison_to_json(&sb, &rev_doc2);
+        printf("JSON (rev2): %s\n", json);
+        ASSERT_TRUE(strcmp(json, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [89]}") == 0);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        bison_revise_begin(&revise, &rev_doc3, &rev_doc2);
+        bison_revise_iterator_open(&it, &revise);
+        bison_array_it_insert_begin(&inserter, &it);
+
+        bison_insert_u8(&inserter, 'A');
+        bison_insert_u8(&inserter, 'B');
+        bison_update_u8(&revise, "2", 'C');
+
+        bison_array_it_insert_end(&inserter);
+        bison_revise_iterator_close(&it);
+        bison_revise_end(&revise);
+
+
+        json = bison_to_json(&sb, &rev_doc3);
+        printf("JSON (rev3): %s\n", json);
+        ASSERT_TRUE(strcmp(json, "{\"meta\": {\"_id\": 0, \"_rev\": 3}, \"doc\": [65, 66, 67]}") == 0);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        bison_revise_begin(&revise, &rev_doc4, &rev_doc3);
+        bison_revise_iterator_open(&it, &revise);
+        bison_array_it_insert_begin(&inserter, &it);
+
+        bison_update_u8(&revise, "0", 1);
+        bison_update_u8(&revise, "1", 2);
+        bison_update_u8(&revise, "2", 3);
+
+        bison_array_it_insert_end(&inserter);
+        bison_revise_iterator_close(&it);
+        bison_revise_end(&revise);
+
+
+        json = bison_to_json(&sb, &rev_doc4);
+        printf("JSON (rev4): %s\n", json);
+        ASSERT_TRUE(strcmp(json, "{\"meta\": {\"_id\": 0, \"_rev\": 4}, \"doc\": [1, 2, 3]}") == 0);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        string_builder_drop(&sb);
+
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+        bison_drop(&rev_doc2);
+        bison_drop(&rev_doc3);
+
+}
+
+TEST(BisonTest, BisonUpdateMixedFixedTypesSimple)
+{
+        struct bison doc, rev_doc, rev_doc2, rev_doc3, rev_doc4;
+        struct bison_revise revise;
+        struct bison_array_it it;
+        struct bison_insert inserter;
+        struct bison_update updater;
+        struct string_builder sb;
+        const char *json;
+
+        string_builder_create(&sb);
+        bison_create(&doc);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_iterator_open(&it, &revise);
+        bison_array_it_insert_begin(&inserter, &it);
+
+        bison_insert_u8(&inserter, 1);
+        bison_insert_i64(&inserter, -42);
+        bison_insert_float(&inserter, 23);
+
+        bison_array_it_insert_end(&inserter);
+        bison_revise_iterator_close(&it);
+        bison_revise_end(&revise);
+
+
+        json = bison_to_json(&sb, &rev_doc);
+        printf("JSON (rev1): %s\n", json);
+        ASSERT_TRUE(strcmp(json, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [1, -42, 23.00]}") == 0);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        bison_revise_begin(&revise, &rev_doc2, &rev_doc);
+        bison_revise_iterator_open(&it, &revise);
+        bison_array_it_insert_begin(&inserter, &it);
+
+        bison_update_i64(&revise, "1", 1024);
+
+        bison_array_it_insert_end(&inserter);
+        bison_revise_iterator_close(&it);
+        bison_revise_end(&revise);
+
+
+        json = bison_to_json(&sb, &rev_doc2);
+        printf("JSON (rev2): %s\n", json);
+        ASSERT_TRUE(strcmp(json, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [1, 1024, 23.00]}") == 0);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        u64 e1 = bison_get_or_default_unsigned(&rev_doc2, "0", 0);
+        i64 e2 = bison_get_or_default_signed(&rev_doc2, "1", 0);
+        float e3 = bison_get_or_default_float(&rev_doc2, "2", NAN);
+
+        ASSERT_EQ(e1, 1);
+        ASSERT_EQ(e2, 1024);
+        ASSERT_TRUE(e3 > 22.9f && e3 < 24.0f);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        string_builder_drop(&sb);
+
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+        bison_drop(&rev_doc2);
+
+}
+//
+//TEST(BisonTest, BisonUpdateMixedFixedTypesTypeChangeSimple)
+//{
+//        struct bison doc, rev_doc, rev_doc2, rev_doc3, rev_doc4;
+//        struct bison_revise revise;
+//        struct bison_array_it it;
+//        struct bison_insert inserter;
+//        struct bison_update updater;
+//        struct string_builder sb;
+//        const char *json;
+//
+//        string_builder_create(&sb);
+//        bison_create(&doc);
+//
+//        // -------------------------------------------------------------------------------------------------------------
+//
+//        bison_revise_begin(&revise, &rev_doc, &doc);
+//        bison_revise_iterator_open(&it, &revise);
+//        bison_array_it_insert_begin(&inserter, &it);
+//
+//        bison_insert_u8(&inserter, 1);
+//        bison_insert_i64(&inserter, -42);
+//        bison_insert_float(&inserter, 23);
+//
+//        bison_array_it_insert_end(&inserter);
+//        bison_revise_iterator_close(&it);
+//        bison_revise_end(&revise);
+//
+//
+//        json = bison_to_json(&sb, &rev_doc);
+//        printf("JSON (rev1): %s\n", json);
+//        ASSERT_TRUE(strcmp(json, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [1, -42, 23.00]}") == 0);
+//
+//        // -------------------------------------------------------------------------------------------------------------
+//
+//        bison_revise_begin(&revise, &rev_doc2, &rev_doc);
+//        bison_revise_iterator_open(&it, &revise);
+//        bison_array_it_insert_begin(&inserter, &it);
+//
+//        bison_update_u32(&revise, "1", 1024);
+//
+//        bison_array_it_insert_end(&inserter);
+//        bison_revise_iterator_close(&it);
+//        bison_revise_end(&revise);
+//
+//
+//        json = bison_to_json(&sb, &rev_doc2);
+//        printf("JSON (rev2): %s\n", json);
+//        ASSERT_TRUE(strcmp(json, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [89]}") == 0);
+//
+//
+//        // -------------------------------------------------------------------------------------------------------------
+//
+//        string_builder_drop(&sb);
+//
+//        bison_drop(&doc);
+//        bison_drop(&rev_doc);
+//        bison_drop(&rev_doc2);
+//
+//}
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
