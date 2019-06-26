@@ -181,6 +181,16 @@ NG5_EXPORT(bool) bison_array_it_prev(struct bison_array_it *it)
         }
 }
 
+NG5_EXPORT(offset_t) bison_array_it_tell(struct bison_array_it *it)
+{
+        if (likely(it != NULL)) {
+                return memfile_tell(&it->memfile);
+        } else {
+                error(&it->err, NG5_ERR_NULLPTR);
+                return 0;
+        }
+}
+
 NG5_EXPORT(bool) bison_int_array_it_offset(offset_t *off, struct bison_array_it *it)
 {
         error_if_null(off)
@@ -414,11 +424,125 @@ NG5_EXPORT(bool) bison_array_it_insert_end(struct bison_insert *inserter)
         return bison_insert_drop(inserter);
 }
 
+static bool remove_field(struct memfile *memfile, struct err *err, enum bison_field_type type)
+{
+        assert(*memfile_peek(memfile, sizeof(u8)) == type);
+        offset_t start_off = memfile_tell(memfile);
+        memfile_skip(memfile, sizeof(u8));
+        size_t rm_nbytes = sizeof(u8); /* at least the type marker must be removed */
+        switch (type) {
+                case BISON_FIELD_TYPE_NULL:
+                case BISON_FIELD_TYPE_TRUE:
+                case BISON_FIELD_TYPE_FALSE:
+                        /* nothing to do */
+                        break;
+                case BISON_FIELD_TYPE_NUMBER_U8:
+                case BISON_FIELD_TYPE_NUMBER_I8:
+                        rm_nbytes += sizeof(u8);
+                        break;
+                case BISON_FIELD_TYPE_NUMBER_U16:
+                case BISON_FIELD_TYPE_NUMBER_I16:
+                        rm_nbytes += sizeof(u16);
+                        break;
+                case BISON_FIELD_TYPE_NUMBER_U32:
+                case BISON_FIELD_TYPE_NUMBER_I32:
+                        rm_nbytes += sizeof(u32);
+                        break;
+                case BISON_FIELD_TYPE_NUMBER_U64:
+                case BISON_FIELD_TYPE_NUMBER_I64:
+                        rm_nbytes += sizeof(u64);
+                        break;
+                case BISON_FIELD_TYPE_NUMBER_FLOAT:
+                        rm_nbytes += sizeof(float);
+                        break;
+                case BISON_FIELD_TYPE_STRING: {
+                        u8 len_nbytes;  /* number of bytes used to store string length */
+                        u64 str_len; /* the number of characters of the string field */
+
+                        str_len = memfile_read_varuint(&len_nbytes, memfile);
+
+                        rm_nbytes += len_nbytes + str_len;
+                } break;
+                case BISON_FIELD_TYPE_BINARY: {
+                        u8 mime_type_nbytes; /* number of bytes for mime type */
+                        u8 blob_length_nbytes; /* number of bytes to store blob length */
+                        u64 blob_nbytes; /* number of bytes to store actual blob data */
+
+                        /* get bytes used for mime type id */
+                        memfile_read_varuint(&mime_type_nbytes, memfile);
+
+                        /* get bytes used for blob length info */
+                        blob_nbytes = memfile_read_varuint(&blob_length_nbytes, memfile);
+
+                        rm_nbytes += mime_type_nbytes + blob_length_nbytes + blob_nbytes;
+                } break;
+                case BISON_FIELD_TYPE_BINARY_CUSTOM: {
+                        u8 custom_type_strlen_nbytes; /* number of bytes for type name string length info */
+                        u8 custom_type_strlen; /* number of characters to encode type name string */
+                        u8 blob_length_nbytes; /* number of bytes to store blob length */
+                        u64 blob_nbytes; /* number of bytes to store actual blob data */
+
+                        /* get bytes for custom type string len, and the actual length */
+                        custom_type_strlen = memfile_read_varuint(&custom_type_strlen_nbytes, memfile);
+
+                        /* get bytes used for blob length info */
+                        blob_nbytes = memfile_read_varuint(&blob_length_nbytes, memfile);
+
+                        rm_nbytes += custom_type_strlen_nbytes + custom_type_strlen + blob_length_nbytes + blob_nbytes;
+                } break;
+                case BISON_FIELD_TYPE_ARRAY: {
+                        struct bison_array_it it;
+
+                        offset_t begin_off = memfile_tell(memfile);
+                        bison_array_it_create(&it, memfile, err, begin_off - sizeof(u8));
+                        bison_array_it_fast_forward(&it);
+                        offset_t end_off = bison_array_it_tell(&it);
+                        bison_array_it_drop(&it);
+
+                        assert(begin_off < end_off);
+                        rm_nbytes += (end_off - begin_off);
+                } break;
+                case BISON_FIELD_TYPE_COLUMN: {
+                        struct bison_column_it it;
+
+                        offset_t begin_off = memfile_tell(memfile);
+                        bison_column_it_create(&it, memfile, err, begin_off - sizeof(u8));
+                        bison_column_it_fast_forward(&it);
+                        offset_t end_off = bison_column_it_tell(&it);
+
+                        assert(begin_off < end_off);
+                        rm_nbytes += (end_off - begin_off);
+                } break;
+                case BISON_FIELD_TYPE_OBJECT:
+                        print_error_and_die(NG5_ERR_NOTIMPLEMENTED)
+                        break;
+                default:
+                        error(err, NG5_ERR_INTERNALERR)
+                        return false;
+        }
+        memfile_seek(memfile, start_off);
+        memfile_move_left(memfile, rm_nbytes);
+
+        return true;
+}
+
 NG5_EXPORT(bool) bison_array_it_remove(struct bison_array_it *it)
 {
         ng5_unused(it);
-        error_print(NG5_ERR_NOTIMPLEMENTED)
-        return false;
+        error_if_null(it);
+        enum bison_field_type type;
+        if (bison_array_it_field_type(&type, it)) {
+                offset_t prev_off = prop_from_history(it);
+                memfile_seek(&it->memfile, prev_off);
+                if (remove_field(&it->memfile, &it->err, type)) {
+                        return bison_array_it_next(it);
+                } else {
+                        return false;
+                }
+        } else {
+                error(&it->err, NG5_ERR_ILLEGALSTATE);
+                return false;
+        }
 }
 
 NG5_EXPORT(bool) bison_array_it_update(struct bison_array_it *it)

@@ -104,6 +104,12 @@ NG5_EXPORT(bool) memfile_save_position(struct memfile *file);
 
 NG5_EXPORT(bool) memfile_restore_position(struct memfile *file);
 
+NG5_EXPORT(bool) memfile_ensure_space(struct memfile *memfile, u64 nbytes);
+
+NG5_EXPORT(u64) memfile_read_varuint(u8 *nbytes, struct memfile *memfile);
+
+NG5_EXPORT(u64) memfile_write_varuint(struct memfile *memfile, u64 value);
+
 /**
  * Moves the contents of the underlying memory block <code>nbytes</code> towards the end of the file.
  * The offset in the memory block from where this move is done is the current position stored in this file.

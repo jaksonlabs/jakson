@@ -21,6 +21,7 @@
 
 #include "shared/common.h"
 #include "shared/types.h"
+#include "core/mem/file.h"
 
 NG5_BEGIN_DECL
 

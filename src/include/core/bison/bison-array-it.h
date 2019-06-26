@@ -110,6 +110,8 @@ NG5_EXPORT(bool) bison_array_it_next(struct bison_array_it *it);
 
 NG5_EXPORT(bool) bison_array_it_prev(struct bison_array_it *it);
 
+NG5_EXPORT(offset_t) bison_array_it_tell(struct bison_array_it *it);
+
 NG5_EXPORT(bool) bison_int_array_it_offset(offset_t *off, struct bison_array_it *it);
 
 NG5_EXPORT(bool) bison_array_it_fast_forward(struct bison_array_it *it);
@@ -156,7 +158,7 @@ NG5_EXPORT(bool) bison_array_it_insert_end(struct bison_insert *inserter);
 NG5_EXPORT(bool) bison_array_it_remove(struct bison_array_it *it);
 
 
-NG5_EXPORT(bool) bison_array_it_update_in_place_u8(struct bison_array_it *it, u8 value);
+//NG5_EXPORT(bool) bison_array_it_update_in_place_u8(struct bison_array_it *it, u8 value);
 
 
 NG5_EXPORT(bool) bison_int_array_it_auto_close(struct bison_array_it *it);

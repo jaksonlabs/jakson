@@ -15,9 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <assert.h>
-
 #include "core/mem/file.h"
+#include "stdx/varuint.h"
 
 bool memfile_open(struct memfile *file, struct memblock *block, enum access_mode mode)
 {
@@ -323,6 +322,53 @@ NG5_EXPORT(bool) memfile_restore_position(struct memfile *file)
                 error(&file->err, NG5_ERR_STACK_UNDERFLOW)
                 return false;
         }
+}
+
+NG5_EXPORT(bool) memfile_ensure_space(struct memfile *memfile, u64 nbytes)
+{
+        error_if_null(memfile)
+
+        offset_t block_size;
+        memblock_size(&block_size, memfile->memblock);
+        assert(memfile->pos < block_size);
+        size_t diff = block_size - memfile->pos;
+        if (diff < nbytes) {
+                memfile_grow(memfile, nbytes - diff, true);
+        }
+
+        memfile_save_position(memfile);
+        offset_t current_off = memfile_tell(memfile);
+        for (u32 i = 0; i < nbytes; i++) {
+                char c = *memfile_read(memfile, 1);
+                if (unlikely(c != 0)) {
+                        /* not enough space; enlarge container */
+                        memfile_seek(memfile, current_off);
+                        memfile_move_right(memfile, nbytes - i);
+                        break;
+                }
+        }
+        memfile_restore_position(memfile);
+
+        return true;
+}
+
+NG5_EXPORT(u64) memfile_read_varuint(u8 *nbytes, struct memfile *memfile)
+{
+        u8 nbytes_read;
+        u64 result = varuint_read(&nbytes_read, (varuint_t) memfile_peek(memfile, sizeof(char)));
+        memfile_skip(memfile, nbytes_read);
+        ng5_optional_set(nbytes, nbytes_read);
+        return result;
+}
+
+NG5_EXPORT(u64) memfile_write_varuint(struct memfile *memfile, u64 value)
+{
+        u8 required_blocks = varuint_required_blocks(value);
+        memfile_ensure_space(memfile, required_blocks);
+        varuint_t dst = (varuint_t) memfile_peek(memfile, sizeof(char));
+        varuint_write(dst, value);
+        memfile_skip(memfile, required_blocks);
+        return required_blocks;
 }
 
 NG5_EXPORT(bool) memfile_move_right(struct memfile *file, size_t nbytes)

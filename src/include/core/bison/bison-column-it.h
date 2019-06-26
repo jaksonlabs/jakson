@@ -53,6 +53,8 @@ NG5_EXPORT(bool) bison_column_it_insert(struct bison_insert *inserter, struct bi
 
 NG5_EXPORT(bool) bison_column_it_fast_forward(struct bison_column_it *it);
 
+NG5_EXPORT(offset_t) bison_column_it_tell(struct bison_column_it *it);
+
 NG5_EXPORT(const void *) bison_column_it_values(enum bison_field_type *type, u32 *nvalues, struct bison_column_it *it);
 
 NG5_EXPORT(bool) bison_column_it_values_info(enum bison_field_type *type, u32 *nvalues, struct bison_column_it *it);

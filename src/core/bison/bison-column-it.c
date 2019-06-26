@@ -87,6 +87,16 @@ NG5_EXPORT(bool) bison_column_it_fast_forward(struct bison_column_it *it)
         return true;
 }
 
+NG5_EXPORT(offset_t) bison_column_it_tell(struct bison_column_it *it)
+{
+        if (likely(it != NULL)) {
+                return memfile_tell(&it->memfile);
+        } else {
+                error(&it->err, NG5_ERR_NULLPTR);
+                return 0;
+        }
+}
+
 NG5_EXPORT(bool) bison_column_it_values_info(enum bison_field_type *type, u32 *nvalues, struct bison_column_it *it)
 {
         error_if_null(it);
