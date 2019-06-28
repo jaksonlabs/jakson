@@ -44,7 +44,7 @@ Donations help to drive the development forward and to support maintenance. In d
 * Design, and produce merchandising for events (cups, T-Shirts,...)
 
 If you want to support [libcarbon](https://github.com/protolabs/libcarbon) with a donation, you can donate monthly via 
-[Patreon](patreon.com/pinnecke), or by a single donation via [PayPal](http://paypal.me/MarcusPinnecke).
+[Patreon](www.patreon.com/pinnecke), or by a single donation via [PayPal](http://paypal.me/MarcusPinnecke).
 
 See [DONORS](DONORS.md) for our donators list. In case of any questions, feel free to 
 [contact us](mailto:pinnecke@ovgu.de) beforehand.
