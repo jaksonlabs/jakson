@@ -155,6 +155,7 @@ bool memfile_skip(struct memfile *file, offset_t nbytes)
                         return false;
                 }
         }
+        memfile_update_last_byte(file->memblock, file->pos);
         assert(file->pos < memfile_size(file));
         return true;
 }

@@ -535,7 +535,9 @@ NG5_EXPORT(bool) bison_array_it_remove(struct bison_array_it *it)
                 offset_t prev_off = prop_from_history(it);
                 memfile_seek(&it->memfile, prev_off);
                 if (remove_field(&it->memfile, &it->err, type)) {
-                        return bison_array_it_next(it);
+                        memfile_seek(&it->memfile, prev_off);
+                        bison_int_array_it_refresh(NULL, NULL, it);
+                        return true;
                 } else {
                         return false;
                 }

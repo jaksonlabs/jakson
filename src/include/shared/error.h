@@ -121,6 +121,8 @@ NG5_BEGIN_DECL
 #define NG5_ERR_DOT_PATH_PARSERR 87         /** dot-notated path could not be parsed */
 #define NG5_ERR_ILLEGALSTATE 88             /** Illegal state */
 #define NG5_ERR_UNSUPPORTEDTYPE 89          /** Unsupported data type */
+#define NG5_ERR_FAILED 90                   /** Operation failed */
+#define NG5_ERR_CLEANUP 91                  /** Cleanup operation failed; potentially a memory leak occurred */
 
 static const char *const _err_str[] =
         {"No error", "Null pointer detected", "Function not implemented", "Index is out of bounds",
@@ -166,7 +168,8 @@ static const char *const _err_str[] =
                  "(or smaller) type than the fist value added to the container. Use '*_insert_X' instead, where X is "
                  "u8, u16,..., u32 resp. i8, i16,..., i32. ", "parsing error dot ('.') expected",
         "parsing error key name or array index expected", "parsing error: unknown token",
-        "dot-notated path could not be parsed", "Illegal state", "Unsupported data type"};
+        "dot-notated path could not be parsed", "Illegal state", "Unsupported data type", "Operation failed",
+        "Cleanup operation failed; potentially a memory leak occurred"};
 
 #define NG5_ERRSTR_ILLEGAL_CODE "illegal error code"
 
@@ -201,6 +204,17 @@ NG5_EXPORT(bool) error_print_to_stderr(const struct err *err);
 NG5_EXPORT(bool) error_print_and_abort(const struct err *err);
 
 #define error_occurred(x)                   ((x)->err.code != NG5_ERR_NOERR)
+
+#define success_else_return(expr, err, code, retval)                                                                   \
+{                                                                                                                      \
+        error_if(!(expr), err, code);                                                                                  \
+        if (!(expr)) { return retval; }                                                                                \
+}
+
+#define success_else_null(expr, err)           success_else_return(expr, err, NG5_ERR_FAILED, NULL)
+#define success_else_fail(expr, err)           success_else_return(expr, err, NG5_ERR_FAILED, false)
+
+
 
 #define error(err, code)                     error_if (true, err, code)
 #define error_no_abort(err, code)            error_if (true, err, code)

@@ -12,7 +12,7 @@ int main(void)
 
         string_builder_create(&builder);
 
-        status = bison_create(&doc);
+        status = bison_create_empty(&doc);
 
 
         status = bison_revision(&rev, &doc);

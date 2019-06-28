@@ -156,6 +156,19 @@ enum bison_printer_impl
         JSON_FORMATTER
 };
 
+struct bison_new
+{
+        struct err err;
+        struct bison original;
+        struct bison_revise revision_context;
+        struct bison_array_it *content_it;
+        struct bison_insert *inserter;
+
+        /* options shrink or compact (or both) documents, see
+         * BISON_KEEP, BISON_SHRINK, BISON_COMPACT, and BISON_OPTIMIZE  */
+        int mode;
+};
+
 enum bison_container_type { BISON_ARRAY, BISON_COLUMN };
 
 #define BISON_FIELD_TYPE_NULL_STR "null"
@@ -182,11 +195,49 @@ enum bison_container_type { BISON_ARRAY, BISON_COLUMN };
 #define BISON_MARKER_COLUMN_BEGIN '('
 #define BISON_MARKER_COLUMN_END ')'
 
-NG5_DEFINE_GET_ERROR_FUNCTION(bison, struct bison, doc);
+NG5_DEFINE_ERROR_GETTER(bison);
+NG5_DEFINE_ERROR_GETTER(bison_new);
 
-NG5_EXPORT(bool) bison_create(struct bison *doc);
+#define BISON_KEEP              0x0
+#define BISON_SHRINK            0x1
+#define BISON_COMPACT           0x2
+#define BISON_OPTIMIZE          (BISON_SHRINK | BISON_COMPACT)
 
-NG5_EXPORT(bool) bison_create_ex(struct bison *doc, u64 doc_cap_byte, u64 array_cap_byte);
+/**
+ * Constructs a new context in which a new document can be created. The parameter <b>mode</b> controls
+ * how reserved spaces should be handled after document creation is done. Set <code>mode</code> to
+ * <code>BISON_KEEP</code> for no optimization. With this mode, all capacities (i.e., additional ununsed but free
+ * space) in containers (objects, arrays, and columns) are kept and tailing free space after the document is
+ * kept, too. Use this mode to optimize for "insertion-heavy" documents since keeping all capacities lowerst the
+ * probability of reallocations and memory movements. Set <b>mode</b> to <code>BISON_COMPACT</code> if capacities in
+ * containers should be removed after creation, and <code>BISON_COMPACT</code> to remove tailing free space. Use
+ * <code>BISON_OPTIMIZE</code> to use both <code>BISON_SHRINK</code> and <code>BISON_COMPACT</code>.
+ *
+ * As a rule of thumb for <b>mode</b>. The resulting document...
+ * <ul>
+ *  <li>...will be updated heavily where updates may change the type-width of fields, will be target of many inserts
+ *  containers, use <code>BISON_KEEP</code>. The document will have a notable portion of reserved memory contained;
+ *  insertions or updates will, however, not require immediately reallocation or memory movements.</li>
+ *  <li>...will <i>not</i> be target of insertion of strings or blob fields in the near future, use
+ *      <code>BISON_SHRINK</code>. The document will not have padding reserved memory at the end, which means that
+ *      a realloction will be required once the document grows (e.g., a container must be englarged). Typically,
+ *      document growth is handled with container capacities (see <code>BISON_COMPACT</code>). However, insertions
+ *      of variable-length data (i.e., strings and blobs) may require container enlargement. In this case, having
+ *      padding reserved memory at the end of the document lowers the risk of a reallocation.</li>
+ *  <li>...will <i>not</i> not be target of insertion operations or update operations that changes a fields type-width
+ *      in the near future. In simpler words, if a document is updated and each such update keeps the (byte) size
+ *      of the field, use <code>BISON_COMPACT</code>. This mode will remove all capacities in containers.</li>
+ *  <li>...is read-mostly, or updates will not change the type or type-width of fields, use <code>BISON_OPTIMIZE</code>.
+ *      The document will have the smallest memory footprint possible.</li>
+ * </ul>
+ */
+NG5_EXPORT(struct bison_insert *) bison_create_begin(struct bison_new *context, struct bison *doc, int mode);
+
+NG5_EXPORT(bool) bison_create_end(struct bison_new *context);
+
+NG5_EXPORT(bool) bison_create_empty(struct bison *doc);
+
+NG5_EXPORT(bool) bison_create_empty_ex(struct bison *doc, u64 doc_cap_byte, u64 array_cap_byte);
 
 NG5_EXPORT(bool) bison_drop(struct bison *doc);
 

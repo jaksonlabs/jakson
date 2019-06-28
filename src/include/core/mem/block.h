@@ -59,6 +59,8 @@ NG5_EXPORT(bool) memblock_move_ex(struct memblock *block, offset_t where, size_t
 
 NG5_EXPORT(void *)memblock_move_contents_and_drop(struct memblock *block);
 
+NG5_EXPORT(bool) memfile_update_last_byte(struct memblock *block, size_t where);
+
 NG5_END_DECL
 
 #endif

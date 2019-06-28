@@ -334,13 +334,11 @@ NG5_EXPORT(bool) bison_insert_binary(struct bison_insert *inserter, const void *
 
                 /* write length of 'user_type' string with variable-length integer type */
                 u64 user_type_strlen = strlen(user_type);
-                u8 required_blocks = varuint_required_blocks(user_type_strlen);
-                memfile_ensure_space(&inserter->memfile, required_blocks + user_type_strlen);
-                varuint_t user_type_strlen_data = (varuint_t) memfile_peek(&inserter->memfile, 1);
-                varuint_write(user_type_strlen_data, user_type_strlen);
-                memfile_skip(&inserter->memfile, required_blocks);
+
+                memfile_write_varuint(&inserter->memfile, user_type_strlen);
 
                 /* write 'user_type' string */
+                memfile_ensure_space(&inserter->memfile, user_type_strlen);
                 memfile_write(&inserter->memfile, user_type, user_type_strlen);
 
                 /* write binary blob */

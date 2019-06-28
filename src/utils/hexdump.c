@@ -35,6 +35,13 @@ NG5_EXPORT(bool) hexdump(struct string_builder *dst, const void *base, u64 nbyte
                         char c = *((const char *) (base + hex_block_id + i));
                         sprintf(buffer, "%02x ", (unsigned char) c);
                         string_builder_append(dst, buffer);
+                        if (i == 7) {
+                                string_builder_append_char(dst, ' ');
+                        }
+                }
+
+                if (unlikely(step == 7)) {
+                        string_builder_append_char(dst, ' ');
                 }
 
                 if (unlikely(step < 16)) {
@@ -49,9 +56,9 @@ NG5_EXPORT(bool) hexdump(struct string_builder *dst, const void *base, u64 nbyte
                 for (u64 i = 0; i < step; i++) {
                         char c = *((const char *) (base + hex_block_id + i));
                         if (isgraph(c)) {
-                                sprintf(buffer, "%c ", c);
+                                sprintf(buffer, "%c", c);
                         } else {
-                                sprintf(buffer, ". ");
+                                sprintf(buffer, ".");
                         }
 
                         string_builder_append(dst, buffer);
@@ -59,7 +66,7 @@ NG5_EXPORT(bool) hexdump(struct string_builder *dst, const void *base, u64 nbyte
 
                 if (unlikely(step < 16)) {
                         for (u8 pad = 0; pad < 16 - step; pad++) {
-                                sprintf(buffer, "  ");
+                                sprintf(buffer, " ");
                                 string_builder_append(dst, buffer);
                         }
                 }

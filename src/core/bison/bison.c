@@ -27,6 +27,7 @@
 #include "core/bison/bison-int.h"
 #include "core/bison/bison-dot.h"
 #include "core/bison/bison-find.h"
+#include "core/bison/bison-insert.h"
 
 #define MIN_DOC_CAPACITY 16 /* minimum number of bytes required to store header and empty document array */
 
@@ -96,12 +97,60 @@ static u64 bison_header_set_oid(struct bison *doc, object_id_t oid);
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-NG5_EXPORT(bool) bison_create(struct bison *doc)
+NG5_EXPORT(struct bison_insert *) bison_create_begin(struct bison_new *context, struct bison *doc, int mode)
 {
-        return bison_create_ex(doc, 1024, 1);
+        if (likely(context != NULL && doc != NULL)) {
+                error_if (mode != BISON_KEEP && mode != BISON_SHRINK && mode != BISON_COMPACT && mode != BISON_OPTIMIZE,
+                          &doc->err, NG5_ERR_ILLEGALARG);
+
+                success_else_null(error_init(&context->err), &doc->err);
+                context->content_it = malloc(sizeof(struct bison_array_it));
+                context->inserter = malloc(sizeof(struct bison_insert));
+                context->mode = mode;
+
+                success_else_null(bison_create_empty(&context->original), &doc->err);
+                success_else_null(bison_revise_begin(&context->revision_context, doc, &context->original), &doc->err);
+                success_else_null(bison_revise_iterator_open(context->content_it, &context->revision_context), &doc->err);
+                success_else_null(bison_array_it_insert_begin(context->inserter, context->content_it), &doc->err);
+                return context->inserter;
+        } else {
+                return NULL;
+        }
 }
 
-NG5_EXPORT(bool) bison_create_ex(struct bison *doc, u64 doc_cap_byte, u64 array_cap_byte)
+NG5_EXPORT(bool) bison_create_end(struct bison_new *context)
+{
+        bool success = true;
+        if (likely(context != NULL)) {
+                success &= bison_array_it_insert_end(context->inserter);
+                success &= bison_revise_iterator_close(context->content_it);
+                if (context->mode & BISON_COMPACT) {
+                        bison_revise_pack(&context->revision_context);
+                }
+                if (context->mode & BISON_SHRINK) {
+                        bison_revise_shrink(&context->revision_context);
+                }
+                success &= bison_revise_end(&context->revision_context) != NULL;
+                free (context->content_it);
+                free (context->inserter);
+                if (unlikely(!success)) {
+                        error(&context->err, NG5_ERR_CLEANUP);
+                        return false;
+                } else {
+                        return true;
+                }
+        } else {
+                error_print(NG5_ERR_NULLPTR);
+                return false;
+        }
+}
+
+NG5_EXPORT(bool) bison_create_empty(struct bison *doc)
+{
+        return bison_create_empty_ex(doc, 1024, 1);
+}
+
+NG5_EXPORT(bool) bison_create_empty_ex(struct bison *doc, u64 doc_cap_byte, u64 array_cap_byte)
 {
         error_if_null(doc);
 
@@ -607,7 +656,6 @@ NG5_EXPORT(bool) bison_revise_pack(struct bison_revise *context)
 
 NG5_EXPORT(bool) bison_revise_shrink(struct bison_revise *context)
 {
-        bison_revise_pack(context);
         struct bison_array_it it;
         bison_revise_iterator_open(&it, context);
         bison_array_it_fast_forward(&it);
@@ -617,6 +665,10 @@ NG5_EXPORT(bool) bison_revise_shrink(struct bison_revise *context)
                 offset_t shrink_size = memfile_size(&it.memfile) - first_empty_slot;
                 memfile_cut(&it.memfile, shrink_size);
         }
+
+        offset_t size;
+        memblock_size(&size, it.memfile.memblock);
+        hexdump_print(stdout, memblock_raw_data(it.memfile.memblock), size);
 
         bison_revise_iterator_close(&it);
         return true;

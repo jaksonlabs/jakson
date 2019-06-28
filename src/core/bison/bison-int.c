@@ -322,10 +322,8 @@ NG5_EXPORT(bool) bison_int_array_it_field_skip(struct bison_array_it *it)
                 memfile_skip(&it->memfile, sizeof(float));
                 break;
         case BISON_FIELD_TYPE_STRING: {
-                u8 nbytes;
-                varuint_t varlen = (varuint_t) memfile_peek(&it->memfile, sizeof(varuint_t));
-                u64 strlen = varuint_read(&nbytes, varlen);
-                memfile_skip(&it->memfile, nbytes + strlen);
+                u64 strlen = memfile_read_varuint(NULL, &it->memfile);
+                memfile_skip(&it->memfile, strlen);
         } break;
         case BISON_FIELD_TYPE_BINARY: {
                 /* read and skip mime type with variable-length integer type */
@@ -386,9 +384,10 @@ static bool array_it_is_slot_occupied(bool *is_empty_slot, bool *is_array_end, s
         error_if_null(it);
         bison_int_array_it_auto_close(it);
         char c = *memfile_peek(&it->memfile, 1);
-        ng5_optional_set(is_empty_slot, c == 0)
-        ng5_optional_set(is_array_end, c == BISON_MARKER_ARRAY_END)
-        if (!*is_empty_slot && !*is_array_end) {
+        bool is_empty = c == 0, is_end = c == BISON_MARKER_ARRAY_END;
+        ng5_optional_set(is_empty_slot, is_empty)
+        ng5_optional_set(is_array_end, is_end)
+        if (!is_empty && !is_end) {
                 return true;
         } else {
                 return false;

@@ -16,7 +16,7 @@ TEST(BisonTest, CreateBison) {
 
         string_builder_create(&builder);
 
-        status = bison_create(&doc);
+        status = bison_create_empty(&doc);
         EXPECT_TRUE(status);
 
         bison_hexdump_print(stderr, &doc);
@@ -44,7 +44,7 @@ TEST(BisonTest, CreateBisonRevisionNumbering) {
 
         string_builder_create(&builder);
 
-        status = bison_create(&doc);
+        status = bison_create_empty(&doc);
         EXPECT_TRUE(status);
 
         status = bison_revision(&rev, &doc);
@@ -85,7 +85,7 @@ TEST(BisonTest, CreateBisonRevisionAbort) {
 
         string_builder_create(&builder);
 
-        status = bison_create(&doc);
+        status = bison_create_empty(&doc);
         EXPECT_TRUE(status);
 
         status = bison_revision(&rev, &doc);
@@ -115,7 +115,7 @@ TEST(BisonTest, CreateBisonRevisionAsyncReading) {
 
         string_builder_create(&builder);
 
-        status = bison_create(&doc);
+        status = bison_create_empty(&doc);
         EXPECT_TRUE(status);
 
         status = bison_revision(&rev, &doc);
@@ -182,7 +182,7 @@ TEST(BisonTest, CreateBisonRevisionListening) {
 
         string_builder_create(&builder);
 
-        status = bison_create(&doc);
+        status = bison_create_empty(&doc);
 
         struct bison_event_listener listener = {
                 .on_revision_begin = print_on_revision_begin,
@@ -215,7 +215,7 @@ TEST(BisonTest, ForceBisonRevisionVarLengthIncrease) {
         bool status;
         struct bison_revise revise;
 
-        bison_create(&doc);
+        bison_create_empty(&doc);
 
         for (u32 i = 0; i < 20000; i++) {
                 status = bison_revision(&old_rev, &doc);
@@ -249,7 +249,7 @@ TEST(BisonTest, ModifyBisonObjectId) {
         struct bison_revise revise;
         u64 rev;
 
-        bison_create(&doc);
+        bison_create_empty(&doc);
 
         bison_object_id(&oid, &doc);
         EXPECT_EQ(oid, 0);
@@ -278,7 +278,7 @@ TEST(BisonTest, BisonArrayIteratorOpenAfterNew) {
         struct bison_revise revise;
         struct bison_array_it it;
 
-        bison_create(&doc);
+        bison_create_empty(&doc);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_gen_object_id(NULL, &revise);
@@ -301,7 +301,7 @@ TEST(BisonTest, BisonArrayIteratorInsertNullAfterNew) {
         struct bison_array_it it;
         struct bison_insert inserter;
 
-        bison_create(&doc);
+        bison_create_empty(&doc);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -325,7 +325,7 @@ TEST(BisonTest, BisonArrayIteratorInsertMultipleLiteralsAfterNewNoOverflow) {
         struct bison_array_it it;
         struct bison_insert inserter;
 
-        bison_create(&doc);
+        bison_create_empty(&doc);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -363,7 +363,7 @@ TEST(BisonTest, BisonArrayIteratorOverwriteLiterals) {
         struct bison_array_it it;
         struct bison_insert inserter;
 
-        bison_create(&doc);
+        bison_create_empty(&doc);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -404,7 +404,7 @@ TEST(BisonTest, BisonArrayIteratorOverwriteLiteralsWithDocOverflow) {
         struct bison_array_it it;
         struct bison_insert inserter;
 
-        bison_create_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -449,7 +449,7 @@ TEST(BisonTest, BisonArrayIteratorUnsignedAndConstants) {
         struct bison_array_it it;
         struct bison_insert inserter;
 
-        bison_create_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -490,7 +490,7 @@ TEST(BisonTest, BisonArrayIteratorStrings) {
         struct bison_array_it it;
         struct bison_insert inserter;
 
-        bison_create_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -524,7 +524,7 @@ TEST(BisonTest, BisonInsertMimeTypedBlob) {
         struct bison_array_it it;
         struct bison_insert inserter;
 
-        bison_create_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -549,7 +549,7 @@ TEST(BisonTest, BisonInsertCustomTypedBlob) {
         struct bison_array_it it;
         struct bison_insert inserter;
 
-        bison_create_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -574,7 +574,7 @@ TEST(BisonTest, BisonInsertTwoMimeTypedBlob) {
         struct bison_array_it it;
         struct bison_insert inserter;
 
-        bison_create_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -602,7 +602,7 @@ TEST(BisonTest, BisonInsertMimeTypedBlobsWithOverflow) {
         struct bison_array_it it;
         struct bison_insert inserter;
 
-        bison_create_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -632,7 +632,7 @@ TEST(BisonTest, BisonInsertMixedTypedBlobsWithOverflow) {
         struct bison_array_it it;
         struct bison_insert inserter;
 
-        bison_create_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -662,7 +662,7 @@ TEST(BisonTest, BisonInsertArrayWithNoOverflow) {
         struct bison_insert inserter;
         struct bison_insert_array_state array_state;
 
-        bison_create_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -692,7 +692,7 @@ TEST(BisonTest, BisonInsertValuesIntoNestedArrayWithNoOverflow) {
         struct bison_insert inserter;
         struct bison_insert_array_state array_state;
 
-        bison_create_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -732,7 +732,7 @@ TEST(BisonTest, BisonInsert2xNestedArrayWithNoOverflow) {
         struct bison_insert inserter;
         struct bison_insert_array_state array_state_l1, array_state_l2;
 
-        bison_create_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -780,7 +780,7 @@ TEST(BisonTest, BisonInsertXxNestedArrayWithoutOverflow) {
         struct bison_insert inserter;
         struct bison_insert_array_state array_state_l1;
 
-        bison_create_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -826,7 +826,7 @@ TEST(BisonTest, BisonInsertXxNestedArrayWithOverflow) {
         struct bison_insert inserter;
         struct bison_insert_array_state array_state_l1;
 
-        bison_create_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -881,7 +881,7 @@ TEST(BisonTest, BisonInsertInsertColumnWithoutOverflow) {
         struct bison_insert inserter;
         struct bison_insert_column_state column_state;
 
-        bison_create_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -921,7 +921,7 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersWithoutOverflow) {
         struct bison_insert inserter;
         struct bison_insert_column_state column_state;
 
-        bison_create_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -959,7 +959,7 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersZeroWithoutOverflow) {
         struct bison_insert inserter;
         struct bison_insert_column_state column_state;
 
-        bison_create_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -998,7 +998,7 @@ TEST(BisonTest, BisonInsertInsertMultileTypedColumnsWithoutOverflow) {
         struct bison_insert_column_state column_state;
         struct bison_insert *ins;
 
-        bison_create_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -1101,7 +1101,7 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersZeroWithOverflow) {
         struct bison_insert inserter;
         struct bison_insert_column_state column_state;
 
-        bison_create_ex(&doc, 16, 1);
+        bison_create_empty_ex(&doc, 16, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -1142,7 +1142,7 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersWithHighOverflow) {
         struct bison_insert inserter;
         struct bison_insert_column_state column_state;
 
-        bison_create_ex(&doc, 16, 1);
+        bison_create_empty_ex(&doc, 16, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -1186,7 +1186,7 @@ TEST(BisonTest, BisonInsertInsertMultipleColumnsNumbersWithHighOverflow) {
         struct bison_insert inserter;
         struct bison_insert_column_state column_state;
 
-        bison_create_ex(&doc, 16, 1);
+        bison_create_empty_ex(&doc, 16, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -1232,7 +1232,7 @@ TEST(BisonTest, BisonInsertNullTest) {
         struct bison_insert_column_state column_state;
         struct bison_insert *ins;
 
-        bison_create_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -1335,7 +1335,7 @@ TEST(BisonTest, BisonShrinkColumnListTest) {
         struct bison_insert_column_state column_state;
         struct bison_insert *ins;
 
-        bison_create_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -1436,7 +1436,7 @@ TEST(BisonTest, BisonShrinkArrayListTest) {
         struct bison_insert_array_state array_state;
         struct bison_insert *ins;
 
-        bison_create_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -1489,7 +1489,7 @@ TEST(BisonTest, BisonShrinkNestedArrayListTest) {
         struct bison_insert_array_state array_state, nested_array_state;
         struct bison_insert *ins, *nested_ins;
 
-        bison_create_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -1565,7 +1565,7 @@ TEST(BisonTest, BisonShrinkNestedArrayListAndColumnListTest) {
         struct bison_insert_array_state array_state, nested_array_state;
         struct bison_insert *ins, *nested_ins, *column_ins;
 
-        bison_create_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, 20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -1738,7 +1738,7 @@ TEST(BisonTest, BisonFind) {
         struct bison_find finder;
         u64 result_unsigned;
         enum bison_field_type type;
-        bison_create(&doc);
+        bison_create_empty(&doc);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
 
@@ -1815,7 +1815,7 @@ TEST(BisonTest, BisonFindTypes) {
         struct bison_find finder;
         u64 result_unsigned;
         enum bison_field_type type;
-        bison_create(&doc);
+        bison_create_empty(&doc);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -2102,7 +2102,7 @@ TEST(BisonTest, BisonUpdateU8Simple)
         const char *json;
 
         string_builder_create(&sb);
-        bison_create(&doc);
+        bison_create_empty(&doc);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2197,7 +2197,7 @@ TEST(BisonTest, BisonUpdateMixedFixedTypesSimple)
         const char *json;
 
         string_builder_create(&sb);
-        bison_create(&doc);
+        bison_create_empty(&doc);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2255,44 +2255,1112 @@ TEST(BisonTest, BisonUpdateMixedFixedTypesSimple)
 
 }
 
-TEST(BisonTest, BisonRemoveConstants)
+TEST(BisonTest, BisonRemoveConstantsToEmpty)
 {
         struct bison doc, rev_doc;
+        struct bison_new context;
         struct bison_revise revise;
-        struct bison_array_it it;
-        struct bison_insert inserter;
+        struct bison_array_it rev_it;
         struct string_builder sb;
-        const char *json;
-
+        bool has_next;
         string_builder_create(&sb);
-        bison_create(&doc);
 
         // -------------------------------------------------------------------------------------------------------------
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
 
+        bison_insert_null(ins);
+
+        bison_create_end(&context);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_1 = strdup(bison_to_json(&sb, &doc));
+
+        // -------------------------------------------------------------------------------------------------------------
         bison_revise_begin(&revise, &rev_doc, &doc);
-        bison_revise_iterator_open(&it, &revise);
-        bison_array_it_insert_begin(&inserter, &it);
-
-        bison_insert_u8(&inserter, 1);
-        bison_insert_i64(&inserter, -42);
-        bison_insert_float(&inserter, 23);
-
-        bison_array_it_insert_end(&inserter);
-        bison_revise_iterator_close(&it);
+        bison_revise_iterator_open(&rev_it, &revise);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+        bison_array_it_remove(&rev_it);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_FALSE(has_next);
+        bison_revise_iterator_close(&rev_it);
         bison_revise_end(&revise);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_2 = strdup(bison_to_json(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
 
-        json = bison_to_json(&sb, &rev_doc);
-        printf("JSON (rev1): %s\n", json);
-        ASSERT_TRUE(strcmp(json, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [1, -42, 23.00]}") == 0);
+        printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
+
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [null]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": []}") == 0);
 
         string_builder_drop(&sb);
-
         bison_drop(&doc);
         bison_drop(&rev_doc);
+        free(json_1);
+        free(json_2);
 }
+
+TEST(BisonTest, BisonRemoveFirstConstants)
+{
+        struct bison doc, rev_doc;
+        struct bison_new context;
+        struct bison_revise revise;
+        struct bison_array_it rev_it;
+        struct string_builder sb;
+        bool has_next;
+        string_builder_create(&sb);
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+
+        bison_insert_true(ins);
+        bison_insert_false(ins);
+
+        bison_create_end(&context);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_1 = strdup(bison_to_json(&sb, &doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_iterator_open(&rev_it, &revise);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+        bison_array_it_remove(&rev_it);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+        bison_field_type next_type;
+        bison_array_it_field_type(&next_type, &rev_it);
+        ASSERT_EQ(next_type, BISON_FIELD_TYPE_FALSE);
+        bison_revise_iterator_close(&rev_it);
+        bison_revise_end(&revise);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_2 = strdup(bison_to_json(&sb, &rev_doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+
+
+        printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
+
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [true, false]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [false]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+        free(json_1);
+        free(json_2);
+}
+
+TEST(BisonTest, BisonRemoveLastConstants)
+{
+        struct bison doc, rev_doc;
+        struct bison_new context;
+        struct bison_revise revise;
+        struct bison_array_it rev_it;
+        struct string_builder sb;
+        bool has_next;
+        string_builder_create(&sb);
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+
+        bison_insert_true(ins);
+        bison_insert_false(ins);
+
+        bison_create_end(&context);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_1 = strdup(bison_to_json(&sb, &doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_iterator_open(&rev_it, &revise);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+        bison_array_it_remove(&rev_it);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_FALSE(has_next);
+        bison_revise_iterator_close(&rev_it);
+        bison_revise_end(&revise);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_2 = strdup(bison_to_json(&sb, &rev_doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+
+
+        printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
+
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [true, false]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [true]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+        free(json_1);
+        free(json_2);
+}
+
+TEST(BisonTest, BisonRemoveMiddleConstants)
+{
+        struct bison doc, rev_doc;
+        struct bison_new context;
+        struct bison_revise revise;
+        struct bison_array_it rev_it;
+        struct string_builder sb;
+        bool has_next;
+        string_builder_create(&sb);
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+
+        bison_insert_true(ins);
+        bison_insert_null(ins);
+        bison_insert_false(ins);
+
+        bison_create_end(&context);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_1 = strdup(bison_to_json(&sb, &doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_iterator_open(&rev_it, &revise);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+        bison_array_it_remove(&rev_it);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+        enum bison_field_type type;
+        bison_array_it_field_type(&type, &rev_it);
+        ASSERT_EQ(type, BISON_FIELD_TYPE_FALSE);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_FALSE(has_next);
+        bison_revise_iterator_close(&rev_it);
+        bison_revise_end(&revise);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_2 = strdup(bison_to_json(&sb, &rev_doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
+
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [true, null, false]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [true, false]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+        free(json_1);
+        free(json_2);
+}
+
+TEST(BisonTest, BisonRemoveNumberToEmpty)
+{
+        struct bison doc, rev_doc;
+        struct bison_new context;
+        struct bison_revise revise;
+        struct bison_array_it rev_it;
+        struct string_builder sb;
+        bool has_next;
+        string_builder_create(&sb);
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+
+        bison_insert_u8(ins, 42);
+
+        bison_create_end(&context);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_1 = strdup(bison_to_json(&sb, &doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_iterator_open(&rev_it, &revise);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+        bison_array_it_remove(&rev_it);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_FALSE(has_next);
+        bison_revise_iterator_close(&rev_it);
+        bison_revise_end(&revise);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_2 = strdup(bison_to_json(&sb, &rev_doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+
+
+        printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
+
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [42]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": []}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+        free(json_1);
+        free(json_2);
+}
+
+TEST(BisonTest, BisonRemoveFirstNumber)
+{
+        struct bison doc, rev_doc;
+        struct bison_new context;
+        struct bison_revise revise;
+        struct bison_array_it rev_it;
+        struct string_builder sb;
+        bool has_next;
+        string_builder_create(&sb);
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+
+        bison_insert_u8(ins, 42);
+        bison_insert_u32(ins, 23);
+
+        bison_create_end(&context);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_1 = strdup(bison_to_json(&sb, &doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_iterator_open(&rev_it, &revise);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+        bison_array_it_remove(&rev_it);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+        bison_field_type next_type;
+        bison_array_it_field_type(&next_type, &rev_it);
+        ASSERT_EQ(next_type, BISON_FIELD_TYPE_NUMBER_U32);
+        bison_revise_iterator_close(&rev_it);
+        bison_revise_end(&revise);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_2 = strdup(bison_to_json(&sb, &rev_doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+
+
+        printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
+
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [42, 23]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [23]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+        free(json_1);
+        free(json_2);
+}
+
+TEST(BisonTest, BisonRemoveLastNumber)
+{
+        struct bison doc, rev_doc;
+        struct bison_new context;
+        struct bison_revise revise;
+        struct bison_array_it rev_it;
+        struct string_builder sb;
+        bool has_next;
+        string_builder_create(&sb);
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+
+        bison_insert_u8(ins, 42);
+        bison_insert_u32(ins, 23);
+
+        bison_create_end(&context);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_1 = strdup(bison_to_json(&sb, &doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_iterator_open(&rev_it, &revise);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+        bison_array_it_remove(&rev_it);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_FALSE(has_next);
+        bison_revise_iterator_close(&rev_it);
+        bison_revise_end(&revise);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_2 = strdup(bison_to_json(&sb, &rev_doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+
+
+        printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
+
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [42, 23]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [42]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+        free(json_1);
+        free(json_2);
+}
+
+TEST(BisonTest, BisonRemoveMiddleNumber)
+{
+        struct bison doc, rev_doc;
+        struct bison_new context;
+        struct bison_revise revise;
+        struct bison_array_it rev_it;
+        struct string_builder sb;
+        bool has_next;
+        string_builder_create(&sb);
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+
+        bison_insert_u8(ins, 42);
+        bison_insert_u16(ins, 21);
+        bison_insert_u32(ins, 23);
+
+        bison_create_end(&context);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_1 = strdup(bison_to_json(&sb, &doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_iterator_open(&rev_it, &revise);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+        bison_array_it_remove(&rev_it);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+        enum bison_field_type type;
+        bison_array_it_field_type(&type, &rev_it);
+        ASSERT_EQ(type, BISON_FIELD_TYPE_NUMBER_U32);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_FALSE(has_next);
+        bison_revise_iterator_close(&rev_it);
+        bison_revise_end(&revise);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_2 = strdup(bison_to_json(&sb, &rev_doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
+
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [42, 21, 23]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [42, 23]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+        free(json_1);
+        free(json_2);
+}
+
+
+TEST(BisonTest, BisonRemoveStringToEmpty)
+{
+        struct bison doc, rev_doc;
+        struct bison_new context;
+        struct bison_revise revise;
+        struct bison_array_it rev_it;
+        struct string_builder sb;
+        bool has_next;
+        string_builder_create(&sb);
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+
+        bison_insert_string(ins, "Hello");
+
+        bison_create_end(&context);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_1 = strdup(bison_to_json(&sb, &doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_iterator_open(&rev_it, &revise);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+        bison_array_it_remove(&rev_it);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_FALSE(has_next);
+        bison_revise_iterator_close(&rev_it);
+        bison_revise_end(&revise);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_2 = strdup(bison_to_json(&sb, &rev_doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+
+
+        printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
+
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [\"Hello\"]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": []}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+        free(json_1);
+        free(json_2);
+}
+
+TEST(BisonTest, BisonRemoveFirstString)
+{
+        struct bison doc, rev_doc;
+        struct bison_new context;
+        struct bison_revise revise;
+        struct bison_array_it rev_it;
+        struct string_builder sb;
+        bool has_next;
+        string_builder_create(&sb);
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+
+        bison_insert_string(ins, "Hello");
+        bison_insert_string(ins, "World");
+
+        bison_create_end(&context);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_1 = strdup(bison_to_json(&sb, &doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_iterator_open(&rev_it, &revise);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+        bison_array_it_remove(&rev_it);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+        bison_field_type next_type;
+        bison_array_it_field_type(&next_type, &rev_it);
+        ASSERT_EQ(next_type, BISON_FIELD_TYPE_STRING);
+        bison_revise_iterator_close(&rev_it);
+        bison_revise_end(&revise);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_2 = strdup(bison_to_json(&sb, &rev_doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+
+
+        printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
+
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [\"Hello\", \"World\"]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [\"World\"]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+        free(json_1);
+        free(json_2);
+}
+
+TEST(BisonTest, BisonRemoveLastString)
+{
+        struct bison doc, rev_doc;
+        struct bison_new context;
+        struct bison_revise revise;
+        struct bison_array_it rev_it;
+        struct string_builder sb;
+        bool has_next;
+        string_builder_create(&sb);
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+
+        bison_insert_string(ins, "Hello");
+        bison_insert_string(ins, "World");
+
+        bison_create_end(&context);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_1 = strdup(bison_to_json(&sb, &doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_iterator_open(&rev_it, &revise);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+        bison_array_it_remove(&rev_it);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_FALSE(has_next);
+        bison_revise_iterator_close(&rev_it);
+        bison_revise_end(&revise);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_2 = strdup(bison_to_json(&sb, &rev_doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+
+
+        printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
+
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [\"Hello\", \"World\"]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [\"Hello\"]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+        free(json_1);
+        free(json_2);
+}
+
+TEST(BisonTest, BisonRemoveMiddleString)
+{
+        struct bison doc, rev_doc;
+        struct bison_new context;
+        struct bison_revise revise;
+        struct bison_array_it rev_it;
+        struct string_builder sb;
+        bool has_next;
+        string_builder_create(&sb);
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+
+        bison_insert_string(ins, "Plato");
+        bison_insert_string(ins, "Kant");
+        bison_insert_string(ins, "Nietzsche");
+
+        bison_create_end(&context);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_1 = strdup(bison_to_json(&sb, &doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_iterator_open(&rev_it, &revise);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+        bison_array_it_remove(&rev_it);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+        enum bison_field_type type;
+        bison_array_it_field_type(&type, &rev_it);
+        ASSERT_EQ(type, BISON_FIELD_TYPE_STRING);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_FALSE(has_next);
+        bison_revise_iterator_close(&rev_it);
+        bison_revise_end(&revise);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_2 = strdup(bison_to_json(&sb, &rev_doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
+
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [\"Plato\", \"Kant\", \"Nietzsche\"]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [\"Plato\", \"Nietzsche\"]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+        free(json_1);
+        free(json_2);
+}
+
+
+
+
+
+TEST(BisonTest, BisonRemoveBinaryToEmpty)
+{
+        struct bison doc, rev_doc;
+        struct bison_new context;
+        struct bison_revise revise;
+        struct bison_array_it rev_it;
+        struct string_builder sb;
+        bool has_next;
+        string_builder_create(&sb);
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+
+        const char *data = "This report, by its very length, defends itself against the risk of being read.";
+        bison_insert_binary(ins, data, strlen(data), "txt", NULL);
+
+        bison_create_end(&context);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_1 = strdup(bison_to_json(&sb, &doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_iterator_open(&rev_it, &revise);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+        bison_array_it_remove(&rev_it);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_FALSE(has_next);
+        bison_revise_iterator_close(&rev_it);
+        bison_revise_end(&revise);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_2 = strdup(bison_to_json(&sb, &rev_doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+
+
+        printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
+
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": []}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+        free(json_1);
+        free(json_2);
+}
+
+TEST(BisonTest, BisonRemoveFirstBinary)
+{
+        struct bison doc, rev_doc;
+        struct bison_new context;
+        struct bison_revise revise;
+        struct bison_array_it rev_it;
+        struct string_builder sb;
+        bool has_next;
+        string_builder_create(&sb);
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+
+        const char *data1 = "This report, by its very length, defends itself against the risk of being read.";
+        bison_insert_binary(ins, data1, strlen(data1), "txt", NULL);
+
+        const char *data2 = "{\"key\": \"value\"}";
+        bison_insert_binary(ins, data2, strlen(data2), "json", NULL);
+
+        bison_create_end(&context);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_1 = strdup(bison_to_json(&sb, &doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_iterator_open(&rev_it, &revise);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+        bison_array_it_remove(&rev_it);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+        bison_field_type next_type;
+        bison_array_it_field_type(&next_type, &rev_it);
+        ASSERT_EQ(next_type, BISON_FIELD_TYPE_BINARY);
+        bison_revise_iterator_close(&rev_it);
+        bison_revise_end(&revise);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_2 = strdup(bison_to_json(&sb, &rev_doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+
+
+        printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
+
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"application/json\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [{ \"type\": \"application/json\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+        free(json_1);
+        free(json_2);
+}
+
+TEST(BisonTest, BisonRemoveLastBinary)
+{
+        struct bison doc, rev_doc;
+        struct bison_new context;
+        struct bison_revise revise;
+        struct bison_array_it rev_it;
+        struct string_builder sb;
+        bool has_next;
+        string_builder_create(&sb);
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+
+        const char *data1 = "This report, by its very length, defends itself against the risk of being read.";
+        bison_insert_binary(ins, data1, strlen(data1), "txt", NULL);
+
+        const char *data2 = "{\"key\": \"value\"}";
+        bison_insert_binary(ins, data2, strlen(data2), "json", NULL);
+
+        bison_create_end(&context);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_1 = strdup(bison_to_json(&sb, &doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_iterator_open(&rev_it, &revise);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+        bison_array_it_remove(&rev_it);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_FALSE(has_next);
+        bison_revise_iterator_close(&rev_it);
+        bison_revise_end(&revise);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_2 = strdup(bison_to_json(&sb, &rev_doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+
+
+        printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
+
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"application/json\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+        free(json_1);
+        free(json_2);
+}
+
+TEST(BisonTest, BisonRemoveMiddleBinary)
+{
+        struct bison doc, rev_doc;
+        struct bison_new context;
+        struct bison_revise revise;
+        struct bison_array_it rev_it;
+        struct string_builder sb;
+        bool has_next;
+        string_builder_create(&sb);
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+
+        const char *data1 = "This report, by its very length, defends itself against the risk of being read.";
+        bison_insert_binary(ins, data1, strlen(data1), "txt", NULL);
+
+        const char *data2 = "{\"key\": \"value\"}";
+        bison_insert_binary(ins, data2, strlen(data2), "json", NULL);
+
+        const char *data3 = "<html><body><p>The quick brown fox jumps over the lazy dog</p></body></html>";
+        bison_insert_binary(ins, data3, strlen(data3), "html", NULL);
+
+        bison_create_end(&context);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_1 = strdup(bison_to_json(&sb, &doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_iterator_open(&rev_it, &revise);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+        bison_array_it_remove(&rev_it);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+        enum bison_field_type type;
+        bison_array_it_field_type(&type, &rev_it);
+        ASSERT_EQ(type, BISON_FIELD_TYPE_BINARY);
+        has_next = bison_array_it_next(&rev_it);
+        ASSERT_FALSE(has_next);
+        bison_revise_iterator_close(&rev_it);
+        bison_revise_end(&revise);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_2 = strdup(bison_to_json(&sb, &rev_doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
+
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"application/json\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }, { \"type\": \"text/html\", \"encoding\": \"base64\", \"binary-string\": \"PGh0bWw+PGJvZHk+PHA+VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wcyBvdmVyIHRoZSBsYXp5IGRvZzwvcD48L2JvZHk+PC9odG1sPgAA\" }]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"text/html\", \"encoding\": \"base64\", \"binary-string\": \"PGh0bWw+PGJvZHk+PHA+VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wcyBvdmVyIHRoZSBsYXp5IGRvZzwvcD48L2JvZHk+PC9odG1sPgAA\" }]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+        free(json_1);
+        free(json_2);
+}
+
+
+
+
+
+
+
+
+
+//
+//
+//TEST(BisonTest, BisonRemoveCustomBinaryToEmpty)
+//{
+//        struct bison doc, rev_doc;
+//        struct bison_new context;
+//        struct bison_revise revise;
+//        struct bison_array_it rev_it;
+//        struct string_builder sb;
+//        bool has_next;
+//        string_builder_create(&sb);
+//
+//        // -------------------------------------------------------------------------------------------------------------
+//        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+//
+//        const char *data = "ABC";
+//        bison_insert_binary(ins, data, strlen(data), NULL, "123");
+//
+//        bison_create_end(&context);
+//        // -------------------------------------------------------------------------------------------------------------
+//
+//        char *json_1 = strdup(bison_to_json(&sb, &doc));
+//
+//        bison_hexdump_print(stdout, &doc);
+//
+//        // -------------------------------------------------------------------------------------------------------------
+//        bison_revise_begin(&revise, &rev_doc, &doc);
+//        bison_revise_iterator_open(&rev_it, &revise);
+//        has_next = bison_array_it_next(&rev_it);
+//        ASSERT_TRUE(has_next);
+//        bison_array_it_remove(&rev_it);
+//        has_next = bison_array_it_next(&rev_it);
+//        ASSERT_FALSE(has_next);
+//        bison_revise_iterator_close(&rev_it);
+//        bison_revise_end(&revise);
+//        // -------------------------------------------------------------------------------------------------------------
+//
+//        char *json_2 = strdup(bison_to_json(&sb, &rev_doc));
+//
+//        // -------------------------------------------------------------------------------------------------------------
+//
+//
+//        printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
+//
+//        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }]}") == 0);
+//        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": []}") == 0);
+//
+//        string_builder_drop(&sb);
+//        bison_drop(&doc);
+//        bison_drop(&rev_doc);
+//        free(json_1);
+//        free(json_2);
+//}
+//
+//TEST(BisonTest, BisonRemoveFirstCustomBinary)
+//{
+//        struct bison doc, rev_doc;
+//        struct bison_new context;
+//        struct bison_revise revise;
+//        struct bison_array_it rev_it;
+//        struct string_builder sb;
+//        bool has_next;
+//        string_builder_create(&sb);
+//
+//        // -------------------------------------------------------------------------------------------------------------
+//        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+//
+//        const char *data1 = "This report, by its very length, defends itself against the risk of being read.";
+//        bison_insert_binary(ins, data1, strlen(data1), NULL, "my-fancy-format");
+//
+//        const char *data2 = "{\"key\": \"value\"}";
+//        bison_insert_binary(ins, data2, strlen(data2), NULL, "application/something-json-like");
+//
+//        bison_create_end(&context);
+//        // -------------------------------------------------------------------------------------------------------------
+//
+//        char *json_1 = strdup(bison_to_json(&sb, &doc));
+//
+//        // -------------------------------------------------------------------------------------------------------------
+//        bison_revise_begin(&revise, &rev_doc, &doc);
+//        bison_revise_iterator_open(&rev_it, &revise);
+//        has_next = bison_array_it_next(&rev_it);
+//        ASSERT_TRUE(has_next);
+//        bison_array_it_remove(&rev_it);
+//        has_next = bison_array_it_next(&rev_it);
+//        ASSERT_TRUE(has_next);
+//        bison_field_type next_type;
+//        bison_array_it_field_type(&next_type, &rev_it);
+//        ASSERT_EQ(next_type, BISON_FIELD_TYPE_BINARY);
+//        bison_revise_iterator_close(&rev_it);
+//        bison_revise_end(&revise);
+//        // -------------------------------------------------------------------------------------------------------------
+//
+//        char *json_2 = strdup(bison_to_json(&sb, &rev_doc));
+//
+//        // -------------------------------------------------------------------------------------------------------------
+//
+//
+//        printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
+//
+//        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"application/json\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }]}") == 0);
+//        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [{ \"type\": \"application/json\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }]}") == 0);
+//
+//        string_builder_drop(&sb);
+//        bison_drop(&doc);
+//        bison_drop(&rev_doc);
+//        free(json_1);
+//        free(json_2);
+//}
+//
+//TEST(BisonTest, BisonRemoveLastCustomBinary)
+//{
+//        struct bison doc, rev_doc;
+//        struct bison_new context;
+//        struct bison_revise revise;
+//        struct bison_array_it rev_it;
+//        struct string_builder sb;
+//        bool has_next;
+//        string_builder_create(&sb);
+//
+//        // -------------------------------------------------------------------------------------------------------------
+//        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+//
+//        const char *data1 = "This report, by its very length, defends itself against the risk of being read.";
+//        bison_insert_binary(ins, data1, strlen(data1), NULL, "my-fancy-format");
+//
+//        const char *data2 = "{\"key\": \"value\"}";
+//        bison_insert_binary(ins, data2, strlen(data2), "application/something-json-like", NULL);
+//
+//        bison_create_end(&context);
+//        // -------------------------------------------------------------------------------------------------------------
+//
+//        char *json_1 = strdup(bison_to_json(&sb, &doc));
+//
+//        // -------------------------------------------------------------------------------------------------------------
+//        bison_revise_begin(&revise, &rev_doc, &doc);
+//        bison_revise_iterator_open(&rev_it, &revise);
+//        has_next = bison_array_it_next(&rev_it);
+//        ASSERT_TRUE(has_next);
+//        has_next = bison_array_it_next(&rev_it);
+//        ASSERT_TRUE(has_next);
+//        bison_array_it_remove(&rev_it);
+//        has_next = bison_array_it_next(&rev_it);
+//        ASSERT_FALSE(has_next);
+//        bison_revise_iterator_close(&rev_it);
+//        bison_revise_end(&revise);
+//        // -------------------------------------------------------------------------------------------------------------
+//
+//        char *json_2 = strdup(bison_to_json(&sb, &rev_doc));
+//
+//        // -------------------------------------------------------------------------------------------------------------
+//
+//
+//        printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
+//
+//        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"application/json\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }]}") == 0);
+//        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }]}") == 0);
+//
+//        string_builder_drop(&sb);
+//        bison_drop(&doc);
+//        bison_drop(&rev_doc);
+//        free(json_1);
+//        free(json_2);
+//}
+//
+//TEST(BisonTest, BisonRemoveMiddleCustomBinary)
+//{
+//        struct bison doc, rev_doc;
+//        struct bison_new context;
+//        struct bison_revise revise;
+//        struct bison_array_it rev_it;
+//        struct string_builder sb;
+//        bool has_next;
+//        string_builder_create(&sb);
+//
+//        // -------------------------------------------------------------------------------------------------------------
+//        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+//
+//        const char *data1 = "This report, by its very length, defends itself against the risk of being read.";
+//        bison_insert_binary(ins, data1, strlen(data1), NULL, "my-fancy-format");
+//
+//        const char *data2 = "{\"key\": \"value\"}";
+//        bison_insert_binary(ins, data2, strlen(data2), NULL, "application/something-json-like");
+//
+//        const char *data3 = "<html><body><p>The quick brown fox jumps over the lazy dog</p></body></html>";
+//        bison_insert_binary(ins, data3, strlen(data3), NULL, "my-other-nonstandard-format");
+//
+//        bison_create_end(&context);
+//        // -------------------------------------------------------------------------------------------------------------
+//
+//        char *json_1 = strdup(bison_to_json(&sb, &doc));
+//
+//        // -------------------------------------------------------------------------------------------------------------
+//        bison_revise_begin(&revise, &rev_doc, &doc);
+//        bison_revise_iterator_open(&rev_it, &revise);
+//        has_next = bison_array_it_next(&rev_it);
+//        ASSERT_TRUE(has_next);
+//        has_next = bison_array_it_next(&rev_it);
+//        ASSERT_TRUE(has_next);
+//        bison_array_it_remove(&rev_it);
+//        has_next = bison_array_it_next(&rev_it);
+//        ASSERT_TRUE(has_next);
+//        enum bison_field_type type;
+//        bison_array_it_field_type(&type, &rev_it);
+//        ASSERT_EQ(type, BISON_FIELD_TYPE_BINARY);
+//        has_next = bison_array_it_next(&rev_it);
+//        ASSERT_FALSE(has_next);
+//        bison_revise_iterator_close(&rev_it);
+//        bison_revise_end(&revise);
+//        // -------------------------------------------------------------------------------------------------------------
+//
+//        char *json_2 = strdup(bison_to_json(&sb, &rev_doc));
+//
+//        // -------------------------------------------------------------------------------------------------------------
+//
+//        printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
+//
+//        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"application/json\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }, { \"type\": \"text/html\", \"encoding\": \"base64\", \"binary-string\": \"PGh0bWw+PGJvZHk+PHA+VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wcyBvdmVyIHRoZSBsYXp5IGRvZzwvcD48L2JvZHk+PC9odG1sPgAA\" }]}") == 0);
+//        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"text/html\", \"encoding\": \"base64\", \"binary-string\": \"PGh0bWw+PGJvZHk+PHA+VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wcyBvdmVyIHRoZSBsYXp5IGRvZzwvcD48L2JvZHk+PC9odG1sPgAA\" }]}") == 0);
+//
+//        string_builder_drop(&sb);
+//        bison_drop(&doc);
+//        bison_drop(&rev_doc);
+//        free(json_1);
+//        free(json_2);
+//}
+//
+//
+//
+//
+
+
+
+
+
+
+
 //
 //TEST(BisonTest, BisonRemoveNumbers)
 //{
@@ -2468,6 +3536,31 @@ TEST(BisonTest, BisonRemoveConstants)
 //        bison_drop(&rev_doc2);
 //
 //}
+
+
+TEST(BisonTest, BisonShrinkIssueFix)
+{
+        struct bison doc;
+        struct bison_new context;
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_OPTIMIZE);
+
+        bison_insert_string(ins, "Hello");
+        bison_insert_string(ins, "World");
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [\"Hello\", \"World\"]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);

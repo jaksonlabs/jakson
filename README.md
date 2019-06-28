@@ -1,7 +1,10 @@
 # libcarbon
 
 This is [libcarbon](https://github.com/protolabs/libcarbon), a C library for creating, modifying and querying 
-Columnar Binary-Encoded JSON (CARBON) files. The CARBON format is designed and optimized for analytics on document collections.
+Columnar Binary-Encoded JSON (CARBON) files. 
+
+The latest Carbon specification document is available at [carbonspec.org](http://carbonspec.org), and the sources are located in [book/spec/latest](book/spec/latest), see [book instructions](book/README.md).
+
 
 The documentation is available at [CodeDocs](https://codedocs.xyz/protolabs/libcarbon/). If you have any issues, please 
 use our [issue tracker](https://github.com/protolabs/libcarbon/issues).
@@ -16,8 +19,9 @@ The latest release can always be found in `master` branch in the
 
 ## Examples and Usage
 
-Example source code is located in the [examples](examples) directory, and [tests](tests). This library shipped with a 
-tool to work on CARBON files, see [carbon-tool](tools/carbon/). 
+Example source code is located in the [examples](examples) directory, and [tests](tests). The latest additional reference document on the library usage is located in [book/libcarbon/latest](book/libcarbon/latest), see [book instructions](book/README.md).
+
+This library shipped with a tool to work on CARBON files, see [carbon-tool](tools/carbon/). 
 
 ## License
 

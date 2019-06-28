@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 Marcus Pinnecke
+ * Copyright 2019 Marcus Pinnecke
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -15,12 +15,33 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "ng5/core/carbon.h"
+#include <core/bison/bison.h>
+#include <core/bison/bison-insert.h>
+
 
 int main(void) {
-    struct err err;
-    error_init(&err);
-    error_with_details(&err, NG5_ERR_NOTFOUND, "some details");
-    error_print(&err);
-    return EXIT_FAILURE;
+
+        struct bison doc;
+        struct bison_new context;
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_OPTIMIZE);
+
+        bison_insert_string(ins, "Hello");
+        bison_insert_string(ins, "World");
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        printf("json formatted: '%s'\n", bison_to_json(&sb, &doc));
+        bison_hexdump_print(stdout, &doc);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+
+        return EXIT_SUCCESS;
 }

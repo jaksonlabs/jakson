@@ -19,7 +19,7 @@
 
 struct memblock {
         offset_t blockLength;
-        offset_t lastByte;
+        offset_t last_byte;
         void *base;
         struct err err;
 };
@@ -31,7 +31,7 @@ bool memblock_create(struct memblock **block, size_t size)
         struct memblock *result = malloc(sizeof(struct memblock));
         error_if_null(result)
         result->blockLength = size;
-        result->lastByte = 0;
+        result->last_byte = 0;
         result->base = malloc(size);
         error_init(&result->err);
         *block = result;
@@ -108,7 +108,7 @@ bool memblock_write(struct memblock *block, offset_t position, const char *data,
         error_if_null(data)
         if (likely(position + nbytes < block->blockLength)) {
                 memcpy(block->base + position, data, nbytes);
-                block->lastByte = ng5_max(block->lastByte, position + nbytes);
+                block->last_byte = ng5_max(block->last_byte, position + nbytes);
                 return true;
         } else {
                 return false;
@@ -124,14 +124,14 @@ bool memblock_cpy(struct memblock **dst, struct memblock *src)
         assert((*dst)->base);
         assert((*dst)->blockLength == src->blockLength);
         assert(memcmp((*dst)->base, src->base, src->blockLength) == 0);
-        (*dst)->lastByte = src->lastByte;
+        (*dst)->last_byte = src->last_byte;
         return true;
 }
 
 bool memblock_shrink(struct memblock *block)
 {
         error_if_null(block)
-        block->blockLength = block->lastByte;
+        block->blockLength = block->last_byte;
         block->base = realloc(block->base, block->blockLength);
         return true;
 }
@@ -148,8 +148,8 @@ NG5_EXPORT(bool) memblock_move_left(struct memblock *block, offset_t where, size
         size_t remainder = block->blockLength - where - nbytes;
         if (remainder > 0) {
                 memmove(block->base + where, block->base + where + nbytes, remainder);
-                assert(block->lastByte >= nbytes);
-                block->lastByte -= nbytes;
+                assert(block->last_byte >= nbytes);
+                block->last_byte -= nbytes;
                 ng5_zero_memory(block->base + block->blockLength - nbytes, nbytes)
                 return true;
         } else {
@@ -164,8 +164,8 @@ NG5_EXPORT(bool) memblock_move_ex(struct memblock *block, offset_t where, size_t
         error_if(nbytes == 0, &block->err, NG5_ERR_ILLEGALARG);
 
         /* resize (if needed) */
-        if (block->lastByte + nbytes > block->blockLength) {
-                size_t new_length = (block->lastByte + nbytes);
+        if (block->last_byte + nbytes > block->blockLength) {
+                size_t new_length = (block->last_byte + nbytes);
                 block->base = realloc(block->base, new_length);
                 error_if(!block->base, &block->err, NG5_ERR_REALLOCERR);
                 if (zero_out) {
@@ -174,11 +174,11 @@ NG5_EXPORT(bool) memblock_move_ex(struct memblock *block, offset_t where, size_t
                 block->blockLength = new_length;
         }
 
-        memmove(block->base + where + nbytes, block->base + where, block->lastByte - where);
+        memmove(block->base + where + nbytes, block->base + where, block->last_byte - where);
         if (zero_out) {
                 ng5_zero_memory(block->base + where, nbytes);
         }
-        block->lastByte += nbytes;
+        block->last_byte += nbytes;
         return true;
 }
 
@@ -188,4 +188,12 @@ void *memblock_move_contents_and_drop(struct memblock *block)
         block->base = NULL;
         free(block);
         return result;
+}
+
+NG5_EXPORT(bool) memfile_update_last_byte(struct memblock *block, size_t where)
+{
+        error_if_null(block);
+        error_if(where >= block->blockLength, &block->err, NG5_ERR_ILLEGALSTATE);
+        block->last_byte = ng5_max(block->last_byte, where);
+        return true;
 }

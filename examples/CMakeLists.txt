@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
-project(carbon-examples C)
+project(examples CXX)
 
-add_executable(examples-error examples-error.c ${LIB_SOURCES})
+ADD_CUSTOM_TARGET(examples)
 
-set_target_properties(examples-error PROPERTIES EXCLUDE_FROM_ALL TRUE)
+add_subdirectory("${CMAKE_SOURCE_DIR}/examples/bison")
