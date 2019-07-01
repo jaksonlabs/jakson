@@ -167,16 +167,16 @@ static void result_from_array(struct bison_find *find, struct bison_array_it *it
                 case BISON_FIELD_TYPE_NUMBER_U16:
                 case BISON_FIELD_TYPE_NUMBER_U32:
                 case BISON_FIELD_TYPE_NUMBER_U64:
-                        bison_array_it_unsigned_value(&find->number_is_nulled, &find->value.unsigned_number, it);
+                        bison_array_it_unsigned_value(&find->value_is_nulled, &find->value.unsigned_number, it);
                         break;
                 case BISON_FIELD_TYPE_NUMBER_I8:
                 case BISON_FIELD_TYPE_NUMBER_I16:
                 case BISON_FIELD_TYPE_NUMBER_I32:
                 case BISON_FIELD_TYPE_NUMBER_I64:
-                        bison_array_it_signed_value(&find->number_is_nulled, &find->value.signed_number, it);
+                        bison_array_it_signed_value(&find->value_is_nulled, &find->value.signed_number, it);
                         break;
                 case BISON_FIELD_TYPE_NUMBER_FLOAT:
-                        bison_array_it_float_value(&find->number_is_nulled, &find->value.float_number, it);
+                        bison_array_it_float_value(&find->value_is_nulled, &find->value.float_number, it);
                         break;
                 case BISON_FIELD_TYPE_BINARY:
                 case BISON_FIELD_TYPE_BINARY_CUSTOM:

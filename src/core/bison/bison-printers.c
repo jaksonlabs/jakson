@@ -50,8 +50,8 @@ static void json_formatter_bison_array_begin(struct bison_printer *self, struct 
 static void json_formatter_bison_array_end(struct bison_printer *self, struct string_builder *builder);
 
 static void json_formatter_bison_null(struct bison_printer *self, struct string_builder *builder);
-static void json_formatter_bison_true(struct bison_printer *self, struct string_builder *builder);
-static void json_formatter_bison_false(struct bison_printer *self, struct string_builder *builder);
+static void json_formatter_bison_true(struct bison_printer *self, bool is_null, struct string_builder *builder);
+static void json_formatter_bison_false(struct bison_printer *self, bool is_null, struct string_builder *builder);
 
 static void json_formatter_bison_signed(struct bison_printer *self, struct string_builder *builder, const i64 *value);
 static void json_formatter_bison_unsigned(struct bison_printer *self, struct string_builder *builder, const u64 *value);
@@ -213,16 +213,16 @@ static void json_formatter_bison_null(struct bison_printer *self, struct string_
         string_builder_append(builder, "null");
 }
 
-static void json_formatter_bison_true(struct bison_printer *self, struct string_builder *builder)
+static void json_formatter_bison_true(struct bison_printer *self, bool is_null, struct string_builder *builder)
 {
         unused(self);
-        string_builder_append(builder, "true");
+        string_builder_append(builder, is_null ? "null" : "true");
 }
 
-static void json_formatter_bison_false(struct bison_printer *self, struct string_builder *builder)
+static void json_formatter_bison_false(struct bison_printer *self, bool is_null, struct string_builder *builder)
 {
         unused(self);
-        string_builder_append(builder, "false");
+        string_builder_append(builder, is_null ? "null" : "false");
 }
 
 static void json_formatter_bison_signed(struct bison_printer *self, struct string_builder *builder, const i64 *value)

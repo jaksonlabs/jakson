@@ -217,10 +217,77 @@ NG5_EXPORT(bool) bison_column_it_remove(struct bison_column_it *it, u32 pos)
 
 NG5_EXPORT(bool) bison_column_it_update_set_null(struct bison_column_it *it, u32 pos)
 {
-        unused(it)
-        unused(pos)
-        error_print(NG5_ERR_NOTIMPLEMENTED); // TODO: implement
-        return false;
+        error_if_null(it)
+        error_if(pos >= it->column_num_elements, &it->err, NG5_ERR_OUTOFBOUNDS)
+
+        memfile_save_position(&it->memfile);
+
+        memfile_seek(&it->memfile, it->payload_start + pos * bison_int_get_type_value_size(it->type));
+
+        switch (it->type) {
+                case BISON_FIELD_TYPE_NULL:
+                        /* nothing to do */
+                        break;
+                case BISON_FIELD_TYPE_TRUE:
+                        memfile_write(&it->memfile, BOOLEAN_NULL, sizeof(u8));
+                        break;
+                case BISON_FIELD_TYPE_FALSE:
+                        memfile_write(&it->memfile, BOOLEAN_NULL, sizeof(u8));
+                        break;
+                case BISON_FIELD_TYPE_NUMBER_U8: {
+                        u8 null_value = U8_NULL;
+                        memfile_write(&it->memfile, &null_value, sizeof(u8));
+                } break;
+                case BISON_FIELD_TYPE_NUMBER_U16: {
+                        u16 null_value = U16_NULL;
+                        memfile_write(&it->memfile, &null_value, sizeof(u16));
+                } break;
+                case BISON_FIELD_TYPE_NUMBER_U32: {
+                        u32 null_value = U32_NULL;
+                        memfile_write(&it->memfile, &null_value, sizeof(u32));
+                } break;
+                case BISON_FIELD_TYPE_NUMBER_U64: {
+                        u64 null_value = U64_NULL;
+                        memfile_write(&it->memfile, &null_value, sizeof(u64));
+                } break;
+                case BISON_FIELD_TYPE_NUMBER_I8: {
+                        i8 null_value = I8_NULL;
+                        memfile_write(&it->memfile, &null_value, sizeof(i8));
+                } break;
+                case BISON_FIELD_TYPE_NUMBER_I16: {
+                        i16 null_value = I16_NULL;
+                        memfile_write(&it->memfile, &null_value, sizeof(i16));
+                } break;
+                case BISON_FIELD_TYPE_NUMBER_I32: {
+                        i32 null_value = I32_NULL;
+                        memfile_write(&it->memfile, &null_value, sizeof(i32));
+                } break;
+                case BISON_FIELD_TYPE_NUMBER_I64: {
+                        i64 null_value = I64_NULL;
+                        memfile_write(&it->memfile, &null_value, sizeof(i64));
+                } break;
+                case BISON_FIELD_TYPE_NUMBER_FLOAT: {
+                        float null_value = FLOAT_NULL;
+                        memfile_write(&it->memfile, &null_value, sizeof(float));
+                } break;
+                case BISON_FIELD_TYPE_OBJECT:
+                case BISON_FIELD_TYPE_ARRAY:
+                case BISON_FIELD_TYPE_COLUMN:
+                case BISON_FIELD_TYPE_STRING:
+                case BISON_FIELD_TYPE_BINARY:
+                case BISON_FIELD_TYPE_BINARY_CUSTOM:
+                        memfile_restore_position(&it->memfile);
+                        error(&it->err, NG5_ERR_UNSUPPCONTAINER)
+                        return false;
+                default:
+                        memfile_restore_position(&it->memfile);
+                        error(&it->err, NG5_ERR_INTERNALERR);
+                        return false;
+        }
+
+        memfile_restore_position(&it->memfile);
+
+        return true;
 }
 
 NG5_EXPORT(bool) bison_column_it_update_set_true(struct bison_column_it *it, u32 pos)

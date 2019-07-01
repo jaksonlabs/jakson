@@ -40,6 +40,7 @@ typedef int32_t i32;
 
 typedef int64_t i64;
 
+#define BOOLEAN_NULL    0
 #define U8_NULL         UINT8_MAX
 #define U16_NULL        UINT16_MAX
 #define U32_NULL        UINT32_MAX
@@ -50,6 +51,7 @@ typedef int64_t i64;
 #define I64_NULL        INT64_MAX
 #define FLOAT_NULL      NAN
 
+#define is_null_boolean(x)      (x == BOOLEAN_NULL)
 #define is_null_u8(x)           (x == U8_NULL)
 #define is_null_u16(x)          (x == U16_NULL)
 #define is_null_u32(x)          (x == U32_NULL)

@@ -35,7 +35,7 @@ struct bison_find
         struct err err;
         struct bison_path_evaluator path_evaluater;
 
-        bool number_is_nulled;
+        bool value_is_nulled;
 
         union {
                 struct bison_array_it *array_it;

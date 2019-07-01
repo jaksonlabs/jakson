@@ -70,8 +70,8 @@ static bool printer_bison_payload_end(struct bison_printer *printer, struct stri
 static bool printer_bison_array_begin(struct bison_printer *printer, struct string_builder *builder);
 static bool printer_bison_array_end(struct bison_printer *printer, struct string_builder *builder);
 static bool printer_bison_null(struct bison_printer *printer, struct string_builder *builder);
-static bool printer_bison_true(struct bison_printer *printer, struct string_builder *builder);
-static bool printer_bison_false(struct bison_printer *printer, struct string_builder *builder);
+static bool printer_bison_true(struct bison_printer *printer, bool is_null, struct string_builder *builder);
+static bool printer_bison_false(struct bison_printer *printer, bool is_null, struct string_builder *builder);
 static bool printer_bison_comma(struct bison_printer *printer, struct string_builder *builder);
 static bool printer_bison_signed(struct bison_printer *printer, struct string_builder *builder, const i64 *value);
 static bool printer_bison_unsigned(struct bison_printer *printer, struct string_builder *builder, const u64 *value);
@@ -1253,17 +1253,17 @@ static bool printer_bison_null(struct bison_printer *printer, struct string_buil
         return true;
 }
 
-static bool printer_bison_true(struct bison_printer *printer, struct string_builder *builder)
+static bool printer_bison_true(struct bison_printer *printer, bool is_null, struct string_builder *builder)
 {
         error_if_null(printer->print_bison_true);
-        printer->print_bison_true(printer, builder);
+        printer->print_bison_true(printer, is_null, builder);
         return true;
 }
 
-static bool printer_bison_false(struct bison_printer *printer, struct string_builder *builder)
+static bool printer_bison_false(struct bison_printer *printer, bool is_null, struct string_builder *builder)
 {
         error_if_null(printer->print_bison_false);
-        printer->print_bison_false(printer, builder);
+        printer->print_bison_false(printer, is_null, builder);
         return true;
 }
 
@@ -1329,10 +1329,14 @@ static bool print_array(struct bison_array_it *it, struct bison_printer *printer
                         printer_bison_null(printer, builder);
                         break;
                 case BISON_FIELD_TYPE_TRUE:
-                        printer_bison_true(printer, builder);
+                        /* in an array, there is no TRUE constant that is set to NULL because it will be replaced with
+                         * a constant NULL. In columns, there might be a NULL-encoded value */
+                        printer_bison_true(printer, false, builder);
                         break;
                 case BISON_FIELD_TYPE_FALSE:
-                        printer_bison_false(printer, builder);
+                        /* in an array, there is no FALSE constant that is set to NULL because it will be replaced with
+                         * a constant NULL. In columns, there might be a NULL-encoded value */
+                        printer_bison_false(printer, false, builder);
                         break;
                 case BISON_FIELD_TYPE_NUMBER_U8:
                 case BISON_FIELD_TYPE_NUMBER_U16:
@@ -1404,12 +1408,14 @@ static bool print_column(struct bison_column_it *it, struct bison_printer *print
                 case BISON_FIELD_TYPE_NULL:
                         printer_bison_null(printer, builder);
                         break;
-                case BISON_FIELD_TYPE_TRUE:
-                        printer_bison_true(printer, builder);
-                        break;
-                case BISON_FIELD_TYPE_FALSE:
-                        printer_bison_false(printer, builder);
-                        break;
+                case BISON_FIELD_TYPE_TRUE: {
+                        u8 value = ((u8*) values)[i];
+                        printer_bison_true(printer, is_null_boolean(value), builder);
+                } break;
+                case BISON_FIELD_TYPE_FALSE: {
+                        u8 value = ((u8*) values)[i];
+                        printer_bison_false(printer, is_null_boolean(value), builder);
+                } break;
                 case BISON_FIELD_TYPE_NUMBER_U8: {
                         u64 number = ((u8*) values)[i];
                         printer_bison_unsigned(printer, builder, is_null_u8(number) ? NULL : &number);
