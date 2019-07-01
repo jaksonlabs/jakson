@@ -736,8 +736,8 @@ NG5_EXPORT(bool) archive_object_get_object_id(object_id_t *id, const struct arch
 NG5_EXPORT(bool) archive_object_get_prop_iter(struct prop_iter *iter, const struct archive_object *object)
 {
         // XXXX archive_prop_iter_from_object()
-        ng5_unused(iter);
-        ng5_unused(object);
+        unused(iter);
+        unused(object);
         return false;
 }
 
@@ -1142,7 +1142,7 @@ DECLARE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(boolean, field_boolean_t, boo
 
 void int_reset_cabin_object_mem_file(struct archive_object *object)
 {
-        ng5_unused(object);
+        unused(object);
         //  memfile_seek(&object->file, object->self);
         abort();
 }

@@ -216,7 +216,7 @@ int trace_alloc_create(struct allocator *alloc)
 
 static void *invoke_malloc(struct allocator *self, size_t size)
 {
-        ng5_unused(self);
+        unused(self);
 
         spin_acquire(global_trace_stats.spinlock);
 
@@ -239,9 +239,9 @@ static void *invoke_malloc(struct allocator *self, size_t size)
                 vec_length(global_trace_stats.malloc_sizes));
         global_trace_stats.total_size += size;
 
-        ng5_unused(min_alloc_size);
-        ng5_unused(max_alloc_size);
-        ng5_unused(avg_alloc_size);
+        unused(min_alloc_size);
+        unused(max_alloc_size);
+        unused(avg_alloc_size);
 
         //DEBUG(TRACE_ALLOC_TAG, "min/max/avg alloc size: %zu/%zu/%f B (allocator %p)", min_alloc_size, max_alloc_size,
         //      avg_alloc_size, self);
@@ -259,7 +259,7 @@ static void *invoke_malloc(struct allocator *self, size_t size)
 
 static void *invoke_realloc(struct allocator *self, void *ptr, size_t size)
 {
-        ng5_unused(self);
+        unused(self);
 
         spin_acquire(global_trace_stats.spinlock);
 
@@ -298,7 +298,7 @@ static void *invoke_realloc(struct allocator *self, void *ptr, size_t size)
 
 static void invoke_free(struct allocator *self, void *ptr)
 {
-        ng5_unused(self);
+        unused(self);
 
         spin_acquire(global_trace_stats.spinlock);
 

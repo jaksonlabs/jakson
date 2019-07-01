@@ -21,13 +21,13 @@ static void visit_string_pairs (struct archive *archive, path_stack_t path, obje
                               const field_sid_t *keys, const field_sid_t *values, u32 num_pairs,
                               void *capture)
 {
-    ng5_unused(id);
-    ng5_unused(keys);
-    ng5_unused(values);
-    ng5_unused(num_pairs);
-    ng5_unused(capture);
-    ng5_unused(archive);
-    ng5_unused(path);
+    unused(id);
+    unused(keys);
+    unused(values);
+    unused(num_pairs);
+    unused(capture);
+    unused(archive);
+    unused(path);
 
 }
 
@@ -36,11 +36,11 @@ before_visit_object_array(struct archive *archive, path_stack_t path,
                                                      object_id_t parent_id, field_sid_t key,
                                                      void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(parent_id);
-    ng5_unused(capture);
-    ng5_unused(key);
+    unused(archive);
+    unused(path);
+    unused(parent_id);
+    unused(capture);
+    unused(key);
 
 //        archive_visitor_print_path(stdout, archive, path);
 //
@@ -61,14 +61,14 @@ before_visit_object_array_objects(bool *skip_group_object_ids,
                                           const object_id_t *group_object_ids,
                                           u32 num_group_object_ids, void *capture)
 {
-    ng5_unused(skip_group_object_ids);
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(parent_id);
-    ng5_unused(key);
-    ng5_unused(group_object_ids);
-    ng5_unused(num_group_object_ids);
-    ng5_unused(capture);
+    unused(skip_group_object_ids);
+    unused(archive);
+    unused(path);
+    unused(parent_id);
+    unused(key);
+    unused(group_object_ids);
+    unused(num_group_object_ids);
+    unused(capture);
 
 //    ops_show_keys_capture_t *params = (ops_show_keys_capture_t *) capture;
 //    if (archive_visitor_path_compare(path, NULL, params->path, archive)) {
@@ -89,14 +89,14 @@ before_object_visit(struct archive *archive, path_stack_t path,
                                                u32 object_idx, u32 num_objects, field_sid_t key,
                                                void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(parent_id);
-    ng5_unused(value_id);
-    ng5_unused(object_idx);
-    ng5_unused(num_objects);
-    ng5_unused(key);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(parent_id);
+    unused(value_id);
+    unused(object_idx);
+    unused(num_objects);
+    unused(key);
+    unused(capture);
 
 //    struct archive_query *query = archive_query_default(archive);
 //    char *keystr = query_fetch_string_by_id(query, key);
@@ -122,13 +122,13 @@ visit_object_property(struct archive *archive, path_stack_t path,
                               object_id_t parent_id,
                               field_sid_t key, enum field_type type, bool is_array_type, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(parent_id);
-    ng5_unused(key);
-    ng5_unused(type);
-    ng5_unused(is_array_type);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(parent_id);
+    unused(key);
+    unused(type);
+    unused(is_array_type);
+    unused(capture);
 
 //    ops_show_keys_capture_t *params = (ops_show_keys_capture_t *) capture;
 //    if (archive_visitor_path_compare(path, NULL, params->path, archive)) {
@@ -178,11 +178,11 @@ visit_object_property(struct archive *archive, path_stack_t path,
 
 static void visit_object_array_prop(struct archive *archive, path_stack_t path, object_id_t parent_id, field_sid_t key, enum field_type type, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(parent_id);
-    ng5_unused(type);
-    ng5_unused(capture);
-    ng5_unused(path);
+    unused(archive);
+    unused(parent_id);
+    unused(type);
+    unused(capture);
+    unused(path);
 
     ops_show_keys_capture_t *params = (ops_show_keys_capture_t *) capture;
 
@@ -216,13 +216,13 @@ before_visit_object_array_object_property(struct archive *archive, path_stack_t 
                                           enum field_type nested_value_type,
                                           void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(parent_id);
-    ng5_unused(key);
-    ng5_unused(nested_key);
-    ng5_unused(nested_value_type);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(parent_id);
+    unused(key);
+    unused(nested_key);
+    unused(nested_value_type);
+    unused(capture);
 
     enum visit_policy follow = VISIT_EXCLUDE;
 
@@ -278,14 +278,14 @@ before_object_array_object_property_object(struct archive *archive, path_stack_t
                                            u32 nested_value_object_id,
                                            void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(parent_id);
-    ng5_unused(key);
-    ng5_unused(nested_key);
-    ng5_unused(nested_object_id);
-    ng5_unused(nested_value_object_id);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(parent_id);
+    unused(key);
+    unused(nested_key);
+    unused(nested_object_id);
+    unused(nested_value_object_id);
+    unused(capture);
 
     return VISIT_INCLUDE;
 }
@@ -293,9 +293,9 @@ before_object_array_object_property_object(struct archive *archive, path_stack_t
 NG5_EXPORT(bool)
 ops_show_keys(timestamp_t *duration, struct vector ofType(ops_show_keys_key_type_pair_t) *result, const char *path, struct archive *archive)
 {
-    ng5_unused(result);
-    ng5_unused(path);
-    ng5_unused(archive);
+    unused(result);
+    unused(path);
+    unused(archive);
 
     struct archive_visitor visitor = { 0 };
     struct archive_visitor_desc desc = { .visit_mask = NG5_ARCHIVE_ITER_MASK_ANY };

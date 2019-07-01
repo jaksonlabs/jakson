@@ -121,7 +121,7 @@ static int create_extra(struct strdic *self, size_t capacity, size_t num_index_b
                 ng5_check_success(vec_push(&extra->contents, &empty, 1));
                 freelist_push(self, i);
         }
-        ng5_unused(num_threads);
+        unused(num_threads);
 
         struct allocator hashtable_alloc;
 #if defined(NG5_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
@@ -202,7 +202,7 @@ static bool this_insert(struct strdic *self, field_sid_t **out, char *const *str
         ng5_trace(STRING_DIC_SYNC_TAG, "local string dictionary insertion invoked for %zu strings", num_strings);
         timestamp_t begin = time_now_wallclock();
 
-        ng5_unused(num_threads);
+        unused(num_threads);
 
         ng5_check_tag(self->tag, SYNC)
         lock(self);
@@ -301,8 +301,8 @@ static bool this_insert(struct strdic *self, field_sid_t **out, char *const *str
         unlock(self);
 
         timestamp_t end = time_now_wallclock();
-        ng5_unused(begin);
-        ng5_unused(end);
+        unused(begin);
+        unused(end);
         ng5_info(STRING_DIC_SYNC_TAG, "insertion operation done: %f seconds spent here", (end - begin) / 1000.0f)
 
         return true;
@@ -373,8 +373,8 @@ static bool this_locate_safe(struct strdic *self, field_sid_t **out, bool **foun
         unlock(self);
 
         timestamp_t end = time_now_wallclock();
-        ng5_unused(begin);
-        ng5_unused(end);
+        unused(begin);
+        unused(end);
         ng5_trace(STRING_DIC_SYNC_TAG, "'locate_safe' function done: %f seconds spent here", (end - begin) / 1000.0f)
 
         return status;
@@ -431,7 +431,7 @@ static char **this_extract(struct strdic *self, const field_sid_t *ids, size_t n
 
 static bool this_free(struct strdic *self, void *ptr)
 {
-        ng5_unused(self);
+        unused(self);
 
         struct allocator hashtable_alloc;
 #if defined(NG5_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)

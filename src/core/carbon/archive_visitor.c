@@ -29,7 +29,7 @@ static void iterate_objects(struct archive *archive, const field_sid_t *keys, u3
         struct archive_value_vector *value_iter, struct vector ofType(struct path_entry) *path_stack,
         struct archive_visitor *visitor, int mask, void *capture, bool is_root_object)
 {
-        ng5_unused(num_pairs);
+        unused(num_pairs);
 
         u32 vector_length;
         struct archive_object object;
@@ -159,8 +159,8 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
         archive_collection_iter_t collection_iter;
         bool first_type_group = true;
 
-        ng5_unused(parent_key);
-        ng5_unused(parent_key_array_idx);
+        unused(parent_key);
+        unused(parent_key_array_idx);
 
         struct path_entry e = {.key = parent_key, .idx = parent_key_array_idx};
         vec_push(path_stack, &e, 1);

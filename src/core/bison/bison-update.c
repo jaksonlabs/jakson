@@ -123,81 +123,81 @@ static bool drop_path(struct bison_update *updater)
 
 static bool column_update_u8(struct bison_column_it *it, u32 pos, u8 value)
 {
-        ng5_unused(it);
-        ng5_unused(pos);
-        ng5_unused(value);
+        unused(it);
+        unused(pos);
+        unused(value);
         error_print(NG5_ERR_NOTIMPLEMENTED);    // TODO: Implement
         return false;
 }
 
 static bool column_update_u16(struct bison_column_it *it, u32 pos, u16 value)
 {
-        ng5_unused(it);
-        ng5_unused(pos);
-        ng5_unused(value);
+        unused(it);
+        unused(pos);
+        unused(value);
         error_print(NG5_ERR_NOTIMPLEMENTED);    // TODO: Implement
         return false;
 }
 
 static bool column_update_u32(struct bison_column_it *it, u32 pos, u32 value)
 {
-        ng5_unused(it);
-        ng5_unused(pos);
-        ng5_unused(value);
+        unused(it);
+        unused(pos);
+        unused(value);
         error_print(NG5_ERR_NOTIMPLEMENTED);    // TODO: Implement
         return false;
 }
 
 static bool column_update_u64(struct bison_column_it *it, u32 pos, u64 value)
 {
-        ng5_unused(it);
-        ng5_unused(pos);
-        ng5_unused(value);
+        unused(it);
+        unused(pos);
+        unused(value);
         error_print(NG5_ERR_NOTIMPLEMENTED);    // TODO: Implement
         return false;
 }
 
 static bool column_update_i8(struct bison_column_it *it, u32 pos, i8 value)
 {
-        ng5_unused(it);
-        ng5_unused(pos);
-        ng5_unused(value);
+        unused(it);
+        unused(pos);
+        unused(value);
         error_print(NG5_ERR_NOTIMPLEMENTED);    // TODO: Implement
         return false;
 }
 
 static bool column_update_i16(struct bison_column_it *it, u32 pos, i16 value)
 {
-        ng5_unused(it);
-        ng5_unused(pos);
-        ng5_unused(value);
+        unused(it);
+        unused(pos);
+        unused(value);
         error_print(NG5_ERR_NOTIMPLEMENTED);    // TODO: Implement
         return false;
 }
 
 static bool column_update_i32(struct bison_column_it *it, u32 pos, i32 value)
 {
-        ng5_unused(it);
-        ng5_unused(pos);
-        ng5_unused(value);
+        unused(it);
+        unused(pos);
+        unused(value);
         error_print(NG5_ERR_NOTIMPLEMENTED);    // TODO: Implement
         return false;
 }
 
 static bool column_update_i64(struct bison_column_it *it, u32 pos, i64 value)
 {
-        ng5_unused(it);
-        ng5_unused(pos);
-        ng5_unused(value);
+        unused(it);
+        unused(pos);
+        unused(value);
         error_print(NG5_ERR_NOTIMPLEMENTED);    // TODO: Implement
         return false;
 }
 
 static bool column_update_float(struct bison_column_it *it, u32 pos, float value)
 {
-        ng5_unused(it);
-        ng5_unused(pos);
-        ng5_unused(value);
+        unused(it);
+        unused(pos);
+        unused(value);
         error_print(NG5_ERR_NOTIMPLEMENTED);    // TODO: Implement
         return false;
 }
@@ -216,24 +216,24 @@ static inline struct bison_column_it *column_iterator(u32 *elem_pos, struct biso
 
 NG5_EXPORT(bool) bison_update_set_null(struct bison_revise *context, const char *path)
 {
-        ng5_unused(context);
-        ng5_unused(path);
+        unused(context);
+        unused(path);
         error_print(NG5_ERR_NOTIMPLEMENTED) // TODO: implement
         return false;
 }
 
 NG5_EXPORT(bool) bison_update_set_true(struct bison_revise *context, const char *path)
 {
-        ng5_unused(context);
-        ng5_unused(path);
+        unused(context);
+        unused(path);
         error_print(NG5_ERR_NOTIMPLEMENTED) // TODO: implement
         return false;
 }
 
 NG5_EXPORT(bool) bison_update_set_false(struct bison_revise *context, const char *path)
 {
-        ng5_unused(context);
-        ng5_unused(path);
+        unused(context);
+        unused(path);
         error_print(NG5_ERR_NOTIMPLEMENTED) // TODO: implement
         return false;
 }
@@ -318,8 +318,8 @@ NG5_EXPORT(bool) bison_update_signed(struct bison_revise *context, const char *p
 NG5_EXPORT(bool) bison_update_string(struct bison_revise *context, const char *value)
 {
         // TODO: Implement
-        ng5_unused(context);
-        ng5_unused(value);
+        unused(context);
+        unused(value);
         error_print(NG5_ERR_NOTIMPLEMENTED)
         return false;
 }
@@ -328,11 +328,11 @@ NG5_EXPORT(bool) bison_update_binary(struct bison_revise *context, const void *v
         const char *file_ext, const char *user_type)
 {
         // TODO: Implement
-        ng5_unused(context);
-        ng5_unused(value);
-        ng5_unused(nbytes);
-        ng5_unused(file_ext);
-        ng5_unused(user_type);
+        unused(context);
+        unused(value);
+        unused(nbytes);
+        unused(file_ext);
+        unused(user_type);
         error_print(NG5_ERR_NOTIMPLEMENTED)
         return false;
 }

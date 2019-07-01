@@ -169,8 +169,8 @@ static int this_fetch_bulk(struct vector ofType(bucket) *buckets, field_sid_t *v
         size_t *num_keys_not_found, size_t *bucket_idxs, char *const *keys, size_t num_keys, struct allocator *alloc,
         struct strhash_counters *counter)
 {
-        ng5_unused(counter);
-        ng5_unused(alloc);
+        unused(counter);
+        unused(alloc);
 
         slice_handle_t result_handle;
         size_t num_not_found = 0;
@@ -200,7 +200,7 @@ static int this_fetch_bulk(struct vector ofType(bucket) *buckets, field_sid_t *v
 static int this_fetch_single(struct vector ofType(bucket) *buckets, field_sid_t *value_out, bool *key_found,
         const size_t bucket_idx, const char *key, struct strhash_counters *counter)
 {
-        ng5_unused(counter);
+        unused(counter);
 
         slice_handle_t handle;
         struct bucket *data = (struct bucket *) vec_data(buckets);
@@ -269,8 +269,8 @@ static int this_get_safe(struct strhash *self, field_sid_t **out, bool **found_m
         *found_mask = found_mask_out;
 
         timestamp_t end = time_now_wallclock();
-        ng5_unused(begin);
-        ng5_unused(end);
+        unused(begin);
+        unused(end);
         ng5_trace(SMART_MAP_TAG, "'get_safe' function done: %f seconds spent here", (end - begin) / 1000.0f)
 
         return true;
@@ -309,10 +309,10 @@ static int this_get_fast(struct strhash *self, field_sid_t **out, char *const *k
 
 static int this_update_key_fast(struct strhash *self, const field_sid_t *values, char *const *keys, size_t num_keys)
 {
-        ng5_unused(self);
-        ng5_unused(values);
-        ng5_unused(keys);
-        ng5_unused(num_keys);
+        unused(self);
+        unused(values);
+        unused(keys);
+        unused(num_keys);
         error(&self->err, NG5_ERR_NOTIMPL);
         error_print_to_stderr(&self->err);
         return false;
@@ -321,8 +321,8 @@ static int this_update_key_fast(struct strhash *self, const field_sid_t *values,
 static int simple_map_remove(struct mem_extra *extra, size_t *bucket_idxs, char *const *keys, size_t num_keys,
         struct allocator *alloc, struct strhash_counters *counter)
 {
-        ng5_unused(counter);
-        ng5_unused(alloc);
+        unused(counter);
+        unused(alloc);
 
         slice_handle_t handle;
         struct bucket *data = (struct bucket *) vec_data(&extra->buckets);
@@ -406,7 +406,7 @@ static int bucket_create(struct bucket *buckets, size_t num_buckets, size_t buck
 
 static int bucket_drop(struct bucket *buckets, size_t num_buckets, struct allocator *alloc)
 {
-        ng5_unused(alloc);
+        unused(alloc);
         error_if_null(buckets);
 
         while (num_buckets--) {
@@ -420,8 +420,8 @@ static int bucket_drop(struct bucket *buckets, size_t num_buckets, struct alloca
 static int bucket_insert(struct bucket *bucket, const char *restrict key, field_sid_t value, struct allocator *alloc,
         struct strhash_counters *counter)
 {
-        ng5_unused(counter);
-        ng5_unused(alloc);
+        unused(counter);
+        unused(alloc);
 
         error_if_null(bucket);
         error_if_null(key);

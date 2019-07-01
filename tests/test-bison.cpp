@@ -146,30 +146,30 @@ TEST(BisonTest, CreateBisonRevisionAsyncReading) {
 
 static void print_on_revision_begin(struct bison_event_listener *self, struct bison *doc)
 {
-        ng5_unused(self);
-        ng5_unused(doc);
+        unused(self);
+        unused(doc);
         printf("revision begins\n");
 }
 
 static void print_on_revision_end(struct bison_event_listener *self, struct bison *doc)
 {
-        ng5_unused(self);
-        ng5_unused(doc);
+        unused(self);
+        unused(doc);
         printf("revision end\n");
 }
 
 static void print_on_revision_abort(struct bison_event_listener *self, struct bison *doc)
 {
-        ng5_unused(self);
-        ng5_unused(doc);
+        unused(self);
+        unused(doc);
         printf("revision aborted\n");
 }
 
 static void print_on_new_revision(struct bison_event_listener *self, struct bison *revised, struct bison *original)
 {
-        ng5_unused(self);
-        ng5_unused(revised);
-        ng5_unused(original);
+        unused(self);
+        unused(revised);
+        unused(original);
         printf("revision complete\n");
 }
 

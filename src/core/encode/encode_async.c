@@ -291,7 +291,7 @@ static void synchronize(struct vector ofType(carrier) *carriers, size_t num_thre
         }
         timestamp_t end = time_now_wallclock();
         timestamp_t duration = (end - begin);
-        ng5_unused(duration);
+        unused(duration);
 
         ng5_debug(STRING_DIC_ASYNC_TAG,
                 "barrier passed for %d threads after %f seconds",
@@ -334,8 +334,8 @@ struct thread_assign_arg {
 static void parallel_compute_thread_assignment_function(const void *restrict start, size_t width, size_t len,
         void *restrict args, thread_id_t tid)
 {
-        ng5_unused(tid);
-        ng5_unused(width);
+        unused(tid);
+        unused(width);
 
         char *const *strings = (char *const *) start;
 
@@ -494,8 +494,8 @@ static bool this_insert(struct strdic *self, field_sid_t **out, char *const *str
         this_unlock(self);
 
         timestamp_t end = time_now_wallclock();
-        ng5_unused(begin);
-        ng5_unused(end);
+        unused(begin);
+        unused(end);
         ng5_info(STRING_DIC_ASYNC_TAG, "insertion operation done: %f seconds spent here", (end - begin) / 1000.0f)
 
         return true;
@@ -559,8 +559,8 @@ static bool this_remove(struct strdic *self, field_sid_t *strings, size_t num_st
         this_unlock(self);
 
         timestamp_t end = time_now_wallclock();
-        ng5_unused(begin);
-        ng5_unused(end);
+        unused(begin);
+        unused(end);
         ng5_info(STRING_DIC_ASYNC_TAG, "remove operation done: %f seconds spent here", (end - begin) / 1000.0f)
 
         return true;
@@ -686,8 +686,8 @@ static bool this_locate_safe(struct strdic *self, field_sid_t **out, bool **foun
         this_unlock(self);
 
         timestamp_t end = time_now_wallclock();
-        ng5_unused(begin);
-        ng5_unused(end);
+        unused(begin);
+        unused(end);
         ng5_info(STRING_DIC_ASYNC_TAG, "locate (safe) operation done: %f seconds spent here", (end - begin) / 1000.0f)
 
         return true;
@@ -787,8 +787,8 @@ static char **this_extract(struct strdic *self, const field_sid_t *ids, size_t n
         this_unlock(self);
 
         timestamp_t end = time_now_wallclock();
-        ng5_unused(begin);
-        ng5_unused(end);
+        unused(begin);
+        unused(end);
         ng5_info(STRING_DIC_ASYNC_TAG, "extract (safe) operation done: %f seconds spent here", (end - begin) / 1000.0f)
 
         return globalResult;
@@ -914,8 +914,8 @@ struct create_carrier_arg {
 static void parallel_create_carrier(const void *restrict start, size_t width, size_t len, void *restrict args,
         thread_id_t tid)
 {
-        ng5_unused(tid);
-        ng5_unused(width);
+        unused(tid);
+        unused(width);
 
         struct carrier *carrier = (struct carrier *) start;
         const struct create_carrier_arg *createArgs = (const struct create_carrier_arg *) args;

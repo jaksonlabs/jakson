@@ -121,7 +121,7 @@ NG5_EXPORT(bool) bison_dot_path_create(struct bison_dot_path *path)
 NG5_EXPORT(bool) bison_dot_path_from_string(struct bison_dot_path *path, const char *path_string)
 {
         error_if_null(path)
-        ng5_unused(path_string);
+        unused(path_string);
 
         struct dot_token token;
         int status = NG5_ERR_NOERR;

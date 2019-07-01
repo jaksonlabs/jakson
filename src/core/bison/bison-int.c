@@ -60,7 +60,7 @@ NG5_EXPORT(bool) bison_int_insert_column(struct memfile *memfile_in, struct err 
         error_if_null(memfile_in);
         error_if_null(err_in);
 
-        ng5_unused(capactity);
+        unused(capactity);
 
         switch (type) {
         case BISON_FIELD_TYPE_NULL:
@@ -328,7 +328,7 @@ NG5_EXPORT(bool) bison_int_array_it_field_skip(struct bison_array_it *it)
         case BISON_FIELD_TYPE_BINARY: {
                 /* read and skip mime type with variable-length integer type */
                 u64 mime_type = memfile_read_varuint(NULL, &it->memfile);
-                ng5_unused(mime_type);
+                unused(mime_type);
 
                 /* read blob length */
                 u64 blob_len = memfile_read_varuint(NULL, &it->memfile);

@@ -149,8 +149,8 @@ NG5_EXPORT(bool) vec_deserialize(struct vector *vec, struct err *err, FILE *file
 bool vec_memadvice(struct vector *vec, int madviseAdvice)
 {
         error_if_null(vec);
-        ng5_unused(vec);
-        ng5_unused(madviseAdvice);
+        unused(vec);
+        unused(madviseAdvice);
         madvise(vec->base, vec->cap_elems * vec->elem_size, madviseAdvice);
         return true;
 }

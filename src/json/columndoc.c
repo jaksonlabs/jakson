@@ -855,7 +855,7 @@ bool columndoc_print(FILE *file, struct columndoc *doc)
 
 bool columndoc_drop(struct columndoc *doc)
 {
-        ng5_unused(doc);
+        unused(doc);
         NG5_NOT_IMPLEMENTED
 }
 
@@ -1221,7 +1221,7 @@ static void object_push_array(struct vector ofType(Vector
 static bool object_put_array(struct columndoc_obj *model, struct err *err, const struct doc_entries *entry,
         struct strdic *dic, const field_sid_t *key_id)
 {
-        ng5_unused(dic);
+        unused(dic);
         u32 num_elements = (u32) vec_length(&entry->values);
 
         switch (entry->type) {

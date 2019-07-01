@@ -92,7 +92,7 @@ NG5_EXPORT(bool) slice_list_create(slice_list_t *list, const struct allocator *a
 
 NG5_EXPORT(bool) SliceListDrop(slice_list_t *list)
 {
-        ng5_unused(list);
+        unused(list);
 
         vec_drop(&list->slices);
         vec_drop(&list->descriptors);
@@ -165,9 +165,9 @@ NG5_EXPORT(bool) slice_list_insert(slice_list_t *list, char **strings, field_sid
 
 NG5_EXPORT(bool) slice_list_lookup(slice_handle_t *handle, slice_list_t *list, const char *needle)
 {
-        ng5_unused(list);
-        ng5_unused(handle);
-        ng5_unused(needle);
+        unused(list);
+        unused(handle);
+        unused(needle);
 
         hash32_t keyHash = get_hashcode(needle);
         u32 numSlices = vec_length(&list->slices);
@@ -241,8 +241,8 @@ NG5_EXPORT(bool) slice_list_lookup(slice_handle_t *handle, slice_list_t *list, c
 
 NG5_EXPORT(bool) SliceListRemove(slice_list_t *list, slice_handle_t *handle)
 {
-        ng5_unused(list);
-        ng5_unused(handle);
+        unused(list);
+        unused(handle);
         NG5_NOT_IMPLEMENTED
 }
 
@@ -309,7 +309,7 @@ static void appenderNew(slice_list_t *list)
 
 static void appenderSeal(Slice *slice)
 {
-        ng5_unused(slice);
+        unused(slice);
         // TODO: sealing means sort and then replace 'find' with bsearch or something.
         // Not yet implemented: sealed slices are also search in a linear fashion
 }

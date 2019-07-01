@@ -13,8 +13,8 @@
 
 static int testFileExists(FILE *file, const char *fileName, size_t fileNum, size_t fileMax, bool requireExistence)
 {
-    ng5_unused(fileNum);
-    ng5_unused(fileMax);
+    unused(fileNum);
+    unused(fileMax);
 
     if (access( fileName, F_OK ) == 0) {
         if (requireExistence) {
@@ -55,23 +55,23 @@ struct capture
 static void
 visit_root_object(struct archive *archive, object_id_t id, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(id);
-    ng5_unused(capture);
+    unused(archive);
+    unused(id);
+    unused(capture);
 }
 
 static void
 before_visit_starts(struct archive *archive, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(capture);
+    unused(archive);
+    unused(capture);
 }
 
 static void
 after_visit_ends(struct archive *archive, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(capture);
+    unused(archive);
+    unused(capture);
 }
 
 static enum visit_policy
@@ -80,14 +80,14 @@ before_object_visit(struct archive *archive, path_stack_t path,
                                                u32 object_idx, u32 num_objects, field_sid_t key,
                                                void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(parent_id);
-    ng5_unused(value_id);
-    ng5_unused(object_idx);
-    ng5_unused(num_objects);
-    ng5_unused(key);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(parent_id);
+    unused(value_id);
+    unused(object_idx);
+    unused(num_objects);
+    unused(key);
+    unused(capture);
     
     archive_visitor_print_path(stderr, archive, path);
 
@@ -98,12 +98,12 @@ static void
 after_object_visit(struct archive *archive, path_stack_t path, object_id_t id,
                            u32 object_idx, u32 num_objects, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(object_idx);
-    ng5_unused(num_objects);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(object_idx);
+    unused(num_objects);
+    unused(capture);
 
     
 }
@@ -111,27 +111,27 @@ after_object_visit(struct archive *archive, path_stack_t path, object_id_t id,
 static void first_prop_type_group(struct archive *archive, path_stack_t path, object_id_t id, const field_sid_t *keys,
                               enum field_type type, bool is_array, u32 num_pairs, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(keys);
-    ng5_unused(type);
-    ng5_unused(is_array);
-    ng5_unused(num_pairs);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(keys);
+    unused(type);
+    unused(is_array);
+    unused(num_pairs);
+    unused(capture);
 }
 
 static void next_prop_type_group(struct archive *archive, path_stack_t path, object_id_t id, const field_sid_t *keys,
                              enum field_type type, bool is_array, u32 num_pairs, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(keys);
-    ng5_unused(type);
-    ng5_unused(is_array);
-    ng5_unused(num_pairs);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(keys);
+    unused(type);
+    unused(is_array);
+    unused(num_pairs);
+    unused(capture);
 }
 
 static void
@@ -139,13 +139,13 @@ visit_int8_pairs (struct archive *archive, path_stack_t path, object_id_t id,
                               const field_sid_t *keys, const field_i8_t *values, u32 num_pairs,
                               void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(keys);
-    ng5_unused(num_pairs);
-    ng5_unused(capture);
-    ng5_unused(values);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(keys);
+    unused(num_pairs);
+    unused(capture);
+    unused(values);
 
     
 }
@@ -155,13 +155,13 @@ visit_int16_pairs (struct archive *archive, path_stack_t path, object_id_t id,
                   const field_sid_t *keys, const field_i16_t *values, u32 num_pairs,
                   void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(keys);
-    ng5_unused(num_pairs);
-    ng5_unused(capture);
-    ng5_unused(values);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(keys);
+    unused(num_pairs);
+    unused(capture);
+    unused(values);
 
     
 }
@@ -171,13 +171,13 @@ visit_int32_pairs (struct archive *archive, path_stack_t path, object_id_t id,
                    const field_sid_t *keys, const field_i32_t *values, u32 num_pairs,
                    void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(keys);
-    ng5_unused(num_pairs);
-    ng5_unused(capture);
-    ng5_unused(values);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(keys);
+    unused(num_pairs);
+    unused(capture);
+    unused(values);
 
     
 
@@ -189,13 +189,13 @@ visit_int64_pairs (struct archive *archive, path_stack_t path, object_id_t id,
                    const field_sid_t *keys, const field_i64_t *values, u32 num_pairs,
                    void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(keys);
-    ng5_unused(num_pairs);
-    ng5_unused(capture);
-    ng5_unused(values);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(keys);
+    unused(num_pairs);
+    unused(capture);
+    unused(values);
 
     
 }
@@ -205,13 +205,13 @@ visit_uint8_pairs (struct archive *archive, path_stack_t path, object_id_t id,
                   const field_sid_t *keys, const field_u8_t *values, u32 num_pairs,
                   void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(keys);
-    ng5_unused(num_pairs);
-    ng5_unused(capture);
-    ng5_unused(values);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(keys);
+    unused(num_pairs);
+    unused(capture);
+    unused(values);
 
     
 }
@@ -221,13 +221,13 @@ visit_uint16_pairs (struct archive *archive, path_stack_t path, object_id_t id,
                    const field_sid_t *keys, const field_u16_t *values, u32 num_pairs,
                    void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(keys);
-    ng5_unused(num_pairs);
-    ng5_unused(capture);
-    ng5_unused(values);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(keys);
+    unused(num_pairs);
+    unused(capture);
+    unused(values);
 
     
 }
@@ -237,13 +237,13 @@ visit_uint32_pairs (struct archive *archive, path_stack_t path, object_id_t id,
                    const field_sid_t *keys, const field_u32_t *values, u32 num_pairs,
                    void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(keys);
-    ng5_unused(num_pairs);
-    ng5_unused(capture);
-    ng5_unused(values);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(keys);
+    unused(num_pairs);
+    unused(capture);
+    unused(values);
 
     
 }
@@ -253,13 +253,13 @@ visit_uint64_pairs (struct archive *archive, path_stack_t path, object_id_t id,
                    const field_sid_t *keys, const field_u64_t *values, u32 num_pairs,
                    void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(keys);
-    ng5_unused(num_pairs);
-    ng5_unused(capture);
-    ng5_unused(values);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(keys);
+    unused(num_pairs);
+    unused(capture);
+    unused(values);
 
     
 }
@@ -269,13 +269,13 @@ visit_number_pairs (struct archive *archive, path_stack_t path, object_id_t id,
                    const field_sid_t *keys, const field_number_t *values, u32 num_pairs,
                    void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(keys);
-    ng5_unused(num_pairs);
-    ng5_unused(capture);
-    ng5_unused(values);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(keys);
+    unused(num_pairs);
+    unused(capture);
+    unused(values);
 
     
 }
@@ -285,13 +285,13 @@ visit_string_pairs (struct archive *archive, path_stack_t path, object_id_t id,
                     const field_sid_t *keys, const field_sid_t *values, u32 num_pairs,
                     void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(keys);
-    ng5_unused(num_pairs);
-    ng5_unused(capture);
-    ng5_unused(values);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(keys);
+    unused(num_pairs);
+    unused(capture);
+    unused(values);
 
 
     
@@ -302,13 +302,13 @@ visit_boolean_pairs (struct archive *archive, path_stack_t path, object_id_t id,
                     const field_sid_t *keys, const field_boolean_t *values, u32 num_pairs,
                     void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(keys);
-    ng5_unused(num_pairs);
-    ng5_unused(capture);
-    ng5_unused(values);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(keys);
+    unused(num_pairs);
+    unused(capture);
+    unused(values);
 
     
 }
@@ -316,12 +316,12 @@ visit_boolean_pairs (struct archive *archive, path_stack_t path, object_id_t id,
 static void visit_null_pairs (struct archive *archive, path_stack_t path, object_id_t id, const field_sid_t *keys,
                           u32 num_pairs, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(keys);
-    ng5_unused(num_pairs);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(keys);
+    unused(num_pairs);
+    unused(capture);
 
     
 }
@@ -335,12 +335,12 @@ visit_enter_int8_array_pairs(struct archive *archive, path_stack_t path,
                              object_id_t id, const field_sid_t *keys,
                              u32 num_pairs, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(keys);
-    ng5_unused(num_pairs);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(keys);
+    unused(num_pairs);
+    unused(capture);
 
     
 
@@ -352,13 +352,13 @@ visit_enter_int8_array_pair(struct archive *archive, path_stack_t path, object_i
                                         field_sid_t key, u32 entry_idx, u32 num_elems,
                                         void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(key);
-    ng5_unused(entry_idx);
-    ng5_unused(num_elems);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(key);
+    unused(entry_idx);
+    unused(num_elems);
+    unused(capture);
 
      
 }
@@ -368,15 +368,15 @@ visit_int8_array_pair (struct archive *archive, path_stack_t path, object_id_t i
                                    field_sid_t key, u32 entry_idx, u32 max_entries,
                                    const field_i8_t *array, u32 array_length, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(key);
-    ng5_unused(entry_idx);
-    ng5_unused(max_entries);
-    ng5_unused(array);
-    ng5_unused(array_length);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(key);
+    unused(entry_idx);
+    unused(max_entries);
+    unused(array);
+    unused(array_length);
+    unused(capture);
 
      
 }
@@ -385,12 +385,12 @@ static void
 ng5_func_unused visit_leave_int8_array_pair(struct archive *archive, path_stack_t path, object_id_t id,
                                         u32 pair_idx, u32 num_pairs, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(pair_idx);
-    ng5_unused(num_pairs);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(pair_idx);
+    unused(num_pairs);
+    unused(capture);
 
      
 }
@@ -399,10 +399,10 @@ static void
 ng5_func_unused visit_leave_int8_array_pairs(struct archive *archive, path_stack_t path, object_id_t id,
                                          void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
 
      
 }
@@ -414,12 +414,12 @@ ng5_func_unused visit_enter_int16_array_pairs(struct archive *archive, path_stac
                               object_id_t id, const field_sid_t *keys,
                               u32 num_pairs, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
-    ng5_unused(keys);
-    ng5_unused(num_pairs);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
+    unused(keys);
+    unused(num_pairs);
 
      
 
@@ -431,13 +431,13 @@ ng5_func_unused visit_enter_int16_array_pair(struct archive *archive, path_stack
                              field_sid_t key, u32 entry_idx, u32 num_elems,
                              void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
-    ng5_unused(key);
-    ng5_unused(entry_idx);
-    ng5_unused(num_elems);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
+    unused(key);
+    unused(entry_idx);
+    unused(num_elems);
 
      
 }
@@ -447,15 +447,15 @@ ng5_func_unused visit_int16_array_pair (struct archive *archive, path_stack_t pa
                         field_sid_t key, u32 entry_idx, u32 max_entries,
                         const field_i16_t *array, u32 array_length, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
-    ng5_unused(key);
-    ng5_unused(entry_idx);
-    ng5_unused(max_entries);
-    ng5_unused(array);
-    ng5_unused(array_length);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
+    unused(key);
+    unused(entry_idx);
+    unused(max_entries);
+    unused(array);
+    unused(array_length);
 
      
 }
@@ -464,12 +464,12 @@ static void
 ng5_func_unused visit_leave_int16_array_pair(struct archive *archive, path_stack_t path, object_id_t id,
                              u32 pair_idx, u32 num_pairs, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
-    ng5_unused(pair_idx);
-    ng5_unused(num_pairs);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
+    unused(pair_idx);
+    unused(num_pairs);
 
      
 }
@@ -478,10 +478,10 @@ static void
 ng5_func_unused visit_leave_int16_array_pairs(struct archive *archive, path_stack_t path, object_id_t id,
                               void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
 
      
 }
@@ -493,12 +493,12 @@ ng5_func_unused visit_enter_int32_array_pairs(struct archive *archive, path_stac
                               object_id_t id, const field_sid_t *keys,
                               u32 num_pairs, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
-    ng5_unused(keys);
-    ng5_unused(num_pairs);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
+    unused(keys);
+    unused(num_pairs);
 
      
 
@@ -510,13 +510,13 @@ ng5_func_unused visit_enter_int32_array_pair(struct archive *archive, path_stack
                              field_sid_t key, u32 entry_idx, u32 num_elems,
                              void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
-    ng5_unused(key);
-    ng5_unused(entry_idx);
-    ng5_unused(num_elems);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
+    unused(key);
+    unused(entry_idx);
+    unused(num_elems);
 
      
 }
@@ -526,15 +526,15 @@ ng5_func_unused visit_int32_array_pair (struct archive *archive, path_stack_t pa
                         field_sid_t key, u32 entry_idx, u32 max_entries,
                         const field_i32_t *array, u32 array_length, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
-    ng5_unused(key);
-    ng5_unused(entry_idx);
-    ng5_unused(max_entries);
-    ng5_unused(array);
-    ng5_unused(array_length);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
+    unused(key);
+    unused(entry_idx);
+    unused(max_entries);
+    unused(array);
+    unused(array_length);
 
      
 }
@@ -543,12 +543,12 @@ static void
 ng5_func_unused visit_leave_int32_array_pair(struct archive *archive, path_stack_t path, object_id_t id,
                              u32 pair_idx, u32 num_pairs, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
-    ng5_unused(pair_idx);
-    ng5_unused(num_pairs);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
+    unused(pair_idx);
+    unused(num_pairs);
 
      
 }
@@ -557,10 +557,10 @@ static void
 ng5_func_unused visit_leave_int32_array_pairs(struct archive *archive, path_stack_t path, object_id_t id,
                               void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
 
      
 }
@@ -572,12 +572,12 @@ ng5_func_unused visit_enter_int64_array_pairs(struct archive *archive, path_stac
                               object_id_t id, const field_sid_t *keys,
                               u32 num_pairs, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
-    ng5_unused(keys);
-    ng5_unused(num_pairs);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
+    unused(keys);
+    unused(num_pairs);
 
      
 
@@ -589,13 +589,13 @@ ng5_func_unused visit_enter_int64_array_pair(struct archive *archive, path_stack
                              field_sid_t key, u32 entry_idx, u32 num_elems,
                              void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
-    ng5_unused(key);
-    ng5_unused(entry_idx);
-    ng5_unused(num_elems);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
+    unused(key);
+    unused(entry_idx);
+    unused(num_elems);
 
      
 
@@ -606,15 +606,15 @@ ng5_func_unused visit_int64_array_pair (struct archive *archive, path_stack_t pa
                         field_sid_t key, u32 entry_idx, u32 max_entries,
                         const field_i64_t *array, u32 array_length, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
-    ng5_unused(key);
-    ng5_unused(entry_idx);
-    ng5_unused(max_entries);
-    ng5_unused(array);
-    ng5_unused(array_length);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
+    unused(key);
+    unused(entry_idx);
+    unused(max_entries);
+    unused(array);
+    unused(array_length);
 
      
 }
@@ -623,12 +623,12 @@ static void
 ng5_func_unused visit_leave_int64_array_pair(struct archive *archive, path_stack_t path, object_id_t id,
                              u32 pair_idx, u32 num_pairs, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
-    ng5_unused(pair_idx);
-    ng5_unused(num_pairs);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
+    unused(pair_idx);
+    unused(num_pairs);
 
      
 
@@ -638,10 +638,10 @@ static void
 ng5_func_unused visit_leave_int64_array_pairs(struct archive *archive, path_stack_t path, object_id_t id,
                               void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
 
      
 }
@@ -653,12 +653,12 @@ ng5_func_unused visit_enter_uint8_array_pairs(struct archive *archive, path_stac
                               object_id_t id, const field_sid_t *keys,
                               u32 num_pairs, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
-    ng5_unused(num_pairs);
-    ng5_unused(keys);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
+    unused(num_pairs);
+    unused(keys);
 
      
 
@@ -670,13 +670,13 @@ ng5_func_unused visit_enter_uint8_array_pair(struct archive *archive, path_stack
                              field_sid_t key, u32 entry_idx, u32 num_elems,
                              void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
-    ng5_unused(key);
-    ng5_unused(entry_idx);
-    ng5_unused(num_elems);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
+    unused(key);
+    unused(entry_idx);
+    unused(num_elems);
 
      
 
@@ -687,16 +687,16 @@ ng5_func_unused visit_uint8_array_pair (struct archive *archive, path_stack_t pa
                         field_sid_t key, u32 entry_idx, u32 max_entries,
                         const field_u8_t *array, u32 array_length, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
-    ng5_unused(key);
-    ng5_unused(entry_idx);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
+    unused(key);
+    unused(entry_idx);
 
-    ng5_unused(max_entries);
-    ng5_unused(array);
-    ng5_unused(array_length);
+    unused(max_entries);
+    unused(array);
+    unused(array_length);
 
      
 }
@@ -705,12 +705,12 @@ static void
 ng5_func_unused visit_leave_uint8_array_pair(struct archive *archive, path_stack_t path, object_id_t id,
                              u32 pair_idx, u32 num_pairs, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
-    ng5_unused(pair_idx);
-    ng5_unused(num_pairs);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
+    unused(pair_idx);
+    unused(num_pairs);
 
      
 }
@@ -719,10 +719,10 @@ static void
 ng5_func_unused visit_leave_uint8_array_pairs(struct archive *archive, path_stack_t path, object_id_t id,
                               void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
 
      
 }
@@ -734,12 +734,12 @@ ng5_func_unused visit_enter_uint16_array_pairs(struct archive *archive, path_sta
                                object_id_t id, const field_sid_t *keys,
                                u32 num_pairs, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
-    ng5_unused(keys);
-    ng5_unused(num_pairs);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
+    unused(keys);
+    unused(num_pairs);
 
      
 
@@ -751,13 +751,13 @@ ng5_func_unused visit_enter_uint16_array_pair(struct archive *archive, path_stac
                               field_sid_t key, u32 entry_idx, u32 num_elems,
                               void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
-    ng5_unused(key);
-    ng5_unused(entry_idx);
-    ng5_unused(num_elems);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
+    unused(key);
+    unused(entry_idx);
+    unused(num_elems);
 
      
 }
@@ -767,15 +767,15 @@ ng5_func_unused visit_uint16_array_pair (struct archive *archive, path_stack_t p
                          field_sid_t key, u32 entry_idx, u32 max_entries,
                          const field_u16_t *array, u32 array_length, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
-    ng5_unused(key);
-    ng5_unused(entry_idx);
-    ng5_unused(max_entries);
-    ng5_unused(array);
-    ng5_unused(array_length);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
+    unused(key);
+    unused(entry_idx);
+    unused(max_entries);
+    unused(array);
+    unused(array_length);
 
      
 
@@ -785,12 +785,12 @@ static void
 ng5_func_unused visit_leave_uint16_array_pair(struct archive *archive, path_stack_t path, object_id_t id,
                               u32 pair_idx, u32 num_pairs, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
-    ng5_unused(pair_idx);
-    ng5_unused(num_pairs);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
+    unused(pair_idx);
+    unused(num_pairs);
 
      
 }
@@ -799,10 +799,10 @@ static void
 ng5_func_unused visit_leave_uint16_array_pairs(struct archive *archive, path_stack_t path, object_id_t id,
                                void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
 
      
 }
@@ -814,12 +814,12 @@ ng5_func_unused visit_enter_uint32_array_pairs(struct archive *archive, path_sta
                                object_id_t id, const field_sid_t *keys,
                                u32 num_pairs, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
-    ng5_unused(keys);
-    ng5_unused(num_pairs);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
+    unused(keys);
+    unused(num_pairs);
 
      
 
@@ -831,13 +831,13 @@ ng5_func_unused visit_enter_uint32_array_pair(struct archive *archive, path_stac
                               field_sid_t key, u32 entry_idx, u32 num_elems,
                               void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
-    ng5_unused(key);
-    ng5_unused(entry_idx);
-    ng5_unused(num_elems);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
+    unused(key);
+    unused(entry_idx);
+    unused(num_elems);
 
      
 }
@@ -847,15 +847,15 @@ ng5_func_unused visit_uint32_array_pair (struct archive *archive, path_stack_t p
                          field_sid_t key, u32 entry_idx, u32 max_entries,
                          const field_u32_t *array, u32 array_length, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
-    ng5_unused(key);
-    ng5_unused(entry_idx);
-    ng5_unused(max_entries);
-    ng5_unused(array);
-    ng5_unused(array_length);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
+    unused(key);
+    unused(entry_idx);
+    unused(max_entries);
+    unused(array);
+    unused(array_length);
 
      
 }
@@ -864,12 +864,12 @@ static void
 ng5_func_unused visit_leave_uint32_array_pair(struct archive *archive, path_stack_t path, object_id_t id,
                               u32 pair_idx, u32 num_pairs, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
-    ng5_unused(pair_idx);
-    ng5_unused(num_pairs);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
+    unused(pair_idx);
+    unused(num_pairs);
 
      
 }
@@ -878,10 +878,10 @@ static void
 ng5_func_unused visit_leave_uint32_array_pairs(struct archive *archive, path_stack_t path, object_id_t id,
                                void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
 
      
 }
@@ -893,12 +893,12 @@ ng5_func_unused visit_enter_uint64_array_pairs(struct archive *archive, path_sta
                                object_id_t id, const field_sid_t *keys,
                                u32 num_pairs, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
-    ng5_unused(keys);
-    ng5_unused(num_pairs);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
+    unused(keys);
+    unused(num_pairs);
 
      
 
@@ -910,14 +910,14 @@ ng5_func_unused visit_enter_uint64_array_pair(struct archive *archive, path_stac
                               field_sid_t key, u32 entry_idx, u32 num_elems,
                               void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
 
-    ng5_unused(key);
-    ng5_unused(entry_idx);
-    ng5_unused(num_elems);
+    unused(key);
+    unused(entry_idx);
+    unused(num_elems);
 
      
 }
@@ -927,15 +927,15 @@ ng5_func_unused visit_uint64_array_pair (struct archive *archive, path_stack_t p
                          field_sid_t key, u32 entry_idx, u32 max_entries,
                          const field_u64_t *array, u32 array_length, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
-    ng5_unused(key);
-    ng5_unused(entry_idx);
-    ng5_unused(max_entries);
-    ng5_unused(array);
-    ng5_unused(array_length);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
+    unused(key);
+    unused(entry_idx);
+    unused(max_entries);
+    unused(array);
+    unused(array_length);
 
      
 }
@@ -944,12 +944,12 @@ static void
 ng5_func_unused visit_leave_uint64_array_pair(struct archive *archive, path_stack_t path, object_id_t id,
                               u32 pair_idx, u32 num_pairs, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
-    ng5_unused(pair_idx);
-    ng5_unused(num_pairs);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
+    unused(pair_idx);
+    unused(num_pairs);
 
      
 }
@@ -958,10 +958,10 @@ static void
 ng5_func_unused visit_leave_uint64_array_pairs(struct archive *archive, path_stack_t path, object_id_t id,
                                void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
 
      
 }
@@ -973,12 +973,12 @@ ng5_func_unused visit_enter_number_array_pairs(struct archive *archive, path_sta
                                object_id_t id, const field_sid_t *keys,
                                u32 num_pairs, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
-    ng5_unused(keys);
-    ng5_unused(num_pairs);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
+    unused(keys);
+    unused(num_pairs);
 
      
 
@@ -990,14 +990,14 @@ ng5_func_unused visit_enter_number_array_pair(struct archive *archive, path_stac
                               field_sid_t key, u32 entry_idx, u32 num_elems,
                               void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
 
-    ng5_unused(key);
-    ng5_unused(entry_idx);
-    ng5_unused(num_elems);
+    unused(key);
+    unused(entry_idx);
+    unused(num_elems);
 
      
 }
@@ -1007,16 +1007,16 @@ ng5_func_unused visit_number_array_pair (struct archive *archive, path_stack_t p
                          field_sid_t key, u32 entry_idx, u32 max_entries,
                          const field_number_t *array, u32 array_length, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
 
-    ng5_unused(key);
-    ng5_unused(entry_idx);
-    ng5_unused(max_entries);
-    ng5_unused(array);
-    ng5_unused(array_length);
+    unused(key);
+    unused(entry_idx);
+    unused(max_entries);
+    unused(array);
+    unused(array_length);
 
      
 }
@@ -1025,13 +1025,13 @@ static void
 ng5_func_unused visit_leave_number_array_pair(struct archive *archive, path_stack_t path, object_id_t id,
                               u32 pair_idx, u32 num_pairs, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
 
-    ng5_unused(pair_idx);
-    ng5_unused(num_pairs);
+    unused(pair_idx);
+    unused(num_pairs);
 
      
 }
@@ -1040,10 +1040,10 @@ static void
 ng5_func_unused visit_leave_number_array_pairs(struct archive *archive, path_stack_t path, object_id_t id,
                                void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
 
      
 
@@ -1056,12 +1056,12 @@ ng5_func_unused visit_enter_string_array_pairs(struct archive *archive, path_sta
                                object_id_t id, const field_sid_t *keys,
                                u32 num_pairs, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
-    ng5_unused(keys);
-    ng5_unused(num_pairs);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
+    unused(keys);
+    unused(num_pairs);
 
      
 
@@ -1073,13 +1073,13 @@ ng5_func_unused visit_enter_string_array_pair(struct archive *archive, path_stac
                               field_sid_t key, u32 entry_idx, u32 num_elems,
                               void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
-    ng5_unused(key);
-    ng5_unused(entry_idx);
-    ng5_unused(num_elems);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
+    unused(key);
+    unused(entry_idx);
+    unused(num_elems);
 
      
 }
@@ -1089,16 +1089,16 @@ ng5_func_unused visit_string_array_pair (struct archive *archive, path_stack_t p
                          field_sid_t key, u32 entry_idx, u32 max_entries,
                          const field_sid_t *array, u32 array_length, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
-    ng5_unused(key);
-    ng5_unused(entry_idx);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
+    unused(key);
+    unused(entry_idx);
 
-    ng5_unused(max_entries);
-    ng5_unused(array);
-    ng5_unused(array_length);
+    unused(max_entries);
+    unused(array);
+    unused(array_length);
 
      
 }
@@ -1107,13 +1107,13 @@ static void
 ng5_func_unused visit_leave_string_array_pair(struct archive *archive, path_stack_t path, object_id_t id,
                               u32 pair_idx, u32 num_pairs, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
 
-    ng5_unused(pair_idx);
-    ng5_unused(num_pairs);
+    unused(pair_idx);
+    unused(num_pairs);
 
      
 }
@@ -1122,10 +1122,10 @@ static void
 ng5_func_unused visit_leave_string_array_pairs(struct archive *archive, path_stack_t path, object_id_t id,
                                void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
 
      
 
@@ -1138,13 +1138,13 @@ ng5_func_unused visit_enter_boolean_array_pairs(struct archive *archive, path_st
                                 object_id_t id, const field_sid_t *keys,
                                 u32 num_pairs, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
 
-    ng5_unused(keys);
-    ng5_unused(num_pairs);
+    unused(keys);
+    unused(num_pairs);
 
      
 
@@ -1156,14 +1156,14 @@ ng5_func_unused visit_enter_boolean_array_pair(struct archive *archive, path_sta
                                field_sid_t key, u32 entry_idx, u32 num_elems,
                                void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
 
-    ng5_unused(key);
-    ng5_unused(entry_idx);
-    ng5_unused(num_elems);
+    unused(key);
+    unused(entry_idx);
+    unused(num_elems);
 
      
 
@@ -1174,17 +1174,17 @@ ng5_func_unused visit_boolean_array_pair (struct archive *archive, path_stack_t 
                           field_sid_t key, u32 entry_idx, u32 max_entries,
                           const field_boolean_t *array, u32 array_length, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
 
-    ng5_unused(key);
-    ng5_unused(entry_idx);
+    unused(key);
+    unused(entry_idx);
 
-    ng5_unused(max_entries);
-    ng5_unused(array);
-    ng5_unused(array_length);
+    unused(max_entries);
+    unused(array);
+    unused(array_length);
 
      
 
@@ -1194,13 +1194,13 @@ static void
 ng5_func_unused visit_leave_boolean_array_pair(struct archive *archive, path_stack_t path, object_id_t id,
                                u32 pair_idx, u32 num_pairs, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
 
-    ng5_unused(pair_idx);
-    ng5_unused(num_pairs);
+    unused(pair_idx);
+    unused(num_pairs);
 
      
 
@@ -1210,10 +1210,10 @@ static void
 ng5_func_unused visit_leave_boolean_array_pairs(struct archive *archive, path_stack_t path, object_id_t id,
                                 void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
 
      
 
@@ -1225,12 +1225,12 @@ ng5_func_unused visit_enter_null_array_pairs(struct archive *archive, path_stack
                                                         const field_sid_t *keys, u32 num_pairs,
                                                         void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
-    ng5_unused(keys);
-    ng5_unused(num_pairs);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
+    unused(keys);
+    unused(num_pairs);
 
      
 
@@ -1242,14 +1242,14 @@ static void
 ng5_func_unused visit_enter_null_array_pair(struct archive *archive, path_stack_t path, object_id_t id,
                                     field_sid_t key, u32 entry_idx, u32 num_elems, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
 
-    ng5_unused(key);
-    ng5_unused(entry_idx);
-    ng5_unused(num_elems);
+    unused(key);
+    unused(entry_idx);
+    unused(num_elems);
 
      
 }
@@ -1259,16 +1259,16 @@ ng5_func_unused visit_null_array_pair (struct archive *archive, path_stack_t pat
                                field_sid_t key, u32 entry_idx, u32 max_entries,
                                field_u32_t num_nulls, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
 
-    ng5_unused(key);
-    ng5_unused(entry_idx);
+    unused(key);
+    unused(entry_idx);
 
-    ng5_unused(max_entries);
-    ng5_unused(num_nulls);
+    unused(max_entries);
+    unused(num_nulls);
 
      
 }
@@ -1277,13 +1277,13 @@ static void
 ng5_func_unused visit_leave_null_array_pair(struct archive *archive, path_stack_t path, object_id_t id,
                                     u32 pair_idx, u32 num_pairs, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
 
-    ng5_unused(pair_idx);
-    ng5_unused(num_pairs);
+    unused(pair_idx);
+    unused(num_pairs);
 
      
 
@@ -1294,10 +1294,10 @@ static void
 ng5_func_unused visit_leave_null_array_pairs(struct archive *archive, path_stack_t path, object_id_t id,
                                      void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(capture);
 
      
 
@@ -1308,11 +1308,11 @@ ng5_func_unused before_visit_object_array(struct archive *archive, path_stack_t 
                                                      object_id_t parent_id, field_sid_t key,
                                                      void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(capture);
-    ng5_unused(parent_id);
-    ng5_unused(key);
+    unused(archive);
+    unused(path);
+    unused(capture);
+    unused(parent_id);
+    unused(key);
 
     archive_visitor_print_path(stderr, archive, path);
      
@@ -1328,14 +1328,14 @@ ng5_func_unused before_visit_object_array_objects(bool *skip_group_object_ids,
                                           const object_id_t *group_object_ids,
                                           u32 num_group_object_ids, void *capture)
 {
-    ng5_unused(skip_group_object_ids);
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(capture);
-    ng5_unused(parent_id);
-    ng5_unused(key);
-    ng5_unused(group_object_ids);
-    ng5_unused(num_group_object_ids);
+    unused(skip_group_object_ids);
+    unused(archive);
+    unused(path);
+    unused(capture);
+    unused(parent_id);
+    unused(key);
+    unused(group_object_ids);
+    unused(num_group_object_ids);
 
      
 
@@ -1349,13 +1349,13 @@ ng5_func_unused before_visit_object_array_object_property(struct archive *archiv
                                                                      enum field_type nested_value_type,
                                                                      void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(capture);
-    ng5_unused(parent_id);
-    ng5_unused(key);
-    ng5_unused(nested_key);
-    ng5_unused(nested_value_type);
+    unused(archive);
+    unused(path);
+    unused(capture);
+    unused(parent_id);
+    unused(key);
+    unused(nested_key);
+    unused(nested_value_type);
 
      
 
@@ -1371,16 +1371,16 @@ ng5_func_unused visit_object_array_object_property_int8(struct archive *archive,
                                                const field_i8_t *nested_values,
                                                u32 num_nested_values, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(capture);
-    ng5_unused(parent_id);
-    ng5_unused(key);
-    ng5_unused(nested_key);
+    unused(archive);
+    unused(path);
+    unused(capture);
+    unused(parent_id);
+    unused(key);
+    unused(nested_key);
 
-    ng5_unused(nested_object_id);
-    ng5_unused(nested_values);
-    ng5_unused(num_nested_values);
+    unused(nested_object_id);
+    unused(nested_values);
+    unused(num_nested_values);
 
      
 }
@@ -1394,16 +1394,16 @@ ng5_func_unused visit_object_array_object_property_int16(struct archive *archive
                                         const field_i16_t *nested_values,
                                         u32 num_nested_values, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(capture);
-    ng5_unused(parent_id);
-    ng5_unused(key);
-    ng5_unused(nested_key);
+    unused(archive);
+    unused(path);
+    unused(capture);
+    unused(parent_id);
+    unused(key);
+    unused(nested_key);
 
-    ng5_unused(nested_object_id);
-    ng5_unused(nested_values);
-    ng5_unused(num_nested_values);
+    unused(nested_object_id);
+    unused(nested_values);
+    unused(num_nested_values);
 
      
 }
@@ -1417,16 +1417,16 @@ ng5_func_unused visit_object_array_object_property_int32(struct archive *archive
                                          const field_i32_t *nested_values,
                                          u32 num_nested_values, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(capture);
-    ng5_unused(parent_id);
-    ng5_unused(key);
-    ng5_unused(nested_key);
+    unused(archive);
+    unused(path);
+    unused(capture);
+    unused(parent_id);
+    unused(key);
+    unused(nested_key);
 
-    ng5_unused(nested_object_id);
-    ng5_unused(nested_values);
-    ng5_unused(num_nested_values);
+    unused(nested_object_id);
+    unused(nested_values);
+    unused(num_nested_values);
 
      
 }
@@ -1441,16 +1441,16 @@ ng5_func_unused visit_object_array_object_property_int64(struct archive *archive
                                          const field_i64_t *nested_values,
                                          u32 num_nested_values, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(capture);
-    ng5_unused(parent_id);
-    ng5_unused(key);
-    ng5_unused(nested_key);
+    unused(archive);
+    unused(path);
+    unused(capture);
+    unused(parent_id);
+    unused(key);
+    unused(nested_key);
 
-    ng5_unused(nested_object_id);
-    ng5_unused(nested_values);
-    ng5_unused(num_nested_values);
+    unused(nested_object_id);
+    unused(nested_values);
+    unused(num_nested_values);
 
      
 }
@@ -1466,16 +1466,16 @@ ng5_func_unused visit_object_array_object_property_uint8(struct archive *archive
                                          const field_u8_t *nested_values,
                                          u32 num_nested_values, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(capture);
-    ng5_unused(parent_id);
-    ng5_unused(key);
-    ng5_unused(nested_key);
+    unused(archive);
+    unused(path);
+    unused(capture);
+    unused(parent_id);
+    unused(key);
+    unused(nested_key);
 
-    ng5_unused(nested_object_id);
-    ng5_unused(nested_values);
-    ng5_unused(num_nested_values);
+    unused(nested_object_id);
+    unused(nested_values);
+    unused(num_nested_values);
 
      
 }
@@ -1490,16 +1490,16 @@ ng5_func_unused visit_object_array_object_property_uint16(struct archive *archiv
                                         const field_u16_t *nested_values,
                                         u32 num_nested_values, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(capture);
-    ng5_unused(parent_id);
-    ng5_unused(key);
-    ng5_unused(nested_key);
+    unused(archive);
+    unused(path);
+    unused(capture);
+    unused(parent_id);
+    unused(key);
+    unused(nested_key);
 
-    ng5_unused(nested_object_id);
-    ng5_unused(nested_values);
-    ng5_unused(num_nested_values);
+    unused(nested_object_id);
+    unused(nested_values);
+    unused(num_nested_values);
 
      
 }
@@ -1514,15 +1514,15 @@ ng5_func_unused visit_object_array_object_property_uint32(struct archive *archiv
                                          const field_u32_t *nested_values,
                                          u32 num_nested_values, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(capture);
-    ng5_unused(parent_id);
-    ng5_unused(key);
-    ng5_unused(nested_key);
-    ng5_unused(nested_object_id);
-    ng5_unused(nested_values);
-    ng5_unused(num_nested_values);
+    unused(archive);
+    unused(path);
+    unused(capture);
+    unused(parent_id);
+    unused(key);
+    unused(nested_key);
+    unused(nested_object_id);
+    unused(nested_values);
+    unused(num_nested_values);
 
      
 }
@@ -1537,16 +1537,16 @@ ng5_func_unused visit_object_array_object_property_uint64(struct archive *archiv
                                          const field_u64_t *nested_values,
                                          u32 num_nested_values, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(capture);
-    ng5_unused(parent_id);
-    ng5_unused(key);
-    ng5_unused(nested_key);
+    unused(archive);
+    unused(path);
+    unused(capture);
+    unused(parent_id);
+    unused(key);
+    unused(nested_key);
 
-    ng5_unused(nested_object_id);
-    ng5_unused(nested_values);
-    ng5_unused(num_nested_values);
+    unused(nested_object_id);
+    unused(nested_values);
+    unused(num_nested_values);
 
      
 }
@@ -1561,16 +1561,16 @@ ng5_func_unused visit_object_array_object_property_numbers(struct archive *archi
                                          const field_number_t *nested_values,
                                          u32 num_nested_values, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(capture);
-    ng5_unused(parent_id);
-    ng5_unused(key);
-    ng5_unused(nested_key);
+    unused(archive);
+    unused(path);
+    unused(capture);
+    unused(parent_id);
+    unused(key);
+    unused(nested_key);
 
-    ng5_unused(nested_object_id);
-    ng5_unused(nested_values);
-    ng5_unused(num_nested_values);
+    unused(nested_object_id);
+    unused(nested_values);
+    unused(num_nested_values);
 
      
 }
@@ -1585,16 +1585,16 @@ ng5_func_unused visit_object_array_object_property_strings(struct archive *archi
                                           const field_sid_t *nested_values,
                                           u32 num_nested_values, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(capture);
-    ng5_unused(parent_id);
-    ng5_unused(key);
-    ng5_unused(nested_key);
+    unused(archive);
+    unused(path);
+    unused(capture);
+    unused(parent_id);
+    unused(key);
+    unused(nested_key);
 
-    ng5_unused(nested_object_id);
-    ng5_unused(nested_values);
-    ng5_unused(num_nested_values);
+    unused(nested_object_id);
+    unused(nested_values);
+    unused(num_nested_values);
 
      
 }
@@ -1609,16 +1609,16 @@ ng5_func_unused visit_object_array_object_property_booleans(struct archive *arch
                                           const field_boolean_t *nested_values,
                                           u32 num_nested_values, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(capture);
-    ng5_unused(parent_id);
-    ng5_unused(key);
-    ng5_unused(nested_key);
+    unused(archive);
+    unused(path);
+    unused(capture);
+    unused(parent_id);
+    unused(key);
+    unused(nested_key);
 
-    ng5_unused(nested_object_id);
-    ng5_unused(nested_values);
-    ng5_unused(num_nested_values);
+    unused(nested_object_id);
+    unused(nested_values);
+    unused(num_nested_values);
 
      
 }
@@ -1632,16 +1632,16 @@ ng5_func_unused visit_object_array_object_property_nulls(struct archive *archive
                                            const field_u32_t *nested_values,
                                            u32 num_nested_values, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(capture);
-    ng5_unused(parent_id);
-    ng5_unused(key);
-    ng5_unused(nested_key);
+    unused(archive);
+    unused(path);
+    unused(capture);
+    unused(parent_id);
+    unused(key);
+    unused(nested_key);
 
-    ng5_unused(nested_object_id);
-    ng5_unused(nested_values);
-    ng5_unused(num_nested_values);
+    unused(nested_object_id);
+    unused(nested_values);
+    unused(num_nested_values);
 
      
 }
@@ -1655,15 +1655,15 @@ ng5_func_unused before_object_array_object_property_object(struct archive *archi
                                                                       u32 nested_value_object_id,
                                                                       void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(capture);
-    ng5_unused(parent_id);
-    ng5_unused(key);
-    ng5_unused(nested_key);
+    unused(archive);
+    unused(path);
+    unused(capture);
+    unused(parent_id);
+    unused(key);
+    unused(nested_key);
 
-    ng5_unused(nested_object_id);
-    ng5_unused(nested_value_object_id);
+    unused(nested_object_id);
+    unused(nested_value_object_id);
 
      archive_visitor_print_path(stdout, archive, path);
 
@@ -2057,7 +2057,7 @@ leave:
 static bool
 process_command(struct archive *archive)
 {
-    ng5_unused(archive);
+    unused(archive);
 
     fprintf(stdout, "> ");
 
@@ -2203,10 +2203,10 @@ cache_monitor(void * data)
 
 bool moduleCliInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
 {
-    ng5_unused(manager);
-    ng5_unused(argv);
-    ng5_unused(argc);
-    ng5_unused(file);
+    unused(manager);
+    unused(argv);
+    unused(argc);
+    unused(file);
 
     if (argc != 1) {
         NG5_CONSOLE_WRITELN(file, "Run '%s' to see usage.", "$ types-tool cli");

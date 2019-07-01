@@ -31,7 +31,7 @@ static int convertJs2Model(struct js_to_context *context, FILE *file, bool optim
     fseek(f, 0, SEEK_SET);
     context->jsonContent = malloc(fsize + 1);
     size_t nread = fread(context->jsonContent, fsize, 1, f);
-    ng5_unused(nread);
+    unused(nread);
     fclose(f);
     context->jsonContent[fsize] = 0;
 
@@ -141,7 +141,7 @@ success:
 
 bool moduleCheckJsInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
 {
-    ng5_unused(manager);
+    unused(manager);
 
     struct js_to_context cabContext;
 
@@ -311,7 +311,7 @@ static void tracker_end_string_id_index_baking()
 
 bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
 {
-    ng5_unused(manager);
+    unused(manager);
 
     if (argc < 2) {
         NG5_CONSOLE_WRITE(file, "Require at least <output> and <input> parameters for <args>.%s", "");
@@ -423,7 +423,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
         fseek(f, 0, SEEK_SET);
         char *jsonContent = malloc(fsize + 1);
         size_t nread = fread(jsonContent, fsize, 1, f);
-        ng5_unused(nread);
+        unused(nread);
         fclose(f);
         jsonContent[fsize] = 0;
 
@@ -508,10 +508,10 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
 
 bool moduleViewCabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
 {
-    ng5_unused(argc);
-    ng5_unused(argv);
-    ng5_unused(file);
-    ng5_unused(manager);
+    unused(argc);
+    unused(argv);
+    unused(file);
+    unused(manager);
 
     NG5_CONSOLE_OUTPUT_OFF()
 
@@ -542,7 +542,7 @@ bool moduleViewCabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *m
 
 bool moduleInspectInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
 {
-    ng5_unused(manager);
+    unused(manager);
 
     if (argc < 1) {
         NG5_CONSOLE_WRITE(file, "Require input file <input> as parameter for <args>.%s", "");
@@ -586,10 +586,10 @@ bool moduleInspectInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *m
 
 bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
 {
-    ng5_unused(argc);
-    ng5_unused(argv);
-    ng5_unused(file);
-    ng5_unused(manager);
+    unused(argc);
+    unused(argv);
+    unused(file);
+    unused(manager);
 
     if (argc != 1) {
         NG5_CONSOLE_WRITE(file, "Require exactly one <input> parameter for <args>.%s", "");
@@ -628,7 +628,7 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
 
 bool moduleListInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
 {
-    ng5_unused(manager);
+    unused(manager);
 
     if (argc != 1) {
         NG5_CONSOLE_WRITE(file, "Require one constant for <args> parameter.%s", "");

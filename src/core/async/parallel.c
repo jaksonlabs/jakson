@@ -212,7 +212,7 @@ NG5_EXPORT(bool) parallel_parallel_for(const void *base, size_t width, size_t le
 
 void mapProxy(const void *src, size_t src_width, size_t len, void *args, thread_id_t tid)
 {
-        ng5_unused(tid);
+        unused(tid);
         ng5_cast(struct map_args *, mapArgs, args);
         size_t globalStart = (src - mapArgs->src) / src_width;
 
@@ -245,7 +245,7 @@ NG5_EXPORT(bool) parallel_map_exec(void *dst, const void *src, size_t src_width,
 
 void gather_function(const void *start, size_t width, size_t len, void *args, thread_id_t tid)
 {
-        ng5_unused(tid);
+        unused(tid);
         ng5_cast(struct gather_scatter_args *, gather_args, args);
         size_t global_index_start = (start - gather_args->dst) / width;
 
@@ -342,7 +342,7 @@ NG5_EXPORT(bool) parallel_sequential_gather_adr(void *dst, const void *src, size
 
 void parallel_gather_adr_func(const void *start, size_t width, size_t len, void *args, thread_id_t tid)
 {
-        ng5_unused(tid);
+        unused(tid);
         ng5_cast(struct gather_scatter_args *, gather_args, args);
 
         prefetch_read(gather_args->idx);
@@ -382,7 +382,7 @@ NG5_EXPORT(bool) parallel_parallel_gather_adr_func(void *dst, const void *src, s
 
 void parallel_scatter_func(const void *start, size_t width, size_t len, void *args, thread_id_t tid)
 {
-        ng5_unused(tid);
+        unused(tid);
         ng5_cast(struct gather_scatter_args *, scatter_args, args);
 
         prefetch_read(scatter_args->idx);
@@ -475,12 +475,12 @@ NG5_EXPORT(bool) parallel_sequential_shuffle(void *dst, const void *src, size_t 
 NG5_EXPORT(bool) parallel_parallel_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
         const size_t *src_idx, size_t idx_len)
 {
-        ng5_unused(dst);
-        ng5_unused(src);
-        ng5_unused(width);
-        ng5_unused(dst_idx);
-        ng5_unused(src_idx);
-        ng5_unused(idx_len);
+        unused(dst);
+        unused(src);
+        unused(width);
+        unused(dst_idx);
+        unused(src_idx);
+        unused(idx_len);
         NG5_NOT_IMPLEMENTED
 }
 

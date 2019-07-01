@@ -93,8 +93,8 @@ bool huffman_dump_dictionary(FILE *file, struct memfile *memfile)
 
 bool huffman_dump_string_table_entry(FILE *file, struct memfile *memfile)
 {
-        ng5_unused(file);
-        ng5_unused(memfile);
+        unused(file);
+        unused(memfile);
 
         struct pack_huffman_str_info info;
 
@@ -128,9 +128,9 @@ NG5_EXPORT(bool) pack_huffman_read_extra(struct packer *self, FILE *src, size_t 
 {
         ng5_check_tag(self->tag, PACK_HUFFMAN);
 
-        ng5_unused(self);
-        ng5_unused(src);
-        ng5_unused(nbytes);
+        unused(self);
+        unused(src);
+        unused(nbytes);
 
         abort(); /* not implemented */
         return false;
@@ -138,7 +138,7 @@ NG5_EXPORT(bool) pack_huffman_read_extra(struct packer *self, FILE *src, size_t 
 
 NG5_EXPORT(bool) pack_huffman_print_extra(struct packer *self, FILE *file, struct memfile *src)
 {
-        ng5_unused(self);
+        unused(self);
 
         huffman_dump_dictionary(file, src);
 
@@ -148,10 +148,10 @@ NG5_EXPORT(bool) pack_huffman_print_extra(struct packer *self, FILE *file, struc
 NG5_EXPORT(bool) pack_huffman_print_encoded(struct packer *self, FILE *file, struct memfile *src,
         u32 decompressed_strlen)
 {
-        ng5_unused(self);
-        ng5_unused(file);
-        ng5_unused(src);
-        ng5_unused(decompressed_strlen);
+        unused(self);
+        unused(file);
+        unused(src);
+        unused(decompressed_strlen);
 
         huffman_dump_string_table_entry(file, src);
 
@@ -171,10 +171,10 @@ bool pack_huffman_encode_string(struct packer *self, struct memfile *dst, struct
 
 NG5_EXPORT(bool) pack_huffman_decode_string(struct packer *self, char *dst, size_t strlen, FILE *src)
 {
-        ng5_unused(self);
-        ng5_unused(dst);
-        ng5_unused(strlen);
-        ng5_unused(src);
+        unused(self);
+        unused(dst);
+        unused(strlen);
+        unused(src);
         abort(); /* not implemented */
         return false;
 }

@@ -453,7 +453,7 @@ static bool parse_array(struct json_array *array, struct err *err,
         struct vector ofType(struct json_token) *token_stream, size_t *token_idx)
 {
         struct json_token token = get_token(token_stream, *token_idx);
-        ng5_unused(token);
+        unused(token);
         assert(token.type == ARRAY_OPEN);
         NEXT_TOKEN(token_idx); /** Skip '[' */
 
@@ -948,7 +948,7 @@ static void json_ast_node_string_drop(struct json_string *string)
 
 static void json_ast_node_number_drop(struct json_number *number)
 {
-        ng5_unused(number);
+        unused(number);
 }
 
 static bool json_ast_node_value_drop(struct json_node_value *value, struct err *err)

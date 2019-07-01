@@ -22,9 +22,9 @@
 NG5_EXPORT(bool) encoded_doc_collection_create(struct encoded_doc_list *collection, struct err *err,
         struct archive *archive)
 {
-        ng5_unused(collection);
-        ng5_unused(err);
-        ng5_unused(archive);
+        unused(collection);
+        unused(err);
+        unused(archive);
 
         vec_create(&collection->flat_object_collection, NULL, sizeof(struct encoded_doc), 5000000);
         hashtable_create(&collection->index, err, sizeof(object_id_t), sizeof(u32), 5000000);
@@ -36,7 +36,7 @@ NG5_EXPORT(bool) encoded_doc_collection_create(struct encoded_doc_list *collecti
 
 NG5_EXPORT(bool) encoded_doc_collection_drop(struct encoded_doc_list *collection)
 {
-        ng5_unused(collection);
+        unused(collection);
 
         hashtable_drop(&collection->index);
         for (u32 i = 0; i < collection->flat_object_collection.num_elems; i++) {
@@ -87,8 +87,8 @@ NG5_EXPORT(struct encoded_doc *)encoded_doc_collection_get_or_append(struct enco
 
 NG5_EXPORT(bool) encoded_doc_collection_print(FILE *file, struct encoded_doc_list *collection)
 {
-        ng5_unused(file);
-        ng5_unused(collection);
+        unused(file);
+        unused(collection);
 
         if (collection->flat_object_collection.num_elems > 0) {
                 struct encoded_doc *root = vec_get(&collection->flat_object_collection, 0, struct encoded_doc);
@@ -100,7 +100,7 @@ NG5_EXPORT(bool) encoded_doc_collection_print(FILE *file, struct encoded_doc_lis
 
 NG5_EXPORT(bool) encoded_doc_drop(struct encoded_doc *doc)
 {
-        ng5_unused(doc);
+        unused(doc);
         for (u32 i = 0; i < doc->props_arrays.num_elems; i++) {
                 struct encoded_doc_prop_array *array = vec_get(&doc->props_arrays, i, struct encoded_doc_prop_array);
                 vec_drop(&array->values);
@@ -457,9 +457,9 @@ DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(null, field_u32_t, FIELD_NULL)
 
 NG5_EXPORT(bool) encoded_doc_array_push_object(struct encoded_doc *doc, field_sid_t key, object_id_t id)
 {
-        ng5_unused(doc);
-        ng5_unused(key);
-        ng5_unused(id);
+        unused(doc);
+        unused(key);
+        unused(id);
 
         error_if_null(doc)
         const u32 *prop_pos = hashtable_get_value(&doc->prop_array_index, &key);
@@ -474,9 +474,9 @@ NG5_EXPORT(bool) encoded_doc_array_push_object(struct encoded_doc *doc, field_si
 
 NG5_EXPORT(bool) encoded_doc_array_push_object_decoded(struct encoded_doc *doc, const char *key, object_id_t id)
 {
-        ng5_unused(doc);
-        ng5_unused(key);
-        ng5_unused(id);
+        unused(doc);
+        unused(key);
+        unused(id);
 
         error_if_null(doc)
         u32 prop_pos = (u32) -1;

@@ -28,13 +28,13 @@ visit_string_pairs (struct archive *archive, path_stack_t path, object_id_t id,
                               const field_sid_t *keys, const field_sid_t *values, u32 num_pairs,
                               void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(id);
-    ng5_unused(keys);
-    ng5_unused(values);
-    ng5_unused(num_pairs);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(id);
+    unused(keys);
+    unused(values);
+    unused(num_pairs);
+    unused(capture);
 
     struct capture *params = (struct capture *) capture;
 
@@ -90,11 +90,11 @@ before_visit_object_array(struct archive *archive, path_stack_t path,
                                                      object_id_t parent_id, field_sid_t key,
                                                      void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(parent_id);
-    ng5_unused(capture);
-    ng5_unused(key);
+    unused(archive);
+    unused(path);
+    unused(parent_id);
+    unused(capture);
+    unused(key);
 
     enum visit_policy follow = VISIT_EXCLUDE;
 
@@ -127,13 +127,13 @@ before_visit_object_array_object_property(struct archive *archive, path_stack_t 
                                           enum field_type nested_value_type,
                                           void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(parent_id);
-    ng5_unused(key);
-    ng5_unused(nested_key);
-    ng5_unused(nested_value_type);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(parent_id);
+    unused(key);
+    unused(nested_key);
+    unused(nested_value_type);
+    unused(capture);
 
     enum visit_policy follow = VISIT_EXCLUDE;
 
@@ -166,15 +166,15 @@ visit_object_array_object_property_string(struct archive *archive, path_stack_t 
                                                const field_sid_t *nested_values,
                                                u32 num_nested_values, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(parent_id);
-    ng5_unused(key);
-    ng5_unused(nested_object_id);
-    ng5_unused(nested_key);
-    ng5_unused(nested_values);
-    ng5_unused(num_nested_values);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(parent_id);
+    unused(key);
+    unused(nested_object_id);
+    unused(nested_key);
+    unused(nested_values);
+    unused(num_nested_values);
+    unused(capture);
 
 
 
@@ -242,15 +242,15 @@ visit_object_array_object_property_int8(struct archive *archive, path_stack_t pa
                                           const field_i8_t *nested_values,
                                           u32 num_nested_values, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(parent_id);
-    ng5_unused(key);
-    ng5_unused(nested_object_id);
-    ng5_unused(nested_key);
-    ng5_unused(nested_values);
-    ng5_unused(num_nested_values);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(parent_id);
+    unused(key);
+    unused(nested_object_id);
+    unused(nested_key);
+    unused(nested_values);
+    unused(num_nested_values);
+    unused(capture);
 
 
 
@@ -306,15 +306,15 @@ visit_object_array_object_property_int16(struct archive *archive, path_stack_t p
                                         const field_i16_t *nested_values,
                                         u32 num_nested_values, void *capture)
 {
-    ng5_unused(archive);
-    ng5_unused(path);
-    ng5_unused(parent_id);
-    ng5_unused(key);
-    ng5_unused(nested_object_id);
-    ng5_unused(nested_key);
-    ng5_unused(nested_values);
-    ng5_unused(num_nested_values);
-    ng5_unused(capture);
+    unused(archive);
+    unused(path);
+    unused(parent_id);
+    unused(key);
+    unused(nested_object_id);
+    unused(nested_key);
+    unused(nested_values);
+    unused(num_nested_values);
+    unused(capture);
 
 
 
@@ -397,9 +397,9 @@ ops_show_values(timestamp_t *duration, struct vector ofType(ops_show_values_resu
                 struct archive *archive, u32 offset, u32 limit, i32 between_lower_bound,
                 i32 between_upper_bound, const char *contains_string)
 {
-    ng5_unused(result);
-    ng5_unused(path);
-    ng5_unused(archive);
+    unused(result);
+    unused(path);
+    unused(archive);
 
     struct archive_visitor visitor = { 0 };
     struct archive_visitor_desc desc = { .visit_mask = NG5_ARCHIVE_ITER_MASK_ANY };

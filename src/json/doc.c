@@ -1318,7 +1318,7 @@ struct columndoc *doc_entries_columndoc(const struct doc_bulk *bulk, const struc
 
 NG5_EXPORT(bool) doc_entries_drop(struct doc_entries *partition)
 {
-        ng5_unused(partition);
+        unused(partition);
         return true;
 }
 

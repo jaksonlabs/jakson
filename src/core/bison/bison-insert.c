@@ -307,8 +307,8 @@ NG5_EXPORT(bool) bison_insert_float(struct bison_insert *inserter, float value)
 
 NG5_EXPORT(bool) bison_insert_string(struct bison_insert *inserter, const char *value)
 {
-        ng5_unused(inserter);
-        ng5_unused(value);
+        unused(inserter);
+        unused(value);
         error_if(inserter->context_type != BISON_ARRAY, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
 
         size_t value_strlen = strlen(value);

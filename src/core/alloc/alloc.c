@@ -80,7 +80,7 @@ NG5_EXPORT (bool) alloc_clone(struct allocator *dst, const struct allocator *src
 
 static void *invoke_malloc(struct allocator *self, size_t size)
 {
-        ng5_unused(self);
+        unused(self);
         void *result;
 
         errno = 0;
@@ -93,7 +93,7 @@ static void *invoke_malloc(struct allocator *self, size_t size)
 
 static void *invoke_realloc(struct allocator *self, void *ptr, size_t size)
 {
-        ng5_unused(self);
+        unused(self);
         void *result;
 
         if ((result = realloc(ptr, size)) == NULL) {
@@ -106,7 +106,7 @@ static void *invoke_realloc(struct allocator *self, void *ptr, size_t size)
 
 static void invoke_free(struct allocator *self, void *ptr)
 {
-        ng5_unused(self);
+        unused(self);
         return free(ptr);
 }
 

@@ -128,8 +128,8 @@ int main (int argc, char **argv)
 
 static bool showHelp(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
 {
-    ng5_unused(argc);
-    ng5_unused(argv);
+    unused(argc);
+    unused(argv);
     opt_mgr_show_help(file, manager);
     return true;
 }

@@ -145,9 +145,9 @@ NG5_EXPORT(void) query_drop_index_string_id_to_offset(struct sid_to_offset *inde
 
 NG5_EXPORT(bool) query_index_id_to_offset_serialize(FILE *file, struct err *err, struct sid_to_offset *index)
 {
-        ng5_unused(file);
-        ng5_unused(err);
-        ng5_unused(index);
+        unused(file);
+        unused(err);
+        unused(index);
         return hashtable_serialize(file, &index->mapping);
 }
 

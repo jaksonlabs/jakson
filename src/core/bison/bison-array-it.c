@@ -529,7 +529,7 @@ static bool remove_field(struct memfile *memfile, struct err *err, enum bison_fi
 
 NG5_EXPORT(bool) bison_array_it_remove(struct bison_array_it *it)
 {
-        ng5_unused(it);
+        unused(it);
         error_if_null(it);
         enum bison_field_type type;
         if (bison_array_it_field_type(&type, it)) {
@@ -550,7 +550,7 @@ NG5_EXPORT(bool) bison_array_it_remove(struct bison_array_it *it)
 
 NG5_EXPORT(bool) bison_array_it_update(struct bison_array_it *it)
 {
-        ng5_unused(it);
+        unused(it);
         return false;
 }
 
