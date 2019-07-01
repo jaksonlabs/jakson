@@ -25,42 +25,12 @@
 #include "core/mem/file.h"
 #include "core/async/spin.h"
 #include "core/bison/bison.h"
+#include "core/bison/bison-int.h"
 
 NG5_BEGIN_DECL
 
 struct bison_array_it; /* forwarded from bison-array-it.h */
 struct bison_column_it; /* forwarded from bison-column-it.h */
-
-struct bison_insert
-{
-        enum bison_container_type context_type;
-        union {
-                struct bison_array_it *array;
-                struct bison_column_it *column;
-        } context;
-
-        struct memfile memfile;
-        offset_t position;
-        struct err err;
-};
-
-struct bison_insert_array_state
-{
-        struct bison_insert *parent_inserter;
-
-        struct bison_array_it *nested_array;
-        struct bison_insert nested_inserter;
-};
-
-struct bison_insert_column_state
-{
-        struct bison_insert *parent_inserter;
-
-        enum bison_field_type type;
-        struct bison_column_it *nested_column;
-        struct bison_insert nested_inserter;
-
-};
 
 NG5_EXPORT(bool) bison_int_insert_create_for_array(struct bison_insert *inserter, struct bison_array_it *context);
 

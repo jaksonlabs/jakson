@@ -3967,6 +3967,362 @@ TEST(BisonTest, BisonShrinkIssueFix)
         bison_drop(&doc);
 }
 
+static void create_nested_doc(struct bison *rev_doc)
+{
+        struct bison doc;
+        struct bison_revise revise;
+        struct bison_new new_ctx;
+        struct bison_array_it it;
+        struct bison_insert ins, nested_ins, *array_ins, *col_ins, *nested_array_ins;
+        struct bison_insert_array_state array_state, nested_array_state;
+        struct bison_insert_column_state column_state;
+        struct bison_update updater;
+        struct string_builder sb;
+        const char *json;
+
+        bison_create_empty(&doc);
+        bison_revise_begin(&revise, rev_doc, &doc);
+        bison_revise_iterator_open(&it, &revise);
+
+        bison_array_it_insert_begin(&nested_ins, &it);
+
+        array_ins = bison_insert_array_begin(&array_state, &nested_ins, 10);
+
+        bison_insert_null(array_ins);
+        bison_insert_true(array_ins);
+        bison_insert_false(array_ins);
+        bison_insert_u8(array_ins, 8);
+        bison_insert_u16(array_ins, 16);
+        bison_insert_string(array_ins, "Hello, World!");
+        bison_insert_binary(array_ins, "My Plain-Text", strlen("My Plain-Text"), "txt", NULL);
+        bison_insert_binary(array_ins, "My Own Format", strlen("My Own Format"), NULL, "own");
+        col_ins = bison_insert_column_begin(&column_state, array_ins, BISON_FIELD_TYPE_NUMBER_U32, 20);
+
+        bison_insert_u32(col_ins, 32);
+        bison_insert_u32(col_ins, 33);
+        bison_insert_u32(col_ins, 34);
+        bison_insert_u32(col_ins, 35);
+
+        bison_insert_column_end(&column_state);
+
+        bison_insert_array_begin(&nested_array_state, array_ins, 20);
+        bison_insert_array_end(&nested_array_state);
+
+        nested_array_ins = bison_insert_array_begin(&nested_array_state, array_ins, 20);
+
+        bison_insert_null(nested_array_ins);
+        bison_insert_true(nested_array_ins);
+        bison_insert_false(nested_array_ins);
+        bison_insert_u8(nested_array_ins, 8);
+        bison_insert_u16(nested_array_ins, 16);
+        bison_insert_string(nested_array_ins, "Hello, World!");
+        bison_insert_binary(nested_array_ins, "My Plain-Text", strlen("My Plain-Text"), "txt", NULL);
+        bison_insert_binary(nested_array_ins, "My Own Format", strlen("My Own Format"), NULL, "own");
+        col_ins = bison_insert_column_begin(&column_state, nested_array_ins, BISON_FIELD_TYPE_NUMBER_U32, 20);
+
+        bison_insert_u32(col_ins, 32);
+        bison_insert_u32(col_ins, 33);
+        bison_insert_u32(col_ins, 34);
+        bison_insert_u32(col_ins, 35);
+
+        bison_insert_column_end(&column_state);
+
+        bison_insert_array_end(&nested_array_state);
+
+        bison_insert_array_end(&array_state);
+
+        array_ins = bison_insert_array_begin(&array_state, &nested_ins, 10);
+
+        bison_insert_null(array_ins);
+        bison_insert_true(array_ins);
+        bison_insert_false(array_ins);
+        bison_insert_u8(array_ins, 8);
+        bison_insert_u16(array_ins, 16);
+        bison_insert_string(array_ins, "Hello, World!");
+        bison_insert_binary(array_ins, "My Plain-Text", strlen("My Plain-Text"), "txt", NULL);
+        bison_insert_binary(array_ins, "My Own Format", strlen("My Own Format"), NULL, "own");
+        col_ins = bison_insert_column_begin(&column_state, array_ins, BISON_FIELD_TYPE_NUMBER_U32, 20);
+
+        bison_insert_u32(col_ins, 32);
+        bison_insert_u32(col_ins, 33);
+        bison_insert_u32(col_ins, 34);
+        bison_insert_u32(col_ins, 35);
+
+        bison_insert_column_end(&column_state);
+
+        bison_insert_array_begin(&nested_array_state, array_ins, 20);
+        bison_insert_array_end(&nested_array_state);
+
+        nested_array_ins = bison_insert_array_begin(&nested_array_state, array_ins, 20);
+
+        bison_insert_null(nested_array_ins);
+        bison_insert_true(nested_array_ins);
+        bison_insert_false(nested_array_ins);
+        bison_insert_u8(nested_array_ins, 8);
+        bison_insert_u16(nested_array_ins, 16);
+        bison_insert_string(nested_array_ins, "Hello, World!");
+        bison_insert_binary(nested_array_ins, "My Plain-Text", strlen("My Plain-Text"), "txt", NULL);
+        bison_insert_binary(nested_array_ins, "My Own Format", strlen("My Own Format"), NULL, "own");
+        col_ins = bison_insert_column_begin(&column_state, nested_array_ins, BISON_FIELD_TYPE_NUMBER_U32, 20);
+
+        bison_insert_u32(col_ins, 32);
+        bison_insert_u32(col_ins, 33);
+        bison_insert_u32(col_ins, 34);
+        bison_insert_u32(col_ins, 35);
+
+        bison_insert_column_end(&column_state);
+
+        bison_insert_array_end(&nested_array_state);
+
+        bison_insert_array_end(&array_state);
+
+        bison_array_it_insert_end(&nested_ins);
+
+        bison_revise_iterator_close(&it);
+        bison_revise_end(&revise);
+}
+
+TEST(BisonTest, BisonUpdateSetToNull)
+{
+        struct bison doc, rev_doc;
+        struct string_builder sb;
+
+        string_builder_create(&sb);
+        create_nested_doc(&doc);
+
+        /* Each time 'create_nested_doc' is called, the following document will be generated
+
+                [
+                   [
+                      null,
+                      true,
+                      false,
+                      8,
+                      16,
+                      "Hello, World!",
+                      {
+                         "type":"text/plain",
+                         "encoding":"base64",
+                         "binary-string":"TXkgUGxhaW4tVGV4dAAA"
+                      },
+                      {
+                         "type":"own",
+                         "encoding":"base64",
+                         "binary-string":"TXkgT3duIEZvcm1hdAAA"
+                      },
+                      [
+                         32,
+                         33,
+                         34,
+                         35
+                      ],
+                      [
+
+                      ],
+                      [
+                         null,
+                         true,
+                         false,
+                         8,
+                         16,
+                         "Hello, World!",
+                         {
+                            "type":"text/plain",
+                            "encoding":"base64",
+                            "binary-string":"TXkgUGxhaW4tVGV4dAAA"
+                         },
+                         {
+                            "type":"own",
+                            "encoding":"base64",
+                            "binary-string":"TXkgT3duIEZvcm1hdAAA"
+                         },
+                         [
+                            32,
+                            33,
+                            34,
+                            35
+                         ]
+                      ]
+                   ],
+                   [
+                      null,
+                      true,
+                      false,
+                      8,
+                      16,
+                      "Hello, World!",
+                      {
+                         "type":"text/plain",
+                         "encoding":"base64",
+                         "binary-string":"TXkgUGxhaW4tVGV4dAAA"
+                      },
+                      {
+                         "type":"own",
+                         "encoding":"base64",
+                         "binary-string":"TXkgT3duIEZvcm1hdAAA"
+                      },
+                      [
+                         32,
+                         33,
+                         34,
+                         35
+                      ],
+                      [
+
+                      ],
+                      [
+                         null,
+                         true,
+                         false,
+                         8,
+                         16,
+                         "Hello, World!",
+                         {
+                            "type":"text/plain",
+                            "encoding":"base64",
+                            "binary-string":"TXkgUGxhaW4tVGV4dAAA"
+                         },
+                         {
+                            "type":"own",
+                            "encoding":"base64",
+                            "binary-string":"TXkgT3duIEZvcm1hdAAA"
+                         },
+                         [
+                            32,
+                            33,
+                            34,
+                            35
+                         ]
+                      ]
+                   ]
+                ]
+
+         */
+
+
+        printf("built: '%s'\n", bison_to_json(&sb, &doc));
+
+        // Update constant in-place
+       // bison_update_one_set_null("0", &rev_doc, &doc);
+       // printf("altered: '%s'\n", bison_to_json(&sb, &rev_doc));
+
+        // Overwrite constant in-pace w/ constant
+        // Overwrite constant in-pace w/ fixed-type
+        // Overwrite constant in-pace w/ string
+        // Overwrite constant in-pace w/ binary
+        // Overwrite constant in-pace w/ custom binary
+        // Overwrite constant in-pace w/ empty array
+        // Overwrite constant in-pace w/ non-empty array
+        // Overwrite constant in-pace w/ empty column
+        // Overwrite constant in-pace w/ non-empty column
+
+        // Update fixed-type in-place
+        // Overwrite fixed-type in-pace w/ constant
+        // Overwrite fixed-type in-pace w/ fixed-type (w/ same width)
+        // Overwrite fixed-type in-pace w/ fixed-type (w/ other width)
+        // Overwrite fixed-type in-pace w/ string
+        // Overwrite fixed-type in-pace w/ binary
+        // Overwrite fixed-type in-pace w/ custom binary
+        // Overwrite fixed-type in-pace w/ empty array
+        // Overwrite fixed-type in-pace w/ non-empty array
+        // Overwrite fixed-type in-pace w/ empty column
+        // Overwrite fixed-type in-pace w/ non-empty column
+
+        // Update string in-place
+        // Overwrite string in-pace w/ constant
+        // Overwrite string in-pace w/ fixed-type
+        // Overwrite string in-pace w/ string
+        // Overwrite string in-pace w/ binary
+        // Overwrite string in-pace w/ custom binary
+        // Overwrite string in-pace w/ empty array
+        // Overwrite string in-pace w/ non-empty array
+        // Overwrite string in-pace w/ empty column
+        // Overwrite string in-pace w/ non-empty column
+
+        // Update binary in-place
+        // Overwrite binary in-pace w/ constant
+        // Overwrite binary in-pace w/ fixed-type
+        // Overwrite binary in-pace w/ string
+        // Overwrite binary in-pace w/ binary
+        // Overwrite binary in-pace w/ custom binary
+        // Overwrite binary in-pace w/ empty array
+        // Overwrite binary in-pace w/ non-empty array
+        // Overwrite binary in-pace w/ empty column
+        // Overwrite binary in-pace w/ non-empty column
+
+        // Update custom binary in-place
+        // Overwrite custom binary in-pace w/ constant
+        // Overwrite custom binary in-pace w/ fixed-type
+        // Overwrite custom binary in-pace w/ string
+        // Overwrite custom binary in-pace w/ binary
+        // Overwrite custom binary in-pace w/ custom binary
+        // Overwrite custom binary in-pace w/ empty array
+        // Overwrite custom binary in-pace w/ non-empty array
+        // Overwrite custom binary in-pace w/ empty column
+        // Overwrite custom binary in-pace w/ non-empty column
+
+        // Update empty-array binary in-place
+        // Overwrite empty-array in-pace w/ constant
+        // Overwrite empty-array in-pace w/ fixed-type
+        // Overwrite empty-array in-pace w/ string
+        // Overwrite empty-array in-pace w/ binary
+        // Overwrite empty-array in-pace w/ custom binary
+        // Overwrite empty-array in-pace w/ non-empty array
+        // Overwrite empty-array in-pace w/ empty column
+        // Overwrite empty-array in-pace w/ non-empty column
+
+        // Update non-empty array binary in-place
+        // Overwrite non-empty array in-pace w/ constant
+        // Overwrite non-empty array in-pace w/ fixed-type
+        // Overwrite non-empty array in-pace w/ string
+        // Overwrite non-empty array in-pace w/ binary
+        // Overwrite non-empty array in-pace w/ custom binary
+        // Overwrite non-empty array in-pace w/ empty array
+        // Overwrite non-empty array in-pace w/ non-empty array
+        // Overwrite non-empty array in-pace w/ empty column
+        // Overwrite non-empty array in-pace w/ non-empty column
+
+        // Overwrite empty column in-pace w/ constant
+        // Overwrite empty column in-pace w/ fixed-type
+        // Overwrite empty column in-pace w/ string
+        // Overwrite empty column in-pace w/ binary
+        // Overwrite empty column in-pace w/ custom binary
+        // Overwrite empty column in-pace w/ empty array
+        // Overwrite empty column in-pace w/ non-empty array
+        // Overwrite empty column in-pace w/ non-empty column
+
+        // Update non-empty column in-place
+        // Overwrite non-empty column in-pace w/ constant
+        // Overwrite non-empty column in-pace w/ fixed-type
+        // Overwrite non-empty column in-pace w/ string
+        // Overwrite non-empty column in-pace w/ binary
+        // Overwrite non-empty column in-pace w/ custom binary
+        // Overwrite non-empty column in-pace w/ empty array
+        // Overwrite non-empty column in-pace w/ non-empty array
+        // Overwrite non-empty column in-pace w/ empty column
+        // Overwrite non-empty column in-pace w/ non-empty column
+
+        // Update column entry in-place
+        // Overwrite column entry in-pace w/ constant (matching type)
+        // Overwrite column entry in-pace w/ constant (not matching type)
+        // Overwrite column entry in-pace w/ fixed-type (matching type)
+        // Overwrite column entry in-pace w/ fixed-type (not matching type)
+
+        // Overwrite entire document content in-pace w/ constant
+        // Overwrite entire document content in-pace w/ fixed-type
+        // Overwrite entire document content in-pace w/ string
+        // Overwrite entire document content in-pace w/ binary
+        // Overwrite entire document content in-pace w/ custom binary
+        // Overwrite entire document content in-pace w/ empty array
+        // Overwrite entire document content in-pace w/ non-empty array
+        // Overwrite entire document content in-pace w/ empty column
+        // Overwrite entire document content in-pace w/ non-empty column
+
+
+        bison_drop(&doc);
+        string_builder_drop(&sb);
+}
+
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

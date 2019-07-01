@@ -283,7 +283,7 @@ NG5_EXPORT(bool) bison_update_set_float(struct bison_revise *context, const char
         return try_update_value(context, path, value, array_update_float, column_update_float);
 }
 
-NG5_EXPORT(bool) bison_update_unsigned(struct bison_revise *context, const char *path, u64 value)
+NG5_EXPORT(bool) bison_update_set_unsigned(struct bison_revise *context, const char *path, u64 value)
 {
         if (value <= UINT8_MAX) {
                 return bison_update_set_u8(context, path, (u8) value);
@@ -299,7 +299,7 @@ NG5_EXPORT(bool) bison_update_unsigned(struct bison_revise *context, const char 
         }
 }
 
-NG5_EXPORT(bool) bison_update_signed(struct bison_revise *context, const char *path, i64 value)
+NG5_EXPORT(bool) bison_update_set_signed(struct bison_revise *context, const char *path, i64 value)
 {
         if (value >= INT8_MIN && value <= INT8_MAX) {
                 return bison_update_set_i8(context, path, (i8) value);
@@ -315,16 +315,17 @@ NG5_EXPORT(bool) bison_update_signed(struct bison_revise *context, const char *p
         }
 }
 
-NG5_EXPORT(bool) bison_update_string(struct bison_revise *context, const char *value)
+NG5_EXPORT(bool) bison_update_set_string(struct bison_revise *context, const char *path, const char *value)
 {
         // TODO: Implement
         unused(context);
+        unused(path);
         unused(value);
         error_print(NG5_ERR_NOTIMPLEMENTED)
         return false;
 }
 
-NG5_EXPORT(bool) bison_update_binary(struct bison_revise *context, const void *value, size_t nbytes,
+NG5_EXPORT(bool) bison_update_set_binary(struct bison_revise *context, const char *path, const void *value, size_t nbytes,
         const char *file_ext, const char *user_type)
 {
         // TODO: Implement
@@ -333,6 +334,179 @@ NG5_EXPORT(bool) bison_update_binary(struct bison_revise *context, const void *v
         unused(nbytes);
         unused(file_ext);
         unused(user_type);
+        unused(path);
         error_print(NG5_ERR_NOTIMPLEMENTED)
         return false;
+}
+
+NG5_EXPORT(struct bison_insert *) bison_update_set_array_begin(struct bison_revise *context, const char *path,
+        struct bison_insert_array_state *state_out, u64 array_capacity)
+{
+        // TODO: Implement
+        unused(context);
+        unused(state_out);
+        unused(array_capacity);
+        unused(path);
+        error_print(NG5_ERR_NOTIMPLEMENTED)
+        return false;
+}
+
+NG5_EXPORT(bool) bison_update_set_array_end(struct bison_insert_array_state *state_in)
+{
+        // TODO: Implement
+        unused(state_in);
+        error_print(NG5_ERR_NOTIMPLEMENTED)
+        return false;
+}
+
+NG5_EXPORT(struct bison_insert *) bison_update_set_column_begin(struct bison_revise *context, const char *path,
+        struct bison_insert_column_state *state_out, enum bison_field_type type, u64 column_capacity)
+{
+        // TODO: Implement
+        unused(state_out);
+        unused(context);
+        unused(type);
+        unused(column_capacity);
+        unused(path);
+        error_print(NG5_ERR_NOTIMPLEMENTED)
+        return false;
+}
+
+NG5_EXPORT(bool) bison_update_set_column_end(struct bison_insert_column_state *state_in)
+{
+        // TODO: Implement
+        unused(state_in);
+        error_print(NG5_ERR_NOTIMPLEMENTED)
+        return false;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+#define revision_context_delegate_func(rev_doc, doc, func, ...)                                                        \
+({                                                                                                                     \
+        struct bison_revise revise;                                                                                    \
+        bison_revise_begin(&revise, rev_doc, doc);                                                                     \
+        bool status = func(&revise, __VA_ARGS__);                                                                      \
+        bison_revise_end(&revise);                                                                                     \
+        status;                                                                                                        \
+})
+
+NG5_EXPORT(bool) bison_update_one_set_null(const char *dot_path, struct bison *rev_doc, struct bison *doc)
+{
+        return revision_context_delegate_func(rev_doc, doc, bison_update_set_null, dot_path);
+}
+
+NG5_EXPORT(bool) bison_update_one_set_true(const char *dot_path, struct bison *rev_doc, struct bison *doc)
+{
+        return revision_context_delegate_func(rev_doc, doc, bison_update_set_true, dot_path);
+}
+
+NG5_EXPORT(bool) bison_update_one_set_false(const char *dot_path, struct bison *rev_doc, struct bison *doc)
+{
+        return revision_context_delegate_func(rev_doc, doc, bison_update_set_false, dot_path);
+}
+
+NG5_EXPORT(bool) bison_update_one_set_u8(const char *dot_path, struct bison *rev_doc, struct bison *doc, u8 value)
+{
+        return revision_context_delegate_func(rev_doc, doc, bison_update_set_u8, dot_path, value);
+}
+
+NG5_EXPORT(bool) bison_update_one_set_u16(const char *dot_path, struct bison *rev_doc, struct bison *doc, u16 value)
+{
+        return revision_context_delegate_func(rev_doc, doc, bison_update_set_u16, dot_path, value);
+}
+
+NG5_EXPORT(bool) bison_update_one_set_u32(const char *dot_path, struct bison *rev_doc, struct bison *doc, u32 value)
+{
+        return revision_context_delegate_func(rev_doc, doc, bison_update_set_u32, dot_path, value);
+}
+
+NG5_EXPORT(bool) bison_update_one_set_u64(const char *dot_path, struct bison *rev_doc, struct bison *doc, u64 value)
+{
+        return revision_context_delegate_func(rev_doc, doc, bison_update_set_u64, dot_path, value);
+}
+
+NG5_EXPORT(bool) bison_update_one_set_i8(const char *dot_path, struct bison *rev_doc, struct bison *doc, i8 value)
+{
+        return revision_context_delegate_func(rev_doc, doc, bison_update_set_i8, dot_path, value);
+}
+
+NG5_EXPORT(bool) bison_update_one_set_i16(const char *dot_path, struct bison *rev_doc, struct bison *doc, i16 value)
+{
+        return revision_context_delegate_func(rev_doc, doc, bison_update_set_i16, dot_path, value);
+}
+
+NG5_EXPORT(bool) bison_update_one_set_i32(const char *dot_path, struct bison *rev_doc, struct bison *doc, i32 value)
+{
+        return revision_context_delegate_func(rev_doc, doc, bison_update_set_i32, dot_path, value);
+}
+
+NG5_EXPORT(bool) bison_update_one_set_i64(const char *dot_path, struct bison *rev_doc, struct bison *doc, i64 value)
+{
+        return revision_context_delegate_func(rev_doc, doc, bison_update_set_i64, dot_path, value);
+}
+
+NG5_EXPORT(bool) bison_update_one_set_float(const char *dot_path, struct bison *rev_doc, struct bison *doc,
+        float value)
+{
+        return revision_context_delegate_func(rev_doc, doc, bison_update_set_float, dot_path, value);
+}
+
+NG5_EXPORT(bool) bison_update_one_set_unsigned(const char *dot_path, struct bison *rev_doc, struct bison *doc,
+        u64 value)
+{
+        return revision_context_delegate_func(rev_doc, doc, bison_update_set_unsigned, dot_path, value);
+}
+
+NG5_EXPORT(bool) bison_update_one_set_signed(const char *dot_path, struct bison *rev_doc, struct bison *doc, i64 value)
+{
+        return revision_context_delegate_func(rev_doc, doc, bison_update_set_signed, dot_path, value);
+}
+
+NG5_EXPORT(bool) bison_update_one_set_string(const char *dot_path, struct bison *rev_doc, struct bison *doc,
+        const char *value)
+{
+        return revision_context_delegate_func(rev_doc, doc, bison_update_set_string, dot_path, value);
+}
+
+NG5_EXPORT(bool) bison_update_one_set_binary(const char *dot_path, struct bison *rev_doc, struct bison *doc,
+        const void *value, size_t nbytes, const char *file_ext, const char *user_type)
+{
+        return revision_context_delegate_func(rev_doc, doc, bison_update_set_binary, dot_path, value, nbytes,
+                file_ext, user_type);
+}
+
+NG5_EXPORT(struct bison_insert *) bison_update_one_set_array_begin(struct bison_insert_array_state *state_out,
+        const char *dot_path, struct bison *rev_doc, struct bison *doc, u64 array_capacity)
+{
+        struct bison_revise revise;
+        bison_revise_begin(&revise, rev_doc, doc);
+        struct bison_insert *result = bison_update_set_array_begin(&revise, dot_path, state_out, array_capacity);
+        // ... TODO: add revision to context
+        return result;
+}
+
+NG5_EXPORT(bool) bison_update_one_set_array_end(struct bison_insert_array_state *state_in)
+{
+        bool status = bison_update_set_array_end(state_in);
+        // ... TODO: drop revision from context
+        return status;
+}
+
+NG5_EXPORT(struct bison_insert *) bison_update_one_set_column_begin(struct bison_insert_column_state *state_out,
+        const char *dot_path, struct bison *rev_doc, struct bison *doc, enum bison_field_type type,
+        u64 column_capacity)
+{
+        struct bison_revise revise;
+        bison_revise_begin(&revise, rev_doc, doc);
+        struct bison_insert *result = bison_update_set_column_begin(&revise, dot_path, state_out, type, column_capacity);
+        // ... TODO: add revision to context
+        return result;
+}
+
+NG5_EXPORT(bool) bison_update_one_set_column_end(struct bison_insert_column_state *state_in)
+{
+        bool status = bison_update_set_column_end(state_in);
+        // ... TODO: drop revision from context
+        return status;
 }
