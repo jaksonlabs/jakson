@@ -17,11 +17,11 @@
 
 #include "core/bison/bison-path.h"
 
-static inline enum bison_path_status traverse_column(struct bison_path_evaluator *state, struct bison_dot_path *path, u32 current_path_pos,
-        struct bison_column_it *it);
+static inline enum bison_path_status traverse_column(struct bison_path_evaluator *state,
+        const struct bison_dot_path *path, u32 current_path_pos, struct bison_column_it *it);
 
-static inline enum bison_path_status traverse_array(struct bison_path_evaluator *state, struct bison_dot_path *path, u32 current_path_pos,
-        struct bison_array_it *it);
+static inline enum bison_path_status traverse_array(struct bison_path_evaluator *state,
+        const struct bison_dot_path *path, u32 current_path_pos, struct bison_array_it *it);
 
 NG5_EXPORT(bool) bison_path_evaluator_begin(struct bison_path_evaluator *eval, struct bison_dot_path *path,
         struct bison *doc)
@@ -37,7 +37,7 @@ NG5_EXPORT(bool) bison_path_evaluator_begin(struct bison_path_evaluator *eval, s
         return true;
 }
 
-NG5_EXPORT(bool) bison_path_evaluator_begin_mutable(struct bison_path_evaluator *eval, struct bison_dot_path *path,
+NG5_EXPORT(bool) bison_path_evaluator_begin_mutable(struct bison_path_evaluator *eval, const struct bison_dot_path *path,
         struct bison_revise *context)
 {
         error_if_null(eval)
@@ -72,8 +72,8 @@ NG5_EXPORT(bool) bison_path_evaluator_end(struct bison_path_evaluator *state)
         return true;
 }
 
-static inline enum bison_path_status traverse_array(struct bison_path_evaluator *state, struct bison_dot_path *path, u32 current_path_pos,
-        struct bison_array_it *it)
+static inline enum bison_path_status traverse_array(struct bison_path_evaluator *state,
+        const struct bison_dot_path *path, u32 current_path_pos, struct bison_array_it *it)
 {
         assert(state);
         assert(path);
@@ -171,14 +171,14 @@ static inline enum bison_path_status traverse_array(struct bison_path_evaluator 
                         }
                         break;
                 default:
-                error(&path->err, NG5_ERR_INTERNALERR);
+                error(&((struct bison_dot_path *)path)->err, NG5_ERR_INTERNALERR);
                         return  BISON_PATH_INTERNAL;
                 }
         }
 }
 
-static inline enum bison_path_status traverse_column(struct bison_path_evaluator *state, struct bison_dot_path *path, u32 current_path_pos,
-        struct bison_column_it *it)
+static inline enum bison_path_status traverse_column(struct bison_path_evaluator *state,
+        const struct bison_dot_path *path, u32 current_path_pos, struct bison_column_it *it)
 {
         u32 total_path_len;
         u32 requested_idx;

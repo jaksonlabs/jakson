@@ -215,6 +215,111 @@ NG5_EXPORT(bool) bison_column_it_remove(struct bison_column_it *it, u32 pos)
         return true;
 }
 
+NG5_EXPORT(bool) bison_column_it_update_set_null(struct bison_column_it *it, u32 pos)
+{
+        unused(it)
+        unused(pos)
+        error_print(NG5_ERR_NOTIMPLEMENTED); // TODO: implement
+        return false;
+}
+
+NG5_EXPORT(bool) bison_column_it_update_set_true(struct bison_column_it *it, u32 pos)
+{
+        unused(it)
+        unused(pos)
+        error_print(NG5_ERR_NOTIMPLEMENTED); // TODO: implement
+        return false;
+}
+
+NG5_EXPORT(bool) bison_column_it_update_set_false(struct bison_column_it *it, u32 pos)
+{
+        unused(it)
+        unused(pos)
+        error_print(NG5_ERR_NOTIMPLEMENTED); // TODO: implement
+        return false;
+}
+
+NG5_EXPORT(bool) bison_column_it_update_set_u8(struct bison_column_it *it, u32 pos, u8 value)
+{
+        unused(it)
+        unused(pos)
+        unused(value)
+        error_print(NG5_ERR_NOTIMPLEMENTED); // TODO: implement
+        return false;
+}
+
+NG5_EXPORT(bool) bison_column_it_update_set_u16(struct bison_column_it *it, u32 pos, u16 value)
+{
+        unused(it)
+        unused(pos)
+        unused(value)
+        error_print(NG5_ERR_NOTIMPLEMENTED); // TODO: implement
+        return false;
+}
+
+NG5_EXPORT(bool) bison_column_it_update_set_u32(struct bison_column_it *it, u32 pos, u32 value)
+{
+        unused(it)
+        unused(pos)
+        unused(value)
+        error_print(NG5_ERR_NOTIMPLEMENTED); // TODO: implement
+        return false;
+}
+
+NG5_EXPORT(bool) bison_column_it_update_set_u64(struct bison_column_it *it, u32 pos, u64 value)
+{
+        unused(it)
+        unused(pos)
+        unused(value)
+        error_print(NG5_ERR_NOTIMPLEMENTED); // TODO: implement
+        return false;
+}
+
+NG5_EXPORT(bool) bison_column_it_update_set_i8(struct bison_column_it *it, u32 pos, i8 value)
+{
+        unused(it)
+        unused(pos)
+        unused(value)
+        error_print(NG5_ERR_NOTIMPLEMENTED); // TODO: implement
+        return false;
+}
+
+NG5_EXPORT(bool) bison_column_it_update_set_i16(struct bison_column_it *it, u32 pos, i16 value)
+{
+        unused(it)
+        unused(pos)
+        unused(value)
+        error_print(NG5_ERR_NOTIMPLEMENTED); // TODO: implement
+        return false;
+}
+
+NG5_EXPORT(bool) bison_column_it_update_set_i32(struct bison_column_it *it, u32 pos, i32 value)
+{
+        unused(it)
+        unused(pos)
+        unused(value)
+        error_print(NG5_ERR_NOTIMPLEMENTED); // TODO: implement
+        return false;
+}
+
+NG5_EXPORT(bool) bison_column_it_update_set_i64(struct bison_column_it *it, u32 pos, i64 value)
+{
+        unused(it)
+        unused(pos)
+        unused(value)
+        error_print(NG5_ERR_NOTIMPLEMENTED); // TODO: implement
+        return false;
+}
+
+NG5_EXPORT(bool) bison_column_it_update_set_float(struct bison_column_it *it, u32 pos, float value)
+{
+        unused(it)
+        unused(pos)
+        unused(value)
+        error_print(NG5_ERR_NOTIMPLEMENTED); // TODO: implement
+        return false;
+}
+
 /**
  * Locks the iterator with a spinlock. A call to <code>bison_column_it_unlock</code> is required for unlocking.
  */

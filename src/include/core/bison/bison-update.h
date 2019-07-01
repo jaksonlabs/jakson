@@ -36,7 +36,7 @@ struct bison_update
 {
         struct bison_revise *context;
         struct bison_path_evaluator path_evaluater;
-        struct bison_dot_path path;
+        const struct bison_dot_path *path;
         struct err err;
         bool is_found;
 };
@@ -88,6 +88,51 @@ NG5_EXPORT(bool) bison_update_set_column_end(struct bison_insert_column_state *s
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+NG5_EXPORT(bool) bison_update_set_null_compiled(struct bison_revise *context, const struct bison_dot_path *path);
+
+NG5_EXPORT(bool) bison_update_set_true_compiled(struct bison_revise *context, const struct bison_dot_path *path);
+
+NG5_EXPORT(bool) bison_update_set_false_compiled(struct bison_revise *context, const struct bison_dot_path *path);
+
+NG5_EXPORT(bool) bison_update_set_u8_compiled(struct bison_revise *context, const struct bison_dot_path *path, u8 value);
+
+NG5_EXPORT(bool) bison_update_set_u16_compiled(struct bison_revise *context, const struct bison_dot_path *path, u16 value);
+
+NG5_EXPORT(bool) bison_update_set_u32_compiled(struct bison_revise *context, const struct bison_dot_path *path, u32 value);
+
+NG5_EXPORT(bool) bison_update_set_u64_compiled(struct bison_revise *context, const struct bison_dot_path *path, u64 value);
+
+NG5_EXPORT(bool) bison_update_set_i8_compiled(struct bison_revise *context, const struct bison_dot_path *path, i8 value);
+
+NG5_EXPORT(bool) bison_update_set_i16_compiled(struct bison_revise *context, const struct bison_dot_path *path, i16 value);
+
+NG5_EXPORT(bool) bison_update_set_i32_compiled(struct bison_revise *context, const struct bison_dot_path *path, i32 value);
+
+NG5_EXPORT(bool) bison_update_set_i64_compiled(struct bison_revise *context, const struct bison_dot_path *path, i64 value);
+
+NG5_EXPORT(bool) bison_update_set_float_compiled(struct bison_revise *context, const struct bison_dot_path *path, float value);
+
+NG5_EXPORT(bool) bison_update_set_unsigned_compiled(struct bison_revise *context, const struct bison_dot_path *path, u64 value);
+
+NG5_EXPORT(bool) bison_update_set_signed_compiled(struct bison_revise *context, const struct bison_dot_path *path, i64 value);
+
+NG5_EXPORT(bool) bison_update_set_string_compiled(struct bison_revise *context, const struct bison_dot_path *path, const char *value);
+
+NG5_EXPORT(bool) bison_update_set_binary_compiled(struct bison_revise *context, const struct bison_dot_path *path, const void *value, size_t nbytes,
+        const char *file_ext, const char *user_type);
+
+NG5_EXPORT(struct bison_insert *) bison_update_set_array_begin_compiled(struct bison_revise *context, const struct bison_dot_path *path,
+        struct bison_insert_array_state *state_out, u64 array_capacity);
+
+NG5_EXPORT(bool) bison_update_set_array_end_compiled(struct bison_insert_array_state *state_in);
+
+NG5_EXPORT(struct bison_insert *) bison_update_set_column_begin_compiled(struct bison_revise *context, const struct bison_dot_path *path,
+        struct bison_insert_column_state *state_out, enum bison_field_type type, u64 column_capacity);
+
+NG5_EXPORT(bool) bison_update_set_column_end_compiled(struct bison_insert_column_state *state_in);
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 NG5_EXPORT(bool) bison_update_one_set_null(const char *dot_path, struct bison *rev_doc, struct bison *doc);
 
 NG5_EXPORT(bool) bison_update_one_set_true(const char *dot_path, struct bison *rev_doc, struct bison *doc);
@@ -135,10 +180,54 @@ NG5_EXPORT(struct bison_insert *) bison_update_one_set_column_begin(struct bison
 
 NG5_EXPORT(bool) bison_update_one_set_column_end(struct bison_insert_column_state *state_in);
 
+// ---------------------------------------------------------------------------------------------------------------------
 
+NG5_EXPORT(bool) bison_update_one_set_null_compiled(const struct bison_dot_path *path, struct bison *rev_doc, struct bison *doc);
 
+NG5_EXPORT(bool) bison_update_one_set_true_compiled(const struct bison_dot_path *path, struct bison *rev_doc, struct bison *doc);
 
+NG5_EXPORT(bool) bison_update_one_set_false_compiled(const struct bison_dot_path *path, struct bison *rev_doc, struct bison *doc);
 
+NG5_EXPORT(bool) bison_update_one_set_u8_compiled(const struct bison_dot_path *path, struct bison *rev_doc, struct bison *doc, u8 value);
+
+NG5_EXPORT(bool) bison_update_one_set_u16_compiled(const struct bison_dot_path *path, struct bison *rev_doc, struct bison *doc, u16 value);
+
+NG5_EXPORT(bool) bison_update_one_set_u32_compiled(const struct bison_dot_path *path, struct bison *rev_doc, struct bison *doc, u32 value);
+
+NG5_EXPORT(bool) bison_update_one_set_u64_compiled(const struct bison_dot_path *path, struct bison *rev_doc, struct bison *doc, u64 value);
+
+NG5_EXPORT(bool) bison_update_one_set_i8_compiled(const struct bison_dot_path *path, struct bison *rev_doc, struct bison *doc, i8 value);
+
+NG5_EXPORT(bool) bison_update_one_set_i16_compiled(const struct bison_dot_path *path, struct bison *rev_doc, struct bison *doc, i16 value);
+
+NG5_EXPORT(bool) bison_update_one_set_i32_compiled(const struct bison_dot_path *path, struct bison *rev_doc, struct bison *doc, i32 value);
+
+NG5_EXPORT(bool) bison_update_one_set_i64_compiled(const struct bison_dot_path *path, struct bison *rev_doc, struct bison *doc, i64 value);
+
+NG5_EXPORT(bool) bison_update_one_set_float_compiled(const struct bison_dot_path *path, struct bison *rev_doc, struct bison *doc,
+        float value);
+
+NG5_EXPORT(bool) bison_update_one_set_unsigned_compiled(const struct bison_dot_path *path, struct bison *rev_doc, struct bison *doc,
+        u64 value);
+
+NG5_EXPORT(bool) bison_update_one_set_signed_compiled(const struct bison_dot_path *path, struct bison *rev_doc, struct bison *doc, i64 value);
+
+NG5_EXPORT(bool) bison_update_one_set_string_compiled(const struct bison_dot_path *path, struct bison *rev_doc, struct bison *doc,
+        const char *value);
+
+NG5_EXPORT(bool) bison_update_one_set_binary_compiled(const struct bison_dot_path *path, struct bison *rev_doc, struct bison *doc,
+        const void *value, size_t nbytes, const char *file_ext, const char *user_type);
+
+NG5_EXPORT(struct bison_insert *) bison_update_one_set_array_begin_compiled(struct bison_insert_array_state *state_out,
+        const struct bison_dot_path *path, struct bison *rev_doc, struct bison *doc, u64 array_capacity);
+
+NG5_EXPORT(bool) bison_update_one_set_array_end_compiled(struct bison_insert_array_state *state_in);
+
+NG5_EXPORT(struct bison_insert *) bison_update_one_set_column_begin_compiled(struct bison_insert_column_state *state_out,
+        const struct bison_dot_path *path, struct bison *rev_doc, struct bison *doc, enum bison_field_type type,
+        u64 column_capacity);
+
+NG5_EXPORT(bool) bison_update_one_set_column_end_compiled(struct bison_insert_column_state *state_in);
 
 
 NG5_END_DECL

@@ -82,6 +82,26 @@ NG5_EXPORT(bool) bison_int_array_it_field_data_access(struct bison_array_it *it)
 
 NG5_EXPORT(bool) bison_int_array_it_field_skip(struct bison_array_it *it);
 
+NG5_EXPORT(bool) bison_int_array_it_skip_array(struct bison_array_it *it);
+
+NG5_EXPORT(bool) bison_int_array_it_skip_column(struct bison_array_it *it);
+
+NG5_EXPORT(bool) bison_int_array_it_skip_binary(struct bison_array_it *it);
+
+NG5_EXPORT(bool) bison_int_array_it_skip_custom_binary(struct bison_array_it *it);
+
+NG5_EXPORT(bool) bison_int_array_it_skip_string(struct bison_array_it *it);
+
+NG5_EXPORT(bool) bison_int_array_it_skip_float(struct bison_array_it *it);
+
+NG5_EXPORT(bool) bison_int_array_it_skip_8(struct bison_array_it *it);
+
+NG5_EXPORT(bool) bison_int_array_it_skip_16(struct bison_array_it *it);
+
+NG5_EXPORT(bool) bison_int_array_it_skip_32(struct bison_array_it *it);
+
+NG5_EXPORT(bool) bison_int_array_it_skip_64(struct bison_array_it *it);
+
 NG5_END_DECL
 
 #endif

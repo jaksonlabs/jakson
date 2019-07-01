@@ -260,7 +260,7 @@ ng5_func_unused static const char *basic_type_to_system_type_str(enum field_type
 #define ng5_cast(type, name, src)                                                                                      \
       type name = (type) src
 
-#define unused(x)   (void)(x)
+#define unused(x)   (void)(x);
 
 #define NG5_BUILT_IN(x)   ng5_func_unused x
 

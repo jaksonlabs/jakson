@@ -81,6 +81,31 @@ NG5_EXPORT(const float *) bison_column_it_float_values(u32 *nvalues, struct biso
 
 NG5_EXPORT(bool) bison_column_it_remove(struct bison_column_it *it, u32 pos);
 
+NG5_EXPORT(bool) bison_column_it_update_set_null(struct bison_column_it *it, u32 pos);
+
+NG5_EXPORT(bool) bison_column_it_update_set_true(struct bison_column_it *it, u32 pos);
+
+NG5_EXPORT(bool) bison_column_it_update_set_false(struct bison_column_it *it, u32 pos);
+
+NG5_EXPORT(bool) bison_column_it_update_set_u8(struct bison_column_it *it, u32 pos, u8 value);
+
+NG5_EXPORT(bool) bison_column_it_update_set_u16(struct bison_column_it *it, u32 pos, u16 value);
+
+NG5_EXPORT(bool) bison_column_it_update_set_u32(struct bison_column_it *it, u32 pos, u32 value);
+
+NG5_EXPORT(bool) bison_column_it_update_set_u64(struct bison_column_it *it, u32 pos, u64 value);
+
+NG5_EXPORT(bool) bison_column_it_update_set_i8(struct bison_column_it *it, u32 pos, i8 value);
+
+NG5_EXPORT(bool) bison_column_it_update_set_i16(struct bison_column_it *it, u32 pos, i16 value);
+
+NG5_EXPORT(bool) bison_column_it_update_set_i32(struct bison_column_it *it, u32 pos, i32 value);
+
+NG5_EXPORT(bool) bison_column_it_update_set_i64(struct bison_column_it *it, u32 pos, i64 value);
+
+NG5_EXPORT(bool) bison_column_it_update_set_float(struct bison_column_it *it, u32 pos, float value);
+
+
 
 /**
  * Locks the iterator with a spinlock. A call to <code>bison_column_it_unlock</code> is required for unlocking.

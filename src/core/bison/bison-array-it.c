@@ -61,6 +61,74 @@ DEFINE_IN_PLACE_UPDATE_FUNCTION(i32, BISON_FIELD_TYPE_NUMBER_I32)
 DEFINE_IN_PLACE_UPDATE_FUNCTION(i64, BISON_FIELD_TYPE_NUMBER_I64)
 DEFINE_IN_PLACE_UPDATE_FUNCTION(float, BISON_FIELD_TYPE_NUMBER_FLOAT)
 
+static bool update_in_place_constant(struct bison_array_it *it, enum bison_constant constant)
+{
+        error_if_null(it);
+
+        memfile_save_position(&it->memfile);
+
+        if (bison_field_type_is_constant(it->it_field_type)) {
+                u8 value;
+                switch (constant) {
+                case BISON_CONSTANT_TRUE:
+                        value = BISON_FIELD_TYPE_TRUE;
+                        break;
+                case BISON_CONSTANT_FALSE:
+                        value = BISON_FIELD_TYPE_FALSE;
+                        break;
+                case BISON_CONSTANT_NULL:
+                        value = BISON_FIELD_TYPE_NULL;
+                        break;
+                default:
+                error(&it->err, NG5_ERR_INTERNALERR);
+                        break;
+                }
+                offset_t datum;
+                bison_int_array_it_offset(&datum, it);
+                memfile_seek(&it->memfile, datum);
+                memfile_write(&it->memfile, &value, sizeof(u8));
+        } else {
+                struct bison_insert ins;
+                bison_array_it_remove(it);
+                bison_array_it_insert_begin(&ins, it);
+
+                switch (constant) {
+                case BISON_CONSTANT_TRUE:
+                        bison_insert_true(&ins);
+                        break;
+                case BISON_CONSTANT_FALSE:
+                        bison_insert_false(&ins);
+                        break;
+                case BISON_CONSTANT_NULL:
+                        bison_insert_null(&ins);
+                        break;
+                default:
+                error(&it->err, NG5_ERR_INTERNALERR);
+                        break;
+                }
+
+                bison_array_it_insert_end(&ins);
+        }
+
+        memfile_restore_position(&it->memfile);
+        return true;
+}
+
+NG5_EXPORT(bool) bison_array_it_update_in_place_true(struct bison_array_it *it)
+{
+        return update_in_place_constant(it, BISON_CONSTANT_TRUE);
+}
+
+NG5_EXPORT(bool) bison_array_it_update_in_place_false(struct bison_array_it *it)
+{
+        return update_in_place_constant(it, BISON_CONSTANT_FALSE);
+}
+
+NG5_EXPORT(bool) bison_array_it_update_in_place_null(struct bison_array_it *it)
+{
+        return update_in_place_constant(it, BISON_CONSTANT_NULL);
+}
+
 NG5_EXPORT(bool) bison_array_it_create(struct bison_array_it *it, struct memfile *memfile, struct err *err,
                                        offset_t payload_start)
 {

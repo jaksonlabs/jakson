@@ -70,6 +70,10 @@ DECLARE_IN_PLACE_UPDATE_FUNCTION(i32)
 DECLARE_IN_PLACE_UPDATE_FUNCTION(i64)
 DECLARE_IN_PLACE_UPDATE_FUNCTION(float)
 
+NG5_EXPORT(bool) bison_array_it_update_in_place_true(struct bison_array_it *it);
+NG5_EXPORT(bool) bison_array_it_update_in_place_false(struct bison_array_it *it);
+NG5_EXPORT(bool) bison_array_it_update_in_place_null(struct bison_array_it *it);
+
 /**
  * Constructs a new array iterator in a BISON document, where <code>payload_start</code> is a memory offset
  * that starts with the first (potentially empty) array entry. If there is some data before the array contents

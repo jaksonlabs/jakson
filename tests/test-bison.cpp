@@ -3992,7 +3992,7 @@ static void create_nested_doc(struct bison *rev_doc)
         bison_insert_true(array_ins);
         bison_insert_false(array_ins);
         bison_insert_u8(array_ins, 8);
-        bison_insert_u16(array_ins, 16);
+        bison_insert_i16(array_ins, -16);
         bison_insert_string(array_ins, "Hello, World!");
         bison_insert_binary(array_ins, "My Plain-Text", strlen("My Plain-Text"), "txt", NULL);
         bison_insert_binary(array_ins, "My Own Format", strlen("My Own Format"), NULL, "own");
@@ -4014,7 +4014,7 @@ static void create_nested_doc(struct bison *rev_doc)
         bison_insert_true(nested_array_ins);
         bison_insert_false(nested_array_ins);
         bison_insert_u8(nested_array_ins, 8);
-        bison_insert_u16(nested_array_ins, 16);
+        bison_insert_i16(nested_array_ins, -16);
         bison_insert_string(nested_array_ins, "Hello, World!");
         bison_insert_binary(nested_array_ins, "My Plain-Text", strlen("My Plain-Text"), "txt", NULL);
         bison_insert_binary(nested_array_ins, "My Own Format", strlen("My Own Format"), NULL, "own");
@@ -4037,7 +4037,7 @@ static void create_nested_doc(struct bison *rev_doc)
         bison_insert_true(array_ins);
         bison_insert_false(array_ins);
         bison_insert_u8(array_ins, 8);
-        bison_insert_u16(array_ins, 16);
+        bison_insert_i16(array_ins, -16);
         bison_insert_string(array_ins, "Hello, World!");
         bison_insert_binary(array_ins, "My Plain-Text", strlen("My Plain-Text"), "txt", NULL);
         bison_insert_binary(array_ins, "My Own Format", strlen("My Own Format"), NULL, "own");
@@ -4059,7 +4059,7 @@ static void create_nested_doc(struct bison *rev_doc)
         bison_insert_true(nested_array_ins);
         bison_insert_false(nested_array_ins);
         bison_insert_u8(nested_array_ins, 8);
-        bison_insert_u16(nested_array_ins, 16);
+        bison_insert_i16(nested_array_ins, -16);
         bison_insert_string(nested_array_ins, "Hello, World!");
         bison_insert_binary(nested_array_ins, "My Plain-Text", strlen("My Plain-Text"), "txt", NULL);
         bison_insert_binary(nested_array_ins, "My Own Format", strlen("My Own Format"), NULL, "own");
@@ -4086,9 +4086,9 @@ TEST(BisonTest, BisonUpdateSetToNull)
 {
         struct bison doc, rev_doc;
         struct string_builder sb;
+        bool status;
 
         string_builder_create(&sb);
-        create_nested_doc(&doc);
 
         /* Each time 'create_nested_doc' is called, the following document will be generated
 
@@ -4098,7 +4098,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
                       true,
                       false,
                       8,
-                      16,
+                      -16,
                       "Hello, World!",
                       {
                          "type":"text/plain",
@@ -4124,7 +4124,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
                          true,
                          false,
                          8,
-                         16,
+                         -16,
                          "Hello, World!",
                          {
                             "type":"text/plain",
@@ -4149,7 +4149,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
                       true,
                       false,
                       8,
-                      16,
+                      -16,
                       "Hello, World!",
                       {
                          "type":"text/plain",
@@ -4175,7 +4175,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
                          true,
                          false,
                          8,
-                         16,
+                         -16,
                          "Hello, World!",
                          {
                             "type":"text/plain",
@@ -4199,14 +4199,108 @@ TEST(BisonTest, BisonUpdateSetToNull)
 
          */
 
+        create_nested_doc(&doc);
+        status = bison_update_one_set_null("0.0", &rev_doc, &doc); // replaces null with null
+        ASSERT_TRUE(status);
+        printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
+        printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
 
-        printf("built: '%s'\n", bison_to_json(&sb, &doc));
+        create_nested_doc(&doc);
+        status = bison_update_one_set_null("0.1", &rev_doc, &doc); // replaces true with null
+        ASSERT_TRUE(status);
+        printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
+        printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, null, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
 
-        // Update constant in-place
-       // bison_update_one_set_null("0", &rev_doc, &doc);
-       // printf("altered: '%s'\n", bison_to_json(&sb, &rev_doc));
+        create_nested_doc(&doc);
+        status = bison_update_one_set_null("0.2", &rev_doc, &doc); // replaces false with null
+        ASSERT_TRUE(status);
+        printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
+        printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, null, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
 
-        // Overwrite constant in-pace w/ constant
+        create_nested_doc(&doc);
+        status = bison_update_one_set_null("0.3", &rev_doc, &doc); // replaces u8 (8) with null
+        ASSERT_TRUE(status);
+        printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
+        printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, false, null, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+
+        create_nested_doc(&doc);
+        status = bison_update_one_set_null("0.4", &rev_doc, &doc); // replaces i16 (-16) with null
+        ASSERT_TRUE(status);
+        printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
+        printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, false, 8, null, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+
+        create_nested_doc(&doc);
+        status = bison_update_one_set_null("0.5", &rev_doc, &doc); // replaces string with null
+        ASSERT_TRUE(status);
+        printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
+        printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, false, 8, -16, null, { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+
+        create_nested_doc(&doc);
+        status = bison_update_one_set_null("0.6", &rev_doc, &doc); // replaces binary string with null
+        ASSERT_TRUE(status);
+        printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
+        printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", null, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+
+        create_nested_doc(&doc);
+        status = bison_update_one_set_null("0.7", &rev_doc, &doc); // replaces custom binary with null
+        ASSERT_TRUE(status);
+        printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
+        printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, null, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+
+        create_nested_doc(&doc);
+        status = bison_update_one_set_null("0.8", &rev_doc, &doc); // replaces column ([32, 33, 34, 35]) with null
+        ASSERT_TRUE(status);
+        printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
+        printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, null, [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+
+//        create_nested_doc(&doc);
+//        status = bison_update_one_set_null("0.8.0", &rev_doc, &doc); // replaces element in column with null value (special case) --> [NULL, 33, 34, 35]
+//        ASSERT_TRUE(status);
+//        printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
+//        printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
+//        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [null, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+//        bison_drop(&doc);
+//        bison_drop(&rev_doc);
+
+        /*
+        create_nested_doc(&doc);
+        status = bison_update_one_set_null("0.5", &rev_doc, &doc); // replaces string with null
+        ASSERT_TRUE(status);
+        printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
+        printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+        */
+
+
         // Overwrite constant in-pace w/ fixed-type
         // Overwrite constant in-pace w/ string
         // Overwrite constant in-pace w/ binary
@@ -4319,7 +4413,6 @@ TEST(BisonTest, BisonUpdateSetToNull)
         // Overwrite entire document content in-pace w/ non-empty column
 
 
-        bison_drop(&doc);
         string_builder_drop(&sb);
 }
 

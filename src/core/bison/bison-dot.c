@@ -228,25 +228,27 @@ NG5_EXPORT(bool) bison_dot_path_is_empty(const struct bison_dot_path *path)
         return (path->path_len == 0);
 }
 
-NG5_EXPORT(bool) bison_dot_path_type_at(enum bison_dot_node_type *type_out, u32 pos, struct bison_dot_path *path)
+NG5_EXPORT(bool) bison_dot_path_type_at(enum bison_dot_node_type *type_out, u32 pos, const struct bison_dot_path *path)
 {
         error_if_null(type_out)
         error_if_null(path)
         if (likely(pos < NG5_ARRAY_LENGTH(path->nodes))) {
                 *type_out = path->nodes[pos].type;
         } else {
-                error(&path->err, NG5_ERR_OUTOFBOUNDS)
+                error(&((struct bison_dot_path *)path)->err, NG5_ERR_OUTOFBOUNDS)
                 return false;
         }
         return true;
 }
 
-NG5_EXPORT(bool) bison_dot_path_idx_at(u32 *idx, u32 pos, struct bison_dot_path *path)
+NG5_EXPORT(bool) bison_dot_path_idx_at(u32 *idx, u32 pos, const struct bison_dot_path *path)
 {
         error_if_null(idx)
         error_if_null(path)
-        error_if_and_return(pos >= NG5_ARRAY_LENGTH(path->nodes), &path->err, NG5_ERR_OUTOFBOUNDS, NULL);
-        error_if_and_return(path->nodes[pos].type != DOT_NODE_ARRAY_IDX, &path->err, NG5_ERR_TYPEMISMATCH, NULL);
+        error_if_and_return(pos >= NG5_ARRAY_LENGTH(path->nodes), &((struct bison_dot_path *)path)->err,
+                NG5_ERR_OUTOFBOUNDS, NULL);
+        error_if_and_return(path->nodes[pos].type != DOT_NODE_ARRAY_IDX, &((struct bison_dot_path *)path)->err,
+                NG5_ERR_TYPEMISMATCH, NULL);
 
         *idx = path->nodes[pos].identifier.idx;
         return true;

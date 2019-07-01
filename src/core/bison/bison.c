@@ -854,6 +854,43 @@ NG5_EXPORT(bool) bison_field_type_is_string(enum bison_field_type type)
         return (type == BISON_FIELD_TYPE_STRING);
 }
 
+NG5_EXPORT(bool) bison_field_type_is_constant(enum bison_field_type type)
+{
+        return (bison_field_type_is_null(type) || bison_field_type_is_boolean(type));
+}
+
+NG5_EXPORT(enum bison_field_class) bison_field_type_get_class(enum bison_field_type type, struct err *err)
+{
+        switch (type) {
+        case BISON_FIELD_TYPE_NULL:
+        case BISON_FIELD_TYPE_TRUE:
+        case BISON_FIELD_TYPE_FALSE:
+                return BISON_FIELD_CLASS_CONSTANT;
+        case BISON_FIELD_TYPE_OBJECT:
+        case BISON_FIELD_TYPE_ARRAY:
+        case BISON_FIELD_TYPE_COLUMN:
+                return BISON_FIELD_CLASS_CONTAINER;
+        case BISON_FIELD_TYPE_STRING:
+                return BISON_FIELD_CLASS_CHARACTER_STRING;
+        case BISON_FIELD_TYPE_NUMBER_U8:
+        case BISON_FIELD_TYPE_NUMBER_U16:
+        case BISON_FIELD_TYPE_NUMBER_U32:
+        case BISON_FIELD_TYPE_NUMBER_U64:
+        case BISON_FIELD_TYPE_NUMBER_I8:
+        case BISON_FIELD_TYPE_NUMBER_I16:
+        case BISON_FIELD_TYPE_NUMBER_I32:
+        case BISON_FIELD_TYPE_NUMBER_I64:
+        case BISON_FIELD_TYPE_NUMBER_FLOAT:
+                return BISON_FIELD_CLASS_NUMBER;
+        case BISON_FIELD_TYPE_BINARY:
+        case BISON_FIELD_TYPE_BINARY_CUSTOM:
+                return BISON_FIELD_CLASS_BINARY_STRING;
+        default:
+                error(err, NG5_ERR_INTERNALERR);
+                return 0;
+        }
+}
+
 NG5_EXPORT(bool) bison_field_type_is_array(enum bison_field_type type)
 {
         return (type == BISON_FIELD_TYPE_ARRAY);

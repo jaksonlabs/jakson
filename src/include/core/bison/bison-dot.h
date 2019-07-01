@@ -80,9 +80,9 @@ NG5_EXPORT(bool) bison_dot_path_len(u32 *len, const struct bison_dot_path *path)
 
 NG5_EXPORT(bool) bison_dot_path_is_empty(const struct bison_dot_path *path);
 
-NG5_EXPORT(bool) bison_dot_path_type_at(enum bison_dot_node_type *type_out, u32 pos, struct bison_dot_path *path);
+NG5_EXPORT(bool) bison_dot_path_type_at(enum bison_dot_node_type *type_out, u32 pos, const struct bison_dot_path *path);
 
-NG5_EXPORT(bool) bison_dot_path_idx_at(u32 *idx, u32 pos, struct bison_dot_path *path);
+NG5_EXPORT(bool) bison_dot_path_idx_at(u32 *idx, u32 pos, const struct bison_dot_path *path);
 
 NG5_EXPORT(const char *) bison_dot_path_key_at(u32 pos, struct bison_dot_path *path);
 

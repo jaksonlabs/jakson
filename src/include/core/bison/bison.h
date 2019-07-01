@@ -87,13 +87,15 @@ enum bison_field_type
         BISON_FIELD_TYPE_TRUE = 't', /* true */
         BISON_FIELD_TYPE_FALSE = 'f', /* false */
 
-        /* JSON typing */
+        /* containers */
         BISON_FIELD_TYPE_OBJECT = 'o', /* object */
         BISON_FIELD_TYPE_ARRAY = '[', /* variable-type array of elements of varying type */
         BISON_FIELD_TYPE_COLUMN = '(', /* fixed-type array of elements of particular type */
+
+        /* character strings */
         BISON_FIELD_TYPE_STRING = 's', /* UTF-8 string */
 
-        /* JSON numbers */
+        /* numbers */
         BISON_FIELD_TYPE_NUMBER_U8 = 'c', /* 8bit unsigned integer */
         BISON_FIELD_TYPE_NUMBER_U16 = 'd', /* 16bit unsigned integer */
         BISON_FIELD_TYPE_NUMBER_U32 = 'i', /* 32bit unsigned integer */
@@ -104,9 +106,25 @@ enum bison_field_type
         BISON_FIELD_TYPE_NUMBER_I64 = 'L', /* 64bit signed integer */
         BISON_FIELD_TYPE_NUMBER_FLOAT = 'r', /* 32bit float */
 
-        /* user-defined binary data */
+        /* binary data */
         BISON_FIELD_TYPE_BINARY = 'b', /* arbitrary binary object with known mime type */
         BISON_FIELD_TYPE_BINARY_CUSTOM = 'x', /* arbitrary binary object with unknown mime type*/
+};
+
+enum bison_field_class
+{
+        BISON_FIELD_CLASS_CONSTANT,
+        BISON_FIELD_CLASS_NUMBER,
+        BISON_FIELD_CLASS_CHARACTER_STRING,
+        BISON_FIELD_CLASS_BINARY_STRING,
+        BISON_FIELD_CLASS_CONTAINER
+};
+
+enum bison_constant
+{
+        BISON_CONSTANT_TRUE,
+        BISON_CONSTANT_FALSE,
+        BISON_CONSTANT_NULL
 };
 
 struct bison_binary
@@ -367,6 +385,10 @@ NG5_EXPORT(bool) bison_field_type_is_object(enum bison_field_type type);
 NG5_EXPORT(bool) bison_field_type_is_null(enum bison_field_type type);
 
 NG5_EXPORT(bool) bison_field_type_is_string(enum bison_field_type type);
+
+NG5_EXPORT(enum bison_field_class) bison_field_type_get_class(enum bison_field_type type, struct err *err);
+
+NG5_EXPORT(bool) bison_field_type_is_constant(enum bison_field_type type);
 
 NG5_EXPORT(bool) bison_print(FILE *file, struct bison *doc);
 
