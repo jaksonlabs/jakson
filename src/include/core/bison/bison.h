@@ -321,14 +321,9 @@ NG5_EXPORT(bool) bison_revise_find_open(struct bison_find *out, const char *dot_
 
 NG5_EXPORT(bool) bison_revise_find_close(struct bison_find *find);
 
+NG5_EXPORT(bool) bison_revise_remove(const char *dot_path, struct bison_revise *context);
 
-
-
-
-
-
-
-
+NG5_EXPORT(bool) bison_revise_remove_one(const char *dot_path, struct bison *rev_doc, struct bison *doc);
 
 NG5_EXPORT(bool) bison_revise_pack(struct bison_revise *context);
 

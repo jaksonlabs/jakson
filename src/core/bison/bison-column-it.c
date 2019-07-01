@@ -187,6 +187,34 @@ NG5_EXPORT(const float *) bison_column_it_float_values(u32 *nvalues, struct biso
         return safe_cast(float, nvalues, it, (type == BISON_FIELD_TYPE_NUMBER_FLOAT));
 }
 
+NG5_EXPORT(bool) bison_column_it_remove(struct bison_column_it *it, u32 pos)
+{
+        error_if_null(it);
+
+        error_if(pos >= it->column_num_elements, &it->err, NG5_ERR_OUTOFBOUNDS);
+        memfile_save_position(&it->memfile);
+
+        /* remove element */
+        size_t elem_size = bison_int_get_type_value_size(it->type);
+        memfile_seek(&it->memfile, it->payload_start + pos * elem_size);
+        memfile_move_left(&it->memfile, elem_size);
+
+        /* add an empty element at the end to restore the column capacity property */
+        memfile_seek(&it->memfile, it->payload_start + it->column_num_elements * elem_size);
+        memfile_move_right(&it->memfile, elem_size);
+
+        /* update element counter */
+        memfile_seek(&it->memfile, it->column_num_elements_offset);
+        u32 num_elements = *NG5_MEMFILE_READ_TYPE(&it->memfile, u32);
+        num_elements--;
+        memfile_seek(&it->memfile, it->column_num_elements_offset);
+        memfile_write(&it->memfile, &num_elements, sizeof(u32));
+
+        memfile_restore_position(&it->memfile);
+
+        return true;
+}
+
 /**
  * Locks the iterator with a spinlock. A call to <code>bison_column_it_unlock</code> is required for unlocking.
  */

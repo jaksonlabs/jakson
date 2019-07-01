@@ -79,6 +79,8 @@ NG5_EXPORT(const i64 *) bison_column_it_i64_values(u32 *nvalues, struct bison_co
 
 NG5_EXPORT(const float *) bison_column_it_float_values(u32 *nvalues, struct bison_column_it *it);
 
+NG5_EXPORT(bool) bison_column_it_remove(struct bison_column_it *it, u32 pos);
+
 
 /**
  * Locks the iterator with a spinlock. A call to <code>bison_column_it_unlock</code> is required for unlocking.

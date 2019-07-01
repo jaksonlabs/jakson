@@ -426,7 +426,7 @@ NG5_EXPORT(bool) bison_array_it_insert_end(struct bison_insert *inserter)
 
 static bool remove_field(struct memfile *memfile, struct err *err, enum bison_field_type type)
 {
-        assert(*memfile_peek(memfile, sizeof(u8)) == type);
+        assert((enum bison_field_type) *memfile_peek(memfile, sizeof(u8)) == type);
         offset_t start_off = memfile_tell(memfile);
         memfile_skip(memfile, sizeof(u8));
         size_t rm_nbytes = sizeof(u8); /* at least the type marker must be removed */
@@ -484,6 +484,7 @@ static bool remove_field(struct memfile *memfile, struct err *err, enum bison_fi
 
                         /* get bytes for custom type string len, and the actual length */
                         custom_type_strlen = memfile_read_varuint(&custom_type_strlen_nbytes, memfile);
+                        memfile_skip(memfile, custom_type_strlen);
 
                         /* get bytes used for blob length info */
                         blob_nbytes = memfile_read_varuint(&blob_length_nbytes, memfile);

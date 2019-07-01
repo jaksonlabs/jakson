@@ -644,6 +644,53 @@ NG5_EXPORT(bool) bison_revise_find_close(struct bison_find *find)
         return bison_find_drop(find);
 }
 
+NG5_EXPORT(bool) bison_revise_remove_one(const char *dot_path, struct bison *rev_doc, struct bison *doc)
+{
+        struct bison_revise revise;
+        bison_revise_begin(&revise, rev_doc, doc);
+        bool status = bison_revise_remove(dot_path, &revise);
+        bison_revise_end(&revise);
+        return status;
+}
+
+NG5_EXPORT(bool) bison_revise_remove(const char *dot_path, struct bison_revise *context)
+{
+        error_if_null(dot_path)
+        error_if_null(context)
+
+        struct bison_dot_path dot;
+        struct bison_path_evaluator eval;
+        bool result;
+
+        if (bison_dot_path_from_string(&dot, dot_path)) {
+                bison_path_evaluator_begin_mutable(&eval, &dot, context);
+
+                if (eval.status != BISON_PATH_RESOLVED) {
+                        result = false;
+                } else {
+                        switch (eval.result.container_type) {
+                        case BISON_ARRAY: {
+                                struct bison_array_it *it = eval.result.containers.array.it;
+                                result = bison_array_it_remove(it);
+                        } break;
+                        case BISON_COLUMN:  {
+                                struct bison_column_it *it = eval.result.containers.column.it;
+                                u32 elem_pos = eval.result.containers.column.elem_pos;
+                                result = bison_column_it_remove(it, elem_pos);
+                        } break;
+                        default:
+                                error(&context->original->err, NG5_ERR_INTERNALERR);
+                                result = false;
+                        }
+                }
+                bison_path_evaluator_end(&eval);
+                return result;
+        } else {
+                error(&context->original->err, NG5_ERR_DOT_PATH_PARSERR);
+                return false;
+        }
+}
+
 NG5_EXPORT(bool) bison_revise_pack(struct bison_revise *context)
 {
         error_if_null(context);
