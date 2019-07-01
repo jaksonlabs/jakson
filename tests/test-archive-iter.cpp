@@ -112,7 +112,7 @@ print_basic_fixed_types_basic(struct archive_value_vector *value_iter, u32 idx)
             printf("\t\t{ type: string, value: %" PRIu64 " }\n", values[idx]);
         } break;
     case FIELD_BOOLEAN: {
-        const FIELD_BOOLEANean_t *values = archive_value_vector_get_booleans(&num_values, value_iter);
+        const field_boolean_t *values = archive_value_vector_get_booleans(&num_values, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(idx < num_values);
         printf("\t\t{ type: boolean, value: %d }\n", values[idx]);
@@ -249,7 +249,7 @@ print_basic_fixed_types_array(struct archive_value_vector *value_iter, u32 idx)
         printf("]\n");
     } break;
     case FIELD_BOOLEAN: {
-        const FIELD_BOOLEANean_t *values = archive_value_vector_get_boolean_arrays_at(&array_length, idx, value_iter);
+        const field_boolean_t *values = archive_value_vector_get_boolean_arrays_at(&array_length, idx, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(array_length != 0);
         printf("\t\t{ type: boolean_array, values: [");
@@ -450,7 +450,7 @@ iterate_properties(struct prop_iter *prop_iter)
                             printf("]\n");
                         } break;
                         case FIELD_BOOLEAN: {
-                            const FIELD_BOOLEANean_t *values = archive_column_entry_get_booleans(&entry_length, &entry_iter);
+                            const field_boolean_t *values = archive_column_entry_get_booleans(&entry_length, &entry_iter);
                             printf("\t\t{ booleans: [");
                             for (u64 i = 0; i < entry_length; i++) {
                                 printf("%d%s", values[i], i + 1 < entry_length ? ", " : "");

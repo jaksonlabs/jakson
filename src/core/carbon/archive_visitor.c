@@ -322,7 +322,7 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                                 break;
                         case FIELD_STRING: SET_TYPE_SWITCH_CASE(string, field_sid_t)
                                 break;
-                        case FIELD_BOOLEAN: SET_TYPE_SWITCH_CASE(boolean, FIELD_BOOLEANean_t)
+                        case FIELD_BOOLEAN: SET_TYPE_SWITCH_CASE(boolean, field_boolean_t)
                                 break;
                         default:
                                 break;
@@ -519,7 +519,7 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                                                                                 break;
                                                                         case FIELD_BOOLEAN: {
                                                                                 SET_NESTED_ARRAY_SWITCH_CASE(booleans,
-                                                                                        FIELD_BOOLEANean_t)
+                                                                                        field_boolean_t)
                                                                         }
                                                                                 break;
                                                                         case FIELD_NULL: {

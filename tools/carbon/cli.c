@@ -88,8 +88,6 @@ before_object_visit(struct archive *archive, path_stack_t path,
     ng5_unused(num_objects);
     ng5_unused(key);
     ng5_unused(capture);
-
-    // TODO: ???   crashes??
     
     archive_visitor_print_path(stderr, archive, path);
 
@@ -301,7 +299,7 @@ visit_string_pairs (struct archive *archive, path_stack_t path, object_id_t id,
 
 static void
 visit_boolean_pairs (struct archive *archive, path_stack_t path, object_id_t id,
-                    const field_sid_t *keys, const FIELD_BOOLEANean_t *values, u32 num_pairs,
+                    const field_sid_t *keys, const field_boolean_t *values, u32 num_pairs,
                     void *capture)
 {
     ng5_unused(archive);
@@ -1174,7 +1172,7 @@ ng5_func_unused visit_enter_boolean_array_pair(struct archive *archive, path_sta
 static void
 ng5_func_unused visit_boolean_array_pair (struct archive *archive, path_stack_t path, object_id_t id,
                           field_sid_t key, u32 entry_idx, u32 max_entries,
-                          const FIELD_BOOLEANean_t *array, u32 array_length, void *capture)
+                          const field_boolean_t *array, u32 array_length, void *capture)
 {
     ng5_unused(archive);
     ng5_unused(path);
@@ -1608,7 +1606,7 @@ ng5_func_unused visit_object_array_object_property_booleans(struct archive *arch
                                           field_sid_t key,
                                           object_id_t nested_object_id,
                                           field_sid_t nested_key,
-                                          const FIELD_BOOLEANean_t *nested_values,
+                                          const field_boolean_t *nested_values,
                                           u32 num_nested_values, void *capture)
 {
     ng5_unused(archive);

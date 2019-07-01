@@ -684,7 +684,7 @@ DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_sid_t, strings, FIELD_STRI
 
 DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_number_t, numbers, FIELD_FLOAT);
 
-DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(FIELD_BOOLEANean_t, booleans, FIELD_BOOLEAN);
+DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_boolean_t, booleans, FIELD_BOOLEAN);
 
 DECLARE_NG5_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_u32_t, nulls, FIELD_NULL);
 
@@ -766,12 +766,6 @@ static void value_vector_init_object_basic(struct archive_value_vector *value)
                 NG5_MEMFILE_READ_TYPE_LIST(&value->record_table_memfile, offset_t, value->value_max_idx);
 }
 
-static void value_vector_init_object_array(struct archive_value_vector *value)
-{
-        ng5_unused(value);
-        abort(); // TODO: Implement XXX
-}
-
 static void value_vector_init_fixed_length_types_basic(struct archive_value_vector *value)
 {
         assert(!value->is_array);
@@ -808,7 +802,7 @@ static void value_vector_init_fixed_length_types_basic(struct archive_value_vect
                 value->data.basic.values.strings = NG5_MEMFILE_PEEK(&value->record_table_memfile, field_sid_t);
                 break;
         case FIELD_BOOLEAN:
-                value->data.basic.values.booleans = NG5_MEMFILE_PEEK(&value->record_table_memfile, FIELD_BOOLEANean_t);
+                value->data.basic.values.booleans = NG5_MEMFILE_PEEK(&value->record_table_memfile, field_boolean_t);
                 break;
         default: print_error_and_die(NG5_ERR_INTERNALERR);
         }
@@ -862,7 +856,7 @@ static void value_vector_init_fixed_length_types_non_null_arrays(struct archive_
                 break;
         case FIELD_BOOLEAN:
                 value->data.arrays.values.booleans_base =
-                        NG5_MEMFILE_PEEK(&value->record_table_memfile, FIELD_BOOLEANean_t);
+                        NG5_MEMFILE_PEEK(&value->record_table_memfile, field_boolean_t);
                 break;
         default: print_error_and_die(NG5_ERR_INTERNALERR);
         }
@@ -880,7 +874,7 @@ static void value_vector_init_fixed_length_types(struct archive_value_vector *va
 static void value_vector_init_object(struct archive_value_vector *value)
 {
         if (value->is_array) {
-                value_vector_init_object_array(value);
+                //value_vector_init_object_array(value);
         } else {
                 value_vector_init_object_basic(value);
         }
@@ -1081,7 +1075,7 @@ DECLARE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(strings, string, field_sid_t, NG
 
 DECLARE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(numbers, number, field_number_t, NG5_ERR_ITER_NONUMBER)
 
-DECLARE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(booleans, boolean, FIELD_BOOLEANean_t, NG5_ERR_ITER_NOBOOL)
+DECLARE_NG5_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(booleans, boolean, field_boolean_t, NG5_ERR_ITER_NOBOOL)
 
 NG5_EXPORT(const field_u32_t *)archive_value_vector_get_null_arrays(u32 *num_values, struct archive_value_vector *value)
 {
@@ -1144,7 +1138,7 @@ DECLARE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(string, field_sid_t, strings_
 
 DECLARE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(number, field_number_t, numbers_base)
 
-DECLARE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(boolean, FIELD_BOOLEANean_t, booleans_base)
+DECLARE_NG5_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(boolean, field_boolean_t, booleans_base)
 
 void int_reset_cabin_object_mem_file(struct archive_object *object)
 {

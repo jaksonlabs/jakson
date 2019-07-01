@@ -317,7 +317,7 @@ bool columndoc_free(struct columndoc *doc)
     if(!vec_is_empty((key_vector))) {                                                                           \
         fprintf(file, "\"Values\": [ ");                                                                               \
         for (size_t i = 0; i < (value_vector)->num_elems; i++) {                                                       \
-            FIELD_BOOLEANean_t value = *vec_get(value_vector, i, FIELD_BOOLEANean_t);                                  \
+            field_boolean_t value = *vec_get(value_vector, i, field_boolean_t);                                  \
             fprintf(file, "%s%s", value == 0 ? "false" : "true", i + 1 < (value_vector)->num_elems ? ", " : "");       \
         }                                                                                                              \
         fprintf(file, "]");                                                                                            \
@@ -409,10 +409,10 @@ static bool print_primitive_objects(FILE *file, struct err *err, const char *typ
         fprintf(file, "],");                                                                                           \
         fprintf(file, "\"Values\": [ ");                                                                               \
         for (size_t i = 0; i < (&value_vector)->num_elems; i++) {                                                      \
-            const struct vector ofType(FIELD_BOOLEANean_t) *values = vec_get(&value_vector, i, struct vector);      \
+            const struct vector ofType(field_boolean_t) *values = vec_get(&value_vector, i, struct vector);      \
             fprintf(file, "[ ");                                                                                       \
             for (size_t j = 0; j < values->num_elems; j++) {                                                           \
-                FIELD_BOOLEANean_t value = *vec_get(values, j, FIELD_BOOLEANean_t);                                    \
+                field_boolean_t value = *vec_get(values, j, field_boolean_t);                                    \
                 fprintf(file, "%s%s", value == 0 ? "false" : "true", j + 1 < values->num_elems ? ", " : "");           \
             }                                                                                                          \
             fprintf(file, "]%s ", i + 1 < (&value_vector)->num_elems ? "," : "");                                      \
@@ -1078,7 +1078,7 @@ static void setup_object(struct columndoc_obj *model, struct columndoc *parent, 
         vec_create(&model->float_array_prop_keys, NULL, sizeof(field_sid_t), 10);
         vec_create(&model->null_array_prop_keys, NULL, sizeof(field_sid_t), 10);
 
-        vec_create(&model->bool_prop_vals, NULL, sizeof(FIELD_BOOLEANean_t), 10);
+        vec_create(&model->bool_prop_vals, NULL, sizeof(field_boolean_t), 10);
         vec_create(&model->int8_prop_vals, NULL, sizeof(field_i8_t), 10);
         vec_create(&model->int16_prop_vals, NULL, sizeof(field_i16_t), 10);
         vec_create(&model->int32_prop_vals, NULL, sizeof(field_i32_t), 10);
@@ -1221,7 +1221,6 @@ static void object_push_array(struct vector ofType(Vector
 static bool object_put_array(struct columndoc_obj *model, struct err *err, const struct doc_entries *entry,
         struct strdic *dic, const field_sid_t *key_id)
 {
-        // TODO: format for array, sort by keys, sort by values!
         ng5_unused(dic);
         u32 num_elements = (u32) vec_length(&entry->values);
 
@@ -1233,7 +1232,7 @@ static bool object_put_array(struct columndoc_obj *model, struct err *err, const
                 break;
         case FIELD_BOOLEAN:
                 object_push_array(&model->bool_array_prop_vals,
-                        sizeof(FIELD_BOOLEANean_t),
+                        sizeof(field_boolean_t),
                         num_elements,
                         entry->values.base,
                         *key_id,

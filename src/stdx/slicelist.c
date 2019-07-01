@@ -93,8 +93,7 @@ NG5_EXPORT(bool) slice_list_create(slice_list_t *list, const struct allocator *a
 NG5_EXPORT(bool) SliceListDrop(slice_list_t *list)
 {
         ng5_unused(list);
-//    NOT_YET_IMPLEMENTED
-        // TODO: implement
+
         vec_drop(&list->slices);
         vec_drop(&list->descriptors);
         vec_drop(&list->bounds);
@@ -136,9 +135,6 @@ NG5_EXPORT(bool) slice_list_insert(slice_list_t *list, char **strings, field_sid
                         HashBounds *restrict bounds = vec_all(&list->bounds, HashBounds);
                         bloom_t *restrict filters = vec_all(&list->filters, bloom_t);
                         Slice *restrict slices = vec_all(&list->slices, Slice);
-
-                        if (list->appender_idx != 0) { ; // TODO: remove
-                        }
 
                         Slice *restrict appender = slices + list->appender_idx;
                         bloom_t *restrict appenderFilter = filters + list->appender_idx;
@@ -314,11 +310,8 @@ static void appenderNew(slice_list_t *list)
 static void appenderSeal(Slice *slice)
 {
         ng5_unused(slice);
-        //  slice->cacheIdx = 0;
-        //  slice_sort(slice);
-        //  slice->strat = SLICE_LOOKUP_BESEARCH;
-
-        // TODO: sealing means sort and then replace 'find' with bsearch or something. Not yet implemented: sealed slices are also search in a linear fashion
+        // TODO: sealing means sort and then replace 'find' with bsearch or something.
+        // Not yet implemented: sealed slices are also search in a linear fashion
 }
 
 static void lock(slice_list_t *list)

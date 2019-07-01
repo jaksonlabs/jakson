@@ -320,7 +320,7 @@ static bool import_json_object_number_prop(struct doc_obj *target, struct err *e
         return true;
 }
 
-static void import_json_object_bool_prop(struct doc_obj *target, const char *key, FIELD_BOOLEANean_t value)
+static void import_json_object_bool_prop(struct doc_obj *target, const char *key, field_boolean_t value)
 {
         struct doc_entries *entry;
         doc_obj_add_key(&entry, target, key, FIELD_BOOLEAN);
@@ -570,13 +570,13 @@ static bool import_json_object_array_prop(struct doc_obj *target, struct err *er
                         case FIELD_BOOLEAN:
                                 if (likely(ast_node_data_type == JSON_VALUE_TRUE
                                         || ast_node_data_type == JSON_VALUE_FALSE)) {
-                                        FIELD_BOOLEANean_t value =
+                                        field_boolean_t value =
                                                 ast_node_data_type == JSON_VALUE_TRUE ? NG5_BOOLEAN_TRUE
                                                                                       : NG5_BOOLEAN_FALSE;
                                         doc_obj_push_primtive(entry, &value);
                                 } else {
                                         assert(ast_node_data_type == JSON_VALUE_NULL);
-                                        FIELD_BOOLEANean_t value = NG5_NULL_BOOLEAN;
+                                        field_boolean_t value = NG5_NULL_BOOLEAN;
                                         doc_obj_push_primtive(entry, &value);
                                 }
                                 break;
@@ -613,7 +613,7 @@ static bool import_json_object(struct doc_obj *target, struct err *err, const st
                         break;
                 case JSON_VALUE_TRUE:
                 case JSON_VALUE_FALSE: {
-                        FIELD_BOOLEANean_t value = value_type == JSON_VALUE_TRUE ? NG5_BOOLEAN_TRUE : NG5_BOOLEAN_FALSE;
+                        field_boolean_t value = value_type == JSON_VALUE_TRUE ? NG5_BOOLEAN_TRUE : NG5_BOOLEAN_FALSE;
                         import_json_object_bool_prop(target, member->key.value, value);
                 }
                         break;
@@ -732,7 +732,7 @@ static bool compare_##type##_leq(const void *lhs, const void *rhs)              
     return (a <= b);                                                                                                   \
 }
 
-DEFINE_NG5_TYPE_LQ_FUNC(FIELD_BOOLEANean_t)
+DEFINE_NG5_TYPE_LQ_FUNC(field_boolean_t)
 
 DEFINE_NG5_TYPE_LQ_FUNC(field_number_t)
 
@@ -791,7 +791,7 @@ static bool compare_##type##_array_leq(const void *lhs, const void *rhs)        
     return true;                                                                                                       \
 }
 
-DEFINE_NG5_ARRAY_TYPE_LQ_FUNC(FIELD_BOOLEANean_t)
+DEFINE_NG5_ARRAY_TYPE_LQ_FUNC(field_boolean_t)
 
 DEFINE_NG5_ARRAY_TYPE_LQ_FUNC(field_i8_t)
 
@@ -1058,7 +1058,7 @@ static bool compare_column_less_eq_func(const void *lhs, const void *rhs, void *
         case FIELD_NULL:
                 return (a->num_elems <= b->num_elems);
                 break;
-        case FIELD_BOOLEAN: ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, FIELD_BOOLEANean_t, a, b);
+        case FIELD_BOOLEAN: ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, field_boolean_t, a, b);
                 break;
         case FIELD_INT8: ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, field_i8_t, a, b);
                 break;
@@ -1194,8 +1194,8 @@ static void sort_columndoc_values(struct columndoc_obj *columndoc)
         if (columndoc->parent->read_optimized) {
                 SORT_META_MODEL_VALUES(columndoc->bool_prop_keys,
                         columndoc->bool_prop_vals,
-                        FIELD_BOOLEANean_t,
-                        compare_FIELD_BOOLEANean_t_leq);
+                        field_boolean_t,
+                        compare_field_boolean_t_leq);
                 SORT_META_MODEL_VALUES(columndoc->int8_prop_keys,
                         columndoc->int8_prop_vals,
                         field_i8_t,
@@ -1238,7 +1238,7 @@ static void sort_columndoc_values(struct columndoc_obj *columndoc)
 
                 SORT_META_MODEL_ARRAYS(columndoc->bool_array_prop_keys,
                         columndoc->bool_array_prop_vals,
-                        compare_FIELD_BOOLEANean_t_array_leq);
+                        compare_field_boolean_t_array_leq);
                 SORT_META_MODEL_ARRAYS(columndoc->int8_array_prop_keys,
                         columndoc->int8_array_prop_vals,
                         compare_field_i8_t_array_leq);
@@ -1333,10 +1333,10 @@ static void create_typed_vector(struct doc_entries *entry)
         size_t size;
         switch (entry->type) {
         case FIELD_NULL:
-                size = sizeof(FIELD_NULL_t);
+                size = sizeof(field_null_t);
                 break;
         case FIELD_BOOLEAN:
-                size = sizeof(FIELD_BOOLEANean_t);
+                size = sizeof(field_boolean_t);
                 break;
         case FIELD_INT8:
                 size = sizeof(field_i8_t);
@@ -1366,7 +1366,7 @@ static void create_typed_vector(struct doc_entries *entry)
                 size = sizeof(field_number_t);
                 break;
         case FIELD_STRING:
-                size = sizeof(FIELD_STRING_t);
+                size = sizeof(field_string_t);
                 break;
         case FIELD_OBJECT:
                 size = sizeof(struct doc_obj);
@@ -1407,7 +1407,7 @@ static bool print_value(FILE *file, field_e type, const struct vector ofType(<T>
                 break;
         case FIELD_BOOLEAN: {
                 for (size_t i = 0; i < num_values; i++) {
-                        FIELD_BOOLEANean_t value = *(vec_get(values, i, FIELD_BOOLEANean_t));
+                        field_boolean_t value = *(vec_get(values, i, field_boolean_t));
                         if (value != NG5_NULL_BOOLEAN) {
                                 fprintf(file, "%s%s", value == 0 ? "false" : "true", i + 1 < num_values ? ", " : "");
                         } else {
@@ -1517,7 +1517,7 @@ static bool print_value(FILE *file, field_e type, const struct vector ofType(<T>
                 break;
         case FIELD_STRING: {
                 for (size_t i = 0; i < num_values; i++) {
-                        FIELD_STRING_t value = *(vec_get(values, i, FIELD_STRING_t));
+                        field_string_t value = *(vec_get(values, i, field_string_t));
                         if (value) {
                                 fprintf(file, "\"%s\"%s", value, i + 1 < num_values ? ", " : "");
                         } else {

@@ -523,7 +523,7 @@ static bool write_primitive_fixed_value_column(struct memfile *memfile, struct e
         switch (type) {
         case FIELD_NULL:
                 break;
-        case FIELD_BOOLEAN: WRITE_PRIMITIVE_VALUES(memfile, values_vec, FIELD_BOOLEANean_t);
+        case FIELD_BOOLEAN: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_boolean_t );
                 break;
         case FIELD_INT8: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_i8_t);
                 break;
@@ -604,7 +604,7 @@ static bool write_array_value_column(struct memfile *memfile, struct err *err, f
         switch (type) {
         case FIELD_NULL: WRITE_PRIMITIVE_VALUES(memfile, values_vec, u32);
                 break;
-        case FIELD_BOOLEAN: WRITE_ARRAY_VALUES(memfile, values_vec, FIELD_BOOLEANean_t);
+        case FIELD_BOOLEAN: WRITE_ARRAY_VALUES(memfile, values_vec, field_boolean_t);
                 break;
         case FIELD_INT8: WRITE_ARRAY_VALUES(memfile, values_vec, field_i8_t);
                 break;
@@ -1528,7 +1528,7 @@ static bool print_column_form_memfile(FILE *file, struct err *err, struct memfil
                 }
                         break;
                 case FIELD_BOOLEAN: {
-                        PRINT_VALUE_ARRAY(FIELD_BOOLEANean_t, memfile, header, "%d");
+                        PRINT_VALUE_ARRAY(field_boolean_t, memfile, header, "%d");
                 }
                         break;
                 case FIELD_INT8: {
@@ -1812,8 +1812,8 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                         struct prop_header *prop_header = NG5_MEMFILE_READ_TYPE(memfile, struct prop_header);
                         field_sid_t *keys = (field_sid_t *) NG5_MEMFILE_READ(memfile,
                                 prop_header->num_entries * sizeof(field_sid_t));
-                        FIELD_BOOLEANean_t *values = (FIELD_BOOLEANean_t *) NG5_MEMFILE_READ(memfile,
-                                prop_header->num_entries * sizeof(FIELD_BOOLEANean_t));
+                        field_boolean_t *values = (field_boolean_t *) NG5_MEMFILE_READ(memfile,
+                                prop_header->num_entries * sizeof(field_boolean_t));
                         fprintf(file, "0x%04x ", offset);
                         INTENT_LINE(nesting_level)
                         fprintf(file, "[marker: %c (boolean)] [nentries: %d] [", entryMarker, prop_header->num_entries);
@@ -2008,8 +2008,8 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                         fprintf(file, "] [");
 
                         for (u32 array_idx = 0; array_idx < prop_header->num_entries; array_idx++) {
-                                FIELD_BOOLEANean_t *values = (FIELD_BOOLEANean_t *) NG5_MEMFILE_READ(memfile,
-                                        array_lengths[array_idx] * sizeof(FIELD_BOOLEANean_t));
+                                field_boolean_t *values = (field_boolean_t *) NG5_MEMFILE_READ(memfile,
+                                        array_lengths[array_idx] * sizeof(field_boolean_t));
                                 fprintf(file, "[");
                                 for (u32 i = 0; i < array_lengths[array_idx]; i++) {
                                         fprintf(file,

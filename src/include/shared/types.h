@@ -63,9 +63,9 @@ typedef int64_t i64;
 struct doc_obj;
 
 typedef u64 field_sid_t;  /* string identifier, resolvable by a string dictionary */
-typedef char FIELD_NULL_t;
+typedef char field_null_t;
 
-typedef i8 FIELD_BOOLEANean_t;
+typedef i8 field_boolean_t;
 
 typedef i8 field_i8_t;
 
@@ -85,7 +85,7 @@ typedef u64 field_u64_t;
 
 typedef float field_number_t;
 
-typedef const char *FIELD_STRING_t;
+typedef const char *field_string_t;
 
 #define NG5_NULL_ENCODED_STRING            0
 #define NG5_NULL_BOOLEAN                   INT8_MAX
@@ -143,7 +143,7 @@ typedef const char *FIELD_STRING_t;
             value_size = sizeof(u16);                                                                                  \
             break;                                                                                                     \
         case FIELD_BOOLEAN:                                                                                            \
-            value_size = sizeof(FIELD_BOOLEANean_t);                                                                   \
+            value_size = sizeof(field_boolean_t);                                                                   \
             break;                                                                                                     \
         case FIELD_INT8:                                                                                               \
             value_size = sizeof(field_i8_t);                                                                           \

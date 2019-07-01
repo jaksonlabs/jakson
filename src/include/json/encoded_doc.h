@@ -36,7 +36,7 @@ union encoded_doc_value {
         field_u32_t uint32;
         field_u64_t uint64;
         field_number_t number;
-        FIELD_BOOLEANean_t boolean;
+        field_boolean_t boolean;
         field_sid_t string;
         object_id_t object;
         u32 null;
@@ -106,8 +106,6 @@ NG5_EXPORT(bool) encoded_doc_collection_print(FILE *file, struct encoded_doc_lis
 
 NG5_EXPORT(bool) encoded_doc_drop(struct encoded_doc *doc);
 
-NG5_EXPORT(bool) encoded_doc_get_object_id(object_id_t *oid, struct encoded_doc *doc);
-
 #define DEFINE_NG5_ENCODED_DOC_ADD_PROP_BASIC(name, built_in_type)                                                  \
 NG5_EXPORT(bool)                                                                                                    \
 encoded_doc_add_prop_##name(struct encoded_doc *doc, field_sid_t key, built_in_type value);
@@ -125,7 +123,7 @@ DEFINE_NG5_ENCODED_DOC_ADD_PROP_BASIC(uint16, field_u16_t)
 DEFINE_NG5_ENCODED_DOC_ADD_PROP_BASIC(uint32, field_u32_t)
 DEFINE_NG5_ENCODED_DOC_ADD_PROP_BASIC(uint64, field_u64_t)
 DEFINE_NG5_ENCODED_DOC_ADD_PROP_BASIC(number, field_number_t)
-DEFINE_NG5_ENCODED_DOC_ADD_PROP_BASIC(boolean, FIELD_BOOLEANean_t)
+DEFINE_NG5_ENCODED_DOC_ADD_PROP_BASIC(boolean, field_boolean_t)
 DEFINE_NG5_ENCODED_DOC_ADD_PROP_BASIC(string, field_sid_t)
 
 DEFINE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(int8, field_i8_t)
@@ -137,7 +135,7 @@ DEFINE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(uint16, field_u16_t)
 DEFINE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(uint32, field_u32_t)
 DEFINE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(uint64, field_u64_t)
 DEFINE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(number, field_number_t)
-DEFINE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(boolean, FIELD_BOOLEANean_t)
+DEFINE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(boolean, field_boolean_t)
 DEFINE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(string, field_sid_t)
 
 NG5_EXPORT(bool) encoded_doc_add_prop_string_decoded_string_value_decoded(struct encoded_doc *doc, const char *key,
@@ -207,7 +205,7 @@ DEFINE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(uint16, field_u16_t)
 DEFINE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(uint32, field_u32_t)
 DEFINE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(uint64, field_u64_t)
 DEFINE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(number, field_number_t)
-DEFINE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(boolean, FIELD_BOOLEANean_t)
+DEFINE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(boolean, field_boolean_t)
 DEFINE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(string, field_sid_t)
 DEFINE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(null, field_u32_t)
 
@@ -220,15 +218,13 @@ DEFINE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(uint16, field_u16_t)
 DEFINE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(uint32, field_u32_t)
 DEFINE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(uint64, field_u64_t)
 DEFINE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(number, field_number_t)
-DEFINE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(boolean, FIELD_BOOLEANean_t)
+DEFINE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(boolean, field_boolean_t)
 DEFINE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(string, field_sid_t)
 DEFINE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(null, field_u32_t)
 
 NG5_EXPORT(bool) encoded_doc_array_push_object(struct encoded_doc *doc, field_sid_t key, object_id_t id);
 
 NG5_EXPORT(bool) encoded_doc_array_push_object_decoded(struct encoded_doc *doc, const char *key, object_id_t id);
-
-NG5_EXPORT(bool) encoded_doc_get_nested_object(struct encoded_doc *nested, object_id_t oid, struct encoded_doc *doc);
 
 NG5_EXPORT(bool) encoded_doc_print(FILE *file, struct encoded_doc *doc);
 
