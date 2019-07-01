@@ -592,6 +592,7 @@ NG5_EXPORT(bool) bison_revise_begin(struct bison_revise *context, struct bison *
                 original->versioning.revision_lock = true;
                 context->original = original;
                 context->revised_doc = revised_doc;
+                error_init(&context->err);
                 bison_clone(context->revised_doc, context->original);
                 fire_revision_begin(original);
                 return true;

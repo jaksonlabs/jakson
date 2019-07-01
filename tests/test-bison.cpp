@@ -2127,7 +2127,7 @@ TEST(BisonTest, BisonUpdateU8Simple)
         bison_revise_iterator_open(&it, &revise);
         bison_array_it_insert_begin(&inserter, &it);
 
-        bison_update_u8(&revise, "0", 'Y');
+        bison_update_set_u8(&revise, "0", 'Y');
 
         bison_array_it_insert_end(&inserter);
         bison_revise_iterator_close(&it);
@@ -2146,7 +2146,7 @@ TEST(BisonTest, BisonUpdateU8Simple)
 
         bison_insert_u8(&inserter, 'A');
         bison_insert_u8(&inserter, 'B');
-        bison_update_u8(&revise, "2", 'C');
+        bison_update_set_u8(&revise, "2", 'C');
 
         bison_array_it_insert_end(&inserter);
         bison_revise_iterator_close(&it);
@@ -2163,9 +2163,9 @@ TEST(BisonTest, BisonUpdateU8Simple)
         bison_revise_iterator_open(&it, &revise);
         bison_array_it_insert_begin(&inserter, &it);
 
-        bison_update_u8(&revise, "0", 1);
-        bison_update_u8(&revise, "1", 2);
-        bison_update_u8(&revise, "2", 3);
+        bison_update_set_u8(&revise, "0", 1);
+        bison_update_set_u8(&revise, "1", 2);
+        bison_update_set_u8(&revise, "2", 3);
 
         bison_array_it_insert_end(&inserter);
         bison_revise_iterator_close(&it);
@@ -2225,7 +2225,7 @@ TEST(BisonTest, BisonUpdateMixedFixedTypesSimple)
         bison_revise_iterator_open(&it, &revise);
         bison_array_it_insert_begin(&inserter, &it);
 
-        bison_update_i64(&revise, "1", 1024);
+        bison_update_set_i64(&revise, "1", 1024);
 
         bison_array_it_insert_end(&inserter);
         bison_revise_iterator_close(&it);
@@ -3920,7 +3920,7 @@ TEST(BisonTest, BisonUpdateMixedFixedTypesTypeChangeSimple)
         bison_revise_iterator_open(&it, &revise);
         bison_array_it_insert_begin(&inserter, &it);
 
-        bison_update_u32(&revise, "1", 1024);
+        bison_update_set_u32(&revise, "1", 1024);
 
         bison_array_it_insert_end(&inserter);
         bison_revise_iterator_close(&it);

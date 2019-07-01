@@ -214,7 +214,7 @@ static inline struct bison_column_it *column_iterator(u32 *elem_pos, struct biso
         return updater->path_evaluater.result.containers.column.it;
 }
 
-NG5_EXPORT(bool) bison_update_null(struct bison_revise *context, const char *path)
+NG5_EXPORT(bool) bison_update_set_null(struct bison_revise *context, const char *path)
 {
         ng5_unused(context);
         ng5_unused(path);
@@ -222,7 +222,7 @@ NG5_EXPORT(bool) bison_update_null(struct bison_revise *context, const char *pat
         return false;
 }
 
-NG5_EXPORT(bool) bison_update_true(struct bison_revise *context, const char *path)
+NG5_EXPORT(bool) bison_update_set_true(struct bison_revise *context, const char *path)
 {
         ng5_unused(context);
         ng5_unused(path);
@@ -230,7 +230,7 @@ NG5_EXPORT(bool) bison_update_true(struct bison_revise *context, const char *pat
         return false;
 }
 
-NG5_EXPORT(bool) bison_update_false(struct bison_revise *context, const char *path)
+NG5_EXPORT(bool) bison_update_set_false(struct bison_revise *context, const char *path)
 {
         ng5_unused(context);
         ng5_unused(path);
@@ -238,47 +238,101 @@ NG5_EXPORT(bool) bison_update_false(struct bison_revise *context, const char *pa
         return false;
 }
 
-NG5_EXPORT(bool) bison_update_u8(struct bison_revise *context, const char *path, u8 value)
+NG5_EXPORT(bool) bison_update_set_u8(struct bison_revise *context, const char *path, u8 value)
 {
         return try_update_value(context, path, value, array_update_u8, column_update_u8);
 }
 
-NG5_EXPORT(bool) bison_update_u16(struct bison_revise *context, const char *path, u16 value)
+NG5_EXPORT(bool) bison_update_set_u16(struct bison_revise *context, const char *path, u16 value)
 {
         return try_update_value(context, path, value, array_update_u16, column_update_u16);
 }
 
-NG5_EXPORT(bool) bison_update_u32(struct bison_revise *context, const char *path, u32 value)
+NG5_EXPORT(bool) bison_update_set_u32(struct bison_revise *context, const char *path, u32 value)
 {
         return try_update_value(context, path, value, array_update_u32, column_update_u32);
 }
 
-NG5_EXPORT(bool) bison_update_u64(struct bison_revise *context, const char *path, u64 value)
+NG5_EXPORT(bool) bison_update_set_u64(struct bison_revise *context, const char *path, u64 value)
 {
         return try_update_value(context, path, value, array_update_u64, column_update_u64);
 }
 
-NG5_EXPORT(bool) bison_update_i8(struct bison_revise *context, const char *path, i8 value)
+NG5_EXPORT(bool) bison_update_set_i8(struct bison_revise *context, const char *path, i8 value)
 {
         return try_update_value(context, path, value, array_update_i8, column_update_i8);
 }
 
-NG5_EXPORT(bool) bison_update_i16(struct bison_revise *context, const char *path, i16 value)
+NG5_EXPORT(bool) bison_update_set_i16(struct bison_revise *context, const char *path, i16 value)
 {
         return try_update_value(context, path, value, array_update_i16, column_update_i16);
 }
 
-NG5_EXPORT(bool) bison_update_i32(struct bison_revise *context, const char *path, i32 value)
+NG5_EXPORT(bool) bison_update_set_i32(struct bison_revise *context, const char *path, i32 value)
 {
         return try_update_value(context, path, value, array_update_i32, column_update_i32);
 }
 
-NG5_EXPORT(bool) bison_update_i64(struct bison_revise *context, const char *path, i64 value)
+NG5_EXPORT(bool) bison_update_set_i64(struct bison_revise *context, const char *path, i64 value)
 {
         return try_update_value(context, path, value, array_update_i64, column_update_i64);
 }
 
-NG5_EXPORT(bool) bison_update_float(struct bison_revise *context, const char *path, float value)
+NG5_EXPORT(bool) bison_update_set_float(struct bison_revise *context, const char *path, float value)
 {
         return try_update_value(context, path, value, array_update_float, column_update_float);
+}
+
+NG5_EXPORT(bool) bison_update_unsigned(struct bison_revise *context, const char *path, u64 value)
+{
+        if (value <= UINT8_MAX) {
+                return bison_update_set_u8(context, path, (u8) value);
+        } else if (value <= UINT16_MAX) {
+                return bison_update_set_u16(context, path, (u16) value);
+        } else if (value <= UINT32_MAX) {
+                return bison_update_set_u32(context, path, (u32) value);
+        } else if (value <= UINT64_MAX) {
+                return bison_update_set_u64(context, path, (u64) value);
+        } else {
+                error(&context->err, NG5_ERR_INTERNALERR);
+                return false;
+        }
+}
+
+NG5_EXPORT(bool) bison_update_signed(struct bison_revise *context, const char *path, i64 value)
+{
+        if (value >= INT8_MIN && value <= INT8_MAX) {
+                return bison_update_set_i8(context, path, (i8) value);
+        } else if (value >= INT16_MIN && value <= INT16_MAX) {
+                return bison_update_set_i16(context, path, (i16) value);
+        } else if (value >= INT32_MIN && value <= INT32_MAX) {
+                return bison_update_set_i32(context, path, (i32) value);
+        } else if (value >= INT64_MIN && value <= INT64_MAX) {
+                return bison_update_set_i64(context, path, (i64) value);
+        } else {
+                error(&context->err, NG5_ERR_INTERNALERR);
+                return false;
+        }
+}
+
+NG5_EXPORT(bool) bison_update_string(struct bison_revise *context, const char *value)
+{
+        // TODO: Implement
+        ng5_unused(context);
+        ng5_unused(value);
+        error_print(NG5_ERR_NOTIMPLEMENTED)
+        return false;
+}
+
+NG5_EXPORT(bool) bison_update_binary(struct bison_revise *context, const void *value, size_t nbytes,
+        const char *file_ext, const char *user_type)
+{
+        // TODO: Implement
+        ng5_unused(context);
+        ng5_unused(value);
+        ng5_unused(nbytes);
+        ng5_unused(file_ext);
+        ng5_unused(user_type);
+        error_print(NG5_ERR_NOTIMPLEMENTED)
+        return false;
 }

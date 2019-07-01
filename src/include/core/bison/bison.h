@@ -75,7 +75,10 @@ struct bison_revise
 {
         struct bison *original;
         struct bison *revised_doc;
+        struct err err;
 };
+
+NG5_DEFINE_ERROR_GETTER(bison_revise)
 
 enum bison_field_type
 {
