@@ -91,10 +91,8 @@ NG5_EXPORT(bool) bison_int_insert_column(struct memfile *memfile_in, struct err 
         u32 num_elements = 0;
         u32 cap_elements = capactity;
 
-        memfile_ensure_space(memfile_in, sizeof(u32));
-        memfile_write(memfile_in, &num_elements, sizeof(u32));
-        memfile_ensure_space(memfile_in, sizeof(u32));
-        memfile_write(memfile_in, &cap_elements, sizeof(u32));
+        memfile_write_varuint(memfile_in, num_elements);
+        memfile_write_varuint(memfile_in, cap_elements);
 
         offset_t payload_begin = memfile_tell(memfile_in);
 
@@ -105,6 +103,8 @@ NG5_EXPORT(bool) bison_int_insert_column(struct memfile *memfile_in, struct err 
 
         memfile_seek(memfile_in, payload_begin + nbytes);
         marker_insert(memfile_in, column_end_marker);
+
+        memfile_hexdump_print(memfile_in); // TODO: debug remove
 
         /* seek to first entry in column */
         memfile_seek(memfile_in, payload_begin);
@@ -387,6 +387,17 @@ NG5_EXPORT(bool) bison_int_array_it_skip_64(struct bison_array_it *it)
         assert(sizeof(u64) == sizeof(i64));
         memfile_skip(&it->memfile, sizeof(u64));
         return true;
+}
+
+NG5_EXPORT(offset_t) bison_int_column_get_payload_off(struct bison_column_it *it)
+{
+        memfile_save_position(&it->memfile);
+        memfile_seek(&it->memfile, it->num_and_capacity_start_offset);
+        memfile_skip_varuint(&it->memfile); // skip num of elements
+        memfile_skip_varuint(&it->memfile); // skip capacity of elements
+        offset_t result = memfile_tell(&it->memfile);
+        memfile_restore_position(&it->memfile);
+        return result;
 }
 
 NG5_EXPORT(bool) bison_int_array_it_field_skip(struct bison_array_it *it)

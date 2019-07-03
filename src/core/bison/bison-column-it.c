@@ -52,13 +52,10 @@ NG5_EXPORT(bool) bison_column_it_create(struct bison_column_it *it, struct memfi
         enum bison_field_type type = (enum bison_field_type) *memfile_read(&it->memfile, sizeof(media_type_t));
         it->type = type;
 
-        it->column_num_elements_offset = memfile_tell(&it->memfile);
-        it->column_num_elements = *memfile_read(&it->memfile, sizeof(u32));
-        it->column_capacity_offset = memfile_tell(&it->memfile);
-        it->column_capacity = *memfile_read(&it->memfile, sizeof(u32));
+        it->num_and_capacity_start_offset = memfile_tell(&it->memfile);
+        it->column_num_elements = (u32) memfile_read_varuint(NULL, &it->memfile);
+        it->column_capacity = (u32) memfile_read_varuint(NULL, &it->memfile);
 
-        /* header consists of column begin marker and contained element type */
-        it->payload_start = memfile_tell(&it->memfile);
         bison_column_it_rewind(it);
 
         return true;
@@ -103,8 +100,8 @@ NG5_EXPORT(bool) bison_column_it_values_info(enum bison_field_type *type, u32 *n
         error_if_null(it);
 
         if (nvalues) {
-                memfile_seek(&it->memfile, it->column_num_elements_offset);
-                u32 num_elements = *NG5_MEMFILE_PEEK(&it->memfile, u32);
+                memfile_seek(&it->memfile, it->num_and_capacity_start_offset);
+                u32 num_elements = (u32) memfile_read_varuint(NULL, &it->memfile);
                 *nvalues = num_elements;
         }
 
@@ -116,20 +113,20 @@ NG5_EXPORT(bool) bison_column_it_values_info(enum bison_field_type *type, u32 *n
 NG5_EXPORT(const void *) bison_column_it_values(enum bison_field_type *type, u32 *nvalues, struct bison_column_it *it)
 {
         error_if_null(it);
-        memfile_seek(&it->memfile, it->column_num_elements_offset);
-        u32 num_elements = *NG5_MEMFILE_READ_TYPE(&it->memfile, u32);
+        memfile_seek(&it->memfile, it->num_and_capacity_start_offset);
+        u32 num_elements = (u32) memfile_read_varuint(NULL, &it->memfile);
+        u32 cap_elements = (u32) memfile_read_varuint(NULL, &it->memfile);
+        offset_t payload_start = memfile_tell(&it->memfile);
 
-        memfile_seek(&it->memfile, it->column_capacity_offset);
-        u32 cap_elements = *NG5_MEMFILE_READ_TYPE(&it->memfile, u32);
-
-        memfile_seek(&it->memfile, it->payload_start);
         const void *result = memfile_peek(&it->memfile, sizeof(void));
 
         ng5_optional_set(type, it->type);
         ng5_optional_set(nvalues, num_elements);
 
         u32 skip = cap_elements * bison_int_get_type_value_size(it->type);
-        memfile_seek(&it->memfile, it->payload_start + skip);
+        memfile_seek(&it->memfile, payload_start + skip);
+
+        memfile_hexdump_print(&it->memfile); // TODO: debug remove
 
         char end = *memfile_read(&it->memfile, sizeof(u8));
 
@@ -195,21 +192,24 @@ NG5_EXPORT(bool) bison_column_it_remove(struct bison_column_it *it, u32 pos)
         error_if(pos >= it->column_num_elements, &it->err, NG5_ERR_OUTOFBOUNDS);
         memfile_save_position(&it->memfile);
 
+        offset_t payload_start = bison_int_column_get_payload_off(it);
+
         /* remove element */
         size_t elem_size = bison_int_get_type_value_size(it->type);
-        memfile_seek(&it->memfile, it->payload_start + pos * elem_size);
+        memfile_seek(&it->memfile, payload_start + pos * elem_size);
         memfile_move_left(&it->memfile, elem_size);
 
         /* add an empty element at the end to restore the column capacity property */
-        memfile_seek(&it->memfile, it->payload_start + it->column_num_elements * elem_size);
+        memfile_seek(&it->memfile, payload_start + it->column_num_elements * elem_size);
         memfile_move_right(&it->memfile, elem_size);
 
         /* update element counter */
-        memfile_seek(&it->memfile, it->column_num_elements_offset);
-        u32 num_elements = *NG5_MEMFILE_READ_TYPE(&it->memfile, u32);
-        num_elements--;
-        memfile_seek(&it->memfile, it->column_num_elements_offset);
-        memfile_write(&it->memfile, &num_elements, sizeof(u32));
+        memfile_seek(&it->memfile, it->num_and_capacity_start_offset);
+        u32 num_elems = memfile_peek_varuint(NULL, &it->memfile);
+        assert(num_elems > 0);
+        num_elems--;
+        memfile_update_varuint(&it->memfile, num_elems);
+        it->column_num_elements = num_elems;
 
         memfile_restore_position(&it->memfile);
 
@@ -223,7 +223,8 @@ NG5_EXPORT(bool) bison_column_it_update_set_null(struct bison_column_it *it, u32
 
         memfile_save_position(&it->memfile);
 
-        memfile_seek(&it->memfile, it->payload_start + pos * bison_int_get_type_value_size(it->type));
+        offset_t payload_start = bison_int_column_get_payload_off(it);
+        memfile_seek(&it->memfile, payload_start + pos * bison_int_get_type_value_size(it->type));
 
         switch (it->type) {
                 case BISON_FIELD_TYPE_NULL:
@@ -401,7 +402,8 @@ NG5_EXPORT(bool) bison_column_it_update_set_true(struct bison_column_it *it, u32
 
         memfile_save_position(&it->memfile);
 
-        memfile_seek(&it->memfile, it->payload_start + pos * bison_int_get_type_value_size(it->type));
+        offset_t payload_start = bison_int_column_get_payload_off(it);
+        memfile_seek(&it->memfile, payload_start + pos * bison_int_get_type_value_size(it->type));
 
         switch (it->type) {
         case BISON_FIELD_TYPE_NULL:
@@ -587,6 +589,7 @@ NG5_EXPORT(bool) bison_column_it_unlock(struct bison_column_it *it)
 NG5_EXPORT(bool) bison_column_it_rewind(struct bison_column_it *it)
 {
         error_if_null(it);
-        error_if(it->payload_start >= memfile_size(&it->memfile), &it->err, NG5_ERR_OUTOFBOUNDS);
-        return memfile_seek(&it->memfile, it->payload_start);
+        offset_t playload_start = bison_int_column_get_payload_off(it);
+        error_if(playload_start >= memfile_size(&it->memfile), &it->err, NG5_ERR_OUTOFBOUNDS);
+        return memfile_seek(&it->memfile, playload_start);
 }

@@ -108,7 +108,13 @@ NG5_EXPORT(bool) memfile_ensure_space(struct memfile *memfile, u64 nbytes);
 
 NG5_EXPORT(u64) memfile_read_varuint(u8 *nbytes, struct memfile *memfile);
 
+NG5_EXPORT(bool) memfile_skip_varuint(struct memfile *memfile);
+
+NG5_EXPORT(u64) memfile_peek_varuint(u8 *nbytes, struct memfile *memfile);
+
 NG5_EXPORT(u64) memfile_write_varuint(struct memfile *memfile, u64 value);
+
+NG5_EXPORT(bool) memfile_update_varuint(struct memfile *memfile, u64 value);
 
 NG5_EXPORT(bool) memfile_seek_to_end(struct memfile *file);
 

@@ -102,6 +102,9 @@ NG5_EXPORT(bool) bison_int_array_it_skip_32(struct bison_array_it *it);
 
 NG5_EXPORT(bool) bison_int_array_it_skip_64(struct bison_array_it *it);
 
+NG5_EXPORT(offset_t) bison_int_column_get_payload_off(struct bison_column_it *it);
+
+
 NG5_END_DECL
 
 #endif

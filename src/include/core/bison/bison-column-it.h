@@ -34,11 +34,13 @@ struct bison_column_it
         struct memfile memfile;
 
 
-        offset_t column_num_elements_offset;
-        offset_t column_capacity_offset;
+        //offset_t column_num_elements_offset;
+        //offset_t column_capacity_offset;
+
+        offset_t num_and_capacity_start_offset;
 
         offset_t column_start_offset;
-        offset_t payload_start;
+        //offset_t payload_start;
 
         struct err err;
         enum bison_field_type type;

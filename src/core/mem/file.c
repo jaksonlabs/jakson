@@ -362,6 +362,21 @@ NG5_EXPORT(u64) memfile_read_varuint(u8 *nbytes, struct memfile *memfile)
         return result;
 }
 
+NG5_EXPORT(bool) memfile_skip_varuint(struct memfile *memfile)
+{
+        error_if_null(memfile)
+        memfile_read_varuint(NULL, memfile);
+        return true;
+}
+
+NG5_EXPORT(u64) memfile_peek_varuint(u8 *nbytes, struct memfile *memfile)
+{
+        memfile_save_position(memfile);
+        u64 result = memfile_read_varuint(nbytes, memfile);
+        memfile_restore_position(memfile);
+        return result;
+}
+
 NG5_EXPORT(u64) memfile_write_varuint(struct memfile *memfile, u64 value)
 {
         u8 required_blocks = varuint_required_blocks(value);
@@ -370,6 +385,30 @@ NG5_EXPORT(u64) memfile_write_varuint(struct memfile *memfile, u64 value)
         varuint_write(dst, value);
         memfile_skip(memfile, required_blocks);
         return required_blocks;
+}
+
+NG5_EXPORT(bool) memfile_update_varuint(struct memfile *memfile, u64 value)
+{
+        error_if_null(memfile);
+
+        u8 bytes_used_now, bytes_used_then;
+
+        memfile_peek_varuint(&bytes_used_now, memfile);
+        bytes_used_then = varuint_required_blocks(value);
+
+        if (bytes_used_now < bytes_used_then) {
+                u8 inc = bytes_used_then - bytes_used_now;
+                memfile_move_right(memfile, inc);
+        } else if (bytes_used_now > bytes_used_then) {
+                u8 dec = bytes_used_now - bytes_used_then;
+                memfile_move_left(memfile, dec);
+        }
+
+        varuint_t dst = (varuint_t) memfile_peek(memfile, sizeof(char));
+        u8 required_blocks = varuint_write(dst, value);
+        memfile_skip(memfile, required_blocks);
+
+        return true;
 }
 
 NG5_EXPORT(bool) memfile_seek_to_end(struct memfile *file)

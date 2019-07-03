@@ -1069,9 +1069,12 @@ static bool internal_pack_column(struct bison_column_it *it)
 
         u32 free_space = (it->column_capacity - it->column_num_elements) * bison_int_get_type_value_size(it->type);
         if (free_space > 0) {
-                memfile_seek(&it->memfile, it->column_capacity_offset);
-                memfile_write(&it->memfile, &it->column_num_elements, sizeof(u32));
-                memfile_seek(&it->memfile, it->payload_start);
+                memfile_seek(&it->memfile, it->num_and_capacity_start_offset);
+                memfile_update_varuint(&it->memfile, it->column_num_elements);
+
+                offset_t payload_start = bison_int_column_get_payload_off(it);
+
+                memfile_seek(&it->memfile, payload_start);
                 memfile_skip(&it->memfile, it->column_num_elements * bison_int_get_type_value_size(it->type));
 
                 memfile_move_left(&it->memfile, free_space);
