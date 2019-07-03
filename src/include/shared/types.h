@@ -40,18 +40,38 @@ typedef int32_t i32;
 
 typedef int64_t i64;
 
-#define BOOLEAN_NULL    0
 #define U8_NULL         UINT8_MAX
 #define U16_NULL        UINT16_MAX
 #define U32_NULL        UINT32_MAX
 #define U64_NULL        UINT64_MAX
-#define I8_NULL         INT8_MAX
-#define I16_NULL        INT16_MAX
-#define I32_NULL        INT32_MAX
-#define I64_NULL        INT64_MAX
+#define I8_NULL         INT8_MIN
+#define I16_NULL        INT16_MIN
+#define I32_NULL        INT32_MIN
+#define I64_NULL        INT64_MIN
 #define FLOAT_NULL      NAN
 
-#define is_null_boolean(x)      (x == BOOLEAN_NULL)
+#define BISON_U8_MIN    UINT8_MIN
+#define BISON_U16_MIN   UINT16_MIN
+#define BISON_U32_MIN   UINT32_MIN
+#define BISON_U64_MIN   UINT64_MIN
+#define BISON_I8_MIN    (INT8_MIN + 1)
+#define BISON_I16_MIN   (INT16_MIN + 1)
+#define BISON_I32_MIN   (INT32_MIN + 1)
+#define BISON_I64_MIN   (INT64_MIN + 1)
+#define BISON_U8_MAX    (U8_NULL - 1)
+#define BISON_U16_MAX   (U16_NULL - 1)
+#define BISON_U32_MAX   (U32_NULL - 1)
+#define BISON_U64_MAX   (U64_NULL - 1)
+#define BISON_I8_MAX    INT8_MAX
+#define BISON_I16_MAX   INT16_MAX
+#define BISON_I32_MAX   INT32_MAX
+#define BISON_I64_MAX   INT64_MAX
+
+#define BISON_BOOLEAN_COLUMN_FALSE     0
+#define BISON_BOOLEAN_COLUMN_TRUE      1
+#define BISON_BOOLEAN_COLUMN_NULL      2
+
+#define is_null_boolean(x)      (x == BISON_BOOLEAN_COLUMN_NULL)
 #define is_null_u8(x)           (x == U8_NULL)
 #define is_null_u16(x)          (x == U16_NULL)
 #define is_null_u32(x)          (x == U32_NULL)

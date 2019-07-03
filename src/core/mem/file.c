@@ -372,6 +372,13 @@ NG5_EXPORT(u64) memfile_write_varuint(struct memfile *memfile, u64 value)
         return required_blocks;
 }
 
+NG5_EXPORT(bool) memfile_seek_to_end(struct memfile *file)
+{
+        error_if_null(file)
+        size_t size = memblock_last_used_byte(file->memblock);
+        return memfile_seek(file, size);
+}
+
 NG5_EXPORT(bool) memfile_move_right(struct memfile *file, size_t nbytes)
 {
         error_if_null(file);

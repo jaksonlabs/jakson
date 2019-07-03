@@ -37,6 +37,8 @@ NG5_EXPORT(bool) memblock_get_error(struct err *out, struct memblock *block);
 
 NG5_EXPORT(bool) memblock_size(offset_t *size, const struct memblock *block);
 
+NG5_EXPORT(offset_t) memblock_last_used_byte(const struct memblock *block);
+
 NG5_EXPORT(bool) memblock_write_to_file(FILE *file, const struct memblock *block);
 
 NG5_EXPORT(const char *) memblock_raw_data(const struct memblock *block);

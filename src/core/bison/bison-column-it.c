@@ -17,6 +17,7 @@
  */
 
 #include "core/bison/bison-column-it.h"
+#include "core/bison/bison-array-it.h"
 #include "core/bison/bison-media.h"
 #include "core/bison/bison-insert.h"
 #include "core/bison/bison-int.h"
@@ -229,11 +230,10 @@ NG5_EXPORT(bool) bison_column_it_update_set_null(struct bison_column_it *it, u32
                         /* nothing to do */
                         break;
                 case BISON_FIELD_TYPE_TRUE:
-                        memfile_write(&it->memfile, BOOLEAN_NULL, sizeof(u8));
-                        break;
-                case BISON_FIELD_TYPE_FALSE:
-                        memfile_write(&it->memfile, BOOLEAN_NULL, sizeof(u8));
-                        break;
+                case BISON_FIELD_TYPE_FALSE: {
+                        u8 null_value = BISON_BOOLEAN_COLUMN_NULL;
+                        memfile_write(&it->memfile, &null_value, sizeof(u8));
+                } break;
                 case BISON_FIELD_TYPE_NUMBER_U8: {
                         u8 null_value = U8_NULL;
                         memfile_write(&it->memfile, &null_value, sizeof(u8));
@@ -290,12 +290,189 @@ NG5_EXPORT(bool) bison_column_it_update_set_null(struct bison_column_it *it, u32
         return true;
 }
 
+#define push_array_element(num_values, data, data_cast_type, null_check, insert_func)                                  \
+for (u32 i = 0; i < num_values; i++) {                                                                                 \
+        data_cast_type datum = ((data_cast_type *)data)[i];                                                            \
+        if (likely(null_check(datum) == false)) {                                                                      \
+                insert_func(&array_ins);                                                                               \
+        } else {                                                                                                       \
+                bison_insert_null(&array_ins);                                                                         \
+        }                                                                                                              \
+}
+
+#define push_array_element_wvalue(num_values, data, data_cast_type, null_check, insert_func)                           \
+for (u32 i = 0; i < num_values; i++) {                                                                                 \
+        data_cast_type datum = ((data_cast_type *)data)[i];                                                            \
+        if (likely(null_check(datum) == false)) {                                                                      \
+                insert_func(&array_ins, datum);                                                                        \
+        } else {                                                                                                       \
+                bison_insert_null(&array_ins);                                                                         \
+        }                                                                                                              \
+}
+
+static bool rewrite_column_to_array(struct bison_column_it *it)
+{
+        struct bison_array_it array_it;
+        struct bison_insert array_ins;
+
+        memfile_save_position(&it->memfile);
+
+        printf("\n\n");
+        memfile_hexdump_print(&it->memfile); // TODO: debug remove
+
+        /* Potentially tailing space after the last ']' marker of the outer most array is used for temporary space */
+        memfile_seek_to_end(&it->memfile);
+        offset_t array_marker_begin = memfile_tell(&it->memfile);
+
+        size_t capacity = it->column_num_elements * bison_int_get_type_value_size(it->type);
+        bison_int_insert_array(&it->memfile, capacity);
+        bison_array_it_create(&array_it, &it->memfile, &it->err, array_marker_begin);
+        bison_array_it_insert_begin(&array_ins, &array_it);
+
+        printf("\n\n");
+        memfile_hexdump_print(&it->memfile); // TODO: debug remove
+
+        enum bison_field_type type;
+        u32 num_values;
+        const void *data = bison_column_it_values(&type, &num_values, it);
+        switch (type) {
+                case BISON_FIELD_TYPE_NULL:
+                        while (num_values--) {
+                                bison_insert_null(&array_ins);
+                        }
+                        break;
+                case BISON_FIELD_TYPE_TRUE:
+                        push_array_element(num_values, data, u8, is_null_boolean, bison_insert_true);
+                        break;
+                case BISON_FIELD_TYPE_FALSE:
+                        push_array_element(num_values, data, u8, is_null_boolean, bison_insert_false);
+                break;
+                case BISON_FIELD_TYPE_NUMBER_U8:
+                        push_array_element_wvalue(num_values, data, u8, is_null_u8, bison_insert_u8);
+                break;
+                case BISON_FIELD_TYPE_NUMBER_U16:
+                        push_array_element_wvalue(num_values, data, u16, is_null_u16, bison_insert_u16);
+                break;
+                case BISON_FIELD_TYPE_NUMBER_U32:
+                        push_array_element_wvalue(num_values, data, u32, is_null_u32, bison_insert_u32);
+                break;
+                case BISON_FIELD_TYPE_NUMBER_U64:
+                        push_array_element_wvalue(num_values, data, u64, is_null_u64, bison_insert_u64);
+                break;
+                case BISON_FIELD_TYPE_NUMBER_I8:
+                        push_array_element_wvalue(num_values, data, i8, is_null_i8, bison_insert_i8);
+                break;
+                case BISON_FIELD_TYPE_NUMBER_I16:
+                        push_array_element_wvalue(num_values, data, i16, is_null_i16, bison_insert_i16);
+                break;
+                case BISON_FIELD_TYPE_NUMBER_I32:
+                        push_array_element_wvalue(num_values, data, i32, is_null_i32, bison_insert_i32);
+                break;
+                case BISON_FIELD_TYPE_NUMBER_I64:
+                        push_array_element_wvalue(num_values, data, i64, is_null_i64, bison_insert_i64);
+                break;
+                case BISON_FIELD_TYPE_NUMBER_FLOAT:
+                        push_array_element_wvalue(num_values, data, float, is_null_float, bison_insert_float);
+                break;
+                default:
+                        error(&it->err, NG5_ERR_UNSUPPORTEDTYPE);
+                        return false;
+        }
+
+        bison_array_it_insert_end(&array_ins);
+        offset_t array_marker_end = bison_array_it_tell(&array_it);
+        bison_array_it_drop(&array_it);
+
+        assert(array_marker_begin < array_marker_end);
+        //offset_t array_size = array_marker_end - array_marker_begin;
+
+
+        printf("\n\n");
+        memfile_hexdump_print(&it->memfile); // TODO: debug remove
+
+        memfile_restore_position(&it->memfile);
+        return true;
+}
+
 NG5_EXPORT(bool) bison_column_it_update_set_true(struct bison_column_it *it, u32 pos)
 {
-        unused(it)
-        unused(pos)
-        error_print(NG5_ERR_NOTIMPLEMENTED); // TODO: implement
-        return false;
+        error_if_null(it)
+        error_if(pos >= it->column_num_elements, &it->err, NG5_ERR_OUTOFBOUNDS)
+
+        memfile_save_position(&it->memfile);
+
+        memfile_seek(&it->memfile, it->payload_start + pos * bison_int_get_type_value_size(it->type));
+
+        switch (it->type) {
+        case BISON_FIELD_TYPE_NULL:
+                /* special case: the column must be re-written to a 'true' column with null-encoded values */
+                // TODO: implement
+                error_print(NG5_ERR_NOTIMPLEMENTED)
+                break;
+        case BISON_FIELD_TYPE_TRUE:
+                /* nothing to do */
+                break;
+        case BISON_FIELD_TYPE_FALSE: {
+                u8 value = BISON_BOOLEAN_COLUMN_TRUE;
+                memfile_write(&it->memfile, &value, sizeof(u8));
+        } break;
+        case BISON_FIELD_TYPE_NUMBER_U8: {
+                u8 null_value = U8_NULL;
+                memfile_write(&it->memfile, &null_value, sizeof(u8));
+        } break;
+        case BISON_FIELD_TYPE_NUMBER_U16: {
+                u16 null_value = U16_NULL;
+                memfile_write(&it->memfile, &null_value, sizeof(u16));
+        } break;
+        case BISON_FIELD_TYPE_NUMBER_U32: {
+                //u32 null_value = U32_NULL;
+                //memfile_write(&it->memfile, &null_value, sizeof(u32));
+                rewrite_column_to_array(it);
+
+
+        } break;
+        case BISON_FIELD_TYPE_NUMBER_U64: {
+                u64 null_value = U64_NULL;
+                memfile_write(&it->memfile, &null_value, sizeof(u64));
+        } break;
+        case BISON_FIELD_TYPE_NUMBER_I8: {
+                i8 null_value = I8_NULL;
+                memfile_write(&it->memfile, &null_value, sizeof(i8));
+        } break;
+        case BISON_FIELD_TYPE_NUMBER_I16: {
+                i16 null_value = I16_NULL;
+                memfile_write(&it->memfile, &null_value, sizeof(i16));
+        } break;
+        case BISON_FIELD_TYPE_NUMBER_I32: {
+                i32 null_value = I32_NULL;
+                memfile_write(&it->memfile, &null_value, sizeof(i32));
+        } break;
+        case BISON_FIELD_TYPE_NUMBER_I64: {
+                i64 null_value = I64_NULL;
+                memfile_write(&it->memfile, &null_value, sizeof(i64));
+        } break;
+        case BISON_FIELD_TYPE_NUMBER_FLOAT: {
+                float null_value = FLOAT_NULL;
+                memfile_write(&it->memfile, &null_value, sizeof(float));
+        } break;
+        case BISON_FIELD_TYPE_OBJECT:
+        case BISON_FIELD_TYPE_ARRAY:
+        case BISON_FIELD_TYPE_COLUMN:
+        case BISON_FIELD_TYPE_STRING:
+        case BISON_FIELD_TYPE_BINARY:
+        case BISON_FIELD_TYPE_BINARY_CUSTOM:
+                memfile_restore_position(&it->memfile);
+                error(&it->err, NG5_ERR_UNSUPPCONTAINER)
+                return false;
+        default:
+                memfile_restore_position(&it->memfile);
+                error(&it->err, NG5_ERR_INTERNALERR);
+                return false;
+        }
+
+        memfile_restore_position(&it->memfile);
+
+        return true;
 }
 
 NG5_EXPORT(bool) bison_column_it_update_set_false(struct bison_column_it *it, u32 pos)

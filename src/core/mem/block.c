@@ -74,6 +74,11 @@ bool memblock_size(offset_t *size, const struct memblock *block)
         return true;
 }
 
+NG5_EXPORT(offset_t) memblock_last_used_byte(const struct memblock *block)
+{
+        return block ? block->last_byte : 0;
+}
+
 bool memblock_write_to_file(FILE *file, const struct memblock *block)
 {
         size_t nwritten = fwrite(block->base, block->blockLength, 1, file);

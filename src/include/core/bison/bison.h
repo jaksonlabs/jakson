@@ -80,15 +80,12 @@ struct bison_revise
 
 NG5_DEFINE_ERROR_GETTER(bison_revise)
 
-#define BISON_ENCODING_TRUE      'T'
-#define BISON_ENCODING_FALSE     'F'
-
 enum bison_field_type
 {
         /* constants */
         BISON_FIELD_TYPE_NULL = 'n', /* null */
-        BISON_FIELD_TYPE_TRUE = BISON_ENCODING_TRUE, /* true */
-        BISON_FIELD_TYPE_FALSE = BISON_ENCODING_FALSE, /* false */
+        BISON_FIELD_TYPE_TRUE = 't', /* true */
+        BISON_FIELD_TYPE_FALSE = 'f', /* false */
 
         /* containers */
         BISON_FIELD_TYPE_OBJECT = 'o', /* object */
@@ -113,15 +110,6 @@ enum bison_field_type
         BISON_FIELD_TYPE_BINARY = 'b', /* arbitrary binary object with known mime type */
         BISON_FIELD_TYPE_BINARY_CUSTOM = 'x', /* arbitrary binary object with unknown mime type*/
 };
-
-
-#if (TRUE_NULL == BISON_ENCODING_TRUE)
-#error "null-encoding clash: field type 'true' cannot be encoded with this value"
-#endif
-
-#if (FALSE_NULL == BISON_ENCODING_FALSE)
-#error "null-encoding clash: field type 'false' cannot be encoded with this value"
-#endif
 
 enum bison_field_class
 {

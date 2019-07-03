@@ -27,6 +27,12 @@ if (unlikely(inserter->context_type == BISON_COLUMN && inserter->context.column-
         error_with_details(&inserter->err, NG5_ERR_TYPEMISMATCH, "Element type does not match container type");        \
 }
 
+#define check_type_range_if_container_is_column(inserter, expected1, expected2, expected3)                             \
+if (unlikely(inserter->context_type == BISON_COLUMN && inserter->context.column->type != expected1 &&                  \
+        inserter->context.column->type != expected2 && inserter->context.column->type != expected3)) {                 \
+        error_with_details(&inserter->err, NG5_ERR_TYPEMISMATCH, "Element type does not match container type");        \
+}
+
 static bool push_in_array(struct bison_insert *inserter, const void *base, u64 nbytes);
 static bool push_in_column(struct bison_insert *inserter, const void *base, enum bison_field_type type);
 
@@ -58,13 +64,29 @@ NG5_EXPORT(bool) bison_int_insert_create_for_column(struct bison_insert *inserte
 
 NG5_EXPORT(bool) bison_insert_null(struct bison_insert *inserter)
 {
-        check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_NULL);
+        check_type_range_if_container_is_column(inserter, BISON_FIELD_TYPE_NULL, BISON_FIELD_TYPE_TRUE,
+                BISON_FIELD_TYPE_FALSE);
+
         switch (inserter->context_type) {
         case BISON_ARRAY:
                 return push_media_type_for_array(inserter, BISON_FIELD_TYPE_NULL);
         case BISON_COLUMN: {
-                u8 media_value = BISON_FIELD_TYPE_NULL;
-                return push_in_column(inserter, &media_value, BISON_FIELD_TYPE_NULL);
+                u8 value;
+
+                switch (inserter->context.column->type) {
+                        case BISON_FIELD_TYPE_NULL:
+                                value = BISON_FIELD_TYPE_NULL;
+                                break;
+                        case BISON_FIELD_TYPE_TRUE:
+                        case BISON_FIELD_TYPE_FALSE:
+                                value = BISON_BOOLEAN_COLUMN_NULL;
+                                break;
+                        default:
+                                error(&inserter->err, NG5_ERR_INTERNALERR)
+                                return false;
+                }
+
+                return push_in_column(inserter, &value, BISON_FIELD_TYPE_NULL);
         }
         default:
                 error(&inserter->err, NG5_ERR_INTERNALERR);
@@ -79,8 +101,8 @@ NG5_EXPORT(bool) bison_insert_true(struct bison_insert *inserter)
         case BISON_ARRAY:
                 return push_media_type_for_array(inserter, BISON_FIELD_TYPE_TRUE);
         case BISON_COLUMN: {
-                u8 media_value = BISON_FIELD_TYPE_TRUE;
-                return push_in_column(inserter, &media_value, BISON_FIELD_TYPE_TRUE);
+                u8 value = BISON_BOOLEAN_COLUMN_TRUE;
+                return push_in_column(inserter, &value, BISON_FIELD_TYPE_TRUE);
         }
         default:
                 error(&inserter->err, NG5_ERR_INTERNALERR);
@@ -95,8 +117,8 @@ NG5_EXPORT(bool) bison_insert_false(struct bison_insert *inserter)
         case BISON_ARRAY:
                 return push_media_type_for_array(inserter, BISON_FIELD_TYPE_FALSE);
         case BISON_COLUMN: {
-                u8 media_value = BISON_FIELD_TYPE_FALSE;
-                return push_in_column(inserter, &media_value, BISON_FIELD_TYPE_FALSE);
+                u8 value = BISON_BOOLEAN_COLUMN_FALSE;
+                return push_in_column(inserter, &value, BISON_FIELD_TYPE_FALSE);
         }
         default:
                 error(&inserter->err, NG5_ERR_INTERNALERR);
@@ -252,13 +274,13 @@ NG5_EXPORT(bool) bison_insert_unsigned(struct bison_insert *inserter, u64 value)
 {
         error_if(inserter->context_type == BISON_COLUMN, &inserter->err, NG5_ERR_INSERT_TOO_DANGEROUS)
 
-        if (value <= UINT8_MAX) {
+        if (value <= BISON_U8_MAX) {
                 return bison_insert_u8(inserter, (u8) value);
-        } else if (value <= UINT16_MAX) {
+        } else if (value <= BISON_U16_MAX) {
                 return bison_insert_u16(inserter, (u16) value);
-        } else if (value <= UINT32_MAX) {
+        } else if (value <= BISON_U32_MAX) {
                 return bison_insert_u32(inserter, (u32) value);
-        } else if (value <= UINT64_MAX) {
+        } else if (value <= BISON_U64_MAX) {
                 return bison_insert_u64(inserter, (u64) value);
         } else {
                 error(&inserter->err, NG5_ERR_INTERNALERR);
@@ -271,13 +293,13 @@ NG5_EXPORT(bool) bison_insert_signed(struct bison_insert *inserter, i64 value)
 {
         error_if(inserter->context_type == BISON_COLUMN, &inserter->err, NG5_ERR_INSERT_TOO_DANGEROUS)
 
-        if (value >= INT8_MIN && value <= INT8_MAX) {
+        if (value >= BISON_I8_MIN && value <= BISON_I8_MAX) {
                 return bison_insert_i8(inserter, (i8) value);
-        } else if (value >= INT16_MIN && value <= INT16_MAX) {
+        } else if (value >= BISON_I16_MIN && value <= BISON_I16_MAX) {
                 return bison_insert_i16(inserter, (i16) value);
-        } else if (value >= INT32_MIN && value <= INT32_MAX) {
+        } else if (value >= BISON_I32_MIN && value <= BISON_I32_MAX) {
                 return bison_insert_i32(inserter, (i32) value);
-        } else if (value >= INT64_MIN && value <= INT64_MAX) {
+        } else if (value >= BISON_I64_MIN && value <= BISON_I64_MAX) {
                 return bison_insert_i64(inserter, (i64) value);
         } else {
                 error(&inserter->err, NG5_ERR_INTERNALERR);

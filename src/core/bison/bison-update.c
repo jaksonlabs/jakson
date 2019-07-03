@@ -319,13 +319,13 @@ NG5_EXPORT(bool) bison_update_set_float(struct bison_revise *context, const char
 
 NG5_EXPORT(bool) bison_update_set_unsigned(struct bison_revise *context, const char *path, u64 value)
 {
-        if (value <= UINT8_MAX) {
+        if (value <= BISON_U8_MAX) {
                 return bison_update_set_u8(context, path, (u8) value);
-        } else if (value <= UINT16_MAX) {
+        } else if (value <= BISON_U16_MAX) {
                 return bison_update_set_u16(context, path, (u16) value);
-        } else if (value <= UINT32_MAX) {
+        } else if (value <= BISON_U32_MAX) {
                 return bison_update_set_u32(context, path, (u32) value);
-        } else if (value <= UINT64_MAX) {
+        } else if (value <= BISON_U64_MAX) {
                 return bison_update_set_u64(context, path, (u64) value);
         } else {
                 error(&context->err, NG5_ERR_INTERNALERR);
@@ -335,13 +335,13 @@ NG5_EXPORT(bool) bison_update_set_unsigned(struct bison_revise *context, const c
 
 NG5_EXPORT(bool) bison_update_set_signed(struct bison_revise *context, const char *path, i64 value)
 {
-        if (value >= INT8_MIN && value <= INT8_MAX) {
+        if (value >= BISON_I8_MIN && value <= BISON_I8_MAX) {
                 return bison_update_set_i8(context, path, (i8) value);
-        } else if (value >= INT16_MIN && value <= INT16_MAX) {
+        } else if (value >= BISON_I16_MIN && value <= BISON_I16_MAX) {
                 return bison_update_set_i16(context, path, (i16) value);
-        } else if (value >= INT32_MIN && value <= INT32_MAX) {
+        } else if (value >= BISON_I32_MIN && value <= BISON_I32_MAX) {
                 return bison_update_set_i32(context, path, (i32) value);
-        } else if (value >= INT64_MIN && value <= INT64_MAX) {
+        } else if (value >= BISON_I64_MIN && value <= BISON_I64_MAX) {
                 return bison_update_set_i64(context, path, (i64) value);
         } else {
                 error(&context->err, NG5_ERR_INTERNALERR);
@@ -488,13 +488,13 @@ NG5_EXPORT(bool) bison_update_set_float_compiled(struct bison_revise *context, c
 NG5_EXPORT(bool) bison_update_set_unsigned_compiled(struct bison_revise *context, const struct bison_dot_path *path,
         u64 value)
 {
-        if (value <= UINT8_MAX) {
+        if (value <= BISON_U8_MAX) {
                 return bison_update_set_u8_compiled(context, path, (u8) value);
-        } else if (value <= UINT16_MAX) {
+        } else if (value <= BISON_U16_MAX) {
                 return bison_update_set_u16_compiled(context, path, (u16) value);
-        } else if (value <= UINT32_MAX) {
+        } else if (value <= BISON_U32_MAX) {
                 return bison_update_set_u32_compiled(context, path, (u32) value);
-        } else if (value <= UINT64_MAX) {
+        } else if (value <= BISON_U64_MAX) {
                 return bison_update_set_u64_compiled(context, path, (u64) value);
         } else {
                 error(&context->err, NG5_ERR_INTERNALERR);
@@ -505,13 +505,13 @@ NG5_EXPORT(bool) bison_update_set_unsigned_compiled(struct bison_revise *context
 NG5_EXPORT(bool) bison_update_set_signed_compiled(struct bison_revise *context, const struct bison_dot_path *path,
         i64 value)
 {
-        if (value >= INT8_MIN && value <= INT8_MAX) {
+        if (value >= BISON_I8_MIN && value <= BISON_I8_MAX) {
                 return bison_update_set_i8_compiled(context, path, (i8) value);
-        } else if (value >= INT16_MIN && value <= INT16_MAX) {
+        } else if (value >= BISON_I16_MIN && value <= BISON_I16_MAX) {
                 return bison_update_set_i16_compiled(context, path, (i16) value);
-        } else if (value >= INT32_MIN && value <= INT32_MAX) {
+        } else if (value >= BISON_I32_MIN && value <= BISON_I32_MAX) {
                 return bison_update_set_i32_compiled(context, path, (i32) value);
-        } else if (value >= INT64_MIN && value <= INT64_MAX) {
+        } else if (value >= BISON_I64_MIN && value <= BISON_I64_MAX) {
                 return bison_update_set_i64_compiled(context, path, (i64) value);
         } else {
                 error(&context->err, NG5_ERR_INTERNALERR);
