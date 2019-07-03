@@ -1,0 +1,1 @@
+# MIME Type and Extension
