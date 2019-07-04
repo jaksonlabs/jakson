@@ -1,0 +1,344 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>The Columnar Binary JSON Specification</title>
+        
+        <meta name="robots" content="noindex" />
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+    </head>
+    <body class="light">
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            document.body.className = theme;
+            document.querySelector('html').className = theme + ' js';
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li><a href="chapter_1.html"><strong aria-hidden="true">1.</strong> Specification</a></li><li><ol class="section"><li><a href="chapter_1.html"><strong aria-hidden="true">1.1.</strong> Quick Start</a></li><li><a href="chapter_1.html"><strong aria-hidden="true">1.2.</strong> Motivation</a></li><li><a href="chapter_1.html"><strong aria-hidden="true">1.3.</strong> Alternatives</a></li><li><a href="chapter_1.html"><strong aria-hidden="true">1.4.</strong> Design Goals</a></li><li><a href="chapter_1.html"><strong aria-hidden="true">1.5.</strong> License</a></li><li><a href="chapter_1.html"><strong aria-hidden="true">1.6.</strong> Data Types</a></li><li><ol class="section"><li><a href="chapter_1.html"><strong aria-hidden="true">1.6.1.</strong> Primtive Types</a></li><li><a href="chapter_1.html"><strong aria-hidden="true">1.6.2.</strong> Container Types</a></li></ol></li><li><a href="chapter_1.html"><strong aria-hidden="true">1.7.</strong> Document Identification</a></li><li><a href="chapter_1.html"><strong aria-hidden="true">1.8.</strong> Carbon Files</a></li><li><ol class="section"><li><a href="chapter_1.html"><strong aria-hidden="true">1.8.1.</strong> General Format</a></li><li><a href="chapter_1.html"><strong aria-hidden="true">1.8.2.</strong> Size Requirements</a></li><li><a href="chapter_1.html"><strong aria-hidden="true">1.8.3.</strong> Revision Control</a></li><li><a href="chapter_1.html"><strong aria-hidden="true">1.8.4.</strong> Atomic Updates</a></li><li><a href="chapter_1.html"><strong aria-hidden="true">1.8.5.</strong> In-Place Updates</a></li></ol></li><li><a href="chapter_2.html"><strong aria-hidden="true">1.9.</strong> Carbon Archives</a></li><li><ol class="section"><li><a href="chapter_1.html"><strong aria-hidden="true">1.9.1.</strong> General Format</a></li><li><a href="chapter_1.html"><strong aria-hidden="true">1.9.2.</strong> Size Requirements</a></li></ol></li><li><a href="chapter_1.html"><strong aria-hidden="true">1.10.</strong> MIME Types</a></li><li><a href="chapter_1.html"><strong aria-hidden="true">1.11.</strong> Feedback and Contribution</a></li></ol></li><li><a href="chapter_1.html"><strong aria-hidden="true">2.</strong> Libcarbon, the Carbon Library for C</a></li><li><ol class="section"><li><a href="chapter_1.html"><strong aria-hidden="true">2.1.</strong> Introduction</a></li><li><a href="chapter_1.html"><strong aria-hidden="true">2.2.</strong> Carbon Files</a></li><li><a href="chapter_2.html"><strong aria-hidden="true">2.3.</strong> Carbon Archives</a></li><li><a href="chapter_1.html"><strong aria-hidden="true">2.4.</strong> Tools</a></li></ol></li><li><a href="chapter_1.html"><strong aria-hidden="true">3.</strong> Third-Party Libraries</a></li><li><a href="chapter_1.html"><strong aria-hidden="true">4.</strong> Developer Resources</a></li><li><a href="chapter_1.html"><strong aria-hidden="true">5.</strong> Contact</a></li><li><a href="chapter_1.html"><strong aria-hidden="true">6.</strong> Thanks To</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar" class="menu-bar">
+                    <div id="menu-bar-sticky-container">
+                        <div class="left-buttons">
+                            <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                                <i class="fa fa-bars"></i>
+                            </button>
+                            <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                                <i class="fa fa-paint-brush"></i>
+                            </button>
+                            <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                                <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                            </ul>
+                            
+                            <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                                <i class="fa fa-search"></i>
+                            </button>
+                            
+                        </div>
+
+                        <h1 class="menu-title">The Columnar Binary JSON Specification</h1>
+
+                        <div class="right-buttons">
+                            <a href="print.html" title="Print this book" aria-label="Print this book">
+                                <i id="print-button" class="fa fa-print"></i>
+                            </a>
+                            
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1><a class="header" href="#chapter-1" id="chapter-1">Chapter 1</a></h1>
+<h2><a class="header" href="#containers" id="containers">Containers</a></h2>
+<h3><a class="header" href="#arrays" id="arrays">Arrays</a></h3>
+<h3><a class="header" href="#columns" id="columns">Columns</a></h3>
+<h3><a class="header" href="#objects" id="objects">Objects</a></h3>
+<h1><a class="header" href="#chapter-1-1" id="chapter-1-1">Chapter 1</a></h1>
+<h2><a class="header" href="#containers-1" id="containers-1">Containers</a></h2>
+<h3><a class="header" href="#arrays-1" id="arrays-1">Arrays</a></h3>
+<h3><a class="header" href="#columns-1" id="columns-1">Columns</a></h3>
+<h3><a class="header" href="#objects-1" id="objects-1">Objects</a></h3>
+<h1><a class="header" href="#chapter-1-2" id="chapter-1-2">Chapter 1</a></h1>
+<h2><a class="header" href="#containers-2" id="containers-2">Containers</a></h2>
+<h3><a class="header" href="#arrays-2" id="arrays-2">Arrays</a></h3>
+<h3><a class="header" href="#columns-2" id="columns-2">Columns</a></h3>
+<h3><a class="header" href="#objects-2" id="objects-2">Objects</a></h3>
+<h1><a class="header" href="#chapter-1-3" id="chapter-1-3">Chapter 1</a></h1>
+<h2><a class="header" href="#containers-3" id="containers-3">Containers</a></h2>
+<h3><a class="header" href="#arrays-3" id="arrays-3">Arrays</a></h3>
+<h3><a class="header" href="#columns-3" id="columns-3">Columns</a></h3>
+<h3><a class="header" href="#objects-3" id="objects-3">Objects</a></h3>
+<h1><a class="header" href="#chapter-1-4" id="chapter-1-4">Chapter 1</a></h1>
+<h2><a class="header" href="#containers-4" id="containers-4">Containers</a></h2>
+<h3><a class="header" href="#arrays-4" id="arrays-4">Arrays</a></h3>
+<h3><a class="header" href="#columns-4" id="columns-4">Columns</a></h3>
+<h3><a class="header" href="#objects-4" id="objects-4">Objects</a></h3>
+<h1><a class="header" href="#chapter-1-5" id="chapter-1-5">Chapter 1</a></h1>
+<h2><a class="header" href="#containers-5" id="containers-5">Containers</a></h2>
+<h3><a class="header" href="#arrays-5" id="arrays-5">Arrays</a></h3>
+<h3><a class="header" href="#columns-5" id="columns-5">Columns</a></h3>
+<h3><a class="header" href="#objects-5" id="objects-5">Objects</a></h3>
+<h1><a class="header" href="#chapter-1-6" id="chapter-1-6">Chapter 1</a></h1>
+<h2><a class="header" href="#containers-6" id="containers-6">Containers</a></h2>
+<h3><a class="header" href="#arrays-6" id="arrays-6">Arrays</a></h3>
+<h3><a class="header" href="#columns-6" id="columns-6">Columns</a></h3>
+<h3><a class="header" href="#objects-6" id="objects-6">Objects</a></h3>
+<h1><a class="header" href="#chapter-1-7" id="chapter-1-7">Chapter 1</a></h1>
+<h2><a class="header" href="#containers-7" id="containers-7">Containers</a></h2>
+<h3><a class="header" href="#arrays-7" id="arrays-7">Arrays</a></h3>
+<h3><a class="header" href="#columns-7" id="columns-7">Columns</a></h3>
+<h3><a class="header" href="#objects-7" id="objects-7">Objects</a></h3>
+<h1><a class="header" href="#chapter-1-8" id="chapter-1-8">Chapter 1</a></h1>
+<h2><a class="header" href="#containers-8" id="containers-8">Containers</a></h2>
+<h3><a class="header" href="#arrays-8" id="arrays-8">Arrays</a></h3>
+<h3><a class="header" href="#columns-8" id="columns-8">Columns</a></h3>
+<h3><a class="header" href="#objects-8" id="objects-8">Objects</a></h3>
+<h1><a class="header" href="#chapter-1-9" id="chapter-1-9">Chapter 1</a></h1>
+<h2><a class="header" href="#containers-9" id="containers-9">Containers</a></h2>
+<h3><a class="header" href="#arrays-9" id="arrays-9">Arrays</a></h3>
+<h3><a class="header" href="#columns-9" id="columns-9">Columns</a></h3>
+<h3><a class="header" href="#objects-9" id="objects-9">Objects</a></h3>
+<h1><a class="header" href="#chapter-1-10" id="chapter-1-10">Chapter 1</a></h1>
+<h2><a class="header" href="#containers-10" id="containers-10">Containers</a></h2>
+<h3><a class="header" href="#arrays-10" id="arrays-10">Arrays</a></h3>
+<h3><a class="header" href="#columns-10" id="columns-10">Columns</a></h3>
+<h3><a class="header" href="#objects-10" id="objects-10">Objects</a></h3>
+<h1><a class="header" href="#chapter-1-11" id="chapter-1-11">Chapter 1</a></h1>
+<h2><a class="header" href="#containers-11" id="containers-11">Containers</a></h2>
+<h3><a class="header" href="#arrays-11" id="arrays-11">Arrays</a></h3>
+<h3><a class="header" href="#columns-11" id="columns-11">Columns</a></h3>
+<h3><a class="header" href="#objects-11" id="objects-11">Objects</a></h3>
+<h1><a class="header" href="#chapter-1-12" id="chapter-1-12">Chapter 1</a></h1>
+<h2><a class="header" href="#containers-12" id="containers-12">Containers</a></h2>
+<h3><a class="header" href="#arrays-12" id="arrays-12">Arrays</a></h3>
+<h3><a class="header" href="#columns-12" id="columns-12">Columns</a></h3>
+<h3><a class="header" href="#objects-12" id="objects-12">Objects</a></h3>
+<h1><a class="header" href="#chapter-1-13" id="chapter-1-13">Chapter 1</a></h1>
+<h2><a class="header" href="#containers-13" id="containers-13">Containers</a></h2>
+<h3><a class="header" href="#arrays-13" id="arrays-13">Arrays</a></h3>
+<h3><a class="header" href="#columns-13" id="columns-13">Columns</a></h3>
+<h3><a class="header" href="#objects-13" id="objects-13">Objects</a></h3>
+<h1><a class="header" href="#chapter-1-14" id="chapter-1-14">Chapter 1</a></h1>
+<h2><a class="header" href="#containers-14" id="containers-14">Containers</a></h2>
+<h3><a class="header" href="#arrays-14" id="arrays-14">Arrays</a></h3>
+<h3><a class="header" href="#columns-14" id="columns-14">Columns</a></h3>
+<h3><a class="header" href="#objects-14" id="objects-14">Objects</a></h3>
+<h1><a class="header" href="#chapter-1-15" id="chapter-1-15">Chapter 1</a></h1>
+<h2><a class="header" href="#containers-15" id="containers-15">Containers</a></h2>
+<h3><a class="header" href="#arrays-15" id="arrays-15">Arrays</a></h3>
+<h3><a class="header" href="#columns-15" id="columns-15">Columns</a></h3>
+<h3><a class="header" href="#objects-15" id="objects-15">Objects</a></h3>
+<h1><a class="header" href="#chapter-1-16" id="chapter-1-16">Chapter 1</a></h1>
+<h1><a class="header" href="#chapter-1-17" id="chapter-1-17">Chapter 1</a></h1>
+<h2><a class="header" href="#containers-16" id="containers-16">Containers</a></h2>
+<h3><a class="header" href="#arrays-16" id="arrays-16">Arrays</a></h3>
+<h3><a class="header" href="#columns-16" id="columns-16">Columns</a></h3>
+<h3><a class="header" href="#objects-16" id="objects-16">Objects</a></h3>
+<h1><a class="header" href="#chapter-1-18" id="chapter-1-18">Chapter 1</a></h1>
+<h2><a class="header" href="#containers-17" id="containers-17">Containers</a></h2>
+<h3><a class="header" href="#arrays-17" id="arrays-17">Arrays</a></h3>
+<h3><a class="header" href="#columns-17" id="columns-17">Columns</a></h3>
+<h3><a class="header" href="#objects-17" id="objects-17">Objects</a></h3>
+<h1><a class="header" href="#chapter-1-19" id="chapter-1-19">Chapter 1</a></h1>
+<h2><a class="header" href="#containers-18" id="containers-18">Containers</a></h2>
+<h3><a class="header" href="#arrays-18" id="arrays-18">Arrays</a></h3>
+<h3><a class="header" href="#columns-18" id="columns-18">Columns</a></h3>
+<h3><a class="header" href="#objects-18" id="objects-18">Objects</a></h3>
+<h1><a class="header" href="#chapter-1-20" id="chapter-1-20">Chapter 1</a></h1>
+<h2><a class="header" href="#containers-19" id="containers-19">Containers</a></h2>
+<h3><a class="header" href="#arrays-19" id="arrays-19">Arrays</a></h3>
+<h3><a class="header" href="#columns-19" id="columns-19">Columns</a></h3>
+<h3><a class="header" href="#objects-19" id="objects-19">Objects</a></h3>
+<h1><a class="header" href="#chapter-1-21" id="chapter-1-21">Chapter 1</a></h1>
+<h2><a class="header" href="#containers-20" id="containers-20">Containers</a></h2>
+<h3><a class="header" href="#arrays-20" id="arrays-20">Arrays</a></h3>
+<h3><a class="header" href="#columns-20" id="columns-20">Columns</a></h3>
+<h3><a class="header" href="#objects-20" id="objects-20">Objects</a></h3>
+<h1><a class="header" href="#chapter-1-22" id="chapter-1-22">Chapter 1</a></h1>
+<h2><a class="header" href="#containers-21" id="containers-21">Containers</a></h2>
+<h3><a class="header" href="#arrays-21" id="arrays-21">Arrays</a></h3>
+<h3><a class="header" href="#columns-21" id="columns-21">Columns</a></h3>
+<h3><a class="header" href="#objects-21" id="objects-21">Objects</a></h3>
+<h1><a class="header" href="#chapter-1-23" id="chapter-1-23">Chapter 1</a></h1>
+<h2><a class="header" href="#containers-22" id="containers-22">Containers</a></h2>
+<h3><a class="header" href="#arrays-22" id="arrays-22">Arrays</a></h3>
+<h3><a class="header" href="#columns-22" id="columns-22">Columns</a></h3>
+<h3><a class="header" href="#objects-22" id="objects-22">Objects</a></h3>
+<h1><a class="header" href="#chapter-1-24" id="chapter-1-24">Chapter 1</a></h1>
+<h1><a class="header" href="#chapter-1-25" id="chapter-1-25">Chapter 1</a></h1>
+<h2><a class="header" href="#containers-23" id="containers-23">Containers</a></h2>
+<h3><a class="header" href="#arrays-23" id="arrays-23">Arrays</a></h3>
+<h3><a class="header" href="#columns-23" id="columns-23">Columns</a></h3>
+<h3><a class="header" href="#objects-23" id="objects-23">Objects</a></h3>
+<h1><a class="header" href="#chapter-1-26" id="chapter-1-26">Chapter 1</a></h1>
+<h2><a class="header" href="#containers-24" id="containers-24">Containers</a></h2>
+<h3><a class="header" href="#arrays-24" id="arrays-24">Arrays</a></h3>
+<h3><a class="header" href="#columns-24" id="columns-24">Columns</a></h3>
+<h3><a class="header" href="#objects-24" id="objects-24">Objects</a></h3>
+<h1><a class="header" href="#chapter-1-27" id="chapter-1-27">Chapter 1</a></h1>
+<h2><a class="header" href="#containers-25" id="containers-25">Containers</a></h2>
+<h3><a class="header" href="#arrays-25" id="arrays-25">Arrays</a></h3>
+<h3><a class="header" href="#columns-25" id="columns-25">Columns</a></h3>
+<h3><a class="header" href="#objects-25" id="objects-25">Objects</a></h3>
+<h1><a class="header" href="#chapter-1-28" id="chapter-1-28">Chapter 1</a></h1>
+<h2><a class="header" href="#containers-26" id="containers-26">Containers</a></h2>
+<h3><a class="header" href="#arrays-26" id="arrays-26">Arrays</a></h3>
+<h3><a class="header" href="#columns-26" id="columns-26">Columns</a></h3>
+<h3><a class="header" href="#objects-26" id="objects-26">Objects</a></h3>
+<h1><a class="header" href="#chapter-1-29" id="chapter-1-29">Chapter 1</a></h1>
+<h2><a class="header" href="#containers-27" id="containers-27">Containers</a></h2>
+<h3><a class="header" href="#arrays-27" id="arrays-27">Arrays</a></h3>
+<h3><a class="header" href="#columns-27" id="columns-27">Columns</a></h3>
+<h3><a class="header" href="#objects-27" id="objects-27">Objects</a></h3>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+
+        
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+        
+        <script type="text/javascript">
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+        
+        
+
+    </body>
+</html>
