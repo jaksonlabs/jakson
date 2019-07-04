@@ -1,23 +1,28 @@
 # Binary Strings
 
-Type            | Description                                      | Size    
-----------------|--------------------------------------------------|-----------
-`binary`        | a binary string `n` bytes with known MIME-type   | `n` bytes
-`custom binary` | a binary string `n` bytes with unknown MIME-type | `n` bytes
+Carbon Type     | Description                       | Size                      | *null*-Value | Marker 
+----------------|-----------------------------------|---------------------------|--------------|--------
+`binary`        | binary of `n` bytes (MIME typed)  | `n` + 2<sup>+</sup> bytes | `null`       | `[b]`
+`custom binary` | binary of `n` bytes (custom type) | `n` + 3<sup>+</sup> bytes | `null`       | `[x]`
 
 
-## As Field Value
+## Encoding As Field Value
 
 ### With Known MIME Types
 
 ```
-[b](mime-type-id)(l) [<binary-string>]
+[b](mime-type-id)(str-len) <binary>
 ```
 
-Description        | Size                      | Marker         | Payload
--------------------|---------------------------|----------------|-------------------------------------------------
- `n`-byte string | 1 + `k` + `l` + `n` bytes | `[b]` (string) | `(mime-type-id)` MIME id (`k` byte), `(n)` string length (`l` bytes) `n` characters
- 
+Description          | Size (in Byte)      | Marker         | Payload
+---------------------|---------------------|----------------|-------------------------------------------------
+ binary of `n` bytes | 1 + `k` + `l` + `n` | `[b]` (`binary`) | *see below*
+
+Payload			   | Description                     | Encoding Type             | Size
+-------------------|---------------------------------|---------------------------|---------
+`(mime-type-id)`   | MIME Type Id (see below)        | variable-length integer   | `k` byte
+`(str-len)`        | binary string length in bytes   | variable-length integer   | `l` byte
+ `<binary>` | the binary string itself        | fixed-sized binary string | `n` byte
 
 ## Example
 
@@ -36,12 +41,19 @@ A (compacted) Carbon file, which encodes the HTML code as `binary`.
 ### With Unknown MIME Types
 
 ```
-[x](mime-type-string-len)[<mime-type-string>](l) [<binary-string>]
+[x](type-str-len)<type-str>(str-len) <binary-string>
 ```
 
-Description        | Size                          | Marker         | Payload
--------------------|-------------------------------|----------------|-------------------------------------------------
- `n`-byte string | 1 + `p` + `q` + `l` + `n` bytes | `[x]` (string) | `(mime-type-string-len)` string length `q` of `<mime-type-string>` (`p` byte), `q` characters, `(n)` string length (`l` bytes) `n` characters
+ Description          | Size (in Byte)            | Marker         | Payload
+----------------------|---------------------------|----------------|-------------
+ binary of `n` bytes  | 1 + `p` + `q` + `l` + `n` | `[x]` (`custom binary`) | *see below*
+
+Payload			         | Description                             | Encoding Type                | Size
+-------------------------|-----------------------------------------|------------------------------|---------
+`(type-str-len)` | used-def type string length | variable-length integer      | `k` byte
+`<type-str>`     | the user-def type string itself     | fixed-sized string | `q` byte
+`(str-len)`              | binary string length in bytes           | variable-length integer      | `l` byte
+ `<binary>`       | the binary string itself                | fixed-sized binary string    | `n` byte
  
 
 ## Example
@@ -94,7 +106,7 @@ Vice versa, a Carbon file converted into a JSON string using the standard JSON f
 
 
 
-## As Column Value
+## Encoding As Column Value
 
 Binary strings are not supported for column containers.
 

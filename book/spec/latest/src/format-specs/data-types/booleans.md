@@ -1,12 +1,14 @@
 # Booleans
 
-## As Field Value
+Carbon Type  | Description             | Size                | *null*-Value      | Marker 
+-------------|-------------------------|---------------------|-------------------|------------------
+`true`       | the truth value *true*  | 0 byte              | `null`            | `[t]`
+`false`      | the truth value *false* | 0 byte              | `null`            | `[f]`
+`boolean`    | a three-valued value    | 0<sup>+</sup> bytes | *dedicated value* | *dedicated value*
 
 
-Description           | Size   | Marker   | Payload 
-----------------------|--------|----------|---------
-JSON `true` constant  | 1 byte | `[t]`    | *none*  
-JSON `false` constant | 1 byte | `[f]`    | *none*  
+## Encoding as Field Value
+
 
 ### Example
 
@@ -21,7 +23,7 @@ A (compacted) Carbon file
 [[] [t] [f] []]
 ```
 
-## As Column Value
+## Encoding as Column Value
 
 
 Column Type Marker      | Marker Size | Value   | Element Size | Block   
@@ -41,5 +43,5 @@ JSON snippet
 A (compacted) Carbon file, which encodes the JSON array as `boolean` column.
 
 ```
-[(] [B][3][3] [0][1][2] [)]
+[(] [B](3)(3) [0][1][2] [#]
 ```

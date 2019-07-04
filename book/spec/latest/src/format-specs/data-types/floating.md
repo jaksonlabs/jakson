@@ -1,8 +1,9 @@
 # Floating Numbers
 
-Type    | Description             | Size    | *null*-Value
---------|-------------------------|---------|------------------
-`float` | 32-bit floating number  | 4 bytes | `NAN` float value
+Carbon Type  | Description                              | Size      | *null*-Value          | Marker 
+-------------|------------------------------------------|-----------|-----------------------|------------------
+`float`      | single-precision floating number | 4 byte  | `null` or `NAN` | `r` 
+
 
 
 ## As Field Value
@@ -45,5 +46,5 @@ JSON snippet
 A (compacted) Carbon file, which encodes the JSON array as a `float` column.
 
 ```
-[(] [r][2][2] [23.3][42.0] [)]
+[(] [r](2)(2) [23.3][42.0] [#]
 ```
