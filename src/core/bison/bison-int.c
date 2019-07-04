@@ -104,8 +104,6 @@ NG5_EXPORT(bool) bison_int_insert_column(struct memfile *memfile_in, struct err 
         memfile_seek(memfile_in, payload_begin + nbytes);
         marker_insert(memfile_in, column_end_marker);
 
-        memfile_hexdump_print(memfile_in); // TODO: debug remove
-
         /* seek to first entry in column */
         memfile_seek(memfile_in, payload_begin);
 

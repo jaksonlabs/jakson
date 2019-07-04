@@ -494,9 +494,6 @@ static bool push_in_column(struct bison_insert *inserter, const void *base, enum
 
         memfile_save_position(&inserter->memfile);
 
-        printf("\n\nBEFORE INC NUM\n:"); // TODO: debug remove
-        memfile_hexdump_print(&inserter->memfile); // TODO: debug remove
-
         // Increase element counter
         memfile_seek(&inserter->memfile, inserter->context.column->num_and_capacity_start_offset);
         u32 num_elems = memfile_peek_varuint(NULL, &inserter->memfile);
@@ -504,17 +501,9 @@ static bool push_in_column(struct bison_insert *inserter, const void *base, enum
         memfile_update_varuint(&inserter->memfile, num_elems);
         inserter->context.column->column_num_elements = num_elems;
 
-        printf("\nAFTER INC NUM\n:"); // TODO: debug remove
-        memfile_hexdump_print(&inserter->memfile); // TODO: debug remove
-
         u32 capacity = memfile_read_varuint(NULL, &inserter->memfile);
 
-
-
         if (unlikely(num_elems > capacity)) {
-                printf("\n\n\nBEFORE ENLARGE\n:"); // TODO: debug remove
-                memfile_hexdump_print(&inserter->memfile); // TODO: debug remove
-
                 memfile_save_position(&inserter->memfile);
 
                 u32 new_capacity = (capacity + 1) * 1.7f;
@@ -529,19 +518,12 @@ static bool push_in_column(struct bison_insert *inserter, const void *base, enum
                 memfile_seek(&inserter->memfile, payload_start + (num_elems-1) * type_size);
                 memfile_ensure_space(&inserter->memfile, (new_capacity - capacity) * type_size);
 
-                printf("\nAFTER ENLARGE\n"); // TODO: debug remove
-                memfile_hexdump_print(&inserter->memfile); // TODO: debug remove
-                printf("\n\n"); // TODO: debug remove
-
                 memfile_restore_position(&inserter->memfile);
         }
 
         size_t payload_start = bison_int_column_get_payload_off(inserter->context.column);
         memfile_seek(&inserter->memfile, payload_start + (num_elems - 1) * type_size);
         memfile_write(&inserter->memfile, base, type_size);
-
-        printf("\nAFTER PUSH\n:"); // TODO: debug remove
-        memfile_hexdump_print(&inserter->memfile); // TODO: debug remove
 
         memfile_restore_position(&inserter->memfile);
         return true;

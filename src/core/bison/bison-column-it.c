@@ -126,8 +126,6 @@ NG5_EXPORT(const void *) bison_column_it_values(enum bison_field_type *type, u32
         u32 skip = cap_elements * bison_int_get_type_value_size(it->type);
         memfile_seek(&it->memfile, payload_start + skip);
 
-        memfile_hexdump_print(&it->memfile); // TODO: debug remove
-
         char end = *memfile_read(&it->memfile, sizeof(u8));
 
         error_if_and_return(end != BISON_MARKER_COLUMN_END, &it->err, NG5_ERR_CORRUPTED, NULL);
@@ -318,9 +316,6 @@ static bool rewrite_column_to_array(struct bison_column_it *it)
 
         memfile_save_position(&it->memfile);
 
-        printf("\n\n");
-        memfile_hexdump_print(&it->memfile); // TODO: debug remove
-
         /* Potentially tailing space after the last ']' marker of the outer most array is used for temporary space */
         memfile_seek_to_end(&it->memfile);
         offset_t array_marker_begin = memfile_tell(&it->memfile);
@@ -329,9 +324,6 @@ static bool rewrite_column_to_array(struct bison_column_it *it)
         bison_int_insert_array(&it->memfile, capacity);
         bison_array_it_create(&array_it, &it->memfile, &it->err, array_marker_begin);
         bison_array_it_insert_begin(&array_ins, &array_it);
-
-        printf("\n\n");
-        memfile_hexdump_print(&it->memfile); // TODO: debug remove
 
         enum bison_field_type type;
         u32 num_values;
@@ -385,11 +377,6 @@ static bool rewrite_column_to_array(struct bison_column_it *it)
         bison_array_it_drop(&array_it);
 
         assert(array_marker_begin < array_marker_end);
-        //offset_t array_size = array_marker_end - array_marker_begin;
-
-
-        printf("\n\n");
-        memfile_hexdump_print(&it->memfile); // TODO: debug remove
 
         memfile_restore_position(&it->memfile);
         return true;
