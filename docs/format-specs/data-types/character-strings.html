@@ -146,10 +146,10 @@
                 <div id="content" class="content">
                     <main>
                         <h1><a class="header" href="#character-strings" id="character-strings">Character Strings</a></h1>
-<table><thead><tr><th>Type</th><th>Description</th><th>Size</th></tr></thead><tbody>
-<tr><td><code>string</code></td><td>a (Pascal) ASCII character string</td><td>1 bytes per character</td></tr>
+<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
+<tr><td><code>string</code></td><td>a (Pascal) character string of <code>n</code> characters</td><td><code>n</code> bytes</td><td><code>null</code></td><td><code>[s]</code></td></tr>
 </tbody></table>
-<h2><a class="header" href="#as-field-value" id="as-field-value">As Field Value</a></h2>
+<h2><a class="header" href="#encoding-as-field-value" id="encoding-as-field-value">Encoding as Field Value</a></h2>
 <pre><code>[s](n) &lt;character-string&gt;
 </code></pre>
 <table><thead><tr><th>Description</th><th>Size</th><th>Marker</th><th>Payload</th></tr></thead><tbody>
@@ -162,7 +162,7 @@
 <p>A (compacted) Carbon file, which encodes the JSON array as <code>array</code> of character-string values.</p>
 <pre><code>[[] [s](5)[Hello] [s](5)[World] [s](1)[!] []]
 </code></pre>
-<h2><a class="header" href="#as-column-value" id="as-column-value">As Column Value</a></h2>
+<h2><a class="header" href="#encoding-as-column-value" id="encoding-as-column-value">Encoding as Column Value</a></h2>
 <p>Character strings are not supported for column containers.</p>
 
                     </main>

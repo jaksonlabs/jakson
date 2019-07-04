@@ -146,11 +146,12 @@
                 <div id="content" class="content">
                     <main>
                         <h1><a class="header" href="#booleans" id="booleans">Booleans</a></h1>
-<h2><a class="header" href="#as-field-value" id="as-field-value">As Field Value</a></h2>
-<table><thead><tr><th>Description</th><th>Size</th><th>Marker</th><th>Payload</th></tr></thead><tbody>
-<tr><td>JSON <code>true</code> constant</td><td>1 byte</td><td><code>[t]</code></td><td><em>none</em></td></tr>
-<tr><td>JSON <code>false</code> constant</td><td>1 byte</td><td><code>[f]</code></td><td><em>none</em></td></tr>
+<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
+<tr><td><code>true</code></td><td>the truth value <em>true</em></td><td>0 byte</td><td><code>null</code></td><td><code>[t]</code></td></tr>
+<tr><td><code>false</code></td><td>the truth value <em>false</em></td><td>0 byte</td><td><code>null</code></td><td><code>[f]</code></td></tr>
+<tr><td><code>boolean</code></td><td>a three-valued value</td><td>0<sup>+</sup> bytes</td><td><em>dedicated value</em></td><td><em>dedicated value</em></td></tr>
 </tbody></table>
+<h2><a class="header" href="#encoding-as-field-value" id="encoding-as-field-value">Encoding as Field Value</a></h2>
 <h3><a class="header" href="#example" id="example">Example</a></h3>
 <p>JSON snippet</p>
 <pre><code class="language-json">[true, false]
@@ -158,7 +159,7 @@
 <p>A (compacted) Carbon file</p>
 <pre><code>[[] [t] [f] []]
 </code></pre>
-<h2><a class="header" href="#as-column-value" id="as-column-value">As Column Value</a></h2>
+<h2><a class="header" href="#encoding-as-column-value" id="encoding-as-column-value">Encoding as Column Value</a></h2>
 <table><thead><tr><th>Column Type Marker</th><th>Marker Size</th><th>Value</th><th>Element Size</th><th>Block</th></tr></thead><tbody>
 <tr><td><code>[B]</code>, boolean values</td><td>1-byte</td><td><code>false</code></td><td>1 byte each</td><td><code>[0]</code></td></tr>
 <tr><td><code>[B]</code>, boolean values</td><td>1-byte</td><td><code>true</code></td><td>1 byte each</td><td><code>[1]</code></td></tr>
@@ -169,7 +170,7 @@
 <pre><code class="language-json">[false, true, null]
 </code></pre>
 <p>A (compacted) Carbon file, which encodes the JSON array as <code>boolean</code> column.</p>
-<pre><code>[(] [B][3][3] [0][1][2] [)]
+<pre><code>[(] [B](3)(3) [0][1][2] [#]
 </code></pre>
 
                     </main>

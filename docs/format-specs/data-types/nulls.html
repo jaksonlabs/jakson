@@ -146,7 +146,10 @@
                 <div id="content" class="content">
                     <main>
                         <h1><a class="header" href="#nulls" id="nulls">Nulls</a></h1>
-<h2><a class="header" href="#null-as-field-value" id="null-as-field-value">Null as Field Value</a></h2>
+<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
+<tr><td><code>null</code></td><td>absence of data</td><td>0<sup>+</sup> byte</td><td><code>null</code> value</td><td><code>[n]</code> or dedicated value</td></tr>
+</tbody></table>
+<h2><a class="header" href="#encoding-as-field-value" id="encoding-as-field-value">Encoding as Field Value</a></h2>
 <table><thead><tr><th>Description</th><th>Size</th><th>Marker</th><th>Payload</th></tr></thead><tbody>
 <tr><td>JSON <code>null</code> constant</td><td>1 byte</td><td><code>[n]</code></td><td><em>none</em></td></tr>
 </tbody></table>
@@ -157,26 +160,26 @@
 <p>Carbon File snippet</p>
 <pre><code>[[] [n] []] 
 </code></pre>
-<h2><a class="header" href="#null-as-column-value" id="null-as-column-value">Null as Column Value</a></h2>
-<table><thead><tr><th>Column Type Marker</th><th>Marker Size</th><th>Element Size</th><th>Block</th></tr></thead><tbody>
-<tr><td><code>[n]</code>, null values</td><td>1 byte</td><td>1 byte each</td><td><code>[n]</code></td></tr>
-<tr><td><code>[B]</code>, booleans values</td><td>1 byte</td><td>1 byte each</td><td><code>[2]</code></td></tr>
-<tr><td><code>[c]</code>, unsigned 8-bit int.</td><td>1 byte</td><td>1 byte each</td><td><code>[255]</code></td></tr>
-<tr><td><code>[d]</code>, unsigned 16-bit int.</td><td>1 byte</td><td>2 bytes each</td><td><code>[65,535]</code></td></tr>
-<tr><td><code>[i]</code>, unsigned 32-bit int.</td><td>1 byte</td><td>4 bytes each</td><td><code>[4,294,967,295]</code></td></tr>
-<tr><td><code>[l]</code>, unsigned 64-bit int.</td><td>1 byte</td><td>8 bytes each</td><td><code>[18,446,744,073,709,551,615]</code></td></tr>
-<tr><td><code>[C]</code>, signed 8-bit integers</td><td>1 byte</td><td>1 byte each</td><td><code>[−128]</code></td></tr>
-<tr><td><code>[D]</code>, signed 16-bit int.</td><td>1 byte</td><td>2 bytes each</td><td><code>[−32,768]</code></td></tr>
-<tr><td><code>[I]</code>, signed 32-bit int.</td><td>1 byte</td><td>4 bytes each</td><td><code>[−2,147,483,648]</code></td></tr>
-<tr><td><code>[L]</code>, signed 64-bit int.</td><td>1 byte</td><td>8 bytes each</td><td><code>[−9,223,372,036,854,775,808]</code></td></tr>
-<tr><td><code>[r]</code>, 32-bit floats</td><td>1 byte</td><td>4 bytes each</td><td><code>[NAN]</code></td></tr>
+<h2><a class="header" href="#encoding-as-column-value" id="encoding-as-column-value">Encoding as Column Value</a></h2>
+<table><thead><tr><th>Column Type Marker</th><th>Marker Size</th><th>Element Size</th><th>Dedicated Value</th></tr></thead><tbody>
+<tr><td><code>[n]</code>, null values</td><td>1 byte</td><td>1 byte each</td><td><code>n</code></td></tr>
+<tr><td><code>[B]</code>, booleans values</td><td>1 byte</td><td>1 byte each</td><td><code>2</code></td></tr>
+<tr><td><code>[c]</code>, unsigned 8-bit int.</td><td>1 byte</td><td>1 byte each</td><td><code>255</code></td></tr>
+<tr><td><code>[d]</code>, unsigned 16-bit int.</td><td>1 byte</td><td>2 bytes each</td><td><code>65,535</code></td></tr>
+<tr><td><code>[i]</code>, unsigned 32-bit int.</td><td>1 byte</td><td>4 bytes each</td><td><code>4,294,967,295</code></td></tr>
+<tr><td><code>[l]</code>, unsigned 64-bit int.</td><td>1 byte</td><td>8 bytes each</td><td><code>18,446,744,073,709,551,615</code></td></tr>
+<tr><td><code>[C]</code>, signed 8-bit integers</td><td>1 byte</td><td>1 byte each</td><td><code>−128</code></td></tr>
+<tr><td><code>[D]</code>, signed 16-bit int.</td><td>1 byte</td><td>2 bytes each</td><td><code>−32,768</code></td></tr>
+<tr><td><code>[I]</code>, signed 32-bit int.</td><td>1 byte</td><td>4 bytes each</td><td><code>−2,147,483,648</code></td></tr>
+<tr><td><code>[L]</code>, signed 64-bit int.</td><td>1 byte</td><td>8 bytes each</td><td><code>−9,223,372,036,854,775,808</code></td></tr>
+<tr><td><code>[r]</code>, 32-bit floats</td><td>1 byte</td><td>4 bytes each</td><td><code>NAN</code></td></tr>
 </tbody></table>
 <h3><a class="header" href="#example-1" id="example-1">Example</a></h3>
 <p>JSON snippet</p>
 <pre><code class="language-json">[42, 23, null]
 </code></pre>
 <p>Carbon File snippet (JSON array encoded as <code>u8</code> column)</p>
-<pre><code>[(] [c][3][3] [42][23][255] [)]
+<pre><code>[(] [c](3)(3) [42][23][255] [#]
 </code></pre>
 
                     </main>

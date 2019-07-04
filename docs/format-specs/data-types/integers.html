@@ -146,51 +146,31 @@
                 <div id="content" class="content">
                     <main>
                         <h1><a class="header" href="#integer-numbers" id="integer-numbers">Integer Numbers</a></h1>
-<table><thead><tr><th>Type</th><th>Description</th><th>Size</th><th>Min</th><th>Max</th><th><em>null</em>-Value</th></tr></thead><tbody>
-<tr><td><code>u8</code></td><td>unsigned 8-bit integer</td><td>1 bytes</td><td>0</td><td>2<sup>8</sup> - 2</td><td>2<sup>8</sup> - 1</td></tr>
-<tr><td><code>u16</code></td><td>unsigned 16-bit integer</td><td>2 bytes</td><td>0</td><td>2<sup>16</sup> - 2</td><td>2<sup>16</sup> - 1</td></tr>
-<tr><td><code>u32</code></td><td>unsigned 32-bit integer</td><td>4 bytes</td><td>0</td><td>2<sup>16</sup> - 2</td><td>2<sup>16</sup> - 1</td></tr>
-<tr><td><code>u64</code></td><td>unsigned 64-bit integer</td><td>8 bytes</td><td>0</td><td>2<sup>16</sup> - 2</td><td>2<sup>16</sup> - 1</td></tr>
-<tr><td><code>i8</code></td><td>signed 8-bit integer</td><td>1 byte</td><td>−2<sup>7</sup> + 1</td><td>2<sup>7</sup> - 2</td><td>-2<sup>7</sup></td></tr>
-<tr><td><code>i16</code></td><td>signed 16-bit integer</td><td>2 bytes</td><td>−2<sup>15</sup> + 1</td><td>2<sup>15</sup> - 2</td><td>-2<sup>15</sup></td></tr>
-<tr><td><code>i32</code></td><td>signed 32-bit integer</td><td>4 bytes</td><td>−2<sup>31</sup> + 1</td><td>2<sup>31</sup> - 2</td><td>-2<sup>31</sup></td></tr>
-<tr><td><code>i64</code></td><td>signed 64-bit integer</td><td>8 bytes</td><td>−2<sup>63</sup> + 1</td><td>2<sup>63</sup> - 2</td><td>-2<sup>63</sup></td></tr>
+<table><thead><tr><th>Carbon</th><th>Description</th><th>Size</th><th>Min</th><th>Max</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
+<tr><td><code>u8</code></td><td>unsigned 8-bit int</td><td>1 B</td><td>0</td><td>2<sup>8</sup> - 2</td><td><code>null</code> or 2<sup>8</sup> - 1</td><td><code>[c]</code></td></tr>
+<tr><td><code>u16</code></td><td>unsigned 16-bit int</td><td>2 B</td><td>0</td><td>2<sup>16</sup> - 2</td><td><code>null</code> or2<sup>16</sup> - 1</td><td><code>[d]</code></td></tr>
+<tr><td><code>u32</code></td><td>unsigned 32-bit int</td><td>4 B</td><td>0</td><td>2<sup>16</sup> - 2</td><td><code>null</code> or2<sup>16</sup> - 1</td><td><code>[i]</code></td></tr>
+<tr><td><code>u64</code></td><td>unsigned 64-bit int</td><td>8 B</td><td>0</td><td>2<sup>16</sup> - 2</td><td><code>null</code> or2<sup>16</sup> - 1</td><td><code>[l]</code></td></tr>
+<tr><td><code>i8</code></td><td>signed 8-bit int</td><td>1 B</td><td>−2<sup>7</sup> + 1</td><td>2<sup>7</sup> - 2</td><td><code>null</code> or-2<sup>7</sup></td><td><code>[C]</code></td></tr>
+<tr><td><code>i16</code></td><td>signed 16-bit int</td><td>2 B</td><td>−2<sup>15</sup> + 1</td><td>2<sup>15</sup> - 2</td><td><code>null</code> or-2<sup>15</sup></td><td><code>[D]</code></td></tr>
+<tr><td><code>i32</code></td><td>signed 32-bit int</td><td>4 B</td><td>−2<sup>31</sup> + 1</td><td>2<sup>31</sup> - 2</td><td><code>null</code> or-2<sup>31</sup></td><td><code>[I]</code></td></tr>
+<tr><td><code>i64</code></td><td>signed 64-bit int</td><td>8 B</td><td>−2<sup>63</sup> + 1</td><td>2<sup>63</sup> - 2</td><td><code>null</code> or-2<sup>63</sup></td><td><code>[L]</code></td></tr>
 </tbody></table>
-<h2><a class="header" href="#as-field-value" id="as-field-value">As Field Value</a></h2>
-<table><thead><tr><th>Description</th><th>Size</th><th>Marker</th><th>Payload</th></tr></thead><tbody>
-<tr><td>unsigned 8-bit integer</td><td>1+1 bytes</td><td><code>[c]</code> (char)</td><td>an <code>u8</code> value</td></tr>
-<tr><td>unsigned 16-bit integer</td><td>1+2 bytes</td><td><code>[d]</code> (decimal)</td><td>an <code>u16</code> value</td></tr>
-<tr><td>unsigned 32-bit integer</td><td>1+4 bytes</td><td><code>[i]</code> (integer)</td><td>an <code>u32</code> value</td></tr>
-<tr><td>unsigned 64-bit integer</td><td>1+8 bytes</td><td><code>[l]</code> (long)</td><td>an <code>u64</code> value</td></tr>
-<tr><td>signed 8-bit integer</td><td>1+1 bytes</td><td><code>[C]</code> (char)</td><td>an <code>i8</code> value</td></tr>
-<tr><td>signed 16-bit integer</td><td>1+2 bytes</td><td><code>[D]</code> (decimal)</td><td>an <code>i16</code> value</td></tr>
-<tr><td>signed 32-bit integer</td><td>1+4 bytes</td><td><code>[I]</code> (integer)</td><td>an <code>i32</code> value</td></tr>
-<tr><td>signed 64-bit integer</td><td>1+8 bytes</td><td><code>[L]</code> (long)</td><td>an <code>i64</code> value</td></tr>
-</tbody></table>
+<h2><a class="header" href="#encoding-as-field-value" id="encoding-as-field-value">Encoding As Field Value</a></h2>
 <h3><a class="header" href="#example" id="example">Example</a></h3>
 <p>JSON snippet</p>
-<pre><code class="language-json">[-42, 42]
+<pre><code class="language-json">[-42, 42, null]
 </code></pre>
-<p>A (compacted) Carbon file, which encodes the JSON array as <code>array</code> of one <code>i8</code> and one <code>u8</code> integer.</p>
-<pre><code>[[] [c][-42] [C][42] []]
+<p>A (compacted) Carbon file, which encodes the JSON array as <code>array</code> of one <code>i8</code> and one <code>u8</code> value.</p>
+<pre><code>[[] [c][-42] [C][42] [n] []]
 </code></pre>
-<h2><a class="header" href="#as-column-value" id="as-column-value">As Column Value</a></h2>
-<table><thead><tr><th>Column Type Marker</th><th>Marker Size</th><th>Element Size</th><th>Block</th></tr></thead><tbody>
-<tr><td><code>[c]</code>, unsigned 8-bit integers</td><td>1 byte</td><td>1 byte each</td><td>an <code>u8</code> value</td></tr>
-<tr><td><code>[d]</code>, unsigned 16-bit integers</td><td>1 byte</td><td>2 bytes each</td><td>an <code>u16</code> value</td></tr>
-<tr><td><code>[i]</code>, unsigned 32-bit integers</td><td>1 byte</td><td>4 bytes each</td><td>an <code>u32</code> value</td></tr>
-<tr><td><code>[l]</code>, unsigned 64-bit integers</td><td>1 byte</td><td>8 bytes each</td><td>an <code>u64</code> value</td></tr>
-<tr><td><code>[C]</code>, signed 8-bit integers</td><td>1 byte</td><td>1 byte each</td><td>an <code>i8</code> value</td></tr>
-<tr><td><code>[D]</code>, signed 16-bit integers</td><td>1 byte</td><td>2 bytes each</td><td>an <code>i16</code> value</td></tr>
-<tr><td><code>[I]</code>, signed 32-bit integers</td><td>1 byte</td><td>4 bytes each</td><td>an <code>i32</code> value</td></tr>
-<tr><td><code>[L]</code>, signed 64-bit integers</td><td>1 byte</td><td>8 bytes each</td><td>an <code>i64</code> value</td></tr>
-</tbody></table>
+<h2><a class="header" href="#encoding-as-column-value" id="encoding-as-column-value">Encoding As Column Value</a></h2>
 <h3><a class="header" href="#example-1" id="example-1">Example</a></h3>
 <p>JSON snippet</p>
-<pre><code class="language-json">[-42, 42]
+<pre><code class="language-json">[-42, 42, null]
 </code></pre>
 <p>A (compacted) Carbon file, which encodes the JSON array as <code>i8</code> column.</p>
-<pre><code>[(] [C][2][2] [-42][42] [)]
+<pre><code>[(] [C](2)(2) [-42][42][255] [#]
 </code></pre>
 
                     </main>

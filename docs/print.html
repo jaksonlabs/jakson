@@ -171,9 +171,22 @@
 </tbody></table>
 <p><code>[x]</code>, <code>(x)</code>, and <code>&lt;x&gt;</code> are called <strong>blocks</strong> with content <code>x</code>.</p>
 <h1><a class="header" href="#marker-format" id="marker-format">Marker Format</a></h1>
-<pre><code>[object-id](rev-number) [[] &lt;values&gt;... []]...
+<pre><code>[document-id](rev-number) [[] &lt;values&gt;... []]...
 </code></pre>
 <p>A <strong>marker</strong> <code>x</code> has always a size of 1 byte. </p>
+<h2><a class="header" href="#document-identification" id="document-identification">Document Identification</a></h2>
+<pre><code>[document-id]
+</code></pre>
+<h2><a class="header" href="#revision-managment" id="revision-managment">Revision Managment</a></h2>
+<pre><code>(rev-number)
+</code></pre>
+<h2><a class="header" href="#values" id="values">Values</a></h2>
+<pre><code>&lt;vlaues&gt;
+</code></pre>
+<h2><a class="header" href="#capacitities" id="capacitities">Capacitities</a></h2>
+<pre><code>...
+</code></pre>
+<h2><a class="header" href="#examples" id="examples">Examples</a></h2>
 <h3><a class="header" href="#example-array" id="example-array">Example (Array)</a></h3>
 <p>JSON snippet</p>
 <pre><code class="language-json">[ &quot;The&quot;, &quot;Number&quot;, 23 ]
@@ -186,7 +199,7 @@
 <pre><code class="language-json">[ 23, 24, 25 ]
 </code></pre>
 <p>A (compacted) Carbon file with object id <code>21</code> in revision <code>5</code> encoding the JSON array as <code>u8</code> integer column.</p>
-<pre><code>[21](5) [[] [(] [u8][3][3] [23][24][25] [)] []] 
+<pre><code>[21](5) [[] [(] [u8](3)(3) [23][24][25] [#] []] 
 </code></pre>
 <h1><a class="header" href="#variable-length-integers" id="variable-length-integers">Variable-Length Integers</a></h1>
 <pre><code>(value)
@@ -197,12 +210,31 @@
 <h1><a class="header" href="#user-defined-keys" id="user-defined-keys">User-Defined Keys</a></h1>
 <h1><a class="header" href="#system-defined-keys" id="system-defined-keys">System-Defined Keys</a></h1>
 <h1><a class="header" href="#data-types" id="data-types">Data Types</a></h1>
-<h1><a class="header" href="#booleans" id="booleans">Booleans</a></h1>
-<h2><a class="header" href="#as-field-value" id="as-field-value">As Field Value</a></h2>
-<table><thead><tr><th>Description</th><th>Size</th><th>Marker</th><th>Payload</th></tr></thead><tbody>
-<tr><td>JSON <code>true</code> constant</td><td>1 byte</td><td><code>[t]</code></td><td><em>none</em></td></tr>
-<tr><td>JSON <code>false</code> constant</td><td>1 byte</td><td><code>[f]</code></td><td><em>none</em></td></tr>
+<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
+<tr><td><code>true</code></td><td>truth value <em>true</em></td><td>0 byte</td><td><code>null</code></td><td><code>[t]</code></td></tr>
+<tr><td><code>false</code></td><td>truth value <em>false</em></td><td>0 byte</td><td><code>null</code></td><td><code>[f]</code></td></tr>
+<tr><td><code>boolean</code></td><td>three-valued logic</td><td>0<sup>+</sup> bytes</td><td><em>const</em></td><td><em>const</em></td></tr>
+<tr><td><code>u8</code></td><td>unsigned 8-bit int</td><td>1 B</td><td><code>null</code>, 2<sup>8</sup> - 1</td><td><code>[c]</code></td></tr>
+<tr><td><code>u16</code></td><td>unsigned 16-bit int</td><td>2 B</td><td><code>null</code>, 2<sup>16</sup> - 1</td><td><code>[d]</code></td></tr>
+<tr><td><code>u32</code></td><td>unsigned 32-bit int</td><td>4 B</td><td><code>null</code>, 2<sup>16</sup> - 1</td><td><code>[i]</code></td></tr>
+<tr><td><code>u64</code></td><td>unsigned 64-bit int</td><td>8 B</td><td><code>null</code>, 2<sup>16</sup> - 1</td><td><code>[l]</code></td></tr>
+<tr><td><code>i8</code></td><td>signed 8-bit int</td><td>1 B</td><td><code>null</code>, -2<sup>7</sup></td><td><code>[C]</code></td></tr>
+<tr><td><code>i16</code></td><td>signed 16-bit int</td><td>2 B</td><td><code>null</code>, -2<sup>15</sup></td><td><code>[D]</code></td></tr>
+<tr><td><code>i32</code></td><td>signed 32-bit int</td><td>4 B</td><td><code>null</code>, -2<sup>31</sup></td><td><code>[I]</code></td></tr>
+<tr><td><code>i64</code></td><td>signed 64-bit int</td><td>8 B</td><td><code>null</code>, -2<sup>63</sup></td><td><code>[L]</code></td></tr>
+<tr><td><code>float</code></td><td>32-bit float</td><td>4 byte</td><td><code>null</code>,  <code>NAN</code></td><td><code>r</code></td></tr>
+<tr><td><code>string</code></td><td>string of <code>n</code> chars</td><td><code>n</code> bytes</td><td><code>null</code></td><td><code>[s]</code></td></tr>
+<tr><td><code>binary</code></td><td>binary of <code>n</code> bytes</td><td><code>n</code> + 2<sup>+</sup> bytes</td><td><code>null</code></td><td><code>[b]</code></td></tr>
+<tr><td><code>custom binary</code></td><td>binary of <code>n</code> bytes</td><td><code>n</code> + 3<sup>+</sup> bytes</td><td><code>null</code></td><td><code>[x]</code></td></tr>
+<tr><td><code>null</code></td><td>absence of data</td><td>0<sup>+</sup> byte</td><td><code>null</code></td><td><code>[n]</code>,  <em>const</em></td></tr>
 </tbody></table>
+<h1><a class="header" href="#booleans" id="booleans">Booleans</a></h1>
+<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
+<tr><td><code>true</code></td><td>the truth value <em>true</em></td><td>0 byte</td><td><code>null</code></td><td><code>[t]</code></td></tr>
+<tr><td><code>false</code></td><td>the truth value <em>false</em></td><td>0 byte</td><td><code>null</code></td><td><code>[f]</code></td></tr>
+<tr><td><code>boolean</code></td><td>a three-valued value</td><td>0<sup>+</sup> bytes</td><td><em>dedicated value</em></td><td><em>dedicated value</em></td></tr>
+</tbody></table>
+<h2><a class="header" href="#encoding-as-field-value" id="encoding-as-field-value">Encoding as Field Value</a></h2>
 <h3><a class="header" href="#example-1" id="example-1">Example</a></h3>
 <p>JSON snippet</p>
 <pre><code class="language-json">[true, false]
@@ -210,7 +242,7 @@
 <p>A (compacted) Carbon file</p>
 <pre><code>[[] [t] [f] []]
 </code></pre>
-<h2><a class="header" href="#as-column-value" id="as-column-value">As Column Value</a></h2>
+<h2><a class="header" href="#encoding-as-column-value" id="encoding-as-column-value">Encoding as Column Value</a></h2>
 <table><thead><tr><th>Column Type Marker</th><th>Marker Size</th><th>Value</th><th>Element Size</th><th>Block</th></tr></thead><tbody>
 <tr><td><code>[B]</code>, boolean values</td><td>1-byte</td><td><code>false</code></td><td>1 byte each</td><td><code>[0]</code></td></tr>
 <tr><td><code>[B]</code>, boolean values</td><td>1-byte</td><td><code>true</code></td><td>1 byte each</td><td><code>[1]</code></td></tr>
@@ -221,60 +253,40 @@
 <pre><code class="language-json">[false, true, null]
 </code></pre>
 <p>A (compacted) Carbon file, which encodes the JSON array as <code>boolean</code> column.</p>
-<pre><code>[(] [B][3][3] [0][1][2] [)]
+<pre><code>[(] [B](3)(3) [0][1][2] [#]
 </code></pre>
 <h1><a class="header" href="#integer-numbers" id="integer-numbers">Integer Numbers</a></h1>
-<table><thead><tr><th>Type</th><th>Description</th><th>Size</th><th>Min</th><th>Max</th><th><em>null</em>-Value</th></tr></thead><tbody>
-<tr><td><code>u8</code></td><td>unsigned 8-bit integer</td><td>1 bytes</td><td>0</td><td>2<sup>8</sup> - 2</td><td>2<sup>8</sup> - 1</td></tr>
-<tr><td><code>u16</code></td><td>unsigned 16-bit integer</td><td>2 bytes</td><td>0</td><td>2<sup>16</sup> - 2</td><td>2<sup>16</sup> - 1</td></tr>
-<tr><td><code>u32</code></td><td>unsigned 32-bit integer</td><td>4 bytes</td><td>0</td><td>2<sup>16</sup> - 2</td><td>2<sup>16</sup> - 1</td></tr>
-<tr><td><code>u64</code></td><td>unsigned 64-bit integer</td><td>8 bytes</td><td>0</td><td>2<sup>16</sup> - 2</td><td>2<sup>16</sup> - 1</td></tr>
-<tr><td><code>i8</code></td><td>signed 8-bit integer</td><td>1 byte</td><td>−2<sup>7</sup> + 1</td><td>2<sup>7</sup> - 2</td><td>-2<sup>7</sup></td></tr>
-<tr><td><code>i16</code></td><td>signed 16-bit integer</td><td>2 bytes</td><td>−2<sup>15</sup> + 1</td><td>2<sup>15</sup> - 2</td><td>-2<sup>15</sup></td></tr>
-<tr><td><code>i32</code></td><td>signed 32-bit integer</td><td>4 bytes</td><td>−2<sup>31</sup> + 1</td><td>2<sup>31</sup> - 2</td><td>-2<sup>31</sup></td></tr>
-<tr><td><code>i64</code></td><td>signed 64-bit integer</td><td>8 bytes</td><td>−2<sup>63</sup> + 1</td><td>2<sup>63</sup> - 2</td><td>-2<sup>63</sup></td></tr>
+<table><thead><tr><th>Carbon</th><th>Description</th><th>Size</th><th>Min</th><th>Max</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
+<tr><td><code>u8</code></td><td>unsigned 8-bit int</td><td>1 B</td><td>0</td><td>2<sup>8</sup> - 2</td><td><code>null</code> or 2<sup>8</sup> - 1</td><td><code>[c]</code></td></tr>
+<tr><td><code>u16</code></td><td>unsigned 16-bit int</td><td>2 B</td><td>0</td><td>2<sup>16</sup> - 2</td><td><code>null</code> or2<sup>16</sup> - 1</td><td><code>[d]</code></td></tr>
+<tr><td><code>u32</code></td><td>unsigned 32-bit int</td><td>4 B</td><td>0</td><td>2<sup>16</sup> - 2</td><td><code>null</code> or2<sup>16</sup> - 1</td><td><code>[i]</code></td></tr>
+<tr><td><code>u64</code></td><td>unsigned 64-bit int</td><td>8 B</td><td>0</td><td>2<sup>16</sup> - 2</td><td><code>null</code> or2<sup>16</sup> - 1</td><td><code>[l]</code></td></tr>
+<tr><td><code>i8</code></td><td>signed 8-bit int</td><td>1 B</td><td>−2<sup>7</sup> + 1</td><td>2<sup>7</sup> - 2</td><td><code>null</code> or-2<sup>7</sup></td><td><code>[C]</code></td></tr>
+<tr><td><code>i16</code></td><td>signed 16-bit int</td><td>2 B</td><td>−2<sup>15</sup> + 1</td><td>2<sup>15</sup> - 2</td><td><code>null</code> or-2<sup>15</sup></td><td><code>[D]</code></td></tr>
+<tr><td><code>i32</code></td><td>signed 32-bit int</td><td>4 B</td><td>−2<sup>31</sup> + 1</td><td>2<sup>31</sup> - 2</td><td><code>null</code> or-2<sup>31</sup></td><td><code>[I]</code></td></tr>
+<tr><td><code>i64</code></td><td>signed 64-bit int</td><td>8 B</td><td>−2<sup>63</sup> + 1</td><td>2<sup>63</sup> - 2</td><td><code>null</code> or-2<sup>63</sup></td><td><code>[L]</code></td></tr>
 </tbody></table>
-<h2><a class="header" href="#as-field-value-1" id="as-field-value-1">As Field Value</a></h2>
-<table><thead><tr><th>Description</th><th>Size</th><th>Marker</th><th>Payload</th></tr></thead><tbody>
-<tr><td>unsigned 8-bit integer</td><td>1+1 bytes</td><td><code>[c]</code> (char)</td><td>an <code>u8</code> value</td></tr>
-<tr><td>unsigned 16-bit integer</td><td>1+2 bytes</td><td><code>[d]</code> (decimal)</td><td>an <code>u16</code> value</td></tr>
-<tr><td>unsigned 32-bit integer</td><td>1+4 bytes</td><td><code>[i]</code> (integer)</td><td>an <code>u32</code> value</td></tr>
-<tr><td>unsigned 64-bit integer</td><td>1+8 bytes</td><td><code>[l]</code> (long)</td><td>an <code>u64</code> value</td></tr>
-<tr><td>signed 8-bit integer</td><td>1+1 bytes</td><td><code>[C]</code> (char)</td><td>an <code>i8</code> value</td></tr>
-<tr><td>signed 16-bit integer</td><td>1+2 bytes</td><td><code>[D]</code> (decimal)</td><td>an <code>i16</code> value</td></tr>
-<tr><td>signed 32-bit integer</td><td>1+4 bytes</td><td><code>[I]</code> (integer)</td><td>an <code>i32</code> value</td></tr>
-<tr><td>signed 64-bit integer</td><td>1+8 bytes</td><td><code>[L]</code> (long)</td><td>an <code>i64</code> value</td></tr>
-</tbody></table>
+<h2><a class="header" href="#encoding-as-field-value-1" id="encoding-as-field-value-1">Encoding As Field Value</a></h2>
 <h3><a class="header" href="#example-3" id="example-3">Example</a></h3>
 <p>JSON snippet</p>
-<pre><code class="language-json">[-42, 42]
+<pre><code class="language-json">[-42, 42, null]
 </code></pre>
-<p>A (compacted) Carbon file, which encodes the JSON array as <code>array</code> of one <code>i8</code> and one <code>u8</code> integer.</p>
-<pre><code>[[] [c][-42] [C][42] []]
+<p>A (compacted) Carbon file, which encodes the JSON array as <code>array</code> of one <code>i8</code> and one <code>u8</code> value.</p>
+<pre><code>[[] [c][-42] [C][42] [n] []]
 </code></pre>
-<h2><a class="header" href="#as-column-value-1" id="as-column-value-1">As Column Value</a></h2>
-<table><thead><tr><th>Column Type Marker</th><th>Marker Size</th><th>Element Size</th><th>Block</th></tr></thead><tbody>
-<tr><td><code>[c]</code>, unsigned 8-bit integers</td><td>1 byte</td><td>1 byte each</td><td>an <code>u8</code> value</td></tr>
-<tr><td><code>[d]</code>, unsigned 16-bit integers</td><td>1 byte</td><td>2 bytes each</td><td>an <code>u16</code> value</td></tr>
-<tr><td><code>[i]</code>, unsigned 32-bit integers</td><td>1 byte</td><td>4 bytes each</td><td>an <code>u32</code> value</td></tr>
-<tr><td><code>[l]</code>, unsigned 64-bit integers</td><td>1 byte</td><td>8 bytes each</td><td>an <code>u64</code> value</td></tr>
-<tr><td><code>[C]</code>, signed 8-bit integers</td><td>1 byte</td><td>1 byte each</td><td>an <code>i8</code> value</td></tr>
-<tr><td><code>[D]</code>, signed 16-bit integers</td><td>1 byte</td><td>2 bytes each</td><td>an <code>i16</code> value</td></tr>
-<tr><td><code>[I]</code>, signed 32-bit integers</td><td>1 byte</td><td>4 bytes each</td><td>an <code>i32</code> value</td></tr>
-<tr><td><code>[L]</code>, signed 64-bit integers</td><td>1 byte</td><td>8 bytes each</td><td>an <code>i64</code> value</td></tr>
-</tbody></table>
+<h2><a class="header" href="#encoding-as-column-value-1" id="encoding-as-column-value-1">Encoding As Column Value</a></h2>
 <h3><a class="header" href="#example-4" id="example-4">Example</a></h3>
 <p>JSON snippet</p>
-<pre><code class="language-json">[-42, 42]
+<pre><code class="language-json">[-42, 42, null]
 </code></pre>
 <p>A (compacted) Carbon file, which encodes the JSON array as <code>i8</code> column.</p>
-<pre><code>[(] [C][2][2] [-42][42] [)]
+<pre><code>[(] [C](2)(2) [-42][42][255] [#]
 </code></pre>
 <h1><a class="header" href="#floating-numbers" id="floating-numbers">Floating Numbers</a></h1>
-<table><thead><tr><th>Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th></tr></thead><tbody>
-<tr><td><code>float</code></td><td>32-bit floating number</td><td>4 bytes</td><td><code>NAN</code> float value</td></tr>
+<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
+<tr><td><code>float</code></td><td>single-precision floating number</td><td>4 byte</td><td><code>null</code> or <code>NAN</code></td><td><code>r</code></td></tr>
 </tbody></table>
-<h2><a class="header" href="#as-field-value-2" id="as-field-value-2">As Field Value</a></h2>
+<h2><a class="header" href="#as-field-value" id="as-field-value">As Field Value</a></h2>
 <table><thead><tr><th>Description</th><th>Size</th><th>Marker</th><th>Payload</th></tr></thead><tbody>
 <tr><td>32-bit floating number</td><td>1+4 bytes</td><td><code>[r]</code> (real)</td><td>a <code>float</code> value</td></tr>
 </tbody></table>
@@ -285,7 +297,7 @@
 <p>A (compacted) Carbon file, which encodes the JSON array as <code>array</code> of one <code>i8</code> and one <code>u8</code> integer.</p>
 <pre><code>[[] [r][23.3] [r][42.0] []]
 </code></pre>
-<h2><a class="header" href="#as-column-value-2" id="as-column-value-2">As Column Value</a></h2>
+<h2><a class="header" href="#as-column-value" id="as-column-value">As Column Value</a></h2>
 <table><thead><tr><th>Column Type Marker</th><th>Marker Size</th><th>Element Size</th><th>Block</th></tr></thead><tbody>
 <tr><td><code>[r]</code>, 32-bit floating numbers</td><td>1 byte</td><td>4 byte each</td><td>a <code>float</code> value</td></tr>
 </tbody></table>
@@ -294,13 +306,13 @@
 <pre><code class="language-json">[23.3, 42.0]
 </code></pre>
 <p>A (compacted) Carbon file, which encodes the JSON array as a <code>float</code> column.</p>
-<pre><code>[(] [r][2][2] [23.3][42.0] [)]
+<pre><code>[(] [r](2)(2) [23.3][42.0] [#]
 </code></pre>
 <h1><a class="header" href="#character-strings" id="character-strings">Character Strings</a></h1>
-<table><thead><tr><th>Type</th><th>Description</th><th>Size</th></tr></thead><tbody>
-<tr><td><code>string</code></td><td>a (Pascal) ASCII character string</td><td>1 bytes per character</td></tr>
+<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
+<tr><td><code>string</code></td><td>a (Pascal) character string of <code>n</code> characters</td><td><code>n</code> bytes</td><td><code>null</code></td><td><code>[s]</code></td></tr>
 </tbody></table>
-<h2><a class="header" href="#as-field-value-3" id="as-field-value-3">As Field Value</a></h2>
+<h2><a class="header" href="#encoding-as-field-value-2" id="encoding-as-field-value-2">Encoding as Field Value</a></h2>
 <pre><code>[s](n) &lt;character-string&gt;
 </code></pre>
 <table><thead><tr><th>Description</th><th>Size</th><th>Marker</th><th>Payload</th></tr></thead><tbody>
@@ -313,19 +325,24 @@
 <p>A (compacted) Carbon file, which encodes the JSON array as <code>array</code> of character-string values.</p>
 <pre><code>[[] [s](5)[Hello] [s](5)[World] [s](1)[!] []]
 </code></pre>
-<h2><a class="header" href="#as-column-value-3" id="as-column-value-3">As Column Value</a></h2>
+<h2><a class="header" href="#encoding-as-column-value-2" id="encoding-as-column-value-2">Encoding as Column Value</a></h2>
 <p>Character strings are not supported for column containers.</p>
 <h1><a class="header" href="#binary-strings" id="binary-strings">Binary Strings</a></h1>
-<table><thead><tr><th>Type</th><th>Description</th><th>Size</th></tr></thead><tbody>
-<tr><td><code>binary</code></td><td>a binary string <code>n</code> bytes with known MIME-type</td><td><code>n</code> bytes</td></tr>
-<tr><td><code>custom binary</code></td><td>a binary string <code>n</code> bytes with unknown MIME-type</td><td><code>n</code> bytes</td></tr>
+<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
+<tr><td><code>binary</code></td><td>binary of <code>n</code> bytes (MIME typed)</td><td><code>n</code> + 2<sup>+</sup> bytes</td><td><code>null</code></td><td><code>[b]</code></td></tr>
+<tr><td><code>custom binary</code></td><td>binary of <code>n</code> bytes (custom type)</td><td><code>n</code> + 3<sup>+</sup> bytes</td><td><code>null</code></td><td><code>[x]</code></td></tr>
 </tbody></table>
-<h2><a class="header" href="#as-field-value-4" id="as-field-value-4">As Field Value</a></h2>
+<h2><a class="header" href="#encoding-as-field-value-3" id="encoding-as-field-value-3">Encoding As Field Value</a></h2>
 <h3><a class="header" href="#with-known-mime-types" id="with-known-mime-types">With Known MIME Types</a></h3>
-<pre><code>[b](mime-type-id)(l) [&lt;binary-string&gt;]
+<pre><code>[b](mime-type-id)(str-len) &lt;binary&gt;
 </code></pre>
-<table><thead><tr><th>Description</th><th>Size</th><th>Marker</th><th>Payload</th></tr></thead><tbody>
-<tr><td><code>n</code>-byte string</td><td>1 + <code>k</code> + <code>l</code> + <code>n</code> bytes</td><td><code>[b]</code> (string)</td><td><code>(mime-type-id)</code> MIME id (<code>k</code> byte), <code>(n)</code> string length (<code>l</code> bytes) <code>n</code> characters</td></tr>
+<table><thead><tr><th>Description</th><th>Size (in Byte)</th><th>Marker</th><th>Payload</th></tr></thead><tbody>
+<tr><td>binary of <code>n</code> bytes</td><td>1 + <code>k</code> + <code>l</code> + <code>n</code></td><td><code>[b]</code> (<code>binary</code>)</td><td><em>see below</em></td></tr>
+</tbody></table>
+<table><thead><tr><th>Payload</th><th>Description</th><th>Encoding Type</th><th>Size</th></tr></thead><tbody>
+<tr><td><code>(mime-type-id)</code></td><td>MIME Type Id (see below)</td><td>variable-length integer</td><td><code>k</code> byte</td></tr>
+<tr><td><code>(str-len)</code></td><td>binary string length in bytes</td><td>variable-length integer</td><td><code>l</code> byte</td></tr>
+<tr><td><code>&lt;binary&gt;</code></td><td>the binary string itself</td><td>fixed-sized binary string</td><td><code>n</code> byte</td></tr>
 </tbody></table>
 <h2><a class="header" href="#example-8" id="example-8">Example</a></h2>
 <p>snippet</p>
@@ -336,10 +353,16 @@ Content:	&lt;html&gt;&lt;body&gt;&lt;p&gt;Hello, World!&lt;/p&gt;&lt;/body&gt;&l
 <pre><code>[b](219)(46) [&lt;html&gt;&lt;body&gt;&lt;p&gt;Hello, World!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;]
 </code></pre>
 <h3><a class="header" href="#with-unknown-mime-types" id="with-unknown-mime-types">With Unknown MIME Types</a></h3>
-<pre><code>[x](mime-type-string-len)[&lt;mime-type-string&gt;](l) [&lt;binary-string&gt;]
+<pre><code>[x](type-str-len)&lt;type-str&gt;(str-len) &lt;binary-string&gt;
 </code></pre>
-<table><thead><tr><th>Description</th><th>Size</th><th>Marker</th><th>Payload</th></tr></thead><tbody>
-<tr><td><code>n</code>-byte string</td><td>1 + <code>p</code> + <code>q</code> + <code>l</code> + <code>n</code> bytes</td><td><code>[x]</code> (string)</td><td><code>(mime-type-string-len)</code> string length <code>q</code> of <code>&lt;mime-type-string&gt;</code> (<code>p</code> byte), <code>q</code> characters, <code>(n)</code> string length (<code>l</code> bytes) <code>n</code> characters</td></tr>
+<table><thead><tr><th>Description</th><th>Size (in Byte)</th><th>Marker</th><th>Payload</th></tr></thead><tbody>
+<tr><td>binary of <code>n</code> bytes</td><td>1 + <code>p</code> + <code>q</code> + <code>l</code> + <code>n</code></td><td><code>[x]</code> (<code>custom binary</code>)</td><td><em>see below</em></td></tr>
+</tbody></table>
+<table><thead><tr><th>Payload</th><th>Description</th><th>Encoding Type</th><th>Size</th></tr></thead><tbody>
+<tr><td><code>(type-str-len)</code></td><td>used-def type string length</td><td>variable-length integer</td><td><code>k</code> byte</td></tr>
+<tr><td><code>&lt;type-str&gt;</code></td><td>the user-def type string itself</td><td>fixed-sized string</td><td><code>q</code> byte</td></tr>
+<tr><td><code>(str-len)</code></td><td>binary string length in bytes</td><td>variable-length integer</td><td><code>l</code> byte</td></tr>
+<tr><td><code>&lt;binary&gt;</code></td><td>the binary string itself</td><td>fixed-sized binary string</td><td><code>n</code> byte</td></tr>
 </tbody></table>
 <h2><a class="header" href="#example-9" id="example-9">Example</a></h2>
 <p>snippet</p>
@@ -373,7 +396,7 @@ Content:        c3RpbGwgYSBzZWNyZXQ=
 <blockquote>
 <p><strong>TODO:</strong> Not yet implemented</p>
 </blockquote>
-<h2><a class="header" href="#as-column-value-4" id="as-column-value-4">As Column Value</a></h2>
+<h2><a class="header" href="#encoding-as-column-value-3" id="encoding-as-column-value-3">Encoding As Column Value</a></h2>
 <p>Binary strings are not supported for column containers.</p>
 <h2><a class="header" href="#mime-type-ids" id="mime-type-ids">MIME Type Ids</a></h2>
 <blockquote>
@@ -1065,7 +1088,10 @@ Content:        c3RpbGwgYSBzZWNyZXQ=
 <tr><td>application/vnd.handheld-entertainment+xml</td><td>zmm</td><td>682</td></tr>
 </tbody></table>
 <h1><a class="header" href="#nulls" id="nulls">Nulls</a></h1>
-<h2><a class="header" href="#null-as-field-value" id="null-as-field-value">Null as Field Value</a></h2>
+<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
+<tr><td><code>null</code></td><td>absence of data</td><td>0<sup>+</sup> byte</td><td><code>null</code> value</td><td><code>[n]</code> or dedicated value</td></tr>
+</tbody></table>
+<h2><a class="header" href="#encoding-as-field-value-4" id="encoding-as-field-value-4">Encoding as Field Value</a></h2>
 <table><thead><tr><th>Description</th><th>Size</th><th>Marker</th><th>Payload</th></tr></thead><tbody>
 <tr><td>JSON <code>null</code> constant</td><td>1 byte</td><td><code>[n]</code></td><td><em>none</em></td></tr>
 </tbody></table>
@@ -1076,30 +1102,45 @@ Content:        c3RpbGwgYSBzZWNyZXQ=
 <p>Carbon File snippet</p>
 <pre><code>[[] [n] []] 
 </code></pre>
-<h2><a class="header" href="#null-as-column-value" id="null-as-column-value">Null as Column Value</a></h2>
-<table><thead><tr><th>Column Type Marker</th><th>Marker Size</th><th>Element Size</th><th>Block</th></tr></thead><tbody>
-<tr><td><code>[n]</code>, null values</td><td>1 byte</td><td>1 byte each</td><td><code>[n]</code></td></tr>
-<tr><td><code>[B]</code>, booleans values</td><td>1 byte</td><td>1 byte each</td><td><code>[2]</code></td></tr>
-<tr><td><code>[c]</code>, unsigned 8-bit int.</td><td>1 byte</td><td>1 byte each</td><td><code>[255]</code></td></tr>
-<tr><td><code>[d]</code>, unsigned 16-bit int.</td><td>1 byte</td><td>2 bytes each</td><td><code>[65,535]</code></td></tr>
-<tr><td><code>[i]</code>, unsigned 32-bit int.</td><td>1 byte</td><td>4 bytes each</td><td><code>[4,294,967,295]</code></td></tr>
-<tr><td><code>[l]</code>, unsigned 64-bit int.</td><td>1 byte</td><td>8 bytes each</td><td><code>[18,446,744,073,709,551,615]</code></td></tr>
-<tr><td><code>[C]</code>, signed 8-bit integers</td><td>1 byte</td><td>1 byte each</td><td><code>[−128]</code></td></tr>
-<tr><td><code>[D]</code>, signed 16-bit int.</td><td>1 byte</td><td>2 bytes each</td><td><code>[−32,768]</code></td></tr>
-<tr><td><code>[I]</code>, signed 32-bit int.</td><td>1 byte</td><td>4 bytes each</td><td><code>[−2,147,483,648]</code></td></tr>
-<tr><td><code>[L]</code>, signed 64-bit int.</td><td>1 byte</td><td>8 bytes each</td><td><code>[−9,223,372,036,854,775,808]</code></td></tr>
-<tr><td><code>[r]</code>, 32-bit floats</td><td>1 byte</td><td>4 bytes each</td><td><code>[NAN]</code></td></tr>
+<h2><a class="header" href="#encoding-as-column-value-4" id="encoding-as-column-value-4">Encoding as Column Value</a></h2>
+<table><thead><tr><th>Column Type Marker</th><th>Marker Size</th><th>Element Size</th><th>Dedicated Value</th></tr></thead><tbody>
+<tr><td><code>[n]</code>, null values</td><td>1 byte</td><td>1 byte each</td><td><code>n</code></td></tr>
+<tr><td><code>[B]</code>, booleans values</td><td>1 byte</td><td>1 byte each</td><td><code>2</code></td></tr>
+<tr><td><code>[c]</code>, unsigned 8-bit int.</td><td>1 byte</td><td>1 byte each</td><td><code>255</code></td></tr>
+<tr><td><code>[d]</code>, unsigned 16-bit int.</td><td>1 byte</td><td>2 bytes each</td><td><code>65,535</code></td></tr>
+<tr><td><code>[i]</code>, unsigned 32-bit int.</td><td>1 byte</td><td>4 bytes each</td><td><code>4,294,967,295</code></td></tr>
+<tr><td><code>[l]</code>, unsigned 64-bit int.</td><td>1 byte</td><td>8 bytes each</td><td><code>18,446,744,073,709,551,615</code></td></tr>
+<tr><td><code>[C]</code>, signed 8-bit integers</td><td>1 byte</td><td>1 byte each</td><td><code>−128</code></td></tr>
+<tr><td><code>[D]</code>, signed 16-bit int.</td><td>1 byte</td><td>2 bytes each</td><td><code>−32,768</code></td></tr>
+<tr><td><code>[I]</code>, signed 32-bit int.</td><td>1 byte</td><td>4 bytes each</td><td><code>−2,147,483,648</code></td></tr>
+<tr><td><code>[L]</code>, signed 64-bit int.</td><td>1 byte</td><td>8 bytes each</td><td><code>−9,223,372,036,854,775,808</code></td></tr>
+<tr><td><code>[r]</code>, 32-bit floats</td><td>1 byte</td><td>4 bytes each</td><td><code>NAN</code></td></tr>
 </tbody></table>
 <h3><a class="header" href="#example-11" id="example-11">Example</a></h3>
 <p>JSON snippet</p>
 <pre><code class="language-json">[42, 23, null]
 </code></pre>
 <p>Carbon File snippet (JSON array encoded as <code>u8</code> column)</p>
-<pre><code>[(] [c][3][3] [42][23][255] [)]
+<pre><code>[(] [c](3)(3) [42][23][255] [#]
 </code></pre>
 <h1><a class="header" href="#container-types" id="container-types">Container Types</a></h1>
 <h1><a class="header" href="#arrays" id="arrays">Arrays</a></h1>
+<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
+<tr><td><code>array</code></td><td>list of variable-typed elements</td><td>2<sup>+</sup> bytes</td><td><code>null</code> value</td><td><code>[</code>, <code>]</code></td></tr>
+</tbody></table>
+<h2><a class="header" href="#encoding" id="encoding">Encoding</a></h2>
+<pre><code>[[] &lt;values&gt; ...[]]
+</code></pre>
+<h3><a class="header" href="#values-1" id="values-1">Values</a></h3>
+<pre><code>&lt;values&gt;
+</code></pre>
+<h3><a class="header" href="#capacities" id="capacities">Capacities</a></h3>
+<pre><code>...
+</code></pre>
 <h1><a class="header" href="#columns" id="columns">Columns</a></h1>
+<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Begin Marker</th><th>End</th></tr></thead><tbody>
+<tr><td><code>column</code></td><td>list of fixed-typed elements</td><td>4<sup>+</sup> bytes</td><td><code>null</code> value</td><td><em>see below</em></td><td><code>#</code></td></tr>
+</tbody></table>
 <h1><a class="header" href="#objects" id="objects">Objects</a></h1>
 <h1><a class="header" href="#update-specification" id="update-specification">Update Specification</a></h1>
 <h1><a class="header" href="#revision-control" id="revision-control">Revision Control</a></h1>

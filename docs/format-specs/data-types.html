@@ -146,6 +146,24 @@
                 <div id="content" class="content">
                     <main>
                         <h1><a class="header" href="#data-types" id="data-types">Data Types</a></h1>
+<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
+<tr><td><code>true</code></td><td>truth value <em>true</em></td><td>0 byte</td><td><code>null</code></td><td><code>[t]</code></td></tr>
+<tr><td><code>false</code></td><td>truth value <em>false</em></td><td>0 byte</td><td><code>null</code></td><td><code>[f]</code></td></tr>
+<tr><td><code>boolean</code></td><td>three-valued logic</td><td>0<sup>+</sup> bytes</td><td><em>const</em></td><td><em>const</em></td></tr>
+<tr><td><code>u8</code></td><td>unsigned 8-bit int</td><td>1 B</td><td><code>null</code>, 2<sup>8</sup> - 1</td><td><code>[c]</code></td></tr>
+<tr><td><code>u16</code></td><td>unsigned 16-bit int</td><td>2 B</td><td><code>null</code>, 2<sup>16</sup> - 1</td><td><code>[d]</code></td></tr>
+<tr><td><code>u32</code></td><td>unsigned 32-bit int</td><td>4 B</td><td><code>null</code>, 2<sup>16</sup> - 1</td><td><code>[i]</code></td></tr>
+<tr><td><code>u64</code></td><td>unsigned 64-bit int</td><td>8 B</td><td><code>null</code>, 2<sup>16</sup> - 1</td><td><code>[l]</code></td></tr>
+<tr><td><code>i8</code></td><td>signed 8-bit int</td><td>1 B</td><td><code>null</code>, -2<sup>7</sup></td><td><code>[C]</code></td></tr>
+<tr><td><code>i16</code></td><td>signed 16-bit int</td><td>2 B</td><td><code>null</code>, -2<sup>15</sup></td><td><code>[D]</code></td></tr>
+<tr><td><code>i32</code></td><td>signed 32-bit int</td><td>4 B</td><td><code>null</code>, -2<sup>31</sup></td><td><code>[I]</code></td></tr>
+<tr><td><code>i64</code></td><td>signed 64-bit int</td><td>8 B</td><td><code>null</code>, -2<sup>63</sup></td><td><code>[L]</code></td></tr>
+<tr><td><code>float</code></td><td>32-bit float</td><td>4 byte</td><td><code>null</code>,  <code>NAN</code></td><td><code>r</code></td></tr>
+<tr><td><code>string</code></td><td>string of <code>n</code> chars</td><td><code>n</code> bytes</td><td><code>null</code></td><td><code>[s]</code></td></tr>
+<tr><td><code>binary</code></td><td>binary of <code>n</code> bytes</td><td><code>n</code> + 2<sup>+</sup> bytes</td><td><code>null</code></td><td><code>[b]</code></td></tr>
+<tr><td><code>custom binary</code></td><td>binary of <code>n</code> bytes</td><td><code>n</code> + 3<sup>+</sup> bytes</td><td><code>null</code></td><td><code>[x]</code></td></tr>
+<tr><td><code>null</code></td><td>absence of data</td><td>0<sup>+</sup> byte</td><td><code>null</code></td><td><code>[n]</code>,  <em>const</em></td></tr>
+</tbody></table>
 
                     </main>
 

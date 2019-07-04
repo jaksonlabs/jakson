@@ -146,8 +146,8 @@
                 <div id="content" class="content">
                     <main>
                         <h1><a class="header" href="#floating-numbers" id="floating-numbers">Floating Numbers</a></h1>
-<table><thead><tr><th>Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th></tr></thead><tbody>
-<tr><td><code>float</code></td><td>32-bit floating number</td><td>4 bytes</td><td><code>NAN</code> float value</td></tr>
+<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
+<tr><td><code>float</code></td><td>single-precision floating number</td><td>4 byte</td><td><code>null</code> or <code>NAN</code></td><td><code>r</code></td></tr>
 </tbody></table>
 <h2><a class="header" href="#as-field-value" id="as-field-value">As Field Value</a></h2>
 <table><thead><tr><th>Description</th><th>Size</th><th>Marker</th><th>Payload</th></tr></thead><tbody>
@@ -169,7 +169,7 @@
 <pre><code class="language-json">[23.3, 42.0]
 </code></pre>
 <p>A (compacted) Carbon file, which encodes the JSON array as a <code>float</code> column.</p>
-<pre><code>[(] [r][2][2] [23.3][42.0] [)]
+<pre><code>[(] [r](2)(2) [23.3][42.0] [#]
 </code></pre>
 
                     </main>

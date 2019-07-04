@@ -146,9 +146,22 @@
                 <div id="content" class="content">
                     <main>
                         <h1><a class="header" href="#marker-format" id="marker-format">Marker Format</a></h1>
-<pre><code>[object-id](rev-number) [[] &lt;values&gt;... []]...
+<pre><code>[document-id](rev-number) [[] &lt;values&gt;... []]...
 </code></pre>
 <p>A <strong>marker</strong> <code>x</code> has always a size of 1 byte. </p>
+<h2><a class="header" href="#document-identification" id="document-identification">Document Identification</a></h2>
+<pre><code>[document-id]
+</code></pre>
+<h2><a class="header" href="#revision-managment" id="revision-managment">Revision Managment</a></h2>
+<pre><code>(rev-number)
+</code></pre>
+<h2><a class="header" href="#values" id="values">Values</a></h2>
+<pre><code>&lt;vlaues&gt;
+</code></pre>
+<h2><a class="header" href="#capacitities" id="capacitities">Capacitities</a></h2>
+<pre><code>...
+</code></pre>
+<h2><a class="header" href="#examples" id="examples">Examples</a></h2>
 <h3><a class="header" href="#example-array" id="example-array">Example (Array)</a></h3>
 <p>JSON snippet</p>
 <pre><code class="language-json">[ &quot;The&quot;, &quot;Number&quot;, 23 ]
@@ -161,7 +174,7 @@
 <pre><code class="language-json">[ 23, 24, 25 ]
 </code></pre>
 <p>A (compacted) Carbon file with object id <code>21</code> in revision <code>5</code> encoding the JSON array as <code>u8</code> integer column.</p>
-<pre><code>[21](5) [[] [(] [u8][3][3] [23][24][25] [)] []] 
+<pre><code>[21](5) [[] [(] [u8](3)(3) [23][24][25] [#] []] 
 </code></pre>
 
                     </main>

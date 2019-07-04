@@ -146,16 +146,21 @@
                 <div id="content" class="content">
                     <main>
                         <h1><a class="header" href="#binary-strings" id="binary-strings">Binary Strings</a></h1>
-<table><thead><tr><th>Type</th><th>Description</th><th>Size</th></tr></thead><tbody>
-<tr><td><code>binary</code></td><td>a binary string <code>n</code> bytes with known MIME-type</td><td><code>n</code> bytes</td></tr>
-<tr><td><code>custom binary</code></td><td>a binary string <code>n</code> bytes with unknown MIME-type</td><td><code>n</code> bytes</td></tr>
+<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
+<tr><td><code>binary</code></td><td>binary of <code>n</code> bytes (MIME typed)</td><td><code>n</code> + 2<sup>+</sup> bytes</td><td><code>null</code></td><td><code>[b]</code></td></tr>
+<tr><td><code>custom binary</code></td><td>binary of <code>n</code> bytes (custom type)</td><td><code>n</code> + 3<sup>+</sup> bytes</td><td><code>null</code></td><td><code>[x]</code></td></tr>
 </tbody></table>
-<h2><a class="header" href="#as-field-value" id="as-field-value">As Field Value</a></h2>
+<h2><a class="header" href="#encoding-as-field-value" id="encoding-as-field-value">Encoding As Field Value</a></h2>
 <h3><a class="header" href="#with-known-mime-types" id="with-known-mime-types">With Known MIME Types</a></h3>
-<pre><code>[b](mime-type-id)(l) [&lt;binary-string&gt;]
+<pre><code>[b](mime-type-id)(str-len) &lt;binary&gt;
 </code></pre>
-<table><thead><tr><th>Description</th><th>Size</th><th>Marker</th><th>Payload</th></tr></thead><tbody>
-<tr><td><code>n</code>-byte string</td><td>1 + <code>k</code> + <code>l</code> + <code>n</code> bytes</td><td><code>[b]</code> (string)</td><td><code>(mime-type-id)</code> MIME id (<code>k</code> byte), <code>(n)</code> string length (<code>l</code> bytes) <code>n</code> characters</td></tr>
+<table><thead><tr><th>Description</th><th>Size (in Byte)</th><th>Marker</th><th>Payload</th></tr></thead><tbody>
+<tr><td>binary of <code>n</code> bytes</td><td>1 + <code>k</code> + <code>l</code> + <code>n</code></td><td><code>[b]</code> (<code>binary</code>)</td><td><em>see below</em></td></tr>
+</tbody></table>
+<table><thead><tr><th>Payload</th><th>Description</th><th>Encoding Type</th><th>Size</th></tr></thead><tbody>
+<tr><td><code>(mime-type-id)</code></td><td>MIME Type Id (see below)</td><td>variable-length integer</td><td><code>k</code> byte</td></tr>
+<tr><td><code>(str-len)</code></td><td>binary string length in bytes</td><td>variable-length integer</td><td><code>l</code> byte</td></tr>
+<tr><td><code>&lt;binary&gt;</code></td><td>the binary string itself</td><td>fixed-sized binary string</td><td><code>n</code> byte</td></tr>
 </tbody></table>
 <h2><a class="header" href="#example" id="example">Example</a></h2>
 <p>snippet</p>
@@ -166,10 +171,16 @@ Content:	&lt;html&gt;&lt;body&gt;&lt;p&gt;Hello, World!&lt;/p&gt;&lt;/body&gt;&l
 <pre><code>[b](219)(46) [&lt;html&gt;&lt;body&gt;&lt;p&gt;Hello, World!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;]
 </code></pre>
 <h3><a class="header" href="#with-unknown-mime-types" id="with-unknown-mime-types">With Unknown MIME Types</a></h3>
-<pre><code>[x](mime-type-string-len)[&lt;mime-type-string&gt;](l) [&lt;binary-string&gt;]
+<pre><code>[x](type-str-len)&lt;type-str&gt;(str-len) &lt;binary-string&gt;
 </code></pre>
-<table><thead><tr><th>Description</th><th>Size</th><th>Marker</th><th>Payload</th></tr></thead><tbody>
-<tr><td><code>n</code>-byte string</td><td>1 + <code>p</code> + <code>q</code> + <code>l</code> + <code>n</code> bytes</td><td><code>[x]</code> (string)</td><td><code>(mime-type-string-len)</code> string length <code>q</code> of <code>&lt;mime-type-string&gt;</code> (<code>p</code> byte), <code>q</code> characters, <code>(n)</code> string length (<code>l</code> bytes) <code>n</code> characters</td></tr>
+<table><thead><tr><th>Description</th><th>Size (in Byte)</th><th>Marker</th><th>Payload</th></tr></thead><tbody>
+<tr><td>binary of <code>n</code> bytes</td><td>1 + <code>p</code> + <code>q</code> + <code>l</code> + <code>n</code></td><td><code>[x]</code> (<code>custom binary</code>)</td><td><em>see below</em></td></tr>
+</tbody></table>
+<table><thead><tr><th>Payload</th><th>Description</th><th>Encoding Type</th><th>Size</th></tr></thead><tbody>
+<tr><td><code>(type-str-len)</code></td><td>used-def type string length</td><td>variable-length integer</td><td><code>k</code> byte</td></tr>
+<tr><td><code>&lt;type-str&gt;</code></td><td>the user-def type string itself</td><td>fixed-sized string</td><td><code>q</code> byte</td></tr>
+<tr><td><code>(str-len)</code></td><td>binary string length in bytes</td><td>variable-length integer</td><td><code>l</code> byte</td></tr>
+<tr><td><code>&lt;binary&gt;</code></td><td>the binary string itself</td><td>fixed-sized binary string</td><td><code>n</code> byte</td></tr>
 </tbody></table>
 <h2><a class="header" href="#example-1" id="example-1">Example</a></h2>
 <p>snippet</p>
@@ -203,7 +214,7 @@ Content:        c3RpbGwgYSBzZWNyZXQ=
 <blockquote>
 <p><strong>TODO:</strong> Not yet implemented</p>
 </blockquote>
-<h2><a class="header" href="#as-column-value" id="as-column-value">As Column Value</a></h2>
+<h2><a class="header" href="#encoding-as-column-value" id="encoding-as-column-value">Encoding As Column Value</a></h2>
 <p>Binary strings are not supported for column containers.</p>
 <h2><a class="header" href="#mime-type-ids" id="mime-type-ids">MIME Type Ids</a></h2>
 <blockquote>
