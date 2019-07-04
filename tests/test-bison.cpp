@@ -7,6 +7,7 @@
 #include "core/bison/bison-find.h"
 #include "core/bison/bison-update.h"
 #include "core/bison/bison-path.h"
+#include "core/bison/bison-get.h"
 
 TEST(BisonTest, CreateBison) {
         struct bison doc;
