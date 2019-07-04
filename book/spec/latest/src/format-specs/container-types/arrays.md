@@ -21,3 +21,17 @@ Carbon Type    | Description                      | Size                | *null*
 ```
 ...
 ```
+
+### Example
+
+
+JSON snippet
+```json
+[ "The", "Number", 23 ]
+```
+
+A (compacted) Carbon file, which encodes the JSON array as `array` of two `string` values and one `u8` value.
+
+```
+[[] [s](3)[The] [s](6)[Number] [c][23] []] 
+```
