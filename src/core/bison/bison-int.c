@@ -81,7 +81,6 @@ NG5_EXPORT(bool) bison_int_insert_column(struct memfile *memfile_in, struct err 
         }
 
         u8 column_begin_marker = BISON_MARKER_COLUMN_BEGIN;
-        u8 column_end_marker = BISON_MARKER_COLUMN_END;
 
         memfile_ensure_space(memfile_in, sizeof(u8));
         marker_insert(memfile_in, column_begin_marker);
@@ -100,9 +99,6 @@ NG5_EXPORT(bool) bison_int_insert_column(struct memfile *memfile_in, struct err 
 
         size_t nbytes = capactity * type_size;
         memfile_ensure_space(memfile_in, nbytes + sizeof(u8) + 2 * sizeof(u32));
-
-        memfile_seek(memfile_in, payload_begin + nbytes);
-        marker_insert(memfile_in, column_end_marker);
 
         /* seek to first entry in column */
         memfile_seek(memfile_in, payload_begin);

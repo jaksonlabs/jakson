@@ -214,7 +214,6 @@ enum bison_container_type { BISON_ARRAY, BISON_COLUMN };
 #define BISON_MARKER_ARRAY_END ']'
 
 #define BISON_MARKER_COLUMN_BEGIN '('
-#define BISON_MARKER_COLUMN_END '#'
 
 NG5_DEFINE_ERROR_GETTER(bison);
 NG5_DEFINE_ERROR_GETTER(bison_new);

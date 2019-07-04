@@ -1076,9 +1076,7 @@ static bool internal_pack_column(struct bison_column_it *it)
 
                 memfile_move_left(&it->memfile, free_space);
 
-                char final = *memfile_read(&it->memfile, sizeof(char));
                 offset_t continue_off = memfile_tell(&it->memfile);
-                assert(final == BISON_MARKER_COLUMN_END);
 
                 memfile_seek(&it->memfile, it->num_and_capacity_start_offset);
                 memfile_skip_varuint(&it->memfile); // skip num of elements counter
