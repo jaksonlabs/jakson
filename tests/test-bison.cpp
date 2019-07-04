@@ -1135,7 +1135,6 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersZeroWithOverflow) {
         bison_drop(&rev_doc);
 }
 
-
 TEST(BisonTest, BisonInsertInsertColumnNumbersWithHighOverflow) {
         struct bison doc, rev_doc;
         struct bison_revise revise;
@@ -1153,10 +1152,9 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersWithHighOverflow) {
 
         ASSERT_TRUE(nested_inserter_l1 != NULL);
         for (u32 i = 0; i < 100; i++) {
-                bison_insert_u32(nested_inserter_l1, i + 1);
-                bison_insert_u32(nested_inserter_l1, i + 2);
-                bison_insert_u32(nested_inserter_l1, i + 3);
-                bison_hexdump_print(stdout,  &rev_doc); // TODO: debug remove
+                bison_insert_u32(nested_inserter_l1, i);
+                bison_insert_u32(nested_inserter_l1, i);
+                bison_insert_u32(nested_inserter_l1, i);
         }
 
         bison_insert_column_end(&column_state);
@@ -1179,7 +1177,6 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersWithHighOverflow) {
         bison_drop(&doc);
         bison_drop(&rev_doc);
 }
-
 
 TEST(BisonTest, BisonInsertInsertMultipleColumnsNumbersWithHighOverflow) {
         struct bison doc, rev_doc;
@@ -3769,28 +3766,10 @@ TEST(BisonTest, BisonRemoveComplexTest)
         array_ins3 = bison_insert_array_begin(&state3, array_ins2, 10);
         column_ins = bison_insert_column_begin(&cstate, array_ins3, BISON_FIELD_TYPE_NUMBER_U8, 10);
 
-        printf("\n\nbefore bison_insert_u8 ...\n"); // TODO: debug remove
-        bison_hexdump_print(stdout, context.revision_context.revised_doc); // TODO: debug remove
-
         bison_insert_u8(column_ins, 41);
-        printf("\n\nbison_insert_u8 41:\n");// TODO: debug remove
-        bison_hexdump_print(stdout, context.revision_context.revised_doc); // TODO: debug remove
-
         bison_insert_u8(column_ins, 42);
-        printf("\n\nbison_insert_u8 42:\n");// TODO: debug remove
-        bison_hexdump_print(stdout, context.revision_context.revised_doc); // TODO: debug remove
-
         bison_insert_u8(column_ins, 43);
-        printf("\n\nbison_insert_u8 43:\n");// TODO: debug remove
-        bison_hexdump_print(stdout, context.revision_context.revised_doc); // TODO: debug remove
-
-
         bison_insert_column_end(&cstate);
-        printf("\n\nbison_insert_column_end:\n");// TODO: debug remove
-        bison_hexdump_print(stdout, context.revision_context.revised_doc); // TODO: debug remove
-
-        printf("\n\nDEBUG:\n");
-        bison_hexdump_print(stdout, context.revision_context.revised_doc); // TODO: debug remove
 
         bison_insert_array_end(&state3);
         array_ins3 = bison_insert_array_begin(&state3, array_ins2, 10);
