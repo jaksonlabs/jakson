@@ -21,7 +21,9 @@
 
 #include "shared/common.h"
 #include "core/mem/file.h"
+#include "stdx/varuint.h"
 #include "core/bison/bison-int.h"
+#include "core/bison/bison-field.h"
 
 NG5_BEGIN_DECL
 
@@ -54,6 +56,16 @@ struct bison_insert_column_state
         struct bison_column_it *nested_column;
         struct bison_insert nested_inserter;
 
+};
+
+struct bison_header
+{
+        object_id_t oid;
+};
+
+struct bison_obj_header
+{
+        varuint_t obj_len;
 };
 
 NG5_EXPORT(bool) bison_int_insert_array(struct memfile *memfile, size_t nbytes);
@@ -103,6 +115,10 @@ NG5_EXPORT(bool) bison_int_array_it_skip_32(struct bison_array_it *it);
 NG5_EXPORT(bool) bison_int_array_it_skip_64(struct bison_array_it *it);
 
 NG5_EXPORT(offset_t) bison_int_column_get_payload_off(struct bison_column_it *it);
+
+NG5_EXPORT(offset_t) bison_int_payload_after_header(struct bison *doc);
+
+NG5_EXPORT(u64) bison_int_header_get_rev(struct bison *doc);
 
 
 NG5_END_DECL

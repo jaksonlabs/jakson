@@ -19,9 +19,49 @@
 #define BISON_PRINTERS_H
 
 #include "shared/common.h"
-#include "core/bison/bison.h"
+#include "shared/types.h"
+#include "std/string_builder.h"
+#include "core/oid/oid.h"
 
 NG5_BEGIN_DECL
+
+struct bison_binary; /* forwarded from bison.h */
+
+struct bison_printer
+{
+        void *extra;
+
+        void (*drop)(struct bison_printer *self);
+
+        void (*print_bison_begin)(struct bison_printer *self, struct string_builder *builder);
+        void (*print_bison_end)(struct bison_printer *self, struct string_builder *builder);
+
+        void (*print_bison_header_begin)(struct bison_printer *self, struct string_builder *builder);
+        void (*print_bison_header_contents)(struct bison_printer *self, struct string_builder *builder, object_id_t oid, u64 rev);
+        void (*print_bison_header_end)(struct bison_printer *self, struct string_builder *builder);
+
+        void (*print_bison_payload_begin)(struct bison_printer *self, struct string_builder *builder);
+        void (*print_bison_payload_end)(struct bison_printer *self, struct string_builder *builder);
+
+        void (*print_bison_array_begin)(struct bison_printer *self, struct string_builder *builder);
+        void (*print_bison_array_end)(struct bison_printer *self, struct string_builder *builder);
+
+        void (*print_bison_null)(struct bison_printer *self, struct string_builder *builder);
+        void (*print_bison_true)(struct bison_printer *self, bool is_null, struct string_builder *builder);
+        void (*print_bison_false)(struct bison_printer *self, bool is_null, struct string_builder *builder);
+
+        /* if <code>value</code> is NULL, <code>value</code> is interpreted as null-value'd entry */
+        void (*print_bison_signed)(struct bison_printer *self, struct string_builder *builder, const i64 *value);
+        /* if <code>value</code> is NULL, <code>value</code> is interpreted as null-value'd entry */
+        void (*print_bison_unsigned)(struct bison_printer *self, struct string_builder *builder, const u64 *value);
+        /* if <code>value</code> is NULL, <code>value</code> is interpreted as null-value'd entry */
+        void (*print_bison_float)(struct bison_printer *self, struct string_builder *builder, const float *value);
+
+        void (*print_bison_string)(struct bison_printer *self, struct string_builder *builder, const char *value, u64 strlen);
+        void (*print_bison_binary)(struct bison_printer *self, struct string_builder *builder, const struct bison_binary *binary);
+
+        void (*print_bison_comma)(struct bison_printer *self, struct string_builder *builder);
+};
 
 NG5_EXPORT(bool) bison_json_formatter_create(struct bison_printer *printer);
 NG5_EXPORT(bool) bison_json_formatter_set_intent(struct bison_printer *printer, bool enable);

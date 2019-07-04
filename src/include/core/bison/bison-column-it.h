@@ -22,7 +22,8 @@
 #include "shared/common.h"
 #include "shared/error.h"
 #include "core/async/spin.h"
-#include "bison.h"
+#include "core/bison/bison-field.h"
+#include "core/bison/bison.h"
 
 NG5_BEGIN_DECL
 

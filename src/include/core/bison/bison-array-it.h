@@ -24,6 +24,7 @@
 #include "std/vec.h"
 #include "core/async/spin.h"
 #include "core/bison/bison.h"
+#include "core/bison/bison-field.h"
 
 NG5_BEGIN_DECL
 

@@ -59,6 +59,24 @@ NG5_EXPORT(bool) bison_path_evaluator_has_result(struct bison_path_evaluator *st
 
 NG5_EXPORT(bool) bison_path_evaluator_end(struct bison_path_evaluator *state);
 
+NG5_EXPORT(bool) bison_path_exists(struct bison *doc, const char *path);
+
+NG5_EXPORT(bool) bison_path_is_array(struct bison *doc, const char *path);
+
+NG5_EXPORT(bool) bison_path_is_column(struct bison *doc, const char *path);
+
+NG5_EXPORT(bool) bison_path_is_object(struct bison *doc, const char *path);
+
+NG5_EXPORT(bool) bison_path_is_container(struct bison *doc, const char *path);
+
+NG5_EXPORT(bool) bison_path_is_null(struct bison *doc, const char *path);
+
+NG5_EXPORT(bool) bison_path_is_number(struct bison *doc, const char *path);
+
+NG5_EXPORT(bool) bison_path_is_boolean(struct bison *doc, const char *path);
+
+NG5_EXPORT(bool) bison_path_is_string(struct bison *doc, const char *path);
+
 NG5_END_DECL
 
 #endif

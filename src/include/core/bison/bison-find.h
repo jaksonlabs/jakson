@@ -56,6 +56,10 @@ struct bison_find
 
 NG5_DEFINE_ERROR_GETTER(bison_find)
 
+NG5_EXPORT(bool) bison_find_open(struct bison_find *out, const char *dot_path, struct bison *doc);
+
+NG5_EXPORT(bool) bison_find_close(struct bison_find *find);
+
 NG5_EXPORT(bool) bison_find_create(struct bison_find *find, struct bison_dot_path *path, struct bison *doc);
 
 NG5_EXPORT(bool) bison_find_has_result(struct bison_find *find);

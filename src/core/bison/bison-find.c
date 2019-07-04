@@ -21,6 +21,24 @@
 static void result_from_array(struct bison_find *find, struct bison_array_it *it);
 static inline bool result_from_column(struct bison_find *find, u32 requested_idx, struct bison_column_it *it);
 
+NG5_EXPORT(bool) bison_find_open(struct bison_find *out, const char *dot_path, struct bison *doc)
+{
+        error_if_null(out)
+        error_if_null(dot_path)
+        error_if_null(doc)
+        struct bison_dot_path path;
+        bison_dot_path_from_string(&path, dot_path);
+        bool status = bison_find_create(out, &path, doc);
+        bison_dot_path_drop(&path);
+        return status;
+}
+
+NG5_EXPORT(bool) bison_find_close(struct bison_find *find)
+{
+        error_if_null(find)
+        return bison_find_drop(find);
+}
+
 NG5_EXPORT(bool) bison_find_create(struct bison_find *find, struct bison_dot_path *path, struct bison *doc)
 {
         error_if_null(find)

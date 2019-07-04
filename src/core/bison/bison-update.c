@@ -20,6 +20,7 @@
 #include "core/bison/bison-path.h"
 #include "core/bison/bison-update.h"
 #include "core/bison/bison-insert.h"
+#include "core/bison/bison-revise.h"
 
 #define try_array_update(type_match, in_place_update_fn, insert_fn)                                                    \
 ({                                                                                                                     \

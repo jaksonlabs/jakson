@@ -394,6 +394,36 @@ NG5_EXPORT(offset_t) bison_int_column_get_payload_off(struct bison_column_it *it
         return result;
 }
 
+NG5_EXPORT(offset_t) bison_int_payload_after_header(struct bison *doc)
+{
+        u8 rev_nbytes;
+        offset_t result;
+
+        memfile_save_position(&doc->memfile);
+        memfile_seek(&doc->memfile, 0);
+        memfile_skip(&doc->memfile, sizeof(struct bison_header));
+        varuint_t revision = (varuint_t) memfile_peek(&doc->memfile, sizeof(char));
+        varuint_read(&rev_nbytes, revision);
+        memfile_skip(&doc->memfile, rev_nbytes);
+        result = memfile_tell(&doc->memfile);
+        memfile_restore_position(&doc->memfile);
+        return result;
+}
+
+NG5_EXPORT(u64) bison_int_header_get_rev(struct bison *doc)
+{
+        assert(doc);
+        u64 rev;
+        memfile_save_position(&doc->memfile);
+        memfile_seek(&doc->memfile, 0);
+        memfile_skip(&doc->memfile, sizeof(struct bison_header));
+        error_if(memfile_remain_size(&doc->memfile) < varuint_max_blocks(), &doc->err, NG5_ERR_CORRUPTED);
+        varuint_t revision = (varuint_t) memfile_peek(&doc->memfile, sizeof(char));
+        rev = varuint_read(NULL, revision);
+        memfile_restore_position(&doc->memfile);
+        return rev;
+}
+
 NG5_EXPORT(bool) bison_int_array_it_field_skip(struct bison_array_it *it)
 {
         error_if_null(it)

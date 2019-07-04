@@ -16,6 +16,8 @@
  */
 
 #include "core/bison/bison-path.h"
+#include "core/bison/bison-find.h"
+#include "core/bison/bison-revise.h"
 
 static inline enum bison_path_status traverse_column(struct bison_path_evaluator *state,
         const struct bison_dot_path *path, u32 current_path_pos, struct bison_column_it *it);
@@ -70,6 +72,124 @@ NG5_EXPORT(bool) bison_path_evaluator_end(struct bison_path_evaluator *state)
         error_if_null(state)
         bison_iterator_close(&state->root_it);
         return true;
+}
+
+NG5_EXPORT(bool) bison_path_exists(struct bison *doc, const char *path)
+{
+        struct bison_find find;
+        bool result = bison_find_open(&find, path, doc);
+        bison_find_close(&find);
+        return result;
+}
+
+NG5_EXPORT(bool) bison_path_is_array(struct bison *doc, const char *path)
+{
+        struct bison_find find;
+        enum bison_field_type field_type;
+        bool result = false;
+
+        if (bison_find_open(&find, path, doc)) {
+                bison_find_result_type(&field_type, &find);
+                result = bison_field_type_is_array(field_type);
+        }
+
+        bison_find_close(&find);
+        return result;
+}
+
+NG5_EXPORT(bool) bison_path_is_column(struct bison *doc, const char *path)
+{
+        struct bison_find find;
+        enum bison_field_type field_type;
+        bool result = false;
+
+        if (bison_find_open(&find, path, doc)) {
+                bison_find_result_type(&field_type, &find);
+                result = bison_field_type_is_column(field_type);
+        }
+
+        bison_find_close(&find);
+        return result;
+}
+
+NG5_EXPORT(bool) bison_path_is_object(struct bison *doc, const char *path)
+{
+        struct bison_find find;
+        enum bison_field_type field_type;
+        bool result = false;
+
+        if (bison_find_open(&find, path, doc)) {
+                bison_find_result_type(&field_type, &find);
+                result = bison_field_type_is_object(field_type);
+        }
+
+        bison_find_close(&find);
+        return result;
+}
+
+NG5_EXPORT(bool) bison_path_is_container(struct bison *doc, const char *path)
+{
+        return (bison_path_is_array(doc, path) || bison_path_is_column(doc, path) || bison_path_is_object(doc, path));
+}
+
+NG5_EXPORT(bool) bison_path_is_null(struct bison *doc, const char *path)
+{
+        struct bison_find find;
+        enum bison_field_type field_type;
+        bool result = false;
+
+        if (bison_find_open(&find, path, doc)) {
+                bison_find_result_type(&field_type, &find);
+                result = bison_field_type_is_null(field_type);
+        }
+
+        bison_find_close(&find);
+        return result;
+}
+
+NG5_EXPORT(bool) bison_path_is_number(struct bison *doc, const char *path)
+{
+        struct bison_find find;
+        enum bison_field_type field_type;
+        bool result = false;
+
+        if (bison_find_open(&find, path, doc)) {
+                bison_find_result_type(&field_type, &find);
+                result = bison_field_type_is_number(field_type);
+        }
+
+        bison_find_close(&find);
+        return result;
+}
+
+NG5_EXPORT(bool) bison_path_is_boolean(struct bison *doc, const char *path)
+{
+        struct bison_find find;
+        enum bison_field_type field_type;
+        bool result = false;
+
+        if (bison_find_open(&find, path, doc)) {
+                bison_find_result_type(&field_type, &find);
+                result = bison_field_type_is_boolean(field_type);
+        }
+
+        bison_find_close(&find);
+        return result;
+}
+
+NG5_EXPORT(bool) bison_path_is_string(struct bison *doc, const char *path)
+{
+        struct bison_find find;
+        enum bison_field_type field_type;
+        bool result = false;
+
+        if (bison_find_open(&find, path, doc)) {
+                bison_find_result_type(&field_type, &find);
+                result = bison_field_type_is_string(field_type);
+        }
+
+        bison_find_close(&find);
+        return result;
 }
 
 static inline enum bison_path_status traverse_array(struct bison_path_evaluator *state,
