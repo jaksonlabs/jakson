@@ -9,11 +9,10 @@
 	
 - [Carbon File Specification](format-spec.md)	
 	- [Design Goals](format-specs/design-goals.md)
+	- [Notation](format-specs/notation.md)		
 	- [Alternatives](format-specs/alternatives.md)
-		- [Plain-Text JSON](format-specs/alternatives/json.md)
 		- [Binary JSON](format-specs/alternatives/bson.md)
 		- [Universal Binary JSON](format-specs/alternatives/ubjson.md)
-	- [Notation](format-specs/notation.md)		
 	- [Format Overview](format-specs/format-overview.md)	
 		- [Marker Format](format-specs/format-overview/marker-format.md)
 		- [Variable-Length Integers](format-specs/format-overview/varuints.md)

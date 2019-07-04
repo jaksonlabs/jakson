@@ -10,6 +10,7 @@
 
 Carbon Type | Description                                  | Size   | Type Marker | Value Type
 ------------|----------------------------------------------|--------|-------------|-------
+`nokey`  | no identifier assigned    | 0 B | `[?]` | *none*
 `autokey`  | 64-bit auto-generated identifier    | 8 B | `[*]` | `u64`
 `ukey`   | 64-bit user-defined unsigned identifier      | 8 B | `[+]` | `u64`
 `ikey`   | 64-bit user-defined signed identifier        | 8 B | `[-]` | `i64`

@@ -54,6 +54,7 @@ Marker  | Carbon Type      | Descriptions
 
 Marker  | Carbon Type      | Descriptions
 --------|------------------|--------------------------------------------------
+`[?]`   | `nokey`          | no record identifier assigned
 `[*]`   | `autokey`        | record identifier is auto-generated a `u64` value
 `[+]`   | `ukey`           | record identifier is user-defined a `u64` value 
 `[-]`   | `ikey`           | record identifier is user-defined a `i64` value 

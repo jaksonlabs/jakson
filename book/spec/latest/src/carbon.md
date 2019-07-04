@@ -1,6 +1,8 @@
 # Columnar Binary JSON Files
 
-> **This specification document is work-in-progress**. You see the latest version in the `master` branch.
+> **This specification document is work-in-progress**. 
+
+> You see the latest version in the `master` branch, as of 4th July 2019.
 
 ## License
 
