@@ -31,6 +31,8 @@
 
         <!-- Custom theme stylesheets -->
         
+        <link rel="stylesheet" href="theme/slim.css">
+        
 
         
     </head>
@@ -80,7 +82,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="affix"><a href="carbon.html">Columnar Binary JSON</a></li><li class="affix"><a href="introduction.html">Introduction</a></li><li><a href="getting-started.html"><strong aria-hidden="true">1.</strong> Getting Started</a></li><li><ol class="section"><li><a href="getting-started/motivation.html"><strong aria-hidden="true">1.1.</strong> Motivation</a></li><li><a href="getting-started/example.html"><strong aria-hidden="true">1.2.</strong> Example</a></li><li><a href="getting-started/comparison.html"><strong aria-hidden="true">1.3.</strong> Comparison</a></li></ol></li><li><a href="format-spec.html"><strong aria-hidden="true">2.</strong> Carbon File Specification</a></li><li><ol class="section"><li><a href="format-specs/design-goals.html"><strong aria-hidden="true">2.1.</strong> Design Goals</a></li><li><a href="format-specs/alternatives.html"><strong aria-hidden="true">2.2.</strong> Alternatives</a></li><li><ol class="section"><li><a href="format-specs/alternatives/json.html"><strong aria-hidden="true">2.2.1.</strong> Plain-Text JSON</a></li><li><a href="format-specs/alternatives/bson.html"><strong aria-hidden="true">2.2.2.</strong> Binary JSON</a></li><li><a href="format-specs/alternatives/ubjson.html"><strong aria-hidden="true">2.2.3.</strong> Universal Binary JSON</a></li></ol></li><li><a href="format-specs/format-overview.html"><strong aria-hidden="true">2.3.</strong> Format Overview</a></li><li><ol class="section"><li><a href="format-specs/format-overview/notation.html"><strong aria-hidden="true">2.3.1.</strong> Notation</a></li><li><a href="format-specs/format-overview/marker-format.html"><strong aria-hidden="true">2.3.2.</strong> Marker Format</a></li><li><a href="format-specs/format-overview/varuints.html"><strong aria-hidden="true">2.3.3.</strong> Variable-Length Integers</a></li><li><a href="format-specs/format-overview/padding-spaces.html"><strong aria-hidden="true">2.3.4.</strong> Compacting and Padding</a></li><li><a href="format-specs/format-overview/bnf-syntax.html"><strong aria-hidden="true">2.3.5.</strong> BNF Syntax</a></li></ol></li><li><a href="format-specs/identification.html"><strong aria-hidden="true">2.4.</strong> Identification</a></li><li><ol class="section"><li><a href="format-specs/identification/user-def-keys.html"><strong aria-hidden="true">2.4.1.</strong> User-Defined Keys</a></li><li><a href="format-specs/identification/sys-def-keys.html"><strong aria-hidden="true">2.4.2.</strong> System-Defined Keys</a></li></ol></li><li><a href="format-specs/data-types.html"><strong aria-hidden="true">2.5.</strong> Data Types</a></li><li><ol class="section"><li><a href="format-specs/data-types/booleans.html"><strong aria-hidden="true">2.5.1.</strong> Booleans</a></li><li><a href="format-specs/data-types/integers.html"><strong aria-hidden="true">2.5.2.</strong> Integer Numbers</a></li><li><a href="format-specs/data-types/floating.html"><strong aria-hidden="true">2.5.3.</strong> Floating Numbers</a></li><li><a href="format-specs/data-types/character-strings.html"><strong aria-hidden="true">2.5.4.</strong> Character Strings</a></li><li><a href="format-specs/data-types/binary-strings.html"><strong aria-hidden="true">2.5.5.</strong> Binary Strings</a></li><li><a href="format-specs/data-types/nulls.html"><strong aria-hidden="true">2.5.6.</strong> Nulls</a></li></ol></li><li><a href="format-specs/container-types.html"><strong aria-hidden="true">2.6.</strong> Container Types</a></li><li><ol class="section"><li><a href="format-specs/container-types/arrays.html"><strong aria-hidden="true">2.6.1.</strong> Arrays</a></li><li><a href="format-specs/container-types/columns.html"><strong aria-hidden="true">2.6.2.</strong> Columns</a></li><li><a href="format-specs/container-types/objects.html"><strong aria-hidden="true">2.6.3.</strong> Objects</a></li></ol></li><li><a href="update-spec.html"><strong aria-hidden="true">2.7.</strong> Update Specification</a></li><li><ol class="section"><li><a href="update-spec/revision-control.html"><strong aria-hidden="true">2.7.1.</strong> Revision Control</a></li><li><a href="update-spec/atomic-ops.html"><strong aria-hidden="true">2.7.2.</strong> Atomic Operations</a></li><li><a href="update-spec/insert-ops.html"><strong aria-hidden="true">2.7.3.</strong> Insert Operations</a></li><li><a href="update-spec/update-ops.html"><strong aria-hidden="true">2.7.4.</strong> In-Place Updates</a></li><li><a href="update-spec/delete-ops.html"><strong aria-hidden="true">2.7.5.</strong> Delete Operations</a></li></ol></li><li><a href="traversals-queries.html"><strong aria-hidden="true">2.8.</strong> Traversals and Queries</a></li><li><ol class="section"><li><a href="traversals-queries/iterators.html"><strong aria-hidden="true">2.8.1.</strong> Iterators</a></li><li><a href="traversals-queries/path-eval.html"><strong aria-hidden="true">2.8.2.</strong> Dot-Path Semantics</a></li></ol></li><li><a href="formatting.html"><strong aria-hidden="true">2.9.</strong> Formatting</a></li><li><ol class="section"><li><a href="formatting/json.html"><strong aria-hidden="true">2.9.1.</strong> JSON Formatting</a></li></ol></li><li><a href="format-specs/mime-types.html"><strong aria-hidden="true">2.10.</strong> MIME Type and Extension</a></li><li><a href="dev-ressources.html"><strong aria-hidden="true">2.11.</strong> Developer Resources</a></li><li><ol class="section"><li><a href="dev-ressources/libraries.html"><strong aria-hidden="true">2.11.1.</strong> Libraries</a></li><li><a href="dev-ressources/best-practise.html"><strong aria-hidden="true">2.11.2.</strong> Best Practise</a></li><li><a href="dev-ressources/example-files.html"><strong aria-hidden="true">2.11.3.</strong> Example Files</a></li></ol></li><li><a href="libcarbon.html"><strong aria-hidden="true">2.12.</strong> Carbon Files in Libcarbon</a></li></ol></li><li><a href="archive-spec.html"><strong aria-hidden="true">3.</strong> Carbon Archive Specification</a></li><li class="affix"><a href="feedback.html">Feedback and Contributions</a></li><li class="affix"><a href="thanks.html">Thanks To</a></li></ol>
+                <ol class="chapter"><li class="affix"><a href="carbon.html">Columnar Binary JSON</a></li><li class="affix"><a href="introduction.html">Introduction</a></li><li><a href="getting-started.html"><strong aria-hidden="true">1.</strong> Getting Started</a></li><li><ol class="section"><li><a href="getting-started/motivation.html"><strong aria-hidden="true">1.1.</strong> Motivation</a></li><li><a href="getting-started/example.html"><strong aria-hidden="true">1.2.</strong> Example</a></li><li><a href="getting-started/comparison.html"><strong aria-hidden="true">1.3.</strong> Comparison</a></li></ol></li><li><a href="format-spec.html"><strong aria-hidden="true">2.</strong> Carbon File Specification</a></li><li><ol class="section"><li><a href="format-specs/design-goals.html"><strong aria-hidden="true">2.1.</strong> Design Goals</a></li><li><a href="format-specs/alternatives.html"><strong aria-hidden="true">2.2.</strong> Alternatives</a></li><li><ol class="section"><li><a href="format-specs/alternatives/json.html"><strong aria-hidden="true">2.2.1.</strong> Plain-Text JSON</a></li><li><a href="format-specs/alternatives/bson.html"><strong aria-hidden="true">2.2.2.</strong> Binary JSON</a></li><li><a href="format-specs/alternatives/ubjson.html"><strong aria-hidden="true">2.2.3.</strong> Universal Binary JSON</a></li></ol></li><li><a href="format-specs/notation.html"><strong aria-hidden="true">2.3.</strong> Notation</a></li><li><a href="format-specs/format-overview.html"><strong aria-hidden="true">2.4.</strong> Format Overview</a></li><li><ol class="section"><li><a href="format-specs/format-overview/marker-format.html"><strong aria-hidden="true">2.4.1.</strong> Marker Format</a></li><li><a href="format-specs/format-overview/varuints.html"><strong aria-hidden="true">2.4.2.</strong> Variable-Length Integers</a></li><li><a href="format-specs/format-overview/padding-spaces.html"><strong aria-hidden="true">2.4.3.</strong> Compacting and Padding</a></li><li><a href="format-specs/format-overview/bnf-syntax.html"><strong aria-hidden="true">2.4.4.</strong> BNF Syntax</a></li></ol></li><li><a href="format-specs/identification.html"><strong aria-hidden="true">2.5.</strong> Identification</a></li><li><ol class="section"><li><a href="format-specs/identification/user-def-keys.html"><strong aria-hidden="true">2.5.1.</strong> User-Defined Keys</a></li><li><a href="format-specs/identification/sys-def-keys.html"><strong aria-hidden="true">2.5.2.</strong> System-Defined Keys</a></li></ol></li><li><a href="format-specs/data-types.html"><strong aria-hidden="true">2.6.</strong> Data Types</a></li><li><ol class="section"><li><a href="format-specs/data-types/booleans.html"><strong aria-hidden="true">2.6.1.</strong> Booleans</a></li><li><a href="format-specs/data-types/integers.html"><strong aria-hidden="true">2.6.2.</strong> Integer Numbers</a></li><li><a href="format-specs/data-types/floating.html"><strong aria-hidden="true">2.6.3.</strong> Floating Numbers</a></li><li><a href="format-specs/data-types/character-strings.html"><strong aria-hidden="true">2.6.4.</strong> Character Strings</a></li><li><a href="format-specs/data-types/binary-strings.html"><strong aria-hidden="true">2.6.5.</strong> Binary Strings</a></li><li><a href="format-specs/data-types/nulls.html"><strong aria-hidden="true">2.6.6.</strong> Nulls</a></li></ol></li><li><a href="format-specs/container-types.html"><strong aria-hidden="true">2.7.</strong> Container Types</a></li><li><ol class="section"><li><a href="format-specs/container-types/arrays.html"><strong aria-hidden="true">2.7.1.</strong> Arrays</a></li><li><a href="format-specs/container-types/columns.html"><strong aria-hidden="true">2.7.2.</strong> Columns</a></li><li><a href="format-specs/container-types/objects.html"><strong aria-hidden="true">2.7.3.</strong> Objects</a></li></ol></li><li><a href="update-spec.html"><strong aria-hidden="true">2.8.</strong> Update Specification</a></li><li><ol class="section"><li><a href="update-spec/revision-control.html"><strong aria-hidden="true">2.8.1.</strong> Revision Control</a></li><li><a href="update-spec/atomic-ops.html"><strong aria-hidden="true">2.8.2.</strong> Atomic Operations</a></li><li><a href="update-spec/insert-ops.html"><strong aria-hidden="true">2.8.3.</strong> Insert Operations</a></li><li><a href="update-spec/update-ops.html"><strong aria-hidden="true">2.8.4.</strong> In-Place Updates</a></li><li><a href="update-spec/delete-ops.html"><strong aria-hidden="true">2.8.5.</strong> Delete Operations</a></li></ol></li><li><a href="traversals-queries.html"><strong aria-hidden="true">2.9.</strong> Traversals and Queries</a></li><li><ol class="section"><li><a href="traversals-queries/iterators.html"><strong aria-hidden="true">2.9.1.</strong> Iterators</a></li><li><a href="traversals-queries/path-eval.html"><strong aria-hidden="true">2.9.2.</strong> Dot-Path Semantics</a></li></ol></li><li><a href="formatting.html"><strong aria-hidden="true">2.10.</strong> Formatting</a></li><li><ol class="section"><li><a href="formatting/json.html"><strong aria-hidden="true">2.10.1.</strong> JSON Formatting</a></li></ol></li><li><a href="format-specs/mime-types.html"><strong aria-hidden="true">2.11.</strong> MIME Type and Extension</a></li><li><a href="dev-ressources.html"><strong aria-hidden="true">2.12.</strong> Developer Resources</a></li><li><ol class="section"><li><a href="dev-ressources/libraries.html"><strong aria-hidden="true">2.12.1.</strong> Libraries</a></li><li><a href="dev-ressources/best-practise.html"><strong aria-hidden="true">2.12.2.</strong> Best Practise</a></li><li><a href="dev-ressources/example-files.html"><strong aria-hidden="true">2.12.3.</strong> Example Files</a></li></ol></li><li><a href="libcarbon.html"><strong aria-hidden="true">2.13.</strong> Carbon Files in Libcarbon</a></li></ol></li><li><a href="archive-spec.html"><strong aria-hidden="true">3.</strong> Carbon Archive Specification</a></li><li class="affix"><a href="feedback.html">Feedback and Contributions</a></li><li class="affix"><a href="thanks.html">Thanks To</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -148,6 +150,9 @@
                 <div id="content" class="content">
                     <main>
                         <h1><a class="header" href="#columnar-binary-json-files" id="columnar-binary-json-files">Columnar Binary JSON Files</a></h1>
+<blockquote>
+<p><strong>This specification document is work-in-progress</strong>. You see the latest version in the <code>master</code> branch.</p>
+</blockquote>
 <h2><a class="header" href="#license" id="license">License</a></h2>
 <p>The Columnar Binary JSON specification and Libcarbon, all the source code, is released under the <a href="https://github.com/protolabs/libcarbon/blob/master/LICENSE">MIT Licsense</a>.</p>
 <h1><a class="header" href="#introduction" id="introduction">Introduction</a></h1>
@@ -161,7 +166,6 @@
 <h1><a class="header" href="#plain-text-json" id="plain-text-json">Plain-Text JSON</a></h1>
 <h1><a class="header" href="#binary-json" id="binary-json">Binary JSON</a></h1>
 <h1><a class="header" href="#universal-binary-json" id="universal-binary-json">Universal Binary JSON</a></h1>
-<h1><a class="header" href="#format-overview" id="format-overview">Format Overview</a></h1>
 <h1><a class="header" href="#notation" id="notation">Notation</a></h1>
 <table><thead><tr><th>Notation</th><th>Description</th><th>Example</th></tr></thead><tbody>
 <tr><td><code>[x]</code></td><td>Fixed-length block <code>x</code> of certain number of bytes</td><td><code>[{]</code> an object start marker, <code>[n]</code> a null value, <code>[21]</code> an integer value, <code>[Hello, World!]</code> a character string</td></tr>
@@ -170,18 +174,20 @@
 <tr><td><code>...</code></td><td>Memory range of zero or more zeros</td><td><code>[...]...</code> an empty array block containing reserved memory, followed by (unused) reserved memory</td></tr>
 </tbody></table>
 <p><code>[x]</code>, <code>(x)</code>, and <code>&lt;x&gt;</code> are called <strong>blocks</strong> with content <code>x</code>.</p>
-<h1><a class="header" href="#marker-format" id="marker-format">Marker Format</a></h1>
-<pre><code>[document-id](rev-number) [[] &lt;values&gt;... []]...
+<h1><a class="header" href="#format-overview" id="format-overview">Format Overview</a></h1>
+<pre><code>&lt;primary-key&gt; (rev-number) [[] &lt;values&gt;... []]...
 </code></pre>
+<p><span class="caption">Figure FO-1: Carbon File Record Format</span></p>
 <p>A <strong>marker</strong> <code>x</code> has always a size of 1 byte. </p>
 <h2><a class="header" href="#document-identification" id="document-identification">Document Identification</a></h2>
-<pre><code>[document-id]
+<pre><code>&lt;primary-key&gt;
 </code></pre>
+<p>See more about identity of Carbon records in the Section about <a href="format-specs/../format-specs/identification.html">Identification</a>.</p>
 <h2><a class="header" href="#revision-managment" id="revision-managment">Revision Managment</a></h2>
 <pre><code>(rev-number)
 </code></pre>
 <h2><a class="header" href="#values" id="values">Values</a></h2>
-<pre><code>&lt;vlaues&gt;
+<pre><code>&lt;values&gt;
 </code></pre>
 <h2><a class="header" href="#capacitities" id="capacitities">Capacitities</a></h2>
 <pre><code>...
@@ -199,34 +205,102 @@
 <pre><code class="language-json">[ 23, 24, 25 ]
 </code></pre>
 <p>A (compacted) Carbon file with object id <code>21</code> in revision <code>5</code> encoding the JSON array as <code>u8</code> integer column.</p>
-<pre><code>[21](5) [[] [(] [u8](3)(3) [23][24][25] [#] []] 
+<pre><code>[21](5) [[] [1](3)(3) [23][24][25] []] 
 </code></pre>
+<h1><a class="header" href="#marker-format" id="marker-format">Marker Format</a></h1>
+<pre><code>[marker]
+</code></pre>
+<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th>Examples</th></tr></thead><tbody>
+<tr><td><code>marker</code></td><td>constant for encoding of items and containers</td><td>1 byte</td><td><code>[n]</code>, <code>[[]</code>, <code>[x]</code></td></tr>
+</tbody></table>
+<h2><a class="header" href="#reserved-marker" id="reserved-marker">Reserved Marker</a></h2>
+<table><thead><tr><th>Marker</th><th>Carbon Type</th><th>Descriptions</th></tr></thead><tbody>
+<tr><td><code>[t]</code></td><td><code>true</code></td><td>a field truth value <em>true</em></td></tr>
+<tr><td><code>[f]</code></td><td><code>false</code></td><td>a field truth value <em>false</em></td></tr>
+<tr><td><code>[c]</code></td><td><code>u8</code></td><td>an unsigned 8-bit integer field</td></tr>
+<tr><td><code>[d]</code></td><td><code>u16</code></td><td>an unsigned 16-bit integer field</td></tr>
+<tr><td><code>[i]</code></td><td><code>u32</code></td><td>an unsigned 32-bit integer field</td></tr>
+<tr><td><code>[l]</code></td><td><code>u64</code></td><td>an unsigned 64-bit integer field</td></tr>
+<tr><td><code>[C]</code></td><td><code>u8</code></td><td>a signed 8-bit integer field</td></tr>
+<tr><td><code>[D]</code></td><td><code>u16</code></td><td>a signed 16-bit integer field</td></tr>
+<tr><td><code>[I]</code></td><td><code>u32</code></td><td>a signed 32-bit integer field</td></tr>
+<tr><td><code>[L]</code></td><td><code>u64</code></td><td>a signed 64-bit integer field</td></tr>
+<tr><td><code>[r]</code></td><td><code>float</code></td><td>a single-precision floating number field</td></tr>
+<tr><td><code>[s]</code></td><td><code>string</code></td><td>a character string field</td></tr>
+<tr><td><code>[b]</code></td><td><code>binary</code></td><td>a binary string field with known MIME type</td></tr>
+<tr><td><code>[x]</code></td><td><code>custom binary</code></td><td>a binary string field with user-defined type</td></tr>
+<tr><td><code>[n]</code></td><td><code>null</code></td><td>absence of data</td></tr>
+</tbody></table>
+<p><span class="caption">Figure MF-1: Data Type Markers</span></p>
+<table><thead><tr><th>Marker</th><th>Carbon Type</th><th>Descriptions</th></tr></thead><tbody>
+<tr><td><code>[{]</code></td><td><code>object</code></td><td>marks begin of an object</td></tr>
+<tr><td><code>[}]</code></td><td><code>object</code></td><td>marks end of an object</td></tr>
+<tr><td><code>[[]</code></td><td><code>array</code></td><td>marks begin of an array</td></tr>
+<tr><td><code>[]]</code></td><td><code>array</code></td><td>marks end of an array</td></tr>
+<tr><td><code>[1]</code></td><td><code>u8</code></td><td>an unsigned 8-bit integer column</td></tr>
+<tr><td><code>[2]</code></td><td><code>u16</code></td><td>an unsigned 16-bit integer column</td></tr>
+<tr><td><code>[3]</code></td><td><code>u32</code></td><td>an unsigned 32-bit integer column</td></tr>
+<tr><td><code>[4]</code></td><td><code>u64</code></td><td>an unsigned 64-bit integer column</td></tr>
+<tr><td><code>[5]</code></td><td><code>u8</code></td><td>an signed 8-bit integer column</td></tr>
+<tr><td><code>[6]</code></td><td><code>u16</code></td><td>an signed 16-bit integer column</td></tr>
+<tr><td><code>[7]</code></td><td><code>u32</code></td><td>an signed 32-bit integer column</td></tr>
+<tr><td><code>[8]</code></td><td><code>u64</code></td><td>an signed 64-bit integer column</td></tr>
+<tr><td><code>[R]</code></td><td><code>float</code></td><td>a single-precision floating number column</td></tr>
+<tr><td><code>[B]</code></td><td><code>boolean</code></td><td>a three-valued logic column</td></tr>
+</tbody></table>
+<p><span class="caption">Figure MF-2: Container Type Markers</span></p>
+<table><thead><tr><th>Marker</th><th>Carbon Type</th><th>Descriptions</th></tr></thead><tbody>
+<tr><td><code>[*]</code></td><td><code>autokey</code></td><td>record identifier is auto-generated a <code>u64</code> value</td></tr>
+<tr><td><code>[+]</code></td><td><code>ukey</code></td><td>record identifier is user-defined a <code>u64</code> value</td></tr>
+<tr><td><code>[-]</code></td><td><code>ikey</code></td><td>record identifier is user-defined a <code>i64</code> value</td></tr>
+<tr><td><code>[!]</code></td><td><code>ikey</code></td><td>record identifier is user-defined a <code>string</code> value</td></tr>
+</tbody></table>
+<p><span class="caption">Figure MF-3: Record Identifier Type Markers</span></p>
+<table><thead><tr><th>Marker</th><th>Carbon Type</th><th>Descriptions</th></tr></thead><tbody>
+<tr><td><code>[0]</code></td><td><code>reserved</code></td><td>marks a single reserved byte</td></tr>
+</tbody></table>
+<p><span class="caption">Figure MF-4: Special Purpose Markers</span></p>
 <h1><a class="header" href="#variable-length-integers" id="variable-length-integers">Variable-Length Integers</a></h1>
 <pre><code>(value)
 </code></pre>
 <h1><a class="header" href="#padding-spaces" id="padding-spaces">Padding Spaces</a></h1>
 <h1><a class="header" href="#bnf-syntax" id="bnf-syntax">BNF Syntax</a></h1>
 <h1><a class="header" href="#identification" id="identification">Identification</a></h1>
+<pre><code>&lt;primary-key&gt;
+</code></pre>
+<pre><code>&lt;type-marker&gt; &lt;value-type&gt;
+</code></pre>
+<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th>Type Marker</th><th>Value Type</th></tr></thead><tbody>
+<tr><td><code>autokey</code></td><td>64-bit auto-generated identifier</td><td>8 B</td><td><code>[*]</code></td><td><code>u64</code></td></tr>
+<tr><td><code>ukey</code></td><td>64-bit user-defined unsigned identifier</td><td>8 B</td><td><code>[+]</code></td><td><code>u64</code></td></tr>
+<tr><td><code>ikey</code></td><td>64-bit user-defined signed identifier</td><td>8 B</td><td><code>[-]</code></td><td><code>i64</code></td></tr>
+<tr><td><code>skey</code></td><td><code>n</code>-char string user-def. identifier</td><td><code>n</code> B</td><td><code>[!]</code></td><td><code>string</code></td></tr>
+</tbody></table>
+<p><span class="caption">Table FO-1: Record Primary Key Types and Encoding</span></p>
+<blockquote>
+<p>The value generation of <code>autokey</code> is implementation-dependent.</p>
+</blockquote>
+<p>For See more in section <a href="format-specs/"></a>.</p>
 <h1><a class="header" href="#user-defined-keys" id="user-defined-keys">User-Defined Keys</a></h1>
 <h1><a class="header" href="#system-defined-keys" id="system-defined-keys">System-Defined Keys</a></h1>
 <h1><a class="header" href="#data-types" id="data-types">Data Types</a></h1>
 <table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
 <tr><td><code>true</code></td><td>truth value <em>true</em></td><td>0 byte</td><td><code>null</code></td><td><code>[t]</code></td></tr>
 <tr><td><code>false</code></td><td>truth value <em>false</em></td><td>0 byte</td><td><code>null</code></td><td><code>[f]</code></td></tr>
-<tr><td><code>boolean</code></td><td>three-valued logic</td><td>0<sup>+</sup> bytes</td><td><em>const</em></td><td><em>const</em></td></tr>
-<tr><td><code>u8</code></td><td>unsigned 8-bit int</td><td>1 B</td><td><code>null</code>, 2<sup>8</sup> - 1</td><td><code>[c]</code></td></tr>
-<tr><td><code>u16</code></td><td>unsigned 16-bit int</td><td>2 B</td><td><code>null</code>, 2<sup>16</sup> - 1</td><td><code>[d]</code></td></tr>
-<tr><td><code>u32</code></td><td>unsigned 32-bit int</td><td>4 B</td><td><code>null</code>, 2<sup>16</sup> - 1</td><td><code>[i]</code></td></tr>
-<tr><td><code>u64</code></td><td>unsigned 64-bit int</td><td>8 B</td><td><code>null</code>, 2<sup>16</sup> - 1</td><td><code>[l]</code></td></tr>
-<tr><td><code>i8</code></td><td>signed 8-bit int</td><td>1 B</td><td><code>null</code>, -2<sup>7</sup></td><td><code>[C]</code></td></tr>
-<tr><td><code>i16</code></td><td>signed 16-bit int</td><td>2 B</td><td><code>null</code>, -2<sup>15</sup></td><td><code>[D]</code></td></tr>
-<tr><td><code>i32</code></td><td>signed 32-bit int</td><td>4 B</td><td><code>null</code>, -2<sup>31</sup></td><td><code>[I]</code></td></tr>
-<tr><td><code>i64</code></td><td>signed 64-bit int</td><td>8 B</td><td><code>null</code>, -2<sup>63</sup></td><td><code>[L]</code></td></tr>
-<tr><td><code>float</code></td><td>32-bit float</td><td>4 byte</td><td><code>null</code>,  <code>NAN</code></td><td><code>r</code></td></tr>
+<tr><td><code>boolean</code></td><td>three-valued logic</td><td>0<sup>+</sup> bytes</td><td>const</td><td><code>[B]</code></td></tr>
+<tr><td><code>u8</code></td><td>unsigned 8-bit int</td><td>1 B</td><td><code>null</code>, 2<sup>8</sup> - 1</td><td><code>[c]</code>, <code>[1]</code></td></tr>
+<tr><td><code>u16</code></td><td>unsigned 16-bit int</td><td>2 B</td><td><code>null</code>, 2<sup>16</sup> - 1</td><td><code>[d]</code>, <code>[2]</code></td></tr>
+<tr><td><code>u32</code></td><td>unsigned 32-bit int</td><td>4 B</td><td><code>null</code>, 2<sup>16</sup> - 1</td><td><code>[i]</code>, <code>[3]</code></td></tr>
+<tr><td><code>u64</code></td><td>unsigned 64-bit int</td><td>8 B</td><td><code>null</code>, 2<sup>16</sup> - 1</td><td><code>[l]</code>, <code>[4]</code></td></tr>
+<tr><td><code>i8</code></td><td>signed 8-bit int</td><td>1 B</td><td><code>null</code>, -2<sup>7</sup></td><td><code>[C]</code>, <code>[5]</code></td></tr>
+<tr><td><code>i16</code></td><td>signed 16-bit int</td><td>2 B</td><td><code>null</code>, -2<sup>15</sup></td><td><code>[D]</code>, <code>[6]</code></td></tr>
+<tr><td><code>i32</code></td><td>signed 32-bit int</td><td>4 B</td><td><code>null</code>, -2<sup>31</sup></td><td><code>[I]</code>, <code>[7]</code></td></tr>
+<tr><td><code>i64</code></td><td>signed 64-bit int</td><td>8 B</td><td><code>null</code>, -2<sup>63</sup></td><td><code>[L]</code>, <code>[8]</code></td></tr>
+<tr><td><code>float</code></td><td>32-bit float</td><td>4 byte</td><td><code>null</code>,  <code>NAN</code></td><td><code>[r]</code>, <code>[R]</code></td></tr>
 <tr><td><code>string</code></td><td>string of <code>n</code> chars</td><td><code>n</code> bytes</td><td><code>null</code></td><td><code>[s]</code></td></tr>
 <tr><td><code>binary</code></td><td>binary of <code>n</code> bytes</td><td><code>n</code> + 2<sup>+</sup> bytes</td><td><code>null</code></td><td><code>[b]</code></td></tr>
 <tr><td><code>custom binary</code></td><td>binary of <code>n</code> bytes</td><td><code>n</code> + 3<sup>+</sup> bytes</td><td><code>null</code></td><td><code>[x]</code></td></tr>
-<tr><td><code>null</code></td><td>absence of data</td><td>0<sup>+</sup> byte</td><td><code>null</code></td><td><code>[n]</code>,  <em>const</em></td></tr>
+<tr><td><code>null</code></td><td>absence of data</td><td>0<sup>+</sup> byte</td><td><code>null</code></td><td><code>[n]</code></td></tr>
 </tbody></table>
 <h1><a class="header" href="#booleans" id="booleans">Booleans</a></h1>
 <table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
@@ -253,7 +327,7 @@
 <pre><code class="language-json">[false, true, null]
 </code></pre>
 <p>A (compacted) Carbon file, which encodes the JSON array as <code>boolean</code> column.</p>
-<pre><code>[(] [B](3)(3) [0][1][2] [#]
+<pre><code>[B](3)(3) [0][1][2]
 </code></pre>
 <h1><a class="header" href="#integer-numbers" id="integer-numbers">Integer Numbers</a></h1>
 <table><thead><tr><th>Carbon</th><th>Description</th><th>Size</th><th>Min</th><th>Max</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
@@ -266,7 +340,7 @@
 <tr><td><code>i32</code></td><td>signed 32-bit int</td><td>4 B</td><td>−2<sup>31</sup> + 1</td><td>2<sup>31</sup> - 2</td><td><code>null</code> or-2<sup>31</sup></td><td><code>[I]</code></td></tr>
 <tr><td><code>i64</code></td><td>signed 64-bit int</td><td>8 B</td><td>−2<sup>63</sup> + 1</td><td>2<sup>63</sup> - 2</td><td><code>null</code> or-2<sup>63</sup></td><td><code>[L]</code></td></tr>
 </tbody></table>
-<h2><a class="header" href="#encoding-as-field-value-1" id="encoding-as-field-value-1">Encoding As Field Value</a></h2>
+<h2><a class="header" href="#encoding-as-field-value-1" id="encoding-as-field-value-1">Encoding as Field Value</a></h2>
 <h3><a class="header" href="#example-3" id="example-3">Example</a></h3>
 <p>JSON snippet</p>
 <pre><code class="language-json">[-42, 42, null]
@@ -274,19 +348,19 @@
 <p>A (compacted) Carbon file, which encodes the JSON array as <code>array</code> of one <code>i8</code> and one <code>u8</code> value.</p>
 <pre><code>[[] [c][-42] [C][42] [n] []]
 </code></pre>
-<h2><a class="header" href="#encoding-as-column-value-1" id="encoding-as-column-value-1">Encoding As Column Value</a></h2>
+<h2><a class="header" href="#encoding-as-column-value-1" id="encoding-as-column-value-1">Encoding as Column Value</a></h2>
 <h3><a class="header" href="#example-4" id="example-4">Example</a></h3>
 <p>JSON snippet</p>
 <pre><code class="language-json">[-42, 42, null]
 </code></pre>
 <p>A (compacted) Carbon file, which encodes the JSON array as <code>i8</code> column.</p>
-<pre><code>[(] [C](2)(2) [-42][42][255] [#]
+<pre><code>[C](2)(2) [-42][42][255]
 </code></pre>
 <h1><a class="header" href="#floating-numbers" id="floating-numbers">Floating Numbers</a></h1>
 <table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
 <tr><td><code>float</code></td><td>single-precision floating number</td><td>4 byte</td><td><code>null</code> or <code>NAN</code></td><td><code>r</code></td></tr>
 </tbody></table>
-<h2><a class="header" href="#as-field-value" id="as-field-value">As Field Value</a></h2>
+<h2><a class="header" href="#encoding-as-field-value-2" id="encoding-as-field-value-2">Encoding as Field Value</a></h2>
 <table><thead><tr><th>Description</th><th>Size</th><th>Marker</th><th>Payload</th></tr></thead><tbody>
 <tr><td>32-bit floating number</td><td>1+4 bytes</td><td><code>[r]</code> (real)</td><td>a <code>float</code> value</td></tr>
 </tbody></table>
@@ -297,7 +371,7 @@
 <p>A (compacted) Carbon file, which encodes the JSON array as <code>array</code> of one <code>i8</code> and one <code>u8</code> integer.</p>
 <pre><code>[[] [r][23.3] [r][42.0] []]
 </code></pre>
-<h2><a class="header" href="#as-column-value" id="as-column-value">As Column Value</a></h2>
+<h2><a class="header" href="#encoding-as-column-value-2" id="encoding-as-column-value-2">Encoding as Column Value</a></h2>
 <table><thead><tr><th>Column Type Marker</th><th>Marker Size</th><th>Element Size</th><th>Block</th></tr></thead><tbody>
 <tr><td><code>[r]</code>, 32-bit floating numbers</td><td>1 byte</td><td>4 byte each</td><td>a <code>float</code> value</td></tr>
 </tbody></table>
@@ -306,13 +380,13 @@
 <pre><code class="language-json">[23.3, 42.0]
 </code></pre>
 <p>A (compacted) Carbon file, which encodes the JSON array as a <code>float</code> column.</p>
-<pre><code>[(] [r](2)(2) [23.3][42.0] [#]
+<pre><code>[R] (2)(2) [23.3][42.0]
 </code></pre>
 <h1><a class="header" href="#character-strings" id="character-strings">Character Strings</a></h1>
 <table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
 <tr><td><code>string</code></td><td>a (Pascal) character string of <code>n</code> characters</td><td><code>n</code> bytes</td><td><code>null</code></td><td><code>[s]</code></td></tr>
 </tbody></table>
-<h2><a class="header" href="#encoding-as-field-value-2" id="encoding-as-field-value-2">Encoding as Field Value</a></h2>
+<h2><a class="header" href="#encoding-as-field-value-3" id="encoding-as-field-value-3">Encoding as Field Value</a></h2>
 <pre><code>[s](n) &lt;character-string&gt;
 </code></pre>
 <table><thead><tr><th>Description</th><th>Size</th><th>Marker</th><th>Payload</th></tr></thead><tbody>
@@ -325,14 +399,14 @@
 <p>A (compacted) Carbon file, which encodes the JSON array as <code>array</code> of character-string values.</p>
 <pre><code>[[] [s](5)[Hello] [s](5)[World] [s](1)[!] []]
 </code></pre>
-<h2><a class="header" href="#encoding-as-column-value-2" id="encoding-as-column-value-2">Encoding as Column Value</a></h2>
+<h2><a class="header" href="#encoding-as-column-value-3" id="encoding-as-column-value-3">Encoding as Column Value</a></h2>
 <p>Character strings are not supported for column containers.</p>
 <h1><a class="header" href="#binary-strings" id="binary-strings">Binary Strings</a></h1>
 <table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
 <tr><td><code>binary</code></td><td>binary of <code>n</code> bytes (MIME typed)</td><td><code>n</code> + 2<sup>+</sup> bytes</td><td><code>null</code></td><td><code>[b]</code></td></tr>
 <tr><td><code>custom binary</code></td><td>binary of <code>n</code> bytes (custom type)</td><td><code>n</code> + 3<sup>+</sup> bytes</td><td><code>null</code></td><td><code>[x]</code></td></tr>
 </tbody></table>
-<h2><a class="header" href="#encoding-as-field-value-3" id="encoding-as-field-value-3">Encoding As Field Value</a></h2>
+<h2><a class="header" href="#encoding-as-field-value-4" id="encoding-as-field-value-4">Encoding As Field Value</a></h2>
 <h3><a class="header" href="#with-known-mime-types" id="with-known-mime-types">With Known MIME Types</a></h3>
 <pre><code>[b](mime-type-id)(str-len) &lt;binary&gt;
 </code></pre>
@@ -396,7 +470,7 @@ Content:        c3RpbGwgYSBzZWNyZXQ=
 <blockquote>
 <p><strong>TODO:</strong> Not yet implemented</p>
 </blockquote>
-<h2><a class="header" href="#encoding-as-column-value-3" id="encoding-as-column-value-3">Encoding As Column Value</a></h2>
+<h2><a class="header" href="#encoding-as-column-value-4" id="encoding-as-column-value-4">Encoding As Column Value</a></h2>
 <p>Binary strings are not supported for column containers.</p>
 <h2><a class="header" href="#mime-type-ids" id="mime-type-ids">MIME Type Ids</a></h2>
 <blockquote>
@@ -1091,7 +1165,7 @@ Content:        c3RpbGwgYSBzZWNyZXQ=
 <table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
 <tr><td><code>null</code></td><td>absence of data</td><td>0<sup>+</sup> byte</td><td><code>null</code> value</td><td><code>[n]</code> or dedicated value</td></tr>
 </tbody></table>
-<h2><a class="header" href="#encoding-as-field-value-4" id="encoding-as-field-value-4">Encoding as Field Value</a></h2>
+<h2><a class="header" href="#encoding-as-field-value-5" id="encoding-as-field-value-5">Encoding as Field Value</a></h2>
 <table><thead><tr><th>Description</th><th>Size</th><th>Marker</th><th>Payload</th></tr></thead><tbody>
 <tr><td>JSON <code>null</code> constant</td><td>1 byte</td><td><code>[n]</code></td><td><em>none</em></td></tr>
 </tbody></table>
@@ -1102,28 +1176,48 @@ Content:        c3RpbGwgYSBzZWNyZXQ=
 <p>Carbon File snippet</p>
 <pre><code>[[] [n] []] 
 </code></pre>
-<h2><a class="header" href="#encoding-as-column-value-4" id="encoding-as-column-value-4">Encoding as Column Value</a></h2>
-<table><thead><tr><th>Column Type Marker</th><th>Marker Size</th><th>Element Size</th><th>Dedicated Value</th></tr></thead><tbody>
-<tr><td><code>[n]</code>, null values</td><td>1 byte</td><td>1 byte each</td><td><code>n</code></td></tr>
-<tr><td><code>[B]</code>, booleans values</td><td>1 byte</td><td>1 byte each</td><td><code>2</code></td></tr>
-<tr><td><code>[c]</code>, unsigned 8-bit int.</td><td>1 byte</td><td>1 byte each</td><td><code>255</code></td></tr>
-<tr><td><code>[d]</code>, unsigned 16-bit int.</td><td>1 byte</td><td>2 bytes each</td><td><code>65,535</code></td></tr>
-<tr><td><code>[i]</code>, unsigned 32-bit int.</td><td>1 byte</td><td>4 bytes each</td><td><code>4,294,967,295</code></td></tr>
-<tr><td><code>[l]</code>, unsigned 64-bit int.</td><td>1 byte</td><td>8 bytes each</td><td><code>18,446,744,073,709,551,615</code></td></tr>
-<tr><td><code>[C]</code>, signed 8-bit integers</td><td>1 byte</td><td>1 byte each</td><td><code>−128</code></td></tr>
-<tr><td><code>[D]</code>, signed 16-bit int.</td><td>1 byte</td><td>2 bytes each</td><td><code>−32,768</code></td></tr>
-<tr><td><code>[I]</code>, signed 32-bit int.</td><td>1 byte</td><td>4 bytes each</td><td><code>−2,147,483,648</code></td></tr>
-<tr><td><code>[L]</code>, signed 64-bit int.</td><td>1 byte</td><td>8 bytes each</td><td><code>−9,223,372,036,854,775,808</code></td></tr>
-<tr><td><code>[r]</code>, 32-bit floats</td><td>1 byte</td><td>4 bytes each</td><td><code>NAN</code></td></tr>
+<h2><a class="header" href="#encoding-as-column-value-5" id="encoding-as-column-value-5">Encoding as Column Value</a></h2>
+<blockquote>
+<p>There is no dedicated column type for <code>null</code>-only lists. Instead use <code>array</code> types that contain only <code>null</code> values. </p>
+</blockquote>
+<p>The occurence of a <code>null</code> value in a column is done by encoding the absence of data with a dedicated value taken from the column type domain. Note that this dedicated value is reserved for this use, and is not in the value domain of the corresponding Carbon type.</p>
+<table><thead><tr><th>Data Type</th><th>Column Marker</th><th>Null Size</th><th>Null Constant</th></tr></thead><tbody>
+<tr><td>booleans values</td><td><code>[B]</code></td><td>1 byte</td><td><code>2</code></td></tr>
+<tr><td>unsigned 8-bit int.</td><td><code>[1]</code></td><td>1 byte</td><td><code>255</code></td></tr>
+<tr><td>unsigned 16-bit int.</td><td><code>[2]</code></td><td>2 bytes</td><td><code>65,535</code></td></tr>
+<tr><td>unsigned 32-bit int.</td><td><code>[3]</code></td><td>4 bytes</td><td><code>4,294,967,295</code></td></tr>
+<tr><td>unsigned 64-bit int.</td><td><code>[4]</code></td><td>8 bytes</td><td><code>18,446,744,073,709,551,615</code></td></tr>
+<tr><td>signed 8-bit integers</td><td><code>[5]</code></td><td>1 byte</td><td><code>−128</code></td></tr>
+<tr><td>signed 16-bit int.</td><td><code>[6]</code></td><td>2 bytes</td><td><code>−32,768</code></td></tr>
+<tr><td>signed 32-bit int.</td><td><code>[7]</code></td><td>4 bytes</td><td><code>−2,147,483,648</code></td></tr>
+<tr><td>signed 64-bit int.</td><td><code>[8]</code></td><td>8 bytes</td><td><code>−9,223,372,036,854,775,808</code></td></tr>
+<tr><td>32-bit floats</td><td><code>[R]</code></td><td>4 bytes</td><td><code>NAN</code></td></tr>
 </tbody></table>
 <h3><a class="header" href="#example-11" id="example-11">Example</a></h3>
 <p>JSON snippet</p>
 <pre><code class="language-json">[42, 23, null]
 </code></pre>
 <p>Carbon File snippet (JSON array encoded as <code>u8</code> column)</p>
-<pre><code>[(] [c](3)(3) [42][23][255] [#]
+<pre><code>[1](3)(3) [42][23][255]
 </code></pre>
 <h1><a class="header" href="#container-types" id="container-types">Container Types</a></h1>
+<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th>JSON Mapping</th></tr></thead><tbody>
+<tr><td><code>array</code></td><td>list of variable-typed elements</td><td>2<sup>+</sup> bytes</td><td>array (unconstrained)</td></tr>
+<tr><td><code>column</code></td><td>list of fixed-typed elements</td><td>3<sup>+</sup> bytes</td><td>array (constrained)</td></tr>
+<tr><td><code>object</code></td><td>list of key-value pairs (properties)</td><td><strong>TODO</strong></td><td>object (unconstrained)</td></tr>
+<tr><td><code>record</code></td><td>identifiable, versioned <code>array</code></td><td><strong>TODO</strong></td><td>JSON file / &quot;document&quot;</td></tr>
+</tbody></table>
+<p><span class="caption">Table CT-1: Container Types in Carbon</span></p>
+<h2><a class="header" href="#container-type-support" id="container-type-support">Container Type Support</a></h2>
+<h3><a class="header" href="#object-array-and-record-containers" id="object-array-and-record-containers">Object, Array and Record Containers</a></h3>
+<pre><code>true, false, u8, u16, u32, u64, i8, i16, i32, i64, float, string, 
+binary, custom binary, null, array, column 
+</code></pre>
+<p><span class="caption">Table CT-2: Container Type Support for <code>array</code> and <code>record</code> Containers</span></p>
+<h3><a class="header" href="#column-containers" id="column-containers">Column Containers</a></h3>
+<pre><code>boolean, u8, u16, u32, u64, i8, i16, i32, i64, float
+</code></pre>
+<p><span class="caption">Table CT-3: Container Type Support for <code>array</code> and <code>record</code> Containers</span></p>
 <h1><a class="header" href="#arrays" id="arrays">Arrays</a></h1>
 <table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
 <tr><td><code>array</code></td><td>list of variable-typed elements</td><td>2<sup>+</sup> bytes</td><td><code>null</code> value</td><td><code>[</code>, <code>]</code></td></tr>
@@ -1134,14 +1228,116 @@ Content:        c3RpbGwgYSBzZWNyZXQ=
 <h3><a class="header" href="#values-1" id="values-1">Values</a></h3>
 <pre><code>&lt;values&gt;
 </code></pre>
+<h4><a class="header" href="#type-support" id="type-support">Type Support</a></h4>
+<pre><code>true, false, u8, u16, u32, u64, i8, i16, i32, i64, float, string, 
+binary, custom binary, null, array, column 
+</code></pre>
 <h3><a class="header" href="#capacities" id="capacities">Capacities</a></h3>
 <pre><code>...
 </code></pre>
+<h3><a class="header" href="#example-12" id="example-12">Example</a></h3>
+<p>JSON snippet</p>
+<pre><code class="language-json">[ &quot;The&quot;, &quot;Number&quot;, 23 ]
+</code></pre>
+<p>A (compacted) Carbon file, which encodes the JSON array as <code>array</code> of two <code>string</code> values and one <code>u8</code> value.</p>
+<pre><code>[[] [s](3)[The] [s](6)[Number] [c][23] []] 
+</code></pre>
 <h1><a class="header" href="#columns" id="columns">Columns</a></h1>
-<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Begin Marker</th><th>End</th></tr></thead><tbody>
-<tr><td><code>column</code></td><td>list of fixed-typed elements</td><td>4<sup>+</sup> bytes</td><td><code>null</code> value</td><td><em>see below</em></td><td><code>#</code></td></tr>
+<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Begin Marker</th></tr></thead><tbody>
+<tr><td><code>column</code></td><td>list of fixed-typed elements</td><td>3<sup>+</sup> bytes</td><td><code>null</code> value</td><td><em>see below</em></td></tr>
 </tbody></table>
+<h2><a class="header" href="#encoding-1" id="encoding-1">Encoding</a></h2>
+<pre><code>[&lt;column-marker&gt;](num-of-elems)(cap-of-elems) &lt;values&gt;...
+</code></pre>
+<h3><a class="header" href="#column-types" id="column-types">Column Types</a></h3>
+<table><thead><tr><th>Carbon Type</th><th>Marker</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th></tr></thead><tbody>
+<tr><td><code>boolean</code></td><td><code>[B]</code></td><td>three-valued logic</td><td>1 B each</td><td>2</td></tr>
+<tr><td><code>u8</code></td><td><code>[1]</code></td><td>unsigned 8-bit int</td><td>1 B each</td><td>2<sup>8</sup> - 1</td></tr>
+<tr><td><code>u16</code></td><td><code>[2]</code></td><td>unsigned 16-bit int</td><td>2 B each</td><td>2<sup>16</sup> - 1</td></tr>
+<tr><td><code>u32</code></td><td><code>[3]</code></td><td>unsigned 32-bit int</td><td>4 B each</td><td>2<sup>16</sup> - 1</td></tr>
+<tr><td><code>u64</code></td><td><code>[4]</code></td><td>unsigned 64-bit int</td><td>8 B each</td><td>2<sup>16</sup> - 1</td></tr>
+<tr><td><code>i8</code></td><td><code>[5]</code></td><td>signed 8-bit int</td><td>1 B each</td><td>-2<sup>7</sup></td></tr>
+<tr><td><code>i16</code></td><td><code>[6]</code></td><td>signed 16-bit int</td><td>2 B each</td><td>-2<sup>15</sup></td></tr>
+<tr><td><code>i32</code></td><td><code>[7]</code></td><td>signed 32-bit int</td><td>4 B each</td><td>-2<sup>31</sup></td></tr>
+<tr><td><code>i64</code></td><td><code>[8]</code></td><td>signed 64-bit int</td><td>8 B each</td><td>-2<sup>63</sup></td></tr>
+<tr><td><code>float</code></td><td><code>[R]</code></td><td>32-bit float</td><td>4 B each</td><td><code>NAN</code> value</td></tr>
+</tbody></table>
+<p><span class="caption">Table C-1: Carbon <code>column</code> Type Support and Markers</span></p>
+<h3><a class="header" href="#values-2" id="values-2">Values</a></h3>
+<pre><code>&lt;values&gt;
+</code></pre>
+<h3><a class="header" href="#capacities-1" id="capacities-1">Capacities</a></h3>
+<pre><code>...
+</code></pre>
+<h3><a class="header" href="#example-13" id="example-13">Example</a></h3>
+<p>JSON snippet</p>
+<pre><code class="language-json">[ &quot;The&quot;, &quot;Number&quot;, 23 ]
+</code></pre>
+<p>A (compacted) Carbon file, which encodes the JSON array as <code>array</code> of two <code>string</code> values and one <code>u8</code> value.</p>
+<pre><code>[[] [s](3)[The] [s](6)[Number] [c][23] []] 
+</code></pre>
 <h1><a class="header" href="#objects" id="objects">Objects</a></h1>
+<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
+<tr><td><code>object</code></td><td>list of key-value pairs (properties)</td><td><strong>TODO</strong> bytes</td><td><code>null</code></td><td><code>{</code>, <code>}</code></td></tr>
+</tbody></table>
+<h2><a class="header" href="#encoding-2" id="encoding-2">Encoding</a></h2>
+<pre><code>[{] &lt;props&gt;... [}]
+</code></pre>
+<h3><a class="header" href="#properties" id="properties">Properties</a></h3>
+<pre><code>&lt;props&gt;
+</code></pre>
+<pre><code>&lt;key-string&gt; &lt;value&gt;
+</code></pre>
+<h4><a class="header" href="#keys" id="keys">Keys</a></h4>
+<pre><code>&lt;key-string&gt;
+</code></pre>
+<p>A <code>&lt;key-string&gt;</code> is any value of type <code>string</code> where the <code>[s]</code> marker is omitted.</p>
+<h4><a class="header" href="#values-3" id="values-3">Values</a></h4>
+<pre><code>&lt;value&gt;
+</code></pre>
+<p>A <code>&lt;value&gt;</code> is any value of a supported type.</p>
+<pre><code>true, false, u8, u16, u32, u64, i8, i16, i32, i64, float, string, 
+binary, custom binary, null, array, column, object 
+</code></pre>
+<h3><a class="header" href="#capacities-2" id="capacities-2">Capacities</a></h3>
+<pre><code>...
+</code></pre>
+<h3><a class="header" href="#example-14" id="example-14">Example</a></h3>
+<p>JSON snippet</p>
+<pre><code class="language-json">{
+   &quot;title&quot;:&quot;Back to the Future&quot;,
+   &quot;sub-title&quot;:null,
+   &quot;year&quot;: 1985,
+   &quot;imdb-rating&quot;: 8.5,
+   &quot;keywords&quot;:[
+      &quot;time travel&quot;,
+      &quot;deloren&quot;,
+      &quot;comedy&quot;
+   ],
+   &quot;release-dates&quot;: [
+   	  1985, 1986, 1987, 
+   	  1992, 2008, 2010, 
+   	  2012, 2015, 2016
+   ]
+}
+</code></pre>
+<p>A (compacted) Carbon <code>object</code>.</p>
+<pre><code>[{]
+   (5)[title] [s](18)[Back to the Future]
+   (9)[sub-title] [n]
+   (4)[year] [c][1985]
+   (11)[imdb-rating] [r][8.5]
+   (8)[keywords] [[] 
+      [s](11)[time travel] 
+      [s](7)[deloren]       
+      [s](6)[comedy]            
+   []]
+   (13)[release-dates] [1](9)(9)
+      [1985] [1986] [1987]
+      [1992] [2008] [2010]
+      [2012] [2015] [2016]
+[}]   
+</code></pre>
 <h1><a class="header" href="#update-specification" id="update-specification">Update Specification</a></h1>
 <h1><a class="header" href="#revision-control" id="revision-control">Revision Control</a></h1>
 <h1><a class="header" href="#atomic-operations" id="atomic-operations">Atomic Operations</a></h1>
