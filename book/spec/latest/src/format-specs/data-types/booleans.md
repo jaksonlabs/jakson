@@ -43,5 +43,5 @@ JSON snippet
 A (compacted) Carbon file, which encodes the JSON array as `boolean` column.
 
 ```
-[(] [B](3)(3) [0][1][2] [#]
+[B](3)(3) [0][1][2]
 ```

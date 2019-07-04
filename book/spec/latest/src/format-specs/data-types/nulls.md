@@ -27,20 +27,23 @@ Carbon File snippet
 
 ## Encoding as Column Value
 
+> There is no dedicated column type for `null`-only lists. Instead use `array` types that contain only `null` values. 
 
-Column Type Marker              | Marker Size | Element Size  | Dedicated Value               |
---------------------------------|-------------|---------------|-------------------------------|
-`[n]`, null values              | 1 byte      | 1 byte each   | `n`                           |
-`[B]`, booleans values          | 1 byte      | 1 byte each   | `2`                           |
-`[c]`, unsigned 8-bit int.      | 1 byte      | 1 byte each   | `255`                         |
-`[d]`, unsigned 16-bit int.     | 1 byte      | 2 bytes each  | `65,535`                      |
-`[i]`, unsigned 32-bit int.     | 1 byte      | 4 bytes each  | `4,294,967,295`               |
-`[l]`, unsigned 64-bit int.     | 1 byte      | 8 bytes each  | `18,446,744,073,709,551,615`  |
-`[C]`, signed 8-bit integers    | 1 byte      | 1 byte each   | `−128`                        |
-`[D]`, signed 16-bit int.       | 1 byte      | 2 bytes each  | `−32,768`                     |
-`[I]`, signed 32-bit int.       | 1 byte      | 4 bytes each  | `−2,147,483,648`              |
-`[L]`, signed 64-bit int.       | 1 byte      | 8 bytes each  | `−9,223,372,036,854,775,808`  |
-`[r]`, 32-bit floats            | 1 byte      | 4 bytes each  | `NAN`                         |
+The occurence of a `null` value in a column is done by encoding the absence of data with a dedicated value taken from the column type domain. Note that this dedicated value is reserved for this use, and is not in the value domain of the corresponding Carbon type.
+
+
+Data Type                | Column Marker | Null Size | Null Constant                 |
+-------------------------|---------------|-----------|-------------------------------|
+booleans values          | `[B]`         | 1 byte    | `2`                           |
+unsigned 8-bit int.      | `[1]`         | 1 byte    | `255`                         |
+unsigned 16-bit int.     | `[2]`         | 2 bytes   | `65,535`                      |
+unsigned 32-bit int.     | `[3]`         | 4 bytes   | `4,294,967,295`               |
+unsigned 64-bit int.     | `[4]`         | 8 bytes   | `18,446,744,073,709,551,615`  |
+signed 8-bit integers    | `[5]`         | 1 byte    | `−128`                        |
+signed 16-bit int.       | `[6]`         | 2 bytes   | `−32,768`                     |
+signed 32-bit int.       | `[7]`         | 4 bytes   | `−2,147,483,648`              |
+signed 64-bit int.       | `[8]`         | 8 bytes   | `−9,223,372,036,854,775,808`  |
+32-bit floats            | `[R]`         | 4 bytes   | `NAN`                         |
 
 ### Example
 
@@ -52,5 +55,5 @@ JSON snippet
 Carbon File snippet (JSON array encoded as `u8` column)
 
 ```
-[(] [c](3)(3) [42][23][255] [#]
+[1](3)(3) [42][23][255]
 ```

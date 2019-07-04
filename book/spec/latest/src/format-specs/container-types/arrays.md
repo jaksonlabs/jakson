@@ -16,6 +16,13 @@ Carbon Type    | Description                      | Size                | *null*
 <values>
 ```
 
+#### Type Support
+
+```
+true, false, u8, u16, u32, u64, i8, i16, i32, i64, float, string, 
+binary, custom binary, null, array, column 
+```
+
 ### Capacities
 
 ```

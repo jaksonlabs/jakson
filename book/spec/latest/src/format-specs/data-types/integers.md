@@ -12,7 +12,7 @@ Carbon  | Description              | Size    | Min                 | Max        
 `i64`        | signed 64-bit int   | 8 B | −2<sup>63</sup> + 1 | 2<sup>63</sup> - 2 | `null` or-2<sup>63</sup>    | `[L]`
 
 
-## Encoding As Field Value
+## Encoding as Field Value
 
 
 
@@ -29,7 +29,7 @@ A (compacted) Carbon file, which encodes the JSON array as `array` of one `i8` a
 [[] [c][-42] [C][42] [n] []]
 ```
 
-## Encoding As Column Value
+## Encoding as Column Value
 
 
 ### Example
@@ -42,5 +42,5 @@ JSON snippet
 A (compacted) Carbon file, which encodes the JSON array as `i8` column.
 
 ```
-[(] [C](2)(2) [-42][42][255] [#]
+[C](2)(2) [-42][42][255]
 ```

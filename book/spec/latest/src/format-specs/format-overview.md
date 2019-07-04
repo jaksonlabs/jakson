@@ -2,16 +2,20 @@
 
 
 ```
-[document-id](rev-number) [[] <values>... []]...
+<primary-key> (rev-number) [[] <values>... []]...
 ```
+
+<span class="caption">Figure FO-1: Carbon File Record Format</span>
 
 A **marker** `x` has always a size of 1 byte. 
 
 ## Document Identification
 
 ```
-[document-id]
+<primary-key>
 ```
+
+See more about identity of Carbon records in the Section about [Identification](../format-specs/identification.md).
 
 ## Revision Managment
 
@@ -22,7 +26,7 @@ A **marker** `x` has always a size of 1 byte.
 ## Values
 
 ```
-<vlaues>
+<values>
 ```
 
 ## Capacitities
@@ -59,5 +63,5 @@ JSON snippet
 A (compacted) Carbon file with object id `21` in revision `5` encoding the JSON array as `u8` integer column.
 
 ```
-[21](5) [[] [(] [u8](3)(3) [23][24][25] [#] []] 
+[21](5) [[] [1](3)(3) [23][24][25] []] 
 ```

@@ -3,7 +3,7 @@
 Carbon Type  | Description                                 | Size | JSON Mapping 
 -------------|---------------------------------------------|-----------------|------------
 `array`      | list of variable-typed elements             | 2<sup>+</sup> bytes     | array (unconstrained)
-`column`     | list of fixed-typed elements                | 4<sup>+</sup> bytes     | array (constrained)
+`column`     | list of fixed-typed elements                | 3<sup>+</sup> bytes     | array (constrained)
 `object`     | list of key-value pairs (properties)        | **TODO**     | object (unconstrained)
 `record`     | identifiable, versioned `array`             | **TODO**     | JSON file / "document"
 
@@ -26,7 +26,7 @@ binary, custom binary, null, array, column
 ### Column Containers
 
 ```
-boolean, u8, u16, u32, u64, i8, i16, i32, i64, float, null
+boolean, u8, u16, u32, u64, i8, i16, i32, i64, float
 ```
 
 <span class="caption">Table CT-3: Container Type Support for `array` and `record` Containers</span>

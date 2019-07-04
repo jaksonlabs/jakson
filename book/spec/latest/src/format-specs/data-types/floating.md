@@ -6,7 +6,7 @@ Carbon Type  | Description                              | Size      | *null*-Val
 
 
 
-## As Field Value
+## Encoding as Field Value
 
 
 Description              | Size      | Marker          | Payload
@@ -27,7 +27,7 @@ A (compacted) Carbon file, which encodes the JSON array as `array` of one `i8` a
 [[] [r][23.3] [r][42.0] []]
 ```
 
-## As Column Value
+## Encoding as Column Value
 
 
 Column Type Marker               | Marker Size | Element Size | Block
@@ -46,5 +46,5 @@ JSON snippet
 A (compacted) Carbon file, which encodes the JSON array as a `float` column.
 
 ```
-[(] [r](2)(2) [23.3][42.0] [#]
+[R] (2)(2) [23.3][42.0]
 ```
