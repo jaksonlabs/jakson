@@ -112,6 +112,7 @@ static bool this_free(carbon_strdic_t *self, void *ptr);
 
 static bool this_num_distinct(carbon_strdic_t *self, size_t *num);
 static bool this_get_contents(carbon_strdic_t *self, carbon_vec_t ofType(carbon_strdic_entry_t) * entries, carbon_string_id_t *grouping_key_filter);
+static bool this_join_grouping_keys(carbon_strdic_t *self, carbon_string_id_t old_key, carbon_string_id_t new_key);
 
 static bool this_reset_counters(carbon_strdic_t *self);
 static bool this_counters(carbon_strdic_t *self, carbon_string_hash_counters_t *counters);
@@ -149,6 +150,7 @@ carbon_strdic_create_async(carbon_strdic_t *dic, size_t capacity, size_t num_ind
     dic->counters = this_counters;
     dic->num_distinct = this_num_distinct;
     dic->get_contents = this_get_contents;
+    dic->join_grouping_keys = this_join_grouping_keys;
 
     CARBON_CHECK_SUCCESS(this_create_extra(dic, capacity, num_index_buckets, approx_num_unique_strs, num_threads));
     return true;
@@ -860,6 +862,26 @@ static bool this_get_contents(carbon_strdic_t *self,
     }
 
     carbon_vec_drop(&local_entry_results);
+    this_unlock(self);
+    return true;
+}
+
+static bool this_join_grouping_keys(carbon_strdic_t *self,
+                                    carbon_string_id_t old_key,
+                                    carbon_string_id_t new_key)
+{
+    CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_ASYNC);
+    this_lock(self);
+
+    struct async_extra *extra = THIS_EXTRAS(self);
+
+    size_t num_carriers = carbon_vec_length(&extra->carriers);
+    for (size_t thread_id = 0; thread_id < num_carriers; thread_id++)
+    {
+        carrier_t *carrier = CARBON_VECTOR_GET(&extra->carriers, thread_id, carrier_t);
+        carbon_strdic_join_grouping_keys(&carrier->local_dictionary, old_key, new_key);
+    }
+
     this_unlock(self);
     return true;
 }

@@ -420,3 +420,31 @@ double carbon_huffman_avg_bit_length(
 
     return ((double)total_num_bits) / total_msg_length;
 }
+
+void carbon_huffman_bitstream_clone(
+        carbon_huffman_bitstream_t *src,
+        carbon_huffman_bitstream_t *dst
+    )
+{
+    dst->data = malloc(src->capacity);
+    memcpy(dst->data, src->data, src->capacity);
+    dst->capacity = src->capacity;
+    dst->num_bits = src->num_bits;
+}
+
+void carbon_huffman_encoder_clone(
+        carbon_huffman_encoder_t *src,
+        carbon_huffman_encoder_t *dst
+    )
+{
+    memcpy(
+        dst->frequencies,
+        src->frequencies,
+        sizeof(dst->frequencies)
+    );
+
+    for(size_t volatile i = 0; i < UCHAR_MAX + 1; ++i) {
+        if(src->frequencies[i])
+            carbon_huffman_bitstream_clone(&src->codes[i], &dst->codes[i]);
+    }
+}

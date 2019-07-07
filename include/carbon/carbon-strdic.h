@@ -117,6 +117,11 @@ typedef struct carbon_strdic
     carbon_strdic_entry_with_grouping_key_t *(*extract)(carbon_strdic_t *self, const carbon_string_id_t *ids, size_t num_ids);
 
     /**
+     * Change grouping key of all entries of key old_key to new_key
+     */
+     bool (*join_grouping_keys)(carbon_strdic_t *self, carbon_string_id_t old_key, carbon_string_id_t new_key);
+
+    /**
      * Frees up memory allocated inside a function call via the allocator given in the constructor
      *
      * Note: Implementation must ensure thread-safeness
@@ -227,6 +232,13 @@ static carbon_strdic_entry_with_grouping_key_t*
 carbon_strdic_extract(carbon_strdic_t *dic, const carbon_string_id_t *ids, size_t nids)
 {
     return dic->extract(dic, ids, nids);
+}
+
+CARBON_FUNC_UNUSED
+static bool
+carbon_strdic_join_grouping_keys(carbon_strdic_t *dic, carbon_string_id_t current, carbon_string_id_t replacement)
+{
+    return dic->join_grouping_keys(dic, current, replacement);
 }
 
 CARBON_FUNC_UNUSED

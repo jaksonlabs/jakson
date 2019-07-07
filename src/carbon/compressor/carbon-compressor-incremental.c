@@ -144,10 +144,6 @@ char const * this_resolve_string_with_prefix_table(
         char *in,
         carbon_compressor_incremental_extra_t *extra
     ) {
-    uint8_t byte_u8[2] = { ((uint8_t const *)in)[0], ((uint8_t const *)in)[1] };
-    uint16_t prefix_id;
-
-    prefix_id = (uint16_t)((uint16_t)byte_u8[0] << 8) + byte_u8[1];
 
     char * resolve_buffer = malloc(10);
     size_t resolve_buffer_len = 10;
@@ -528,8 +524,8 @@ carbon_compressor_incremental_init(carbon_compressor_t *self, carbon_doc_bulk_t 
     carbon_hashmap_put(self->options, "prefix", (carbon_hashmap_any_t)&set_prefix);
     carbon_hashmap_put(self->options, "suffix", (carbon_hashmap_any_t)&set_suffix);
     carbon_hashmap_put(self->options, "huffman", (carbon_hashmap_any_t)&set_huffman);
-    carbon_hashmap_put(self->options, "reverse_strings", (carbon_hashmap_any_t)&set_reverse_sort);
-    carbon_hashmap_put(self->options, "reverse_sort", (carbon_hashmap_any_t)&set_reverse_strings);
+    carbon_hashmap_put(self->options, "reverse_strings", (carbon_hashmap_any_t)&set_reverse_strings);
+    carbon_hashmap_put(self->options, "reverse_sort", (carbon_hashmap_any_t)&set_reverse_sort);
     carbon_hashmap_put(self->options, "sort_chunk_length", (carbon_hashmap_any_t)&set_sort_chunk_length);
     carbon_hashmap_put(self->options, "delta_chunk_length", (carbon_hashmap_any_t)&set_delta_chunk_length);
 

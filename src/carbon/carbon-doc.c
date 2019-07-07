@@ -1319,37 +1319,6 @@ carbon_columndoc_t *carbon_doc_entries_to_columndoc(const carbon_doc_bulk_t *bul
                     carbon_vec_data(strings_for_current_key), key_id,
                     element_count, 0
         );
-
-        // Replace the current value at this key with the deduplicated version
-        {
-            carbon_vec_t ofType(carbon_strdic_entry_t) unique_entries;
-            carbon_vec_create(&unique_entries, NULL, sizeof(carbon_strdic_entry_t), element_count);
-
-            carbon_strdic_get_contents(&unique_entries, bulk->dic, &key_id);
-
-            carbon_vec_t ofType(char const *) *unique_strings = malloc(sizeof(carbon_vec_t));
-            carbon_vec_create(unique_strings, NULL, sizeof(char const *), unique_entries.num_elems);
-
-            for(size_t i = 0; i < unique_entries.num_elems;++i) {
-                carbon_strdic_entry_t const *entry = (carbon_strdic_entry_t const *)carbon_vec_at(&unique_entries, i);
-                char const *clone = strdup(entry->string);
-                carbon_vec_push(unique_strings, &clone, 1);
-            }
-
-            for(size_t i = 0; i < strings_for_current_key->num_elems; ++i) {
-                free((void *)*(char const * const *)carbon_vec_at(strings_for_current_key, i));
-            }
-
-            carbon_vec_drop(strings_for_current_key);
-            carbon_vec_drop(&unique_entries);
-
-            if(unique_strings->num_elems > 0) {
-                carbon_hashmap_replace(&it, unique_strings);
-            } else {
-                carbon_vec_drop(unique_strings);
-                carbon_hashmap_remove_inplace(&it);
-            }
-        }
     }
 
     carbon_hashmap_drop(key_id_map);

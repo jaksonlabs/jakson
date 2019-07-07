@@ -55,6 +55,8 @@ static bool this_num_distinct(carbon_strdic_t *self, size_t *num);
 
 static bool this_get_contents(carbon_strdic_t *self, carbon_vec_t ofType(carbon_strdic_entry_t) * entries, carbon_string_id_t *grouping_key_filter);
 
+static bool this_join_grouping_keys(carbon_strdic_t *self, carbon_string_id_t old_key, carbon_string_id_t new_key);
+
 static void lock(carbon_strdic_t *self);
 static void unlock(carbon_strdic_t *self);
 
@@ -84,6 +86,7 @@ int carbon_strdic_create_sync(carbon_strdic_t *dic, size_t capacity, size_t num_
     dic->counters = this_counters;
     dic->num_distinct = this_num_distinct;
     dic->get_contents = this_get_contents;
+    dic->join_grouping_keys = this_join_grouping_keys;
 
     CARBON_CHECK_SUCCESS(create_extra(dic, capacity, num_indx_buckets, num_index_bucket_cap, num_threads));
     return true;
@@ -489,5 +492,23 @@ static bool this_get_contents(carbon_strdic_t *self,
             carbon_vec_push(entries, &entry, 1);
         }
     }
+    return true;
+}
+
+static bool this_join_grouping_keys(carbon_strdic_t *self,
+                                    carbon_string_id_t old_key,
+                                    carbon_string_id_t new_key) {
+    CARBON_CHECK_TAG(self->tag, CARBON_STRDIC_TYPE_SYNC);
+    struct sync_extra *extra = this_extra(self);
+
+    for (carbon_string_id_t i = 0; i < extra->contents.num_elems; i++) {
+        struct entry *e = (struct entry *)CARBON_VECTOR_GET(&extra->contents, i, struct entry);
+        if (e->in_use) {
+            if(e->content.grouping_key == old_key) {
+                e->content.grouping_key = new_key;
+            }
+        }
+    }
+
     return true;
 }
