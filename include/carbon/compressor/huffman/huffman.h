@@ -82,7 +82,7 @@ void carbon_huffman_encoder_create(carbon_huffman_encoder_t *encoder);
 
 void carbon_huffman_encoder_learn_frequencies(carbon_huffman_encoder_t *encoder, char const *data, size_t length);
 
-void carbon_huffman_encoder_bake_code(carbon_huffman_encoder_t *encoder);
+void carbon_huffman_encoder_bake_codes(carbon_huffman_encoder_t *encoder);
 
 void carbon_huffman_encoder_drop(carbon_huffman_encoder_t *encoder);
 

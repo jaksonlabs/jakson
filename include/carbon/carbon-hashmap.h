@@ -13,6 +13,8 @@
 
 #include "carbon-common.h"
 
+CARBON_BEGIN_DECL
+
 typedef enum carbon_hashmap_status {
     carbon_hashmap_status_ok = -1,
     carbon_hashmap_status_missing = -2,
@@ -51,18 +53,27 @@ typedef struct carbon_hashmap_iterator {
 /*
  * Return an empty hashmap.
 */
-carbon_hashmap_t carbon_hashmap_new();
+CARBON_EXPORT(carbon_hashmap_t)
+carbon_hashmap_new(void);
 
 
-carbon_hashmap_iterator_t carbon_hashmap_begin(carbon_hashmap_t *map);
-carbon_hashmap_iterator_status_t carbon_hashmap_next(carbon_hashmap_iterator_t *it);
-void carbon_hashmap_replace(carbon_hashmap_iterator_t *it, carbon_hashmap_any_t new_value);
-void carbon_hashmap_remove_inplace(carbon_hashmap_iterator_t *it);
+CARBON_EXPORT(carbon_hashmap_iterator_t)
+carbon_hashmap_begin(carbon_hashmap_t *map);
+
+CARBON_EXPORT(carbon_hashmap_iterator_status_t)
+carbon_hashmap_next(carbon_hashmap_iterator_t *it);
+
+CARBON_EXPORT(void)
+carbon_hashmap_replace(carbon_hashmap_iterator_t *it, carbon_hashmap_any_t new_value);
+
+CARBON_EXPORT(void)
+carbon_hashmap_remove_inplace(carbon_hashmap_iterator_t *it);
 
 /*
  * Add an element to the hashmap. Return MAP_OK or MAP_OMEM.
  */
-carbon_hashmap_status_t carbon_hashmap_put(
+CARBON_EXPORT(carbon_hashmap_status_t)
+carbon_hashmap_put(
         carbon_hashmap_t map,
         char const* key,
         carbon_hashmap_any_t value
@@ -71,7 +82,8 @@ carbon_hashmap_status_t carbon_hashmap_put(
 /*
  * Get an element from the hashmap. Return MAP_OK or MAP_MISSING.
  */
-carbon_hashmap_status_t carbon_hashmap_get(
+CARBON_EXPORT(carbon_hashmap_status_t)
+carbon_hashmap_get(
         carbon_hashmap_t map,
         char const* key,
         carbon_hashmap_any_t *arg
@@ -80,7 +92,8 @@ carbon_hashmap_status_t carbon_hashmap_get(
 /*
  * Remove an element from the hashmap. Return MAP_OK or MAP_MISSING.
  */
-carbon_hashmap_status_t carbon_hashmap_remove(
+CARBON_EXPORT(carbon_hashmap_status_t)
+carbon_hashmap_remove(
         carbon_hashmap_t map,
         char* key
 );
@@ -88,11 +101,15 @@ carbon_hashmap_status_t carbon_hashmap_remove(
 /*
  * Free the hashmap
  */
-void carbon_hashmap_drop(carbon_hashmap_t map);
+CARBON_EXPORT(void)
+carbon_hashmap_drop(carbon_hashmap_t map);
 
 /*
  * Get the current size of a hashmap
  */
-size_t carbon_hashmap_length(carbon_hashmap_t map);
+CARBON_EXPORT(size_t)
+carbon_hashmap_length(carbon_hashmap_t map);
+
+CARBON_END_DECL
 
 #endif // CARBON_HASHMAP_H

@@ -51,6 +51,7 @@ extern "C" {
 #include "carbon/carbon-spinlock.h"
 #include "carbon/carbon-strdic.h"
 #include "carbon/carbon-strhash.h"
+#include "carbon/carbon-hashmap.h"
 #include "carbon/carbon-strid-iter.h"
 #include "carbon/carbon-string-id-cache.h"
 #include "carbon/carbon-time.h"

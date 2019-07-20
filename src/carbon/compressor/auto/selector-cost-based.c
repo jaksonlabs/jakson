@@ -1,4 +1,6 @@
 #include <carbon/compressor/auto/selector-cost-based.h>
+#include <carbon/compressor/auto/common-prefix-suffix-iterator.h>
+
 #include <carbon/compressor/compressor-utils.h>
 #include <carbon/compressor/carbon-compressor-incremental.h>
 #include <carbon/compressor/huffman/priority-queue.h>
@@ -6,415 +8,307 @@
 
 #include <math.h>
 
-#define NUM_BLOCKS 8
-#define BLOCK_LENGTH 20
+// Avoid writing out these every time...
+static carbon_compressor_incremental_prefix_type_e const none = carbon_compressor_incremental_prefix_type_none;
+static carbon_compressor_incremental_prefix_type_e const inc = carbon_compressor_incremental_prefix_type_incremental;
+static carbon_compressor_incremental_prefix_type_e const table = carbon_compressor_incremental_prefix_type_table;
 
-typedef bool (*char_compare_fn_t)(size_t current_length, size_t previous_length, char const *current, char const *previous, size_t idx);
-typedef int  (*sort_compare_fn_t)(void const *a, void const *b);
+
+typedef struct cost_model_input {
+    size_t huffman_savings;
+    size_t sample_entry_count;
+    size_t total_entry_count;
+
+    double avg_prefix_prefix_len;
+    double avg_prefix_suffix_len;
+    double avg_suffix_prefix_len;
+    double avg_suffix_suffix_len;
+} cost_model_input_t;
 
 
 static double
-selector_average_common_length(char **strings, size_t length, char_compare_fn_t char_cmp, sort_compare_fn_t sort_cmp);
+selector_average_common_length(
+        carbon_vec_t *samples,
+        carbon_common_prefix_suffix_it_comp_dir_e char_cmp,
+        carbon_common_prefix_suffix_it_sort_dir_e sort_cmp
+);
 
 static size_t
-selector_estimate_huffman_table_size(carbon_huffman_encoder_t *encoder);
+selector_estimate_huffman_table_size(
+        carbon_huffman_encoder_t *encoder
+);
+
+static size_t
+selector_estimate_huffman_savings(
+        carbon_huffman_encoder_t *encoder,
+        size_t sample_entry_count,
+        size_t total_entry_count
+);
 
 static void
-selector_config_from_prefix_suffix_analysis(stringset_properties_t *properties);
+selector_estimate_huffman_encoder(
+        carbon_vec_t ofType(char *) *samples,
+        carbon_huffman_encoder_t *encoder
+);
 
-static void
-selector_analyze_prefix_suffix_properties(carbon_vec_t ofType(char const *) * entries, stringset_properties_t * properties);
+static ssize_t
+selector_evluate_model(
+        cost_model_input_t *input,
+        carbon_compressor_highlevel_config_t *config
+);
 
-static void
-selector_apply_to_compressor(stringset_properties_t * properties, carbon_compressor_t * compressor, carbon_doc_bulk_t const * context);
-
-static void
-selector_analyze_huffman_and_prefix_table(carbon_vec_t ofType(char const *) * strings, stringset_properties_t * properties);
-
-static void
-selector_analyze_prefix_table_size_and_savings(char **strings, size_t length, stringset_properties_t *properties);
-
-static bool
-selector_config_similar(stringset_properties_t *cfg_a, stringset_properties_t *cfg_b) {
-    if(cfg_a->compressor_config.prefix != cfg_b->compressor_config.prefix)
-        return false;
-
-    if(cfg_a->compressor_config.suffix != cfg_b->compressor_config.suffix)
-        return false;
-
-    if(cfg_a->compressor_config.huffman != cfg_b->compressor_config.huffman)
-        return false;
-
-    if(cfg_a->compressor_config.huffman)
-        return (
-            carbon_huffman_avg_bit_length(&cfg_a->huffman_encoder, cfg_b->huffman_encoder.frequencies)
-                    -
-            carbon_huffman_avg_bit_length(&cfg_a->huffman_encoder, cfg_a->huffman_encoder.frequencies)
-        ) < 0.1;
-
-    return true;
-}
-
-static void selector_sort_by_string(
-    carbon_vec_t * entries, size_t idx_offset, size_t length, bool forward
-) {
-    qsort(
-        (char const **)entries->base + idx_offset, length, sizeof(char const *),
-        forward ? carbon_sort_cmp_fwd : carbon_sort_cmp_rwd
-    );
-}
-
-static char const * selector_get_strvec_str(
-    carbon_vec_t * entries, size_t idx
-) {
-    return *(char const * const *)carbon_vec_at(entries, idx);
-}
-
-static size_t min(size_t a, size_t b) {
-    return a < b ? a : b;
-}
-
-static double minf(double a, double b) {
-    return a < b ? a : b;
-}
-
-static size_t max(size_t a, size_t b) {
-    return a > b ? a : b;
-}
-
-static ssize_t maxs(ssize_t a, ssize_t b) {
-    return a > b ? a : b;
-}
-
-static double maxf(double a, double b) {
-    return a > b ? a : b;
-}
-
-static bool char_cmp_prefix(size_t current_length, size_t previous_length, char const *current, char const *previous, size_t idx) {
-    CARBON_UNUSED(current_length);
-    CARBON_UNUSED(previous_length);
-    return current[idx] == previous[idx];
-}
-
-static bool char_cmp_suffix(size_t current_length, size_t previous_length, char const *current, char const *previous, size_t idx) {
-    CARBON_UNUSED(current_length);
-    CARBON_UNUSED(previous_length);
-    return current[current_length - 1 - idx] == previous[previous_length - 1 - idx];
-}
-
-carbon_compressor_t *carbon_compressor_find_by_strings_cost_based(
+carbon_compressor_selector_result_t carbon_compressor_find_by_strings_cost_based(
         carbon_vec_t ofType(char *) *strings,
-        carbon_doc_bulk_t const *context
+        carbon_doc_bulk_t const *context,
+        carbon_compressor_selector_sampling_config_t const sampling_config
     ) {
     CARBON_UNUSED(strings);
-    carbon_compressor_t *compressor = malloc(sizeof(carbon_compressor_t));
-
-    stringset_properties_t properties;
-    properties.num_entries = strings->num_elems;
-
-    selector_analyze_prefix_suffix_properties(strings, &properties);
-    selector_analyze_prefix_table_size_and_savings(strings->base, strings->num_elems, &properties);
-    selector_config_from_prefix_suffix_analysis(&properties);
-    selector_analyze_huffman_and_prefix_table(strings, &properties);
-
-
-    size_t huffman_saving_bytes =
-            (size_t)((8.0 - properties.huffman_average_bit_len) * properties.remaining_text_length) / 8;
-
-    properties.compressor_config.huffman = huffman_saving_bytes > properties.huffman_estimated_table_size;
-
-    CARBON_CONSOLE_WRITELN(
-                stdout,
-                "            pp = %.1f, ps = %.1f, sp = %.1f, ss = %.1f, avg_rem_len = %.1f",
-                properties.avg_pre_pre_len, properties.avg_pre_suf_len,
-                properties.avg_suf_pre_len, properties.avg_suf_suf_len,
-                (double)properties.remaining_text_length / strings->num_elems
-    );
-    CARBON_CONSOLE_WRITELN(
-                stdout,
-                "            avg_symbol_len = %.1f, est_saving = %zu, est_huff_tbl_size = %zu",
-                properties.huffman_average_bit_len,
-                huffman_saving_bytes,
-                properties.huffman_estimated_table_size
-    );
-    CARBON_CONSOLE_WRITELN(
-                stdout,
-                "            Detected settings: prefix = %s (avg %.1f), suffix = %s (avg %.1f), huffman = %s (svg %zu), rev_sort = %s, rev_str = %s",
-                (
-                    properties.compressor_config.prefix == carbon_compressor_incremental_prefix_type_incremental ? "incremental" : (
-                        properties.compressor_config.prefix == carbon_compressor_incremental_prefix_type_table ? "table" : "none")
-                ),
-                properties.avg_suf_pre_len,
-                (properties.compressor_config.suffix == carbon_compressor_incremental_prefix_type_incremental ? "incremental" : "none"),
-                properties.avg_suf_suf_len,
-                properties.compressor_config.huffman ? "true" : "false",
-                properties.compressor_config.huffman ? huffman_saving_bytes - properties.huffman_estimated_table_size : 0,
-                properties.compressor_config.reverse_sort ? "true" : "false",
-                properties.compressor_config.reverse_strings ? "true" : "false"
-    );
-
-
-    selector_apply_to_compressor(&properties, compressor, context);
-    return compressor;
-}
-
-static void selector_analyze_prefix_suffix_properties(
-    carbon_vec_t ofType(char const *) * strings, stringset_properties_t * properties
-) {
-    properties->avg_pre_pre_len = selector_average_common_length((char **)strings->base, strings->num_elems, char_cmp_prefix, carbon_sort_cmp_fwd);
-    properties->avg_pre_suf_len = selector_average_common_length((char **)strings->base, strings->num_elems, char_cmp_suffix, carbon_sort_cmp_fwd);
-    properties->avg_suf_pre_len = selector_average_common_length((char **)strings->base, strings->num_elems, char_cmp_prefix, carbon_sort_cmp_rwd);
-    properties->avg_suf_suf_len = selector_average_common_length((char **)strings->base, strings->num_elems, char_cmp_suffix, carbon_sort_cmp_rwd);
-}
-
-static void selector_apply_to_compressor(
-    stringset_properties_t * properties,
-    carbon_compressor_t * compressor,
-    carbon_doc_bulk_t const * context
-) {
-    char tmp_buffer[16];
+    CARBON_UNUSED(context);
 
     carbon_err_t err;
-    carbon_compressor_by_type(&err, compressor, context, CARBON_COMPRESSOR_INCREMENTAL);
-    carbon_compressor_set_option(
-                &err, compressor, "prefix",
-                properties->compressor_config.prefix == carbon_compressor_incremental_prefix_type_incremental ? "incremental" : (
-                    properties->compressor_config.prefix == carbon_compressor_incremental_prefix_type_table ? "table" : "none"
-                )
-    );
-    carbon_compressor_set_option(&err, compressor, "suffix", properties->compressor_config.suffix == carbon_compressor_incremental_prefix_type_incremental ? "incremental" : "none");
-    carbon_compressor_set_option(&err, compressor, "huffman", properties->compressor_config.huffman ? "true" : "false");
-    snprintf(tmp_buffer, 15, "%lu", properties->compressor_config.delta_chunk_length);
-    carbon_compressor_set_option(&err, compressor, "delta_chunk_length", tmp_buffer);
-    snprintf(tmp_buffer, 15, "%lu", properties->compressor_config.sort_chunk_length);
-    carbon_compressor_set_option(&err, compressor, "sort_chunk_length", tmp_buffer);
-}
 
-static void
-selector_analyze_huffman_and_prefix_table(
-    carbon_vec_t ofType(char const *) * strings,
-    stringset_properties_t * properties
-) {
-    properties->compressor_config.huffman = true;
+    carbon_vec_t *samples =
+            carbon_compressor_selector_sample_strings(strings, &sampling_config);
 
-    carbon_huffman_encoder_create(&properties->huffman_encoder);
+    ssize_t estd_savings = 0;
 
-    carbon_prefix_table *prefix_tbl_table = 0;
-    carbon_prefix_ro_tree *prefix_tbl_encoder = 0;
-    carbon_compressor_incremental_stringset_properties_t huffman_stringset_properties =
-        carbon_compressor_incremental_prepare_and_analyze(
-            strings, &properties->compressor_config, &prefix_tbl_table, &prefix_tbl_encoder,
-            &properties->huffman_encoder, selector_sort_by_string, selector_get_strvec_str
-        );
+    carbon_compressor_selector_result_t result;
+    carbon_huffman_encoder_t huffman_encoder;
+    selector_estimate_huffman_encoder(samples, &huffman_encoder);
 
-    properties->remaining_text_length = huffman_stringset_properties.total_remaining_text_length;
-    properties->huffman_average_bit_len = carbon_huffman_avg_bit_length(&properties->huffman_encoder, properties->huffman_encoder.frequencies);
-    properties->huffman_estimated_table_size = selector_estimate_huffman_table_size(&properties->huffman_encoder);
-
-    if(prefix_tbl_table)
-        carbon_prefix_table_free(prefix_tbl_table);
-    if(prefix_tbl_encoder)
-        carbon_prefix_ro_tree_free(prefix_tbl_encoder);
-    carbon_huffman_encoder_drop(&properties->huffman_encoder);
-}
-
-static void selector_config_from_prefix_suffix_analysis(
-        stringset_properties_t *properties
-) {
-    ssize_t delta_chunk_length = 20;
-
-    ssize_t s_pre_tbl = ((ssize_t)(properties->prefix_saving) - (ssize_t)properties->prefix_tbl_len - (ssize_t)(1.0 * properties->num_entries));
-    ssize_t s_suf_tbl = ((ssize_t)(properties->suffix_saving) - (ssize_t)properties->suffix_tbl_len - (ssize_t)(1.0 * properties->num_entries));
-
-    ssize_t s_pre_pre_inc = (ssize_t)((properties->avg_pre_pre_len - 1.0) * properties->num_entries);
-    ssize_t s_suf_suf_inc = (ssize_t)((properties->avg_suf_suf_len - 1.0) * properties->num_entries);
-    ssize_t s_pre_suf_inc = (ssize_t)((properties->avg_pre_suf_len - 1.0) * properties->num_entries);
-    ssize_t s_suf_pre_inc = (ssize_t)((properties->avg_suf_pre_len - 1.0) * properties->num_entries);
-
-    typedef struct local_config {
-        carbon_compressor_incremental_prefix_type_e prefix;
-        carbon_compressor_incremental_prefix_type_e suffix;
-
-        ssize_t pre_savings;
-        ssize_t suf_savings;
-        bool reverse;
-    } local_config_t;
-
-    (void)s_pre_tbl;
-    (void)s_suf_tbl;
-    (void)s_suf_suf_inc;
-    (void)s_suf_pre_inc;
-    (void)s_pre_pre_inc;
-    (void)s_pre_suf_inc;
-    local_config_t configs[] = {
-        { .prefix = carbon_compressor_incremental_prefix_type_none, .suffix = carbon_compressor_incremental_prefix_type_none, .reverse = false, .pre_savings = 0, .suf_savings = 0 },
-        { .prefix = carbon_compressor_incremental_prefix_type_table, .suffix = carbon_compressor_incremental_prefix_type_incremental, .reverse = false, .pre_savings = s_pre_tbl, .suf_savings = s_suf_suf_inc },
-        { .prefix = carbon_compressor_incremental_prefix_type_table, .suffix = carbon_compressor_incremental_prefix_type_none, .reverse = false, .pre_savings = s_pre_tbl, .suf_savings = 0 },
-        { .prefix = carbon_compressor_incremental_prefix_type_incremental, .suffix = carbon_compressor_incremental_prefix_type_incremental, .reverse = false, .pre_savings = s_suf_pre_inc, .suf_savings = s_suf_suf_inc },
-        { .prefix = carbon_compressor_incremental_prefix_type_incremental, .suffix = carbon_compressor_incremental_prefix_type_none, .reverse = false, .pre_savings = s_suf_pre_inc, .suf_savings = 0 },
-        { .prefix = carbon_compressor_incremental_prefix_type_none, .suffix = carbon_compressor_incremental_prefix_type_incremental, .reverse = false, .pre_savings = 0, .suf_savings = s_suf_suf_inc },
-        { .prefix = carbon_compressor_incremental_prefix_type_table, .suffix = carbon_compressor_incremental_prefix_type_incremental, .reverse = true, .pre_savings = s_suf_tbl, .suf_savings = s_pre_pre_inc },
-        { .prefix = carbon_compressor_incremental_prefix_type_table, .suffix = carbon_compressor_incremental_prefix_type_none, .reverse = true, .pre_savings = s_suf_tbl, .suf_savings = 0 },
-        { .prefix = carbon_compressor_incremental_prefix_type_incremental, .suffix = carbon_compressor_incremental_prefix_type_incremental, .reverse = true, .pre_savings = s_pre_suf_inc, .suf_savings = s_pre_pre_inc },
-        { .prefix = carbon_compressor_incremental_prefix_type_incremental, .suffix = carbon_compressor_incremental_prefix_type_none, .reverse = true, .pre_savings = s_pre_suf_inc, .suf_savings = 0 },
-        { .prefix = carbon_compressor_incremental_prefix_type_none, .suffix = carbon_compressor_incremental_prefix_type_incremental, .reverse = true, .pre_savings = 0, .suf_savings = s_pre_pre_inc }
+    cost_model_input_t input = {
+        .huffman_savings = selector_estimate_huffman_savings(&huffman_encoder, samples->num_elems, strings->num_elems),
+        .sample_entry_count = samples->num_elems,
+        .total_entry_count = strings->num_elems,
+        .avg_prefix_prefix_len = selector_average_common_length(samples, carbon_cps_comp_from_start, carbon_cps_sort_from_start),
+        .avg_prefix_suffix_len = selector_average_common_length(samples, carbon_cps_comp_from_end, carbon_cps_sort_from_start),
+        .avg_suffix_prefix_len = selector_average_common_length(samples, carbon_cps_comp_from_start, carbon_cps_sort_from_end),
+        .avg_suffix_suffix_len = selector_average_common_length(samples, carbon_cps_comp_from_end, carbon_cps_sort_from_end)
     };
 
-    local_config_t best_config = configs[0];
-    ssize_t best_config_savings = configs[0].pre_savings + configs[0].suf_savings;
 
-    for(size_t i = 0; i < sizeof(configs) / sizeof(configs[0]); ++i) {
-        printf("%s (%zd) / %s (%zd) / %s : %zd\n",
-               configs[i].prefix == carbon_compressor_incremental_prefix_type_none ? "none" : (configs[i].prefix == carbon_compressor_incremental_prefix_type_table ? "table" : "incremental"),
-               configs[i].pre_savings,
-               configs[i].suffix == carbon_compressor_incremental_prefix_type_none ? "none" : (configs[i].suffix == carbon_compressor_incremental_prefix_type_table ? "table" : "incremental"),
-               configs[i].suf_savings,
-               configs[i].reverse ? "rwd" : "fwd",
-               configs[i].pre_savings + configs[i].suf_savings
-        );
-
-        if(configs[i].pre_savings + configs[i].suf_savings > best_config_savings) {
-            best_config_savings = configs[i].pre_savings + configs[i].suf_savings;
-            best_config = configs[i];
-        }
-    }
-
-    printf(" --> %s / %s / %s : %zd\n",
-           best_config.prefix == carbon_compressor_incremental_prefix_type_none ? "none" : (best_config.prefix == carbon_compressor_incremental_prefix_type_table ? "table" : "incremental"),
-           best_config.suffix == carbon_compressor_incremental_prefix_type_none ? "none" : (best_config.suffix == carbon_compressor_incremental_prefix_type_table ? "table" : "incremental"),
-           best_config.reverse ? "rwd" : "fwd",
-           best_config.pre_savings + best_config.suf_savings
+    CARBON_CONSOLE_WRITELN(
+        stdout, "            hufsav: %zu, avg_pre_pre: %.3f, avg_pre_suf: %.3f, avg_suf_pre: %.3f, avg_suf_suf: %.3f",
+        input.huffman_savings,
+        input.avg_prefix_prefix_len, input.avg_prefix_suffix_len,
+        input.avg_suffix_prefix_len, input.avg_suffix_suffix_len
     );
 
-    properties->compressor_config.prefix = best_config.prefix;
-    properties->compressor_config.suffix = best_config.suffix;
-    properties->compressor_config.reverse_strings = best_config.reverse;
+    carbon_compressor_highlevel_config_t configurations[] = {
+        { .prefix = none,  .suffix = none,  .reverse_strings = false, .reverse_sort = false, .huffman = false },
+        { .prefix = none,  .suffix = none,  .reverse_strings = false, .reverse_sort = false, .huffman = true  },
+        { .prefix = none,  .suffix = none,  .reverse_strings = true,  .reverse_sort = false, .huffman = false },
+        { .prefix = none,  .suffix = none,  .reverse_strings = true,  .reverse_sort = false, .huffman = true  },
+        { .prefix = none,  .suffix = inc,   .reverse_strings = false, .reverse_sort = false, .huffman = false },
+        { .prefix = none,  .suffix = inc,   .reverse_strings = false, .reverse_sort = false, .huffman = true  },
+        { .prefix = none,  .suffix = inc,   .reverse_strings = true,  .reverse_sort = false, .huffman = false },
+        { .prefix = none,  .suffix = inc,   .reverse_strings = true,  .reverse_sort = false, .huffman = true  },
+        { .prefix = inc,   .suffix = none,  .reverse_strings = false, .reverse_sort = false, .huffman = false },
+        { .prefix = inc,   .suffix = none,  .reverse_strings = false, .reverse_sort = false, .huffman = true  },
+        { .prefix = inc,   .suffix = none,  .reverse_strings = true,  .reverse_sort = false, .huffman = false },
+        { .prefix = inc,   .suffix = none,  .reverse_strings = true,  .reverse_sort = false, .huffman = true  },
+        { .prefix = inc,   .suffix = inc,   .reverse_strings = false, .reverse_sort = false, .huffman = false },
+        { .prefix = inc,   .suffix = inc,   .reverse_strings = false, .reverse_sort = false, .huffman = true  },
+        { .prefix = inc,   .suffix = inc,   .reverse_strings = true,  .reverse_sort = false, .huffman = false },
+        { .prefix = inc,   .suffix = inc,   .reverse_strings = true,  .reverse_sort = false, .huffman = true  },
+        { .prefix = table, .suffix = none,  .reverse_strings = false, .reverse_sort = false, .huffman = false },
+        { .prefix = table, .suffix = none,  .reverse_strings = false, .reverse_sort = false, .huffman = true  },
+        { .prefix = table, .suffix = none,  .reverse_strings = true,  .reverse_sort = false, .huffman = false },
+        { .prefix = table, .suffix = none,  .reverse_strings = true,  .reverse_sort = false, .huffman = true  },
+        { .prefix = table, .suffix = inc,   .reverse_strings = false, .reverse_sort = false, .huffman = false },
+        { .prefix = table, .suffix = inc,   .reverse_strings = false, .reverse_sort = false, .huffman = true  },
+        { .prefix = table, .suffix = inc,   .reverse_strings = true,  .reverse_sort = false, .huffman = false },
+        { .prefix = table, .suffix = inc,   .reverse_strings = true,  .reverse_sort = false, .huffman = true  },
 
-    properties->compressor_config.reverse_sort = true;
-    properties->compressor_config.delta_chunk_length = delta_chunk_length;
-    properties->compressor_config.sort_chunk_length = 10000000;
-}
+        { .prefix = none,  .suffix = none,  .reverse_strings = false, .reverse_sort = true,  .huffman = false },
+        { .prefix = none,  .suffix = none,  .reverse_strings = false, .reverse_sort = true,  .huffman = true  },
+        { .prefix = none,  .suffix = none,  .reverse_strings = true,  .reverse_sort = true,  .huffman = false },
+        { .prefix = none,  .suffix = none,  .reverse_strings = true,  .reverse_sort = true,  .huffman = true  },
+        { .prefix = none,  .suffix = inc,   .reverse_strings = false, .reverse_sort = true,  .huffman = false },
+        { .prefix = none,  .suffix = inc,   .reverse_strings = false, .reverse_sort = true,  .huffman = true  },
+        { .prefix = none,  .suffix = inc,   .reverse_strings = true,  .reverse_sort = true,  .huffman = false },
+        { .prefix = none,  .suffix = inc,   .reverse_strings = true,  .reverse_sort = true,  .huffman = true  },
+        { .prefix = inc,   .suffix = none,  .reverse_strings = false, .reverse_sort = true,  .huffman = false },
+        { .prefix = inc,   .suffix = none,  .reverse_strings = false, .reverse_sort = true,  .huffman = true  },
+        { .prefix = inc,   .suffix = none,  .reverse_strings = true,  .reverse_sort = true,  .huffman = false },
+        { .prefix = inc,   .suffix = none,  .reverse_strings = true,  .reverse_sort = true,  .huffman = true  },
+        { .prefix = inc,   .suffix = inc,   .reverse_strings = false, .reverse_sort = true,  .huffman = false },
+        { .prefix = inc,   .suffix = inc,   .reverse_strings = false, .reverse_sort = true,  .huffman = true  },
+        { .prefix = inc,   .suffix = inc,   .reverse_strings = true,  .reverse_sort = true,  .huffman = false },
+        { .prefix = inc,   .suffix = inc,   .reverse_strings = true,  .reverse_sort = true,  .huffman = true  },
+        { .prefix = table, .suffix = none,  .reverse_strings = false, .reverse_sort = true,  .huffman = false },
+        { .prefix = table, .suffix = none,  .reverse_strings = false, .reverse_sort = true,  .huffman = true  },
+        { .prefix = table, .suffix = none,  .reverse_strings = true,  .reverse_sort = true,  .huffman = false },
+        { .prefix = table, .suffix = none,  .reverse_strings = true,  .reverse_sort = true,  .huffman = true  },
+        { .prefix = table, .suffix = inc,   .reverse_strings = false, .reverse_sort = true,  .huffman = false },
+        { .prefix = table, .suffix = inc,   .reverse_strings = false, .reverse_sort = true,  .huffman = true  },
+        { .prefix = table, .suffix = inc,   .reverse_strings = true,  .reverse_sort = true,  .huffman = false },
+        { .prefix = table, .suffix = inc,   .reverse_strings = true,  .reverse_sort = true,  .huffman = true  }
+    };
 
-static void selector_analyze_prefix_table_size_and_savings(
-        char **strings, size_t length, stringset_properties_t *properties
-    ) {
-    if(length <= BLOCK_LENGTH) {
-        properties->prefix_tbl_len = 0;
-        properties->suffix_tbl_len = 0;
-        properties->prefix_saving = 0;
-        properties->suffix_saving = 0;
-        return;
-    }
-
-    carbon_prefix_encoder_config * cfg = carbon_prefix_encoder_auto_config(length, 2.0);
-
-    carbon_prefix_tree_node * fwd_root = carbon_prefix_tree_node_create(0);
-    carbon_prefix_tree_node * rwd_root = carbon_prefix_tree_node_create(0);
-
-    for(size_t i = 0; i < length; ++i) {
-        char const * current = strings[i];
-        char * tnerruc = strdup(strings[i]);
-        carbon_str_reverse(tnerruc);
-
-        carbon_prefix_tree_node_add_string(fwd_root, current, cfg->max_new_children_per_entry);
-        carbon_prefix_tree_node_add_string(rwd_root, tnerruc, cfg->max_new_children_per_entry);
-
-        free(tnerruc);
-    }
-
-    carbon_prefix_tree_node_prune(fwd_root, cfg->prune_min_support);
-    carbon_prefix_tree_node_prune(rwd_root, cfg->prune_min_support);
-
-    carbon_prefix_tree_calculate_savings(fwd_root, 15);
-    carbon_prefix_tree_calculate_savings(rwd_root, 15);
-
-    carbon_prefix_table * fwd_table = carbon_prefix_table_create();
-    carbon_prefix_table * rwd_table = carbon_prefix_table_create();
-    carbon_prefix_tree_encode_all_with_queue(fwd_root, fwd_table);
-    carbon_prefix_tree_encode_all_with_queue(rwd_root, rwd_table);
-
-    properties->prefix_tbl_len = carbon_prefix_table_num_bytes(fwd_table);
-    properties->suffix_tbl_len = carbon_prefix_table_num_bytes(rwd_table);
-
-    carbon_prefix_ro_tree * fwd_encoder = carbon_prefix_table_to_encoder_tree(fwd_table);
-    carbon_prefix_ro_tree * rwd_encoder = carbon_prefix_table_to_encoder_tree(rwd_table);
-
-    size_t fwd_length_sum = 0;
-    size_t rwd_length_sum = 0;
-
-    for(size_t i = 0; i < NUM_BLOCKS; ++i) {
-        size_t const start_idx = (size_t)(rand() % (length - BLOCK_LENGTH));
-
-        for(size_t j = 0; j < BLOCK_LENGTH;++j) {
-            char const * current = strings[j + start_idx];
-            char * tnerruc = strdup(current);
-            carbon_str_reverse(tnerruc);
-
-            size_t fwd_max_length = 0;
-            size_t rwd_max_length = 0;
-
-            carbon_prefix_ro_tree_max_prefix(fwd_encoder, current, &fwd_max_length);
-            carbon_prefix_ro_tree_max_prefix(rwd_encoder, current, &rwd_max_length);
-
-            fwd_length_sum += fwd_max_length;
-            rwd_length_sum += rwd_max_length;
-
-            free(tnerruc);
+    for(size_t i = 0; i < sizeof(configurations)/sizeof(configurations[0]);++i) {
+        ssize_t const size = selector_evluate_model(&input, &configurations[i]);
+        if(size > estd_savings) {
+            estd_savings  = size;
+            result.config = configurations[i];
         }
     }
 
-    free(cfg);
-    carbon_prefix_ro_tree_free(fwd_encoder);
-    carbon_prefix_ro_tree_free(rwd_encoder);
-    carbon_prefix_tree_node_free(&fwd_root);
-    carbon_prefix_tree_node_free(&rwd_root);
-    carbon_prefix_table_free(fwd_table);
-    carbon_prefix_table_free(rwd_table);
+    result.joinable_group = 0;
+    result.compressor     = malloc(sizeof(carbon_compressor_t));
 
-    properties->prefix_saving = (size_t)((double)fwd_length_sum / (double)(BLOCK_LENGTH * NUM_BLOCKS) * properties->num_entries);
-    properties->suffix_saving = (size_t)((double)rwd_length_sum / (double)(BLOCK_LENGTH * NUM_BLOCKS) * properties->num_entries);
+    carbon_compressor_by_type(&err, result.compressor, context, CARBON_COMPRESSOR_INCREMENTAL);
+    carbon_compressor_selector_apply_highlevel_config(result.compressor, &result.config);
+
+    CARBON_CONSOLE_WRITELN(
+                stdout,
+                "            Detected settings: prefix = %s, suffix = %s, huffman = %s, rev_str = %s, rev_sort = %s",
+                (result.config.prefix == inc ? "incremental" : ( result.config.prefix == table ? "table" : "none" )),
+                (result.config.suffix == inc ? "incremental" : ( result.config.suffix == table ? "table" : "none" )),
+                result.config.huffman ?         "true" : "false",
+                result.config.reverse_strings ? "true" : "false",
+                result.config.reverse_sort ?    "true" : "false"
+    );
+
+    carbon_vec_drop(samples);
+    free(samples);
+
+    carbon_huffman_encoder_drop(&huffman_encoder);
+    return result;
 }
+
 
 static double selector_average_common_length(
-        char **strings, size_t length,
-        char_compare_fn_t char_cmp, sort_compare_fn_t sort_cmp
+        carbon_vec_t ofType(char *) *samples,
+        carbon_common_prefix_suffix_it_comp_dir_e comp,
+        carbon_common_prefix_suffix_it_sort_dir_e sort
     ) {
-    if(length <= 1)
+    if(samples->num_elems <= 1)
         return 0;
 
-    size_t const block_len = min(BLOCK_LENGTH, length - 1);
-
-    char **cpy = malloc(sizeof(char *) * length);
-    memcpy(cpy, strings, sizeof(char *) * length);
-    qsort(cpy, length, sizeof(char *), sort_cmp);
-
     size_t prefix_length_sum = 0;
-    for(size_t i = 0; i < NUM_BLOCKS; ++i) {
-        size_t const start_idx = (size_t)(rand() % (length - block_len));
-
-        char const * previous = "";
-        size_t previous_length = 0;
-        for(size_t j = 0; j < block_len;++j) {
-            char   const * current        = cpy[j + start_idx];
-            size_t const   current_length = strlen(current);
-
-            size_t max_length = min(current_length, min(previous_length, 255));
-            size_t prefix_length = 0;
-            for(; prefix_length < max_length && char_cmp(current_length, previous_length, current, previous, prefix_length);++prefix_length);
-
-            previous = current;
-            previous_length = current_length;
-            prefix_length_sum += prefix_length;
-        }
+    for(carbon_cps_it it = carbon_cps_begin(samples, sort, comp);it.valid;carbon_cps_next(&it)) {
+        prefix_length_sum += it.common_length;
     }
 
-    free(cpy);
-    return (double)prefix_length_sum / (NUM_BLOCKS * block_len);
+    return (double)prefix_length_sum / samples->num_elems;
+}
+
+static size_t selector_estimate_huffman_savings(
+        carbon_huffman_encoder_t *encoder,
+        size_t sample_entry_count,
+        size_t total_entry_count
+    ) {
+    double abl = carbon_huffman_avg_bit_length(encoder, encoder->frequencies);
+
+    size_t total_symbol_count = 0;
+    for(size_t i = 0; i < UCHAR_MAX + 1; ++i) {
+        total_symbol_count += encoder->frequencies[ i ];
+    }
+
+    // Scale the number of entries up to represent the original number of symbols
+    total_symbol_count *= (double)total_entry_count / (double)sample_entry_count;
+
+    ssize_t bytes_saved =
+            (ssize_t)((8.0 - abl) / 8.0 * total_symbol_count) -
+            (ssize_t)selector_estimate_huffman_table_size(encoder);
+    return bytes_saved < 0 ? 0 : (size_t)bytes_saved;
+}
+
+static void selector_estimate_huffman_encoder(
+        carbon_vec_t ofType(char *) *samples,
+        carbon_huffman_encoder_t *encoder
+    ) {    
+    typedef struct { size_t prefix; size_t suffix; } local_hashmap_entry_t;
+
+    carbon_huffman_encoder_create(encoder);
+
+    // Avoid a lot of small size allocations -> allocate once
+    local_hashmap_entry_t * prefix_suffix_mem = malloc(sizeof(local_hashmap_entry_t) * samples->num_elems);
+
+    carbon_hashmap_t map = carbon_hashmap_new();
+    for(carbon_cps_it it = carbon_cps_begin(samples, carbon_cps_sort_from_start, carbon_cps_comp_from_start);it.valid;carbon_cps_next(&it)) {
+        local_hashmap_entry_t *entry = prefix_suffix_mem + it.index;
+        entry->prefix = it.common_length;
+
+        carbon_hashmap_put(map, it.current, entry);
+    }
+
+    for(carbon_cps_it it = carbon_cps_begin(samples, carbon_cps_sort_from_end, carbon_cps_comp_from_end);it.valid;carbon_cps_next(&it)) {
+        local_hashmap_entry_t * entry;
+        carbon_hashmap_get(map, it.current, (carbon_hashmap_any_t)&entry);
+        entry->suffix = it.common_length;
+    }
+
+    carbon_huffman_encoder_create(encoder);
+    for(carbon_hashmap_iterator_t it = carbon_hashmap_begin(map);it.valid;carbon_hashmap_next(&it)) {
+        local_hashmap_entry_t * entry = (local_hashmap_entry_t *)it.value;
+
+        size_t string_length = strlen(it.key);
+        if(string_length > entry->prefix + entry->suffix)
+            carbon_huffman_encoder_learn_frequencies(encoder, it.key + entry->prefix, string_length - entry->prefix - entry->suffix);
+    }
+
+    carbon_huffman_encoder_bake_codes(encoder);
+}
+
+static ssize_t selector_evluate_model(
+        cost_model_input_t *input,
+        carbon_compressor_highlevel_config_t *config
+    ) {
+    CARBON_UNUSED(input);
+    CARBON_UNUSED(config);
+
+    ssize_t savings = 0;
+
+    switch(config->prefix) {
+    case carbon_compressor_incremental_prefix_type_incremental:
+    {
+        if(config->reverse_strings)
+            savings += ((config->reverse_sort ? input->avg_suffix_suffix_len : input->avg_prefix_suffix_len) - 1.0) * (ssize_t)input->total_entry_count;
+        else
+            savings += ((config->reverse_sort ? input->avg_suffix_prefix_len : input->avg_prefix_prefix_len) - 1.0) * (ssize_t)input->total_entry_count;
+
+        break;
+    }
+    case carbon_compressor_incremental_prefix_type_table:
+    {
+        if(config->reverse_strings)
+            savings += (input->avg_suffix_suffix_len - 2.0) * (ssize_t)input->total_entry_count;
+        else
+            savings += (input->avg_prefix_prefix_len - 2.0) * (ssize_t)input->total_entry_count;
+
+        break;
+    }
+    default:
+        break;
+    }
+
+
+
+    switch(config->suffix) {
+    case carbon_compressor_incremental_prefix_type_incremental:
+    {
+        if(config->reverse_strings)
+            savings += ((config->reverse_sort ? input->avg_prefix_prefix_len : input->avg_suffix_prefix_len) - 1.0) * (ssize_t)input->total_entry_count;
+        else
+            savings += ((config->reverse_sort ? input->avg_prefix_suffix_len : input->avg_suffix_suffix_len) - 1.0) * (ssize_t)input->total_entry_count;
+
+        break;
+    }
+    default:
+        break;
+    }
+
+    if(config->huffman)
+        savings += input->huffman_savings;
+
+    return savings;
 }
 
 static size_t selector_estimate_huffman_table_size(
-    carbon_huffman_encoder_t *encoder
-        ) {
+        carbon_huffman_encoder_t *encoder
+    ) {
     size_t total_size = 0;
 
     size_t num_entries = 0;

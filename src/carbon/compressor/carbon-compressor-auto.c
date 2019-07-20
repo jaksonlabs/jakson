@@ -8,7 +8,15 @@
 #include <carbon/compressor/auto/similarity.h>
 #include <carbon/compressor/auto/selector-cost-based.h>
 #include <carbon/compressor/auto/selector-brute-force.h>
+#include <carbon/compressor/auto/selector-rule-based.h>
 #include <carbon/compressor/carbon-compressor-auto.h>
+
+typedef enum selector {
+    selector_brute_force = 0,
+    selector_cost_model,
+    selector_rule_based,
+    selector__last = selector_rule_based
+} selector_e;
 
 typedef struct {
     char const *key;
@@ -32,7 +40,10 @@ typedef struct {
     carbon_off_t range_begin_table_offset;
     carbon_compressor_t *current_range_compressor;
 
+    selector_e selector;
+    carbon_compressor_selector_sampling_config_t sampling_config;
     carbon_compressor_selector_brute_force_config_t bf_config;
+    carbon_compressor_selector_rule_based_config_t rb_config;
 } carbon_compressor_auto_extra_t;
 
 
@@ -129,6 +140,15 @@ carbon_string_id_t  this_safe_find_key(carbon_strdic_t *dic, char const * key) {
     return id;
 }
 
+static char const * selector_name(selector_e selector) {
+    switch(selector) {
+    case selector_brute_force: return "brute-force";
+    case selector_cost_model: return "cost-model";
+    case selector_rule_based: return "rule-based";
+    }
+}
+
+
 static bool set_size_type_option(carbon_err_t *err, char *value, size_t *value_ptr) {
     long long parsed_value = atoll(value);
 
@@ -141,26 +161,50 @@ static bool set_size_type_option(carbon_err_t *err, char *value, size_t *value_p
     return true;
 }
 
-static bool set_cfg_bf_sample_enable(carbon_err_t *err, carbon_compressor_t *self, char *value) {
+static bool set_cfg_sample_enable(carbon_err_t *err, carbon_compressor_t *self, char *value) {
     if(strcmp(value, "true") == 0) {
-        ((carbon_compressor_auto_extra_t *)self->extra)->bf_config.sampling_enabled = true; return true;
+        ((carbon_compressor_auto_extra_t *)self->extra)->sampling_config.enabled = true; return true;
     } else if(strcmp(value, "false") == 0) {
-        ((carbon_compressor_auto_extra_t *)self->extra)->bf_config.sampling_enabled = false; return true;
+        ((carbon_compressor_auto_extra_t *)self->extra)->sampling_config.enabled = false; return true;
     } else {
         CARBON_ERROR(err, CARBON_ERR_COMPRESSOR_OPT_VAL_INVALID); return false;
     }
 }
 
-static bool set_cfg_bf_sample_block_count(carbon_err_t *err, carbon_compressor_t *self, char *value) {
-    return set_size_type_option(err, value, &((carbon_compressor_auto_extra_t *)self->extra)->bf_config.sampling_block_count);
+static bool set_cfg_sample_block_count(carbon_err_t *err, carbon_compressor_t *self, char *value) {
+    return set_size_type_option(err, value, &((carbon_compressor_auto_extra_t *)self->extra)->sampling_config.block_count);
 }
 
-static bool set_cfg_bf_sample_block_length(carbon_err_t *err, carbon_compressor_t *self, char *value) {
-    return set_size_type_option(err, value, &((carbon_compressor_auto_extra_t *)self->extra)->bf_config.sampling_block_length);
+static bool set_cfg_sample_block_length(carbon_err_t *err, carbon_compressor_t *self, char *value) {
+    return set_size_type_option(err, value, &((carbon_compressor_auto_extra_t *)self->extra)->sampling_config.block_length);
 }
 
-static bool set_cfg_bf_sample_min_entries(carbon_err_t *err, carbon_compressor_t *self, char *value) {
-    return set_size_type_option(err, value, &((carbon_compressor_auto_extra_t *)self->extra)->bf_config.sampling_min_entries);
+static bool set_cfg_sample_min_entries(carbon_err_t *err, carbon_compressor_t *self, char *value) {
+    return set_size_type_option(err, value, &((carbon_compressor_auto_extra_t *)self->extra)->sampling_config.min_entries);
+}
+
+static bool set_cfg_selector(carbon_err_t *err, carbon_compressor_t *self, char *value) {
+    carbon_compressor_auto_extra_t * extra =
+            (carbon_compressor_auto_extra_t *)self->extra;
+
+    for(int i = 0; i <= selector__last; ++i) {
+        if(strcmp(value, selector_name((selector_e)i)) == 0) {
+            extra->selector = (selector_e)i;
+            return true;
+        }
+    }
+
+    CARBON_ERROR(err, CARBON_ERR_COMPRESSOR_OPT_VAL_INVALID);
+    return false;
+}
+
+static bool set_cfg_rb_filename(carbon_err_t *err, carbon_compressor_t *self, char *value) {
+    CARBON_UNUSED(err);
+
+    carbon_compressor_auto_extra_t * extra =
+            (carbon_compressor_auto_extra_t *)self->extra;
+    extra->rb_config.ruleset_filename = value;
+    return true;
 }
 
 
@@ -175,6 +219,7 @@ carbon_compressor_auto_init(carbon_compressor_t *self, carbon_doc_bulk_t const *
 
     carbon_compressor_auto_extra_t *extra =
             (carbon_compressor_auto_extra_t *)self->extra;
+    extra->selector = selector_brute_force;
     extra->compressors = carbon_hashmap_new();
 
 
@@ -199,13 +244,20 @@ carbon_compressor_auto_init(carbon_compressor_t *self, carbon_doc_bulk_t const *
     carbon_vec_create(&extra->ranges, NULL, sizeof(carbon_compressor_auto_range_t), 10);
     carbon_vec_create(&extra->range_begin_table, NULL, sizeof(carbon_off_t), 10);
 
+    carbon_compressor_selector_sampling_config_init(&extra->sampling_config);
     carbon_compressor_selector_brute_force_config_init(&extra->bf_config);
+    carbon_compressor_selector_rule_based_config_init(&extra->rb_config);
+
+    carbon_hashmap_put(self->options, "selector", (carbon_hashmap_any_t)&set_cfg_selector);
+    {
+        carbon_hashmap_put(self->options, "sampling.enabled", (carbon_hashmap_any_t)&set_cfg_sample_enable);
+        carbon_hashmap_put(self->options, "sampling.block-length", (carbon_hashmap_any_t)&set_cfg_sample_block_length);
+        carbon_hashmap_put(self->options, "sampling.block-count", (carbon_hashmap_any_t)&set_cfg_sample_block_count);
+        carbon_hashmap_put(self->options, "sampling.min-entries", (carbon_hashmap_any_t)&set_cfg_sample_min_entries);
+    }
 
     {
-        carbon_hashmap_put(self->options, "brute_force.sampling_enabled", (carbon_hashmap_any_t)&set_cfg_bf_sample_enable);
-        carbon_hashmap_put(self->options, "brute_force.sampling_block_length", (carbon_hashmap_any_t)&set_cfg_bf_sample_block_length);
-        carbon_hashmap_put(self->options, "brute_force.sampling_block_count", (carbon_hashmap_any_t)&set_cfg_bf_sample_block_count);
-        carbon_hashmap_put(self->options, "brute_force.sampling_min_entries", (carbon_hashmap_any_t)&set_cfg_bf_sample_min_entries);
+        carbon_hashmap_put(self->options, "rule-based.filename", (carbon_hashmap_any_t)&set_cfg_rb_filename);
     }
 
     return true;
@@ -216,7 +268,6 @@ carbon_compressor_auto_prepare_entries(carbon_compressor_t *self,
                                        carbon_vec_t ofType(carbon_strdic_entry_t) *unused_entries)
 {
     CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_AUTO);
-    CARBON_UNUSED(unused_entries);
 
     carbon_compressor_auto_extra_t *extra =
             (carbon_compressor_auto_extra_t *)self->extra;
@@ -252,28 +303,34 @@ carbon_compressor_auto_prepare_entries(carbon_compressor_t *self,
             continue;
         }
 
-        CARBON_CONSOLE_WRITELN(stdout, "      - Setting up compressor for %s", it.key);
+        CARBON_CONSOLE_WRITELN(stdout, "      - Setting up compressor for %s using %s", it.key, selector_name(extra->selector));
 
-        carbon_compressor_selector_result_t tmp = carbon_compressor_find_by_strings_brute_force(&strings_for_key, extra->context, extra->bf_config);
+        carbon_compressor_selector_result_t tmp;
+
+        switch(extra->selector) {
+            case selector_brute_force:
+            {
+                tmp = carbon_compressor_find_by_strings_brute_force(&strings_for_key, extra->context, extra->bf_config, extra->sampling_config);
+                break;
+            }
+            case selector_cost_model:
+            {
+                tmp = carbon_compressor_find_by_strings_cost_based(&strings_for_key, extra->context, extra->sampling_config);
+                break;
+            }
+            case selector_rule_based:
+            {
+                tmp = carbon_compressor_find_by_strings_rule_based(&strings_for_key, extra->context, &extra->rb_config, extra->sampling_config);
+                break;
+            }
+        }
+
         for(carbon_hashmap_iterator_t inner_it = carbon_hashmap_begin(extra->compressors);inner_it.valid;carbon_hashmap_next(&inner_it)) {
             if(carbon_compressor_config_similarity(&tmp, (carbon_compressor_selector_result_t*)inner_it.value)) {
                 CARBON_CONSOLE_WRITELN(stdout, "            Joining %s to %s", it.key, inner_it.key);
 
                 carbon_string_id_t old_key_id = this_safe_find_key(extra->context->dic, inner_it.key);
                 carbon_strdic_join_grouping_keys(extra->context->dic, new_key_id, old_key_id);
-
-                carbon_compressor_selector_result_t* exiting_compressor =
-                        (carbon_compressor_selector_result_t*)inner_it.value;
-                carbon_compressor_incremental_config_t *config =
-                        &((carbon_compressor_incremental_extra_t *)exiting_compressor->compressor->extra)->config;
-
-                if(config->suffix == carbon_compressor_incremental_prefix_type_incremental) {
-                    config->suffix = carbon_compressor_incremental_prefix_type_table;
-                    CARBON_CONSOLE_WRITELN(
-                                stdout, "            Changing suffix from %s to %s because of the join",
-                                "incremental", "table"
-                    );
-                }
 
                 similar_compressor_found = true;
                 break;
@@ -349,6 +406,8 @@ carbon_compressor_auto_prepare_entries(carbon_compressor_t *self,
 
         offset += num_values;
     }
+
+    carbon_vec_cpy_to(unused_entries, entries);
 
     carbon_vec_drop(&keys);
     carbon_vec_drop(entries);

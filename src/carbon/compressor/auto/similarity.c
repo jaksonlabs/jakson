@@ -6,9 +6,18 @@ bool carbon_compressor_config_similarity(
     )
 {
     if(
+            a->joinable_group == SIZE_MAX ||
+            b->joinable_group == SIZE_MAX ||
+            a->joinable_group != b->joinable_group
+    ) {
+        return false;
+    }
+
+    if(
             a->config.prefix != b->config.prefix ||
             a->config.suffix != b->config.suffix ||
-            a->config.reverse != b->config.reverse ||
+            a->config.reverse_strings != b->config.reverse_strings ||
+            a->config.reverse_sort    != b->config.reverse_sort ||
             a->config.huffman != b->config.huffman
     ) {
         return false;

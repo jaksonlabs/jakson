@@ -472,7 +472,7 @@ carbon_compressor_incremental_stringset_properties_t carbon_compressor_increment
             properties.total_remaining_text_length += total_length;
         }
 
-        carbon_huffman_encoder_bake_code(huffman_encoder);
+        carbon_huffman_encoder_bake_codes(huffman_encoder);
     }
 
     for(size_t i = 0; i < strings.num_elems; ++i) {

@@ -139,3 +139,15 @@ const char *carbon_remove_common_prefix_and_suffix(
     *length = current_length - prefix_length - suffix_length;
     return current + prefix_length;
 }
+
+size_t carbon_str_vec_total_length(
+        carbon_vec_t ofType(char *) *vec
+    )
+{
+    size_t total_num_bytes = 0;
+    for(size_t i = 0; i < vec->num_elems; ++i) {
+        total_num_bytes += strlen(*(char * const *)carbon_vec_at(vec, i));
+    }
+
+    return total_num_bytes;
+}

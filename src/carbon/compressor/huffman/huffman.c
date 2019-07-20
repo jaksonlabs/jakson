@@ -66,7 +66,7 @@ void carbon_huffman_encoder_learn_frequencies(
     }
 }
 
-void carbon_huffman_encoder_bake_code(
+void carbon_huffman_encoder_bake_codes(
         carbon_huffman_encoder_t *encoder
     )
 {
@@ -345,7 +345,7 @@ void carbon_huffman_adaptive_update(
         carbon_huffman_encoder_learn_frequencies(encoder, entries[i], strlen(entries[i]));
     }
 
-    carbon_huffman_encoder_bake_code(encoder);
+    carbon_huffman_encoder_bake_codes(encoder);
 }
 
 void carbon_huffman_create_all_eq_encoder(
@@ -355,7 +355,7 @@ void carbon_huffman_create_all_eq_encoder(
         encoder->frequencies[i] = 1;
     }
 
-    carbon_huffman_encoder_bake_code(encoder);
+    carbon_huffman_encoder_bake_codes(encoder);
 }
 
 char *carbon_huffman_decode_io(
