@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <inttypes.h>
+#include <test-constants.h>
 #include <carbon/carbon-query.h>
 #include "carbon/carbon.h"
 
@@ -11,11 +12,13 @@ TEST(CarbonArchiveOpsTest, CreateStreamFromJsonString)
 
     const char        *json_string = "{ \"test\": 123 }";
     bool               read_optimized = false;
+    carbon_hashmap_t   options = carbon_hashmap_new();
 
     bool status = carbon_archive_stream_from_json(&stream, &err, json_string,
-                                                  CARBON_COMPRESSOR_NONE, CARBON_STRDIC_TYPE_SYNC, 0, read_optimized, false, NULL);
+                                                  CARBON_COMPRESSOR_NONE, options, CARBON_STRDIC_TYPE_SYNC, 0, read_optimized, false, NULL);
 
     carbon_memblock_drop(stream);
+    carbon_hashmap_drop(options);
     ASSERT_TRUE(status);
 }
 
@@ -27,16 +30,17 @@ TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonString)
     const char        *json_string = "{ \"test\": 123 }";
     const char        *archive_file = "tmp-test-archive.carbon";
     bool               read_optimized = false;
+    carbon_hashmap_t   options = carbon_hashmap_new();
 
     bool status = carbon_archive_from_json(&archive, archive_file, &err, json_string,
-                                           CARBON_COMPRESSOR_NONE, CARBON_STRDIC_TYPE_SYNC, 0, read_optimized, false, NULL);
+                                           CARBON_COMPRESSOR_NONE, options, CARBON_STRDIC_TYPE_SYNC, 0, read_optimized, false, NULL);
     ASSERT_TRUE(status);
     bool has_index;
     carbon_archive_has_query_index_string_id_to_offset(&has_index, &archive);
     ASSERT_TRUE(has_index == false);
 
     carbon_archive_close(&archive);
-
+    carbon_hashmap_drop(options);
 }
 
 TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonStringWithBakedStringIdIndex)
@@ -47,16 +51,17 @@ TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonStringWithBakedStringIdIndex)
     const char        *json_string = "{ \"test\": 123 }";
     const char        *archive_file = "tmp-test-archive.carbon";
     bool               read_optimized = false;
+    carbon_hashmap_t   options = carbon_hashmap_new();
 
     bool status = carbon_archive_from_json(&archive, archive_file, &err, json_string,
-                                           CARBON_COMPRESSOR_NONE, CARBON_STRDIC_TYPE_SYNC, 0, read_optimized, true, NULL);
+                                           CARBON_COMPRESSOR_NONE, options, CARBON_STRDIC_TYPE_SYNC, 0, read_optimized, true, NULL);
     ASSERT_TRUE(status);
     bool has_index;
     carbon_archive_has_query_index_string_id_to_offset(&has_index, &archive);
     ASSERT_TRUE(has_index == true);
 
     carbon_archive_close(&archive);
-
+    carbon_hashmap_drop(options);
 }
 
 TEST(CarbonArchiveOpsTest, CreateArchiveStringHandling)
@@ -74,7 +79,7 @@ TEST(CarbonArchiveOpsTest, CreateArchiveStringHandling)
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
      * below the projects root directory (e.g., 'build/') */
-    status = carbon_archive_open(&archive, "../tests/assets/test-archive.carbon");
+    status = carbon_archive_open(&archive, TEST_CONSTANT_ASSETS_PATH "/test-archive.carbon");
     ASSERT_TRUE(status);
 
     status = carbon_archive_query(&query, &archive);
@@ -121,7 +126,7 @@ TEST(CarbonArchiveOpsTest, DecodeStringByIdFullScan)
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
      * below the projects root directory (e.g., 'build/') */
-    status = carbon_archive_open(&archive, "../tests/assets/test-archive.carbon");
+    status = carbon_archive_open(&archive, TEST_CONSTANT_ASSETS_PATH "/test-archive.carbon");
     ASSERT_TRUE(status);
 
     status = carbon_archive_query(&query, &archive);
@@ -167,7 +172,7 @@ TEST(CarbonArchiveOpsTest, DecodeStringByFastUnsafeAccess)
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
      * below the projects root directory (e.g., 'build/') */
-    status = carbon_archive_open(&archive, "../tests/assets/test-archive.carbon");
+    status = carbon_archive_open(&archive, TEST_CONSTANT_ASSETS_PATH "/test-archive.carbon");
     ASSERT_TRUE(status);
 
     status = carbon_archive_query(&query, &archive);
@@ -208,7 +213,7 @@ TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateContains)
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
      * below the projects root directory (e.g., 'build/') */
-    status = carbon_archive_open(&archive, "../tests/assets/test-archive.carbon");
+    status = carbon_archive_open(&archive, TEST_CONSTANT_ASSETS_PATH "/test-archive.carbon");
     ASSERT_TRUE(status);
 
     status = carbon_archive_query(&query, &archive);
@@ -245,7 +250,7 @@ TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateEquals)
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
      * below the projects root directory (e.g., 'build/') */
-    status = carbon_archive_open(&archive, "../tests/assets/test-archive.carbon");
+    status = carbon_archive_open(&archive, TEST_CONSTANT_ASSETS_PATH "/test-archive.carbon");
     ASSERT_TRUE(status);
 
     status = carbon_archive_query(&query, &archive);

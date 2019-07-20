@@ -1,0 +1,1 @@
+#define TEST_CONSTANT_ASSETS_PATH "${CMAKE_SOURCE_DIR}/tests/assets"

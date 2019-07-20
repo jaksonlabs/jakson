@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <stdio.h>
 #include <inttypes.h>
+#include <test-constants.h>
 #include <carbon/carbon-archive-iter.h>
 
 #include "carbon/carbon.h"
@@ -503,7 +504,7 @@ TEST(ArchiveIterTest, CreateIterator)
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
      * below the projects root directory (e.g., 'build/') */
-    status = carbon_archive_open(&archive, "../tests/assets/test-archive.carbon");
+    status = carbon_archive_open(&archive, TEST_CONSTANT_ASSETS_PATH "/test-archive.carbon");
     ASSERT_TRUE(status);
 
     status = carbon_archive_prop_iter_from_archive(&prop_iter, &err, CARBON_ARCHIVE_ITER_MASK_ANY, &archive);

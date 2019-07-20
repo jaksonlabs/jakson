@@ -1357,11 +1357,6 @@ static bool serialize_string_dic(carbon_memfile_t *memfile, carbon_err_t *err, c
 
     carbon_doc_bulk_get_dic_contents(&entries, context);
     carbon_compressor_prepare_entries(err, &strategy, entries);
-    carbon_vec_drop(entries);
-    free(entries);
-
-    // As the entries might change in the prepare phase...
-    carbon_doc_bulk_get_dic_contents(&entries, context);
 
     uint8_t flag_bit = carbon_compressor_flagbit_by_type(compressor);
     CARBON_FIELD_SET(flags.value, flag_bit);
