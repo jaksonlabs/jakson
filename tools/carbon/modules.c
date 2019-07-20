@@ -42,7 +42,7 @@ static int convertJs2Model(Js2CabContext *context, FILE *file, bool optimizeForR
 
     CARBON_CONSOLE_WRITE(file, "  - Setup string dictionary%s", "");
 
-    carbon_strdic_create_async(&context->dictionary, 1000, 1000, 1000, 8, NULL);
+    carbon_strdic_create_async(&context->dictionary, 1000, 100, 100, 8, NULL);
     CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
 
     CARBON_CONSOLE_WRITE(file, "  - Parse JSON file%s", "");
@@ -327,7 +327,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *
         bool flagForceOverwrite = false;
         bool flagBakeStringIdIndex = true;
         carbon_compressor_type_e compressor = CARBON_COMPRESSOR_NONE;
-        carbon_strdic_type_e dic_type = CARBON_STRDIC_TYPE_ASYNC;
+        carbon_strdic_type_e dic_type = CARBON_STRDIC_TYPE_SYNC;
         int string_dic_async_nthreads = 8;
 
         carbon_hashmap_t compressor_options = carbon_hashmap_new();
@@ -653,9 +653,30 @@ bool moduleListInvoke(int argc, char **argv, FILE *file, carbon_cmdopt_mgr_t *ma
                 CARBON_CONSOLE_WRITELN(file, "%s", carbon_compressor_strategy_register[i].name);
             }
         } else {
-            CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
-            CARBON_CONSOLE_WRITELN(file, "Constant '%s' is not known.", constant);
-            return false;
+            if (strcmp(constant, "compressor-options") == 0) {
+                for (size_t i = 0; i < CARBON_ARRAY_LENGTH(carbon_compressor_strategy_register); i++) {
+                    carbon_err_t err;
+                    carbon_compressor_t compressor;
+                    carbon_compressor_by_type(&err, &compressor, NULL, carbon_compressor_strategy_register[i].type);
+
+                    printf("%s: ", carbon_compressor_strategy_register[i].name);
+                    for(carbon_hashmap_iterator_t it = carbon_hashmap_begin(compressor.options);it.valid;carbon_hashmap_next(&it)) {
+                        printf("%s ", it.key);
+                    }
+
+                    if(carbon_hashmap_length(compressor.options) == 0) {
+                        printf("(none)");
+                    }
+
+                    printf("\n");
+
+                    carbon_compressor_drop(&err, &compressor);
+                }
+            } else {
+                CARBON_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
+                CARBON_CONSOLE_WRITELN(file, "Constant '%s' is not known.", constant);
+                return false;
+            }
         }
 
         return true;

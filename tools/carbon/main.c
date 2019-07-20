@@ -51,7 +51,8 @@
 
 #define DESC_LIST       "List properties and configurations for carbon-tool to stdout"
 #define DESC_LIST_USAGE "The parameter <args> is one of the following constants:\n\n"                                  \
-                        "   compressors               Shows available compressors used by `convert` module"
+                        "   compressors               Shows available compressors used by `convert` module\n"          \
+                        "   compressor-options        Shows available compressor-opts for all available compressors"
 
 #define DEFINE_MODULE(module_name, moduleCommand, desc, invokeFunc)                                              \
 static int module##module_name##Entry(int argc, char **argv, FILE *file)                                         \
