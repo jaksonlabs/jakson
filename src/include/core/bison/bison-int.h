@@ -58,16 +58,6 @@ struct bison_insert_column_state
 
 };
 
-struct bison_header
-{
-        object_id_t oid;
-};
-
-struct bison_obj_header
-{
-        varuint_t obj_len;
-};
-
 NG5_EXPORT(bool) bison_int_insert_array(struct memfile *memfile, size_t nbytes);
 
 NG5_EXPORT(bool) bison_int_insert_column(struct memfile *memfile_in, struct err *err_in, enum bison_field_type type, size_t capactity);

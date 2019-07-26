@@ -19,7 +19,6 @@
 #ifndef BISON_UPDATE_H
 #define BISON_UPDATE_H
 
-
 #include "shared/common.h"
 #include "shared/error.h"
 #include "core/mem/block.h"

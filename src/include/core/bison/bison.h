@@ -106,10 +106,29 @@ struct bison_new
 
 enum bison_container_type { BISON_ARRAY, BISON_COLUMN };
 
+enum bison_primary_key_type {
+        /* no key, no revision number */
+        BISON_KEY_NOKEY,
+        /* auto-generated 64bit integer key */
+        BISON_KEY_AUTOKEY,
+        /* user-defined 64bit unsigned integer key */
+        BISON_KEY_UKEY,
+        /* user-defined 64bit signed integer key */
+        BISON_KEY_IKEY,
+        /* user-defined n-char string key */
+        BISON_KEY_SKEY
+};
+
 #define BISON_MARKER_ARRAY_BEGIN '['
 #define BISON_MARKER_ARRAY_END ']'
 
 #define BISON_MARKER_COLUMN_BEGIN '('
+
+#define BISON_MARKER_KEY_NOKEY '?'
+#define BISON_MARKER_KEY_AUTOKEY '*'
+#define BISON_MARKER_KEY_UKEY '+'
+#define BISON_MARKER_KEY_IKEY '-'
+#define BISON_MARKER_KEY_SKEY '!'
 
 NG5_DEFINE_ERROR_GETTER(bison);
 NG5_DEFINE_ERROR_GETTER(bison_new);
@@ -147,17 +166,37 @@ NG5_DEFINE_ERROR_GETTER(bison_new);
  *      The document will have the smallest memory footprint possible.</li>
  * </ul>
  */
-NG5_EXPORT(struct bison_insert *) bison_create_begin(struct bison_new *context, struct bison *doc, int mode);
+NG5_EXPORT(struct bison_insert *) bison_create_begin(struct bison_new *context, struct bison *doc,
+        enum bison_primary_key_type key_type, int mode);
 
 NG5_EXPORT(bool) bison_create_end(struct bison_new *context);
 
-NG5_EXPORT(bool) bison_create_empty(struct bison *doc);
+NG5_EXPORT(bool) bison_create_empty(struct bison *doc, enum bison_primary_key_type key_type);
 
-NG5_EXPORT(bool) bison_create_empty_ex(struct bison *doc, u64 doc_cap_byte, u64 array_cap_byte);
+NG5_EXPORT(bool) bison_create_empty_ex(struct bison *doc, enum bison_primary_key_type key_type, u64 doc_cap_byte,
+        u64 array_cap_byte);
 
 NG5_EXPORT(bool) bison_drop(struct bison *doc);
 
 NG5_EXPORT(bool) bison_is_up_to_date(struct bison *doc);
+
+NG5_EXPORT(bool) bison_key_get_type(enum bison_primary_key_type *out, struct bison *doc);
+
+NG5_EXPORT(const void *) bison_key_raw_value(u64 *key_len, enum bison_primary_key_type *type, struct bison *doc);
+
+NG5_EXPORT(bool) bison_key_signed_value(i64 *key, struct bison *doc);
+
+NG5_EXPORT(bool) bison_key_unsigned_value(u64 *key, struct bison *doc);
+
+NG5_EXPORT(const char *) bison_key_string_value(u64 *str_len, struct bison *doc);
+
+NG5_EXPORT(bool) bison_has_key(enum bison_primary_key_type type);
+
+NG5_EXPORT(bool) bison_key_is_unsigned_type(enum bison_primary_key_type type);
+
+NG5_EXPORT(bool) bison_key_is_signed_type(enum bison_primary_key_type type);
+
+NG5_EXPORT(bool) bison_key_is_string_type(enum bison_primary_key_type type);
 
 NG5_EXPORT(bool) bison_register_listener(listener_handle_t *handle, struct bison_event_listener *listener, struct bison *doc);
 
@@ -166,8 +205,6 @@ NG5_EXPORT(bool) bison_unregister_listener(struct bison *doc, listener_handle_t 
 NG5_EXPORT(bool) bison_clone(struct bison *clone, struct bison *doc);
 
 NG5_EXPORT(bool) bison_revision(u64 *rev, struct bison *doc);
-
-NG5_EXPORT(bool) bison_object_id(object_id_t *oid, struct bison *doc);
 
 NG5_EXPORT(bool) bison_to_str(struct string_builder *dst, enum bison_printer_impl printer, struct bison *doc);
 

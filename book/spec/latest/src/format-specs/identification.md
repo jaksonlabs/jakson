@@ -20,4 +20,7 @@ Carbon Type | Description                                  | Size   | Type Marke
 
 > The value generation of `autokey` is implementation-dependent.
 
-For See more in section []().
+> The default value for numeric keys (`autokey`, `ukey`, and `ikey`) is `0`. The empty string `""` is used to encode the default value for character string keys (`skey`). JSON formatters are required to format the value of `nokey` and the default value for character string keys as JSON `null`.
+
+> If `nokey` is set, the `rev-number` field for a carbon `record` is omitted. In any case of revison, the revision number for such a `record` is `0`.
+

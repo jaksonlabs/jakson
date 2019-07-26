@@ -21,6 +21,7 @@
 #include "core/bison/bison-insert.h"
 #include "core/bison/bison-media.h"
 #include "core/bison/bison-int.h"
+#include "core/bison/bison-string.h"
 
 #define check_type_if_container_is_column(inserter, expected)                                                          \
 if (unlikely(inserter->context_type == BISON_COLUMN && inserter->context.column->type != expected)) {                  \
@@ -333,14 +334,7 @@ NG5_EXPORT(bool) bison_insert_string(struct bison_insert *inserter, const char *
         unused(value);
         error_if(inserter->context_type != BISON_ARRAY, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
 
-        size_t value_strlen = strlen(value);
-        push_media_type_for_array(inserter, BISON_FIELD_TYPE_STRING);
-        memfile_ensure_space(&inserter->memfile, varuint_sizeof(value_strlen) + value_strlen);
-        varuint_t enc_len = (varuint_t) memfile_peek(&inserter->memfile, sizeof(varuint_t));
-        u8 varuin_nbytes = varuint_write(enc_len, value_strlen);
-        memfile_skip(&inserter->memfile, varuin_nbytes);
-        memfile_write(&inserter->memfile, value, value_strlen);
-        return false;
+        return bison_string_write(&inserter->memfile, value);
 }
 
 NG5_EXPORT(bool) bison_insert_binary(struct bison_insert *inserter, const void *value, size_t nbytes,

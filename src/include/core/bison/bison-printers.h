@@ -22,6 +22,7 @@
 #include "shared/types.h"
 #include "std/string_builder.h"
 #include "core/oid/oid.h"
+#include "bison.h"
 
 NG5_BEGIN_DECL
 
@@ -37,7 +38,8 @@ struct bison_printer
         void (*print_bison_end)(struct bison_printer *self, struct string_builder *builder);
 
         void (*print_bison_header_begin)(struct bison_printer *self, struct string_builder *builder);
-        void (*print_bison_header_contents)(struct bison_printer *self, struct string_builder *builder, object_id_t oid, u64 rev);
+        void (*print_bison_header_contents)(struct bison_printer *self, struct string_builder *builder,
+                enum bison_primary_key_type key_type, const void *key, u64 key_length, u64 rev);
         void (*print_bison_header_end)(struct bison_printer *self, struct string_builder *builder);
 
         void (*print_bison_payload_begin)(struct bison_printer *self, struct string_builder *builder);

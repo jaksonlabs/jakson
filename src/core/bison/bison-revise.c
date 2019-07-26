@@ -21,8 +21,8 @@
 #include "core/bison/bison-int.h"
 #include "core/bison/bison-dot.h"
 #include "core/bison/bison-find.h"
-
-static u64 bison_header_set_oid(struct bison *doc, object_id_t oid);
+#include "core/bison/bison-key.h"
+#include "core/bison/bison-revision.h"
 
 static bool internal_pack_array(struct bison_array_it *it);
 static bool internal_pack_column(struct bison_column_it *it);
@@ -78,14 +78,97 @@ NG5_EXPORT(bool) bison_revise_begin(struct bison_revise *context, struct bison *
         }
 }
 
-NG5_EXPORT(bool) bison_revise_gen_object_id(object_id_t *out, struct bison_revise *context)
+
+static void key_unsigned_set(struct bison *doc, u64 key)
+{
+        assert(doc);
+        memfile_save_position(&doc->memfile);
+        memfile_seek(&doc->memfile, 0);
+
+        bison_key_write_unsigned(&doc->memfile, key);
+
+        memfile_restore_position(&doc->memfile);
+}
+
+static void key_signed_set(struct bison *doc, i64 key)
+{
+        assert(doc);
+        memfile_save_position(&doc->memfile);
+        memfile_seek(&doc->memfile, 0);
+
+        bison_key_write_signed(&doc->memfile, key);
+
+        memfile_restore_position(&doc->memfile);
+}
+
+static void key_string_set(struct bison *doc, const char *key)
+{
+        assert(doc);
+        memfile_save_position(&doc->memfile);
+        memfile_seek(&doc->memfile, 0);
+
+        bison_key_update_string(&doc->memfile, key);
+
+        memfile_restore_position(&doc->memfile);
+}
+
+NG5_EXPORT(bool) bison_revise_key_generate(object_id_t *out, struct bison_revise *context)
 {
         error_if_null(context);
-        object_id_t oid;
-        object_id_create(&oid);
-        bison_header_set_oid(context->revised_doc, oid);
-        ng5_optional_set(out, oid);
-        return true;
+        enum bison_primary_key_type key_type;
+        bison_key_get_type(&key_type, context->revised_doc);
+        if (key_type == BISON_KEY_AUTOKEY) {
+                object_id_t oid;
+                object_id_create(&oid);
+                key_unsigned_set(context->revised_doc, oid);
+                ng5_optional_set(out, oid);
+                return true;
+        } else {
+                error(&context->err, NG5_ERR_TYPEMISMATCH)
+                return false;
+        }
+}
+
+NG5_EXPORT(bool) bison_revise_key_set_unsigned(struct bison_revise *context, u64 key_value)
+{
+        error_if_null(context);
+        enum bison_primary_key_type key_type;
+        bison_key_get_type(&key_type, context->revised_doc);
+        if (key_type == BISON_KEY_UKEY) {
+                key_unsigned_set(context->revised_doc, key_value);
+                return true;
+        } else {
+                error(&context->err, NG5_ERR_TYPEMISMATCH)
+                return false;
+        }
+}
+
+NG5_EXPORT(bool) bison_revise_key_set_signed(struct bison_revise *context, i64 key_value)
+{
+        error_if_null(context);
+        enum bison_primary_key_type key_type;
+        bison_key_get_type(&key_type, context->revised_doc);
+        if (key_type == BISON_KEY_IKEY) {
+                key_signed_set(context->revised_doc, key_value);
+                return true;
+        } else {
+                error(&context->err, NG5_ERR_TYPEMISMATCH)
+                return false;
+        }
+}
+
+NG5_EXPORT(bool) bison_revise_key_set_string(struct bison_revise *context, const char *key_value)
+{
+        error_if_null(context);
+        enum bison_primary_key_type key_type;
+        bison_key_get_type(&key_type, context->revised_doc);
+        if (key_type == BISON_KEY_SKEY) {
+                key_string_set(context->revised_doc, key_value);
+                return true;
+        } else {
+                error(&context->err, NG5_ERR_TYPEMISMATCH)
+                return false;
+        }
 }
 
 NG5_EXPORT(bool) bison_revise_iterator_open(struct bison_array_it *it, struct bison_revise *context)
@@ -232,19 +315,6 @@ NG5_EXPORT(bool) bison_revise_abort(struct bison_revise *context)
         return true;
 }
 
-static u64 bison_header_set_oid(struct bison *doc, object_id_t oid)
-{
-        assert(doc);
-        memfile_save_position(&doc->memfile);
-        memfile_seek(&doc->memfile, 0);
-        struct bison_header *header = NG5_MEMFILE_READ_TYPE(&doc->memfile, struct bison_header);
-        header->oid = oid;
-        memfile_seek(&doc->memfile, 0);
-        memfile_write(&doc->memfile, header, sizeof(struct bison_header));
-        memfile_restore_position(&doc->memfile);
-        return header->oid;
-}
-
 static bool internal_pack_array(struct bison_array_it *it)
 {
         assert(it);
@@ -369,28 +439,15 @@ static bool internal_revision_inc(struct bison *doc)
 static bool bison_header_rev_inc(struct bison *doc)
 {
         assert(doc);
-        u64 rev = bison_int_header_get_rev(doc);
-        u64 new_rev = rev + 1;
 
-        u8 nblocks_rev = varuint_required_blocks(rev);
-        u8 nblocks_new_rev = varuint_required_blocks(new_rev);
-
+        enum bison_primary_key_type key_type;
         memfile_save_position(&doc->memfile);
         memfile_seek(&doc->memfile, 0);
-        memfile_skip(&doc->memfile, sizeof(struct bison_header));
-        error_if(memfile_remain_size(&doc->memfile) < varuint_max_blocks(), &doc->err, NG5_ERR_CORRUPTED);
-        varuint_t revision = (varuint_t) memfile_peek(&doc->memfile, sizeof(char));
-
-        assert (nblocks_rev <= nblocks_new_rev);
-        assert (nblocks_rev == nblocks_new_rev ||
-                (nblocks_new_rev - nblocks_rev) == 1 );
-
-        if (nblocks_new_rev > nblocks_rev) {
-                /* variable-length revision number requires more space; move remainders */
-                memfile_move_right(&doc->memfile, (nblocks_new_rev - nblocks_rev));
+        bison_key_read(NULL, &key_type, &doc->memfile);
+        if (bison_has_key(key_type)) {
+                bison_revision_inc(&doc->memfile);
         }
-
-        varuint_write(revision, new_rev);
         memfile_restore_position(&doc->memfile);
+
         return true;
 }

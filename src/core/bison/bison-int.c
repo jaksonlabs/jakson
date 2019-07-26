@@ -16,6 +16,7 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+
 #include "stdx/varuint.h"
 
 #include "core/bison/bison.h"
@@ -24,7 +25,8 @@
 #include "core/bison/bison-int.h"
 #include "core/bison/bison-array-it.h"
 #include "core/bison/bison-column-it.h"
-
+#include "core/bison/bison-key.h"
+#include "core/bison/bison-revision.h"
 
 static void marker_insert(struct memfile *memfile, u8 marker);
 
@@ -396,30 +398,38 @@ NG5_EXPORT(offset_t) bison_int_column_get_payload_off(struct bison_column_it *it
 
 NG5_EXPORT(offset_t) bison_int_payload_after_header(struct bison *doc)
 {
-        u8 rev_nbytes;
-        offset_t result;
+        offset_t result = 0;
+        enum bison_primary_key_type key_type;
 
         memfile_save_position(&doc->memfile);
         memfile_seek(&doc->memfile, 0);
-        memfile_skip(&doc->memfile, sizeof(struct bison_header));
-        varuint_t revision = (varuint_t) memfile_peek(&doc->memfile, sizeof(char));
-        varuint_read(&rev_nbytes, revision);
-        memfile_skip(&doc->memfile, rev_nbytes);
-        result = memfile_tell(&doc->memfile);
+
+        if (likely(bison_key_skip(&key_type, &doc->memfile))) {
+                if (key_type != BISON_KEY_NOKEY) {
+                        bison_revision_skip(&doc->memfile);
+                }
+                result = memfile_tell(&doc->memfile);
+        }
+
         memfile_restore_position(&doc->memfile);
+
         return result;
 }
 
 NG5_EXPORT(u64) bison_int_header_get_rev(struct bison *doc)
 {
         assert(doc);
-        u64 rev;
+        u64 rev = 0;
+        enum bison_primary_key_type key_type;
+
         memfile_save_position(&doc->memfile);
         memfile_seek(&doc->memfile, 0);
-        memfile_skip(&doc->memfile, sizeof(struct bison_header));
-        error_if(memfile_remain_size(&doc->memfile) < varuint_max_blocks(), &doc->err, NG5_ERR_CORRUPTED);
-        varuint_t revision = (varuint_t) memfile_peek(&doc->memfile, sizeof(char));
-        rev = varuint_read(NULL, revision);
+
+        bison_key_skip(&key_type, &doc->memfile);
+        if (key_type != BISON_KEY_NOKEY) {
+                bison_revision_read(&rev, &doc->memfile);
+        }
+
         memfile_restore_position(&doc->memfile);
         return rev;
 }

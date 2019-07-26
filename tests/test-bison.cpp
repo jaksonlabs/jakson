@@ -19,12 +19,12 @@ TEST(BisonTest, CreateBison) {
 
         string_builder_create(&builder);
 
-        status = bison_create_empty(&doc);
+        status = bison_create_empty(&doc, BISON_KEY_AUTOKEY);
         EXPECT_TRUE(status);
 
-        bison_hexdump_print(stderr, &doc);
+        //bison_hexdump_print(stderr, &doc);
 
-        status = bison_object_id(&oid, &doc);
+        status = bison_key_unsigned_value(&oid, &doc);
         EXPECT_TRUE(status);
         EXPECT_EQ(oid, 0);
 
@@ -47,7 +47,7 @@ TEST(BisonTest, CreateBisonRevisionNumbering) {
 
         string_builder_create(&builder);
 
-        status = bison_create_empty(&doc);
+        status = bison_create_empty(&doc, BISON_KEY_AUTOKEY);
         EXPECT_TRUE(status);
 
         status = bison_revision(&rev, &doc);
@@ -88,7 +88,7 @@ TEST(BisonTest, CreateBisonRevisionAbort) {
 
         string_builder_create(&builder);
 
-        status = bison_create_empty(&doc);
+        status = bison_create_empty(&doc, BISON_KEY_AUTOKEY);
         EXPECT_TRUE(status);
 
         status = bison_revision(&rev, &doc);
@@ -118,7 +118,7 @@ TEST(BisonTest, CreateBisonRevisionAsyncReading) {
 
         string_builder_create(&builder);
 
-        status = bison_create_empty(&doc);
+        status = bison_create_empty(&doc, BISON_KEY_AUTOKEY);
         EXPECT_TRUE(status);
 
         status = bison_revision(&rev, &doc);
@@ -185,7 +185,7 @@ TEST(BisonTest, CreateBisonRevisionListening) {
 
         string_builder_create(&builder);
 
-        status = bison_create_empty(&doc);
+        status = bison_create_empty(&doc, BISON_KEY_AUTOKEY);
 
         struct bison_event_listener listener = {
                 .on_revision_begin = print_on_revision_begin,
@@ -218,7 +218,7 @@ TEST(BisonTest, ForceBisonRevisionVarLengthIncrease) {
         bool status;
         struct bison_revise revise;
 
-        bison_create_empty(&doc);
+        bison_create_empty(&doc, BISON_KEY_AUTOKEY);
 
         for (u32 i = 0; i < 20000; i++) {
                 status = bison_revision(&old_rev, &doc);
@@ -252,22 +252,22 @@ TEST(BisonTest, ModifyBisonObjectId) {
         struct bison_revise revise;
         u64 rev;
 
-        bison_create_empty(&doc);
+        bison_create_empty(&doc, BISON_KEY_AUTOKEY);
 
-        bison_object_id(&oid, &doc);
+        bison_key_unsigned_value(&oid, &doc);
         EXPECT_EQ(oid, 0);
 
         bison_revision(&rev, &doc);
         EXPECT_EQ(rev, 0);
         bison_revise_begin(&revise, &rev_doc, &doc);
-        bison_revise_gen_object_id(&new_oid, &revise);
+        bison_revise_key_generate(&new_oid, &revise);
         EXPECT_NE(oid, new_oid);
         bison_revise_end(&revise);
 
         bison_revision(&rev, &rev_doc);
         EXPECT_NE(rev, 0);
 
-        bison_object_id(&oid, &rev_doc);
+        bison_key_unsigned_value(&oid, &rev_doc);
         EXPECT_EQ(oid, new_oid);
 
         bison_print(stdout, &rev_doc);
@@ -281,10 +281,10 @@ TEST(BisonTest, BisonArrayIteratorOpenAfterNew) {
         struct bison_revise revise;
         struct bison_array_it it;
 
-        bison_create_empty(&doc);
+        bison_create_empty(&doc, BISON_KEY_AUTOKEY);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
-        bison_revise_gen_object_id(NULL, &revise);
+        bison_revise_key_generate(NULL, &revise);
         bison_revise_iterator_open(&it, &revise);
         bool has_next = bison_array_it_next(&it);
         EXPECT_EQ(has_next, false);
@@ -292,7 +292,7 @@ TEST(BisonTest, BisonArrayIteratorOpenAfterNew) {
         bison_array_it_drop(&it);
 
         bison_print(stdout, &rev_doc);
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
 
         bison_drop(&doc);
         bison_drop(&rev_doc);
@@ -304,11 +304,11 @@ TEST(BisonTest, BisonArrayIteratorInsertNullAfterNew) {
         struct bison_array_it it;
         struct bison_insert inserter;
 
-        bison_create_empty(&doc);
+        bison_create_empty(&doc, BISON_KEY_AUTOKEY);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
-        bison_revise_gen_object_id(NULL, &revise);
+        bison_revise_key_generate(NULL, &revise);
         bison_array_it_insert_begin(&inserter, &it);
         bison_insert_null(&inserter);
         bison_insert_drop(&inserter);
@@ -316,7 +316,7 @@ TEST(BisonTest, BisonArrayIteratorInsertNullAfterNew) {
         bison_array_it_drop(&it);
 
         bison_print(stdout, &rev_doc);
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
 
         bison_drop(&doc);
         bison_drop(&rev_doc);
@@ -328,14 +328,14 @@ TEST(BisonTest, BisonArrayIteratorInsertMultipleLiteralsAfterNewNoOverflow) {
         struct bison_array_it it;
         struct bison_insert inserter;
 
-        bison_create_empty(&doc);
+        bison_create_empty(&doc, BISON_KEY_AUTOKEY);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
         bison_array_it_insert_begin(&inserter, &it);
         for (i32 i = 0; i < 10; i++) {
                 fprintf(stdout, "before:\n");
-                bison_hexdump_print(stdout, &rev_doc);
+                //bison_hexdump_print(stdout, &rev_doc);
                 bool status;
                 if (i % 3 == 0) {
                         status = bison_insert_null(&inserter);
@@ -346,7 +346,7 @@ TEST(BisonTest, BisonArrayIteratorInsertMultipleLiteralsAfterNewNoOverflow) {
                 }
                 ASSERT_TRUE(status);
                 fprintf(stdout, "after:\n");
-                bison_hexdump_print(stdout, &rev_doc);
+                //bison_hexdump_print(stdout, &rev_doc);
                 fprintf(stdout, "\n\n");
         }
         bison_insert_drop(&inserter);
@@ -354,7 +354,7 @@ TEST(BisonTest, BisonArrayIteratorInsertMultipleLiteralsAfterNewNoOverflow) {
         bison_revise_end(&revise);
 
         bison_print(stdout, &rev_doc);
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
 
         bison_drop(&doc);
         bison_drop(&rev_doc);
@@ -366,7 +366,7 @@ TEST(BisonTest, BisonArrayIteratorOverwriteLiterals) {
         struct bison_array_it it;
         struct bison_insert inserter;
 
-        bison_create_empty(&doc);
+        bison_create_empty(&doc, BISON_KEY_AUTOKEY);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -407,7 +407,7 @@ TEST(BisonTest, BisonArrayIteratorOverwriteLiteralsWithDocOverflow) {
         struct bison_array_it it;
         struct bison_insert inserter;
 
-        bison_create_empty_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, BISON_KEY_AUTOKEY,20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -421,7 +421,7 @@ TEST(BisonTest, BisonArrayIteratorOverwriteLiteralsWithDocOverflow) {
                         bison_insert_false(&inserter);
                 }
                // fprintf(stdout, "after initial push:\n");
-               // bison_hexdump_print(stdout, &rev_doc);
+               // //bison_hexdump_print(stdout, &rev_doc);
         }
         bison_insert_drop(&inserter);
         bison_array_it_drop(&it);
@@ -432,10 +432,10 @@ TEST(BisonTest, BisonArrayIteratorOverwriteLiteralsWithDocOverflow) {
         bison_array_it_insert_begin(&inserter, &it);
         for (i32 i = 0; i < 2; i++) {
                 fprintf(stdout, "before:\n");
-                bison_hexdump_print(stdout, &rev_doc2);
+                //bison_hexdump_print(stdout, &rev_doc2);
                 bison_insert_true(&inserter);
                 fprintf(stdout, "after:\n");
-                bison_hexdump_print(stdout, &rev_doc2);
+                //bison_hexdump_print(stdout, &rev_doc2);
         }
         bison_insert_drop(&inserter);
         bison_array_it_drop(&it);
@@ -452,7 +452,7 @@ TEST(BisonTest, BisonArrayIteratorUnsignedAndConstants) {
         struct bison_array_it it;
         struct bison_insert inserter;
 
-        bison_create_empty_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, BISON_KEY_AUTOKEY,20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -475,7 +475,7 @@ TEST(BisonTest, BisonArrayIteratorUnsignedAndConstants) {
                         bison_insert_float(&inserter, rand_value);
                 }
                 //fprintf(stdout, "after initial push:\n");
-                //bison_hexdump_print(stdout, &rev_doc);
+                ////bison_hexdump_print(stdout, &rev_doc);
         }
         bison_insert_drop(&inserter);
         bison_array_it_drop(&it);
@@ -493,7 +493,7 @@ TEST(BisonTest, BisonArrayIteratorStrings) {
         struct bison_array_it it;
         struct bison_insert inserter;
 
-        bison_create_empty_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, BISON_KEY_AUTOKEY,20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -509,7 +509,7 @@ TEST(BisonTest, BisonArrayIteratorStrings) {
                 buffer[strlen - 1] = '\0';
                 bison_insert_string(&inserter, buffer);
                 //fprintf(stdout, "after initial push:\n");
-                //bison_hexdump_print(stdout, &rev_doc);
+                ////bison_hexdump_print(stdout, &rev_doc);
         }
         bison_insert_drop(&inserter);
         bison_array_it_drop(&it);
@@ -527,7 +527,7 @@ TEST(BisonTest, BisonInsertMimeTypedBlob) {
         struct bison_array_it it;
         struct bison_insert inserter;
 
-        bison_create_empty_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, BISON_KEY_AUTOKEY,20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -552,7 +552,7 @@ TEST(BisonTest, BisonInsertCustomTypedBlob) {
         struct bison_array_it it;
         struct bison_insert inserter;
 
-        bison_create_empty_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, BISON_KEY_AUTOKEY,20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -560,7 +560,7 @@ TEST(BisonTest, BisonInsertCustomTypedBlob) {
         const char *data = "{ \"Message\": \"Hello World\" }";
         bool status = bison_insert_binary(&inserter, data, strlen(data), NULL, "my data");
         ASSERT_TRUE(status);
-        //bison_hexdump_print(stdout, &rev_doc);
+        ////bison_hexdump_print(stdout, &rev_doc);
         bison_insert_drop(&inserter);
         bison_array_it_drop(&it);
         bison_revise_end(&revise);
@@ -577,7 +577,7 @@ TEST(BisonTest, BisonInsertTwoMimeTypedBlob) {
         struct bison_array_it it;
         struct bison_insert inserter;
 
-        bison_create_empty_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, BISON_KEY_AUTOKEY,20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -588,7 +588,7 @@ TEST(BisonTest, BisonInsertTwoMimeTypedBlob) {
         ASSERT_TRUE(status);
         status = bison_insert_binary(&inserter, data2, strlen(data2), "txt", NULL);
         ASSERT_TRUE(status);
-        //bison_hexdump_print(stdout, &rev_doc);
+        ////bison_hexdump_print(stdout, &rev_doc);
         bison_insert_drop(&inserter);
         bison_array_it_drop(&it);
         bison_revise_end(&revise);
@@ -605,7 +605,7 @@ TEST(BisonTest, BisonInsertMimeTypedBlobsWithOverflow) {
         struct bison_array_it it;
         struct bison_insert inserter;
 
-        bison_create_empty_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, BISON_KEY_AUTOKEY,20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -617,7 +617,7 @@ TEST(BisonTest, BisonInsertMimeTypedBlobsWithOverflow) {
                         strlen(i % 2 == 0 ? data1 : data2), "json", NULL);
                 ASSERT_TRUE(status);
         }
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
 
         bison_insert_drop(&inserter);
         bison_array_it_drop(&it);
@@ -635,7 +635,7 @@ TEST(BisonTest, BisonInsertMixedTypedBlobsWithOverflow) {
         struct bison_array_it it;
         struct bison_insert inserter;
 
-        bison_create_empty_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, BISON_KEY_AUTOKEY,20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -647,7 +647,7 @@ TEST(BisonTest, BisonInsertMixedTypedBlobsWithOverflow) {
                         strlen(i % 2 == 0 ? data1 : data2), i % 3 == 0 ? "json" : NULL, i % 5 == 0 ? "user/app" : NULL);
                 ASSERT_TRUE(status);
         }
-        //bison_hexdump_print(stdout, &rev_doc);
+        ////bison_hexdump_print(stdout, &rev_doc);
         bison_insert_drop(&inserter);
         bison_array_it_drop(&it);
         bison_revise_end(&revise);
@@ -665,23 +665,23 @@ TEST(BisonTest, BisonInsertArrayWithNoOverflow) {
         struct bison_insert inserter;
         struct bison_insert_array_state array_state;
 
-        bison_create_empty_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, BISON_KEY_AUTOKEY,20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
         bison_array_it_insert_begin(&inserter, &it);
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
 
         struct bison_insert *nested_inserter = bison_insert_array_begin(&array_state, &inserter, 10);
         ASSERT_TRUE(nested_inserter != NULL);
         bison_insert_array_end(&array_state);
 
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
         bison_insert_drop(&inserter);
         bison_array_it_drop(&it);
         bison_revise_end(&revise);
 
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
         bison_print(stdout, &rev_doc);
 
         bison_drop(&doc);
@@ -695,7 +695,7 @@ TEST(BisonTest, BisonInsertValuesIntoNestedArrayWithNoOverflow) {
         struct bison_insert inserter;
         struct bison_insert_array_state array_state;
 
-        bison_create_empty_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, BISON_KEY_AUTOKEY,20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -717,7 +717,7 @@ TEST(BisonTest, BisonInsertValuesIntoNestedArrayWithNoOverflow) {
         bison_insert_false(&inserter);
 
 
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
         bison_insert_drop(&inserter);
         bison_array_it_drop(&it);
         bison_revise_end(&revise);
@@ -735,7 +735,7 @@ TEST(BisonTest, BisonInsert2xNestedArrayWithNoOverflow) {
         struct bison_insert inserter;
         struct bison_insert_array_state array_state_l1, array_state_l2;
 
-        bison_create_empty_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, BISON_KEY_AUTOKEY,20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -765,7 +765,7 @@ TEST(BisonTest, BisonInsert2xNestedArrayWithNoOverflow) {
         bison_insert_false(&inserter);
 
 
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
         bison_insert_drop(&inserter);
         bison_array_it_drop(&it);
         bison_revise_end(&revise);
@@ -783,7 +783,7 @@ TEST(BisonTest, BisonInsertXxNestedArrayWithoutOverflow) {
         struct bison_insert inserter;
         struct bison_insert_array_state array_state_l1;
 
-        bison_create_empty_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, BISON_KEY_AUTOKEY,20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -806,7 +806,7 @@ TEST(BisonTest, BisonInsertXxNestedArrayWithoutOverflow) {
         bison_insert_false(&inserter);
         bison_insert_false(&inserter);
 
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
         bison_insert_drop(&inserter);
         bison_array_it_drop(&it);
         bison_revise_end(&revise);
@@ -815,7 +815,7 @@ TEST(BisonTest, BisonInsertXxNestedArrayWithoutOverflow) {
         struct string_builder sb;
         string_builder_create(&sb);
         bison_to_str(&sb, JSON_FORMATTER, &rev_doc);
-        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [null, null, null, [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], false, false, false]}"));
+        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [null, null, null, [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], false, false, false]}"));
         string_builder_drop(&sb);
 
         bison_drop(&doc);
@@ -829,23 +829,23 @@ TEST(BisonTest, BisonInsertXxNestedArrayWithOverflow) {
         struct bison_insert inserter;
         struct bison_insert_array_state array_state_l1;
 
-        bison_create_empty_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, BISON_KEY_AUTOKEY,20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
         bison_array_it_insert_begin(&inserter, &it);
 
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
         printf("\n");
 
         bison_insert_null(&inserter);
 
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
         printf("\n");
 
         bison_insert_null(&inserter);
 
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
         printf("\n");
 
         bison_insert_null(&inserter);
@@ -871,7 +871,7 @@ TEST(BisonTest, BisonInsertXxNestedArrayWithOverflow) {
         struct string_builder sb;
         string_builder_create(&sb);
         bison_to_str(&sb, JSON_FORMATTER, &rev_doc);
-        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [null, null, null, [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], false, false, false]}"));        string_builder_drop(&sb);
+        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [null, null, null, [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], false, false, false]}"));        string_builder_drop(&sb);
 
         bison_drop(&doc);
         bison_drop(&rev_doc);
@@ -884,7 +884,7 @@ TEST(BisonTest, BisonInsertInsertColumnWithoutOverflow) {
         struct bison_insert inserter;
         struct bison_insert_column_state column_state;
 
-        bison_create_empty_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, BISON_KEY_AUTOKEY,20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -892,7 +892,7 @@ TEST(BisonTest, BisonInsertInsertColumnWithoutOverflow) {
 
         struct bison_insert *nested_inserter_l1 = bison_insert_column_begin(&column_state, &inserter, BISON_FIELD_TYPE_NULL, 10);
 
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
 
         ASSERT_TRUE(nested_inserter_l1 != NULL);
         bison_insert_null(nested_inserter_l1);
@@ -904,13 +904,13 @@ TEST(BisonTest, BisonInsertInsertColumnWithoutOverflow) {
         bison_array_it_drop(&it);
         bison_revise_end(&revise);
 
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
 
         bison_print(stdout, &rev_doc);
         struct string_builder sb;
         string_builder_create(&sb);
         bison_to_str(&sb, JSON_FORMATTER, &rev_doc);
-        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [[null, null, null]]}"));
+        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [[null, null, null]]}"));
         string_builder_drop(&sb);
 
         bison_drop(&doc);
@@ -924,7 +924,7 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersWithoutOverflow) {
         struct bison_insert inserter;
         struct bison_insert_column_state column_state;
 
-        bison_create_empty_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, BISON_KEY_AUTOKEY,20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -942,13 +942,13 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersWithoutOverflow) {
         bison_array_it_drop(&it);
         bison_revise_end(&revise);
 
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
 
         bison_print(stdout, &rev_doc);
         struct string_builder sb;
         string_builder_create(&sb);
         bison_to_str(&sb, JSON_FORMATTER, &rev_doc);
-        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [[42, 43, 44]]}"));
+        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [[42, 43, 44]]}"));
         string_builder_drop(&sb);
 
         bison_drop(&doc);
@@ -962,7 +962,7 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersZeroWithoutOverflow) {
         struct bison_insert inserter;
         struct bison_insert_column_state column_state;
 
-        bison_create_empty_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, BISON_KEY_AUTOKEY,20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -980,13 +980,13 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersZeroWithoutOverflow) {
         bison_array_it_drop(&it);
         bison_revise_end(&revise);
 
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
 
         bison_print(stdout, &rev_doc);
         struct string_builder sb;
         string_builder_create(&sb);
         bison_to_str(&sb, JSON_FORMATTER, &rev_doc);
-        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [[0, 0, 0]]}"));
+        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [[0, 0, 0]]}"));
         string_builder_drop(&sb);
 
         bison_drop(&doc);
@@ -1001,7 +1001,7 @@ TEST(BisonTest, BisonInsertInsertMultileTypedColumnsWithoutOverflow) {
         struct bison_insert_column_state column_state;
         struct bison_insert *ins;
 
-        bison_create_empty_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, BISON_KEY_AUTOKEY,20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -1083,14 +1083,14 @@ TEST(BisonTest, BisonInsertInsertMultileTypedColumnsWithoutOverflow) {
         bison_array_it_drop(&it);
         bison_revise_end(&revise);
 
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
 
         bison_print(stdout, &rev_doc);
         struct string_builder sb;
         string_builder_create(&sb);
         bison_to_str(&sb, JSON_FORMATTER, &rev_doc);
         string_builder_print(&sb);
-        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [[null, null, null], [true, true, true], [false, false, false], [1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12], [-1, -2, -3], [-4, -5, -6], [-7, -8, -9], [-10, -11, -12], [42.00, 21.00, 23.42]]}"));
+        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [[null, null, null], [true, true, true], [false, false, false], [1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12], [-1, -2, -3], [-4, -5, -6], [-7, -8, -9], [-10, -11, -12], [42.00, 21.00, 23.42]]}"));
         string_builder_drop(&sb);
 
         bison_drop(&doc);
@@ -1104,7 +1104,7 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersZeroWithOverflow) {
         struct bison_insert inserter;
         struct bison_insert_column_state column_state;
 
-        bison_create_empty_ex(&doc, 16, 1);
+        bison_create_empty_ex(&doc, BISON_KEY_AUTOKEY,16, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -1122,7 +1122,7 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersZeroWithOverflow) {
         bison_array_it_drop(&it);
         bison_revise_end(&revise);
 
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
 
         printf("BISON DOC PRINT:");
         bison_print(stdout, &rev_doc);
@@ -1130,7 +1130,7 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersZeroWithOverflow) {
         struct string_builder sb;
         string_builder_create(&sb);
         bison_to_str(&sb, JSON_FORMATTER, &rev_doc);
-        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [[1, 2, 3]]}"));
+        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [[1, 2, 3]]}"));
         string_builder_drop(&sb);
 
         bison_drop(&doc);
@@ -1144,7 +1144,7 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersWithHighOverflow) {
         struct bison_insert inserter;
         struct bison_insert_column_state column_state;
 
-        bison_create_empty_ex(&doc, 16, 1);
+        bison_create_empty_ex(&doc, BISON_KEY_AUTOKEY,16, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -1165,7 +1165,7 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersWithHighOverflow) {
         bison_array_it_drop(&it);
         bison_revise_end(&revise);
 
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
 
         printf("BISON DOC PRINT:");
         bison_print(stdout, &rev_doc);
@@ -1173,7 +1173,7 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersWithHighOverflow) {
         struct string_builder sb;
         string_builder_create(&sb);
         bison_to_str(&sb, JSON_FORMATTER, &rev_doc);
-        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [[0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 7, 8, 8, 8, 9, 9, 9, 10, 10, 10, 11, 11, 11, 12, 12, 12, 13, 13, 13, 14, 14, 14, 15, 15, 15, 16, 16, 16, 17, 17, 17, 18, 18, 18, 19, 19, 19, 20, 20, 20, 21, 21, 21, 22, 22, 22, 23, 23, 23, 24, 24, 24, 25, 25, 25, 26, 26, 26, 27, 27, 27, 28, 28, 28, 29, 29, 29, 30, 30, 30, 31, 31, 31, 32, 32, 32, 33, 33, 33, 34, 34, 34, 35, 35, 35, 36, 36, 36, 37, 37, 37, 38, 38, 38, 39, 39, 39, 40, 40, 40, 41, 41, 41, 42, 42, 42, 43, 43, 43, 44, 44, 44, 45, 45, 45, 46, 46, 46, 47, 47, 47, 48, 48, 48, 49, 49, 49, 50, 50, 50, 51, 51, 51, 52, 52, 52, 53, 53, 53, 54, 54, 54, 55, 55, 55, 56, 56, 56, 57, 57, 57, 58, 58, 58, 59, 59, 59, 60, 60, 60, 61, 61, 61, 62, 62, 62, 63, 63, 63, 64, 64, 64, 65, 65, 65, 66, 66, 66, 67, 67, 67, 68, 68, 68, 69, 69, 69, 70, 70, 70, 71, 71, 71, 72, 72, 72, 73, 73, 73, 74, 74, 74, 75, 75, 75, 76, 76, 76, 77, 77, 77, 78, 78, 78, 79, 79, 79, 80, 80, 80, 81, 81, 81, 82, 82, 82, 83, 83, 83, 84, 84, 84, 85, 85, 85, 86, 86, 86, 87, 87, 87, 88, 88, 88, 89, 89, 89, 90, 90, 90, 91, 91, 91, 92, 92, 92, 93, 93, 93, 94, 94, 94, 95, 95, 95, 96, 96, 96, 97, 97, 97, 98, 98, 98, 99, 99, 99]]}"));
+        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [[0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 7, 8, 8, 8, 9, 9, 9, 10, 10, 10, 11, 11, 11, 12, 12, 12, 13, 13, 13, 14, 14, 14, 15, 15, 15, 16, 16, 16, 17, 17, 17, 18, 18, 18, 19, 19, 19, 20, 20, 20, 21, 21, 21, 22, 22, 22, 23, 23, 23, 24, 24, 24, 25, 25, 25, 26, 26, 26, 27, 27, 27, 28, 28, 28, 29, 29, 29, 30, 30, 30, 31, 31, 31, 32, 32, 32, 33, 33, 33, 34, 34, 34, 35, 35, 35, 36, 36, 36, 37, 37, 37, 38, 38, 38, 39, 39, 39, 40, 40, 40, 41, 41, 41, 42, 42, 42, 43, 43, 43, 44, 44, 44, 45, 45, 45, 46, 46, 46, 47, 47, 47, 48, 48, 48, 49, 49, 49, 50, 50, 50, 51, 51, 51, 52, 52, 52, 53, 53, 53, 54, 54, 54, 55, 55, 55, 56, 56, 56, 57, 57, 57, 58, 58, 58, 59, 59, 59, 60, 60, 60, 61, 61, 61, 62, 62, 62, 63, 63, 63, 64, 64, 64, 65, 65, 65, 66, 66, 66, 67, 67, 67, 68, 68, 68, 69, 69, 69, 70, 70, 70, 71, 71, 71, 72, 72, 72, 73, 73, 73, 74, 74, 74, 75, 75, 75, 76, 76, 76, 77, 77, 77, 78, 78, 78, 79, 79, 79, 80, 80, 80, 81, 81, 81, 82, 82, 82, 83, 83, 83, 84, 84, 84, 85, 85, 85, 86, 86, 86, 87, 87, 87, 88, 88, 88, 89, 89, 89, 90, 90, 90, 91, 91, 91, 92, 92, 92, 93, 93, 93, 94, 94, 94, 95, 95, 95, 96, 96, 96, 97, 97, 97, 98, 98, 98, 99, 99, 99]]}"));
         string_builder_drop(&sb);
 
         bison_drop(&doc);
@@ -1187,7 +1187,7 @@ TEST(BisonTest, BisonInsertInsertMultipleColumnsNumbersWithHighOverflow) {
         struct bison_insert inserter;
         struct bison_insert_column_state column_state;
 
-        bison_create_empty_ex(&doc, 16, 1);
+        bison_create_empty_ex(&doc, BISON_KEY_AUTOKEY,16, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -1210,7 +1210,7 @@ TEST(BisonTest, BisonInsertInsertMultipleColumnsNumbersWithHighOverflow) {
         bison_array_it_drop(&it);
         bison_revise_end(&revise);
 
-        //bison_hexdump_print(stdout, &rev_doc);
+        ////bison_hexdump_print(stdout, &rev_doc);
 
         printf("BISON DOC PRINT:");
         bison_print(stdout, &rev_doc);
@@ -1218,7 +1218,7 @@ TEST(BisonTest, BisonInsertInsertMultipleColumnsNumbersWithHighOverflow) {
         struct string_builder sb;
         string_builder_create(&sb);
         bison_to_str(&sb, JSON_FORMATTER, &rev_doc);
-        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [[97, 97, 97, 98, 98, 98, 99, 99, 99, 100, 100, 100], [97, 97, 97, 98, 98, 98, 99, 99, 99, 100, 100, 100], [97, 97, 97, 98, 98, 98, 99, 99, 99, 100, 100, 100]]}"));
+        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [[97, 97, 97, 98, 98, 98, 99, 99, 99, 100, 100, 100], [97, 97, 97, 98, 98, 98, 99, 99, 99, 100, 100, 100], [97, 97, 97, 98, 98, 98, 99, 99, 99, 100, 100, 100]]}"));
         string_builder_drop(&sb);
 
         bison_drop(&doc);
@@ -1233,7 +1233,7 @@ TEST(BisonTest, BisonInsertNullTest) {
         struct bison_insert_column_state column_state;
         struct bison_insert *ins;
 
-        bison_create_empty_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, BISON_KEY_AUTOKEY,20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -1315,13 +1315,13 @@ TEST(BisonTest, BisonInsertNullTest) {
         bison_array_it_drop(&it);
         bison_revise_end(&revise);
 
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
 
         bison_print(stdout, &rev_doc);
         struct string_builder sb;
         string_builder_create(&sb);
         bison_to_str(&sb, JSON_FORMATTER, &rev_doc);
-        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [[null, null, null], [true, true, true], [false, false, false], [1, null, 3], [4, null, 6], [7, null, 9], [10, null, 12], [-1, null, -3], [-4, null, -6], [-7, null, -9], [-10, null, -12], [42.00, null, 23.42]]}"));
+        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [[null, null, null], [true, true, true], [false, false, false], [1, null, 3], [4, null, 6], [7, null, 9], [10, null, 12], [-1, null, -3], [-4, null, -6], [-7, null, -9], [-10, null, -12], [42.00, null, 23.42]]}"));
         string_builder_drop(&sb);
 
         bison_drop(&doc);
@@ -1336,7 +1336,7 @@ TEST(BisonTest, BisonShrinkColumnListTest) {
         struct bison_insert_column_state column_state;
         struct bison_insert *ins;
 
-        bison_create_empty_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, BISON_KEY_AUTOKEY,20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -1408,21 +1408,21 @@ TEST(BisonTest, BisonShrinkColumnListTest) {
         bison_insert_i64(ins, 16);
         bison_insert_column_end(&column_state);
 
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
         bison_revise_shrink(&revise);
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
 
         bison_insert_drop(&inserter);
         bison_array_it_drop(&it);
         bison_revise_end(&revise);
 
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
 
         bison_print(stdout, &rev_doc);
         struct string_builder sb;
         string_builder_create(&sb);
         bison_to_str(&sb, JSON_FORMATTER, &rev_doc);
-        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [[null, null, null], [true, true, true], [false, false, false], [1, null, 2], [3, null, 4], [5, null, 6], [7, null, 8], [9, null, 10], [11, null, 12], [13, null, 14], [15, null, 16]]}"));
+        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [[null, null, null], [true, true, true], [false, false, false], [1, null, 2], [3, null, 4], [5, null, 6], [7, null, 8], [9, null, 10], [11, null, 12], [13, null, 14], [15, null, 16]]}"));
         string_builder_drop(&sb);
 
         bison_drop(&doc);
@@ -1437,7 +1437,7 @@ TEST(BisonTest, BisonShrinkArrayListTest) {
         struct bison_insert_array_state array_state;
         struct bison_insert *ins;
 
-        bison_create_empty_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, BISON_KEY_AUTOKEY,20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -1461,21 +1461,21 @@ TEST(BisonTest, BisonShrinkArrayListTest) {
         bison_insert_u8(ins, 7);
         bison_insert_array_end(&array_state);
 
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
         bison_revise_shrink(&revise);
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
 
         bison_insert_drop(&inserter);
         bison_array_it_drop(&it);
         bison_revise_end(&revise);
 
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
 
         bison_print(stdout, &rev_doc);
         struct string_builder sb;
         string_builder_create(&sb);
         bison_to_str(&sb, JSON_FORMATTER, &rev_doc);
-        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [[1, 1, 1], [2, 3, 4], [5, 6, 7]]}"));
+        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [[1, 1, 1], [2, 3, 4], [5, 6, 7]]}"));
         string_builder_drop(&sb);
 
         bison_drop(&doc);
@@ -1490,7 +1490,7 @@ TEST(BisonTest, BisonShrinkNestedArrayListTest) {
         struct bison_insert_array_state array_state, nested_array_state;
         struct bison_insert *ins, *nested_ins;
 
-        bison_create_empty_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, BISON_KEY_AUTOKEY,20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -1536,21 +1536,21 @@ TEST(BisonTest, BisonShrinkNestedArrayListTest) {
         bison_insert_array_end(&nested_array_state);
         bison_insert_array_end(&array_state);
 
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
         bison_revise_shrink(&revise);
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
 
         bison_insert_drop(&inserter);
         bison_array_it_drop(&it);
         bison_revise_end(&revise);
 
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
 
         bison_print(stdout, &rev_doc);
         struct string_builder sb;
         string_builder_create(&sb);
         bison_to_str(&sb, JSON_FORMATTER, &rev_doc);
-        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [[[\"Hello\", \"World\"], 1, 1, 1], [2, [\"Hello\", \"World\"], 3, 4], [5, 6, [\"Hello\", \"World\"], 7], [8, 9, 10, [\"Hello\", \"World\"]]]}"));
+        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [[[\"Hello\", \"World\"], 1, 1, 1], [2, [\"Hello\", \"World\"], 3, 4], [5, 6, [\"Hello\", \"World\"], 7], [8, 9, 10, [\"Hello\", \"World\"]]]}"));
         string_builder_drop(&sb);
 
         bison_drop(&doc);
@@ -1566,7 +1566,7 @@ TEST(BisonTest, BisonShrinkNestedArrayListAndColumnListTest) {
         struct bison_insert_array_state array_state, nested_array_state;
         struct bison_insert *ins, *nested_ins, *column_ins;
 
-        bison_create_empty_ex(&doc, 20, 1);
+        bison_create_empty_ex(&doc, BISON_KEY_AUTOKEY,20, 1);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -1598,15 +1598,15 @@ TEST(BisonTest, BisonShrinkNestedArrayListAndColumnListTest) {
                 bison_insert_u8(ins, 1);
         bison_insert_array_end(&array_state);
 
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
         bison_revise_shrink(&revise);
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
 
         bison_insert_drop(&inserter);
         bison_array_it_drop(&it);
         bison_revise_end(&revise);
 
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
 
         bison_print(stdout, &rev_doc);
 
@@ -1615,9 +1615,9 @@ TEST(BisonTest, BisonShrinkNestedArrayListAndColumnListTest) {
         bison_to_str(&sb, JSON_FORMATTER, &rev_doc);
 
         fprintf(stdout, "IST  %s\n", string_builder_cstr(&sb));
-        fprintf(stdout, "SOLL {\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [4223, [[88, 89, 90], [\"Hello\", [65, 66, 67], \"World\"], 1, 1, [23, 24, 25], 1]]}\n");
+        fprintf(stdout, "SOLL {\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [4223, [[88, 89, 90], [\"Hello\", [65, 66, 67], \"World\"], 1, 1, [23, 24, 25], 1]]}\n");
 
-        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [4223, [[88, 89, 90], [\"Hello\", [65, 66, 67], \"World\"], 1, 1, [23, 24, 25], 1]]}"));
+        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [4223, [[88, 89, 90], [\"Hello\", [65, 66, 67], \"World\"], 1, 1, [23, 24, 25], 1]]}"));
         string_builder_drop(&sb);
 
         bison_drop(&doc);
@@ -1739,7 +1739,7 @@ TEST(BisonTest, BisonFind) {
         struct bison_find finder;
         u64 result_unsigned;
         enum bison_field_type type;
-        bison_create_empty(&doc);
+        bison_create_empty(&doc, BISON_KEY_AUTOKEY);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
 
@@ -1816,7 +1816,7 @@ TEST(BisonTest, BisonFindTypes) {
         struct bison_find finder;
         u64 result_unsigned;
         enum bison_field_type type;
-        bison_create_empty(&doc);
+        bison_create_empty(&doc, BISON_KEY_AUTOKEY);
 
         bison_revise_begin(&revise, &rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
@@ -2085,7 +2085,7 @@ TEST(BisonTest, BisonFindTypes) {
         bison_array_it_drop(&it);
         bison_revise_end(&revise);
 
-        bison_hexdump_print(stdout, &rev_doc);
+        //bison_hexdump_print(stdout, &rev_doc);
 
         bison_print(stdout, &rev_doc);
         bison_drop(&rev_doc);
@@ -2103,7 +2103,7 @@ TEST(BisonTest, BisonUpdateU8Simple)
         const char *json;
 
         string_builder_create(&sb);
-        bison_create_empty(&doc);
+        bison_create_empty(&doc, BISON_KEY_AUTOKEY);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2136,7 +2136,7 @@ TEST(BisonTest, BisonUpdateU8Simple)
 
         json = bison_to_json(&sb, &rev_doc2);
         printf("JSON (rev2): %s\n", json);
-        ASSERT_TRUE(strcmp(json, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [89]}") == 0);
+        ASSERT_TRUE(strcmp(json, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [89]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2155,7 +2155,7 @@ TEST(BisonTest, BisonUpdateU8Simple)
 
         json = bison_to_json(&sb, &rev_doc3);
         printf("JSON (rev3): %s\n", json);
-        ASSERT_TRUE(strcmp(json, "{\"meta\": {\"_id\": 0, \"_rev\": 3}, \"doc\": [65, 66, 67]}") == 0);
+        ASSERT_TRUE(strcmp(json, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 3}, \"record\": [65, 66, 67]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2174,7 +2174,7 @@ TEST(BisonTest, BisonUpdateU8Simple)
 
         json = bison_to_json(&sb, &rev_doc4);
         printf("JSON (rev4): %s\n", json);
-        ASSERT_TRUE(strcmp(json, "{\"meta\": {\"_id\": 0, \"_rev\": 4}, \"doc\": [1, 2, 3]}") == 0);
+        ASSERT_TRUE(strcmp(json, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 4}, \"record\": [1, 2, 3]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2198,7 +2198,7 @@ TEST(BisonTest, BisonUpdateMixedFixedTypesSimple)
         const char *json;
 
         string_builder_create(&sb);
-        bison_create_empty(&doc);
+        bison_create_empty(&doc, BISON_KEY_AUTOKEY);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2217,7 +2217,7 @@ TEST(BisonTest, BisonUpdateMixedFixedTypesSimple)
 
         json = bison_to_json(&sb, &rev_doc);
         printf("JSON (rev1): %s\n", json);
-        ASSERT_TRUE(strcmp(json, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [1, -42, 23.00]}") == 0);
+        ASSERT_TRUE(strcmp(json, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [1, -42, 23.00]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2234,7 +2234,7 @@ TEST(BisonTest, BisonUpdateMixedFixedTypesSimple)
 
         json = bison_to_json(&sb, &rev_doc2);
         printf("JSON (rev2): %s\n", json);
-        ASSERT_TRUE(strcmp(json, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [1, 1024, 23.00]}") == 0);
+        ASSERT_TRUE(strcmp(json, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [1, 1024, 23.00]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2267,7 +2267,7 @@ TEST(BisonTest, BisonRemoveConstantsToEmpty)
         string_builder_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_AUTOKEY, BISON_KEEP);
 
         bison_insert_null(ins);
 
@@ -2295,8 +2295,8 @@ TEST(BisonTest, BisonRemoveConstantsToEmpty)
 
         printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [null]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": []}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [null]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": []}") == 0);
 
         string_builder_drop(&sb);
         bison_drop(&doc);
@@ -2316,7 +2316,7 @@ TEST(BisonTest, BisonRemoveFirstConstants)
         string_builder_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_AUTOKEY, BISON_KEEP);
 
         bison_insert_true(ins);
         bison_insert_false(ins);
@@ -2348,8 +2348,8 @@ TEST(BisonTest, BisonRemoveFirstConstants)
 
         printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [true, false]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [false]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [true, false]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [false]}") == 0);
 
         string_builder_drop(&sb);
         bison_drop(&doc);
@@ -2369,7 +2369,7 @@ TEST(BisonTest, BisonRemoveLastConstants)
         string_builder_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_AUTOKEY, BISON_KEEP);
 
         bison_insert_true(ins);
         bison_insert_false(ins);
@@ -2400,8 +2400,8 @@ TEST(BisonTest, BisonRemoveLastConstants)
 
         printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [true, false]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [true]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [true, false]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [true]}") == 0);
 
         string_builder_drop(&sb);
         bison_drop(&doc);
@@ -2421,7 +2421,7 @@ TEST(BisonTest, BisonRemoveMiddleConstants)
         string_builder_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_AUTOKEY, BISON_KEEP);
 
         bison_insert_true(ins);
         bison_insert_null(ins);
@@ -2457,8 +2457,8 @@ TEST(BisonTest, BisonRemoveMiddleConstants)
 
         printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [true, null, false]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [true, false]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [true, null, false]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [true, false]}") == 0);
 
         string_builder_drop(&sb);
         bison_drop(&doc);
@@ -2478,7 +2478,7 @@ TEST(BisonTest, BisonRemoveNumberToEmpty)
         string_builder_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_AUTOKEY, BISON_KEEP);
 
         bison_insert_u8(ins, 42);
 
@@ -2506,8 +2506,8 @@ TEST(BisonTest, BisonRemoveNumberToEmpty)
 
         printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [42]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": []}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [42]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": []}") == 0);
 
         string_builder_drop(&sb);
         bison_drop(&doc);
@@ -2527,7 +2527,7 @@ TEST(BisonTest, BisonRemoveFirstNumber)
         string_builder_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_AUTOKEY, BISON_KEEP);
 
         bison_insert_u8(ins, 42);
         bison_insert_u32(ins, 23);
@@ -2559,8 +2559,8 @@ TEST(BisonTest, BisonRemoveFirstNumber)
 
         printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [42, 23]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [23]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [42, 23]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [23]}") == 0);
 
         string_builder_drop(&sb);
         bison_drop(&doc);
@@ -2580,7 +2580,7 @@ TEST(BisonTest, BisonRemoveLastNumber)
         string_builder_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_AUTOKEY, BISON_KEEP);
 
         bison_insert_u8(ins, 42);
         bison_insert_u32(ins, 23);
@@ -2611,8 +2611,8 @@ TEST(BisonTest, BisonRemoveLastNumber)
 
         printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [42, 23]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [42]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [42, 23]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [42]}") == 0);
 
         string_builder_drop(&sb);
         bison_drop(&doc);
@@ -2632,7 +2632,7 @@ TEST(BisonTest, BisonRemoveMiddleNumber)
         string_builder_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_AUTOKEY, BISON_KEEP);
 
         bison_insert_u8(ins, 42);
         bison_insert_u16(ins, 21);
@@ -2668,8 +2668,8 @@ TEST(BisonTest, BisonRemoveMiddleNumber)
 
         printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [42, 21, 23]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [42, 23]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [42, 21, 23]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [42, 23]}") == 0);
 
         string_builder_drop(&sb);
         bison_drop(&doc);
@@ -2690,7 +2690,7 @@ TEST(BisonTest, BisonRemoveStringToEmpty)
         string_builder_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_AUTOKEY, BISON_KEEP);
 
         bison_insert_string(ins, "Hello");
 
@@ -2718,8 +2718,8 @@ TEST(BisonTest, BisonRemoveStringToEmpty)
 
         printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [\"Hello\"]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": []}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [\"Hello\"]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": []}") == 0);
 
         string_builder_drop(&sb);
         bison_drop(&doc);
@@ -2739,7 +2739,7 @@ TEST(BisonTest, BisonRemoveFirstString)
         string_builder_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_AUTOKEY, BISON_KEEP);
 
         bison_insert_string(ins, "Hello");
         bison_insert_string(ins, "World");
@@ -2771,8 +2771,8 @@ TEST(BisonTest, BisonRemoveFirstString)
 
         printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [\"Hello\", \"World\"]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [\"World\"]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [\"Hello\", \"World\"]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [\"World\"]}") == 0);
 
         string_builder_drop(&sb);
         bison_drop(&doc);
@@ -2792,7 +2792,7 @@ TEST(BisonTest, BisonRemoveLastString)
         string_builder_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_AUTOKEY, BISON_KEEP);
 
         bison_insert_string(ins, "Hello");
         bison_insert_string(ins, "World");
@@ -2823,8 +2823,8 @@ TEST(BisonTest, BisonRemoveLastString)
 
         printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [\"Hello\", \"World\"]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [\"Hello\"]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [\"Hello\", \"World\"]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [\"Hello\"]}") == 0);
 
         string_builder_drop(&sb);
         bison_drop(&doc);
@@ -2844,7 +2844,7 @@ TEST(BisonTest, BisonRemoveMiddleString)
         string_builder_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_AUTOKEY, BISON_KEEP);
 
         bison_insert_string(ins, "Plato");
         bison_insert_string(ins, "Kant");
@@ -2880,8 +2880,8 @@ TEST(BisonTest, BisonRemoveMiddleString)
 
         printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [\"Plato\", \"Kant\", \"Nietzsche\"]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [\"Plato\", \"Nietzsche\"]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [\"Plato\", \"Kant\", \"Nietzsche\"]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [\"Plato\", \"Nietzsche\"]}") == 0);
 
         string_builder_drop(&sb);
         bison_drop(&doc);
@@ -2905,7 +2905,7 @@ TEST(BisonTest, BisonRemoveBinaryToEmpty)
         string_builder_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_AUTOKEY, BISON_KEEP);
 
         const char *data = "This report, by its very length, defends itself against the risk of being read.";
         bison_insert_binary(ins, data, strlen(data), "txt", NULL);
@@ -2934,8 +2934,8 @@ TEST(BisonTest, BisonRemoveBinaryToEmpty)
 
         printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": []}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": []}") == 0);
 
         string_builder_drop(&sb);
         bison_drop(&doc);
@@ -2955,7 +2955,7 @@ TEST(BisonTest, BisonRemoveFirstBinary)
         string_builder_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_AUTOKEY, BISON_KEEP);
 
         const char *data1 = "This report, by its very length, defends itself against the risk of being read.";
         bison_insert_binary(ins, data1, strlen(data1), "txt", NULL);
@@ -2990,8 +2990,8 @@ TEST(BisonTest, BisonRemoveFirstBinary)
 
         printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"application/json\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [{ \"type\": \"application/json\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"application/json\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [{ \"type\": \"application/json\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }]}") == 0);
 
         string_builder_drop(&sb);
         bison_drop(&doc);
@@ -3011,7 +3011,7 @@ TEST(BisonTest, BisonRemoveLastBinary)
         string_builder_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_AUTOKEY, BISON_KEEP);
 
         const char *data1 = "This report, by its very length, defends itself against the risk of being read.";
         bison_insert_binary(ins, data1, strlen(data1), "txt", NULL);
@@ -3045,8 +3045,8 @@ TEST(BisonTest, BisonRemoveLastBinary)
 
         printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"application/json\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"application/json\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }]}") == 0);
 
         string_builder_drop(&sb);
         bison_drop(&doc);
@@ -3066,7 +3066,7 @@ TEST(BisonTest, BisonRemoveMiddleBinary)
         string_builder_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_AUTOKEY, BISON_KEEP);
 
         const char *data1 = "This report, by its very length, defends itself against the risk of being read.";
         bison_insert_binary(ins, data1, strlen(data1), "txt", NULL);
@@ -3107,8 +3107,8 @@ TEST(BisonTest, BisonRemoveMiddleBinary)
 
         printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"application/json\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }, { \"type\": \"text/html\", \"encoding\": \"base64\", \"binary-string\": \"PGh0bWw+PGJvZHk+PHA+VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wcyBvdmVyIHRoZSBsYXp5IGRvZzwvcD48L2JvZHk+PC9odG1sPgAA\" }]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"text/html\", \"encoding\": \"base64\", \"binary-string\": \"PGh0bWw+PGJvZHk+PHA+VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wcyBvdmVyIHRoZSBsYXp5IGRvZzwvcD48L2JvZHk+PC9odG1sPgAA\" }]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"application/json\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }, { \"type\": \"text/html\", \"encoding\": \"base64\", \"binary-string\": \"PGh0bWw+PGJvZHk+PHA+VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wcyBvdmVyIHRoZSBsYXp5IGRvZzwvcD48L2JvZHk+PC9odG1sPgAA\" }]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"text/html\", \"encoding\": \"base64\", \"binary-string\": \"PGh0bWw+PGJvZHk+PHA+VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wcyBvdmVyIHRoZSBsYXp5IGRvZzwvcD48L2JvZHk+PC9odG1sPgAA\" }]}") == 0);
 
         string_builder_drop(&sb);
         bison_drop(&doc);
@@ -3138,7 +3138,7 @@ TEST(BisonTest, BisonRemoveCustomBinaryToEmpty)
         string_builder_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_AUTOKEY, BISON_KEEP);
 
         const char *data = "ABC";
         bison_insert_binary(ins, data, strlen(data), NULL, "123");
@@ -3148,7 +3148,7 @@ TEST(BisonTest, BisonRemoveCustomBinaryToEmpty)
 
         char *json_1 = strdup(bison_to_json(&sb, &doc));
 
-        bison_hexdump_print(stdout, &doc);
+        //bison_hexdump_print(stdout, &doc);
 
         // -------------------------------------------------------------------------------------------------------------
         bison_revise_begin(&revise, &rev_doc, &doc);
@@ -3169,8 +3169,8 @@ TEST(BisonTest, BisonRemoveCustomBinaryToEmpty)
 
         printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [{ \"type\": \"123\", \"encoding\": \"base64\", \"binary-string\": \"A=JDAA\" }]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": []}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [{ \"type\": \"123\", \"encoding\": \"base64\", \"binary-string\": \"A=JDAA\" }]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": []}") == 0);
 
         string_builder_drop(&sb);
         bison_drop(&doc);
@@ -3190,7 +3190,7 @@ TEST(BisonTest, BisonRemoveFirstCustomBinary)
         string_builder_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_AUTOKEY, BISON_KEEP);
 
         const char *data1 = "This report, by its very length, defends itself against the risk of being read.";
         bison_insert_binary(ins, data1, strlen(data1), NULL, "my-fancy-format");
@@ -3225,8 +3225,8 @@ TEST(BisonTest, BisonRemoveFirstCustomBinary)
 
         printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [{ \"type\": \"my-fancy-format\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"application/something-json-like\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [{ \"type\": \"application/something-json-like\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [{ \"type\": \"my-fancy-format\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"application/something-json-like\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [{ \"type\": \"application/something-json-like\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }]}") == 0);
 
         string_builder_drop(&sb);
         bison_drop(&doc);
@@ -3246,7 +3246,7 @@ TEST(BisonTest, BisonRemoveLastCustomBinary)
         string_builder_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_AUTOKEY, BISON_KEEP);
 
         const char *data1 = "This report, by its very length, defends itself against the risk of being read.";
         bison_insert_binary(ins, data1, strlen(data1), NULL, "my-fancy-format");
@@ -3280,8 +3280,8 @@ TEST(BisonTest, BisonRemoveLastCustomBinary)
 
         printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [{ \"type\": \"my-fancy-format\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"application/something-json-like\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [{ \"type\": \"my-fancy-format\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [{ \"type\": \"my-fancy-format\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"application/something-json-like\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [{ \"type\": \"my-fancy-format\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }]}") == 0);
 
         string_builder_drop(&sb);
         bison_drop(&doc);
@@ -3301,7 +3301,7 @@ TEST(BisonTest, BisonRemoveMiddleCustomBinary)
         string_builder_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_AUTOKEY, BISON_KEEP);
 
         const char *data1 = "This report, by its very length, defends itself against the risk of being read.";
         bison_insert_binary(ins, data1, strlen(data1), NULL, "my-fancy-format");
@@ -3342,8 +3342,8 @@ TEST(BisonTest, BisonRemoveMiddleCustomBinary)
 
         printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [{ \"type\": \"my-fancy-format\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"application/something-json-like\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }, { \"type\": \"my-other-nonstandard-format\", \"encoding\": \"base64\", \"binary-string\": \"PGh0bWw+PGJvZHk+PHA+VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wcyBvdmVyIHRoZSBsYXp5IGRvZzwvcD48L2JvZHk+PC9odG1sPgAA\" }]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [{ \"type\": \"my-fancy-format\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"my-other-nonstandard-format\", \"encoding\": \"base64\", \"binary-string\": \"PGh0bWw+PGJvZHk+PHA+VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wcyBvdmVyIHRoZSBsYXp5IGRvZzwvcD48L2JvZHk+PC9odG1sPgAA\" }]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [{ \"type\": \"my-fancy-format\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"application/something-json-like\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }, { \"type\": \"my-other-nonstandard-format\", \"encoding\": \"base64\", \"binary-string\": \"PGh0bWw+PGJvZHk+PHA+VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wcyBvdmVyIHRoZSBsYXp5IGRvZzwvcD48L2JvZHk+PC9odG1sPgAA\" }]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [{ \"type\": \"my-fancy-format\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"my-other-nonstandard-format\", \"encoding\": \"base64\", \"binary-string\": \"PGh0bWw+PGJvZHk+PHA+VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wcyBvdmVyIHRoZSBsYXp5IGRvZzwvcD48L2JvZHk+PC9odG1sPgAA\" }]}") == 0);
 
         string_builder_drop(&sb);
         bison_drop(&doc);
@@ -3374,7 +3374,7 @@ TEST(BisonTest, BisonRemoveArrayToEmpty)
         string_builder_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_AUTOKEY, BISON_KEEP);
 
         array_ins = bison_insert_array_begin(&state, ins, 10);
         bison_insert_u8(array_ins, 1);
@@ -3387,7 +3387,7 @@ TEST(BisonTest, BisonRemoveArrayToEmpty)
 
         char *json_1 = strdup(bison_to_json(&sb, &doc));
 
-        bison_hexdump_print(stdout, &doc);
+        //bison_hexdump_print(stdout, &doc);
 
         // -------------------------------------------------------------------------------------------------------------
         bison_revise_begin(&revise, &rev_doc, &doc);
@@ -3408,8 +3408,8 @@ TEST(BisonTest, BisonRemoveArrayToEmpty)
 
         printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [[1, 2, 3]]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": []}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [[1, 2, 3]]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": []}") == 0);
 
         string_builder_drop(&sb);
         bison_drop(&doc);
@@ -3432,7 +3432,7 @@ TEST(BisonTest, BisonRemoveFirstArray)
         struct bison_insert *array_ins;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_AUTOKEY, BISON_KEEP);
 
         array_ins = bison_insert_array_begin(&state, ins, 10);
         bison_insert_u8(array_ins, 1);
@@ -3473,8 +3473,8 @@ TEST(BisonTest, BisonRemoveFirstArray)
 
         printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [[1, 2, 3], [4, 5, 6]]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[4, 5, 6]]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [[1, 2, 3], [4, 5, 6]]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [[4, 5, 6]]}") == 0);
 
         string_builder_drop(&sb);
         bison_drop(&doc);
@@ -3497,7 +3497,7 @@ TEST(BisonTest, BisonRemoveLastArray)
         struct bison_insert *array_ins;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_AUTOKEY, BISON_KEEP);
 
         array_ins = bison_insert_array_begin(&state, ins, 10);
         bison_insert_u8(array_ins, 1);
@@ -3537,8 +3537,8 @@ TEST(BisonTest, BisonRemoveLastArray)
 
         printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [[1, 2, 3], [4, 5, 6]]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[1, 2, 3]]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [[1, 2, 3], [4, 5, 6]]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [[1, 2, 3]]}") == 0);
 
         string_builder_drop(&sb);
         bison_drop(&doc);
@@ -3561,7 +3561,7 @@ TEST(BisonTest, BisonRemoveMiddleArray)
         struct bison_insert *array_ins;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_AUTOKEY, BISON_KEEP);
 
         array_ins = bison_insert_array_begin(&state, ins, 10);
         bison_insert_u8(array_ins, 1);
@@ -3611,8 +3611,8 @@ TEST(BisonTest, BisonRemoveMiddleArray)
 
         printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [[1, 2, 3], [4, 5, 6], [7, 8, 9]]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[1, 2, 3], [7, 8, 9]]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [[1, 2, 3], [4, 5, 6], [7, 8, 9]]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [[1, 2, 3], [7, 8, 9]]}") == 0);
 
         string_builder_drop(&sb);
         bison_drop(&doc);
@@ -3637,7 +3637,7 @@ TEST(BisonTest, BisonColumnRemoveTest)
         struct bison_insert *array_ins;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEEP);
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_AUTOKEY, BISON_KEEP);
 
         array_ins = bison_insert_column_begin(&state, ins, BISON_FIELD_TYPE_NUMBER_U16, 10);
         bison_insert_u16(array_ins, 1);
@@ -3703,10 +3703,10 @@ TEST(BisonTest, BisonColumnRemoveTest)
         printf(">> %s\n", json_3);
         printf(">> %s\n", json_4);
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [[1, 2, 3]]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [[1, 3]]}") == 0);
-        ASSERT_TRUE(strcmp(json_3, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [[3]]}") == 0);
-        ASSERT_TRUE(strcmp(json_4, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [[]]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [[1, 2, 3]]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [[1, 3]]}") == 0);
+        ASSERT_TRUE(strcmp(json_3, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [[3]]}") == 0);
+        ASSERT_TRUE(strcmp(json_4, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [[]]}") == 0);
 
         string_builder_drop(&sb);
         bison_drop(&doc);
@@ -3736,7 +3736,7 @@ TEST(BisonTest, BisonRemoveComplexTest)
         enum bison_path_status path_status;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_OPTIMIZE);
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_AUTOKEY, BISON_OPTIMIZE);
 
         bison_insert_u8(ins, 1);
         bison_insert_string(ins, "Hello");
@@ -3784,37 +3784,37 @@ TEST(BisonTest, BisonRemoveComplexTest)
         // -------------------------------------------------------------------------------------------------------------
 
         char *json_1 = strdup(bison_to_json(&sb, &doc));
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [1, \"Hello\", 2, 3, 3, \"World\", [], [4, \"Fox!\", 6], [[], [4], null, [\"Dog!\", [], [[41, 42, 43]], []]]]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [1, \"Hello\", 2, 3, 3, \"World\", [], [4, \"Fox!\", 6], [[], [4], null, [\"Dog!\", [], [[41, 42, 43]], []]]]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
         bison_revise_remove_one("3", &rev_doc, &doc);
         char *json_2 = strdup(bison_to_json(&sb, &rev_doc));
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [1, \"Hello\", 2, 3, \"World\", [], [4, \"Fox!\", 6], [[], [4], null, [\"Dog!\", [], [[41, 42, 43]], []]]]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [1, \"Hello\", 2, 3, \"World\", [], [4, \"Fox!\", 6], [[], [4], null, [\"Dog!\", [], [[41, 42, 43]], []]]]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
         bison_revise_remove_one("5", &rev_doc2, &rev_doc);
         char *json_3 = strdup(bison_to_json(&sb, &rev_doc2));
-        ASSERT_TRUE(strcmp(json_3, "{\"meta\": {\"_id\": 0, \"_rev\": 3}, \"doc\": [1, \"Hello\", 2, 3, \"World\", [4, \"Fox!\", 6], [[], [4], null, [\"Dog!\", [], [[41, 42, 43]], []]]]}") == 0);
+        ASSERT_TRUE(strcmp(json_3, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 3}, \"record\": [1, \"Hello\", 2, 3, \"World\", [4, \"Fox!\", 6], [[], [4], null, [\"Dog!\", [], [[41, 42, 43]], []]]]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
         bison_revise_remove_one("5.1", &rev_doc3, &rev_doc2);
         char *json_4 = strdup(bison_to_json(&sb, &rev_doc3));
-        ASSERT_TRUE(strcmp(json_4, "{\"meta\": {\"_id\": 0, \"_rev\": 4}, \"doc\": [1, \"Hello\", 2, 3, \"World\", [4, 6], [[], [4], null, [\"Dog!\", [], [[41, 42, 43]], []]]]}") == 0);
+        ASSERT_TRUE(strcmp(json_4, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 4}, \"record\": [1, \"Hello\", 2, 3, \"World\", [4, 6], [[], [4], null, [\"Dog!\", [], [[41, 42, 43]], []]]]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
         bison_revise_remove_one("6.0", &rev_doc4, &rev_doc3);
         char *json_5 = strdup(bison_to_json(&sb, &rev_doc4));
-        ASSERT_TRUE(strcmp(json_5, "{\"meta\": {\"_id\": 0, \"_rev\": 5}, \"doc\": [1, \"Hello\", 2, 3, \"World\", [4, 6], [[4], null, [\"Dog!\", [], [[41, 42, 43]], []]]]}") == 0);
+        ASSERT_TRUE(strcmp(json_5, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 5}, \"record\": [1, \"Hello\", 2, 3, \"World\", [4, 6], [[4], null, [\"Dog!\", [], [[41, 42, 43]], []]]]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
         bison_revise_remove_one("5", &rev_doc5, &rev_doc4);
         char *json_6 = strdup(bison_to_json(&sb, &rev_doc5));
-        ASSERT_TRUE(strcmp(json_6, "{\"meta\": {\"_id\": 0, \"_rev\": 6}, \"doc\": [1, \"Hello\", 2, 3, \"World\", [[4], null, [\"Dog!\", [], [[41, 42, 43]], []]]]}") == 0);
+        ASSERT_TRUE(strcmp(json_6, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 6}, \"record\": [1, \"Hello\", 2, 3, \"World\", [[4], null, [\"Dog!\", [], [[41, 42, 43]], []]]]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -3824,35 +3824,35 @@ TEST(BisonTest, BisonRemoveComplexTest)
         bison_revise_remove_one("1", &rev_doc9, &rev_doc8);
         bison_revise_remove_one("0", &rev_doc10, &rev_doc9);
         char *json_11 = strdup(bison_to_json(&sb, &rev_doc10));
-        ASSERT_TRUE(strcmp(json_11, "{\"meta\": {\"_id\": 0, \"_rev\": 11}, \"doc\": [[[4], null, [\"Dog!\", [], [[41, 42, 43]], []]]]}") == 0);
+        ASSERT_TRUE(strcmp(json_11, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 11}, \"record\": [[[4], null, [\"Dog!\", [], [[41, 42, 43]], []]]]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
         bison_revise_remove_one("0.2.2.0", &rev_doc11, &rev_doc10);
 
         char *json_12 = strdup(bison_to_json(&sb, &rev_doc11));
-        ASSERT_TRUE(strcmp(json_12, "{\"meta\": {\"_id\": 0, \"_rev\": 12}, \"doc\": [[[4], null, [\"Dog!\", [], [], []]]]}") == 0);
+        ASSERT_TRUE(strcmp(json_12, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 12}, \"record\": [[[4], null, [\"Dog!\", [], [], []]]]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
         bison_revise_remove_one("0.2.2", &rev_doc12, &rev_doc11);
 
         char *json_13 = strdup(bison_to_json(&sb, &rev_doc12));
-        ASSERT_TRUE(strcmp(json_13, "{\"meta\": {\"_id\": 0, \"_rev\": 13}, \"doc\": [[[4], null, [\"Dog!\", [], []]]]}") == 0);
+        ASSERT_TRUE(strcmp(json_13, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 13}, \"record\": [[[4], null, [\"Dog!\", [], []]]]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
         bison_revise_remove_one("0.2", &rev_doc13, &rev_doc12);
 
         char *json_14 = strdup(bison_to_json(&sb, &rev_doc13));
-        ASSERT_TRUE(strcmp(json_14, "{\"meta\": {\"_id\": 0, \"_rev\": 14}, \"doc\": [[[4], null]]}") == 0);
+        ASSERT_TRUE(strcmp(json_14, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 14}, \"record\": [[[4], null]]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
         bison_revise_remove_one("0", &rev_doc14, &rev_doc13);
 
         char *json_15 = strdup(bison_to_json(&sb, &rev_doc14));
-        ASSERT_TRUE(strcmp(json_15, "{\"meta\": {\"_id\": 0, \"_rev\": 15}, \"doc\": []}") == 0);
+        ASSERT_TRUE(strcmp(json_15, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 15}, \"record\": []}") == 0);
 
 
         string_builder_drop(&sb);
@@ -3895,7 +3895,7 @@ TEST(BisonTest, BisonUpdateMixedFixedTypesTypeChangeSimple)
         const char *json;
 
         string_builder_create(&sb);
-        bison_create_empty(&doc);
+        bison_create_empty(&doc, BISON_KEY_AUTOKEY);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -3914,7 +3914,7 @@ TEST(BisonTest, BisonUpdateMixedFixedTypesTypeChangeSimple)
 
         json = bison_to_json(&sb, &rev_doc);
         printf("JSON (rev1): %s\n", json);
-        ASSERT_TRUE(strcmp(json, "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [1, -42, 23.00]}") == 0);
+        ASSERT_TRUE(strcmp(json, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [1, -42, 23.00]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -3931,7 +3931,7 @@ TEST(BisonTest, BisonUpdateMixedFixedTypesTypeChangeSimple)
 
         json = bison_to_json(&sb, &rev_doc2);
         printf("JSON (rev2): %s\n", json);
-        ASSERT_TRUE(strcmp(json, "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [1, 1024, 23.00]}") == 0);
+        ASSERT_TRUE(strcmp(json, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [1, 1024, 23.00]}") == 0);
 
 
         // -------------------------------------------------------------------------------------------------------------
@@ -3951,7 +3951,7 @@ TEST(BisonTest, BisonShrinkIssueFix)
         struct bison_new context;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_OPTIMIZE);
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_AUTOKEY, BISON_OPTIMIZE);
 
         bison_insert_string(ins, "Hello");
         bison_insert_string(ins, "World");
@@ -3963,11 +3963,436 @@ TEST(BisonTest, BisonShrinkIssueFix)
         struct string_builder sb;
         string_builder_create(&sb);
 
-        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"_id\": 0, \"_rev\": 1}, \"doc\": [\"Hello\", \"World\"]}") == 0);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [\"Hello\", \"World\"]}") == 0);
 
         string_builder_drop(&sb);
         bison_drop(&doc);
 }
+
+TEST(BisonTest, BisonKeyTypeNoKey)
+{
+        struct bison doc;
+        struct bison_new context;
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_NOKEY, BISON_OPTIMIZE);
+
+        bison_insert_string(ins, "Hello");
+        bison_insert_string(ins, "World");
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"record\": [\"Hello\", \"World\"]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonKeyTypeNoKeyNoRevInc)
+{
+        struct bison doc, rev_doc;
+        struct bison_new context;
+        struct bison_revise revise;
+        u64 rev_old, rev_new;
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_NOKEY, BISON_OPTIMIZE);
+
+        bison_insert_string(ins, "Hello");
+        bison_insert_string(ins, "World");
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        bison_revision(&rev_old, &doc);
+
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_end(&revise);
+
+        bison_revision(&rev_new, &rev_doc);
+
+        ASSERT_EQ(rev_old, 0);
+        ASSERT_EQ(rev_new, rev_old);
+
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+}
+
+TEST(BisonTest, BisonKeyTypeAutoKey)
+{
+        struct bison doc;
+        struct bison_new context;
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_AUTOKEY, BISON_OPTIMIZE);
+
+        bison_insert_string(ins, "Hello");
+        bison_insert_string(ins, "World");
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"record\": [\"Hello\", \"World\"]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonKeyTypeAutoKeyRevInc)
+{
+        struct bison doc, rev_doc;
+        struct bison_new context;
+        struct bison_revise revise;
+        u64 rev_old, rev_new;
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_AUTOKEY, BISON_OPTIMIZE);
+
+        bison_insert_string(ins, "Hello");
+        bison_insert_string(ins, "World");
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        bison_revision(&rev_old, &doc);
+
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_end(&revise);
+
+        bison_revision(&rev_new, &rev_doc);
+
+        ASSERT_EQ(rev_old, 1);
+        ASSERT_EQ(rev_new, 2);
+
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+}
+
+TEST(BisonTest, BisonKeyTypeAutoKeyUpdate)
+{
+        struct bison doc, rev_doc;
+        struct bison_new context;
+        struct bison_revise revise;
+        object_id_t id, id_read;
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_AUTOKEY, BISON_OPTIMIZE);
+
+        bison_insert_string(ins, "Hello");
+        bison_insert_string(ins, "World");
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_key_generate(&id, &revise);
+        bison_revise_end(&revise);
+
+        bison_key_unsigned_value(&id_read, &rev_doc);
+        ASSERT_NE(id, 0);
+        ASSERT_EQ(id, id_read);
+
+        bison_print(stdout, &rev_doc);
+
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+}
+
+TEST(BisonTest, BisonKeyTypeUnsignedKeyUpdate)
+{
+        struct bison doc, rev_doc;
+        struct bison_new context;
+        struct bison_revise revise;
+        struct string_builder sb;
+
+        string_builder_create(&sb);
+
+        u64 id_read;
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_UKEY, BISON_OPTIMIZE);
+
+        bison_insert_string(ins, "Hello");
+        bison_insert_string(ins, "World");
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_key_set_unsigned(&revise, 42);
+        bison_revise_end(&revise);
+
+        bison_key_unsigned_value(&id_read, &rev_doc);
+        ASSERT_EQ(id_read, 42);
+
+        bison_print(stdout, &rev_doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"ukey\", \"value\": 42}, \"rev\": 2}, \"record\": [\"Hello\", \"World\"]}") == 0);
+
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+        string_builder_drop(&sb);
+}
+
+TEST(BisonTest, BisonKeyTypeSignedKeyUpdate)
+{
+        struct bison doc, rev_doc;
+        struct bison_new context;
+        struct bison_revise revise;
+        struct string_builder sb;
+
+        string_builder_create(&sb);
+
+        i64 id_read;
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_IKEY, BISON_OPTIMIZE);
+
+        bison_insert_string(ins, "Hello");
+        bison_insert_string(ins, "World");
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_key_set_signed(&revise, 42);
+        bison_revise_end(&revise);
+
+        bison_key_signed_value(&id_read, &rev_doc);
+        ASSERT_EQ(id_read, 42);
+
+        bison_print(stdout, &rev_doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"ikey\", \"value\": 42}, \"rev\": 2}, \"record\": [\"Hello\", \"World\"]}") == 0);
+
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+        string_builder_drop(&sb);
+}
+
+TEST(BisonTest, BisonKeyTypeStringKeyUpdate)
+{
+        struct bison doc, rev_doc;
+        struct bison_new context;
+        struct bison_revise revise;
+        struct string_builder sb;
+
+        string_builder_create(&sb);
+
+        u64 key_len;
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        bison_insert_string(ins, "Hello");
+        bison_insert_string(ins, "World");
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_key_set_string(&revise, "my_unique_id");
+        bison_revise_end(&revise);
+
+        const char *key = bison_key_string_value(&key_len, &rev_doc);
+        ASSERT_TRUE(strncmp(key, "my_unique_id", strlen("my_unique_id")) == 0);
+
+        bison_print(stdout, &rev_doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": \"my_unique_id\"}, \"rev\": 2}, \"record\": [\"Hello\", \"World\"]}") == 0);
+
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+        string_builder_drop(&sb);
+}
+
+TEST(BisonTest, BisonKeyTypeUnsignedKey)
+{
+        struct bison doc;
+        struct bison_new context;
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_UKEY, BISON_OPTIMIZE);
+
+        bison_insert_string(ins, "Hello");
+        bison_insert_string(ins, "World");
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"ukey\", \"value\": 0}, \"rev\": 1}, \"record\": [\"Hello\", \"World\"]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonKeyTypeSignedKeyRevInc)
+{
+        struct bison doc, rev_doc;
+        struct bison_new context;
+        struct bison_revise revise;
+        u64 rev_old, rev_new;
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_IKEY, BISON_OPTIMIZE);
+
+        bison_insert_string(ins, "Hello");
+        bison_insert_string(ins, "World");
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        bison_revision(&rev_old, &doc);
+
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_end(&revise);
+
+        bison_revision(&rev_new, &rev_doc);
+
+        ASSERT_EQ(rev_old, 1);
+        ASSERT_EQ(rev_new, 2);
+
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+}
+
+TEST(BisonTest, BisonKeyTypeUnsignedKeyRevInc)
+{
+        struct bison doc, rev_doc;
+        struct bison_new context;
+        struct bison_revise revise;
+        u64 rev_old, rev_new;
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_UKEY, BISON_OPTIMIZE);
+
+        bison_insert_string(ins, "Hello");
+        bison_insert_string(ins, "World");
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        bison_revision(&rev_old, &doc);
+
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_end(&revise);
+
+        bison_revision(&rev_new, &rev_doc);
+
+        ASSERT_EQ(rev_old, 1);
+        ASSERT_EQ(rev_new, 2);
+
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+}
+
+TEST(BisonTest, BisonKeyTypeStringKeyRevInc)
+{
+        struct bison doc, rev_doc;
+        struct bison_new context;
+        struct bison_revise revise;
+        u64 rev_old, rev_new;
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        bison_insert_string(ins, "Hello");
+        bison_insert_string(ins, "World");
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        bison_revision(&rev_old, &doc);
+
+        bison_revise_begin(&revise, &rev_doc, &doc);
+        bison_revise_end(&revise);
+
+        bison_revision(&rev_new, &rev_doc);
+
+        ASSERT_EQ(rev_old, 1);
+        ASSERT_EQ(rev_new, 2);
+
+        bison_drop(&doc);
+        bison_drop(&rev_doc);
+}
+
+
+TEST(BisonTest, BisonKeyTypeSignedKey)
+{
+        struct bison doc;
+        struct bison_new context;
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_IKEY, BISON_OPTIMIZE);
+
+        bison_insert_string(ins, "Hello");
+        bison_insert_string(ins, "World");
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"ikey\", \"value\": 0}, \"rev\": 1}, \"record\": [\"Hello\", \"World\"]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonKeyTypeStringKey)
+{
+        struct bison doc;
+        struct bison_new context;
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        bison_insert_string(ins, "Hello");
+        bison_insert_string(ins, "World");
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"record\": [\"Hello\", \"World\"]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
 
 static void create_nested_doc(struct bison *rev_doc)
 {
@@ -3982,7 +4407,7 @@ static void create_nested_doc(struct bison *rev_doc)
         struct string_builder sb;
         const char *json;
 
-        bison_create_empty(&doc);
+        bison_create_empty(&doc, BISON_KEY_AUTOKEY);
         bison_revise_begin(&revise, rev_doc, &doc);
         bison_revise_iterator_open(&it, &revise);
 
@@ -4210,7 +4635,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
         ASSERT_TRUE(status);
         printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
         printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
-        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
         bison_drop(&doc);
         bison_drop(&rev_doc);
 
@@ -4219,7 +4644,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
         ASSERT_TRUE(status);
         printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
         printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
-        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, null, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [[null, null, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
         bison_drop(&doc);
         bison_drop(&rev_doc);
 
@@ -4228,7 +4653,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
         ASSERT_TRUE(status);
         printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
         printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
-        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, null, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [[null, true, null, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
         bison_drop(&doc);
         bison_drop(&rev_doc);
 
@@ -4237,7 +4662,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
         ASSERT_TRUE(status);
         printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
         printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
-        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, false, null, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [[null, true, false, null, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
         bison_drop(&doc);
         bison_drop(&rev_doc);
 
@@ -4246,7 +4671,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
         ASSERT_TRUE(status);
         printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
         printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
-        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, false, 8, null, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [[null, true, false, 8, null, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
         bison_drop(&doc);
         bison_drop(&rev_doc);
 
@@ -4255,7 +4680,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
         ASSERT_TRUE(status);
         printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
         printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
-        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, false, 8, -16, null, { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [[null, true, false, 8, -16, null, { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
         bison_drop(&doc);
         bison_drop(&rev_doc);
 
@@ -4264,7 +4689,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
         ASSERT_TRUE(status);
         printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
         printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
-        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", null, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [[null, true, false, 8, -16, \"Hello, World!\", null, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
         bison_drop(&doc);
         bison_drop(&rev_doc);
 
@@ -4273,7 +4698,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
         ASSERT_TRUE(status);
         printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
         printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
-        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, null, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, null, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
         bison_drop(&doc);
         bison_drop(&rev_doc);
 
@@ -4282,7 +4707,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
         ASSERT_TRUE(status);
         printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
         printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
-        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, null, [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, null, [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
         bison_drop(&doc);
         bison_drop(&rev_doc);
 
@@ -4291,7 +4716,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
         ASSERT_TRUE(status);
         printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
         printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
-        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [null, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [null, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
         bison_drop(&doc);
         bison_drop(&rev_doc);
 
@@ -4300,7 +4725,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
         ASSERT_TRUE(status);
         printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
         printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
-        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], null, [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], null, [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
         bison_drop(&doc);
         bison_drop(&rev_doc);
 
@@ -4309,7 +4734,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
         ASSERT_TRUE(status);
         printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
         printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
-        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], null], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], null], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
         bison_drop(&doc);
         bison_drop(&rev_doc);
 
@@ -4318,7 +4743,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
         ASSERT_TRUE(status);
         printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
         printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
-        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [null, [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [null, [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
         bison_drop(&doc);
         bison_drop(&rev_doc);
 
@@ -4327,7 +4752,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
         ASSERT_TRUE(status);
         printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
         printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
-        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], null]}") == 0);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], null]}") == 0);
         bison_drop(&doc);
         bison_drop(&rev_doc);
 
@@ -4340,7 +4765,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
         ASSERT_TRUE(status);
         printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
         printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
-        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[true, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [[true, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
         bison_drop(&doc);
         bison_drop(&rev_doc);
 
@@ -4349,7 +4774,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
         ASSERT_TRUE(status);
         printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
         printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
-        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
         bison_drop(&doc);
         bison_drop(&rev_doc);
 
@@ -4358,7 +4783,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
         ASSERT_TRUE(status);
         printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
         printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
-        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, true, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [[null, true, true, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
         bison_drop(&doc);
         bison_drop(&rev_doc);
 
@@ -4367,7 +4792,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
         ASSERT_TRUE(status);
         printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
         printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
-        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, false, true, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [[null, true, false, true, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
         bison_drop(&doc);
         bison_drop(&rev_doc);
 
@@ -4376,7 +4801,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
         ASSERT_TRUE(status);
         printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
         printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
-        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, false, 8, true, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [[null, true, false, 8, true, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
         bison_drop(&doc);
         bison_drop(&rev_doc);
 
@@ -4385,7 +4810,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
         ASSERT_TRUE(status);
         printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
         printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
-        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, false, 8, -16, true, { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [[null, true, false, 8, -16, true, { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
         bison_drop(&doc);
         bison_drop(&rev_doc);
 
@@ -4394,7 +4819,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
         ASSERT_TRUE(status);
         printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
         printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
-        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", true, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [[null, true, false, 8, -16, \"Hello, World!\", true, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
         bison_drop(&doc);
         bison_drop(&rev_doc);
 
@@ -4403,7 +4828,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
         ASSERT_TRUE(status);
         printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
         printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
-        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, true, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, true, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
         bison_drop(&doc);
         bison_drop(&rev_doc);
 
@@ -4412,7 +4837,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
         ASSERT_TRUE(status);
         printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
         printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
-        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, true, [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, true, [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
         bison_drop(&doc);
         bison_drop(&rev_doc);
 
@@ -4422,7 +4847,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
 //        ASSERT_TRUE(status);
 //        printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
 //        printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
-//        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [true, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+//        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [true, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
 //        bison_drop(&doc);
 //        bison_drop(&rev_doc);
 //
@@ -4431,7 +4856,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
 //        ASSERT_TRUE(status);
 //        printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
 //        printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
-//        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], true, [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+//        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], true, [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
 //        bison_drop(&doc);
 //        bison_drop(&rev_doc);
 //
@@ -4440,7 +4865,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
 //        ASSERT_TRUE(status);
 //        printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
 //        printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
-//        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], true], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+//        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], true], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
 //        bison_drop(&doc);
 //        bison_drop(&rev_doc);
 //
@@ -4449,7 +4874,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
 //        ASSERT_TRUE(status);
 //        printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
 //        printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
-//        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [true, [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+//        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [true, [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
 //        bison_drop(&doc);
 //        bison_drop(&rev_doc);
 //
@@ -4458,7 +4883,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
 //        ASSERT_TRUE(status);
 //        printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
 //        printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
-//        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], true]}") == 0);
+//        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], true]}") == 0);
 //        bison_drop(&doc);
 //        bison_drop(&rev_doc);
 
@@ -4468,7 +4893,7 @@ TEST(BisonTest, BisonUpdateSetToNull)
         ASSERT_TRUE(status);
         printf("built:  \t'%s'\n", bison_to_json(&sb, &doc));
         printf("altered:\t'%s'\n", bison_to_json(&sb, &rev_doc));
-        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"_id\": 0, \"_rev\": 2}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"record\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
         bison_drop(&doc);
         bison_drop(&rev_doc);
         */

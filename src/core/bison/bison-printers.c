@@ -41,7 +41,8 @@ static void json_formatter_bison_begin(struct bison_printer *self, struct string
 static void json_formatter_bison_end(struct bison_printer *self, struct string_builder *builder);
 
 static void json_formatter_header_begin(struct bison_printer *self, struct string_builder *builder);
-static void json_formatter_bison_header_contents(struct bison_printer *self, struct string_builder *builder, object_id_t oid, u64 rev);
+static void json_formatter_bison_header_contents(struct bison_printer *self, struct string_builder *builder,
+        enum bison_primary_key_type key_type, const void *key, u64 key_length, u64 rev);
 static void json_formatter_bison_header_end(struct bison_printer *self, struct string_builder *builder);
 
 static void json_formatter_bison_payload_begin(struct bison_printer *self, struct string_builder *builder);
@@ -160,17 +161,76 @@ static void json_formatter_header_begin(struct bison_printer *self, struct strin
         }
 }
 
-static void json_formatter_bison_header_contents(struct bison_printer *self, struct string_builder *builder, object_id_t oid, u64 rev)
+static void json_formatter_bison_header_contents(struct bison_printer *self, struct string_builder *builder,
+        enum bison_primary_key_type key_type, const void *key, u64 key_length, u64 rev)
 {
         if (json_formatter_is_strict(self)) {
-                string_builder_append(builder, "\"_id\": ");
-                string_builder_append_u64(builder, oid);
-                string_builder_append(builder, ", \"_rev\": ");
+                string_builder_append(builder, "\"key\": {");
+
+                switch (key_type) {
+                case BISON_KEY_NOKEY:
+                        string_builder_append(builder, "\"type\": \"nokey\", \"value\": null");
+                        break;
+                case BISON_KEY_AUTOKEY:
+                        string_builder_append(builder, "\"type\": \"autokey\", \"value\": ");
+                        string_builder_append_u64(builder, *(u64 *) key);
+                        break;
+                case BISON_KEY_UKEY:
+                        string_builder_append(builder, "\"type\": \"ukey\", \"value\": ");
+                        string_builder_append_u64(builder, *(u64 *) key);
+                        break;
+                case BISON_KEY_IKEY:
+                        string_builder_append(builder, "\"type\": \"ikey\", \"value\": ");
+                        string_builder_append_u64(builder, *(i64 *) key);
+                        break;
+                case BISON_KEY_SKEY:
+                        string_builder_append(builder, "\"type\": \"skey\", \"value\": ");
+                        if (key_length > 0) {
+                                string_builder_append(builder, "\"");
+                                string_builder_append_nchar(builder, key, key_length);
+                                string_builder_append(builder, "\"");
+                        } else {
+                                string_builder_append(builder, "null");
+                        }
+
+                        break;
+                default:
+                        error_print(NG5_ERR_INTERNALERR);
+                }
+                string_builder_append(builder, "}, \"rev\": ");
                 string_builder_append_u64(builder, rev);
         } else {
-                string_builder_append(builder, "_id: ");
-                string_builder_append_u64(builder, oid);
-                string_builder_append(builder, ", _rev: ");
+                string_builder_append(builder, "key: {");
+
+                switch (key_type) {
+                case BISON_KEY_NOKEY:
+                        string_builder_append(builder, "type: nokey, value: null");
+                        break;
+                case BISON_KEY_AUTOKEY:
+                        string_builder_append(builder, "type: autokey, value: ");
+                        string_builder_append_u64(builder, *(u64 *) key);
+                        break;
+                case BISON_KEY_UKEY:
+                        string_builder_append(builder, "type: ukey, value: ");
+                        string_builder_append_u64(builder, *(u64 *) key);
+                        break;
+                case BISON_KEY_IKEY:
+                        string_builder_append(builder, "type: ikey, value: ");
+                        string_builder_append_u64(builder, *(i64 *) key);
+                        break;
+                case BISON_KEY_SKEY:
+                        string_builder_append(builder, "type: skey, value: ");
+                        if (key_length > 0) {
+                                string_builder_append(builder, "\"");
+                                string_builder_append_nchar(builder, key, key_length);
+                                string_builder_append(builder, "\"");
+                        } else {
+                                string_builder_append(builder, "null");
+                        }
+                default:
+                error_print(NG5_ERR_INTERNALERR);
+                }
+                string_builder_append(builder, "}, \"rev\": ");
                 string_builder_append_u64(builder, rev);
         }
 }
@@ -184,9 +244,9 @@ static void json_formatter_bison_header_end(struct bison_printer *self, struct s
 static void json_formatter_bison_payload_begin(struct bison_printer *self, struct string_builder *builder)
 {
         if (json_formatter_is_strict(self)) {
-                string_builder_append(builder, "\"doc\": ");
+                string_builder_append(builder, "\"record\": ");
         } else {
-                string_builder_append(builder, "doc: ");
+                string_builder_append(builder, "record: ");
         }
 }
 

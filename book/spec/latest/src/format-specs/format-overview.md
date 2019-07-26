@@ -23,6 +23,8 @@ See more about identity of Carbon records in the Section about [Identification](
 (rev-number)
 ```
 
+> The `rev-number` field for a carbon `record` which has no primary key (i.e., `nokey` is set), is omitted. In any case of revison, the revision number of a `record` without primary key is `0`. See more in section about record [identification](identification.md).
+
 ## Values
 
 ```

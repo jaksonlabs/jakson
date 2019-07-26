@@ -42,7 +42,13 @@ NG5_EXPORT(bool) bison_revise_try_begin(struct bison_revise *context, struct bis
 
 NG5_EXPORT(bool) bison_revise_begin(struct bison_revise *context, struct bison *revised_doc, struct bison *original);
 
-NG5_EXPORT(bool) bison_revise_gen_object_id(object_id_t *out, struct bison_revise *context);
+NG5_EXPORT(bool) bison_revise_key_generate(object_id_t *out, struct bison_revise *context);
+
+NG5_EXPORT(bool) bison_revise_key_set_unsigned(struct bison_revise *context, u64 key_value);
+
+NG5_EXPORT(bool) bison_revise_key_set_signed(struct bison_revise *context, i64 key_value);
+
+NG5_EXPORT(bool) bison_revise_key_set_string(struct bison_revise *context, const char *key_value);
 
 NG5_EXPORT(bool) bison_revise_iterator_open(struct bison_array_it *it, struct bison_revise *context);
 

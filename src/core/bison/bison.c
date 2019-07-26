@@ -29,14 +29,18 @@
 #include "core/bison/bison-find.h"
 #include "core/bison/bison-insert.h"
 #include "core/bison/bison-revise.h"
+#include "core/bison/bison-string.h"
+#include "core/bison/bison-key.h"
+#include "core/bison/bison-revision.h"
 
-#define MIN_DOC_CAPACITY 16 /* minimum number of bytes required to store header and empty document array */
+#define MIN_DOC_CAPACITY 17 /* minimum number of bytes required to store header and empty document array */
 
 static bool printer_drop(struct bison_printer *printer);
 static bool printer_bison_begin(struct bison_printer *printer, struct string_builder *builder);
 static bool printer_bison_end(struct bison_printer *printer, struct string_builder *builder);
 static bool printer_bison_header_begin(struct bison_printer *printer, struct string_builder *builder);
-static bool printer_bison_header_contents(struct bison_printer *printer, struct string_builder *builder, object_id_t oid, u64 rev);
+static bool printer_bison_header_contents(struct bison_printer *printer, struct string_builder *builder,
+        enum bison_primary_key_type key_type, const void *key, u64 key_length, u64 rev);
 static bool printer_bison_header_end(struct bison_printer *printer, struct string_builder *builder);
 static bool printer_bison_payload_begin(struct bison_printer *printer, struct string_builder *builder);
 static bool printer_bison_payload_end(struct bison_printer *printer, struct string_builder *builder);
@@ -57,12 +61,12 @@ static bool print_column(struct bison_column_it *it, struct bison_printer *print
 
 static bool internal_drop(struct bison *doc);
 
-static void bison_header_init(struct bison *doc);
-static u64 bison_header_get_oid(struct bison *doc);
+static void bison_header_init(struct bison *doc, enum bison_primary_key_type key_type);
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-NG5_EXPORT(struct bison_insert *) bison_create_begin(struct bison_new *context, struct bison *doc, int mode)
+NG5_EXPORT(struct bison_insert *) bison_create_begin(struct bison_new *context, struct bison *doc,
+        enum bison_primary_key_type key_type, int mode)
 {
         if (likely(context != NULL && doc != NULL)) {
                 error_if (mode != BISON_KEEP && mode != BISON_SHRINK && mode != BISON_COMPACT && mode != BISON_OPTIMIZE,
@@ -73,7 +77,7 @@ NG5_EXPORT(struct bison_insert *) bison_create_begin(struct bison_new *context, 
                 context->inserter = malloc(sizeof(struct bison_insert));
                 context->mode = mode;
 
-                success_else_null(bison_create_empty(&context->original), &doc->err);
+                success_else_null(bison_create_empty(&context->original, key_type), &doc->err);
                 success_else_null(bison_revise_begin(&context->revision_context, doc, &context->original), &doc->err);
                 success_else_null(bison_revise_iterator_open(context->content_it, &context->revision_context), &doc->err);
                 success_else_null(bison_array_it_insert_begin(context->inserter, context->content_it), &doc->err);
@@ -110,12 +114,13 @@ NG5_EXPORT(bool) bison_create_end(struct bison_new *context)
         }
 }
 
-NG5_EXPORT(bool) bison_create_empty(struct bison *doc)
+NG5_EXPORT(bool) bison_create_empty(struct bison *doc, enum bison_primary_key_type key_type)
 {
-        return bison_create_empty_ex(doc, 1024, 1);
+        return bison_create_empty_ex(doc, key_type, 1024, 1);
 }
 
-NG5_EXPORT(bool) bison_create_empty_ex(struct bison *doc, u64 doc_cap_byte, u64 array_cap_byte)
+NG5_EXPORT(bool) bison_create_empty_ex(struct bison *doc, enum bison_primary_key_type key_type, u64 doc_cap_byte,
+                                       u64 array_cap_byte)
 {
         error_if_null(doc);
 
@@ -132,7 +137,7 @@ NG5_EXPORT(bool) bison_create_empty_ex(struct bison *doc, u64 doc_cap_byte, u64 
         doc->versioning.revision_lock = false;
         doc->versioning.is_latest = true;
 
-        bison_header_init(doc);
+        bison_header_init(doc, key_type);
         bison_int_insert_array(&doc->memfile, array_cap_byte);
 
         return true;
@@ -148,6 +153,92 @@ NG5_EXPORT(bool) bison_is_up_to_date(struct bison *doc)
 {
         error_if_null(doc);
         return doc->versioning.is_latest;
+}
+
+NG5_EXPORT(bool) bison_key_get_type(enum bison_primary_key_type *out, struct bison *doc)
+{
+        error_if_null(out)
+        error_if_null(doc)
+        memfile_save_position(&doc->memfile);
+        bison_key_skip(out, &doc->memfile);
+        memfile_restore_position(&doc->memfile);
+        return true;
+}
+
+NG5_EXPORT(const void *) bison_key_raw_value(u64 *key_len, enum bison_primary_key_type *type, struct bison *doc)
+{
+        memfile_save_position(&doc->memfile);
+        memfile_seek(&doc->memfile, 0);
+        const void *result = bison_key_read(key_len, type, &doc->memfile);
+        memfile_restore_position(&doc->memfile);
+        return result;
+}
+
+NG5_EXPORT(bool) bison_key_signed_value(i64 *key, struct bison *doc)
+{
+        enum bison_primary_key_type type;
+        memfile_save_position(&doc->memfile);
+        memfile_seek(&doc->memfile, 0);
+        const void *result = bison_key_read(NULL, &type, &doc->memfile);
+        memfile_restore_position(&doc->memfile);
+        if (likely(bison_key_is_signed_type(type))) {
+                *key = *((const i64 *) result);
+                return true;
+        } else {
+                error(&doc->err, NG5_ERR_TYPEMISMATCH);
+                return false;
+        }
+}
+
+NG5_EXPORT(bool) bison_key_unsigned_value(u64 *key, struct bison *doc)
+{
+        enum bison_primary_key_type type;
+        memfile_save_position(&doc->memfile);
+        memfile_seek(&doc->memfile, 0);
+        const void *result = bison_key_read(NULL, &type, &doc->memfile);
+        memfile_restore_position(&doc->memfile);
+        if (likely(bison_key_is_unsigned_type(type))) {
+                *key = *((const u64 *) result);
+                return true;
+        } else {
+                error(&doc->err, NG5_ERR_TYPEMISMATCH);
+                return false;
+        }
+}
+
+NG5_EXPORT(const char *) bison_key_string_value(u64 *str_len, struct bison *doc)
+{
+        enum bison_primary_key_type type;
+        memfile_save_position(&doc->memfile);
+        memfile_seek(&doc->memfile, 0);
+        const void *result = bison_key_read(str_len, &type, &doc->memfile);
+        memfile_restore_position(&doc->memfile);
+        if (likely(bison_key_is_string_type(type))) {
+                return result;
+        } else {
+                error(&doc->err, NG5_ERR_TYPEMISMATCH);
+                return false;
+        }
+}
+
+NG5_EXPORT(bool) bison_key_is_unsigned_type(enum bison_primary_key_type type)
+{
+        return type == BISON_KEY_UKEY || type == BISON_KEY_AUTOKEY;
+}
+
+NG5_EXPORT(bool) bison_key_is_signed_type(enum bison_primary_key_type type)
+{
+        return type == BISON_KEY_IKEY;
+}
+
+NG5_EXPORT(bool) bison_key_is_string_type(enum bison_primary_key_type type)
+{
+        return type == BISON_KEY_SKEY;
+}
+
+NG5_EXPORT(bool) bison_has_key(enum bison_primary_key_type type)
+{
+        return type != BISON_KEY_NOKEY;
 }
 
 NG5_EXPORT(bool) bison_register_listener(listener_handle_t *handle, struct bison_event_listener *listener, struct bison *doc)
@@ -229,21 +320,14 @@ NG5_EXPORT(bool) bison_revision(u64 *rev, struct bison *doc)
         return true;
 }
 
-NG5_EXPORT(bool) bison_object_id(object_id_t *oid, struct bison *doc)
-{
-        error_if_null(doc);
-        error_if_null(oid);
-        *oid = bison_header_get_oid(doc);
-        return true;
-}
-
 NG5_EXPORT(bool) bison_to_str(struct string_builder *dst, enum bison_printer_impl printer, struct bison *doc)
 {
         error_if_null(doc);
 
         struct bison_printer p;
         struct string_builder b;
-        object_id_t oid;
+        enum bison_primary_key_type key_type;
+        u64 key_len;
         u64 rev;
 
         string_builder_clear(dst);
@@ -252,7 +336,7 @@ NG5_EXPORT(bool) bison_to_str(struct string_builder *dst, enum bison_printer_imp
 
         ng5_zero_memory(&p, sizeof(struct bison_printer));
         string_builder_create(&b);
-        bison_object_id(&oid, doc);
+
         bison_revision(&rev, doc);
 
         switch (printer) {
@@ -265,7 +349,10 @@ NG5_EXPORT(bool) bison_to_str(struct string_builder *dst, enum bison_printer_imp
 
         printer_bison_begin(&p, &b);
         printer_bison_header_begin(&p, &b);
-        printer_bison_header_contents(&p, &b, oid, rev);
+
+        const void *key = bison_key_raw_value(&key_len, &key_type, doc);
+        printer_bison_header_contents(&p, &b, key_type, key, key_len, rev);
+
         printer_bison_header_end(&p, &b);
         printer_bison_payload_begin(&p, &b);
 
@@ -352,40 +439,16 @@ static bool internal_drop(struct bison *doc)
         return true;
 }
 
-static void bison_header_init(struct bison *doc)
+static void bison_header_init(struct bison *doc, enum bison_primary_key_type key_type)
 {
         assert(doc);
 
-        struct bison_header header = {
-                .oid = 0
-        };
-
         memfile_seek(&doc->memfile, 0);
-        memfile_write(&doc->memfile, &header, sizeof(struct bison_header));
+        bison_key_create(&doc->memfile, key_type, &doc->err);
 
-        varuint_t revision = NG5_MEMFILE_PEEK(&doc->memfile, varuint_t);
-
-        /* in case not enough space is available for writing revision (variable-length) number, enlarge */
-        size_t remain = memfile_remain_size(&doc->memfile);
-        offset_t rev_off = memfile_tell(&doc->memfile);
-        if (unlikely(remain < varuint_max_blocks())) {
-                memfile_write_zero(&doc->memfile, varuint_max_blocks());
-                memfile_seek(&doc->memfile, rev_off);
+        if (key_type != BISON_KEY_NOKEY) {
+                bison_revision_create(&doc->memfile);
         }
-
-        u8 bytes_written = varuint_write(revision, 0);
-        memfile_skip(&doc->memfile, bytes_written);
-        assert (bison_int_header_get_rev(doc) == 0);
-}
-
-static u64 bison_header_get_oid(struct bison *doc)
-{
-        assert(doc);
-        memfile_save_position(&doc->memfile);
-        memfile_seek(&doc->memfile, 0);
-        const struct bison_header *header = NG5_MEMFILE_READ_TYPE(&doc->memfile, struct bison_header);
-        memfile_restore_position(&doc->memfile);
-        return header->oid;
 }
 
 static bool printer_drop(struct bison_printer *printer)
@@ -416,10 +479,11 @@ static bool printer_bison_header_begin(struct bison_printer *printer, struct str
         return true;
 }
 
-static bool printer_bison_header_contents(struct bison_printer *printer, struct string_builder *builder, object_id_t oid, u64 rev)
+static bool printer_bison_header_contents(struct bison_printer *printer, struct string_builder *builder,
+        enum bison_primary_key_type key_type, const void *key, u64 key_length, u64 rev)
 {
         error_if_null(printer->drop);
-        printer->print_bison_header_contents(printer, builder, oid, rev);
+        printer->print_bison_header_contents(printer, builder, key_type, key, key_length, rev);
         return true;
 }
 
