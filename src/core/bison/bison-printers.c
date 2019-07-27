@@ -244,9 +244,9 @@ static void json_formatter_bison_header_end(struct bison_printer *self, struct s
 static void json_formatter_bison_payload_begin(struct bison_printer *self, struct string_builder *builder)
 {
         if (json_formatter_is_strict(self)) {
-                string_builder_append(builder, "\"record\": ");
+                string_builder_append(builder, "\"doc\": ");
         } else {
-                string_builder_append(builder, "record: ");
+                string_builder_append(builder, "doc: ");
         }
 }
 

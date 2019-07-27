@@ -2209,7 +2209,7 @@ bool moduleCliInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manag
     unused(file);
 
     if (argc != 1) {
-        NG5_CONSOLE_WRITELN(file, "Run '%s' to see usage.", "$ types-tool cli");
+        NG5_CONSOLE_WRITELN(file, "Run '%s' to see usage.", "$ carbon-tool cli");
         return false;
     } else {
         const int filePathArgIdx = 0;

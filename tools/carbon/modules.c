@@ -594,7 +594,7 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
     if (argc != 1) {
         NG5_CONSOLE_WRITE(file, "Require exactly one <input> parameter for <args>.%s", "");
         NG5_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
-        NG5_CONSOLE_WRITELN(file, "Run '%s' to see an example on the usage.", "$ types-tool to_json");
+        NG5_CONSOLE_WRITELN(file, "Run '%s' to see an example on the usage.", "$ carbon-tool to_json");
         return false;
     } else {
         const int filePathArgIdx = 0;

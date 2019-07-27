@@ -83,7 +83,7 @@ int main (int argc, char **argv)
     struct cmdopt_mgr manager;
     struct cmdopt_group *group;
 
-    opt_mgr_create(&manager, "types-tool", "A tool to work with CARBON files.\n"
+    opt_mgr_create(&manager, "carbon-tool", "A tool to work with CARBON files.\n"
                                  "Copyright (c) 2018-2019 Marcus Pinnecke (pinnecke@ovgu.de)", NG5_MOD_ARG_MAYBE_REQUIRED,
                              showHelp);
 

@@ -291,7 +291,7 @@ static bool run_string_id_baking(struct err *err, struct memblock **stream)
         char tmp_file_name[512];
         object_id_t rand_part;
         object_id_create(&rand_part);
-        sprintf(tmp_file_name, "/tmp/types-tool-temp-%"
+        sprintf(tmp_file_name, "/tmp/carbon-tool-temp-%"
                 PRIu64
                 ".carbon", rand_part);
         FILE *tmp_file;
