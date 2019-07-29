@@ -15,7 +15,12 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include "core/mem/file.h"
 #include "core/bison/bison-field.h"
+#include "core/bison/bison-column-it.h"
+#include "core/bison/bison-media.h"
+#include "core/bison/bison-array-it.h"
+#include "core/bison/bison-object-it.h"
 
 NG5_EXPORT(const char *) bison_field_type_str(struct err *err, enum bison_field_type type)
 {
@@ -102,6 +107,213 @@ NG5_EXPORT(bool) bison_field_type_is_string(enum bison_field_type type)
 NG5_EXPORT(bool) bison_field_type_is_constant(enum bison_field_type type)
 {
         return (bison_field_type_is_null(type) || bison_field_type_is_boolean(type));
+}
+
+NG5_EXPORT(bool) bison_field_skip(struct memfile *file)
+{
+        error_if_null(file)
+        u8 type_marker = *NG5_MEMFILE_PEEK(file, u8);
+
+        switch (type_marker) {
+        case BISON_FIELD_TYPE_NULL:
+                bison_field_skip_null(file);
+                break;
+        case BISON_FIELD_TYPE_TRUE:
+        case BISON_FIELD_TYPE_FALSE:
+                bison_field_skip_boolean(file);
+                break;
+        case BISON_FIELD_TYPE_NUMBER_U8:
+        case BISON_FIELD_TYPE_NUMBER_I8:
+                bison_field_skip_8(file);
+                break;
+        case BISON_FIELD_TYPE_NUMBER_U16:
+        case BISON_FIELD_TYPE_NUMBER_I16:
+                bison_field_skip_16(file);
+                break;
+        case BISON_FIELD_TYPE_NUMBER_U32:
+        case BISON_FIELD_TYPE_NUMBER_I32:
+                bison_field_skip_32(file);
+                break;
+        case BISON_FIELD_TYPE_NUMBER_U64:
+        case BISON_FIELD_TYPE_NUMBER_I64:
+                bison_field_skip_64(file);
+                break;
+        case BISON_FIELD_TYPE_NUMBER_FLOAT:
+                bison_field_skip_float(file);
+                break;
+        case BISON_FIELD_TYPE_STRING:
+                bison_field_skip_string(file);
+                break;
+        case BISON_FIELD_TYPE_BINARY:
+                bison_field_skip_binary(file);
+                break;
+        case BISON_FIELD_TYPE_BINARY_CUSTOM:
+                bison_field_skip_custom_binary(file);
+                break;
+        case BISON_FIELD_TYPE_ARRAY:
+                bison_field_skip_array(file);
+                break;
+        case BISON_FIELD_TYPE_COLUMN:
+                bison_field_skip_column(file);
+                break;
+        case BISON_FIELD_TYPE_OBJECT:
+                bison_field_skip_object(file);
+                break;
+        default:
+        error(&file->err, NG5_ERR_CORRUPTED);
+                return false;
+        }
+        return true;
+}
+
+NG5_EXPORT(bool) bison_field_skip_object(struct memfile *file)
+{
+        u8 type_marker = *NG5_MEMFILE_READ_TYPE(file, u8);
+
+        error_if(type_marker != BISON_FIELD_TYPE_OBJECT, &file->err, NG5_ERR_TYPEMISMATCH);
+        struct bison_object_it skip_it;
+        bison_object_it_create(&skip_it, file, &file->err, memfile_tell(file) - sizeof(u8));
+        bison_object_it_fast_forward(&skip_it);
+        memfile_seek(file, memfile_tell(&skip_it.memfile));
+        bison_object_it_drop(&skip_it);
+        return true;
+}
+
+NG5_EXPORT(bool) bison_field_skip_array(struct memfile *file)
+{
+        u8 type_marker = *NG5_MEMFILE_READ_TYPE(file, u8);
+
+        error_if(type_marker != BISON_FIELD_TYPE_ARRAY, &file->err, NG5_ERR_TYPEMISMATCH);
+        struct bison_array_it skip_it;
+        bison_array_it_create(&skip_it, file, &file->err, memfile_tell(file) - sizeof(u8));
+        bison_array_it_fast_forward(&skip_it);
+        memfile_seek(file, memfile_tell(&skip_it.memfile));
+        bison_array_it_drop(&skip_it);
+        return true;
+}
+
+NG5_EXPORT(bool) bison_field_skip_column(struct memfile *file)
+{
+        u8 type_marker = *NG5_MEMFILE_READ_TYPE(file, u8);
+
+        error_if(type_marker != BISON_FIELD_TYPE_COLUMN, &file->err, NG5_ERR_TYPEMISMATCH);
+        struct bison_column_it skip_it;
+        bison_column_it_create(&skip_it, file, &file->err,
+                memfile_tell(file) - sizeof(media_type_t));
+        bison_column_it_fast_forward(&skip_it);
+        memfile_seek(file, memfile_tell(&skip_it.memfile));
+        return true;
+}
+
+NG5_EXPORT(bool) bison_field_skip_binary(struct memfile *file)
+{
+        u8 type_marker = *NG5_MEMFILE_READ_TYPE(file, u8);
+
+        error_if(type_marker != BISON_FIELD_TYPE_BINARY, &file->err, NG5_ERR_TYPEMISMATCH);
+        /* read and skip mime type with variable-length integer type */
+        u64 mime_type = memfile_read_varuint(NULL, file);
+        unused(mime_type);
+
+        /* read blob length */
+        u64 blob_len = memfile_read_varuint(NULL, file);
+
+        /* skip blob */
+        memfile_skip(file, blob_len);
+        return true;
+}
+
+NG5_EXPORT(bool) bison_field_skip_custom_binary(struct memfile *file)
+{
+        u8 type_marker = *NG5_MEMFILE_READ_TYPE(file, u8);
+
+        error_if(type_marker != BISON_FIELD_TYPE_BINARY_CUSTOM, &file->err, NG5_ERR_TYPEMISMATCH);
+        /* read custom type string length, and skip the type string */
+        u64 custom_type_str_len = memfile_read_varuint(NULL, file);
+        memfile_skip(file, custom_type_str_len);
+
+        /* read blob length, and skip blob data */
+        u64 blob_len = memfile_read_varuint(NULL, file);
+        memfile_skip(file, blob_len);
+        return true;
+}
+
+NG5_EXPORT(bool) bison_field_skip_string(struct memfile *file)
+{
+        u8 type_marker = *NG5_MEMFILE_READ_TYPE(file, u8);
+
+        error_if(type_marker != BISON_FIELD_TYPE_STRING, &file->err, NG5_ERR_TYPEMISMATCH);
+        u64 strlen = memfile_read_varuint(NULL, file);
+        memfile_skip(file, strlen);
+        return true;
+}
+
+NG5_EXPORT(bool) bison_field_skip_float(struct memfile *file)
+{
+        u8 type_marker = *NG5_MEMFILE_READ_TYPE(file, u8);
+
+        error_if(type_marker != BISON_FIELD_TYPE_NUMBER_FLOAT, &file->err, NG5_ERR_TYPEMISMATCH);
+        memfile_skip(file, sizeof(float));
+        return true;
+}
+
+NG5_EXPORT(bool) bison_field_skip_boolean(struct memfile *file)
+{
+        u8 type_marker = *NG5_MEMFILE_READ_TYPE(file, u8);
+
+        error_if(type_marker != BISON_FIELD_TYPE_TRUE && type_marker != BISON_FIELD_TYPE_FALSE, &file->err, NG5_ERR_TYPEMISMATCH);
+        return true;
+}
+
+NG5_EXPORT(bool) bison_field_skip_null(struct memfile *file)
+{
+        u8 type_marker = *NG5_MEMFILE_READ_TYPE(file, u8);
+
+        error_if(type_marker != BISON_FIELD_TYPE_NULL, &file->err, NG5_ERR_TYPEMISMATCH);
+        return true;
+}
+
+NG5_EXPORT(bool) bison_field_skip_8(struct memfile *file)
+{
+        u8 type_marker = *NG5_MEMFILE_READ_TYPE(file, u8);
+
+        error_if(type_marker != BISON_FIELD_TYPE_NUMBER_I8 && type_marker != BISON_FIELD_TYPE_NUMBER_U8,
+                &file->err, NG5_ERR_TYPEMISMATCH);
+        assert(sizeof(u8) == sizeof(i8));
+        memfile_skip(file, sizeof(u8));
+        return true;
+}
+
+NG5_EXPORT(bool) bison_field_skip_16(struct memfile *file)
+{
+        u8 type_marker = *NG5_MEMFILE_READ_TYPE(file, u8);
+
+        error_if(type_marker != BISON_FIELD_TYPE_NUMBER_I16 && type_marker != BISON_FIELD_TYPE_NUMBER_U16,
+                &file->err, NG5_ERR_TYPEMISMATCH);
+        assert(sizeof(u16) == sizeof(i16));
+        memfile_skip(file, sizeof(u16));
+        return true;
+}
+
+NG5_EXPORT(bool) bison_field_skip_32(struct memfile *file)
+{
+        u8 type_marker = *NG5_MEMFILE_READ_TYPE(file, u8);
+
+        error_if(type_marker != BISON_FIELD_TYPE_NUMBER_I32 && type_marker != BISON_FIELD_TYPE_NUMBER_U32,
+                &file->err, NG5_ERR_TYPEMISMATCH);
+        assert(sizeof(u32) == sizeof(i32));
+        memfile_skip(file, sizeof(u32));
+        return true;
+}
+
+NG5_EXPORT(bool) bison_field_skip_64(struct memfile *file)
+{
+        u8 type_marker = *NG5_MEMFILE_READ_TYPE(file, u8);
+
+        error_if(type_marker != BISON_FIELD_TYPE_NUMBER_I64 && type_marker != BISON_FIELD_TYPE_NUMBER_U64,
+                &file->err, NG5_ERR_TYPEMISMATCH);
+        assert(sizeof(u64) == sizeof(i64));
+        memfile_skip(file, sizeof(u64));
+        return true;
 }
 
 NG5_EXPORT(enum bison_field_class) bison_field_type_get_class(enum bison_field_type type, struct err *err)

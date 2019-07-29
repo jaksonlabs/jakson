@@ -36,6 +36,7 @@ NG5_EXPORT(bool) bison_int_insert_create_for_array(struct bison_insert *inserter
 
 NG5_EXPORT(bool) bison_int_insert_create_for_column(struct bison_insert *inserter, struct bison_column_it *context);
 
+NG5_EXPORT(bool) bison_int_insert_create_for_object(struct bison_insert *inserter, struct bison_object_it *context);
 
 NG5_EXPORT(bool) bison_insert_null(struct bison_insert *inserter);
 
@@ -76,6 +77,11 @@ NG5_EXPORT(bool) bison_insert_string(struct bison_insert *inserter, const char *
  */
 NG5_EXPORT(bool) bison_insert_binary(struct bison_insert *inserter, const void *value, size_t nbytes,
         const char *file_ext, const char *user_type);
+
+NG5_EXPORT(struct bison_insert *) bison_insert_object_begin(struct bison_insert_object_state *out,
+        struct bison_insert *inserter, u64 object_capacity);
+
+NG5_EXPORT(bool) bison_insert_object_end(struct bison_insert_object_state *state);
 
 NG5_EXPORT(struct bison_insert *) bison_insert_array_begin(struct bison_insert_array_state *state_out,
         struct bison_insert *inserter_in, u64 array_capacity);

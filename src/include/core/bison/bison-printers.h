@@ -63,6 +63,32 @@ struct bison_printer
         void (*print_bison_binary)(struct bison_printer *self, struct string_builder *builder, const struct bison_binary *binary);
 
         void (*print_bison_comma)(struct bison_printer *self, struct string_builder *builder);
+
+        void (*print_bison_object_begin)(struct bison_printer *self, struct string_builder *builder);
+        void (*print_bison_object_end)(struct bison_printer *self, struct string_builder *builder);
+
+        void (*print_bison_prop_null)(struct bison_printer *self, struct string_builder *builder,
+                const char *key_name, u64 key_len);
+        void (*print_bison_prop_true)(struct bison_printer *self, struct string_builder *builder,
+                const char *key_name, u64 key_len);
+        void (*print_bison_prop_false)(struct bison_printer *self, struct string_builder *builder,
+                const char *key_name, u64 key_len);
+        void (*print_bison_prop_signed)(struct bison_printer *self, struct string_builder *builder,
+                const char *key_name, u64 key_len, const i64 *value);
+        void (*print_bison_prop_unsigned)(struct bison_printer *self, struct string_builder *builder,
+                const char *key_name, u64 key_len, const u64 *value);
+        void (*print_bison_prop_float)(struct bison_printer *self, struct string_builder *builder,
+                const char *key_name, u64 key_len, const float *value);
+        void (*print_bison_prop_string)(struct bison_printer *self, struct string_builder *builder,
+                const char *key_name, u64 key_len, const char *value, u64 strlen);
+        void (*print_bison_prop_binary)(struct bison_printer *self, struct string_builder *builder,
+                const char *key_name, u64 key_len, const struct bison_binary *binary);
+        void (*print_bison_array_prop_name)(struct bison_printer *self, struct string_builder *builder,
+                const char *key_name, u64 key_len);
+        void (*print_bison_column_prop_name)(struct bison_printer *self, struct string_builder *builder,
+                const char *key_name, u64 key_len);
+        void (*print_bison_object_prop_name)(struct bison_printer *self, struct string_builder *builder,
+                const char *key_name, u64 key_len);
 };
 
 NG5_EXPORT(bool) bison_json_formatter_create(struct bison_printer *printer);

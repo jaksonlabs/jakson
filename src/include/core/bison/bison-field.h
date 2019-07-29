@@ -24,20 +24,20 @@
 enum bison_field_type
 {
         /* constants */
-                BISON_FIELD_TYPE_NULL = 'n', /* null */
+        BISON_FIELD_TYPE_NULL = 'n', /* null */
         BISON_FIELD_TYPE_TRUE = 't', /* true */
         BISON_FIELD_TYPE_FALSE = 'f', /* false */
 
         /* containers */
-                BISON_FIELD_TYPE_OBJECT = 'o', /* object */
+        BISON_FIELD_TYPE_OBJECT = '{', /* object */
         BISON_FIELD_TYPE_ARRAY = '[', /* variable-type array of elements of varying type */
         BISON_FIELD_TYPE_COLUMN = '(', /* fixed-type array of elements of particular type */
 
         /* character strings */
-                BISON_FIELD_TYPE_STRING = 's', /* UTF-8 string */
+        BISON_FIELD_TYPE_STRING = 's', /* UTF-8 string */
 
         /* numbers */
-                BISON_FIELD_TYPE_NUMBER_U8 = 'c', /* 8bit unsigned integer */
+        BISON_FIELD_TYPE_NUMBER_U8 = 'c', /* 8bit unsigned integer */
         BISON_FIELD_TYPE_NUMBER_U16 = 'd', /* 16bit unsigned integer */
         BISON_FIELD_TYPE_NUMBER_U32 = 'i', /* 32bit unsigned integer */
         BISON_FIELD_TYPE_NUMBER_U64 = 'l', /* 64bit unsigned integer */
@@ -48,7 +48,7 @@ enum bison_field_type
         BISON_FIELD_TYPE_NUMBER_FLOAT = 'r', /* 32bit float */
 
         /* binary data */
-                BISON_FIELD_TYPE_BINARY = 'b', /* arbitrary binary object with known mime type */
+        BISON_FIELD_TYPE_BINARY = 'b', /* arbitrary binary object with known mime type */
         BISON_FIELD_TYPE_BINARY_CUSTOM = 'x', /* arbitrary binary object with unknown mime type*/
 };
 
@@ -119,6 +119,34 @@ NG5_EXPORT(bool) bison_field_type_is_string(enum bison_field_type type);
 NG5_EXPORT(enum bison_field_class) bison_field_type_get_class(enum bison_field_type type, struct err *err);
 
 NG5_EXPORT(bool) bison_field_type_is_constant(enum bison_field_type type);
+
+NG5_EXPORT(bool) bison_field_skip(struct memfile *file);
+
+NG5_EXPORT(bool) bison_field_skip_object(struct memfile *file);
+
+NG5_EXPORT(bool) bison_field_skip_array(struct memfile *file);
+
+NG5_EXPORT(bool) bison_field_skip_column(struct memfile *file);
+
+NG5_EXPORT(bool) bison_field_skip_binary(struct memfile *file);
+
+NG5_EXPORT(bool) bison_field_skip_custom_binary(struct memfile *file);
+
+NG5_EXPORT(bool) bison_field_skip_string(struct memfile *file);
+
+NG5_EXPORT(bool) bison_field_skip_float(struct memfile *file);
+
+NG5_EXPORT(bool) bison_field_skip_boolean(struct memfile *file);
+
+NG5_EXPORT(bool) bison_field_skip_null(struct memfile *file);
+
+NG5_EXPORT(bool) bison_field_skip_8(struct memfile *file);
+
+NG5_EXPORT(bool) bison_field_skip_16(struct memfile *file);
+
+NG5_EXPORT(bool) bison_field_skip_32(struct memfile *file);
+
+NG5_EXPORT(bool) bison_field_skip_64(struct memfile *file);
 
 NG5_END_DECL
 

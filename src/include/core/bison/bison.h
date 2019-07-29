@@ -104,7 +104,7 @@ struct bison_new
         int mode;
 };
 
-enum bison_container_type { BISON_ARRAY, BISON_COLUMN };
+enum bison_container_type { BISON_OBJECT, BISON_ARRAY, BISON_COLUMN };
 
 enum bison_primary_key_type {
         /* no key, no revision number */
@@ -118,6 +118,9 @@ enum bison_primary_key_type {
         /* user-defined n-char string key */
         BISON_KEY_SKEY
 };
+
+#define BISON_MARKER_OBJECT_BEGIN '{'
+#define BISON_MARKER_OBJECT_END '}'
 
 #define BISON_MARKER_ARRAY_BEGIN '['
 #define BISON_MARKER_ARRAY_END ']'

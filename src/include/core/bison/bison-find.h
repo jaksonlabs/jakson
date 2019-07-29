@@ -84,7 +84,6 @@ NG5_EXPORT(struct bison_binary *) bison_find_result_binary(struct bison_find *fi
 
 NG5_EXPORT(bool) bison_find_drop(struct bison_find *find);
 
-
 NG5_END_DECL
 
 #endif

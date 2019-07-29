@@ -23,6 +23,7 @@
 #include "core/bison/bison.h"
 #include "core/bison/bison-array-it.h"
 #include "core/bison/bison-column-it.h"
+#include "core/bison/bison-object-it.h"
 #include "core/bison/bison-printers.h"
 #include "core/bison/bison-int.h"
 #include "core/bison/bison-dot.h"
@@ -46,6 +47,8 @@ static bool printer_bison_payload_begin(struct bison_printer *printer, struct st
 static bool printer_bison_payload_end(struct bison_printer *printer, struct string_builder *builder);
 static bool printer_bison_array_begin(struct bison_printer *printer, struct string_builder *builder);
 static bool printer_bison_array_end(struct bison_printer *printer, struct string_builder *builder);
+static bool printer_bison_object_begin(struct bison_printer *printer, struct string_builder *builder);
+static bool printer_bison_object_end(struct bison_printer *printer, struct string_builder *builder);
 static bool printer_bison_null(struct bison_printer *printer, struct string_builder *builder);
 static bool printer_bison_true(struct bison_printer *printer, bool is_null, struct string_builder *builder);
 static bool printer_bison_false(struct bison_printer *printer, bool is_null, struct string_builder *builder);
@@ -56,7 +59,31 @@ static bool printer_bison_float(struct bison_printer *printer, struct string_bui
 static bool printer_bison_string(struct bison_printer *printer, struct string_builder *builder, const char *value, u64 strlen);
 static bool printer_bison_binary(struct bison_printer *printer, struct string_builder *builder, const struct bison_binary *binary);
 
+static bool printer_bison_prop_null(struct bison_printer *printer, struct string_builder *builder,
+        const char *key_name, u64 key_len);
+static bool printer_bison_prop_true(struct bison_printer *printer, struct string_builder *builder,
+        const char *key_name, u64 key_len);
+static bool printer_bison_prop_false(struct bison_printer *printer, struct string_builder *builder,
+        const char *key_name, u64 key_len);
+static bool printer_bison_prop_signed(struct bison_printer *printer, struct string_builder *builder,
+        const char *key_name, u64 key_len, const i64 *value);
+static bool printer_bison_prop_unsigned(struct bison_printer *printer, struct string_builder *builder,
+        const char *key_name, u64 key_len, const u64 *value);
+static bool printer_bison_prop_float(struct bison_printer *printer, struct string_builder *builder,
+        const char *key_name, u64 key_len, const float *value);
+static bool printer_bison_prop_string(struct bison_printer *printer, struct string_builder *builder,
+        const char *key_name, u64 key_len, const char *value, u64 strlen);
+static bool printer_bison_prop_binary(struct bison_printer *printer, struct string_builder *builder,
+        const char *key_name, u64 key_len, const struct bison_binary *binary);
+static bool printer_bison_array_prop_name(struct bison_printer *printer, struct string_builder *builder,
+        const char *key_name, u64 key_len);
+static bool printer_bison_column_prop_name(struct bison_printer *printer, struct string_builder *builder,
+        const char *key_name, u64 key_len);
+static bool printer_bison_object_prop_name(struct bison_printer *printer, struct string_builder *builder,
+        const char *key_name, u64 key_len);
+
 static bool print_array(struct bison_array_it *it, struct bison_printer *printer, struct string_builder *builder);
+static bool print_object(struct bison_object_it *it, struct bison_printer *printer, struct string_builder *builder);
 static bool print_column(struct bison_column_it *it, struct bison_printer *printer, struct string_builder *builder);
 
 static bool internal_drop(struct bison *doc);
@@ -522,6 +549,20 @@ static bool printer_bison_array_end(struct bison_printer *printer, struct string
         return true;
 }
 
+static bool printer_bison_object_begin(struct bison_printer *printer, struct string_builder *builder)
+{
+        error_if_null(printer->print_bison_object_begin);
+        printer->print_bison_object_begin(printer, builder);
+        return true;
+}
+
+static bool printer_bison_object_end(struct bison_printer *printer, struct string_builder *builder)
+{
+        error_if_null(printer->print_bison_object_end);
+        printer->print_bison_object_end(printer, builder);
+        return true;
+}
+
 static bool printer_bison_null(struct bison_printer *printer, struct string_builder *builder)
 {
         error_if_null(printer->print_bison_null);
@@ -582,6 +623,187 @@ static bool printer_bison_binary(struct bison_printer *printer, struct string_bu
 {
         error_if_null(printer->print_bison_binary);
         printer->print_bison_binary(printer, builder, binary);
+        return true;
+}
+
+static bool printer_bison_prop_null(struct bison_printer *printer, struct string_builder *builder,
+        const char *key_name, u64 key_len)
+{
+        error_if_null(printer->print_bison_prop_null);
+        printer->print_bison_prop_null(printer, builder, key_name, key_len);
+        return true;
+}
+
+static bool printer_bison_prop_true(struct bison_printer *printer, struct string_builder *builder,
+        const char *key_name, u64 key_len)
+{
+        error_if_null(printer->print_bison_prop_true);
+        printer->print_bison_prop_true(printer, builder, key_name, key_len);
+        return true;
+}
+
+static bool printer_bison_prop_false(struct bison_printer *printer, struct string_builder *builder,
+        const char *key_name, u64 key_len)
+{
+        error_if_null(printer->print_bison_prop_false);
+        printer->print_bison_prop_false(printer, builder, key_name, key_len);
+        return true;
+}
+
+static bool printer_bison_prop_signed(struct bison_printer *printer, struct string_builder *builder,
+        const char *key_name, u64 key_len, const i64 *value)
+{
+        error_if_null(printer->print_bison_prop_signed);
+        printer->print_bison_prop_signed(printer, builder, key_name, key_len, value);
+        return true;
+}
+
+static bool printer_bison_prop_unsigned(struct bison_printer *printer, struct string_builder *builder,
+        const char *key_name, u64 key_len, const u64 *value)
+{
+        error_if_null(printer->print_bison_prop_unsigned);
+        printer->print_bison_prop_unsigned(printer, builder, key_name, key_len, value);
+        return true;
+}
+
+static bool printer_bison_prop_float(struct bison_printer *printer, struct string_builder *builder,
+        const char *key_name, u64 key_len, const float *value)
+{
+        error_if_null(printer->print_bison_prop_float);
+        printer->print_bison_prop_float(printer, builder, key_name, key_len, value);
+        return true;
+}
+
+static bool printer_bison_prop_string(struct bison_printer *printer, struct string_builder *builder,
+        const char *key_name, u64 key_len, const char *value, u64 strlen)
+{
+        error_if_null(printer->print_bison_prop_string);
+        printer->print_bison_prop_string(printer, builder, key_name, key_len, value, strlen);
+        return true;
+}
+
+static bool printer_bison_prop_binary(struct bison_printer *printer, struct string_builder *builder,
+        const char *key_name, u64 key_len, const struct bison_binary *binary)
+{
+        error_if_null(printer->print_bison_prop_binary);
+        printer->print_bison_prop_binary(printer, builder, key_name, key_len, binary);
+        return true;
+}
+
+static bool printer_bison_array_prop_name(struct bison_printer *printer, struct string_builder *builder,
+        const char *key_name, u64 key_len)
+{
+        error_if_null(printer->print_bison_array_prop_name);
+        printer->print_bison_array_prop_name(printer, builder, key_name, key_len);
+        return true;
+}
+
+static bool printer_bison_column_prop_name(struct bison_printer *printer, struct string_builder *builder,
+        const char *key_name, u64 key_len)
+{
+        error_if_null(printer->print_bison_column_prop_name);
+        printer->print_bison_column_prop_name(printer, builder, key_name, key_len);
+        return true;
+}
+
+static bool printer_bison_object_prop_name(struct bison_printer *printer, struct string_builder *builder,
+        const char *key_name, u64 key_len)
+{
+        error_if_null(printer->print_bison_object_prop_name);
+        printer->print_bison_object_prop_name(printer, builder, key_name, key_len);
+        return true;
+}
+
+static bool print_object(struct bison_object_it *it, struct bison_printer *printer, struct string_builder *builder)
+{
+        assert(it);
+        assert(printer);
+        assert(builder);
+        bool is_null_value;
+        bool first_entry = true;
+        printer_bison_object_begin(printer, builder);
+
+        while (bison_object_it_next(it)) {
+                if (likely(!first_entry)) {
+                        printer_bison_comma(printer, builder);
+                }
+                enum bison_field_type type;
+                u64 key_len;
+                const char *key_name = bison_object_it_prop_name(&key_len, it);
+
+                bison_object_it_prop_type(&type, it);
+                switch (type) {
+                case BISON_FIELD_TYPE_NULL:
+                        printer_bison_prop_null(printer, builder, key_name, key_len);
+                        break;
+                case BISON_FIELD_TYPE_TRUE:
+                        /* in an array, there is no TRUE constant that is set to NULL because it will be replaced with
+                         * a constant NULL. In columns, there might be a NULL-encoded value */
+                        printer_bison_prop_true(printer, builder, key_name, key_len);
+                        break;
+                case BISON_FIELD_TYPE_FALSE:
+                        /* in an array, there is no FALSE constant that is set to NULL because it will be replaced with
+                         * a constant NULL. In columns, there might be a NULL-encoded value */
+                        printer_bison_prop_false(printer, builder, key_name, key_len);
+                        break;
+                case BISON_FIELD_TYPE_NUMBER_U8:
+                case BISON_FIELD_TYPE_NUMBER_U16:
+                case BISON_FIELD_TYPE_NUMBER_U32:
+                case BISON_FIELD_TYPE_NUMBER_U64: {
+                        u64 value;
+                        bison_object_it_unsigned_value(&is_null_value, &value, it);
+                        printer_bison_prop_unsigned(printer, builder, key_name, key_len, is_null_value ? NULL : &value);
+                } break;
+                case BISON_FIELD_TYPE_NUMBER_I8:
+                case BISON_FIELD_TYPE_NUMBER_I16:
+                case BISON_FIELD_TYPE_NUMBER_I32:
+                case BISON_FIELD_TYPE_NUMBER_I64: {
+                        i64 value;
+                        bison_object_it_signed_value(&is_null_value, &value, it);
+                        printer_bison_prop_signed(printer, builder, key_name, key_len, is_null_value ? NULL : &value);
+                } break;
+                case BISON_FIELD_TYPE_NUMBER_FLOAT: {
+                        float value;
+                        bison_object_it_float_value(&is_null_value, &value, it);
+                        printer_bison_prop_float(printer, builder, key_name, key_len, is_null_value ? NULL : &value);
+                } break;
+                case BISON_FIELD_TYPE_STRING: {
+                        u64 strlen;
+                        const char *value = bison_object_it_string_value(&strlen, it);
+                        printer_bison_prop_string(printer, builder, key_name, key_len, value, strlen);
+                } break;
+                case BISON_FIELD_TYPE_BINARY:
+                case BISON_FIELD_TYPE_BINARY_CUSTOM: {
+                        struct bison_binary binary;
+                        bison_object_it_binary_value(&binary, it);
+                        printer_bison_prop_binary(printer, builder, key_name, key_len, &binary);
+                } break;
+                case BISON_FIELD_TYPE_ARRAY: {
+                        struct bison_array_it *array = bison_object_it_array_value(it);
+                        printer_bison_array_prop_name(printer, builder, key_name, key_len);
+                        print_array(array, printer, builder);
+                        bison_array_it_drop(array);
+                } break;
+                case BISON_FIELD_TYPE_COLUMN: {
+                        struct bison_column_it *column = bison_object_it_column_value(it);
+                        printer_bison_column_prop_name(printer, builder, key_name, key_len);
+                        print_column(column, printer, builder);
+                } break;
+                case BISON_FIELD_TYPE_OBJECT: {
+                        struct bison_object_it *object = bison_object_it_object_value(it);
+                        printer_bison_object_prop_name(printer, builder, key_name, key_len);
+                        print_object(object, printer, builder);
+                        bison_object_it_drop(object);
+                } break;
+                default:
+                        printer_bison_object_end(printer, builder);
+                        error(&it->err, NG5_ERR_CORRUPTED);
+                        return false;
+                }
+                first_entry = false;
+        }
+
+        printer_bison_object_end(printer, builder);
         return true;
 }
 
@@ -655,7 +877,11 @@ static bool print_array(struct bison_array_it *it, struct bison_printer *printer
                         struct bison_column_it *column = bison_array_it_column_value(it);
                         print_column(column, printer, builder);
                 } break;
-                case BISON_FIELD_TYPE_OBJECT:
+                case BISON_FIELD_TYPE_OBJECT: {
+                        struct bison_object_it *object = bison_array_it_object_value(it);
+                        print_object(object, printer, builder);
+                        bison_object_it_drop(object);
+                } break;
                 default:
                         printer_bison_array_end(printer, builder);
                         error(&it->err, NG5_ERR_CORRUPTED);

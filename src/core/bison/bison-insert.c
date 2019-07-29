@@ -22,6 +22,7 @@
 #include "core/bison/bison-media.h"
 #include "core/bison/bison-int.h"
 #include "core/bison/bison-string.h"
+#include "core/bison/bison-object-it.h"
 
 #define check_type_if_container_is_column(inserter, expected)                                                          \
 if (unlikely(inserter->context_type == BISON_COLUMN && inserter->context.column->type != expected)) {                  \
@@ -59,6 +60,17 @@ NG5_EXPORT(bool) bison_int_insert_create_for_column(struct bison_insert *inserte
         bison_column_it_lock(context);
         inserter->context_type = BISON_COLUMN;
         inserter->context.column = context;
+        internal_create(inserter, &context->memfile);
+        return true;
+}
+
+NG5_EXPORT(bool) bison_int_insert_create_for_object(struct bison_insert *inserter, struct bison_object_it *context)
+{
+        error_if_null(inserter)
+        error_if_null(context)
+        bison_object_it_lock(context);
+        inserter->context_type = BISON_OBJECT;
+        inserter->context.object = context;
         internal_create(inserter, &context->memfile);
         return true;
 }
@@ -377,11 +389,51 @@ NG5_EXPORT(bool) bison_insert_binary(struct bison_insert *inserter, const void *
         return true;
 }
 
+NG5_EXPORT(struct bison_insert *) bison_insert_object_begin(struct bison_insert_object_state *out,
+        struct bison_insert *inserter, u64 object_capacity)
+{
+        error_if_null(out)
+        error_if_null(inserter)
+
+        error_if_and_return(!out, &inserter->err, NG5_ERR_NULLPTR, NULL);
+        if (!inserter) {
+                error_print(NG5_ERR_NULLPTR);
+                return false;
+        }
+
+        *out = (struct bison_insert_object_state) {
+                .parent_inserter = inserter,
+                .it = malloc(sizeof(struct bison_object_it))
+        };
+
+        bison_int_insert_object(&inserter->memfile, object_capacity);
+        u64 payload_start = memfile_tell(&inserter->memfile) - 1;
+
+        bison_object_it_create(out->it, &inserter->memfile, &inserter->err, payload_start);
+        bison_object_it_insert_begin(&out->inserter, out->it);
+
+        return &out->inserter;
+}
+
+NG5_EXPORT(bool) bison_insert_object_end(struct bison_insert_object_state *state)
+{
+        error_if_null(state)
+
+        bison_insert_drop(&state->inserter);
+        free(state->it);
+
+        return true;
+}
+
 NG5_EXPORT(struct bison_insert *) bison_insert_array_begin(struct bison_insert_array_state *state_out,
         struct bison_insert *inserter_in, u64 array_capacity)
 {
         error_if_and_return(!state_out, &inserter_in->err, NG5_ERR_NULLPTR, NULL);
-        error_if_and_return(!inserter_in, &inserter_in->err, NG5_ERR_NULLPTR, NULL);
+        if (!inserter_in) {
+                error_print(NG5_ERR_NULLPTR);
+                return false;
+        }
+
         error_if(inserter_in->context_type != BISON_ARRAY, &inserter_in->err, NG5_ERR_UNSUPPCONTAINER);
 
         *state_out = (struct bison_insert_array_state) {
@@ -465,6 +517,8 @@ NG5_EXPORT(bool) bison_insert_drop(struct bison_insert *inserter)
                 bison_array_it_unlock(inserter->context.array);
         } else if (inserter->context_type == BISON_COLUMN) {
                 bison_column_it_unlock(inserter->context.column);
+        } else if (inserter->context_type == BISON_OBJECT) {
+                bison_object_it_unlock(inserter->context.object);
         } else {
                 error(&inserter->err, NG5_ERR_INTERNALERR);
         }

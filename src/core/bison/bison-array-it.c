@@ -20,25 +20,17 @@
 #include "core/bison/bison.h"
 #include "core/bison/bison-array-it.h"
 #include "core/bison/bison-column-it.h"
+#include "core/bison/bison-object-it.h"
 #include "core/bison/bison-insert.h"
 #include "core/bison/bison-media.h"
 #include "core/bison/bison-int.h"
-
-static void auto_close_nested_array_it(struct bison_array_it *it);
-static void auto_close_nested_column_it(struct bison_array_it *it);
-
-static inline void history_clear(struct bison_array_it *it);
-static inline void push_to_history(struct bison_array_it *it, offset_t off);
-static inline offset_t peek_from_history(struct bison_array_it *it);
-static inline offset_t prop_from_history(struct bison_array_it *it);
-static inline bool has_history(struct bison_array_it *it);
 
 #define DEFINE_IN_PLACE_UPDATE_FUNCTION(type_name, field_type)                                                         \
 NG5_EXPORT(bool) bison_array_it_update_in_place_##type_name(struct bison_array_it *it, type_name value)                \
 {                                                                                                                      \
         offset_t datum;                                                                                                \
         error_if_null(it);                                                                                             \
-        if (likely(it->it_field_type == field_type)) {                                                                 \
+        if (likely(it->field_access.it_field_type == field_type)) {                                                    \
                 memfile_save_position(&it->memfile);                                                                   \
                 bison_int_array_it_offset(&datum, it);                                                                 \
                 memfile_seek(&it->memfile, datum + sizeof(u8));                                                        \
@@ -67,7 +59,7 @@ static bool update_in_place_constant(struct bison_array_it *it, enum bison_const
 
         memfile_save_position(&it->memfile);
 
-        if (bison_field_type_is_constant(it->it_field_type)) {
+        if (bison_field_type_is_constant(it->field_access.it_field_type)) {
                 u8 value;
                 switch (constant) {
                 case BISON_CONSTANT_TRUE:
@@ -137,8 +129,7 @@ NG5_EXPORT(bool) bison_array_it_create(struct bison_array_it *it, struct memfile
         error_if_null(err);
 
         it->payload_start = payload_start;
-        it->nested_array_it_opened = false;
-        it->nested_array_it_accessed = false;
+
         error_init(&it->err);
         spin_init(&it->lock);
         vec_create(&it->history, NULL, sizeof(offset_t), 40);
@@ -152,10 +143,9 @@ NG5_EXPORT(bool) bison_array_it_create(struct bison_array_it *it, struct memfile
                 "array begin marker ('[') not found");
 
         it->payload_start += sizeof(u8);
-        it->nested_array_it = malloc(sizeof(struct bison_array_it));
-        it->nested_column_it = malloc(sizeof(struct bison_column_it));
-        ng5_zero_memory(it->nested_array_it, sizeof(struct bison_array_it))
-        ng5_zero_memory(it->nested_column_it, sizeof(struct bison_column_it))
+
+        bison_int_field_access_create(&it->field_access);
+
         bison_array_it_rewind(it);
 
         return true;
@@ -178,10 +168,9 @@ NG5_EXPORT(bool) bison_array_it_readonly(struct bison_array_it *it)
 
 NG5_EXPORT(bool) bison_array_it_drop(struct bison_array_it *it)
 {
-        bison_int_array_it_auto_close(it);
+        bison_int_field_auto_close(&it->field_access);
+        bison_int_field_access_drop(&it->field_access);
         vec_drop(&it->history);
-        free (it->nested_array_it);
-        free (it->nested_column_it);
         return true;
 }
 
@@ -209,7 +198,7 @@ NG5_EXPORT(bool) bison_array_it_rewind(struct bison_array_it *it)
 {
         error_if_null(it);
         error_if(it->payload_start >= memfile_size(&it->memfile), &it->err, NG5_ERR_OUTOFBOUNDS);
-        history_clear(it);
+        bison_int_history_clear(&it->history);
         return memfile_seek(&it->memfile, it->payload_start);
 }
 
@@ -219,7 +208,7 @@ NG5_EXPORT(bool) bison_array_it_next(struct bison_array_it *it)
         bool is_empty_slot, is_array_end;
         offset_t last_off = memfile_tell(&it->memfile);
         if (bison_int_array_it_next(&is_empty_slot, &is_array_end, it)) {
-                push_to_history(it, last_off);
+                bison_int_history_push(&it->history, last_off);
                 return true;
         } else {
                 /* skip remaining zeros until end of array is reached */
@@ -232,7 +221,7 @@ NG5_EXPORT(bool) bison_array_it_next(struct bison_array_it *it)
                 }
                 char final = *memfile_peek(&it->memfile, sizeof(char));
                 assert( final == BISON_MARKER_ARRAY_END);
-                bison_int_array_it_auto_close(it);
+                bison_int_field_auto_close(&it->field_access);
                 return false;
         }
 }
@@ -240,8 +229,8 @@ NG5_EXPORT(bool) bison_array_it_next(struct bison_array_it *it)
 NG5_EXPORT(bool) bison_array_it_prev(struct bison_array_it *it)
 {
         error_if_null(it);
-        if (has_history(it)) {
-                offset_t prev_off = prop_from_history(it);
+        if (bison_int_history_has(&it->history)) {
+                offset_t prev_off = bison_int_history_pop(&it->history);
                 memfile_seek(&it->memfile, prev_off);
                 return bison_int_array_it_refresh(NULL, NULL, it);
         } else {
@@ -263,8 +252,8 @@ NG5_EXPORT(bool) bison_int_array_it_offset(offset_t *off, struct bison_array_it 
 {
         error_if_null(off)
         error_if_null(it)
-        if (has_history(it)) {
-                *off = peek_from_history(it);
+        if (bison_int_history_has(&it->history)) {
+                *off = bison_int_history_peek(&it->history);
                 return true;
         }
         return false;
@@ -283,200 +272,87 @@ NG5_EXPORT(bool) bison_array_it_fast_forward(struct bison_array_it *it)
 
 NG5_EXPORT(bool) bison_array_it_field_type(enum bison_field_type *type, struct bison_array_it *it)
 {
-        error_if_null(type)
-        error_if_null(it)
-        *type = it->it_field_type;
-        return true;
+        return bison_int_field_access_field_type(type, &it->field_access);
 }
 
 NG5_EXPORT(bool) bison_array_it_u8_value(u8 *value, struct bison_array_it *it)
 {
-        error_if_null(value)
-        error_if_null(it)
-        error_if(it->it_field_type != BISON_FIELD_TYPE_NUMBER_U8, &it->err, NG5_ERR_TYPEMISMATCH);
-        *value = *(u8 *) it->it_field_data;
-        return true;
+        return bison_int_field_access_u8_value(value, &it->field_access, &it->err);
 }
 
 NG5_EXPORT(bool) bison_array_it_u16_value(u16 *value, struct bison_array_it *it)
 {
-        error_if_null(value)
-        error_if_null(it)
-        error_if(it->it_field_type != BISON_FIELD_TYPE_NUMBER_U16, &it->err, NG5_ERR_TYPEMISMATCH);
-        *value = *(u16 *) it->it_field_data;
-        return true;
+        return bison_int_field_access_u16_value(value, &it->field_access, &it->err);
 }
 
 NG5_EXPORT(bool) bison_array_it_u32_value(u32 *value, struct bison_array_it *it)
 {
-        error_if_null(value)
-        error_if_null(it)
-        error_if(it->it_field_type != BISON_FIELD_TYPE_NUMBER_U32, &it->err, NG5_ERR_TYPEMISMATCH);
-        *value = *(u32 *) it->it_field_data;
-        return true;
+        return bison_int_field_access_u32_value(value, &it->field_access, &it->err);
 }
 
 NG5_EXPORT(bool) bison_array_it_u64_value(u64 *value, struct bison_array_it *it)
 {
-        error_if_null(value)
-        error_if_null(it)
-        error_if(it->it_field_type != BISON_FIELD_TYPE_NUMBER_U64, &it->err, NG5_ERR_TYPEMISMATCH);
-        *value = *(u64 *) it->it_field_data;
-        return true;
+        return bison_int_field_access_u64_value(value, &it->field_access, &it->err);
 }
 
 NG5_EXPORT(bool) bison_array_it_i8_value(i8 *value, struct bison_array_it *it)
 {
-        error_if_null(value)
-        error_if_null(it)
-        error_if(it->it_field_type != BISON_FIELD_TYPE_NUMBER_I8, &it->err, NG5_ERR_TYPEMISMATCH);
-        *value = *(i8 *) it->it_field_data;
-        return true;
+        return bison_int_field_access_i8_value(value, &it->field_access, &it->err);
 }
 
 NG5_EXPORT(bool) bison_array_it_i16_value(i16 *value, struct bison_array_it *it)
 {
-        error_if_null(value)
-        error_if_null(it)
-        error_if(it->it_field_type != BISON_FIELD_TYPE_NUMBER_I16, &it->err, NG5_ERR_TYPEMISMATCH);
-        *value = *(i16 *) it->it_field_data;
-        return true;
+        return bison_int_field_access_i16_value(value, &it->field_access, &it->err);
 }
 
 NG5_EXPORT(bool) bison_array_it_i32_value(i32 *value, struct bison_array_it *it)
 {
-        error_if_null(value)
-        error_if_null(it)
-        error_if(it->it_field_type != BISON_FIELD_TYPE_NUMBER_I32, &it->err, NG5_ERR_TYPEMISMATCH);
-        *value = *(i32 *) it->it_field_data;
-        return true;
+        return bison_int_field_access_i32_value(value, &it->field_access, &it->err);
 }
 
 NG5_EXPORT(bool) bison_array_it_i64_value(i64 *value, struct bison_array_it *it)
 {
-        error_if_null(value)
-        error_if_null(it)
-        error_if(it->it_field_type != BISON_FIELD_TYPE_NUMBER_I64, &it->err, NG5_ERR_TYPEMISMATCH);
-        *value = *(i64 *) it->it_field_data;
-        return true;
+        return bison_int_field_access_i64_value(value, &it->field_access, &it->err);
 }
 
 NG5_EXPORT(bool) bison_array_it_float_value(bool *is_null_in, float *value, struct bison_array_it *it)
 {
-        error_if_null(it)
-        error_if(it->it_field_type != BISON_FIELD_TYPE_NUMBER_FLOAT, &it->err, NG5_ERR_TYPEMISMATCH);
-        float read_value = *(float *) it->it_field_data;
-        ng5_optional_set(value, read_value);
-        ng5_optional_set(is_null_in, is_null_float(read_value));
-
-        return true;
+        return bison_int_field_access_float_value(is_null_in, value, &it->field_access, &it->err);
 }
 
 NG5_EXPORT(bool) bison_array_it_signed_value(bool *is_null_in, i64 *value, struct bison_array_it *it)
 {
-        error_if_null(it)
-        switch (it->it_field_type) {
-        case BISON_FIELD_TYPE_NUMBER_I8: {
-                i8 read_value;
-                bison_array_it_i8_value(&read_value, it);
-                ng5_optional_set(value, read_value);
-                ng5_optional_set(is_null_in, is_null_i8(read_value));
-        } break;
-        case BISON_FIELD_TYPE_NUMBER_I16: {
-                i16 read_value;
-                bison_array_it_i16_value(&read_value, it);
-                ng5_optional_set(value, read_value);
-                ng5_optional_set(is_null_in, is_null_i16(read_value));
-        } break;
-        case BISON_FIELD_TYPE_NUMBER_I32: {
-                i32 read_value;
-                bison_array_it_i32_value(&read_value, it);
-                ng5_optional_set(value, read_value);
-                ng5_optional_set(is_null_in, is_null_i32(read_value));
-        } break;
-        case BISON_FIELD_TYPE_NUMBER_I64: {
-                i64 read_value;
-                bison_array_it_i64_value(&read_value, it);
-                ng5_optional_set(value, read_value);
-                ng5_optional_set(is_null_in, is_null_i64(read_value));
-        } break;
-        default:
-                error(&it->err, NG5_ERR_TYPEMISMATCH);
-                return false;
-        }
-        return true;
+        return bison_int_field_access_signed_value(is_null_in, value, &it->field_access, &it->err);
 }
 
 NG5_EXPORT(bool) bison_array_it_unsigned_value(bool *is_null_in, u64 *value, struct bison_array_it *it)
 {
-        error_if_null(it)
-        switch (it->it_field_type) {
-        case BISON_FIELD_TYPE_NUMBER_U8: {
-                u8 read_value;
-                bison_array_it_u8_value(&read_value, it);
-                ng5_optional_set(value, read_value);
-                ng5_optional_set(is_null_in, is_null_u8(read_value));
-        } break;
-        case BISON_FIELD_TYPE_NUMBER_U16: {
-                u16 read_value;
-                bison_array_it_u16_value(&read_value, it);
-                ng5_optional_set(value, read_value);
-                ng5_optional_set(is_null_in, is_null_u16(read_value));
-        } break;
-        case BISON_FIELD_TYPE_NUMBER_U32: {
-                u32 read_value;
-                bison_array_it_u32_value(&read_value, it);
-                ng5_optional_set(value, read_value);
-                ng5_optional_set(is_null_in, is_null_u32(read_value));
-        } break;
-        case BISON_FIELD_TYPE_NUMBER_U64: {
-                u64 read_value;
-                bison_array_it_u64_value(&read_value, it);
-                ng5_optional_set(value, read_value);
-                ng5_optional_set(is_null_in, is_null_u64(read_value));
-        } break;
-        default:
-        error(&it->err, NG5_ERR_TYPEMISMATCH);
-                return false;
-        }
-        return true;
+        return bison_int_field_access_unsigned_value(is_null_in, value, &it->field_access, &it->err);
 }
 
 NG5_EXPORT(const char *) bison_array_it_string_value(u64 *strlen, struct bison_array_it *it)
 {
-        error_if_null(strlen);
-        error_if_and_return(it == NULL, &it->err, NG5_ERR_NULLPTR, NULL);
-        error_if(it->it_field_type != BISON_FIELD_TYPE_STRING, &it->err, NG5_ERR_TYPEMISMATCH);
-        *strlen = it->it_field_len;
-        return it->it_field_data;
+        return bison_int_field_access_string_value(strlen, &it->field_access, &it->err);
 }
 
 NG5_EXPORT(bool) bison_array_it_binary_value(struct bison_binary *out, struct bison_array_it *it)
 {
-        error_if_null(out)
-        error_if_null(it)
-        error_if(it->it_field_type != BISON_FIELD_TYPE_BINARY && it->it_field_type != BISON_FIELD_TYPE_BINARY_CUSTOM,
-                &it->err, NG5_ERR_TYPEMISMATCH);
-        out->blob = it->it_field_data;
-        out->blob_len = it->it_field_len;
-        out->mime_type = it->it_mime_type;
-        out->mime_type_strlen = it->it_mime_type_strlen;
-        return true;
+        return bison_int_field_access_binary_value(out, &it->field_access, &it->err);
 }
 
 NG5_EXPORT(struct bison_array_it *) bison_array_it_array_value(struct bison_array_it *it_in)
 {
-        error_if_and_return(!it_in, &it_in->err, NG5_ERR_NULLPTR, NULL);
-        error_if(it_in->it_field_type != BISON_FIELD_TYPE_ARRAY, &it_in->err, NG5_ERR_TYPEMISMATCH);
-        it_in->nested_array_it_accessed = true;
-        return it_in->nested_array_it;
+        return bison_int_field_access_array_value(&it_in->field_access, &it_in->err);
+}
+
+NG5_EXPORT(struct bison_object_it *) bison_array_it_object_value(struct bison_array_it *it_in)
+{
+        return bison_int_field_access_object_value(&it_in->field_access, &it_in->err);
 }
 
 NG5_EXPORT(struct bison_column_it *) bison_array_it_column_value(struct bison_array_it *it_in)
 {
-        error_if_and_return(!it_in, &it_in->err, NG5_ERR_NULLPTR, NULL);
-        error_if(it_in->it_field_type != BISON_FIELD_TYPE_COLUMN, &it_in->err, NG5_ERR_TYPEMISMATCH);
-        return it_in->nested_column_it;
+        return bison_int_field_access_column_value(&it_in->field_access, &it_in->err);
 }
 
 NG5_EXPORT(bool) bison_array_it_insert_begin(struct bison_insert *inserter, struct bison_array_it *it)
@@ -601,7 +477,7 @@ NG5_EXPORT(bool) bison_array_it_remove(struct bison_array_it *it)
         error_if_null(it);
         enum bison_field_type type;
         if (bison_array_it_field_type(&type, it)) {
-                offset_t prev_off = prop_from_history(it);
+                offset_t prev_off = bison_int_history_pop(&it->history);
                 memfile_seek(&it->memfile, prev_off);
                 if (remove_field(&it->memfile, &it->err, type)) {
                         memfile_seek(&it->memfile, prev_off);
@@ -614,69 +490,4 @@ NG5_EXPORT(bool) bison_array_it_remove(struct bison_array_it *it)
                 error(&it->err, NG5_ERR_ILLEGALSTATE);
                 return false;
         }
-}
-
-NG5_EXPORT(bool) bison_array_it_update(struct bison_array_it *it)
-{
-        unused(it);
-        return false;
-}
-
-NG5_EXPORT(bool) bison_int_array_it_auto_close(struct bison_array_it *it)
-{
-        error_if_null(it)
-        if (it->nested_array_it_opened && !it->nested_array_it_accessed) {
-                auto_close_nested_array_it(it);
-                it->nested_array_it_opened = false;
-                it->nested_array_it_accessed = false;
-        }
-        auto_close_nested_column_it(it);
-        return true;
-}
-
-static void auto_close_nested_array_it(struct bison_array_it *it)
-{
-        if (((char *) it->nested_array_it)[0] != 0) {
-                bison_array_it_drop(it->nested_array_it);
-                ng5_zero_memory(it->nested_array_it, sizeof(struct bison_array_it));
-        }
-}
-
-static void auto_close_nested_column_it(struct bison_array_it *it)
-{
-        if (((char *) it->nested_column_it)[0] != 0) {
-                ng5_zero_memory(it->nested_column_it, sizeof(struct bison_column_it));
-        }
-}
-
-static inline void history_clear(struct bison_array_it *it)
-{
-        assert(it);
-        vec_clear(&it->history);
-}
-
-static inline void push_to_history(struct bison_array_it *it, offset_t off)
-{
-        assert(it);
-        vec_push(&it->history, &off, sizeof(offset_t));
-}
-
-static inline offset_t prop_from_history(struct bison_array_it *it)
-{
-        assert(it);
-        assert(has_history(it));
-        return *(offset_t *) vec_pop(&it->history);
-}
-
-static inline offset_t peek_from_history(struct bison_array_it *it)
-{
-        assert(it);
-        assert(has_history(it));
-        return *(offset_t *) vec_peek(&it->history);
-}
-
-static inline bool has_history(struct bison_array_it *it)
-{
-        assert(it);
-        return !vec_is_empty(&it->history);
 }

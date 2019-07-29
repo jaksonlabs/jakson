@@ -162,7 +162,7 @@ NG5_EXPORT(bool) bison_find_drop(struct bison_find *find)
 
 static void result_from_array(struct bison_find *find, struct bison_array_it *it)
 {
-        find->type = it->it_field_type;
+        find->type = it->field_access.it_field_type;
         switch (find->type) {
                 case BISON_FIELD_TYPE_NULL:
                 case BISON_FIELD_TYPE_TRUE:

@@ -64,6 +64,31 @@ static void json_formatter_bison_binary(struct bison_printer *self, struct strin
 
 static void json_formatter_bison_comma(struct bison_printer *self, struct string_builder *builder);
 
+static void json_formatter_bison_prop_null(struct bison_printer *self, struct string_builder *builder,
+        const char *key_name, u64 key_len);
+static void json_formatter_bison_prop_true(struct bison_printer *self, struct string_builder *builder,
+        const char *key_name, u64 key_len);
+static void json_formatter_bison_prop_false(struct bison_printer *self, struct string_builder *builder,
+        const char *key_name, u64 key_len);
+static void json_formatter_bison_prop_signed(struct bison_printer *self, struct string_builder *builder,
+        const char *key_name, u64 key_len, const i64 *value);
+static void json_formatter_bison_prop_unsigned(struct bison_printer *self, struct string_builder *builder,
+        const char *key_name, u64 key_len, const u64 *value);
+static void json_formatter_bison_prop_float(struct bison_printer *self, struct string_builder *builder,
+        const char *key_name, u64 key_len, const float *value);
+static void json_formatter_bison_prop_string(struct bison_printer *self, struct string_builder *builder,
+        const char *key_name, u64 key_len, const char *value, u64 strlen);
+static void json_formatter_bison_prop_binary(struct bison_printer *self, struct string_builder *builder,
+        const char *key_name, u64 key_len, const struct bison_binary *binary);
+static void json_formatter_bison_array_prop_name(struct bison_printer *self, struct string_builder *builder,
+        const char *key_name, u64 key_len);
+static void json_formatter_bison_column_prop_name(struct bison_printer *self, struct string_builder *builder,
+        const char *key_name, u64 key_len);
+static void json_formatter_bison_object_prop_name(struct bison_printer *self, struct string_builder *builder,
+        const char *key_name, u64 key_len);
+static void json_formatter_bison_object_begin(struct bison_printer *self, struct string_builder *builder);
+static void json_formatter_bison_object_end(struct bison_printer *self, struct string_builder *builder);
+
 NG5_EXPORT(bool) bison_json_formatter_create(struct bison_printer *printer)
 {
         error_if_null(printer);
@@ -93,6 +118,20 @@ NG5_EXPORT(bool) bison_json_formatter_create(struct bison_printer *printer)
         printer->print_bison_binary = json_formatter_bison_binary;
 
         printer->print_bison_comma = json_formatter_bison_comma;
+
+        printer->print_bison_prop_null = json_formatter_bison_prop_null;
+        printer->print_bison_prop_true = json_formatter_bison_prop_true;
+        printer->print_bison_prop_false = json_formatter_bison_prop_false;
+        printer->print_bison_prop_signed = json_formatter_bison_prop_signed;
+        printer->print_bison_prop_unsigned = json_formatter_bison_prop_unsigned;
+        printer->print_bison_prop_float = json_formatter_bison_prop_float;
+        printer->print_bison_prop_string = json_formatter_bison_prop_string;
+        printer->print_bison_prop_binary = json_formatter_bison_prop_binary;
+        printer->print_bison_array_prop_name = json_formatter_bison_array_prop_name;
+        printer->print_bison_column_prop_name = json_formatter_bison_column_prop_name;
+        printer->print_bison_object_prop_name = json_formatter_bison_object_prop_name;
+        printer->print_bison_object_begin = json_formatter_bison_object_begin;
+        printer->print_bison_object_end = json_formatter_bison_object_end;
 
         printer->extra = malloc(sizeof(struct json_formatter_extra));
         struct json_formatter_extra *extra = (struct json_formatter_extra *) printer->extra;
@@ -328,10 +367,8 @@ static void json_formatter_bison_string(struct bison_printer *self, struct strin
 #define code_of(x, data_len)      (x + data_len + 2)
 #define data_of(x)      (x)
 
-static void json_formatter_bison_binary(struct bison_printer *self, struct string_builder *builder, const struct bison_binary *binary)
+static void print_binary(struct bison_printer *self, struct string_builder *builder, const struct bison_binary *binary)
 {
-        unused(self);
-
         /* base64 code will be written into the extra's buffer after a null-terminated copy of the binary data */
         struct json_formatter_extra *extra = (struct json_formatter_extra *) self->extra;
         /* buffer of at least 2x data length for base64 code + 1x data length to hold the null-terminated value */
@@ -371,8 +408,116 @@ static void json_formatter_bison_binary(struct bison_printer *self, struct strin
         string_builder_append(builder, "\" }");
 }
 
+static void json_formatter_bison_binary(struct bison_printer *self, struct string_builder *builder, const struct bison_binary *binary)
+{
+        print_binary(self, builder, binary);
+}
+
 static void json_formatter_bison_comma(struct bison_printer *self, struct string_builder *builder)
 {
         unused(self);
         string_builder_append(builder, ", ");
+}
+
+static void print_key(struct string_builder *builder, const char *key_name, u64 key_len)
+{
+        string_builder_append_char(builder, '"');
+        string_builder_append_nchar(builder, key_name, key_len);
+        string_builder_append(builder, "\":");
+}
+
+static void json_formatter_bison_prop_null(struct bison_printer *self, struct string_builder *builder,
+        const char *key_name, u64 key_len)
+{
+        unused(self);
+        print_key(builder, key_name, key_len);
+        string_builder_append(builder, "null");
+}
+
+static void json_formatter_bison_prop_true(struct bison_printer *self, struct string_builder *builder,
+        const char *key_name, u64 key_len)
+{
+        unused(self);
+        print_key(builder, key_name, key_len);
+        string_builder_append(builder, "true");
+}
+
+static void json_formatter_bison_prop_false(struct bison_printer *self, struct string_builder *builder,
+        const char *key_name, u64 key_len)
+{
+        unused(self);
+        print_key(builder, key_name, key_len);
+        string_builder_append(builder, "false");
+}
+
+static void json_formatter_bison_prop_signed(struct bison_printer *self, struct string_builder *builder,
+        const char *key_name, u64 key_len, const i64 *value)
+{
+        unused(self);
+        print_key(builder, key_name, key_len);
+        string_builder_append_i64(builder, *value);
+}
+
+static void json_formatter_bison_prop_unsigned(struct bison_printer *self, struct string_builder *builder,
+        const char *key_name, u64 key_len, const u64 *value)
+{
+        unused(self);
+        print_key(builder, key_name, key_len);
+        string_builder_append_u64(builder, *value);
+}
+
+static void json_formatter_bison_prop_float(struct bison_printer *self, struct string_builder *builder,
+        const char *key_name, u64 key_len, const float *value)
+{
+        unused(self);
+        print_key(builder, key_name, key_len);
+        string_builder_append_float(builder, *value);
+}
+
+static void json_formatter_bison_prop_string(struct bison_printer *self, struct string_builder *builder,
+        const char *key_name, u64 key_len, const char *value, u64 strlen)
+{
+        unused(self);
+        print_key(builder, key_name, key_len);
+        string_builder_append_nchar(builder, value, strlen);
+}
+
+static void json_formatter_bison_prop_binary(struct bison_printer *self, struct string_builder *builder,
+        const char *key_name, u64 key_len, const struct bison_binary *binary)
+{
+        print_key(builder, key_name, key_len);
+        print_binary(self, builder, binary);
+}
+
+static void json_formatter_bison_array_prop_name(struct bison_printer *self, struct string_builder *builder,
+        const char *key_name, u64 key_len)
+{
+        unused(self)
+        print_key(builder, key_name, key_len);
+}
+
+static void json_formatter_bison_column_prop_name(struct bison_printer *self, struct string_builder *builder,
+        const char *key_name, u64 key_len)
+{
+        unused(self)
+        print_key(builder, key_name, key_len);
+}
+
+static void json_formatter_bison_object_prop_name(struct bison_printer *self, struct string_builder *builder,
+        const char *key_name, u64 key_len)
+{
+        unused(self)
+        print_key(builder, key_name, key_len);
+}
+
+static void json_formatter_bison_object_begin(struct bison_printer *self, struct string_builder *builder)
+{
+        unused(self)
+        string_builder_append(builder, "{");
+}
+
+static void json_formatter_bison_object_end(struct bison_printer *self, struct string_builder *builder)
+{
+        unused(self)
+        string_builder_append(builder, "}");
 }

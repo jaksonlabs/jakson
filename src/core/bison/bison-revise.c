@@ -23,8 +23,10 @@
 #include "core/bison/bison-find.h"
 #include "core/bison/bison-key.h"
 #include "core/bison/bison-revision.h"
+#include "core/bison/bison-object-it.h"
 
 static bool internal_pack_array(struct bison_array_it *it);
+static bool internal_pack_object(struct bison_object_it *it);
 static bool internal_pack_column(struct bison_column_it *it);
 static bool internal_revision_inc(struct bison *doc);
 static bool bison_header_rev_inc(struct bison *doc);
@@ -374,7 +376,7 @@ static bool internal_pack_array(struct bison_array_it *it)
                         case BISON_FIELD_TYPE_ARRAY: {
                                 struct bison_array_it nested_array_it;
                                 bison_array_it_create(&nested_array_it, &it->memfile, &it->err,
-                                        it->nested_array_it->payload_start - sizeof(u8));
+                                        it->field_access.nested_array_it->payload_start - sizeof(u8));
                                 internal_pack_array(&nested_array_it);
                                 char last = *memfile_peek(&nested_array_it.memfile, sizeof(char));
                                 assert(last == BISON_MARKER_ARRAY_END);
@@ -383,13 +385,21 @@ static bool internal_pack_array(struct bison_array_it *it)
                                 bison_array_it_drop(&nested_array_it);
                         } break;
                         case BISON_FIELD_TYPE_COLUMN:
-                                bison_column_it_rewind(it->nested_column_it);
-                                internal_pack_column(it->nested_column_it);
-                                memfile_seek(&it->memfile, memfile_tell(&it->nested_column_it->memfile));
+                                bison_column_it_rewind(it->field_access.nested_column_it);
+                                internal_pack_column(it->field_access.nested_column_it);
+                                memfile_seek(&it->memfile, memfile_tell(&it->field_access.nested_column_it->memfile));
                                 break;
-                        case BISON_FIELD_TYPE_OBJECT:
-                        error(&it->err, NG5_ERR_NOTIMPLEMENTED);
-                                return false;
+                        case BISON_FIELD_TYPE_OBJECT: {
+                                struct bison_object_it nested_object_it;
+                                bison_object_it_create(&nested_object_it, &it->memfile, &it->err,
+                                        it->field_access.nested_object_it->payload_start - sizeof(u8));
+                                internal_pack_object(&nested_object_it);
+                                char last = *memfile_peek(&nested_object_it.memfile, sizeof(char));
+                                assert(last == BISON_MARKER_OBJECT_END);
+                                memfile_skip(&nested_object_it.memfile, sizeof(char));
+                                memfile_seek(&it->memfile, memfile_tell(&nested_object_it.memfile));
+                                bison_object_it_drop(&nested_object_it);
+                        } break;
                         default:
                         error(&it->err, NG5_ERR_INTERNALERR);
                                 return false;
@@ -399,6 +409,102 @@ static bool internal_pack_array(struct bison_array_it *it)
 
         char last = *memfile_peek(&it->memfile, sizeof(char));
         assert(last == BISON_MARKER_ARRAY_END);
+
+        return true;
+}
+
+static bool internal_pack_object(struct bison_object_it *it)
+{
+        assert(it);
+
+        /* shrink this object */
+        {
+                struct bison_object_it this_object_it;
+                bool is_empty_slot, is_object_end;
+
+                bison_object_it_copy(&this_object_it, it);
+                bison_int_object_skip_contents(&is_empty_slot, &is_object_end, &this_object_it);
+
+                if (!is_object_end) {
+
+                        error_if(!is_empty_slot, &it->err, NG5_ERR_CORRUPTED);
+                        offset_t first_empty_slot_offset = memfile_tell(&this_object_it.memfile);
+                        char final;
+                        while ((final = *memfile_read(&this_object_it.memfile, sizeof(char))) == 0)
+                        { }
+                        assert(final == BISON_MARKER_OBJECT_END);
+                        offset_t last_empty_slot_offset = memfile_tell(&this_object_it.memfile) - sizeof(char);
+                        memfile_seek(&this_object_it.memfile, first_empty_slot_offset);
+                        assert(last_empty_slot_offset > first_empty_slot_offset);
+
+                        memfile_move_left(&this_object_it.memfile, last_empty_slot_offset - first_empty_slot_offset);
+
+                        final = *memfile_read(&this_object_it.memfile, sizeof(char));
+                        assert(final == BISON_MARKER_ARRAY_END);
+                }
+
+                bison_object_it_drop(&this_object_it);
+        }
+
+        /* shrink contained containers */
+        {
+                while (bison_object_it_next(it)) {
+                        enum bison_field_type type;
+                        bison_object_it_prop_type(&type, it);
+                        switch (type) {
+                        case BISON_FIELD_TYPE_NULL:
+                        case BISON_FIELD_TYPE_TRUE:
+                        case BISON_FIELD_TYPE_FALSE:
+                        case BISON_FIELD_TYPE_STRING:
+                        case BISON_FIELD_TYPE_NUMBER_U8:
+                        case BISON_FIELD_TYPE_NUMBER_U16:
+                        case BISON_FIELD_TYPE_NUMBER_U32:
+                        case BISON_FIELD_TYPE_NUMBER_U64:
+                        case BISON_FIELD_TYPE_NUMBER_I8:
+                        case BISON_FIELD_TYPE_NUMBER_I16:
+                        case BISON_FIELD_TYPE_NUMBER_I32:
+                        case BISON_FIELD_TYPE_NUMBER_I64:
+                        case BISON_FIELD_TYPE_NUMBER_FLOAT:
+                        case BISON_FIELD_TYPE_BINARY:
+                        case BISON_FIELD_TYPE_BINARY_CUSTOM:
+                                /* nothing to shrink, because there are no padded zeros here */
+                                break;
+                        case BISON_FIELD_TYPE_ARRAY: {
+                                struct bison_array_it nested_array_it;
+                                bison_array_it_create(&nested_array_it, &it->memfile, &it->err,
+                                        it->field_access.nested_array_it->payload_start - sizeof(u8));
+                                internal_pack_array(&nested_array_it);
+                                char last = *memfile_peek(&nested_array_it.memfile, sizeof(char));
+                                assert(last == BISON_MARKER_ARRAY_END);
+                                memfile_skip(&nested_array_it.memfile, sizeof(char));
+                                memfile_seek(&it->memfile, memfile_tell(&nested_array_it.memfile));
+                                bison_array_it_drop(&nested_array_it);
+                        } break;
+                        case BISON_FIELD_TYPE_COLUMN:
+                                bison_column_it_rewind(it->field_access.nested_column_it);
+                                internal_pack_column(it->field_access.nested_column_it);
+                                memfile_seek(&it->memfile, memfile_tell(&it->field_access.nested_column_it->memfile));
+                                break;
+                        case BISON_FIELD_TYPE_OBJECT: {
+                                struct bison_object_it nested_object_it;
+                                bison_object_it_create(&nested_object_it, &it->memfile, &it->err,
+                                        it->field_access.nested_object_it->payload_start - sizeof(u8));
+                                internal_pack_object(&nested_object_it);
+                                char last = *memfile_peek(&nested_object_it.memfile, sizeof(char));
+                                assert(last == BISON_MARKER_OBJECT_END);
+                                memfile_skip(&nested_object_it.memfile, sizeof(char));
+                                memfile_seek(&it->memfile, memfile_tell(&nested_object_it.memfile));
+                                bison_object_it_drop(&nested_object_it);
+                        } break;
+                        default:
+                        error(&it->err, NG5_ERR_INTERNALERR);
+                                return false;
+                        }
+                }
+        }
+
+        char last = *memfile_peek(&it->memfile, sizeof(char));
+        assert(last == BISON_MARKER_OBJECT_END);
 
         return true;
 }

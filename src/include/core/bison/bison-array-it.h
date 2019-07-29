@@ -32,15 +32,8 @@ struct bison; /* forwarded from bison.h */
 struct bison_insert; /* forwarded from bison-literal-inserter.h */
 struct bison_column_it; /* forwarded from bison-column-it.h */
 
-struct bison_array_it
+struct field_access
 {
-        struct memfile memfile;
-        offset_t payload_start;
-        struct spinlock lock;
-        struct err err;
-
-        struct vector ofType(offset_t) history;
-
         enum bison_field_type it_field_type;
 
         const void *it_field_data;
@@ -52,8 +45,23 @@ struct bison_array_it
         bool nested_array_it_opened;
         bool nested_array_it_accessed;
 
+        bool nested_object_it_opened;
+        bool nested_object_it_accessed;
+
         struct bison_array_it *nested_array_it;
         struct bison_column_it *nested_column_it;
+        struct bison_object_it *nested_object_it;
+};
+
+struct bison_array_it
+{
+        struct memfile memfile;
+        offset_t payload_start;
+        struct spinlock lock;
+        struct err err;
+
+        struct vector ofType(offset_t) history;
+        struct field_access field_access;
 };
 
 NG5_DEFINE_ERROR_GETTER(bison_array_it);
@@ -151,6 +159,8 @@ NG5_EXPORT(bool) bison_array_it_binary_value(struct bison_binary *out, struct bi
 
 NG5_EXPORT(struct bison_array_it *) bison_array_it_array_value(struct bison_array_it *it_in);
 
+NG5_EXPORT(struct bison_object_it *) bison_array_it_object_value(struct bison_array_it *it_in);
+
 NG5_EXPORT(struct bison_column_it *) bison_array_it_column_value(struct bison_array_it *it_in);
 
 /**
@@ -164,9 +174,6 @@ NG5_EXPORT(bool) bison_array_it_remove(struct bison_array_it *it);
 
 
 //NG5_EXPORT(bool) bison_array_it_update_in_place_u8(struct bison_array_it *it, u8 value);
-
-
-NG5_EXPORT(bool) bison_int_array_it_auto_close(struct bison_array_it *it);
 
 NG5_END_DECL
 
