@@ -93,6 +93,63 @@ NG5_EXPORT(struct bison_insert *) bison_insert_column_begin(struct bison_insert_
 
 NG5_EXPORT(bool) bison_insert_column_end(struct bison_insert_column_state *state_in);
 
+
+
+
+
+
+
+NG5_EXPORT(bool) bison_insert_prop_null(struct bison_insert *inserter, const char *key);
+
+NG5_EXPORT(bool) bison_insert_prop_true(struct bison_insert *inserter, const char *key);
+
+NG5_EXPORT(bool) bison_insert_prop_false(struct bison_insert *inserter, const char *key);
+
+NG5_EXPORT(bool) bison_insert_prop_u8(struct bison_insert *inserter, const char *key, u8 value);
+
+NG5_EXPORT(bool) bison_insert_prop_u16(struct bison_insert *inserter, const char *key, u16 value);
+
+NG5_EXPORT(bool) bison_insert_prop_u32(struct bison_insert *inserter, const char *key, u32 value);
+
+NG5_EXPORT(bool) bison_insert_prop_u64(struct bison_insert *inserter, const char *key, u64 value);
+
+NG5_EXPORT(bool) bison_insert_prop_i8(struct bison_insert *inserter, const char *key, i8 value);
+
+NG5_EXPORT(bool) bison_insert_prop_i16(struct bison_insert *inserter, const char *key, i16 value);
+
+NG5_EXPORT(bool) bison_insert_prop_i32(struct bison_insert *inserter, const char *key, i32 value);
+
+NG5_EXPORT(bool) bison_insert_prop_i64(struct bison_insert *inserter, const char *key, i64 value);
+
+NG5_EXPORT(bool) bison_insert_prop_unsigned(struct bison_insert *inserter, const char *key, u64 value);
+
+NG5_EXPORT(bool) bison_insert_prop_signed(struct bison_insert *inserter, const char *key, i64 value);
+
+NG5_EXPORT(bool) bison_insert_prop_float(struct bison_insert *inserter, const char *key, float value);
+
+NG5_EXPORT(bool) bison_insert_prop_string(struct bison_insert *inserter, const char *key, const char *value);
+
+NG5_EXPORT(bool) bison_insert_prop_binary(struct bison_insert *inserter, const char *key, const void *value,
+        size_t nbytes, const char *file_ext, const char *user_type);
+
+NG5_EXPORT(struct bison_insert *) bison_insert_prop_object_begin(struct bison_insert_object_state *out,
+        struct bison_insert *inserter, const char *key, u64 object_capacity);
+
+NG5_EXPORT(bool) bison_insert_prop_object_end(struct bison_insert_object_state *state);
+
+NG5_EXPORT(struct bison_insert *) bison_insert_prop_array_begin(struct bison_insert_array_state *state_out,
+        struct bison_insert *inserter_in, const char *key, u64 array_capacity);
+
+NG5_EXPORT(bool) bison_insert_prop_array_end(struct bison_insert_array_state *state_in);
+
+NG5_EXPORT(struct bison_insert *) bison_insert_prop_column_begin(struct bison_insert_column_state *state_out,
+        struct bison_insert *inserter_in, const char *key, enum bison_field_type type, u64 column_capacity);
+
+NG5_EXPORT(bool) bison_insert_prop_column_end(struct bison_insert_column_state *state_in);
+
+
+
+
 NG5_EXPORT(bool) bison_insert_drop(struct bison_insert *inserter);
 
 NG5_END_DECL

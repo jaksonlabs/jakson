@@ -4420,6 +4420,712 @@ TEST(BisonTest, BisonObjectInsertEmpty)
         bison_drop(&doc);
 }
 
+TEST(BisonTest, BisonObjectInsertNull)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1024);
+        bison_insert_prop_null(obj_ins, "My Key");
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":null}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonObjectInsertMultipleNulls)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1);
+        bison_insert_prop_null(obj_ins, "My Key 1");
+        bison_insert_prop_null(obj_ins, "My Key 2");
+        bison_insert_prop_null(obj_ins, "My Key 3");
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":null, \"My Key 2\":null, \"My Key 3\":null}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonObjectInsertU8)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1024);
+        bison_insert_prop_u8(obj_ins, "My Key", 123);
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":123}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonObjectInsertMultipleU8s)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1);
+        bison_insert_prop_u8(obj_ins, "My Key 1", 1);
+        bison_insert_prop_u8(obj_ins, "My Key 2", 2);
+        bison_insert_prop_u8(obj_ins, "My Key 3", 3);
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":1, \"My Key 2\":2, \"My Key 3\":3}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonObjectInsertU16)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1024);
+        bison_insert_prop_u16(obj_ins, "My Key", 123);
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":123}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonObjectInsertMultipleU16s)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1);
+        bison_insert_prop_u16(obj_ins, "My Key 1", 1);
+        bison_insert_prop_u16(obj_ins, "My Key 2", 2);
+        bison_insert_prop_u16(obj_ins, "My Key 3", 3);
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":1, \"My Key 2\":2, \"My Key 3\":3}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonObjectInsertU32)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1024);
+        bison_insert_prop_u32(obj_ins, "My Key", 123);
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":123}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonObjectInsertMultipleU32s)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1);
+        bison_insert_prop_u32(obj_ins, "My Key 1", 1);
+        bison_insert_prop_u32(obj_ins, "My Key 2", 2);
+        bison_insert_prop_u32(obj_ins, "My Key 3", 3);
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":1, \"My Key 2\":2, \"My Key 3\":3}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonObjectInsertU64)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1024);
+        bison_insert_prop_u64(obj_ins, "My Key", 123);
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":123}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonObjectInsertMultipleU64s)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1);
+        bison_insert_prop_u64(obj_ins, "My Key 1", 1);
+        bison_insert_prop_u64(obj_ins, "My Key 2", 2);
+        bison_insert_prop_u64(obj_ins, "My Key 3", 3);
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":1, \"My Key 2\":2, \"My Key 3\":3}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonObjectInsertI8)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1024);
+        bison_insert_prop_i8(obj_ins, "My Key", -123);
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":-123}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonObjectInsertMultipleI8s)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1);
+        bison_insert_prop_i8(obj_ins, "My Key 1", -1);
+        bison_insert_prop_i8(obj_ins, "My Key 2", -2);
+        bison_insert_prop_i8(obj_ins, "My Key 3", -3);
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":-1, \"My Key 2\":-2, \"My Key 3\":-3}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonObjectInsertI16)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1024);
+        bison_insert_prop_i16(obj_ins, "My Key", -123);
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":-123}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonObjectInsertMultipleI16s)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1);
+        bison_insert_prop_i16(obj_ins, "My Key 1", -1);
+        bison_insert_prop_i16(obj_ins, "My Key 2", -2);
+        bison_insert_prop_i16(obj_ins, "My Key 3", -3);
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":-1, \"My Key 2\":-2, \"My Key 3\":-3}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonObjectInsertI32)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1024);
+        bison_insert_prop_i32(obj_ins, "My Key", -123);
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":-123}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonObjectInsertMultipleI32s)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1);
+        bison_insert_prop_i32(obj_ins, "My Key 1", -1);
+        bison_insert_prop_i32(obj_ins, "My Key 2", -2);
+        bison_insert_prop_i32(obj_ins, "My Key 3", -3);
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":-1, \"My Key 2\":-2, \"My Key 3\":-3}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonObjectInsertI64)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1024);
+        bison_insert_prop_i64(obj_ins, "My Key", -123);
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":-123}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonObjectInsertMultipleI64s)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1);
+        bison_insert_prop_i64(obj_ins, "My Key 1", -1);
+        bison_insert_prop_i64(obj_ins, "My Key 2", -2);
+        bison_insert_prop_i64(obj_ins, "My Key 3", -3);
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":-1, \"My Key 2\":-2, \"My Key 3\":-3}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonObjectInsertFloat)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1024);
+        bison_insert_prop_float(obj_ins, "My Key", -123.32);
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":-123.32}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonObjectInsertMultipleFloats)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1);
+        bison_insert_prop_float(obj_ins, "My Key 1", -1.23);
+        bison_insert_prop_float(obj_ins, "My Key 2", -2.42);
+        bison_insert_prop_float(obj_ins, "My Key 3", 3.21);
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":-1.23, \"My Key 2\":-2.42, \"My Key 3\":3.21}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonObjectInsertTrue)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1024);
+        bison_insert_prop_true(obj_ins, "My Key");
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":true}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonObjectInsertFalse)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1024);
+        bison_insert_prop_false(obj_ins, "My Key");
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":false}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonObjectInsertMultipleBooleans)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1);
+        bison_insert_prop_true(obj_ins, "My Key 1");
+        bison_insert_prop_false(obj_ins, "My Key 2");
+        bison_insert_prop_true(obj_ins, "My Key 3");
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":true, \"My Key 2\":false, \"My Key 3\":true}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonObjectInsertMixed)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1);
+        bison_insert_prop_true(obj_ins, "k1");
+        bison_insert_prop_false(obj_ins, "k2");
+        bison_insert_prop_null(obj_ins, "k3");
+        bison_insert_prop_u8(obj_ins, "k4", 1);
+        bison_insert_prop_u16(obj_ins, "k5", 2);
+        bison_insert_prop_u32(obj_ins, "k6", 3);
+        bison_insert_prop_u64(obj_ins, "k7", 4);
+        bison_insert_prop_i8(obj_ins, "k8", -1);
+        bison_insert_prop_i16(obj_ins, "k9", -2);
+        bison_insert_prop_i32(obj_ins, "k10", -3);
+        bison_insert_prop_i64(obj_ins, "k11", -4);
+        bison_insert_prop_float(obj_ins, "k12", 42.23);
+
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"k1\":true, \"k2\":false, \"k3\":null, \"k4\":1, \"k5\":2, \"k6\":3, \"k7\":4, \"k8\":-1, \"k9\":-2, \"k10\":-3, \"k11\":-4, \"k12\":42.23}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
 
 static void create_nested_doc(struct bison *rev_doc)
 {

@@ -35,7 +35,7 @@ if (unlikely(inserter->context_type == BISON_COLUMN && inserter->context.column-
         error_with_details(&inserter->err, NG5_ERR_TYPEMISMATCH, "Element type does not match container type");        \
 }
 
-static bool push_in_array(struct bison_insert *inserter, const void *base, u64 nbytes);
+static bool write_field_data(struct bison_insert *inserter, u8 field_type_marker, const void *base, u64 nbytes);
 static bool push_in_column(struct bison_insert *inserter, const void *base, enum bison_field_type type);
 
 static bool push_media_type_for_array(struct bison_insert *inserter, enum bison_field_type type);
@@ -144,8 +144,7 @@ NG5_EXPORT(bool) bison_insert_u8(struct bison_insert *inserter, u8 value)
         check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_NUMBER_U8);
         switch (inserter->context_type) {
         case BISON_ARRAY:
-                push_media_type_for_array(inserter, BISON_FIELD_TYPE_NUMBER_U8);
-                push_in_array(inserter, &value, sizeof(u8));
+                write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_U8, &value, sizeof(u8));
                 break;
         case BISON_COLUMN:
                 push_in_column(inserter, &value, BISON_FIELD_TYPE_NUMBER_U8);
@@ -162,8 +161,7 @@ NG5_EXPORT(bool) bison_insert_u16(struct bison_insert *inserter, u16 value)
         check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_NUMBER_U16);
         switch (inserter->context_type) {
         case BISON_ARRAY:
-                push_media_type_for_array(inserter, BISON_FIELD_TYPE_NUMBER_U16);
-                push_in_array(inserter, &value, sizeof(u16));
+                write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_U16, &value, sizeof(u16));
                 break;
         case BISON_COLUMN:
                 push_in_column(inserter, &value, BISON_FIELD_TYPE_NUMBER_U16);
@@ -180,8 +178,7 @@ NG5_EXPORT(bool) bison_insert_u32(struct bison_insert *inserter, u32 value)
         check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_NUMBER_U32);
         switch (inserter->context_type) {
         case BISON_ARRAY:
-                push_media_type_for_array(inserter, BISON_FIELD_TYPE_NUMBER_U32);
-                push_in_array(inserter, &value, sizeof(u32));
+                write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_U32, &value, sizeof(u32));
                 break;
         case BISON_COLUMN:
                 push_in_column(inserter, &value, BISON_FIELD_TYPE_NUMBER_U32);
@@ -198,8 +195,7 @@ NG5_EXPORT(bool) bison_insert_u64(struct bison_insert *inserter, u64 value)
         check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_NUMBER_U64);
         switch (inserter->context_type) {
         case BISON_ARRAY:
-                push_media_type_for_array(inserter, BISON_FIELD_TYPE_NUMBER_U64);
-                push_in_array(inserter, &value, sizeof(u64));
+                write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_U64, &value, sizeof(u64));
                 break;
         case BISON_COLUMN:
                 push_in_column(inserter, &value, BISON_FIELD_TYPE_NUMBER_U64);
@@ -216,8 +212,7 @@ NG5_EXPORT(bool) bison_insert_i8(struct bison_insert *inserter, i8 value)
         check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_NUMBER_I8);
         switch (inserter->context_type) {
         case BISON_ARRAY:
-                push_media_type_for_array(inserter, BISON_FIELD_TYPE_NUMBER_I8);
-                push_in_array(inserter, &value, sizeof(i8));
+                write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_I8, &value, sizeof(i8));
                 break;
         case BISON_COLUMN:
                 push_in_column(inserter, &value, BISON_FIELD_TYPE_NUMBER_I8);
@@ -234,8 +229,7 @@ NG5_EXPORT(bool) bison_insert_i16(struct bison_insert *inserter, i16 value)
         check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_NUMBER_I16);
         switch (inserter->context_type) {
         case BISON_ARRAY:
-                push_media_type_for_array(inserter, BISON_FIELD_TYPE_NUMBER_I16);
-                push_in_array(inserter, &value, sizeof(i16));
+                write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_I16, &value, sizeof(i16));
                 break;
         case BISON_COLUMN:
                 push_in_column(inserter, &value, BISON_FIELD_TYPE_NUMBER_I16);
@@ -252,8 +246,7 @@ NG5_EXPORT(bool) bison_insert_i32(struct bison_insert *inserter, i32 value)
         check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_NUMBER_I32);
         switch (inserter->context_type) {
         case BISON_ARRAY:
-                push_media_type_for_array(inserter, BISON_FIELD_TYPE_NUMBER_I32);
-                push_in_array(inserter, &value, sizeof(i32));
+                write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_I32, &value, sizeof(i32));
                 break;
         case BISON_COLUMN:
                 push_in_column(inserter, &value, BISON_FIELD_TYPE_NUMBER_I32);
@@ -270,8 +263,7 @@ NG5_EXPORT(bool) bison_insert_i64(struct bison_insert *inserter, i64 value)
         check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_NUMBER_I64);
         switch (inserter->context_type) {
         case BISON_ARRAY:
-                push_media_type_for_array(inserter, BISON_FIELD_TYPE_NUMBER_I64);
-                push_in_array(inserter, &value, sizeof(i64));
+                write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_I64, &value, sizeof(i64));
                 break;
         case BISON_COLUMN:
                 push_in_column(inserter, &value, BISON_FIELD_TYPE_NUMBER_I64);
@@ -327,8 +319,7 @@ NG5_EXPORT(bool) bison_insert_float(struct bison_insert *inserter, float value)
         check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_NUMBER_FLOAT);
         switch (inserter->context_type) {
         case BISON_ARRAY:
-                push_media_type_for_array(inserter, BISON_FIELD_TYPE_NUMBER_FLOAT);
-                push_in_array(inserter, &value, sizeof(float));
+                write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_FLOAT, &value, sizeof(float));
                 break;
         case BISON_COLUMN:
                 push_in_column(inserter, &value, BISON_FIELD_TYPE_NUMBER_FLOAT);
@@ -510,6 +501,175 @@ NG5_EXPORT(bool) bison_insert_column_end(struct bison_insert_column_state *state
         return true;
 }
 
+NG5_EXPORT(bool) bison_insert_prop_null(struct bison_insert *inserter, const char *key)
+{
+        error_if(inserter->context_type != BISON_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        bison_string_write(&inserter->memfile, key);
+        push_media_type_for_array(inserter, BISON_FIELD_TYPE_NULL);
+        return true;
+}
+
+NG5_EXPORT(bool) bison_insert_prop_true(struct bison_insert *inserter, const char *key)
+{
+        error_if(inserter->context_type != BISON_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        bison_string_write(&inserter->memfile, key);
+        push_media_type_for_array(inserter, BISON_FIELD_TYPE_TRUE);
+        return true;
+}
+
+NG5_EXPORT(bool) bison_insert_prop_false(struct bison_insert *inserter, const char *key)
+{
+        error_if(inserter->context_type != BISON_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        bison_string_write(&inserter->memfile, key);
+        push_media_type_for_array(inserter, BISON_FIELD_TYPE_FALSE);
+        return true;
+}
+
+NG5_EXPORT(bool) bison_insert_prop_u8(struct bison_insert *inserter, const char *key, u8 value)
+{
+        error_if(inserter->context_type != BISON_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        bison_string_write(&inserter->memfile, key);
+        return write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_U8, &value, sizeof(u8));
+}
+
+NG5_EXPORT(bool) bison_insert_prop_u16(struct bison_insert *inserter, const char *key, u16 value)
+{
+        error_if(inserter->context_type != BISON_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        bison_string_write(&inserter->memfile, key);
+        return write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_U16, &value, sizeof(u16));
+}
+
+NG5_EXPORT(bool) bison_insert_prop_u32(struct bison_insert *inserter, const char *key, u32 value)
+{
+        error_if(inserter->context_type != BISON_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        bison_string_write(&inserter->memfile, key);
+        return write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_U32, &value, sizeof(u32));
+}
+
+NG5_EXPORT(bool) bison_insert_prop_u64(struct bison_insert *inserter, const char *key, u64 value)
+{
+        error_if(inserter->context_type != BISON_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        bison_string_write(&inserter->memfile, key);
+        return write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_U64, &value, sizeof(u64));
+}
+
+NG5_EXPORT(bool) bison_insert_prop_i8(struct bison_insert *inserter, const char *key, i8 value)
+{
+        error_if(inserter->context_type != BISON_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        bison_string_write(&inserter->memfile, key);
+        return write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_I8, &value, sizeof(i8));
+}
+
+NG5_EXPORT(bool) bison_insert_prop_i16(struct bison_insert *inserter, const char *key, i16 value)
+{
+        error_if(inserter->context_type != BISON_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        bison_string_write(&inserter->memfile, key);
+        return write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_I16, &value, sizeof(i16));
+}
+
+NG5_EXPORT(bool) bison_insert_prop_i32(struct bison_insert *inserter, const char *key, i32 value)
+{
+        error_if(inserter->context_type != BISON_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        bison_string_write(&inserter->memfile, key);
+        return write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_I32, &value, sizeof(i32));
+}
+
+NG5_EXPORT(bool) bison_insert_prop_i64(struct bison_insert *inserter, const char *key, i64 value)
+{
+        error_if(inserter->context_type != BISON_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        bison_string_write(&inserter->memfile, key);
+        return write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_I64, &value, sizeof(i64));
+}
+
+NG5_EXPORT(bool) bison_insert_prop_unsigned(struct bison_insert *inserter, const char *key, u64 value)
+{
+        error_if(inserter->context_type != BISON_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER)
+
+        if (value <= BISON_U8_MAX) {
+                return bison_insert_prop_u8(inserter, key, (u8) value);
+        } else if (value <= BISON_U16_MAX) {
+                return bison_insert_prop_u16(inserter, key, (u16) value);
+        } else if (value <= BISON_U32_MAX) {
+                return bison_insert_prop_u32(inserter, key, (u32) value);
+        } else if (value <= BISON_U64_MAX) {
+                return bison_insert_prop_u64(inserter, key, (u64) value);
+        } else {
+                error(&inserter->err, NG5_ERR_INTERNALERR);
+                return false;
+        }
+        return true;
+}
+
+NG5_EXPORT(bool) bison_insert_prop_signed(struct bison_insert *inserter, const char *key, i64 value)
+{
+        error_if(inserter->context_type != BISON_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER)
+
+        if (value >= BISON_I8_MIN && value <= BISON_I8_MAX) {
+                return bison_insert_prop_i8(inserter, key, (i8) value);
+        } else if (value >= BISON_I16_MIN && value <= BISON_I16_MAX) {
+                return bison_insert_prop_i16(inserter, key, (i16) value);
+        } else if (value >= BISON_I32_MIN && value <= BISON_I32_MAX) {
+                return bison_insert_prop_i32(inserter, key, (i32) value);
+        } else if (value >= BISON_I64_MIN && value <= BISON_I64_MAX) {
+                return bison_insert_prop_i64(inserter, key, (i64) value);
+        } else {
+                error(&inserter->err, NG5_ERR_INTERNALERR);
+                return false;
+        }
+        return true;
+}
+
+NG5_EXPORT(bool) bison_insert_prop_float(struct bison_insert *inserter, const char *key, float value)
+{
+        error_if(inserter->context_type != BISON_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        bison_string_write(&inserter->memfile, key);
+        return write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_FLOAT, &value, sizeof(float));
+}
+//
+//NG5_EXPORT(bool) bison_insert_prop_string(struct bison_insert *inserter, const char *key, const char *value)
+//{
+//
+//}
+//
+//NG5_EXPORT(bool) bison_insert_prop_binary(struct bison_insert *inserter, const char *key, const void *value,
+//        size_t nbytes, const char *file_ext, const char *user_type)
+//{
+//
+//}
+//
+//NG5_EXPORT(struct bison_insert *) bison_insert_prop_object_begin(struct bison_insert_object_state *out,
+//        struct bison_insert *inserter, const char *key, u64 object_capacity)
+//{
+//
+//}
+//
+//NG5_EXPORT(bool) bison_insert_prop_object_end(struct bison_insert_object_state *state)
+//{
+//
+//}
+//
+//NG5_EXPORT(struct bison_insert *) bison_insert_prop_array_begin(struct bison_insert_array_state *state_out,
+//        struct bison_insert *inserter_in, const char *key, u64 array_capacity)
+//{
+//
+//}
+//
+//NG5_EXPORT(bool) bison_insert_prop_array_end(struct bison_insert_array_state *state_in)
+//{
+//
+//}
+//
+//NG5_EXPORT(struct bison_insert *) bison_insert_prop_column_begin(struct bison_insert_column_state *state_out,
+//        struct bison_insert *inserter_in, const char *key, enum bison_field_type type, u64 column_capacity)
+//{
+//
+//}
+//
+//NG5_EXPORT(bool) bison_insert_prop_column_end(struct bison_insert_column_state *state_in)
+//{
+//
+//}
+
 NG5_EXPORT(bool) bison_insert_drop(struct bison_insert *inserter)
 {
         error_if_null(inserter)
@@ -526,11 +686,12 @@ NG5_EXPORT(bool) bison_insert_drop(struct bison_insert *inserter)
         return true;
 }
 
-static bool push_in_array(struct bison_insert *inserter, const void *base, u64 nbytes)
+static bool write_field_data(struct bison_insert *inserter, u8 field_type_marker, const void *base, u64 nbytes)
 {
-        assert(inserter->context_type == BISON_ARRAY);
+        assert(inserter->context_type == BISON_ARRAY || inserter->context_type == BISON_OBJECT);
 
-        memfile_ensure_space(&inserter->memfile, nbytes);
+        memfile_ensure_space(&inserter->memfile, sizeof(u8) + nbytes);
+        memfile_write(&inserter->memfile, &field_type_marker, sizeof(u8));
         return memfile_write(&inserter->memfile, base, nbytes);
 }
 
