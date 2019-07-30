@@ -340,13 +340,9 @@ NG5_EXPORT(bool) bison_insert_string(struct bison_insert *inserter, const char *
         return bison_string_write(&inserter->memfile, value);
 }
 
-NG5_EXPORT(bool) bison_insert_binary(struct bison_insert *inserter, const void *value, size_t nbytes,
+static void insert_binary(struct bison_insert *inserter, const void *value, size_t nbytes,
         const char *file_ext, const char *user_type)
 {
-        error_if_null(inserter)
-        error_if_null(value)
-        error_if(inserter->context_type != BISON_ARRAY, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
-
         if (user_type && strlen(user_type) > 0) {
                 /* write media type 'user binary' */
                 push_media_type_for_array(inserter, BISON_FIELD_TYPE_BINARY_CUSTOM);
@@ -376,6 +372,16 @@ NG5_EXPORT(bool) bison_insert_binary(struct bison_insert *inserter, const void *
                 /* write binary blob */
                 write_binary_blob(inserter, value, nbytes);
         }
+}
+
+NG5_EXPORT(bool) bison_insert_binary(struct bison_insert *inserter, const void *value, size_t nbytes,
+        const char *file_ext, const char *user_type)
+{
+        error_if_null(inserter)
+        error_if_null(value)
+        error_if(inserter->context_type != BISON_ARRAY, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+
+        insert_binary(inserter, value, nbytes, file_ext, user_type);
 
         return true;
 }
@@ -408,11 +414,23 @@ NG5_EXPORT(struct bison_insert *) bison_insert_object_begin(struct bison_insert_
 
 NG5_EXPORT(bool) bison_insert_object_end(struct bison_insert_object_state *state)
 {
-        error_if_null(state)
+        error_if_null(state);
 
+        struct bison_object_it scan;
+        bison_object_it_create(&scan, &state->parent_inserter->memfile, &state->parent_inserter->err,
+                memfile_tell(&state->parent_inserter->memfile) - 1);
+        while (bison_object_it_next(&scan))
+        { }
+
+        char final = *memfile_read(&scan.memfile, sizeof(char));
+        assert(final == BISON_MARKER_OBJECT_END);
+        memfile_skip(&scan.memfile, 1);
+
+        memfile_seek(&state->parent_inserter->memfile, memfile_tell(&scan.memfile) - 1);
+        bison_object_it_drop(&scan);
         bison_insert_drop(&state->inserter);
+        bison_object_it_drop(state->it);
         free(state->it);
-
         return true;
 }
 
@@ -425,7 +443,7 @@ NG5_EXPORT(struct bison_insert *) bison_insert_array_begin(struct bison_insert_a
                 return false;
         }
 
-        error_if(inserter_in->context_type != BISON_ARRAY, &inserter_in->err, NG5_ERR_UNSUPPCONTAINER);
+        error_if(inserter_in->context_type != BISON_ARRAY && inserter_in->context_type != BISON_OBJECT, &inserter_in->err, NG5_ERR_UNSUPPCONTAINER);
 
         *state_out = (struct bison_insert_array_state) {
                 .parent_inserter = inserter_in,
@@ -468,7 +486,7 @@ NG5_EXPORT(struct bison_insert *) bison_insert_column_begin(struct bison_insert_
 {
         error_if_and_return(!state_out, &inserter_in->err, NG5_ERR_NULLPTR, NULL);
         error_if_and_return(!inserter_in, &inserter_in->err, NG5_ERR_NULLPTR, NULL);
-        error_if(inserter_in->context_type != BISON_ARRAY, &inserter_in->err, NG5_ERR_UNSUPPCONTAINER);
+        error_if(inserter_in->context_type != BISON_ARRAY && inserter_in->context_type != BISON_OBJECT, &inserter_in->err, NG5_ERR_UNSUPPCONTAINER);
 
         *state_out = (struct bison_insert_column_state) {
                 .parent_inserter = inserter_in,
@@ -504,7 +522,7 @@ NG5_EXPORT(bool) bison_insert_column_end(struct bison_insert_column_state *state
 NG5_EXPORT(bool) bison_insert_prop_null(struct bison_insert *inserter, const char *key)
 {
         error_if(inserter->context_type != BISON_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
-        bison_string_write(&inserter->memfile, key);
+        bison_string_nomarker_write(&inserter->memfile, key);
         push_media_type_for_array(inserter, BISON_FIELD_TYPE_NULL);
         return true;
 }
@@ -512,7 +530,7 @@ NG5_EXPORT(bool) bison_insert_prop_null(struct bison_insert *inserter, const cha
 NG5_EXPORT(bool) bison_insert_prop_true(struct bison_insert *inserter, const char *key)
 {
         error_if(inserter->context_type != BISON_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
-        bison_string_write(&inserter->memfile, key);
+        bison_string_nomarker_write(&inserter->memfile, key);
         push_media_type_for_array(inserter, BISON_FIELD_TYPE_TRUE);
         return true;
 }
@@ -520,7 +538,7 @@ NG5_EXPORT(bool) bison_insert_prop_true(struct bison_insert *inserter, const cha
 NG5_EXPORT(bool) bison_insert_prop_false(struct bison_insert *inserter, const char *key)
 {
         error_if(inserter->context_type != BISON_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
-        bison_string_write(&inserter->memfile, key);
+        bison_string_nomarker_write(&inserter->memfile, key);
         push_media_type_for_array(inserter, BISON_FIELD_TYPE_FALSE);
         return true;
 }
@@ -528,56 +546,56 @@ NG5_EXPORT(bool) bison_insert_prop_false(struct bison_insert *inserter, const ch
 NG5_EXPORT(bool) bison_insert_prop_u8(struct bison_insert *inserter, const char *key, u8 value)
 {
         error_if(inserter->context_type != BISON_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
-        bison_string_write(&inserter->memfile, key);
+        bison_string_nomarker_write(&inserter->memfile, key);
         return write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_U8, &value, sizeof(u8));
 }
 
 NG5_EXPORT(bool) bison_insert_prop_u16(struct bison_insert *inserter, const char *key, u16 value)
 {
         error_if(inserter->context_type != BISON_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
-        bison_string_write(&inserter->memfile, key);
+        bison_string_nomarker_write(&inserter->memfile, key);
         return write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_U16, &value, sizeof(u16));
 }
 
 NG5_EXPORT(bool) bison_insert_prop_u32(struct bison_insert *inserter, const char *key, u32 value)
 {
         error_if(inserter->context_type != BISON_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
-        bison_string_write(&inserter->memfile, key);
+        bison_string_nomarker_write(&inserter->memfile, key);
         return write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_U32, &value, sizeof(u32));
 }
 
 NG5_EXPORT(bool) bison_insert_prop_u64(struct bison_insert *inserter, const char *key, u64 value)
 {
         error_if(inserter->context_type != BISON_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
-        bison_string_write(&inserter->memfile, key);
+        bison_string_nomarker_write(&inserter->memfile, key);
         return write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_U64, &value, sizeof(u64));
 }
 
 NG5_EXPORT(bool) bison_insert_prop_i8(struct bison_insert *inserter, const char *key, i8 value)
 {
         error_if(inserter->context_type != BISON_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
-        bison_string_write(&inserter->memfile, key);
+        bison_string_nomarker_write(&inserter->memfile, key);
         return write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_I8, &value, sizeof(i8));
 }
 
 NG5_EXPORT(bool) bison_insert_prop_i16(struct bison_insert *inserter, const char *key, i16 value)
 {
         error_if(inserter->context_type != BISON_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
-        bison_string_write(&inserter->memfile, key);
+        bison_string_nomarker_write(&inserter->memfile, key);
         return write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_I16, &value, sizeof(i16));
 }
 
 NG5_EXPORT(bool) bison_insert_prop_i32(struct bison_insert *inserter, const char *key, i32 value)
 {
         error_if(inserter->context_type != BISON_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
-        bison_string_write(&inserter->memfile, key);
+        bison_string_nomarker_write(&inserter->memfile, key);
         return write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_I32, &value, sizeof(i32));
 }
 
 NG5_EXPORT(bool) bison_insert_prop_i64(struct bison_insert *inserter, const char *key, i64 value)
 {
         error_if(inserter->context_type != BISON_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
-        bison_string_write(&inserter->memfile, key);
+        bison_string_nomarker_write(&inserter->memfile, key);
         return write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_I64, &value, sizeof(i64));
 }
 
@@ -622,53 +640,64 @@ NG5_EXPORT(bool) bison_insert_prop_signed(struct bison_insert *inserter, const c
 NG5_EXPORT(bool) bison_insert_prop_float(struct bison_insert *inserter, const char *key, float value)
 {
         error_if(inserter->context_type != BISON_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
-        bison_string_write(&inserter->memfile, key);
+        bison_string_nomarker_write(&inserter->memfile, key);
         return write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_FLOAT, &value, sizeof(float));
 }
-//
-//NG5_EXPORT(bool) bison_insert_prop_string(struct bison_insert *inserter, const char *key, const char *value)
-//{
-//
-//}
-//
-//NG5_EXPORT(bool) bison_insert_prop_binary(struct bison_insert *inserter, const char *key, const void *value,
-//        size_t nbytes, const char *file_ext, const char *user_type)
-//{
-//
-//}
-//
-//NG5_EXPORT(struct bison_insert *) bison_insert_prop_object_begin(struct bison_insert_object_state *out,
-//        struct bison_insert *inserter, const char *key, u64 object_capacity)
-//{
-//
-//}
-//
-//NG5_EXPORT(bool) bison_insert_prop_object_end(struct bison_insert_object_state *state)
-//{
-//
-//}
-//
-//NG5_EXPORT(struct bison_insert *) bison_insert_prop_array_begin(struct bison_insert_array_state *state_out,
-//        struct bison_insert *inserter_in, const char *key, u64 array_capacity)
-//{
-//
-//}
-//
-//NG5_EXPORT(bool) bison_insert_prop_array_end(struct bison_insert_array_state *state_in)
-//{
-//
-//}
-//
-//NG5_EXPORT(struct bison_insert *) bison_insert_prop_column_begin(struct bison_insert_column_state *state_out,
-//        struct bison_insert *inserter_in, const char *key, enum bison_field_type type, u64 column_capacity)
-//{
-//
-//}
-//
-//NG5_EXPORT(bool) bison_insert_prop_column_end(struct bison_insert_column_state *state_in)
-//{
-//
-//}
+
+NG5_EXPORT(bool) bison_insert_prop_string(struct bison_insert *inserter, const char *key, const char *value)
+{
+        error_if(inserter->context_type != BISON_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        bison_string_nomarker_write(&inserter->memfile, key);
+        return bison_string_write(&inserter->memfile, value);
+}
+
+NG5_EXPORT(bool) bison_insert_prop_binary(struct bison_insert *inserter, const char *key, const void *value,
+        size_t nbytes, const char *file_ext, const char *user_type)
+{
+        error_if(inserter->context_type != BISON_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        bison_string_nomarker_write(&inserter->memfile, key);
+        insert_binary(inserter, value, nbytes, file_ext, user_type);
+        return true;
+}
+
+NG5_EXPORT(struct bison_insert *) bison_insert_prop_object_begin(struct bison_insert_object_state *out,
+        struct bison_insert *inserter, const char *key, u64 object_capacity)
+{
+        error_if(inserter->context_type != BISON_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        bison_string_nomarker_write(&inserter->memfile, key);
+        return bison_insert_object_begin(out, inserter, object_capacity);
+}
+
+NG5_EXPORT(bool) bison_insert_prop_object_end(struct bison_insert_object_state *state)
+{
+        return bison_insert_object_end(state);
+}
+
+NG5_EXPORT(struct bison_insert *) bison_insert_prop_array_begin(struct bison_insert_array_state *state,
+        struct bison_insert *inserter, const char *key, u64 array_capacity)
+{
+        error_if(inserter->context_type != BISON_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        bison_string_nomarker_write(&inserter->memfile, key);
+        return bison_insert_array_begin(state, inserter, array_capacity);
+}
+
+NG5_EXPORT(bool) bison_insert_prop_array_end(struct bison_insert_array_state *state)
+{
+        return bison_insert_array_end(state);
+}
+
+NG5_EXPORT(struct bison_insert *) bison_insert_prop_column_begin(struct bison_insert_column_state *state_out,
+        struct bison_insert *inserter_in, const char *key, enum bison_field_type type, u64 column_capacity)
+{
+        error_if(inserter_in->context_type != BISON_OBJECT, &inserter_in->err, NG5_ERR_UNSUPPCONTAINER);
+        bison_string_nomarker_write(&inserter_in->memfile, key);
+        return bison_insert_column_begin(state_out, inserter_in, type, column_capacity);
+}
+
+NG5_EXPORT(bool) bison_insert_prop_column_end(struct bison_insert_column_state *state_in)
+{
+        return bison_insert_column_end(state_in);
+}
 
 NG5_EXPORT(bool) bison_insert_drop(struct bison_insert *inserter)
 {

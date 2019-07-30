@@ -106,7 +106,7 @@ NG5_EXPORT(bool) bison_int_array_it_refresh(bool *is_empty_slot, bool *is_array_
 
 NG5_EXPORT(bool) bison_int_array_it_field_type_read(struct bison_array_it *it);
 
-NG5_EXPORT(bool) bison_int_array_it_field_data_access(struct bison_array_it *it);
+NG5_EXPORT(bool) bison_int_field_data_access(struct memfile *file, struct err *err, struct field_access *field_access);
 
 NG5_EXPORT(offset_t) bison_int_column_get_payload_off(struct bison_column_it *it);
 

@@ -479,7 +479,9 @@ static void json_formatter_bison_prop_string(struct bison_printer *self, struct 
 {
         unused(self);
         print_key(builder, key_name, key_len);
+        string_builder_append_char(builder, '"');
         string_builder_append_nchar(builder, value, strlen);
+        string_builder_append_char(builder, '"');
 }
 
 static void json_formatter_bison_prop_binary(struct bison_printer *self, struct string_builder *builder,

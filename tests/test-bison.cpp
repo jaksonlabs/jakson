@@ -5126,6 +5126,430 @@ TEST(BisonTest, BisonObjectInsertMixed)
         bison_drop(&doc);
 }
 
+TEST(BisonTest, BisonObjectInsertString)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1);
+
+        bison_insert_prop_string(obj_ins, "hello", "world");
+
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"hello\":\"world\"}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonObjectInsertMultipleString)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1);
+
+        bison_insert_prop_string(obj_ins, "k1", "v1");
+        bison_insert_prop_string(obj_ins, "hello", "world");
+        bison_insert_prop_string(obj_ins, "k3", "there");
+
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"k1\":\"v1\", \"hello\":\"world\", \"k3\":\"there\"}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonObjectInsertMultipleStringMixedTypes)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1);
+
+        bison_insert_prop_false(obj_ins, "k2");
+        bison_insert_prop_null(obj_ins, "k3");
+        bison_insert_prop_u8(obj_ins, "k4", 1);
+        bison_insert_prop_string(obj_ins, "s1", "v1");
+        bison_insert_prop_u16(obj_ins, "k5", 2);
+        bison_insert_prop_string(obj_ins, "s2-longer", "world");
+        bison_insert_prop_u32(obj_ins, "k6", 3);
+        bison_insert_prop_u64(obj_ins, "k7", 4);
+        bison_insert_prop_i8(obj_ins, "k8", -1);
+        bison_insert_prop_string(obj_ins, "s3", "there");
+        bison_insert_prop_i16(obj_ins, "k9", -2);
+        bison_insert_prop_i32(obj_ins, "k10", -3);
+        bison_insert_prop_i64(obj_ins, "k11", -4);
+        bison_insert_prop_float(obj_ins, "k12", 42.23);
+        bison_insert_prop_true(obj_ins, "k1");
+
+
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"k2\":false, \"k3\":null, \"k4\":1, \"s1\":\"v1\", \"k5\":2, \"s2-longer\":\"world\", \"k6\":3, \"k7\":4, \"k8\":-1, \"s3\":\"there\", \"k9\":-2, \"k10\":-3, \"k11\":-4, \"k12\":42.23, \"k1\":true}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonObjectInsertBinary)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1);
+
+        bison_insert_prop_binary(obj_ins, "my binary", "My Plain-Text", strlen("My Plain-Text"), "txt", NULL);
+
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"my binary\":{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonObjectInsertMultipleBinariesMixedTypes)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1);
+
+        bison_insert_prop_float(obj_ins, "k12", 42.23);
+        bison_insert_prop_true(obj_ins, "k1");
+        bison_insert_prop_binary(obj_ins, "b1", "Hello", strlen("Hello"), "txt", NULL);
+        bison_insert_prop_binary(obj_ins, "my binary", ",", strlen(","), "txt", NULL);
+        bison_insert_prop_false(obj_ins, "k2");
+        bison_insert_prop_null(obj_ins, "k3");
+        bison_insert_prop_u8(obj_ins, "k4", 1);
+        bison_insert_prop_string(obj_ins, "s1", "v1");
+        bison_insert_prop_u16(obj_ins, "k5", 2);
+        bison_insert_prop_binary(obj_ins, "b2", "World", strlen("World"), "txt", NULL);
+        bison_insert_prop_string(obj_ins, "s2-longer", "world");
+        bison_insert_prop_u32(obj_ins, "k6", 3);
+        bison_insert_prop_u64(obj_ins, "k7", 4);
+        bison_insert_prop_i8(obj_ins, "k8", -1);
+        bison_insert_prop_string(obj_ins, "s3", "there");
+        bison_insert_prop_i16(obj_ins, "k9", -2);
+        bison_insert_prop_i32(obj_ins, "k10", -3);
+        bison_insert_prop_i64(obj_ins, "k11", -4);
+
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"k12\":42.23, \"k1\":true, \"b1\":{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"A==sbG8AA\" }, \"my binary\":{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"LAAA\" }, \"k2\":false, \"k3\":null, \"k4\":1, \"s1\":\"v1\", \"k5\":2, \"b2\":{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"A==ybGQAA\" }, \"s2-longer\":\"world\", \"k6\":3, \"k7\":4, \"k8\":-1, \"s3\":\"there\", \"k9\":-2, \"k10\":-3, \"k11\":-4}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonObjectInsertMultipleBinaries)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1);
+
+        bison_insert_prop_binary(obj_ins, "b1", "Hello", strlen("Hello"), "txt", NULL);
+        bison_insert_prop_binary(obj_ins, "my binary", ",", strlen(","), "txt", NULL);
+        bison_insert_prop_binary(obj_ins, "b2", "World", strlen("World"), "txt", NULL);
+
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"b1\":{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"A==sbG8AA\" }, \"my binary\":{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"LAAA\" }, \"b2\":{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"A==ybGQAA\" }}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonObjectInsertObjectEmpty)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state, nested;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1);
+
+        struct bison_insert *nested_obj_ins = bison_insert_prop_object_begin(&nested, obj_ins, "my nested", 200);
+        bison_insert_prop_object_end(&nested);
+
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"my nested\":{}}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonObjectInsertObjectMixedMxed)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state, nested;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1);
+
+        bison_insert_prop_float(obj_ins, "1", 42.23);
+        bison_insert_prop_true(obj_ins, "2");
+        bison_insert_prop_binary(obj_ins, "3", "Hello", strlen("Hello"), "txt", NULL);
+        bison_insert_prop_binary(obj_ins, "4", ",", strlen(","), "txt", NULL);
+        bison_insert_prop_binary(obj_ins, "5", "World", strlen("World"), "txt", NULL);
+        bison_insert_prop_string(obj_ins, "6", "world");
+
+        struct bison_insert *nested_obj_ins = bison_insert_prop_object_begin(&nested, obj_ins, "my nested", 200);
+
+        bison_insert_prop_false(nested_obj_ins, "7");
+        bison_insert_prop_null(nested_obj_ins, "8");
+        bison_insert_prop_u8(nested_obj_ins, "9", 1);
+        bison_insert_prop_string(nested_obj_ins, "10", "v1");
+        bison_insert_prop_u16(nested_obj_ins, "11", 2);
+
+        bison_insert_prop_object_end(&nested);
+
+        bison_insert_prop_u32(obj_ins, "12", 3);
+        bison_insert_prop_u64(obj_ins, "13", 4);
+        bison_insert_prop_i8(obj_ins, "14", -1);
+        bison_insert_prop_string(obj_ins, "15", "there");
+        bison_insert_prop_i16(obj_ins, "16", -2);
+        bison_insert_prop_i32(obj_ins, "17", -3);
+        bison_insert_prop_i64(obj_ins, "18", -4);
+
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"1\":42.23, \"2\":true, \"3\":{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"A==sbG8AA\" }, \"4\":{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"LAAA\" }, \"5\":{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"A==ybGQAA\" }, \"6\":\"world\", \"my nested\":{\"7\":false, \"8\":null, \"9\":1, \"10\":\"v1\", \"11\":2}, \"12\":3, \"13\":4, \"14\":-1, \"15\":\"there\", \"16\":-2, \"17\":-3, \"18\":-4}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonObjectInsertArrayEmpty)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+        struct bison_insert_array_state array_state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1);
+
+        struct bison_insert *nested_array_ins = bison_insert_prop_array_begin(&array_state, obj_ins, "my array", 200);
+        bison_insert_prop_array_end(&array_state);
+
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"my array\":[]}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+TEST(BisonTest, BisonObjectInsertArrayData)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+        struct bison_insert_array_state array_state, nested_array_state;
+        struct bison_insert_column_state column_state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1);
+
+        struct bison_insert *nested_array_ins = bison_insert_prop_array_begin(&array_state, obj_ins, "my array", 200);
+
+        struct bison_insert *column_ins = bison_insert_column_begin(&column_state, nested_array_ins, BISON_FIELD_TYPE_NUMBER_U32, 10);
+        bison_insert_u32(column_ins, 'X');
+        bison_insert_u32(column_ins, 'Y');
+        bison_insert_u32(column_ins, 'Z');
+        bison_insert_column_end(&column_state);
+        struct bison_insert *nested_ins = bison_insert_array_begin(&nested_array_state, nested_array_ins, 10);
+        bison_insert_string(nested_ins, "Hello");
+        column_ins = bison_insert_column_begin(&column_state, nested_ins, BISON_FIELD_TYPE_NUMBER_U32, 10);
+        bison_insert_u32(column_ins, 'A');
+        bison_insert_u32(column_ins, 'B');
+        bison_insert_u32(column_ins, 'C');
+        bison_insert_column_end(&column_state);
+        bison_insert_string(nested_ins, "World");
+        bison_insert_array_end(&nested_array_state);
+        bison_insert_u8(nested_array_ins, 1);
+        bison_insert_u8(nested_array_ins, 1);
+        column_ins = bison_insert_column_begin(&column_state, nested_array_ins, BISON_FIELD_TYPE_NUMBER_U32, 10);
+        bison_insert_u32(column_ins, 23);
+        bison_insert_u32(column_ins, 24);
+        bison_insert_u32(column_ins, 25);
+        bison_insert_column_end(&column_state);
+        bison_insert_u8(nested_array_ins, 1);
+
+        bison_insert_prop_array_end(&array_state);
+
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"my array\":[[88, 89, 90], [\"Hello\", [65, 66, 67], \"World\"], 1, 1, [23, 24, 25], 1]}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
+
+//TEST(BisonTest, BisonObjectInsertColumnNonEmpty)
+//{
+//        struct bison doc;
+//        struct bison_new context;
+//        struct bison_insert_object_state state;
+//        struct bison_insert_column_state column_state;
+//
+//        // -------------------------------------------------------------------------------------------------------------
+//
+//        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+//
+//        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1);
+//
+//        struct bison_insert *nested_column_ins = bison_insert_prop_column_begin(&column_state, obj_ins, "my column", BISON_FIELD_TYPE_NUMBER_U16, 200);
+//        bison_insert_u16(nested_column_ins, 1);
+//        bison_insert_u16(nested_column_ins, 2);
+//        bison_insert_u16(nested_column_ins, 3);
+//        bison_insert_prop_column_end(&column_state);
+//
+//        bison_insert_object_end(&state);
+//
+//        bison_create_end(&context);
+//
+//        // -------------------------------------------------------------------------------------------------------------
+//
+//        struct string_builder sb;
+//        string_builder_create(&sb);
+//
+//        bison_print(stdout, &doc);
+//        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"my array\":[]}]}]}") == 0);
+//
+//        string_builder_drop(&sb);
+//        bison_drop(&doc);
+//}
 
 static void create_nested_doc(struct bison *rev_doc)
 {

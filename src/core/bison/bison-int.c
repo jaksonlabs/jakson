@@ -209,6 +209,7 @@ NG5_EXPORT(bool) bison_int_object_it_refresh(bool *is_empty_slot, bool *is_objec
         error_if_null(it);
         if (object_it_is_slot_occupied(is_empty_slot, is_object_end, it)) {
                 bison_int_object_it_prop_key_access(it);
+                bison_int_field_data_access(&it->memfile, &it->err, &it->field_access);
                 return true;
         } else {
                 return false;
@@ -218,18 +219,14 @@ NG5_EXPORT(bool) bison_int_object_it_refresh(bool *is_empty_slot, bool *is_objec
 NG5_EXPORT(bool) bison_int_object_it_prop_key_access(struct bison_object_it *it)
 {
         error_if_null(it)
-        memfile_save_position(&it->memfile);
-        memfile_skip(&it->memfile, sizeof(media_type_t));
+        //memfile_skip(&it->memfile, sizeof(media_type_t));
 
         it->key_len = memfile_read_varuint(NULL, &it->memfile);
         it->key = memfile_peek(&it->memfile, it->key_len);
         memfile_skip(&it->memfile, it->key_len);
-
         it->value_off = memfile_tell(&it->memfile);
-        it->field_access.it_field_type = *NG5_MEMFILE_READ_TYPE(&it->memfile, u8);
-        it->field_access.it_field_data = memfile_peek(&it->memfile, sizeof(u8));
+        it->field_access.it_field_type = *NG5_MEMFILE_PEEK(&it->memfile, u8);
 
-        memfile_restore_position(&it->memfile);
         return true;
 }
 
@@ -256,7 +253,6 @@ NG5_EXPORT(bool) bison_int_object_it_prop_value_skip(struct bison_object_it *it)
 NG5_EXPORT(bool) bison_int_object_it_prop_skip(struct bison_object_it *it)
 {
         error_if_null(it)
-        memfile_skip(&it->memfile, sizeof(media_type_t));
 
         it->key_len = memfile_read_varuint(NULL, &it->memfile);
         memfile_skip(&it->memfile, it->key_len);
@@ -283,7 +279,7 @@ NG5_EXPORT(bool) bison_int_array_it_refresh(bool *is_empty_slot, bool *is_array_
         error_if_null(it);
         if (array_it_is_slot_occupied(is_empty_slot, is_array_end, it)) {
                 bison_int_array_it_field_type_read(it);
-                bison_int_array_it_field_data_access(it);
+                bison_int_field_data_access(&it->memfile, &it->err, &it->field_access);
                 return true;
         } else {
                 return false;
@@ -303,7 +299,7 @@ NG5_EXPORT(bool) bison_int_array_it_field_type_read(struct bison_array_it *it)
         return true;
 }
 
-static bool field_data_access(struct memfile *file, struct err *err, struct field_access *field_access)
+NG5_EXPORT(bool) bison_int_field_data_access(struct memfile *file, struct err *err, struct field_access *field_access)
 {
         memfile_save_position(file);
         memfile_skip(file, sizeof(media_type_t));
@@ -368,18 +364,13 @@ static bool field_data_access(struct memfile *file, struct err *err, struct fiel
                         memfile_tell(file) - sizeof(u8));
                 break;
         default:
-                error(err, NG5_ERR_CORRUPTED)
+        error(err, NG5_ERR_CORRUPTED)
                 return false;
         }
 
         field_access->it_field_data = memfile_peek(file, 1);
         memfile_restore_position(file);
         return true;
-}
-
-NG5_EXPORT(bool) bison_int_array_it_field_data_access(struct bison_array_it *it)
-{
-        return field_data_access(&it->memfile, &it->err, &it->field_access);
 }
 
 NG5_EXPORT(offset_t) bison_int_column_get_payload_off(struct bison_column_it *it)

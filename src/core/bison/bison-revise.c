@@ -440,7 +440,7 @@ static bool internal_pack_object(struct bison_object_it *it)
                         memfile_move_left(&this_object_it.memfile, last_empty_slot_offset - first_empty_slot_offset);
 
                         final = *memfile_read(&this_object_it.memfile, sizeof(char));
-                        assert(final == BISON_MARKER_ARRAY_END);
+                        assert(final == BISON_MARKER_ARRAY_END || final == BISON_MARKER_OBJECT_END);
                 }
 
                 bison_object_it_drop(&this_object_it);

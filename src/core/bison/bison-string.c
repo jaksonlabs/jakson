@@ -28,15 +28,23 @@ static void write_payload(struct memfile *file, const char *string)
         memfile_write(file, string, value_strlen);
 }
 
+NG5_EXPORT(bool) bison_string_nomarker_write(struct memfile *file, const char *string)
+{
+        error_if_null(file)
+        error_if_null(string)
+        write_payload(file, string);
+
+        return true;
+}
+
 NG5_EXPORT(bool) bison_string_write(struct memfile *file, const char *string)
 {
         error_if_null(file)
         error_if_null(string)
 
-
         memfile_ensure_space(file, sizeof(media_type_t));
         bison_media_write(file, BISON_FIELD_TYPE_STRING);
-        write_payload(file, string);
+        bison_string_nomarker_write(file, string);
 
         return true;
 }

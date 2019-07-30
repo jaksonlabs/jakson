@@ -26,6 +26,8 @@ NG5_BEGIN_DECL
 
 NG5_EXPORT(bool) bison_string_write(struct memfile *file, const char *string);
 
+NG5_EXPORT(bool) bison_string_nomarker_write(struct memfile *file, const char *string);
+
 NG5_EXPORT(bool) bison_string_update(struct memfile *file, const char *string);
 
 NG5_EXPORT(bool) bison_string_skip(struct memfile *file);
