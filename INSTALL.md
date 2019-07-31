@@ -2,7 +2,7 @@ libcarbon uses [CMake](https://cmake.org) as build system. CMake 3.9.6 or higher
 
 The basic usage is 
 ```
-$ cmake . && make -j4 && make test && make install
+$ cmake . && make -j4 && make test && sudo make install
 ```
 
 By default, all targets are built as release configuration. To build all targets in *debug mode* (without compiler 
