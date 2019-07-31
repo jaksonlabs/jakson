@@ -9,6 +9,7 @@
 #include "core/bison/bison-path.h"
 #include "core/bison/bison-get.h"
 #include "core/bison/bison-revise.h"
+#include "core/bison/bison-object-it.h"
 
 TEST(BisonTest, CreateBison) {
         struct bison doc;
@@ -2127,7 +2128,6 @@ TEST(BisonTest, BisonUpdateU8Simple)
         struct bison_revise revise;
         struct bison_array_it it;
         struct bison_insert inserter;
-        struct bison_update updater;
         struct string_builder sb;
         const char *json;
 
@@ -2218,11 +2218,10 @@ TEST(BisonTest, BisonUpdateU8Simple)
 
 TEST(BisonTest, BisonUpdateMixedFixedTypesSimple)
 {
-        struct bison doc, rev_doc, rev_doc2, rev_doc3, rev_doc4;
+        struct bison doc, rev_doc, rev_doc2;
         struct bison_revise revise;
         struct bison_array_it it;
         struct bison_insert inserter;
-        struct bison_update updater;
         struct string_builder sb;
         const char *json;
 
@@ -3751,18 +3750,12 @@ TEST(BisonTest, BisonRemoveComplexTest)
         struct bison doc, rev_doc, rev_doc2, rev_doc3, rev_doc4, rev_doc5, rev_doc6, rev_doc7, rev_doc8, rev_doc9,
                 rev_doc10, rev_doc11, rev_doc12, rev_doc13, rev_doc14;
         struct bison_new context;
-        struct bison_revise revise;
-        struct bison_array_it rev_it;
         struct string_builder sb;
-        bool has_next;
         string_builder_create(&sb);
 
         struct bison_insert_array_state state, state2, state3;
         struct bison_insert_column_state cstate;
         struct bison_insert *array_ins, *array_ins2, *array_ins3, *column_ins;
-
-        struct bison_path_evaluator eval;
-        enum bison_path_status path_status;
 
         // -------------------------------------------------------------------------------------------------------------
         struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_AUTOKEY, BISON_OPTIMIZE);
@@ -3915,11 +3908,10 @@ TEST(BisonTest, BisonRemoveComplexTest)
 
 TEST(BisonTest, BisonUpdateMixedFixedTypesTypeChangeSimple)
 {
-        struct bison doc, rev_doc, rev_doc2, rev_doc3, rev_doc4;
+        struct bison doc, rev_doc, rev_doc2;
         struct bison_revise revise;
         struct bison_array_it it;
         struct bison_insert inserter;
-        struct bison_update updater;
         struct string_builder sb;
         const char *json;
 
@@ -4432,7 +4424,7 @@ TEST(BisonTest, BisonObjectInsertEmpty)
 
         struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
 
-        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1024);
+        bison_insert_object_begin(&state, ins, 1024);
         bison_insert_object_end(&state);
 
         bison_create_end(&context);
@@ -5383,7 +5375,7 @@ TEST(BisonTest, BisonObjectInsertObjectEmpty)
 
         struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1);
 
-        struct bison_insert *nested_obj_ins = bison_insert_prop_object_begin(&nested, obj_ins, "my nested", 200);
+        bison_insert_prop_object_begin(&nested, obj_ins, "my nested", 200);
         bison_insert_prop_object_end(&nested);
 
         bison_insert_object_end(&state);
@@ -5469,7 +5461,7 @@ TEST(BisonTest, BisonObjectInsertArrayEmpty)
 
         struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1);
 
-        struct bison_insert *nested_array_ins = bison_insert_prop_array_begin(&array_state, obj_ins, "my array", 200);
+        bison_insert_prop_array_begin(&array_state, obj_ins, "my array", 200);
         bison_insert_prop_array_end(&array_state);
 
         bison_insert_object_end(&state);
@@ -5584,14 +5576,10 @@ static void create_nested_doc(struct bison *rev_doc)
 {
         struct bison doc;
         struct bison_revise revise;
-        struct bison_new new_ctx;
         struct bison_array_it it;
-        struct bison_insert ins, nested_ins, *array_ins, *col_ins, *nested_array_ins;
+        struct bison_insert nested_ins, *array_ins, *col_ins, *nested_array_ins;
         struct bison_insert_array_state array_state, nested_array_state;
         struct bison_insert_column_state column_state;
-        struct bison_update updater;
-        struct string_builder sb;
-        const char *json;
 
         bison_create_empty(&doc, BISON_KEY_AUTOKEY);
         bison_revise_begin(&revise, rev_doc, &doc);
@@ -5694,6 +5682,79 @@ static void create_nested_doc(struct bison *rev_doc)
         bison_revise_iterator_close(&it);
         bison_revise_end(&revise);
 }
+
+//TEST(BisonTest, BisonObjectRemoveTest)
+//{
+//        struct bison doc, rev_doc;
+//        struct bison_new context;
+//        struct bison_revise revise;
+//        struct bison_array_it rev_it;
+//        struct string_builder sb;
+//        bool has_next;
+//        string_builder_create(&sb);
+//        bool status;
+//        const u16 *values;
+//
+//        struct bison_insert_object_state state;
+//        struct bison_insert_column_state column_state;
+//        struct bison_insert *array_ins;
+//
+//        // -------------------------------------------------------------------------------------------------------------
+//        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+//
+//        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1);
+//
+//        struct bison_insert *nested_column_ins = bison_insert_prop_column_begin(&column_state, obj_ins, "my column", BISON_COLUMN_TYPE_U16, 200);
+//        bison_insert_u16(nested_column_ins, 1);
+//        bison_insert_u16(nested_column_ins, 2);
+//        bison_insert_u16(nested_column_ins, 3);
+//        bison_insert_prop_column_end(&column_state);
+//
+//        bison_insert_object_end(&state);
+//
+//        bison_create_end(&context);
+//        // -------------------------------------------------------------------------------------------------------------
+//
+//        char *json_1 = strdup(bison_to_json(&sb, &doc));
+//
+//        // -------------------------------------------------------------------------------------------------------------
+//
+//        bison_revise_begin(&revise, &rev_doc, &doc);
+//        bison_revise_iterator_open(&rev_it, &revise);
+//        has_next = bison_array_it_next(&rev_it);
+//        ASSERT_TRUE(has_next);
+//        enum bison_field_type field_type;
+//        bison_array_it_field_type(&field_type, &rev_it);
+//        ASSERT_EQ(field_type, BISON_FIELD_TYPE_OBJECT);
+//        struct bison_object_it *oit = bison_array_it_object_value(&rev_it);
+//        has_next = bison_object_it_next(oit);
+//        ASSERT_TRUE(has_next);
+//        bison_object_it_remove(oit);
+//        has_next = bison_object_it_next(oit);
+//        ASSERT_FALSE(has_next);
+//
+//        bison_revise_iterator_close(&rev_it);
+//        bison_revise_end(&revise);
+//
+//        char *json_2 = strdup(bison_to_json(&sb, &rev_doc));
+//
+//        // -------------------------------------------------------------------------------------------------------------
+//
+//
+//        // printf(">> %s\n", json_1);
+//        // printf(">> %s\n", json_2);
+//        // printf(">> %s\n", json_3);
+//        // printf(">> %s\n", json_4);
+//
+//        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"doc\": [[1, 2, 3]]}") == 0);
+//        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"doc\": [[1, 3]]}") == 0);
+//
+//        string_builder_drop(&sb);
+//        bison_drop(&doc);
+//        bison_drop(&rev_doc);
+//        free(json_1);
+//        free(json_2);
+//}
 
 TEST(BisonTest, BisonUpdateSetToNull)
 {
