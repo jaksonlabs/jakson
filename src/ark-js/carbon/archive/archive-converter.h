@@ -15,16 +15,16 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_ARCHIVE_DOC_CONVERTER_H
-#define NG5_ARCHIVE_DOC_CONVERTER_H
+#ifndef ARK_ARCHIVE_DOC_CONVERTER_H
+#define ARK_ARCHIVE_DOC_CONVERTER_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/json/encoded_doc.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
-NG5_EXPORT(bool) archive_converter(struct encoded_doc_list *collection, struct archive *archive);
+ARK_EXPORT(bool) archive_converter(struct encoded_doc_list *collection, struct archive *archive);
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

@@ -24,7 +24,7 @@
 #include <ark-js/carbon/oid/oid.h>
 #include <ark-js/carbon/carbon.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
 struct carbon_binary; /* forwarded from carbon.h */
 
@@ -91,10 +91,10 @@ struct carbon_printer
                 const char *key_name, u64 key_len);
 };
 
-NG5_EXPORT(bool) carbon_json_formatter_create(struct carbon_printer *printer);
-NG5_EXPORT(bool) carbon_json_formatter_set_intent(struct carbon_printer *printer, bool enable);
-NG5_EXPORT(bool) carbon_json_formatter_set_strict(struct carbon_printer *printer, bool enable);
+ARK_EXPORT(bool) carbon_json_formatter_create(struct carbon_printer *printer);
+ARK_EXPORT(bool) carbon_json_formatter_set_intent(struct carbon_printer *printer, bool enable);
+ARK_EXPORT(bool) carbon_json_formatter_set_strict(struct carbon_printer *printer, bool enable);
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

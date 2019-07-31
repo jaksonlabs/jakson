@@ -15,36 +15,36 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_BLOOM_H
-#define NG5_BLOOM_H
+#ifndef ARK_BLOOM_H
+#define ARK_BLOOM_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/stdx/bitmap.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
 typedef struct bitmap bloom_t;
 
-#define NG5_BLOOM_SET(filter, key, keySize)                 \
+#define ARK_BLOOM_SET(filter, key, keySize)                 \
 ({                                                          \
     size_t nbits = bitmap_nbits(filter);                    \
-    size_t b0 = NG5_HASH_ADDITIVE(keySize, key) % nbits;    \
-    size_t b1 = NG5_HASH_XOR(keySize, key) % nbits;         \
-    size_t b2 = NG5_HASH_ROT(keySize, key) % nbits;         \
-    size_t b3 = NG5_HASH_SAX(keySize, key) % nbits;         \
+    size_t b0 = ARK_HASH_ADDITIVE(keySize, key) % nbits;    \
+    size_t b1 = ARK_HASH_XOR(keySize, key) % nbits;         \
+    size_t b2 = ARK_HASH_ROT(keySize, key) % nbits;         \
+    size_t b3 = ARK_HASH_SAX(keySize, key) % nbits;         \
     bitmap_set(filter, b0, true);                           \
     bitmap_set(filter, b1, true);                           \
     bitmap_set(filter, b2, true);                           \
     bitmap_set(filter, b3, true);                           \
 })
 
-#define NG5_BLOOM_TEST(filter, key, keySize)                \
+#define ARK_BLOOM_TEST(filter, key, keySize)                \
 ({                                                          \
     size_t nbits = bitmap_nbits(filter);                    \
-    size_t b0 = NG5_HASH_ADDITIVE(keySize, key) % nbits;    \
-    size_t b1 = NG5_HASH_XOR(keySize, key) % nbits;         \
-    size_t b2 = NG5_HASH_ROT(keySize, key) % nbits;         \
-    size_t b3 = NG5_HASH_SAX(keySize, key) % nbits;         \
+    size_t b0 = ARK_HASH_ADDITIVE(keySize, key) % nbits;    \
+    size_t b1 = ARK_HASH_XOR(keySize, key) % nbits;         \
+    size_t b2 = ARK_HASH_ROT(keySize, key) % nbits;         \
+    size_t b3 = ARK_HASH_SAX(keySize, key) % nbits;         \
     bool b0set = bitmap_get(filter, b0);                    \
     bool b1set = bitmap_get(filter, b1);                    \
     bool b2set = bitmap_get(filter, b2);                    \
@@ -52,13 +52,13 @@ typedef struct bitmap bloom_t;
     (b0set && b1set && b2set && b3set);                     \
 })
 
-#define NG5_BLOOM_TEST_AND_SET(filter, key, keySize)        \
+#define ARK_BLOOM_TEST_AND_SET(filter, key, keySize)        \
 ({                                                          \
     size_t nbits = bitmap_nbits(filter);                    \
-    size_t b0 = NG5_HASH_ADDITIVE(keySize, key) % nbits;    \
-    size_t b1 = NG5_HASH_XOR(keySize, key) % nbits;         \
-    size_t b2 = NG5_HASH_ROT(keySize, key) % nbits;         \
-    size_t b3 = NG5_HASH_SAX(keySize, key) % nbits;         \
+    size_t b0 = ARK_HASH_ADDITIVE(keySize, key) % nbits;    \
+    size_t b1 = ARK_HASH_XOR(keySize, key) % nbits;         \
+    size_t b2 = ARK_HASH_ROT(keySize, key) % nbits;         \
+    size_t b3 = ARK_HASH_SAX(keySize, key) % nbits;         \
     bool b0set = bitmap_get(filter, b0);                    \
     bool b1set = bitmap_get(filter, b1);                    \
     bool b2set = bitmap_get(filter, b2);                    \
@@ -70,16 +70,16 @@ typedef struct bitmap bloom_t;
     (b0set && b1set && b2set && b3set);                     \
 })
 
-NG5_EXPORT(bool) bloom_create(bloom_t *filter, size_t size);
+ARK_EXPORT(bool) bloom_create(bloom_t *filter, size_t size);
 
-NG5_EXPORT(bool) bloom_drop(bloom_t *filter);
+ARK_EXPORT(bool) bloom_drop(bloom_t *filter);
 
-NG5_EXPORT(bool) bloom_clear(bloom_t *filter);
+ARK_EXPORT(bool) bloom_clear(bloom_t *filter);
 
-NG5_EXPORT(size_t) bloom_nbits(bloom_t *filter);
+ARK_EXPORT(size_t) bloom_nbits(bloom_t *filter);
 
-NG5_EXPORT(unsigned) bloom_nhashs();
+ARK_EXPORT(unsigned) bloom_nhashs();
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

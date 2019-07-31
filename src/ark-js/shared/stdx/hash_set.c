@@ -18,42 +18,42 @@
 #include <ark-js/shared/hash/bern.h>
 #include <ark-js/shared/stdx/hash_set.h>
 
-#define HASHCODE_OF(size, x) NG5_HASH_BERNSTEIN(size, x)
+#define HASHCODE_OF(size, x) ARK_HASH_BERNSTEIN(size, x)
 #define FIX_MAP_AUTO_REHASH_LOADFACTOR 0.9f
 
-NG5_EXPORT(bool) hashset_create(struct hashset *map, struct err *err, size_t key_size, size_t capacity)
+ARK_EXPORT(bool) hashset_create(struct hashset *map, struct err *err, size_t key_size, size_t capacity)
 {
         error_if_null(map)
         error_if_null(key_size)
 
-        int err_code = NG5_ERR_INITFAILED;
+        int err_code = ARK_ERR_INITFAILED;
 
         map->size = 0;
 
-        ng5_success_or_jump(vec_create(&map->key_data, NULL, key_size, capacity), error_handling);
-        ng5_success_or_jump(vec_create(&map->table, NULL, sizeof(struct hashset_bucket), capacity),
+        ark_success_or_jump(vec_create(&map->key_data, NULL, key_size, capacity), error_handling);
+        ark_success_or_jump(vec_create(&map->table, NULL, sizeof(struct hashset_bucket), capacity),
                 cleanup_key_data_and_error);
-        ng5_success_or_jump(vec_enlarge_size_to_capacity(&map->table), cleanup_key_value_table_and_error);
-        ng5_success_or_jump(vec_zero_memory(&map->table), cleanup_key_value_table_and_error);
-        ng5_success_or_jump(spin_init(&map->lock), cleanup_key_value_table_and_error);
-        ng5_success_or_jump(error_init(&map->err), cleanup_key_value_table_and_error);
+        ark_success_or_jump(vec_enlarge_size_to_capacity(&map->table), cleanup_key_value_table_and_error);
+        ark_success_or_jump(vec_zero_memory(&map->table), cleanup_key_value_table_and_error);
+        ark_success_or_jump(spin_init(&map->lock), cleanup_key_value_table_and_error);
+        ark_success_or_jump(error_init(&map->err), cleanup_key_value_table_and_error);
 
         return true;
 
         cleanup_key_value_table_and_error:
         if (!vec_drop(&map->table)) {
-                err_code = NG5_ERR_DROPFAILED;
+                err_code = ARK_ERR_DROPFAILED;
         }
         cleanup_key_data_and_error:
         if (!vec_drop(&map->key_data)) {
-                err_code = NG5_ERR_DROPFAILED;
+                err_code = ARK_ERR_DROPFAILED;
         }
         error_handling:
         error(err, err_code);
         return false;
 }
 
-NG5_EXPORT(bool) hashset_drop(struct hashset *map)
+ARK_EXPORT(bool) hashset_drop(struct hashset *map)
 {
         error_if_null(map)
 
@@ -63,13 +63,13 @@ NG5_EXPORT(bool) hashset_drop(struct hashset *map)
         status &= vec_drop(&map->key_data);
 
         if (!status) {
-                error(&map->err, NG5_ERR_DROPFAILED);
+                error(&map->err, ARK_ERR_DROPFAILED);
         }
 
         return status;
 }
 
-NG5_EXPORT(struct vector *)hashset_keys(struct hashset *map)
+ARK_EXPORT(struct vector *)hashset_keys(struct hashset *map)
 {
         if (map) {
                 struct vector *result = malloc(sizeof(struct vector));
@@ -87,7 +87,7 @@ NG5_EXPORT(struct vector *)hashset_keys(struct hashset *map)
         }
 }
 
-NG5_EXPORT(struct hashset *)hashset_cpy(struct hashset *src)
+ARK_EXPORT(struct hashset *)hashset_cpy(struct hashset *src)
 {
         if (src) {
                 struct hashset *cpy = malloc(sizeof(struct hashset));
@@ -110,12 +110,12 @@ NG5_EXPORT(struct hashset *)hashset_cpy(struct hashset *src)
                 hashset_unlock(src);
                 return cpy;
         } else {
-                error(&src->err, NG5_ERR_NULLPTR);
+                error(&src->err, ARK_ERR_NULLPTR);
                 return NULL;
         }
 }
 
-NG5_EXPORT(bool) hashset_clear(struct hashset *map)
+ARK_EXPORT(bool) hashset_clear(struct hashset *map)
 {
         error_if_null(map)
         assert(map->key_data.cap_elems == map->table.cap_elems);
@@ -131,7 +131,7 @@ NG5_EXPORT(bool) hashset_clear(struct hashset *map)
         assert(map->key_data.num_elems <= map->table.num_elems);
 
         if (!status) {
-                error(&map->err, NG5_ERR_OPPFAILED);
+                error(&map->err, ARK_ERR_OPPFAILED);
         }
 
         hashset_unlock(map);
@@ -139,7 +139,7 @@ NG5_EXPORT(bool) hashset_clear(struct hashset *map)
         return status;
 }
 
-NG5_EXPORT(bool) hashset_avg_displace(float *displace, const struct hashset *map)
+ARK_EXPORT(bool) hashset_avg_displace(float *displace, const struct hashset *map)
 {
         error_if_null(displace);
         error_if_null(map);
@@ -154,14 +154,14 @@ NG5_EXPORT(bool) hashset_avg_displace(float *displace, const struct hashset *map
         return true;
 }
 
-NG5_EXPORT(bool) hashset_lock(struct hashset *map)
+ARK_EXPORT(bool) hashset_lock(struct hashset *map)
 {
         error_if_null(map)
         spin_acquire(&map->lock);
         return true;
 }
 
-NG5_EXPORT(bool) hashset_unlock(struct hashset *map)
+ARK_EXPORT(bool) hashset_unlock(struct hashset *map)
 {
         error_if_null(map)
         spin_release(&map->lock);
@@ -249,7 +249,7 @@ static inline uint_fast32_t insert_or_update(struct hashset *map, const u32 *buc
         return 0;
 }
 
-NG5_EXPORT(bool) hashset_insert_or_update(struct hashset *map, const void *keys, uint_fast32_t num_pairs)
+ARK_EXPORT(bool) hashset_insert_or_update(struct hashset *map, const void *keys, uint_fast32_t num_pairs)
 {
         error_if_null(map)
         error_if_null(keys)
@@ -261,7 +261,7 @@ NG5_EXPORT(bool) hashset_insert_or_update(struct hashset *map, const void *keys,
 
         u32 *bucket_idxs = malloc(num_pairs * sizeof(u32));
         if (!bucket_idxs) {
-                error(&map->err, NG5_ERR_MALLOCERR);
+                error(&map->err, ARK_ERR_MALLOCERR);
                 return false;
         }
 
@@ -293,7 +293,7 @@ NG5_EXPORT(bool) hashset_insert_or_update(struct hashset *map, const void *keys,
         return true;
 }
 
-NG5_EXPORT(bool) hashset_remove_if_contained(struct hashset *map, const void *keys, size_t num_pairs)
+ARK_EXPORT(bool) hashset_remove_if_contained(struct hashset *map, const void *keys, size_t num_pairs)
 {
         error_if_null(map)
         error_if_null(keys)
@@ -302,7 +302,7 @@ NG5_EXPORT(bool) hashset_remove_if_contained(struct hashset *map, const void *ke
 
         u32 *bucket_idxs = malloc(num_pairs * sizeof(u32));
         if (!bucket_idxs) {
-                error(&map->err, NG5_ERR_MALLOCERR);
+                error(&map->err, ARK_ERR_MALLOCERR);
                 hashset_unlock(map);
                 return false;
         }
@@ -345,7 +345,7 @@ NG5_EXPORT(bool) hashset_remove_if_contained(struct hashset *map, const void *ke
         return true;
 }
 
-NG5_EXPORT(bool) hashset_contains_key(struct hashset *map, const void *key)
+ARK_EXPORT(bool) hashset_contains_key(struct hashset *map, const void *key)
 {
         error_if_null(map)
         error_if_null(key)
@@ -374,7 +374,7 @@ NG5_EXPORT(bool) hashset_contains_key(struct hashset *map, const void *key)
         return result;
 }
 
-NG5_EXPORT(bool) hashset_get_fload_factor(float *factor, struct hashset *map)
+ARK_EXPORT(bool) hashset_get_fload_factor(float *factor, struct hashset *map)
 {
         error_if_null(factor)
         error_if_null(map)
@@ -388,7 +388,7 @@ NG5_EXPORT(bool) hashset_get_fload_factor(float *factor, struct hashset *map)
         return true;
 }
 
-NG5_EXPORT(bool) hashset_rehash(struct hashset *map)
+ARK_EXPORT(bool) hashset_rehash(struct hashset *map)
 {
         error_if_null(map)
 
@@ -412,7 +412,7 @@ NG5_EXPORT(bool) hashset_rehash(struct hashset *map)
                 if (bucket->in_use_flag) {
                         const void *old_key = get_bucket_key(bucket, cpy);
                         if (!hashset_insert_or_update(map, old_key, 1)) {
-                                error(&map->err, NG5_ERR_REHASH_NOROLLBACK)
+                                error(&map->err, ARK_ERR_REHASH_NOROLLBACK)
                                 hashset_unlock(map);
                                 return false;
                         }

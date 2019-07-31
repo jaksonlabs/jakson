@@ -37,27 +37,27 @@
 })
 
 
-NG5_EXPORT(u64) carbon_get_or_default_unsigned(struct carbon *doc, const char *path, u64 default_val)
+ARK_EXPORT(u64) carbon_get_or_default_unsigned(struct carbon *doc, const char *path, u64 default_val)
 {
         return get_or_default(doc, path, u64, default_val, carbon_field_type_is_unsigned_integer, carbon_find_result_unsigned);
 }
 
-NG5_EXPORT(i64) carbon_get_or_default_signed(struct carbon *doc, const char *path, i64 default_val)
+ARK_EXPORT(i64) carbon_get_or_default_signed(struct carbon *doc, const char *path, i64 default_val)
 {
         return get_or_default(doc, path, i64, default_val, carbon_field_type_is_signed_integer, carbon_find_result_signed);
 }
 
-NG5_EXPORT(float) carbon_get_or_default_float(struct carbon *doc, const char *path, float default_val)
+ARK_EXPORT(float) carbon_get_or_default_float(struct carbon *doc, const char *path, float default_val)
 {
         return get_or_default(doc, path, float, default_val, carbon_field_type_is_floating_number, carbon_find_result_float);
 }
 
-NG5_EXPORT(bool) carbon_get_or_default_boolean(struct carbon *doc, const char *path, bool default_val)
+ARK_EXPORT(bool) carbon_get_or_default_boolean(struct carbon *doc, const char *path, bool default_val)
 {
         return get_or_default(doc, path, bool, default_val, carbon_field_type_is_boolean, carbon_find_result_boolean);
 }
 
-NG5_EXPORT(const char *) carbon_get_or_default_string(u64 *len_out, struct carbon *doc, const char *path, const char *default_val)
+ARK_EXPORT(const char *) carbon_get_or_default_string(u64 *len_out, struct carbon *doc, const char *path, const char *default_val)
 {
         struct carbon_find find;
         enum carbon_field_type field_type;
@@ -75,7 +75,7 @@ NG5_EXPORT(const char *) carbon_get_or_default_string(u64 *len_out, struct carbo
         return result;
 }
 
-NG5_EXPORT(struct carbon_binary *) carbon_get_or_default_binary(struct carbon *doc, const char *path, struct carbon_binary *default_val)
+ARK_EXPORT(struct carbon_binary *) carbon_get_or_default_binary(struct carbon *doc, const char *path, struct carbon_binary *default_val)
 {
         struct carbon_find find;
         enum carbon_field_type field_type;
@@ -92,7 +92,7 @@ NG5_EXPORT(struct carbon_binary *) carbon_get_or_default_binary(struct carbon *d
         return result;
 }
 
-NG5_EXPORT(struct carbon_array_it *) carbon_get_array_or_null(struct carbon *doc, const char *path)
+ARK_EXPORT(struct carbon_array_it *) carbon_get_array_or_null(struct carbon *doc, const char *path)
 {
         struct carbon_find find;
         enum carbon_field_type field_type;
@@ -109,7 +109,7 @@ NG5_EXPORT(struct carbon_array_it *) carbon_get_array_or_null(struct carbon *doc
         return result;
 }
 
-NG5_EXPORT(struct carbon_column_it *) carbon_get_column_or_null(struct carbon *doc, const char *path)
+ARK_EXPORT(struct carbon_column_it *) carbon_get_column_or_null(struct carbon *doc, const char *path)
 {
         struct carbon_find find;
         enum carbon_field_type field_type;

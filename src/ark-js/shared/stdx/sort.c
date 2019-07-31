@@ -17,7 +17,7 @@
 
 #include <ark-js/shared/stdx/sort.h>
 
-NG5_EXPORT(bool) sort_qsort_indicies(size_t *indices, const void *base, size_t width, less_eq_func_t comp,
+ARK_EXPORT(bool) sort_qsort_indicies(size_t *indices, const void *base, size_t width, less_eq_func_t comp,
         size_t nelemns, struct allocator *alloc)
 {
         error_if_null(base);
@@ -39,7 +39,7 @@ NG5_EXPORT(bool) sort_qsort_indicies(size_t *indices, const void *base, size_t w
                 h = stack[top--];
                 l = stack[top--];
 
-                i64 p = NG5_QSORT_INDICIES_PARTITION(indices, base, width, comp, l, h);
+                i64 p = ARK_QSORT_INDICIES_PARTITION(indices, base, width, comp, l, h);
 
                 if (p - 1 > l) {
                         stack[++top] = l;
@@ -52,11 +52,11 @@ NG5_EXPORT(bool) sort_qsort_indicies(size_t *indices, const void *base, size_t w
                 }
         }
 
-        ng5_check_success(alloc_free(alloc, stack));
+        ark_check_success(alloc_free(alloc, stack));
         return true;
 }
 
-NG5_EXPORT(int) sort_qsort_indicies_wargs(size_t *indices, const void *base, size_t width, less_eq_wargs_func_t comp,
+ARK_EXPORT(int) sort_qsort_indicies_wargs(size_t *indices, const void *base, size_t width, less_eq_wargs_func_t comp,
         size_t nelemens, struct allocator *alloc, void *args)
 {
         error_if_null(base);
@@ -80,7 +80,7 @@ NG5_EXPORT(int) sort_qsort_indicies_wargs(size_t *indices, const void *base, siz
                 h = stack[top--];
                 l = stack[top--];
 
-                i64 p = NG5_QSORT_INDICIES_PARTITION_WARGS(indices, base, width, comp, l, h, args);
+                i64 p = ARK_QSORT_INDICIES_PARTITION_WARGS(indices, base, width, comp, l, h, args);
 
                 if (p - 1 > l) {
                         stack[++top] = l;
@@ -93,11 +93,11 @@ NG5_EXPORT(int) sort_qsort_indicies_wargs(size_t *indices, const void *base, siz
                 }
         }
 
-        ng5_check_success(alloc_free(alloc, stack));
+        ark_check_success(alloc_free(alloc, stack));
         return true;
 }
 
-NG5_EXPORT(size_t) sort_bsearch_indicies(const size_t *indicies, const void *base, size_t width, size_t nelemens,
+ARK_EXPORT(size_t) sort_bsearch_indicies(const size_t *indicies, const void *base, size_t width, size_t nelemens,
         const void *neelde, eq_func_t compEq, less_func_t compLess)
 {
         size_t l = 0;
@@ -125,7 +125,7 @@ NG5_EXPORT(size_t) sort_bsearch_indicies(const size_t *indicies, const void *bas
         return nelemens;
 }
 
-NG5_EXPORT(size_t) sort_get_min(const size_t *elements, size_t nelemens)
+ARK_EXPORT(size_t) sort_get_min(const size_t *elements, size_t nelemens)
 {
         size_t min = (size_t) -1;
         while (nelemens--) {
@@ -135,7 +135,7 @@ NG5_EXPORT(size_t) sort_get_min(const size_t *elements, size_t nelemens)
         return min;
 }
 
-NG5_EXPORT(size_t) sort_get_max(const size_t *elements, size_t nelemens)
+ARK_EXPORT(size_t) sort_get_max(const size_t *elements, size_t nelemens)
 {
         size_t max = 0;
         while (nelemens--) {
@@ -145,7 +145,7 @@ NG5_EXPORT(size_t) sort_get_max(const size_t *elements, size_t nelemens)
         return max;
 }
 
-NG5_EXPORT(double) sort_get_sum(const size_t *elements, size_t nelemens)
+ARK_EXPORT(double) sort_get_sum(const size_t *elements, size_t nelemens)
 {
         double sum = 0;
         while (nelemens--) {
@@ -155,7 +155,7 @@ NG5_EXPORT(double) sort_get_sum(const size_t *elements, size_t nelemens)
         return sum;
 }
 
-NG5_EXPORT(double) sort_get_avg(const size_t *elements, size_t nelemens)
+ARK_EXPORT(double) sort_get_avg(const size_t *elements, size_t nelemens)
 {
         return sort_get_sum(elements, nelemens) / (double) nelemens;
 }

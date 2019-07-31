@@ -15,15 +15,15 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_HUFFMAN_H
-#define NG5_HUFFMAN_H
+#ifndef ARK_HUFFMAN_H
+#define ARK_HUFFMAN_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/stdx/vec.h>
 #include <ark-js/shared/mem/file.h>
 #include <ark-js/shared/types.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
 struct coding_huffman {
         struct vector ofType(struct pack_huffman_entry) table;
@@ -47,24 +47,24 @@ struct pack_huffman_str_info {
         const char *encoded_bytes;
 };
 
-NG5_EXPORT(bool) coding_huffman_create(struct coding_huffman *dic);
+ARK_EXPORT(bool) coding_huffman_create(struct coding_huffman *dic);
 
-NG5_EXPORT(bool) coding_huffman_cpy(struct coding_huffman *dst, struct coding_huffman *src);
+ARK_EXPORT(bool) coding_huffman_cpy(struct coding_huffman *dst, struct coding_huffman *src);
 
-NG5_EXPORT(bool) coding_huffman_build(struct coding_huffman *encoder, const string_vector_t *strings);
+ARK_EXPORT(bool) coding_huffman_build(struct coding_huffman *encoder, const string_vector_t *strings);
 
-NG5_EXPORT(bool) coding_huffman_get_error(struct err *err, const struct coding_huffman *dic);
+ARK_EXPORT(bool) coding_huffman_get_error(struct err *err, const struct coding_huffman *dic);
 
-NG5_EXPORT(bool) coding_huffman_encode(struct memfile *file, struct coding_huffman *dic, const char *string);
+ARK_EXPORT(bool) coding_huffman_encode(struct memfile *file, struct coding_huffman *dic, const char *string);
 
-NG5_EXPORT(bool) coding_huffman_read_string(struct pack_huffman_str_info *info, struct memfile *src);
+ARK_EXPORT(bool) coding_huffman_read_string(struct pack_huffman_str_info *info, struct memfile *src);
 
-NG5_EXPORT(bool) coding_huffman_drop(struct coding_huffman *dic);
+ARK_EXPORT(bool) coding_huffman_drop(struct coding_huffman *dic);
 
-NG5_EXPORT(bool) coding_huffman_serialize(struct memfile *file, const struct coding_huffman *dic, char marker_symbol);
+ARK_EXPORT(bool) coding_huffman_serialize(struct memfile *file, const struct coding_huffman *dic, char marker_symbol);
 
-NG5_EXPORT(bool) coding_huffman_read_entry(struct pack_huffman_info *info, struct memfile *file, char marker_symbol);
+ARK_EXPORT(bool) coding_huffman_read_entry(struct pack_huffman_info *info, struct memfile *file, char marker_symbol);
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

@@ -24,7 +24,7 @@
 #include <ark-js/carbon/carbon.h>
 #include <ark-js/carbon/carbon-field.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
 typedef u8 media_type_t; /* byte to determine type at hand (e.g., JSON array, string, null, ...) */
 
@@ -719,28 +719,28 @@ static struct mime_type
         { "application/vnd.handheld-entertainment+xml", "zmm" },
 };
 
-static const int _nmime_type_register = NG5_ARRAY_LENGTH(mime_type_register);
+static const int _nmime_type_register = ARK_ARRAY_LENGTH(mime_type_register);
 
-NG5_EXPORT(bool) carbon_media_write(struct memfile *dst, enum carbon_field_type type);
+ARK_EXPORT(bool) carbon_media_write(struct memfile *dst, enum carbon_field_type type);
 
 /**
  * Returns the mime type identifier for a file extension <code>ext</code>. If <code>ext</code> is not known,
  * the mime type application/octet-stream (.bin) is returned.
  */
-NG5_EXPORT(u32) carbon_media_mime_type_by_ext(const char *ext);
+ARK_EXPORT(u32) carbon_media_mime_type_by_ext(const char *ext);
 
 /**
  * Returns a human readable string representing the mime type for the mime type identifier <code>id</code>.
  * In case <code>id</code> is invalid, the mime type application/octet-stream is returned.
  */
-NG5_EXPORT(const char *) carbon_media_mime_type_by_id(u32 id);
+ARK_EXPORT(const char *) carbon_media_mime_type_by_id(u32 id);
 
 /**
  * Returns the file extension for the mime type identifier <code>id</code>.
  * In case <code>id</code> is invalid, the file extension "bin" is returned.
  */
-NG5_EXPORT(const char *) carbon_media_mime_ext_by_id(u32 id);
+ARK_EXPORT(const char *) carbon_media_mime_ext_by_id(u32 id);
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

@@ -25,7 +25,7 @@ static inline enum carbon_path_status traverse_column(struct carbon_path_evaluat
 static inline enum carbon_path_status traverse_array(struct carbon_path_evaluator *state,
         const struct carbon_dot_path *path, u32 current_path_pos, struct carbon_array_it *it);
 
-NG5_EXPORT(bool) carbon_path_evaluator_begin(struct carbon_path_evaluator *eval, struct carbon_dot_path *path,
+ARK_EXPORT(bool) carbon_path_evaluator_begin(struct carbon_path_evaluator *eval, struct carbon_dot_path *path,
         struct carbon *doc)
 {
         error_if_null(eval)
@@ -33,13 +33,13 @@ NG5_EXPORT(bool) carbon_path_evaluator_begin(struct carbon_path_evaluator *eval,
         error_if_null(doc)
 
         eval->doc = doc;
-        ng5_check_success(error_init(&eval->err));
-        ng5_check_success(carbon_iterator_open(&eval->root_it, eval->doc));
+        ark_check_success(error_init(&eval->err));
+        ark_check_success(carbon_iterator_open(&eval->root_it, eval->doc));
         eval->status = traverse_array(eval, path, 0, &eval->root_it);
         return true;
 }
 
-NG5_EXPORT(bool) carbon_path_evaluator_begin_mutable(struct carbon_path_evaluator *eval, const struct carbon_dot_path *path,
+ARK_EXPORT(bool) carbon_path_evaluator_begin_mutable(struct carbon_path_evaluator *eval, const struct carbon_dot_path *path,
         struct carbon_revise *context)
 {
         error_if_null(eval)
@@ -47,13 +47,13 @@ NG5_EXPORT(bool) carbon_path_evaluator_begin_mutable(struct carbon_path_evaluato
         error_if_null(context)
 
         eval->doc = context->revised_doc;
-        ng5_check_success(error_init(&eval->err));
-        ng5_check_success(carbon_revise_iterator_open(&eval->root_it, context));
+        ark_check_success(error_init(&eval->err));
+        ark_check_success(carbon_revise_iterator_open(&eval->root_it, context));
         eval->status = traverse_array(eval, path, 0, &eval->root_it);
         return true;
 }
 
-NG5_EXPORT(bool) carbon_path_evaluator_status(enum carbon_path_status *status, struct carbon_path_evaluator *state)
+ARK_EXPORT(bool) carbon_path_evaluator_status(enum carbon_path_status *status, struct carbon_path_evaluator *state)
 {
         error_if_null(status)
         error_if_null(state)
@@ -61,20 +61,20 @@ NG5_EXPORT(bool) carbon_path_evaluator_status(enum carbon_path_status *status, s
         return true;
 }
 
-NG5_EXPORT(bool) carbon_path_evaluator_has_result(struct carbon_path_evaluator *state)
+ARK_EXPORT(bool) carbon_path_evaluator_has_result(struct carbon_path_evaluator *state)
 {
         error_if_null(state)
         return state->status == carbon_PATH_RESOLVED;
 }
 
-NG5_EXPORT(bool) carbon_path_evaluator_end(struct carbon_path_evaluator *state)
+ARK_EXPORT(bool) carbon_path_evaluator_end(struct carbon_path_evaluator *state)
 {
         error_if_null(state)
         carbon_iterator_close(&state->root_it);
         return true;
 }
 
-NG5_EXPORT(bool) carbon_path_exists(struct carbon *doc, const char *path)
+ARK_EXPORT(bool) carbon_path_exists(struct carbon *doc, const char *path)
 {
         struct carbon_find find;
         bool result = carbon_find_open(&find, path, doc);
@@ -82,7 +82,7 @@ NG5_EXPORT(bool) carbon_path_exists(struct carbon *doc, const char *path)
         return result;
 }
 
-NG5_EXPORT(bool) carbon_path_is_array(struct carbon *doc, const char *path)
+ARK_EXPORT(bool) carbon_path_is_array(struct carbon *doc, const char *path)
 {
         struct carbon_find find;
         enum carbon_field_type field_type;
@@ -97,7 +97,7 @@ NG5_EXPORT(bool) carbon_path_is_array(struct carbon *doc, const char *path)
         return result;
 }
 
-NG5_EXPORT(bool) carbon_path_is_column(struct carbon *doc, const char *path)
+ARK_EXPORT(bool) carbon_path_is_column(struct carbon *doc, const char *path)
 {
         struct carbon_find find;
         enum carbon_field_type field_type;
@@ -112,7 +112,7 @@ NG5_EXPORT(bool) carbon_path_is_column(struct carbon *doc, const char *path)
         return result;
 }
 
-NG5_EXPORT(bool) carbon_path_is_object(struct carbon *doc, const char *path)
+ARK_EXPORT(bool) carbon_path_is_object(struct carbon *doc, const char *path)
 {
         struct carbon_find find;
         enum carbon_field_type field_type;
@@ -127,12 +127,12 @@ NG5_EXPORT(bool) carbon_path_is_object(struct carbon *doc, const char *path)
         return result;
 }
 
-NG5_EXPORT(bool) carbon_path_is_container(struct carbon *doc, const char *path)
+ARK_EXPORT(bool) carbon_path_is_container(struct carbon *doc, const char *path)
 {
         return (carbon_path_is_array(doc, path) || carbon_path_is_column(doc, path) || carbon_path_is_object(doc, path));
 }
 
-NG5_EXPORT(bool) carbon_path_is_null(struct carbon *doc, const char *path)
+ARK_EXPORT(bool) carbon_path_is_null(struct carbon *doc, const char *path)
 {
         struct carbon_find find;
         enum carbon_field_type field_type;
@@ -147,7 +147,7 @@ NG5_EXPORT(bool) carbon_path_is_null(struct carbon *doc, const char *path)
         return result;
 }
 
-NG5_EXPORT(bool) carbon_path_is_number(struct carbon *doc, const char *path)
+ARK_EXPORT(bool) carbon_path_is_number(struct carbon *doc, const char *path)
 {
         struct carbon_find find;
         enum carbon_field_type field_type;
@@ -162,7 +162,7 @@ NG5_EXPORT(bool) carbon_path_is_number(struct carbon *doc, const char *path)
         return result;
 }
 
-NG5_EXPORT(bool) carbon_path_is_boolean(struct carbon *doc, const char *path)
+ARK_EXPORT(bool) carbon_path_is_boolean(struct carbon *doc, const char *path)
 {
         struct carbon_find find;
         enum carbon_field_type field_type;
@@ -177,7 +177,7 @@ NG5_EXPORT(bool) carbon_path_is_boolean(struct carbon *doc, const char *path)
         return result;
 }
 
-NG5_EXPORT(bool) carbon_path_is_string(struct carbon *doc, const char *path)
+ARK_EXPORT(bool) carbon_path_is_string(struct carbon *doc, const char *path)
 {
         struct carbon_find find;
         enum carbon_field_type field_type;
@@ -281,11 +281,11 @@ static inline enum carbon_path_status traverse_array(struct carbon_path_evaluato
                                                         if (elem_type != carbon_FIELD_TYPE_OBJECT) {
                                                                 return carbon_PATH_NOTANOBJECT;
                                                         } else {
-                                                                error_print_and_die_if(true, NG5_ERR_NOTIMPLEMENTED) /* TODO: implement for objects */
+                                                                error_print_and_die_if(true, ARK_ERR_NOTIMPLEMENTED) /* TODO: implement for objects */
                                                                 return carbon_PATH_INTERNAL;
                                                         }
                                                 default:
-                                                error_print(NG5_ERR_INTERNALERR);
+                                                error_print(ARK_ERR_INTERNALERR);
                                                         return carbon_PATH_INTERNAL;
                                                 }
                                         }
@@ -304,12 +304,12 @@ static inline enum carbon_path_status traverse_array(struct carbon_path_evaluato
                                  * be executed, consequentially */
                                 return carbon_PATH_NOTANOBJECT;
                         } else {
-                                error_print_and_die_if(true, NG5_ERR_NOTIMPLEMENTED) /* TODO: implement for objects */
+                                error_print_and_die_if(true, ARK_ERR_NOTIMPLEMENTED) /* TODO: implement for objects */
                                 return carbon_PATH_INTERNAL;
                         }
                         break;
                 default:
-                error(&((struct carbon_dot_path *)path)->err, NG5_ERR_INTERNALERR);
+                error(&((struct carbon_dot_path *)path)->err, ARK_ERR_INTERNALERR);
                         return  carbon_PATH_INTERNAL;
                 }
         }

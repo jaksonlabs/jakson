@@ -25,7 +25,7 @@
 #include <ark-js/carbon/carbon-field.h>
 #include <ark-js/carbon/carbon.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
 struct carbon; /* forwarded from carbon.h */
 struct carbon_insert; /* forwarded from carbon-literal-inserter.h */
@@ -52,82 +52,82 @@ struct carbon_column_it
         struct spinlock lock;
 };
 
-NG5_EXPORT(bool) carbon_column_it_create(struct carbon_column_it *it, struct memfile *memfile, struct err *err,
+ARK_EXPORT(bool) carbon_column_it_create(struct carbon_column_it *it, struct memfile *memfile, struct err *err,
         offset_t column_start_offset);
 
-NG5_EXPORT(bool) carbon_column_it_insert(struct carbon_insert *inserter, struct carbon_column_it *it);
+ARK_EXPORT(bool) carbon_column_it_insert(struct carbon_insert *inserter, struct carbon_column_it *it);
 
-NG5_EXPORT(bool) carbon_column_it_fast_forward(struct carbon_column_it *it);
+ARK_EXPORT(bool) carbon_column_it_fast_forward(struct carbon_column_it *it);
 
-NG5_EXPORT(offset_t) carbon_column_it_tell(struct carbon_column_it *it);
+ARK_EXPORT(offset_t) carbon_column_it_tell(struct carbon_column_it *it);
 
-NG5_EXPORT(const void *) carbon_column_it_values(enum carbon_field_type *type, u32 *nvalues, struct carbon_column_it *it);
+ARK_EXPORT(const void *) carbon_column_it_values(enum carbon_field_type *type, u32 *nvalues, struct carbon_column_it *it);
 
-NG5_EXPORT(bool) carbon_column_it_values_info(enum carbon_field_type *type, u32 *nvalues, struct carbon_column_it *it);
+ARK_EXPORT(bool) carbon_column_it_values_info(enum carbon_field_type *type, u32 *nvalues, struct carbon_column_it *it);
 
-NG5_EXPORT(const u8 *) carbon_column_it_boolean_values(u32 *nvalues, struct carbon_column_it *it);
+ARK_EXPORT(const u8 *) carbon_column_it_boolean_values(u32 *nvalues, struct carbon_column_it *it);
 
-NG5_EXPORT(const u8 *) carbon_column_it_u8_values(u32 *nvalues, struct carbon_column_it *it);
+ARK_EXPORT(const u8 *) carbon_column_it_u8_values(u32 *nvalues, struct carbon_column_it *it);
 
-NG5_EXPORT(const u16 *) carbon_column_it_u16_values(u32 *nvalues, struct carbon_column_it *it);
+ARK_EXPORT(const u16 *) carbon_column_it_u16_values(u32 *nvalues, struct carbon_column_it *it);
 
-NG5_EXPORT(const u32 *) carbon_column_it_u32_values(u32 *nvalues, struct carbon_column_it *it);
+ARK_EXPORT(const u32 *) carbon_column_it_u32_values(u32 *nvalues, struct carbon_column_it *it);
 
-NG5_EXPORT(const u64 *) carbon_column_it_u64_values(u32 *nvalues, struct carbon_column_it *it);
+ARK_EXPORT(const u64 *) carbon_column_it_u64_values(u32 *nvalues, struct carbon_column_it *it);
 
-NG5_EXPORT(const i8 *) carbon_column_it_i8_values(u32 *nvalues, struct carbon_column_it *it);
+ARK_EXPORT(const i8 *) carbon_column_it_i8_values(u32 *nvalues, struct carbon_column_it *it);
 
-NG5_EXPORT(const i16 *) carbon_column_it_i16_values(u32 *nvalues, struct carbon_column_it *it);
+ARK_EXPORT(const i16 *) carbon_column_it_i16_values(u32 *nvalues, struct carbon_column_it *it);
 
-NG5_EXPORT(const i32 *) carbon_column_it_i32_values(u32 *nvalues, struct carbon_column_it *it);
+ARK_EXPORT(const i32 *) carbon_column_it_i32_values(u32 *nvalues, struct carbon_column_it *it);
 
-NG5_EXPORT(const i64 *) carbon_column_it_i64_values(u32 *nvalues, struct carbon_column_it *it);
+ARK_EXPORT(const i64 *) carbon_column_it_i64_values(u32 *nvalues, struct carbon_column_it *it);
 
-NG5_EXPORT(const float *) carbon_column_it_float_values(u32 *nvalues, struct carbon_column_it *it);
+ARK_EXPORT(const float *) carbon_column_it_float_values(u32 *nvalues, struct carbon_column_it *it);
 
-NG5_EXPORT(bool) carbon_column_it_remove(struct carbon_column_it *it, u32 pos);
+ARK_EXPORT(bool) carbon_column_it_remove(struct carbon_column_it *it, u32 pos);
 
-NG5_EXPORT(bool) carbon_column_it_update_set_null(struct carbon_column_it *it, u32 pos);
+ARK_EXPORT(bool) carbon_column_it_update_set_null(struct carbon_column_it *it, u32 pos);
 
-NG5_EXPORT(bool) carbon_column_it_update_set_true(struct carbon_column_it *it, u32 pos);
+ARK_EXPORT(bool) carbon_column_it_update_set_true(struct carbon_column_it *it, u32 pos);
 
-NG5_EXPORT(bool) carbon_column_it_update_set_false(struct carbon_column_it *it, u32 pos);
+ARK_EXPORT(bool) carbon_column_it_update_set_false(struct carbon_column_it *it, u32 pos);
 
-NG5_EXPORT(bool) carbon_column_it_update_set_u8(struct carbon_column_it *it, u32 pos, u8 value);
+ARK_EXPORT(bool) carbon_column_it_update_set_u8(struct carbon_column_it *it, u32 pos, u8 value);
 
-NG5_EXPORT(bool) carbon_column_it_update_set_u16(struct carbon_column_it *it, u32 pos, u16 value);
+ARK_EXPORT(bool) carbon_column_it_update_set_u16(struct carbon_column_it *it, u32 pos, u16 value);
 
-NG5_EXPORT(bool) carbon_column_it_update_set_u32(struct carbon_column_it *it, u32 pos, u32 value);
+ARK_EXPORT(bool) carbon_column_it_update_set_u32(struct carbon_column_it *it, u32 pos, u32 value);
 
-NG5_EXPORT(bool) carbon_column_it_update_set_u64(struct carbon_column_it *it, u32 pos, u64 value);
+ARK_EXPORT(bool) carbon_column_it_update_set_u64(struct carbon_column_it *it, u32 pos, u64 value);
 
-NG5_EXPORT(bool) carbon_column_it_update_set_i8(struct carbon_column_it *it, u32 pos, i8 value);
+ARK_EXPORT(bool) carbon_column_it_update_set_i8(struct carbon_column_it *it, u32 pos, i8 value);
 
-NG5_EXPORT(bool) carbon_column_it_update_set_i16(struct carbon_column_it *it, u32 pos, i16 value);
+ARK_EXPORT(bool) carbon_column_it_update_set_i16(struct carbon_column_it *it, u32 pos, i16 value);
 
-NG5_EXPORT(bool) carbon_column_it_update_set_i32(struct carbon_column_it *it, u32 pos, i32 value);
+ARK_EXPORT(bool) carbon_column_it_update_set_i32(struct carbon_column_it *it, u32 pos, i32 value);
 
-NG5_EXPORT(bool) carbon_column_it_update_set_i64(struct carbon_column_it *it, u32 pos, i64 value);
+ARK_EXPORT(bool) carbon_column_it_update_set_i64(struct carbon_column_it *it, u32 pos, i64 value);
 
-NG5_EXPORT(bool) carbon_column_it_update_set_float(struct carbon_column_it *it, u32 pos, float value);
+ARK_EXPORT(bool) carbon_column_it_update_set_float(struct carbon_column_it *it, u32 pos, float value);
 
 
 
 /**
  * Locks the iterator with a spinlock. A call to <code>carbon_column_it_unlock</code> is required for unlocking.
  */
-NG5_EXPORT(bool) carbon_column_it_lock(struct carbon_column_it *it);
+ARK_EXPORT(bool) carbon_column_it_lock(struct carbon_column_it *it);
 
 /**
  * Unlocks the iterator
  */
-NG5_EXPORT(bool) carbon_column_it_unlock(struct carbon_column_it *it);
+ARK_EXPORT(bool) carbon_column_it_unlock(struct carbon_column_it *it);
 
 /**
  * Positions the iterator at the beginning of this array.
  */
-NG5_EXPORT(bool) carbon_column_it_rewind(struct carbon_column_it *it);
+ARK_EXPORT(bool) carbon_column_it_rewind(struct carbon_column_it *it);
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

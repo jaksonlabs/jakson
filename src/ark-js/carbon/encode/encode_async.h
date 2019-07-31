@@ -15,16 +15,16 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_STRDIC_ASYNC_H
-#define NG5_STRDIC_ASYNC_H
+#ifndef ARK_STRDIC_ASYNC_H
+#define ARK_STRDIC_ASYNC_H
 
 #include <ark-js/shared/stdx/strdic.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
-NG5_EXPORT (int) encode_async_create(struct strdic *dic, size_t capacity, size_t num_index_buckets,
+ARK_EXPORT (int) encode_async_create(struct strdic *dic, size_t capacity, size_t num_index_buckets,
         size_t approx_num_unique_strs, size_t num_threads, const struct allocator *alloc);
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

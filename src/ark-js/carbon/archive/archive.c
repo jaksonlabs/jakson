@@ -48,10 +48,10 @@
 
 #define PRINT_SIMPLE_PROPS(file, memfile, offset, nesting_level, value_type, type_string, format_string)               \
 {                                                                                                                      \
-    struct prop_header *prop_header = NG5_MEMFILE_READ_TYPE(memfile, struct prop_header);             \
-    field_sid_t *keys = (field_sid_t *) NG5_MEMFILE_READ(memfile, prop_header->num_entries *          \
+    struct prop_header *prop_header = ARK_MEMFILE_READ_TYPE(memfile, struct prop_header);             \
+    field_sid_t *keys = (field_sid_t *) ARK_MEMFILE_READ(memfile, prop_header->num_entries *          \
                                    sizeof(field_sid_t));                                                        \
-    value_type *values = (value_type *) NG5_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(value_type));   \
+    value_type *values = (value_type *) ARK_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(value_type));   \
     fprintf(file, "0x%04x ", (unsigned) offset);                                                                       \
     INTENT_LINE(nesting_level)                                                                                         \
     fprintf(file, "[marker: %c (" type_string ")] [num_entries: %d] [", entryMarker, prop_header->num_entries);        \
@@ -67,9 +67,9 @@
 
 #define PRINT_ARRAY_PROPS(memfile, offset, nesting_level, entryMarker, type, type_string, format_string)               \
 {                                                                                                                      \
-    struct prop_header *prop_header = NG5_MEMFILE_READ_TYPE(memfile, struct prop_header);             \
+    struct prop_header *prop_header = ARK_MEMFILE_READ_TYPE(memfile, struct prop_header);             \
                                                                                                                        \
-    field_sid_t *keys = (field_sid_t *) NG5_MEMFILE_READ(memfile, prop_header->num_entries *          \
+    field_sid_t *keys = (field_sid_t *) ARK_MEMFILE_READ(memfile, prop_header->num_entries *          \
                                         sizeof(field_sid_t));                                                   \
     u32 *array_lengths;                                                                                           \
                                                                                                                        \
@@ -82,7 +82,7 @@
     }                                                                                                                  \
     fprintf(file, "] [");                                                                                              \
                                                                                                                        \
-    array_lengths = (u32 *) NG5_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(u32));            \
+    array_lengths = (u32 *) ARK_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(u32));            \
                                                                                                                        \
     for (u32 i = 0; i < prop_header->num_entries; i++) {                                                          \
         fprintf(file, "num_entries: %d%s", array_lengths[i], i + 1 < prop_header->num_entries ? ", " : "");            \
@@ -91,7 +91,7 @@
     fprintf(file, "] [");                                                                                              \
                                                                                                                        \
     for (u32 array_idx = 0; array_idx < prop_header->num_entries; array_idx++) {                                  \
-        type *values = (type *) NG5_MEMFILE_READ(memfile, array_lengths[array_idx] * sizeof(type));                 \
+        type *values = (type *) ARK_MEMFILE_READ(memfile, array_lengths[array_idx] * sizeof(type));                 \
         fprintf(file, "[");                                                                                            \
         for (u32 i = 0; i < array_lengths[array_idx]; i++) {                                                      \
             fprintf(file, "value: "format_string"%s", values[i], i + 1 < array_lengths[array_idx] ? ", " : "");        \
@@ -111,8 +111,8 @@
 
 #define PRINT_VALUE_ARRAY(type, memfile, header, format_string)                                                        \
 {                                                                                                                      \
-    u32 num_elements = *NG5_MEMFILE_READ_TYPE(memfile, u32);                                              \
-    const type *values = (const type *) NG5_MEMFILE_READ(memfile, num_elements * sizeof(type));                     \
+    u32 num_elements = *ARK_MEMFILE_READ_TYPE(memfile, u32);                                              \
+    const type *values = (const type *) ARK_MEMFILE_READ(memfile, num_elements * sizeof(type));                     \
     fprintf(file, "0x%04x ", (unsigned) offset);                                                                       \
     INTENT_LINE(nesting_level);                                                                                        \
     fprintf(file, "   [num_elements: %d] [values: [", num_elements);                                                   \
@@ -134,7 +134,7 @@ static bool serialize_string_dic(struct memfile *memfile, struct err *err, const
         enum packer_type compressor);
 static bool print_archive_from_memfile(FILE *file, struct err *err, struct memfile *memfile);
 
-NG5_EXPORT(bool) archive_from_json(struct archive *out, const char *file, struct err *err, const char *json_string,
+ARK_EXPORT(bool) archive_from_json(struct archive *out, const char *file, struct err *err, const char *json_string,
         enum packer_type compressor, enum strdic_tag dictionary, size_t num_async_dic_threads, bool read_optimized,
         bool bake_string_id_index, struct archive_callback *callback)
 {
@@ -143,7 +143,7 @@ NG5_EXPORT(bool) archive_from_json(struct archive *out, const char *file, struct
         error_if_null(err);
         error_if_null(json_string);
 
-        ng5_optional_call(callback, begin_create_from_json);
+        ark_optional_call(callback, begin_create_from_json);
 
         struct memblock *stream;
         FILE *out_file;
@@ -160,16 +160,16 @@ NG5_EXPORT(bool) archive_from_json(struct archive *out, const char *file, struct
                 return false;
         }
 
-        ng5_optional_call(callback, begin_write_archive_file_to_disk);
+        ark_optional_call(callback, begin_write_archive_file_to_disk);
 
         if ((out_file = fopen(file, "w")) == NULL) {
-                error(err, NG5_ERR_FOPENWRITE);
+                error(err, ARK_ERR_FOPENWRITE);
                 memblock_drop(stream);
                 return false;
         }
 
         if (!archive_write(out_file, stream)) {
-                error(err, NG5_ERR_WRITEARCHIVE);
+                error(err, ARK_ERR_WRITEARCHIVE);
                 fclose(out_file);
                 memblock_drop(stream);
                 return false;
@@ -177,25 +177,25 @@ NG5_EXPORT(bool) archive_from_json(struct archive *out, const char *file, struct
 
         fclose(out_file);
 
-        ng5_optional_call(callback, end_write_archive_file_to_disk);
+        ark_optional_call(callback, end_write_archive_file_to_disk);
 
-        ng5_optional_call(callback, begin_load_archive);
+        ark_optional_call(callback, begin_load_archive);
 
         if (!archive_open(out, file)) {
-                error(err, NG5_ERR_ARCHIVEOPEN);
+                error(err, ARK_ERR_ARCHIVEOPEN);
                 return false;
         }
 
-        ng5_optional_call(callback, end_load_archive);
+        ark_optional_call(callback, end_load_archive);
 
         memblock_drop(stream);
 
-        ng5_optional_call(callback, end_create_from_json);
+        ark_optional_call(callback, end_create_from_json);
 
         return true;
 }
 
-NG5_EXPORT(bool) archive_stream_from_json(struct memblock **stream, struct err *err, const char *json_string,
+ARK_EXPORT(bool) archive_stream_from_json(struct memblock **stream, struct err *err, const char *json_string,
         enum packer_type compressor, enum strdic_tag dictionary, size_t num_async_dic_threads, bool read_optimized,
         bool bake_id_index, struct archive_callback *callback)
 {
@@ -211,20 +211,20 @@ NG5_EXPORT(bool) archive_stream_from_json(struct memblock **stream, struct err *
         struct columndoc *columndoc;
         struct json json;
 
-        ng5_optional_call(callback, begin_archive_stream_from_json)
+        ark_optional_call(callback, begin_archive_stream_from_json)
 
-        ng5_optional_call(callback, begin_setup_string_dictionary);
+        ark_optional_call(callback, begin_setup_string_dictionary);
         if (dictionary == SYNC) {
                 encode_sync_create(&dic, 1000, 1000, 1000, 0, NULL);
         } else if (dictionary == ASYNC) {
                 encode_async_create(&dic, 1000, 1000, 1000, num_async_dic_threads, NULL);
         } else {
-                error(err, NG5_ERR_UNKNOWN_DIC_TYPE);
+                error(err, ARK_ERR_UNKNOWN_DIC_TYPE);
         }
 
-        ng5_optional_call(callback, end_setup_string_dictionary);
+        ark_optional_call(callback, end_setup_string_dictionary);
 
-        ng5_optional_call(callback, begin_parse_json);
+        ark_optional_call(callback, begin_parse_json);
         json_parser_create(&parser, &bulk);
         if (!(json_parse(&json, &error_desc, &parser, json_string))) {
                 char buffer[2048];
@@ -235,24 +235,24 @@ NG5_EXPORT(bool) archive_stream_from_json(struct memblock **stream, struct err *
                                 error_desc.token_type_str,
                                 error_desc.token->line,
                                 error_desc.token->column);
-                        error_with_details(err, NG5_ERR_JSONPARSEERR, &buffer[0]);
+                        error_with_details(err, ARK_ERR_JSONPARSEERR, &buffer[0]);
                 } else {
                         sprintf(buffer, "%s", error_desc.msg);
-                        error_with_details(err, NG5_ERR_JSONPARSEERR, &buffer[0]);
+                        error_with_details(err, ARK_ERR_JSONPARSEERR, &buffer[0]);
                 }
                 return false;
         }
-        ng5_optional_call(callback, end_parse_json);
+        ark_optional_call(callback, end_parse_json);
 
-        ng5_optional_call(callback, begin_test_json);
+        ark_optional_call(callback, begin_test_json);
         if (!json_test(err, &json)) {
                 return false;
         }
-        ng5_optional_call(callback, end_test_json);
+        ark_optional_call(callback, end_test_json);
 
-        ng5_optional_call(callback, begin_import_json);
+        ark_optional_call(callback, begin_import_json);
         if (!doc_bulk_create(&bulk, &dic)) {
-                error(err, NG5_ERR_BULKCREATEFAILED);
+                error(err, ARK_ERR_BULKCREATEFAILED);
                 return false;
         }
 
@@ -269,17 +269,17 @@ NG5_EXPORT(bool) archive_stream_from_json(struct memblock **stream, struct err *
                 return false;
         }
 
-        ng5_optional_call(callback, end_import_json);
+        ark_optional_call(callback, end_import_json);
 
-        ng5_optional_call(callback, begin_cleanup);
+        ark_optional_call(callback, begin_cleanup);
         strdic_drop(&dic);
         doc_bulk_Drop(&bulk);
         doc_entries_drop(partition);
         columndoc_free(columndoc);
         free(columndoc);
-        ng5_optional_call(callback, end_cleanup);
+        ark_optional_call(callback, end_cleanup);
 
-        ng5_optional_call(callback, end_archive_stream_from_json)
+        ark_optional_call(callback, end_archive_stream_from_json)
 
         return true;
 }
@@ -296,12 +296,12 @@ static bool run_string_id_baking(struct err *err, struct memblock **stream)
         FILE *tmp_file;
 
         if ((tmp_file = fopen(tmp_file_name, "w")) == NULL) {
-                error(err, NG5_ERR_TMP_FOPENWRITE);
+                error(err, ARK_ERR_TMP_FOPENWRITE);
                 return false;
         }
 
         if (!archive_write(tmp_file, *stream)) {
-                error(err, NG5_ERR_WRITEARCHIVE);
+                error(err, ARK_ERR_WRITEARCHIVE);
                 fclose(tmp_file);
                 remove(tmp_file_name);
                 return false;
@@ -311,14 +311,14 @@ static bool run_string_id_baking(struct err *err, struct memblock **stream)
         fclose(tmp_file);
 
         if (!archive_open(&archive, tmp_file_name)) {
-                error(err, NG5_ERR_ARCHIVEOPEN);
+                error(err, ARK_ERR_ARCHIVEOPEN);
                 return false;
         }
 
         bool has_index;
         archive_has_query_index_string_id_to_offset(&has_index, &archive);
         if (has_index) {
-                error(err, NG5_ERR_INTERNALERR);
+                error(err, ARK_ERR_INTERNALERR);
                 remove(tmp_file_name);
                 return false;
         }
@@ -331,7 +331,7 @@ static bool run_string_id_baking(struct err *err, struct memblock **stream)
         archive_close(&archive);
 
         if ((tmp_file = fopen(tmp_file_name, "rb+")) == NULL) {
-                error(err, NG5_ERR_TMP_FOPENWRITE);
+                error(err, ARK_ERR_TMP_FOPENWRITE);
                 return false;
         }
 
@@ -343,11 +343,11 @@ static bool run_string_id_baking(struct err *err, struct memblock **stream)
 
         struct archive_header header;
         size_t nread = fread(&header, sizeof(struct archive_header), 1, tmp_file);
-        error_if(nread != 1, err, NG5_ERR_FREAD_FAILED);
+        error_if(nread != 1, err, ARK_ERR_FREAD_FAILED);
         header.string_id_to_offset_index_offset = index_pos;
         fseek(tmp_file, 0, SEEK_SET);
         int nwrite = fwrite(&header, sizeof(struct archive_header), 1, tmp_file);
-        error_if(nwrite != 1, err, NG5_ERR_FWRITE_FAILED);
+        error_if(nwrite != 1, err, ARK_ERR_FWRITE_FAILED);
         fseek(tmp_file, 0, SEEK_SET);
 
         query_drop_index_string_id_to_offset(index);
@@ -367,20 +367,20 @@ bool archive_from_model(struct memblock **stream, struct err *err, struct column
         error_if_null(stream)
         error_if_null(err)
 
-        ng5_optional_call(callback, begin_create_from_model)
+        ark_optional_call(callback, begin_create_from_model)
 
         memblock_create(stream, 1024 * 1024 * 1024);
         struct memfile memfile;
         memfile_open(&memfile, *stream, READ_WRITE);
 
-        ng5_optional_call(callback, begin_write_string_table);
+        ark_optional_call(callback, begin_write_string_table);
         skip_file_header(&memfile);
         if (!serialize_string_dic(&memfile, err, model->bulk, compressor)) {
                 return false;
         }
-        ng5_optional_call(callback, end_write_string_table);
+        ark_optional_call(callback, end_write_string_table);
 
-        ng5_optional_call(callback, begin_write_record_table);
+        ark_optional_call(callback, begin_write_record_table);
         offset_t record_header_offset = skip_record_header(&memfile);
         update_file_header(&memfile, record_header_offset);
         offset_t root_object_header_offset = memfile_tell(&memfile);
@@ -389,34 +389,34 @@ bool archive_from_model(struct memblock **stream, struct err *err, struct column
         }
         u64 record_size = memfile_tell(&memfile) - (record_header_offset + sizeof(struct record_header));
         update_record_header(&memfile, record_header_offset, model, record_size);
-        ng5_optional_call(callback, end_write_record_table);
+        ark_optional_call(callback, end_write_record_table);
 
         memfile_shrink(&memfile);
 
         if (bake_string_id_index) {
                 /* create string id to offset index, and append it to the CARBON file */
-                ng5_optional_call(callback, begin_string_id_index_baking);
+                ark_optional_call(callback, begin_string_id_index_baking);
                 if (!run_string_id_baking(err, stream)) {
                         return false;
                 }
-                ng5_optional_call(callback, end_string_id_index_baking);
+                ark_optional_call(callback, end_string_id_index_baking);
         } else {
-                ng5_optional_call(callback, skip_string_id_index_baking);
+                ark_optional_call(callback, skip_string_id_index_baking);
         }
 
-        ng5_optional_call(callback, end_create_from_model)
+        ark_optional_call(callback, end_create_from_model)
 
         return true;
 }
 
-NG5_EXPORT(struct io_context *)archive_io_context_create(struct archive *archive)
+ARK_EXPORT(struct io_context *)archive_io_context_create(struct archive *archive)
 {
         error_if_null(archive);
         struct io_context *context;
         if (io_context_create(&context, &archive->err, archive->diskFilePath)) {
                 return context;
         } else {
-                error(&archive->err, NG5_ERR_IO)
+                error(&archive->err, ARK_ERR_IO)
                 return NULL;
         }
 }
@@ -443,7 +443,7 @@ bool archive_print(FILE *file, struct err *err, struct memblock *stream)
         memfile_open(&memfile, stream, READ_ONLY);
         if (memfile_size(&memfile)
                 < sizeof(struct archive_header) + sizeof(struct string_table_header) + sizeof(struct object_header)) {
-                error(err, NG5_ERR_NOCARBONSTREAM);
+                error(err, ARK_ERR_NOCARBONSTREAM);
                 return false;
         } else {
                 return print_archive_from_memfile(file, err, &memfile);
@@ -487,7 +487,7 @@ static const char *array_value_type_to_string(struct err *err, field_e type)
         case FIELD_OBJECT:
                 return "Object Array";
         default: {
-                error(err, NG5_ERR_NOVALUESTR)
+                error(err, ARK_ERR_NOVALUESTR)
                 return NULL;
         }
         }
@@ -544,7 +544,7 @@ static bool write_primitive_fixed_value_column(struct memfile *memfile, struct e
                 break;
         case FIELD_STRING: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_sid_t);
                 break;
-        default: error(err, NG5_ERR_NOTYPE);
+        default: error(err, ARK_ERR_NOTYPE);
                 return false;
         }
         return true;
@@ -587,10 +587,10 @@ static bool __write_array_len_column(struct err *err, struct memfile *memfile, f
                         memfile_write(memfile, &arrays->num_elems, sizeof(u32));
                 }
                 break;
-        case FIELD_OBJECT: print_error_and_die(NG5_ERR_ILLEGALIMPL)
+        case FIELD_OBJECT: print_error_and_die(ARK_ERR_ILLEGALIMPL)
                 return false;
                 break;
-        default: error(err, NG5_ERR_NOTYPE);
+        default: error(err, ARK_ERR_NOTYPE);
                 return false;
         }
         return true;
@@ -625,9 +625,9 @@ static bool write_array_value_column(struct memfile *memfile, struct err *err, f
                 break;
         case FIELD_STRING: WRITE_ARRAY_VALUES(memfile, values_vec, field_sid_t);
                 break;
-        case FIELD_OBJECT: print_error_and_die(NG5_ERR_NOTIMPL)
+        case FIELD_OBJECT: print_error_and_die(ARK_ERR_NOTIMPL)
                 return false;
-        default: error(err, NG5_ERR_NOTYPE)
+        default: error(err, ARK_ERR_NOTYPE)
                 return false;
         }
         return true;
@@ -992,7 +992,7 @@ static bool write_column_entry(struct memfile *memfile, struct err *err, field_e
                 }
         }
                 break;
-        default: error(err, NG5_ERR_NOTYPE)
+        default: error(err, ARK_ERR_NOTYPE)
                 return false;
         }
         return true;
@@ -1060,7 +1060,7 @@ static bool write_object_array_props(struct memfile *memfile, struct err *err,
                                         *column = vec_get(&column_group->columns, k, struct columndoc_column);
                                 const u32 *array_pos = vec_all(&column->array_positions, u32);
                                 for (size_t m = 0; m < column->array_positions.num_elems; m++) {
-                                        max_pos = ng5_max(max_pos, array_pos[m]);
+                                        max_pos = ark_max(max_pos, array_pos[m]);
                                 }
                         }
                         struct column_group_header column_group_header =
@@ -1071,7 +1071,7 @@ static bool write_object_array_props(struct memfile *memfile, struct err *err,
                         for (size_t i = 0; i < column_group_header.num_objects; i++) {
                                 object_id_t oid;
                                 if (!object_id_create(&oid)) {
-                                        error(err, NG5_ERR_THREADOOOBJIDS);
+                                        error(err, ARK_ERR_THREADOOOBJIDS);
                                         return false;
                                 }
                                 memfile_write(memfile, &oid, sizeof(object_id_t));
@@ -1330,7 +1330,7 @@ static bool __serialize(offset_t *offset, struct err *err, struct memfile *memfi
 
         object_id_t oid;
         if (!object_id_create(&oid)) {
-                error(err, NG5_ERR_THREADOOOBJIDS);
+                error(err, ARK_ERR_THREADOOOBJIDS);
                 return false;
         }
 
@@ -1344,7 +1344,7 @@ static bool __serialize(offset_t *offset, struct err *err, struct memfile *memfi
         propOffsetsWrite(memfile, &flags, &prop_offsets);
 
         memfile_seek(memfile, object_end_offset);
-        ng5_optional_set(offset, next_offset);
+        ark_optional_set(offset, next_offset);
         return true;
 }
 
@@ -1360,7 +1360,7 @@ static char *embedded_dic_flags_to_string(const union string_tab_flags *flags)
                 assert(length <= max);
         } else {
 
-                for (size_t i = 0; i < NG5_ARRAY_LENGTH(compressor_strategy_register); i++) {
+                for (size_t i = 0; i < ARK_ARRAY_LENGTH(compressor_strategy_register); i++) {
                         if (flags->value & compressor_strategy_register[i].flag_bit) {
                                 strcpy(string + length, compressor_strategy_register[i].name);
                                 length = strlen(string);
@@ -1413,7 +1413,7 @@ static bool serialize_string_dic(struct memfile *memfile, struct err *err, const
                 return false;
         }
         u8 flag_bit = pack_flagbit_by_type(compressor);
-        ng5_set_bits(flags.value, flag_bit);
+        ark_set_bits(flags.value, flag_bit);
 
         offset_t header_pos = memfile_tell(memfile);
         memfile_skip(memfile, sizeof(struct string_table_header));
@@ -1482,11 +1482,11 @@ static bool print_column_form_memfile(FILE *file, struct err *err, struct memfil
 {
         offset_t offset;
         memfile_get_offset(&offset, memfile);
-        struct column_header *header = NG5_MEMFILE_READ_TYPE(memfile, struct column_header);
+        struct column_header *header = ARK_MEMFILE_READ_TYPE(memfile, struct column_header);
         if (header->marker != MARKER_SYMBOL_COLUMN) {
                 char buffer[256];
                 sprintf(buffer, "expected marker [%c] but found [%c]", MARKER_SYMBOL_COLUMN, header->marker);
-                error_with_details(err, NG5_ERR_CORRUPTED, buffer);
+                error_with_details(err, ARK_ERR_CORRUPTED, buffer);
                 return false;
         }
         fprintf(file, "0x%04x ", (unsigned) offset);
@@ -1505,11 +1505,11 @@ static bool print_column_form_memfile(FILE *file, struct err *err, struct memfil
                 header->num_entries);
 
         for (size_t i = 0; i < header->num_entries; i++) {
-                offset_t entry_off = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
+                offset_t entry_off = *ARK_MEMFILE_READ_TYPE(memfile, offset_t);
                 fprintf(file, "offset: 0x%04x%s", (unsigned) entry_off, i + 1 < header->num_entries ? ", " : "");
         }
 
-        u32 *positions = (u32 *) NG5_MEMFILE_READ(memfile, header->num_entries * sizeof(u32));
+        u32 *positions = (u32 *) ARK_MEMFILE_READ(memfile, header->num_entries * sizeof(u32));
         fprintf(file, "] [positions: [");
         for (size_t i = 0; i < header->num_entries; i++) {
                 fprintf(file, "%d%s", positions[i], i + 1 < header->num_entries ? ", " : "");
@@ -1575,7 +1575,7 @@ static bool print_column_form_memfile(FILE *file, struct err *err, struct memfil
                 }
                         break;
                 case FIELD_OBJECT: {
-                        u32 num_elements = *NG5_MEMFILE_READ_TYPE(memfile, u32);
+                        u32 num_elements = *ARK_MEMFILE_READ_TYPE(memfile, u32);
                         INTENT_LINE(nesting_level);
                         fprintf(file, "   [num_elements: %d] [values: [\n", num_elements);
                         for (size_t i = 0; i < num_elements; i++) {
@@ -1587,7 +1587,7 @@ static bool print_column_form_memfile(FILE *file, struct err *err, struct memfil
                         fprintf(file, "   ]\n");
                 }
                         break;
-                default: error(err, NG5_ERR_NOTYPE)
+                default: error(err, ARK_ERR_NOTYPE)
                         return false;
                 }
         }
@@ -1598,11 +1598,11 @@ static bool print_object_array_from_memfile(FILE *file, struct err *err, struct 
         unsigned nesting_level)
 {
         unsigned offset = (unsigned) memfile_tell(memfile);
-        struct object_array_header *header = NG5_MEMFILE_READ_TYPE(memfile, struct object_array_header);
+        struct object_array_header *header = ARK_MEMFILE_READ_TYPE(memfile, struct object_array_header);
         if (header->marker != MARKER_SYMBOL_PROP_OBJECT_ARRAY) {
                 char buffer[256];
                 sprintf(buffer, "expected marker [%c] but found [%c]", MARKER_SYMBOL_PROP_OBJECT_ARRAY, header->marker);
-                error_with_details(err, NG5_ERR_CORRUPTED, buffer);
+                error_with_details(err, ARK_ERR_CORRUPTED, buffer);
                 return false;
         }
 
@@ -1611,12 +1611,12 @@ static bool print_object_array_from_memfile(FILE *file, struct err *err, struct 
         fprintf(file, "[marker: %c (Object Array)] [nentries: %d] [", header->marker, header->num_entries);
 
         for (size_t i = 0; i < header->num_entries; i++) {
-                field_sid_t string_id = *NG5_MEMFILE_READ_TYPE(memfile, field_sid_t);
+                field_sid_t string_id = *ARK_MEMFILE_READ_TYPE(memfile, field_sid_t);
                 fprintf(file, "key: %"PRIu64"%s", string_id, i + 1 < header->num_entries ? ", " : "");
         }
         fprintf(file, "] [");
         for (size_t i = 0; i < header->num_entries; i++) {
-                offset_t columnGroupOffset = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
+                offset_t columnGroupOffset = *ARK_MEMFILE_READ_TYPE(memfile, offset_t);
                 fprintf(file,
                         "offset: 0x%04x%s",
                         (unsigned) columnGroupOffset,
@@ -1629,14 +1629,14 @@ static bool print_object_array_from_memfile(FILE *file, struct err *err, struct 
         for (size_t i = 0; i < header->num_entries; i++) {
                 offset = memfile_tell(memfile);
                 struct column_group_header
-                        *column_group_header = NG5_MEMFILE_READ_TYPE(memfile, struct column_group_header);
+                        *column_group_header = ARK_MEMFILE_READ_TYPE(memfile, struct column_group_header);
                 if (column_group_header->marker != MARKER_SYMBOL_COLUMN_GROUP) {
                         char buffer[256];
                         sprintf(buffer,
                                 "expected marker [%c] but found [%c]",
                                 MARKER_SYMBOL_COLUMN_GROUP,
                                 column_group_header->marker);
-                        error_with_details(err, NG5_ERR_CORRUPTED, buffer);
+                        error_with_details(err, ARK_ERR_CORRUPTED, buffer);
                         return false;
                 }
                 fprintf(file, "0x%04x ", offset);
@@ -1647,13 +1647,13 @@ static bool print_object_array_from_memfile(FILE *file, struct err *err, struct 
                         column_group_header->num_columns,
                         column_group_header->num_objects);
                 const object_id_t
-                        *oids = NG5_MEMFILE_READ_TYPE_LIST(memfile, object_id_t, column_group_header->num_objects);
+                        *oids = ARK_MEMFILE_READ_TYPE_LIST(memfile, object_id_t, column_group_header->num_objects);
                 for (size_t k = 0; k < column_group_header->num_objects; k++) {
                         fprintf(file, "%"PRIu64"%s", oids[k], k + 1 < column_group_header->num_objects ? ", " : "");
                 }
                 fprintf(file, "] [offsets: ");
                 for (size_t k = 0; k < column_group_header->num_columns; k++) {
-                        offset_t column_off = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
+                        offset_t column_off = *ARK_MEMFILE_READ_TYPE(memfile, offset_t);
                         fprintf(file,
                                 "0x%04x%s",
                                 (unsigned) column_off,
@@ -1761,18 +1761,18 @@ static void print_prop_offsets(FILE *file, const union object_flags *flags,
 bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned nesting_level)
 {
         unsigned offset = (unsigned) memfile_tell(memfile);
-        struct object_header *header = NG5_MEMFILE_READ_TYPE(memfile, struct object_header);
+        struct object_header *header = ARK_MEMFILE_READ_TYPE(memfile, struct object_header);
 
         struct archive_prop_offs prop_offsets;
         union object_flags flags = {.value = header->flags};
 
         int_read_prop_offsets(&prop_offsets, memfile, &flags);
-        offset_t nextObjectOrNil = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
+        offset_t nextObjectOrNil = *ARK_MEMFILE_READ_TYPE(memfile, offset_t);
 
         if (header->marker != MARKER_SYMBOL_OBJECT_BEGIN) {
                 char buffer[256];
                 sprintf(buffer, "Parsing error: expected object marker [{] but found [%c]\"", header->marker);
-                error_with_details(err, NG5_ERR_CORRUPTED, buffer);
+                error_with_details(err, ARK_ERR_CORRUPTED, buffer);
                 return false;
         }
 
@@ -1790,12 +1790,12 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
         bool continue_read = true;
         while (continue_read) {
                 offset = memfile_tell(memfile);
-                char entryMarker = *NG5_MEMFILE_PEEK(memfile, char);
+                char entryMarker = *ARK_MEMFILE_PEEK(memfile, char);
 
                 switch (entryMarker) {
                 case MARKER_SYMBOL_PROP_NULL: {
-                        struct prop_header *prop_header = NG5_MEMFILE_READ_TYPE(memfile, struct prop_header);
-                        field_sid_t *keys = (field_sid_t *) NG5_MEMFILE_READ(memfile,
+                        struct prop_header *prop_header = ARK_MEMFILE_READ_TYPE(memfile, struct prop_header);
+                        field_sid_t *keys = (field_sid_t *) ARK_MEMFILE_READ(memfile,
                                 prop_header->num_entries * sizeof(field_sid_t));
                         fprintf(file, "0x%04x ", offset);
                         INTENT_LINE(nesting_level)
@@ -1808,10 +1808,10 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                 }
                         break;
                 case MARKER_SYMBOL_PROP_BOOLEAN: {
-                        struct prop_header *prop_header = NG5_MEMFILE_READ_TYPE(memfile, struct prop_header);
-                        field_sid_t *keys = (field_sid_t *) NG5_MEMFILE_READ(memfile,
+                        struct prop_header *prop_header = ARK_MEMFILE_READ_TYPE(memfile, struct prop_header);
+                        field_sid_t *keys = (field_sid_t *) ARK_MEMFILE_READ(memfile,
                                 prop_header->num_entries * sizeof(field_sid_t));
-                        field_boolean_t *values = (field_boolean_t *) NG5_MEMFILE_READ(memfile,
+                        field_boolean_t *values = (field_boolean_t *) ARK_MEMFILE_READ(memfile,
                                 prop_header->num_entries * sizeof(field_boolean_t));
                         fprintf(file, "0x%04x ", offset);
                         INTENT_LINE(nesting_level)
@@ -1939,16 +1939,16 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                                 if (!print_object(file, err, memfile, nesting_level + 1)) {
                                         return false;
                                 }
-                                nextEntryMarker = *NG5_MEMFILE_PEEK(memfile, char);
+                                nextEntryMarker = *ARK_MEMFILE_PEEK(memfile, char);
                         }
                         while (nextEntryMarker == MARKER_SYMBOL_OBJECT_BEGIN);
 
                 }
                         break;
                 case MARKER_SYMBOL_PROP_NULL_ARRAY: {
-                        struct prop_header *prop_header = NG5_MEMFILE_READ_TYPE(memfile, struct prop_header);
+                        struct prop_header *prop_header = ARK_MEMFILE_READ_TYPE(memfile, struct prop_header);
 
-                        field_sid_t *keys = (field_sid_t *) NG5_MEMFILE_READ(memfile,
+                        field_sid_t *keys = (field_sid_t *) ARK_MEMFILE_READ(memfile,
                                 prop_header->num_entries * sizeof(field_sid_t));
                         u32 *nullArrayLengths;
 
@@ -1964,7 +1964,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                         }
                         fprintf(file, "] [");
 
-                        nullArrayLengths = (u32 *) NG5_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(u32));
+                        nullArrayLengths = (u32 *) ARK_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(u32));
 
                         for (u32 i = 0; i < prop_header->num_entries; i++) {
                                 fprintf(file,
@@ -1977,9 +1977,9 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                 }
                         break;
                 case MARKER_SYMBOL_PROP_BOOLEAN_ARRAY: {
-                        struct prop_header *prop_header = NG5_MEMFILE_READ_TYPE(memfile, struct prop_header);
+                        struct prop_header *prop_header = ARK_MEMFILE_READ_TYPE(memfile, struct prop_header);
 
-                        field_sid_t *keys = (field_sid_t *) NG5_MEMFILE_READ(memfile,
+                        field_sid_t *keys = (field_sid_t *) ARK_MEMFILE_READ(memfile,
                                 prop_header->num_entries * sizeof(field_sid_t));
                         u32 *array_lengths;
 
@@ -1995,7 +1995,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                         }
                         fprintf(file, "] [");
 
-                        array_lengths = (u32 *) NG5_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(u32));
+                        array_lengths = (u32 *) ARK_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(u32));
 
                         for (u32 i = 0; i < prop_header->num_entries; i++) {
                                 fprintf(file,
@@ -2007,7 +2007,7 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                         fprintf(file, "] [");
 
                         for (u32 array_idx = 0; array_idx < prop_header->num_entries; array_idx++) {
-                                field_boolean_t *values = (field_boolean_t *) NG5_MEMFILE_READ(memfile,
+                                field_boolean_t *values = (field_boolean_t *) ARK_MEMFILE_READ(memfile,
                                         array_lengths[array_idx] * sizeof(field_boolean_t));
                                 fprintf(file, "[");
                                 for (u32 i = 0; i < array_lengths[array_idx]; i++) {
@@ -2123,14 +2123,14 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                                 "Parsing error: unexpected marker [%c] was detected in file %p",
                                 entryMarker,
                                 memfile);
-                        error_with_details(err, NG5_ERR_CORRUPTED, buffer);
+                        error_with_details(err, ARK_ERR_CORRUPTED, buffer);
                         return false;
                 }
                 }
         }
 
         offset = memfile_tell(memfile);
-        char end_marker = *NG5_MEMFILE_READ_TYPE(memfile, char);
+        char end_marker = *ARK_MEMFILE_READ_TYPE(memfile, char);
         assert (end_marker == MARKER_SYMBOL_OBJECT_END);
         nesting_level--;
         fprintf(file, "0x%04x ", offset);
@@ -2141,10 +2141,10 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
 
 static bool is_valid_file(const struct archive_header *header)
 {
-        if (NG5_ARRAY_LENGTH(header->magic) != strlen(CARBON_ARCHIVE_MAGIC)) {
+        if (ARK_ARRAY_LENGTH(header->magic) != strlen(CARBON_ARCHIVE_MAGIC)) {
                 return false;
         } else {
-                for (size_t i = 0; i < NG5_ARRAY_LENGTH(header->magic); i++) {
+                for (size_t i = 0; i < ARK_ARRAY_LENGTH(header->magic); i++) {
                         if (header->magic[i] != CARBON_ARCHIVE_MAGIC[i]) {
                                 return false;
                         }
@@ -2162,7 +2162,7 @@ static bool is_valid_file(const struct archive_header *header)
 static void print_record_header_from_memfile(FILE *file, struct memfile *memfile)
 {
         unsigned offset = memfile_tell(memfile);
-        struct record_header *header = NG5_MEMFILE_READ_TYPE(memfile, struct record_header);
+        struct record_header *header = ARK_MEMFILE_READ_TYPE(memfile, struct record_header);
         struct record_flags flags;
         memset(&flags, 0, sizeof(struct record_flags));
         flags.value = header->flags;
@@ -2180,9 +2180,9 @@ static bool print_header_from_memfile(FILE *file, struct err *err, struct memfil
 {
         unsigned offset = memfile_tell(memfile);
         assert(memfile_size(memfile) > sizeof(struct archive_header));
-        struct archive_header *header = NG5_MEMFILE_READ_TYPE(memfile, struct archive_header);
+        struct archive_header *header = ARK_MEMFILE_READ_TYPE(memfile, struct archive_header);
         if (!is_valid_file(header)) {
-                error(err, NG5_ERR_NOARCHIVEFILE)
+                error(err, ARK_ERR_NOARCHIVEFILE)
                 return false;
         }
 
@@ -2201,14 +2201,14 @@ static bool print_embedded_dic_from_memfile(FILE *file, struct err *err, struct 
         union string_tab_flags flags;
 
         unsigned offset = memfile_tell(memfile);
-        struct string_table_header *header = NG5_MEMFILE_READ_TYPE(memfile, struct string_table_header);
+        struct string_table_header *header = ARK_MEMFILE_READ_TYPE(memfile, struct string_table_header);
         if (header->marker != marker_symbols[MARKER_TYPE_EMBEDDED_STR_DIC].symbol) {
                 char buffer[256];
                 sprintf(buffer,
                         "expected [%c] marker, but found [%c]",
                         marker_symbols[MARKER_TYPE_EMBEDDED_STR_DIC].symbol,
                         header->marker);
-                error_with_details(err, NG5_ERR_CORRUPTED, buffer);
+                error_with_details(err, ARK_ERR_CORRUPTED, buffer);
                 return false;
         }
         flags.value = header->flags;
@@ -2225,15 +2225,15 @@ static bool print_embedded_dic_from_memfile(FILE *file, struct err *err, struct 
         free(flagsStr);
 
         if (pack_by_flags(&strategy, flags.value) != true) {
-                error(err, NG5_ERR_NOCOMPRESSOR);
+                error(err, ARK_ERR_NOCOMPRESSOR);
                 return false;
         }
 
         pack_print_extra(err, &strategy, file, memfile);
 
-        while ((*NG5_MEMFILE_PEEK(memfile, char)) == marker_symbols[MARKER_TYPE_EMBEDDED_UNCOMP_STR].symbol) {
+        while ((*ARK_MEMFILE_PEEK(memfile, char)) == marker_symbols[MARKER_TYPE_EMBEDDED_UNCOMP_STR].symbol) {
                 unsigned offset = memfile_tell(memfile);
-                struct string_entry_header header = *NG5_MEMFILE_READ_TYPE(memfile, struct string_entry_header);
+                struct string_entry_header header = *ARK_MEMFILE_READ_TYPE(memfile, struct string_entry_header);
                 fprintf(file,
                         "0x%04x    [marker: %c] [next-entry-off: 0x%04zx] [string-id: %"PRIu64"] [string-length: %"PRIu32"]",
                         offset,
@@ -2265,7 +2265,7 @@ static bool print_archive_from_memfile(FILE *file, struct err *err, struct memfi
 
 static union object_flags *get_flags(union object_flags *flags, struct columndoc_obj *columndoc)
 {
-        ng5_zero_memory(flags, sizeof(union object_flags));
+        ark_zero_memory(flags, sizeof(union object_flags));
         flags->bits.has_null_props = (columndoc->null_prop_keys.num_elems > 0);
         flags->bits.has_bool_props = (columndoc->bool_prop_keys.num_elems > 0);
         flags->bits.has_int8_props = (columndoc->int8_prop_keys.num_elems > 0);
@@ -2324,7 +2324,7 @@ bool archive_open(struct archive *out, const char *file_path)
                 string_builder_append(&sb, "' not found in current working directory ('");
                 string_builder_append(&sb, getcwd(cwd, sizeof(cwd)));
                 string_builder_append(&sb, "')");
-                error_with_details(&out->err, NG5_ERR_FOPEN_FAILED, string_builder_cstr(&sb));
+                error_with_details(&out->err, ARK_ERR_FOPEN_FAILED, string_builder_cstr(&sb));
                 string_builder_drop(&sb);
                 return false;
         } else {
@@ -2332,11 +2332,11 @@ bool archive_open(struct archive *out, const char *file_path)
                 size_t nread = fread(&header, sizeof(struct archive_header), 1, disk_file);
                 if (nread != 1) {
                         fclose(disk_file);
-                        error_print(NG5_ERR_IO);
+                        error_print(ARK_ERR_IO);
                         return false;
                 } else {
                         if (!is_valid_file(&header)) {
-                                error_print(NG5_ERR_FORMATVERERR);
+                                error_print(ARK_ERR_FORMATVERERR);
                                 return false;
                         } else {
                                 out->query_index_string_id_to_offset = NULL;
@@ -2391,7 +2391,7 @@ bool archive_open(struct archive *out, const char *file_path)
         return true;
 }
 
-NG5_EXPORT(bool) archive_get_info(struct archive_info *info, const struct archive *archive)
+ARK_EXPORT(bool) archive_get_info(struct archive_info *info, const struct archive *archive)
 {
         error_if_null(info);
         error_if_null(archive);
@@ -2399,7 +2399,7 @@ NG5_EXPORT(bool) archive_get_info(struct archive_info *info, const struct archiv
         return true;
 }
 
-NG5_EXPORT(bool) archive_close(struct archive *archive)
+ARK_EXPORT(bool) archive_close(struct archive *archive)
 {
         error_if_null(archive);
         archive_drop_indexes(archive);
@@ -2411,7 +2411,7 @@ NG5_EXPORT(bool) archive_close(struct archive *archive)
         return true;
 }
 
-NG5_EXPORT(bool) archive_drop_indexes(struct archive *archive)
+ARK_EXPORT(bool) archive_drop_indexes(struct archive *archive)
 {
         if (archive->query_index_string_id_to_offset) {
                 query_drop_index_string_id_to_offset(archive->query_index_string_id_to_offset);
@@ -2420,7 +2420,7 @@ NG5_EXPORT(bool) archive_drop_indexes(struct archive *archive)
         return true;
 }
 
-NG5_EXPORT(bool) archive_query(struct archive_query *query, struct archive *archive)
+ARK_EXPORT(bool) archive_query(struct archive_query *query, struct archive *archive)
 {
         if (query_create(query, archive)) {
                 bool has_index = false;
@@ -2439,7 +2439,7 @@ NG5_EXPORT(bool) archive_query(struct archive_query *query, struct archive *arch
         }
 }
 
-NG5_EXPORT(bool) archive_has_query_index_string_id_to_offset(bool *state, struct archive *archive)
+ARK_EXPORT(bool) archive_has_query_index_string_id_to_offset(bool *state, struct archive *archive)
 {
         error_if_null(state)
         error_if_null(archive)
@@ -2447,7 +2447,7 @@ NG5_EXPORT(bool) archive_has_query_index_string_id_to_offset(bool *state, struct
         return true;
 }
 
-NG5_EXPORT(bool) archive_hash_query_string_id_cache(bool *has_cache, struct archive *archive)
+ARK_EXPORT(bool) archive_hash_query_string_id_cache(bool *has_cache, struct archive *archive)
 {
         error_if_null(has_cache)
         error_if_null(archive)
@@ -2455,7 +2455,7 @@ NG5_EXPORT(bool) archive_hash_query_string_id_cache(bool *has_cache, struct arch
         return true;
 }
 
-NG5_EXPORT(bool) archive_drop_query_string_id_cache(struct archive *archive)
+ARK_EXPORT(bool) archive_drop_query_string_id_cache(struct archive *archive)
 {
         error_if_null(archive)
         if (archive->string_id_cache) {
@@ -2465,12 +2465,12 @@ NG5_EXPORT(bool) archive_drop_query_string_id_cache(struct archive *archive)
         return true;
 }
 
-NG5_EXPORT(struct string_cache *)archive_get_query_string_id_cache(struct archive *archive)
+ARK_EXPORT(struct string_cache *)archive_get_query_string_id_cache(struct archive *archive)
 {
         return archive->string_id_cache;
 }
 
-NG5_EXPORT(struct archive_query *)archive_query_default(struct archive *archive)
+ARK_EXPORT(struct archive_query *)archive_query_default(struct archive *archive)
 {
         return archive ? archive->default_query : NULL;
 }
@@ -2492,11 +2492,11 @@ static bool read_stringtable(struct string_table *table, struct err *err, FILE *
 
         size_t num_read = fread(&header, sizeof(struct string_table_header), 1, disk_file);
         if (num_read != 1) {
-                error(err, NG5_ERR_IO);
+                error(err, ARK_ERR_IO);
                 return false;
         }
         if (header.marker != marker_symbols[MARKER_TYPE_EMBEDDED_STR_DIC].symbol) {
-                error(err, NG5_ERR_CORRUPTED);
+                error(err, ARK_ERR_CORRUPTED);
                 return false;
         }
 
@@ -2520,7 +2520,7 @@ static bool read_record(struct record_header *header_read, struct archive *archi
         fseek(disk_file, record_header_offset, SEEK_SET);
         struct record_header header;
         if (fread(&header, sizeof(struct record_header), 1, disk_file) != 1) {
-                error(&archive->err, NG5_ERR_CORRUPTED);
+                error(&archive->err, ARK_ERR_CORRUPTED);
                 return false;
         } else {
                 archive->record_table.flags.value = header.flags;
@@ -2533,11 +2533,11 @@ static bool read_record(struct record_header *header_read, struct archive *archi
 
                 struct memfile memfile;
                 if (memfile_open(&memfile, archive->record_table.recordDataBase, READ_ONLY) != true) {
-                        error(&archive->err, NG5_ERR_CORRUPTED);
+                        error(&archive->err, ARK_ERR_CORRUPTED);
                         status = false;
                 }
-                if (*NG5_MEMFILE_PEEK(&memfile, char) != MARKER_SYMBOL_OBJECT_BEGIN) {
-                        error(&archive->err, NG5_ERR_CORRUPTED);
+                if (*ARK_MEMFILE_PEEK(&memfile, char) != MARKER_SYMBOL_OBJECT_BEGIN) {
+                        error(&archive->err, ARK_ERR_CORRUPTED);
                         status = false;
                 }
 

@@ -23,107 +23,107 @@
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/types.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
-#define NG5_ERR_NOERR 0                    /** No error */
-#define NG5_ERR_NULLPTR 1                  /** Null pointer detected */
-#define NG5_ERR_NOTIMPL 2                  /** Function not implemented */
-#define NG5_ERR_OUTOFBOUNDS 3              /** Index is out of bounds */
-#define NG5_ERR_MALLOCERR 4                /** Memory allocation failed */
-#define NG5_ERR_ILLEGALARG 5               /** Illegal arguments */
-#define NG5_ERR_INTERNALERR 6              /** Internal error */
-#define NG5_ERR_ILLEGALIMPL 7              /** Illegal implementation */
-#define NG5_ERR_NOTFOUND 8                 /** Not found */
-#define NG5_ERR_NIL 9                      /** Element not in list */
-#define NG5_ERR_ARRAYOFARRAYS 10           /** Array index out of bounds */
-#define NG5_ERR_ARRAYOFMIXEDTYPES 11       /** Illegal JSON array: mixed types */
-#define NG5_ERR_FOPEN_FAILED 12            /** Reading from file failed */
-#define NG5_ERR_IO 13                      /** I/O error */
-#define NG5_ERR_FORMATVERERR 14            /** Unsupported archive format version */
-#define NG5_ERR_CORRUPTED 15               /** Format is corrupted */
-#define NG5_ERR_NOCARBONSTREAM 16          /** Stream is not a carbon archive */
-#define NG5_ERR_NOBITMODE 17               /** Not in bit writing mode */
-#define NG5_ERR_NOTIMPLEMENTED 18          /** Function is not yet implemented */
-#define NG5_ERR_NOTYPE 19                  /** Unsupported type found */
-#define NG5_ERR_NOCOMPRESSOR 20            /** Unsupported compressor strategy requested */
-#define NG5_ERR_NOVALUESTR 21              /** No string representation for type available */
-#define NG5_ERR_MARKERMAPPING 22           /** Marker type cannot be mapped to value type */
-#define NG5_ERR_PARSETYPE 23               /** Parsing stopped; unknown data type requested */
-#define NG5_ERR_NOJSONTOKEN 24             /** Unknown token during parsing JSON detected */
-#define NG5_ERR_NOJSONNUMBERT 25           /** Unknown value type for number in JSON property */
-#define NG5_ERR_NOARCHIVEFILE 26           /** Stream is not a valid archive file */
-#define NG5_ERR_UNSUPFINDSTRAT 27          /** Unsupported strategy requested for key lookup */
-#define NG5_ERR_ERRINTERNAL 28             /** Internal error */
-#define NG5_ERR_HUFFERR 29                 /** No huffman code table entry found for character */
-#define NG5_ERR_MEMSTATE 30                /** Memory file was opened as read-only but requested a modification */
-#define NG5_ERR_JSONTYPE 31                /** Unable to import json file: unsupported type */
-#define NG5_ERR_WRITEPROT 32               /** Mode set to read-only but modification was requested */
-#define NG5_ERR_READOUTOFBOUNDS 33         /** Read outside of memory range bounds */
-#define NG5_ERR_SLOTBROKEN 34              /** Slot management broken */
-#define NG5_ERR_THREADOOOBJIDS 35          /** Thread run out of object ids: start another one */
-#define NG5_ERR_JSONPARSEERR 36            /** JSON parsing error */
-#define NG5_ERR_BULKCREATEFAILED 37        /** Document insertion bulk creation failed */
-#define NG5_ERR_FOPENWRITE 38              /** File cannot be opened for writing */
-#define NG5_ERR_WRITEARCHIVE 39            /** Archive cannot be serialized into file */
-#define NG5_ERR_ARCHIVEOPEN 40             /** Archive cannot be deserialized form file */
-#define NG5_ERR_FREAD_FAILED 41            /** Unable to read from file */
-#define NG5_ERR_SCAN_FAILED 42             /** Unable to perform full scan in archive file */
-#define NG5_ERR_DECOMPRESSFAILED 43        /** String decompression from archive failed */
-#define NG5_ERR_ITERATORNOTCLOSED 44       /** Closing iterator failed */
-#define NG5_ERR_HARDCOPYFAILED 45          /** Unable to construct a hard copy of the source object */
-#define NG5_ERR_REALLOCERR 46              /** Memory reallocation failed */
-#define NG5_ERR_PREDEVAL_FAILED 47         /** Predicate evaluation failed */
-#define NG5_ERR_INITFAILED 48              /** Initialization failed */
-#define NG5_ERR_DROPFAILED 49              /** Resource release failed: potentially a memory leak occurred */
-#define NG5_ERR_OPPFAILED 50               /** Operation failed */
-#define NG5_ERR_REHASH_NOROLLBACK 51       /** Rehashing hash table failed; rollback is not performed */
-#define NG5_ERR_MEMFILEOPEN_FAILED 52      /** Unable to open memory file */
-#define NG5_ERR_VITEROPEN_FAILED 53        /** Value iterator cannot be initialized */
-#define NG5_ERR_MEMFILESKIP_FAILED 54      /** Memfile cannot skip desired amount of bytes */
-#define NG5_ERR_MEMFILESEEK_FAILED 55      /** Unable to seek in memory file */
-#define NG5_ERR_ITER_NOOBJ 56              /** Unable to get value: type is not non-array object */
-#define NG5_ERR_ITER_NOBOOL 57             /** Unable to get value: type is not non-array boolean */
-#define NG5_ERR_ITER_NOINT8 58             /** Unable to get value: type is not non-array int8 */
-#define NG5_ERR_ITER_NOINT16 59            /** Unable to get value: type is not non-array int16 */
-#define NG5_ERR_ITER_NOINT32 60            /** Unable to get value: type is not non-array int32 */
-#define NG5_ERR_ITER_NOINT64 61            /** Unable to get value: type is not non-array int64 */
-#define NG5_ERR_ITER_NOUINT8 62            /** Unable to get value: type is not non-array uint8 */
-#define NG5_ERR_ITER_NOUINT16 63           /** Unable to get value: type is not non-array uint16 */
-#define NG5_ERR_ITER_NOUINT32 64           /** Unable to get value: type is not non-array uint32 */
-#define NG5_ERR_ITER_NOUINT64 65           /** Unable to get value: type is not non-array uint64 */
-#define NG5_ERR_ITER_NONUMBER 66           /** Unable to get value: type is not non-array number */
-#define NG5_ERR_ITER_NOSTRING 67           /** Unable to get value: type is not non-array string */
-#define NG5_ERR_ITER_OBJECT_NEEDED 68      /** Illegal state: iteration over object issued, but collection found */
-#define NG5_ERR_ITER_COLLECTION_NEEDED 69  /** Illegal state: iteration over collection issued, but object found */
-#define NG5_ERR_TYPEMISMATCH 70            /** Type mismatch detected */
-#define NG5_ERR_INDEXCORRUPTED_OFFSET 71   /** Index is corrupted: requested offset is outside file bounds */
-#define NG5_ERR_TMP_FOPENWRITE 72          /** Temporary file cannot be opened for writing */
-#define NG5_ERR_FWRITE_FAILED 73           /** Unable to write to file */
-#define NG5_ERR_HASTABLE_DESERIALERR 74    /** Unable to deserialize hash table from file */
-#define NG5_ERR_UNKNOWN_DIC_TYPE 75        /** Unknown string dictionary implementation requested */
-#define NG5_ERR_STACK_OVERFLOW 76          /** Stack overflow */
-#define NG5_ERR_STACK_UNDERFLOW 77         /** Stack underflow */
-#define NG5_ERR_OUTDATED 78                /** Object was modified but is out of date */
-#define NG5_ERR_NOTREADABLE 79             /** Object is currently being updated; no read allowed */
-#define NG5_ERR_ILLEGALOP 80               /** Illegal operation */
-#define NG5_ERR_BADTYPE 81                 /** Unsupported type */
-#define NG5_ERR_UNSUPPCONTAINER 82         /** Unsupported container for data type */
-#define NG5_ERR_INSERT_TOO_DANGEROUS 83    /** Adding integers with this function will perform an auto casting to
+#define ARK_ERR_NOERR 0                    /** No error */
+#define ARK_ERR_NULLPTR 1                  /** Null pointer detected */
+#define ARK_ERR_NOTIMPL 2                  /** Function not implemented */
+#define ARK_ERR_OUTOFBOUNDS 3              /** Index is out of bounds */
+#define ARK_ERR_MALLOCERR 4                /** Memory allocation failed */
+#define ARK_ERR_ILLEGALARG 5               /** Illegal arguments */
+#define ARK_ERR_INTERNALERR 6              /** Internal error */
+#define ARK_ERR_ILLEGALIMPL 7              /** Illegal implementation */
+#define ARK_ERR_NOTFOUND 8                 /** Not found */
+#define ARK_ERR_NIL 9                      /** Element not in list */
+#define ARK_ERR_ARRAYOFARRAYS 10           /** Array index out of bounds */
+#define ARK_ERR_ARRAYOFMIXEDTYPES 11       /** Illegal JSON array: mixed types */
+#define ARK_ERR_FOPEN_FAILED 12            /** Reading from file failed */
+#define ARK_ERR_IO 13                      /** I/O error */
+#define ARK_ERR_FORMATVERERR 14            /** Unsupported archive format version */
+#define ARK_ERR_CORRUPTED 15               /** Format is corrupted */
+#define ARK_ERR_NOCARBONSTREAM 16          /** Stream is not a carbon archive */
+#define ARK_ERR_NOBITMODE 17               /** Not in bit writing mode */
+#define ARK_ERR_NOTIMPLEMENTED 18          /** Function is not yet implemented */
+#define ARK_ERR_NOTYPE 19                  /** Unsupported type found */
+#define ARK_ERR_NOCOMPRESSOR 20            /** Unsupported compressor strategy requested */
+#define ARK_ERR_NOVALUESTR 21              /** No string representation for type available */
+#define ARK_ERR_MARKERMAPPING 22           /** Marker type cannot be mapped to value type */
+#define ARK_ERR_PARSETYPE 23               /** Parsing stopped; unknown data type requested */
+#define ARK_ERR_NOJSONTOKEN 24             /** Unknown token during parsing JSON detected */
+#define ARK_ERR_NOJSONNUMBERT 25           /** Unknown value type for number in JSON property */
+#define ARK_ERR_NOARCHIVEFILE 26           /** Stream is not a valid archive file */
+#define ARK_ERR_UNSUPFINDSTRAT 27          /** Unsupported strategy requested for key lookup */
+#define ARK_ERR_ERRINTERNAL 28             /** Internal error */
+#define ARK_ERR_HUFFERR 29                 /** No huffman code table entry found for character */
+#define ARK_ERR_MEMSTATE 30                /** Memory file was opened as read-only but requested a modification */
+#define ARK_ERR_JSONTYPE 31                /** Unable to import json file: unsupported type */
+#define ARK_ERR_WRITEPROT 32               /** Mode set to read-only but modification was requested */
+#define ARK_ERR_READOUTOFBOUNDS 33         /** Read outside of memory range bounds */
+#define ARK_ERR_SLOTBROKEN 34              /** Slot management broken */
+#define ARK_ERR_THREADOOOBJIDS 35          /** Thread run out of object ids: start another one */
+#define ARK_ERR_JSONPARSEERR 36            /** JSON parsing error */
+#define ARK_ERR_BULKCREATEFAILED 37        /** Document insertion bulk creation failed */
+#define ARK_ERR_FOPENWRITE 38              /** File cannot be opened for writing */
+#define ARK_ERR_WRITEARCHIVE 39            /** Archive cannot be serialized into file */
+#define ARK_ERR_ARCHIVEOPEN 40             /** Archive cannot be deserialized form file */
+#define ARK_ERR_FREAD_FAILED 41            /** Unable to read from file */
+#define ARK_ERR_SCAN_FAILED 42             /** Unable to perform full scan in archive file */
+#define ARK_ERR_DECOMPRESSFAILED 43        /** String decompression from archive failed */
+#define ARK_ERR_ITERATORNOTCLOSED 44       /** Closing iterator failed */
+#define ARK_ERR_HARDCOPYFAILED 45          /** Unable to construct a hard copy of the source object */
+#define ARK_ERR_REALLOCERR 46              /** Memory reallocation failed */
+#define ARK_ERR_PREDEVAL_FAILED 47         /** Predicate evaluation failed */
+#define ARK_ERR_INITFAILED 48              /** Initialization failed */
+#define ARK_ERR_DROPFAILED 49              /** Resource release failed: potentially a memory leak occurred */
+#define ARK_ERR_OPPFAILED 50               /** Operation failed */
+#define ARK_ERR_REHASH_NOROLLBACK 51       /** Rehashing hash table failed; rollback is not performed */
+#define ARK_ERR_MEMFILEOPEN_FAILED 52      /** Unable to open memory file */
+#define ARK_ERR_VITEROPEN_FAILED 53        /** Value iterator cannot be initialized */
+#define ARK_ERR_MEMFILESKIP_FAILED 54      /** Memfile cannot skip desired amount of bytes */
+#define ARK_ERR_MEMFILESEEK_FAILED 55      /** Unable to seek in memory file */
+#define ARK_ERR_ITER_NOOBJ 56              /** Unable to get value: type is not non-array object */
+#define ARK_ERR_ITER_NOBOOL 57             /** Unable to get value: type is not non-array boolean */
+#define ARK_ERR_ITER_NOINT8 58             /** Unable to get value: type is not non-array int8 */
+#define ARK_ERR_ITER_NOINT16 59            /** Unable to get value: type is not non-array int16 */
+#define ARK_ERR_ITER_NOINT32 60            /** Unable to get value: type is not non-array int32 */
+#define ARK_ERR_ITER_NOINT64 61            /** Unable to get value: type is not non-array int64 */
+#define ARK_ERR_ITER_NOUINT8 62            /** Unable to get value: type is not non-array uint8 */
+#define ARK_ERR_ITER_NOUINT16 63           /** Unable to get value: type is not non-array uint16 */
+#define ARK_ERR_ITER_NOUINT32 64           /** Unable to get value: type is not non-array uint32 */
+#define ARK_ERR_ITER_NOUINT64 65           /** Unable to get value: type is not non-array uint64 */
+#define ARK_ERR_ITER_NONUMBER 66           /** Unable to get value: type is not non-array number */
+#define ARK_ERR_ITER_NOSTRING 67           /** Unable to get value: type is not non-array string */
+#define ARK_ERR_ITER_OBJECT_NEEDED 68      /** Illegal state: iteration over object issued, but collection found */
+#define ARK_ERR_ITER_COLLECTION_NEEDED 69  /** Illegal state: iteration over collection issued, but object found */
+#define ARK_ERR_TYPEMISMATCH 70            /** Type mismatch detected */
+#define ARK_ERR_INDEXCORRUPTED_OFFSET 71   /** Index is corrupted: requested offset is outside file bounds */
+#define ARK_ERR_TMP_FOPENWRITE 72          /** Temporary file cannot be opened for writing */
+#define ARK_ERR_FWRITE_FAILED 73           /** Unable to write to file */
+#define ARK_ERR_HASTABLE_DESERIALERR 74    /** Unable to deserialize hash table from file */
+#define ARK_ERR_UNKNOWN_DIC_TYPE 75        /** Unknown string dictionary implementation requested */
+#define ARK_ERR_STACK_OVERFLOW 76          /** Stack overflow */
+#define ARK_ERR_STACK_UNDERFLOW 77         /** Stack underflow */
+#define ARK_ERR_OUTDATED 78                /** Object was modified but is out of date */
+#define ARK_ERR_NOTREADABLE 79             /** Object is currently being updated; no read allowed */
+#define ARK_ERR_ILLEGALOP 80               /** Illegal operation */
+#define ARK_ERR_BADTYPE 81                 /** Unsupported type */
+#define ARK_ERR_UNSUPPCONTAINER 82         /** Unsupported container for data type */
+#define ARK_ERR_INSERT_TOO_DANGEROUS 83    /** Adding integers with this function will perform an auto casting to
                                              * the smallest type required to store the integer value. Since you push
                                              * integers with this function into an column container that is bound
                                              * to a specific type, any insertion function call will fail once the
                                              * integer value requires a larger (or smaller) type than the fist value
                                              * added to the container. Use '*_insert_X' instead, where X is u8, u16,...
                                              * , u32 resp. i8, i16,..., i32. */
-#define NG5_ERR_PARSE_DOT_EXPECTED 84       /** parsing error: dot ('.') expected */
-#define NG5_ERR_PARSE_ENTRY_EXPECTED 85     /** parsing error: key name or array index expected */
-#define NG5_ERR_PARSE_UNKNOWN_TOKEN 86      /** parsing error: unknown token */
-#define NG5_ERR_DOT_PATH_PARSERR 87         /** dot-notated path could not be parsed */
-#define NG5_ERR_ILLEGALSTATE 88             /** Illegal state */
-#define NG5_ERR_UNSUPPORTEDTYPE 89          /** Unsupported data type */
-#define NG5_ERR_FAILED 90                   /** Operation failed */
-#define NG5_ERR_CLEANUP 91                  /** Cleanup operation failed; potentially a memory leak occurred */
-#define NG5_ERR_DOT_PATH_COMPILEERR 92      /** dot-notated path could not be compiled */
+#define ARK_ERR_PARSE_DOT_EXPECTED 84       /** parsing error: dot ('.') expected */
+#define ARK_ERR_PARSE_ENTRY_EXPECTED 85     /** parsing error: key name or array index expected */
+#define ARK_ERR_PARSE_UNKNOWN_TOKEN 86      /** parsing error: unknown token */
+#define ARK_ERR_DOT_PATH_PARSERR 87         /** dot-notated path could not be parsed */
+#define ARK_ERR_ILLEGALSTATE 88             /** Illegal state */
+#define ARK_ERR_UNSUPPORTEDTYPE 89          /** Unsupported data type */
+#define ARK_ERR_FAILED 90                   /** Operation failed */
+#define ARK_ERR_CLEANUP 91                  /** Cleanup operation failed; potentially a memory leak occurred */
+#define ARK_ERR_DOT_PATH_COMPILEERR 92      /** dot-notated path could not be compiled */
 
 static const char *const _err_str[] =
         {"No error", "Null pointer detected", "Function not implemented", "Index is out of bounds",
@@ -172,9 +172,9 @@ static const char *const _err_str[] =
         "dot-notated path could not be parsed", "Illegal state", "Unsupported data type", "Operation failed",
         "Cleanup operation failed; potentially a memory leak occurred", "dot-notated path could not be compiled"};
 
-#define NG5_ERRSTR_ILLEGAL_CODE "illegal error code"
+#define ARK_ERRSTR_ILLEGAL_CODE "illegal error code"
 
-static const int _nerr_str = NG5_ARRAY_LENGTH(_err_str);
+static const int _nerr_str = ARK_ARRAY_LENGTH(_err_str);
 
 struct err {
         int code;
@@ -183,28 +183,28 @@ struct err {
         char *details;
 };
 
-NG5_EXPORT(bool) error_init(struct err *err);
+ARK_EXPORT(bool) error_init(struct err *err);
 
-NG5_EXPORT(bool) error_cpy(struct err *dst, const struct err *src);
+ARK_EXPORT(bool) error_cpy(struct err *dst, const struct err *src);
 
-NG5_EXPORT(bool) error_drop(struct err *err);
+ARK_EXPORT(bool) error_drop(struct err *err);
 
-NG5_EXPORT(bool) error_set(struct err *err, int code, const char *file, u32 line);
+ARK_EXPORT(bool) error_set(struct err *err, int code, const char *file, u32 line);
 
-NG5_EXPORT(bool) error_set_wdetails(struct err *err, int code, const char *file, u32 line, const char *details);
+ARK_EXPORT(bool) error_set_wdetails(struct err *err, int code, const char *file, u32 line, const char *details);
 
-NG5_EXPORT(bool) error_set_no_abort(struct err *err, int code, const char *file, u32 line);
+ARK_EXPORT(bool) error_set_no_abort(struct err *err, int code, const char *file, u32 line);
 
-NG5_EXPORT(bool) error_set_wdetails_no_abort(struct err *err, int code, const char *file, u32 line, const char *details);
+ARK_EXPORT(bool) error_set_wdetails_no_abort(struct err *err, int code, const char *file, u32 line, const char *details);
 
-NG5_EXPORT(bool) error_str(const char **errstr, const char **file, u32 *line, bool *details, const char **detailsstr,
+ARK_EXPORT(bool) error_str(const char **errstr, const char **file, u32 *line, bool *details, const char **detailsstr,
         const struct err *err);
 
-NG5_EXPORT(bool) error_print_to_stderr(const struct err *err);
+ARK_EXPORT(bool) error_print_to_stderr(const struct err *err);
 
-NG5_EXPORT(bool) error_print_and_abort(const struct err *err);
+ARK_EXPORT(bool) error_print_and_abort(const struct err *err);
 
-#define error_occurred(x)                   ((x)->err.code != NG5_ERR_NOERR)
+#define error_occurred(x)                   ((x)->err.code != ARK_ERR_NOERR)
 
 #define success_else_return(expr, err, code, retval)                                                                   \
 {                                                                                                                      \
@@ -212,8 +212,8 @@ NG5_EXPORT(bool) error_print_and_abort(const struct err *err);
         if (!(expr)) { return retval; }                                                                                \
 }
 
-#define success_else_null(expr, err)           success_else_return(expr, err, NG5_ERR_FAILED, NULL)
-#define success_else_fail(expr, err)           success_else_return(expr, err, NG5_ERR_FAILED, false)
+#define success_else_null(expr, err)           success_else_return(expr, err, ARK_ERR_FAILED, NULL)
+#define success_else_fail(expr, err)           success_else_return(expr, err, ARK_ERR_FAILED, false)
 
 
 
@@ -240,10 +240,10 @@ NG5_EXPORT(bool) error_print_and_abort(const struct err *err);
     }                                                                                                                  \
 }
 
-#define NG5_DEFINE_ERROR_GETTER(type_tag_name)  NG5_DEFINE_GET_ERROR_FUNCTION(type_tag_name, struct type_tag_name, e)
+#define ARK_DEFINE_ERROR_GETTER(type_tag_name)  ARK_DEFINE_GET_ERROR_FUNCTION(type_tag_name, struct type_tag_name, e)
 
-#define NG5_DEFINE_GET_ERROR_FUNCTION(type_name, type, arg)                                                            \
-ng5_func_unused static bool                                                                                            \
+#define ARK_DEFINE_GET_ERROR_FUNCTION(type_name, type, arg)                                                            \
+ark_func_unused static bool                                                                                            \
 type_name##_get_error(struct err *err, const type *arg)                                                                \
 {                                                                                                                      \
     error_if_null(err)                                                                                                 \
@@ -252,6 +252,6 @@ type_name##_get_error(struct err *err, const type *arg)                         
     return true;                                                                                                       \
 }
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

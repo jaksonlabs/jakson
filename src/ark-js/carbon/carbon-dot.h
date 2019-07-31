@@ -26,7 +26,7 @@
 #include <ark-js/carbon/carbon-array-it.h>
 #include <ark-js/carbon/carbon-column-it.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
 struct carbon; /* forwarded from carbon.h */
 
@@ -64,36 +64,36 @@ enum carbon_path_status
         carbon_PATH_INTERNAL
 };
 
-NG5_DEFINE_ERROR_GETTER(carbon_dot_path)
+ARK_DEFINE_ERROR_GETTER(carbon_dot_path)
 
-NG5_EXPORT(bool) carbon_dot_path_create(struct carbon_dot_path *path);
+ARK_EXPORT(bool) carbon_dot_path_create(struct carbon_dot_path *path);
 
-NG5_EXPORT(bool) carbon_dot_path_from_string(struct carbon_dot_path *path, const char *path_string);
+ARK_EXPORT(bool) carbon_dot_path_from_string(struct carbon_dot_path *path, const char *path_string);
 
-NG5_EXPORT(bool) carbon_dot_path_add_key(struct carbon_dot_path *dst, const char *key);
+ARK_EXPORT(bool) carbon_dot_path_add_key(struct carbon_dot_path *dst, const char *key);
 
-NG5_EXPORT(bool) carbon_dot_path_add_nkey(struct carbon_dot_path *dst, const char *key, size_t len);
+ARK_EXPORT(bool) carbon_dot_path_add_nkey(struct carbon_dot_path *dst, const char *key, size_t len);
 
-NG5_EXPORT(bool) carbon_dot_path_add_idx(struct carbon_dot_path *dst, u32 idx);
+ARK_EXPORT(bool) carbon_dot_path_add_idx(struct carbon_dot_path *dst, u32 idx);
 
-NG5_EXPORT(bool) carbon_dot_path_len(u32 *len, const struct carbon_dot_path *path);
+ARK_EXPORT(bool) carbon_dot_path_len(u32 *len, const struct carbon_dot_path *path);
 
-NG5_EXPORT(bool) carbon_dot_path_is_empty(const struct carbon_dot_path *path);
+ARK_EXPORT(bool) carbon_dot_path_is_empty(const struct carbon_dot_path *path);
 
-NG5_EXPORT(bool) carbon_dot_path_type_at(enum carbon_dot_node_type *type_out, u32 pos, const struct carbon_dot_path *path);
+ARK_EXPORT(bool) carbon_dot_path_type_at(enum carbon_dot_node_type *type_out, u32 pos, const struct carbon_dot_path *path);
 
-NG5_EXPORT(bool) carbon_dot_path_idx_at(u32 *idx, u32 pos, const struct carbon_dot_path *path);
+ARK_EXPORT(bool) carbon_dot_path_idx_at(u32 *idx, u32 pos, const struct carbon_dot_path *path);
 
-NG5_EXPORT(const char *) carbon_dot_path_key_at(u32 pos, struct carbon_dot_path *path);
+ARK_EXPORT(const char *) carbon_dot_path_key_at(u32 pos, struct carbon_dot_path *path);
 
-NG5_EXPORT(bool) carbon_dot_path_drop(struct carbon_dot_path *path);
+ARK_EXPORT(bool) carbon_dot_path_drop(struct carbon_dot_path *path);
 
-NG5_EXPORT(bool) carbon_dot_path_to_str(struct string_builder *sb, struct carbon_dot_path *path);
+ARK_EXPORT(bool) carbon_dot_path_to_str(struct string_builder *sb, struct carbon_dot_path *path);
 
-NG5_EXPORT(bool) carbon_dot_path_fprint(FILE *file, struct carbon_dot_path *path);
+ARK_EXPORT(bool) carbon_dot_path_fprint(FILE *file, struct carbon_dot_path *path);
 
-NG5_EXPORT(bool) carbon_dot_path_print(struct carbon_dot_path *path);
+ARK_EXPORT(bool) carbon_dot_path_print(struct carbon_dot_path *path);
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

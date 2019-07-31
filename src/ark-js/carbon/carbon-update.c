@@ -79,7 +79,7 @@ DEFINE_ARRAY_UPDATE_FUNCTION(float, carbon_FIELD_TYPE_NUMBER_FLOAT, carbon_array
                                 status = true;                                                                         \
                         } break;                                                                                       \
                         default:                                                                                       \
-                        error(&context->original->err, NG5_ERR_INTERNALERR)                                            \
+                        error(&context->original->err, ARK_ERR_INTERNALERR)                                            \
                         }                                                                                              \
                 }                                                                                                      \
                 drop_path_evaluator(&updater);                                                                         \
@@ -134,7 +134,7 @@ static bool column_update_u8(struct carbon_column_it *it, u32 pos, u8 value)
         unused(it);
         unused(pos);
         unused(value);
-        error_print(NG5_ERR_NOTIMPLEMENTED);    // TODO: Implement
+        error_print(ARK_ERR_NOTIMPLEMENTED);    // TODO: Implement
         return false;
 }
 
@@ -143,7 +143,7 @@ static bool column_update_u16(struct carbon_column_it *it, u32 pos, u16 value)
         unused(it);
         unused(pos);
         unused(value);
-        error_print(NG5_ERR_NOTIMPLEMENTED);    // TODO: Implement
+        error_print(ARK_ERR_NOTIMPLEMENTED);    // TODO: Implement
         return false;
 }
 
@@ -152,7 +152,7 @@ static bool column_update_u32(struct carbon_column_it *it, u32 pos, u32 value)
         unused(it);
         unused(pos);
         unused(value);
-        error_print(NG5_ERR_NOTIMPLEMENTED);    // TODO: Implement
+        error_print(ARK_ERR_NOTIMPLEMENTED);    // TODO: Implement
         return false;
 }
 
@@ -161,7 +161,7 @@ static bool column_update_u64(struct carbon_column_it *it, u32 pos, u64 value)
         unused(it);
         unused(pos);
         unused(value);
-        error_print(NG5_ERR_NOTIMPLEMENTED);    // TODO: Implement
+        error_print(ARK_ERR_NOTIMPLEMENTED);    // TODO: Implement
         return false;
 }
 
@@ -170,7 +170,7 @@ static bool column_update_i8(struct carbon_column_it *it, u32 pos, i8 value)
         unused(it);
         unused(pos);
         unused(value);
-        error_print(NG5_ERR_NOTIMPLEMENTED);    // TODO: Implement
+        error_print(ARK_ERR_NOTIMPLEMENTED);    // TODO: Implement
         return false;
 }
 
@@ -179,7 +179,7 @@ static bool column_update_i16(struct carbon_column_it *it, u32 pos, i16 value)
         unused(it);
         unused(pos);
         unused(value);
-        error_print(NG5_ERR_NOTIMPLEMENTED);    // TODO: Implement
+        error_print(ARK_ERR_NOTIMPLEMENTED);    // TODO: Implement
         return false;
 }
 
@@ -188,7 +188,7 @@ static bool column_update_i32(struct carbon_column_it *it, u32 pos, i32 value)
         unused(it);
         unused(pos);
         unused(value);
-        error_print(NG5_ERR_NOTIMPLEMENTED);    // TODO: Implement
+        error_print(ARK_ERR_NOTIMPLEMENTED);    // TODO: Implement
         return false;
 }
 
@@ -197,7 +197,7 @@ static bool column_update_i64(struct carbon_column_it *it, u32 pos, i64 value)
         unused(it);
         unused(pos);
         unused(value);
-        error_print(NG5_ERR_NOTIMPLEMENTED);    // TODO: Implement
+        error_print(ARK_ERR_NOTIMPLEMENTED);    // TODO: Implement
         return false;
 }
 
@@ -206,7 +206,7 @@ static bool column_update_float(struct carbon_column_it *it, u32 pos, float valu
         unused(it);
         unused(pos);
         unused(value);
-        error_print(NG5_ERR_NOTIMPLEMENTED);    // TODO: Implement
+        error_print(ARK_ERR_NOTIMPLEMENTED);    // TODO: Implement
         return false;
 }
 
@@ -233,7 +233,7 @@ static inline struct carbon_column_it *column_iterator(u32 *elem_pos, struct car
                 status = func(context, &compiled_path);                                                                \
                 carbon_dot_path_drop(&compiled_path);                                                                   \
         } else {                                                                                                       \
-                error(&context->err, NG5_ERR_DOT_PATH_PARSERR)                                                         \
+                error(&context->err, ARK_ERR_DOT_PATH_PARSERR)                                                         \
                 status = false;                                                                                        \
         }                                                                                                              \
         status;                                                                                                        \
@@ -250,74 +250,74 @@ static inline struct carbon_column_it *column_iterator(u32 *elem_pos, struct car
                 status = func(context, &compiled_path, __VA_ARGS__);                                                   \
                 carbon_dot_path_drop(&compiled_path);                                                                   \
         } else {                                                                                                       \
-                error(&context->err, NG5_ERR_DOT_PATH_PARSERR)                                                         \
+                error(&context->err, ARK_ERR_DOT_PATH_PARSERR)                                                         \
                 status = false;                                                                                        \
         }                                                                                                              \
         status;                                                                                                        \
 })
 
 
-NG5_EXPORT(bool) carbon_update_set_null(struct carbon_revise *context, const char *path)
+ARK_EXPORT(bool) carbon_update_set_null(struct carbon_revise *context, const char *path)
 {
         return compile_path_and_delegate(context, path, carbon_update_set_null_compiled);
 }
 
-NG5_EXPORT(bool) carbon_update_set_true(struct carbon_revise *context, const char *path)
+ARK_EXPORT(bool) carbon_update_set_true(struct carbon_revise *context, const char *path)
 {
         return compile_path_and_delegate(context, path, carbon_update_set_true_compiled);
 }
 
-NG5_EXPORT(bool) carbon_update_set_false(struct carbon_revise *context, const char *path)
+ARK_EXPORT(bool) carbon_update_set_false(struct carbon_revise *context, const char *path)
 {
         return compile_path_and_delegate(context, path, carbon_update_set_false_compiled);
 }
 
-NG5_EXPORT(bool) carbon_update_set_u8(struct carbon_revise *context, const char *path, u8 value)
+ARK_EXPORT(bool) carbon_update_set_u8(struct carbon_revise *context, const char *path, u8 value)
 {
         return compile_path_and_delegate_wargs(context, path, carbon_update_set_u8_compiled, value);
 }
 
-NG5_EXPORT(bool) carbon_update_set_u16(struct carbon_revise *context, const char *path, u16 value)
+ARK_EXPORT(bool) carbon_update_set_u16(struct carbon_revise *context, const char *path, u16 value)
 {
         return compile_path_and_delegate_wargs(context, path, carbon_update_set_u16_compiled, value);
 }
 
-NG5_EXPORT(bool) carbon_update_set_u32(struct carbon_revise *context, const char *path, u32 value)
+ARK_EXPORT(bool) carbon_update_set_u32(struct carbon_revise *context, const char *path, u32 value)
 {
         return compile_path_and_delegate_wargs(context, path, carbon_update_set_u32_compiled, value);
 }
 
-NG5_EXPORT(bool) carbon_update_set_u64(struct carbon_revise *context, const char *path, u64 value)
+ARK_EXPORT(bool) carbon_update_set_u64(struct carbon_revise *context, const char *path, u64 value)
 {
         return compile_path_and_delegate_wargs(context, path, carbon_update_set_u64_compiled, value);
 }
 
-NG5_EXPORT(bool) carbon_update_set_i8(struct carbon_revise *context, const char *path, i8 value)
+ARK_EXPORT(bool) carbon_update_set_i8(struct carbon_revise *context, const char *path, i8 value)
 {
         return compile_path_and_delegate_wargs(context, path, carbon_update_set_i8_compiled, value);
 }
 
-NG5_EXPORT(bool) carbon_update_set_i16(struct carbon_revise *context, const char *path, i16 value)
+ARK_EXPORT(bool) carbon_update_set_i16(struct carbon_revise *context, const char *path, i16 value)
 {
         return compile_path_and_delegate_wargs(context, path, carbon_update_set_i16_compiled, value);
 }
 
-NG5_EXPORT(bool) carbon_update_set_i32(struct carbon_revise *context, const char *path, i32 value)
+ARK_EXPORT(bool) carbon_update_set_i32(struct carbon_revise *context, const char *path, i32 value)
 {
         return compile_path_and_delegate_wargs(context, path, carbon_update_set_i32_compiled, value);
 }
 
-NG5_EXPORT(bool) carbon_update_set_i64(struct carbon_revise *context, const char *path, i64 value)
+ARK_EXPORT(bool) carbon_update_set_i64(struct carbon_revise *context, const char *path, i64 value)
 {
         return compile_path_and_delegate_wargs(context, path, carbon_update_set_i64_compiled, value);
 }
 
-NG5_EXPORT(bool) carbon_update_set_float(struct carbon_revise *context, const char *path, float value)
+ARK_EXPORT(bool) carbon_update_set_float(struct carbon_revise *context, const char *path, float value)
 {
         return compile_path_and_delegate_wargs(context, path, carbon_update_set_float_compiled, value);
 }
 
-NG5_EXPORT(bool) carbon_update_set_unsigned(struct carbon_revise *context, const char *path, u64 value)
+ARK_EXPORT(bool) carbon_update_set_unsigned(struct carbon_revise *context, const char *path, u64 value)
 {
         if (value <= carbon_U8_MAX) {
                 return carbon_update_set_u8(context, path, (u8) value);
@@ -328,12 +328,12 @@ NG5_EXPORT(bool) carbon_update_set_unsigned(struct carbon_revise *context, const
         } else if (value <= carbon_U64_MAX) {
                 return carbon_update_set_u64(context, path, (u64) value);
         } else {
-                error(&context->err, NG5_ERR_INTERNALERR);
+                error(&context->err, ARK_ERR_INTERNALERR);
                 return false;
         }
 }
 
-NG5_EXPORT(bool) carbon_update_set_signed(struct carbon_revise *context, const char *path, i64 value)
+ARK_EXPORT(bool) carbon_update_set_signed(struct carbon_revise *context, const char *path, i64 value)
 {
         if (value >= carbon_I8_MIN && value <= carbon_I8_MAX) {
                 return carbon_update_set_i8(context, path, (i8) value);
@@ -344,22 +344,22 @@ NG5_EXPORT(bool) carbon_update_set_signed(struct carbon_revise *context, const c
         } else if (value >= carbon_I64_MIN && value <= carbon_I64_MAX) {
                 return carbon_update_set_i64(context, path, (i64) value);
         } else {
-                error(&context->err, NG5_ERR_INTERNALERR);
+                error(&context->err, ARK_ERR_INTERNALERR);
                 return false;
         }
 }
 
-NG5_EXPORT(bool) carbon_update_set_string(struct carbon_revise *context, const char *path, const char *value)
+ARK_EXPORT(bool) carbon_update_set_string(struct carbon_revise *context, const char *path, const char *value)
 {
         // TODO: Implement
         unused(context);
         unused(path);
         unused(value);
-        error_print(NG5_ERR_NOTIMPLEMENTED)
+        error_print(ARK_ERR_NOTIMPLEMENTED)
         return false;
 }
 
-NG5_EXPORT(bool) carbon_update_set_binary(struct carbon_revise *context, const char *path, const void *value, size_t nbytes,
+ARK_EXPORT(bool) carbon_update_set_binary(struct carbon_revise *context, const char *path, const void *value, size_t nbytes,
         const char *file_ext, const char *user_type)
 {
         // TODO: Implement
@@ -369,11 +369,11 @@ NG5_EXPORT(bool) carbon_update_set_binary(struct carbon_revise *context, const c
         unused(file_ext);
         unused(user_type);
         unused(path);
-        error_print(NG5_ERR_NOTIMPLEMENTED)
+        error_print(ARK_ERR_NOTIMPLEMENTED)
         return false;
 }
 
-NG5_EXPORT(struct carbon_insert *) carbon_update_set_array_begin(struct carbon_revise *context, const char *path,
+ARK_EXPORT(struct carbon_insert *) carbon_update_set_array_begin(struct carbon_revise *context, const char *path,
         struct carbon_insert_array_state *state_out, u64 array_capacity)
 {
         // TODO: Implement
@@ -381,19 +381,19 @@ NG5_EXPORT(struct carbon_insert *) carbon_update_set_array_begin(struct carbon_r
         unused(state_out);
         unused(array_capacity);
         unused(path);
-        error_print(NG5_ERR_NOTIMPLEMENTED)
+        error_print(ARK_ERR_NOTIMPLEMENTED)
         return false;
 }
 
-NG5_EXPORT(bool) carbon_update_set_array_end(struct carbon_insert_array_state *state_in)
+ARK_EXPORT(bool) carbon_update_set_array_end(struct carbon_insert_array_state *state_in)
 {
         // TODO: Implement
         unused(state_in);
-        error_print(NG5_ERR_NOTIMPLEMENTED)
+        error_print(ARK_ERR_NOTIMPLEMENTED)
         return false;
 }
 
-NG5_EXPORT(struct carbon_insert *) carbon_update_set_column_begin(struct carbon_revise *context, const char *path,
+ARK_EXPORT(struct carbon_insert *) carbon_update_set_column_begin(struct carbon_revise *context, const char *path,
         struct carbon_insert_column_state *state_out, enum carbon_field_type type, u64 column_capacity)
 {
         // TODO: Implement
@@ -402,90 +402,90 @@ NG5_EXPORT(struct carbon_insert *) carbon_update_set_column_begin(struct carbon_
         unused(type);
         unused(column_capacity);
         unused(path);
-        error_print(NG5_ERR_NOTIMPLEMENTED)
+        error_print(ARK_ERR_NOTIMPLEMENTED)
         return false;
 }
 
-NG5_EXPORT(bool) carbon_update_set_column_end(struct carbon_insert_column_state *state_in)
+ARK_EXPORT(bool) carbon_update_set_column_end(struct carbon_insert_column_state *state_in)
 {
         // TODO: Implement
         unused(state_in);
-        error_print(NG5_ERR_NOTIMPLEMENTED)
+        error_print(ARK_ERR_NOTIMPLEMENTED)
         return false;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-NG5_EXPORT(bool) carbon_update_set_null_compiled(struct carbon_revise *context, const struct carbon_dot_path *path)
+ARK_EXPORT(bool) carbon_update_set_null_compiled(struct carbon_revise *context, const struct carbon_dot_path *path)
 {
         return try_update(context, path, carbon_array_it_update_in_place_null, carbon_column_it_update_set_null);
 }
 
-NG5_EXPORT(bool) carbon_update_set_true_compiled(struct carbon_revise *context, const struct carbon_dot_path *path)
+ARK_EXPORT(bool) carbon_update_set_true_compiled(struct carbon_revise *context, const struct carbon_dot_path *path)
 {
         return try_update(context, path, carbon_array_it_update_in_place_true, carbon_column_it_update_set_true);
 }
 
-NG5_EXPORT(bool) carbon_update_set_false_compiled(struct carbon_revise *context, const struct carbon_dot_path *path)
+ARK_EXPORT(bool) carbon_update_set_false_compiled(struct carbon_revise *context, const struct carbon_dot_path *path)
 {
         return try_update(context, path, carbon_array_it_update_in_place_false, carbon_column_it_update_set_false);
 }
 
-NG5_EXPORT(bool) carbon_update_set_u8_compiled(struct carbon_revise *context, const struct carbon_dot_path *path,
+ARK_EXPORT(bool) carbon_update_set_u8_compiled(struct carbon_revise *context, const struct carbon_dot_path *path,
         u8 value)
 {
         return try_update_value(context, path, value, array_update_u8, column_update_u8);
 }
 
-NG5_EXPORT(bool) carbon_update_set_u16_compiled(struct carbon_revise *context, const struct carbon_dot_path *path,
+ARK_EXPORT(bool) carbon_update_set_u16_compiled(struct carbon_revise *context, const struct carbon_dot_path *path,
         u16 value)
 {
         return try_update_value(context, path, value, array_update_u16, column_update_u16);
 }
 
-NG5_EXPORT(bool) carbon_update_set_u32_compiled(struct carbon_revise *context, const struct carbon_dot_path *path,
+ARK_EXPORT(bool) carbon_update_set_u32_compiled(struct carbon_revise *context, const struct carbon_dot_path *path,
         u32 value)
 {
         return try_update_value(context, path, value, array_update_u32, column_update_u32);
 }
 
-NG5_EXPORT(bool) carbon_update_set_u64_compiled(struct carbon_revise *context, const struct carbon_dot_path *path,
+ARK_EXPORT(bool) carbon_update_set_u64_compiled(struct carbon_revise *context, const struct carbon_dot_path *path,
         u64 value)
 {
         return try_update_value(context, path, value, array_update_u64, column_update_u64);
 }
 
-NG5_EXPORT(bool) carbon_update_set_i8_compiled(struct carbon_revise *context, const struct carbon_dot_path *path,
+ARK_EXPORT(bool) carbon_update_set_i8_compiled(struct carbon_revise *context, const struct carbon_dot_path *path,
         i8 value)
 {
         return try_update_value(context, path, value, array_update_i8, column_update_i8);
 }
 
-NG5_EXPORT(bool) carbon_update_set_i16_compiled(struct carbon_revise *context, const struct carbon_dot_path *path,
+ARK_EXPORT(bool) carbon_update_set_i16_compiled(struct carbon_revise *context, const struct carbon_dot_path *path,
         i16 value)
 {
         return try_update_value(context, path, value, array_update_i16, column_update_i16);
 }
 
-NG5_EXPORT(bool) carbon_update_set_i32_compiled(struct carbon_revise *context, const struct carbon_dot_path *path,
+ARK_EXPORT(bool) carbon_update_set_i32_compiled(struct carbon_revise *context, const struct carbon_dot_path *path,
         i32 value)
 {
         return try_update_value(context, path, value, array_update_i32, column_update_i32);
 }
 
-NG5_EXPORT(bool) carbon_update_set_i64_compiled(struct carbon_revise *context, const struct carbon_dot_path *path,
+ARK_EXPORT(bool) carbon_update_set_i64_compiled(struct carbon_revise *context, const struct carbon_dot_path *path,
         i64 value)
 {
         return try_update_value(context, path, value, array_update_i64, column_update_i64);
 }
 
-NG5_EXPORT(bool) carbon_update_set_float_compiled(struct carbon_revise *context, const struct carbon_dot_path *path,
+ARK_EXPORT(bool) carbon_update_set_float_compiled(struct carbon_revise *context, const struct carbon_dot_path *path,
         float value)
 {
         return try_update_value(context, path, value, array_update_float, column_update_float);
 }
 
-NG5_EXPORT(bool) carbon_update_set_unsigned_compiled(struct carbon_revise *context, const struct carbon_dot_path *path,
+ARK_EXPORT(bool) carbon_update_set_unsigned_compiled(struct carbon_revise *context, const struct carbon_dot_path *path,
         u64 value)
 {
         if (value <= carbon_U8_MAX) {
@@ -497,12 +497,12 @@ NG5_EXPORT(bool) carbon_update_set_unsigned_compiled(struct carbon_revise *conte
         } else if (value <= carbon_U64_MAX) {
                 return carbon_update_set_u64_compiled(context, path, (u64) value);
         } else {
-                error(&context->err, NG5_ERR_INTERNALERR);
+                error(&context->err, ARK_ERR_INTERNALERR);
                 return false;
         }
 }
 
-NG5_EXPORT(bool) carbon_update_set_signed_compiled(struct carbon_revise *context, const struct carbon_dot_path *path,
+ARK_EXPORT(bool) carbon_update_set_signed_compiled(struct carbon_revise *context, const struct carbon_dot_path *path,
         i64 value)
 {
         if (value >= carbon_I8_MIN && value <= carbon_I8_MAX) {
@@ -514,23 +514,23 @@ NG5_EXPORT(bool) carbon_update_set_signed_compiled(struct carbon_revise *context
         } else if (value >= carbon_I64_MIN && value <= carbon_I64_MAX) {
                 return carbon_update_set_i64_compiled(context, path, (i64) value);
         } else {
-                error(&context->err, NG5_ERR_INTERNALERR);
+                error(&context->err, ARK_ERR_INTERNALERR);
                 return false;
         }
 }
 
-NG5_EXPORT(bool) carbon_update_set_string_compiled(struct carbon_revise *context, const struct carbon_dot_path *path,
+ARK_EXPORT(bool) carbon_update_set_string_compiled(struct carbon_revise *context, const struct carbon_dot_path *path,
         const char *value)
 {
         // TODO: Implement
         unused(context);
         unused(path);
         unused(value);
-        error_print(NG5_ERR_NOTIMPLEMENTED)
+        error_print(ARK_ERR_NOTIMPLEMENTED)
         return false;
 }
 
-NG5_EXPORT(bool) carbon_update_set_binary_compiled(struct carbon_revise *context, const struct carbon_dot_path *path,
+ARK_EXPORT(bool) carbon_update_set_binary_compiled(struct carbon_revise *context, const struct carbon_dot_path *path,
         const void *value, size_t nbytes, const char *file_ext, const char *user_type)
 {
         // TODO: Implement
@@ -540,11 +540,11 @@ NG5_EXPORT(bool) carbon_update_set_binary_compiled(struct carbon_revise *context
         unused(file_ext);
         unused(user_type);
         unused(path);
-        error_print(NG5_ERR_NOTIMPLEMENTED)
+        error_print(ARK_ERR_NOTIMPLEMENTED)
         return false;
 }
 
-NG5_EXPORT(struct carbon_insert *) carbon_update_set_array_begin_compiled(struct carbon_revise *context,
+ARK_EXPORT(struct carbon_insert *) carbon_update_set_array_begin_compiled(struct carbon_revise *context,
         const struct carbon_dot_path *path, struct carbon_insert_array_state *state_out, u64 array_capacity)
 {
         // TODO: Implement
@@ -552,19 +552,19 @@ NG5_EXPORT(struct carbon_insert *) carbon_update_set_array_begin_compiled(struct
         unused(state_out);
         unused(array_capacity);
         unused(path);
-        error_print(NG5_ERR_NOTIMPLEMENTED)
+        error_print(ARK_ERR_NOTIMPLEMENTED)
         return false;
 }
 
-NG5_EXPORT(bool) carbon_update_set_array_end_compiled(struct carbon_insert_array_state *state_in)
+ARK_EXPORT(bool) carbon_update_set_array_end_compiled(struct carbon_insert_array_state *state_in)
 {
         // TODO: Implement
         unused(state_in);
-        error_print(NG5_ERR_NOTIMPLEMENTED)
+        error_print(ARK_ERR_NOTIMPLEMENTED)
         return false;
 }
 
-NG5_EXPORT(struct carbon_insert *) carbon_update_set_column_begin_compiled(struct carbon_revise *context,
+ARK_EXPORT(struct carbon_insert *) carbon_update_set_column_begin_compiled(struct carbon_revise *context,
         const struct carbon_dot_path *path, struct carbon_insert_column_state *state_out, enum carbon_field_type type,
         u64 column_capacity)
 {
@@ -574,15 +574,15 @@ NG5_EXPORT(struct carbon_insert *) carbon_update_set_column_begin_compiled(struc
         unused(type);
         unused(column_capacity);
         unused(path);
-        error_print(NG5_ERR_NOTIMPLEMENTED)
+        error_print(ARK_ERR_NOTIMPLEMENTED)
         return false;
 }
 
-NG5_EXPORT(bool) carbon_update_set_column_end_compiled(struct carbon_insert_column_state *state_in)
+ARK_EXPORT(bool) carbon_update_set_column_end_compiled(struct carbon_insert_column_state *state_in)
 {
         // TODO: Implement
         unused(state_in);
-        error_print(NG5_ERR_NOTIMPLEMENTED)
+        error_print(ARK_ERR_NOTIMPLEMENTED)
         return false;
 }
 
@@ -597,92 +597,92 @@ NG5_EXPORT(bool) carbon_update_set_column_end_compiled(struct carbon_insert_colu
         status;                                                                                                        \
 })
 
-NG5_EXPORT(bool) carbon_update_one_set_null(const char *dot_path, struct carbon *rev_doc, struct carbon *doc)
+ARK_EXPORT(bool) carbon_update_one_set_null(const char *dot_path, struct carbon *rev_doc, struct carbon *doc)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_null, dot_path);
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_true(const char *dot_path, struct carbon *rev_doc, struct carbon *doc)
+ARK_EXPORT(bool) carbon_update_one_set_true(const char *dot_path, struct carbon *rev_doc, struct carbon *doc)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_true, dot_path);
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_false(const char *dot_path, struct carbon *rev_doc, struct carbon *doc)
+ARK_EXPORT(bool) carbon_update_one_set_false(const char *dot_path, struct carbon *rev_doc, struct carbon *doc)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_false, dot_path);
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_u8(const char *dot_path, struct carbon *rev_doc, struct carbon *doc, u8 value)
+ARK_EXPORT(bool) carbon_update_one_set_u8(const char *dot_path, struct carbon *rev_doc, struct carbon *doc, u8 value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_u8, dot_path, value);
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_u16(const char *dot_path, struct carbon *rev_doc, struct carbon *doc, u16 value)
+ARK_EXPORT(bool) carbon_update_one_set_u16(const char *dot_path, struct carbon *rev_doc, struct carbon *doc, u16 value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_u16, dot_path, value);
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_u32(const char *dot_path, struct carbon *rev_doc, struct carbon *doc, u32 value)
+ARK_EXPORT(bool) carbon_update_one_set_u32(const char *dot_path, struct carbon *rev_doc, struct carbon *doc, u32 value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_u32, dot_path, value);
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_u64(const char *dot_path, struct carbon *rev_doc, struct carbon *doc, u64 value)
+ARK_EXPORT(bool) carbon_update_one_set_u64(const char *dot_path, struct carbon *rev_doc, struct carbon *doc, u64 value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_u64, dot_path, value);
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_i8(const char *dot_path, struct carbon *rev_doc, struct carbon *doc, i8 value)
+ARK_EXPORT(bool) carbon_update_one_set_i8(const char *dot_path, struct carbon *rev_doc, struct carbon *doc, i8 value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_i8, dot_path, value);
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_i16(const char *dot_path, struct carbon *rev_doc, struct carbon *doc, i16 value)
+ARK_EXPORT(bool) carbon_update_one_set_i16(const char *dot_path, struct carbon *rev_doc, struct carbon *doc, i16 value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_i16, dot_path, value);
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_i32(const char *dot_path, struct carbon *rev_doc, struct carbon *doc, i32 value)
+ARK_EXPORT(bool) carbon_update_one_set_i32(const char *dot_path, struct carbon *rev_doc, struct carbon *doc, i32 value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_i32, dot_path, value);
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_i64(const char *dot_path, struct carbon *rev_doc, struct carbon *doc, i64 value)
+ARK_EXPORT(bool) carbon_update_one_set_i64(const char *dot_path, struct carbon *rev_doc, struct carbon *doc, i64 value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_i64, dot_path, value);
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_float(const char *dot_path, struct carbon *rev_doc, struct carbon *doc,
+ARK_EXPORT(bool) carbon_update_one_set_float(const char *dot_path, struct carbon *rev_doc, struct carbon *doc,
         float value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_float, dot_path, value);
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_unsigned(const char *dot_path, struct carbon *rev_doc, struct carbon *doc,
+ARK_EXPORT(bool) carbon_update_one_set_unsigned(const char *dot_path, struct carbon *rev_doc, struct carbon *doc,
         u64 value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_unsigned, dot_path, value);
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_signed(const char *dot_path, struct carbon *rev_doc, struct carbon *doc, i64 value)
+ARK_EXPORT(bool) carbon_update_one_set_signed(const char *dot_path, struct carbon *rev_doc, struct carbon *doc, i64 value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_signed, dot_path, value);
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_string(const char *dot_path, struct carbon *rev_doc, struct carbon *doc,
+ARK_EXPORT(bool) carbon_update_one_set_string(const char *dot_path, struct carbon *rev_doc, struct carbon *doc,
         const char *value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_string, dot_path, value);
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_binary(const char *dot_path, struct carbon *rev_doc, struct carbon *doc,
+ARK_EXPORT(bool) carbon_update_one_set_binary(const char *dot_path, struct carbon *rev_doc, struct carbon *doc,
         const void *value, size_t nbytes, const char *file_ext, const char *user_type)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_binary, dot_path, value, nbytes,
                 file_ext, user_type);
 }
 
-NG5_EXPORT(struct carbon_insert *) carbon_update_one_set_array_begin(struct carbon_insert_array_state *state_out,
+ARK_EXPORT(struct carbon_insert *) carbon_update_one_set_array_begin(struct carbon_insert_array_state *state_out,
         const char *dot_path, struct carbon *rev_doc, struct carbon *doc, u64 array_capacity)
 {
         struct carbon_revise revise;
@@ -692,14 +692,14 @@ NG5_EXPORT(struct carbon_insert *) carbon_update_one_set_array_begin(struct carb
         return result;
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_array_end(struct carbon_insert_array_state *state_in)
+ARK_EXPORT(bool) carbon_update_one_set_array_end(struct carbon_insert_array_state *state_in)
 {
         bool status = carbon_update_set_array_end(state_in);
         // ... TODO: drop revision from context
         return status;
 }
 
-NG5_EXPORT(struct carbon_insert *) carbon_update_one_set_column_begin(struct carbon_insert_column_state *state_out,
+ARK_EXPORT(struct carbon_insert *) carbon_update_one_set_column_begin(struct carbon_insert_column_state *state_out,
         const char *dot_path, struct carbon *rev_doc, struct carbon *doc, enum carbon_field_type type,
         u64 column_capacity)
 {
@@ -710,7 +710,7 @@ NG5_EXPORT(struct carbon_insert *) carbon_update_one_set_column_begin(struct car
         return result;
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_column_end(struct carbon_insert_column_state *state_in)
+ARK_EXPORT(bool) carbon_update_one_set_column_end(struct carbon_insert_column_state *state_in)
 {
         bool status = carbon_update_set_column_end(state_in);
         // ... TODO: drop revision from context
@@ -719,104 +719,104 @@ NG5_EXPORT(bool) carbon_update_one_set_column_end(struct carbon_insert_column_st
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-NG5_EXPORT(bool) carbon_update_one_set_null_compiled(const struct carbon_dot_path *path, struct carbon *rev_doc,
+ARK_EXPORT(bool) carbon_update_one_set_null_compiled(const struct carbon_dot_path *path, struct carbon *rev_doc,
         struct carbon *doc)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_null_compiled, path);
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_true_compiled(const struct carbon_dot_path *path, struct carbon *rev_doc,
+ARK_EXPORT(bool) carbon_update_one_set_true_compiled(const struct carbon_dot_path *path, struct carbon *rev_doc,
         struct carbon *doc)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_true_compiled, path);
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_false_compiled(const struct carbon_dot_path *path, struct carbon *rev_doc,
+ARK_EXPORT(bool) carbon_update_one_set_false_compiled(const struct carbon_dot_path *path, struct carbon *rev_doc,
         struct carbon *doc)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_false_compiled, path);
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_u8_compiled(const struct carbon_dot_path *path, struct carbon *rev_doc,
+ARK_EXPORT(bool) carbon_update_one_set_u8_compiled(const struct carbon_dot_path *path, struct carbon *rev_doc,
         struct carbon *doc, u8 value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_u8_compiled, path, value);
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_u16_compiled(const struct carbon_dot_path *path, struct carbon *rev_doc,
+ARK_EXPORT(bool) carbon_update_one_set_u16_compiled(const struct carbon_dot_path *path, struct carbon *rev_doc,
         struct carbon *doc, u16 value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_u16_compiled, path, value);
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_u32_compiled(const struct carbon_dot_path *path, struct carbon *rev_doc,
+ARK_EXPORT(bool) carbon_update_one_set_u32_compiled(const struct carbon_dot_path *path, struct carbon *rev_doc,
         struct carbon *doc, u32 value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_u32_compiled, path, value);
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_u64_compiled(const struct carbon_dot_path *path, struct carbon *rev_doc,
+ARK_EXPORT(bool) carbon_update_one_set_u64_compiled(const struct carbon_dot_path *path, struct carbon *rev_doc,
         struct carbon *doc, u64 value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_u64_compiled, path, value);
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_i8_compiled(const struct carbon_dot_path *path, struct carbon *rev_doc,
+ARK_EXPORT(bool) carbon_update_one_set_i8_compiled(const struct carbon_dot_path *path, struct carbon *rev_doc,
         struct carbon *doc, i8 value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_i8_compiled, path, value);
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_i16_compiled(const struct carbon_dot_path *path, struct carbon *rev_doc,
+ARK_EXPORT(bool) carbon_update_one_set_i16_compiled(const struct carbon_dot_path *path, struct carbon *rev_doc,
         struct carbon *doc, i16 value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_i16_compiled, path, value);
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_i32_compiled(const struct carbon_dot_path *path, struct carbon *rev_doc,
+ARK_EXPORT(bool) carbon_update_one_set_i32_compiled(const struct carbon_dot_path *path, struct carbon *rev_doc,
         struct carbon *doc, i32 value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_i32_compiled, path, value);
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_i64_compiled(const struct carbon_dot_path *path, struct carbon *rev_doc,
+ARK_EXPORT(bool) carbon_update_one_set_i64_compiled(const struct carbon_dot_path *path, struct carbon *rev_doc,
         struct carbon *doc, i64 value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_i64_compiled, path, value);
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_float_compiled(const struct carbon_dot_path *path, struct carbon *rev_doc,
+ARK_EXPORT(bool) carbon_update_one_set_float_compiled(const struct carbon_dot_path *path, struct carbon *rev_doc,
         struct carbon *doc, float value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_float_compiled, path, value);
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_unsigned_compiled(const struct carbon_dot_path *path, struct carbon *rev_doc,
+ARK_EXPORT(bool) carbon_update_one_set_unsigned_compiled(const struct carbon_dot_path *path, struct carbon *rev_doc,
         struct carbon *doc, u64 value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_unsigned_compiled, path, value);
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_signed_compiled(const struct carbon_dot_path *path, struct carbon *rev_doc,
+ARK_EXPORT(bool) carbon_update_one_set_signed_compiled(const struct carbon_dot_path *path, struct carbon *rev_doc,
         struct carbon *doc, i64 value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_signed_compiled, path, value);
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_string_compiled(const struct carbon_dot_path *path, struct carbon *rev_doc,
+ARK_EXPORT(bool) carbon_update_one_set_string_compiled(const struct carbon_dot_path *path, struct carbon *rev_doc,
         struct carbon *doc, const char *value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_string_compiled, path, value);
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_binary_compiled(const struct carbon_dot_path *path, struct carbon *rev_doc,
+ARK_EXPORT(bool) carbon_update_one_set_binary_compiled(const struct carbon_dot_path *path, struct carbon *rev_doc,
         struct carbon *doc, const void *value, size_t nbytes, const char *file_ext, const char *user_type)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_binary_compiled, path, value, nbytes,
                 file_ext, user_type);
 }
 
-NG5_EXPORT(struct carbon_insert *) carbon_update_one_set_array_begin_compiled(struct carbon_insert_array_state *state_out,
+ARK_EXPORT(struct carbon_insert *) carbon_update_one_set_array_begin_compiled(struct carbon_insert_array_state *state_out,
         const struct carbon_dot_path *path, struct carbon *rev_doc, struct carbon *doc, u64 array_capacity)
 {
         struct carbon_revise revise;
@@ -826,14 +826,14 @@ NG5_EXPORT(struct carbon_insert *) carbon_update_one_set_array_begin_compiled(st
         return result;
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_array_end_compiled(struct carbon_insert_array_state *state_in)
+ARK_EXPORT(bool) carbon_update_one_set_array_end_compiled(struct carbon_insert_array_state *state_in)
 {
         bool status = carbon_update_set_array_end_compiled(state_in);
         // ... TODO: drop revision from context
         return status;
 }
 
-NG5_EXPORT(struct carbon_insert *) carbon_update_one_set_column_begin_compiled(
+ARK_EXPORT(struct carbon_insert *) carbon_update_one_set_column_begin_compiled(
         struct carbon_insert_column_state *state_out, const struct carbon_dot_path *path, struct carbon *rev_doc,
         struct carbon *doc, enum carbon_field_type type, u64 column_capacity)
 {
@@ -844,7 +844,7 @@ NG5_EXPORT(struct carbon_insert *) carbon_update_one_set_column_begin_compiled(
         return result;
 }
 
-NG5_EXPORT(bool) carbon_update_one_set_column_end_compiled(struct carbon_insert_column_state *state_in)
+ARK_EXPORT(bool) carbon_update_one_set_column_end_compiled(struct carbon_insert_column_state *state_in)
 {
         bool status = carbon_update_set_column_end_compiled(state_in);
         // ... TODO: drop revision from context

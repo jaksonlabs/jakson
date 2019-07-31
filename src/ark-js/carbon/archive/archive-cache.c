@@ -51,7 +51,7 @@ static void init_list(struct lru_list *list)
         }
 }
 
-NG5_EXPORT(bool) string_id_cache_create_LRU(struct string_cache **cache, struct archive *archive)
+ARK_EXPORT(bool) string_id_cache_create_LRU(struct string_cache **cache, struct archive *archive)
 {
         struct archive_info archive_info;
         archive_get_info(&archive_info, archive);
@@ -59,7 +59,7 @@ NG5_EXPORT(bool) string_id_cache_create_LRU(struct string_cache **cache, struct 
         return string_id_cache_create_LRU_ex(cache, archive, capacity);
 }
 
-NG5_EXPORT(bool) string_id_cache_create_LRU_ex(struct string_cache **cache, struct archive *archive, size_t capacity)
+ARK_EXPORT(bool) string_id_cache_create_LRU_ex(struct string_cache **cache, struct archive *archive, size_t capacity)
 {
         error_if_null(cache)
         error_if_null(archive)
@@ -69,11 +69,11 @@ NG5_EXPORT(bool) string_id_cache_create_LRU_ex(struct string_cache **cache, stru
         query_create(&result->query, archive);
         result->capacity = capacity;
 
-        size_t num_buckets = ng5_max(1, capacity);
+        size_t num_buckets = ark_max(1, capacity);
         vec_create(&result->list_entries, NULL, sizeof(struct lru_list), num_buckets);
         for (size_t i = 0; i < num_buckets; i++) {
                 struct lru_list *list = vec_new_and_get(&result->list_entries, struct lru_list);
-                ng5_zero_memory(list, sizeof(struct lru_list));
+                ark_zero_memory(list, sizeof(struct lru_list));
                 init_list(list);
         }
 
@@ -84,7 +84,7 @@ NG5_EXPORT(bool) string_id_cache_create_LRU_ex(struct string_cache **cache, stru
         return true;
 }
 
-NG5_EXPORT(bool) string_id_cache_get_error(struct err *err, const struct string_cache *cache)
+ARK_EXPORT(bool) string_id_cache_get_error(struct err *err, const struct string_cache *cache)
 {
         error_if_null(err)
         error_if_null(cache)
@@ -92,7 +92,7 @@ NG5_EXPORT(bool) string_id_cache_get_error(struct err *err, const struct string_
         return true;
 }
 
-NG5_EXPORT(bool) string_id_cache_get_size(size_t *size, const struct string_cache *cache)
+ARK_EXPORT(bool) string_id_cache_get_size(size_t *size, const struct string_cache *cache)
 {
         error_if_null(size)
         error_if_null(cache)
@@ -119,10 +119,10 @@ static void make_most_recent(struct lru_list *list, struct cache_entry *entry)
         }
 }
 
-NG5_EXPORT(char *)string_id_cache_get(struct string_cache *cache, field_sid_t id)
+ARK_EXPORT(char *)string_id_cache_get(struct string_cache *cache, field_sid_t id)
 {
         error_if_null(cache)
-        hash32_t id_hash = NG5_HASH_BERNSTEIN(sizeof(field_sid_t), &id);
+        hash32_t id_hash = ARK_HASH_BERNSTEIN(sizeof(field_sid_t), &id);
         size_t bucket_pos = id_hash % cache->list_entries.num_elems;
         struct lru_list *list = vec_get(&cache->list_entries, bucket_pos, struct lru_list);
         struct cache_entry *cursor = list->most_recent;
@@ -146,7 +146,7 @@ NG5_EXPORT(char *)string_id_cache_get(struct string_cache *cache, field_sid_t id
         return strdup(result);
 }
 
-NG5_EXPORT(bool) string_id_cache_get_statistics(struct sid_cache_stats *statistics, struct string_cache *cache)
+ARK_EXPORT(bool) string_id_cache_get_statistics(struct sid_cache_stats *statistics, struct string_cache *cache)
 {
         error_if_null(statistics);
         error_if_null(cache);
@@ -154,14 +154,14 @@ NG5_EXPORT(bool) string_id_cache_get_statistics(struct sid_cache_stats *statisti
         return true;
 }
 
-NG5_EXPORT(bool) string_id_cache_reset_statistics(struct string_cache *cache)
+ARK_EXPORT(bool) string_id_cache_reset_statistics(struct string_cache *cache)
 {
         error_if_null(cache);
-        ng5_zero_memory(&cache->statistics, sizeof(struct sid_cache_stats));
+        ark_zero_memory(&cache->statistics, sizeof(struct sid_cache_stats));
         return true;
 }
 
-NG5_EXPORT(bool) string_id_cache_drop(struct string_cache *cache)
+ARK_EXPORT(bool) string_id_cache_drop(struct string_cache *cache)
 {
         error_if_null(cache);
         for (size_t i = 0; i < cache->list_entries.num_elems; i++) {

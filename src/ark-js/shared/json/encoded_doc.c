@@ -19,7 +19,7 @@
 
 #include <ark-js/shared/json/encoded_doc.h>
 
-NG5_EXPORT(bool) encoded_doc_collection_create(struct encoded_doc_list *collection, struct err *err,
+ARK_EXPORT(bool) encoded_doc_collection_create(struct encoded_doc_list *collection, struct err *err,
         struct archive *archive)
 {
         unused(collection);
@@ -34,7 +34,7 @@ NG5_EXPORT(bool) encoded_doc_collection_create(struct encoded_doc_list *collecti
         return true;
 }
 
-NG5_EXPORT(bool) encoded_doc_collection_drop(struct encoded_doc_list *collection)
+ARK_EXPORT(bool) encoded_doc_collection_drop(struct encoded_doc_list *collection)
 {
         unused(collection);
 
@@ -62,30 +62,30 @@ static struct encoded_doc *doc_create(struct err *err, object_id_t object_id, st
                 hashtable_insert_or_update(&collection->index, &object_id, &doc_position, 1);
                 return new_doc;
         } else {
-                error(err, NG5_ERR_ILLEGALARG);
+                error(err, ARK_ERR_ILLEGALARG);
                 return NULL;
         }
 }
 
-NG5_EXPORT(struct encoded_doc *)encoded_doc_collection_get_or_append(struct encoded_doc_list *collection,
+ARK_EXPORT(struct encoded_doc *)encoded_doc_collection_get_or_append(struct encoded_doc_list *collection,
         object_id_t id)
 {
         error_if_null(collection);
         const u32 *doc_pos = hashtable_get_value(&collection->index, &id);
         if (doc_pos) {
                 struct encoded_doc *result = vec_get(&collection->flat_object_collection, *doc_pos, struct encoded_doc);
-                error_if(result == NULL, &collection->err, NG5_ERR_INTERNALERR);
+                error_if(result == NULL, &collection->err, ARK_ERR_INTERNALERR);
                 return result;
         } else {
                 struct encoded_doc *result = doc_create(&collection->err, id, collection);
                 if (!result) {
-                        error(&collection->err, NG5_ERR_INTERNALERR);
+                        error(&collection->err, ARK_ERR_INTERNALERR);
                 }
                 return result;
         }
 }
 
-NG5_EXPORT(bool) encoded_doc_collection_print(FILE *file, struct encoded_doc_list *collection)
+ARK_EXPORT(bool) encoded_doc_collection_print(FILE *file, struct encoded_doc_list *collection)
 {
         unused(file);
         unused(collection);
@@ -98,7 +98,7 @@ NG5_EXPORT(bool) encoded_doc_collection_print(FILE *file, struct encoded_doc_lis
         return false;
 }
 
-NG5_EXPORT(bool) encoded_doc_drop(struct encoded_doc *doc)
+ARK_EXPORT(bool) encoded_doc_drop(struct encoded_doc *doc)
 {
         unused(doc);
         for (u32 i = 0; i < doc->props_arrays.num_elems; i++) {
@@ -117,8 +117,8 @@ NG5_EXPORT(bool) encoded_doc_drop(struct encoded_doc *doc)
         return false;
 }
 
-#define DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(built_in_type, basic_type, value_name)                               \
-NG5_EXPORT(bool)                                                                                                    \
+#define DECLARE_ARK_ENCODED_DOC_ADD_PROP_BASIC(built_in_type, basic_type, value_name)                               \
+ARK_EXPORT(bool)                                                                                                    \
 encoded_doc_add_prop_##value_name(struct encoded_doc *doc, field_sid_t key, built_in_type value)       \
 {                                                                                                                      \
     error_if_null(doc)                                                                                      \
@@ -132,8 +132,8 @@ encoded_doc_add_prop_##value_name(struct encoded_doc *doc, field_sid_t key, buil
     return true;                                                                                                       \
 }
 
-#define DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(built_in_type, basic_type, value_name)                       \
-NG5_EXPORT(bool)                                                                                                    \
+#define DECLARE_ARK_ENCODED_DOC_ADD_PROP_BASIC_DECODED(built_in_type, basic_type, value_name)                       \
+ARK_EXPORT(bool)                                                                                                    \
 encoded_doc_add_prop_##value_name##_decoded(struct encoded_doc *doc, const char *key, built_in_type value)    \
 {                                                                                                                      \
     error_if_null(doc)                                                                                      \
@@ -147,51 +147,51 @@ encoded_doc_add_prop_##value_name##_decoded(struct encoded_doc *doc, const char 
     return true;                                                                                                       \
 }
 
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(field_i8_t, FIELD_INT8, int8)
+DECLARE_ARK_ENCODED_DOC_ADD_PROP_BASIC(field_i8_t, FIELD_INT8, int8)
 
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(field_i16_t, FIELD_INT16, int16)
+DECLARE_ARK_ENCODED_DOC_ADD_PROP_BASIC(field_i16_t, FIELD_INT16, int16)
 
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(field_i32_t, FIELD_INT32, int32)
+DECLARE_ARK_ENCODED_DOC_ADD_PROP_BASIC(field_i32_t, FIELD_INT32, int32)
 
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(field_i64_t, FIELD_INT64, int64)
+DECLARE_ARK_ENCODED_DOC_ADD_PROP_BASIC(field_i64_t, FIELD_INT64, int64)
 
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(field_u8_t, FIELD_UINT8, uint8)
+DECLARE_ARK_ENCODED_DOC_ADD_PROP_BASIC(field_u8_t, FIELD_UINT8, uint8)
 
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(field_u16_t, FIELD_UINT16, uint16)
+DECLARE_ARK_ENCODED_DOC_ADD_PROP_BASIC(field_u16_t, FIELD_UINT16, uint16)
 
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(field_u32_t, FIELD_UINT32, uint32)
+DECLARE_ARK_ENCODED_DOC_ADD_PROP_BASIC(field_u32_t, FIELD_UINT32, uint32)
 
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(field_u64_t, FIELD_UINT64, uint64)
+DECLARE_ARK_ENCODED_DOC_ADD_PROP_BASIC(field_u64_t, FIELD_UINT64, uint64)
 
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(field_number_t, FIELD_FLOAT, number)
+DECLARE_ARK_ENCODED_DOC_ADD_PROP_BASIC(field_number_t, FIELD_FLOAT, number)
 
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(field_boolean_t, FIELD_BOOLEAN, boolean)
+DECLARE_ARK_ENCODED_DOC_ADD_PROP_BASIC(field_boolean_t, FIELD_BOOLEAN, boolean)
 
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC(field_sid_t, FIELD_STRING, string)
+DECLARE_ARK_ENCODED_DOC_ADD_PROP_BASIC(field_sid_t, FIELD_STRING, string)
 
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_i8_t, FIELD_INT8, int8)
+DECLARE_ARK_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_i8_t, FIELD_INT8, int8)
 
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_i16_t, FIELD_INT16, int16)
+DECLARE_ARK_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_i16_t, FIELD_INT16, int16)
 
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_i32_t, FIELD_INT32, int32)
+DECLARE_ARK_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_i32_t, FIELD_INT32, int32)
 
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_i64_t, FIELD_INT64, int64)
+DECLARE_ARK_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_i64_t, FIELD_INT64, int64)
 
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_u8_t, FIELD_UINT8, uint8)
+DECLARE_ARK_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_u8_t, FIELD_UINT8, uint8)
 
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_u16_t, FIELD_UINT16, uint16)
+DECLARE_ARK_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_u16_t, FIELD_UINT16, uint16)
 
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_u32_t, FIELD_UINT32, uint32)
+DECLARE_ARK_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_u32_t, FIELD_UINT32, uint32)
 
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_u64_t, FIELD_UINT64, uint64)
+DECLARE_ARK_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_u64_t, FIELD_UINT64, uint64)
 
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_number_t, FIELD_FLOAT, number)
+DECLARE_ARK_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_number_t, FIELD_FLOAT, number)
 
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_boolean_t, FIELD_BOOLEAN, boolean)
+DECLARE_ARK_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_boolean_t, FIELD_BOOLEAN, boolean)
 
-DECLARE_NG5_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_sid_t, FIELD_STRING, string)
+DECLARE_ARK_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_sid_t, FIELD_STRING, string)
 
-NG5_EXPORT(bool) encoded_doc_add_prop_string_decoded_string_value_decoded(struct encoded_doc *doc, const char *key,
+ARK_EXPORT(bool) encoded_doc_add_prop_string_decoded_string_value_decoded(struct encoded_doc *doc, const char *key,
         const char *value)
 {
         error_if_null(doc)
@@ -204,7 +204,7 @@ NG5_EXPORT(bool) encoded_doc_add_prop_string_decoded_string_value_decoded(struct
         return true;
 }
 
-NG5_EXPORT(bool) encoded_doc_add_prop_null(struct encoded_doc *doc, field_sid_t key)
+ARK_EXPORT(bool) encoded_doc_add_prop_null(struct encoded_doc *doc, field_sid_t key)
 {
         error_if_null(doc)
         struct encoded_doc_prop *prop = vec_new_and_get(&doc->props, struct encoded_doc_prop);
@@ -216,7 +216,7 @@ NG5_EXPORT(bool) encoded_doc_add_prop_null(struct encoded_doc *doc, field_sid_t 
         return true;
 }
 
-NG5_EXPORT(bool) encoded_doc_add_prop_null_decoded(struct encoded_doc *doc, const char *key)
+ARK_EXPORT(bool) encoded_doc_add_prop_null_decoded(struct encoded_doc *doc, const char *key)
 {
         error_if_null(doc)
         struct encoded_doc_prop *prop = vec_new_and_get(&doc->props, struct encoded_doc_prop);
@@ -228,7 +228,7 @@ NG5_EXPORT(bool) encoded_doc_add_prop_null_decoded(struct encoded_doc *doc, cons
         return true;
 }
 
-NG5_EXPORT(bool) encoded_doc_add_prop_object(struct encoded_doc *doc, field_sid_t key, struct encoded_doc *value)
+ARK_EXPORT(bool) encoded_doc_add_prop_object(struct encoded_doc *doc, field_sid_t key, struct encoded_doc *value)
 {
         error_if_null(doc)
         struct encoded_doc_prop *prop = vec_new_and_get(&doc->props, struct encoded_doc_prop);
@@ -240,7 +240,7 @@ NG5_EXPORT(bool) encoded_doc_add_prop_object(struct encoded_doc *doc, field_sid_
         return true;
 }
 
-NG5_EXPORT(bool) encoded_doc_add_prop_object_decoded(struct encoded_doc *doc, const char *key,
+ARK_EXPORT(bool) encoded_doc_add_prop_object_decoded(struct encoded_doc *doc, const char *key,
         struct encoded_doc *value)
 {
         error_if_null(doc)
@@ -253,8 +253,8 @@ NG5_EXPORT(bool) encoded_doc_add_prop_object_decoded(struct encoded_doc *doc, co
         return true;
 }
 
-#define DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(name, basic_type)                                               \
-NG5_EXPORT(bool)                                                                                                    \
+#define DECALRE_ARK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(name, basic_type)                                               \
+ARK_EXPORT(bool)                                                                                                    \
 encoded_doc_add_prop_array_##name(struct encoded_doc *doc,                                                    \
                                        field_sid_t key)                                                         \
 {                                                                                                                      \
@@ -270,8 +270,8 @@ encoded_doc_add_prop_array_##name(struct encoded_doc *doc,                      
     return true;                                                                                                       \
 }
 
-#define DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(name, basic_type)                                       \
-NG5_EXPORT(bool)                                                                                                    \
+#define DECALRE_ARK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(name, basic_type)                                       \
+ARK_EXPORT(bool)                                                                                                    \
 encoded_doc_add_prop_array_##name##_decoded(struct encoded_doc *doc,                                          \
                                        const char *key)                                                                \
 {                                                                                                                      \
@@ -285,70 +285,70 @@ encoded_doc_add_prop_array_##name##_decoded(struct encoded_doc *doc,            
     return true;                                                                                                       \
 }
 
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(int8, FIELD_INT8)
+DECALRE_ARK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(int8, FIELD_INT8)
 
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(int16, FIELD_INT16)
+DECALRE_ARK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(int16, FIELD_INT16)
 
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(int32, FIELD_INT32)
+DECALRE_ARK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(int32, FIELD_INT32)
 
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(int64, FIELD_INT64)
+DECALRE_ARK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(int64, FIELD_INT64)
 
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(uint8, FIELD_UINT8)
+DECALRE_ARK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(uint8, FIELD_UINT8)
 
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(uint16, FIELD_UINT16)
+DECALRE_ARK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(uint16, FIELD_UINT16)
 
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(uint32, FIELD_UINT32)
+DECALRE_ARK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(uint32, FIELD_UINT32)
 
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(uint64, FIELD_UINT64)
+DECALRE_ARK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(uint64, FIELD_UINT64)
 
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(number, FIELD_FLOAT)
+DECALRE_ARK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(number, FIELD_FLOAT)
 
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(boolean, FIELD_BOOLEAN)
+DECALRE_ARK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(boolean, FIELD_BOOLEAN)
 
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(string, FIELD_STRING)
+DECALRE_ARK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(string, FIELD_STRING)
 
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(null, FIELD_NULL)
+DECALRE_ARK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(null, FIELD_NULL)
 
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(object, FIELD_OBJECT)
+DECALRE_ARK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(object, FIELD_OBJECT)
 
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(int8, FIELD_INT8)
+DECALRE_ARK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(int8, FIELD_INT8)
 
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(int16, FIELD_INT16)
+DECALRE_ARK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(int16, FIELD_INT16)
 
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(int32, FIELD_INT32)
+DECALRE_ARK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(int32, FIELD_INT32)
 
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(int64, FIELD_INT64)
+DECALRE_ARK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(int64, FIELD_INT64)
 
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(uint8, FIELD_UINT8)
+DECALRE_ARK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(uint8, FIELD_UINT8)
 
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(uint16, FIELD_UINT16)
+DECALRE_ARK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(uint16, FIELD_UINT16)
 
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(uint32, FIELD_UINT32)
+DECALRE_ARK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(uint32, FIELD_UINT32)
 
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(uint64, FIELD_UINT64)
+DECALRE_ARK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(uint64, FIELD_UINT64)
 
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(number, FIELD_FLOAT)
+DECALRE_ARK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(number, FIELD_FLOAT)
 
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(boolean, FIELD_BOOLEAN)
+DECALRE_ARK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(boolean, FIELD_BOOLEAN)
 
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(string, FIELD_STRING)
+DECALRE_ARK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(string, FIELD_STRING)
 
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(null, FIELD_NULL)
+DECALRE_ARK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(null, FIELD_NULL)
 
-DECALRE_NG5_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(object, FIELD_OBJECT)
+DECALRE_ARK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(object, FIELD_OBJECT)
 
-#define DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(name, built_in_type, basic_type)                                    \
-NG5_EXPORT(bool)                                                                                                    \
+#define DECLARE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE(name, built_in_type, basic_type)                                    \
+ARK_EXPORT(bool)                                                                                                    \
 encoded_doc_array_push_##name(struct encoded_doc *doc, field_sid_t key,                                \
                                      const built_in_type *values, u32 values_length)                              \
 {                                                                                                                      \
     error_if_null(doc)                                                                                      \
     const u32 *prop_pos = hashtable_get_value(&doc->prop_array_index, &key);                               \
-    error_if(prop_pos == NULL, &doc->err, NG5_ERR_NOTFOUND);                                                 \
+    error_if(prop_pos == NULL, &doc->err, ARK_ERR_NOTFOUND);                                                 \
     struct encoded_doc_prop_array *array = vec_get(&doc->props_arrays, *prop_pos,                          \
                                                                struct encoded_doc_prop_array);                       \
-    error_if(array == NULL, &doc->err, NG5_ERR_INTERNALERR);                                                 \
-    error_if(array->header.type != basic_type, &doc->err, NG5_ERR_TYPEMISMATCH);                             \
+    error_if(array == NULL, &doc->err, ARK_ERR_INTERNALERR);                                                 \
+    error_if(array->header.type != basic_type, &doc->err, ARK_ERR_TYPEMISMATCH);                             \
     for (u32 i = 0; i < values_length; i++) {                                                                     \
         union encoded_doc_value *value = vec_new_and_get(&array->values, union encoded_doc_value);            \
         value->name = values[i];                                                                                       \
@@ -359,8 +359,8 @@ encoded_doc_array_push_##name(struct encoded_doc *doc, field_sid_t key,         
 
 #include <inttypes.h>
 
-#define DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(name, built_in_type, basic_type)                            \
-NG5_EXPORT(bool)                                                                                                    \
+#define DECLARE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(name, built_in_type, basic_type)                            \
+ARK_EXPORT(bool)                                                                                                    \
 encoded_doc_array_push_##name##_decoded(struct encoded_doc *doc, const char *key,                             \
                                      const built_in_type *values, u32 values_length)                              \
 {                                                                                                                      \
@@ -375,11 +375,11 @@ encoded_doc_array_push_##name##_decoded(struct encoded_doc *doc, const char *key
             }                                                                                                          \
         }                                                                                                              \
     }                                                                                                                  \
-    error_if(prop_pos == (u32) -1, &doc->err, NG5_ERR_NOTFOUND);                                        \
+    error_if(prop_pos == (u32) -1, &doc->err, ARK_ERR_NOTFOUND);                                        \
     struct encoded_doc_prop_array *array = vec_get(&doc->props_arrays, prop_pos,                           \
                                                                    struct encoded_doc_prop_array);                   \
-    error_if(array == NULL, &doc->err, NG5_ERR_INTERNALERR);                                                 \
-    error_if(array->header.type != basic_type, &doc->err, NG5_ERR_TYPEMISMATCH);                             \
+    error_if(array == NULL, &doc->err, ARK_ERR_INTERNALERR);                                                 \
+    error_if(array->header.type != basic_type, &doc->err, ARK_ERR_TYPEMISMATCH);                             \
     for (u32 i = 0; i < values_length; i++) {                                                                     \
         union encoded_doc_value *value = vec_new_and_get(&array->values, union encoded_doc_value);            \
         value->name = values[i];                                                                                       \
@@ -388,64 +388,64 @@ encoded_doc_array_push_##name##_decoded(struct encoded_doc *doc, const char *key
     return true;                                                                                                       \
 }
 
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(int8, field_i8_t, FIELD_INT8)
+DECLARE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE(int8, field_i8_t, FIELD_INT8)
 
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(int16, field_i16_t, FIELD_INT16)
+DECLARE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE(int16, field_i16_t, FIELD_INT16)
 
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(int32, field_i32_t, FIELD_INT32)
+DECLARE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE(int32, field_i32_t, FIELD_INT32)
 
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(int64, field_i64_t, FIELD_INT64)
+DECLARE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE(int64, field_i64_t, FIELD_INT64)
 
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(uint8, field_u8_t, FIELD_UINT8)
+DECLARE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE(uint8, field_u8_t, FIELD_UINT8)
 
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(uint16, field_u16_t, FIELD_UINT16)
+DECLARE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE(uint16, field_u16_t, FIELD_UINT16)
 
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(uint32, field_u32_t, FIELD_UINT32)
+DECLARE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE(uint32, field_u32_t, FIELD_UINT32)
 
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(uint64, field_u64_t, FIELD_UINT64)
+DECLARE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE(uint64, field_u64_t, FIELD_UINT64)
 
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(number, field_number_t, FIELD_FLOAT)
+DECLARE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE(number, field_number_t, FIELD_FLOAT)
 
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(boolean, field_boolean_t, FIELD_BOOLEAN)
+DECLARE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE(boolean, field_boolean_t, FIELD_BOOLEAN)
 
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(string, field_sid_t, FIELD_STRING)
+DECLARE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE(string, field_sid_t, FIELD_STRING)
 
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE(null, field_u32_t, FIELD_NULL)
+DECLARE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE(null, field_u32_t, FIELD_NULL)
 
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(int8, field_i8_t, FIELD_INT8)
+DECLARE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(int8, field_i8_t, FIELD_INT8)
 
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(int16, field_i16_t, FIELD_INT16)
+DECLARE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(int16, field_i16_t, FIELD_INT16)
 
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(int32, field_i32_t, FIELD_INT32)
+DECLARE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(int32, field_i32_t, FIELD_INT32)
 
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(int64, field_i64_t, FIELD_INT64)
+DECLARE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(int64, field_i64_t, FIELD_INT64)
 
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(uint8, field_u8_t, FIELD_UINT8)
+DECLARE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(uint8, field_u8_t, FIELD_UINT8)
 
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(uint16, field_u16_t, FIELD_UINT16)
+DECLARE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(uint16, field_u16_t, FIELD_UINT16)
 
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(uint32, field_u32_t, FIELD_UINT32)
+DECLARE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(uint32, field_u32_t, FIELD_UINT32)
 
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(uint64, field_u64_t, FIELD_UINT64)
+DECLARE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(uint64, field_u64_t, FIELD_UINT64)
 
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(number, field_number_t, FIELD_FLOAT)
+DECLARE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(number, field_number_t, FIELD_FLOAT)
 
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(boolean, field_boolean_t, FIELD_BOOLEAN)
+DECLARE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(boolean, field_boolean_t, FIELD_BOOLEAN)
 
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(string, field_sid_t, FIELD_STRING)
+DECLARE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(string, field_sid_t, FIELD_STRING)
 
-DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(null, field_u32_t, FIELD_NULL)
+DECLARE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(null, field_u32_t, FIELD_NULL)
 //
-//NG5_EXPORT(bool)
+//ARK_EXPORT(bool)
 //encoded_doc_array_push_null(struct encoded_doc *doc, field_sid_t key, u32 how_many)
 //{
 //    error_if_null(doc)
 //    const u32 *prop_pos = hashtable_get_value(&doc->prop_array_index, &key);
-//    error_if(prop_pos == NULL, &doc->err, NG5_ERR_NOTFOUND);
+//    error_if(prop_pos == NULL, &doc->err, ARK_ERR_NOTFOUND);
 //    struct encoded_doc_prop_array *array = vec_get(&doc->props_arrays, *prop_pos,
 //                                                               struct encoded_doc_prop_array);
-//    error_if(array == NULL, &doc->err, NG5_ERR_INTERNALERR);
-//    error_if(array->header.type != FIELD_NULL, &doc->err, NG5_ERR_TYPEMISMATCH);
+//    error_if(array == NULL, &doc->err, ARK_ERR_INTERNALERR);
+//    error_if(array->header.type != FIELD_NULL, &doc->err, ARK_ERR_TYPEMISMATCH);
 //    union encoded_doc_value *value = vec_new_and_get(&array->values, union encoded_doc_value);
 //    value->num_nulls = how_many;
 //    return true;
@@ -455,7 +455,7 @@ DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(null, field_u32_t, FIELD_NULL)
 #include <inttypes.h>
 #include <ark-js/carbon/archive/archive-query.h>
 
-NG5_EXPORT(bool) encoded_doc_array_push_object(struct encoded_doc *doc, field_sid_t key, object_id_t id)
+ARK_EXPORT(bool) encoded_doc_array_push_object(struct encoded_doc *doc, field_sid_t key, object_id_t id)
 {
         unused(doc);
         unused(key);
@@ -463,16 +463,16 @@ NG5_EXPORT(bool) encoded_doc_array_push_object(struct encoded_doc *doc, field_si
 
         error_if_null(doc)
         const u32 *prop_pos = hashtable_get_value(&doc->prop_array_index, &key);
-        error_if(prop_pos == NULL, &doc->err, NG5_ERR_NOTFOUND);
+        error_if(prop_pos == NULL, &doc->err, ARK_ERR_NOTFOUND);
         struct encoded_doc_prop_array *array = vec_get(&doc->props_arrays, *prop_pos, struct encoded_doc_prop_array);
-        error_if(array == NULL, &doc->err, NG5_ERR_INTERNALERR);
-        error_if(array->header.type != FIELD_OBJECT, &doc->err, NG5_ERR_TYPEMISMATCH);
+        error_if(array == NULL, &doc->err, ARK_ERR_INTERNALERR);
+        error_if(array->header.type != FIELD_OBJECT, &doc->err, ARK_ERR_TYPEMISMATCH);
         union encoded_doc_value *value = vec_new_and_get(&array->values, union encoded_doc_value);
         value->object = id;
         return true;
 }
 
-NG5_EXPORT(bool) encoded_doc_array_push_object_decoded(struct encoded_doc *doc, const char *key, object_id_t id)
+ARK_EXPORT(bool) encoded_doc_array_push_object_decoded(struct encoded_doc *doc, const char *key, object_id_t id)
 {
         unused(doc);
         unused(key);
@@ -489,10 +489,10 @@ NG5_EXPORT(bool) encoded_doc_array_push_object_decoded(struct encoded_doc *doc, 
                         }
                 }
         }
-        error_if(prop_pos == (u32) -1, &doc->err, NG5_ERR_NOTFOUND);
+        error_if(prop_pos == (u32) -1, &doc->err, ARK_ERR_NOTFOUND);
         struct encoded_doc_prop_array *array = vec_get(&doc->props_arrays, prop_pos, struct encoded_doc_prop_array);
-        error_if(array == NULL, &doc->err, NG5_ERR_INTERNALERR);
-        error_if(array->header.type != FIELD_OBJECT, &doc->err, NG5_ERR_TYPEMISMATCH);
+        error_if(array == NULL, &doc->err, ARK_ERR_INTERNALERR);
+        error_if(array->header.type != FIELD_OBJECT, &doc->err, ARK_ERR_TYPEMISMATCH);
         union encoded_doc_value *value = vec_new_and_get(&array->values, union encoded_doc_value);
         value->object = id;
         return true;
@@ -569,7 +569,7 @@ static bool doc_print_pretty(FILE *file, struct encoded_doc *doc, unsigned level
                         doc_print_pretty(file, nested, level + 1);
                 }
                         break;
-                default: error(&doc->err, NG5_ERR_INTERNALERR);
+                default: error(&doc->err, ARK_ERR_INTERNALERR);
                         return false;
                 }
                 free(key_str);
@@ -604,7 +604,7 @@ static bool doc_print_pretty(FILE *file, struct encoded_doc *doc, unsigned level
                 case FIELD_INT8:
                         for (u32 k = 0; k < prop->values.num_elems; k++) {
                                 field_i8_t value = (vec_get(&prop->values, k, union encoded_doc_value))->int8;
-                                if (NG5_IS_NULL_INT8(value)) {
+                                if (ARK_IS_NULL_INT8(value)) {
                                         fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                                 } else {
                                         fprintf(file,
@@ -617,7 +617,7 @@ static bool doc_print_pretty(FILE *file, struct encoded_doc *doc, unsigned level
                 case FIELD_INT16:
                         for (u32 k = 0; k < prop->values.num_elems; k++) {
                                 field_i16_t value = (vec_get(&prop->values, k, union encoded_doc_value))->int16;
-                                if (NG5_IS_NULL_INT16(value)) {
+                                if (ARK_IS_NULL_INT16(value)) {
                                         fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                                 } else {
                                         fprintf(file,
@@ -630,7 +630,7 @@ static bool doc_print_pretty(FILE *file, struct encoded_doc *doc, unsigned level
                 case FIELD_INT32:
                         for (u32 k = 0; k < prop->values.num_elems; k++) {
                                 field_i32_t value = (vec_get(&prop->values, k, union encoded_doc_value))->int32;
-                                if (NG5_IS_NULL_INT32(value)) {
+                                if (ARK_IS_NULL_INT32(value)) {
                                         fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                                 } else {
                                         fprintf(file,
@@ -643,7 +643,7 @@ static bool doc_print_pretty(FILE *file, struct encoded_doc *doc, unsigned level
                 case FIELD_INT64:
                         for (u32 k = 0; k < prop->values.num_elems; k++) {
                                 field_i64_t value = (vec_get(&prop->values, k, union encoded_doc_value))->int64;
-                                if (NG5_IS_NULL_INT64(value)) {
+                                if (ARK_IS_NULL_INT64(value)) {
                                         fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                                 } else {
                                         fprintf(file,
@@ -656,7 +656,7 @@ static bool doc_print_pretty(FILE *file, struct encoded_doc *doc, unsigned level
                 case FIELD_UINT8:
                         for (u32 k = 0; k < prop->values.num_elems; k++) {
                                 field_u8_t value = (vec_get(&prop->values, k, union encoded_doc_value))->uint8;
-                                if (NG5_IS_NULL_UINT8(value)) {
+                                if (ARK_IS_NULL_UINT8(value)) {
                                         fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                                 } else {
                                         fprintf(file,
@@ -669,7 +669,7 @@ static bool doc_print_pretty(FILE *file, struct encoded_doc *doc, unsigned level
                 case FIELD_UINT16:
                         for (u32 k = 0; k < prop->values.num_elems; k++) {
                                 field_u16_t value = (vec_get(&prop->values, k, union encoded_doc_value))->uint16;
-                                if (NG5_IS_NULL_UINT16(value)) {
+                                if (ARK_IS_NULL_UINT16(value)) {
                                         fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                                 } else {
                                         fprintf(file,
@@ -682,7 +682,7 @@ static bool doc_print_pretty(FILE *file, struct encoded_doc *doc, unsigned level
                 case FIELD_UINT32:
                         for (u32 k = 0; k < prop->values.num_elems; k++) {
                                 field_u32_t value = (vec_get(&prop->values, k, union encoded_doc_value))->uint32;
-                                if (NG5_IS_NULL_UINT32(value)) {
+                                if (ARK_IS_NULL_UINT32(value)) {
                                         fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                                 } else {
                                         fprintf(file,
@@ -695,7 +695,7 @@ static bool doc_print_pretty(FILE *file, struct encoded_doc *doc, unsigned level
                 case FIELD_UINT64:
                         for (u32 k = 0; k < prop->values.num_elems; k++) {
                                 field_u64_t value = (vec_get(&prop->values, k, union encoded_doc_value))->uint64;
-                                if (NG5_IS_NULL_UINT64(value)) {
+                                if (ARK_IS_NULL_UINT64(value)) {
                                         fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                                 } else {
                                         fprintf(file,
@@ -708,7 +708,7 @@ static bool doc_print_pretty(FILE *file, struct encoded_doc *doc, unsigned level
                 case FIELD_FLOAT:
                         for (u32 k = 0; k < prop->values.num_elems; k++) {
                                 field_number_t value = (vec_get(&prop->values, k, union encoded_doc_value))->number;
-                                if (NG5_IS_NULL_NUMBER(value)) {
+                                if (ARK_IS_NULL_NUMBER(value)) {
                                         fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                                 } else {
                                         fprintf(file,
@@ -721,7 +721,7 @@ static bool doc_print_pretty(FILE *file, struct encoded_doc *doc, unsigned level
                 case FIELD_STRING: {
                         for (u32 k = 0; k < prop->values.num_elems; k++) {
                                 field_sid_t value = (vec_get(&prop->values, k, union encoded_doc_value))->string;
-                                if (NG5_IS_NULL_STRING(value)) {
+                                if (ARK_IS_NULL_STRING(value)) {
                                         fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                                 } else {
                                         char *value_str = query_fetch_string_by_id(&query, value);
@@ -738,7 +738,7 @@ static bool doc_print_pretty(FILE *file, struct encoded_doc *doc, unsigned level
                         for (u32 k = 0; k < prop->values.num_elems; k++) {
                                 field_boolean_t
                                         value = (vec_get(&prop->values, k, union encoded_doc_value))->boolean;
-                                if (NG5_IS_NULL_BOOLEAN(value)) {
+                                if (ARK_IS_NULL_BOOLEAN(value)) {
                                         fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                                 } else {
                                         fprintf(file,
@@ -771,7 +771,7 @@ static bool doc_print_pretty(FILE *file, struct encoded_doc *doc, unsigned level
                         }
                 }
                         break;
-                default: error(&doc->err, NG5_ERR_INTERNALERR);
+                default: error(&doc->err, ARK_ERR_INTERNALERR);
                         return false;
                 }
                 free(key_str);
@@ -792,7 +792,7 @@ static bool doc_print_pretty(FILE *file, struct encoded_doc *doc, unsigned level
         return true;
 }
 
-NG5_EXPORT(bool) encoded_doc_print(FILE *file, struct encoded_doc *doc)
+ARK_EXPORT(bool) encoded_doc_print(FILE *file, struct encoded_doc *doc)
 {
         return doc_print_pretty(file, doc, 1);
 }

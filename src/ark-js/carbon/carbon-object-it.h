@@ -24,7 +24,7 @@
 #include <ark-js/carbon/carbon-field.h>
 #include <ark-js/carbon/carbon-array-it.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
 struct carbon_object_it
 {
@@ -43,65 +43,65 @@ struct carbon_object_it
         struct field_access field_access;
 };
 
-NG5_EXPORT(bool) carbon_object_it_create(struct carbon_object_it *it, struct memfile *memfile, struct err *err,
+ARK_EXPORT(bool) carbon_object_it_create(struct carbon_object_it *it, struct memfile *memfile, struct err *err,
         offset_t payload_start);
 
-NG5_EXPORT(bool) carbon_object_it_copy(struct carbon_object_it *dst, struct carbon_object_it *src);
+ARK_EXPORT(bool) carbon_object_it_copy(struct carbon_object_it *dst, struct carbon_object_it *src);
 
-NG5_EXPORT(bool) carbon_object_it_drop(struct carbon_object_it *it);
+ARK_EXPORT(bool) carbon_object_it_drop(struct carbon_object_it *it);
 
-NG5_EXPORT(bool) carbon_object_it_rewind(struct carbon_object_it *it);
+ARK_EXPORT(bool) carbon_object_it_rewind(struct carbon_object_it *it);
 
-NG5_EXPORT(bool) carbon_object_it_next(struct carbon_object_it *it);
+ARK_EXPORT(bool) carbon_object_it_next(struct carbon_object_it *it);
 
-NG5_EXPORT(const char *) carbon_object_it_prop_name(u64 *key_len, struct carbon_object_it *it);
+ARK_EXPORT(const char *) carbon_object_it_prop_name(u64 *key_len, struct carbon_object_it *it);
 
-NG5_EXPORT(bool) carbon_object_it_prop_type(enum carbon_field_type *type, struct carbon_object_it *it);
+ARK_EXPORT(bool) carbon_object_it_prop_type(enum carbon_field_type *type, struct carbon_object_it *it);
 
-NG5_EXPORT(bool) carbon_object_it_insert_begin(struct carbon_insert *inserter, struct carbon_object_it *it);
+ARK_EXPORT(bool) carbon_object_it_insert_begin(struct carbon_insert *inserter, struct carbon_object_it *it);
 
-NG5_EXPORT(bool) carbon_object_it_insert_end(struct carbon_insert *inserter);
+ARK_EXPORT(bool) carbon_object_it_insert_end(struct carbon_insert *inserter);
 
-NG5_EXPORT(bool) carbon_object_it_lock(struct carbon_object_it *it);
+ARK_EXPORT(bool) carbon_object_it_lock(struct carbon_object_it *it);
 
-NG5_EXPORT(bool) carbon_object_it_unlock(struct carbon_object_it *it);
+ARK_EXPORT(bool) carbon_object_it_unlock(struct carbon_object_it *it);
 
-NG5_EXPORT(bool) carbon_object_it_fast_forward(struct carbon_object_it *it);
+ARK_EXPORT(bool) carbon_object_it_fast_forward(struct carbon_object_it *it);
 
-NG5_EXPORT(bool) carbon_object_it_u8_value(u8 *value, struct carbon_object_it *it);
+ARK_EXPORT(bool) carbon_object_it_u8_value(u8 *value, struct carbon_object_it *it);
 
-NG5_EXPORT(bool) carbon_object_it_u16_value(u16 *value, struct carbon_object_it *it);
+ARK_EXPORT(bool) carbon_object_it_u16_value(u16 *value, struct carbon_object_it *it);
 
-NG5_EXPORT(bool) carbon_object_it_u32_value(u32 *value, struct carbon_object_it *it);
+ARK_EXPORT(bool) carbon_object_it_u32_value(u32 *value, struct carbon_object_it *it);
 
-NG5_EXPORT(bool) carbon_object_it_u64_value(u64 *value, struct carbon_object_it *it);
+ARK_EXPORT(bool) carbon_object_it_u64_value(u64 *value, struct carbon_object_it *it);
 
-NG5_EXPORT(bool) carbon_object_it_i8_value(i8 *value, struct carbon_object_it *it);
+ARK_EXPORT(bool) carbon_object_it_i8_value(i8 *value, struct carbon_object_it *it);
 
-NG5_EXPORT(bool) carbon_object_it_i16_value(i16 *value, struct carbon_object_it *it);
+ARK_EXPORT(bool) carbon_object_it_i16_value(i16 *value, struct carbon_object_it *it);
 
-NG5_EXPORT(bool) carbon_object_it_i32_value(i32 *value, struct carbon_object_it *it);
+ARK_EXPORT(bool) carbon_object_it_i32_value(i32 *value, struct carbon_object_it *it);
 
-NG5_EXPORT(bool) carbon_object_it_i64_value(i64 *value, struct carbon_object_it *it);
+ARK_EXPORT(bool) carbon_object_it_i64_value(i64 *value, struct carbon_object_it *it);
 
-NG5_EXPORT(bool) carbon_object_it_float_value(bool *is_null_in, float *value, struct carbon_object_it *it);
+ARK_EXPORT(bool) carbon_object_it_float_value(bool *is_null_in, float *value, struct carbon_object_it *it);
 
-NG5_EXPORT(bool) carbon_object_it_signed_value(bool *is_null_in, i64 *value, struct carbon_object_it *it);
+ARK_EXPORT(bool) carbon_object_it_signed_value(bool *is_null_in, i64 *value, struct carbon_object_it *it);
 
-NG5_EXPORT(bool) carbon_object_it_unsigned_value(bool *is_null_in, u64 *value, struct carbon_object_it *it);
+ARK_EXPORT(bool) carbon_object_it_unsigned_value(bool *is_null_in, u64 *value, struct carbon_object_it *it);
 
-NG5_EXPORT(const char *) carbon_object_it_string_value(u64 *strlen, struct carbon_object_it *it);
+ARK_EXPORT(const char *) carbon_object_it_string_value(u64 *strlen, struct carbon_object_it *it);
 
-NG5_EXPORT(bool) carbon_object_it_binary_value(struct carbon_binary *out, struct carbon_object_it *it);
+ARK_EXPORT(bool) carbon_object_it_binary_value(struct carbon_binary *out, struct carbon_object_it *it);
 
-NG5_EXPORT(struct carbon_array_it *) carbon_object_it_array_value(struct carbon_object_it *it_in);
+ARK_EXPORT(struct carbon_array_it *) carbon_object_it_array_value(struct carbon_object_it *it_in);
 
-NG5_EXPORT(struct carbon_object_it *) carbon_object_it_object_value(struct carbon_object_it *it_in);
+ARK_EXPORT(struct carbon_object_it *) carbon_object_it_object_value(struct carbon_object_it *it_in);
 
-NG5_EXPORT(struct carbon_column_it *) carbon_object_it_column_value(struct carbon_object_it *it_in);
+ARK_EXPORT(struct carbon_column_it *) carbon_object_it_column_value(struct carbon_object_it *it_in);
 
 
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

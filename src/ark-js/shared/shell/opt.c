@@ -29,7 +29,7 @@ bool opt_mgr_create(struct cmdopt_mgr *manager, char *module_name, char *module_
         manager->module_desc = module_desc ? strdup(module_desc) : NULL;
         manager->policy = policy;
         manager->fallback = fallback;
-        ng5_check_success(vec_create(&manager->groups, NULL, sizeof(struct cmdopt_group), 5));
+        ark_check_success(vec_create(&manager->groups, NULL, sizeof(struct cmdopt_group), 5));
         return true;
 }
 
@@ -44,11 +44,11 @@ bool opt_mgr_drop(struct cmdopt_mgr *manager)
                         free(option->opt_desc);
                         free(option->opt_manfile);
                 }
-                ng5_check_success(vec_drop(&cmdGroup->cmd_options));
+                ark_check_success(vec_drop(&cmdGroup->cmd_options));
                 free(cmdGroup->desc);
         }
 
-        ng5_check_success(vec_drop(&manager->groups));
+        ark_check_success(vec_drop(&manager->groups));
         free(manager->module_name);
         if (manager->module_desc) {
                 free(manager->module_desc);
@@ -63,7 +63,7 @@ bool opt_mgr_process(struct cmdopt_mgr *manager, int argc, char **argv, FILE *fi
         error_if_null(file)
 
         if (argc == 0) {
-                if (manager->policy == NG5_MOD_ARG_REQUIRED) {
+                if (manager->policy == ARK_MOD_ARG_REQUIRED) {
                         opt_mgr_show_help(file, manager);
                 } else {
                         return manager->fallback(argc, argv, file, manager);
@@ -88,7 +88,7 @@ bool opt_mgr_create_group(struct cmdopt_group **group, const char *desc, struct 
         error_if_null(manager)
         struct cmdopt_group *cmdGroup = vec_new_and_get(&manager->groups, struct cmdopt_group);
         cmdGroup->desc = strdup(desc);
-        ng5_check_success(vec_create(&cmdGroup->cmd_options, NULL, sizeof(struct cmdopt), 10));
+        ark_check_success(vec_create(&cmdGroup->cmd_options, NULL, sizeof(struct cmdopt), 10));
         *group = cmdGroup;
         return true;
 }
@@ -120,8 +120,8 @@ bool opt_mgr_show_help(FILE *file, struct cmdopt_mgr *manager)
                 fprintf(file,
                         "usage: %s <command> %s\n\n",
                         manager->module_name,
-                        (manager->policy == NG5_MOD_ARG_REQUIRED ? "<args>" : manager->policy
-                                                                                      == NG5_MOD_ARG_MAYBE_REQUIRED
+                        (manager->policy == ARK_MOD_ARG_REQUIRED ? "<args>" : manager->policy
+                                                                                      == ARK_MOD_ARG_MAYBE_REQUIRED
                                                                               ? "[<args>]" : ""));
 
                 if (manager->module_desc) {
@@ -145,8 +145,8 @@ bool opt_mgr_show_help(FILE *file, struct cmdopt_mgr *manager)
                 fprintf(file,
                         "usage: %s %s\n\n",
                         manager->module_name,
-                        (manager->policy == NG5_MOD_ARG_REQUIRED ? "<args>" : manager->policy
-                                                                                      == NG5_MOD_ARG_MAYBE_REQUIRED
+                        (manager->policy == ARK_MOD_ARG_REQUIRED ? "<args>" : manager->policy
+                                                                                      == ARK_MOD_ARG_MAYBE_REQUIRED
                                                                               ? "[<args>]" : ""));
 
                 fprintf(file, "%s\n\n", manager->module_desc);

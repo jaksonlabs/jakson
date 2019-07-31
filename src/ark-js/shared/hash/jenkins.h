@@ -15,15 +15,15 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_JENKINS_H
-#define NG5_JENKINS_H
+#ifndef ARK_JENKINS_H
+#define ARK_JENKINS_H
 
 #include "hash.h"
 #include "ark-js/shared/common.h"
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
-#define NG5_JENKINS_MIX(a, b, c)                                                                                       \
+#define ARK_JENKINS_MIX(a, b, c)                                                                                       \
 {                                                                                                                      \
     a -= b; a -= c; a ^= (c >> 13);                                                                                    \
     b -= c; b -= a; b ^= (a << 8);                                                                                     \
@@ -37,7 +37,7 @@ NG5_BEGIN_DECL
 }
 
 /** implements: hash32_t hash_jenkins(size_t key_size, const void *key) */
-#define NG5_HASH_JENKINS(keySizeIn, key)                                                                               \
+#define ARK_HASH_JENKINS(keySizeIn, key)                                                                               \
 ({                                                                                                                     \
     size_t key_size = keySizeIn;                                                                                       \
     assert ((key != NULL) && (key_size > 0));                                                                          \
@@ -76,6 +76,6 @@ NG5_BEGIN_DECL
     c;                                                                                                                 \
 })
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

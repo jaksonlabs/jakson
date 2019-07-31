@@ -15,8 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_SORT_H
-#define NG5_SORT_H
+#ifndef ARK_SORT_H
+#define ARK_SORT_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/carbon/alloc/alloc.h>
@@ -24,7 +24,7 @@
 #include "stdlib.h"
 #include <assert.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
 typedef bool (*less_eq_func_t)(const void *lhs, const void *rhs);
 
@@ -34,7 +34,7 @@ typedef bool (*eq_func_t)(const void *lhs, const void *rhs);
 
 typedef bool (*less_func_t)(const void *lhs, const void *rhs);
 
-#define NG5_QSORT_INDICES_SWAP(x, y)                                                                                   \
+#define ARK_QSORT_INDICES_SWAP(x, y)                                                                                   \
 {                                                                                                                      \
     size_t *a = x;                                                                                                     \
     size_t *b = y;                                                                                                     \
@@ -43,7 +43,7 @@ typedef bool (*less_func_t)(const void *lhs, const void *rhs);
     *b = tmp;                                                                                                          \
 }
 
-#define NG5_QSORT_INDICIES_PARTITION(indices, base, width, comp, l, h)                                                 \
+#define ARK_QSORT_INDICIES_PARTITION(indices, base, width, comp, l, h)                                                 \
 ({                                                                                                                     \
     const void   *x       = base + indices[h] * width;                                                                 \
     i64        i       = (l - 1);                                                                                      \
@@ -53,14 +53,14 @@ typedef bool (*less_func_t)(const void *lhs, const void *rhs);
         if (comp(base + indices[j] * width, x))                                                                        \
         {                                                                                                              \
             i++;                                                                                                       \
-            NG5_QSORT_INDICES_SWAP (indices + i, indices + j);                                                         \
+            ARK_QSORT_INDICES_SWAP (indices + i, indices + j);                                                         \
         }                                                                                                              \
     }                                                                                                                  \
-    NG5_QSORT_INDICES_SWAP (indices + (i + 1), indices + h);                                                           \
+    ARK_QSORT_INDICES_SWAP (indices + (i + 1), indices + h);                                                           \
     (i + 1);                                                                                                           \
 })
 
-#define NG5_QSORT_INDICIES_PARTITION_WARGS(indices, base, width, comp, l, h, args)                                     \
+#define ARK_QSORT_INDICIES_PARTITION_WARGS(indices, base, width, comp, l, h, args)                                     \
 ({                                                                                                                     \
     const void   *x       = base + indices[h] * width;                                                                 \
     i64        i       = (l - 1);                                                                                      \
@@ -70,30 +70,30 @@ typedef bool (*less_func_t)(const void *lhs, const void *rhs);
         if (comp(base + indices[j] * width, x, args))                                                                  \
         {                                                                                                              \
             i++;                                                                                                       \
-            NG5_QSORT_INDICES_SWAP (indices + i, indices + j);                                                         \
+            ARK_QSORT_INDICES_SWAP (indices + i, indices + j);                                                         \
         }                                                                                                              \
     }                                                                                                                  \
-    NG5_QSORT_INDICES_SWAP (indices + (i + 1), indices + h);                                                           \
+    ARK_QSORT_INDICES_SWAP (indices + (i + 1), indices + h);                                                           \
     (i + 1);                                                                                                           \
 })
 
-NG5_EXPORT(bool) sort_qsort_indicies(size_t *indices, const void *base, size_t width, less_eq_func_t comp,
+ARK_EXPORT(bool) sort_qsort_indicies(size_t *indices, const void *base, size_t width, less_eq_func_t comp,
         size_t nelemns, struct allocator *alloc);
 
-NG5_EXPORT(int) sort_qsort_indicies_wargs(size_t *indices, const void *base, size_t width, less_eq_wargs_func_t comp,
+ARK_EXPORT(int) sort_qsort_indicies_wargs(size_t *indices, const void *base, size_t width, less_eq_wargs_func_t comp,
         size_t nelemens, struct allocator *alloc, void *args);
 
-NG5_EXPORT(size_t) sort_bsearch_indicies(const size_t *indicies, const void *base, size_t width, size_t nelemens,
+ARK_EXPORT(size_t) sort_bsearch_indicies(const size_t *indicies, const void *base, size_t width, size_t nelemens,
         const void *neelde, eq_func_t compEq, less_func_t compLess);
 
-NG5_EXPORT(size_t) sort_get_min(const size_t *elements, size_t nelemens);
+ARK_EXPORT(size_t) sort_get_min(const size_t *elements, size_t nelemens);
 
-NG5_EXPORT(size_t) sort_get_max(const size_t *elements, size_t nelemens);
+ARK_EXPORT(size_t) sort_get_max(const size_t *elements, size_t nelemens);
 
-NG5_EXPORT(double) sort_get_sum(const size_t *elements, size_t nelemens);
+ARK_EXPORT(double) sort_get_sum(const size_t *elements, size_t nelemens);
 
-NG5_EXPORT(double) sort_get_avg(const size_t *elements, size_t nelemens);
+ARK_EXPORT(double) sort_get_avg(const size_t *elements, size_t nelemens);
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

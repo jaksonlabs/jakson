@@ -15,27 +15,27 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_SPINLOCK_H
-#define NG5_SPINLOCK_H
+#ifndef ARK_SPINLOCK_H
+#define ARK_SPINLOCK_H
 
 #include <stdatomic.h>
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/stdx/vec.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
 struct spinlock {
         atomic_flag lock;
         pthread_t owner;
 };
 
-NG5_EXPORT(bool) spin_init(struct spinlock *spinlock);
+ARK_EXPORT(bool) spin_init(struct spinlock *spinlock);
 
-NG5_EXPORT(bool) spin_acquire(struct spinlock *spinlock);
+ARK_EXPORT(bool) spin_acquire(struct spinlock *spinlock);
 
-NG5_EXPORT(bool) spin_release(struct spinlock *spinlock);
+ARK_EXPORT(bool) spin_release(struct spinlock *spinlock);
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

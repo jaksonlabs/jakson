@@ -15,14 +15,14 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_XOR_H
-#define NG5_XOR_H
+#ifndef ARK_XOR_H
+#define ARK_XOR_H
 
 #include "hash.h"
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
-#define NG5_HASH_XOR(key_size, key)                                                                                    \
+#define ARK_HASH_XOR(key_size, key)                                                                                    \
 ({                                                                                                                     \
     hash32_t hash = 0;                                                                                                 \
     for (size_t i = 0; i < key_size; i++) {                                                                            \
@@ -31,6 +31,6 @@ NG5_BEGIN_DECL
     hash;                                                                                                              \
 })
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

@@ -20,35 +20,35 @@
 #include <ark-js/carbon/coding/pack.h>
 #include <ark-js/carbon/coding/pack_none.h>
 
-NG5_EXPORT(bool) pack_none_init(struct packer *self)
+ARK_EXPORT(bool) pack_none_init(struct packer *self)
 {
         unused(self);
         /* nothing to do for uncompressed dictionaries */
         return true;
 }
 
-NG5_EXPORT(bool) pack_none_cpy(const struct packer *self, struct packer *dst)
+ARK_EXPORT(bool) pack_none_cpy(const struct packer *self, struct packer *dst)
 {
-        ng5_check_tag(self->tag, PACK_NONE);
+        ark_check_tag(self->tag, PACK_NONE);
 
         /* nothing to hard copy but the function pointers */
         *dst = *self;
         return true;
 }
 
-NG5_EXPORT(bool) pack_none_drop(struct packer *self)
+ARK_EXPORT(bool) pack_none_drop(struct packer *self)
 {
-        ng5_check_tag(self->tag, PACK_NONE);
+        ark_check_tag(self->tag, PACK_NONE);
 
         unused(self);
         /* nothing to do for uncompressed dictionaries */
         return true;
 }
 
-NG5_EXPORT(bool) pack_none_write_extra(struct packer *self, struct memfile *dst,
+ARK_EXPORT(bool) pack_none_write_extra(struct packer *self, struct memfile *dst,
         const struct vector ofType (const char *) *strings)
 {
-        ng5_check_tag(self->tag, PACK_NONE);
+        ark_check_tag(self->tag, PACK_NONE);
 
         unused(self);
         unused(dst);
@@ -57,9 +57,9 @@ NG5_EXPORT(bool) pack_none_write_extra(struct packer *self, struct memfile *dst,
         return true;
 }
 
-NG5_EXPORT(bool) pack_none_read_extra(struct packer *self, FILE *src, size_t nbytes)
+ARK_EXPORT(bool) pack_none_read_extra(struct packer *self, FILE *src, size_t nbytes)
 {
-        ng5_check_tag(self->tag, PACK_NONE);
+        ark_check_tag(self->tag, PACK_NONE);
 
         unused(self);
         unused(src);
@@ -70,7 +70,7 @@ NG5_EXPORT(bool) pack_none_read_extra(struct packer *self, FILE *src, size_t nby
 
 bool pack_none_print_extra(struct packer *self, FILE *file, struct memfile *src)
 {
-        ng5_check_tag(self->tag, PACK_NONE);
+        ark_check_tag(self->tag, PACK_NONE);
 
         unused(self);
         unused(file);
@@ -79,14 +79,14 @@ bool pack_none_print_extra(struct packer *self, FILE *file, struct memfile *src)
         return true;
 }
 
-NG5_EXPORT(bool) pack_none_print_encoded_string(struct packer *self, FILE *file, struct memfile *src,
+ARK_EXPORT(bool) pack_none_print_encoded_string(struct packer *self, FILE *file, struct memfile *src,
         u32 decompressed_strlen)
 {
-        ng5_check_tag(self->tag, PACK_NONE);
+        ark_check_tag(self->tag, PACK_NONE);
 
         unused(self);
 
-        const char *string = NG5_MEMFILE_READ(src, decompressed_strlen);
+        const char *string = ARK_MEMFILE_READ(src, decompressed_strlen);
 
         char *printableString = malloc(decompressed_strlen + 1);
         memcpy(printableString, string, decompressed_strlen);
@@ -99,27 +99,27 @@ NG5_EXPORT(bool) pack_none_print_encoded_string(struct packer *self, FILE *file,
         return true;
 }
 
-NG5_EXPORT(bool) pack_none_encode_string(struct packer *self, struct memfile *dst, struct err *err,
+ARK_EXPORT(bool) pack_none_encode_string(struct packer *self, struct memfile *dst, struct err *err,
         const char *string)
 {
-        ng5_check_tag(self->tag, PACK_NONE);
+        ark_check_tag(self->tag, PACK_NONE);
 
         unused(self);
 
         u32 string_length = strlen(string);
 
-        ng5_success_or_jump(memfile_write(dst, string, string_length), error_handling)
+        ark_success_or_jump(memfile_write(dst, string, string_length), error_handling)
 
         return true;
 
         error_handling:
-        error(err, NG5_ERR_IO)
+        error(err, ARK_ERR_IO)
         return false;
 }
 
-NG5_EXPORT(bool) pack_none_decode_string(struct packer *self, char *dst, size_t strlen, FILE *src)
+ARK_EXPORT(bool) pack_none_decode_string(struct packer *self, char *dst, size_t strlen, FILE *src)
 {
-        ng5_check_tag(self->tag, PACK_NONE);
+        ark_check_tag(self->tag, PACK_NONE);
 
         unused(self);
 

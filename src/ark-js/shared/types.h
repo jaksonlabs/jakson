@@ -15,14 +15,14 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_TYPES_H
-#define NG5_TYPES_H
+#ifndef ARK_TYPES_H
+#define ARK_TYPES_H
 
 #include <limits.h>
 #include <math.h>
 #include <ark-js/shared/common.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
 typedef uint8_t u8;
 
@@ -109,53 +109,53 @@ typedef float field_number_t;
 
 typedef const char *field_string_t;
 
-#define NG5_NULL_ENCODED_STRING            0
-#define NG5_NULL_BOOLEAN                   INT8_MAX
-#define NG5_NULL_INT8                      INT8_MAX
-#define NG5_NULL_INT16                     INT16_MAX
-#define NG5_NULL_INT32                     INT32_MAX
-#define NG5_NULL_INT64                     INT64_MAX
-#define NG5_NULL_UINT8                     UINT8_MAX
-#define NG5_NULL_UINT16                    UINT16_MAX
-#define NG5_NULL_UINT32                    UINT32_MAX
-#define NG5_NULL_UINT64                    UINT64_MAX
-#define NG5_NULL_FLOAT                     NAN
-#define NG5_NULL_OBJECT_MODEL(objectModel) (objectModel->entries.num_elems == 0)
+#define ARK_NULL_ENCODED_STRING            0
+#define ARK_NULL_BOOLEAN                   INT8_MAX
+#define ARK_NULL_INT8                      INT8_MAX
+#define ARK_NULL_INT16                     INT16_MAX
+#define ARK_NULL_INT32                     INT32_MAX
+#define ARK_NULL_INT64                     INT64_MAX
+#define ARK_NULL_UINT8                     UINT8_MAX
+#define ARK_NULL_UINT16                    UINT16_MAX
+#define ARK_NULL_UINT32                    UINT32_MAX
+#define ARK_NULL_UINT64                    UINT64_MAX
+#define ARK_NULL_FLOAT                     NAN
+#define ARK_NULL_OBJECT_MODEL(objectModel) (objectModel->entries.num_elems == 0)
 
-#define NG5_IS_NULL_STRING(str)   (str == NG5_NULL_ENCODED_STRING)
-#define NG5_IS_NULL_BOOLEAN(val)  (val == NG5_NULL_BOOLEAN)
-#define NG5_IS_NULL_INT8(val)     (val == NG5_NULL_INT8)
-#define NG5_IS_NULL_INT16(val)    (val == NG5_NULL_INT16)
-#define NG5_IS_NULL_INT32(val)    (val == NG5_NULL_INT32)
-#define NG5_IS_NULL_INT64(val)    (val == NG5_NULL_INT64)
-#define NG5_IS_NULL_UINT8(val)    (val == NG5_NULL_UINT8)
-#define NG5_IS_NULL_UINT16(val)   (val == NG5_NULL_UINT16)
-#define NG5_IS_NULL_UINT32(val)   (val == NG5_NULL_UINT32)
-#define NG5_IS_NULL_UINT64(val)   (val == NG5_NULL_UINT64)
-#define NG5_IS_NULL_NUMBER(val)   (val == NG5_NULL_FLOAT)
+#define ARK_IS_NULL_STRING(str)   (str == ARK_NULL_ENCODED_STRING)
+#define ARK_IS_NULL_BOOLEAN(val)  (val == ARK_NULL_BOOLEAN)
+#define ARK_IS_NULL_INT8(val)     (val == ARK_NULL_INT8)
+#define ARK_IS_NULL_INT16(val)    (val == ARK_NULL_INT16)
+#define ARK_IS_NULL_INT32(val)    (val == ARK_NULL_INT32)
+#define ARK_IS_NULL_INT64(val)    (val == ARK_NULL_INT64)
+#define ARK_IS_NULL_UINT8(val)    (val == ARK_NULL_UINT8)
+#define ARK_IS_NULL_UINT16(val)   (val == ARK_NULL_UINT16)
+#define ARK_IS_NULL_UINT32(val)   (val == ARK_NULL_UINT32)
+#define ARK_IS_NULL_UINT64(val)   (val == ARK_NULL_UINT64)
+#define ARK_IS_NULL_NUMBER(val)   (val == ARK_NULL_FLOAT)
 
-#define NG5_LIMITS_INT8_MAX                (NG5_NULL_INT8 - 1)
-#define NG5_LIMITS_INT16_MAX               (NG5_NULL_INT16 - 1)
-#define NG5_LIMITS_INT32_MAX               (NG5_NULL_INT32 - 1)
-#define NG5_LIMITS_INT64_MAX               (NG5_NULL_INT64 - 1)
-#define NG5_LIMITS_UINT8_MAX               (NG5_NULL_UINT8 - 1)
-#define NG5_LIMITS_UINT16_MAX              (NG5_NULL_UINT16 - 1)
-#define NG5_LIMITS_UINT32_MAX              (NG5_NULL_UINT32 - 1)
-#define NG5_LIMITS_UINT64_MAX              (NG5_NULL_UINT64 - 1)
+#define ARK_LIMITS_INT8_MAX                (ARK_NULL_INT8 - 1)
+#define ARK_LIMITS_INT16_MAX               (ARK_NULL_INT16 - 1)
+#define ARK_LIMITS_INT32_MAX               (ARK_NULL_INT32 - 1)
+#define ARK_LIMITS_INT64_MAX               (ARK_NULL_INT64 - 1)
+#define ARK_LIMITS_UINT8_MAX               (ARK_NULL_UINT8 - 1)
+#define ARK_LIMITS_UINT16_MAX              (ARK_NULL_UINT16 - 1)
+#define ARK_LIMITS_UINT32_MAX              (ARK_NULL_UINT32 - 1)
+#define ARK_LIMITS_UINT64_MAX              (ARK_NULL_UINT64 - 1)
 
-#define NG5_LIMITS_INT8_MIN                INT8_MIN
-#define NG5_LIMITS_INT16_MIN               INT16_MIN
-#define NG5_LIMITS_INT32_MIN               INT32_MIN
-#define NG5_LIMITS_INT64_MIN               INT64_MIN
-#define NG5_LIMITS_UINT8_MIN               0
-#define NG5_LIMITS_UINT16_MIN              0
-#define NG5_LIMITS_UINT32_MIN              0
-#define NG5_LIMITS_UINT64_MIN              0
+#define ARK_LIMITS_INT8_MIN                INT8_MIN
+#define ARK_LIMITS_INT16_MIN               INT16_MIN
+#define ARK_LIMITS_INT32_MIN               INT32_MIN
+#define ARK_LIMITS_INT64_MIN               INT64_MIN
+#define ARK_LIMITS_UINT8_MIN               0
+#define ARK_LIMITS_UINT16_MIN              0
+#define ARK_LIMITS_UINT32_MIN              0
+#define ARK_LIMITS_UINT64_MIN              0
 
-#define NG5_NULL_TEXT "null"
+#define ARK_NULL_TEXT "null"
 
-#define NG5_BOOLEAN_FALSE 0
-#define NG5_BOOLEAN_TRUE  1
+#define ARK_BOOLEAN_FALSE 0
+#define ARK_BOOLEAN_TRUE  1
 
 #define GET_TYPE_SIZE(value_type)                                                                                      \
 ({                                                                                                                     \
@@ -201,11 +201,11 @@ typedef const char *field_string_t;
             value_size = sizeof(struct columndoc_obj);                                                                 \
             break;                                                                                                     \
         default:                                                                                                       \
-        print_error_and_die(NG5_ERR_NOTYPE);                                                                           \
+        print_error_and_die(ARK_ERR_NOTYPE);                                                                           \
     }                                                                                                                  \
     value_size;                                                                                                        \
 })
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

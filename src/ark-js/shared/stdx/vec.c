@@ -88,7 +88,7 @@ struct vector_serialize_header {
         float grow_factor;
 };
 
-NG5_EXPORT(bool) vec_serialize(FILE *file, struct vector *vec)
+ARK_EXPORT(bool) vec_serialize(FILE *file, struct vector *vec)
 {
         error_if_null(file)
         error_if_null(vec)
@@ -97,30 +97,30 @@ NG5_EXPORT(bool) vec_serialize(FILE *file, struct vector *vec)
                 {.marker = MARKER_SYMBOL_VECTOR_HEADER, .elem_size = vec->elem_size, .num_elems = vec
                         ->num_elems, .cap_elems = vec->cap_elems, .grow_factor = vec->grow_factor};
         int nwrite = fwrite(&header, sizeof(struct vector_serialize_header), 1, file);
-        error_if(nwrite != 1, &vec->err, NG5_ERR_FWRITE_FAILED);
+        error_if(nwrite != 1, &vec->err, ARK_ERR_FWRITE_FAILED);
         nwrite = fwrite(vec->base, vec->elem_size, vec->num_elems, file);
-        error_if(nwrite != (int) vec->num_elems, &vec->err, NG5_ERR_FWRITE_FAILED);
+        error_if(nwrite != (int) vec->num_elems, &vec->err, ARK_ERR_FWRITE_FAILED);
 
         return true;
 }
 
-NG5_EXPORT(bool) vec_deserialize(struct vector *vec, struct err *err, FILE *file)
+ARK_EXPORT(bool) vec_deserialize(struct vector *vec, struct err *err, FILE *file)
 {
         error_if_null(file)
         error_if_null(err)
         error_if_null(vec)
 
         offset_t start = ftell(file);
-        int err_code = NG5_ERR_NOERR;
+        int err_code = ARK_ERR_NOERR;
 
         struct vector_serialize_header header;
         if (fread(&header, sizeof(struct vector_serialize_header), 1, file) != 1) {
-                err_code = NG5_ERR_FREAD_FAILED;
+                err_code = ARK_ERR_FREAD_FAILED;
                 goto error_handling;
         }
 
         if (header.marker != MARKER_SYMBOL_VECTOR_HEADER) {
-                err_code = NG5_ERR_CORRUPTED;
+                err_code = ARK_ERR_CORRUPTED;
                 goto error_handling;
         }
 
@@ -134,7 +134,7 @@ NG5_EXPORT(bool) vec_deserialize(struct vector *vec, struct err *err, FILE *file
         error_init(&vec->err);
 
         if (fread(vec->base, header.elem_size, vec->num_elems, file) != vec->num_elems) {
-                err_code = NG5_ERR_FREAD_FAILED;
+                err_code = ARK_ERR_FREAD_FAILED;
                 goto error_handling;
         }
 
@@ -158,7 +158,7 @@ bool vec_memadvice(struct vector *vec, int madviseAdvice)
 bool vec_set_grow_factor(struct vector *vec, float factor)
 {
         error_if_null(vec);
-        error_print_if(factor <= 1.01f, NG5_ERR_ILLEGALARG)
+        error_print_if(factor <= 1.01f, ARK_ERR_ILLEGALARG)
         vec->grow_factor = factor;
         return true;
 }
@@ -239,7 +239,7 @@ bool vec_shrink(struct vector *vec)
 {
         error_if_null(vec);
         if (vec->num_elems < vec->cap_elems) {
-                vec->cap_elems = ng5_max(1, vec->num_elems);
+                vec->cap_elems = ark_max(1, vec->num_elems);
                 vec->base = alloc_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
         }
         return true;
@@ -259,10 +259,10 @@ bool vec_grow(size_t *numNewSlots, struct vector *vec)
         return true;
 }
 
-NG5_EXPORT(bool) vec_grow_to(struct vector *vec, size_t capacity)
+ARK_EXPORT(bool) vec_grow_to(struct vector *vec, size_t capacity)
 {
         error_if_null(vec);
-        vec->cap_elems = ng5_max(vec->cap_elems, capacity);
+        vec->cap_elems = ark_max(vec->cap_elems, capacity);
         vec->base = alloc_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
         return true;
 }
@@ -291,19 +291,19 @@ bool vec_enlarge_size_to_capacity(struct vector *vec)
         return true;
 }
 
-NG5_EXPORT(bool) vec_zero_memory(struct vector *vec)
+ARK_EXPORT(bool) vec_zero_memory(struct vector *vec)
 {
         error_if_null(vec);
-        ng5_zero_memory(vec->base, vec->elem_size * vec->num_elems);
+        ark_zero_memory(vec->base, vec->elem_size * vec->num_elems);
         return true;
 }
 
-NG5_EXPORT(bool) vec_zero_memory_in_range(struct vector *vec, size_t from, size_t to)
+ARK_EXPORT(bool) vec_zero_memory_in_range(struct vector *vec, size_t from, size_t to)
 {
         error_if_null(vec);
         assert(from < to);
         assert(to <= vec->cap_elems);
-        ng5_zero_memory(vec->base + from * vec->elem_size, vec->elem_size * (to - from));
+        ark_zero_memory(vec->base + from * vec->elem_size, vec->elem_size * (to - from));
         return true;
 }
 
@@ -317,7 +317,7 @@ bool vec_set(struct vector *vec, size_t pos, const void *data)
 
 bool vec_cpy(struct vector *dst, const struct vector *src)
 {
-        ng5_check_success(vec_create(dst, NULL, src->elem_size, src->num_elems));
+        ark_check_success(vec_create(dst, NULL, src->elem_size, src->num_elems));
         dst->num_elems = src->num_elems;
         if (dst->num_elems > 0) {
                 memcpy(dst->base, src->base, src->elem_size * src->num_elems);
@@ -325,7 +325,7 @@ bool vec_cpy(struct vector *dst, const struct vector *src)
         return true;
 }
 
-NG5_EXPORT(bool) vec_cpy_to(struct vector *dst, struct vector *src)
+ARK_EXPORT(bool) vec_cpy_to(struct vector *dst, struct vector *src)
 {
         error_if_null(dst)
         error_if_null(src)
@@ -340,7 +340,7 @@ NG5_EXPORT(bool) vec_cpy_to(struct vector *dst, struct vector *src)
                 error_cpy(&dst->err, &src->err);
                 return true;
         } else {
-                error(&src->err, NG5_ERR_HARDCOPYFAILED)
+                error(&src->err, ARK_ERR_HARDCOPYFAILED)
                 return false;
         }
 }

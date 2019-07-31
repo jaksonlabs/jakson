@@ -18,11 +18,11 @@
 #include <ark-js/carbon/carbon-revision.h>
 #include <ark-js/shared/stdx/varuint.h>
 
-NG5_EXPORT(bool) carbon_revision_create(struct memfile *file)
+ARK_EXPORT(bool) carbon_revision_create(struct memfile *file)
 {
         error_if_null(file)
 
-        varuint_t revision = NG5_MEMFILE_PEEK(file, varuint_t);
+        varuint_t revision = ARK_MEMFILE_PEEK(file, varuint_t);
 
         /* in case not enough space is available for writing revision (variable-length) number, enlarge */
         size_t remain = memfile_remain_size(file);
@@ -38,14 +38,14 @@ NG5_EXPORT(bool) carbon_revision_create(struct memfile *file)
         return true;
 }
 
-NG5_EXPORT(bool) carbon_revision_skip(struct memfile *file)
+ARK_EXPORT(bool) carbon_revision_skip(struct memfile *file)
 {
         error_if_null(file)
         memfile_read_varuint(NULL, file);
         return true;
 }
 
-NG5_EXPORT(bool) carbon_revision_read(u64 *revision, struct memfile *file)
+ARK_EXPORT(bool) carbon_revision_read(u64 *revision, struct memfile *file)
 {
         error_if_null(file)
         error_if_null(revision)
@@ -53,7 +53,7 @@ NG5_EXPORT(bool) carbon_revision_read(u64 *revision, struct memfile *file)
         return true;
 }
 
-NG5_EXPORT(bool) carbon_revision_peek(u64 *revision, struct memfile *file)
+ARK_EXPORT(bool) carbon_revision_peek(u64 *revision, struct memfile *file)
 {
         error_if_null(file)
         error_if_null(revision)
@@ -61,7 +61,7 @@ NG5_EXPORT(bool) carbon_revision_peek(u64 *revision, struct memfile *file)
         return true;
 }
 
-NG5_EXPORT(bool) carbon_revision_inc(struct memfile *file)
+ARK_EXPORT(bool) carbon_revision_inc(struct memfile *file)
 {
         u64 rev;
         carbon_revision_peek(&rev, file);

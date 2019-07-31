@@ -15,25 +15,25 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_ALLOC_H
-#define NG5_ALLOC_H
+#ifndef ARK_ALLOC_H
+#define ARK_ALLOC_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/error.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
 /**
  * Allocates <code>num</code> elements of size <code>sizeof(type)</code> using the allocator <code>alloc</code> and
  * creates a new stack variable <code>type *name</code>.
  */
-#define ng5_malloc(type, name, num, alloc)                                                                          \
+#define ark_malloc(type, name, num, alloc)                                                                          \
     type *name = alloc_malloc(alloc, num *sizeof(type))
 
 /**
  * Invokes a free operation in <code>alloc</code> allocator to free up memory assigned to pointer <code>name</code>
  */
-#define ng5_free(name, alloc)                                                                                       \
+#define ark_free(name, alloc)                                                                                       \
     alloc_free(alloc, name)
 
 struct allocator {
@@ -79,7 +79,7 @@ struct allocator {
  * @param alloc must be non-null
  * @return STATUS_OK in case of non-null parameter alloc, STATUS_NULLPTR otherwise
  */
-NG5_EXPORT (bool) alloc_create_std(struct allocator *alloc);
+ARK_EXPORT (bool) alloc_create_std(struct allocator *alloc);
 
 /**
  * Creates a new allocator 'dst' with default constructor (in case of 'this' is null), or as copy of
@@ -88,7 +88,7 @@ NG5_EXPORT (bool) alloc_create_std(struct allocator *alloc);
  * @param self possibly null-pointer to an allocator implementation
  * @return a value unequal to STATUS_OK in case the operation is not successful
  */
-NG5_EXPORT (bool) alloc_this_or_std(struct allocator *dst, const struct allocator *self);
+ARK_EXPORT (bool) alloc_this_or_std(struct allocator *dst, const struct allocator *self);
 
 /**
  * Performs a deep copy of the allocator 'src' into the allocator 'dst'.
@@ -97,7 +97,7 @@ NG5_EXPORT (bool) alloc_this_or_std(struct allocator *dst, const struct allocato
  * @param src non-null pointer to allocator implementation (of same implementation as dst)
  * @return STATUS_OK in case of success, otherwise a value unequal to STATUS_OK describing the error
  */
-NG5_EXPORT (bool) alloc_clone(struct allocator *dst, const struct allocator *src);
+ARK_EXPORT (bool) alloc_clone(struct allocator *dst, const struct allocator *src);
 
 /**
  * Invokes memory allocation of 'size' bytes using the allocator 'alloc'.
@@ -108,7 +108,7 @@ NG5_EXPORT (bool) alloc_clone(struct allocator *dst, const struct allocator *src
  * @param size number of bytes requested
  * @return non-null pointer to memory allocated with 'alloc'
  */
-NG5_EXPORT (void *) alloc_malloc(struct allocator *alloc, size_t size);
+ARK_EXPORT (void *) alloc_malloc(struct allocator *alloc, size_t size);
 
 /**
  * Invokes memory re-allocation for pointer 'ptr' (that is managed by 'alloc') to size 'size' in bytes.
@@ -118,7 +118,7 @@ NG5_EXPORT (void *) alloc_malloc(struct allocator *alloc, size_t size);
  * @param size new number of bytes for 'ptr'
  * @return non-null pointer that points to reallocated memory for 'ptr'
  */
-NG5_EXPORT (void *) alloc_realloc(struct allocator *alloc, void *ptr, size_t size);
+ARK_EXPORT (void *) alloc_realloc(struct allocator *alloc, void *ptr, size_t size);
 
 /**
  * Invokes memory freeing for pointer 'ptr' (that is managed by 'alloc').
@@ -128,8 +128,8 @@ NG5_EXPORT (void *) alloc_realloc(struct allocator *alloc, void *ptr, size_t siz
  * @param ptr non-null pointer manged by 'alloc'
  * @return STATUS_OK if success, STATUS_NULLPTR if <code>alloc</code> or <code>ptr</ptr> is <b>NULL</b>
  */
-NG5_EXPORT (bool) alloc_free(struct allocator *alloc, void *ptr);
+ARK_EXPORT (bool) alloc_free(struct allocator *alloc, void *ptr);
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

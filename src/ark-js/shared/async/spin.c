@@ -42,7 +42,7 @@ bool spin_acquire(struct spinlock *spinlock)
         timestamp_t end = time_now_wallclock();
         float duration = (end - begin) / 1000.0f;
         if (duration > 0.01f) {
-                ng5_warn(SPINLOCK_TAG, "spin lock acquisition took exceptionally long: %f seconds", duration);
+                ark_warn(SPINLOCK_TAG, "spin lock acquisition took exceptionally long: %f seconds", duration);
         }
 
         return true;

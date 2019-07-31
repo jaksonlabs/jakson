@@ -41,8 +41,8 @@
  * The underlying hashing function is the Jenkins hash function.
  */
 
-#ifndef NG5_STRHASH_H
-#define NG5_STRHASH_H
+#ifndef ARK_STRHASH_H
+#define ARK_STRHASH_H
 
 #include <assert.h>
 
@@ -52,31 +52,31 @@
 #include <ark-js/shared/hash/hash.h>
 #include <ark-js/shared/types.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
 /**
  * Enables or disabled packing of entries inside a bucket. By default, packing is disabled.
- * To turn on packing, set 'NG5_CONFIG_PACK_BUCKETS' symbol
+ * To turn on packing, set 'ARK_CONFIG_PACK_BUCKETS' symbol
  */
-#ifdef NG5_CONFIG_PACK_BUCKETS
+#ifdef ARK_CONFIG_PACK_BUCKETS
 #define
-#define NG5_BUCKET_PACKING __attribute__((__packed__))
+#define ARK_BUCKET_PACKING __attribute__((__packed__))
 #else
-#define NG5_BUCKET_PACKING
+#define ARK_BUCKET_PACKING
 #endif
 
 /**
  * Number of elements stored in the per-bucket cache (Tier 2, see below)
  */
-#ifndef NG5_CONFIG_BUCKET_CACHE_SIZE
-#define NG5_CONFIG_BUCKET_CACHE_SIZE  16
+#ifndef ARK_CONFIG_BUCKET_CACHE_SIZE
+#define ARK_CONFIG_BUCKET_CACHE_SIZE  16
 #endif
 
 /**
  * Maximum number of elements stored per bucket (Tier 3, see below)
  */
-#ifndef NG5_CONFIG_BUCKET_CAPACITY
-#define NG5_CONFIG_BUCKET_CAPACITY  1024
+#ifndef ARK_CONFIG_BUCKET_CAPACITY
+#define ARK_CONFIG_BUCKET_CAPACITY  1024
 #endif
 
 struct strhash;
@@ -180,7 +180,7 @@ struct strhash {
 
 };
 
-NG5_DEFINE_GET_ERROR_FUNCTION(strhash, struct strhash, table);
+ARK_DEFINE_GET_ERROR_FUNCTION(strhash, struct strhash, table);
 
 /**
  * Frees resources bound to <code>parallel_map_exec</code> via the allocator specified by the call to <code>string_id_map_create</code>.
@@ -473,6 +473,6 @@ inline static int strhash_counters_add(struct strhash_counters *dst_lhs, const s
         return true;
 }
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

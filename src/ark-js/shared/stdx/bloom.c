@@ -17,17 +17,17 @@
 
 #include <ark-js/shared/stdx/bloom.h>
 
-NG5_EXPORT(bool) bloom_create(bloom_t *filter, size_t size)
+ARK_EXPORT(bool) bloom_create(bloom_t *filter, size_t size)
 {
         return bitmap_create(filter, size);
 }
 
-NG5_EXPORT(bool) bloom_drop(bloom_t *filter)
+ARK_EXPORT(bool) bloom_drop(bloom_t *filter)
 {
         return bitmap_drop(filter);
 }
 
-NG5_EXPORT(bool) bloom_clear(bloom_t *filter)
+ARK_EXPORT(bool) bloom_clear(bloom_t *filter)
 {
         return bitmap_clear(filter);
 }

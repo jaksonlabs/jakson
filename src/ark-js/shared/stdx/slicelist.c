@@ -24,15 +24,15 @@
 #include <ark-js/shared/hash/rot.h>
 #include <ark-js/shared/hash/sax.h>
 
-#define NG5_SLICE_LIST_TAG "slice-list"
+#define ARK_SLICE_LIST_TAG "slice-list"
 
-#define get_hashcode(key)    NG5_HASH_ADDITIVE(strlen(key), key)
+#define get_hashcode(key)    ARK_HASH_ADDITIVE(strlen(key), key)
 
 /** OPTIMIZATION: we have only one item to find. Use branch-less scan instead of branching scan */
 /** OPTIMIZATION: find function as macro */
 #define SLICE_SCAN(slice, needle_hash, needle_str)                                                                     \
 ({                                                                                                                     \
-    ng5_trace(NG5_SLICE_LIST_TAG, "SLICE_SCAN for '%s' started", needle_str);                                    \
+    ark_trace(ARK_SLICE_LIST_TAG, "SLICE_SCAN for '%s' started", needle_str);                                    \
     assert(slice);                                                                                                     \
     assert(needle_str);                                                                                                \
                                                                                                                        \
@@ -66,7 +66,7 @@ static void appenderSeal(Slice *slice);
 static void lock(slice_list_t *list);
 static void unlock(slice_list_t *list);
 
-NG5_EXPORT(bool) slice_list_create(slice_list_t *list, const struct allocator *alloc, size_t sliceCapacity)
+ARK_EXPORT(bool) slice_list_create(slice_list_t *list, const struct allocator *alloc, size_t sliceCapacity)
 {
         error_if_null(list)
         error_if_null(sliceCapacity)
@@ -80,17 +80,17 @@ NG5_EXPORT(bool) slice_list_create(slice_list_t *list, const struct allocator *a
         vec_create(&list->filters, &list->alloc, sizeof(bloom_t), sliceCapacity);
         vec_create(&list->bounds, &list->alloc, sizeof(HashBounds), sliceCapacity);
 
-        ng5_zero_memory(vec_data(&list->slices), sliceCapacity * sizeof(Slice));
-        ng5_zero_memory(vec_data(&list->descriptors), sliceCapacity * sizeof(SliceDescriptor));
-        ng5_zero_memory(vec_data(&list->filters), sliceCapacity * sizeof(bloom_t));
-        ng5_zero_memory(vec_data(&list->bounds), sliceCapacity * sizeof(HashBounds));
+        ark_zero_memory(vec_data(&list->slices), sliceCapacity * sizeof(Slice));
+        ark_zero_memory(vec_data(&list->descriptors), sliceCapacity * sizeof(SliceDescriptor));
+        ark_zero_memory(vec_data(&list->filters), sliceCapacity * sizeof(bloom_t));
+        ark_zero_memory(vec_data(&list->bounds), sliceCapacity * sizeof(HashBounds));
 
         appenderNew(list);
 
         return true;
 }
 
-NG5_EXPORT(bool) SliceListDrop(slice_list_t *list)
+ARK_EXPORT(bool) SliceListDrop(slice_list_t *list)
 {
         unused(list);
 
@@ -105,12 +105,12 @@ NG5_EXPORT(bool) SliceListDrop(slice_list_t *list)
         return true;
 }
 
-NG5_EXPORT(bool) SliceListIsEmpty(const slice_list_t *list)
+ARK_EXPORT(bool) SliceListIsEmpty(const slice_list_t *list)
 {
         return (vec_is_empty(&list->slices));
 }
 
-NG5_EXPORT(bool) slice_list_insert(slice_list_t *list, char **strings, field_sid_t *ids, size_t num_pairs)
+ARK_EXPORT(bool) slice_list_insert(slice_list_t *list, char **strings, field_sid_t *ids, size_t num_pairs)
 {
         lock(list);
 
@@ -140,7 +140,7 @@ NG5_EXPORT(bool) slice_list_insert(slice_list_t *list, char **strings, field_sid
                         bloom_t *restrict appenderFilter = filters + list->appender_idx;
                         HashBounds *restrict appenderBounds = bounds + list->appender_idx;
 
-                        ng5_debug(NG5_SLICE_LIST_TAG,
+                        ark_debug(ARK_SLICE_LIST_TAG,
                                 "appender # of elems: %zu, limit: %zu",
                                 appender->num_elems,
                                 SLICE_KEY_COLUMN_MAX_ELEMS);
@@ -150,7 +150,7 @@ NG5_EXPORT(bool) slice_list_insert(slice_list_t *list, char **strings, field_sid
                         appender->string_id_tColumn[appender->num_elems] = value;
                         appenderBounds->minHash = appenderBounds->minHash < keyHash ? appenderBounds->minHash : keyHash;
                         appenderBounds->maxHash = appenderBounds->maxHash > keyHash ? appenderBounds->maxHash : keyHash;
-                        NG5_BLOOM_SET(appenderFilter, &keyHash, sizeof(hash32_t));
+                        ARK_BLOOM_SET(appenderFilter, &keyHash, sizeof(hash32_t));
                         appender->num_elems++;
                         if (unlikely(appender->num_elems == SLICE_KEY_COLUMN_MAX_ELEMS)) {
                                 appenderSeal(appender);
@@ -163,7 +163,7 @@ NG5_EXPORT(bool) slice_list_insert(slice_list_t *list, char **strings, field_sid
         return true;
 }
 
-NG5_EXPORT(bool) slice_list_lookup(slice_handle_t *handle, slice_list_t *list, const char *needle)
+ARK_EXPORT(bool) slice_list_lookup(slice_handle_t *handle, slice_list_t *list, const char *needle)
 {
         unused(list);
         unused(handle);
@@ -189,10 +189,10 @@ NG5_EXPORT(bool) slice_list_lookup(slice_handle_t *handle, slice_list_t *list, c
                         bool keyHashIn = keyHash >= bound->minHash && keyHash <= bound->maxHash;
                         if (keyHashIn) {
                                 bloom_t *restrict filter = filters + i;
-                                bool maybeContained = NG5_BLOOM_TEST(filter, &keyHash, sizeof(hash32_t));
+                                bool maybeContained = ARK_BLOOM_TEST(filter, &keyHash, sizeof(hash32_t));
                                 if (maybeContained) {
-                                        ng5_debug(NG5_SLICE_LIST_TAG,
-                                                "NG5_slice_list_lookup_by_key keys(%s) -> ?",
+                                        ark_debug(ARK_SLICE_LIST_TAG,
+                                                "ARK_slice_list_lookup_by_key keys(%s) -> ?",
                                                 needle);
                                         u32 pairPosition;
 
@@ -203,12 +203,12 @@ NG5_EXPORT(bool) slice_list_lookup(slice_handle_t *handle, slice_list_t *list, c
                                         case SLICE_LOOKUP_BESEARCH:
                                                 pairPosition = SLICE_BESEARCH(slice, keyHash, needle);
                                                 break;
-                                        default: error(&list->err, NG5_ERR_UNSUPFINDSTRAT)
+                                        default: error(&list->err, ARK_ERR_UNSUPFINDSTRAT)
                                                 return false;
                                         }
 
-                                        ng5_debug(NG5_SLICE_LIST_TAG,
-                                                "NG5_slice_list_lookup_by_key keys(%s) -> pos(%zu in slice #%zu)",
+                                        ark_debug(ARK_SLICE_LIST_TAG,
+                                                "ARK_slice_list_lookup_by_key keys(%s) -> pos(%zu in slice #%zu)",
                                                 needle,
                                                 pairPosition,
                                                 i);
@@ -239,11 +239,11 @@ NG5_EXPORT(bool) slice_list_lookup(slice_handle_t *handle, slice_list_t *list, c
         return false;
 }
 
-NG5_EXPORT(bool) SliceListRemove(slice_list_t *list, slice_handle_t *handle)
+ARK_EXPORT(bool) SliceListRemove(slice_list_t *list, slice_handle_t *handle)
 {
         unused(list);
         unused(handle);
-        NG5_NOT_IMPLEMENTED
+        ARK_NOT_IMPLEMENTED
 }
 
 static void appenderNew(slice_list_t *list)
@@ -264,7 +264,7 @@ static void appenderNew(slice_list_t *list)
         vec_push(&list->descriptors, &desc, 1);
 
         /** the lookup guards */
-        assert(sizeof(bloom_t) <= NG5_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE);
+        assert(sizeof(bloom_t) <= ARK_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE);
         bloom_t filter;
 
         /** NOTE: the size of each bloom_t lead to a false positive probability of 100%, i.e., number of items in the
@@ -272,12 +272,12 @@ static void appenderNew(slice_list_t *list)
          * in bits minus the header for the bloom_t) along with the number of used hash functions (4), lead to that
          * probability. However, the reason a bloom_t is used is to skip slices whch definitively do NOT contain the
          * keys-values pair - and that still works ;) */
-        bloom_create(&filter, (NG5_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE - sizeof(bloom_t)) * 8);
+        bloom_create(&filter, (ARK_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE - sizeof(bloom_t)) * 8);
         vec_push(&list->filters, &filter, 1);
         HashBounds bounds = {.minHash        = (hash32_t) -1, .maxHash        = (hash32_t) 0};
         vec_push(&list->bounds, &bounds, 1);
 
-        ng5_info(NG5_SLICE_LIST_TAG,
+        ark_info(ARK_SLICE_LIST_TAG,
                 "created new appender in slice list %p\n\t"
                         "# of slices (incl. appender) in total...............: %zu\n\t"
                         "Slice target memory size............................: %zuB (%s)\n\t"
@@ -289,10 +289,10 @@ static void appenderNew(slice_list_t *list)
                         "Total slice-list size...............................: %f MiB",
                 list,
                 list->slices.num_elems,
-                (size_t) NG5_SLICE_LIST_TARGET_MEMORY_SIZE_IN_BYTE,
-                NG5_SLICE_LIST_TARGET_MEMORY_NAME,
-                (size_t) NG5_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE,
-                NG5_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_NAME,
+                (size_t) ARK_SLICE_LIST_TARGET_MEMORY_SIZE_IN_BYTE,
+                ARK_SLICE_LIST_TARGET_MEMORY_NAME,
+                (size_t) ARK_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE,
+                ARK_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_NAME,
                 (size_t) SLICE_KEY_COLUMN_MAX_ELEMS,
                 bitmap_nbits(&filter),
                 (pow(1 - exp(-(double) bloom_nhashs()

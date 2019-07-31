@@ -15,15 +15,15 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_STRING_PRED_EQUALS_H
-#define NG5_STRING_PRED_EQUALS_H
+#ifndef ARK_STRING_PRED_EQUALS_H
+#define ARK_STRING_PRED_EQUALS_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/carbon/archive/archive-pred.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
-NG5_BUILT_IN(static bool) __string_pred_equals_func(size_t *idxs_matching, size_t *num_matching, char **strings,
+ARK_BUILT_IN(static bool) __string_pred_equals_func(size_t *idxs_matching, size_t *num_matching, char **strings,
                                                 size_t num_strings, void *capture)
 {
         size_t result_size = 0;
@@ -39,16 +39,16 @@ NG5_BUILT_IN(static bool) __string_pred_equals_func(size_t *idxs_matching, size_
         return true;
 }
 
-NG5_BUILT_IN(static bool)
+ARK_BUILT_IN(static bool)
 
 string_pred_equals_init(struct string_pred_t *pred)
 {
         error_if_null(pred);
-        pred->limit = NG5_QUERY_LIMIT_1;
+        pred->limit = ARK_QUERY_LIMIT_1;
         pred->func = __string_pred_equals_func;
         return true;
 }
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

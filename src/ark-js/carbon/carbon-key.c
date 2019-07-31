@@ -56,7 +56,7 @@ static void write_skey(struct memfile *file)
         carbon_string_write(file, key);
 }
 
-NG5_EXPORT(bool) carbon_key_create(struct memfile *file, enum carbon_primary_key_type type, struct err *err)
+ARK_EXPORT(bool) carbon_key_create(struct memfile *file, enum carbon_primary_key_type type, struct err *err)
 {
         error_if_null(file)
 
@@ -77,20 +77,20 @@ NG5_EXPORT(bool) carbon_key_create(struct memfile *file, enum carbon_primary_key
                 write_skey(file);
                 break;
         default:
-                ng5_optional(err != NULL, error(err, NG5_ERR_INTERNALERR))
+                ark_optional(err != NULL, error(err, ARK_ERR_INTERNALERR))
                 return false;
         }
         return true;
 }
 
-NG5_EXPORT(bool) carbon_key_skip(enum carbon_primary_key_type *out, struct memfile *file)
+ARK_EXPORT(bool) carbon_key_skip(enum carbon_primary_key_type *out, struct memfile *file)
 {
         error_if_null(file)
         carbon_key_read(NULL, out, file);
         return true;
 }
 
-NG5_EXPORT(bool) carbon_key_write_unsigned(struct memfile *file, u64 key)
+ARK_EXPORT(bool) carbon_key_write_unsigned(struct memfile *file, u64 key)
 {
         error_if_null(file)
         enum carbon_primary_key_type key_type;
@@ -99,12 +99,12 @@ NG5_EXPORT(bool) carbon_key_write_unsigned(struct memfile *file, u64 key)
                 memfile_write(file, &key, sizeof(u64));
                 return true;
         } else {
-                error(&file->err, NG5_ERR_TYPEMISMATCH)
+                error(&file->err, ARK_ERR_TYPEMISMATCH)
                 return false;
         }
 }
 
-NG5_EXPORT(bool) carbon_key_write_signed(struct memfile *file, i64 key)
+ARK_EXPORT(bool) carbon_key_write_signed(struct memfile *file, i64 key)
 {
         error_if_null(file)
         enum carbon_primary_key_type key_type;
@@ -113,12 +113,12 @@ NG5_EXPORT(bool) carbon_key_write_signed(struct memfile *file, i64 key)
                 memfile_write(file, &key, sizeof(i64));
                 return true;
         } else {
-                error(&file->err, NG5_ERR_TYPEMISMATCH)
+                error(&file->err, ARK_ERR_TYPEMISMATCH)
                 return false;
         }
 }
 
-NG5_EXPORT(bool) carbon_key_update_string(struct memfile *file, const char *key)
+ARK_EXPORT(bool) carbon_key_update_string(struct memfile *file, const char *key)
 {
         error_if_null(file)
         enum carbon_primary_key_type key_type;
@@ -127,12 +127,12 @@ NG5_EXPORT(bool) carbon_key_update_string(struct memfile *file, const char *key)
                 carbon_string_update(file, key);
                 return true;
         } else {
-                error(&file->err, NG5_ERR_TYPEMISMATCH)
+                error(&file->err, ARK_ERR_TYPEMISMATCH)
                 return false;
         }
 }
 
-NG5_EXPORT(bool) carbon_key_write_string(struct memfile *file, const char *key)
+ARK_EXPORT(bool) carbon_key_write_string(struct memfile *file, const char *key)
 {
         error_if_null(file)
         enum carbon_primary_key_type key_type;
@@ -141,65 +141,65 @@ NG5_EXPORT(bool) carbon_key_write_string(struct memfile *file, const char *key)
                 carbon_string_write(file, key);
                 return true;
         } else {
-                error(&file->err, NG5_ERR_TYPEMISMATCH)
+                error(&file->err, ARK_ERR_TYPEMISMATCH)
                 return false;
         }
 }
 
-NG5_EXPORT(bool) carbon_key_read_type(enum carbon_primary_key_type *out, struct memfile *file)
+ARK_EXPORT(bool) carbon_key_read_type(enum carbon_primary_key_type *out, struct memfile *file)
 {
-        u8 marker = *NG5_MEMFILE_READ_TYPE(file, u8);
+        u8 marker = *ARK_MEMFILE_READ_TYPE(file, u8);
 
         assert(marker == carbon_MARKER_KEY_NOKEY || marker == carbon_MARKER_KEY_AUTOKEY || marker ==
                 carbon_MARKER_KEY_UKEY || marker == carbon_MARKER_KEY_IKEY || marker == carbon_MARKER_KEY_SKEY);
 
         switch (marker) {
         case carbon_MARKER_KEY_NOKEY:
-                ng5_optional_set(out, carbon_KEY_NOKEY)
+                ark_optional_set(out, carbon_KEY_NOKEY)
                 break;
         case carbon_MARKER_KEY_AUTOKEY:
-                ng5_optional_set(out, carbon_KEY_AUTOKEY)
+                ark_optional_set(out, carbon_KEY_AUTOKEY)
                 break;
         case carbon_MARKER_KEY_UKEY:
-                ng5_optional_set(out, carbon_KEY_UKEY)
+                ark_optional_set(out, carbon_KEY_UKEY)
                 break;
         case carbon_MARKER_KEY_IKEY:
-                ng5_optional_set(out, carbon_KEY_IKEY)
+                ark_optional_set(out, carbon_KEY_IKEY)
                 break;
         case carbon_MARKER_KEY_SKEY:
-                ng5_optional_set(out, carbon_KEY_SKEY)
+                ark_optional_set(out, carbon_KEY_SKEY)
                 break;
         default:
-                error(&file->err, NG5_ERR_INTERNALERR)
+                error(&file->err, ARK_ERR_INTERNALERR)
                 return false;
         }
         return true;
 }
 
-NG5_EXPORT(const void *) carbon_key_read(u64 *len, enum carbon_primary_key_type *out, struct memfile *file)
+ARK_EXPORT(const void *) carbon_key_read(u64 *len, enum carbon_primary_key_type *out, struct memfile *file)
 {
         enum carbon_primary_key_type key_type;
         carbon_key_read_type(&key_type, file);
 
-        ng5_optional_set(out, key_type)
+        ark_optional_set(out, key_type)
 
         switch (key_type) {
         case carbon_KEY_NOKEY:
-                ng5_optional_set(len, 0)
+                ark_optional_set(len, 0)
                 return NULL;
         case carbon_KEY_AUTOKEY:
-                ng5_optional_set(len, sizeof(object_id_t))
-                return NG5_MEMFILE_READ_TYPE(file, object_id_t);
+                ark_optional_set(len, sizeof(object_id_t))
+                return ARK_MEMFILE_READ_TYPE(file, object_id_t);
         case carbon_KEY_UKEY:
-                ng5_optional_set(len, sizeof(u64))
-                return NG5_MEMFILE_READ_TYPE(file, u64);
+                ark_optional_set(len, sizeof(u64))
+                return ARK_MEMFILE_READ_TYPE(file, u64);
         case carbon_KEY_IKEY:
-                ng5_optional_set(len, sizeof(i64))
-                return NG5_MEMFILE_READ_TYPE(file, i64);
+                ark_optional_set(len, sizeof(i64))
+                return ARK_MEMFILE_READ_TYPE(file, i64);
         case carbon_KEY_SKEY:
                 return carbon_string_read(len, file);
         default:
-                error(&file->err, NG5_ERR_INTERNALERR)
+                error(&file->err, ARK_ERR_INTERNALERR)
                 return NULL;
         }
 }

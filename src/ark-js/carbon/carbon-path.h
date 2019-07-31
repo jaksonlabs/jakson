@@ -21,7 +21,7 @@
 #include <ark-js/shared/common.h>
 #include <ark-js/carbon/carbon-dot.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
 struct carbon_path_evaluator
 {
@@ -47,36 +47,36 @@ struct carbon_path_evaluator
         } result;
 };
 
-NG5_EXPORT(bool) carbon_path_evaluator_begin(struct carbon_path_evaluator *eval, struct carbon_dot_path *path,
+ARK_EXPORT(bool) carbon_path_evaluator_begin(struct carbon_path_evaluator *eval, struct carbon_dot_path *path,
         struct carbon *doc);
 
-NG5_EXPORT(bool) carbon_path_evaluator_begin_mutable(struct carbon_path_evaluator *eval, const struct carbon_dot_path *path,
+ARK_EXPORT(bool) carbon_path_evaluator_begin_mutable(struct carbon_path_evaluator *eval, const struct carbon_dot_path *path,
         struct carbon_revise *context);
 
-NG5_EXPORT(bool) carbon_path_evaluator_status(enum carbon_path_status *status, struct carbon_path_evaluator *state);
+ARK_EXPORT(bool) carbon_path_evaluator_status(enum carbon_path_status *status, struct carbon_path_evaluator *state);
 
-NG5_EXPORT(bool) carbon_path_evaluator_has_result(struct carbon_path_evaluator *state);
+ARK_EXPORT(bool) carbon_path_evaluator_has_result(struct carbon_path_evaluator *state);
 
-NG5_EXPORT(bool) carbon_path_evaluator_end(struct carbon_path_evaluator *state);
+ARK_EXPORT(bool) carbon_path_evaluator_end(struct carbon_path_evaluator *state);
 
-NG5_EXPORT(bool) carbon_path_exists(struct carbon *doc, const char *path);
+ARK_EXPORT(bool) carbon_path_exists(struct carbon *doc, const char *path);
 
-NG5_EXPORT(bool) carbon_path_is_array(struct carbon *doc, const char *path);
+ARK_EXPORT(bool) carbon_path_is_array(struct carbon *doc, const char *path);
 
-NG5_EXPORT(bool) carbon_path_is_column(struct carbon *doc, const char *path);
+ARK_EXPORT(bool) carbon_path_is_column(struct carbon *doc, const char *path);
 
-NG5_EXPORT(bool) carbon_path_is_object(struct carbon *doc, const char *path);
+ARK_EXPORT(bool) carbon_path_is_object(struct carbon *doc, const char *path);
 
-NG5_EXPORT(bool) carbon_path_is_container(struct carbon *doc, const char *path);
+ARK_EXPORT(bool) carbon_path_is_container(struct carbon *doc, const char *path);
 
-NG5_EXPORT(bool) carbon_path_is_null(struct carbon *doc, const char *path);
+ARK_EXPORT(bool) carbon_path_is_null(struct carbon *doc, const char *path);
 
-NG5_EXPORT(bool) carbon_path_is_number(struct carbon *doc, const char *path);
+ARK_EXPORT(bool) carbon_path_is_number(struct carbon *doc, const char *path);
 
-NG5_EXPORT(bool) carbon_path_is_boolean(struct carbon *doc, const char *path);
+ARK_EXPORT(bool) carbon_path_is_boolean(struct carbon *doc, const char *path);
 
-NG5_EXPORT(bool) carbon_path_is_string(struct carbon *doc, const char *path);
+ARK_EXPORT(bool) carbon_path_is_string(struct carbon *doc, const char *path);
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

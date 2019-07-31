@@ -15,19 +15,19 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_HASH_H
-#define NG5_HASH_H
+#ifndef ARK_HASH_H
+#define ARK_HASH_H
 
 #include <assert.h>
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/types.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
 typedef u16 hash16_t;
 typedef u32 hash32_t;
 typedef u8 hash8_t;
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

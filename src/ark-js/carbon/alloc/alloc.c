@@ -28,7 +28,7 @@ static void invoke_free(struct allocator *self, void *ptr);
 
 static void invoke_clone(struct allocator *dst, const struct allocator *self);
 
-NG5_EXPORT (bool) alloc_create_std(struct allocator *alloc)
+ARK_EXPORT (bool) alloc_create_std(struct allocator *alloc)
 {
         if (alloc) {
                 alloc->extra = NULL;
@@ -43,7 +43,7 @@ NG5_EXPORT (bool) alloc_create_std(struct allocator *alloc)
         }
 }
 
-NG5_EXPORT (bool) alloc_this_or_std(struct allocator *dst, const struct allocator *self)
+ARK_EXPORT (bool) alloc_this_or_std(struct allocator *dst, const struct allocator *self)
 {
         if (!self) {
                 return alloc_create_std(dst);
@@ -52,18 +52,18 @@ NG5_EXPORT (bool) alloc_this_or_std(struct allocator *dst, const struct allocato
         }
 }
 
-NG5_EXPORT (void *)alloc_malloc(struct allocator *alloc, size_t size)
+ARK_EXPORT (void *)alloc_malloc(struct allocator *alloc, size_t size)
 {
         assert(alloc);
         return alloc->malloc(alloc, size);
 }
 
-NG5_EXPORT (void *)alloc_realloc(struct allocator *alloc, void *ptr, size_t size)
+ARK_EXPORT (void *)alloc_realloc(struct allocator *alloc, void *ptr, size_t size)
 {
         return alloc->realloc(alloc, ptr, size);
 }
 
-NG5_EXPORT (bool) alloc_free(struct allocator *alloc, void *ptr)
+ARK_EXPORT (bool) alloc_free(struct allocator *alloc, void *ptr)
 {
         error_if_null(alloc);
         error_if_null(ptr);
@@ -71,7 +71,7 @@ NG5_EXPORT (bool) alloc_free(struct allocator *alloc, void *ptr)
         return true;
 }
 
-NG5_EXPORT (bool) alloc_clone(struct allocator *dst, const struct allocator *src)
+ARK_EXPORT (bool) alloc_clone(struct allocator *dst, const struct allocator *src)
 {
         error_if_null(dst && src)
         src->clone(dst, src);
@@ -85,7 +85,7 @@ static void *invoke_malloc(struct allocator *self, size_t size)
 
         errno = 0;
         if ((result = malloc(size)) == NULL) {
-                print_error_and_die(NG5_ERR_MALLOCERR)
+                print_error_and_die(ARK_ERR_MALLOCERR)
         } else {
                 return result;
         }
@@ -97,7 +97,7 @@ static void *invoke_realloc(struct allocator *self, void *ptr, size_t size)
         void *result;
 
         if ((result = realloc(ptr, size)) == NULL) {
-                error_print(NG5_ERR_MALLOCERR)
+                error_print(ARK_ERR_MALLOCERR)
                 return ptr;
         } else {
                 return result;

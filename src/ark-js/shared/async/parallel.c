@@ -17,14 +17,14 @@
 
 #include <ark-js/shared/async/parallel.h>
 
-NG5_EXPORT(void *)parallel_for_proxy_function(void *args)
+ARK_EXPORT(void *)parallel_for_proxy_function(void *args)
 {
-        ng5_cast(struct parallel_func_proxy *, proxy_arg, args);
+        ark_cast(struct parallel_func_proxy *, proxy_arg, args);
         proxy_arg->function(proxy_arg->start, proxy_arg->width, proxy_arg->len, proxy_arg->args, proxy_arg->tid);
         return NULL;
 }
 
-#define ng5_parallel_error(msg, retval)                                                                             \
+#define ark_parallel_error(msg, retval)                                                                             \
 {                                                                                                                      \
     perror(msg);                                                                                                       \
     return retval;                                                                                                     \
@@ -36,130 +36,130 @@ NG5_EXPORT(void *)parallel_for_proxy_function(void *args)
         return (forMulti);                                                                                             \
     } else if (hint == THREADING_HINT_SINGLE) {                                                           \
         return (forSingle);                                                                                            \
-    } else ng5_parallel_error(PARALLEL_MSG_UNKNOWN_HINT, false);                                                    \
+    } else ark_parallel_error(PARALLEL_MSG_UNKNOWN_HINT, false);                                                    \
 }
 
-NG5_EXPORT(bool) parallel_for(const void *base, size_t width, size_t len, parallel_for_body_func_t f, void *args,
+ARK_EXPORT(bool) parallel_for(const void *base, size_t width, size_t len, parallel_for_body_func_t f, void *args,
         enum threading_hint hint, uint_fast16_t num_threads);
 
-NG5_EXPORT(bool) parallel_map(void *dst, const void *src, size_t src_width, size_t len, size_t dst_width,
+ARK_EXPORT(bool) parallel_map(void *dst, const void *src, size_t src_width, size_t len, size_t dst_width,
         parallel_map_body_func_t f, void *args, enum threading_hint hint, uint_fast16_t num_threads);
 
-NG5_EXPORT(bool) parallel_gather(void *dst, const void *src, size_t width, const size_t *idx, size_t dstSrcLen,
+ARK_EXPORT(bool) parallel_gather(void *dst, const void *src, size_t width, const size_t *idx, size_t dstSrcLen,
         enum threading_hint hint, uint_fast16_t num_threads);
 
-NG5_EXPORT(bool) parallel_gather_adr(void *dst, const void *src, size_t src_width, const size_t *idx, size_t num,
+ARK_EXPORT(bool) parallel_gather_adr(void *dst, const void *src, size_t src_width, const size_t *idx, size_t num,
         enum threading_hint hint, uint_fast16_t num_threads);
 
-NG5_EXPORT(bool) parallel_scatter(void *dst, const void *src, size_t width, const size_t *idx, size_t num,
+ARK_EXPORT(bool) parallel_scatter(void *dst, const void *src, size_t width, const size_t *idx, size_t num,
         enum threading_hint hint, uint_fast16_t num_threads);
 
-NG5_EXPORT(bool) parallel_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
+ARK_EXPORT(bool) parallel_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
         const size_t *src_idx, size_t idxLen, enum threading_hint hint);
 
-NG5_EXPORT(bool) parallel_filter_early(void *result, size_t *result_size, const void *src, size_t width, size_t len,
+ARK_EXPORT(bool) parallel_filter_early(void *result, size_t *result_size, const void *src, size_t width, size_t len,
         parallel_predicate_func_t pred, void *args, enum threading_hint hint, uint_fast16_t num_threads);
 
-NG5_EXPORT(bool) parallel_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width, size_t len,
+ARK_EXPORT(bool) parallel_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width, size_t len,
         parallel_predicate_func_t pred, void *args, enum threading_hint hint, size_t num_threads);
 
-NG5_EXPORT(bool) parallel_sequential_for(const void *base, size_t width, size_t len, parallel_for_body_func_t f,
+ARK_EXPORT(bool) parallel_sequential_for(const void *base, size_t width, size_t len, parallel_for_body_func_t f,
         void *args);
-NG5_EXPORT(bool) parallel_parallel_for(const void *base, size_t width, size_t len, parallel_for_body_func_t f,
+ARK_EXPORT(bool) parallel_parallel_for(const void *base, size_t width, size_t len, parallel_for_body_func_t f,
         void *args, uint_fast16_t num_threads);
 
-NG5_EXPORT(bool) parallel_map_exec(void *dst, const void *src, size_t src_width, size_t len, size_t dst_width,
+ARK_EXPORT(bool) parallel_map_exec(void *dst, const void *src, size_t src_width, size_t len, size_t dst_width,
         parallel_map_body_func_t f, void *args, enum threading_hint hint, uint_fast16_t num_threads);
 
-NG5_EXPORT(bool) parallel_sequential_gather(void *dst, const void *src, size_t width, const size_t *idx,
+ARK_EXPORT(bool) parallel_sequential_gather(void *dst, const void *src, size_t width, const size_t *idx,
         size_t dstSrcLen);
-NG5_EXPORT(bool) parallel_parallel_gather(void *dst, const void *src, size_t width, const size_t *idx, size_t dstSrcLen,
+ARK_EXPORT(bool) parallel_parallel_gather(void *dst, const void *src, size_t width, const size_t *idx, size_t dstSrcLen,
         uint_fast16_t num_threads);
 
-NG5_EXPORT(bool) parallel_sequential_gather_adr(void *dst, const void *src, size_t src_width, const size_t *idx,
+ARK_EXPORT(bool) parallel_sequential_gather_adr(void *dst, const void *src, size_t src_width, const size_t *idx,
         size_t num);
-NG5_EXPORT(bool) parallel_parallel_gather_adr_func(void *dst, const void *src, size_t src_width, const size_t *idx,
+ARK_EXPORT(bool) parallel_parallel_gather_adr_func(void *dst, const void *src, size_t src_width, const size_t *idx,
         size_t num, uint_fast16_t num_threads);
 
-NG5_EXPORT(bool) parallel_sequential_scatter_func(void *dst, const void *src, size_t width, const size_t *idx,
+ARK_EXPORT(bool) parallel_sequential_scatter_func(void *dst, const void *src, size_t width, const size_t *idx,
         size_t num);
-NG5_EXPORT(bool) parallel_parallel_scatter_func(void *dst, const void *src, size_t width, const size_t *idx, size_t num,
+ARK_EXPORT(bool) parallel_parallel_scatter_func(void *dst, const void *src, size_t width, const size_t *idx, size_t num,
         uint_fast16_t num_threads);
 
-NG5_EXPORT(bool) parallel_sequential_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
+ARK_EXPORT(bool) parallel_sequential_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
         const size_t *src_idx, size_t idx_len);
 
-NG5_EXPORT(bool) parallel_parallel_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
+ARK_EXPORT(bool) parallel_parallel_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
         const size_t *src_idx, size_t idx_len);
 
-NG5_EXPORT(bool) parallel_sequential_filter_early(void *result, size_t *result_size, const void *src, size_t width,
+ARK_EXPORT(bool) parallel_sequential_filter_early(void *result, size_t *result_size, const void *src, size_t width,
         size_t len, parallel_predicate_func_t pred, void *args);
 
-NG5_EXPORT(bool) parallel_parallel_filter_early(void *result, size_t *result_size, const void *src, size_t width,
+ARK_EXPORT(bool) parallel_parallel_filter_early(void *result, size_t *result_size, const void *src, size_t width,
         size_t len, parallel_predicate_func_t pred, void *args, uint_fast16_t num_threads);
 
-NG5_EXPORT(bool) parallel_sequential_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width,
+ARK_EXPORT(bool) parallel_sequential_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width,
         size_t len, parallel_predicate_func_t pred, void *args);
 
-NG5_EXPORT(bool) parallel_parallel_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width, size_t len,
+ARK_EXPORT(bool) parallel_parallel_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width, size_t len,
         parallel_predicate_func_t pred, void *args, size_t num_threads);
 
-NG5_EXPORT(bool) parallel_for(const void *base, size_t width, size_t len, parallel_for_body_func_t f, void *args,
+ARK_EXPORT(bool) parallel_for(const void *base, size_t width, size_t len, parallel_for_body_func_t f, void *args,
         enum threading_hint hint, uint_fast16_t num_threads)
 {
         parallel_match(parallel_sequential_for(base, width, len, f, args),
                 parallel_parallel_for(base, width, len, f, args, num_threads))
 }
 
-NG5_EXPORT(bool) parallel_map(void *dst, const void *src, size_t src_width, size_t len, size_t dst_width,
+ARK_EXPORT(bool) parallel_map(void *dst, const void *src, size_t src_width, size_t len, size_t dst_width,
         parallel_map_body_func_t f, void *args, enum threading_hint hint, uint_fast16_t num_threads)
 {
         return parallel_map_exec(dst, src, src_width, len, dst_width, f, args, hint, num_threads);
 }
 
-NG5_EXPORT(bool) parallel_gather(void *dst, const void *src, size_t width, const size_t *idx, size_t dst_src_len,
+ARK_EXPORT(bool) parallel_gather(void *dst, const void *src, size_t width, const size_t *idx, size_t dst_src_len,
         enum threading_hint hint, uint_fast16_t num_threads)
 {
         parallel_match(parallel_sequential_gather(dst, src, width, idx, dst_src_len),
                 parallel_parallel_gather(dst, src, width, idx, dst_src_len, num_threads))
 }
 
-NG5_EXPORT(bool) parallel_gather_adr(void *dst, const void *src, size_t src_width, const size_t *idx, size_t num,
+ARK_EXPORT(bool) parallel_gather_adr(void *dst, const void *src, size_t src_width, const size_t *idx, size_t num,
         enum threading_hint hint, uint_fast16_t num_threads)
 {
         parallel_match(parallel_sequential_gather_adr(dst, src, src_width, idx, num),
                 parallel_parallel_gather_adr_func(dst, src, src_width, idx, num, num_threads))
 }
 
-NG5_EXPORT(bool) parallel_scatter(void *dst, const void *src, size_t width, const size_t *idx, size_t num,
+ARK_EXPORT(bool) parallel_scatter(void *dst, const void *src, size_t width, const size_t *idx, size_t num,
         enum threading_hint hint, uint_fast16_t num_threads)
 {
         parallel_match(parallel_sequential_scatter_func(dst, src, width, idx, num),
                 parallel_parallel_scatter_func(dst, src, width, idx, num, num_threads))
 }
 
-NG5_EXPORT(bool) parallel_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
+ARK_EXPORT(bool) parallel_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
         const size_t *src_idx, size_t idx_len, enum threading_hint hint)
 {
         parallel_match(parallel_sequential_shuffle(dst, src, width, dst_idx, src_idx, idx_len),
                 parallel_parallel_shuffle(dst, src, width, dst_idx, src_idx, idx_len))
 }
 
-NG5_EXPORT(bool) parallel_filter_early(void *result, size_t *result_size, const void *src, size_t width, size_t len,
+ARK_EXPORT(bool) parallel_filter_early(void *result, size_t *result_size, const void *src, size_t width, size_t len,
         parallel_predicate_func_t pred, void *args, enum threading_hint hint, uint_fast16_t num_threads)
 {
         parallel_match(parallel_sequential_filter_early(result, result_size, src, width, len, pred, args),
                 parallel_parallel_filter_early(result, result_size, src, width, len, pred, args, num_threads))
 }
 
-NG5_EXPORT(bool) parallel_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width, size_t len,
+ARK_EXPORT(bool) parallel_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width, size_t len,
         parallel_predicate_func_t pred, void *args, enum threading_hint hint, size_t num_threads)
 {
         parallel_match(parallel_sequential_filter_late(pos, num_pos, src, width, len, pred, args),
                 parallel_parallel_filter_late(pos, num_pos, src, width, len, pred, args, num_threads))
 }
 
-NG5_EXPORT(bool) parallel_sequential_for(const void *base, size_t width, size_t len, parallel_for_body_func_t f,
+ARK_EXPORT(bool) parallel_sequential_for(const void *base, size_t width, size_t len, parallel_for_body_func_t f,
         void *args)
 {
         error_if_null(base)
@@ -169,7 +169,7 @@ NG5_EXPORT(bool) parallel_sequential_for(const void *base, size_t width, size_t 
         return true;
 }
 
-NG5_EXPORT(bool) parallel_parallel_for(const void *base, size_t width, size_t len, parallel_for_body_func_t f,
+ARK_EXPORT(bool) parallel_parallel_for(const void *base, size_t width, size_t len, parallel_for_body_func_t f,
         void *args, uint_fast16_t num_threads)
 {
         error_if_null(base)
@@ -213,7 +213,7 @@ NG5_EXPORT(bool) parallel_parallel_for(const void *base, size_t width, size_t le
 void mapProxy(const void *src, size_t src_width, size_t len, void *args, thread_id_t tid)
 {
         unused(tid);
-        ng5_cast(struct map_args *, mapArgs, args);
+        ark_cast(struct map_args *, mapArgs, args);
         size_t globalStart = (src - mapArgs->src) / src_width;
 
         prefetch_read(mapArgs->src);
@@ -227,7 +227,7 @@ void mapProxy(const void *src, size_t src_width, size_t len, void *args, thread_
                 mapArgs->args);
 }
 
-NG5_EXPORT(bool) parallel_map_exec(void *dst, const void *src, size_t src_width, size_t len, size_t dst_width,
+ARK_EXPORT(bool) parallel_map_exec(void *dst, const void *src, size_t src_width, size_t len, size_t dst_width,
         parallel_map_body_func_t f, void *args, enum threading_hint hint, uint_fast16_t num_threads)
 {
         error_if_null(src)
@@ -246,7 +246,7 @@ NG5_EXPORT(bool) parallel_map_exec(void *dst, const void *src, size_t src_width,
 void gather_function(const void *start, size_t width, size_t len, void *args, thread_id_t tid)
 {
         unused(tid);
-        ng5_cast(struct gather_scatter_args *, gather_args, args);
+        ark_cast(struct gather_scatter_args *, gather_args, args);
         size_t global_index_start = (start - gather_args->dst) / width;
 
         prefetch_write(gather_args->dst);
@@ -267,7 +267,7 @@ void gather_function(const void *start, size_t width, size_t len, void *args, th
         }
 }
 
-NG5_EXPORT(bool) parallel_sequential_gather(void *dst, const void *src, size_t width, const size_t *idx,
+ARK_EXPORT(bool) parallel_sequential_gather(void *dst, const void *src, size_t width, const size_t *idx,
         size_t dst_src_len)
 {
         error_if_null(dst)
@@ -295,7 +295,7 @@ NG5_EXPORT(bool) parallel_sequential_gather(void *dst, const void *src, size_t w
         return true;
 }
 
-NG5_EXPORT(bool) parallel_parallel_gather(void *dst, const void *src, size_t width, const size_t *idx,
+ARK_EXPORT(bool) parallel_parallel_gather(void *dst, const void *src, size_t width, const size_t *idx,
         size_t dst_src_len, uint_fast16_t num_threads)
 {
         error_if_null(dst)
@@ -311,7 +311,7 @@ NG5_EXPORT(bool) parallel_parallel_gather(void *dst, const void *src, size_t wid
         return parallel_parallel_for(dst, width, dst_src_len, gather_function, &args, num_threads);
 }
 
-NG5_EXPORT(bool) parallel_sequential_gather_adr(void *dst, const void *src, size_t src_width, const size_t *idx,
+ARK_EXPORT(bool) parallel_sequential_gather_adr(void *dst, const void *src, size_t src_width, const size_t *idx,
         size_t num)
 {
         error_if_null(dst)
@@ -343,7 +343,7 @@ NG5_EXPORT(bool) parallel_sequential_gather_adr(void *dst, const void *src, size
 void parallel_gather_adr_func(const void *start, size_t width, size_t len, void *args, thread_id_t tid)
 {
         unused(tid);
-        ng5_cast(struct gather_scatter_args *, gather_args, args);
+        ark_cast(struct gather_scatter_args *, gather_args, args);
 
         prefetch_read(gather_args->idx);
         prefetch_write(gather_args->dst);
@@ -364,7 +364,7 @@ void parallel_gather_adr_func(const void *start, size_t width, size_t len, void 
         }
 }
 
-NG5_EXPORT(bool) parallel_parallel_gather_adr_func(void *dst, const void *src, size_t src_width, const size_t *idx,
+ARK_EXPORT(bool) parallel_parallel_gather_adr_func(void *dst, const void *src, size_t src_width, const size_t *idx,
         size_t num, uint_fast16_t num_threads)
 {
         error_if_null(dst)
@@ -383,7 +383,7 @@ NG5_EXPORT(bool) parallel_parallel_gather_adr_func(void *dst, const void *src, s
 void parallel_scatter_func(const void *start, size_t width, size_t len, void *args, thread_id_t tid)
 {
         unused(tid);
-        ng5_cast(struct gather_scatter_args *, scatter_args, args);
+        ark_cast(struct gather_scatter_args *, scatter_args, args);
 
         prefetch_read(scatter_args->idx);
         prefetch_read(scatter_args->src);
@@ -405,7 +405,7 @@ void parallel_scatter_func(const void *start, size_t width, size_t len, void *ar
         }
 }
 
-NG5_EXPORT(bool) parallel_sequential_scatter_func(void *dst, const void *src, size_t width, const size_t *idx,
+ARK_EXPORT(bool) parallel_sequential_scatter_func(void *dst, const void *src, size_t width, const size_t *idx,
         size_t num)
 {
         error_if_null(dst)
@@ -428,7 +428,7 @@ NG5_EXPORT(bool) parallel_sequential_scatter_func(void *dst, const void *src, si
         return true;
 }
 
-NG5_EXPORT(bool) parallel_parallel_scatter_func(void *dst, const void *src, size_t width, const size_t *idx, size_t num,
+ARK_EXPORT(bool) parallel_parallel_scatter_func(void *dst, const void *src, size_t width, const size_t *idx, size_t num,
         uint_fast16_t num_threads)
 {
         error_if_null(dst)
@@ -444,7 +444,7 @@ NG5_EXPORT(bool) parallel_parallel_scatter_func(void *dst, const void *src, size
         return parallel_parallel_for(dst, width, num, parallel_scatter_func, &args, num_threads);
 }
 
-NG5_EXPORT(bool) parallel_sequential_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
+ARK_EXPORT(bool) parallel_sequential_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
         const size_t *src_idx, size_t idx_len)
 {
         error_if_null(dst)
@@ -472,7 +472,7 @@ NG5_EXPORT(bool) parallel_sequential_shuffle(void *dst, const void *src, size_t 
         return true;
 }
 
-NG5_EXPORT(bool) parallel_parallel_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
+ARK_EXPORT(bool) parallel_parallel_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
         const size_t *src_idx, size_t idx_len)
 {
         unused(dst);
@@ -481,10 +481,10 @@ NG5_EXPORT(bool) parallel_parallel_shuffle(void *dst, const void *src, size_t wi
         unused(dst_idx);
         unused(src_idx);
         unused(idx_len);
-        NG5_NOT_IMPLEMENTED
+        ARK_NOT_IMPLEMENTED
 }
 
-NG5_EXPORT(bool) parallel_sequential_filter_late(size_t *positions, size_t *num_positions, const void *source,
+ARK_EXPORT(bool) parallel_sequential_filter_late(size_t *positions, size_t *num_positions, const void *source,
         size_t width, size_t length, parallel_predicate_func_t predicate, void *arguments)
 {
         error_if_null(positions);
@@ -501,7 +501,7 @@ NG5_EXPORT(bool) parallel_sequential_filter_late(size_t *positions, size_t *num_
 
 void *parallel_filter_proxy_func(void *args)
 {
-        ng5_cast(struct filter_arg *, proxy_arg, args);
+        ark_cast(struct filter_arg *, proxy_arg, args);
         proxy_arg->pred(proxy_arg->src_positions,
                 &proxy_arg->num_positions,
                 proxy_arg->start,
@@ -512,7 +512,7 @@ void *parallel_filter_proxy_func(void *args)
         return NULL;
 }
 
-NG5_EXPORT(bool) parallel_parallel_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width, size_t len,
+ARK_EXPORT(bool) parallel_parallel_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width, size_t len,
         parallel_predicate_func_t pred, void *args, size_t num_threads)
 {
         error_if_null(pos);
@@ -597,7 +597,7 @@ NG5_EXPORT(bool) parallel_parallel_filter_late(size_t *pos, size_t *num_pos, con
         return true;
 }
 
-NG5_EXPORT(bool) parallel_sequential_filter_early(void *result, size_t *result_size, const void *src, size_t width,
+ARK_EXPORT(bool) parallel_sequential_filter_early(void *result, size_t *result_size, const void *src, size_t width,
         size_t len, parallel_predicate_func_t pred, void *args)
 {
         error_if_null(result);
@@ -620,7 +620,7 @@ NG5_EXPORT(bool) parallel_sequential_filter_early(void *result, size_t *result_s
         return true;
 }
 
-NG5_EXPORT(bool) parallel_parallel_filter_early(void *result, size_t *result_size, const void *src, size_t width,
+ARK_EXPORT(bool) parallel_parallel_filter_early(void *result, size_t *result_size, const void *src, size_t width,
         size_t len, parallel_predicate_func_t pred, void *args, uint_fast16_t num_threads)
 {
         error_if_null(result);

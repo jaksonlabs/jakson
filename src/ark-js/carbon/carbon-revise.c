@@ -49,7 +49,7 @@ for (u32 i = 0; i < doc->handler.num_elems; i++) {                              
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-NG5_EXPORT(bool) carbon_revise_try_begin(struct carbon_revise *context, struct carbon *revised_doc, struct carbon *doc)
+ARK_EXPORT(bool) carbon_revise_try_begin(struct carbon_revise *context, struct carbon *revised_doc, struct carbon *doc)
 {
         error_if_null(context)
         error_if_null(doc)
@@ -60,7 +60,7 @@ NG5_EXPORT(bool) carbon_revise_try_begin(struct carbon_revise *context, struct c
         }
 }
 
-NG5_EXPORT(bool) carbon_revise_begin(struct carbon_revise *context, struct carbon *revised_doc, struct carbon *original)
+ARK_EXPORT(bool) carbon_revise_begin(struct carbon_revise *context, struct carbon *revised_doc, struct carbon *original)
 {
         error_if_null(context)
         error_if_null(original)
@@ -75,7 +75,7 @@ NG5_EXPORT(bool) carbon_revise_begin(struct carbon_revise *context, struct carbo
                 fire_revision_begin(original);
                 return true;
         } else {
-                error(&original->err, NG5_ERR_OUTDATED)
+                error(&original->err, ARK_ERR_OUTDATED)
                 return false;
         }
 }
@@ -114,7 +114,7 @@ static void key_string_set(struct carbon *doc, const char *key)
         memfile_restore_position(&doc->memfile);
 }
 
-NG5_EXPORT(bool) carbon_revise_key_generate(object_id_t *out, struct carbon_revise *context)
+ARK_EXPORT(bool) carbon_revise_key_generate(object_id_t *out, struct carbon_revise *context)
 {
         error_if_null(context);
         enum carbon_primary_key_type key_type;
@@ -123,15 +123,15 @@ NG5_EXPORT(bool) carbon_revise_key_generate(object_id_t *out, struct carbon_revi
                 object_id_t oid;
                 object_id_create(&oid);
                 key_unsigned_set(context->revised_doc, oid);
-                ng5_optional_set(out, oid);
+                ark_optional_set(out, oid);
                 return true;
         } else {
-                error(&context->err, NG5_ERR_TYPEMISMATCH)
+                error(&context->err, ARK_ERR_TYPEMISMATCH)
                 return false;
         }
 }
 
-NG5_EXPORT(bool) carbon_revise_key_set_unsigned(struct carbon_revise *context, u64 key_value)
+ARK_EXPORT(bool) carbon_revise_key_set_unsigned(struct carbon_revise *context, u64 key_value)
 {
         error_if_null(context);
         enum carbon_primary_key_type key_type;
@@ -140,12 +140,12 @@ NG5_EXPORT(bool) carbon_revise_key_set_unsigned(struct carbon_revise *context, u
                 key_unsigned_set(context->revised_doc, key_value);
                 return true;
         } else {
-                error(&context->err, NG5_ERR_TYPEMISMATCH)
+                error(&context->err, ARK_ERR_TYPEMISMATCH)
                 return false;
         }
 }
 
-NG5_EXPORT(bool) carbon_revise_key_set_signed(struct carbon_revise *context, i64 key_value)
+ARK_EXPORT(bool) carbon_revise_key_set_signed(struct carbon_revise *context, i64 key_value)
 {
         error_if_null(context);
         enum carbon_primary_key_type key_type;
@@ -154,12 +154,12 @@ NG5_EXPORT(bool) carbon_revise_key_set_signed(struct carbon_revise *context, i64
                 key_signed_set(context->revised_doc, key_value);
                 return true;
         } else {
-                error(&context->err, NG5_ERR_TYPEMISMATCH)
+                error(&context->err, ARK_ERR_TYPEMISMATCH)
                 return false;
         }
 }
 
-NG5_EXPORT(bool) carbon_revise_key_set_string(struct carbon_revise *context, const char *key_value)
+ARK_EXPORT(bool) carbon_revise_key_set_string(struct carbon_revise *context, const char *key_value)
 {
         error_if_null(context);
         enum carbon_primary_key_type key_type;
@@ -168,27 +168,27 @@ NG5_EXPORT(bool) carbon_revise_key_set_string(struct carbon_revise *context, con
                 key_string_set(context->revised_doc, key_value);
                 return true;
         } else {
-                error(&context->err, NG5_ERR_TYPEMISMATCH)
+                error(&context->err, ARK_ERR_TYPEMISMATCH)
                 return false;
         }
 }
 
-NG5_EXPORT(bool) carbon_revise_iterator_open(struct carbon_array_it *it, struct carbon_revise *context)
+ARK_EXPORT(bool) carbon_revise_iterator_open(struct carbon_array_it *it, struct carbon_revise *context)
 {
         error_if_null(it);
         error_if_null(context);
         offset_t payload_start = carbon_int_payload_after_header(context->revised_doc);
-        error_if(context->revised_doc->memfile.mode != READ_WRITE, &context->original->err, NG5_ERR_INTERNALERR)
+        error_if(context->revised_doc->memfile.mode != READ_WRITE, &context->original->err, ARK_ERR_INTERNALERR)
         return carbon_array_it_create(it, &context->revised_doc->memfile, &context->original->err, payload_start);
 }
 
-NG5_EXPORT(bool) carbon_revise_iterator_close(struct carbon_array_it *it)
+ARK_EXPORT(bool) carbon_revise_iterator_close(struct carbon_array_it *it)
 {
         error_if_null(it);
         return carbon_array_it_drop(it);
 }
 
-NG5_EXPORT(bool) carbon_revise_find_open(struct carbon_find *out, const char *dot_path, struct carbon_revise *context)
+ARK_EXPORT(bool) carbon_revise_find_open(struct carbon_find *out, const char *dot_path, struct carbon_revise *context)
 {
         error_if_null(out)
         error_if_null(dot_path)
@@ -200,13 +200,13 @@ NG5_EXPORT(bool) carbon_revise_find_open(struct carbon_find *out, const char *do
         return status;
 }
 
-NG5_EXPORT(bool) carbon_revise_find_close(struct carbon_find *find)
+ARK_EXPORT(bool) carbon_revise_find_close(struct carbon_find *find)
 {
         error_if_null(find)
         return carbon_find_drop(find);
 }
 
-NG5_EXPORT(bool) carbon_revise_remove_one(const char *dot_path, struct carbon *rev_doc, struct carbon *doc)
+ARK_EXPORT(bool) carbon_revise_remove_one(const char *dot_path, struct carbon *rev_doc, struct carbon *doc)
 {
         struct carbon_revise revise;
         carbon_revise_begin(&revise, rev_doc, doc);
@@ -215,7 +215,7 @@ NG5_EXPORT(bool) carbon_revise_remove_one(const char *dot_path, struct carbon *r
         return status;
 }
 
-NG5_EXPORT(bool) carbon_revise_remove(const char *dot_path, struct carbon_revise *context)
+ARK_EXPORT(bool) carbon_revise_remove(const char *dot_path, struct carbon_revise *context)
 {
         error_if_null(dot_path)
         error_if_null(context)
@@ -241,19 +241,19 @@ NG5_EXPORT(bool) carbon_revise_remove(const char *dot_path, struct carbon_revise
                                 result = carbon_column_it_remove(it, elem_pos);
                         } break;
                         default:
-                                error(&context->original->err, NG5_ERR_INTERNALERR);
+                                error(&context->original->err, ARK_ERR_INTERNALERR);
                                 result = false;
                         }
                 }
                 carbon_path_evaluator_end(&eval);
                 return result;
         } else {
-                error(&context->original->err, NG5_ERR_DOT_PATH_PARSERR);
+                error(&context->original->err, ARK_ERR_DOT_PATH_PARSERR);
                 return false;
         }
 }
 
-NG5_EXPORT(bool) carbon_revise_pack(struct carbon_revise *context)
+ARK_EXPORT(bool) carbon_revise_pack(struct carbon_revise *context)
 {
         error_if_null(context);
         struct carbon_array_it it;
@@ -263,7 +263,7 @@ NG5_EXPORT(bool) carbon_revise_pack(struct carbon_revise *context)
         return true;
 }
 
-NG5_EXPORT(bool) carbon_revise_shrink(struct carbon_revise *context)
+ARK_EXPORT(bool) carbon_revise_shrink(struct carbon_revise *context)
 {
         struct carbon_array_it it;
         carbon_revise_iterator_open(&it, context);
@@ -281,7 +281,7 @@ NG5_EXPORT(bool) carbon_revise_shrink(struct carbon_revise *context)
         return true;
 }
 
-NG5_EXPORT(const struct carbon *) carbon_revise_end(struct carbon_revise *context)
+ARK_EXPORT(const struct carbon *) carbon_revise_end(struct carbon_revise *context)
 {
         if (likely(context != NULL)) {
                 internal_revision_inc(context->revised_doc);
@@ -296,12 +296,12 @@ NG5_EXPORT(const struct carbon *) carbon_revise_end(struct carbon_revise *contex
 
                 return context->revised_doc;
         } else {
-                error_print(NG5_ERR_NULLPTR);
+                error_print(ARK_ERR_NULLPTR);
                 return NULL;
         }
 }
 
-NG5_EXPORT(bool) carbon_revise_abort(struct carbon_revise *context)
+ARK_EXPORT(bool) carbon_revise_abort(struct carbon_revise *context)
 {
         error_if_null(context)
 
@@ -329,7 +329,7 @@ static bool internal_pack_array(struct carbon_array_it *it)
 
                 if (!is_array_end) {
 
-                        error_if(!is_empty_slot, &it->err, NG5_ERR_CORRUPTED);
+                        error_if(!is_empty_slot, &it->err, ARK_ERR_CORRUPTED);
                         offset_t first_empty_slot_offset = memfile_tell(&this_array_it.memfile);
                         char final;
                         while ((final = *memfile_read(&this_array_it.memfile, sizeof(char))) == 0)
@@ -408,7 +408,7 @@ static bool internal_pack_array(struct carbon_array_it *it)
                                 carbon_object_it_drop(&nested_object_it);
                         } break;
                         default:
-                        error(&it->err, NG5_ERR_INTERNALERR);
+                        error(&it->err, ARK_ERR_INTERNALERR);
                                 return false;
                         }
                 }
@@ -434,7 +434,7 @@ static bool internal_pack_object(struct carbon_object_it *it)
 
                 if (!is_object_end) {
 
-                        error_if(!is_empty_slot, &it->err, NG5_ERR_CORRUPTED);
+                        error_if(!is_empty_slot, &it->err, ARK_ERR_CORRUPTED);
                         offset_t first_empty_slot_offset = memfile_tell(&this_object_it.memfile);
                         char final;
                         while ((final = *memfile_read(&this_object_it.memfile, sizeof(char))) == 0)
@@ -513,7 +513,7 @@ static bool internal_pack_object(struct carbon_object_it *it)
                                 carbon_object_it_drop(&nested_object_it);
                         } break;
                         default:
-                        error(&it->err, NG5_ERR_INTERNALERR);
+                        error(&it->err, ARK_ERR_INTERNALERR);
                                 return false;
                         }
                 }

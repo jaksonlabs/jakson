@@ -55,21 +55,21 @@ static void insert_embedded_container(struct memfile *memfile, u8 begin_marker, 
         memfile_seek(memfile, payload_begin);
 }
 
-NG5_EXPORT(bool) carbon_int_insert_object(struct memfile *memfile, size_t nbytes)
+ARK_EXPORT(bool) carbon_int_insert_object(struct memfile *memfile, size_t nbytes)
 {
         error_if_null(memfile);
         insert_embedded_container(memfile, carbon_MARKER_OBJECT_BEGIN, carbon_MARKER_OBJECT_END, nbytes);
         return true;
 }
 
-NG5_EXPORT(bool) carbon_int_insert_array(struct memfile *memfile, size_t nbytes)
+ARK_EXPORT(bool) carbon_int_insert_array(struct memfile *memfile, size_t nbytes)
 {
         error_if_null(memfile);
         insert_embedded_container(memfile, carbon_MARKER_ARRAY_BEGIN, carbon_MARKER_ARRAY_END, nbytes);
         return true;
 }
 
-NG5_EXPORT(bool) carbon_int_insert_column(struct memfile *memfile_in, struct err *err_in, enum carbon_column_type type, size_t capactity)
+ARK_EXPORT(bool) carbon_int_insert_column(struct memfile *memfile_in, struct err *err_in, enum carbon_column_type type, size_t capactity)
 {
         error_if_null(memfile_in);
         error_if_null(err_in);
@@ -108,7 +108,7 @@ NG5_EXPORT(bool) carbon_int_insert_column(struct memfile *memfile_in, struct err
                 column_type = carbon_FIELD_TYPE_COLUMN_FLOAT;
                 break;
         default:
-                error_with_details(err_in, NG5_ERR_BADTYPE, "carbon column supports fixed-length types only")
+                error_with_details(err_in, ARK_ERR_BADTYPE, "carbon column supports fixed-length types only")
         }
 
         memfile_ensure_space(memfile_in, sizeof(u8));
@@ -133,7 +133,7 @@ NG5_EXPORT(bool) carbon_int_insert_column(struct memfile *memfile_in, struct err
         return true;
 }
 
-NG5_EXPORT(size_t) carbon_int_get_type_size_encoded(enum carbon_field_type type)
+ARK_EXPORT(size_t) carbon_int_get_type_size_encoded(enum carbon_field_type type)
 {
         size_t type_size = sizeof(media_type_t); /* at least the media type marker is required */
         switch (type) {
@@ -162,13 +162,13 @@ NG5_EXPORT(size_t) carbon_int_get_type_size_encoded(enum carbon_field_type type)
                 type_size += sizeof(float);
                 break;
         default:
-                error_print(NG5_ERR_INTERNALERR);
+                error_print(ARK_ERR_INTERNALERR);
                 return 0;
         }
         return type_size;
 }
 
-NG5_EXPORT(size_t) carbon_int_get_type_value_size(enum carbon_field_type type)
+ARK_EXPORT(size_t) carbon_int_get_type_value_size(enum carbon_field_type type)
 {
         switch (type) {
         case carbon_FIELD_TYPE_NULL:
@@ -200,12 +200,12 @@ NG5_EXPORT(size_t) carbon_int_get_type_value_size(enum carbon_field_type type)
         case carbon_FIELD_TYPE_COLUMN_FLOAT:
                 return sizeof(float);
         default:
-        error_print(NG5_ERR_INTERNALERR);
+        error_print(ARK_ERR_INTERNALERR);
                 return 0;
         }
 }
 
-NG5_EXPORT(bool) carbon_int_array_it_next(bool *is_empty_slot, bool *is_array_end, struct carbon_array_it *it)
+ARK_EXPORT(bool) carbon_int_array_it_next(bool *is_empty_slot, bool *is_array_end, struct carbon_array_it *it)
 {
         if (carbon_int_array_it_refresh(is_empty_slot, is_array_end, it)) {
                 carbon_field_skip(&it->memfile);
@@ -215,7 +215,7 @@ NG5_EXPORT(bool) carbon_int_array_it_next(bool *is_empty_slot, bool *is_array_en
         }
 }
 
-NG5_EXPORT(bool) carbon_int_object_it_next(bool *is_empty_slot, bool *is_object_end, struct carbon_object_it *it)
+ARK_EXPORT(bool) carbon_int_object_it_next(bool *is_empty_slot, bool *is_object_end, struct carbon_object_it *it)
 {
         if (carbon_int_object_it_refresh(is_empty_slot, is_object_end, it)) {
                 carbon_int_object_it_prop_value_skip(it);
@@ -225,7 +225,7 @@ NG5_EXPORT(bool) carbon_int_object_it_next(bool *is_empty_slot, bool *is_object_
         }
 }
 
-NG5_EXPORT(bool) carbon_int_object_it_refresh(bool *is_empty_slot, bool *is_object_end, struct carbon_object_it *it)
+ARK_EXPORT(bool) carbon_int_object_it_refresh(bool *is_empty_slot, bool *is_object_end, struct carbon_object_it *it)
 {
         error_if_null(it);
         if (object_it_is_slot_occupied(is_empty_slot, is_object_end, it)) {
@@ -237,7 +237,7 @@ NG5_EXPORT(bool) carbon_int_object_it_refresh(bool *is_empty_slot, bool *is_obje
         }
 }
 
-NG5_EXPORT(bool) carbon_int_object_it_prop_key_access(struct carbon_object_it *it)
+ARK_EXPORT(bool) carbon_int_object_it_prop_key_access(struct carbon_object_it *it)
 {
         error_if_null(it)
         //memfile_skip(&it->memfile, sizeof(media_type_t));
@@ -246,12 +246,12 @@ NG5_EXPORT(bool) carbon_int_object_it_prop_key_access(struct carbon_object_it *i
         it->key = memfile_peek(&it->memfile, it->key_len);
         memfile_skip(&it->memfile, it->key_len);
         it->value_off = memfile_tell(&it->memfile);
-        it->field_access.it_field_type = *NG5_MEMFILE_PEEK(&it->memfile, u8);
+        it->field_access.it_field_type = *ARK_MEMFILE_PEEK(&it->memfile, u8);
 
         return true;
 }
 
-NG5_EXPORT(bool) carbon_int_object_it_prop_key_skip(struct carbon_object_it *it)
+ARK_EXPORT(bool) carbon_int_object_it_prop_key_skip(struct carbon_object_it *it)
 {
         error_if_null(it)
         memfile_skip(&it->memfile, sizeof(media_type_t));
@@ -260,18 +260,18 @@ NG5_EXPORT(bool) carbon_int_object_it_prop_key_skip(struct carbon_object_it *it)
         memfile_skip(&it->memfile, it->key_len);
 
         it->value_off = memfile_tell(&it->memfile);
-        it->field_access.it_field_type = *NG5_MEMFILE_READ_TYPE(&it->memfile, u8);
+        it->field_access.it_field_type = *ARK_MEMFILE_READ_TYPE(&it->memfile, u8);
         return true;
 }
 
-NG5_EXPORT(bool) carbon_int_object_it_prop_value_skip(struct carbon_object_it *it)
+ARK_EXPORT(bool) carbon_int_object_it_prop_value_skip(struct carbon_object_it *it)
 {
         error_if_null(it)
         memfile_seek(&it->memfile, it->value_off);
         return carbon_field_skip(&it->memfile);
 }
 
-NG5_EXPORT(bool) carbon_int_object_it_prop_skip(struct carbon_object_it *it)
+ARK_EXPORT(bool) carbon_int_object_it_prop_skip(struct carbon_object_it *it)
 {
         error_if_null(it)
 
@@ -281,21 +281,21 @@ NG5_EXPORT(bool) carbon_int_object_it_prop_skip(struct carbon_object_it *it)
         return carbon_field_skip(&it->memfile);
 }
 
-NG5_EXPORT(bool) carbon_int_object_skip_contents(bool *is_empty_slot, bool *is_array_end, struct carbon_object_it *it)
+ARK_EXPORT(bool) carbon_int_object_skip_contents(bool *is_empty_slot, bool *is_array_end, struct carbon_object_it *it)
 {
         while (object_it_next_no_load(is_empty_slot, is_array_end, it))
         { }
         return true;
 }
 
-NG5_EXPORT(bool) carbon_int_array_skip_contents(bool *is_empty_slot, bool *is_array_end, struct carbon_array_it *it)
+ARK_EXPORT(bool) carbon_int_array_skip_contents(bool *is_empty_slot, bool *is_array_end, struct carbon_array_it *it)
 {
         while (array_it_next_no_load(is_empty_slot, is_array_end, it))
         { }
         return true;
 }
 
-NG5_EXPORT(bool) carbon_int_array_it_refresh(bool *is_empty_slot, bool *is_array_end, struct carbon_array_it *it)
+ARK_EXPORT(bool) carbon_int_array_it_refresh(bool *is_empty_slot, bool *is_array_end, struct carbon_array_it *it)
 {
         error_if_null(it);
         if (array_it_is_slot_occupied(is_empty_slot, is_array_end, it)) {
@@ -307,20 +307,20 @@ NG5_EXPORT(bool) carbon_int_array_it_refresh(bool *is_empty_slot, bool *is_array
         }
 }
 
-NG5_EXPORT(bool) carbon_int_array_it_field_type_read(struct carbon_array_it *it)
+ARK_EXPORT(bool) carbon_int_array_it_field_type_read(struct carbon_array_it *it)
 {
         error_if_null(it)
-        error_if(memfile_remain_size(&it->memfile) < 1, &it->err, NG5_ERR_ILLEGALOP);
+        error_if(memfile_remain_size(&it->memfile) < 1, &it->err, ARK_ERR_ILLEGALOP);
         memfile_save_position(&it->memfile);
         u8 media_type = *memfile_read(&it->memfile, 1);
-        error_if(media_type == 0, &it->err, NG5_ERR_NOTFOUND)
-        error_if(media_type == carbon_MARKER_ARRAY_END, &it->err, NG5_ERR_OUTOFBOUNDS)
+        error_if(media_type == 0, &it->err, ARK_ERR_NOTFOUND)
+        error_if(media_type == carbon_MARKER_ARRAY_END, &it->err, ARK_ERR_OUTOFBOUNDS)
         it->field_access.it_field_type = media_type;
         memfile_restore_position(&it->memfile);
         return true;
 }
 
-NG5_EXPORT(bool) carbon_int_field_data_access(struct memfile *file, struct err *err, struct field_access *field_access)
+ARK_EXPORT(bool) carbon_int_field_data_access(struct memfile *file, struct err *err, struct field_access *field_access)
 {
         memfile_save_position(file);
         memfile_skip(file, sizeof(media_type_t));
@@ -394,7 +394,7 @@ NG5_EXPORT(bool) carbon_int_field_data_access(struct memfile *file, struct err *
                         memfile_tell(file) - sizeof(u8));
                 break;
         default:
-        error(err, NG5_ERR_CORRUPTED)
+        error(err, ARK_ERR_CORRUPTED)
                 return false;
         }
 
@@ -403,7 +403,7 @@ NG5_EXPORT(bool) carbon_int_field_data_access(struct memfile *file, struct err *
         return true;
 }
 
-NG5_EXPORT(offset_t) carbon_int_column_get_payload_off(struct carbon_column_it *it)
+ARK_EXPORT(offset_t) carbon_int_column_get_payload_off(struct carbon_column_it *it)
 {
         memfile_save_position(&it->memfile);
         memfile_seek(&it->memfile, it->num_and_capacity_start_offset);
@@ -414,7 +414,7 @@ NG5_EXPORT(offset_t) carbon_int_column_get_payload_off(struct carbon_column_it *
         return result;
 }
 
-NG5_EXPORT(offset_t) carbon_int_payload_after_header(struct carbon *doc)
+ARK_EXPORT(offset_t) carbon_int_payload_after_header(struct carbon *doc)
 {
         offset_t result = 0;
         enum carbon_primary_key_type key_type;
@@ -434,7 +434,7 @@ NG5_EXPORT(offset_t) carbon_int_payload_after_header(struct carbon *doc)
         return result;
 }
 
-NG5_EXPORT(u64) carbon_int_header_get_rev(struct carbon *doc)
+ARK_EXPORT(u64) carbon_int_header_get_rev(struct carbon *doc)
 {
         assert(doc);
         u64 rev = 0;
@@ -452,39 +452,39 @@ NG5_EXPORT(u64) carbon_int_header_get_rev(struct carbon *doc)
         return rev;
 }
 
-NG5_EXPORT(void) carbon_int_history_push(struct vector ofType(offset_t) *vec, offset_t off)
+ARK_EXPORT(void) carbon_int_history_push(struct vector ofType(offset_t) *vec, offset_t off)
 {
         assert(vec);
         vec_push(vec, &off, sizeof(offset_t));
 }
 
-NG5_EXPORT(void) carbon_int_history_clear(struct vector ofType(offset_t) *vec)
+ARK_EXPORT(void) carbon_int_history_clear(struct vector ofType(offset_t) *vec)
 {
         assert(vec);
         vec_clear(vec);
 }
 
-NG5_EXPORT(offset_t) carbon_int_history_pop(struct vector ofType(offset_t) *vec)
+ARK_EXPORT(offset_t) carbon_int_history_pop(struct vector ofType(offset_t) *vec)
 {
         assert(vec);
         assert(carbon_int_history_has(vec));
         return *(offset_t *) vec_pop(vec);
 }
 
-NG5_EXPORT(offset_t) carbon_int_history_peek(struct vector ofType(offset_t) *vec)
+ARK_EXPORT(offset_t) carbon_int_history_peek(struct vector ofType(offset_t) *vec)
 {
         assert(vec);
         assert(carbon_int_history_has(vec));
         return *(offset_t *) vec_peek(vec);
 }
 
-NG5_EXPORT(bool) carbon_int_history_has(struct vector ofType(offset_t) *vec)
+ARK_EXPORT(bool) carbon_int_history_has(struct vector ofType(offset_t) *vec)
 {
         assert(vec);
         return !vec_is_empty(vec);
 }
 
-NG5_EXPORT(bool) carbon_int_field_access_create(struct field_access *field)
+ARK_EXPORT(bool) carbon_int_field_access_create(struct field_access *field)
 {
         field->nested_array_it_opened = false;
         field->nested_array_it_accessed = false;
@@ -493,13 +493,13 @@ NG5_EXPORT(bool) carbon_int_field_access_create(struct field_access *field)
         field->nested_array_it = malloc(sizeof(struct carbon_array_it));
         field->nested_object_it = malloc(sizeof(struct carbon_object_it));
         field->nested_column_it = malloc(sizeof(struct carbon_column_it));
-        ng5_zero_memory(field->nested_array_it, sizeof(struct carbon_array_it))
-        ng5_zero_memory(field->nested_object_it, sizeof(struct carbon_object_it))
-        ng5_zero_memory(field->nested_column_it, sizeof(struct carbon_column_it))
+        ark_zero_memory(field->nested_array_it, sizeof(struct carbon_array_it))
+        ark_zero_memory(field->nested_object_it, sizeof(struct carbon_object_it))
+        ark_zero_memory(field->nested_column_it, sizeof(struct carbon_column_it))
         return true;
 }
 
-NG5_EXPORT(bool) carbon_int_field_access_drop(struct field_access *field)
+ARK_EXPORT(bool) carbon_int_field_access_drop(struct field_access *field)
 {
         carbon_int_field_auto_close(field);
         free (field->nested_array_it);
@@ -508,30 +508,30 @@ NG5_EXPORT(bool) carbon_int_field_access_drop(struct field_access *field)
         return true;
 }
 
-NG5_EXPORT(void) carbon_int_auto_close_nested_array_it(struct field_access *field)
+ARK_EXPORT(void) carbon_int_auto_close_nested_array_it(struct field_access *field)
 {
         if (((char *) field->nested_array_it)[0] != 0) {
                 carbon_array_it_drop(field->nested_array_it);
-                ng5_zero_memory(field->nested_array_it, sizeof(struct carbon_array_it));
+                ark_zero_memory(field->nested_array_it, sizeof(struct carbon_array_it));
         }
 }
 
-NG5_EXPORT(void) carbon_int_auto_close_nested_object_it(struct field_access *field)
+ARK_EXPORT(void) carbon_int_auto_close_nested_object_it(struct field_access *field)
 {
         if (((char *) field->nested_object_it)[0] != 0) {
                 carbon_object_it_drop(field->nested_object_it);
-                ng5_zero_memory(field->nested_object_it, sizeof(struct carbon_object_it));
+                ark_zero_memory(field->nested_object_it, sizeof(struct carbon_object_it));
         }
 }
 
-NG5_EXPORT(void) carbon_int_auto_close_nested_column_it(struct field_access *field)
+ARK_EXPORT(void) carbon_int_auto_close_nested_column_it(struct field_access *field)
 {
         if (((char *) field->nested_column_it)[0] != 0) {
-                ng5_zero_memory(field->nested_column_it, sizeof(struct carbon_column_it));
+                ark_zero_memory(field->nested_column_it, sizeof(struct carbon_column_it));
         }
 }
 
-NG5_EXPORT(bool) carbon_int_field_auto_close(struct field_access *field)
+ARK_EXPORT(bool) carbon_int_field_auto_close(struct field_access *field)
 {
         error_if_null(field)
         if (field->nested_array_it_opened && !field->nested_array_it_accessed) {
@@ -548,7 +548,7 @@ NG5_EXPORT(bool) carbon_int_field_auto_close(struct field_access *field)
         return true;
 }
 
-NG5_EXPORT(bool) carbon_int_field_access_field_type(enum carbon_field_type *type, struct field_access *field)
+ARK_EXPORT(bool) carbon_int_field_access_field_type(enum carbon_field_type *type, struct field_access *field)
 {
         error_if_null(type)
         error_if_null(field)
@@ -556,174 +556,174 @@ NG5_EXPORT(bool) carbon_int_field_access_field_type(enum carbon_field_type *type
         return true;
 }
 
-NG5_EXPORT(bool) carbon_int_field_access_u8_value(u8 *value, struct field_access *field, struct err *err)
+ARK_EXPORT(bool) carbon_int_field_access_u8_value(u8 *value, struct field_access *field, struct err *err)
 {
         error_if_null(value)
         error_if_null(field)
-        error_if(field->it_field_type != carbon_FIELD_TYPE_NUMBER_U8, err, NG5_ERR_TYPEMISMATCH);
+        error_if(field->it_field_type != carbon_FIELD_TYPE_NUMBER_U8, err, ARK_ERR_TYPEMISMATCH);
         *value = *(u8 *) field->it_field_data;
         return true;
 }
 
-NG5_EXPORT(bool) carbon_int_field_access_u16_value(u16 *value, struct field_access *field, struct err *err)
+ARK_EXPORT(bool) carbon_int_field_access_u16_value(u16 *value, struct field_access *field, struct err *err)
 {
         error_if_null(value)
         error_if_null(field)
-        error_if(field->it_field_type != carbon_FIELD_TYPE_NUMBER_U16, err, NG5_ERR_TYPEMISMATCH);
+        error_if(field->it_field_type != carbon_FIELD_TYPE_NUMBER_U16, err, ARK_ERR_TYPEMISMATCH);
         *value = *(u16 *) field->it_field_data;
         return true;
 }
 
-NG5_EXPORT(bool) carbon_int_field_access_u32_value(u32 *value, struct field_access *field, struct err *err)
+ARK_EXPORT(bool) carbon_int_field_access_u32_value(u32 *value, struct field_access *field, struct err *err)
 {
         error_if_null(value)
         error_if_null(field)
-        error_if(field->it_field_type != carbon_FIELD_TYPE_NUMBER_U32, err, NG5_ERR_TYPEMISMATCH);
+        error_if(field->it_field_type != carbon_FIELD_TYPE_NUMBER_U32, err, ARK_ERR_TYPEMISMATCH);
         *value = *(u32 *) field->it_field_data;
         return true;
 }
 
-NG5_EXPORT(bool) carbon_int_field_access_u64_value(u64 *value, struct field_access *field, struct err *err)
+ARK_EXPORT(bool) carbon_int_field_access_u64_value(u64 *value, struct field_access *field, struct err *err)
 {
         error_if_null(value)
         error_if_null(field)
-        error_if(field->it_field_type != carbon_FIELD_TYPE_NUMBER_U64, err, NG5_ERR_TYPEMISMATCH);
+        error_if(field->it_field_type != carbon_FIELD_TYPE_NUMBER_U64, err, ARK_ERR_TYPEMISMATCH);
         *value = *(u64 *) field->it_field_data;
         return true;
 }
 
-NG5_EXPORT(bool) carbon_int_field_access_i8_value(i8 *value, struct field_access *field, struct err *err)
+ARK_EXPORT(bool) carbon_int_field_access_i8_value(i8 *value, struct field_access *field, struct err *err)
 {
         error_if_null(value)
         error_if_null(field)
-        error_if(field->it_field_type != carbon_FIELD_TYPE_NUMBER_I8, err, NG5_ERR_TYPEMISMATCH);
+        error_if(field->it_field_type != carbon_FIELD_TYPE_NUMBER_I8, err, ARK_ERR_TYPEMISMATCH);
         *value = *(i8 *) field->it_field_data;
         return true;
 }
 
-NG5_EXPORT(bool) carbon_int_field_access_i16_value(i16 *value, struct field_access *field, struct err *err)
+ARK_EXPORT(bool) carbon_int_field_access_i16_value(i16 *value, struct field_access *field, struct err *err)
 {
         error_if_null(value)
         error_if_null(field)
-        error_if(field->it_field_type != carbon_FIELD_TYPE_NUMBER_I16, err, NG5_ERR_TYPEMISMATCH);
+        error_if(field->it_field_type != carbon_FIELD_TYPE_NUMBER_I16, err, ARK_ERR_TYPEMISMATCH);
         *value = *(i16 *) field->it_field_data;
         return true;
 }
 
-NG5_EXPORT(bool) carbon_int_field_access_i32_value(i32 *value, struct field_access *field, struct err *err)
+ARK_EXPORT(bool) carbon_int_field_access_i32_value(i32 *value, struct field_access *field, struct err *err)
 {
         error_if_null(value)
         error_if_null(field)
-        error_if(field->it_field_type != carbon_FIELD_TYPE_NUMBER_I32, err, NG5_ERR_TYPEMISMATCH);
+        error_if(field->it_field_type != carbon_FIELD_TYPE_NUMBER_I32, err, ARK_ERR_TYPEMISMATCH);
         *value = *(i32 *) field->it_field_data;
         return true;
 }
 
-NG5_EXPORT(bool) carbon_int_field_access_i64_value(i64 *value, struct field_access *field, struct err *err)
+ARK_EXPORT(bool) carbon_int_field_access_i64_value(i64 *value, struct field_access *field, struct err *err)
 {
         error_if_null(value)
         error_if_null(field)
-        error_if(field->it_field_type != carbon_FIELD_TYPE_NUMBER_I64, err, NG5_ERR_TYPEMISMATCH);
+        error_if(field->it_field_type != carbon_FIELD_TYPE_NUMBER_I64, err, ARK_ERR_TYPEMISMATCH);
         *value = *(i64 *) field->it_field_data;
         return true;
 }
 
-NG5_EXPORT(bool) carbon_int_field_access_float_value(bool *is_null_in, float *value, struct field_access *field, struct err *err)
+ARK_EXPORT(bool) carbon_int_field_access_float_value(bool *is_null_in, float *value, struct field_access *field, struct err *err)
 {
         error_if_null(field)
-        error_if(field->it_field_type != carbon_FIELD_TYPE_NUMBER_FLOAT, err, NG5_ERR_TYPEMISMATCH);
+        error_if(field->it_field_type != carbon_FIELD_TYPE_NUMBER_FLOAT, err, ARK_ERR_TYPEMISMATCH);
         float read_value = *(float *) field->it_field_data;
-        ng5_optional_set(value, read_value);
-        ng5_optional_set(is_null_in, is_null_float(read_value));
+        ark_optional_set(value, read_value);
+        ark_optional_set(is_null_in, is_null_float(read_value));
 
         return true;
 }
 
-NG5_EXPORT(bool) carbon_int_field_access_signed_value(bool *is_null_in, i64 *value, struct field_access *field, struct err *err)
+ARK_EXPORT(bool) carbon_int_field_access_signed_value(bool *is_null_in, i64 *value, struct field_access *field, struct err *err)
 {
         error_if_null(field)
         switch (field->it_field_type) {
         case carbon_FIELD_TYPE_NUMBER_I8: {
                 i8 read_value;
                 carbon_int_field_access_i8_value(&read_value, field, err);
-                ng5_optional_set(value, read_value);
-                ng5_optional_set(is_null_in, is_null_i8(read_value));
+                ark_optional_set(value, read_value);
+                ark_optional_set(is_null_in, is_null_i8(read_value));
         } break;
         case carbon_FIELD_TYPE_NUMBER_I16: {
                 i16 read_value;
                 carbon_int_field_access_i16_value(&read_value, field, err);
-                ng5_optional_set(value, read_value);
-                ng5_optional_set(is_null_in, is_null_i16(read_value));
+                ark_optional_set(value, read_value);
+                ark_optional_set(is_null_in, is_null_i16(read_value));
         } break;
         case carbon_FIELD_TYPE_NUMBER_I32: {
                 i32 read_value;
                 carbon_int_field_access_i32_value(&read_value, field, err);
-                ng5_optional_set(value, read_value);
-                ng5_optional_set(is_null_in, is_null_i32(read_value));
+                ark_optional_set(value, read_value);
+                ark_optional_set(is_null_in, is_null_i32(read_value));
         } break;
         case carbon_FIELD_TYPE_NUMBER_I64: {
                 i64 read_value;
                 carbon_int_field_access_i64_value(&read_value, field, err);
-                ng5_optional_set(value, read_value);
-                ng5_optional_set(is_null_in, is_null_i64(read_value));
+                ark_optional_set(value, read_value);
+                ark_optional_set(is_null_in, is_null_i64(read_value));
         } break;
         default:
-                error(err, NG5_ERR_TYPEMISMATCH);
+                error(err, ARK_ERR_TYPEMISMATCH);
                 return false;
         }
         return true;
 }
 
-NG5_EXPORT(bool) carbon_int_field_access_unsigned_value(bool *is_null_in, u64 *value, struct field_access *field, struct err *err)
+ARK_EXPORT(bool) carbon_int_field_access_unsigned_value(bool *is_null_in, u64 *value, struct field_access *field, struct err *err)
 {
         error_if_null(field)
         switch (field->it_field_type) {
         case carbon_FIELD_TYPE_NUMBER_U8: {
                 u8 read_value;
                 carbon_int_field_access_u8_value(&read_value, field, err);
-                ng5_optional_set(value, read_value);
-                ng5_optional_set(is_null_in, is_null_u8(read_value));
+                ark_optional_set(value, read_value);
+                ark_optional_set(is_null_in, is_null_u8(read_value));
         } break;
         case carbon_FIELD_TYPE_NUMBER_U16: {
                 u16 read_value;
                 carbon_int_field_access_u16_value(&read_value, field, err);
-                ng5_optional_set(value, read_value);
-                ng5_optional_set(is_null_in, is_null_u16(read_value));
+                ark_optional_set(value, read_value);
+                ark_optional_set(is_null_in, is_null_u16(read_value));
         } break;
         case carbon_FIELD_TYPE_NUMBER_U32: {
                 u32 read_value;
                 carbon_int_field_access_u32_value(&read_value, field, err);
-                ng5_optional_set(value, read_value);
-                ng5_optional_set(is_null_in, is_null_u32(read_value));
+                ark_optional_set(value, read_value);
+                ark_optional_set(is_null_in, is_null_u32(read_value));
         } break;
         case carbon_FIELD_TYPE_NUMBER_U64: {
                 u64 read_value;
                 carbon_int_field_access_u64_value(&read_value, field, err);
-                ng5_optional_set(value, read_value);
-                ng5_optional_set(is_null_in, is_null_u64(read_value));
+                ark_optional_set(value, read_value);
+                ark_optional_set(is_null_in, is_null_u64(read_value));
         } break;
         default:
-                error(err, NG5_ERR_TYPEMISMATCH);
+                error(err, ARK_ERR_TYPEMISMATCH);
                 return false;
         }
         return true;
 }
 
-NG5_EXPORT(const char *) carbon_int_field_access_string_value(u64 *strlen, struct field_access *field, struct err *err)
+ARK_EXPORT(const char *) carbon_int_field_access_string_value(u64 *strlen, struct field_access *field, struct err *err)
 {
         error_if_null(strlen);
-        error_if_and_return(field == NULL, err, NG5_ERR_NULLPTR, NULL);
-        error_if(field->it_field_type != carbon_FIELD_TYPE_STRING, err, NG5_ERR_TYPEMISMATCH);
+        error_if_and_return(field == NULL, err, ARK_ERR_NULLPTR, NULL);
+        error_if(field->it_field_type != carbon_FIELD_TYPE_STRING, err, ARK_ERR_TYPEMISMATCH);
         *strlen = field->it_field_len;
         return field->it_field_data;
 }
 
-NG5_EXPORT(bool) carbon_int_field_access_binary_value(struct carbon_binary *out, struct field_access *field, struct err *err)
+ARK_EXPORT(bool) carbon_int_field_access_binary_value(struct carbon_binary *out, struct field_access *field, struct err *err)
 {
         error_if_null(out)
         error_if_null(field)
         error_if(field->it_field_type != carbon_FIELD_TYPE_BINARY && field->it_field_type != carbon_FIELD_TYPE_BINARY_CUSTOM,
-                err, NG5_ERR_TYPEMISMATCH);
+                err, ARK_ERR_TYPEMISMATCH);
         out->blob = field->it_field_data;
         out->blob_len = field->it_field_len;
         out->mime_type = field->it_mime_type;
@@ -731,25 +731,25 @@ NG5_EXPORT(bool) carbon_int_field_access_binary_value(struct carbon_binary *out,
         return true;
 }
 
-NG5_EXPORT(struct carbon_array_it *) carbon_int_field_access_array_value(struct field_access *field, struct err *err)
+ARK_EXPORT(struct carbon_array_it *) carbon_int_field_access_array_value(struct field_access *field, struct err *err)
 {
-        error_print_if(!field, NG5_ERR_NULLPTR);
-        error_if(field->it_field_type != carbon_FIELD_TYPE_ARRAY, err, NG5_ERR_TYPEMISMATCH);
+        error_print_if(!field, ARK_ERR_NULLPTR);
+        error_if(field->it_field_type != carbon_FIELD_TYPE_ARRAY, err, ARK_ERR_TYPEMISMATCH);
         field->nested_array_it_accessed = true;
         return field->nested_array_it;
 }
 
-NG5_EXPORT(struct carbon_object_it *) carbon_int_field_access_object_value(struct field_access *field, struct err *err)
+ARK_EXPORT(struct carbon_object_it *) carbon_int_field_access_object_value(struct field_access *field, struct err *err)
 {
-        error_print_if(!field, NG5_ERR_NULLPTR);
-        error_if(field->it_field_type != carbon_FIELD_TYPE_OBJECT, err, NG5_ERR_TYPEMISMATCH);
+        error_print_if(!field, ARK_ERR_NULLPTR);
+        error_if(field->it_field_type != carbon_FIELD_TYPE_OBJECT, err, ARK_ERR_TYPEMISMATCH);
         field->nested_object_it_accessed = true;
         return field->nested_object_it;
 }
 
-NG5_EXPORT(struct carbon_column_it *) carbon_int_field_access_column_value(struct field_access *field, struct err *err)
+ARK_EXPORT(struct carbon_column_it *) carbon_int_field_access_column_value(struct field_access *field, struct err *err)
 {
-        error_print_if(!field, NG5_ERR_NULLPTR);
+        error_print_if(!field, ARK_ERR_NULLPTR);
         error_if(field->it_field_type != carbon_FIELD_TYPE_COLUMN_U8 &&
                 field->it_field_type != carbon_FIELD_TYPE_COLUMN_U16 &&
                 field->it_field_type != carbon_FIELD_TYPE_COLUMN_U32 &&
@@ -759,7 +759,7 @@ NG5_EXPORT(struct carbon_column_it *) carbon_int_field_access_column_value(struc
                 field->it_field_type != carbon_FIELD_TYPE_COLUMN_I32 &&
                 field->it_field_type != carbon_FIELD_TYPE_COLUMN_I64 &&
                 field->it_field_type != carbon_FIELD_TYPE_COLUMN_FLOAT &&
-                field->it_field_type != carbon_FIELD_TYPE_COLUMN_BOOLEAN, err, NG5_ERR_TYPEMISMATCH);
+                field->it_field_type != carbon_FIELD_TYPE_COLUMN_BOOLEAN, err, ARK_ERR_TYPEMISMATCH);
         return field->nested_column_it;
 }
 
@@ -790,8 +790,8 @@ static bool is_slot_occupied(bool *is_empty_slot, bool *is_end_reached, struct m
         error_if_null(file);
         char c = *memfile_peek(file, 1);
         bool is_empty = c == 0, is_end = c == end_marker;
-        ng5_optional_set(is_empty_slot, is_empty)
-        ng5_optional_set(is_end_reached, is_end)
+        ark_optional_set(is_empty_slot, is_empty)
+        ark_optional_set(is_end_reached, is_end)
         if (!is_empty && !is_end) {
                 return true;
         } else {

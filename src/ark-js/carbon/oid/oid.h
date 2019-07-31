@@ -15,38 +15,38 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_OID_H
-#define NG5_OID_H
+#ifndef ARK_OID_H
+#define ARK_OID_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/types.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
 typedef u64 object_id_t;
 
-NG5_EXPORT(bool) object_id_create(object_id_t *out);
+ARK_EXPORT(bool) object_id_create(object_id_t *out);
 
-NG5_EXPORT(bool) object_id_get_global_wallclocktime(uint_fast8_t *out, object_id_t id);
+ARK_EXPORT(bool) object_id_get_global_wallclocktime(uint_fast8_t *out, object_id_t id);
 
-NG5_EXPORT(bool) object_id_get_global_build_path_bit(uint_fast8_t *out, object_id_t id);
+ARK_EXPORT(bool) object_id_get_global_build_path_bit(uint_fast8_t *out, object_id_t id);
 
-NG5_EXPORT(bool) object_id_get_global_build_time_bit(uint_fast8_t *out, object_id_t id);
+ARK_EXPORT(bool) object_id_get_global_build_time_bit(uint_fast8_t *out, object_id_t id);
 
-NG5_EXPORT(bool) object_id_get_process_id(uint_fast8_t *out, object_id_t id);
+ARK_EXPORT(bool) object_id_get_process_id(uint_fast8_t *out, object_id_t id);
 
-NG5_EXPORT(bool) object_id_get_process_magic(uint_fast8_t *out, object_id_t id);
+ARK_EXPORT(bool) object_id_get_process_magic(uint_fast8_t *out, object_id_t id);
 
-NG5_EXPORT(bool) object_id_get_process_counter(uint_fast16_t *out, object_id_t id);
+ARK_EXPORT(bool) object_id_get_process_counter(uint_fast16_t *out, object_id_t id);
 
-NG5_EXPORT(bool) object_id_get_thread_id(uint_fast8_t *out, object_id_t id);
+ARK_EXPORT(bool) object_id_get_thread_id(uint_fast8_t *out, object_id_t id);
 
-NG5_EXPORT(bool) object_id_get_thread_magic(uint_fast8_t *out, object_id_t id);
+ARK_EXPORT(bool) object_id_get_thread_magic(uint_fast8_t *out, object_id_t id);
 
-NG5_EXPORT(bool) object_id_get_thread_counter(uint_fast32_t *out, object_id_t id);
+ARK_EXPORT(bool) object_id_get_thread_counter(uint_fast32_t *out, object_id_t id);
 
-NG5_EXPORT(bool) object_id_get_call_random(uint_fast8_t *out, object_id_t id);
+ARK_EXPORT(bool) object_id_get_call_random(uint_fast8_t *out, object_id_t id);
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

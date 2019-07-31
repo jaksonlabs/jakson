@@ -15,13 +15,13 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_STRING_BUILDER_H
-#define NG5_STRING_BUILDER_H
+#ifndef ARK_STRING_BUILDER_H
+#define ARK_STRING_BUILDER_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/error.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
 struct string_builder
 {
@@ -31,48 +31,48 @@ struct string_builder
         struct err err;
 };
 
-NG5_DEFINE_GET_ERROR_FUNCTION(string_builder, struct string_builder, builder);
+ARK_DEFINE_GET_ERROR_FUNCTION(string_builder, struct string_builder, builder);
 
-NG5_EXPORT(bool) string_builder_create(struct string_builder *builder);
+ARK_EXPORT(bool) string_builder_create(struct string_builder *builder);
 
-NG5_EXPORT(bool) string_builder_create_ex(struct string_builder *builder, size_t capacity);
+ARK_EXPORT(bool) string_builder_create_ex(struct string_builder *builder, size_t capacity);
 
-NG5_EXPORT(bool) string_builder_append(struct string_builder *builder, const char *str);
+ARK_EXPORT(bool) string_builder_append(struct string_builder *builder, const char *str);
 
-NG5_EXPORT(bool) string_builder_append_nchar(struct string_builder *builder, const char *str, u64 strlen);
+ARK_EXPORT(bool) string_builder_append_nchar(struct string_builder *builder, const char *str, u64 strlen);
 
-NG5_EXPORT(bool) string_builder_append_char(struct string_builder *builder, char c);
+ARK_EXPORT(bool) string_builder_append_char(struct string_builder *builder, char c);
 
-NG5_EXPORT(bool) string_builder_append_u8(struct string_builder *builder, u8 value);
+ARK_EXPORT(bool) string_builder_append_u8(struct string_builder *builder, u8 value);
 
-NG5_EXPORT(bool) string_builder_append_u16(struct string_builder *builder, u16 value);
+ARK_EXPORT(bool) string_builder_append_u16(struct string_builder *builder, u16 value);
 
-NG5_EXPORT(bool) string_builder_append_u32(struct string_builder *builder, u32 value);
+ARK_EXPORT(bool) string_builder_append_u32(struct string_builder *builder, u32 value);
 
-NG5_EXPORT(bool) string_builder_append_u64(struct string_builder *builder, u64 value);
+ARK_EXPORT(bool) string_builder_append_u64(struct string_builder *builder, u64 value);
 
-NG5_EXPORT(bool) string_builder_append_i8(struct string_builder *builder, i8 value);
+ARK_EXPORT(bool) string_builder_append_i8(struct string_builder *builder, i8 value);
 
-NG5_EXPORT(bool) string_builder_append_i16(struct string_builder *builder, i16 value);
+ARK_EXPORT(bool) string_builder_append_i16(struct string_builder *builder, i16 value);
 
-NG5_EXPORT(bool) string_builder_append_i32(struct string_builder *builder, i32 value);
+ARK_EXPORT(bool) string_builder_append_i32(struct string_builder *builder, i32 value);
 
-NG5_EXPORT(bool) string_builder_append_i64(struct string_builder *builder, i64 value);
+ARK_EXPORT(bool) string_builder_append_i64(struct string_builder *builder, i64 value);
 
-NG5_EXPORT(bool) string_builder_append_float(struct string_builder *builder, float value);
+ARK_EXPORT(bool) string_builder_append_float(struct string_builder *builder, float value);
 
-NG5_EXPORT(bool) string_builder_clear(struct string_builder *builder);
+ARK_EXPORT(bool) string_builder_clear(struct string_builder *builder);
 
-NG5_EXPORT(size_t) string_builder_length(struct string_builder *builder);
+ARK_EXPORT(size_t) string_builder_length(struct string_builder *builder);
 
-NG5_EXPORT(bool) string_builder_drop(struct string_builder *builder);
+ARK_EXPORT(bool) string_builder_drop(struct string_builder *builder);
 
-NG5_EXPORT(bool) string_builder_print(struct string_builder *builder);
+ARK_EXPORT(bool) string_builder_print(struct string_builder *builder);
 
-NG5_EXPORT(bool) string_builder_printf(FILE *file, struct string_builder *builder);
+ARK_EXPORT(bool) string_builder_printf(FILE *file, struct string_builder *builder);
 
-NG5_EXPORT(const char *) string_builder_cstr(struct string_builder *builder);
+ARK_EXPORT(const char *) string_builder_cstr(struct string_builder *builder);
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

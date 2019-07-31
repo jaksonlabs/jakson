@@ -15,14 +15,14 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_BERNSTEIN2_H
-#define NG5_BERNSTEIN2_H
+#ifndef ARK_BERNSTEIN2_H
+#define ARK_BERNSTEIN2_H
 
 #include "hash/hash.h"
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
-#define NG5_HASH_BERNSTEIN2(key_size, key)                                                                          \
+#define ARK_HASH_BERNSTEIN2(key_size, key)                                                                          \
 ({                                                                                                                     \
     assert ((key != NULL) && (key_size > 0));                                                                          \
                                                                                                                        \
@@ -33,6 +33,6 @@ NG5_BEGIN_DECL
     hash;                                                                                                              \
 })
 
-        NG5_END_DECL
+        ARK_END_DECL
 
 #endif

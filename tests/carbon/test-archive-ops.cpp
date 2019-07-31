@@ -217,7 +217,7 @@ TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateContains)
     const char *needle = "arg";
 
     string_pred_contains_init(&pred);
-    result = query_find_ids(&num_match, &query, &pred, (void *) needle, NG5_QUERY_LIMIT_NONE);
+    result = query_find_ids(&num_match, &query, &pred, (void *) needle, ARK_QUERY_LIMIT_NONE);
     ASSERT_TRUE(result != NULL);
     ASSERT_TRUE(num_match == 4);
 
@@ -254,7 +254,7 @@ TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateEquals)
     const char *needle = "phoneNumbers";
 
     string_pred_equals_init(&pred);
-    result = query_find_ids(&num_match, &query, &pred, (void *) needle, NG5_QUERY_LIMIT_NONE);
+    result = query_find_ids(&num_match, &query, &pred, (void *) needle, ARK_QUERY_LIMIT_NONE);
     ASSERT_TRUE(result != NULL);
 
     ASSERT_TRUE(num_match == 1);

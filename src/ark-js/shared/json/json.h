@@ -15,13 +15,13 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_JSON_H
-#define NG5_JSON_H
+#ifndef ARK_JSON_H
+#define ARK_JSON_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/stdx/vec.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
 /** forwarded */
 
@@ -178,27 +178,27 @@ struct json_number {
         } value;
 };
 
-NG5_EXPORT(bool) json_tokenizer_init(struct json_tokenizer *tokenizer, const char *input);
+ARK_EXPORT(bool) json_tokenizer_init(struct json_tokenizer *tokenizer, const char *input);
 
-NG5_EXPORT(const struct json_token *)json_tokenizer_next(struct json_tokenizer *tokenizer);
+ARK_EXPORT(const struct json_token *)json_tokenizer_next(struct json_tokenizer *tokenizer);
 
-NG5_EXPORT(void) json_token_dup(struct json_token *dst, const struct json_token *src);
+ARK_EXPORT(void) json_token_dup(struct json_token *dst, const struct json_token *src);
 
-NG5_EXPORT(void) json_token_print(FILE *file, const struct json_token *token);
+ARK_EXPORT(void) json_token_print(FILE *file, const struct json_token *token);
 
-NG5_EXPORT(bool) json_parser_create(struct json_parser *parser, struct doc_bulk *partition);
+ARK_EXPORT(bool) json_parser_create(struct json_parser *parser, struct doc_bulk *partition);
 
-NG5_EXPORT(bool) json_parse(struct json *json, struct json_err *error_desc, struct json_parser *parser,
+ARK_EXPORT(bool) json_parse(struct json *json, struct json_err *error_desc, struct json_parser *parser,
         const char *input);
 
-NG5_EXPORT(bool) json_test(struct err *err, struct json *json);
+ARK_EXPORT(bool) json_test(struct err *err, struct json *json);
 
-NG5_EXPORT(bool) json_drop(struct json *json);
+ARK_EXPORT(bool) json_drop(struct json *json);
 
-NG5_EXPORT(bool) json_print(FILE *file, struct json *json);
+ARK_EXPORT(bool) json_print(FILE *file, struct json *json);
 
-NG5_DEFINE_GET_ERROR_FUNCTION(json, struct json, json);
+ARK_DEFINE_GET_ERROR_FUNCTION(json, struct json, json);
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

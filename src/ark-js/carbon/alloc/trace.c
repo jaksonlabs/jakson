@@ -46,7 +46,7 @@ typedef struct page_##x##b_t                                                    
     char                          data[x];                                                                             \
 } page_##x##b_t;                                                                                                       \
                                                                                                                        \
-ng5_func_unused static inline void *page_##x##b_new(size_t user_size) {                                             \
+ark_func_unused static inline void *page_##x##b_new(size_t user_size) {                                             \
     assert (user_size <= x);                                                                                           \
     struct page_##x##b_t *page = malloc(sizeof(struct page_##x##b_t));                                                 \
     page->user_size = user_size;                                                                                       \
@@ -156,14 +156,14 @@ struct page_template_entry {
 
 static inline void *alloc_register(size_t size)
 {
-        size_t num_options = NG5_ARRAY_LENGTH(page_template_register);
+        size_t num_options = ARK_ARRAY_LENGTH(page_template_register);
         for (size_t i = 0; i < num_options; i++) {
                 struct page_template_entry *entry = page_template_register + i;
                 if (size <= entry->size) {
                         return entry->new_ptr_func(size);
                 }
         }
-        print_error_and_die(NG5_ERR_MALLOCERR)
+        print_error_and_die(ARK_ERR_MALLOCERR)
         return NULL;
 }
 

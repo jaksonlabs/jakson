@@ -22,18 +22,18 @@
 #include <ark-js/shared/error.h>
 #include <ark-js/shared/mem/file.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
-NG5_EXPORT(bool) carbon_string_write(struct memfile *file, const char *string);
+ARK_EXPORT(bool) carbon_string_write(struct memfile *file, const char *string);
 
-NG5_EXPORT(bool) carbon_string_nomarker_write(struct memfile *file, const char *string);
+ARK_EXPORT(bool) carbon_string_nomarker_write(struct memfile *file, const char *string);
 
-NG5_EXPORT(bool) carbon_string_update(struct memfile *file, const char *string);
+ARK_EXPORT(bool) carbon_string_update(struct memfile *file, const char *string);
 
-NG5_EXPORT(bool) carbon_string_skip(struct memfile *file);
+ARK_EXPORT(bool) carbon_string_skip(struct memfile *file);
 
-NG5_EXPORT(const char *) carbon_string_read(u64 *len, struct memfile *file);
+ARK_EXPORT(const char *) carbon_string_read(u64 *len, struct memfile *file);
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

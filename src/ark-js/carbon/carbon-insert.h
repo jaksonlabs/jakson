@@ -27,46 +27,46 @@
 #include <ark-js/carbon/carbon.h>
 #include <ark-js/carbon/carbon-int.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
 struct carbon_array_it; /* forwarded from carbon-array-it.h */
 struct carbon_column_it; /* forwarded from carbon-column-it.h */
 
-NG5_EXPORT(bool) carbon_int_insert_create_for_array(struct carbon_insert *inserter, struct carbon_array_it *context);
+ARK_EXPORT(bool) carbon_int_insert_create_for_array(struct carbon_insert *inserter, struct carbon_array_it *context);
 
-NG5_EXPORT(bool) carbon_int_insert_create_for_column(struct carbon_insert *inserter, struct carbon_column_it *context);
+ARK_EXPORT(bool) carbon_int_insert_create_for_column(struct carbon_insert *inserter, struct carbon_column_it *context);
 
-NG5_EXPORT(bool) carbon_int_insert_create_for_object(struct carbon_insert *inserter, struct carbon_object_it *context);
+ARK_EXPORT(bool) carbon_int_insert_create_for_object(struct carbon_insert *inserter, struct carbon_object_it *context);
 
-NG5_EXPORT(bool) carbon_insert_null(struct carbon_insert *inserter);
+ARK_EXPORT(bool) carbon_insert_null(struct carbon_insert *inserter);
 
-NG5_EXPORT(bool) carbon_insert_true(struct carbon_insert *inserter);
+ARK_EXPORT(bool) carbon_insert_true(struct carbon_insert *inserter);
 
-NG5_EXPORT(bool) carbon_insert_false(struct carbon_insert *inserter);
+ARK_EXPORT(bool) carbon_insert_false(struct carbon_insert *inserter);
 
-NG5_EXPORT(bool) carbon_insert_u8(struct carbon_insert *inserter, u8 value);
+ARK_EXPORT(bool) carbon_insert_u8(struct carbon_insert *inserter, u8 value);
 
-NG5_EXPORT(bool) carbon_insert_u16(struct carbon_insert *inserter, u16 value);
+ARK_EXPORT(bool) carbon_insert_u16(struct carbon_insert *inserter, u16 value);
 
-NG5_EXPORT(bool) carbon_insert_u32(struct carbon_insert *inserter, u32 value);
+ARK_EXPORT(bool) carbon_insert_u32(struct carbon_insert *inserter, u32 value);
 
-NG5_EXPORT(bool) carbon_insert_u64(struct carbon_insert *inserter, u64 value);
+ARK_EXPORT(bool) carbon_insert_u64(struct carbon_insert *inserter, u64 value);
 
-NG5_EXPORT(bool) carbon_insert_i8(struct carbon_insert *inserter, i8 value);
+ARK_EXPORT(bool) carbon_insert_i8(struct carbon_insert *inserter, i8 value);
 
-NG5_EXPORT(bool) carbon_insert_i16(struct carbon_insert *inserter, i16 value);
+ARK_EXPORT(bool) carbon_insert_i16(struct carbon_insert *inserter, i16 value);
 
-NG5_EXPORT(bool) carbon_insert_i32(struct carbon_insert *inserter, i32 value);
+ARK_EXPORT(bool) carbon_insert_i32(struct carbon_insert *inserter, i32 value);
 
-NG5_EXPORT(bool) carbon_insert_i64(struct carbon_insert *inserter, i64 value);
+ARK_EXPORT(bool) carbon_insert_i64(struct carbon_insert *inserter, i64 value);
 
-NG5_EXPORT(bool) carbon_insert_unsigned(struct carbon_insert *inserter, u64 value);
+ARK_EXPORT(bool) carbon_insert_unsigned(struct carbon_insert *inserter, u64 value);
 
-NG5_EXPORT(bool) carbon_insert_signed(struct carbon_insert *inserter, i64 value);
+ARK_EXPORT(bool) carbon_insert_signed(struct carbon_insert *inserter, i64 value);
 
-NG5_EXPORT(bool) carbon_insert_float(struct carbon_insert *inserter, float value);
+ARK_EXPORT(bool) carbon_insert_float(struct carbon_insert *inserter, float value);
 
-NG5_EXPORT(bool) carbon_insert_string(struct carbon_insert *inserter, const char *value);
+ARK_EXPORT(bool) carbon_insert_string(struct carbon_insert *inserter, const char *value);
 
 /**
  * Inserts a user-defined binary string <code>value</code> of <code>nbytes</code> bytes along with a (mime) type annotation.
@@ -75,23 +75,23 @@ NG5_EXPORT(bool) carbon_insert_string(struct carbon_insert *inserter, const char
  * <code>user_type</code> is null (or empty) and <code>file_ext</code> is null (or not known), the mime type is set to
  * <code>application/octet-stream</code>, which encodes arbitrary binary data.
  */
-NG5_EXPORT(bool) carbon_insert_binary(struct carbon_insert *inserter, const void *value, size_t nbytes,
+ARK_EXPORT(bool) carbon_insert_binary(struct carbon_insert *inserter, const void *value, size_t nbytes,
         const char *file_ext, const char *user_type);
 
-NG5_EXPORT(struct carbon_insert *) carbon_insert_object_begin(struct carbon_insert_object_state *out,
+ARK_EXPORT(struct carbon_insert *) carbon_insert_object_begin(struct carbon_insert_object_state *out,
         struct carbon_insert *inserter, u64 object_capacity);
 
-NG5_EXPORT(bool) carbon_insert_object_end(struct carbon_insert_object_state *state);
+ARK_EXPORT(bool) carbon_insert_object_end(struct carbon_insert_object_state *state);
 
-NG5_EXPORT(struct carbon_insert *) carbon_insert_array_begin(struct carbon_insert_array_state *state_out,
+ARK_EXPORT(struct carbon_insert *) carbon_insert_array_begin(struct carbon_insert_array_state *state_out,
         struct carbon_insert *inserter_in, u64 array_capacity);
 
-NG5_EXPORT(bool) carbon_insert_array_end(struct carbon_insert_array_state *state_in);
+ARK_EXPORT(bool) carbon_insert_array_end(struct carbon_insert_array_state *state_in);
 
-NG5_EXPORT(struct carbon_insert *) carbon_insert_column_begin(struct carbon_insert_column_state *state_out,
+ARK_EXPORT(struct carbon_insert *) carbon_insert_column_begin(struct carbon_insert_column_state *state_out,
         struct carbon_insert *inserter_in, enum carbon_column_type type, u64 column_capacity);
 
-NG5_EXPORT(bool) carbon_insert_column_end(struct carbon_insert_column_state *state_in);
+ARK_EXPORT(bool) carbon_insert_column_end(struct carbon_insert_column_state *state_in);
 
 
 
@@ -99,59 +99,59 @@ NG5_EXPORT(bool) carbon_insert_column_end(struct carbon_insert_column_state *sta
 
 
 
-NG5_EXPORT(bool) carbon_insert_prop_null(struct carbon_insert *inserter, const char *key);
+ARK_EXPORT(bool) carbon_insert_prop_null(struct carbon_insert *inserter, const char *key);
 
-NG5_EXPORT(bool) carbon_insert_prop_true(struct carbon_insert *inserter, const char *key);
+ARK_EXPORT(bool) carbon_insert_prop_true(struct carbon_insert *inserter, const char *key);
 
-NG5_EXPORT(bool) carbon_insert_prop_false(struct carbon_insert *inserter, const char *key);
+ARK_EXPORT(bool) carbon_insert_prop_false(struct carbon_insert *inserter, const char *key);
 
-NG5_EXPORT(bool) carbon_insert_prop_u8(struct carbon_insert *inserter, const char *key, u8 value);
+ARK_EXPORT(bool) carbon_insert_prop_u8(struct carbon_insert *inserter, const char *key, u8 value);
 
-NG5_EXPORT(bool) carbon_insert_prop_u16(struct carbon_insert *inserter, const char *key, u16 value);
+ARK_EXPORT(bool) carbon_insert_prop_u16(struct carbon_insert *inserter, const char *key, u16 value);
 
-NG5_EXPORT(bool) carbon_insert_prop_u32(struct carbon_insert *inserter, const char *key, u32 value);
+ARK_EXPORT(bool) carbon_insert_prop_u32(struct carbon_insert *inserter, const char *key, u32 value);
 
-NG5_EXPORT(bool) carbon_insert_prop_u64(struct carbon_insert *inserter, const char *key, u64 value);
+ARK_EXPORT(bool) carbon_insert_prop_u64(struct carbon_insert *inserter, const char *key, u64 value);
 
-NG5_EXPORT(bool) carbon_insert_prop_i8(struct carbon_insert *inserter, const char *key, i8 value);
+ARK_EXPORT(bool) carbon_insert_prop_i8(struct carbon_insert *inserter, const char *key, i8 value);
 
-NG5_EXPORT(bool) carbon_insert_prop_i16(struct carbon_insert *inserter, const char *key, i16 value);
+ARK_EXPORT(bool) carbon_insert_prop_i16(struct carbon_insert *inserter, const char *key, i16 value);
 
-NG5_EXPORT(bool) carbon_insert_prop_i32(struct carbon_insert *inserter, const char *key, i32 value);
+ARK_EXPORT(bool) carbon_insert_prop_i32(struct carbon_insert *inserter, const char *key, i32 value);
 
-NG5_EXPORT(bool) carbon_insert_prop_i64(struct carbon_insert *inserter, const char *key, i64 value);
+ARK_EXPORT(bool) carbon_insert_prop_i64(struct carbon_insert *inserter, const char *key, i64 value);
 
-NG5_EXPORT(bool) carbon_insert_prop_unsigned(struct carbon_insert *inserter, const char *key, u64 value);
+ARK_EXPORT(bool) carbon_insert_prop_unsigned(struct carbon_insert *inserter, const char *key, u64 value);
 
-NG5_EXPORT(bool) carbon_insert_prop_signed(struct carbon_insert *inserter, const char *key, i64 value);
+ARK_EXPORT(bool) carbon_insert_prop_signed(struct carbon_insert *inserter, const char *key, i64 value);
 
-NG5_EXPORT(bool) carbon_insert_prop_float(struct carbon_insert *inserter, const char *key, float value);
+ARK_EXPORT(bool) carbon_insert_prop_float(struct carbon_insert *inserter, const char *key, float value);
 
-NG5_EXPORT(bool) carbon_insert_prop_string(struct carbon_insert *inserter, const char *key, const char *value);
+ARK_EXPORT(bool) carbon_insert_prop_string(struct carbon_insert *inserter, const char *key, const char *value);
 
-NG5_EXPORT(bool) carbon_insert_prop_binary(struct carbon_insert *inserter, const char *key, const void *value,
+ARK_EXPORT(bool) carbon_insert_prop_binary(struct carbon_insert *inserter, const char *key, const void *value,
         size_t nbytes, const char *file_ext, const char *user_type);
 
-NG5_EXPORT(struct carbon_insert *) carbon_insert_prop_object_begin(struct carbon_insert_object_state *out,
+ARK_EXPORT(struct carbon_insert *) carbon_insert_prop_object_begin(struct carbon_insert_object_state *out,
         struct carbon_insert *inserter, const char *key, u64 object_capacity);
 
-NG5_EXPORT(bool) carbon_insert_prop_object_end(struct carbon_insert_object_state *state);
+ARK_EXPORT(bool) carbon_insert_prop_object_end(struct carbon_insert_object_state *state);
 
-NG5_EXPORT(struct carbon_insert *) carbon_insert_prop_array_begin(struct carbon_insert_array_state *state,
+ARK_EXPORT(struct carbon_insert *) carbon_insert_prop_array_begin(struct carbon_insert_array_state *state,
         struct carbon_insert *inserter, const char *key, u64 array_capacity);
 
-NG5_EXPORT(bool) carbon_insert_prop_array_end(struct carbon_insert_array_state *state);
+ARK_EXPORT(bool) carbon_insert_prop_array_end(struct carbon_insert_array_state *state);
 
-NG5_EXPORT(struct carbon_insert *) carbon_insert_prop_column_begin(struct carbon_insert_column_state *state_out,
+ARK_EXPORT(struct carbon_insert *) carbon_insert_prop_column_begin(struct carbon_insert_column_state *state_out,
         struct carbon_insert *inserter_in, const char *key, enum carbon_column_type type, u64 column_capacity);
 
-NG5_EXPORT(bool) carbon_insert_prop_column_end(struct carbon_insert_column_state *state_in);
+ARK_EXPORT(bool) carbon_insert_prop_column_end(struct carbon_insert_column_state *state_in);
 
 
 
 
-NG5_EXPORT(bool) carbon_insert_drop(struct carbon_insert *inserter);
+ARK_EXPORT(bool) carbon_insert_drop(struct carbon_insert *inserter);
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

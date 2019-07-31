@@ -15,8 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_STRDIC_H
-#define NG5_STRDIC_H
+#ifndef ARK_STRDIC_H
+#define ARK_STRDIC_H
 
 #include <assert.h>
 
@@ -26,10 +26,10 @@
 #include <ark-js/shared/hash/hash.h>
 #include <ark-js/shared/stdx/vec.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
-NG5_FORWARD_STRUCT_DECL(StringDictionary)
-NG5_FORWARD_STRUCT_DECL(Vector)
+ARK_FORWARD_STRUCT_DECL(StringDictionary)
+ARK_FORWARD_STRUCT_DECL(Vector)
 
 struct strhash_counters;
 
@@ -134,7 +134,7 @@ struct strdic {
  * @param dic
  * @return
  */
-ng5_func_unused
+ark_func_unused
 static bool strdic_drop(struct strdic *dic)
 {
         error_if_null(dic);
@@ -142,7 +142,7 @@ static bool strdic_drop(struct strdic *dic)
         return dic->drop(dic);
 }
 
-ng5_func_unused
+ark_func_unused
 static bool strdic_insert(struct strdic *dic, field_sid_t **out, char *const *strings, size_t nstrings, size_t nthreads)
 {
         error_if_null(dic);
@@ -151,7 +151,7 @@ static bool strdic_insert(struct strdic *dic, field_sid_t **out, char *const *st
         return dic->insert(dic, out, strings, nstrings, nthreads);
 }
 
-ng5_func_unused
+ark_func_unused
 static bool strdic_reset_counters(struct strdic *dic)
 {
         error_if_null(dic);
@@ -159,7 +159,7 @@ static bool strdic_reset_counters(struct strdic *dic)
         return dic->resetCounters(dic);
 }
 
-ng5_func_unused
+ark_func_unused
 static bool strdic_get_counters(struct strhash_counters *counters, struct strdic *dic)
 {
         error_if_null(dic);
@@ -167,7 +167,7 @@ static bool strdic_get_counters(struct strhash_counters *counters, struct strdic
         return dic->counters(dic, counters);
 }
 
-ng5_func_unused
+ark_func_unused
 static bool strdic_remove(struct strdic *dic, field_sid_t *strings, size_t num_strings)
 {
         error_if_null(dic);
@@ -176,7 +176,7 @@ static bool strdic_remove(struct strdic *dic, field_sid_t *strings, size_t num_s
         return dic->remove(dic, strings, num_strings);
 }
 
-ng5_func_unused
+ark_func_unused
 static bool strdic_locate_safe(field_sid_t **out, bool **found_mask, size_t *num_not_found, struct strdic *dic,
         char *const *keys, size_t num_keys)
 {
@@ -189,7 +189,7 @@ static bool strdic_locate_safe(field_sid_t **out, bool **found_mask, size_t *num
         return dic->locate_safe(dic, out, found_mask, num_not_found, keys, num_keys);
 }
 
-ng5_func_unused
+ark_func_unused
 static bool strdic_locate_fast(field_sid_t **out, struct strdic *dic, char *const *keys, size_t nkeys)
 {
         error_if_null(out);
@@ -199,13 +199,13 @@ static bool strdic_locate_fast(field_sid_t **out, struct strdic *dic, char *cons
         return dic->locate_fast(dic, out, keys, nkeys);
 }
 
-ng5_func_unused
+ark_func_unused
 static char **strdic_extract(struct strdic *dic, const field_sid_t *ids, size_t nids)
 {
         return dic->extract(dic, ids, nids);
 }
 
-ng5_func_unused
+ark_func_unused
 static bool strdic_free(struct strdic *dic, void *ptr)
 {
         error_if_null(dic);
@@ -217,7 +217,7 @@ static bool strdic_free(struct strdic *dic, void *ptr)
         }
 }
 
-ng5_func_unused
+ark_func_unused
 static bool strdic_num_distinct(size_t *num, struct strdic *dic)
 {
         error_if_null(num);
@@ -226,7 +226,7 @@ static bool strdic_num_distinct(size_t *num, struct strdic *dic)
         return dic->num_distinct(dic, num);
 }
 
-ng5_func_unused
+ark_func_unused
 static bool strdic_get_contents(struct vector ofType (char *) *strings, struct vector ofType(field_sid_t) *string_ids,
         struct strdic *dic)
 {
@@ -237,6 +237,6 @@ static bool strdic_get_contents(struct vector ofType (char *) *strings, struct v
         return dic->get_contents(dic, strings, string_ids);
 }
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

@@ -16,14 +16,14 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_VARUINT_H
-#define NG5_VARUINT_H
+#ifndef ARK_VARUINT_H
+#define ARK_VARUINT_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/types.h>
 #include <ark-js/shared/mem/file.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
 /**
  * This type is for variable-length unsigned integer types.
@@ -61,7 +61,7 @@ typedef void *varuint_t;
 
 #define varuint_max_blocks()    (4)
 
-NG5_EXPORT(u8) varuint_write(varuint_t dst, u64 value);
+ARK_EXPORT(u8) varuint_write(varuint_t dst, u64 value);
 
 #define varuint_sizeof(value)                                                                                   \
 ({                                                                                                              \
@@ -97,8 +97,8 @@ NG5_EXPORT(u8) varuint_write(varuint_t dst, u64 value);
         num_blocks_required;                            \
 })
 
-NG5_EXPORT(u64) varuint_read(u8 *nbytes, varuint_t src);
+ARK_EXPORT(u64) varuint_read(u8 *nbytes, varuint_t src);
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

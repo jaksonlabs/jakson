@@ -15,8 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_COLUMNDOC_H
-#define NG5_COLUMNDOC_H
+#ifndef ARK_COLUMNDOC_H
+#define ARK_COLUMNDOC_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/stdx/vec.h>
@@ -24,7 +24,7 @@
 #include <ark-js/shared/stdx/strdic.h>
 #include <ark-js/shared/json/doc.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
 /**
  * Transformation of an JSON-like array of objects to a columnar representation of key values.
@@ -228,17 +228,17 @@ struct columndoc {
         struct err err;
 };
 
-NG5_EXPORT(bool) columndoc_create(struct columndoc *columndoc, struct err *err, const struct doc *doc,
+ARK_EXPORT(bool) columndoc_create(struct columndoc *columndoc, struct err *err, const struct doc *doc,
         const struct doc_bulk *bulk, const struct doc_entries *entries, struct strdic *dic);
 
-NG5_DEFINE_GET_ERROR_FUNCTION(columndoc, struct columndoc, doc)
+ARK_DEFINE_GET_ERROR_FUNCTION(columndoc, struct columndoc, doc)
 
-NG5_EXPORT(bool) columndoc_free(struct columndoc *doc);
+ARK_EXPORT(bool) columndoc_free(struct columndoc *doc);
 
-NG5_EXPORT(bool) columndoc_print(FILE *file, struct columndoc *doc);
+ARK_EXPORT(bool) columndoc_print(FILE *file, struct columndoc *doc);
 
-NG5_EXPORT(bool) columndoc_drop(struct columndoc *doc);
+ARK_EXPORT(bool) columndoc_drop(struct columndoc *doc);
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

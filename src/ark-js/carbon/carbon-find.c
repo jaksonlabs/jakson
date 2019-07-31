@@ -21,7 +21,7 @@
 static void result_from_array(struct carbon_find *find, struct carbon_array_it *it);
 static inline bool result_from_column(struct carbon_find *find, u32 requested_idx, struct carbon_column_it *it);
 
-NG5_EXPORT(bool) carbon_find_open(struct carbon_find *out, const char *dot_path, struct carbon *doc)
+ARK_EXPORT(bool) carbon_find_open(struct carbon_find *out, const char *dot_path, struct carbon *doc)
 {
         error_if_null(out)
         error_if_null(dot_path)
@@ -33,13 +33,13 @@ NG5_EXPORT(bool) carbon_find_open(struct carbon_find *out, const char *dot_path,
         return status;
 }
 
-NG5_EXPORT(bool) carbon_find_close(struct carbon_find *find)
+ARK_EXPORT(bool) carbon_find_close(struct carbon_find *find)
 {
         error_if_null(find)
         return carbon_find_drop(find);
 }
 
-NG5_EXPORT(bool) carbon_find_create(struct carbon_find *find, struct carbon_dot_path *path, struct carbon *doc)
+ARK_EXPORT(bool) carbon_find_create(struct carbon_find *find, struct carbon_dot_path *path, struct carbon *doc)
 {
         error_if_null(find)
         error_if_null(path)
@@ -48,7 +48,7 @@ NG5_EXPORT(bool) carbon_find_create(struct carbon_find *find, struct carbon_dot_
         error_init(&find->err);
         find->doc = doc;
 
-        ng5_check_success(carbon_path_evaluator_begin(&find->path_evaluater, path, doc));
+        ark_check_success(carbon_path_evaluator_begin(&find->path_evaluater, path, doc));
         if (carbon_path_evaluator_has_result(&find->path_evaluater)) {
                 switch (find->path_evaluater.result.container_type) {
                 case carbon_ARRAY:
@@ -59,7 +59,7 @@ NG5_EXPORT(bool) carbon_find_create(struct carbon_find *find, struct carbon_dot_
                                 find->path_evaluater.result.containers.column.it);
                         break;
                 default:
-                        error(&path->err, NG5_ERR_INTERNALERR);
+                        error(&path->err, ARK_ERR_INTERNALERR);
                         return false;
                 }
                 return true;
@@ -68,33 +68,33 @@ NG5_EXPORT(bool) carbon_find_create(struct carbon_find *find, struct carbon_dot_
         }
 }
 
-NG5_EXPORT(bool) carbon_find_has_result(struct carbon_find *find)
+ARK_EXPORT(bool) carbon_find_has_result(struct carbon_find *find)
 {
         error_if_null(find)
         return carbon_path_evaluator_has_result(&find->path_evaluater);
 }
 
-NG5_EXPORT(bool) carbon_find_result_type(enum carbon_field_type *type, struct carbon_find *find)
+ARK_EXPORT(bool) carbon_find_result_type(enum carbon_field_type *type, struct carbon_find *find)
 {
         error_if_null(type)
         error_if_null(find)
-        error_if(!carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, NG5_ERR_ILLEGALSTATE)
+        error_if(!carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, ARK_ERR_ILLEGALSTATE)
         *type = find->type;
         return true;
 }
 
-NG5_EXPORT(struct carbon_array_it *) carbon_find_result_array(struct carbon_find *find)
+ARK_EXPORT(struct carbon_array_it *) carbon_find_result_array(struct carbon_find *find)
 {
         error_if_null(find)
-        error_if(!carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, NG5_ERR_ILLEGALSTATE)
-        error_if(find->type != carbon_FIELD_TYPE_ARRAY, &find->err, NG5_ERR_TYPEMISMATCH)
+        error_if(!carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, ARK_ERR_ILLEGALSTATE)
+        error_if(find->type != carbon_FIELD_TYPE_ARRAY, &find->err, ARK_ERR_TYPEMISMATCH)
         return find->value.array_it;
 }
 
-NG5_EXPORT(struct carbon_column_it *) carbon_find_result_column(struct carbon_find *find)
+ARK_EXPORT(struct carbon_column_it *) carbon_find_result_column(struct carbon_find *find)
 {
         error_if_null(find)
-        error_if(!carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, NG5_ERR_ILLEGALSTATE)
+        error_if(!carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, ARK_ERR_ILLEGALSTATE)
         error_if(find->type != carbon_FIELD_TYPE_COLUMN_U8 &&
                 find->type != carbon_FIELD_TYPE_COLUMN_U16 &&
                 find->type != carbon_FIELD_TYPE_COLUMN_U32 &&
@@ -104,65 +104,65 @@ NG5_EXPORT(struct carbon_column_it *) carbon_find_result_column(struct carbon_fi
                 find->type != carbon_FIELD_TYPE_COLUMN_I32 &&
                 find->type != carbon_FIELD_TYPE_COLUMN_I64 &&
                 find->type != carbon_FIELD_TYPE_COLUMN_FLOAT &&
-                find->type != carbon_FIELD_TYPE_COLUMN_BOOLEAN, &find->err, NG5_ERR_TYPEMISMATCH)
+                find->type != carbon_FIELD_TYPE_COLUMN_BOOLEAN, &find->err, ARK_ERR_TYPEMISMATCH)
         return find->value.column_it;
 }
 
-NG5_EXPORT(bool) carbon_find_result_boolean(bool *out, struct carbon_find *find)
+ARK_EXPORT(bool) carbon_find_result_boolean(bool *out, struct carbon_find *find)
 {
         error_if_null(find)
-        error_if(!carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, NG5_ERR_ILLEGALSTATE)
-        error_if(!carbon_field_type_is_boolean(find->type), &find->err, NG5_ERR_TYPEMISMATCH)
+        error_if(!carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, ARK_ERR_ILLEGALSTATE)
+        error_if(!carbon_field_type_is_boolean(find->type), &find->err, ARK_ERR_TYPEMISMATCH)
         *out = find->value.boolean;
         return true;
 }
 
-NG5_EXPORT(bool) carbon_find_result_unsigned(u64 *out, struct carbon_find *find)
+ARK_EXPORT(bool) carbon_find_result_unsigned(u64 *out, struct carbon_find *find)
 {
         error_if_null(find)
-        error_if(!carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, NG5_ERR_ILLEGALSTATE)
-        error_if(!carbon_field_type_is_unsigned_integer(find->type), &find->err, NG5_ERR_TYPEMISMATCH)
+        error_if(!carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, ARK_ERR_ILLEGALSTATE)
+        error_if(!carbon_field_type_is_unsigned_integer(find->type), &find->err, ARK_ERR_TYPEMISMATCH)
         *out = find->value.unsigned_number;
         return true;
 }
 
-NG5_EXPORT(bool) carbon_find_result_signed(i64 *out, struct carbon_find *find)
+ARK_EXPORT(bool) carbon_find_result_signed(i64 *out, struct carbon_find *find)
 {
         error_if_null(find)
-        error_if(!carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, NG5_ERR_ILLEGALSTATE)
-        error_if(!carbon_field_type_is_signed_integer(find->type), &find->err, NG5_ERR_TYPEMISMATCH)
+        error_if(!carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, ARK_ERR_ILLEGALSTATE)
+        error_if(!carbon_field_type_is_signed_integer(find->type), &find->err, ARK_ERR_TYPEMISMATCH)
         *out = find->value.signed_number;
         return true;
 }
 
-NG5_EXPORT(bool) carbon_find_result_float(float *out, struct carbon_find *find)
+ARK_EXPORT(bool) carbon_find_result_float(float *out, struct carbon_find *find)
 {
         error_if_null(find)
-        error_if(!carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, NG5_ERR_ILLEGALSTATE)
-        error_if(!carbon_field_type_is_floating_number(find->type), &find->err, NG5_ERR_TYPEMISMATCH)
+        error_if(!carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, ARK_ERR_ILLEGALSTATE)
+        error_if(!carbon_field_type_is_floating_number(find->type), &find->err, ARK_ERR_TYPEMISMATCH)
         *out = find->value.float_number;
         return true;
 }
 
-NG5_EXPORT(const char *) carbon_find_result_string(u64 *str_len, struct carbon_find *find)
+ARK_EXPORT(const char *) carbon_find_result_string(u64 *str_len, struct carbon_find *find)
 {
         error_if_null(find)
         error_if_null(str_len)
-        error_if(!carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, NG5_ERR_ILLEGALSTATE)
-        error_if(find->type != carbon_FIELD_TYPE_STRING, &find->err, NG5_ERR_TYPEMISMATCH)
+        error_if(!carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, ARK_ERR_ILLEGALSTATE)
+        error_if(find->type != carbon_FIELD_TYPE_STRING, &find->err, ARK_ERR_TYPEMISMATCH)
         *str_len = find->value.string.len;
         return find->value.string.base;
 }
 
-NG5_EXPORT(struct carbon_binary *) carbon_find_result_binary(struct carbon_find *find)
+ARK_EXPORT(struct carbon_binary *) carbon_find_result_binary(struct carbon_find *find)
 {
         error_if_null(find)
-        error_if(!carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, NG5_ERR_ILLEGALSTATE)
-        error_if(!carbon_field_type_is_binary(find->type), &find->err, NG5_ERR_TYPEMISMATCH)
+        error_if(!carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, ARK_ERR_ILLEGALSTATE)
+        error_if(!carbon_field_type_is_binary(find->type), &find->err, ARK_ERR_TYPEMISMATCH)
         return &find->value.binary;
 }
 
-NG5_EXPORT(bool) carbon_find_drop(struct carbon_find *find)
+ARK_EXPORT(bool) carbon_find_drop(struct carbon_find *find)
 {
         error_if_null(find)
         carbon_path_evaluator_end(&find->path_evaluater);
@@ -194,7 +194,7 @@ static void result_from_array(struct carbon_find *find, struct carbon_array_it *
                         find->value.column_it = carbon_array_it_column_value(it);
                         break;
                 case carbon_FIELD_TYPE_OBJECT:
-                        error_print_and_die_if(true, NG5_ERR_NOTIMPLEMENTED); /* TODO: implement this for objects */
+                        error_print_and_die_if(true, ARK_ERR_NOTIMPLEMENTED); /* TODO: implement this for objects */
                         break;
                 case carbon_FIELD_TYPE_STRING:
                         find->value.string.base = carbon_array_it_string_value(&find->value.string.len, it);
@@ -219,7 +219,7 @@ static void result_from_array(struct carbon_find *find, struct carbon_array_it *
                         carbon_array_it_binary_value(&find->value.binary, it);
                         break;
                 default:
-                        error(&find->err, NG5_ERR_INTERNALERR);
+                        error(&find->err, ARK_ERR_INTERNALERR);
                         break;
         }
 }
@@ -262,7 +262,7 @@ static inline bool result_from_column(struct carbon_find *find, u32 requested_id
                 find->value.float_number = carbon_column_it_float_values(NULL, it)[requested_idx];
                 break;
         default:
-        error(&it->err, NG5_ERR_UNSUPPORTEDTYPE)
+        error(&it->err, ARK_ERR_UNSUPPORTEDTYPE)
                 return false;
         }
         return true;

@@ -18,7 +18,7 @@
 #include <ctype.h>
 #include <ark-js/shared/utils/hexdump.h>
 
-NG5_EXPORT(bool) hexdump(struct string_builder *dst, const void *base, u64 nbytes)
+ARK_EXPORT(bool) hexdump(struct string_builder *dst, const void *base, u64 nbytes)
 {
         error_if_null(dst);
         error_if_null(base);
@@ -29,7 +29,7 @@ NG5_EXPORT(bool) hexdump(struct string_builder *dst, const void *base, u64 nbyte
 
         for (u64 hex_block_id = 0; hex_block_id < nbytes; ) {
 
-                u8 step = ng5_min(16, nbytes - hex_block_id);
+                u8 step = ark_min(16, nbytes - hex_block_id);
 
                 for (u64 i = 0; i < step; i++) {
                         char c = *((const char *) (base + hex_block_id + i));
@@ -89,7 +89,7 @@ NG5_EXPORT(bool) hexdump(struct string_builder *dst, const void *base, u64 nbyte
         return true;
 }
 
-NG5_EXPORT(bool) hexdump_print(FILE *file, const void *base, u64 nbytes)
+ARK_EXPORT(bool) hexdump_print(FILE *file, const void *base, u64 nbytes)
 {
         bool status;
         struct string_builder sb;

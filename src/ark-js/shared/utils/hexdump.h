@@ -15,18 +15,18 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_HEXDUMP_H
-#define NG5_HEXDUMP_H
+#ifndef ARK_HEXDUMP_H
+#define ARK_HEXDUMP_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/stdx/string_builder.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
-NG5_EXPORT(bool) hexdump(struct string_builder *dst, const void *base, u64 nbytes);
+ARK_EXPORT(bool) hexdump(struct string_builder *dst, const void *base, u64 nbytes);
 
-NG5_EXPORT(bool) hexdump_print(FILE *file, const void *base, u64 nbytes);
+ARK_EXPORT(bool) hexdump_print(FILE *file, const void *base, u64 nbytes);
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

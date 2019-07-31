@@ -15,27 +15,27 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_IO_CONTEXT_H
-#define NG5_IO_CONTEXT_H
+#ifndef ARK_IO_CONTEXT_H
+#define ARK_IO_CONTEXT_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/error.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
 struct archive; /* forwarded */
 struct io_context; /* forwarded */
 
-NG5_EXPORT(bool) io_context_create(struct io_context **context, struct err *err, const char *file_path);
+ARK_EXPORT(bool) io_context_create(struct io_context **context, struct err *err, const char *file_path);
 
-NG5_EXPORT(struct err *) io_context_get_error(struct io_context *context);
+ARK_EXPORT(struct err *) io_context_get_error(struct io_context *context);
 
-NG5_EXPORT(FILE *) io_context_lock_and_access(struct io_context *context);
+ARK_EXPORT(FILE *) io_context_lock_and_access(struct io_context *context);
 
-NG5_EXPORT(bool) io_context_unlock(struct io_context *context);
+ARK_EXPORT(bool) io_context_unlock(struct io_context *context);
 
-NG5_EXPORT(bool) io_context_drop(struct io_context *context);
+ARK_EXPORT(bool) io_context_drop(struct io_context *context);
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

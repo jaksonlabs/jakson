@@ -15,14 +15,14 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_CACHE_H
-#define NG5_CACHE_H
+#ifndef ARK_CACHE_H
+#define ARK_CACHE_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/types.h>
 #include <ark-js/carbon/archive/archive-query.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
 struct sid_cache_stats {
         size_t num_hits;
@@ -30,22 +30,22 @@ struct sid_cache_stats {
         size_t num_evicted;
 };
 
-NG5_EXPORT(bool) string_id_cache_create_LRU(struct string_cache **cache, struct archive *archive);
+ARK_EXPORT(bool) string_id_cache_create_LRU(struct string_cache **cache, struct archive *archive);
 
-NG5_EXPORT(bool) string_id_cache_create_LRU_ex(struct string_cache **cache, struct archive *archive, size_t capacity);
+ARK_EXPORT(bool) string_id_cache_create_LRU_ex(struct string_cache **cache, struct archive *archive, size_t capacity);
 
-NG5_EXPORT(bool) string_id_cache_get_error(struct err *err, const struct string_cache *cache);
+ARK_EXPORT(bool) string_id_cache_get_error(struct err *err, const struct string_cache *cache);
 
-NG5_EXPORT(bool) string_id_cache_get_size(size_t *size, const struct string_cache *cache);
+ARK_EXPORT(bool) string_id_cache_get_size(size_t *size, const struct string_cache *cache);
 
-NG5_EXPORT(char *) string_id_cache_get(struct string_cache *cache, field_sid_t id);
+ARK_EXPORT(char *) string_id_cache_get(struct string_cache *cache, field_sid_t id);
 
-NG5_EXPORT(bool) string_id_cache_get_statistics(struct sid_cache_stats *statistics, struct string_cache *cache);
+ARK_EXPORT(bool) string_id_cache_get_statistics(struct sid_cache_stats *statistics, struct string_cache *cache);
 
-NG5_EXPORT(bool) string_id_cache_reset_statistics(struct string_cache *cache);
+ARK_EXPORT(bool) string_id_cache_reset_statistics(struct string_cache *cache);
 
-NG5_EXPORT(bool) string_id_cache_drop(struct string_cache *cache);
+ARK_EXPORT(bool) string_id_cache_drop(struct string_cache *cache);
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

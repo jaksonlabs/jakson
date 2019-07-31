@@ -32,20 +32,20 @@ static bool create_strategy(size_t i, struct packer *strategy)
         return strategy->create(strategy);
 }
 
-NG5_EXPORT(bool) pack_by_type(struct err *err, struct packer *strategy, enum packer_type type)
+ARK_EXPORT(bool) pack_by_type(struct err *err, struct packer *strategy, enum packer_type type)
 {
-        for (size_t i = 0; i < NG5_ARRAY_LENGTH(compressor_strategy_register); i++) {
+        for (size_t i = 0; i < ARK_ARRAY_LENGTH(compressor_strategy_register); i++) {
                 if (compressor_strategy_register[i].type == type) {
                         return create_strategy(i, strategy);
                 }
         }
-        error(err, NG5_ERR_NOCOMPRESSOR)
+        error(err, ARK_ERR_NOCOMPRESSOR)
         return false;
 }
 
-NG5_EXPORT(u8) pack_flagbit_by_type(enum packer_type type)
+ARK_EXPORT(u8) pack_flagbit_by_type(enum packer_type type)
 {
-        for (size_t i = 0; i < NG5_ARRAY_LENGTH(compressor_strategy_register); i++) {
+        for (size_t i = 0; i < ARK_ARRAY_LENGTH(compressor_strategy_register); i++) {
                 if (compressor_strategy_register[i].type == type) {
                         return compressor_strategy_register[i].flag_bit;
                 }
@@ -53,9 +53,9 @@ NG5_EXPORT(u8) pack_flagbit_by_type(enum packer_type type)
         return 0;
 }
 
-NG5_EXPORT(bool) pack_by_flags(struct packer *strategy, u8 flags)
+ARK_EXPORT(bool) pack_by_flags(struct packer *strategy, u8 flags)
 {
-        for (size_t i = 0; i < NG5_ARRAY_LENGTH(compressor_strategy_register); i++) {
+        for (size_t i = 0; i < ARK_ARRAY_LENGTH(compressor_strategy_register); i++) {
                 if (compressor_strategy_register[i].flag_bit & flags) {
                         return create_strategy(i, strategy);
                 }
@@ -63,9 +63,9 @@ NG5_EXPORT(bool) pack_by_flags(struct packer *strategy, u8 flags)
         return false;
 }
 
-NG5_EXPORT(bool) pack_by_name(enum packer_type *type, const char *name)
+ARK_EXPORT(bool) pack_by_name(enum packer_type *type, const char *name)
 {
-        for (size_t i = 0; i < NG5_ARRAY_LENGTH(compressor_strategy_register); i++) {
+        for (size_t i = 0; i < ARK_ARRAY_LENGTH(compressor_strategy_register); i++) {
                 if (strcmp(compressor_strategy_register[i].name, name) == 0) {
                         *type = compressor_strategy_register[i].type;
                         return true;
@@ -74,61 +74,61 @@ NG5_EXPORT(bool) pack_by_name(enum packer_type *type, const char *name)
         return false;
 }
 
-NG5_EXPORT(bool) pack_cpy(struct err *err, struct packer *dst, const struct packer *src)
+ARK_EXPORT(bool) pack_cpy(struct err *err, struct packer *dst, const struct packer *src)
 {
         error_if_null(dst)
         error_if_null(src)
-        ng5_implemented_or_error(err, src, cpy)
+        ark_implemented_or_error(err, src, cpy)
         return src->cpy(src, dst);
 }
 
-NG5_EXPORT(bool) pack_drop(struct err *err, struct packer *self)
+ARK_EXPORT(bool) pack_drop(struct err *err, struct packer *self)
 {
         error_if_null(self)
-        ng5_implemented_or_error(err, self, drop)
+        ark_implemented_or_error(err, self, drop)
         return self->drop(self);
 }
 
-NG5_EXPORT(bool) pack_write_extra(struct err *err, struct packer *self, struct memfile *dst,
+ARK_EXPORT(bool) pack_write_extra(struct err *err, struct packer *self, struct memfile *dst,
         const struct vector ofType (const char *) *strings)
 {
         error_if_null(self)
-        ng5_implemented_or_error(err, self, write_extra)
+        ark_implemented_or_error(err, self, write_extra)
         return self->write_extra(self, dst, strings);
 }
 
-NG5_EXPORT(bool) pack_read_extra(struct err *err, struct packer *self, FILE *src, size_t nbytes)
+ARK_EXPORT(bool) pack_read_extra(struct err *err, struct packer *self, FILE *src, size_t nbytes)
 {
         error_if_null(self)
-        ng5_implemented_or_error(err, self, read_extra)
+        ark_implemented_or_error(err, self, read_extra)
         return self->read_extra(self, src, nbytes);
 }
 
-NG5_EXPORT(bool) pack_encode(struct err *err, struct packer *self, struct memfile *dst, const char *string)
+ARK_EXPORT(bool) pack_encode(struct err *err, struct packer *self, struct memfile *dst, const char *string)
 {
         error_if_null(self)
-        ng5_implemented_or_error(err, self, encode_string)
+        ark_implemented_or_error(err, self, encode_string)
         return self->encode_string(self, dst, err, string);
 }
 
-NG5_EXPORT(bool) pack_decode(struct err *err, struct packer *self, char *dst, size_t strlen, FILE *src)
+ARK_EXPORT(bool) pack_decode(struct err *err, struct packer *self, char *dst, size_t strlen, FILE *src)
 {
         error_if_null(self)
-        ng5_implemented_or_error(err, self, decode_string)
+        ark_implemented_or_error(err, self, decode_string)
         return self->decode_string(self, dst, strlen, src);
 }
 
-NG5_EXPORT(bool) pack_print_extra(struct err *err, struct packer *self, FILE *file, struct memfile *src)
+ARK_EXPORT(bool) pack_print_extra(struct err *err, struct packer *self, FILE *file, struct memfile *src)
 {
         error_if_null(self)
-        ng5_implemented_or_error(err, self, print_extra)
+        ark_implemented_or_error(err, self, print_extra)
         return self->print_extra(self, file, src);
 }
 
-NG5_EXPORT(bool) pack_print_encoded(struct err *err, struct packer *self, FILE *file, struct memfile *src,
+ARK_EXPORT(bool) pack_print_encoded(struct err *err, struct packer *self, FILE *file, struct memfile *src,
         u32 decompressed_strlen)
 {
         error_if_null(self)
-        ng5_implemented_or_error(err, self, print_encoded)
+        ark_implemented_or_error(err, self, print_encoded)
         return self->print_encoded(self, file, src, decompressed_strlen);
 }

@@ -18,12 +18,12 @@
 #include <inttypes.h>
 #include <ark-js/shared/stdx/string_builder.h>
 
-NG5_EXPORT(bool) string_builder_create(struct string_builder *builder)
+ARK_EXPORT(bool) string_builder_create(struct string_builder *builder)
 {
         return string_builder_create_ex(builder, 1024);
 }
 
-NG5_EXPORT(bool) string_builder_create_ex(struct string_builder *builder, size_t capacity)
+ARK_EXPORT(bool) string_builder_create_ex(struct string_builder *builder, size_t capacity)
 {
         error_if_null(builder)
         error_if_null(capacity)
@@ -31,12 +31,12 @@ NG5_EXPORT(bool) string_builder_create_ex(struct string_builder *builder, size_t
         builder->cap = capacity;
         builder->end = 0;
         builder->data = malloc(capacity);
-        error_if_and_return(!builder->data, &builder->err, NG5_ERR_MALLOCERR, false);
-        ng5_zero_memory(builder->data, builder->cap);
+        error_if_and_return(!builder->data, &builder->err, ARK_ERR_MALLOCERR, false);
+        ark_zero_memory(builder->data, builder->cap);
         return true;
 }
 
-NG5_EXPORT(bool) string_builder_append(struct string_builder *builder, const char *str)
+ARK_EXPORT(bool) string_builder_append(struct string_builder *builder, const char *str)
 {
         error_if_null(builder)
         error_if_null(str)
@@ -44,7 +44,7 @@ NG5_EXPORT(bool) string_builder_append(struct string_builder *builder, const cha
         return string_builder_append_nchar(builder, str, len);
 }
 
-NG5_EXPORT(bool) string_builder_append_nchar(struct string_builder *builder, const char *str, u64 strlen)
+ARK_EXPORT(bool) string_builder_append_nchar(struct string_builder *builder, const char *str, u64 strlen)
 {
         error_if_null(builder)
         error_if_null(str)
@@ -53,8 +53,8 @@ NG5_EXPORT(bool) string_builder_append_nchar(struct string_builder *builder, con
         if (unlikely(builder->end + strlen >= builder->cap)) {
                 size_t new_cap = (builder->end + strlen) * 1.7f;
                 builder->data = realloc(builder->data, new_cap);
-                error_if_and_return(!builder->data, &builder->err, NG5_ERR_REALLOCERR, false);
-                ng5_zero_memory(builder->data + builder->cap, (new_cap - builder->cap));
+                error_if_and_return(!builder->data, &builder->err, ARK_ERR_REALLOCERR, false);
+                ark_zero_memory(builder->data + builder->cap, (new_cap - builder->cap));
                 builder->cap = new_cap;
         }
 
@@ -65,7 +65,7 @@ NG5_EXPORT(bool) string_builder_append_nchar(struct string_builder *builder, con
         return true;
 }
 
-NG5_EXPORT(bool) string_builder_append_char(struct string_builder *builder, char c)
+ARK_EXPORT(bool) string_builder_append_char(struct string_builder *builder, char c)
 {
         error_if_null(builder)
         char buffer[2];
@@ -74,97 +74,97 @@ NG5_EXPORT(bool) string_builder_append_char(struct string_builder *builder, char
         return true;
 }
 
-NG5_EXPORT(bool) string_builder_append_u8(struct string_builder *builder, u8 value)
+ARK_EXPORT(bool) string_builder_append_u8(struct string_builder *builder, u8 value)
 {
         char buffer[21];
-        ng5_zero_memory(buffer, NG5_ARRAY_LENGTH(buffer));
+        ark_zero_memory(buffer, ARK_ARRAY_LENGTH(buffer));
         sprintf(buffer, "%u", value);
         return string_builder_append(builder, buffer);
 }
 
-NG5_EXPORT(bool) string_builder_append_u16(struct string_builder *builder, u16 value)
-{
-        char buffer[21];
-        sprintf(buffer, "%u", value);
-        return string_builder_append(builder, buffer);
-}
-
-NG5_EXPORT(bool) string_builder_append_u32(struct string_builder *builder, u32 value)
+ARK_EXPORT(bool) string_builder_append_u16(struct string_builder *builder, u16 value)
 {
         char buffer[21];
         sprintf(buffer, "%u", value);
         return string_builder_append(builder, buffer);
 }
 
-NG5_EXPORT(bool) string_builder_append_u64(struct string_builder *builder, u64 value)
+ARK_EXPORT(bool) string_builder_append_u32(struct string_builder *builder, u32 value)
+{
+        char buffer[21];
+        sprintf(buffer, "%u", value);
+        return string_builder_append(builder, buffer);
+}
+
+ARK_EXPORT(bool) string_builder_append_u64(struct string_builder *builder, u64 value)
 {
         char buffer[21];
         sprintf(buffer, "%" PRIu64, value);
         return string_builder_append(builder, buffer);
 }
 
-NG5_EXPORT(bool) string_builder_append_i8(struct string_builder *builder, i8 value)
+ARK_EXPORT(bool) string_builder_append_i8(struct string_builder *builder, i8 value)
 {
         char buffer[21];
         sprintf(buffer, "%d", value);
         return string_builder_append(builder, buffer);
 }
 
-NG5_EXPORT(bool) string_builder_append_i16(struct string_builder *builder, i16 value)
+ARK_EXPORT(bool) string_builder_append_i16(struct string_builder *builder, i16 value)
 {
         char buffer[21];
         sprintf(buffer, "%d", value);
         return string_builder_append(builder, buffer);
 }
 
-NG5_EXPORT(bool) string_builder_append_i32(struct string_builder *builder, i32 value)
+ARK_EXPORT(bool) string_builder_append_i32(struct string_builder *builder, i32 value)
 {
         char buffer[21];
         sprintf(buffer, "%d", value);
         return string_builder_append(builder, buffer);
 }
 
-NG5_EXPORT(bool) string_builder_append_i64(struct string_builder *builder, i64 value)
+ARK_EXPORT(bool) string_builder_append_i64(struct string_builder *builder, i64 value)
 {
         char buffer[21];
         sprintf(buffer, "%" PRIi64, value);
         return string_builder_append(builder, buffer);
 }
 
-NG5_EXPORT(bool) string_builder_append_float(struct string_builder *builder, float value)
+ARK_EXPORT(bool) string_builder_append_float(struct string_builder *builder, float value)
 {
         char buffer[2046];
         sprintf(buffer, "%0.2f", value);
         return string_builder_append(builder, buffer);
 }
 
-NG5_EXPORT(bool) string_builder_clear(struct string_builder *builder)
+ARK_EXPORT(bool) string_builder_clear(struct string_builder *builder)
 {
         error_if_null(builder)
-        ng5_zero_memory(builder->data, builder->cap);
+        ark_zero_memory(builder->data, builder->cap);
         builder->end = 0;
         return true;
 }
 
-NG5_EXPORT(size_t) string_builder_length(struct string_builder *builder)
+ARK_EXPORT(size_t) string_builder_length(struct string_builder *builder)
 {
         error_if_null(builder)
         return builder->end;
 }
 
-NG5_EXPORT(bool) string_builder_drop(struct string_builder *builder)
+ARK_EXPORT(bool) string_builder_drop(struct string_builder *builder)
 {
         error_if_null(builder)
         free (builder->data);
         return true;
 }
 
-NG5_EXPORT(bool) string_builder_print(struct string_builder *builder)
+ARK_EXPORT(bool) string_builder_print(struct string_builder *builder)
 {
         return string_builder_printf(stdout, builder);
 }
 
-NG5_EXPORT(bool) string_builder_printf(FILE *file, struct string_builder *builder)
+ARK_EXPORT(bool) string_builder_printf(FILE *file, struct string_builder *builder)
 {
         error_if_null(file)
         error_if_null(builder)
@@ -172,7 +172,7 @@ NG5_EXPORT(bool) string_builder_printf(FILE *file, struct string_builder *builde
         return true;
 }
 
-NG5_EXPORT(const char *) string_builder_cstr(struct string_builder *builder)
+ARK_EXPORT(const char *) string_builder_cstr(struct string_builder *builder)
 {
         return builder->data;
 }

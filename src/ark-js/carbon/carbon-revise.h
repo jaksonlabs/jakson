@@ -23,9 +23,9 @@
 #include <ark-js/carbon/oid/oid.h>
 #include <ark-js/carbon/carbon.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
-NG5_DEFINE_ERROR_GETTER(carbon_revise)
+ARK_DEFINE_ERROR_GETTER(carbon_revise)
 
 /**
  * Acquires a new revision context for the carbon document.
@@ -38,38 +38,38 @@ NG5_DEFINE_ERROR_GETTER(carbon_revise)
  * @return <code>false</code> in case of an already running revision. Otherwise returns value of
  *                            <code>carbon_revise_begin</code>
  */
-NG5_EXPORT(bool) carbon_revise_try_begin(struct carbon_revise *context, struct carbon *revised_doc, struct carbon *doc);
+ARK_EXPORT(bool) carbon_revise_try_begin(struct carbon_revise *context, struct carbon *revised_doc, struct carbon *doc);
 
-NG5_EXPORT(bool) carbon_revise_begin(struct carbon_revise *context, struct carbon *revised_doc, struct carbon *original);
+ARK_EXPORT(bool) carbon_revise_begin(struct carbon_revise *context, struct carbon *revised_doc, struct carbon *original);
 
-NG5_EXPORT(bool) carbon_revise_key_generate(object_id_t *out, struct carbon_revise *context);
+ARK_EXPORT(bool) carbon_revise_key_generate(object_id_t *out, struct carbon_revise *context);
 
-NG5_EXPORT(bool) carbon_revise_key_set_unsigned(struct carbon_revise *context, u64 key_value);
+ARK_EXPORT(bool) carbon_revise_key_set_unsigned(struct carbon_revise *context, u64 key_value);
 
-NG5_EXPORT(bool) carbon_revise_key_set_signed(struct carbon_revise *context, i64 key_value);
+ARK_EXPORT(bool) carbon_revise_key_set_signed(struct carbon_revise *context, i64 key_value);
 
-NG5_EXPORT(bool) carbon_revise_key_set_string(struct carbon_revise *context, const char *key_value);
+ARK_EXPORT(bool) carbon_revise_key_set_string(struct carbon_revise *context, const char *key_value);
 
-NG5_EXPORT(bool) carbon_revise_iterator_open(struct carbon_array_it *it, struct carbon_revise *context);
+ARK_EXPORT(bool) carbon_revise_iterator_open(struct carbon_array_it *it, struct carbon_revise *context);
 
-NG5_EXPORT(bool) carbon_revise_iterator_close(struct carbon_array_it *it);
+ARK_EXPORT(bool) carbon_revise_iterator_close(struct carbon_array_it *it);
 
-NG5_EXPORT(bool) carbon_revise_find_open(struct carbon_find *out, const char *dot_path, struct carbon_revise *context);
+ARK_EXPORT(bool) carbon_revise_find_open(struct carbon_find *out, const char *dot_path, struct carbon_revise *context);
 
-NG5_EXPORT(bool) carbon_revise_find_close(struct carbon_find *find);
+ARK_EXPORT(bool) carbon_revise_find_close(struct carbon_find *find);
 
-NG5_EXPORT(bool) carbon_revise_remove(const char *dot_path, struct carbon_revise *context);
+ARK_EXPORT(bool) carbon_revise_remove(const char *dot_path, struct carbon_revise *context);
 
-NG5_EXPORT(bool) carbon_revise_remove_one(const char *dot_path, struct carbon *rev_doc, struct carbon *doc);
+ARK_EXPORT(bool) carbon_revise_remove_one(const char *dot_path, struct carbon *rev_doc, struct carbon *doc);
 
-NG5_EXPORT(bool) carbon_revise_pack(struct carbon_revise *context);
+ARK_EXPORT(bool) carbon_revise_pack(struct carbon_revise *context);
 
-NG5_EXPORT(bool) carbon_revise_shrink(struct carbon_revise *context);
+ARK_EXPORT(bool) carbon_revise_shrink(struct carbon_revise *context);
 
-NG5_EXPORT(const struct carbon *) carbon_revise_end(struct carbon_revise *context);
+ARK_EXPORT(const struct carbon *) carbon_revise_end(struct carbon_revise *context);
 
-NG5_EXPORT(bool) carbon_revise_abort(struct carbon_revise *context);
+ARK_EXPORT(bool) carbon_revise_abort(struct carbon_revise *context);
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

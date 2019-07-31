@@ -15,18 +15,18 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_CONVERT_H
-#define NG5_CONVERT_H
+#ifndef ARK_CONVERT_H
+#define ARK_CONVERT_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/types.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
-NG5_EXPORT(i64) convert_atoi64(const char *string);
+ARK_EXPORT(i64) convert_atoi64(const char *string);
 
-NG5_EXPORT(u64) convert_atoiu64(const char *string);
+ARK_EXPORT(u64) convert_atoiu64(const char *string);
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

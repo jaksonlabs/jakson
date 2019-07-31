@@ -15,14 +15,14 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_FIX_MAP_H
-#define NG5_FIX_MAP_H
+#ifndef ARK_FIX_MAP_H
+#define ARK_FIX_MAP_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/stdx/vec.h>
 #include <ark-js/shared/async/spin.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
 struct hashtable_bucket {
         bool in_use_flag;  /* flag indicating if bucket is in use */
@@ -51,38 +51,38 @@ struct hashtable {
         struct err err;
 };
 
-NG5_DEFINE_GET_ERROR_FUNCTION(hashtable, struct hashtable, table);
+ARK_DEFINE_GET_ERROR_FUNCTION(hashtable, struct hashtable, table);
 
-NG5_EXPORT(bool) hashtable_create(struct hashtable *map, struct err *err, size_t key_size, size_t value_size,
+ARK_EXPORT(bool) hashtable_create(struct hashtable *map, struct err *err, size_t key_size, size_t value_size,
         size_t capacity);
 
-NG5_EXPORT(struct hashtable *) hashtable_cpy(struct hashtable *src);
+ARK_EXPORT(struct hashtable *) hashtable_cpy(struct hashtable *src);
 
-NG5_EXPORT(bool) hashtable_drop(struct hashtable *map);
+ARK_EXPORT(bool) hashtable_drop(struct hashtable *map);
 
-NG5_EXPORT(bool) hashtable_clear(struct hashtable *map);
+ARK_EXPORT(bool) hashtable_clear(struct hashtable *map);
 
-NG5_EXPORT(bool) hashtable_avg_displace(float *displace, const struct hashtable *map);
+ARK_EXPORT(bool) hashtable_avg_displace(float *displace, const struct hashtable *map);
 
-NG5_EXPORT(bool) hashtable_lock(struct hashtable *map);
+ARK_EXPORT(bool) hashtable_lock(struct hashtable *map);
 
-NG5_EXPORT(bool) hashtable_unlock(struct hashtable *map);
+ARK_EXPORT(bool) hashtable_unlock(struct hashtable *map);
 
-NG5_EXPORT(bool) hashtable_insert_or_update(struct hashtable *map, const void *keys, const void *values,
+ARK_EXPORT(bool) hashtable_insert_or_update(struct hashtable *map, const void *keys, const void *values,
         uint_fast32_t num_pairs);
 
-NG5_EXPORT(bool) hashtable_serialize(FILE *file, struct hashtable *table);
+ARK_EXPORT(bool) hashtable_serialize(FILE *file, struct hashtable *table);
 
-NG5_EXPORT(bool) hashtable_deserialize(struct hashtable *table, struct err *err, FILE *file);
+ARK_EXPORT(bool) hashtable_deserialize(struct hashtable *table, struct err *err, FILE *file);
 
-NG5_EXPORT(bool) hashtable_remove_if_contained(struct hashtable *map, const void *keys, size_t num_pairs);
+ARK_EXPORT(bool) hashtable_remove_if_contained(struct hashtable *map, const void *keys, size_t num_pairs);
 
-NG5_EXPORT(const void *) hashtable_get_value(struct hashtable *map, const void *key);
+ARK_EXPORT(const void *) hashtable_get_value(struct hashtable *map, const void *key);
 
-NG5_EXPORT(bool) hashtable_get_fload_factor(float *factor, struct hashtable *map);
+ARK_EXPORT(bool) hashtable_get_fload_factor(float *factor, struct hashtable *map);
 
-NG5_EXPORT(bool) hashtable_rehash(struct hashtable *map);
+ARK_EXPORT(bool) hashtable_rehash(struct hashtable *map);
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

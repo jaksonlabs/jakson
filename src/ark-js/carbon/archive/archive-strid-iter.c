@@ -17,7 +17,7 @@
 
 #include <ark-js/carbon/archive/archive-strid-iter.h>
 
-NG5_EXPORT(bool) strid_iter_open(struct strid_iter *it, struct err *err, struct archive *archive)
+ARK_EXPORT(bool) strid_iter_open(struct strid_iter *it, struct err *err, struct archive *archive)
 {
         error_if_null(it)
         error_if_null(archive)
@@ -25,7 +25,7 @@ NG5_EXPORT(bool) strid_iter_open(struct strid_iter *it, struct err *err, struct 
         memset(&it->vector, 0, sizeof(it->vector));
         it->disk_file = fopen(archive->diskFilePath, "r");
         if (!it->disk_file) {
-                ng5_optional(err, error(err, NG5_ERR_FOPEN_FAILED))
+                ark_optional(err, error(err, ARK_ERR_FOPEN_FAILED))
                 it->is_open = false;
                 return false;
         }
@@ -35,7 +35,7 @@ NG5_EXPORT(bool) strid_iter_open(struct strid_iter *it, struct err *err, struct 
         return true;
 }
 
-NG5_EXPORT(bool) strid_iter_next(bool *success, struct strid_info **info, struct err *err, size_t *info_length,
+ARK_EXPORT(bool) strid_iter_next(bool *success, struct strid_info **info, struct err *err, size_t *info_length,
         struct strid_iter *it)
 {
         error_if_null(info)
@@ -49,11 +49,11 @@ NG5_EXPORT(bool) strid_iter_next(bool *success, struct strid_info **info, struct
                         fseek(it->disk_file, it->disk_offset, SEEK_SET);
                         int num_read = fread(&header, sizeof(struct string_entry_header), 1, it->disk_file);
                         if (header.marker != '-') {
-                                error_print(NG5_ERR_INTERNALERR);
+                                error_print(ARK_ERR_INTERNALERR);
                                 return false;
                         }
                         if (num_read != 1) {
-                                ng5_optional(err, error(err, NG5_ERR_FREAD_FAILED))
+                                ark_optional(err, error(err, ARK_ERR_FREAD_FAILED))
                                 *success = false;
                                 return false;
                         } else {
@@ -64,7 +64,7 @@ NG5_EXPORT(bool) strid_iter_next(bool *success, struct strid_info **info, struct
                                 vec_pos++;
                         }
                 }
-                while (header.next_entry_off != 0 && vec_pos < NG5_ARRAY_LENGTH(it->vector));
+                while (header.next_entry_off != 0 && vec_pos < ARK_ARRAY_LENGTH(it->vector));
 
                 *info_length = vec_pos;
                 *success = true;
@@ -75,7 +75,7 @@ NG5_EXPORT(bool) strid_iter_next(bool *success, struct strid_info **info, struct
         }
 }
 
-NG5_EXPORT(bool) strid_iter_close(struct strid_iter *it)
+ARK_EXPORT(bool) strid_iter_close(struct strid_iter *it)
 {
         error_if_null(it)
         if (it->is_open) {

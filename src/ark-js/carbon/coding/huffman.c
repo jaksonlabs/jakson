@@ -41,19 +41,19 @@ bool coding_huffman_create(struct coding_huffman *dic)
         return true;
 }
 
-NG5_EXPORT(bool) coding_huffman_cpy(struct coding_huffman *dst, struct coding_huffman *src)
+ARK_EXPORT(bool) coding_huffman_cpy(struct coding_huffman *dst, struct coding_huffman *src)
 {
         error_if_null(dst);
         error_if_null(src);
         if (!vec_cpy(&dst->table, &src->table)) {
-                error(&src->err, NG5_ERR_HARDCOPYFAILED);
+                error(&src->err, ARK_ERR_HARDCOPYFAILED);
                 return false;
         } else {
                 return error_cpy(&dst->err, &src->err);
         }
 }
 
-NG5_EXPORT(bool) coding_huffman_build(struct coding_huffman *encoder, const string_vector_t *strings)
+ARK_EXPORT(bool) coding_huffman_build(struct coding_huffman *encoder, const string_vector_t *strings)
 {
         error_if_null(encoder);
         error_if_null(strings);
@@ -63,7 +63,7 @@ NG5_EXPORT(bool) coding_huffman_build(struct coding_huffman *encoder, const stri
         vec_enlarge_size_to_capacity(&frequencies);
 
         u32 *freq_data = vec_all(&frequencies, u32);
-        ng5_zero_memory(freq_data, UCHAR_MAX * sizeof(u32));
+        ark_zero_memory(freq_data, UCHAR_MAX * sizeof(u32));
 
         for (size_t i = 0; i < strings->num_elems; i++) {
                 const char *string = *vec_get(strings, i, const char *);
@@ -80,7 +80,7 @@ NG5_EXPORT(bool) coding_huffman_build(struct coding_huffman *encoder, const stri
         return true;
 }
 
-NG5_EXPORT(bool) coding_huffman_get_error(struct err *err, const struct coding_huffman *dic)
+ARK_EXPORT(bool) coding_huffman_get_error(struct err *err, const struct coding_huffman *dic)
 {
         error_if_null(err)
         error_if_null(dic)
@@ -153,7 +153,7 @@ static struct pack_huffman_entry *find_dic_entry(struct coding_huffman *dic, uns
                         return entry;
                 }
         }
-        error(&dic->err, NG5_ERR_HUFFERR)
+        error(&dic->err, ARK_ERR_HUFFERR)
         return NULL;
 }
 
@@ -193,7 +193,7 @@ static size_t encodeString(struct memfile *file, struct coding_huffman *dic, con
         return num_written_bytes;
 }
 
-NG5_EXPORT(bool) coding_huffman_encode(struct memfile *file, struct coding_huffman *dic, const char *string)
+ARK_EXPORT(bool) coding_huffman_encode(struct memfile *file, struct coding_huffman *dic, const char *string)
 {
         error_if_null(file)
         error_if_null(dic)
@@ -218,19 +218,19 @@ NG5_EXPORT(bool) coding_huffman_encode(struct memfile *file, struct coding_huffm
 
 bool coding_huffman_read_string(struct pack_huffman_str_info *info, struct memfile *src)
 {
-        info->nbytes_encoded = *NG5_MEMFILE_READ_TYPE(src, u32);
-        info->encoded_bytes = NG5_MEMFILE_READ(src, info->nbytes_encoded);
+        info->nbytes_encoded = *ARK_MEMFILE_READ_TYPE(src, u32);
+        info->encoded_bytes = ARK_MEMFILE_READ(src, info->nbytes_encoded);
         return true;
 }
 
 bool coding_huffman_read_entry(struct pack_huffman_info *info, struct memfile *file, char marker_symbol)
 {
-        char marker = *NG5_MEMFILE_PEEK(file, char);
+        char marker = *ARK_MEMFILE_PEEK(file, char);
         if (marker == marker_symbol) {
                 memfile_skip(file, sizeof(char));
-                info->letter = *NG5_MEMFILE_READ_TYPE(file, unsigned char);
-                info->nbytes_prefix = *NG5_MEMFILE_READ_TYPE(file, u8);
-                info->prefix_code = NG5_MEMFILE_PEEK(file, char);
+                info->letter = *ARK_MEMFILE_READ_TYPE(file, unsigned char);
+                info->nbytes_prefix = *ARK_MEMFILE_READ_TYPE(file, u8);
+                info->prefix_code = ARK_MEMFILE_PEEK(file, char);
 
                 memfile_skip(file, info->nbytes_prefix);
 
@@ -281,7 +281,7 @@ static struct huff_node *seek_to_end(struct huff_node *handle)
         return handle;
 }
 
-ng5_func_unused
+ark_func_unused
 static void __diag_print_insight(struct huff_node *n)
 {
         printf("(");
@@ -300,7 +300,7 @@ static void __diag_print_insight(struct huff_node *n)
         printf(": %"PRIu64"", n->freq);
 }
 
-ng5_func_unused
+ark_func_unused
 static void __diag_dump_remaining_candidates(struct huff_node *n)
 {
         struct huff_node *it = seek_to_begin(n);
@@ -441,7 +441,7 @@ static void huff_tree_create(struct vector ofType(struct pack_huffman_entry) *ta
                 } else if (smallest->next) {
                         handle = seek_to_begin(smallest->next);
                 } else {
-                        print_error_and_die(NG5_ERR_INTERNALERR);
+                        print_error_and_die(ARK_ERR_INTERNALERR);
                 }
 
                 assert (!handle->prev);

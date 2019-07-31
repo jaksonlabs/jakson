@@ -119,70 +119,70 @@ enum carbon_constant
 #define carbon_FIELD_TYPE_NUMBER_I64_STR "number (i64)"
 #define carbon_FIELD_TYPE_NUMBER_FLOAT_STR "number (float)"
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
-NG5_EXPORT(const char *) carbon_field_type_str(struct err *err, enum carbon_field_type type);
+ARK_EXPORT(const char *) carbon_field_type_str(struct err *err, enum carbon_field_type type);
 
-NG5_EXPORT(bool) carbon_field_type_is_traversable(enum carbon_field_type type);
+ARK_EXPORT(bool) carbon_field_type_is_traversable(enum carbon_field_type type);
 
-NG5_EXPORT(bool) carbon_field_type_is_signed_integer(enum carbon_field_type type);
+ARK_EXPORT(bool) carbon_field_type_is_signed_integer(enum carbon_field_type type);
 
-NG5_EXPORT(bool) carbon_field_type_is_unsigned_integer(enum carbon_field_type type);
+ARK_EXPORT(bool) carbon_field_type_is_unsigned_integer(enum carbon_field_type type);
 
-NG5_EXPORT(bool) carbon_field_type_is_floating_number(enum carbon_field_type type);
+ARK_EXPORT(bool) carbon_field_type_is_floating_number(enum carbon_field_type type);
 
-NG5_EXPORT(bool) carbon_field_type_is_number(enum carbon_field_type type);
+ARK_EXPORT(bool) carbon_field_type_is_number(enum carbon_field_type type);
 
-NG5_EXPORT(bool) carbon_field_type_is_integer(enum carbon_field_type type);
+ARK_EXPORT(bool) carbon_field_type_is_integer(enum carbon_field_type type);
 
-NG5_EXPORT(bool) carbon_field_type_is_binary(enum carbon_field_type type);
+ARK_EXPORT(bool) carbon_field_type_is_binary(enum carbon_field_type type);
 
-NG5_EXPORT(bool) carbon_field_type_is_boolean(enum carbon_field_type type);
+ARK_EXPORT(bool) carbon_field_type_is_boolean(enum carbon_field_type type);
 
-NG5_EXPORT(bool) carbon_field_type_is_array(enum carbon_field_type type);
+ARK_EXPORT(bool) carbon_field_type_is_array(enum carbon_field_type type);
 
-NG5_EXPORT(bool) carbon_field_type_is_column(enum carbon_field_type type);
+ARK_EXPORT(bool) carbon_field_type_is_column(enum carbon_field_type type);
 
-NG5_EXPORT(bool) carbon_field_type_is_object(enum carbon_field_type type);
+ARK_EXPORT(bool) carbon_field_type_is_object(enum carbon_field_type type);
 
-NG5_EXPORT(bool) carbon_field_type_is_null(enum carbon_field_type type);
+ARK_EXPORT(bool) carbon_field_type_is_null(enum carbon_field_type type);
 
-NG5_EXPORT(bool) carbon_field_type_is_string(enum carbon_field_type type);
+ARK_EXPORT(bool) carbon_field_type_is_string(enum carbon_field_type type);
 
-NG5_EXPORT(enum carbon_field_class) carbon_field_type_get_class(enum carbon_field_type type, struct err *err);
+ARK_EXPORT(enum carbon_field_class) carbon_field_type_get_class(enum carbon_field_type type, struct err *err);
 
-NG5_EXPORT(bool) carbon_field_type_is_constant(enum carbon_field_type type);
+ARK_EXPORT(bool) carbon_field_type_is_constant(enum carbon_field_type type);
 
-NG5_EXPORT(bool) carbon_field_skip(struct memfile *file);
+ARK_EXPORT(bool) carbon_field_skip(struct memfile *file);
 
-NG5_EXPORT(bool) carbon_field_skip_object(struct memfile *file);
+ARK_EXPORT(bool) carbon_field_skip_object(struct memfile *file);
 
-NG5_EXPORT(bool) carbon_field_skip_array(struct memfile *file);
+ARK_EXPORT(bool) carbon_field_skip_array(struct memfile *file);
 
-NG5_EXPORT(bool) carbon_field_skip_column(struct memfile *file);
+ARK_EXPORT(bool) carbon_field_skip_column(struct memfile *file);
 
-NG5_EXPORT(bool) carbon_field_skip_binary(struct memfile *file);
+ARK_EXPORT(bool) carbon_field_skip_binary(struct memfile *file);
 
-NG5_EXPORT(bool) carbon_field_skip_custom_binary(struct memfile *file);
+ARK_EXPORT(bool) carbon_field_skip_custom_binary(struct memfile *file);
 
-NG5_EXPORT(bool) carbon_field_skip_string(struct memfile *file);
+ARK_EXPORT(bool) carbon_field_skip_string(struct memfile *file);
 
-NG5_EXPORT(bool) carbon_field_skip_float(struct memfile *file);
+ARK_EXPORT(bool) carbon_field_skip_float(struct memfile *file);
 
-NG5_EXPORT(bool) carbon_field_skip_boolean(struct memfile *file);
+ARK_EXPORT(bool) carbon_field_skip_boolean(struct memfile *file);
 
-NG5_EXPORT(bool) carbon_field_skip_null(struct memfile *file);
+ARK_EXPORT(bool) carbon_field_skip_null(struct memfile *file);
 
-NG5_EXPORT(bool) carbon_field_skip_8(struct memfile *file);
+ARK_EXPORT(bool) carbon_field_skip_8(struct memfile *file);
 
-NG5_EXPORT(bool) carbon_field_skip_16(struct memfile *file);
+ARK_EXPORT(bool) carbon_field_skip_16(struct memfile *file);
 
-NG5_EXPORT(bool) carbon_field_skip_32(struct memfile *file);
+ARK_EXPORT(bool) carbon_field_skip_32(struct memfile *file);
 
-NG5_EXPORT(bool) carbon_field_skip_64(struct memfile *file);
+ARK_EXPORT(bool) carbon_field_skip_64(struct memfile *file);
 
-NG5_EXPORT(enum carbon_field_type) carbon_field_type_for_column(enum carbon_column_type type);
+ARK_EXPORT(enum carbon_field_type) carbon_field_type_for_column(enum carbon_column_type type);
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

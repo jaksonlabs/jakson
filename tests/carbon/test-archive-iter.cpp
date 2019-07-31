@@ -32,7 +32,7 @@ iterate_object_vals(struct archive_value_vector *value_iter)
         printf("\t\t{type: object, id: %" PRIu64 "}\n", object.object_id);
 
 
-        status = archive_prop_iter_from_object(&prop_iter, NG5_ARCHIVE_ITER_MASK_ANY, &err, &object);
+        status = archive_prop_iter_from_object(&prop_iter, ARK_ARCHIVE_ITER_MASK_ANY, &err, &object);
         ASSERT_TRUE(status);
 
         iterate_properties(&prop_iter);
@@ -476,7 +476,7 @@ iterate_properties(struct prop_iter *prop_iter)
                                 printf("{ oid: %" PRIu64 " } \n", id);
 
                                 struct prop_iter nested_obj_prop_iter;
-                                archive_prop_iter_from_object(&nested_obj_prop_iter, NG5_ARCHIVE_ITER_MASK_ANY,
+                                archive_prop_iter_from_object(&nested_obj_prop_iter, ARK_ARCHIVE_ITER_MASK_ANY,
                                                                      &err, archive_object);
                                 iterate_properties(&nested_obj_prop_iter);
                             }
@@ -506,7 +506,7 @@ TEST(ArchiveIterTest, CreateIterator)
     status = archive_open(&archive, "./assets/test-archive.carbon");
     ASSERT_TRUE(status);
 
-    status = archive_prop_iter_from_archive(&prop_iter, &err, NG5_ARCHIVE_ITER_MASK_ANY, &archive);
+    status = archive_prop_iter_from_archive(&prop_iter, &err, ARK_ARCHIVE_ITER_MASK_ANY, &archive);
     ASSERT_TRUE(status);
 
     iterate_properties(&prop_iter);

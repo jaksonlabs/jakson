@@ -109,22 +109,22 @@ static const char *next_token(struct dot_token *token, const char *str)
         return str;
 }
 
-NG5_EXPORT(bool) carbon_dot_path_create(struct carbon_dot_path *path)
+ARK_EXPORT(bool) carbon_dot_path_create(struct carbon_dot_path *path)
 {
         error_if_null(path)
         error_init(&path->err);
         path->path_len = 0;
-        ng5_zero_memory(&path->nodes, NG5_ARRAY_LENGTH(path->nodes) * sizeof(struct carbon_dot_node));
+        ark_zero_memory(&path->nodes, ARK_ARRAY_LENGTH(path->nodes) * sizeof(struct carbon_dot_node));
         return true;
 }
 
-NG5_EXPORT(bool) carbon_dot_path_from_string(struct carbon_dot_path *path, const char *path_string)
+ARK_EXPORT(bool) carbon_dot_path_from_string(struct carbon_dot_path *path, const char *path_string)
 {
         error_if_null(path)
         unused(path_string);
 
         struct dot_token token;
-        int status = NG5_ERR_NOERR;
+        int status = ARK_ERR_NOERR;
         carbon_dot_path_create(path);
 
         enum path_entry { DOT, ENTRY } expected_entry = ENTRY;
@@ -134,13 +134,13 @@ NG5_EXPORT(bool) carbon_dot_path_from_string(struct carbon_dot_path *path, const
                 switch (token.type) {
                 case TOKEN_DOT:
                         if (expected_entry != DOT) {
-                                status = NG5_ERR_PARSE_DOT_EXPECTED;
+                                status = ARK_ERR_PARSE_DOT_EXPECTED;
                                 goto cleanup_and_error;
                         }
                         break;
                 case TOKEN_STRING:
                         if (expected_entry != ENTRY) {
-                                status = NG5_ERR_PARSE_ENTRY_EXPECTED;
+                                status = ARK_ERR_PARSE_ENTRY_EXPECTED;
                                 goto cleanup_and_error;
                         } else {
                                 carbon_dot_path_add_nkey(path, token.str, token.len);
@@ -148,7 +148,7 @@ NG5_EXPORT(bool) carbon_dot_path_from_string(struct carbon_dot_path *path, const
                         break;
                 case TOKEN_NUMBER:
                         if (expected_entry != ENTRY) {
-                                status = NG5_ERR_PARSE_ENTRY_EXPECTED;
+                                status = ARK_ERR_PARSE_ENTRY_EXPECTED;
                                 goto cleanup_and_error;
                         } else {
                                 u64 num = convert_atoiu64(token.str);
@@ -156,10 +156,10 @@ NG5_EXPORT(bool) carbon_dot_path_from_string(struct carbon_dot_path *path, const
                         }
                         break;
                 case TOKEN_UNKNOWN:
-                        status = NG5_ERR_PARSE_UNKNOWN_TOKEN;
+                        status = ARK_ERR_PARSE_UNKNOWN_TOKEN;
                         goto cleanup_and_error;
                 default:
-                        error(&path->err, NG5_ERR_INTERNALERR);
+                        error(&path->err, ARK_ERR_INTERNALERR);
                         break;
                 }
                 path_string = next_token(&token, path_string);
@@ -173,16 +173,16 @@ cleanup_and_error:
         return false;
 }
 
-NG5_EXPORT(bool) carbon_dot_path_add_key(struct carbon_dot_path *dst, const char *key)
+ARK_EXPORT(bool) carbon_dot_path_add_key(struct carbon_dot_path *dst, const char *key)
 {
         return carbon_dot_path_add_nkey(dst, key, strlen(key));
 }
 
-NG5_EXPORT(bool) carbon_dot_path_add_nkey(struct carbon_dot_path *dst, const char *key, size_t len)
+ARK_EXPORT(bool) carbon_dot_path_add_nkey(struct carbon_dot_path *dst, const char *key, size_t len)
 {
         error_if_null(dst)
         error_if_null(key)
-        if (likely(dst->path_len < NG5_ARRAY_LENGTH(dst->nodes))) {
+        if (likely(dst->path_len < ARK_ARRAY_LENGTH(dst->nodes))) {
                 struct carbon_dot_node *node = dst->nodes + dst->path_len++;
                 bool enquoted = strings_is_enquoted_wlen(key, len);
                 node->type = DOT_NODE_KEY_NAME;
@@ -195,26 +195,26 @@ NG5_EXPORT(bool) carbon_dot_path_add_nkey(struct carbon_dot_path *dst, const cha
                 assert(!strings_is_enquoted(node->identifier.string));
                 return true;
         } else {
-                error(&dst->err, NG5_ERR_OUTOFBOUNDS)
+                error(&dst->err, ARK_ERR_OUTOFBOUNDS)
                 return false;
         }
 }
 
-NG5_EXPORT(bool) carbon_dot_path_add_idx(struct carbon_dot_path *dst, u32 idx)
+ARK_EXPORT(bool) carbon_dot_path_add_idx(struct carbon_dot_path *dst, u32 idx)
 {
         error_if_null(dst)
-        if (likely(dst->path_len < NG5_ARRAY_LENGTH(dst->nodes))) {
+        if (likely(dst->path_len < ARK_ARRAY_LENGTH(dst->nodes))) {
                 struct carbon_dot_node *node = dst->nodes + dst->path_len++;
                 node->type = DOT_NODE_ARRAY_IDX;
                 node->identifier.idx = idx;
                 return true;
         } else {
-                error(&dst->err, NG5_ERR_OUTOFBOUNDS)
+                error(&dst->err, ARK_ERR_OUTOFBOUNDS)
                 return false;
         }
 }
 
-NG5_EXPORT(bool) carbon_dot_path_len(u32 *len, const struct carbon_dot_path *path)
+ARK_EXPORT(bool) carbon_dot_path_len(u32 *len, const struct carbon_dot_path *path)
 {
         error_if_null(len)
         error_if_null(path)
@@ -222,48 +222,48 @@ NG5_EXPORT(bool) carbon_dot_path_len(u32 *len, const struct carbon_dot_path *pat
         return true;
 }
 
-NG5_EXPORT(bool) carbon_dot_path_is_empty(const struct carbon_dot_path *path)
+ARK_EXPORT(bool) carbon_dot_path_is_empty(const struct carbon_dot_path *path)
 {
         error_if_null(path)
         return (path->path_len == 0);
 }
 
-NG5_EXPORT(bool) carbon_dot_path_type_at(enum carbon_dot_node_type *type_out, u32 pos, const struct carbon_dot_path *path)
+ARK_EXPORT(bool) carbon_dot_path_type_at(enum carbon_dot_node_type *type_out, u32 pos, const struct carbon_dot_path *path)
 {
         error_if_null(type_out)
         error_if_null(path)
-        if (likely(pos < NG5_ARRAY_LENGTH(path->nodes))) {
+        if (likely(pos < ARK_ARRAY_LENGTH(path->nodes))) {
                 *type_out = path->nodes[pos].type;
         } else {
-                error(&((struct carbon_dot_path *)path)->err, NG5_ERR_OUTOFBOUNDS)
+                error(&((struct carbon_dot_path *)path)->err, ARK_ERR_OUTOFBOUNDS)
                 return false;
         }
         return true;
 }
 
-NG5_EXPORT(bool) carbon_dot_path_idx_at(u32 *idx, u32 pos, const struct carbon_dot_path *path)
+ARK_EXPORT(bool) carbon_dot_path_idx_at(u32 *idx, u32 pos, const struct carbon_dot_path *path)
 {
         error_if_null(idx)
         error_if_null(path)
-        error_if_and_return(pos >= NG5_ARRAY_LENGTH(path->nodes), &((struct carbon_dot_path *)path)->err,
-                NG5_ERR_OUTOFBOUNDS, NULL);
+        error_if_and_return(pos >= ARK_ARRAY_LENGTH(path->nodes), &((struct carbon_dot_path *)path)->err,
+                ARK_ERR_OUTOFBOUNDS, NULL);
         error_if_and_return(path->nodes[pos].type != DOT_NODE_ARRAY_IDX, &((struct carbon_dot_path *)path)->err,
-                NG5_ERR_TYPEMISMATCH, NULL);
+                ARK_ERR_TYPEMISMATCH, NULL);
 
         *idx = path->nodes[pos].identifier.idx;
         return true;
 }
 
-NG5_EXPORT(const char *) carbon_dot_path_key_at(u32 pos, struct carbon_dot_path *path)
+ARK_EXPORT(const char *) carbon_dot_path_key_at(u32 pos, struct carbon_dot_path *path)
 {
         error_if_null(path)
-        error_if_and_return(pos >= NG5_ARRAY_LENGTH(path->nodes), &path->err, NG5_ERR_OUTOFBOUNDS, NULL);
-        error_if_and_return(path->nodes[pos].type != DOT_NODE_KEY_NAME, &path->err, NG5_ERR_TYPEMISMATCH, NULL);
+        error_if_and_return(pos >= ARK_ARRAY_LENGTH(path->nodes), &path->err, ARK_ERR_OUTOFBOUNDS, NULL);
+        error_if_and_return(path->nodes[pos].type != DOT_NODE_KEY_NAME, &path->err, ARK_ERR_TYPEMISMATCH, NULL);
 
         return path->nodes[pos].identifier.string;
 }
 
-NG5_EXPORT(bool) carbon_dot_path_drop(struct carbon_dot_path *path)
+ARK_EXPORT(bool) carbon_dot_path_drop(struct carbon_dot_path *path)
 {
         error_if_null(path)
         for (u32 i = 0; i < path->path_len; i++) {
@@ -276,7 +276,7 @@ NG5_EXPORT(bool) carbon_dot_path_drop(struct carbon_dot_path *path)
         return true;
 }
 
-NG5_EXPORT(bool) carbon_dot_path_to_str(struct string_builder *sb, struct carbon_dot_path *path)
+ARK_EXPORT(bool) carbon_dot_path_to_str(struct string_builder *sb, struct carbon_dot_path *path)
 {
         error_if_null(path)
         for (u32 i = 0; i < path->path_len; i++) {
@@ -306,7 +306,7 @@ NG5_EXPORT(bool) carbon_dot_path_to_str(struct string_builder *sb, struct carbon
         return true;
 }
 
-NG5_EXPORT(bool) carbon_dot_path_fprint(FILE *file, struct carbon_dot_path *path)
+ARK_EXPORT(bool) carbon_dot_path_fprint(FILE *file, struct carbon_dot_path *path)
 {
         error_if_null(file);
         error_if_null(path);
@@ -318,7 +318,7 @@ NG5_EXPORT(bool) carbon_dot_path_fprint(FILE *file, struct carbon_dot_path *path
         return true;
 }
 
-NG5_EXPORT(bool) carbon_dot_path_print(struct carbon_dot_path *path)
+ARK_EXPORT(bool) carbon_dot_path_print(struct carbon_dot_path *path)
 {
         return carbon_dot_path_fprint(stdout, path);
 }

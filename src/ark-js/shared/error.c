@@ -17,10 +17,10 @@
 
 #include <ark-js/shared/error.h>
 
-NG5_EXPORT(bool) error_init(struct err *err)
+ARK_EXPORT(bool) error_init(struct err *err)
 {
         if (err) {
-                err->code = NG5_ERR_NOERR;
+                err->code = ARK_ERR_NOERR;
                 err->details = NULL;
                 err->file = NULL;
                 err->line = 0;
@@ -28,7 +28,7 @@ NG5_EXPORT(bool) error_init(struct err *err)
         return (err != NULL);
 }
 
-NG5_EXPORT(bool) error_cpy(struct err *dst, const struct err *src)
+ARK_EXPORT(bool) error_cpy(struct err *dst, const struct err *src)
 {
         error_if_null(dst);
         error_if_null(src);
@@ -36,7 +36,7 @@ NG5_EXPORT(bool) error_cpy(struct err *dst, const struct err *src)
         return true;
 }
 
-NG5_EXPORT(bool) error_drop(struct err *err)
+ARK_EXPORT(bool) error_drop(struct err *err)
 {
         error_if_null(err);
         if (err->details) {
@@ -46,12 +46,12 @@ NG5_EXPORT(bool) error_drop(struct err *err)
         return true;
 }
 
-NG5_EXPORT(bool) error_set(struct err *err, int code, const char *file, u32 line)
+ARK_EXPORT(bool) error_set(struct err *err, int code, const char *file, u32 line)
 {
         return error_set_wdetails(err, code, file, line, NULL);
 }
 
-NG5_EXPORT(bool) error_set_wdetails(struct err *err, int code, const char *file, u32 line, const char *details)
+ARK_EXPORT(bool) error_set_wdetails(struct err *err, int code, const char *file, u32 line, const char *details)
 {
         if (err) {
                 err->code = code;
@@ -65,12 +65,12 @@ NG5_EXPORT(bool) error_set_wdetails(struct err *err, int code, const char *file,
         return (err != NULL);
 }
 
-NG5_EXPORT(bool) error_set_no_abort(struct err *err, int code, const char *file, u32 line)
+ARK_EXPORT(bool) error_set_no_abort(struct err *err, int code, const char *file, u32 line)
 {
         return error_set_wdetails_no_abort(err, code, file, line, NULL);
 }
 
-NG5_EXPORT(bool) error_set_wdetails_no_abort(struct err *err, int code, const char *file, u32 line, const char *details)
+ARK_EXPORT(bool) error_set_wdetails_no_abort(struct err *err, int code, const char *file, u32 line, const char *details)
 {
         if (err) {
                 err->code = code;
@@ -84,25 +84,25 @@ NG5_EXPORT(bool) error_set_wdetails_no_abort(struct err *err, int code, const ch
         return (err != NULL);
 }
 
-NG5_EXPORT(bool) error_str(const char **errstr, const char **file, u32 *line, bool *details, const char **detailsstr,
+ARK_EXPORT(bool) error_str(const char **errstr, const char **file, u32 *line, bool *details, const char **detailsstr,
         const struct err *err)
 {
         if (err) {
                 if (err->code >= _nerr_str) {
-                        ng5_optional_set(errstr, NG5_ERRSTR_ILLEGAL_CODE)
+                        ark_optional_set(errstr, ARK_ERRSTR_ILLEGAL_CODE)
                 } else {
-                        ng5_optional_set(errstr, _err_str[err->code])
+                        ark_optional_set(errstr, _err_str[err->code])
                 }
-                ng5_optional_set(file, err->file)
-                ng5_optional_set(line, err->line)
-                ng5_optional_set(details, err->details != NULL);
-                ng5_optional_set(detailsstr, err->details)
+                ark_optional_set(file, err->file)
+                ark_optional_set(line, err->line)
+                ark_optional_set(details, err->details != NULL);
+                ark_optional_set(detailsstr, err->details)
                 return true;
         }
         return false;
 }
 
-NG5_EXPORT(bool) error_print_to_stderr(const struct err *err)
+ARK_EXPORT(bool) error_print_to_stderr(const struct err *err)
 {
         if (err) {
                 const char *errstr;
@@ -122,7 +122,7 @@ NG5_EXPORT(bool) error_print_to_stderr(const struct err *err)
         return (err != NULL);
 }
 
-NG5_EXPORT(bool) error_print_and_abort(const struct err *err)
+ARK_EXPORT(bool) error_print_and_abort(const struct err *err)
 {
         error_print_to_stderr(err);
         abort();

@@ -31,7 +31,7 @@ bool memfile_open(struct memfile *file, struct memblock *block, enum access_mode
         return true;
 }
 
-NG5_EXPORT(bool) memfile_dup(struct memfile *dst, struct memfile *src)
+ARK_EXPORT(bool) memfile_dup(struct memfile *dst, struct memfile *src)
 {
         error_if_null(dst)
         error_if_null(src)
@@ -50,7 +50,7 @@ bool memfile_seek(struct memfile *file, offset_t pos)
                         offset_t new_size = pos + 1;
                         memblock_resize(file->memblock, new_size);
                 } else {
-                        error(&file->err, NG5_ERR_MEMSTATE)
+                        error(&file->err, ARK_ERR_MEMSTATE)
                         return false;
                 }
         }
@@ -65,7 +65,7 @@ bool memfile_rewind(struct memfile *file)
         return true;
 }
 
-NG5_EXPORT(bool) memfile_grow(struct memfile *file_in, size_t grow_by_bytes, bool zero_out)
+ARK_EXPORT(bool) memfile_grow(struct memfile *file_in, size_t grow_by_bytes, bool zero_out)
 {
         error_if_null(file_in)
         if (likely(grow_by_bytes > 0)) {
@@ -95,7 +95,7 @@ size_t memfile_size(struct memfile *file)
         }
 }
 
-NG5_EXPORT(bool) memfile_cut(struct memfile *file, size_t how_many_bytes)
+ARK_EXPORT(bool) memfile_cut(struct memfile *file, size_t how_many_bytes)
 {
         error_if_null(file);
         offset_t block_size;
@@ -104,10 +104,10 @@ NG5_EXPORT(bool) memfile_cut(struct memfile *file, size_t how_many_bytes)
         if (how_many_bytes > 0 && block_size > how_many_bytes) {
                 size_t new_block_size = block_size - how_many_bytes;
                 memblock_resize(file->memblock, new_block_size);
-                file->pos = ng5_min(file->pos, new_block_size);
+                file->pos = ark_min(file->pos, new_block_size);
                 return true;
         } else {
-                error(&file->err, NG5_ERR_ILLEGALARG);
+                error(&file->err, ARK_ERR_ILLEGALARG);
                 return false;
         }
 }
@@ -128,7 +128,7 @@ bool memfile_shrink(struct memfile *file)
                 assert(size == file->pos);
                 return status;
         } else {
-                error(&file->err, NG5_ERR_WRITEPROT)
+                error(&file->err, ARK_ERR_WRITEPROT)
                 return false;
         }
 }
@@ -151,7 +151,7 @@ bool memfile_skip(struct memfile *file, offset_t nbytes)
                 if (file->mode == READ_WRITE) {
                         memblock_resize(file->memblock, required_size * 1.7f);
                 } else {
-                        error(&file->err, NG5_ERR_WRITEPROT);
+                        error(&file->err, ARK_ERR_WRITEPROT);
                         return false;
                 }
         }
@@ -165,7 +165,7 @@ const char *memfile_peek(struct memfile *file, offset_t nbytes)
         offset_t file_size;
         memblock_size(&file_size, file->memblock);
         if (unlikely(file->pos + nbytes > file_size)) {
-                error(&file->err, NG5_ERR_READOUTOFBOUNDS);
+                error(&file->err, ARK_ERR_READOUTOFBOUNDS);
                 return NULL;
         } else {
                 const char *result = memblock_raw_data(file->memblock) + file->pos;
@@ -193,12 +193,12 @@ bool memfile_write(struct memfile *file, const void *data, offset_t nbytes)
                 }
                 return true;
         } else {
-                error(&file->err, NG5_ERR_WRITEPROT);
+                error(&file->err, ARK_ERR_WRITEPROT);
                 return false;
         }
 }
 
-NG5_EXPORT(bool) memfile_write_zero(struct memfile *file, size_t how_many)
+ARK_EXPORT(bool) memfile_write_zero(struct memfile *file, size_t how_many)
 {
         error_if_null(file);
         error_if_null(how_many);
@@ -222,7 +222,7 @@ bool memfile_begin_bit_mode(struct memfile *file)
                 memfile_write(file, &empty, sizeof(char));
                 memfile_seek(file, offset);
         } else {
-                error(&file->err, NG5_ERR_WRITEPROT);
+                error(&file->err, ARK_ERR_WRITEPROT);
                 return false;
         }
 
@@ -241,9 +241,9 @@ bool memfile_write_bit(struct memfile *file, bool flag)
                         char byte = *memfile_read(file, sizeof(char));
                         char mask = 1 << file->current_write_bit;
                         if (flag) {
-                                ng5_set_bits(byte, mask);
+                                ark_set_bits(byte, mask);
                         } else {
-                                ng5_unset_bits(byte, mask);
+                                ark_unset_bits(byte, mask);
                         }
                         memfile_seek(file, offset);
                         memfile_write(file, &byte, sizeof(char));
@@ -263,7 +263,7 @@ bool memfile_write_bit(struct memfile *file, bool flag)
                 }
                 return true;
         } else {
-                error(&file->err, NG5_ERR_NOBITMODE);
+                error(&file->err, ARK_ERR_NOBITMODE);
                 return false;
         }
 }
@@ -293,26 +293,26 @@ bool memfile_read_bit(struct memfile *file)
                         return memfile_read_bit(file);
                 }
         } else {
-                error(&file->err, NG5_ERR_NOBITMODE);
+                error(&file->err, ARK_ERR_NOBITMODE);
                 return false;
         }
 }
 
-NG5_EXPORT(bool) memfile_save_position(struct memfile *file)
+ARK_EXPORT(bool) memfile_save_position(struct memfile *file)
 {
         error_if_null(file);
         offset_t pos = memfile_tell(file);
-        if (likely(file->saved_pos_ptr < (i8) (NG5_ARRAY_LENGTH(file->saved_pos)))) {
+        if (likely(file->saved_pos_ptr < (i8) (ARK_ARRAY_LENGTH(file->saved_pos)))) {
                 file->saved_pos[file->saved_pos_ptr++] = pos;
                 return true;
         } else {
-                error(&file->err, NG5_ERR_STACK_OVERFLOW)
+                error(&file->err, ARK_ERR_STACK_OVERFLOW)
                 return false;
         }
 
 }
 
-NG5_EXPORT(bool) memfile_restore_position(struct memfile *file)
+ARK_EXPORT(bool) memfile_restore_position(struct memfile *file)
 {
         error_if_null(file);
         if (likely(file->saved_pos_ptr >= 0)) {
@@ -320,12 +320,12 @@ NG5_EXPORT(bool) memfile_restore_position(struct memfile *file)
                 memfile_seek(file, pos);
                 return true;
         } else {
-                error(&file->err, NG5_ERR_STACK_UNDERFLOW)
+                error(&file->err, ARK_ERR_STACK_UNDERFLOW)
                 return false;
         }
 }
 
-NG5_EXPORT(bool) memfile_ensure_space(struct memfile *memfile, u64 nbytes)
+ARK_EXPORT(bool) memfile_ensure_space(struct memfile *memfile, u64 nbytes)
 {
         error_if_null(memfile)
 
@@ -353,23 +353,23 @@ NG5_EXPORT(bool) memfile_ensure_space(struct memfile *memfile, u64 nbytes)
         return true;
 }
 
-NG5_EXPORT(u64) memfile_read_varuint(u8 *nbytes, struct memfile *memfile)
+ARK_EXPORT(u64) memfile_read_varuint(u8 *nbytes, struct memfile *memfile)
 {
         u8 nbytes_read;
         u64 result = varuint_read(&nbytes_read, (varuint_t) memfile_peek(memfile, sizeof(char)));
         memfile_skip(memfile, nbytes_read);
-        ng5_optional_set(nbytes, nbytes_read);
+        ark_optional_set(nbytes, nbytes_read);
         return result;
 }
 
-NG5_EXPORT(bool) memfile_skip_varuint(struct memfile *memfile)
+ARK_EXPORT(bool) memfile_skip_varuint(struct memfile *memfile)
 {
         error_if_null(memfile)
         memfile_read_varuint(NULL, memfile);
         return true;
 }
 
-NG5_EXPORT(u64) memfile_peek_varuint(u8 *nbytes, struct memfile *memfile)
+ARK_EXPORT(u64) memfile_peek_varuint(u8 *nbytes, struct memfile *memfile)
 {
         memfile_save_position(memfile);
         u64 result = memfile_read_varuint(nbytes, memfile);
@@ -377,7 +377,7 @@ NG5_EXPORT(u64) memfile_peek_varuint(u8 *nbytes, struct memfile *memfile)
         return result;
 }
 
-NG5_EXPORT(u64) memfile_write_varuint(struct memfile *memfile, u64 value)
+ARK_EXPORT(u64) memfile_write_varuint(struct memfile *memfile, u64 value)
 {
         u8 required_blocks = varuint_required_blocks(value);
         memfile_ensure_space(memfile, required_blocks);
@@ -387,7 +387,7 @@ NG5_EXPORT(u64) memfile_write_varuint(struct memfile *memfile, u64 value)
         return required_blocks;
 }
 
-NG5_EXPORT(bool) memfile_update_varuint(struct memfile *memfile, u64 value)
+ARK_EXPORT(bool) memfile_update_varuint(struct memfile *memfile, u64 value)
 {
         error_if_null(memfile);
 
@@ -411,20 +411,20 @@ NG5_EXPORT(bool) memfile_update_varuint(struct memfile *memfile, u64 value)
         return true;
 }
 
-NG5_EXPORT(bool) memfile_seek_to_end(struct memfile *file)
+ARK_EXPORT(bool) memfile_seek_to_end(struct memfile *file)
 {
         error_if_null(file)
         size_t size = memblock_last_used_byte(file->memblock);
         return memfile_seek(file, size);
 }
 
-NG5_EXPORT(bool) memfile_move_right(struct memfile *file, size_t nbytes)
+ARK_EXPORT(bool) memfile_move_right(struct memfile *file, size_t nbytes)
 {
         error_if_null(file);
         return memblock_move_right(file->memblock, file->pos, nbytes);
 }
 
-NG5_EXPORT(bool) memfile_move_left(struct memfile *file, size_t nbytes_from_here)
+ARK_EXPORT(bool) memfile_move_left(struct memfile *file, size_t nbytes_from_here)
 {
         error_if_null(file);
         return memblock_move_left(file->memblock, file->pos, nbytes_from_here);
@@ -438,7 +438,7 @@ bool memfile_end_bit_mode(size_t *num_bytes_written, struct memfile *file)
                 memfile_skip(file, 1);
                 file->bytes_completed++;
         }
-        ng5_optional_set(num_bytes_written, file->bytes_completed);
+        ark_optional_set(num_bytes_written, file->bytes_completed);
         file->current_write_bit = file->bytes_completed = 0;
         return true;
 }
@@ -453,7 +453,7 @@ void *memfile_current_pos(struct memfile *file, offset_t nbytes)
                         if (file->mode == READ_WRITE) {
                                 memblock_resize(file->memblock, required_size * 1.7f);
                         } else {
-                                error(&file->err, NG5_ERR_WRITEPROT);
+                                error(&file->err, ARK_ERR_WRITEPROT);
                                 return NULL;
                         }
                 }
@@ -464,7 +464,7 @@ void *memfile_current_pos(struct memfile *file, offset_t nbytes)
         }
 }
 
-NG5_EXPORT(bool) memfile_hexdump(struct string_builder *sb, struct memfile *file)
+ARK_EXPORT(bool) memfile_hexdump(struct string_builder *sb, struct memfile *file)
 {
         error_if_null(sb);
         error_if_null(file);
@@ -474,7 +474,7 @@ NG5_EXPORT(bool) memfile_hexdump(struct string_builder *sb, struct memfile *file
         return true;
 }
 
-NG5_EXPORT(bool) memfile_hexdump_printf(FILE *file, struct memfile *memfile)
+ARK_EXPORT(bool) memfile_hexdump_printf(FILE *file, struct memfile *memfile)
 {
         error_if_null(file)
         error_if_null(memfile)
@@ -484,7 +484,7 @@ NG5_EXPORT(bool) memfile_hexdump_printf(FILE *file, struct memfile *memfile)
         return true;
 }
 
-NG5_EXPORT(bool) memfile_hexdump_print(struct memfile *memfile)
+ARK_EXPORT(bool) memfile_hexdump_print(struct memfile *memfile)
 {
         return memfile_hexdump_printf(stdout, memfile);
 }

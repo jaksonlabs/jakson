@@ -26,7 +26,7 @@
 #include <ark-js/carbon/carbon-dot.h>
 #include <ark-js/carbon/carbon-path.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
 struct carbon_find
 {
@@ -54,36 +54,36 @@ struct carbon_find
         } value;
 };
 
-NG5_DEFINE_ERROR_GETTER(carbon_find)
+ARK_DEFINE_ERROR_GETTER(carbon_find)
 
-NG5_EXPORT(bool) carbon_find_open(struct carbon_find *out, const char *dot_path, struct carbon *doc);
+ARK_EXPORT(bool) carbon_find_open(struct carbon_find *out, const char *dot_path, struct carbon *doc);
 
-NG5_EXPORT(bool) carbon_find_close(struct carbon_find *find);
+ARK_EXPORT(bool) carbon_find_close(struct carbon_find *find);
 
-NG5_EXPORT(bool) carbon_find_create(struct carbon_find *find, struct carbon_dot_path *path, struct carbon *doc);
+ARK_EXPORT(bool) carbon_find_create(struct carbon_find *find, struct carbon_dot_path *path, struct carbon *doc);
 
-NG5_EXPORT(bool) carbon_find_has_result(struct carbon_find *find);
+ARK_EXPORT(bool) carbon_find_has_result(struct carbon_find *find);
 
-NG5_EXPORT(bool) carbon_find_result_type(enum carbon_field_type *type, struct carbon_find *find);
+ARK_EXPORT(bool) carbon_find_result_type(enum carbon_field_type *type, struct carbon_find *find);
 
-NG5_EXPORT(struct carbon_array_it *) carbon_find_result_array(struct carbon_find *find);
+ARK_EXPORT(struct carbon_array_it *) carbon_find_result_array(struct carbon_find *find);
 
-NG5_EXPORT(struct carbon_column_it *) carbon_find_result_column(struct carbon_find *find);
+ARK_EXPORT(struct carbon_column_it *) carbon_find_result_column(struct carbon_find *find);
 
-NG5_EXPORT(bool) carbon_find_result_boolean(bool *out, struct carbon_find *find);
+ARK_EXPORT(bool) carbon_find_result_boolean(bool *out, struct carbon_find *find);
 
-NG5_EXPORT(bool) carbon_find_result_unsigned(u64 *out, struct carbon_find *find);
+ARK_EXPORT(bool) carbon_find_result_unsigned(u64 *out, struct carbon_find *find);
 
-NG5_EXPORT(bool) carbon_find_result_signed(i64 *out, struct carbon_find *find);
+ARK_EXPORT(bool) carbon_find_result_signed(i64 *out, struct carbon_find *find);
 
-NG5_EXPORT(bool) carbon_find_result_float(float *out, struct carbon_find *find);
+ARK_EXPORT(bool) carbon_find_result_float(float *out, struct carbon_find *find);
 
-NG5_EXPORT(const char *) carbon_find_result_string(u64 *str_len, struct carbon_find *find);
+ARK_EXPORT(const char *) carbon_find_result_string(u64 *str_len, struct carbon_find *find);
 
-NG5_EXPORT(struct carbon_binary *) carbon_find_result_binary(struct carbon_find *find);
+ARK_EXPORT(struct carbon_binary *) carbon_find_result_binary(struct carbon_find *find);
 
-NG5_EXPORT(bool) carbon_find_drop(struct carbon_find *find);
+ARK_EXPORT(bool) carbon_find_drop(struct carbon_find *find);
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

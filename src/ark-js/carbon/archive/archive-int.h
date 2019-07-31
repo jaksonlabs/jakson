@@ -15,8 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_INTERNALS_ARCHIVE_H
-#define NG5_INTERNALS_ARCHIVE_H
+#ifndef ARK_INTERNALS_ARCHIVE_H
+#define ARK_INTERNALS_ARCHIVE_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/mem/file.h>
@@ -24,7 +24,7 @@
 #include <ark-js/carbon/oid/oid.h>
 #include <ark-js/carbon/coding/pack.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
 
 struct __attribute__((packed)) archive_header {
@@ -375,6 +375,6 @@ field_e int_get_value_type_of_char(char c);
 
 field_e int_marker_to_field_type(char symbol);
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

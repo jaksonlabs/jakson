@@ -35,7 +35,7 @@ struct sid_to_offset {
 #define OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(num_pairs, obj, bit_flag_name, offset_name)                                \
 {                                                                                                                      \
     if (!obj) {                                                                                                        \
-        print_error_and_die(NG5_ERR_NULLPTR)                                                                 \
+        print_error_and_die(ARK_ERR_NULLPTR)                                                                 \
     }                                                                                                                  \
                                                                                                                        \
     if (obj->flags.bits.bit_flag_name) {                                                                               \
@@ -44,15 +44,15 @@ struct sid_to_offset {
         struct fixed_prop prop;                                                                                      \
         int_embedded_fixed_props_read(&prop, &obj->file);                                                       \
         int_reset_cabin_object_mem_file(obj);                                                                   \
-        ng5_optional_set(num_pairs, prop.header->num_entries);                                                      \
+        ark_optional_set(num_pairs, prop.header->num_entries);                                                      \
         return prop.keys;                                                                                              \
     } else {                                                                                                           \
-        ng5_optional_set(num_pairs, 0);                                                                             \
+        ark_optional_set(num_pairs, 0);                                                                             \
         return NULL;                                                                                                   \
     }                                                                                                                  \
 }
 
-NG5_EXPORT(bool) query_create(struct archive_query *query, struct archive *archive)
+ARK_EXPORT(bool) query_create(struct archive_query *query, struct archive *archive)
 {
         error_if_null(query)
         error_if_null(archive)
@@ -62,13 +62,13 @@ NG5_EXPORT(bool) query_create(struct archive_query *query, struct archive *archi
         return query->context != NULL;
 }
 
-NG5_EXPORT(bool) query_drop(struct archive_query *query)
+ARK_EXPORT(bool) query_drop(struct archive_query *query)
 {
         error_if_null(query)
         return io_context_drop(query->context);
 }
 
-NG5_EXPORT(bool) query_scan_strids(struct strid_iter *it, struct archive_query *query)
+ARK_EXPORT(bool) query_scan_strids(struct strid_iter *it, struct archive_query *query)
 {
         error_if_null(it)
         error_if_null(query)
@@ -79,7 +79,7 @@ static bool index_string_id_to_offset_open_file(struct sid_to_offset *index, str
 {
         index->disk_file = fopen(file, "r");
         if (!index->disk_file) {
-                error(err, NG5_ERR_FOPEN_FAILED)
+                error(err, ARK_ERR_FOPEN_FAILED)
                 return false;
         } else {
                 fseek(index->disk_file, 0, SEEK_END);
@@ -89,7 +89,7 @@ static bool index_string_id_to_offset_open_file(struct sid_to_offset *index, str
         }
 }
 
-NG5_EXPORT(bool) query_create_index_string_id_to_offset(struct sid_to_offset **index, struct archive_query *query)
+ARK_EXPORT(bool) query_create_index_string_id_to_offset(struct sid_to_offset **index, struct archive_query *query)
 {
         error_if_null(index)
         error_if_null(query)
@@ -128,13 +128,13 @@ NG5_EXPORT(bool) query_create_index_string_id_to_offset(struct sid_to_offset **i
                 strid_iter_close(&strid_iter);
                 return true;
         } else {
-                error(&query->err, NG5_ERR_SCAN_FAILED);
+                error(&query->err, ARK_ERR_SCAN_FAILED);
                 return false;
         }
 
 }
 
-NG5_EXPORT(void) query_drop_index_string_id_to_offset(struct sid_to_offset *index)
+ARK_EXPORT(void) query_drop_index_string_id_to_offset(struct sid_to_offset *index)
 {
         if (index) {
                 hashtable_drop(&index->mapping);
@@ -143,7 +143,7 @@ NG5_EXPORT(void) query_drop_index_string_id_to_offset(struct sid_to_offset *inde
         }
 }
 
-NG5_EXPORT(bool) query_index_id_to_offset_serialize(FILE *file, struct err *err, struct sid_to_offset *index)
+ARK_EXPORT(bool) query_index_id_to_offset_serialize(FILE *file, struct err *err, struct sid_to_offset *index)
 {
         unused(file);
         unused(err);
@@ -151,7 +151,7 @@ NG5_EXPORT(bool) query_index_id_to_offset_serialize(FILE *file, struct err *err,
         return hashtable_serialize(file, &index->mapping);
 }
 
-NG5_EXPORT(bool) query_index_id_to_offset_deserialize(struct sid_to_offset **index, struct err *err,
+ARK_EXPORT(bool) query_index_id_to_offset_deserialize(struct sid_to_offset **index, struct err *err,
         const char *file_path, offset_t offset)
 {
         error_if_null(index)
@@ -161,7 +161,7 @@ NG5_EXPORT(bool) query_index_id_to_offset_deserialize(struct sid_to_offset **ind
 
         struct sid_to_offset *result = malloc(sizeof(struct sid_to_offset));
         if (!result) {
-                error(err, NG5_ERR_MALLOCERR);
+                error(err, ARK_ERR_MALLOCERR);
                 return false;
         }
 
@@ -171,21 +171,21 @@ NG5_EXPORT(bool) query_index_id_to_offset_deserialize(struct sid_to_offset **ind
 
         FILE *index_reader_file = fopen(file_path, "r");
         if (!index_reader_file) {
-                error(err, NG5_ERR_FOPEN_FAILED)
+                error(err, ARK_ERR_FOPEN_FAILED)
                 return false;
         } else {
                 fseek(index_reader_file, 0, SEEK_END);
                 offset_t file_size = ftell(index_reader_file);
 
                 if (offset >= file_size) {
-                        error(err, NG5_ERR_INTERNALERR)
+                        error(err, ARK_ERR_INTERNALERR)
                         return false;
                 }
 
                 fseek(index_reader_file, offset, SEEK_SET);
 
                 if (!hashtable_deserialize(&result->mapping, err, index_reader_file)) {
-                        error(err, NG5_ERR_HASTABLE_DESERIALERR);
+                        error(err, ARK_ERR_HASTABLE_DESERIALERR);
                         fclose(index_reader_file);
                         *index = NULL;
                         return false;
@@ -242,8 +242,8 @@ static char *fetch_string_by_id_via_scan(struct archive_query *query, field_sid_
                                                         free(result);
                                                 }
                                                 error(&query->err,
-                                                        !decode_result ? NG5_ERR_DECOMPRESSFAILED
-                                                                       : NG5_ERR_ITERATORNOTCLOSED);
+                                                        !decode_result ? ARK_ERR_DECOMPRESSFAILED
+                                                                       : ARK_ERR_ITERATORNOTCLOSED);
                                                 return NULL;
                                         } else {
                                                 return result;
@@ -252,10 +252,10 @@ static char *fetch_string_by_id_via_scan(struct archive_query *query, field_sid_
                         }
                 }
                 strid_iter_close(&strid_iter);
-                error(&query->err, NG5_ERR_NOTFOUND);
+                error(&query->err, ARK_ERR_NOTFOUND);
                 return NULL;
         } else {
-                error(&query->err, NG5_ERR_SCAN_FAILED);
+                error(&query->err, ARK_ERR_SCAN_FAILED);
                 return NULL;
         }
 }
@@ -275,21 +275,21 @@ static char *fetch_string_by_id_via_index(struct archive_query *query, struct si
                         if (decode_result) {
                                 return result;
                         } else {
-                                error(&query->err, NG5_ERR_DECOMPRESSFAILED);
+                                error(&query->err, ARK_ERR_DECOMPRESSFAILED);
                                 return NULL;
                         }
 
                 } else {
-                        error(&query->err, NG5_ERR_INDEXCORRUPTED_OFFSET);
+                        error(&query->err, ARK_ERR_INDEXCORRUPTED_OFFSET);
                         return NULL;
                 }
         } else {
-                error(&query->err, NG5_ERR_NOTFOUND);
+                error(&query->err, ARK_ERR_NOTFOUND);
                 return NULL;
         }
 }
 
-NG5_EXPORT(char *)query_fetch_string_by_id(struct archive_query *query, field_sid_t id)
+ARK_EXPORT(char *)query_fetch_string_by_id(struct archive_query *query, field_sid_t id)
 {
         assert(query);
 
@@ -302,7 +302,7 @@ NG5_EXPORT(char *)query_fetch_string_by_id(struct archive_query *query, field_si
         }
 }
 
-NG5_EXPORT(char *)query_fetch_string_by_id_nocache(struct archive_query *query, field_sid_t id)
+ARK_EXPORT(char *)query_fetch_string_by_id_nocache(struct archive_query *query, field_sid_t id)
 {
         bool has_index;
         archive_has_query_index_string_id_to_offset(&has_index, query->archive);
@@ -313,7 +313,7 @@ NG5_EXPORT(char *)query_fetch_string_by_id_nocache(struct archive_query *query, 
         }
 }
 
-NG5_EXPORT(char **)query_fetch_strings_by_offset(struct archive_query *query, offset_t *offs, u32 *strlens,
+ARK_EXPORT(char **)query_fetch_strings_by_offset(struct archive_query *query, offset_t *offs, u32 *strlens,
         size_t num_offs)
 {
         assert(query);
@@ -328,7 +328,7 @@ NG5_EXPORT(char **)query_fetch_strings_by_offset(struct archive_query *query, of
 
         char **result = malloc(num_offs * sizeof(char *));
         if (!result) {
-                error(&query->err, NG5_ERR_MALLOCERR);
+                error(&query->err, ARK_ERR_MALLOCERR);
                 return NULL;
         }
         for (size_t i = 0; i < num_offs; i++) {
@@ -343,7 +343,7 @@ NG5_EXPORT(char **)query_fetch_strings_by_offset(struct archive_query *query, of
         }
 
         if (!result) {
-                error(io_context_get_error(query->context), NG5_ERR_MALLOCERR);
+                error(io_context_get_error(query->context), ARK_ERR_MALLOCERR);
                 return NULL;
         } else {
                 if (!(file = io_context_lock_and_access(query->context))) {
@@ -374,7 +374,7 @@ NG5_EXPORT(char **)query_fetch_strings_by_offset(struct archive_query *query, of
         return NULL;
 }
 
-NG5_EXPORT(field_sid_t *)query_find_ids(size_t *num_found, struct archive_query *query,
+ARK_EXPORT(field_sid_t *)query_find_ids(size_t *num_found, struct archive_query *query,
         const struct string_pred_t *pred, void *capture, i64 limit)
 {
         if (unlikely(string_pred_validate(&query->err, pred) == false)) {
@@ -382,7 +382,7 @@ NG5_EXPORT(field_sid_t *)query_find_ids(size_t *num_found, struct archive_query 
         }
         i64 pred_limit;
         string_pred_get_limit(&pred_limit, pred);
-        pred_limit = pred_limit < 0 ? limit : ng5_min(pred_limit, limit);
+        pred_limit = pred_limit < 0 ? limit : ark_min(pred_limit, limit);
 
         struct strid_iter it;
         struct strid_info *info = NULL;
@@ -406,30 +406,30 @@ NG5_EXPORT(field_sid_t *)query_find_ids(size_t *num_found, struct archive_query 
         }
 
         if (unlikely(!num_found || !query || !pred)) {
-                error(&query->err, NG5_ERR_NULLPTR);
+                error(&query->err, ARK_ERR_NULLPTR);
                 return NULL;
         }
 
         if (unlikely((step_ids = malloc(str_cap * sizeof(field_sid_t))) == NULL)) {
-                error(&query->err, NG5_ERR_MALLOCERR);
+                error(&query->err, ARK_ERR_MALLOCERR);
                 return NULL;
         }
 
         if (unlikely((str_offs = malloc(str_cap * sizeof(offset_t))) == NULL)) {
-                error(&query->err, NG5_ERR_MALLOCERR);
+                error(&query->err, ARK_ERR_MALLOCERR);
                 goto cleanup_result_and_error;
                 return NULL;
         }
 
         if (unlikely((str_lens = malloc(str_cap * sizeof(u32))) == NULL)) {
-                error(&query->err, NG5_ERR_MALLOCERR);
+                error(&query->err, ARK_ERR_MALLOCERR);
                 free(str_offs);
                 goto cleanup_result_and_error;
                 return NULL;
         }
 
         if (unlikely((idxs_matching = malloc(str_cap * sizeof(size_t))) == NULL)) {
-                error(&query->err, NG5_ERR_MALLOCERR);
+                error(&query->err, ARK_ERR_MALLOCERR);
                 free(str_offs);
                 free(str_lens);
                 goto cleanup_result_and_error;
@@ -444,7 +444,7 @@ NG5_EXPORT(field_sid_t *)query_find_ids(size_t *num_found, struct archive_query 
         }
 
         if (unlikely((result_ids = malloc(result_cap * sizeof(field_sid_t))) == NULL)) {
-                error(&query->err, NG5_ERR_MALLOCERR);
+                error(&query->err, ARK_ERR_MALLOCERR);
                 free(str_offs);
                 free(str_lens);
                 free(idxs_matching);
@@ -486,7 +486,7 @@ NG5_EXPORT(field_sid_t *)query_find_ids(size_t *num_found, struct archive_query 
 
                 if (unlikely(
                         string_pred_eval(pred, idxs_matching, &num_matching, strings, step_len, capture) == false)) {
-                        error(&query->err, NG5_ERR_PREDEVAL_FAILED);
+                        error(&query->err, ARK_ERR_PREDEVAL_FAILED);
                         strid_iter_close(&it);
                         goto cleanup_intermediate;
                 }
@@ -525,7 +525,7 @@ NG5_EXPORT(field_sid_t *)query_find_ids(size_t *num_found, struct archive_query 
         return result_ids;
 
         realloc_error:
-        error(&query->err, NG5_ERR_REALLOCERR);
+        error(&query->err, ARK_ERR_REALLOCERR);
 
         cleanup_intermediate:
         free(str_offs);

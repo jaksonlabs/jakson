@@ -24,7 +24,7 @@
 
 #define extract_data(x, byte_shift)     (MASK_BLOCK_DATA & (MASK_LAST_BYTE & (x >> byte_shift)))
 
-NG5_EXPORT(u8) varuint_write(varuint_t dst, u64 value)
+ARK_EXPORT(u8) varuint_write(varuint_t dst, u64 value)
 {
         if (likely(dst != NULL)) {
                 u8 num_bytes = 0;
@@ -43,7 +43,7 @@ NG5_EXPORT(u8) varuint_write(varuint_t dst, u64 value)
         }
 }
 
-NG5_EXPORT(u64) varuint_read(u8 *nbytes, varuint_t src)
+ARK_EXPORT(u64) varuint_read(u8 *nbytes, varuint_t src)
 {
         u64 value = 0;
         bool has_next = true;
@@ -55,6 +55,6 @@ NG5_EXPORT(u64) varuint_read(u8 *nbytes, varuint_t src)
         { }
 
 
-        ng5_optional_set(nbytes, ndecoded);
+        ark_optional_set(nbytes, ndecoded);
         return value;
 }

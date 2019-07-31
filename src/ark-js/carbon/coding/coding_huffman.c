@@ -24,7 +24,7 @@
 
 #define  MARKER_SYMBOL_HUFFMAN_DIC_ENTRY   'd'
 
-NG5_EXPORT(bool) pack_huffman_init(struct packer *self)
+ARK_EXPORT(bool) pack_huffman_init(struct packer *self)
 {
         self->extra = malloc(sizeof(struct coding_huffman));
         if (self->extra != NULL) {
@@ -36,9 +36,9 @@ NG5_EXPORT(bool) pack_huffman_init(struct packer *self)
         }
 }
 
-NG5_EXPORT(bool) pack_coding_huffman_cpy(const struct packer *self, struct packer *dst)
+ARK_EXPORT(bool) pack_coding_huffman_cpy(const struct packer *self, struct packer *dst)
 {
-        ng5_check_tag(self->tag, PACK_HUFFMAN);
+        ark_check_tag(self->tag, PACK_HUFFMAN);
 
         *dst = *self;
         dst->extra = malloc(sizeof(struct coding_huffman));
@@ -51,9 +51,9 @@ NG5_EXPORT(bool) pack_coding_huffman_cpy(const struct packer *self, struct packe
         }
 }
 
-NG5_EXPORT(bool) pack_coding_huffman_drop(struct packer *self)
+ARK_EXPORT(bool) pack_coding_huffman_drop(struct packer *self)
 {
-        ng5_check_tag(self->tag, PACK_HUFFMAN);
+        ark_check_tag(self->tag, PACK_HUFFMAN);
 
         struct coding_huffman *encoder = (struct coding_huffman *) self->extra;
         coding_huffman_drop(encoder);
@@ -66,7 +66,7 @@ bool huffman_dump_dictionary(FILE *file, struct memfile *memfile)
         struct pack_huffman_info entry_info;
         offset_t offset;
 
-        while ((*NG5_MEMFILE_PEEK(memfile, char)) == MARKER_SYMBOL_HUFFMAN_DIC_ENTRY) {
+        while ((*ARK_MEMFILE_PEEK(memfile, char)) == MARKER_SYMBOL_HUFFMAN_DIC_ENTRY) {
                 memfile_get_offset(&offset, memfile);
                 coding_huffman_read_entry(&entry_info, memfile, MARKER_SYMBOL_HUFFMAN_DIC_ENTRY);
 
@@ -111,10 +111,10 @@ bool huffman_dump_string_table_entry(FILE *file, struct memfile *memfile)
         return true;
 }
 
-NG5_EXPORT(bool) pack_huffman_write_extra(struct packer *self, struct memfile *dst,
+ARK_EXPORT(bool) pack_huffman_write_extra(struct packer *self, struct memfile *dst,
         const struct vector ofType (const char *) *strings)
 {
-        ng5_check_tag(self->tag, PACK_HUFFMAN);
+        ark_check_tag(self->tag, PACK_HUFFMAN);
 
         struct coding_huffman *encoder = (struct coding_huffman *) self->extra;
 
@@ -124,9 +124,9 @@ NG5_EXPORT(bool) pack_huffman_write_extra(struct packer *self, struct memfile *d
         return true;
 }
 
-NG5_EXPORT(bool) pack_huffman_read_extra(struct packer *self, FILE *src, size_t nbytes)
+ARK_EXPORT(bool) pack_huffman_read_extra(struct packer *self, FILE *src, size_t nbytes)
 {
-        ng5_check_tag(self->tag, PACK_HUFFMAN);
+        ark_check_tag(self->tag, PACK_HUFFMAN);
 
         unused(self);
         unused(src);
@@ -136,7 +136,7 @@ NG5_EXPORT(bool) pack_huffman_read_extra(struct packer *self, FILE *src, size_t 
         return false;
 }
 
-NG5_EXPORT(bool) pack_huffman_print_extra(struct packer *self, FILE *file, struct memfile *src)
+ARK_EXPORT(bool) pack_huffman_print_extra(struct packer *self, FILE *file, struct memfile *src)
 {
         unused(self);
 
@@ -145,7 +145,7 @@ NG5_EXPORT(bool) pack_huffman_print_extra(struct packer *self, FILE *file, struc
         return true;
 }
 
-NG5_EXPORT(bool) pack_huffman_print_encoded(struct packer *self, FILE *file, struct memfile *src,
+ARK_EXPORT(bool) pack_huffman_print_encoded(struct packer *self, FILE *file, struct memfile *src,
         u32 decompressed_strlen)
 {
         unused(self);
@@ -160,7 +160,7 @@ NG5_EXPORT(bool) pack_huffman_print_encoded(struct packer *self, FILE *file, str
 
 bool pack_huffman_encode_string(struct packer *self, struct memfile *dst, struct err *err, const char *string)
 {
-        ng5_check_tag(self->tag, PACK_HUFFMAN);
+        ark_check_tag(self->tag, PACK_HUFFMAN);
 
         struct coding_huffman *encoder = (struct coding_huffman *) self->extra;
         bool status = coding_huffman_encode(dst, encoder, string);
@@ -169,7 +169,7 @@ bool pack_huffman_encode_string(struct packer *self, struct memfile *dst, struct
         return status;
 }
 
-NG5_EXPORT(bool) pack_huffman_decode_string(struct packer *self, char *dst, size_t strlen, FILE *src)
+ARK_EXPORT(bool) pack_huffman_decode_string(struct packer *self, char *dst, size_t strlen, FILE *src)
 {
         unused(self);
         unused(dst);

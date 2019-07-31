@@ -15,8 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_ARCHIVE_COMPR_H
-#define NG5_ARCHIVE_COMPR_H
+#ifndef ARK_ARCHIVE_COMPR_H
+#define ARK_ARCHIVE_COMPR_H
 
 #include <ark-js/carbon/coding/pack_none.h>
 #include <ark-js/carbon/coding/huffman.h>
@@ -24,7 +24,7 @@
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/types.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
 /**
  * Unique tag identifying a specific implementation for compressing/decompressing string in a CARBON archives
@@ -225,32 +225,32 @@ static struct {
 
 #pragma GCC diagnostic pop
 
-NG5_EXPORT(bool) pack_by_type(struct err *err, struct packer *strategy, enum packer_type type);
+ARK_EXPORT(bool) pack_by_type(struct err *err, struct packer *strategy, enum packer_type type);
 
-NG5_EXPORT(u8) pack_flagbit_by_type(enum packer_type type);
+ARK_EXPORT(u8) pack_flagbit_by_type(enum packer_type type);
 
-NG5_EXPORT(bool) pack_by_flags(struct packer *strategy, u8 flags);
+ARK_EXPORT(bool) pack_by_flags(struct packer *strategy, u8 flags);
 
-NG5_EXPORT(bool) pack_by_name(enum packer_type *type, const char *name);
+ARK_EXPORT(bool) pack_by_name(enum packer_type *type, const char *name);
 
-NG5_EXPORT(bool) pack_cpy(struct err *err, struct packer *dst, const struct packer *src);
+ARK_EXPORT(bool) pack_cpy(struct err *err, struct packer *dst, const struct packer *src);
 
-NG5_EXPORT(bool) pack_drop(struct err *err, struct packer *self);
+ARK_EXPORT(bool) pack_drop(struct err *err, struct packer *self);
 
-NG5_EXPORT(bool) pack_write_extra(struct err *err, struct packer *self, struct memfile *dst,
+ARK_EXPORT(bool) pack_write_extra(struct err *err, struct packer *self, struct memfile *dst,
         const struct vector ofType (const char *) *strings);
 
-NG5_EXPORT(bool) pack_read_extra(struct err *err, struct packer *self, FILE *src, size_t nbytes);
+ARK_EXPORT(bool) pack_read_extra(struct err *err, struct packer *self, FILE *src, size_t nbytes);
 
-NG5_EXPORT(bool) pack_encode(struct err *err, struct packer *self, struct memfile *dst, const char *string);
+ARK_EXPORT(bool) pack_encode(struct err *err, struct packer *self, struct memfile *dst, const char *string);
 
-NG5_EXPORT(bool) pack_decode(struct err *err, struct packer *self, char *dst, size_t strlen, FILE *src);
+ARK_EXPORT(bool) pack_decode(struct err *err, struct packer *self, char *dst, size_t strlen, FILE *src);
 
-NG5_EXPORT(bool) pack_print_extra(struct err *err, struct packer *self, FILE *file, struct memfile *src);
+ARK_EXPORT(bool) pack_print_extra(struct err *err, struct packer *self, FILE *file, struct memfile *src);
 
-NG5_EXPORT(bool) pack_print_encoded(struct err *err, struct packer *self, FILE *file, struct memfile *src,
+ARK_EXPORT(bool) pack_print_encoded(struct err *err, struct packer *self, FILE *file, struct memfile *src,
         u32 decompressed_strlen);
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

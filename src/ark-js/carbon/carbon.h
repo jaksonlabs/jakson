@@ -67,7 +67,7 @@
 #include <ark-js/carbon/string-pred/pred-equals.h>
 #include <ark-js/shared/stdx/varuint.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
 struct carbon; /* forwarded */
 struct carbon_array_it; /* forwarded from carbon-array-it.h */
@@ -198,8 +198,8 @@ enum carbon_primary_key_type {
 #define carbon_MARKER_KEY_IKEY '-'
 #define carbon_MARKER_KEY_SKEY '!'
 
-NG5_DEFINE_ERROR_GETTER(carbon);
-NG5_DEFINE_ERROR_GETTER(carbon_new);
+ARK_DEFINE_ERROR_GETTER(carbon);
+ARK_DEFINE_ERROR_GETTER(carbon_new);
 
 #define carbon_KEEP              0x0
 #define carbon_SHRINK            0x1
@@ -234,58 +234,58 @@ NG5_DEFINE_ERROR_GETTER(carbon_new);
  *      The document will have the smallest memory footprint possible.</li>
  * </ul>
  */
-NG5_EXPORT(struct carbon_insert *) carbon_create_begin(struct carbon_new *context, struct carbon *doc,
+ARK_EXPORT(struct carbon_insert *) carbon_create_begin(struct carbon_new *context, struct carbon *doc,
         enum carbon_primary_key_type key_type, int mode);
 
-NG5_EXPORT(bool) carbon_create_end(struct carbon_new *context);
+ARK_EXPORT(bool) carbon_create_end(struct carbon_new *context);
 
-NG5_EXPORT(bool) carbon_create_empty(struct carbon *doc, enum carbon_primary_key_type key_type);
+ARK_EXPORT(bool) carbon_create_empty(struct carbon *doc, enum carbon_primary_key_type key_type);
 
-NG5_EXPORT(bool) carbon_create_empty_ex(struct carbon *doc, enum carbon_primary_key_type key_type, u64 doc_cap_byte,
+ARK_EXPORT(bool) carbon_create_empty_ex(struct carbon *doc, enum carbon_primary_key_type key_type, u64 doc_cap_byte,
         u64 array_cap_byte);
 
-NG5_EXPORT(bool) carbon_drop(struct carbon *doc);
+ARK_EXPORT(bool) carbon_drop(struct carbon *doc);
 
-NG5_EXPORT(bool) carbon_is_up_to_date(struct carbon *doc);
+ARK_EXPORT(bool) carbon_is_up_to_date(struct carbon *doc);
 
-NG5_EXPORT(bool) carbon_key_get_type(enum carbon_primary_key_type *out, struct carbon *doc);
+ARK_EXPORT(bool) carbon_key_get_type(enum carbon_primary_key_type *out, struct carbon *doc);
 
-NG5_EXPORT(const void *) carbon_key_raw_value(u64 *key_len, enum carbon_primary_key_type *type, struct carbon *doc);
+ARK_EXPORT(const void *) carbon_key_raw_value(u64 *key_len, enum carbon_primary_key_type *type, struct carbon *doc);
 
-NG5_EXPORT(bool) carbon_key_signed_value(i64 *key, struct carbon *doc);
+ARK_EXPORT(bool) carbon_key_signed_value(i64 *key, struct carbon *doc);
 
-NG5_EXPORT(bool) carbon_key_unsigned_value(u64 *key, struct carbon *doc);
+ARK_EXPORT(bool) carbon_key_unsigned_value(u64 *key, struct carbon *doc);
 
-NG5_EXPORT(const char *) carbon_key_string_value(u64 *str_len, struct carbon *doc);
+ARK_EXPORT(const char *) carbon_key_string_value(u64 *str_len, struct carbon *doc);
 
-NG5_EXPORT(bool) carbon_has_key(enum carbon_primary_key_type type);
+ARK_EXPORT(bool) carbon_has_key(enum carbon_primary_key_type type);
 
-NG5_EXPORT(bool) carbon_key_is_unsigned_type(enum carbon_primary_key_type type);
+ARK_EXPORT(bool) carbon_key_is_unsigned_type(enum carbon_primary_key_type type);
 
-NG5_EXPORT(bool) carbon_key_is_signed_type(enum carbon_primary_key_type type);
+ARK_EXPORT(bool) carbon_key_is_signed_type(enum carbon_primary_key_type type);
 
-NG5_EXPORT(bool) carbon_key_is_string_type(enum carbon_primary_key_type type);
+ARK_EXPORT(bool) carbon_key_is_string_type(enum carbon_primary_key_type type);
 
-NG5_EXPORT(bool) carbon_register_listener(listener_handle_t *handle, struct carbon_event_listener *listener, struct carbon *doc);
+ARK_EXPORT(bool) carbon_register_listener(listener_handle_t *handle, struct carbon_event_listener *listener, struct carbon *doc);
 
-NG5_EXPORT(bool) carbon_unregister_listener(struct carbon *doc, listener_handle_t handle);
+ARK_EXPORT(bool) carbon_unregister_listener(struct carbon *doc, listener_handle_t handle);
 
-NG5_EXPORT(bool) carbon_clone(struct carbon *clone, struct carbon *doc);
+ARK_EXPORT(bool) carbon_clone(struct carbon *clone, struct carbon *doc);
 
-NG5_EXPORT(bool) carbon_revision(u64 *rev, struct carbon *doc);
+ARK_EXPORT(bool) carbon_revision(u64 *rev, struct carbon *doc);
 
-NG5_EXPORT(bool) carbon_to_str(struct string_builder *dst, enum carbon_printer_impl printer, struct carbon *doc);
+ARK_EXPORT(bool) carbon_to_str(struct string_builder *dst, enum carbon_printer_impl printer, struct carbon *doc);
 
-NG5_EXPORT(const char *) carbon_to_json(struct string_builder *dst, struct carbon *doc);
+ARK_EXPORT(const char *) carbon_to_json(struct string_builder *dst, struct carbon *doc);
 
-NG5_EXPORT(bool) carbon_iterator_open(struct carbon_array_it *it, struct carbon *doc);
+ARK_EXPORT(bool) carbon_iterator_open(struct carbon_array_it *it, struct carbon *doc);
 
-NG5_EXPORT(bool) carbon_iterator_close(struct carbon_array_it *it);
+ARK_EXPORT(bool) carbon_iterator_close(struct carbon_array_it *it);
 
-NG5_EXPORT(bool) carbon_print(FILE *file, struct carbon *doc);
+ARK_EXPORT(bool) carbon_print(FILE *file, struct carbon *doc);
 
-NG5_EXPORT(bool) carbon_hexdump_print(FILE *file, struct carbon *doc);
+ARK_EXPORT(bool) carbon_hexdump_print(FILE *file, struct carbon *doc);
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

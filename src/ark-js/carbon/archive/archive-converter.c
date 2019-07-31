@@ -283,7 +283,7 @@ DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(boolean, field_boolean_t);
 
 DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(null, field_u32_t);
 
-NG5_EXPORT(bool) archive_converter(struct encoded_doc_list *collection, struct archive *archive)
+ARK_EXPORT(bool) archive_converter(struct encoded_doc_list *collection, struct archive *archive)
 {
 
         error_if_null(collection);
@@ -292,7 +292,7 @@ NG5_EXPORT(bool) archive_converter(struct encoded_doc_list *collection, struct a
         encoded_doc_collection_create(collection, &archive->err, archive);
 
         struct archive_visitor visitor = {0};
-        struct archive_visitor_desc desc = {.visit_mask = NG5_ARCHIVE_ITER_MASK_ANY};
+        struct archive_visitor_desc desc = {.visit_mask = ARK_ARCHIVE_ITER_MASK_ANY};
         struct converter_capture capture = {.collection = collection};
 
         visitor.visit_root_object = visit_root_object;

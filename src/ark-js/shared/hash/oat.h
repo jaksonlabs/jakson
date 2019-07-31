@@ -15,15 +15,15 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_OAT_H
-#define NG5_OAT_H
+#ifndef ARK_OAT_H
+#define ARK_OAT_H
 
 #include "hash.h"
 #include "ark-js/shared/common.h"
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
-#define NG5_HASH_OAT(key_size, key)                                                                                    \
+#define ARK_HASH_OAT(key_size, key)                                                                                    \
 ({                                                                                                                     \
     assert ((key != NULL) && (key_size > 0));                                                                          \
                                                                                                                        \
@@ -41,6 +41,6 @@ NG5_BEGIN_DECL
     hash;                                                                                                              \
 })
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

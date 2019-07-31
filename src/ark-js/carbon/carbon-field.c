@@ -22,7 +22,7 @@
 #include <ark-js/carbon/carbon-array-it.h>
 #include <ark-js/carbon/carbon-object-it.h>
 
-NG5_EXPORT(const char *) carbon_field_type_str(struct err *err, enum carbon_field_type type)
+ARK_EXPORT(const char *) carbon_field_type_str(struct err *err, enum carbon_field_type type)
 {
         switch (type) {
         case carbon_FIELD_TYPE_NULL: return carbon_FIELD_TYPE_NULL_STR;
@@ -54,12 +54,12 @@ NG5_EXPORT(const char *) carbon_field_type_str(struct err *err, enum carbon_fiel
         case carbon_FIELD_TYPE_BINARY:
                 return carbon_FIELD_TYPE_BINARY_STR;
         default:
-                error(err, NG5_ERR_NOTFOUND);
+                error(err, ARK_ERR_NOTFOUND);
                 return NULL;
         }
 }
 
-NG5_EXPORT(bool) carbon_field_type_is_traversable(enum carbon_field_type type)
+ARK_EXPORT(bool) carbon_field_type_is_traversable(enum carbon_field_type type)
 {
         switch (type) {
         case carbon_FIELD_TYPE_OBJECT:
@@ -80,7 +80,7 @@ NG5_EXPORT(bool) carbon_field_type_is_traversable(enum carbon_field_type type)
         }
 }
 
-NG5_EXPORT(bool) carbon_field_type_is_signed_integer(enum carbon_field_type type)
+ARK_EXPORT(bool) carbon_field_type_is_signed_integer(enum carbon_field_type type)
 {
         return (type == carbon_FIELD_TYPE_NUMBER_I8 || type == carbon_FIELD_TYPE_NUMBER_I16 ||
                 type == carbon_FIELD_TYPE_NUMBER_I32 || type == carbon_FIELD_TYPE_NUMBER_I64 ||
@@ -88,7 +88,7 @@ NG5_EXPORT(bool) carbon_field_type_is_signed_integer(enum carbon_field_type type
                 type == carbon_FIELD_TYPE_COLUMN_I32 || type == carbon_FIELD_TYPE_COLUMN_I64);
 }
 
-NG5_EXPORT(bool) carbon_field_type_is_unsigned_integer(enum carbon_field_type type)
+ARK_EXPORT(bool) carbon_field_type_is_unsigned_integer(enum carbon_field_type type)
 {
         return (type == carbon_FIELD_TYPE_NUMBER_U8 || type == carbon_FIELD_TYPE_NUMBER_U16 ||
                 type == carbon_FIELD_TYPE_NUMBER_U32 || type == carbon_FIELD_TYPE_NUMBER_U64  ||
@@ -96,45 +96,45 @@ NG5_EXPORT(bool) carbon_field_type_is_unsigned_integer(enum carbon_field_type ty
                 type == carbon_FIELD_TYPE_COLUMN_U32 || type == carbon_FIELD_TYPE_COLUMN_U64);
 }
 
-NG5_EXPORT(bool) carbon_field_type_is_floating_number(enum carbon_field_type type)
+ARK_EXPORT(bool) carbon_field_type_is_floating_number(enum carbon_field_type type)
 {
         return (type == carbon_FIELD_TYPE_NUMBER_FLOAT || type == carbon_FIELD_TYPE_COLUMN_FLOAT);
 }
 
-NG5_EXPORT(bool) carbon_field_type_is_number(enum carbon_field_type type)
+ARK_EXPORT(bool) carbon_field_type_is_number(enum carbon_field_type type)
 {
         return carbon_field_type_is_integer(type) || carbon_field_type_is_floating_number(type);
 }
 
-NG5_EXPORT(bool) carbon_field_type_is_integer(enum carbon_field_type type)
+ARK_EXPORT(bool) carbon_field_type_is_integer(enum carbon_field_type type)
 {
         return carbon_field_type_is_signed_integer(type) || carbon_field_type_is_unsigned_integer(type);
 }
 
-NG5_EXPORT(bool) carbon_field_type_is_binary(enum carbon_field_type type)
+ARK_EXPORT(bool) carbon_field_type_is_binary(enum carbon_field_type type)
 {
         return (type == carbon_FIELD_TYPE_BINARY || type == carbon_FIELD_TYPE_BINARY_CUSTOM);
 }
 
-NG5_EXPORT(bool) carbon_field_type_is_boolean(enum carbon_field_type type)
+ARK_EXPORT(bool) carbon_field_type_is_boolean(enum carbon_field_type type)
 {
         return (type == carbon_FIELD_TYPE_TRUE || type == carbon_FIELD_TYPE_FALSE || type == carbon_FIELD_TYPE_COLUMN_BOOLEAN);
 }
 
-NG5_EXPORT(bool) carbon_field_type_is_string(enum carbon_field_type type)
+ARK_EXPORT(bool) carbon_field_type_is_string(enum carbon_field_type type)
 {
         return (type == carbon_FIELD_TYPE_STRING);
 }
 
-NG5_EXPORT(bool) carbon_field_type_is_constant(enum carbon_field_type type)
+ARK_EXPORT(bool) carbon_field_type_is_constant(enum carbon_field_type type)
 {
         return (carbon_field_type_is_null(type) || carbon_field_type_is_boolean(type));
 }
 
-NG5_EXPORT(bool) carbon_field_skip(struct memfile *file)
+ARK_EXPORT(bool) carbon_field_skip(struct memfile *file)
 {
         error_if_null(file)
-        u8 type_marker = *NG5_MEMFILE_PEEK(file, u8);
+        u8 type_marker = *ARK_MEMFILE_PEEK(file, u8);
 
         switch (type_marker) {
         case carbon_FIELD_TYPE_NULL:
@@ -191,17 +191,17 @@ NG5_EXPORT(bool) carbon_field_skip(struct memfile *file)
                 carbon_field_skip_object(file);
                 break;
         default:
-        error(&file->err, NG5_ERR_CORRUPTED);
+        error(&file->err, ARK_ERR_CORRUPTED);
                 return false;
         }
         return true;
 }
 
-NG5_EXPORT(bool) carbon_field_skip_object(struct memfile *file)
+ARK_EXPORT(bool) carbon_field_skip_object(struct memfile *file)
 {
-        u8 type_marker = *NG5_MEMFILE_READ_TYPE(file, u8);
+        u8 type_marker = *ARK_MEMFILE_READ_TYPE(file, u8);
 
-        error_if(type_marker != carbon_FIELD_TYPE_OBJECT, &file->err, NG5_ERR_TYPEMISMATCH);
+        error_if(type_marker != carbon_FIELD_TYPE_OBJECT, &file->err, ARK_ERR_TYPEMISMATCH);
         struct carbon_object_it skip_it;
         carbon_object_it_create(&skip_it, file, &file->err, memfile_tell(file) - sizeof(u8));
         carbon_object_it_fast_forward(&skip_it);
@@ -210,11 +210,11 @@ NG5_EXPORT(bool) carbon_field_skip_object(struct memfile *file)
         return true;
 }
 
-NG5_EXPORT(bool) carbon_field_skip_array(struct memfile *file)
+ARK_EXPORT(bool) carbon_field_skip_array(struct memfile *file)
 {
-        u8 type_marker = *NG5_MEMFILE_READ_TYPE(file, u8);
+        u8 type_marker = *ARK_MEMFILE_READ_TYPE(file, u8);
 
-        error_if(type_marker != carbon_FIELD_TYPE_ARRAY, &file->err, NG5_ERR_TYPEMISMATCH);
+        error_if(type_marker != carbon_FIELD_TYPE_ARRAY, &file->err, ARK_ERR_TYPEMISMATCH);
         struct carbon_array_it skip_it;
         carbon_array_it_create(&skip_it, file, &file->err, memfile_tell(file) - sizeof(u8));
         carbon_array_it_fast_forward(&skip_it);
@@ -223,9 +223,9 @@ NG5_EXPORT(bool) carbon_field_skip_array(struct memfile *file)
         return true;
 }
 
-NG5_EXPORT(bool) carbon_field_skip_column(struct memfile *file)
+ARK_EXPORT(bool) carbon_field_skip_column(struct memfile *file)
 {
-        u8 type_marker = *NG5_MEMFILE_READ_TYPE(file, u8);
+        u8 type_marker = *ARK_MEMFILE_READ_TYPE(file, u8);
 
         error_if(type_marker != carbon_FIELD_TYPE_COLUMN_U8 &&
                 type_marker != carbon_FIELD_TYPE_COLUMN_U16 &&
@@ -236,7 +236,7 @@ NG5_EXPORT(bool) carbon_field_skip_column(struct memfile *file)
                 type_marker != carbon_FIELD_TYPE_COLUMN_I32 &&
                 type_marker != carbon_FIELD_TYPE_COLUMN_I64 &&
                 type_marker != carbon_FIELD_TYPE_COLUMN_BOOLEAN &&
-                type_marker != carbon_FIELD_TYPE_COLUMN_FLOAT, &file->err, NG5_ERR_TYPEMISMATCH);
+                type_marker != carbon_FIELD_TYPE_COLUMN_FLOAT, &file->err, ARK_ERR_TYPEMISMATCH);
 
         struct carbon_column_it skip_it;
         carbon_column_it_create(&skip_it, file, &file->err,
@@ -246,11 +246,11 @@ NG5_EXPORT(bool) carbon_field_skip_column(struct memfile *file)
         return true;
 }
 
-NG5_EXPORT(bool) carbon_field_skip_binary(struct memfile *file)
+ARK_EXPORT(bool) carbon_field_skip_binary(struct memfile *file)
 {
-        u8 type_marker = *NG5_MEMFILE_READ_TYPE(file, u8);
+        u8 type_marker = *ARK_MEMFILE_READ_TYPE(file, u8);
 
-        error_if(type_marker != carbon_FIELD_TYPE_BINARY, &file->err, NG5_ERR_TYPEMISMATCH);
+        error_if(type_marker != carbon_FIELD_TYPE_BINARY, &file->err, ARK_ERR_TYPEMISMATCH);
         /* read and skip mime type with variable-length integer type */
         u64 mime_type = memfile_read_varuint(NULL, file);
         unused(mime_type);
@@ -263,11 +263,11 @@ NG5_EXPORT(bool) carbon_field_skip_binary(struct memfile *file)
         return true;
 }
 
-NG5_EXPORT(bool) carbon_field_skip_custom_binary(struct memfile *file)
+ARK_EXPORT(bool) carbon_field_skip_custom_binary(struct memfile *file)
 {
-        u8 type_marker = *NG5_MEMFILE_READ_TYPE(file, u8);
+        u8 type_marker = *ARK_MEMFILE_READ_TYPE(file, u8);
 
-        error_if(type_marker != carbon_FIELD_TYPE_BINARY_CUSTOM, &file->err, NG5_ERR_TYPEMISMATCH);
+        error_if(type_marker != carbon_FIELD_TYPE_BINARY_CUSTOM, &file->err, ARK_ERR_TYPEMISMATCH);
         /* read custom type string length, and skip the type string */
         u64 custom_type_str_len = memfile_read_varuint(NULL, file);
         memfile_skip(file, custom_type_str_len);
@@ -278,86 +278,86 @@ NG5_EXPORT(bool) carbon_field_skip_custom_binary(struct memfile *file)
         return true;
 }
 
-NG5_EXPORT(bool) carbon_field_skip_string(struct memfile *file)
+ARK_EXPORT(bool) carbon_field_skip_string(struct memfile *file)
 {
-        u8 type_marker = *NG5_MEMFILE_READ_TYPE(file, u8);
+        u8 type_marker = *ARK_MEMFILE_READ_TYPE(file, u8);
 
-        error_if(type_marker != carbon_FIELD_TYPE_STRING, &file->err, NG5_ERR_TYPEMISMATCH);
+        error_if(type_marker != carbon_FIELD_TYPE_STRING, &file->err, ARK_ERR_TYPEMISMATCH);
         u64 strlen = memfile_read_varuint(NULL, file);
         memfile_skip(file, strlen);
         return true;
 }
 
-NG5_EXPORT(bool) carbon_field_skip_float(struct memfile *file)
+ARK_EXPORT(bool) carbon_field_skip_float(struct memfile *file)
 {
-        u8 type_marker = *NG5_MEMFILE_READ_TYPE(file, u8);
+        u8 type_marker = *ARK_MEMFILE_READ_TYPE(file, u8);
 
-        error_if(type_marker != carbon_FIELD_TYPE_NUMBER_FLOAT, &file->err, NG5_ERR_TYPEMISMATCH);
+        error_if(type_marker != carbon_FIELD_TYPE_NUMBER_FLOAT, &file->err, ARK_ERR_TYPEMISMATCH);
         memfile_skip(file, sizeof(float));
         return true;
 }
 
-NG5_EXPORT(bool) carbon_field_skip_boolean(struct memfile *file)
+ARK_EXPORT(bool) carbon_field_skip_boolean(struct memfile *file)
 {
-        u8 type_marker = *NG5_MEMFILE_READ_TYPE(file, u8);
+        u8 type_marker = *ARK_MEMFILE_READ_TYPE(file, u8);
 
-        error_if(type_marker != carbon_FIELD_TYPE_TRUE && type_marker != carbon_FIELD_TYPE_FALSE, &file->err, NG5_ERR_TYPEMISMATCH);
+        error_if(type_marker != carbon_FIELD_TYPE_TRUE && type_marker != carbon_FIELD_TYPE_FALSE, &file->err, ARK_ERR_TYPEMISMATCH);
         return true;
 }
 
-NG5_EXPORT(bool) carbon_field_skip_null(struct memfile *file)
+ARK_EXPORT(bool) carbon_field_skip_null(struct memfile *file)
 {
-        u8 type_marker = *NG5_MEMFILE_READ_TYPE(file, u8);
+        u8 type_marker = *ARK_MEMFILE_READ_TYPE(file, u8);
 
-        error_if(type_marker != carbon_FIELD_TYPE_NULL, &file->err, NG5_ERR_TYPEMISMATCH);
+        error_if(type_marker != carbon_FIELD_TYPE_NULL, &file->err, ARK_ERR_TYPEMISMATCH);
         return true;
 }
 
-NG5_EXPORT(bool) carbon_field_skip_8(struct memfile *file)
+ARK_EXPORT(bool) carbon_field_skip_8(struct memfile *file)
 {
-        u8 type_marker = *NG5_MEMFILE_READ_TYPE(file, u8);
+        u8 type_marker = *ARK_MEMFILE_READ_TYPE(file, u8);
 
         error_if(type_marker != carbon_FIELD_TYPE_NUMBER_I8 && type_marker != carbon_FIELD_TYPE_NUMBER_U8,
-                &file->err, NG5_ERR_TYPEMISMATCH);
+                &file->err, ARK_ERR_TYPEMISMATCH);
         assert(sizeof(u8) == sizeof(i8));
         memfile_skip(file, sizeof(u8));
         return true;
 }
 
-NG5_EXPORT(bool) carbon_field_skip_16(struct memfile *file)
+ARK_EXPORT(bool) carbon_field_skip_16(struct memfile *file)
 {
-        u8 type_marker = *NG5_MEMFILE_READ_TYPE(file, u8);
+        u8 type_marker = *ARK_MEMFILE_READ_TYPE(file, u8);
 
         error_if(type_marker != carbon_FIELD_TYPE_NUMBER_I16 && type_marker != carbon_FIELD_TYPE_NUMBER_U16,
-                &file->err, NG5_ERR_TYPEMISMATCH);
+                &file->err, ARK_ERR_TYPEMISMATCH);
         assert(sizeof(u16) == sizeof(i16));
         memfile_skip(file, sizeof(u16));
         return true;
 }
 
-NG5_EXPORT(bool) carbon_field_skip_32(struct memfile *file)
+ARK_EXPORT(bool) carbon_field_skip_32(struct memfile *file)
 {
-        u8 type_marker = *NG5_MEMFILE_READ_TYPE(file, u8);
+        u8 type_marker = *ARK_MEMFILE_READ_TYPE(file, u8);
 
         error_if(type_marker != carbon_FIELD_TYPE_NUMBER_I32 && type_marker != carbon_FIELD_TYPE_NUMBER_U32,
-                &file->err, NG5_ERR_TYPEMISMATCH);
+                &file->err, ARK_ERR_TYPEMISMATCH);
         assert(sizeof(u32) == sizeof(i32));
         memfile_skip(file, sizeof(u32));
         return true;
 }
 
-NG5_EXPORT(bool) carbon_field_skip_64(struct memfile *file)
+ARK_EXPORT(bool) carbon_field_skip_64(struct memfile *file)
 {
-        u8 type_marker = *NG5_MEMFILE_READ_TYPE(file, u8);
+        u8 type_marker = *ARK_MEMFILE_READ_TYPE(file, u8);
 
         error_if(type_marker != carbon_FIELD_TYPE_NUMBER_I64 && type_marker != carbon_FIELD_TYPE_NUMBER_U64,
-                &file->err, NG5_ERR_TYPEMISMATCH);
+                &file->err, ARK_ERR_TYPEMISMATCH);
         assert(sizeof(u64) == sizeof(i64));
         memfile_skip(file, sizeof(u64));
         return true;
 }
 
-NG5_EXPORT(enum carbon_field_type) carbon_field_type_for_column(enum carbon_column_type type)
+ARK_EXPORT(enum carbon_field_type) carbon_field_type_for_column(enum carbon_column_type type)
 {
         switch (type) {
         case carbon_COLUMN_TYPE_U8: return carbon_FIELD_TYPE_COLUMN_U8;
@@ -371,12 +371,12 @@ NG5_EXPORT(enum carbon_field_type) carbon_field_type_for_column(enum carbon_colu
         case carbon_COLUMN_TYPE_FLOAT: return carbon_FIELD_TYPE_COLUMN_FLOAT;
         case carbon_COLUMN_TYPE_BOOLEAN: return carbon_FIELD_TYPE_COLUMN_BOOLEAN;
         default:
-                error_print(NG5_ERR_INTERNALERR)
+                error_print(ARK_ERR_INTERNALERR)
                 return 0;
         }
 }
 
-NG5_EXPORT(enum carbon_field_class) carbon_field_type_get_class(enum carbon_field_type type, struct err *err)
+ARK_EXPORT(enum carbon_field_class) carbon_field_type_get_class(enum carbon_field_type type, struct err *err)
 {
         switch (type) {
         case carbon_FIELD_TYPE_NULL:
@@ -412,17 +412,17 @@ NG5_EXPORT(enum carbon_field_class) carbon_field_type_get_class(enum carbon_fiel
         case carbon_FIELD_TYPE_BINARY_CUSTOM:
                 return carbon_FIELD_CLASS_BINARY_STRING;
         default:
-                error(err, NG5_ERR_INTERNALERR);
+                error(err, ARK_ERR_INTERNALERR);
                 return 0;
         }
 }
 
-NG5_EXPORT(bool) carbon_field_type_is_array(enum carbon_field_type type)
+ARK_EXPORT(bool) carbon_field_type_is_array(enum carbon_field_type type)
 {
         return (type == carbon_FIELD_TYPE_ARRAY);
 }
 
-NG5_EXPORT(bool) carbon_field_type_is_column(enum carbon_field_type type)
+ARK_EXPORT(bool) carbon_field_type_is_column(enum carbon_field_type type)
 {
         return (type == carbon_FIELD_TYPE_COLUMN_U8 ||
                 type == carbon_FIELD_TYPE_COLUMN_U16 ||
@@ -436,12 +436,12 @@ NG5_EXPORT(bool) carbon_field_type_is_column(enum carbon_field_type type)
                 type == carbon_FIELD_TYPE_COLUMN_BOOLEAN);
 }
 
-NG5_EXPORT(bool) carbon_field_type_is_object(enum carbon_field_type type)
+ARK_EXPORT(bool) carbon_field_type_is_object(enum carbon_field_type type)
 {
         return (type == carbon_FIELD_TYPE_OBJECT);
 }
 
-NG5_EXPORT(bool) carbon_field_type_is_null(enum carbon_field_type type)
+ARK_EXPORT(bool) carbon_field_type_is_null(enum carbon_field_type type)
 {
         return (type == carbon_FIELD_TYPE_NULL);
 }

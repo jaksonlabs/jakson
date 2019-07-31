@@ -45,7 +45,7 @@ static int process_token(struct err *err, struct json_err *error_desc, const str
 
 static int set_error(struct json_err *error_desc, const struct json_token *token, const char *msg);
 
-NG5_EXPORT(bool) json_tokenizer_init(struct json_tokenizer *tokenizer, const char *input)
+ARK_EXPORT(bool) json_tokenizer_init(struct json_tokenizer *tokenizer, const char *input)
 {
         error_if_null(tokenizer)
         error_if_null(input)
@@ -218,7 +218,7 @@ static bool json_ast_node_element_print(FILE *file, struct err *err, struct json
 #define NEXT_TOKEN(x) { *x = *x + 1; }
 #define PREV_TOKEN(x) { *x = *x - 1; }
 
-NG5_EXPORT(bool) json_parser_create(struct json_parser *parser, struct doc_bulk *partition)
+ARK_EXPORT(bool) json_parser_create(struct json_parser *parser, struct doc_bulk *partition)
 {
         error_if_null(parser)
         error_if_null(partition)
@@ -272,7 +272,7 @@ bool json_parse(struct json *json, struct json_err *error_desc, struct json_pars
                 return false;
         }
 
-        ng5_optional_set_or_else(json, retval, json_drop(json));
+        ark_optional_set_or_else(json, retval, json_drop(json));
         status = true;
 
         cleanup:
@@ -312,7 +312,7 @@ bool test_condition_value(struct err *err, struct json_node_value *value)
                                 char message[] = "JSON file constraint broken: arrays of mixed types detected";
                                 char *result = malloc(strlen(message) + 1);
                                 strcpy(result, &message[0]);
-                                error_with_details(err, NG5_ERR_ARRAYOFMIXEDTYPES, result);
+                                error_with_details(err, ARK_ERR_ARRAYOFMIXEDTYPES, result);
                                 free(result);
                                 return false;
                         }
@@ -333,7 +333,7 @@ bool test_condition_value(struct err *err, struct json_node_value *value)
                                 char message[] = "JSON file constraint broken: arrays of arrays detected";
                                 char *result = malloc(strlen(message) + 1);
                                 strcpy(result, &message[0]);
-                                error_with_details(err, NG5_ERR_ARRAYOFARRAYS, result);
+                                error_with_details(err, ARK_ERR_ARRAYOFARRAYS, result);
                                 free(result);
                                 return false;
                         }
@@ -349,7 +349,7 @@ bool test_condition_value(struct err *err, struct json_node_value *value)
         return true;
 }
 
-NG5_EXPORT(bool) json_test(struct err *err, struct json *json)
+ARK_EXPORT(bool) json_test(struct err *err, struct json *json)
 {
         return (test_condition_value(err, &json->element->value));
 }
@@ -415,7 +415,7 @@ bool parse_members(struct err *err, struct json_members *members, struct vector 
                         member->value.value.value_type = JSON_VALUE_NULL;
                         NEXT_TOKEN(token_idx);
                         break;
-                default: error(err, NG5_ERR_PARSETYPE)
+                default: error(err, ARK_ERR_PARSETYPE)
                         return false;
                 }
 
@@ -773,7 +773,7 @@ static int process_token(struct err *err, struct json_err *error_desc, const str
                         return set_error(error_desc, token, "Unexpected token");
                 }
                 break;
-        default: error(err, NG5_ERR_NOJSONTOKEN)
+        default: error(err, ARK_ERR_NOJSONTOKEN)
                 return false;
         }
 
@@ -842,7 +842,7 @@ static bool json_ast_node_number_print(FILE *file, struct err *err, struct json_
         case JSON_NUMBER_SIGNED:
                 fprintf(file, "%" PRIi64, number->value.signed_integer);
                 break;
-        default: error(err, NG5_ERR_NOJSONNUMBERT);
+        default: error(err, ARK_ERR_NOJSONNUMBERT);
                 return false;
         }
         return true;
@@ -878,7 +878,7 @@ static bool json_ast_node_value_print(FILE *file, struct err *err, struct json_n
         case JSON_VALUE_NULL:
                 fprintf(file, "null");
                 break;
-        default: error(err, NG5_ERR_NOTYPE);
+        default: error(err, ARK_ERR_NOTYPE);
                 return false;
         }
         return true;
@@ -980,7 +980,7 @@ static bool json_ast_node_value_drop(struct json_node_value *value, struct err *
         case JSON_VALUE_FALSE:
         case JSON_VALUE_NULL:
                 break;
-        default: error(err, NG5_ERR_NOTYPE)
+        default: error(err, ARK_ERR_NOTYPE)
                 return false;
 
         }

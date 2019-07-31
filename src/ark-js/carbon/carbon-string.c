@@ -28,7 +28,7 @@ static void write_payload(struct memfile *file, const char *string)
         memfile_write(file, string, value_strlen);
 }
 
-NG5_EXPORT(bool) carbon_string_nomarker_write(struct memfile *file, const char *string)
+ARK_EXPORT(bool) carbon_string_nomarker_write(struct memfile *file, const char *string)
 {
         error_if_null(file)
         error_if_null(string)
@@ -37,7 +37,7 @@ NG5_EXPORT(bool) carbon_string_nomarker_write(struct memfile *file, const char *
         return true;
 }
 
-NG5_EXPORT(bool) carbon_string_write(struct memfile *file, const char *string)
+ARK_EXPORT(bool) carbon_string_write(struct memfile *file, const char *string)
 {
         error_if_null(file)
         error_if_null(string)
@@ -49,9 +49,9 @@ NG5_EXPORT(bool) carbon_string_write(struct memfile *file, const char *string)
         return true;
 }
 
-NG5_EXPORT(bool) carbon_string_update(struct memfile *file, const char *string)
+ARK_EXPORT(bool) carbon_string_update(struct memfile *file, const char *string)
 {
-        u8 marker = *NG5_MEMFILE_READ_TYPE(file, u8);
+        u8 marker = *ARK_MEMFILE_READ_TYPE(file, u8);
         if (likely(marker == carbon_FIELD_TYPE_STRING)) {
                 offset_t payload_start = memfile_tell(file);
                 u32 old_len = memfile_read_varuint(NULL, file);
@@ -63,27 +63,27 @@ NG5_EXPORT(bool) carbon_string_update(struct memfile *file, const char *string)
                 write_payload(file, string);
                 return true;
         } else {
-                error(&file->err, NG5_ERR_MARKERMAPPING)
+                error(&file->err, ARK_ERR_MARKERMAPPING)
                 return false;
         }
 }
 
-NG5_EXPORT(bool) carbon_string_skip(struct memfile *file)
+ARK_EXPORT(bool) carbon_string_skip(struct memfile *file)
 {
         return carbon_string_read(NULL, file);
 }
 
-NG5_EXPORT(const char *) carbon_string_read(u64 *len, struct memfile *file)
+ARK_EXPORT(const char *) carbon_string_read(u64 *len, struct memfile *file)
 {
         error_if_null(file)
-        u8 marker = *NG5_MEMFILE_READ_TYPE(file, u8);
+        u8 marker = *ARK_MEMFILE_READ_TYPE(file, u8);
         if (likely(marker == carbon_FIELD_TYPE_STRING)) {
                 u64 str_len = memfile_read_varuint(NULL, file);
                 const char *result = memfile_read(file, str_len);
-                ng5_optional_set(len, str_len);
+                ark_optional_set(len, str_len);
                 return result;
         } else {
-                error(&file->err, NG5_ERR_MARKERMAPPING)
+                error(&file->err, ARK_ERR_MARKERMAPPING)
                 return false;
         }
 }

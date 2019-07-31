@@ -26,13 +26,13 @@
 
 #define check_type_if_container_is_column(inserter, expected)                                                          \
 if (unlikely(inserter->context_type == carbon_COLUMN && inserter->context.column->type != expected)) {                  \
-        error_with_details(&inserter->err, NG5_ERR_TYPEMISMATCH, "Element type does not match container type");        \
+        error_with_details(&inserter->err, ARK_ERR_TYPEMISMATCH, "Element type does not match container type");        \
 }
 
 #define check_type_range_if_container_is_column(inserter, expected1, expected2, expected3)                             \
 if (unlikely(inserter->context_type == carbon_COLUMN && inserter->context.column->type != expected1 &&                  \
         inserter->context.column->type != expected2 && inserter->context.column->type != expected3)) {                 \
-        error_with_details(&inserter->err, NG5_ERR_TYPEMISMATCH, "Element type does not match container type");        \
+        error_with_details(&inserter->err, ARK_ERR_TYPEMISMATCH, "Element type does not match container type");        \
 }
 
 static bool write_field_data(struct carbon_insert *inserter, u8 field_type_marker, const void *base, u64 nbytes);
@@ -42,7 +42,7 @@ static bool push_media_type_for_array(struct carbon_insert *inserter, enum carbo
 static void internal_create(struct carbon_insert *inserter, struct memfile *src);
 static void write_binary_blob(struct carbon_insert *inserter, const void *value, size_t nbytes);
 
-NG5_EXPORT(bool) carbon_int_insert_create_for_array(struct carbon_insert *inserter, struct carbon_array_it *context)
+ARK_EXPORT(bool) carbon_int_insert_create_for_array(struct carbon_insert *inserter, struct carbon_array_it *context)
 {
         error_if_null(inserter)
         error_if_null(context)
@@ -53,7 +53,7 @@ NG5_EXPORT(bool) carbon_int_insert_create_for_array(struct carbon_insert *insert
         return true;
 }
 
-NG5_EXPORT(bool) carbon_int_insert_create_for_column(struct carbon_insert *inserter, struct carbon_column_it *context)
+ARK_EXPORT(bool) carbon_int_insert_create_for_column(struct carbon_insert *inserter, struct carbon_column_it *context)
 {
         error_if_null(inserter)
         error_if_null(context)
@@ -64,7 +64,7 @@ NG5_EXPORT(bool) carbon_int_insert_create_for_column(struct carbon_insert *inser
         return true;
 }
 
-NG5_EXPORT(bool) carbon_int_insert_create_for_object(struct carbon_insert *inserter, struct carbon_object_it *context)
+ARK_EXPORT(bool) carbon_int_insert_create_for_object(struct carbon_insert *inserter, struct carbon_object_it *context)
 {
         error_if_null(inserter)
         error_if_null(context)
@@ -75,7 +75,7 @@ NG5_EXPORT(bool) carbon_int_insert_create_for_object(struct carbon_insert *inser
         return true;
 }
 
-NG5_EXPORT(bool) carbon_insert_null(struct carbon_insert *inserter)
+ARK_EXPORT(bool) carbon_insert_null(struct carbon_insert *inserter)
 {
         check_type_if_container_is_column(inserter, carbon_FIELD_TYPE_COLUMN_BOOLEAN);
 
@@ -125,17 +125,17 @@ NG5_EXPORT(bool) carbon_insert_null(struct carbon_insert *inserter)
                                 return push_in_column(inserter, &value, inserter->context.column->type);
                         } break;
                         default:
-                                error(&inserter->err, NG5_ERR_INTERNALERR)
+                                error(&inserter->err, ARK_ERR_INTERNALERR)
                                 return false;
                 }
         }
         default:
-                error(&inserter->err, NG5_ERR_INTERNALERR);
+                error(&inserter->err, ARK_ERR_INTERNALERR);
                 return false;
         }
 }
 
-NG5_EXPORT(bool) carbon_insert_true(struct carbon_insert *inserter)
+ARK_EXPORT(bool) carbon_insert_true(struct carbon_insert *inserter)
 {
         check_type_if_container_is_column(inserter, carbon_FIELD_TYPE_COLUMN_BOOLEAN);
         switch (inserter->context_type) {
@@ -146,12 +146,12 @@ NG5_EXPORT(bool) carbon_insert_true(struct carbon_insert *inserter)
                 return push_in_column(inserter, &value, carbon_FIELD_TYPE_COLUMN_BOOLEAN);
         }
         default:
-                error(&inserter->err, NG5_ERR_INTERNALERR);
+                error(&inserter->err, ARK_ERR_INTERNALERR);
                 return false;
         }
 }
 
-NG5_EXPORT(bool) carbon_insert_false(struct carbon_insert *inserter)
+ARK_EXPORT(bool) carbon_insert_false(struct carbon_insert *inserter)
 {
         check_type_if_container_is_column(inserter, carbon_FIELD_TYPE_COLUMN_BOOLEAN);
         switch (inserter->context_type) {
@@ -162,12 +162,12 @@ NG5_EXPORT(bool) carbon_insert_false(struct carbon_insert *inserter)
                 return push_in_column(inserter, &value, carbon_FIELD_TYPE_COLUMN_BOOLEAN);
         }
         default:
-                error(&inserter->err, NG5_ERR_INTERNALERR);
+                error(&inserter->err, ARK_ERR_INTERNALERR);
                 return false;
         }
 }
 
-NG5_EXPORT(bool) carbon_insert_u8(struct carbon_insert *inserter, u8 value)
+ARK_EXPORT(bool) carbon_insert_u8(struct carbon_insert *inserter, u8 value)
 {
         check_type_if_container_is_column(inserter, carbon_FIELD_TYPE_COLUMN_U8);
         switch (inserter->context_type) {
@@ -178,13 +178,13 @@ NG5_EXPORT(bool) carbon_insert_u8(struct carbon_insert *inserter, u8 value)
                 push_in_column(inserter, &value, carbon_FIELD_TYPE_COLUMN_U8);
                 break;
         default:
-                error(&inserter->err, NG5_ERR_INTERNALERR);
+                error(&inserter->err, ARK_ERR_INTERNALERR);
                 return false;
         }
         return true;
 }
 
-NG5_EXPORT(bool) carbon_insert_u16(struct carbon_insert *inserter, u16 value)
+ARK_EXPORT(bool) carbon_insert_u16(struct carbon_insert *inserter, u16 value)
 {
         check_type_if_container_is_column(inserter, carbon_FIELD_TYPE_COLUMN_U16);
         switch (inserter->context_type) {
@@ -195,13 +195,13 @@ NG5_EXPORT(bool) carbon_insert_u16(struct carbon_insert *inserter, u16 value)
                 push_in_column(inserter, &value, carbon_FIELD_TYPE_COLUMN_U16);
                 break;
         default:
-                error(&inserter->err, NG5_ERR_INTERNALERR);
+                error(&inserter->err, ARK_ERR_INTERNALERR);
                 return false;
         }
         return true;
 }
 
-NG5_EXPORT(bool) carbon_insert_u32(struct carbon_insert *inserter, u32 value)
+ARK_EXPORT(bool) carbon_insert_u32(struct carbon_insert *inserter, u32 value)
 {
         check_type_if_container_is_column(inserter, carbon_FIELD_TYPE_COLUMN_U32);
         switch (inserter->context_type) {
@@ -212,13 +212,13 @@ NG5_EXPORT(bool) carbon_insert_u32(struct carbon_insert *inserter, u32 value)
                 push_in_column(inserter, &value, carbon_FIELD_TYPE_COLUMN_U32);
                 break;
         default:
-                error(&inserter->err, NG5_ERR_INTERNALERR);
+                error(&inserter->err, ARK_ERR_INTERNALERR);
                 return false;
         }
         return true;
 }
 
-NG5_EXPORT(bool) carbon_insert_u64(struct carbon_insert *inserter, u64 value)
+ARK_EXPORT(bool) carbon_insert_u64(struct carbon_insert *inserter, u64 value)
 {
         check_type_if_container_is_column(inserter, carbon_FIELD_TYPE_COLUMN_U64);
         switch (inserter->context_type) {
@@ -229,13 +229,13 @@ NG5_EXPORT(bool) carbon_insert_u64(struct carbon_insert *inserter, u64 value)
                 push_in_column(inserter, &value,carbon_FIELD_TYPE_COLUMN_U64);
                 break;
         default:
-                error(&inserter->err, NG5_ERR_INTERNALERR);
+                error(&inserter->err, ARK_ERR_INTERNALERR);
                 return false;
         }
         return true;
 }
 
-NG5_EXPORT(bool) carbon_insert_i8(struct carbon_insert *inserter, i8 value)
+ARK_EXPORT(bool) carbon_insert_i8(struct carbon_insert *inserter, i8 value)
 {
         check_type_if_container_is_column(inserter, carbon_FIELD_TYPE_COLUMN_I8);
         switch (inserter->context_type) {
@@ -246,13 +246,13 @@ NG5_EXPORT(bool) carbon_insert_i8(struct carbon_insert *inserter, i8 value)
                 push_in_column(inserter, &value, carbon_FIELD_TYPE_COLUMN_I8);
                 break;
         default:
-                error(&inserter->err, NG5_ERR_INTERNALERR);
+                error(&inserter->err, ARK_ERR_INTERNALERR);
                 return false;
         }
         return true;
 }
 
-NG5_EXPORT(bool) carbon_insert_i16(struct carbon_insert *inserter, i16 value)
+ARK_EXPORT(bool) carbon_insert_i16(struct carbon_insert *inserter, i16 value)
 {
         check_type_if_container_is_column(inserter, carbon_FIELD_TYPE_COLUMN_I16);
         switch (inserter->context_type) {
@@ -263,13 +263,13 @@ NG5_EXPORT(bool) carbon_insert_i16(struct carbon_insert *inserter, i16 value)
                 push_in_column(inserter, &value, carbon_FIELD_TYPE_COLUMN_I16);
                 break;
         default:
-                error(&inserter->err, NG5_ERR_INTERNALERR);
+                error(&inserter->err, ARK_ERR_INTERNALERR);
                 return false;
         }
         return true;
 }
 
-NG5_EXPORT(bool) carbon_insert_i32(struct carbon_insert *inserter, i32 value)
+ARK_EXPORT(bool) carbon_insert_i32(struct carbon_insert *inserter, i32 value)
 {
         check_type_if_container_is_column(inserter, carbon_FIELD_TYPE_COLUMN_I32);
         switch (inserter->context_type) {
@@ -280,13 +280,13 @@ NG5_EXPORT(bool) carbon_insert_i32(struct carbon_insert *inserter, i32 value)
                 push_in_column(inserter, &value, carbon_FIELD_TYPE_COLUMN_I32);
                 break;
         default:
-                error(&inserter->err, NG5_ERR_INTERNALERR);
+                error(&inserter->err, ARK_ERR_INTERNALERR);
                 return false;
         }
         return true;
 }
 
-NG5_EXPORT(bool) carbon_insert_i64(struct carbon_insert *inserter, i64 value)
+ARK_EXPORT(bool) carbon_insert_i64(struct carbon_insert *inserter, i64 value)
 {
         check_type_if_container_is_column(inserter, carbon_FIELD_TYPE_COLUMN_I64);
         switch (inserter->context_type) {
@@ -297,15 +297,15 @@ NG5_EXPORT(bool) carbon_insert_i64(struct carbon_insert *inserter, i64 value)
                 push_in_column(inserter, &value, carbon_FIELD_TYPE_COLUMN_I64);
                 break;
         default:
-                error(&inserter->err, NG5_ERR_INTERNALERR);
+                error(&inserter->err, ARK_ERR_INTERNALERR);
                 return false;
         }
         return true;
 }
 
-NG5_EXPORT(bool) carbon_insert_unsigned(struct carbon_insert *inserter, u64 value)
+ARK_EXPORT(bool) carbon_insert_unsigned(struct carbon_insert *inserter, u64 value)
 {
-        error_if(inserter->context_type == carbon_COLUMN, &inserter->err, NG5_ERR_INSERT_TOO_DANGEROUS)
+        error_if(inserter->context_type == carbon_COLUMN, &inserter->err, ARK_ERR_INSERT_TOO_DANGEROUS)
 
         if (value <= carbon_U8_MAX) {
                 return carbon_insert_u8(inserter, (u8) value);
@@ -316,15 +316,15 @@ NG5_EXPORT(bool) carbon_insert_unsigned(struct carbon_insert *inserter, u64 valu
         } else if (value <= carbon_U64_MAX) {
                 return carbon_insert_u64(inserter, (u64) value);
         } else {
-                error(&inserter->err, NG5_ERR_INTERNALERR);
+                error(&inserter->err, ARK_ERR_INTERNALERR);
                 return false;
         }
         return true;
 }
 
-NG5_EXPORT(bool) carbon_insert_signed(struct carbon_insert *inserter, i64 value)
+ARK_EXPORT(bool) carbon_insert_signed(struct carbon_insert *inserter, i64 value)
 {
-        error_if(inserter->context_type == carbon_COLUMN, &inserter->err, NG5_ERR_INSERT_TOO_DANGEROUS)
+        error_if(inserter->context_type == carbon_COLUMN, &inserter->err, ARK_ERR_INSERT_TOO_DANGEROUS)
 
         if (value >= carbon_I8_MIN && value <= carbon_I8_MAX) {
                 return carbon_insert_i8(inserter, (i8) value);
@@ -335,13 +335,13 @@ NG5_EXPORT(bool) carbon_insert_signed(struct carbon_insert *inserter, i64 value)
         } else if (value >= carbon_I64_MIN && value <= carbon_I64_MAX) {
                 return carbon_insert_i64(inserter, (i64) value);
         } else {
-                error(&inserter->err, NG5_ERR_INTERNALERR);
+                error(&inserter->err, ARK_ERR_INTERNALERR);
                 return false;
         }
         return true;
 }
 
-NG5_EXPORT(bool) carbon_insert_float(struct carbon_insert *inserter, float value)
+ARK_EXPORT(bool) carbon_insert_float(struct carbon_insert *inserter, float value)
 {
         error_if_null(inserter)
         check_type_if_container_is_column(inserter, carbon_FIELD_TYPE_COLUMN_FLOAT);
@@ -353,17 +353,17 @@ NG5_EXPORT(bool) carbon_insert_float(struct carbon_insert *inserter, float value
                 push_in_column(inserter, &value, carbon_FIELD_TYPE_COLUMN_FLOAT);
                 break;
         default:
-        error(&inserter->err, NG5_ERR_INTERNALERR);
+        error(&inserter->err, ARK_ERR_INTERNALERR);
                 return false;
         }
         return true;
 }
 
-NG5_EXPORT(bool) carbon_insert_string(struct carbon_insert *inserter, const char *value)
+ARK_EXPORT(bool) carbon_insert_string(struct carbon_insert *inserter, const char *value)
 {
         unused(inserter);
         unused(value);
-        error_if(inserter->context_type != carbon_ARRAY, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != carbon_ARRAY, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
 
         return carbon_string_write(&inserter->memfile, value);
 }
@@ -402,27 +402,27 @@ static void insert_binary(struct carbon_insert *inserter, const void *value, siz
         }
 }
 
-NG5_EXPORT(bool) carbon_insert_binary(struct carbon_insert *inserter, const void *value, size_t nbytes,
+ARK_EXPORT(bool) carbon_insert_binary(struct carbon_insert *inserter, const void *value, size_t nbytes,
         const char *file_ext, const char *user_type)
 {
         error_if_null(inserter)
         error_if_null(value)
-        error_if(inserter->context_type != carbon_ARRAY, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != carbon_ARRAY, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
 
         insert_binary(inserter, value, nbytes, file_ext, user_type);
 
         return true;
 }
 
-NG5_EXPORT(struct carbon_insert *) carbon_insert_object_begin(struct carbon_insert_object_state *out,
+ARK_EXPORT(struct carbon_insert *) carbon_insert_object_begin(struct carbon_insert_object_state *out,
         struct carbon_insert *inserter, u64 object_capacity)
 {
         error_if_null(out)
         error_if_null(inserter)
 
-        error_if_and_return(!out, &inserter->err, NG5_ERR_NULLPTR, NULL);
+        error_if_and_return(!out, &inserter->err, ARK_ERR_NULLPTR, NULL);
         if (!inserter) {
-                error_print(NG5_ERR_NULLPTR);
+                error_print(ARK_ERR_NULLPTR);
                 return false;
         }
 
@@ -440,7 +440,7 @@ NG5_EXPORT(struct carbon_insert *) carbon_insert_object_begin(struct carbon_inse
         return &out->inserter;
 }
 
-NG5_EXPORT(bool) carbon_insert_object_end(struct carbon_insert_object_state *state)
+ARK_EXPORT(bool) carbon_insert_object_end(struct carbon_insert_object_state *state)
 {
         error_if_null(state);
 
@@ -462,16 +462,16 @@ NG5_EXPORT(bool) carbon_insert_object_end(struct carbon_insert_object_state *sta
         return true;
 }
 
-NG5_EXPORT(struct carbon_insert *) carbon_insert_array_begin(struct carbon_insert_array_state *state_out,
+ARK_EXPORT(struct carbon_insert *) carbon_insert_array_begin(struct carbon_insert_array_state *state_out,
         struct carbon_insert *inserter_in, u64 array_capacity)
 {
-        error_if_and_return(!state_out, &inserter_in->err, NG5_ERR_NULLPTR, NULL);
+        error_if_and_return(!state_out, &inserter_in->err, ARK_ERR_NULLPTR, NULL);
         if (!inserter_in) {
-                error_print(NG5_ERR_NULLPTR);
+                error_print(ARK_ERR_NULLPTR);
                 return false;
         }
 
-        error_if(inserter_in->context_type != carbon_ARRAY && inserter_in->context_type != carbon_OBJECT, &inserter_in->err, NG5_ERR_UNSUPPCONTAINER);
+        error_if(inserter_in->context_type != carbon_ARRAY && inserter_in->context_type != carbon_OBJECT, &inserter_in->err, ARK_ERR_UNSUPPCONTAINER);
 
         *state_out = (struct carbon_insert_array_state) {
                 .parent_inserter = inserter_in,
@@ -487,7 +487,7 @@ NG5_EXPORT(struct carbon_insert *) carbon_insert_array_begin(struct carbon_inser
         return &state_out->nested_inserter;
 }
 
-NG5_EXPORT(bool) carbon_insert_array_end(struct carbon_insert_array_state *state_in)
+ARK_EXPORT(bool) carbon_insert_array_end(struct carbon_insert_array_state *state_in)
 {
         error_if_null(state_in);
 
@@ -509,12 +509,12 @@ NG5_EXPORT(bool) carbon_insert_array_end(struct carbon_insert_array_state *state
         return true;
 }
 
-NG5_EXPORT(struct carbon_insert *) carbon_insert_column_begin(struct carbon_insert_column_state *state_out,
+ARK_EXPORT(struct carbon_insert *) carbon_insert_column_begin(struct carbon_insert_column_state *state_out,
         struct carbon_insert *inserter_in, enum carbon_column_type type, u64 column_capacity)
 {
-        error_if_and_return(!state_out, &inserter_in->err, NG5_ERR_NULLPTR, NULL);
-        error_if_and_return(!inserter_in, &inserter_in->err, NG5_ERR_NULLPTR, NULL);
-        error_if(inserter_in->context_type != carbon_ARRAY && inserter_in->context_type != carbon_OBJECT, &inserter_in->err, NG5_ERR_UNSUPPCONTAINER);
+        error_if_and_return(!state_out, &inserter_in->err, ARK_ERR_NULLPTR, NULL);
+        error_if_and_return(!inserter_in, &inserter_in->err, ARK_ERR_NULLPTR, NULL);
+        error_if(inserter_in->context_type != carbon_ARRAY && inserter_in->context_type != carbon_OBJECT, &inserter_in->err, ARK_ERR_UNSUPPCONTAINER);
 
         enum carbon_field_type field_type = carbon_field_type_for_column(type);
 
@@ -533,7 +533,7 @@ NG5_EXPORT(struct carbon_insert *) carbon_insert_column_begin(struct carbon_inse
         return &state_out->nested_inserter;
 }
 
-NG5_EXPORT(bool) carbon_insert_column_end(struct carbon_insert_column_state *state_in)
+ARK_EXPORT(bool) carbon_insert_column_end(struct carbon_insert_column_state *state_in)
 {
         error_if_null(state_in);
 
@@ -549,89 +549,89 @@ NG5_EXPORT(bool) carbon_insert_column_end(struct carbon_insert_column_state *sta
         return true;
 }
 
-NG5_EXPORT(bool) carbon_insert_prop_null(struct carbon_insert *inserter, const char *key)
+ARK_EXPORT(bool) carbon_insert_prop_null(struct carbon_insert *inserter, const char *key)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
         carbon_string_nomarker_write(&inserter->memfile, key);
         push_media_type_for_array(inserter, carbon_FIELD_TYPE_NULL);
         return true;
 }
 
-NG5_EXPORT(bool) carbon_insert_prop_true(struct carbon_insert *inserter, const char *key)
+ARK_EXPORT(bool) carbon_insert_prop_true(struct carbon_insert *inserter, const char *key)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
         carbon_string_nomarker_write(&inserter->memfile, key);
         push_media_type_for_array(inserter, carbon_FIELD_TYPE_TRUE);
         return true;
 }
 
-NG5_EXPORT(bool) carbon_insert_prop_false(struct carbon_insert *inserter, const char *key)
+ARK_EXPORT(bool) carbon_insert_prop_false(struct carbon_insert *inserter, const char *key)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
         carbon_string_nomarker_write(&inserter->memfile, key);
         push_media_type_for_array(inserter, carbon_FIELD_TYPE_FALSE);
         return true;
 }
 
-NG5_EXPORT(bool) carbon_insert_prop_u8(struct carbon_insert *inserter, const char *key, u8 value)
+ARK_EXPORT(bool) carbon_insert_prop_u8(struct carbon_insert *inserter, const char *key, u8 value)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
         carbon_string_nomarker_write(&inserter->memfile, key);
         return write_field_data(inserter, carbon_FIELD_TYPE_NUMBER_U8, &value, sizeof(u8));
 }
 
-NG5_EXPORT(bool) carbon_insert_prop_u16(struct carbon_insert *inserter, const char *key, u16 value)
+ARK_EXPORT(bool) carbon_insert_prop_u16(struct carbon_insert *inserter, const char *key, u16 value)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
         carbon_string_nomarker_write(&inserter->memfile, key);
         return write_field_data(inserter, carbon_FIELD_TYPE_NUMBER_U16, &value, sizeof(u16));
 }
 
-NG5_EXPORT(bool) carbon_insert_prop_u32(struct carbon_insert *inserter, const char *key, u32 value)
+ARK_EXPORT(bool) carbon_insert_prop_u32(struct carbon_insert *inserter, const char *key, u32 value)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
         carbon_string_nomarker_write(&inserter->memfile, key);
         return write_field_data(inserter, carbon_FIELD_TYPE_NUMBER_U32, &value, sizeof(u32));
 }
 
-NG5_EXPORT(bool) carbon_insert_prop_u64(struct carbon_insert *inserter, const char *key, u64 value)
+ARK_EXPORT(bool) carbon_insert_prop_u64(struct carbon_insert *inserter, const char *key, u64 value)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
         carbon_string_nomarker_write(&inserter->memfile, key);
         return write_field_data(inserter, carbon_FIELD_TYPE_NUMBER_U64, &value, sizeof(u64));
 }
 
-NG5_EXPORT(bool) carbon_insert_prop_i8(struct carbon_insert *inserter, const char *key, i8 value)
+ARK_EXPORT(bool) carbon_insert_prop_i8(struct carbon_insert *inserter, const char *key, i8 value)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
         carbon_string_nomarker_write(&inserter->memfile, key);
         return write_field_data(inserter, carbon_FIELD_TYPE_NUMBER_I8, &value, sizeof(i8));
 }
 
-NG5_EXPORT(bool) carbon_insert_prop_i16(struct carbon_insert *inserter, const char *key, i16 value)
+ARK_EXPORT(bool) carbon_insert_prop_i16(struct carbon_insert *inserter, const char *key, i16 value)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
         carbon_string_nomarker_write(&inserter->memfile, key);
         return write_field_data(inserter, carbon_FIELD_TYPE_NUMBER_I16, &value, sizeof(i16));
 }
 
-NG5_EXPORT(bool) carbon_insert_prop_i32(struct carbon_insert *inserter, const char *key, i32 value)
+ARK_EXPORT(bool) carbon_insert_prop_i32(struct carbon_insert *inserter, const char *key, i32 value)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
         carbon_string_nomarker_write(&inserter->memfile, key);
         return write_field_data(inserter, carbon_FIELD_TYPE_NUMBER_I32, &value, sizeof(i32));
 }
 
-NG5_EXPORT(bool) carbon_insert_prop_i64(struct carbon_insert *inserter, const char *key, i64 value)
+ARK_EXPORT(bool) carbon_insert_prop_i64(struct carbon_insert *inserter, const char *key, i64 value)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
         carbon_string_nomarker_write(&inserter->memfile, key);
         return write_field_data(inserter, carbon_FIELD_TYPE_NUMBER_I64, &value, sizeof(i64));
 }
 
-NG5_EXPORT(bool) carbon_insert_prop_unsigned(struct carbon_insert *inserter, const char *key, u64 value)
+ARK_EXPORT(bool) carbon_insert_prop_unsigned(struct carbon_insert *inserter, const char *key, u64 value)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER)
+        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER)
 
         if (value <= carbon_U8_MAX) {
                 return carbon_insert_prop_u8(inserter, key, (u8) value);
@@ -642,15 +642,15 @@ NG5_EXPORT(bool) carbon_insert_prop_unsigned(struct carbon_insert *inserter, con
         } else if (value <= carbon_U64_MAX) {
                 return carbon_insert_prop_u64(inserter, key, (u64) value);
         } else {
-                error(&inserter->err, NG5_ERR_INTERNALERR);
+                error(&inserter->err, ARK_ERR_INTERNALERR);
                 return false;
         }
         return true;
 }
 
-NG5_EXPORT(bool) carbon_insert_prop_signed(struct carbon_insert *inserter, const char *key, i64 value)
+ARK_EXPORT(bool) carbon_insert_prop_signed(struct carbon_insert *inserter, const char *key, i64 value)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER)
+        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER)
 
         if (value >= carbon_I8_MIN && value <= carbon_I8_MAX) {
                 return carbon_insert_prop_i8(inserter, key, (i8) value);
@@ -661,75 +661,75 @@ NG5_EXPORT(bool) carbon_insert_prop_signed(struct carbon_insert *inserter, const
         } else if (value >= carbon_I64_MIN && value <= carbon_I64_MAX) {
                 return carbon_insert_prop_i64(inserter, key, (i64) value);
         } else {
-                error(&inserter->err, NG5_ERR_INTERNALERR);
+                error(&inserter->err, ARK_ERR_INTERNALERR);
                 return false;
         }
         return true;
 }
 
-NG5_EXPORT(bool) carbon_insert_prop_float(struct carbon_insert *inserter, const char *key, float value)
+ARK_EXPORT(bool) carbon_insert_prop_float(struct carbon_insert *inserter, const char *key, float value)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
         carbon_string_nomarker_write(&inserter->memfile, key);
         return write_field_data(inserter, carbon_FIELD_TYPE_NUMBER_FLOAT, &value, sizeof(float));
 }
 
-NG5_EXPORT(bool) carbon_insert_prop_string(struct carbon_insert *inserter, const char *key, const char *value)
+ARK_EXPORT(bool) carbon_insert_prop_string(struct carbon_insert *inserter, const char *key, const char *value)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
         carbon_string_nomarker_write(&inserter->memfile, key);
         return carbon_string_write(&inserter->memfile, value);
 }
 
-NG5_EXPORT(bool) carbon_insert_prop_binary(struct carbon_insert *inserter, const char *key, const void *value,
+ARK_EXPORT(bool) carbon_insert_prop_binary(struct carbon_insert *inserter, const char *key, const void *value,
         size_t nbytes, const char *file_ext, const char *user_type)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
         carbon_string_nomarker_write(&inserter->memfile, key);
         insert_binary(inserter, value, nbytes, file_ext, user_type);
         return true;
 }
 
-NG5_EXPORT(struct carbon_insert *) carbon_insert_prop_object_begin(struct carbon_insert_object_state *out,
+ARK_EXPORT(struct carbon_insert *) carbon_insert_prop_object_begin(struct carbon_insert_object_state *out,
         struct carbon_insert *inserter, const char *key, u64 object_capacity)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
         carbon_string_nomarker_write(&inserter->memfile, key);
         return carbon_insert_object_begin(out, inserter, object_capacity);
 }
 
-NG5_EXPORT(bool) carbon_insert_prop_object_end(struct carbon_insert_object_state *state)
+ARK_EXPORT(bool) carbon_insert_prop_object_end(struct carbon_insert_object_state *state)
 {
         return carbon_insert_object_end(state);
 }
 
-NG5_EXPORT(struct carbon_insert *) carbon_insert_prop_array_begin(struct carbon_insert_array_state *state,
+ARK_EXPORT(struct carbon_insert *) carbon_insert_prop_array_begin(struct carbon_insert_array_state *state,
         struct carbon_insert *inserter, const char *key, u64 array_capacity)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, NG5_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
         carbon_string_nomarker_write(&inserter->memfile, key);
         return carbon_insert_array_begin(state, inserter, array_capacity);
 }
 
-NG5_EXPORT(bool) carbon_insert_prop_array_end(struct carbon_insert_array_state *state)
+ARK_EXPORT(bool) carbon_insert_prop_array_end(struct carbon_insert_array_state *state)
 {
         return carbon_insert_array_end(state);
 }
 
-NG5_EXPORT(struct carbon_insert *) carbon_insert_prop_column_begin(struct carbon_insert_column_state *state_out,
+ARK_EXPORT(struct carbon_insert *) carbon_insert_prop_column_begin(struct carbon_insert_column_state *state_out,
         struct carbon_insert *inserter_in, const char *key, enum carbon_column_type type, u64 column_capacity)
 {
-        error_if(inserter_in->context_type != carbon_OBJECT, &inserter_in->err, NG5_ERR_UNSUPPCONTAINER);
+        error_if(inserter_in->context_type != carbon_OBJECT, &inserter_in->err, ARK_ERR_UNSUPPCONTAINER);
         carbon_string_nomarker_write(&inserter_in->memfile, key);
         return carbon_insert_column_begin(state_out, inserter_in, type, column_capacity);
 }
 
-NG5_EXPORT(bool) carbon_insert_prop_column_end(struct carbon_insert_column_state *state_in)
+ARK_EXPORT(bool) carbon_insert_prop_column_end(struct carbon_insert_column_state *state_in)
 {
         return carbon_insert_column_end(state_in);
 }
 
-NG5_EXPORT(bool) carbon_insert_drop(struct carbon_insert *inserter)
+ARK_EXPORT(bool) carbon_insert_drop(struct carbon_insert *inserter)
 {
         error_if_null(inserter)
         if (inserter->context_type == carbon_ARRAY) {
@@ -739,7 +739,7 @@ NG5_EXPORT(bool) carbon_insert_drop(struct carbon_insert *inserter)
         } else if (inserter->context_type == carbon_OBJECT) {
                 carbon_object_it_unlock(inserter->context.object);
         } else {
-                error(&inserter->err, NG5_ERR_INTERNALERR);
+                error(&inserter->err, ARK_ERR_INTERNALERR);
         }
 
         return true;

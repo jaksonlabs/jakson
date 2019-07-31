@@ -24,7 +24,7 @@
 #include <ark-js/shared/stdx/slicelist.h>
 #include <ark-js/shared/hash/bern.h>
 
-#define HASHCODE_OF(key)      NG5_HASH_BERNSTEIN(strlen(key), key)
+#define HASHCODE_OF(key)      ARK_HASH_BERNSTEIN(strlen(key), key)
 
 #define SMART_MAP_TAG "strhash-mem"
 
@@ -71,7 +71,7 @@ static int bucket_insert(struct bucket *bucket, const char *restrict key, field_
 bool strhash_create_inmemory(struct strhash *parallel_map_exec, const struct allocator *alloc, size_t num_buckets,
         size_t cap_buckets)
 {
-        ng5_check_success(alloc_this_or_std(&parallel_map_exec->allocator, alloc));
+        ark_check_success(alloc_this_or_std(&parallel_map_exec->allocator, alloc));
 
         num_buckets = num_buckets < 1 ? 1 : num_buckets;
         cap_buckets = cap_buckets < 1 ? 1 : cap_buckets;
@@ -91,7 +91,7 @@ bool strhash_create_inmemory(struct strhash *parallel_map_exec, const struct all
         error_init(&parallel_map_exec->err);
 
         strhash_reset_counters(parallel_map_exec);
-        ng5_check_success(this_create_extra(parallel_map_exec, num_buckets, cap_buckets));
+        ark_check_success(this_create_extra(parallel_map_exec, num_buckets, cap_buckets));
         return true;
 }
 
@@ -100,7 +100,7 @@ static int this_drop(struct strhash *self)
         assert(self->tag == MEMORY_RESIDENT);
         struct mem_extra *extra = this_get_exta(self);
         struct bucket *data = (struct bucket *) vec_data(&extra->buckets);
-        ng5_check_success(bucket_drop(data, extra->buckets.cap_elems, &self->allocator));
+        ark_check_success(bucket_drop(data, extra->buckets.cap_elems, &self->allocator));
         vec_drop(&extra->buckets);
         alloc_free(&self->allocator, self->extra);
         return true;
@@ -124,14 +124,14 @@ static int this_put_safe_bulk(struct strhash *self, char *const *keys, const fie
         prefetch_read(keys);
         prefetch_read(values);
 
-        ng5_check_success(this_insert_bulk(&extra->buckets,
+        ark_check_success(this_insert_bulk(&extra->buckets,
                 keys,
                 values,
                 bucket_idxs,
                 num_pairs,
                 &self->allocator,
                 &self->counters));
-        ng5_check_success(alloc_free(&self->allocator, bucket_idxs));
+        ark_check_success(alloc_free(&self->allocator, bucket_idxs));
         return true;
 }
 
@@ -145,7 +145,7 @@ static int this_put_safe_exact(struct strhash *self, const char *key, field_sid_
 
         prefetch_read(key);
 
-        ng5_check_success(this_insert_exact(&extra->buckets,
+        ark_check_success(this_insert_exact(&extra->buckets,
                 key,
                 value,
                 bucket_idx,
@@ -185,7 +185,7 @@ static int this_fetch_bulk(struct vector ofType(bucket) *buckets, field_sid_t *v
                         slice_list_lookup(&result_handle, &bucket->slice_list, key);
                 } else {
                         result_handle.is_contained = true;
-                        result_handle.value = NG5_NULL_ENCODED_STRING;
+                        result_handle.value = ARK_NULL_ENCODED_STRING;
                 }
 
                 num_not_found += result_handle.is_contained ? 0 : 1;
@@ -224,13 +224,13 @@ static int this_get_safe(struct strhash *self, field_sid_t **out, bool **found_m
         assert(self->tag == MEMORY_RESIDENT);
 
         timestamp_t begin = time_now_wallclock();
-        ng5_trace(SMART_MAP_TAG, "'get_safe' function invoked for %zu strings", num_keys)
+        ark_trace(SMART_MAP_TAG, "'get_safe' function invoked for %zu strings", num_keys)
 
         struct allocator hashtable_alloc;
-#if defined(NG5_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
+#if defined(ARK_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
         CHECK_SUCCESS(allocator_TRACE(&hashtable_alloc));
 #else
-        ng5_check_success(alloc_this_or_std(&hashtable_alloc, &self->allocator));
+        ark_check_success(alloc_this_or_std(&hashtable_alloc, &self->allocator));
 #endif
 
         struct mem_extra *extra = this_get_exta(self);
@@ -249,8 +249,8 @@ static int this_get_safe(struct strhash *self, field_sid_t **out, bool **found_m
                 prefetch_read((struct bucket *) vec_data(&extra->buckets) + bucket_idxs[i]);
         }
 
-        ng5_trace(SMART_MAP_TAG, "'get_safe' function invoke fetch...for %zu strings", num_keys)
-        ng5_check_success(this_fetch_bulk(&extra->buckets,
+        ark_trace(SMART_MAP_TAG, "'get_safe' function invoke fetch...for %zu strings", num_keys)
+        ark_check_success(this_fetch_bulk(&extra->buckets,
                 values_out,
                 found_mask_out,
                 num_not_found,
@@ -259,8 +259,8 @@ static int this_get_safe(struct strhash *self, field_sid_t **out, bool **found_m
                 num_keys,
                 &self->allocator,
                 &self->counters));
-        ng5_check_success(alloc_free(&self->allocator, bucket_idxs));
-        ng5_trace(SMART_MAP_TAG, "'get_safe' function invok fetch: done for %zu strings", num_keys)
+        ark_check_success(alloc_free(&self->allocator, bucket_idxs));
+        ark_trace(SMART_MAP_TAG, "'get_safe' function invok fetch: done for %zu strings", num_keys)
 
         assert(values_out != NULL);
         assert(found_mask_out != NULL);
@@ -271,7 +271,7 @@ static int this_get_safe(struct strhash *self, field_sid_t **out, bool **found_m
         timestamp_t end = time_now_wallclock();
         unused(begin);
         unused(end);
-        ng5_trace(SMART_MAP_TAG, "'get_safe' function done: %f seconds spent here", (end - begin) / 1000.0f)
+        ark_trace(SMART_MAP_TAG, "'get_safe' function done: %f seconds spent here", (end - begin) / 1000.0f)
 
         return true;
 }
@@ -281,10 +281,10 @@ static int this_get_safe_exact(struct strhash *self, field_sid_t *out, bool *fou
         assert(self->tag == MEMORY_RESIDENT);
 
         struct allocator hashtable_alloc;
-#if defined(NG5_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
+#if defined(ARK_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
         CHECK_SUCCESS(allocator_TRACE(&hashtable_alloc));
 #else
-        ng5_check_success(alloc_this_or_std(&hashtable_alloc, &self->allocator));
+        ark_check_success(alloc_this_or_std(&hashtable_alloc, &self->allocator));
 #endif
 
         struct mem_extra *extra = this_get_exta(self);
@@ -293,7 +293,7 @@ static int this_get_safe_exact(struct strhash *self, field_sid_t *out, bool *fou
         size_t bucket_idx = hash % extra->buckets.cap_elems;
         prefetch_read((struct bucket *) vec_data(&extra->buckets) + bucket_idx);
 
-        ng5_check_success(this_fetch_single(&extra->buckets, out, found_mask, bucket_idx, key, &self->counters));
+        ark_check_success(this_fetch_single(&extra->buckets, out, found_mask, bucket_idx, key, &self->counters));
 
         return true;
 }
@@ -313,7 +313,7 @@ static int this_update_key_fast(struct strhash *self, const field_sid_t *values,
         unused(values);
         unused(keys);
         unused(num_keys);
-        error(&self->err, NG5_ERR_NOTIMPL);
+        error(&self->err, ARK_ERR_NOTIMPL);
         error_print_to_stderr(&self->err);
         return false;
 }
@@ -352,19 +352,19 @@ static int this_remove(struct strhash *self, char *const *keys, size_t num_keys)
                 bucket_idxs[i] = hash % extra->buckets.cap_elems;
         }
 
-        ng5_check_success(simple_map_remove(extra, bucket_idxs, keys, num_keys, &self->allocator, &self->counters));
-        ng5_check_success(alloc_free(&self->allocator, bucket_idxs));
+        ark_check_success(simple_map_remove(extra, bucket_idxs, keys, num_keys, &self->allocator, &self->counters));
+        ark_check_success(alloc_free(&self->allocator, bucket_idxs));
         return true;
 }
 
 static int this_free(struct strhash *self, void *ptr)
 {
         assert(self->tag == MEMORY_RESIDENT);
-        ng5_check_success(alloc_free(&self->allocator, ptr));
+        ark_check_success(alloc_free(&self->allocator, ptr));
         return true;
 }
 
-ng5_func_unused
+ark_func_unused
 static int this_create_extra(struct strhash *self, size_t num_buckets, size_t cap_buckets)
 {
         if ((self->extra = alloc_malloc(&self->allocator, sizeof(struct mem_extra))) != NULL) {
@@ -375,22 +375,22 @@ static int this_create_extra(struct strhash *self, size_t num_buckets, size_t ca
                 vec_memadvice(&extra->buckets, MADV_RANDOM | MADV_WILLNEED);
 
                 struct bucket *data = (struct bucket *) vec_data(&extra->buckets);
-                ng5_check_success(bucket_create(data, num_buckets, cap_buckets, &self->allocator));
+                ark_check_success(bucket_create(data, num_buckets, cap_buckets, &self->allocator));
                 return true;
         } else {
-                error(&self->err, NG5_ERR_MALLOCERR);
+                error(&self->err, ARK_ERR_MALLOCERR);
                 return false;
         }
 }
 
-ng5_func_unused
+ark_func_unused
 static struct mem_extra *this_get_exta(struct strhash *self)
 {
         assert (self->tag == MEMORY_RESIDENT);
         return (struct mem_extra *) (self->extra);
 }
 
-ng5_func_unused
+ark_func_unused
 static int bucket_create(struct bucket *buckets, size_t num_buckets, size_t bucket_cap, struct allocator *alloc)
 {
         error_if_null(buckets);

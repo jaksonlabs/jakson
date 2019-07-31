@@ -15,8 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_COMMON_H
-#define NG5_COMMON_H
+#ifndef ARK_COMMON_H
+#define ARK_COMMON_H
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -29,31 +29,31 @@
 #include <assert.h>
 
 #ifdef __cplusplus
-#define NG5_BEGIN_DECL  extern "C" {
-#define NG5_END_DECL    }
+#define ARK_BEGIN_DECL  extern "C" {
+#define ARK_END_DECL    }
 #else
-#define NG5_BEGIN_DECL
-#define NG5_END_DECL
+#define ARK_BEGIN_DECL
+#define ARK_END_DECL
 #endif
 
-#ifndef NG5_EXPORT
-#ifndef NG5_STATIC
+#ifndef ARK_EXPORT
+#ifndef ARK_STATIC
 #ifdef _WIN32
-#define NG5_EXPORT(x) __declspec(dllimport) x
+#define ARK_EXPORT(x) __declspec(dllimport) x
 #elif defined(__GNUC__) && __GNUC__ >= 4
-#define NG5_EXPORT(x) __attribute__((visibility("default"))) x
+#define ARK_EXPORT(x) __attribute__((visibility("default"))) x
 #else
-#define NG5_EXPORT(x) x
+#define ARK_EXPORT(x) x
 #endif
 #else
-#define NG5_EXPORT(x) x
+#define ARK_EXPORT(x) x
 #endif
 #endif
 
-#define NG5_QUERY_LIMIT_NONE -1
-#define NG5_QUERY_LIMIT_1     1
+#define ARK_QUERY_LIMIT_NONE -1
+#define ARK_QUERY_LIMIT_1     1
 
-#define NG5_ARRAY_LENGTH(x)                                                                                            \
+#define ARK_ARRAY_LENGTH(x)                                                                                            \
     sizeof(x)/sizeof(x[0])
 
 typedef uint64_t offset_t;
@@ -81,9 +81,9 @@ enum access_mode {
         READ_ONLY
 };
 
-#define ng5_func_unused __attribute__((unused))
+#define ark_func_unused __attribute__((unused))
 
-ng5_func_unused static const char *basic_type_to_json_type_str(enum field_type t)
+ark_func_unused static const char *basic_type_to_json_type_str(enum field_type t)
 {
         switch (t) {
         case FIELD_INT8:
@@ -110,7 +110,7 @@ ng5_func_unused static const char *basic_type_to_json_type_str(enum field_type t
         }
 }
 
-ng5_func_unused static const char *basic_type_to_system_type_str(enum field_type t)
+ark_func_unused static const char *basic_type_to_system_type_str(enum field_type t)
 {
         switch (t) {
         case FIELD_INT8:
@@ -144,31 +144,31 @@ ng5_func_unused static const char *basic_type_to_system_type_str(enum field_type
         }
 }
 
-#define NG5_NOT_IMPLEMENTED                                                                                            \
+#define ARK_NOT_IMPLEMENTED                                                                                            \
 {                                                                                                                      \
     struct err err;                                                                                                    \
     error_init(&err);                                                                                                  \
-    error(&err, NG5_ERR_NOTIMPLEMENTED)                                                                                \
+    error(&err, ARK_ERR_NOTIMPLEMENTED)                                                                                \
     error_print_and_abort(&err);                                                                                       \
     return false;                                                                                                      \
 };
 
 #ifndef NDEBUG
-#define ng5_check_tag(is, expected)                                                                                 \
+#define ark_check_tag(is, expected)                                                                                 \
 {                                                                                                                      \
     if (is != expected) {                                                                                              \
-        error_print(NG5_ERR_ERRINTERNAL)                                                                     \
+        error_print(ARK_ERR_ERRINTERNAL)                                                                     \
         return false;                                                                                                  \
     }                                                                                                                  \
 }
 #else
-#define ng5_check_tag(is, expected) { }
+#define ark_check_tag(is, expected) { }
 #endif
 
-#if !defined(NG5_LOG_TRACE) || defined(NDEBUG)
-#define ng5_trace(tag, msg, ...) { }
+#if !defined(ARK_LOG_TRACE) || defined(NDEBUG)
+#define ark_trace(tag, msg, ...) { }
 #else
-#define ng5_trace(tag, msg, ...)                                                                                    \
+#define ark_trace(tag, msg, ...)                                                                                    \
 {                                                                                                                      \
     char buffer[1024];                                                                                                 \
     sprintf(buffer, "--%d-- [TRACE   : %-10s] %s\n", getpid(), tag, msg);                                              \
@@ -177,10 +177,10 @@ ng5_func_unused static const char *basic_type_to_system_type_str(enum field_type
 }
 #endif
 
-#if !defined(NG5_LOG_INFO) || defined(NDEBUG)
-#define ng5_info(tag, msg, ...) { }
+#if !defined(ARK_LOG_INFO) || defined(NDEBUG)
+#define ark_info(tag, msg, ...) { }
 #else
-#define ng5_info(tag, msg, ...)                                                                                     \
+#define ark_info(tag, msg, ...)                                                                                     \
 {                                                                                                                      \
     char buffer[1024];                                                                                                 \
     sprintf(buffer, "--%d-- [INFO    : %-10s] %s\n", getpid(), tag, msg);                                              \
@@ -189,11 +189,11 @@ ng5_func_unused static const char *basic_type_to_system_type_str(enum field_type
 }
 #endif
 
-#if !defined(NG5_LOG_DEBUG) || defined(NDEBUG)
-#define ng5_debug(tag, msg, ...)                                                                                       \
+#if !defined(ARK_LOG_DEBUG) || defined(NDEBUG)
+#define ark_debug(tag, msg, ...)                                                                                       \
 { }
 #else
-#define ng5_debug(tag, msg, ...)                                                                                    \
+#define ark_debug(tag, msg, ...)                                                                                    \
 {                                                                                                                      \
     char buffer[1024];                                                                                                 \
     sprintf(buffer, "--%d-- [DEBUG   : %-10s] %s\n", getpid(), tag, msg);                                              \
@@ -202,10 +202,10 @@ ng5_func_unused static const char *basic_type_to_system_type_str(enum field_type
 }
 #endif
 
-#if !defined(NG5_LOG_WARN) || defined(NDEBUG)
-#define ng5_warn(tag, msg, ...) { }
+#if !defined(ARK_LOG_WARN) || defined(NDEBUG)
+#define ark_warn(tag, msg, ...) { }
 #else
-#define ng5_warn(tag, msg, ...)                                                                                     \
+#define ark_warn(tag, msg, ...)                                                                                     \
     {                                                                                                                  \
         char buffer[1024];                                                                                             \
         sprintf(buffer, "--%d-- [WARNING: %-10s] %s\n", getpid(), tag, msg);                                           \
@@ -254,25 +254,25 @@ ng5_func_unused static const char *basic_type_to_system_type_str(enum field_type
 #define  MARKER_SYMBOL_HASHTABLE_HEADER    '#'
 #define  MARKER_SYMBOL_VECTOR_HEADER       '|'
 
-#define ng5_zero_memory(dst, len)                                                                                      \
+#define ark_zero_memory(dst, len)                                                                                      \
     memset((void *) dst, 0, len);
 
-#define ng5_cast(type, name, src)                                                                                      \
+#define ark_cast(type, name, src)                                                                                      \
       type name = (type) src
 
 #define unused(x)   (void)(x);
 
-#define NG5_BUILT_IN(x)   ng5_func_unused x
+#define ARK_BUILT_IN(x)   ark_func_unused x
 
 #define ofType(x) /** a convenience way to write types for generic containers; no effect than just a visual one */
 #define ofMapping(x, y) /** a convenience way to write types for generic containers; no effect than just a visual one */
 
-#define ng5_optional_call(x, func, ...) if((x) && (x)->func) { (x)->func(__VA_ARGS__); }
+#define ark_optional_call(x, func, ...) if((x) && (x)->func) { (x)->func(__VA_ARGS__); }
 
-#define ng5_max(a, b)                                                                                                  \
+#define ark_max(a, b)                                                                                                  \
     ((b) > (a) ? (b) : (a))
 
-#define ng5_min(a, b)                                                                                                  \
+#define ark_min(a, b)                                                                                                  \
     ((a) < (b) ? (a) : (b))
 
 #define error_if_null(x)                                                                                               \
@@ -280,20 +280,20 @@ ng5_func_unused static const char *basic_type_to_system_type_str(enum field_type
     if (!(x)) {                                                                                                        \
         struct err err;                                                                                                \
         error_init(&err);                                                                                              \
-        error(&err, NG5_ERR_NULLPTR);                                                                                  \
+        error(&err, ARK_ERR_NULLPTR);                                                                                  \
         error_print_to_stderr(&err);                                                                                   \
         return false;                                                                                                  \
     }                                                                                                                  \
 }
 
-#define ng5_check_success(x)                                                                                           \
+#define ark_check_success(x)                                                                                           \
 {                                                                                                                      \
     if (unlikely(!x)) {                                                                                                \
         return x;                                                                                                      \
     }                                                                                                                  \
 }
 
-#define ng5_success_or_jump(expr, label)                                                                               \
+#define ark_success_or_jump(expr, label)                                                                               \
 {                                                                                                                      \
     if (unlikely(!expr)) {                                                                                             \
         goto label;                                                                                                    \
@@ -311,37 +311,37 @@ ng5_func_unused static const char *basic_type_to_system_type_str(enum field_type
 #define prefetch_write(adr)                                                                                            \
     __builtin_prefetch(adr, 1, 3)
 
-#define NG5_FORWARD_STRUCT_DECL(x) struct x;
+#define ARK_FORWARD_STRUCT_DECL(x) struct x;
 
-#define ng5_bit_num_of(x)             (sizeof(x) * 8)
-#define ng5_set_bit(n)                ( ((u32) 1) << (n) )
-#define ng5_set_bits(x, mask)         ( x |=  (mask) )
-#define ng5_unset_bits(x, mask)       ( x &= ~(mask) )
-#define ng5_are_bits_set(mask, bit)   (((bit) & mask ) == (bit))
+#define ark_bit_num_of(x)             (sizeof(x) * 8)
+#define ark_set_bit(n)                ( ((u32) 1) << (n) )
+#define ark_set_bits(x, mask)         ( x |=  (mask) )
+#define ark_unset_bits(x, mask)       ( x &= ~(mask) )
+#define ark_are_bits_set(mask, bit)   (((bit) & mask ) == (bit))
 
-#define ng5_implemented_or_error(err, x, func)                                                                         \
-    ng5_optional(x->func == NULL, error(err, NG5_ERR_NOTIMPLEMENTED))
+#define ark_implemented_or_error(err, x, func)                                                                         \
+    ark_optional(x->func == NULL, error(err, ARK_ERR_NOTIMPLEMENTED))
 
-#define ng5_optional(expr, stmt)                                                                                       \
+#define ark_optional(expr, stmt)                                                                                       \
     if (expr) { stmt; }
 
-#define ng5_optional_set(x, y)                                                                                         \
-     ng5_optional(x, *x = y)
+#define ark_optional_set(x, y)                                                                                         \
+     ark_optional(x, *x = y)
 
-#define ng5_optional_set_or_else(x, y, stmt)                                                                           \
+#define ark_optional_set_or_else(x, y, stmt)                                                                           \
     if (x) {                                                                                                           \
         *x = y;                                                                                                        \
     } else { stmt; }
 
 bool GlobalEnableConsoleOutput;
 
-#define NG5_CONSOLE_OUTPUT_ON()                                                                                        \
+#define ARK_CONSOLE_OUTPUT_ON()                                                                                        \
     GlobalEnableConsoleOutput = true;
 
-#define NG5_CONSOLE_OUTPUT_OFF()                                                                                       \
+#define ARK_CONSOLE_OUTPUT_OFF()                                                                                       \
     GlobalEnableConsoleOutput = false;
 
-#define NG5_CONSOLE_WRITE(file, msg, ...)                                                                              \
+#define ARK_CONSOLE_WRITE(file, msg, ...)                                                                              \
 {                                                                                                                      \
     if (GlobalEnableConsoleOutput) {                                                                                   \
         pid_t pid = getpid();                                                                                          \
@@ -356,25 +356,25 @@ bool GlobalEnableConsoleOutput;
     }                                                                                                                  \
 }
 
-#define NG5_CONSOLE_WRITE_ENDL(file)                                                                                   \
+#define ARK_CONSOLE_WRITE_ENDL(file)                                                                                   \
 {                                                                                                                      \
     if (GlobalEnableConsoleOutput) {                                                                                   \
         fprintf(file, "\n");                                                                                           \
     }                                                                                                                  \
 }
 
-#define NG5_CONSOLE_WRITE_CONT(file, msg, ...)                                                                         \
+#define ARK_CONSOLE_WRITE_CONT(file, msg, ...)                                                                         \
 {                                                                                                                      \
     if (GlobalEnableConsoleOutput) {                                                                                   \
         fprintf(file, msg, __VA_ARGS__);                                                                               \
     }                                                                                                                  \
 }
 
-#define NG5_CONSOLE_WRITELN(file, msg, ...)                                                                            \
+#define ARK_CONSOLE_WRITELN(file, msg, ...)                                                                            \
 {                                                                                                                      \
     if (GlobalEnableConsoleOutput) {                                                                                   \
-        NG5_CONSOLE_WRITE(file, msg, __VA_ARGS__)                                                                      \
-        NG5_CONSOLE_WRITE_ENDL(file)                                                                                   \
+        ARK_CONSOLE_WRITE(file, msg, __VA_ARGS__)                                                                      \
+        ARK_CONSOLE_WRITE_ENDL(file)                                                                                   \
         fflush(file);                                                                                                  \
     }                                                                                                                  \
 }

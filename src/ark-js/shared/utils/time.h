@@ -15,18 +15,18 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_TIME_H
-#define NG5_TIME_H
+#ifndef ARK_TIME_H
+#define ARK_TIME_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/types.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
 typedef u64 timestamp_t;
 
-NG5_EXPORT(timestamp_t) time_now_wallclock();
+ARK_EXPORT(timestamp_t) time_now_wallclock();
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

@@ -19,13 +19,13 @@
 #include <lzma.h>
 #include <ark-js/shared/stdx/bitmap.h>
 
-NG5_EXPORT(bool) bitmap_create(struct bitmap *bitmap, u16 num_bits)
+ARK_EXPORT(bool) bitmap_create(struct bitmap *bitmap, u16 num_bits)
 {
         error_if_null(bitmap);
 
         struct allocator alloc;
         alloc_create_std(&alloc);
-        vec_create(&bitmap->data, &alloc, sizeof(u32), ceil(num_bits / (double) ng5_bit_num_of(u32)));
+        vec_create(&bitmap->data, &alloc, sizeof(u32), ceil(num_bits / (double) ark_bit_num_of(u32)));
         size_t cap = vec_capacity(&bitmap->data);
         u32 zero = 0;
         vec_repeated_push(&bitmap->data, &zero, cap);
@@ -34,13 +34,13 @@ NG5_EXPORT(bool) bitmap_create(struct bitmap *bitmap, u16 num_bits)
         return true;
 }
 
-NG5_EXPORT(bool) bitmap_cpy(struct bitmap *dst, const struct bitmap *src)
+ARK_EXPORT(bool) bitmap_cpy(struct bitmap *dst, const struct bitmap *src)
 {
         dst->num_bits = src->num_bits;
         return vec_cpy(&dst->data, &src->data);
 }
 
-NG5_EXPORT(bool) bitmap_drop(struct bitmap *bitset)
+ARK_EXPORT(bool) bitmap_drop(struct bitmap *bitset)
 {
         return vec_drop(&bitset->data);
 }
@@ -51,7 +51,7 @@ size_t bitmap_nbits(const struct bitmap *bitset)
         return bitset->num_bits;
 }
 
-NG5_EXPORT(bool) bitmap_clear(struct bitmap *bitset)
+ARK_EXPORT(bool) bitmap_clear(struct bitmap *bitset)
 {
         error_if_null(bitset);
         void *data = (void *) vec_data(&bitset->data);
@@ -59,17 +59,17 @@ NG5_EXPORT(bool) bitmap_clear(struct bitmap *bitset)
         return true;
 }
 
-NG5_EXPORT(bool) bitmap_set(struct bitmap *bitset, u16 bit_position, bool on)
+ARK_EXPORT(bool) bitmap_set(struct bitmap *bitset, u16 bit_position, bool on)
 {
         error_if_null(bitset)
-        size_t block_pos = floor(bit_position / (double) ng5_bit_num_of(u32));
-        size_t block_bit = bit_position % ng5_bit_num_of(u32);
+        size_t block_pos = floor(bit_position / (double) ark_bit_num_of(u32));
+        size_t block_bit = bit_position % ark_bit_num_of(u32);
         u32 block = *vec_get(&bitset->data, block_pos, u32);
-        u32 mask = ng5_set_bit(block_bit);
+        u32 mask = ark_set_bit(block_bit);
         if (on) {
-                ng5_set_bits(block, mask);
+                ark_set_bits(block, mask);
         } else {
-                ng5_unset_bits(block, mask);
+                ark_unset_bits(block, mask);
         }
         vec_set(&bitset->data, block_pos, &block);
         return true;
@@ -78,14 +78,14 @@ NG5_EXPORT(bool) bitmap_set(struct bitmap *bitset, u16 bit_position, bool on)
 bool bitmap_get(struct bitmap *bitset, u16 bit_position)
 {
         error_if_null(bitset)
-        size_t block_pos = floor(bit_position / (double) ng5_bit_num_of(u32));
-        size_t block_bit = bit_position % ng5_bit_num_of(u32);
+        size_t block_pos = floor(bit_position / (double) ark_bit_num_of(u32));
+        size_t block_bit = bit_position % ark_bit_num_of(u32);
         u32 block = *vec_get(&bitset->data, block_pos, u32);
-        u32 mask = ng5_set_bit(block_bit);
+        u32 mask = ark_set_bit(block_bit);
         return ((mask & block) >> bit_position) == true;
 }
 
-NG5_EXPORT(bool) bitmap_lshift(struct bitmap *map)
+ARK_EXPORT(bool) bitmap_lshift(struct bitmap *map)
 {
         error_if_null(map)
         for (int i = map->num_bits - 1; i >= 0; i--) {

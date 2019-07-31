@@ -26,7 +26,7 @@ struct io_context {
         offset_t last_pos;
 };
 
-NG5_EXPORT(bool) io_context_create(struct io_context **context, struct err *err, const char *file_path)
+ARK_EXPORT(bool) io_context_create(struct io_context **context, struct err *err, const char *file_path)
 {
         error_if_null(context);
         error_if_null(err);
@@ -35,7 +35,7 @@ NG5_EXPORT(bool) io_context_create(struct io_context **context, struct err *err,
         struct io_context *result = malloc(sizeof(struct io_context));
 
         if (!result) {
-                error(err, NG5_ERR_MALLOCERR);
+                error(err, ARK_ERR_MALLOCERR);
                 return false;
         }
 
@@ -45,7 +45,7 @@ NG5_EXPORT(bool) io_context_create(struct io_context **context, struct err *err,
         result->file = fopen(file_path, "r");
 
         if (!result->file) {
-                error(err, NG5_ERR_FOPEN_FAILED);
+                error(err, ARK_ERR_FOPEN_FAILED);
                 result->file = NULL;
                 return false;
         } else {
@@ -54,39 +54,39 @@ NG5_EXPORT(bool) io_context_create(struct io_context **context, struct err *err,
         }
 }
 
-NG5_EXPORT(struct err *)io_context_get_error(struct io_context *context)
+ARK_EXPORT(struct err *)io_context_get_error(struct io_context *context)
 {
         return context ? &context->err : NULL;
 }
 
-NG5_EXPORT(FILE *)io_context_lock_and_access(struct io_context *context)
+ARK_EXPORT(FILE *)io_context_lock_and_access(struct io_context *context)
 {
         if (context) {
                 spin_acquire(&context->lock);
                 context->last_pos = ftell(context->file);
                 return context->file;
         } else {
-                error(&context->err, NG5_ERR_NULLPTR);
+                error(&context->err, ARK_ERR_NULLPTR);
                 return NULL;
         }
 }
 
-NG5_EXPORT(bool) io_context_unlock(struct io_context *context)
+ARK_EXPORT(bool) io_context_unlock(struct io_context *context)
 {
         if (context) {
                 fseek(context->file, context->last_pos, SEEK_SET);
                 spin_release(&context->lock);
                 return true;
         } else {
-                error(&context->err, NG5_ERR_NULLPTR);
+                error(&context->err, ARK_ERR_NULLPTR);
                 return false;
         }
 }
 
-NG5_EXPORT(bool) io_context_drop(struct io_context *context)
+ARK_EXPORT(bool) io_context_drop(struct io_context *context)
 {
         error_if_null(context);
-        ng5_optional(context->file != NULL, fclose(context->file);
+        ark_optional(context->file != NULL, fclose(context->file);
                 context->file = NULL)
         free(context);
         return true;

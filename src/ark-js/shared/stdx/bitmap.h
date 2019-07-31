@@ -15,43 +15,43 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_BITMAP_H
-#define NG5_BITMAP_H
+#ifndef ARK_BITMAP_H
+#define ARK_BITMAP_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/stdx/vec.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
 struct bitmap {
         struct vector ofType(u64) data;
         u16 num_bits;
 };
 
-NG5_EXPORT(bool) bitmap_create(struct bitmap *bitmap, u16 num_bits);
+ARK_EXPORT(bool) bitmap_create(struct bitmap *bitmap, u16 num_bits);
 
-NG5_EXPORT(bool) bitmap_cpy(struct bitmap *dst, const struct bitmap *src);
+ARK_EXPORT(bool) bitmap_cpy(struct bitmap *dst, const struct bitmap *src);
 
-NG5_EXPORT(bool) bitmap_drop(struct bitmap *map);
+ARK_EXPORT(bool) bitmap_drop(struct bitmap *map);
 
-NG5_EXPORT(size_t) bitmap_nbits(const struct bitmap *map);
+ARK_EXPORT(size_t) bitmap_nbits(const struct bitmap *map);
 
-NG5_EXPORT(bool) bitmap_clear(struct bitmap *map);
+ARK_EXPORT(bool) bitmap_clear(struct bitmap *map);
 
-NG5_EXPORT(bool) bitmap_set(struct bitmap *map, u16 bit_position, bool on);
+ARK_EXPORT(bool) bitmap_set(struct bitmap *map, u16 bit_position, bool on);
 
-NG5_EXPORT(bool) bitmap_get(struct bitmap *map, u16 bit_position);
+ARK_EXPORT(bool) bitmap_get(struct bitmap *map, u16 bit_position);
 
-NG5_EXPORT(bool) bitmap_lshift(struct bitmap *map);
+ARK_EXPORT(bool) bitmap_lshift(struct bitmap *map);
 
-NG5_EXPORT(bool) bitmap_print(FILE *file, const struct bitmap *map);
+ARK_EXPORT(bool) bitmap_print(FILE *file, const struct bitmap *map);
 
-NG5_EXPORT(bool) bitmap_blocks(u32 **blocks, u32 *num_blocks, const struct bitmap *map);
+ARK_EXPORT(bool) bitmap_blocks(u32 **blocks, u32 *num_blocks, const struct bitmap *map);
 
-NG5_EXPORT(void) bitmap_print_bits(FILE *file, u32 n);
+ARK_EXPORT(void) bitmap_print_bits(FILE *file, u32 n);
 
-NG5_EXPORT(void) bitmap_print_bits_in_char(FILE *file, char n);
+ARK_EXPORT(void) bitmap_print_bits_in_char(FILE *file, char n);
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

@@ -379,7 +379,7 @@ static bool print_primitive_objects(FILE *file, struct err *err, const char *typ
                 if (nonnull_expr) {                                                                                    \
                     fprintf(file, "" TYPE_FORMAT "%s", value, j + 1 < values->num_elems ? ", " : "");                  \
                 } else {                                                                                               \
-                    fprintf(file, NG5_NULL_TEXT "%s", j + 1 < values->num_elems ? ", " : "");                       \
+                    fprintf(file, ARK_NULL_TEXT "%s", j + 1 < values->num_elems ? ", " : "");                       \
                 }                                                                                                      \
             }                                                                                                          \
             fprintf(file, "]%s ", i + 1 < (&value_vector)->num_elems ? "," : "");                                      \
@@ -490,7 +490,7 @@ static void print_array_strings(FILE *file, const char *type_name, const struct 
                         for (size_t j = 0; j < values->num_elems; j++) {
                                 field_sid_t value = *vec_get(values, j, field_sid_t);
 
-                                if (likely(value != NG5_NULL_ENCODED_STRING)) {
+                                if (likely(value != ARK_NULL_ENCODED_STRING)) {
                                         char **decoded = strdic_extract(dic, &value, 1);
                                         fprintf(file, "\"%s\"%s", *decoded, j + 1 < values->num_elems ? ", " : "");
                                         strdic_free(dic, decoded);
@@ -661,7 +661,7 @@ static bool print_array_objects(FILE *file, struct err *err, const char *type_na
                                         fprintf(file, "%s", column->num_elems > 1 ? "]" : "");
                                 }
                                         break;
-                                default: error(err, NG5_ERR_NOTYPE)
+                                default: error(err, ARK_ERR_NOTYPE)
                                         return false;
                                 }
                                 fprintf(file, array_idx + 1 < columnTable->values.num_elems ? ", " : "");
@@ -787,46 +787,46 @@ static bool print_object(FILE *file, struct err *err, const struct columndoc_obj
                 object->uint8_array_prop_vals,
                 field_u8_t,
                 "%d",
-                (value != NG5_NULL_UINT8));
+                (value != ARK_NULL_UINT8));
         PRINT_ARRAY(file,
                 "UInt16",
                 object->uint16_array_prop_keys,
                 object->uint16_array_prop_vals,
                 field_u16_t,
                 "%d",
-                (value != NG5_NULL_UINT16));
+                (value != ARK_NULL_UINT16));
         PRINT_ARRAY(file,
                 "UInt32",
                 object->uint32_array_prop_keys,
                 object->uint32_array_prop_vals,
                 field_u32_t,
                 "%d",
-                (value != NG5_NULL_UINT32));
+                (value != ARK_NULL_UINT32));
         PRINT_ARRAY(file, "UInt64", object->uint64_array_prop_keys, object->ui64_array_prop_vals, field_u64_t, "%"
-                PRIu64, (value != NG5_NULL_UINT64));
+                PRIu64, (value != ARK_NULL_UINT64));
         PRINT_ARRAY(file,
                 "Int8",
                 object->int8_array_prop_keys,
                 object->int8_array_prop_vals,
                 field_i8_t,
                 "%d",
-                (value != NG5_NULL_INT8));
+                (value != ARK_NULL_INT8));
         PRINT_ARRAY(file,
                 "Int16",
                 object->int16_array_prop_keys,
                 object->int16_array_prop_vals,
                 field_i16_t,
                 "%d",
-                (value != NG5_NULL_INT16));
+                (value != ARK_NULL_INT16));
         PRINT_ARRAY(file,
                 "Int32",
                 object->int32_array_prop_keys,
                 object->int32_array_prop_vals,
                 field_i32_t,
                 "%d",
-                (value != NG5_NULL_INT32));
+                (value != ARK_NULL_INT32));
         PRINT_ARRAY(file, "Int64", object->int64_array_prop_keys, object->int64_array_prop_vals, field_i64_t, "%"
-                PRIi64, (value != NG5_NULL_INT64));
+                PRIi64, (value != ARK_NULL_INT64));
         PRINT_ARRAY(file,
                 "Real",
                 object->float_array_prop_keys,
@@ -856,7 +856,7 @@ bool columndoc_print(FILE *file, struct columndoc *doc)
 bool columndoc_drop(struct columndoc *doc)
 {
         unused(doc);
-        NG5_NOT_IMPLEMENTED
+        ARK_NOT_IMPLEMENTED
 }
 
 static void object_array_key_columns_create(struct vector ofType(struct columndoc_group) *columns)
@@ -927,7 +927,7 @@ static const char *get_type_name(struct err *err, field_e type)
         case FIELD_OBJECT:
                 return "Object";
         default: {
-                error(err, NG5_ERR_NOTYPE);
+                error(err, ARK_ERR_NOTYPE);
                 return NULL;
         }
         }
@@ -1039,7 +1039,7 @@ static bool object_array_key_column_push(struct columndoc_column *col, struct er
                 }
                 strdic_free(dic, array_key);
                 break;
-        default: error(err, NG5_ERR_NOTYPE);
+        default: error(err, ARK_ERR_NOTYPE);
                 return false;
         }
         return true;
@@ -1199,7 +1199,7 @@ static bool object_put_primitive(struct columndoc_obj *columndoc, struct err *er
                 }
         }
                 break;
-                error(err, NG5_ERR_NOTYPE)
+                error(err, ARK_ERR_NOTYPE)
                 return false;
         }
         return true;
@@ -1345,7 +1345,7 @@ static bool object_put_array(struct columndoc_obj *model, struct err *err, const
         }
                 break;
         default: {
-                error(err, NG5_ERR_NOTYPE)
+                error(err, ARK_ERR_NOTYPE)
                 return false;
         }
                 break;
@@ -1379,7 +1379,7 @@ static bool object_put(struct columndoc_obj *model, struct err *err, const struc
                         return false;
                 }
                 break;
-        default: error(err, NG5_ERR_NOTYPE)
+        default: error(err, ARK_ERR_NOTYPE)
                 return false;
         }
 

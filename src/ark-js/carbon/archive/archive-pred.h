@@ -15,12 +15,12 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_STRING_PRED_H
-#define NG5_STRING_PRED_H
+#ifndef ARK_STRING_PRED_H
+#define ARK_STRING_PRED_H
 
 #include <ark-js/shared/common.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
 typedef bool
 (*string_pred_func_t)(size_t *idxs_matching, size_t *num_matching, char **strings, size_t num_strings, void *capture);
@@ -30,14 +30,14 @@ struct string_pred_t {
         i64 limit;
 };
 
-NG5_BUILT_IN(static bool) string_pred_validate(struct err *err, const struct string_pred_t *pred)
+ARK_BUILT_IN(static bool) string_pred_validate(struct err *err, const struct string_pred_t *pred)
 {
         error_if_null(pred);
-        ng5_implemented_or_error(err, pred, func)
+        ark_implemented_or_error(err, pred, func)
         return true;
 }
 
-NG5_BUILT_IN(static bool) string_pred_eval(const struct string_pred_t *pred, size_t *idxs_matching,
+ARK_BUILT_IN(static bool) string_pred_eval(const struct string_pred_t *pred, size_t *idxs_matching,
         size_t *num_matching, char **strings, size_t num_strings, void *capture)
 {
         assert(pred);
@@ -48,7 +48,7 @@ NG5_BUILT_IN(static bool) string_pred_eval(const struct string_pred_t *pred, siz
         return pred->func(idxs_matching, num_matching, strings, num_strings, capture);
 }
 
-NG5_BUILT_IN(static bool) string_pred_get_limit(i64 *limit, const struct string_pred_t *pred)
+ARK_BUILT_IN(static bool) string_pred_get_limit(i64 *limit, const struct string_pred_t *pred)
 {
         error_if_null(limit);
         error_if_null(pred);
@@ -56,6 +56,6 @@ NG5_BUILT_IN(static bool) string_pred_get_limit(i64 *limit, const struct string_
         return true;
 }
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

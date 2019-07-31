@@ -18,49 +18,49 @@
 #include <ark-js/shared/hash/bern.h>
 #include <ark-js/shared/stdx/hash_table.h>
 
-#define HASHCODE_OF(size, x) NG5_HASH_BERNSTEIN(size, x)
+#define HASHCODE_OF(size, x) ARK_HASH_BERNSTEIN(size, x)
 #define FIX_MAP_AUTO_REHASH_LOADFACTOR 0.9f
 
-NG5_EXPORT(bool) hashtable_create(struct hashtable *map, struct err *err, size_t key_size, size_t value_size,
+ARK_EXPORT(bool) hashtable_create(struct hashtable *map, struct err *err, size_t key_size, size_t value_size,
         size_t capacity)
 {
         error_if_null(map)
         error_if_null(key_size)
         error_if_null(value_size)
 
-        int err_code = NG5_ERR_INITFAILED;
+        int err_code = ARK_ERR_INITFAILED;
 
         map->size = 0;
 
-        ng5_success_or_jump(vec_create(&map->key_data, NULL, key_size, capacity), error_handling);
-        ng5_success_or_jump(vec_create(&map->value_data, NULL, value_size, capacity), cleanup_key_data_and_error);
-        ng5_success_or_jump(vec_create(&map->table, NULL, sizeof(struct hashtable_bucket), capacity),
+        ark_success_or_jump(vec_create(&map->key_data, NULL, key_size, capacity), error_handling);
+        ark_success_or_jump(vec_create(&map->value_data, NULL, value_size, capacity), cleanup_key_data_and_error);
+        ark_success_or_jump(vec_create(&map->table, NULL, sizeof(struct hashtable_bucket), capacity),
                 cleanup_value_key_data_and_error);
-        ng5_success_or_jump(vec_enlarge_size_to_capacity(&map->table), cleanup_key_value_table_and_error);
-        ng5_success_or_jump(vec_zero_memory(&map->table), cleanup_key_value_table_and_error);
-        ng5_success_or_jump(spin_init(&map->lock), cleanup_key_value_table_and_error);
-        ng5_success_or_jump(error_init(&map->err), cleanup_key_value_table_and_error);
+        ark_success_or_jump(vec_enlarge_size_to_capacity(&map->table), cleanup_key_value_table_and_error);
+        ark_success_or_jump(vec_zero_memory(&map->table), cleanup_key_value_table_and_error);
+        ark_success_or_jump(spin_init(&map->lock), cleanup_key_value_table_and_error);
+        ark_success_or_jump(error_init(&map->err), cleanup_key_value_table_and_error);
 
         return true;
 
         cleanup_key_value_table_and_error:
         if (!vec_drop(&map->table)) {
-                err_code = NG5_ERR_DROPFAILED;
+                err_code = ARK_ERR_DROPFAILED;
         }
         cleanup_value_key_data_and_error:
         if (!vec_drop(&map->value_data)) {
-                err_code = NG5_ERR_DROPFAILED;
+                err_code = ARK_ERR_DROPFAILED;
         }
         cleanup_key_data_and_error:
         if (!vec_drop(&map->key_data)) {
-                err_code = NG5_ERR_DROPFAILED;
+                err_code = ARK_ERR_DROPFAILED;
         }
         error_handling:
         error(err, err_code);
         return false;
 }
 
-NG5_EXPORT(bool) hashtable_drop(struct hashtable *map)
+ARK_EXPORT(bool) hashtable_drop(struct hashtable *map)
 {
         error_if_null(map)
 
@@ -71,13 +71,13 @@ NG5_EXPORT(bool) hashtable_drop(struct hashtable *map)
         status &= vec_drop(&map->key_data);
 
         if (!status) {
-                error(&map->err, NG5_ERR_DROPFAILED);
+                error(&map->err, ARK_ERR_DROPFAILED);
         }
 
         return status;
 }
 
-NG5_EXPORT(struct hashtable *)hashtable_cpy(struct hashtable *src)
+ARK_EXPORT(struct hashtable *)hashtable_cpy(struct hashtable *src)
 {
         if (src) {
                 struct hashtable *cpy = malloc(sizeof(struct hashtable));
@@ -109,12 +109,12 @@ NG5_EXPORT(struct hashtable *)hashtable_cpy(struct hashtable *src)
                 hashtable_unlock(src);
                 return cpy;
         } else {
-                error(&src->err, NG5_ERR_NULLPTR);
+                error(&src->err, ARK_ERR_NULLPTR);
                 return NULL;
         }
 }
 
-NG5_EXPORT(bool) hashtable_clear(struct hashtable *map)
+ARK_EXPORT(bool) hashtable_clear(struct hashtable *map)
 {
         error_if_null(map)
         assert(map->key_data.cap_elems == map->value_data.cap_elems
@@ -134,7 +134,7 @@ NG5_EXPORT(bool) hashtable_clear(struct hashtable *map)
                 && map->value_data.num_elems <= map->table.num_elems);
 
         if (!status) {
-                error(&map->err, NG5_ERR_OPPFAILED);
+                error(&map->err, ARK_ERR_OPPFAILED);
         }
 
         hashtable_unlock(map);
@@ -142,7 +142,7 @@ NG5_EXPORT(bool) hashtable_clear(struct hashtable *map)
         return status;
 }
 
-NG5_EXPORT(bool) hashtable_avg_displace(float *displace, const struct hashtable *map)
+ARK_EXPORT(bool) hashtable_avg_displace(float *displace, const struct hashtable *map)
 {
         error_if_null(displace);
         error_if_null(map);
@@ -157,14 +157,14 @@ NG5_EXPORT(bool) hashtable_avg_displace(float *displace, const struct hashtable 
         return true;
 }
 
-NG5_EXPORT(bool) hashtable_lock(struct hashtable *map)
+ARK_EXPORT(bool) hashtable_lock(struct hashtable *map)
 {
         error_if_null(map)
         //spin_acquire(&map->lock);
         return true;
 }
 
-NG5_EXPORT(bool) hashtable_unlock(struct hashtable *map)
+ARK_EXPORT(bool) hashtable_unlock(struct hashtable *map)
 {
         error_if_null(map)
         //spin_release(&map->lock);
@@ -266,7 +266,7 @@ static inline uint_fast32_t insert_or_update(struct hashtable *map, const u32 *b
         return 0;
 }
 
-NG5_EXPORT(bool) hashtable_insert_or_update(struct hashtable *map, const void *keys, const void *values,
+ARK_EXPORT(bool) hashtable_insert_or_update(struct hashtable *map, const void *keys, const void *values,
         uint_fast32_t num_pairs)
 {
         error_if_null(map)
@@ -282,7 +282,7 @@ NG5_EXPORT(bool) hashtable_insert_or_update(struct hashtable *map, const void *k
 
         u32 *bucket_idxs = malloc(num_pairs * sizeof(u32));
         if (!bucket_idxs) {
-                error(&map->err, NG5_ERR_MALLOCERR);
+                error(&map->err, ARK_ERR_MALLOCERR);
                 return false;
         }
 
@@ -323,7 +323,7 @@ struct hashtable_header {
         u32 size;
 };
 
-NG5_EXPORT(bool) hashtable_serialize(FILE *file, struct hashtable *table)
+ARK_EXPORT(bool) hashtable_serialize(FILE *file, struct hashtable *table)
 {
         offset_t header_pos = ftell(file);
         fseek(file, sizeof(struct hashtable_header), SEEK_CUR);
@@ -349,7 +349,7 @@ NG5_EXPORT(bool) hashtable_serialize(FILE *file, struct hashtable *table)
         struct hashtable_header header = {.marker = MARKER_SYMBOL_HASHTABLE_HEADER, .size = table
                 ->size, .key_data_off = key_data_off, .value_data_off = value_data_off, .table_off = table_off};
         int nwrite = fwrite(&header, sizeof(struct hashtable_header), 1, file);
-        error_if(nwrite != 1, &table->err, NG5_ERR_FWRITE_FAILED);
+        error_if(nwrite != 1, &table->err, ARK_ERR_FWRITE_FAILED);
         fseek(file, end, SEEK_SET);
         return true;
 
@@ -358,23 +358,23 @@ NG5_EXPORT(bool) hashtable_serialize(FILE *file, struct hashtable *table)
         return false;
 }
 
-NG5_EXPORT(bool) hashtable_deserialize(struct hashtable *table, struct err *err, FILE *file)
+ARK_EXPORT(bool) hashtable_deserialize(struct hashtable *table, struct err *err, FILE *file)
 {
         error_if_null(table)
         error_if_null(err)
         error_if_null(file)
 
-        int err_code = NG5_ERR_NOERR;
+        int err_code = ARK_ERR_NOERR;
 
         struct hashtable_header header;
         offset_t start = ftell(file);
         int nread = fread(&header, sizeof(struct hashtable_header), 1, file);
         if (nread != 1) {
-                err_code = NG5_ERR_FREAD_FAILED;
+                err_code = ARK_ERR_FREAD_FAILED;
                 goto error_handling;
         }
         if (header.marker != MARKER_SYMBOL_HASHTABLE_HEADER) {
-                err_code = NG5_ERR_CORRUPTED;
+                err_code = ARK_ERR_CORRUPTED;
                 goto error_handling;
         }
 
@@ -406,7 +406,7 @@ NG5_EXPORT(bool) hashtable_deserialize(struct hashtable *table, struct err *err,
         return false;
 }
 
-NG5_EXPORT(bool) hashtable_remove_if_contained(struct hashtable *map, const void *keys, size_t num_pairs)
+ARK_EXPORT(bool) hashtable_remove_if_contained(struct hashtable *map, const void *keys, size_t num_pairs)
 {
         error_if_null(map)
         error_if_null(keys)
@@ -415,7 +415,7 @@ NG5_EXPORT(bool) hashtable_remove_if_contained(struct hashtable *map, const void
 
         u32 *bucket_idxs = malloc(num_pairs * sizeof(u32));
         if (!bucket_idxs) {
-                error(&map->err, NG5_ERR_MALLOCERR);
+                error(&map->err, ARK_ERR_MALLOCERR);
                 hashtable_unlock(map);
                 return false;
         }
@@ -459,7 +459,7 @@ NG5_EXPORT(bool) hashtable_remove_if_contained(struct hashtable *map, const void
         return true;
 }
 
-NG5_EXPORT(const void *)hashtable_get_value(struct hashtable *map, const void *key)
+ARK_EXPORT(const void *)hashtable_get_value(struct hashtable *map, const void *key)
 {
         error_if_null(map)
         error_if_null(key)
@@ -495,7 +495,7 @@ NG5_EXPORT(const void *)hashtable_get_value(struct hashtable *map, const void *k
         return result;
 }
 
-NG5_EXPORT(bool) hashtable_get_fload_factor(float *factor, struct hashtable *map)
+ARK_EXPORT(bool) hashtable_get_fload_factor(float *factor, struct hashtable *map)
 {
         error_if_null(factor)
         error_if_null(map)
@@ -509,7 +509,7 @@ NG5_EXPORT(bool) hashtable_get_fload_factor(float *factor, struct hashtable *map
         return true;
 }
 
-NG5_EXPORT(bool) hashtable_rehash(struct hashtable *map)
+ARK_EXPORT(bool) hashtable_rehash(struct hashtable *map)
 {
         error_if_null(map)
 
@@ -537,7 +537,7 @@ NG5_EXPORT(bool) hashtable_rehash(struct hashtable *map)
                         const void *old_key = get_bucket_key(bucket, cpy);
                         const void *old_value = get_bucket_value(bucket, cpy);
                         if (!hashtable_insert_or_update(map, old_key, old_value, 1)) {
-                                error(&map->err, NG5_ERR_REHASH_NOROLLBACK)
+                                error(&map->err, ARK_ERR_REHASH_NOROLLBACK)
                                 hashtable_unlock(map);
                                 return false;
                         }

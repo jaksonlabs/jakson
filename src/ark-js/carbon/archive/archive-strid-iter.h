@@ -15,14 +15,14 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_STRID_ITER_H
-#define NG5_STRID_ITER_H
+#ifndef ARK_STRID_ITER_H
+#define ARK_STRID_ITER_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/types.h>
 #include <ark-js/carbon/archive/archive.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
 struct strid_info {
         field_sid_t id;
@@ -37,13 +37,13 @@ struct strid_iter {
         struct strid_info vector[100000];
 };
 
-NG5_EXPORT(bool) strid_iter_open(struct strid_iter *it, struct err *err, struct archive *archive);
+ARK_EXPORT(bool) strid_iter_open(struct strid_iter *it, struct err *err, struct archive *archive);
 
-NG5_EXPORT(bool) strid_iter_next(bool *success, struct strid_info **info, struct err *err, size_t *info_length,
+ARK_EXPORT(bool) strid_iter_next(bool *success, struct strid_info **info, struct err *err, size_t *info_length,
         struct strid_iter *it);
 
-NG5_EXPORT(bool) strid_iter_close(struct strid_iter *it);
+ARK_EXPORT(bool) strid_iter_close(struct strid_iter *it);
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

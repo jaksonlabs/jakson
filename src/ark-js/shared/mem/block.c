@@ -27,7 +27,7 @@ struct memblock {
 bool memblock_create(struct memblock **block, size_t size)
 {
         error_if_null(block)
-        error_print_if(size == 0, NG5_ERR_ILLEGALARG)
+        error_print_if(size == 0, ARK_ERR_ILLEGALARG)
         struct memblock *result = malloc(sizeof(struct memblock));
         error_if_null(result)
         result->blockLength = size;
@@ -38,10 +38,10 @@ bool memblock_create(struct memblock **block, size_t size)
         return true;
 }
 
-NG5_EXPORT(bool) memblock_zero_out(struct memblock *block)
+ARK_EXPORT(bool) memblock_zero_out(struct memblock *block)
 {
         error_if_null(block);
-        ng5_zero_memory(block->base, block->blockLength);
+        ark_zero_memory(block->base, block->blockLength);
         return true;
 }
 
@@ -60,7 +60,7 @@ bool memblock_drop(struct memblock *block)
         return true;
 }
 
-NG5_EXPORT(bool) memblock_get_error(struct err *out, struct memblock *block)
+ARK_EXPORT(bool) memblock_get_error(struct err *out, struct memblock *block)
 {
         error_if_null(block);
         error_if_null(out);
@@ -74,7 +74,7 @@ bool memblock_size(offset_t *size, const struct memblock *block)
         return true;
 }
 
-NG5_EXPORT(offset_t) memblock_last_used_byte(const struct memblock *block)
+ARK_EXPORT(offset_t) memblock_last_used_byte(const struct memblock *block)
 {
         return block ? block->last_byte : 0;
 }
@@ -90,7 +90,7 @@ const char *memblock_raw_data(const struct memblock *block)
         return (block && block->base ? block->base : NULL);
 }
 
-NG5_EXPORT(bool) memblock_resize(struct memblock *block, size_t size)
+ARK_EXPORT(bool) memblock_resize(struct memblock *block, size_t size)
 {
         return memblock_resize_ex(block, size, false);
 }
@@ -98,10 +98,10 @@ NG5_EXPORT(bool) memblock_resize(struct memblock *block, size_t size)
 bool memblock_resize_ex(struct memblock *block, size_t size, bool zero_out)
 {
         error_if_null(block)
-        error_print_if(size == 0, NG5_ERR_ILLEGALARG)
+        error_print_if(size == 0, ARK_ERR_ILLEGALARG)
         block->base = realloc(block->base, size);
         if (zero_out) {
-                ng5_zero_memory(block->base + block->blockLength, (size - block->blockLength));
+                ark_zero_memory(block->base + block->blockLength, (size - block->blockLength));
         }
         block->blockLength = size;
         return true;
@@ -113,7 +113,7 @@ bool memblock_write(struct memblock *block, offset_t position, const char *data,
         error_if_null(data)
         if (likely(position + nbytes < block->blockLength)) {
                 memcpy(block->base + position, data, nbytes);
-                block->last_byte = ng5_max(block->last_byte, position + nbytes);
+                block->last_byte = ark_max(block->last_byte, position + nbytes);
                 return true;
         } else {
                 return false;
@@ -124,7 +124,7 @@ bool memblock_cpy(struct memblock **dst, struct memblock *src)
 {
         error_if_null(dst)
         error_if_null(src)
-        ng5_check_success(memblock_create(dst, src->blockLength));
+        ark_check_success(memblock_create(dst, src->blockLength));
         memcpy((*dst)->base, src->base, src->blockLength);
         assert((*dst)->base);
         assert((*dst)->blockLength == src->blockLength);
@@ -141,47 +141,47 @@ bool memblock_shrink(struct memblock *block)
         return true;
 }
 
-NG5_EXPORT(bool) memblock_move_right(struct memblock *block, offset_t where, size_t nbytes)
+ARK_EXPORT(bool) memblock_move_right(struct memblock *block, offset_t where, size_t nbytes)
 {
         return memblock_move_ex(block, where, nbytes, true);
 }
 
-NG5_EXPORT(bool) memblock_move_left(struct memblock *block, offset_t where, size_t nbytes)
+ARK_EXPORT(bool) memblock_move_left(struct memblock *block, offset_t where, size_t nbytes)
 {
         error_if_null(block)
-        error_if(where + nbytes >= block->blockLength, &block->err, NG5_ERR_OUTOFBOUNDS)
+        error_if(where + nbytes >= block->blockLength, &block->err, ARK_ERR_OUTOFBOUNDS)
         size_t remainder = block->blockLength - where - nbytes;
         if (remainder > 0) {
                 memmove(block->base + where, block->base + where + nbytes, remainder);
                 assert(block->last_byte >= nbytes);
                 block->last_byte -= nbytes;
-                ng5_zero_memory(block->base + block->blockLength - nbytes, nbytes)
+                ark_zero_memory(block->base + block->blockLength - nbytes, nbytes)
                 return true;
         } else {
                 return false;
         }
 }
 
-NG5_EXPORT(bool) memblock_move_ex(struct memblock *block, offset_t where, size_t nbytes, bool zero_out)
+ARK_EXPORT(bool) memblock_move_ex(struct memblock *block, offset_t where, size_t nbytes, bool zero_out)
 {
         error_if_null(block)
-        error_if(where >= block->blockLength, &block->err, NG5_ERR_OUTOFBOUNDS);
-        error_if(nbytes == 0, &block->err, NG5_ERR_ILLEGALARG);
+        error_if(where >= block->blockLength, &block->err, ARK_ERR_OUTOFBOUNDS);
+        error_if(nbytes == 0, &block->err, ARK_ERR_ILLEGALARG);
 
         /* resize (if needed) */
         if (block->last_byte + nbytes > block->blockLength) {
                 size_t new_length = (block->last_byte + nbytes);
                 block->base = realloc(block->base, new_length);
-                error_if(!block->base, &block->err, NG5_ERR_REALLOCERR);
+                error_if(!block->base, &block->err, ARK_ERR_REALLOCERR);
                 if (zero_out) {
-                        ng5_zero_memory(block->base + block->blockLength, (new_length - block->blockLength));
+                        ark_zero_memory(block->base + block->blockLength, (new_length - block->blockLength));
                 }
                 block->blockLength = new_length;
         }
 
         memmove(block->base + where + nbytes, block->base + where, block->last_byte - where);
         if (zero_out) {
-                ng5_zero_memory(block->base + where, nbytes);
+                ark_zero_memory(block->base + where, nbytes);
         }
         block->last_byte += nbytes;
         return true;
@@ -195,10 +195,10 @@ void *memblock_move_contents_and_drop(struct memblock *block)
         return result;
 }
 
-NG5_EXPORT(bool) memfile_update_last_byte(struct memblock *block, size_t where)
+ARK_EXPORT(bool) memfile_update_last_byte(struct memblock *block, size_t where)
 {
         error_if_null(block);
-        error_if(where >= block->blockLength, &block->err, NG5_ERR_ILLEGALSTATE);
-        block->last_byte = ng5_max(block->last_byte, where);
+        error_if(where >= block->blockLength, &block->err, ARK_ERR_ILLEGALSTATE);
+        block->last_byte = ark_max(block->last_byte, where);
         return true;
 }

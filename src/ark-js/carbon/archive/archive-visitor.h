@@ -15,8 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_NG5_ARCHIVE_VISITOR_H
-#define NG5_NG5_ARCHIVE_VISITOR_H
+#ifndef ARK_ARK_ARCHIVE_VISITOR_H
+#define ARK_ARK_ARCHIVE_VISITOR_H
 
 #include "archive-iter.h"
 
@@ -26,7 +26,7 @@ struct path_entry {
 };
 
 struct archive_visitor_desc {
-        int visit_mask;                 /** bitmask of 'NG5_ARCHIVE_ITER_MASK_XXX' */
+        int visit_mask;                 /** bitmask of 'ARK_ARCHIVE_ITER_MASK_XXX' */
 };
 
 enum visit_policy {
@@ -164,16 +164,16 @@ struct archive_visitor {
 
 };
 
-NG5_EXPORT(bool) archive_visit_archive(struct archive *archive, const struct archive_visitor_desc *desc,
+ARK_EXPORT(bool) archive_visit_archive(struct archive *archive, const struct archive_visitor_desc *desc,
         struct archive_visitor *visitor, void *capture);
 
-NG5_EXPORT(bool) archive_visitor_print_path(FILE *file, struct archive *archive,
+ARK_EXPORT(bool) archive_visitor_print_path(FILE *file, struct archive *archive,
         const struct vector ofType(struct path_entry) *path_stack);
 
-NG5_EXPORT(void) archive_visitor_path_to_string(char path_buffer[2048], struct archive *archive,
+ARK_EXPORT(void) archive_visitor_path_to_string(char path_buffer[2048], struct archive *archive,
         const struct vector ofType(struct path_entry) *path_stack);
 
-NG5_EXPORT(bool) archive_visitor_path_compare(const struct vector ofType(struct path_entry) *path,
+ARK_EXPORT(bool) archive_visitor_path_compare(const struct vector ofType(struct path_entry) *path,
         field_sid_t *group_name, const char *path_str, struct archive *archive);
 
 #endif

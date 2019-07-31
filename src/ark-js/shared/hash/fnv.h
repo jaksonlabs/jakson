@@ -15,18 +15,18 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_FNV_H
-#define NG5_FNV_H
+#ifndef ARK_FNV_H
+#define ARK_FNV_H
 
 #include "hash.h"
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
-#define NG5_HASH_FNV(key_size, key)              NG5_HASH_FNV_WTYPE(key_size, key, hash32_t)
-#define NG5_HASH16_FNV(key_size, key)            NG5_HASH_FNV_WTYPE(key_size, key, hash16_t)
-#define NG5_HASH8_FNV(key_size, key)             NG5_HASH_FNV_WTYPE(key_size, key, hash8_t)
+#define ARK_HASH_FNV(key_size, key)              ARK_HASH_FNV_WTYPE(key_size, key, hash32_t)
+#define ARK_HASH16_FNV(key_size, key)            ARK_HASH_FNV_WTYPE(key_size, key, hash16_t)
+#define ARK_HASH8_FNV(key_size, key)             ARK_HASH_FNV_WTYPE(key_size, key, hash8_t)
 
-#define NG5_HASH_FNV_WTYPE(key_size, key, hash_type)                                                                   \
+#define ARK_HASH_FNV_WTYPE(key_size, key, hash_type)                                                                   \
 ({                                                                                                                     \
     assert ((key != NULL) && (key_size > 0));                                                                          \
                                                                                                                        \
@@ -37,6 +37,6 @@ NG5_BEGIN_DECL
     hash;                                                                                                              \
 })
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif

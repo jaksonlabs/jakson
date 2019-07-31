@@ -21,122 +21,122 @@
 void int_read_prop_offsets(struct archive_prop_offs *prop_offsets, struct memfile *memfile,
         const union object_flags *flags)
 {
-        ng5_zero_memory(prop_offsets, sizeof(struct archive_prop_offs));
+        ark_zero_memory(prop_offsets, sizeof(struct archive_prop_offs));
         if (flags->bits.has_null_props) {
-                prop_offsets->nulls = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
+                prop_offsets->nulls = *ARK_MEMFILE_READ_TYPE(memfile, offset_t);
         }
         if (flags->bits.has_bool_props) {
-                prop_offsets->bools = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
+                prop_offsets->bools = *ARK_MEMFILE_READ_TYPE(memfile, offset_t);
         }
         if (flags->bits.has_int8_props) {
-                prop_offsets->int8s = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
+                prop_offsets->int8s = *ARK_MEMFILE_READ_TYPE(memfile, offset_t);
         }
         if (flags->bits.has_int16_props) {
-                prop_offsets->int16s = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
+                prop_offsets->int16s = *ARK_MEMFILE_READ_TYPE(memfile, offset_t);
         }
         if (flags->bits.has_int32_props) {
-                prop_offsets->int32s = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
+                prop_offsets->int32s = *ARK_MEMFILE_READ_TYPE(memfile, offset_t);
         }
         if (flags->bits.has_int64_props) {
-                prop_offsets->int64s = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
+                prop_offsets->int64s = *ARK_MEMFILE_READ_TYPE(memfile, offset_t);
         }
         if (flags->bits.has_uint8_props) {
-                prop_offsets->uint8s = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
+                prop_offsets->uint8s = *ARK_MEMFILE_READ_TYPE(memfile, offset_t);
         }
         if (flags->bits.has_uint16_props) {
-                prop_offsets->uint16s = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
+                prop_offsets->uint16s = *ARK_MEMFILE_READ_TYPE(memfile, offset_t);
         }
         if (flags->bits.has_uint32_props) {
-                prop_offsets->uint32s = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
+                prop_offsets->uint32s = *ARK_MEMFILE_READ_TYPE(memfile, offset_t);
         }
         if (flags->bits.has_uint64_props) {
-                prop_offsets->uint64s = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
+                prop_offsets->uint64s = *ARK_MEMFILE_READ_TYPE(memfile, offset_t);
         }
         if (flags->bits.has_float_props) {
-                prop_offsets->floats = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
+                prop_offsets->floats = *ARK_MEMFILE_READ_TYPE(memfile, offset_t);
         }
         if (flags->bits.has_string_props) {
-                prop_offsets->strings = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
+                prop_offsets->strings = *ARK_MEMFILE_READ_TYPE(memfile, offset_t);
         }
         if (flags->bits.has_object_props) {
-                prop_offsets->objects = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
+                prop_offsets->objects = *ARK_MEMFILE_READ_TYPE(memfile, offset_t);
         }
         if (flags->bits.has_null_array_props) {
-                prop_offsets->null_arrays = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
+                prop_offsets->null_arrays = *ARK_MEMFILE_READ_TYPE(memfile, offset_t);
         }
         if (flags->bits.has_bool_array_props) {
-                prop_offsets->bool_arrays = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
+                prop_offsets->bool_arrays = *ARK_MEMFILE_READ_TYPE(memfile, offset_t);
         }
         if (flags->bits.has_int8_array_props) {
-                prop_offsets->int8_arrays = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
+                prop_offsets->int8_arrays = *ARK_MEMFILE_READ_TYPE(memfile, offset_t);
         }
         if (flags->bits.has_int16_array_props) {
-                prop_offsets->int16_arrays = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
+                prop_offsets->int16_arrays = *ARK_MEMFILE_READ_TYPE(memfile, offset_t);
         }
         if (flags->bits.has_int32_array_props) {
-                prop_offsets->int32_arrays = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
+                prop_offsets->int32_arrays = *ARK_MEMFILE_READ_TYPE(memfile, offset_t);
         }
         if (flags->bits.has_int64_array_props) {
-                prop_offsets->int64_arrays = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
+                prop_offsets->int64_arrays = *ARK_MEMFILE_READ_TYPE(memfile, offset_t);
         }
         if (flags->bits.has_uint8_array_props) {
-                prop_offsets->uint8_arrays = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
+                prop_offsets->uint8_arrays = *ARK_MEMFILE_READ_TYPE(memfile, offset_t);
         }
         if (flags->bits.has_uint16_array_props) {
-                prop_offsets->uint16_arrays = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
+                prop_offsets->uint16_arrays = *ARK_MEMFILE_READ_TYPE(memfile, offset_t);
         }
         if (flags->bits.has_uint32_array_props) {
-                prop_offsets->uint32_arrays = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
+                prop_offsets->uint32_arrays = *ARK_MEMFILE_READ_TYPE(memfile, offset_t);
         }
         if (flags->bits.has_uint64_array_props) {
-                prop_offsets->uint64_arrays = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
+                prop_offsets->uint64_arrays = *ARK_MEMFILE_READ_TYPE(memfile, offset_t);
         }
         if (flags->bits.has_float_array_props) {
-                prop_offsets->float_arrays = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
+                prop_offsets->float_arrays = *ARK_MEMFILE_READ_TYPE(memfile, offset_t);
         }
         if (flags->bits.has_string_array_props) {
-                prop_offsets->string_arrays = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
+                prop_offsets->string_arrays = *ARK_MEMFILE_READ_TYPE(memfile, offset_t);
         }
         if (flags->bits.has_object_array_props) {
-                prop_offsets->object_arrays = *NG5_MEMFILE_READ_TYPE(memfile, offset_t);
+                prop_offsets->object_arrays = *ARK_MEMFILE_READ_TYPE(memfile, offset_t);
         }
 }
 
 void int_embedded_fixed_props_read(struct fixed_prop *prop, struct memfile *memfile)
 {
-        prop->header = NG5_MEMFILE_READ_TYPE(memfile, struct prop_header);
-        prop->keys = (field_sid_t *) NG5_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(field_sid_t));
+        prop->header = ARK_MEMFILE_READ_TYPE(memfile, struct prop_header);
+        prop->keys = (field_sid_t *) ARK_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(field_sid_t));
         prop->values = memfile_peek(memfile, 1);
 }
 
 void int_embedded_var_props_read(struct var_prop *prop, struct memfile *memfile)
 {
-        prop->header = NG5_MEMFILE_READ_TYPE(memfile, struct prop_header);
-        prop->keys = (field_sid_t *) NG5_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(field_sid_t));
-        prop->offsets = (offset_t *) NG5_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(offset_t));
+        prop->header = ARK_MEMFILE_READ_TYPE(memfile, struct prop_header);
+        prop->keys = (field_sid_t *) ARK_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(field_sid_t));
+        prop->offsets = (offset_t *) ARK_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(offset_t));
         prop->values = memfile_peek(memfile, 1);
 }
 
 void int_embedded_null_props_read(struct null_prop *prop, struct memfile *memfile)
 {
-        prop->header = NG5_MEMFILE_READ_TYPE(memfile, struct prop_header);
-        prop->keys = (field_sid_t *) NG5_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(field_sid_t));
+        prop->header = ARK_MEMFILE_READ_TYPE(memfile, struct prop_header);
+        prop->keys = (field_sid_t *) ARK_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(field_sid_t));
 }
 
 void int_embedded_array_props_read(struct array_prop *prop, struct memfile *memfile)
 {
-        prop->header = NG5_MEMFILE_READ_TYPE(memfile, struct prop_header);
-        prop->keys = (field_sid_t *) NG5_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(field_sid_t));
-        prop->lengths = (u32 *) NG5_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(u32));
+        prop->header = ARK_MEMFILE_READ_TYPE(memfile, struct prop_header);
+        prop->keys = (field_sid_t *) ARK_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(field_sid_t));
+        prop->lengths = (u32 *) ARK_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(u32));
         prop->values_begin = memfile_tell(memfile);
 }
 
 void int_embedded_table_props_read(struct table_prop *prop, struct memfile *memfile)
 {
-        prop->header->marker = *NG5_MEMFILE_READ_TYPE(memfile, char);
-        prop->header->num_entries = *NG5_MEMFILE_READ_TYPE(memfile, u8);
-        prop->keys = (field_sid_t *) NG5_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(field_sid_t));
-        prop->groupOffs = (offset_t *) NG5_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(offset_t));
+        prop->header->marker = *ARK_MEMFILE_READ_TYPE(memfile, char);
+        prop->header->num_entries = *ARK_MEMFILE_READ_TYPE(memfile, u8);
+        prop->keys = (field_sid_t *) ARK_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(field_sid_t));
+        prop->groupOffs = (offset_t *) ARK_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(offset_t));
 }
 
 field_e int_get_value_type_of_char(char c)
@@ -194,7 +194,7 @@ int_marker_to_field_type(char symbol)
         case MARKER_SYMBOL_PROP_OBJECT_ARRAY:
                 return FIELD_OBJECT;
         default: {
-                print_error_and_die(NG5_ERR_MARKERMAPPING);
+                print_error_and_die(ARK_ERR_MARKERMAPPING);
         }
         }
 }

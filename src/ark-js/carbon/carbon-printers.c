@@ -89,7 +89,7 @@ static void json_formatter_carbon_object_prop_name(struct carbon_printer *self, 
 static void json_formatter_carbon_object_begin(struct carbon_printer *self, struct string_builder *builder);
 static void json_formatter_carbon_object_end(struct carbon_printer *self, struct string_builder *builder);
 
-NG5_EXPORT(bool) carbon_json_formatter_create(struct carbon_printer *printer)
+ARK_EXPORT(bool) carbon_json_formatter_create(struct carbon_printer *printer)
 {
         error_if_null(printer);
         printer->drop = json_formatter_drop;
@@ -141,19 +141,19 @@ NG5_EXPORT(bool) carbon_json_formatter_create(struct carbon_printer *printer)
                 .buffer_size = INIT_BUFFER_LEN,
                 .buffer = malloc(INIT_BUFFER_LEN)
         };
-        ng5_zero_memory(extra->buffer, extra->buffer_size);
+        ark_zero_memory(extra->buffer, extra->buffer_size);
 
         return true;
 }
 
-NG5_EXPORT(bool) carbon_json_formatter_set_intent(struct carbon_printer *printer, bool enable)
+ARK_EXPORT(bool) carbon_json_formatter_set_intent(struct carbon_printer *printer, bool enable)
 {
         error_if_null(printer);
         ((struct json_formatter_extra *) printer->extra)->intent = enable;
         return true;
 }
 
-NG5_EXPORT(bool) carbon_json_formatter_set_strict(struct carbon_printer *printer, bool enable)
+ARK_EXPORT(bool) carbon_json_formatter_set_strict(struct carbon_printer *printer, bool enable)
 {
         error_if_null(printer);
         ((struct json_formatter_extra *) printer->extra)->strict = enable;
@@ -167,7 +167,7 @@ static void json_formatter_drop(struct carbon_printer *self)
         free (self->extra);
 }
 
-ng5_func_unused
+ark_func_unused
 inline static bool json_formatter_has_intention(struct carbon_printer *printer)
 {
         return ((struct json_formatter_extra *) printer->extra)->intent;
@@ -234,7 +234,7 @@ static void json_formatter_carbon_header_contents(struct carbon_printer *self, s
 
                         break;
                 default:
-                        error_print(NG5_ERR_INTERNALERR);
+                        error_print(ARK_ERR_INTERNALERR);
                 }
                 string_builder_append(builder, "}, \"rev\": ");
                 string_builder_append_u64(builder, rev);
@@ -267,7 +267,7 @@ static void json_formatter_carbon_header_contents(struct carbon_printer *self, s
                                 string_builder_append(builder, "null");
                         }
                 default:
-                error_print(NG5_ERR_INTERNALERR);
+                error_print(ARK_ERR_INTERNALERR);
                 }
                 string_builder_append(builder, "}, \"rev\": ");
                 string_builder_append_u64(builder, rev);
@@ -377,17 +377,17 @@ static void print_binary(struct carbon_printer *self, struct string_builder *bui
         if (extra->buffer_size < required_buff_size) {
                 extra->buffer_size = required_buff_size * 1.7f;
                 extra->buffer = realloc(extra->buffer, extra->buffer_size);
-                error_print_if(!extra->buffer, NG5_ERR_REALLOCERR);
+                error_print_if(!extra->buffer, ARK_ERR_REALLOCERR);
         }
         /* decrease buffer capacity if needed */
         if (extra->buffer_size * 0.3f > required_buff_size) {
                 extra->buffer_size = required_buff_size;
                 extra->buffer = realloc(extra->buffer, extra->buffer_size);
-                error_print_if(!extra->buffer, NG5_ERR_REALLOCERR);
+                error_print_if(!extra->buffer, ARK_ERR_REALLOCERR);
         }
 
         assert(extra->buffer_size >= required_buff_size);
-        ng5_zero_memory(extra->buffer, extra->buffer_size);
+        ark_zero_memory(extra->buffer, extra->buffer_size);
         /* copy binary data into buffer, and leave one (zero'd) byte free; null-termination is required by libb64 */
         memcpy(data_of(extra->buffer), binary->blob, binary->blob_len);
 

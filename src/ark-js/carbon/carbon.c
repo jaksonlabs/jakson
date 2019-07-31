@@ -91,12 +91,12 @@ static void carbon_header_init(struct carbon *doc, enum carbon_primary_key_type 
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-NG5_EXPORT(struct carbon_insert *) carbon_create_begin(struct carbon_new *context, struct carbon *doc,
+ARK_EXPORT(struct carbon_insert *) carbon_create_begin(struct carbon_new *context, struct carbon *doc,
         enum carbon_primary_key_type key_type, int mode)
 {
         if (likely(context != NULL && doc != NULL)) {
                 error_if (mode != carbon_KEEP && mode != carbon_SHRINK && mode != carbon_COMPACT && mode != carbon_OPTIMIZE,
-                          &doc->err, NG5_ERR_ILLEGALARG);
+                          &doc->err, ARK_ERR_ILLEGALARG);
 
                 success_else_null(error_init(&context->err), &doc->err);
                 context->content_it = malloc(sizeof(struct carbon_array_it));
@@ -113,7 +113,7 @@ NG5_EXPORT(struct carbon_insert *) carbon_create_begin(struct carbon_new *contex
         }
 }
 
-NG5_EXPORT(bool) carbon_create_end(struct carbon_new *context)
+ARK_EXPORT(bool) carbon_create_end(struct carbon_new *context)
 {
         bool success = true;
         if (likely(context != NULL)) {
@@ -129,28 +129,28 @@ NG5_EXPORT(bool) carbon_create_end(struct carbon_new *context)
                 free (context->content_it);
                 free (context->inserter);
                 if (unlikely(!success)) {
-                        error(&context->err, NG5_ERR_CLEANUP);
+                        error(&context->err, ARK_ERR_CLEANUP);
                         return false;
                 } else {
                         return true;
                 }
         } else {
-                error_print(NG5_ERR_NULLPTR);
+                error_print(ARK_ERR_NULLPTR);
                 return false;
         }
 }
 
-NG5_EXPORT(bool) carbon_create_empty(struct carbon *doc, enum carbon_primary_key_type key_type)
+ARK_EXPORT(bool) carbon_create_empty(struct carbon *doc, enum carbon_primary_key_type key_type)
 {
         return carbon_create_empty_ex(doc, key_type, 1024, 1);
 }
 
-NG5_EXPORT(bool) carbon_create_empty_ex(struct carbon *doc, enum carbon_primary_key_type key_type, u64 doc_cap_byte,
+ARK_EXPORT(bool) carbon_create_empty_ex(struct carbon *doc, enum carbon_primary_key_type key_type, u64 doc_cap_byte,
                                        u64 array_cap_byte)
 {
         error_if_null(doc);
 
-        doc_cap_byte = ng5_max(MIN_DOC_CAPACITY, doc_cap_byte);
+        doc_cap_byte = ark_max(MIN_DOC_CAPACITY, doc_cap_byte);
 
         error_init(&doc->err);
         memblock_create(&doc->memblock, doc_cap_byte);
@@ -169,19 +169,19 @@ NG5_EXPORT(bool) carbon_create_empty_ex(struct carbon *doc, enum carbon_primary_
         return true;
 }
 
-NG5_EXPORT(bool) carbon_drop(struct carbon *doc)
+ARK_EXPORT(bool) carbon_drop(struct carbon *doc)
 {
         error_if_null(doc);
         return internal_drop(doc);
 }
 
-NG5_EXPORT(bool) carbon_is_up_to_date(struct carbon *doc)
+ARK_EXPORT(bool) carbon_is_up_to_date(struct carbon *doc)
 {
         error_if_null(doc);
         return doc->versioning.is_latest;
 }
 
-NG5_EXPORT(bool) carbon_key_get_type(enum carbon_primary_key_type *out, struct carbon *doc)
+ARK_EXPORT(bool) carbon_key_get_type(enum carbon_primary_key_type *out, struct carbon *doc)
 {
         error_if_null(out)
         error_if_null(doc)
@@ -191,7 +191,7 @@ NG5_EXPORT(bool) carbon_key_get_type(enum carbon_primary_key_type *out, struct c
         return true;
 }
 
-NG5_EXPORT(const void *) carbon_key_raw_value(u64 *key_len, enum carbon_primary_key_type *type, struct carbon *doc)
+ARK_EXPORT(const void *) carbon_key_raw_value(u64 *key_len, enum carbon_primary_key_type *type, struct carbon *doc)
 {
         memfile_save_position(&doc->memfile);
         memfile_seek(&doc->memfile, 0);
@@ -200,7 +200,7 @@ NG5_EXPORT(const void *) carbon_key_raw_value(u64 *key_len, enum carbon_primary_
         return result;
 }
 
-NG5_EXPORT(bool) carbon_key_signed_value(i64 *key, struct carbon *doc)
+ARK_EXPORT(bool) carbon_key_signed_value(i64 *key, struct carbon *doc)
 {
         enum carbon_primary_key_type type;
         memfile_save_position(&doc->memfile);
@@ -211,12 +211,12 @@ NG5_EXPORT(bool) carbon_key_signed_value(i64 *key, struct carbon *doc)
                 *key = *((const i64 *) result);
                 return true;
         } else {
-                error(&doc->err, NG5_ERR_TYPEMISMATCH);
+                error(&doc->err, ARK_ERR_TYPEMISMATCH);
                 return false;
         }
 }
 
-NG5_EXPORT(bool) carbon_key_unsigned_value(u64 *key, struct carbon *doc)
+ARK_EXPORT(bool) carbon_key_unsigned_value(u64 *key, struct carbon *doc)
 {
         enum carbon_primary_key_type type;
         memfile_save_position(&doc->memfile);
@@ -227,12 +227,12 @@ NG5_EXPORT(bool) carbon_key_unsigned_value(u64 *key, struct carbon *doc)
                 *key = *((const u64 *) result);
                 return true;
         } else {
-                error(&doc->err, NG5_ERR_TYPEMISMATCH);
+                error(&doc->err, ARK_ERR_TYPEMISMATCH);
                 return false;
         }
 }
 
-NG5_EXPORT(const char *) carbon_key_string_value(u64 *str_len, struct carbon *doc)
+ARK_EXPORT(const char *) carbon_key_string_value(u64 *str_len, struct carbon *doc)
 {
         enum carbon_primary_key_type type;
         memfile_save_position(&doc->memfile);
@@ -242,32 +242,32 @@ NG5_EXPORT(const char *) carbon_key_string_value(u64 *str_len, struct carbon *do
         if (likely(carbon_key_is_string_type(type))) {
                 return result;
         } else {
-                error(&doc->err, NG5_ERR_TYPEMISMATCH);
+                error(&doc->err, ARK_ERR_TYPEMISMATCH);
                 return false;
         }
 }
 
-NG5_EXPORT(bool) carbon_key_is_unsigned_type(enum carbon_primary_key_type type)
+ARK_EXPORT(bool) carbon_key_is_unsigned_type(enum carbon_primary_key_type type)
 {
         return type == carbon_KEY_UKEY || type == carbon_KEY_AUTOKEY;
 }
 
-NG5_EXPORT(bool) carbon_key_is_signed_type(enum carbon_primary_key_type type)
+ARK_EXPORT(bool) carbon_key_is_signed_type(enum carbon_primary_key_type type)
 {
         return type == carbon_KEY_IKEY;
 }
 
-NG5_EXPORT(bool) carbon_key_is_string_type(enum carbon_primary_key_type type)
+ARK_EXPORT(bool) carbon_key_is_string_type(enum carbon_primary_key_type type)
 {
         return type == carbon_KEY_SKEY;
 }
 
-NG5_EXPORT(bool) carbon_has_key(enum carbon_primary_key_type type)
+ARK_EXPORT(bool) carbon_has_key(enum carbon_primary_key_type type)
 {
         return type != carbon_KEY_NOKEY;
 }
 
-NG5_EXPORT(bool) carbon_register_listener(listener_handle_t *handle, struct carbon_event_listener *listener, struct carbon *doc)
+ARK_EXPORT(bool) carbon_register_listener(listener_handle_t *handle, struct carbon_event_listener *listener, struct carbon *doc)
 {
         error_if_null(listener);
         error_if_null(doc);
@@ -289,37 +289,37 @@ NG5_EXPORT(bool) carbon_register_listener(listener_handle_t *handle, struct carb
 
         handler->in_use = true;
         handler->listener = *listener;
-        ng5_optional_call(listener, clone, &handler->listener, listener);
-        ng5_optional_set(handle, pos);
+        ark_optional_call(listener, clone, &handler->listener, listener);
+        ark_optional_set(handle, pos);
         return true;
 }
 
-NG5_EXPORT(bool) carbon_unregister_listener(struct carbon *doc, listener_handle_t handle)
+ARK_EXPORT(bool) carbon_unregister_listener(struct carbon *doc, listener_handle_t handle)
 {
         error_if_null(doc);
         if (likely(handle < doc->handler.num_elems)) {
                 struct carbon_handler *handler = vec_get(&doc->handler, handle, struct carbon_handler);
                 if (likely(handler->in_use)) {
                         handler->in_use = false;
-                        ng5_optional_call(&handler->listener, drop, &handler->listener);
+                        ark_optional_call(&handler->listener, drop, &handler->listener);
                         return true;
                 } else {
-                        error(&doc->err, NG5_ERR_NOTFOUND);
+                        error(&doc->err, ARK_ERR_NOTFOUND);
                         return false;
                 }
         } else {
-                error(&doc->err, NG5_ERR_OUTOFBOUNDS);
+                error(&doc->err, ARK_ERR_OUTOFBOUNDS);
                 return false;
         }
 }
 
-NG5_EXPORT(bool) carbon_clone(struct carbon *clone, struct carbon *doc)
+ARK_EXPORT(bool) carbon_clone(struct carbon *clone, struct carbon *doc)
 {
         error_if_null(clone);
         error_if_null(doc);
-        ng5_check_success(memblock_cpy(&clone->memblock, doc->memblock));
-        ng5_check_success(memfile_open(&clone->memfile, clone->memblock, READ_WRITE));
-        ng5_check_success(error_init(&clone->err));
+        ark_check_success(memblock_cpy(&clone->memblock, doc->memblock));
+        ark_check_success(memfile_open(&clone->memfile, clone->memblock, READ_WRITE));
+        ark_check_success(error_init(&clone->err));
 
         vec_create(&clone->handler, NULL, sizeof(struct carbon_handler), doc->handler.num_elems);
         for (u32 i = 0; i < doc->handler.num_elems; i++) {
@@ -328,7 +328,7 @@ NG5_EXPORT(bool) carbon_clone(struct carbon *clone, struct carbon *doc)
                 copy->in_use = original->in_use;
                 if (original->in_use) {
                         copy->listener = original->listener;
-                        ng5_optional_call(&original->listener, clone, &copy->listener, &original->listener);
+                        ark_optional_call(&original->listener, clone, &copy->listener, &original->listener);
                 }
         }
 
@@ -339,14 +339,14 @@ NG5_EXPORT(bool) carbon_clone(struct carbon *clone, struct carbon *doc)
         return true;
 }
 
-NG5_EXPORT(bool) carbon_revision(u64 *rev, struct carbon *doc)
+ARK_EXPORT(bool) carbon_revision(u64 *rev, struct carbon *doc)
 {
         error_if_null(doc);
         *rev = carbon_int_header_get_rev(doc);
         return true;
 }
 
-NG5_EXPORT(bool) carbon_to_str(struct string_builder *dst, enum carbon_printer_impl printer, struct carbon *doc)
+ARK_EXPORT(bool) carbon_to_str(struct string_builder *dst, enum carbon_printer_impl printer, struct carbon *doc)
 {
         error_if_null(doc);
 
@@ -360,7 +360,7 @@ NG5_EXPORT(bool) carbon_to_str(struct string_builder *dst, enum carbon_printer_i
 
         memfile_save_position(&doc->memfile);
 
-        ng5_zero_memory(&p, sizeof(struct carbon_printer));
+        ark_zero_memory(&p, sizeof(struct carbon_printer));
         string_builder_create(&b);
 
         carbon_revision(&rev, doc);
@@ -370,7 +370,7 @@ NG5_EXPORT(bool) carbon_to_str(struct string_builder *dst, enum carbon_printer_i
                 carbon_json_formatter_create(&p);
                 break;
         default:
-                error(&doc->err, NG5_ERR_NOTFOUND);
+                error(&doc->err, ARK_ERR_NOTFOUND);
         }
 
         printer_carbon_begin(&p, &b);
@@ -399,7 +399,7 @@ NG5_EXPORT(bool) carbon_to_str(struct string_builder *dst, enum carbon_printer_i
         return true;
 }
 
-NG5_EXPORT(const char *) carbon_to_json(struct string_builder *dst, struct carbon *doc)
+ARK_EXPORT(const char *) carbon_to_json(struct string_builder *dst, struct carbon *doc)
 {
         error_if_null(dst)
         error_if_null(doc)
@@ -407,7 +407,7 @@ NG5_EXPORT(const char *) carbon_to_json(struct string_builder *dst, struct carbo
         return string_builder_cstr(dst);
 }
 
-NG5_EXPORT(bool) carbon_iterator_open(struct carbon_array_it *it, struct carbon *doc)
+ARK_EXPORT(bool) carbon_iterator_open(struct carbon_array_it *it, struct carbon *doc)
 {
         error_if_null(it);
         error_if_null(doc);
@@ -417,13 +417,13 @@ NG5_EXPORT(bool) carbon_iterator_open(struct carbon_array_it *it, struct carbon 
         return true;
 }
 
-NG5_EXPORT(bool) carbon_iterator_close(struct carbon_array_it *it)
+ARK_EXPORT(bool) carbon_iterator_close(struct carbon_array_it *it)
 {
         error_if_null(it);
         return carbon_array_it_drop(it);
 }
 
-NG5_EXPORT(bool) carbon_print(FILE *file, struct carbon *doc)
+ARK_EXPORT(bool) carbon_print(FILE *file, struct carbon *doc)
 {
         error_if_null(file);
         error_if_null(doc);
@@ -437,7 +437,7 @@ NG5_EXPORT(bool) carbon_print(FILE *file, struct carbon *doc)
         return true;
 }
 
-NG5_EXPORT(bool) carbon_hexdump_print(FILE *file, struct carbon *doc)
+ARK_EXPORT(bool) carbon_hexdump_print(FILE *file, struct carbon *doc)
 {
         error_if_null(file);
         error_if_null(doc);
@@ -457,7 +457,7 @@ static bool internal_drop(struct carbon *doc)
         for (u32 i = 0; i < doc->handler.num_elems; i++) {
                 struct carbon_handler *handler = vec_get(&doc->handler, i, struct carbon_handler);
                 if (handler->in_use) {
-                        ng5_optional_call(&handler->listener, drop, &handler->listener);
+                        ark_optional_call(&handler->listener, drop, &handler->listener);
                 }
 
         }
@@ -805,7 +805,7 @@ static bool print_object(struct carbon_object_it *it, struct carbon_printer *pri
                 } break;
                 default:
                         printer_carbon_object_end(printer, builder);
-                        error(&it->err, NG5_ERR_CORRUPTED);
+                        error(&it->err, ARK_ERR_CORRUPTED);
                         return false;
                 }
                 first_entry = false;
@@ -901,7 +901,7 @@ static bool print_array(struct carbon_array_it *it, struct carbon_printer *print
                 } break;
                 default:
                         printer_carbon_array_end(printer, builder);
-                        error(&it->err, NG5_ERR_CORRUPTED);
+                        error(&it->err, ARK_ERR_CORRUPTED);
                         return false;
                 }
                 first_entry = false;
@@ -972,7 +972,7 @@ static bool print_column(struct carbon_column_it *it, struct carbon_printer *pri
                 } break;
                 default:
                         printer_carbon_array_end(printer, builder);
-                        error(&it->err, NG5_ERR_CORRUPTED);
+                        error(&it->err, ARK_ERR_CORRUPTED);
                         return false;
                 }
                 if (i + 1 < nvalues) {

@@ -15,18 +15,18 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef NG5_STRHASH_MEM_H
-#define NG5_STRHASH_MEM_H
+#ifndef ARK_STRHASH_MEM_H
+#define ARK_STRHASH_MEM_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/carbon/alloc/alloc.h>
 #include <ark-js/shared/stdx/strhash.h>
 
-NG5_BEGIN_DECL
+ARK_BEGIN_DECL
 
-NG5_EXPORT (bool) strhash_create_inmemory(struct strhash *parallel_map_exec, const struct allocator *alloc,
+ARK_EXPORT (bool) strhash_create_inmemory(struct strhash *parallel_map_exec, const struct allocator *alloc,
         size_t num_buckets, size_t cap_buckets);
 
-NG5_END_DECL
+ARK_END_DECL
 
 #endif
