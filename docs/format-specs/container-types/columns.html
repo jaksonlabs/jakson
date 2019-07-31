@@ -155,17 +155,17 @@
 <pre><code>[&lt;column-marker&gt;](num-of-elems)(cap-of-elems) &lt;values&gt;...
 </code></pre>
 <h3><a class="header" href="#column-types" id="column-types">Column Types</a></h3>
-<table><thead><tr><th>Carbon Type</th><th>Marker</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th></tr></thead><tbody>
-<tr><td><code>boolean</code></td><td><code>[B]</code></td><td>three-valued logic</td><td>1 B each</td><td>2</td></tr>
-<tr><td><code>u8</code></td><td><code>[1]</code></td><td>unsigned 8-bit int</td><td>1 B each</td><td>2<sup>8</sup> - 1</td></tr>
-<tr><td><code>u16</code></td><td><code>[2]</code></td><td>unsigned 16-bit int</td><td>2 B each</td><td>2<sup>16</sup> - 1</td></tr>
-<tr><td><code>u32</code></td><td><code>[3]</code></td><td>unsigned 32-bit int</td><td>4 B each</td><td>2<sup>16</sup> - 1</td></tr>
-<tr><td><code>u64</code></td><td><code>[4]</code></td><td>unsigned 64-bit int</td><td>8 B each</td><td>2<sup>16</sup> - 1</td></tr>
-<tr><td><code>i8</code></td><td><code>[5]</code></td><td>signed 8-bit int</td><td>1 B each</td><td>-2<sup>7</sup></td></tr>
-<tr><td><code>i16</code></td><td><code>[6]</code></td><td>signed 16-bit int</td><td>2 B each</td><td>-2<sup>15</sup></td></tr>
-<tr><td><code>i32</code></td><td><code>[7]</code></td><td>signed 32-bit int</td><td>4 B each</td><td>-2<sup>31</sup></td></tr>
-<tr><td><code>i64</code></td><td><code>[8]</code></td><td>signed 64-bit int</td><td>8 B each</td><td>-2<sup>63</sup></td></tr>
-<tr><td><code>float</code></td><td><code>[R]</code></td><td>32-bit float</td><td>4 B each</td><td><code>NAN</code> value</td></tr>
+<table><thead><tr><th>Marker</th><th>Container</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th></tr></thead><tbody>
+<tr><td><code>[B]</code></td><td><code>column-boolean</code></td><td>three-valued logic</td><td>1 B each</td><td>2</td></tr>
+<tr><td><code>[1]</code></td><td><code>column-u8</code></td><td>unsigned 8-bit int</td><td>1 B each</td><td>2<sup>8</sup> - 1</td></tr>
+<tr><td><code>[2]</code></td><td><code>column-u16</code></td><td>unsigned 16-bit int</td><td>2 B each</td><td>2<sup>16</sup> - 1</td></tr>
+<tr><td><code>[3]</code></td><td><code>column-u32</code></td><td>unsigned 32-bit int</td><td>4 B each</td><td>2<sup>16</sup> - 1</td></tr>
+<tr><td><code>[4]</code></td><td><code>column-u64</code></td><td>unsigned 64-bit int</td><td>8 B each</td><td>2<sup>16</sup> - 1</td></tr>
+<tr><td><code>[5]</code></td><td><code>column-i8</code></td><td>signed 8-bit int</td><td>1 B each</td><td>-2<sup>7</sup></td></tr>
+<tr><td><code>[6]</code></td><td><code>column-i16</code></td><td>signed 16-bit int</td><td>2 B each</td><td>-2<sup>15</sup></td></tr>
+<tr><td><code>[7]</code></td><td><code>column-i32</code></td><td>signed 32-bit int</td><td>4 B each</td><td>-2<sup>31</sup></td></tr>
+<tr><td><code>[8]</code></td><td><code>column-i64</code></td><td>signed 64-bit int</td><td>8 B each</td><td>-2<sup>63</sup></td></tr>
+<tr><td><code>[R]</code></td><td><code>column-float</code></td><td>32-bit float</td><td>4 B each</td><td><code>NAN</code> value</td></tr>
 </tbody></table>
 <p><span class="caption">Table C-1: Carbon <code>column</code> Type Support and Markers</span></p>
 <h3><a class="header" href="#values" id="values">Values</a></h3>
@@ -176,10 +176,10 @@
 </code></pre>
 <h3><a class="header" href="#example" id="example">Example</a></h3>
 <p>JSON snippet</p>
-<pre><code class="language-json">[ &quot;The&quot;, &quot;Number&quot;, 23 ]
+<pre><code class="language-json">[ -4, 2, null ]
 </code></pre>
-<p>A (compacted) Carbon file, which encodes the JSON array as <code>array</code> of two <code>string</code> values and one <code>u8</code> value.</p>
-<pre><code>[[] [s](3)[The] [s](6)[Number] [c][23] []] 
+<p>A (compacted) Carbon <code>carbon-i8</code>.</p>
+<pre><code>[5] (3)(3) [-4] [2] [-128]
 </code></pre>
 
                     </main>

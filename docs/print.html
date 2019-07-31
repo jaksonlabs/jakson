@@ -215,8 +215,7 @@
 }
 </code></pre>
 <p>Carbon <code>record</code> for JSON snippet</p>
-<pre><code>[no-key, 1B]
-(revision-number, 1B)
+<pre><code>[nokey, 1B]
 [object-begin, 1B]
    (str-len, 1B)[title, 5B] [string-field, 1B](str-len, 1B)[Back to the Future, 18B]
    (str-len, 1B)[sub-title, 9B] [null-field, 1B]
@@ -241,12 +240,12 @@
          [2016, 1B]
 [object-end, 1B]  
 </code></pre>
-<p>132 byte</p>
+<p>131 byte</p>
 <table><thead><tr><th>Format</th><th>Document Size</th></tr></thead><tbody>
 <tr><td>Plain-Text JSON</td><td>187 byte</td></tr>
 <tr><td>Binary JSON (BSON)</td><td>218 byte</td></tr>
 <tr><td>Universal Binary JSON (UBJSON)</td><td>144 byte</td></tr>
-<tr><td>Columnar Binary JSON (Carbon)</td><td>132 byte</td></tr>
+<tr><td>Columnar Binary JSON (Carbon)</td><td>131 byte</td></tr>
 </tbody></table>
 <h1><a class="header" href="#binary-json" id="binary-json">Binary JSON</a></h1>
 <h2><a class="header" href="#bison-running-example" id="bison-running-example">BISON Running Example</a></h2>
@@ -348,6 +347,9 @@
 <h2><a class="header" href="#revision-managment" id="revision-managment">Revision Managment</a></h2>
 <pre><code>(rev-number)
 </code></pre>
+<blockquote>
+<p>The <code>rev-number</code> field for a carbon <code>record</code> which has no primary key (i.e., <code>nokey</code> is set), is omitted. In any case of revison, the revision number of a <code>record</code> without primary key is <code>0</code>. See more in section about record <a href="format-specs/identification.html">identification</a>.</p>
+</blockquote>
 <h2><a class="header" href="#values" id="values">Values</a></h2>
 <pre><code>&lt;values&gt;
 </code></pre>
@@ -359,15 +361,15 @@
 <p>JSON snippet</p>
 <pre><code class="language-json">[ &quot;The&quot;, &quot;Number&quot;, 23 ]
 </code></pre>
-<p>A (compacted) Carbon file with object id <code>21</code> in revision <code>5</code> encoding the JSON array as <code>array</code>.</p>
-<pre><code>[21](5) [[] [s](3)[The] [s](6)[Number] [c][23] []] 
+<p>A (compacted) Carbon <code>record</code> with user-defined primary key <code>21</code> in revision <code>5</code> encoding the JSON array as <code>array</code>.</p>
+<pre><code>[ukey][21](5) [[] [s](3)[The] [s](6)[Number] [c][23] []] 
 </code></pre>
 <h3><a class="header" href="#example-column" id="example-column">Example (Column)</a></h3>
 <p>JSON snippet</p>
 <pre><code class="language-json">[ 23, 24, 25 ]
 </code></pre>
-<p>A (compacted) Carbon file with object id <code>21</code> in revision <code>5</code> encoding the JSON array as <code>u8</code> integer column.</p>
-<pre><code>[21](5) [[] [1](3)(3) [23][24][25] []] 
+<p>A (compacted) Carbon <code>record</code> with user-defined primary key <code>21</code> in revision <code>5</code> encoding the JSON array as <code>column-u8</code> integer column with <code>3</code> elements and a capacity of <code>3</code>.</p>
+<pre><code>[ukey][21](5) [1](3)(3) [23][24][25] []] 
 </code></pre>
 <h1><a class="header" href="#marker-format" id="marker-format">Marker Format</a></h1>
 <pre><code>[marker]
@@ -399,16 +401,16 @@
 <tr><td><code>[}]</code></td><td><code>object</code></td><td>marks end of an object</td></tr>
 <tr><td><code>[[]</code></td><td><code>array</code></td><td>marks begin of an array</td></tr>
 <tr><td><code>[]]</code></td><td><code>array</code></td><td>marks end of an array</td></tr>
-<tr><td><code>[1]</code></td><td><code>u8</code></td><td>an unsigned 8-bit integer column</td></tr>
-<tr><td><code>[2]</code></td><td><code>u16</code></td><td>an unsigned 16-bit integer column</td></tr>
-<tr><td><code>[3]</code></td><td><code>u32</code></td><td>an unsigned 32-bit integer column</td></tr>
-<tr><td><code>[4]</code></td><td><code>u64</code></td><td>an unsigned 64-bit integer column</td></tr>
-<tr><td><code>[5]</code></td><td><code>u8</code></td><td>an signed 8-bit integer column</td></tr>
-<tr><td><code>[6]</code></td><td><code>u16</code></td><td>an signed 16-bit integer column</td></tr>
-<tr><td><code>[7]</code></td><td><code>u32</code></td><td>an signed 32-bit integer column</td></tr>
-<tr><td><code>[8]</code></td><td><code>u64</code></td><td>an signed 64-bit integer column</td></tr>
-<tr><td><code>[R]</code></td><td><code>float</code></td><td>a single-precision floating number column</td></tr>
-<tr><td><code>[B]</code></td><td><code>boolean</code></td><td>a three-valued logic column</td></tr>
+<tr><td><code>[1]</code></td><td><code>column-u8</code></td><td>an unsigned 8-bit integer column</td></tr>
+<tr><td><code>[2]</code></td><td><code>column-u16</code></td><td>an unsigned 16-bit integer column</td></tr>
+<tr><td><code>[3]</code></td><td><code>column-u32</code></td><td>an unsigned 32-bit integer column</td></tr>
+<tr><td><code>[4]</code></td><td><code>column-u64</code></td><td>an unsigned 64-bit integer column</td></tr>
+<tr><td><code>[5]</code></td><td><code>column-i8</code></td><td>an signed 8-bit integer column</td></tr>
+<tr><td><code>[6]</code></td><td><code>column-i16</code></td><td>an signed 16-bit integer column</td></tr>
+<tr><td><code>[7]</code></td><td><code>column-i32</code></td><td>an signed 32-bit integer column</td></tr>
+<tr><td><code>[8]</code></td><td><code>column-i64</code></td><td>an signed 64-bit integer column</td></tr>
+<tr><td><code>[R]</code></td><td><code>column-float</code></td><td>a single-precision floating number column</td></tr>
+<tr><td><code>[B]</code></td><td><code>column-boolean</code></td><td>a three-valued logic column</td></tr>
 </tbody></table>
 <p><span class="caption">Figure MF-2: Container Type Markers</span></p>
 <table><thead><tr><th>Marker</th><th>Carbon Type</th><th>Descriptions</th></tr></thead><tbody>
@@ -453,7 +455,12 @@
 <blockquote>
 <p>The value generation of <code>autokey</code> is implementation-dependent.</p>
 </blockquote>
-<p>For See more in section <a href="format-specs/"></a>.</p>
+<blockquote>
+<p>The default value for numeric keys (<code>autokey</code>, <code>ukey</code>, and <code>ikey</code>) is <code>0</code>. The empty string <code>&quot;&quot;</code> is used to encode the default value for character string keys (<code>skey</code>). JSON formatters are required to format the value of <code>nokey</code> and the default value for character string keys as JSON <code>null</code>.</p>
+</blockquote>
+<blockquote>
+<p>If <code>nokey</code> is set, the <code>rev-number</code> field for a carbon <code>record</code> is omitted. In any case of revison, the revision number for such a <code>record</code> is <code>0</code>.</p>
+</blockquote>
 <h1><a class="header" href="#user-defined-keys" id="user-defined-keys">User-Defined Keys</a></h1>
 <blockquote>
 <p><strong>Not yet described</strong>. </p>
@@ -492,7 +499,7 @@
 <p>JSON snippet</p>
 <pre><code class="language-json">[true, false]
 </code></pre>
-<p>A (compacted) Carbon file</p>
+<p>A (compacted) Carbon <code>array</code></p>
 <pre><code>[[] [t] [f] []]
 </code></pre>
 <h2><a class="header" href="#encoding-as-column-value" id="encoding-as-column-value">Encoding as Column Value</a></h2>
@@ -505,7 +512,7 @@
 <p>JSON snippet</p>
 <pre><code class="language-json">[false, true, null]
 </code></pre>
-<p>A (compacted) Carbon file, which encodes the JSON array as <code>boolean</code> column.</p>
+<p>A (compacted) Carbon <code>column-boolean</code>.</p>
 <pre><code>[B](3)(3) [0][1][2]
 </code></pre>
 <h1><a class="header" href="#integer-numbers" id="integer-numbers">Integer Numbers</a></h1>
@@ -532,7 +539,7 @@
 <p>JSON snippet</p>
 <pre><code class="language-json">[-42, 42, null]
 </code></pre>
-<p>A (compacted) Carbon file, which encodes the JSON array as <code>i8</code> column.</p>
+<p>A (compacted) Carbon <code>column-8</code>.</p>
 <pre><code>[C](2)(2) [-42][42][255]
 </code></pre>
 <h1><a class="header" href="#floating-numbers" id="floating-numbers">Floating Numbers</a></h1>
@@ -551,14 +558,14 @@
 <pre><code>[[] [r][23.3] [r][42.0] []]
 </code></pre>
 <h2><a class="header" href="#encoding-as-column-value-2" id="encoding-as-column-value-2">Encoding as Column Value</a></h2>
-<table><thead><tr><th>Column Type Marker</th><th>Marker Size</th><th>Element Size</th><th>Block</th></tr></thead><tbody>
-<tr><td><code>[r]</code>, 32-bit floating numbers</td><td>1 byte</td><td>4 byte each</td><td>a <code>float</code> value</td></tr>
+<table><thead><tr><th>Column Type Marker</th><th>Element Size</th><th>Block</th></tr></thead><tbody>
+<tr><td><code>[R]</code>, 32-bit floating numbers</td><td>4 byte each</td><td>a <code>float</code> value</td></tr>
 </tbody></table>
 <h3><a class="header" href="#example-6" id="example-6">Example</a></h3>
 <p>JSON snippet</p>
 <pre><code class="language-json">[23.3, 42.0]
 </code></pre>
-<p>A (compacted) Carbon file, which encodes the JSON array as a <code>float</code> column.</p>
+<p>A (compacted) Carbon <code>column-float</code>.</p>
 <pre><code>[R] (2)(2) [23.3][42.0]
 </code></pre>
 <h1><a class="header" href="#character-strings" id="character-strings">Character Strings</a></h1>
@@ -1376,7 +1383,7 @@ Content:        c3RpbGwgYSBzZWNyZXQ=
 <p>JSON snippet</p>
 <pre><code class="language-json">[42, 23, null]
 </code></pre>
-<p>Carbon File snippet (JSON array encoded as <code>u8</code> column)</p>
+<p>A (compacted) Carbon <code>column-u8</code></p>
 <pre><code>[1](3)(3) [42][23][255]
 </code></pre>
 <h1><a class="header" href="#container-types" id="container-types">Container Types</a></h1>
@@ -1390,13 +1397,15 @@ Content:        c3RpbGwgYSBzZWNyZXQ=
 <h2><a class="header" href="#container-type-support" id="container-type-support">Container Type Support</a></h2>
 <h3><a class="header" href="#object-array-and-record-containers" id="object-array-and-record-containers">Object, Array and Record Containers</a></h3>
 <pre><code>true, false, u8, u16, u32, u64, i8, i16, i32, i64, float, string, 
-binary, custom binary, null, array, column 
+binary, custom binary, null, array, column-u8, column-u16, column-u32, 
+column-u64, column-i8, column-i16, column-i32, column-i64, column-float, 
+column-boolean, object 
 </code></pre>
 <p><span class="caption">Table CT-2: Container Type Support for <code>array</code> and <code>record</code> Containers</span></p>
 <h3><a class="header" href="#column-containers" id="column-containers">Column Containers</a></h3>
 <pre><code>boolean, u8, u16, u32, u64, i8, i16, i32, i64, float
 </code></pre>
-<p><span class="caption">Table CT-3: Container Type Support for <code>array</code> and <code>record</code> Containers</span></p>
+<p><span class="caption">Table CT-3: Container Type Support for <code>column</code> Containers</span></p>
 <h1><a class="header" href="#arrays" id="arrays">Arrays</a></h1>
 <table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
 <tr><td><code>array</code></td><td>list of variable-typed elements</td><td>2<sup>+</sup> bytes</td><td><code>null</code> value</td><td><code>[</code>, <code>]</code></td></tr>
@@ -1409,7 +1418,9 @@ binary, custom binary, null, array, column
 </code></pre>
 <h4><a class="header" href="#type-support" id="type-support">Type Support</a></h4>
 <pre><code>true, false, u8, u16, u32, u64, i8, i16, i32, i64, float, string, 
-binary, custom binary, null, array, column 
+binary, custom binary, null, array, column-u8, column-u16, column-u32, 
+column-u64, column-i8, column-i16, column-i32, column-i64, column-float, 
+column-boolean, object 
 </code></pre>
 <h3><a class="header" href="#capacities" id="capacities">Capacities</a></h3>
 <pre><code>...
@@ -1418,7 +1429,7 @@ binary, custom binary, null, array, column
 <p>JSON snippet</p>
 <pre><code class="language-json">[ &quot;The&quot;, &quot;Number&quot;, 23 ]
 </code></pre>
-<p>A (compacted) Carbon file, which encodes the JSON array as <code>array</code> of two <code>string</code> values and one <code>u8</code> value.</p>
+<p>A (compacted) Carbon <code>array</code> of two <code>string</code> values and one <code>u8</code> value.</p>
 <pre><code>[[] [s](3)[The] [s](6)[Number] [c][23] []] 
 </code></pre>
 <h1><a class="header" href="#columns" id="columns">Columns</a></h1>
@@ -1429,17 +1440,17 @@ binary, custom binary, null, array, column
 <pre><code>[&lt;column-marker&gt;](num-of-elems)(cap-of-elems) &lt;values&gt;...
 </code></pre>
 <h3><a class="header" href="#column-types" id="column-types">Column Types</a></h3>
-<table><thead><tr><th>Carbon Type</th><th>Marker</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th></tr></thead><tbody>
-<tr><td><code>boolean</code></td><td><code>[B]</code></td><td>three-valued logic</td><td>1 B each</td><td>2</td></tr>
-<tr><td><code>u8</code></td><td><code>[1]</code></td><td>unsigned 8-bit int</td><td>1 B each</td><td>2<sup>8</sup> - 1</td></tr>
-<tr><td><code>u16</code></td><td><code>[2]</code></td><td>unsigned 16-bit int</td><td>2 B each</td><td>2<sup>16</sup> - 1</td></tr>
-<tr><td><code>u32</code></td><td><code>[3]</code></td><td>unsigned 32-bit int</td><td>4 B each</td><td>2<sup>16</sup> - 1</td></tr>
-<tr><td><code>u64</code></td><td><code>[4]</code></td><td>unsigned 64-bit int</td><td>8 B each</td><td>2<sup>16</sup> - 1</td></tr>
-<tr><td><code>i8</code></td><td><code>[5]</code></td><td>signed 8-bit int</td><td>1 B each</td><td>-2<sup>7</sup></td></tr>
-<tr><td><code>i16</code></td><td><code>[6]</code></td><td>signed 16-bit int</td><td>2 B each</td><td>-2<sup>15</sup></td></tr>
-<tr><td><code>i32</code></td><td><code>[7]</code></td><td>signed 32-bit int</td><td>4 B each</td><td>-2<sup>31</sup></td></tr>
-<tr><td><code>i64</code></td><td><code>[8]</code></td><td>signed 64-bit int</td><td>8 B each</td><td>-2<sup>63</sup></td></tr>
-<tr><td><code>float</code></td><td><code>[R]</code></td><td>32-bit float</td><td>4 B each</td><td><code>NAN</code> value</td></tr>
+<table><thead><tr><th>Marker</th><th>Container</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th></tr></thead><tbody>
+<tr><td><code>[B]</code></td><td><code>column-boolean</code></td><td>three-valued logic</td><td>1 B each</td><td>2</td></tr>
+<tr><td><code>[1]</code></td><td><code>column-u8</code></td><td>unsigned 8-bit int</td><td>1 B each</td><td>2<sup>8</sup> - 1</td></tr>
+<tr><td><code>[2]</code></td><td><code>column-u16</code></td><td>unsigned 16-bit int</td><td>2 B each</td><td>2<sup>16</sup> - 1</td></tr>
+<tr><td><code>[3]</code></td><td><code>column-u32</code></td><td>unsigned 32-bit int</td><td>4 B each</td><td>2<sup>16</sup> - 1</td></tr>
+<tr><td><code>[4]</code></td><td><code>column-u64</code></td><td>unsigned 64-bit int</td><td>8 B each</td><td>2<sup>16</sup> - 1</td></tr>
+<tr><td><code>[5]</code></td><td><code>column-i8</code></td><td>signed 8-bit int</td><td>1 B each</td><td>-2<sup>7</sup></td></tr>
+<tr><td><code>[6]</code></td><td><code>column-i16</code></td><td>signed 16-bit int</td><td>2 B each</td><td>-2<sup>15</sup></td></tr>
+<tr><td><code>[7]</code></td><td><code>column-i32</code></td><td>signed 32-bit int</td><td>4 B each</td><td>-2<sup>31</sup></td></tr>
+<tr><td><code>[8]</code></td><td><code>column-i64</code></td><td>signed 64-bit int</td><td>8 B each</td><td>-2<sup>63</sup></td></tr>
+<tr><td><code>[R]</code></td><td><code>column-float</code></td><td>32-bit float</td><td>4 B each</td><td><code>NAN</code> value</td></tr>
 </tbody></table>
 <p><span class="caption">Table C-1: Carbon <code>column</code> Type Support and Markers</span></p>
 <h3><a class="header" href="#values-2" id="values-2">Values</a></h3>
@@ -1450,10 +1461,10 @@ binary, custom binary, null, array, column
 </code></pre>
 <h3><a class="header" href="#example-13" id="example-13">Example</a></h3>
 <p>JSON snippet</p>
-<pre><code class="language-json">[ &quot;The&quot;, &quot;Number&quot;, 23 ]
+<pre><code class="language-json">[ -4, 2, null ]
 </code></pre>
-<p>A (compacted) Carbon file, which encodes the JSON array as <code>array</code> of two <code>string</code> values and one <code>u8</code> value.</p>
-<pre><code>[[] [s](3)[The] [s](6)[Number] [c][23] []] 
+<p>A (compacted) Carbon <code>carbon-i8</code>.</p>
+<pre><code>[5] (3)(3) [-4] [2] [-128]
 </code></pre>
 <h1><a class="header" href="#objects" id="objects">Objects</a></h1>
 <table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
@@ -1476,7 +1487,9 @@ binary, custom binary, null, array, column
 </code></pre>
 <p>A <code>&lt;value&gt;</code> is any value of a supported type.</p>
 <pre><code>true, false, u8, u16, u32, u64, i8, i16, i32, i64, float, string, 
-binary, custom binary, null, array, column, object 
+binary, custom binary, null, array, column-u8, column-u16, column-u32, 
+column-u64, column-i8, column-i16, column-i32, column-i64, column-float, 
+column-boolean, object 
 </code></pre>
 <h3><a class="header" href="#capacities-2" id="capacities-2">Capacities</a></h3>
 <pre><code>...

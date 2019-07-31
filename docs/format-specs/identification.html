@@ -163,7 +163,12 @@
 <blockquote>
 <p>The value generation of <code>autokey</code> is implementation-dependent.</p>
 </blockquote>
-<p>For See more in section <a href=""></a>.</p>
+<blockquote>
+<p>The default value for numeric keys (<code>autokey</code>, <code>ukey</code>, and <code>ikey</code>) is <code>0</code>. The empty string <code>&quot;&quot;</code> is used to encode the default value for character string keys (<code>skey</code>). JSON formatters are required to format the value of <code>nokey</code> and the default value for character string keys as JSON <code>null</code>.</p>
+</blockquote>
+<blockquote>
+<p>If <code>nokey</code> is set, the <code>rev-number</code> field for a carbon <code>record</code> is omitted. In any case of revison, the revision number for such a <code>record</code> is <code>0</code>.</p>
+</blockquote>
 
                     </main>
 

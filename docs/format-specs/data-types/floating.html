@@ -163,14 +163,14 @@
 <pre><code>[[] [r][23.3] [r][42.0] []]
 </code></pre>
 <h2><a class="header" href="#encoding-as-column-value" id="encoding-as-column-value">Encoding as Column Value</a></h2>
-<table><thead><tr><th>Column Type Marker</th><th>Marker Size</th><th>Element Size</th><th>Block</th></tr></thead><tbody>
-<tr><td><code>[r]</code>, 32-bit floating numbers</td><td>1 byte</td><td>4 byte each</td><td>a <code>float</code> value</td></tr>
+<table><thead><tr><th>Column Type Marker</th><th>Element Size</th><th>Block</th></tr></thead><tbody>
+<tr><td><code>[R]</code>, 32-bit floating numbers</td><td>4 byte each</td><td>a <code>float</code> value</td></tr>
 </tbody></table>
 <h3><a class="header" href="#example-1" id="example-1">Example</a></h3>
 <p>JSON snippet</p>
 <pre><code class="language-json">[23.3, 42.0]
 </code></pre>
-<p>A (compacted) Carbon file, which encodes the JSON array as a <code>float</code> column.</p>
+<p>A (compacted) Carbon <code>column-float</code>.</p>
 <pre><code>[R] (2)(2) [23.3][42.0]
 </code></pre>
 
