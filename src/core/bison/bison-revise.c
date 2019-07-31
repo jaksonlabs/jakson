@@ -277,8 +277,6 @@ NG5_EXPORT(bool) bison_revise_shrink(struct bison_revise *context)
 
         offset_t size;
         memblock_size(&size, it.memfile.memblock);
-        hexdump_print(stdout, memblock_raw_data(it.memfile.memblock), size);
-
         bison_revise_iterator_close(&it);
         return true;
 }
@@ -384,7 +382,16 @@ static bool internal_pack_array(struct bison_array_it *it)
                                 memfile_seek(&it->memfile, memfile_tell(&nested_array_it.memfile));
                                 bison_array_it_drop(&nested_array_it);
                         } break;
-                        case BISON_FIELD_TYPE_COLUMN:
+                        case BISON_FIELD_TYPE_COLUMN_U8:
+                        case BISON_FIELD_TYPE_COLUMN_U16:
+                        case BISON_FIELD_TYPE_COLUMN_U32:
+                        case BISON_FIELD_TYPE_COLUMN_U64:
+                        case BISON_FIELD_TYPE_COLUMN_I8:
+                        case BISON_FIELD_TYPE_COLUMN_I16:
+                        case BISON_FIELD_TYPE_COLUMN_I32:
+                        case BISON_FIELD_TYPE_COLUMN_I64:
+                        case BISON_FIELD_TYPE_COLUMN_FLOAT:
+                        case BISON_FIELD_TYPE_COLUMN_BOOLEAN:
                                 bison_column_it_rewind(it->field_access.nested_column_it);
                                 internal_pack_column(it->field_access.nested_column_it);
                                 memfile_seek(&it->memfile, memfile_tell(&it->field_access.nested_column_it->memfile));
@@ -480,7 +487,16 @@ static bool internal_pack_object(struct bison_object_it *it)
                                 memfile_seek(&it->memfile, memfile_tell(&nested_array_it.memfile));
                                 bison_array_it_drop(&nested_array_it);
                         } break;
-                        case BISON_FIELD_TYPE_COLUMN:
+                        case BISON_FIELD_TYPE_COLUMN_U8:
+                        case BISON_FIELD_TYPE_COLUMN_U16:
+                        case BISON_FIELD_TYPE_COLUMN_U32:
+                        case BISON_FIELD_TYPE_COLUMN_U64:
+                        case BISON_FIELD_TYPE_COLUMN_I8:
+                        case BISON_FIELD_TYPE_COLUMN_I16:
+                        case BISON_FIELD_TYPE_COLUMN_I32:
+                        case BISON_FIELD_TYPE_COLUMN_I64:
+                        case BISON_FIELD_TYPE_COLUMN_FLOAT:
+                        case BISON_FIELD_TYPE_COLUMN_BOOLEAN:
                                 bison_column_it_rewind(it->field_access.nested_column_it);
                                 internal_pack_column(it->field_access.nested_column_it);
                                 memfile_seek(&it->memfile, memfile_tell(&it->field_access.nested_column_it->memfile) - sizeof(u8));

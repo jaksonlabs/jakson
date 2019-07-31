@@ -17,6 +17,7 @@
 
 #include "shared/common.h"
 #include "shared/error.h"
+#include "core/bison/bison.h"
 
 #ifndef BISON_FIELD_H
 #define BISON_FIELD_H
@@ -24,32 +25,55 @@
 enum bison_field_type
 {
         /* constants */
-        BISON_FIELD_TYPE_NULL = 'n', /* null */
-        BISON_FIELD_TYPE_TRUE = 't', /* true */
-        BISON_FIELD_TYPE_FALSE = 'f', /* false */
+        BISON_FIELD_TYPE_NULL = BISON_MARKER_NULL, /* null */
+        BISON_FIELD_TYPE_TRUE = BISON_MARKER_TRUE, /* true */
+        BISON_FIELD_TYPE_FALSE = BISON_MARKER_FALSE, /* false */
 
         /* containers */
-        BISON_FIELD_TYPE_OBJECT = '{', /* object */
-        BISON_FIELD_TYPE_ARRAY = '[', /* variable-type array of elements of varying type */
-        BISON_FIELD_TYPE_COLUMN = '(', /* fixed-type array of elements of particular type */
+        BISON_FIELD_TYPE_OBJECT = BISON_MARKER_OBJECT_BEGIN, /* object */
+        BISON_FIELD_TYPE_ARRAY = BISON_MARKER_ARRAY_BEGIN, /* variable-type array of elements of varying type */
+        BISON_FIELD_TYPE_COLUMN_U8 = BISON_MARKER_COLUMN_U8, /* fixed-type array of elements of particular type */
+        BISON_FIELD_TYPE_COLUMN_U16 = BISON_MARKER_COLUMN_U16, /* fixed-type array of elements of particular type */
+        BISON_FIELD_TYPE_COLUMN_U32 = BISON_MARKER_COLUMN_U32, /* fixed-type array of elements of particular type */
+        BISON_FIELD_TYPE_COLUMN_U64 = BISON_MARKER_COLUMN_U64, /* fixed-type array of elements of particular type */
+        BISON_FIELD_TYPE_COLUMN_I8 = BISON_MARKER_COLUMN_I8, /* fixed-type array of elements of particular type */
+        BISON_FIELD_TYPE_COLUMN_I16 = BISON_MARKER_COLUMN_I16, /* fixed-type array of elements of particular type */
+        BISON_FIELD_TYPE_COLUMN_I32 = BISON_MARKER_COLUMN_I32, /* fixed-type array of elements of particular type */
+        BISON_FIELD_TYPE_COLUMN_I64 = BISON_MARKER_COLUMN_I64, /* fixed-type array of elements of particular type */
+        BISON_FIELD_TYPE_COLUMN_FLOAT = BISON_MARKER_COLUMN_FLOAT, /* fixed-type array of elements of particular type */
+        BISON_FIELD_TYPE_COLUMN_BOOLEAN = BISON_MARKER_COLUMN_BOOLEAN, /* fixed-type array of elements of particular type */
 
         /* character strings */
-        BISON_FIELD_TYPE_STRING = 's', /* UTF-8 string */
+        BISON_FIELD_TYPE_STRING = BISON_MARKER_STRING, /* UTF-8 string */
 
         /* numbers */
-        BISON_FIELD_TYPE_NUMBER_U8 = 'c', /* 8bit unsigned integer */
-        BISON_FIELD_TYPE_NUMBER_U16 = 'd', /* 16bit unsigned integer */
-        BISON_FIELD_TYPE_NUMBER_U32 = 'i', /* 32bit unsigned integer */
-        BISON_FIELD_TYPE_NUMBER_U64 = 'l', /* 64bit unsigned integer */
-        BISON_FIELD_TYPE_NUMBER_I8 = 'C', /* 8bit signed integer */
-        BISON_FIELD_TYPE_NUMBER_I16 = 'D', /* 16bit signed integer */
-        BISON_FIELD_TYPE_NUMBER_I32 = 'I', /* 32bit signed integer */
-        BISON_FIELD_TYPE_NUMBER_I64 = 'L', /* 64bit signed integer */
-        BISON_FIELD_TYPE_NUMBER_FLOAT = 'r', /* 32bit float */
+        BISON_FIELD_TYPE_NUMBER_U8 = BISON_MARKER_U8, /* 8bit unsigned integer */
+        BISON_FIELD_TYPE_NUMBER_U16 = BISON_MARKER_U16, /* 16bit unsigned integer */
+        BISON_FIELD_TYPE_NUMBER_U32 = BISON_MARKER_U32, /* 32bit unsigned integer */
+        BISON_FIELD_TYPE_NUMBER_U64 = BISON_MARKER_U64, /* 64bit unsigned integer */
+        BISON_FIELD_TYPE_NUMBER_I8 = BISON_MARKER_I8, /* 8bit signed integer */
+        BISON_FIELD_TYPE_NUMBER_I16 = BISON_MARKER_I16, /* 16bit signed integer */
+        BISON_FIELD_TYPE_NUMBER_I32 = BISON_MARKER_I32, /* 32bit signed integer */
+        BISON_FIELD_TYPE_NUMBER_I64 = BISON_MARKER_I64, /* 64bit signed integer */
+        BISON_FIELD_TYPE_NUMBER_FLOAT = BISON_MARKER_FLOAT, /* 32bit float */
 
         /* binary data */
-        BISON_FIELD_TYPE_BINARY = 'b', /* arbitrary binary object with known mime type */
-        BISON_FIELD_TYPE_BINARY_CUSTOM = 'x', /* arbitrary binary object with unknown mime type*/
+        BISON_FIELD_TYPE_BINARY = BISON_MARKER_BINARY, /* arbitrary binary object with known mime type */
+        BISON_FIELD_TYPE_BINARY_CUSTOM = BISON_MARKER_CUSTOM_BINARY, /* arbitrary binary object with unknown mime type*/
+};
+
+enum bison_column_type
+{
+        BISON_COLUMN_TYPE_U8,
+        BISON_COLUMN_TYPE_U16,
+        BISON_COLUMN_TYPE_U32,
+        BISON_COLUMN_TYPE_U64,
+        BISON_COLUMN_TYPE_I8,
+        BISON_COLUMN_TYPE_I16,
+        BISON_COLUMN_TYPE_I32,
+        BISON_COLUMN_TYPE_I64,
+        BISON_COLUMN_TYPE_FLOAT,
+        BISON_COLUMN_TYPE_BOOLEAN
 };
 
 enum bison_field_class
@@ -73,7 +97,16 @@ enum bison_constant
 #define BISON_FIELD_TYPE_FALSE_STR "boolean (false)"
 #define BISON_FIELD_TYPE_OBJECT_STR "object"
 #define BISON_FIELD_TYPE_ARRAY_STR "array"
-#define BISON_FIELD_TYPE_COLUMN_STR "column"
+#define BISON_FIELD_TYPE_COLUMN_U8_STR "column-u8"
+#define BISON_FIELD_TYPE_COLUMN_U16_STR "column-u16"
+#define BISON_FIELD_TYPE_COLUMN_U32_STR "column-u32"
+#define BISON_FIELD_TYPE_COLUMN_U64_STR "column-u64"
+#define BISON_FIELD_TYPE_COLUMN_I8_STR "column-i8"
+#define BISON_FIELD_TYPE_COLUMN_I16_STR "column-i16"
+#define BISON_FIELD_TYPE_COLUMN_I32_STR "column-i32"
+#define BISON_FIELD_TYPE_COLUMN_I64_STR "column-i64"
+#define BISON_FIELD_TYPE_COLUMN_FLOAT_STR "column-float"
+#define BISON_FIELD_TYPE_COLUMN_BOOLEAN_STR "column-boolean"
 #define BISON_FIELD_TYPE_STRING_STR "string"
 #define BISON_FIELD_TYPE_BINARY_STR "binary"
 #define BISON_FIELD_TYPE_NUMBER_U8_STR "number (u8)"
@@ -147,6 +180,8 @@ NG5_EXPORT(bool) bison_field_skip_16(struct memfile *file);
 NG5_EXPORT(bool) bison_field_skip_32(struct memfile *file);
 
 NG5_EXPORT(bool) bison_field_skip_64(struct memfile *file);
+
+NG5_EXPORT(enum bison_field_type) bison_field_type_for_column(enum bison_column_type type);
 
 NG5_END_DECL
 

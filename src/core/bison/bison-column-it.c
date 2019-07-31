@@ -46,10 +46,19 @@ NG5_EXPORT(bool) bison_column_it_create(struct bison_column_it *it, struct memfi
         error_if(memfile_remain_size(&it->memfile) < sizeof(u8) + sizeof(media_type_t), err, NG5_ERR_CORRUPTED);
 
         u8 marker = *memfile_read(&it->memfile, sizeof(u8));
-        error_if_with_details(marker != BISON_MARKER_COLUMN_BEGIN, err, NG5_ERR_ILLEGALOP,
+        error_if_with_details(marker != BISON_MARKER_COLUMN_U8 &&
+                marker != BISON_MARKER_COLUMN_U16 &&
+                marker != BISON_MARKER_COLUMN_U32 &&
+                marker != BISON_MARKER_COLUMN_U64 &&
+                marker != BISON_MARKER_COLUMN_I8 &&
+                marker != BISON_MARKER_COLUMN_I16 &&
+                marker != BISON_MARKER_COLUMN_I32 &&
+                marker != BISON_MARKER_COLUMN_I64 &&
+                marker != BISON_MARKER_COLUMN_FLOAT &&
+                marker != BISON_MARKER_COLUMN_BOOLEAN, err, NG5_ERR_ILLEGALOP,
                 "column begin marker ('(') not found");
 
-        enum bison_field_type type = (enum bison_field_type) *memfile_read(&it->memfile, sizeof(media_type_t));
+        enum bison_field_type type = (enum bison_field_type) marker;
         it->type = type;
 
         it->num_and_capacity_start_offset = memfile_tell(&it->memfile);
@@ -131,52 +140,52 @@ NG5_EXPORT(const void *) bison_column_it_values(enum bison_field_type *type, u32
 
 NG5_EXPORT(const u8 *) bison_column_it_boolean_values(u32 *nvalues, struct bison_column_it *it)
 {
-        return safe_cast(u8, nvalues, it, (type == BISON_FIELD_TYPE_TRUE || type == BISON_FIELD_TYPE_FALSE));
+        return safe_cast(u8, nvalues, it, (type == BISON_FIELD_TYPE_COLUMN_BOOLEAN));
 }
 
 NG5_EXPORT(const u8 *) bison_column_it_u8_values(u32 *nvalues, struct bison_column_it *it)
 {
-        return safe_cast(u8, nvalues, it, (type == BISON_FIELD_TYPE_NUMBER_U8));
+        return safe_cast(u8, nvalues, it, (type == BISON_FIELD_TYPE_COLUMN_U8));
 }
 
 NG5_EXPORT(const u16 *) bison_column_it_u16_values(u32 *nvalues, struct bison_column_it *it)
 {
-        return safe_cast(u16, nvalues, it, (type == BISON_FIELD_TYPE_NUMBER_U16));
+        return safe_cast(u16, nvalues, it, (type == BISON_FIELD_TYPE_COLUMN_U16));
 }
 
 NG5_EXPORT(const u32 *) bison_column_it_u32_values(u32 *nvalues, struct bison_column_it *it)
 {
-        return safe_cast(u32, nvalues, it, (type == BISON_FIELD_TYPE_NUMBER_U32));
+        return safe_cast(u32, nvalues, it, (type == BISON_FIELD_TYPE_COLUMN_U32));
 }
 
 NG5_EXPORT(const u64 *) bison_column_it_u64_values(u32 *nvalues, struct bison_column_it *it)
 {
-        return safe_cast(u64, nvalues, it, (type == BISON_FIELD_TYPE_NUMBER_U64));
+        return safe_cast(u64, nvalues, it, (type == BISON_FIELD_TYPE_COLUMN_U64));
 }
 
 NG5_EXPORT(const i8 *) bison_column_it_i8_values(u32 *nvalues, struct bison_column_it *it)
 {
-        return safe_cast(i8, nvalues, it, (type == BISON_FIELD_TYPE_NUMBER_I8));
+        return safe_cast(i8, nvalues, it, (type == BISON_FIELD_TYPE_COLUMN_I8));
 }
 
 NG5_EXPORT(const i16 *) bison_column_it_i16_values(u32 *nvalues, struct bison_column_it *it)
 {
-        return safe_cast(i16, nvalues, it, (type == BISON_FIELD_TYPE_NUMBER_I16));
+        return safe_cast(i16, nvalues, it, (type == BISON_FIELD_TYPE_COLUMN_I16));
 }
 
 NG5_EXPORT(const i32 *) bison_column_it_i32_values(u32 *nvalues, struct bison_column_it *it)
 {
-        return safe_cast(i32, nvalues, it, (type == BISON_FIELD_TYPE_NUMBER_I32));
+        return safe_cast(i32, nvalues, it, (type == BISON_FIELD_TYPE_COLUMN_I32));
 }
 
 NG5_EXPORT(const i64 *) bison_column_it_i64_values(u32 *nvalues, struct bison_column_it *it)
 {
-        return safe_cast(i64, nvalues, it, (type == BISON_FIELD_TYPE_NUMBER_I64));
+        return safe_cast(i64, nvalues, it, (type == BISON_FIELD_TYPE_COLUMN_I64));
 }
 
 NG5_EXPORT(const float *) bison_column_it_float_values(u32 *nvalues, struct bison_column_it *it)
 {
-        return safe_cast(float, nvalues, it, (type == BISON_FIELD_TYPE_NUMBER_FLOAT));
+        return safe_cast(float, nvalues, it, (type == BISON_FIELD_TYPE_COLUMN_FLOAT));
 }
 
 NG5_EXPORT(bool) bison_column_it_remove(struct bison_column_it *it, u32 pos)
@@ -221,54 +230,61 @@ NG5_EXPORT(bool) bison_column_it_update_set_null(struct bison_column_it *it, u32
         memfile_seek(&it->memfile, payload_start + pos * bison_int_get_type_value_size(it->type));
 
         switch (it->type) {
-                case BISON_FIELD_TYPE_NULL:
-                        /* nothing to do */
-                        break;
-                case BISON_FIELD_TYPE_TRUE:
-                case BISON_FIELD_TYPE_FALSE: {
+                case BISON_FIELD_TYPE_COLUMN_BOOLEAN: {
                         u8 null_value = BISON_BOOLEAN_COLUMN_NULL;
                         memfile_write(&it->memfile, &null_value, sizeof(u8));
                 } break;
-                case BISON_FIELD_TYPE_NUMBER_U8: {
+                case BISON_FIELD_TYPE_COLUMN_U8: {
                         u8 null_value = U8_NULL;
                         memfile_write(&it->memfile, &null_value, sizeof(u8));
                 } break;
-                case BISON_FIELD_TYPE_NUMBER_U16: {
+                case BISON_FIELD_TYPE_COLUMN_U16: {
                         u16 null_value = U16_NULL;
                         memfile_write(&it->memfile, &null_value, sizeof(u16));
                 } break;
-                case BISON_FIELD_TYPE_NUMBER_U32: {
+                case BISON_FIELD_TYPE_COLUMN_U32: {
                         u32 null_value = U32_NULL;
                         memfile_write(&it->memfile, &null_value, sizeof(u32));
                 } break;
-                case BISON_FIELD_TYPE_NUMBER_U64: {
+                case BISON_FIELD_TYPE_COLUMN_U64: {
                         u64 null_value = U64_NULL;
                         memfile_write(&it->memfile, &null_value, sizeof(u64));
                 } break;
-                case BISON_FIELD_TYPE_NUMBER_I8: {
+                case BISON_FIELD_TYPE_COLUMN_I8: {
                         i8 null_value = I8_NULL;
                         memfile_write(&it->memfile, &null_value, sizeof(i8));
                 } break;
-                case BISON_FIELD_TYPE_NUMBER_I16: {
+                case BISON_FIELD_TYPE_COLUMN_I16: {
                         i16 null_value = I16_NULL;
                         memfile_write(&it->memfile, &null_value, sizeof(i16));
                 } break;
-                case BISON_FIELD_TYPE_NUMBER_I32: {
+                case BISON_FIELD_TYPE_COLUMN_I32: {
                         i32 null_value = I32_NULL;
                         memfile_write(&it->memfile, &null_value, sizeof(i32));
                 } break;
-                case BISON_FIELD_TYPE_NUMBER_I64: {
+                case BISON_FIELD_TYPE_COLUMN_I64: {
                         i64 null_value = I64_NULL;
                         memfile_write(&it->memfile, &null_value, sizeof(i64));
                 } break;
-                case BISON_FIELD_TYPE_NUMBER_FLOAT: {
+                case BISON_FIELD_TYPE_COLUMN_FLOAT: {
                         float null_value = FLOAT_NULL;
                         memfile_write(&it->memfile, &null_value, sizeof(float));
                 } break;
+                case BISON_FIELD_TYPE_NULL:
+                case BISON_FIELD_TYPE_TRUE:
+                case BISON_FIELD_TYPE_FALSE:
                 case BISON_FIELD_TYPE_OBJECT:
                 case BISON_FIELD_TYPE_ARRAY:
-                case BISON_FIELD_TYPE_COLUMN:
                 case BISON_FIELD_TYPE_STRING:
+                case BISON_FIELD_TYPE_NUMBER_U8:
+                case BISON_FIELD_TYPE_NUMBER_U16:
+                case BISON_FIELD_TYPE_NUMBER_U32:
+                case BISON_FIELD_TYPE_NUMBER_U64:
+                case BISON_FIELD_TYPE_NUMBER_I8:
+                case BISON_FIELD_TYPE_NUMBER_I16:
+                case BISON_FIELD_TYPE_NUMBER_I32:
+                case BISON_FIELD_TYPE_NUMBER_I64:
+                case BISON_FIELD_TYPE_NUMBER_FLOAT:
                 case BISON_FIELD_TYPE_BINARY:
                 case BISON_FIELD_TYPE_BINARY_CUSTOM:
                         memfile_restore_position(&it->memfile);
@@ -389,61 +405,64 @@ NG5_EXPORT(bool) bison_column_it_update_set_true(struct bison_column_it *it, u32
         memfile_seek(&it->memfile, payload_start + pos * bison_int_get_type_value_size(it->type));
 
         switch (it->type) {
-        case BISON_FIELD_TYPE_NULL:
-                /* special case: the column must be re-written to a 'true' column with null-encoded values */
-                // TODO: implement
-                error_print(NG5_ERR_NOTIMPLEMENTED)
-                break;
-        case BISON_FIELD_TYPE_TRUE:
-                /* nothing to do */
-                break;
-        case BISON_FIELD_TYPE_FALSE: {
+        case BISON_FIELD_TYPE_COLUMN_BOOLEAN: {
                 u8 value = BISON_BOOLEAN_COLUMN_TRUE;
                 memfile_write(&it->memfile, &value, sizeof(u8));
         } break;
-        case BISON_FIELD_TYPE_NUMBER_U8: {
+        case BISON_FIELD_TYPE_COLUMN_U8: {
                 u8 null_value = U8_NULL;
                 memfile_write(&it->memfile, &null_value, sizeof(u8));
         } break;
-        case BISON_FIELD_TYPE_NUMBER_U16: {
+        case BISON_FIELD_TYPE_COLUMN_U16: {
                 u16 null_value = U16_NULL;
                 memfile_write(&it->memfile, &null_value, sizeof(u16));
         } break;
-        case BISON_FIELD_TYPE_NUMBER_U32: {
+        case BISON_FIELD_TYPE_COLUMN_U32: {
                 //u32 null_value = U32_NULL;
                 //memfile_write(&it->memfile, &null_value, sizeof(u32));
                 rewrite_column_to_array(it);
 
 
         } break;
-        case BISON_FIELD_TYPE_NUMBER_U64: {
+        case BISON_FIELD_TYPE_COLUMN_U64: {
                 u64 null_value = U64_NULL;
                 memfile_write(&it->memfile, &null_value, sizeof(u64));
         } break;
-        case BISON_FIELD_TYPE_NUMBER_I8: {
+        case BISON_FIELD_TYPE_COLUMN_I8: {
                 i8 null_value = I8_NULL;
                 memfile_write(&it->memfile, &null_value, sizeof(i8));
         } break;
-        case BISON_FIELD_TYPE_NUMBER_I16: {
+        case BISON_FIELD_TYPE_COLUMN_I16: {
                 i16 null_value = I16_NULL;
                 memfile_write(&it->memfile, &null_value, sizeof(i16));
         } break;
-        case BISON_FIELD_TYPE_NUMBER_I32: {
+        case BISON_FIELD_TYPE_COLUMN_I32: {
                 i32 null_value = I32_NULL;
                 memfile_write(&it->memfile, &null_value, sizeof(i32));
         } break;
-        case BISON_FIELD_TYPE_NUMBER_I64: {
+        case BISON_FIELD_TYPE_COLUMN_I64: {
                 i64 null_value = I64_NULL;
                 memfile_write(&it->memfile, &null_value, sizeof(i64));
         } break;
-        case BISON_FIELD_TYPE_NUMBER_FLOAT: {
+        case BISON_FIELD_TYPE_COLUMN_FLOAT: {
                 float null_value = FLOAT_NULL;
                 memfile_write(&it->memfile, &null_value, sizeof(float));
         } break;
+        case BISON_FIELD_TYPE_NULL:
+        case BISON_FIELD_TYPE_TRUE:
+        case BISON_FIELD_TYPE_FALSE:
         case BISON_FIELD_TYPE_OBJECT:
         case BISON_FIELD_TYPE_ARRAY:
-        case BISON_FIELD_TYPE_COLUMN:
         case BISON_FIELD_TYPE_STRING:
+        case BISON_FIELD_TYPE_NUMBER_U8:
+        case BISON_FIELD_TYPE_NUMBER_U16:
+        case BISON_FIELD_TYPE_NUMBER_U32:
+        case BISON_FIELD_TYPE_NUMBER_U64:
+        case BISON_FIELD_TYPE_NUMBER_I8:
+        case BISON_FIELD_TYPE_NUMBER_I16:
+        case BISON_FIELD_TYPE_NUMBER_I32:
+        case BISON_FIELD_TYPE_NUMBER_I64:
+        case BISON_FIELD_TYPE_NUMBER_FLOAT:
         case BISON_FIELD_TYPE_BINARY:
         case BISON_FIELD_TYPE_BINARY_CUSTOM:
                 memfile_restore_position(&it->memfile);

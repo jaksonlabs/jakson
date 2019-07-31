@@ -37,16 +37,16 @@ Marker  | Carbon Type      | Descriptions
 `[}]`   | `object`         | marks end of an object
 `[[]`   | `array`          | marks begin of an array
 `[]]`   | `array`          | marks end of an array
-`[1]`   | `u8`             | an unsigned 8-bit integer column
-`[2]`   | `u16`            | an unsigned 16-bit integer column
-`[3]`   | `u32`            | an unsigned 32-bit integer column
-`[4]`   | `u64`            | an unsigned 64-bit integer column
-`[5]`   | `u8`             | an signed 8-bit integer column
-`[6]`   | `u16`            | an signed 16-bit integer column
-`[7]`   | `u32`            | an signed 32-bit integer column
-`[8]`   | `u64`            | an signed 64-bit integer column
-`[R]`   | `float`          | a single-precision floating number column
-`[B]`   | `boolean`        | a three-valued logic column
+`[1]`   | `column-u8`             | an unsigned 8-bit integer column
+`[2]`   | `column-u16`            | an unsigned 16-bit integer column
+`[3]`   | `column-u32`            | an unsigned 32-bit integer column
+`[4]`   | `column-u64`            | an unsigned 64-bit integer column
+`[5]`   | `column-i8`             | an signed 8-bit integer column
+`[6]`   | `column-i16`            | an signed 16-bit integer column
+`[7]`   | `column-i32`            | an signed 32-bit integer column
+`[8]`   | `column-i64`            | an signed 64-bit integer column
+`[R]`   | `column-float`          | a single-precision floating number column
+`[B]`   | `column-boolean`        | a three-valued logic column
 
 
 

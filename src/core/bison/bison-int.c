@@ -71,37 +71,50 @@ NG5_EXPORT(bool) bison_int_insert_array(struct memfile *memfile, size_t nbytes)
         return true;
 }
 
-NG5_EXPORT(bool) bison_int_insert_column(struct memfile *memfile_in, struct err *err_in, enum bison_field_type type, size_t capactity)
+NG5_EXPORT(bool) bison_int_insert_column(struct memfile *memfile_in, struct err *err_in, enum bison_column_type type, size_t capactity)
 {
         error_if_null(memfile_in);
         error_if_null(err_in);
 
-        unused(capactity);
+        enum bison_field_type column_type;
 
         switch (type) {
-        case BISON_FIELD_TYPE_NULL:
-        case BISON_FIELD_TYPE_TRUE:
-        case BISON_FIELD_TYPE_FALSE:
-        case BISON_FIELD_TYPE_NUMBER_U8:
-        case BISON_FIELD_TYPE_NUMBER_U16:
-        case BISON_FIELD_TYPE_NUMBER_U32:
-        case BISON_FIELD_TYPE_NUMBER_U64:
-        case BISON_FIELD_TYPE_NUMBER_I8:
-        case BISON_FIELD_TYPE_NUMBER_I16:
-        case BISON_FIELD_TYPE_NUMBER_I32:
-        case BISON_FIELD_TYPE_NUMBER_I64:
-        case BISON_FIELD_TYPE_NUMBER_FLOAT:
-                break; /* all types from above are fixed-length and therefore supported in a column */
+        case BISON_COLUMN_TYPE_BOOLEAN:
+                column_type = BISON_FIELD_TYPE_COLUMN_BOOLEAN;
+                break;
+        case BISON_COLUMN_TYPE_U8:
+                column_type = BISON_FIELD_TYPE_COLUMN_U8;
+                break;
+        case BISON_COLUMN_TYPE_U16:
+                column_type = BISON_FIELD_TYPE_COLUMN_U16;
+                break;
+        case BISON_COLUMN_TYPE_U32:
+                column_type = BISON_FIELD_TYPE_COLUMN_U32;
+                break;
+        case BISON_COLUMN_TYPE_U64:
+                column_type = BISON_FIELD_TYPE_COLUMN_U64;
+                break;
+        case BISON_COLUMN_TYPE_I8:
+                column_type = BISON_FIELD_TYPE_COLUMN_I8;
+                break;
+        case BISON_COLUMN_TYPE_I16:
+                column_type = BISON_FIELD_TYPE_COLUMN_I16;
+                break;
+        case BISON_COLUMN_TYPE_I32:
+                column_type = BISON_FIELD_TYPE_COLUMN_I32;
+                break;
+        case BISON_COLUMN_TYPE_I64:
+                column_type = BISON_FIELD_TYPE_COLUMN_I64;
+                break;
+        case BISON_COLUMN_TYPE_FLOAT:
+                column_type = BISON_FIELD_TYPE_COLUMN_FLOAT;
+                break;
         default:
                 error_with_details(err_in, NG5_ERR_BADTYPE, "BISON column supports fixed-length types only")
         }
 
-        u8 column_begin_marker = BISON_MARKER_COLUMN_BEGIN;
-
         memfile_ensure_space(memfile_in, sizeof(u8));
-        marker_insert(memfile_in, column_begin_marker);
-        memfile_ensure_space(memfile_in, sizeof(media_type_t));
-        bison_media_write(memfile_in, type);
+        marker_insert(memfile_in, column_type);
 
         u32 num_elements = 0;
         u32 cap_elements = capactity;
@@ -111,7 +124,7 @@ NG5_EXPORT(bool) bison_int_insert_column(struct memfile *memfile_in, struct err 
 
         offset_t payload_begin = memfile_tell(memfile_in);
 
-        size_t type_size = bison_int_get_type_value_size(type);
+        size_t type_size = bison_int_get_type_value_size(column_type);
 
         size_t nbytes = capactity * type_size;
         memfile_ensure_space(memfile_in, nbytes + sizeof(u8) + 2 * sizeof(u32));
@@ -163,20 +176,30 @@ NG5_EXPORT(size_t) bison_int_get_type_value_size(enum bison_field_type type)
         case BISON_FIELD_TYPE_NULL:
         case BISON_FIELD_TYPE_TRUE:
         case BISON_FIELD_TYPE_FALSE:
+        case BISON_FIELD_TYPE_COLUMN_BOOLEAN:
                 return sizeof(media_type_t); /* these constant values are determined by their media type markers */
         case BISON_FIELD_TYPE_NUMBER_U8:
         case BISON_FIELD_TYPE_NUMBER_I8:
+        case BISON_FIELD_TYPE_COLUMN_U8:
+        case BISON_FIELD_TYPE_COLUMN_I8:
                 return sizeof(u8);
         case BISON_FIELD_TYPE_NUMBER_U16:
         case BISON_FIELD_TYPE_NUMBER_I16:
+        case BISON_FIELD_TYPE_COLUMN_U16:
+        case BISON_FIELD_TYPE_COLUMN_I16:
                 return sizeof(u16);
         case BISON_FIELD_TYPE_NUMBER_U32:
         case BISON_FIELD_TYPE_NUMBER_I32:
+        case BISON_FIELD_TYPE_COLUMN_U32:
+        case BISON_FIELD_TYPE_COLUMN_I32:
                 return sizeof(u32);
         case BISON_FIELD_TYPE_NUMBER_U64:
         case BISON_FIELD_TYPE_NUMBER_I64:
+        case BISON_FIELD_TYPE_COLUMN_U64:
+        case BISON_FIELD_TYPE_COLUMN_I64:
                 return sizeof(u64);
         case BISON_FIELD_TYPE_NUMBER_FLOAT:
+        case BISON_FIELD_TYPE_COLUMN_FLOAT:
                 return sizeof(float);
         default:
         error_print(NG5_ERR_INTERNALERR);
@@ -353,7 +376,16 @@ NG5_EXPORT(bool) bison_int_field_data_access(struct memfile *file, struct err *e
                 bison_array_it_create(field_access->nested_array_it, file, err,
                         memfile_tell(file) - sizeof(u8));
                 break;
-        case BISON_FIELD_TYPE_COLUMN: {
+        case BISON_FIELD_TYPE_COLUMN_U8:
+        case BISON_FIELD_TYPE_COLUMN_U16:
+        case BISON_FIELD_TYPE_COLUMN_U32:
+        case BISON_FIELD_TYPE_COLUMN_U64:
+        case BISON_FIELD_TYPE_COLUMN_I8:
+        case BISON_FIELD_TYPE_COLUMN_I16:
+        case BISON_FIELD_TYPE_COLUMN_I32:
+        case BISON_FIELD_TYPE_COLUMN_I64:
+        case BISON_FIELD_TYPE_COLUMN_FLOAT:
+        case BISON_FIELD_TYPE_COLUMN_BOOLEAN: {
                 bison_column_it_create(field_access->nested_column_it, file, err,
                         memfile_tell(file) - sizeof(u8));
         } break;
@@ -720,7 +752,16 @@ NG5_EXPORT(struct bison_object_it *) bison_int_field_access_object_value(struct 
 NG5_EXPORT(struct bison_column_it *) bison_int_field_access_column_value(struct field_access *field, struct err *err)
 {
         error_print_if(!field, NG5_ERR_NULLPTR);
-        error_if(field->it_field_type != BISON_FIELD_TYPE_COLUMN, err, NG5_ERR_TYPEMISMATCH);
+        error_if(field->it_field_type != BISON_FIELD_TYPE_COLUMN_U8 &&
+                field->it_field_type != BISON_FIELD_TYPE_COLUMN_U16 &&
+                field->it_field_type != BISON_FIELD_TYPE_COLUMN_U32 &&
+                field->it_field_type != BISON_FIELD_TYPE_COLUMN_U64 &&
+                field->it_field_type != BISON_FIELD_TYPE_COLUMN_I8 &&
+                field->it_field_type != BISON_FIELD_TYPE_COLUMN_I16 &&
+                field->it_field_type != BISON_FIELD_TYPE_COLUMN_I32 &&
+                field->it_field_type != BISON_FIELD_TYPE_COLUMN_I64 &&
+                field->it_field_type != BISON_FIELD_TYPE_COLUMN_FLOAT &&
+                field->it_field_type != BISON_FIELD_TYPE_COLUMN_BOOLEAN, err, NG5_ERR_TYPEMISMATCH);
         return field->nested_column_it;
 }
 

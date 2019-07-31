@@ -52,7 +52,7 @@ JSON snippet
 [42, 23, null]
 ```
 
-Carbon File snippet (JSON array encoded as `u8` column)
+A (compacted) Carbon `column-u8`
 
 ```
 [1](3)(3) [42][23][255]

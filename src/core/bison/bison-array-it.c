@@ -447,7 +447,16 @@ static bool remove_field(struct memfile *memfile, struct err *err, enum bison_fi
                         assert(begin_off < end_off);
                         rm_nbytes += (end_off - begin_off);
                 } break;
-                case BISON_FIELD_TYPE_COLUMN: {
+                case BISON_FIELD_TYPE_COLUMN_U8:
+                case BISON_FIELD_TYPE_COLUMN_U16:
+                case BISON_FIELD_TYPE_COLUMN_U32:
+                case BISON_FIELD_TYPE_COLUMN_U64:
+                case BISON_FIELD_TYPE_COLUMN_I8:
+                case BISON_FIELD_TYPE_COLUMN_I16:
+                case BISON_FIELD_TYPE_COLUMN_I32:
+                case BISON_FIELD_TYPE_COLUMN_I64:
+                case BISON_FIELD_TYPE_COLUMN_FLOAT:
+                case BISON_FIELD_TYPE_COLUMN_BOOLEAN: {
                         struct bison_column_it it;
 
                         offset_t begin_off = memfile_tell(memfile);

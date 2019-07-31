@@ -17,7 +17,7 @@ JSON snippet
 [true, false]
 ```
 
-A (compacted) Carbon file
+A (compacted) Carbon `array`
 
 ```
 [[] [t] [f] []]
@@ -40,7 +40,7 @@ JSON snippet
 [false, true, null]
 ```
 
-A (compacted) Carbon file, which encodes the JSON array as `boolean` column.
+A (compacted) Carbon `column-boolean`.
 
 ```
 [B](3)(3) [0][1][2]

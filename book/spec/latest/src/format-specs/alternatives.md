@@ -26,7 +26,7 @@ JSON snippet
 Carbon `record` for JSON snippet
 
 ```
-[no-key, 1B]
+[nokey, 1B]
 [object-begin, 1B]
    (str-len, 1B)[title, 5B] [string-field, 1B](str-len, 1B)[Back to the Future, 18B]
    (str-len, 1B)[sub-title, 9B] [null-field, 1B]

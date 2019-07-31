@@ -12,18 +12,18 @@ Carbon Type    | Description                      | Size                | *null*
 
 ### Column Types
 
-Carbon Type  | Marker | Description             | Size     | *null*-Value       
--------------|--------|-------------------------|----------|--------------------
-`boolean`    | `[B]`  | three-valued logic      | 1 B each | 2			       
-`u8`         | `[1]`  | unsigned 8-bit int      | 1 B each | 2<sup>8</sup> - 1  
-`u16`        | `[2]`  | unsigned 16-bit int     | 2 B each | 2<sup>16</sup> - 1 
-`u32`        | `[3]`  | unsigned 32-bit int     | 4 B each | 2<sup>16</sup> - 1 
-`u64`        | `[4]`  | unsigned 64-bit int     | 8 B each | 2<sup>16</sup> - 1 
-`i8`         | `[5]`  | signed 8-bit int        | 1 B each | -2<sup>7</sup>     
-`i16`        | `[6]`  | signed 16-bit int       | 2 B each | -2<sup>15</sup>    
-`i32`        | `[7]`  | signed 32-bit int       | 4 B each | -2<sup>31</sup>    
-`i64`        | `[8]`  | signed 64-bit int       | 8 B each | -2<sup>63</sup>    
-`float`      | `[R]`  | 32-bit float            | 4 B each | `NAN` value 	   
+Marker | Container | Description             | Size     | *null*-Value       
+--------|----------|-------------------------|----------|--------------------
+`[B]`  | `column-boolean` | three-valued logic      | 1 B each | 2			       
+`[1]`  | `column-u8` | unsigned 8-bit int      | 1 B each | 2<sup>8</sup> - 1  
+`[2]`  | `column-u16` | unsigned 16-bit int     | 2 B each | 2<sup>16</sup> - 1 
+`[3]`  | `column-u32` | unsigned 32-bit int     | 4 B each | 2<sup>16</sup> - 1 
+`[4]`  | `column-u64` | unsigned 64-bit int     | 8 B each | 2<sup>16</sup> - 1 
+`[5]`  | `column-i8` | signed 8-bit int        | 1 B each | -2<sup>7</sup>     
+`[6]`  | `column-i16` | signed 16-bit int       | 2 B each | -2<sup>15</sup>    
+`[7]`  | `column-i32` | signed 32-bit int       | 4 B each | -2<sup>31</sup>    
+`[8]`  | `column-i64` | signed 64-bit int       | 8 B each | -2<sup>63</sup>    
+`[R]`  | `column-float` | 32-bit float            | 4 B each | `NAN` value 	   
 
 <span class="caption">Table C-1: Carbon `column` Type Support and Markers</span>
 
@@ -44,11 +44,11 @@ Carbon Type  | Marker | Description             | Size     | *null*-Value
 
 JSON snippet
 ```json
-[ "The", "Number", 23 ]
+[ -4, 2, null ]
 ```
 
-A (compacted) Carbon file, which encodes the JSON array as `array` of two `string` values and one `u8` value.
+A (compacted) Carbon `carbon-i8`.
 
 ```
-[[] [s](3)[The] [s](6)[Number] [c][23] []] 
+[5] (3)(3) [-4] [2] [-128]
 ```

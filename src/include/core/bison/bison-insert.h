@@ -89,7 +89,7 @@ NG5_EXPORT(struct bison_insert *) bison_insert_array_begin(struct bison_insert_a
 NG5_EXPORT(bool) bison_insert_array_end(struct bison_insert_array_state *state_in);
 
 NG5_EXPORT(struct bison_insert *) bison_insert_column_begin(struct bison_insert_column_state *state_out,
-        struct bison_insert *inserter_in, enum bison_field_type type, u64 column_capacity);
+        struct bison_insert *inserter_in, enum bison_column_type type, u64 column_capacity);
 
 NG5_EXPORT(bool) bison_insert_column_end(struct bison_insert_column_state *state_in);
 
@@ -143,7 +143,7 @@ NG5_EXPORT(struct bison_insert *) bison_insert_prop_array_begin(struct bison_ins
 NG5_EXPORT(bool) bison_insert_prop_array_end(struct bison_insert_array_state *state);
 
 NG5_EXPORT(struct bison_insert *) bison_insert_prop_column_begin(struct bison_insert_column_state *state_out,
-        struct bison_insert *inserter_in, const char *key, enum bison_field_type type, u64 column_capacity);
+        struct bison_insert *inserter_in, const char *key, enum bison_column_type type, u64 column_capacity);
 
 NG5_EXPORT(bool) bison_insert_prop_column_end(struct bison_insert_column_state *state_in);
 

@@ -20,7 +20,9 @@ Carbon Type    | Description                      | Size                | *null*
 
 ```
 true, false, u8, u16, u32, u64, i8, i16, i32, i64, float, string, 
-binary, custom binary, null, array, column 
+binary, custom binary, null, array, column-u8, column-u16, column-u32, 
+column-u64, column-i8, column-i16, column-i32, column-i64, column-float, 
+column-boolean, object 
 ```
 
 ### Capacities
@@ -37,7 +39,7 @@ JSON snippet
 [ "The", "Number", 23 ]
 ```
 
-A (compacted) Carbon file, which encodes the JSON array as `array` of two `string` values and one `u8` value.
+A (compacted) Carbon `array` of two `string` values and one `u8` value.
 
 ```
 [[] [s](3)[The] [s](6)[Number] [c][23] []] 

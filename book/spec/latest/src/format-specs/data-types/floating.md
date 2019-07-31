@@ -30,9 +30,9 @@ A (compacted) Carbon file, which encodes the JSON array as `array` of one `i8` a
 ## Encoding as Column Value
 
 
-Column Type Marker               | Marker Size | Element Size | Block
----------------------------------|-------------|--------------| ---------------
- `[r]`, 32-bit floating numbers  | 1 byte      | 4 byte each  | a `float` value
+Column Type Marker               | Element Size | Block
+---------------------------------|--------------| ---------------
+ `[R]`, 32-bit floating numbers  | 4 byte each  | a `float` value
  
 
 
@@ -43,7 +43,7 @@ JSON snippet
 [23.3, 42.0]
 ```
 
-A (compacted) Carbon file, which encodes the JSON array as a `float` column.
+A (compacted) Carbon `column-float`.
 
 ```
 [R] (2)(2) [23.3][42.0]

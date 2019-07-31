@@ -784,7 +784,16 @@ static bool print_object(struct bison_object_it *it, struct bison_printer *print
                         print_array(array, printer, builder);
                         bison_array_it_drop(array);
                 } break;
-                case BISON_FIELD_TYPE_COLUMN: {
+                case BISON_FIELD_TYPE_COLUMN_U8:
+                case BISON_FIELD_TYPE_COLUMN_U16:
+                case BISON_FIELD_TYPE_COLUMN_U32:
+                case BISON_FIELD_TYPE_COLUMN_U64:
+                case BISON_FIELD_TYPE_COLUMN_I8:
+                case BISON_FIELD_TYPE_COLUMN_I16:
+                case BISON_FIELD_TYPE_COLUMN_I32:
+                case BISON_FIELD_TYPE_COLUMN_I64:
+                case BISON_FIELD_TYPE_COLUMN_FLOAT:
+                case BISON_FIELD_TYPE_COLUMN_BOOLEAN: {
                         struct bison_column_it *column = bison_object_it_column_value(it);
                         printer_bison_column_prop_name(printer, builder, key_name, key_len);
                         print_column(column, printer, builder);
@@ -873,7 +882,16 @@ static bool print_array(struct bison_array_it *it, struct bison_printer *printer
                         print_array(array, printer, builder);
                         bison_array_it_drop(array);
                 } break;
-                case BISON_FIELD_TYPE_COLUMN: {
+                case BISON_FIELD_TYPE_COLUMN_U8:
+                case BISON_FIELD_TYPE_COLUMN_U16:
+                case BISON_FIELD_TYPE_COLUMN_U32:
+                case BISON_FIELD_TYPE_COLUMN_U64:
+                case BISON_FIELD_TYPE_COLUMN_I8:
+                case BISON_FIELD_TYPE_COLUMN_I16:
+                case BISON_FIELD_TYPE_COLUMN_I32:
+                case BISON_FIELD_TYPE_COLUMN_I64:
+                case BISON_FIELD_TYPE_COLUMN_FLOAT:
+                case BISON_FIELD_TYPE_COLUMN_BOOLEAN: {
                         struct bison_column_it *column = bison_array_it_column_value(it);
                         print_column(column, printer, builder);
                 } break;
@@ -907,50 +925,49 @@ static bool print_column(struct bison_column_it *it, struct bison_printer *print
         printer_bison_array_begin(printer, builder);
         for (u32 i = 0; i < nvalues; i++) {
                 switch (type) {
-                case BISON_FIELD_TYPE_NULL:
-                        printer_bison_null(printer, builder);
-                        break;
-                case BISON_FIELD_TYPE_TRUE: {
+                case BISON_FIELD_TYPE_COLUMN_BOOLEAN: {
                         u8 value = ((u8*) values)[i];
-                        printer_bison_true(printer, is_null_boolean(value), builder);
+                        if (is_null_boolean(value)) {
+                                printer_bison_null(printer, builder);
+                        } else if (value == BISON_BOOLEAN_COLUMN_TRUE) {
+                                printer_bison_true(printer, false, builder);
+                        } else {
+                                printer_bison_false(printer, false, builder);
+                        }
                 } break;
-                case BISON_FIELD_TYPE_FALSE: {
-                        u8 value = ((u8*) values)[i];
-                        printer_bison_false(printer, is_null_boolean(value), builder);
-                } break;
-                case BISON_FIELD_TYPE_NUMBER_U8: {
+                case BISON_FIELD_TYPE_COLUMN_U8: {
                         u64 number = ((u8*) values)[i];
                         printer_bison_unsigned(printer, builder, is_null_u8(number) ? NULL : &number);
                 } break;
-                case BISON_FIELD_TYPE_NUMBER_U16: {
+                case BISON_FIELD_TYPE_COLUMN_U16: {
                         u64 number = ((u16*) values)[i];
                         printer_bison_unsigned(printer, builder, is_null_u16(number) ? NULL : &number);
                 } break;
-                case BISON_FIELD_TYPE_NUMBER_U32: {
+                case BISON_FIELD_TYPE_COLUMN_U32: {
                         u64 number = ((u32*) values)[i];
                         printer_bison_unsigned(printer, builder, is_null_u32(number) ? NULL : &number);
                 } break;
-                case BISON_FIELD_TYPE_NUMBER_U64: {
+                case BISON_FIELD_TYPE_COLUMN_U64: {
                         u64 number = ((u64*) values)[i];
                         printer_bison_unsigned(printer, builder, is_null_u64(number) ? NULL : &number);
                 } break;
-                case BISON_FIELD_TYPE_NUMBER_I8: {
+                case BISON_FIELD_TYPE_COLUMN_I8: {
                         i64 number = ((i8*) values)[i];
                         printer_bison_signed(printer, builder, is_null_i8(number) ? NULL : &number);
                 } break;
-                case BISON_FIELD_TYPE_NUMBER_I16: {
+                case BISON_FIELD_TYPE_COLUMN_I16: {
                         i64 number = ((i16*) values)[i];
                         printer_bison_signed(printer, builder, is_null_i16(number) ? NULL : &number);
                 } break;
-                case BISON_FIELD_TYPE_NUMBER_I32: {
+                case BISON_FIELD_TYPE_COLUMN_I32: {
                         i64 number = ((i32*) values)[i];
                         printer_bison_signed(printer, builder, is_null_i32(number) ? NULL : &number);
                 } break;
-                case BISON_FIELD_TYPE_NUMBER_I64: {
+                case BISON_FIELD_TYPE_COLUMN_I64: {
                         i64 number = ((i64*) values)[i];
                         printer_bison_signed(printer, builder, is_null_i64(number) ? NULL : &number);
                 } break;
-                case BISON_FIELD_TYPE_NUMBER_FLOAT: {
+                case BISON_FIELD_TYPE_COLUMN_FLOAT: {
                         float number = ((float*) values)[i];
                         printer_bison_float(printer, builder, is_null_float(number) ? NULL : &number);
                 } break;

@@ -95,7 +95,16 @@ NG5_EXPORT(struct bison_column_it *) bison_find_result_column(struct bison_find 
 {
         error_if_null(find)
         error_if(!bison_path_evaluator_has_result(&find->path_evaluater), &find->err, NG5_ERR_ILLEGALSTATE)
-        error_if(find->type != BISON_FIELD_TYPE_COLUMN, &find->err, NG5_ERR_TYPEMISMATCH)
+        error_if(find->type != BISON_FIELD_TYPE_COLUMN_U8 &&
+                find->type != BISON_FIELD_TYPE_COLUMN_U16 &&
+                find->type != BISON_FIELD_TYPE_COLUMN_U32 &&
+                find->type != BISON_FIELD_TYPE_COLUMN_U64 &&
+                find->type != BISON_FIELD_TYPE_COLUMN_I8 &&
+                find->type != BISON_FIELD_TYPE_COLUMN_I16 &&
+                find->type != BISON_FIELD_TYPE_COLUMN_I32 &&
+                find->type != BISON_FIELD_TYPE_COLUMN_I64 &&
+                find->type != BISON_FIELD_TYPE_COLUMN_FLOAT &&
+                find->type != BISON_FIELD_TYPE_COLUMN_BOOLEAN, &find->err, NG5_ERR_TYPEMISMATCH)
         return find->value.column_it;
 }
 
@@ -172,7 +181,16 @@ static void result_from_array(struct bison_find *find, struct bison_array_it *it
                 case BISON_FIELD_TYPE_ARRAY:
                         find->value.array_it = bison_array_it_array_value(it);
                         break;
-                case BISON_FIELD_TYPE_COLUMN:
+                case BISON_FIELD_TYPE_COLUMN_U8:
+                case BISON_FIELD_TYPE_COLUMN_U16:
+                case BISON_FIELD_TYPE_COLUMN_U32:
+                case BISON_FIELD_TYPE_COLUMN_U64:
+                case BISON_FIELD_TYPE_COLUMN_I8:
+                case BISON_FIELD_TYPE_COLUMN_I16:
+                case BISON_FIELD_TYPE_COLUMN_I32:
+                case BISON_FIELD_TYPE_COLUMN_I64:
+                case BISON_FIELD_TYPE_COLUMN_FLOAT:
+                case BISON_FIELD_TYPE_COLUMN_BOOLEAN:
                         find->value.column_it = bison_array_it_column_value(it);
                         break;
                 case BISON_FIELD_TYPE_OBJECT:
@@ -213,38 +231,34 @@ static inline bool result_from_column(struct bison_find *find, u32 requested_idx
         assert(requested_idx < num_contained_values);
 
         switch(find->type) {
-        case BISON_FIELD_TYPE_NULL:
-                /* nothing to do */
-                break;
-        case BISON_FIELD_TYPE_TRUE:
-        case BISON_FIELD_TYPE_FALSE:
+        case BISON_FIELD_TYPE_COLUMN_BOOLEAN:
                 find->value.boolean = bison_column_it_boolean_values(NULL, it)[requested_idx];
                 break;
-        case BISON_FIELD_TYPE_NUMBER_U8:
+        case BISON_FIELD_TYPE_COLUMN_U8:
                 find->value.unsigned_number = bison_column_it_u8_values(NULL, it)[requested_idx];
                 break;
-        case BISON_FIELD_TYPE_NUMBER_U16:
+        case BISON_FIELD_TYPE_COLUMN_U16:
                 find->value.unsigned_number = bison_column_it_u16_values(NULL, it)[requested_idx];
                 break;
-        case BISON_FIELD_TYPE_NUMBER_U32:
+        case BISON_FIELD_TYPE_COLUMN_U32:
                 find->value.unsigned_number = bison_column_it_u32_values(NULL, it)[requested_idx];
                 break;
-        case BISON_FIELD_TYPE_NUMBER_U64:
+        case BISON_FIELD_TYPE_COLUMN_U64:
                 find->value.unsigned_number = bison_column_it_u64_values(NULL, it)[requested_idx];
                 break;
-        case BISON_FIELD_TYPE_NUMBER_I8:
+        case BISON_FIELD_TYPE_COLUMN_I8:
                 find->value.signed_number = bison_column_it_i8_values(NULL, it)[requested_idx];
                 break;
-        case BISON_FIELD_TYPE_NUMBER_I16:
+        case BISON_FIELD_TYPE_COLUMN_I16:
                 find->value.signed_number = bison_column_it_i16_values(NULL, it)[requested_idx];
                 break;
-        case BISON_FIELD_TYPE_NUMBER_I32:
+        case BISON_FIELD_TYPE_COLUMN_I32:
                 find->value.signed_number = bison_column_it_i32_values(NULL, it)[requested_idx];
                 break;
-        case BISON_FIELD_TYPE_NUMBER_I64:
+        case BISON_FIELD_TYPE_COLUMN_I64:
                 find->value.signed_number = bison_column_it_i64_values(NULL, it)[requested_idx];
                 break;
-        case BISON_FIELD_TYPE_NUMBER_FLOAT:
+        case BISON_FIELD_TYPE_COLUMN_FLOAT:
                 find->value.float_number = bison_column_it_float_values(NULL, it)[requested_idx];
                 break;
         default:

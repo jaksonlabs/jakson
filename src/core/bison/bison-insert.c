@@ -77,29 +77,57 @@ NG5_EXPORT(bool) bison_int_insert_create_for_object(struct bison_insert *inserte
 
 NG5_EXPORT(bool) bison_insert_null(struct bison_insert *inserter)
 {
-        check_type_range_if_container_is_column(inserter, BISON_FIELD_TYPE_NULL, BISON_FIELD_TYPE_TRUE,
-                BISON_FIELD_TYPE_FALSE);
+        check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_COLUMN_BOOLEAN);
 
         switch (inserter->context_type) {
         case BISON_ARRAY:
                 return push_media_type_for_array(inserter, BISON_FIELD_TYPE_NULL);
         case BISON_COLUMN: {
-                u8 value;
-
                 switch (inserter->context.column->type) {
-                        case BISON_FIELD_TYPE_NULL:
-                                value = BISON_FIELD_TYPE_NULL;
-                                break;
-                        case BISON_FIELD_TYPE_TRUE:
-                        case BISON_FIELD_TYPE_FALSE:
-                                value = BISON_BOOLEAN_COLUMN_NULL;
-                                break;
+                        case BISON_FIELD_TYPE_COLUMN_U8: {
+                                u8 value = U8_NULL;
+                                return push_in_column(inserter, &value, inserter->context.column->type);
+                        } break;
+                        case BISON_FIELD_TYPE_COLUMN_U16: {
+                                u16 value = U16_NULL;
+                                return push_in_column(inserter, &value, inserter->context.column->type);
+                        } break;
+                        case BISON_FIELD_TYPE_COLUMN_U32: {
+                                u32 value = U32_NULL;
+                                return push_in_column(inserter, &value, inserter->context.column->type);
+                        } break;
+                        case BISON_FIELD_TYPE_COLUMN_U64: {
+                                u64 value = U64_NULL;
+                                return push_in_column(inserter, &value, inserter->context.column->type);
+                        } break;
+                        case BISON_FIELD_TYPE_COLUMN_I8: {
+                                i8 value = I8_NULL;
+                                return push_in_column(inserter, &value, inserter->context.column->type);
+                        } break;
+                        case BISON_FIELD_TYPE_COLUMN_I16: {
+                                i16 value = I16_NULL;
+                                return push_in_column(inserter, &value, inserter->context.column->type);
+                        } break;
+                        case BISON_FIELD_TYPE_COLUMN_I32: {
+                                i32 value = I32_NULL;
+                                return push_in_column(inserter, &value, inserter->context.column->type);
+                        } break;
+                        case BISON_FIELD_TYPE_COLUMN_I64: {
+                                i64 value = I64_NULL;
+                                return push_in_column(inserter, &value, inserter->context.column->type);
+                        } break;
+                        case BISON_FIELD_TYPE_COLUMN_FLOAT: {
+                                float value = FLOAT_NULL;
+                                return push_in_column(inserter, &value, inserter->context.column->type);
+                        } break;
+                        case BISON_FIELD_TYPE_COLUMN_BOOLEAN: {
+                                u8 value = BISON_BOOLEAN_COLUMN_NULL;
+                                return push_in_column(inserter, &value, inserter->context.column->type);
+                        } break;
                         default:
                                 error(&inserter->err, NG5_ERR_INTERNALERR)
                                 return false;
                 }
-
-                return push_in_column(inserter, &value, BISON_FIELD_TYPE_NULL);
         }
         default:
                 error(&inserter->err, NG5_ERR_INTERNALERR);
@@ -109,13 +137,13 @@ NG5_EXPORT(bool) bison_insert_null(struct bison_insert *inserter)
 
 NG5_EXPORT(bool) bison_insert_true(struct bison_insert *inserter)
 {
-        check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_TRUE);
+        check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_COLUMN_BOOLEAN);
         switch (inserter->context_type) {
         case BISON_ARRAY:
                 return push_media_type_for_array(inserter, BISON_FIELD_TYPE_TRUE);
         case BISON_COLUMN: {
                 u8 value = BISON_BOOLEAN_COLUMN_TRUE;
-                return push_in_column(inserter, &value, BISON_FIELD_TYPE_TRUE);
+                return push_in_column(inserter, &value, BISON_FIELD_TYPE_COLUMN_BOOLEAN);
         }
         default:
                 error(&inserter->err, NG5_ERR_INTERNALERR);
@@ -125,13 +153,13 @@ NG5_EXPORT(bool) bison_insert_true(struct bison_insert *inserter)
 
 NG5_EXPORT(bool) bison_insert_false(struct bison_insert *inserter)
 {
-        check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_FALSE);
+        check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_COLUMN_BOOLEAN);
         switch (inserter->context_type) {
         case BISON_ARRAY:
                 return push_media_type_for_array(inserter, BISON_FIELD_TYPE_FALSE);
         case BISON_COLUMN: {
                 u8 value = BISON_BOOLEAN_COLUMN_FALSE;
-                return push_in_column(inserter, &value, BISON_FIELD_TYPE_FALSE);
+                return push_in_column(inserter, &value, BISON_FIELD_TYPE_COLUMN_BOOLEAN);
         }
         default:
                 error(&inserter->err, NG5_ERR_INTERNALERR);
@@ -141,13 +169,13 @@ NG5_EXPORT(bool) bison_insert_false(struct bison_insert *inserter)
 
 NG5_EXPORT(bool) bison_insert_u8(struct bison_insert *inserter, u8 value)
 {
-        check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_NUMBER_U8);
+        check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_COLUMN_U8);
         switch (inserter->context_type) {
         case BISON_ARRAY:
                 write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_U8, &value, sizeof(u8));
                 break;
         case BISON_COLUMN:
-                push_in_column(inserter, &value, BISON_FIELD_TYPE_NUMBER_U8);
+                push_in_column(inserter, &value, BISON_FIELD_TYPE_COLUMN_U8);
                 break;
         default:
                 error(&inserter->err, NG5_ERR_INTERNALERR);
@@ -158,13 +186,13 @@ NG5_EXPORT(bool) bison_insert_u8(struct bison_insert *inserter, u8 value)
 
 NG5_EXPORT(bool) bison_insert_u16(struct bison_insert *inserter, u16 value)
 {
-        check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_NUMBER_U16);
+        check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_COLUMN_U16);
         switch (inserter->context_type) {
         case BISON_ARRAY:
                 write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_U16, &value, sizeof(u16));
                 break;
         case BISON_COLUMN:
-                push_in_column(inserter, &value, BISON_FIELD_TYPE_NUMBER_U16);
+                push_in_column(inserter, &value, BISON_FIELD_TYPE_COLUMN_U16);
                 break;
         default:
                 error(&inserter->err, NG5_ERR_INTERNALERR);
@@ -175,13 +203,13 @@ NG5_EXPORT(bool) bison_insert_u16(struct bison_insert *inserter, u16 value)
 
 NG5_EXPORT(bool) bison_insert_u32(struct bison_insert *inserter, u32 value)
 {
-        check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_NUMBER_U32);
+        check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_COLUMN_U32);
         switch (inserter->context_type) {
         case BISON_ARRAY:
                 write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_U32, &value, sizeof(u32));
                 break;
         case BISON_COLUMN:
-                push_in_column(inserter, &value, BISON_FIELD_TYPE_NUMBER_U32);
+                push_in_column(inserter, &value, BISON_FIELD_TYPE_COLUMN_U32);
                 break;
         default:
                 error(&inserter->err, NG5_ERR_INTERNALERR);
@@ -192,13 +220,13 @@ NG5_EXPORT(bool) bison_insert_u32(struct bison_insert *inserter, u32 value)
 
 NG5_EXPORT(bool) bison_insert_u64(struct bison_insert *inserter, u64 value)
 {
-        check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_NUMBER_U64);
+        check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_COLUMN_U64);
         switch (inserter->context_type) {
         case BISON_ARRAY:
                 write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_U64, &value, sizeof(u64));
                 break;
         case BISON_COLUMN:
-                push_in_column(inserter, &value, BISON_FIELD_TYPE_NUMBER_U64);
+                push_in_column(inserter, &value,BISON_FIELD_TYPE_COLUMN_U64);
                 break;
         default:
                 error(&inserter->err, NG5_ERR_INTERNALERR);
@@ -209,13 +237,13 @@ NG5_EXPORT(bool) bison_insert_u64(struct bison_insert *inserter, u64 value)
 
 NG5_EXPORT(bool) bison_insert_i8(struct bison_insert *inserter, i8 value)
 {
-        check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_NUMBER_I8);
+        check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_COLUMN_I8);
         switch (inserter->context_type) {
         case BISON_ARRAY:
                 write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_I8, &value, sizeof(i8));
                 break;
         case BISON_COLUMN:
-                push_in_column(inserter, &value, BISON_FIELD_TYPE_NUMBER_I8);
+                push_in_column(inserter, &value, BISON_FIELD_TYPE_COLUMN_I8);
                 break;
         default:
                 error(&inserter->err, NG5_ERR_INTERNALERR);
@@ -226,13 +254,13 @@ NG5_EXPORT(bool) bison_insert_i8(struct bison_insert *inserter, i8 value)
 
 NG5_EXPORT(bool) bison_insert_i16(struct bison_insert *inserter, i16 value)
 {
-        check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_NUMBER_I16);
+        check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_COLUMN_I16);
         switch (inserter->context_type) {
         case BISON_ARRAY:
                 write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_I16, &value, sizeof(i16));
                 break;
         case BISON_COLUMN:
-                push_in_column(inserter, &value, BISON_FIELD_TYPE_NUMBER_I16);
+                push_in_column(inserter, &value, BISON_FIELD_TYPE_COLUMN_I16);
                 break;
         default:
                 error(&inserter->err, NG5_ERR_INTERNALERR);
@@ -243,13 +271,13 @@ NG5_EXPORT(bool) bison_insert_i16(struct bison_insert *inserter, i16 value)
 
 NG5_EXPORT(bool) bison_insert_i32(struct bison_insert *inserter, i32 value)
 {
-        check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_NUMBER_I32);
+        check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_COLUMN_I32);
         switch (inserter->context_type) {
         case BISON_ARRAY:
                 write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_I32, &value, sizeof(i32));
                 break;
         case BISON_COLUMN:
-                push_in_column(inserter, &value, BISON_FIELD_TYPE_NUMBER_I32);
+                push_in_column(inserter, &value, BISON_FIELD_TYPE_COLUMN_I32);
                 break;
         default:
                 error(&inserter->err, NG5_ERR_INTERNALERR);
@@ -260,13 +288,13 @@ NG5_EXPORT(bool) bison_insert_i32(struct bison_insert *inserter, i32 value)
 
 NG5_EXPORT(bool) bison_insert_i64(struct bison_insert *inserter, i64 value)
 {
-        check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_NUMBER_I64);
+        check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_COLUMN_I64);
         switch (inserter->context_type) {
         case BISON_ARRAY:
                 write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_I64, &value, sizeof(i64));
                 break;
         case BISON_COLUMN:
-                push_in_column(inserter, &value, BISON_FIELD_TYPE_NUMBER_I64);
+                push_in_column(inserter, &value, BISON_FIELD_TYPE_COLUMN_I64);
                 break;
         default:
                 error(&inserter->err, NG5_ERR_INTERNALERR);
@@ -316,13 +344,13 @@ NG5_EXPORT(bool) bison_insert_signed(struct bison_insert *inserter, i64 value)
 NG5_EXPORT(bool) bison_insert_float(struct bison_insert *inserter, float value)
 {
         error_if_null(inserter)
-        check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_NUMBER_FLOAT);
+        check_type_if_container_is_column(inserter, BISON_FIELD_TYPE_COLUMN_FLOAT);
         switch (inserter->context_type) {
         case BISON_ARRAY:
                 write_field_data(inserter, BISON_FIELD_TYPE_NUMBER_FLOAT, &value, sizeof(float));
                 break;
         case BISON_COLUMN:
-                push_in_column(inserter, &value, BISON_FIELD_TYPE_NUMBER_FLOAT);
+                push_in_column(inserter, &value, BISON_FIELD_TYPE_COLUMN_FLOAT);
                 break;
         default:
         error(&inserter->err, NG5_ERR_INTERNALERR);
@@ -482,16 +510,18 @@ NG5_EXPORT(bool) bison_insert_array_end(struct bison_insert_array_state *state_i
 }
 
 NG5_EXPORT(struct bison_insert *) bison_insert_column_begin(struct bison_insert_column_state *state_out,
-        struct bison_insert *inserter_in, enum bison_field_type type, u64 column_capacity)
+        struct bison_insert *inserter_in, enum bison_column_type type, u64 column_capacity)
 {
         error_if_and_return(!state_out, &inserter_in->err, NG5_ERR_NULLPTR, NULL);
         error_if_and_return(!inserter_in, &inserter_in->err, NG5_ERR_NULLPTR, NULL);
         error_if(inserter_in->context_type != BISON_ARRAY && inserter_in->context_type != BISON_OBJECT, &inserter_in->err, NG5_ERR_UNSUPPCONTAINER);
 
+        enum bison_field_type field_type = bison_field_type_for_column(type);
+
         *state_out = (struct bison_insert_column_state) {
                 .parent_inserter = inserter_in,
                 .nested_column = malloc(sizeof(struct bison_column_it)),
-                .type = type
+                .type = field_type
         };
 
         u64 container_start_off = memfile_tell(&inserter_in->memfile);
@@ -687,7 +717,7 @@ NG5_EXPORT(bool) bison_insert_prop_array_end(struct bison_insert_array_state *st
 }
 
 NG5_EXPORT(struct bison_insert *) bison_insert_prop_column_begin(struct bison_insert_column_state *state_out,
-        struct bison_insert *inserter_in, const char *key, enum bison_field_type type, u64 column_capacity)
+        struct bison_insert *inserter_in, const char *key, enum bison_column_type type, u64 column_capacity)
 {
         error_if(inserter_in->context_type != BISON_OBJECT, &inserter_in->err, NG5_ERR_UNSUPPCONTAINER);
         bison_string_nomarker_write(&inserter_in->memfile, key);

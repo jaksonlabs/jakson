@@ -244,7 +244,16 @@ static inline enum bison_path_status traverse_array(struct bison_path_evaluator 
                                                         /* next node in path is an array index which requires that
                                                          * the current array element is an array or column */
                                                         if (elem_type != BISON_FIELD_TYPE_ARRAY &&
-                                                                elem_type != BISON_FIELD_TYPE_COLUMN) {
+                                                                elem_type != BISON_FIELD_TYPE_COLUMN_U8 &&
+                                                                elem_type != BISON_FIELD_TYPE_COLUMN_U16 &&
+                                                                elem_type != BISON_FIELD_TYPE_COLUMN_U32 &&
+                                                                elem_type != BISON_FIELD_TYPE_COLUMN_U64 &&
+                                                                elem_type != BISON_FIELD_TYPE_COLUMN_I8 &&
+                                                                elem_type != BISON_FIELD_TYPE_COLUMN_I16 &&
+                                                                elem_type != BISON_FIELD_TYPE_COLUMN_I32 &&
+                                                                elem_type != BISON_FIELD_TYPE_COLUMN_I64 &&
+                                                                elem_type != BISON_FIELD_TYPE_COLUMN_FLOAT &&
+                                                                elem_type != BISON_FIELD_TYPE_COLUMN_BOOLEAN) {
                                                                 return BISON_PATH_NOCONTAINER;
                                                         } else {
                                                                 if (elem_type == BISON_FIELD_TYPE_ARRAY) {
@@ -252,7 +261,16 @@ static inline enum bison_path_status traverse_array(struct bison_path_evaluator 
                                                                         status = traverse_array(state, path, next_path_pos, sub_it);
                                                                         return status;
                                                                 } else {
-                                                                        assert(elem_type == BISON_FIELD_TYPE_COLUMN);
+                                                                        assert(elem_type == BISON_FIELD_TYPE_COLUMN_U8 ||
+                                                                                elem_type == BISON_FIELD_TYPE_COLUMN_U16 ||
+                                                                                elem_type == BISON_FIELD_TYPE_COLUMN_U32 ||
+                                                                                elem_type == BISON_FIELD_TYPE_COLUMN_U64 ||
+                                                                                elem_type == BISON_FIELD_TYPE_COLUMN_I8 ||
+                                                                                elem_type == BISON_FIELD_TYPE_COLUMN_I16 ||
+                                                                                elem_type == BISON_FIELD_TYPE_COLUMN_I32 ||
+                                                                                elem_type == BISON_FIELD_TYPE_COLUMN_I64 ||
+                                                                                elem_type == BISON_FIELD_TYPE_COLUMN_FLOAT ||
+                                                                                elem_type == BISON_FIELD_TYPE_COLUMN_BOOLEAN);
                                                                         struct bison_column_it *sub_it = bison_array_it_column_value(it);
                                                                         return traverse_column(state, path, next_path_pos, sub_it);
                                                                 }

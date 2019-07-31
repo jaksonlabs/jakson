@@ -39,7 +39,7 @@ JSON snippet
 [-42, 42, null]
 ```
 
-A (compacted) Carbon file, which encodes the JSON array as `i8` column.
+A (compacted) Carbon `column-8`.
 
 ```
 [C](2)(2) [-42][42][255]
