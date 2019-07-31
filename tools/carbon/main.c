@@ -2,7 +2,6 @@
 #include <ark-js/shared/shell/opt.h>
 
 #include "modules.h"
-#include "cli.h"
 
 #define DESC_CHECK_JS "Test if JSON files are suitable for CARBON."
 #define DESC_CHECK_JS_USAGE "Test if input files given via <args> parameter are suitable for CARBON conversion.\n" \
@@ -16,7 +15,7 @@
                           "                              particular compressor\n" \
                           "   --compressor <compressor>  Use <compressor> as compression technique for\n" \
                           "                              size optimization. Run `list compressors` in\n" \
-                          "                              carbon-tool to see available compressors\n" \
+                          "                              ark-carbon to see available compressors\n" \
                           "   --no-string-id-index       Turn-off pre-computation of string id to offset\n" \
                           "                              index\n" \
                           "   --read-optimized           Sort keys and values during pre-processing for\n" \
@@ -33,8 +32,8 @@
                           "                              parameter `--dic-type` is set to `async`.\n" \
                           "                              By default, 8 threads are spawned\n" \
                           "\nEXAMPLE\n" \
-                          "   $ carbon-tool convert out.carbon in.json\n" \
-                          "   $ carbon-tool convert --size-optimized --read-optimized out.carbon in.json" \
+                          "   $ ark-carbon convert out.carbon in.json\n" \
+                          "   $ ark-carbon convert --size-optimized --read-optimized out.carbon in.json" \
 
 #define DESC_CAB2JS_INFO  "Convert single CARBON file into JSON and print it to stdout"
 #define DESC_CAB2JS_USAGE "The parameter <args> is a path to a CARBON file that is converted JSON and printed on stdout.\n" \
@@ -49,7 +48,7 @@
                       "\nEXAMPLE\n" \
                       "   $ carbon cli myfile.carbon\n" \
 
-#define DESC_LIST       "List properties and configurations for carbon-tool to stdout"
+#define DESC_LIST       "List properties and configurations for ark-carbon to stdout"
 #define DESC_LIST_USAGE "The parameter <args> is one of the following constants:\n\n"                                  \
                         "   compressors               Shows available compressors used by `convert` module"
 
@@ -67,7 +66,6 @@ DEFINE_MODULE(CheckJs, "checkjs", DESC_CHECK_JS_USAGE, moduleCheckJsInvoke);
 DEFINE_MODULE(Js2Cab, "convert", DESC_JS2CAB_USAGE, moduleJs2CabInvoke);
 
 DEFINE_MODULE(ViewCab, "view", DESC_CAB_VIEW, moduleViewCabInvoke);
-DEFINE_MODULE(Cli, "cli", DESC_CLI_INFO, moduleCliInvoke);
 DEFINE_MODULE(Inspect, "inspect", DESC_CAB_INFO, moduleInspectInvoke);
 DEFINE_MODULE(Cab2Js, "to_json", DESC_CAB2JS_USAGE, moduleCab2JsInvoke);
 
@@ -83,7 +81,7 @@ int main (int argc, char **argv)
     struct cmdopt_mgr manager;
     struct cmdopt_group *group;
 
-    opt_mgr_create(&manager, "carbon-tool", "A tool to work with CARBON files.\n"
+    opt_mgr_create(&manager, "ark-carbon", "A tool to work with CARBON files.\n"
                                  "Copyright (c) 2018-2019 Marcus Pinnecke (pinnecke@ovgu.de)", NG5_MOD_ARG_MAYBE_REQUIRED,
                              showHelp);
 
@@ -98,10 +96,6 @@ int main (int argc, char **argv)
                                 moduleJs2CabEntry);
 
     opt_mgr_create_group(&group, "work with CARBON files", &manager);
-    opt_group_add_cmd(group,
-                                "cli", DESC_CLI,
-                                "manpages/types/cli",
-                                moduleCliEntry);
     opt_group_add_cmd(group,
                                 "view", DESC_CAB_VIEW,
                                 "manpages/types/view",

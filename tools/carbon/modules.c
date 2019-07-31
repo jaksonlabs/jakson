@@ -1,9 +1,9 @@
 
 #include <inttypes.h>
-#include <ark-js/carbon/pack/pack.h>
-#include <ark-js/carbon/carbon/archive_query.h>
-#include <ark-js/carbon/carbon/archive_int.h>
-#include <ark-js/carbon/carbon.h>
+#include <ark-js/carbon/coding/pack.h>
+#include <ark-js/carbon/archive/archive-query.h>
+#include <ark-js/carbon/archive/archive-int.h>
+#include <ark-js/carbon/bison.h>
 
 #include "modules.h"
 
@@ -594,7 +594,7 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
     if (argc != 1) {
         NG5_CONSOLE_WRITE(file, "Require exactly one <input> parameter for <args>.%s", "");
         NG5_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
-        NG5_CONSOLE_WRITELN(file, "Run '%s' to see an example on the usage.", "$ carbon-tool to_json");
+        NG5_CONSOLE_WRITELN(file, "Run '%s' to see an example on the usage.", "$ ark-carbon to_json");
         return false;
     } else {
         const int filePathArgIdx = 0;

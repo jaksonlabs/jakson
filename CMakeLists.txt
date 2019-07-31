@@ -19,7 +19,7 @@ file(MAKE_DIRECTORY ${CMAKE_HOME_DIRECTORY}/build)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/build)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/build)
 
-include_directories("${CMAKE_SOURCE_DIR}/src/include")
+include_directories("${CMAKE_SOURCE_DIR}/src")
 include_directories("${CMAKE_SOURCE_DIR}")
 
 include_directories("/usr/include")
@@ -27,7 +27,7 @@ include_directories("/usr/local/include")
 
 set(LIBS ${LIBS} pthread m)
 
-file(GLOB_RECURSE LIB_HEADER_FILES src/include/*.h )
+file(GLOB_RECURSE LIB_HEADER_FILES src/*.h )
 file(GLOB_RECURSE LIB_SOURCE_FILES src/*.c )
 file(GLOB_RECURSE LIB_LIBS_HEADER_FILES libs/*.h )
 file(GLOB_RECURSE LIB_LIBS_SOURCE_FILES libs/*.c )
@@ -103,11 +103,9 @@ install(FILES carbon.pc DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig)
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/carbon DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/carbon
         FILES_MATCHING PATTERN "*.h*")
 
-add_subdirectory("${CMAKE_SOURCE_DIR}/tools/carbon")
-add_subdirectory("${CMAKE_SOURCE_DIR}/examples")
-add_subdirectory("${CMAKE_SOURCE_DIR}/misc")
-
 enable_testing()
+
+add_subdirectory("${CMAKE_SOURCE_DIR}/tools")
 add_subdirectory("${CMAKE_SOURCE_DIR}/tests")
 
 
