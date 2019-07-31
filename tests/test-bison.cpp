@@ -5516,40 +5516,40 @@ TEST(BisonTest, BisonObjectInsertArrayData)
         bison_drop(&doc);
 }
 
-//TEST(BisonTest, BisonObjectInsertColumnNonEmpty)
-//{
-//        struct bison doc;
-//        struct bison_new context;
-//        struct bison_insert_object_state state;
-//        struct bison_insert_column_state column_state;
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
-//
-//        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1);
-//
-//        struct bison_insert *nested_column_ins = bison_insert_prop_column_begin(&column_state, obj_ins, "my column", BISON_FIELD_TYPE_NUMBER_U16, 200);
-//        bison_insert_u16(nested_column_ins, 1);
-//        bison_insert_u16(nested_column_ins, 2);
-//        bison_insert_u16(nested_column_ins, 3);
-//        bison_insert_prop_column_end(&column_state);
-//
-//        bison_insert_object_end(&state);
-//
-//        bison_create_end(&context);
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//
-//        bison_print(stdout, &doc);
-//        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"my array\":[]}]}]}") == 0);
-//
-//        string_builder_drop(&sb);
-//        bison_drop(&doc);
-//}
+TEST(BisonTest, BisonObjectInsertColumnNonEmpty)
+{
+        struct bison doc;
+        struct bison_new context;
+        struct bison_insert_object_state state;
+        struct bison_insert_column_state column_state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct bison_insert *ins = bison_create_begin(&context, &doc, BISON_KEY_SKEY, BISON_OPTIMIZE);
+
+        struct bison_insert *obj_ins = bison_insert_object_begin(&state, ins, 1);
+
+        struct bison_insert *nested_column_ins = bison_insert_prop_column_begin(&column_state, obj_ins, "my column", BISON_FIELD_TYPE_NUMBER_U16, 200);
+        bison_insert_u16(nested_column_ins, 1);
+        bison_insert_u16(nested_column_ins, 2);
+        bison_insert_u16(nested_column_ins, 3);
+        bison_insert_prop_column_end(&column_state);
+
+        bison_insert_object_end(&state);
+
+        bison_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        bison_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(bison_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"my column\":[1, 2, 3]}]}") == 0);
+
+        string_builder_drop(&sb);
+        bison_drop(&doc);
+}
 
 static void create_nested_doc(struct bison *rev_doc)
 {

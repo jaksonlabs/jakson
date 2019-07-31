@@ -440,7 +440,7 @@ static bool internal_pack_object(struct bison_object_it *it)
                         memfile_move_left(&this_object_it.memfile, last_empty_slot_offset - first_empty_slot_offset);
 
                         final = *memfile_read(&this_object_it.memfile, sizeof(char));
-                        assert(final == BISON_MARKER_ARRAY_END || final == BISON_MARKER_OBJECT_END);
+                        assert(final == BISON_MARKER_OBJECT_END);
                 }
 
                 bison_object_it_drop(&this_object_it);
@@ -483,7 +483,7 @@ static bool internal_pack_object(struct bison_object_it *it)
                         case BISON_FIELD_TYPE_COLUMN:
                                 bison_column_it_rewind(it->field_access.nested_column_it);
                                 internal_pack_column(it->field_access.nested_column_it);
-                                memfile_seek(&it->memfile, memfile_tell(&it->field_access.nested_column_it->memfile));
+                                memfile_seek(&it->memfile, memfile_tell(&it->field_access.nested_column_it->memfile) - sizeof(u8));
                                 break;
                         case BISON_FIELD_TYPE_OBJECT: {
                                 struct bison_object_it nested_object_it;
