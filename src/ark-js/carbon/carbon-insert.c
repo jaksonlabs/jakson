@@ -450,8 +450,8 @@ ARK_EXPORT(bool) carbon_insert_object_end(struct carbon_insert_object_state *sta
         while (carbon_object_it_next(&scan))
         { }
 
-        char final = *memfile_read(&scan.memfile, sizeof(char));
-        assert(final == CARBON_MARKER_OBJECT_END);
+        assert(*memfile_peek(&scan.memfile, sizeof(char)) == CARBON_MARKER_OBJECT_END);
+        memfile_read(&scan.memfile, sizeof(char));
         memfile_skip(&scan.memfile, 1);
 
         memfile_seek(&state->parent_inserter->memfile, memfile_tell(&scan.memfile) - 1);
@@ -497,8 +497,8 @@ ARK_EXPORT(bool) carbon_insert_array_end(struct carbon_insert_array_state *state
         while (carbon_array_it_next(&scan))
                 { }
 
-        char final = *memfile_read(&scan.memfile, sizeof(char));
-        assert(final == CARBON_MARKER_ARRAY_END);
+        assert(*memfile_peek(&scan.memfile, sizeof(char)) == CARBON_MARKER_ARRAY_END);
+        memfile_read(&scan.memfile, sizeof(char));
         memfile_skip(&scan.memfile, 1);
 
         memfile_seek(&state_in->parent_inserter->memfile, memfile_tell(&scan.memfile) - 1);

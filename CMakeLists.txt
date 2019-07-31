@@ -3,8 +3,6 @@ cmake_minimum_required(VERSION 3.9.6)
 project(libcarbon VERSION 1.0.0.0 DESCRIPTION "A library to operate with CARBON files"
         LANGUAGES C) # VERSION major.minor.patch.tweak
 
-include(GNUInstallDirs)
-
 set (CMAKE_C_STANDARD 11)
 
 #if (${BUILD_TYPE} MATCHES Debug)
@@ -70,14 +68,12 @@ if (${LOG_WARN} MATCHES "on")
     endif()
 endif()
 
-#set (CMAKE_C_COMPILER             "/usr/bin/clang")
 set (CMAKE_C_FLAGS                "-Wall -std=c11 -Wextra -Werror")
 set (CMAKE_C_FLAGS_DEBUG          "-g")
 set (CMAKE_C_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
 set (CMAKE_C_FLAGS_RELEASE        "-O3 -DNDEBUG")
 set (CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
 
-set (CMAKE_CXX_COMPILER             "/usr/bin/clang++")
 set (CMAKE_CXX_FLAGS                "-std=c++11 -Wall")
 set (CMAKE_CXX_FLAGS_DEBUG          "-g")
 set (CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG")

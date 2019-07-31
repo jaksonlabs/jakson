@@ -3,10 +3,9 @@ libcarbon uses [CMake](https://cmake.org) as build system. CMake 3.9.6 or higher
 The basic usage is 
 ```
 cmake . &&
-make  &&
-make tests  &&
-make test  &&
-sudo make install
+make -j4 &&
+make -j4 tests &&
+make test
 ```
 After installation, link against `libcarbon` and use
  

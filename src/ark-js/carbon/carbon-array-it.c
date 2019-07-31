@@ -219,8 +219,7 @@ ARK_EXPORT(bool) carbon_array_it_next(struct carbon_array_it *it)
                                 memfile_skip(&it->memfile, 1);
                         }
                 }
-                char final = *memfile_peek(&it->memfile, sizeof(char));
-                assert( final == CARBON_MARKER_ARRAY_END);
+                assert( *memfile_peek(&it->memfile, sizeof(char)) == CARBON_MARKER_ARRAY_END);
                 carbon_int_field_auto_close(&it->field_access);
                 return false;
         }
@@ -264,8 +263,8 @@ ARK_EXPORT(bool) carbon_array_it_fast_forward(struct carbon_array_it *it)
         error_if_null(it);
         while (carbon_array_it_next(it))
                 { }
-        char last = *memfile_peek(&it->memfile, sizeof(char));
-        assert(last == CARBON_MARKER_ARRAY_END);
+
+        assert(*memfile_peek(&it->memfile, sizeof(char)) == CARBON_MARKER_ARRAY_END);
         memfile_skip(&it->memfile, sizeof(char));
         return true;
 }

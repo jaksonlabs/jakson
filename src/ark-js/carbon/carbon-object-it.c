@@ -93,8 +93,8 @@ ARK_EXPORT(bool) carbon_object_it_next(struct carbon_object_it *it)
                                 memfile_skip(&it->memfile, 1);
                         }
                 }
-                char final = *memfile_peek(&it->memfile, sizeof(char));
-                assert( final == CARBON_MARKER_OBJECT_END);
+
+                assert(*memfile_peek(&it->memfile, sizeof(char)) == CARBON_MARKER_OBJECT_END);
                 return false;
         }
 }
@@ -224,8 +224,8 @@ ARK_EXPORT(bool) carbon_object_it_fast_forward(struct carbon_object_it *it)
         error_if_null(it);
         while (carbon_object_it_next(it))
         { }
-        char last = *memfile_peek(&it->memfile, sizeof(u8));
-        assert(last == CARBON_MARKER_OBJECT_END);
+
+        assert(*memfile_peek(&it->memfile, sizeof(u8)) == CARBON_MARKER_OBJECT_END);
         memfile_skip(&it->memfile, sizeof(u8));
         return true;
 }

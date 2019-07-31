@@ -385,10 +385,8 @@ static bool rewrite_column_to_array(struct carbon_column_it *it)
         }
 
         carbon_array_it_insert_end(&array_ins);
-        offset_t array_marker_end = carbon_array_it_tell(&array_it);
+        assert(array_marker_begin < carbon_array_it_tell(&array_it));
         carbon_array_it_drop(&array_it);
-
-        assert(array_marker_begin < array_marker_end);
 
         memfile_restore_position(&it->memfile);
         return true;

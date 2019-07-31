@@ -376,8 +376,7 @@ static bool internal_pack_array(struct carbon_array_it *it)
                                 carbon_array_it_create(&nested_array_it, &it->memfile, &it->err,
                                         it->field_access.nested_array_it->payload_start - sizeof(u8));
                                 internal_pack_array(&nested_array_it);
-                                char last = *memfile_peek(&nested_array_it.memfile, sizeof(char));
-                                assert(last == CARBON_MARKER_ARRAY_END);
+                                assert(*memfile_peek(&nested_array_it.memfile, sizeof(char)) == CARBON_MARKER_ARRAY_END);
                                 memfile_skip(&nested_array_it.memfile, sizeof(char));
                                 memfile_seek(&it->memfile, memfile_tell(&nested_array_it.memfile));
                                 carbon_array_it_drop(&nested_array_it);
@@ -401,8 +400,7 @@ static bool internal_pack_array(struct carbon_array_it *it)
                                 carbon_object_it_create(&nested_object_it, &it->memfile, &it->err,
                                         it->field_access.nested_object_it->payload_start - sizeof(u8));
                                 internal_pack_object(&nested_object_it);
-                                char last = *memfile_peek(&nested_object_it.memfile, sizeof(char));
-                                assert(last == CARBON_MARKER_OBJECT_END);
+                                assert(*memfile_peek(&nested_object_it.memfile, sizeof(char)) == CARBON_MARKER_OBJECT_END);
                                 memfile_skip(&nested_object_it.memfile, sizeof(char));
                                 memfile_seek(&it->memfile, memfile_tell(&nested_object_it.memfile));
                                 carbon_object_it_drop(&nested_object_it);
@@ -414,8 +412,7 @@ static bool internal_pack_array(struct carbon_array_it *it)
                 }
         }
 
-        char last = *memfile_peek(&it->memfile, sizeof(char));
-        assert(last == CARBON_MARKER_ARRAY_END);
+        assert(*memfile_peek(&it->memfile, sizeof(char)) == CARBON_MARKER_ARRAY_END);
 
         return true;
 }
@@ -481,8 +478,7 @@ static bool internal_pack_object(struct carbon_object_it *it)
                                 carbon_array_it_create(&nested_array_it, &it->memfile, &it->err,
                                         it->field_access.nested_array_it->payload_start - sizeof(u8));
                                 internal_pack_array(&nested_array_it);
-                                char last = *memfile_peek(&nested_array_it.memfile, sizeof(char));
-                                assert(last == CARBON_MARKER_ARRAY_END);
+                                assert(*memfile_peek(&nested_array_it.memfile, sizeof(char)) == CARBON_MARKER_ARRAY_END);
                                 memfile_skip(&nested_array_it.memfile, sizeof(char));
                                 memfile_seek(&it->memfile, memfile_tell(&nested_array_it.memfile));
                                 carbon_array_it_drop(&nested_array_it);
@@ -506,8 +502,7 @@ static bool internal_pack_object(struct carbon_object_it *it)
                                 carbon_object_it_create(&nested_object_it, &it->memfile, &it->err,
                                         it->field_access.nested_object_it->payload_start - sizeof(u8));
                                 internal_pack_object(&nested_object_it);
-                                char last = *memfile_peek(&nested_object_it.memfile, sizeof(char));
-                                assert(last == CARBON_MARKER_OBJECT_END);
+                                assert(*memfile_peek(&nested_object_it.memfile, sizeof(char)) == CARBON_MARKER_OBJECT_END);
                                 memfile_skip(&nested_object_it.memfile, sizeof(char));
                                 memfile_seek(&it->memfile, memfile_tell(&nested_object_it.memfile));
                                 carbon_object_it_drop(&nested_object_it);
@@ -519,8 +514,7 @@ static bool internal_pack_object(struct carbon_object_it *it)
                 }
         }
 
-        char last = *memfile_peek(&it->memfile, sizeof(char));
-        assert(last == CARBON_MARKER_OBJECT_END);
+        assert(*memfile_peek(&it->memfile, sizeof(char)) == CARBON_MARKER_OBJECT_END);
 
         return true;
 }
