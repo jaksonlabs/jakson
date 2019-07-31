@@ -17,10 +17,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef NG5_TOOLS_NG5_MODULES
-#define NG5_TOOLS_NG5_MODULES
+#ifndef ARK_TOOLS_ARK_MODULES
+#define ARK_TOOLS_ARK_MODULES
 
-#include "shell/opt.h"
+#include <ark-js/shared/shell/opt.h>
 
 bool moduleCheckJsInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager);
 bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager);

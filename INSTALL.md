@@ -22,18 +22,17 @@ information in a log. To To turn on trace, information, warn or debug log in deb
 with all logs, use `cmake -DBUILD_TYPE=Debug -DLOG_TRACE=on -DLOG_INFO=on -DLOG_WARN=on -DLOG_DEBUG=on .`.
 
 
-A tool to work with CARBON files (called `carbon-tool`) is shipped with this library.
+A tool to work with CARBON files (called `ark-carbon`) is shipped with this library.
 The build process is 
 ```
 cmake .
-make carbon-tool
+make ark-carbon
 ```
-After a successful build, the tool is located in the `build` directory. The tool supports the POSIX standard for its arguments. Type `build/carbon-tool` for usage instructions.
+After a successful build, the tool is located in the `build` directory. The tool supports the POSIX standard for its arguments. Type `build/ark-carbon` for usage instructions.
 
-Examples files are located in the `examples` directory, and are build with
+Examples files are located in the `examples` directory. All example targets are built with
 ```
 cmake .
-make examples-${name}
+make examples
 ```
-where `${name}`  is the topic (e.g., `error`). See source files in the `examples` 
-directory to get a list of possible targets.
+To build a specific example only, figure out the example target in the [example build file](examples/CMakeLists.txt).
