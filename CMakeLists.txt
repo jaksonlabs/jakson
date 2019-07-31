@@ -86,19 +86,6 @@ set (CMAKE_NM      "/usr/bin/llvm-nm")
 set (CMAKE_OBJDUMP "/usr/bin/llvm-objdump")
 set (CMAKE_RANLIB  "/usr/bin/llvm-ranlib")
 
-
-add_library(carbon SHARED ${LIB_SOURCES})
-set_target_properties(carbon PROPERTIES VERSION ${PROJECT_VERSION})
-set_target_properties(carbon PROPERTIES PUBLIC_HEADER include/carbon/carbon.h)
-
-install(TARGETS carbon
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/carbon)
-configure_file(carbon.pc.in carbon.pc @ONLY)
-install(FILES carbon.pc DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig)
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/carbon DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/carbon
-        FILES_MATCHING PATTERN "*.h*")
-
 enable_testing()
 
 add_subdirectory("${CMAKE_SOURCE_DIR}/tools")

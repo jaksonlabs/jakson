@@ -14,3 +14,6 @@ set(TOOL_SOURCES
 
 add_executable(ark-carbon main.c ${TOOL_SOURCES})
 target_link_libraries(ark-carbon ${LIBS})
+
+install(TARGETS ark-carbon
+        RUNTIME DESTINATION bin)

@@ -2,16 +2,8 @@ libcarbon uses [CMake](https://cmake.org) as build system. CMake 3.9.6 or higher
 
 The basic usage is 
 ```
-cmake . &&
-make -j4 &&
-make -j4 tests &&
-make test
+$ cmake . && make -j4 && make test && make install
 ```
-After installation, link against `libcarbon` and use
- 
-```#include <carbon/carbon.h>```
-
-in your project in order to use the library. 
 
 By default, all targets are built as release configuration. To build all targets in *debug mode* (without compiler 
 optimization, with debug symbols enabled, and other debug-related features available), use 
@@ -21,17 +13,21 @@ information in a log. To To turn on trace, information, warn or debug log in deb
 with all logs, use `cmake -DBUILD_TYPE=Debug -DLOG_TRACE=on -DLOG_INFO=on -DLOG_WARN=on -DLOG_DEBUG=on .`.
 
 
-A tool to work with CARBON files (called `ark-carbon`) is shipped with this library.
-The build process is 
-```
-cmake .
-make ark-carbon
-```
-After a successful build, the tool is located in the `build` directory. The tool supports the POSIX standard for its arguments. Type `build/ark-carbon` for usage instructions.
+A tool to work with Carbon files (called `ark-carbon`) is shipped with this library.
+This tool is automatically built when `make` is called, and installed via `make install`. However, to build the tool 
+via its target, type 
 
-Examples files are located in the `examples` directory. All example targets are built with
 ```
-cmake .
-make examples
+$ cmake .
+$ make ark-carbon
 ```
-To build a specific example only, figure out the example target in the [example build file](examples/CMakeLists.txt).
+
+After a successful build, the tool is located in the `build` directory. 
+The tool supports the POSIX standard for its arguments. Type `build/ark-carbon` for usage instructions.
+
+In case `make install` was called, 
+```
+$ ark-carbon
+```
+ 
+is enough to execute the tool.
