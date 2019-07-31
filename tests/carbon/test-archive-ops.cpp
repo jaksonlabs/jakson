@@ -2,7 +2,7 @@
 
 #include <inttypes.h>
 #include <ark-js/carbon/archive/archive-query.h>
-#include <ark-js/carbon/bison.h>
+#include <ark-js/carbon/carbon.h>
 
 TEST(CarbonArchiveOpsTest, CreateStreamFromJsonString)
 {

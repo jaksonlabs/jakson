@@ -3,7 +3,7 @@
 #include <ark-js/carbon/coding/pack.h>
 #include <ark-js/carbon/archive/archive-query.h>
 #include <ark-js/carbon/archive/archive-int.h>
-#include <ark-js/carbon/bison.h>
+#include <ark-js/carbon/carbon.h>
 
 #include "modules.h"
 

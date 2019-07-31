@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <ark-js/carbon/bison.h>
+#include <ark-js/carbon/carbon.h>
 
 TEST(ConverterTest, PerformConversion)
 {

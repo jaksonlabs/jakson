@@ -3,7 +3,7 @@
 #include <inttypes.h>
 
 #include <ark-js/carbon/archive/archive-iter.h>
-#include <ark-js/carbon/bison.h>
+#include <ark-js/carbon/carbon.h>
 
 static void
 iterate_properties(struct prop_iter *prop_iter);

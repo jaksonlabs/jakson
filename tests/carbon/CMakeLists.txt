@@ -29,7 +29,7 @@ target_link_libraries(test-archive-converter gtest ${TEST_LIBS})
 add_executable(test-varuint test-varuint.cpp ${LIB_SOURCES})
 target_link_libraries(test-varuint gtest ${TEST_LIBS})
 
-add_executable(test-bison test-bison.cpp ${LIB_SOURCES})
+add_executable(test-bison test-carbon.cpp ${LIB_SOURCES})
 target_link_libraries(test-bison gtest ${TEST_LIBS})
 
 add_executable(test-mime test-mime.cpp ${LIB_SOURCES})
