@@ -17,9 +17,7 @@ file.
 The latest release can always be found in `master` branch in the 
 [official GitHub repository](https://github.com/protolabs/libcarbon).
 
-## Examples and Usage
-
-Example source code is located in the [examples](examples) directory, and [tests](tests). The latest additional reference document on the library usage is located in [book/libcarbon/latest](book/libcarbon/latest), see [book instructions](book/README.md).
+## Tooling
 
 This library shipped with a tool to work on CARBON files, see [ark-carbon](tools/carbon/). 
 
