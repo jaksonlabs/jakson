@@ -16,7 +16,7 @@
  */
 
 #ifndef carbon_MEDIA_H
-#define carbon_MEDIA_H
+#define CARBON_MEDIA_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/error.h>

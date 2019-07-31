@@ -16,7 +16,7 @@
  */
 
 #ifndef carbon_FIND_H
-#define carbon_FIND_H
+#define CARBON_FIND_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/error.h>

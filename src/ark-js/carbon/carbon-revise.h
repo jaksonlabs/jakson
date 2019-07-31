@@ -16,7 +16,7 @@
  */
 
 #ifndef carbon_REVISE_H
-#define carbon_REVISE_H
+#define CARBON_REVISE_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/error.h>

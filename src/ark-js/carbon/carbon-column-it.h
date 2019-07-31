@@ -17,7 +17,7 @@
  */
 
 #ifndef carbon_COLUMN_IT_H
-#define carbon_COLUMN_IT_H
+#define CARBON_COLUMN_IT_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/error.h>

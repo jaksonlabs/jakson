@@ -16,7 +16,7 @@
  */
 
 #ifndef carbon_PATH_H
-#define carbon_PATH_H
+#define CARBON_PATH_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/carbon/carbon-dot.h>

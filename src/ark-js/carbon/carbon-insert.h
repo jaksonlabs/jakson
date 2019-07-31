@@ -17,7 +17,7 @@
  */
 
 #ifndef carbon_LITERAL_INSERTER_H
-#define carbon_LITERAL_INSERTER_H
+#define CARBON_LITERAL_INSERTER_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/error.h>

@@ -17,7 +17,7 @@
  */
 
 #ifndef carbon_INT_H
-#define carbon_INT_H
+#define CARBON_INT_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/mem/file.h>

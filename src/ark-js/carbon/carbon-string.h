@@ -16,7 +16,7 @@
  */
 
 #ifndef carbon_STRING_H
-#define carbon_STRING_H
+#define CARBON_STRING_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/error.h>

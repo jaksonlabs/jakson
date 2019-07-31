@@ -16,7 +16,7 @@
  */
 
 #ifndef carbon_KEY_H
-#define carbon_KEY_H
+#define CARBON_KEY_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/error.h>

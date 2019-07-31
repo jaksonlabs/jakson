@@ -16,7 +16,7 @@
  */
 
 #ifndef carbon_H
-#define carbon_H
+#define CARBON_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/error.h>
@@ -159,52 +159,52 @@ enum carbon_primary_key_type {
         carbon_KEY_SKEY
 };
 
-#define carbon_MARKER_NULL 'n'
-#define carbon_MARKER_TRUE 't'
-#define carbon_MARKER_FALSE 'f'
-#define carbon_MARKER_STRING 's'
-#define carbon_MARKER_U8 'c'
-#define carbon_MARKER_U16 'd'
-#define carbon_MARKER_U32 'i'
-#define carbon_MARKER_U64 'l'
-#define carbon_MARKER_I8 'C'
-#define carbon_MARKER_I16 'D'
-#define carbon_MARKER_I32 'I'
-#define carbon_MARKER_I64 'L'
-#define carbon_MARKER_FLOAT 'r'
-#define carbon_MARKER_BINARY 'b'
-#define carbon_MARKER_CUSTOM_BINARY 'x'
+#define CARBON_MARKER_NULL 'n'
+#define CARBON_MARKER_TRUE 't'
+#define CARBON_MARKER_FALSE 'f'
+#define CARBON_MARKER_STRING 's'
+#define CARBON_MARKER_U8 'c'
+#define CARBON_MARKER_U16 'd'
+#define CARBON_MARKER_U32 'i'
+#define CARBON_MARKER_U64 'l'
+#define CARBON_MARKER_I8 'C'
+#define CARBON_MARKER_I16 'D'
+#define CARBON_MARKER_I32 'I'
+#define CARBON_MARKER_I64 'L'
+#define CARBON_MARKER_FLOAT 'r'
+#define CARBON_MARKER_BINARY 'b'
+#define CARBON_MARKER_CUSTOM_BINARY 'x'
 
-#define carbon_MARKER_OBJECT_BEGIN '{'
-#define carbon_MARKER_OBJECT_END '}'
+#define CARBON_MARKER_OBJECT_BEGIN '{'
+#define CARBON_MARKER_OBJECT_END '}'
 
-#define carbon_MARKER_ARRAY_BEGIN '['
-#define carbon_MARKER_ARRAY_END ']'
+#define CARBON_MARKER_ARRAY_BEGIN '['
+#define CARBON_MARKER_ARRAY_END ']'
 
-#define carbon_MARKER_COLUMN_U8 '1'
-#define carbon_MARKER_COLUMN_U16 '2'
-#define carbon_MARKER_COLUMN_U32 '3'
-#define carbon_MARKER_COLUMN_U64 '4'
-#define carbon_MARKER_COLUMN_I8 '5'
-#define carbon_MARKER_COLUMN_I16 '6'
-#define carbon_MARKER_COLUMN_I32 '7'
-#define carbon_MARKER_COLUMN_I64 '8'
-#define carbon_MARKER_COLUMN_FLOAT 'R'
-#define carbon_MARKER_COLUMN_BOOLEAN 'B'
+#define CARBON_MARKER_COLUMN_U8 '1'
+#define CARBON_MARKER_COLUMN_U16 '2'
+#define CARBON_MARKER_COLUMN_U32 '3'
+#define CARBON_MARKER_COLUMN_U64 '4'
+#define CARBON_MARKER_COLUMN_I8 '5'
+#define CARBON_MARKER_COLUMN_I16 '6'
+#define CARBON_MARKER_COLUMN_I32 '7'
+#define CARBON_MARKER_COLUMN_I64 '8'
+#define CARBON_MARKER_COLUMN_FLOAT 'R'
+#define CARBON_MARKER_COLUMN_BOOLEAN 'B'
 
-#define carbon_MARKER_KEY_NOKEY '?'
-#define carbon_MARKER_KEY_AUTOKEY '*'
-#define carbon_MARKER_KEY_UKEY '+'
-#define carbon_MARKER_KEY_IKEY '-'
-#define carbon_MARKER_KEY_SKEY '!'
+#define CARBON_MARKER_KEY_NOKEY '?'
+#define CARBON_MARKER_KEY_AUTOKEY '*'
+#define CARBON_MARKER_KEY_UKEY '+'
+#define CARBON_MARKER_KEY_IKEY '-'
+#define CARBON_MARKER_KEY_SKEY '!'
 
 ARK_DEFINE_ERROR_GETTER(carbon);
 ARK_DEFINE_ERROR_GETTER(carbon_new);
 
-#define carbon_KEEP              0x0
-#define carbon_SHRINK            0x1
-#define carbon_COMPACT           0x2
-#define carbon_OPTIMIZE          (carbon_SHRINK | carbon_COMPACT)
+#define CARBON_KEEP              0x0
+#define CARBON_SHRINK            0x1
+#define CARBON_COMPACT           0x2
+#define CARBON_OPTIMIZE          (carbon_SHRINK | carbon_COMPACT)
 
 /**
  * Constructs a new context in which a new document can be created. The parameter <b>mode</b> controls

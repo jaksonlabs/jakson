@@ -16,7 +16,7 @@
  */
 
 #ifndef carbon_GET_H
-#define carbon_GET_H
+#define CARBON_GET_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/types.h>

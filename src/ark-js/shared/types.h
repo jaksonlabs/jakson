@@ -50,26 +50,26 @@ typedef int64_t i64;
 #define I64_NULL        INT64_MIN
 #define FLOAT_NULL      NAN
 
-#define carbon_U8_MIN    UINT8_MIN
-#define carbon_U16_MIN   UINT16_MIN
-#define carbon_U32_MIN   UINT32_MIN
-#define carbon_U64_MIN   UINT64_MIN
-#define carbon_I8_MIN    (INT8_MIN + 1)
-#define carbon_I16_MIN   (INT16_MIN + 1)
-#define carbon_I32_MIN   (INT32_MIN + 1)
-#define carbon_I64_MIN   (INT64_MIN + 1)
-#define carbon_U8_MAX    (U8_NULL - 1)
-#define carbon_U16_MAX   (U16_NULL - 1)
-#define carbon_U32_MAX   (U32_NULL - 1)
-#define carbon_U64_MAX   (U64_NULL - 1)
-#define carbon_I8_MAX    INT8_MAX
-#define carbon_I16_MAX   INT16_MAX
-#define carbon_I32_MAX   INT32_MAX
-#define carbon_I64_MAX   INT64_MAX
+#define CARBON_U8_MIN    UINT8_MIN
+#define CARBON_U16_MIN   UINT16_MIN
+#define CARBON_U32_MIN   UINT32_MIN
+#define CARBON_U64_MIN   UINT64_MIN
+#define CARBON_I8_MIN    (INT8_MIN + 1)
+#define CARBON_I16_MIN   (INT16_MIN + 1)
+#define CARBON_I32_MIN   (INT32_MIN + 1)
+#define CARBON_I64_MIN   (INT64_MIN + 1)
+#define CARBON_U8_MAX    (U8_NULL - 1)
+#define CARBON_U16_MAX   (U16_NULL - 1)
+#define CARBON_U32_MAX   (U32_NULL - 1)
+#define CARBON_U64_MAX   (U64_NULL - 1)
+#define CARBON_I8_MAX    INT8_MAX
+#define CARBON_I16_MAX   INT16_MAX
+#define CARBON_I32_MAX   INT32_MAX
+#define CARBON_I64_MAX   INT64_MAX
 
-#define carbon_BOOLEAN_COLUMN_FALSE     0
-#define carbon_BOOLEAN_COLUMN_TRUE      1
-#define carbon_BOOLEAN_COLUMN_NULL      2
+#define CARBON_BOOLEAN_COLUMN_FALSE     0
+#define CARBON_BOOLEAN_COLUMN_TRUE      1
+#define CARBON_BOOLEAN_COLUMN_NULL      2
 
 #define is_null_boolean(x)      (x == carbon_BOOLEAN_COLUMN_NULL)
 #define is_null_u8(x)           (x == U8_NULL)

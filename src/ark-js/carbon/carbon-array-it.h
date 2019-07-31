@@ -17,7 +17,7 @@
  */
 
 #ifndef carbon_ARRAY_IT_H
-#define carbon_ARRAY_IT_H
+#define CARBON_ARRAY_IT_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/error.h>

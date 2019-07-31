@@ -17,7 +17,7 @@
  */
 
 #ifndef carbon_DOT_H
-#define carbon_DOT_H
+#define CARBON_DOT_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/error.h>

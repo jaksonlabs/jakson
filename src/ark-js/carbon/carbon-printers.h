@@ -16,7 +16,7 @@
  */
 
 #ifndef carbon_PRINTERS_H
-#define carbon_PRINTERS_H
+#define CARBON_PRINTERS_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/types.h>
