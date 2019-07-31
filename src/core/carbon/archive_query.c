@@ -15,10 +15,10 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "core/carbon/archive_int.h"
-#include "core/carbon/archive_string_pred.h"
-#include "core/carbon/archive_sid_cache.h"
-#include "core/carbon/archive_query.h"
+#include <ark-js/carbon/carbon/archive_int.h>
+#include <ark-js/carbon/carbon/archive_string_pred.h>
+#include <ark-js/carbon/carbon/archive_sid_cache.h>
+#include <ark-js/carbon/carbon/archive_query.h>
 
 struct sid_to_offset_arg {
         offset_t offset;

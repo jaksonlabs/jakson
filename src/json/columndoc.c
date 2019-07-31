@@ -18,8 +18,8 @@
 #include <math.h>
 #include <inttypes.h>
 
-#include "json/columndoc.h"
-#include "json/doc.h"
+#include <ark-js/shared/json/columndoc.h>
+#include <ark-js/shared/json/doc.h>
 
 static void setup_object(struct columndoc_obj *model, struct columndoc *parent, field_sid_t key, size_t idx);
 

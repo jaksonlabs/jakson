@@ -18,21 +18,20 @@
 
 #include <inttypes.h>
 
-#include "stdx/varuint.h"
-
-#include "core/bison/bison.h"
-#include "core/bison/bison-array-it.h"
-#include "core/bison/bison-column-it.h"
-#include "core/bison/bison-object-it.h"
-#include "core/bison/bison-printers.h"
-#include "core/bison/bison-int.h"
-#include "core/bison/bison-dot.h"
-#include "core/bison/bison-find.h"
-#include "core/bison/bison-insert.h"
-#include "core/bison/bison-revise.h"
-#include "core/bison/bison-string.h"
-#include "core/bison/bison-key.h"
-#include "core/bison/bison-revision.h"
+#include <ark-js/shared/stdx/varuint.h>
+#include <ark-js/carbon/bison/bison.h>
+#include <ark-js/carbon/bison/bison-array-it.h>
+#include <ark-js/carbon/bison/bison-column-it.h>
+#include <ark-js/carbon/bison/bison-object-it.h>
+#include <ark-js/carbon/bison/bison-printers.h>
+#include <ark-js/carbon/bison/bison-int.h>
+#include <ark-js/carbon/bison/bison-dot.h>
+#include <ark-js/carbon/bison/bison-find.h>
+#include <ark-js/carbon/bison/bison-insert.h>
+#include <ark-js/carbon/bison/bison-revise.h>
+#include <ark-js/carbon/bison/bison-string.h>
+#include <ark-js/carbon/bison/bison-key.h>
+#include <ark-js/carbon/bison/bison-revision.h>
 
 #define MIN_DOC_CAPACITY 17 /* minimum number of bytes required to store header and empty document array */
 

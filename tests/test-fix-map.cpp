@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <stdio.h>
 
-#include "core/carbon.h"
+#include <ark-js/carbon/carbon.h>
 
 TEST(FixMapTest, CreationAndDrop)
 {

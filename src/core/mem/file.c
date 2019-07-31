@@ -15,8 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "core/mem/file.h"
-#include "stdx/varuint.h"
+#include <ark-js/shared/mem/file.h>
+#include <ark-js/shared/stdx/varuint.h>
 
 bool memfile_open(struct memfile *file, struct memblock *block, enum access_mode mode)
 {

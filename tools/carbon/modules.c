@@ -1,9 +1,9 @@
 
 #include <inttypes.h>
-#include "core/pack/pack.h"
-#include "core/carbon/archive_query.h"
-#include "core/carbon/archive_int.h"
-#include "core/carbon.h"
+#include <ark-js/carbon/pack/pack.h>
+#include <ark-js/carbon/carbon/archive_query.h>
+#include <ark-js/carbon/carbon/archive_int.h>
+#include <ark-js/carbon/carbon.h>
 
 #include "modules.h"
 

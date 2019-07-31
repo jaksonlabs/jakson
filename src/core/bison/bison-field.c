@@ -15,12 +15,12 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "core/mem/file.h"
-#include "core/bison/bison-field.h"
-#include "core/bison/bison-column-it.h"
-#include "core/bison/bison-media.h"
-#include "core/bison/bison-array-it.h"
-#include "core/bison/bison-object-it.h"
+#include <ark-js/shared/mem/file.h>
+#include <ark-js/carbon/bison/bison-field.h>
+#include <ark-js/carbon/bison/bison-column-it.h>
+#include <ark-js/carbon/bison/bison-media.h>
+#include <ark-js/carbon/bison/bison-array-it.h>
+#include <ark-js/carbon/bison/bison-object-it.h>
 
 NG5_EXPORT(const char *) bison_field_type_str(struct err *err, enum bison_field_type type)
 {

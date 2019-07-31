@@ -18,9 +18,9 @@
 #include <inttypes.h>
 #include <ctype.h>
 #include <locale.h>
-#include "json/json.h"
-#include "json/doc.h"
-#include "utils/convert.h"
+#include <ark-js/shared/json/json.h>
+#include <ark-js/shared/json/doc.h>
+#include <ark-js/shared/utils/convert.h>
 
 static struct {
         enum json_token_type token;

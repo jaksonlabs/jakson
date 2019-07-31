@@ -16,7 +16,7 @@
  */
 
 #include <assert.h>
-#include "core/carbon/archive_int.h"
+#include <ark-js/carbon/carbon/archive_int.h>
 
 void int_read_prop_offsets(struct archive_prop_offs *prop_offsets, struct memfile *memfile,
         const union object_flags *flags)

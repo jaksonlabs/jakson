@@ -17,8 +17,8 @@
 
 #include <inttypes.h>
 #include <assert.h>
-#include "core/pack/pack.h"
-#include "core/pack/pack_none.h"
+#include <ark-js/carbon/pack/pack.h>
+#include <ark-js/carbon/pack/pack_none.h>
 
 NG5_EXPORT(bool) pack_none_init(struct packer *self)
 {

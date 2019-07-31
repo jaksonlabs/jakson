@@ -15,9 +15,9 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "core/bison/bison-path.h"
-#include "core/bison/bison-find.h"
-#include "core/bison/bison-revise.h"
+#include <ark-js/carbon/bison/bison-path.h>
+#include <ark-js/carbon/bison/bison-find.h>
+#include <ark-js/carbon/bison/bison-revise.h>
 
 static inline enum bison_path_status traverse_column(struct bison_path_evaluator *state,
         const struct bison_dot_path *path, u32 current_path_pos, struct bison_column_it *it);

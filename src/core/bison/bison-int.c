@@ -16,18 +16,16 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-
-#include "stdx/varuint.h"
-
-#include "core/bison/bison.h"
-#include "core/bison/bison-insert.h"
-#include "core/bison/bison-media.h"
-#include "core/bison/bison-int.h"
-#include "core/bison/bison-array-it.h"
-#include "core/bison/bison-column-it.h"
-#include "core/bison/bison-object-it.h"
-#include "core/bison/bison-key.h"
-#include "core/bison/bison-revision.h"
+#include <ark-js/shared/stdx/varuint.h>
+#include <ark-js/carbon/bison/bison.h>
+#include <ark-js/carbon/bison/bison-insert.h>
+#include <ark-js/carbon/bison/bison-media.h>
+#include <ark-js/carbon/bison/bison-int.h>
+#include <ark-js/carbon/bison/bison-array-it.h>
+#include <ark-js/carbon/bison/bison-column-it.h>
+#include <ark-js/carbon/bison/bison-object-it.h>
+#include <ark-js/carbon/bison/bison-key.h>
+#include <ark-js/carbon/bison/bison-revision.h>
 
 static void marker_insert(struct memfile *memfile, u8 marker);
 

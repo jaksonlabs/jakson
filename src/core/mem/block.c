@@ -15,7 +15,7 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "core/mem/block.h"
+#include <ark-js/shared/mem/block.h>
 
 struct memblock {
         offset_t blockLength;

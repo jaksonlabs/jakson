@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
 #include <inttypes.h>
-#include "core/carbon/archive_query.h"
-#include "core/carbon.h"
+#include <ark-js/carbon/carbon/archive_query.h>
+#include <ark-js/carbon/carbon.h>
 
 TEST(CarbonArchiveOpsTest, CreateStreamFromJsonString)
 {

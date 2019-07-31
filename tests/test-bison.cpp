@@ -1,15 +1,15 @@
 #include <gtest/gtest.h>
 
-#include "core/bison/bison.h"
-#include "core/bison/bison-dot.h"
-#include "core/bison/bison-array-it.h"
-#include "core/bison/bison-insert.h"
-#include "core/bison/bison-find.h"
-#include "core/bison/bison-update.h"
-#include "core/bison/bison-path.h"
-#include "core/bison/bison-get.h"
-#include "core/bison/bison-revise.h"
-#include "core/bison/bison-object-it.h"
+#include <ark-js/carbon/bison/bison.h>
+#include <ark-js/carbon/bison/bison-dot.h>
+#include <ark-js/carbon/bison/bison-array-it.h>
+#include <ark-js/carbon/bison/bison-insert.h>
+#include <ark-js/carbon/bison/bison-find.h>
+#include <ark-js/carbon/bison/bison-update.h>
+#include <ark-js/carbon/bison/bison-path.h>
+#include <ark-js/carbon/bison/bison-get.h>
+#include <ark-js/carbon/bison/bison-revise.h>
+#include <ark-js/carbon/bison/bison-object-it.h>
 
 TEST(BisonTest, CreateBison) {
         struct bison doc;

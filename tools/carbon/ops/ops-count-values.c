@@ -1,7 +1,7 @@
-#include "core/carbon/archive_visitor.h"
-#include "std/hash_set.h"
-#include "std/hash_table.h"
-#include "core/carbon/archive_query.h"
+#include <ark-js/carbon/carbon/archive_visitor.h>
+#include <ark-js/shared/stdx/hash_set.h>
+#include <ark-js/shared/stdx/hash_table.h>
+#include <ark-js/carbon/carbon/archive_query.h>
 #include "ops-count-values.h"
 
 struct capture

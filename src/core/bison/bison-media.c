@@ -15,7 +15,7 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "core/bison/bison-media.h"
+#include <ark-js/carbon/bison/bison-media.h>
 
 #define find_mime_by_ext(needle_ext)                                                    \
 ({                                                                                      \

@@ -17,21 +17,20 @@
 
 #include <inttypes.h>
 
-#include "core/oid/oid.h"
-#include "core/encode/encode_async.h"
-#include "core/pack/pack.h"
-#include "core/carbon/archive_strid_iter.h"
-#include "core/carbon/archive_int.h"
-#include "core/carbon/archive_query.h"
-#include "core/carbon/archive_sid_cache.h"
-#include "err.h"
-#include "core/carbon/archive.h"
-#include "core/encode/encode_sync.h"
-#include "shared/common.h"
-#include "core/mem/block.h"
-#include "core/mem/file.h"
-#include "coding/coding_huffman.h"
-#include "core/carbon/archive.h"
+#include <ark-js/carbon/oid/oid.h>
+#include <ark-js/carbon/encode/encode_async.h>
+#include <ark-js/carbon/pack/pack.h>
+#include <ark-js/carbon/carbon/archive_strid_iter.h>
+#include <ark-js/carbon/carbon/archive_int.h>
+#include <ark-js/carbon/carbon/archive_query.h>
+#include <ark-js/carbon/carbon/archive_sid_cache.h>
+#include <ark-js/carbon/carbon/archive.h>
+#include <ark-js/carbon/encode/encode_sync.h>
+#include <ark-js/shared/common.h>
+#include <ark-js/shared/mem/block.h>
+#include <ark-js/shared/mem/file.h>
+#include <ark-js/carbon/coding/coding_huffman.h>
+#include <ark-js/carbon/carbon/archive.h>
 
 #define WRITE_PRIMITIVE_VALUES(memfile, values_vec, type)                                                              \
 {                                                                                                                      \

@@ -15,8 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "core/carbon/archive_iter.h"
-#include "core/carbon/archive_int.h"
+#include <ark-js/carbon/carbon/archive_iter.h>
+#include <ark-js/carbon/carbon/archive_int.h>
 
 static bool init_object_from_memfile(struct archive_object *obj, struct memfile *memfile)
 {

@@ -17,11 +17,11 @@
 
 #include <math.h>
 #include <inttypes.h>
-#include "json/json.h"
-#include "json/doc.h"
-#include "json/columndoc.h"
-#include "json/json.h"
-#include "std/sort.h"
+#include <ark-js/shared/json/json.h>
+#include <ark-js/shared/json/doc.h>
+#include <ark-js/shared/json/columndoc.h>
+#include <ark-js/shared/json/json.h>
+#include <ark-js/shared/stdx/sort.h>
 
 char VALUE_NULL = '\0';
 

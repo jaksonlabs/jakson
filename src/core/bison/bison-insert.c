@@ -15,14 +15,14 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "stdx/varuint.h"
-#include "core/bison/bison-array-it.h"
-#include "core/bison/bison-column-it.h"
-#include "core/bison/bison-insert.h"
-#include "core/bison/bison-media.h"
-#include "core/bison/bison-int.h"
-#include "core/bison/bison-string.h"
-#include "core/bison/bison-object-it.h"
+#include <ark-js/shared/stdx/varuint.h>
+#include <ark-js/carbon/bison/bison-array-it.h>
+#include <ark-js/carbon/bison/bison-column-it.h>
+#include <ark-js/carbon/bison/bison-insert.h>
+#include <ark-js/carbon/bison/bison-media.h>
+#include <ark-js/carbon/bison/bison-int.h>
+#include <ark-js/carbon/bison/bison-string.h>
+#include <ark-js/carbon/bison/bison-object-it.h>
 
 #define check_type_if_container_is_column(inserter, expected)                                                          \
 if (unlikely(inserter->context_type == BISON_COLUMN && inserter->context.column->type != expected)) {                  \

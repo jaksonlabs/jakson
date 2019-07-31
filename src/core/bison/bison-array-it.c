@@ -16,14 +16,14 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "stdx/varuint.h"
-#include "core/bison/bison.h"
-#include "core/bison/bison-array-it.h"
-#include "core/bison/bison-column-it.h"
-#include "core/bison/bison-object-it.h"
-#include "core/bison/bison-insert.h"
-#include "core/bison/bison-media.h"
-#include "core/bison/bison-int.h"
+#include <ark-js/shared/stdx/varuint.h>
+#include <ark-js/carbon/bison/bison.h>
+#include <ark-js/carbon/bison/bison-array-it.h>
+#include <ark-js/carbon/bison/bison-column-it.h>
+#include <ark-js/carbon/bison/bison-object-it.h>
+#include <ark-js/carbon/bison/bison-insert.h>
+#include <ark-js/carbon/bison/bison-media.h>
+#include <ark-js/carbon/bison/bison-int.h>
 
 #define DEFINE_IN_PLACE_UPDATE_FUNCTION(type_name, field_type)                                                         \
 NG5_EXPORT(bool) bison_array_it_update_in_place_##type_name(struct bison_array_it *it, type_name value)                \

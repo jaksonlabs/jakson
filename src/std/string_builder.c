@@ -16,7 +16,7 @@
  */
 
 #include <inttypes.h>
-#include "std/string_builder.h"
+#include <ark-js/shared/stdx/string_builder.h>
 
 NG5_EXPORT(bool) string_builder_create(struct string_builder *builder)
 {

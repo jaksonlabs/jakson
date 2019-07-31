@@ -15,8 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "core/bison/bison-key.h"
-#include "core/bison/bison-string.h"
+#include <ark-js/carbon/bison/bison-key.h>
+#include <ark-js/carbon/bison/bison-string.h>
 
 static void write_nokey(struct memfile *file)
 {

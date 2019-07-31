@@ -5,9 +5,9 @@
 #ifndef LIBNG5_OPS_SHOW_KEYS_H
 #define LIBNG5_OPS_SHOW_KEYS_H
 
-#include "shared/common.h"
-#include "std/vec.h"
-#include "core/carbon/archive.h"
+#include <ark-js/shared/common.h>
+#include <ark-js/shared/stdx/vec.h>
+#include <ark-js/carbon/carbon/archive.h>
 
 typedef struct
 {

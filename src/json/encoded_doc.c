@@ -17,7 +17,7 @@
 
 #include <math.h>
 
-#include "json/encoded_doc.h"
+#include <ark-js/shared/json/encoded_doc.h>
 
 NG5_EXPORT(bool) encoded_doc_collection_create(struct encoded_doc_list *collection, struct err *err,
         struct archive *archive)
@@ -453,7 +453,7 @@ DECLARE_NG5_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(null, field_u32_t, FIELD_NULL)
 
 
 #include <inttypes.h>
-#include "core/carbon/archive_query.h"
+#include <ark-js/carbon/carbon/archive_query.h>
 
 NG5_EXPORT(bool) encoded_doc_array_push_object(struct encoded_doc *doc, field_sid_t key, object_id_t id)
 {

@@ -5,7 +5,7 @@
 #ifndef LIBNG5_CLI_H
 #define LIBNG5_CLI_H
 
-#include "shell/opt.h"
+#include <ark-js/shared/shell/opt.h>
 
 bool moduleCliInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager);
 

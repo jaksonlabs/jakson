@@ -15,11 +15,11 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "core/carbon/archive_visitor.h"
-#include "std/hash_table.h"
-#include "std/hash_set.h"
-#include "core/carbon/archive_visitor.h"
-#include "core/carbon/archive_query.h"
+#include <ark-js/carbon/carbon/archive_visitor.h>
+#include <ark-js/shared/stdx/hash_table.h>
+#include <ark-js/shared/stdx/hash_set.h>
+#include <ark-js/carbon/carbon/archive_visitor.h>
+#include <ark-js/carbon/carbon/archive_query.h>
 
 static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
         struct vector ofType(struct path_entry) *path_stack, struct archive_visitor *visitor, int mask, void *capture,

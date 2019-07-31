@@ -16,11 +16,11 @@
  */
 
 #include <ctype.h>
-#include <utils/convert.h>
-#include <core/bison/bison-dot.h>
-#include "core/bison/bison-dot.h"
-#include "std/string_builder.h"
-#include "utils/string.h"
+#include <ark-js/shared/utils/convert.h>
+#include <ark-js/carbon/bison/bison-dot.h>
+#include <ark-js/carbon/bison/bison-dot.h>
+#include <ark-js/shared/stdx/string_builder.h>
+#include <ark-js/shared/utils/string.h>
 
 enum dot_token_type {
         TOKEN_DOT,

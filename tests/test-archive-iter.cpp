@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <inttypes.h>
 
-#include "core/carbon/archive_iter.h"
-#include "core/carbon.h"
+#include <ark-js/carbon/carbon/archive_iter.h>
+#include <ark-js/carbon/carbon.h>
 
 static void
 iterate_properties(struct prop_iter *prop_iter);

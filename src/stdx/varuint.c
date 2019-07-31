@@ -16,7 +16,7 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "stdx/varuint.h"
+#include <ark-js/shared/stdx/varuint.h>
 
 #define MASK_LAST_BYTE                  (0 | ((char) ~0u))
 #define MASK_FORWARD_BIT                ((char) (1u << 7))

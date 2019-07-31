@@ -15,16 +15,16 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "core/alloc/alloc.h"
-#include "std/vec.h"
-#include "core/encode/encode_sync.h"
-#include "core/encode/encode_async.h"
-#include "core/async/spin.h"
-#include "stdx/strhash.h"
-#include "utils/time.h"
-#include "core/async/parallel.h"
-#include "stdx/slicelist.h"
-#include "hash/sax.h"
+#include <ark-js/carbon/alloc/alloc.h>
+#include <ark-js/shared/stdx/vec.h>
+#include <ark-js/carbon/encode/encode_sync.h>
+#include <ark-js/carbon/encode/encode_async.h>
+#include <ark-js/shared/async/spin.h>
+#include <ark-js/shared/stdx/strhash.h>
+#include <ark-js/shared/utils/time.h>
+#include <ark-js/shared/async/parallel.h>
+#include <ark-js/shared/stdx/slicelist.h>
+#include <ark-js/shared/hash/sax.h>
 
 #define STRING_DIC_ASYNC_TAG "strdic_async"
 

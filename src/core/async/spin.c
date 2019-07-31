@@ -15,8 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "core/async/spin.h"
-#include "utils/time.h"
+#include <ark-js/shared/async/spin.h>
+#include <ark-js/shared/utils/time.h>
 
 #define SPINLOCK_TAG "spinlock"
 

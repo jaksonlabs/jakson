@@ -15,11 +15,11 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "core/bison/bison.h"
-#include "core/bison/bison-object-it.h"
-#include "core/bison/bison-array-it.h"
-#include "core/bison/bison-column-it.h"
-#include "core/bison/bison-insert.h"
+#include <ark-js/carbon/bison/bison.h>
+#include <ark-js/carbon/bison/bison-object-it.h>
+#include <ark-js/carbon/bison/bison-array-it.h>
+#include <ark-js/carbon/bison/bison-column-it.h>
+#include <ark-js/carbon/bison/bison-insert.h>
 
 NG5_EXPORT(bool) bison_object_it_create(struct bison_object_it *it, struct memfile *memfile, struct err *err,
         offset_t payload_start)

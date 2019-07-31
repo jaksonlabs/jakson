@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "core/bison/bison-media.h"
+#include <ark-js/carbon/bison/bison-media.h>
 
 TEST(MimeTypeTest, TestMimeMapping) {
 

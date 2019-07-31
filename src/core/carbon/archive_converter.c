@@ -17,9 +17,9 @@
 
 #include "inttypes.h"
 
-#include "shared/common.h"
-#include "core/carbon/archive_visitor.h"
-#include "core/carbon/archive_converter.h"
+#include <ark-js/shared/common.h>
+#include <ark-js/carbon/carbon/archive_visitor.h>
+#include <ark-js/carbon/carbon/archive_converter.h>
 
 struct converter_capture {
         struct encoded_doc_list *collection;

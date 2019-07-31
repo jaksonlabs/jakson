@@ -16,7 +16,7 @@
  */
 
 #include <ctype.h>
-#include "utils/hexdump.h"
+#include <ark-js/shared/utils/hexdump.h>
 
 NG5_EXPORT(bool) hexdump(struct string_builder *dst, const void *base, u64 nbytes)
 {

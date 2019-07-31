@@ -15,11 +15,11 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <core/bison/bison-path.h>
-#include "core/bison/bison-path.h"
-#include "core/bison/bison-update.h"
-#include "core/bison/bison-insert.h"
-#include "core/bison/bison-revise.h"
+#include <ark-js/carbon/bison/bison-path.h>
+#include <ark-js/carbon/bison/bison-path.h>
+#include <ark-js/carbon/bison/bison-update.h>
+#include <ark-js/carbon/bison/bison-insert.h>
+#include <ark-js/carbon/bison/bison-revise.h>
 
 #define try_array_update(type_match, in_place_update_fn, insert_fn)                                                    \
 ({                                                                                                                     \

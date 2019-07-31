@@ -18,9 +18,9 @@
 #include <assert.h>
 #include <inttypes.h>
 
-#include "std/bitmap.h"
-#include "core/pack/pack.h"
-#include "coding/coding_huffman.h"
+#include <ark-js/shared/stdx/bitmap.h>
+#include <ark-js/carbon/pack/pack.h>
+#include <ark-js/carbon/coding/coding_huffman.h>
 
 #define  MARKER_SYMBOL_HUFFMAN_DIC_ENTRY   'd'
 

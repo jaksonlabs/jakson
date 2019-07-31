@@ -15,8 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "core/bison/bison-dot.h"
-#include "core/bison/bison-find.h"
+#include <ark-js/carbon/bison/bison-dot.h>
+#include <ark-js/carbon/bison/bison-find.h>
 
 static void result_from_array(struct bison_find *find, struct bison_array_it *it);
 static inline bool result_from_column(struct bison_find *find, u32 requested_idx, struct bison_column_it *it);

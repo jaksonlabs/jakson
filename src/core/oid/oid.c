@@ -15,10 +15,10 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "core/oid/oid.h"
-#include "utils/time.h"
-#include "shared/error.h"
-#include "hash/bern.h"
+#include <ark-js/carbon/oid/oid.h>
+#include <ark-js/shared/utils/time.h>
+#include <ark-js/shared/error.h>
+#include <ark-js/shared/hash/bern.h>
 
 _Thread_local bool thread_local_init;
 

@@ -15,7 +15,7 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "std/bloom.h"
+#include <ark-js/shared/stdx/bloom.h>
 
 NG5_EXPORT(bool) bloom_create(bloom_t *filter, size_t size)
 {

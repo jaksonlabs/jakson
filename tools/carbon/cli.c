@@ -1,6 +1,6 @@
-#include "core/carbon/archive_int.h"
-#include "core/carbon/archive_sid_cache.h"
-#include "core/carbon.h"
+#include <ark-js/carbon/carbon/archive_int.h>
+#include <ark-js/carbon/carbon/archive_sid_cache.h>
+#include <ark-js/carbon/carbon.h>
 
 #include "modules.h"
 

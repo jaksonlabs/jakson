@@ -15,15 +15,15 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "core/bison/bison.h"
-#include "core/bison/bison-revise.h"
-#include "core/bison/bison-array-it.h"
-#include "core/bison/bison-int.h"
-#include "core/bison/bison-dot.h"
-#include "core/bison/bison-find.h"
-#include "core/bison/bison-key.h"
-#include "core/bison/bison-revision.h"
-#include "core/bison/bison-object-it.h"
+#include <ark-js/carbon/bison/bison.h>
+#include <ark-js/carbon/bison/bison-revise.h>
+#include <ark-js/carbon/bison/bison-array-it.h>
+#include <ark-js/carbon/bison/bison-int.h>
+#include <ark-js/carbon/bison/bison-dot.h>
+#include <ark-js/carbon/bison/bison-find.h>
+#include <ark-js/carbon/bison/bison-key.h>
+#include <ark-js/carbon/bison/bison-revision.h>
+#include <ark-js/carbon/bison/bison-object-it.h>
 
 static bool internal_pack_array(struct bison_array_it *it);
 static bool internal_pack_object(struct bison_object_it *it);

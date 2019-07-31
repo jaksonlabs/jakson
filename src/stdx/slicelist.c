@@ -18,11 +18,11 @@
 #include <assert.h>
 #include <math.h>
 
-#include "stdx/slicelist.h"
-#include "hash/add.h"
-#include "hash/xor.h"
-#include "hash/rot.h"
-#include "hash/sax.h"
+#include <ark-js/shared/stdx/slicelist.h>
+#include <ark-js/shared/hash/add.h>
+#include <ark-js/shared/hash/xor.h>
+#include <ark-js/shared/hash/rot.h>
+#include <ark-js/shared/hash/sax.h>
 
 #define NG5_SLICE_LIST_TAG "slice-list"
 

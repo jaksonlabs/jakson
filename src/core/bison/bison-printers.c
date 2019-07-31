@@ -17,8 +17,8 @@
 
 #include "libs/libb64/libb64.h"
 
-#include "core/bison/bison-printers.h"
-#include "core/bison/bison.h"
+#include <ark-js/carbon/bison/bison-printers.h>
+#include <ark-js/carbon/bison/bison.h>
 
 #define INIT_BUFFER_LEN 1024
 

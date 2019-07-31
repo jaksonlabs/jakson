@@ -15,18 +15,18 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "std/vec.h"
-#include "core/async/spin.h"
-#include "stdx/strhash.h"
-#include "core/encode/encode_sync.h"
-#include "core/strhash/strhash_mem.h"
-#include "utils/time.h"
-#include "std/bloom.h"
-#include "hash/fnv.h"
-#include "hash/add.h"
-#include "hash/xor.h"
-#include "hash/rot.h"
-#include "hash/sax.h"
+#include <ark-js/shared/stdx/vec.h>
+#include <ark-js/shared/async/spin.h>
+#include <ark-js/shared/stdx/strhash.h>
+#include <ark-js/carbon/encode/encode_sync.h>
+#include <ark-js/carbon/strhash/strhash_mem.h>
+#include <ark-js/shared/utils/time.h>
+#include <ark-js/shared/stdx/bloom.h>
+#include <ark-js/shared/hash/fnv.h>
+#include <ark-js/shared/hash/add.h>
+#include <ark-js/shared/hash/xor.h>
+#include <ark-js/shared/hash/rot.h>
+#include <ark-js/shared/hash/sax.h>
 
 #define STRING_DIC_SYNC_TAG "string-dic-sync"
 

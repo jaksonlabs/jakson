@@ -1,5 +1,5 @@
-#include "shared/error.h"
-#include "shell/opt.h"
+#include <ark-js/shared/error.h>
+#include <ark-js/shared/shell/opt.h>
 
 #include "modules.h"
 #include "cli.h"

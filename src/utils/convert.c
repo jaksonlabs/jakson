@@ -17,7 +17,7 @@
 
 #include <inttypes.h>
 
-#include "utils/convert.h"
+#include <ark-js/shared/utils/convert.h>
 
 i64 convert_atoi64(const char *string)
 {

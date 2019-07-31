@@ -18,7 +18,7 @@
 #include <errno.h>
 #include <assert.h>
 
-#include "core/alloc/alloc.h"
+#include <ark-js/carbon/alloc/alloc.h>
 
 static void *invoke_malloc(struct allocator *self, size_t size);
 

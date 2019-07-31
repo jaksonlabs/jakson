@@ -16,11 +16,12 @@
  */
 
 #include <inttypes.h>
-#include "std/vec.h"
-#include "core/alloc/trace.h"
-#include "std/sort.h"
-#include "core/async/spin.h"
-#include "utils/time.h"
+
+#include <ark-js/shared/stdx/vec.h>
+#include <ark-js/carbon/alloc/trace.h>
+#include <ark-js/shared/stdx/sort.h>
+#include <ark-js/shared/async/spin.h>
+#include <ark-js/shared/utils/time.h>
 
 #define TRACE_ALLOC_TAG "trace_alloc"
 

@@ -16,7 +16,7 @@
  */
 
 #include <ctype.h>
-#include "utils/string.h"
+#include <ark-js/shared/utils/string.h>
 
 NG5_EXPORT(bool) strings_contains_blank_char(const char *str)
 {

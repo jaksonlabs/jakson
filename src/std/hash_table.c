@@ -15,8 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "hash/bern.h"
-#include "std/hash_table.h"
+#include <ark-js/shared/hash/bern.h>
+#include <ark-js/shared/stdx/hash_table.h>
 
 #define HASHCODE_OF(size, x) NG5_HASH_BERNSTEIN(size, x)
 #define FIX_MAP_AUTO_REHASH_LOADFACTOR 0.9f

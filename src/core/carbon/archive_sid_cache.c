@@ -15,9 +15,9 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "hash/bern.h"
-#include "shared/error.h"
-#include "core/carbon/archive_sid_cache.h"
+#include <ark-js/shared/hash/bern.h>
+#include <ark-js/shared/error.h>
+#include <ark-js/carbon/carbon/archive_sid_cache.h>
 
 struct cache_entry {
         struct cache_entry *prev, *next;

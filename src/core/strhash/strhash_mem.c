@@ -15,14 +15,14 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "core/strhash/strhash_mem.h"
-#include "core/async/spin.h"
-#include "std/sort.h"
-#include "core/alloc/trace.h"
-#include "utils/time.h"
-#include "std/bloom.h"
-#include "stdx/slicelist.h"
-#include "hash/bern.h"
+#include <ark-js/carbon/strhash/strhash_mem.h>
+#include <ark-js/shared/async/spin.h>
+#include <ark-js/shared/stdx/sort.h>
+#include <ark-js/carbon/alloc/trace.h>
+#include <ark-js/shared/utils/time.h>
+#include <ark-js/shared/stdx/bloom.h>
+#include <ark-js/shared/stdx/slicelist.h>
+#include <ark-js/shared/hash/bern.h>
 
 #define HASHCODE_OF(key)      NG5_HASH_BERNSTEIN(strlen(key), key)
 

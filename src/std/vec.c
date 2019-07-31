@@ -19,8 +19,8 @@
 #include <inttypes.h>
 #include <sys/mman.h>
 
-#include "core/mem/file.h"
-#include "std/vec.h"
+#include <ark-js/shared/mem/file.h>
+#include <ark-js/shared/stdx/vec.h>
 
 #define DEFINE_PRINTER_FUNCTION_WCAST(type, castType, format_string)                                                   \
 void vector_##type##_PrinterFunc(struct memfile *dst, void ofType(T) *values, size_t num_elems)                      \

@@ -15,9 +15,9 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "core/carbon/archive.h"
-#include "core/async/spin.h"
-#include "core/carbon/archive_io.h"
+#include <ark-js/carbon/carbon/archive.h>
+#include <ark-js/shared/async/spin.h>
+#include <ark-js/carbon/carbon/archive_io.h>
 
 struct io_context {
         struct err err;

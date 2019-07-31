@@ -15,8 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "core/bison/bison-revision.h"
-#include "stdx/varuint.h"
+#include <ark-js/carbon/bison/bison-revision.h>
+#include <ark-js/shared/stdx/varuint.h>
 
 NG5_EXPORT(bool) bison_revision_create(struct memfile *file)
 {

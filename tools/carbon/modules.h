@@ -20,7 +20,7 @@
 #ifndef NG5_TOOLS_NG5_MODULES
 #define NG5_TOOLS_NG5_MODULES
 
-#include "shell/opt.h"
+#include <ark-js/shared/shell/opt.h>
 
 bool moduleCheckJsInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager);
 bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager);

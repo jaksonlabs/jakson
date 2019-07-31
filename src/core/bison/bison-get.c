@@ -16,8 +16,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "core/bison/bison-get.h"
-#include "core/bison/bison-find.h"
+#include <ark-js/carbon/bison/bison-get.h>
+#include <ark-js/carbon/bison/bison-find.h>
 
 #define get_or_default(doc, path, type_name, default_val, test_fn, get_fn)                                             \
 ({                                                                                                                     \

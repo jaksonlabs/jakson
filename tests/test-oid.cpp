@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <printf.h>
 
-#include "core/carbon.h"
+#include <ark-js/carbon/carbon.h>
 
 TEST(ObjectIdTest, CreateId) {
     object_id_t id;

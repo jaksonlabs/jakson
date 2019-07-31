@@ -15,7 +15,7 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "shell/opt.h"
+#include <ark-js/shared/shell/opt.h>
 
 static struct cmdopt *option_by_name(struct cmdopt_mgr *manager, const char *name);
 

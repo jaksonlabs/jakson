@@ -16,7 +16,7 @@
  */
 
 #include <assert.h>
-#include "core/pack/pack.h"
+#include <ark-js/carbon/pack/pack.h>
 
 static bool create_strategy(size_t i, struct packer *strategy)
 {

@@ -15,7 +15,7 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "core/async/parallel.h"
+#include <ark-js/shared/async/parallel.h>
 
 NG5_EXPORT(void *)parallel_for_proxy_function(void *args)
 {

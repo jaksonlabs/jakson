@@ -17,7 +17,7 @@
 
 #include <math.h>
 
-#include "utils/time.h"
+#include <ark-js/shared/utils/time.h>
 
 timestamp_t time_now_wallclock()
 {

@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <printf.h>
 
-#include "stdx/varuint.h"
+#include <ark-js/shared/stdx/varuint.h>
 
 #define DEFINE_VARUINT_POINT_TEST(test_name, value, expected_bytes)     \
 TEST(VarUintTest, ReadWrite##test_name) {                               \

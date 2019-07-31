@@ -15,7 +15,7 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "shared/error.h"
+#include <ark-js/shared/error.h>
 
 NG5_EXPORT(bool) error_init(struct err *err)
 {

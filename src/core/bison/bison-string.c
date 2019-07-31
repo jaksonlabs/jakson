@@ -15,10 +15,10 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "stdx/varuint.h"
-#include "core/bison/bison-media.h"
-#include "core/bison/bison-field.h"
-#include "core/bison/bison-string.h"
+#include <ark-js/shared/stdx/varuint.h>
+#include <ark-js/carbon/bison/bison-media.h>
+#include <ark-js/carbon/bison/bison-field.h>
+#include <ark-js/carbon/bison/bison-string.h>
 
 static void write_payload(struct memfile *file, const char *string)
 {

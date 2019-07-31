@@ -15,7 +15,7 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "core/carbon/archive_strid_iter.h"
+#include <ark-js/carbon/carbon/archive_strid_iter.h>
 
 NG5_EXPORT(bool) strid_iter_open(struct strid_iter *it, struct err *err, struct archive *archive)
 {
