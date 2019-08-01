@@ -11,7 +11,7 @@
 	[array-field, 1B] [keywords\0, 9B] 
 		[doc-size, 4 B]
 			[string-field, 1B] [0\0, 2B] [byte-num, 4B] [time travel\0, 12B]
-			[string-field, 1B] [1\0, 2B] [byte-num, 4B] [deloren\0, 8B]
+			[string-field, 1B] [1\0, 2B] [byte-num, 4B] [delorean\0, 9B]
 			[string-field, 1B] [2\0, 2B] [byte-num, 4B] [comedy\0, 7B]
 		[null, 1 B]
 	[array-field, 1B] [release-dates\0, 9B] 
@@ -29,7 +29,7 @@
 	[null, 1B]
 ```
 
-218 byte
+219 byte
 
 
 ## Comparison to Carbon

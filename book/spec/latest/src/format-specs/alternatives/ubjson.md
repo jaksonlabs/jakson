@@ -15,7 +15,7 @@
    [small-int, 1B] [str-len, 1B][keywords, 8B] 
       [array-begin, 1B] [strong-type-marker, 1B] [string-type, 1B]
          [small-int, 1B] [str-len, 1B][time travel, 11B] 
-         [small-int, 1B] [str-len, 1B][deloren, 7B]       
+         [small-int, 1B] [str-len, 1B][delorean, 8B]       
          [small-int, 1B] [str-len, 1B][comedy, 6B]            
       [array-end, 1B]
    [small-int, 1B] [str-len, 1B][release-dates,13B] 
@@ -32,7 +32,7 @@
 [object-end, 1B]  
 ```
 
-144 byte
+145 byte
 
 ## Comparison to Carbon
 

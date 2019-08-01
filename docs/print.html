@@ -204,7 +204,7 @@
    &quot;imdb-rating&quot;:8.5,
    &quot;keywords&quot;:[
       &quot;time travel&quot;,
-      &quot;deloren&quot;,
+      &quot;delorean&quot;,
       &quot;comedy&quot;
    ],
    &quot;release-dates&quot;:[
@@ -224,7 +224,7 @@
    (str-len, 1B)[keywords, 8B] 
       [array-begin, 1B] 
          [string-field, 1B](str-len, 1B)[time travel, 11B] 
-         [string-field, 1B](str-len, 1B)[deloren, 7B]       
+         [string-field, 1B](str-len, 1B)[delorean, 8B]       
          [string-field, 1B](str-len, 1B)[comedy, 6B]            
       [array-end, 1B]
    (str-len, 1B)[release-dates,13B] 
@@ -240,12 +240,12 @@
          [2016, 1B]
 [object-end, 1B]  
 </code></pre>
-<p>131 byte</p>
+<p>132 byte</p>
 <table><thead><tr><th>Format</th><th>Document Size</th></tr></thead><tbody>
 <tr><td>Plain-Text JSON</td><td>187 byte</td></tr>
-<tr><td>Binary JSON (BSON)</td><td>218 byte</td></tr>
-<tr><td>Universal Binary JSON (UBJSON)</td><td>144 byte</td></tr>
-<tr><td>Columnar Binary JSON (Carbon)</td><td>131 byte</td></tr>
+<tr><td>Binary JSON (BSON)</td><td>219 byte</td></tr>
+<tr><td>Universal Binary JSON (UBJSON)</td><td>145 byte</td></tr>
+<tr><td>Columnar Binary JSON (Carbon)</td><td>132 byte</td></tr>
 </tbody></table>
 <h1><a class="header" href="#binary-json" id="binary-json">Binary JSON</a></h1>
 <h2><a class="header" href="#bson-running-example" id="bson-running-example">BSON Running Example</a></h2>
@@ -257,7 +257,7 @@
 	[array-field, 1B] [keywords\0, 9B] 
 		[doc-size, 4 B]
 			[string-field, 1B] [0\0, 2B] [byte-num, 4B] [time travel\0, 12B]
-			[string-field, 1B] [1\0, 2B] [byte-num, 4B] [deloren\0, 8B]
+			[string-field, 1B] [1\0, 2B] [byte-num, 4B] [delorean\0, 9B]
 			[string-field, 1B] [2\0, 2B] [byte-num, 4B] [comedy\0, 7B]
 		[null, 1 B]
 	[array-field, 1B] [release-dates\0, 9B] 
@@ -274,7 +274,7 @@
 		[null, 1 B]
 	[null, 1B]
 </code></pre>
-<p>218 byte</p>
+<p>219 byte</p>
 <h2><a class="header" href="#comparison-to-carbon" id="comparison-to-carbon">Comparison to Carbon</a></h2>
 <h3><a class="header" href="#design-goals-1" id="design-goals-1">Design Goals</a></h3>
 <h4><a class="header" href="#commonalities" id="commonalities">Commonalities</a></h4>
@@ -294,7 +294,7 @@
    [small-int, 1B] [str-len, 1B][keywords, 8B] 
       [array-begin, 1B] [strong-type-marker, 1B] [string-type, 1B]
          [small-int, 1B] [str-len, 1B][time travel, 11B] 
-         [small-int, 1B] [str-len, 1B][deloren, 7B]       
+         [small-int, 1B] [str-len, 1B][delorean, 8B]       
          [small-int, 1B] [str-len, 1B][comedy, 6B]            
       [array-end, 1B]
    [small-int, 1B] [str-len, 1B][release-dates,13B] 
@@ -310,7 +310,7 @@
          [2016, 1B]
 [object-end, 1B]  
 </code></pre>
-<p>144 byte</p>
+<p>145 byte</p>
 <h2><a class="header" href="#comparison-to-carbon-1" id="comparison-to-carbon-1">Comparison to Carbon</a></h2>
 <h3><a class="header" href="#design-goals-2" id="design-goals-2">Design Goals</a></h3>
 <h4><a class="header" href="#commonalities-2" id="commonalities-2">Commonalities</a></h4>

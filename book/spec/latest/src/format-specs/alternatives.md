@@ -11,7 +11,7 @@ JSON snippet
    "imdb-rating":8.5,
    "keywords":[
       "time travel",
-      "deloren",
+      "delorean",
       "comedy"
    ],
    "release-dates":[
@@ -35,7 +35,7 @@ Carbon `record` for JSON snippet
    (str-len, 1B)[keywords, 8B] 
       [array-begin, 1B] 
          [string-field, 1B](str-len, 1B)[time travel, 11B] 
-         [string-field, 1B](str-len, 1B)[deloren, 7B]       
+         [string-field, 1B](str-len, 1B)[delorean, 8B]       
          [string-field, 1B](str-len, 1B)[comedy, 6B]            
       [array-end, 1B]
    (str-len, 1B)[release-dates,13B] 
@@ -52,11 +52,11 @@ Carbon `record` for JSON snippet
 [object-end, 1B]  
 ```
 
-131 byte
+132 byte
 
 Format                         | Document Size
 -------------------------------|--------------
 Plain-Text JSON                | 187 byte
-Binary JSON (BSON)             | 218 byte
-Universal Binary JSON (UBJSON) | 144 byte
-Columnar Binary JSON (Carbon)  | 131 byte
+Binary JSON (BSON)             | 219 byte
+Universal Binary JSON (UBJSON) | 145 byte
+Columnar Binary JSON (Carbon)  | 132 byte
