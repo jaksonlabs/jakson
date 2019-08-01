@@ -1,6 +1,6 @@
 # Binary JSON
 
-## BISON Running Example
+## BSON Running Example
 
 ```
 [object-size, 4B]
