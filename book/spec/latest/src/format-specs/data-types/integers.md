@@ -42,5 +42,5 @@ JSON snippet
 A (compacted) Carbon `column-8`.
 
 ```
-[C](2)(2) [-42][42][255]
+[C](3)(3) [-42][42][255]
 ```
