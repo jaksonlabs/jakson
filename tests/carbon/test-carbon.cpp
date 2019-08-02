@@ -257,173 +257,132 @@
 //        carbon_drop(&doc);
 //        carbon_drop(&rev_doc);
 //}
-
-TEST(CarbonTest, BisonArrayIteratorInsertMultipleLiteralsAfterNewNoOverflow) {
-        struct carbon doc, rev_doc;
-        struct carbon_revise revise;
-        struct carbon_array_it it;
-        struct carbon_insert inserter;
-
-        carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
-
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
-        carbon_array_it_insert_begin(&inserter, &it);
-        for (i32 i = 0; i < 10; i++) {
-                // fprintf(stdout, "before:\n");
-                //carbon_hexdump_print(stdout, &rev_doc);
-                bool status;
-                if (i % 3 == 0) {
-                        status = carbon_insert_null(&inserter);
-                } else if (i % 3 == 1) {
-                        status = carbon_insert_true(&inserter);
-                } else {
-                        status = carbon_insert_false(&inserter);
-                }
-                ASSERT_TRUE(status);
-                // fprintf(stdout, "after:\n");
-                //carbon_hexdump_print(stdout, &rev_doc);
-                // fprintf(stdout, "\n\n");
-        }
-        carbon_insert_drop(&inserter);
-        carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
-
-        // carbon_print(stdout, &rev_doc);
-        //carbon_hexdump_print(stdout, &rev_doc);
-
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
-}
-
-TEST(CarbonTest, BisonArrayIteratorOverwriteLiterals) {
-        struct carbon doc, rev_doc, rev_doc2;
-        struct carbon_revise revise;
-        struct carbon_array_it it;
-        struct carbon_insert inserter;
-
-        carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
-
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
-        carbon_array_it_insert_begin(&inserter, &it);
-        for (i32 i = 0; i < 3; i++) {
-                if (i % 3 == 0) {
-                        carbon_insert_null(&inserter);
-                } else if (i % 3 == 1) {
-                        carbon_insert_true(&inserter);
-                } else {
-                        carbon_insert_false(&inserter);
-                }
-        }
-        carbon_insert_drop(&inserter);
-        carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
-
-        carbon_revise_begin(&revise, &rev_doc2, &rev_doc);
-        carbon_revise_iterator_open(&it, &revise);
-        carbon_array_it_insert_begin(&inserter, &it);
-        for (i32 i = 0; i < 2; i++) {
-                carbon_insert_true(&inserter);
-        }
-        carbon_insert_drop(&inserter);
-        carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
-
-        // carbon_print(stdout, &rev_doc2);
-
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
-        carbon_drop(&rev_doc2);
-}
-
-TEST(CarbonTest, BisonArrayIteratorOverwriteLiteralsWithDocOverflow) {
-        struct carbon doc, rev_doc, rev_doc2;
-        struct carbon_revise revise;
-        struct carbon_array_it it;
-        struct carbon_insert inserter;
-
-        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
-
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
-        carbon_array_it_insert_begin(&inserter, &it);
-        for (i32 i = 0; i < 22; i++) {
-                if (i % 3 == 0) {
-                        carbon_insert_null(&inserter);
-                } else if (i % 3 == 1) {
-                        carbon_insert_true(&inserter);
-                } else {
-                        carbon_insert_false(&inserter);
-                }
-               // fprintf(stdout, "after initial push:\n");
-               // //carbon_hexdump_print(stdout, &rev_doc);
-        }
-        carbon_insert_drop(&inserter);
-        carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
-
-        carbon_revise_begin(&revise, &rev_doc2, &rev_doc);
-        carbon_revise_iterator_open(&it, &revise);
-        carbon_array_it_insert_begin(&inserter, &it);
-        for (i32 i = 0; i < 2; i++) {
-                // fprintf(stdout, "before:\n");
-                //carbon_hexdump_print(stdout, &rev_doc2);
-                carbon_insert_true(&inserter);
-                // fprintf(stdout, "after:\n");
-                //carbon_hexdump_print(stdout, &rev_doc2);
-        }
-        carbon_insert_drop(&inserter);
-        carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
-        // carbon_print(stdout, &rev_doc2);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
-        carbon_drop(&rev_doc2);
-}
-
-TEST(CarbonTest, BisonArrayIteratorUnsignedAndConstants) {
-        struct carbon doc, rev_doc;
-        struct carbon_revise revise;
-        struct carbon_array_it it;
-        struct carbon_insert inserter;
-
-        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
-
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
-        carbon_array_it_insert_begin(&inserter, &it);
-        for (i32 i = 0; i < 500; i++) {
-                if (i % 6 == 0) {
-                        carbon_insert_null(&inserter);
-                } else if (i % 6 == 1) {
-                        carbon_insert_true(&inserter);
-                } else if (i % 6 == 2) {
-                        carbon_insert_false(&inserter);
-                } else if (i % 6 == 3) {
-                        u64 rand_value = random();
-                        carbon_insert_unsigned(&inserter, rand_value);
-                } else if (i % 6 == 4) {
-                        i64 rand_value = random();
-                        carbon_insert_signed(&inserter, rand_value);
-                } else {
-                        float rand_value = (float)rand()/(float)(RAND_MAX/INT32_MAX);
-                        carbon_insert_float(&inserter, rand_value);
-                }
-                //fprintf(stdout, "after initial push:\n");
-                ////carbon_hexdump_print(stdout, &rev_doc);
-        }
-        carbon_insert_drop(&inserter);
-        carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
-
-        // carbon_print(stdout, &rev_doc);
-
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
-}
-
-//TEST(CarbonTest, BisonArrayIteratorStrings) {
+//
+//TEST(CarbonTest, BisonArrayIteratorInsertMultipleLiteralsAfterNewNoOverflow) {
+//        struct carbon doc, rev_doc;
+//        struct carbon_revise revise;
+//        struct carbon_array_it it;
+//        struct carbon_insert inserter;
+//
+//        carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
+//
+//        carbon_revise_begin(&revise, &rev_doc, &doc);
+//        carbon_revise_iterator_open(&it, &revise);
+//        carbon_array_it_insert_begin(&inserter, &it);
+//        for (i32 i = 0; i < 10; i++) {
+//                // fprintf(stdout, "before:\n");
+//                //carbon_hexdump_print(stdout, &rev_doc);
+//                bool status;
+//                if (i % 3 == 0) {
+//                        status = carbon_insert_null(&inserter);
+//                } else if (i % 3 == 1) {
+//                        status = carbon_insert_true(&inserter);
+//                } else {
+//                        status = carbon_insert_false(&inserter);
+//                }
+//                ASSERT_TRUE(status);
+//                // fprintf(stdout, "after:\n");
+//                //carbon_hexdump_print(stdout, &rev_doc);
+//                // fprintf(stdout, "\n\n");
+//        }
+//        carbon_insert_drop(&inserter);
+//        carbon_array_it_drop(&it);
+//        carbon_revise_end(&revise);
+//
+//        // carbon_print(stdout, &rev_doc);
+//        //carbon_hexdump_print(stdout, &rev_doc);
+//
+//        carbon_drop(&doc);
+//        carbon_drop(&rev_doc);
+//}
+//
+//TEST(CarbonTest, BisonArrayIteratorOverwriteLiterals) {
+//        struct carbon doc, rev_doc, rev_doc2;
+//        struct carbon_revise revise;
+//        struct carbon_array_it it;
+//        struct carbon_insert inserter;
+//
+//        carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
+//
+//        carbon_revise_begin(&revise, &rev_doc, &doc);
+//        carbon_revise_iterator_open(&it, &revise);
+//        carbon_array_it_insert_begin(&inserter, &it);
+//        for (i32 i = 0; i < 3; i++) {
+//                if (i % 3 == 0) {
+//                        carbon_insert_null(&inserter);
+//                } else if (i % 3 == 1) {
+//                        carbon_insert_true(&inserter);
+//                } else {
+//                        carbon_insert_false(&inserter);
+//                }
+//        }
+//        carbon_insert_drop(&inserter);
+//        carbon_array_it_drop(&it);
+//        carbon_revise_end(&revise);
+//
+//        carbon_revise_begin(&revise, &rev_doc2, &rev_doc);
+//        carbon_revise_iterator_open(&it, &revise);
+//        carbon_array_it_insert_begin(&inserter, &it);
+//        for (i32 i = 0; i < 2; i++) {
+//                carbon_insert_true(&inserter);
+//        }
+//        carbon_insert_drop(&inserter);
+//        carbon_array_it_drop(&it);
+//        carbon_revise_end(&revise);
+//
+//        // carbon_print(stdout, &rev_doc2);
+//
+//        carbon_drop(&doc);
+//        carbon_drop(&rev_doc);
+//        carbon_drop(&rev_doc2);
+//}
+//
+//TEST(CarbonTest, BisonArrayIteratorOverwriteLiteralsWithDocOverflow) {
+//        struct carbon doc, rev_doc, rev_doc2;
+//        struct carbon_revise revise;
+//        struct carbon_array_it it;
+//        struct carbon_insert inserter;
+//
+//        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
+//
+//        carbon_revise_begin(&revise, &rev_doc, &doc);
+//        carbon_revise_iterator_open(&it, &revise);
+//        carbon_array_it_insert_begin(&inserter, &it);
+//        for (i32 i = 0; i < 22; i++) {
+//                if (i % 3 == 0) {
+//                        carbon_insert_null(&inserter);
+//                } else if (i % 3 == 1) {
+//                        carbon_insert_true(&inserter);
+//                } else {
+//                        carbon_insert_false(&inserter);
+//                }
+//               // fprintf(stdout, "after initial push:\n");
+//               // //carbon_hexdump_print(stdout, &rev_doc);
+//        }
+//        carbon_insert_drop(&inserter);
+//        carbon_array_it_drop(&it);
+//        carbon_revise_end(&revise);
+//
+//        carbon_revise_begin(&revise, &rev_doc2, &rev_doc);
+//        carbon_revise_iterator_open(&it, &revise);
+//        carbon_array_it_insert_begin(&inserter, &it);
+//        for (i32 i = 0; i < 2; i++) {
+//                // fprintf(stdout, "before:\n");
+//                //carbon_hexdump_print(stdout, &rev_doc2);
+//                carbon_insert_true(&inserter);
+//                // fprintf(stdout, "after:\n");
+//                //carbon_hexdump_print(stdout, &rev_doc2);
+//        }
+//        carbon_insert_drop(&inserter);
+//        carbon_array_it_drop(&it);
+//        carbon_revise_end(&revise);
+//        // carbon_print(stdout, &rev_doc2);
+//        carbon_drop(&doc);
+//        carbon_drop(&rev_doc);
+//        carbon_drop(&rev_doc2);
+//}
+//
+//TEST(CarbonTest, BisonArrayIteratorUnsignedAndConstants) {
 //        struct carbon doc, rev_doc;
 //        struct carbon_revise revise;
 //        struct carbon_array_it it;
@@ -434,16 +393,23 @@ TEST(CarbonTest, BisonArrayIteratorUnsignedAndConstants) {
 //        carbon_revise_begin(&revise, &rev_doc, &doc);
 //        carbon_revise_iterator_open(&it, &revise);
 //        carbon_array_it_insert_begin(&inserter, &it);
-//        for (i32 i = 0; i < 10; i++) {
-//                u64 strlen = rand() % (100 + 1 - 4) + 4;
-//                char buffer[strlen];
-//                for (i32 j = 0; j < strlen; j++) {
-//                        buffer[j] = 65 + (rand() % 25);
+//        for (i32 i = 0; i < 500; i++) {
+//                if (i % 6 == 0) {
+//                        carbon_insert_null(&inserter);
+//                } else if (i % 6 == 1) {
+//                        carbon_insert_true(&inserter);
+//                } else if (i % 6 == 2) {
+//                        carbon_insert_false(&inserter);
+//                } else if (i % 6 == 3) {
+//                        u64 rand_value = random();
+//                        carbon_insert_unsigned(&inserter, rand_value);
+//                } else if (i % 6 == 4) {
+//                        i64 rand_value = random();
+//                        carbon_insert_signed(&inserter, rand_value);
+//                } else {
+//                        float rand_value = (float)rand()/(float)(RAND_MAX/INT32_MAX);
+//                        carbon_insert_float(&inserter, rand_value);
 //                }
-//                buffer[0] = '!';
-//                buffer[strlen - 2] = '!';
-//                buffer[strlen - 1] = '\0';
-//                carbon_insert_string(&inserter, buffer);
 //                //fprintf(stdout, "after initial push:\n");
 //                ////carbon_hexdump_print(stdout, &rev_doc);
 //        }
@@ -457,260 +423,294 @@ TEST(CarbonTest, BisonArrayIteratorUnsignedAndConstants) {
 //        carbon_drop(&rev_doc);
 //}
 //
-//TEST(CarbonTest, BisonInsertMimeTypedBlob) {
-//        struct carbon doc, rev_doc;
-//        struct carbon_revise revise;
-//        struct carbon_array_it it;
-//        struct carbon_insert inserter;
-//
-//        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
-//
-//        carbon_revise_begin(&revise, &rev_doc, &doc);
-//        carbon_revise_iterator_open(&it, &revise);
-//        carbon_array_it_insert_begin(&inserter, &it);
-//        const char *data = "{ \"Message\": \"Hello World\" }";
-//        bool status = carbon_insert_binary(&inserter, data, strlen(data), "json", NULL);
-//        ASSERT_TRUE(status);
-//
-//        carbon_insert_drop(&inserter);
-//        carbon_array_it_drop(&it);
-//        carbon_revise_end(&revise);
-//
-//        // carbon_print(stdout, &rev_doc);
-//
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
-//}
-//
-//TEST(CarbonTest, BisonInsertCustomTypedBlob) {
-//        struct carbon doc, rev_doc;
-//        struct carbon_revise revise;
-//        struct carbon_array_it it;
-//        struct carbon_insert inserter;
-//
-//        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
-//
-//        carbon_revise_begin(&revise, &rev_doc, &doc);
-//        carbon_revise_iterator_open(&it, &revise);
-//        carbon_array_it_insert_begin(&inserter, &it);
-//        const char *data = "{ \"Message\": \"Hello World\" }";
-//        bool status = carbon_insert_binary(&inserter, data, strlen(data), NULL, "my data");
-//        ASSERT_TRUE(status);
-//        ////carbon_hexdump_print(stdout, &rev_doc);
-//        carbon_insert_drop(&inserter);
-//        carbon_array_it_drop(&it);
-//        carbon_revise_end(&revise);
-//
-//        // carbon_print(stdout, &rev_doc);
-//
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
-//}
-//
-//TEST(CarbonTest, BisonInsertTwoMimeTypedBlob) {
-//        struct carbon doc, rev_doc;
-//        struct carbon_revise revise;
-//        struct carbon_array_it it;
-//        struct carbon_insert inserter;
-//
-//        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
-//
-//        carbon_revise_begin(&revise, &rev_doc, &doc);
-//        carbon_revise_iterator_open(&it, &revise);
-//        carbon_array_it_insert_begin(&inserter, &it);
-//        const char *data1 = "{ \"Message\": \"Hello World\" }";
-//        const char *data2 = "{ \"Blog-Header\": \"My Fancy Blog\" }";
-//        bool status = carbon_insert_binary(&inserter, data1, strlen(data1), "json", NULL);
-//        ASSERT_TRUE(status);
-//        status = carbon_insert_binary(&inserter, data2, strlen(data2), "txt", NULL);
-//        ASSERT_TRUE(status);
-//        ////carbon_hexdump_print(stdout, &rev_doc);
-//        carbon_insert_drop(&inserter);
-//        carbon_array_it_drop(&it);
-//        carbon_revise_end(&revise);
-//
-//        // carbon_print(stdout, &rev_doc);
-//
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
-//}
-//
-//TEST(CarbonTest, BisonInsertMimeTypedBlobsWithOverflow) {
-//        struct carbon doc, rev_doc;
-//        struct carbon_revise revise;
-//        struct carbon_array_it it;
-//        struct carbon_insert inserter;
-//
-//        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
-//
-//        carbon_revise_begin(&revise, &rev_doc, &doc);
-//        carbon_revise_iterator_open(&it, &revise);
-//        carbon_array_it_insert_begin(&inserter, &it);
-//        const char *data1 = "{ \"Message\": \"Hello World\" }";
-//        const char *data2 = "{ \"Blog-Header\": \"My Fancy Blog\" }";
-//        for (u32 i = 0; i < 100; i++) {
-//                bool status = carbon_insert_binary(&inserter, i % 2 == 0 ? data1 : data2,
-//                        strlen(i % 2 == 0 ? data1 : data2), "json", NULL);
-//                ASSERT_TRUE(status);
-//        }
-//        //carbon_hexdump_print(stdout, &rev_doc);
-//
-//        carbon_insert_drop(&inserter);
-//        carbon_array_it_drop(&it);
-//        carbon_revise_end(&revise);
-//
-//        // carbon_print(stdout, &rev_doc);
-//
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
-//}
-//
-//TEST(CarbonTest, BisonInsertMixedTypedBlobsWithOverflow) {
-//        struct carbon doc, rev_doc;
-//        struct carbon_revise revise;
-//        struct carbon_array_it it;
-//        struct carbon_insert inserter;
-//
-//        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
-//
-//        carbon_revise_begin(&revise, &rev_doc, &doc);
-//        carbon_revise_iterator_open(&it, &revise);
-//        carbon_array_it_insert_begin(&inserter, &it);
-//        const char *data1 = "{ \"Message\": \"Hello World\" }";
-//        const char *data2 = "{ \"Blog-Header\": \"My Fancy Blog\" }";
-//        for (u32 i = 0; i < 100; i++) {
-//                bool status = carbon_insert_binary(&inserter, i % 2 == 0 ? data1 : data2,
-//                        strlen(i % 2 == 0 ? data1 : data2), i % 3 == 0 ? "json" : NULL, i % 5 == 0 ? "user/app" : NULL);
-//                ASSERT_TRUE(status);
-//        }
-//        ////carbon_hexdump_print(stdout, &rev_doc);
-//        carbon_insert_drop(&inserter);
-//        carbon_array_it_drop(&it);
-//        carbon_revise_end(&revise);
-//
-//        //carbon_print(stdout, &rev_doc);
-//
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
-//}
-//
-//TEST(CarbonTest, BisonInsertArrayWithNoOverflow) {
-//        struct carbon doc, rev_doc;
-//        struct carbon_revise revise;
-//        struct carbon_array_it it;
-//        struct carbon_insert inserter;
-//        struct carbon_insert_array_state array_state;
-//
-//        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
-//
-//        carbon_revise_begin(&revise, &rev_doc, &doc);
-//        carbon_revise_iterator_open(&it, &revise);
-//        carbon_array_it_insert_begin(&inserter, &it);
-//        //carbon_hexdump_print(stdout, &rev_doc);
-//
-//        struct carbon_insert *nested_inserter = carbon_insert_array_begin(&array_state, &inserter, 10);
-//        ASSERT_TRUE(nested_inserter != NULL);
-//        carbon_insert_array_end(&array_state);
-//
-//        //carbon_hexdump_print(stdout, &rev_doc);
-//        carbon_insert_drop(&inserter);
-//        carbon_array_it_drop(&it);
-//        carbon_revise_end(&revise);
-//
-//        //carbon_hexdump_print(stdout, &rev_doc);
-//        // carbon_print(stdout, &rev_doc);
-//
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
-//}
-//
-//TEST(CarbonTest, BisonInsertValuesIntoNestedArrayWithNoOverflow) {
-//        struct carbon doc, rev_doc;
-//        struct carbon_revise revise;
-//        struct carbon_array_it it;
-//        struct carbon_insert inserter;
-//        struct carbon_insert_array_state array_state;
-//
-//        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
-//
-//        carbon_revise_begin(&revise, &rev_doc, &doc);
-//        carbon_revise_iterator_open(&it, &revise);
-//        carbon_array_it_insert_begin(&inserter, &it);
-//
-//        carbon_insert_null(&inserter);
-//        carbon_insert_null(&inserter);
-//        carbon_insert_null(&inserter);
-//
-//        struct carbon_insert *nested_inserter = carbon_insert_array_begin(&array_state, &inserter, 10);
-//        ASSERT_TRUE(nested_inserter != NULL);
-//        carbon_insert_true(nested_inserter);
-//        carbon_insert_true(nested_inserter);
-//        carbon_insert_true(nested_inserter);
-//        carbon_insert_array_end(&array_state);
-//
-//        carbon_insert_false(&inserter);
-//        carbon_insert_false(&inserter);
-//        carbon_insert_false(&inserter);
-//
-//
-//        //carbon_hexdump_print(stdout, &rev_doc);
-//        carbon_insert_drop(&inserter);
-//        carbon_array_it_drop(&it);
-//        carbon_revise_end(&revise);
-//
-//        // carbon_print(stdout, &rev_doc);
-//
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
-//}
-//
-//TEST(CarbonTest, BisonInsert2xNestedArrayWithNoOverflow) {
-//        struct carbon doc, rev_doc;
-//        struct carbon_revise revise;
-//        struct carbon_array_it it;
-//        struct carbon_insert inserter;
-//        struct carbon_insert_array_state array_state_l1, array_state_l2;
-//
-//        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
-//
-//        carbon_revise_begin(&revise, &rev_doc, &doc);
-//        carbon_revise_iterator_open(&it, &revise);
-//        carbon_array_it_insert_begin(&inserter, &it);
-//
-//        carbon_insert_null(&inserter);
-//        carbon_insert_null(&inserter);
-//        carbon_insert_null(&inserter);
-//
-//        struct carbon_insert *nested_inserter_l1 = carbon_insert_array_begin(&array_state_l1, &inserter, 10);
-//        ASSERT_TRUE(nested_inserter_l1 != NULL);
-//        carbon_insert_true(nested_inserter_l1);
-//        carbon_insert_true(nested_inserter_l1);
-//        carbon_insert_true(nested_inserter_l1);
-//
-//        struct carbon_insert *nested_inserter_l2 = carbon_insert_array_begin(&array_state_l2, nested_inserter_l1, 10);
-//        ASSERT_TRUE(nested_inserter_l2 != NULL);
-//        carbon_insert_true(nested_inserter_l2);
-//        carbon_insert_false(nested_inserter_l2);
-//        carbon_insert_null(nested_inserter_l2);
-//        carbon_insert_array_end(&array_state_l2);
-//
-//        carbon_insert_array_end(&array_state_l1);
-//
-//        carbon_insert_false(&inserter);
-//        carbon_insert_false(&inserter);
-//        carbon_insert_false(&inserter);
-//
-//
-//        //carbon_hexdump_print(stdout, &rev_doc);
-//        carbon_insert_drop(&inserter);
-//        carbon_array_it_drop(&it);
-//        carbon_revise_end(&revise);
-//
-//        // carbon_print(stdout, &rev_doc);
-//
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
-//}
+TEST(CarbonTest, BisonArrayIteratorStrings) {
+        struct carbon doc, rev_doc;
+        struct carbon_revise revise;
+        struct carbon_array_it it;
+        struct carbon_insert inserter;
+
+        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
+
+        carbon_revise_begin(&revise, &rev_doc, &doc);
+        carbon_revise_iterator_open(&it, &revise);
+        carbon_array_it_insert_begin(&inserter, &it);
+        for (i32 i = 0; i < 10; i++) {
+                u64 strlen = rand() % (100 + 1 - 4) + 4;
+                char buffer[strlen];
+                for (i32 j = 0; j < strlen; j++) {
+                        buffer[j] = 65 + (rand() % 25);
+                }
+                buffer[0] = '!';
+                buffer[strlen - 2] = '!';
+                buffer[strlen - 1] = '\0';
+                carbon_insert_string(&inserter, buffer);
+                //fprintf(stdout, "after initial push:\n");
+                ////carbon_hexdump_print(stdout, &rev_doc);
+        }
+        carbon_insert_drop(&inserter);
+        carbon_array_it_drop(&it);
+        carbon_revise_end(&revise);
+
+        // carbon_print(stdout, &rev_doc);
+
+        carbon_drop(&doc);
+        carbon_drop(&rev_doc);
+}
+
+TEST(CarbonTest, BisonInsertMimeTypedBlob) {
+        struct carbon doc, rev_doc;
+        struct carbon_revise revise;
+        struct carbon_array_it it;
+        struct carbon_insert inserter;
+
+        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
+
+        carbon_revise_begin(&revise, &rev_doc, &doc);
+        carbon_revise_iterator_open(&it, &revise);
+        carbon_array_it_insert_begin(&inserter, &it);
+        const char *data = "{ \"Message\": \"Hello World\" }";
+        bool status = carbon_insert_binary(&inserter, data, strlen(data), "json", NULL);
+        ASSERT_TRUE(status);
+
+        carbon_insert_drop(&inserter);
+        carbon_array_it_drop(&it);
+        carbon_revise_end(&revise);
+
+        // carbon_print(stdout, &rev_doc);
+
+        carbon_drop(&doc);
+        carbon_drop(&rev_doc);
+}
+
+TEST(CarbonTest, BisonInsertCustomTypedBlob) {
+        struct carbon doc, rev_doc;
+        struct carbon_revise revise;
+        struct carbon_array_it it;
+        struct carbon_insert inserter;
+
+        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
+
+        carbon_revise_begin(&revise, &rev_doc, &doc);
+        carbon_revise_iterator_open(&it, &revise);
+        carbon_array_it_insert_begin(&inserter, &it);
+        const char *data = "{ \"Message\": \"Hello World\" }";
+        bool status = carbon_insert_binary(&inserter, data, strlen(data), NULL, "my data");
+        ASSERT_TRUE(status);
+        ////carbon_hexdump_print(stdout, &rev_doc);
+        carbon_insert_drop(&inserter);
+        carbon_array_it_drop(&it);
+        carbon_revise_end(&revise);
+
+        // carbon_print(stdout, &rev_doc);
+
+        carbon_drop(&doc);
+        carbon_drop(&rev_doc);
+}
+
+TEST(CarbonTest, BisonInsertTwoMimeTypedBlob) {
+        struct carbon doc, rev_doc;
+        struct carbon_revise revise;
+        struct carbon_array_it it;
+        struct carbon_insert inserter;
+
+        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
+
+        carbon_revise_begin(&revise, &rev_doc, &doc);
+        carbon_revise_iterator_open(&it, &revise);
+        carbon_array_it_insert_begin(&inserter, &it);
+        const char *data1 = "{ \"Message\": \"Hello World\" }";
+        const char *data2 = "{ \"Blog-Header\": \"My Fancy Blog\" }";
+        bool status = carbon_insert_binary(&inserter, data1, strlen(data1), "json", NULL);
+        ASSERT_TRUE(status);
+        status = carbon_insert_binary(&inserter, data2, strlen(data2), "txt", NULL);
+        ASSERT_TRUE(status);
+        ////carbon_hexdump_print(stdout, &rev_doc);
+        carbon_insert_drop(&inserter);
+        carbon_array_it_drop(&it);
+        carbon_revise_end(&revise);
+
+        // carbon_print(stdout, &rev_doc);
+
+        carbon_drop(&doc);
+        carbon_drop(&rev_doc);
+}
+
+TEST(CarbonTest, BisonInsertMimeTypedBlobsWithOverflow) {
+        struct carbon doc, rev_doc;
+        struct carbon_revise revise;
+        struct carbon_array_it it;
+        struct carbon_insert inserter;
+
+        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
+
+        carbon_revise_begin(&revise, &rev_doc, &doc);
+        carbon_revise_iterator_open(&it, &revise);
+        carbon_array_it_insert_begin(&inserter, &it);
+        const char *data1 = "{ \"Message\": \"Hello World\" }";
+        const char *data2 = "{ \"Blog-Header\": \"My Fancy Blog\" }";
+        for (u32 i = 0; i < 100; i++) {
+                bool status = carbon_insert_binary(&inserter, i % 2 == 0 ? data1 : data2,
+                        strlen(i % 2 == 0 ? data1 : data2), "json", NULL);
+                ASSERT_TRUE(status);
+        }
+        //carbon_hexdump_print(stdout, &rev_doc);
+
+        carbon_insert_drop(&inserter);
+        carbon_array_it_drop(&it);
+        carbon_revise_end(&revise);
+
+        // carbon_print(stdout, &rev_doc);
+
+        carbon_drop(&doc);
+        carbon_drop(&rev_doc);
+}
+
+TEST(CarbonTest, BisonInsertMixedTypedBlobsWithOverflow) {
+        struct carbon doc, rev_doc;
+        struct carbon_revise revise;
+        struct carbon_array_it it;
+        struct carbon_insert inserter;
+
+        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
+
+        carbon_revise_begin(&revise, &rev_doc, &doc);
+        carbon_revise_iterator_open(&it, &revise);
+        carbon_array_it_insert_begin(&inserter, &it);
+        const char *data1 = "{ \"Message\": \"Hello World\" }";
+        const char *data2 = "{ \"Blog-Header\": \"My Fancy Blog\" }";
+        for (u32 i = 0; i < 100; i++) {
+                bool status = carbon_insert_binary(&inserter, i % 2 == 0 ? data1 : data2,
+                        strlen(i % 2 == 0 ? data1 : data2), i % 3 == 0 ? "json" : NULL, i % 5 == 0 ? "user/app" : NULL);
+                ASSERT_TRUE(status);
+        }
+        ////carbon_hexdump_print(stdout, &rev_doc);
+        carbon_insert_drop(&inserter);
+        carbon_array_it_drop(&it);
+        carbon_revise_end(&revise);
+
+        //carbon_print(stdout, &rev_doc);
+
+        carbon_drop(&doc);
+        carbon_drop(&rev_doc);
+}
+
+TEST(CarbonTest, BisonInsertArrayWithNoOverflow) {
+        struct carbon doc, rev_doc;
+        struct carbon_revise revise;
+        struct carbon_array_it it;
+        struct carbon_insert inserter;
+        struct carbon_insert_array_state array_state;
+
+        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
+
+        carbon_revise_begin(&revise, &rev_doc, &doc);
+        carbon_revise_iterator_open(&it, &revise);
+        carbon_array_it_insert_begin(&inserter, &it);
+        //carbon_hexdump_print(stdout, &rev_doc);
+
+        struct carbon_insert *nested_inserter = carbon_insert_array_begin(&array_state, &inserter, 10);
+        ASSERT_TRUE(nested_inserter != NULL);
+        carbon_insert_array_end(&array_state);
+
+        //carbon_hexdump_print(stdout, &rev_doc);
+        carbon_insert_drop(&inserter);
+        carbon_array_it_drop(&it);
+        carbon_revise_end(&revise);
+
+        //carbon_hexdump_print(stdout, &rev_doc);
+        // carbon_print(stdout, &rev_doc);
+
+        carbon_drop(&doc);
+        carbon_drop(&rev_doc);
+}
+
+TEST(CarbonTest, BisonInsertValuesIntoNestedArrayWithNoOverflow) {
+        struct carbon doc, rev_doc;
+        struct carbon_revise revise;
+        struct carbon_array_it it;
+        struct carbon_insert inserter;
+        struct carbon_insert_array_state array_state;
+
+        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
+
+        carbon_revise_begin(&revise, &rev_doc, &doc);
+        carbon_revise_iterator_open(&it, &revise);
+        carbon_array_it_insert_begin(&inserter, &it);
+
+        carbon_insert_null(&inserter);
+        carbon_insert_null(&inserter);
+        carbon_insert_null(&inserter);
+
+        struct carbon_insert *nested_inserter = carbon_insert_array_begin(&array_state, &inserter, 10);
+        ASSERT_TRUE(nested_inserter != NULL);
+        carbon_insert_true(nested_inserter);
+        carbon_insert_true(nested_inserter);
+        carbon_insert_true(nested_inserter);
+        carbon_insert_array_end(&array_state);
+
+        carbon_insert_false(&inserter);
+        carbon_insert_false(&inserter);
+        carbon_insert_false(&inserter);
+
+
+        //carbon_hexdump_print(stdout, &rev_doc);
+        carbon_insert_drop(&inserter);
+        carbon_array_it_drop(&it);
+        carbon_revise_end(&revise);
+
+        // carbon_print(stdout, &rev_doc);
+
+        carbon_drop(&doc);
+        carbon_drop(&rev_doc);
+}
+
+TEST(CarbonTest, BisonInsert2xNestedArrayWithNoOverflow) {
+        struct carbon doc, rev_doc;
+        struct carbon_revise revise;
+        struct carbon_array_it it;
+        struct carbon_insert inserter;
+        struct carbon_insert_array_state array_state_l1, array_state_l2;
+
+        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
+
+        carbon_revise_begin(&revise, &rev_doc, &doc);
+        carbon_revise_iterator_open(&it, &revise);
+        carbon_array_it_insert_begin(&inserter, &it);
+
+        carbon_insert_null(&inserter);
+        carbon_insert_null(&inserter);
+        carbon_insert_null(&inserter);
+
+        struct carbon_insert *nested_inserter_l1 = carbon_insert_array_begin(&array_state_l1, &inserter, 10);
+        ASSERT_TRUE(nested_inserter_l1 != NULL);
+        carbon_insert_true(nested_inserter_l1);
+        carbon_insert_true(nested_inserter_l1);
+        carbon_insert_true(nested_inserter_l1);
+
+        struct carbon_insert *nested_inserter_l2 = carbon_insert_array_begin(&array_state_l2, nested_inserter_l1, 10);
+        ASSERT_TRUE(nested_inserter_l2 != NULL);
+        carbon_insert_true(nested_inserter_l2);
+        carbon_insert_false(nested_inserter_l2);
+        carbon_insert_null(nested_inserter_l2);
+        carbon_insert_array_end(&array_state_l2);
+
+        carbon_insert_array_end(&array_state_l1);
+
+        carbon_insert_false(&inserter);
+        carbon_insert_false(&inserter);
+        carbon_insert_false(&inserter);
+
+
+        //carbon_hexdump_print(stdout, &rev_doc);
+        carbon_insert_drop(&inserter);
+        carbon_array_it_drop(&it);
+        carbon_revise_end(&revise);
+
+        // carbon_print(stdout, &rev_doc);
+
+        carbon_drop(&doc);
+        carbon_drop(&rev_doc);
+}
 //
 //TEST(CarbonTest, BisonInsertXxNestedArrayWithoutOverflow) {
 //        struct carbon doc, rev_doc;
