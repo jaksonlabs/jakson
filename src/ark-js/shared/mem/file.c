@@ -44,7 +44,7 @@ ARK_EXPORT(bool) memfile_dup(struct memfile *dst, struct memfile *src)
 bool memfile_seek(struct memfile *file, offset_t pos)
 {
         error_if_null(file)
-        offset_t file_size;
+        offset_t file_size = 0;
         memblock_size(&file_size, file->memblock);
         if (unlikely(pos >= file_size)) {
                 if (file->mode == READ_WRITE) {
