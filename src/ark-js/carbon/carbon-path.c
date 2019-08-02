@@ -238,6 +238,7 @@ static inline enum carbon_path_status traverse_array(struct carbon_path_evaluato
                                         carbon_dot_path_type_at(&next_node_type, next_path_pos, path);
                                         if (!carbon_field_type_is_traversable(elem_type)) {
                                                 /* the array element is not a container; path evaluation stops here */
+                                                carbon_array_it_drop(it);
                                                 return carbon_PATH_NOTTRAVERSABLE;
                                         } else {
                                                 /* array element is traversable */
@@ -256,6 +257,7 @@ static inline enum carbon_path_status traverse_array(struct carbon_path_evaluato
                                                                 elem_type != CARBON_FIELD_TYPE_COLUMN_I64 &&
                                                                 elem_type != CARBON_FIELD_TYPE_COLUMN_FLOAT &&
                                                                 elem_type != CARBON_FIELD_TYPE_COLUMN_BOOLEAN) {
+                                                                carbon_array_it_drop(it);
                                                                 return carbon_PATH_NOCONTAINER;
                                                         } else {
                                                                 if (elem_type == CARBON_FIELD_TYPE_ARRAY) {
@@ -291,7 +293,6 @@ static inline enum carbon_path_status traverse_array(struct carbon_path_evaluato
                                                         return carbon_PATH_INTERNAL;
                                                 }
                                         }
-                                        carbon_array_it_drop(it);
                                 } else {
                                         /* path end is reached */
                                         state->result.container_type = CARBON_ARRAY;
