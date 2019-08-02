@@ -237,7 +237,9 @@ bool json_parse(struct json *json, struct json_err *error_desc, struct json_pars
         struct vector ofType(enum json_token_type) brackets;
         struct vector ofType(struct json_token) token_stream;
 
-        struct json retval = {.element = ark_malloc(sizeof(struct json_element))};
+        struct json retval;
+        ark_zero_memory(&retval, sizeof(struct json))
+        retval.element = ark_malloc(sizeof(struct json_element));
         error_init(&retval.err);
         const struct json_token *token;
         int status;
