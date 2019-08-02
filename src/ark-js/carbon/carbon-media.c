@@ -50,7 +50,7 @@ ARK_EXPORT(u32) carbon_media_mime_type_by_ext(const char *ext)
 {
         u32 id;
         if (likely(ext != NULL)) {
-                if (likely((id = find_mime_by_ext(ext)) < _nmime_type_register)) {
+                if (likely( (id = find_mime_by_ext(ext)) < (u32) _nmime_type_register)) {
                         return id;
                 }
         }
