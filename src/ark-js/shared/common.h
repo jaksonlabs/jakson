@@ -27,6 +27,8 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <assert.h>
+#include <assert.h>
+#include <inttypes.h>
 
 #ifdef __cplusplus
 #define ARK_BEGIN_DECL  extern "C" {

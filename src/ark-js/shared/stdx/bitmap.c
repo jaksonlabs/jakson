@@ -15,8 +15,6 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <math.h>
-#include <lzma.h>
 #include <ark-js/shared/stdx/bitmap.h>
 
 ARK_EXPORT(bool) bitmap_create(struct bitmap *bitmap, u16 num_bits)
