@@ -263,7 +263,6 @@ static inline enum carbon_path_status traverse_array(struct carbon_path_evaluato
                                                                 if (elem_type == CARBON_FIELD_TYPE_ARRAY) {
                                                                         struct carbon_array_it *sub_it = carbon_array_it_array_value(it);
                                                                         status = traverse_array(state, path, next_path_pos, sub_it);
-                                                                        carbon_array_it_drop(sub_it);   // TODO: Debug mem?
                                                                         return status;
                                                                 } else {
                                                                         assert(elem_type == CARBON_FIELD_TYPE_COLUMN_U8 ||
@@ -284,13 +283,16 @@ static inline enum carbon_path_status traverse_array(struct carbon_path_evaluato
                                                         /* next node in path is a key name which requires that
                                                          * the current array element is of type object */
                                                         if (elem_type != CARBON_FIELD_TYPE_OBJECT) {
+                                                                carbon_array_it_drop(it);   // TODO: Debug mem?
                                                                 return carbon_PATH_NOTANOBJECT;
                                                         } else {
                                                                 error_print_and_die_if(true, ARK_ERR_NOTIMPLEMENTED) /* TODO: implement for objects */
+                                                                carbon_array_it_drop(it);   // TODO: Debug mem?
                                                                 return carbon_PATH_INTERNAL;
                                                         }
                                                 default:
                                                 error_print(ARK_ERR_INTERNALERR);
+                                                        carbon_array_it_drop(it);   // TODO: Debug mem?
                                                         return carbon_PATH_INTERNAL;
                                                 }
                                         }
@@ -307,14 +309,17 @@ static inline enum carbon_path_status traverse_array(struct carbon_path_evaluato
                         if (elem_type != CARBON_FIELD_TYPE_OBJECT) {
                                 /* first array element is not of type object and a key lookup cannot
                                  * be executed, consequentially */
+                                carbon_array_it_drop(it);   // TODO: Debug mem?
                                 return carbon_PATH_NOTANOBJECT;
                         } else {
                                 error_print_and_die_if(true, ARK_ERR_NOTIMPLEMENTED) /* TODO: implement for objects */
+                                carbon_array_it_drop(it);   // TODO: Debug mem?
                                 return carbon_PATH_INTERNAL;
                         }
                         break;
                 default:
-                error(&((struct carbon_dot_path *)path)->err, ARK_ERR_INTERNALERR);
+                        error(&((struct carbon_dot_path *)path)->err, ARK_ERR_INTERNALERR);
+                        carbon_array_it_drop(it);   // TODO: Debug mem?
                         return  carbon_PATH_INTERNAL;
                 }
         }
