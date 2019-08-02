@@ -1801,16 +1801,16 @@ TEST(CarbonTest, BisonFindTypes) {
                 carbon_find_close(&finder);
         }
 
-//        {
-//                carbon_find_open(&finder, "1", &rev_doc);
-//                ASSERT_TRUE(carbon_find_has_result(&finder));
-//                carbon_find_result_type(&type, &finder);
-//                ASSERT_EQ(type, CARBON_FIELD_TYPE_ARRAY);
-//                struct carbon_array_it *retval = carbon_find_result_array(&finder);
-//                ASSERT_TRUE(retval != NULL);
-//                carbon_find_close(&finder);
-//        }
-//
+        {
+                carbon_find_open(&finder, "1", &rev_doc);
+                ASSERT_TRUE(carbon_find_has_result(&finder));
+                carbon_find_result_type(&type, &finder);
+                ASSERT_EQ(type, CARBON_FIELD_TYPE_ARRAY);
+                struct carbon_array_it *retval = carbon_find_result_array(&finder);
+                ASSERT_TRUE(retval != NULL);
+                carbon_find_close(&finder);
+        }
+
 //        {
 //                carbon_find_open(&finder, "1.0", &rev_doc);
 //                ASSERT_TRUE(carbon_find_has_result(&finder));
