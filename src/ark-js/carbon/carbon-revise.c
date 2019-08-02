@@ -33,22 +33,6 @@ static bool carbon_header_rev_inc(struct carbon *doc);
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-#define event_promote(doc, event, ...)                                                                                 \
-for (u32 i = 0; i < doc->handler.num_elems; i++) {                                                                     \
-        struct carbon_handler *handler = vec_get(&doc->handler, i, struct carbon_handler);                               \
-        assert(handler);                                                                                               \
-        if (handler->in_use && handler->listener.event) {                                                              \
-        handler->listener.event(&handler->listener, __VA_ARGS__);                                                      \
-        }                                                                                                              \
-}
-
-#define fire_revision_begin(doc)                      event_promote(doc, on_revision_begin, doc);
-#define fire_revision_end(doc)                        event_promote(doc, on_revision_end, doc);
-#define fire_revision_abort(doc)                      event_promote(doc, on_revision_abort, doc);
-#define fire_new_revision(revised, original)          event_promote(original, on_new_revision, revised, original);
-
-// ---------------------------------------------------------------------------------------------------------------------
-
 ARK_EXPORT(bool) carbon_revise_try_begin(struct carbon_revise *context, struct carbon *revised_doc, struct carbon *doc)
 {
         error_if_null(context)
@@ -72,7 +56,6 @@ ARK_EXPORT(bool) carbon_revise_begin(struct carbon_revise *context, struct carbo
                 context->revised_doc = revised_doc;
                 error_init(&context->err);
                 carbon_clone(context->revised_doc, context->original);
-                fire_revision_begin(original);
                 return true;
         } else {
                 error(&original->err, ARK_ERR_OUTDATED)
@@ -289,9 +272,6 @@ ARK_EXPORT(const struct carbon *) carbon_revise_end(struct carbon_revise *contex
                 context->original->versioning.is_latest = false;
                 context->original->versioning.revision_lock = false;
 
-                fire_new_revision(context->revised_doc, context->original);
-                fire_revision_end(context->original);
-
                 spin_release(&context->original->versioning.write_lock);
 
                 return context->revised_doc;
@@ -308,8 +288,6 @@ ARK_EXPORT(bool) carbon_revise_abort(struct carbon_revise *context)
         carbon_drop(context->revised_doc);
         context->original->versioning.is_latest = true;
         context->original->versioning.revision_lock = false;
-        fire_revision_abort(context->original);
-        fire_revision_end(context->original);
         spin_release(&context->original->versioning.write_lock);
 
         return true;

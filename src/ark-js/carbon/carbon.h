@@ -73,32 +73,12 @@ struct carbon; /* forwarded */
 struct carbon_array_it; /* forwarded from carbon-array-it.h */
 struct carbon_find; /* forward from carbon-find.h */
 
-struct carbon_event_listener
-{
-        void *extra;
-        void (*clone)(struct carbon_event_listener *dst, struct carbon_event_listener *self);
-        void (*drop)(struct carbon_event_listener *self);
-
-        void (*on_revision_begin)(struct carbon_event_listener *self, struct carbon *doc);
-        void (*on_revision_end)(struct carbon_event_listener *self, struct carbon *doc);
-        void (*on_revision_abort)(struct carbon_event_listener *self, struct carbon *doc);
-        void (*on_new_revision)(struct carbon_event_listener *self, struct carbon *revised, struct carbon *original);
-};
-
-struct carbon_handler
-{
-        bool in_use;
-        struct carbon_event_listener listener;
-};
-
 typedef u32 listener_handle_t;
 
 struct carbon
 {
         struct memblock *memblock;
         struct memfile memfile;
-
-        struct vector ofType(struct carbon_handler) handler;
 
         struct
         {
@@ -265,10 +245,6 @@ ARK_EXPORT(bool) carbon_key_is_unsigned_type(enum carbon_primary_key_type type);
 ARK_EXPORT(bool) carbon_key_is_signed_type(enum carbon_primary_key_type type);
 
 ARK_EXPORT(bool) carbon_key_is_string_type(enum carbon_primary_key_type type);
-
-ARK_EXPORT(bool) carbon_register_listener(listener_handle_t *handle, struct carbon_event_listener *listener, struct carbon *doc);
-
-ARK_EXPORT(bool) carbon_unregister_listener(struct carbon *doc, listener_handle_t handle);
 
 ARK_EXPORT(bool) carbon_clone(struct carbon *clone, struct carbon *doc);
 
