@@ -1830,15 +1830,15 @@ TEST(CarbonTest, BisonFindTypes) {
                 carbon_find_close(&finder);
         }
 
-//        {
-//                carbon_find_open(&finder, "1.0.0", &rev_doc);
-//                ASSERT_TRUE(carbon_find_has_result(&finder));
-//                carbon_find_result_type(&type, &finder);
-//                ASSERT_EQ(type, CARBON_FIELD_TYPE_COLUMN_U32);
-//                carbon_find_result_unsigned(&result_unsigned, &finder);
-//                ASSERT_EQ(result_unsigned, 88);
-//                carbon_find_close(&finder);
-//        }
+        {
+                carbon_find_open(&finder, "1.0.0", &rev_doc);
+                ASSERT_TRUE(carbon_find_has_result(&finder));
+                carbon_find_result_type(&type, &finder);
+                ASSERT_EQ(type, CARBON_FIELD_TYPE_COLUMN_U32);
+                carbon_find_result_unsigned(&result_unsigned, &finder);
+                ASSERT_EQ(result_unsigned, 88);
+                carbon_find_close(&finder);
+        }
 //
 //        {
 //                carbon_find_open(&finder, "1.0.1", &rev_doc);
