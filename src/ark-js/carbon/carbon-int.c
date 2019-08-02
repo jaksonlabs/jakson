@@ -77,34 +77,34 @@ ARK_EXPORT(bool) carbon_int_insert_column(struct memfile *memfile_in, struct err
         enum carbon_field_type column_type;
 
         switch (type) {
-        case carbon_COLUMN_TYPE_BOOLEAN:
+        case CARBON_COLUMN_TYPE_BOOLEAN:
                 column_type = CARBON_FIELD_TYPE_COLUMN_BOOLEAN;
                 break;
-        case carbon_COLUMN_TYPE_U8:
+        case CARBON_COLUMN_TYPE_U8:
                 column_type = CARBON_FIELD_TYPE_COLUMN_U8;
                 break;
-        case carbon_COLUMN_TYPE_U16:
+        case CARBON_COLUMN_TYPE_U16:
                 column_type = CARBON_FIELD_TYPE_COLUMN_U16;
                 break;
-        case carbon_COLUMN_TYPE_U32:
+        case CARBON_COLUMN_TYPE_U32:
                 column_type = CARBON_FIELD_TYPE_COLUMN_U32;
                 break;
-        case carbon_COLUMN_TYPE_U64:
+        case CARBON_COLUMN_TYPE_U64:
                 column_type = CARBON_FIELD_TYPE_COLUMN_U64;
                 break;
-        case carbon_COLUMN_TYPE_I8:
+        case CARBON_COLUMN_TYPE_I8:
                 column_type = CARBON_FIELD_TYPE_COLUMN_I8;
                 break;
-        case carbon_COLUMN_TYPE_I16:
+        case CARBON_COLUMN_TYPE_I16:
                 column_type = CARBON_FIELD_TYPE_COLUMN_I16;
                 break;
-        case carbon_COLUMN_TYPE_I32:
+        case CARBON_COLUMN_TYPE_I32:
                 column_type = CARBON_FIELD_TYPE_COLUMN_I32;
                 break;
-        case carbon_COLUMN_TYPE_I64:
+        case CARBON_COLUMN_TYPE_I64:
                 column_type = CARBON_FIELD_TYPE_COLUMN_I64;
                 break;
-        case carbon_COLUMN_TYPE_FLOAT:
+        case CARBON_COLUMN_TYPE_FLOAT:
                 column_type = CARBON_FIELD_TYPE_COLUMN_FLOAT;
                 break;
         default:

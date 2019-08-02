@@ -128,6 +128,7 @@ ARK_EXPORT(bool) carbon_create_end(struct carbon_new *context)
                 success &= carbon_revise_end(&context->revision_context) != NULL;
                 free (context->content_it);
                 free (context->inserter);
+                carbon_drop(&context->original);
                 if (unlikely(!success)) {
                         error(&context->err, ARK_ERR_CLEANUP);
                         return false;

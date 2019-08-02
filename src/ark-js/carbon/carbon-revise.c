@@ -496,7 +496,8 @@ static bool internal_pack_object(struct carbon_object_it *it)
                         case CARBON_FIELD_TYPE_COLUMN_BOOLEAN:
                                 carbon_column_it_rewind(it->field_access.nested_column_it);
                                 internal_pack_column(it->field_access.nested_column_it);
-                                memfile_seek(&it->memfile, memfile_tell(&it->field_access.nested_column_it->memfile) - sizeof(u8));
+                                memfile_seek(&it->memfile, memfile_tell(&it->field_access.nested_column_it->memfile));
+                                memfile_hexdump_printf(stderr, &it->memfile); // TODO: Debug remove
                                 break;
                         case CARBON_FIELD_TYPE_OBJECT: {
                                 struct carbon_object_it nested_object_it;
@@ -527,19 +528,18 @@ static bool internal_pack_column(struct carbon_column_it *it)
         u32 free_space = (it->column_capacity - it->column_num_elements) * carbon_int_get_type_value_size(it->type);
         if (free_space > 0) {
                 offset_t payload_start = carbon_int_column_get_payload_off(it);
+                u64 payload_size = it->column_num_elements * carbon_int_get_type_value_size(it->type);
 
                 memfile_seek(&it->memfile, payload_start);
-                memfile_skip(&it->memfile, it->column_num_elements * carbon_int_get_type_value_size(it->type));
+                memfile_skip(&it->memfile, payload_size);
 
                 memfile_inplace_remove(&it->memfile, free_space);
-
-                offset_t continue_off = memfile_tell(&it->memfile);
 
                 memfile_seek(&it->memfile, it->num_and_capacity_start_offset);
                 memfile_skip_varuint(&it->memfile); // skip num of elements counter
                 memfile_update_varuint(&it->memfile, it->column_num_elements); // update capacity counter to num elems
 
-                memfile_seek(&it->memfile, continue_off);
+                memfile_skip(&it->memfile, payload_size);
 
                 return true;
         } else {

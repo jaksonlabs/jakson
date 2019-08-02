@@ -31,6 +31,8 @@ ARK_EXPORT(bool) carbon_object_it_create(struct carbon_object_it *it, struct mem
 
         it->payload_start = payload_start;
         it->mod_size = 0;
+        it->object_end_reached = false;
+
         spin_init(&it->lock);
         error_init(&it->err);
 
@@ -96,6 +98,7 @@ ARK_EXPORT(bool) carbon_object_it_next(struct carbon_object_it *it)
                         }
                 }
 
+                memfile_hexdump_printf(stderr, &it->memfile); // TODO: Debug Remove
                 assert(*memfile_peek(&it->memfile, sizeof(char)) == CARBON_MARKER_OBJECT_END);
                 return false;
         }

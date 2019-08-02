@@ -62,13 +62,13 @@ static bool update_in_place_constant(struct carbon_array_it *it, enum carbon_con
         if (carbon_field_type_is_constant(it->field_access.it_field_type)) {
                 u8 value;
                 switch (constant) {
-                case carbon_CONSTANT_TRUE:
+                case CARBON_CONSTANT_TRUE:
                         value = CARBON_FIELD_TYPE_TRUE;
                         break;
-                case carbon_CONSTANT_FALSE:
+                case CARBON_CONSTANT_FALSE:
                         value = CARBON_FIELD_TYPE_FALSE;
                         break;
-                case carbon_CONSTANT_NULL:
+                case CARBON_CONSTANT_NULL:
                         value = CARBON_FIELD_TYPE_NULL;
                         break;
                 default:
@@ -85,13 +85,13 @@ static bool update_in_place_constant(struct carbon_array_it *it, enum carbon_con
                 carbon_array_it_insert_begin(&ins, it);
 
                 switch (constant) {
-                case carbon_CONSTANT_TRUE:
+                case CARBON_CONSTANT_TRUE:
                         carbon_insert_true(&ins);
                         break;
-                case carbon_CONSTANT_FALSE:
+                case CARBON_CONSTANT_FALSE:
                         carbon_insert_false(&ins);
                         break;
-                case carbon_CONSTANT_NULL:
+                case CARBON_CONSTANT_NULL:
                         carbon_insert_null(&ins);
                         break;
                 default:
@@ -108,17 +108,17 @@ static bool update_in_place_constant(struct carbon_array_it *it, enum carbon_con
 
 ARK_EXPORT(bool) carbon_array_it_update_in_place_true(struct carbon_array_it *it)
 {
-        return update_in_place_constant(it, carbon_CONSTANT_TRUE);
+        return update_in_place_constant(it, CARBON_CONSTANT_TRUE);
 }
 
 ARK_EXPORT(bool) carbon_array_it_update_in_place_false(struct carbon_array_it *it)
 {
-        return update_in_place_constant(it, carbon_CONSTANT_FALSE);
+        return update_in_place_constant(it, CARBON_CONSTANT_FALSE);
 }
 
 ARK_EXPORT(bool) carbon_array_it_update_in_place_null(struct carbon_array_it *it)
 {
-        return update_in_place_constant(it, carbon_CONSTANT_NULL);
+        return update_in_place_constant(it, CARBON_CONSTANT_NULL);
 }
 
 ARK_EXPORT(bool) carbon_array_it_create(struct carbon_array_it *it, struct memfile *memfile, struct err *err,
@@ -130,6 +130,7 @@ ARK_EXPORT(bool) carbon_array_it_create(struct carbon_array_it *it, struct memfi
 
         it->payload_start = payload_start;
         it->mod_size = 0;
+        it->array_end_reached = false;
 
         error_init(&it->err);
         spin_init(&it->lock);

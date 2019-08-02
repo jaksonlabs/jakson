@@ -64,32 +64,32 @@ enum carbon_field_type
 
 enum carbon_column_type
 {
-        carbon_COLUMN_TYPE_U8,
-        carbon_COLUMN_TYPE_U16,
-        carbon_COLUMN_TYPE_U32,
-        carbon_COLUMN_TYPE_U64,
-        carbon_COLUMN_TYPE_I8,
-        carbon_COLUMN_TYPE_I16,
-        carbon_COLUMN_TYPE_I32,
-        carbon_COLUMN_TYPE_I64,
-        carbon_COLUMN_TYPE_FLOAT,
-        carbon_COLUMN_TYPE_BOOLEAN
+        CARBON_COLUMN_TYPE_U8,
+        CARBON_COLUMN_TYPE_U16,
+        CARBON_COLUMN_TYPE_U32,
+        CARBON_COLUMN_TYPE_U64,
+        CARBON_COLUMN_TYPE_I8,
+        CARBON_COLUMN_TYPE_I16,
+        CARBON_COLUMN_TYPE_I32,
+        CARBON_COLUMN_TYPE_I64,
+        CARBON_COLUMN_TYPE_FLOAT,
+        CARBON_COLUMN_TYPE_BOOLEAN
 };
 
 enum carbon_field_class
 {
-        carbon_FIELD_CLASS_CONSTANT,
-        carbon_FIELD_CLASS_NUMBER,
-        carbon_FIELD_CLASS_CHARACTER_STRING,
-        carbon_FIELD_CLASS_BINARY_STRING,
-        carbon_FIELD_CLASS_CONTAINER
+        CARBON_FIELD_CLASS_CONSTANT,
+        CARBON_FIELD_CLASS_NUMBER,
+        CARBON_FIELD_CLASS_CHARACTER_STRING,
+        CARBON_FIELD_CLASS_BINARY_STRING,
+        CARBON_FIELD_CLASS_CONTAINER
 };
 
 enum carbon_constant
 {
-        carbon_CONSTANT_TRUE,
-        carbon_CONSTANT_FALSE,
-        carbon_CONSTANT_NULL
+        CARBON_CONSTANT_TRUE,
+        CARBON_CONSTANT_FALSE,
+        CARBON_CONSTANT_NULL
 };
 
 #define CARBON_FIELD_TYPE_NULL_STR "null"

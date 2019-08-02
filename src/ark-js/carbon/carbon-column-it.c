@@ -39,6 +39,7 @@ ARK_EXPORT(bool) carbon_column_it_create(struct carbon_column_it *it, struct mem
 
         it->column_start_offset = column_start_offset;
         it->mod_size = 0;
+
         error_init(&it->err);
         spin_init(&it->lock);
         memfile_open(&it->memfile, memfile->memblock, memfile->mode);

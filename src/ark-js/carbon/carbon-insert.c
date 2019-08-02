@@ -577,6 +577,8 @@ ARK_EXPORT(bool) carbon_insert_column_end(struct carbon_insert_column_state *sta
 
 static void inserter_refresh_mod_size(struct carbon_insert *inserter, i64 mod_size)
 {
+        assert(mod_size > 0);
+
         i64 *target = NULL;
         switch (inserter->context_type) {
         case CARBON_OBJECT:
