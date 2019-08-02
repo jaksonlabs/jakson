@@ -72,7 +72,7 @@ ARK_EXPORT(bool) hashset_drop(struct hashset *map)
 ARK_EXPORT(struct vector *)hashset_keys(struct hashset *map)
 {
         if (map) {
-                struct vector *result = malloc(sizeof(struct vector));
+                struct vector *result = ark_malloc(sizeof(struct vector));
                 vec_create(result, NULL, map->key_data.elem_size, map->key_data.num_elems);
                 for (u32 i = 0; i < map->table.num_elems; i++) {
                         struct hashset_bucket *bucket = vec_get(&map->table, i, struct hashset_bucket);
@@ -90,7 +90,7 @@ ARK_EXPORT(struct vector *)hashset_keys(struct hashset *map)
 ARK_EXPORT(struct hashset *)hashset_cpy(struct hashset *src)
 {
         if (src) {
-                struct hashset *cpy = malloc(sizeof(struct hashset));
+                struct hashset *cpy = ark_malloc(sizeof(struct hashset));
 
                 hashset_lock(src);
 
@@ -259,7 +259,7 @@ ARK_EXPORT(bool) hashset_insert_or_update(struct hashset *map, const void *keys,
 
         hashset_lock(map);
 
-        u32 *bucket_idxs = malloc(num_pairs * sizeof(u32));
+        u32 *bucket_idxs = ark_malloc(num_pairs * sizeof(u32));
         if (!bucket_idxs) {
                 error(&map->err, ARK_ERR_MALLOCERR);
                 return false;
@@ -300,7 +300,7 @@ ARK_EXPORT(bool) hashset_remove_if_contained(struct hashset *map, const void *ke
 
         hashset_lock(map);
 
-        u32 *bucket_idxs = malloc(num_pairs * sizeof(u32));
+        u32 *bucket_idxs = ark_malloc(num_pairs * sizeof(u32));
         if (!bucket_idxs) {
                 error(&map->err, ARK_ERR_MALLOCERR);
                 hashset_unlock(map);

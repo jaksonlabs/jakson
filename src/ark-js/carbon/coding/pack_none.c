@@ -88,7 +88,7 @@ ARK_EXPORT(bool) pack_none_print_encoded_string(struct packer *self, FILE *file,
 
         const char *string = ARK_MEMFILE_READ(src, decompressed_strlen);
 
-        char *printableString = malloc(decompressed_strlen + 1);
+        char *printableString = ark_malloc(decompressed_strlen + 1);
         memcpy(printableString, string, decompressed_strlen);
         printableString[decompressed_strlen] = '\0';
 

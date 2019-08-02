@@ -26,7 +26,7 @@ static inline void __execute_task();
 
 ARK_EXPORT(struct thread_pool *) thread_pool_create(size_t num_threads, int enable_monitoring)
 {
-        struct thread_pool *pool = malloc(sizeof(struct thread_pool));
+        struct thread_pool *pool = ark_malloc(sizeof(struct thread_pool));
 
         pool->name = NULL;
         pool->size = num_threads;
@@ -39,7 +39,7 @@ ARK_EXPORT(struct thread_pool *) thread_pool_create(size_t num_threads, int enab
         pool->task_group_states = calloc(pool->task_state_capacity, sizeof(struct task_state));
         pool->enable_monitoring = enable_monitoring;
 
-        pthread_t *threads = malloc(sizeof(pthread_t) * pool->capacity);
+        pthread_t *threads = ark_malloc(sizeof(pthread_t) * pool->capacity);
         pool->pool = threads;
 
         if (enable_monitoring) {
@@ -48,7 +48,7 @@ ARK_EXPORT(struct thread_pool *) thread_pool_create(size_t num_threads, int enab
 
         for (size_t i = 0; i < pool->capacity; i++) {
                 // one block per thread to reduce risk of two threads sharing the same cache line
-                struct thread_info *thread_info = malloc(sizeof(struct thread_info));
+                struct thread_info *thread_info = ark_malloc(sizeof(struct thread_info));
                 pool->thread_infos[i] = thread_info;
                 thread_info->pool = pool;
                 thread_info->id = i;
@@ -122,7 +122,7 @@ ARK_EXPORT(void) thread_pool_set_name(struct thread_pool *pool, const char *name
         }
 
         size_t s = strlen(name);
-        char *str = malloc(s + 1);
+        char *str = ark_malloc(s + 1);
         strcpy(str, name);
         pool->name = str;
 }

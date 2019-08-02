@@ -173,7 +173,7 @@ void json_token_dup(struct json_token *dst, const struct json_token *src)
 
 void json_token_print(FILE *file, const struct json_token *token)
 {
-        char *string = malloc(token->length + 1);
+        char *string = ark_malloc(token->length + 1);
         strncpy(string, token->string, token->length);
         string[token->length] = '\0';
         fprintf(file,
@@ -237,7 +237,7 @@ bool json_parse(struct json *json, struct json_err *error_desc, struct json_pars
         struct vector ofType(enum json_token_type) brackets;
         struct vector ofType(struct json_token) token_stream;
 
-        struct json retval = {.element = malloc(sizeof(struct json_element))};
+        struct json retval = {.element = ark_malloc(sizeof(struct json_element))};
         error_init(&retval.err);
         const struct json_token *token;
         int status;
@@ -310,7 +310,7 @@ bool test_condition_value(struct err *err, struct json_node_value *value)
                                 && ((value_type != JSON_VALUE_TRUE && value_type != JSON_VALUE_FALSE)
                                         && value_type != element->value.value_type)) {
                                 char message[] = "JSON file constraint broken: arrays of mixed types detected";
-                                char *result = malloc(strlen(message) + 1);
+                                char *result = ark_malloc(strlen(message) + 1);
                                 strcpy(result, &message[0]);
                                 error_with_details(err, ARK_ERR_ARRAYOFMIXEDTYPES, result);
                                 free(result);
@@ -331,7 +331,7 @@ bool test_condition_value(struct err *err, struct json_node_value *value)
                                 break;
                         case JSON_VALUE_ARRAY: {/** Test "No Array of Arrays" condition */
                                 char message[] = "JSON file constraint broken: arrays of arrays detected";
-                                char *result = malloc(strlen(message) + 1);
+                                char *result = ark_malloc(strlen(message) + 1);
                                 strcpy(result, &message[0]);
                                 error_with_details(err, ARK_ERR_ARRAYOFARRAYS, result);
                                 free(result);
@@ -369,7 +369,7 @@ bool parse_members(struct err *err, struct json_members *members, struct vector 
                 struct json_prop *member = vec_new_and_get(&members->members, struct json_prop);
                 struct json_token keyNameToken = get_token(token_stream, *token_idx);
 
-                member->key.value = malloc(keyNameToken.length + 1);
+                member->key.value = ark_malloc(keyNameToken.length + 1);
                 strncpy(member->key.value, keyNameToken.string, keyNameToken.length);
                 member->key.value[keyNameToken.length] = '\0';
 
@@ -380,27 +380,27 @@ bool parse_members(struct err *err, struct json_members *members, struct vector 
                 switch (valueToken.type) {
                 case OBJECT_OPEN:
                         member->value.value.value_type = JSON_VALUE_OBJECT;
-                        member->value.value.value.object = malloc(sizeof(struct json_object_t));
+                        member->value.value.value.object = ark_malloc(sizeof(struct json_object_t));
                         if (!parse_object(member->value.value.value.object, err, token_stream, token_idx)) {
                                 return false;
                         }
                         break;
                 case ARRAY_OPEN:
                         member->value.value.value_type = JSON_VALUE_ARRAY;
-                        member->value.value.value.array = malloc(sizeof(struct json_array));
+                        member->value.value.value.array = ark_malloc(sizeof(struct json_array));
                         if (!parse_array(member->value.value.value.array, err, token_stream, token_idx)) {
                                 return false;
                         }
                         break;
                 case LITERAL_STRING:
                         member->value.value.value_type = JSON_VALUE_STRING;
-                        member->value.value.value.string = malloc(sizeof(struct json_string));
+                        member->value.value.value.string = ark_malloc(sizeof(struct json_string));
                         parse_string(member->value.value.value.string, token_stream, token_idx);
                         break;
                 case LITERAL_INT:
                 case LITERAL_FLOAT:
                         member->value.value.value_type = JSON_VALUE_NUMBER;
-                        member->value.value.value.number = malloc(sizeof(struct json_number));
+                        member->value.value.value.number = ark_malloc(sizeof(struct json_number));
                         parse_number(member->value.value.value.number, token_stream, token_idx);
                         break;
                 case LITERAL_TRUE:
@@ -432,7 +432,7 @@ static bool parse_object(struct json_object_t *object, struct err *err,
 {
         assert(get_token(token_stream, *token_idx).type == OBJECT_OPEN);
         NEXT_TOKEN(token_idx);  /** Skip '{' */
-        object->value = malloc(sizeof(struct json_members));
+        object->value = ark_malloc(sizeof(struct json_members));
 
         /** test whether this is an empty object */
         struct json_token token = get_token(token_stream, *token_idx);
@@ -472,7 +472,7 @@ static void parse_string(struct json_string *string, struct vector ofType(struct
         struct json_token token = get_token(token_stream, *token_idx);
         assert(token.type == LITERAL_STRING);
 
-        string->value = malloc(token.length + 1);
+        string->value = ark_malloc(token.length + 1);
         if (likely(token.length > 0)) {
                 strncpy(string->value, token.string, token.length);
         }
@@ -486,7 +486,7 @@ static void parse_number(struct json_number *number, struct vector ofType(struct
         struct json_token token = get_token(token_stream, *token_idx);
         assert(token.type == LITERAL_FLOAT || token.type == LITERAL_INT);
 
-        char *value = malloc(token.length + 1);
+        char *value = ark_malloc(token.length + 1);
         strncpy(value, token.string, token.length);
         value[token.length] = '\0';
 
@@ -522,23 +522,23 @@ static bool parse_element(struct json_element *element, struct err *err,
 
         if (token.type == OBJECT_OPEN) { /** Parse object */
                 element->value.value_type = JSON_VALUE_OBJECT;
-                element->value.value.object = malloc(sizeof(struct json_object_t));
+                element->value.value.object = ark_malloc(sizeof(struct json_object_t));
                 if (!parse_object(element->value.value.object, err, token_stream, token_idx)) {
                         return false;
                 }
         } else if (token.type == ARRAY_OPEN) { /** Parse array */
                 element->value.value_type = JSON_VALUE_ARRAY;
-                element->value.value.array = malloc(sizeof(struct json_array));
+                element->value.value.array = ark_malloc(sizeof(struct json_array));
                 if (!parse_array(element->value.value.array, err, token_stream, token_idx)) {
                         return false;
                 }
         } else if (token.type == LITERAL_STRING) { /** Parse string */
                 element->value.value_type = JSON_VALUE_STRING;
-                element->value.value.string = malloc(sizeof(struct json_string));
+                element->value.value.string = ark_malloc(sizeof(struct json_string));
                 parse_string(element->value.value.string, token_stream, token_idx);
         } else if (token.type == LITERAL_FLOAT || token.type == LITERAL_INT) { /** Parse number */
                 element->value.value_type = JSON_VALUE_NUMBER;
-                element->value.value.number = malloc(sizeof(struct json_number));
+                element->value.value.number = ark_malloc(sizeof(struct json_number));
                 parse_number(element->value.value.number, token_stream, token_idx);
         } else if (token.type == LITERAL_TRUE) {
                 element->value.value_type = JSON_VALUE_TRUE;

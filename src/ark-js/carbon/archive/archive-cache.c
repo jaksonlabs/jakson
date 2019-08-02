@@ -15,6 +15,7 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include <ark-js/shared/common.h>
 #include <ark-js/shared/hash/bern.h>
 #include <ark-js/shared/error.h>
 #include <ark-js/carbon/archive/archive-cache.h>
@@ -64,7 +65,7 @@ ARK_EXPORT(bool) string_id_cache_create_LRU_ex(struct string_cache **cache, stru
         error_if_null(cache)
         error_if_null(archive)
 
-        struct string_cache *result = malloc(sizeof(struct string_cache));
+        struct string_cache *result = ark_malloc(sizeof(struct string_cache));
 
         query_create(&result->query, archive);
         result->capacity = capacity;

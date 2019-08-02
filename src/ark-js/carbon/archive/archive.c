@@ -553,7 +553,7 @@ static bool write_primitive_fixed_value_column(struct memfile *memfile, struct e
 static offset_t *__write_primitive_column(struct memfile *memfile, struct err *err,
         struct vector ofType(struct columndoc_obj) *values_vec, offset_t root_offset)
 {
-        offset_t *result = malloc(values_vec->num_elems * sizeof(offset_t));
+        offset_t *result = ark_malloc(values_vec->num_elems * sizeof(offset_t));
         struct columndoc_obj *mapped = vec_all(values_vec, struct columndoc_obj);
         for (u32 i = 0; i < values_vec->num_elems; i++) {
                 struct columndoc_obj *obj = mapped + i;
@@ -1351,7 +1351,7 @@ static bool __serialize(offset_t *offset, struct err *err, struct memfile *memfi
 static char *embedded_dic_flags_to_string(const union string_tab_flags *flags)
 {
         size_t max = 2048;
-        char *string = malloc(max + 1);
+        char *string = ark_malloc(max + 1);
         size_t length = 0;
 
         if (flags->value == 0) {
@@ -1376,7 +1376,7 @@ static char *embedded_dic_flags_to_string(const union string_tab_flags *flags)
 static char *record_header_flags_to_string(const struct record_flags *flags)
 {
         size_t max = 2048;
-        char *string = malloc(max + 1);
+        char *string = ark_malloc(max + 1);
         size_t length = 0;
 
         if (flags->value == 0) {
@@ -2381,7 +2381,7 @@ bool archive_open(struct archive *out, const char *file_path)
                                 out->info.record_table_size = record_table_size;
                                 out->info.num_embeddded_strings = out->string_table.num_embeddded_strings;
                                 out->info.string_id_index_size = string_id_index;
-                                out->default_query = malloc(sizeof(struct archive_query));
+                                out->default_query = ark_malloc(sizeof(struct archive_query));
                                 query_create(out->default_query, out);
 
                         }

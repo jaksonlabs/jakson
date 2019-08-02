@@ -29,7 +29,7 @@ static int convertJs2Model(struct js_to_context *context, FILE *file, bool optim
     fseek(f, 0, SEEK_END);
     long fsize = ftell(f);
     fseek(f, 0, SEEK_SET);
-    context->jsonContent = malloc(fsize + 1);
+    context->jsonContent = ark_malloc(fsize + 1);
     size_t nread = fread(context->jsonContent, fsize, 1, f);
     unused(nread);
     fclose(f);
@@ -421,7 +421,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
         fseek(f, 0, SEEK_END);
         long fsize = ftell(f);
         fseek(f, 0, SEEK_SET);
-        char *jsonContent = malloc(fsize + 1);
+        char *jsonContent = ark_malloc(fsize + 1);
         size_t nread = fread(jsonContent, fsize, 1, f);
         unused(nread);
         fclose(f);

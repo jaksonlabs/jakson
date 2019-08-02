@@ -490,9 +490,9 @@ ARK_EXPORT(bool) carbon_int_field_access_create(struct field_access *field)
         field->nested_array_it_accessed = false;
         field->nested_object_it_opened = false;
         field->nested_object_it_accessed = false;
-        field->nested_array_it = malloc(sizeof(struct carbon_array_it));
-        field->nested_object_it = malloc(sizeof(struct carbon_object_it));
-        field->nested_column_it = malloc(sizeof(struct carbon_column_it));
+        field->nested_array_it = ark_malloc(sizeof(struct carbon_array_it));
+        field->nested_object_it = ark_malloc(sizeof(struct carbon_object_it));
+        field->nested_column_it = ark_malloc(sizeof(struct carbon_column_it));
         ark_zero_memory(field->nested_array_it, sizeof(struct carbon_array_it))
         ark_zero_memory(field->nested_object_it, sizeof(struct carbon_object_it))
         ark_zero_memory(field->nested_column_it, sizeof(struct carbon_column_it))

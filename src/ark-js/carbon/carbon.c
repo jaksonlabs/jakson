@@ -99,8 +99,8 @@ ARK_EXPORT(struct carbon_insert *) carbon_create_begin(struct carbon_new *contex
                           &doc->err, ARK_ERR_ILLEGALARG);
 
                 success_else_null(error_init(&context->err), &doc->err);
-                context->content_it = malloc(sizeof(struct carbon_array_it));
-                context->inserter = malloc(sizeof(struct carbon_insert));
+                context->content_it = ark_malloc(sizeof(struct carbon_array_it));
+                context->inserter = ark_malloc(sizeof(struct carbon_insert));
                 context->mode = mode;
 
                 success_else_null(carbon_create_empty(&context->original, key_type), &doc->err);

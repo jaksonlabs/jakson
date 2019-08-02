@@ -445,7 +445,7 @@ ARK_EXPORT(struct carbon_insert *) carbon_insert_object_begin(struct carbon_inse
 
         *out = (struct carbon_insert_object_state) {
                 .parent_inserter = inserter,
-                .it = malloc(sizeof(struct carbon_object_it)),
+                .it = ark_malloc(sizeof(struct carbon_object_it)),
                 .object_begin = memfile_tell(&inserter->memfile)
         };
 
@@ -497,7 +497,7 @@ ARK_EXPORT(struct carbon_insert *) carbon_insert_array_begin(struct carbon_inser
 
         *state_out = (struct carbon_insert_array_state) {
                 .parent_inserter = inserter_in,
-                .nested_array = malloc(sizeof(struct carbon_array_it)),
+                .nested_array = ark_malloc(sizeof(struct carbon_array_it)),
                 .array_begin = memfile_tell(&inserter_in->memfile)
         };
 
@@ -544,7 +544,7 @@ ARK_EXPORT(struct carbon_insert *) carbon_insert_column_begin(struct carbon_inse
 
         *state_out = (struct carbon_insert_column_state) {
                 .parent_inserter = inserter_in,
-                .nested_column = malloc(sizeof(struct carbon_column_it)),
+                .nested_column = ark_malloc(sizeof(struct carbon_column_it)),
                 .type = field_type,
                 .column_begin = memfile_tell(&inserter_in->memfile)
         };

@@ -30,7 +30,7 @@ ARK_EXPORT(bool) string_builder_create_ex(struct string_builder *builder, size_t
         error_init(&builder->err);
         builder->cap = capacity;
         builder->end = 0;
-        builder->data = malloc(capacity);
+        builder->data = ark_malloc(capacity);
         error_if_and_return(!builder->data, &builder->err, ARK_ERR_MALLOCERR, false);
         ark_zero_memory(builder->data, builder->cap);
         return true;

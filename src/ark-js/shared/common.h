@@ -59,6 +59,13 @@
 #endif
 #endif
 
+#define ark_malloc(size)                \
+({                                      \
+        void *ptr = malloc(size);       \
+        ark_zero_memory(ptr, size);     \
+        ptr;                            \
+})
+
 #define ARK_QUERY_LIMIT_NONE -1
 #define ARK_QUERY_LIMIT_1     1
 

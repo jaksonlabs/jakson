@@ -28,11 +28,12 @@ bool memblock_create(struct memblock **block, size_t size)
 {
         error_if_null(block)
         error_print_if(size == 0, ARK_ERR_ILLEGALARG)
-        struct memblock *result = malloc(sizeof(struct memblock));
+        struct memblock *result = ark_malloc(sizeof(struct memblock));
+        ark_zero_memory(result, sizeof(struct memblock));
         error_if_null(result)
         result->blockLength = size;
         result->last_byte = 0;
-        result->base = malloc(size);
+        result->base = ark_malloc(size);
         error_init(&result->err);
         *block = result;
         return true;

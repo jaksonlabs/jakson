@@ -580,8 +580,8 @@ static bool this_locate_safe(struct strdic *self, field_sid_t **out, bool **foun
         uint_fast16_t num_threads = vec_length(&extra->carriers);
 
         /** global result output */
-        ark_malloc(field_sid_t, global_out, num_keys, &self->alloc);
-        ark_malloc(bool, global_found_mask, num_keys, &self->alloc);
+        ALLOC_MALLOC(field_sid_t, global_out, num_keys, &self->alloc);
+        ALLOC_MALLOC(bool, global_found_mask, num_keys, &self->alloc);
 
         size_t global_num_not_found = 0;
 
@@ -725,15 +725,15 @@ static char **this_extract(struct strdic *self, const field_sid_t *ids, size_t n
 
         this_lock(self);
 
-        ark_malloc(char *, globalResult, num_ids, &self->alloc);
+        ALLOC_MALLOC(char *, globalResult, num_ids, &self->alloc);
 
         struct async_extra *extra = (struct async_extra *) self->extra;
         uint_fast16_t num_threads = vec_length(&extra->carriers);
         size_t approx_num_strings_per_thread = ark_max(1, num_ids / num_threads);
 
-        ark_malloc(size_t, local_thread_idx, num_ids, &self->alloc);
-        ark_malloc(uint_fast16_t, owning_thread_ids, num_ids, &self->alloc);
-        ark_malloc(struct parallel_extract_arg, thread_args, num_threads, &self->alloc);
+        ALLOC_MALLOC(size_t, local_thread_idx, num_ids, &self->alloc);
+        ALLOC_MALLOC(uint_fast16_t, owning_thread_ids, num_ids, &self->alloc);
+        ALLOC_MALLOC(struct parallel_extract_arg, thread_args, num_threads, &self->alloc);
 
         for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
                 struct parallel_extract_arg *arg = thread_args + thread_id;

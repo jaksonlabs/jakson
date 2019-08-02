@@ -69,7 +69,7 @@ DEFINE_PRINTER_FUNCTION(size_t, "%zu")
 bool vec_create(struct vector *out, const struct allocator *alloc, size_t elem_size, size_t cap_elems)
 {
         error_if_null(out)
-        out->allocator = malloc(sizeof(struct allocator));
+        out->allocator = ark_malloc(sizeof(struct allocator));
         alloc_this_or_std(out->allocator, alloc);
         out->base = alloc_malloc(out->allocator, cap_elems * elem_size);
         out->num_elems = 0;
@@ -124,7 +124,7 @@ ARK_EXPORT(bool) vec_deserialize(struct vector *vec, struct err *err, FILE *file
                 goto error_handling;
         }
 
-        vec->allocator = malloc(sizeof(struct allocator));
+        vec->allocator = ark_malloc(sizeof(struct allocator));
         alloc_this_or_std(vec->allocator, NULL);
         vec->base = alloc_malloc(vec->allocator, header.cap_elems * header.elem_size);
         vec->num_elems = header.num_elems;
