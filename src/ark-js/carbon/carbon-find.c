@@ -17,6 +17,7 @@
 
 #include <ark-js/carbon/carbon-dot.h>
 #include <ark-js/carbon/carbon-find.h>
+#include "carbon-find.h"
 
 static void result_from_array(struct carbon_find *find, struct carbon_array_it *it);
 static inline bool result_from_column(struct carbon_find *find, u32 requested_idx, struct carbon_column_it *it);
@@ -36,6 +37,31 @@ ARK_EXPORT(bool) carbon_find_open(struct carbon_find *out, const char *dot_path,
 ARK_EXPORT(bool) carbon_find_close(struct carbon_find *find)
 {
         error_if_null(find)
+        if (carbon_find_has_result(find)) {
+                enum carbon_field_type type;
+                carbon_find_result_type(&type, find);
+                switch (type) {
+                case CARBON_FIELD_TYPE_OBJECT:
+                        error_print(ARK_ERR_NOTIMPLEMENTED)
+                        break;
+                case CARBON_FIELD_TYPE_ARRAY:
+                        carbon_array_it_drop(find->value.array_it);
+                        break;
+                case CARBON_FIELD_TYPE_COLUMN_U8:
+                case CARBON_FIELD_TYPE_COLUMN_U16:
+                case CARBON_FIELD_TYPE_COLUMN_U32:
+                case CARBON_FIELD_TYPE_COLUMN_U64:
+                case CARBON_FIELD_TYPE_COLUMN_I8:
+                case CARBON_FIELD_TYPE_COLUMN_I16:
+                case CARBON_FIELD_TYPE_COLUMN_I32:
+                case CARBON_FIELD_TYPE_COLUMN_I64:
+                case CARBON_FIELD_TYPE_COLUMN_FLOAT:
+                case CARBON_FIELD_TYPE_COLUMN_BOOLEAN:
+                        break;
+                default:
+                        break;
+                }
+        }
         return carbon_find_drop(find);
 }
 
