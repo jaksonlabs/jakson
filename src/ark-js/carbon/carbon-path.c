@@ -32,6 +32,7 @@ ARK_EXPORT(bool) carbon_path_evaluator_begin(struct carbon_path_evaluator *eval,
         error_if_null(path)
         error_if_null(doc)
 
+        ark_zero_memory(eval, sizeof(struct carbon_path_evaluator));
         eval->doc = doc;
         ark_check_success(error_init(&eval->err));
         ark_check_success(carbon_iterator_open(&eval->root_it, eval->doc));
