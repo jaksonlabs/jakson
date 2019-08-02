@@ -12,8 +12,8 @@ For details, see http://sourceforge.net/projects/libb64
 
 #include "libb64.h"
 
-#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 #pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 
 static inline char
 base64_decode_value (char value_in)
