@@ -719,7 +719,7 @@ static struct mime_type
         { "application/vnd.handheld-entertainment+xml", "zmm" },
 };
 
-static const int _nmime_type_register = ARK_ARRAY_LENGTH(mime_type_register);
+static const u32 _nmime_type_register = ARK_ARRAY_LENGTH(mime_type_register);
 
 ARK_EXPORT(bool) carbon_media_write(struct memfile *dst, enum carbon_field_type type);
 
