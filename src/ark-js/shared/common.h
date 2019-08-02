@@ -30,6 +30,13 @@
 #include <assert.h>
 #include <inttypes.h>
 
+#ifndef __cplusplus
+# include <stdatomic.h>
+#else
+# include <atomic>
+# define _Atomic(X) std::atomic< X >
+#endif
+
 #ifdef __cplusplus
 #define ARK_BEGIN_DECL  extern "C" {
 #define ARK_END_DECL    }
