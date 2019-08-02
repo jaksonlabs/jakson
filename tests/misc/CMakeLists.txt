@@ -11,7 +11,7 @@ set(
         ${LIBS}
 )
 
-add_executable(test-thread-pool EXCLUDE_FROM_ALL test-thread-pool.cpp ${LIB_SOURCES})
+add_executable(test-thread-pool test-thread-pool.cpp ${LIB_SOURCES})
 target_link_libraries(test-thread-pool gtest ${TEST_LIBS})
 
 ADD_DEPENDENCIES(tests test-thread-pool)

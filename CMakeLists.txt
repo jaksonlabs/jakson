@@ -86,9 +86,9 @@ set (CMAKE_NM      "/usr/bin/llvm-nm")
 set (CMAKE_OBJDUMP "/usr/bin/llvm-objdump")
 set (CMAKE_RANLIB  "/usr/bin/llvm-ranlib")
 
-enable_testing()
-
 add_subdirectory("${CMAKE_SOURCE_DIR}/tools")
+
+enable_testing()
 add_subdirectory("${CMAKE_SOURCE_DIR}/tests")
 
 
