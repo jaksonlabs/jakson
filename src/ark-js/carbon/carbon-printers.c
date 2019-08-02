@@ -266,6 +266,7 @@ static void json_formatter_carbon_header_contents(struct carbon_printer *self, s
                         } else {
                                 string_builder_append(builder, "null");
                         }
+                        break;
                 default:
                 error_print(ARK_ERR_INTERNALERR);
                 }
