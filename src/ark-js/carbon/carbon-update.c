@@ -68,11 +68,11 @@ DEFINE_ARRAY_UPDATE_FUNCTION(float, CARBON_FIELD_TYPE_NUMBER_FLOAT, carbon_array
                 if (resolve_path(&updater) && path_resolved(&updater)) {                                               \
                                                                                                                        \
                         switch (updater.path_evaluater.result.container_type) {                                        \
-                        case carbon_ARRAY:                                                                              \
+                        case CARBON_ARRAY:                                                                              \
                                 array_exec;                                                                            \
                                 status = true;                                                                         \
                                 break;                                                                                 \
-                        case carbon_COLUMN: {                                                                           \
+                        case CARBON_COLUMN: {                                                                           \
                                 u32 elem_pos;                                                                          \
                                 struct carbon_column_it *it = column_iterator(&elem_pos, &updater);                     \
                                 column_exec;                                                                           \

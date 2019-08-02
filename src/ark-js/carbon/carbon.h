@@ -144,7 +144,7 @@ struct carbon_new
         int mode;
 };
 
-enum carbon_container_type { carbon_OBJECT, carbon_ARRAY, carbon_COLUMN };
+enum carbon_container_type { CARBON_OBJECT, CARBON_ARRAY, CARBON_COLUMN };
 
 enum carbon_primary_key_type {
         /* no key, no revision number */

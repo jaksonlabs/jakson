@@ -231,11 +231,11 @@ ARK_EXPORT(bool) carbon_revise_remove(const char *dot_path, struct carbon_revise
                         result = false;
                 } else {
                         switch (eval.result.container_type) {
-                        case carbon_ARRAY: {
+                        case CARBON_ARRAY: {
                                 struct carbon_array_it *it = eval.result.containers.array.it;
                                 result = carbon_array_it_remove(it);
                         } break;
-                        case carbon_COLUMN:  {
+                        case CARBON_COLUMN:  {
                                 struct carbon_column_it *it = eval.result.containers.column.it;
                                 u32 elem_pos = eval.result.containers.column.elem_pos;
                                 result = carbon_column_it_remove(it, elem_pos);
@@ -339,7 +339,7 @@ static bool internal_pack_array(struct carbon_array_it *it)
                         memfile_seek(&this_array_it.memfile, first_empty_slot_offset);
                         assert(last_empty_slot_offset > first_empty_slot_offset);
 
-                        memfile_move_left(&this_array_it.memfile, last_empty_slot_offset - first_empty_slot_offset);
+                        memfile_inplace_remove(&this_array_it.memfile, last_empty_slot_offset - first_empty_slot_offset);
 
                         final = *memfile_read(&this_array_it.memfile, sizeof(char));
                         assert(final == CARBON_MARKER_ARRAY_END);
@@ -441,7 +441,8 @@ static bool internal_pack_object(struct carbon_object_it *it)
                         memfile_seek(&this_object_it.memfile, first_empty_slot_offset);
                         assert(last_empty_slot_offset > first_empty_slot_offset);
 
-                        memfile_move_left(&this_object_it.memfile, last_empty_slot_offset - first_empty_slot_offset);
+                        memfile_inplace_remove(&this_object_it.memfile,
+                                last_empty_slot_offset - first_empty_slot_offset);
 
                         final = *memfile_read(&this_object_it.memfile, sizeof(char));
                         assert(final == CARBON_MARKER_OBJECT_END);
@@ -530,7 +531,7 @@ static bool internal_pack_column(struct carbon_column_it *it)
                 memfile_seek(&it->memfile, payload_start);
                 memfile_skip(&it->memfile, it->column_num_elements * carbon_int_get_type_value_size(it->type));
 
-                memfile_move_left(&it->memfile, free_space);
+                memfile_inplace_remove(&it->memfile, free_space);
 
                 offset_t continue_off = memfile_tell(&it->memfile);
 

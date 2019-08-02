@@ -291,7 +291,7 @@ static inline enum carbon_path_status traverse_array(struct carbon_path_evaluato
                                         }
                                 } else {
                                         /* path end is reached */
-                                        state->result.container_type = carbon_ARRAY;
+                                        state->result.container_type = CARBON_ARRAY;
                                         state->result.containers.array.it = it;
                                         return carbon_PATH_RESOLVED;
                                 }
@@ -337,7 +337,7 @@ static inline enum carbon_path_status traverse_column(struct carbon_path_evaluat
                         /* requested index does not exists in this column */
                         return carbon_PATH_NOSUCHINDEX;
                 } else {
-                        state->result.container_type = carbon_COLUMN;
+                        state->result.container_type = CARBON_COLUMN;
                         state->result.containers.column.it = it;
                         state->result.containers.column.elem_pos = requested_idx;
                         return carbon_PATH_RESOLVED;

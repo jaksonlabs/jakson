@@ -508,9 +508,21 @@ ARK_EXPORT(bool) carbon_int_field_access_drop(struct field_access *field)
         return true;
 }
 
+ARK_EXPORT(bool) carbon_int_field_access_object_it_opened(struct field_access *field)
+{
+        assert(field);
+        return ((char *) field->nested_object_it)[0] != 0;
+}
+
+ARK_EXPORT(bool) carbon_int_field_access_array_it_opened(struct field_access *field)
+{
+        assert(field);
+        return ((char *) field->nested_array_it)[0] != 0;
+}
+
 ARK_EXPORT(void) carbon_int_auto_close_nested_array_it(struct field_access *field)
 {
-        if (((char *) field->nested_array_it)[0] != 0) {
+        if (carbon_int_field_access_array_it_opened(field)) {
                 carbon_array_it_drop(field->nested_array_it);
                 ark_zero_memory(field->nested_array_it, sizeof(struct carbon_array_it));
         }
@@ -518,7 +530,7 @@ ARK_EXPORT(void) carbon_int_auto_close_nested_array_it(struct field_access *fiel
 
 ARK_EXPORT(void) carbon_int_auto_close_nested_object_it(struct field_access *field)
 {
-        if (((char *) field->nested_object_it)[0] != 0) {
+        if (carbon_int_field_access_object_it_opened(field)) {
                 carbon_object_it_drop(field->nested_object_it);
                 ark_zero_memory(field->nested_object_it, sizeof(struct carbon_object_it));
         }
@@ -763,12 +775,133 @@ ARK_EXPORT(struct carbon_column_it *) carbon_int_field_access_column_value(struc
         return field->nested_column_it;
 }
 
+ARK_EXPORT(bool) carbon_int_field_remove(struct memfile *memfile, struct err *err, enum carbon_field_type type)
+{
+        assert((enum carbon_field_type) *memfile_peek(memfile, sizeof(u8)) == type);
+        offset_t start_off = memfile_tell(memfile);
+        memfile_skip(memfile, sizeof(u8));
+        size_t rm_nbytes = sizeof(u8); /* at least the type marker must be removed */
+        switch (type) {
+        case CARBON_FIELD_TYPE_NULL:
+        case CARBON_FIELD_TYPE_TRUE:
+        case CARBON_FIELD_TYPE_FALSE:
+                /* nothing to do */
+                break;
+        case CARBON_FIELD_TYPE_NUMBER_U8:
+        case CARBON_FIELD_TYPE_NUMBER_I8:
+                rm_nbytes += sizeof(u8);
+                break;
+        case CARBON_FIELD_TYPE_NUMBER_U16:
+        case CARBON_FIELD_TYPE_NUMBER_I16:
+                rm_nbytes += sizeof(u16);
+                break;
+        case CARBON_FIELD_TYPE_NUMBER_U32:
+        case CARBON_FIELD_TYPE_NUMBER_I32:
+                rm_nbytes += sizeof(u32);
+                break;
+        case CARBON_FIELD_TYPE_NUMBER_U64:
+        case CARBON_FIELD_TYPE_NUMBER_I64:
+                rm_nbytes += sizeof(u64);
+                break;
+        case CARBON_FIELD_TYPE_NUMBER_FLOAT:
+                rm_nbytes += sizeof(float);
+                break;
+        case CARBON_FIELD_TYPE_STRING: {
+                u8 len_nbytes;  /* number of bytes used to store string length */
+                u64 str_len; /* the number of characters of the string field */
+
+                str_len = memfile_read_varuint(&len_nbytes, memfile);
+
+                rm_nbytes += len_nbytes + str_len;
+        } break;
+        case CARBON_FIELD_TYPE_BINARY: {
+                u8 mime_type_nbytes; /* number of bytes for mime type */
+                u8 blob_length_nbytes; /* number of bytes to store blob length */
+                u64 blob_nbytes; /* number of bytes to store actual blob data */
+
+                /* get bytes used for mime type id */
+                memfile_read_varuint(&mime_type_nbytes, memfile);
+
+                /* get bytes used for blob length info */
+                blob_nbytes = memfile_read_varuint(&blob_length_nbytes, memfile);
+
+                rm_nbytes += mime_type_nbytes + blob_length_nbytes + blob_nbytes;
+        } break;
+        case CARBON_FIELD_TYPE_BINARY_CUSTOM: {
+                u8 custom_type_strlen_nbytes; /* number of bytes for type name string length info */
+                u8 custom_type_strlen; /* number of characters to encode type name string */
+                u8 blob_length_nbytes; /* number of bytes to store blob length */
+                u64 blob_nbytes; /* number of bytes to store actual blob data */
+
+                /* get bytes for custom type string len, and the actual length */
+                custom_type_strlen = memfile_read_varuint(&custom_type_strlen_nbytes, memfile);
+                memfile_skip(memfile, custom_type_strlen);
+
+                /* get bytes used for blob length info */
+                blob_nbytes = memfile_read_varuint(&blob_length_nbytes, memfile);
+
+                rm_nbytes += custom_type_strlen_nbytes + custom_type_strlen + blob_length_nbytes + blob_nbytes;
+        } break;
+        case CARBON_FIELD_TYPE_ARRAY: {
+                struct carbon_array_it it;
+
+                offset_t begin_off = memfile_tell(memfile);
+                carbon_array_it_create(&it, memfile, err, begin_off - sizeof(u8));
+                carbon_array_it_fast_forward(&it);
+                offset_t end_off = carbon_array_it_tell(&it);
+                carbon_array_it_drop(&it);
+
+                assert(begin_off < end_off);
+                rm_nbytes += (end_off - begin_off);
+        } break;
+        case CARBON_FIELD_TYPE_COLUMN_U8:
+        case CARBON_FIELD_TYPE_COLUMN_U16:
+        case CARBON_FIELD_TYPE_COLUMN_U32:
+        case CARBON_FIELD_TYPE_COLUMN_U64:
+        case CARBON_FIELD_TYPE_COLUMN_I8:
+        case CARBON_FIELD_TYPE_COLUMN_I16:
+        case CARBON_FIELD_TYPE_COLUMN_I32:
+        case CARBON_FIELD_TYPE_COLUMN_I64:
+        case CARBON_FIELD_TYPE_COLUMN_FLOAT:
+        case CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
+                struct carbon_column_it it;
+
+                offset_t begin_off = memfile_tell(memfile);
+                carbon_column_it_create(&it, memfile, err, begin_off - sizeof(u8));
+                carbon_column_it_fast_forward(&it);
+                offset_t end_off = carbon_column_it_tell(&it);
+
+                assert(begin_off < end_off);
+                rm_nbytes += (end_off - begin_off);
+        } break;
+        case CARBON_FIELD_TYPE_OBJECT: {
+                struct carbon_object_it it;
+
+                offset_t begin_off = memfile_tell(memfile);
+                carbon_object_it_create(&it, memfile, err, begin_off - sizeof(u8));
+                carbon_object_it_fast_forward(&it);
+                offset_t end_off = carbon_object_it_tell(&it);
+                carbon_object_it_drop(&it);
+
+                assert(begin_off < end_off);
+                rm_nbytes += (end_off - begin_off);
+        } break;
+        default:
+        error(err, ARK_ERR_INTERNALERR)
+                return false;
+        }
+        memfile_seek(memfile, start_off);
+        memfile_inplace_remove(memfile, rm_nbytes);
+
+        return true;
+}
+
 static void marker_insert(struct memfile *memfile, u8 marker)
 {
         /* check whether marker can be written, otherwise make space for it */
         char c = *memfile_peek(memfile, sizeof(u8));
         if (c != 0) {
-                memfile_move_right(memfile, sizeof(u8));
+                memfile_inplace_insert(memfile, sizeof(u8));
         }
         memfile_write(memfile, &marker, sizeof(u8));
 }

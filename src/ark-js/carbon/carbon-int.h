@@ -48,6 +48,8 @@ struct carbon_insert_array_state
 
         struct carbon_array_it *nested_array;
         struct carbon_insert nested_inserter;
+
+        offset_t array_begin, array_end;
 };
 
 struct carbon_insert_object_state
@@ -56,6 +58,8 @@ struct carbon_insert_object_state
 
         struct carbon_object_it *it;
         struct carbon_insert inserter;
+
+        offset_t object_begin, object_end;
 };
 
 struct carbon_insert_column_state
@@ -66,6 +70,7 @@ struct carbon_insert_column_state
         struct carbon_column_it *nested_column;
         struct carbon_insert nested_inserter;
 
+        offset_t column_begin, column_end;
 };
 
 ARK_EXPORT(bool) carbon_int_insert_object(struct memfile *memfile, size_t nbytes);
@@ -130,6 +135,10 @@ ARK_EXPORT(bool) carbon_int_field_access_drop(struct field_access *field);
 
 ARK_EXPORT(bool) carbon_int_field_auto_close(struct field_access *it);
 
+ARK_EXPORT(bool) carbon_int_field_access_object_it_opened(struct field_access *field);
+
+ARK_EXPORT(bool) carbon_int_field_access_array_it_opened(struct field_access *field);
+
 ARK_EXPORT(void) carbon_int_auto_close_nested_array_it(struct field_access *field);
 
 ARK_EXPORT(void) carbon_int_auto_close_nested_object_it(struct field_access *field);
@@ -169,6 +178,8 @@ ARK_EXPORT(struct carbon_array_it *) carbon_int_field_access_array_value(struct 
 ARK_EXPORT(struct carbon_object_it *) carbon_int_field_access_object_value(struct field_access *field, struct err *err);
 
 ARK_EXPORT(struct carbon_column_it *) carbon_int_field_access_column_value(struct field_access *field, struct err *err);
+
+ARK_EXPORT(bool) carbon_int_field_remove(struct memfile *memfile, struct err *err, enum carbon_field_type type);
 
 
 ARK_END_DECL

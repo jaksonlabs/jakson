@@ -38,6 +38,7 @@ ARK_EXPORT(bool) carbon_column_it_create(struct carbon_column_it *it, struct mem
         error_if_null(err);
 
         it->column_start_offset = column_start_offset;
+        it->mod_size = 0;
         error_init(&it->err);
         spin_init(&it->lock);
         memfile_open(&it->memfile, memfile->memblock, memfile->mode);
@@ -200,11 +201,11 @@ ARK_EXPORT(bool) carbon_column_it_remove(struct carbon_column_it *it, u32 pos)
         /* remove element */
         size_t elem_size = carbon_int_get_type_value_size(it->type);
         memfile_seek(&it->memfile, payload_start + pos * elem_size);
-        memfile_move_left(&it->memfile, elem_size);
+        memfile_inplace_remove(&it->memfile, elem_size);
 
         /* add an empty element at the end to restore the column capacity property */
         memfile_seek(&it->memfile, payload_start + it->column_num_elements * elem_size);
-        memfile_move_right(&it->memfile, elem_size);
+        memfile_inplace_insert(&it->memfile, elem_size);
 
         /* update element counter */
         memfile_seek(&it->memfile, it->num_and_capacity_start_offset);

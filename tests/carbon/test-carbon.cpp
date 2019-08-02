@@ -11,7 +11,7 @@
 #include <ark-js/carbon/carbon-revise.h>
 #include <ark-js/carbon/carbon-object-it.h>
 
-TEST(BisonTest, CreateBison) {
+TEST(CarbonTest, CreateBison) {
         struct carbon doc;
         object_id_t oid;
         u64 rev;
@@ -40,7 +40,7 @@ TEST(BisonTest, CreateBison) {
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, CreateBisonRevisionNumbering) {
+TEST(CarbonTest, CreateBisonRevisionNumbering) {
         struct carbon doc, rev_doc;
         u64 rev;
         struct string_builder builder;
@@ -81,7 +81,7 @@ TEST(BisonTest, CreateBisonRevisionNumbering) {
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, CreateBisonRevisionAbort) {
+TEST(CarbonTest, CreateBisonRevisionAbort) {
         struct carbon doc, rev_doc;
         u64 rev;
         struct string_builder builder;
@@ -111,7 +111,7 @@ TEST(BisonTest, CreateBisonRevisionAbort) {
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, CreateBisonRevisionAsyncReading) {
+TEST(CarbonTest, CreateBisonRevisionAsyncReading) {
         struct carbon doc, rev_doc;
         u64 rev;
         struct string_builder builder;
@@ -176,7 +176,7 @@ static void print_on_new_revision(struct carbon_event_listener *self, struct car
         //printf("revision complete\n");
 }
 
-TEST(BisonTest, CreateBisonRevisionListening) {
+TEST(CarbonTest, CreateBisonRevisionListening) {
         struct carbon doc;
         struct carbon rev_doc;
         u64 rev;
@@ -212,7 +212,7 @@ TEST(BisonTest, CreateBisonRevisionListening) {
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, ForceBisonRevisionVarLengthIncrease) {
+TEST(CarbonTest, ForceBisonRevisionVarLengthIncrease) {
         struct carbon doc, rev_doc;
         u64 old_rev;
         u64 new_rev;
@@ -246,7 +246,7 @@ TEST(BisonTest, ForceBisonRevisionVarLengthIncrease) {
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, ModifyBisonObjectId) {
+TEST(CarbonTest, ModifyBisonObjectId) {
         struct carbon doc, rev_doc;
         object_id_t oid;
         object_id_t new_oid;
@@ -277,7 +277,7 @@ TEST(BisonTest, ModifyBisonObjectId) {
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonArrayIteratorOpenAfterNew) {
+TEST(CarbonTest, BisonArrayIteratorOpenAfterNew) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
@@ -299,7 +299,7 @@ TEST(BisonTest, BisonArrayIteratorOpenAfterNew) {
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonArrayIteratorInsertNullAfterNew) {
+TEST(CarbonTest, BisonArrayIteratorInsertNullAfterNew) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
@@ -323,7 +323,7 @@ TEST(BisonTest, BisonArrayIteratorInsertNullAfterNew) {
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonArrayIteratorInsertMultipleLiteralsAfterNewNoOverflow) {
+TEST(CarbonTest, BisonArrayIteratorInsertMultipleLiteralsAfterNewNoOverflow) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
@@ -361,7 +361,7 @@ TEST(BisonTest, BisonArrayIteratorInsertMultipleLiteralsAfterNewNoOverflow) {
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonArrayIteratorOverwriteLiterals) {
+TEST(CarbonTest, BisonArrayIteratorOverwriteLiterals) {
         struct carbon doc, rev_doc, rev_doc2;
         struct carbon_revise revise;
         struct carbon_array_it it;
@@ -402,7 +402,7 @@ TEST(BisonTest, BisonArrayIteratorOverwriteLiterals) {
         carbon_drop(&rev_doc2);
 }
 
-TEST(BisonTest, BisonArrayIteratorOverwriteLiteralsWithDocOverflow) {
+TEST(CarbonTest, BisonArrayIteratorOverwriteLiteralsWithDocOverflow) {
         struct carbon doc, rev_doc, rev_doc2;
         struct carbon_revise revise;
         struct carbon_array_it it;
@@ -447,7 +447,7 @@ TEST(BisonTest, BisonArrayIteratorOverwriteLiteralsWithDocOverflow) {
         carbon_drop(&rev_doc2);
 }
 
-TEST(BisonTest, BisonArrayIteratorUnsignedAndConstants) {
+TEST(CarbonTest, BisonArrayIteratorUnsignedAndConstants) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
@@ -488,7 +488,7 @@ TEST(BisonTest, BisonArrayIteratorUnsignedAndConstants) {
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonArrayIteratorStrings) {
+TEST(CarbonTest, BisonArrayIteratorStrings) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
@@ -522,7 +522,7 @@ TEST(BisonTest, BisonArrayIteratorStrings) {
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonInsertMimeTypedBlob) {
+TEST(CarbonTest, BisonInsertMimeTypedBlob) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
@@ -547,7 +547,7 @@ TEST(BisonTest, BisonInsertMimeTypedBlob) {
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonInsertCustomTypedBlob) {
+TEST(CarbonTest, BisonInsertCustomTypedBlob) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
@@ -572,7 +572,7 @@ TEST(BisonTest, BisonInsertCustomTypedBlob) {
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonInsertTwoMimeTypedBlob) {
+TEST(CarbonTest, BisonInsertTwoMimeTypedBlob) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
@@ -600,7 +600,7 @@ TEST(BisonTest, BisonInsertTwoMimeTypedBlob) {
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonInsertMimeTypedBlobsWithOverflow) {
+TEST(CarbonTest, BisonInsertMimeTypedBlobsWithOverflow) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
@@ -630,7 +630,7 @@ TEST(BisonTest, BisonInsertMimeTypedBlobsWithOverflow) {
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonInsertMixedTypedBlobsWithOverflow) {
+TEST(CarbonTest, BisonInsertMixedTypedBlobsWithOverflow) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
@@ -659,7 +659,7 @@ TEST(BisonTest, BisonInsertMixedTypedBlobsWithOverflow) {
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonInsertArrayWithNoOverflow) {
+TEST(CarbonTest, BisonInsertArrayWithNoOverflow) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
@@ -689,7 +689,7 @@ TEST(BisonTest, BisonInsertArrayWithNoOverflow) {
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonInsertValuesIntoNestedArrayWithNoOverflow) {
+TEST(CarbonTest, BisonInsertValuesIntoNestedArrayWithNoOverflow) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
@@ -729,7 +729,7 @@ TEST(BisonTest, BisonInsertValuesIntoNestedArrayWithNoOverflow) {
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonInsert2xNestedArrayWithNoOverflow) {
+TEST(CarbonTest, BisonInsert2xNestedArrayWithNoOverflow) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
@@ -777,7 +777,7 @@ TEST(BisonTest, BisonInsert2xNestedArrayWithNoOverflow) {
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonInsertXxNestedArrayWithoutOverflow) {
+TEST(CarbonTest, BisonInsertXxNestedArrayWithoutOverflow) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
@@ -823,7 +823,7 @@ TEST(BisonTest, BisonInsertXxNestedArrayWithoutOverflow) {
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonInsertXxNestedArrayWithOverflow) {
+TEST(CarbonTest, BisonInsertXxNestedArrayWithOverflow) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
@@ -878,7 +878,7 @@ TEST(BisonTest, BisonInsertXxNestedArrayWithOverflow) {
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonInsertInsertColumnWithoutOverflow) {
+TEST(CarbonTest, BisonInsertInsertColumnWithoutOverflow) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
@@ -918,7 +918,7 @@ TEST(BisonTest, BisonInsertInsertColumnWithoutOverflow) {
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonInsertInsertColumnNumbersWithoutOverflow) {
+TEST(CarbonTest, BisonInsertInsertColumnNumbersWithoutOverflow) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
@@ -956,7 +956,7 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersWithoutOverflow) {
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonInsertInsertColumnNumbersZeroWithoutOverflow) {
+TEST(CarbonTest, BisonInsertInsertColumnNumbersZeroWithoutOverflow) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
@@ -994,7 +994,7 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersZeroWithoutOverflow) {
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonInsertInsertMultileTypedColumnsWithoutOverflow) {
+TEST(CarbonTest, BisonInsertInsertMultileTypedColumnsWithoutOverflow) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
@@ -1098,7 +1098,7 @@ TEST(BisonTest, BisonInsertInsertMultileTypedColumnsWithoutOverflow) {
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonInsertInsertColumnNumbersZeroWithOverflow) {
+TEST(CarbonTest, BisonInsertInsertColumnNumbersZeroWithOverflow) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
@@ -1138,7 +1138,7 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersZeroWithOverflow) {
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonInsertInsertColumnNumbersWithHighOverflow) {
+TEST(CarbonTest, BisonInsertInsertColumnNumbersWithHighOverflow) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
@@ -1181,7 +1181,7 @@ TEST(BisonTest, BisonInsertInsertColumnNumbersWithHighOverflow) {
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonInsertInsertMultipleColumnsNumbersWithHighOverflow) {
+TEST(CarbonTest, BisonInsertInsertMultipleColumnsNumbersWithHighOverflow) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
@@ -1226,7 +1226,7 @@ TEST(BisonTest, BisonInsertInsertMultipleColumnsNumbersWithHighOverflow) {
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonInsertNullTest) {
+TEST(CarbonTest, BisonInsertNullTest) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
@@ -1329,7 +1329,7 @@ TEST(BisonTest, BisonInsertNullTest) {
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonShrinkColumnListTest) {
+TEST(CarbonTest, BisonShrinkColumnListTest) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
@@ -1430,7 +1430,7 @@ TEST(BisonTest, BisonShrinkColumnListTest) {
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonShrinkArrayListTest) {
+TEST(CarbonTest, BisonShrinkArrayListTest) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
@@ -1483,7 +1483,7 @@ TEST(BisonTest, BisonShrinkArrayListTest) {
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonShrinkNestedArrayListTest) {
+TEST(CarbonTest, BisonShrinkNestedArrayListTest) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
@@ -1558,7 +1558,7 @@ TEST(BisonTest, BisonShrinkNestedArrayListTest) {
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonShrinkNestedArrayListAndColumnListTest) {
+TEST(CarbonTest, BisonShrinkNestedArrayListAndColumnListTest) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
@@ -1625,7 +1625,7 @@ TEST(BisonTest, BisonShrinkNestedArrayListAndColumnListTest) {
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonDotNotation) {
+TEST(CarbonTest, BisonDotNotation) {
         struct carbon_dot_path path;
         struct string_builder sb;
         string_builder_create(&sb);
@@ -1670,7 +1670,7 @@ TEST(BisonTest, BisonDotNotation) {
         string_builder_drop(&sb);
 }
 
-TEST(BisonTest, BisonDotNotationParsing) {
+TEST(CarbonTest, BisonDotNotationParsing) {
         struct carbon_dot_path path;
         struct string_builder sb;
         string_builder_create(&sb);
@@ -1732,7 +1732,7 @@ TEST(BisonTest, BisonDotNotationParsing) {
         string_builder_drop(&sb);
 }
 
-TEST(BisonTest, BisonFind) {
+TEST(CarbonTest, BisonFind) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
@@ -1807,7 +1807,7 @@ TEST(BisonTest, BisonFind) {
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonFindTypes) {
+TEST(CarbonTest, BisonFindTypes) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
@@ -2122,7 +2122,7 @@ TEST(BisonTest, BisonFindTypes) {
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonUpdateU8Simple)
+TEST(CarbonTest, BisonUpdateU8Simple)
 {
         struct carbon doc, rev_doc, rev_doc2, rev_doc3, rev_doc4;
         struct carbon_revise revise;
@@ -2216,7 +2216,7 @@ TEST(BisonTest, BisonUpdateU8Simple)
 
 }
 
-TEST(BisonTest, BisonUpdateMixedFixedTypesSimple)
+TEST(CarbonTest, BisonUpdateMixedFixedTypesSimple)
 {
         struct carbon doc, rev_doc, rev_doc2;
         struct carbon_revise revise;
@@ -2284,7 +2284,7 @@ TEST(BisonTest, BisonUpdateMixedFixedTypesSimple)
 
 }
 
-TEST(BisonTest, BisonRemoveConstantsToEmpty)
+TEST(CarbonTest, BisonRemoveConstantsToEmpty)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -2333,7 +2333,7 @@ TEST(BisonTest, BisonRemoveConstantsToEmpty)
         free(json_2);
 }
 
-TEST(BisonTest, BisonRemoveFirstConstants)
+TEST(CarbonTest, BisonRemoveFirstConstants)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -2386,7 +2386,7 @@ TEST(BisonTest, BisonRemoveFirstConstants)
         free(json_2);
 }
 
-TEST(BisonTest, BisonRemoveLastConstants)
+TEST(CarbonTest, BisonRemoveLastConstants)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -2438,7 +2438,7 @@ TEST(BisonTest, BisonRemoveLastConstants)
         free(json_2);
 }
 
-TEST(BisonTest, BisonRemoveMiddleConstants)
+TEST(CarbonTest, BisonRemoveMiddleConstants)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -2495,7 +2495,7 @@ TEST(BisonTest, BisonRemoveMiddleConstants)
         free(json_2);
 }
 
-TEST(BisonTest, BisonRemoveNumberToEmpty)
+TEST(CarbonTest, BisonRemoveNumberToEmpty)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -2544,7 +2544,7 @@ TEST(BisonTest, BisonRemoveNumberToEmpty)
         free(json_2);
 }
 
-TEST(BisonTest, BisonRemoveFirstNumber)
+TEST(CarbonTest, BisonRemoveFirstNumber)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -2597,7 +2597,7 @@ TEST(BisonTest, BisonRemoveFirstNumber)
         free(json_2);
 }
 
-TEST(BisonTest, BisonRemoveLastNumber)
+TEST(CarbonTest, BisonRemoveLastNumber)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -2649,7 +2649,7 @@ TEST(BisonTest, BisonRemoveLastNumber)
         free(json_2);
 }
 
-TEST(BisonTest, BisonRemoveMiddleNumber)
+TEST(CarbonTest, BisonRemoveMiddleNumber)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -2707,7 +2707,7 @@ TEST(BisonTest, BisonRemoveMiddleNumber)
 }
 
 
-TEST(BisonTest, BisonRemoveStringToEmpty)
+TEST(CarbonTest, BisonRemoveStringToEmpty)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -2756,7 +2756,7 @@ TEST(BisonTest, BisonRemoveStringToEmpty)
         free(json_2);
 }
 
-TEST(BisonTest, BisonRemoveFirstString)
+TEST(CarbonTest, BisonRemoveFirstString)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -2809,7 +2809,7 @@ TEST(BisonTest, BisonRemoveFirstString)
         free(json_2);
 }
 
-TEST(BisonTest, BisonRemoveLastString)
+TEST(CarbonTest, BisonRemoveLastString)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -2861,7 +2861,7 @@ TEST(BisonTest, BisonRemoveLastString)
         free(json_2);
 }
 
-TEST(BisonTest, BisonRemoveMiddleString)
+TEST(CarbonTest, BisonRemoveMiddleString)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -2922,7 +2922,7 @@ TEST(BisonTest, BisonRemoveMiddleString)
 
 
 
-TEST(BisonTest, BisonRemoveBinaryToEmpty)
+TEST(CarbonTest, BisonRemoveBinaryToEmpty)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -2972,7 +2972,7 @@ TEST(BisonTest, BisonRemoveBinaryToEmpty)
         free(json_2);
 }
 
-TEST(BisonTest, BisonRemoveFirstBinary)
+TEST(CarbonTest, BisonRemoveFirstBinary)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -3028,7 +3028,7 @@ TEST(BisonTest, BisonRemoveFirstBinary)
         free(json_2);
 }
 
-TEST(BisonTest, BisonRemoveLastBinary)
+TEST(CarbonTest, BisonRemoveLastBinary)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -3083,7 +3083,7 @@ TEST(BisonTest, BisonRemoveLastBinary)
         free(json_2);
 }
 
-TEST(BisonTest, BisonRemoveMiddleBinary)
+TEST(CarbonTest, BisonRemoveMiddleBinary)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -3155,7 +3155,7 @@ TEST(BisonTest, BisonRemoveMiddleBinary)
 
 
 
-TEST(BisonTest, BisonRemoveCustomBinaryToEmpty)
+TEST(CarbonTest, BisonRemoveCustomBinaryToEmpty)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -3207,7 +3207,7 @@ TEST(BisonTest, BisonRemoveCustomBinaryToEmpty)
         free(json_2);
 }
 
-TEST(BisonTest, BisonRemoveFirstCustomBinary)
+TEST(CarbonTest, BisonRemoveFirstCustomBinary)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -3263,7 +3263,7 @@ TEST(BisonTest, BisonRemoveFirstCustomBinary)
         free(json_2);
 }
 
-TEST(BisonTest, BisonRemoveLastCustomBinary)
+TEST(CarbonTest, BisonRemoveLastCustomBinary)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -3318,7 +3318,7 @@ TEST(BisonTest, BisonRemoveLastCustomBinary)
         free(json_2);
 }
 
-TEST(BisonTest, BisonRemoveMiddleCustomBinary)
+TEST(CarbonTest, BisonRemoveMiddleCustomBinary)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -3389,7 +3389,7 @@ TEST(BisonTest, BisonRemoveMiddleCustomBinary)
 
 
 
-TEST(BisonTest, BisonRemoveArrayToEmpty)
+TEST(CarbonTest, BisonRemoveArrayToEmpty)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -3446,7 +3446,7 @@ TEST(BisonTest, BisonRemoveArrayToEmpty)
         free(json_2);
 }
 
-TEST(BisonTest, BisonRemoveFirstArray)
+TEST(CarbonTest, BisonRemoveFirstArray)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -3511,7 +3511,7 @@ TEST(BisonTest, BisonRemoveFirstArray)
         free(json_2);
 }
 
-TEST(BisonTest, BisonRemoveLastArray)
+TEST(CarbonTest, BisonRemoveLastArray)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -3575,7 +3575,7 @@ TEST(BisonTest, BisonRemoveLastArray)
         free(json_2);
 }
 
-TEST(BisonTest, BisonRemoveMiddleArray)
+TEST(CarbonTest, BisonRemoveMiddleArray)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -3649,7 +3649,7 @@ TEST(BisonTest, BisonRemoveMiddleArray)
         free(json_2);
 }
 
-TEST(BisonTest, BisonColumnRemoveTest)
+TEST(CarbonTest, BisonColumnRemoveTest)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -3745,7 +3745,7 @@ TEST(BisonTest, BisonColumnRemoveTest)
         free(json_4);
 }
 
-TEST(BisonTest, BisonRemoveComplexTest)
+TEST(CarbonTest, BisonRemoveComplexTest)
 {
         struct carbon doc, rev_doc, rev_doc2, rev_doc3, rev_doc4, rev_doc5, rev_doc6, rev_doc7, rev_doc8, rev_doc9,
                 rev_doc10, rev_doc11, rev_doc12, rev_doc13, rev_doc14;
@@ -3906,7 +3906,7 @@ TEST(BisonTest, BisonRemoveComplexTest)
         free(json_15);
 }
 
-TEST(BisonTest, BisonUpdateMixedFixedTypesTypeChangeSimple)
+TEST(CarbonTest, BisonUpdateMixedFixedTypesTypeChangeSimple)
 {
         struct carbon doc, rev_doc, rev_doc2;
         struct carbon_revise revise;
@@ -3966,7 +3966,7 @@ TEST(BisonTest, BisonUpdateMixedFixedTypesTypeChangeSimple)
 }
 
 
-TEST(BisonTest, BisonShrinkIssueFix)
+TEST(CarbonTest, BisonShrinkIssueFix)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -3990,7 +3990,7 @@ TEST(BisonTest, BisonShrinkIssueFix)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonKeyTypeNoKey)
+TEST(CarbonTest, BisonKeyTypeNoKey)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -4015,7 +4015,7 @@ TEST(BisonTest, BisonKeyTypeNoKey)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonKeyTypeNoKeyNoRevInc)
+TEST(CarbonTest, BisonKeyTypeNoKeyNoRevInc)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -4046,7 +4046,7 @@ TEST(BisonTest, BisonKeyTypeNoKeyNoRevInc)
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonKeyTypeAutoKey)
+TEST(CarbonTest, BisonKeyTypeAutoKey)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -4071,7 +4071,7 @@ TEST(BisonTest, BisonKeyTypeAutoKey)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonKeyTypeAutoKeyRevInc)
+TEST(CarbonTest, BisonKeyTypeAutoKeyRevInc)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -4102,7 +4102,7 @@ TEST(BisonTest, BisonKeyTypeAutoKeyRevInc)
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonKeyTypeAutoKeyUpdate)
+TEST(CarbonTest, BisonKeyTypeAutoKeyUpdate)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -4134,7 +4134,7 @@ TEST(BisonTest, BisonKeyTypeAutoKeyUpdate)
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonKeyTypeUnsignedKeyUpdate)
+TEST(CarbonTest, BisonKeyTypeUnsignedKeyUpdate)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -4171,7 +4171,7 @@ TEST(BisonTest, BisonKeyTypeUnsignedKeyUpdate)
         string_builder_drop(&sb);
 }
 
-TEST(BisonTest, BisonKeyTypeSignedKeyUpdate)
+TEST(CarbonTest, BisonKeyTypeSignedKeyUpdate)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -4208,7 +4208,7 @@ TEST(BisonTest, BisonKeyTypeSignedKeyUpdate)
         string_builder_drop(&sb);
 }
 
-TEST(BisonTest, BisonKeyTypeStringKeyUpdate)
+TEST(CarbonTest, BisonKeyTypeStringKeyUpdate)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -4245,7 +4245,7 @@ TEST(BisonTest, BisonKeyTypeStringKeyUpdate)
         string_builder_drop(&sb);
 }
 
-TEST(BisonTest, BisonKeyTypeUnsignedKey)
+TEST(CarbonTest, BisonKeyTypeUnsignedKey)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -4270,7 +4270,7 @@ TEST(BisonTest, BisonKeyTypeUnsignedKey)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonKeyTypeSignedKeyRevInc)
+TEST(CarbonTest, BisonKeyTypeSignedKeyRevInc)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -4301,7 +4301,7 @@ TEST(BisonTest, BisonKeyTypeSignedKeyRevInc)
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonKeyTypeUnsignedKeyRevInc)
+TEST(CarbonTest, BisonKeyTypeUnsignedKeyRevInc)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -4332,7 +4332,7 @@ TEST(BisonTest, BisonKeyTypeUnsignedKeyRevInc)
         carbon_drop(&rev_doc);
 }
 
-TEST(BisonTest, BisonKeyTypeStringKeyRevInc)
+TEST(CarbonTest, BisonKeyTypeStringKeyRevInc)
 {
         struct carbon doc, rev_doc;
         struct carbon_new context;
@@ -4364,7 +4364,7 @@ TEST(BisonTest, BisonKeyTypeStringKeyRevInc)
 }
 
 
-TEST(BisonTest, BisonKeyTypeSignedKey)
+TEST(CarbonTest, BisonKeyTypeSignedKey)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -4389,7 +4389,7 @@ TEST(BisonTest, BisonKeyTypeSignedKey)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonKeyTypeStringKey)
+TEST(CarbonTest, BisonKeyTypeStringKey)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -4414,7 +4414,7 @@ TEST(BisonTest, BisonKeyTypeStringKey)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertEmpty)
+TEST(CarbonTest, BisonObjectInsertEmpty)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -4441,7 +4441,7 @@ TEST(BisonTest, BisonObjectInsertEmpty)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertNull)
+TEST(CarbonTest, BisonObjectInsertNull)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -4469,7 +4469,7 @@ TEST(BisonTest, BisonObjectInsertNull)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertMultipleNulls)
+TEST(CarbonTest, BisonObjectInsertMultipleNulls)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -4499,7 +4499,7 @@ TEST(BisonTest, BisonObjectInsertMultipleNulls)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertU8)
+TEST(CarbonTest, BisonObjectInsertU8)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -4527,7 +4527,7 @@ TEST(BisonTest, BisonObjectInsertU8)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertMultipleU8s)
+TEST(CarbonTest, BisonObjectInsertMultipleU8s)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -4557,7 +4557,7 @@ TEST(BisonTest, BisonObjectInsertMultipleU8s)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertU16)
+TEST(CarbonTest, BisonObjectInsertU16)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -4585,7 +4585,7 @@ TEST(BisonTest, BisonObjectInsertU16)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertMultipleU16s)
+TEST(CarbonTest, BisonObjectInsertMultipleU16s)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -4615,7 +4615,7 @@ TEST(BisonTest, BisonObjectInsertMultipleU16s)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertU32)
+TEST(CarbonTest, BisonObjectInsertU32)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -4643,7 +4643,7 @@ TEST(BisonTest, BisonObjectInsertU32)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertMultipleU32s)
+TEST(CarbonTest, BisonObjectInsertMultipleU32s)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -4673,7 +4673,7 @@ TEST(BisonTest, BisonObjectInsertMultipleU32s)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertU64)
+TEST(CarbonTest, BisonObjectInsertU64)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -4701,7 +4701,7 @@ TEST(BisonTest, BisonObjectInsertU64)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertMultipleU64s)
+TEST(CarbonTest, BisonObjectInsertMultipleU64s)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -4731,7 +4731,7 @@ TEST(BisonTest, BisonObjectInsertMultipleU64s)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertI8)
+TEST(CarbonTest, BisonObjectInsertI8)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -4759,7 +4759,7 @@ TEST(BisonTest, BisonObjectInsertI8)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertMultipleI8s)
+TEST(CarbonTest, BisonObjectInsertMultipleI8s)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -4789,7 +4789,7 @@ TEST(BisonTest, BisonObjectInsertMultipleI8s)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertI16)
+TEST(CarbonTest, BisonObjectInsertI16)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -4817,7 +4817,7 @@ TEST(BisonTest, BisonObjectInsertI16)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertMultipleI16s)
+TEST(CarbonTest, BisonObjectInsertMultipleI16s)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -4847,7 +4847,7 @@ TEST(BisonTest, BisonObjectInsertMultipleI16s)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertI32)
+TEST(CarbonTest, BisonObjectInsertI32)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -4875,7 +4875,7 @@ TEST(BisonTest, BisonObjectInsertI32)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertMultipleI32s)
+TEST(CarbonTest, BisonObjectInsertMultipleI32s)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -4905,7 +4905,7 @@ TEST(BisonTest, BisonObjectInsertMultipleI32s)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertI64)
+TEST(CarbonTest, BisonObjectInsertI64)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -4933,7 +4933,7 @@ TEST(BisonTest, BisonObjectInsertI64)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertMultipleI64s)
+TEST(CarbonTest, BisonObjectInsertMultipleI64s)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -4963,7 +4963,7 @@ TEST(BisonTest, BisonObjectInsertMultipleI64s)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertFloat)
+TEST(CarbonTest, BisonObjectInsertFloat)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -4991,7 +4991,7 @@ TEST(BisonTest, BisonObjectInsertFloat)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertMultipleFloats)
+TEST(CarbonTest, BisonObjectInsertMultipleFloats)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -5021,7 +5021,7 @@ TEST(BisonTest, BisonObjectInsertMultipleFloats)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertTrue)
+TEST(CarbonTest, BisonObjectInsertTrue)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -5049,7 +5049,7 @@ TEST(BisonTest, BisonObjectInsertTrue)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertFalse)
+TEST(CarbonTest, BisonObjectInsertFalse)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -5077,7 +5077,7 @@ TEST(BisonTest, BisonObjectInsertFalse)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertMultipleBooleans)
+TEST(CarbonTest, BisonObjectInsertMultipleBooleans)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -5107,7 +5107,7 @@ TEST(BisonTest, BisonObjectInsertMultipleBooleans)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertMixed)
+TEST(CarbonTest, BisonObjectInsertMixed)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -5147,7 +5147,7 @@ TEST(BisonTest, BisonObjectInsertMixed)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertString)
+TEST(CarbonTest, BisonObjectInsertString)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -5177,7 +5177,7 @@ TEST(BisonTest, BisonObjectInsertString)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertMultipleString)
+TEST(CarbonTest, BisonObjectInsertMultipleString)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -5209,7 +5209,7 @@ TEST(BisonTest, BisonObjectInsertMultipleString)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertMultipleStringMixedTypes)
+TEST(CarbonTest, BisonObjectInsertMultipleStringMixedTypes)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -5254,7 +5254,7 @@ TEST(BisonTest, BisonObjectInsertMultipleStringMixedTypes)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertBinary)
+TEST(CarbonTest, BisonObjectInsertBinary)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -5284,7 +5284,7 @@ TEST(BisonTest, BisonObjectInsertBinary)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertMultipleBinariesMixedTypes)
+TEST(CarbonTest, BisonObjectInsertMultipleBinariesMixedTypes)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -5331,7 +5331,7 @@ TEST(BisonTest, BisonObjectInsertMultipleBinariesMixedTypes)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertMultipleBinaries)
+TEST(CarbonTest, BisonObjectInsertMultipleBinaries)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -5363,7 +5363,7 @@ TEST(BisonTest, BisonObjectInsertMultipleBinaries)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertObjectEmpty)
+TEST(CarbonTest, BisonObjectInsertObjectEmpty)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -5394,7 +5394,7 @@ TEST(BisonTest, BisonObjectInsertObjectEmpty)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertObjectMixedMxed)
+TEST(CarbonTest, BisonObjectInsertObjectMixedMxed)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -5448,7 +5448,7 @@ TEST(BisonTest, BisonObjectInsertObjectMixedMxed)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertArrayEmpty)
+TEST(CarbonTest, BisonObjectInsertArrayEmpty)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -5480,7 +5480,7 @@ TEST(BisonTest, BisonObjectInsertArrayEmpty)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertArrayData)
+TEST(CarbonTest, BisonObjectInsertArrayData)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -5537,7 +5537,7 @@ TEST(BisonTest, BisonObjectInsertArrayData)
         carbon_drop(&doc);
 }
 
-TEST(BisonTest, BisonObjectInsertColumnNonEmpty)
+TEST(CarbonTest, BisonObjectInsertColumnNonEmpty)
 {
         struct carbon doc;
         struct carbon_new context;
@@ -5683,80 +5683,765 @@ static void create_nested_doc(struct carbon *rev_doc)
         carbon_revise_end(&revise);
 }
 
-//TEST(BisonTest, BisonObjectRemoveTest)
-//{
-//        struct bison doc, rev_doc;
-//        struct carbon_new context;
-//        struct carbon_revise revise;
-//        struct carbon_array_it rev_it;
-//        struct string_builder sb;
-//        bool has_next;
-//        string_builder_create(&sb);
-//        bool status;
-//        const u16 *values;
-//
-//        struct carbon_insert_object_state state;
-//        struct carbon_insert_column_state column_state;
-//        struct carbon_insert *array_ins;
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
-//
-//        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
-//
-//        struct carbon_insert *nested_column_ins = carbon_insert_prop_column_begin(&column_state, obj_ins, "my column", carbon_COLUMN_TYPE_U16, 200);
-//        carbon_insert_u16(nested_column_ins, 1);
-//        carbon_insert_u16(nested_column_ins, 2);
-//        carbon_insert_u16(nested_column_ins, 3);
-//        carbon_insert_prop_column_end(&column_state);
-//
-//        carbon_insert_object_end(&state);
-//
-//        carbon_create_end(&context);
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        char *json_1 = strdup(carbon_to_json(&sb, &doc));
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        carbon_revise_begin(&revise, &rev_doc, &doc);
-//        carbon_revise_iterator_open(&rev_it, &revise);
-//        has_next = carbon_array_it_next(&rev_it);
-//        ASSERT_TRUE(has_next);
-//        enum carbon_field_type field_type;
-//        carbon_array_it_field_type(&field_type, &rev_it);
-//        ASSERT_EQ(field_type, CARBON_FIELD_TYPE_OBJECT);
-//        struct carbon_object_it *oit = carbon_array_it_object_value(&rev_it);
-//        has_next = carbon_object_it_next(oit);
-//        ASSERT_TRUE(has_next);
-//        carbon_object_it_remove(oit);
-//        has_next = carbon_object_it_next(oit);
-//        ASSERT_FALSE(has_next);
-//
-//        carbon_revise_iterator_close(&rev_it);
-//        carbon_revise_end(&revise);
-//
-//        char *json_2 = strdup(carbon_to_json(&sb, &rev_doc));
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//
-//        // printf(">> %s\n", json_1);
-//        // printf(">> %s\n", json_2);
-//        // printf(">> %s\n", json_3);
-//        // printf(">> %s\n", json_4);
-//
-//        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"doc\": [[1, 2, 3]]}") == 0);
-//        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"doc\": [[1, 3]]}") == 0);
-//
-//        string_builder_drop(&sb);
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
-//        free(json_1);
-//        free(json_2);
-//}
+TEST(CarbonTest, BisonObjectRemoveTest)
+{
+        struct carbon doc, rev_doc;
+        struct carbon_new context;
+        struct carbon_revise revise;
+        struct carbon_array_it rev_it;
+        struct string_builder sb;
+        bool has_next;
+        string_builder_create(&sb);
+        bool status;
+        const u16 *values;
 
-TEST(BisonTest, BisonUpdateSetToNull)
+        struct carbon_insert_object_state state;
+        struct carbon_insert_column_state column_state;
+        struct carbon_insert *array_ins;
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+
+        carbon_insert_prop_false(nested_obj_ins, "1");
+        carbon_insert_prop_null(nested_obj_ins, "2");
+        carbon_insert_prop_u8(nested_obj_ins, "3", 1);
+        carbon_insert_prop_string(nested_obj_ins, "4", "v1");
+        carbon_insert_prop_u16(nested_obj_ins, "5", 2);
+
+        carbon_insert_prop_object_end(&state);
+
+        nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+
+        carbon_insert_prop_false(nested_obj_ins, "6");
+        carbon_insert_prop_null(nested_obj_ins, "7");
+        carbon_insert_prop_u8(nested_obj_ins, "8", 1);
+        carbon_insert_prop_string(nested_obj_ins, "9", "v1");
+        carbon_insert_prop_u16(nested_obj_ins, "10", 2);
+
+        carbon_insert_prop_object_end(&state);
+
+        nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+
+        carbon_insert_prop_false(nested_obj_ins, "11");
+        carbon_insert_prop_null(nested_obj_ins, "12");
+        carbon_insert_prop_u8(nested_obj_ins, "13", 1);
+        carbon_insert_prop_string(nested_obj_ins, "14", "v1");
+        carbon_insert_prop_u16(nested_obj_ins, "15", 2);
+
+        carbon_insert_prop_object_end(&state);
+
+        carbon_create_end(&context);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_1 = strdup(carbon_to_json(&sb, &doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        carbon_revise_begin(&revise, &rev_doc, &doc);
+        carbon_revise_iterator_open(&rev_it, &revise);
+        has_next = carbon_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+
+        enum carbon_field_type field_type;
+        carbon_array_it_field_type(&field_type, &rev_it);
+        ASSERT_EQ(field_type, CARBON_FIELD_TYPE_OBJECT);
+
+        carbon_array_it_remove(&rev_it);
+        has_next = carbon_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+
+        carbon_array_it_remove(&rev_it);
+        has_next = carbon_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+
+        carbon_array_it_remove(&rev_it);
+        has_next = carbon_array_it_next(&rev_it);
+        ASSERT_FALSE(has_next);
+
+        carbon_revise_iterator_close(&rev_it);
+        carbon_revise_end(&revise);
+
+        char *json_2 = strdup(carbon_to_json(&sb, &rev_doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"1\":false, \"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}, {\"6\":false, \"7\":null, \"8\":1, \"9\":\"v1\", \"10\":2}, {\"11\":false, \"12\":null, \"13\":1, \"14\":\"v1\", \"15\":2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 2}, \"doc\": []}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+        carbon_drop(&rev_doc);
+        free(json_1);
+        free(json_2);
+}
+
+TEST(CarbonTest, BisonObjectRemoveSkipOneTest)
+{
+        struct carbon doc, rev_doc;
+        struct carbon_new context;
+        struct carbon_revise revise;
+        struct carbon_array_it rev_it;
+        struct string_builder sb;
+        bool has_next;
+        string_builder_create(&sb);
+        bool status;
+        const u16 *values;
+
+        struct carbon_insert_object_state state;
+        struct carbon_insert_column_state column_state;
+        struct carbon_insert *array_ins;
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+
+        carbon_insert_prop_false(nested_obj_ins, "1");
+        carbon_insert_prop_null(nested_obj_ins, "2");
+        carbon_insert_prop_u8(nested_obj_ins, "3", 1);
+        carbon_insert_prop_string(nested_obj_ins, "4", "v1");
+        carbon_insert_prop_u16(nested_obj_ins, "5", 2);
+
+        carbon_insert_prop_object_end(&state);
+
+        nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+
+        carbon_insert_prop_false(nested_obj_ins, "6");
+        carbon_insert_prop_null(nested_obj_ins, "7");
+        carbon_insert_prop_u8(nested_obj_ins, "8", 1);
+        carbon_insert_prop_string(nested_obj_ins, "9", "v1");
+        carbon_insert_prop_u16(nested_obj_ins, "10", 2);
+
+        carbon_insert_prop_object_end(&state);
+
+        nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+
+        carbon_insert_prop_false(nested_obj_ins, "11");
+        carbon_insert_prop_null(nested_obj_ins, "12");
+        carbon_insert_prop_u8(nested_obj_ins, "13", 1);
+        carbon_insert_prop_string(nested_obj_ins, "14", "v1");
+        carbon_insert_prop_u16(nested_obj_ins, "15", 2);
+
+        carbon_insert_prop_object_end(&state);
+
+        carbon_create_end(&context);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_1 = strdup(carbon_to_json(&sb, &doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        carbon_revise_begin(&revise, &rev_doc, &doc);
+        carbon_revise_iterator_open(&rev_it, &revise);
+        has_next = carbon_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+
+        enum carbon_field_type field_type;
+        carbon_array_it_field_type(&field_type, &rev_it);
+        ASSERT_EQ(field_type, CARBON_FIELD_TYPE_OBJECT);
+
+        has_next = carbon_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+
+        carbon_array_it_remove(&rev_it);
+        has_next = carbon_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+
+        carbon_array_it_remove(&rev_it);
+        has_next = carbon_array_it_next(&rev_it);
+        ASSERT_FALSE(has_next);
+
+        carbon_revise_iterator_close(&rev_it);
+        carbon_revise_end(&revise);
+
+        char *json_2 = strdup(carbon_to_json(&sb, &rev_doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"1\":false, \"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}, {\"6\":false, \"7\":null, \"8\":1, \"9\":\"v1\", \"10\":2}, {\"11\":false, \"12\":null, \"13\":1, \"14\":\"v1\", \"15\":2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 2}, \"doc\": [{\"1\":false, \"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+        carbon_drop(&rev_doc);
+        free(json_1);
+        free(json_2);
+}
+
+TEST(CarbonTest, BisonObjectInsertPropDuringIt)
+{
+        struct carbon doc, rev_doc;
+        struct carbon_new context;
+        struct carbon_revise revise;
+        struct carbon_array_it rev_it;
+        struct string_builder sb;
+        bool has_next;
+        string_builder_create(&sb);
+        bool status;
+        const u16 *values;
+        u64 key_len;
+
+        struct carbon_insert_object_state state;
+        struct carbon_insert_column_state column_state;
+        struct carbon_insert *array_ins, nested_ins;
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+
+        carbon_insert_prop_false(nested_obj_ins, "1");
+        carbon_insert_prop_null(nested_obj_ins, "2");
+        carbon_insert_prop_u8(nested_obj_ins, "3", 1);
+        carbon_insert_prop_string(nested_obj_ins, "4", "v1");
+        carbon_insert_prop_u16(nested_obj_ins, "5", 2);
+
+        carbon_insert_prop_object_end(&state);
+
+        carbon_create_end(&context);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_1 = strdup(carbon_to_json(&sb, &doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        carbon_revise_begin(&revise, &rev_doc, &doc);
+        carbon_revise_iterator_open(&rev_it, &revise);
+        has_next = carbon_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        enum carbon_field_type field_type;
+        carbon_array_it_field_type(&field_type, &rev_it);
+        ASSERT_EQ(field_type, CARBON_FIELD_TYPE_OBJECT);
+        struct carbon_object_it *obj_it = carbon_array_it_object_value(&rev_it);
+        has_next = carbon_object_it_next(obj_it);
+        ASSERT_TRUE(has_next);
+        const char *prop_name = carbon_object_it_prop_name(&key_len, obj_it);
+        ASSERT_TRUE(strncmp(prop_name, "1", strlen("1")) == 0);
+
+        carbon_hexdump_print(stderr, &rev_doc);
+        carbon_object_it_insert_begin(&nested_ins, obj_it);
+        carbon_insert_prop_string(&nested_ins, "Hello Long Key", "Hello Long Value");
+        carbon_object_it_insert_end(&nested_ins);
+        carbon_hexdump_print(stderr, &rev_doc);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        has_next = carbon_array_it_next(&rev_it);
+        ASSERT_FALSE(has_next);
+
+        carbon_revise_iterator_close(&rev_it);
+        carbon_revise_end(&revise);
+
+        char *json_2 = strdup(carbon_to_json(&sb, &rev_doc));
+        printf("\n%s\n", json_2);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\":false, \"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"Hello Long Key\":\"Hello Long Value\", \"1\":false, \"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+        carbon_drop(&rev_doc);
+        free(json_1);
+        free(json_2);
+}
+
+TEST(CarbonTest, BisonObjectInsertPropDuringItAtIndex1)
+{
+        struct carbon doc, rev_doc;
+        struct carbon_new context;
+        struct carbon_revise revise;
+        struct carbon_array_it rev_it;
+        struct string_builder sb;
+        bool has_next;
+        string_builder_create(&sb);
+        bool status;
+        const u16 *values;
+        u64 key_len;
+
+        struct carbon_insert_object_state state;
+        struct carbon_insert_column_state column_state;
+        struct carbon_insert *array_ins, nested_ins;
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+
+        carbon_insert_prop_false(nested_obj_ins, "1");
+        carbon_insert_prop_null(nested_obj_ins, "2");
+        carbon_insert_prop_u8(nested_obj_ins, "3", 1);
+        carbon_insert_prop_string(nested_obj_ins, "4", "v1");
+        carbon_insert_prop_u16(nested_obj_ins, "5", 2);
+
+        carbon_insert_prop_object_end(&state);
+
+        carbon_create_end(&context);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_1 = strdup(carbon_to_json(&sb, &doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        carbon_revise_begin(&revise, &rev_doc, &doc);
+        carbon_revise_iterator_open(&rev_it, &revise);
+        has_next = carbon_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        enum carbon_field_type field_type;
+        carbon_array_it_field_type(&field_type, &rev_it);
+        ASSERT_EQ(field_type, CARBON_FIELD_TYPE_OBJECT);
+        struct carbon_object_it *obj_it = carbon_array_it_object_value(&rev_it);
+        ASSERT_TRUE(carbon_object_it_next(obj_it));
+        ASSERT_TRUE(carbon_object_it_next(obj_it));
+
+        carbon_hexdump_print(stderr, &rev_doc);
+        carbon_object_it_insert_begin(&nested_ins, obj_it);
+        carbon_insert_prop_string(&nested_ins, "Hello Long Key", "Hello Long Value");
+        carbon_object_it_insert_end(&nested_ins);
+        carbon_hexdump_print(stderr, &rev_doc);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        has_next = carbon_array_it_next(&rev_it);
+        ASSERT_FALSE(has_next);
+
+        carbon_revise_iterator_close(&rev_it);
+        carbon_revise_end(&revise);
+
+        char *json_2 = strdup(carbon_to_json(&sb, &rev_doc));
+        printf("\n%s\n", json_2);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\":false, \"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\":false, \"Hello Long Key\":\"Hello Long Value\", \"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+        carbon_drop(&rev_doc);
+        free(json_1);
+        free(json_2);
+}
+
+TEST(CarbonTest, BisonObjectInsertPropDuringItAtIndex2)
+{
+        struct carbon doc, rev_doc;
+        struct carbon_new context;
+        struct carbon_revise revise;
+        struct carbon_array_it rev_it;
+        struct string_builder sb;
+        bool has_next;
+        string_builder_create(&sb);
+        bool status;
+        const u16 *values;
+        u64 key_len;
+
+        struct carbon_insert_object_state state;
+        struct carbon_insert_column_state column_state;
+        struct carbon_insert *array_ins, nested_ins;
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+
+        carbon_insert_prop_false(nested_obj_ins, "1");
+        carbon_insert_prop_null(nested_obj_ins, "2");
+        carbon_insert_prop_u8(nested_obj_ins, "3", 1);
+        carbon_insert_prop_string(nested_obj_ins, "4", "v1");
+        carbon_insert_prop_u16(nested_obj_ins, "5", 2);
+
+        carbon_insert_prop_object_end(&state);
+
+        carbon_create_end(&context);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_1 = strdup(carbon_to_json(&sb, &doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        carbon_revise_begin(&revise, &rev_doc, &doc);
+        carbon_revise_iterator_open(&rev_it, &revise);
+        has_next = carbon_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        enum carbon_field_type field_type;
+        carbon_array_it_field_type(&field_type, &rev_it);
+        ASSERT_EQ(field_type, CARBON_FIELD_TYPE_OBJECT);
+        struct carbon_object_it *obj_it = carbon_array_it_object_value(&rev_it);
+        ASSERT_TRUE(carbon_object_it_next(obj_it));
+        ASSERT_TRUE(carbon_object_it_next(obj_it));
+        ASSERT_TRUE(carbon_object_it_next(obj_it));
+
+        carbon_hexdump_print(stderr, &rev_doc);
+        carbon_object_it_insert_begin(&nested_ins, obj_it);
+        carbon_insert_prop_string(&nested_ins, "Hello Long Key", "Hello Long Value");
+        carbon_object_it_insert_end(&nested_ins);
+        carbon_hexdump_print(stderr, &rev_doc);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        has_next = carbon_array_it_next(&rev_it);
+        ASSERT_FALSE(has_next);
+
+        carbon_revise_iterator_close(&rev_it);
+        carbon_revise_end(&revise);
+
+        char *json_2 = strdup(carbon_to_json(&sb, &rev_doc));
+        printf("\n%s\n", json_2);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\":false, \"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\":false, \"2\":null, \"Hello Long Key\":\"Hello Long Value\", \"3\":1, \"4\":\"v1\", \"5\":2}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+        carbon_drop(&rev_doc);
+        free(json_1);
+        free(json_2);
+}
+
+TEST(CarbonTest, BisonObjectInsertPropDuringItAtIndex3)
+{
+        struct carbon doc, rev_doc;
+        struct carbon_new context;
+        struct carbon_revise revise;
+        struct carbon_array_it rev_it;
+        struct string_builder sb;
+        bool has_next;
+        string_builder_create(&sb);
+        bool status;
+        const u16 *values;
+        u64 key_len;
+
+        struct carbon_insert_object_state state;
+        struct carbon_insert_column_state column_state;
+        struct carbon_insert *array_ins, nested_ins;
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+
+        carbon_insert_prop_false(nested_obj_ins, "1");
+        carbon_insert_prop_null(nested_obj_ins, "2");
+        carbon_insert_prop_u8(nested_obj_ins, "3", 1);
+        carbon_insert_prop_string(nested_obj_ins, "4", "v1");
+        carbon_insert_prop_u16(nested_obj_ins, "5", 2);
+
+        carbon_insert_prop_object_end(&state);
+
+        carbon_create_end(&context);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_1 = strdup(carbon_to_json(&sb, &doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        carbon_revise_begin(&revise, &rev_doc, &doc);
+        carbon_revise_iterator_open(&rev_it, &revise);
+        has_next = carbon_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        enum carbon_field_type field_type;
+        carbon_array_it_field_type(&field_type, &rev_it);
+        ASSERT_EQ(field_type, CARBON_FIELD_TYPE_OBJECT);
+        struct carbon_object_it *obj_it = carbon_array_it_object_value(&rev_it);
+        ASSERT_TRUE(carbon_object_it_next(obj_it));
+        ASSERT_TRUE(carbon_object_it_next(obj_it));
+        ASSERT_TRUE(carbon_object_it_next(obj_it));
+        ASSERT_TRUE(carbon_object_it_next(obj_it));
+
+        carbon_hexdump_print(stderr, &rev_doc);
+        carbon_object_it_insert_begin(&nested_ins, obj_it);
+        carbon_insert_prop_string(&nested_ins, "Hello Long Key", "Hello Long Value");
+        carbon_object_it_insert_end(&nested_ins);
+        carbon_hexdump_print(stderr, &rev_doc);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        has_next = carbon_array_it_next(&rev_it);
+        ASSERT_FALSE(has_next);
+
+        carbon_revise_iterator_close(&rev_it);
+        carbon_revise_end(&revise);
+
+        char *json_2 = strdup(carbon_to_json(&sb, &rev_doc));
+        printf("\n%s\n", json_2);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\":false, \"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\":false, \"2\":null, \"3\":1, \"Hello Long Key\":\"Hello Long Value\", \"4\":\"v1\", \"5\":2}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+        carbon_drop(&rev_doc);
+        free(json_1);
+        free(json_2);
+}
+
+TEST(CarbonTest, BisonObjectInsertPropDuringItAtIndex4)
+{
+        struct carbon doc, rev_doc;
+        struct carbon_new context;
+        struct carbon_revise revise;
+        struct carbon_array_it rev_it;
+        struct string_builder sb;
+        bool has_next;
+        string_builder_create(&sb);
+        bool status;
+        const u16 *values;
+        u64 key_len;
+
+        struct carbon_insert_object_state state;
+        struct carbon_insert_column_state column_state;
+        struct carbon_insert *array_ins, nested_ins;
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+
+        carbon_insert_prop_false(nested_obj_ins, "1");
+        carbon_insert_prop_null(nested_obj_ins, "2");
+        carbon_insert_prop_u8(nested_obj_ins, "3", 1);
+        carbon_insert_prop_string(nested_obj_ins, "4", "v1");
+        carbon_insert_prop_u16(nested_obj_ins, "5", 2);
+
+        carbon_insert_prop_object_end(&state);
+
+        carbon_create_end(&context);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_1 = strdup(carbon_to_json(&sb, &doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        carbon_revise_begin(&revise, &rev_doc, &doc);
+        carbon_revise_iterator_open(&rev_it, &revise);
+        has_next = carbon_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        enum carbon_field_type field_type;
+        carbon_array_it_field_type(&field_type, &rev_it);
+        ASSERT_EQ(field_type, CARBON_FIELD_TYPE_OBJECT);
+        struct carbon_object_it *obj_it = carbon_array_it_object_value(&rev_it);
+        ASSERT_TRUE(carbon_object_it_next(obj_it));
+        ASSERT_TRUE(carbon_object_it_next(obj_it));
+        ASSERT_TRUE(carbon_object_it_next(obj_it));
+        ASSERT_TRUE(carbon_object_it_next(obj_it));
+        ASSERT_TRUE(carbon_object_it_next(obj_it));
+
+        carbon_hexdump_print(stderr, &rev_doc);
+        carbon_object_it_insert_begin(&nested_ins, obj_it);
+        carbon_insert_prop_string(&nested_ins, "Hello Long Key", "Hello Long Value");
+        carbon_object_it_insert_end(&nested_ins);
+        carbon_hexdump_print(stderr, &rev_doc);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        has_next = carbon_array_it_next(&rev_it);
+        ASSERT_FALSE(has_next);
+
+        carbon_revise_iterator_close(&rev_it);
+        carbon_revise_end(&revise);
+
+        char *json_2 = strdup(carbon_to_json(&sb, &rev_doc));
+        printf("\n%s\n", json_2);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\":false, \"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\":false, \"2\":null, \"3\":1, \"4\":\"v1\", \"Hello Long Key\":\"Hello Long Value\", \"5\":2}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+        carbon_drop(&rev_doc);
+        free(json_1);
+        free(json_2);
+}
+
+TEST(CarbonTest, BisonObjectInsertPropDuringItAtIndex5)
+{
+        struct carbon doc, rev_doc;
+        struct carbon_new context;
+        struct carbon_revise revise;
+        struct carbon_array_it rev_it;
+        struct string_builder sb;
+        bool has_next;
+        string_builder_create(&sb);
+        bool status;
+        const u16 *values;
+        u64 key_len;
+
+        struct carbon_insert_object_state state;
+        struct carbon_insert_column_state column_state;
+        struct carbon_insert *array_ins, nested_ins;
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+
+        carbon_insert_prop_false(nested_obj_ins, "1");
+        carbon_insert_prop_null(nested_obj_ins, "2");
+        carbon_insert_prop_u8(nested_obj_ins, "3", 1);
+        carbon_insert_prop_string(nested_obj_ins, "4", "v1");
+        carbon_insert_prop_u16(nested_obj_ins, "5", 2);
+
+        carbon_insert_prop_object_end(&state);
+
+        carbon_create_end(&context);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_1 = strdup(carbon_to_json(&sb, &doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        carbon_revise_begin(&revise, &rev_doc, &doc);
+        carbon_revise_iterator_open(&rev_it, &revise);
+        has_next = carbon_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        enum carbon_field_type field_type;
+        carbon_array_it_field_type(&field_type, &rev_it);
+        ASSERT_EQ(field_type, CARBON_FIELD_TYPE_OBJECT);
+        struct carbon_object_it *obj_it = carbon_array_it_object_value(&rev_it);
+        ASSERT_TRUE(carbon_object_it_next(obj_it));
+        ASSERT_TRUE(carbon_object_it_next(obj_it));
+        ASSERT_TRUE(carbon_object_it_next(obj_it));
+        ASSERT_TRUE(carbon_object_it_next(obj_it));
+        ASSERT_TRUE(carbon_object_it_next(obj_it));
+        ASSERT_FALSE(carbon_object_it_next(obj_it));
+
+        carbon_hexdump_print(stderr, &rev_doc);
+        carbon_object_it_insert_begin(&nested_ins, obj_it);
+        carbon_insert_prop_string(&nested_ins, "Hello Long Key", "Hello Long Value");
+        carbon_object_it_insert_end(&nested_ins);
+        carbon_hexdump_print(stderr, &rev_doc);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        has_next = carbon_array_it_next(&rev_it);
+        ASSERT_FALSE(has_next);
+
+        carbon_revise_iterator_close(&rev_it);
+        carbon_revise_end(&revise);
+
+        char *json_2 = strdup(carbon_to_json(&sb, &rev_doc));
+        printf("\n%s\n", json_2);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\":false, \"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\":false, \"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2, \"Hello Long Key\":\"Hello Long Value\"}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+        carbon_drop(&rev_doc);
+        free(json_1);
+        free(json_2);
+}
+
+TEST(CarbonTest, BisonObjectRemovePropByKey)
+{
+        struct carbon doc, rev_doc;
+        struct carbon_new context;
+        struct carbon_revise revise;
+        struct carbon_array_it rev_it;
+        struct string_builder sb;
+        bool has_next;
+        string_builder_create(&sb);
+        bool status;
+        const u16 *values;
+        u64 key_len;
+
+        struct carbon_insert_object_state state;
+        struct carbon_insert_column_state column_state;
+        struct carbon_insert *array_ins;
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+
+        carbon_insert_prop_false(nested_obj_ins, "1");
+        carbon_insert_prop_null(nested_obj_ins, "2");
+        carbon_insert_prop_u8(nested_obj_ins, "3", 1);
+        carbon_insert_prop_string(nested_obj_ins, "4", "v1");
+        carbon_insert_prop_u16(nested_obj_ins, "5", 2);
+
+        carbon_insert_prop_object_end(&state);
+
+        carbon_create_end(&context);
+        // -------------------------------------------------------------------------------------------------------------
+
+        char *json_1 = strdup(carbon_to_json(&sb, &doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        carbon_revise_begin(&revise, &rev_doc, &doc);
+        carbon_revise_iterator_open(&rev_it, &revise);
+        has_next = carbon_array_it_next(&rev_it);
+        ASSERT_TRUE(has_next);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        enum carbon_field_type field_type;
+        carbon_array_it_field_type(&field_type, &rev_it);
+        ASSERT_EQ(field_type, CARBON_FIELD_TYPE_OBJECT);
+        struct carbon_object_it *obj_it = carbon_array_it_object_value(&rev_it);
+        has_next = carbon_object_it_next(obj_it);
+        ASSERT_TRUE(has_next);
+        const char *prop_name = carbon_object_it_prop_name(&key_len, obj_it);
+        ASSERT_TRUE(strncmp(prop_name, "1", strlen("1")) == 0);
+
+        carbon_hexdump_print(stderr, &rev_doc);
+        carbon_object_it_remove(obj_it);
+        carbon_hexdump_print(stderr, &rev_doc);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        has_next = carbon_array_it_next(&rev_it);
+        ASSERT_FALSE(has_next);
+
+        carbon_revise_iterator_close(&rev_it);
+        carbon_revise_end(&revise);
+
+        char *json_2 = strdup(carbon_to_json(&sb, &rev_doc));
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\":false, \"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+        carbon_drop(&rev_doc);
+        free(json_1);
+        free(json_2);
+}
+
+TEST(CarbonTest, BisonUpdateSetToNull)
 {
         struct carbon doc, rev_doc;
         struct string_builder sb;

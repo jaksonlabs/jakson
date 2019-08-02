@@ -15,32 +15,15 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_STRING_H
-#define CARBON_STRING_H
+#ifndef CARBON_PROP_H
+#define CARBON_PROP_H
 
 #include <ark-js/shared/common.h>
-#include <ark-js/shared/error.h>
-#include <ark-js/shared/mem/file.h>
+#include <ark-js/carbon/carbon-field.h>
 
 ARK_BEGIN_DECL
 
-ARK_EXPORT(bool) carbon_string_write(struct memfile *file, const char *string);
-
-ARK_EXPORT(bool) carbon_string_nomarker_write(struct memfile *file, const char *string);
-
-ARK_EXPORT(bool) carbon_string_nomarker_remove(struct memfile *file);
-
-ARK_EXPORT(bool) carbon_string_remove(struct memfile *file);
-
-ARK_EXPORT(bool) carbon_string_update(struct memfile *file, const char *string);
-
-ARK_EXPORT(bool) carbon_string_skip(struct memfile *file);
-
-ARK_EXPORT(bool) carbon_string_nomarker_skip(struct memfile *file);
-
-ARK_EXPORT(const char *) carbon_string_read(u64 *len, struct memfile *file);
-
-ARK_EXPORT(const char *) carbon_string_nomarker_read(u64 *len, struct memfile *file);
+ARK_EXPORT(u64) carbon_prop_size(struct memfile *file);
 
 ARK_END_DECL
 

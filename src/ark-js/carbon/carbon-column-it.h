@@ -46,6 +46,9 @@ struct carbon_column_it
         struct err err;
         enum carbon_field_type type;
 
+        /* in case of modifications (updates, inserts, deletes), the number of bytes that are added resp. removed */
+        i64 mod_size;
+
         u32 column_capacity;
         u32 column_num_elements;
 

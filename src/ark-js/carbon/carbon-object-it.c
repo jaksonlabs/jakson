@@ -17,9 +17,10 @@
 
 #include <ark-js/carbon/carbon.h>
 #include <ark-js/carbon/carbon-object-it.h>
-#include <ark-js/carbon/carbon-array-it.h>
 #include <ark-js/carbon/carbon-column-it.h>
 #include <ark-js/carbon/carbon-insert.h>
+#include <ark-js/carbon/carbon-string.h>
+#include <ark-js/carbon/carbon-prop.h>
 
 ARK_EXPORT(bool) carbon_object_it_create(struct carbon_object_it *it, struct memfile *memfile, struct err *err,
         offset_t payload_start)
@@ -29,6 +30,7 @@ ARK_EXPORT(bool) carbon_object_it_create(struct carbon_object_it *it, struct mem
         error_if_null(err);
 
         it->payload_start = payload_start;
+        it->mod_size = 0;
         spin_init(&it->lock);
         error_init(&it->err);
 
@@ -79,14 +81,14 @@ ARK_EXPORT(bool) carbon_object_it_rewind(struct carbon_object_it *it)
 ARK_EXPORT(bool) carbon_object_it_next(struct carbon_object_it *it)
 {
         error_if_null(it);
-        bool is_empty_slot, is_object_end;
+        bool is_empty_slot;
         offset_t last_off = memfile_tell(&it->memfile);
-        if (carbon_int_object_it_next(&is_empty_slot, &is_object_end, it)) {
+        if (carbon_int_object_it_next(&is_empty_slot, &it->object_end_reached, it)) {
                 carbon_int_history_push(&it->history, last_off);
                 return true;
         } else {
                 /* skip remaining zeros until end of array is reached */
-                if (!is_object_end) {
+                if (!it->object_end_reached) {
                         error_if(!is_empty_slot, &it->err, ARK_ERR_CORRUPTED);
 
                         while (*memfile_peek(&it->memfile, 1) == 0) {
@@ -99,12 +101,45 @@ ARK_EXPORT(bool) carbon_object_it_next(struct carbon_object_it *it)
         }
 }
 
+ARK_EXPORT(offset_t) carbon_object_it_tell(struct carbon_object_it *it)
+{
+        error_if_null(it)
+        return memfile_tell(&it->memfile);
+}
+
 ARK_EXPORT(const char *) carbon_object_it_prop_name(u64 *key_len, struct carbon_object_it *it)
 {
         error_if_null(it)
         error_if_null(key_len)
         *key_len = it->key_len;
         return it->key;
+}
+
+static i64 prop_remove(struct carbon_object_it *it, enum carbon_field_type type)
+{
+        i64 prop_size = carbon_prop_size(&it->memfile);
+        carbon_string_nomarker_remove(&it->memfile);
+        if (carbon_int_field_remove(&it->memfile, &it->err, type)) {
+                carbon_int_object_it_refresh(NULL, NULL, it);
+                return prop_size;
+        } else {
+                return 0;
+        }
+}
+
+ARK_EXPORT(bool) carbon_object_it_remove(struct carbon_object_it *it)
+{
+        error_if_null(it);
+        enum carbon_field_type type;
+        if (carbon_object_it_prop_type(&type, it)) {
+                offset_t prop_off = carbon_int_history_pop(&it->history);
+                memfile_seek(&it->memfile, prop_off);
+                it->mod_size -= prop_remove(it, type);
+                return true;
+        } else {
+                error(&it->err, ARK_ERR_ILLEGALSTATE);
+                return false;
+        }
 }
 
 ARK_EXPORT(bool) carbon_object_it_prop_type(enum carbon_field_type *type, struct carbon_object_it *it)

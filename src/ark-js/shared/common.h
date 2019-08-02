@@ -57,6 +57,7 @@
     sizeof(x)/sizeof(x[0])
 
 typedef uint64_t offset_t;
+typedef int64_t signed_offset_t;
 
 typedef unsigned char u_char;
 
