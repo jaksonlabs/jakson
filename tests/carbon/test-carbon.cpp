@@ -1686,6 +1686,7 @@ TEST(CarbonTest, BisonFind) {
         carbon_insert_u8(&ins, 'c');
         carbon_array_it_insert_end(&ins);
         carbon_revise_iterator_close(&it);
+
         carbon_revise_end(&revise);
 
         {
@@ -1740,6 +1741,7 @@ TEST(CarbonTest, BisonFind) {
 
         // carbon_print(stdout, &rev_doc);
         carbon_drop(&doc);
+        carbon_drop(&rev_doc);
 }
 //
 //TEST(CarbonTest, BisonFindTypes) {
