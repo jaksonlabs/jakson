@@ -10,231 +10,255 @@
 #include <ark-js/carbon/carbon-get.h>
 #include <ark-js/carbon/carbon-revise.h>
 #include <ark-js/carbon/carbon-object-it.h>
+//
+//TEST(CarbonTest, CreateBison) {
+//        struct carbon doc;
+//        object_id_t oid;
+//        u64 rev;
+//        struct string_builder builder;
+//        bool status;
+//
+//        string_builder_create(&builder);
+//
+//        status = carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
+//        EXPECT_TRUE(status);
+//
+//        //carbon_hexdump_print(stderr, &doc);
+//
+//        status = carbon_key_unsigned_value(&oid, &doc);
+//        EXPECT_TRUE(status);
+//        EXPECT_EQ(oid, 0);
+//
+//        status = carbon_revision(&rev, &doc);
+//        EXPECT_TRUE(status);
+//        EXPECT_EQ(rev, 0);
+//
+//        carbon_to_str(&builder, JSON_FORMATTER, &doc);
+//        // printf("%s\n", string_builder_cstr(&builder));
+//        string_builder_drop(&builder);
+//
+//        carbon_drop(&doc);
+//}
+//
+//TEST(CarbonTest, CreateBisonRevisionNumbering) {
+//        struct carbon doc, rev_doc;
+//        u64 rev;
+//        struct string_builder builder;
+//        bool status;
+//
+//        string_builder_create(&builder);
+//
+//        status = carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
+//        EXPECT_TRUE(status);
+//
+//        status = carbon_revision(&rev, &doc);
+//        EXPECT_TRUE(status);
+//        EXPECT_EQ(rev, 0);
+//
+//        struct carbon_revise revise;
+//        carbon_revise_begin(&revise, &rev_doc, &doc);
+//        carbon_revise_end(&revise);
+//
+//        status = carbon_revision(&rev, &doc);
+//        EXPECT_TRUE(status);
+//        EXPECT_EQ(rev, 0);
+//
+//        status = carbon_revision(&rev, &rev_doc);
+//        EXPECT_TRUE(status);
+//        EXPECT_EQ(rev, 1);
+//
+//        status = carbon_is_up_to_date(&doc);
+//        EXPECT_FALSE(status);
+//
+//        status = carbon_is_up_to_date(&rev_doc);
+//        EXPECT_TRUE(status);
+//
+//        carbon_to_str(&builder, JSON_FORMATTER, &doc);
+//        // printf("%s\n", string_builder_cstr(&builder));
+//        string_builder_drop(&builder);
+//
+//        carbon_drop(&doc);
+//        carbon_drop(&rev_doc);
+//}
+//
+//TEST(CarbonTest, CreateBisonRevisionAbort) {
+//        struct carbon doc, rev_doc;
+//        u64 rev;
+//        struct string_builder builder;
+//        bool status;
+//
+//        string_builder_create(&builder);
+//
+//        status = carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
+//        EXPECT_TRUE(status);
+//
+//        status = carbon_revision(&rev, &doc);
+//        EXPECT_TRUE(status);
+//        EXPECT_EQ(rev, 0);
+//
+//        struct carbon_revise revise;
+//        carbon_revise_begin(&revise, &rev_doc, &doc);
+//        carbon_revise_abort(&revise);
+//
+//        status = carbon_revision(&rev, &doc);
+//        EXPECT_TRUE(status);
+//        EXPECT_EQ(rev, 0);
+//
+//        carbon_to_str(&builder, JSON_FORMATTER, &doc);
+//        // printf("%s\n", string_builder_cstr(&builder));
+//        string_builder_drop(&builder);
+//
+//        carbon_drop(&doc);
+//}
+//
+//TEST(CarbonTest, CreateBisonRevisionAsyncReading) {
+//        struct carbon doc, rev_doc;
+//        u64 rev;
+//        struct string_builder builder;
+//        bool status;
+//
+//        string_builder_create(&builder);
+//
+//        status = carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
+//        EXPECT_TRUE(status);
+//
+//        status = carbon_revision(&rev, &doc);
+//        EXPECT_TRUE(status);
+//        EXPECT_EQ(rev, 0);
+//
+//        struct carbon_revise revise;
+//        carbon_revise_begin(&revise, &rev_doc, &doc);
+//
+//        status = carbon_revision(&rev, &doc);
+//        EXPECT_TRUE(status);
+//        EXPECT_EQ(rev, 0);
+//
+//        carbon_revise_end(&revise);
+//
+//        status = carbon_revision(&rev, &doc);
+//        EXPECT_TRUE(status);
+//        EXPECT_EQ(rev, 0);
+//
+//        carbon_to_str(&builder, JSON_FORMATTER, &doc);
+//        // printf("%s\n", string_builder_cstr(&builder));
+//        string_builder_drop(&builder);
+//
+//        carbon_drop(&doc);
+//        carbon_drop(&rev_doc);
+//}
+//
+//TEST(CarbonTest, ForceBisonRevisionVarLengthIncrease) {
+//        struct carbon doc, rev_doc;
+//        u64 old_rev;
+//        u64 new_rev;
+//        bool status;
+//        struct carbon_revise revise;
+//
+//        carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
+//
+//        for (u32 i = 0; i < 20000; i++) {
+//                status = carbon_revision(&old_rev, &doc);
+//
+//                carbon_revise_begin(&revise, &rev_doc, &doc);
+//                carbon_revise_end(&revise);
+//
+//                status = carbon_revision(&new_rev, &doc);
+//                EXPECT_TRUE(status);
+//                EXPECT_EQ(new_rev, old_rev);
+//
+//                status = carbon_revision(&new_rev, &rev_doc);
+//                EXPECT_TRUE(status);
+//                EXPECT_EQ(new_rev, old_rev + 1);
+//
+//                // carbon_print(stdout, &rev_doc);
+//
+//                carbon_drop(&doc);
+//                carbon_clone(&doc, &rev_doc);
+//                carbon_drop(&rev_doc);
+//        }
+//
+//
+//        carbon_drop(&doc);
+//}
+//
+//TEST(CarbonTest, ModifyBisonObjectId) {
+//        struct carbon doc, rev_doc;
+//        object_id_t oid;
+//        object_id_t new_oid;
+//        struct carbon_revise revise;
+//        u64 rev;
+//
+//        carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
+//
+//        carbon_key_unsigned_value(&oid, &doc);
+//        EXPECT_EQ(oid, 0);
+//
+//        carbon_revision(&rev, &doc);
+//        EXPECT_EQ(rev, 0);
+//        carbon_revise_begin(&revise, &rev_doc, &doc);
+//        carbon_revise_key_generate(&new_oid, &revise);
+//        EXPECT_NE(oid, new_oid);
+//        carbon_revise_end(&revise);
+//
+//        carbon_revision(&rev, &rev_doc);
+//        EXPECT_NE(rev, 0);
+//
+//        carbon_key_unsigned_value(&oid, &rev_doc);
+//        EXPECT_EQ(oid, new_oid);
+//
+//        // carbon_print(stdout, &rev_doc);
+//
+//        carbon_drop(&doc);
+//        carbon_drop(&rev_doc);
+//}
+//
+//TEST(CarbonTest, BisonArrayIteratorOpenAfterNew) {
+//        struct carbon doc, rev_doc;
+//        struct carbon_revise revise;
+//        struct carbon_array_it it;
+//
+//        carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
+//
+//        carbon_revise_begin(&revise, &rev_doc, &doc);
+//        carbon_revise_key_generate(NULL, &revise);
+//        carbon_revise_iterator_open(&it, &revise);
+//        bool has_next = carbon_array_it_next(&it);
+//        EXPECT_EQ(has_next, false);
+//        carbon_revise_end(&revise);
+//        carbon_array_it_drop(&it);
+//
+//        // carbon_print(stdout, &rev_doc);
+//        //carbon_hexdump_print(stdout, &rev_doc);
+//
+//        carbon_drop(&doc);
+//        carbon_drop(&rev_doc);
+//}
 
-TEST(CarbonTest, CreateBison) {
-        struct carbon doc;
-        object_id_t oid;
-        u64 rev;
-        struct string_builder builder;
-        bool status;
+//TEST(CarbonTest, BisonArrayIteratorInsertNullAfterNew) {
+//        struct carbon doc, rev_doc;
+//        struct carbon_revise revise;
+//        struct carbon_array_it it;
+//        struct carbon_insert inserter;
+//
+//        carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
+//
+//        carbon_revise_begin(&revise, &rev_doc, &doc);
+//        carbon_revise_iterator_open(&it, &revise);
+//        carbon_revise_key_generate(NULL, &revise);
+//        carbon_array_it_insert_begin(&inserter, &it);
+//        carbon_insert_null(&inserter);
+//        carbon_insert_drop(&inserter);
+//        carbon_revise_end(&revise);
+//        carbon_array_it_drop(&it);
+//
+//        // carbon_print(stdout, &rev_doc);
+//        //carbon_hexdump_print(stdout, &rev_doc);
+//
+//        carbon_drop(&doc);
+//        carbon_drop(&rev_doc);
+//}
 
-        string_builder_create(&builder);
-
-        status = carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
-        EXPECT_TRUE(status);
-
-        //carbon_hexdump_print(stderr, &doc);
-
-        status = carbon_key_unsigned_value(&oid, &doc);
-        EXPECT_TRUE(status);
-        EXPECT_EQ(oid, 0);
-
-        status = carbon_revision(&rev, &doc);
-        EXPECT_TRUE(status);
-        EXPECT_EQ(rev, 0);
-
-        carbon_to_str(&builder, JSON_FORMATTER, &doc);
-        // printf("%s\n", string_builder_cstr(&builder));
-        string_builder_drop(&builder);
-
-        carbon_drop(&doc);
-}
-
-TEST(CarbonTest, CreateBisonRevisionNumbering) {
-        struct carbon doc, rev_doc;
-        u64 rev;
-        struct string_builder builder;
-        bool status;
-
-        string_builder_create(&builder);
-
-        status = carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
-        EXPECT_TRUE(status);
-
-        status = carbon_revision(&rev, &doc);
-        EXPECT_TRUE(status);
-        EXPECT_EQ(rev, 0);
-
-        struct carbon_revise revise;
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_end(&revise);
-
-        status = carbon_revision(&rev, &doc);
-        EXPECT_TRUE(status);
-        EXPECT_EQ(rev, 0);
-
-        status = carbon_revision(&rev, &rev_doc);
-        EXPECT_TRUE(status);
-        EXPECT_EQ(rev, 1);
-
-        status = carbon_is_up_to_date(&doc);
-        EXPECT_FALSE(status);
-
-        status = carbon_is_up_to_date(&rev_doc);
-        EXPECT_TRUE(status);
-
-        carbon_to_str(&builder, JSON_FORMATTER, &doc);
-        // printf("%s\n", string_builder_cstr(&builder));
-        string_builder_drop(&builder);
-
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
-}
-
-TEST(CarbonTest, CreateBisonRevisionAbort) {
-        struct carbon doc, rev_doc;
-        u64 rev;
-        struct string_builder builder;
-        bool status;
-
-        string_builder_create(&builder);
-
-        status = carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
-        EXPECT_TRUE(status);
-
-        status = carbon_revision(&rev, &doc);
-        EXPECT_TRUE(status);
-        EXPECT_EQ(rev, 0);
-
-        struct carbon_revise revise;
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_abort(&revise);
-
-        status = carbon_revision(&rev, &doc);
-        EXPECT_TRUE(status);
-        EXPECT_EQ(rev, 0);
-
-        carbon_to_str(&builder, JSON_FORMATTER, &doc);
-        // printf("%s\n", string_builder_cstr(&builder));
-        string_builder_drop(&builder);
-
-        carbon_drop(&doc);
-}
-
-TEST(CarbonTest, CreateBisonRevisionAsyncReading) {
-        struct carbon doc, rev_doc;
-        u64 rev;
-        struct string_builder builder;
-        bool status;
-
-        string_builder_create(&builder);
-
-        status = carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
-        EXPECT_TRUE(status);
-
-        status = carbon_revision(&rev, &doc);
-        EXPECT_TRUE(status);
-        EXPECT_EQ(rev, 0);
-
-        struct carbon_revise revise;
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-
-        status = carbon_revision(&rev, &doc);
-        EXPECT_TRUE(status);
-        EXPECT_EQ(rev, 0);
-
-        carbon_revise_end(&revise);
-
-        status = carbon_revision(&rev, &doc);
-        EXPECT_TRUE(status);
-        EXPECT_EQ(rev, 0);
-
-        carbon_to_str(&builder, JSON_FORMATTER, &doc);
-        // printf("%s\n", string_builder_cstr(&builder));
-        string_builder_drop(&builder);
-
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
-}
-
-TEST(CarbonTest, ForceBisonRevisionVarLengthIncrease) {
-        struct carbon doc, rev_doc;
-        u64 old_rev;
-        u64 new_rev;
-        bool status;
-        struct carbon_revise revise;
-
-        carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
-
-        for (u32 i = 0; i < 20000; i++) {
-                status = carbon_revision(&old_rev, &doc);
-
-                carbon_revise_begin(&revise, &rev_doc, &doc);
-                carbon_revise_end(&revise);
-
-                status = carbon_revision(&new_rev, &doc);
-                EXPECT_TRUE(status);
-                EXPECT_EQ(new_rev, old_rev);
-
-                status = carbon_revision(&new_rev, &rev_doc);
-                EXPECT_TRUE(status);
-                EXPECT_EQ(new_rev, old_rev + 1);
-
-                // carbon_print(stdout, &rev_doc);
-
-                carbon_drop(&doc);
-                carbon_clone(&doc, &rev_doc);
-                carbon_drop(&rev_doc);
-        }
-
-
-        carbon_drop(&doc);
-}
-
-TEST(CarbonTest, ModifyBisonObjectId) {
-        struct carbon doc, rev_doc;
-        object_id_t oid;
-        object_id_t new_oid;
-        struct carbon_revise revise;
-        u64 rev;
-
-        carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
-
-        carbon_key_unsigned_value(&oid, &doc);
-        EXPECT_EQ(oid, 0);
-
-        carbon_revision(&rev, &doc);
-        EXPECT_EQ(rev, 0);
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_key_generate(&new_oid, &revise);
-        EXPECT_NE(oid, new_oid);
-        carbon_revise_end(&revise);
-
-        carbon_revision(&rev, &rev_doc);
-        EXPECT_NE(rev, 0);
-
-        carbon_key_unsigned_value(&oid, &rev_doc);
-        EXPECT_EQ(oid, new_oid);
-
-        // carbon_print(stdout, &rev_doc);
-
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
-}
-
-TEST(CarbonTest, BisonArrayIteratorOpenAfterNew) {
-        struct carbon doc, rev_doc;
-        struct carbon_revise revise;
-        struct carbon_array_it it;
-
-        carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
-
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_key_generate(NULL, &revise);
-        carbon_revise_iterator_open(&it, &revise);
-        bool has_next = carbon_array_it_next(&it);
-        EXPECT_EQ(has_next, false);
-        carbon_revise_end(&revise);
-        carbon_array_it_drop(&it);
-
-        // carbon_print(stdout, &rev_doc);
-        //carbon_hexdump_print(stdout, &rev_doc);
-
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
-}
-
-TEST(CarbonTest, BisonArrayIteratorInsertNullAfterNew) {
+TEST(CarbonTest, BisonArrayIteratorInsertMultipleLiteralsAfterNewNoOverflow) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
@@ -244,12 +268,26 @@ TEST(CarbonTest, BisonArrayIteratorInsertNullAfterNew) {
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
-        carbon_revise_key_generate(NULL, &revise);
         carbon_array_it_insert_begin(&inserter, &it);
-        carbon_insert_null(&inserter);
+        for (i32 i = 0; i < 10; i++) {
+                // fprintf(stdout, "before:\n");
+                //carbon_hexdump_print(stdout, &rev_doc);
+                bool status;
+                if (i % 3 == 0) {
+                        status = carbon_insert_null(&inserter);
+                } else if (i % 3 == 1) {
+                        status = carbon_insert_true(&inserter);
+                } else {
+                        status = carbon_insert_false(&inserter);
+                }
+                ASSERT_TRUE(status);
+                // fprintf(stdout, "after:\n");
+                //carbon_hexdump_print(stdout, &rev_doc);
+                // fprintf(stdout, "\n\n");
+        }
         carbon_insert_drop(&inserter);
-        carbon_revise_end(&revise);
         carbon_array_it_drop(&it);
+        carbon_revise_end(&revise);
 
         // carbon_print(stdout, &rev_doc);
         //carbon_hexdump_print(stdout, &rev_doc);
@@ -257,172 +295,134 @@ TEST(CarbonTest, BisonArrayIteratorInsertNullAfterNew) {
         carbon_drop(&doc);
         carbon_drop(&rev_doc);
 }
-//
-//TEST(CarbonTest, BisonArrayIteratorInsertMultipleLiteralsAfterNewNoOverflow) {
-//        struct carbon doc, rev_doc;
-//        struct carbon_revise revise;
-//        struct carbon_array_it it;
-//        struct carbon_insert inserter;
-//
-//        carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
-//
-//        carbon_revise_begin(&revise, &rev_doc, &doc);
-//        carbon_revise_iterator_open(&it, &revise);
-//        carbon_array_it_insert_begin(&inserter, &it);
-//        for (i32 i = 0; i < 10; i++) {
-//                // fprintf(stdout, "before:\n");
-//                //carbon_hexdump_print(stdout, &rev_doc);
-//                bool status;
-//                if (i % 3 == 0) {
-//                        status = carbon_insert_null(&inserter);
-//                } else if (i % 3 == 1) {
-//                        status = carbon_insert_true(&inserter);
-//                } else {
-//                        status = carbon_insert_false(&inserter);
-//                }
-//                ASSERT_TRUE(status);
-//                // fprintf(stdout, "after:\n");
-//                //carbon_hexdump_print(stdout, &rev_doc);
-//                // fprintf(stdout, "\n\n");
-//        }
-//        carbon_insert_drop(&inserter);
-//        carbon_array_it_drop(&it);
-//        carbon_revise_end(&revise);
-//
-//        // carbon_print(stdout, &rev_doc);
-//        //carbon_hexdump_print(stdout, &rev_doc);
-//
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
-//}
-//
-//TEST(CarbonTest, BisonArrayIteratorOverwriteLiterals) {
-//        struct carbon doc, rev_doc, rev_doc2;
-//        struct carbon_revise revise;
-//        struct carbon_array_it it;
-//        struct carbon_insert inserter;
-//
-//        carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
-//
-//        carbon_revise_begin(&revise, &rev_doc, &doc);
-//        carbon_revise_iterator_open(&it, &revise);
-//        carbon_array_it_insert_begin(&inserter, &it);
-//        for (i32 i = 0; i < 3; i++) {
-//                if (i % 3 == 0) {
-//                        carbon_insert_null(&inserter);
-//                } else if (i % 3 == 1) {
-//                        carbon_insert_true(&inserter);
-//                } else {
-//                        carbon_insert_false(&inserter);
-//                }
-//        }
-//        carbon_insert_drop(&inserter);
-//        carbon_array_it_drop(&it);
-//        carbon_revise_end(&revise);
-//
-//        carbon_revise_begin(&revise, &rev_doc2, &rev_doc);
-//        carbon_revise_iterator_open(&it, &revise);
-//        carbon_array_it_insert_begin(&inserter, &it);
-//        for (i32 i = 0; i < 2; i++) {
-//                carbon_insert_true(&inserter);
-//        }
-//        carbon_insert_drop(&inserter);
-//        carbon_array_it_drop(&it);
-//        carbon_revise_end(&revise);
-//
-//        // carbon_print(stdout, &rev_doc2);
-//
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
-//        carbon_drop(&rev_doc2);
-//}
-//
-//TEST(CarbonTest, BisonArrayIteratorOverwriteLiteralsWithDocOverflow) {
-//        struct carbon doc, rev_doc, rev_doc2;
-//        struct carbon_revise revise;
-//        struct carbon_array_it it;
-//        struct carbon_insert inserter;
-//
-//        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
-//
-//        carbon_revise_begin(&revise, &rev_doc, &doc);
-//        carbon_revise_iterator_open(&it, &revise);
-//        carbon_array_it_insert_begin(&inserter, &it);
-//        for (i32 i = 0; i < 22; i++) {
-//                if (i % 3 == 0) {
-//                        carbon_insert_null(&inserter);
-//                } else if (i % 3 == 1) {
-//                        carbon_insert_true(&inserter);
-//                } else {
-//                        carbon_insert_false(&inserter);
-//                }
-//               // fprintf(stdout, "after initial push:\n");
-//               // //carbon_hexdump_print(stdout, &rev_doc);
-//        }
-//        carbon_insert_drop(&inserter);
-//        carbon_array_it_drop(&it);
-//        carbon_revise_end(&revise);
-//
-//        carbon_revise_begin(&revise, &rev_doc2, &rev_doc);
-//        carbon_revise_iterator_open(&it, &revise);
-//        carbon_array_it_insert_begin(&inserter, &it);
-//        for (i32 i = 0; i < 2; i++) {
-//                // fprintf(stdout, "before:\n");
-//                //carbon_hexdump_print(stdout, &rev_doc2);
-//                carbon_insert_true(&inserter);
-//                // fprintf(stdout, "after:\n");
-//                //carbon_hexdump_print(stdout, &rev_doc2);
-//        }
-//        carbon_insert_drop(&inserter);
-//        carbon_array_it_drop(&it);
-//        carbon_revise_end(&revise);
-//        // carbon_print(stdout, &rev_doc2);
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
-//        carbon_drop(&rev_doc2);
-//}
-//
-//TEST(CarbonTest, BisonArrayIteratorUnsignedAndConstants) {
-//        struct carbon doc, rev_doc;
-//        struct carbon_revise revise;
-//        struct carbon_array_it it;
-//        struct carbon_insert inserter;
-//
-//        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
-//
-//        carbon_revise_begin(&revise, &rev_doc, &doc);
-//        carbon_revise_iterator_open(&it, &revise);
-//        carbon_array_it_insert_begin(&inserter, &it);
-//        for (i32 i = 0; i < 500; i++) {
-//                if (i % 6 == 0) {
-//                        carbon_insert_null(&inserter);
-//                } else if (i % 6 == 1) {
-//                        carbon_insert_true(&inserter);
-//                } else if (i % 6 == 2) {
-//                        carbon_insert_false(&inserter);
-//                } else if (i % 6 == 3) {
-//                        u64 rand_value = random();
-//                        carbon_insert_unsigned(&inserter, rand_value);
-//                } else if (i % 6 == 4) {
-//                        i64 rand_value = random();
-//                        carbon_insert_signed(&inserter, rand_value);
-//                } else {
-//                        float rand_value = (float)rand()/(float)(RAND_MAX/INT32_MAX);
-//                        carbon_insert_float(&inserter, rand_value);
-//                }
-//                //fprintf(stdout, "after initial push:\n");
-//                ////carbon_hexdump_print(stdout, &rev_doc);
-//        }
-//        carbon_insert_drop(&inserter);
-//        carbon_array_it_drop(&it);
-//        carbon_revise_end(&revise);
-//
-//        // carbon_print(stdout, &rev_doc);
-//
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
-//}
-//
+
+TEST(CarbonTest, BisonArrayIteratorOverwriteLiterals) {
+        struct carbon doc, rev_doc, rev_doc2;
+        struct carbon_revise revise;
+        struct carbon_array_it it;
+        struct carbon_insert inserter;
+
+        carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
+
+        carbon_revise_begin(&revise, &rev_doc, &doc);
+        carbon_revise_iterator_open(&it, &revise);
+        carbon_array_it_insert_begin(&inserter, &it);
+        for (i32 i = 0; i < 3; i++) {
+                if (i % 3 == 0) {
+                        carbon_insert_null(&inserter);
+                } else if (i % 3 == 1) {
+                        carbon_insert_true(&inserter);
+                } else {
+                        carbon_insert_false(&inserter);
+                }
+        }
+        carbon_insert_drop(&inserter);
+        carbon_array_it_drop(&it);
+        carbon_revise_end(&revise);
+
+        carbon_revise_begin(&revise, &rev_doc2, &rev_doc);
+        carbon_revise_iterator_open(&it, &revise);
+        carbon_array_it_insert_begin(&inserter, &it);
+        for (i32 i = 0; i < 2; i++) {
+                carbon_insert_true(&inserter);
+        }
+        carbon_insert_drop(&inserter);
+        carbon_array_it_drop(&it);
+        carbon_revise_end(&revise);
+
+        // carbon_print(stdout, &rev_doc2);
+
+        carbon_drop(&doc);
+        carbon_drop(&rev_doc);
+        carbon_drop(&rev_doc2);
+}
+
+TEST(CarbonTest, BisonArrayIteratorOverwriteLiteralsWithDocOverflow) {
+        struct carbon doc, rev_doc, rev_doc2;
+        struct carbon_revise revise;
+        struct carbon_array_it it;
+        struct carbon_insert inserter;
+
+        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
+
+        carbon_revise_begin(&revise, &rev_doc, &doc);
+        carbon_revise_iterator_open(&it, &revise);
+        carbon_array_it_insert_begin(&inserter, &it);
+        for (i32 i = 0; i < 22; i++) {
+                if (i % 3 == 0) {
+                        carbon_insert_null(&inserter);
+                } else if (i % 3 == 1) {
+                        carbon_insert_true(&inserter);
+                } else {
+                        carbon_insert_false(&inserter);
+                }
+               // fprintf(stdout, "after initial push:\n");
+               // //carbon_hexdump_print(stdout, &rev_doc);
+        }
+        carbon_insert_drop(&inserter);
+        carbon_array_it_drop(&it);
+        carbon_revise_end(&revise);
+
+        carbon_revise_begin(&revise, &rev_doc2, &rev_doc);
+        carbon_revise_iterator_open(&it, &revise);
+        carbon_array_it_insert_begin(&inserter, &it);
+        for (i32 i = 0; i < 2; i++) {
+                // fprintf(stdout, "before:\n");
+                //carbon_hexdump_print(stdout, &rev_doc2);
+                carbon_insert_true(&inserter);
+                // fprintf(stdout, "after:\n");
+                //carbon_hexdump_print(stdout, &rev_doc2);
+        }
+        carbon_insert_drop(&inserter);
+        carbon_array_it_drop(&it);
+        carbon_revise_end(&revise);
+        // carbon_print(stdout, &rev_doc2);
+        carbon_drop(&doc);
+        carbon_drop(&rev_doc);
+        carbon_drop(&rev_doc2);
+}
+
+TEST(CarbonTest, BisonArrayIteratorUnsignedAndConstants) {
+        struct carbon doc, rev_doc;
+        struct carbon_revise revise;
+        struct carbon_array_it it;
+        struct carbon_insert inserter;
+
+        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
+
+        carbon_revise_begin(&revise, &rev_doc, &doc);
+        carbon_revise_iterator_open(&it, &revise);
+        carbon_array_it_insert_begin(&inserter, &it);
+        for (i32 i = 0; i < 500; i++) {
+                if (i % 6 == 0) {
+                        carbon_insert_null(&inserter);
+                } else if (i % 6 == 1) {
+                        carbon_insert_true(&inserter);
+                } else if (i % 6 == 2) {
+                        carbon_insert_false(&inserter);
+                } else if (i % 6 == 3) {
+                        u64 rand_value = random();
+                        carbon_insert_unsigned(&inserter, rand_value);
+                } else if (i % 6 == 4) {
+                        i64 rand_value = random();
+                        carbon_insert_signed(&inserter, rand_value);
+                } else {
+                        float rand_value = (float)rand()/(float)(RAND_MAX/INT32_MAX);
+                        carbon_insert_float(&inserter, rand_value);
+                }
+                //fprintf(stdout, "after initial push:\n");
+                ////carbon_hexdump_print(stdout, &rev_doc);
+        }
+        carbon_insert_drop(&inserter);
+        carbon_array_it_drop(&it);
+        carbon_revise_end(&revise);
+
+        // carbon_print(stdout, &rev_doc);
+
+        carbon_drop(&doc);
+        carbon_drop(&rev_doc);
+}
+
 //TEST(CarbonTest, BisonArrayIteratorStrings) {
 //        struct carbon doc, rev_doc;
 //        struct carbon_revise revise;
