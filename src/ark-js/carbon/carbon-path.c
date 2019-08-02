@@ -263,6 +263,7 @@ static inline enum carbon_path_status traverse_array(struct carbon_path_evaluato
                                                                 if (elem_type == CARBON_FIELD_TYPE_ARRAY) {
                                                                         struct carbon_array_it *sub_it = carbon_array_it_array_value(it);
                                                                         status = traverse_array(state, path, next_path_pos, sub_it);
+                                                                        carbon_array_it_drop(sub_it);   // TODO: Debug mem?
                                                                         return status;
                                                                 } else {
                                                                         assert(elem_type == CARBON_FIELD_TYPE_COLUMN_U8 ||
