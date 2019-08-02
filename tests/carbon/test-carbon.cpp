@@ -39,77 +39,77 @@ TEST(CarbonTest, CreateBison) {
 
         carbon_drop(&doc);
 }
-//
-//TEST(CarbonTest, CreateBisonRevisionNumbering) {
-//        struct carbon doc, rev_doc;
-//        u64 rev;
-//        struct string_builder builder;
-//        bool status;
-//
-//        string_builder_create(&builder);
-//
-//        status = carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
-//        EXPECT_TRUE(status);
-//
-//        status = carbon_revision(&rev, &doc);
-//        EXPECT_TRUE(status);
-//        EXPECT_EQ(rev, 0);
-//
-//        struct carbon_revise revise;
-//        carbon_revise_begin(&revise, &rev_doc, &doc);
-//        carbon_revise_end(&revise);
-//
-//        status = carbon_revision(&rev, &doc);
-//        EXPECT_TRUE(status);
-//        EXPECT_EQ(rev, 0);
-//
-//        status = carbon_revision(&rev, &rev_doc);
-//        EXPECT_TRUE(status);
-//        EXPECT_EQ(rev, 1);
-//
-//        status = carbon_is_up_to_date(&doc);
-//        EXPECT_FALSE(status);
-//
-//        status = carbon_is_up_to_date(&rev_doc);
-//        EXPECT_TRUE(status);
-//
-//        carbon_to_str(&builder, JSON_FORMATTER, &doc);
-//        // printf("%s\n", string_builder_cstr(&builder));
-//        string_builder_drop(&builder);
-//
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
-//}
-//
-//TEST(CarbonTest, CreateBisonRevisionAbort) {
-//        struct carbon doc, rev_doc;
-//        u64 rev;
-//        struct string_builder builder;
-//        bool status;
-//
-//        string_builder_create(&builder);
-//
-//        status = carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
-//        EXPECT_TRUE(status);
-//
-//        status = carbon_revision(&rev, &doc);
-//        EXPECT_TRUE(status);
-//        EXPECT_EQ(rev, 0);
-//
-//        struct carbon_revise revise;
-//        carbon_revise_begin(&revise, &rev_doc, &doc);
-//        carbon_revise_abort(&revise);
-//
-//        status = carbon_revision(&rev, &doc);
-//        EXPECT_TRUE(status);
-//        EXPECT_EQ(rev, 0);
-//
-//        carbon_to_str(&builder, JSON_FORMATTER, &doc);
-//        // printf("%s\n", string_builder_cstr(&builder));
-//        string_builder_drop(&builder);
-//
-//        carbon_drop(&doc);
-//}
+
+TEST(CarbonTest, CreateBisonRevisionNumbering) {
+        struct carbon doc, rev_doc;
+        u64 rev;
+        struct string_builder builder;
+        bool status;
+
+        string_builder_create(&builder);
+
+        status = carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
+        EXPECT_TRUE(status);
+
+        status = carbon_revision(&rev, &doc);
+        EXPECT_TRUE(status);
+        EXPECT_EQ(rev, 0);
+
+        struct carbon_revise revise;
+        carbon_revise_begin(&revise, &rev_doc, &doc);
+        carbon_revise_end(&revise);
+
+        status = carbon_revision(&rev, &doc);
+        EXPECT_TRUE(status);
+        EXPECT_EQ(rev, 0);
+
+        status = carbon_revision(&rev, &rev_doc);
+        EXPECT_TRUE(status);
+        EXPECT_EQ(rev, 1);
+
+        status = carbon_is_up_to_date(&doc);
+        EXPECT_FALSE(status);
+
+        status = carbon_is_up_to_date(&rev_doc);
+        EXPECT_TRUE(status);
+
+        carbon_to_str(&builder, JSON_FORMATTER, &doc);
+        // printf("%s\n", string_builder_cstr(&builder));
+        string_builder_drop(&builder);
+
+        carbon_drop(&doc);
+        carbon_drop(&rev_doc);
+}
+
+TEST(CarbonTest, CreateBisonRevisionAbort) {
+        struct carbon doc, rev_doc;
+        u64 rev;
+        struct string_builder builder;
+        bool status;
+
+        string_builder_create(&builder);
+
+        status = carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
+        EXPECT_TRUE(status);
+
+        status = carbon_revision(&rev, &doc);
+        EXPECT_TRUE(status);
+        EXPECT_EQ(rev, 0);
+
+        struct carbon_revise revise;
+        carbon_revise_begin(&revise, &rev_doc, &doc);
+        carbon_revise_abort(&revise);
+
+        status = carbon_revision(&rev, &doc);
+        EXPECT_TRUE(status);
+        EXPECT_EQ(rev, 0);
+
+        carbon_to_str(&builder, JSON_FORMATTER, &doc);
+        // printf("%s\n", string_builder_cstr(&builder));
+        string_builder_drop(&builder);
+
+        carbon_drop(&doc);
+}
 //
 //TEST(CarbonTest, CreateBisonRevisionAsyncReading) {
 //        struct carbon doc, rev_doc;
