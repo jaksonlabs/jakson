@@ -423,213 +423,347 @@
 //        carbon_drop(&rev_doc);
 //}
 //
-TEST(CarbonTest, BisonArrayIteratorStrings) {
+//TEST(CarbonTest, BisonArrayIteratorStrings) {
+//        struct carbon doc, rev_doc;
+//        struct carbon_revise revise;
+//        struct carbon_array_it it;
+//        struct carbon_insert inserter;
+//
+//        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
+//
+//        carbon_revise_begin(&revise, &rev_doc, &doc);
+//        carbon_revise_iterator_open(&it, &revise);
+//        carbon_array_it_insert_begin(&inserter, &it);
+//        for (i32 i = 0; i < 10; i++) {
+//                u64 strlen = rand() % (100 + 1 - 4) + 4;
+//                char buffer[strlen];
+//                for (i32 j = 0; j < strlen; j++) {
+//                        buffer[j] = 65 + (rand() % 25);
+//                }
+//                buffer[0] = '!';
+//                buffer[strlen - 2] = '!';
+//                buffer[strlen - 1] = '\0';
+//                carbon_insert_string(&inserter, buffer);
+//                //fprintf(stdout, "after initial push:\n");
+//                ////carbon_hexdump_print(stdout, &rev_doc);
+//        }
+//        carbon_insert_drop(&inserter);
+//        carbon_array_it_drop(&it);
+//        carbon_revise_end(&revise);
+//
+//        // carbon_print(stdout, &rev_doc);
+//
+//        carbon_drop(&doc);
+//        carbon_drop(&rev_doc);
+//}
+//
+//TEST(CarbonTest, BisonInsertMimeTypedBlob) {
+//        struct carbon doc, rev_doc;
+//        struct carbon_revise revise;
+//        struct carbon_array_it it;
+//        struct carbon_insert inserter;
+//
+//        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
+//
+//        carbon_revise_begin(&revise, &rev_doc, &doc);
+//        carbon_revise_iterator_open(&it, &revise);
+//        carbon_array_it_insert_begin(&inserter, &it);
+//        const char *data = "{ \"Message\": \"Hello World\" }";
+//        bool status = carbon_insert_binary(&inserter, data, strlen(data), "json", NULL);
+//        ASSERT_TRUE(status);
+//
+//        carbon_insert_drop(&inserter);
+//        carbon_array_it_drop(&it);
+//        carbon_revise_end(&revise);
+//
+//        // carbon_print(stdout, &rev_doc);
+//
+//        carbon_drop(&doc);
+//        carbon_drop(&rev_doc);
+//}
+//
+//TEST(CarbonTest, BisonInsertCustomTypedBlob) {
+//        struct carbon doc, rev_doc;
+//        struct carbon_revise revise;
+//        struct carbon_array_it it;
+//        struct carbon_insert inserter;
+//
+//        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
+//
+//        carbon_revise_begin(&revise, &rev_doc, &doc);
+//        carbon_revise_iterator_open(&it, &revise);
+//        carbon_array_it_insert_begin(&inserter, &it);
+//        const char *data = "{ \"Message\": \"Hello World\" }";
+//        bool status = carbon_insert_binary(&inserter, data, strlen(data), NULL, "my data");
+//        ASSERT_TRUE(status);
+//        ////carbon_hexdump_print(stdout, &rev_doc);
+//        carbon_insert_drop(&inserter);
+//        carbon_array_it_drop(&it);
+//        carbon_revise_end(&revise);
+//
+//        // carbon_print(stdout, &rev_doc);
+//
+//        carbon_drop(&doc);
+//        carbon_drop(&rev_doc);
+//}
+//
+//TEST(CarbonTest, BisonInsertTwoMimeTypedBlob) {
+//        struct carbon doc, rev_doc;
+//        struct carbon_revise revise;
+//        struct carbon_array_it it;
+//        struct carbon_insert inserter;
+//
+//        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
+//
+//        carbon_revise_begin(&revise, &rev_doc, &doc);
+//        carbon_revise_iterator_open(&it, &revise);
+//        carbon_array_it_insert_begin(&inserter, &it);
+//        const char *data1 = "{ \"Message\": \"Hello World\" }";
+//        const char *data2 = "{ \"Blog-Header\": \"My Fancy Blog\" }";
+//        bool status = carbon_insert_binary(&inserter, data1, strlen(data1), "json", NULL);
+//        ASSERT_TRUE(status);
+//        status = carbon_insert_binary(&inserter, data2, strlen(data2), "txt", NULL);
+//        ASSERT_TRUE(status);
+//        ////carbon_hexdump_print(stdout, &rev_doc);
+//        carbon_insert_drop(&inserter);
+//        carbon_array_it_drop(&it);
+//        carbon_revise_end(&revise);
+//
+//        // carbon_print(stdout, &rev_doc);
+//
+//        carbon_drop(&doc);
+//        carbon_drop(&rev_doc);
+//}
+//
+//TEST(CarbonTest, BisonInsertMimeTypedBlobsWithOverflow) {
+//        struct carbon doc, rev_doc;
+//        struct carbon_revise revise;
+//        struct carbon_array_it it;
+//        struct carbon_insert inserter;
+//
+//        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
+//
+//        carbon_revise_begin(&revise, &rev_doc, &doc);
+//        carbon_revise_iterator_open(&it, &revise);
+//        carbon_array_it_insert_begin(&inserter, &it);
+//        const char *data1 = "{ \"Message\": \"Hello World\" }";
+//        const char *data2 = "{ \"Blog-Header\": \"My Fancy Blog\" }";
+//        for (u32 i = 0; i < 100; i++) {
+//                bool status = carbon_insert_binary(&inserter, i % 2 == 0 ? data1 : data2,
+//                        strlen(i % 2 == 0 ? data1 : data2), "json", NULL);
+//                ASSERT_TRUE(status);
+//        }
+//        //carbon_hexdump_print(stdout, &rev_doc);
+//
+//        carbon_insert_drop(&inserter);
+//        carbon_array_it_drop(&it);
+//        carbon_revise_end(&revise);
+//
+//        // carbon_print(stdout, &rev_doc);
+//
+//        carbon_drop(&doc);
+//        carbon_drop(&rev_doc);
+//}
+//
+//TEST(CarbonTest, BisonInsertMixedTypedBlobsWithOverflow) {
+//        struct carbon doc, rev_doc;
+//        struct carbon_revise revise;
+//        struct carbon_array_it it;
+//        struct carbon_insert inserter;
+//
+//        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
+//
+//        carbon_revise_begin(&revise, &rev_doc, &doc);
+//        carbon_revise_iterator_open(&it, &revise);
+//        carbon_array_it_insert_begin(&inserter, &it);
+//        const char *data1 = "{ \"Message\": \"Hello World\" }";
+//        const char *data2 = "{ \"Blog-Header\": \"My Fancy Blog\" }";
+//        for (u32 i = 0; i < 100; i++) {
+//                bool status = carbon_insert_binary(&inserter, i % 2 == 0 ? data1 : data2,
+//                        strlen(i % 2 == 0 ? data1 : data2), i % 3 == 0 ? "json" : NULL, i % 5 == 0 ? "user/app" : NULL);
+//                ASSERT_TRUE(status);
+//        }
+//        ////carbon_hexdump_print(stdout, &rev_doc);
+//        carbon_insert_drop(&inserter);
+//        carbon_array_it_drop(&it);
+//        carbon_revise_end(&revise);
+//
+//        //carbon_print(stdout, &rev_doc);
+//
+//        carbon_drop(&doc);
+//        carbon_drop(&rev_doc);
+//}
+//
+//TEST(CarbonTest, BisonInsertArrayWithNoOverflow) {
+//        struct carbon doc, rev_doc;
+//        struct carbon_revise revise;
+//        struct carbon_array_it it;
+//        struct carbon_insert inserter;
+//        struct carbon_insert_array_state array_state;
+//
+//        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
+//
+//        carbon_revise_begin(&revise, &rev_doc, &doc);
+//        carbon_revise_iterator_open(&it, &revise);
+//        carbon_array_it_insert_begin(&inserter, &it);
+//        //carbon_hexdump_print(stdout, &rev_doc);
+//
+//        struct carbon_insert *nested_inserter = carbon_insert_array_begin(&array_state, &inserter, 10);
+//        ASSERT_TRUE(nested_inserter != NULL);
+//        carbon_insert_array_end(&array_state);
+//
+//        //carbon_hexdump_print(stdout, &rev_doc);
+//        carbon_insert_drop(&inserter);
+//        carbon_array_it_drop(&it);
+//        carbon_revise_end(&revise);
+//
+//        //carbon_hexdump_print(stdout, &rev_doc);
+//        // carbon_print(stdout, &rev_doc);
+//
+//        carbon_drop(&doc);
+//        carbon_drop(&rev_doc);
+//}
+//
+//TEST(CarbonTest, BisonInsertValuesIntoNestedArrayWithNoOverflow) {
+//        struct carbon doc, rev_doc;
+//        struct carbon_revise revise;
+//        struct carbon_array_it it;
+//        struct carbon_insert inserter;
+//        struct carbon_insert_array_state array_state;
+//
+//        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
+//
+//        carbon_revise_begin(&revise, &rev_doc, &doc);
+//        carbon_revise_iterator_open(&it, &revise);
+//        carbon_array_it_insert_begin(&inserter, &it);
+//
+//        carbon_insert_null(&inserter);
+//        carbon_insert_null(&inserter);
+//        carbon_insert_null(&inserter);
+//
+//        struct carbon_insert *nested_inserter = carbon_insert_array_begin(&array_state, &inserter, 10);
+//        ASSERT_TRUE(nested_inserter != NULL);
+//        carbon_insert_true(nested_inserter);
+//        carbon_insert_true(nested_inserter);
+//        carbon_insert_true(nested_inserter);
+//        carbon_insert_array_end(&array_state);
+//
+//        carbon_insert_false(&inserter);
+//        carbon_insert_false(&inserter);
+//        carbon_insert_false(&inserter);
+//
+//
+//        //carbon_hexdump_print(stdout, &rev_doc);
+//        carbon_insert_drop(&inserter);
+//        carbon_array_it_drop(&it);
+//        carbon_revise_end(&revise);
+//
+//        // carbon_print(stdout, &rev_doc);
+//
+//        carbon_drop(&doc);
+//        carbon_drop(&rev_doc);
+//}
+//
+//TEST(CarbonTest, BisonInsert2xNestedArrayWithNoOverflow) {
+//        struct carbon doc, rev_doc;
+//        struct carbon_revise revise;
+//        struct carbon_array_it it;
+//        struct carbon_insert inserter;
+//        struct carbon_insert_array_state array_state_l1, array_state_l2;
+//
+//        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
+//
+//        carbon_revise_begin(&revise, &rev_doc, &doc);
+//        carbon_revise_iterator_open(&it, &revise);
+//        carbon_array_it_insert_begin(&inserter, &it);
+//
+//        carbon_insert_null(&inserter);
+//        carbon_insert_null(&inserter);
+//        carbon_insert_null(&inserter);
+//
+//        struct carbon_insert *nested_inserter_l1 = carbon_insert_array_begin(&array_state_l1, &inserter, 10);
+//        ASSERT_TRUE(nested_inserter_l1 != NULL);
+//        carbon_insert_true(nested_inserter_l1);
+//        carbon_insert_true(nested_inserter_l1);
+//        carbon_insert_true(nested_inserter_l1);
+//
+//        struct carbon_insert *nested_inserter_l2 = carbon_insert_array_begin(&array_state_l2, nested_inserter_l1, 10);
+//        ASSERT_TRUE(nested_inserter_l2 != NULL);
+//        carbon_insert_true(nested_inserter_l2);
+//        carbon_insert_false(nested_inserter_l2);
+//        carbon_insert_null(nested_inserter_l2);
+//        carbon_insert_array_end(&array_state_l2);
+//
+//        carbon_insert_array_end(&array_state_l1);
+//
+//        carbon_insert_false(&inserter);
+//        carbon_insert_false(&inserter);
+//        carbon_insert_false(&inserter);
+//
+//
+//        //carbon_hexdump_print(stdout, &rev_doc);
+//        carbon_insert_drop(&inserter);
+//        carbon_array_it_drop(&it);
+//        carbon_revise_end(&revise);
+//
+//        // carbon_print(stdout, &rev_doc);
+//
+//        carbon_drop(&doc);
+//        carbon_drop(&rev_doc);
+//}
+
+TEST(CarbonTest, BisonInsertXxNestedArrayWithoutOverflow) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
         struct carbon_insert inserter;
+        struct carbon_insert_array_state array_state_l1;
 
         carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
         carbon_array_it_insert_begin(&inserter, &it);
-        for (i32 i = 0; i < 10; i++) {
-                u64 strlen = rand() % (100 + 1 - 4) + 4;
-                char buffer[strlen];
-                for (i32 j = 0; j < strlen; j++) {
-                        buffer[j] = 65 + (rand() % 25);
-                }
-                buffer[0] = '!';
-                buffer[strlen - 2] = '!';
-                buffer[strlen - 1] = '\0';
-                carbon_insert_string(&inserter, buffer);
-                //fprintf(stdout, "after initial push:\n");
-                ////carbon_hexdump_print(stdout, &rev_doc);
+
+        carbon_insert_null(&inserter);
+        carbon_insert_null(&inserter);
+        carbon_insert_null(&inserter);
+
+        for (int i = 0; i < 10; i++) {
+                struct carbon_insert *nested_inserter_l1 = carbon_insert_array_begin(&array_state_l1, &inserter, 10);
+                ASSERT_TRUE(nested_inserter_l1 != NULL);
+                carbon_insert_true(nested_inserter_l1);
+                carbon_insert_true(nested_inserter_l1);
+                carbon_insert_true(nested_inserter_l1);
+                carbon_insert_array_end(&array_state_l1);
         }
-        carbon_insert_drop(&inserter);
-        carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
 
-        // carbon_print(stdout, &rev_doc);
+        carbon_insert_false(&inserter);
+        carbon_insert_false(&inserter);
+        carbon_insert_false(&inserter);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
-}
-
-TEST(CarbonTest, BisonInsertMimeTypedBlob) {
-        struct carbon doc, rev_doc;
-        struct carbon_revise revise;
-        struct carbon_array_it it;
-        struct carbon_insert inserter;
-
-        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
-
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
-        carbon_array_it_insert_begin(&inserter, &it);
-        const char *data = "{ \"Message\": \"Hello World\" }";
-        bool status = carbon_insert_binary(&inserter, data, strlen(data), "json", NULL);
-        ASSERT_TRUE(status);
-
-        carbon_insert_drop(&inserter);
-        carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
-
-        // carbon_print(stdout, &rev_doc);
-
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
-}
-
-TEST(CarbonTest, BisonInsertCustomTypedBlob) {
-        struct carbon doc, rev_doc;
-        struct carbon_revise revise;
-        struct carbon_array_it it;
-        struct carbon_insert inserter;
-
-        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
-
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
-        carbon_array_it_insert_begin(&inserter, &it);
-        const char *data = "{ \"Message\": \"Hello World\" }";
-        bool status = carbon_insert_binary(&inserter, data, strlen(data), NULL, "my data");
-        ASSERT_TRUE(status);
-        ////carbon_hexdump_print(stdout, &rev_doc);
-        carbon_insert_drop(&inserter);
-        carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
-
-        // carbon_print(stdout, &rev_doc);
-
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
-}
-
-TEST(CarbonTest, BisonInsertTwoMimeTypedBlob) {
-        struct carbon doc, rev_doc;
-        struct carbon_revise revise;
-        struct carbon_array_it it;
-        struct carbon_insert inserter;
-
-        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
-
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
-        carbon_array_it_insert_begin(&inserter, &it);
-        const char *data1 = "{ \"Message\": \"Hello World\" }";
-        const char *data2 = "{ \"Blog-Header\": \"My Fancy Blog\" }";
-        bool status = carbon_insert_binary(&inserter, data1, strlen(data1), "json", NULL);
-        ASSERT_TRUE(status);
-        status = carbon_insert_binary(&inserter, data2, strlen(data2), "txt", NULL);
-        ASSERT_TRUE(status);
-        ////carbon_hexdump_print(stdout, &rev_doc);
-        carbon_insert_drop(&inserter);
-        carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
-
-        // carbon_print(stdout, &rev_doc);
-
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
-}
-
-TEST(CarbonTest, BisonInsertMimeTypedBlobsWithOverflow) {
-        struct carbon doc, rev_doc;
-        struct carbon_revise revise;
-        struct carbon_array_it it;
-        struct carbon_insert inserter;
-
-        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
-
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
-        carbon_array_it_insert_begin(&inserter, &it);
-        const char *data1 = "{ \"Message\": \"Hello World\" }";
-        const char *data2 = "{ \"Blog-Header\": \"My Fancy Blog\" }";
-        for (u32 i = 0; i < 100; i++) {
-                bool status = carbon_insert_binary(&inserter, i % 2 == 0 ? data1 : data2,
-                        strlen(i % 2 == 0 ? data1 : data2), "json", NULL);
-                ASSERT_TRUE(status);
-        }
         //carbon_hexdump_print(stdout, &rev_doc);
-
-        carbon_insert_drop(&inserter);
-        carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
-
-        // carbon_print(stdout, &rev_doc);
-
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
-}
-
-TEST(CarbonTest, BisonInsertMixedTypedBlobsWithOverflow) {
-        struct carbon doc, rev_doc;
-        struct carbon_revise revise;
-        struct carbon_array_it it;
-        struct carbon_insert inserter;
-
-        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
-
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
-        carbon_array_it_insert_begin(&inserter, &it);
-        const char *data1 = "{ \"Message\": \"Hello World\" }";
-        const char *data2 = "{ \"Blog-Header\": \"My Fancy Blog\" }";
-        for (u32 i = 0; i < 100; i++) {
-                bool status = carbon_insert_binary(&inserter, i % 2 == 0 ? data1 : data2,
-                        strlen(i % 2 == 0 ? data1 : data2), i % 3 == 0 ? "json" : NULL, i % 5 == 0 ? "user/app" : NULL);
-                ASSERT_TRUE(status);
-        }
-        ////carbon_hexdump_print(stdout, &rev_doc);
         carbon_insert_drop(&inserter);
         carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
         //carbon_print(stdout, &rev_doc);
+        struct string_builder sb;
+        string_builder_create(&sb);
+        carbon_to_str(&sb, JSON_FORMATTER, &rev_doc);
+        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"doc\": [null, null, null, [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], false, false, false]}"));
+        string_builder_drop(&sb);
 
         carbon_drop(&doc);
         carbon_drop(&rev_doc);
 }
 
-TEST(CarbonTest, BisonInsertArrayWithNoOverflow) {
+TEST(CarbonTest, BisonInsertXxNestedArrayWithOverflow) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
         struct carbon_insert inserter;
-        struct carbon_insert_array_state array_state;
-
-        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
-
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
-        carbon_array_it_insert_begin(&inserter, &it);
-        //carbon_hexdump_print(stdout, &rev_doc);
-
-        struct carbon_insert *nested_inserter = carbon_insert_array_begin(&array_state, &inserter, 10);
-        ASSERT_TRUE(nested_inserter != NULL);
-        carbon_insert_array_end(&array_state);
-
-        //carbon_hexdump_print(stdout, &rev_doc);
-        carbon_insert_drop(&inserter);
-        carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
-
-        //carbon_hexdump_print(stdout, &rev_doc);
-        // carbon_print(stdout, &rev_doc);
-
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
-}
-
-TEST(CarbonTest, BisonInsertValuesIntoNestedArrayWithNoOverflow) {
-        struct carbon doc, rev_doc;
-        struct carbon_revise revise;
-        struct carbon_array_it it;
-        struct carbon_insert inserter;
-        struct carbon_insert_array_state array_state;
+        struct carbon_insert_array_state array_state_l1;
 
         carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
 
@@ -637,39 +771,54 @@ TEST(CarbonTest, BisonInsertValuesIntoNestedArrayWithNoOverflow) {
         carbon_revise_iterator_open(&it, &revise);
         carbon_array_it_insert_begin(&inserter, &it);
 
-        carbon_insert_null(&inserter);
-        carbon_insert_null(&inserter);
-        carbon_insert_null(&inserter);
+        //carbon_hexdump_print(stdout, &rev_doc);
+        // printf("\n");
 
-        struct carbon_insert *nested_inserter = carbon_insert_array_begin(&array_state, &inserter, 10);
-        ASSERT_TRUE(nested_inserter != NULL);
-        carbon_insert_true(nested_inserter);
-        carbon_insert_true(nested_inserter);
-        carbon_insert_true(nested_inserter);
-        carbon_insert_array_end(&array_state);
-
-        carbon_insert_false(&inserter);
-        carbon_insert_false(&inserter);
-        carbon_insert_false(&inserter);
-
+        carbon_insert_null(&inserter);
 
         //carbon_hexdump_print(stdout, &rev_doc);
+        // printf("\n");
+
+        carbon_insert_null(&inserter);
+
+        //carbon_hexdump_print(stdout, &rev_doc);
+        // printf("\n");
+
+        carbon_insert_null(&inserter);
+
+        for (int i = 0; i < 10; i++) {
+                struct carbon_insert *nested_inserter_l1 = carbon_insert_array_begin(&array_state_l1, &inserter, 1);
+                ASSERT_TRUE(nested_inserter_l1 != NULL);
+                carbon_insert_true(nested_inserter_l1);
+                carbon_insert_true(nested_inserter_l1);
+                carbon_insert_true(nested_inserter_l1);
+                carbon_insert_array_end(&array_state_l1);
+        }
+
+        carbon_insert_false(&inserter);
+        carbon_insert_false(&inserter);
+        carbon_insert_false(&inserter);
+
         carbon_insert_drop(&inserter);
         carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
         // carbon_print(stdout, &rev_doc);
+        struct string_builder sb;
+        string_builder_create(&sb);
+        carbon_to_str(&sb, JSON_FORMATTER, &rev_doc);
+        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"doc\": [null, null, null, [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], false, false, false]}"));        string_builder_drop(&sb);
 
         carbon_drop(&doc);
         carbon_drop(&rev_doc);
 }
 
-TEST(CarbonTest, BisonInsert2xNestedArrayWithNoOverflow) {
+TEST(CarbonTest, BisonInsertInsertColumnWithoutOverflow) {
         struct carbon doc, rev_doc;
         struct carbon_revise revise;
         struct carbon_array_it it;
         struct carbon_insert inserter;
-        struct carbon_insert_array_state array_state_l1, array_state_l2;
+        struct carbon_insert_column_state column_state;
 
         carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
 
@@ -677,489 +826,340 @@ TEST(CarbonTest, BisonInsert2xNestedArrayWithNoOverflow) {
         carbon_revise_iterator_open(&it, &revise);
         carbon_array_it_insert_begin(&inserter, &it);
 
-        carbon_insert_null(&inserter);
-        carbon_insert_null(&inserter);
-        carbon_insert_null(&inserter);
+        struct carbon_insert *nested_inserter_l1 = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U8, 10);
 
-        struct carbon_insert *nested_inserter_l1 = carbon_insert_array_begin(&array_state_l1, &inserter, 10);
+        //carbon_hexdump_print(stdout, &rev_doc);
+
         ASSERT_TRUE(nested_inserter_l1 != NULL);
-        carbon_insert_true(nested_inserter_l1);
-        carbon_insert_true(nested_inserter_l1);
-        carbon_insert_true(nested_inserter_l1);
+        carbon_insert_u8(nested_inserter_l1, 1);
+        carbon_insert_u8(nested_inserter_l1, 2);
+        carbon_insert_u8(nested_inserter_l1, 3);
+        carbon_insert_column_end(&column_state);
 
-        struct carbon_insert *nested_inserter_l2 = carbon_insert_array_begin(&array_state_l2, nested_inserter_l1, 10);
-        ASSERT_TRUE(nested_inserter_l2 != NULL);
-        carbon_insert_true(nested_inserter_l2);
-        carbon_insert_false(nested_inserter_l2);
-        carbon_insert_null(nested_inserter_l2);
-        carbon_insert_array_end(&array_state_l2);
-
-        carbon_insert_array_end(&array_state_l1);
-
-        carbon_insert_false(&inserter);
-        carbon_insert_false(&inserter);
-        carbon_insert_false(&inserter);
-
-
-        //carbon_hexdump_print(stdout, &rev_doc);
         carbon_insert_drop(&inserter);
         carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
+        //carbon_hexdump_print(stdout, &rev_doc);
+
         // carbon_print(stdout, &rev_doc);
+        struct string_builder sb;
+        string_builder_create(&sb);
+        carbon_to_str(&sb, JSON_FORMATTER, &rev_doc);
+        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"doc\": [[1, 2, 3]]}"));
+        string_builder_drop(&sb);
 
         carbon_drop(&doc);
         carbon_drop(&rev_doc);
 }
-//
-//TEST(CarbonTest, BisonInsertXxNestedArrayWithoutOverflow) {
-//        struct carbon doc, rev_doc;
-//        struct carbon_revise revise;
-//        struct carbon_array_it it;
-//        struct carbon_insert inserter;
-//        struct carbon_insert_array_state array_state_l1;
-//
-//        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
-//
-//        carbon_revise_begin(&revise, &rev_doc, &doc);
-//        carbon_revise_iterator_open(&it, &revise);
-//        carbon_array_it_insert_begin(&inserter, &it);
-//
-//        carbon_insert_null(&inserter);
-//        carbon_insert_null(&inserter);
-//        carbon_insert_null(&inserter);
-//
-//        for (int i = 0; i < 10; i++) {
-//                struct carbon_insert *nested_inserter_l1 = carbon_insert_array_begin(&array_state_l1, &inserter, 10);
-//                ASSERT_TRUE(nested_inserter_l1 != NULL);
-//                carbon_insert_true(nested_inserter_l1);
-//                carbon_insert_true(nested_inserter_l1);
-//                carbon_insert_true(nested_inserter_l1);
-//                carbon_insert_array_end(&array_state_l1);
-//        }
-//
-//        carbon_insert_false(&inserter);
-//        carbon_insert_false(&inserter);
-//        carbon_insert_false(&inserter);
-//
-//        //carbon_hexdump_print(stdout, &rev_doc);
-//        carbon_insert_drop(&inserter);
-//        carbon_array_it_drop(&it);
-//        carbon_revise_end(&revise);
-//
-//        //carbon_print(stdout, &rev_doc);
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//        carbon_to_str(&sb, JSON_FORMATTER, &rev_doc);
-//        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"doc\": [null, null, null, [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], false, false, false]}"));
-//        string_builder_drop(&sb);
-//
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
-//}
-//
-//TEST(CarbonTest, BisonInsertXxNestedArrayWithOverflow) {
-//        struct carbon doc, rev_doc;
-//        struct carbon_revise revise;
-//        struct carbon_array_it it;
-//        struct carbon_insert inserter;
-//        struct carbon_insert_array_state array_state_l1;
-//
-//        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
-//
-//        carbon_revise_begin(&revise, &rev_doc, &doc);
-//        carbon_revise_iterator_open(&it, &revise);
-//        carbon_array_it_insert_begin(&inserter, &it);
-//
-//        //carbon_hexdump_print(stdout, &rev_doc);
-//        // printf("\n");
-//
-//        carbon_insert_null(&inserter);
-//
-//        //carbon_hexdump_print(stdout, &rev_doc);
-//        // printf("\n");
-//
-//        carbon_insert_null(&inserter);
-//
-//        //carbon_hexdump_print(stdout, &rev_doc);
-//        // printf("\n");
-//
-//        carbon_insert_null(&inserter);
-//
-//        for (int i = 0; i < 10; i++) {
-//                struct carbon_insert *nested_inserter_l1 = carbon_insert_array_begin(&array_state_l1, &inserter, 1);
-//                ASSERT_TRUE(nested_inserter_l1 != NULL);
-//                carbon_insert_true(nested_inserter_l1);
-//                carbon_insert_true(nested_inserter_l1);
-//                carbon_insert_true(nested_inserter_l1);
-//                carbon_insert_array_end(&array_state_l1);
-//        }
-//
-//        carbon_insert_false(&inserter);
-//        carbon_insert_false(&inserter);
-//        carbon_insert_false(&inserter);
-//
-//        carbon_insert_drop(&inserter);
-//        carbon_array_it_drop(&it);
-//        carbon_revise_end(&revise);
-//
-//        // carbon_print(stdout, &rev_doc);
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//        carbon_to_str(&sb, JSON_FORMATTER, &rev_doc);
-//        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"doc\": [null, null, null, [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], false, false, false]}"));        string_builder_drop(&sb);
-//
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
-//}
-//
-//TEST(CarbonTest, BisonInsertInsertColumnWithoutOverflow) {
-//        struct carbon doc, rev_doc;
-//        struct carbon_revise revise;
-//        struct carbon_array_it it;
-//        struct carbon_insert inserter;
-//        struct carbon_insert_column_state column_state;
-//
-//        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
-//
-//        carbon_revise_begin(&revise, &rev_doc, &doc);
-//        carbon_revise_iterator_open(&it, &revise);
-//        carbon_array_it_insert_begin(&inserter, &it);
-//
-//        struct carbon_insert *nested_inserter_l1 = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U8, 10);
-//
-//        //carbon_hexdump_print(stdout, &rev_doc);
-//
-//        ASSERT_TRUE(nested_inserter_l1 != NULL);
-//        carbon_insert_u8(nested_inserter_l1, 1);
-//        carbon_insert_u8(nested_inserter_l1, 2);
-//        carbon_insert_u8(nested_inserter_l1, 3);
-//        carbon_insert_column_end(&column_state);
-//
-//        carbon_insert_drop(&inserter);
-//        carbon_array_it_drop(&it);
-//        carbon_revise_end(&revise);
-//
-//        //carbon_hexdump_print(stdout, &rev_doc);
-//
-//        // carbon_print(stdout, &rev_doc);
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//        carbon_to_str(&sb, JSON_FORMATTER, &rev_doc);
-//        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"doc\": [[1, 2, 3]]}"));
-//        string_builder_drop(&sb);
-//
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
-//}
-//
-//TEST(CarbonTest, BisonInsertInsertColumnNumbersWithoutOverflow) {
-//        struct carbon doc, rev_doc;
-//        struct carbon_revise revise;
-//        struct carbon_array_it it;
-//        struct carbon_insert inserter;
-//        struct carbon_insert_column_state column_state;
-//
-//        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
-//
-//        carbon_revise_begin(&revise, &rev_doc, &doc);
-//        carbon_revise_iterator_open(&it, &revise);
-//        carbon_array_it_insert_begin(&inserter, &it);
-//
-//        struct carbon_insert *nested_inserter_l1 = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U8, 10);
-//
-//        ASSERT_TRUE(nested_inserter_l1 != NULL);
-//        carbon_insert_u8(nested_inserter_l1, 42);
-//        carbon_insert_u8(nested_inserter_l1, 43);
-//        carbon_insert_u8(nested_inserter_l1, 44);
-//        carbon_insert_column_end(&column_state);
-//
-//        carbon_insert_drop(&inserter);
-//        carbon_array_it_drop(&it);
-//        carbon_revise_end(&revise);
-//
-//        //carbon_hexdump_print(stdout, &rev_doc);
-//
-//        // carbon_print(stdout, &rev_doc);
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//        carbon_to_str(&sb, JSON_FORMATTER, &rev_doc);
-//        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"doc\": [[42, 43, 44]]}"));
-//        string_builder_drop(&sb);
-//
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
-//}
-//
-//TEST(CarbonTest, BisonInsertInsertColumnNumbersZeroWithoutOverflow) {
-//        struct carbon doc, rev_doc;
-//        struct carbon_revise revise;
-//        struct carbon_array_it it;
-//        struct carbon_insert inserter;
-//        struct carbon_insert_column_state column_state;
-//
-//        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
-//
-//        carbon_revise_begin(&revise, &rev_doc, &doc);
-//        carbon_revise_iterator_open(&it, &revise);
-//        carbon_array_it_insert_begin(&inserter, &it);
-//
-//        struct carbon_insert *nested_inserter_l1 = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U8, 10);
-//
-//        ASSERT_TRUE(nested_inserter_l1 != NULL);
-//        carbon_insert_u8(nested_inserter_l1, 0);
-//        carbon_insert_u8(nested_inserter_l1, 0);
-//        carbon_insert_u8(nested_inserter_l1, 0);
-//        carbon_insert_column_end(&column_state);
-//
-//        carbon_insert_drop(&inserter);
-//        carbon_array_it_drop(&it);
-//        carbon_revise_end(&revise);
-//
-//        //carbon_hexdump_print(stdout, &rev_doc);
-//
-//        // carbon_print(stdout, &rev_doc);
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//        carbon_to_str(&sb, JSON_FORMATTER, &rev_doc);
-//        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"doc\": [[0, 0, 0]]}"));
-//        string_builder_drop(&sb);
-//
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
-//}
-//
-//TEST(CarbonTest, BisonInsertInsertMultileTypedColumnsWithoutOverflow) {
-//        struct carbon doc, rev_doc;
-//        struct carbon_revise revise;
-//        struct carbon_array_it it;
-//        struct carbon_insert inserter;
-//        struct carbon_insert_column_state column_state;
-//        struct carbon_insert *ins;
-//
-//        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
-//
-//        carbon_revise_begin(&revise, &rev_doc, &doc);
-//        carbon_revise_iterator_open(&it, &revise);
-//        carbon_array_it_insert_begin(&inserter, &it);
-//
-//        ins = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U8, 10);
-//        carbon_insert_u8(ins, 1);
-//        carbon_insert_u8(ins, 2);
-//        carbon_insert_u8(ins, 3);
-//        carbon_insert_column_end(&column_state);
-//
-//        ins = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_BOOLEAN, 10);
-//        carbon_insert_true(ins);
-//        carbon_insert_true(ins);
-//        carbon_insert_true(ins);
-//        carbon_insert_column_end(&column_state);
-//
-//        ins = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_BOOLEAN, 10);
-//        carbon_insert_false(ins);
-//        carbon_insert_false(ins);
-//        carbon_insert_false(ins);
-//        carbon_insert_column_end(&column_state);
-//
-//        ins = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U8, 10);
-//        carbon_insert_u8(ins, 1);
-//        carbon_insert_u8(ins, 2);
-//        carbon_insert_u8(ins, 3);
-//        carbon_insert_column_end(&column_state);
-//
-//        ins = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U16, 10);
-//        carbon_insert_u16(ins, 4);
-//        carbon_insert_u16(ins, 5);
-//        carbon_insert_u16(ins, 6);
-//        carbon_insert_column_end(&column_state);
-//
-//        ins = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U32, 10);
-//        carbon_insert_u32(ins, 7);
-//        carbon_insert_u32(ins, 8);
-//        carbon_insert_u32(ins, 9);
-//        carbon_insert_column_end(&column_state);
-//
-//        ins = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U64, 10);
-//        carbon_insert_u64(ins, 10);
-//        carbon_insert_u64(ins, 11);
-//        carbon_insert_u64(ins, 12);
-//        carbon_insert_column_end(&column_state);
-//
-//        ins = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_I8, 10);
-//        carbon_insert_i8(ins, -1);
-//        carbon_insert_i8(ins, -2);
-//        carbon_insert_i8(ins, -3);
-//        carbon_insert_column_end(&column_state);
-//
-//        ins = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_I16, 10);
-//        carbon_insert_i16(ins, -4);
-//        carbon_insert_i16(ins, -5);
-//        carbon_insert_i16(ins, -6);
-//        carbon_insert_column_end(&column_state);
-//
-//        ins = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_I32, 10);
-//        carbon_insert_i32(ins, -7);
-//        carbon_insert_i32(ins, -8);
-//        carbon_insert_i32(ins, -9);
-//        carbon_insert_column_end(&column_state);
-//
-//        ins = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_I64, 10);
-//        carbon_insert_i64(ins, -10);
-//        carbon_insert_i64(ins, -11);
-//        carbon_insert_i64(ins, -12);
-//        carbon_insert_column_end(&column_state);
-//
-//        ins = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_FLOAT, 10);
-//        carbon_insert_float(ins, 42.0f);
-//        carbon_insert_float(ins, 21.0f);
-//        carbon_insert_float(ins, 23.4221f);
-//        carbon_insert_column_end(&column_state);
-//
-//        carbon_insert_drop(&inserter);
-//        carbon_array_it_drop(&it);
-//        carbon_revise_end(&revise);
-//
-//        //carbon_hexdump_print(stdout, &rev_doc);
-//
-//        //carbon_print(stdout, &rev_doc);
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//        carbon_to_str(&sb, JSON_FORMATTER, &rev_doc);
-//        //string_builder_print(&sb);
-//        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"doc\": [[1, 2, 3], [true, true, true], [false, false, false], [1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12], [-1, -2, -3], [-4, -5, -6], [-7, -8, -9], [-10, -11, -12], [42.00, 21.00, 23.42]]}"));
-//        string_builder_drop(&sb);
-//
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
-//}
-//
-//TEST(CarbonTest, BisonInsertInsertColumnNumbersZeroWithOverflow) {
-//        struct carbon doc, rev_doc;
-//        struct carbon_revise revise;
-//        struct carbon_array_it it;
-//        struct carbon_insert inserter;
-//        struct carbon_insert_column_state column_state;
-//
-//        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,16, 1);
-//
-//        carbon_revise_begin(&revise, &rev_doc, &doc);
-//        carbon_revise_iterator_open(&it, &revise);
-//        carbon_array_it_insert_begin(&inserter, &it);
-//
-//        struct carbon_insert *nested_inserter_l1 = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U8, 1);
-//
-//        ASSERT_TRUE(nested_inserter_l1 != NULL);
-//        carbon_insert_u8(nested_inserter_l1, 1);
-//        carbon_insert_u8(nested_inserter_l1, 2);
-//        carbon_insert_u8(nested_inserter_l1, 3);
-//        carbon_insert_column_end(&column_state);
-//
-//        carbon_insert_drop(&inserter);
-//        carbon_array_it_drop(&it);
-//        carbon_revise_end(&revise);
-//
-//        //carbon_hexdump_print(stdout, &rev_doc);
-//
-//        // printf("BISON DOC PRINT:");
-//        // carbon_print(stdout, &rev_doc);
-//        // fflush(stdout);
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//        carbon_to_str(&sb, JSON_FORMATTER, &rev_doc);
-//        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"doc\": [[1, 2, 3]]}"));
-//        string_builder_drop(&sb);
-//
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
-//}
-//
-//TEST(CarbonTest, BisonInsertInsertColumnNumbersWithHighOverflow) {
-//        struct carbon doc, rev_doc;
-//        struct carbon_revise revise;
-//        struct carbon_array_it it;
-//        struct carbon_insert inserter;
-//        struct carbon_insert_column_state column_state;
-//
-//        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,16, 1);
-//
-//        carbon_revise_begin(&revise, &rev_doc, &doc);
-//        carbon_revise_iterator_open(&it, &revise);
-//        carbon_array_it_insert_begin(&inserter, &it);
-//
-//        struct carbon_insert *nested_inserter_l1 = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U32, 1);
-//
-//        ASSERT_TRUE(nested_inserter_l1 != NULL);
-//        for (u32 i = 0; i < 100; i++) {
-//                carbon_insert_u32(nested_inserter_l1, i);
-//                carbon_insert_u32(nested_inserter_l1, i);
-//                carbon_insert_u32(nested_inserter_l1, i);
-//        }
-//
-//        carbon_insert_column_end(&column_state);
-//
-//        carbon_insert_drop(&inserter);
-//        carbon_array_it_drop(&it);
-//        carbon_revise_end(&revise);
-//
-//        //carbon_hexdump_print(stdout, &rev_doc);
-//
-//        // printf("BISON DOC PRINT:");
-//        // carbon_print(stdout, &rev_doc);
-//        // fflush(stdout);
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//        carbon_to_str(&sb, JSON_FORMATTER, &rev_doc);
-//        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"doc\": [[0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 7, 8, 8, 8, 9, 9, 9, 10, 10, 10, 11, 11, 11, 12, 12, 12, 13, 13, 13, 14, 14, 14, 15, 15, 15, 16, 16, 16, 17, 17, 17, 18, 18, 18, 19, 19, 19, 20, 20, 20, 21, 21, 21, 22, 22, 22, 23, 23, 23, 24, 24, 24, 25, 25, 25, 26, 26, 26, 27, 27, 27, 28, 28, 28, 29, 29, 29, 30, 30, 30, 31, 31, 31, 32, 32, 32, 33, 33, 33, 34, 34, 34, 35, 35, 35, 36, 36, 36, 37, 37, 37, 38, 38, 38, 39, 39, 39, 40, 40, 40, 41, 41, 41, 42, 42, 42, 43, 43, 43, 44, 44, 44, 45, 45, 45, 46, 46, 46, 47, 47, 47, 48, 48, 48, 49, 49, 49, 50, 50, 50, 51, 51, 51, 52, 52, 52, 53, 53, 53, 54, 54, 54, 55, 55, 55, 56, 56, 56, 57, 57, 57, 58, 58, 58, 59, 59, 59, 60, 60, 60, 61, 61, 61, 62, 62, 62, 63, 63, 63, 64, 64, 64, 65, 65, 65, 66, 66, 66, 67, 67, 67, 68, 68, 68, 69, 69, 69, 70, 70, 70, 71, 71, 71, 72, 72, 72, 73, 73, 73, 74, 74, 74, 75, 75, 75, 76, 76, 76, 77, 77, 77, 78, 78, 78, 79, 79, 79, 80, 80, 80, 81, 81, 81, 82, 82, 82, 83, 83, 83, 84, 84, 84, 85, 85, 85, 86, 86, 86, 87, 87, 87, 88, 88, 88, 89, 89, 89, 90, 90, 90, 91, 91, 91, 92, 92, 92, 93, 93, 93, 94, 94, 94, 95, 95, 95, 96, 96, 96, 97, 97, 97, 98, 98, 98, 99, 99, 99]]}"));
-//        string_builder_drop(&sb);
-//
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
-//}
-//
-//TEST(CarbonTest, BisonInsertInsertMultipleColumnsNumbersWithHighOverflow) {
-//        struct carbon doc, rev_doc;
-//        struct carbon_revise revise;
-//        struct carbon_array_it it;
-//        struct carbon_insert inserter;
-//        struct carbon_insert_column_state column_state;
-//
-//        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,16, 1);
-//
-//        carbon_revise_begin(&revise, &rev_doc, &doc);
-//        carbon_revise_iterator_open(&it, &revise);
-//        carbon_array_it_insert_begin(&inserter, &it);
-//
-//        for (u32 k = 0; k < 3; k++) {
-//                struct carbon_insert *nested_inserter_l1 = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U32, 1);
-//
-//                ASSERT_TRUE(nested_inserter_l1 != NULL);
-//                for (u32 i = 0; i < 4; i++) {
-//                        carbon_insert_u32(nested_inserter_l1, 'a' + i);
-//                        carbon_insert_u32(nested_inserter_l1, 'a' + i);
-//                        carbon_insert_u32(nested_inserter_l1, 'a' + i);
-//                }
-//
-//                carbon_insert_column_end(&column_state);
-//        }
-//
-//        carbon_insert_drop(&inserter);
-//        carbon_array_it_drop(&it);
-//        carbon_revise_end(&revise);
-//
-//        ////carbon_hexdump_print(stdout, &rev_doc);
-//
-//        // printf("BISON DOC PRINT:");
-//        // carbon_print(stdout, &rev_doc);
-//        // fflush(stdout);
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//        carbon_to_str(&sb, JSON_FORMATTER, &rev_doc);
-//        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"doc\": [[97, 97, 97, 98, 98, 98, 99, 99, 99, 100, 100, 100], [97, 97, 97, 98, 98, 98, 99, 99, 99, 100, 100, 100], [97, 97, 97, 98, 98, 98, 99, 99, 99, 100, 100, 100]]}"));
-//        string_builder_drop(&sb);
-//
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
-//}
+
+TEST(CarbonTest, BisonInsertInsertColumnNumbersWithoutOverflow) {
+        struct carbon doc, rev_doc;
+        struct carbon_revise revise;
+        struct carbon_array_it it;
+        struct carbon_insert inserter;
+        struct carbon_insert_column_state column_state;
+
+        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
+
+        carbon_revise_begin(&revise, &rev_doc, &doc);
+        carbon_revise_iterator_open(&it, &revise);
+        carbon_array_it_insert_begin(&inserter, &it);
+
+        struct carbon_insert *nested_inserter_l1 = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U8, 10);
+
+        ASSERT_TRUE(nested_inserter_l1 != NULL);
+        carbon_insert_u8(nested_inserter_l1, 42);
+        carbon_insert_u8(nested_inserter_l1, 43);
+        carbon_insert_u8(nested_inserter_l1, 44);
+        carbon_insert_column_end(&column_state);
+
+        carbon_insert_drop(&inserter);
+        carbon_array_it_drop(&it);
+        carbon_revise_end(&revise);
+
+        //carbon_hexdump_print(stdout, &rev_doc);
+
+        // carbon_print(stdout, &rev_doc);
+        struct string_builder sb;
+        string_builder_create(&sb);
+        carbon_to_str(&sb, JSON_FORMATTER, &rev_doc);
+        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"doc\": [[42, 43, 44]]}"));
+        string_builder_drop(&sb);
+
+        carbon_drop(&doc);
+        carbon_drop(&rev_doc);
+}
+
+TEST(CarbonTest, BisonInsertInsertColumnNumbersZeroWithoutOverflow) {
+        struct carbon doc, rev_doc;
+        struct carbon_revise revise;
+        struct carbon_array_it it;
+        struct carbon_insert inserter;
+        struct carbon_insert_column_state column_state;
+
+        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
+
+        carbon_revise_begin(&revise, &rev_doc, &doc);
+        carbon_revise_iterator_open(&it, &revise);
+        carbon_array_it_insert_begin(&inserter, &it);
+
+        struct carbon_insert *nested_inserter_l1 = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U8, 10);
+
+        ASSERT_TRUE(nested_inserter_l1 != NULL);
+        carbon_insert_u8(nested_inserter_l1, 0);
+        carbon_insert_u8(nested_inserter_l1, 0);
+        carbon_insert_u8(nested_inserter_l1, 0);
+        carbon_insert_column_end(&column_state);
+
+        carbon_insert_drop(&inserter);
+        carbon_array_it_drop(&it);
+        carbon_revise_end(&revise);
+
+        //carbon_hexdump_print(stdout, &rev_doc);
+
+        // carbon_print(stdout, &rev_doc);
+        struct string_builder sb;
+        string_builder_create(&sb);
+        carbon_to_str(&sb, JSON_FORMATTER, &rev_doc);
+        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"doc\": [[0, 0, 0]]}"));
+        string_builder_drop(&sb);
+
+        carbon_drop(&doc);
+        carbon_drop(&rev_doc);
+}
+
+TEST(CarbonTest, BisonInsertInsertMultileTypedColumnsWithoutOverflow) {
+        struct carbon doc, rev_doc;
+        struct carbon_revise revise;
+        struct carbon_array_it it;
+        struct carbon_insert inserter;
+        struct carbon_insert_column_state column_state;
+        struct carbon_insert *ins;
+
+        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,20, 1);
+
+        carbon_revise_begin(&revise, &rev_doc, &doc);
+        carbon_revise_iterator_open(&it, &revise);
+        carbon_array_it_insert_begin(&inserter, &it);
+
+        ins = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U8, 10);
+        carbon_insert_u8(ins, 1);
+        carbon_insert_u8(ins, 2);
+        carbon_insert_u8(ins, 3);
+        carbon_insert_column_end(&column_state);
+
+        ins = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_BOOLEAN, 10);
+        carbon_insert_true(ins);
+        carbon_insert_true(ins);
+        carbon_insert_true(ins);
+        carbon_insert_column_end(&column_state);
+
+        ins = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_BOOLEAN, 10);
+        carbon_insert_false(ins);
+        carbon_insert_false(ins);
+        carbon_insert_false(ins);
+        carbon_insert_column_end(&column_state);
+
+        ins = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U8, 10);
+        carbon_insert_u8(ins, 1);
+        carbon_insert_u8(ins, 2);
+        carbon_insert_u8(ins, 3);
+        carbon_insert_column_end(&column_state);
+
+        ins = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U16, 10);
+        carbon_insert_u16(ins, 4);
+        carbon_insert_u16(ins, 5);
+        carbon_insert_u16(ins, 6);
+        carbon_insert_column_end(&column_state);
+
+        ins = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U32, 10);
+        carbon_insert_u32(ins, 7);
+        carbon_insert_u32(ins, 8);
+        carbon_insert_u32(ins, 9);
+        carbon_insert_column_end(&column_state);
+
+        ins = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U64, 10);
+        carbon_insert_u64(ins, 10);
+        carbon_insert_u64(ins, 11);
+        carbon_insert_u64(ins, 12);
+        carbon_insert_column_end(&column_state);
+
+        ins = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_I8, 10);
+        carbon_insert_i8(ins, -1);
+        carbon_insert_i8(ins, -2);
+        carbon_insert_i8(ins, -3);
+        carbon_insert_column_end(&column_state);
+
+        ins = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_I16, 10);
+        carbon_insert_i16(ins, -4);
+        carbon_insert_i16(ins, -5);
+        carbon_insert_i16(ins, -6);
+        carbon_insert_column_end(&column_state);
+
+        ins = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_I32, 10);
+        carbon_insert_i32(ins, -7);
+        carbon_insert_i32(ins, -8);
+        carbon_insert_i32(ins, -9);
+        carbon_insert_column_end(&column_state);
+
+        ins = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_I64, 10);
+        carbon_insert_i64(ins, -10);
+        carbon_insert_i64(ins, -11);
+        carbon_insert_i64(ins, -12);
+        carbon_insert_column_end(&column_state);
+
+        ins = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_FLOAT, 10);
+        carbon_insert_float(ins, 42.0f);
+        carbon_insert_float(ins, 21.0f);
+        carbon_insert_float(ins, 23.4221f);
+        carbon_insert_column_end(&column_state);
+
+        carbon_insert_drop(&inserter);
+        carbon_array_it_drop(&it);
+        carbon_revise_end(&revise);
+
+        //carbon_hexdump_print(stdout, &rev_doc);
+
+        //carbon_print(stdout, &rev_doc);
+        struct string_builder sb;
+        string_builder_create(&sb);
+        carbon_to_str(&sb, JSON_FORMATTER, &rev_doc);
+        //string_builder_print(&sb);
+        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"doc\": [[1, 2, 3], [true, true, true], [false, false, false], [1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12], [-1, -2, -3], [-4, -5, -6], [-7, -8, -9], [-10, -11, -12], [42.00, 21.00, 23.42]]}"));
+        string_builder_drop(&sb);
+
+        carbon_drop(&doc);
+        carbon_drop(&rev_doc);
+}
+
+TEST(CarbonTest, BisonInsertInsertColumnNumbersZeroWithOverflow) {
+        struct carbon doc, rev_doc;
+        struct carbon_revise revise;
+        struct carbon_array_it it;
+        struct carbon_insert inserter;
+        struct carbon_insert_column_state column_state;
+
+        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,16, 1);
+
+        carbon_revise_begin(&revise, &rev_doc, &doc);
+        carbon_revise_iterator_open(&it, &revise);
+        carbon_array_it_insert_begin(&inserter, &it);
+
+        struct carbon_insert *nested_inserter_l1 = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U8, 1);
+
+        ASSERT_TRUE(nested_inserter_l1 != NULL);
+        carbon_insert_u8(nested_inserter_l1, 1);
+        carbon_insert_u8(nested_inserter_l1, 2);
+        carbon_insert_u8(nested_inserter_l1, 3);
+        carbon_insert_column_end(&column_state);
+
+        carbon_insert_drop(&inserter);
+        carbon_array_it_drop(&it);
+        carbon_revise_end(&revise);
+
+        //carbon_hexdump_print(stdout, &rev_doc);
+
+        // printf("BISON DOC PRINT:");
+        // carbon_print(stdout, &rev_doc);
+        // fflush(stdout);
+        struct string_builder sb;
+        string_builder_create(&sb);
+        carbon_to_str(&sb, JSON_FORMATTER, &rev_doc);
+        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"doc\": [[1, 2, 3]]}"));
+        string_builder_drop(&sb);
+
+        carbon_drop(&doc);
+        carbon_drop(&rev_doc);
+}
+
+TEST(CarbonTest, BisonInsertInsertColumnNumbersWithHighOverflow) {
+        struct carbon doc, rev_doc;
+        struct carbon_revise revise;
+        struct carbon_array_it it;
+        struct carbon_insert inserter;
+        struct carbon_insert_column_state column_state;
+
+        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,16, 1);
+
+        carbon_revise_begin(&revise, &rev_doc, &doc);
+        carbon_revise_iterator_open(&it, &revise);
+        carbon_array_it_insert_begin(&inserter, &it);
+
+        struct carbon_insert *nested_inserter_l1 = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U32, 1);
+
+        ASSERT_TRUE(nested_inserter_l1 != NULL);
+        for (u32 i = 0; i < 100; i++) {
+                carbon_insert_u32(nested_inserter_l1, i);
+                carbon_insert_u32(nested_inserter_l1, i);
+                carbon_insert_u32(nested_inserter_l1, i);
+        }
+
+        carbon_insert_column_end(&column_state);
+
+        carbon_insert_drop(&inserter);
+        carbon_array_it_drop(&it);
+        carbon_revise_end(&revise);
+
+        //carbon_hexdump_print(stdout, &rev_doc);
+
+        // printf("BISON DOC PRINT:");
+        // carbon_print(stdout, &rev_doc);
+        // fflush(stdout);
+        struct string_builder sb;
+        string_builder_create(&sb);
+        carbon_to_str(&sb, JSON_FORMATTER, &rev_doc);
+        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"doc\": [[0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 7, 8, 8, 8, 9, 9, 9, 10, 10, 10, 11, 11, 11, 12, 12, 12, 13, 13, 13, 14, 14, 14, 15, 15, 15, 16, 16, 16, 17, 17, 17, 18, 18, 18, 19, 19, 19, 20, 20, 20, 21, 21, 21, 22, 22, 22, 23, 23, 23, 24, 24, 24, 25, 25, 25, 26, 26, 26, 27, 27, 27, 28, 28, 28, 29, 29, 29, 30, 30, 30, 31, 31, 31, 32, 32, 32, 33, 33, 33, 34, 34, 34, 35, 35, 35, 36, 36, 36, 37, 37, 37, 38, 38, 38, 39, 39, 39, 40, 40, 40, 41, 41, 41, 42, 42, 42, 43, 43, 43, 44, 44, 44, 45, 45, 45, 46, 46, 46, 47, 47, 47, 48, 48, 48, 49, 49, 49, 50, 50, 50, 51, 51, 51, 52, 52, 52, 53, 53, 53, 54, 54, 54, 55, 55, 55, 56, 56, 56, 57, 57, 57, 58, 58, 58, 59, 59, 59, 60, 60, 60, 61, 61, 61, 62, 62, 62, 63, 63, 63, 64, 64, 64, 65, 65, 65, 66, 66, 66, 67, 67, 67, 68, 68, 68, 69, 69, 69, 70, 70, 70, 71, 71, 71, 72, 72, 72, 73, 73, 73, 74, 74, 74, 75, 75, 75, 76, 76, 76, 77, 77, 77, 78, 78, 78, 79, 79, 79, 80, 80, 80, 81, 81, 81, 82, 82, 82, 83, 83, 83, 84, 84, 84, 85, 85, 85, 86, 86, 86, 87, 87, 87, 88, 88, 88, 89, 89, 89, 90, 90, 90, 91, 91, 91, 92, 92, 92, 93, 93, 93, 94, 94, 94, 95, 95, 95, 96, 96, 96, 97, 97, 97, 98, 98, 98, 99, 99, 99]]}"));
+        string_builder_drop(&sb);
+
+        carbon_drop(&doc);
+        carbon_drop(&rev_doc);
+}
+
+TEST(CarbonTest, BisonInsertInsertMultipleColumnsNumbersWithHighOverflow) {
+        struct carbon doc, rev_doc;
+        struct carbon_revise revise;
+        struct carbon_array_it it;
+        struct carbon_insert inserter;
+        struct carbon_insert_column_state column_state;
+
+        carbon_create_empty_ex(&doc, CARBON_KEY_AUTOKEY,16, 1);
+
+        carbon_revise_begin(&revise, &rev_doc, &doc);
+        carbon_revise_iterator_open(&it, &revise);
+        carbon_array_it_insert_begin(&inserter, &it);
+
+        for (u32 k = 0; k < 3; k++) {
+                struct carbon_insert *nested_inserter_l1 = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U32, 1);
+
+                ASSERT_TRUE(nested_inserter_l1 != NULL);
+                for (u32 i = 0; i < 4; i++) {
+                        carbon_insert_u32(nested_inserter_l1, 'a' + i);
+                        carbon_insert_u32(nested_inserter_l1, 'a' + i);
+                        carbon_insert_u32(nested_inserter_l1, 'a' + i);
+                }
+
+                carbon_insert_column_end(&column_state);
+        }
+
+        carbon_insert_drop(&inserter);
+        carbon_array_it_drop(&it);
+        carbon_revise_end(&revise);
+
+        ////carbon_hexdump_print(stdout, &rev_doc);
+
+        // printf("BISON DOC PRINT:");
+        // carbon_print(stdout, &rev_doc);
+        // fflush(stdout);
+        struct string_builder sb;
+        string_builder_create(&sb);
+        carbon_to_str(&sb, JSON_FORMATTER, &rev_doc);
+        ASSERT_TRUE(0 == strcmp(string_builder_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"doc\": [[97, 97, 97, 98, 98, 98, 99, 99, 99, 100, 100, 100], [97, 97, 97, 98, 98, 98, 99, 99, 99, 100, 100, 100], [97, 97, 97, 98, 98, 98, 99, 99, 99, 100, 100, 100]]}"));
+        string_builder_drop(&sb);
+
+        carbon_drop(&doc);
+        carbon_drop(&rev_doc);
+}
 //
 //TEST(CarbonTest, BisonInsertNullTest) {
 //        struct carbon doc, rev_doc;
