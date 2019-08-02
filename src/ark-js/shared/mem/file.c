@@ -22,6 +22,7 @@ bool memfile_open(struct memfile *file, struct memblock *block, enum access_mode
 {
         error_if_null(file)
         error_if_null(block)
+        ark_zero_memory(file, sizeof(struct memfile))
         file->memblock = block;
         file->pos = 0;
         file->bit_mode = false;
@@ -65,13 +66,13 @@ bool memfile_rewind(struct memfile *file)
         return true;
 }
 
-ARK_EXPORT(bool) memfile_grow(struct memfile *file_in, size_t grow_by_bytes, bool zero_out)
+ARK_EXPORT(bool) memfile_grow(struct memfile *file_in, size_t grow_by_bytes)
 {
         error_if_null(file_in)
         if (likely(grow_by_bytes > 0)) {
                 offset_t block_size;
                 memblock_size(&block_size, file_in->memblock);
-                memblock_resize_ex(file_in->memblock, (block_size + grow_by_bytes), zero_out);
+                memblock_resize(file_in->memblock, (block_size + grow_by_bytes));
         }
         return true;
 }
@@ -332,7 +333,7 @@ ARK_EXPORT(bool) memfile_ensure_space(struct memfile *memfile, u64 nbytes)
         assert(memfile->pos < block_size);
         size_t diff = block_size - memfile->pos;
         if (diff < nbytes) {
-                memfile_grow(memfile, nbytes - diff, true);
+                memfile_grow(memfile, nbytes - diff);
         }
 
         memfile_save_position(memfile);

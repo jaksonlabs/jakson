@@ -72,7 +72,7 @@ ARK_EXPORT(bool) memfile_seek(struct memfile *file, offset_t pos);
 
 ARK_EXPORT(bool) memfile_rewind(struct memfile *file);
 
-ARK_EXPORT(bool) memfile_grow(struct memfile *file_in, size_t grow_by_bytes, bool zero_out);
+ARK_EXPORT(bool) memfile_grow(struct memfile *file_in, size_t grow_by_bytes);
 
 ARK_EXPORT(bool) memfile_get_offset(offset_t *pos, const struct memfile *file);
 

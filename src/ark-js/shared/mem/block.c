@@ -92,15 +92,10 @@ const char *memblock_raw_data(const struct memblock *block)
 
 ARK_EXPORT(bool) memblock_resize(struct memblock *block, size_t size)
 {
-        return memblock_resize_ex(block, size, false);
-}
-
-bool memblock_resize_ex(struct memblock *block, size_t size, bool zero_out)
-{
         error_if_null(block)
         error_print_if(size == 0, ARK_ERR_ILLEGALARG)
         block->base = realloc(block->base, size);
-        if (zero_out) {
+        if (size > block->blockLength) {
                 ark_zero_memory(block->base + block->blockLength, (size - block->blockLength));
         }
         block->blockLength = size;
