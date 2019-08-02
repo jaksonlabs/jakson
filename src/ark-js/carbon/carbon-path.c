@@ -225,6 +225,7 @@ static inline enum carbon_path_status traverse_array(struct carbon_path_evaluato
                         assert(current_array_idx <= requested_array_idx);
                         if (current_array_idx != requested_array_idx) {
                                 /* root array has too less elements to reach the requested index */
+                                carbon_array_it_drop(it);
                                 return carbon_PATH_NOSUCHINDEX;
                         } else {
                                 /* requested index is reached; depending on the subsequent path, lookup may stops */
@@ -290,6 +291,7 @@ static inline enum carbon_path_status traverse_array(struct carbon_path_evaluato
                                                         return carbon_PATH_INTERNAL;
                                                 }
                                         }
+                                        carbon_array_it_drop(it);
                                 } else {
                                         /* path end is reached */
                                         state->result.container_type = CARBON_ARRAY;
