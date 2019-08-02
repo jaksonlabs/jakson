@@ -1666,81 +1666,81 @@ TEST(CarbonTest, BisonDotNotationParsing) {
 
         string_builder_drop(&sb);
 }
-//
-//TEST(CarbonTest, BisonFind) {
-//        struct carbon doc, rev_doc;
-//        struct carbon_revise revise;
-//        struct carbon_array_it it;
-//        struct carbon_insert ins;
-//        struct carbon_find finder;
-//        u64 result_unsigned;
-//        enum carbon_field_type type;
-//        carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
-//
-//        carbon_revise_begin(&revise, &rev_doc, &doc);
-//
-//        carbon_revise_iterator_open(&it, &revise);
-//        carbon_array_it_insert_begin(&ins, &it);
-//        carbon_insert_u8(&ins, 'a');
-//        carbon_insert_u8(&ins, 'b');
-//        carbon_insert_u8(&ins, 'c');
-//        carbon_array_it_insert_end(&ins);
-//        carbon_revise_iterator_close(&it);
-//        carbon_revise_end(&revise);
-//
-//        {
-//                carbon_find_open(&finder, "0", &rev_doc);
-//
-//                ASSERT_TRUE(carbon_find_has_result(&finder));
-//
-//                carbon_find_result_type(&type, &finder);
-//                ASSERT_EQ(type, CARBON_FIELD_TYPE_NUMBER_U8);
-//
-//                carbon_find_result_unsigned(&result_unsigned, &finder);
-//                ASSERT_EQ(result_unsigned, 'a');
-//
-//                carbon_find_close(&finder);
-//        }
-//
-//        {
-//                carbon_find_open(&finder, "1", &rev_doc);
-//
-//                ASSERT_TRUE(carbon_find_has_result(&finder));
-//
-//                carbon_find_result_type(&type, &finder);
-//                ASSERT_EQ(type, CARBON_FIELD_TYPE_NUMBER_U8);
-//
-//                carbon_find_result_unsigned(&result_unsigned, &finder);
-//                ASSERT_EQ(result_unsigned, 'b');
-//
-//                carbon_find_close(&finder);
-//        }
-//
-//        {
-//                carbon_find_open(&finder, "2", &rev_doc);
-//
-//                ASSERT_TRUE(carbon_find_has_result(&finder));
-//
-//                carbon_find_result_type(&type, &finder);
-//                ASSERT_EQ(type, CARBON_FIELD_TYPE_NUMBER_U8);
-//
-//                carbon_find_result_unsigned(&result_unsigned, &finder);
-//                ASSERT_EQ(result_unsigned, 'c');
-//
-//                carbon_find_close(&finder);
-//        }
-//
-//        {
-//                carbon_find_open(&finder, "3", &rev_doc);
-//
-//                ASSERT_FALSE(carbon_find_has_result(&finder));
-//
-//                carbon_find_close(&finder);
-//        }
-//
-//        // carbon_print(stdout, &rev_doc);
-//        carbon_drop(&doc);
-//}
+
+TEST(CarbonTest, BisonFind) {
+        struct carbon doc, rev_doc;
+        struct carbon_revise revise;
+        struct carbon_array_it it;
+        struct carbon_insert ins;
+        struct carbon_find finder;
+        u64 result_unsigned;
+        enum carbon_field_type type;
+        carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
+
+        carbon_revise_begin(&revise, &rev_doc, &doc);
+
+        carbon_revise_iterator_open(&it, &revise);
+        carbon_array_it_insert_begin(&ins, &it);
+        carbon_insert_u8(&ins, 'a');
+        carbon_insert_u8(&ins, 'b');
+        carbon_insert_u8(&ins, 'c');
+        carbon_array_it_insert_end(&ins);
+        carbon_revise_iterator_close(&it);
+        carbon_revise_end(&revise);
+
+        {
+                carbon_find_open(&finder, "0", &rev_doc);
+
+                ASSERT_TRUE(carbon_find_has_result(&finder));
+
+                carbon_find_result_type(&type, &finder);
+                ASSERT_EQ(type, CARBON_FIELD_TYPE_NUMBER_U8);
+
+                carbon_find_result_unsigned(&result_unsigned, &finder);
+                ASSERT_EQ(result_unsigned, 'a');
+
+                carbon_find_close(&finder);
+        }
+
+        {
+                carbon_find_open(&finder, "1", &rev_doc);
+
+                ASSERT_TRUE(carbon_find_has_result(&finder));
+
+                carbon_find_result_type(&type, &finder);
+                ASSERT_EQ(type, CARBON_FIELD_TYPE_NUMBER_U8);
+
+                carbon_find_result_unsigned(&result_unsigned, &finder);
+                ASSERT_EQ(result_unsigned, 'b');
+
+                carbon_find_close(&finder);
+        }
+
+        {
+                carbon_find_open(&finder, "2", &rev_doc);
+
+                ASSERT_TRUE(carbon_find_has_result(&finder));
+
+                carbon_find_result_type(&type, &finder);
+                ASSERT_EQ(type, CARBON_FIELD_TYPE_NUMBER_U8);
+
+                carbon_find_result_unsigned(&result_unsigned, &finder);
+                ASSERT_EQ(result_unsigned, 'c');
+
+                carbon_find_close(&finder);
+        }
+
+        {
+                carbon_find_open(&finder, "3", &rev_doc);
+
+                ASSERT_FALSE(carbon_find_has_result(&finder));
+
+                carbon_find_close(&finder);
+        }
+
+        // carbon_print(stdout, &rev_doc);
+        carbon_drop(&doc);
+}
 //
 //TEST(CarbonTest, BisonFindTypes) {
 //        struct carbon doc, rev_doc;
