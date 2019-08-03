@@ -54,14 +54,14 @@ struct carbon_dot_path
 
 enum carbon_path_status
 {
-        carbon_PATH_RESOLVED,
-        carbon_PATH_EMPTY_DOC,
-        carbon_PATH_NOSUCHINDEX,
-        carbon_PATH_NOTTRAVERSABLE,
-        carbon_PATH_NOCONTAINER,
-        carbon_PATH_NOTANOBJECT,
-        carbon_PATH_NONESTING,
-        carbon_PATH_INTERNAL
+        CARBON_PATH_RESOLVED,
+        CARBON_PATH_EMPTY_DOC,
+        CARBON_PATH_NOSUCHINDEX,
+        CARBON_PATH_NOTTRAVERSABLE,
+        CARBON_PATH_NOCONTAINER,
+        CARBON_PATH_NOTANOBJECT,
+        CARBON_PATH_NONESTING,
+        CARBON_PATH_INTERNAL
 };
 
 ARK_DEFINE_ERROR_GETTER(carbon_dot_path)

@@ -210,7 +210,7 @@ ARK_EXPORT(bool) carbon_revise_remove(const char *dot_path, struct carbon_revise
         if (carbon_dot_path_from_string(&dot, dot_path)) {
                 carbon_path_evaluator_begin_mutable(&eval, &dot, context);
 
-                if (eval.status != carbon_PATH_RESOLVED) {
+                if (eval.status != CARBON_PATH_RESOLVED) {
                         result = false;
                 } else {
                         switch (eval.result.container_type) {
