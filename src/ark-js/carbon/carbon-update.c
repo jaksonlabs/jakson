@@ -219,7 +219,7 @@ static inline struct carbon_array_it *array_iterator(struct carbon_update *updat
 static inline struct carbon_column_it *column_iterator(u32 *elem_pos, struct carbon_update *updater)
 {
         *elem_pos = updater->path_evaluater.result.containers.column.elem_pos;
-        return updater->path_evaluater.result.containers.column.it;
+        return &updater->path_evaluater.result.containers.column.it;
 }
 
 #define compile_path_and_delegate(context, path, func)                                                                 \

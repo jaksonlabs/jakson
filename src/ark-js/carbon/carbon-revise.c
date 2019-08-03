@@ -219,7 +219,7 @@ ARK_EXPORT(bool) carbon_revise_remove(const char *dot_path, struct carbon_revise
                                 result = carbon_array_it_remove(it);
                         } break;
                         case CARBON_COLUMN:  {
-                                struct carbon_column_it *it = eval.result.containers.column.it;
+                                struct carbon_column_it *it = &eval.result.containers.column.it;
                                 u32 elem_pos = eval.result.containers.column.elem_pos;
                                 result = carbon_column_it_remove(it, elem_pos);
                         } break;

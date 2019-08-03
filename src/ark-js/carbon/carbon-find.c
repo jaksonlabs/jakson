@@ -82,7 +82,7 @@ ARK_EXPORT(bool) carbon_find_create(struct carbon_find *find, struct carbon_dot_
                         break;
                 case CARBON_COLUMN:
                         result_from_column(find, find->path_evaluater.result.containers.column.elem_pos,
-                                find->path_evaluater.result.containers.column.it);
+                                &find->path_evaluater.result.containers.column.it);
                         break;
                 default:
                         error(&path->err, ARK_ERR_INTERNALERR);

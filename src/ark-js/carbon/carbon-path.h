@@ -39,7 +39,7 @@ struct carbon_path_evaluator
 
 
                         struct {
-                                struct carbon_column_it *it;
+                                struct carbon_column_it it;
                                 u32 elem_pos;
                         } column;
 

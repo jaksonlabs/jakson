@@ -275,6 +275,7 @@ static inline enum carbon_path_status traverse_array(struct carbon_path_evaluato
                                                                 if (elem_type == CARBON_FIELD_TYPE_ARRAY) {
                                                                         struct carbon_array_it *sub_it = carbon_array_it_array_value(it);
                                                                         status = traverse_array(state, path, next_path_pos, sub_it);
+                                                                        carbon_array_it_drop(sub_it);
                                                                         return status;
                                                                 } else {
                                                                         assert(elem_type == CARBON_FIELD_TYPE_COLUMN_U8 ||
@@ -354,7 +355,7 @@ static inline enum carbon_path_status traverse_column(struct carbon_path_evaluat
                         return CARBON_PATH_NOSUCHINDEX;
                 } else {
                         state->result.container_type = CARBON_COLUMN;
-                        state->result.containers.column.it = it;
+                        carbon_column_it_clone(&state->result.containers.column.it, it);
                         state->result.containers.column.elem_pos = requested_idx;
                         return CARBON_PATH_RESOLVED;
                 }
