@@ -161,6 +161,19 @@ ARK_EXPORT(bool) carbon_array_it_copy(struct carbon_array_it *dst, struct carbon
         return true;
 }
 
+ARK_EXPORT(bool) carbon_array_it_clone(struct carbon_array_it *dst, struct carbon_array_it *src)
+{
+        memfile_clone(&dst->memfile, &src->memfile);
+        dst->payload_start = src->payload_start;
+        spin_init(&dst->lock);
+        error_cpy(&dst->err, &src->err);
+        dst->mod_size = src->mod_size;
+        dst->array_end_reached = src->array_end_reached;
+        vec_cpy(&dst->history, &src->history);
+        carbon_int_field_access_clone(&dst->field_access, &src->field_access);
+        return true;
+}
+
 ARK_EXPORT(bool) carbon_array_it_readonly(struct carbon_array_it *it)
 {
         error_if_null(it);

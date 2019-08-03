@@ -74,11 +74,15 @@ ARK_EXPORT(bool) carbon_column_it_create(struct carbon_column_it *it, struct mem
 
 ARK_EXPORT(bool) carbon_column_it_clone(struct carbon_column_it *dst, struct carbon_column_it *src)
 {
-        error_if_null(dst)
-        error_if_null(src)
-
-        carbon_column_it_create(dst, &src->memfile, &src->err, src->column_start_offset);
-
+        memfile_clone(&dst->memfile, &src->memfile);
+        dst->num_and_capacity_start_offset = src->num_and_capacity_start_offset;
+        dst->column_start_offset = src->column_start_offset;
+        error_cpy(&dst->err, &src->err);
+        dst->type = src->type;
+        dst->mod_size = src->mod_size;
+        dst->column_capacity = src->column_capacity;
+        dst->column_num_elements = src->column_num_elements;
+        spin_init(&dst->lock);
         return true;
 }
 

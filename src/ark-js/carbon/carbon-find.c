@@ -78,7 +78,7 @@ ARK_EXPORT(bool) carbon_find_create(struct carbon_find *find, struct carbon_dot_
         if (carbon_path_evaluator_has_result(&find->path_evaluater)) {
                 switch (find->path_evaluater.result.container_type) {
                 case CARBON_ARRAY:
-                        result_from_array(find, find->path_evaluater.result.containers.array.it);
+                        result_from_array(find, &find->path_evaluater.result.containers.array.it);
                         break;
                 case CARBON_COLUMN:
                         result_from_column(find, find->path_evaluater.result.containers.column.elem_pos,

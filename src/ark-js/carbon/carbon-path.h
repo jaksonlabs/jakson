@@ -34,7 +34,7 @@ struct carbon_path_evaluator
                 enum carbon_container_type container_type;
                 union {
                         struct {
-                                struct carbon_array_it *it;
+                                struct carbon_array_it it;
                         } array;
 
 

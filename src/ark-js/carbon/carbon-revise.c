@@ -215,7 +215,7 @@ ARK_EXPORT(bool) carbon_revise_remove(const char *dot_path, struct carbon_revise
                 } else {
                         switch (eval.result.container_type) {
                         case CARBON_ARRAY: {
-                                struct carbon_array_it *it = eval.result.containers.array.it;
+                                struct carbon_array_it *it = &eval.result.containers.array.it;
                                 result = carbon_array_it_remove(it);
                         } break;
                         case CARBON_COLUMN:  {

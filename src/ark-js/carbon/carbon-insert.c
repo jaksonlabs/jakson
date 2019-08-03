@@ -907,7 +907,7 @@ static bool push_media_type_for_array(struct carbon_insert *inserter, enum carbo
 
 static void internal_create(struct carbon_insert *inserter, struct memfile *src, offset_t pos)
 {
-        memfile_dup(&inserter->memfile, src);
+        memfile_clone(&inserter->memfile, src);
         error_init(&inserter->err);
         inserter->position = pos ? pos : memfile_tell(src);
         memfile_seek(&inserter->memfile, inserter->position);

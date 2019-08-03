@@ -18,6 +18,7 @@
 #include <ark-js/carbon/carbon-path.h>
 #include <ark-js/carbon/carbon-find.h>
 #include <ark-js/carbon/carbon-revise.h>
+#include "carbon-path.h"
 
 static inline enum carbon_path_status traverse_column(struct carbon_path_evaluator *state,
         const struct carbon_dot_path *path, u32 current_path_pos, struct carbon_column_it *it);
@@ -37,6 +38,7 @@ ARK_EXPORT(bool) carbon_path_evaluator_begin(struct carbon_path_evaluator *eval,
         ark_check_success(error_init(&eval->err));
         ark_check_success(carbon_iterator_open(&eval->root_it, eval->doc));
         eval->status = traverse_array(eval, path, 0, &eval->root_it);
+        ark_check_success(carbon_iterator_close(&eval->root_it));
         return true;
 }
 
@@ -71,7 +73,20 @@ ARK_EXPORT(bool) carbon_path_evaluator_has_result(struct carbon_path_evaluator *
 ARK_EXPORT(bool) carbon_path_evaluator_end(struct carbon_path_evaluator *state)
 {
         error_if_null(state)
-        carbon_iterator_close(&state->root_it);
+        switch (state->result.container_type) {
+        case CARBON_OBJECT:
+                //carbon_object_it_drop(state->result.containers.)
+                // TODO: Implement
+                error_print(ARK_ERR_NOTIMPLEMENTED);
+                break;
+        case CARBON_ARRAY:
+                carbon_array_it_drop(&state->result.containers.array.it);
+                break;
+        case CARBON_COLUMN:
+                break;
+        default:
+                error_print(ARK_ERR_NOTIMPLEMENTED);
+        }
         return true;
 }
 
@@ -225,7 +240,6 @@ static inline enum carbon_path_status traverse_array(struct carbon_path_evaluato
                         assert(current_array_idx <= requested_array_idx);
                         if (current_array_idx != requested_array_idx) {
                                 /* root array has too less elements to reach the requested index */
-                                carbon_array_it_drop(it);
                                 return carbon_PATH_NOSUCHINDEX;
                         } else {
                                 /* requested index is reached; depending on the subsequent path, lookup may stops */
@@ -238,7 +252,6 @@ static inline enum carbon_path_status traverse_array(struct carbon_path_evaluato
                                         carbon_dot_path_type_at(&next_node_type, next_path_pos, path);
                                         if (!carbon_field_type_is_traversable(elem_type)) {
                                                 /* the array element is not a container; path evaluation stops here */
-                                                carbon_array_it_drop(it);
                                                 return carbon_PATH_NOTTRAVERSABLE;
                                         } else {
                                                 /* array element is traversable */
@@ -257,7 +270,6 @@ static inline enum carbon_path_status traverse_array(struct carbon_path_evaluato
                                                                 elem_type != CARBON_FIELD_TYPE_COLUMN_I64 &&
                                                                 elem_type != CARBON_FIELD_TYPE_COLUMN_FLOAT &&
                                                                 elem_type != CARBON_FIELD_TYPE_COLUMN_BOOLEAN) {
-                                                                carbon_array_it_drop(it);
                                                                 return carbon_PATH_NOCONTAINER;
                                                         } else {
                                                                 if (elem_type == CARBON_FIELD_TYPE_ARRAY) {
@@ -283,23 +295,20 @@ static inline enum carbon_path_status traverse_array(struct carbon_path_evaluato
                                                         /* next node in path is a key name which requires that
                                                          * the current array element is of type object */
                                                         if (elem_type != CARBON_FIELD_TYPE_OBJECT) {
-                                                                carbon_array_it_drop(it);   // TODO: Debug mem?
                                                                 return carbon_PATH_NOTANOBJECT;
                                                         } else {
                                                                 error_print_and_die_if(true, ARK_ERR_NOTIMPLEMENTED) /* TODO: implement for objects */
-                                                                carbon_array_it_drop(it);   // TODO: Debug mem?
                                                                 return carbon_PATH_INTERNAL;
                                                         }
                                                 default:
                                                 error_print(ARK_ERR_INTERNALERR);
-                                                        carbon_array_it_drop(it);   // TODO: Debug mem?
                                                         return carbon_PATH_INTERNAL;
                                                 }
                                         }
                                 } else {
                                         /* path end is reached */
                                         state->result.container_type = CARBON_ARRAY;
-                                        state->result.containers.array.it = it;
+                                        carbon_array_it_clone(&state->result.containers.array.it, it);
                                         return carbon_PATH_RESOLVED;
                                 }
                         }
@@ -309,17 +318,14 @@ static inline enum carbon_path_status traverse_array(struct carbon_path_evaluato
                         if (elem_type != CARBON_FIELD_TYPE_OBJECT) {
                                 /* first array element is not of type object and a key lookup cannot
                                  * be executed, consequentially */
-                                carbon_array_it_drop(it);   // TODO: Debug mem?
                                 return carbon_PATH_NOTANOBJECT;
                         } else {
                                 error_print_and_die_if(true, ARK_ERR_NOTIMPLEMENTED) /* TODO: implement for objects */
-                                carbon_array_it_drop(it);   // TODO: Debug mem?
                                 return carbon_PATH_INTERNAL;
                         }
                         break;
                 default:
                         error(&((struct carbon_dot_path *)path)->err, ARK_ERR_INTERNALERR);
-                        carbon_array_it_drop(it);   // TODO: Debug mem?
                         return  carbon_PATH_INTERNAL;
                 }
         }

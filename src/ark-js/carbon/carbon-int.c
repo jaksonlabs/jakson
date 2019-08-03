@@ -493,9 +493,34 @@ ARK_EXPORT(bool) carbon_int_field_access_create(struct field_access *field)
         field->nested_array_it = ark_malloc(sizeof(struct carbon_array_it));
         field->nested_object_it = ark_malloc(sizeof(struct carbon_object_it));
         field->nested_column_it = ark_malloc(sizeof(struct carbon_column_it));
-        ark_zero_memory(field->nested_array_it, sizeof(struct carbon_array_it))
-        ark_zero_memory(field->nested_object_it, sizeof(struct carbon_object_it))
-        ark_zero_memory(field->nested_column_it, sizeof(struct carbon_column_it))
+        return true;
+}
+
+ARK_EXPORT(bool) carbon_int_field_access_clone(struct field_access *dst, struct field_access *src)
+{
+        error_if_null(dst)
+        error_if_null(src)
+
+        dst->it_field_type = src->it_field_type;
+        dst->it_field_data = src->it_field_data;
+        dst->it_field_len = src->it_field_len;
+        dst->it_mime_type = src->it_mime_type;
+        dst->it_mime_type_strlen = src->it_mime_type_strlen;
+        dst->nested_array_it_opened = src->nested_array_it_opened;
+        dst->nested_array_it_accessed = src->nested_array_it_accessed;
+        dst->nested_object_it_opened = src->nested_object_it_opened;
+        dst->nested_object_it_accessed = src->nested_object_it_accessed;
+        dst->nested_array_it = ark_malloc(sizeof(struct carbon_array_it));
+        dst->nested_object_it = ark_malloc(sizeof(struct carbon_object_it));
+        dst->nested_column_it = ark_malloc(sizeof(struct carbon_column_it));
+
+        if (carbon_int_field_access_object_it_opened(src)) {
+                carbon_object_it_clone(dst->nested_object_it, src->nested_object_it);
+        } else if (carbon_int_field_access_column_it_opened(src)) {
+                carbon_column_it_clone(dst->nested_column_it, src->nested_column_it);
+        } else if (carbon_int_field_access_array_it_opened(src)) {
+                carbon_array_it_clone(dst->nested_array_it, src->nested_array_it);
+        }
         return true;
 }
 
@@ -520,6 +545,12 @@ ARK_EXPORT(bool) carbon_int_field_access_array_it_opened(struct field_access *fi
         return ((char *) field->nested_array_it)[0] != 0;
 }
 
+ARK_EXPORT(bool) carbon_int_field_access_column_it_opened(struct field_access *field)
+{
+        assert(field);
+        return ((char *) field->nested_column_it)[0] != 0;
+}
+
 ARK_EXPORT(void) carbon_int_auto_close_nested_array_it(struct field_access *field)
 {
         if (carbon_int_field_access_array_it_opened(field)) {
@@ -538,7 +569,7 @@ ARK_EXPORT(void) carbon_int_auto_close_nested_object_it(struct field_access *fie
 
 ARK_EXPORT(void) carbon_int_auto_close_nested_column_it(struct field_access *field)
 {
-        if (((char *) field->nested_column_it)[0] != 0) {
+        if (carbon_int_field_access_column_it_opened(field)) {
                 ark_zero_memory(field->nested_column_it, sizeof(struct carbon_column_it));
         }
 }

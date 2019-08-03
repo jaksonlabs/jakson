@@ -97,6 +97,8 @@ ARK_EXPORT(bool) carbon_array_it_create(struct carbon_array_it *it, struct memfi
 
 ARK_EXPORT(bool) carbon_array_it_copy(struct carbon_array_it *dst, struct carbon_array_it *src);
 
+ARK_EXPORT(bool) carbon_array_it_clone(struct carbon_array_it *dst, struct carbon_array_it *src);
+
 ARK_EXPORT(bool) carbon_array_it_readonly(struct carbon_array_it *it);
 
 /**

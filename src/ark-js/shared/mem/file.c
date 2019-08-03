@@ -32,12 +32,16 @@ bool memfile_open(struct memfile *file, struct memblock *block, enum access_mode
         return true;
 }
 
-ARK_EXPORT(bool) memfile_dup(struct memfile *dst, struct memfile *src)
+ARK_EXPORT(bool) memfile_clone(struct memfile *dst, struct memfile *src)
 {
         error_if_null(dst)
         error_if_null(src)
         memfile_open(dst, src->memblock, src->mode);
         memfile_seek(dst, memfile_tell(src));
+        dst->bit_mode = src->bit_mode;
+        dst->saved_pos_ptr = src->saved_pos_ptr;
+        error_cpy(&dst->err, &src->err);
+        memcpy(&dst->saved_pos, &src->saved_pos, ARK_ARRAY_LENGTH(src->saved_pos));
         return true;
 }
 

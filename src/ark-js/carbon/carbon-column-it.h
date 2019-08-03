@@ -34,14 +34,8 @@ struct carbon_column_it
 {
         struct memfile memfile;
 
-
-        //offset_t column_num_elements_offset;
-        //offset_t column_capacity_offset;
-
         offset_t num_and_capacity_start_offset;
-
         offset_t column_start_offset;
-        //offset_t payload_start;
 
         struct err err;
         enum carbon_field_type type;
@@ -57,6 +51,8 @@ struct carbon_column_it
 
 ARK_EXPORT(bool) carbon_column_it_create(struct carbon_column_it *it, struct memfile *memfile, struct err *err,
         offset_t column_start_offset);
+
+ARK_EXPORT(bool) carbon_column_it_clone(struct carbon_column_it *dst, struct carbon_column_it *src);
 
 ARK_EXPORT(bool) carbon_column_it_insert(struct carbon_insert *inserter, struct carbon_column_it *it);
 

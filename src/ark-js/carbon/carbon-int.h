@@ -131,6 +131,8 @@ ARK_EXPORT(bool) carbon_int_history_has(struct vector ofType(offset_t) *vec);
 
 ARK_EXPORT(bool) carbon_int_field_access_create(struct field_access *field);
 
+ARK_EXPORT(bool) carbon_int_field_access_clone(struct field_access *dst, struct field_access *src);
+
 ARK_EXPORT(bool) carbon_int_field_access_drop(struct field_access *field);
 
 ARK_EXPORT(bool) carbon_int_field_auto_close(struct field_access *it);
@@ -138,6 +140,8 @@ ARK_EXPORT(bool) carbon_int_field_auto_close(struct field_access *it);
 ARK_EXPORT(bool) carbon_int_field_access_object_it_opened(struct field_access *field);
 
 ARK_EXPORT(bool) carbon_int_field_access_array_it_opened(struct field_access *field);
+
+ARK_EXPORT(bool) carbon_int_field_access_column_it_opened(struct field_access *field);
 
 ARK_EXPORT(void) carbon_int_auto_close_nested_array_it(struct field_access *field);
 

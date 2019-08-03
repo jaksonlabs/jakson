@@ -52,6 +52,8 @@ ARK_EXPORT(bool) carbon_object_it_create(struct carbon_object_it *it, struct mem
 
 ARK_EXPORT(bool) carbon_object_it_copy(struct carbon_object_it *dst, struct carbon_object_it *src);
 
+ARK_EXPORT(bool) carbon_object_it_clone(struct carbon_object_it *dst, struct carbon_object_it *src);
+
 ARK_EXPORT(bool) carbon_object_it_drop(struct carbon_object_it *it);
 
 ARK_EXPORT(bool) carbon_object_it_rewind(struct carbon_object_it *it);

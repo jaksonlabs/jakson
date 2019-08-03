@@ -66,7 +66,7 @@ struct memfile {
 
 ARK_EXPORT(bool) memfile_open(struct memfile *file, struct memblock *block, enum access_mode mode);
 
-ARK_EXPORT(bool) memfile_dup(struct memfile *dst, struct memfile *src);
+ARK_EXPORT(bool) memfile_clone(struct memfile *dst, struct memfile *src);
 
 ARK_EXPORT(bool) memfile_seek(struct memfile *file, offset_t pos);
 

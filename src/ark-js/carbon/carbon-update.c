@@ -213,7 +213,7 @@ static bool column_update_float(struct carbon_column_it *it, u32 pos, float valu
 
 static inline struct carbon_array_it *array_iterator(struct carbon_update *updater)
 {
-        return updater->path_evaluater.result.containers.array.it;
+        return &updater->path_evaluater.result.containers.array.it;
 }
 
 static inline struct carbon_column_it *column_iterator(u32 *elem_pos, struct carbon_update *updater)

@@ -64,6 +64,24 @@ ARK_EXPORT(bool) carbon_object_it_copy(struct carbon_object_it *dst, struct carb
         return true;
 }
 
+ARK_EXPORT(bool) carbon_object_it_clone(struct carbon_object_it *dst, struct carbon_object_it *src)
+{
+        error_if_null(dst);
+        error_if_null(src);
+        memfile_clone(&dst->memfile, &src->memfile);
+        dst->payload_start = src->payload_start;
+        spin_init(&dst->lock);
+        error_cpy(&dst->err, &src->err);
+        dst->mod_size = src->mod_size;
+        dst->object_end_reached = src->object_end_reached;
+        vec_cpy(&dst->history, &src->history);
+        dst->key_len = src->key_len;
+        dst->key = src->key;
+        dst->value_off = src->value_off;
+        carbon_int_field_access_clone(&dst->field_access, &src->field_access);
+        return true;
+}
+
 ARK_EXPORT(bool) carbon_object_it_drop(struct carbon_object_it *it)
 {
         carbon_int_field_auto_close(&it->field_access);
