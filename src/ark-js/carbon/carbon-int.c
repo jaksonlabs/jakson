@@ -298,6 +298,7 @@ ARK_EXPORT(bool) carbon_int_array_skip_contents(bool *is_empty_slot, bool *is_ar
 ARK_EXPORT(bool) carbon_int_array_it_refresh(bool *is_empty_slot, bool *is_array_end, struct carbon_array_it *it)
 {
         error_if_null(it);
+        carbon_int_field_access_drop(&it->field_access);
         if (array_it_is_slot_occupied(is_empty_slot, is_array_end, it)) {
                 carbon_int_array_it_field_type_read(it);
                 carbon_int_field_data_access(&it->memfile, &it->err, &it->field_access);

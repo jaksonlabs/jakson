@@ -59,7 +59,7 @@ struct memfile {
 
 #define memfile_tell(file)                                                                                             \
 ({                                                                                                                     \
-    offset_t offset;                                                                                                   \
+    offset_t offset = 0;                                                                                               \
     memfile_get_offset(&offset, file);                                                                                 \
     offset;                                                                                                            \
 })

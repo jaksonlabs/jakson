@@ -72,6 +72,8 @@ bool vec_create(struct vector *out, const struct allocator *alloc, size_t elem_s
         out->allocator = ark_malloc(sizeof(struct allocator));
         alloc_this_or_std(out->allocator, alloc);
         out->base = alloc_malloc(out->allocator, cap_elems * elem_size);
+        //ark_zero_memory(out->base, cap_elems * elem_size);
+    //out->base = ark_malloc(cap_elems * elem_size);
         out->num_elems = 0;
         out->cap_elems = cap_elems;
         out->elem_size = elem_size;

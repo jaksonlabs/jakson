@@ -128,6 +128,8 @@ ARK_EXPORT(bool) carbon_array_it_create(struct carbon_array_it *it, struct memfi
         error_if_null(memfile);
         error_if_null(err);
 
+        ark_zero_memory(it, sizeof(struct carbon_array_it));
+
         it->payload_start = payload_start;
         it->mod_size = 0;
         it->array_end_reached = false;
@@ -230,10 +232,9 @@ static void auto_adjust_pos_after_mod(struct carbon_array_it *it)
 ARK_EXPORT(bool) carbon_array_it_next(struct carbon_array_it *it)
 {
         error_if_null(it);
-        bool is_empty_slot;
+        bool is_empty_slot = true;
 
         auto_adjust_pos_after_mod(it);
-        carbon_int_field_access_drop(&it->field_access);
         offset_t last_off = memfile_tell(&it->memfile);
 
         if (carbon_int_array_it_next(&is_empty_slot, &it->array_end_reached, it)) {
