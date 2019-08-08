@@ -82,8 +82,8 @@ DEFINE_ARRAY_UPDATE_FUNCTION(float, CARBON_FIELD_TYPE_NUMBER_FLOAT, carbon_array
                         error(&context->original->err, ARK_ERR_INTERNALERR)                                            \
                         }                                                                                              \
                 }                                                                                                      \
-                drop_path_evaluator(&updater);                                                                         \
-        }                                                                                                              \
+                carbon_path_evaluator_end(&updater.path_evaluater);                                                    \
+                }                                                                                                              \
         status;                                                                                                        \
 })
 
@@ -121,12 +121,6 @@ static bool resolve_path(struct carbon_update *updater)
 static bool path_resolved(struct carbon_update *updater)
 {
         return carbon_path_evaluator_has_result(&updater->path_evaluater);
-}
-
-static bool drop_path_evaluator(struct carbon_update *updater)
-{
-        error_if_null(updater)
-        return carbon_path_evaluator_end(&updater->path_evaluater);
 }
 
 static bool column_update_u8(struct carbon_column_it *it, u32 pos, u8 value)

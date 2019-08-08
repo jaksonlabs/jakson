@@ -516,12 +516,10 @@ ARK_EXPORT(bool) carbon_insert_array_end(struct carbon_insert_array_state *state
 
         struct carbon_array_it scan;
         carbon_array_it_create(&scan, &state_in->parent_inserter->memfile, &state_in->parent_inserter->err,
-                memfile_tell(&state_in->parent_inserter->memfile) - 1);
-        while (carbon_array_it_next(&scan))
-                { }
+                           memfile_tell(&state_in->parent_inserter->memfile) - 1);
 
-        assert(*memfile_peek(&scan.memfile, sizeof(char)) == CARBON_MARKER_ARRAY_END);
-        memfile_read(&scan.memfile, sizeof(char));
+        carbon_array_it_fast_forward(&scan);
+
         state_in->array_end = memfile_tell(&scan.memfile);
         memfile_skip(&scan.memfile, 1);
 

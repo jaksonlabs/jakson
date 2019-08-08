@@ -233,6 +233,7 @@ ARK_EXPORT(bool) carbon_array_it_next(struct carbon_array_it *it)
         bool is_empty_slot;
 
         auto_adjust_pos_after_mod(it);
+        carbon_int_field_access_drop(&it->field_access);
         offset_t last_off = memfile_tell(&it->memfile);
 
         if (carbon_int_array_it_next(&is_empty_slot, &it->array_end_reached, it)) {
