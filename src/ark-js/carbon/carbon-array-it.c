@@ -28,7 +28,7 @@
 #define DEFINE_IN_PLACE_UPDATE_FUNCTION(type_name, field_type)                                                         \
 ARK_EXPORT(bool) carbon_array_it_update_in_place_##type_name(struct carbon_array_it *it, type_name value)                \
 {                                                                                                                      \
-        offset_t datum;                                                                                                \
+        offset_t datum = 0;                                                                                                \
         error_if_null(it);                                                                                             \
         if (likely(it->field_access.it_field_type == field_type)) {                                                    \
                 memfile_save_position(&it->memfile);                                                                   \
@@ -405,7 +405,6 @@ ARK_EXPORT(bool) carbon_array_it_remove(struct carbon_array_it *it)
                 offset_t prev_off = carbon_int_history_pop(&it->history);
                 memfile_seek(&it->memfile, prev_off);
                 if (carbon_int_field_remove(&it->memfile, &it->err, type)) {
-                        memfile_seek(&it->memfile, prev_off);
                         carbon_int_array_it_refresh(NULL, NULL, it);
                         return true;
                 } else {

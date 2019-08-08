@@ -3871,26 +3871,17 @@ TEST(CarbonTest, BisonUpdateMixedFixedTypesTypeChangeSimple)
 
 
         json = carbon_to_json(&sb, &rev_doc);
-         printf("JSON (rev1): %s\n", json);
         ASSERT_TRUE(strcmp(json, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 1}, \"doc\": [1, -42, 23.00]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
         carbon_revise_begin(&revise, &rev_doc2, &rev_doc);
-    //  carbon_revise_iterator_open(&it, &revise);
-    //carbon_array_it_insert_begin(&inserter, &it);
-
         carbon_update_set_u32(&revise, "1", 1024);
-
-    //  carbon_array_it_insert_end(&inserter);
-    //    carbon_revise_iterator_close(&it);
         carbon_revise_end(&revise);
 
 
         json = carbon_to_json(&sb, &rev_doc2);
-        printf("JSON (rev2): %s\n", json);
-      //  ASSERT_TRUE(strcmp(json, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"doc\": [1, 1024, 23.00]}") == 0);
-
+        ASSERT_TRUE(strcmp(json, "{\"meta\": {\"key\": {\"type\": \"autokey\", \"value\": 0}, \"rev\": 2}, \"doc\": [1, 1024, 23.00]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -4299,819 +4290,819 @@ TEST(CarbonTest, BisonKeyTypeStringKeyRevInc)
         carbon_drop(&rev_doc);
 }
 
-//
-//TEST(CarbonTest, BisonKeyTypeSignedKey)
-//{
-//        struct carbon doc;
-//        struct carbon_new context;
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_IKEY, CARBON_OPTIMIZE);
-//
-//        carbon_insert_string(ins, "Hello");
-//        carbon_insert_string(ins, "World");
-//
-//        carbon_create_end(&context);
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//
-//        // carbon_print(stdout, &doc);
-//        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"ikey\", \"value\": 0}, \"rev\": 1}, \"doc\": [\"Hello\", \"World\"]}") == 0);
-//
-//        string_builder_drop(&sb);
-//        carbon_drop(&doc);
-//}
-//
-//TEST(CarbonTest, BisonKeyTypeStringKey)
-//{
-//        struct carbon doc;
-//        struct carbon_new context;
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
-//
-//        carbon_insert_string(ins, "Hello");
-//        carbon_insert_string(ins, "World");
-//
-//        carbon_create_end(&context);
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//
-//        // carbon_print(stdout, &doc);
-//        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [\"Hello\", \"World\"]}") == 0);
-//
-//        string_builder_drop(&sb);
-//        carbon_drop(&doc);
-//}
-//
-//TEST(CarbonTest, BisonObjectInsertEmpty)
-//{
-//        struct carbon doc;
-//        struct carbon_new context;
-//        struct carbon_insert_object_state state;
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
-//
-//        carbon_insert_object_begin(&state, ins, 1024);
-//        carbon_insert_object_end(&state);
-//
-//        carbon_create_end(&context);
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//
-//        // carbon_print(stdout, &doc);
-//        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{}]}") == 0);
-//
-//        string_builder_drop(&sb);
-//        carbon_drop(&doc);
-//}
-//
-//TEST(CarbonTest, BisonObjectInsertNull)
-//{
-//        struct carbon doc;
-//        struct carbon_new context;
-//        struct carbon_insert_object_state state;
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
-//
-//        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
-//        carbon_insert_prop_null(obj_ins, "My Key");
-//        carbon_insert_object_end(&state);
-//
-//        carbon_create_end(&context);
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//
-//        // carbon_print(stdout, &doc);
-//        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":null}]}") == 0);
-//
-//        string_builder_drop(&sb);
-//        carbon_drop(&doc);
-//}
-//
-//TEST(CarbonTest, BisonObjectInsertMultipleNulls)
-//{
-//        struct carbon doc;
-//        struct carbon_new context;
-//        struct carbon_insert_object_state state;
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
-//
-//        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
-//        carbon_insert_prop_null(obj_ins, "My Key 1");
-//        carbon_insert_prop_null(obj_ins, "My Key 2");
-//        carbon_insert_prop_null(obj_ins, "My Key 3");
-//        carbon_insert_object_end(&state);
-//
-//        carbon_create_end(&context);
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//
-//        // carbon_print(stdout, &doc);
-//        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":null, \"My Key 2\":null, \"My Key 3\":null}]}") == 0);
-//
-//        string_builder_drop(&sb);
-//        carbon_drop(&doc);
-//}
-//
-//TEST(CarbonTest, BisonObjectInsertU8)
-//{
-//        struct carbon doc;
-//        struct carbon_new context;
-//        struct carbon_insert_object_state state;
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
-//
-//        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
-//        carbon_insert_prop_u8(obj_ins, "My Key", 123);
-//        carbon_insert_object_end(&state);
-//
-//        carbon_create_end(&context);
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//
-//        // carbon_print(stdout, &doc);
-//        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":123}]}") == 0);
-//
-//        string_builder_drop(&sb);
-//        carbon_drop(&doc);
-//}
-//
-//TEST(CarbonTest, BisonObjectInsertMultipleU8s)
-//{
-//        struct carbon doc;
-//        struct carbon_new context;
-//        struct carbon_insert_object_state state;
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
-//
-//        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
-//        carbon_insert_prop_u8(obj_ins, "My Key 1", 1);
-//        carbon_insert_prop_u8(obj_ins, "My Key 2", 2);
-//        carbon_insert_prop_u8(obj_ins, "My Key 3", 3);
-//        carbon_insert_object_end(&state);
-//
-//        carbon_create_end(&context);
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//
-//        // carbon_print(stdout, &doc);
-//        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":1, \"My Key 2\":2, \"My Key 3\":3}]}") == 0);
-//
-//        string_builder_drop(&sb);
-//        carbon_drop(&doc);
-//}
-//
-//TEST(CarbonTest, BisonObjectInsertU16)
-//{
-//        struct carbon doc;
-//        struct carbon_new context;
-//        struct carbon_insert_object_state state;
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
-//
-//        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
-//        carbon_insert_prop_u16(obj_ins, "My Key", 123);
-//        carbon_insert_object_end(&state);
-//
-//        carbon_create_end(&context);
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//
-//        // carbon_print(stdout, &doc);
-//        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":123}]}") == 0);
-//
-//        string_builder_drop(&sb);
-//        carbon_drop(&doc);
-//}
-//
-//TEST(CarbonTest, BisonObjectInsertMultipleU16s)
-//{
-//        struct carbon doc;
-//        struct carbon_new context;
-//        struct carbon_insert_object_state state;
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
-//
-//        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
-//        carbon_insert_prop_u16(obj_ins, "My Key 1", 1);
-//        carbon_insert_prop_u16(obj_ins, "My Key 2", 2);
-//        carbon_insert_prop_u16(obj_ins, "My Key 3", 3);
-//        carbon_insert_object_end(&state);
-//
-//        carbon_create_end(&context);
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//
-//        // carbon_print(stdout, &doc);
-//        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":1, \"My Key 2\":2, \"My Key 3\":3}]}") == 0);
-//
-//        string_builder_drop(&sb);
-//        carbon_drop(&doc);
-//}
-//
-//TEST(CarbonTest, BisonObjectInsertU32)
-//{
-//        struct carbon doc;
-//        struct carbon_new context;
-//        struct carbon_insert_object_state state;
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
-//
-//        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
-//        carbon_insert_prop_u32(obj_ins, "My Key", 123);
-//        carbon_insert_object_end(&state);
-//
-//        carbon_create_end(&context);
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//
-//        // carbon_print(stdout, &doc);
-//        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":123}]}") == 0);
-//
-//        string_builder_drop(&sb);
-//        carbon_drop(&doc);
-//}
-//
-//TEST(CarbonTest, BisonObjectInsertMultipleU32s)
-//{
-//        struct carbon doc;
-//        struct carbon_new context;
-//        struct carbon_insert_object_state state;
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
-//
-//        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
-//        carbon_insert_prop_u32(obj_ins, "My Key 1", 1);
-//        carbon_insert_prop_u32(obj_ins, "My Key 2", 2);
-//        carbon_insert_prop_u32(obj_ins, "My Key 3", 3);
-//        carbon_insert_object_end(&state);
-//
-//        carbon_create_end(&context);
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//
-//        // carbon_print(stdout, &doc);
-//        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":1, \"My Key 2\":2, \"My Key 3\":3}]}") == 0);
-//
-//        string_builder_drop(&sb);
-//        carbon_drop(&doc);
-//}
-//
-//TEST(CarbonTest, BisonObjectInsertU64)
-//{
-//        struct carbon doc;
-//        struct carbon_new context;
-//        struct carbon_insert_object_state state;
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
-//
-//        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
-//        carbon_insert_prop_u64(obj_ins, "My Key", 123);
-//        carbon_insert_object_end(&state);
-//
-//        carbon_create_end(&context);
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//
-//        // carbon_print(stdout, &doc);
-//        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":123}]}") == 0);
-//
-//        string_builder_drop(&sb);
-//        carbon_drop(&doc);
-//}
-//
-//TEST(CarbonTest, BisonObjectInsertMultipleU64s)
-//{
-//        struct carbon doc;
-//        struct carbon_new context;
-//        struct carbon_insert_object_state state;
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
-//
-//        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
-//        carbon_insert_prop_u64(obj_ins, "My Key 1", 1);
-//        carbon_insert_prop_u64(obj_ins, "My Key 2", 2);
-//        carbon_insert_prop_u64(obj_ins, "My Key 3", 3);
-//        carbon_insert_object_end(&state);
-//
-//        carbon_create_end(&context);
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//
-//        //carbon_print(stdout, &doc);
-//        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":1, \"My Key 2\":2, \"My Key 3\":3}]}") == 0);
-//
-//        string_builder_drop(&sb);
-//        carbon_drop(&doc);
-//}
-//
-//TEST(CarbonTest, BisonObjectInsertI8)
-//{
-//        struct carbon doc;
-//        struct carbon_new context;
-//        struct carbon_insert_object_state state;
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
-//
-//        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
-//        carbon_insert_prop_i8(obj_ins, "My Key", -123);
-//        carbon_insert_object_end(&state);
-//
-//        carbon_create_end(&context);
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//
-//        // carbon_print(stdout, &doc);
-//        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":-123}]}") == 0);
-//
-//        string_builder_drop(&sb);
-//        carbon_drop(&doc);
-//}
-//
-//TEST(CarbonTest, BisonObjectInsertMultipleI8s)
-//{
-//        struct carbon doc;
-//        struct carbon_new context;
-//        struct carbon_insert_object_state state;
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
-//
-//        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
-//        carbon_insert_prop_i8(obj_ins, "My Key 1", -1);
-//        carbon_insert_prop_i8(obj_ins, "My Key 2", -2);
-//        carbon_insert_prop_i8(obj_ins, "My Key 3", -3);
-//        carbon_insert_object_end(&state);
-//
-//        carbon_create_end(&context);
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//
-//        // carbon_print(stdout, &doc);
-//        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":-1, \"My Key 2\":-2, \"My Key 3\":-3}]}") == 0);
-//
-//        string_builder_drop(&sb);
-//        carbon_drop(&doc);
-//}
-//
-//TEST(CarbonTest, BisonObjectInsertI16)
-//{
-//        struct carbon doc;
-//        struct carbon_new context;
-//        struct carbon_insert_object_state state;
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
-//
-//        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
-//        carbon_insert_prop_i16(obj_ins, "My Key", -123);
-//        carbon_insert_object_end(&state);
-//
-//        carbon_create_end(&context);
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//
-//        // carbon_print(stdout, &doc);
-//        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":-123}]}") == 0);
-//
-//        string_builder_drop(&sb);
-//        carbon_drop(&doc);
-//}
-//
-//TEST(CarbonTest, BisonObjectInsertMultipleI16s)
-//{
-//        struct carbon doc;
-//        struct carbon_new context;
-//        struct carbon_insert_object_state state;
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
-//
-//        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
-//        carbon_insert_prop_i16(obj_ins, "My Key 1", -1);
-//        carbon_insert_prop_i16(obj_ins, "My Key 2", -2);
-//        carbon_insert_prop_i16(obj_ins, "My Key 3", -3);
-//        carbon_insert_object_end(&state);
-//
-//        carbon_create_end(&context);
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//
-//        // carbon_print(stdout, &doc);
-//        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":-1, \"My Key 2\":-2, \"My Key 3\":-3}]}") == 0);
-//
-//        string_builder_drop(&sb);
-//        carbon_drop(&doc);
-//}
-//
-//TEST(CarbonTest, BisonObjectInsertI32)
-//{
-//        struct carbon doc;
-//        struct carbon_new context;
-//        struct carbon_insert_object_state state;
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
-//
-//        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
-//        carbon_insert_prop_i32(obj_ins, "My Key", -123);
-//        carbon_insert_object_end(&state);
-//
-//        carbon_create_end(&context);
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//
-//        // carbon_print(stdout, &doc);
-//        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":-123}]}") == 0);
-//
-//        string_builder_drop(&sb);
-//        carbon_drop(&doc);
-//}
-//
-//TEST(CarbonTest, BisonObjectInsertMultipleI32s)
-//{
-//        struct carbon doc;
-//        struct carbon_new context;
-//        struct carbon_insert_object_state state;
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
-//
-//        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
-//        carbon_insert_prop_i32(obj_ins, "My Key 1", -1);
-//        carbon_insert_prop_i32(obj_ins, "My Key 2", -2);
-//        carbon_insert_prop_i32(obj_ins, "My Key 3", -3);
-//        carbon_insert_object_end(&state);
-//
-//        carbon_create_end(&context);
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//
-//        // carbon_print(stdout, &doc);
-//        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":-1, \"My Key 2\":-2, \"My Key 3\":-3}]}") == 0);
-//
-//        string_builder_drop(&sb);
-//        carbon_drop(&doc);
-//}
-//
-//TEST(CarbonTest, BisonObjectInsertI64)
-//{
-//        struct carbon doc;
-//        struct carbon_new context;
-//        struct carbon_insert_object_state state;
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
-//
-//        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
-//        carbon_insert_prop_i64(obj_ins, "My Key", -123);
-//        carbon_insert_object_end(&state);
-//
-//        carbon_create_end(&context);
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//
-//        // carbon_print(stdout, &doc);
-//        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":-123}]}") == 0);
-//
-//        string_builder_drop(&sb);
-//        carbon_drop(&doc);
-//}
-//
-//TEST(CarbonTest, BisonObjectInsertMultipleI64s)
-//{
-//        struct carbon doc;
-//        struct carbon_new context;
-//        struct carbon_insert_object_state state;
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
-//
-//        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
-//        carbon_insert_prop_i64(obj_ins, "My Key 1", -1);
-//        carbon_insert_prop_i64(obj_ins, "My Key 2", -2);
-//        carbon_insert_prop_i64(obj_ins, "My Key 3", -3);
-//        carbon_insert_object_end(&state);
-//
-//        carbon_create_end(&context);
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//
-//        // carbon_print(stdout, &doc);
-//        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":-1, \"My Key 2\":-2, \"My Key 3\":-3}]}") == 0);
-//
-//        string_builder_drop(&sb);
-//        carbon_drop(&doc);
-//}
-//
-//TEST(CarbonTest, BisonObjectInsertFloat)
-//{
-//        struct carbon doc;
-//        struct carbon_new context;
-//        struct carbon_insert_object_state state;
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
-//
-//        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
-//        carbon_insert_prop_float(obj_ins, "My Key", -123.32);
-//        carbon_insert_object_end(&state);
-//
-//        carbon_create_end(&context);
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//
-//        // carbon_print(stdout, &doc);
-//        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":-123.32}]}") == 0);
-//
-//        string_builder_drop(&sb);
-//        carbon_drop(&doc);
-//}
-//
-//TEST(CarbonTest, BisonObjectInsertMultipleFloats)
-//{
-//        struct carbon doc;
-//        struct carbon_new context;
-//        struct carbon_insert_object_state state;
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
-//
-//        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
-//        carbon_insert_prop_float(obj_ins, "My Key 1", -1.23);
-//        carbon_insert_prop_float(obj_ins, "My Key 2", -2.42);
-//        carbon_insert_prop_float(obj_ins, "My Key 3", 3.21);
-//        carbon_insert_object_end(&state);
-//
-//        carbon_create_end(&context);
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//
-//        // carbon_print(stdout, &doc);
-//        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":-1.23, \"My Key 2\":-2.42, \"My Key 3\":3.21}]}") == 0);
-//
-//        string_builder_drop(&sb);
-//        carbon_drop(&doc);
-//}
-//
-//TEST(CarbonTest, BisonObjectInsertTrue)
-//{
-//        struct carbon doc;
-//        struct carbon_new context;
-//        struct carbon_insert_object_state state;
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
-//
-//        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
-//        carbon_insert_prop_true(obj_ins, "My Key");
-//        carbon_insert_object_end(&state);
-//
-//        carbon_create_end(&context);
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//
-//        // carbon_print(stdout, &doc);
-//        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":true}]}") == 0);
-//
-//        string_builder_drop(&sb);
-//        carbon_drop(&doc);
-//}
-//
-//TEST(CarbonTest, BisonObjectInsertFalse)
-//{
-//        struct carbon doc;
-//        struct carbon_new context;
-//        struct carbon_insert_object_state state;
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
-//
-//        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
-//        carbon_insert_prop_false(obj_ins, "My Key");
-//        carbon_insert_object_end(&state);
-//
-//        carbon_create_end(&context);
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//
-//        // carbon_print(stdout, &doc);
-//        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":false}]}") == 0);
-//
-//        string_builder_drop(&sb);
-//        carbon_drop(&doc);
-//}
-//
-//TEST(CarbonTest, BisonObjectInsertMultipleBooleans)
-//{
-//        struct carbon doc;
-//        struct carbon_new context;
-//        struct carbon_insert_object_state state;
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
-//
-//        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
-//        carbon_insert_prop_true(obj_ins, "My Key 1");
-//        carbon_insert_prop_false(obj_ins, "My Key 2");
-//        carbon_insert_prop_true(obj_ins, "My Key 3");
-//        carbon_insert_object_end(&state);
-//
-//        carbon_create_end(&context);
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//
-//        // carbon_print(stdout, &doc);
-//        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":true, \"My Key 2\":false, \"My Key 3\":true}]}") == 0);
-//
-//        string_builder_drop(&sb);
-//        carbon_drop(&doc);
-//}
-//
-//TEST(CarbonTest, BisonObjectInsertMixed)
-//{
-//        struct carbon doc;
-//        struct carbon_new context;
-//        struct carbon_insert_object_state state;
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
-//
-//        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
-//        carbon_insert_prop_true(obj_ins, "k1");
-//        carbon_insert_prop_false(obj_ins, "k2");
-//        carbon_insert_prop_null(obj_ins, "k3");
-//        carbon_insert_prop_u8(obj_ins, "k4", 1);
-//        carbon_insert_prop_u16(obj_ins, "k5", 2);
-//        carbon_insert_prop_u32(obj_ins, "k6", 3);
-//        carbon_insert_prop_u64(obj_ins, "k7", 4);
-//        carbon_insert_prop_i8(obj_ins, "k8", -1);
-//        carbon_insert_prop_i16(obj_ins, "k9", -2);
-//        carbon_insert_prop_i32(obj_ins, "k10", -3);
-//        carbon_insert_prop_i64(obj_ins, "k11", -4);
-//        carbon_insert_prop_float(obj_ins, "k12", 42.23);
-//
-//        carbon_insert_object_end(&state);
-//
-//        carbon_create_end(&context);
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//
-//        // carbon_print(stdout, &doc);
-//        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"k1\":true, \"k2\":false, \"k3\":null, \"k4\":1, \"k5\":2, \"k6\":3, \"k7\":4, \"k8\":-1, \"k9\":-2, \"k10\":-3, \"k11\":-4, \"k12\":42.23}]}") == 0);
-//
-//        string_builder_drop(&sb);
-//        carbon_drop(&doc);
-//}
-//
-//TEST(CarbonTest, BisonObjectInsertString)
-//{
-//        struct carbon doc;
-//        struct carbon_new context;
-//        struct carbon_insert_object_state state;
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
-//
-//        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
-//
-//        carbon_insert_prop_string(obj_ins, "hello", "world");
-//
-//        carbon_insert_object_end(&state);
-//
-//        carbon_create_end(&context);
-//
-//        // -------------------------------------------------------------------------------------------------------------
-//
-//        struct string_builder sb;
-//        string_builder_create(&sb);
-//
-//        // carbon_print(stdout, &doc);
-//        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"hello\":\"world\"}]}") == 0);
-//
-//        string_builder_drop(&sb);
-//        carbon_drop(&doc);
-//}
+
+TEST(CarbonTest, BisonKeyTypeSignedKey)
+{
+        struct carbon doc;
+        struct carbon_new context;
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_IKEY, CARBON_OPTIMIZE);
+
+        carbon_insert_string(ins, "Hello");
+        carbon_insert_string(ins, "World");
+
+        carbon_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        // carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"ikey\", \"value\": 0}, \"rev\": 1}, \"doc\": [\"Hello\", \"World\"]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+}
+
+TEST(CarbonTest, BisonKeyTypeStringKey)
+{
+        struct carbon doc;
+        struct carbon_new context;
+
+        // -------------------------------------------------------------------------------------------------------------
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
+
+        carbon_insert_string(ins, "Hello");
+        carbon_insert_string(ins, "World");
+
+        carbon_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        // carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [\"Hello\", \"World\"]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+}
+
+TEST(CarbonTest, BisonObjectInsertEmpty)
+{
+        struct carbon doc;
+        struct carbon_new context;
+        struct carbon_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
+
+        carbon_insert_object_begin(&state, ins, 1024);
+        carbon_insert_object_end(&state);
+
+        carbon_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        // carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+}
+
+TEST(CarbonTest, BisonObjectInsertNull)
+{
+        struct carbon doc;
+        struct carbon_new context;
+        struct carbon_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
+        carbon_insert_prop_null(obj_ins, "My Key");
+        carbon_insert_object_end(&state);
+
+        carbon_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        // carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":null}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+}
+
+TEST(CarbonTest, BisonObjectInsertMultipleNulls)
+{
+        struct carbon doc;
+        struct carbon_new context;
+        struct carbon_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        carbon_insert_prop_null(obj_ins, "My Key 1");
+        carbon_insert_prop_null(obj_ins, "My Key 2");
+        carbon_insert_prop_null(obj_ins, "My Key 3");
+        carbon_insert_object_end(&state);
+
+        carbon_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        // carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":null, \"My Key 2\":null, \"My Key 3\":null}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+}
+
+TEST(CarbonTest, BisonObjectInsertU8)
+{
+        struct carbon doc;
+        struct carbon_new context;
+        struct carbon_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
+        carbon_insert_prop_u8(obj_ins, "My Key", 123);
+        carbon_insert_object_end(&state);
+
+        carbon_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        // carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":123}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+}
+
+TEST(CarbonTest, BisonObjectInsertMultipleU8s)
+{
+        struct carbon doc;
+        struct carbon_new context;
+        struct carbon_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        carbon_insert_prop_u8(obj_ins, "My Key 1", 1);
+        carbon_insert_prop_u8(obj_ins, "My Key 2", 2);
+        carbon_insert_prop_u8(obj_ins, "My Key 3", 3);
+        carbon_insert_object_end(&state);
+
+        carbon_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        // carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":1, \"My Key 2\":2, \"My Key 3\":3}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+}
+
+TEST(CarbonTest, BisonObjectInsertU16)
+{
+        struct carbon doc;
+        struct carbon_new context;
+        struct carbon_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
+        carbon_insert_prop_u16(obj_ins, "My Key", 123);
+        carbon_insert_object_end(&state);
+
+        carbon_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        // carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":123}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+}
+
+TEST(CarbonTest, BisonObjectInsertMultipleU16s)
+{
+        struct carbon doc;
+        struct carbon_new context;
+        struct carbon_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        carbon_insert_prop_u16(obj_ins, "My Key 1", 1);
+        carbon_insert_prop_u16(obj_ins, "My Key 2", 2);
+        carbon_insert_prop_u16(obj_ins, "My Key 3", 3);
+        carbon_insert_object_end(&state);
+
+        carbon_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        // carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":1, \"My Key 2\":2, \"My Key 3\":3}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+}
+
+TEST(CarbonTest, BisonObjectInsertU32)
+{
+        struct carbon doc;
+        struct carbon_new context;
+        struct carbon_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
+        carbon_insert_prop_u32(obj_ins, "My Key", 123);
+        carbon_insert_object_end(&state);
+
+        carbon_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        // carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":123}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+}
+
+TEST(CarbonTest, BisonObjectInsertMultipleU32s)
+{
+        struct carbon doc;
+        struct carbon_new context;
+        struct carbon_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        carbon_insert_prop_u32(obj_ins, "My Key 1", 1);
+        carbon_insert_prop_u32(obj_ins, "My Key 2", 2);
+        carbon_insert_prop_u32(obj_ins, "My Key 3", 3);
+        carbon_insert_object_end(&state);
+
+        carbon_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        // carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":1, \"My Key 2\":2, \"My Key 3\":3}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+}
+
+TEST(CarbonTest, BisonObjectInsertU64)
+{
+        struct carbon doc;
+        struct carbon_new context;
+        struct carbon_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
+        carbon_insert_prop_u64(obj_ins, "My Key", 123);
+        carbon_insert_object_end(&state);
+
+        carbon_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        // carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":123}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+}
+
+TEST(CarbonTest, BisonObjectInsertMultipleU64s)
+{
+        struct carbon doc;
+        struct carbon_new context;
+        struct carbon_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        carbon_insert_prop_u64(obj_ins, "My Key 1", 1);
+        carbon_insert_prop_u64(obj_ins, "My Key 2", 2);
+        carbon_insert_prop_u64(obj_ins, "My Key 3", 3);
+        carbon_insert_object_end(&state);
+
+        carbon_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        //carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":1, \"My Key 2\":2, \"My Key 3\":3}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+}
+
+TEST(CarbonTest, BisonObjectInsertI8)
+{
+        struct carbon doc;
+        struct carbon_new context;
+        struct carbon_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
+        carbon_insert_prop_i8(obj_ins, "My Key", -123);
+        carbon_insert_object_end(&state);
+
+        carbon_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        // carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":-123}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+}
+
+TEST(CarbonTest, BisonObjectInsertMultipleI8s)
+{
+        struct carbon doc;
+        struct carbon_new context;
+        struct carbon_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        carbon_insert_prop_i8(obj_ins, "My Key 1", -1);
+        carbon_insert_prop_i8(obj_ins, "My Key 2", -2);
+        carbon_insert_prop_i8(obj_ins, "My Key 3", -3);
+        carbon_insert_object_end(&state);
+
+        carbon_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        // carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":-1, \"My Key 2\":-2, \"My Key 3\":-3}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+}
+
+TEST(CarbonTest, BisonObjectInsertI16)
+{
+        struct carbon doc;
+        struct carbon_new context;
+        struct carbon_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
+        carbon_insert_prop_i16(obj_ins, "My Key", -123);
+        carbon_insert_object_end(&state);
+
+        carbon_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        // carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":-123}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+}
+
+TEST(CarbonTest, BisonObjectInsertMultipleI16s)
+{
+        struct carbon doc;
+        struct carbon_new context;
+        struct carbon_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        carbon_insert_prop_i16(obj_ins, "My Key 1", -1);
+        carbon_insert_prop_i16(obj_ins, "My Key 2", -2);
+        carbon_insert_prop_i16(obj_ins, "My Key 3", -3);
+        carbon_insert_object_end(&state);
+
+        carbon_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        // carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":-1, \"My Key 2\":-2, \"My Key 3\":-3}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+}
+
+TEST(CarbonTest, BisonObjectInsertI32)
+{
+        struct carbon doc;
+        struct carbon_new context;
+        struct carbon_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
+        carbon_insert_prop_i32(obj_ins, "My Key", -123);
+        carbon_insert_object_end(&state);
+
+        carbon_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        // carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":-123}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+}
+
+TEST(CarbonTest, BisonObjectInsertMultipleI32s)
+{
+        struct carbon doc;
+        struct carbon_new context;
+        struct carbon_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        carbon_insert_prop_i32(obj_ins, "My Key 1", -1);
+        carbon_insert_prop_i32(obj_ins, "My Key 2", -2);
+        carbon_insert_prop_i32(obj_ins, "My Key 3", -3);
+        carbon_insert_object_end(&state);
+
+        carbon_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        // carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":-1, \"My Key 2\":-2, \"My Key 3\":-3}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+}
+
+TEST(CarbonTest, BisonObjectInsertI64)
+{
+        struct carbon doc;
+        struct carbon_new context;
+        struct carbon_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
+        carbon_insert_prop_i64(obj_ins, "My Key", -123);
+        carbon_insert_object_end(&state);
+
+        carbon_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        // carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":-123}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+}
+
+TEST(CarbonTest, BisonObjectInsertMultipleI64s)
+{
+        struct carbon doc;
+        struct carbon_new context;
+        struct carbon_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        carbon_insert_prop_i64(obj_ins, "My Key 1", -1);
+        carbon_insert_prop_i64(obj_ins, "My Key 2", -2);
+        carbon_insert_prop_i64(obj_ins, "My Key 3", -3);
+        carbon_insert_object_end(&state);
+
+        carbon_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        // carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":-1, \"My Key 2\":-2, \"My Key 3\":-3}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+}
+
+TEST(CarbonTest, BisonObjectInsertFloat)
+{
+        struct carbon doc;
+        struct carbon_new context;
+        struct carbon_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
+        carbon_insert_prop_float(obj_ins, "My Key", -123.32);
+        carbon_insert_object_end(&state);
+
+        carbon_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        // carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":-123.32}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+}
+
+TEST(CarbonTest, BisonObjectInsertMultipleFloats)
+{
+        struct carbon doc;
+        struct carbon_new context;
+        struct carbon_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        carbon_insert_prop_float(obj_ins, "My Key 1", -1.23);
+        carbon_insert_prop_float(obj_ins, "My Key 2", -2.42);
+        carbon_insert_prop_float(obj_ins, "My Key 3", 3.21);
+        carbon_insert_object_end(&state);
+
+        carbon_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        // carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":-1.23, \"My Key 2\":-2.42, \"My Key 3\":3.21}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+}
+
+TEST(CarbonTest, BisonObjectInsertTrue)
+{
+        struct carbon doc;
+        struct carbon_new context;
+        struct carbon_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
+        carbon_insert_prop_true(obj_ins, "My Key");
+        carbon_insert_object_end(&state);
+
+        carbon_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        // carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":true}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+}
+
+TEST(CarbonTest, BisonObjectInsertFalse)
+{
+        struct carbon doc;
+        struct carbon_new context;
+        struct carbon_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
+        carbon_insert_prop_false(obj_ins, "My Key");
+        carbon_insert_object_end(&state);
+
+        carbon_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        // carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":false}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+}
+
+TEST(CarbonTest, BisonObjectInsertMultipleBooleans)
+{
+        struct carbon doc;
+        struct carbon_new context;
+        struct carbon_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        carbon_insert_prop_true(obj_ins, "My Key 1");
+        carbon_insert_prop_false(obj_ins, "My Key 2");
+        carbon_insert_prop_true(obj_ins, "My Key 3");
+        carbon_insert_object_end(&state);
+
+        carbon_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        // carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":true, \"My Key 2\":false, \"My Key 3\":true}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+}
+
+TEST(CarbonTest, BisonObjectInsertMixed)
+{
+        struct carbon doc;
+        struct carbon_new context;
+        struct carbon_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        carbon_insert_prop_true(obj_ins, "k1");
+        carbon_insert_prop_false(obj_ins, "k2");
+        carbon_insert_prop_null(obj_ins, "k3");
+        carbon_insert_prop_u8(obj_ins, "k4", 1);
+        carbon_insert_prop_u16(obj_ins, "k5", 2);
+        carbon_insert_prop_u32(obj_ins, "k6", 3);
+        carbon_insert_prop_u64(obj_ins, "k7", 4);
+        carbon_insert_prop_i8(obj_ins, "k8", -1);
+        carbon_insert_prop_i16(obj_ins, "k9", -2);
+        carbon_insert_prop_i32(obj_ins, "k10", -3);
+        carbon_insert_prop_i64(obj_ins, "k11", -4);
+        carbon_insert_prop_float(obj_ins, "k12", 42.23);
+
+        carbon_insert_object_end(&state);
+
+        carbon_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        // carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"k1\":true, \"k2\":false, \"k3\":null, \"k4\":1, \"k5\":2, \"k6\":3, \"k7\":4, \"k8\":-1, \"k9\":-2, \"k10\":-3, \"k11\":-4, \"k12\":42.23}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+}
+
+TEST(CarbonTest, BisonObjectInsertString)
+{
+        struct carbon doc;
+        struct carbon_new context;
+        struct carbon_insert_object_state state;
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
+
+        struct carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+
+        carbon_insert_prop_string(obj_ins, "hello", "world");
+
+        carbon_insert_object_end(&state);
+
+        carbon_create_end(&context);
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        struct string_builder sb;
+        string_builder_create(&sb);
+
+        // carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"hello\":\"world\"}]}") == 0);
+
+        string_builder_drop(&sb);
+        carbon_drop(&doc);
+}
 //
 //TEST(CarbonTest, BisonObjectInsertMultipleString)
 //{

@@ -23,19 +23,20 @@
 
 #define try_array_update(type_match, in_place_update_fn, insert_fn)                                                    \
 ({                                                                                                                     \
-        enum carbon_field_type type_is;                                                                                 \
-        carbon_array_it_field_type(&type_is, it);                                                                       \
-        bool status;                                                                                                   \
+        enum carbon_field_type type_is = 0;                                                                            \
+        carbon_array_it_field_type(&type_is, it);                                                                      \
+        bool status = false;                                                                                           \
         switch (type_is) {                                                                                             \
                 case type_match:                                                                                       \
                         status = in_place_update_fn(it, value);                                                        \
                 break;                                                                                                 \
                 default: {                                                                                             \
-                        struct carbon_insert inserter;                                                                  \
-                        carbon_array_it_remove(it);                                                                     \
-                        carbon_array_it_insert_begin(&inserter, it);                                                    \
+                        struct carbon_insert inserter;                                                                 \
+                        carbon_array_it_remove(it);                                                                    \
+                        carbon_array_it_next(it);                                                                      \
+                        carbon_array_it_insert_begin(&inserter, it);                                                   \
                         status = insert_fn(&inserter, value);                                                          \
-                        carbon_array_it_insert_end(&inserter);                                                          \
+                        carbon_array_it_insert_end(&inserter);                                                         \
                 break;                                                                                                 \
                 }                                                                                                      \
         }                                                                                                              \

@@ -50,6 +50,7 @@ ARK_EXPORT(bool) carbon_int_insert_create_for_array(struct carbon_insert *insert
         carbon_array_it_lock(context);
         inserter->context_type = CARBON_ARRAY;
         inserter->context.array = context;
+        inserter->position = 0;
 
         offset_t pos = 0;
         if (context->array_end_reached) {

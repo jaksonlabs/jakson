@@ -116,7 +116,6 @@ ARK_EXPORT(bool) carbon_object_it_next(struct carbon_object_it *it)
                         }
                 }
 
-                memfile_hexdump_printf(stderr, &it->memfile); // TODO: Debug Remove
                 assert(*memfile_peek(&it->memfile, sizeof(char)) == CARBON_MARKER_OBJECT_END);
                 return false;
         }

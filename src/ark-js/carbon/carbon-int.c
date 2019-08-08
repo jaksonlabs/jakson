@@ -457,7 +457,7 @@ ARK_EXPORT(u64) carbon_int_header_get_rev(struct carbon *doc)
 ARK_EXPORT(void) carbon_int_history_push(struct vector ofType(offset_t) *vec, offset_t off)
 {
         assert(vec);
-        vec_push(vec, &off, sizeof(offset_t));
+        vec_push(vec, &off, 1);
 }
 
 ARK_EXPORT(void) carbon_int_history_clear(struct vector ofType(offset_t) *vec)
