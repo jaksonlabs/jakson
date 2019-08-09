@@ -5499,116 +5499,116 @@ TEST(CarbonTest, BisonObjectInsertColumnNonEmpty)
         carbon_drop(&doc);
 }
 
-static void create_nested_doc(struct carbon *rev_doc)
-{
-        struct carbon doc;
-        struct carbon_revise revise;
-        struct carbon_array_it it;
-        struct carbon_insert nested_ins, *array_ins, *col_ins, *nested_array_ins;
-        struct carbon_insert_array_state array_state, nested_array_state;
-        struct carbon_insert_column_state column_state;
-
-        carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
-        carbon_revise_begin(&revise, rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
-
-        carbon_array_it_insert_begin(&nested_ins, &it);
-
-        array_ins = carbon_insert_array_begin(&array_state, &nested_ins, 10);
-
-        carbon_insert_null(array_ins);
-        carbon_insert_true(array_ins);
-        carbon_insert_false(array_ins);
-        carbon_insert_u8(array_ins, 8);
-        carbon_insert_i16(array_ins, -16);
-        carbon_insert_string(array_ins, "Hello, World!");
-        carbon_insert_binary(array_ins, "My Plain-Text", strlen("My Plain-Text"), "txt", NULL);
-        carbon_insert_binary(array_ins, "My Own Format", strlen("My Own Format"), NULL, "own");
-        col_ins = carbon_insert_column_begin(&column_state, array_ins, CARBON_COLUMN_TYPE_U32, 20);
-
-        carbon_insert_u32(col_ins, 32);
-        carbon_insert_u32(col_ins, 33);
-        carbon_insert_u32(col_ins, 34);
-        carbon_insert_u32(col_ins, 35);
-
-        carbon_insert_column_end(&column_state);
-
-        carbon_insert_array_begin(&nested_array_state, array_ins, 20);
-        carbon_insert_array_end(&nested_array_state);
-
-        nested_array_ins = carbon_insert_array_begin(&nested_array_state, array_ins, 20);
-
-        carbon_insert_null(nested_array_ins);
-        carbon_insert_true(nested_array_ins);
-        carbon_insert_false(nested_array_ins);
-        carbon_insert_u8(nested_array_ins, 8);
-        carbon_insert_i16(nested_array_ins, -16);
-        carbon_insert_string(nested_array_ins, "Hello, World!");
-        carbon_insert_binary(nested_array_ins, "My Plain-Text", strlen("My Plain-Text"), "txt", NULL);
-        carbon_insert_binary(nested_array_ins, "My Own Format", strlen("My Own Format"), NULL, "own");
-        col_ins = carbon_insert_column_begin(&column_state, nested_array_ins, CARBON_COLUMN_TYPE_U32, 20);
-
-        carbon_insert_u32(col_ins, 32);
-        carbon_insert_u32(col_ins, 33);
-        carbon_insert_u32(col_ins, 34);
-        carbon_insert_u32(col_ins, 35);
-
-        carbon_insert_column_end(&column_state);
-
-        carbon_insert_array_end(&nested_array_state);
-
-        carbon_insert_array_end(&array_state);
-
-        array_ins = carbon_insert_array_begin(&array_state, &nested_ins, 10);
-
-        carbon_insert_null(array_ins);
-        carbon_insert_true(array_ins);
-        carbon_insert_false(array_ins);
-        carbon_insert_u8(array_ins, 8);
-        carbon_insert_i16(array_ins, -16);
-        carbon_insert_string(array_ins, "Hello, World!");
-        carbon_insert_binary(array_ins, "My Plain-Text", strlen("My Plain-Text"), "txt", NULL);
-        carbon_insert_binary(array_ins, "My Own Format", strlen("My Own Format"), NULL, "own");
-        col_ins = carbon_insert_column_begin(&column_state, array_ins, CARBON_COLUMN_TYPE_U32, 20);
-
-        carbon_insert_u32(col_ins, 32);
-        carbon_insert_u32(col_ins, 33);
-        carbon_insert_u32(col_ins, 34);
-        carbon_insert_u32(col_ins, 35);
-
-        carbon_insert_column_end(&column_state);
-
-        carbon_insert_array_begin(&nested_array_state, array_ins, 20);
-        carbon_insert_array_end(&nested_array_state);
-
-        nested_array_ins = carbon_insert_array_begin(&nested_array_state, array_ins, 20);
-
-        carbon_insert_null(nested_array_ins);
-        carbon_insert_true(nested_array_ins);
-        carbon_insert_false(nested_array_ins);
-        carbon_insert_u8(nested_array_ins, 8);
-        carbon_insert_i16(nested_array_ins, -16);
-        carbon_insert_string(nested_array_ins, "Hello, World!");
-        carbon_insert_binary(nested_array_ins, "My Plain-Text", strlen("My Plain-Text"), "txt", NULL);
-        carbon_insert_binary(nested_array_ins, "My Own Format", strlen("My Own Format"), NULL, "own");
-        col_ins = carbon_insert_column_begin(&column_state, nested_array_ins, CARBON_COLUMN_TYPE_U32, 20);
-
-        carbon_insert_u32(col_ins, 32);
-        carbon_insert_u32(col_ins, 33);
-        carbon_insert_u32(col_ins, 34);
-        carbon_insert_u32(col_ins, 35);
-
-        carbon_insert_column_end(&column_state);
-
-        carbon_insert_array_end(&nested_array_state);
-
-        carbon_insert_array_end(&array_state);
-
-        carbon_array_it_insert_end(&nested_ins);
-
-        carbon_revise_iterator_close(&it);
-        carbon_revise_end(&revise);
-}
+//static void create_nested_doc(struct carbon *rev_doc)
+//{
+//        struct carbon doc;
+//        struct carbon_revise revise;
+//        struct carbon_array_it it;
+//        struct carbon_insert nested_ins, *array_ins, *col_ins, *nested_array_ins;
+//        struct carbon_insert_array_state array_state, nested_array_state;
+//        struct carbon_insert_column_state column_state;
+//
+//        carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
+//        carbon_revise_begin(&revise, rev_doc, &doc);
+//        carbon_revise_iterator_open(&it, &revise);
+//
+//        carbon_array_it_insert_begin(&nested_ins, &it);
+//
+//        array_ins = carbon_insert_array_begin(&array_state, &nested_ins, 10);
+//
+//        carbon_insert_null(array_ins);
+//        carbon_insert_true(array_ins);
+//        carbon_insert_false(array_ins);
+//        carbon_insert_u8(array_ins, 8);
+//        carbon_insert_i16(array_ins, -16);
+//        carbon_insert_string(array_ins, "Hello, World!");
+//        carbon_insert_binary(array_ins, "My Plain-Text", strlen("My Plain-Text"), "txt", NULL);
+//        carbon_insert_binary(array_ins, "My Own Format", strlen("My Own Format"), NULL, "own");
+//        col_ins = carbon_insert_column_begin(&column_state, array_ins, CARBON_COLUMN_TYPE_U32, 20);
+//
+//        carbon_insert_u32(col_ins, 32);
+//        carbon_insert_u32(col_ins, 33);
+//        carbon_insert_u32(col_ins, 34);
+//        carbon_insert_u32(col_ins, 35);
+//
+//        carbon_insert_column_end(&column_state);
+//
+//        carbon_insert_array_begin(&nested_array_state, array_ins, 20);
+//        carbon_insert_array_end(&nested_array_state);
+//
+//        nested_array_ins = carbon_insert_array_begin(&nested_array_state, array_ins, 20);
+//
+//        carbon_insert_null(nested_array_ins);
+//        carbon_insert_true(nested_array_ins);
+//        carbon_insert_false(nested_array_ins);
+//        carbon_insert_u8(nested_array_ins, 8);
+//        carbon_insert_i16(nested_array_ins, -16);
+//        carbon_insert_string(nested_array_ins, "Hello, World!");
+//        carbon_insert_binary(nested_array_ins, "My Plain-Text", strlen("My Plain-Text"), "txt", NULL);
+//        carbon_insert_binary(nested_array_ins, "My Own Format", strlen("My Own Format"), NULL, "own");
+//        col_ins = carbon_insert_column_begin(&column_state, nested_array_ins, CARBON_COLUMN_TYPE_U32, 20);
+//
+//        carbon_insert_u32(col_ins, 32);
+//        carbon_insert_u32(col_ins, 33);
+//        carbon_insert_u32(col_ins, 34);
+//        carbon_insert_u32(col_ins, 35);
+//
+//        carbon_insert_column_end(&column_state);
+//
+//        carbon_insert_array_end(&nested_array_state);
+//
+//        carbon_insert_array_end(&array_state);
+//
+//        array_ins = carbon_insert_array_begin(&array_state, &nested_ins, 10);
+//
+//        carbon_insert_null(array_ins);
+//        carbon_insert_true(array_ins);
+//        carbon_insert_false(array_ins);
+//        carbon_insert_u8(array_ins, 8);
+//        carbon_insert_i16(array_ins, -16);
+//        carbon_insert_string(array_ins, "Hello, World!");
+//        carbon_insert_binary(array_ins, "My Plain-Text", strlen("My Plain-Text"), "txt", NULL);
+//        carbon_insert_binary(array_ins, "My Own Format", strlen("My Own Format"), NULL, "own");
+//        col_ins = carbon_insert_column_begin(&column_state, array_ins, CARBON_COLUMN_TYPE_U32, 20);
+//
+//        carbon_insert_u32(col_ins, 32);
+//        carbon_insert_u32(col_ins, 33);
+//        carbon_insert_u32(col_ins, 34);
+//        carbon_insert_u32(col_ins, 35);
+//
+//        carbon_insert_column_end(&column_state);
+//
+//        carbon_insert_array_begin(&nested_array_state, array_ins, 20);
+//        carbon_insert_array_end(&nested_array_state);
+//
+//        nested_array_ins = carbon_insert_array_begin(&nested_array_state, array_ins, 20);
+//
+//        carbon_insert_null(nested_array_ins);
+//        carbon_insert_true(nested_array_ins);
+//        carbon_insert_false(nested_array_ins);
+//        carbon_insert_u8(nested_array_ins, 8);
+//        carbon_insert_i16(nested_array_ins, -16);
+//        carbon_insert_string(nested_array_ins, "Hello, World!");
+//        carbon_insert_binary(nested_array_ins, "My Plain-Text", strlen("My Plain-Text"), "txt", NULL);
+//        carbon_insert_binary(nested_array_ins, "My Own Format", strlen("My Own Format"), NULL, "own");
+//        col_ins = carbon_insert_column_begin(&column_state, nested_array_ins, CARBON_COLUMN_TYPE_U32, 20);
+//
+//        carbon_insert_u32(col_ins, 32);
+//        carbon_insert_u32(col_ins, 33);
+//        carbon_insert_u32(col_ins, 34);
+//        carbon_insert_u32(col_ins, 35);
+//
+//        carbon_insert_column_end(&column_state);
+//
+//        carbon_insert_array_end(&nested_array_state);
+//
+//        carbon_insert_array_end(&array_state);
+//
+//        carbon_array_it_insert_end(&nested_ins);
+//
+//        carbon_revise_iterator_close(&it);
+//        carbon_revise_end(&revise);
+//}
 
 TEST(CarbonTest, BisonObjectRemoveTest)
 {
@@ -5619,12 +5619,8 @@ TEST(CarbonTest, BisonObjectRemoveTest)
         struct string_builder sb;
         bool has_next;
         string_builder_create(&sb);
-        bool status;
-        const u16 *values;
 
         struct carbon_insert_object_state state;
-        struct carbon_insert_column_state column_state;
-        struct carbon_insert *array_ins;
 
         // -------------------------------------------------------------------------------------------------------------
         struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
@@ -5713,12 +5709,8 @@ TEST(CarbonTest, BisonObjectRemoveSkipOneTest)
         struct string_builder sb;
         bool has_next;
         string_builder_create(&sb);
-        bool status;
-        const u16 *values;
 
         struct carbon_insert_object_state state;
-        struct carbon_insert_column_state column_state;
-        struct carbon_insert *array_ins;
 
         // -------------------------------------------------------------------------------------------------------------
         struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, CARBON_OPTIMIZE);
@@ -5806,13 +5798,10 @@ TEST(CarbonTest, BisonObjectInsertPropDuringIt)
         struct string_builder sb;
         bool has_next;
         string_builder_create(&sb);
-        bool status;
-        const u16 *values;
         u64 key_len;
 
         struct carbon_insert_object_state state;
-        struct carbon_insert_column_state column_state;
-        struct carbon_insert *array_ins, nested_ins;
+        struct carbon_insert nested_ins;
 
         // -------------------------------------------------------------------------------------------------------------
         struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, CARBON_OPTIMIZE);
@@ -5888,13 +5877,9 @@ TEST(CarbonTest, BisonObjectInsertPropDuringItAtIndex1)
         struct string_builder sb;
         bool has_next;
         string_builder_create(&sb);
-        bool status;
-        const u16 *values;
-        u64 key_len;
 
         struct carbon_insert_object_state state;
-        struct carbon_insert_column_state column_state;
-        struct carbon_insert *array_ins, nested_ins;
+        struct carbon_insert nested_ins;
 
         // -------------------------------------------------------------------------------------------------------------
         struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, CARBON_OPTIMIZE);
@@ -5967,13 +5952,9 @@ TEST(CarbonTest, BisonObjectInsertPropDuringItAtIndex2)
         struct string_builder sb;
         bool has_next;
         string_builder_create(&sb);
-        bool status;
-        const u16 *values;
-        u64 key_len;
 
         struct carbon_insert_object_state state;
-        struct carbon_insert_column_state column_state;
-        struct carbon_insert *array_ins, nested_ins;
+        struct carbon_insert nested_ins;
 
         // -------------------------------------------------------------------------------------------------------------
         struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, CARBON_OPTIMIZE);
@@ -6046,13 +6027,9 @@ TEST(CarbonTest, BisonObjectInsertPropDuringItAtIndex3)
         struct string_builder sb;
         bool has_next;
         string_builder_create(&sb);
-        bool status;
-        const u16 *values;
-        u64 key_len;
 
         struct carbon_insert_object_state state;
-        struct carbon_insert_column_state column_state;
-        struct carbon_insert *array_ins, nested_ins;
+        struct carbon_insert nested_ins;
 
         // -------------------------------------------------------------------------------------------------------------
         struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, CARBON_OPTIMIZE);
@@ -6126,13 +6103,9 @@ TEST(CarbonTest, BisonObjectInsertPropDuringItAtIndex4)
         struct string_builder sb;
         bool has_next;
         string_builder_create(&sb);
-        bool status;
-        const u16 *values;
-        u64 key_len;
 
         struct carbon_insert_object_state state;
-        struct carbon_insert_column_state column_state;
-        struct carbon_insert *array_ins, nested_ins;
+        struct carbon_insert nested_ins;
 
         // -------------------------------------------------------------------------------------------------------------
         struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, CARBON_OPTIMIZE);
@@ -6207,13 +6180,9 @@ TEST(CarbonTest, BisonObjectInsertPropDuringItAtIndex5)
         struct string_builder sb;
         bool has_next;
         string_builder_create(&sb);
-        bool status;
-        const u16 *values;
-        u64 key_len;
 
         struct carbon_insert_object_state state;
-        struct carbon_insert_column_state column_state;
-        struct carbon_insert *array_ins, nested_ins;
+        struct carbon_insert nested_ins;
 
         // -------------------------------------------------------------------------------------------------------------
         struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, CARBON_OPTIMIZE);
@@ -6289,13 +6258,9 @@ TEST(CarbonTest, BisonObjectRemovePropByKey)
         struct string_builder sb;
         bool has_next;
         string_builder_create(&sb);
-        bool status;
-        const u16 *values;
         u64 key_len;
 
         struct carbon_insert_object_state state;
-        struct carbon_insert_column_state column_state;
-        struct carbon_insert *array_ins;
 
         // -------------------------------------------------------------------------------------------------------------
         struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, CARBON_OPTIMIZE);
@@ -6367,14 +6332,10 @@ TEST(CarbonTest, BisonObjectRemovePropByKeyTypeObjectNonEmpty)
         struct string_builder sb;
         bool has_next;
         string_builder_create(&sb);
-        bool status;
-        const u16 *values;
         u64 key_len;
 
         struct carbon_insert_object_state state;
-        struct carbon_insert_column_state column_state;
         struct carbon_insert_object_state nested_obj;
-        struct carbon_insert *array_ins;
 
         // -------------------------------------------------------------------------------------------------------------
         struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, CARBON_OPTIMIZE);
@@ -6452,21 +6413,17 @@ TEST(CarbonTest, BisonObjectRemovePropByKeyTypeArrayEmpty)
         struct string_builder sb;
         bool has_next;
         string_builder_create(&sb);
-        bool status;
-        const u16 *values;
         u64 key_len;
 
         struct carbon_insert_object_state state;
-        struct carbon_insert_column_state column_state;
         struct carbon_insert_array_state nested_arr;
-        struct carbon_insert *array_ins;
 
         // -------------------------------------------------------------------------------------------------------------
         struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, CARBON_OPTIMIZE);
 
         struct carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
 
-        struct carbon_insert *nested_arr_it = carbon_insert_prop_array_begin(&nested_arr, nested_obj_ins, "1", 100);
+        carbon_insert_prop_array_begin(&nested_arr, nested_obj_ins, "1", 100);
 
         carbon_insert_prop_array_end(&nested_arr);
 
@@ -6534,14 +6491,10 @@ TEST(CarbonTest, BisonObjectRemovePropByKeyTypeArrayNonEmpty)
         struct string_builder sb;
         bool has_next;
         string_builder_create(&sb);
-        bool status;
-        const u16 *values;
         u64 key_len;
 
         struct carbon_insert_object_state state;
-        struct carbon_insert_column_state column_state;
         struct carbon_insert_array_state nested_arr;
-        struct carbon_insert *array_ins;
 
         // -------------------------------------------------------------------------------------------------------------
         struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, CARBON_OPTIMIZE);
@@ -6619,14 +6572,10 @@ TEST(CarbonTest, BisonObjectRemovePropByKeyTypeColumnEmpty)
         struct string_builder sb;
         bool has_next;
         string_builder_create(&sb);
-        bool status;
-        const u16 *values;
         u64 key_len;
 
         struct carbon_insert_object_state state;
-        struct carbon_insert_column_state column_state;
         struct carbon_insert_column_state nested_col;
-        struct carbon_insert *array_ins;
 
         // -------------------------------------------------------------------------------------------------------------
         struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, CARBON_OPTIMIZE);
@@ -6701,14 +6650,10 @@ TEST(CarbonTest, BisonObjectRemovePropByKeyTypeObjectEmpty)
         struct string_builder sb;
         bool has_next;
         string_builder_create(&sb);
-        bool status;
-        const u16 *values;
         u64 key_len;
 
         struct carbon_insert_object_state state;
-        struct carbon_insert_column_state column_state;
         struct carbon_insert_object_state nested_obj;
-        struct carbon_insert *array_ins;
 
         // -------------------------------------------------------------------------------------------------------------
         struct carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, CARBON_OPTIMIZE);
@@ -6775,9 +6720,7 @@ TEST(CarbonTest, BisonObjectRemovePropByKeyTypeObjectEmpty)
 
 TEST(CarbonTest, BisonUpdateSetToNull)
 {
-        struct carbon doc, rev_doc;
         struct string_builder sb;
-        bool status;
 
         string_builder_create(&sb);
 
