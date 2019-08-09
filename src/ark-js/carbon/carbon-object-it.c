@@ -103,6 +103,7 @@ ARK_EXPORT(bool) carbon_object_it_next(struct carbon_object_it *it)
         error_if_null(it);
         bool is_empty_slot;
         offset_t last_off = memfile_tell(&it->memfile);
+        carbon_int_field_access_drop(&it->field_access);
         if (carbon_int_object_it_next(&is_empty_slot, &it->object_end_reached, it)) {
                 carbon_int_history_push(&it->history, last_off);
                 return true;

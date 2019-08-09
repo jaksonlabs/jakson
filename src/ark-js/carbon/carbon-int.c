@@ -209,7 +209,7 @@ ARK_EXPORT(bool) carbon_int_array_it_next(bool *is_empty_slot, bool *is_array_en
 {
         if (carbon_int_array_it_refresh(is_empty_slot, is_array_end, it)) {
                 carbon_field_skip(&it->memfile);
-                return true;
+            return true;
         } else {
                 return false;
         }
