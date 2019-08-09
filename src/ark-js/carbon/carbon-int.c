@@ -209,7 +209,7 @@ ARK_EXPORT(bool) carbon_int_array_it_next(bool *is_empty_slot, bool *is_array_en
 {
         if (carbon_int_array_it_refresh(is_empty_slot, is_array_end, it)) {
                 carbon_field_skip(&it->memfile);
-                return true;
+            return true;
         } else {
                 return false;
         }
@@ -298,6 +298,7 @@ ARK_EXPORT(bool) carbon_int_array_skip_contents(bool *is_empty_slot, bool *is_ar
 ARK_EXPORT(bool) carbon_int_array_it_refresh(bool *is_empty_slot, bool *is_array_end, struct carbon_array_it *it)
 {
         error_if_null(it);
+        carbon_int_field_access_drop(&it->field_access);
         if (array_it_is_slot_occupied(is_empty_slot, is_array_end, it)) {
                 carbon_int_array_it_field_type_read(it);
                 carbon_int_field_data_access(&it->memfile, &it->err, &it->field_access);
@@ -369,8 +370,8 @@ ARK_EXPORT(bool) carbon_int_field_data_access(struct memfile *file, struct err *
                 /* the memfile points now to the actual blob data, which is used by the iterator to set the field */
         } break;
         case CARBON_FIELD_TYPE_ARRAY:
-                field_access->nested_array_it_opened = true;
-                field_access->nested_array_it_accessed = false;
+                carbon_int_field_access_create(field_access);
+                field_access->nested_array_it_is_created = true;
                 carbon_array_it_create(field_access->nested_array_it, file, err,
                         memfile_tell(file) - sizeof(u8));
                 break;
@@ -384,12 +385,13 @@ ARK_EXPORT(bool) carbon_int_field_data_access(struct memfile *file, struct err *
         case CARBON_FIELD_TYPE_COLUMN_I64:
         case CARBON_FIELD_TYPE_COLUMN_FLOAT:
         case CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
+                carbon_int_field_access_create(field_access);
                 carbon_column_it_create(field_access->nested_column_it, file, err,
                         memfile_tell(file) - sizeof(u8));
         } break;
         case CARBON_FIELD_TYPE_OBJECT:
-                field_access->nested_object_it_opened = true;
-                field_access->nested_object_it_accessed = false;
+                carbon_int_field_access_create(field_access);
+                field_access->nested_object_it_is_created = true;
                 carbon_object_it_create(field_access->nested_object_it, file, err,
                         memfile_tell(file) - sizeof(u8));
                 break;
@@ -455,7 +457,7 @@ ARK_EXPORT(u64) carbon_int_header_get_rev(struct carbon *doc)
 ARK_EXPORT(void) carbon_int_history_push(struct vector ofType(offset_t) *vec, offset_t off)
 {
         assert(vec);
-        vec_push(vec, &off, sizeof(offset_t));
+        vec_push(vec, &off, 1);
 }
 
 ARK_EXPORT(void) carbon_int_history_clear(struct vector ofType(offset_t) *vec)
@@ -486,10 +488,11 @@ ARK_EXPORT(bool) carbon_int_history_has(struct vector ofType(offset_t) *vec)
 
 ARK_EXPORT(bool) carbon_int_field_access_create(struct field_access *field)
 {
-        field->nested_array_it_opened = false;
+        field->nested_array_it_is_created = false;
         field->nested_array_it_accessed = false;
-        field->nested_object_it_opened = false;
+        field->nested_object_it_is_created = false;
         field->nested_object_it_accessed = false;
+        field->nested_column_it_is_created = false;
         field->nested_array_it = ark_malloc(sizeof(struct carbon_array_it));
         field->nested_object_it = ark_malloc(sizeof(struct carbon_object_it));
         field->nested_column_it = ark_malloc(sizeof(struct carbon_column_it));
@@ -506,10 +509,11 @@ ARK_EXPORT(bool) carbon_int_field_access_clone(struct field_access *dst, struct 
         dst->it_field_len = src->it_field_len;
         dst->it_mime_type = src->it_mime_type;
         dst->it_mime_type_strlen = src->it_mime_type_strlen;
-        dst->nested_array_it_opened = src->nested_array_it_opened;
+        dst->nested_array_it_is_created = src->nested_array_it_is_created;
         dst->nested_array_it_accessed = src->nested_array_it_accessed;
-        dst->nested_object_it_opened = src->nested_object_it_opened;
+        dst->nested_object_it_is_created = src->nested_object_it_is_created;
         dst->nested_object_it_accessed = src->nested_object_it_accessed;
+        dst->nested_column_it_is_created = src->nested_column_it_is_created;
         dst->nested_array_it = ark_malloc(sizeof(struct carbon_array_it));
         dst->nested_object_it = ark_malloc(sizeof(struct carbon_object_it));
         dst->nested_column_it = ark_malloc(sizeof(struct carbon_column_it));
@@ -530,25 +534,28 @@ ARK_EXPORT(bool) carbon_int_field_access_drop(struct field_access *field)
         free (field->nested_array_it);
         free (field->nested_object_it);
         free (field->nested_column_it);
+        field->nested_array_it = NULL;
+        field->nested_object_it = NULL;
+        field->nested_column_it = NULL;
         return true;
 }
 
 ARK_EXPORT(bool) carbon_int_field_access_object_it_opened(struct field_access *field)
 {
         assert(field);
-        return ((char *) field->nested_object_it)[0] != 0;
+        return field->nested_object_it_is_created;//field->nested_object_it != 0;
 }
 
 ARK_EXPORT(bool) carbon_int_field_access_array_it_opened(struct field_access *field)
 {
         assert(field);
-        return ((char *) field->nested_array_it)[0] != 0;
+        return field->nested_array_it_is_created != 0;
 }
 
 ARK_EXPORT(bool) carbon_int_field_access_column_it_opened(struct field_access *field)
 {
         assert(field);
-        return ((char *) field->nested_column_it)[0] != 0;
+        return field->nested_column_it_is_created != 0;
 }
 
 ARK_EXPORT(void) carbon_int_auto_close_nested_array_it(struct field_access *field)
@@ -577,17 +584,21 @@ ARK_EXPORT(void) carbon_int_auto_close_nested_column_it(struct field_access *fie
 ARK_EXPORT(bool) carbon_int_field_auto_close(struct field_access *field)
 {
         error_if_null(field)
-        if (field->nested_array_it_opened && !field->nested_array_it_accessed) {
+        if (field->nested_array_it_is_created && !field->nested_array_it_accessed) {
                 carbon_int_auto_close_nested_array_it(field);
-                field->nested_array_it_opened = false;
+                field->nested_array_it_is_created = false;
                 field->nested_array_it_accessed = false;
         }
-        if (field->nested_object_it_opened && !field->nested_object_it_accessed) {
+        if (field->nested_object_it_is_created && !field->nested_object_it_accessed) {
                 carbon_int_auto_close_nested_object_it(field);
-                field->nested_array_it_opened = false;
-                field->nested_array_it_accessed = false;
+                field->nested_object_it_is_created = false;
+                field->nested_object_it_accessed = false;
         }
-        carbon_int_auto_close_nested_column_it(field);
+        if (field->nested_column_it_is_created) {
+                carbon_int_auto_close_nested_column_it(field);
+                field->nested_object_it_is_created = false;
+        }
+
         return true;
 }
 

@@ -50,8 +50,9 @@ ARK_EXPORT(bool) carbon_int_insert_create_for_array(struct carbon_insert *insert
         carbon_array_it_lock(context);
         inserter->context_type = CARBON_ARRAY;
         inserter->context.array = context;
+        inserter->position = 0;
 
-        offset_t pos;
+        offset_t pos = 0;
         if (context->array_end_reached) {
                 pos = memfile_tell(&context->memfile);
         } else {
@@ -446,7 +447,8 @@ ARK_EXPORT(struct carbon_insert *) carbon_insert_object_begin(struct carbon_inse
         *out = (struct carbon_insert_object_state) {
                 .parent_inserter = inserter,
                 .it = ark_malloc(sizeof(struct carbon_object_it)),
-                .object_begin = memfile_tell(&inserter->memfile)
+                .object_begin = memfile_tell(&inserter->memfile),
+                .object_end = 0
         };
 
 
@@ -498,7 +500,8 @@ ARK_EXPORT(struct carbon_insert *) carbon_insert_array_begin(struct carbon_inser
         *state_out = (struct carbon_insert_array_state) {
                 .parent_inserter = inserter_in,
                 .nested_array = ark_malloc(sizeof(struct carbon_array_it)),
-                .array_begin = memfile_tell(&inserter_in->memfile)
+                .array_begin = memfile_tell(&inserter_in->memfile),
+                .array_end = 0
         };
 
         carbon_int_insert_array(&inserter_in->memfile, array_capacity);
@@ -516,12 +519,10 @@ ARK_EXPORT(bool) carbon_insert_array_end(struct carbon_insert_array_state *state
 
         struct carbon_array_it scan;
         carbon_array_it_create(&scan, &state_in->parent_inserter->memfile, &state_in->parent_inserter->err,
-                memfile_tell(&state_in->parent_inserter->memfile) - 1);
-        while (carbon_array_it_next(&scan))
-                { }
+                           memfile_tell(&state_in->parent_inserter->memfile) - 1);
 
-        assert(*memfile_peek(&scan.memfile, sizeof(char)) == CARBON_MARKER_ARRAY_END);
-        memfile_read(&scan.memfile, sizeof(char));
+        carbon_array_it_fast_forward(&scan);
+
         state_in->array_end = memfile_tell(&scan.memfile);
         memfile_skip(&scan.memfile, 1);
 
@@ -546,7 +547,8 @@ ARK_EXPORT(struct carbon_insert *) carbon_insert_column_begin(struct carbon_inse
                 .parent_inserter = inserter_in,
                 .nested_column = ark_malloc(sizeof(struct carbon_column_it)),
                 .type = field_type,
-                .column_begin = memfile_tell(&inserter_in->memfile)
+                .column_begin = memfile_tell(&inserter_in->memfile),
+                .column_end = 0
         };
 
         u64 container_start_off = memfile_tell(&inserter_in->memfile);
