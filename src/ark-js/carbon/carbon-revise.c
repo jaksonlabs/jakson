@@ -475,7 +475,6 @@ static bool internal_pack_object(struct carbon_object_it *it)
                                 carbon_column_it_rewind(it->field_access.nested_column_it);
                                 internal_pack_column(it->field_access.nested_column_it);
                                 memfile_seek(&it->memfile, memfile_tell(&it->field_access.nested_column_it->memfile));
-                                memfile_hexdump_printf(stderr, &it->memfile); // TODO: Debug remove
                                 break;
                         case CARBON_FIELD_TYPE_OBJECT: {
                                 struct carbon_object_it nested_object_it;

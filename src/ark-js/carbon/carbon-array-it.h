@@ -42,11 +42,13 @@ struct field_access
         const char *it_mime_type;
         u64 it_mime_type_strlen;
 
-        bool nested_array_it_opened;
+        bool nested_array_it_is_created;
         bool nested_array_it_accessed;
 
-        bool nested_object_it_opened;
+        bool nested_object_it_is_created;
         bool nested_object_it_accessed;
+
+        bool nested_column_it_is_created;
 
         struct carbon_array_it *nested_array_it;
         struct carbon_column_it *nested_column_it;

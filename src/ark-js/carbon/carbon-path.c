@@ -53,6 +53,7 @@ ARK_EXPORT(bool) carbon_path_evaluator_begin_mutable(struct carbon_path_evaluato
         ark_check_success(error_init(&eval->err));
         ark_check_success(carbon_revise_iterator_open(&eval->root_it, context));
         eval->status = traverse_array(eval, path, 0, &eval->root_it);
+        ark_check_success(carbon_iterator_close(&eval->root_it));
         return true;
 }
 

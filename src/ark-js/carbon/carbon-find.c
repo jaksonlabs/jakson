@@ -61,8 +61,9 @@ ARK_EXPORT(bool) carbon_find_close(struct carbon_find *find)
                 default:
                         break;
                 }
+            return carbon_find_drop(find);
         }
-        return carbon_find_drop(find);
+    return true;
 }
 
 ARK_EXPORT(bool) carbon_find_create(struct carbon_find *find, struct carbon_dot_path *path, struct carbon *doc)
