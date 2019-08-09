@@ -23,14 +23,15 @@
 #include <ark-js/carbon/carbon-int.h>
 #include <ark-js/carbon/carbon-string.h>
 #include <ark-js/carbon/carbon-object-it.h>
+#include "carbon-int.h"
 
 #define check_type_if_container_is_column(inserter, expected)                                                          \
-if (unlikely(inserter->context_type == carbon_COLUMN && inserter->context.column->type != expected)) {                  \
+if (unlikely(inserter->context_type == CARBON_COLUMN && inserter->context.column->type != expected)) {                 \
         error_with_details(&inserter->err, ARK_ERR_TYPEMISMATCH, "Element type does not match container type");        \
 }
 
 #define check_type_range_if_container_is_column(inserter, expected1, expected2, expected3)                             \
-if (unlikely(inserter->context_type == carbon_COLUMN && inserter->context.column->type != expected1 &&                  \
+if (unlikely(inserter->context_type == CARBON_COLUMN && inserter->context.column->type != expected1 &&                 \
         inserter->context.column->type != expected2 && inserter->context.column->type != expected3)) {                 \
         error_with_details(&inserter->err, ARK_ERR_TYPEMISMATCH, "Element type does not match container type");        \
 }
@@ -39,7 +40,7 @@ static bool write_field_data(struct carbon_insert *inserter, u8 field_type_marke
 static bool push_in_column(struct carbon_insert *inserter, const void *base, enum carbon_field_type type);
 
 static bool push_media_type_for_array(struct carbon_insert *inserter, enum carbon_field_type type);
-static void internal_create(struct carbon_insert *inserter, struct memfile *src);
+static void internal_create(struct carbon_insert *inserter, struct memfile *src, offset_t pos);
 static void write_binary_blob(struct carbon_insert *inserter, const void *value, size_t nbytes);
 
 ARK_EXPORT(bool) carbon_int_insert_create_for_array(struct carbon_insert *inserter, struct carbon_array_it *context)
@@ -47,9 +48,18 @@ ARK_EXPORT(bool) carbon_int_insert_create_for_array(struct carbon_insert *insert
         error_if_null(inserter)
         error_if_null(context)
         carbon_array_it_lock(context);
-        inserter->context_type = carbon_ARRAY;
+        inserter->context_type = CARBON_ARRAY;
         inserter->context.array = context;
-        internal_create(inserter, &context->memfile);
+        inserter->position = 0;
+
+        offset_t pos = 0;
+        if (context->array_end_reached) {
+                pos = memfile_tell(&context->memfile);
+        } else {
+                pos = carbon_int_history_has(&context->history) ? carbon_int_history_peek(&context->history) : 0;
+        }
+
+        internal_create(inserter, &context->memfile, pos);
         return true;
 }
 
@@ -58,9 +68,9 @@ ARK_EXPORT(bool) carbon_int_insert_create_for_column(struct carbon_insert *inser
         error_if_null(inserter)
         error_if_null(context)
         carbon_column_it_lock(context);
-        inserter->context_type = carbon_COLUMN;
+        inserter->context_type = CARBON_COLUMN;
         inserter->context.column = context;
-        internal_create(inserter, &context->memfile);
+        internal_create(inserter, &context->memfile, memfile_tell(&context->memfile));
         return true;
 }
 
@@ -69,9 +79,17 @@ ARK_EXPORT(bool) carbon_int_insert_create_for_object(struct carbon_insert *inser
         error_if_null(inserter)
         error_if_null(context)
         carbon_object_it_lock(context);
-        inserter->context_type = carbon_OBJECT;
+        inserter->context_type = CARBON_OBJECT;
         inserter->context.object = context;
-        internal_create(inserter, &context->memfile);
+
+        offset_t pos;
+        if (context->object_end_reached) {
+                pos = memfile_tell(&context->memfile);
+        } else {
+                pos = carbon_int_history_has(&context->history) ? carbon_int_history_peek(&context->history) : 0;
+        }
+
+        internal_create(inserter, &context->memfile, pos);
         return true;
 }
 
@@ -80,9 +98,9 @@ ARK_EXPORT(bool) carbon_insert_null(struct carbon_insert *inserter)
         check_type_if_container_is_column(inserter, CARBON_FIELD_TYPE_COLUMN_BOOLEAN);
 
         switch (inserter->context_type) {
-        case carbon_ARRAY:
+        case CARBON_ARRAY:
                 return push_media_type_for_array(inserter, CARBON_FIELD_TYPE_NULL);
-        case carbon_COLUMN: {
+        case CARBON_COLUMN: {
                 switch (inserter->context.column->type) {
                         case CARBON_FIELD_TYPE_COLUMN_U8: {
                                 u8 value = U8_NULL;
@@ -139,9 +157,9 @@ ARK_EXPORT(bool) carbon_insert_true(struct carbon_insert *inserter)
 {
         check_type_if_container_is_column(inserter, CARBON_FIELD_TYPE_COLUMN_BOOLEAN);
         switch (inserter->context_type) {
-        case carbon_ARRAY:
+        case CARBON_ARRAY:
                 return push_media_type_for_array(inserter, CARBON_FIELD_TYPE_TRUE);
-        case carbon_COLUMN: {
+        case CARBON_COLUMN: {
                 u8 value = CARBON_BOOLEAN_COLUMN_TRUE;
                 return push_in_column(inserter, &value, CARBON_FIELD_TYPE_COLUMN_BOOLEAN);
         }
@@ -155,9 +173,9 @@ ARK_EXPORT(bool) carbon_insert_false(struct carbon_insert *inserter)
 {
         check_type_if_container_is_column(inserter, CARBON_FIELD_TYPE_COLUMN_BOOLEAN);
         switch (inserter->context_type) {
-        case carbon_ARRAY:
+        case CARBON_ARRAY:
                 return push_media_type_for_array(inserter, CARBON_FIELD_TYPE_FALSE);
-        case carbon_COLUMN: {
+        case CARBON_COLUMN: {
                 u8 value = CARBON_BOOLEAN_COLUMN_FALSE;
                 return push_in_column(inserter, &value, CARBON_FIELD_TYPE_COLUMN_BOOLEAN);
         }
@@ -171,10 +189,10 @@ ARK_EXPORT(bool) carbon_insert_u8(struct carbon_insert *inserter, u8 value)
 {
         check_type_if_container_is_column(inserter, CARBON_FIELD_TYPE_COLUMN_U8);
         switch (inserter->context_type) {
-        case carbon_ARRAY:
+        case CARBON_ARRAY:
                 write_field_data(inserter, CARBON_FIELD_TYPE_NUMBER_U8, &value, sizeof(u8));
                 break;
-        case carbon_COLUMN:
+        case CARBON_COLUMN:
                 push_in_column(inserter, &value, CARBON_FIELD_TYPE_COLUMN_U8);
                 break;
         default:
@@ -188,10 +206,10 @@ ARK_EXPORT(bool) carbon_insert_u16(struct carbon_insert *inserter, u16 value)
 {
         check_type_if_container_is_column(inserter, CARBON_FIELD_TYPE_COLUMN_U16);
         switch (inserter->context_type) {
-        case carbon_ARRAY:
+        case CARBON_ARRAY:
                 write_field_data(inserter, CARBON_FIELD_TYPE_NUMBER_U16, &value, sizeof(u16));
                 break;
-        case carbon_COLUMN:
+        case CARBON_COLUMN:
                 push_in_column(inserter, &value, CARBON_FIELD_TYPE_COLUMN_U16);
                 break;
         default:
@@ -205,10 +223,10 @@ ARK_EXPORT(bool) carbon_insert_u32(struct carbon_insert *inserter, u32 value)
 {
         check_type_if_container_is_column(inserter, CARBON_FIELD_TYPE_COLUMN_U32);
         switch (inserter->context_type) {
-        case carbon_ARRAY:
+        case CARBON_ARRAY:
                 write_field_data(inserter, CARBON_FIELD_TYPE_NUMBER_U32, &value, sizeof(u32));
                 break;
-        case carbon_COLUMN:
+        case CARBON_COLUMN:
                 push_in_column(inserter, &value, CARBON_FIELD_TYPE_COLUMN_U32);
                 break;
         default:
@@ -222,10 +240,10 @@ ARK_EXPORT(bool) carbon_insert_u64(struct carbon_insert *inserter, u64 value)
 {
         check_type_if_container_is_column(inserter, CARBON_FIELD_TYPE_COLUMN_U64);
         switch (inserter->context_type) {
-        case carbon_ARRAY:
+        case CARBON_ARRAY:
                 write_field_data(inserter, CARBON_FIELD_TYPE_NUMBER_U64, &value, sizeof(u64));
                 break;
-        case carbon_COLUMN:
+        case CARBON_COLUMN:
                 push_in_column(inserter, &value,CARBON_FIELD_TYPE_COLUMN_U64);
                 break;
         default:
@@ -239,10 +257,10 @@ ARK_EXPORT(bool) carbon_insert_i8(struct carbon_insert *inserter, i8 value)
 {
         check_type_if_container_is_column(inserter, CARBON_FIELD_TYPE_COLUMN_I8);
         switch (inserter->context_type) {
-        case carbon_ARRAY:
+        case CARBON_ARRAY:
                 write_field_data(inserter, CARBON_FIELD_TYPE_NUMBER_I8, &value, sizeof(i8));
                 break;
-        case carbon_COLUMN:
+        case CARBON_COLUMN:
                 push_in_column(inserter, &value, CARBON_FIELD_TYPE_COLUMN_I8);
                 break;
         default:
@@ -256,10 +274,10 @@ ARK_EXPORT(bool) carbon_insert_i16(struct carbon_insert *inserter, i16 value)
 {
         check_type_if_container_is_column(inserter, CARBON_FIELD_TYPE_COLUMN_I16);
         switch (inserter->context_type) {
-        case carbon_ARRAY:
+        case CARBON_ARRAY:
                 write_field_data(inserter, CARBON_FIELD_TYPE_NUMBER_I16, &value, sizeof(i16));
                 break;
-        case carbon_COLUMN:
+        case CARBON_COLUMN:
                 push_in_column(inserter, &value, CARBON_FIELD_TYPE_COLUMN_I16);
                 break;
         default:
@@ -273,10 +291,10 @@ ARK_EXPORT(bool) carbon_insert_i32(struct carbon_insert *inserter, i32 value)
 {
         check_type_if_container_is_column(inserter, CARBON_FIELD_TYPE_COLUMN_I32);
         switch (inserter->context_type) {
-        case carbon_ARRAY:
+        case CARBON_ARRAY:
                 write_field_data(inserter, CARBON_FIELD_TYPE_NUMBER_I32, &value, sizeof(i32));
                 break;
-        case carbon_COLUMN:
+        case CARBON_COLUMN:
                 push_in_column(inserter, &value, CARBON_FIELD_TYPE_COLUMN_I32);
                 break;
         default:
@@ -290,10 +308,10 @@ ARK_EXPORT(bool) carbon_insert_i64(struct carbon_insert *inserter, i64 value)
 {
         check_type_if_container_is_column(inserter, CARBON_FIELD_TYPE_COLUMN_I64);
         switch (inserter->context_type) {
-        case carbon_ARRAY:
+        case CARBON_ARRAY:
                 write_field_data(inserter, CARBON_FIELD_TYPE_NUMBER_I64, &value, sizeof(i64));
                 break;
-        case carbon_COLUMN:
+        case CARBON_COLUMN:
                 push_in_column(inserter, &value, CARBON_FIELD_TYPE_COLUMN_I64);
                 break;
         default:
@@ -305,7 +323,7 @@ ARK_EXPORT(bool) carbon_insert_i64(struct carbon_insert *inserter, i64 value)
 
 ARK_EXPORT(bool) carbon_insert_unsigned(struct carbon_insert *inserter, u64 value)
 {
-        error_if(inserter->context_type == carbon_COLUMN, &inserter->err, ARK_ERR_INSERT_TOO_DANGEROUS)
+        error_if(inserter->context_type == CARBON_COLUMN, &inserter->err, ARK_ERR_INSERT_TOO_DANGEROUS)
 
         if (value <= CARBON_U8_MAX) {
                 return carbon_insert_u8(inserter, (u8) value);
@@ -324,7 +342,7 @@ ARK_EXPORT(bool) carbon_insert_unsigned(struct carbon_insert *inserter, u64 valu
 
 ARK_EXPORT(bool) carbon_insert_signed(struct carbon_insert *inserter, i64 value)
 {
-        error_if(inserter->context_type == carbon_COLUMN, &inserter->err, ARK_ERR_INSERT_TOO_DANGEROUS)
+        error_if(inserter->context_type == CARBON_COLUMN, &inserter->err, ARK_ERR_INSERT_TOO_DANGEROUS)
 
         if (value >= CARBON_I8_MIN && value <= CARBON_I8_MAX) {
                 return carbon_insert_i8(inserter, (i8) value);
@@ -346,10 +364,10 @@ ARK_EXPORT(bool) carbon_insert_float(struct carbon_insert *inserter, float value
         error_if_null(inserter)
         check_type_if_container_is_column(inserter, CARBON_FIELD_TYPE_COLUMN_FLOAT);
         switch (inserter->context_type) {
-        case carbon_ARRAY:
+        case CARBON_ARRAY:
                 write_field_data(inserter, CARBON_FIELD_TYPE_NUMBER_FLOAT, &value, sizeof(float));
                 break;
-        case carbon_COLUMN:
+        case CARBON_COLUMN:
                 push_in_column(inserter, &value, CARBON_FIELD_TYPE_COLUMN_FLOAT);
                 break;
         default:
@@ -363,7 +381,7 @@ ARK_EXPORT(bool) carbon_insert_string(struct carbon_insert *inserter, const char
 {
         unused(inserter);
         unused(value);
-        error_if(inserter->context_type != carbon_ARRAY, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != CARBON_ARRAY, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
 
         return carbon_string_write(&inserter->memfile, value);
 }
@@ -407,7 +425,7 @@ ARK_EXPORT(bool) carbon_insert_binary(struct carbon_insert *inserter, const void
 {
         error_if_null(inserter)
         error_if_null(value)
-        error_if(inserter->context_type != carbon_ARRAY, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != CARBON_ARRAY, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
 
         insert_binary(inserter, value, nbytes, file_ext, user_type);
 
@@ -428,8 +446,11 @@ ARK_EXPORT(struct carbon_insert *) carbon_insert_object_begin(struct carbon_inse
 
         *out = (struct carbon_insert_object_state) {
                 .parent_inserter = inserter,
-                .it = malloc(sizeof(struct carbon_object_it))
+                .it = ark_malloc(sizeof(struct carbon_object_it)),
+                .object_begin = memfile_tell(&inserter->memfile),
+                .object_end = 0
         };
+
 
         carbon_int_insert_object(&inserter->memfile, object_capacity);
         u64 payload_start = memfile_tell(&inserter->memfile) - 1;
@@ -452,6 +473,9 @@ ARK_EXPORT(bool) carbon_insert_object_end(struct carbon_insert_object_state *sta
 
         assert(*memfile_peek(&scan.memfile, sizeof(char)) == CARBON_MARKER_OBJECT_END);
         memfile_read(&scan.memfile, sizeof(char));
+
+        state->object_end = memfile_tell(&scan.memfile);
+
         memfile_skip(&scan.memfile, 1);
 
         memfile_seek(&state->parent_inserter->memfile, memfile_tell(&scan.memfile) - 1);
@@ -471,11 +495,13 @@ ARK_EXPORT(struct carbon_insert *) carbon_insert_array_begin(struct carbon_inser
                 return false;
         }
 
-        error_if(inserter_in->context_type != carbon_ARRAY && inserter_in->context_type != carbon_OBJECT, &inserter_in->err, ARK_ERR_UNSUPPCONTAINER);
+        error_if(inserter_in->context_type != CARBON_ARRAY && inserter_in->context_type != CARBON_OBJECT, &inserter_in->err, ARK_ERR_UNSUPPCONTAINER);
 
         *state_out = (struct carbon_insert_array_state) {
                 .parent_inserter = inserter_in,
-                .nested_array = malloc(sizeof(struct carbon_array_it))
+                .nested_array = ark_malloc(sizeof(struct carbon_array_it)),
+                .array_begin = memfile_tell(&inserter_in->memfile),
+                .array_end = 0
         };
 
         carbon_int_insert_array(&inserter_in->memfile, array_capacity);
@@ -493,12 +519,11 @@ ARK_EXPORT(bool) carbon_insert_array_end(struct carbon_insert_array_state *state
 
         struct carbon_array_it scan;
         carbon_array_it_create(&scan, &state_in->parent_inserter->memfile, &state_in->parent_inserter->err,
-                memfile_tell(&state_in->parent_inserter->memfile) - 1);
-        while (carbon_array_it_next(&scan))
-                { }
+                           memfile_tell(&state_in->parent_inserter->memfile) - 1);
 
-        assert(*memfile_peek(&scan.memfile, sizeof(char)) == CARBON_MARKER_ARRAY_END);
-        memfile_read(&scan.memfile, sizeof(char));
+        carbon_array_it_fast_forward(&scan);
+
+        state_in->array_end = memfile_tell(&scan.memfile);
         memfile_skip(&scan.memfile, 1);
 
         memfile_seek(&state_in->parent_inserter->memfile, memfile_tell(&scan.memfile) - 1);
@@ -514,14 +539,16 @@ ARK_EXPORT(struct carbon_insert *) carbon_insert_column_begin(struct carbon_inse
 {
         error_if_and_return(!state_out, &inserter_in->err, ARK_ERR_NULLPTR, NULL);
         error_if_and_return(!inserter_in, &inserter_in->err, ARK_ERR_NULLPTR, NULL);
-        error_if(inserter_in->context_type != carbon_ARRAY && inserter_in->context_type != carbon_OBJECT, &inserter_in->err, ARK_ERR_UNSUPPCONTAINER);
+        error_if(inserter_in->context_type != CARBON_ARRAY && inserter_in->context_type != CARBON_OBJECT, &inserter_in->err, ARK_ERR_UNSUPPCONTAINER);
 
         enum carbon_field_type field_type = carbon_field_type_for_column(type);
 
         *state_out = (struct carbon_insert_column_state) {
                 .parent_inserter = inserter_in,
-                .nested_column = malloc(sizeof(struct carbon_column_it)),
-                .type = field_type
+                .nested_column = ark_malloc(sizeof(struct carbon_column_it)),
+                .type = field_type,
+                .column_begin = memfile_tell(&inserter_in->memfile),
+                .column_end = 0
         };
 
         u64 container_start_off = memfile_tell(&inserter_in->memfile);
@@ -542,6 +569,7 @@ ARK_EXPORT(bool) carbon_insert_column_end(struct carbon_insert_column_state *sta
                 state_in->nested_column->column_start_offset);
         carbon_column_it_fast_forward(&scan);
 
+        state_in->column_end = memfile_tell(&scan.memfile);
         memfile_seek(&state_in->parent_inserter->memfile, memfile_tell(&scan.memfile));
 
         carbon_insert_drop(&state_in->nested_inserter);
@@ -549,89 +577,151 @@ ARK_EXPORT(bool) carbon_insert_column_end(struct carbon_insert_column_state *sta
         return true;
 }
 
+static void inserter_refresh_mod_size(struct carbon_insert *inserter, i64 mod_size)
+{
+        assert(mod_size > 0);
+
+        i64 *target = NULL;
+        switch (inserter->context_type) {
+        case CARBON_OBJECT:
+                target = &inserter->context.object->mod_size;
+                break;
+        case CARBON_ARRAY:
+                target = &inserter->context.array->mod_size;
+                break;
+        case CARBON_COLUMN:
+                target = &inserter->context.column->mod_size;
+                break;
+        default:
+                error_print(ARK_ERR_UNSUPPCONTAINER);
+        }
+        *target += mod_size;
+}
+
 ARK_EXPORT(bool) carbon_insert_prop_null(struct carbon_insert *inserter, const char *key)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
+        offset_t prop_start = memfile_tell(&inserter->memfile);
         carbon_string_nomarker_write(&inserter->memfile, key);
         push_media_type_for_array(inserter, CARBON_FIELD_TYPE_NULL);
+        offset_t prop_end = memfile_tell(&inserter->memfile);
+        inserter_refresh_mod_size(inserter, prop_end - prop_start);
         return true;
 }
 
 ARK_EXPORT(bool) carbon_insert_prop_true(struct carbon_insert *inserter, const char *key)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
+        offset_t prop_start = memfile_tell(&inserter->memfile);
         carbon_string_nomarker_write(&inserter->memfile, key);
         push_media_type_for_array(inserter, CARBON_FIELD_TYPE_TRUE);
+        offset_t prop_end = memfile_tell(&inserter->memfile);
+        inserter_refresh_mod_size(inserter, prop_end - prop_start);
         return true;
 }
 
 ARK_EXPORT(bool) carbon_insert_prop_false(struct carbon_insert *inserter, const char *key)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
+        offset_t prop_start = memfile_tell(&inserter->memfile);
         carbon_string_nomarker_write(&inserter->memfile, key);
         push_media_type_for_array(inserter, CARBON_FIELD_TYPE_FALSE);
+        offset_t prop_end = memfile_tell(&inserter->memfile);
+        inserter_refresh_mod_size(inserter, prop_end - prop_start);
         return true;
 }
 
 ARK_EXPORT(bool) carbon_insert_prop_u8(struct carbon_insert *inserter, const char *key, u8 value)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
+        offset_t prop_start = memfile_tell(&inserter->memfile);
         carbon_string_nomarker_write(&inserter->memfile, key);
-        return write_field_data(inserter, CARBON_FIELD_TYPE_NUMBER_U8, &value, sizeof(u8));
+        write_field_data(inserter, CARBON_FIELD_TYPE_NUMBER_U8, &value, sizeof(u8));
+        offset_t prop_end = memfile_tell(&inserter->memfile);
+        inserter_refresh_mod_size(inserter, prop_end - prop_start);
+        return true;
 }
 
 ARK_EXPORT(bool) carbon_insert_prop_u16(struct carbon_insert *inserter, const char *key, u16 value)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
+        offset_t prop_start = memfile_tell(&inserter->memfile);
         carbon_string_nomarker_write(&inserter->memfile, key);
-        return write_field_data(inserter, CARBON_FIELD_TYPE_NUMBER_U16, &value, sizeof(u16));
+        write_field_data(inserter, CARBON_FIELD_TYPE_NUMBER_U16, &value, sizeof(u16));
+        offset_t prop_end = memfile_tell(&inserter->memfile);
+        inserter_refresh_mod_size(inserter, prop_end - prop_start);
+        return true;
 }
 
 ARK_EXPORT(bool) carbon_insert_prop_u32(struct carbon_insert *inserter, const char *key, u32 value)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
+        offset_t prop_start = memfile_tell(&inserter->memfile);
         carbon_string_nomarker_write(&inserter->memfile, key);
-        return write_field_data(inserter, CARBON_FIELD_TYPE_NUMBER_U32, &value, sizeof(u32));
+        write_field_data(inserter, CARBON_FIELD_TYPE_NUMBER_U32, &value, sizeof(u32));
+        offset_t prop_end = memfile_tell(&inserter->memfile);
+        inserter_refresh_mod_size(inserter, prop_end - prop_start);
+        return true;
 }
 
 ARK_EXPORT(bool) carbon_insert_prop_u64(struct carbon_insert *inserter, const char *key, u64 value)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
+        offset_t prop_start = memfile_tell(&inserter->memfile);
         carbon_string_nomarker_write(&inserter->memfile, key);
-        return write_field_data(inserter, CARBON_FIELD_TYPE_NUMBER_U64, &value, sizeof(u64));
+        write_field_data(inserter, CARBON_FIELD_TYPE_NUMBER_U64, &value, sizeof(u64));
+        offset_t prop_end = memfile_tell(&inserter->memfile);
+        inserter_refresh_mod_size(inserter, prop_end - prop_start);
+        return true;
 }
 
 ARK_EXPORT(bool) carbon_insert_prop_i8(struct carbon_insert *inserter, const char *key, i8 value)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
+        offset_t prop_start = memfile_tell(&inserter->memfile);
         carbon_string_nomarker_write(&inserter->memfile, key);
-        return write_field_data(inserter, CARBON_FIELD_TYPE_NUMBER_I8, &value, sizeof(i8));
+        write_field_data(inserter, CARBON_FIELD_TYPE_NUMBER_I8, &value, sizeof(i8));
+        offset_t prop_end = memfile_tell(&inserter->memfile);
+        inserter_refresh_mod_size(inserter, prop_end - prop_start);
+        return true;
 }
 
 ARK_EXPORT(bool) carbon_insert_prop_i16(struct carbon_insert *inserter, const char *key, i16 value)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
+        offset_t prop_start = memfile_tell(&inserter->memfile);
         carbon_string_nomarker_write(&inserter->memfile, key);
-        return write_field_data(inserter, CARBON_FIELD_TYPE_NUMBER_I16, &value, sizeof(i16));
+        write_field_data(inserter, CARBON_FIELD_TYPE_NUMBER_I16, &value, sizeof(i16));
+        offset_t prop_end = memfile_tell(&inserter->memfile);
+        inserter_refresh_mod_size(inserter, prop_end - prop_start);
+        return true;
 }
 
 ARK_EXPORT(bool) carbon_insert_prop_i32(struct carbon_insert *inserter, const char *key, i32 value)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
+        offset_t prop_start = memfile_tell(&inserter->memfile);
         carbon_string_nomarker_write(&inserter->memfile, key);
-        return write_field_data(inserter, CARBON_FIELD_TYPE_NUMBER_I32, &value, sizeof(i32));
+        write_field_data(inserter, CARBON_FIELD_TYPE_NUMBER_I32, &value, sizeof(i32));
+        offset_t prop_end = memfile_tell(&inserter->memfile);
+        inserter_refresh_mod_size(inserter, prop_end - prop_start);
+        return true;
 }
 
 ARK_EXPORT(bool) carbon_insert_prop_i64(struct carbon_insert *inserter, const char *key, i64 value)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
+        offset_t prop_start = memfile_tell(&inserter->memfile);
         carbon_string_nomarker_write(&inserter->memfile, key);
-        return write_field_data(inserter, CARBON_FIELD_TYPE_NUMBER_I64, &value, sizeof(i64));
+        write_field_data(inserter, CARBON_FIELD_TYPE_NUMBER_I64, &value, sizeof(i64));
+        offset_t prop_end = memfile_tell(&inserter->memfile);
+        inserter_refresh_mod_size(inserter, prop_end - prop_start);
+        return true;
 }
 
 ARK_EXPORT(bool) carbon_insert_prop_unsigned(struct carbon_insert *inserter, const char *key, u64 value)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER)
+        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER)
 
         if (value <= CARBON_U8_MAX) {
                 return carbon_insert_prop_u8(inserter, key, (u8) value);
@@ -650,7 +740,7 @@ ARK_EXPORT(bool) carbon_insert_prop_unsigned(struct carbon_insert *inserter, con
 
 ARK_EXPORT(bool) carbon_insert_prop_signed(struct carbon_insert *inserter, const char *key, i64 value)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER)
+        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER)
 
         if (value >= CARBON_I8_MIN && value <= CARBON_I8_MAX) {
                 return carbon_insert_prop_i8(inserter, key, (i8) value);
@@ -669,74 +759,88 @@ ARK_EXPORT(bool) carbon_insert_prop_signed(struct carbon_insert *inserter, const
 
 ARK_EXPORT(bool) carbon_insert_prop_float(struct carbon_insert *inserter, const char *key, float value)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
+        offset_t prop_start = memfile_tell(&inserter->memfile);
         carbon_string_nomarker_write(&inserter->memfile, key);
-        return write_field_data(inserter, CARBON_FIELD_TYPE_NUMBER_FLOAT, &value, sizeof(float));
+        write_field_data(inserter, CARBON_FIELD_TYPE_NUMBER_FLOAT, &value, sizeof(float));
+        offset_t prop_end = memfile_tell(&inserter->memfile);
+        inserter_refresh_mod_size(inserter, prop_end - prop_start);
+        return true;
 }
 
 ARK_EXPORT(bool) carbon_insert_prop_string(struct carbon_insert *inserter, const char *key, const char *value)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
+        offset_t prop_start = memfile_tell(&inserter->memfile);
         carbon_string_nomarker_write(&inserter->memfile, key);
-        return carbon_string_write(&inserter->memfile, value);
+        carbon_string_write(&inserter->memfile, value);
+        offset_t prop_end = memfile_tell(&inserter->memfile);
+        inserter_refresh_mod_size(inserter, prop_end - prop_start);
+        return true;
 }
 
 ARK_EXPORT(bool) carbon_insert_prop_binary(struct carbon_insert *inserter, const char *key, const void *value,
         size_t nbytes, const char *file_ext, const char *user_type)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
+        offset_t prop_start = memfile_tell(&inserter->memfile);
         carbon_string_nomarker_write(&inserter->memfile, key);
         insert_binary(inserter, value, nbytes, file_ext, user_type);
+        offset_t prop_end = memfile_tell(&inserter->memfile);
+        inserter_refresh_mod_size(inserter, prop_end - prop_start);
         return true;
 }
 
 ARK_EXPORT(struct carbon_insert *) carbon_insert_prop_object_begin(struct carbon_insert_object_state *out,
         struct carbon_insert *inserter, const char *key, u64 object_capacity)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
         carbon_string_nomarker_write(&inserter->memfile, key);
         return carbon_insert_object_begin(out, inserter, object_capacity);
 }
 
-ARK_EXPORT(bool) carbon_insert_prop_object_end(struct carbon_insert_object_state *state)
+ARK_EXPORT(u64) carbon_insert_prop_object_end(struct carbon_insert_object_state *state)
 {
-        return carbon_insert_object_end(state);
+        carbon_insert_object_end(state);
+        return state->object_end - state->object_begin;
 }
 
 ARK_EXPORT(struct carbon_insert *) carbon_insert_prop_array_begin(struct carbon_insert_array_state *state,
         struct carbon_insert *inserter, const char *key, u64 array_capacity)
 {
-        error_if(inserter->context_type != carbon_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
         carbon_string_nomarker_write(&inserter->memfile, key);
         return carbon_insert_array_begin(state, inserter, array_capacity);
 }
 
-ARK_EXPORT(bool) carbon_insert_prop_array_end(struct carbon_insert_array_state *state)
+ARK_EXPORT(u64) carbon_insert_prop_array_end(struct carbon_insert_array_state *state)
 {
-        return carbon_insert_array_end(state);
+        carbon_insert_array_end(state);
+        return state->array_end - state->array_begin;
 }
 
 ARK_EXPORT(struct carbon_insert *) carbon_insert_prop_column_begin(struct carbon_insert_column_state *state_out,
         struct carbon_insert *inserter_in, const char *key, enum carbon_column_type type, u64 column_capacity)
 {
-        error_if(inserter_in->context_type != carbon_OBJECT, &inserter_in->err, ARK_ERR_UNSUPPCONTAINER);
+        error_if(inserter_in->context_type != CARBON_OBJECT, &inserter_in->err, ARK_ERR_UNSUPPCONTAINER);
         carbon_string_nomarker_write(&inserter_in->memfile, key);
         return carbon_insert_column_begin(state_out, inserter_in, type, column_capacity);
 }
 
-ARK_EXPORT(bool) carbon_insert_prop_column_end(struct carbon_insert_column_state *state_in)
+ARK_EXPORT(u64) carbon_insert_prop_column_end(struct carbon_insert_column_state *state_in)
 {
-        return carbon_insert_column_end(state_in);
+        carbon_insert_column_end(state_in);
+        return state_in->column_end - state_in->column_begin;
 }
 
 ARK_EXPORT(bool) carbon_insert_drop(struct carbon_insert *inserter)
 {
         error_if_null(inserter)
-        if (inserter->context_type == carbon_ARRAY) {
+        if (inserter->context_type == CARBON_ARRAY) {
                 carbon_array_it_unlock(inserter->context.array);
-        } else if (inserter->context_type == carbon_COLUMN) {
+        } else if (inserter->context_type == CARBON_COLUMN) {
                 carbon_column_it_unlock(inserter->context.column);
-        } else if (inserter->context_type == carbon_OBJECT) {
+        } else if (inserter->context_type == CARBON_OBJECT) {
                 carbon_object_it_unlock(inserter->context.object);
         } else {
                 error(&inserter->err, ARK_ERR_INTERNALERR);
@@ -747,7 +851,7 @@ ARK_EXPORT(bool) carbon_insert_drop(struct carbon_insert *inserter)
 
 static bool write_field_data(struct carbon_insert *inserter, u8 field_type_marker, const void *base, u64 nbytes)
 {
-        assert(inserter->context_type == carbon_ARRAY || inserter->context_type == carbon_OBJECT);
+        assert(inserter->context_type == CARBON_ARRAY || inserter->context_type == CARBON_OBJECT);
 
         memfile_ensure_space(&inserter->memfile, sizeof(u8) + nbytes);
         memfile_write(&inserter->memfile, &field_type_marker, sizeof(u8));
@@ -756,7 +860,7 @@ static bool write_field_data(struct carbon_insert *inserter, u8 field_type_marke
 
 static bool push_in_column(struct carbon_insert *inserter, const void *base, enum carbon_field_type type)
 {
-        assert(inserter->context_type == carbon_COLUMN);
+        assert(inserter->context_type == CARBON_COLUMN);
 
         size_t type_size = carbon_int_get_type_value_size(type);
 
@@ -803,11 +907,12 @@ static bool push_media_type_for_array(struct carbon_insert *inserter, enum carbo
         return carbon_media_write(&inserter->memfile, type);
 }
 
-static void internal_create(struct carbon_insert *inserter, struct memfile *src)
+static void internal_create(struct carbon_insert *inserter, struct memfile *src, offset_t pos)
 {
-        memfile_dup(&inserter->memfile, src);
+        memfile_clone(&inserter->memfile, src);
         error_init(&inserter->err);
-        inserter->position = memfile_tell(src);
+        inserter->position = pos ? pos : memfile_tell(src);
+        memfile_seek(&inserter->memfile, inserter->position);
 }
 
 static void write_binary_blob(struct carbon_insert *inserter, const void *value, size_t nbytes)

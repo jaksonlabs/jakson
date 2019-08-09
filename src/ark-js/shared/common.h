@@ -27,6 +27,15 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <assert.h>
+#include <assert.h>
+#include <inttypes.h>
+
+#ifndef __cplusplus
+# include <stdatomic.h>
+#else
+# include <atomic>
+# define _Atomic(X) std::atomic< X >
+#endif
 
 #ifdef __cplusplus
 #define ARK_BEGIN_DECL  extern "C" {
@@ -50,6 +59,13 @@
 #endif
 #endif
 
+#define ark_malloc(size)                \
+({                                      \
+        void *ptr = malloc(size);       \
+        ark_zero_memory(ptr, size);     \
+        ptr;                            \
+})
+
 #define ARK_QUERY_LIMIT_NONE -1
 #define ARK_QUERY_LIMIT_1     1
 
@@ -57,6 +73,7 @@
     sizeof(x)/sizeof(x[0])
 
 typedef uint64_t offset_t;
+typedef int64_t signed_offset_t;
 
 typedef unsigned char u_char;
 

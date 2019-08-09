@@ -77,34 +77,34 @@ ARK_EXPORT(bool) carbon_int_insert_column(struct memfile *memfile_in, struct err
         enum carbon_field_type column_type;
 
         switch (type) {
-        case carbon_COLUMN_TYPE_BOOLEAN:
+        case CARBON_COLUMN_TYPE_BOOLEAN:
                 column_type = CARBON_FIELD_TYPE_COLUMN_BOOLEAN;
                 break;
-        case carbon_COLUMN_TYPE_U8:
+        case CARBON_COLUMN_TYPE_U8:
                 column_type = CARBON_FIELD_TYPE_COLUMN_U8;
                 break;
-        case carbon_COLUMN_TYPE_U16:
+        case CARBON_COLUMN_TYPE_U16:
                 column_type = CARBON_FIELD_TYPE_COLUMN_U16;
                 break;
-        case carbon_COLUMN_TYPE_U32:
+        case CARBON_COLUMN_TYPE_U32:
                 column_type = CARBON_FIELD_TYPE_COLUMN_U32;
                 break;
-        case carbon_COLUMN_TYPE_U64:
+        case CARBON_COLUMN_TYPE_U64:
                 column_type = CARBON_FIELD_TYPE_COLUMN_U64;
                 break;
-        case carbon_COLUMN_TYPE_I8:
+        case CARBON_COLUMN_TYPE_I8:
                 column_type = CARBON_FIELD_TYPE_COLUMN_I8;
                 break;
-        case carbon_COLUMN_TYPE_I16:
+        case CARBON_COLUMN_TYPE_I16:
                 column_type = CARBON_FIELD_TYPE_COLUMN_I16;
                 break;
-        case carbon_COLUMN_TYPE_I32:
+        case CARBON_COLUMN_TYPE_I32:
                 column_type = CARBON_FIELD_TYPE_COLUMN_I32;
                 break;
-        case carbon_COLUMN_TYPE_I64:
+        case CARBON_COLUMN_TYPE_I64:
                 column_type = CARBON_FIELD_TYPE_COLUMN_I64;
                 break;
-        case carbon_COLUMN_TYPE_FLOAT:
+        case CARBON_COLUMN_TYPE_FLOAT:
                 column_type = CARBON_FIELD_TYPE_COLUMN_FLOAT;
                 break;
         default:
@@ -209,7 +209,7 @@ ARK_EXPORT(bool) carbon_int_array_it_next(bool *is_empty_slot, bool *is_array_en
 {
         if (carbon_int_array_it_refresh(is_empty_slot, is_array_end, it)) {
                 carbon_field_skip(&it->memfile);
-                return true;
+            return true;
         } else {
                 return false;
         }
@@ -298,6 +298,7 @@ ARK_EXPORT(bool) carbon_int_array_skip_contents(bool *is_empty_slot, bool *is_ar
 ARK_EXPORT(bool) carbon_int_array_it_refresh(bool *is_empty_slot, bool *is_array_end, struct carbon_array_it *it)
 {
         error_if_null(it);
+        carbon_int_field_access_drop(&it->field_access);
         if (array_it_is_slot_occupied(is_empty_slot, is_array_end, it)) {
                 carbon_int_array_it_field_type_read(it);
                 carbon_int_field_data_access(&it->memfile, &it->err, &it->field_access);
@@ -369,8 +370,8 @@ ARK_EXPORT(bool) carbon_int_field_data_access(struct memfile *file, struct err *
                 /* the memfile points now to the actual blob data, which is used by the iterator to set the field */
         } break;
         case CARBON_FIELD_TYPE_ARRAY:
-                field_access->nested_array_it_opened = true;
-                field_access->nested_array_it_accessed = false;
+                carbon_int_field_access_create(field_access);
+                field_access->nested_array_it_is_created = true;
                 carbon_array_it_create(field_access->nested_array_it, file, err,
                         memfile_tell(file) - sizeof(u8));
                 break;
@@ -384,12 +385,13 @@ ARK_EXPORT(bool) carbon_int_field_data_access(struct memfile *file, struct err *
         case CARBON_FIELD_TYPE_COLUMN_I64:
         case CARBON_FIELD_TYPE_COLUMN_FLOAT:
         case CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
+                carbon_int_field_access_create(field_access);
                 carbon_column_it_create(field_access->nested_column_it, file, err,
                         memfile_tell(file) - sizeof(u8));
         } break;
         case CARBON_FIELD_TYPE_OBJECT:
-                field_access->nested_object_it_opened = true;
-                field_access->nested_object_it_accessed = false;
+                carbon_int_field_access_create(field_access);
+                field_access->nested_object_it_is_created = true;
                 carbon_object_it_create(field_access->nested_object_it, file, err,
                         memfile_tell(file) - sizeof(u8));
                 break;
@@ -455,7 +457,7 @@ ARK_EXPORT(u64) carbon_int_header_get_rev(struct carbon *doc)
 ARK_EXPORT(void) carbon_int_history_push(struct vector ofType(offset_t) *vec, offset_t off)
 {
         assert(vec);
-        vec_push(vec, &off, sizeof(offset_t));
+        vec_push(vec, &off, 1);
 }
 
 ARK_EXPORT(void) carbon_int_history_clear(struct vector ofType(offset_t) *vec)
@@ -486,16 +488,43 @@ ARK_EXPORT(bool) carbon_int_history_has(struct vector ofType(offset_t) *vec)
 
 ARK_EXPORT(bool) carbon_int_field_access_create(struct field_access *field)
 {
-        field->nested_array_it_opened = false;
+        field->nested_array_it_is_created = false;
         field->nested_array_it_accessed = false;
-        field->nested_object_it_opened = false;
+        field->nested_object_it_is_created = false;
         field->nested_object_it_accessed = false;
-        field->nested_array_it = malloc(sizeof(struct carbon_array_it));
-        field->nested_object_it = malloc(sizeof(struct carbon_object_it));
-        field->nested_column_it = malloc(sizeof(struct carbon_column_it));
-        ark_zero_memory(field->nested_array_it, sizeof(struct carbon_array_it))
-        ark_zero_memory(field->nested_object_it, sizeof(struct carbon_object_it))
-        ark_zero_memory(field->nested_column_it, sizeof(struct carbon_column_it))
+        field->nested_column_it_is_created = false;
+        field->nested_array_it = ark_malloc(sizeof(struct carbon_array_it));
+        field->nested_object_it = ark_malloc(sizeof(struct carbon_object_it));
+        field->nested_column_it = ark_malloc(sizeof(struct carbon_column_it));
+        return true;
+}
+
+ARK_EXPORT(bool) carbon_int_field_access_clone(struct field_access *dst, struct field_access *src)
+{
+        error_if_null(dst)
+        error_if_null(src)
+
+        dst->it_field_type = src->it_field_type;
+        dst->it_field_data = src->it_field_data;
+        dst->it_field_len = src->it_field_len;
+        dst->it_mime_type = src->it_mime_type;
+        dst->it_mime_type_strlen = src->it_mime_type_strlen;
+        dst->nested_array_it_is_created = src->nested_array_it_is_created;
+        dst->nested_array_it_accessed = src->nested_array_it_accessed;
+        dst->nested_object_it_is_created = src->nested_object_it_is_created;
+        dst->nested_object_it_accessed = src->nested_object_it_accessed;
+        dst->nested_column_it_is_created = src->nested_column_it_is_created;
+        dst->nested_array_it = ark_malloc(sizeof(struct carbon_array_it));
+        dst->nested_object_it = ark_malloc(sizeof(struct carbon_object_it));
+        dst->nested_column_it = ark_malloc(sizeof(struct carbon_column_it));
+
+        if (carbon_int_field_access_object_it_opened(src)) {
+                carbon_object_it_clone(dst->nested_object_it, src->nested_object_it);
+        } else if (carbon_int_field_access_column_it_opened(src)) {
+                carbon_column_it_clone(dst->nested_column_it, src->nested_column_it);
+        } else if (carbon_int_field_access_array_it_opened(src)) {
+                carbon_array_it_clone(dst->nested_array_it, src->nested_array_it);
+        }
         return true;
 }
 
@@ -505,12 +534,33 @@ ARK_EXPORT(bool) carbon_int_field_access_drop(struct field_access *field)
         free (field->nested_array_it);
         free (field->nested_object_it);
         free (field->nested_column_it);
+        field->nested_array_it = NULL;
+        field->nested_object_it = NULL;
+        field->nested_column_it = NULL;
         return true;
+}
+
+ARK_EXPORT(bool) carbon_int_field_access_object_it_opened(struct field_access *field)
+{
+        assert(field);
+        return field->nested_object_it_is_created;//field->nested_object_it != 0;
+}
+
+ARK_EXPORT(bool) carbon_int_field_access_array_it_opened(struct field_access *field)
+{
+        assert(field);
+        return field->nested_array_it_is_created != 0;
+}
+
+ARK_EXPORT(bool) carbon_int_field_access_column_it_opened(struct field_access *field)
+{
+        assert(field);
+        return field->nested_column_it_is_created != 0;
 }
 
 ARK_EXPORT(void) carbon_int_auto_close_nested_array_it(struct field_access *field)
 {
-        if (((char *) field->nested_array_it)[0] != 0) {
+        if (carbon_int_field_access_array_it_opened(field)) {
                 carbon_array_it_drop(field->nested_array_it);
                 ark_zero_memory(field->nested_array_it, sizeof(struct carbon_array_it));
         }
@@ -518,7 +568,7 @@ ARK_EXPORT(void) carbon_int_auto_close_nested_array_it(struct field_access *fiel
 
 ARK_EXPORT(void) carbon_int_auto_close_nested_object_it(struct field_access *field)
 {
-        if (((char *) field->nested_object_it)[0] != 0) {
+        if (carbon_int_field_access_object_it_opened(field)) {
                 carbon_object_it_drop(field->nested_object_it);
                 ark_zero_memory(field->nested_object_it, sizeof(struct carbon_object_it));
         }
@@ -526,7 +576,7 @@ ARK_EXPORT(void) carbon_int_auto_close_nested_object_it(struct field_access *fie
 
 ARK_EXPORT(void) carbon_int_auto_close_nested_column_it(struct field_access *field)
 {
-        if (((char *) field->nested_column_it)[0] != 0) {
+        if (carbon_int_field_access_column_it_opened(field)) {
                 ark_zero_memory(field->nested_column_it, sizeof(struct carbon_column_it));
         }
 }
@@ -534,17 +584,21 @@ ARK_EXPORT(void) carbon_int_auto_close_nested_column_it(struct field_access *fie
 ARK_EXPORT(bool) carbon_int_field_auto_close(struct field_access *field)
 {
         error_if_null(field)
-        if (field->nested_array_it_opened && !field->nested_array_it_accessed) {
+        if (field->nested_array_it_is_created && !field->nested_array_it_accessed) {
                 carbon_int_auto_close_nested_array_it(field);
-                field->nested_array_it_opened = false;
+                field->nested_array_it_is_created = false;
                 field->nested_array_it_accessed = false;
         }
-        if (field->nested_object_it_opened && !field->nested_object_it_accessed) {
+        if (field->nested_object_it_is_created && !field->nested_object_it_accessed) {
                 carbon_int_auto_close_nested_object_it(field);
-                field->nested_array_it_opened = false;
-                field->nested_array_it_accessed = false;
+                field->nested_object_it_is_created = false;
+                field->nested_object_it_accessed = false;
         }
-        carbon_int_auto_close_nested_column_it(field);
+        if (field->nested_column_it_is_created) {
+                carbon_int_auto_close_nested_column_it(field);
+                field->nested_object_it_is_created = false;
+        }
+
         return true;
 }
 
@@ -763,12 +817,133 @@ ARK_EXPORT(struct carbon_column_it *) carbon_int_field_access_column_value(struc
         return field->nested_column_it;
 }
 
+ARK_EXPORT(bool) carbon_int_field_remove(struct memfile *memfile, struct err *err, enum carbon_field_type type)
+{
+        assert((enum carbon_field_type) *memfile_peek(memfile, sizeof(u8)) == type);
+        offset_t start_off = memfile_tell(memfile);
+        memfile_skip(memfile, sizeof(u8));
+        size_t rm_nbytes = sizeof(u8); /* at least the type marker must be removed */
+        switch (type) {
+        case CARBON_FIELD_TYPE_NULL:
+        case CARBON_FIELD_TYPE_TRUE:
+        case CARBON_FIELD_TYPE_FALSE:
+                /* nothing to do */
+                break;
+        case CARBON_FIELD_TYPE_NUMBER_U8:
+        case CARBON_FIELD_TYPE_NUMBER_I8:
+                rm_nbytes += sizeof(u8);
+                break;
+        case CARBON_FIELD_TYPE_NUMBER_U16:
+        case CARBON_FIELD_TYPE_NUMBER_I16:
+                rm_nbytes += sizeof(u16);
+                break;
+        case CARBON_FIELD_TYPE_NUMBER_U32:
+        case CARBON_FIELD_TYPE_NUMBER_I32:
+                rm_nbytes += sizeof(u32);
+                break;
+        case CARBON_FIELD_TYPE_NUMBER_U64:
+        case CARBON_FIELD_TYPE_NUMBER_I64:
+                rm_nbytes += sizeof(u64);
+                break;
+        case CARBON_FIELD_TYPE_NUMBER_FLOAT:
+                rm_nbytes += sizeof(float);
+                break;
+        case CARBON_FIELD_TYPE_STRING: {
+                u8 len_nbytes;  /* number of bytes used to store string length */
+                u64 str_len; /* the number of characters of the string field */
+
+                str_len = memfile_read_varuint(&len_nbytes, memfile);
+
+                rm_nbytes += len_nbytes + str_len;
+        } break;
+        case CARBON_FIELD_TYPE_BINARY: {
+                u8 mime_type_nbytes; /* number of bytes for mime type */
+                u8 blob_length_nbytes; /* number of bytes to store blob length */
+                u64 blob_nbytes; /* number of bytes to store actual blob data */
+
+                /* get bytes used for mime type id */
+                memfile_read_varuint(&mime_type_nbytes, memfile);
+
+                /* get bytes used for blob length info */
+                blob_nbytes = memfile_read_varuint(&blob_length_nbytes, memfile);
+
+                rm_nbytes += mime_type_nbytes + blob_length_nbytes + blob_nbytes;
+        } break;
+        case CARBON_FIELD_TYPE_BINARY_CUSTOM: {
+                u8 custom_type_strlen_nbytes; /* number of bytes for type name string length info */
+                u8 custom_type_strlen; /* number of characters to encode type name string */
+                u8 blob_length_nbytes; /* number of bytes to store blob length */
+                u64 blob_nbytes; /* number of bytes to store actual blob data */
+
+                /* get bytes for custom type string len, and the actual length */
+                custom_type_strlen = memfile_read_varuint(&custom_type_strlen_nbytes, memfile);
+                memfile_skip(memfile, custom_type_strlen);
+
+                /* get bytes used for blob length info */
+                blob_nbytes = memfile_read_varuint(&blob_length_nbytes, memfile);
+
+                rm_nbytes += custom_type_strlen_nbytes + custom_type_strlen + blob_length_nbytes + blob_nbytes;
+        } break;
+        case CARBON_FIELD_TYPE_ARRAY: {
+                struct carbon_array_it it;
+
+                offset_t begin_off = memfile_tell(memfile);
+                carbon_array_it_create(&it, memfile, err, begin_off - sizeof(u8));
+                carbon_array_it_fast_forward(&it);
+                offset_t end_off = carbon_array_it_tell(&it);
+                carbon_array_it_drop(&it);
+
+                assert(begin_off < end_off);
+                rm_nbytes += (end_off - begin_off);
+        } break;
+        case CARBON_FIELD_TYPE_COLUMN_U8:
+        case CARBON_FIELD_TYPE_COLUMN_U16:
+        case CARBON_FIELD_TYPE_COLUMN_U32:
+        case CARBON_FIELD_TYPE_COLUMN_U64:
+        case CARBON_FIELD_TYPE_COLUMN_I8:
+        case CARBON_FIELD_TYPE_COLUMN_I16:
+        case CARBON_FIELD_TYPE_COLUMN_I32:
+        case CARBON_FIELD_TYPE_COLUMN_I64:
+        case CARBON_FIELD_TYPE_COLUMN_FLOAT:
+        case CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
+                struct carbon_column_it it;
+
+                offset_t begin_off = memfile_tell(memfile);
+                carbon_column_it_create(&it, memfile, err, begin_off - sizeof(u8));
+                carbon_column_it_fast_forward(&it);
+                offset_t end_off = carbon_column_it_tell(&it);
+
+                assert(begin_off < end_off);
+                rm_nbytes += (end_off - begin_off);
+        } break;
+        case CARBON_FIELD_TYPE_OBJECT: {
+                struct carbon_object_it it;
+
+                offset_t begin_off = memfile_tell(memfile);
+                carbon_object_it_create(&it, memfile, err, begin_off - sizeof(u8));
+                carbon_object_it_fast_forward(&it);
+                offset_t end_off = carbon_object_it_tell(&it);
+                carbon_object_it_drop(&it);
+
+                assert(begin_off < end_off);
+                rm_nbytes += (end_off - begin_off);
+        } break;
+        default:
+        error(err, ARK_ERR_INTERNALERR)
+                return false;
+        }
+        memfile_seek(memfile, start_off);
+        memfile_inplace_remove(memfile, rm_nbytes);
+
+        return true;
+}
+
 static void marker_insert(struct memfile *memfile, u8 marker)
 {
         /* check whether marker can be written, otherwise make space for it */
         char c = *memfile_peek(memfile, sizeof(u8));
         if (c != 0) {
-                memfile_move_right(memfile, sizeof(u8));
+                memfile_inplace_insert(memfile, sizeof(u8));
         }
         memfile_write(memfile, &marker, sizeof(u8));
 }

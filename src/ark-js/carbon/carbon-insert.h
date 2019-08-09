@@ -135,17 +135,17 @@ ARK_EXPORT(bool) carbon_insert_prop_binary(struct carbon_insert *inserter, const
 ARK_EXPORT(struct carbon_insert *) carbon_insert_prop_object_begin(struct carbon_insert_object_state *out,
         struct carbon_insert *inserter, const char *key, u64 object_capacity);
 
-ARK_EXPORT(bool) carbon_insert_prop_object_end(struct carbon_insert_object_state *state);
+ARK_EXPORT(u64) carbon_insert_prop_object_end(struct carbon_insert_object_state *state);
 
 ARK_EXPORT(struct carbon_insert *) carbon_insert_prop_array_begin(struct carbon_insert_array_state *state,
         struct carbon_insert *inserter, const char *key, u64 array_capacity);
 
-ARK_EXPORT(bool) carbon_insert_prop_array_end(struct carbon_insert_array_state *state);
+ARK_EXPORT(u64) carbon_insert_prop_array_end(struct carbon_insert_array_state *state);
 
 ARK_EXPORT(struct carbon_insert *) carbon_insert_prop_column_begin(struct carbon_insert_column_state *state_out,
         struct carbon_insert *inserter_in, const char *key, enum carbon_column_type type, u64 column_capacity);
 
-ARK_EXPORT(bool) carbon_insert_prop_column_end(struct carbon_insert_column_state *state_in);
+ARK_EXPORT(u64) carbon_insert_prop_column_end(struct carbon_insert_column_state *state_in);
 
 
 

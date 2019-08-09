@@ -208,8 +208,9 @@ ARK_EXPORT(bool) error_print_and_abort(const struct err *err);
 
 #define success_else_return(expr, err, code, retval)                                                                   \
 {                                                                                                                      \
-        error_if(!(expr), err, code);                                                                                  \
-        if (!(expr)) { return retval; }                                                                                \
+        bool result = expr;                                                                                            \
+        error_if(!(result), err, code);                                                                                \
+        if (!(result)) { return retval; }                                                                              \
 }
 
 #define success_else_null(expr, err)           success_else_return(expr, err, ARK_ERR_FAILED, NULL)

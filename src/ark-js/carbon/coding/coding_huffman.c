@@ -26,7 +26,7 @@
 
 ARK_EXPORT(bool) pack_huffman_init(struct packer *self)
 {
-        self->extra = malloc(sizeof(struct coding_huffman));
+        self->extra = ark_malloc(sizeof(struct coding_huffman));
         if (self->extra != NULL) {
                 struct coding_huffman *encoder = (struct coding_huffman *) self->extra;
                 coding_huffman_create(encoder);
@@ -41,7 +41,7 @@ ARK_EXPORT(bool) pack_coding_huffman_cpy(const struct packer *self, struct packe
         ark_check_tag(self->tag, PACK_HUFFMAN);
 
         *dst = *self;
-        dst->extra = malloc(sizeof(struct coding_huffman));
+        dst->extra = ark_malloc(sizeof(struct coding_huffman));
         if (dst->extra != NULL) {
                 struct coding_huffman *self_encoder = (struct coding_huffman *) self->extra;
                 struct coding_huffman *dst_encoder = (struct coding_huffman *) dst->extra;

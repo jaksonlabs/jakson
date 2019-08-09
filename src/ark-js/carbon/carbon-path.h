@@ -34,12 +34,12 @@ struct carbon_path_evaluator
                 enum carbon_container_type container_type;
                 union {
                         struct {
-                                struct carbon_array_it *it;
+                                struct carbon_array_it it;
                         } array;
 
 
                         struct {
-                                struct carbon_column_it *it;
+                                struct carbon_column_it it;
                                 u32 elem_pos;
                         } column;
 

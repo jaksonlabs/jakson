@@ -33,6 +33,10 @@ struct carbon_object_it
         struct spinlock lock;
         struct err err;
 
+        /* in case of modifications (updates, inserts, deletes), the number of bytes that are added resp. removed */
+        i64 mod_size;
+        bool object_end_reached;
+
         struct vector ofType(offset_t) history;
 
         u64 key_len;
@@ -48,13 +52,19 @@ ARK_EXPORT(bool) carbon_object_it_create(struct carbon_object_it *it, struct mem
 
 ARK_EXPORT(bool) carbon_object_it_copy(struct carbon_object_it *dst, struct carbon_object_it *src);
 
+ARK_EXPORT(bool) carbon_object_it_clone(struct carbon_object_it *dst, struct carbon_object_it *src);
+
 ARK_EXPORT(bool) carbon_object_it_drop(struct carbon_object_it *it);
 
 ARK_EXPORT(bool) carbon_object_it_rewind(struct carbon_object_it *it);
 
 ARK_EXPORT(bool) carbon_object_it_next(struct carbon_object_it *it);
 
+ARK_EXPORT(offset_t) carbon_object_it_tell(struct carbon_object_it *it);
+
 ARK_EXPORT(const char *) carbon_object_it_prop_name(u64 *key_len, struct carbon_object_it *it);
+
+ARK_EXPORT(bool) carbon_object_it_remove(struct carbon_object_it *it);
 
 ARK_EXPORT(bool) carbon_object_it_prop_type(enum carbon_field_type *type, struct carbon_object_it *it);
 

@@ -32,7 +32,7 @@ ARK_EXPORT(bool) io_context_create(struct io_context **context, struct err *err,
         error_if_null(err);
         error_if_null(file_path);
 
-        struct io_context *result = malloc(sizeof(struct io_context));
+        struct io_context *result = ark_malloc(sizeof(struct io_context));
 
         if (!result) {
                 error(err, ARK_ERR_MALLOCERR);

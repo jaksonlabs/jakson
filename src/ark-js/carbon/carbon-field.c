@@ -360,16 +360,16 @@ ARK_EXPORT(bool) carbon_field_skip_64(struct memfile *file)
 ARK_EXPORT(enum carbon_field_type) carbon_field_type_for_column(enum carbon_column_type type)
 {
         switch (type) {
-        case carbon_COLUMN_TYPE_U8: return CARBON_FIELD_TYPE_COLUMN_U8;
-        case carbon_COLUMN_TYPE_U16: return CARBON_FIELD_TYPE_COLUMN_U16;
-        case carbon_COLUMN_TYPE_U32: return CARBON_FIELD_TYPE_COLUMN_U32;
-        case carbon_COLUMN_TYPE_U64: return CARBON_FIELD_TYPE_COLUMN_U64;
-        case carbon_COLUMN_TYPE_I8: return CARBON_FIELD_TYPE_COLUMN_I8;
-        case carbon_COLUMN_TYPE_I16: return CARBON_FIELD_TYPE_COLUMN_I16;
-        case carbon_COLUMN_TYPE_I32: return CARBON_FIELD_TYPE_COLUMN_I32;
-        case carbon_COLUMN_TYPE_I64: return CARBON_FIELD_TYPE_COLUMN_I64;
-        case carbon_COLUMN_TYPE_FLOAT: return CARBON_FIELD_TYPE_COLUMN_FLOAT;
-        case carbon_COLUMN_TYPE_BOOLEAN: return CARBON_FIELD_TYPE_COLUMN_BOOLEAN;
+        case CARBON_COLUMN_TYPE_U8: return CARBON_FIELD_TYPE_COLUMN_U8;
+        case CARBON_COLUMN_TYPE_U16: return CARBON_FIELD_TYPE_COLUMN_U16;
+        case CARBON_COLUMN_TYPE_U32: return CARBON_FIELD_TYPE_COLUMN_U32;
+        case CARBON_COLUMN_TYPE_U64: return CARBON_FIELD_TYPE_COLUMN_U64;
+        case CARBON_COLUMN_TYPE_I8: return CARBON_FIELD_TYPE_COLUMN_I8;
+        case CARBON_COLUMN_TYPE_I16: return CARBON_FIELD_TYPE_COLUMN_I16;
+        case CARBON_COLUMN_TYPE_I32: return CARBON_FIELD_TYPE_COLUMN_I32;
+        case CARBON_COLUMN_TYPE_I64: return CARBON_FIELD_TYPE_COLUMN_I64;
+        case CARBON_COLUMN_TYPE_FLOAT: return CARBON_FIELD_TYPE_COLUMN_FLOAT;
+        case CARBON_COLUMN_TYPE_BOOLEAN: return CARBON_FIELD_TYPE_COLUMN_BOOLEAN;
         default:
                 error_print(ARK_ERR_INTERNALERR)
                 return 0;
@@ -382,7 +382,7 @@ ARK_EXPORT(enum carbon_field_class) carbon_field_type_get_class(enum carbon_fiel
         case CARBON_FIELD_TYPE_NULL:
         case CARBON_FIELD_TYPE_TRUE:
         case CARBON_FIELD_TYPE_FALSE:
-                return carbon_FIELD_CLASS_CONSTANT;
+                return CARBON_FIELD_CLASS_CONSTANT;
         case CARBON_FIELD_TYPE_OBJECT:
         case CARBON_FIELD_TYPE_ARRAY:
         case CARBON_FIELD_TYPE_COLUMN_U8:
@@ -395,9 +395,9 @@ ARK_EXPORT(enum carbon_field_class) carbon_field_type_get_class(enum carbon_fiel
         case CARBON_FIELD_TYPE_COLUMN_I64:
         case CARBON_FIELD_TYPE_COLUMN_FLOAT:
         case CARBON_FIELD_TYPE_COLUMN_BOOLEAN:
-                return carbon_FIELD_CLASS_CONTAINER;
+                return CARBON_FIELD_CLASS_CONTAINER;
         case CARBON_FIELD_TYPE_STRING:
-                return carbon_FIELD_CLASS_CHARACTER_STRING;
+                return CARBON_FIELD_CLASS_CHARACTER_STRING;
         case CARBON_FIELD_TYPE_NUMBER_U8:
         case CARBON_FIELD_TYPE_NUMBER_U16:
         case CARBON_FIELD_TYPE_NUMBER_U32:
@@ -407,10 +407,10 @@ ARK_EXPORT(enum carbon_field_class) carbon_field_type_get_class(enum carbon_fiel
         case CARBON_FIELD_TYPE_NUMBER_I32:
         case CARBON_FIELD_TYPE_NUMBER_I64:
         case CARBON_FIELD_TYPE_NUMBER_FLOAT:
-                return carbon_FIELD_CLASS_NUMBER;
+                return CARBON_FIELD_CLASS_NUMBER;
         case CARBON_FIELD_TYPE_BINARY:
         case CARBON_FIELD_TYPE_BINARY_CUSTOM:
-                return carbon_FIELD_CLASS_BINARY_STRING;
+                return CARBON_FIELD_CLASS_BINARY_STRING;
         default:
                 error(err, ARK_ERR_INTERNALERR);
                 return 0;

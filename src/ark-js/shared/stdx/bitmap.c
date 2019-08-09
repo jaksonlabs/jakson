@@ -15,8 +15,6 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <math.h>
-#include <lzma.h>
 #include <ark-js/shared/stdx/bitmap.h>
 
 ARK_EXPORT(bool) bitmap_create(struct bitmap *bitmap, u16 num_bits)
@@ -120,7 +118,7 @@ bool bitmap_blocks(u32 **blocks, u32 *num_blocks, const struct bitmap *map)
         error_if_null(num_blocks)
         error_if_null(map)
 
-        u32 *result = malloc(map->data.num_elems * sizeof(u32));
+        u32 *result = ark_malloc(map->data.num_elems * sizeof(u32));
         i32 k = 0;
         for (i32 i = map->data.num_elems - 1; i >= 0; i--) {
                 result[k++] = *vec_get(&map->data, i, u32);

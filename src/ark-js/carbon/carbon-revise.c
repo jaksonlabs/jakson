@@ -33,22 +33,6 @@ static bool carbon_header_rev_inc(struct carbon *doc);
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-#define event_promote(doc, event, ...)                                                                                 \
-for (u32 i = 0; i < doc->handler.num_elems; i++) {                                                                     \
-        struct carbon_handler *handler = vec_get(&doc->handler, i, struct carbon_handler);                               \
-        assert(handler);                                                                                               \
-        if (handler->in_use && handler->listener.event) {                                                              \
-        handler->listener.event(&handler->listener, __VA_ARGS__);                                                      \
-        }                                                                                                              \
-}
-
-#define fire_revision_begin(doc)                      event_promote(doc, on_revision_begin, doc);
-#define fire_revision_end(doc)                        event_promote(doc, on_revision_end, doc);
-#define fire_revision_abort(doc)                      event_promote(doc, on_revision_abort, doc);
-#define fire_new_revision(revised, original)          event_promote(original, on_new_revision, revised, original);
-
-// ---------------------------------------------------------------------------------------------------------------------
-
 ARK_EXPORT(bool) carbon_revise_try_begin(struct carbon_revise *context, struct carbon *revised_doc, struct carbon *doc)
 {
         error_if_null(context)
@@ -72,7 +56,6 @@ ARK_EXPORT(bool) carbon_revise_begin(struct carbon_revise *context, struct carbo
                 context->revised_doc = revised_doc;
                 error_init(&context->err);
                 carbon_clone(context->revised_doc, context->original);
-                fire_revision_begin(original);
                 return true;
         } else {
                 error(&original->err, ARK_ERR_OUTDATED)
@@ -227,16 +210,16 @@ ARK_EXPORT(bool) carbon_revise_remove(const char *dot_path, struct carbon_revise
         if (carbon_dot_path_from_string(&dot, dot_path)) {
                 carbon_path_evaluator_begin_mutable(&eval, &dot, context);
 
-                if (eval.status != carbon_PATH_RESOLVED) {
+                if (eval.status != CARBON_PATH_RESOLVED) {
                         result = false;
                 } else {
                         switch (eval.result.container_type) {
-                        case carbon_ARRAY: {
-                                struct carbon_array_it *it = eval.result.containers.array.it;
+                        case CARBON_ARRAY: {
+                                struct carbon_array_it *it = &eval.result.containers.array.it;
                                 result = carbon_array_it_remove(it);
                         } break;
-                        case carbon_COLUMN:  {
-                                struct carbon_column_it *it = eval.result.containers.column.it;
+                        case CARBON_COLUMN:  {
+                                struct carbon_column_it *it = &eval.result.containers.column.it;
                                 u32 elem_pos = eval.result.containers.column.elem_pos;
                                 result = carbon_column_it_remove(it, elem_pos);
                         } break;
@@ -289,9 +272,6 @@ ARK_EXPORT(const struct carbon *) carbon_revise_end(struct carbon_revise *contex
                 context->original->versioning.is_latest = false;
                 context->original->versioning.revision_lock = false;
 
-                fire_new_revision(context->revised_doc, context->original);
-                fire_revision_end(context->original);
-
                 spin_release(&context->original->versioning.write_lock);
 
                 return context->revised_doc;
@@ -308,8 +288,6 @@ ARK_EXPORT(bool) carbon_revise_abort(struct carbon_revise *context)
         carbon_drop(context->revised_doc);
         context->original->versioning.is_latest = true;
         context->original->versioning.revision_lock = false;
-        fire_revision_abort(context->original);
-        fire_revision_end(context->original);
         spin_release(&context->original->versioning.write_lock);
 
         return true;
@@ -339,7 +317,7 @@ static bool internal_pack_array(struct carbon_array_it *it)
                         memfile_seek(&this_array_it.memfile, first_empty_slot_offset);
                         assert(last_empty_slot_offset > first_empty_slot_offset);
 
-                        memfile_move_left(&this_array_it.memfile, last_empty_slot_offset - first_empty_slot_offset);
+                        memfile_inplace_remove(&this_array_it.memfile, last_empty_slot_offset - first_empty_slot_offset);
 
                         final = *memfile_read(&this_array_it.memfile, sizeof(char));
                         assert(final == CARBON_MARKER_ARRAY_END);
@@ -441,7 +419,8 @@ static bool internal_pack_object(struct carbon_object_it *it)
                         memfile_seek(&this_object_it.memfile, first_empty_slot_offset);
                         assert(last_empty_slot_offset > first_empty_slot_offset);
 
-                        memfile_move_left(&this_object_it.memfile, last_empty_slot_offset - first_empty_slot_offset);
+                        memfile_inplace_remove(&this_object_it.memfile,
+                                last_empty_slot_offset - first_empty_slot_offset);
 
                         final = *memfile_read(&this_object_it.memfile, sizeof(char));
                         assert(final == CARBON_MARKER_OBJECT_END);
@@ -495,7 +474,7 @@ static bool internal_pack_object(struct carbon_object_it *it)
                         case CARBON_FIELD_TYPE_COLUMN_BOOLEAN:
                                 carbon_column_it_rewind(it->field_access.nested_column_it);
                                 internal_pack_column(it->field_access.nested_column_it);
-                                memfile_seek(&it->memfile, memfile_tell(&it->field_access.nested_column_it->memfile) - sizeof(u8));
+                                memfile_seek(&it->memfile, memfile_tell(&it->field_access.nested_column_it->memfile));
                                 break;
                         case CARBON_FIELD_TYPE_OBJECT: {
                                 struct carbon_object_it nested_object_it;
@@ -526,19 +505,18 @@ static bool internal_pack_column(struct carbon_column_it *it)
         u32 free_space = (it->column_capacity - it->column_num_elements) * carbon_int_get_type_value_size(it->type);
         if (free_space > 0) {
                 offset_t payload_start = carbon_int_column_get_payload_off(it);
+                u64 payload_size = it->column_num_elements * carbon_int_get_type_value_size(it->type);
 
                 memfile_seek(&it->memfile, payload_start);
-                memfile_skip(&it->memfile, it->column_num_elements * carbon_int_get_type_value_size(it->type));
+                memfile_skip(&it->memfile, payload_size);
 
-                memfile_move_left(&it->memfile, free_space);
-
-                offset_t continue_off = memfile_tell(&it->memfile);
+                memfile_inplace_remove(&it->memfile, free_space);
 
                 memfile_seek(&it->memfile, it->num_and_capacity_start_offset);
                 memfile_skip_varuint(&it->memfile); // skip num of elements counter
                 memfile_update_varuint(&it->memfile, it->column_num_elements); // update capacity counter to num elems
 
-                memfile_seek(&it->memfile, continue_off);
+                memfile_skip(&it->memfile, payload_size);
 
                 return true;
         } else {

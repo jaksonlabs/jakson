@@ -35,7 +35,7 @@ ARK_EXPORT(void) priority_queue_free(struct priority_queue *queue)
 
 void priority_queue_resize(struct priority_queue *queue, size_t size)
 {
-        struct priority_queue_element_info *new_data = malloc(sizeof(struct priority_queue_element_info) * size);
+        struct priority_queue_element_info *new_data = ark_malloc(sizeof(struct priority_queue_element_info) * size);
 
         memcpy(new_data, queue->data, sizeof(struct priority_queue_element_info) * queue->num_elements);
         free(queue->data);

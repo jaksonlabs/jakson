@@ -18,6 +18,7 @@
 #include <ark-js/carbon/carbon-path.h>
 #include <ark-js/carbon/carbon-find.h>
 #include <ark-js/carbon/carbon-revise.h>
+#include "carbon-path.h"
 
 static inline enum carbon_path_status traverse_column(struct carbon_path_evaluator *state,
         const struct carbon_dot_path *path, u32 current_path_pos, struct carbon_column_it *it);
@@ -32,10 +33,12 @@ ARK_EXPORT(bool) carbon_path_evaluator_begin(struct carbon_path_evaluator *eval,
         error_if_null(path)
         error_if_null(doc)
 
+        ark_zero_memory(eval, sizeof(struct carbon_path_evaluator));
         eval->doc = doc;
         ark_check_success(error_init(&eval->err));
         ark_check_success(carbon_iterator_open(&eval->root_it, eval->doc));
         eval->status = traverse_array(eval, path, 0, &eval->root_it);
+        ark_check_success(carbon_iterator_close(&eval->root_it));
         return true;
 }
 
@@ -50,6 +53,7 @@ ARK_EXPORT(bool) carbon_path_evaluator_begin_mutable(struct carbon_path_evaluato
         ark_check_success(error_init(&eval->err));
         ark_check_success(carbon_revise_iterator_open(&eval->root_it, context));
         eval->status = traverse_array(eval, path, 0, &eval->root_it);
+        ark_check_success(carbon_iterator_close(&eval->root_it));
         return true;
 }
 
@@ -64,13 +68,26 @@ ARK_EXPORT(bool) carbon_path_evaluator_status(enum carbon_path_status *status, s
 ARK_EXPORT(bool) carbon_path_evaluator_has_result(struct carbon_path_evaluator *state)
 {
         error_if_null(state)
-        return state->status == carbon_PATH_RESOLVED;
+        return state->status == CARBON_PATH_RESOLVED;
 }
 
 ARK_EXPORT(bool) carbon_path_evaluator_end(struct carbon_path_evaluator *state)
 {
         error_if_null(state)
-        carbon_iterator_close(&state->root_it);
+        switch (state->result.container_type) {
+        case CARBON_OBJECT:
+                //carbon_object_it_drop(state->result.containers.)
+                // TODO: Implement
+                error_print(ARK_ERR_NOTIMPLEMENTED);
+                break;
+        case CARBON_ARRAY:
+                carbon_array_it_drop(&state->result.containers.array.it);
+                break;
+        case CARBON_COLUMN:
+                break;
+        default:
+                error_print(ARK_ERR_NOTIMPLEMENTED);
+        }
         return true;
 }
 
@@ -214,7 +231,7 @@ static inline enum carbon_path_status traverse_array(struct carbon_path_evaluato
 
         if (!status) {
                 /* empty document */
-                return carbon_PATH_EMPTY_DOC;
+                return CARBON_PATH_EMPTY_DOC;
         } else {
                 switch (node_type) {
                 case DOT_NODE_ARRAY_IDX:
@@ -224,7 +241,7 @@ static inline enum carbon_path_status traverse_array(struct carbon_path_evaluato
                         assert(current_array_idx <= requested_array_idx);
                         if (current_array_idx != requested_array_idx) {
                                 /* root array has too less elements to reach the requested index */
-                                return carbon_PATH_NOSUCHINDEX;
+                                return CARBON_PATH_NOSUCHINDEX;
                         } else {
                                 /* requested index is reached; depending on the subsequent path, lookup may stops */
                                 carbon_array_it_field_type(&elem_type, it);
@@ -236,7 +253,7 @@ static inline enum carbon_path_status traverse_array(struct carbon_path_evaluato
                                         carbon_dot_path_type_at(&next_node_type, next_path_pos, path);
                                         if (!carbon_field_type_is_traversable(elem_type)) {
                                                 /* the array element is not a container; path evaluation stops here */
-                                                return carbon_PATH_NOTTRAVERSABLE;
+                                                return CARBON_PATH_NOTTRAVERSABLE;
                                         } else {
                                                 /* array element is traversable */
                                                 switch (next_node_type) {
@@ -254,11 +271,12 @@ static inline enum carbon_path_status traverse_array(struct carbon_path_evaluato
                                                                 elem_type != CARBON_FIELD_TYPE_COLUMN_I64 &&
                                                                 elem_type != CARBON_FIELD_TYPE_COLUMN_FLOAT &&
                                                                 elem_type != CARBON_FIELD_TYPE_COLUMN_BOOLEAN) {
-                                                                return carbon_PATH_NOCONTAINER;
+                                                                return CARBON_PATH_NOCONTAINER;
                                                         } else {
                                                                 if (elem_type == CARBON_FIELD_TYPE_ARRAY) {
                                                                         struct carbon_array_it *sub_it = carbon_array_it_array_value(it);
                                                                         status = traverse_array(state, path, next_path_pos, sub_it);
+                                                                        carbon_array_it_drop(sub_it);
                                                                         return status;
                                                                 } else {
                                                                         assert(elem_type == CARBON_FIELD_TYPE_COLUMN_U8 ||
@@ -279,21 +297,21 @@ static inline enum carbon_path_status traverse_array(struct carbon_path_evaluato
                                                         /* next node in path is a key name which requires that
                                                          * the current array element is of type object */
                                                         if (elem_type != CARBON_FIELD_TYPE_OBJECT) {
-                                                                return carbon_PATH_NOTANOBJECT;
+                                                                return CARBON_PATH_NOTANOBJECT;
                                                         } else {
                                                                 error_print_and_die_if(true, ARK_ERR_NOTIMPLEMENTED) /* TODO: implement for objects */
-                                                                return carbon_PATH_INTERNAL;
+                                                                return CARBON_PATH_INTERNAL;
                                                         }
                                                 default:
                                                 error_print(ARK_ERR_INTERNALERR);
-                                                        return carbon_PATH_INTERNAL;
+                                                        return CARBON_PATH_INTERNAL;
                                                 }
                                         }
                                 } else {
                                         /* path end is reached */
-                                        state->result.container_type = carbon_ARRAY;
-                                        state->result.containers.array.it = it;
-                                        return carbon_PATH_RESOLVED;
+                                        state->result.container_type = CARBON_ARRAY;
+                                        carbon_array_it_clone(&state->result.containers.array.it, it);
+                                        return CARBON_PATH_RESOLVED;
                                 }
                         }
                 case DOT_NODE_KEY_NAME:
@@ -302,15 +320,15 @@ static inline enum carbon_path_status traverse_array(struct carbon_path_evaluato
                         if (elem_type != CARBON_FIELD_TYPE_OBJECT) {
                                 /* first array element is not of type object and a key lookup cannot
                                  * be executed, consequentially */
-                                return carbon_PATH_NOTANOBJECT;
+                                return CARBON_PATH_NOTANOBJECT;
                         } else {
                                 error_print_and_die_if(true, ARK_ERR_NOTIMPLEMENTED) /* TODO: implement for objects */
-                                return carbon_PATH_INTERNAL;
+                                return CARBON_PATH_INTERNAL;
                         }
                         break;
                 default:
-                error(&((struct carbon_dot_path *)path)->err, ARK_ERR_INTERNALERR);
-                        return  carbon_PATH_INTERNAL;
+                        error(&((struct carbon_dot_path *)path)->err, ARK_ERR_INTERNALERR);
+                        return  CARBON_PATH_INTERNAL;
                 }
         }
 }
@@ -327,7 +345,7 @@ static inline enum carbon_path_status traverse_column(struct carbon_path_evaluat
         if (current_path_pos + 1 != total_path_len) {
                 /* a column cannot contain further containers; since the current path node is not
                  * the last one, traversal cannot be continued */
-                return carbon_PATH_NONESTING;
+                return CARBON_PATH_NONESTING;
         } else {
                 carbon_dot_path_type_at(&node_type, current_path_pos, path);
                 assert(node_type == DOT_NODE_ARRAY_IDX);
@@ -335,12 +353,12 @@ static inline enum carbon_path_status traverse_column(struct carbon_path_evaluat
                 carbon_column_it_values_info(&column_type, &nun_values_contained, it);
                 if (requested_idx >= nun_values_contained) {
                         /* requested index does not exists in this column */
-                        return carbon_PATH_NOSUCHINDEX;
+                        return CARBON_PATH_NOSUCHINDEX;
                 } else {
-                        state->result.container_type = carbon_COLUMN;
-                        state->result.containers.column.it = it;
+                        state->result.container_type = CARBON_COLUMN;
+                        carbon_column_it_clone(&state->result.containers.column.it, it);
                         state->result.containers.column.elem_pos = requested_idx;
-                        return carbon_PATH_RESOLVED;
+                        return CARBON_PATH_RESOLVED;
                 }
         }
 }

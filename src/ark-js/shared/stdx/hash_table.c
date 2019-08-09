@@ -80,7 +80,7 @@ ARK_EXPORT(bool) hashtable_drop(struct hashtable *map)
 ARK_EXPORT(struct hashtable *)hashtable_cpy(struct hashtable *src)
 {
         if (src) {
-                struct hashtable *cpy = malloc(sizeof(struct hashtable));
+                struct hashtable *cpy = ark_malloc(sizeof(struct hashtable));
 
                 hashtable_lock(src);
 
@@ -280,7 +280,7 @@ ARK_EXPORT(bool) hashtable_insert_or_update(struct hashtable *map, const void *k
 
         hashtable_lock(map);
 
-        u32 *bucket_idxs = malloc(num_pairs * sizeof(u32));
+        u32 *bucket_idxs = ark_malloc(num_pairs * sizeof(u32));
         if (!bucket_idxs) {
                 error(&map->err, ARK_ERR_MALLOCERR);
                 return false;
@@ -413,7 +413,7 @@ ARK_EXPORT(bool) hashtable_remove_if_contained(struct hashtable *map, const void
 
         hashtable_lock(map);
 
-        u32 *bucket_idxs = malloc(num_pairs * sizeof(u32));
+        u32 *bucket_idxs = ark_malloc(num_pairs * sizeof(u32));
         if (!bucket_idxs) {
                 error(&map->err, ARK_ERR_MALLOCERR);
                 hashtable_unlock(map);

@@ -45,8 +45,6 @@ ARK_EXPORT(const char *) memblock_raw_data(const struct memblock *block);
 
 ARK_EXPORT(bool) memblock_resize(struct memblock *block, size_t size);
 
-ARK_EXPORT(bool) memblock_resize_ex(struct memblock *block, size_t size, bool zero_out);
-
 ARK_EXPORT(bool) memblock_write(struct memblock *block, offset_t position, const char *data, offset_t nbytes);
 
 ARK_EXPORT(bool) memblock_cpy(struct memblock **dst, struct memblock *src);

@@ -59,20 +59,20 @@ struct memfile {
 
 #define memfile_tell(file)                                                                                             \
 ({                                                                                                                     \
-    offset_t offset;                                                                                                   \
+    offset_t offset = 0;                                                                                               \
     memfile_get_offset(&offset, file);                                                                                 \
     offset;                                                                                                            \
 })
 
 ARK_EXPORT(bool) memfile_open(struct memfile *file, struct memblock *block, enum access_mode mode);
 
-ARK_EXPORT(bool) memfile_dup(struct memfile *dst, struct memfile *src);
+ARK_EXPORT(bool) memfile_clone(struct memfile *dst, struct memfile *src);
 
 ARK_EXPORT(bool) memfile_seek(struct memfile *file, offset_t pos);
 
 ARK_EXPORT(bool) memfile_rewind(struct memfile *file);
 
-ARK_EXPORT(bool) memfile_grow(struct memfile *file_in, size_t grow_by_bytes, bool zero_out);
+ARK_EXPORT(bool) memfile_grow(struct memfile *file_in, size_t grow_by_bytes);
 
 ARK_EXPORT(bool) memfile_get_offset(offset_t *pos, const struct memfile *file);
 
@@ -86,7 +86,7 @@ ARK_EXPORT(bool) memfile_shrink(struct memfile *file);
 
 ARK_EXPORT(const char *)memfile_read(struct memfile *file, offset_t nbytes);
 
-ARK_EXPORT(bool) memfile_skip(struct memfile *file, offset_t nbytes);
+ARK_EXPORT(bool) memfile_skip(struct memfile *file, signed_offset_t nbytes);
 
 ARK_EXPORT(const char *)memfile_peek(struct memfile *file, offset_t nbytes);
 
@@ -100,7 +100,7 @@ ARK_EXPORT(bool) memfile_write_bit(struct memfile *file, bool flag);
 
 ARK_EXPORT(bool) memfile_read_bit(struct memfile *file);
 
-ARK_EXPORT(bool) memfile_save_position(struct memfile *file);
+ARK_EXPORT(offset_t) memfile_save_position(struct memfile *file);
 
 ARK_EXPORT(bool) memfile_restore_position(struct memfile *file);
 
@@ -123,9 +123,9 @@ ARK_EXPORT(bool) memfile_seek_to_end(struct memfile *file);
  * The offset in the memory block from where this move is done is the current position stored in this file.
  * In case of not enough space, the underlying memory block is resized.
  */
-ARK_EXPORT(bool) memfile_move_right(struct memfile *file, size_t nbytes);
+ARK_EXPORT(bool) memfile_inplace_insert(struct memfile *file, size_t nbytes);
 
-ARK_EXPORT(bool) memfile_move_left(struct memfile *file, size_t nbytes_from_here);
+ARK_EXPORT(bool) memfile_inplace_remove(struct memfile *file, size_t nbytes_from_here);
 
 ARK_EXPORT(bool) memfile_end_bit_mode(size_t *num_bytes_written, struct memfile *file);
 

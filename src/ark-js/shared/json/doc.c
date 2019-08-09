@@ -68,8 +68,8 @@ ARK_EXPORT(bool) doc_bulk_get_dic_contents(struct vector ofType (const char *) *
 
         size_t num_distinct_values;
         strdic_num_distinct(&num_distinct_values, context->dic);
-        struct vector ofType (const char *) *result_strings = malloc(sizeof(struct vector));
-        struct vector ofType (field_sid_t) *resultstring_id_ts = malloc(sizeof(struct vector));
+        struct vector ofType (const char *) *result_strings = ark_malloc(sizeof(struct vector));
+        struct vector ofType (field_sid_t) *resultstring_id_ts = ark_malloc(sizeof(struct vector));
         vec_create(result_strings, NULL, sizeof(const char *), num_distinct_values);
         vec_create(resultstring_id_ts, NULL, sizeof(field_sid_t), num_distinct_values);
 
@@ -866,7 +866,7 @@ static void sorted_nested_array_objects(struct columndoc_obj *columndoc)
     size_t num_elements = vec_length(&key_vector);                                                              \
                                                                                                                        \
     if (num_elements > 0) {                                                                                            \
-        size_t *value_indicies = malloc(sizeof(size_t) * num_elements);                                                \
+        size_t *value_indicies = ark_malloc(sizeof(size_t) * num_elements);                                                \
         for (size_t i = 0; i < num_elements; i++) {                                                                    \
             value_indicies[i] = i;                                                                                     \
         }                                                                                                              \
@@ -900,7 +900,7 @@ static void sort_meta_model_string_values(struct vector ofType(field_sid_t) *key
         size_t num_elements = vec_length(key_vector);
 
         if (num_elements > 0) {
-                size_t *value_indicies = malloc(sizeof(size_t) * num_elements);
+                size_t *value_indicies = ark_malloc(sizeof(size_t) * num_elements);
                 for (size_t i = 0; i < num_elements; i++) {
                         value_indicies[i] = i;
                 }
@@ -937,7 +937,7 @@ static void sort_meta_model_string_values(struct vector ofType(field_sid_t) *key
     size_t num_elements = vec_length(&key_vector);                                                              \
                                                                                                                        \
     if (num_elements > 0) {                                                                                            \
-        size_t *value_indicies = malloc(sizeof(size_t) * num_elements);                                                \
+        size_t *value_indicies = ark_malloc(sizeof(size_t) * num_elements);                                                \
         for (size_t i = 0; i < num_elements; i++) {                                                                    \
             value_indicies[i] = i;                                                                                     \
         }                                                                                                              \
@@ -970,7 +970,7 @@ static void sort_columndoc_strings_arrays(struct vector ofType(field_sid_t) *key
         size_t num_elements = vec_length(key_vector);
 
         if (num_elements > 0) {
-                size_t *value_indicies = malloc(sizeof(size_t) * num_elements);
+                size_t *value_indicies = ark_malloc(sizeof(size_t) * num_elements);
                 for (size_t i = 0; i < num_elements; i++) {
                         value_indicies[i] = i;
                 }
@@ -1113,7 +1113,7 @@ static void sort_columndoc_column(struct columndoc_column *column, struct strdic
         assert(array_position_cpy.num_elems == values_cpy.num_elems);
         assert(values_cpy.num_elems == column->array_positions.num_elems);
 
-        size_t *indices = malloc(values_cpy.num_elems * sizeof(size_t));
+        size_t *indices = ark_malloc(values_cpy.num_elems * sizeof(size_t));
         for (size_t i = 0; i < values_cpy.num_elems; i++) {
                 indices[i] = i;
         }
@@ -1142,7 +1142,7 @@ static void sort_columndoc_column_arrays(struct columndoc_obj *columndoc)
 {
         struct vector ofType(struct columndoc_group) cpy;
         vec_cpy(&cpy, &columndoc->obj_array_props);
-        size_t *indices = malloc(cpy.num_elems * sizeof(size_t));
+        size_t *indices = ark_malloc(cpy.num_elems * sizeof(size_t));
         for (size_t i = 0; i < cpy.num_elems; i++) {
                 indices[i] = i;
         }
@@ -1160,7 +1160,7 @@ static void sort_columndoc_column_arrays(struct columndoc_obj *columndoc)
 
         for (size_t i = 0; i < cpy.num_elems; i++) {
                 struct columndoc_group *key_columns = vec_get(&columndoc->obj_array_props, i, struct columndoc_group);
-                size_t *columnIndices = malloc(key_columns->columns.num_elems * sizeof(size_t));
+                size_t *columnIndices = ark_malloc(key_columns->columns.num_elems * sizeof(size_t));
                 struct vector ofType(struct columndoc_column) columnCpy;
                 vec_cpy(&columnCpy, &key_columns->columns);
                 for (size_t i = 0; i < key_columns->columns.num_elems; i++) {
@@ -1302,7 +1302,7 @@ struct columndoc *doc_entries_columndoc(const struct doc_bulk *bulk, const struc
 
         const struct doc *model = models;
 
-        struct columndoc *columndoc = malloc(sizeof(struct columndoc));
+        struct columndoc *columndoc = ark_malloc(sizeof(struct columndoc));
         columndoc->read_optimized = read_optimized;
         struct err err;
         if (!columndoc_create(columndoc, &err, model, bulk, partition, bulk->dic)) {

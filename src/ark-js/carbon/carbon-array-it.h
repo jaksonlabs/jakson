@@ -42,11 +42,13 @@ struct field_access
         const char *it_mime_type;
         u64 it_mime_type_strlen;
 
-        bool nested_array_it_opened;
+        bool nested_array_it_is_created;
         bool nested_array_it_accessed;
 
-        bool nested_object_it_opened;
+        bool nested_object_it_is_created;
         bool nested_object_it_accessed;
+
+        bool nested_column_it_is_created;
 
         struct carbon_array_it *nested_array_it;
         struct carbon_column_it *nested_column_it;
@@ -59,6 +61,10 @@ struct carbon_array_it
         offset_t payload_start;
         struct spinlock lock;
         struct err err;
+
+        /* in case of modifications (updates, inserts, deletes), the number of bytes that are added resp. removed */
+        i64 mod_size;
+        bool array_end_reached;
 
         struct vector ofType(offset_t) history;
         struct field_access field_access;
@@ -92,6 +98,8 @@ ARK_EXPORT(bool) carbon_array_it_create(struct carbon_array_it *it, struct memfi
         offset_t payload_start);
 
 ARK_EXPORT(bool) carbon_array_it_copy(struct carbon_array_it *dst, struct carbon_array_it *src);
+
+ARK_EXPORT(bool) carbon_array_it_clone(struct carbon_array_it *dst, struct carbon_array_it *src);
 
 ARK_EXPORT(bool) carbon_array_it_readonly(struct carbon_array_it *it);
 

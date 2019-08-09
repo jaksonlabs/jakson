@@ -104,7 +104,7 @@ ARK_EXPORT(bool) query_create_index_string_id_to_offset(struct sid_to_offset **i
         archive_get_info(&archive_info, query->archive);
         capacity = archive_info.num_embeddded_strings;
 
-        struct sid_to_offset *result = malloc(sizeof(struct sid_to_offset));
+        struct sid_to_offset *result = ark_malloc(sizeof(struct sid_to_offset));
         hashtable_create(&result->mapping,
                 &query->err,
                 sizeof(field_sid_t),
@@ -159,7 +159,7 @@ ARK_EXPORT(bool) query_index_id_to_offset_deserialize(struct sid_to_offset **ind
         error_if_null(file_path)
         error_if_null(offset)
 
-        struct sid_to_offset *result = malloc(sizeof(struct sid_to_offset));
+        struct sid_to_offset *result = ark_malloc(sizeof(struct sid_to_offset));
         if (!result) {
                 error(err, ARK_ERR_MALLOCERR);
                 return false;
@@ -200,7 +200,7 @@ ARK_EXPORT(bool) query_index_id_to_offset_deserialize(struct sid_to_offset **ind
 static char *fetch_string_from_file(bool *decode_success, FILE *disk_file, size_t offset, size_t string_len,
         struct err *err, struct archive *archive)
 {
-        char *result = malloc(string_len + 1);
+        char *result = ark_malloc(string_len + 1);
         memset(result, 0, string_len + 1);
 
         fseek(disk_file, offset, SEEK_SET);
@@ -326,13 +326,13 @@ ARK_EXPORT(char **)query_fetch_strings_by_offset(struct archive_query *query, of
                 return NULL;
         }
 
-        char **result = malloc(num_offs * sizeof(char *));
+        char **result = ark_malloc(num_offs * sizeof(char *));
         if (!result) {
                 error(&query->err, ARK_ERR_MALLOCERR);
                 return NULL;
         }
         for (size_t i = 0; i < num_offs; i++) {
-                if ((result[i] = malloc((strlens[i] + 1) * sizeof(char))) == NULL) {
+                if ((result[i] = ark_malloc((strlens[i] + 1) * sizeof(char))) == NULL) {
                         for (size_t k = 0; k < i; k++) {
                                 free(result[k]);
                         }
@@ -410,25 +410,25 @@ ARK_EXPORT(field_sid_t *)query_find_ids(size_t *num_found, struct archive_query 
                 return NULL;
         }
 
-        if (unlikely((step_ids = malloc(str_cap * sizeof(field_sid_t))) == NULL)) {
+        if (unlikely((step_ids = ark_malloc(str_cap * sizeof(field_sid_t))) == NULL)) {
                 error(&query->err, ARK_ERR_MALLOCERR);
                 return NULL;
         }
 
-        if (unlikely((str_offs = malloc(str_cap * sizeof(offset_t))) == NULL)) {
+        if (unlikely((str_offs = ark_malloc(str_cap * sizeof(offset_t))) == NULL)) {
                 error(&query->err, ARK_ERR_MALLOCERR);
                 goto cleanup_result_and_error;
                 return NULL;
         }
 
-        if (unlikely((str_lens = malloc(str_cap * sizeof(u32))) == NULL)) {
+        if (unlikely((str_lens = ark_malloc(str_cap * sizeof(u32))) == NULL)) {
                 error(&query->err, ARK_ERR_MALLOCERR);
                 free(str_offs);
                 goto cleanup_result_and_error;
                 return NULL;
         }
 
-        if (unlikely((idxs_matching = malloc(str_cap * sizeof(size_t))) == NULL)) {
+        if (unlikely((idxs_matching = ark_malloc(str_cap * sizeof(size_t))) == NULL)) {
                 error(&query->err, ARK_ERR_MALLOCERR);
                 free(str_offs);
                 free(str_lens);
@@ -443,7 +443,7 @@ ARK_EXPORT(field_sid_t *)query_find_ids(size_t *num_found, struct archive_query 
                 goto cleanup_result_and_error;
         }
 
-        if (unlikely((result_ids = malloc(result_cap * sizeof(field_sid_t))) == NULL)) {
+        if (unlikely((result_ids = ark_malloc(result_cap * sizeof(field_sid_t))) == NULL)) {
                 error(&query->err, ARK_ERR_MALLOCERR);
                 free(str_offs);
                 free(str_lens);

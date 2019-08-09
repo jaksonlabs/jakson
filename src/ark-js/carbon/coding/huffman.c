@@ -260,7 +260,7 @@ static void import_into_entry(struct pack_huffman_entry *entry, const struct huf
         const u32 *used_blocks;
         bitmap_blocks(&blocks, &num_blocks, map);
         used_blocks = get_num_used_blocks(&entry->nblocks, entry, num_blocks, blocks);
-        entry->blocks = malloc(entry->nblocks * sizeof(u32));
+        entry->blocks = ark_malloc(entry->nblocks * sizeof(u32));
         if (num_blocks > 0) {
                 memcpy(entry->blocks, used_blocks, entry->nblocks * sizeof(u32));
         } else {

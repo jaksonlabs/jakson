@@ -334,7 +334,7 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                         u32 num_column_groups;
                         keys = archive_collection_iter_get_keys(&num_column_groups, &collection_iter);
 
-                        bool *skip_groups_by_key = malloc(num_column_groups * sizeof(bool));
+                        bool *skip_groups_by_key = ark_malloc(num_column_groups * sizeof(bool));
                         ark_zero_memory(skip_groups_by_key, num_column_groups * sizeof(bool));
 
                         if (visitor->before_visit_object_array) {
@@ -367,7 +367,7 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                                         const object_id_t *column_group_object_ids =
                                                 archive_column_group_get_object_ids(&num_column_group_objs,
                                                         &group_iter);
-                                        bool *skip_objects = malloc(num_column_group_objs * sizeof(bool));
+                                        bool *skip_objects = ark_malloc(num_column_group_objs * sizeof(bool));
                                         ark_zero_memory(skip_objects, num_column_group_objs * sizeof(bool));
 
                                         if (visitor->before_visit_object_array_objects) {
@@ -439,7 +439,7 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                                                                 archive_column_entry_iter_t entry_iter;
 
                                                                 object_id_t *entry_object_containments =
-                                                                        malloc(num_positions * sizeof(object_id_t));
+                                                                        ark_malloc(num_positions * sizeof(object_id_t));
                                                                 for (u32 m = 0; m < num_positions; m++) {
                                                                         entry_object_containments[m] =
                                                                                 column_group_object_ids[entry_positions[m]];

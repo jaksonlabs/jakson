@@ -23,19 +23,20 @@
 
 #define try_array_update(type_match, in_place_update_fn, insert_fn)                                                    \
 ({                                                                                                                     \
-        enum carbon_field_type type_is;                                                                                 \
-        carbon_array_it_field_type(&type_is, it);                                                                       \
-        bool status;                                                                                                   \
+        enum carbon_field_type type_is = 0;                                                                            \
+        carbon_array_it_field_type(&type_is, it);                                                                      \
+        bool status = false;                                                                                           \
         switch (type_is) {                                                                                             \
                 case type_match:                                                                                       \
                         status = in_place_update_fn(it, value);                                                        \
                 break;                                                                                                 \
                 default: {                                                                                             \
-                        struct carbon_insert inserter;                                                                  \
-                        carbon_array_it_remove(it);                                                                     \
-                        carbon_array_it_insert_begin(&inserter, it);                                                    \
+                        struct carbon_insert inserter;                                                                 \
+                        carbon_array_it_remove(it);                                                                    \
+                        carbon_array_it_next(it);                                                                      \
+                        carbon_array_it_insert_begin(&inserter, it);                                                   \
                         status = insert_fn(&inserter, value);                                                          \
-                        carbon_array_it_insert_end(&inserter);                                                          \
+                        carbon_array_it_insert_end(&inserter);                                                         \
                 break;                                                                                                 \
                 }                                                                                                      \
         }                                                                                                              \
@@ -68,11 +69,11 @@ DEFINE_ARRAY_UPDATE_FUNCTION(float, CARBON_FIELD_TYPE_NUMBER_FLOAT, carbon_array
                 if (resolve_path(&updater) && path_resolved(&updater)) {                                               \
                                                                                                                        \
                         switch (updater.path_evaluater.result.container_type) {                                        \
-                        case carbon_ARRAY:                                                                              \
+                        case CARBON_ARRAY:                                                                              \
                                 array_exec;                                                                            \
                                 status = true;                                                                         \
                                 break;                                                                                 \
-                        case carbon_COLUMN: {                                                                           \
+                        case CARBON_COLUMN: {                                                                           \
                                 u32 elem_pos;                                                                          \
                                 struct carbon_column_it *it = column_iterator(&elem_pos, &updater);                     \
                                 column_exec;                                                                           \
@@ -82,8 +83,8 @@ DEFINE_ARRAY_UPDATE_FUNCTION(float, CARBON_FIELD_TYPE_NUMBER_FLOAT, carbon_array
                         error(&context->original->err, ARK_ERR_INTERNALERR)                                            \
                         }                                                                                              \
                 }                                                                                                      \
-                drop_path_evaluator(&updater);                                                                         \
-        }                                                                                                              \
+                carbon_path_evaluator_end(&updater.path_evaluater);                                                    \
+                }                                                                                                              \
         status;                                                                                                        \
 })
 
@@ -121,12 +122,6 @@ static bool resolve_path(struct carbon_update *updater)
 static bool path_resolved(struct carbon_update *updater)
 {
         return carbon_path_evaluator_has_result(&updater->path_evaluater);
-}
-
-static bool drop_path_evaluator(struct carbon_update *updater)
-{
-        error_if_null(updater)
-        return carbon_path_evaluator_end(&updater->path_evaluater);
 }
 
 static bool column_update_u8(struct carbon_column_it *it, u32 pos, u8 value)
@@ -213,13 +208,13 @@ static bool column_update_float(struct carbon_column_it *it, u32 pos, float valu
 
 static inline struct carbon_array_it *array_iterator(struct carbon_update *updater)
 {
-        return updater->path_evaluater.result.containers.array.it;
+        return &updater->path_evaluater.result.containers.array.it;
 }
 
 static inline struct carbon_column_it *column_iterator(u32 *elem_pos, struct carbon_update *updater)
 {
         *elem_pos = updater->path_evaluater.result.containers.column.elem_pos;
-        return updater->path_evaluater.result.containers.column.it;
+        return &updater->path_evaluater.result.containers.column.it;
 }
 
 #define compile_path_and_delegate(context, path, func)                                                                 \

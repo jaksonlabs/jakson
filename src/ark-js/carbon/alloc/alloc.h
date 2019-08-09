@@ -27,7 +27,7 @@ ARK_BEGIN_DECL
  * Allocates <code>num</code> elements of size <code>sizeof(type)</code> using the allocator <code>alloc</code> and
  * creates a new stack variable <code>type *name</code>.
  */
-#define ark_malloc(type, name, num, alloc)                                                                          \
+#define ALLOC_MALLOC(type, name, num, alloc)                                                                          \
     type *name = alloc_malloc(alloc, num *sizeof(type))
 
 /**

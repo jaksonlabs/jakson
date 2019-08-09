@@ -28,11 +28,12 @@ bool memblock_create(struct memblock **block, size_t size)
 {
         error_if_null(block)
         error_print_if(size == 0, ARK_ERR_ILLEGALARG)
-        struct memblock *result = malloc(sizeof(struct memblock));
+        struct memblock *result = ark_malloc(sizeof(struct memblock));
+        ark_zero_memory(result, sizeof(struct memblock));
         error_if_null(result)
         result->blockLength = size;
         result->last_byte = 0;
-        result->base = malloc(size);
+        result->base = ark_malloc(size);
         error_init(&result->err);
         *block = result;
         return true;
@@ -92,15 +93,10 @@ const char *memblock_raw_data(const struct memblock *block)
 
 ARK_EXPORT(bool) memblock_resize(struct memblock *block, size_t size)
 {
-        return memblock_resize_ex(block, size, false);
-}
-
-bool memblock_resize_ex(struct memblock *block, size_t size, bool zero_out)
-{
         error_if_null(block)
         error_print_if(size == 0, ARK_ERR_ILLEGALARG)
         block->base = realloc(block->base, size);
-        if (zero_out) {
+        if (size > block->blockLength) {
                 ark_zero_memory(block->base + block->blockLength, (size - block->blockLength));
         }
         block->blockLength = size;

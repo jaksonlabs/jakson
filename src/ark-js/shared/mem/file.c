@@ -22,6 +22,7 @@ bool memfile_open(struct memfile *file, struct memblock *block, enum access_mode
 {
         error_if_null(file)
         error_if_null(block)
+        ark_zero_memory(file, sizeof(struct memfile))
         file->memblock = block;
         file->pos = 0;
         file->bit_mode = false;
@@ -31,19 +32,23 @@ bool memfile_open(struct memfile *file, struct memblock *block, enum access_mode
         return true;
 }
 
-ARK_EXPORT(bool) memfile_dup(struct memfile *dst, struct memfile *src)
+ARK_EXPORT(bool) memfile_clone(struct memfile *dst, struct memfile *src)
 {
         error_if_null(dst)
         error_if_null(src)
         memfile_open(dst, src->memblock, src->mode);
         memfile_seek(dst, memfile_tell(src));
+        dst->bit_mode = src->bit_mode;
+        dst->saved_pos_ptr = src->saved_pos_ptr;
+        error_cpy(&dst->err, &src->err);
+        memcpy(&dst->saved_pos, &src->saved_pos, ARK_ARRAY_LENGTH(src->saved_pos));
         return true;
 }
 
 bool memfile_seek(struct memfile *file, offset_t pos)
 {
         error_if_null(file)
-        offset_t file_size;
+        offset_t file_size = 0;
         memblock_size(&file_size, file->memblock);
         if (unlikely(pos >= file_size)) {
                 if (file->mode == READ_WRITE) {
@@ -65,13 +70,13 @@ bool memfile_rewind(struct memfile *file)
         return true;
 }
 
-ARK_EXPORT(bool) memfile_grow(struct memfile *file_in, size_t grow_by_bytes, bool zero_out)
+ARK_EXPORT(bool) memfile_grow(struct memfile *file_in, size_t grow_by_bytes)
 {
         error_if_null(file_in)
         if (likely(grow_by_bytes > 0)) {
                 offset_t block_size;
                 memblock_size(&block_size, file_in->memblock);
-                memblock_resize_ex(file_in->memblock, (block_size + grow_by_bytes), zero_out);
+                memblock_resize(file_in->memblock, (block_size + grow_by_bytes));
         }
         return true;
 }
@@ -140,7 +145,7 @@ const char *memfile_read(struct memfile *file, offset_t nbytes)
         return result;
 }
 
-bool memfile_skip(struct memfile *file, offset_t nbytes)
+bool memfile_skip(struct memfile *file, signed_offset_t nbytes)
 {
         offset_t required_size = file->pos + nbytes;
         file->pos += nbytes;
@@ -298,18 +303,16 @@ bool memfile_read_bit(struct memfile *file)
         }
 }
 
-ARK_EXPORT(bool) memfile_save_position(struct memfile *file)
+ARK_EXPORT(offset_t) memfile_save_position(struct memfile *file)
 {
         error_if_null(file);
         offset_t pos = memfile_tell(file);
         if (likely(file->saved_pos_ptr < (i8) (ARK_ARRAY_LENGTH(file->saved_pos)))) {
                 file->saved_pos[file->saved_pos_ptr++] = pos;
-                return true;
         } else {
                 error(&file->err, ARK_ERR_STACK_OVERFLOW)
-                return false;
         }
-
+        return pos;
 }
 
 ARK_EXPORT(bool) memfile_restore_position(struct memfile *file)
@@ -334,7 +337,7 @@ ARK_EXPORT(bool) memfile_ensure_space(struct memfile *memfile, u64 nbytes)
         assert(memfile->pos < block_size);
         size_t diff = block_size - memfile->pos;
         if (diff < nbytes) {
-                memfile_grow(memfile, nbytes - diff, true);
+                memfile_grow(memfile, nbytes - diff);
         }
 
         memfile_save_position(memfile);
@@ -344,7 +347,7 @@ ARK_EXPORT(bool) memfile_ensure_space(struct memfile *memfile, u64 nbytes)
                 if (unlikely(c != 0)) {
                         /* not enough space; enlarge container */
                         memfile_seek(memfile, current_off);
-                        memfile_move_right(memfile, nbytes - i);
+                        memfile_inplace_insert(memfile, nbytes - i);
                         break;
                 }
         }
@@ -398,10 +401,10 @@ ARK_EXPORT(bool) memfile_update_varuint(struct memfile *memfile, u64 value)
 
         if (bytes_used_now < bytes_used_then) {
                 u8 inc = bytes_used_then - bytes_used_now;
-                memfile_move_right(memfile, inc);
+                memfile_inplace_insert(memfile, inc);
         } else if (bytes_used_now > bytes_used_then) {
                 u8 dec = bytes_used_now - bytes_used_then;
-                memfile_move_left(memfile, dec);
+                memfile_inplace_remove(memfile, dec);
         }
 
         varuint_t dst = (varuint_t) memfile_peek(memfile, sizeof(char));
@@ -418,13 +421,13 @@ ARK_EXPORT(bool) memfile_seek_to_end(struct memfile *file)
         return memfile_seek(file, size);
 }
 
-ARK_EXPORT(bool) memfile_move_right(struct memfile *file, size_t nbytes)
+ARK_EXPORT(bool) memfile_inplace_insert(struct memfile *file, size_t nbytes)
 {
         error_if_null(file);
         return memblock_move_right(file->memblock, file->pos, nbytes);
 }
 
-ARK_EXPORT(bool) memfile_move_left(struct memfile *file, size_t nbytes_from_here)
+ARK_EXPORT(bool) memfile_inplace_remove(struct memfile *file, size_t nbytes_from_here)
 {
         error_if_null(file);
         return memblock_move_left(file->memblock, file->pos, nbytes_from_here);

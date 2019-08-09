@@ -133,13 +133,13 @@ ARK_EXPORT(bool) carbon_json_formatter_create(struct carbon_printer *printer)
         printer->print_carbon_object_begin = json_formatter_carbon_object_begin;
         printer->print_carbon_object_end = json_formatter_carbon_object_end;
 
-        printer->extra = malloc(sizeof(struct json_formatter_extra));
+        printer->extra = ark_malloc(sizeof(struct json_formatter_extra));
         struct json_formatter_extra *extra = (struct json_formatter_extra *) printer->extra;
         *extra = (struct json_formatter_extra) {
                 .intent = false,
                 .strict = true,
                 .buffer_size = INIT_BUFFER_LEN,
-                .buffer = malloc(INIT_BUFFER_LEN)
+                .buffer = ark_malloc(INIT_BUFFER_LEN)
         };
         ark_zero_memory(extra->buffer, extra->buffer_size);
 
@@ -266,6 +266,7 @@ static void json_formatter_carbon_header_contents(struct carbon_printer *self, s
                         } else {
                                 string_builder_append(builder, "null");
                         }
+                        break;
                 default:
                 error_print(ARK_ERR_INTERNALERR);
                 }

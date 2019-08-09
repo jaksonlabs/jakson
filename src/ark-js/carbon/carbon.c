@@ -99,8 +99,8 @@ ARK_EXPORT(struct carbon_insert *) carbon_create_begin(struct carbon_new *contex
                           &doc->err, ARK_ERR_ILLEGALARG);
 
                 success_else_null(error_init(&context->err), &doc->err);
-                context->content_it = malloc(sizeof(struct carbon_array_it));
-                context->inserter = malloc(sizeof(struct carbon_insert));
+                context->content_it = ark_malloc(sizeof(struct carbon_array_it));
+                context->inserter = ark_malloc(sizeof(struct carbon_insert));
                 context->mode = mode;
 
                 success_else_null(carbon_create_empty(&context->original, key_type), &doc->err);
@@ -128,6 +128,7 @@ ARK_EXPORT(bool) carbon_create_end(struct carbon_new *context)
                 success &= carbon_revise_end(&context->revision_context) != NULL;
                 free (context->content_it);
                 free (context->inserter);
+                carbon_drop(&context->original);
                 if (unlikely(!success)) {
                         error(&context->err, ARK_ERR_CLEANUP);
                         return false;
@@ -156,7 +157,6 @@ ARK_EXPORT(bool) carbon_create_empty_ex(struct carbon *doc, enum carbon_primary_
         memblock_create(&doc->memblock, doc_cap_byte);
         memblock_zero_out(doc->memblock);
         memfile_open(&doc->memfile, doc->memblock, READ_WRITE);
-        vec_create(&doc->handler, NULL, sizeof(struct carbon_handler), 1);
 
         spin_init(&doc->versioning.write_lock);
 
@@ -267,52 +267,6 @@ ARK_EXPORT(bool) carbon_has_key(enum carbon_primary_key_type type)
         return type != CARBON_KEY_NOKEY;
 }
 
-ARK_EXPORT(bool) carbon_register_listener(listener_handle_t *handle, struct carbon_event_listener *listener, struct carbon *doc)
-{
-        error_if_null(listener);
-        error_if_null(doc);
-
-        u32 pos = 0;
-        struct carbon_handler *handler;
-
-        for (u32 pos = 0; pos < doc->handler.num_elems; pos++) {
-                handler = vec_get(&doc->handler, pos, struct carbon_handler);
-                if (!handler->in_use) {
-                        break;
-                }
-        }
-
-        if (pos == doc->handler.num_elems) {
-                /* append new handler */
-                handler = vec_new_and_get(&doc->handler, struct carbon_handler);
-        }
-
-        handler->in_use = true;
-        handler->listener = *listener;
-        ark_optional_call(listener, clone, &handler->listener, listener);
-        ark_optional_set(handle, pos);
-        return true;
-}
-
-ARK_EXPORT(bool) carbon_unregister_listener(struct carbon *doc, listener_handle_t handle)
-{
-        error_if_null(doc);
-        if (likely(handle < doc->handler.num_elems)) {
-                struct carbon_handler *handler = vec_get(&doc->handler, handle, struct carbon_handler);
-                if (likely(handler->in_use)) {
-                        handler->in_use = false;
-                        ark_optional_call(&handler->listener, drop, &handler->listener);
-                        return true;
-                } else {
-                        error(&doc->err, ARK_ERR_NOTFOUND);
-                        return false;
-                }
-        } else {
-                error(&doc->err, ARK_ERR_OUTOFBOUNDS);
-                return false;
-        }
-}
-
 ARK_EXPORT(bool) carbon_clone(struct carbon *clone, struct carbon *doc)
 {
         error_if_null(clone);
@@ -320,17 +274,6 @@ ARK_EXPORT(bool) carbon_clone(struct carbon *clone, struct carbon *doc)
         ark_check_success(memblock_cpy(&clone->memblock, doc->memblock));
         ark_check_success(memfile_open(&clone->memfile, clone->memblock, READ_WRITE));
         ark_check_success(error_init(&clone->err));
-
-        vec_create(&clone->handler, NULL, sizeof(struct carbon_handler), doc->handler.num_elems);
-        for (u32 i = 0; i < doc->handler.num_elems; i++) {
-                struct carbon_handler *original = vec_get(&doc->handler, i, struct carbon_handler);
-                struct carbon_handler *copy = vec_new_and_get(&clone->handler, struct carbon_handler);
-                copy->in_use = original->in_use;
-                if (original->in_use) {
-                        copy->listener = original->listener;
-                        ark_optional_call(&original->listener, clone, &copy->listener, &original->listener);
-                }
-        }
 
         spin_init(&clone->versioning.write_lock);
         clone->versioning.revision_lock = false;
@@ -454,14 +397,6 @@ static bool internal_drop(struct carbon *doc)
 {
         assert(doc);
         memblock_drop(doc->memblock);
-        for (u32 i = 0; i < doc->handler.num_elems; i++) {
-                struct carbon_handler *handler = vec_get(&doc->handler, i, struct carbon_handler);
-                if (handler->in_use) {
-                        ark_optional_call(&handler->listener, drop, &handler->listener);
-                }
-
-        }
-        vec_drop(&doc->handler);
         return true;
 }
 

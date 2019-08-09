@@ -28,7 +28,7 @@
 #define DEFINE_IN_PLACE_UPDATE_FUNCTION(type_name, field_type)                                                         \
 ARK_EXPORT(bool) carbon_array_it_update_in_place_##type_name(struct carbon_array_it *it, type_name value)                \
 {                                                                                                                      \
-        offset_t datum;                                                                                                \
+        offset_t datum = 0;                                                                                                \
         error_if_null(it);                                                                                             \
         if (likely(it->field_access.it_field_type == field_type)) {                                                    \
                 memfile_save_position(&it->memfile);                                                                   \
@@ -62,13 +62,13 @@ static bool update_in_place_constant(struct carbon_array_it *it, enum carbon_con
         if (carbon_field_type_is_constant(it->field_access.it_field_type)) {
                 u8 value;
                 switch (constant) {
-                case carbon_CONSTANT_TRUE:
+                case CARBON_CONSTANT_TRUE:
                         value = CARBON_FIELD_TYPE_TRUE;
                         break;
-                case carbon_CONSTANT_FALSE:
+                case CARBON_CONSTANT_FALSE:
                         value = CARBON_FIELD_TYPE_FALSE;
                         break;
-                case carbon_CONSTANT_NULL:
+                case CARBON_CONSTANT_NULL:
                         value = CARBON_FIELD_TYPE_NULL;
                         break;
                 default:
@@ -85,13 +85,13 @@ static bool update_in_place_constant(struct carbon_array_it *it, enum carbon_con
                 carbon_array_it_insert_begin(&ins, it);
 
                 switch (constant) {
-                case carbon_CONSTANT_TRUE:
+                case CARBON_CONSTANT_TRUE:
                         carbon_insert_true(&ins);
                         break;
-                case carbon_CONSTANT_FALSE:
+                case CARBON_CONSTANT_FALSE:
                         carbon_insert_false(&ins);
                         break;
-                case carbon_CONSTANT_NULL:
+                case CARBON_CONSTANT_NULL:
                         carbon_insert_null(&ins);
                         break;
                 default:
@@ -108,17 +108,17 @@ static bool update_in_place_constant(struct carbon_array_it *it, enum carbon_con
 
 ARK_EXPORT(bool) carbon_array_it_update_in_place_true(struct carbon_array_it *it)
 {
-        return update_in_place_constant(it, carbon_CONSTANT_TRUE);
+        return update_in_place_constant(it, CARBON_CONSTANT_TRUE);
 }
 
 ARK_EXPORT(bool) carbon_array_it_update_in_place_false(struct carbon_array_it *it)
 {
-        return update_in_place_constant(it, carbon_CONSTANT_FALSE);
+        return update_in_place_constant(it, CARBON_CONSTANT_FALSE);
 }
 
 ARK_EXPORT(bool) carbon_array_it_update_in_place_null(struct carbon_array_it *it)
 {
-        return update_in_place_constant(it, carbon_CONSTANT_NULL);
+        return update_in_place_constant(it, CARBON_CONSTANT_NULL);
 }
 
 ARK_EXPORT(bool) carbon_array_it_create(struct carbon_array_it *it, struct memfile *memfile, struct err *err,
@@ -128,7 +128,11 @@ ARK_EXPORT(bool) carbon_array_it_create(struct carbon_array_it *it, struct memfi
         error_if_null(memfile);
         error_if_null(err);
 
+        ark_zero_memory(it, sizeof(struct carbon_array_it));
+
         it->payload_start = payload_start;
+        it->mod_size = 0;
+        it->array_end_reached = false;
 
         error_init(&it->err);
         spin_init(&it->lock);
@@ -156,6 +160,19 @@ ARK_EXPORT(bool) carbon_array_it_copy(struct carbon_array_it *dst, struct carbon
         error_if_null(dst);
         error_if_null(src);
         carbon_array_it_create(dst, &src->memfile, &src->err, src->payload_start - sizeof(u8));
+        return true;
+}
+
+ARK_EXPORT(bool) carbon_array_it_clone(struct carbon_array_it *dst, struct carbon_array_it *src)
+{
+        memfile_clone(&dst->memfile, &src->memfile);
+        dst->payload_start = src->payload_start;
+        spin_init(&dst->lock);
+        error_cpy(&dst->err, &src->err);
+        dst->mod_size = src->mod_size;
+        dst->array_end_reached = src->array_end_reached;
+        vec_cpy(&dst->history, &src->history);
+        carbon_int_field_access_clone(&dst->field_access, &src->field_access);
         return true;
 }
 
@@ -202,17 +219,30 @@ ARK_EXPORT(bool) carbon_array_it_rewind(struct carbon_array_it *it)
         return memfile_seek(&it->memfile, it->payload_start);
 }
 
+static void auto_adjust_pos_after_mod(struct carbon_array_it *it)
+{
+        if (carbon_int_field_access_object_it_opened(&it->field_access)) {
+                memfile_skip(&it->memfile, it->field_access.nested_object_it->mod_size);
+        } else if (carbon_int_field_access_array_it_opened(&it->field_access)) {
+                //memfile_skip(&it->memfile, it->field_access.nested_array_it->mod_size);
+                //abort(); // TODO: implement!
+        }
+}
+
 ARK_EXPORT(bool) carbon_array_it_next(struct carbon_array_it *it)
 {
         error_if_null(it);
-        bool is_empty_slot, is_array_end;
+        bool is_empty_slot = true;
+
+        auto_adjust_pos_after_mod(it);
         offset_t last_off = memfile_tell(&it->memfile);
-        if (carbon_int_array_it_next(&is_empty_slot, &is_array_end, it)) {
+
+        if (carbon_int_array_it_next(&is_empty_slot, &it->array_end_reached, it)) {
                 carbon_int_history_push(&it->history, last_off);
                 return true;
         } else {
                 /* skip remaining zeros until end of array is reached */
-                if (!is_array_end) {
+                if (!it->array_end_reached) {
                         error_if(!is_empty_slot, &it->err, ARK_ERR_CORRUPTED);
 
                         while (*memfile_peek(&it->memfile, 1) == 0) {
@@ -367,128 +397,14 @@ ARK_EXPORT(bool) carbon_array_it_insert_end(struct carbon_insert *inserter)
         return carbon_insert_drop(inserter);
 }
 
-static bool remove_field(struct memfile *memfile, struct err *err, enum carbon_field_type type)
-{
-        assert((enum carbon_field_type) *memfile_peek(memfile, sizeof(u8)) == type);
-        offset_t start_off = memfile_tell(memfile);
-        memfile_skip(memfile, sizeof(u8));
-        size_t rm_nbytes = sizeof(u8); /* at least the type marker must be removed */
-        switch (type) {
-                case CARBON_FIELD_TYPE_NULL:
-                case CARBON_FIELD_TYPE_TRUE:
-                case CARBON_FIELD_TYPE_FALSE:
-                        /* nothing to do */
-                        break;
-                case CARBON_FIELD_TYPE_NUMBER_U8:
-                case CARBON_FIELD_TYPE_NUMBER_I8:
-                        rm_nbytes += sizeof(u8);
-                        break;
-                case CARBON_FIELD_TYPE_NUMBER_U16:
-                case CARBON_FIELD_TYPE_NUMBER_I16:
-                        rm_nbytes += sizeof(u16);
-                        break;
-                case CARBON_FIELD_TYPE_NUMBER_U32:
-                case CARBON_FIELD_TYPE_NUMBER_I32:
-                        rm_nbytes += sizeof(u32);
-                        break;
-                case CARBON_FIELD_TYPE_NUMBER_U64:
-                case CARBON_FIELD_TYPE_NUMBER_I64:
-                        rm_nbytes += sizeof(u64);
-                        break;
-                case CARBON_FIELD_TYPE_NUMBER_FLOAT:
-                        rm_nbytes += sizeof(float);
-                        break;
-                case CARBON_FIELD_TYPE_STRING: {
-                        u8 len_nbytes;  /* number of bytes used to store string length */
-                        u64 str_len; /* the number of characters of the string field */
-
-                        str_len = memfile_read_varuint(&len_nbytes, memfile);
-
-                        rm_nbytes += len_nbytes + str_len;
-                } break;
-                case CARBON_FIELD_TYPE_BINARY: {
-                        u8 mime_type_nbytes; /* number of bytes for mime type */
-                        u8 blob_length_nbytes; /* number of bytes to store blob length */
-                        u64 blob_nbytes; /* number of bytes to store actual blob data */
-
-                        /* get bytes used for mime type id */
-                        memfile_read_varuint(&mime_type_nbytes, memfile);
-
-                        /* get bytes used for blob length info */
-                        blob_nbytes = memfile_read_varuint(&blob_length_nbytes, memfile);
-
-                        rm_nbytes += mime_type_nbytes + blob_length_nbytes + blob_nbytes;
-                } break;
-                case CARBON_FIELD_TYPE_BINARY_CUSTOM: {
-                        u8 custom_type_strlen_nbytes; /* number of bytes for type name string length info */
-                        u8 custom_type_strlen; /* number of characters to encode type name string */
-                        u8 blob_length_nbytes; /* number of bytes to store blob length */
-                        u64 blob_nbytes; /* number of bytes to store actual blob data */
-
-                        /* get bytes for custom type string len, and the actual length */
-                        custom_type_strlen = memfile_read_varuint(&custom_type_strlen_nbytes, memfile);
-                        memfile_skip(memfile, custom_type_strlen);
-
-                        /* get bytes used for blob length info */
-                        blob_nbytes = memfile_read_varuint(&blob_length_nbytes, memfile);
-
-                        rm_nbytes += custom_type_strlen_nbytes + custom_type_strlen + blob_length_nbytes + blob_nbytes;
-                } break;
-                case CARBON_FIELD_TYPE_ARRAY: {
-                        struct carbon_array_it it;
-
-                        offset_t begin_off = memfile_tell(memfile);
-                        carbon_array_it_create(&it, memfile, err, begin_off - sizeof(u8));
-                        carbon_array_it_fast_forward(&it);
-                        offset_t end_off = carbon_array_it_tell(&it);
-                        carbon_array_it_drop(&it);
-
-                        assert(begin_off < end_off);
-                        rm_nbytes += (end_off - begin_off);
-                } break;
-                case CARBON_FIELD_TYPE_COLUMN_U8:
-                case CARBON_FIELD_TYPE_COLUMN_U16:
-                case CARBON_FIELD_TYPE_COLUMN_U32:
-                case CARBON_FIELD_TYPE_COLUMN_U64:
-                case CARBON_FIELD_TYPE_COLUMN_I8:
-                case CARBON_FIELD_TYPE_COLUMN_I16:
-                case CARBON_FIELD_TYPE_COLUMN_I32:
-                case CARBON_FIELD_TYPE_COLUMN_I64:
-                case CARBON_FIELD_TYPE_COLUMN_FLOAT:
-                case CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
-                        struct carbon_column_it it;
-
-                        offset_t begin_off = memfile_tell(memfile);
-                        carbon_column_it_create(&it, memfile, err, begin_off - sizeof(u8));
-                        carbon_column_it_fast_forward(&it);
-                        offset_t end_off = carbon_column_it_tell(&it);
-
-                        assert(begin_off < end_off);
-                        rm_nbytes += (end_off - begin_off);
-                } break;
-                case CARBON_FIELD_TYPE_OBJECT:
-                        print_error_and_die(ARK_ERR_NOTIMPLEMENTED)
-                        break;
-                default:
-                        error(err, ARK_ERR_INTERNALERR)
-                        return false;
-        }
-        memfile_seek(memfile, start_off);
-        memfile_move_left(memfile, rm_nbytes);
-
-        return true;
-}
-
 ARK_EXPORT(bool) carbon_array_it_remove(struct carbon_array_it *it)
 {
-        unused(it);
         error_if_null(it);
         enum carbon_field_type type;
         if (carbon_array_it_field_type(&type, it)) {
                 offset_t prev_off = carbon_int_history_pop(&it->history);
                 memfile_seek(&it->memfile, prev_off);
-                if (remove_field(&it->memfile, &it->err, type)) {
-                        memfile_seek(&it->memfile, prev_off);
+                if (carbon_int_field_remove(&it->memfile, &it->err, type)) {
                         carbon_int_array_it_refresh(NULL, NULL, it);
                         return true;
                 } else {

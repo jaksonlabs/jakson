@@ -17,6 +17,7 @@
 
 #include <ark-js/carbon/carbon-dot.h>
 #include <ark-js/carbon/carbon-find.h>
+#include "carbon-find.h"
 
 static void result_from_array(struct carbon_find *find, struct carbon_array_it *it);
 static inline bool result_from_column(struct carbon_find *find, u32 requested_idx, struct carbon_column_it *it);
@@ -36,7 +37,33 @@ ARK_EXPORT(bool) carbon_find_open(struct carbon_find *out, const char *dot_path,
 ARK_EXPORT(bool) carbon_find_close(struct carbon_find *find)
 {
         error_if_null(find)
-        return carbon_find_drop(find);
+        if (carbon_find_has_result(find)) {
+                enum carbon_field_type type;
+                carbon_find_result_type(&type, find);
+                switch (type) {
+                case CARBON_FIELD_TYPE_OBJECT:
+                        error_print(ARK_ERR_NOTIMPLEMENTED)
+                        break;
+                case CARBON_FIELD_TYPE_ARRAY:
+                        carbon_array_it_drop(find->value.array_it);
+                        break;
+                case CARBON_FIELD_TYPE_COLUMN_U8:
+                case CARBON_FIELD_TYPE_COLUMN_U16:
+                case CARBON_FIELD_TYPE_COLUMN_U32:
+                case CARBON_FIELD_TYPE_COLUMN_U64:
+                case CARBON_FIELD_TYPE_COLUMN_I8:
+                case CARBON_FIELD_TYPE_COLUMN_I16:
+                case CARBON_FIELD_TYPE_COLUMN_I32:
+                case CARBON_FIELD_TYPE_COLUMN_I64:
+                case CARBON_FIELD_TYPE_COLUMN_FLOAT:
+                case CARBON_FIELD_TYPE_COLUMN_BOOLEAN:
+                        break;
+                default:
+                        break;
+                }
+            return carbon_find_drop(find);
+        }
+    return true;
 }
 
 ARK_EXPORT(bool) carbon_find_create(struct carbon_find *find, struct carbon_dot_path *path, struct carbon *doc)
@@ -51,12 +78,12 @@ ARK_EXPORT(bool) carbon_find_create(struct carbon_find *find, struct carbon_dot_
         ark_check_success(carbon_path_evaluator_begin(&find->path_evaluater, path, doc));
         if (carbon_path_evaluator_has_result(&find->path_evaluater)) {
                 switch (find->path_evaluater.result.container_type) {
-                case carbon_ARRAY:
-                        result_from_array(find, find->path_evaluater.result.containers.array.it);
+                case CARBON_ARRAY:
+                        result_from_array(find, &find->path_evaluater.result.containers.array.it);
                         break;
-                case carbon_COLUMN:
+                case CARBON_COLUMN:
                         result_from_column(find, find->path_evaluater.result.containers.column.elem_pos,
-                                find->path_evaluater.result.containers.column.it);
+                                &find->path_evaluater.result.containers.column.it);
                         break;
                 default:
                         error(&path->err, ARK_ERR_INTERNALERR);

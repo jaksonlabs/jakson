@@ -544,7 +544,7 @@ ARK_EXPORT(bool) parallel_parallel_filter_late(size_t *pos, size_t *num_pos, con
                 for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
                         struct filter_arg *arg = thread_args + tid;
                         arg->num_positions = 0;
-                        arg->src_positions = malloc(chunk_len * sizeof(size_t));
+                        arg->src_positions = ark_malloc(chunk_len * sizeof(size_t));
                         arg->position_offset_to_add = tid * chunk_len;
                         arg->start = src + arg->position_offset_to_add * width;
                         arg->len = chunk_len;
@@ -559,7 +559,7 @@ ARK_EXPORT(bool) parallel_parallel_filter_late(size_t *pos, size_t *num_pos, con
         /** run f on this thread */
         prefetch_read(main_thread_base);
         size_t main_chunk_len = chunk_len + chunk_len_remain;
-        size_t *main_src_positions = malloc(main_chunk_len * sizeof(size_t));
+        size_t *main_src_positions = ark_malloc(main_chunk_len * sizeof(size_t));
         size_t main_num_positions = 0;
 
         pred(main_src_positions,
@@ -608,7 +608,7 @@ ARK_EXPORT(bool) parallel_sequential_filter_early(void *result, size_t *result_s
         error_if_null(pred);
 
         size_t num_matching_positions;
-        size_t *matching_positions = malloc(len * sizeof(size_t));
+        size_t *matching_positions = ark_malloc(len * sizeof(size_t));
 
         pred(matching_positions, &num_matching_positions, src, width, len, args, 0);
 
@@ -647,7 +647,7 @@ ARK_EXPORT(bool) parallel_parallel_filter_early(void *result, size_t *result_siz
         for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
                 struct filter_arg *arg = thread_args + tid;
                 arg->num_positions = 0;
-                arg->src_positions = malloc(chunk_len * sizeof(size_t));
+                arg->src_positions = ark_malloc(chunk_len * sizeof(size_t));
                 arg->position_offset_to_add = tid * chunk_len;
                 arg->start = src + arg->position_offset_to_add * width;
                 arg->len = chunk_len;
@@ -661,7 +661,7 @@ ARK_EXPORT(bool) parallel_parallel_filter_early(void *result, size_t *result_siz
         /** run f on this thread */
         prefetch_read(main_thread_base);
         size_t main_chunk_len = chunk_len + chunk_len_remain;
-        size_t *main_src_positions = malloc(main_chunk_len * sizeof(size_t));
+        size_t *main_src_positions = ark_malloc(main_chunk_len * sizeof(size_t));
         size_t main_num_positions = 0;
 
         pred(main_src_positions,
