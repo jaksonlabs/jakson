@@ -93,7 +93,9 @@ ARK_EXPORT(bool) carbon_key_skip(enum carbon_primary_key_type *out, struct memfi
 ARK_EXPORT(bool) carbon_key_write_unsigned(struct memfile *file, u64 key)
 {
         error_if_null(file)
-        enum carbon_primary_key_type key_type;
+
+        ark_declare_and_init(enum carbon_primary_key_type, key_type)
+
         carbon_key_read_type(&key_type, file);
         if (carbon_key_is_unsigned_type(key_type)) {
                 memfile_write(file, &key, sizeof(u64));
@@ -107,7 +109,9 @@ ARK_EXPORT(bool) carbon_key_write_unsigned(struct memfile *file, u64 key)
 ARK_EXPORT(bool) carbon_key_write_signed(struct memfile *file, i64 key)
 {
         error_if_null(file)
-        enum carbon_primary_key_type key_type;
+
+        ark_declare_and_init(enum carbon_primary_key_type, key_type)
+
         carbon_key_read_type(&key_type, file);
         if (carbon_key_is_signed_type(key_type)) {
                 memfile_write(file, &key, sizeof(i64));
@@ -121,7 +125,7 @@ ARK_EXPORT(bool) carbon_key_write_signed(struct memfile *file, i64 key)
 ARK_EXPORT(bool) carbon_key_update_string(struct memfile *file, const char *key)
 {
         error_if_null(file)
-        enum carbon_primary_key_type key_type;
+        ark_declare_and_init(enum carbon_primary_key_type, key_type)
         carbon_key_read_type(&key_type, file);
         if (carbon_key_is_string_type(key_type)) {
                 carbon_string_update(file, key);
@@ -135,7 +139,9 @@ ARK_EXPORT(bool) carbon_key_update_string(struct memfile *file, const char *key)
 ARK_EXPORT(bool) carbon_key_write_string(struct memfile *file, const char *key)
 {
         error_if_null(file)
-        enum carbon_primary_key_type key_type;
+
+        ark_declare_and_init(enum carbon_primary_key_type, key_type)
+
         carbon_key_read_type(&key_type, file);
         if (carbon_key_is_string_type(key_type)) {
                 carbon_string_write(file, key);

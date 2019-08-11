@@ -74,7 +74,7 @@ ARK_EXPORT(bool) carbon_int_insert_column(struct memfile *memfile_in, struct err
         error_if_null(memfile_in);
         error_if_null(err_in);
 
-        enum carbon_field_type column_type;
+        ark_declare_and_init(enum carbon_field_type, column_type)
 
         switch (type) {
         case CARBON_COLUMN_TYPE_BOOLEAN:

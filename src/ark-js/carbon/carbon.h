@@ -224,6 +224,8 @@ ARK_EXPORT(bool) carbon_create_empty(struct carbon *doc, enum carbon_primary_key
 ARK_EXPORT(bool) carbon_create_empty_ex(struct carbon *doc, enum carbon_primary_key_type key_type, u64 doc_cap_byte,
         u64 array_cap_byte);
 
+ARK_EXPORT(bool) carbon_from_json(struct carbon *doc, const char *json);
+
 ARK_EXPORT(bool) carbon_drop(struct carbon *doc);
 
 ARK_EXPORT(bool) carbon_is_up_to_date(struct carbon *doc);

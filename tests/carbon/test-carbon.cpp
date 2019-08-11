@@ -437,7 +437,7 @@ TEST(CarbonTest, BisonArrayIteratorStrings) {
         for (i32 i = 0; i < 10; i++) {
                 u64 strlen = rand() % (100 + 1 - 4) + 4;
                 char buffer[strlen];
-                for (i32 j = 0; j < strlen; j++) {
+                for (u64 j = 0; j < strlen; j++) {
                         buffer[j] = 65 + (rand() % 25);
                 }
                 buffer[0] = '!';
@@ -7219,6 +7219,11 @@ TEST(CarbonTest, BisonUpdateSetToNull)
 
 
         string_builder_drop(&sb);
+}
+
+TEST(CarbonTest, CarbonFromJson)
+{
+
 }
 
 int main(int argc, char **argv) {
