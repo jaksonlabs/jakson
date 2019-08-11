@@ -63,9 +63,11 @@ ARK_EXPORT(bool) carbon_revision_peek(u64 *revision, struct memfile *file)
 
 ARK_EXPORT(bool) carbon_revision_inc(struct memfile *file)
 {
-        u64 rev;
+        ark_declare_and_init(u64, rev)
+
         carbon_revision_peek(&rev, file);
         rev++;
         memfile_update_varuint(file, rev);
+
         return true;
 }

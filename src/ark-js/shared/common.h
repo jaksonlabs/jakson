@@ -271,6 +271,10 @@ ark_func_unused static const char *basic_type_to_system_type_str(enum field_type
 #define  MARKER_SYMBOL_HASHTABLE_HEADER    '#'
 #define  MARKER_SYMBOL_VECTOR_HEADER       '|'
 
+#define ark_declare_and_init(type, name)                                                                               \
+        type name;                                                                                                     \
+        ark_zero_memory(&name, sizeof(type));
+
 #define ark_zero_memory(dst, len)                                                                                      \
     memset((void *) dst, 0, len);
 

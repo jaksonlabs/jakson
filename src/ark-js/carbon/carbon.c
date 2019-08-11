@@ -169,6 +169,14 @@ ARK_EXPORT(bool) carbon_create_empty_ex(struct carbon *doc, enum carbon_primary_
         return true;
 }
 
+ARK_EXPORT(bool) carbon_from_json(struct carbon *doc, const char *json)
+{
+        error_if_null(doc)
+        error_if_null(json)
+
+        return true;
+}
+
 ARK_EXPORT(bool) carbon_drop(struct carbon *doc)
 {
         error_if_null(doc);
