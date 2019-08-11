@@ -75,7 +75,7 @@ static bool update_in_place_constant(struct carbon_array_it *it, enum carbon_con
                 error(&it->err, ARK_ERR_INTERNALERR);
                         break;
                 }
-                offset_t datum;
+                offset_t datum = 0;
                 carbon_int_array_it_offset(&datum, it);
                 memfile_seek(&it->memfile, datum);
                 memfile_write(&it->memfile, &value, sizeof(u8));
