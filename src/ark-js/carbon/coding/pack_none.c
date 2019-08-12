@@ -20,14 +20,14 @@
 #include <ark-js/carbon/coding/pack.h>
 #include <ark-js/carbon/coding/pack_none.h>
 
-ARK_EXPORT(bool) pack_none_init(struct packer *self)
+bool pack_none_init(struct packer *self)
 {
         unused(self);
         /* nothing to do for uncompressed dictionaries */
         return true;
 }
 
-ARK_EXPORT(bool) pack_none_cpy(const struct packer *self, struct packer *dst)
+bool pack_none_cpy(const struct packer *self, struct packer *dst)
 {
         ark_check_tag(self->tag, PACK_NONE);
 
@@ -36,7 +36,7 @@ ARK_EXPORT(bool) pack_none_cpy(const struct packer *self, struct packer *dst)
         return true;
 }
 
-ARK_EXPORT(bool) pack_none_drop(struct packer *self)
+bool pack_none_drop(struct packer *self)
 {
         ark_check_tag(self->tag, PACK_NONE);
 
@@ -45,8 +45,8 @@ ARK_EXPORT(bool) pack_none_drop(struct packer *self)
         return true;
 }
 
-ARK_EXPORT(bool) pack_none_write_extra(struct packer *self, struct memfile *dst,
-        const struct vector ofType (const char *) *strings)
+bool pack_none_write_extra(struct packer *self, struct memfile *dst,
+                           const struct vector ofType (const char *) *strings)
 {
         ark_check_tag(self->tag, PACK_NONE);
 
@@ -57,7 +57,7 @@ ARK_EXPORT(bool) pack_none_write_extra(struct packer *self, struct memfile *dst,
         return true;
 }
 
-ARK_EXPORT(bool) pack_none_read_extra(struct packer *self, FILE *src, size_t nbytes)
+bool pack_none_read_extra(struct packer *self, FILE *src, size_t nbytes)
 {
         ark_check_tag(self->tag, PACK_NONE);
 
@@ -79,8 +79,8 @@ bool pack_none_print_extra(struct packer *self, FILE *file, struct memfile *src)
         return true;
 }
 
-ARK_EXPORT(bool) pack_none_print_encoded_string(struct packer *self, FILE *file, struct memfile *src,
-        u32 decompressed_strlen)
+bool pack_none_print_encoded_string(struct packer *self, FILE *file, struct memfile *src,
+                                    u32 decompressed_strlen)
 {
         ark_check_tag(self->tag, PACK_NONE);
 
@@ -88,7 +88,7 @@ ARK_EXPORT(bool) pack_none_print_encoded_string(struct packer *self, FILE *file,
 
         const char *string = ARK_MEMFILE_READ(src, decompressed_strlen);
 
-        char *printableString = malloc(decompressed_strlen + 1);
+        char *printableString = ark_malloc(decompressed_strlen + 1);
         memcpy(printableString, string, decompressed_strlen);
         printableString[decompressed_strlen] = '\0';
 
@@ -99,8 +99,8 @@ ARK_EXPORT(bool) pack_none_print_encoded_string(struct packer *self, FILE *file,
         return true;
 }
 
-ARK_EXPORT(bool) pack_none_encode_string(struct packer *self, struct memfile *dst, struct err *err,
-        const char *string)
+bool pack_none_encode_string(struct packer *self, struct memfile *dst, struct err *err,
+                             const char *string)
 {
         ark_check_tag(self->tag, PACK_NONE);
 
@@ -117,7 +117,7 @@ ARK_EXPORT(bool) pack_none_encode_string(struct packer *self, struct memfile *ds
         return false;
 }
 
-ARK_EXPORT(bool) pack_none_decode_string(struct packer *self, char *dst, size_t strlen, FILE *src)
+bool pack_none_decode_string(struct packer *self, char *dst, size_t strlen, FILE *src)
 {
         ark_check_tag(self->tag, PACK_NONE);
 

@@ -24,8 +24,8 @@
 
 ARK_BEGIN_DECL
 
-ARK_EXPORT (bool) strhash_create_inmemory(struct strhash *parallel_map_exec, const struct allocator *alloc,
-        size_t num_buckets, size_t cap_buckets);
+bool strhash_create_inmemory(struct strhash *parallel_map_exec, const struct allocator *alloc,
+                             size_t num_buckets, size_t cap_buckets);
 
 ARK_END_DECL
 

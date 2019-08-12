@@ -20,7 +20,7 @@
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/types.h>
-#include <ark-js/shared/stdx/string_builder.h>
+#include <ark-js/shared/stdx/string.h>
 #include <ark-js/carbon/oid/oid.h>
 #include <ark-js/carbon/carbon.h>
 
@@ -28,72 +28,62 @@ ARK_BEGIN_DECL
 
 struct carbon_binary; /* forwarded from carbon.h */
 
-struct carbon_printer
-{
-        void *extra;
+struct printer {
 
-        void (*drop)(struct carbon_printer *self);
+    void *extra;
 
-        void (*print_carbon_begin)(struct carbon_printer *self, struct string_builder *builder);
-        void (*print_carbon_end)(struct carbon_printer *self, struct string_builder *builder);
-
-        void (*print_carbon_header_begin)(struct carbon_printer *self, struct string_builder *builder);
-        void (*print_carbon_header_contents)(struct carbon_printer *self, struct string_builder *builder,
-                enum carbon_primary_key_type key_type, const void *key, u64 key_length, u64 rev);
-        void (*print_carbon_header_end)(struct carbon_printer *self, struct string_builder *builder);
-
-        void (*print_carbon_payload_begin)(struct carbon_printer *self, struct string_builder *builder);
-        void (*print_carbon_payload_end)(struct carbon_printer *self, struct string_builder *builder);
-
-        void (*print_carbon_array_begin)(struct carbon_printer *self, struct string_builder *builder);
-        void (*print_carbon_array_end)(struct carbon_printer *self, struct string_builder *builder);
-
-        void (*print_carbon_null)(struct carbon_printer *self, struct string_builder *builder);
-        void (*print_carbon_true)(struct carbon_printer *self, bool is_null, struct string_builder *builder);
-        void (*print_carbon_false)(struct carbon_printer *self, bool is_null, struct string_builder *builder);
-
-        /* if <code>value</code> is NULL, <code>value</code> is interpreted as null-value'd entry */
-        void (*print_carbon_signed)(struct carbon_printer *self, struct string_builder *builder, const i64 *value);
-        /* if <code>value</code> is NULL, <code>value</code> is interpreted as null-value'd entry */
-        void (*print_carbon_unsigned)(struct carbon_printer *self, struct string_builder *builder, const u64 *value);
-        /* if <code>value</code> is NULL, <code>value</code> is interpreted as null-value'd entry */
-        void (*print_carbon_float)(struct carbon_printer *self, struct string_builder *builder, const float *value);
-
-        void (*print_carbon_string)(struct carbon_printer *self, struct string_builder *builder, const char *value, u64 strlen);
-        void (*print_carbon_binary)(struct carbon_printer *self, struct string_builder *builder, const struct carbon_binary *binary);
-
-        void (*print_carbon_comma)(struct carbon_printer *self, struct string_builder *builder);
-
-        void (*print_carbon_object_begin)(struct carbon_printer *self, struct string_builder *builder);
-        void (*print_carbon_object_end)(struct carbon_printer *self, struct string_builder *builder);
-
-        void (*print_carbon_prop_null)(struct carbon_printer *self, struct string_builder *builder,
-                const char *key_name, u64 key_len);
-        void (*print_carbon_prop_true)(struct carbon_printer *self, struct string_builder *builder,
-                const char *key_name, u64 key_len);
-        void (*print_carbon_prop_false)(struct carbon_printer *self, struct string_builder *builder,
-                const char *key_name, u64 key_len);
-        void (*print_carbon_prop_signed)(struct carbon_printer *self, struct string_builder *builder,
-                const char *key_name, u64 key_len, const i64 *value);
-        void (*print_carbon_prop_unsigned)(struct carbon_printer *self, struct string_builder *builder,
-                const char *key_name, u64 key_len, const u64 *value);
-        void (*print_carbon_prop_float)(struct carbon_printer *self, struct string_builder *builder,
-                const char *key_name, u64 key_len, const float *value);
-        void (*print_carbon_prop_string)(struct carbon_printer *self, struct string_builder *builder,
-                const char *key_name, u64 key_len, const char *value, u64 strlen);
-        void (*print_carbon_prop_binary)(struct carbon_printer *self, struct string_builder *builder,
-                const char *key_name, u64 key_len, const struct carbon_binary *binary);
-        void (*print_carbon_array_prop_name)(struct carbon_printer *self, struct string_builder *builder,
-                const char *key_name, u64 key_len);
-        void (*print_carbon_column_prop_name)(struct carbon_printer *self, struct string_builder *builder,
-                const char *key_name, u64 key_len);
-        void (*print_carbon_object_prop_name)(struct carbon_printer *self, struct string_builder *builder,
-                const char *key_name, u64 key_len);
+    void (*drop)(struct printer *self);
+    void (*record_begin)(struct printer *self, struct string *builder);
+    void (*record_end)(struct printer *self, struct string *builder);
+    void (*meta_begin)(struct printer *self, struct string *builder);
+    void (*meta_data)(struct printer *self, struct string *builder,
+                      enum carbon_key_type key_type, const void *key, u64 key_length,
+                      u64 rev);
+    void (*meta_end)(struct printer *self, struct string *builder);
+    void (*doc_begin)(struct printer *self, struct string *builder);
+    void (*doc_end)(struct printer *self, struct string *builder);
+    void (*empty_record)(struct printer *self, struct string *builder);
+    void (*unit_array_begin)(struct printer *self, struct string *builder);
+    void (*unit_array_end)(struct printer *self, struct string *builder);
+    void (*array_begin)(struct printer *self, struct string *builder);
+    void (*array_end)(struct printer *self, struct string *builder);
+    void (*const_null)(struct printer *self, struct string *builder);
+    void (*const_true)(struct printer *self, bool is_null, struct string *builder);
+    void (*const_false)(struct printer *self, bool is_null, struct string *builder);
+    /* if <code>value</code> is NULL, <code>value</code> is interpreted as null-value'd entry */
+    void (*val_signed)(struct printer *self, struct string *builder, const i64 *value);
+    /* if <code>value</code> is NULL, <code>value</code> is interpreted as null-value'd entry */
+    void (*val_unsigned)(struct printer *self, struct string *builder, const u64 *value);
+    /* if <code>value</code> is NULL, <code>value</code> is interpreted as null-value'd entry */
+    void (*val_float)(struct printer *self, struct string *builder, const float *value);
+    void (*val_string)(struct printer *self, struct string *builder, const char *value, u64 strlen);
+    void (*val_binary)(struct printer *self, struct string *builder, const struct carbon_binary *binary);
+    void (*comma)(struct printer *self, struct string *builder);
+    void (*obj_begin)(struct printer *self, struct string *builder);
+    void (*obj_end)(struct printer *self, struct string *builder);
+    void (*prop_null)(struct printer *self, struct string *builder,
+                      const char *key_name, u64 key_len);
+    void (*prop_true)(struct printer *self, struct string *builder,
+                      const char *key_name, u64 key_len);
+    void (*prop_false)(struct printer *self, struct string *builder,
+                       const char *key_name, u64 key_len);
+    void (*prop_signed)(struct printer *self, struct string *builder,
+                        const char *key_name, u64 key_len, const i64 *value);
+    void (*prop_unsigned)(struct printer *self, struct string *builder,
+                          const char *key_name, u64 key_len, const u64 *value);
+    void (*prop_float)(struct printer *self, struct string *builder,
+                       const char *key_name, u64 key_len, const float *value);
+    void (*prop_string)(struct printer *self, struct string *builder,
+                        const char *key_name, u64 key_len, const char *value, u64 strlen);
+    void (*prop_binary)(struct printer *self, struct string *builder,
+                        const char *key_name, u64 key_len, const struct carbon_binary *binary);
+    void (*array_prop_name)(struct printer *self, struct string *builder,
+                            const char *key_name, u64 key_len);
+    void (*column_prop_name)(struct printer *self, struct string *builder,
+                             const char *key_name, u64 key_len);
+    void (*obj_prop_name)(struct printer *self, struct string *builder,
+                          const char *key_name, u64 key_len);
 };
-
-ARK_EXPORT(bool) carbon_json_formatter_create(struct carbon_printer *printer);
-ARK_EXPORT(bool) carbon_json_formatter_set_intent(struct carbon_printer *printer, bool enable);
-ARK_EXPORT(bool) carbon_json_formatter_set_strict(struct carbon_printer *printer, bool enable);
 
 ARK_END_DECL
 

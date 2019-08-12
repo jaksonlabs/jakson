@@ -12,6 +12,9 @@ For details, see http://sourceforge.net/projects/libb64
 
 #include "libb64.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+
 static inline char
 base64_decode_value (char value_in)
 {
@@ -100,3 +103,5 @@ base64_decode_block (const char *code_in, size_t length_in,
   /* control should not reach here */
   return (size_t) (plainchar - plaintext_out);
 }
+
+#pragma GCC diagnostic pop

@@ -25,10 +25,10 @@
 ARK_BEGIN_DECL
 
 struct hashtable_bucket {
-        bool in_use_flag;  /* flag indicating if bucket is in use */
-        i32 displacement; /* difference between intended position during insert, and actual position in table */
-        u32 num_probs;    /* number of probe calls to this bucket */
-        u64 data_idx;      /* position of key element in owning struct hashtable structure */
+    bool in_use_flag;  /* flag indicating if bucket is in use */
+    i32 displacement; /* difference between intended position during insert, and actual position in table */
+    u32 num_probs;    /* number of probe calls to this bucket */
+    u64 data_idx;      /* position of key element in owning struct hashtable structure */
 };
 
 /**
@@ -43,45 +43,45 @@ struct hashtable_bucket {
  * lock implementation.
  */
 struct hashtable {
-        struct vector key_data;
-        struct vector value_data;
-        struct vector ofType(struct hashtable_bucket) table;
-        struct spinlock lock;
-        u32 size;
-        struct err err;
+    struct vector key_data;
+    struct vector value_data;
+    struct vector ofType(struct hashtable_bucket) table;
+    struct spinlock lock;
+    u32 size;
+    struct err err;
 };
 
 ARK_DEFINE_GET_ERROR_FUNCTION(hashtable, struct hashtable, table);
 
-ARK_EXPORT(bool) hashtable_create(struct hashtable *map, struct err *err, size_t key_size, size_t value_size,
-        size_t capacity);
+bool hashtable_create(struct hashtable *map, struct err *err, size_t key_size, size_t value_size,
+                      size_t capacity);
 
-ARK_EXPORT(struct hashtable *) hashtable_cpy(struct hashtable *src);
+struct hashtable *hashtable_cpy(struct hashtable *src);
 
-ARK_EXPORT(bool) hashtable_drop(struct hashtable *map);
+bool hashtable_drop(struct hashtable *map);
 
-ARK_EXPORT(bool) hashtable_clear(struct hashtable *map);
+bool hashtable_clear(struct hashtable *map);
 
-ARK_EXPORT(bool) hashtable_avg_displace(float *displace, const struct hashtable *map);
+bool hashtable_avg_displace(float *displace, const struct hashtable *map);
 
-ARK_EXPORT(bool) hashtable_lock(struct hashtable *map);
+bool hashtable_lock(struct hashtable *map);
 
-ARK_EXPORT(bool) hashtable_unlock(struct hashtable *map);
+bool hashtable_unlock(struct hashtable *map);
 
-ARK_EXPORT(bool) hashtable_insert_or_update(struct hashtable *map, const void *keys, const void *values,
-        uint_fast32_t num_pairs);
+bool hashtable_insert_or_update(struct hashtable *map, const void *keys, const void *values,
+                                uint_fast32_t num_pairs);
 
-ARK_EXPORT(bool) hashtable_serialize(FILE *file, struct hashtable *table);
+bool hashtable_serialize(FILE *file, struct hashtable *table);
 
-ARK_EXPORT(bool) hashtable_deserialize(struct hashtable *table, struct err *err, FILE *file);
+bool hashtable_deserialize(struct hashtable *table, struct err *err, FILE *file);
 
-ARK_EXPORT(bool) hashtable_remove_if_contained(struct hashtable *map, const void *keys, size_t num_pairs);
+bool hashtable_remove_if_contained(struct hashtable *map, const void *keys, size_t num_pairs);
 
-ARK_EXPORT(const void *) hashtable_get_value(struct hashtable *map, const void *key);
+const void *hashtable_get_value(struct hashtable *map, const void *key);
 
-ARK_EXPORT(bool) hashtable_get_fload_factor(float *factor, struct hashtable *map);
+bool hashtable_get_fload_factor(float *factor, struct hashtable *map);
 
-ARK_EXPORT(bool) hashtable_rehash(struct hashtable *map);
+bool hashtable_rehash(struct hashtable *map);
 
 ARK_END_DECL
 

@@ -29,47 +29,65 @@
 #define SMART_MAP_TAG "strhash-mem"
 
 struct bucket {
-        slice_list_t slice_list;
+    slice_list_t slice_list;
 };
 
 struct mem_extra {
-        struct vector ofType(bucket) buckets;
+    struct vector ofType(bucket) buckets;
 };
 
 static int this_drop(struct strhash *self);
+
 static int this_put_safe_bulk(struct strhash *self, char *const *keys, const field_sid_t *values, size_t num_pairs);
+
 static int this_put_fast_bulk(struct strhash *self, char *const *keys, const field_sid_t *values, size_t num_pairs);
+
 static int this_put_safe_exact(struct strhash *self, const char *key, field_sid_t value);
+
 static int this_put_fast_exact(struct strhash *self, const char *key, field_sid_t value);
+
 static int this_get_safe(struct strhash *self, field_sid_t **out, bool **found_mask, size_t *num_not_found,
-        char *const *keys, size_t num_keys);
+                         char *const *keys, size_t num_keys);
+
 static int this_get_safe_exact(struct strhash *self, field_sid_t *out, bool *found_mask, const char *key);
+
 static int this_get_fast(struct strhash *self, field_sid_t **out, char *const *keys, size_t num_keys);
+
 static int this_update_key_fast(struct strhash *self, const field_sid_t *values, char *const *keys, size_t num_keys);
+
 static int this_remove(struct strhash *self, char *const *keys, size_t num_keys);
+
 static int this_free(struct strhash *self, void *ptr);
 
 static int this_insert_bulk(struct vector ofType(bucket) *buckets, char *const *restrict keys,
-        const field_sid_t *restrict values, size_t *restrict bucket_idxs, size_t num_pairs, struct allocator *alloc,
-        struct strhash_counters *counter);
+                            const field_sid_t *restrict values, size_t *restrict bucket_idxs, size_t num_pairs,
+                            struct allocator *alloc,
+                            struct strhash_counters *counter);
 
 static int this_insert_exact(struct vector ofType(bucket) *buckets, const char *restrict key, field_sid_t value,
-        size_t bucket_idx, struct allocator *alloc, struct strhash_counters *counter);
+                             size_t bucket_idx, struct allocator *alloc, struct strhash_counters *counter);
+
 static int this_fetch_bulk(struct vector ofType(bucket) *buckets, field_sid_t *values_out, bool *key_found_mask,
-        size_t *num_keys_not_found, size_t *bucket_idxs, char *const *keys, size_t num_keys, struct allocator *alloc,
-        struct strhash_counters *counter);
+                           size_t *num_keys_not_found, size_t *bucket_idxs, char *const *keys, size_t num_keys,
+                           struct allocator *alloc,
+                           struct strhash_counters *counter);
+
 static int this_fetch_single(struct vector ofType(bucket) *buckets, field_sid_t *value_out, bool *key_found,
-        const size_t bucket_idx, const char *key, struct strhash_counters *counter);
+                             const size_t bucket_idx, const char *key, struct strhash_counters *counter);
 
 static int this_create_extra(struct strhash *self, size_t num_buckets, size_t cap_buckets);
+
 static struct mem_extra *this_get_exta(struct strhash *self);
+
 static int bucket_create(struct bucket *buckets, size_t num_buckets, size_t bucket_cap, struct allocator *alloc);
+
 static int bucket_drop(struct bucket *buckets, size_t num_buckets, struct allocator *alloc);
+
 static int bucket_insert(struct bucket *bucket, const char *restrict key, field_sid_t value, struct allocator *alloc,
-        struct strhash_counters *counter);
+                         struct strhash_counters *counter);
 
 bool strhash_create_inmemory(struct strhash *parallel_map_exec, const struct allocator *alloc, size_t num_buckets,
-        size_t cap_buckets)
+                             size_t cap_buckets)
 {
         ark_check_success(alloc_this_or_std(&parallel_map_exec->allocator, alloc));
 
@@ -125,12 +143,12 @@ static int this_put_safe_bulk(struct strhash *self, char *const *keys, const fie
         prefetch_read(values);
 
         ark_check_success(this_insert_bulk(&extra->buckets,
-                keys,
-                values,
-                bucket_idxs,
-                num_pairs,
-                &self->allocator,
-                &self->counters));
+                                           keys,
+                                           values,
+                                           bucket_idxs,
+                                           num_pairs,
+                                           &self->allocator,
+                                           &self->counters));
         ark_check_success(alloc_free(&self->allocator, bucket_idxs));
         return true;
 }
@@ -146,11 +164,11 @@ static int this_put_safe_exact(struct strhash *self, const char *key, field_sid_
         prefetch_read(key);
 
         ark_check_success(this_insert_exact(&extra->buckets,
-                key,
-                value,
-                bucket_idx,
-                &self->allocator,
-                &self->counters));
+                                            key,
+                                            value,
+                                            bucket_idx,
+                                            &self->allocator,
+                                            &self->counters));
 
         return true;
 }
@@ -166,8 +184,9 @@ static int this_put_fast_bulk(struct strhash *self, char *const *keys, const fie
 }
 
 static int this_fetch_bulk(struct vector ofType(bucket) *buckets, field_sid_t *values_out, bool *key_found_mask,
-        size_t *num_keys_not_found, size_t *bucket_idxs, char *const *keys, size_t num_keys, struct allocator *alloc,
-        struct strhash_counters *counter)
+                           size_t *num_keys_not_found, size_t *bucket_idxs, char *const *keys, size_t num_keys,
+                           struct allocator *alloc,
+                           struct strhash_counters *counter)
 {
         unused(counter);
         unused(alloc);
@@ -198,7 +217,7 @@ static int this_fetch_bulk(struct vector ofType(bucket) *buckets, field_sid_t *v
 }
 
 static int this_fetch_single(struct vector ofType(bucket) *buckets, field_sid_t *value_out, bool *key_found,
-        const size_t bucket_idx, const char *key, struct strhash_counters *counter)
+                             const size_t bucket_idx, const char *key, struct strhash_counters *counter)
 {
         unused(counter);
 
@@ -219,7 +238,7 @@ static int this_fetch_single(struct vector ofType(bucket) *buckets, field_sid_t 
 }
 
 static int this_get_safe(struct strhash *self, field_sid_t **out, bool **found_mask, size_t *num_not_found,
-        char *const *keys, size_t num_keys)
+                         char *const *keys, size_t num_keys)
 {
         assert(self->tag == MEMORY_RESIDENT);
 
@@ -251,14 +270,14 @@ static int this_get_safe(struct strhash *self, field_sid_t **out, bool **found_m
 
         ark_trace(SMART_MAP_TAG, "'get_safe' function invoke fetch...for %zu strings", num_keys)
         ark_check_success(this_fetch_bulk(&extra->buckets,
-                values_out,
-                found_mask_out,
-                num_not_found,
-                bucket_idxs,
-                keys,
-                num_keys,
-                &self->allocator,
-                &self->counters));
+                                          values_out,
+                                          found_mask_out,
+                                          num_not_found,
+                                          bucket_idxs,
+                                          keys,
+                                          num_keys,
+                                          &self->allocator,
+                                          &self->counters));
         ark_check_success(alloc_free(&self->allocator, bucket_idxs));
         ark_trace(SMART_MAP_TAG, "'get_safe' function invok fetch: done for %zu strings", num_keys)
 
@@ -319,7 +338,7 @@ static int this_update_key_fast(struct strhash *self, const field_sid_t *values,
 }
 
 static int simple_map_remove(struct mem_extra *extra, size_t *bucket_idxs, char *const *keys, size_t num_keys,
-        struct allocator *alloc, struct strhash_counters *counter)
+                             struct allocator *alloc, struct strhash_counters *counter)
 {
         unused(counter);
         unused(alloc);
@@ -418,7 +437,7 @@ static int bucket_drop(struct bucket *buckets, size_t num_buckets, struct alloca
 }
 
 static int bucket_insert(struct bucket *bucket, const char *restrict key, field_sid_t value, struct allocator *alloc,
-        struct strhash_counters *counter)
+                         struct strhash_counters *counter)
 {
         unused(counter);
         unused(alloc);
@@ -445,8 +464,9 @@ static int bucket_insert(struct bucket *bucket, const char *restrict key, field_
 }
 
 static int this_insert_bulk(struct vector ofType(bucket) *buckets, char *const *restrict keys,
-        const field_sid_t *restrict values, size_t *restrict bucket_idxs, size_t num_pairs, struct allocator *alloc,
-        struct strhash_counters *counter)
+                            const field_sid_t *restrict values, size_t *restrict bucket_idxs, size_t num_pairs,
+                            struct allocator *alloc,
+                            struct strhash_counters *counter)
 {
         error_if_null(buckets)
         error_if_null(keys)
@@ -468,7 +488,7 @@ static int this_insert_bulk(struct vector ofType(bucket) *buckets, char *const *
 }
 
 static int this_insert_exact(struct vector ofType(bucket) *buckets, const char *restrict key, field_sid_t value,
-        size_t bucket_idx, struct allocator *alloc, struct strhash_counters *counter)
+                             size_t bucket_idx, struct allocator *alloc, struct strhash_counters *counter)
 {
         error_if_null(buckets)
         error_if_null(key)

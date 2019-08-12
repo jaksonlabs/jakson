@@ -69,7 +69,7 @@ DEFINE_PRINTER_FUNCTION(size_t, "%zu")
 bool vec_create(struct vector *out, const struct allocator *alloc, size_t elem_size, size_t cap_elems)
 {
         error_if_null(out)
-        out->allocator = malloc(sizeof(struct allocator));
+        out->allocator = ark_malloc(sizeof(struct allocator));
         alloc_this_or_std(out->allocator, alloc);
         out->base = alloc_malloc(out->allocator, cap_elems * elem_size);
         out->num_elems = 0;
@@ -81,14 +81,14 @@ bool vec_create(struct vector *out, const struct allocator *alloc, size_t elem_s
 }
 
 struct vector_serialize_header {
-        char marker;
-        u32 elem_size;
-        u32 num_elems;
-        u32 cap_elems;
-        float grow_factor;
+    char marker;
+    u32 elem_size;
+    u32 num_elems;
+    u32 cap_elems;
+    float grow_factor;
 };
 
-ARK_EXPORT(bool) vec_serialize(FILE *file, struct vector *vec)
+bool vec_serialize(FILE *file, struct vector *vec)
 {
         error_if_null(file)
         error_if_null(vec)
@@ -104,7 +104,7 @@ ARK_EXPORT(bool) vec_serialize(FILE *file, struct vector *vec)
         return true;
 }
 
-ARK_EXPORT(bool) vec_deserialize(struct vector *vec, struct err *err, FILE *file)
+bool vec_deserialize(struct vector *vec, struct err *err, FILE *file)
 {
         error_if_null(file)
         error_if_null(err)
@@ -124,7 +124,7 @@ ARK_EXPORT(bool) vec_deserialize(struct vector *vec, struct err *err, FILE *file
                 goto error_handling;
         }
 
-        vec->allocator = malloc(sizeof(struct allocator));
+        vec->allocator = ark_malloc(sizeof(struct allocator));
         alloc_this_or_std(vec->allocator, NULL);
         vec->base = alloc_malloc(vec->allocator, header.cap_elems * header.elem_size);
         vec->num_elems = header.num_elems;
@@ -222,7 +222,7 @@ const void *vec_pop(struct vector *vec)
 {
         void *result;
         if (likely((result = (vec ? (vec->num_elems > 0 ? vec->base + (vec->num_elems - 1) * vec->elem_size : NULL)
-                                      : NULL)) != NULL)) {
+                                  : NULL)) != NULL)) {
                 vec->num_elems--;
         }
         return result;
@@ -259,7 +259,7 @@ bool vec_grow(size_t *numNewSlots, struct vector *vec)
         return true;
 }
 
-ARK_EXPORT(bool) vec_grow_to(struct vector *vec, size_t capacity)
+bool vec_grow_to(struct vector *vec, size_t capacity)
 {
         error_if_null(vec);
         vec->cap_elems = ark_max(vec->cap_elems, capacity);
@@ -291,14 +291,14 @@ bool vec_enlarge_size_to_capacity(struct vector *vec)
         return true;
 }
 
-ARK_EXPORT(bool) vec_zero_memory(struct vector *vec)
+bool vec_zero_memory(struct vector *vec)
 {
         error_if_null(vec);
         ark_zero_memory(vec->base, vec->elem_size * vec->num_elems);
         return true;
 }
 
-ARK_EXPORT(bool) vec_zero_memory_in_range(struct vector *vec, size_t from, size_t to)
+bool vec_zero_memory_in_range(struct vector *vec, size_t from, size_t to)
 {
         error_if_null(vec);
         assert(from < to);
@@ -325,7 +325,7 @@ bool vec_cpy(struct vector *dst, const struct vector *src)
         return true;
 }
 
-ARK_EXPORT(bool) vec_cpy_to(struct vector *dst, struct vector *src)
+bool vec_cpy_to(struct vector *dst, struct vector *src)
 {
         error_if_null(dst)
         error_if_null(src)
@@ -351,7 +351,7 @@ const void *vec_data(const struct vector *vec)
 }
 
 char *vector_string(const struct vector ofType(T) *vec,
-        void (*printerFunc)(struct memfile *dst, void ofType(T) *values, size_t num_elems))
+                    void (*printerFunc)(struct memfile *dst, void ofType(T) *values, size_t num_elems))
 {
         struct memblock *block;
         struct memfile file;

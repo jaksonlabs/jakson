@@ -24,9 +24,9 @@
 
 static inline void __execute_task();
 
-ARK_EXPORT(struct thread_pool *) thread_pool_create(size_t num_threads, int enable_monitoring)
+struct thread_pool *thread_pool_create(size_t num_threads, int enable_monitoring)
 {
-        struct thread_pool *pool = malloc(sizeof(struct thread_pool));
+        struct thread_pool *pool = ark_malloc(sizeof(struct thread_pool));
 
         pool->name = NULL;
         pool->size = num_threads;
@@ -39,7 +39,7 @@ ARK_EXPORT(struct thread_pool *) thread_pool_create(size_t num_threads, int enab
         pool->task_group_states = calloc(pool->task_state_capacity, sizeof(struct task_state));
         pool->enable_monitoring = enable_monitoring;
 
-        pthread_t *threads = malloc(sizeof(pthread_t) * pool->capacity);
+        pthread_t *threads = ark_malloc(sizeof(pthread_t) * pool->capacity);
         pool->pool = threads;
 
         if (enable_monitoring) {
@@ -48,7 +48,7 @@ ARK_EXPORT(struct thread_pool *) thread_pool_create(size_t num_threads, int enab
 
         for (size_t i = 0; i < pool->capacity; i++) {
                 // one block per thread to reduce risk of two threads sharing the same cache line
-                struct thread_info *thread_info = malloc(sizeof(struct thread_info));
+                struct thread_info *thread_info = ark_malloc(sizeof(struct thread_info));
                 pool->thread_infos[i] = thread_info;
                 thread_info->pool = pool;
                 thread_info->id = i;
@@ -67,7 +67,7 @@ ARK_EXPORT(struct thread_pool *) thread_pool_create(size_t num_threads, int enab
         return pool;
 }
 
-ARK_EXPORT(struct thread_pool *) thread_pool_create_named(size_t num_threads, const char *name, int enable_monitoring)
+struct thread_pool *thread_pool_create_named(size_t num_threads, const char *name, int enable_monitoring)
 {
         struct thread_pool *pool = thread_pool_create(num_threads, enable_monitoring);
 
@@ -78,7 +78,7 @@ ARK_EXPORT(struct thread_pool *) thread_pool_create_named(size_t num_threads, co
         return pool;
 }
 
-ARK_EXPORT(void) thread_pool_free(struct thread_pool *pool)
+void thread_pool_free(struct thread_pool *pool)
 {
         // Update all status
         for (size_t i = 0; i < pool->size; ++i) {
@@ -115,19 +115,19 @@ ARK_EXPORT(void) thread_pool_free(struct thread_pool *pool)
         free(pool);
 }
 
-ARK_EXPORT(void) thread_pool_set_name(struct thread_pool *pool, const char *name)
+void thread_pool_set_name(struct thread_pool *pool, const char *name)
 {
         if (pool->name) {
                 free(pool->name);
         }
 
         size_t s = strlen(name);
-        char *str = malloc(s + 1);
+        char *str = ark_malloc(s + 1);
         strcpy(str, name);
         pool->name = str;
 }
 
-ARK_EXPORT(bool) thread_pool_resize(struct thread_pool *pool, size_t num_threads)
+bool thread_pool_resize(struct thread_pool *pool, size_t num_threads)
 {
         if (num_threads > pool->size) {
                 if (num_threads > pool->capacity) {
@@ -138,8 +138,8 @@ ARK_EXPORT(bool) thread_pool_resize(struct thread_pool *pool, size_t num_threads
                         //try to revive thread
                         int will_terminate = thread_status_will_terminate;
                         if (atomic_compare_exchange_strong(&pool->thread_infos[i]->status,
-                                &will_terminate,
-                                thread_status_idle)) { }
+                                                           &will_terminate,
+                                                           thread_status_idle)) {}
                         else {
                                 // create a new
                                 if (pool->enable_monitoring && !pool->thread_infos[i]->statistics) {
@@ -160,13 +160,13 @@ ARK_EXPORT(bool) thread_pool_resize(struct thread_pool *pool, size_t num_threads
         return true;
 }
 
-ARK_EXPORT(bool) thread_pool_enqueue_tasks(struct thread_task *tasks, struct thread_pool *pool, size_t num_tasks, struct task_handle *hndl)
+bool thread_pool_enqueue_tasks(struct thread_task *tasks, struct thread_pool *pool, size_t num_tasks,
+                               struct task_handle *hndl)
 {
         // find unused slot
         size_t ind = 0;
 
-        for (; pool->task_group_states[ind].task_count; ind = (ind + 8) % MAX_NUM_TASKS)
-                { }
+        for (; pool->task_group_states[ind].task_count; ind = (ind + 8) % MAX_NUM_TASKS) {}
 
         // increment generation first to always be identifiable as finished
         ++pool->task_group_states[ind].generation;
@@ -192,12 +192,12 @@ ARK_EXPORT(bool) thread_pool_enqueue_tasks(struct thread_task *tasks, struct thr
         return true;
 }
 
-ARK_EXPORT(bool) thread_pool_enqueue_task(struct thread_task *task, struct thread_pool *pool, struct task_handle *hndl)
+bool thread_pool_enqueue_task(struct thread_task *task, struct thread_pool *pool, struct task_handle *hndl)
 {
         return thread_pool_enqueue_tasks(task, pool, 1, hndl);
 }
 
-ARK_EXPORT(bool) thread_pool_enqueue_tasks_wait(struct thread_task *tasks, struct thread_pool *pool, size_t num_tasks)
+bool thread_pool_enqueue_tasks_wait(struct thread_task *tasks, struct thread_pool *pool, size_t num_tasks)
 {
         // Pass all tasks except the last one to the queue
         struct task_handle hndl;
@@ -224,14 +224,14 @@ ARK_EXPORT(bool) thread_pool_enqueue_tasks_wait(struct thread_task *tasks, struc
         return thread_pool_wait_for_task(pool, &hndl);
 }
 
-ARK_EXPORT(bool) thread_pool_wait_for_task(struct thread_pool *pool, struct task_handle *hndl)
+bool thread_pool_wait_for_task(struct thread_pool *pool, struct task_handle *hndl)
 {
         volatile unsigned *gen = &pool->task_group_states[hndl->index].generation;
-        while (*gen == hndl->generation && pool->task_group_states[hndl->index].task_count) { }
+        while (*gen == hndl->generation && pool->task_group_states[hndl->index].task_count) {}
         return true;
 }
 
-ARK_EXPORT(bool) thread_pool_wait_for_all(struct thread_pool *pool)
+bool thread_pool_wait_for_all(struct thread_pool *pool)
 {
         struct thread_task *next_task;
         while ((next_task = __get_next_task(pool))) {
@@ -244,9 +244,9 @@ ARK_EXPORT(bool) thread_pool_wait_for_all(struct thread_pool *pool)
 
                         // Just add the time, calculate the average at evaluation time
                         pool->statistics->wait_time += __get_time_diff(&next_task->statistics.enqueue_time,
-                                &next_task->statistics.execution_time);
+                                                                       &next_task->statistics.execution_time);
                         pool->statistics->complete_time += __get_time_diff(&next_task->statistics.execution_time,
-                                &next_task->statistics.complete_time);
+                                                                           &next_task->statistics.complete_time);
                 } else {
                         __execute_task(pool, next_task);
                 }
@@ -262,7 +262,7 @@ ARK_EXPORT(bool) thread_pool_wait_for_all(struct thread_pool *pool)
         return false;
 }
 
-ARK_EXPORT(void *) __thread_main(void *args)
+void *__thread_main(void *args)
 {
         struct thread_info *thread_info = (struct thread_info *) args;
 
@@ -295,10 +295,10 @@ ARK_EXPORT(void *) __thread_main(void *args)
                                 // Just add the time, calculate the average at evaluation time
                                 thread_info->pool->statistics->wait_time +=
                                         __get_time_diff(&next_task->statistics.enqueue_time,
-                                                &next_task->statistics.execution_time);
+                                                        &next_task->statistics.execution_time);
                                 thread_info->pool->statistics->complete_time +=
                                         __get_time_diff(&next_task->statistics.execution_time,
-                                                &next_task->statistics.complete_time);
+                                                        &next_task->statistics.complete_time);
 
                         } else {
                                 __execute_task(thread_info->pool, next_task);
@@ -325,13 +325,13 @@ ARK_EXPORT(void *) __thread_main(void *args)
         return (void *) 0;
 }
 
-ARK_EXPORT(struct thread_task *) __get_next_task(struct thread_pool *pool)
+struct thread_task *__get_next_task(struct thread_pool *pool)
 {
         struct thread_task *next_task = priority_queue_pop(&pool->waiting_tasks);
         return next_task;
 }
 
-ARK_EXPORT(bool) __create_thread(struct thread_info *thread_info, pthread_t *pp)
+bool __create_thread(struct thread_info *thread_info, pthread_t *pp)
 {
         thread_info->status = thread_status_created;
         pthread_create(pp, NULL, &__thread_main, thread_info);
@@ -351,7 +351,7 @@ void __execute_task(struct thread_pool *pool, struct thread_task *task)
         --pool->task_group_states[task->group_id].task_count;
 }
 
-ARK_EXPORT(void) __sig_seg(int sig)
+void __sig_seg(int sig)
 {
         if (sig != SIGSEGV) {
                 return;

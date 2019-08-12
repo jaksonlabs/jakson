@@ -22,15 +22,15 @@
 
 ARK_BEGIN_DECL
 
-ARK_EXPORT(bool) strings_contains_blank_char(const char *str);
+bool strings_contains_blank_char(const char *str);
 
-ARK_EXPORT(bool) strings_is_enquoted(const char *str);
+bool strings_is_enquoted(const char *str);
 
-ARK_EXPORT(bool) strings_is_enquoted_wlen(const char *str, size_t len);
+bool strings_is_enquoted_wlen(const char *str, size_t len);
 
-ARK_EXPORT(const char *) strings_skip_blanks(const char *str);
+const char *strings_skip_blanks(const char *str);
 
-ARK_EXPORT(char *) strings_remove_tailing_blanks(char *str_in);
+char *strings_remove_tailing_blanks(char *str_in);
 
 ARK_END_DECL
 

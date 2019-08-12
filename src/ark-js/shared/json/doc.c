@@ -39,7 +39,7 @@ static bool import_json_object(struct doc_obj *target, struct err *err, const st
 
 static void sort_columndoc_entries(struct columndoc_obj *columndoc);
 
-ARK_EXPORT(bool) doc_bulk_create(struct doc_bulk *bulk, struct strdic *dic)
+bool doc_bulk_create(struct doc_bulk *bulk, struct strdic *dic)
 {
         error_if_null(bulk)
         error_if_null(dic)
@@ -61,15 +61,15 @@ struct doc_obj *doc_bulk_new_obj(struct doc *model)
         }
 }
 
-ARK_EXPORT(bool) doc_bulk_get_dic_contents(struct vector ofType (const char *) **strings,
-        struct vector ofType(field_sid_t) **string_ids, const struct doc_bulk *context)
+bool doc_bulk_get_dic_contents(struct vector ofType (const char *) **strings,
+                               struct vector ofType(field_sid_t) **string_ids, const struct doc_bulk *context)
 {
         error_if_null(context)
 
         size_t num_distinct_values;
         strdic_num_distinct(&num_distinct_values, context->dic);
-        struct vector ofType (const char *) *result_strings = malloc(sizeof(struct vector));
-        struct vector ofType (field_sid_t) *resultstring_id_ts = malloc(sizeof(struct vector));
+        struct vector ofType (const char *) *result_strings = ark_malloc(sizeof(struct vector));
+        struct vector ofType (field_sid_t) *resultstring_id_ts = ark_malloc(sizeof(struct vector));
         vec_create(result_strings, NULL, sizeof(const char *), num_distinct_values);
         vec_create(resultstring_id_ts, NULL, sizeof(field_sid_t), num_distinct_values);
 
@@ -99,7 +99,7 @@ struct doc *doc_bulk_new_doc(struct doc_bulk *context, field_e type)
         return model;
 }
 
-ARK_EXPORT(bool) doc_bulk_Drop(struct doc_bulk *bulk)
+bool doc_bulk_Drop(struct doc_bulk *bulk)
 {
         error_if_null(bulk)
         for (size_t i = 0; i < bulk->keys.num_elems; i++) {
@@ -125,7 +125,7 @@ ARK_EXPORT(bool) doc_bulk_Drop(struct doc_bulk *bulk)
         return true;
 }
 
-ARK_EXPORT(bool) doc_bulk_shrink(struct doc_bulk *bulk)
+bool doc_bulk_shrink(struct doc_bulk *bulk)
 {
         error_if_null(bulk)
         vec_shrink(&bulk->keys);
@@ -133,7 +133,7 @@ ARK_EXPORT(bool) doc_bulk_shrink(struct doc_bulk *bulk)
         return true;
 }
 
-ARK_EXPORT(bool) doc_bulk_print(FILE *file, struct doc_bulk *bulk)
+bool doc_bulk_print(FILE *file, struct doc_bulk *bulk)
 {
         error_if_null(file)
         error_if_null(bulk)
@@ -156,7 +156,7 @@ ARK_EXPORT(bool) doc_bulk_print(FILE *file, struct doc_bulk *bulk)
         return true;
 }
 
-ARK_EXPORT(bool) doc_print(FILE *file, const struct doc *doc)
+bool doc_print(FILE *file, const struct doc *doc)
 {
         error_if_null(file)
         error_if_null(doc)
@@ -229,18 +229,18 @@ bool doc_obj_push_primtive(struct doc_entries *entry, const void *value)
         error_if_null((entry->type == FIELD_NULL) || (value != NULL))
 
         switch (entry->type) {
-        case FIELD_NULL:
-                vec_push(&entry->values, &VALUE_NULL, 1);
-                break;
-        case FIELD_STRING: {
-                char *string = value ? strdup((char *) value) : NULL;
-                vec_push(&entry->context->doc->context->values, &string, 1);
-                vec_push(&entry->values, &string, 1);
-        }
-                break;
-        default:
-                vec_push(&entry->values, value, 1);
-                break;
+                case FIELD_NULL:
+                        vec_push(&entry->values, &VALUE_NULL, 1);
+                        break;
+                case FIELD_STRING: {
+                        char *string = value ? strdup((char *) value) : NULL;
+                        vec_push(&entry->context->doc->context->values, &string, 1);
+                        vec_push(&entry->values, &string, 1);
+                }
+                        break;
+                default:
+                        vec_push(&entry->values, value, 1);
+                        break;
         }
         return true;
 }
@@ -267,35 +267,35 @@ static field_e value_type_for_json_number(bool *success, struct err *err, const 
 {
         *success = true;
         switch (number->value_type) {
-        case JSON_NUMBER_FLOAT:
-                return FIELD_FLOAT;
-        case JSON_NUMBER_UNSIGNED: {
-                u64 test = number->value.unsigned_integer;
-                if (test <= ARK_LIMITS_UINT8_MAX) {
-                        return FIELD_UINT8;
-                } else if (test <= ARK_LIMITS_UINT16_MAX) {
-                        return FIELD_UINT16;
-                } else if (test <= ARK_LIMITS_UINT32_MAX) {
-                        return FIELD_UINT32;
-                } else {
-                        return FIELD_UINT64;
+                case JSON_NUMBER_FLOAT:
+                        return FIELD_FLOAT;
+                case JSON_NUMBER_UNSIGNED: {
+                        u64 test = number->value.unsigned_integer;
+                        if (test <= ARK_LIMITS_UINT8_MAX) {
+                                return FIELD_UINT8;
+                        } else if (test <= ARK_LIMITS_UINT16_MAX) {
+                                return FIELD_UINT16;
+                        } else if (test <= ARK_LIMITS_UINT32_MAX) {
+                                return FIELD_UINT32;
+                        } else {
+                                return FIELD_UINT64;
+                        }
                 }
-        }
-        case JSON_NUMBER_SIGNED: {
-                i64 test = number->value.signed_integer;
-                if (test >= ARK_LIMITS_INT8_MIN && test <= ARK_LIMITS_INT8_MAX) {
+                case JSON_NUMBER_SIGNED: {
+                        i64 test = number->value.signed_integer;
+                        if (test >= ARK_LIMITS_INT8_MIN && test <= ARK_LIMITS_INT8_MAX) {
+                                return FIELD_INT8;
+                        } else if (test >= ARK_LIMITS_INT16_MIN && test <= ARK_LIMITS_INT16_MAX) {
+                                return FIELD_INT16;
+                        } else if (test >= ARK_LIMITS_INT32_MIN && test <= ARK_LIMITS_INT32_MAX) {
+                                return FIELD_INT32;
+                        } else {
+                                return FIELD_INT64;
+                        }
+                }
+                default: error(err, ARK_ERR_NOJSONNUMBERT);
+                        *success = false;
                         return FIELD_INT8;
-                } else if (test >= ARK_LIMITS_INT16_MIN && test <= ARK_LIMITS_INT16_MAX) {
-                        return FIELD_INT16;
-                } else if (test >= ARK_LIMITS_INT32_MIN && test <= ARK_LIMITS_INT32_MAX) {
-                        return FIELD_INT32;
-                } else {
-                        return FIELD_INT64;
-                }
-        }
-        default: error(err, ARK_ERR_NOJSONNUMBERT);
-                *success = false;
-                return FIELD_INT8;
         }
 }
 
@@ -307,7 +307,7 @@ static void import_json_object_string_prop(struct doc_obj *target, const char *k
 }
 
 static bool import_json_object_number_prop(struct doc_obj *target, struct err *err, const char *key,
-        const struct json_number *number)
+                                           const struct json_number *number)
 {
         struct doc_entries *entry;
         bool success;
@@ -335,7 +335,7 @@ static void import_json_object_null_prop(struct doc_obj *target, const char *key
 }
 
 static bool import_json_object_object_prop(struct doc_obj *target, struct err *err, const char *key,
-        const struct json_object_t *object)
+                                           const struct json_object_t *object)
 {
         struct doc_entries *entry;
         struct doc_obj *nested_object = NULL;
@@ -345,7 +345,7 @@ static bool import_json_object_object_prop(struct doc_obj *target, struct err *e
 }
 
 static bool import_json_object_array_prop(struct doc_obj *target, struct err *err, const char *key,
-        const struct json_array *array)
+                                          const struct json_array *array)
 {
         struct doc_entries *entry;
 
@@ -362,93 +362,95 @@ static bool import_json_object_array_prop(struct doc_obj *target, struct err *er
                 }
 
                 switch (array_data_type) {
-                case JSON_VALUE_OBJECT:
-                        field_type = FIELD_OBJECT;
-                        break;
-                case JSON_VALUE_STRING:
-                        field_type = FIELD_STRING;
-                        break;
-                case JSON_VALUE_NUMBER: {
-                        /** find smallest fitting physical number type */
-                        field_e array_number_type = FIELD_NULL;
-                        for (size_t i = 0; i < num_elements; i++) {
-                                const struct json_element
-                                        *element = vec_get(&array->elements.elements, i, struct json_element);
-                                if (unlikely(element->value.value_type == JSON_VALUE_NULL)) {
-                                        continue;
-                                } else {
-                                        bool success;
-                                        field_e element_number_type =
-                                                value_type_for_json_number(&success, err, element->value.value.number);
-                                        if (!success) {
-                                                return false;
-                                        }
-                                        assert(element_number_type == FIELD_INT8 || element_number_type == FIELD_INT16
-                                                || element_number_type == FIELD_INT32
-                                                || element_number_type == FIELD_INT64
-                                                || element_number_type == FIELD_UINT8
-                                                || element_number_type == FIELD_UINT16
-                                                || element_number_type == FIELD_UINT32
-                                                || element_number_type == FIELD_UINT64
-                                                || element_number_type == FIELD_FLOAT);
-                                        if (unlikely(array_number_type == FIELD_NULL)) {
-                                                array_number_type = element_number_type;
+                        case JSON_VALUE_OBJECT:
+                                field_type = FIELD_OBJECT;
+                                break;
+                        case JSON_VALUE_STRING:
+                                field_type = FIELD_STRING;
+                                break;
+                        case JSON_VALUE_NUMBER: {
+                                /** find smallest fitting physical number type */
+                                field_e array_number_type = FIELD_NULL;
+                                for (size_t i = 0; i < num_elements; i++) {
+                                        const struct json_element
+                                                *element = vec_get(&array->elements.elements, i, struct json_element);
+                                        if (unlikely(element->value.value_type == JSON_VALUE_NULL)) {
+                                                continue;
                                         } else {
-                                                if (array_number_type == FIELD_INT8) {
+                                                bool success;
+                                                field_e element_number_type =
+                                                        value_type_for_json_number(&success, err,
+                                                                                   element->value.value.number);
+                                                if (!success) {
+                                                        return false;
+                                                }
+                                                assert(element_number_type == FIELD_INT8 ||
+                                                       element_number_type == FIELD_INT16
+                                                       || element_number_type == FIELD_INT32
+                                                       || element_number_type == FIELD_INT64
+                                                       || element_number_type == FIELD_UINT8
+                                                       || element_number_type == FIELD_UINT16
+                                                       || element_number_type == FIELD_UINT32
+                                                       || element_number_type == FIELD_UINT64
+                                                       || element_number_type == FIELD_FLOAT);
+                                                if (unlikely(array_number_type == FIELD_NULL)) {
                                                         array_number_type = element_number_type;
-                                                } else if (array_number_type == FIELD_INT16) {
-                                                        if (element_number_type != FIELD_INT8) {
+                                                } else {
+                                                        if (array_number_type == FIELD_INT8) {
                                                                 array_number_type = element_number_type;
-                                                        }
-                                                } else if (array_number_type == FIELD_INT32) {
-                                                        if (element_number_type != FIELD_INT8
-                                                                && element_number_type != FIELD_INT16) {
+                                                        } else if (array_number_type == FIELD_INT16) {
+                                                                if (element_number_type != FIELD_INT8) {
+                                                                        array_number_type = element_number_type;
+                                                                }
+                                                        } else if (array_number_type == FIELD_INT32) {
+                                                                if (element_number_type != FIELD_INT8
+                                                                    && element_number_type != FIELD_INT16) {
+                                                                        array_number_type = element_number_type;
+                                                                }
+                                                        } else if (array_number_type == FIELD_INT64) {
+                                                                if (element_number_type != FIELD_INT8
+                                                                    && element_number_type != FIELD_INT16
+                                                                    && element_number_type != FIELD_INT32) {
+                                                                        array_number_type = element_number_type;
+                                                                }
+                                                        } else if (array_number_type == FIELD_UINT8) {
                                                                 array_number_type = element_number_type;
+                                                        } else if (array_number_type == FIELD_UINT16) {
+                                                                if (element_number_type != FIELD_UINT16) {
+                                                                        array_number_type = element_number_type;
+                                                                }
+                                                        } else if (array_number_type == FIELD_UINT32) {
+                                                                if (element_number_type != FIELD_UINT8
+                                                                    && element_number_type != FIELD_UINT16) {
+                                                                        array_number_type = element_number_type;
+                                                                }
+                                                        } else if (array_number_type == FIELD_UINT64) {
+                                                                if (element_number_type != FIELD_UINT8
+                                                                    && element_number_type != FIELD_UINT16
+                                                                    && element_number_type != FIELD_UINT32) {
+                                                                        array_number_type = element_number_type;
+                                                                }
+                                                        } else if (array_number_type == FIELD_FLOAT) {
+                                                                break;
                                                         }
-                                                } else if (array_number_type == FIELD_INT64) {
-                                                        if (element_number_type != FIELD_INT8
-                                                                && element_number_type != FIELD_INT16
-                                                                && element_number_type != FIELD_INT32) {
-                                                                array_number_type = element_number_type;
-                                                        }
-                                                } else if (array_number_type == FIELD_UINT8) {
-                                                        array_number_type = element_number_type;
-                                                } else if (array_number_type == FIELD_UINT16) {
-                                                        if (element_number_type != FIELD_UINT16) {
-                                                                array_number_type = element_number_type;
-                                                        }
-                                                } else if (array_number_type == FIELD_UINT32) {
-                                                        if (element_number_type != FIELD_UINT8
-                                                                && element_number_type != FIELD_UINT16) {
-                                                                array_number_type = element_number_type;
-                                                        }
-                                                } else if (array_number_type == FIELD_UINT64) {
-                                                        if (element_number_type != FIELD_UINT8
-                                                                && element_number_type != FIELD_UINT16
-                                                                && element_number_type != FIELD_UINT32) {
-                                                                array_number_type = element_number_type;
-                                                        }
-                                                } else if (array_number_type == FIELD_FLOAT) {
-                                                        break;
                                                 }
                                         }
                                 }
+                                assert(array_number_type != FIELD_NULL);
+                                field_type = array_number_type;
                         }
-                        assert(array_number_type != FIELD_NULL);
-                        field_type = array_number_type;
-                }
-                        break;
-                case JSON_VALUE_FALSE:
-                case JSON_VALUE_TRUE:
-                        field_type = FIELD_BOOLEAN;
-                        break;
-                case JSON_VALUE_NULL:
-                        field_type = FIELD_NULL;
-                        break;
-                case JSON_VALUE_ARRAY: error(err, ARK_ERR_ERRINTERNAL) /** array type is illegal here */
-                        return false;
-                default: error(err, ARK_ERR_NOTYPE)
-                        return false;
+                                break;
+                        case JSON_VALUE_FALSE:
+                        case JSON_VALUE_TRUE:
+                                field_type = FIELD_BOOLEAN;
+                                break;
+                        case JSON_VALUE_NULL:
+                                field_type = FIELD_NULL;
+                                break;
+                        case JSON_VALUE_ARRAY: error(err, ARK_ERR_ERRINTERNAL) /** array type is illegal here */
+                                return false;
+                        default: error(err, ARK_ERR_NOTYPE)
+                                return false;
                 }
 
                 doc_obj_add_key(&entry, target, key, field_type);
@@ -458,134 +460,149 @@ static bool import_json_object_array_prop(struct doc_obj *target, struct err *er
                         enum json_value_type ast_node_data_type = element->value.value_type;
 
                         switch (field_type) {
-                        case FIELD_OBJECT: {
-                                struct doc_obj *nested_object = NULL;
-                                doc_obj_push_object(&nested_object, entry);
-                                if (ast_node_data_type != JSON_VALUE_NULL) {
-                                        /** the object is null by definition, if no entries are contained */
-                                        if (!import_json_object(nested_object, err, element->value.value.object)) {
-                                                return false;
-                                        }
-                                }
-                        }
-                                break;
-                        case FIELD_STRING: {
-                                assert(ast_node_data_type == array_data_type || ast_node_data_type == JSON_VALUE_NULL);
-                                doc_obj_push_primtive(entry,
-                                        ast_node_data_type == JSON_VALUE_NULL ? ARK_NULL_ENCODED_STRING : element->value
-                                                .value.string->value);
-                        }
-                                break;
-                        case FIELD_INT8:
-                        case FIELD_INT16:
-                        case FIELD_INT32:
-                        case FIELD_INT64:
-                        case FIELD_UINT8:
-                        case FIELD_UINT16:
-                        case FIELD_UINT32:
-                        case FIELD_UINT64:
-                        case FIELD_FLOAT: {
-                                assert(ast_node_data_type == array_data_type || ast_node_data_type == JSON_VALUE_NULL);
-                                switch (field_type) {
-                                case FIELD_INT8: {
-                                        field_i8_t value = ast_node_data_type == JSON_VALUE_NULL ? ARK_NULL_INT8
-                                                                                                 : (field_i8_t) element
-                                                        ->value.value.number->value.signed_integer;
-                                        doc_obj_push_primtive(entry, &value);
-                                }
-                                        break;
-                                case FIELD_INT16: {
-                                        field_i16_t value = ast_node_data_type == JSON_VALUE_NULL ? ARK_NULL_INT16
-                                                                                                  : (field_i16_t) element
-                                                        ->value.value.number->value.signed_integer;
-                                        doc_obj_push_primtive(entry, &value);
-                                }
-                                        break;
-                                case FIELD_INT32: {
-                                        field_i32_t value = ast_node_data_type == JSON_VALUE_NULL ? ARK_NULL_INT32
-                                                                                                  : (field_i32_t) element
-                                                        ->value.value.number->value.signed_integer;
-                                        doc_obj_push_primtive(entry, &value);
-                                }
-                                        break;
-                                case FIELD_INT64: {
-                                        field_i64_t value = ast_node_data_type == JSON_VALUE_NULL ? ARK_NULL_INT64
-                                                                                                  : (field_i64_t) element
-                                                        ->value.value.number->value.signed_integer;
-                                        doc_obj_push_primtive(entry, &value);
-                                }
-                                        break;
-                                case FIELD_UINT8: {
-                                        field_u8_t value = ast_node_data_type == JSON_VALUE_NULL ? ARK_NULL_UINT8
-                                                                                                 : (field_u8_t) element
-                                                        ->value.value.number->value.unsigned_integer;
-                                        doc_obj_push_primtive(entry, &value);
-                                }
-                                        break;
-                                case FIELD_UINT16: {
-                                        field_u16_t value = ast_node_data_type == JSON_VALUE_NULL ? ARK_NULL_UINT16
-                                                                                                  : (field_u16_t) element
-                                                        ->value.value.number->value.unsigned_integer;
-                                        doc_obj_push_primtive(entry, &value);
-                                }
-                                        break;
-                                case FIELD_UINT32: {
-                                        field_u32_t value = ast_node_data_type == JSON_VALUE_NULL ? ARK_NULL_UINT32
-                                                                                                  : (field_u32_t) element
-                                                        ->value.value.number->value.unsigned_integer;
-                                        doc_obj_push_primtive(entry, &value);
-                                }
-                                        break;
-                                case FIELD_UINT64: {
-                                        field_u64_t value = ast_node_data_type == JSON_VALUE_NULL ? ARK_NULL_UINT64
-                                                                                                  : (field_u64_t) element
-                                                        ->value.value.number->value.unsigned_integer;
-                                        doc_obj_push_primtive(entry, &value);
-                                }
-                                        break;
-                                case FIELD_FLOAT: {
-                                        field_number_t value = ARK_NULL_FLOAT;
+                                case FIELD_OBJECT: {
+                                        struct doc_obj *nested_object = NULL;
+                                        doc_obj_push_object(&nested_object, entry);
                                         if (ast_node_data_type != JSON_VALUE_NULL) {
-                                                enum json_number_type
-                                                        element_number_type = element->value.value.number->value_type;
-                                                if (element_number_type == JSON_NUMBER_FLOAT) {
-                                                        value = element->value.value.number->value.float_number;
-                                                } else if (element_number_type == JSON_NUMBER_UNSIGNED) {
-                                                        value = element->value.value.number->value.unsigned_integer;
-                                                } else if (element_number_type == JSON_NUMBER_SIGNED) {
-                                                        value = element->value.value.number->value.signed_integer;
-                                                } else {
-                                                        print_error_and_die(ARK_ERR_INTERNALERR) /** type mismatch */
+                                                /** the object is null by definition, if no entries are contained */
+                                                if (!import_json_object(nested_object, err,
+                                                                        element->value.value.object)) {
                                                         return false;
                                                 }
                                         }
-                                        doc_obj_push_primtive(entry, &value);
                                 }
                                         break;
-                                default: print_error_and_die(ARK_ERR_INTERNALERR) /** not a number type  */
+                                case FIELD_STRING: {
+                                        assert(ast_node_data_type == array_data_type ||
+                                               ast_node_data_type == JSON_VALUE_NULL);
+                                        doc_obj_push_primtive(entry,
+                                                              ast_node_data_type == JSON_VALUE_NULL
+                                                              ? ARK_NULL_ENCODED_STRING : element->value
+                                                                      .value.string->value);
+                                }
+                                        break;
+                                case FIELD_INT8:
+                                case FIELD_INT16:
+                                case FIELD_INT32:
+                                case FIELD_INT64:
+                                case FIELD_UINT8:
+                                case FIELD_UINT16:
+                                case FIELD_UINT32:
+                                case FIELD_UINT64:
+                                case FIELD_FLOAT: {
+                                        assert(ast_node_data_type == array_data_type ||
+                                               ast_node_data_type == JSON_VALUE_NULL);
+                                        switch (field_type) {
+                                                case FIELD_INT8: {
+                                                        field_i8_t value =
+                                                                ast_node_data_type == JSON_VALUE_NULL ? ARK_NULL_INT8
+                                                                                                      : (field_i8_t) element
+                                                                        ->value.value.number->value.signed_integer;
+                                                        doc_obj_push_primtive(entry, &value);
+                                                }
+                                                        break;
+                                                case FIELD_INT16: {
+                                                        field_i16_t value =
+                                                                ast_node_data_type == JSON_VALUE_NULL ? ARK_NULL_INT16
+                                                                                                      : (field_i16_t) element
+                                                                        ->value.value.number->value.signed_integer;
+                                                        doc_obj_push_primtive(entry, &value);
+                                                }
+                                                        break;
+                                                case FIELD_INT32: {
+                                                        field_i32_t value =
+                                                                ast_node_data_type == JSON_VALUE_NULL ? ARK_NULL_INT32
+                                                                                                      : (field_i32_t) element
+                                                                        ->value.value.number->value.signed_integer;
+                                                        doc_obj_push_primtive(entry, &value);
+                                                }
+                                                        break;
+                                                case FIELD_INT64: {
+                                                        field_i64_t value =
+                                                                ast_node_data_type == JSON_VALUE_NULL ? ARK_NULL_INT64
+                                                                                                      : (field_i64_t) element
+                                                                        ->value.value.number->value.signed_integer;
+                                                        doc_obj_push_primtive(entry, &value);
+                                                }
+                                                        break;
+                                                case FIELD_UINT8: {
+                                                        field_u8_t value =
+                                                                ast_node_data_type == JSON_VALUE_NULL ? ARK_NULL_UINT8
+                                                                                                      : (field_u8_t) element
+                                                                        ->value.value.number->value.unsigned_integer;
+                                                        doc_obj_push_primtive(entry, &value);
+                                                }
+                                                        break;
+                                                case FIELD_UINT16: {
+                                                        field_u16_t value =
+                                                                ast_node_data_type == JSON_VALUE_NULL ? ARK_NULL_UINT16
+                                                                                                      : (field_u16_t) element
+                                                                        ->value.value.number->value.unsigned_integer;
+                                                        doc_obj_push_primtive(entry, &value);
+                                                }
+                                                        break;
+                                                case FIELD_UINT32: {
+                                                        field_u32_t value =
+                                                                ast_node_data_type == JSON_VALUE_NULL ? ARK_NULL_UINT32
+                                                                                                      : (field_u32_t) element
+                                                                        ->value.value.number->value.unsigned_integer;
+                                                        doc_obj_push_primtive(entry, &value);
+                                                }
+                                                        break;
+                                                case FIELD_UINT64: {
+                                                        field_u64_t value =
+                                                                ast_node_data_type == JSON_VALUE_NULL ? ARK_NULL_UINT64
+                                                                                                      : (field_u64_t) element
+                                                                        ->value.value.number->value.unsigned_integer;
+                                                        doc_obj_push_primtive(entry, &value);
+                                                }
+                                                        break;
+                                                case FIELD_FLOAT: {
+                                                        field_number_t value = ARK_NULL_FLOAT;
+                                                        if (ast_node_data_type != JSON_VALUE_NULL) {
+                                                                enum json_number_type
+                                                                        element_number_type = element->value.value.number->value_type;
+                                                                if (element_number_type == JSON_NUMBER_FLOAT) {
+                                                                        value = element->value.value.number->value.float_number;
+                                                                } else if (element_number_type ==
+                                                                           JSON_NUMBER_UNSIGNED) {
+                                                                        value = element->value.value.number->value.unsigned_integer;
+                                                                } else if (element_number_type == JSON_NUMBER_SIGNED) {
+                                                                        value = element->value.value.number->value.signed_integer;
+                                                                } else {
+                                                                        print_error_and_die(
+                                                                                ARK_ERR_INTERNALERR) /** type mismatch */
+                                                                        return false;
+                                                                }
+                                                        }
+                                                        doc_obj_push_primtive(entry, &value);
+                                                }
+                                                        break;
+                                                default: print_error_and_die(
+                                                        ARK_ERR_INTERNALERR) /** not a number type  */
+                                                        return false;
+                                        }
+                                }
+                                        break;
+                                case FIELD_BOOLEAN:
+                                        if (likely(ast_node_data_type == JSON_VALUE_TRUE
+                                                   || ast_node_data_type == JSON_VALUE_FALSE)) {
+                                                field_boolean_t value =
+                                                        ast_node_data_type == JSON_VALUE_TRUE ? ARK_BOOLEAN_TRUE
+                                                                                              : ARK_BOOLEAN_FALSE;
+                                                doc_obj_push_primtive(entry, &value);
+                                        } else {
+                                                assert(ast_node_data_type == JSON_VALUE_NULL);
+                                                field_boolean_t value = ARK_NULL_BOOLEAN;
+                                                doc_obj_push_primtive(entry, &value);
+                                        }
+                                        break;
+                                case FIELD_NULL:
+                                        assert(ast_node_data_type == array_data_type);
+                                        doc_obj_push_primtive(entry, NULL);
+                                        break;
+                                default: error(err, ARK_ERR_NOTYPE)
                                         return false;
-                                }
-                        }
-                                break;
-                        case FIELD_BOOLEAN:
-                                if (likely(ast_node_data_type == JSON_VALUE_TRUE
-                                        || ast_node_data_type == JSON_VALUE_FALSE)) {
-                                        field_boolean_t value =
-                                                ast_node_data_type == JSON_VALUE_TRUE ? ARK_BOOLEAN_TRUE
-                                                                                      : ARK_BOOLEAN_FALSE;
-                                        doc_obj_push_primtive(entry, &value);
-                                } else {
-                                        assert(ast_node_data_type == JSON_VALUE_NULL);
-                                        field_boolean_t value = ARK_NULL_BOOLEAN;
-                                        doc_obj_push_primtive(entry, &value);
-                                }
-                                break;
-                        case FIELD_NULL:
-                                assert(ast_node_data_type == array_data_type);
-                                doc_obj_push_primtive(entry, NULL);
-                                break;
-                        default: error(err, ARK_ERR_NOTYPE)
-                                return false;
                         }
                 }
         } else {
@@ -600,97 +617,103 @@ static bool import_json_object(struct doc_obj *target, struct err *err, const st
                 struct json_prop *member = vec_get(&json_obj->value->members, i, struct json_prop);
                 enum json_value_type value_type = member->value.value.value_type;
                 switch (value_type) {
-                case JSON_VALUE_STRING:
-                        import_json_object_string_prop(target, member->key.value, member->value.value.value.string);
-                        break;
-                case JSON_VALUE_NUMBER:
-                        if (!import_json_object_number_prop(target,
-                                err,
-                                member->key.value,
-                                member->value.value.value.number)) {
-                                return false;
+                        case JSON_VALUE_STRING:
+                                import_json_object_string_prop(target, member->key.value,
+                                                               member->value.value.value.string);
+                                break;
+                        case JSON_VALUE_NUMBER:
+                                if (!import_json_object_number_prop(target,
+                                                                    err,
+                                                                    member->key.value,
+                                                                    member->value.value.value.number)) {
+                                        return false;
+                                }
+                                break;
+                        case JSON_VALUE_TRUE:
+                        case JSON_VALUE_FALSE: {
+                                field_boolean_t value =
+                                        value_type == JSON_VALUE_TRUE ? ARK_BOOLEAN_TRUE : ARK_BOOLEAN_FALSE;
+                                import_json_object_bool_prop(target, member->key.value, value);
                         }
-                        break;
-                case JSON_VALUE_TRUE:
-                case JSON_VALUE_FALSE: {
-                        field_boolean_t value = value_type == JSON_VALUE_TRUE ? ARK_BOOLEAN_TRUE : ARK_BOOLEAN_FALSE;
-                        import_json_object_bool_prop(target, member->key.value, value);
-                }
-                        break;
-                case JSON_VALUE_NULL:
-                        import_json_object_null_prop(target, member->key.value);
-                        break;
-                case JSON_VALUE_OBJECT:
-                        if (!import_json_object_object_prop(target,
-                                err,
-                                member->key.value,
-                                member->value.value.value.object)) {
+                                break;
+                        case JSON_VALUE_NULL:
+                                import_json_object_null_prop(target, member->key.value);
+                                break;
+                        case JSON_VALUE_OBJECT:
+                                if (!import_json_object_object_prop(target,
+                                                                    err,
+                                                                    member->key.value,
+                                                                    member->value.value.value.object)) {
+                                        return false;
+                                }
+                                break;
+                        case JSON_VALUE_ARRAY:
+                                if (!import_json_object_array_prop(target,
+                                                                   err,
+                                                                   member->key.value,
+                                                                   member->value.value.value.array)) {
+                                        return false;
+                                }
+                                break;
+                        default: error(err, ARK_ERR_NOTYPE);
                                 return false;
-                        }
-                        break;
-                case JSON_VALUE_ARRAY:
-                        if (!import_json_object_array_prop(target,
-                                err,
-                                member->key.value,
-                                member->value.value.value.array)) {
-                                return false;
-                        }
-                        break;
-                default: error(err, ARK_ERR_NOTYPE);
-                        return false;
                 }
         }
         return true;
 }
 
-static bool import_json(struct doc_obj *target, struct err *err, const struct json *json, struct doc_entries *partition)
+static bool
+import_json(struct doc_obj *target, struct err *err, const struct json *json, struct doc_entries *partition)
 {
         enum json_value_type value_type = json->element->value.value_type;
         switch (value_type) {
-        case JSON_VALUE_OBJECT:
-                if (!import_json_object(target, err, json->element->value.value.object)) {
-                        return false;
-                }
-                break;
-        case JSON_VALUE_ARRAY: {
-                const struct vector ofType(struct json_element)
-                        *arrayContent = &json->element->value.value.array->elements.elements;
-                if (!vec_is_empty(arrayContent)) {
-                        const struct json_element *first = vec_get(arrayContent, 0, struct json_element);
-                        switch (first->value.value_type) {
-                        case JSON_VALUE_OBJECT:
-                                if (!import_json_object(target, err, first->value.value.object)) {
-                                        return false;
+                case JSON_VALUE_OBJECT:
+                        if (!import_json_object(target, err, json->element->value.value.object)) {
+                                return false;
+                        }
+                        break;
+                case JSON_VALUE_ARRAY: {
+                        const struct vector ofType(struct json_element)
+                                *arrayContent = &json->element->value.value.array->elements.elements;
+                        if (!vec_is_empty(arrayContent)) {
+                                const struct json_element *first = vec_get(arrayContent, 0, struct json_element);
+                                switch (first->value.value_type) {
+                                        case JSON_VALUE_OBJECT:
+                                                if (!import_json_object(target, err, first->value.value.object)) {
+                                                        return false;
+                                                }
+                                                for (size_t i = 1; i < arrayContent->num_elems; i++) {
+                                                        const struct json_element
+                                                                *element = vec_get(arrayContent, i,
+                                                                                   struct json_element);
+                                                        struct doc_obj *nested;
+                                                        doc_obj_push_object(&nested, partition);
+                                                        if (!import_json_object(nested, err,
+                                                                                element->value.value.object)) {
+                                                                return false;
+                                                        }
+                                                }
+                                                break;
+                                        case JSON_VALUE_ARRAY:
+                                        case JSON_VALUE_STRING:
+                                        case JSON_VALUE_NUMBER:
+                                        case JSON_VALUE_TRUE:
+                                        case JSON_VALUE_FALSE:
+                                        case JSON_VALUE_NULL:
+                                        default: print_error_and_die(
+                                                ARK_ERR_INTERNALERR) /** Unsupported operation in arrays */
+                                                break;
                                 }
-                                for (size_t i = 1; i < arrayContent->num_elems; i++) {
-                                        const struct json_element
-                                                *element = vec_get(arrayContent, i, struct json_element);
-                                        struct doc_obj *nested;
-                                        doc_obj_push_object(&nested, partition);
-                                        if (!import_json_object(nested, err, element->value.value.object)) {
-                                                return false;
-                                        }
-                                }
-                                break;
-                        case JSON_VALUE_ARRAY:
-                        case JSON_VALUE_STRING:
-                        case JSON_VALUE_NUMBER:
-                        case JSON_VALUE_TRUE:
-                        case JSON_VALUE_FALSE:
-                        case JSON_VALUE_NULL:
-                        default: print_error_and_die(ARK_ERR_INTERNALERR) /** Unsupported operation in arrays */
-                                break;
                         }
                 }
-        }
-                break;
-        case JSON_VALUE_STRING:
-        case JSON_VALUE_NUMBER:
-        case JSON_VALUE_TRUE:
-        case JSON_VALUE_FALSE:
-        case JSON_VALUE_NULL:
-        default: error(err, ARK_ERR_JSONTYPE);
-                return false;
+                        break;
+                case JSON_VALUE_STRING:
+                case JSON_VALUE_NUMBER:
+                case JSON_VALUE_TRUE:
+                case JSON_VALUE_FALSE:
+                case JSON_VALUE_NULL:
+                default: error(err, ARK_ERR_JSONTYPE);
+                        return false;
         }
         return true;
 }
@@ -866,7 +889,7 @@ static void sorted_nested_array_objects(struct columndoc_obj *columndoc)
     size_t num_elements = vec_length(&key_vector);                                                              \
                                                                                                                        \
     if (num_elements > 0) {                                                                                            \
-        size_t *value_indicies = malloc(sizeof(size_t) * num_elements);                                                \
+        size_t *value_indicies = ark_malloc(sizeof(size_t) * num_elements);                                                \
         for (size_t i = 0; i < num_elements; i++) {                                                                    \
             value_indicies[i] = i;                                                                                     \
         }                                                                                                              \
@@ -895,12 +918,12 @@ static void sorted_nested_array_objects(struct columndoc_obj *columndoc)
 }
 
 static void sort_meta_model_string_values(struct vector ofType(field_sid_t) *key_vector,
-        struct vector ofType(field_sid_t) *value_vector, struct strdic *dic)
+                                          struct vector ofType(field_sid_t) *value_vector, struct strdic *dic)
 {
         size_t num_elements = vec_length(key_vector);
 
         if (num_elements > 0) {
-                size_t *value_indicies = malloc(sizeof(size_t) * num_elements);
+                size_t *value_indicies = ark_malloc(sizeof(size_t) * num_elements);
                 for (size_t i = 0; i < num_elements; i++) {
                         value_indicies[i] = i;
                 }
@@ -914,12 +937,12 @@ static void sort_meta_model_string_values(struct vector ofType(field_sid_t) *key
                 field_sid_t *values = vec_all(&value_cpy, field_sid_t);
 
                 sort_qsort_indicies_wargs(value_indicies,
-                        values,
-                        sizeof(field_sid_t),
-                        compare_encoded_string_less_eq_func,
-                        num_elements,
-                        key_vector->allocator,
-                        dic);
+                                          values,
+                                          sizeof(field_sid_t),
+                                          compare_encoded_string_less_eq_func,
+                                          num_elements,
+                                          key_vector->allocator,
+                                          dic);
 
                 for (size_t i = 0; i < num_elements; i++) {
                         vec_set(key_vector, i, vec_get(&key_cpy, value_indicies[i], field_sid_t));
@@ -937,7 +960,7 @@ static void sort_meta_model_string_values(struct vector ofType(field_sid_t) *key
     size_t num_elements = vec_length(&key_vector);                                                              \
                                                                                                                        \
     if (num_elements > 0) {                                                                                            \
-        size_t *value_indicies = malloc(sizeof(size_t) * num_elements);                                                \
+        size_t *value_indicies = ark_malloc(sizeof(size_t) * num_elements);                                                \
         for (size_t i = 0; i < num_elements; i++) {                                                                    \
             value_indicies[i] = i;                                                                                     \
         }                                                                                                              \
@@ -965,12 +988,12 @@ static void sort_meta_model_string_values(struct vector ofType(field_sid_t) *key
 }
 
 static void sort_columndoc_strings_arrays(struct vector ofType(field_sid_t) *key_vector,
-        struct vector ofType(field_sid_t) *value_array_vector, struct strdic *dic)
+                                          struct vector ofType(field_sid_t) *value_array_vector, struct strdic *dic)
 {
         size_t num_elements = vec_length(key_vector);
 
         if (num_elements > 0) {
-                size_t *value_indicies = malloc(sizeof(size_t) * num_elements);
+                size_t *value_indicies = ark_malloc(sizeof(size_t) * num_elements);
                 for (size_t i = 0; i < num_elements; i++) {
                         value_indicies[i] = i;
                 }
@@ -984,12 +1007,12 @@ static void sort_columndoc_strings_arrays(struct vector ofType(field_sid_t) *key
                 const struct vector *values = vec_all(value_array_vector, struct vector);
 
                 sort_qsort_indicies_wargs(value_indicies,
-                        values,
-                        sizeof(struct vector),
-                        compare_encoded_string_array_less_eq_func,
-                        num_elements,
-                        key_vector->allocator,
-                        dic);
+                                          values,
+                                          sizeof(struct vector),
+                                          compare_encoded_string_array_less_eq_func,
+                                          num_elements,
+                                          key_vector->allocator,
+                                          dic);
 
                 for (size_t i = 0; i < num_elements; i++) {
                         vec_set(key_vector, i, vec_get(&key_cpy, value_indicies[i], field_sid_t));
@@ -1030,8 +1053,8 @@ static bool compare_object_array_key_column_less_eq_func(const void *lhs, const 
 }
 
 struct com_column_leq_arg {
-        struct strdic *dic;
-        field_e value_type;
+    struct strdic *dic;
+    field_e value_type;
 };
 
 #define ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, type, valueVectorAPtr, valueVectorBPtr)                                 \
@@ -1055,48 +1078,48 @@ static bool compare_column_less_eq_func(const void *lhs, const void *rhs, void *
         size_t max_num_elem = ark_min(a->num_elems, b->num_elems);
 
         switch (func_arg->value_type) {
-        case FIELD_NULL:
-                return (a->num_elems <= b->num_elems);
-                break;
-        case FIELD_BOOLEAN: ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, field_boolean_t, a, b);
-                break;
-        case FIELD_INT8: ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, field_i8_t, a, b);
-                break;
-        case FIELD_INT16: ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, field_i16_t, a, b);
-                break;
-        case FIELD_INT32: ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, field_i32_t, a, b);
-                break;
-        case FIELD_INT64: ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, field_i64_t, a, b);
-                break;
-        case FIELD_UINT8: ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, field_u8_t, a, b);
-                break;
-        case FIELD_UINT16: ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, field_u16_t, a, b);
-                break;
-        case FIELD_UINT32: ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, field_u32_t, a, b);
-                break;
-        case FIELD_UINT64: ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, field_u64_t, a, b);
-                break;
-        case FIELD_FLOAT: ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, field_number_t, a, b);
-                break;
-        case FIELD_STRING:
-                for (size_t i = 0; i < max_num_elem; i++) {
-                        field_sid_t o1 = *vec_get(a, i, field_sid_t);
-                        field_sid_t o2 = *vec_get(b, i, field_sid_t);
-                        char **o1_string = strdic_extract(func_arg->dic, &o1, 1);
-                        char **o2_string = strdic_extract(func_arg->dic, &o2, 1);
-                        bool greater = strcmp(*o1_string, *o2_string) > 0;
-                        strdic_free(func_arg->dic, o1_string);
-                        strdic_free(func_arg->dic, o2_string);
-                        if (greater) {
-                                return false;
+                case FIELD_NULL:
+                        return (a->num_elems <= b->num_elems);
+                        break;
+                case FIELD_BOOLEAN: ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, field_boolean_t, a, b);
+                        break;
+                case FIELD_INT8: ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, field_i8_t, a, b);
+                        break;
+                case FIELD_INT16: ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, field_i16_t, a, b);
+                        break;
+                case FIELD_INT32: ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, field_i32_t, a, b);
+                        break;
+                case FIELD_INT64: ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, field_i64_t, a, b);
+                        break;
+                case FIELD_UINT8: ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, field_u8_t, a, b);
+                        break;
+                case FIELD_UINT16: ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, field_u16_t, a, b);
+                        break;
+                case FIELD_UINT32: ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, field_u32_t, a, b);
+                        break;
+                case FIELD_UINT64: ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, field_u64_t, a, b);
+                        break;
+                case FIELD_FLOAT: ARRAY_LEQ_PRIMITIVE_FUNC(max_num_elem, field_number_t, a, b);
+                        break;
+                case FIELD_STRING:
+                        for (size_t i = 0; i < max_num_elem; i++) {
+                                field_sid_t o1 = *vec_get(a, i, field_sid_t);
+                                field_sid_t o2 = *vec_get(b, i, field_sid_t);
+                                char **o1_string = strdic_extract(func_arg->dic, &o1, 1);
+                                char **o2_string = strdic_extract(func_arg->dic, &o2, 1);
+                                bool greater = strcmp(*o1_string, *o2_string) > 0;
+                                strdic_free(func_arg->dic, o1_string);
+                                strdic_free(func_arg->dic, o2_string);
+                                if (greater) {
+                                        return false;
+                                }
                         }
-                }
-                return true;
-        case FIELD_OBJECT:
-                return true;
-                break;
-        default: print_error_and_die(ARK_ERR_NOTYPE)
-                return false;
+                        return true;
+                case FIELD_OBJECT:
+                        return true;
+                        break;
+                default: print_error_and_die(ARK_ERR_NOTYPE)
+                        return false;
         }
 }
 
@@ -1113,7 +1136,7 @@ static void sort_columndoc_column(struct columndoc_column *column, struct strdic
         assert(array_position_cpy.num_elems == values_cpy.num_elems);
         assert(values_cpy.num_elems == column->array_positions.num_elems);
 
-        size_t *indices = malloc(values_cpy.num_elems * sizeof(size_t));
+        size_t *indices = ark_malloc(values_cpy.num_elems * sizeof(size_t));
         for (size_t i = 0; i < values_cpy.num_elems; i++) {
                 indices[i] = i;
         }
@@ -1121,12 +1144,12 @@ static void sort_columndoc_column(struct columndoc_column *column, struct strdic
         struct com_column_leq_arg func_arg = {.dic = dic, .value_type = column->type};
 
         sort_qsort_indicies_wargs(indices,
-                values_cpy.base,
-                values_cpy.elem_size,
-                compare_column_less_eq_func,
-                values_cpy.num_elems,
-                values_cpy.allocator,
-                &func_arg);
+                                  values_cpy.base,
+                                  values_cpy.elem_size,
+                                  compare_column_less_eq_func,
+                                  values_cpy.num_elems,
+                                  values_cpy.allocator,
+                                  &func_arg);
 
         for (size_t i = 0; i < values_cpy.num_elems; i++) {
                 vec_set(&column->values, i, vec_at(&values_cpy, indices[i]));
@@ -1142,17 +1165,17 @@ static void sort_columndoc_column_arrays(struct columndoc_obj *columndoc)
 {
         struct vector ofType(struct columndoc_group) cpy;
         vec_cpy(&cpy, &columndoc->obj_array_props);
-        size_t *indices = malloc(cpy.num_elems * sizeof(size_t));
+        size_t *indices = ark_malloc(cpy.num_elems * sizeof(size_t));
         for (size_t i = 0; i < cpy.num_elems; i++) {
                 indices[i] = i;
         }
         sort_qsort_indicies_wargs(indices,
-                cpy.base,
-                sizeof(struct columndoc_group),
-                compare_object_array_key_columns_less_eq_func,
-                cpy.num_elems,
-                cpy.allocator,
-                columndoc->parent->dic);
+                                  cpy.base,
+                                  sizeof(struct columndoc_group),
+                                  compare_object_array_key_columns_less_eq_func,
+                                  cpy.num_elems,
+                                  cpy.allocator,
+                                  columndoc->parent->dic);
         for (size_t i = 0; i < cpy.num_elems; i++) {
                 vec_set(&columndoc->obj_array_props, i, vec_get(&cpy, indices[i], struct columndoc_group));
         }
@@ -1160,7 +1183,7 @@ static void sort_columndoc_column_arrays(struct columndoc_obj *columndoc)
 
         for (size_t i = 0; i < cpy.num_elems; i++) {
                 struct columndoc_group *key_columns = vec_get(&columndoc->obj_array_props, i, struct columndoc_group);
-                size_t *columnIndices = malloc(key_columns->columns.num_elems * sizeof(size_t));
+                size_t *columnIndices = ark_malloc(key_columns->columns.num_elems * sizeof(size_t));
                 struct vector ofType(struct columndoc_column) columnCpy;
                 vec_cpy(&columnCpy, &key_columns->columns);
                 for (size_t i = 0; i < key_columns->columns.num_elems; i++) {
@@ -1169,12 +1192,12 @@ static void sort_columndoc_column_arrays(struct columndoc_obj *columndoc)
 
                 /** First, sort by column name; Then, sort by columns with same name by type */
                 sort_qsort_indicies_wargs(columnIndices,
-                        columnCpy.base,
-                        sizeof(struct columndoc_column),
-                        compare_object_array_key_column_less_eq_func,
-                        key_columns->columns.num_elems,
-                        key_columns->columns.allocator,
-                        columndoc->parent->dic);
+                                          columnCpy.base,
+                                          sizeof(struct columndoc_column),
+                                          compare_object_array_key_column_less_eq_func,
+                                          key_columns->columns.num_elems,
+                                          key_columns->columns.allocator,
+                                          columndoc->parent->dic);
                 for (size_t i = 0; i < key_columns->columns.num_elems; i++) {
                         vec_set(&key_columns->columns,
                                 i,
@@ -1193,82 +1216,82 @@ static void sort_columndoc_values(struct columndoc_obj *columndoc)
 {
         if (columndoc->parent->read_optimized) {
                 SORT_META_MODEL_VALUES(columndoc->bool_prop_keys,
-                        columndoc->bool_prop_vals,
-                        field_boolean_t,
-                        compare_field_boolean_t_leq);
+                                       columndoc->bool_prop_vals,
+                                       field_boolean_t,
+                                       compare_field_boolean_t_leq);
                 SORT_META_MODEL_VALUES(columndoc->int8_prop_keys,
-                        columndoc->int8_prop_vals,
-                        field_i8_t,
-                        compare_field_i8_t_leq);
+                                       columndoc->int8_prop_vals,
+                                       field_i8_t,
+                                       compare_field_i8_t_leq);
                 SORT_META_MODEL_VALUES(columndoc->int16_prop_keys,
-                        columndoc->int16_prop_vals,
-                        field_i16_t,
-                        compare_field_i16_t_leq);
+                                       columndoc->int16_prop_vals,
+                                       field_i16_t,
+                                       compare_field_i16_t_leq);
                 SORT_META_MODEL_VALUES(columndoc->int32_prop_keys,
-                        columndoc->int32_prop_vals,
-                        field_i32_t,
-                        compare_field_i32_t_leq);
+                                       columndoc->int32_prop_vals,
+                                       field_i32_t,
+                                       compare_field_i32_t_leq);
                 SORT_META_MODEL_VALUES(columndoc->int64_prop_keys,
-                        columndoc->int64_prop_vals,
-                        field_i64_t,
-                        compare_field_i64_t_leq);
+                                       columndoc->int64_prop_vals,
+                                       field_i64_t,
+                                       compare_field_i64_t_leq);
                 SORT_META_MODEL_VALUES(columndoc->uint8_prop_keys,
-                        columndoc->uint8_prop_vals,
-                        field_u8_t,
-                        compare_field_u8_t_leq);
+                                       columndoc->uint8_prop_vals,
+                                       field_u8_t,
+                                       compare_field_u8_t_leq);
                 SORT_META_MODEL_VALUES(columndoc->uint16_prop_keys,
-                        columndoc->uint16_prop_vals,
-                        field_u16_t,
-                        compare_field_u16_t_leq);
+                                       columndoc->uint16_prop_vals,
+                                       field_u16_t,
+                                       compare_field_u16_t_leq);
                 SORT_META_MODEL_VALUES(columndoc->uin32_prop_keys,
-                        columndoc->uint32_prop_vals,
-                        field_u32_t,
-                        compare_field_u32_t_leq);
+                                       columndoc->uint32_prop_vals,
+                                       field_u32_t,
+                                       compare_field_u32_t_leq);
                 SORT_META_MODEL_VALUES(columndoc->uint64_prop_keys,
-                        columndoc->uint64_prop_vals,
-                        field_u64_t,
-                        compare_field_u64_t_leq);
+                                       columndoc->uint64_prop_vals,
+                                       field_u64_t,
+                                       compare_field_u64_t_leq);
                 SORT_META_MODEL_VALUES(columndoc->float_prop_keys,
-                        columndoc->float_prop_vals,
-                        field_number_t,
-                        compare_field_number_t_leq);
+                                       columndoc->float_prop_vals,
+                                       field_number_t,
+                                       compare_field_number_t_leq);
                 sort_meta_model_string_values(&columndoc->string_prop_keys,
-                        &columndoc->string_prop_vals,
-                        columndoc->parent->dic);
+                                              &columndoc->string_prop_vals,
+                                              columndoc->parent->dic);
 
                 SORT_META_MODEL_ARRAYS(columndoc->bool_array_prop_keys,
-                        columndoc->bool_array_prop_vals,
-                        compare_field_boolean_t_array_leq);
+                                       columndoc->bool_array_prop_vals,
+                                       compare_field_boolean_t_array_leq);
                 SORT_META_MODEL_ARRAYS(columndoc->int8_array_prop_keys,
-                        columndoc->int8_array_prop_vals,
-                        compare_field_i8_t_array_leq);
+                                       columndoc->int8_array_prop_vals,
+                                       compare_field_i8_t_array_leq);
                 SORT_META_MODEL_ARRAYS(columndoc->int16_array_prop_keys,
-                        columndoc->int16_array_prop_vals,
-                        compare_field_i16_t_array_leq);
+                                       columndoc->int16_array_prop_vals,
+                                       compare_field_i16_t_array_leq);
                 SORT_META_MODEL_ARRAYS(columndoc->int32_array_prop_keys,
-                        columndoc->int32_array_prop_vals,
-                        compare_field_i32_t_array_leq);
+                                       columndoc->int32_array_prop_vals,
+                                       compare_field_i32_t_array_leq);
                 SORT_META_MODEL_ARRAYS(columndoc->int64_array_prop_keys,
-                        columndoc->int64_array_prop_vals,
-                        compare_field_i64_t_array_leq);
+                                       columndoc->int64_array_prop_vals,
+                                       compare_field_i64_t_array_leq);
                 SORT_META_MODEL_ARRAYS(columndoc->uint8_array_prop_keys,
-                        columndoc->uint8_array_prop_vals,
-                        compare_field_u8_t_array_leq);
+                                       columndoc->uint8_array_prop_vals,
+                                       compare_field_u8_t_array_leq);
                 SORT_META_MODEL_ARRAYS(columndoc->uint16_array_prop_keys,
-                        columndoc->uint16_array_prop_vals,
-                        compare_field_u16_t_array_leq);
+                                       columndoc->uint16_array_prop_vals,
+                                       compare_field_u16_t_array_leq);
                 SORT_META_MODEL_ARRAYS(columndoc->uint32_array_prop_keys,
-                        columndoc->uint32_array_prop_vals,
-                        compare_field_u32_t_array_leq);
+                                       columndoc->uint32_array_prop_vals,
+                                       compare_field_u32_t_array_leq);
                 SORT_META_MODEL_ARRAYS(columndoc->uint64_array_prop_keys,
-                        columndoc->ui64_array_prop_vals,
-                        compare_field_u64_t_array_leq);
+                                       columndoc->ui64_array_prop_vals,
+                                       compare_field_u64_t_array_leq);
                 SORT_META_MODEL_ARRAYS(columndoc->float_array_prop_keys,
-                        columndoc->float_array_prop_vals,
-                        compare_field_number_t_array_leq);
+                                       columndoc->float_array_prop_vals,
+                                       compare_field_number_t_array_leq);
                 sort_columndoc_strings_arrays(&columndoc->string_array_prop_keys,
-                        &columndoc->string_array_prop_vals,
-                        columndoc->parent->dic);
+                                              &columndoc->string_array_prop_vals,
+                                              columndoc->parent->dic);
 
                 sort_columndoc_column_arrays(columndoc);
         }
@@ -1284,7 +1307,7 @@ static void sort_columndoc_entries(struct columndoc_obj *columndoc)
 }
 
 struct columndoc *doc_entries_columndoc(const struct doc_bulk *bulk, const struct doc_entries *partition,
-        bool read_optimized)
+                                        bool read_optimized)
 {
         if (!bulk || !partition) {
                 return NULL;
@@ -1302,7 +1325,7 @@ struct columndoc *doc_entries_columndoc(const struct doc_bulk *bulk, const struc
 
         const struct doc *model = models;
 
-        struct columndoc *columndoc = malloc(sizeof(struct columndoc));
+        struct columndoc *columndoc = ark_malloc(sizeof(struct columndoc));
         columndoc->read_optimized = read_optimized;
         struct err err;
         if (!columndoc_create(columndoc, &err, model, bulk, partition, bulk->dic)) {
@@ -1316,7 +1339,7 @@ struct columndoc *doc_entries_columndoc(const struct doc_bulk *bulk, const struc
         return columndoc;
 }
 
-ARK_EXPORT(bool) doc_entries_drop(struct doc_entries *partition)
+bool doc_entries_drop(struct doc_entries *partition)
 {
         unused(partition);
         return true;
@@ -1332,47 +1355,47 @@ static void create_typed_vector(struct doc_entries *entry)
 {
         size_t size;
         switch (entry->type) {
-        case FIELD_NULL:
-                size = sizeof(field_null_t);
-                break;
-        case FIELD_BOOLEAN:
-                size = sizeof(field_boolean_t);
-                break;
-        case FIELD_INT8:
-                size = sizeof(field_i8_t);
-                break;
-        case FIELD_INT16:
-                size = sizeof(field_i16_t);
-                break;
-        case FIELD_INT32:
-                size = sizeof(field_i32_t);
-                break;
-        case FIELD_INT64:
-                size = sizeof(field_i64_t);
-                break;
-        case FIELD_UINT8:
-                size = sizeof(field_u8_t);
-                break;
-        case FIELD_UINT16:
-                size = sizeof(field_u16_t);
-                break;
-        case FIELD_UINT32:
-                size = sizeof(field_u32_t);
-                break;
-        case FIELD_UINT64:
-                size = sizeof(field_u64_t);
-                break;
-        case FIELD_FLOAT:
-                size = sizeof(field_number_t);
-                break;
-        case FIELD_STRING:
-                size = sizeof(field_string_t);
-                break;
-        case FIELD_OBJECT:
-                size = sizeof(struct doc_obj);
-                break;
-        default: print_error_and_die(ARK_ERR_INTERNALERR) /** unknown type */
-                return;
+                case FIELD_NULL:
+                        size = sizeof(field_null_t);
+                        break;
+                case FIELD_BOOLEAN:
+                        size = sizeof(field_boolean_t);
+                        break;
+                case FIELD_INT8:
+                        size = sizeof(field_i8_t);
+                        break;
+                case FIELD_INT16:
+                        size = sizeof(field_i16_t);
+                        break;
+                case FIELD_INT32:
+                        size = sizeof(field_i32_t);
+                        break;
+                case FIELD_INT64:
+                        size = sizeof(field_i64_t);
+                        break;
+                case FIELD_UINT8:
+                        size = sizeof(field_u8_t);
+                        break;
+                case FIELD_UINT16:
+                        size = sizeof(field_u16_t);
+                        break;
+                case FIELD_UINT32:
+                        size = sizeof(field_u32_t);
+                        break;
+                case FIELD_UINT64:
+                        size = sizeof(field_u64_t);
+                        break;
+                case FIELD_FLOAT:
+                        size = sizeof(field_number_t);
+                        break;
+                case FIELD_STRING:
+                        size = sizeof(field_string_t);
+                        break;
+                case FIELD_OBJECT:
+                        size = sizeof(struct doc_obj);
+                        break;
+                default: print_error_and_die(ARK_ERR_INTERNALERR) /** unknown type */
+                        return;
         }
         vec_create(&entry->values, NULL, size, 50);
 }
@@ -1399,146 +1422,147 @@ static bool print_value(FILE *file, field_e type, const struct vector ofType(<T>
                 fprintf(file, "[");
         }
         switch (type) {
-        case FIELD_NULL: {
-                for (size_t i = 0; i < num_values; i++) {
-                        fprintf(file, "null%s", i + 1 < num_values ? ", " : "");
-                }
-        }
-                break;
-        case FIELD_BOOLEAN: {
-                for (size_t i = 0; i < num_values; i++) {
-                        field_boolean_t value = *(vec_get(values, i, field_boolean_t));
-                        if (value != ARK_NULL_BOOLEAN) {
-                                fprintf(file, "%s%s", value == 0 ? "false" : "true", i + 1 < num_values ? ", " : "");
-                        } else {
+                case FIELD_NULL: {
+                        for (size_t i = 0; i < num_values; i++) {
                                 fprintf(file, "null%s", i + 1 < num_values ? ", " : "");
                         }
                 }
-        }
-                break;
-        case FIELD_INT8: {
-                for (size_t i = 0; i < num_values; i++) {
-                        field_i8_t value = *(vec_get(values, i, field_i8_t));
-                        if (value != ARK_NULL_INT8) {
-                                fprintf(file, "%d%s", value, i + 1 < num_values ? ", " : "");
-                        } else {
-                                fprintf(file, "null%s", i + 1 < num_values ? ", " : "");
+                        break;
+                case FIELD_BOOLEAN: {
+                        for (size_t i = 0; i < num_values; i++) {
+                                field_boolean_t value = *(vec_get(values, i, field_boolean_t));
+                                if (value != ARK_NULL_BOOLEAN) {
+                                        fprintf(file, "%s%s", value == 0 ? "false" : "true",
+                                                i + 1 < num_values ? ", " : "");
+                                } else {
+                                        fprintf(file, "null%s", i + 1 < num_values ? ", " : "");
+                                }
                         }
                 }
-        }
-                break;
-        case FIELD_INT16: {
-                for (size_t i = 0; i < num_values; i++) {
-                        field_i16_t value = *(vec_get(values, i, field_i16_t));
-                        if (value != ARK_NULL_INT16) {
-                                fprintf(file, "%d%s", value, i + 1 < num_values ? ", " : "");
-                        } else {
-                                fprintf(file, "null%s", i + 1 < num_values ? ", " : "");
+                        break;
+                case FIELD_INT8: {
+                        for (size_t i = 0; i < num_values; i++) {
+                                field_i8_t value = *(vec_get(values, i, field_i8_t));
+                                if (value != ARK_NULL_INT8) {
+                                        fprintf(file, "%d%s", value, i + 1 < num_values ? ", " : "");
+                                } else {
+                                        fprintf(file, "null%s", i + 1 < num_values ? ", " : "");
+                                }
                         }
                 }
-        }
-                break;
-        case FIELD_INT32: {
-                for (size_t i = 0; i < num_values; i++) {
-                        field_i32_t value = *(vec_get(values, i, field_i32_t));
-                        if (value != ARK_NULL_INT32) {
-                                fprintf(file, "%d%s", value, i + 1 < num_values ? ", " : "");
-                        } else {
-                                fprintf(file, "null%s", i + 1 < num_values ? ", " : "");
+                        break;
+                case FIELD_INT16: {
+                        for (size_t i = 0; i < num_values; i++) {
+                                field_i16_t value = *(vec_get(values, i, field_i16_t));
+                                if (value != ARK_NULL_INT16) {
+                                        fprintf(file, "%d%s", value, i + 1 < num_values ? ", " : "");
+                                } else {
+                                        fprintf(file, "null%s", i + 1 < num_values ? ", " : "");
+                                }
                         }
                 }
-        }
-                break;
-        case FIELD_INT64: {
-                for (size_t i = 0; i < num_values; i++) {
-                        field_i64_t value = *(vec_get(values, i, field_i64_t));
-                        if (value != ARK_NULL_INT64) {
-                                fprintf(file, "%" PRIi64 "%s", value, i + 1 < num_values ? ", " : "");
-                        } else {
-                                fprintf(file, "null%s", i + 1 < num_values ? ", " : "");
+                        break;
+                case FIELD_INT32: {
+                        for (size_t i = 0; i < num_values; i++) {
+                                field_i32_t value = *(vec_get(values, i, field_i32_t));
+                                if (value != ARK_NULL_INT32) {
+                                        fprintf(file, "%d%s", value, i + 1 < num_values ? ", " : "");
+                                } else {
+                                        fprintf(file, "null%s", i + 1 < num_values ? ", " : "");
+                                }
                         }
                 }
-        }
-                break;
-        case FIELD_UINT8: {
-                for (size_t i = 0; i < num_values; i++) {
-                        field_u8_t value = *(vec_get(values, i, field_u8_t));
-                        if (value != ARK_NULL_UINT8) {
-                                fprintf(file, "%d%s", value, i + 1 < num_values ? ", " : "");
-                        } else {
-                                fprintf(file, "null%s", i + 1 < num_values ? ", " : "");
+                        break;
+                case FIELD_INT64: {
+                        for (size_t i = 0; i < num_values; i++) {
+                                field_i64_t value = *(vec_get(values, i, field_i64_t));
+                                if (value != ARK_NULL_INT64) {
+                                        fprintf(file, "%" PRIi64 "%s", value, i + 1 < num_values ? ", " : "");
+                                } else {
+                                        fprintf(file, "null%s", i + 1 < num_values ? ", " : "");
+                                }
                         }
                 }
-        }
-                break;
-        case FIELD_UINT16: {
-                for (size_t i = 0; i < num_values; i++) {
-                        field_u16_t value = *(vec_get(values, i, field_u16_t));
-                        if (value != ARK_NULL_UINT16) {
-                                fprintf(file, "%d%s", value, i + 1 < num_values ? ", " : "");
-                        } else {
-                                fprintf(file, "null%s", i + 1 < num_values ? ", " : "");
+                        break;
+                case FIELD_UINT8: {
+                        for (size_t i = 0; i < num_values; i++) {
+                                field_u8_t value = *(vec_get(values, i, field_u8_t));
+                                if (value != ARK_NULL_UINT8) {
+                                        fprintf(file, "%d%s", value, i + 1 < num_values ? ", " : "");
+                                } else {
+                                        fprintf(file, "null%s", i + 1 < num_values ? ", " : "");
+                                }
                         }
                 }
-        }
-                break;
-        case FIELD_UINT32: {
-                for (size_t i = 0; i < num_values; i++) {
-                        field_u32_t value = *(vec_get(values, i, field_u32_t));
-                        if (value != ARK_NULL_UINT32) {
-                                fprintf(file, "%d%s", value, i + 1 < num_values ? ", " : "");
-                        } else {
-                                fprintf(file, "null%s", i + 1 < num_values ? ", " : "");
+                        break;
+                case FIELD_UINT16: {
+                        for (size_t i = 0; i < num_values; i++) {
+                                field_u16_t value = *(vec_get(values, i, field_u16_t));
+                                if (value != ARK_NULL_UINT16) {
+                                        fprintf(file, "%d%s", value, i + 1 < num_values ? ", " : "");
+                                } else {
+                                        fprintf(file, "null%s", i + 1 < num_values ? ", " : "");
+                                }
                         }
                 }
-        }
-                break;
-        case FIELD_UINT64: {
-                for (size_t i = 0; i < num_values; i++) {
-                        field_u64_t value = *(vec_get(values, i, field_u64_t));
-                        if (value != ARK_NULL_UINT64) {
-                                fprintf(file, "%" PRIu64 "%s", value, i + 1 < num_values ? ", " : "");
-                        } else {
-                                fprintf(file, "null%s", i + 1 < num_values ? ", " : "");
+                        break;
+                case FIELD_UINT32: {
+                        for (size_t i = 0; i < num_values; i++) {
+                                field_u32_t value = *(vec_get(values, i, field_u32_t));
+                                if (value != ARK_NULL_UINT32) {
+                                        fprintf(file, "%d%s", value, i + 1 < num_values ? ", " : "");
+                                } else {
+                                        fprintf(file, "null%s", i + 1 < num_values ? ", " : "");
+                                }
                         }
                 }
-        }
-                break;
-        case FIELD_FLOAT: {
-                for (size_t i = 0; i < num_values; i++) {
-                        field_number_t value = *(vec_get(values, i, field_number_t));
-                        if (!isnan(value)) {
-                                fprintf(file, "%f%s", value, i + 1 < num_values ? ", " : "");
-                        } else {
-                                fprintf(file, "null%s", i + 1 < num_values ? ", " : "");
+                        break;
+                case FIELD_UINT64: {
+                        for (size_t i = 0; i < num_values; i++) {
+                                field_u64_t value = *(vec_get(values, i, field_u64_t));
+                                if (value != ARK_NULL_UINT64) {
+                                        fprintf(file, "%" PRIu64 "%s", value, i + 1 < num_values ? ", " : "");
+                                } else {
+                                        fprintf(file, "null%s", i + 1 < num_values ? ", " : "");
+                                }
                         }
                 }
-        }
-                break;
-        case FIELD_STRING: {
-                for (size_t i = 0; i < num_values; i++) {
-                        field_string_t value = *(vec_get(values, i, field_string_t));
-                        if (value) {
-                                fprintf(file, "\"%s\"%s", value, i + 1 < num_values ? ", " : "");
-                        } else {
-                                fprintf(file, "null%s", i + 1 < num_values ? ", " : "");
+                        break;
+                case FIELD_FLOAT: {
+                        for (size_t i = 0; i < num_values; i++) {
+                                field_number_t value = *(vec_get(values, i, field_number_t));
+                                if (!isnan(value)) {
+                                        fprintf(file, "%f%s", value, i + 1 < num_values ? ", " : "");
+                                } else {
+                                        fprintf(file, "null%s", i + 1 < num_values ? ", " : "");
+                                }
                         }
                 }
-        }
-                break;
-        case FIELD_OBJECT: {
-                for (size_t i = 0; i < num_values; i++) {
-                        struct doc_obj *obj = vec_get(values, i, struct doc_obj);
-                        if (!ARK_NULL_OBJECT_MODEL(obj)) {
-                                print_object(file, obj);
-                        } else {
-                                fprintf(file, "null");
+                        break;
+                case FIELD_STRING: {
+                        for (size_t i = 0; i < num_values; i++) {
+                                field_string_t value = *(vec_get(values, i, field_string_t));
+                                if (value) {
+                                        fprintf(file, "\"%s\"%s", value, i + 1 < num_values ? ", " : "");
+                                } else {
+                                        fprintf(file, "null%s", i + 1 < num_values ? ", " : "");
+                                }
                         }
-                        fprintf(file, "%s", i + 1 < num_values ? ", " : "");
                 }
-        }
-                break;
-        default: ARK_NOT_IMPLEMENTED;
+                        break;
+                case FIELD_OBJECT: {
+                        for (size_t i = 0; i < num_values; i++) {
+                                struct doc_obj *obj = vec_get(values, i, struct doc_obj);
+                                if (!ARK_NULL_OBJECT_MODEL(obj)) {
+                                        print_object(file, obj);
+                                } else {
+                                        fprintf(file, "null");
+                                }
+                                fprintf(file, "%s", i + 1 < num_values ? ", " : "");
+                        }
+                }
+                        break;
+                default: ARK_NOT_IMPLEMENTED;
         }
         if (num_values > 1) {
                 fprintf(file, "]");

@@ -26,15 +26,15 @@
 ARK_BEGIN_DECL
 
 struct spinlock {
-        atomic_flag lock;
-        pthread_t owner;
+    atomic_flag lock;
+    pthread_t owner;
 };
 
-ARK_EXPORT(bool) spin_init(struct spinlock *spinlock);
+bool spin_init(struct spinlock *spinlock);
 
-ARK_EXPORT(bool) spin_acquire(struct spinlock *spinlock);
+bool spin_acquire(struct spinlock *spinlock);
 
-ARK_EXPORT(bool) spin_release(struct spinlock *spinlock);
+bool spin_release(struct spinlock *spinlock);
 
 ARK_END_DECL
 

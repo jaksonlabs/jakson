@@ -20,7 +20,7 @@
 static struct cmdopt *option_by_name(struct cmdopt_mgr *manager, const char *name);
 
 bool opt_mgr_create(struct cmdopt_mgr *manager, char *module_name, char *module_desc, enum mod_arg_policy policy,
-        bool (*fallback)(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager))
+                    bool (*fallback)(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager))
 {
         error_if_null(manager)
         error_if_null(module_name)
@@ -94,7 +94,7 @@ bool opt_mgr_create_group(struct cmdopt_group **group, const char *desc, struct 
 }
 
 bool opt_group_add_cmd(struct cmdopt_group *group, const char *opt_name, char *opt_desc, char *opt_manfile,
-        int (*callback)(int argc, char **argv, FILE *file))
+                       int (*callback)(int argc, char **argv, FILE *file))
 {
         error_if_null(group)
         error_if_null(opt_name)
@@ -121,7 +121,7 @@ bool opt_mgr_show_help(FILE *file, struct cmdopt_mgr *manager)
                         "usage: %s <command> %s\n\n",
                         manager->module_name,
                         (manager->policy == ARK_MOD_ARG_REQUIRED ? "<args>" : manager->policy
-                                                                                      == ARK_MOD_ARG_MAYBE_REQUIRED
+                                                                              == ARK_MOD_ARG_MAYBE_REQUIRED
                                                                               ? "[<args>]" : ""));
 
                 if (manager->module_desc) {
@@ -146,7 +146,7 @@ bool opt_mgr_show_help(FILE *file, struct cmdopt_mgr *manager)
                         "usage: %s %s\n\n",
                         manager->module_name,
                         (manager->policy == ARK_MOD_ARG_REQUIRED ? "<args>" : manager->policy
-                                                                                      == ARK_MOD_ARG_MAYBE_REQUIRED
+                                                                              == ARK_MOD_ARG_MAYBE_REQUIRED
                                                                               ? "[<args>]" : ""));
 
                 fprintf(file, "%s\n\n", manager->module_desc);

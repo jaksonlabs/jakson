@@ -25,26 +25,26 @@
 ARK_BEGIN_DECL
 
 struct sid_cache_stats {
-        size_t num_hits;
-        size_t num_misses;
-        size_t num_evicted;
+    size_t num_hits;
+    size_t num_misses;
+    size_t num_evicted;
 };
 
-ARK_EXPORT(bool) string_id_cache_create_LRU(struct string_cache **cache, struct archive *archive);
+bool string_id_cache_create_LRU(struct string_cache **cache, struct archive *archive);
 
-ARK_EXPORT(bool) string_id_cache_create_LRU_ex(struct string_cache **cache, struct archive *archive, size_t capacity);
+bool string_id_cache_create_LRU_ex(struct string_cache **cache, struct archive *archive, size_t capacity);
 
-ARK_EXPORT(bool) string_id_cache_get_error(struct err *err, const struct string_cache *cache);
+bool string_id_cache_get_error(struct err *err, const struct string_cache *cache);
 
-ARK_EXPORT(bool) string_id_cache_get_size(size_t *size, const struct string_cache *cache);
+bool string_id_cache_get_size(size_t *size, const struct string_cache *cache);
 
-ARK_EXPORT(char *) string_id_cache_get(struct string_cache *cache, field_sid_t id);
+char *string_id_cache_get(struct string_cache *cache, field_sid_t id);
 
-ARK_EXPORT(bool) string_id_cache_get_statistics(struct sid_cache_stats *statistics, struct string_cache *cache);
+bool string_id_cache_get_statistics(struct sid_cache_stats *statistics, struct string_cache *cache);
 
-ARK_EXPORT(bool) string_id_cache_reset_statistics(struct string_cache *cache);
+bool string_id_cache_reset_statistics(struct string_cache *cache);
 
-ARK_EXPORT(bool) string_id_cache_drop(struct string_cache *cache);
+bool string_id_cache_drop(struct string_cache *cache);
 
 ARK_END_DECL
 

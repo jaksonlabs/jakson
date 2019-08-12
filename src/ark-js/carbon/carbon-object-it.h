@@ -26,80 +26,88 @@
 
 ARK_BEGIN_DECL
 
-struct carbon_object_it
-{
-        struct memfile memfile;
-        offset_t payload_start;
-        struct spinlock lock;
-        struct err err;
+struct carbon_object_it {
+    struct memfile memfile;
+    offset_t payload_start;
+    struct spinlock lock;
+    struct err err;
 
-        struct vector ofType(offset_t) history;
+    /* in case of modifications (updates, inserts, deletes), the number of bytes that are added resp. removed */
+    i64 mod_size;
+    bool object_end_reached;
 
-        u64 key_len;
-        const char *key;
+    struct vector ofType(offset_t) history;
 
-        offset_t value_off;
+    u64 key_len;
+    const char *key;
 
-        struct field_access field_access;
+    offset_t value_off;
+
+    struct field_access field_access;
 };
 
-ARK_EXPORT(bool) carbon_object_it_create(struct carbon_object_it *it, struct memfile *memfile, struct err *err,
-        offset_t payload_start);
+bool carbon_object_it_create(struct carbon_object_it *it, struct memfile *memfile, struct err *err,
+                             offset_t payload_start);
 
-ARK_EXPORT(bool) carbon_object_it_copy(struct carbon_object_it *dst, struct carbon_object_it *src);
+bool carbon_object_it_copy(struct carbon_object_it *dst, struct carbon_object_it *src);
 
-ARK_EXPORT(bool) carbon_object_it_drop(struct carbon_object_it *it);
+bool carbon_object_it_clone(struct carbon_object_it *dst, struct carbon_object_it *src);
 
-ARK_EXPORT(bool) carbon_object_it_rewind(struct carbon_object_it *it);
+bool carbon_object_it_drop(struct carbon_object_it *it);
 
-ARK_EXPORT(bool) carbon_object_it_next(struct carbon_object_it *it);
+bool carbon_object_it_rewind(struct carbon_object_it *it);
 
-ARK_EXPORT(const char *) carbon_object_it_prop_name(u64 *key_len, struct carbon_object_it *it);
+bool carbon_object_it_next(struct carbon_object_it *it);
 
-ARK_EXPORT(bool) carbon_object_it_prop_type(enum carbon_field_type *type, struct carbon_object_it *it);
+offset_t carbon_object_it_tell(struct carbon_object_it *it);
 
-ARK_EXPORT(bool) carbon_object_it_insert_begin(struct carbon_insert *inserter, struct carbon_object_it *it);
+const char *carbon_object_it_prop_name(u64 *key_len, struct carbon_object_it *it);
 
-ARK_EXPORT(bool) carbon_object_it_insert_end(struct carbon_insert *inserter);
+bool carbon_object_it_remove(struct carbon_object_it *it);
 
-ARK_EXPORT(bool) carbon_object_it_lock(struct carbon_object_it *it);
+bool carbon_object_it_prop_type(enum carbon_field_type *type, struct carbon_object_it *it);
 
-ARK_EXPORT(bool) carbon_object_it_unlock(struct carbon_object_it *it);
+bool carbon_object_it_insert_begin(struct carbon_insert *inserter, struct carbon_object_it *it);
 
-ARK_EXPORT(bool) carbon_object_it_fast_forward(struct carbon_object_it *it);
+bool carbon_object_it_insert_end(struct carbon_insert *inserter);
 
-ARK_EXPORT(bool) carbon_object_it_u8_value(u8 *value, struct carbon_object_it *it);
+bool carbon_object_it_lock(struct carbon_object_it *it);
 
-ARK_EXPORT(bool) carbon_object_it_u16_value(u16 *value, struct carbon_object_it *it);
+bool carbon_object_it_unlock(struct carbon_object_it *it);
 
-ARK_EXPORT(bool) carbon_object_it_u32_value(u32 *value, struct carbon_object_it *it);
+bool carbon_object_it_fast_forward(struct carbon_object_it *it);
 
-ARK_EXPORT(bool) carbon_object_it_u64_value(u64 *value, struct carbon_object_it *it);
+bool carbon_object_it_u8_value(u8 *value, struct carbon_object_it *it);
 
-ARK_EXPORT(bool) carbon_object_it_i8_value(i8 *value, struct carbon_object_it *it);
+bool carbon_object_it_u16_value(u16 *value, struct carbon_object_it *it);
 
-ARK_EXPORT(bool) carbon_object_it_i16_value(i16 *value, struct carbon_object_it *it);
+bool carbon_object_it_u32_value(u32 *value, struct carbon_object_it *it);
 
-ARK_EXPORT(bool) carbon_object_it_i32_value(i32 *value, struct carbon_object_it *it);
+bool carbon_object_it_u64_value(u64 *value, struct carbon_object_it *it);
 
-ARK_EXPORT(bool) carbon_object_it_i64_value(i64 *value, struct carbon_object_it *it);
+bool carbon_object_it_i8_value(i8 *value, struct carbon_object_it *it);
 
-ARK_EXPORT(bool) carbon_object_it_float_value(bool *is_null_in, float *value, struct carbon_object_it *it);
+bool carbon_object_it_i16_value(i16 *value, struct carbon_object_it *it);
 
-ARK_EXPORT(bool) carbon_object_it_signed_value(bool *is_null_in, i64 *value, struct carbon_object_it *it);
+bool carbon_object_it_i32_value(i32 *value, struct carbon_object_it *it);
 
-ARK_EXPORT(bool) carbon_object_it_unsigned_value(bool *is_null_in, u64 *value, struct carbon_object_it *it);
+bool carbon_object_it_i64_value(i64 *value, struct carbon_object_it *it);
 
-ARK_EXPORT(const char *) carbon_object_it_string_value(u64 *strlen, struct carbon_object_it *it);
+bool carbon_object_it_float_value(bool *is_null_in, float *value, struct carbon_object_it *it);
 
-ARK_EXPORT(bool) carbon_object_it_binary_value(struct carbon_binary *out, struct carbon_object_it *it);
+bool carbon_object_it_signed_value(bool *is_null_in, i64 *value, struct carbon_object_it *it);
 
-ARK_EXPORT(struct carbon_array_it *) carbon_object_it_array_value(struct carbon_object_it *it_in);
+bool carbon_object_it_unsigned_value(bool *is_null_in, u64 *value, struct carbon_object_it *it);
 
-ARK_EXPORT(struct carbon_object_it *) carbon_object_it_object_value(struct carbon_object_it *it_in);
+const char *carbon_object_it_string_value(u64 *strlen, struct carbon_object_it *it);
 
-ARK_EXPORT(struct carbon_column_it *) carbon_object_it_column_value(struct carbon_object_it *it_in);
+bool carbon_object_it_binary_value(struct carbon_binary *out, struct carbon_object_it *it);
 
+struct carbon_array_it *carbon_object_it_array_value(struct carbon_object_it *it_in);
+
+struct carbon_object_it *carbon_object_it_object_value(struct carbon_object_it *it_in);
+
+struct carbon_column_it *carbon_object_it_column_value(struct carbon_object_it *it_in);
 
 
 ARK_END_DECL

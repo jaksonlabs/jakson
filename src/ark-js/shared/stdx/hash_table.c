@@ -21,8 +21,8 @@
 #define HASHCODE_OF(size, x) ARK_HASH_BERNSTEIN(size, x)
 #define FIX_MAP_AUTO_REHASH_LOADFACTOR 0.9f
 
-ARK_EXPORT(bool) hashtable_create(struct hashtable *map, struct err *err, size_t key_size, size_t value_size,
-        size_t capacity)
+bool hashtable_create(struct hashtable *map, struct err *err, size_t key_size, size_t value_size,
+                      size_t capacity)
 {
         error_if_null(map)
         error_if_null(key_size)
@@ -35,7 +35,7 @@ ARK_EXPORT(bool) hashtable_create(struct hashtable *map, struct err *err, size_t
         ark_success_or_jump(vec_create(&map->key_data, NULL, key_size, capacity), error_handling);
         ark_success_or_jump(vec_create(&map->value_data, NULL, value_size, capacity), cleanup_key_data_and_error);
         ark_success_or_jump(vec_create(&map->table, NULL, sizeof(struct hashtable_bucket), capacity),
-                cleanup_value_key_data_and_error);
+                            cleanup_value_key_data_and_error);
         ark_success_or_jump(vec_enlarge_size_to_capacity(&map->table), cleanup_key_value_table_and_error);
         ark_success_or_jump(vec_zero_memory(&map->table), cleanup_key_value_table_and_error);
         ark_success_or_jump(spin_init(&map->lock), cleanup_key_value_table_and_error);
@@ -60,7 +60,7 @@ ARK_EXPORT(bool) hashtable_create(struct hashtable *map, struct err *err, size_t
         return false;
 }
 
-ARK_EXPORT(bool) hashtable_drop(struct hashtable *map)
+bool hashtable_drop(struct hashtable *map)
 {
         error_if_null(map)
 
@@ -77,23 +77,23 @@ ARK_EXPORT(bool) hashtable_drop(struct hashtable *map)
         return status;
 }
 
-ARK_EXPORT(struct hashtable *)hashtable_cpy(struct hashtable *src)
+struct hashtable *hashtable_cpy(struct hashtable *src)
 {
         if (src) {
-                struct hashtable *cpy = malloc(sizeof(struct hashtable));
+                struct hashtable *cpy = ark_malloc(sizeof(struct hashtable));
 
                 hashtable_lock(src);
 
                 hashtable_create(cpy,
-                        &src->err,
-                        src->key_data.elem_size,
-                        src->value_data.elem_size,
-                        src->table.cap_elems);
+                                 &src->err,
+                                 src->key_data.elem_size,
+                                 src->value_data.elem_size,
+                                 src->table.cap_elems);
 
                 assert(src->key_data.cap_elems == src->value_data.cap_elems
-                        && src->value_data.cap_elems == src->table.cap_elems);
+                       && src->value_data.cap_elems == src->table.cap_elems);
                 assert((src->key_data.num_elems == src->value_data.num_elems)
-                        && src->value_data.num_elems <= src->table.num_elems);
+                       && src->value_data.num_elems <= src->table.num_elems);
 
                 vec_cpy_to(&cpy->key_data, &src->key_data);
                 vec_cpy_to(&cpy->value_data, &src->value_data);
@@ -102,9 +102,9 @@ ARK_EXPORT(struct hashtable *)hashtable_cpy(struct hashtable *src)
                 error_cpy(&cpy->err, &src->err);
 
                 assert(cpy->key_data.cap_elems == src->value_data.cap_elems
-                        && src->value_data.cap_elems == cpy->table.cap_elems);
+                       && src->value_data.cap_elems == cpy->table.cap_elems);
                 assert((cpy->key_data.num_elems == src->value_data.num_elems)
-                        && src->value_data.num_elems <= cpy->table.num_elems);
+                       && src->value_data.num_elems <= cpy->table.num_elems);
 
                 hashtable_unlock(src);
                 return cpy;
@@ -114,13 +114,13 @@ ARK_EXPORT(struct hashtable *)hashtable_cpy(struct hashtable *src)
         }
 }
 
-ARK_EXPORT(bool) hashtable_clear(struct hashtable *map)
+bool hashtable_clear(struct hashtable *map)
 {
         error_if_null(map)
         assert(map->key_data.cap_elems == map->value_data.cap_elems
-                && map->value_data.cap_elems == map->table.cap_elems);
+               && map->value_data.cap_elems == map->table.cap_elems);
         assert((map->key_data.num_elems == map->value_data.num_elems)
-                && map->value_data.num_elems <= map->table.num_elems);
+               && map->value_data.num_elems <= map->table.num_elems);
 
         hashtable_lock(map);
 
@@ -129,9 +129,9 @@ ARK_EXPORT(bool) hashtable_clear(struct hashtable *map)
         map->size = 0;
 
         assert(map->key_data.cap_elems == map->value_data.cap_elems
-                && map->value_data.cap_elems == map->table.cap_elems);
+               && map->value_data.cap_elems == map->table.cap_elems);
         assert((map->key_data.num_elems == map->value_data.num_elems)
-                && map->value_data.num_elems <= map->table.num_elems);
+               && map->value_data.num_elems <= map->table.num_elems);
 
         if (!status) {
                 error(&map->err, ARK_ERR_OPPFAILED);
@@ -142,7 +142,7 @@ ARK_EXPORT(bool) hashtable_clear(struct hashtable *map)
         return status;
 }
 
-ARK_EXPORT(bool) hashtable_avg_displace(float *displace, const struct hashtable *map)
+bool hashtable_avg_displace(float *displace, const struct hashtable *map)
 {
         error_if_null(displace);
         error_if_null(map);
@@ -157,14 +157,14 @@ ARK_EXPORT(bool) hashtable_avg_displace(float *displace, const struct hashtable 
         return true;
 }
 
-ARK_EXPORT(bool) hashtable_lock(struct hashtable *map)
+bool hashtable_lock(struct hashtable *map)
 {
         error_if_null(map)
         //spin_acquire(&map->lock);
         return true;
 }
 
-ARK_EXPORT(bool) hashtable_unlock(struct hashtable *map)
+bool hashtable_unlock(struct hashtable *map)
 {
         error_if_null(map)
         //spin_release(&map->lock);
@@ -182,7 +182,7 @@ static inline const void *get_bucket_value(const struct hashtable_bucket *bucket
 }
 
 static void insert(struct hashtable_bucket *bucket, struct hashtable *map, const void *key, const void *value,
-        i32 displacement)
+                   i32 displacement)
 {
         assert(map->key_data.num_elems == map->value_data.num_elems);
         u64 idx = map->key_data.num_elems;
@@ -197,7 +197,7 @@ static void insert(struct hashtable_bucket *bucket, struct hashtable *map, const
 }
 
 static inline uint_fast32_t insert_or_update(struct hashtable *map, const u32 *bucket_idxs, const void *keys,
-        const void *values, uint_fast32_t num_pairs)
+                                             const void *values, uint_fast32_t num_pairs)
 {
         for (uint_fast32_t i = 0; i < num_pairs; i++) {
                 const void *key = keys + i * map->key_data.elem_size;
@@ -214,7 +214,9 @@ static inline uint_fast32_t insert_or_update(struct hashtable *map, const u32 *b
                                 struct hashtable_bucket
                                         *bucket = vec_get(&map->table, displace_idx, struct hashtable_bucket);
                                 fitting_bucket_found = !bucket->in_use_flag || (bucket->in_use_flag
-                                        && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0);
+                                                                                &&
+                                                                                memcmp(get_bucket_key(bucket, map), key,
+                                                                                       map->key_data.elem_size) == 0);
                                 if (fitting_bucket_found) {
                                         break;
                                 } else {
@@ -234,8 +236,11 @@ static inline uint_fast32_t insert_or_update(struct hashtable *map, const u32 *b
                                         const struct hashtable_bucket
                                                 *bucket = vec_get(&map->table, displace_idx, struct hashtable_bucket);
                                         fitting_bucket_found = !bucket->in_use_flag || (bucket->in_use_flag
-                                                && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size)
-                                                        == 0);
+                                                                                        && memcmp(get_bucket_key(bucket,
+                                                                                                                 map),
+                                                                                                  key,
+                                                                                                  map->key_data.elem_size)
+                                                                                           == 0);
                                         if (fitting_bucket_found) {
                                                 break;
                                         }
@@ -266,21 +271,21 @@ static inline uint_fast32_t insert_or_update(struct hashtable *map, const u32 *b
         return 0;
 }
 
-ARK_EXPORT(bool) hashtable_insert_or_update(struct hashtable *map, const void *keys, const void *values,
-        uint_fast32_t num_pairs)
+bool hashtable_insert_or_update(struct hashtable *map, const void *keys, const void *values,
+                                uint_fast32_t num_pairs)
 {
         error_if_null(map)
         error_if_null(keys)
         error_if_null(values)
 
         assert(map->key_data.cap_elems == map->value_data.cap_elems
-                && map->value_data.cap_elems == map->table.cap_elems);
+               && map->value_data.cap_elems == map->table.cap_elems);
         assert((map->key_data.num_elems == map->value_data.num_elems)
-                && map->value_data.num_elems <= map->table.num_elems);
+               && map->value_data.num_elems <= map->table.num_elems);
 
         hashtable_lock(map);
 
-        u32 *bucket_idxs = malloc(num_pairs * sizeof(u32));
+        u32 *bucket_idxs = ark_malloc(num_pairs * sizeof(u32));
         if (!bucket_idxs) {
                 error(&map->err, ARK_ERR_MALLOCERR);
                 return false;
@@ -295,10 +300,10 @@ ARK_EXPORT(bool) hashtable_insert_or_update(struct hashtable *map, const void *k
         uint_fast32_t cont_idx = 0;
         do {
                 cont_idx = insert_or_update(map,
-                        bucket_idxs + cont_idx,
-                        keys + cont_idx * map->key_data.elem_size,
-                        values + cont_idx * map->value_data.elem_size,
-                        num_pairs - cont_idx);
+                                            bucket_idxs + cont_idx,
+                                            keys + cont_idx * map->key_data.elem_size,
+                                            values + cont_idx * map->value_data.elem_size,
+                                            num_pairs - cont_idx);
                 if (cont_idx != 0) {
                         /* rehashing is required, and [status, num_pairs) are left to be inserted */
                         if (!hashtable_rehash(map)) {
@@ -306,8 +311,7 @@ ARK_EXPORT(bool) hashtable_insert_or_update(struct hashtable *map, const void *k
                                 return false;
                         }
                 }
-        }
-        while (cont_idx != 0);
+        } while (cont_idx != 0);
 
         free(bucket_idxs);
         hashtable_unlock(map);
@@ -316,14 +320,14 @@ ARK_EXPORT(bool) hashtable_insert_or_update(struct hashtable *map, const void *k
 }
 
 struct hashtable_header {
-        char marker;
-        offset_t key_data_off;
-        offset_t value_data_off;
-        offset_t table_off;
-        u32 size;
+    char marker;
+    offset_t key_data_off;
+    offset_t value_data_off;
+    offset_t table_off;
+    u32 size;
 };
 
-ARK_EXPORT(bool) hashtable_serialize(FILE *file, struct hashtable *table)
+bool hashtable_serialize(FILE *file, struct hashtable *table)
 {
         offset_t header_pos = ftell(file);
         fseek(file, sizeof(struct hashtable_header), SEEK_CUR);
@@ -358,7 +362,7 @@ ARK_EXPORT(bool) hashtable_serialize(FILE *file, struct hashtable *table)
         return false;
 }
 
-ARK_EXPORT(bool) hashtable_deserialize(struct hashtable *table, struct err *err, FILE *file)
+bool hashtable_deserialize(struct hashtable *table, struct err *err, FILE *file)
 {
         error_if_null(table)
         error_if_null(err)
@@ -406,14 +410,14 @@ ARK_EXPORT(bool) hashtable_deserialize(struct hashtable *table, struct err *err,
         return false;
 }
 
-ARK_EXPORT(bool) hashtable_remove_if_contained(struct hashtable *map, const void *keys, size_t num_pairs)
+bool hashtable_remove_if_contained(struct hashtable *map, const void *keys, size_t num_pairs)
 {
         error_if_null(map)
         error_if_null(keys)
 
         hashtable_lock(map);
 
-        u32 *bucket_idxs = malloc(num_pairs * sizeof(u32));
+        u32 *bucket_idxs = ark_malloc(num_pairs * sizeof(u32));
         if (!bucket_idxs) {
                 error(&map->err, ARK_ERR_MALLOCERR);
                 hashtable_unlock(map);
@@ -434,13 +438,13 @@ ARK_EXPORT(bool) hashtable_remove_if_contained(struct hashtable *map, const void
                 for (u32 k = bucket_idx; !bucket_found && k < map->table.num_elems; k++) {
                         const struct hashtable_bucket *bucket = vec_get(&map->table, k, struct hashtable_bucket);
                         bucket_found = bucket->in_use_flag
-                                && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
+                                       && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
                         actual_idx = k;
                 }
                 for (u32 k = 0; !bucket_found && k < bucket_idx; k++) {
                         const struct hashtable_bucket *bucket = vec_get(&map->table, k, struct hashtable_bucket);
                         bucket_found = bucket->in_use_flag
-                                && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
+                                       && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
                         actual_idx = k;
                 }
 
@@ -459,7 +463,7 @@ ARK_EXPORT(bool) hashtable_remove_if_contained(struct hashtable *map, const void
         return true;
 }
 
-ARK_EXPORT(const void *)hashtable_get_value(struct hashtable *map, const void *key)
+const void *hashtable_get_value(struct hashtable *map, const void *key)
 {
         error_if_null(map)
         error_if_null(key)
@@ -495,7 +499,7 @@ ARK_EXPORT(const void *)hashtable_get_value(struct hashtable *map, const void *k
         return result;
 }
 
-ARK_EXPORT(bool) hashtable_get_fload_factor(float *factor, struct hashtable *map)
+bool hashtable_get_fload_factor(float *factor, struct hashtable *map)
 {
         error_if_null(factor)
         error_if_null(map)
@@ -509,7 +513,7 @@ ARK_EXPORT(bool) hashtable_get_fload_factor(float *factor, struct hashtable *map
         return true;
 }
 
-ARK_EXPORT(bool) hashtable_rehash(struct hashtable *map)
+bool hashtable_rehash(struct hashtable *map)
 {
         error_if_null(map)
 
@@ -527,9 +531,9 @@ ARK_EXPORT(bool) hashtable_rehash(struct hashtable *map)
         vec_zero_memory(&map->table);
 
         assert(map->key_data.cap_elems == map->value_data.cap_elems
-                && map->value_data.cap_elems == map->table.cap_elems);
+               && map->value_data.cap_elems == map->table.cap_elems);
         assert((map->key_data.num_elems == map->value_data.num_elems)
-                && map->value_data.num_elems <= map->table.num_elems);
+               && map->value_data.num_elems <= map->table.num_elems);
 
         for (size_t i = 0; i < cpy->table.num_elems; i++) {
                 struct hashtable_bucket *bucket = vec_get(&cpy->table, i, struct hashtable_bucket);

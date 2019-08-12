@@ -49,81 +49,81 @@ ARK_FORWARD_STRUCT_DECL(Slice)
 #define SLICE_KEY_COLUMN_MAX_ELEMS (SLICE_DATA_SIZE / 8 / 3) /** one array with elements of 64 bits each, 3 of them */
 
 typedef enum slice_lookup_strat_e {
-        SLICE_LOOKUP_SCAN, SLICE_LOOKUP_BESEARCH,
+    SLICE_LOOKUP_SCAN, SLICE_LOOKUP_BESEARCH,
 } slice_lookup_strat_e;
 
 typedef struct SliceDescriptor SliceDescriptor;
 
 typedef struct Slice {
-        /** Enumeration to determine which strategy for 'find' is currently applied */
-        slice_lookup_strat_e strat;
+    /** Enumeration to determine which strategy for 'find' is currently applied */
+    slice_lookup_strat_e strat;
 
-        /** Data stored inside this slice. By setting 'ARK_SLICE_LIST_CPU_L3_SIZE_IN_BYTE' statically to the target
-         * CPU L3 size, it is intended that one entire 'ARK_slice_t' structure fits into the L3 cache of the CPU.
-         * It is assumed that at least one element can be inserted into a 'ARK_slice_t' object (which means that
-         * the type of elements to be inserted must be less or equal to SLICE_DATA_SIZE. In case an element is
-         * removed from this list, data is physically moved to avoid a "sparse" list, i.e., it is alwalys
-         * guaranteeed that 'data' contains continously elements without any gabs until 'num_elems' limit. This
-         * avoids to lookup in a struct bitmap or other structure whether a particular element is removed or not; also
-         * this does not steal an element from the domain of the used data type to encode 'not present' with a
-         * particular values. However, a remove operation is expensive. */
-        const char *key_column[SLICE_KEY_COLUMN_MAX_ELEMS];
-        hash32_t keyHashColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
-        field_sid_t string_id_tColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
+    /** Data stored inside this slice. By setting 'ARK_SLICE_LIST_CPU_L3_SIZE_IN_BYTE' statically to the target
+     * CPU L3 size, it is intended that one entire 'ARK_slice_t' structure fits into the L3 cache of the CPU.
+     * It is assumed that at least one element can be inserted into a 'ARK_slice_t' object (which means that
+     * the type of elements to be inserted must be less or equal to SLICE_DATA_SIZE. In case an element is
+     * removed from this list, data is physically moved to avoid a "sparse" list, i.e., it is alwalys
+     * guaranteeed that 'data' contains continously elements without any gabs until 'num_elems' limit. This
+     * avoids to lookup in a struct bitmap or other structure whether a particular element is removed or not; also
+     * this does not steal an element from the domain of the used data type to encode 'not present' with a
+     * particular values. However, a remove operation is expensive. */
+    const char *key_column[SLICE_KEY_COLUMN_MAX_ELEMS];
+    hash32_t keyHashColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
+    field_sid_t string_id_tColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
 
-        /** The number of elements stored in 'key_colum', 'key_hash_column', and 'string_id_column' */
-        u32 num_elems;
+    /** The number of elements stored in 'key_colum', 'key_hash_column', and 'string_id_column' */
+    u32 num_elems;
 
-        u32 cacheIdx;
+    u32 cacheIdx;
 } Slice;
 
 typedef struct ARK_hash_bounds_t {
-        /** Min and max values inside this slice. Used to skip the lookup in the per-slice bloom_t during search */
-        hash32_t minHash, maxHash;
+    /** Min and max values inside this slice. Used to skip the lookup in the per-slice bloom_t during search */
+    hash32_t minHash, maxHash;
 } HashBounds;
 
 typedef struct SliceDescriptor {
-        /** The number of reads to this slice including misses and hits. Along with 'num_reads_hit' used to determine
-         * the order of this element w.r.t. to other elements in the list */
-        size_t numReadsAll;
+    /** The number of reads to this slice including misses and hits. Along with 'num_reads_hit' used to determine
+     * the order of this element w.r.t. to other elements in the list */
+    size_t numReadsAll;
 
-        /** The number of reads to this slice that lead to a search hit. See 'num_reads_all' for the purpose. */
-        size_t numReadsHit;
+    /** The number of reads to this slice that lead to a search hit. See 'num_reads_all' for the purpose. */
+    size_t numReadsHit;
 
 } SliceDescriptor;
 
 typedef struct ARK_slice_list_t {
-        struct allocator alloc;
-        struct spinlock lock;
+    struct allocator alloc;
+    struct spinlock lock;
 
-        struct vector ofType(ARK_slice_t) slices;
-        struct vector ofType(ARK_slice_desc_t) descriptors;
-        struct vector ofType(ARK_bloomfilter_t) filters;
-        struct vector ofType(ARK_hash_bounds_t) bounds;
+    struct vector ofType(ARK_slice_t) slices;
+    struct vector ofType(ARK_slice_desc_t) descriptors;
+    struct vector ofType(ARK_bloomfilter_t) filters;
+    struct vector ofType(ARK_hash_bounds_t) bounds;
 
-        u32 appender_idx;
+    u32 appender_idx;
 
-        struct err err;
+    struct err err;
 } slice_list_t;
 
 typedef struct ARK_slice_handle_t {
-        Slice *container;
-        const char *key;
-        field_sid_t value;
-        bool is_contained;
+    Slice *container;
+    const char *key;
+    field_sid_t value;
+    bool is_contained;
 } slice_handle_t;
 
-ARK_EXPORT(bool) slice_list_create(slice_list_t *list, const struct allocator *alloc, size_t sliceCapacity);
+bool slice_list_create(slice_list_t *list, const struct allocator *alloc, size_t sliceCapacity);
 
-ARK_EXPORT(bool) SliceListDrop(slice_list_t *list);
+bool SliceListDrop(slice_list_t *list);
 
-ARK_EXPORT(bool) slice_list_lookup(slice_handle_t *handle, slice_list_t *list, const char *needle);
+bool slice_list_lookup(slice_handle_t *handle, slice_list_t *list, const char *needle);
 
-ARK_EXPORT(bool) SliceListIsEmpty(const slice_list_t *list);
+bool SliceListIsEmpty(const slice_list_t *list);
 
-ARK_EXPORT(bool) slice_list_insert(slice_list_t *list, char **strings, field_sid_t *ids, size_t npairs);
+bool slice_list_insert(slice_list_t *list, char **strings, field_sid_t *ids, size_t npairs);
 
-ARK_EXPORT(bool) SliceListRemove(slice_list_t *list, slice_handle_t *handle);
+bool SliceListRemove(slice_list_t *list, slice_handle_t *handle);
 
 ARK_END_DECL
 

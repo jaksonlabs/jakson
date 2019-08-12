@@ -38,7 +38,7 @@
         result;                                                                         \
 })
 
-ARK_EXPORT(bool) carbon_media_write(struct memfile *dst, enum carbon_field_type type)
+bool carbon_media_write(struct memfile *dst, enum carbon_field_type type)
 {
         error_if_null(dst);
         media_type_t t = type;
@@ -46,11 +46,11 @@ ARK_EXPORT(bool) carbon_media_write(struct memfile *dst, enum carbon_field_type 
         return true;
 }
 
-ARK_EXPORT(u32) carbon_media_mime_type_by_ext(const char *ext)
+u32 carbon_media_mime_type_by_ext(const char *ext)
 {
         u32 id;
         if (likely(ext != NULL)) {
-                if (likely((id = find_mime_by_ext(ext)) < _nmime_type_register)) {
+                if (likely((id = find_mime_by_ext(ext)) < (u32) _nmime_type_register)) {
                         return id;
                 }
         }
@@ -59,7 +59,7 @@ ARK_EXPORT(u32) carbon_media_mime_type_by_ext(const char *ext)
         return id;
 }
 
-ARK_EXPORT(const char *) carbon_media_mime_type_by_id(u32 id)
+const char *carbon_media_mime_type_by_id(u32 id)
 {
         if (unlikely(id >= _nmime_type_register)) {
                 id = find_mime_by_ext("bin");
@@ -68,7 +68,7 @@ ARK_EXPORT(const char *) carbon_media_mime_type_by_id(u32 id)
         return mime_type_register[id].type;
 }
 
-ARK_EXPORT(const char *) carbon_media_mime_ext_by_id(u32 id)
+const char *carbon_media_mime_ext_by_id(u32 id)
 {
         if (unlikely(id >= _nmime_type_register)) {
                 id = find_mime_by_ext("bin");

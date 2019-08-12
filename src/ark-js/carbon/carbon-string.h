@@ -24,15 +24,23 @@
 
 ARK_BEGIN_DECL
 
-ARK_EXPORT(bool) carbon_string_write(struct memfile *file, const char *string);
+bool carbon_string_write(struct memfile *file, const char *string);
 
-ARK_EXPORT(bool) carbon_string_nomarker_write(struct memfile *file, const char *string);
+bool carbon_string_nomarker_write(struct memfile *file, const char *string);
 
-ARK_EXPORT(bool) carbon_string_update(struct memfile *file, const char *string);
+bool carbon_string_nomarker_remove(struct memfile *file);
 
-ARK_EXPORT(bool) carbon_string_skip(struct memfile *file);
+bool carbon_string_remove(struct memfile *file);
 
-ARK_EXPORT(const char *) carbon_string_read(u64 *len, struct memfile *file);
+bool carbon_string_update(struct memfile *file, const char *string);
+
+bool carbon_string_skip(struct memfile *file);
+
+bool carbon_string_nomarker_skip(struct memfile *file);
+
+const char *carbon_string_read(u64 *len, struct memfile *file);
+
+const char *carbon_string_nomarker_read(u64 *len, struct memfile *file);
 
 ARK_END_DECL
 

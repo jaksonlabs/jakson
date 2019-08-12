@@ -12,6 +12,9 @@ For details, see http://sourceforge.net/projects/libb64
 
 #include "libb64.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+
 const int           CHARS_PER_LINE = 72;
 
 static inline char
@@ -119,3 +122,5 @@ base64_encode_blockend (char *code_out, base64_encodestate * state_in)
 
   return (size_t) (codechar - code_out);
 }
+
+#pragma GCC diagnostic pop
