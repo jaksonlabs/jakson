@@ -23,22 +23,26 @@
 ARK_BEGIN_DECL
 
 struct priority_queue_element_info {
-        size_t priority;
-        void *element;
+    size_t priority;
+    void *element;
 };
 
 struct priority_queue {
-        struct priority_queue_element_info *data;
-        size_t num_elements;
-        size_t capacity;
-        pthread_mutex_t mutex;
+    struct priority_queue_element_info *data;
+    size_t num_elements;
+    size_t capacity;
+    pthread_mutex_t mutex;
 };
 
-ARK_EXPORT(void) priority_queue_init(struct priority_queue *queue);
-ARK_EXPORT(void) priority_queue_free(struct priority_queue *queue);
-ARK_EXPORT(void) priority_queue_push(struct priority_queue *queue, void *data, size_t priority);
-ARK_EXPORT(void *) priority_queue_pop(struct priority_queue *queue);
-ARK_EXPORT(int) priority_queue_is_empty(struct priority_queue *queue);
+void priority_queue_init(struct priority_queue *queue);
+
+void priority_queue_free(struct priority_queue *queue);
+
+void priority_queue_push(struct priority_queue *queue, void *data, size_t priority);
+
+void *priority_queue_pop(struct priority_queue *queue);
+
+int priority_queue_is_empty(struct priority_queue *queue);
 
 ARK_END_DECL
 

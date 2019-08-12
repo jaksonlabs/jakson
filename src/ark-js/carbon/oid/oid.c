@@ -40,40 +40,40 @@ _Thread_local u32 thread_local_counter_limit;
  * machines.
  */
 union object_id {
-        struct {
-                /* global */
-                u64 global_wallclock
-                        : 5;   /* increasing wall clock time (ms) */
-                u64 global_build_date
-                        : 1;   /* fix bit dependent on compilation time */
-                u64 global_build_path
-                        : 1;   /* fix bit dependent on compilation path */
+    struct {
+        /* global */
+        u64 global_wallclock
+                : 5;   /* increasing wall clock time (ms) */
+        u64 global_build_date
+                : 1;   /* fix bit dependent on compilation time */
+        u64 global_build_path
+                : 1;   /* fix bit dependent on compilation path */
 
-                /* per-process */
-                u64 process_id
-                        : 7;   /* fix id */
-                u64 process_magic
-                        : 2;   /* random fix value */
-                u64 process_counter
-                        : 8;   /* increasing counter */
+        /* per-process */
+        u64 process_id
+                : 7;   /* fix id */
+        u64 process_magic
+                : 2;   /* random fix value */
+        u64 process_counter
+                : 8;   /* increasing counter */
 
-                /* per-thread  */
-                u64 thread_id
-                        : 7;   /* fix id */
-                u64 thread_magic
-                        : 2;   /* random fix value */
-                u64 thread_counter
-                        : 29;  /* increasing counter (< 536mio ids per thread) */
+        /* per-thread  */
+        u64 thread_id
+                : 7;   /* fix id */
+        u64 thread_magic
+                : 2;   /* random fix value */
+        u64 thread_counter
+                : 29;  /* increasing counter (< 536mio ids per thread) */
 
-                /* per-call */
-                u64 call_random
-                        :  2;  /* random value */
-        };
+        /* per-call */
+        u64 call_random
+                :  2;  /* random value */
+    };
 
-        u64 value;
+    u64 value;
 };
 
-ARK_EXPORT(bool) object_id_create(object_id_t *out)
+bool object_id_create(object_id_t *out)
 {
         assert(out);
 
@@ -119,70 +119,70 @@ ARK_EXPORT(bool) object_id_create(object_id_t *out)
         return capacity_left;
 }
 
-ARK_EXPORT(bool) object_id_get_global_wallclocktime(uint_fast8_t *out, object_id_t id)
+bool object_id_get_global_wallclocktime(uint_fast8_t *out, object_id_t id)
 {
         error_if_null(out);
         *out = ((union object_id *) &id)->global_wallclock;
         return true;
 }
 
-ARK_EXPORT(bool) object_id_get_global_build_path_bit(uint_fast8_t *out, object_id_t id)
+bool object_id_get_global_build_path_bit(uint_fast8_t *out, object_id_t id)
 {
         error_if_null(out);
         *out = ((union object_id *) &id)->global_build_path;
         return true;
 }
 
-ARK_EXPORT(bool) object_id_get_global_build_time_bit(uint_fast8_t *out, object_id_t id)
+bool object_id_get_global_build_time_bit(uint_fast8_t *out, object_id_t id)
 {
         error_if_null(out);
         *out = ((union object_id *) &id)->global_build_date;
         return true;
 }
 
-ARK_EXPORT(bool) object_id_get_process_id(uint_fast8_t *out, object_id_t id)
+bool object_id_get_process_id(uint_fast8_t *out, object_id_t id)
 {
         error_if_null(out);
         *out = ((union object_id *) &id)->process_id;
         return true;
 }
 
-ARK_EXPORT(bool) object_id_get_process_magic(uint_fast8_t *out, object_id_t id)
+bool object_id_get_process_magic(uint_fast8_t *out, object_id_t id)
 {
         error_if_null(out);
         *out = ((union object_id *) &id)->process_magic;
         return true;
 }
 
-ARK_EXPORT(bool) object_id_get_process_counter(uint_fast16_t *out, object_id_t id)
+bool object_id_get_process_counter(uint_fast16_t *out, object_id_t id)
 {
         error_if_null(out);
         *out = ((union object_id *) &id)->process_counter;
         return true;
 }
 
-ARK_EXPORT(bool) object_id_get_thread_id(uint_fast8_t *out, object_id_t id)
+bool object_id_get_thread_id(uint_fast8_t *out, object_id_t id)
 {
         error_if_null(out);
         *out = ((union object_id *) &id)->thread_id;
         return true;
 }
 
-ARK_EXPORT(bool) object_id_get_thread_magic(uint_fast8_t *out, object_id_t id)
+bool object_id_get_thread_magic(uint_fast8_t *out, object_id_t id)
 {
         error_if_null(out);
         *out = ((union object_id *) &id)->thread_magic;
         return true;
 }
 
-ARK_EXPORT(bool) object_id_get_thread_counter(uint_fast32_t *out, object_id_t id)
+bool object_id_get_thread_counter(uint_fast32_t *out, object_id_t id)
 {
         error_if_null(out);
         *out = ((union object_id *) &id)->thread_counter;
         return true;
 }
 
-ARK_EXPORT(bool) object_id_get_call_random(uint_fast8_t *out, object_id_t id)
+bool object_id_get_call_random(uint_fast8_t *out, object_id_t id)
 {
         error_if_null(out);
         *out = ((union object_id *) &id)->call_random;

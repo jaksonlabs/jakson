@@ -30,8 +30,8 @@
         (const builtin_type *) raw;                                                                                    \
 })
 
-ARK_EXPORT(bool) carbon_column_it_create(struct carbon_column_it *it, struct memfile *memfile, struct err *err,
-        offset_t column_start_offset)
+bool carbon_column_it_create(struct carbon_column_it *it, struct memfile *memfile, struct err *err,
+                             offset_t column_start_offset)
 {
         error_if_null(it);
         error_if_null(memfile);
@@ -49,16 +49,16 @@ ARK_EXPORT(bool) carbon_column_it_create(struct carbon_column_it *it, struct mem
 
         u8 marker = *memfile_read(&it->memfile, sizeof(u8));
         error_if_with_details(marker != CARBON_MARKER_COLUMN_U8 &&
-                marker != CARBON_MARKER_COLUMN_U16 &&
-                marker != CARBON_MARKER_COLUMN_U32 &&
-                marker != CARBON_MARKER_COLUMN_U64 &&
-                marker != CARBON_MARKER_COLUMN_I8 &&
-                marker != CARBON_MARKER_COLUMN_I16 &&
-                marker != CARBON_MARKER_COLUMN_I32 &&
-                marker != CARBON_MARKER_COLUMN_I64 &&
-                marker != CARBON_MARKER_COLUMN_FLOAT &&
-                marker != CARBON_MARKER_COLUMN_BOOLEAN, err, ARK_ERR_ILLEGALOP,
-                "column begin marker ('(') not found");
+                              marker != CARBON_MARKER_COLUMN_U16 &&
+                              marker != CARBON_MARKER_COLUMN_U32 &&
+                              marker != CARBON_MARKER_COLUMN_U64 &&
+                              marker != CARBON_MARKER_COLUMN_I8 &&
+                              marker != CARBON_MARKER_COLUMN_I16 &&
+                              marker != CARBON_MARKER_COLUMN_I32 &&
+                              marker != CARBON_MARKER_COLUMN_I64 &&
+                              marker != CARBON_MARKER_COLUMN_FLOAT &&
+                              marker != CARBON_MARKER_COLUMN_BOOLEAN, err, ARK_ERR_ILLEGALOP,
+                              "column begin marker ('(') not found");
 
         enum carbon_field_type type = (enum carbon_field_type) marker;
         it->type = type;
@@ -72,7 +72,7 @@ ARK_EXPORT(bool) carbon_column_it_create(struct carbon_column_it *it, struct mem
         return true;
 }
 
-ARK_EXPORT(bool) carbon_column_it_clone(struct carbon_column_it *dst, struct carbon_column_it *src)
+bool carbon_column_it_clone(struct carbon_column_it *dst, struct carbon_column_it *src)
 {
         memfile_clone(&dst->memfile, &src->memfile);
         dst->num_and_capacity_start_offset = src->num_and_capacity_start_offset;
@@ -86,21 +86,21 @@ ARK_EXPORT(bool) carbon_column_it_clone(struct carbon_column_it *dst, struct car
         return true;
 }
 
-ARK_EXPORT(bool) carbon_column_it_insert(struct carbon_insert *inserter, struct carbon_column_it *it)
+bool carbon_column_it_insert(struct carbon_insert *inserter, struct carbon_column_it *it)
 {
         error_if_null(inserter)
         error_if_null(it)
         return carbon_int_insert_create_for_column(inserter, it);
 }
 
-ARK_EXPORT(bool) carbon_column_it_fast_forward(struct carbon_column_it *it)
+bool carbon_column_it_fast_forward(struct carbon_column_it *it)
 {
         error_if_null(it);
         carbon_column_it_values(NULL, NULL, it);
         return true;
 }
 
-ARK_EXPORT(offset_t) carbon_column_it_tell(struct carbon_column_it *it)
+offset_t carbon_column_it_tell(struct carbon_column_it *it)
 {
         if (likely(it != NULL)) {
                 return memfile_tell(&it->memfile);
@@ -110,7 +110,7 @@ ARK_EXPORT(offset_t) carbon_column_it_tell(struct carbon_column_it *it)
         }
 }
 
-ARK_EXPORT(bool) carbon_column_it_values_info(enum carbon_field_type *type, u32 *nvalues, struct carbon_column_it *it)
+bool carbon_column_it_values_info(enum carbon_field_type *type, u32 *nvalues, struct carbon_column_it *it)
 {
         error_if_null(it);
 
@@ -125,7 +125,7 @@ ARK_EXPORT(bool) carbon_column_it_values_info(enum carbon_field_type *type, u32 
         return true;
 }
 
-ARK_EXPORT(const void *) carbon_column_it_values(enum carbon_field_type *type, u32 *nvalues, struct carbon_column_it *it)
+const void *carbon_column_it_values(enum carbon_field_type *type, u32 *nvalues, struct carbon_column_it *it)
 {
         error_if_null(it);
         memfile_seek(&it->memfile, it->num_and_capacity_start_offset);
@@ -144,57 +144,57 @@ ARK_EXPORT(const void *) carbon_column_it_values(enum carbon_field_type *type, u
         return result;
 }
 
-ARK_EXPORT(const u8 *) carbon_column_it_boolean_values(u32 *nvalues, struct carbon_column_it *it)
+const u8 *carbon_column_it_boolean_values(u32 *nvalues, struct carbon_column_it *it)
 {
         return safe_cast(u8, nvalues, it, (type == CARBON_FIELD_TYPE_COLUMN_BOOLEAN));
 }
 
-ARK_EXPORT(const u8 *) carbon_column_it_u8_values(u32 *nvalues, struct carbon_column_it *it)
+const u8 *carbon_column_it_u8_values(u32 *nvalues, struct carbon_column_it *it)
 {
         return safe_cast(u8, nvalues, it, (type == CARBON_FIELD_TYPE_COLUMN_U8));
 }
 
-ARK_EXPORT(const u16 *) carbon_column_it_u16_values(u32 *nvalues, struct carbon_column_it *it)
+const u16 *carbon_column_it_u16_values(u32 *nvalues, struct carbon_column_it *it)
 {
         return safe_cast(u16, nvalues, it, (type == CARBON_FIELD_TYPE_COLUMN_U16));
 }
 
-ARK_EXPORT(const u32 *) carbon_column_it_u32_values(u32 *nvalues, struct carbon_column_it *it)
+const u32 *carbon_column_it_u32_values(u32 *nvalues, struct carbon_column_it *it)
 {
         return safe_cast(u32, nvalues, it, (type == CARBON_FIELD_TYPE_COLUMN_U32));
 }
 
-ARK_EXPORT(const u64 *) carbon_column_it_u64_values(u32 *nvalues, struct carbon_column_it *it)
+const u64 *carbon_column_it_u64_values(u32 *nvalues, struct carbon_column_it *it)
 {
         return safe_cast(u64, nvalues, it, (type == CARBON_FIELD_TYPE_COLUMN_U64));
 }
 
-ARK_EXPORT(const i8 *) carbon_column_it_i8_values(u32 *nvalues, struct carbon_column_it *it)
+const i8 *carbon_column_it_i8_values(u32 *nvalues, struct carbon_column_it *it)
 {
         return safe_cast(i8, nvalues, it, (type == CARBON_FIELD_TYPE_COLUMN_I8));
 }
 
-ARK_EXPORT(const i16 *) carbon_column_it_i16_values(u32 *nvalues, struct carbon_column_it *it)
+const i16 *carbon_column_it_i16_values(u32 *nvalues, struct carbon_column_it *it)
 {
         return safe_cast(i16, nvalues, it, (type == CARBON_FIELD_TYPE_COLUMN_I16));
 }
 
-ARK_EXPORT(const i32 *) carbon_column_it_i32_values(u32 *nvalues, struct carbon_column_it *it)
+const i32 *carbon_column_it_i32_values(u32 *nvalues, struct carbon_column_it *it)
 {
         return safe_cast(i32, nvalues, it, (type == CARBON_FIELD_TYPE_COLUMN_I32));
 }
 
-ARK_EXPORT(const i64 *) carbon_column_it_i64_values(u32 *nvalues, struct carbon_column_it *it)
+const i64 *carbon_column_it_i64_values(u32 *nvalues, struct carbon_column_it *it)
 {
         return safe_cast(i64, nvalues, it, (type == CARBON_FIELD_TYPE_COLUMN_I64));
 }
 
-ARK_EXPORT(const float *) carbon_column_it_float_values(u32 *nvalues, struct carbon_column_it *it)
+const float *carbon_column_it_float_values(u32 *nvalues, struct carbon_column_it *it)
 {
         return safe_cast(float, nvalues, it, (type == CARBON_FIELD_TYPE_COLUMN_FLOAT));
 }
 
-ARK_EXPORT(bool) carbon_column_it_remove(struct carbon_column_it *it, u32 pos)
+bool carbon_column_it_remove(struct carbon_column_it *it, u32 pos)
 {
         error_if_null(it);
 
@@ -225,7 +225,7 @@ ARK_EXPORT(bool) carbon_column_it_remove(struct carbon_column_it *it, u32 pos)
         return true;
 }
 
-ARK_EXPORT(bool) carbon_column_it_update_set_null(struct carbon_column_it *it, u32 pos)
+bool carbon_column_it_update_set_null(struct carbon_column_it *it, u32 pos)
 {
         error_if_null(it)
         error_if(pos >= it->column_num_elements, &it->err, ARK_ERR_OUTOFBOUNDS)
@@ -239,43 +239,53 @@ ARK_EXPORT(bool) carbon_column_it_update_set_null(struct carbon_column_it *it, u
                 case CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
                         u8 null_value = CARBON_BOOLEAN_COLUMN_NULL;
                         memfile_write(&it->memfile, &null_value, sizeof(u8));
-                } break;
+                }
+                        break;
                 case CARBON_FIELD_TYPE_COLUMN_U8: {
                         u8 null_value = U8_NULL;
                         memfile_write(&it->memfile, &null_value, sizeof(u8));
-                } break;
+                }
+                        break;
                 case CARBON_FIELD_TYPE_COLUMN_U16: {
                         u16 null_value = U16_NULL;
                         memfile_write(&it->memfile, &null_value, sizeof(u16));
-                } break;
+                }
+                        break;
                 case CARBON_FIELD_TYPE_COLUMN_U32: {
                         u32 null_value = U32_NULL;
                         memfile_write(&it->memfile, &null_value, sizeof(u32));
-                } break;
+                }
+                        break;
                 case CARBON_FIELD_TYPE_COLUMN_U64: {
                         u64 null_value = U64_NULL;
                         memfile_write(&it->memfile, &null_value, sizeof(u64));
-                } break;
+                }
+                        break;
                 case CARBON_FIELD_TYPE_COLUMN_I8: {
                         i8 null_value = I8_NULL;
                         memfile_write(&it->memfile, &null_value, sizeof(i8));
-                } break;
+                }
+                        break;
                 case CARBON_FIELD_TYPE_COLUMN_I16: {
                         i16 null_value = I16_NULL;
                         memfile_write(&it->memfile, &null_value, sizeof(i16));
-                } break;
+                }
+                        break;
                 case CARBON_FIELD_TYPE_COLUMN_I32: {
                         i32 null_value = I32_NULL;
                         memfile_write(&it->memfile, &null_value, sizeof(i32));
-                } break;
+                }
+                        break;
                 case CARBON_FIELD_TYPE_COLUMN_I64: {
                         i64 null_value = I64_NULL;
                         memfile_write(&it->memfile, &null_value, sizeof(i64));
-                } break;
+                }
+                        break;
                 case CARBON_FIELD_TYPE_COLUMN_FLOAT: {
                         float null_value = FLOAT_NULL;
                         memfile_write(&it->memfile, &null_value, sizeof(float));
-                } break;
+                }
+                        break;
                 case CARBON_FIELD_TYPE_NULL:
                 case CARBON_FIELD_TYPE_TRUE:
                 case CARBON_FIELD_TYPE_FALSE:
@@ -357,36 +367,35 @@ static bool rewrite_column_to_array(struct carbon_column_it *it)
                         break;
                 case CARBON_FIELD_TYPE_FALSE:
                         push_array_element(num_values, data, u8, is_null_boolean, carbon_insert_false);
-                break;
+                        break;
                 case CARBON_FIELD_TYPE_NUMBER_U8:
                         push_array_element_wvalue(num_values, data, u8, is_null_u8, carbon_insert_u8);
-                break;
+                        break;
                 case CARBON_FIELD_TYPE_NUMBER_U16:
                         push_array_element_wvalue(num_values, data, u16, is_null_u16, carbon_insert_u16);
-                break;
+                        break;
                 case CARBON_FIELD_TYPE_NUMBER_U32:
                         push_array_element_wvalue(num_values, data, u32, is_null_u32, carbon_insert_u32);
-                break;
+                        break;
                 case CARBON_FIELD_TYPE_NUMBER_U64:
                         push_array_element_wvalue(num_values, data, u64, is_null_u64, carbon_insert_u64);
-                break;
+                        break;
                 case CARBON_FIELD_TYPE_NUMBER_I8:
                         push_array_element_wvalue(num_values, data, i8, is_null_i8, carbon_insert_i8);
-                break;
+                        break;
                 case CARBON_FIELD_TYPE_NUMBER_I16:
                         push_array_element_wvalue(num_values, data, i16, is_null_i16, carbon_insert_i16);
-                break;
+                        break;
                 case CARBON_FIELD_TYPE_NUMBER_I32:
                         push_array_element_wvalue(num_values, data, i32, is_null_i32, carbon_insert_i32);
-                break;
+                        break;
                 case CARBON_FIELD_TYPE_NUMBER_I64:
                         push_array_element_wvalue(num_values, data, i64, is_null_i64, carbon_insert_i64);
-                break;
+                        break;
                 case CARBON_FIELD_TYPE_NUMBER_FLOAT:
                         push_array_element_wvalue(num_values, data, float, is_null_float, carbon_insert_float);
-                break;
-                default:
-                        error(&it->err, ARK_ERR_UNSUPPORTEDTYPE);
+                        break;
+                default: error(&it->err, ARK_ERR_UNSUPPORTEDTYPE);
                         return false;
         }
 
@@ -398,7 +407,7 @@ static bool rewrite_column_to_array(struct carbon_column_it *it)
         return true;
 }
 
-ARK_EXPORT(bool) carbon_column_it_update_set_true(struct carbon_column_it *it, u32 pos)
+bool carbon_column_it_update_set_true(struct carbon_column_it *it, u32 pos)
 {
         error_if_null(it)
         error_if(pos >= it->column_num_elements, &it->err, ARK_ERR_OUTOFBOUNDS)
@@ -409,73 +418,83 @@ ARK_EXPORT(bool) carbon_column_it_update_set_true(struct carbon_column_it *it, u
         memfile_seek(&it->memfile, payload_start + pos * carbon_int_get_type_value_size(it->type));
 
         switch (it->type) {
-        case CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
-                u8 value = CARBON_BOOLEAN_COLUMN_TRUE;
-                memfile_write(&it->memfile, &value, sizeof(u8));
-        } break;
-        case CARBON_FIELD_TYPE_COLUMN_U8: {
-                u8 null_value = U8_NULL;
-                memfile_write(&it->memfile, &null_value, sizeof(u8));
-        } break;
-        case CARBON_FIELD_TYPE_COLUMN_U16: {
-                u16 null_value = U16_NULL;
-                memfile_write(&it->memfile, &null_value, sizeof(u16));
-        } break;
-        case CARBON_FIELD_TYPE_COLUMN_U32: {
-                //u32 null_value = U32_NULL;
-                //memfile_write(&it->memfile, &null_value, sizeof(u32));
-                rewrite_column_to_array(it);
+                case CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
+                        u8 value = CARBON_BOOLEAN_COLUMN_TRUE;
+                        memfile_write(&it->memfile, &value, sizeof(u8));
+                }
+                        break;
+                case CARBON_FIELD_TYPE_COLUMN_U8: {
+                        u8 null_value = U8_NULL;
+                        memfile_write(&it->memfile, &null_value, sizeof(u8));
+                }
+                        break;
+                case CARBON_FIELD_TYPE_COLUMN_U16: {
+                        u16 null_value = U16_NULL;
+                        memfile_write(&it->memfile, &null_value, sizeof(u16));
+                }
+                        break;
+                case CARBON_FIELD_TYPE_COLUMN_U32: {
+                        //u32 null_value = U32_NULL;
+                        //memfile_write(&it->memfile, &null_value, sizeof(u32));
+                        rewrite_column_to_array(it);
 
 
-        } break;
-        case CARBON_FIELD_TYPE_COLUMN_U64: {
-                u64 null_value = U64_NULL;
-                memfile_write(&it->memfile, &null_value, sizeof(u64));
-        } break;
-        case CARBON_FIELD_TYPE_COLUMN_I8: {
-                i8 null_value = I8_NULL;
-                memfile_write(&it->memfile, &null_value, sizeof(i8));
-        } break;
-        case CARBON_FIELD_TYPE_COLUMN_I16: {
-                i16 null_value = I16_NULL;
-                memfile_write(&it->memfile, &null_value, sizeof(i16));
-        } break;
-        case CARBON_FIELD_TYPE_COLUMN_I32: {
-                i32 null_value = I32_NULL;
-                memfile_write(&it->memfile, &null_value, sizeof(i32));
-        } break;
-        case CARBON_FIELD_TYPE_COLUMN_I64: {
-                i64 null_value = I64_NULL;
-                memfile_write(&it->memfile, &null_value, sizeof(i64));
-        } break;
-        case CARBON_FIELD_TYPE_COLUMN_FLOAT: {
-                float null_value = FLOAT_NULL;
-                memfile_write(&it->memfile, &null_value, sizeof(float));
-        } break;
-        case CARBON_FIELD_TYPE_NULL:
-        case CARBON_FIELD_TYPE_TRUE:
-        case CARBON_FIELD_TYPE_FALSE:
-        case CARBON_FIELD_TYPE_OBJECT:
-        case CARBON_FIELD_TYPE_ARRAY:
-        case CARBON_FIELD_TYPE_STRING:
-        case CARBON_FIELD_TYPE_NUMBER_U8:
-        case CARBON_FIELD_TYPE_NUMBER_U16:
-        case CARBON_FIELD_TYPE_NUMBER_U32:
-        case CARBON_FIELD_TYPE_NUMBER_U64:
-        case CARBON_FIELD_TYPE_NUMBER_I8:
-        case CARBON_FIELD_TYPE_NUMBER_I16:
-        case CARBON_FIELD_TYPE_NUMBER_I32:
-        case CARBON_FIELD_TYPE_NUMBER_I64:
-        case CARBON_FIELD_TYPE_NUMBER_FLOAT:
-        case CARBON_FIELD_TYPE_BINARY:
-        case CARBON_FIELD_TYPE_BINARY_CUSTOM:
-                memfile_restore_position(&it->memfile);
-                error(&it->err, ARK_ERR_UNSUPPCONTAINER)
-                return false;
-        default:
-                memfile_restore_position(&it->memfile);
-                error(&it->err, ARK_ERR_INTERNALERR);
-                return false;
+                }
+                        break;
+                case CARBON_FIELD_TYPE_COLUMN_U64: {
+                        u64 null_value = U64_NULL;
+                        memfile_write(&it->memfile, &null_value, sizeof(u64));
+                }
+                        break;
+                case CARBON_FIELD_TYPE_COLUMN_I8: {
+                        i8 null_value = I8_NULL;
+                        memfile_write(&it->memfile, &null_value, sizeof(i8));
+                }
+                        break;
+                case CARBON_FIELD_TYPE_COLUMN_I16: {
+                        i16 null_value = I16_NULL;
+                        memfile_write(&it->memfile, &null_value, sizeof(i16));
+                }
+                        break;
+                case CARBON_FIELD_TYPE_COLUMN_I32: {
+                        i32 null_value = I32_NULL;
+                        memfile_write(&it->memfile, &null_value, sizeof(i32));
+                }
+                        break;
+                case CARBON_FIELD_TYPE_COLUMN_I64: {
+                        i64 null_value = I64_NULL;
+                        memfile_write(&it->memfile, &null_value, sizeof(i64));
+                }
+                        break;
+                case CARBON_FIELD_TYPE_COLUMN_FLOAT: {
+                        float null_value = FLOAT_NULL;
+                        memfile_write(&it->memfile, &null_value, sizeof(float));
+                }
+                        break;
+                case CARBON_FIELD_TYPE_NULL:
+                case CARBON_FIELD_TYPE_TRUE:
+                case CARBON_FIELD_TYPE_FALSE:
+                case CARBON_FIELD_TYPE_OBJECT:
+                case CARBON_FIELD_TYPE_ARRAY:
+                case CARBON_FIELD_TYPE_STRING:
+                case CARBON_FIELD_TYPE_NUMBER_U8:
+                case CARBON_FIELD_TYPE_NUMBER_U16:
+                case CARBON_FIELD_TYPE_NUMBER_U32:
+                case CARBON_FIELD_TYPE_NUMBER_U64:
+                case CARBON_FIELD_TYPE_NUMBER_I8:
+                case CARBON_FIELD_TYPE_NUMBER_I16:
+                case CARBON_FIELD_TYPE_NUMBER_I32:
+                case CARBON_FIELD_TYPE_NUMBER_I64:
+                case CARBON_FIELD_TYPE_NUMBER_FLOAT:
+                case CARBON_FIELD_TYPE_BINARY:
+                case CARBON_FIELD_TYPE_BINARY_CUSTOM:
+                        memfile_restore_position(&it->memfile);
+                        error(&it->err, ARK_ERR_UNSUPPCONTAINER)
+                        return false;
+                default:
+                        memfile_restore_position(&it->memfile);
+                        error(&it->err, ARK_ERR_INTERNALERR);
+                        return false;
         }
 
         memfile_restore_position(&it->memfile);
@@ -483,7 +502,7 @@ ARK_EXPORT(bool) carbon_column_it_update_set_true(struct carbon_column_it *it, u
         return true;
 }
 
-ARK_EXPORT(bool) carbon_column_it_update_set_false(struct carbon_column_it *it, u32 pos)
+bool carbon_column_it_update_set_false(struct carbon_column_it *it, u32 pos)
 {
         unused(it)
         unused(pos)
@@ -491,16 +510,7 @@ ARK_EXPORT(bool) carbon_column_it_update_set_false(struct carbon_column_it *it, 
         return false;
 }
 
-ARK_EXPORT(bool) carbon_column_it_update_set_u8(struct carbon_column_it *it, u32 pos, u8 value)
-{
-        unused(it)
-        unused(pos)
-        unused(value)
-        error_print(ARK_ERR_NOTIMPLEMENTED); // TODO: implement
-        return false;
-}
-
-ARK_EXPORT(bool) carbon_column_it_update_set_u16(struct carbon_column_it *it, u32 pos, u16 value)
+bool carbon_column_it_update_set_u8(struct carbon_column_it *it, u32 pos, u8 value)
 {
         unused(it)
         unused(pos)
@@ -509,7 +519,7 @@ ARK_EXPORT(bool) carbon_column_it_update_set_u16(struct carbon_column_it *it, u3
         return false;
 }
 
-ARK_EXPORT(bool) carbon_column_it_update_set_u32(struct carbon_column_it *it, u32 pos, u32 value)
+bool carbon_column_it_update_set_u16(struct carbon_column_it *it, u32 pos, u16 value)
 {
         unused(it)
         unused(pos)
@@ -518,7 +528,7 @@ ARK_EXPORT(bool) carbon_column_it_update_set_u32(struct carbon_column_it *it, u3
         return false;
 }
 
-ARK_EXPORT(bool) carbon_column_it_update_set_u64(struct carbon_column_it *it, u32 pos, u64 value)
+bool carbon_column_it_update_set_u32(struct carbon_column_it *it, u32 pos, u32 value)
 {
         unused(it)
         unused(pos)
@@ -527,7 +537,7 @@ ARK_EXPORT(bool) carbon_column_it_update_set_u64(struct carbon_column_it *it, u3
         return false;
 }
 
-ARK_EXPORT(bool) carbon_column_it_update_set_i8(struct carbon_column_it *it, u32 pos, i8 value)
+bool carbon_column_it_update_set_u64(struct carbon_column_it *it, u32 pos, u64 value)
 {
         unused(it)
         unused(pos)
@@ -536,7 +546,7 @@ ARK_EXPORT(bool) carbon_column_it_update_set_i8(struct carbon_column_it *it, u32
         return false;
 }
 
-ARK_EXPORT(bool) carbon_column_it_update_set_i16(struct carbon_column_it *it, u32 pos, i16 value)
+bool carbon_column_it_update_set_i8(struct carbon_column_it *it, u32 pos, i8 value)
 {
         unused(it)
         unused(pos)
@@ -545,7 +555,7 @@ ARK_EXPORT(bool) carbon_column_it_update_set_i16(struct carbon_column_it *it, u3
         return false;
 }
 
-ARK_EXPORT(bool) carbon_column_it_update_set_i32(struct carbon_column_it *it, u32 pos, i32 value)
+bool carbon_column_it_update_set_i16(struct carbon_column_it *it, u32 pos, i16 value)
 {
         unused(it)
         unused(pos)
@@ -554,7 +564,7 @@ ARK_EXPORT(bool) carbon_column_it_update_set_i32(struct carbon_column_it *it, u3
         return false;
 }
 
-ARK_EXPORT(bool) carbon_column_it_update_set_i64(struct carbon_column_it *it, u32 pos, i64 value)
+bool carbon_column_it_update_set_i32(struct carbon_column_it *it, u32 pos, i32 value)
 {
         unused(it)
         unused(pos)
@@ -563,7 +573,16 @@ ARK_EXPORT(bool) carbon_column_it_update_set_i64(struct carbon_column_it *it, u3
         return false;
 }
 
-ARK_EXPORT(bool) carbon_column_it_update_set_float(struct carbon_column_it *it, u32 pos, float value)
+bool carbon_column_it_update_set_i64(struct carbon_column_it *it, u32 pos, i64 value)
+{
+        unused(it)
+        unused(pos)
+        unused(value)
+        error_print(ARK_ERR_NOTIMPLEMENTED); // TODO: implement
+        return false;
+}
+
+bool carbon_column_it_update_set_float(struct carbon_column_it *it, u32 pos, float value)
 {
         unused(it)
         unused(pos)
@@ -575,7 +594,7 @@ ARK_EXPORT(bool) carbon_column_it_update_set_float(struct carbon_column_it *it, 
 /**
  * Locks the iterator with a spinlock. A call to <code>carbon_column_it_unlock</code> is required for unlocking.
  */
-ARK_EXPORT(bool) carbon_column_it_lock(struct carbon_column_it *it)
+bool carbon_column_it_lock(struct carbon_column_it *it)
 {
         error_if_null(it);
         spin_acquire(&it->lock);
@@ -585,14 +604,14 @@ ARK_EXPORT(bool) carbon_column_it_lock(struct carbon_column_it *it)
 /**
  * Unlocks the iterator
  */
-ARK_EXPORT(bool) carbon_column_it_unlock(struct carbon_column_it *it)
+bool carbon_column_it_unlock(struct carbon_column_it *it)
 {
         error_if_null(it);
         spin_release(&it->lock);
         return true;
 }
 
-ARK_EXPORT(bool) carbon_column_it_rewind(struct carbon_column_it *it)
+bool carbon_column_it_rewind(struct carbon_column_it *it)
 {
         error_if_null(it);
         offset_t playload_start = carbon_int_column_get_payload_off(it);

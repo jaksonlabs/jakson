@@ -27,26 +27,26 @@ ARK_BEGIN_DECL
 
 struct packer;
 
-ARK_EXPORT(bool) pack_none_init(struct packer *self);
+bool pack_none_init(struct packer *self);
 
-ARK_EXPORT(bool) pack_none_cpy(const struct packer *self, struct packer *dst);
+bool pack_none_cpy(const struct packer *self, struct packer *dst);
 
-ARK_EXPORT(bool) pack_none_drop(struct packer *self);
+bool pack_none_drop(struct packer *self);
 
-ARK_EXPORT(bool) pack_none_write_extra(struct packer *self, struct memfile *dst,
-        const struct vector ofType (const char *) *strings);
+bool pack_none_write_extra(struct packer *self, struct memfile *dst,
+                           const struct vector ofType (const char *) *strings);
 
-ARK_EXPORT(bool) pack_none_read_extra(struct packer *self, FILE *src, size_t nbytes);
+bool pack_none_read_extra(struct packer *self, FILE *src, size_t nbytes);
 
-ARK_EXPORT(bool) pack_none_print_extra(struct packer *self, FILE *file, struct memfile *src);
+bool pack_none_print_extra(struct packer *self, FILE *file, struct memfile *src);
 
-ARK_EXPORT(bool) pack_none_print_encoded_string(struct packer *self, FILE *file, struct memfile *src,
-        u32 decompressed_strlen);
+bool pack_none_print_encoded_string(struct packer *self, FILE *file, struct memfile *src,
+                                    u32 decompressed_strlen);
 
-ARK_EXPORT(bool) pack_none_encode_string(struct packer *self, struct memfile *dst, struct err *err,
-        const char *string);
+bool pack_none_encode_string(struct packer *self, struct memfile *dst, struct err *err,
+                             const char *string);
 
-ARK_EXPORT(bool) pack_none_decode_string(struct packer *self, char *dst, size_t strlen, FILE *src);
+bool pack_none_decode_string(struct packer *self, char *dst, size_t strlen, FILE *src);
 
 ARK_END_DECL
 

@@ -47,7 +47,7 @@ static int convertJs2Model(struct js_to_context *context, FILE *file, bool optim
     struct json_parser parser;
     struct json_err error_desc;
     struct json jsonAst;
-    json_parser_create(&parser, &context->context);
+    json_parser_create(&parser);
     int status = json_parse(&jsonAst, &error_desc, &parser, context->jsonContent);
     if (!status) {
         ARK_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");

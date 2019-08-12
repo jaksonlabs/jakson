@@ -32,7 +32,7 @@ static bool create_strategy(size_t i, struct packer *strategy)
         return strategy->create(strategy);
 }
 
-ARK_EXPORT(bool) pack_by_type(struct err *err, struct packer *strategy, enum packer_type type)
+bool pack_by_type(struct err *err, struct packer *strategy, enum packer_type type)
 {
         for (size_t i = 0; i < ARK_ARRAY_LENGTH(compressor_strategy_register); i++) {
                 if (compressor_strategy_register[i].type == type) {
@@ -43,7 +43,7 @@ ARK_EXPORT(bool) pack_by_type(struct err *err, struct packer *strategy, enum pac
         return false;
 }
 
-ARK_EXPORT(u8) pack_flagbit_by_type(enum packer_type type)
+u8 pack_flagbit_by_type(enum packer_type type)
 {
         for (size_t i = 0; i < ARK_ARRAY_LENGTH(compressor_strategy_register); i++) {
                 if (compressor_strategy_register[i].type == type) {
@@ -53,7 +53,7 @@ ARK_EXPORT(u8) pack_flagbit_by_type(enum packer_type type)
         return 0;
 }
 
-ARK_EXPORT(bool) pack_by_flags(struct packer *strategy, u8 flags)
+bool pack_by_flags(struct packer *strategy, u8 flags)
 {
         for (size_t i = 0; i < ARK_ARRAY_LENGTH(compressor_strategy_register); i++) {
                 if (compressor_strategy_register[i].flag_bit & flags) {
@@ -63,7 +63,7 @@ ARK_EXPORT(bool) pack_by_flags(struct packer *strategy, u8 flags)
         return false;
 }
 
-ARK_EXPORT(bool) pack_by_name(enum packer_type *type, const char *name)
+bool pack_by_name(enum packer_type *type, const char *name)
 {
         for (size_t i = 0; i < ARK_ARRAY_LENGTH(compressor_strategy_register); i++) {
                 if (strcmp(compressor_strategy_register[i].name, name) == 0) {
@@ -74,7 +74,7 @@ ARK_EXPORT(bool) pack_by_name(enum packer_type *type, const char *name)
         return false;
 }
 
-ARK_EXPORT(bool) pack_cpy(struct err *err, struct packer *dst, const struct packer *src)
+bool pack_cpy(struct err *err, struct packer *dst, const struct packer *src)
 {
         error_if_null(dst)
         error_if_null(src)
@@ -82,51 +82,51 @@ ARK_EXPORT(bool) pack_cpy(struct err *err, struct packer *dst, const struct pack
         return src->cpy(src, dst);
 }
 
-ARK_EXPORT(bool) pack_drop(struct err *err, struct packer *self)
+bool pack_drop(struct err *err, struct packer *self)
 {
         error_if_null(self)
         ark_implemented_or_error(err, self, drop)
         return self->drop(self);
 }
 
-ARK_EXPORT(bool) pack_write_extra(struct err *err, struct packer *self, struct memfile *dst,
-        const struct vector ofType (const char *) *strings)
+bool pack_write_extra(struct err *err, struct packer *self, struct memfile *dst,
+                      const struct vector ofType (const char *) *strings)
 {
         error_if_null(self)
         ark_implemented_or_error(err, self, write_extra)
         return self->write_extra(self, dst, strings);
 }
 
-ARK_EXPORT(bool) pack_read_extra(struct err *err, struct packer *self, FILE *src, size_t nbytes)
+bool pack_read_extra(struct err *err, struct packer *self, FILE *src, size_t nbytes)
 {
         error_if_null(self)
         ark_implemented_or_error(err, self, read_extra)
         return self->read_extra(self, src, nbytes);
 }
 
-ARK_EXPORT(bool) pack_encode(struct err *err, struct packer *self, struct memfile *dst, const char *string)
+bool pack_encode(struct err *err, struct packer *self, struct memfile *dst, const char *string)
 {
         error_if_null(self)
         ark_implemented_or_error(err, self, encode_string)
         return self->encode_string(self, dst, err, string);
 }
 
-ARK_EXPORT(bool) pack_decode(struct err *err, struct packer *self, char *dst, size_t strlen, FILE *src)
+bool pack_decode(struct err *err, struct packer *self, char *dst, size_t strlen, FILE *src)
 {
         error_if_null(self)
         ark_implemented_or_error(err, self, decode_string)
         return self->decode_string(self, dst, strlen, src);
 }
 
-ARK_EXPORT(bool) pack_print_extra(struct err *err, struct packer *self, FILE *file, struct memfile *src)
+bool pack_print_extra(struct err *err, struct packer *self, FILE *file, struct memfile *src)
 {
         error_if_null(self)
         ark_implemented_or_error(err, self, print_extra)
         return self->print_extra(self, file, src);
 }
 
-ARK_EXPORT(bool) pack_print_encoded(struct err *err, struct packer *self, FILE *file, struct memfile *src,
-        u32 decompressed_strlen)
+bool pack_print_encoded(struct err *err, struct packer *self, FILE *file, struct memfile *src,
+                        u32 decompressed_strlen)
 {
         error_if_null(self)
         ark_implemented_or_error(err, self, print_encoded)

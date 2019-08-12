@@ -28,7 +28,7 @@ static void write_payload(struct memfile *file, const char *string)
         memfile_write(file, string, value_strlen);
 }
 
-ARK_EXPORT(bool) carbon_string_nomarker_write(struct memfile *file, const char *string)
+bool carbon_string_nomarker_write(struct memfile *file, const char *string)
 {
         error_if_null(file)
         error_if_null(string)
@@ -37,7 +37,7 @@ ARK_EXPORT(bool) carbon_string_nomarker_write(struct memfile *file, const char *
         return true;
 }
 
-ARK_EXPORT(bool) carbon_string_nomarker_remove(struct memfile *file)
+bool carbon_string_nomarker_remove(struct memfile *file)
 {
         error_if_null(file);
         u8 len_nbytes;
@@ -47,7 +47,7 @@ ARK_EXPORT(bool) carbon_string_nomarker_remove(struct memfile *file)
         return true;
 }
 
-ARK_EXPORT(bool) carbon_string_remove(struct memfile *file)
+bool carbon_string_remove(struct memfile *file)
 {
         error_if_null(file);
         u8 marker = *ARK_MEMFILE_READ_TYPE(file, u8);
@@ -60,7 +60,7 @@ ARK_EXPORT(bool) carbon_string_remove(struct memfile *file)
         }
 }
 
-ARK_EXPORT(bool) carbon_string_write(struct memfile *file, const char *string)
+bool carbon_string_write(struct memfile *file, const char *string)
 {
         error_if_null(file)
         error_if_null(string)
@@ -72,7 +72,7 @@ ARK_EXPORT(bool) carbon_string_write(struct memfile *file, const char *string)
         return true;
 }
 
-ARK_EXPORT(bool) carbon_string_update(struct memfile *file, const char *string)
+bool carbon_string_update(struct memfile *file, const char *string)
 {
         u8 marker = *ARK_MEMFILE_READ_TYPE(file, u8);
         if (likely(marker == CARBON_FIELD_TYPE_STRING)) {
@@ -91,17 +91,17 @@ ARK_EXPORT(bool) carbon_string_update(struct memfile *file, const char *string)
         }
 }
 
-ARK_EXPORT(bool) carbon_string_skip(struct memfile *file)
+bool carbon_string_skip(struct memfile *file)
 {
         return carbon_string_read(NULL, file);
 }
 
-ARK_EXPORT(bool) carbon_string_nomarker_skip(struct memfile *file)
+bool carbon_string_nomarker_skip(struct memfile *file)
 {
         return carbon_string_nomarker_read(NULL, file);
 }
 
-ARK_EXPORT(const char *) carbon_string_read(u64 *len, struct memfile *file)
+const char *carbon_string_read(u64 *len, struct memfile *file)
 {
         error_if_null(file)
         u8 marker = *ARK_MEMFILE_READ_TYPE(file, u8);
@@ -113,7 +113,7 @@ ARK_EXPORT(const char *) carbon_string_read(u64 *len, struct memfile *file)
         }
 }
 
-ARK_EXPORT(const char *) carbon_string_nomarker_read(u64 *len, struct memfile *file)
+const char *carbon_string_nomarker_read(u64 *len, struct memfile *file)
 {
         u64 str_len = memfile_read_varuint(NULL, file);
         const char *result = memfile_read(file, str_len);

@@ -56,45 +56,45 @@ static void write_skey(struct memfile *file)
         carbon_string_write(file, key);
 }
 
-ARK_EXPORT(bool) carbon_key_create(struct memfile *file, enum carbon_primary_key_type type, struct err *err)
+bool carbon_key_create(struct memfile *file, enum carbon_key_type type, struct err *err)
 {
         error_if_null(file)
 
         switch (type) {
-        case CARBON_KEY_NOKEY:
-                write_nokey(file);
-                break;
-        case CARBON_KEY_AUTOKEY:
-                write_autokey(file);
-                break;
-        case CARBON_KEY_UKEY:
-                write_ukey(file);
-                break;
-        case CARBON_KEY_IKEY:
-                write_ikey(file);
-                break;
-        case CARBON_KEY_SKEY:
-                write_skey(file);
-                break;
-        default:
-                ark_optional(err != NULL, error(err, ARK_ERR_INTERNALERR))
-                return false;
+                case CARBON_KEY_NOKEY:
+                        write_nokey(file);
+                        break;
+                case CARBON_KEY_AUTOKEY:
+                        write_autokey(file);
+                        break;
+                case CARBON_KEY_UKEY:
+                        write_ukey(file);
+                        break;
+                case CARBON_KEY_IKEY:
+                        write_ikey(file);
+                        break;
+                case CARBON_KEY_SKEY:
+                        write_skey(file);
+                        break;
+                default:
+                        ark_optional(err != NULL, error(err, ARK_ERR_INTERNALERR))
+                        return false;
         }
         return true;
 }
 
-ARK_EXPORT(bool) carbon_key_skip(enum carbon_primary_key_type *out, struct memfile *file)
+bool carbon_key_skip(enum carbon_key_type *out, struct memfile *file)
 {
         error_if_null(file)
         carbon_key_read(NULL, out, file);
         return true;
 }
 
-ARK_EXPORT(bool) carbon_key_write_unsigned(struct memfile *file, u64 key)
+bool carbon_key_write_unsigned(struct memfile *file, u64 key)
 {
         error_if_null(file)
 
-        ark_declare_and_init(enum carbon_primary_key_type, key_type)
+        ark_declare_and_init(enum carbon_key_type, key_type)
 
         carbon_key_read_type(&key_type, file);
         if (carbon_key_is_unsigned_type(key_type)) {
@@ -106,11 +106,11 @@ ARK_EXPORT(bool) carbon_key_write_unsigned(struct memfile *file, u64 key)
         }
 }
 
-ARK_EXPORT(bool) carbon_key_write_signed(struct memfile *file, i64 key)
+bool carbon_key_write_signed(struct memfile *file, i64 key)
 {
         error_if_null(file)
 
-        ark_declare_and_init(enum carbon_primary_key_type, key_type)
+        ark_declare_and_init(enum carbon_key_type, key_type)
 
         carbon_key_read_type(&key_type, file);
         if (carbon_key_is_signed_type(key_type)) {
@@ -122,10 +122,10 @@ ARK_EXPORT(bool) carbon_key_write_signed(struct memfile *file, i64 key)
         }
 }
 
-ARK_EXPORT(bool) carbon_key_update_string(struct memfile *file, const char *key)
+bool carbon_key_update_string(struct memfile *file, const char *key)
 {
         error_if_null(file)
-        ark_declare_and_init(enum carbon_primary_key_type, key_type)
+        ark_declare_and_init(enum carbon_key_type, key_type)
         carbon_key_read_type(&key_type, file);
         if (carbon_key_is_string_type(key_type)) {
                 carbon_string_update(file, key);
@@ -136,11 +136,11 @@ ARK_EXPORT(bool) carbon_key_update_string(struct memfile *file, const char *key)
         }
 }
 
-ARK_EXPORT(bool) carbon_key_write_string(struct memfile *file, const char *key)
+bool carbon_key_write_string(struct memfile *file, const char *key)
 {
         error_if_null(file)
 
-        ark_declare_and_init(enum carbon_primary_key_type, key_type)
+        ark_declare_and_init(enum carbon_key_type, key_type)
 
         carbon_key_read_type(&key_type, file);
         if (carbon_key_is_string_type(key_type)) {
@@ -152,60 +152,59 @@ ARK_EXPORT(bool) carbon_key_write_string(struct memfile *file, const char *key)
         }
 }
 
-ARK_EXPORT(bool) carbon_key_read_type(enum carbon_primary_key_type *out, struct memfile *file)
+bool carbon_key_read_type(enum carbon_key_type *out, struct memfile *file)
 {
         u8 marker = *ARK_MEMFILE_READ_TYPE(file, u8);
 
         assert(marker == CARBON_MARKER_KEY_NOKEY || marker == CARBON_MARKER_KEY_AUTOKEY || marker ==
-                CARBON_MARKER_KEY_UKEY || marker == CARBON_MARKER_KEY_IKEY || marker == CARBON_MARKER_KEY_SKEY);
+                                                                                           CARBON_MARKER_KEY_UKEY ||
+               marker == CARBON_MARKER_KEY_IKEY || marker == CARBON_MARKER_KEY_SKEY);
 
         switch (marker) {
-        case CARBON_MARKER_KEY_NOKEY:
-                ark_optional_set(out, CARBON_KEY_NOKEY)
-                break;
-        case CARBON_MARKER_KEY_AUTOKEY:
-                ark_optional_set(out, CARBON_KEY_AUTOKEY)
-                break;
-        case CARBON_MARKER_KEY_UKEY:
-                ark_optional_set(out, CARBON_KEY_UKEY)
-                break;
-        case CARBON_MARKER_KEY_IKEY:
-                ark_optional_set(out, CARBON_KEY_IKEY)
-                break;
-        case CARBON_MARKER_KEY_SKEY:
-                ark_optional_set(out, CARBON_KEY_SKEY)
-                break;
-        default:
-                error(&file->err, ARK_ERR_INTERNALERR)
-                return false;
+                case CARBON_MARKER_KEY_NOKEY:
+                        ark_optional_set(out, CARBON_KEY_NOKEY)
+                        break;
+                case CARBON_MARKER_KEY_AUTOKEY:
+                        ark_optional_set(out, CARBON_KEY_AUTOKEY)
+                        break;
+                case CARBON_MARKER_KEY_UKEY:
+                        ark_optional_set(out, CARBON_KEY_UKEY)
+                        break;
+                case CARBON_MARKER_KEY_IKEY:
+                        ark_optional_set(out, CARBON_KEY_IKEY)
+                        break;
+                case CARBON_MARKER_KEY_SKEY:
+                        ark_optional_set(out, CARBON_KEY_SKEY)
+                        break;
+                default: error(&file->err, ARK_ERR_INTERNALERR)
+                        return false;
         }
         return true;
 }
 
-ARK_EXPORT(const void *) carbon_key_read(u64 *len, enum carbon_primary_key_type *out, struct memfile *file)
+const void *carbon_key_read(u64 *len, enum carbon_key_type *out, struct memfile *file)
 {
-        enum carbon_primary_key_type key_type;
+        enum carbon_key_type key_type;
         carbon_key_read_type(&key_type, file);
 
         ark_optional_set(out, key_type)
 
         switch (key_type) {
-        case CARBON_KEY_NOKEY:
-                ark_optional_set(len, 0)
-                return NULL;
-        case CARBON_KEY_AUTOKEY:
-                ark_optional_set(len, sizeof(object_id_t))
-                return ARK_MEMFILE_READ_TYPE(file, object_id_t);
-        case CARBON_KEY_UKEY:
-                ark_optional_set(len, sizeof(u64))
-                return ARK_MEMFILE_READ_TYPE(file, u64);
-        case CARBON_KEY_IKEY:
-                ark_optional_set(len, sizeof(i64))
-                return ARK_MEMFILE_READ_TYPE(file, i64);
-        case CARBON_KEY_SKEY:
-                return carbon_string_read(len, file);
-        default:
-                error(&file->err, ARK_ERR_INTERNALERR)
-                return NULL;
+                case CARBON_KEY_NOKEY:
+                        ark_optional_set(len, 0)
+                        return NULL;
+                case CARBON_KEY_AUTOKEY:
+                        ark_optional_set(len, sizeof(object_id_t))
+                        return ARK_MEMFILE_READ_TYPE(file, object_id_t);
+                case CARBON_KEY_UKEY:
+                        ark_optional_set(len, sizeof(u64))
+                        return ARK_MEMFILE_READ_TYPE(file, u64);
+                case CARBON_KEY_IKEY:
+                        ark_optional_set(len, sizeof(i64))
+                        return ARK_MEMFILE_READ_TYPE(file, i64);
+                case CARBON_KEY_SKEY:
+                        return carbon_string_read(len, file);
+                default: error(&file->err, ARK_ERR_INTERNALERR)
+                        return NULL;
         }
 }

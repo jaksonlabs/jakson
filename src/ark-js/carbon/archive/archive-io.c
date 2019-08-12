@@ -20,13 +20,13 @@
 #include <ark-js/carbon/archive/archive-io.h>
 
 struct io_context {
-        struct err err;
-        FILE *file;
-        struct spinlock lock;
-        offset_t last_pos;
+    struct err err;
+    FILE *file;
+    struct spinlock lock;
+    offset_t last_pos;
 };
 
-ARK_EXPORT(bool) io_context_create(struct io_context **context, struct err *err, const char *file_path)
+bool io_context_create(struct io_context **context, struct err *err, const char *file_path)
 {
         error_if_null(context);
         error_if_null(err);
@@ -54,12 +54,12 @@ ARK_EXPORT(bool) io_context_create(struct io_context **context, struct err *err,
         }
 }
 
-ARK_EXPORT(struct err *)io_context_get_error(struct io_context *context)
+struct err *io_context_get_error(struct io_context *context)
 {
         return context ? &context->err : NULL;
 }
 
-ARK_EXPORT(FILE *)io_context_lock_and_access(struct io_context *context)
+FILE *io_context_lock_and_access(struct io_context *context)
 {
         if (context) {
                 spin_acquire(&context->lock);
@@ -71,7 +71,7 @@ ARK_EXPORT(FILE *)io_context_lock_and_access(struct io_context *context)
         }
 }
 
-ARK_EXPORT(bool) io_context_unlock(struct io_context *context)
+bool io_context_unlock(struct io_context *context)
 {
         if (context) {
                 fseek(context->file, context->last_pos, SEEK_SET);
@@ -83,7 +83,7 @@ ARK_EXPORT(bool) io_context_unlock(struct io_context *context)
         }
 }
 
-ARK_EXPORT(bool) io_context_drop(struct io_context *context)
+bool io_context_drop(struct io_context *context)
 {
         error_if_null(context);
         ark_optional(context->file != NULL, fclose(context->file);

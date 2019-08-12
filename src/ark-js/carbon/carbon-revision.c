@@ -18,7 +18,7 @@
 #include <ark-js/carbon/carbon-revision.h>
 #include <ark-js/shared/stdx/varuint.h>
 
-ARK_EXPORT(bool) carbon_revision_create(struct memfile *file)
+bool carbon_revision_create(struct memfile *file)
 {
         error_if_null(file)
 
@@ -38,14 +38,14 @@ ARK_EXPORT(bool) carbon_revision_create(struct memfile *file)
         return true;
 }
 
-ARK_EXPORT(bool) carbon_revision_skip(struct memfile *file)
+bool carbon_revision_skip(struct memfile *file)
 {
         error_if_null(file)
         memfile_read_varuint(NULL, file);
         return true;
 }
 
-ARK_EXPORT(bool) carbon_revision_read(u64 *revision, struct memfile *file)
+bool carbon_revision_read(u64 *revision, struct memfile *file)
 {
         error_if_null(file)
         error_if_null(revision)
@@ -53,7 +53,7 @@ ARK_EXPORT(bool) carbon_revision_read(u64 *revision, struct memfile *file)
         return true;
 }
 
-ARK_EXPORT(bool) carbon_revision_peek(u64 *revision, struct memfile *file)
+bool carbon_revision_peek(u64 *revision, struct memfile *file)
 {
         error_if_null(file)
         error_if_null(revision)
@@ -61,7 +61,7 @@ ARK_EXPORT(bool) carbon_revision_peek(u64 *revision, struct memfile *file)
         return true;
 }
 
-ARK_EXPORT(bool) carbon_revision_inc(struct memfile *file)
+bool carbon_revision_inc(struct memfile *file)
 {
         ark_declare_and_init(u64, rev)
 

@@ -17,7 +17,7 @@
 
 #include <ark-js/carbon/archive/archive-strid-iter.h>
 
-ARK_EXPORT(bool) strid_iter_open(struct strid_iter *it, struct err *err, struct archive *archive)
+bool strid_iter_open(struct strid_iter *it, struct err *err, struct archive *archive)
 {
         error_if_null(it)
         error_if_null(archive)
@@ -35,8 +35,8 @@ ARK_EXPORT(bool) strid_iter_open(struct strid_iter *it, struct err *err, struct 
         return true;
 }
 
-ARK_EXPORT(bool) strid_iter_next(bool *success, struct strid_info **info, struct err *err, size_t *info_length,
-        struct strid_iter *it)
+bool strid_iter_next(bool *success, struct strid_info **info, struct err *err, size_t *info_length,
+                     struct strid_iter *it)
 {
         error_if_null(info)
         error_if_null(info_length)
@@ -63,8 +63,7 @@ ARK_EXPORT(bool) strid_iter_next(bool *success, struct strid_info **info, struct
                                 it->disk_offset = header.next_entry_off;
                                 vec_pos++;
                         }
-                }
-                while (header.next_entry_off != 0 && vec_pos < ARK_ARRAY_LENGTH(it->vector));
+                } while (header.next_entry_off != 0 && vec_pos < ARK_ARRAY_LENGTH(it->vector));
 
                 *info_length = vec_pos;
                 *success = true;
@@ -75,7 +74,7 @@ ARK_EXPORT(bool) strid_iter_next(bool *success, struct strid_info **info, struct
         }
 }
 
-ARK_EXPORT(bool) strid_iter_close(struct strid_iter *it)
+bool strid_iter_close(struct strid_iter *it)
 {
         error_if_null(it)
         if (it->is_open) {

@@ -21,14 +21,14 @@
 #include <ark-js/carbon/archive/archive-query.h>
 
 struct sid_to_offset_arg {
-        offset_t offset;
-        u32 strlen;
+    offset_t offset;
+    u32 strlen;
 };
 
 struct sid_to_offset {
-        struct hashtable ofMapping(field_sid_t, struct sid_to_offset_arg) mapping;
-        FILE *disk_file;
-        size_t disk_file_size;
+    struct hashtable ofMapping(field_sid_t, struct sid_to_offset_arg) mapping;
+    FILE *disk_file;
+    size_t disk_file_size;
 
 };
 
@@ -52,7 +52,7 @@ struct sid_to_offset {
     }                                                                                                                  \
 }
 
-ARK_EXPORT(bool) query_create(struct archive_query *query, struct archive *archive)
+bool query_create(struct archive_query *query, struct archive *archive)
 {
         error_if_null(query)
         error_if_null(archive)
@@ -62,13 +62,13 @@ ARK_EXPORT(bool) query_create(struct archive_query *query, struct archive *archi
         return query->context != NULL;
 }
 
-ARK_EXPORT(bool) query_drop(struct archive_query *query)
+bool query_drop(struct archive_query *query)
 {
         error_if_null(query)
         return io_context_drop(query->context);
 }
 
-ARK_EXPORT(bool) query_scan_strids(struct strid_iter *it, struct archive_query *query)
+bool query_scan_strids(struct strid_iter *it, struct archive_query *query)
 {
         error_if_null(it)
         error_if_null(query)
@@ -89,7 +89,7 @@ static bool index_string_id_to_offset_open_file(struct sid_to_offset *index, str
         }
 }
 
-ARK_EXPORT(bool) query_create_index_string_id_to_offset(struct sid_to_offset **index, struct archive_query *query)
+bool query_create_index_string_id_to_offset(struct sid_to_offset **index, struct archive_query *query)
 {
         error_if_null(index)
         error_if_null(query)
@@ -106,10 +106,10 @@ ARK_EXPORT(bool) query_create_index_string_id_to_offset(struct sid_to_offset **i
 
         struct sid_to_offset *result = ark_malloc(sizeof(struct sid_to_offset));
         hashtable_create(&result->mapping,
-                &query->err,
-                sizeof(field_sid_t),
-                sizeof(struct sid_to_offset_arg),
-                capacity);
+                         &query->err,
+                         sizeof(field_sid_t),
+                         sizeof(struct sid_to_offset_arg),
+                         capacity);
 
         if (!index_string_id_to_offset_open_file(result, &query->err, query->archive->diskFilePath)) {
                 return false;
@@ -134,7 +134,7 @@ ARK_EXPORT(bool) query_create_index_string_id_to_offset(struct sid_to_offset **i
 
 }
 
-ARK_EXPORT(void) query_drop_index_string_id_to_offset(struct sid_to_offset *index)
+void query_drop_index_string_id_to_offset(struct sid_to_offset *index)
 {
         if (index) {
                 hashtable_drop(&index->mapping);
@@ -143,7 +143,7 @@ ARK_EXPORT(void) query_drop_index_string_id_to_offset(struct sid_to_offset *inde
         }
 }
 
-ARK_EXPORT(bool) query_index_id_to_offset_serialize(FILE *file, struct err *err, struct sid_to_offset *index)
+bool query_index_id_to_offset_serialize(FILE *file, struct err *err, struct sid_to_offset *index)
 {
         unused(file);
         unused(err);
@@ -151,8 +151,8 @@ ARK_EXPORT(bool) query_index_id_to_offset_serialize(FILE *file, struct err *err,
         return hashtable_serialize(file, &index->mapping);
 }
 
-ARK_EXPORT(bool) query_index_id_to_offset_deserialize(struct sid_to_offset **index, struct err *err,
-        const char *file_path, offset_t offset)
+bool query_index_id_to_offset_deserialize(struct sid_to_offset **index, struct err *err,
+                                          const char *file_path, offset_t offset)
 {
         error_if_null(index)
         error_if_null(err)
@@ -198,7 +198,7 @@ ARK_EXPORT(bool) query_index_id_to_offset_deserialize(struct sid_to_offset **ind
 }
 
 static char *fetch_string_from_file(bool *decode_success, FILE *disk_file, size_t offset, size_t string_len,
-        struct err *err, struct archive *archive)
+                                    struct err *err, struct archive *archive)
 {
         char *result = ark_malloc(string_len + 1);
         memset(result, 0, string_len + 1);
@@ -229,11 +229,11 @@ static char *fetch_string_by_id_via_scan(struct archive_query *query, field_sid_
                                 if (info[i].id == id) {
                                         bool decode_result;
                                         char *result = fetch_string_from_file(&decode_result,
-                                                strid_iter.disk_file,
-                                                info[i].offset,
-                                                info[i].strlen,
-                                                &query->err,
-                                                query->archive);
+                                                                              strid_iter.disk_file,
+                                                                              info[i].offset,
+                                                                              info[i].strlen,
+                                                                              &query->err,
+                                                                              query->archive);
 
                                         bool close_iter_result = strid_iter_close(&strid_iter);
 
@@ -242,8 +242,8 @@ static char *fetch_string_by_id_via_scan(struct archive_query *query, field_sid_
                                                         free(result);
                                                 }
                                                 error(&query->err,
-                                                        !decode_result ? ARK_ERR_DECOMPRESSFAILED
-                                                                       : ARK_ERR_ITERATORNOTCLOSED);
+                                                      !decode_result ? ARK_ERR_DECOMPRESSFAILED
+                                                                     : ARK_ERR_ITERATORNOTCLOSED);
                                                 return NULL;
                                         } else {
                                                 return result;
@@ -267,11 +267,11 @@ static char *fetch_string_by_id_via_index(struct archive_query *query, struct si
                 if (args->offset < index->disk_file_size) {
                         bool decode_result;
                         char *result = fetch_string_from_file(&decode_result,
-                                index->disk_file,
-                                args->offset,
-                                args->strlen,
-                                &query->err,
-                                query->archive);
+                                                              index->disk_file,
+                                                              args->offset,
+                                                              args->strlen,
+                                                              &query->err,
+                                                              query->archive);
                         if (decode_result) {
                                 return result;
                         } else {
@@ -289,7 +289,7 @@ static char *fetch_string_by_id_via_index(struct archive_query *query, struct si
         }
 }
 
-ARK_EXPORT(char *)query_fetch_string_by_id(struct archive_query *query, field_sid_t id)
+char *query_fetch_string_by_id(struct archive_query *query, field_sid_t id)
 {
         assert(query);
 
@@ -302,7 +302,7 @@ ARK_EXPORT(char *)query_fetch_string_by_id(struct archive_query *query, field_si
         }
 }
 
-ARK_EXPORT(char *)query_fetch_string_by_id_nocache(struct archive_query *query, field_sid_t id)
+char *query_fetch_string_by_id_nocache(struct archive_query *query, field_sid_t id)
 {
         bool has_index;
         archive_has_query_index_string_id_to_offset(&has_index, query->archive);
@@ -313,8 +313,8 @@ ARK_EXPORT(char *)query_fetch_string_by_id_nocache(struct archive_query *query, 
         }
 }
 
-ARK_EXPORT(char **)query_fetch_strings_by_offset(struct archive_query *query, offset_t *offs, u32 *strlens,
-        size_t num_offs)
+char **query_fetch_strings_by_offset(struct archive_query *query, offset_t *offs, u32 *strlens,
+                                     size_t num_offs)
 {
         assert(query);
         assert(offs);
@@ -354,10 +354,10 @@ ARK_EXPORT(char **)query_fetch_strings_by_offset(struct archive_query *query, of
                 for (size_t i = 0; i < num_offs; i++) {
                         fseek(file, offs[i], SEEK_SET);
                         if (!pack_decode(&query->err,
-                                &query->archive->string_table.compressor,
-                                result[i],
-                                strlens[i],
-                                file)) {
+                                         &query->archive->string_table.compressor,
+                                         result[i],
+                                         strlens[i],
+                                         file)) {
                                 io_context_unlock(query->context);
                                 goto cleanup_and_error;
                         }
@@ -374,8 +374,8 @@ ARK_EXPORT(char **)query_fetch_strings_by_offset(struct archive_query *query, of
         return NULL;
 }
 
-ARK_EXPORT(field_sid_t *)query_find_ids(size_t *num_found, struct archive_query *query,
-        const struct string_pred_t *pred, void *capture, i64 limit)
+field_sid_t *query_find_ids(size_t *num_found, struct archive_query *query,
+                            const struct string_pred_t *pred, void *capture, i64 limit)
 {
         if (unlikely(string_pred_validate(&query->err, pred) == false)) {
                 return NULL;
@@ -480,9 +480,9 @@ ARK_EXPORT(field_sid_t *)query_find_ids(size_t *num_found, struct archive_query 
                 }
 
                 char **strings = query_fetch_strings_by_offset(query,
-                        str_offs,
-                        str_lens,
-                        step_len); // TODO: buffer + cleanup buffer
+                                                               str_offs,
+                                                               str_lens,
+                                                               step_len); // TODO: buffer + cleanup buffer
 
                 if (unlikely(
                         string_pred_eval(pred, idxs_matching, &num_matching, strings, step_len, capture) == false)) {

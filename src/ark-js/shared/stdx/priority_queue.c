@@ -20,7 +20,7 @@
 
 #include <ark-js/shared/stdx/priority_queue.h>
 
-ARK_EXPORT(void) priority_queue_init(struct priority_queue *queue)
+void priority_queue_init(struct priority_queue *queue)
 {
         queue->num_elements = 0;
         pthread_mutex_init(&queue->mutex, NULL);
@@ -28,7 +28,7 @@ ARK_EXPORT(void) priority_queue_init(struct priority_queue *queue)
         queue->data = NULL;
 }
 
-ARK_EXPORT(void) priority_queue_free(struct priority_queue *queue)
+void priority_queue_free(struct priority_queue *queue)
 {
         free(queue->data);
 }
@@ -100,7 +100,7 @@ static void up_heap(struct priority_queue_element_info *heap, size_t size)
         }
 }
 
-ARK_EXPORT(void) priority_queue_push(struct priority_queue *queue, void *data, size_t priority)
+void priority_queue_push(struct priority_queue *queue, void *data, size_t priority)
 {
         pthread_mutex_lock(&queue->mutex);
 
@@ -116,7 +116,7 @@ ARK_EXPORT(void) priority_queue_push(struct priority_queue *queue, void *data, s
         pthread_mutex_unlock(&queue->mutex);
 }
 
-ARK_EXPORT(void *) priority_queue_pop(struct priority_queue *queue)
+void *priority_queue_pop(struct priority_queue *queue)
 {
         pthread_mutex_lock(&queue->mutex);
 
@@ -134,7 +134,7 @@ ARK_EXPORT(void *) priority_queue_pop(struct priority_queue *queue)
         return ptr;
 }
 
-ARK_EXPORT(int) priority_queue_is_empty(struct priority_queue *queue)
+int priority_queue_is_empty(struct priority_queue *queue)
 {
         pthread_mutex_lock(&queue->mutex);
 

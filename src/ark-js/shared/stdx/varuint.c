@@ -24,35 +24,34 @@
 
 #define extract_data(x, byte_shift)     (MASK_BLOCK_DATA & (MASK_LAST_BYTE & (x >> byte_shift)))
 
-ARK_EXPORT(u8) varuint_write(varuint_t dst, u64 value)
+u8 varuint_write(varuint_t dst, u64 value)
 {
         if (likely(dst != NULL)) {
                 u8 num_bytes = 0;
                 for (i8 i = 9; i > 0; i--) {
                         char block_data = extract_data(value, i * 7);
                         if (block_data || num_bytes) {
-                                *(char *)dst = MASK_FORWARD_BIT | block_data;
-                                num_bytes = num_bytes? num_bytes : i + 1;
+                                *(char *) dst = MASK_FORWARD_BIT | block_data;
+                                num_bytes = num_bytes ? num_bytes : i + 1;
                                 dst++;
                         }
                 }
-                *(char *)dst = extract_data(value, 0);
-                return num_bytes? num_bytes : 1;
+                *(char *) dst = extract_data(value, 0);
+                return num_bytes ? num_bytes : 1;
         } else {
                 return 0;
         }
 }
 
-ARK_EXPORT(u64) varuint_read(u8 *nbytes, varuint_t src)
+u64 varuint_read(u8 *nbytes, varuint_t src)
 {
         u64 value = 0;
         bool has_next = true;
         u8 ndecoded = 0;
 
-        for (char it = * (char *)src, block_val = 0; has_next; has_next = (it & MASK_FORWARD_BIT) == MASK_FORWARD_BIT,
+        for (char it = *(char *) src, block_val = 0; has_next; has_next = (it & MASK_FORWARD_BIT) == MASK_FORWARD_BIT,
                 block_val = it & MASK_BLOCK_DATA, value = (value << 7) | block_val, src++,
-                ndecoded++, it = * (char *)src)
-        { }
+                ndecoded++, it = *(char *) src) {}
 
 
         ark_optional_set(nbytes, ndecoded);

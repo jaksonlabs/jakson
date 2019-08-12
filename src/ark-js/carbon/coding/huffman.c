@@ -23,13 +23,13 @@
 #include <ark-js/shared/stdx/bitmap.h>
 
 struct huff_node {
-        struct huff_node *prev, *next, *left, *right;
-        u64 freq;
-        unsigned char letter;
+    struct huff_node *prev, *next, *left, *right;
+    u64 freq;
+    unsigned char letter;
 };
 
 static void huff_tree_create(struct vector ofType(struct pack_huffman_entry) *table,
-        const struct vector ofType(u32) *frequencies);
+                             const struct vector ofType(u32) *frequencies);
 
 bool coding_huffman_create(struct coding_huffman *dic)
 {
@@ -41,7 +41,7 @@ bool coding_huffman_create(struct coding_huffman *dic)
         return true;
 }
 
-ARK_EXPORT(bool) coding_huffman_cpy(struct coding_huffman *dst, struct coding_huffman *src)
+bool coding_huffman_cpy(struct coding_huffman *dst, struct coding_huffman *src)
 {
         error_if_null(dst);
         error_if_null(src);
@@ -53,7 +53,7 @@ ARK_EXPORT(bool) coding_huffman_cpy(struct coding_huffman *dst, struct coding_hu
         }
 }
 
-ARK_EXPORT(bool) coding_huffman_build(struct coding_huffman *encoder, const string_vector_t *strings)
+bool coding_huffman_build(struct coding_huffman *encoder, const string_vector_t *strings)
 {
         error_if_null(encoder);
         error_if_null(strings);
@@ -80,7 +80,7 @@ ARK_EXPORT(bool) coding_huffman_build(struct coding_huffman *encoder, const stri
         return true;
 }
 
-ARK_EXPORT(bool) coding_huffman_get_error(struct err *err, const struct coding_huffman *dic)
+bool coding_huffman_get_error(struct err *err, const struct coding_huffman *dic)
 {
         error_if_null(err)
         error_if_null(dic)
@@ -193,7 +193,7 @@ static size_t encodeString(struct memfile *file, struct coding_huffman *dic, con
         return num_written_bytes;
 }
 
-ARK_EXPORT(bool) coding_huffman_encode(struct memfile *file, struct coding_huffman *dic, const char *string)
+bool coding_huffman_encode(struct memfile *file, struct coding_huffman *dic, const char *string)
 {
         error_if_null(file)
         error_if_null(dic)
@@ -241,7 +241,7 @@ bool coding_huffman_read_entry(struct pack_huffman_info *info, struct memfile *f
 }
 
 static const u32 *get_num_used_blocks(u16 *numUsedBlocks, struct pack_huffman_entry *entry, u16 num_blocks,
-        const u32 *blocks)
+                                      const u32 *blocks)
 {
         for (entry->nblocks = 0; entry->nblocks < num_blocks; entry->nblocks++) {
                 const u32 *block = blocks + entry->nblocks;
@@ -253,7 +253,8 @@ static const u32 *get_num_used_blocks(u16 *numUsedBlocks, struct pack_huffman_en
         return NULL;
 }
 
-static void import_into_entry(struct pack_huffman_entry *entry, const struct huff_node *node, const struct bitmap *map)
+static void
+import_into_entry(struct pack_huffman_entry *entry, const struct huff_node *node, const struct bitmap *map)
 {
         entry->letter = node->letter;
         u32 *blocks, num_blocks;
@@ -271,13 +272,13 @@ static void import_into_entry(struct pack_huffman_entry *entry, const struct huf
 
 static struct huff_node *seek_to_begin(struct huff_node *handle)
 {
-        for (; handle->prev != NULL; handle = handle->prev) { }
+        for (; handle->prev != NULL; handle = handle->prev) {}
         return handle;
 }
 
 static struct huff_node *seek_to_end(struct huff_node *handle)
 {
-        for (; handle->next != NULL; handle = handle->next) { }
+        for (; handle->next != NULL; handle = handle->next) {}
         return handle;
 }
 
@@ -325,7 +326,7 @@ static struct huff_node *find_smallest(struct huff_node *begin, u64 lowerBound, 
 }
 
 static void assign_code(struct huff_node *node, const struct bitmap *path,
-        struct vector ofType(struct pack_huffman_entry) *table)
+                        struct vector ofType(struct pack_huffman_entry) *table)
 {
         if (!node->left && !node->right) {
                 struct pack_huffman_entry *entry = vec_new_and_get(table, struct pack_huffman_entry);
@@ -374,7 +375,7 @@ static struct huff_node *trim_and_begin(struct vector ofType(HuffNode) *candidat
 }
 
 static void huff_tree_create(struct vector ofType(struct pack_huffman_entry) *table,
-        const struct vector ofType(u32) *frequencies)
+                             const struct vector ofType(u32) *frequencies)
 {
         assert(UCHAR_MAX == frequencies->num_elems);
 

@@ -21,31 +21,37 @@
 #include <ark-js/shared/json/json.h>
 #include <ark-js/shared/json/doc.h>
 #include <ark-js/shared/utils/convert.h>
+#include <ark-js/shared/utils/numbers.h>
+#include "json.h"
 
 static struct {
-        enum json_token_type token;
-        const char *string;
-} TOKEN_STRING[] = {{.token = OBJECT_OPEN, .string = "OBJECT_OPEN"}, {.token = OBJECT_CLOSE, .string = "OBJECT_CLOSE"},
+    enum json_token_type token;
+    const char *string;
+} TOKEN_STRING[] = {{.token = OBJECT_OPEN, .string = "OBJECT_OPEN"},
+                    {.token = OBJECT_CLOSE, .string = "OBJECT_CLOSE"},
                     {.token = LITERAL_STRING, .string = "JSON_TOKEN_STRING"},
                     {.token = LITERAL_INT, .string = "LITERAL_INT"},
                     {.token = LITERAL_FLOAT, .string = "LITERAL_FLOAT"},
                     {.token = LITERAL_TRUE, .string = "LITERAL_TRUE"},
                     {.token = LITERAL_FALSE, .string = "LITERAL_FALSE"},
-                    {.token = LITERAL_NULL, .string = "LITERAL_NULL"}, {.token = COMMA, .string = "COMMA"},
-                    {.token = ASSIGN, .string = "JSON_TOKEN_ASSIGMENT"}, {.token = ARRAY_OPEN, .string = "ARRAY_OPEN"},
-                    {.token = ARRAY_CLOSE, .string = "ARRAY_CLOSE"}, {.token = JSON_UNKNOWN, .string = "JSON_UNKNOWN"}};
+                    {.token = LITERAL_NULL, .string = "LITERAL_NULL"},
+                    {.token = COMMA, .string = "COMMA"},
+                    {.token = ASSIGN, .string = "JSON_TOKEN_ASSIGMENT"},
+                    {.token = ARRAY_OPEN, .string = "ARRAY_OPEN"},
+                    {.token = ARRAY_CLOSE, .string = "ARRAY_CLOSE"},
+                    {.token = JSON_UNKNOWN, .string = "JSON_UNKNOWN"}};
 
 struct token_memory {
-        enum json_token_type type;
-        bool init;
+    enum json_token_type type;
+    bool init;
 };
 
 static int process_token(struct err *err, struct json_err *error_desc, const struct json_token *token,
-        struct vector ofType(enum json_token_type) *brackets, struct token_memory *token_mem);
+                         struct vector ofType(enum json_token_type) *brackets, struct token_memory *token_mem);
 
 static int set_error(struct json_err *error_desc, const struct json_token *token, const char *msg);
 
-ARK_EXPORT(bool) json_tokenizer_init(struct json_tokenizer *tokenizer, const char *input)
+bool json_tokenizer_init(struct json_tokenizer *tokenizer, const char *input)
 {
         error_if_null(tokenizer)
         error_if_null(input)
@@ -72,8 +78,7 @@ const struct json_token *json_tokenizer_next(struct json_tokenizer *tokenizer)
                         do {
                                 tokenizer->cursor++;
                                 tokenizer->token.column++;
-                        }
-                        while (isspace(c = *tokenizer->cursor) && c != '\n');
+                        } while (isspace(c = *tokenizer->cursor) && c != '\n');
                         return json_tokenizer_next(tokenizer);
                 } else if (c == '{' || c == '}' || c == '[' || c == ']' || c == ':' || c == ',') {
                         tokenizer->token.type =
@@ -104,9 +109,9 @@ const struct json_token *json_tokenizer_next(struct json_tokenizer *tokenizer)
                                         goto next_char;
                                 }
                                 escapeQuote = c == '"' && last_1_c == '\\'
-                                        && ((last_2_c == '\\' && last_3_c == '\\' && last_4_c != '\\')
-                                                || (last_2_c != '\\' && last_3_c == '\\')
-                                                || (last_2_c != '\\' && last_3_c != '\\'));
+                                              && ((last_2_c == '\\' && last_3_c == '\\' && last_4_c != '\\')
+                                                  || (last_2_c != '\\' && last_3_c == '\\')
+                                                  || (last_2_c != '\\' && last_3_c != '\\'));
                         }
                         tokenizer->cursor++;
                         tokenizer->cursor += (c == '\r' || c == '\n') ? 1 : 0;
@@ -114,13 +119,13 @@ const struct json_token *json_tokenizer_next(struct json_tokenizer *tokenizer)
                         const unsigned lenTrueNull = 4;
                         const unsigned lenFalse = 5;
                         const unsigned cursorLen = strlen(tokenizer->cursor);
-                        if (cursorLen > lenTrueNull && strncmp(tokenizer->cursor, "true", lenTrueNull) == 0) {
+                        if (cursorLen >= lenTrueNull && strncmp(tokenizer->cursor, "true", lenTrueNull) == 0) {
                                 tokenizer->token.type = LITERAL_TRUE;
                                 tokenizer->token.length = lenTrueNull;
-                        } else if (cursorLen > lenFalse && strncmp(tokenizer->cursor, "false", lenFalse) == 0) {
+                        } else if (cursorLen >= lenFalse && strncmp(tokenizer->cursor, "false", lenFalse) == 0) {
                                 tokenizer->token.type = LITERAL_FALSE;
                                 tokenizer->token.length = lenFalse;
-                        } else if (cursorLen > lenTrueNull && strncmp(tokenizer->cursor, "null", lenTrueNull) == 0) {
+                        } else if (cursorLen >= lenTrueNull && strncmp(tokenizer->cursor, "null", lenTrueNull) == 0) {
                                 tokenizer->token.type = LITERAL_NULL;
                                 tokenizer->token.length = lenTrueNull;
                         } else {
@@ -140,10 +145,9 @@ const struct json_token *json_tokenizer_next(struct json_tokenizer *tokenizer)
                                 expFound += (c == 'e') || (c == 'E');
                                 plusMinusFound += plusMinusAllowed && ((c == '+') || (c == '-')) ? 1 : 0;
                                 tokenizer->token.length++;
-                        }
-                        while ((((isdigit(c)) || (c == '.' && fracFound <= 1)
-                                || (plusMinusAllowed && (plusMinusFound <= 1) && ((c == '+') || (c == '-')))
-                                || ((c == 'e' || c == 'E') && expFound <= 1))) && c != '\n' && c != '\r');
+                        } while ((((isdigit(c)) || (c == '.' && fracFound <= 1)
+                                   || (plusMinusAllowed && (plusMinusFound <= 1) && ((c == '+') || (c == '-')))
+                                   || ((c == 'e' || c == 'E') && expFound <= 1))) && c != '\n' && c != '\r');
 
                         if (!isdigit(*(tokenizer->cursor - 1))) {
                                 tokenizer->token.column -= tokenizer->token.length;
@@ -187,43 +191,61 @@ void json_token_print(FILE *file, const struct json_token *token)
 }
 
 static bool parse_object(struct json_object_t *object, struct err *err,
-        struct vector ofType(struct json_token) *token_stream, size_t *token_idx);
+                         struct vector ofType(struct json_token) *token_stream, size_t *token_idx);
+
 static bool parse_array(struct json_array *array, struct err *err,
-        struct vector ofType(struct json_token) *token_stream, size_t *token_idx);
+                        struct vector ofType(struct json_token) *token_stream, size_t *token_idx);
+
 static void parse_string(struct json_string *string, struct vector ofType(struct json_token) *token_stream,
-        size_t *token_idx);
+                         size_t *token_idx);
+
 static void parse_number(struct json_number *number, struct vector ofType(struct json_token) *token_stream,
-        size_t *token_idx);
+                         size_t *token_idx);
+
 static bool parse_element(struct json_element *element, struct err *err,
-        struct vector ofType(struct json_token) *token_stream, size_t *token_idx);
+                          struct vector ofType(struct json_token) *token_stream, size_t *token_idx);
+
 static bool parse_elements(struct json_elements *elements, struct err *err,
-        struct vector ofType(struct json_token) *token_stream, size_t *token_idx);
+                           struct vector ofType(struct json_token) *token_stream, size_t *token_idx);
+
 static bool parse_token_stream(struct json *json, struct err *err,
-        struct vector ofType(struct json_token) *token_stream);
+                               struct vector ofType(struct json_token) *token_stream);
+
 static struct json_token get_token(struct vector ofType(struct json_token) *token_stream, size_t token_idx);
+
 static void connect_child_and_parents_member(struct json_prop *member);
+
 static void connect_child_and_parents_object(struct json_object_t *object);
+
 static void connect_child_and_parents_array(struct json_array *array);
+
 static void connect_child_and_parents_value(struct json_node_value *value);
+
 static void connect_child_and_parents_element(struct json_element *element);
+
 static void connect_child_and_parents(struct json *json);
+
 static bool json_ast_node_member_print(FILE *file, struct err *err, struct json_prop *member);
+
 static bool json_ast_node_object_print(FILE *file, struct err *err, struct json_object_t *object);
+
 static bool json_ast_node_array_print(FILE *file, struct err *err, struct json_array *array);
+
 static void json_ast_node_string_print(FILE *file, struct json_string *string);
+
 static bool json_ast_node_number_print(FILE *file, struct err *err, struct json_number *number);
+
 static bool json_ast_node_value_print(FILE *file, struct err *err, struct json_node_value *value);
+
 static bool json_ast_node_element_print(FILE *file, struct err *err, struct json_element *element);
 
 #define NEXT_TOKEN(x) { *x = *x + 1; }
 #define PREV_TOKEN(x) { *x = *x - 1; }
 
-ARK_EXPORT(bool) json_parser_create(struct json_parser *parser, struct doc_bulk *partition)
+bool json_parser_create(struct json_parser *parser)
 {
         error_if_null(parser)
-        error_if_null(partition)
 
-        parser->partition = partition;
         error_init(&parser->err);
 
         return true;
@@ -286,72 +308,79 @@ bool json_parse(struct json *json, struct json_err *error_desc, struct json_pars
 bool test_condition_value(struct err *err, struct json_node_value *value)
 {
         switch (value->value_type) {
-        case JSON_VALUE_OBJECT:
-                for (size_t i = 0; i < value->value.object->value->members.num_elems; i++) {
-                        struct json_prop *member = vec_get(&value->value.object->value->members, i, struct json_prop);
-                        if (!test_condition_value(err, &member->value.value)) {
-                                return false;
-                        }
-                }
-                break;
-        case JSON_VALUE_ARRAY: {
-                struct json_elements *elements = &value->value.array->elements;
-                enum json_value_type value_type = JSON_VALUE_NULL;
-
-                for (size_t i = 0; i < elements->elements.num_elems; i++) {
-                        struct json_element *element = vec_get(&elements->elements, i, struct json_element);
-                        value_type =
-                                ((i == 0 || value_type == JSON_VALUE_NULL) ? element->value.value_type : value_type);
-
-                        /** Test "All elements in array of same type" condition */
-                        if ((element->value.value_type != JSON_VALUE_NULL) && (value_type == JSON_VALUE_TRUE
-                                && (element->value.value_type != JSON_VALUE_TRUE
-                                        || element->value.value_type != JSON_VALUE_FALSE))
-                                && (value_type == JSON_VALUE_FALSE && (element->value.value_type != JSON_VALUE_TRUE
-                                        || element->value.value_type != JSON_VALUE_FALSE))
-                                && ((value_type != JSON_VALUE_TRUE && value_type != JSON_VALUE_FALSE)
-                                        && value_type != element->value.value_type)) {
-                                char message[] = "JSON file constraint broken: arrays of mixed types detected";
-                                char *result = ark_malloc(strlen(message) + 1);
-                                strcpy(result, &message[0]);
-                                error_with_details(err, ARK_ERR_ARRAYOFMIXEDTYPES, result);
-                                free(result);
-                                return false;
-                        }
-
-                        switch (element->value.value_type) {
-                        case JSON_VALUE_OBJECT: {
-                                struct json_object_t *object = element->value.value.object;
-                                for (size_t i = 0; i < object->value->members.num_elems; i++) {
-                                        struct json_prop
-                                                *member = vec_get(&object->value->members, i, struct json_prop);
-                                        if (!test_condition_value(err, &member->value.value)) {
-                                                return false;
-                                        }
+                case JSON_VALUE_OBJECT:
+                        for (size_t i = 0; i < value->value.object->value->members.num_elems; i++) {
+                                struct json_prop *member = vec_get(&value->value.object->value->members, i,
+                                                                   struct json_prop);
+                                if (!test_condition_value(err, &member->value.value)) {
+                                        return false;
                                 }
                         }
-                                break;
-                        case JSON_VALUE_ARRAY: {/** Test "No Array of Arrays" condition */
-                                char message[] = "JSON file constraint broken: arrays of arrays detected";
-                                char *result = ark_malloc(strlen(message) + 1);
-                                strcpy(result, &message[0]);
-                                error_with_details(err, ARK_ERR_ARRAYOFARRAYS, result);
-                                free(result);
-                                return false;
-                        }
-                        default:
-                                break;
+                        break;
+                case JSON_VALUE_ARRAY: {
+                        struct json_elements *elements = &value->value.array->elements;
+                        enum json_value_type value_type = JSON_VALUE_NULL;
+
+                        for (size_t i = 0; i < elements->elements.num_elems; i++) {
+                                struct json_element *element = vec_get(&elements->elements, i, struct json_element);
+                                value_type =
+                                        ((i == 0 || value_type == JSON_VALUE_NULL) ? element->value.value_type
+                                                                                   : value_type);
+
+                                /** Test "All elements in array of same type" condition */
+                                if ((element->value.value_type != JSON_VALUE_NULL) && (value_type == JSON_VALUE_TRUE
+                                                                                       && (element->value.value_type !=
+                                                                                           JSON_VALUE_TRUE
+                                                                                           ||
+                                                                                           element->value.value_type !=
+                                                                                           JSON_VALUE_FALSE))
+                                    && (value_type == JSON_VALUE_FALSE && (element->value.value_type != JSON_VALUE_TRUE
+                                                                           || element->value.value_type !=
+                                                                              JSON_VALUE_FALSE))
+                                    && ((value_type != JSON_VALUE_TRUE && value_type != JSON_VALUE_FALSE)
+                                        && value_type != element->value.value_type)) {
+                                        char message[] = "JSON file constraint broken: arrays of mixed types detected";
+                                        char *result = ark_malloc(strlen(message) + 1);
+                                        strcpy(result, &message[0]);
+                                        error_with_details(err, ARK_ERR_ARRAYOFMIXEDTYPES, result);
+                                        free(result);
+                                        return false;
+                                }
+
+                                switch (element->value.value_type) {
+                                        case JSON_VALUE_OBJECT: {
+                                                struct json_object_t *object = element->value.value.object;
+                                                for (size_t i = 0; i < object->value->members.num_elems; i++) {
+                                                        struct json_prop
+                                                                *member = vec_get(&object->value->members, i,
+                                                                                  struct json_prop);
+                                                        if (!test_condition_value(err, &member->value.value)) {
+                                                                return false;
+                                                        }
+                                                }
+                                        }
+                                                break;
+                                        case JSON_VALUE_ARRAY: {/** Test "No Array of Arrays" condition */
+                                                char message[] = "JSON file constraint broken: arrays of arrays detected";
+                                                char *result = ark_malloc(strlen(message) + 1);
+                                                strcpy(result, &message[0]);
+                                                error_with_details(err, ARK_ERR_ARRAYOFARRAYS, result);
+                                                free(result);
+                                                return false;
+                                        }
+                                        default:
+                                                break;
+                                }
                         }
                 }
-        }
-                break;
-        default:
-                break;
+                        break;
+                default:
+                        break;
         }
         return true;
 }
 
-ARK_EXPORT(bool) json_test(struct err *err, struct json *json)
+bool json_test(struct err *err, struct json *json)
 {
         return (test_condition_value(err, &json->element->value));
 }
@@ -362,7 +391,7 @@ static struct json_token get_token(struct vector ofType(struct json_token) *toke
 }
 
 bool parse_members(struct err *err, struct json_members *members, struct vector ofType(struct json_token) *token_stream,
-        size_t *token_idx)
+                   size_t *token_idx)
 {
         vec_create(&members->members, NULL, sizeof(struct json_prop), 20);
         struct json_token delimiter_token;
@@ -380,57 +409,56 @@ bool parse_members(struct err *err, struct json_members *members, struct vector 
                 struct json_token valueToken = get_token(token_stream, *token_idx);
 
                 switch (valueToken.type) {
-                case OBJECT_OPEN:
-                        member->value.value.value_type = JSON_VALUE_OBJECT;
-                        member->value.value.value.object = ark_malloc(sizeof(struct json_object_t));
-                        if (!parse_object(member->value.value.value.object, err, token_stream, token_idx)) {
+                        case OBJECT_OPEN:
+                                member->value.value.value_type = JSON_VALUE_OBJECT;
+                                member->value.value.value.object = ark_malloc(sizeof(struct json_object_t));
+                                if (!parse_object(member->value.value.value.object, err, token_stream, token_idx)) {
+                                        return false;
+                                }
+                                break;
+                        case ARRAY_OPEN:
+                                member->value.value.value_type = JSON_VALUE_ARRAY;
+                                member->value.value.value.array = ark_malloc(sizeof(struct json_array));
+                                if (!parse_array(member->value.value.value.array, err, token_stream, token_idx)) {
+                                        return false;
+                                }
+                                break;
+                        case LITERAL_STRING:
+                                member->value.value.value_type = JSON_VALUE_STRING;
+                                member->value.value.value.string = ark_malloc(sizeof(struct json_string));
+                                parse_string(member->value.value.value.string, token_stream, token_idx);
+                                break;
+                        case LITERAL_INT:
+                        case LITERAL_FLOAT:
+                                member->value.value.value_type = JSON_VALUE_NUMBER;
+                                member->value.value.value.number = ark_malloc(sizeof(struct json_number));
+                                parse_number(member->value.value.value.number, token_stream, token_idx);
+                                break;
+                        case LITERAL_TRUE:
+                                member->value.value.value_type = JSON_VALUE_TRUE;
+                                NEXT_TOKEN(token_idx);
+                                break;
+                        case LITERAL_FALSE:
+                                member->value.value.value_type = JSON_VALUE_FALSE;
+                                NEXT_TOKEN(token_idx);
+                                break;
+                        case LITERAL_NULL:
+                                member->value.value.value_type = JSON_VALUE_NULL;
+                                NEXT_TOKEN(token_idx);
+                                break;
+                        default: error(err, ARK_ERR_PARSETYPE)
                                 return false;
-                        }
-                        break;
-                case ARRAY_OPEN:
-                        member->value.value.value_type = JSON_VALUE_ARRAY;
-                        member->value.value.value.array = ark_malloc(sizeof(struct json_array));
-                        if (!parse_array(member->value.value.value.array, err, token_stream, token_idx)) {
-                                return false;
-                        }
-                        break;
-                case LITERAL_STRING:
-                        member->value.value.value_type = JSON_VALUE_STRING;
-                        member->value.value.value.string = ark_malloc(sizeof(struct json_string));
-                        parse_string(member->value.value.value.string, token_stream, token_idx);
-                        break;
-                case LITERAL_INT:
-                case LITERAL_FLOAT:
-                        member->value.value.value_type = JSON_VALUE_NUMBER;
-                        member->value.value.value.number = ark_malloc(sizeof(struct json_number));
-                        parse_number(member->value.value.value.number, token_stream, token_idx);
-                        break;
-                case LITERAL_TRUE:
-                        member->value.value.value_type = JSON_VALUE_TRUE;
-                        NEXT_TOKEN(token_idx);
-                        break;
-                case LITERAL_FALSE:
-                        member->value.value.value_type = JSON_VALUE_FALSE;
-                        NEXT_TOKEN(token_idx);
-                        break;
-                case LITERAL_NULL:
-                        member->value.value.value_type = JSON_VALUE_NULL;
-                        NEXT_TOKEN(token_idx);
-                        break;
-                default: error(err, ARK_ERR_PARSETYPE)
-                        return false;
                 }
 
                 delimiter_token = get_token(token_stream, *token_idx);
                 NEXT_TOKEN(token_idx);
-        }
-        while (delimiter_token.type == COMMA);
+        } while (delimiter_token.type == COMMA);
         PREV_TOKEN(token_idx);
         return true;
 }
 
 static bool parse_object(struct json_object_t *object, struct err *err,
-        struct vector ofType(struct json_token) *token_stream, size_t *token_idx)
+                         struct vector ofType(struct json_token) *token_stream, size_t *token_idx)
 {
         assert(get_token(token_stream, *token_idx).type == OBJECT_OPEN);
         NEXT_TOKEN(token_idx);  /** Skip '{' */
@@ -452,7 +480,7 @@ static bool parse_object(struct json_object_t *object, struct err *err,
 }
 
 static bool parse_array(struct json_array *array, struct err *err,
-        struct vector ofType(struct json_token) *token_stream, size_t *token_idx)
+                        struct vector ofType(struct json_token) *token_stream, size_t *token_idx)
 {
         struct json_token token = get_token(token_stream, *token_idx);
         unused(token);
@@ -469,7 +497,7 @@ static bool parse_array(struct json_array *array, struct err *err,
 }
 
 static void parse_string(struct json_string *string, struct vector ofType(struct json_token) *token_stream,
-        size_t *token_idx)
+                         size_t *token_idx)
 {
         struct json_token token = get_token(token_stream, *token_idx);
         assert(token.type == LITERAL_STRING);
@@ -483,7 +511,7 @@ static void parse_string(struct json_string *string, struct vector ofType(struct
 }
 
 static void parse_number(struct json_number *number, struct vector ofType(struct json_token) *token_stream,
-        size_t *token_idx)
+                         size_t *token_idx)
 {
         struct json_token token = get_token(token_stream, *token_idx);
         assert(token.type == LITERAL_FLOAT || token.type == LITERAL_INT);
@@ -499,7 +527,7 @@ static void parse_number(struct json_number *number, struct vector ofType(struct
                         number->value.signed_integer = assumeSigned;
                 } else {
                         u64 assumeUnsigned = convert_atoiu64(value);
-                        if (assumeUnsigned > (u64) assumeSigned) {
+                        if (assumeUnsigned >= (u64) assumeSigned) {
                                 number->value_type = JSON_NUMBER_UNSIGNED;
                                 number->value.unsigned_integer = assumeUnsigned;
                         } else {
@@ -518,7 +546,7 @@ static void parse_number(struct json_number *number, struct vector ofType(struct
 }
 
 static bool parse_element(struct json_element *element, struct err *err,
-        struct vector ofType(struct json_token) *token_stream, size_t *token_idx)
+                          struct vector ofType(struct json_token) *token_stream, size_t *token_idx)
 {
         struct json_token token = get_token(token_stream, *token_idx);
 
@@ -558,26 +586,28 @@ static bool parse_element(struct json_element *element, struct err *err,
 }
 
 static bool parse_elements(struct json_elements *elements, struct err *err,
-        struct vector ofType(struct json_token) *token_stream, size_t *token_idx)
+                           struct vector ofType(struct json_token) *token_stream, size_t *token_idx)
 {
         struct json_token delimiter;
         do {
-                if (!parse_element(vec_new_and_get(&elements->elements, struct json_element),
-                        err,
-                        token_stream,
-                        token_idx)) {
-                        return false;
+                struct json_token current = get_token(token_stream, *token_idx);
+                if (current.type != ARRAY_CLOSE && current.type != OBJECT_CLOSE) {
+                        if (!parse_element(vec_new_and_get(&elements->elements, struct json_element),
+                                           err,
+                                           token_stream,
+                                           token_idx)) {
+                                return false;
+                        }
                 }
                 delimiter = get_token(token_stream, *token_idx);
                 NEXT_TOKEN(token_idx);
-        }
-        while (delimiter.type == COMMA);
+        } while (delimiter.type == COMMA);
         PREV_TOKEN(token_idx);
         return true;
 }
 
 static bool parse_token_stream(struct json *json, struct err *err,
-        struct vector ofType(struct json_token) *token_stream)
+                               struct vector ofType(struct json_token) *token_stream)
 {
         size_t token_idx = 0;
         if (!parse_element(json->element, err, token_stream, &token_idx)) {
@@ -622,14 +652,14 @@ static void connect_child_and_parents_array(struct json_array *array)
 static void connect_child_and_parents_value(struct json_node_value *value)
 {
         switch (value->value_type) {
-        case JSON_VALUE_OBJECT:
-                connect_child_and_parents_object(value->value.object);
-                break;
-        case JSON_VALUE_ARRAY:
-                connect_child_and_parents_array(value->value.array);
-                break;
-        default:
-                break;
+                case JSON_VALUE_OBJECT:
+                        connect_child_and_parents_object(value->value.object);
+                        break;
+                case JSON_VALUE_ARRAY:
+                        connect_child_and_parents_array(value->value.array);
+                        break;
+                default:
+                        break;
         }
 }
 
@@ -653,130 +683,135 @@ static bool isValue(enum json_token_type token)
 }
 
 static int process_token(struct err *err, struct json_err *error_desc, const struct json_token *token,
-        struct vector ofType(enum json_token_type) *brackets, struct token_memory *token_mem)
+                         struct vector ofType(enum json_token_type) *brackets, struct token_memory *token_mem)
 {
         switch (token->type) {
-        case OBJECT_OPEN:
-        case ARRAY_OPEN:
-                vec_push(brackets, &token->type, 1);
-                break;
-        case OBJECT_CLOSE:
-        case ARRAY_CLOSE: {
-                if (!vec_is_empty(brackets)) {
-                        enum json_token_type bracket = *VECTOR_PEEK(brackets, enum json_token_type);
-                        if ((token->type == ARRAY_CLOSE && bracket == ARRAY_OPEN)
-                                || (token->type == OBJECT_CLOSE && bracket == OBJECT_OPEN)) {
-                                vec_pop(brackets);
-                        } else {
-                                goto pushEntry;
-                        }
-                } else {
-                        pushEntry:
+                case OBJECT_OPEN:
+                case ARRAY_OPEN:
                         vec_push(brackets, &token->type, 1);
+                        break;
+                case OBJECT_CLOSE:
+                case ARRAY_CLOSE: {
+                        if (!vec_is_empty(brackets)) {
+                                enum json_token_type bracket = *VECTOR_PEEK(brackets, enum json_token_type);
+                                if ((token->type == ARRAY_CLOSE && bracket == ARRAY_OPEN)
+                                    || (token->type == OBJECT_CLOSE && bracket == OBJECT_OPEN)) {
+                                        vec_pop(brackets);
+                                } else {
+                                        goto pushEntry;
+                                }
+                        } else {
+                                pushEntry:
+                                vec_push(brackets, &token->type, 1);
+                        }
                 }
-        }
-                break;
-        default:
-                break;
+                        break;
+                default:
+                        break;
         }
 
         switch (token_mem->type) {
-        case OBJECT_OPEN:
-                switch (token->type) {
-                case LITERAL_STRING:
-                case OBJECT_CLOSE:
+                case OBJECT_OPEN:
+                        switch (token->type) {
+                                case LITERAL_STRING:
+                                case OBJECT_CLOSE:
+                                        break;
+                                default:
+                                        return set_error(error_desc, token, "Expected key name or '}'");
+                        }
                         break;
-                default:
-                        return set_error(error_desc, token, "Expected key name or '}'");
-                }
-                break;
-        case LITERAL_STRING:
-                switch (token->type) {
+                case LITERAL_STRING:
+                        switch (token->type) {
+                                case ASSIGN:
+                                case COMMA:
+                                case ARRAY_CLOSE:
+                                case OBJECT_CLOSE:
+                                        break;
+                                default:
+                                        return set_error(error_desc, token,
+                                                         "Expected key name (missing ':'), enumeration (','), "
+                                                         "end of enumeration (']'), or end of object ('}')");
+                        }
+                        break;
+                case OBJECT_CLOSE:
+                case LITERAL_INT:
+                case LITERAL_FLOAT:
+                case LITERAL_TRUE:
+                case LITERAL_FALSE:
+                case LITERAL_NULL:
+                        switch (token->type) {
+                                case COMMA:
+                                case ARRAY_CLOSE:
+                                case OBJECT_CLOSE:
+                                        break;
+                                default:
+                                        return set_error(error_desc, token,
+                                                         "Expected enumeration (','), end of enumeration (']'), "
+                                                         "or end of object ('})");
+                        }
+                        break;
                 case ASSIGN:
                 case COMMA:
-                case ARRAY_CLOSE:
-                case OBJECT_CLOSE:
-                        break;
-                default:
-                        return set_error(error_desc, token, "Expected key name (missing ':'), enumeration (','), "
-                                "end of enumeration (']'), or end of object ('}')");
-                }
-                break;
-        case OBJECT_CLOSE:
-        case LITERAL_INT:
-        case LITERAL_FLOAT:
-        case LITERAL_TRUE:
-        case LITERAL_FALSE:
-        case LITERAL_NULL:
-                switch (token->type) {
-                case COMMA:
-                case ARRAY_CLOSE:
-                case OBJECT_CLOSE:
-                        break;
-                default:
-                        return set_error(error_desc, token, "Expected enumeration (','), end of enumeration (']'), "
-                                "or end of object ('})");
-                }
-                break;
-        case ASSIGN:
-        case COMMA:
-                switch (token->type) {
-                case LITERAL_STRING:
-                case LITERAL_FLOAT:
-                case LITERAL_INT:
-                case OBJECT_OPEN:
-                case ARRAY_OPEN:
-                case LITERAL_TRUE:
-                case LITERAL_FALSE:
-                case LITERAL_NULL:
-                        break;
-                default:
-                        return set_error(error_desc,
-                                token,
-                                "Expected key name, or value (string, number, object, enumeration, true, "
-                                        "false, or null).");
-                }
-                break;
-        case ARRAY_OPEN:
-                switch (token->type) {
-                case ARRAY_CLOSE:
-                case LITERAL_STRING:
-                case LITERAL_FLOAT:
-                case LITERAL_INT:
-                case OBJECT_OPEN:
-                case ARRAY_OPEN:
-                case LITERAL_TRUE:
-                case LITERAL_FALSE:
-                case LITERAL_NULL:
-                        break;
-                default:
-                        return set_error(error_desc, token, "End of enumeration (']'), enumeration (','), or "
-                                "end of enumeration (']')");
-                }
-                break;
-        case ARRAY_CLOSE:
-                switch (token->type) {
-                case COMMA:
-                case ARRAY_CLOSE:
-                case OBJECT_CLOSE:
-                        break;
-                default:
-                        return set_error(error_desc, token, "End of enumeration (']'), enumeration (','), or "
-                                "end of object ('}')");
-                }
-                break;
-        case JSON_UNKNOWN:
-                if (token_mem->init) {
-                        if (token->type != OBJECT_OPEN && token->type != ARRAY_OPEN && !isValue(token->type)) {
-                                return set_error(error_desc, token, "Expected JSON document: missing '{' or '['");
+                        switch (token->type) {
+                                case LITERAL_STRING:
+                                case LITERAL_FLOAT:
+                                case LITERAL_INT:
+                                case OBJECT_OPEN:
+                                case ARRAY_OPEN:
+                                case LITERAL_TRUE:
+                                case LITERAL_FALSE:
+                                case LITERAL_NULL:
+                                        break;
+                                default:
+                                        return set_error(error_desc,
+                                                         token,
+                                                         "Expected key name, or value (string, number, object, enumeration, true, "
+                                                         "false, or null).");
                         }
-                        token_mem->init = false;
-                } else {
-                        return set_error(error_desc, token, "Unexpected token");
-                }
-                break;
-        default: error(err, ARK_ERR_NOJSONTOKEN)
-                return false;
+                        break;
+                case ARRAY_OPEN:
+                        switch (token->type) {
+                                case ARRAY_CLOSE:
+                                case LITERAL_STRING:
+                                case LITERAL_FLOAT:
+                                case LITERAL_INT:
+                                case OBJECT_OPEN:
+                                case ARRAY_OPEN:
+                                case LITERAL_TRUE:
+                                case LITERAL_FALSE:
+                                case LITERAL_NULL:
+                                        break;
+                                default:
+                                        return set_error(error_desc, token,
+                                                         "End of enumeration (']'), enumeration (','), or "
+                                                         "end of enumeration (']')");
+                        }
+                        break;
+                case ARRAY_CLOSE:
+                        switch (token->type) {
+                                case COMMA:
+                                case ARRAY_CLOSE:
+                                case OBJECT_CLOSE:
+                                        break;
+                                default:
+                                        return set_error(error_desc, token,
+                                                         "End of enumeration (']'), enumeration (','), or "
+                                                         "end of object ('}')");
+                        }
+                        break;
+                case JSON_UNKNOWN:
+                        if (token_mem->init) {
+                                if (token->type != OBJECT_OPEN && token->type != ARRAY_OPEN && !isValue(token->type)) {
+                                        return set_error(error_desc, token,
+                                                         "Expected JSON document: missing '{' or '['");
+                                }
+                                token_mem->init = false;
+                        } else {
+                                return set_error(error_desc, token, "Unexpected token");
+                        }
+                        break;
+                default: error(err, ARK_ERR_NOJSONTOKEN)
+                        return false;
         }
 
         token_mem->type = token->type;
@@ -835,17 +870,17 @@ static void json_ast_node_string_print(FILE *file, struct json_string *string)
 static bool json_ast_node_number_print(FILE *file, struct err *err, struct json_number *number)
 {
         switch (number->value_type) {
-        case JSON_NUMBER_FLOAT:
-                fprintf(file, "%f", number->value.float_number);
-                break;
-        case JSON_NUMBER_UNSIGNED:
-                fprintf(file, "%" PRIu64, number->value.unsigned_integer);
-                break;
-        case JSON_NUMBER_SIGNED:
-                fprintf(file, "%" PRIi64, number->value.signed_integer);
-                break;
-        default: error(err, ARK_ERR_NOJSONNUMBERT);
-                return false;
+                case JSON_NUMBER_FLOAT:
+                        fprintf(file, "%f", number->value.float_number);
+                        break;
+                case JSON_NUMBER_UNSIGNED:
+                        fprintf(file, "%" PRIu64, number->value.unsigned_integer);
+                        break;
+                case JSON_NUMBER_SIGNED:
+                        fprintf(file, "%" PRIi64, number->value.signed_integer);
+                        break;
+                default: error(err, ARK_ERR_NOJSONNUMBERT);
+                        return false;
         }
         return true;
 }
@@ -853,35 +888,35 @@ static bool json_ast_node_number_print(FILE *file, struct err *err, struct json_
 static bool json_ast_node_value_print(FILE *file, struct err *err, struct json_node_value *value)
 {
         switch (value->value_type) {
-        case JSON_VALUE_OBJECT:
-                if (!json_ast_node_object_print(file, err, value->value.object)) {
+                case JSON_VALUE_OBJECT:
+                        if (!json_ast_node_object_print(file, err, value->value.object)) {
+                                return false;
+                        }
+                        break;
+                case JSON_VALUE_ARRAY:
+                        if (!json_ast_node_array_print(file, err, value->value.array)) {
+                                return false;
+                        }
+                        break;
+                case JSON_VALUE_STRING:
+                        json_ast_node_string_print(file, value->value.string);
+                        break;
+                case JSON_VALUE_NUMBER:
+                        if (!json_ast_node_number_print(file, err, value->value.number)) {
+                                return false;
+                        }
+                        break;
+                case JSON_VALUE_TRUE:
+                        fprintf(file, "true");
+                        break;
+                case JSON_VALUE_FALSE:
+                        fprintf(file, "false");
+                        break;
+                case JSON_VALUE_NULL:
+                        fprintf(file, "null");
+                        break;
+                default: error(err, ARK_ERR_NOTYPE);
                         return false;
-                }
-                break;
-        case JSON_VALUE_ARRAY:
-                if (!json_ast_node_array_print(file, err, value->value.array)) {
-                        return false;
-                }
-                break;
-        case JSON_VALUE_STRING:
-                json_ast_node_string_print(file, value->value.string);
-                break;
-        case JSON_VALUE_NUMBER:
-                if (!json_ast_node_number_print(file, err, value->value.number)) {
-                        return false;
-                }
-                break;
-        case JSON_VALUE_TRUE:
-                fprintf(file, "true");
-                break;
-        case JSON_VALUE_FALSE:
-                fprintf(file, "false");
-                break;
-        case JSON_VALUE_NULL:
-                fprintf(file, "null");
-                break;
-        default: error(err, ARK_ERR_NOTYPE);
-                return false;
         }
         return true;
 }
@@ -956,34 +991,34 @@ static void json_ast_node_number_drop(struct json_number *number)
 static bool json_ast_node_value_drop(struct json_node_value *value, struct err *err)
 {
         switch (value->value_type) {
-        case JSON_VALUE_OBJECT:
-                if (!json_ast_node_object_drop(value->value.object, err)) {
+                case JSON_VALUE_OBJECT:
+                        if (!json_ast_node_object_drop(value->value.object, err)) {
+                                return false;
+                        } else {
+                                free(value->value.object);
+                        }
+                        break;
+                case JSON_VALUE_ARRAY:
+                        if (!json_ast_node_array_drop(value->value.array, err)) {
+                                return false;
+                        } else {
+                                free(value->value.array);
+                        }
+                        break;
+                case JSON_VALUE_STRING:
+                        json_ast_node_string_drop(value->value.string);
+                        free(value->value.string);
+                        break;
+                case JSON_VALUE_NUMBER:
+                        json_ast_node_number_drop(value->value.number);
+                        free(value->value.number);
+                        break;
+                case JSON_VALUE_TRUE:
+                case JSON_VALUE_FALSE:
+                case JSON_VALUE_NULL:
+                        break;
+                default: error(err, ARK_ERR_NOTYPE)
                         return false;
-                } else {
-                        free(value->value.object);
-                }
-                break;
-        case JSON_VALUE_ARRAY:
-                if (!json_ast_node_array_drop(value->value.array, err)) {
-                        return false;
-                } else {
-                        free(value->value.array);
-                }
-                break;
-        case JSON_VALUE_STRING:
-                json_ast_node_string_drop(value->value.string);
-                free(value->value.string);
-                break;
-        case JSON_VALUE_NUMBER:
-                json_ast_node_number_drop(value->value.number);
-                free(value->value.number);
-                break;
-        case JSON_VALUE_TRUE:
-        case JSON_VALUE_FALSE:
-        case JSON_VALUE_NULL:
-                break;
-        default: error(err, ARK_ERR_NOTYPE)
-                return false;
 
         }
         return true;
@@ -1003,4 +1038,331 @@ bool json_drop(struct json *json)
 bool json_print(FILE *file, struct json *json)
 {
         return json_ast_node_element_print(file, &json->err, json->element);
+}
+
+bool json_list_is_empty(const struct json_elements *elements)
+{
+        return elements->elements.num_elems == 0;
+}
+
+bool json_list_length(u32 *len, const struct json_elements *elements)
+{
+        error_if_null(len)
+        error_if_null(elements)
+        *len = elements->elements.num_elems;
+        return true;
+}
+
+enum json_list_type json_fitting_type(enum json_list_type current, enum json_list_type to_add)
+{
+        if (current == JSON_LIST_TYPE_VARIABLE_OR_NESTED || to_add == JSON_LIST_TYPE_VARIABLE_OR_NESTED) {
+                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+        }
+        if (current == JSON_LIST_TYPE_EMPTY || current == JSON_LIST_TYPE_FIXED_BOOLEAN ||
+                to_add == JSON_LIST_TYPE_EMPTY || to_add == JSON_LIST_TYPE_FIXED_BOOLEAN) {
+                if (current == to_add) {
+                        return current;
+                } else {
+                        if ((to_add == JSON_LIST_TYPE_FIXED_BOOLEAN && current == JSON_LIST_TYPE_FIXED_NULL) ||
+                                (to_add == JSON_LIST_TYPE_FIXED_NULL && current == JSON_LIST_TYPE_FIXED_BOOLEAN)) {
+                                return JSON_LIST_TYPE_FIXED_BOOLEAN;
+                        } else {
+                                if (to_add == JSON_LIST_TYPE_EMPTY) {
+                                        return current;
+                                } else if (current == JSON_LIST_TYPE_EMPTY) {
+                                        return to_add;
+                                } else {
+
+                                        return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                }
+                        }
+                }
+        } else {
+                switch (current) {
+                        case JSON_LIST_TYPE_FIXED_NULL:
+                                switch (to_add) {
+                                        case JSON_LIST_TYPE_FIXED_NULL:
+                                        case JSON_LIST_TYPE_FIXED_FLOAT:
+                                        case JSON_LIST_TYPE_FIXED_BOOLEAN:
+                                        case JSON_LIST_TYPE_FIXED_U8:
+                                        case JSON_LIST_TYPE_FIXED_U16:
+                                        case JSON_LIST_TYPE_FIXED_U32:
+                                        case JSON_LIST_TYPE_FIXED_U64:
+                                        case JSON_LIST_TYPE_FIXED_I8:
+                                        case JSON_LIST_TYPE_FIXED_I16:
+                                        case JSON_LIST_TYPE_FIXED_I32:
+                                        case JSON_LIST_TYPE_FIXED_I64:
+                                                return to_add;
+                                        default:
+                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                }
+                        case JSON_LIST_TYPE_FIXED_FLOAT:
+                                switch (to_add) {
+                                        case JSON_LIST_TYPE_FIXED_NULL:
+                                        case JSON_LIST_TYPE_FIXED_FLOAT:
+                                        case JSON_LIST_TYPE_FIXED_U8:
+                                        case JSON_LIST_TYPE_FIXED_U16:
+                                        case JSON_LIST_TYPE_FIXED_U32:
+                                        case JSON_LIST_TYPE_FIXED_U64:
+                                        case JSON_LIST_TYPE_FIXED_I8:
+                                        case JSON_LIST_TYPE_FIXED_I16:
+                                        case JSON_LIST_TYPE_FIXED_I32:
+                                        case JSON_LIST_TYPE_FIXED_I64:
+                                                return JSON_LIST_TYPE_FIXED_FLOAT;
+                                        default:
+                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                }
+                        case JSON_LIST_TYPE_FIXED_U8:
+                                switch (to_add) {
+                                        case JSON_LIST_TYPE_FIXED_NULL:
+                                                return JSON_LIST_TYPE_FIXED_U8;
+                                        case JSON_LIST_TYPE_FIXED_U8:
+                                                return JSON_LIST_TYPE_FIXED_U8;
+                                        case JSON_LIST_TYPE_FIXED_U16:
+                                                return JSON_LIST_TYPE_FIXED_U16;
+                                        case JSON_LIST_TYPE_FIXED_U32:
+                                                return JSON_LIST_TYPE_FIXED_U32;
+                                        case JSON_LIST_TYPE_FIXED_U64:
+                                                return JSON_LIST_TYPE_FIXED_U64;
+                                        case JSON_LIST_TYPE_FIXED_I8:
+                                                return JSON_LIST_TYPE_FIXED_I16;
+                                        case JSON_LIST_TYPE_FIXED_I16:
+                                                return JSON_LIST_TYPE_FIXED_I32;
+                                        case JSON_LIST_TYPE_FIXED_I32:
+                                                return JSON_LIST_TYPE_FIXED_I64;
+                                        case JSON_LIST_TYPE_FIXED_I64:
+                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                        default:
+                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                }
+                        case JSON_LIST_TYPE_FIXED_U16:
+                                switch (to_add) {
+                                        case JSON_LIST_TYPE_FIXED_NULL:
+                                                return JSON_LIST_TYPE_FIXED_U16;
+                                        case JSON_LIST_TYPE_FIXED_U8:
+                                        case JSON_LIST_TYPE_FIXED_U16:
+                                                return JSON_LIST_TYPE_FIXED_U16;
+                                        case JSON_LIST_TYPE_FIXED_U32:
+                                                return JSON_LIST_TYPE_FIXED_U32;
+                                        case JSON_LIST_TYPE_FIXED_U64:
+                                                return JSON_LIST_TYPE_FIXED_U64;
+                                        case JSON_LIST_TYPE_FIXED_I8:
+                                                return JSON_LIST_TYPE_FIXED_I32;
+                                        case JSON_LIST_TYPE_FIXED_I16:
+                                                return JSON_LIST_TYPE_FIXED_I32;
+                                        case JSON_LIST_TYPE_FIXED_I32:
+                                                return JSON_LIST_TYPE_FIXED_I64;
+                                        case JSON_LIST_TYPE_FIXED_I64:
+                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                        default:
+                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                }
+                        case JSON_LIST_TYPE_FIXED_U32:
+                                switch (to_add) {
+                                        case JSON_LIST_TYPE_FIXED_NULL:
+                                                return JSON_LIST_TYPE_FIXED_U32;
+                                        case JSON_LIST_TYPE_FIXED_U8:
+                                        case JSON_LIST_TYPE_FIXED_U16:
+                                        case JSON_LIST_TYPE_FIXED_U32:
+                                                return JSON_LIST_TYPE_FIXED_U32;
+                                        case JSON_LIST_TYPE_FIXED_U64:
+                                                return JSON_LIST_TYPE_FIXED_U64;
+                                        case JSON_LIST_TYPE_FIXED_I8:
+                                        case JSON_LIST_TYPE_FIXED_I16:
+                                        case JSON_LIST_TYPE_FIXED_I32:
+                                                return JSON_LIST_TYPE_FIXED_I64;
+                                        case JSON_LIST_TYPE_FIXED_I64:
+                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                        default:
+                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                }
+                        case JSON_LIST_TYPE_FIXED_U64:
+                                switch (to_add) {
+                                        case JSON_LIST_TYPE_FIXED_NULL:
+                                                return JSON_LIST_TYPE_FIXED_U64;
+                                        case JSON_LIST_TYPE_FIXED_U8:
+                                        case JSON_LIST_TYPE_FIXED_U16:
+                                        case JSON_LIST_TYPE_FIXED_U32:
+                                        case JSON_LIST_TYPE_FIXED_U64:
+                                                return JSON_LIST_TYPE_FIXED_U64;
+                                        case JSON_LIST_TYPE_FIXED_I8:
+                                        case JSON_LIST_TYPE_FIXED_I16:
+                                        case JSON_LIST_TYPE_FIXED_I32:
+                                        case JSON_LIST_TYPE_FIXED_I64:
+                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                        default:
+                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                }
+                        case JSON_LIST_TYPE_FIXED_I8:
+                                switch (to_add) {
+                                        case JSON_LIST_TYPE_FIXED_NULL:
+                                                return JSON_LIST_TYPE_FIXED_I8;
+                                        case JSON_LIST_TYPE_FIXED_U8:
+                                                return JSON_LIST_TYPE_FIXED_I16;
+                                        case JSON_LIST_TYPE_FIXED_U16:
+                                                return JSON_LIST_TYPE_FIXED_I32;
+                                        case JSON_LIST_TYPE_FIXED_U32:
+                                                return JSON_LIST_TYPE_FIXED_I64;
+                                        case JSON_LIST_TYPE_FIXED_U64:
+                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                        case JSON_LIST_TYPE_FIXED_I8:
+                                                return JSON_LIST_TYPE_FIXED_I8;
+                                        case JSON_LIST_TYPE_FIXED_I16:
+                                                return JSON_LIST_TYPE_FIXED_I16;
+                                        case JSON_LIST_TYPE_FIXED_I32:
+                                                return JSON_LIST_TYPE_FIXED_I32;
+                                        case JSON_LIST_TYPE_FIXED_I64:
+                                                return JSON_LIST_TYPE_FIXED_I64;
+                                        default:
+                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                }
+                        case JSON_LIST_TYPE_FIXED_I16:
+                                switch (to_add) {
+                                        case JSON_LIST_TYPE_FIXED_NULL:
+                                                return JSON_LIST_TYPE_FIXED_I16;
+                                        case JSON_LIST_TYPE_FIXED_U8:
+                                        case JSON_LIST_TYPE_FIXED_U16:
+                                                return JSON_LIST_TYPE_FIXED_I32;
+                                        case JSON_LIST_TYPE_FIXED_U32:
+                                                return JSON_LIST_TYPE_FIXED_I64;
+                                        case JSON_LIST_TYPE_FIXED_U64:
+                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                        case JSON_LIST_TYPE_FIXED_I8:
+                                        case JSON_LIST_TYPE_FIXED_I16:
+                                                return JSON_LIST_TYPE_FIXED_I16;
+                                        case JSON_LIST_TYPE_FIXED_I32:
+                                                return JSON_LIST_TYPE_FIXED_I32;
+                                        case JSON_LIST_TYPE_FIXED_I64:
+                                                return JSON_LIST_TYPE_FIXED_I64;
+                                        default:
+                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                }
+                        case JSON_LIST_TYPE_FIXED_I32:
+                                switch (to_add) {
+                                        case JSON_LIST_TYPE_FIXED_NULL:
+                                                return JSON_LIST_TYPE_FIXED_I32;
+                                        case JSON_LIST_TYPE_FIXED_U8:
+                                        case JSON_LIST_TYPE_FIXED_U16:
+                                        case JSON_LIST_TYPE_FIXED_U32:
+                                                return JSON_LIST_TYPE_FIXED_I64;
+                                        case JSON_LIST_TYPE_FIXED_U64:
+                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                        case JSON_LIST_TYPE_FIXED_I8:
+                                        case JSON_LIST_TYPE_FIXED_I16:
+                                        case JSON_LIST_TYPE_FIXED_I32:
+                                                return JSON_LIST_TYPE_FIXED_I32;
+                                        case JSON_LIST_TYPE_FIXED_I64:
+                                                return JSON_LIST_TYPE_FIXED_I64;
+                                        default:
+                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                }
+                        case JSON_LIST_TYPE_FIXED_I64:
+                                switch (to_add) {
+                                        case JSON_LIST_TYPE_FIXED_NULL:
+                                                return JSON_LIST_TYPE_FIXED_I64;
+                                        case JSON_LIST_TYPE_FIXED_U8:
+                                        case JSON_LIST_TYPE_FIXED_U16:
+                                        case JSON_LIST_TYPE_FIXED_U32:
+                                        case JSON_LIST_TYPE_FIXED_U64:
+                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                        case JSON_LIST_TYPE_FIXED_I8:
+                                        case JSON_LIST_TYPE_FIXED_I16:
+                                        case JSON_LIST_TYPE_FIXED_I32:
+                                        case JSON_LIST_TYPE_FIXED_I64:
+                                                return JSON_LIST_TYPE_FIXED_I64;
+                                        default:
+                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                }
+                        default:
+                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                }
+        }
+}
+
+static enum json_list_type number_type_to_list_type(enum number_min_type type)
+{
+        switch (type) {
+                case NUMBER_U8:
+                        return JSON_LIST_TYPE_FIXED_U8;
+                case NUMBER_U16:
+                        return JSON_LIST_TYPE_FIXED_U16;
+                case NUMBER_U32:
+                        return JSON_LIST_TYPE_FIXED_U32;
+                case NUMBER_U64:
+                        return JSON_LIST_TYPE_FIXED_U64;
+                case NUMBER_I8:
+                        return JSON_LIST_TYPE_FIXED_I8;
+                case NUMBER_I16:
+                        return JSON_LIST_TYPE_FIXED_I16;
+                case NUMBER_I32:
+                        return JSON_LIST_TYPE_FIXED_I32;
+                case NUMBER_I64:
+                        return JSON_LIST_TYPE_FIXED_I64;
+                default:
+                        error_print(ARK_ERR_UNSUPPORTEDTYPE)
+                        return JSON_LIST_TYPE_EMPTY;
+
+        }
+}
+
+bool json_array_get_type(enum json_list_type *type, const struct json_array *array)
+{
+        error_if_null(type)
+        error_if_null(array)
+        enum json_list_type list_type = JSON_LIST_TYPE_EMPTY;
+        for (u32 i = 0; i < array->elements.elements.num_elems; i++) {
+                const struct json_element *elem = vec_get(&array->elements.elements, i, struct json_element);
+                switch (elem->value.value_type) {
+                        case JSON_VALUE_OBJECT:
+                        case JSON_VALUE_ARRAY:
+                        case JSON_VALUE_STRING:
+                                list_type = JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                goto return_result;
+                        case JSON_VALUE_NUMBER: {
+                                enum json_list_type elem_type;
+                                switch (elem->value.value.number->value_type) {
+                                        case JSON_NUMBER_FLOAT:
+                                                elem_type = JSON_LIST_TYPE_FIXED_FLOAT;
+                                                break;
+                                        case JSON_NUMBER_UNSIGNED:
+                                                elem_type = number_type_to_list_type(number_min_type_unsigned(
+                                                        elem->value.value.number->value.unsigned_integer));
+                                                break;
+                                        case JSON_NUMBER_SIGNED:
+                                                elem_type = number_type_to_list_type(number_min_type_signed(
+                                                        elem->value.value.number->value.signed_integer));
+                                                break;
+                                        default:
+                                                error_print(ARK_ERR_UNSUPPORTEDTYPE);
+                                                continue;
+                                }
+
+                                list_type = json_fitting_type(list_type, elem_type);
+                                if (list_type == JSON_LIST_TYPE_VARIABLE_OR_NESTED) {
+                                        goto return_result;
+                                }
+                                break;
+                        }
+                        case JSON_VALUE_TRUE:
+                        case JSON_VALUE_FALSE:
+                                list_type = json_fitting_type(list_type, JSON_LIST_TYPE_FIXED_BOOLEAN);
+                                if (list_type == JSON_LIST_TYPE_VARIABLE_OR_NESTED) {
+                                        goto return_result;
+                                }
+                                break;
+                        case JSON_VALUE_NULL:
+                                list_type = json_fitting_type(list_type, JSON_LIST_TYPE_FIXED_NULL);
+                                if (list_type == JSON_LIST_TYPE_VARIABLE_OR_NESTED) {
+                                        goto return_result;
+                                }
+                                break;
+                        default:
+                                error_print(ARK_ERR_UNSUPPORTEDTYPE);
+                                break;
+                }
+        }
+return_result:
+        *type = list_type;
+        return true;
+
 }

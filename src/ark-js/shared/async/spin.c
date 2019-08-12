@@ -35,7 +35,7 @@ bool spin_acquire(struct spinlock *spinlock)
         timestamp_t begin = time_now_wallclock();
         error_if_null(spinlock)
         if (!pthread_equal(spinlock->owner, pthread_self())) {
-                while (atomic_flag_test_and_set(&spinlock->lock)) { }
+                while (atomic_flag_test_and_set(&spinlock->lock)) {}
                 /** remeber the thread that aquires this lock */
                 spinlock->owner = pthread_self();
         }

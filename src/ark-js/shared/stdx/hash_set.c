@@ -21,7 +21,7 @@
 #define HASHCODE_OF(size, x) ARK_HASH_BERNSTEIN(size, x)
 #define FIX_MAP_AUTO_REHASH_LOADFACTOR 0.9f
 
-ARK_EXPORT(bool) hashset_create(struct hashset *map, struct err *err, size_t key_size, size_t capacity)
+bool hashset_create(struct hashset *map, struct err *err, size_t key_size, size_t capacity)
 {
         error_if_null(map)
         error_if_null(key_size)
@@ -32,7 +32,7 @@ ARK_EXPORT(bool) hashset_create(struct hashset *map, struct err *err, size_t key
 
         ark_success_or_jump(vec_create(&map->key_data, NULL, key_size, capacity), error_handling);
         ark_success_or_jump(vec_create(&map->table, NULL, sizeof(struct hashset_bucket), capacity),
-                cleanup_key_data_and_error);
+                            cleanup_key_data_and_error);
         ark_success_or_jump(vec_enlarge_size_to_capacity(&map->table), cleanup_key_value_table_and_error);
         ark_success_or_jump(vec_zero_memory(&map->table), cleanup_key_value_table_and_error);
         ark_success_or_jump(spin_init(&map->lock), cleanup_key_value_table_and_error);
@@ -53,7 +53,7 @@ ARK_EXPORT(bool) hashset_create(struct hashset *map, struct err *err, size_t key
         return false;
 }
 
-ARK_EXPORT(bool) hashset_drop(struct hashset *map)
+bool hashset_drop(struct hashset *map)
 {
         error_if_null(map)
 
@@ -69,7 +69,7 @@ ARK_EXPORT(bool) hashset_drop(struct hashset *map)
         return status;
 }
 
-ARK_EXPORT(struct vector *)hashset_keys(struct hashset *map)
+struct vector *hashset_keys(struct hashset *map)
 {
         if (map) {
                 struct vector *result = ark_malloc(sizeof(struct vector));
@@ -87,7 +87,7 @@ ARK_EXPORT(struct vector *)hashset_keys(struct hashset *map)
         }
 }
 
-ARK_EXPORT(struct hashset *)hashset_cpy(struct hashset *src)
+struct hashset *hashset_cpy(struct hashset *src)
 {
         if (src) {
                 struct hashset *cpy = ark_malloc(sizeof(struct hashset));
@@ -115,7 +115,7 @@ ARK_EXPORT(struct hashset *)hashset_cpy(struct hashset *src)
         }
 }
 
-ARK_EXPORT(bool) hashset_clear(struct hashset *map)
+bool hashset_clear(struct hashset *map)
 {
         error_if_null(map)
         assert(map->key_data.cap_elems == map->table.cap_elems);
@@ -139,7 +139,7 @@ ARK_EXPORT(bool) hashset_clear(struct hashset *map)
         return status;
 }
 
-ARK_EXPORT(bool) hashset_avg_displace(float *displace, const struct hashset *map)
+bool hashset_avg_displace(float *displace, const struct hashset *map)
 {
         error_if_null(displace);
         error_if_null(map);
@@ -154,14 +154,14 @@ ARK_EXPORT(bool) hashset_avg_displace(float *displace, const struct hashset *map
         return true;
 }
 
-ARK_EXPORT(bool) hashset_lock(struct hashset *map)
+bool hashset_lock(struct hashset *map)
 {
         error_if_null(map)
         spin_acquire(&map->lock);
         return true;
 }
 
-ARK_EXPORT(bool) hashset_unlock(struct hashset *map)
+bool hashset_unlock(struct hashset *map)
 {
         error_if_null(map)
         spin_release(&map->lock);
@@ -185,7 +185,7 @@ static void insert(struct hashset_bucket *bucket, struct hashset *map, const voi
 }
 
 static inline uint_fast32_t insert_or_update(struct hashset *map, const u32 *bucket_idxs, const void *keys,
-        uint_fast32_t num_pairs)
+                                             uint_fast32_t num_pairs)
 {
         for (uint_fast32_t i = 0; i < num_pairs; i++) {
                 const void *key = keys + i * map->key_data.elem_size;
@@ -201,7 +201,9 @@ static inline uint_fast32_t insert_or_update(struct hashset *map, const u32 *buc
                                 struct hashset_bucket
                                         *bucket = vec_get(&map->table, displace_idx, struct hashset_bucket);
                                 fitting_bucket_found = !bucket->in_use_flag || (bucket->in_use_flag
-                                        && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0);
+                                                                                &&
+                                                                                memcmp(get_bucket_key(bucket, map), key,
+                                                                                       map->key_data.elem_size) == 0);
                                 if (fitting_bucket_found) {
                                         break;
                                 } else {
@@ -220,8 +222,11 @@ static inline uint_fast32_t insert_or_update(struct hashset *map, const u32 *buc
                                         const struct hashset_bucket
                                                 *bucket = vec_get(&map->table, displace_idx, struct hashset_bucket);
                                         fitting_bucket_found = !bucket->in_use_flag || (bucket->in_use_flag
-                                                && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size)
-                                                        == 0);
+                                                                                        && memcmp(get_bucket_key(bucket,
+                                                                                                                 map),
+                                                                                                  key,
+                                                                                                  map->key_data.elem_size)
+                                                                                           == 0);
                                         if (fitting_bucket_found) {
                                                 break;
                                         }
@@ -249,7 +254,7 @@ static inline uint_fast32_t insert_or_update(struct hashset *map, const u32 *buc
         return 0;
 }
 
-ARK_EXPORT(bool) hashset_insert_or_update(struct hashset *map, const void *keys, uint_fast32_t num_pairs)
+bool hashset_insert_or_update(struct hashset *map, const void *keys, uint_fast32_t num_pairs)
 {
         error_if_null(map)
         error_if_null(keys)
@@ -274,9 +279,9 @@ ARK_EXPORT(bool) hashset_insert_or_update(struct hashset *map, const void *keys,
         uint_fast32_t cont_idx = 0;
         do {
                 cont_idx = insert_or_update(map,
-                        bucket_idxs + cont_idx,
-                        keys + cont_idx * map->key_data.elem_size,
-                        num_pairs - cont_idx);
+                                            bucket_idxs + cont_idx,
+                                            keys + cont_idx * map->key_data.elem_size,
+                                            num_pairs - cont_idx);
                 if (cont_idx != 0) {
                         /* rehashing is required, and [status, num_pairs) are left to be inserted */
                         if (!hashset_rehash(map)) {
@@ -284,8 +289,7 @@ ARK_EXPORT(bool) hashset_insert_or_update(struct hashset *map, const void *keys,
                                 return false;
                         }
                 }
-        }
-        while (cont_idx != 0);
+        } while (cont_idx != 0);
 
         free(bucket_idxs);
         hashset_unlock(map);
@@ -293,7 +297,7 @@ ARK_EXPORT(bool) hashset_insert_or_update(struct hashset *map, const void *keys,
         return true;
 }
 
-ARK_EXPORT(bool) hashset_remove_if_contained(struct hashset *map, const void *keys, size_t num_pairs)
+bool hashset_remove_if_contained(struct hashset *map, const void *keys, size_t num_pairs)
 {
         error_if_null(map)
         error_if_null(keys)
@@ -321,13 +325,13 @@ ARK_EXPORT(bool) hashset_remove_if_contained(struct hashset *map, const void *ke
                 for (u32 k = bucket_idx; !bucket_found && k < map->table.num_elems; k++) {
                         const struct hashset_bucket *bucket = vec_get(&map->table, k, struct hashset_bucket);
                         bucket_found = bucket->in_use_flag
-                                && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
+                                       && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
                         actual_idx = k;
                 }
                 for (u32 k = 0; !bucket_found && k < bucket_idx; k++) {
                         const struct hashset_bucket *bucket = vec_get(&map->table, k, struct hashset_bucket);
                         bucket_found = bucket->in_use_flag
-                                && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
+                                       && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
                         actual_idx = k;
                 }
 
@@ -345,7 +349,7 @@ ARK_EXPORT(bool) hashset_remove_if_contained(struct hashset *map, const void *ke
         return true;
 }
 
-ARK_EXPORT(bool) hashset_contains_key(struct hashset *map, const void *key)
+bool hashset_contains_key(struct hashset *map, const void *key)
 {
         error_if_null(map)
         error_if_null(key)
@@ -374,7 +378,7 @@ ARK_EXPORT(bool) hashset_contains_key(struct hashset *map, const void *key)
         return result;
 }
 
-ARK_EXPORT(bool) hashset_get_fload_factor(float *factor, struct hashset *map)
+bool hashset_get_fload_factor(float *factor, struct hashset *map)
 {
         error_if_null(factor)
         error_if_null(map)
@@ -388,7 +392,7 @@ ARK_EXPORT(bool) hashset_get_fload_factor(float *factor, struct hashset *map)
         return true;
 }
 
-ARK_EXPORT(bool) hashset_rehash(struct hashset *map)
+bool hashset_rehash(struct hashset *map)
 {
         error_if_null(map)
 

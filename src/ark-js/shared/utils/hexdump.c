@@ -18,40 +18,40 @@
 #include <ctype.h>
 #include <ark-js/shared/utils/hexdump.h>
 
-ARK_EXPORT(bool) hexdump(struct string_builder *dst, const void *base, u64 nbytes)
+bool hexdump(struct string *dst, const void *base, u64 nbytes)
 {
         error_if_null(dst);
         error_if_null(base);
         char buffer[11];
 
         sprintf(buffer, "%08x  ", 0);
-        string_builder_append(dst, buffer);
+        string_add(dst, buffer);
 
-        for (u64 hex_block_id = 0; hex_block_id < nbytes; ) {
+        for (u64 hex_block_id = 0; hex_block_id < nbytes;) {
 
                 u8 step = ark_min(16, nbytes - hex_block_id);
 
                 for (u64 i = 0; i < step; i++) {
                         char c = *((const char *) (base + hex_block_id + i));
                         sprintf(buffer, "%02x ", (unsigned char) c);
-                        string_builder_append(dst, buffer);
+                        string_add(dst, buffer);
                         if (i == 7) {
-                                string_builder_append_char(dst, ' ');
+                                string_add_char(dst, ' ');
                         }
                 }
 
                 if (unlikely(step == 7)) {
-                        string_builder_append_char(dst, ' ');
+                        string_add_char(dst, ' ');
                 }
 
                 if (unlikely(step < 16)) {
                         for (u8 pad = 0; pad < 16 - step; pad++) {
                                 sprintf(buffer, "   ");
-                                string_builder_append(dst, buffer);
+                                string_add(dst, buffer);
                         }
                 }
 
-                string_builder_append(dst, " | ");
+                string_add(dst, " | ");
 
                 for (u64 i = 0; i < step; i++) {
                         char c = *((const char *) (base + hex_block_id + i));
@@ -61,43 +61,43 @@ ARK_EXPORT(bool) hexdump(struct string_builder *dst, const void *base, u64 nbyte
                                 sprintf(buffer, ".");
                         }
 
-                        string_builder_append(dst, buffer);
+                        string_add(dst, buffer);
                 }
 
                 if (unlikely(step < 16)) {
                         for (u8 pad = 0; pad < 16 - step; pad++) {
                                 sprintf(buffer, " ");
-                                string_builder_append(dst, buffer);
+                                string_add(dst, buffer);
                         }
                 }
 
-                string_builder_append_char(dst, '|');
+                string_add_char(dst, '|');
 
 
                 if (likely(hex_block_id + step < nbytes)) {
-                        string_builder_append(dst, "\n");
-                        sprintf(buffer, "%08x  ", ((u32)hex_block_id + 16));
-                        string_builder_append(dst, buffer);
+                        string_add(dst, "\n");
+                        sprintf(buffer, "%08x  ", ((u32) hex_block_id + 16));
+                        string_add(dst, buffer);
                 }
 
 
                 hex_block_id += step;
         }
 
-        string_builder_append(dst, "\n");
+        string_add(dst, "\n");
 
         return true;
 }
 
-ARK_EXPORT(bool) hexdump_print(FILE *file, const void *base, u64 nbytes)
+bool hexdump_print(FILE *file, const void *base, u64 nbytes)
 {
         bool status;
-        struct string_builder sb;
-        string_builder_create(&sb);
+        struct string sb;
+        string_create(&sb);
         if ((status = hexdump(&sb, base, nbytes))) {
-                fprintf(file, "%s", string_builder_cstr(&sb));
+                fprintf(file, "%s", string_cstr(&sb));
         }
-        string_builder_drop(&sb);
+        string_drop(&sb);
         return status;
 
 }

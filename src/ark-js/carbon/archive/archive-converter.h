@@ -23,7 +23,7 @@
 
 ARK_BEGIN_DECL
 
-ARK_EXPORT(bool) archive_converter(struct encoded_doc_list *collection, struct archive *archive);
+bool archive_converter(struct encoded_doc_list *collection, struct archive *archive);
 
 ARK_END_DECL
 

@@ -22,7 +22,7 @@
 #include <ark-js/carbon/archive/archive-converter.h>
 
 struct converter_capture {
-        struct encoded_doc_list *collection;
+    struct encoded_doc_list *collection;
 };
 
 #define IMPORT_BASIC_PAIR(name)                                                                                        \
@@ -123,7 +123,7 @@ DECLARE_VISIT_BASIC_TYPE_PAIR(boolean, field_boolean_t)
 DECLARE_VISIT_BASIC_TYPE_PAIR(string, field_sid_t)
 
 static void visit_null_pairs(struct archive *archive, path_stack_t path, object_id_t oid, const field_sid_t *keys,
-        u32 num_pairs, void *capture)
+                             u32 num_pairs, void *capture)
 {
         unused(archive);
         unused(path);
@@ -137,7 +137,8 @@ static void visit_null_pairs(struct archive *archive, path_stack_t path, object_
 }
 
 static enum visit_policy before_object_visit(struct archive *archive, path_stack_t path_stack, object_id_t parent_id,
-        object_id_t value_id, u32 object_idx, u32 num_objects, field_sid_t key, void *capture)
+                                             object_id_t value_id, u32 object_idx, u32 num_objects, field_sid_t key,
+                                             void *capture)
 {
         unused(archive);
         unused(path_stack);
@@ -177,7 +178,7 @@ DECLARE_VISIT_ARRAY_TYPE(boolean, field_boolean_t)
 DECLARE_VISIT_ARRAY_TYPE(string, field_sid_t)
 
 static enum visit_policy visit_enter_null_array_pairs(struct archive *archive, path_stack_t path, object_id_t id,
-        const field_sid_t *keys, u32 num_pairs, void *capture)
+                                                      const field_sid_t *keys, u32 num_pairs, void *capture)
 {
         unused(archive);
         unused(path);
@@ -198,7 +199,7 @@ static enum visit_policy visit_enter_null_array_pairs(struct archive *archive, p
 }
 
 static void visit_null_array_pair(struct archive *archive, path_stack_t path, object_id_t id, const field_sid_t key,
-        u32 entry_idx, u32 max_entries, u32 num_nulls, void *capture)
+                                  u32 entry_idx, u32 max_entries, u32 num_nulls, void *capture)
 {
         unused(archive);
         unused(path);
@@ -217,8 +218,9 @@ static void visit_null_array_pair(struct archive *archive, path_stack_t path, ob
 }
 
 static void before_visit_object_array_objects(bool *skip_group_object_ids, struct archive *archive, path_stack_t path,
-        object_id_t parent_id, field_sid_t key, const object_id_t *group_object_ids, u32 num_group_object_ids,
-        void *capture)
+                                              object_id_t parent_id, field_sid_t key,
+                                              const object_id_t *group_object_ids, u32 num_group_object_ids,
+                                              void *capture)
 {
         unused(archive);
         unused(path);
@@ -283,7 +285,7 @@ DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(boolean, field_boolean_t);
 
 DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(null, field_u32_t);
 
-ARK_EXPORT(bool) archive_converter(struct encoded_doc_list *collection, struct archive *archive)
+bool archive_converter(struct encoded_doc_list *collection, struct archive *archive)
 {
 
         error_if_null(collection);
