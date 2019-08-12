@@ -28,7 +28,7 @@ static void invoke_free(struct allocator *self, void *ptr);
 
 static void invoke_clone(struct allocator *dst, const struct allocator *self);
 
-ARK_EXPORT (bool) alloc_create_std(struct allocator *alloc)
+bool alloc_create_std(struct allocator *alloc)
 {
         if (alloc) {
                 alloc->extra = NULL;
@@ -43,7 +43,7 @@ ARK_EXPORT (bool) alloc_create_std(struct allocator *alloc)
         }
 }
 
-ARK_EXPORT (bool) alloc_this_or_std(struct allocator *dst, const struct allocator *self)
+bool alloc_this_or_std(struct allocator *dst, const struct allocator *self)
 {
         if (!self) {
                 return alloc_create_std(dst);
@@ -52,18 +52,18 @@ ARK_EXPORT (bool) alloc_this_or_std(struct allocator *dst, const struct allocato
         }
 }
 
-ARK_EXPORT (void *)alloc_malloc(struct allocator *alloc, size_t size)
+void *alloc_malloc(struct allocator *alloc, size_t size)
 {
         assert(alloc);
         return alloc->malloc(alloc, size);
 }
 
-ARK_EXPORT (void *)alloc_realloc(struct allocator *alloc, void *ptr, size_t size)
+void *alloc_realloc(struct allocator *alloc, void *ptr, size_t size)
 {
         return alloc->realloc(alloc, ptr, size);
 }
 
-ARK_EXPORT (bool) alloc_free(struct allocator *alloc, void *ptr)
+bool alloc_free(struct allocator *alloc, void *ptr)
 {
         error_if_null(alloc);
         error_if_null(ptr);
@@ -71,7 +71,7 @@ ARK_EXPORT (bool) alloc_free(struct allocator *alloc, void *ptr)
         return true;
 }
 
-ARK_EXPORT (bool) alloc_clone(struct allocator *dst, const struct allocator *src)
+bool alloc_clone(struct allocator *dst, const struct allocator *src)
 {
         error_if_null(dst && src)
         src->clone(dst, src);

@@ -25,13 +25,13 @@ ARK_BEGIN_DECL
 #include "thread-pool.h"
 
 // Returns the average fraction of time the active threads have been working.
-ARK_EXPORT(double) thread_pool_get_time_working(struct thread_pool *pool);
+double thread_pool_get_time_working(struct thread_pool *pool);
 
 // Fill all stats of the passed thread pool instance
-ARK_EXPORT(struct thread_pool_stats) thread_pool_get_stats(struct thread_pool *pool);
+struct thread_pool_stats thread_pool_get_stats(struct thread_pool *pool);
 
 // Fill all stats of the thread matching the given id in the thread pool
-ARK_EXPORT(struct thread_stats) thread_pool_get_thread_stats(struct thread_pool *pool, size_t id);
+struct thread_stats thread_pool_get_thread_stats(struct thread_pool *pool, size_t id);
 
 ARK_END_DECL
 

@@ -22,45 +22,49 @@
 #include <ark-js/shared/stdx/vec.h>
 
 struct cmdopt {
-        char *opt_name;
+    char *opt_name;
 
-        char *opt_desc;
+    char *opt_desc;
 
-        char *opt_manfile;
+    char *opt_manfile;
 
-        int (*callback)(int argc, char **argv, FILE *file);
+    int (*callback)(int argc, char **argv, FILE *file);
 };
 
 struct cmdopt_group {
-        struct vector ofType(struct cmdopt) cmd_options;
-        char *desc;
+    struct vector ofType(struct cmdopt) cmd_options;
+    char *desc;
 };
 
 enum mod_arg_policy {
-        ARK_MOD_ARG_REQUIRED, ARK_MOD_ARG_NOT_REQUIRED, ARK_MOD_ARG_MAYBE_REQUIRED,
+    ARK_MOD_ARG_REQUIRED, ARK_MOD_ARG_NOT_REQUIRED, ARK_MOD_ARG_MAYBE_REQUIRED,
 };
 
 struct cmdopt_mgr {
-        struct vector ofType(struct cmdopt_group) groups;
+    struct vector ofType(struct cmdopt_group) groups;
 
-        enum mod_arg_policy policy;
+    enum mod_arg_policy policy;
 
-        bool (*fallback)(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager);
+    bool (*fallback)(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager);
 
-        char *module_name;
+    char *module_name;
 
-        char *module_desc;
+    char *module_desc;
 };
 
-ARK_EXPORT(bool) opt_mgr_create(struct cmdopt_mgr *manager, char *module_name, char *module_desc,
-        enum mod_arg_policy policy, bool (*fallback)(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager));
-ARK_EXPORT(bool) opt_mgr_drop(struct cmdopt_mgr *manager);
+bool opt_mgr_create(struct cmdopt_mgr *manager, char *module_name, char *module_desc,
+                    enum mod_arg_policy policy,
+                    bool (*fallback)(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager));
 
-ARK_EXPORT(bool) opt_mgr_process(struct cmdopt_mgr *manager, int argc, char **argv, FILE *file);
+bool opt_mgr_drop(struct cmdopt_mgr *manager);
 
-ARK_EXPORT(bool) opt_mgr_create_group(struct cmdopt_group **group, const char *desc, struct cmdopt_mgr *manager);
-ARK_EXPORT(bool) opt_group_add_cmd(struct cmdopt_group *group, const char *opt_name, char *opt_desc,
-        char *opt_manfile, int (*callback)(int argc, char **argv, FILE *file));
-ARK_EXPORT(bool) opt_mgr_show_help(FILE *file, struct cmdopt_mgr *manager);
+bool opt_mgr_process(struct cmdopt_mgr *manager, int argc, char **argv, FILE *file);
+
+bool opt_mgr_create_group(struct cmdopt_group **group, const char *desc, struct cmdopt_mgr *manager);
+
+bool opt_group_add_cmd(struct cmdopt_group *group, const char *opt_name, char *opt_desc,
+                       char *opt_manfile, int (*callback)(int argc, char **argv, FILE *file));
+
+bool opt_mgr_show_help(FILE *file, struct cmdopt_mgr *manager);
 
 #endif

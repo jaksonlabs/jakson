@@ -28,14 +28,14 @@
 #define TO_GIB(x)       (x/1024.0f/1024.0f/1024.0f)
 
 struct trace_stats {
-        size_t num_malloc_calls;
-        size_t num_realloc_calls;
-        size_t num_free_calls;
-        size_t total_size;
-        struct vector ofType(size_t) *malloc_sizes;
-        struct spinlock *spinlock;
-        FILE *statistics_file;
-        timestamp_t startup_timestamp;
+    size_t num_malloc_calls;
+    size_t num_realloc_calls;
+    size_t num_free_calls;
+    size_t total_size;
+    struct vector ofType(size_t) *malloc_sizes;
+    struct spinlock *spinlock;
+    FILE *statistics_file;
+    timestamp_t startup_timestamp;
 };
 
 #define DEFINE_PAGE_WITH_SIZE(x)                                                                                       \
@@ -138,9 +138,9 @@ DEFINE_PAGE_WITH_SIZE(549755813888)
     {x, page_##x##b_new}
 
 struct page_template_entry {
-        size_t size;
+    size_t size;
 
-        void *(*new_ptr_func)(size_t user_size);
+    void *(*new_ptr_func)(size_t user_size);
 } page_template_register[] = {
 
         REGISTER_PAGE(1), REGISTER_PAGE(2), REGISTER_PAGE(4), REGISTER_PAGE(8), REGISTER_PAGE(16), REGISTER_PAGE(32),
@@ -171,8 +171,11 @@ struct trace_stats global_trace_stats =
         {.num_malloc_calls   = 0, .num_realloc_calls  = 0, .num_free_calls     = 0, .total_size         = 0, .malloc_sizes       = NULL, .spinlock           = NULL};
 
 static void *invoke_malloc(struct allocator *self, size_t size);
+
 static void *invoke_realloc(struct allocator *self, void *ptr, size_t size);
+
 static void invoke_free(struct allocator *self, void *ptr);
+
 static void invoke_clone(struct allocator *dst, const struct allocator *self);
 
 #define LAZY_INIT()                                                                                                    \
@@ -233,11 +236,11 @@ static void *invoke_malloc(struct allocator *self, size_t size)
         vec_push(global_trace_stats.malloc_sizes, &size, 1);
 
         size_t min_alloc_size = sort_get_min(vec_all(global_trace_stats.malloc_sizes, size_t),
-                vec_length(global_trace_stats.malloc_sizes));
+                                             vec_length(global_trace_stats.malloc_sizes));
         size_t max_alloc_size = sort_get_max(vec_all(global_trace_stats.malloc_sizes, size_t),
-                vec_length(global_trace_stats.malloc_sizes));
+                                             vec_length(global_trace_stats.malloc_sizes));
         double avg_alloc_size = sort_get_avg(vec_all(global_trace_stats.malloc_sizes, size_t),
-                vec_length(global_trace_stats.malloc_sizes));
+                                             vec_length(global_trace_stats.malloc_sizes));
         global_trace_stats.total_size += size;
 
         unused(min_alloc_size);

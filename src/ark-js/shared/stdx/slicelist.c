@@ -61,12 +61,14 @@
 })
 
 static void appenderNew(slice_list_t *list);
+
 static void appenderSeal(Slice *slice);
 
 static void lock(slice_list_t *list);
+
 static void unlock(slice_list_t *list);
 
-ARK_EXPORT(bool) slice_list_create(slice_list_t *list, const struct allocator *alloc, size_t sliceCapacity)
+bool slice_list_create(slice_list_t *list, const struct allocator *alloc, size_t sliceCapacity)
 {
         error_if_null(list)
         error_if_null(sliceCapacity)
@@ -90,7 +92,7 @@ ARK_EXPORT(bool) slice_list_create(slice_list_t *list, const struct allocator *a
         return true;
 }
 
-ARK_EXPORT(bool) SliceListDrop(slice_list_t *list)
+bool SliceListDrop(slice_list_t *list)
 {
         unused(list);
 
@@ -105,12 +107,12 @@ ARK_EXPORT(bool) SliceListDrop(slice_list_t *list)
         return true;
 }
 
-ARK_EXPORT(bool) SliceListIsEmpty(const slice_list_t *list)
+bool SliceListIsEmpty(const slice_list_t *list)
 {
         return (vec_is_empty(&list->slices));
 }
 
-ARK_EXPORT(bool) slice_list_insert(slice_list_t *list, char **strings, field_sid_t *ids, size_t num_pairs)
+bool slice_list_insert(slice_list_t *list, char **strings, field_sid_t *ids, size_t num_pairs)
 {
         lock(list);
 
@@ -141,9 +143,9 @@ ARK_EXPORT(bool) slice_list_insert(slice_list_t *list, char **strings, field_sid
                         HashBounds *restrict appenderBounds = bounds + list->appender_idx;
 
                         ark_debug(ARK_SLICE_LIST_TAG,
-                                "appender # of elems: %zu, limit: %zu",
-                                appender->num_elems,
-                                SLICE_KEY_COLUMN_MAX_ELEMS);
+                                  "appender # of elems: %zu, limit: %zu",
+                                  appender->num_elems,
+                                  SLICE_KEY_COLUMN_MAX_ELEMS);
                         assert(appender->num_elems < SLICE_KEY_COLUMN_MAX_ELEMS);
                         appender->key_column[appender->num_elems] = key;
                         appender->keyHashColumn[appender->num_elems] = keyHash;
@@ -163,7 +165,7 @@ ARK_EXPORT(bool) slice_list_insert(slice_list_t *list, char **strings, field_sid
         return true;
 }
 
-ARK_EXPORT(bool) slice_list_lookup(slice_handle_t *handle, slice_list_t *list, const char *needle)
+bool slice_list_lookup(slice_handle_t *handle, slice_list_t *list, const char *needle)
 {
         unused(list);
         unused(handle);
@@ -192,26 +194,26 @@ ARK_EXPORT(bool) slice_list_lookup(slice_handle_t *handle, slice_list_t *list, c
                                 bool maybeContained = ARK_BLOOM_TEST(filter, &keyHash, sizeof(hash32_t));
                                 if (maybeContained) {
                                         ark_debug(ARK_SLICE_LIST_TAG,
-                                                "ARK_slice_list_lookup_by_key keys(%s) -> ?",
-                                                needle);
+                                                  "ARK_slice_list_lookup_by_key keys(%s) -> ?",
+                                                  needle);
                                         u32 pairPosition;
 
                                         switch (slice->strat) {
-                                        case SLICE_LOOKUP_SCAN:
-                                                pairPosition = SLICE_SCAN(slice, keyHash, needle);
-                                                break;
-                                        case SLICE_LOOKUP_BESEARCH:
-                                                pairPosition = SLICE_BESEARCH(slice, keyHash, needle);
-                                                break;
-                                        default: error(&list->err, ARK_ERR_UNSUPFINDSTRAT)
-                                                return false;
+                                                case SLICE_LOOKUP_SCAN:
+                                                        pairPosition = SLICE_SCAN(slice, keyHash, needle);
+                                                        break;
+                                                case SLICE_LOOKUP_BESEARCH:
+                                                        pairPosition = SLICE_BESEARCH(slice, keyHash, needle);
+                                                        break;
+                                                default: error(&list->err, ARK_ERR_UNSUPFINDSTRAT)
+                                                        return false;
                                         }
 
                                         ark_debug(ARK_SLICE_LIST_TAG,
-                                                "ARK_slice_list_lookup_by_key keys(%s) -> pos(%zu in slice #%zu)",
-                                                needle,
-                                                pairPosition,
-                                                i);
+                                                  "ARK_slice_list_lookup_by_key keys(%s) -> pos(%zu in slice #%zu)",
+                                                  needle,
+                                                  pairPosition,
+                                                  i);
                                         if (pairPosition < slice->num_elems) {
                                                 /** pair is contained */
                                                 desc->numReadsHit++;
@@ -239,7 +241,7 @@ ARK_EXPORT(bool) slice_list_lookup(slice_handle_t *handle, slice_list_t *list, c
         return false;
 }
 
-ARK_EXPORT(bool) SliceListRemove(slice_list_t *list, slice_handle_t *handle)
+bool SliceListRemove(slice_list_t *list, slice_handle_t *handle)
 {
         unused(list);
         unused(handle);
@@ -278,30 +280,32 @@ static void appenderNew(slice_list_t *list)
         vec_push(&list->bounds, &bounds, 1);
 
         ark_info(ARK_SLICE_LIST_TAG,
-                "created new appender in slice list %p\n\t"
-                        "# of slices (incl. appender) in total...............: %zu\n\t"
-                        "Slice target memory size............................: %zuB (%s)\n\t"
-                        "bloom_t target memory size......................: %zuB (%s)\n\t"
-                        "Max # of (keys, hash, string) in appender/slice......: %zu\n\t"
-                        "Bits used in per-slice bloom_t..................: %zu\n\t"
-                        "Prob. of bloom_t to produce false-positives.....: %f\n\t"
-                        "Single slice type size..............................: %zuB\n\t"
-                        "Total slice-list size...............................: %f MiB",
-                list,
-                list->slices.num_elems,
-                (size_t) ARK_SLICE_LIST_TARGET_MEMORY_SIZE_IN_BYTE,
-                ARK_SLICE_LIST_TARGET_MEMORY_NAME,
-                (size_t) ARK_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE,
-                ARK_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_NAME,
-                (size_t) SLICE_KEY_COLUMN_MAX_ELEMS,
-                bitmap_nbits(&filter),
-                (pow(1 - exp(-(double) bloom_nhashs()
-                                / ((double) bitmap_nbits(&filter) / (double) SLICE_KEY_COLUMN_MAX_ELEMS)),
-                        bitmap_nbits(&filter))),
-                sizeof(Slice),
-                (sizeof(slice_list_t) + list->slices.num_elems
-                        * (sizeof(Slice) + sizeof(SliceDescriptor) + (sizeof(u32) * list->descriptors.num_elems)
-                                + sizeof(bloom_t) + bitmap_nbits(&filter) / 8 + sizeof(HashBounds))) / 1024.0 / 1024.0);
+                 "created new appender in slice list %p\n\t"
+                 "# of slices (incl. appender) in total...............: %zu\n\t"
+                 "Slice target memory size............................: %zuB (%s)\n\t"
+                 "bloom_t target memory size......................: %zuB (%s)\n\t"
+                 "Max # of (keys, hash, string) in appender/slice......: %zu\n\t"
+                 "Bits used in per-slice bloom_t..................: %zu\n\t"
+                 "Prob. of bloom_t to produce false-positives.....: %f\n\t"
+                 "Single slice type size..............................: %zuB\n\t"
+                 "Total slice-list size...............................: %f MiB",
+                 list,
+                 list->slices.num_elems,
+                 (size_t) ARK_SLICE_LIST_TARGET_MEMORY_SIZE_IN_BYTE,
+                 ARK_SLICE_LIST_TARGET_MEMORY_NAME,
+                 (size_t) ARK_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE,
+                 ARK_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_NAME,
+                 (size_t) SLICE_KEY_COLUMN_MAX_ELEMS,
+                 bitmap_nbits(&filter),
+                 (pow(1 - exp(-(double) bloom_nhashs()
+                              / ((double) bitmap_nbits(&filter) / (double) SLICE_KEY_COLUMN_MAX_ELEMS)),
+                      bitmap_nbits(&filter))),
+                 sizeof(Slice),
+                 (sizeof(slice_list_t) + list->slices.num_elems
+                                         * (sizeof(Slice) + sizeof(SliceDescriptor) +
+                                            (sizeof(u32) * list->descriptors.num_elems)
+                                            + sizeof(bloom_t) + bitmap_nbits(&filter) / 8 + sizeof(HashBounds))) /
+                 1024.0 / 1024.0);
 
         /** register new slice as the current appender */
         list->appender_idx = numSlices;

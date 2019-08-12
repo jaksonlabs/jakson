@@ -25,27 +25,27 @@ ARK_BEGIN_DECL
 
 typedef u64 object_id_t;
 
-ARK_EXPORT(bool) object_id_create(object_id_t *out);
+bool object_id_create(object_id_t *out);
 
-ARK_EXPORT(bool) object_id_get_global_wallclocktime(uint_fast8_t *out, object_id_t id);
+bool object_id_get_global_wallclocktime(uint_fast8_t *out, object_id_t id);
 
-ARK_EXPORT(bool) object_id_get_global_build_path_bit(uint_fast8_t *out, object_id_t id);
+bool object_id_get_global_build_path_bit(uint_fast8_t *out, object_id_t id);
 
-ARK_EXPORT(bool) object_id_get_global_build_time_bit(uint_fast8_t *out, object_id_t id);
+bool object_id_get_global_build_time_bit(uint_fast8_t *out, object_id_t id);
 
-ARK_EXPORT(bool) object_id_get_process_id(uint_fast8_t *out, object_id_t id);
+bool object_id_get_process_id(uint_fast8_t *out, object_id_t id);
 
-ARK_EXPORT(bool) object_id_get_process_magic(uint_fast8_t *out, object_id_t id);
+bool object_id_get_process_magic(uint_fast8_t *out, object_id_t id);
 
-ARK_EXPORT(bool) object_id_get_process_counter(uint_fast16_t *out, object_id_t id);
+bool object_id_get_process_counter(uint_fast16_t *out, object_id_t id);
 
-ARK_EXPORT(bool) object_id_get_thread_id(uint_fast8_t *out, object_id_t id);
+bool object_id_get_thread_id(uint_fast8_t *out, object_id_t id);
 
-ARK_EXPORT(bool) object_id_get_thread_magic(uint_fast8_t *out, object_id_t id);
+bool object_id_get_thread_magic(uint_fast8_t *out, object_id_t id);
 
-ARK_EXPORT(bool) object_id_get_thread_counter(uint_fast32_t *out, object_id_t id);
+bool object_id_get_thread_counter(uint_fast32_t *out, object_id_t id);
 
-ARK_EXPORT(bool) object_id_get_call_random(uint_fast8_t *out, object_id_t id);
+bool object_id_get_call_random(uint_fast8_t *out, object_id_t id);
 
 ARK_END_DECL
 

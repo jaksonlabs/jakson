@@ -6,11 +6,11 @@ project(libcarbon VERSION 1.0.0.0 DESCRIPTION "A library to operate with CARBON 
 set (CMAKE_C_STANDARD 11)
 
 #if (${BUILD_TYPE} MATCHES Debug)
-        message("-- Debug build is enabled")
-        set(CMAKE_BUILD_TYPE Debug)
+#        message("-- Debug build is enabled")
+#        set(CMAKE_BUILD_TYPE Debug)
 #else()
-#        message("-- Release build is enabled")
-#        set(CMAKE_BUILD_TYPE Release)
+        message("-- Release build is enabled")
+        set(CMAKE_BUILD_TYPE Release)
 #endif()
 
 file(MAKE_DIRECTORY ${CMAKE_HOME_DIRECTORY}/build)
@@ -68,23 +68,20 @@ if (${LOG_WARN} MATCHES "on")
     endif()
 endif()
 
-set (CMAKE_C_FLAGS                "-Wall -std=c11 -Wextra -Werror")
+set (CMAKE_C_FLAGS                "-std=c11 -Wall -Wextra -Werror")
 set (CMAKE_C_FLAGS_DEBUG          "-g")
 set (CMAKE_C_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
 set (CMAKE_C_FLAGS_RELEASE        "-O3 -DNDEBUG")
 set (CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
 
-set (CMAKE_CXX_FLAGS                "-std=c++11 -Wall")
+set (CMAKE_CXX_FLAGS                "-std=c++11 -Wall -Wextra -Werror")
 set (CMAKE_CXX_FLAGS_DEBUG          "-g")
 set (CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
 set (CMAKE_CXX_FLAGS_RELEASE        "-O3 -DNDEBUG")
 set (CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
 
-set (CMAKE_AR      "/usr/bin/llvm-ar")
-set (CMAKE_LINKER  "/usr/bin/llvm-ld")
-set (CMAKE_NM      "/usr/bin/llvm-nm")
-set (CMAKE_OBJDUMP "/usr/bin/llvm-objdump")
-set (CMAKE_RANLIB  "/usr/bin/llvm-ranlib")
+add_library(ark-sources STATIC ${LIB_SOURCES}) # used to share object files across different dependent targets
+link_libraries(ark-sources ${LIBS})
 
 add_subdirectory("${CMAKE_SOURCE_DIR}/tools")
 

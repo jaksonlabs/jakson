@@ -32,7 +32,7 @@ bool memfile_open(struct memfile *file, struct memblock *block, enum access_mode
         return true;
 }
 
-ARK_EXPORT(bool) memfile_clone(struct memfile *dst, struct memfile *src)
+bool memfile_clone(struct memfile *dst, struct memfile *src)
 {
         error_if_null(dst)
         error_if_null(src)
@@ -70,7 +70,7 @@ bool memfile_rewind(struct memfile *file)
         return true;
 }
 
-ARK_EXPORT(bool) memfile_grow(struct memfile *file_in, size_t grow_by_bytes)
+bool memfile_grow(struct memfile *file_in, size_t grow_by_bytes)
 {
         error_if_null(file_in)
         if (likely(grow_by_bytes > 0)) {
@@ -100,7 +100,7 @@ size_t memfile_size(struct memfile *file)
         }
 }
 
-ARK_EXPORT(bool) memfile_cut(struct memfile *file, size_t how_many_bytes)
+bool memfile_cut(struct memfile *file, size_t how_many_bytes)
 {
         error_if_null(file);
         offset_t block_size;
@@ -203,7 +203,7 @@ bool memfile_write(struct memfile *file, const void *data, offset_t nbytes)
         }
 }
 
-ARK_EXPORT(bool) memfile_write_zero(struct memfile *file, size_t how_many)
+bool memfile_write_zero(struct memfile *file, size_t how_many)
 {
         error_if_null(file);
         error_if_null(how_many);
@@ -303,7 +303,7 @@ bool memfile_read_bit(struct memfile *file)
         }
 }
 
-ARK_EXPORT(offset_t) memfile_save_position(struct memfile *file)
+offset_t memfile_save_position(struct memfile *file)
 {
         error_if_null(file);
         offset_t pos = memfile_tell(file);
@@ -315,7 +315,7 @@ ARK_EXPORT(offset_t) memfile_save_position(struct memfile *file)
         return pos;
 }
 
-ARK_EXPORT(bool) memfile_restore_position(struct memfile *file)
+bool memfile_restore_position(struct memfile *file)
 {
         error_if_null(file);
         if (likely(file->saved_pos_ptr >= 0)) {
@@ -328,7 +328,7 @@ ARK_EXPORT(bool) memfile_restore_position(struct memfile *file)
         }
 }
 
-ARK_EXPORT(bool) memfile_ensure_space(struct memfile *memfile, u64 nbytes)
+bool memfile_ensure_space(struct memfile *memfile, u64 nbytes)
 {
         error_if_null(memfile)
 
@@ -356,7 +356,7 @@ ARK_EXPORT(bool) memfile_ensure_space(struct memfile *memfile, u64 nbytes)
         return true;
 }
 
-ARK_EXPORT(u64) memfile_read_varuint(u8 *nbytes, struct memfile *memfile)
+u64 memfile_read_varuint(u8 *nbytes, struct memfile *memfile)
 {
         u8 nbytes_read;
         u64 result = varuint_read(&nbytes_read, (varuint_t) memfile_peek(memfile, sizeof(char)));
@@ -365,14 +365,14 @@ ARK_EXPORT(u64) memfile_read_varuint(u8 *nbytes, struct memfile *memfile)
         return result;
 }
 
-ARK_EXPORT(bool) memfile_skip_varuint(struct memfile *memfile)
+bool memfile_skip_varuint(struct memfile *memfile)
 {
         error_if_null(memfile)
         memfile_read_varuint(NULL, memfile);
         return true;
 }
 
-ARK_EXPORT(u64) memfile_peek_varuint(u8 *nbytes, struct memfile *memfile)
+u64 memfile_peek_varuint(u8 *nbytes, struct memfile *memfile)
 {
         memfile_save_position(memfile);
         u64 result = memfile_read_varuint(nbytes, memfile);
@@ -380,7 +380,7 @@ ARK_EXPORT(u64) memfile_peek_varuint(u8 *nbytes, struct memfile *memfile)
         return result;
 }
 
-ARK_EXPORT(u64) memfile_write_varuint(struct memfile *memfile, u64 value)
+u64 memfile_write_varuint(struct memfile *memfile, u64 value)
 {
         u8 required_blocks = varuint_required_blocks(value);
         memfile_ensure_space(memfile, required_blocks);
@@ -390,7 +390,7 @@ ARK_EXPORT(u64) memfile_write_varuint(struct memfile *memfile, u64 value)
         return required_blocks;
 }
 
-ARK_EXPORT(bool) memfile_update_varuint(struct memfile *memfile, u64 value)
+bool memfile_update_varuint(struct memfile *memfile, u64 value)
 {
         error_if_null(memfile);
 
@@ -414,20 +414,20 @@ ARK_EXPORT(bool) memfile_update_varuint(struct memfile *memfile, u64 value)
         return true;
 }
 
-ARK_EXPORT(bool) memfile_seek_to_end(struct memfile *file)
+bool memfile_seek_to_end(struct memfile *file)
 {
         error_if_null(file)
         size_t size = memblock_last_used_byte(file->memblock);
         return memfile_seek(file, size);
 }
 
-ARK_EXPORT(bool) memfile_inplace_insert(struct memfile *file, size_t nbytes)
+bool memfile_inplace_insert(struct memfile *file, size_t nbytes)
 {
         error_if_null(file);
         return memblock_move_right(file->memblock, file->pos, nbytes);
 }
 
-ARK_EXPORT(bool) memfile_inplace_remove(struct memfile *file, size_t nbytes_from_here)
+bool memfile_inplace_remove(struct memfile *file, size_t nbytes_from_here)
 {
         error_if_null(file);
         return memblock_move_left(file->memblock, file->pos, nbytes_from_here);
@@ -467,7 +467,7 @@ void *memfile_current_pos(struct memfile *file, offset_t nbytes)
         }
 }
 
-ARK_EXPORT(bool) memfile_hexdump(struct string_builder *sb, struct memfile *file)
+bool memfile_hexdump(struct string *sb, struct memfile *file)
 {
         error_if_null(sb);
         error_if_null(file);
@@ -477,7 +477,7 @@ ARK_EXPORT(bool) memfile_hexdump(struct string_builder *sb, struct memfile *file
         return true;
 }
 
-ARK_EXPORT(bool) memfile_hexdump_printf(FILE *file, struct memfile *memfile)
+bool memfile_hexdump_printf(FILE *file, struct memfile *memfile)
 {
         error_if_null(file)
         error_if_null(memfile)
@@ -487,7 +487,7 @@ ARK_EXPORT(bool) memfile_hexdump_printf(FILE *file, struct memfile *memfile)
         return true;
 }
 
-ARK_EXPORT(bool) memfile_hexdump_print(struct memfile *memfile)
+bool memfile_hexdump_print(struct memfile *memfile)
 {
         return memfile_hexdump_printf(stdout, memfile);
 }

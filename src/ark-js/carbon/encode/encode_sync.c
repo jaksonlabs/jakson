@@ -31,47 +31,57 @@
 #define STRING_DIC_SYNC_TAG "string-dic-sync"
 
 struct entry {
-        char *str;
-        bool in_use;
+    char *str;
+    bool in_use;
 };
 
 struct sync_extra {
-        struct vector ofType(entry) contents;
-        struct vector ofType(string_id_t_t) freelist;
-        struct strhash index;
-        struct spinlock lock;
+    struct vector ofType(entry) contents;
+    struct vector ofType(string_id_t_t) freelist;
+    struct strhash index;
+    struct spinlock lock;
 };
 
 static bool this_drop(struct strdic *self);
+
 static bool this_insert(struct strdic *self, field_sid_t **out, char *const *strings, size_t num_strings,
-        size_t num_threads);
+                        size_t num_threads);
+
 static bool this_remove(struct strdic *self, field_sid_t *strings, size_t num_strings);
+
 static bool this_locate_safe(struct strdic *self, field_sid_t **out, bool **found_mask, size_t *num_not_found,
-        char *const *keys, size_t num_keys);
+                             char *const *keys, size_t num_keys);
+
 static bool this_locate_fast(struct strdic *self, field_sid_t **out, char *const *keys, size_t num_keys);
+
 static char **this_extract(struct strdic *self, const field_sid_t *ids, size_t num_ids);
+
 static bool this_free(struct strdic *self, void *ptr);
 
 static bool this_reset_counters(struct strdic *self);
+
 static bool this_counters(struct strdic *self, struct strhash_counters *counters);
 
 static bool this_num_distinct(struct strdic *self, size_t *num);
 
 static bool this_get_contents(struct strdic *self, struct vector ofType (char *) *strings,
-        struct vector ofType(field_sid_t) *string_ids);
+                              struct vector ofType(field_sid_t) *string_ids);
 
 static void lock(struct strdic *self);
+
 static void unlock(struct strdic *self);
 
 static int create_extra(struct strdic *self, size_t capacity, size_t num_index_buckets, size_t num_index_bucket_cap,
-        size_t num_threads);
+                        size_t num_threads);
+
 static struct sync_extra *this_extra(struct strdic *self);
 
 static int freelist_pop(field_sid_t *out, struct strdic *self);
+
 static int freelist_push(struct strdic *self, field_sid_t idx);
 
 int encode_sync_create(struct strdic *dic, size_t capacity, size_t num_indx_buckets, size_t num_index_bucket_cap,
-        size_t num_threads, const struct allocator *alloc)
+                       size_t num_threads, const struct allocator *alloc)
 {
         error_if_null(dic);
 
@@ -109,7 +119,7 @@ static void unlock(struct strdic *self)
 }
 
 static int create_extra(struct strdic *self, size_t capacity, size_t num_index_buckets, size_t num_index_bucket_cap,
-        size_t num_threads)
+                        size_t num_threads)
 {
         self->extra = alloc_malloc(&self->alloc, sizeof(struct sync_extra));
         struct sync_extra *extra = this_extra(self);
@@ -131,9 +141,9 @@ static int create_extra(struct strdic *self, size_t capacity, size_t num_index_b
 #endif
 
         ark_check_success(strhash_create_inmemory(&extra->index,
-                &hashtable_alloc,
-                num_index_buckets,
-                num_index_bucket_cap));
+                                                  &hashtable_alloc,
+                                                  num_index_buckets,
+                                                  num_index_bucket_cap));
         return true;
 }
 
@@ -197,7 +207,7 @@ static bool this_drop(struct strdic *self)
 }
 
 static bool this_insert(struct strdic *self, field_sid_t **out, char *const *strings, size_t num_strings,
-        size_t num_threads)
+                        size_t num_threads)
 {
         ark_trace(STRING_DIC_SYNC_TAG, "local string dictionary insertion invoked for %zu strings", num_strings);
         timestamp_t begin = time_now_wallclock();
@@ -265,9 +275,9 @@ static bool this_insert(struct strdic *self, field_sid_t **out, char *const *str
                                 /** This is for the case that the string was not already contained in the string dictionary but may have
                                  * duplicates in this insertion batch that are already inserted */
                                 strhash_get_bulk_safe_exact(&value,
-                                        &found,
-                                        &extra->index,
-                                        key);  /** OPTIMIZATION: use specialized function for "exact" query to avoid unnessecary malloc calls to manage set of results if only a single result is needed */
+                                                            &found,
+                                                            &extra->index,
+                                                            key);  /** OPTIMIZATION: use specialized function for "exact" query to avoid unnessecary malloc calls to manage set of results if only a single result is needed */
                         }
 
                         if (found) {
@@ -354,7 +364,7 @@ static bool this_remove(struct strdic *self, field_sid_t *strings, size_t num_st
 }
 
 static bool this_locate_safe(struct strdic *self, field_sid_t **out, bool **found_mask, size_t *num_not_found,
-        char *const *keys, size_t num_keys)
+                             char *const *keys, size_t num_keys)
 {
         timestamp_t begin = time_now_wallclock();
         ark_trace(STRING_DIC_SYNC_TAG, "'locate_safe' function invoked for %zu strings", num_keys)
@@ -468,7 +478,7 @@ static bool this_num_distinct(struct strdic *self, size_t *num)
 }
 
 static bool this_get_contents(struct strdic *self, struct vector ofType (char *) *strings,
-        struct vector ofType(field_sid_t) *string_ids)
+                              struct vector ofType(field_sid_t) *string_ids)
 {
         ark_check_tag(self->tag, SYNC);
         struct sync_extra *extra = this_extra(self);

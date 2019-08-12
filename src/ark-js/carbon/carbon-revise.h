@@ -38,37 +38,37 @@ ARK_DEFINE_ERROR_GETTER(carbon_revise)
  * @return <code>false</code> in case of an already running revision. Otherwise returns value of
  *                            <code>carbon_revise_begin</code>
  */
-ARK_EXPORT(bool) carbon_revise_try_begin(struct carbon_revise *context, struct carbon *revised_doc, struct carbon *doc);
+bool carbon_revise_try_begin(struct carbon_revise *context, struct carbon *revised_doc, struct carbon *doc);
 
-ARK_EXPORT(bool) carbon_revise_begin(struct carbon_revise *context, struct carbon *revised_doc, struct carbon *original);
+bool carbon_revise_begin(struct carbon_revise *context, struct carbon *revised_doc, struct carbon *original);
 
-ARK_EXPORT(bool) carbon_revise_key_generate(object_id_t *out, struct carbon_revise *context);
+bool carbon_revise_key_generate(object_id_t *out, struct carbon_revise *context);
 
-ARK_EXPORT(bool) carbon_revise_key_set_unsigned(struct carbon_revise *context, u64 key_value);
+bool carbon_revise_key_set_unsigned(struct carbon_revise *context, u64 key_value);
 
-ARK_EXPORT(bool) carbon_revise_key_set_signed(struct carbon_revise *context, i64 key_value);
+bool carbon_revise_key_set_signed(struct carbon_revise *context, i64 key_value);
 
-ARK_EXPORT(bool) carbon_revise_key_set_string(struct carbon_revise *context, const char *key_value);
+bool carbon_revise_key_set_string(struct carbon_revise *context, const char *key_value);
 
-ARK_EXPORT(bool) carbon_revise_iterator_open(struct carbon_array_it *it, struct carbon_revise *context);
+bool carbon_revise_iterator_open(struct carbon_array_it *it, struct carbon_revise *context);
 
-ARK_EXPORT(bool) carbon_revise_iterator_close(struct carbon_array_it *it);
+bool carbon_revise_iterator_close(struct carbon_array_it *it);
 
-ARK_EXPORT(bool) carbon_revise_find_open(struct carbon_find *out, const char *dot_path, struct carbon_revise *context);
+bool carbon_revise_find_open(struct carbon_find *out, const char *dot_path, struct carbon_revise *context);
 
-ARK_EXPORT(bool) carbon_revise_find_close(struct carbon_find *find);
+bool carbon_revise_find_close(struct carbon_find *find);
 
-ARK_EXPORT(bool) carbon_revise_remove(const char *dot_path, struct carbon_revise *context);
+bool carbon_revise_remove(const char *dot_path, struct carbon_revise *context);
 
-ARK_EXPORT(bool) carbon_revise_remove_one(const char *dot_path, struct carbon *rev_doc, struct carbon *doc);
+bool carbon_revise_remove_one(const char *dot_path, struct carbon *rev_doc, struct carbon *doc);
 
-ARK_EXPORT(bool) carbon_revise_pack(struct carbon_revise *context);
+bool carbon_revise_pack(struct carbon_revise *context);
 
-ARK_EXPORT(bool) carbon_revise_shrink(struct carbon_revise *context);
+bool carbon_revise_shrink(struct carbon_revise *context);
 
-ARK_EXPORT(const struct carbon *) carbon_revise_end(struct carbon_revise *context);
+const struct carbon *carbon_revise_end(struct carbon_revise *context);
 
-ARK_EXPORT(bool) carbon_revise_abort(struct carbon_revise *context);
+bool carbon_revise_abort(struct carbon_revise *context);
 
 ARK_END_DECL
 

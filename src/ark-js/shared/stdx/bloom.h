@@ -70,15 +70,15 @@ typedef struct bitmap bloom_t;
     (b0set && b1set && b2set && b3set);                     \
 })
 
-ARK_EXPORT(bool) bloom_create(bloom_t *filter, size_t size);
+bool bloom_create(bloom_t *filter, size_t size);
 
-ARK_EXPORT(bool) bloom_drop(bloom_t *filter);
+bool bloom_drop(bloom_t *filter);
 
-ARK_EXPORT(bool) bloom_clear(bloom_t *filter);
+bool bloom_clear(bloom_t *filter);
 
-ARK_EXPORT(size_t) bloom_nbits(bloom_t *filter);
+size_t bloom_nbits(bloom_t *filter);
 
-ARK_EXPORT(unsigned) bloom_nhashs();
+unsigned bloom_nhashs();
 
 ARK_END_DECL
 

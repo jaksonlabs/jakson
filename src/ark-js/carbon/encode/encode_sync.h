@@ -22,8 +22,8 @@
 
 ARK_BEGIN_DECL
 
-ARK_EXPORT (int) encode_sync_create(struct strdic *dic, size_t capacity, size_t num_indx_buckets,
-        size_t num_index_bucket_cap, size_t num_threads, const struct allocator *alloc);
+int encode_sync_create(struct strdic *dic, size_t capacity, size_t num_indx_buckets,
+                       size_t num_index_bucket_cap, size_t num_threads, const struct allocator *alloc);
 
 ARK_END_DECL
 

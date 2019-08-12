@@ -25,24 +25,24 @@
 ARK_BEGIN_DECL
 
 struct strid_info {
-        field_sid_t id;
-        u32 strlen;
-        offset_t offset;
+    field_sid_t id;
+    u32 strlen;
+    offset_t offset;
 };
 
 struct strid_iter {
-        FILE *disk_file;
-        bool is_open;
-        offset_t disk_offset;
-        struct strid_info vector[100000];
+    FILE *disk_file;
+    bool is_open;
+    offset_t disk_offset;
+    struct strid_info vector[100000];
 };
 
-ARK_EXPORT(bool) strid_iter_open(struct strid_iter *it, struct err *err, struct archive *archive);
+bool strid_iter_open(struct strid_iter *it, struct err *err, struct archive *archive);
 
-ARK_EXPORT(bool) strid_iter_next(bool *success, struct strid_info **info, struct err *err, size_t *info_length,
-        struct strid_iter *it);
+bool strid_iter_next(bool *success, struct strid_info **info, struct err *err, size_t *info_length,
+                     struct strid_iter *it);
 
-ARK_EXPORT(bool) strid_iter_close(struct strid_iter *it);
+bool strid_iter_close(struct strid_iter *it);
 
 ARK_END_DECL
 

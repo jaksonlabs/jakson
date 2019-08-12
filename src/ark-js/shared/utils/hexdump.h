@@ -19,13 +19,13 @@
 #define ARK_HEXDUMP_H
 
 #include <ark-js/shared/common.h>
-#include <ark-js/shared/stdx/string_builder.h>
+#include <ark-js/shared/stdx/string.h>
 
 ARK_BEGIN_DECL
 
-ARK_EXPORT(bool) hexdump(struct string_builder *dst, const void *base, u64 nbytes);
+bool hexdump(struct string *dst, const void *base, u64 nbytes);
 
-ARK_EXPORT(bool) hexdump_print(FILE *file, const void *base, u64 nbytes);
+bool hexdump_print(FILE *file, const void *base, u64 nbytes);
 
 ARK_END_DECL
 

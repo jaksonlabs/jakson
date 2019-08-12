@@ -123,20 +123,28 @@
 }
 
 static offset_t skip_record_header(struct memfile *memfile);
+
 static void update_record_header(struct memfile *memfile, offset_t root_object_header_offset, struct columndoc *model,
-        u64 record_size);
+                                 u64 record_size);
+
 static bool __serialize(offset_t *offset, struct err *err, struct memfile *memfile, struct columndoc_obj *columndoc,
-        offset_t root_object_header_offset);
+                        offset_t root_object_header_offset);
+
 static union object_flags *get_flags(union object_flags *flags, struct columndoc_obj *columndoc);
+
 static void update_file_header(struct memfile *memfile, offset_t root_object_header_offset);
+
 static void skip_file_header(struct memfile *memfile);
+
 static bool serialize_string_dic(struct memfile *memfile, struct err *err, const struct doc_bulk *context,
-        enum packer_type compressor);
+                                 enum packer_type compressor);
+
 static bool print_archive_from_memfile(FILE *file, struct err *err, struct memfile *memfile);
 
-ARK_EXPORT(bool) archive_from_json(struct archive *out, const char *file, struct err *err, const char *json_string,
-        enum packer_type compressor, enum strdic_tag dictionary, size_t num_async_dic_threads, bool read_optimized,
-        bool bake_string_id_index, struct archive_callback *callback)
+bool archive_from_json(struct archive *out, const char *file, struct err *err, const char *json_string,
+                       enum packer_type compressor, enum strdic_tag dictionary, size_t num_async_dic_threads,
+                       bool read_optimized,
+                       bool bake_string_id_index, struct archive_callback *callback)
 {
         error_if_null(out);
         error_if_null(file);
@@ -149,14 +157,14 @@ ARK_EXPORT(bool) archive_from_json(struct archive *out, const char *file, struct
         FILE *out_file;
 
         if (!archive_stream_from_json(&stream,
-                err,
-                json_string,
-                compressor,
-                dictionary,
-                num_async_dic_threads,
-                read_optimized,
-                bake_string_id_index,
-                callback)) {
+                                      err,
+                                      json_string,
+                                      compressor,
+                                      dictionary,
+                                      num_async_dic_threads,
+                                      read_optimized,
+                                      bake_string_id_index,
+                                      callback)) {
                 return false;
         }
 
@@ -195,9 +203,10 @@ ARK_EXPORT(bool) archive_from_json(struct archive *out, const char *file, struct
         return true;
 }
 
-ARK_EXPORT(bool) archive_stream_from_json(struct memblock **stream, struct err *err, const char *json_string,
-        enum packer_type compressor, enum strdic_tag dictionary, size_t num_async_dic_threads, bool read_optimized,
-        bool bake_id_index, struct archive_callback *callback)
+bool archive_stream_from_json(struct memblock **stream, struct err *err, const char *json_string,
+                              enum packer_type compressor, enum strdic_tag dictionary, size_t num_async_dic_threads,
+                              bool read_optimized,
+                              bool bake_id_index, struct archive_callback *callback)
 {
         error_if_null(stream);
         error_if_null(err);
@@ -225,7 +234,7 @@ ARK_EXPORT(bool) archive_stream_from_json(struct memblock **stream, struct err *
         ark_optional_call(callback, end_setup_string_dictionary);
 
         ark_optional_call(callback, begin_parse_json);
-        json_parser_create(&parser, &bulk);
+        json_parser_create(&parser);
         if (!(json_parse(&json, &error_desc, &parser, json_string))) {
                 char buffer[2048];
                 if (error_desc.token) {
@@ -291,8 +300,8 @@ static bool run_string_id_baking(struct err *err, struct memblock **stream)
         object_id_t rand_part;
         object_id_create(&rand_part);
         sprintf(tmp_file_name, "/tmp/ark-carbon-temp-%"
-                PRIu64
-                ".carbon", rand_part);
+                               PRIu64
+                               ".carbon", rand_part);
         FILE *tmp_file;
 
         if ((tmp_file = fopen(tmp_file_name, "w")) == NULL) {
@@ -361,7 +370,7 @@ static bool run_string_id_baking(struct err *err, struct memblock **stream)
 }
 
 bool archive_from_model(struct memblock **stream, struct err *err, struct columndoc *model, enum packer_type compressor,
-        bool bake_string_id_index, struct archive_callback *callback)
+                        bool bake_string_id_index, struct archive_callback *callback)
 {
         error_if_null(model)
         error_if_null(stream)
@@ -409,7 +418,7 @@ bool archive_from_model(struct memblock **stream, struct err *err, struct column
         return true;
 }
 
-ARK_EXPORT(struct io_context *)archive_io_context_create(struct archive *archive)
+struct io_context *archive_io_context_create(struct archive *archive)
 {
         error_if_null(archive);
         struct io_context *context;
@@ -442,7 +451,7 @@ bool archive_print(FILE *file, struct err *err, struct memblock *stream)
         struct memfile memfile;
         memfile_open(&memfile, stream, READ_ONLY);
         if (memfile_size(&memfile)
-                < sizeof(struct archive_header) + sizeof(struct string_table_header) + sizeof(struct object_header)) {
+            < sizeof(struct archive_header) + sizeof(struct string_table_header) + sizeof(struct object_header)) {
                 error(err, ARK_ERR_NOCARBONSTREAM);
                 return false;
         } else {
@@ -460,36 +469,36 @@ static u32 flags_to_int32(union object_flags *flags)
 static const char *array_value_type_to_string(struct err *err, field_e type)
 {
         switch (type) {
-        case FIELD_NULL:
-                return "Null Array";
-        case FIELD_BOOLEAN:
-                return "Boolean Array";
-        case FIELD_INT8:
-                return "Int8 Array";
-        case FIELD_INT16:
-                return "Int16 Array";
-        case FIELD_INT32:
-                return "Int32 Array";
-        case FIELD_INT64:
-                return "Int64 Array";
-        case FIELD_UINT8:
-                return "UInt8 Array";
-        case FIELD_UINT16:
-                return "UInt16 Array";
-        case FIELD_UINT32:
-                return "UInt32 Array";
-        case FIELD_UINT64:
-                return "UInt64 Array";
-        case FIELD_FLOAT:
-                return "UIntFloat Array";
-        case FIELD_STRING:
-                return "Text Array";
-        case FIELD_OBJECT:
-                return "Object Array";
-        default: {
-                error(err, ARK_ERR_NOVALUESTR)
-                return NULL;
-        }
+                case FIELD_NULL:
+                        return "Null Array";
+                case FIELD_BOOLEAN:
+                        return "Boolean Array";
+                case FIELD_INT8:
+                        return "Int8 Array";
+                case FIELD_INT16:
+                        return "Int16 Array";
+                case FIELD_INT32:
+                        return "Int32 Array";
+                case FIELD_INT64:
+                        return "Int64 Array";
+                case FIELD_UINT8:
+                        return "UInt8 Array";
+                case FIELD_UINT16:
+                        return "UInt16 Array";
+                case FIELD_UINT32:
+                        return "UInt32 Array";
+                case FIELD_UINT64:
+                        return "UInt64 Array";
+                case FIELD_FLOAT:
+                        return "UIntFloat Array";
+                case FIELD_STRING:
+                        return "Text Array";
+                case FIELD_OBJECT:
+                        return "Object Array";
+                default: {
+                        error(err, ARK_ERR_NOVALUESTR)
+                        return NULL;
+                }
         }
 }
 
@@ -507,7 +516,7 @@ static offset_t skip_var_value_offset_column(struct memfile *memfile, size_t num
 }
 
 static void write_var_value_offset_column(struct memfile *file, offset_t where, offset_t after, const offset_t *values,
-        size_t n)
+                                          size_t n)
 {
         memfile_seek(file, where);
         memfile_write(file, values, n * sizeof(offset_t));
@@ -515,43 +524,44 @@ static void write_var_value_offset_column(struct memfile *file, offset_t where, 
 }
 
 static bool write_primitive_fixed_value_column(struct memfile *memfile, struct err *err, field_e type,
-        struct vector ofType(T) *values_vec)
+                                               struct vector ofType(T) *values_vec)
 {
         assert (type != FIELD_OBJECT); /** use 'write_primitive_var_value_column' instead */
 
         switch (type) {
-        case FIELD_NULL:
-                break;
-        case FIELD_BOOLEAN: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_boolean_t );
-                break;
-        case FIELD_INT8: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_i8_t);
-                break;
-        case FIELD_INT16: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_i16_t);
-                break;
-        case FIELD_INT32: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_i32_t);
-                break;
-        case FIELD_INT64: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_i64_t);
-                break;
-        case FIELD_UINT8: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_u8_t);
-                break;
-        case FIELD_UINT16: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_u16_t);
-                break;
-        case FIELD_UINT32: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_u32_t);
-                break;
-        case FIELD_UINT64: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_u64_t);
-                break;
-        case FIELD_FLOAT: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_number_t);
-                break;
-        case FIELD_STRING: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_sid_t);
-                break;
-        default: error(err, ARK_ERR_NOTYPE);
-                return false;
+                case FIELD_NULL:
+                        break;
+                case FIELD_BOOLEAN: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_boolean_t);
+                        break;
+                case FIELD_INT8: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_i8_t);
+                        break;
+                case FIELD_INT16: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_i16_t);
+                        break;
+                case FIELD_INT32: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_i32_t);
+                        break;
+                case FIELD_INT64: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_i64_t);
+                        break;
+                case FIELD_UINT8: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_u8_t);
+                        break;
+                case FIELD_UINT16: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_u16_t);
+                        break;
+                case FIELD_UINT32: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_u32_t);
+                        break;
+                case FIELD_UINT64: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_u64_t);
+                        break;
+                case FIELD_FLOAT: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_number_t);
+                        break;
+                case FIELD_STRING: WRITE_PRIMITIVE_VALUES(memfile, values_vec, field_sid_t);
+                        break;
+                default: error(err, ARK_ERR_NOTYPE);
+                        return false;
         }
         return true;
 }
 
 static offset_t *__write_primitive_column(struct memfile *memfile, struct err *err,
-        struct vector ofType(struct columndoc_obj) *values_vec, offset_t root_offset)
+                                          struct vector ofType(struct columndoc_obj) *values_vec,
+                                          offset_t root_offset)
 {
         offset_t *result = ark_malloc(values_vec->num_elems * sizeof(offset_t));
         struct columndoc_obj *mapped = vec_all(values_vec, struct columndoc_obj);
@@ -566,76 +576,76 @@ static offset_t *__write_primitive_column(struct memfile *memfile, struct err *e
 }
 
 static bool __write_array_len_column(struct err *err, struct memfile *memfile, field_e type,
-        struct vector ofType(...) *values)
+                                     struct vector ofType(...) *values)
 {
         switch (type) {
-        case FIELD_NULL:
-                break;
-        case FIELD_BOOLEAN:
-        case FIELD_INT8:
-        case FIELD_INT16:
-        case FIELD_INT32:
-        case FIELD_INT64:
-        case FIELD_UINT8:
-        case FIELD_UINT16:
-        case FIELD_UINT32:
-        case FIELD_UINT64:
-        case FIELD_FLOAT:
-        case FIELD_STRING:
-                for (u32 i = 0; i < values->num_elems; i++) {
-                        struct vector *arrays = vec_get(values, i, struct vector);
-                        memfile_write(memfile, &arrays->num_elems, sizeof(u32));
-                }
-                break;
-        case FIELD_OBJECT: print_error_and_die(ARK_ERR_ILLEGALIMPL)
-                return false;
-                break;
-        default: error(err, ARK_ERR_NOTYPE);
-                return false;
+                case FIELD_NULL:
+                        break;
+                case FIELD_BOOLEAN:
+                case FIELD_INT8:
+                case FIELD_INT16:
+                case FIELD_INT32:
+                case FIELD_INT64:
+                case FIELD_UINT8:
+                case FIELD_UINT16:
+                case FIELD_UINT32:
+                case FIELD_UINT64:
+                case FIELD_FLOAT:
+                case FIELD_STRING:
+                        for (u32 i = 0; i < values->num_elems; i++) {
+                                struct vector *arrays = vec_get(values, i, struct vector);
+                                memfile_write(memfile, &arrays->num_elems, sizeof(u32));
+                        }
+                        break;
+                case FIELD_OBJECT: print_error_and_die(ARK_ERR_ILLEGALIMPL)
+                        return false;
+                        break;
+                default: error(err, ARK_ERR_NOTYPE);
+                        return false;
         }
         return true;
 }
 
 static bool write_array_value_column(struct memfile *memfile, struct err *err, field_e type,
-        struct vector ofType(...) *values_vec)
+                                     struct vector ofType(...) *values_vec)
 {
 
         switch (type) {
-        case FIELD_NULL: WRITE_PRIMITIVE_VALUES(memfile, values_vec, u32);
-                break;
-        case FIELD_BOOLEAN: WRITE_ARRAY_VALUES(memfile, values_vec, field_boolean_t);
-                break;
-        case FIELD_INT8: WRITE_ARRAY_VALUES(memfile, values_vec, field_i8_t);
-                break;
-        case FIELD_INT16: WRITE_ARRAY_VALUES(memfile, values_vec, field_i16_t);
-                break;
-        case FIELD_INT32: WRITE_ARRAY_VALUES(memfile, values_vec, field_i32_t);
-                break;
-        case FIELD_INT64: WRITE_ARRAY_VALUES(memfile, values_vec, field_i64_t);
-                break;
-        case FIELD_UINT8: WRITE_ARRAY_VALUES(memfile, values_vec, field_u64_t);
-                break;
-        case FIELD_UINT16: WRITE_ARRAY_VALUES(memfile, values_vec, field_u16_t);
-                break;
-        case FIELD_UINT32: WRITE_ARRAY_VALUES(memfile, values_vec, field_u32_t);
-                break;
-        case FIELD_UINT64: WRITE_ARRAY_VALUES(memfile, values_vec, field_u64_t);
-                break;
-        case FIELD_FLOAT: WRITE_ARRAY_VALUES(memfile, values_vec, field_number_t);
-                break;
-        case FIELD_STRING: WRITE_ARRAY_VALUES(memfile, values_vec, field_sid_t);
-                break;
-        case FIELD_OBJECT: print_error_and_die(ARK_ERR_NOTIMPL)
-                return false;
-        default: error(err, ARK_ERR_NOTYPE)
-                return false;
+                case FIELD_NULL: WRITE_PRIMITIVE_VALUES(memfile, values_vec, u32);
+                        break;
+                case FIELD_BOOLEAN: WRITE_ARRAY_VALUES(memfile, values_vec, field_boolean_t);
+                        break;
+                case FIELD_INT8: WRITE_ARRAY_VALUES(memfile, values_vec, field_i8_t);
+                        break;
+                case FIELD_INT16: WRITE_ARRAY_VALUES(memfile, values_vec, field_i16_t);
+                        break;
+                case FIELD_INT32: WRITE_ARRAY_VALUES(memfile, values_vec, field_i32_t);
+                        break;
+                case FIELD_INT64: WRITE_ARRAY_VALUES(memfile, values_vec, field_i64_t);
+                        break;
+                case FIELD_UINT8: WRITE_ARRAY_VALUES(memfile, values_vec, field_u64_t);
+                        break;
+                case FIELD_UINT16: WRITE_ARRAY_VALUES(memfile, values_vec, field_u16_t);
+                        break;
+                case FIELD_UINT32: WRITE_ARRAY_VALUES(memfile, values_vec, field_u32_t);
+                        break;
+                case FIELD_UINT64: WRITE_ARRAY_VALUES(memfile, values_vec, field_u64_t);
+                        break;
+                case FIELD_FLOAT: WRITE_ARRAY_VALUES(memfile, values_vec, field_number_t);
+                        break;
+                case FIELD_STRING: WRITE_ARRAY_VALUES(memfile, values_vec, field_sid_t);
+                        break;
+                case FIELD_OBJECT: print_error_and_die(ARK_ERR_NOTIMPL)
+                        return false;
+                default: error(err, ARK_ERR_NOTYPE)
+                        return false;
         }
         return true;
 }
 
 static bool write_array_prop(offset_t *offset, struct err *err, struct memfile *memfile,
-        struct vector ofType(field_sid_t) *keys, field_e type, struct vector ofType(...) *values,
-        offset_t root_object_header_offset)
+                             struct vector ofType(field_sid_t) *keys, field_e type, struct vector ofType(...) *values,
+                             offset_t root_object_header_offset)
 {
         assert(keys->num_elems == values->num_elems);
 
@@ -661,114 +671,114 @@ static bool write_array_prop(offset_t *offset, struct err *err, struct memfile *
 }
 
 static bool write_array_props(struct memfile *memfile, struct err *err, struct columndoc_obj *columndoc,
-        struct archive_prop_offs *offsets, offset_t root_object_header_offset)
+                              struct archive_prop_offs *offsets, offset_t root_object_header_offset)
 {
         if (!write_array_prop(&offsets->null_arrays,
-                err,
-                memfile,
-                &columndoc->null_array_prop_keys,
-                FIELD_NULL,
-                &columndoc->null_array_prop_vals,
-                root_object_header_offset)) {
+                              err,
+                              memfile,
+                              &columndoc->null_array_prop_keys,
+                              FIELD_NULL,
+                              &columndoc->null_array_prop_vals,
+                              root_object_header_offset)) {
                 return false;
         }
         if (!write_array_prop(&offsets->bool_arrays,
-                err,
-                memfile,
-                &columndoc->bool_array_prop_keys,
-                FIELD_BOOLEAN,
-                &columndoc->bool_array_prop_vals,
-                root_object_header_offset)) {
+                              err,
+                              memfile,
+                              &columndoc->bool_array_prop_keys,
+                              FIELD_BOOLEAN,
+                              &columndoc->bool_array_prop_vals,
+                              root_object_header_offset)) {
                 return false;
         }
         if (!write_array_prop(&offsets->int8_arrays,
-                err,
-                memfile,
-                &columndoc->int8_array_prop_keys,
-                FIELD_INT8,
-                &columndoc->int8_array_prop_vals,
-                root_object_header_offset)) {
+                              err,
+                              memfile,
+                              &columndoc->int8_array_prop_keys,
+                              FIELD_INT8,
+                              &columndoc->int8_array_prop_vals,
+                              root_object_header_offset)) {
                 return false;
         }
         if (!write_array_prop(&offsets->int16_arrays,
-                err,
-                memfile,
-                &columndoc->int16_array_prop_keys,
-                FIELD_INT16,
-                &columndoc->int16_array_prop_vals,
-                root_object_header_offset)) {
+                              err,
+                              memfile,
+                              &columndoc->int16_array_prop_keys,
+                              FIELD_INT16,
+                              &columndoc->int16_array_prop_vals,
+                              root_object_header_offset)) {
                 return false;
         }
         if (!write_array_prop(&offsets->int32_arrays,
-                err,
-                memfile,
-                &columndoc->int32_array_prop_keys,
-                FIELD_INT32,
-                &columndoc->int32_array_prop_vals,
-                root_object_header_offset)) {
+                              err,
+                              memfile,
+                              &columndoc->int32_array_prop_keys,
+                              FIELD_INT32,
+                              &columndoc->int32_array_prop_vals,
+                              root_object_header_offset)) {
                 return false;
         }
         if (!write_array_prop(&offsets->int64_arrays,
-                err,
-                memfile,
-                &columndoc->int64_array_prop_keys,
-                FIELD_INT64,
-                &columndoc->int64_array_prop_vals,
-                root_object_header_offset)) {
+                              err,
+                              memfile,
+                              &columndoc->int64_array_prop_keys,
+                              FIELD_INT64,
+                              &columndoc->int64_array_prop_vals,
+                              root_object_header_offset)) {
                 return false;
         }
         if (!write_array_prop(&offsets->uint8_arrays,
-                err,
-                memfile,
-                &columndoc->uint8_array_prop_keys,
-                FIELD_UINT8,
-                &columndoc->uint8_array_prop_vals,
-                root_object_header_offset)) {
+                              err,
+                              memfile,
+                              &columndoc->uint8_array_prop_keys,
+                              FIELD_UINT8,
+                              &columndoc->uint8_array_prop_vals,
+                              root_object_header_offset)) {
                 return false;
         }
         if (!write_array_prop(&offsets->uint16_arrays,
-                err,
-                memfile,
-                &columndoc->uint16_array_prop_keys,
-                FIELD_UINT16,
-                &columndoc->uint16_array_prop_vals,
-                root_object_header_offset)) {
+                              err,
+                              memfile,
+                              &columndoc->uint16_array_prop_keys,
+                              FIELD_UINT16,
+                              &columndoc->uint16_array_prop_vals,
+                              root_object_header_offset)) {
                 return false;
         }
         if (!write_array_prop(&offsets->uint32_arrays,
-                err,
-                memfile,
-                &columndoc->uint32_array_prop_keys,
-                FIELD_UINT32,
-                &columndoc->uint32_array_prop_vals,
-                root_object_header_offset)) {
+                              err,
+                              memfile,
+                              &columndoc->uint32_array_prop_keys,
+                              FIELD_UINT32,
+                              &columndoc->uint32_array_prop_vals,
+                              root_object_header_offset)) {
                 return false;
         }
         if (!write_array_prop(&offsets->uint64_arrays,
-                err,
-                memfile,
-                &columndoc->uint64_array_prop_keys,
-                FIELD_UINT64,
-                &columndoc->ui64_array_prop_vals,
-                root_object_header_offset)) {
+                              err,
+                              memfile,
+                              &columndoc->uint64_array_prop_keys,
+                              FIELD_UINT64,
+                              &columndoc->ui64_array_prop_vals,
+                              root_object_header_offset)) {
                 return false;
         }
         if (!write_array_prop(&offsets->float_arrays,
-                err,
-                memfile,
-                &columndoc->float_array_prop_keys,
-                FIELD_FLOAT,
-                &columndoc->float_array_prop_vals,
-                root_object_header_offset)) {
+                              err,
+                              memfile,
+                              &columndoc->float_array_prop_keys,
+                              FIELD_FLOAT,
+                              &columndoc->float_array_prop_vals,
+                              root_object_header_offset)) {
                 return false;
         }
         if (!write_array_prop(&offsets->string_arrays,
-                err,
-                memfile,
-                &columndoc->string_array_prop_keys,
-                FIELD_STRING,
-                &columndoc->string_array_prop_vals,
-                root_object_header_offset)) {
+                              err,
+                              memfile,
+                              &columndoc->string_array_prop_keys,
+                              FIELD_STRING,
+                              &columndoc->string_array_prop_vals,
+                              root_object_header_offset)) {
                 return false;
         }
         return true;
@@ -777,7 +787,7 @@ static bool write_array_props(struct memfile *memfile, struct err *err, struct c
 /** Fixed-length property lists; value position can be determined by size of value and position of key in key column.
  * In contrast, variable-length property list require an additional offset column (see 'write_var_props') */
 static bool write_fixed_props(offset_t *offset, struct err *err, struct memfile *memfile,
-        struct vector ofType(field_sid_t) *keys, field_e type, struct vector ofType(T) *values)
+                              struct vector ofType(field_sid_t) *keys, field_e type, struct vector ofType(T) *values)
 {
         assert(!values || keys->num_elems == values->num_elems);
         assert(type != FIELD_OBJECT); /** use 'write_var_props' instead */
@@ -807,8 +817,9 @@ static bool write_fixed_props(offset_t *offset, struct err *err, struct memfile 
  * the only variable-length value for properties are "JSON objects".
  * In contrast, fixed-length property list doesn't require an additional offset column (see 'write_fixed_props') */
 static bool write_var_props(offset_t *offset, struct err *err, struct memfile *memfile,
-        struct vector ofType(field_sid_t) *keys, struct vector ofType(struct columndoc_obj) *objects,
-        offset_t root_object_header_offset)
+                            struct vector ofType(field_sid_t) *keys,
+                            struct vector ofType(struct columndoc_obj) *objects,
+                            offset_t root_object_header_offset)
 {
         assert(!objects || keys->num_elems == objects->num_elems);
 
@@ -836,105 +847,105 @@ static bool write_var_props(offset_t *offset, struct err *err, struct memfile *m
 }
 
 static bool write_primitive_props(struct memfile *memfile, struct err *err, struct columndoc_obj *columndoc,
-        struct archive_prop_offs *offsets, offset_t root_object_header_offset)
+                                  struct archive_prop_offs *offsets, offset_t root_object_header_offset)
 {
         if (!write_fixed_props(&offsets->nulls, err, memfile, &columndoc->null_prop_keys, FIELD_NULL, NULL)) {
                 return false;
         }
         if (!write_fixed_props(&offsets->bools,
-                err,
-                memfile,
-                &columndoc->bool_prop_keys,
-                FIELD_BOOLEAN,
-                &columndoc->bool_prop_vals)) {
+                               err,
+                               memfile,
+                               &columndoc->bool_prop_keys,
+                               FIELD_BOOLEAN,
+                               &columndoc->bool_prop_vals)) {
                 return false;
         }
         if (!write_fixed_props(&offsets->int8s,
-                err,
-                memfile,
-                &columndoc->int8_prop_keys,
-                FIELD_INT8,
-                &columndoc->int8_prop_vals)) {
+                               err,
+                               memfile,
+                               &columndoc->int8_prop_keys,
+                               FIELD_INT8,
+                               &columndoc->int8_prop_vals)) {
                 return false;
         }
         if (!write_fixed_props(&offsets->int16s,
-                err,
-                memfile,
-                &columndoc->int16_prop_keys,
-                FIELD_INT16,
-                &columndoc->int16_prop_vals)) {
+                               err,
+                               memfile,
+                               &columndoc->int16_prop_keys,
+                               FIELD_INT16,
+                               &columndoc->int16_prop_vals)) {
                 return false;
         }
         if (!write_fixed_props(&offsets->int32s,
-                err,
-                memfile,
-                &columndoc->int32_prop_keys,
-                FIELD_INT32,
-                &columndoc->int32_prop_vals)) {
+                               err,
+                               memfile,
+                               &columndoc->int32_prop_keys,
+                               FIELD_INT32,
+                               &columndoc->int32_prop_vals)) {
                 return false;
         }
         if (!write_fixed_props(&offsets->int64s,
-                err,
-                memfile,
-                &columndoc->int64_prop_keys,
-                FIELD_INT64,
-                &columndoc->int64_prop_vals)) {
+                               err,
+                               memfile,
+                               &columndoc->int64_prop_keys,
+                               FIELD_INT64,
+                               &columndoc->int64_prop_vals)) {
                 return false;
         }
         if (!write_fixed_props(&offsets->uint8s,
-                err,
-                memfile,
-                &columndoc->uint8_prop_keys,
-                FIELD_UINT8,
-                &columndoc->uint8_prop_vals)) {
+                               err,
+                               memfile,
+                               &columndoc->uint8_prop_keys,
+                               FIELD_UINT8,
+                               &columndoc->uint8_prop_vals)) {
                 return false;
         }
         if (!write_fixed_props(&offsets->uint16s,
-                err,
-                memfile,
-                &columndoc->uint16_prop_keys,
-                FIELD_UINT16,
-                &columndoc->uint16_prop_vals)) {
+                               err,
+                               memfile,
+                               &columndoc->uint16_prop_keys,
+                               FIELD_UINT16,
+                               &columndoc->uint16_prop_vals)) {
                 return false;
         }
         if (!write_fixed_props(&offsets->uint32s,
-                err,
-                memfile,
-                &columndoc->uin32_prop_keys,
-                FIELD_UINT32,
-                &columndoc->uint32_prop_vals)) {
+                               err,
+                               memfile,
+                               &columndoc->uin32_prop_keys,
+                               FIELD_UINT32,
+                               &columndoc->uint32_prop_vals)) {
                 return false;
         }
         if (!write_fixed_props(&offsets->uint64s,
-                err,
-                memfile,
-                &columndoc->uint64_prop_keys,
-                FIELD_UINT64,
-                &columndoc->uint64_prop_vals)) {
+                               err,
+                               memfile,
+                               &columndoc->uint64_prop_keys,
+                               FIELD_UINT64,
+                               &columndoc->uint64_prop_vals)) {
                 return false;
         }
         if (!write_fixed_props(&offsets->floats,
-                err,
-                memfile,
-                &columndoc->float_prop_keys,
-                FIELD_FLOAT,
-                &columndoc->float_prop_vals)) {
+                               err,
+                               memfile,
+                               &columndoc->float_prop_keys,
+                               FIELD_FLOAT,
+                               &columndoc->float_prop_vals)) {
                 return false;
         }
         if (!write_fixed_props(&offsets->strings,
-                err,
-                memfile,
-                &columndoc->string_prop_keys,
-                FIELD_STRING,
-                &columndoc->string_prop_vals)) {
+                               err,
+                               memfile,
+                               &columndoc->string_prop_keys,
+                               FIELD_STRING,
+                               &columndoc->string_prop_vals)) {
                 return false;
         }
         if (!write_var_props(&offsets->objects,
-                err,
-                memfile,
-                &columndoc->obj_prop_keys,
-                &columndoc->obj_prop_vals,
-                root_object_header_offset)) {
+                             err,
+                             memfile,
+                             &columndoc->obj_prop_keys,
+                             &columndoc->obj_prop_vals,
+                             root_object_header_offset)) {
                 return false;
         }
 
@@ -955,51 +966,51 @@ static bool write_primitive_props(struct memfile *memfile, struct err *err, stru
 }
 
 static bool write_column_entry(struct memfile *memfile, struct err *err, field_e type,
-        struct vector ofType(<T>) *column, offset_t root_object_header_offset)
+                               struct vector ofType(<T>) *column, offset_t root_object_header_offset)
 {
         memfile_write(memfile, &column->num_elems, sizeof(u32));
         switch (type) {
-        case FIELD_NULL:
-                memfile_write(memfile, column->base, column->num_elems * sizeof(u32));
-                break;
-        case FIELD_BOOLEAN:
-        case FIELD_INT8:
-        case FIELD_INT16:
-        case FIELD_INT32:
-        case FIELD_INT64:
-        case FIELD_UINT8:
-        case FIELD_UINT16:
-        case FIELD_UINT32:
-        case FIELD_UINT64:
-        case FIELD_FLOAT:
-        case FIELD_STRING:
-                memfile_write(memfile, column->base, column->num_elems * GET_TYPE_SIZE(type));
-                break;
-        case FIELD_OBJECT: {
-                offset_t preObjectNext = 0;
-                for (size_t i = 0; i < column->num_elems; i++) {
-                        struct columndoc_obj *object = vec_get(column, i, struct columndoc_obj);
-                        if (likely(preObjectNext != 0)) {
-                                offset_t continuePos = memfile_tell(memfile);
-                                offset_t relativeContinuePos = continuePos - root_object_header_offset;
-                                memfile_seek(memfile, preObjectNext);
-                                memfile_write(memfile, &relativeContinuePos, sizeof(offset_t));
-                                memfile_seek(memfile, continuePos);
-                        }
-                        if (!__serialize(&preObjectNext, err, memfile, object, root_object_header_offset)) {
-                                return false;
+                case FIELD_NULL:
+                        memfile_write(memfile, column->base, column->num_elems * sizeof(u32));
+                        break;
+                case FIELD_BOOLEAN:
+                case FIELD_INT8:
+                case FIELD_INT16:
+                case FIELD_INT32:
+                case FIELD_INT64:
+                case FIELD_UINT8:
+                case FIELD_UINT16:
+                case FIELD_UINT32:
+                case FIELD_UINT64:
+                case FIELD_FLOAT:
+                case FIELD_STRING:
+                        memfile_write(memfile, column->base, column->num_elems * GET_TYPE_SIZE(type));
+                        break;
+                case FIELD_OBJECT: {
+                        offset_t preObjectNext = 0;
+                        for (size_t i = 0; i < column->num_elems; i++) {
+                                struct columndoc_obj *object = vec_get(column, i, struct columndoc_obj);
+                                if (likely(preObjectNext != 0)) {
+                                        offset_t continuePos = memfile_tell(memfile);
+                                        offset_t relativeContinuePos = continuePos - root_object_header_offset;
+                                        memfile_seek(memfile, preObjectNext);
+                                        memfile_write(memfile, &relativeContinuePos, sizeof(offset_t));
+                                        memfile_seek(memfile, continuePos);
+                                }
+                                if (!__serialize(&preObjectNext, err, memfile, object, root_object_header_offset)) {
+                                        return false;
+                                }
                         }
                 }
-        }
-                break;
-        default: error(err, ARK_ERR_NOTYPE)
-                return false;
+                        break;
+                default: error(err, ARK_ERR_NOTYPE)
+                        return false;
         }
         return true;
 }
 
 static bool write_column(struct memfile *memfile, struct err *err, struct columndoc_column *column,
-        offset_t root_object_header_offset)
+                         offset_t root_object_header_offset)
 {
         assert(column->array_positions.num_elems == column->values.num_elems);
 
@@ -1030,8 +1041,9 @@ static bool write_column(struct memfile *memfile, struct err *err, struct column
 }
 
 static bool write_object_array_props(struct memfile *memfile, struct err *err,
-        struct vector ofType(struct columndoc_group) *object_key_columns, struct archive_prop_offs *offsets,
-        offset_t root_object_header_offset)
+                                     struct vector ofType(struct columndoc_group) *object_key_columns,
+                                     struct archive_prop_offs *offsets,
+                                     offset_t root_object_header_offset)
 {
         if (object_key_columns->num_elems > 0) {
                 struct object_array_header header = {.marker = marker_symbols[MARKER_TYPE_PROP_OBJECT_ARRAY]
@@ -1114,7 +1126,7 @@ static offset_t skip_record_header(struct memfile *memfile)
 }
 
 static void update_record_header(struct memfile *memfile, offset_t root_object_header_offset, struct columndoc *model,
-        u64 record_size)
+                                 u64 record_size)
 {
         struct record_flags flags = {.bits.is_sorted = model->read_optimized};
         struct record_header
@@ -1127,7 +1139,7 @@ static void update_record_header(struct memfile *memfile, offset_t root_object_h
 }
 
 static void propOffsetsWrite(struct memfile *memfile, const union object_flags *flags,
-        struct archive_prop_offs *prop_offsets)
+                             struct archive_prop_offs *prop_offsets)
 {
         if (flags->bits.has_null_props) {
                 memfile_write(memfile, &prop_offsets->nulls, sizeof(offset_t));
@@ -1295,7 +1307,7 @@ static void prop_offsets_skip_write(struct memfile *memfile, const union object_
 }
 
 static bool __serialize(offset_t *offset, struct err *err, struct memfile *memfile, struct columndoc_obj *columndoc,
-        offset_t root_object_header_offset)
+                        offset_t root_object_header_offset)
 {
         union object_flags flags;
         struct archive_prop_offs prop_offsets;
@@ -1316,10 +1328,10 @@ static bool __serialize(offset_t *offset, struct err *err, struct memfile *memfi
                 return false;
         }
         if (!write_object_array_props(memfile,
-                err,
-                &columndoc->obj_array_props,
-                &prop_offsets,
-                root_object_header_offset)) {
+                                      err,
+                                      &columndoc->obj_array_props,
+                                      &prop_offsets,
+                                      root_object_header_offset)) {
                 return false;
         }
 
@@ -1395,7 +1407,7 @@ static char *record_header_flags_to_string(const struct record_flags *flags)
 }
 
 static bool serialize_string_dic(struct memfile *memfile, struct err *err, const struct doc_bulk *context,
-        enum packer_type compressor)
+                                 enum packer_type compressor)
 {
         union string_tab_flags flags;
         struct packer strategy;
@@ -1425,7 +1437,7 @@ static bool serialize_string_dic(struct memfile *memfile, struct err *err, const
         header = (struct string_table_header) {.marker = marker_symbols[MARKER_TYPE_EMBEDDED_STR_DIC]
                 .symbol, .flags = flags.value, .num_entries = strings
                 ->num_elems, .first_entry = memfile_tell(memfile), .compressor_extra_size = (extra_end_off
-                - extra_begin_off)};
+                                                                                             - extra_begin_off)};
 
         for (size_t i = 0; i < strings->num_elems; i++) {
                 field_sid_t id = *vec_get(string_ids, i, field_sid_t);
@@ -1522,80 +1534,80 @@ static bool print_column_form_memfile(FILE *file, struct err *err, struct memfil
         //fprintf(file, "[");
         for (size_t i = 0; i < header->num_entries; i++) {
                 switch (data_type) {
-                case FIELD_NULL: {
-                        PRINT_VALUE_ARRAY(u32, memfile, header, "%d");
-                }
-                        break;
-                case FIELD_BOOLEAN: {
-                        PRINT_VALUE_ARRAY(field_boolean_t, memfile, header, "%d");
-                }
-                        break;
-                case FIELD_INT8: {
-                        PRINT_VALUE_ARRAY(field_i8_t, memfile, header, "%d");
-                }
-                        break;
-                case FIELD_INT16: {
-                        PRINT_VALUE_ARRAY(field_i16_t, memfile, header, "%d");
-                }
-                        break;
-                case FIELD_INT32: {
-                        PRINT_VALUE_ARRAY(field_i32_t, memfile, header, "%d");
-                }
-                        break;
-                case FIELD_INT64: {
-                        PRINT_VALUE_ARRAY(field_i64_t, memfile, header, "%"
-                                PRIi64);
-                }
-                        break;
-                case FIELD_UINT8: {
-                        PRINT_VALUE_ARRAY(field_u8_t, memfile, header, "%d");
-                }
-                        break;
-                case FIELD_UINT16: {
-                        PRINT_VALUE_ARRAY(field_u16_t, memfile, header, "%d");
-                }
-                        break;
-                case FIELD_UINT32: {
-                        PRINT_VALUE_ARRAY(field_u32_t, memfile, header, "%d");
-                }
-                        break;
-                case FIELD_UINT64: {
-                        PRINT_VALUE_ARRAY(field_u64_t, memfile, header, "%"
-                                PRIu64);
-                }
-                        break;
-                case FIELD_FLOAT: {
-                        PRINT_VALUE_ARRAY(field_number_t, memfile, header, "%f");
-                }
-                        break;
-                case FIELD_STRING: {
-                        PRINT_VALUE_ARRAY(field_sid_t, memfile, header, "%"
-                                PRIu64
-                                "");
-                }
-                        break;
-                case FIELD_OBJECT: {
-                        u32 num_elements = *ARK_MEMFILE_READ_TYPE(memfile, u32);
-                        INTENT_LINE(nesting_level);
-                        fprintf(file, "   [num_elements: %d] [values: [\n", num_elements);
-                        for (size_t i = 0; i < num_elements; i++) {
-                                if (!print_object(file, err, memfile, nesting_level + 2)) {
-                                        return false;
-                                }
+                        case FIELD_NULL: {
+                                PRINT_VALUE_ARRAY(u32, memfile, header, "%d");
                         }
-                        INTENT_LINE(nesting_level);
-                        fprintf(file, "   ]\n");
-                }
-                        break;
-                default: error(err, ARK_ERR_NOTYPE)
-                        return false;
+                                break;
+                        case FIELD_BOOLEAN: {
+                                PRINT_VALUE_ARRAY(field_boolean_t, memfile, header, "%d");
+                        }
+                                break;
+                        case FIELD_INT8: {
+                                PRINT_VALUE_ARRAY(field_i8_t, memfile, header, "%d");
+                        }
+                                break;
+                        case FIELD_INT16: {
+                                PRINT_VALUE_ARRAY(field_i16_t, memfile, header, "%d");
+                        }
+                                break;
+                        case FIELD_INT32: {
+                                PRINT_VALUE_ARRAY(field_i32_t, memfile, header, "%d");
+                        }
+                                break;
+                        case FIELD_INT64: {
+                                PRINT_VALUE_ARRAY(field_i64_t, memfile, header, "%"
+                                        PRIi64);
+                        }
+                                break;
+                        case FIELD_UINT8: {
+                                PRINT_VALUE_ARRAY(field_u8_t, memfile, header, "%d");
+                        }
+                                break;
+                        case FIELD_UINT16: {
+                                PRINT_VALUE_ARRAY(field_u16_t, memfile, header, "%d");
+                        }
+                                break;
+                        case FIELD_UINT32: {
+                                PRINT_VALUE_ARRAY(field_u32_t, memfile, header, "%d");
+                        }
+                                break;
+                        case FIELD_UINT64: {
+                                PRINT_VALUE_ARRAY(field_u64_t, memfile, header, "%"
+                                        PRIu64);
+                        }
+                                break;
+                        case FIELD_FLOAT: {
+                                PRINT_VALUE_ARRAY(field_number_t, memfile, header, "%f");
+                        }
+                                break;
+                        case FIELD_STRING: {
+                                PRINT_VALUE_ARRAY(field_sid_t, memfile, header, "%"
+                                        PRIu64
+                                        "");
+                        }
+                                break;
+                        case FIELD_OBJECT: {
+                                u32 num_elements = *ARK_MEMFILE_READ_TYPE(memfile, u32);
+                                INTENT_LINE(nesting_level);
+                                fprintf(file, "   [num_elements: %d] [values: [\n", num_elements);
+                                for (size_t i = 0; i < num_elements; i++) {
+                                        if (!print_object(file, err, memfile, nesting_level + 2)) {
+                                                return false;
+                                        }
+                                }
+                                INTENT_LINE(nesting_level);
+                                fprintf(file, "   ]\n");
+                        }
+                                break;
+                        default: error(err, ARK_ERR_NOTYPE)
+                                return false;
                 }
         }
         return true;
 }
 
 static bool print_object_array_from_memfile(FILE *file, struct err *err, struct memfile *memfile,
-        unsigned nesting_level)
+                                            unsigned nesting_level)
 {
         unsigned offset = (unsigned) memfile_tell(memfile);
         struct object_array_header *header = ARK_MEMFILE_READ_TYPE(memfile, struct object_array_header);
@@ -1676,7 +1688,7 @@ static bool print_object_array_from_memfile(FILE *file, struct err *err, struct 
 }
 
 static void print_prop_offsets(FILE *file, const union object_flags *flags,
-        const struct archive_prop_offs *prop_offsets)
+                               const struct archive_prop_offs *prop_offsets)
 {
         if (flags->bits.has_null_props) {
                 fprintf(file, " nulls: 0x%04x", (unsigned) prop_offsets->nulls);
@@ -1793,339 +1805,353 @@ bool print_object(FILE *file, struct err *err, struct memfile *memfile, unsigned
                 char entryMarker = *ARK_MEMFILE_PEEK(memfile, char);
 
                 switch (entryMarker) {
-                case MARKER_SYMBOL_PROP_NULL: {
-                        struct prop_header *prop_header = ARK_MEMFILE_READ_TYPE(memfile, struct prop_header);
-                        field_sid_t *keys = (field_sid_t *) ARK_MEMFILE_READ(memfile,
-                                prop_header->num_entries * sizeof(field_sid_t));
-                        fprintf(file, "0x%04x ", offset);
-                        INTENT_LINE(nesting_level)
-                        fprintf(file, "[marker: %c (null)] [nentries: %d] [", entryMarker, prop_header->num_entries);
+                        case MARKER_SYMBOL_PROP_NULL: {
+                                struct prop_header *prop_header = ARK_MEMFILE_READ_TYPE(memfile, struct prop_header);
+                                field_sid_t *keys = (field_sid_t *) ARK_MEMFILE_READ(memfile,
+                                                                                     prop_header->num_entries *
+                                                                                     sizeof(field_sid_t));
+                                fprintf(file, "0x%04x ", offset);
+                                INTENT_LINE(nesting_level)
+                                fprintf(file, "[marker: %c (null)] [nentries: %d] [", entryMarker,
+                                        prop_header->num_entries);
 
-                        for (u32 i = 0; i < prop_header->num_entries; i++) {
-                                fprintf(file, "%"PRIu64"%s", keys[i], i + 1 < prop_header->num_entries ? ", " : "");
+                                for (u32 i = 0; i < prop_header->num_entries; i++) {
+                                        fprintf(file, "%"PRIu64"%s", keys[i],
+                                                i + 1 < prop_header->num_entries ? ", " : "");
+                                }
+                                fprintf(file, "]\n");
                         }
-                        fprintf(file, "]\n");
-                }
-                        break;
-                case MARKER_SYMBOL_PROP_BOOLEAN: {
-                        struct prop_header *prop_header = ARK_MEMFILE_READ_TYPE(memfile, struct prop_header);
-                        field_sid_t *keys = (field_sid_t *) ARK_MEMFILE_READ(memfile,
-                                prop_header->num_entries * sizeof(field_sid_t));
-                        field_boolean_t *values = (field_boolean_t *) ARK_MEMFILE_READ(memfile,
-                                prop_header->num_entries * sizeof(field_boolean_t));
-                        fprintf(file, "0x%04x ", offset);
-                        INTENT_LINE(nesting_level)
-                        fprintf(file, "[marker: %c (boolean)] [nentries: %d] [", entryMarker, prop_header->num_entries);
-                        for (u32 i = 0; i < prop_header->num_entries; i++) {
-                                fprintf(file, "%"PRIu64"%s", keys[i], i + 1 < prop_header->num_entries ? ", " : "");
+                                break;
+                        case MARKER_SYMBOL_PROP_BOOLEAN: {
+                                struct prop_header *prop_header = ARK_MEMFILE_READ_TYPE(memfile, struct prop_header);
+                                field_sid_t *keys = (field_sid_t *) ARK_MEMFILE_READ(memfile,
+                                                                                     prop_header->num_entries *
+                                                                                     sizeof(field_sid_t));
+                                field_boolean_t *values = (field_boolean_t *) ARK_MEMFILE_READ(memfile,
+                                                                                               prop_header->num_entries *
+                                                                                               sizeof(field_boolean_t));
+                                fprintf(file, "0x%04x ", offset);
+                                INTENT_LINE(nesting_level)
+                                fprintf(file, "[marker: %c (boolean)] [nentries: %d] [", entryMarker,
+                                        prop_header->num_entries);
+                                for (u32 i = 0; i < prop_header->num_entries; i++) {
+                                        fprintf(file, "%"PRIu64"%s", keys[i],
+                                                i + 1 < prop_header->num_entries ? ", " : "");
+                                }
+                                fprintf(file, "] [");
+                                for (u32 i = 0; i < prop_header->num_entries; i++) {
+                                        fprintf(file,
+                                                "%s%s",
+                                                values[i] ? "true" : "false",
+                                                i + 1 < prop_header->num_entries ? ", " : "");
+                                }
+                                fprintf(file, "]\n");
                         }
-                        fprintf(file, "] [");
-                        for (u32 i = 0; i < prop_header->num_entries; i++) {
-                                fprintf(file,
-                                        "%s%s",
-                                        values[i] ? "true" : "false",
-                                        i + 1 < prop_header->num_entries ? ", " : "");
-                        }
-                        fprintf(file, "]\n");
-                }
-                        break;
-                case MARKER_SYMBOL_PROP_INT8: PRINT_SIMPLE_PROPS(file,
-                        memfile,
-                        memfile_tell(memfile),
-                        nesting_level,
-                        field_i8_t,
-                        "Int8",
-                        "%d");
-                        break;
-                case MARKER_SYMBOL_PROP_INT16: PRINT_SIMPLE_PROPS(file,
-                        memfile,
-                        memfile_tell(memfile),
-                        nesting_level,
-                        field_i16_t,
-                        "Int16",
-                        "%d");
-                        break;
-                case MARKER_SYMBOL_PROP_INT32: PRINT_SIMPLE_PROPS(file,
-                        memfile,
-                        memfile_tell(memfile),
-                        nesting_level,
-                        field_i32_t,
-                        "Int32",
-                        "%d");
-                        break;
-                case MARKER_SYMBOL_PROP_INT64: PRINT_SIMPLE_PROPS(file,
-                        memfile,
-                        memfile_tell(memfile),
-                        nesting_level,
-                        field_i64_t,
-                        "Int64",
-                        "%"
-                        PRIi64);
-                        break;
-                case MARKER_SYMBOL_PROP_UINT8: PRINT_SIMPLE_PROPS(file,
-                        memfile,
-                        memfile_tell(memfile),
-                        nesting_level,
-                        field_u8_t,
-                        "UInt8",
-                        "%d");
-                        break;
-                case MARKER_SYMBOL_PROP_UINT16: PRINT_SIMPLE_PROPS(file,
-                        memfile,
-                        memfile_tell(memfile),
-                        nesting_level,
-                        field_u16_t,
-                        "UInt16",
-                        "%d");
-                        break;
-                case MARKER_SYMBOL_PROP_UINT32: PRINT_SIMPLE_PROPS(file,
-                        memfile,
-                        memfile_tell(memfile),
-                        nesting_level,
-                        field_u32_t,
-                        "UInt32",
-                        "%d");
-                        break;
-                case MARKER_SYMBOL_PROP_UINT64: PRINT_SIMPLE_PROPS(file,
-                        memfile,
-                        memfile_tell(memfile),
-                        nesting_level,
-                        field_u64_t,
-                        "UInt64",
-                        "%"
-                        PRIu64);
-                        break;
-                case MARKER_SYMBOL_PROP_REAL: PRINT_SIMPLE_PROPS(file,
-                        memfile,
-                        memfile_tell(memfile),
-                        nesting_level,
-                        field_number_t,
-                        "Float",
-                        "%f");
-                        break;
-                case MARKER_SYMBOL_PROP_TEXT: PRINT_SIMPLE_PROPS(file,
-                        memfile,
-                        memfile_tell(memfile),
-                        nesting_level,
-                        field_sid_t,
-                        "Text",
-                        "%"
-                        PRIu64
-                        "");
-                        break;
-                case MARKER_SYMBOL_PROP_OBJECT: {
-                        struct var_prop prop;
-                        int_embedded_var_props_read(&prop, memfile);
-                        fprintf(file, "0x%04x ", offset);
-                        INTENT_LINE(nesting_level)
-                        fprintf(file, "[marker: %c (Object)] [nentries: %d] [", entryMarker, prop.header->num_entries);
-                        for (u32 i = 0; i < prop.header->num_entries; i++) {
-                                fprintf(file,
-                                        "key: %"PRIu64"%s",
-                                        prop.keys[i],
-                                        i + 1 < prop.header->num_entries ? ", " : "");
-                        }
-                        fprintf(file, "] [");
-                        for (u32 i = 0; i < prop.header->num_entries; i++) {
-                                fprintf(file,
-                                        "offsets: 0x%04x%s",
-                                        (unsigned) prop.offsets[i],
-                                        i + 1 < prop.header->num_entries ? ", " : "");
-                        }
-                        fprintf(file, "] [\n");
+                                break;
+                        case MARKER_SYMBOL_PROP_INT8: PRINT_SIMPLE_PROPS(file,
+                                                                         memfile,
+                                                                         memfile_tell(memfile),
+                                                                         nesting_level,
+                                                                         field_i8_t,
+                                                                         "Int8",
+                                                                         "%d");
+                                break;
+                        case MARKER_SYMBOL_PROP_INT16: PRINT_SIMPLE_PROPS(file,
+                                                                          memfile,
+                                                                          memfile_tell(memfile),
+                                                                          nesting_level,
+                                                                          field_i16_t,
+                                                                          "Int16",
+                                                                          "%d");
+                                break;
+                        case MARKER_SYMBOL_PROP_INT32: PRINT_SIMPLE_PROPS(file,
+                                                                          memfile,
+                                                                          memfile_tell(memfile),
+                                                                          nesting_level,
+                                                                          field_i32_t,
+                                                                          "Int32",
+                                                                          "%d");
+                                break;
+                        case MARKER_SYMBOL_PROP_INT64: PRINT_SIMPLE_PROPS(file,
+                                                                          memfile,
+                                                                          memfile_tell(memfile),
+                                                                          nesting_level,
+                                                                          field_i64_t,
+                                                                          "Int64",
+                                                                          "%"
+                                                                                  PRIi64);
+                                break;
+                        case MARKER_SYMBOL_PROP_UINT8: PRINT_SIMPLE_PROPS(file,
+                                                                          memfile,
+                                                                          memfile_tell(memfile),
+                                                                          nesting_level,
+                                                                          field_u8_t,
+                                                                          "UInt8",
+                                                                          "%d");
+                                break;
+                        case MARKER_SYMBOL_PROP_UINT16: PRINT_SIMPLE_PROPS(file,
+                                                                           memfile,
+                                                                           memfile_tell(memfile),
+                                                                           nesting_level,
+                                                                           field_u16_t,
+                                                                           "UInt16",
+                                                                           "%d");
+                                break;
+                        case MARKER_SYMBOL_PROP_UINT32: PRINT_SIMPLE_PROPS(file,
+                                                                           memfile,
+                                                                           memfile_tell(memfile),
+                                                                           nesting_level,
+                                                                           field_u32_t,
+                                                                           "UInt32",
+                                                                           "%d");
+                                break;
+                        case MARKER_SYMBOL_PROP_UINT64: PRINT_SIMPLE_PROPS(file,
+                                                                           memfile,
+                                                                           memfile_tell(memfile),
+                                                                           nesting_level,
+                                                                           field_u64_t,
+                                                                           "UInt64",
+                                                                           "%"
+                                                                                   PRIu64);
+                                break;
+                        case MARKER_SYMBOL_PROP_REAL: PRINT_SIMPLE_PROPS(file,
+                                                                         memfile,
+                                                                         memfile_tell(memfile),
+                                                                         nesting_level,
+                                                                         field_number_t,
+                                                                         "Float",
+                                                                         "%f");
+                                break;
+                        case MARKER_SYMBOL_PROP_TEXT: PRINT_SIMPLE_PROPS(file,
+                                                                         memfile,
+                                                                         memfile_tell(memfile),
+                                                                         nesting_level,
+                                                                         field_sid_t,
+                                                                         "Text",
+                                                                         "%"
+                                                                                 PRIu64
+                                                                                 "");
+                                break;
+                        case MARKER_SYMBOL_PROP_OBJECT: {
+                                struct var_prop prop;
+                                int_embedded_var_props_read(&prop, memfile);
+                                fprintf(file, "0x%04x ", offset);
+                                INTENT_LINE(nesting_level)
+                                fprintf(file, "[marker: %c (Object)] [nentries: %d] [", entryMarker,
+                                        prop.header->num_entries);
+                                for (u32 i = 0; i < prop.header->num_entries; i++) {
+                                        fprintf(file,
+                                                "key: %"PRIu64"%s",
+                                                prop.keys[i],
+                                                i + 1 < prop.header->num_entries ? ", " : "");
+                                }
+                                fprintf(file, "] [");
+                                for (u32 i = 0; i < prop.header->num_entries; i++) {
+                                        fprintf(file,
+                                                "offsets: 0x%04x%s",
+                                                (unsigned) prop.offsets[i],
+                                                i + 1 < prop.header->num_entries ? ", " : "");
+                                }
+                                fprintf(file, "] [\n");
 
-                        char nextEntryMarker;
-                        do {
-                                if (!print_object(file, err, memfile, nesting_level + 1)) {
+                                char nextEntryMarker;
+                                do {
+                                        if (!print_object(file, err, memfile, nesting_level + 1)) {
+                                                return false;
+                                        }
+                                        nextEntryMarker = *ARK_MEMFILE_PEEK(memfile, char);
+                                } while (nextEntryMarker == MARKER_SYMBOL_OBJECT_BEGIN);
+
+                        }
+                                break;
+                        case MARKER_SYMBOL_PROP_NULL_ARRAY: {
+                                struct prop_header *prop_header = ARK_MEMFILE_READ_TYPE(memfile, struct prop_header);
+
+                                field_sid_t *keys = (field_sid_t *) ARK_MEMFILE_READ(memfile,
+                                                                                     prop_header->num_entries *
+                                                                                     sizeof(field_sid_t));
+                                u32 *nullArrayLengths;
+
+                                fprintf(file, "0x%04x ", offset);
+                                INTENT_LINE(nesting_level)
+                                fprintf(file,
+                                        "[marker: %c (Null Array)] [nentries: %d] [",
+                                        entryMarker,
+                                        prop_header->num_entries);
+
+                                for (u32 i = 0; i < prop_header->num_entries; i++) {
+                                        fprintf(file, "%"PRIu64"%s", keys[i],
+                                                i + 1 < prop_header->num_entries ? ", " : "");
+                                }
+                                fprintf(file, "] [");
+
+                                nullArrayLengths = (u32 *) ARK_MEMFILE_READ(memfile,
+                                                                            prop_header->num_entries * sizeof(u32));
+
+                                for (u32 i = 0; i < prop_header->num_entries; i++) {
+                                        fprintf(file,
+                                                "nentries: %d%s",
+                                                nullArrayLengths[i],
+                                                i + 1 < prop_header->num_entries ? ", " : "");
+                                }
+
+                                fprintf(file, "]\n");
+                        }
+                                break;
+                        case MARKER_SYMBOL_PROP_BOOLEAN_ARRAY: {
+                                struct prop_header *prop_header = ARK_MEMFILE_READ_TYPE(memfile, struct prop_header);
+
+                                field_sid_t *keys = (field_sid_t *) ARK_MEMFILE_READ(memfile,
+                                                                                     prop_header->num_entries *
+                                                                                     sizeof(field_sid_t));
+                                u32 *array_lengths;
+
+                                fprintf(file, "0x%04x ", offset);
+                                INTENT_LINE(nesting_level)
+                                fprintf(file,
+                                        "[marker: %c (Boolean Array)] [nentries: %d] [",
+                                        entryMarker,
+                                        prop_header->num_entries);
+
+                                for (u32 i = 0; i < prop_header->num_entries; i++) {
+                                        fprintf(file, "%"PRIu64"%s", keys[i],
+                                                i + 1 < prop_header->num_entries ? ", " : "");
+                                }
+                                fprintf(file, "] [");
+
+                                array_lengths = (u32 *) ARK_MEMFILE_READ(memfile,
+                                                                         prop_header->num_entries * sizeof(u32));
+
+                                for (u32 i = 0; i < prop_header->num_entries; i++) {
+                                        fprintf(file,
+                                                "arrayLength: %d%s",
+                                                array_lengths[i],
+                                                i + 1 < prop_header->num_entries ? ", " : "");
+                                }
+
+                                fprintf(file, "] [");
+
+                                for (u32 array_idx = 0; array_idx < prop_header->num_entries; array_idx++) {
+                                        field_boolean_t *values = (field_boolean_t *) ARK_MEMFILE_READ(memfile,
+                                                                                                       array_lengths[array_idx] *
+                                                                                                       sizeof(field_boolean_t));
+                                        fprintf(file, "[");
+                                        for (u32 i = 0; i < array_lengths[array_idx]; i++) {
+                                                fprintf(file,
+                                                        "value: %s%s",
+                                                        values[i] ? "true" : "false",
+                                                        i + 1 < array_lengths[array_idx] ? ", " : "");
+                                        }
+                                        fprintf(file, "]%s", array_idx + 1 < prop_header->num_entries ? ", " : "");
+                                }
+
+                                fprintf(file, "]\n");
+                        }
+                                break;
+                                break;
+                        case MARKER_SYMBOL_PROP_INT8_ARRAY: {
+                                PRINT_ARRAY_PROPS(memfile,
+                                                  memfile_tell(memfile),
+                                                  nesting_level,
+                                                  entryMarker,
+                                                  field_i8_t,
+                                                  "Int8 Array",
+                                                  "%d");
+                        }
+                                break;
+                        case MARKER_SYMBOL_PROP_INT16_ARRAY: PRINT_ARRAY_PROPS(memfile,
+                                                                               memfile_tell(memfile),
+                                                                               nesting_level,
+                                                                               entryMarker,
+                                                                               field_i16_t,
+                                                                               "Int16 Array",
+                                                                               "%d");
+                                break;
+                        case MARKER_SYMBOL_PROP_INT32_ARRAY: PRINT_ARRAY_PROPS(memfile,
+                                                                               memfile_tell(memfile),
+                                                                               nesting_level,
+                                                                               entryMarker,
+                                                                               field_i32_t,
+                                                                               "Int32 Array",
+                                                                               "%d");
+                                break;
+                        case MARKER_SYMBOL_PROP_INT64_ARRAY: PRINT_ARRAY_PROPS(memfile,
+                                                                               memfile_tell(memfile),
+                                                                               nesting_level,
+                                                                               entryMarker,
+                                                                               field_i64_t,
+                                                                               "Int64 Array",
+                                                                               "%"
+                                                                                       PRIi64);
+                                break;
+                        case MARKER_SYMBOL_PROP_UINT8_ARRAY: PRINT_ARRAY_PROPS(memfile,
+                                                                               memfile_tell(memfile),
+                                                                               nesting_level,
+                                                                               entryMarker,
+                                                                               field_u8_t,
+                                                                               "UInt8 Array",
+                                                                               "%d");
+                                break;
+                        case MARKER_SYMBOL_PROP_UINT16_ARRAY: PRINT_ARRAY_PROPS(memfile,
+                                                                                memfile_tell(memfile),
+                                                                                nesting_level,
+                                                                                entryMarker,
+                                                                                field_u16_t,
+                                                                                "UInt16 Array",
+                                                                                "%d");
+                                break;
+                        case MARKER_SYMBOL_PROP_UINT32_ARRAY: PRINT_ARRAY_PROPS(memfile,
+                                                                                memfile_tell(memfile),
+                                                                                nesting_level,
+                                                                                entryMarker,
+                                                                                field_u32_t,
+                                                                                "UInt32 Array",
+                                                                                "%d");
+                                break;
+                        case MARKER_SYMBOL_PROP_UINT64_ARRAY: PRINT_ARRAY_PROPS(memfile,
+                                                                                memfile_tell(memfile),
+                                                                                nesting_level,
+                                                                                entryMarker,
+                                                                                field_u64_t,
+                                                                                "UInt64 Array",
+                                                                                "%"
+                                                                                        PRIu64);
+                                break;
+                        case MARKER_SYMBOL_PROP_REAL_ARRAY: PRINT_ARRAY_PROPS(memfile,
+                                                                              memfile_tell(memfile),
+                                                                              nesting_level,
+                                                                              entryMarker,
+                                                                              field_number_t,
+                                                                              "Float Array",
+                                                                              "%f");
+                                break;
+                        case MARKER_SYMBOL_PROP_TEXT_ARRAY: PRINT_ARRAY_PROPS(memfile,
+                                                                              memfile_tell(memfile),
+                                                                              nesting_level,
+                                                                              entryMarker,
+                                                                              field_sid_t,
+                                                                              "Text Array",
+                                                                              "%"
+                                                                                      PRIu64
+                                                                                      "");
+                                break;
+                        case MARKER_SYMBOL_PROP_OBJECT_ARRAY:
+                                if (!print_object_array_from_memfile(file, err, memfile, nesting_level)) {
                                         return false;
                                 }
-                                nextEntryMarker = *ARK_MEMFILE_PEEK(memfile, char);
-                        }
-                        while (nextEntryMarker == MARKER_SYMBOL_OBJECT_BEGIN);
-
-                }
-                        break;
-                case MARKER_SYMBOL_PROP_NULL_ARRAY: {
-                        struct prop_header *prop_header = ARK_MEMFILE_READ_TYPE(memfile, struct prop_header);
-
-                        field_sid_t *keys = (field_sid_t *) ARK_MEMFILE_READ(memfile,
-                                prop_header->num_entries * sizeof(field_sid_t));
-                        u32 *nullArrayLengths;
-
-                        fprintf(file, "0x%04x ", offset);
-                        INTENT_LINE(nesting_level)
-                        fprintf(file,
-                                "[marker: %c (Null Array)] [nentries: %d] [",
-                                entryMarker,
-                                prop_header->num_entries);
-
-                        for (u32 i = 0; i < prop_header->num_entries; i++) {
-                                fprintf(file, "%"PRIu64"%s", keys[i], i + 1 < prop_header->num_entries ? ", " : "");
-                        }
-                        fprintf(file, "] [");
-
-                        nullArrayLengths = (u32 *) ARK_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(u32));
-
-                        for (u32 i = 0; i < prop_header->num_entries; i++) {
-                                fprintf(file,
-                                        "nentries: %d%s",
-                                        nullArrayLengths[i],
-                                        i + 1 < prop_header->num_entries ? ", " : "");
-                        }
-
-                        fprintf(file, "]\n");
-                }
-                        break;
-                case MARKER_SYMBOL_PROP_BOOLEAN_ARRAY: {
-                        struct prop_header *prop_header = ARK_MEMFILE_READ_TYPE(memfile, struct prop_header);
-
-                        field_sid_t *keys = (field_sid_t *) ARK_MEMFILE_READ(memfile,
-                                prop_header->num_entries * sizeof(field_sid_t));
-                        u32 *array_lengths;
-
-                        fprintf(file, "0x%04x ", offset);
-                        INTENT_LINE(nesting_level)
-                        fprintf(file,
-                                "[marker: %c (Boolean Array)] [nentries: %d] [",
-                                entryMarker,
-                                prop_header->num_entries);
-
-                        for (u32 i = 0; i < prop_header->num_entries; i++) {
-                                fprintf(file, "%"PRIu64"%s", keys[i], i + 1 < prop_header->num_entries ? ", " : "");
-                        }
-                        fprintf(file, "] [");
-
-                        array_lengths = (u32 *) ARK_MEMFILE_READ(memfile, prop_header->num_entries * sizeof(u32));
-
-                        for (u32 i = 0; i < prop_header->num_entries; i++) {
-                                fprintf(file,
-                                        "arrayLength: %d%s",
-                                        array_lengths[i],
-                                        i + 1 < prop_header->num_entries ? ", " : "");
-                        }
-
-                        fprintf(file, "] [");
-
-                        for (u32 array_idx = 0; array_idx < prop_header->num_entries; array_idx++) {
-                                field_boolean_t *values = (field_boolean_t *) ARK_MEMFILE_READ(memfile,
-                                        array_lengths[array_idx] * sizeof(field_boolean_t));
-                                fprintf(file, "[");
-                                for (u32 i = 0; i < array_lengths[array_idx]; i++) {
-                                        fprintf(file,
-                                                "value: %s%s",
-                                                values[i] ? "true" : "false",
-                                                i + 1 < array_lengths[array_idx] ? ", " : "");
-                                }
-                                fprintf(file, "]%s", array_idx + 1 < prop_header->num_entries ? ", " : "");
-                        }
-
-                        fprintf(file, "]\n");
-                }
-                        break;
-                        break;
-                case MARKER_SYMBOL_PROP_INT8_ARRAY: {
-                        PRINT_ARRAY_PROPS(memfile,
-                                memfile_tell(memfile),
-                                nesting_level,
-                                entryMarker,
-                                field_i8_t,
-                                "Int8 Array",
-                                "%d");
-                }
-                        break;
-                case MARKER_SYMBOL_PROP_INT16_ARRAY: PRINT_ARRAY_PROPS(memfile,
-                        memfile_tell(memfile),
-                        nesting_level,
-                        entryMarker,
-                        field_i16_t,
-                        "Int16 Array",
-                        "%d");
-                        break;
-                case MARKER_SYMBOL_PROP_INT32_ARRAY: PRINT_ARRAY_PROPS(memfile,
-                        memfile_tell(memfile),
-                        nesting_level,
-                        entryMarker,
-                        field_i32_t,
-                        "Int32 Array",
-                        "%d");
-                        break;
-                case MARKER_SYMBOL_PROP_INT64_ARRAY: PRINT_ARRAY_PROPS(memfile,
-                        memfile_tell(memfile),
-                        nesting_level,
-                        entryMarker,
-                        field_i64_t,
-                        "Int64 Array",
-                        "%"
-                        PRIi64);
-                        break;
-                case MARKER_SYMBOL_PROP_UINT8_ARRAY: PRINT_ARRAY_PROPS(memfile,
-                        memfile_tell(memfile),
-                        nesting_level,
-                        entryMarker,
-                        field_u8_t,
-                        "UInt8 Array",
-                        "%d");
-                        break;
-                case MARKER_SYMBOL_PROP_UINT16_ARRAY: PRINT_ARRAY_PROPS(memfile,
-                        memfile_tell(memfile),
-                        nesting_level,
-                        entryMarker,
-                        field_u16_t,
-                        "UInt16 Array",
-                        "%d");
-                        break;
-                case MARKER_SYMBOL_PROP_UINT32_ARRAY: PRINT_ARRAY_PROPS(memfile,
-                        memfile_tell(memfile),
-                        nesting_level,
-                        entryMarker,
-                        field_u32_t,
-                        "UInt32 Array",
-                        "%d");
-                        break;
-                case MARKER_SYMBOL_PROP_UINT64_ARRAY: PRINT_ARRAY_PROPS(memfile,
-                        memfile_tell(memfile),
-                        nesting_level,
-                        entryMarker,
-                        field_u64_t,
-                        "UInt64 Array",
-                        "%"
-                        PRIu64);
-                        break;
-                case MARKER_SYMBOL_PROP_REAL_ARRAY: PRINT_ARRAY_PROPS(memfile,
-                        memfile_tell(memfile),
-                        nesting_level,
-                        entryMarker,
-                        field_number_t,
-                        "Float Array",
-                        "%f");
-                        break;
-                case MARKER_SYMBOL_PROP_TEXT_ARRAY: PRINT_ARRAY_PROPS(memfile,
-                        memfile_tell(memfile),
-                        nesting_level,
-                        entryMarker,
-                        field_sid_t,
-                        "Text Array",
-                        "%"
-                        PRIu64
-                        "");
-                        break;
-                case MARKER_SYMBOL_PROP_OBJECT_ARRAY:
-                        if (!print_object_array_from_memfile(file, err, memfile, nesting_level)) {
+                                break;
+                        case MARKER_SYMBOL_OBJECT_END:
+                                continue_read = false;
+                                break;
+                        default: {
+                                char buffer[256];
+                                sprintf(buffer,
+                                        "Parsing error: unexpected marker [%c] was detected in file %p",
+                                        entryMarker,
+                                        memfile);
+                                error_with_details(err, ARK_ERR_CORRUPTED, buffer);
                                 return false;
                         }
-                        break;
-                case MARKER_SYMBOL_OBJECT_END:
-                        continue_read = false;
-                        break;
-                default: {
-                        char buffer[256];
-                        sprintf(buffer,
-                                "Parsing error: unexpected marker [%c] was detected in file %p",
-                                entryMarker,
-                                memfile);
-                        error_with_details(err, ARK_ERR_CORRUPTED, buffer);
-                        return false;
-                }
                 }
         }
 
@@ -2301,10 +2327,10 @@ static bool init_decompressor(struct packer *strategy, u8 flags);
 static bool read_stringtable(struct string_table *table, struct err *err, FILE *disk_file);
 
 static bool read_record(struct record_header *header_read, struct archive *archive, FILE *disk_file,
-        offset_t record_header_offset);
+                        offset_t record_header_offset);
 
 static bool read_string_id_to_offset_index(struct err *err, struct archive *archive, const char *file_path,
-        offset_t string_id_to_offset_index_offset);
+                                           offset_t string_id_to_offset_index_offset);
 
 bool archive_open(struct archive *out, const char *file_path)
 {
@@ -2315,17 +2341,17 @@ bool archive_open(struct archive *out, const char *file_path)
         out->diskFilePath = strdup(file_path);
         disk_file = fopen(out->diskFilePath, "r");
         if (!disk_file) {
-                struct string_builder sb;
+                struct string sb;
                 char cwd[PATH_MAX];
-                string_builder_create(&sb);
+                string_create(&sb);
 
-                string_builder_append(&sb, "File '");
-                string_builder_append(&sb, file_path);
-                string_builder_append(&sb, "' not found in current working directory ('");
-                string_builder_append(&sb, getcwd(cwd, sizeof(cwd)));
-                string_builder_append(&sb, "')");
-                error_with_details(&out->err, ARK_ERR_FOPEN_FAILED, string_builder_cstr(&sb));
-                string_builder_drop(&sb);
+                string_add(&sb, "File '");
+                string_add(&sb, file_path);
+                string_add(&sb, "' not found in current working directory ('");
+                string_add(&sb, getcwd(cwd, sizeof(cwd)));
+                string_add(&sb, "')");
+                error_with_details(&out->err, ARK_ERR_FOPEN_FAILED, string_cstr(&sb));
+                string_drop(&sb);
                 return false;
         } else {
                 struct archive_header header;
@@ -2348,18 +2374,19 @@ bool archive_open(struct archive *out, const char *file_path)
                                         return status;
                                 }
                                 if ((status = read_record(&record_header,
-                                        out,
-                                        disk_file,
-                                        header.root_object_header_offset)) != true) {
+                                                          out,
+                                                          disk_file,
+                                                          header.root_object_header_offset)) != true) {
                                         return status;
                                 }
 
                                 if (header.string_id_to_offset_index_offset != 0) {
                                         struct err err;
                                         if ((status = read_string_id_to_offset_index(&err,
-                                                out,
-                                                file_path,
-                                                header.string_id_to_offset_index_offset)) != true) {
+                                                                                     out,
+                                                                                     file_path,
+                                                                                     header.string_id_to_offset_index_offset)) !=
+                                            true) {
                                                 error_print(err.code);
                                                 return status;
                                         }
@@ -2391,7 +2418,7 @@ bool archive_open(struct archive *out, const char *file_path)
         return true;
 }
 
-ARK_EXPORT(bool) archive_get_info(struct archive_info *info, const struct archive *archive)
+bool archive_get_info(struct archive_info *info, const struct archive *archive)
 {
         error_if_null(info);
         error_if_null(archive);
@@ -2399,7 +2426,7 @@ ARK_EXPORT(bool) archive_get_info(struct archive_info *info, const struct archiv
         return true;
 }
 
-ARK_EXPORT(bool) archive_close(struct archive *archive)
+bool archive_close(struct archive *archive)
 {
         error_if_null(archive);
         archive_drop_indexes(archive);
@@ -2411,7 +2438,7 @@ ARK_EXPORT(bool) archive_close(struct archive *archive)
         return true;
 }
 
-ARK_EXPORT(bool) archive_drop_indexes(struct archive *archive)
+bool archive_drop_indexes(struct archive *archive)
 {
         if (archive->query_index_string_id_to_offset) {
                 query_drop_index_string_id_to_offset(archive->query_index_string_id_to_offset);
@@ -2420,7 +2447,7 @@ ARK_EXPORT(bool) archive_drop_indexes(struct archive *archive)
         return true;
 }
 
-ARK_EXPORT(bool) archive_query(struct archive_query *query, struct archive *archive)
+bool archive_query(struct archive_query *query, struct archive *archive)
 {
         if (query_create(query, archive)) {
                 bool has_index = false;
@@ -2439,7 +2466,7 @@ ARK_EXPORT(bool) archive_query(struct archive_query *query, struct archive *arch
         }
 }
 
-ARK_EXPORT(bool) archive_has_query_index_string_id_to_offset(bool *state, struct archive *archive)
+bool archive_has_query_index_string_id_to_offset(bool *state, struct archive *archive)
 {
         error_if_null(state)
         error_if_null(archive)
@@ -2447,7 +2474,7 @@ ARK_EXPORT(bool) archive_has_query_index_string_id_to_offset(bool *state, struct
         return true;
 }
 
-ARK_EXPORT(bool) archive_hash_query_string_id_cache(bool *has_cache, struct archive *archive)
+bool archive_hash_query_string_id_cache(bool *has_cache, struct archive *archive)
 {
         error_if_null(has_cache)
         error_if_null(archive)
@@ -2455,7 +2482,7 @@ ARK_EXPORT(bool) archive_hash_query_string_id_cache(bool *has_cache, struct arch
         return true;
 }
 
-ARK_EXPORT(bool) archive_drop_query_string_id_cache(struct archive *archive)
+bool archive_drop_query_string_id_cache(struct archive *archive)
 {
         error_if_null(archive)
         if (archive->string_id_cache) {
@@ -2465,12 +2492,12 @@ ARK_EXPORT(bool) archive_drop_query_string_id_cache(struct archive *archive)
         return true;
 }
 
-ARK_EXPORT(struct string_cache *)archive_get_query_string_id_cache(struct archive *archive)
+struct string_cache *archive_get_query_string_id_cache(struct archive *archive)
 {
         return archive->string_id_cache;
 }
 
-ARK_EXPORT(struct archive_query *)archive_query_default(struct archive *archive)
+struct archive_query *archive_query_default(struct archive *archive)
 {
         return archive ? archive->default_query : NULL;
 }
@@ -2514,7 +2541,7 @@ static bool read_stringtable(struct string_table *table, struct err *err, FILE *
 }
 
 static bool read_record(struct record_header *header_read, struct archive *archive, FILE *disk_file,
-        offset_t record_header_offset)
+                        offset_t record_header_offset)
 {
         struct err err;
         fseek(disk_file, record_header_offset, SEEK_SET);
@@ -2547,12 +2574,12 @@ static bool read_record(struct record_header *header_read, struct archive *archi
 }
 
 static bool read_string_id_to_offset_index(struct err *err, struct archive *archive, const char *file_path,
-        offset_t string_id_to_offset_index_offset)
+                                           offset_t string_id_to_offset_index_offset)
 {
         return query_index_id_to_offset_deserialize(&archive->query_index_string_id_to_offset,
-                err,
-                file_path,
-                string_id_to_offset_index_offset);
+                                                    err,
+                                                    file_path,
+                                                    string_id_to_offset_index_offset);
 }
 
 

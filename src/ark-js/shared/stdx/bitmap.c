@@ -17,7 +17,7 @@
 
 #include <ark-js/shared/stdx/bitmap.h>
 
-ARK_EXPORT(bool) bitmap_create(struct bitmap *bitmap, u16 num_bits)
+bool bitmap_create(struct bitmap *bitmap, u16 num_bits)
 {
         error_if_null(bitmap);
 
@@ -32,13 +32,13 @@ ARK_EXPORT(bool) bitmap_create(struct bitmap *bitmap, u16 num_bits)
         return true;
 }
 
-ARK_EXPORT(bool) bitmap_cpy(struct bitmap *dst, const struct bitmap *src)
+bool bitmap_cpy(struct bitmap *dst, const struct bitmap *src)
 {
         dst->num_bits = src->num_bits;
         return vec_cpy(&dst->data, &src->data);
 }
 
-ARK_EXPORT(bool) bitmap_drop(struct bitmap *bitset)
+bool bitmap_drop(struct bitmap *bitset)
 {
         return vec_drop(&bitset->data);
 }
@@ -49,7 +49,7 @@ size_t bitmap_nbits(const struct bitmap *bitset)
         return bitset->num_bits;
 }
 
-ARK_EXPORT(bool) bitmap_clear(struct bitmap *bitset)
+bool bitmap_clear(struct bitmap *bitset)
 {
         error_if_null(bitset);
         void *data = (void *) vec_data(&bitset->data);
@@ -57,7 +57,7 @@ ARK_EXPORT(bool) bitmap_clear(struct bitmap *bitset)
         return true;
 }
 
-ARK_EXPORT(bool) bitmap_set(struct bitmap *bitset, u16 bit_position, bool on)
+bool bitmap_set(struct bitmap *bitset, u16 bit_position, bool on)
 {
         error_if_null(bitset)
         size_t block_pos = floor(bit_position / (double) ark_bit_num_of(u32));
@@ -83,7 +83,7 @@ bool bitmap_get(struct bitmap *bitset, u16 bit_position)
         return ((mask & block) >> bit_position) == true;
 }
 
-ARK_EXPORT(bool) bitmap_lshift(struct bitmap *map)
+bool bitmap_lshift(struct bitmap *map)
 {
         error_if_null(map)
         for (int i = map->num_bits - 1; i >= 0; i--) {

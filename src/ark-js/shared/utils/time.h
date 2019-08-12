@@ -25,7 +25,7 @@ ARK_BEGIN_DECL
 
 typedef u64 timestamp_t;
 
-ARK_EXPORT(timestamp_t) time_now_wallclock();
+timestamp_t time_now_wallclock();
 
 ARK_END_DECL
 

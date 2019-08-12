@@ -20,7 +20,7 @@
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/async/thread-pool.h>
 
-ARK_EXPORT(struct thread_pool_stats) thread_pool_get_stats(struct thread_pool *pool)
+struct thread_pool_stats thread_pool_get_stats(struct thread_pool *pool)
 {
         // In case no tasks care completed, no averages can be calculated
         if (pool->statistics->task_complete_count) {
@@ -31,7 +31,7 @@ ARK_EXPORT(struct thread_pool_stats) thread_pool_get_stats(struct thread_pool *p
         return *pool->statistics;
 }
 
-ARK_EXPORT(struct thread_stats) thread_pool_get_thread_stats(struct thread_pool *pool, size_t id)
+struct thread_stats thread_pool_get_thread_stats(struct thread_pool *pool, size_t id)
 {
         struct thread_stats *thread_stats = pool->thread_infos[id]->statistics;
 
@@ -42,7 +42,7 @@ ARK_EXPORT(struct thread_stats) thread_pool_get_thread_stats(struct thread_pool 
         return *thread_stats;
 }
 
-ARK_EXPORT(double) thread_pool_get_time_working(struct thread_pool *pool)
+double thread_pool_get_time_working(struct thread_pool *pool)
 {
         struct timespec end;
 

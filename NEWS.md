@@ -1,4 +1,7 @@
-## 0.3.00.01 [2019-XX-XX]
+## 0.5.00.01 [2019-XX-XX]
+- JSON parser for carbon files (see `carbon_from_json` in `carbon.h`)
+
+## 0.3.00.01 [2019-08-09]
 - Add thread pool implementation (`struct thread_pool`)
 
 ## 0.3.00.00 [2019-04-11]
