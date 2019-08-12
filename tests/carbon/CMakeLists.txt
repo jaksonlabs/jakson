@@ -35,6 +35,9 @@ target_link_libraries(test-carbon gtest ${TEST_LIBS})
 add_executable(test-mime test-mime.cpp ${LIB_SOURCES})
 target_link_libraries(test-mime gtest ${TEST_LIBS})
 
+add_executable(test-json test-json.cpp ${LIB_SOURCES})
+target_link_libraries(test-json gtest ${TEST_LIBS})
+
 ADD_DEPENDENCIES(tests test-object-ids)
 ADD_DEPENDENCIES(tests test-archive-ops)
 ADD_DEPENDENCIES(tests test-fix-map)
@@ -43,6 +46,7 @@ ADD_DEPENDENCIES(tests test-archive-converter)
 ADD_DEPENDENCIES(tests test-varuint)
 ADD_DEPENDENCIES(tests test-carbon)
 ADD_DEPENDENCIES(tests test-mime)
+ADD_DEPENDENCIES(tests test-json)
 
 add_test(TestObjectIds  ${CMAKE_HOME_DIRECTORY}/build/test-object-ids)
 add_test(TestArchiveOps ${CMAKE_HOME_DIRECTORY}/build/test-archive-ops)
@@ -52,3 +56,4 @@ add_test(TestArchiveConverter ${CMAKE_HOME_DIRECTORY}/build/test-archive-convert
 add_test(TestVariableLengthUnsigned ${CMAKE_HOME_DIRECTORY}/build/test-varuint)
 add_test(TestCarbonFiles ${CMAKE_HOME_DIRECTORY}/build/test-carbon)
 add_test(TestMimeTypeEncoding ${CMAKE_HOME_DIRECTORY}/build/test-mime)
+add_test(TestJson ${CMAKE_HOME_DIRECTORY}/build/test-json)

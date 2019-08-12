@@ -17,7 +17,7 @@
 
 #include <ark-js/shared/error.h>
 
-ARK_EXPORT(bool) error_init(struct err *err)
+bool error_init(struct err *err)
 {
         if (err) {
                 err->code = ARK_ERR_NOERR;
@@ -28,7 +28,7 @@ ARK_EXPORT(bool) error_init(struct err *err)
         return (err != NULL);
 }
 
-ARK_EXPORT(bool) error_cpy(struct err *dst, const struct err *src)
+bool error_cpy(struct err *dst, const struct err *src)
 {
         error_if_null(dst);
         error_if_null(src);
@@ -36,7 +36,7 @@ ARK_EXPORT(bool) error_cpy(struct err *dst, const struct err *src)
         return true;
 }
 
-ARK_EXPORT(bool) error_drop(struct err *err)
+bool error_drop(struct err *err)
 {
         error_if_null(err);
         if (err->details) {
@@ -46,12 +46,12 @@ ARK_EXPORT(bool) error_drop(struct err *err)
         return true;
 }
 
-ARK_EXPORT(bool) error_set(struct err *err, int code, const char *file, u32 line)
+bool error_set(struct err *err, int code, const char *file, u32 line)
 {
         return error_set_wdetails(err, code, file, line, NULL);
 }
 
-ARK_EXPORT(bool) error_set_wdetails(struct err *err, int code, const char *file, u32 line, const char *details)
+bool error_set_wdetails(struct err *err, int code, const char *file, u32 line, const char *details)
 {
         if (err) {
                 err->code = code;
@@ -65,12 +65,12 @@ ARK_EXPORT(bool) error_set_wdetails(struct err *err, int code, const char *file,
         return (err != NULL);
 }
 
-ARK_EXPORT(bool) error_set_no_abort(struct err *err, int code, const char *file, u32 line)
+bool error_set_no_abort(struct err *err, int code, const char *file, u32 line)
 {
         return error_set_wdetails_no_abort(err, code, file, line, NULL);
 }
 
-ARK_EXPORT(bool) error_set_wdetails_no_abort(struct err *err, int code, const char *file, u32 line, const char *details)
+bool error_set_wdetails_no_abort(struct err *err, int code, const char *file, u32 line, const char *details)
 {
         if (err) {
                 err->code = code;
@@ -84,8 +84,8 @@ ARK_EXPORT(bool) error_set_wdetails_no_abort(struct err *err, int code, const ch
         return (err != NULL);
 }
 
-ARK_EXPORT(bool) error_str(const char **errstr, const char **file, u32 *line, bool *details, const char **detailsstr,
-        const struct err *err)
+bool error_str(const char **errstr, const char **file, u32 *line, bool *details, const char **detailsstr,
+               const struct err *err)
 {
         if (err) {
                 if (err->code >= _nerr_str) {
@@ -102,7 +102,7 @@ ARK_EXPORT(bool) error_str(const char **errstr, const char **file, u32 *line, bo
         return false;
 }
 
-ARK_EXPORT(bool) error_print_to_stderr(const struct err *err)
+bool error_print_to_stderr(const struct err *err)
 {
         if (err) {
                 const char *errstr;
@@ -122,7 +122,7 @@ ARK_EXPORT(bool) error_print_to_stderr(const struct err *err)
         return (err != NULL);
 }
 
-ARK_EXPORT(bool) error_print_and_abort(const struct err *err)
+bool error_print_and_abort(const struct err *err)
 {
         error_print_to_stderr(err);
         abort();

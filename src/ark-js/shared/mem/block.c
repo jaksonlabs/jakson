@@ -18,10 +18,10 @@
 #include <ark-js/shared/mem/block.h>
 
 struct memblock {
-        offset_t blockLength;
-        offset_t last_byte;
-        void *base;
-        struct err err;
+    offset_t blockLength;
+    offset_t last_byte;
+    void *base;
+    struct err err;
 };
 
 bool memblock_create(struct memblock **block, size_t size)
@@ -39,7 +39,7 @@ bool memblock_create(struct memblock **block, size_t size)
         return true;
 }
 
-ARK_EXPORT(bool) memblock_zero_out(struct memblock *block)
+bool memblock_zero_out(struct memblock *block)
 {
         error_if_null(block);
         ark_zero_memory(block->base, block->blockLength);
@@ -61,7 +61,7 @@ bool memblock_drop(struct memblock *block)
         return true;
 }
 
-ARK_EXPORT(bool) memblock_get_error(struct err *out, struct memblock *block)
+bool memblock_get_error(struct err *out, struct memblock *block)
 {
         error_if_null(block);
         error_if_null(out);
@@ -75,7 +75,7 @@ bool memblock_size(offset_t *size, const struct memblock *block)
         return true;
 }
 
-ARK_EXPORT(offset_t) memblock_last_used_byte(const struct memblock *block)
+offset_t memblock_last_used_byte(const struct memblock *block)
 {
         return block ? block->last_byte : 0;
 }
@@ -91,7 +91,7 @@ const char *memblock_raw_data(const struct memblock *block)
         return (block && block->base ? block->base : NULL);
 }
 
-ARK_EXPORT(bool) memblock_resize(struct memblock *block, size_t size)
+bool memblock_resize(struct memblock *block, size_t size)
 {
         error_if_null(block)
         error_print_if(size == 0, ARK_ERR_ILLEGALARG)
@@ -137,12 +137,12 @@ bool memblock_shrink(struct memblock *block)
         return true;
 }
 
-ARK_EXPORT(bool) memblock_move_right(struct memblock *block, offset_t where, size_t nbytes)
+bool memblock_move_right(struct memblock *block, offset_t where, size_t nbytes)
 {
         return memblock_move_ex(block, where, nbytes, true);
 }
 
-ARK_EXPORT(bool) memblock_move_left(struct memblock *block, offset_t where, size_t nbytes)
+bool memblock_move_left(struct memblock *block, offset_t where, size_t nbytes)
 {
         error_if_null(block)
         error_if(where + nbytes >= block->blockLength, &block->err, ARK_ERR_OUTOFBOUNDS)
@@ -158,7 +158,7 @@ ARK_EXPORT(bool) memblock_move_left(struct memblock *block, offset_t where, size
         }
 }
 
-ARK_EXPORT(bool) memblock_move_ex(struct memblock *block, offset_t where, size_t nbytes, bool zero_out)
+bool memblock_move_ex(struct memblock *block, offset_t where, size_t nbytes, bool zero_out)
 {
         error_if_null(block)
         error_if(where >= block->blockLength, &block->err, ARK_ERR_OUTOFBOUNDS);
@@ -191,7 +191,7 @@ void *memblock_move_contents_and_drop(struct memblock *block)
         return result;
 }
 
-ARK_EXPORT(bool) memfile_update_last_byte(struct memblock *block, size_t where)
+bool memfile_update_last_byte(struct memblock *block, size_t where)
 {
         error_if_null(block);
         error_if(where >= block->blockLength, &block->err, ARK_ERR_ILLEGALSTATE);

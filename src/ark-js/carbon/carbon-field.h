@@ -22,8 +22,7 @@
 #ifndef CARBON_FIELD_H
 #define CARBON_FIELD_H
 
-enum carbon_field_type
-{
+enum carbon_field_type {
         /* constants */
         CARBON_FIELD_TYPE_NULL = CARBON_MARKER_NULL, /* null */
         CARBON_FIELD_TYPE_TRUE = CARBON_MARKER_TRUE, /* true */
@@ -62,34 +61,31 @@ enum carbon_field_type
         CARBON_FIELD_TYPE_BINARY_CUSTOM = CARBON_MARKER_CUSTOM_BINARY, /* arbitrary binary object with unknown mime type*/
 };
 
-enum carbon_column_type
-{
-        CARBON_COLUMN_TYPE_U8,
-        CARBON_COLUMN_TYPE_U16,
-        CARBON_COLUMN_TYPE_U32,
-        CARBON_COLUMN_TYPE_U64,
-        CARBON_COLUMN_TYPE_I8,
-        CARBON_COLUMN_TYPE_I16,
-        CARBON_COLUMN_TYPE_I32,
-        CARBON_COLUMN_TYPE_I64,
-        CARBON_COLUMN_TYPE_FLOAT,
-        CARBON_COLUMN_TYPE_BOOLEAN
+enum carbon_column_type {
+    CARBON_COLUMN_TYPE_U8,
+    CARBON_COLUMN_TYPE_U16,
+    CARBON_COLUMN_TYPE_U32,
+    CARBON_COLUMN_TYPE_U64,
+    CARBON_COLUMN_TYPE_I8,
+    CARBON_COLUMN_TYPE_I16,
+    CARBON_COLUMN_TYPE_I32,
+    CARBON_COLUMN_TYPE_I64,
+    CARBON_COLUMN_TYPE_FLOAT,
+    CARBON_COLUMN_TYPE_BOOLEAN
 };
 
-enum carbon_field_class
-{
-        CARBON_FIELD_CLASS_CONSTANT,
-        CARBON_FIELD_CLASS_NUMBER,
-        CARBON_FIELD_CLASS_CHARACTER_STRING,
-        CARBON_FIELD_CLASS_BINARY_STRING,
-        CARBON_FIELD_CLASS_CONTAINER
+enum carbon_field_class {
+    CARBON_FIELD_CLASS_CONSTANT,
+    CARBON_FIELD_CLASS_NUMBER,
+    CARBON_FIELD_CLASS_CHARACTER_STRING,
+    CARBON_FIELD_CLASS_BINARY_STRING,
+    CARBON_FIELD_CLASS_CONTAINER
 };
 
-enum carbon_constant
-{
-        CARBON_CONSTANT_TRUE,
-        CARBON_CONSTANT_FALSE,
-        CARBON_CONSTANT_NULL
+enum carbon_constant {
+    CARBON_CONSTANT_TRUE,
+    CARBON_CONSTANT_FALSE,
+    CARBON_CONSTANT_NULL
 };
 
 #define CARBON_FIELD_TYPE_NULL_STR "null"
@@ -121,67 +117,67 @@ enum carbon_constant
 
 ARK_BEGIN_DECL
 
-ARK_EXPORT(const char *) carbon_field_type_str(struct err *err, enum carbon_field_type type);
+const char *carbon_field_type_str(struct err *err, enum carbon_field_type type);
 
-ARK_EXPORT(bool) carbon_field_type_is_traversable(enum carbon_field_type type);
+bool carbon_field_type_is_traversable(enum carbon_field_type type);
 
-ARK_EXPORT(bool) carbon_field_type_is_signed_integer(enum carbon_field_type type);
+bool carbon_field_type_is_signed_integer(enum carbon_field_type type);
 
-ARK_EXPORT(bool) carbon_field_type_is_unsigned_integer(enum carbon_field_type type);
+bool carbon_field_type_is_unsigned_integer(enum carbon_field_type type);
 
-ARK_EXPORT(bool) carbon_field_type_is_floating_number(enum carbon_field_type type);
+bool carbon_field_type_is_floating_number(enum carbon_field_type type);
 
-ARK_EXPORT(bool) carbon_field_type_is_number(enum carbon_field_type type);
+bool carbon_field_type_is_number(enum carbon_field_type type);
 
-ARK_EXPORT(bool) carbon_field_type_is_integer(enum carbon_field_type type);
+bool carbon_field_type_is_integer(enum carbon_field_type type);
 
-ARK_EXPORT(bool) carbon_field_type_is_binary(enum carbon_field_type type);
+bool carbon_field_type_is_binary(enum carbon_field_type type);
 
-ARK_EXPORT(bool) carbon_field_type_is_boolean(enum carbon_field_type type);
+bool carbon_field_type_is_boolean(enum carbon_field_type type);
 
-ARK_EXPORT(bool) carbon_field_type_is_array(enum carbon_field_type type);
+bool carbon_field_type_is_array(enum carbon_field_type type);
 
-ARK_EXPORT(bool) carbon_field_type_is_column(enum carbon_field_type type);
+bool carbon_field_type_is_column(enum carbon_field_type type);
 
-ARK_EXPORT(bool) carbon_field_type_is_object(enum carbon_field_type type);
+bool carbon_field_type_is_object(enum carbon_field_type type);
 
-ARK_EXPORT(bool) carbon_field_type_is_null(enum carbon_field_type type);
+bool carbon_field_type_is_null(enum carbon_field_type type);
 
-ARK_EXPORT(bool) carbon_field_type_is_string(enum carbon_field_type type);
+bool carbon_field_type_is_string(enum carbon_field_type type);
 
-ARK_EXPORT(enum carbon_field_class) carbon_field_type_get_class(enum carbon_field_type type, struct err *err);
+enum carbon_field_class carbon_field_type_get_class(enum carbon_field_type type, struct err *err);
 
-ARK_EXPORT(bool) carbon_field_type_is_constant(enum carbon_field_type type);
+bool carbon_field_type_is_constant(enum carbon_field_type type);
 
-ARK_EXPORT(bool) carbon_field_skip(struct memfile *file);
+bool carbon_field_skip(struct memfile *file);
 
-ARK_EXPORT(bool) carbon_field_skip_object(struct memfile *file);
+bool carbon_field_skip_object(struct memfile *file);
 
-ARK_EXPORT(bool) carbon_field_skip_array(struct memfile *file);
+bool carbon_field_skip_array(struct memfile *file);
 
-ARK_EXPORT(bool) carbon_field_skip_column(struct memfile *file);
+bool carbon_field_skip_column(struct memfile *file);
 
-ARK_EXPORT(bool) carbon_field_skip_binary(struct memfile *file);
+bool carbon_field_skip_binary(struct memfile *file);
 
-ARK_EXPORT(bool) carbon_field_skip_custom_binary(struct memfile *file);
+bool carbon_field_skip_custom_binary(struct memfile *file);
 
-ARK_EXPORT(bool) carbon_field_skip_string(struct memfile *file);
+bool carbon_field_skip_string(struct memfile *file);
 
-ARK_EXPORT(bool) carbon_field_skip_float(struct memfile *file);
+bool carbon_field_skip_float(struct memfile *file);
 
-ARK_EXPORT(bool) carbon_field_skip_boolean(struct memfile *file);
+bool carbon_field_skip_boolean(struct memfile *file);
 
-ARK_EXPORT(bool) carbon_field_skip_null(struct memfile *file);
+bool carbon_field_skip_null(struct memfile *file);
 
-ARK_EXPORT(bool) carbon_field_skip_8(struct memfile *file);
+bool carbon_field_skip_8(struct memfile *file);
 
-ARK_EXPORT(bool) carbon_field_skip_16(struct memfile *file);
+bool carbon_field_skip_16(struct memfile *file);
 
-ARK_EXPORT(bool) carbon_field_skip_32(struct memfile *file);
+bool carbon_field_skip_32(struct memfile *file);
 
-ARK_EXPORT(bool) carbon_field_skip_64(struct memfile *file);
+bool carbon_field_skip_64(struct memfile *file);
 
-ARK_EXPORT(enum carbon_field_type) carbon_field_type_for_column(enum carbon_column_type type);
+enum carbon_field_type carbon_field_type_for_column(enum carbon_column_type type);
 
 ARK_END_DECL
 

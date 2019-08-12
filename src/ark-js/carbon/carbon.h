@@ -23,7 +23,7 @@
 #include <ark-js/shared/mem/block.h>
 #include <ark-js/shared/mem/file.h>
 #include <ark-js/carbon/oid/oid.h>
-#include <ark-js/shared/stdx/string_builder.h>
+#include <ark-js/shared/stdx/string.h>
 #include <ark-js/shared/async/spin.h>
 #include <ark-js/shared/stdx/vec.h>
 #include <ark-js/shared/common.h>
@@ -75,68 +75,65 @@ struct carbon_find; /* forward from carbon-find.h */
 
 typedef u32 listener_handle_t;
 
-struct carbon
-{
-        struct memblock *memblock;
-        struct memfile memfile;
+struct carbon {
+    struct memblock *memblock;
+    struct memfile memfile;
 
-        struct
-        {
-                struct spinlock write_lock;
-                bool revision_lock;
-                bool is_latest;
-        } versioning;
+    struct {
+        struct spinlock write_lock;
+        bool revision_lock;
+        bool is_latest;
+    } versioning;
 
-        struct err err;
+    struct err err;
 };
 
-struct carbon_revise
-{
-        struct carbon *original;
-        struct carbon *revised_doc;
-        struct err err;
+struct carbon_revise {
+    struct carbon *original;
+    struct carbon *revised_doc;
+    struct err err;
 };
 
-struct carbon_binary
-{
-        const char *mime_type;
-        u64 mime_type_strlen;
+struct carbon_binary {
+    const char *mime_type;
+    u64 mime_type_strlen;
 
-        const void *blob;
-        u64 blob_len;
+    const void *blob;
+    u64 blob_len;
 };
 
-enum carbon_printer_impl
-{
-        JSON_FORMATTER
+enum carbon_printer_impl {
+    JSON_EXTENDED,
+    JSON_COMPACT
 };
 
-struct carbon_new
-{
-        struct err err;
-        struct carbon original;
-        struct carbon_revise revision_context;
-        struct carbon_array_it *content_it;
-        struct carbon_insert *inserter;
+struct carbon_new {
+    struct err err;
+    struct carbon original;
+    struct carbon_revise revision_context;
+    struct carbon_array_it *content_it;
+    struct carbon_insert *inserter;
 
-        /* options shrink or compact (or both) documents, see
-         * CARBON_KEEP, CARBON_SHRINK, CARBON_COMPACT, and CARBON_OPTIMIZE  */
-        int mode;
+    /* options shrink or compact (or both) documents, see
+     * CARBON_KEEP, CARBON_SHRINK, CARBON_COMPACT, and CARBON_OPTIMIZE  */
+    int mode;
 };
 
-enum carbon_container_type { CARBON_OBJECT, CARBON_ARRAY, CARBON_COLUMN };
+enum carbon_container_type {
+    CARBON_OBJECT, CARBON_ARRAY, CARBON_COLUMN
+};
 
-enum carbon_primary_key_type {
-        /* no key, no revision number */
-        CARBON_KEY_NOKEY,
-        /* auto-generated 64bit integer key */
-        CARBON_KEY_AUTOKEY,
-        /* user-defined 64bit unsigned integer key */
-        CARBON_KEY_UKEY,
-        /* user-defined 64bit signed integer key */
-        CARBON_KEY_IKEY,
-        /* user-defined n-char string key */
-        CARBON_KEY_SKEY
+enum carbon_key_type {
+    /* no key, no revision number */
+            CARBON_KEY_NOKEY,
+    /* auto-generated 64bit integer key */
+            CARBON_KEY_AUTOKEY,
+    /* user-defined 64bit unsigned integer key */
+            CARBON_KEY_UKEY,
+    /* user-defined 64bit signed integer key */
+            CARBON_KEY_IKEY,
+    /* user-defined n-char string key */
+            CARBON_KEY_SKEY
 };
 
 #define CARBON_MARKER_NULL 'n'
@@ -179,6 +176,7 @@ enum carbon_primary_key_type {
 #define CARBON_MARKER_KEY_SKEY '!'
 
 ARK_DEFINE_ERROR_GETTER(carbon);
+
 ARK_DEFINE_ERROR_GETTER(carbon_new);
 
 #define CARBON_KEEP              0x0
@@ -214,55 +212,37 @@ ARK_DEFINE_ERROR_GETTER(carbon_new);
  *      The document will have the smallest memory footprint possible.</li>
  * </ul>
  */
-ARK_EXPORT(struct carbon_insert *) carbon_create_begin(struct carbon_new *context, struct carbon *doc,
-        enum carbon_primary_key_type key_type, int mode);
-
-ARK_EXPORT(bool) carbon_create_end(struct carbon_new *context);
-
-ARK_EXPORT(bool) carbon_create_empty(struct carbon *doc, enum carbon_primary_key_type key_type);
-
-ARK_EXPORT(bool) carbon_create_empty_ex(struct carbon *doc, enum carbon_primary_key_type key_type, u64 doc_cap_byte,
-        u64 array_cap_byte);
-
-ARK_EXPORT(bool) carbon_from_json(struct carbon *doc, const char *json);
-
-ARK_EXPORT(bool) carbon_drop(struct carbon *doc);
-
-ARK_EXPORT(bool) carbon_is_up_to_date(struct carbon *doc);
-
-ARK_EXPORT(bool) carbon_key_get_type(enum carbon_primary_key_type *out, struct carbon *doc);
-
-ARK_EXPORT(const void *) carbon_key_raw_value(u64 *key_len, enum carbon_primary_key_type *type, struct carbon *doc);
-
-ARK_EXPORT(bool) carbon_key_signed_value(i64 *key, struct carbon *doc);
-
-ARK_EXPORT(bool) carbon_key_unsigned_value(u64 *key, struct carbon *doc);
-
-ARK_EXPORT(const char *) carbon_key_string_value(u64 *str_len, struct carbon *doc);
-
-ARK_EXPORT(bool) carbon_has_key(enum carbon_primary_key_type type);
-
-ARK_EXPORT(bool) carbon_key_is_unsigned_type(enum carbon_primary_key_type type);
-
-ARK_EXPORT(bool) carbon_key_is_signed_type(enum carbon_primary_key_type type);
-
-ARK_EXPORT(bool) carbon_key_is_string_type(enum carbon_primary_key_type type);
-
-ARK_EXPORT(bool) carbon_clone(struct carbon *clone, struct carbon *doc);
-
-ARK_EXPORT(bool) carbon_revision(u64 *rev, struct carbon *doc);
-
-ARK_EXPORT(bool) carbon_to_str(struct string_builder *dst, enum carbon_printer_impl printer, struct carbon *doc);
-
-ARK_EXPORT(const char *) carbon_to_json(struct string_builder *dst, struct carbon *doc);
-
-ARK_EXPORT(bool) carbon_iterator_open(struct carbon_array_it *it, struct carbon *doc);
-
-ARK_EXPORT(bool) carbon_iterator_close(struct carbon_array_it *it);
-
-ARK_EXPORT(bool) carbon_print(FILE *file, struct carbon *doc);
-
-ARK_EXPORT(bool) carbon_hexdump_print(FILE *file, struct carbon *doc);
+struct carbon_insert *carbon_create_begin(struct carbon_new *context, struct carbon *doc,
+                                          enum carbon_key_type key_type, int mode);
+bool carbon_create_end(struct carbon_new *context);
+bool carbon_create_empty(struct carbon *doc, enum carbon_key_type key_type);
+bool carbon_create_empty_ex(struct carbon *doc, enum carbon_key_type key_type, u64 doc_cap_byte,
+                            u64 array_cap_byte);
+bool carbon_from_json(struct carbon *doc, const char *json, enum carbon_key_type key_type,
+                      const void *key, struct err *err);
+bool carbon_drop(struct carbon *doc);
+const void *carbon_raw_data(u64 *len, struct carbon *doc);
+bool carbon_is_up_to_date(struct carbon *doc);
+bool carbon_key_get_type(enum carbon_key_type *out, struct carbon *doc);
+const void *carbon_key_raw_value(u64 *key_len, enum carbon_key_type *type, struct carbon *doc);
+bool carbon_key_signed_value(i64 *key, struct carbon *doc);
+bool carbon_key_unsigned_value(u64 *key, struct carbon *doc);
+const char *carbon_key_string_value(u64 *str_len, struct carbon *doc);
+bool carbon_has_key(enum carbon_key_type type);
+bool carbon_key_is_unsigned_type(enum carbon_key_type type);
+bool carbon_key_is_signed_type(enum carbon_key_type type);
+bool carbon_key_is_string_type(enum carbon_key_type type);
+bool carbon_clone(struct carbon *clone, struct carbon *doc);
+bool carbon_revision(u64 *rev, struct carbon *doc);
+bool carbon_to_str(struct string *dst, enum carbon_printer_impl printer, struct carbon *doc);
+const char *carbon_to_json_extended(struct string *dst, struct carbon *doc);
+const char *carbon_to_json_compact(struct string *dst, struct carbon *doc);
+char *carbon_to_json_extended_dup(struct carbon *doc);
+char *carbon_to_json_compact_dup(struct carbon *doc);
+bool carbon_iterator_open(struct carbon_array_it *it, struct carbon *doc);
+bool carbon_iterator_close(struct carbon_array_it *it);
+bool carbon_print(FILE *file, struct carbon *doc);
+bool carbon_hexdump_print(FILE *file, struct carbon *doc);
 
 ARK_END_DECL
 

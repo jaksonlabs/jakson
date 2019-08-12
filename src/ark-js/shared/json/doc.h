@@ -30,69 +30,68 @@ struct doc_obj;
 struct columndoc;
 
 struct doc_entries {
-        struct doc_obj *context;
-        const char *key;
-        field_e type;
-        struct vector ofType(<T>) values;
+    struct doc_obj *context;
+    const char *key;
+    field_e type;
+    struct vector ofType(<T>) values;
 };
 
 struct doc_bulk {
-        struct strdic *dic;
-        struct vector ofType(char *) keys, values;
-        struct vector ofType(struct doc) models;
+    struct strdic *dic;
+    struct vector ofType(char *) keys, values;
+    struct vector ofType(struct doc) models;
 };
 
 struct doc {
-        struct doc_bulk *context;
-        struct vector ofType(struct doc_obj) obj_model;
-        field_e type;
+    struct doc_bulk *context;
+    struct vector ofType(struct doc_obj) obj_model;
+    field_e type;
 };
 
 struct doc_obj {
-        struct vector ofType(struct doc_entries) entries;
-        struct doc *doc;
+    struct vector ofType(struct doc_entries) entries;
+    struct doc *doc;
 };
 
-ARK_EXPORT(bool) doc_bulk_create(struct doc_bulk *bulk, struct strdic *dic);
+bool doc_bulk_create(struct doc_bulk *bulk, struct strdic *dic);
 
-ARK_EXPORT(bool) doc_bulk_Drop(struct doc_bulk *bulk);
+bool doc_bulk_Drop(struct doc_bulk *bulk);
 
-ARK_EXPORT(bool) doc_bulk_shrink(struct doc_bulk *bulk);
+bool doc_bulk_shrink(struct doc_bulk *bulk);
 
-ARK_EXPORT(bool) doc_bulk_print(FILE *file, struct doc_bulk *bulk);
+bool doc_bulk_print(FILE *file, struct doc_bulk *bulk);
 
-ARK_EXPORT(struct doc *)doc_bulk_new_doc(struct doc_bulk *context, field_e type);
+struct doc *doc_bulk_new_doc(struct doc_bulk *context, field_e type);
 
-ARK_EXPORT(struct doc_obj *)doc_bulk_new_obj(struct doc *model);
+struct doc_obj *doc_bulk_new_obj(struct doc *model);
 
-ARK_EXPORT(bool) doc_bulk_get_dic_contents(struct vector ofType (const char *) **strings,
-        struct vector ofType(field_sid_t) **string_ids, const struct doc_bulk *context);
+bool doc_bulk_get_dic_contents(struct vector ofType (const char *) **strings,
+                               struct vector ofType(field_sid_t) **string_ids, const struct doc_bulk *context);
 
-ARK_EXPORT(bool) doc_print(FILE *file, const struct doc *doc);
+bool doc_print(FILE *file, const struct doc *doc);
 
-ARK_EXPORT(const struct vector ofType(struct doc_entries)
-        *)doc_get_entries(const struct doc_obj *model);
+const struct vector ofType(struct doc_entries) *doc_get_entries(const struct doc_obj *model);
 
-ARK_EXPORT(void) doc_print_entries(FILE *file, const struct doc_entries *entries);
+void doc_print_entries(FILE *file, const struct doc_entries *entries);
 
-ARK_EXPORT(void) doc_drop(struct doc_obj *model);
+void doc_drop(struct doc_obj *model);
 
-ARK_EXPORT(bool) doc_obj_add_key(struct doc_entries **out, struct doc_obj *obj, const char *key, field_e type);
+bool doc_obj_add_key(struct doc_entries **out, struct doc_obj *obj, const char *key, field_e type);
 
-ARK_EXPORT(bool) doc_obj_push_primtive(struct doc_entries *entry, const void *value);
+bool doc_obj_push_primtive(struct doc_entries *entry, const void *value);
 
-ARK_EXPORT(bool) doc_obj_push_object(struct doc_obj **out, struct doc_entries *entry);
+bool doc_obj_push_object(struct doc_obj **out, struct doc_entries *entry);
 
-ARK_EXPORT(struct doc_entries *)doc_bulk_new_entries(struct doc_bulk *dst);
+struct doc_entries *doc_bulk_new_entries(struct doc_bulk *dst);
 
-ARK_EXPORT(struct doc_obj *)doc_bulk_add_json(struct doc_entries *partition, struct json *json);
+struct doc_obj *doc_bulk_add_json(struct doc_entries *partition, struct json *json);
 
-ARK_EXPORT(struct doc_obj *)doc_entries_get_root(const struct doc_entries *partition);
+struct doc_obj *doc_entries_get_root(const struct doc_entries *partition);
 
-ARK_EXPORT(struct columndoc *)doc_entries_columndoc(const struct doc_bulk *bulk, const struct doc_entries *partition,
-        bool read_optimized);
+struct columndoc *doc_entries_columndoc(const struct doc_bulk *bulk, const struct doc_entries *partition,
+                                        bool read_optimized);
 
-ARK_EXPORT(bool) doc_entries_drop(struct doc_entries *partition);
+bool doc_entries_drop(struct doc_entries *partition);
 
 ARK_END_DECL
 

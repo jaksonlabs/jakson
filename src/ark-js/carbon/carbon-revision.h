@@ -24,15 +24,15 @@
 
 ARK_BEGIN_DECL
 
-ARK_EXPORT(bool) carbon_revision_create(struct memfile *file);
+bool carbon_revision_create(struct memfile *file);
 
-ARK_EXPORT(bool) carbon_revision_skip(struct memfile *file);
+bool carbon_revision_skip(struct memfile *file);
 
-ARK_EXPORT(bool) carbon_revision_read(u64 *revision, struct memfile *file);
+bool carbon_revision_read(u64 *revision, struct memfile *file);
 
-ARK_EXPORT(bool) carbon_revision_peek(u64 *revision, struct memfile *file);
+bool carbon_revision_peek(u64 *revision, struct memfile *file);
 
-ARK_EXPORT(bool) carbon_revision_inc(struct memfile *file);
+bool carbon_revision_inc(struct memfile *file);
 
 ARK_END_DECL
 

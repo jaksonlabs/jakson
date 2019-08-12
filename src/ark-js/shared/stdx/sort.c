@@ -17,8 +17,8 @@
 
 #include <ark-js/shared/stdx/sort.h>
 
-ARK_EXPORT(bool) sort_qsort_indicies(size_t *indices, const void *base, size_t width, less_eq_func_t comp,
-        size_t nelemns, struct allocator *alloc)
+bool sort_qsort_indicies(size_t *indices, const void *base, size_t width, less_eq_func_t comp,
+                         size_t nelemns, struct allocator *alloc)
 {
         error_if_null(base);
         error_if_null(alloc);
@@ -56,8 +56,8 @@ ARK_EXPORT(bool) sort_qsort_indicies(size_t *indices, const void *base, size_t w
         return true;
 }
 
-ARK_EXPORT(int) sort_qsort_indicies_wargs(size_t *indices, const void *base, size_t width, less_eq_wargs_func_t comp,
-        size_t nelemens, struct allocator *alloc, void *args)
+int sort_qsort_indicies_wargs(size_t *indices, const void *base, size_t width, less_eq_wargs_func_t comp,
+                              size_t nelemens, struct allocator *alloc, void *args)
 {
         error_if_null(base);
         error_if_null(alloc);
@@ -97,8 +97,8 @@ ARK_EXPORT(int) sort_qsort_indicies_wargs(size_t *indices, const void *base, siz
         return true;
 }
 
-ARK_EXPORT(size_t) sort_bsearch_indicies(const size_t *indicies, const void *base, size_t width, size_t nelemens,
-        const void *neelde, eq_func_t compEq, less_func_t compLess)
+size_t sort_bsearch_indicies(const size_t *indicies, const void *base, size_t width, size_t nelemens,
+                             const void *neelde, eq_func_t compEq, less_func_t compLess)
 {
         size_t l = 0;
         size_t r = nelemens - 1;
@@ -125,7 +125,7 @@ ARK_EXPORT(size_t) sort_bsearch_indicies(const size_t *indicies, const void *bas
         return nelemens;
 }
 
-ARK_EXPORT(size_t) sort_get_min(const size_t *elements, size_t nelemens)
+size_t sort_get_min(const size_t *elements, size_t nelemens)
 {
         size_t min = (size_t) -1;
         while (nelemens--) {
@@ -135,7 +135,7 @@ ARK_EXPORT(size_t) sort_get_min(const size_t *elements, size_t nelemens)
         return min;
 }
 
-ARK_EXPORT(size_t) sort_get_max(const size_t *elements, size_t nelemens)
+size_t sort_get_max(const size_t *elements, size_t nelemens)
 {
         size_t max = 0;
         while (nelemens--) {
@@ -145,7 +145,7 @@ ARK_EXPORT(size_t) sort_get_max(const size_t *elements, size_t nelemens)
         return max;
 }
 
-ARK_EXPORT(double) sort_get_sum(const size_t *elements, size_t nelemens)
+double sort_get_sum(const size_t *elements, size_t nelemens)
 {
         double sum = 0;
         while (nelemens--) {
@@ -155,7 +155,7 @@ ARK_EXPORT(double) sort_get_sum(const size_t *elements, size_t nelemens)
         return sum;
 }
 
-ARK_EXPORT(double) sort_get_avg(const size_t *elements, size_t nelemens)
+double sort_get_avg(const size_t *elements, size_t nelemens)
 {
         return sort_get_sum(elements, nelemens) / (double) nelemens;
 }

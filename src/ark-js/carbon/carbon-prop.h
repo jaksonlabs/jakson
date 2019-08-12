@@ -23,7 +23,7 @@
 
 ARK_BEGIN_DECL
 
-ARK_EXPORT(u64) carbon_prop_size(struct memfile *file);
+u64 carbon_prop_size(struct memfile *file);
 
 ARK_END_DECL
 

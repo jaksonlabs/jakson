@@ -45,84 +45,87 @@ ARK_BEGIN_DECL
 typedef void (*task_routine)(void *routine);
 
 struct thread_task {
-        void *args;
-        pthread_attr_t *attr;
-        task_routine routine;
-        size_t group_id;
-        size_t priority;
-        struct task_stats statistics;
+    void *args;
+    pthread_attr_t *attr;
+    task_routine routine;
+    size_t group_id;
+    size_t priority;
+    struct task_stats statistics;
 };
 
 struct thread_info;
 
 struct task_state {
-        atomic_int task_count; // remaining tasks in this group
-        unsigned generation;
+    atomic_int task_count; // remaining tasks in this group
+    unsigned generation;
 };
 
 struct task_handle {
-        size_t index;
-        unsigned generation;
+    size_t index;
+    unsigned generation;
 };
 
 struct thread_pool {
-        char *name;
-        pthread_t *pool;
-        struct priority_queue waiting_tasks;
-        struct task_state *task_group_states;
-        size_t task_state_capacity; // number of tasks that can be tracked
-        size_t size;
-        size_t capacity;
-        struct thread_info **thread_infos;
-        struct thread_task **thread_tasks;
-        struct thread_pool_stats *statistics;
-        int enable_monitoring;
+    char *name;
+    pthread_t *pool;
+    struct priority_queue waiting_tasks;
+    struct task_state *task_group_states;
+    size_t task_state_capacity; // number of tasks that can be tracked
+    size_t size;
+    size_t capacity;
+    struct thread_info **thread_infos;
+    struct thread_task **thread_tasks;
+    struct thread_pool_stats *statistics;
+    int enable_monitoring;
 };
 
 struct thread_info {
-        char name[12];
-        struct thread_pool *pool;
-        size_t id;
-        atomic_int status;
-        struct thread_stats *statistics;
+    char name[12];
+    struct thread_pool *pool;
+    size_t id;
+    atomic_int status;
+    struct thread_stats *statistics;
 };
 
-ARK_EXPORT(struct thread_pool *) thread_pool_create(size_t num_threads, int enable_monitoring);
+struct thread_pool *thread_pool_create(size_t num_threads, int enable_monitoring);
 
-ARK_EXPORT(struct thread_pool *) thread_pool_create_named(size_t num_threads, const char *name, int enable_monitoring);
+struct thread_pool *thread_pool_create_named(size_t num_threads, const char *name, int enable_monitoring);
 
 // Releases all resources hold by the threadpool. 
 // Currently working threads may finish but tasks left in the queue will be discarded.
-ARK_EXPORT(void) thread_pool_free(struct thread_pool *pool);
+void thread_pool_free(struct thread_pool *pool);
 
-ARK_EXPORT(void) thread_pool_set_name(struct thread_pool *pool, const char *name);
+void thread_pool_set_name(struct thread_pool *pool, const char *name);
 
 // Sets the number of active threads to num_threads.
 // Currently working threads are terminated after there task is completed.
-ARK_EXPORT(bool) thread_pool_resize(struct thread_pool *pool, size_t num_threads);
+bool thread_pool_resize(struct thread_pool *pool, size_t num_threads);
 
 // Add multiple tasks to be executed. Their progress is tracked by a single handle.
 // hndl can be a nullptr.
-ARK_EXPORT(bool) thread_pool_enqueue_tasks(struct thread_task *task, struct thread_pool *pool, size_t num_tasks, struct task_handle *hndl);
-ARK_EXPORT(bool) thread_pool_enqueue_task(struct thread_task *task, struct thread_pool *pool, struct task_handle *hndl);
+bool thread_pool_enqueue_tasks(struct thread_task *task, struct thread_pool *pool, size_t num_tasks,
+                               struct task_handle *hndl);
+
+bool thread_pool_enqueue_task(struct thread_task *task, struct thread_pool *pool, struct task_handle *hndl);
 
 // Add multiple tasks to be executed. Waits until all passed tasks are finished. 
 // The main thread also participates in task execution
-ARK_EXPORT(bool) thread_pool_enqueue_tasks_wait(struct thread_task *task, struct thread_pool *pool, size_t num_tasks);
+bool thread_pool_enqueue_tasks_wait(struct thread_task *task, struct thread_pool *pool, size_t num_tasks);
 
 // Waits until the tasks referenced by hndl are completed.
-ARK_EXPORT(bool) thread_pool_wait_for_task(struct thread_pool *pool, struct task_handle *hndl);
+bool thread_pool_wait_for_task(struct thread_pool *pool, struct task_handle *hndl);
 
 // Waits until all tasks currently in the queue are executed.
 // The main thread also participates in task execution.
-ARK_EXPORT(bool) thread_pool_wait_for_all(struct thread_pool *pool);
+bool thread_pool_wait_for_all(struct thread_pool *pool);
 
-ARK_EXPORT(void *) __thread_main(void *args);
-ARK_EXPORT(struct thread_task *) __get_next_task(struct thread_pool *pool);
+void *__thread_main(void *args);
 
-ARK_EXPORT(bool) __create_thread(struct thread_info *thread_info, pthread_t *pp);
+struct thread_task *__get_next_task(struct thread_pool *pool);
 
-ARK_EXPORT(void) __sig_seg(int sig);
+bool __create_thread(struct thread_info *thread_info, pthread_t *pp);
+
+void __sig_seg(int sig);
 
 ARK_END_DECL
 

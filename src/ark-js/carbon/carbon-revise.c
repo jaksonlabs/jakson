@@ -26,14 +26,18 @@
 #include <ark-js/carbon/carbon-object-it.h>
 
 static bool internal_pack_array(struct carbon_array_it *it);
+
 static bool internal_pack_object(struct carbon_object_it *it);
+
 static bool internal_pack_column(struct carbon_column_it *it);
+
 static bool internal_revision_inc(struct carbon *doc);
+
 static bool carbon_header_rev_inc(struct carbon *doc);
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-ARK_EXPORT(bool) carbon_revise_try_begin(struct carbon_revise *context, struct carbon *revised_doc, struct carbon *doc)
+bool carbon_revise_try_begin(struct carbon_revise *context, struct carbon *revised_doc, struct carbon *doc)
 {
         error_if_null(context)
         error_if_null(doc)
@@ -44,7 +48,7 @@ ARK_EXPORT(bool) carbon_revise_try_begin(struct carbon_revise *context, struct c
         }
 }
 
-ARK_EXPORT(bool) carbon_revise_begin(struct carbon_revise *context, struct carbon *revised_doc, struct carbon *original)
+bool carbon_revise_begin(struct carbon_revise *context, struct carbon *revised_doc, struct carbon *original)
 {
         error_if_null(context)
         error_if_null(original)
@@ -97,10 +101,10 @@ static void key_string_set(struct carbon *doc, const char *key)
         memfile_restore_position(&doc->memfile);
 }
 
-ARK_EXPORT(bool) carbon_revise_key_generate(object_id_t *out, struct carbon_revise *context)
+bool carbon_revise_key_generate(object_id_t *out, struct carbon_revise *context)
 {
         error_if_null(context);
-        enum carbon_primary_key_type key_type;
+        enum carbon_key_type key_type;
         carbon_key_get_type(&key_type, context->revised_doc);
         if (key_type == CARBON_KEY_AUTOKEY) {
                 object_id_t oid;
@@ -114,10 +118,10 @@ ARK_EXPORT(bool) carbon_revise_key_generate(object_id_t *out, struct carbon_revi
         }
 }
 
-ARK_EXPORT(bool) carbon_revise_key_set_unsigned(struct carbon_revise *context, u64 key_value)
+bool carbon_revise_key_set_unsigned(struct carbon_revise *context, u64 key_value)
 {
         error_if_null(context);
-        enum carbon_primary_key_type key_type;
+        enum carbon_key_type key_type;
         carbon_key_get_type(&key_type, context->revised_doc);
         if (key_type == CARBON_KEY_UKEY) {
                 key_unsigned_set(context->revised_doc, key_value);
@@ -128,10 +132,10 @@ ARK_EXPORT(bool) carbon_revise_key_set_unsigned(struct carbon_revise *context, u
         }
 }
 
-ARK_EXPORT(bool) carbon_revise_key_set_signed(struct carbon_revise *context, i64 key_value)
+bool carbon_revise_key_set_signed(struct carbon_revise *context, i64 key_value)
 {
         error_if_null(context);
-        enum carbon_primary_key_type key_type;
+        enum carbon_key_type key_type;
         carbon_key_get_type(&key_type, context->revised_doc);
         if (key_type == CARBON_KEY_IKEY) {
                 key_signed_set(context->revised_doc, key_value);
@@ -142,10 +146,10 @@ ARK_EXPORT(bool) carbon_revise_key_set_signed(struct carbon_revise *context, i64
         }
 }
 
-ARK_EXPORT(bool) carbon_revise_key_set_string(struct carbon_revise *context, const char *key_value)
+bool carbon_revise_key_set_string(struct carbon_revise *context, const char *key_value)
 {
         error_if_null(context);
-        enum carbon_primary_key_type key_type;
+        enum carbon_key_type key_type;
         carbon_key_get_type(&key_type, context->revised_doc);
         if (key_type == CARBON_KEY_SKEY) {
                 key_string_set(context->revised_doc, key_value);
@@ -156,7 +160,7 @@ ARK_EXPORT(bool) carbon_revise_key_set_string(struct carbon_revise *context, con
         }
 }
 
-ARK_EXPORT(bool) carbon_revise_iterator_open(struct carbon_array_it *it, struct carbon_revise *context)
+bool carbon_revise_iterator_open(struct carbon_array_it *it, struct carbon_revise *context)
 {
         error_if_null(it);
         error_if_null(context);
@@ -165,13 +169,13 @@ ARK_EXPORT(bool) carbon_revise_iterator_open(struct carbon_array_it *it, struct 
         return carbon_array_it_create(it, &context->revised_doc->memfile, &context->original->err, payload_start);
 }
 
-ARK_EXPORT(bool) carbon_revise_iterator_close(struct carbon_array_it *it)
+bool carbon_revise_iterator_close(struct carbon_array_it *it)
 {
         error_if_null(it);
         return carbon_array_it_drop(it);
 }
 
-ARK_EXPORT(bool) carbon_revise_find_open(struct carbon_find *out, const char *dot_path, struct carbon_revise *context)
+bool carbon_revise_find_open(struct carbon_find *out, const char *dot_path, struct carbon_revise *context)
 {
         error_if_null(out)
         error_if_null(dot_path)
@@ -183,13 +187,13 @@ ARK_EXPORT(bool) carbon_revise_find_open(struct carbon_find *out, const char *do
         return status;
 }
 
-ARK_EXPORT(bool) carbon_revise_find_close(struct carbon_find *find)
+bool carbon_revise_find_close(struct carbon_find *find)
 {
         error_if_null(find)
         return carbon_find_drop(find);
 }
 
-ARK_EXPORT(bool) carbon_revise_remove_one(const char *dot_path, struct carbon *rev_doc, struct carbon *doc)
+bool carbon_revise_remove_one(const char *dot_path, struct carbon *rev_doc, struct carbon *doc)
 {
         struct carbon_revise revise;
         carbon_revise_begin(&revise, rev_doc, doc);
@@ -198,7 +202,7 @@ ARK_EXPORT(bool) carbon_revise_remove_one(const char *dot_path, struct carbon *r
         return status;
 }
 
-ARK_EXPORT(bool) carbon_revise_remove(const char *dot_path, struct carbon_revise *context)
+bool carbon_revise_remove(const char *dot_path, struct carbon_revise *context)
 {
         error_if_null(dot_path)
         error_if_null(context)
@@ -214,18 +218,19 @@ ARK_EXPORT(bool) carbon_revise_remove(const char *dot_path, struct carbon_revise
                         result = false;
                 } else {
                         switch (eval.result.container_type) {
-                        case CARBON_ARRAY: {
-                                struct carbon_array_it *it = &eval.result.containers.array.it;
-                                result = carbon_array_it_remove(it);
-                        } break;
-                        case CARBON_COLUMN:  {
-                                struct carbon_column_it *it = &eval.result.containers.column.it;
-                                u32 elem_pos = eval.result.containers.column.elem_pos;
-                                result = carbon_column_it_remove(it, elem_pos);
-                        } break;
-                        default:
-                                error(&context->original->err, ARK_ERR_INTERNALERR);
-                                result = false;
+                                case CARBON_ARRAY: {
+                                        struct carbon_array_it *it = &eval.result.containers.array.it;
+                                        result = carbon_array_it_remove(it);
+                                }
+                                        break;
+                                case CARBON_COLUMN: {
+                                        struct carbon_column_it *it = &eval.result.containers.column.it;
+                                        u32 elem_pos = eval.result.containers.column.elem_pos;
+                                        result = carbon_column_it_remove(it, elem_pos);
+                                }
+                                        break;
+                                default: error(&context->original->err, ARK_ERR_INTERNALERR);
+                                        result = false;
                         }
                 }
                 carbon_path_evaluator_end(&eval);
@@ -236,7 +241,7 @@ ARK_EXPORT(bool) carbon_revise_remove(const char *dot_path, struct carbon_revise
         }
 }
 
-ARK_EXPORT(bool) carbon_revise_pack(struct carbon_revise *context)
+bool carbon_revise_pack(struct carbon_revise *context)
 {
         error_if_null(context);
         struct carbon_array_it it;
@@ -246,7 +251,7 @@ ARK_EXPORT(bool) carbon_revise_pack(struct carbon_revise *context)
         return true;
 }
 
-ARK_EXPORT(bool) carbon_revise_shrink(struct carbon_revise *context)
+bool carbon_revise_shrink(struct carbon_revise *context)
 {
         struct carbon_array_it it;
         carbon_revise_iterator_open(&it, context);
@@ -264,7 +269,7 @@ ARK_EXPORT(bool) carbon_revise_shrink(struct carbon_revise *context)
         return true;
 }
 
-ARK_EXPORT(const struct carbon *) carbon_revise_end(struct carbon_revise *context)
+const struct carbon *carbon_revise_end(struct carbon_revise *context)
 {
         if (likely(context != NULL)) {
                 internal_revision_inc(context->revised_doc);
@@ -281,7 +286,7 @@ ARK_EXPORT(const struct carbon *) carbon_revise_end(struct carbon_revise *contex
         }
 }
 
-ARK_EXPORT(bool) carbon_revise_abort(struct carbon_revise *context)
+bool carbon_revise_abort(struct carbon_revise *context)
 {
         error_if_null(context)
 
@@ -310,14 +315,14 @@ static bool internal_pack_array(struct carbon_array_it *it)
                         error_if(!is_empty_slot, &it->err, ARK_ERR_CORRUPTED);
                         offset_t first_empty_slot_offset = memfile_tell(&this_array_it.memfile);
                         char final;
-                        while ((final = *memfile_read(&this_array_it.memfile, sizeof(char))) == 0)
-                        { }
+                        while ((final = *memfile_read(&this_array_it.memfile, sizeof(char))) == 0) {}
                         assert(final == CARBON_MARKER_ARRAY_END);
                         offset_t last_empty_slot_offset = memfile_tell(&this_array_it.memfile) - sizeof(char);
                         memfile_seek(&this_array_it.memfile, first_empty_slot_offset);
                         assert(last_empty_slot_offset > first_empty_slot_offset);
 
-                        memfile_inplace_remove(&this_array_it.memfile, last_empty_slot_offset - first_empty_slot_offset);
+                        memfile_inplace_remove(&this_array_it.memfile,
+                                               last_empty_slot_offset - first_empty_slot_offset);
 
                         final = *memfile_read(&this_array_it.memfile, sizeof(char));
                         assert(final == CARBON_MARKER_ARRAY_END);
@@ -332,60 +337,66 @@ static bool internal_pack_array(struct carbon_array_it *it)
                         enum carbon_field_type type;
                         carbon_array_it_field_type(&type, it);
                         switch (type) {
-                        case CARBON_FIELD_TYPE_NULL:
-                        case CARBON_FIELD_TYPE_TRUE:
-                        case CARBON_FIELD_TYPE_FALSE:
-                        case CARBON_FIELD_TYPE_STRING:
-                        case CARBON_FIELD_TYPE_NUMBER_U8:
-                        case CARBON_FIELD_TYPE_NUMBER_U16:
-                        case CARBON_FIELD_TYPE_NUMBER_U32:
-                        case CARBON_FIELD_TYPE_NUMBER_U64:
-                        case CARBON_FIELD_TYPE_NUMBER_I8:
-                        case CARBON_FIELD_TYPE_NUMBER_I16:
-                        case CARBON_FIELD_TYPE_NUMBER_I32:
-                        case CARBON_FIELD_TYPE_NUMBER_I64:
-                        case CARBON_FIELD_TYPE_NUMBER_FLOAT:
-                        case CARBON_FIELD_TYPE_BINARY:
-                        case CARBON_FIELD_TYPE_BINARY_CUSTOM:
-                                /* nothing to shrink, because there are no padded zeros here */
-                                break;
-                        case CARBON_FIELD_TYPE_ARRAY: {
-                                struct carbon_array_it nested_array_it;
-                                carbon_array_it_create(&nested_array_it, &it->memfile, &it->err,
-                                        it->field_access.nested_array_it->payload_start - sizeof(u8));
-                                internal_pack_array(&nested_array_it);
-                                assert(*memfile_peek(&nested_array_it.memfile, sizeof(char)) == CARBON_MARKER_ARRAY_END);
-                                memfile_skip(&nested_array_it.memfile, sizeof(char));
-                                memfile_seek(&it->memfile, memfile_tell(&nested_array_it.memfile));
-                                carbon_array_it_drop(&nested_array_it);
-                        } break;
-                        case CARBON_FIELD_TYPE_COLUMN_U8:
-                        case CARBON_FIELD_TYPE_COLUMN_U16:
-                        case CARBON_FIELD_TYPE_COLUMN_U32:
-                        case CARBON_FIELD_TYPE_COLUMN_U64:
-                        case CARBON_FIELD_TYPE_COLUMN_I8:
-                        case CARBON_FIELD_TYPE_COLUMN_I16:
-                        case CARBON_FIELD_TYPE_COLUMN_I32:
-                        case CARBON_FIELD_TYPE_COLUMN_I64:
-                        case CARBON_FIELD_TYPE_COLUMN_FLOAT:
-                        case CARBON_FIELD_TYPE_COLUMN_BOOLEAN:
-                                carbon_column_it_rewind(it->field_access.nested_column_it);
-                                internal_pack_column(it->field_access.nested_column_it);
-                                memfile_seek(&it->memfile, memfile_tell(&it->field_access.nested_column_it->memfile));
-                                break;
-                        case CARBON_FIELD_TYPE_OBJECT: {
-                                struct carbon_object_it nested_object_it;
-                                carbon_object_it_create(&nested_object_it, &it->memfile, &it->err,
-                                        it->field_access.nested_object_it->payload_start - sizeof(u8));
-                                internal_pack_object(&nested_object_it);
-                                assert(*memfile_peek(&nested_object_it.memfile, sizeof(char)) == CARBON_MARKER_OBJECT_END);
-                                memfile_skip(&nested_object_it.memfile, sizeof(char));
-                                memfile_seek(&it->memfile, memfile_tell(&nested_object_it.memfile));
-                                carbon_object_it_drop(&nested_object_it);
-                        } break;
-                        default:
-                        error(&it->err, ARK_ERR_INTERNALERR);
-                                return false;
+                                case CARBON_FIELD_TYPE_NULL:
+                                case CARBON_FIELD_TYPE_TRUE:
+                                case CARBON_FIELD_TYPE_FALSE:
+                                case CARBON_FIELD_TYPE_STRING:
+                                case CARBON_FIELD_TYPE_NUMBER_U8:
+                                case CARBON_FIELD_TYPE_NUMBER_U16:
+                                case CARBON_FIELD_TYPE_NUMBER_U32:
+                                case CARBON_FIELD_TYPE_NUMBER_U64:
+                                case CARBON_FIELD_TYPE_NUMBER_I8:
+                                case CARBON_FIELD_TYPE_NUMBER_I16:
+                                case CARBON_FIELD_TYPE_NUMBER_I32:
+                                case CARBON_FIELD_TYPE_NUMBER_I64:
+                                case CARBON_FIELD_TYPE_NUMBER_FLOAT:
+                                case CARBON_FIELD_TYPE_BINARY:
+                                case CARBON_FIELD_TYPE_BINARY_CUSTOM:
+                                        /* nothing to shrink, because there are no padded zeros here */
+                                        break;
+                                case CARBON_FIELD_TYPE_ARRAY: {
+                                        struct carbon_array_it nested_array_it;
+                                        carbon_array_it_create(&nested_array_it, &it->memfile, &it->err,
+                                                               it->field_access.nested_array_it->payload_start -
+                                                               sizeof(u8));
+                                        internal_pack_array(&nested_array_it);
+                                        assert(*memfile_peek(&nested_array_it.memfile, sizeof(char)) ==
+                                               CARBON_MARKER_ARRAY_END);
+                                        memfile_skip(&nested_array_it.memfile, sizeof(char));
+                                        memfile_seek(&it->memfile, memfile_tell(&nested_array_it.memfile));
+                                        carbon_array_it_drop(&nested_array_it);
+                                }
+                                        break;
+                                case CARBON_FIELD_TYPE_COLUMN_U8:
+                                case CARBON_FIELD_TYPE_COLUMN_U16:
+                                case CARBON_FIELD_TYPE_COLUMN_U32:
+                                case CARBON_FIELD_TYPE_COLUMN_U64:
+                                case CARBON_FIELD_TYPE_COLUMN_I8:
+                                case CARBON_FIELD_TYPE_COLUMN_I16:
+                                case CARBON_FIELD_TYPE_COLUMN_I32:
+                                case CARBON_FIELD_TYPE_COLUMN_I64:
+                                case CARBON_FIELD_TYPE_COLUMN_FLOAT:
+                                case CARBON_FIELD_TYPE_COLUMN_BOOLEAN:
+                                        carbon_column_it_rewind(it->field_access.nested_column_it);
+                                        internal_pack_column(it->field_access.nested_column_it);
+                                        memfile_seek(&it->memfile,
+                                                     memfile_tell(&it->field_access.nested_column_it->memfile));
+                                        break;
+                                case CARBON_FIELD_TYPE_OBJECT: {
+                                        struct carbon_object_it nested_object_it;
+                                        carbon_object_it_create(&nested_object_it, &it->memfile, &it->err,
+                                                                it->field_access.nested_object_it->payload_start -
+                                                                sizeof(u8));
+                                        internal_pack_object(&nested_object_it);
+                                        assert(*memfile_peek(&nested_object_it.memfile, sizeof(char)) ==
+                                               CARBON_MARKER_OBJECT_END);
+                                        memfile_skip(&nested_object_it.memfile, sizeof(char));
+                                        memfile_seek(&it->memfile, memfile_tell(&nested_object_it.memfile));
+                                        carbon_object_it_drop(&nested_object_it);
+                                }
+                                        break;
+                                default: error(&it->err, ARK_ERR_INTERNALERR);
+                                        return false;
                         }
                 }
         }
@@ -412,15 +423,14 @@ static bool internal_pack_object(struct carbon_object_it *it)
                         error_if(!is_empty_slot, &it->err, ARK_ERR_CORRUPTED);
                         offset_t first_empty_slot_offset = memfile_tell(&this_object_it.memfile);
                         char final;
-                        while ((final = *memfile_read(&this_object_it.memfile, sizeof(char))) == 0)
-                        { }
+                        while ((final = *memfile_read(&this_object_it.memfile, sizeof(char))) == 0) {}
                         assert(final == CARBON_MARKER_OBJECT_END);
                         offset_t last_empty_slot_offset = memfile_tell(&this_object_it.memfile) - sizeof(char);
                         memfile_seek(&this_object_it.memfile, first_empty_slot_offset);
                         assert(last_empty_slot_offset > first_empty_slot_offset);
 
                         memfile_inplace_remove(&this_object_it.memfile,
-                                last_empty_slot_offset - first_empty_slot_offset);
+                                               last_empty_slot_offset - first_empty_slot_offset);
 
                         final = *memfile_read(&this_object_it.memfile, sizeof(char));
                         assert(final == CARBON_MARKER_OBJECT_END);
@@ -435,60 +445,66 @@ static bool internal_pack_object(struct carbon_object_it *it)
                         enum carbon_field_type type;
                         carbon_object_it_prop_type(&type, it);
                         switch (type) {
-                        case CARBON_FIELD_TYPE_NULL:
-                        case CARBON_FIELD_TYPE_TRUE:
-                        case CARBON_FIELD_TYPE_FALSE:
-                        case CARBON_FIELD_TYPE_STRING:
-                        case CARBON_FIELD_TYPE_NUMBER_U8:
-                        case CARBON_FIELD_TYPE_NUMBER_U16:
-                        case CARBON_FIELD_TYPE_NUMBER_U32:
-                        case CARBON_FIELD_TYPE_NUMBER_U64:
-                        case CARBON_FIELD_TYPE_NUMBER_I8:
-                        case CARBON_FIELD_TYPE_NUMBER_I16:
-                        case CARBON_FIELD_TYPE_NUMBER_I32:
-                        case CARBON_FIELD_TYPE_NUMBER_I64:
-                        case CARBON_FIELD_TYPE_NUMBER_FLOAT:
-                        case CARBON_FIELD_TYPE_BINARY:
-                        case CARBON_FIELD_TYPE_BINARY_CUSTOM:
-                                /* nothing to shrink, because there are no padded zeros here */
-                                break;
-                        case CARBON_FIELD_TYPE_ARRAY: {
-                                struct carbon_array_it nested_array_it;
-                                carbon_array_it_create(&nested_array_it, &it->memfile, &it->err,
-                                        it->field_access.nested_array_it->payload_start - sizeof(u8));
-                                internal_pack_array(&nested_array_it);
-                                assert(*memfile_peek(&nested_array_it.memfile, sizeof(char)) == CARBON_MARKER_ARRAY_END);
-                                memfile_skip(&nested_array_it.memfile, sizeof(char));
-                                memfile_seek(&it->memfile, memfile_tell(&nested_array_it.memfile));
-                                carbon_array_it_drop(&nested_array_it);
-                        } break;
-                        case CARBON_FIELD_TYPE_COLUMN_U8:
-                        case CARBON_FIELD_TYPE_COLUMN_U16:
-                        case CARBON_FIELD_TYPE_COLUMN_U32:
-                        case CARBON_FIELD_TYPE_COLUMN_U64:
-                        case CARBON_FIELD_TYPE_COLUMN_I8:
-                        case CARBON_FIELD_TYPE_COLUMN_I16:
-                        case CARBON_FIELD_TYPE_COLUMN_I32:
-                        case CARBON_FIELD_TYPE_COLUMN_I64:
-                        case CARBON_FIELD_TYPE_COLUMN_FLOAT:
-                        case CARBON_FIELD_TYPE_COLUMN_BOOLEAN:
-                                carbon_column_it_rewind(it->field_access.nested_column_it);
-                                internal_pack_column(it->field_access.nested_column_it);
-                                memfile_seek(&it->memfile, memfile_tell(&it->field_access.nested_column_it->memfile));
-                                break;
-                        case CARBON_FIELD_TYPE_OBJECT: {
-                                struct carbon_object_it nested_object_it;
-                                carbon_object_it_create(&nested_object_it, &it->memfile, &it->err,
-                                        it->field_access.nested_object_it->payload_start - sizeof(u8));
-                                internal_pack_object(&nested_object_it);
-                                assert(*memfile_peek(&nested_object_it.memfile, sizeof(char)) == CARBON_MARKER_OBJECT_END);
-                                memfile_skip(&nested_object_it.memfile, sizeof(char));
-                                memfile_seek(&it->memfile, memfile_tell(&nested_object_it.memfile));
-                                carbon_object_it_drop(&nested_object_it);
-                        } break;
-                        default:
-                        error(&it->err, ARK_ERR_INTERNALERR);
-                                return false;
+                                case CARBON_FIELD_TYPE_NULL:
+                                case CARBON_FIELD_TYPE_TRUE:
+                                case CARBON_FIELD_TYPE_FALSE:
+                                case CARBON_FIELD_TYPE_STRING:
+                                case CARBON_FIELD_TYPE_NUMBER_U8:
+                                case CARBON_FIELD_TYPE_NUMBER_U16:
+                                case CARBON_FIELD_TYPE_NUMBER_U32:
+                                case CARBON_FIELD_TYPE_NUMBER_U64:
+                                case CARBON_FIELD_TYPE_NUMBER_I8:
+                                case CARBON_FIELD_TYPE_NUMBER_I16:
+                                case CARBON_FIELD_TYPE_NUMBER_I32:
+                                case CARBON_FIELD_TYPE_NUMBER_I64:
+                                case CARBON_FIELD_TYPE_NUMBER_FLOAT:
+                                case CARBON_FIELD_TYPE_BINARY:
+                                case CARBON_FIELD_TYPE_BINARY_CUSTOM:
+                                        /* nothing to shrink, because there are no padded zeros here */
+                                        break;
+                                case CARBON_FIELD_TYPE_ARRAY: {
+                                        struct carbon_array_it nested_array_it;
+                                        carbon_array_it_create(&nested_array_it, &it->memfile, &it->err,
+                                                               it->field_access.nested_array_it->payload_start -
+                                                               sizeof(u8));
+                                        internal_pack_array(&nested_array_it);
+                                        assert(*memfile_peek(&nested_array_it.memfile, sizeof(char)) ==
+                                               CARBON_MARKER_ARRAY_END);
+                                        memfile_skip(&nested_array_it.memfile, sizeof(char));
+                                        memfile_seek(&it->memfile, memfile_tell(&nested_array_it.memfile));
+                                        carbon_array_it_drop(&nested_array_it);
+                                }
+                                        break;
+                                case CARBON_FIELD_TYPE_COLUMN_U8:
+                                case CARBON_FIELD_TYPE_COLUMN_U16:
+                                case CARBON_FIELD_TYPE_COLUMN_U32:
+                                case CARBON_FIELD_TYPE_COLUMN_U64:
+                                case CARBON_FIELD_TYPE_COLUMN_I8:
+                                case CARBON_FIELD_TYPE_COLUMN_I16:
+                                case CARBON_FIELD_TYPE_COLUMN_I32:
+                                case CARBON_FIELD_TYPE_COLUMN_I64:
+                                case CARBON_FIELD_TYPE_COLUMN_FLOAT:
+                                case CARBON_FIELD_TYPE_COLUMN_BOOLEAN:
+                                        carbon_column_it_rewind(it->field_access.nested_column_it);
+                                        internal_pack_column(it->field_access.nested_column_it);
+                                        memfile_seek(&it->memfile,
+                                                     memfile_tell(&it->field_access.nested_column_it->memfile));
+                                        break;
+                                case CARBON_FIELD_TYPE_OBJECT: {
+                                        struct carbon_object_it nested_object_it;
+                                        carbon_object_it_create(&nested_object_it, &it->memfile, &it->err,
+                                                                it->field_access.nested_object_it->payload_start -
+                                                                sizeof(u8));
+                                        internal_pack_object(&nested_object_it);
+                                        assert(*memfile_peek(&nested_object_it.memfile, sizeof(char)) ==
+                                               CARBON_MARKER_OBJECT_END);
+                                        memfile_skip(&nested_object_it.memfile, sizeof(char));
+                                        memfile_seek(&it->memfile, memfile_tell(&nested_object_it.memfile));
+                                        carbon_object_it_drop(&nested_object_it);
+                                }
+                                        break;
+                                default: error(&it->err, ARK_ERR_INTERNALERR);
+                                        return false;
                         }
                 }
         }
@@ -503,13 +519,12 @@ static bool internal_pack_column(struct carbon_column_it *it)
         assert(it);
 
         u32 free_space = (it->column_capacity - it->column_num_elements) * carbon_int_get_type_value_size(it->type);
+        offset_t payload_start = carbon_int_column_get_payload_off(it);
+        u64 payload_size = it->column_num_elements * carbon_int_get_type_value_size(it->type);
+        memfile_seek(&it->memfile, payload_start);
+        memfile_skip(&it->memfile, payload_size);
+
         if (free_space > 0) {
-                offset_t payload_start = carbon_int_column_get_payload_off(it);
-                u64 payload_size = it->column_num_elements * carbon_int_get_type_value_size(it->type);
-
-                memfile_seek(&it->memfile, payload_start);
-                memfile_skip(&it->memfile, payload_size);
-
                 memfile_inplace_remove(&it->memfile, free_space);
 
                 memfile_seek(&it->memfile, it->num_and_capacity_start_offset);
@@ -534,7 +549,7 @@ static bool carbon_header_rev_inc(struct carbon *doc)
 {
         assert(doc);
 
-        enum carbon_primary_key_type key_type;
+        enum carbon_key_type key_type;
         memfile_save_position(&doc->memfile);
         memfile_seek(&doc->memfile, 0);
         carbon_key_read(NULL, &key_type, &doc->memfile);

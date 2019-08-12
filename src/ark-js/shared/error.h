@@ -164,45 +164,45 @@ static const char *const _err_str[] =
          "Object was modified but is out of date", "Object is currently being updated; no read allowed",
          "Illegal operation", "Unsupported type", "Unsupported container for data type",
          "Adding integers with this function will perform an auto casting to the smallest type required to store "
-                 "the integer value. Since you push integers with this function into an column container that is bound "
-                 "to a specific type, any insertion function call will fail once the integer value requires a larger "
-                 "(or smaller) type than the fist value added to the container. Use '*_insert_X' instead, where X is "
-                 "u8, u16,..., u32 resp. i8, i16,..., i32. ", "parsing error dot ('.') expected",
-        "parsing error key name or array index expected", "parsing error: unknown token",
-        "dot-notated path could not be parsed", "Illegal state", "Unsupported data type", "Operation failed",
-        "Cleanup operation failed; potentially a memory leak occurred", "dot-notated path could not be compiled"};
+         "the integer value. Since you push integers with this function into an column container that is bound "
+         "to a specific type, any insertion function call will fail once the integer value requires a larger "
+         "(or smaller) type than the fist value added to the container. Use '*_insert_X' instead, where X is "
+         "u8, u16,..., u32 resp. i8, i16,..., i32. ", "parsing error dot ('.') expected",
+         "parsing error key name or array index expected", "parsing error: unknown token",
+         "dot-notated path could not be parsed", "Illegal state", "Unsupported data type", "Operation failed",
+         "Cleanup operation failed; potentially a memory leak occurred", "dot-notated path could not be compiled"};
 
 #define ARK_ERRSTR_ILLEGAL_CODE "illegal error code"
 
 static const int _nerr_str = ARK_ARRAY_LENGTH(_err_str);
 
 struct err {
-        int code;
-        const char *file;
-        u32 line;
-        char *details;
+    int code;
+    const char *file;
+    u32 line;
+    char *details;
 };
 
-ARK_EXPORT(bool) error_init(struct err *err);
+bool error_init(struct err *err);
 
-ARK_EXPORT(bool) error_cpy(struct err *dst, const struct err *src);
+bool error_cpy(struct err *dst, const struct err *src);
 
-ARK_EXPORT(bool) error_drop(struct err *err);
+bool error_drop(struct err *err);
 
-ARK_EXPORT(bool) error_set(struct err *err, int code, const char *file, u32 line);
+bool error_set(struct err *err, int code, const char *file, u32 line);
 
-ARK_EXPORT(bool) error_set_wdetails(struct err *err, int code, const char *file, u32 line, const char *details);
+bool error_set_wdetails(struct err *err, int code, const char *file, u32 line, const char *details);
 
-ARK_EXPORT(bool) error_set_no_abort(struct err *err, int code, const char *file, u32 line);
+bool error_set_no_abort(struct err *err, int code, const char *file, u32 line);
 
-ARK_EXPORT(bool) error_set_wdetails_no_abort(struct err *err, int code, const char *file, u32 line, const char *details);
+bool error_set_wdetails_no_abort(struct err *err, int code, const char *file, u32 line, const char *details);
 
-ARK_EXPORT(bool) error_str(const char **errstr, const char **file, u32 *line, bool *details, const char **detailsstr,
-        const struct err *err);
+bool error_str(const char **errstr, const char **file, u32 *line, bool *details, const char **detailsstr,
+               const struct err *err);
 
-ARK_EXPORT(bool) error_print_to_stderr(const struct err *err);
+bool error_print_to_stderr(const struct err *err);
 
-ARK_EXPORT(bool) error_print_and_abort(const struct err *err);
+bool error_print_and_abort(const struct err *err);
 
 #define error_occurred(x)                   ((x)->err.code != ARK_ERR_NOERR)
 
@@ -215,7 +215,6 @@ ARK_EXPORT(bool) error_print_and_abort(const struct err *err);
 
 #define success_else_null(expr, err)           success_else_return(expr, err, ARK_ERR_FAILED, NULL)
 #define success_else_fail(expr, err)           success_else_return(expr, err, ARK_ERR_FAILED, false)
-
 
 
 #define error(err, code)                     error_if (true, err, code)

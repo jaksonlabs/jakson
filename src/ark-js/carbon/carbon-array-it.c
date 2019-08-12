@@ -26,7 +26,7 @@
 #include <ark-js/carbon/carbon-int.h>
 
 #define DEFINE_IN_PLACE_UPDATE_FUNCTION(type_name, field_type)                                                         \
-ARK_EXPORT(bool) carbon_array_it_update_in_place_##type_name(struct carbon_array_it *it, type_name value)                \
+bool carbon_array_it_update_in_place_##type_name(struct carbon_array_it *it, type_name value)                \
 {                                                                                                                      \
         offset_t datum = 0;                                                                                                \
         error_if_null(it);                                                                                             \
@@ -44,13 +44,21 @@ ARK_EXPORT(bool) carbon_array_it_update_in_place_##type_name(struct carbon_array
 }
 
 DEFINE_IN_PLACE_UPDATE_FUNCTION(u8, CARBON_FIELD_TYPE_NUMBER_U8)
+
 DEFINE_IN_PLACE_UPDATE_FUNCTION(u16, CARBON_FIELD_TYPE_NUMBER_U16)
+
 DEFINE_IN_PLACE_UPDATE_FUNCTION(u32, CARBON_FIELD_TYPE_NUMBER_U32)
+
 DEFINE_IN_PLACE_UPDATE_FUNCTION(u64, CARBON_FIELD_TYPE_NUMBER_U64)
+
 DEFINE_IN_PLACE_UPDATE_FUNCTION(i8, CARBON_FIELD_TYPE_NUMBER_I8)
+
 DEFINE_IN_PLACE_UPDATE_FUNCTION(i16, CARBON_FIELD_TYPE_NUMBER_I16)
+
 DEFINE_IN_PLACE_UPDATE_FUNCTION(i32, CARBON_FIELD_TYPE_NUMBER_I32)
+
 DEFINE_IN_PLACE_UPDATE_FUNCTION(i64, CARBON_FIELD_TYPE_NUMBER_I64)
+
 DEFINE_IN_PLACE_UPDATE_FUNCTION(float, CARBON_FIELD_TYPE_NUMBER_FLOAT)
 
 static bool update_in_place_constant(struct carbon_array_it *it, enum carbon_constant constant)
@@ -62,18 +70,17 @@ static bool update_in_place_constant(struct carbon_array_it *it, enum carbon_con
         if (carbon_field_type_is_constant(it->field_access.it_field_type)) {
                 u8 value;
                 switch (constant) {
-                case CARBON_CONSTANT_TRUE:
-                        value = CARBON_FIELD_TYPE_TRUE;
-                        break;
-                case CARBON_CONSTANT_FALSE:
-                        value = CARBON_FIELD_TYPE_FALSE;
-                        break;
-                case CARBON_CONSTANT_NULL:
-                        value = CARBON_FIELD_TYPE_NULL;
-                        break;
-                default:
-                error(&it->err, ARK_ERR_INTERNALERR);
-                        break;
+                        case CARBON_CONSTANT_TRUE:
+                                value = CARBON_FIELD_TYPE_TRUE;
+                                break;
+                        case CARBON_CONSTANT_FALSE:
+                                value = CARBON_FIELD_TYPE_FALSE;
+                                break;
+                        case CARBON_CONSTANT_NULL:
+                                value = CARBON_FIELD_TYPE_NULL;
+                                break;
+                        default: error(&it->err, ARK_ERR_INTERNALERR);
+                                break;
                 }
                 offset_t datum = 0;
                 carbon_int_array_it_offset(&datum, it);
@@ -85,18 +92,17 @@ static bool update_in_place_constant(struct carbon_array_it *it, enum carbon_con
                 carbon_array_it_insert_begin(&ins, it);
 
                 switch (constant) {
-                case CARBON_CONSTANT_TRUE:
-                        carbon_insert_true(&ins);
-                        break;
-                case CARBON_CONSTANT_FALSE:
-                        carbon_insert_false(&ins);
-                        break;
-                case CARBON_CONSTANT_NULL:
-                        carbon_insert_null(&ins);
-                        break;
-                default:
-                error(&it->err, ARK_ERR_INTERNALERR);
-                        break;
+                        case CARBON_CONSTANT_TRUE:
+                                carbon_insert_true(&ins);
+                                break;
+                        case CARBON_CONSTANT_FALSE:
+                                carbon_insert_false(&ins);
+                                break;
+                        case CARBON_CONSTANT_NULL:
+                                carbon_insert_null(&ins);
+                                break;
+                        default: error(&it->err, ARK_ERR_INTERNALERR);
+                                break;
                 }
 
                 carbon_array_it_insert_end(&ins);
@@ -106,23 +112,23 @@ static bool update_in_place_constant(struct carbon_array_it *it, enum carbon_con
         return true;
 }
 
-ARK_EXPORT(bool) carbon_array_it_update_in_place_true(struct carbon_array_it *it)
+bool carbon_array_it_update_in_place_true(struct carbon_array_it *it)
 {
         return update_in_place_constant(it, CARBON_CONSTANT_TRUE);
 }
 
-ARK_EXPORT(bool) carbon_array_it_update_in_place_false(struct carbon_array_it *it)
+bool carbon_array_it_update_in_place_false(struct carbon_array_it *it)
 {
         return update_in_place_constant(it, CARBON_CONSTANT_FALSE);
 }
 
-ARK_EXPORT(bool) carbon_array_it_update_in_place_null(struct carbon_array_it *it)
+bool carbon_array_it_update_in_place_null(struct carbon_array_it *it)
 {
         return update_in_place_constant(it, CARBON_CONSTANT_NULL);
 }
 
-ARK_EXPORT(bool) carbon_array_it_create(struct carbon_array_it *it, struct memfile *memfile, struct err *err,
-                                       offset_t payload_start)
+bool carbon_array_it_create(struct carbon_array_it *it, struct memfile *memfile, struct err *err,
+                            offset_t payload_start)
 {
         error_if_null(it);
         error_if_null(memfile);
@@ -144,7 +150,7 @@ ARK_EXPORT(bool) carbon_array_it_create(struct carbon_array_it *it, struct memfi
 
         u8 marker = *memfile_read(&it->memfile, sizeof(u8));
         error_if_with_details(marker != CARBON_MARKER_ARRAY_BEGIN, err, ARK_ERR_ILLEGALOP,
-                "array begin marker ('[') not found");
+                              "array begin marker ('[') not found");
 
         it->payload_start += sizeof(u8);
 
@@ -155,7 +161,7 @@ ARK_EXPORT(bool) carbon_array_it_create(struct carbon_array_it *it, struct memfi
         return true;
 }
 
-ARK_EXPORT(bool) carbon_array_it_copy(struct carbon_array_it *dst, struct carbon_array_it *src)
+bool carbon_array_it_copy(struct carbon_array_it *dst, struct carbon_array_it *src)
 {
         error_if_null(dst);
         error_if_null(src);
@@ -163,7 +169,7 @@ ARK_EXPORT(bool) carbon_array_it_copy(struct carbon_array_it *dst, struct carbon
         return true;
 }
 
-ARK_EXPORT(bool) carbon_array_it_clone(struct carbon_array_it *dst, struct carbon_array_it *src)
+bool carbon_array_it_clone(struct carbon_array_it *dst, struct carbon_array_it *src)
 {
         memfile_clone(&dst->memfile, &src->memfile);
         dst->payload_start = src->payload_start;
@@ -176,14 +182,35 @@ ARK_EXPORT(bool) carbon_array_it_clone(struct carbon_array_it *dst, struct carbo
         return true;
 }
 
-ARK_EXPORT(bool) carbon_array_it_readonly(struct carbon_array_it *it)
+bool carbon_array_it_readonly(struct carbon_array_it *it)
 {
         error_if_null(it);
         it->memfile.mode = READ_ONLY;
         return true;
 }
 
-ARK_EXPORT(bool) carbon_array_it_drop(struct carbon_array_it *it)
+bool carbon_array_it_length(u64 *len, struct carbon_array_it *it)
+{
+        error_if_null(len)
+        error_if_null(it)
+
+        u64 num_elem = 0;
+        carbon_array_it_rewind(it);
+        while (carbon_array_it_next(it)) {
+                num_elem++;
+        }
+        *len = num_elem;
+
+        return true;
+}
+
+bool carbon_array_it_is_empty(struct carbon_array_it *it)
+{
+        carbon_array_it_rewind(it);
+        return carbon_array_it_next(it);
+}
+
+bool carbon_array_it_drop(struct carbon_array_it *it)
 {
         carbon_int_field_auto_close(&it->field_access);
         carbon_int_field_access_drop(&it->field_access);
@@ -194,7 +221,7 @@ ARK_EXPORT(bool) carbon_array_it_drop(struct carbon_array_it *it)
 /**
  * Locks the iterator with a spinlock. A call to <code>carbon_array_it_unlock</code> is required for unlocking.
  */
-ARK_EXPORT(bool) carbon_array_it_lock(struct carbon_array_it *it)
+bool carbon_array_it_lock(struct carbon_array_it *it)
 {
         error_if_null(it);
         spin_acquire(&it->lock);
@@ -204,14 +231,14 @@ ARK_EXPORT(bool) carbon_array_it_lock(struct carbon_array_it *it)
 /**
  * Unlocks the iterator
  */
-ARK_EXPORT(bool) carbon_array_it_unlock(struct carbon_array_it *it)
+bool carbon_array_it_unlock(struct carbon_array_it *it)
 {
         error_if_null(it);
         spin_release(&it->lock);
         return true;
 }
 
-ARK_EXPORT(bool) carbon_array_it_rewind(struct carbon_array_it *it)
+bool carbon_array_it_rewind(struct carbon_array_it *it)
 {
         error_if_null(it);
         error_if(it->payload_start >= memfile_size(&it->memfile), &it->err, ARK_ERR_OUTOFBOUNDS);
@@ -229,7 +256,27 @@ static void auto_adjust_pos_after_mod(struct carbon_array_it *it)
         }
 }
 
-ARK_EXPORT(bool) carbon_array_it_next(struct carbon_array_it *it)
+bool carbon_array_it_has_next(struct carbon_array_it *it)
+{
+        bool has_next = carbon_array_it_next(it);
+        carbon_array_it_prev(it);
+        return has_next;
+}
+
+bool carbon_array_it_is_unit(struct carbon_array_it *it)
+{
+        bool has_next = carbon_array_it_next(it);
+        if (has_next) {
+                has_next = carbon_array_it_next(it);
+                carbon_array_it_prev(it);
+                carbon_array_it_prev(it);
+                return !has_next;
+        }
+        carbon_array_it_prev(it);
+        return false;
+}
+
+bool carbon_array_it_next(struct carbon_array_it *it)
 {
         error_if_null(it);
         bool is_empty_slot = true;
@@ -249,13 +296,13 @@ ARK_EXPORT(bool) carbon_array_it_next(struct carbon_array_it *it)
                                 memfile_skip(&it->memfile, 1);
                         }
                 }
-                assert( *memfile_peek(&it->memfile, sizeof(char)) == CARBON_MARKER_ARRAY_END);
+                assert(*memfile_peek(&it->memfile, sizeof(char)) == CARBON_MARKER_ARRAY_END);
                 carbon_int_field_auto_close(&it->field_access);
                 return false;
         }
 }
 
-ARK_EXPORT(bool) carbon_array_it_prev(struct carbon_array_it *it)
+bool carbon_array_it_prev(struct carbon_array_it *it)
 {
         error_if_null(it);
         if (carbon_int_history_has(&it->history)) {
@@ -267,7 +314,7 @@ ARK_EXPORT(bool) carbon_array_it_prev(struct carbon_array_it *it)
         }
 }
 
-ARK_EXPORT(offset_t) carbon_array_it_tell(struct carbon_array_it *it)
+offset_t carbon_array_it_tell(struct carbon_array_it *it)
 {
         if (likely(it != NULL)) {
                 return memfile_tell(&it->memfile);
@@ -277,7 +324,7 @@ ARK_EXPORT(offset_t) carbon_array_it_tell(struct carbon_array_it *it)
         }
 }
 
-ARK_EXPORT(bool) carbon_int_array_it_offset(offset_t *off, struct carbon_array_it *it)
+bool carbon_int_array_it_offset(offset_t *off, struct carbon_array_it *it)
 {
         error_if_null(off)
         error_if_null(it)
@@ -288,116 +335,115 @@ ARK_EXPORT(bool) carbon_int_array_it_offset(offset_t *off, struct carbon_array_i
         return false;
 }
 
-ARK_EXPORT(bool) carbon_array_it_fast_forward(struct carbon_array_it *it)
+bool carbon_array_it_fast_forward(struct carbon_array_it *it)
 {
         error_if_null(it);
-        while (carbon_array_it_next(it))
-                { }
+        while (carbon_array_it_next(it)) {}
 
         assert(*memfile_peek(&it->memfile, sizeof(char)) == CARBON_MARKER_ARRAY_END);
         memfile_skip(&it->memfile, sizeof(char));
         return true;
 }
 
-ARK_EXPORT(bool) carbon_array_it_field_type(enum carbon_field_type *type, struct carbon_array_it *it)
+bool carbon_array_it_field_type(enum carbon_field_type *type, struct carbon_array_it *it)
 {
         return carbon_int_field_access_field_type(type, &it->field_access);
 }
 
-ARK_EXPORT(bool) carbon_array_it_u8_value(u8 *value, struct carbon_array_it *it)
+bool carbon_array_it_u8_value(u8 *value, struct carbon_array_it *it)
 {
         return carbon_int_field_access_u8_value(value, &it->field_access, &it->err);
 }
 
-ARK_EXPORT(bool) carbon_array_it_u16_value(u16 *value, struct carbon_array_it *it)
+bool carbon_array_it_u16_value(u16 *value, struct carbon_array_it *it)
 {
         return carbon_int_field_access_u16_value(value, &it->field_access, &it->err);
 }
 
-ARK_EXPORT(bool) carbon_array_it_u32_value(u32 *value, struct carbon_array_it *it)
+bool carbon_array_it_u32_value(u32 *value, struct carbon_array_it *it)
 {
         return carbon_int_field_access_u32_value(value, &it->field_access, &it->err);
 }
 
-ARK_EXPORT(bool) carbon_array_it_u64_value(u64 *value, struct carbon_array_it *it)
+bool carbon_array_it_u64_value(u64 *value, struct carbon_array_it *it)
 {
         return carbon_int_field_access_u64_value(value, &it->field_access, &it->err);
 }
 
-ARK_EXPORT(bool) carbon_array_it_i8_value(i8 *value, struct carbon_array_it *it)
+bool carbon_array_it_i8_value(i8 *value, struct carbon_array_it *it)
 {
         return carbon_int_field_access_i8_value(value, &it->field_access, &it->err);
 }
 
-ARK_EXPORT(bool) carbon_array_it_i16_value(i16 *value, struct carbon_array_it *it)
+bool carbon_array_it_i16_value(i16 *value, struct carbon_array_it *it)
 {
         return carbon_int_field_access_i16_value(value, &it->field_access, &it->err);
 }
 
-ARK_EXPORT(bool) carbon_array_it_i32_value(i32 *value, struct carbon_array_it *it)
+bool carbon_array_it_i32_value(i32 *value, struct carbon_array_it *it)
 {
         return carbon_int_field_access_i32_value(value, &it->field_access, &it->err);
 }
 
-ARK_EXPORT(bool) carbon_array_it_i64_value(i64 *value, struct carbon_array_it *it)
+bool carbon_array_it_i64_value(i64 *value, struct carbon_array_it *it)
 {
         return carbon_int_field_access_i64_value(value, &it->field_access, &it->err);
 }
 
-ARK_EXPORT(bool) carbon_array_it_float_value(bool *is_null_in, float *value, struct carbon_array_it *it)
+bool carbon_array_it_float_value(bool *is_null_in, float *value, struct carbon_array_it *it)
 {
         return carbon_int_field_access_float_value(is_null_in, value, &it->field_access, &it->err);
 }
 
-ARK_EXPORT(bool) carbon_array_it_signed_value(bool *is_null_in, i64 *value, struct carbon_array_it *it)
+bool carbon_array_it_signed_value(bool *is_null_in, i64 *value, struct carbon_array_it *it)
 {
         return carbon_int_field_access_signed_value(is_null_in, value, &it->field_access, &it->err);
 }
 
-ARK_EXPORT(bool) carbon_array_it_unsigned_value(bool *is_null_in, u64 *value, struct carbon_array_it *it)
+bool carbon_array_it_unsigned_value(bool *is_null_in, u64 *value, struct carbon_array_it *it)
 {
         return carbon_int_field_access_unsigned_value(is_null_in, value, &it->field_access, &it->err);
 }
 
-ARK_EXPORT(const char *) carbon_array_it_string_value(u64 *strlen, struct carbon_array_it *it)
+const char *carbon_array_it_string_value(u64 *strlen, struct carbon_array_it *it)
 {
         return carbon_int_field_access_string_value(strlen, &it->field_access, &it->err);
 }
 
-ARK_EXPORT(bool) carbon_array_it_binary_value(struct carbon_binary *out, struct carbon_array_it *it)
+bool carbon_array_it_binary_value(struct carbon_binary *out, struct carbon_array_it *it)
 {
         return carbon_int_field_access_binary_value(out, &it->field_access, &it->err);
 }
 
-ARK_EXPORT(struct carbon_array_it *) carbon_array_it_array_value(struct carbon_array_it *it_in)
+struct carbon_array_it *carbon_array_it_array_value(struct carbon_array_it *it_in)
 {
         return carbon_int_field_access_array_value(&it_in->field_access, &it_in->err);
 }
 
-ARK_EXPORT(struct carbon_object_it *) carbon_array_it_object_value(struct carbon_array_it *it_in)
+struct carbon_object_it *carbon_array_it_object_value(struct carbon_array_it *it_in)
 {
         return carbon_int_field_access_object_value(&it_in->field_access, &it_in->err);
 }
 
-ARK_EXPORT(struct carbon_column_it *) carbon_array_it_column_value(struct carbon_array_it *it_in)
+struct carbon_column_it *carbon_array_it_column_value(struct carbon_array_it *it_in)
 {
         return carbon_int_field_access_column_value(&it_in->field_access, &it_in->err);
 }
 
-ARK_EXPORT(bool) carbon_array_it_insert_begin(struct carbon_insert *inserter, struct carbon_array_it *it)
+bool carbon_array_it_insert_begin(struct carbon_insert *inserter, struct carbon_array_it *it)
 {
         error_if_null(inserter)
         error_if_null(it)
         return carbon_int_insert_create_for_array(inserter, it);
 }
 
-ARK_EXPORT(bool) carbon_array_it_insert_end(struct carbon_insert *inserter)
+bool carbon_array_it_insert_end(struct carbon_insert *inserter)
 {
         error_if_null(inserter)
         return carbon_insert_drop(inserter);
 }
 
-ARK_EXPORT(bool) carbon_array_it_remove(struct carbon_array_it *it)
+bool carbon_array_it_remove(struct carbon_array_it *it)
 {
         error_if_null(it);
         enum carbon_field_type type;

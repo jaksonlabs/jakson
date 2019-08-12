@@ -82,101 +82,101 @@ ARK_BEGIN_DECL
 struct strhash;
 
 enum strhash_tag {
-        MEMORY_RESIDENT
+    MEMORY_RESIDENT
 };
 
 struct strhash_counters {
-        size_t num_bucket_search_miss;
-        size_t num_bucket_search_hit;
-        size_t num_bucket_cache_search_miss;
-        size_t num_bucket_cache_search_hit;
+    size_t num_bucket_search_miss;
+    size_t num_bucket_search_hit;
+    size_t num_bucket_cache_search_miss;
+    size_t num_bucket_cache_search_hit;
 };
 
 struct strhash {
-        /**
-         * Implementation-specific values
-         */
-        void *extra;
+    /**
+     * Implementation-specific values
+     */
+    void *extra;
 
-        /**
-         * Implementation tag
-         */
-        enum strhash_tag tag;
+    /**
+     * Implementation tag
+     */
+    enum strhash_tag tag;
 
-        /**
-         * Statistics to lookup misses and hits
-         *
-         * <b>Note</b>: Implementation must maintain counters by itself
-         */
-        struct strhash_counters counters;
+    /**
+     * Statistics to lookup misses and hits
+     *
+     * <b>Note</b>: Implementation must maintain counters by itself
+     */
+    struct strhash_counters counters;
 
-        /**
-        *  Memory allocator that is used to get memory for user data
-        */
-        struct allocator allocator;
+    /**
+    *  Memory allocator that is used to get memory for user data
+    */
+    struct allocator allocator;
 
-        /**
-         *  Frees resources bound to <code>self</code> via the allocator specified by the constructor
-         */
-        int (*drop)(struct strhash *self);
+    /**
+     *  Frees resources bound to <code>self</code> via the allocator specified by the constructor
+     */
+    int (*drop)(struct strhash *self);
 
-        /**
-         * Put <code>num_pair</code> objects into this parallel_map_exec maybe updating old objects with the same key.
-         */
-        int (*put_bulk_safe)(struct strhash *self, char *const *keys, const field_sid_t *values, size_t npairs);
+    /**
+     * Put <code>num_pair</code> objects into this parallel_map_exec maybe updating old objects with the same key.
+     */
+    int (*put_bulk_safe)(struct strhash *self, char *const *keys, const field_sid_t *values, size_t npairs);
 
-        /**
-         * Put <code>num_pair</code> objects into this parallel_map_exec maybe without checking for updates.
-         */
-        int (*put_bulk_fast)(struct strhash *self, char *const *keys, const field_sid_t *values, size_t npairs);
+    /**
+     * Put <code>num_pair</code> objects into this parallel_map_exec maybe without checking for updates.
+     */
+    int (*put_bulk_fast)(struct strhash *self, char *const *keys, const field_sid_t *values, size_t npairs);
 
-        /**
-         * Same as 'put_safe_bulk' but specialized for a single element
-         */
-        int (*put_exact_safe)(struct strhash *self, const char *key, field_sid_t value);
+    /**
+     * Same as 'put_safe_bulk' but specialized for a single element
+     */
+    int (*put_exact_safe)(struct strhash *self, const char *key, field_sid_t value);
 
-        /**
-         * Same as 'put_fast_bulk' but specialized for a single element
-         */
-        int (*put_exact_fast)(struct strhash *self, const char *key, field_sid_t value);
+    /**
+     * Same as 'put_fast_bulk' but specialized for a single element
+     */
+    int (*put_exact_fast)(struct strhash *self, const char *key, field_sid_t value);
 
-        /**
-         * Get the values associated with <code>keys</code> in this parallel_map_exec (if any).
-         */
-        int (*get_bulk_safe)(struct strhash *self, field_sid_t **out, bool **found_mask, size_t *nnot_found,
-                char *const *keys, size_t nkeys);
+    /**
+     * Get the values associated with <code>keys</code> in this parallel_map_exec (if any).
+     */
+    int (*get_bulk_safe)(struct strhash *self, field_sid_t **out, bool **found_mask, size_t *nnot_found,
+                         char *const *keys, size_t nkeys);
 
-        /**
-         * The same as 'get_safe_bulk' but optimized for a single element
-         */
-        int (*get_exact_safe)(struct strhash *self, field_sid_t *out, bool *found_mask, const char *key);
+    /**
+     * The same as 'get_safe_bulk' but optimized for a single element
+     */
+    int (*get_exact_safe)(struct strhash *self, field_sid_t *out, bool *found_mask, const char *key);
 
-        /**
-         * Get the values associated with <code>keys</code> in this parallel_map_exec. All keys <u>must</u> exist.
-         */
-        int (*get_fast)(struct strhash *self, field_sid_t **out, char *const *keys, size_t nkeys);
+    /**
+     * Get the values associated with <code>keys</code> in this parallel_map_exec. All keys <u>must</u> exist.
+     */
+    int (*get_fast)(struct strhash *self, field_sid_t **out, char *const *keys, size_t nkeys);
 
-        /**
-         * Updates keys associated with <code>values</code> in this parallel_map_exec. All values <u>must</u> exist, and the
-         * mapping between keys and values must be bidirectional.
-         */
-        int (*update_key_fast)(struct strhash *self, const field_sid_t *values, char *const *keys, size_t nkeys);
+    /**
+     * Updates keys associated with <code>values</code> in this parallel_map_exec. All values <u>must</u> exist, and the
+     * mapping between keys and values must be bidirectional.
+     */
+    int (*update_key_fast)(struct strhash *self, const field_sid_t *values, char *const *keys, size_t nkeys);
 
-        /**
-         * Removes the objects with the gives keys from this parallel_map_exec
-         */
-        int (*remove)(struct strhash *self, char *const *keys, size_t nkeys);
+    /**
+     * Removes the objects with the gives keys from this parallel_map_exec
+     */
+    int (*remove)(struct strhash *self, char *const *keys, size_t nkeys);
 
-        /**
-         * Frees up allocated memory for <code>ptr</code> via the allocator in <code>parallel_map_exec</code> that was specified
-         * by the call to <code>string_id_map_create</code>
-         */
-        int (*free)(struct strhash *self, void *ptr);
+    /**
+     * Frees up allocated memory for <code>ptr</code> via the allocator in <code>parallel_map_exec</code> that was specified
+     * by the call to <code>string_id_map_create</code>
+     */
+    int (*free)(struct strhash *self, void *ptr);
 
-        /**
-         *  Error information
-         */
-        struct err err;
+    /**
+     *  Error information
+     */
+    struct err err;
 
 };
 
@@ -235,7 +235,7 @@ inline static int strhash_get_counters(struct strhash_counters *out, const struc
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
 inline static int strhash_put_safe(struct strhash *parallel_map_exec, char *const *keys, const field_sid_t *values,
-        size_t npairs)
+                                   size_t npairs)
 {
         error_if_null(parallel_map_exec);
         error_if_null(keys);
@@ -261,7 +261,7 @@ inline static int strhash_put_safe(struct strhash *parallel_map_exec, char *cons
  * @return <code>true</code> in case of success, otherwise a value indiciating the error.
  */
 inline static int strhash_put_bulk_fast(struct strhash *parallel_map_exec, char *const *keys, const field_sid_t *values,
-        size_t npairs)
+                                        size_t npairs)
 {
         error_if_null(parallel_map_exec);
         error_if_null(keys);
@@ -324,7 +324,7 @@ inline static int strhash_put_exact_fast(struct strhash *parallel_map_exec, cons
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
 inline static int strhash_get_bulk_safe(field_sid_t **out, bool **found_mask, size_t *num_not_found,
-        struct strhash *parallel_map_exec, char *const *keys, size_t nkeys)
+                                        struct strhash *parallel_map_exec, char *const *keys, size_t nkeys)
 {
         error_if_null(out);
         error_if_null(found_mask);
@@ -342,7 +342,7 @@ inline static int strhash_get_bulk_safe(field_sid_t **out, bool **found_mask, si
 }
 
 inline static int strhash_get_bulk_safe_exact(field_sid_t *out, bool *found, struct strhash *parallel_map_exec,
-        const char *key)
+                                              const char *key)
 {
         error_if_null(out);
         error_if_null(found);
@@ -374,7 +374,7 @@ inline static int strhash_get_bulk_safe_exact(field_sid_t *out, bool *found, str
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
 inline static int strhash_get_bulk_fast(field_sid_t **out, struct strhash *parallel_map_exec, char *const *keys,
-        size_t nkeys)
+                                        size_t nkeys)
 {
         error_if_null(out);
         error_if_null(parallel_map_exec);
@@ -400,7 +400,7 @@ inline static int strhash_get_bulk_fast(field_sid_t **out, struct strhash *paral
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
 inline static int strhash_update_fast(struct strhash *parallel_map_exec, const field_sid_t *values, char *const *keys,
-        size_t nkeys)
+                                      size_t nkeys)
 {
         error_if_null(parallel_map_exec);
         error_if_null(keys);

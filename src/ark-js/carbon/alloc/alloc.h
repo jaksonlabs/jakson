@@ -37,40 +37,40 @@ ARK_BEGIN_DECL
     alloc_free(alloc, name)
 
 struct allocator {
-        /**
-         *  Implementation-specific data (private fields etc.)
-         *  This pointer may point to NULL.
-         */
-        void *extra;
+    /**
+     *  Implementation-specific data (private fields etc.)
+     *  This pointer may point to NULL.
+     */
+    void *extra;
 
-        /**
-         *  Error information
-         */
-        struct err err;
+    /**
+     *  Error information
+     */
+    struct err err;
 
-        /**
-         *  Implementation to call memory allocation.
-         */
-        void *(*malloc)(struct allocator *self, size_t size);
+    /**
+     *  Implementation to call memory allocation.
+     */
+    void *(*malloc)(struct allocator *self, size_t size);
 
-        /**
-         *  Implementation to call memory re-allocation.
-         */
-        void *(*realloc)(struct allocator *self, void *ptr, size_t size);
+    /**
+     *  Implementation to call memory re-allocation.
+     */
+    void *(*realloc)(struct allocator *self, void *ptr, size_t size);
 
-        /**
-         *  Implementation to call freeing up memory.
-         *  Depending on the strategy, freeing up memory might be lazy.
-         */
-        void (*free)(struct allocator *self, void *ptr);
+    /**
+     *  Implementation to call freeing up memory.
+     *  Depending on the strategy, freeing up memory might be lazy.
+     */
+    void (*free)(struct allocator *self, void *ptr);
 
-        /**
-         *  Perform a deep copy of this allocator including implementation-specific data stored in 'extra'
-         *
-         * @param dst non-null target in which 'self' should be cloned
-         * @param self non-null source which should be clones in 'dst'
-         */
-        void (*clone)(struct allocator *dst, const struct allocator *self);
+    /**
+     *  Perform a deep copy of this allocator including implementation-specific data stored in 'extra'
+     *
+     * @param dst non-null target in which 'self' should be cloned
+     * @param self non-null source which should be clones in 'dst'
+     */
+    void (*clone)(struct allocator *dst, const struct allocator *self);
 };
 
 /**
@@ -79,7 +79,7 @@ struct allocator {
  * @param alloc must be non-null
  * @return STATUS_OK in case of non-null parameter alloc, STATUS_NULLPTR otherwise
  */
-ARK_EXPORT (bool) alloc_create_std(struct allocator *alloc);
+bool alloc_create_std(struct allocator *alloc);
 
 /**
  * Creates a new allocator 'dst' with default constructor (in case of 'this' is null), or as copy of
@@ -88,7 +88,7 @@ ARK_EXPORT (bool) alloc_create_std(struct allocator *alloc);
  * @param self possibly null-pointer to an allocator implementation
  * @return a value unequal to STATUS_OK in case the operation is not successful
  */
-ARK_EXPORT (bool) alloc_this_or_std(struct allocator *dst, const struct allocator *self);
+bool alloc_this_or_std(struct allocator *dst, const struct allocator *self);
 
 /**
  * Performs a deep copy of the allocator 'src' into the allocator 'dst'.
@@ -97,7 +97,7 @@ ARK_EXPORT (bool) alloc_this_or_std(struct allocator *dst, const struct allocato
  * @param src non-null pointer to allocator implementation (of same implementation as dst)
  * @return STATUS_OK in case of success, otherwise a value unequal to STATUS_OK describing the error
  */
-ARK_EXPORT (bool) alloc_clone(struct allocator *dst, const struct allocator *src);
+bool alloc_clone(struct allocator *dst, const struct allocator *src);
 
 /**
  * Invokes memory allocation of 'size' bytes using the allocator 'alloc'.
@@ -108,7 +108,7 @@ ARK_EXPORT (bool) alloc_clone(struct allocator *dst, const struct allocator *src
  * @param size number of bytes requested
  * @return non-null pointer to memory allocated with 'alloc'
  */
-ARK_EXPORT (void *) alloc_malloc(struct allocator *alloc, size_t size);
+void *alloc_malloc(struct allocator *alloc, size_t size);
 
 /**
  * Invokes memory re-allocation for pointer 'ptr' (that is managed by 'alloc') to size 'size' in bytes.
@@ -118,7 +118,7 @@ ARK_EXPORT (void *) alloc_malloc(struct allocator *alloc, size_t size);
  * @param size new number of bytes for 'ptr'
  * @return non-null pointer that points to reallocated memory for 'ptr'
  */
-ARK_EXPORT (void *) alloc_realloc(struct allocator *alloc, void *ptr, size_t size);
+void *alloc_realloc(struct allocator *alloc, void *ptr, size_t size);
 
 /**
  * Invokes memory freeing for pointer 'ptr' (that is managed by 'alloc').
@@ -128,7 +128,7 @@ ARK_EXPORT (void *) alloc_realloc(struct allocator *alloc, void *ptr, size_t siz
  * @param ptr non-null pointer manged by 'alloc'
  * @return STATUS_OK if success, STATUS_NULLPTR if <code>alloc</code> or <code>ptr</ptr> is <b>NULL</b>
  */
-ARK_EXPORT (bool) alloc_free(struct allocator *alloc, void *ptr);
+bool alloc_free(struct allocator *alloc, void *ptr);
 
 ARK_END_DECL
 

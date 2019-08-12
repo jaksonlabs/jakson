@@ -24,7 +24,7 @@
 static void setup_object(struct columndoc_obj *model, struct columndoc *parent, field_sid_t key, size_t idx);
 
 static bool object_put(struct columndoc_obj *model, struct err *err, const struct doc_entries *entry,
-        struct strdic *dic);
+                       struct strdic *dic);
 
 static bool import_object(struct columndoc_obj *dst, struct err *err, const struct doc_obj *doc, struct strdic *dic);
 
@@ -39,10 +39,10 @@ static struct columndoc_column *object_array_key_columns_find_or_new(
         field_sid_t nested_object_entry_key, field_e nested_object_entry_type);
 
 static bool object_array_key_column_push(struct columndoc_column *col, struct err *err, const struct doc_entries *entry,
-        u32 array_idx, struct strdic *dic, struct columndoc_obj *model);
+                                         u32 array_idx, struct strdic *dic, struct columndoc_obj *model);
 
 bool columndoc_create(struct columndoc *columndoc, struct err *err, const struct doc *doc, const struct doc_bulk *bulk,
-        const struct doc_entries *entries, struct strdic *dic)
+                      const struct doc_entries *entries, struct strdic *dic)
 {
         error_if_null(columndoc)
         error_if_null(doc)
@@ -326,15 +326,16 @@ bool columndoc_free(struct columndoc *doc)
 }
 
 static void print_primitive_null(FILE *file, const char *type_name, const struct vector ofType(field_sid_t) *key_vector,
-        struct strdic *dic)
+                                 struct strdic *dic)
 {
         PRINT_PRIMITIVE_KEY_PART(file, type_name, key_vector, dic, "")
         fprintf(file, "}, ");
 }
 
 static bool print_primitive_objects(FILE *file, struct err *err, const char *type_name,
-        const struct vector ofType(field_sid_t) *key_vector,
-        const struct vector ofType(struct columndoc_obj) *value_vector, struct strdic *dic)
+                                    const struct vector ofType(field_sid_t) *key_vector,
+                                    const struct vector ofType(struct columndoc_obj) *value_vector,
+                                    struct strdic *dic)
 {
         PRINT_PRIMITIVE_KEY_PART(file, type_name, key_vector, dic, ", ")
         if (!vec_is_empty((key_vector))) {
@@ -423,7 +424,7 @@ static bool print_primitive_objects(FILE *file, struct err *err, const char *typ
 }
 
 static void print_array_null(FILE *file, const char *type_name, const struct vector ofType(field_sid_t) *key_vector,
-        const struct vector ofType(u16) *value_vector, struct strdic *dic)
+                             const struct vector ofType(u16) *value_vector, struct strdic *dic)
 {
         fprintf(file, "\"%s\": { ", type_name);
         if (!vec_is_empty((key_vector))) {
@@ -452,8 +453,9 @@ static void print_array_null(FILE *file, const char *type_name, const struct vec
 }
 
 static void print_array_strings(FILE *file, const char *type_name, const struct vector ofType(field_sid_t) *key_vector,
-        const struct vector ofType(Vector
-                ofType(field_sid_t)) *value_vector, struct strdic *dic)
+                                const struct vector ofType(Vector
+                                                                   ofType(field_sid_t)) *value_vector,
+                                struct strdic *dic)
 {
         fprintf(file, "\"%s\": { ", type_name);
         if (!vec_is_empty((key_vector))) {
@@ -508,8 +510,9 @@ static void print_array_strings(FILE *file, const char *type_name, const struct 
 }
 
 static void print_primitive_strings(FILE *file, const char *type_name,
-        const struct vector ofType(field_sid_t) *key_vector, const struct vector ofType(field_sid_t) *value_vector,
-        struct strdic *dic)
+                                    const struct vector ofType(field_sid_t) *key_vector,
+                                    const struct vector ofType(field_sid_t) *value_vector,
+                                    struct strdic *dic)
 {
         PRINT_PRIMITIVE_KEY_PART(file, type_name, key_vector, dic, ", ")
         if (!vec_is_empty((key_vector))) {
@@ -544,7 +547,7 @@ static void print_primitive_strings(FILE *file, const char *type_name,
 }
 
 static bool print_array_objects(FILE *file, struct err *err, const char *type_name,
-        const struct vector ofType(struct columndoc_group) *key_columns, struct strdic *dic)
+                                const struct vector ofType(struct columndoc_group) *key_columns, struct strdic *dic)
 {
         fprintf(file, "\"%s\": {", type_name);
         fprintf(file, "\"Keys\": [");
@@ -584,9 +587,9 @@ static bool print_array_objects(FILE *file, struct err *err, const char *type_na
 
                         fprintf(file,
                                 "\"Column Name\": %"PRIu64", "
-                                        "\"Column Name Decoded\": \"%s\", "
-                                        "\"Unique Column Name Decoded\": \"{'%s'}$%s\", "
-                                        "\"Type\": \"%s\",",
+                                "\"Column Name Decoded\": \"%s\", "
+                                "\"Unique Column Name Decoded\": \"{'%s'}$%s\", "
+                                "\"Type\": \"%s\",",
                                 columnTable->key_name,
                                 *decColumnKeyName,
                                 *decColumnKeyName,
@@ -596,73 +599,77 @@ static bool print_array_objects(FILE *file, struct err *err, const char *type_na
                         fprintf(file, "\"Values\": [");
                         for (size_t array_idx = 0; array_idx < columnTable->values.num_elems; array_idx++) {
                                 switch (columnTable->type) {
-                                case FIELD_NULL: {
-                                        const struct vector
-                                                *column = vec_get(&columnTable->values, array_idx, struct vector);
-                                        fprintf(file, "%s", column->num_elems > 1 ? "[" : "");
-                                        for (size_t i = 0; i < column->num_elems; i++) {
-                                                fprintf(file, "null");
-                                                fprintf(file, "%s", i + 1 < column->num_elems ? ", " : "");
-                                        }
-                                        fprintf(file, "%s", column->num_elems > 1 ? "]" : "");
-                                }
-                                        break;
-                                case FIELD_INT8: PRINT_COLUMN(file, columnTable, array_idx, field_i8_t, "%d")
-                                        break;
-                                case FIELD_INT16: PRINT_COLUMN(file, columnTable, array_idx, field_i16_t, "%d")
-                                        break;
-                                case FIELD_INT32: PRINT_COLUMN(file, columnTable, array_idx, field_i32_t, "%d")
-                                        break;
-                                case FIELD_INT64: PRINT_COLUMN(file, columnTable, array_idx, field_i64_t, "%"
-                                        PRIi64)
-                                        break;
-                                case FIELD_UINT8: PRINT_COLUMN(file, columnTable, array_idx, field_u8_t, "%d")
-                                        break;
-                                case FIELD_UINT16: PRINT_COLUMN(file, columnTable, array_idx, field_u16_t, "%d")
-                                        break;
-                                case FIELD_UINT32: PRINT_COLUMN(file, columnTable, array_idx, field_u32_t, "%d")
-                                        break;
-                                case FIELD_UINT64: PRINT_COLUMN(file, columnTable, array_idx, field_u64_t, "%"
-                                        PRIu64)
-                                        break;
-                                case FIELD_FLOAT: PRINT_COLUMN(file, columnTable, array_idx, field_number_t, "%f")
-                                        break;
-                                case FIELD_STRING: {
-                                        const struct vector
-                                                *column = vec_get(&columnTable->values, array_idx, struct vector);
-                                        fprintf(file, "%s", column->num_elems > 1 ? "[" : "");
-                                        for (size_t i = 0; i < column->num_elems; i++) {
-                                                field_sid_t encodedString = *vec_get(column, i, field_sid_t);
-                                                char **decodedString = strdic_extract(dic, &encodedString, 1);
-                                                fprintf(file,
-                                                        "{\"Encoded\": %"PRIu64", \"Decoded\": \"%s\"}",
-                                                        encodedString,
-                                                        *decodedString);
-                                                fprintf(file, "%s", i + 1 < column->num_elems ? ", " : "");
-                                                strdic_free(dic, decodedString);
-                                        }
-                                        fprintf(file, "%s", column->num_elems > 1 ? "]" : "");
-                                }
-                                        break;
-                                case FIELD_OBJECT: {
-                                        // struct columndoc_obj *doc = vec_get(&column->values, valueIdx, struct columndoc_obj);
-                                        //  print_object(file, doc, encode);
-                                        const struct vector
-                                                *column = vec_get(&columnTable->values, array_idx, struct vector);
-                                        fprintf(file, "%s", column->num_elems > 1 ? "[" : "");
-                                        for (size_t i = 0; i < column->num_elems; i++) {
-                                                const struct columndoc_obj
-                                                        *object = vec_get(column, i, struct columndoc_obj);
-                                                if (!print_object(file, err, object, dic)) {
-                                                        return false;
+                                        case FIELD_NULL: {
+                                                const struct vector
+                                                        *column = vec_get(&columnTable->values, array_idx,
+                                                                          struct vector);
+                                                fprintf(file, "%s", column->num_elems > 1 ? "[" : "");
+                                                for (size_t i = 0; i < column->num_elems; i++) {
+                                                        fprintf(file, "null");
+                                                        fprintf(file, "%s", i + 1 < column->num_elems ? ", " : "");
                                                 }
-                                                fprintf(file, "%s", i + 1 < column->num_elems ? ", " : "");
+                                                fprintf(file, "%s", column->num_elems > 1 ? "]" : "");
                                         }
-                                        fprintf(file, "%s", column->num_elems > 1 ? "]" : "");
-                                }
-                                        break;
-                                default: error(err, ARK_ERR_NOTYPE)
-                                        return false;
+                                                break;
+                                        case FIELD_INT8: PRINT_COLUMN(file, columnTable, array_idx, field_i8_t, "%d")
+                                                break;
+                                        case FIELD_INT16: PRINT_COLUMN(file, columnTable, array_idx, field_i16_t, "%d")
+                                                break;
+                                        case FIELD_INT32: PRINT_COLUMN(file, columnTable, array_idx, field_i32_t, "%d")
+                                                break;
+                                        case FIELD_INT64: PRINT_COLUMN(file, columnTable, array_idx, field_i64_t, "%"
+                                                PRIi64)
+                                                break;
+                                        case FIELD_UINT8: PRINT_COLUMN(file, columnTable, array_idx, field_u8_t, "%d")
+                                                break;
+                                        case FIELD_UINT16: PRINT_COLUMN(file, columnTable, array_idx, field_u16_t, "%d")
+                                                break;
+                                        case FIELD_UINT32: PRINT_COLUMN(file, columnTable, array_idx, field_u32_t, "%d")
+                                                break;
+                                        case FIELD_UINT64: PRINT_COLUMN(file, columnTable, array_idx, field_u64_t, "%"
+                                                PRIu64)
+                                                break;
+                                        case FIELD_FLOAT: PRINT_COLUMN(file, columnTable, array_idx, field_number_t,
+                                                                       "%f")
+                                                break;
+                                        case FIELD_STRING: {
+                                                const struct vector
+                                                        *column = vec_get(&columnTable->values, array_idx,
+                                                                          struct vector);
+                                                fprintf(file, "%s", column->num_elems > 1 ? "[" : "");
+                                                for (size_t i = 0; i < column->num_elems; i++) {
+                                                        field_sid_t encodedString = *vec_get(column, i, field_sid_t);
+                                                        char **decodedString = strdic_extract(dic, &encodedString, 1);
+                                                        fprintf(file,
+                                                                "{\"Encoded\": %"PRIu64", \"Decoded\": \"%s\"}",
+                                                                encodedString,
+                                                                *decodedString);
+                                                        fprintf(file, "%s", i + 1 < column->num_elems ? ", " : "");
+                                                        strdic_free(dic, decodedString);
+                                                }
+                                                fprintf(file, "%s", column->num_elems > 1 ? "]" : "");
+                                        }
+                                                break;
+                                        case FIELD_OBJECT: {
+                                                // struct columndoc_obj *doc = vec_get(&column->values, valueIdx, struct columndoc_obj);
+                                                //  print_object(file, doc, encode);
+                                                const struct vector
+                                                        *column = vec_get(&columnTable->values, array_idx,
+                                                                          struct vector);
+                                                fprintf(file, "%s", column->num_elems > 1 ? "[" : "");
+                                                for (size_t i = 0; i < column->num_elems; i++) {
+                                                        const struct columndoc_obj
+                                                                *object = vec_get(column, i, struct columndoc_obj);
+                                                        if (!print_object(file, err, object, dic)) {
+                                                                return false;
+                                                        }
+                                                        fprintf(file, "%s", i + 1 < column->num_elems ? ", " : "");
+                                                }
+                                                fprintf(file, "%s", column->num_elems > 1 ? "]" : "");
+                                        }
+                                                break;
+                                        default: error(err, ARK_ERR_NOTYPE)
+                                                return false;
                                 }
                                 fprintf(file, array_idx + 1 < columnTable->values.num_elems ? ", " : "");
                         }
@@ -700,79 +707,79 @@ static bool print_object(FILE *file, struct err *err, const struct columndoc_obj
         fprintf(file, "\"Primitives\": { ");
         PRINT_PRIMITIVE_BOOLEAN_COLUMN(file, "Boolean", &object->bool_prop_keys, &object->bool_prop_vals, dic)
         PRINT_PRIMITIVE_COLUMN(file,
-                "UInt8",
-                &object->uint8_prop_keys,
-                &object->uint8_prop_vals,
-                &object->uint8_val_idxs,
-                dic,
-                field_u8_t,
-                "%d")
+                               "UInt8",
+                               &object->uint8_prop_keys,
+                               &object->uint8_prop_vals,
+                               &object->uint8_val_idxs,
+                               dic,
+                               field_u8_t,
+                               "%d")
         PRINT_PRIMITIVE_COLUMN(file,
-                "UInt16",
-                &object->uint16_prop_keys,
-                &object->uint16_prop_vals,
-                &object->uint16_val_idxs,
-                dic,
-                field_u16_t,
-                "%d")
+                               "UInt16",
+                               &object->uint16_prop_keys,
+                               &object->uint16_prop_vals,
+                               &object->uint16_val_idxs,
+                               dic,
+                               field_u16_t,
+                               "%d")
         PRINT_PRIMITIVE_COLUMN(file,
-                "UInt32",
-                &object->uin32_prop_keys,
-                &object->uint32_prop_vals,
-                &object->uint32_val_idxs,
-                dic,
-                field_u32_t,
-                "%d")
+                               "UInt32",
+                               &object->uin32_prop_keys,
+                               &object->uint32_prop_vals,
+                               &object->uint32_val_idxs,
+                               dic,
+                               field_u32_t,
+                               "%d")
         PRINT_PRIMITIVE_COLUMN(file,
-                "UInt64",
-                &object->uint64_prop_keys,
-                &object->uint64_prop_vals,
-                &object->uint64_val_idxs,
-                dic,
-                field_u64_t,
-                "%"
-                PRIu64)
+                               "UInt64",
+                               &object->uint64_prop_keys,
+                               &object->uint64_prop_vals,
+                               &object->uint64_val_idxs,
+                               dic,
+                               field_u64_t,
+                               "%"
+                                       PRIu64)
         PRINT_PRIMITIVE_COLUMN(file,
-                "Int8",
-                &object->int8_prop_keys,
-                &object->int8_prop_vals,
-                &object->int8_val_idxs,
-                dic,
-                field_i8_t,
-                "%d")
+                               "Int8",
+                               &object->int8_prop_keys,
+                               &object->int8_prop_vals,
+                               &object->int8_val_idxs,
+                               dic,
+                               field_i8_t,
+                               "%d")
         PRINT_PRIMITIVE_COLUMN(file,
-                "Int16",
-                &object->int16_prop_keys,
-                &object->int16_prop_vals,
-                &object->int16_val_idxs,
-                dic,
-                field_i16_t,
-                "%d")
+                               "Int16",
+                               &object->int16_prop_keys,
+                               &object->int16_prop_vals,
+                               &object->int16_val_idxs,
+                               dic,
+                               field_i16_t,
+                               "%d")
         PRINT_PRIMITIVE_COLUMN(file,
-                "Int32",
-                &object->int32_prop_keys,
-                &object->int32_prop_vals,
-                &object->int32_val_idxs,
-                dic,
-                field_i32_t,
-                "%d")
+                               "Int32",
+                               &object->int32_prop_keys,
+                               &object->int32_prop_vals,
+                               &object->int32_val_idxs,
+                               dic,
+                               field_i32_t,
+                               "%d")
         PRINT_PRIMITIVE_COLUMN(file,
-                "Int64",
-                &object->int64_prop_keys,
-                &object->int64_prop_vals,
-                &object->int64_val_idxs,
-                dic,
-                field_i64_t,
-                "%"
-                PRIi64)
+                               "Int64",
+                               &object->int64_prop_keys,
+                               &object->int64_prop_vals,
+                               &object->int64_val_idxs,
+                               dic,
+                               field_i64_t,
+                               "%"
+                                       PRIi64)
         PRINT_PRIMITIVE_COLUMN(file,
-                "Real",
-                &object->float_prop_keys,
-                &object->float_prop_vals,
-                &object->float_val_idxs,
-                dic,
-                field_number_t,
-                "%f")
+                               "Real",
+                               &object->float_prop_keys,
+                               &object->float_prop_vals,
+                               &object->float_val_idxs,
+                               dic,
+                               field_number_t,
+                               "%f")
         print_primitive_strings(file, "Strings", &object->string_prop_keys, &object->string_prop_vals, dic);
         print_primitive_null(file, "Null", &object->null_prop_keys, dic);
         if (print_primitive_objects(file, err, "Objects", &object->obj_prop_keys, &object->obj_prop_vals, dic)) {
@@ -782,58 +789,58 @@ static bool print_object(FILE *file, struct err *err, const struct columndoc_obj
         fprintf(file, "\"Arrays\": { ");
         PRINT_BOOLEAN_ARRAY(file, "Boolean", object->bool_array_prop_keys, object->bool_array_prop_vals);
         PRINT_ARRAY(file,
-                "UInt8",
-                object->uint8_array_prop_keys,
-                object->uint8_array_prop_vals,
-                field_u8_t,
-                "%d",
-                (value != ARK_NULL_UINT8));
+                    "UInt8",
+                    object->uint8_array_prop_keys,
+                    object->uint8_array_prop_vals,
+                    field_u8_t,
+                    "%d",
+                    (value != ARK_NULL_UINT8));
         PRINT_ARRAY(file,
-                "UInt16",
-                object->uint16_array_prop_keys,
-                object->uint16_array_prop_vals,
-                field_u16_t,
-                "%d",
-                (value != ARK_NULL_UINT16));
+                    "UInt16",
+                    object->uint16_array_prop_keys,
+                    object->uint16_array_prop_vals,
+                    field_u16_t,
+                    "%d",
+                    (value != ARK_NULL_UINT16));
         PRINT_ARRAY(file,
-                "UInt32",
-                object->uint32_array_prop_keys,
-                object->uint32_array_prop_vals,
-                field_u32_t,
-                "%d",
-                (value != ARK_NULL_UINT32));
+                    "UInt32",
+                    object->uint32_array_prop_keys,
+                    object->uint32_array_prop_vals,
+                    field_u32_t,
+                    "%d",
+                    (value != ARK_NULL_UINT32));
         PRINT_ARRAY(file, "UInt64", object->uint64_array_prop_keys, object->ui64_array_prop_vals, field_u64_t, "%"
                 PRIu64, (value != ARK_NULL_UINT64));
         PRINT_ARRAY(file,
-                "Int8",
-                object->int8_array_prop_keys,
-                object->int8_array_prop_vals,
-                field_i8_t,
-                "%d",
-                (value != ARK_NULL_INT8));
+                    "Int8",
+                    object->int8_array_prop_keys,
+                    object->int8_array_prop_vals,
+                    field_i8_t,
+                    "%d",
+                    (value != ARK_NULL_INT8));
         PRINT_ARRAY(file,
-                "Int16",
-                object->int16_array_prop_keys,
-                object->int16_array_prop_vals,
-                field_i16_t,
-                "%d",
-                (value != ARK_NULL_INT16));
+                    "Int16",
+                    object->int16_array_prop_keys,
+                    object->int16_array_prop_vals,
+                    field_i16_t,
+                    "%d",
+                    (value != ARK_NULL_INT16));
         PRINT_ARRAY(file,
-                "Int32",
-                object->int32_array_prop_keys,
-                object->int32_array_prop_vals,
-                field_i32_t,
-                "%d",
-                (value != ARK_NULL_INT32));
+                    "Int32",
+                    object->int32_array_prop_keys,
+                    object->int32_array_prop_vals,
+                    field_i32_t,
+                    "%d",
+                    (value != ARK_NULL_INT32));
         PRINT_ARRAY(file, "Int64", object->int64_array_prop_keys, object->int64_array_prop_vals, field_i64_t, "%"
                 PRIi64, (value != ARK_NULL_INT64));
         PRINT_ARRAY(file,
-                "Real",
-                object->float_array_prop_keys,
-                object->float_array_prop_vals,
-                field_number_t,
-                "%f",
-                (!isnan(value)));
+                    "Real",
+                    object->float_array_prop_keys,
+                    object->float_array_prop_vals,
+                    field_number_t,
+                    "%f",
+                    (!isnan(value)));
         print_array_strings(file, "Strings", &object->string_array_prop_keys, &object->string_array_prop_vals, dic);
         print_array_null(file, "Null", &object->null_array_prop_keys, &object->null_array_prop_vals, dic);
         if (!print_array_objects(file, err, "Objects", &object->obj_array_props, dic)) {
@@ -902,34 +909,34 @@ static void object_array_key_columns_drop(struct vector ofType(struct columndoc_
 static const char *get_type_name(struct err *err, field_e type)
 {
         switch (type) {
-        case FIELD_NULL:
-                return "Null";
-        case FIELD_INT8:
-                return "Int8";
-        case FIELD_INT16:
-                return "Int16";
-        case FIELD_INT32:
-                return "Int32";
-        case FIELD_INT64:
-                return "Int64";
-        case FIELD_UINT8:
-                return "UInt8";
-        case FIELD_UINT16:
-                return "UInt16";
-        case FIELD_UINT32:
-                return "UInt32";
-        case FIELD_UINT64:
-                return "UInt64";
-        case FIELD_FLOAT:
-                return "Real";
-        case FIELD_STRING:
-                return "String";
-        case FIELD_OBJECT:
-                return "Object";
-        default: {
-                error(err, ARK_ERR_NOTYPE);
-                return NULL;
-        }
+                case FIELD_NULL:
+                        return "Null";
+                case FIELD_INT8:
+                        return "Int8";
+                case FIELD_INT16:
+                        return "Int16";
+                case FIELD_INT32:
+                        return "Int32";
+                case FIELD_INT64:
+                        return "Int64";
+                case FIELD_UINT8:
+                        return "UInt8";
+                case FIELD_UINT16:
+                        return "UInt16";
+                case FIELD_UINT32:
+                        return "UInt32";
+                case FIELD_UINT64:
+                        return "UInt64";
+                case FIELD_FLOAT:
+                        return "Real";
+                case FIELD_STRING:
+                        return "String";
+                case FIELD_OBJECT:
+                        return "Object";
+                default: {
+                        error(err, ARK_ERR_NOTYPE);
+                        return NULL;
+                }
         }
 }
 
@@ -948,7 +955,7 @@ static struct columndoc_column *object_array_key_columns_find_or_new(
                         for (size_t j = 0; j < key_columns->columns.num_elems; j++) {
                                 key_column = vec_get(&key_columns->columns, j, struct columndoc_column);
                                 if (key_column->key_name == nested_object_entry_key
-                                        && key_column->type == nested_object_entry_type) {
+                                    && key_column->type == nested_object_entry_type) {
                                         /** Column for the object array with the desired key, the nested object entry with the desired key
                                          * and a matching type is found */
                                         return key_column;
@@ -976,7 +983,7 @@ static struct columndoc_column *object_array_key_columns_find_or_new(
 }
 
 static bool object_array_key_column_push(struct columndoc_column *col, struct err *err, const struct doc_entries *entry,
-        u32 array_idx, struct strdic *dic, struct columndoc_obj *model)
+                                         u32 array_idx, struct strdic *dic, struct columndoc_obj *model)
 {
         assert(col->type == entry->type);
 
@@ -993,54 +1000,54 @@ static bool object_array_key_column_push(struct columndoc_column *col, struct er
         num_elements = is_null_by_def ? 1 : num_elements;
 
         switch (entryType) {
-        case FIELD_NULL: {
-                vec_push(values_for_entry, &num_elements, 1);
-        }
-                break;
-        case FIELD_BOOLEAN:
-        case FIELD_INT8:
-        case FIELD_INT16:
-        case FIELD_INT32:
-        case FIELD_INT64:
-        case FIELD_UINT8:
-        case FIELD_UINT16:
-        case FIELD_UINT32:
-        case FIELD_UINT64:
-        case FIELD_FLOAT:
-                assert(!is_null_by_def);
-                vec_push(values_for_entry, entry->values.base, num_elements);
-                break;
-        case FIELD_STRING: {
-                assert(!is_null_by_def);
-                char **strings = vec_all(&entry->values, char *);
-                field_sid_t *string_ids;
-                strdic_locate_fast(&string_ids, dic, (char *const *) strings, num_elements);
-                vec_push(values_for_entry, string_ids, num_elements);
-                strdic_free(dic, string_ids);
-                //strdic_free(encode, strings);
-        }
-                break;
-        case FIELD_OBJECT:
-                assert(!is_null_by_def);
-
-                field_sid_t *array_key;
-                strdic_locate_fast(&array_key, dic, (char *const *) &entry->key, 1);
-
-                for (size_t array_idx = 0; array_idx < num_elements; array_idx++) {
-                        struct columndoc_obj
-                                *nested_object = vec_new_and_get(values_for_entry, struct columndoc_obj);
-                        setup_object(nested_object, model->parent, *array_key, array_idx);
-                        if (!import_object(nested_object,
-                                err,
-                                vec_get(&entry->values, array_idx, struct doc_obj),
-                                dic)) {
-                                return false;
-                        }
+                case FIELD_NULL: {
+                        vec_push(values_for_entry, &num_elements, 1);
                 }
-                strdic_free(dic, array_key);
-                break;
-        default: error(err, ARK_ERR_NOTYPE);
-                return false;
+                        break;
+                case FIELD_BOOLEAN:
+                case FIELD_INT8:
+                case FIELD_INT16:
+                case FIELD_INT32:
+                case FIELD_INT64:
+                case FIELD_UINT8:
+                case FIELD_UINT16:
+                case FIELD_UINT32:
+                case FIELD_UINT64:
+                case FIELD_FLOAT:
+                        assert(!is_null_by_def);
+                        vec_push(values_for_entry, entry->values.base, num_elements);
+                        break;
+                case FIELD_STRING: {
+                        assert(!is_null_by_def);
+                        char **strings = vec_all(&entry->values, char *);
+                        field_sid_t *string_ids;
+                        strdic_locate_fast(&string_ids, dic, (char *const *) strings, num_elements);
+                        vec_push(values_for_entry, string_ids, num_elements);
+                        strdic_free(dic, string_ids);
+                        //strdic_free(encode, strings);
+                }
+                        break;
+                case FIELD_OBJECT:
+                        assert(!is_null_by_def);
+
+                        field_sid_t *array_key;
+                        strdic_locate_fast(&array_key, dic, (char *const *) &entry->key, 1);
+
+                        for (size_t array_idx = 0; array_idx < num_elements; array_idx++) {
+                                struct columndoc_obj
+                                        *nested_object = vec_new_and_get(values_for_entry, struct columndoc_obj);
+                                setup_object(nested_object, model->parent, *array_key, array_idx);
+                                if (!import_object(nested_object,
+                                                   err,
+                                                   vec_get(&entry->values, array_idx, struct doc_obj),
+                                                   dic)) {
+                                        return false;
+                                }
+                        }
+                        strdic_free(dic, array_key);
+                        break;
+                default: error(err, ARK_ERR_NOTYPE);
+                        return false;
         }
         return true;
 }
@@ -1133,81 +1140,82 @@ static void setup_object(struct columndoc_obj *model, struct columndoc *parent, 
 }
 
 static bool object_put_primitive(struct columndoc_obj *columndoc, struct err *err, const struct doc_entries *entry,
-        struct strdic *dic, const field_sid_t *key_id)
+                                 struct strdic *dic, const field_sid_t *key_id)
 {
         switch (entry->type) {
-        case FIELD_NULL:
-                vec_push(&columndoc->null_prop_keys, key_id, 1);
-                break;
-        case FIELD_BOOLEAN:
-                vec_push(&columndoc->bool_prop_keys, key_id, 1);
-                vec_push(&columndoc->bool_prop_vals, entry->values.base, 1);
-                break;
-        case FIELD_INT8:
-                vec_push(&columndoc->int8_prop_keys, key_id, 1);
-                vec_push(&columndoc->int8_prop_vals, entry->values.base, 1);
-                break;
-        case FIELD_INT16:
-                vec_push(&columndoc->int16_prop_keys, key_id, 1);
-                vec_push(&columndoc->int16_prop_vals, entry->values.base, 1);
-                break;
-        case FIELD_INT32:
-                vec_push(&columndoc->int32_prop_keys, key_id, 1);
-                vec_push(&columndoc->int32_prop_vals, entry->values.base, 1);
-                break;
-        case FIELD_INT64:
-                vec_push(&columndoc->int64_prop_keys, key_id, 1);
-                vec_push(&columndoc->int64_prop_vals, entry->values.base, 1);
-                break;
-        case FIELD_UINT8:
-                vec_push(&columndoc->uint8_prop_keys, key_id, 1);
-                vec_push(&columndoc->uint8_prop_vals, entry->values.base, 1);
-                break;
-        case FIELD_UINT16:
-                vec_push(&columndoc->uint16_prop_keys, key_id, 1);
-                vec_push(&columndoc->uint16_prop_vals, entry->values.base, 1);
-                break;
-        case FIELD_UINT32:
-                vec_push(&columndoc->uin32_prop_keys, key_id, 1);
-                vec_push(&columndoc->uint32_prop_vals, entry->values.base, 1);
-                break;
-        case FIELD_UINT64:
-                vec_push(&columndoc->uint64_prop_keys, key_id, 1);
-                vec_push(&columndoc->uint64_prop_vals, entry->values.base, 1);
-                break;
-        case FIELD_FLOAT:
-                vec_push(&columndoc->float_prop_keys, key_id, 1);
-                vec_push(&columndoc->float_prop_vals, entry->values.base, 1);
-                break;
-        case FIELD_STRING: {
-                field_sid_t *value;
-                strdic_locate_fast(&value, dic, (char *const *) entry->values.base, 1);
-                vec_push(&columndoc->string_prop_keys, key_id, 1);
-                vec_push(&columndoc->string_prop_vals, value, 1);
-                strdic_free(dic, value);
-        }
-                break;
-        case FIELD_OBJECT: {
-                struct columndoc_obj template, *nested_object;
-                size_t position = vec_length(&columndoc->obj_prop_keys);
-                vec_push(&columndoc->obj_prop_keys, key_id, 1);
-                vec_push(&columndoc->obj_prop_vals, &template, 1);
-                nested_object = vec_get(&columndoc->obj_prop_vals, position, struct columndoc_obj);
-                setup_object(nested_object, columndoc->parent, *key_id, 0);
-                if (!import_object(nested_object, err, vec_get(&entry->values, 0, struct doc_obj), dic)) {
-                        return false;
+                case FIELD_NULL:
+                        vec_push(&columndoc->null_prop_keys, key_id, 1);
+                        break;
+                case FIELD_BOOLEAN:
+                        vec_push(&columndoc->bool_prop_keys, key_id, 1);
+                        vec_push(&columndoc->bool_prop_vals, entry->values.base, 1);
+                        break;
+                case FIELD_INT8:
+                        vec_push(&columndoc->int8_prop_keys, key_id, 1);
+                        vec_push(&columndoc->int8_prop_vals, entry->values.base, 1);
+                        break;
+                case FIELD_INT16:
+                        vec_push(&columndoc->int16_prop_keys, key_id, 1);
+                        vec_push(&columndoc->int16_prop_vals, entry->values.base, 1);
+                        break;
+                case FIELD_INT32:
+                        vec_push(&columndoc->int32_prop_keys, key_id, 1);
+                        vec_push(&columndoc->int32_prop_vals, entry->values.base, 1);
+                        break;
+                case FIELD_INT64:
+                        vec_push(&columndoc->int64_prop_keys, key_id, 1);
+                        vec_push(&columndoc->int64_prop_vals, entry->values.base, 1);
+                        break;
+                case FIELD_UINT8:
+                        vec_push(&columndoc->uint8_prop_keys, key_id, 1);
+                        vec_push(&columndoc->uint8_prop_vals, entry->values.base, 1);
+                        break;
+                case FIELD_UINT16:
+                        vec_push(&columndoc->uint16_prop_keys, key_id, 1);
+                        vec_push(&columndoc->uint16_prop_vals, entry->values.base, 1);
+                        break;
+                case FIELD_UINT32:
+                        vec_push(&columndoc->uin32_prop_keys, key_id, 1);
+                        vec_push(&columndoc->uint32_prop_vals, entry->values.base, 1);
+                        break;
+                case FIELD_UINT64:
+                        vec_push(&columndoc->uint64_prop_keys, key_id, 1);
+                        vec_push(&columndoc->uint64_prop_vals, entry->values.base, 1);
+                        break;
+                case FIELD_FLOAT:
+                        vec_push(&columndoc->float_prop_keys, key_id, 1);
+                        vec_push(&columndoc->float_prop_vals, entry->values.base, 1);
+                        break;
+                case FIELD_STRING: {
+                        field_sid_t *value;
+                        strdic_locate_fast(&value, dic, (char *const *) entry->values.base, 1);
+                        vec_push(&columndoc->string_prop_keys, key_id, 1);
+                        vec_push(&columndoc->string_prop_vals, value, 1);
+                        strdic_free(dic, value);
                 }
-        }
-                break;
-                error(err, ARK_ERR_NOTYPE)
-                return false;
+                        break;
+                case FIELD_OBJECT: {
+                        struct columndoc_obj template, *nested_object;
+                        size_t position = vec_length(&columndoc->obj_prop_keys);
+                        vec_push(&columndoc->obj_prop_keys, key_id, 1);
+                        vec_push(&columndoc->obj_prop_vals, &template, 1);
+                        nested_object = vec_get(&columndoc->obj_prop_vals, position, struct columndoc_obj);
+                        setup_object(nested_object, columndoc->parent, *key_id, 0);
+                        if (!import_object(nested_object, err, vec_get(&entry->values, 0, struct doc_obj), dic)) {
+                                return false;
+                        }
+                }
+                        break;
+                        error(err, ARK_ERR_NOTYPE)
+                        return false;
         }
         return true;
 }
 
 static void object_push_array(struct vector ofType(Vector
-        ofType( < T >)) *values, size_t TSize, u32 num_elements, const void *data, field_sid_t key_id,
-        struct vector ofType(field_sid_t) *key_vector)
+                                                           ofType( < T >)) *values, size_t TSize, u32 num_elements,
+                              const void *data, field_sid_t key_id,
+                              struct vector ofType(field_sid_t) *key_vector)
 {
         struct vector ofType(<T>) template, *vector;
         size_t idx = vec_length(values);
@@ -1219,145 +1227,148 @@ static void object_push_array(struct vector ofType(Vector
 }
 
 static bool object_put_array(struct columndoc_obj *model, struct err *err, const struct doc_entries *entry,
-        struct strdic *dic, const field_sid_t *key_id)
+                             struct strdic *dic, const field_sid_t *key_id)
 {
         unused(dic);
         u32 num_elements = (u32) vec_length(&entry->values);
 
         switch (entry->type) {
-        case FIELD_NULL: {
-                vec_push(&model->null_array_prop_vals, &num_elements, 1);
-                vec_push(&model->null_array_prop_keys, key_id, 1);
-        }
-                break;
-        case FIELD_BOOLEAN:
-                object_push_array(&model->bool_array_prop_vals,
-                        sizeof(field_boolean_t),
-                        num_elements,
-                        entry->values.base,
-                        *key_id,
-                        &model->bool_array_prop_keys);
-                break;
-        case FIELD_INT8:
-                object_push_array(&model->int8_array_prop_vals,
-                        sizeof(field_i8_t),
-                        num_elements,
-                        entry->values.base,
-                        *key_id,
-                        &model->int8_array_prop_keys);
-                break;
-        case FIELD_INT16:
-                object_push_array(&model->int16_array_prop_vals,
-                        sizeof(field_i16_t),
-                        num_elements,
-                        entry->values.base,
-                        *key_id,
-                        &model->int16_array_prop_keys);
-                break;
-        case FIELD_INT32:
-                object_push_array(&model->int32_array_prop_vals,
-                        sizeof(field_i32_t),
-                        num_elements,
-                        entry->values.base,
-                        *key_id,
-                        &model->int32_array_prop_keys);
-                break;
-        case FIELD_INT64:
-                object_push_array(&model->int64_array_prop_vals,
-                        sizeof(field_i64_t),
-                        num_elements,
-                        entry->values.base,
-                        *key_id,
-                        &model->int64_array_prop_keys);
-                break;
-        case FIELD_UINT8:
-                object_push_array(&model->uint8_array_prop_vals,
-                        sizeof(field_u8_t),
-                        num_elements,
-                        entry->values.base,
-                        *key_id,
-                        &model->uint8_array_prop_keys);
-                break;
-        case FIELD_UINT16:
-                object_push_array(&model->uint16_array_prop_vals,
-                        sizeof(field_u16_t),
-                        num_elements,
-                        entry->values.base,
-                        *key_id,
-                        &model->uint16_array_prop_keys);
-                break;
-        case FIELD_UINT32:
-                object_push_array(&model->uint32_array_prop_vals,
-                        sizeof(field_u32_t),
-                        num_elements,
-                        entry->values.base,
-                        *key_id,
-                        &model->uint32_array_prop_keys);
-                break;
-        case FIELD_UINT64:
-                object_push_array(&model->ui64_array_prop_vals,
-                        sizeof(field_u64_t),
-                        num_elements,
-                        entry->values.base,
-                        *key_id,
-                        &model->uint64_array_prop_keys);
-                break;
-        case FIELD_FLOAT:
-                object_push_array(&model->float_array_prop_vals,
-                        sizeof(field_number_t),
-                        num_elements,
-                        entry->values.base,
-                        *key_id,
-                        &model->float_array_prop_keys);
-                break;
-        case FIELD_STRING: {
-                const char **strings = vec_all(&entry->values, const char *);
-                field_sid_t *string_ids;
-                strdic_locate_fast(&string_ids, dic, (char *const *) strings, num_elements);
-                object_push_array(&model->string_array_prop_vals,
-                        sizeof(field_sid_t),
-                        num_elements,
-                        string_ids,
-                        *key_id,
-                        &model->string_array_prop_keys);
-                strdic_free(dic, string_ids);
-        }
-                break;
-        case FIELD_OBJECT: {
-                field_sid_t *nested_object_key_name;
-                for (u32 array_idx = 0; array_idx < num_elements; array_idx++) {
-                        const struct doc_obj *object = vec_get(&entry->values, array_idx, struct doc_obj);
-                        for (size_t pair_idx = 0; pair_idx < object->entries.num_elems; pair_idx++) {
-                                const struct doc_entries
-                                        *pair = vec_get(&object->entries, pair_idx, struct doc_entries);
-                                strdic_locate_fast(&nested_object_key_name, dic, (char *const *) &pair->key, 1);
-                                struct columndoc_column *key_column =
-                                        object_array_key_columns_find_or_new(&model->obj_array_props,
-                                                *key_id,
-                                                *nested_object_key_name,
-                                                pair->type);
-                                if (!object_array_key_column_push(key_column, err, pair, array_idx, dic, model)) {
-                                        return false;
+                case FIELD_NULL: {
+                        vec_push(&model->null_array_prop_vals, &num_elements, 1);
+                        vec_push(&model->null_array_prop_keys, key_id, 1);
+                }
+                        break;
+                case FIELD_BOOLEAN:
+                        object_push_array(&model->bool_array_prop_vals,
+                                          sizeof(field_boolean_t),
+                                          num_elements,
+                                          entry->values.base,
+                                          *key_id,
+                                          &model->bool_array_prop_keys);
+                        break;
+                case FIELD_INT8:
+                        object_push_array(&model->int8_array_prop_vals,
+                                          sizeof(field_i8_t),
+                                          num_elements,
+                                          entry->values.base,
+                                          *key_id,
+                                          &model->int8_array_prop_keys);
+                        break;
+                case FIELD_INT16:
+                        object_push_array(&model->int16_array_prop_vals,
+                                          sizeof(field_i16_t),
+                                          num_elements,
+                                          entry->values.base,
+                                          *key_id,
+                                          &model->int16_array_prop_keys);
+                        break;
+                case FIELD_INT32:
+                        object_push_array(&model->int32_array_prop_vals,
+                                          sizeof(field_i32_t),
+                                          num_elements,
+                                          entry->values.base,
+                                          *key_id,
+                                          &model->int32_array_prop_keys);
+                        break;
+                case FIELD_INT64:
+                        object_push_array(&model->int64_array_prop_vals,
+                                          sizeof(field_i64_t),
+                                          num_elements,
+                                          entry->values.base,
+                                          *key_id,
+                                          &model->int64_array_prop_keys);
+                        break;
+                case FIELD_UINT8:
+                        object_push_array(&model->uint8_array_prop_vals,
+                                          sizeof(field_u8_t),
+                                          num_elements,
+                                          entry->values.base,
+                                          *key_id,
+                                          &model->uint8_array_prop_keys);
+                        break;
+                case FIELD_UINT16:
+                        object_push_array(&model->uint16_array_prop_vals,
+                                          sizeof(field_u16_t),
+                                          num_elements,
+                                          entry->values.base,
+                                          *key_id,
+                                          &model->uint16_array_prop_keys);
+                        break;
+                case FIELD_UINT32:
+                        object_push_array(&model->uint32_array_prop_vals,
+                                          sizeof(field_u32_t),
+                                          num_elements,
+                                          entry->values.base,
+                                          *key_id,
+                                          &model->uint32_array_prop_keys);
+                        break;
+                case FIELD_UINT64:
+                        object_push_array(&model->ui64_array_prop_vals,
+                                          sizeof(field_u64_t),
+                                          num_elements,
+                                          entry->values.base,
+                                          *key_id,
+                                          &model->uint64_array_prop_keys);
+                        break;
+                case FIELD_FLOAT:
+                        object_push_array(&model->float_array_prop_vals,
+                                          sizeof(field_number_t),
+                                          num_elements,
+                                          entry->values.base,
+                                          *key_id,
+                                          &model->float_array_prop_keys);
+                        break;
+                case FIELD_STRING: {
+                        const char **strings = vec_all(&entry->values, const char *);
+                        field_sid_t *string_ids;
+                        strdic_locate_fast(&string_ids, dic, (char *const *) strings, num_elements);
+                        object_push_array(&model->string_array_prop_vals,
+                                          sizeof(field_sid_t),
+                                          num_elements,
+                                          string_ids,
+                                          *key_id,
+                                          &model->string_array_prop_keys);
+                        strdic_free(dic, string_ids);
+                }
+                        break;
+                case FIELD_OBJECT: {
+                        field_sid_t *nested_object_key_name;
+                        for (u32 array_idx = 0; array_idx < num_elements; array_idx++) {
+                                const struct doc_obj *object = vec_get(&entry->values, array_idx, struct doc_obj);
+                                for (size_t pair_idx = 0; pair_idx < object->entries.num_elems; pair_idx++) {
+                                        const struct doc_entries
+                                                *pair = vec_get(&object->entries, pair_idx, struct doc_entries);
+                                        strdic_locate_fast(&nested_object_key_name, dic, (char *const *) &pair->key, 1);
+                                        struct columndoc_column *key_column =
+                                                object_array_key_columns_find_or_new(&model->obj_array_props,
+                                                                                     *key_id,
+                                                                                     *nested_object_key_name,
+                                                                                     pair->type);
+                                        if (!object_array_key_column_push(key_column, err, pair, array_idx, dic,
+                                                                          model)) {
+                                                return false;
+                                        }
+                                        strdic_free(dic, nested_object_key_name);
                                 }
-                                strdic_free(dic, nested_object_key_name);
                         }
                 }
-        }
-                break;
-        default: {
-                error(err, ARK_ERR_NOTYPE)
-                return false;
-        }
-                break;
+                        break;
+                default: {
+                        error(err, ARK_ERR_NOTYPE)
+                        return false;
+                }
+                        break;
         }
         return true;
 }
 
 static bool object_put(struct columndoc_obj *model, struct err *err, const struct doc_entries *entry,
-        struct strdic *dic)
+                       struct strdic *dic)
 {
         field_sid_t *key_id;
-        enum EntryType { ENTRY_TYPE_NULL, ENTRY_TYPE_PRIMITIVE, ENTRY_TYPE_ARRAY } entryType;
+        enum EntryType {
+            ENTRY_TYPE_NULL, ENTRY_TYPE_PRIMITIVE, ENTRY_TYPE_ARRAY
+        } entryType;
 
         strdic_locate_fast(&key_id, dic, (char *const *) &entry->key, 1);
         entryType =
@@ -1365,22 +1376,22 @@ static bool object_put(struct columndoc_obj *model, struct err *err, const struc
                                                                                                : ENTRY_TYPE_ARRAY);
 
         switch (entryType) {
-        case ENTRY_TYPE_NULL:
-                /** For a key which does not parallel_map_exec to any value, the value is defined as 'null'  */
-                vec_push(&model->null_prop_keys, key_id, 1);
-                break;
-        case ENTRY_TYPE_PRIMITIVE:
-                if (!object_put_primitive(model, err, entry, dic, key_id)) {
+                case ENTRY_TYPE_NULL:
+                        /** For a key which does not parallel_map_exec to any value, the value is defined as 'null'  */
+                        vec_push(&model->null_prop_keys, key_id, 1);
+                        break;
+                case ENTRY_TYPE_PRIMITIVE:
+                        if (!object_put_primitive(model, err, entry, dic, key_id)) {
+                                return false;
+                        }
+                        break;
+                case ENTRY_TYPE_ARRAY:
+                        if (!object_put_array(model, err, entry, dic, key_id)) {
+                                return false;
+                        }
+                        break;
+                default: error(err, ARK_ERR_NOTYPE)
                         return false;
-                }
-                break;
-        case ENTRY_TYPE_ARRAY:
-                if (!object_put_array(model, err, entry, dic, key_id)) {
-                        return false;
-                }
-                break;
-        default: error(err, ARK_ERR_NOTYPE)
-                return false;
         }
 
         strdic_free(dic, key_id);

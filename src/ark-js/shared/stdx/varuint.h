@@ -61,7 +61,7 @@ typedef void *varuint_t;
 
 #define varuint_max_blocks()    (4)
 
-ARK_EXPORT(u8) varuint_write(varuint_t dst, u64 value);
+u8 varuint_write(varuint_t dst, u64 value);
 
 #define varuint_sizeof(value)                                                                                   \
 ({                                                                                                              \
@@ -97,7 +97,7 @@ ARK_EXPORT(u8) varuint_write(varuint_t dst, u64 value);
         num_blocks_required;                            \
 })
 
-ARK_EXPORT(u64) varuint_read(u8 *nbytes, varuint_t src);
+u64 varuint_read(u8 *nbytes, varuint_t src);
 
 ARK_END_DECL
 

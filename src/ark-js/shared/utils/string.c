@@ -18,7 +18,7 @@
 #include <ctype.h>
 #include <ark-js/shared/utils/string.h>
 
-ARK_EXPORT(bool) strings_contains_blank_char(const char *str)
+bool strings_contains_blank_char(const char *str)
 {
         if (likely(str != NULL)) {
                 for (const char *it = str; *it != '\0'; it++) {
@@ -32,12 +32,12 @@ ARK_EXPORT(bool) strings_contains_blank_char(const char *str)
         }
 }
 
-ARK_EXPORT(bool) strings_is_enquoted(const char *str)
+bool strings_is_enquoted(const char *str)
 {
         return strings_is_enquoted_wlen(str, strlen(str));
 }
 
-ARK_EXPORT(bool) strings_is_enquoted_wlen(const char *str, size_t len)
+bool strings_is_enquoted_wlen(const char *str, size_t len)
 {
         if (*str == '"') {
                 if (len > 1) {
@@ -50,7 +50,7 @@ ARK_EXPORT(bool) strings_is_enquoted_wlen(const char *str, size_t len)
         }
 }
 
-ARK_EXPORT(char *) strings_remove_tailing_blanks(char *str_in)
+char *strings_remove_tailing_blanks(char *str_in)
 {
         size_t sl = strlen(str_in);
         size_t i = sl > 0 ? sl - 1 : 0;
@@ -66,7 +66,7 @@ ARK_EXPORT(char *) strings_remove_tailing_blanks(char *str_in)
         return str_in;
 }
 
-ARK_EXPORT(const char *) strings_skip_blanks(const char *str)
+const char *strings_skip_blanks(const char *str)
 {
         if (likely(str != NULL)) {
                 const char *ret = str;

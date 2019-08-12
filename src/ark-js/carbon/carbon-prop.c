@@ -19,7 +19,7 @@
 #include <ark-js/carbon/carbon-string.h>
 #include <ark-js/carbon/carbon-field.h>
 
-ARK_EXPORT(u64) carbon_prop_size(struct memfile *file)
+u64 carbon_prop_size(struct memfile *file)
 {
         error_if_null(file);
         offset_t prop_start = memfile_save_position(file);

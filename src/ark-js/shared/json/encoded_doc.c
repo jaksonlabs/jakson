@@ -19,8 +19,8 @@
 
 #include <ark-js/shared/json/encoded_doc.h>
 
-ARK_EXPORT(bool) encoded_doc_collection_create(struct encoded_doc_list *collection, struct err *err,
-        struct archive *archive)
+bool encoded_doc_collection_create(struct encoded_doc_list *collection, struct err *err,
+                                   struct archive *archive)
 {
         unused(collection);
         unused(err);
@@ -34,7 +34,7 @@ ARK_EXPORT(bool) encoded_doc_collection_create(struct encoded_doc_list *collecti
         return true;
 }
 
-ARK_EXPORT(bool) encoded_doc_collection_drop(struct encoded_doc_list *collection)
+bool encoded_doc_collection_drop(struct encoded_doc_list *collection)
 {
         unused(collection);
 
@@ -67,8 +67,8 @@ static struct encoded_doc *doc_create(struct err *err, object_id_t object_id, st
         }
 }
 
-ARK_EXPORT(struct encoded_doc *)encoded_doc_collection_get_or_append(struct encoded_doc_list *collection,
-        object_id_t id)
+struct encoded_doc *encoded_doc_collection_get_or_append(struct encoded_doc_list *collection,
+                                                         object_id_t id)
 {
         error_if_null(collection);
         const u32 *doc_pos = hashtable_get_value(&collection->index, &id);
@@ -85,7 +85,7 @@ ARK_EXPORT(struct encoded_doc *)encoded_doc_collection_get_or_append(struct enco
         }
 }
 
-ARK_EXPORT(bool) encoded_doc_collection_print(FILE *file, struct encoded_doc_list *collection)
+bool encoded_doc_collection_print(FILE *file, struct encoded_doc_list *collection)
 {
         unused(file);
         unused(collection);
@@ -98,7 +98,7 @@ ARK_EXPORT(bool) encoded_doc_collection_print(FILE *file, struct encoded_doc_lis
         return false;
 }
 
-ARK_EXPORT(bool) encoded_doc_drop(struct encoded_doc *doc)
+bool encoded_doc_drop(struct encoded_doc *doc)
 {
         unused(doc);
         for (u32 i = 0; i < doc->props_arrays.num_elems; i++) {
@@ -118,7 +118,7 @@ ARK_EXPORT(bool) encoded_doc_drop(struct encoded_doc *doc)
 }
 
 #define DECLARE_ARK_ENCODED_DOC_ADD_PROP_BASIC(built_in_type, basic_type, value_name)                               \
-ARK_EXPORT(bool)                                                                                                    \
+bool                                                                                                    \
 encoded_doc_add_prop_##value_name(struct encoded_doc *doc, field_sid_t key, built_in_type value)       \
 {                                                                                                                      \
     error_if_null(doc)                                                                                      \
@@ -133,7 +133,7 @@ encoded_doc_add_prop_##value_name(struct encoded_doc *doc, field_sid_t key, buil
 }
 
 #define DECLARE_ARK_ENCODED_DOC_ADD_PROP_BASIC_DECODED(built_in_type, basic_type, value_name)                       \
-ARK_EXPORT(bool)                                                                                                    \
+bool                                                                                                    \
 encoded_doc_add_prop_##value_name##_decoded(struct encoded_doc *doc, const char *key, built_in_type value)    \
 {                                                                                                                      \
     error_if_null(doc)                                                                                      \
@@ -191,8 +191,8 @@ DECLARE_ARK_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_boolean_t, FIELD_BOOLEAN, b
 
 DECLARE_ARK_ENCODED_DOC_ADD_PROP_BASIC_DECODED(field_sid_t, FIELD_STRING, string)
 
-ARK_EXPORT(bool) encoded_doc_add_prop_string_decoded_string_value_decoded(struct encoded_doc *doc, const char *key,
-        const char *value)
+bool encoded_doc_add_prop_string_decoded_string_value_decoded(struct encoded_doc *doc, const char *key,
+                                                              const char *value)
 {
         error_if_null(doc)
         struct encoded_doc_prop *prop = vec_new_and_get(&doc->props, struct encoded_doc_prop);
@@ -204,7 +204,7 @@ ARK_EXPORT(bool) encoded_doc_add_prop_string_decoded_string_value_decoded(struct
         return true;
 }
 
-ARK_EXPORT(bool) encoded_doc_add_prop_null(struct encoded_doc *doc, field_sid_t key)
+bool encoded_doc_add_prop_null(struct encoded_doc *doc, field_sid_t key)
 {
         error_if_null(doc)
         struct encoded_doc_prop *prop = vec_new_and_get(&doc->props, struct encoded_doc_prop);
@@ -216,7 +216,7 @@ ARK_EXPORT(bool) encoded_doc_add_prop_null(struct encoded_doc *doc, field_sid_t 
         return true;
 }
 
-ARK_EXPORT(bool) encoded_doc_add_prop_null_decoded(struct encoded_doc *doc, const char *key)
+bool encoded_doc_add_prop_null_decoded(struct encoded_doc *doc, const char *key)
 {
         error_if_null(doc)
         struct encoded_doc_prop *prop = vec_new_and_get(&doc->props, struct encoded_doc_prop);
@@ -228,7 +228,7 @@ ARK_EXPORT(bool) encoded_doc_add_prop_null_decoded(struct encoded_doc *doc, cons
         return true;
 }
 
-ARK_EXPORT(bool) encoded_doc_add_prop_object(struct encoded_doc *doc, field_sid_t key, struct encoded_doc *value)
+bool encoded_doc_add_prop_object(struct encoded_doc *doc, field_sid_t key, struct encoded_doc *value)
 {
         error_if_null(doc)
         struct encoded_doc_prop *prop = vec_new_and_get(&doc->props, struct encoded_doc_prop);
@@ -240,8 +240,8 @@ ARK_EXPORT(bool) encoded_doc_add_prop_object(struct encoded_doc *doc, field_sid_
         return true;
 }
 
-ARK_EXPORT(bool) encoded_doc_add_prop_object_decoded(struct encoded_doc *doc, const char *key,
-        struct encoded_doc *value)
+bool encoded_doc_add_prop_object_decoded(struct encoded_doc *doc, const char *key,
+                                         struct encoded_doc *value)
 {
         error_if_null(doc)
         struct encoded_doc_prop *prop = vec_new_and_get(&doc->props, struct encoded_doc_prop);
@@ -254,7 +254,7 @@ ARK_EXPORT(bool) encoded_doc_add_prop_object_decoded(struct encoded_doc *doc, co
 }
 
 #define DECALRE_ARK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(name, basic_type)                                               \
-ARK_EXPORT(bool)                                                                                                    \
+bool                                                                                                    \
 encoded_doc_add_prop_array_##name(struct encoded_doc *doc,                                                    \
                                        field_sid_t key)                                                         \
 {                                                                                                                      \
@@ -271,7 +271,7 @@ encoded_doc_add_prop_array_##name(struct encoded_doc *doc,                      
 }
 
 #define DECALRE_ARK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(name, basic_type)                                       \
-ARK_EXPORT(bool)                                                                                                    \
+bool                                                                                                    \
 encoded_doc_add_prop_array_##name##_decoded(struct encoded_doc *doc,                                          \
                                        const char *key)                                                                \
 {                                                                                                                      \
@@ -338,7 +338,7 @@ DECALRE_ARK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(null, FIELD_NULL)
 DECALRE_ARK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(object, FIELD_OBJECT)
 
 #define DECLARE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE(name, built_in_type, basic_type)                                    \
-ARK_EXPORT(bool)                                                                                                    \
+bool                                                                                                    \
 encoded_doc_array_push_##name(struct encoded_doc *doc, field_sid_t key,                                \
                                      const built_in_type *values, u32 values_length)                              \
 {                                                                                                                      \
@@ -360,7 +360,7 @@ encoded_doc_array_push_##name(struct encoded_doc *doc, field_sid_t key,         
 #include <inttypes.h>
 
 #define DECLARE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(name, built_in_type, basic_type)                            \
-ARK_EXPORT(bool)                                                                                                    \
+bool                                                                                                    \
 encoded_doc_array_push_##name##_decoded(struct encoded_doc *doc, const char *key,                             \
                                      const built_in_type *values, u32 values_length)                              \
 {                                                                                                                      \
@@ -436,7 +436,7 @@ DECLARE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(string, field_sid_t, FIELD_STRIN
 
 DECLARE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(null, field_u32_t, FIELD_NULL)
 //
-//ARK_EXPORT(bool)
+//bool
 //encoded_doc_array_push_null(struct encoded_doc *doc, field_sid_t key, u32 how_many)
 //{
 //    error_if_null(doc)
@@ -455,7 +455,7 @@ DECLARE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(null, field_u32_t, FIELD_NULL)
 #include <inttypes.h>
 #include <ark-js/carbon/archive/archive-query.h>
 
-ARK_EXPORT(bool) encoded_doc_array_push_object(struct encoded_doc *doc, field_sid_t key, object_id_t id)
+bool encoded_doc_array_push_object(struct encoded_doc *doc, field_sid_t key, object_id_t id)
 {
         unused(doc);
         unused(key);
@@ -472,7 +472,7 @@ ARK_EXPORT(bool) encoded_doc_array_push_object(struct encoded_doc *doc, field_si
         return true;
 }
 
-ARK_EXPORT(bool) encoded_doc_array_push_object_decoded(struct encoded_doc *doc, const char *key, object_id_t id)
+bool encoded_doc_array_push_object_decoded(struct encoded_doc *doc, const char *key, object_id_t id)
 {
         unused(doc);
         unused(key);
@@ -520,57 +520,57 @@ static bool doc_print_pretty(FILE *file, struct encoded_doc *doc, unsigned level
 
                 fprintf(file, "\"%s\": ", key_str);
                 switch (prop->header.type) {
-                case FIELD_INT8:
-                        fprintf(file, "%" PRIi8, prop->value.builtin.int8);
-                        break;
-                case FIELD_INT16:
-                        fprintf(file, "%" PRIi16, prop->value.builtin.int16);
-                        break;
-                case FIELD_INT32:
-                        fprintf(file, "%" PRIi32, prop->value.builtin.int32);
-                        break;
-                case FIELD_INT64:
-                        fprintf(file, "%" PRIi64, prop->value.builtin.int64);
-                        break;
-                case FIELD_UINT8:
-                        fprintf(file, "%" PRIu8, prop->value.builtin.uint8);
-                        break;
-                case FIELD_UINT16:
-                        fprintf(file, "%" PRIu16, prop->value.builtin.uint16);
-                        break;
-                case FIELD_UINT32:
-                        fprintf(file, "%" PRIu32, prop->value.builtin.uint32);
-                        break;
-                case FIELD_UINT64:
-                        fprintf(file, "%" PRIu64, prop->value.builtin.uint64);
-                        break;
-                case FIELD_FLOAT:
-                        fprintf(file, "%.2f", ceilf(prop->value.builtin.number * 100) / 100);
-                        break;
-                case FIELD_STRING: {
-                        if (prop->header.value_type == VALUE_BUILTIN) {
-                                char *value_str = query_fetch_string_by_id(&query, prop->value.builtin.string);
-                                fprintf(file, "\"%s\"", value_str);
-                                free(value_str);
-                        } else {
-                                fprintf(file, "\"%s\"", prop->value.string);
+                        case FIELD_INT8:
+                                fprintf(file, "%" PRIi8, prop->value.builtin.int8);
+                                break;
+                        case FIELD_INT16:
+                                fprintf(file, "%" PRIi16, prop->value.builtin.int16);
+                                break;
+                        case FIELD_INT32:
+                                fprintf(file, "%" PRIi32, prop->value.builtin.int32);
+                                break;
+                        case FIELD_INT64:
+                                fprintf(file, "%" PRIi64, prop->value.builtin.int64);
+                                break;
+                        case FIELD_UINT8:
+                                fprintf(file, "%" PRIu8, prop->value.builtin.uint8);
+                                break;
+                        case FIELD_UINT16:
+                                fprintf(file, "%" PRIu16, prop->value.builtin.uint16);
+                                break;
+                        case FIELD_UINT32:
+                                fprintf(file, "%" PRIu32, prop->value.builtin.uint32);
+                                break;
+                        case FIELD_UINT64:
+                                fprintf(file, "%" PRIu64, prop->value.builtin.uint64);
+                                break;
+                        case FIELD_FLOAT:
+                                fprintf(file, "%.2f", ceilf(prop->value.builtin.number * 100) / 100);
+                                break;
+                        case FIELD_STRING: {
+                                if (prop->header.value_type == VALUE_BUILTIN) {
+                                        char *value_str = query_fetch_string_by_id(&query, prop->value.builtin.string);
+                                        fprintf(file, "\"%s\"", value_str);
+                                        free(value_str);
+                                } else {
+                                        fprintf(file, "\"%s\"", prop->value.string);
+                                }
                         }
-                }
-                        break;
-                case FIELD_BOOLEAN:
-                        fprintf(file, "\"%s\"", prop->value.builtin.boolean ? "true" : "false");
-                        break;
-                case FIELD_NULL:
-                        fprintf(file, "null");
-                        break;
-                case FIELD_OBJECT: {
-                        struct encoded_doc *nested =
-                                encoded_doc_collection_get_or_append(doc->context, prop->value.builtin.object);
-                        doc_print_pretty(file, nested, level + 1);
-                }
-                        break;
-                default: error(&doc->err, ARK_ERR_INTERNALERR);
-                        return false;
+                                break;
+                        case FIELD_BOOLEAN:
+                                fprintf(file, "\"%s\"", prop->value.builtin.boolean ? "true" : "false");
+                                break;
+                        case FIELD_NULL:
+                                fprintf(file, "null");
+                                break;
+                        case FIELD_OBJECT: {
+                                struct encoded_doc *nested =
+                                        encoded_doc_collection_get_or_append(doc->context, prop->value.builtin.object);
+                                doc_print_pretty(file, nested, level + 1);
+                        }
+                                break;
+                        default: error(&doc->err, ARK_ERR_INTERNALERR);
+                                return false;
                 }
                 free(key_str);
                 fprintf(file, "%s\n", i + 1 < doc->props.num_elems || doc->props_arrays.num_elems > 0 ? ", " : "");
@@ -601,178 +601,185 @@ static bool doc_print_pretty(FILE *file, struct encoded_doc *doc, unsigned level
                 }
 
                 switch (prop->header.type) {
-                case FIELD_INT8:
-                        for (u32 k = 0; k < prop->values.num_elems; k++) {
-                                field_i8_t value = (vec_get(&prop->values, k, union encoded_doc_value))->int8;
-                                if (ARK_IS_NULL_INT8(value)) {
-                                        fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
-                                } else {
-                                        fprintf(file,
-                                                "%" PRIi8 "%s",
-                                                value,
-                                                k + 1 < prop->values.num_elems ? ", " : "");
+                        case FIELD_INT8:
+                                for (u32 k = 0; k < prop->values.num_elems; k++) {
+                                        field_i8_t value = (vec_get(&prop->values, k, union encoded_doc_value))->int8;
+                                        if (ARK_IS_NULL_INT8(value)) {
+                                                fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
+                                        } else {
+                                                fprintf(file,
+                                                        "%" PRIi8 "%s",
+                                                        value,
+                                                        k + 1 < prop->values.num_elems ? ", " : "");
+                                        }
+                                }
+                                break;
+                        case FIELD_INT16:
+                                for (u32 k = 0; k < prop->values.num_elems; k++) {
+                                        field_i16_t value = (vec_get(&prop->values, k, union encoded_doc_value))->int16;
+                                        if (ARK_IS_NULL_INT16(value)) {
+                                                fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
+                                        } else {
+                                                fprintf(file,
+                                                        "%" PRIi16 "%s",
+                                                        value,
+                                                        k + 1 < prop->values.num_elems ? ", " : "");
+                                        }
+                                }
+                                break;
+                        case FIELD_INT32:
+                                for (u32 k = 0; k < prop->values.num_elems; k++) {
+                                        field_i32_t value = (vec_get(&prop->values, k, union encoded_doc_value))->int32;
+                                        if (ARK_IS_NULL_INT32(value)) {
+                                                fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
+                                        } else {
+                                                fprintf(file,
+                                                        "%" PRIi32 "%s",
+                                                        value,
+                                                        k + 1 < prop->values.num_elems ? ", " : "");
+                                        }
+                                }
+                                break;
+                        case FIELD_INT64:
+                                for (u32 k = 0; k < prop->values.num_elems; k++) {
+                                        field_i64_t value = (vec_get(&prop->values, k, union encoded_doc_value))->int64;
+                                        if (ARK_IS_NULL_INT64(value)) {
+                                                fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
+                                        } else {
+                                                fprintf(file,
+                                                        "%" PRIi64 "%s",
+                                                        value,
+                                                        k + 1 < prop->values.num_elems ? ", " : "");
+                                        }
+                                }
+                                break;
+                        case FIELD_UINT8:
+                                for (u32 k = 0; k < prop->values.num_elems; k++) {
+                                        field_u8_t value = (vec_get(&prop->values, k, union encoded_doc_value))->uint8;
+                                        if (ARK_IS_NULL_UINT8(value)) {
+                                                fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
+                                        } else {
+                                                fprintf(file,
+                                                        "%" PRIu8 "%s",
+                                                        value,
+                                                        k + 1 < prop->values.num_elems ? ", " : "");
+                                        }
+                                }
+                                break;
+                        case FIELD_UINT16:
+                                for (u32 k = 0; k < prop->values.num_elems; k++) {
+                                        field_u16_t value = (vec_get(&prop->values, k,
+                                                                     union encoded_doc_value))->uint16;
+                                        if (ARK_IS_NULL_UINT16(value)) {
+                                                fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
+                                        } else {
+                                                fprintf(file,
+                                                        "%" PRIu16 "%s",
+                                                        value,
+                                                        k + 1 < prop->values.num_elems ? ", " : "");
+                                        }
+                                }
+                                break;
+                        case FIELD_UINT32:
+                                for (u32 k = 0; k < prop->values.num_elems; k++) {
+                                        field_u32_t value = (vec_get(&prop->values, k,
+                                                                     union encoded_doc_value))->uint32;
+                                        if (ARK_IS_NULL_UINT32(value)) {
+                                                fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
+                                        } else {
+                                                fprintf(file,
+                                                        "%" PRIu32 "%s",
+                                                        value,
+                                                        k + 1 < prop->values.num_elems ? ", " : "");
+                                        }
+                                }
+                                break;
+                        case FIELD_UINT64:
+                                for (u32 k = 0; k < prop->values.num_elems; k++) {
+                                        field_u64_t value = (vec_get(&prop->values, k,
+                                                                     union encoded_doc_value))->uint64;
+                                        if (ARK_IS_NULL_UINT64(value)) {
+                                                fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
+                                        } else {
+                                                fprintf(file,
+                                                        "%" PRIu64 "%s",
+                                                        value,
+                                                        k + 1 < prop->values.num_elems ? ", " : "");
+                                        }
+                                }
+                                break;
+                        case FIELD_FLOAT:
+                                for (u32 k = 0; k < prop->values.num_elems; k++) {
+                                        field_number_t value = (vec_get(&prop->values, k,
+                                                                        union encoded_doc_value))->number;
+                                        if (ARK_IS_NULL_NUMBER(value)) {
+                                                fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
+                                        } else {
+                                                fprintf(file,
+                                                        "%.2f%s",
+                                                        ceilf(value * 100) / 100,
+                                                        k + 1 < prop->values.num_elems ? ", " : "");
+                                        }
+                                }
+                                break;
+                        case FIELD_STRING: {
+                                for (u32 k = 0; k < prop->values.num_elems; k++) {
+                                        field_sid_t value = (vec_get(&prop->values, k,
+                                                                     union encoded_doc_value))->string;
+                                        if (ARK_IS_NULL_STRING(value)) {
+                                                fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
+                                        } else {
+                                                char *value_str = query_fetch_string_by_id(&query, value);
+                                                fprintf(file,
+                                                        "\"%s\"%s",
+                                                        value_str,
+                                                        k + 1 < prop->values.num_elems ? ", " : "");
+                                                free(value_str);
+                                        }
                                 }
                         }
-                        break;
-                case FIELD_INT16:
-                        for (u32 k = 0; k < prop->values.num_elems; k++) {
-                                field_i16_t value = (vec_get(&prop->values, k, union encoded_doc_value))->int16;
-                                if (ARK_IS_NULL_INT16(value)) {
-                                        fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
-                                } else {
-                                        fprintf(file,
-                                                "%" PRIi16 "%s",
-                                                value,
-                                                k + 1 < prop->values.num_elems ? ", " : "");
+                                break;
+                        case FIELD_BOOLEAN:
+                                for (u32 k = 0; k < prop->values.num_elems; k++) {
+                                        field_boolean_t
+                                                value = (vec_get(&prop->values, k, union encoded_doc_value))->boolean;
+                                        if (ARK_IS_NULL_BOOLEAN(value)) {
+                                                fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
+                                        } else {
+                                                fprintf(file,
+                                                        "%s%s",
+                                                        value ? "true" : "false",
+                                                        k + 1 < prop->values.num_elems ? ", " : "");
+                                        }
                                 }
-                        }
-                        break;
-                case FIELD_INT32:
-                        for (u32 k = 0; k < prop->values.num_elems; k++) {
-                                field_i32_t value = (vec_get(&prop->values, k, union encoded_doc_value))->int32;
-                                if (ARK_IS_NULL_INT32(value)) {
+                                break;
+                        case FIELD_NULL:
+                                for (u32 k = 0; k < prop->values.num_elems; k++) {
                                         fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
-                                } else {
-                                        fprintf(file,
-                                                "%" PRIi32 "%s",
-                                                value,
-                                                k + 1 < prop->values.num_elems ? ", " : "");
                                 }
-                        }
-                        break;
-                case FIELD_INT64:
-                        for (u32 k = 0; k < prop->values.num_elems; k++) {
-                                field_i64_t value = (vec_get(&prop->values, k, union encoded_doc_value))->int64;
-                                if (ARK_IS_NULL_INT64(value)) {
-                                        fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
-                                } else {
-                                        fprintf(file,
-                                                "%" PRIi64 "%s",
-                                                value,
-                                                k + 1 < prop->values.num_elems ? ", " : "");
+                                break;
+                        case FIELD_OBJECT: {
+                                for (u32 k = 0; k < prop->values.num_elems; k++) {
+                                        object_id_t nested_oid = (vec_get(&prop->values, k,
+                                                                          union encoded_doc_value))->object;
+                                        struct encoded_doc
+                                                *nested_doc = encoded_doc_collection_get_or_append(doc->context,
+                                                                                                   nested_oid);
+                                        fprintf(file, "\n");
+                                        for (unsigned k = 0; k < level + 1; k++) {
+                                                fprintf(file, "   ");
+                                        }
+                                        doc_print_pretty(file, nested_doc, level + 2);
+                                        fprintf(file, "%s", k + 1 < prop->values.num_elems ? "," : "");
                                 }
-                        }
-                        break;
-                case FIELD_UINT8:
-                        for (u32 k = 0; k < prop->values.num_elems; k++) {
-                                field_u8_t value = (vec_get(&prop->values, k, union encoded_doc_value))->uint8;
-                                if (ARK_IS_NULL_UINT8(value)) {
-                                        fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
-                                } else {
-                                        fprintf(file,
-                                                "%" PRIu8 "%s",
-                                                value,
-                                                k + 1 < prop->values.num_elems ? ", " : "");
-                                }
-                        }
-                        break;
-                case FIELD_UINT16:
-                        for (u32 k = 0; k < prop->values.num_elems; k++) {
-                                field_u16_t value = (vec_get(&prop->values, k, union encoded_doc_value))->uint16;
-                                if (ARK_IS_NULL_UINT16(value)) {
-                                        fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
-                                } else {
-                                        fprintf(file,
-                                                "%" PRIu16 "%s",
-                                                value,
-                                                k + 1 < prop->values.num_elems ? ", " : "");
-                                }
-                        }
-                        break;
-                case FIELD_UINT32:
-                        for (u32 k = 0; k < prop->values.num_elems; k++) {
-                                field_u32_t value = (vec_get(&prop->values, k, union encoded_doc_value))->uint32;
-                                if (ARK_IS_NULL_UINT32(value)) {
-                                        fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
-                                } else {
-                                        fprintf(file,
-                                                "%" PRIu32 "%s",
-                                                value,
-                                                k + 1 < prop->values.num_elems ? ", " : "");
-                                }
-                        }
-                        break;
-                case FIELD_UINT64:
-                        for (u32 k = 0; k < prop->values.num_elems; k++) {
-                                field_u64_t value = (vec_get(&prop->values, k, union encoded_doc_value))->uint64;
-                                if (ARK_IS_NULL_UINT64(value)) {
-                                        fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
-                                } else {
-                                        fprintf(file,
-                                                "%" PRIu64 "%s",
-                                                value,
-                                                k + 1 < prop->values.num_elems ? ", " : "");
-                                }
-                        }
-                        break;
-                case FIELD_FLOAT:
-                        for (u32 k = 0; k < prop->values.num_elems; k++) {
-                                field_number_t value = (vec_get(&prop->values, k, union encoded_doc_value))->number;
-                                if (ARK_IS_NULL_NUMBER(value)) {
-                                        fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
-                                } else {
-                                        fprintf(file,
-                                                "%.2f%s",
-                                                ceilf(value * 100) / 100,
-                                                k + 1 < prop->values.num_elems ? ", " : "");
-                                }
-                        }
-                        break;
-                case FIELD_STRING: {
-                        for (u32 k = 0; k < prop->values.num_elems; k++) {
-                                field_sid_t value = (vec_get(&prop->values, k, union encoded_doc_value))->string;
-                                if (ARK_IS_NULL_STRING(value)) {
-                                        fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
-                                } else {
-                                        char *value_str = query_fetch_string_by_id(&query, value);
-                                        fprintf(file,
-                                                "\"%s\"%s",
-                                                value_str,
-                                                k + 1 < prop->values.num_elems ? ", " : "");
-                                        free(value_str);
-                                }
-                        }
-                }
-                        break;
-                case FIELD_BOOLEAN:
-                        for (u32 k = 0; k < prop->values.num_elems; k++) {
-                                field_boolean_t
-                                        value = (vec_get(&prop->values, k, union encoded_doc_value))->boolean;
-                                if (ARK_IS_NULL_BOOLEAN(value)) {
-                                        fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
-                                } else {
-                                        fprintf(file,
-                                                "%s%s",
-                                                value ? "true" : "false",
-                                                k + 1 < prop->values.num_elems ? ", " : "");
-                                }
-                        }
-                        break;
-                case FIELD_NULL:
-                        for (u32 k = 0; k < prop->values.num_elems; k++) {
-                                fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
-                        }
-                        break;
-                case FIELD_OBJECT: {
-                        for (u32 k = 0; k < prop->values.num_elems; k++) {
-                                object_id_t nested_oid = (vec_get(&prop->values, k, union encoded_doc_value))->object;
-                                struct encoded_doc
-                                        *nested_doc = encoded_doc_collection_get_or_append(doc->context, nested_oid);
                                 fprintf(file, "\n");
-                                for (unsigned k = 0; k < level + 1; k++) {
+                                for (unsigned k = 0; k < level; k++) {
                                         fprintf(file, "   ");
                                 }
-                                doc_print_pretty(file, nested_doc, level + 2);
-                                fprintf(file, "%s", k + 1 < prop->values.num_elems ? "," : "");
                         }
-                        fprintf(file, "\n");
-                        for (unsigned k = 0; k < level; k++) {
-                                fprintf(file, "   ");
-                        }
-                }
-                        break;
-                default: error(&doc->err, ARK_ERR_INTERNALERR);
-                        return false;
+                                break;
+                        default: error(&doc->err, ARK_ERR_INTERNALERR);
+                                return false;
                 }
                 free(key_str);
                 if (prop->values.num_elems > 1) {
@@ -792,7 +799,7 @@ static bool doc_print_pretty(FILE *file, struct encoded_doc *doc, unsigned level
         return true;
 }
 
-ARK_EXPORT(bool) encoded_doc_print(FILE *file, struct encoded_doc *doc)
+bool encoded_doc_print(FILE *file, struct encoded_doc *doc)
 {
         return doc_print_pretty(file, doc, 1);
 }

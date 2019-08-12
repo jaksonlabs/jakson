@@ -26,8 +26,8 @@ typedef bool
 (*string_pred_func_t)(size_t *idxs_matching, size_t *num_matching, char **strings, size_t num_strings, void *capture);
 
 struct string_pred_t {
-        string_pred_func_t func;
-        i64 limit;
+    string_pred_func_t func;
+    i64 limit;
 };
 
 ARK_BUILT_IN(static bool) string_pred_validate(struct err *err, const struct string_pred_t *pred)
@@ -38,7 +38,7 @@ ARK_BUILT_IN(static bool) string_pred_validate(struct err *err, const struct str
 }
 
 ARK_BUILT_IN(static bool) string_pred_eval(const struct string_pred_t *pred, size_t *idxs_matching,
-        size_t *num_matching, char **strings, size_t num_strings, void *capture)
+                                           size_t *num_matching, char **strings, size_t num_strings, void *capture)
 {
         assert(pred);
         assert(idxs_matching);

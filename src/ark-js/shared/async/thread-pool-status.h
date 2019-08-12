@@ -23,15 +23,15 @@
 ARK_BEGIN_DECL
 
 typedef enum thread_status_e {
-        thread_status_idle = 0,
-        thread_status_working = 1,
-        thread_status_aborted = 2,
-        thread_status_finished = 3,
-        thread_status_killed = 4,
-        thread_status_created = 5,
-        thread_status_will_terminate = 6,
-        thread_status_completed = 7,
-        thread_status_empty = 99
+    thread_status_idle = 0,
+    thread_status_working = 1,
+    thread_status_aborted = 2,
+    thread_status_finished = 3,
+    thread_status_killed = 4,
+    thread_status_created = 5,
+    thread_status_will_terminate = 6,
+    thread_status_completed = 7,
+    thread_status_empty = 99
 } thread_status_e;
 
 ARK_END_DECL
