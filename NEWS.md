@@ -1,5 +1,6 @@
 ## 0.5.00.01 [2019-XX-XX]
 - JSON parser for carbon files (see `carbon_from_json` in `carbon.h`)
+- Increase building times by sharing common sources in a static library
 
 ## 0.3.00.01 [2019-08-09]
 - Add thread pool implementation (`struct thread_pool`)
