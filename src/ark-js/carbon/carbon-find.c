@@ -21,6 +21,8 @@
 
 static void result_from_array(struct carbon_find *find, struct carbon_array_it *it);
 
+static void result_from_object(struct carbon_find *find, struct carbon_object_it *it);
+
 static inline bool result_from_column(struct carbon_find *find, u32 requested_idx, struct carbon_column_it *it);
 
 bool carbon_find_open(struct carbon_find *out, const char *dot_path, struct carbon *doc)
@@ -30,9 +32,9 @@ bool carbon_find_open(struct carbon_find *out, const char *dot_path, struct carb
         error_if_null(doc)
         struct carbon_dot_path path;
         carbon_dot_path_from_string(&path, dot_path);
-        bool status = carbon_find_create(out, &path, doc);
+        carbon_find_create(out, &path, doc);
         carbon_dot_path_drop(&path);
-        return status;
+        return true;
 }
 
 bool carbon_find_close(struct carbon_find *find)
@@ -42,7 +44,8 @@ bool carbon_find_close(struct carbon_find *find)
                 enum carbon_field_type type;
                 carbon_find_result_type(&type, find);
                 switch (type) {
-                        case CARBON_FIELD_TYPE_OBJECT: error_print(ARK_ERR_NOTIMPLEMENTED)
+                        case CARBON_FIELD_TYPE_OBJECT:
+                                carbon_object_it_drop(find->value.object_it);
                                 break;
                         case CARBON_FIELD_TYPE_ARRAY:
                                 carbon_array_it_drop(find->value.array_it);
@@ -84,6 +87,9 @@ bool carbon_find_create(struct carbon_find *find, struct carbon_dot_path *path, 
                         case CARBON_COLUMN:
                                 result_from_column(find, find->path_evaluater.result.containers.column.elem_pos,
                                                    &find->path_evaluater.result.containers.column.it);
+                                break;
+                        case CARBON_OBJECT:
+                                result_from_object(find, &find->path_evaluater.result.containers.object.it);
                                 break;
                         default: error(&path->err, ARK_ERR_INTERNALERR);
                                 return false;
@@ -219,8 +225,8 @@ static void result_from_array(struct carbon_find *find, struct carbon_array_it *
                 case CARBON_FIELD_TYPE_COLUMN_BOOLEAN:
                         find->value.column_it = carbon_array_it_column_value(it);
                         break;
-                case CARBON_FIELD_TYPE_OBJECT: error_print_and_die_if(true,
-                                                                      ARK_ERR_NOTIMPLEMENTED); /* TODO: implement this for objects */
+                case CARBON_FIELD_TYPE_OBJECT:
+                        find->value.object_it = carbon_array_it_object_value(it);
                         break;
                 case CARBON_FIELD_TYPE_STRING:
                         find->value.string.base = carbon_array_it_string_value(&find->value.string.len, it);
@@ -249,6 +255,60 @@ static void result_from_array(struct carbon_find *find, struct carbon_array_it *
         }
 }
 
+static void result_from_object(struct carbon_find *find, struct carbon_object_it *it)
+{
+        carbon_object_it_prop_type(&find->type, it);
+        switch (find->type) {
+                case CARBON_FIELD_TYPE_NULL:
+                case CARBON_FIELD_TYPE_TRUE:
+                case CARBON_FIELD_TYPE_FALSE:
+                        /* no value to be stored */
+                        break;
+                case CARBON_FIELD_TYPE_ARRAY:
+                        find->value.array_it = carbon_object_it_array_value(it);
+                        break;
+                case CARBON_FIELD_TYPE_COLUMN_U8:
+                case CARBON_FIELD_TYPE_COLUMN_U16:
+                case CARBON_FIELD_TYPE_COLUMN_U32:
+                case CARBON_FIELD_TYPE_COLUMN_U64:
+                case CARBON_FIELD_TYPE_COLUMN_I8:
+                case CARBON_FIELD_TYPE_COLUMN_I16:
+                case CARBON_FIELD_TYPE_COLUMN_I32:
+                case CARBON_FIELD_TYPE_COLUMN_I64:
+                case CARBON_FIELD_TYPE_COLUMN_FLOAT:
+                case CARBON_FIELD_TYPE_COLUMN_BOOLEAN:
+                        find->value.column_it = carbon_object_it_column_value(it);
+                        break;
+                case CARBON_FIELD_TYPE_OBJECT:
+                        find->value.object_it = carbon_object_it_object_value(it);
+                        break;
+                case CARBON_FIELD_TYPE_STRING:
+                        find->value.string.base = carbon_object_it_string_value(&find->value.string.len, it);
+                        break;
+                case CARBON_FIELD_TYPE_NUMBER_U8:
+                case CARBON_FIELD_TYPE_NUMBER_U16:
+                case CARBON_FIELD_TYPE_NUMBER_U32:
+                case CARBON_FIELD_TYPE_NUMBER_U64:
+                        carbon_object_it_unsigned_value(&find->value_is_nulled, &find->value.unsigned_number, it);
+                        break;
+                case CARBON_FIELD_TYPE_NUMBER_I8:
+                case CARBON_FIELD_TYPE_NUMBER_I16:
+                case CARBON_FIELD_TYPE_NUMBER_I32:
+                case CARBON_FIELD_TYPE_NUMBER_I64:
+                        carbon_object_it_signed_value(&find->value_is_nulled, &find->value.signed_number, it);
+                        break;
+                case CARBON_FIELD_TYPE_NUMBER_FLOAT:
+                        carbon_object_it_float_value(&find->value_is_nulled, &find->value.float_number, it);
+                        break;
+                case CARBON_FIELD_TYPE_BINARY:
+                case CARBON_FIELD_TYPE_BINARY_CUSTOM:
+                        carbon_object_it_binary_value(&find->value.binary, it);
+                        break;
+                default: error(&find->err, ARK_ERR_INTERNALERR);
+                        break;
+        }
+}
+
 static inline bool result_from_column(struct carbon_find *find, u32 requested_idx, struct carbon_column_it *it)
 {
         u32 num_contained_values;
@@ -256,36 +316,99 @@ static inline bool result_from_column(struct carbon_find *find, u32 requested_id
         assert(requested_idx < num_contained_values);
 
         switch (find->type) {
-                case CARBON_FIELD_TYPE_COLUMN_BOOLEAN:
-                        find->value.boolean = carbon_column_it_boolean_values(NULL, it)[requested_idx];
-                        break;
-                case CARBON_FIELD_TYPE_COLUMN_U8:
-                        find->value.unsigned_number = carbon_column_it_u8_values(NULL, it)[requested_idx];
-                        break;
-                case CARBON_FIELD_TYPE_COLUMN_U16:
-                        find->value.unsigned_number = carbon_column_it_u16_values(NULL, it)[requested_idx];
-                        break;
-                case CARBON_FIELD_TYPE_COLUMN_U32:
-                        find->value.unsigned_number = carbon_column_it_u32_values(NULL, it)[requested_idx];
-                        break;
-                case CARBON_FIELD_TYPE_COLUMN_U64:
-                        find->value.unsigned_number = carbon_column_it_u64_values(NULL, it)[requested_idx];
-                        break;
-                case CARBON_FIELD_TYPE_COLUMN_I8:
-                        find->value.signed_number = carbon_column_it_i8_values(NULL, it)[requested_idx];
-                        break;
-                case CARBON_FIELD_TYPE_COLUMN_I16:
-                        find->value.signed_number = carbon_column_it_i16_values(NULL, it)[requested_idx];
-                        break;
-                case CARBON_FIELD_TYPE_COLUMN_I32:
-                        find->value.signed_number = carbon_column_it_i32_values(NULL, it)[requested_idx];
-                        break;
-                case CARBON_FIELD_TYPE_COLUMN_I64:
-                        find->value.signed_number = carbon_column_it_i64_values(NULL, it)[requested_idx];
-                        break;
-                case CARBON_FIELD_TYPE_COLUMN_FLOAT:
-                        find->value.float_number = carbon_column_it_float_values(NULL, it)[requested_idx];
-                        break;
+                case CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
+                        u8 field_value = carbon_column_it_boolean_values(NULL, it)[requested_idx];
+                        if (is_null_boolean(field_value)) {
+                                find->type = CARBON_FIELD_TYPE_NULL;
+                        } else if (field_value == CARBON_BOOLEAN_COLUMN_TRUE) {
+                                find->type = CARBON_FIELD_TYPE_TRUE;
+                        } else if (field_value == CARBON_BOOLEAN_COLUMN_FALSE) {
+                                find->type = CARBON_FIELD_TYPE_FALSE;
+                        } else {
+                                error(&it->err, ARK_ERR_INTERNALERR);
+                        }
+                } break;
+                case CARBON_FIELD_TYPE_COLUMN_U8: {
+                        u8 field_value = carbon_column_it_u8_values(NULL, it)[requested_idx];
+                        if (is_null_u8(field_value)) {
+                                find->type = CARBON_FIELD_TYPE_NULL;
+                        } else {
+                                find->type = CARBON_FIELD_TYPE_NUMBER_U8;
+                                find->value.unsigned_number = carbon_column_it_u8_values(NULL, it)[requested_idx];
+                        }
+                } break;
+                case CARBON_FIELD_TYPE_COLUMN_U16: {
+                        u16 field_value = carbon_column_it_u16_values(NULL, it)[requested_idx];
+                        if (is_null_u16(field_value)) {
+                                find->type = CARBON_FIELD_TYPE_NULL;
+                        } else {
+                                find->type = CARBON_FIELD_TYPE_NUMBER_U16;
+                                find->value.unsigned_number = carbon_column_it_u16_values(NULL, it)[requested_idx];
+                        }
+                } break;
+                case CARBON_FIELD_TYPE_COLUMN_U32: {
+                        u32 field_value = carbon_column_it_u32_values(NULL, it)[requested_idx];
+                        if (is_null_u32(field_value)) {
+                                find->type = CARBON_FIELD_TYPE_NULL;
+                        } else {
+                                find->type = CARBON_FIELD_TYPE_NUMBER_U32;
+                                find->value.unsigned_number = carbon_column_it_u32_values(NULL, it)[requested_idx];
+                        }
+                } break;
+                case CARBON_FIELD_TYPE_COLUMN_U64: {
+                        u64 field_value = carbon_column_it_u64_values(NULL, it)[requested_idx];
+                        if (is_null_u64(field_value)) {
+                                find->type = CARBON_FIELD_TYPE_NULL;
+                        } else {
+                                find->type = CARBON_FIELD_TYPE_NUMBER_U64;
+                                find->value.unsigned_number = carbon_column_it_u64_values(NULL, it)[requested_idx];
+                        }
+                } break;
+                case CARBON_FIELD_TYPE_COLUMN_I8: {
+                        i8 field_value = carbon_column_it_i8_values(NULL, it)[requested_idx];
+                        if (is_null_i8(field_value)) {
+                                find->type = CARBON_FIELD_TYPE_NULL;
+                        } else {
+                                find->type = CARBON_FIELD_TYPE_NUMBER_I8;
+                                find->value.signed_number = carbon_column_it_i8_values(NULL, it)[requested_idx];
+                        }
+                } break;
+                case CARBON_FIELD_TYPE_COLUMN_I16: {
+                        i16 field_value = carbon_column_it_i16_values(NULL, it)[requested_idx];
+                        if (is_null_i16(field_value)) {
+                                find->type = CARBON_FIELD_TYPE_NULL;
+                        } else {
+                                find->type = CARBON_FIELD_TYPE_NUMBER_I16;
+                                find->value.signed_number = carbon_column_it_i16_values(NULL, it)[requested_idx];
+                        }
+                } break;
+                case CARBON_FIELD_TYPE_COLUMN_I32: {
+                        i32 field_value = carbon_column_it_i32_values(NULL, it)[requested_idx];
+                        if (is_null_i32(field_value)) {
+                                find->type = CARBON_FIELD_TYPE_NULL;
+                        } else {
+                                find->type = CARBON_FIELD_TYPE_NUMBER_I32;
+                                find->value.signed_number = carbon_column_it_i32_values(NULL, it)[requested_idx];
+                        }
+                } break;
+                case CARBON_FIELD_TYPE_COLUMN_I64: {
+                        i64 field_value = carbon_column_it_i64_values(NULL, it)[requested_idx];
+                        if (is_null_i64(field_value)) {
+                                find->type = CARBON_FIELD_TYPE_NULL;
+                        } else {
+                                find->type = CARBON_FIELD_TYPE_NUMBER_I64;
+                                find->value.signed_number = carbon_column_it_i64_values(NULL, it)[requested_idx];
+                        }
+                } break;
+                case CARBON_FIELD_TYPE_COLUMN_FLOAT: {
+                        float field_value = carbon_column_it_float_values(NULL, it)[requested_idx];
+                        if (is_null_float(field_value)) {
+                                find->type = CARBON_FIELD_TYPE_NULL;
+                        } else {
+                                find->type = CARBON_FIELD_TYPE_NUMBER_FLOAT;
+                                find->value.float_number = carbon_column_it_float_values(NULL, it)[requested_idx];
+                        }
+                } break;
                 default: error(&it->err, ARK_ERR_UNSUPPORTEDTYPE)
                         return false;
         }

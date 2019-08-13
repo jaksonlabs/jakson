@@ -11,6 +11,9 @@
 #include <ark-js/carbon/carbon-revise.h>
 #include <ark-js/carbon/carbon-object-it.h>
 
+#include <sys/stat.h>
+#include <fcntl.h>
+
 TEST(CarbonTest, CreateCarbon) {
         struct carbon doc;
         object_id_t oid;
@@ -1835,7 +1838,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 carbon_find_open(&finder, "1.0.0", &rev_doc);
                 ASSERT_TRUE(carbon_find_has_result(&finder));
                 carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, CARBON_FIELD_TYPE_COLUMN_U32);
+                ASSERT_EQ(type, CARBON_FIELD_TYPE_NUMBER_U32);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 88);
                 carbon_find_close(&finder);
@@ -1845,7 +1848,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 carbon_find_open(&finder, "1.0.1", &rev_doc);
                 ASSERT_TRUE(carbon_find_has_result(&finder));
                 carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, CARBON_FIELD_TYPE_COLUMN_U32);
+                ASSERT_EQ(type, CARBON_FIELD_TYPE_NUMBER_U32);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 89);
                 carbon_find_close(&finder);
@@ -1855,7 +1858,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 carbon_find_open(&finder, "1.0.2", &rev_doc);
                 ASSERT_TRUE(carbon_find_has_result(&finder));
                 carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, CARBON_FIELD_TYPE_COLUMN_U32);
+                ASSERT_EQ(type, CARBON_FIELD_TYPE_NUMBER_U32);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 90);
                 carbon_find_close(&finder);
@@ -1911,7 +1914,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 carbon_find_open(&finder, "1.1.1.0", &rev_doc);
                 ASSERT_TRUE(carbon_find_has_result(&finder));
                 carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, CARBON_FIELD_TYPE_COLUMN_U32);
+                ASSERT_EQ(type, CARBON_FIELD_TYPE_NUMBER_U32);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 65);
                 carbon_find_close(&finder);
@@ -1921,7 +1924,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 carbon_find_open(&finder, "1.1.1.1", &rev_doc);
                 ASSERT_TRUE(carbon_find_has_result(&finder));
                 carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, CARBON_FIELD_TYPE_COLUMN_U32);
+                ASSERT_EQ(type, CARBON_FIELD_TYPE_NUMBER_U32);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 66);
                 carbon_find_close(&finder);
@@ -1931,7 +1934,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 carbon_find_open(&finder, "1.1.1.2", &rev_doc);
                 ASSERT_TRUE(carbon_find_has_result(&finder));
                 carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, CARBON_FIELD_TYPE_COLUMN_U32);
+                ASSERT_EQ(type, CARBON_FIELD_TYPE_NUMBER_U32);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 67);
                 carbon_find_close(&finder);
@@ -2002,7 +2005,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 carbon_find_open(&finder, "1.4.0", &rev_doc);
                 ASSERT_TRUE(carbon_find_has_result(&finder));
                 carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, CARBON_FIELD_TYPE_COLUMN_U32);
+                ASSERT_EQ(type, CARBON_FIELD_TYPE_NUMBER_U32);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 23);
                 carbon_find_close(&finder);
@@ -2012,7 +2015,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 carbon_find_open(&finder, "1.4.1", &rev_doc);
                 ASSERT_TRUE(carbon_find_has_result(&finder));
                 carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, CARBON_FIELD_TYPE_COLUMN_U32);
+                ASSERT_EQ(type, CARBON_FIELD_TYPE_NUMBER_U32);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 24);
                 carbon_find_close(&finder);
@@ -2022,7 +2025,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 carbon_find_open(&finder, "1.4.2", &rev_doc);
                 ASSERT_TRUE(carbon_find_has_result(&finder));
                 carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, CARBON_FIELD_TYPE_COLUMN_U32);
+                ASSERT_EQ(type, CARBON_FIELD_TYPE_NUMBER_U32);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 25);
                 carbon_find_close(&finder);
@@ -4391,7 +4394,7 @@ TEST(CarbonTest, CarbonObjectInsertNull)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":null}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\": null}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -4421,7 +4424,7 @@ TEST(CarbonTest, CarbonObjectInsertMultipleNulls)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":null, \"My Key 2\":null, \"My Key 3\":null}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\": null, \"My Key 2\": null, \"My Key 3\": null}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -4449,7 +4452,7 @@ TEST(CarbonTest, CarbonObjectInsertU8)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":123}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\": 123}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -4479,7 +4482,7 @@ TEST(CarbonTest, CarbonObjectInsertMultipleU8s)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":1, \"My Key 2\":2, \"My Key 3\":3}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\": 1, \"My Key 2\": 2, \"My Key 3\": 3}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -4507,7 +4510,7 @@ TEST(CarbonTest, CarbonObjectInsertU16)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":123}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\": 123}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -4537,7 +4540,7 @@ TEST(CarbonTest, CarbonObjectInsertMultipleU16s)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":1, \"My Key 2\":2, \"My Key 3\":3}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\": 1, \"My Key 2\": 2, \"My Key 3\": 3}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -4565,7 +4568,7 @@ TEST(CarbonTest, CarbonObjectInsertU32)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":123}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\": 123}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -4595,7 +4598,7 @@ TEST(CarbonTest, CarbonObjectInsertMultipleU32s)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":1, \"My Key 2\":2, \"My Key 3\":3}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\": 1, \"My Key 2\": 2, \"My Key 3\": 3}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -4623,7 +4626,7 @@ TEST(CarbonTest, CarbonObjectInsertU64)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":123}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\": 123}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -4653,7 +4656,7 @@ TEST(CarbonTest, CarbonObjectInsertMultipleU64s)
         string_create(&sb);
 
         //carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":1, \"My Key 2\":2, \"My Key 3\":3}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\": 1, \"My Key 2\": 2, \"My Key 3\": 3}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -4681,7 +4684,7 @@ TEST(CarbonTest, CarbonObjectInsertI8)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":-123}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\": -123}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -4711,7 +4714,7 @@ TEST(CarbonTest, CarbonObjectInsertMultipleI8s)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":-1, \"My Key 2\":-2, \"My Key 3\":-3}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\": -1, \"My Key 2\": -2, \"My Key 3\": -3}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -4739,7 +4742,7 @@ TEST(CarbonTest, CarbonObjectInsertI16)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":-123}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\": -123}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -4769,7 +4772,7 @@ TEST(CarbonTest, CarbonObjectInsertMultipleI16s)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":-1, \"My Key 2\":-2, \"My Key 3\":-3}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\": -1, \"My Key 2\": -2, \"My Key 3\": -3}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -4797,7 +4800,7 @@ TEST(CarbonTest, CarbonObjectInsertI32)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":-123}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\": -123}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -4827,7 +4830,7 @@ TEST(CarbonTest, CarbonObjectInsertMultipleI32s)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":-1, \"My Key 2\":-2, \"My Key 3\":-3}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\": -1, \"My Key 2\": -2, \"My Key 3\": -3}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -4855,7 +4858,7 @@ TEST(CarbonTest, CarbonObjectInsertI64)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":-123}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\": -123}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -4885,7 +4888,7 @@ TEST(CarbonTest, CarbonObjectInsertMultipleI64s)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":-1, \"My Key 2\":-2, \"My Key 3\":-3}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\": -1, \"My Key 2\": -2, \"My Key 3\": -3}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -4913,7 +4916,7 @@ TEST(CarbonTest, CarbonObjectInsertFloat)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":-123.32}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\": -123.32}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -4943,7 +4946,7 @@ TEST(CarbonTest, CarbonObjectInsertMultipleFloats)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":-1.23, \"My Key 2\":-2.42, \"My Key 3\":3.21}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\": -1.23, \"My Key 2\": -2.42, \"My Key 3\": 3.21}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -4971,7 +4974,7 @@ TEST(CarbonTest, CarbonObjectInsertTrue)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":true}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\": true}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -4999,7 +5002,7 @@ TEST(CarbonTest, CarbonObjectInsertFalse)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\":false}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key\": false}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -5029,7 +5032,7 @@ TEST(CarbonTest, CarbonObjectInsertMultipleBooleans)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\":true, \"My Key 2\":false, \"My Key 3\":true}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"My Key 1\": true, \"My Key 2\": false, \"My Key 3\": true}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -5069,7 +5072,7 @@ TEST(CarbonTest, CarbonObjectInsertMixed)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"k1\":true, \"k2\":false, \"k3\":null, \"k4\":1, \"k5\":2, \"k6\":3, \"k7\":4, \"k8\":-1, \"k9\":-2, \"k10\":-3, \"k11\":-4, \"k12\":42.23}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"k1\": true, \"k2\": false, \"k3\": null, \"k4\": 1, \"k5\": 2, \"k6\": 3, \"k7\": 4, \"k8\": -1, \"k9\": -2, \"k10\": -3, \"k11\": -4, \"k12\": 42.23}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -5099,7 +5102,7 @@ TEST(CarbonTest, CarbonObjectInsertString)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"hello\":\"world\"}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"hello\": \"world\"}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -5131,7 +5134,7 @@ TEST(CarbonTest, CarbonObjectInsertMultipleString)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"k1\":\"v1\", \"hello\":\"world\", \"k3\":\"there\"}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"k1\": \"v1\", \"hello\": \"world\", \"k3\": \"there\"}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -5176,7 +5179,7 @@ TEST(CarbonTest, CarbonObjectInsertMultipleStringMixedTypes)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"k2\":false, \"k3\":null, \"k4\":1, \"s1\":\"v1\", \"k5\":2, \"s2-longer\":\"world\", \"k6\":3, \"k7\":4, \"k8\":-1, \"s3\":\"there\", \"k9\":-2, \"k10\":-3, \"k11\":-4, \"k12\":42.23, \"k1\":true}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"k2\": false, \"k3\": null, \"k4\": 1, \"s1\": \"v1\", \"k5\": 2, \"s2-longer\": \"world\", \"k6\": 3, \"k7\": 4, \"k8\": -1, \"s3\": \"there\", \"k9\": -2, \"k10\": -3, \"k11\": -4, \"k12\": 42.23, \"k1\": true}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -5206,7 +5209,7 @@ TEST(CarbonTest, CarbonObjectInsertBinary)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"my binary\":{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"my binary\": { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -5253,7 +5256,7 @@ TEST(CarbonTest, CarbonObjectInsertMultipleBinariesMixedTypes)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"k12\":42.23, \"k1\":true, \"b1\":{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"A==sbG8AA\" }, \"my binary\":{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"LAAA\" }, \"k2\":false, \"k3\":null, \"k4\":1, \"s1\":\"v1\", \"k5\":2, \"b2\":{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"A==ybGQAA\" }, \"s2-longer\":\"world\", \"k6\":3, \"k7\":4, \"k8\":-1, \"s3\":\"there\", \"k9\":-2, \"k10\":-3, \"k11\":-4}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"k12\": 42.23, \"k1\": true, \"b1\": { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"A==sbG8AA\" }, \"my binary\": { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"LAAA\" }, \"k2\": false, \"k3\": null, \"k4\": 1, \"s1\": \"v1\", \"k5\": 2, \"b2\": { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"A==ybGQAA\" }, \"s2-longer\": \"world\", \"k6\": 3, \"k7\": 4, \"k8\": -1, \"s3\": \"there\", \"k9\": -2, \"k10\": -3, \"k11\": -4}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -5285,7 +5288,7 @@ TEST(CarbonTest, CarbonObjectInsertMultipleBinaries)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"b1\":{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"A==sbG8AA\" }, \"my binary\":{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"LAAA\" }, \"b2\":{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"A==ybGQAA\" }}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"b1\": { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"A==sbG8AA\" }, \"my binary\": { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"LAAA\" }, \"b2\": { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"A==ybGQAA\" }}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -5316,7 +5319,7 @@ TEST(CarbonTest, CarbonObjectInsertObjectEmpty)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"my nested\":{}}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"my nested\": {}}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -5370,7 +5373,7 @@ TEST(CarbonTest, CarbonObjectInsertObjectMixedMxed)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"1\":42.23, \"2\":true, \"3\":{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"A==sbG8AA\" }, \"4\":{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"LAAA\" }, \"5\":{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"A==ybGQAA\" }, \"6\":\"world\", \"my nested\":{\"7\":false, \"8\":null, \"9\":1, \"10\":\"v1\", \"11\":2}, \"12\":3, \"13\":4, \"14\":-1, \"15\":\"there\", \"16\":-2, \"17\":-3, \"18\":-4}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"1\": 42.23, \"2\": true, \"3\": { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"A==sbG8AA\" }, \"4\": { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"LAAA\" }, \"5\": { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"A==ybGQAA\" }, \"6\": \"world\", \"my nested\": {\"7\": false, \"8\": null, \"9\": 1, \"10\": \"v1\", \"11\": 2}, \"12\": 3, \"13\": 4, \"14\": -1, \"15\": \"there\", \"16\": -2, \"17\": -3, \"18\": -4}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -5402,7 +5405,7 @@ TEST(CarbonTest, CarbonObjectInsertArrayEmpty)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"my array\":[]}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"my array\": []}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -5459,7 +5462,7 @@ TEST(CarbonTest, CarbonObjectInsertArrayData)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"my array\":[[88, 89, 90], [\"Hello\", [65, 66, 67], \"World\"], 1, 1, [23, 24, 25], 1]}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"my array\": [[88, 89, 90], [\"Hello\", [65, 66, 67], \"World\"], 1, 1, [23, 24, 25], 1]}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -5494,7 +5497,7 @@ TEST(CarbonTest, CarbonObjectInsertColumnNonEmpty)
         string_create(&sb);
 
         // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"my column\":[1, 2, 3]}]}") == 0);
+        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"my column\": [1, 2, 3]}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -5691,7 +5694,7 @@ TEST(CarbonTest, CarbonObjectRemoveTest)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"1\":false, \"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}, {\"6\":false, \"7\":null, \"8\":1, \"9\":\"v1\", \"10\":2}, {\"11\":false, \"12\":null, \"13\":1, \"14\":\"v1\", \"15\":2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"1\": false, \"2\": null, \"3\": 1, \"4\": \"v1\", \"5\": 2}, {\"6\": false, \"7\": null, \"8\": 1, \"9\": \"v1\", \"10\": 2}, {\"11\": false, \"12\": null, \"13\": 1, \"14\": \"v1\", \"15\": 2}]}") == 0);
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 2}, \"doc\": []}") == 0);
 
         string_drop(&sb);
@@ -5780,8 +5783,8 @@ TEST(CarbonTest, CarbonObjectRemoveSkipOneTest)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"1\":false, \"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}, {\"6\":false, \"7\":null, \"8\":1, \"9\":\"v1\", \"10\":2}, {\"11\":false, \"12\":null, \"13\":1, \"14\":\"v1\", \"15\":2}]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 2}, \"doc\": [{\"1\":false, \"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 1}, \"doc\": [{\"1\": false, \"2\": null, \"3\": 1, \"4\": \"v1\", \"5\": 2}, {\"6\": false, \"7\": null, \"8\": 1, \"9\": \"v1\", \"10\": 2}, {\"11\": false, \"12\": null, \"13\": 1, \"14\": \"v1\", \"15\": 2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"skey\", \"value\": null}, \"rev\": 2}, \"doc\": [{\"1\": false, \"2\": null, \"3\": 1, \"4\": \"v1\", \"5\": 2}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -5859,8 +5862,8 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringIt)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\":false, \"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"Hello Long Key\":\"Hello Long Value\", \"1\":false, \"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\": false, \"2\": null, \"3\": 1, \"4\": \"v1\", \"5\": 2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"Hello Long Key\": \"Hello Long Value\", \"1\": false, \"2\": null, \"3\": 1, \"4\": \"v1\", \"5\": 2}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -5934,8 +5937,8 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex1)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\":false, \"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\":false, \"Hello Long Key\":\"Hello Long Value\", \"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\": false, \"2\": null, \"3\": 1, \"4\": \"v1\", \"5\": 2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\": false, \"Hello Long Key\": \"Hello Long Value\", \"2\": null, \"3\": 1, \"4\": \"v1\", \"5\": 2}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -6009,8 +6012,8 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex2)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\":false, \"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\":false, \"2\":null, \"Hello Long Key\":\"Hello Long Value\", \"3\":1, \"4\":\"v1\", \"5\":2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\": false, \"2\": null, \"3\": 1, \"4\": \"v1\", \"5\": 2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\": false, \"2\": null, \"Hello Long Key\": \"Hello Long Value\", \"3\": 1, \"4\": \"v1\", \"5\": 2}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -6085,8 +6088,8 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex3)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\":false, \"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\":false, \"2\":null, \"3\":1, \"Hello Long Key\":\"Hello Long Value\", \"4\":\"v1\", \"5\":2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\": false, \"2\": null, \"3\": 1, \"4\": \"v1\", \"5\": 2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\": false, \"2\": null, \"3\": 1, \"Hello Long Key\": \"Hello Long Value\", \"4\": \"v1\", \"5\": 2}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -6162,8 +6165,8 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex4)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\":false, \"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\":false, \"2\":null, \"3\":1, \"4\":\"v1\", \"Hello Long Key\":\"Hello Long Value\", \"5\":2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\": false, \"2\": null, \"3\": 1, \"4\": \"v1\", \"5\": 2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\": false, \"2\": null, \"3\": 1, \"4\": \"v1\", \"Hello Long Key\": \"Hello Long Value\", \"5\": 2}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -6240,8 +6243,8 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex5)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\":false, \"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\":false, \"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2, \"Hello Long Key\":\"Hello Long Value\"}]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\": false, \"2\": null, \"3\": 1, \"4\": \"v1\", \"5\": 2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\": false, \"2\": null, \"3\": 1, \"4\": \"v1\", \"5\": 2, \"Hello Long Key\": \"Hello Long Value\"}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -6314,8 +6317,8 @@ TEST(CarbonTest, CarbonObjectRemovePropByKey)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\":false, \"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\": false, \"2\": null, \"3\": 1, \"4\": \"v1\", \"5\": 2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"2\": null, \"3\": 1, \"4\": \"v1\", \"5\": 2}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -6395,8 +6398,8 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeObjectNonEmpty)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\":{\"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}, \"6\":null, \"7\":1, \"8\":\"v1\", \"9\":2}]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"6\":null, \"7\":1, \"8\":\"v1\", \"9\":2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\": {\"2\": null, \"3\": 1, \"4\": \"v1\", \"5\": 2}, \"6\": null, \"7\": 1, \"8\": \"v1\", \"9\": 2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"6\": null, \"7\": 1, \"8\": \"v1\", \"9\": 2}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -6475,8 +6478,8 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeArrayEmpty)
 
         //printf("%s\n", json_1);
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\":[], \"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\": [], \"2\": null, \"3\": 1, \"4\": \"v1\", \"5\": 2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"2\": null, \"3\": 1, \"4\": \"v1\", \"5\": 2}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -6556,8 +6559,8 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeArrayNonEmpty)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\":[null, 1, \"v1\", 2], \"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\": [null, 1, \"v1\", 2], \"2\": null, \"3\": 1, \"4\": \"v1\", \"5\": 2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"2\": null, \"3\": 1, \"4\": \"v1\", \"5\": 2}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -6634,8 +6637,8 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeColumnEmpty)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\":[], \"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\": [], \"2\": null, \"3\": 1, \"4\": \"v1\", \"5\": 2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"2\": null, \"3\": 1, \"4\": \"v1\", \"5\": 2}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -6711,8 +6714,8 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeObjectEmpty)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\":{}, \"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"2\":null, \"3\":1, \"4\":\"v1\", \"5\":2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"1\": {}, \"2\": null, \"3\": 1, \"4\": \"v1\", \"5\": 2}]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"2\": null, \"3\": 1, \"4\": \"v1\", \"5\": 2}]}") == 0);
 
         string_drop(&sb);
         carbon_drop(&doc);
@@ -7473,7 +7476,7 @@ TEST(CarbonTest, CarbonFromJsonObjectSingle)
         const char *json_in;
         char *json_out_compact, *json_out_extended;
 
-        json_in = "{\"k\":\"v\"}";
+        json_in = "{\"k\": \"v\"}";
 
         carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
 
@@ -7486,7 +7489,7 @@ TEST(CarbonTest, CarbonFromJsonObjectSingle)
         carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
-        ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"k\":\"v\"}]}") == 0);
+        ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"k\": \"v\"}]}") == 0);
 
         free(json_out_compact);
         free(json_out_extended);
@@ -7501,7 +7504,7 @@ TEST(CarbonTest, CarbonFromJsonObjectEmptyArrayProp)
         const char *json_in;
         char *json_out_compact, *json_out_extended;
 
-        json_in = "{\"k\":[]}";
+        json_in = "{\"k\": []}";
 
         carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
 
@@ -7514,7 +7517,7 @@ TEST(CarbonTest, CarbonFromJsonObjectEmptyArrayProp)
         carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
-        ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"k\":[]}]}") == 0);
+        ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"k\": []}]}") == 0);
 
         free(json_out_compact);
         free(json_out_extended);
@@ -7528,7 +7531,7 @@ TEST(CarbonTest, CarbonFromJsonObjectEmptyObjectProp)
         const char *json_in;
         char *json_out_compact, *json_out_extended;
 
-        json_in = "{\"k\":{}}";
+        json_in = "{\"k\": {}}";
 
         carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
 
@@ -7541,7 +7544,7 @@ TEST(CarbonTest, CarbonFromJsonObjectEmptyObjectProp)
         carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
-        ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"k\":{}}]}") == 0);
+        ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"k\": {}}]}") == 0);
 
         free(json_out_compact);
         free(json_out_extended);
@@ -7555,7 +7558,7 @@ TEST(CarbonTest, CarbonFromJsonObjectTrueProp)
         const char *json_in;
         char *json_out_compact, *json_out_extended;
 
-        json_in = "{\"k\":true}";
+        json_in = "{\"k\": true}";
 
         carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
 
@@ -7568,7 +7571,7 @@ TEST(CarbonTest, CarbonFromJsonObjectTrueProp)
         carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
-        ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"k\":true}]}") == 0);
+        ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"k\": true}]}") == 0);
 
         free(json_out_compact);
         free(json_out_extended);
@@ -7582,7 +7585,7 @@ TEST(CarbonTest, CarbonFromJsonObjectFalseProp)
         const char *json_in;
         char *json_out_compact, *json_out_extended;
 
-        json_in = "{\"k\":false}";
+        json_in = "{\"k\": false}";
 
         carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
 
@@ -7595,7 +7598,7 @@ TEST(CarbonTest, CarbonFromJsonObjectFalseProp)
         carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
-        ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"k\":false}]}") == 0);
+        ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"k\": false}]}") == 0);
 
         free(json_out_compact);
         free(json_out_extended);
@@ -7609,7 +7612,7 @@ TEST(CarbonTest, CarbonFromJsonObjectNullProp)
         const char *json_in;
         char *json_out_compact, *json_out_extended;
 
-        json_in = "{\"k\":null}";
+        json_in = "{\"k\": null}";
 
         carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
 
@@ -7622,7 +7625,7 @@ TEST(CarbonTest, CarbonFromJsonObjectNullProp)
         carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
-        ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"k\":null}]}") == 0);
+        ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"k\": null}]}") == 0);
 
         free(json_out_compact);
         free(json_out_extended);
@@ -7636,7 +7639,7 @@ TEST(CarbonTest, CarbonFromJsonObjectUnsignedProp)
         const char *json_in;
         char *json_out_compact, *json_out_extended;
 
-        json_in = "{\"k\":42}";
+        json_in = "{\"k\": 42}";
 
         carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
 
@@ -7649,7 +7652,7 @@ TEST(CarbonTest, CarbonFromJsonObjectUnsignedProp)
         carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
-        ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"k\":42}]}") == 0);
+        ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"k\": 42}]}") == 0);
 
         free(json_out_compact);
         free(json_out_extended);
@@ -7663,7 +7666,7 @@ TEST(CarbonTest, CarbonFromJsonObjectSignedProp)
         const char *json_in;
         char *json_out_compact, *json_out_extended;
 
-        json_in = "{\"k\":-42}";
+        json_in = "{\"k\": -42}";
 
         carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
 
@@ -7676,7 +7679,7 @@ TEST(CarbonTest, CarbonFromJsonObjectSignedProp)
         carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
-        ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"k\":-42}]}") == 0);
+        ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"k\": -42}]}") == 0);
 
         free(json_out_compact);
         free(json_out_extended);
@@ -7690,7 +7693,7 @@ TEST(CarbonTest, CarbonFromJsonObjectFloatProp)
         const char *json_in;
         char *json_out_compact, *json_out_extended;
 
-        json_in = "{\"k\":-42.23}";
+        json_in = "{\"k\": -42.23}";
 
         carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
 
@@ -7703,7 +7706,7 @@ TEST(CarbonTest, CarbonFromJsonObjectFloatProp)
         carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
-        ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"k\":-42.23}]}") == 0);
+        ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"k\": -42.23}]}") == 0);
 
         free(json_out_compact);
         free(json_out_extended);
@@ -7847,7 +7850,7 @@ TEST(CarbonTest, CarbonFromJsonExample)
         char *json_out_compact;
 
         /* example json taken from 'https://json.org/example.html' */
-        json_in = "{\"web-app\":{\"servlet\":[{\"servlet-name\":\"cofaxCDS\", \"servlet-class\":\"org.cofax.cds.CDSServlet\", \"init-param\":{\"configGlossary:installationAt\":\"Philadelphia, PA\", \"configGlossary:adminEmail\":\"ksm@pobox.com\", \"configGlossary:poweredBy\":\"Cofax\", \"configGlossary:poweredByIcon\":\"/images/cofax.gif\", \"configGlossary:staticPath\":\"/content/static\", \"templateProcessorClass\":\"org.cofax.WysiwygTemplate\", \"templateLoaderClass\":\"org.cofax.FilesTemplateLoader\", \"templatePath\":\"templates\", \"templateOverridePath\":\"\", \"defaultListTemplate\":\"listTemplate.htm\", \"defaultFileTemplate\":\"articleTemplate.htm\", \"useJSP\":false, \"jspListTemplate\":\"listTemplate.jsp\", \"jspFileTemplate\":\"articleTemplate.jsp\", \"cachePackageTagsTrack\":200, \"cachePackageTagsStore\":200, \"cachePackageTagsRefresh\":60, \"cacheTemplatesTrack\":100, \"cacheTemplatesStore\":50, \"cacheTemplatesRefresh\":15, \"cachePagesTrack\":200, \"cachePagesStore\":100, \"cachePagesRefresh\":10, \"cachePagesDirtyRead\":10, \"searchEngineListTemplate\":\"forSearchEnginesList.htm\", \"searchEngineFileTemplate\":\"forSearchEngines.htm\", \"searchEngineRobotsDb\":\"WEB-INF/robots.db\", \"useDataStore\":true, \"dataStoreClass\":\"org.cofax.SqlDataStore\", \"redirectionClass\":\"org.cofax.SqlRedirection\", \"dataStoreName\":\"cofax\", \"dataStoreDriver\":\"com.microsoft.jdbc.sqlserver.SQLServerDriver\", \"dataStoreUrl\":\"jdbc:microsoft:sqlserver://LOCALHOST:1433;DatabaseName=goon\", \"dataStoreUser\":\"sa\", \"dataStorePassword\":\"dataStoreTestQuery\", \"dataStoreTestQuery\":\"SET NOCOUNT ON;select test='test';\", \"dataStoreLogFile\":\"/usr/local/tomcat/logs/datastore.log\", \"dataStoreInitConns\":10, \"dataStoreMaxConns\":100, \"dataStoreConnUsageLimit\":100, \"dataStoreLogLevel\":\"debug\", \"maxUrlLength\":500}}, {\"servlet-name\":\"cofaxEmail\", \"servlet-class\":\"org.cofax.cds.EmailServlet\", \"init-param\":{\"mailHost\":\"mail1\", \"mailHostOverride\":\"mail2\"}}, {\"servlet-name\":\"cofaxAdmin\", \"servlet-class\":\"org.cofax.cds.AdminServlet\"}, {\"servlet-name\":\"fileServlet\", \"servlet-class\":\"org.cofax.cds.FileServlet\"}, {\"servlet-name\":\"cofaxTools\", \"servlet-class\":\"org.cofax.cms.CofaxToolsServlet\", \"init-param\":{\"templatePath\":\"toolstemplates/\", \"log\":1, \"logLocation\":\"/usr/local/tomcat/logs/CofaxTools.log\", \"logMaxSize\":\"\", \"dataLog\":1, \"dataLogLocation\":\"/usr/local/tomcat/logs/dataLog.log\", \"dataLogMaxSize\":\"\", \"removePageCache\":\"/content/admin/remove?cache=pages&id=\", \"removeTemplateCache\":\"/content/admin/remove?cache=templates&id=\", \"fileTransferFolder\":\"/usr/local/tomcat/webapps/content/fileTransferFolder\", \"lookInContext\":1, \"adminGroupID\":4, \"betaServer\":true}}], \"servlet-mapping\":{\"cofaxCDS\":\"/\", \"cofaxEmail\":\"/cofaxutil/aemail/*\", \"cofaxAdmin\":\"/admin/*\", \"fileServlet\":\"/static/*\", \"cofaxTools\":\"/tools/*\"}, \"taglib\":{\"taglib-uri\":\"cofax.tld\", \"taglib-location\":\"/WEB-INF/tlds/cofax.tld\"}}}";
+        json_in = "{\"web-app\": {\"servlet\": [{\"servlet-name\": \"cofaxCDS\", \"servlet-class\": \"org.cofax.cds.CDSServlet\", \"init-param\": {\"configGlossary: installationAt\": \"Philadelphia, PA\", \"configGlossary: adminEmail\": \"ksm@pobox.com\", \"configGlossary: poweredBy\": \"Cofax\", \"configGlossary: poweredByIcon\": \"/images/cofax.gif\", \"configGlossary: staticPath\": \"/content/static\", \"templateProcessorClass\": \"org.cofax.WysiwygTemplate\", \"templateLoaderClass\": \"org.cofax.FilesTemplateLoader\", \"templatePath\": \"templates\", \"templateOverridePath\": \"\", \"defaultListTemplate\": \"listTemplate.htm\", \"defaultFileTemplate\": \"articleTemplate.htm\", \"useJSP\": false, \"jspListTemplate\": \"listTemplate.jsp\", \"jspFileTemplate\": \"articleTemplate.jsp\", \"cachePackageTagsTrack\": 200, \"cachePackageTagsStore\": 200, \"cachePackageTagsRefresh\": 60, \"cacheTemplatesTrack\": 100, \"cacheTemplatesStore\": 50, \"cacheTemplatesRefresh\": 15, \"cachePagesTrack\": 200, \"cachePagesStore\": 100, \"cachePagesRefresh\": 10, \"cachePagesDirtyRead\": 10, \"searchEngineListTemplate\": \"forSearchEnginesList.htm\", \"searchEngineFileTemplate\": \"forSearchEngines.htm\", \"searchEngineRobotsDb\": \"WEB-INF/robots.db\", \"useDataStore\": true, \"dataStoreClass\": \"org.cofax.SqlDataStore\", \"redirectionClass\": \"org.cofax.SqlRedirection\", \"dataStoreName\": \"cofax\", \"dataStoreDriver\": \"com.microsoft.jdbc.sqlserver.SQLServerDriver\", \"dataStoreUrl\": \"jdbc: microsoft: sqlserver: //LOCALHOST: 1433;DatabaseName=goon\", \"dataStoreUser\": \"sa\", \"dataStorePassword\": \"dataStoreTestQuery\", \"dataStoreTestQuery\": \"SET NOCOUNT ON;select test='test';\", \"dataStoreLogFile\": \"/usr/local/tomcat/logs/datastore.log\", \"dataStoreInitConns\": 10, \"dataStoreMaxConns\": 100, \"dataStoreConnUsageLimit\": 100, \"dataStoreLogLevel\": \"debug\", \"maxUrlLength\": 500}}, {\"servlet-name\": \"cofaxEmail\", \"servlet-class\": \"org.cofax.cds.EmailServlet\", \"init-param\": {\"mailHost\": \"mail1\", \"mailHostOverride\": \"mail2\"}}, {\"servlet-name\": \"cofaxAdmin\", \"servlet-class\": \"org.cofax.cds.AdminServlet\"}, {\"servlet-name\": \"fileServlet\", \"servlet-class\": \"org.cofax.cds.FileServlet\"}, {\"servlet-name\": \"cofaxTools\", \"servlet-class\": \"org.cofax.cms.CofaxToolsServlet\", \"init-param\": {\"templatePath\": \"toolstemplates/\", \"log\": 1, \"logLocation\": \"/usr/local/tomcat/logs/CofaxTools.log\", \"logMaxSize\": \"\", \"dataLog\": 1, \"dataLogLocation\": \"/usr/local/tomcat/logs/dataLog.log\", \"dataLogMaxSize\": \"\", \"removePageCache\": \"/content/admin/remove?cache=pages&id=\", \"removeTemplateCache\": \"/content/admin/remove?cache=templates&id=\", \"fileTransferFolder\": \"/usr/local/tomcat/webapps/content/fileTransferFolder\", \"lookInContext\": 1, \"adminGroupID\": 4, \"betaServer\": true}}], \"servlet-mapping\": {\"cofaxCDS\": \"/\", \"cofaxEmail\": \"/cofaxutil/aemail/*\", \"cofaxAdmin\": \"/admin/*\", \"fileServlet\": \"/static/*\", \"cofaxTools\": \"/tools/*\"}, \"taglib\": {\"taglib-uri\": \"cofax.tld\", \"taglib-location\": \"/WEB-INF/tlds/cofax.tld\"}}}";
 
         carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
 
@@ -7881,6 +7884,54 @@ TEST(CarbonTest, CarbonFromJsonExample)
         free(json_out_compact);
 }
 
+TEST(CarbonTest, CarbonFromJsonUnitArrayPrimitive)
+{
+        struct carbon doc;
+        struct err err;
+
+        const char *json_in;
+        char *json_out_compact;
+
+        json_in = "{\"x\": [1]}";
+
+        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+
+        json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be '{"x":[1]}'
+
+        //printf("INS:\t%s\n", json_in);
+        //printf("SRT:\t%s\n", json_out_compact);
+
+        carbon_drop(&doc);
+
+        ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
+
+        free(json_out_compact);
+}
+
+TEST(CarbonTest, CarbonFromJsonUnitArrayObject)
+{
+        struct carbon doc;
+        struct err err;
+
+        const char *json_in;
+        char *json_out_compact;
+
+        json_in = "{\"x\": [{\"y\": 1}]}";
+
+        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+
+        json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be '{"x":[{"y":1}]}'
+
+        printf("INS:\t%s\n", json_in);
+        printf("SRT:\t%s\n", json_out_compact);
+
+        carbon_drop(&doc);
+
+        ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
+
+        free(json_out_compact);
+}
+
 TEST(CarbonTest, CarbonFromJsonSimpleExample)
 {
         struct carbon doc;
@@ -7891,8 +7942,175 @@ TEST(CarbonTest, CarbonFromJsonSimpleExample)
         //carbon_hexdump_print(stdout, &doc);
         //carbon_print(stdout, &doc);
         carbon_drop(&doc);
-
 }
+
+TEST(CarbonTest, CarbonFromJsonFromExcerpt)
+{
+        struct carbon doc;
+        struct err err;
+
+        /* the working directory must be 'tests/carbon' to find this file */
+        int fd = open("./assets/ms-academic-graph.json", O_RDONLY);
+        ASSERT_NE(fd, -1);
+        int json_in_len = lseek(fd, 0, SEEK_END);
+        const char *json_in = (const char *) mmap(0, json_in_len, PROT_READ, MAP_PRIVATE, fd, 0);
+
+        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+
+        u64 carbon_out_len = 0;
+        carbon_raw_data(&carbon_out_len, &doc);
+
+        ASSERT_LT(carbon_out_len, json_in_len);
+        printf("%0.2f%% space saving\n", 100 * (1 - (carbon_out_len / (float) json_in_len)));
+
+        char *json_out = carbon_to_json_compact_dup(&doc);
+        fprintf(stderr, "%s\n", json_out);
+        ASSERT_TRUE(strcmp(json_in, json_out) == 0);
+
+        carbon_drop(&doc);
+}
+
+TEST(CarbonTest, CarbonResolveDotPathForObjects)
+{
+        struct carbon doc;
+        struct err err;
+        struct carbon_find find;
+        enum carbon_field_type result_type;
+        u64 number;
+
+        const char *json_in = "{\"a\": 1, \"b\": {\"c\": [1,2,3], \"d\": [\"Hello\", \"World\"], \"e\": [4], \"f\": [\"!\"], \"the key\": \"x\"}}";
+        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+
+        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
+        ASSERT_TRUE(carbon_find_has_result(&find));
+        ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
+        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_TRUE(carbon_find_close(&find));
+
+        ASSERT_TRUE(carbon_find_open(&find, "1", &doc));
+        ASSERT_FALSE(carbon_find_has_result(&find));
+        ASSERT_TRUE(carbon_find_close(&find));
+
+        ASSERT_TRUE(carbon_find_open(&find, "0.a", &doc));
+        ASSERT_TRUE(carbon_find_has_result(&find));
+        ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
+        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_NUMBER_U8);
+        ASSERT_TRUE(carbon_find_close(&find));
+
+        ASSERT_TRUE(carbon_find_open(&find, "0.b", &doc));
+        ASSERT_TRUE(carbon_find_has_result(&find));
+        ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
+        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_TRUE(carbon_find_close(&find));
+
+        ASSERT_TRUE(carbon_find_open(&find, "0.c", &doc));
+        ASSERT_FALSE(carbon_find_has_result(&find));
+        ASSERT_TRUE(carbon_find_close(&find));
+
+        ASSERT_TRUE(carbon_find_open(&find, "0.b.c", &doc));
+        ASSERT_TRUE(carbon_find_has_result(&find));
+        ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
+        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_COLUMN_U8);
+        ASSERT_TRUE(carbon_find_close(&find));
+
+        ASSERT_TRUE(carbon_find_open(&find, "0.b.c.0", &doc));
+        ASSERT_TRUE(carbon_find_has_result(&find));
+        ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
+        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_NUMBER_U8);
+        ASSERT_TRUE(carbon_find_result_unsigned(&number, &find));
+        ASSERT_EQ(number, 1);
+        ASSERT_TRUE(carbon_find_close(&find));
+
+        ASSERT_TRUE(carbon_find_open(&find, "0.b.c.1", &doc));
+        ASSERT_TRUE(carbon_find_has_result(&find));
+        ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
+        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_NUMBER_U8);
+        ASSERT_TRUE(carbon_find_result_unsigned(&number, &find));
+        ASSERT_EQ(number, 2);
+        ASSERT_TRUE(carbon_find_close(&find));
+
+        ASSERT_TRUE(carbon_find_open(&find, "0.b.c.2", &doc));
+        ASSERT_TRUE(carbon_find_has_result(&find));
+        ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
+        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_NUMBER_U8);
+        ASSERT_TRUE(carbon_find_result_unsigned(&number, &find));
+        ASSERT_EQ(number, 3);
+        ASSERT_TRUE(carbon_find_close(&find));
+
+        ASSERT_TRUE(carbon_find_open(&find, "0.b.c.3", &doc));
+        ASSERT_FALSE(carbon_find_has_result(&find));
+        ASSERT_TRUE(carbon_find_close(&find));
+
+        ASSERT_TRUE(carbon_find_open(&find, "0.b.d", &doc));
+        ASSERT_TRUE(carbon_find_has_result(&find));
+        ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
+        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_ARRAY);
+        ASSERT_TRUE(carbon_find_close(&find));
+
+        ASSERT_TRUE(carbon_find_open(&find, "0.b.d.0", &doc));
+        ASSERT_TRUE(carbon_find_has_result(&find));
+        ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
+        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_STRING);
+        ASSERT_TRUE(strncmp(carbon_find_result_string(&number, &find), "Hello", number) == 0);
+        ASSERT_TRUE(carbon_find_close(&find));
+
+        ASSERT_TRUE(carbon_find_open(&find, "0.b.d.1", &doc));
+        ASSERT_TRUE(carbon_find_has_result(&find));
+        ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
+        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_STRING);
+        ASSERT_TRUE(strncmp(carbon_find_result_string(&number, &find), "World", number) == 0);
+        ASSERT_TRUE(carbon_find_close(&find));
+
+        ASSERT_TRUE(carbon_find_open(&find, "0.b.d.2", &doc));
+        ASSERT_FALSE(carbon_find_has_result(&find));
+        ASSERT_TRUE(carbon_find_close(&find));
+
+        ASSERT_TRUE(carbon_find_open(&find, "0.b.e", &doc));
+        ASSERT_TRUE(carbon_find_has_result(&find));
+        ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
+        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_COLUMN_U8);
+        ASSERT_TRUE(carbon_find_close(&find));
+
+        ASSERT_TRUE(carbon_find_open(&find, "0.b.e.0", &doc));
+        ASSERT_TRUE(carbon_find_has_result(&find));
+        ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
+        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_NUMBER_U8);
+        ASSERT_TRUE(carbon_find_result_unsigned(&number, &find));
+        ASSERT_EQ(number, 4);
+        ASSERT_TRUE(carbon_find_close(&find));
+
+        ASSERT_TRUE(carbon_find_open(&find, "0.b.e.1", &doc));
+        ASSERT_FALSE(carbon_find_has_result(&find));
+        ASSERT_TRUE(carbon_find_close(&find));
+
+        ASSERT_TRUE(carbon_find_open(&find, "0.b.f", &doc));
+        ASSERT_TRUE(carbon_find_has_result(&find));
+        ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
+        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_ARRAY);
+        ASSERT_TRUE(carbon_find_close(&find));
+
+        ASSERT_TRUE(carbon_find_open(&find, "0.b.f.0", &doc));
+        ASSERT_TRUE(carbon_find_has_result(&find));
+        ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
+        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_STRING);
+        ASSERT_TRUE(strncmp(carbon_find_result_string(&number, &find), "!", number) == 0);
+        ASSERT_TRUE(carbon_find_close(&find));
+
+        ASSERT_TRUE(carbon_find_open(&find, "0.b.f.1", &doc));
+        ASSERT_FALSE(carbon_find_has_result(&find));
+        ASSERT_TRUE(carbon_find_close(&find));
+
+        ASSERT_TRUE(carbon_find_open(&find, "0.b.\"the key\"", &doc));
+        ASSERT_TRUE(carbon_find_has_result(&find));
+        ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
+        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_STRING);
+        ASSERT_TRUE(strncmp(carbon_find_result_string(&number, &find), "x", number) == 0);
+        ASSERT_TRUE(carbon_find_close(&find));
+
+        carbon_drop(&doc);
+}
+
+
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);

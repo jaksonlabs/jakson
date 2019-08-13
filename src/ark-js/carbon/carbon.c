@@ -921,7 +921,7 @@ static bool print_array(struct carbon_array_it *it, struct printer *printer, str
                 if (likely(!first_entry)) {
                         printer_carbon_comma(printer, builder);
                 } else {
-                        if (is_single_entry_array) {
+                        if (is_single_entry_array && is_record_container) {
                                 printer_carbon_unit_array_begin(printer, builder);
                         } else {
                                 printer_carbon_array_begin(printer, builder);
@@ -1016,7 +1016,7 @@ static bool print_array(struct carbon_array_it *it, struct printer *printer, str
         }
 
         if (has_entries) {
-                if (is_single_entry_array) {
+                if (is_single_entry_array && is_record_container) {
                         printer_carbon_unit_array_end(printer, builder);
                 } else {
                         printer_carbon_array_end(printer, builder);

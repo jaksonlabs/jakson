@@ -23,6 +23,7 @@
 #include <ark-js/carbon/carbon.h>
 #include <ark-js/carbon/carbon-column-it.h>
 #include <ark-js/carbon/carbon-array-it.h>
+#include <ark-js/carbon/carbon-object-it.h>
 #include <ark-js/carbon/carbon-dot.h>
 #include <ark-js/carbon/carbon-path.h>
 
@@ -39,6 +40,7 @@ struct carbon_find {
     union {
         struct carbon_array_it *array_it;
         struct carbon_column_it *column_it;
+        struct carbon_object_it *object_it;
         bool boolean;
         u64 unsigned_number;
         i64 signed_number;

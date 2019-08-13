@@ -219,7 +219,7 @@ static void print_key(struct string *builder, const char *key_name, u64 key_len)
 {
         string_add_char(builder, '"');
         string_add_nchar(builder, key_name, key_len);
-        string_add(builder, "\":");
+        string_add(builder, "\": ");
 }
 
 static void prop_null(struct printer *self, struct string *builder,

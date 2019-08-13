@@ -25,6 +25,7 @@
 #include <ark-js/shared/stdx/string.h>
 #include <ark-js/carbon/carbon-array-it.h>
 #include <ark-js/carbon/carbon-column-it.h>
+#include <ark-js/carbon/carbon-object-it.h>
 
 ARK_BEGIN_DECL
 
@@ -53,6 +54,7 @@ enum carbon_path_status {
     CARBON_PATH_RESOLVED,
     CARBON_PATH_EMPTY_DOC,
     CARBON_PATH_NOSUCHINDEX,
+    CARBON_PATH_NOSUCHKEY,
     CARBON_PATH_NOTTRAVERSABLE,
     CARBON_PATH_NOCONTAINER,
     CARBON_PATH_NOTANOBJECT,
@@ -80,7 +82,7 @@ bool carbon_dot_path_type_at(enum carbon_dot_node_type *type_out, u32 pos, const
 
 bool carbon_dot_path_idx_at(u32 *idx, u32 pos, const struct carbon_dot_path *path);
 
-const char *carbon_dot_path_key_at(u32 pos, struct carbon_dot_path *path);
+const char *carbon_dot_path_key_at(u32 pos, const struct carbon_dot_path *path);
 
 bool carbon_dot_path_drop(struct carbon_dot_path *path);
 

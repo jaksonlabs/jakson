@@ -254,11 +254,11 @@ bool carbon_dot_path_idx_at(u32 *idx, u32 pos, const struct carbon_dot_path *pat
         return true;
 }
 
-const char *carbon_dot_path_key_at(u32 pos, struct carbon_dot_path *path)
+const char *carbon_dot_path_key_at(u32 pos, const struct carbon_dot_path *path)
 {
         error_if_null(path)
-        error_if_and_return(pos >= ARK_ARRAY_LENGTH(path->nodes), &path->err, ARK_ERR_OUTOFBOUNDS, NULL);
-        error_if_and_return(path->nodes[pos].type != DOT_NODE_KEY_NAME, &path->err, ARK_ERR_TYPEMISMATCH, NULL);
+        error_if_and_return(pos >= ARK_ARRAY_LENGTH(path->nodes), &((struct carbon_dot_path *)path)->err, ARK_ERR_OUTOFBOUNDS, NULL);
+        error_if_and_return(path->nodes[pos].type != DOT_NODE_KEY_NAME, &((struct carbon_dot_path *)path)->err, ARK_ERR_TYPEMISMATCH, NULL);
 
         return path->nodes[pos].identifier.string;
 }
