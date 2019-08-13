@@ -7922,8 +7922,8 @@ TEST(CarbonTest, CarbonFromJsonUnitArrayObject)
 
         json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be '{"x":[{"y":1}]}'
 
-        printf("INS:\t%s\n", json_in);
-        printf("SRT:\t%s\n", json_out_compact);
+        //printf("INS:\t%s\n", json_in);
+        //printf("SRT:\t%s\n", json_out_compact);
 
         carbon_drop(&doc);
 
@@ -7961,13 +7961,13 @@ TEST(CarbonTest, CarbonFromJsonFromExcerpt)
         carbon_raw_data(&carbon_out_len, &doc);
 
         ASSERT_LT(carbon_out_len, json_in_len);
-        printf("%0.2f%% space saving\n", 100 * (1 - (carbon_out_len / (float) json_in_len)));
+        //printf("%0.2f%% space saving\n", 100 * (1 - (carbon_out_len / (float) json_in_len)));
 
         char *json_out = carbon_to_json_compact_dup(&doc);
-        fprintf(stderr, "%s\n", json_out);
         ASSERT_TRUE(strcmp(json_in, json_out) == 0);
 
         carbon_drop(&doc);
+        free(json_out);
 }
 
 TEST(CarbonTest, CarbonResolveDotPathForObjects)
