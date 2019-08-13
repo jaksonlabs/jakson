@@ -75,6 +75,7 @@ bool carbon_find_create(struct carbon_find *find, struct carbon_dot_path *path, 
         error_if_null(path)
         error_if_null(doc)
 
+        ark_zero_memory(find, sizeof(struct carbon_find));
         error_init(&find->err);
         find->doc = doc;
 
@@ -94,10 +95,8 @@ bool carbon_find_create(struct carbon_find *find, struct carbon_dot_path *path, 
                         default: error(&path->err, ARK_ERR_INTERNALERR);
                                 return false;
                 }
-                return true;
-        } else {
-                return false;
         }
+        return true;
 }
 
 bool carbon_find_has_result(struct carbon_find *find)

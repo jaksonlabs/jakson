@@ -8110,6 +8110,155 @@ TEST(CarbonTest, CarbonResolveDotPathForObjects)
         carbon_drop(&doc);
 }
 
+TEST(CarbonTest, CarbonResolveDotPathForObjectsBench)
+{
+        struct carbon doc;
+        struct err err;
+        struct carbon_find find;
+
+        const char *json_in = "{\"a\": 1, \"b\": {\"c\": [1,2,3], \"d\": [\"Hello\", \"World\"], \"e\": [4], \"f\": [\"!\"], \"the key\": \"x\"}}";
+        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+
+        struct carbon_dot_path path1, path2, path3, path4, path5, path6, path7, path8, path9, path10, path11, path12,
+                path13, path14, path15, path16, path17, path18, path19, path20, path21;
+
+        ASSERT_TRUE(carbon_dot_path_from_string(&path1, "0"));
+        ASSERT_TRUE(carbon_dot_path_from_string(&path2, "1"));
+        ASSERT_TRUE(carbon_dot_path_from_string(&path3, "0.a"));
+        ASSERT_TRUE(carbon_dot_path_from_string(&path4, "0.b"));
+        ASSERT_TRUE(carbon_dot_path_from_string(&path5, "0.c"));
+        ASSERT_TRUE(carbon_dot_path_from_string(&path6, "0.b.c"));
+        ASSERT_TRUE(carbon_dot_path_from_string(&path7, "0.b.c.0"));
+        ASSERT_TRUE(carbon_dot_path_from_string(&path8, "0.b.c.1"));
+        ASSERT_TRUE(carbon_dot_path_from_string(&path9, "0.b.c.2"));
+        ASSERT_TRUE(carbon_dot_path_from_string(&path10, "0.b.c.3"));
+        ASSERT_TRUE(carbon_dot_path_from_string(&path11, "0.b.d"));
+        ASSERT_TRUE(carbon_dot_path_from_string(&path12, "0.b.d.0"));
+        ASSERT_TRUE(carbon_dot_path_from_string(&path13, "0.b.d.1"));
+        ASSERT_TRUE(carbon_dot_path_from_string(&path14, "0.b.d.2"));
+        ASSERT_TRUE(carbon_dot_path_from_string(&path15, "0.b.e"));
+        ASSERT_TRUE(carbon_dot_path_from_string(&path16, "0.b.e.0"));
+        ASSERT_TRUE(carbon_dot_path_from_string(&path17, "0.b.e.1"));
+        ASSERT_TRUE(carbon_dot_path_from_string(&path18, "0.b.f"));
+        ASSERT_TRUE(carbon_dot_path_from_string(&path19, "0.b.f.0"));
+        ASSERT_TRUE(carbon_dot_path_from_string(&path20, "0.b.f.1"));
+        ASSERT_TRUE(carbon_dot_path_from_string(&path21, "0.b.\"the key\""));
+
+        u32 max = 10000;
+        timestamp_t t1 = time_now_wallclock();
+        for (u32 i = 0; i < max; i++) {
+                ASSERT_TRUE(carbon_find_create(&find, &path1, &doc));
+                ASSERT_TRUE(carbon_find_has_result(&find));
+                ASSERT_TRUE(carbon_find_close(&find));
+
+                ASSERT_TRUE(carbon_find_create(&find, &path2, &doc));
+                ASSERT_FALSE(carbon_find_has_result(&find));
+                ASSERT_TRUE(carbon_find_close(&find));
+
+                ASSERT_TRUE(carbon_find_create(&find, &path3, &doc));
+                ASSERT_TRUE(carbon_find_has_result(&find));
+                ASSERT_TRUE(carbon_find_close(&find));
+
+                ASSERT_TRUE(carbon_find_create(&find, &path4, &doc));
+                ASSERT_TRUE(carbon_find_has_result(&find));
+                ASSERT_TRUE(carbon_find_close(&find));
+
+                ASSERT_TRUE(carbon_find_create(&find, &path5, &doc));
+                ASSERT_FALSE(carbon_find_has_result(&find));
+                ASSERT_TRUE(carbon_find_close(&find));
+
+                ASSERT_TRUE(carbon_find_create(&find, &path6, &doc));
+                ASSERT_TRUE(carbon_find_has_result(&find));
+                ASSERT_TRUE(carbon_find_close(&find));
+
+                ASSERT_TRUE(carbon_find_create(&find, &path7, &doc));
+                ASSERT_TRUE(carbon_find_has_result(&find));
+                ASSERT_TRUE(carbon_find_close(&find));
+
+                ASSERT_TRUE(carbon_find_create(&find, &path8, &doc));
+                ASSERT_TRUE(carbon_find_has_result(&find));
+                ASSERT_TRUE(carbon_find_close(&find));
+
+                ASSERT_TRUE(carbon_find_create(&find, &path9, &doc));
+                ASSERT_TRUE(carbon_find_has_result(&find));
+                ASSERT_TRUE(carbon_find_close(&find));
+
+                ASSERT_TRUE(carbon_find_create(&find, &path10, &doc));
+                ASSERT_FALSE(carbon_find_has_result(&find));
+                ASSERT_TRUE(carbon_find_close(&find));
+
+                ASSERT_TRUE(carbon_find_create(&find, &path11, &doc));
+                ASSERT_TRUE(carbon_find_has_result(&find));
+                ASSERT_TRUE(carbon_find_close(&find));
+
+                ASSERT_TRUE(carbon_find_create(&find, &path12, &doc));
+                ASSERT_TRUE(carbon_find_has_result(&find));
+                ASSERT_TRUE(carbon_find_close(&find));
+
+                ASSERT_TRUE(carbon_find_create(&find, &path13, &doc));
+                ASSERT_TRUE(carbon_find_has_result(&find));
+                ASSERT_TRUE(carbon_find_close(&find));
+
+                ASSERT_TRUE(carbon_find_create(&find, &path14, &doc));
+                ASSERT_FALSE(carbon_find_has_result(&find));
+                ASSERT_TRUE(carbon_find_close(&find));
+
+                ASSERT_TRUE(carbon_find_create(&find, &path15, &doc));
+                ASSERT_TRUE(carbon_find_has_result(&find));
+                ASSERT_TRUE(carbon_find_close(&find));
+
+                ASSERT_TRUE(carbon_find_create(&find, &path16, &doc));
+                ASSERT_TRUE(carbon_find_has_result(&find));
+                ASSERT_TRUE(carbon_find_close(&find));
+
+                ASSERT_TRUE(carbon_find_create(&find, &path17, &doc));
+                ASSERT_FALSE(carbon_find_has_result(&find));
+                ASSERT_TRUE(carbon_find_close(&find));
+
+                ASSERT_TRUE(carbon_find_create(&find, &path18, &doc));
+                ASSERT_TRUE(carbon_find_has_result(&find));
+                ASSERT_TRUE(carbon_find_close(&find));
+
+                ASSERT_TRUE(carbon_find_create(&find, &path19, &doc));
+                ASSERT_TRUE(carbon_find_has_result(&find));
+                ASSERT_TRUE(carbon_find_close(&find));
+
+                ASSERT_TRUE(carbon_find_create(&find, &path20, &doc));
+                ASSERT_FALSE(carbon_find_has_result(&find));
+                ASSERT_TRUE(carbon_find_close(&find));
+
+                ASSERT_TRUE(carbon_find_create(&find, &path21, &doc));
+                ASSERT_TRUE(carbon_find_has_result(&find));
+                ASSERT_TRUE(carbon_find_close(&find));
+        }
+        timestamp_t t2 = time_now_wallclock();
+        printf("%.2fmsec/opp, %.4f ops/sec\n", (t2-t1)/(float)max/21.0f, 1.0f/((t2-t1)/(float)max/(21*1000.0f)));
+
+        carbon_dot_path_drop(&path1);
+        carbon_dot_path_drop(&path2);
+        carbon_dot_path_drop(&path3);
+        carbon_dot_path_drop(&path4);
+        carbon_dot_path_drop(&path5);
+        carbon_dot_path_drop(&path6);
+        carbon_dot_path_drop(&path7);
+        carbon_dot_path_drop(&path8);
+        carbon_dot_path_drop(&path9);
+        carbon_dot_path_drop(&path10);
+        carbon_dot_path_drop(&path11);
+        carbon_dot_path_drop(&path12);
+        carbon_dot_path_drop(&path13);
+        carbon_dot_path_drop(&path14);
+        carbon_dot_path_drop(&path15);
+        carbon_dot_path_drop(&path16);
+        carbon_dot_path_drop(&path17);
+        carbon_dot_path_drop(&path18);
+        carbon_dot_path_drop(&path19);
+        carbon_dot_path_drop(&path20);
+        carbon_dot_path_drop(&path21);
+
+        carbon_drop(&doc);
+}
+
 
 
 int main(int argc, char **argv) {
