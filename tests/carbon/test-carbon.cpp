@@ -8645,6 +8645,48 @@ TEST(CarbonTest, CarbonFindPrint)
         carbon_drop(&doc);
 }
 
+TEST(CarbonTest, CarbonFindPrintExamples)
+{
+        struct carbon doc;
+        struct err err;
+        struct carbon_find find;
+        struct string result;
+
+        const char *json = "{\"x\": {\"y\": [{\"z\": 23}, {\"z\": null}]} }";
+
+        carbon_from_json(&doc, json, CARBON_KEY_NOKEY, NULL, &err);
+        string_create(&result);
+
+        printf("input: '%s'\n", json);
+
+        carbon_find_open(&find, "x", &doc);
+        printf("x\t\t\t->\t%s\n", carbon_find_result_to_json_compact(&result, &find));
+        carbon_find_close(&find);
+
+        carbon_find_open(&find, "x.y", &doc);
+        printf("x.y\t\t\t->\t%s\n", carbon_find_result_to_json_compact(&result, &find));
+        carbon_find_close(&find);
+
+        carbon_find_open(&find, "x.z", &doc);
+        printf("x.z\t\t\t->\t%s\n", carbon_find_result_to_json_compact(&result, &find));
+        carbon_find_close(&find);
+
+        carbon_find_open(&find, "x.y.z", &doc);
+        printf("x.y.z\t\t->\t%s\n", carbon_find_result_to_json_compact(&result, &find));
+        carbon_find_close(&find);
+
+        carbon_find_open(&find, "x.y.0.z", &doc);
+        printf("x.y.0.z\t\t->\t%s\n", carbon_find_result_to_json_compact(&result, &find));
+        carbon_find_close(&find);
+
+        carbon_find_open(&find, "x.y.1.z", &doc);
+        printf("x.y.0.z\t\t->\t%s\n", carbon_find_result_to_json_compact(&result, &find));
+        carbon_find_close(&find);
+
+        string_drop(&result);
+        carbon_drop(&doc);
+}
+
 
 
 int main(int argc, char **argv) {
