@@ -65,6 +65,7 @@
 #include <ark-js/carbon/strhash/strhash-mem.h>
 #include <ark-js/carbon/string-pred/pred-contains.h>
 #include <ark-js/carbon/string-pred/pred-equals.h>
+#include <ark-js/carbon/carbon-printers.h>
 #include <ark-js/shared/stdx/varuint.h>
 
 ARK_BEGIN_DECL
@@ -102,11 +103,6 @@ struct carbon_binary {
     u64 blob_len;
 };
 
-enum carbon_printer_impl {
-    JSON_EXTENDED,
-    JSON_COMPACT
-};
-
 struct carbon_new {
     struct err err;
     struct carbon original;
@@ -123,6 +119,11 @@ enum carbon_container_type {
     CARBON_OBJECT, CARBON_ARRAY, CARBON_COLUMN
 };
 
+enum carbon_printer_impl {
+    JSON_EXTENDED,
+    JSON_COMPACT
+};
+
 enum carbon_key_type {
     /* no key, no revision number */
             CARBON_KEY_NOKEY,
@@ -135,6 +136,8 @@ enum carbon_key_type {
     /* user-defined n-char string key */
             CARBON_KEY_SKEY
 };
+
+#define CARBON_NIL_STR "_nil"
 
 #define CARBON_MARKER_NULL 'n'
 #define CARBON_MARKER_TRUE 't'
