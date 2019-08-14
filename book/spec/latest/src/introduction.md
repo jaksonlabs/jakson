@@ -1,3 +1,3 @@
 # Introduction
 
-> **Not yet described**. 
+> **Not yet described**

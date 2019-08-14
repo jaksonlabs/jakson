@@ -1,5 +1,13 @@
 ## 0.5.00.01 [2019-XX-XX]
 - JSON parser for carbon files (see `carbon_from_json` in `carbon.h`)
+- Increase building times by sharing common sources in a static library
+- Dot path evaluation for objects (e.g., `0.x.5."my key"`) for carbon files
+- Add shortened path evaluation for record container to make the initial array index `0` optional, i.e., `0.x` is 
+  equivalent to `x` if a record (array) container only contains one element, such as for an input `{"x":"y"}` . This 
+  does not hold for single-element ("unit") arrays that are not the record container, i.e., `x.0.y` is not equivalent 
+  to `x.y` for an input `{"x": [{"y": "z"}]}`. The reason for the latter is not shadow user-data semantics, while the 
+  first leads to compatibility to MongoDB and CouchDB and hides internal structure of carbon files.   
+- Results for `carbon_find` dot path expression can be printed with the default Json printer 
 
 ## 0.3.00.01 [2019-08-09]
 - Add thread pool implementation (`struct thread_pool`)

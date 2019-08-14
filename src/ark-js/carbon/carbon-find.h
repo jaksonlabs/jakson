@@ -23,6 +23,7 @@
 #include <ark-js/carbon/carbon.h>
 #include <ark-js/carbon/carbon-column-it.h>
 #include <ark-js/carbon/carbon-array-it.h>
+#include <ark-js/carbon/carbon-object-it.h>
 #include <ark-js/carbon/carbon-dot.h>
 #include <ark-js/carbon/carbon-path.h>
 
@@ -39,6 +40,7 @@ struct carbon_find {
     union {
         struct carbon_array_it *array_it;
         struct carbon_column_it *column_it;
+        struct carbon_object_it *object_it;
         bool boolean;
         u64 unsigned_number;
         i64 signed_number;
@@ -63,9 +65,17 @@ bool carbon_find_create(struct carbon_find *find, struct carbon_dot_path *path, 
 
 bool carbon_find_has_result(struct carbon_find *find);
 
+const char *carbon_find_result_to_str(struct string *dst_str, enum carbon_printer_impl print_type, struct carbon_find *find);
+
+const char *carbon_find_result_to_json_compact(struct string *dst_str, struct carbon_find *find);
+
+char *carbon_find_result_to_json_compact_dup(struct carbon_find *find);
+
 bool carbon_find_result_type(enum carbon_field_type *type, struct carbon_find *find);
 
 struct carbon_array_it *carbon_find_result_array(struct carbon_find *find);
+
+struct carbon_object_it *carbon_find_result_object(struct carbon_find *find);
 
 struct carbon_column_it *carbon_find_result_column(struct carbon_find *find);
 
