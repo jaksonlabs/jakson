@@ -6,11 +6,11 @@ project(libcarbon VERSION 1.0.0.0 DESCRIPTION "A library to operate with CARBON 
 set (CMAKE_C_STANDARD 11)
 
 #if (${BUILD_TYPE} MATCHES Debug)
-#        message("-- Debug build is enabled")
-#        set(CMAKE_BUILD_TYPE Debug)
+        message("-- Debug build is enabled")
+        set(CMAKE_BUILD_TYPE Debug)
 #else()
-        message("-- Release build is enabled")
-        set(CMAKE_BUILD_TYPE Release)
+#        message("-- Release build is enabled")
+#        set(CMAKE_BUILD_TYPE Release)
 #endif()
 
 file(MAKE_DIRECTORY ${CMAKE_HOME_DIRECTORY}/build)

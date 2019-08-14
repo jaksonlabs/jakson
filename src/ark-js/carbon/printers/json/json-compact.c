@@ -72,8 +72,7 @@ static void obj_end(struct printer *self, struct string *builder)
         string_add(builder, "}");
 }
 
-static void meta_data_nop(struct printer *self, struct string *builder,
-                      enum carbon_key_type key_type, const void *key,
+static void meta_data_nop(struct printer *self, struct string *builder, int key_type, const void *key,
                       u64 key_length, u64 rev)
 {
         unused(self)

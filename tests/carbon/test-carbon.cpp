@@ -7266,14 +7266,14 @@ TEST(CarbonTest, CarbonFromEmptyArray)
         json_out_extended = carbon_to_json_extended_dup(&doc);
         json_out_compact = carbon_to_json_compact_dup(&doc);
 
-        //printf("INS:\t%s\n", json_in);
-        //printf("EXT:\t%s\n", json_out_extended);
-        //printf("SRT:\t%s\n", json_out_compact);
+//        printf("INS:\t%s\n", json_in);
+//        printf("EXT:\t%s\n", json_out_extended);
+//        printf("SRT:\t%s\n", json_out_compact);
 
         carbon_drop(&doc);
 
-        ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
-        ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [[]]}") == 0);
+        ASSERT_TRUE(strcmp(json_out_compact, "{}") == 0);
+        ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": []}") == 0);
 
         free(json_out_compact);
         free(json_out_extended);
@@ -7720,7 +7720,7 @@ TEST(CarbonTest, CarbonFromJsonColumnNumber)
         const char *json_in;
         char *json_out_compact, *json_out_extended;
 
-        json_in = "[1, 2, 3]";
+        json_in = "{\"x\": [1, 2, 3]}";
 
         carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
 
@@ -7729,11 +7729,16 @@ TEST(CarbonTest, CarbonFromJsonColumnNumber)
         carbon_iterator_open(&it, &doc);
         ASSERT_TRUE(carbon_array_it_next(&it));
         carbon_array_it_field_type(&field_type, &it);
+        ASSERT_TRUE(field_type == CARBON_FIELD_TYPE_OBJECT);
+        struct carbon_object_it *oit = carbon_array_it_object_value(&it);
+        ASSERT_TRUE(carbon_object_it_next(oit));
+        carbon_object_it_prop_type(&field_type, oit);
         ASSERT_TRUE(carbon_field_type_is_column(field_type));
         ASSERT_TRUE(field_type == CARBON_FIELD_TYPE_COLUMN_U8);
+        carbon_object_it_drop(oit);
         carbon_iterator_close(&it);
 
-        json_out_extended = carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [[1, 2, 3]]}'
+        json_out_extended = carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [{\"x\": [1, 2, 3]}}'
         json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be '[1, 2, 3]'
 
         //printf("EXT:\t%s\n", json_out_extended);
@@ -7742,7 +7747,7 @@ TEST(CarbonTest, CarbonFromJsonColumnNumber)
         carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
-        ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [[1, 2, 3]]}") == 0);
+        ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"x\": [1, 2, 3]}]}") == 0);
 
         free(json_out_compact);
         free(json_out_extended);
@@ -7756,7 +7761,7 @@ TEST(CarbonTest, CarbonFromJsonColumnNullableNumber)
         const char *json_in;
         char *json_out_compact, *json_out_extended;
 
-        json_in = "[1, null, 3]";
+        json_in = "{\"x\": [1, null, 3]}";
 
         carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
 
@@ -7765,12 +7770,17 @@ TEST(CarbonTest, CarbonFromJsonColumnNullableNumber)
         carbon_iterator_open(&it, &doc);
         ASSERT_TRUE(carbon_array_it_next(&it));
         carbon_array_it_field_type(&field_type, &it);
+        ASSERT_TRUE(field_type == CARBON_FIELD_TYPE_OBJECT);
+        struct carbon_object_it *oit = carbon_array_it_object_value(&it);
+        ASSERT_TRUE(carbon_object_it_next(oit));
+        carbon_object_it_prop_type(&field_type, oit);
         ASSERT_TRUE(carbon_field_type_is_column(field_type));
         ASSERT_TRUE(field_type == CARBON_FIELD_TYPE_COLUMN_U8);
+        carbon_object_it_drop(oit);
         carbon_iterator_close(&it);
 
-        json_out_extended = carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [[1, null, 3]]}'
-        json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be '[1, null, 3]'
+        json_out_extended = carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [{"x": [1, null, 3]}]}'
+        json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be '{"x": [1, null, 3]}'
 
         //printf("INS:\t%s\n", json_in);
         //printf("EXT:\t%s\n", json_out_extended);
@@ -7779,7 +7789,7 @@ TEST(CarbonTest, CarbonFromJsonColumnNullableNumber)
         carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
-        ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [[1, null, 3]]}") == 0);
+        ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [{\"x\": [1, null, 3]}]}") == 0);
 
         free(json_out_compact);
         free(json_out_extended);
@@ -7802,10 +7812,10 @@ TEST(CarbonTest, CarbonFromJsonNonColumn)
         carbon_iterator_open(&it, &doc);
         ASSERT_TRUE(carbon_array_it_next(&it));
         carbon_array_it_field_type(&field_type, &it);
-        ASSERT_TRUE(carbon_field_type_is_array(field_type));
+        ASSERT_TRUE(carbon_field_type_is_number(field_type));
         carbon_iterator_close(&it);
 
-        json_out_extended = carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [[1, null, 3, \"a\"]]}'
+        json_out_extended = carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [1, null, 3, \"a\"]}'
         json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be '[1, null, 3, \"a\"]'
 
         //printf("INS:\t%s\n", json_in);
@@ -7815,7 +7825,7 @@ TEST(CarbonTest, CarbonFromJsonNonColumn)
         carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
-        ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [[1, null, 3, \"a\"]]}") == 0);
+        ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"rev\": 0}, \"doc\": [1, null, 3, \"a\"]}") == 0);
 
         free(json_out_compact);
         free(json_out_extended);
@@ -8256,6 +8266,382 @@ TEST(CarbonTest, CarbonResolveDotPathForObjectsBench)
         carbon_dot_path_drop(&path20);
         carbon_dot_path_drop(&path21);
 
+        carbon_drop(&doc);
+}
+
+TEST(CarbonTest, CarbonFromJsonShortenedDotPath)
+{
+        struct carbon doc;
+        struct carbon_find find;
+        enum carbon_field_type result_type;
+        struct err err;
+
+        const char *json_in = "{\"x\": \"y\"}";
+        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+
+        /* without shortened dot path rule, the json object as given is embedded in an record container (aka array)
+         * such that the object must be referenced by its index in the record container (i.e., 0) */
+        carbon_find_open(&find, "0.x", &doc);
+        ASSERT_TRUE(carbon_find_has_result(&find));
+        carbon_find_result_type(&result_type, &find);
+        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_STRING);
+        carbon_find_close(&find);
+
+        /* with shortened dot path rule, the json object can be referenced without providing its index in the record */
+        carbon_find_open(&find, "x", &doc);
+        ASSERT_TRUE(carbon_find_has_result(&find));
+        carbon_find_result_type(&result_type, &find);
+        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_STRING);
+        carbon_find_close(&find);
+
+        carbon_drop(&doc);
+
+        json_in = "[{\"x\": \"y\"},{\"x\": [{\"z\": 42}]}]";
+        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+
+        /* The shortened dot path rule does not apply here since the user input is an array  */
+        carbon_find_open(&find, "0.x", &doc);
+        ASSERT_TRUE(carbon_find_has_result(&find));
+        carbon_find_result_type(&result_type, &find);
+        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_STRING);
+        carbon_find_close(&find);
+
+        carbon_find_open(&find, "1.x", &doc);
+        ASSERT_TRUE(carbon_find_has_result(&find));
+        carbon_find_result_type(&result_type, &find);
+        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_ARRAY);
+        carbon_find_close(&find);
+
+        carbon_find_open(&find, "x", &doc);
+        ASSERT_FALSE(carbon_find_has_result(&find));
+        carbon_find_close(&find);
+
+        /* The shortened dot path rule does also never apply outside the record container  */
+        carbon_find_open(&find, "1.x.0.z", &doc);
+        ASSERT_TRUE(carbon_find_has_result(&find));
+        carbon_find_close(&find);
+
+        carbon_find_open(&find, "1.x.z", &doc);
+        ASSERT_FALSE(carbon_find_has_result(&find));
+        carbon_find_close(&find);
+
+        carbon_drop(&doc);
+}
+
+TEST(CarbonTest, CarbonFindPrint)
+{
+        struct carbon doc;
+        struct err err;
+        struct carbon_find find;
+        char *result;
+
+        carbon_from_json(&doc, "8", CARBON_KEY_NOKEY, NULL, &err);
+        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "8") == 0);
+        carbon_find_close(&find);
+        free(result);
+        carbon_drop(&doc);
+
+        carbon_from_json(&doc, "-8", CARBON_KEY_NOKEY, NULL, &err);
+        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "-8") == 0);
+        carbon_find_close(&find);
+        free(result);
+        carbon_drop(&doc);
+
+        carbon_from_json(&doc, "\"A\"", CARBON_KEY_NOKEY, NULL, &err);
+        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "\"A\"") == 0);
+        carbon_find_close(&find);
+        free(result);
+        carbon_drop(&doc);
+
+        carbon_from_json(&doc, "32.4", CARBON_KEY_NOKEY, NULL, &err);
+        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "32.40") == 0);
+        carbon_find_close(&find);
+        free(result);
+        carbon_drop(&doc);
+
+        carbon_from_json(&doc, "null", CARBON_KEY_NOKEY, NULL, &err);
+        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "null") == 0);
+        carbon_find_close(&find);
+        free(result);
+        carbon_drop(&doc);
+
+        carbon_from_json(&doc, "true", CARBON_KEY_NOKEY, NULL, &err);
+        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "true") == 0);
+        carbon_find_close(&find);
+        free(result);
+        carbon_drop(&doc);
+
+        carbon_from_json(&doc, "false", CARBON_KEY_NOKEY, NULL, &err);
+        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "false") == 0);
+        carbon_find_close(&find);
+        free(result);
+        carbon_drop(&doc);
+
+        carbon_from_json(&doc, "[1, 2, 3, null]", CARBON_KEY_NOKEY, NULL, &err);
+        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "1") == 0);
+        carbon_find_close(&find);
+        free(result);
+        carbon_drop(&doc);
+
+        carbon_from_json(&doc, "[1, 2, 3, null]", CARBON_KEY_NOKEY, NULL, &err);
+        ASSERT_TRUE(carbon_find_open(&find, "1", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "2") == 0);
+        carbon_find_close(&find);
+        free(result);
+        carbon_drop(&doc);
+
+        carbon_from_json(&doc, "[1, 2, 3, null]", CARBON_KEY_NOKEY, NULL, &err);
+        ASSERT_TRUE(carbon_find_open(&find, "2", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "3") == 0);
+        carbon_find_close(&find);
+        free(result);
+        carbon_drop(&doc);
+
+        carbon_from_json(&doc, "[1, 2, 3, null]", CARBON_KEY_NOKEY, NULL, &err);
+        ASSERT_TRUE(carbon_find_open(&find, "3", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "null") == 0);
+        carbon_find_close(&find);
+        free(result);
+        carbon_drop(&doc);
+
+        carbon_from_json(&doc, "[1, 2, 3, null]", CARBON_KEY_NOKEY, NULL, &err);
+        ASSERT_TRUE(carbon_find_open(&find, "4", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "_nil") == 0);
+        carbon_find_close(&find);
+        free(result);
+        carbon_drop(&doc);
+
+        carbon_from_json(&doc, "[\"A\", \"B\", \"C\", null]", CARBON_KEY_NOKEY, NULL, &err);
+        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "\"A\"") == 0);
+        carbon_find_close(&find);
+        free(result);
+        carbon_drop(&doc);
+
+        carbon_from_json(&doc, "[\"A\", \"B\", \"C\", null]", CARBON_KEY_NOKEY, NULL, &err);
+        ASSERT_TRUE(carbon_find_open(&find, "1", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "\"B\"") == 0);
+        carbon_find_close(&find);
+        free(result);
+        carbon_drop(&doc);
+
+        carbon_from_json(&doc, "[\"A\", \"B\", \"C\", null]", CARBON_KEY_NOKEY, NULL, &err);
+        ASSERT_TRUE(carbon_find_open(&find, "2", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "\"C\"") == 0);
+        carbon_find_close(&find);
+        free(result);
+        carbon_drop(&doc);
+
+        carbon_from_json(&doc, "[\"A\", \"B\", \"C\", null]", CARBON_KEY_NOKEY, NULL, &err);
+        ASSERT_TRUE(carbon_find_open(&find, "3", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "null") == 0);
+        carbon_find_close(&find);
+        free(result);
+        carbon_drop(&doc);
+
+        carbon_from_json(&doc, "\"Hello, World!\"", CARBON_KEY_NOKEY, NULL, &err);
+        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "\"Hello, World!\"") == 0);
+        carbon_find_close(&find);
+        free(result);
+        carbon_drop(&doc);
+
+        carbon_from_json(&doc, "{}", CARBON_KEY_NOKEY, NULL, &err);
+        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "{}") == 0);
+        carbon_find_close(&find);
+        free(result);
+        carbon_drop(&doc);
+
+        carbon_from_json(&doc, "[]", CARBON_KEY_NOKEY, NULL, &err);
+        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "_nil") == 0);
+        carbon_find_close(&find);
+        free(result);
+        carbon_drop(&doc);
+
+        const char *complex = "{\n"
+                              "   \"m\": {\n"
+                              "         \"n\":8,\n"
+                              "         \"o\":-8,\n"
+                              "         \"p\":\"A\",\n"
+                              "         \"q\":32.4,\n"
+                              "         \"r\":null,\n"
+                              "         \"s\":true,\n"
+                              "         \"t\":false,\n"
+                              "         \"u\":[\n"
+                              "            1,\n"
+                              "            2,\n"
+                              "            3,\n"
+                              "            null\n"
+                              "         ],\n"
+                              "         \"v\":[\n"
+                              "            \"A\",\n"
+                              "            \"B\",\n"
+                              "            null\n"
+                              "         ],\n"
+                              "         \"w\":\"Hello, World!\",\n"
+                              "         \"x\":{\n"
+                              "            \"a\": null\n"
+                              "         },\n"
+                              "         \"y\":[\n"
+                              "\n"
+                              "         ],\n"
+                              "         \"z\":{\n"
+                              "\n"
+                              "         }\n"
+                              "      }\n"
+                              "}";
+
+        carbon_from_json(&doc, complex, CARBON_KEY_NOKEY, NULL, &err);
+
+        ASSERT_TRUE(carbon_find_open(&find, "m", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "{\"n\": 8, \"o\": -8, \"p\": \"A\", \"q\": 32.40, \"r\": null, \"s\": true, \"t\": false, \"u\": [1, 2, 3, null], \"v\": [\"A\", \"B\", null], \"w\": \"Hello, World!\", \"x\": {\"a\": null}, \"y\": [], \"z\": {}}") == 0);
+        carbon_find_close(&find);
+        free(result);
+
+        ASSERT_TRUE(carbon_find_open(&find, "m.n", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "8") == 0);
+        carbon_find_close(&find);
+        free(result);
+
+        ASSERT_TRUE(carbon_find_open(&find, "m.o", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "-8") == 0);
+        carbon_find_close(&find);
+        free(result);
+
+        ASSERT_TRUE(carbon_find_open(&find, "m.p", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "\"A\"") == 0);
+        carbon_find_close(&find);
+        free(result);
+
+        ASSERT_TRUE(carbon_find_open(&find, "m.q", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "32.40") == 0);
+        carbon_find_close(&find);
+        free(result);
+
+        ASSERT_TRUE(carbon_find_open(&find, "m.r", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "null") == 0);
+        carbon_find_close(&find);
+        free(result);
+
+        ASSERT_TRUE(carbon_find_open(&find, "m.s", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "true") == 0);
+        carbon_find_close(&find);
+        free(result);
+
+        ASSERT_TRUE(carbon_find_open(&find, "m.t", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "false") == 0);
+        carbon_find_close(&find);
+        free(result);
+
+        ASSERT_TRUE(carbon_find_open(&find, "m.u", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "[1, 2, 3, null]") == 0);
+        carbon_find_close(&find);
+        free(result);
+
+        ASSERT_TRUE(carbon_find_open(&find, "m.u.0", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "1") == 0);
+        carbon_find_close(&find);
+        free(result);
+
+        ASSERT_TRUE(carbon_find_open(&find, "m.u.1", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "2") == 0);
+        carbon_find_close(&find);
+        free(result);
+
+        ASSERT_TRUE(carbon_find_open(&find, "m.u.2", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "3") == 0);
+        carbon_find_close(&find);
+        free(result);
+
+        ASSERT_TRUE(carbon_find_open(&find, "m.u.3", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "null") == 0);
+        carbon_find_close(&find);
+        free(result);
+
+        ASSERT_TRUE(carbon_find_open(&find, "m.u.4", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "_nil") == 0);
+        carbon_find_close(&find);
+        free(result);
+
+        ASSERT_TRUE(carbon_find_open(&find, "m.v", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "[\"A\", \"B\", null]") == 0);
+        carbon_find_close(&find);
+        free(result);
+
+        ASSERT_TRUE(carbon_find_open(&find, "m.w", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "\"Hello, World!\"") == 0);
+        carbon_find_close(&find);
+        free(result);
+
+        ASSERT_TRUE(carbon_find_open(&find, "m.x", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "{\"a\": null}") == 0);
+        carbon_find_close(&find);
+        free(result);
+
+        ASSERT_TRUE(carbon_find_open(&find, "m.x.a", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "null") == 0);
+        carbon_find_close(&find);
+        free(result);
+
+        ASSERT_TRUE(carbon_find_open(&find, "m.y", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "[]") == 0);
+        carbon_find_close(&find);
+        free(result);
+
+        ASSERT_TRUE(carbon_find_open(&find, "m.z", &doc));
+        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(strcmp(result, "{}") == 0);
+        carbon_find_close(&find);
+        free(result);
+        
         carbon_drop(&doc);
 }
 

@@ -105,6 +105,132 @@ bool carbon_find_has_result(struct carbon_find *find)
         return carbon_path_evaluator_has_result(&find->path_evaluater);
 }
 
+const char *carbon_find_result_to_str(struct string *dst_str, enum carbon_printer_impl print_type, struct carbon_find *find)
+{
+        error_if_null(dst_str)
+        error_if_null(find)
+
+        string_clear(dst_str);
+
+        struct printer printer;
+        carbon_printer_by_type(&printer, print_type);
+
+        if (carbon_find_has_result(find)) {
+                enum carbon_field_type result_type;
+                carbon_find_result_type(&result_type, find);
+                switch (result_type) {
+                        case CARBON_FIELD_TYPE_NULL:
+                                carbon_printer_null(&printer, dst_str);
+                                break;
+                        case CARBON_FIELD_TYPE_TRUE:
+                                carbon_printer_true(&printer, false, dst_str);
+                                break;
+                        case CARBON_FIELD_TYPE_FALSE:
+                                carbon_printer_false(&printer, false, dst_str);
+                                break;
+                        case CARBON_FIELD_TYPE_OBJECT: {
+                                struct carbon_object_it *sub_it = carbon_find_result_object(find);
+                                carbon_printer_print_object(sub_it, &printer, dst_str);
+                        } break;
+                        case CARBON_FIELD_TYPE_ARRAY: {
+                                struct carbon_array_it *sub_it = carbon_find_result_array(find);
+                                carbon_printer_print_array(sub_it, &printer, dst_str, false);
+                        } break;
+                        case CARBON_FIELD_TYPE_COLUMN_U8:
+                        case CARBON_FIELD_TYPE_COLUMN_U16:
+                        case CARBON_FIELD_TYPE_COLUMN_U32:
+                        case CARBON_FIELD_TYPE_COLUMN_U64:
+                        case CARBON_FIELD_TYPE_COLUMN_I8:
+                        case CARBON_FIELD_TYPE_COLUMN_I16:
+                        case CARBON_FIELD_TYPE_COLUMN_I32:
+                        case CARBON_FIELD_TYPE_COLUMN_I64:
+                        case CARBON_FIELD_TYPE_COLUMN_FLOAT:
+                        case CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
+                                struct carbon_column_it *sub_it = carbon_find_result_column(find);
+                                carbon_printer_print_column(sub_it, &printer, dst_str);
+                        } break;
+                        case CARBON_FIELD_TYPE_STRING: {
+                                u64 str_len = 0;
+                                const char *str = carbon_find_result_string(&str_len, find);
+                                carbon_printer_string(&printer, dst_str, str, str_len);
+                        } break;
+                        case CARBON_FIELD_TYPE_NUMBER_U8: {
+                                u64 val = 0;
+                                carbon_find_result_unsigned(&val, find);
+                                carbon_printer_u8_or_null(&printer, dst_str, (u8) val);
+                        } break;
+                        case CARBON_FIELD_TYPE_NUMBER_U16: {
+                                u64 val = 0;
+                                carbon_find_result_unsigned(&val, find);
+                                carbon_printer_u16_or_null(&printer, dst_str, (u16) val);
+                        } break;
+                        case CARBON_FIELD_TYPE_NUMBER_U32: {
+                                u64 val = 0;
+                                carbon_find_result_unsigned(&val, find);
+                                carbon_printer_u32_or_null(&printer, dst_str, (u32) val);
+                        } break;
+                        case CARBON_FIELD_TYPE_NUMBER_U64: {
+                                u64 val = 0;
+                                carbon_find_result_unsigned(&val, find);
+                                carbon_printer_u64_or_null(&printer, dst_str, (u64) val);
+                        } break;
+                        case CARBON_FIELD_TYPE_NUMBER_I8: {
+                                i64 val = 0;
+                                carbon_find_result_signed(&val, find);
+                                carbon_printer_i8_or_null(&printer, dst_str, (i8) val);
+                        } break;
+                        case CARBON_FIELD_TYPE_NUMBER_I16: {
+                                i64 val = 0;
+                                carbon_find_result_signed(&val, find);
+                                carbon_printer_i16_or_null(&printer, dst_str, (i16) val);
+                        } break;
+                        case CARBON_FIELD_TYPE_NUMBER_I32: {
+                                i64 val = 0;
+                                carbon_find_result_signed(&val, find);
+                                carbon_printer_i32_or_null(&printer, dst_str, (i32) val);
+                        } break;
+                        case CARBON_FIELD_TYPE_NUMBER_I64: {
+                                i64 val = 0;
+                                carbon_find_result_signed(&val, find);
+                                carbon_printer_i64_or_null(&printer, dst_str, (i64) val);
+                        } break;
+                        case CARBON_FIELD_TYPE_NUMBER_FLOAT: {
+                                float val = 0;
+                                carbon_find_result_float(&val, find);
+                                carbon_printer_float(&printer, dst_str, &val);
+                        } break;
+                        case CARBON_FIELD_TYPE_BINARY:
+                        case CARBON_FIELD_TYPE_BINARY_CUSTOM: {
+                                const struct carbon_binary *val = carbon_find_result_binary(find);
+                                carbon_printer_binary(&printer, dst_str, val);
+                        } break;
+                        default:
+                                error(&find->err, ARK_ERR_INTERNALERR)
+                                return NULL;
+                }
+
+        } else {
+                string_add(dst_str, CARBON_NIL_STR);
+        }
+        carbon_printer_drop(&printer);
+
+        return string_cstr(dst_str);
+}
+
+const char *carbon_find_result_to_json_compact(struct string *dst_str, struct carbon_find *find)
+{
+        return carbon_find_result_to_str(dst_str, JSON_COMPACT, find);
+}
+
+char *carbon_find_result_to_json_compact_dup(struct carbon_find *find)
+{
+        struct string str;
+        string_create(&str);
+        char *ret = strdup(carbon_find_result_to_json_compact(&str, find));
+        string_drop(&str);
+        return ret;
+}
+
 bool carbon_find_result_type(enum carbon_field_type *type, struct carbon_find *find)
 {
         error_if_null(type)
@@ -120,6 +246,14 @@ struct carbon_array_it *carbon_find_result_array(struct carbon_find *find)
         error_if(!carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, ARK_ERR_ILLEGALSTATE)
         error_if(find->type != CARBON_FIELD_TYPE_ARRAY, &find->err, ARK_ERR_TYPEMISMATCH)
         return find->value.array_it;
+}
+
+struct carbon_object_it *carbon_find_result_object(struct carbon_find *find)
+{
+        error_if_null(find)
+        error_if(!carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, ARK_ERR_ILLEGALSTATE)
+        error_if(find->type != CARBON_FIELD_TYPE_OBJECT, &find->err, ARK_ERR_TYPEMISMATCH)
+        return find->value.object_it;
 }
 
 struct carbon_column_it *carbon_find_result_column(struct carbon_find *find)

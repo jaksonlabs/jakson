@@ -18,6 +18,7 @@
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <libs/libb64/libb64.h>
+#include <ark-js/carbon/carbon.h>
 #include <ark-js/carbon/printers/json/json-extended.h>
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -60,7 +61,7 @@ static void meta_begin(struct printer *self, struct string *builder)
 }
 
 static void meta_data(struct printer *self, struct string *builder,
-                      enum carbon_key_type key_type, const void *key,
+                      int key_type, const void *key,
                       u64 key_length, u64 rev)
 {
         unused(self)

@@ -40,7 +40,7 @@ static bool array_it_next_no_load(bool *is_empty_slot, bool *is_array_end, struc
 
 static bool object_it_next_no_load(bool *is_empty_slot, bool *is_array_end, struct carbon_object_it *it);
 
-static void int_carbon_from_json_elem(struct carbon_insert *ins, const struct json_element *elem);
+static void int_carbon_from_json_elem(struct carbon_insert *ins, const struct json_element *elem, bool is_root);
 
 static void int_insert_prop_object(struct carbon_insert *oins, struct json_object_t *obj);
 
@@ -391,6 +391,7 @@ bool carbon_int_field_data_access(struct memfile *file, struct err *err, struct 
                 case CARBON_FIELD_TYPE_COLUMN_FLOAT:
                 case CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
                         carbon_int_field_access_create(field_access);
+                        field_access->nested_column_it_is_created = true;
                         carbon_column_it_create(field_access->nested_column_it, file, err,
                                                 memfile_tell(file) - sizeof(u8));
                 }
@@ -548,19 +549,19 @@ bool carbon_int_field_access_drop(struct field_access *field)
 bool carbon_int_field_access_object_it_opened(struct field_access *field)
 {
         assert(field);
-        return field->nested_object_it_is_created;//field->nested_object_it != 0;
+        return field->nested_object_it_is_created && field->nested_object_it != NULL;
 }
 
 bool carbon_int_field_access_array_it_opened(struct field_access *field)
 {
         assert(field);
-        return field->nested_array_it_is_created != 0;
+        return field->nested_array_it_is_created && field->nested_array_it != NULL;
 }
 
 bool carbon_int_field_access_column_it_opened(struct field_access *field)
 {
         assert(field);
-        return field->nested_column_it_is_created != 0;
+        return field->nested_column_it_is_created && field->nested_column_it != NULL;
 }
 
 void carbon_int_auto_close_nested_array_it(struct field_access *field)
@@ -962,7 +963,7 @@ static void int_insert_array_array(struct carbon_insert *array_ins, struct json_
                 array->elements.elements.num_elems * 256);
         for (u32 i = 0; i < array->elements.elements.num_elems; i++) {
                 const struct json_element *elem = vec_get(&array->elements.elements, i, struct json_element);
-                int_carbon_from_json_elem(sub_ins, elem);
+                int_carbon_from_json_elem(sub_ins, elem, false);
         }
         carbon_insert_array_end(&state);
 }
@@ -1041,7 +1042,20 @@ static void int_insert_array_elements(struct carbon_insert *array_ins, struct js
         }
 }
 
-#define insert_into_column(ins, elem, field_type, column_type, ctype, accessor)                                             \
+#define insert_into_array(ins, elem, ctype, accessor)                                                                  \
+{                                                                                                                      \
+        for (u32 k = 0; k < elem->value.value.array->elements.elements.num_elems; k++) {                               \
+                struct json_element *array_elem = vec_get(                                                             \
+                        &elem->value.value.array->elements.elements, k, struct json_element);                          \
+                if (array_elem->value.value_type == JSON_VALUE_NULL) {                                                 \
+                        carbon_insert_null(ins);                                                                       \
+                } else {                                                                                               \
+                        carbon_insert_##ctype(ins, array_elem->value.value.number->value.accessor);                    \
+                }                                                                                                      \
+        }                                                                                                              \
+}
+
+#define insert_into_column(ins, elem, field_type, column_type, ctype, accessor)                                        \
 ({                                                                                                                     \
         struct carbon_insert_column_state state;                                                                       \
         u64 approx_cap_nbytes = elem->value.value.array->elements.elements.num_elems *                                 \
@@ -1228,7 +1242,7 @@ static void int_insert_prop_object(struct carbon_insert *oins, struct json_objec
         }
 }
 
-static void int_carbon_from_json_elem(struct carbon_insert *ins, const struct json_element *elem)
+static void int_carbon_from_json_elem(struct carbon_insert *ins, const struct json_element *elem, bool is_root)
 {
         switch (elem->value.value_type) {
                 case JSON_VALUE_OBJECT: {
@@ -1244,84 +1258,160 @@ static void int_carbon_from_json_elem(struct carbon_insert *ins, const struct js
                         json_array_get_type(&type, elem->value.value.array);
                         switch (type) {
                                 case JSON_LIST_TYPE_EMPTY: {
-                                        struct carbon_insert_array_state state;
-                                        carbon_insert_array_begin(&state, ins, 0);
-                                        carbon_insert_array_end(&state);
+                                        if (is_root) {
+                                                /* nothing to do */
+                                        } else {
+                                                struct carbon_insert_array_state state;
+                                                carbon_insert_array_begin(&state, ins, 0);
+                                                carbon_insert_array_end(&state);
+                                        }
                                 } break;
                                 case JSON_LIST_TYPE_VARIABLE_OR_NESTED: {
-                                        struct carbon_insert_array_state state;
                                         u64 approx_cap_nbytes = elem->value.value.array->elements.elements.num_elems * 256;
-                                        struct carbon_insert *array_ins = carbon_insert_array_begin(&state, ins,
-                                                approx_cap_nbytes);
-                                        int_insert_array_elements(array_ins, elem->value.value.array);
-                                        carbon_insert_array_end(&state);
+                                        if (is_root) {
+                                                int_insert_array_elements(ins, elem->value.value.array);
+                                        } else {
+                                                struct carbon_insert_array_state state;
+                                                struct carbon_insert *array_ins = carbon_insert_array_begin(&state, ins,
+                                                                                                            approx_cap_nbytes);
+                                                int_insert_array_elements(array_ins, elem->value.value.array);
+                                                carbon_insert_array_end(&state);
+                                        }
                                 } break;
                                 case JSON_LIST_TYPE_FIXED_U8:
-                                        insert_into_column(ins, elem, CARBON_FIELD_TYPE_NUMBER_U8, CARBON_COLUMN_TYPE_U8,
-                                                u8, unsigned_integer);
+                                        if (is_root) {
+                                                insert_into_array(ins, elem, unsigned, unsigned_integer)
+                                        } else {
+                                                insert_into_column(ins, elem, CARBON_FIELD_TYPE_NUMBER_U8,
+                                                                   CARBON_COLUMN_TYPE_U8,
+                                                                   u8, unsigned_integer);
+                                        }
                                 break;
                                 case JSON_LIST_TYPE_FIXED_U16:
-                                        insert_into_column(ins, elem, CARBON_FIELD_TYPE_NUMBER_U16, CARBON_COLUMN_TYPE_U16,
-                                                           u16, unsigned_integer);
-                                        break;
-                                case JSON_LIST_TYPE_FIXED_U32:
-                                        insert_into_column(ins, elem, CARBON_FIELD_TYPE_NUMBER_U32, CARBON_COLUMN_TYPE_U32,
-                                                           u32, unsigned_integer);
-                                        break;
-                                case JSON_LIST_TYPE_FIXED_U64:
-                                        insert_into_column(ins, elem, CARBON_FIELD_TYPE_NUMBER_U64, CARBON_COLUMN_TYPE_U64,
-                                                           u64, unsigned_integer);
-                                        break;
-                                case JSON_LIST_TYPE_FIXED_I8:
-                                        insert_into_column(ins, elem, CARBON_FIELD_TYPE_NUMBER_I8, CARBON_COLUMN_TYPE_I8,
-                                                           i8, signed_integer);
-                                        break;
-                                case JSON_LIST_TYPE_FIXED_I16:
-                                        insert_into_column(ins, elem, CARBON_FIELD_TYPE_NUMBER_I16, CARBON_COLUMN_TYPE_I16,
-                                                           u16, signed_integer);
-                                        break;
-                                case JSON_LIST_TYPE_FIXED_I32:
-                                        insert_into_column(ins, elem, CARBON_FIELD_TYPE_NUMBER_I32, CARBON_COLUMN_TYPE_I32,
-                                                           u32, signed_integer);
-                                        break;
-                                case JSON_LIST_TYPE_FIXED_I64:
-                                        insert_into_column(ins, elem, CARBON_FIELD_TYPE_NUMBER_I64, CARBON_COLUMN_TYPE_I64,
-                                                           u64, signed_integer);
-                                        break;
-                                case JSON_LIST_TYPE_FIXED_FLOAT:
-                                        insert_into_column(ins, elem, CARBON_FIELD_TYPE_NUMBER_FLOAT, CARBON_COLUMN_TYPE_FLOAT,
-                                                           float, float_number);
-                                        break;
-                                case JSON_LIST_TYPE_FIXED_NULL: {
-                                        struct carbon_insert_array_state state;
-                                        u64 approx_cap_nbytes = elem->value.value.array->elements.elements.num_elems;
-                                        struct carbon_insert *array_ins = carbon_insert_array_begin(&state, ins,
-                                                                                                    approx_cap_nbytes);
-                                        for (u32 i = 0; i < elem->value.value.array->elements.elements.num_elems; i++) {
-                                                carbon_insert_null(array_ins);
+                                        if (is_root) {
+                                                insert_into_array(ins, elem, unsigned, unsigned_integer)
+                                        } else {
+                                                insert_into_column(ins, elem, CARBON_FIELD_TYPE_NUMBER_U16,
+                                                                   CARBON_COLUMN_TYPE_U16,
+                                                                   u16, unsigned_integer);
                                         }
-                                        carbon_insert_array_end(&state);
+                                break;
+                                case JSON_LIST_TYPE_FIXED_U32:
+                                        if (is_root) {
+                                                insert_into_array(ins, elem, unsigned, unsigned_integer)
+                                        } else {
+                                                insert_into_column(ins, elem, CARBON_FIELD_TYPE_NUMBER_U32,
+                                                                   CARBON_COLUMN_TYPE_U32,
+                                                                   u32, unsigned_integer);
+                                        }
+                                break;
+                                case JSON_LIST_TYPE_FIXED_U64:
+                                        if (is_root) {
+                                                insert_into_array(ins, elem, unsigned, unsigned_integer)
+                                        } else {
+                                                insert_into_column(ins, elem, CARBON_FIELD_TYPE_NUMBER_U64,
+                                                                   CARBON_COLUMN_TYPE_U64,
+                                                                   u64, unsigned_integer);
+                                        }
+                                break;
+                                case JSON_LIST_TYPE_FIXED_I8:
+                                        if (is_root) {
+                                                insert_into_array(ins, elem, signed, signed_integer)
+                                        } else {
+                                                insert_into_column(ins, elem, CARBON_FIELD_TYPE_NUMBER_I8,
+                                                                   CARBON_COLUMN_TYPE_I8,
+                                                                   i8, signed_integer);
+                                        }
+                                break;
+                                case JSON_LIST_TYPE_FIXED_I16:
+                                        if (is_root) {
+                                                insert_into_array(ins, elem, signed, signed_integer)
+                                        } else {
+                                                insert_into_column(ins, elem, CARBON_FIELD_TYPE_NUMBER_I16,
+                                                                   CARBON_COLUMN_TYPE_I16,
+                                                                   u16, signed_integer);
+                                        }
+                                break;
+                                case JSON_LIST_TYPE_FIXED_I32:
+                                        if (is_root) {
+                                                insert_into_array(ins, elem, signed, signed_integer)
+                                        } else {
+                                                insert_into_column(ins, elem, CARBON_FIELD_TYPE_NUMBER_I32,
+                                                                   CARBON_COLUMN_TYPE_I32,
+                                                                   u32, signed_integer);
+                                        }
+                                break;
+                                case JSON_LIST_TYPE_FIXED_I64:
+                                        if (is_root) {
+                                                insert_into_array(ins, elem, signed, signed_integer)
+                                        } else {
+                                                insert_into_column(ins, elem, CARBON_FIELD_TYPE_NUMBER_I64,
+                                                                   CARBON_COLUMN_TYPE_I64,
+                                                                   u64, signed_integer);
+                                        }
+                                break;
+                                case JSON_LIST_TYPE_FIXED_FLOAT:
+                                        if (is_root) {
+                                                insert_into_array(ins, elem, float, float_number)
+                                        } else {
+                                                insert_into_column(ins, elem, CARBON_FIELD_TYPE_NUMBER_FLOAT,
+                                                                   CARBON_COLUMN_TYPE_FLOAT,
+                                                                   float, float_number);
+                                        }
+                                break;
+                                case JSON_LIST_TYPE_FIXED_NULL: {
+                                        u64 approx_cap_nbytes = elem->value.value.array->elements.elements.num_elems;
+                                        if (is_root) {
+                                                for (u32 i = 0; i < elem->value.value.array->elements.elements.num_elems; i++) {
+                                                        carbon_insert_null(ins);
+                                                }
+                                        } else {
+                                                struct carbon_insert_array_state state;
+                                                struct carbon_insert *array_ins = carbon_insert_array_begin(&state, ins,
+                                                                                                            approx_cap_nbytes);
+                                                for (u32 i = 0; i < elem->value.value.array->elements.elements.num_elems; i++) {
+                                                        carbon_insert_null(array_ins);
+                                                }
+                                                carbon_insert_array_end(&state);
+                                        }
                                 } break;
                                 case JSON_LIST_TYPE_FIXED_BOOLEAN: {
-                                        struct carbon_insert_column_state state;
-                                        u64 cap_nbytes = elem->value.value.array->elements.elements.num_elems;
-                                        struct carbon_insert *array_ins = carbon_insert_column_begin(&state, ins,
-                                                                            CARBON_COLUMN_TYPE_BOOLEAN, cap_nbytes);
-                                        for (u32 i = 0; i < elem->value.value.array->elements.elements.num_elems; i++) {
-                                                struct json_element *array_elem = vec_get(
-                                                        &elem->value.value.array->elements.elements, i,
-                                                        struct json_element);
-                                                if (array_elem->value.value_type == JSON_VALUE_TRUE) {
-                                                        carbon_insert_true(array_ins);
-                                                } else if (array_elem->value.value_type == JSON_VALUE_FALSE) {
-                                                        carbon_insert_false(array_ins);
-                                                } else if (array_elem->value.value_type == JSON_VALUE_NULL) {
-                                                        carbon_insert_null(array_ins);
-                                                } else {
-                                                        error_print(ARK_ERR_UNSUPPORTEDTYPE);
+                                        if (is_root) {
+                                                for (u32 i = 0; i < elem->value.value.array->elements.elements.num_elems; i++) {
+                                                        struct json_element *array_elem = vec_get(
+                                                                &elem->value.value.array->elements.elements, i,
+                                                                struct json_element);
+                                                        if (array_elem->value.value_type == JSON_VALUE_TRUE) {
+                                                                carbon_insert_true(ins);
+                                                        } else if (array_elem->value.value_type == JSON_VALUE_FALSE) {
+                                                                carbon_insert_false(ins);
+                                                        } else if (array_elem->value.value_type == JSON_VALUE_NULL) {
+                                                                carbon_insert_null(ins);
+                                                        } else {
+                                                                error_print(ARK_ERR_UNSUPPORTEDTYPE);
+                                                        }
                                                 }
+                                        } else {
+                                                struct carbon_insert_column_state state;
+                                                u64 cap_nbytes = elem->value.value.array->elements.elements.num_elems;
+                                                struct carbon_insert *array_ins = carbon_insert_column_begin(&state, ins,
+                                                                                                             CARBON_COLUMN_TYPE_BOOLEAN, cap_nbytes);
+                                                for (u32 i = 0; i < elem->value.value.array->elements.elements.num_elems; i++) {
+                                                        struct json_element *array_elem = vec_get(
+                                                                &elem->value.value.array->elements.elements, i,
+                                                                struct json_element);
+                                                        if (array_elem->value.value_type == JSON_VALUE_TRUE) {
+                                                                carbon_insert_true(array_ins);
+                                                        } else if (array_elem->value.value_type == JSON_VALUE_FALSE) {
+                                                                carbon_insert_false(array_ins);
+                                                        } else if (array_elem->value.value_type == JSON_VALUE_NULL) {
+                                                                carbon_insert_null(array_ins);
+                                                        } else {
+                                                                error_print(ARK_ERR_UNSUPPORTEDTYPE);
+                                                        }
+                                                }
+                                                carbon_insert_column_end(&state);
                                         }
-                                        carbon_insert_column_end(&state);
                                 } break;
                                 default:
                                         error_print(ARK_ERR_UNSUPPORTEDTYPE)
@@ -1370,7 +1460,7 @@ bool carbon_int_from_json(struct carbon *doc, const struct json *data,
 
         struct carbon_new context;
         struct carbon_insert *ins = carbon_create_begin(&context, doc, key_type, mode);
-        int_carbon_from_json_elem(ins, data->element);
+        int_carbon_from_json_elem(ins, data->element, true);
 
         carbon_create_end(&context);
 
