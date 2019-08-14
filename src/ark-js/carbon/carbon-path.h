@@ -36,6 +36,9 @@ struct carbon_path_evaluator {
                 struct carbon_array_it it;
             } array;
 
+            struct {
+                struct carbon_object_it it;
+            } object;
 
             struct {
                 struct carbon_column_it it;

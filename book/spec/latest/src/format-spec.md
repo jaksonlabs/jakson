@@ -1,3 +1,3 @@
 # Format Specification
 
-> **Not yet described**. 
+> **Not yet described**

@@ -22,11 +22,13 @@
 #include <ark-js/shared/types.h>
 #include <ark-js/shared/stdx/string.h>
 #include <ark-js/carbon/oid/oid.h>
-#include <ark-js/carbon/carbon.h>
 
 ARK_BEGIN_DECL
 
 struct carbon_binary; /* forwarded from carbon.h */
+struct carbon_object_it; /* forwarded from carbon-object-it.h */
+struct carbon_array_it; /* forwarded from carbon-array-it.h */
+struct carbon_column_it; /* forwarded from carbon-column-it.h */
 
 struct printer {
 
@@ -36,8 +38,10 @@ struct printer {
     void (*record_begin)(struct printer *self, struct string *builder);
     void (*record_end)(struct printer *self, struct string *builder);
     void (*meta_begin)(struct printer *self, struct string *builder);
+
+    /* type is of enum carbon_key_type */
     void (*meta_data)(struct printer *self, struct string *builder,
-                      enum carbon_key_type key_type, const void *key, u64 key_length,
+                      int key_type, const void *key, u64 key_length,
                       u64 rev);
     void (*meta_end)(struct printer *self, struct string *builder);
     void (*doc_begin)(struct printer *self, struct string *builder);
@@ -84,6 +88,71 @@ struct printer {
     void (*obj_prop_name)(struct printer *self, struct string *builder,
                           const char *key_name, u64 key_len);
 };
+
+/* 'impl' is of enum carbon_printer_impl */
+bool carbon_printer_by_type(struct printer *printer, int impl);
+bool carbon_printer_drop(struct printer *printer);
+bool carbon_printer_begin(struct printer *printer, struct string *str);
+bool carbon_printer_end(struct printer *printer, struct string *str);
+bool carbon_printer_header_begin(struct printer *printer, struct string *str);
+
+/* 'key_type' is of enum carbon_key_type */
+bool carbon_printer_header_contents(struct printer *printer, struct string *str,
+                                    int key_type, const void *key, u64 key_length,
+                                    u64 rev);
+bool carbon_printer_header_end(struct printer *printer, struct string *str);
+bool carbon_printer_payload_begin(struct printer *printer, struct string *str);
+bool carbon_printer_payload_end(struct printer *printer, struct string *str);
+bool carbon_printer_empty_record(struct printer *printer, struct string *str);
+bool carbon_printer_array_begin(struct printer *printer, struct string *str);
+bool carbon_printer_array_end(struct printer *printer, struct string *str);
+bool carbon_printer_unit_array_begin(struct printer *printer, struct string *str);
+bool carbon_printer_unit_array_end(struct printer *printer, struct string *str);
+bool carbon_printer_object_begin(struct printer *printer, struct string *str);
+bool carbon_printer_object_end(struct printer *printer, struct string *str);
+bool carbon_printer_null(struct printer *printer, struct string *str);
+bool carbon_printer_true(struct printer *printer, bool is_null, struct string *str);
+bool carbon_printer_false(struct printer *printer, bool is_null, struct string *str);
+bool carbon_printer_comma(struct printer *printer, struct string *str);
+bool carbon_printer_signed_nonull(struct printer *printer, struct string *str, const i64 *value);
+bool carbon_printer_unsigned_nonull(struct printer *printer, struct string *str, const u64 *value);
+bool carbon_printer_u8_or_null(struct printer *printer, struct string *str, u8 value);
+bool carbon_printer_u16_or_null(struct printer *printer, struct string *str, u16 value);
+bool carbon_printer_u32_or_null(struct printer *printer, struct string *str, u32 value);
+bool carbon_printer_u64_or_null(struct printer *printer, struct string *str, u64 value);
+bool carbon_printer_i8_or_null(struct printer *printer, struct string *str, i8 value);
+bool carbon_printer_i16_or_null(struct printer *printer, struct string *str, i16 value);
+bool carbon_printer_i32_or_null(struct printer *printer, struct string *str, i32 value);
+bool carbon_printer_i64_or_null(struct printer *printer, struct string *str, i64 value);
+bool carbon_printer_float(struct printer *printer, struct string *str, const float *value);
+bool carbon_printer_string(struct printer *printer, struct string *str, const char *value, u64 strlen);
+bool carbon_printer_binary(struct printer *printer, struct string *str, const struct carbon_binary *binary);
+bool carbon_printer_prop_null(struct printer *printer, struct string *str,
+                              const char *key_name, u64 key_len);
+bool carbon_printer_prop_true(struct printer *printer, struct string *str,
+                              const char *key_name, u64 key_len);
+bool carbon_printer_prop_false(struct printer *printer, struct string *str,
+                               const char *key_name, u64 key_len);
+bool carbon_printer_prop_signed(struct printer *printer, struct string *str,
+                                const char *key_name, u64 key_len, const i64 *value);
+bool carbon_printer_prop_unsigned(struct printer *printer, struct string *str,
+                                  const char *key_name, u64 key_len, const u64 *value);
+bool carbon_printer_prop_float(struct printer *printer, struct string *str,
+                               const char *key_name, u64 key_len, const float *value);
+bool carbon_printer_prop_string(struct printer *printer, struct string *str,
+                                const char *key_name, u64 key_len, const char *value, u64 strlen);
+bool carbon_printer_prop_binary(struct printer *printer, struct string *str,
+                                const char *key_name, u64 key_len, const struct carbon_binary *binary);
+bool carbon_printer_array_prop_name(struct printer *printer, struct string *str,
+                                    const char *key_name, u64 key_len);
+bool carbon_printer_column_prop_name(struct printer *printer, struct string *str,
+                                     const char *key_name, u64 key_len);
+bool carbon_printer_object_prop_name(struct printer *printer, struct string *str,
+                                     const char *key_name, u64 key_len);
+bool carbon_printer_print_object(struct carbon_object_it *it, struct printer *printer, struct string *builder);
+bool carbon_printer_print_array(struct carbon_array_it *it, struct printer *printer, struct string *builder,
+                        bool is_record_container);
+bool carbon_printer_print_column(struct carbon_column_it *it, struct printer *printer, struct string *builder);
 
 ARK_END_DECL
 
