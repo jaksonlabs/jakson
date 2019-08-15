@@ -3,6 +3,7 @@
 
 #include <ark-js/shared/json/json.h>
 #include <ark-js/shared/utils/convert.h>
+#include <ark-js/carbon/archive/archive.h>
 
 TEST (TestArray, NormalJSON)
 {
@@ -37,58 +38,7 @@ TEST (TestArray, GeoJSON)
     struct err err;
     struct json_err error_desc;
     json_parser_create(&parser);
-    bool status = json_parse(&json, &error_desc, &parser, "{\n"
-                                                          "\t\"type\": \"FeatureCollection\",\n"
-                                                          "\t\"features\": [{\n"
-                                                          "\t\t\t\"type\": \"Feature\",\n"
-                                                          "\t\t\t\"geometry\": {\n"
-                                                          "\t\t\t\t\"type\": \"Point\",\n"
-                                                          "\t\t\t\t\"coordinates\": [102.0, 0.5]\n"
-                                                          "\t\t\t},\n"
-                                                          "\t\t\t\"properties\": {\n"
-                                                          "\t\t\t\t\"prop0\": \"value0\"\n"
-                                                          "\t\t\t}\n"
-                                                          "\t\t},\n"
-                                                          "\t\t{\n"
-                                                          "\t\t\t\"type\": \"Feature\",\n"
-                                                          "\t\t\t\"geometry\": {\n"
-                                                          "\t\t\t\t\"type\": \"LineString\",\n"
-                                                          "\t\t\t\t\"coordinates\": [\n"
-                                                          "\t\t\t\t\t[102.0, 0.0],\n"
-                                                          "\t\t\t\t\t[103.0, 1.0],\n"
-                                                          "\t\t\t\t\t[104.0, 0.0],\n"
-                                                          "\t\t\t\t\t[105.0, 1.0]\n"
-                                                          "\t\t\t\t]\n"
-                                                          "\t\t\t},\n"
-                                                          "\t\t\t\"properties\": {\n"
-                                                          "\t\t\t\t\"prop0\": \"value0\",\n"
-                                                          "\t\t\t\t\"prop1\": 0.0\n"
-                                                          "\t\t\t}\n"
-                                                          "\t\t},\n"
-                                                          "\t\t{\n"
-                                                          "\t\t\t\"type\": \"Feature\",\n"
-                                                          "\t\t\t\"geometry\": {\n"
-                                                          "\t\t\t\t\"type\": \"Polygon\",\n"
-                                                          "\t\t\t\t\"coordinates\": [\n"
-                                                          "\t\t\t\t\t[\n"
-                                                          "\t\t\t\t\t\t[100.0, 0.0],\n"
-                                                          "\t\t\t\t\t\t[101.0, 0.0],\n"
-                                                          "\t\t\t\t\t\t[101.0, 1.0],\n"
-                                                          "\t\t\t\t\t\t[100.0, 1.0],\n"
-                                                          "\t\t\t\t\t\t[100.0, 0.0]\n"
-                                                          "\t\t\t\t\t]\n"
-                                                          "\t\t\t\t]\n"
-                                                          "\n"
-                                                          "\t\t\t},\n"
-                                                          "\t\t\t\"properties\": {\n"
-                                                          "\t\t\t\t\"prop0\": \"value0\",\n"
-                                                          "\t\t\t\t\"prop1\": {\n"
-                                                          "\t\t\t\t\t\"this\": \"that\"\n"
-                                                          "\t\t\t\t}\n"
-                                                          "\t\t\t}\n"
-                                                          "\t\t}\n"
-                                                          "\t]\n"
-                                                          "}");
+    bool status = json_parse(&json, &error_desc, &parser, "{\"x\": [[1,2,3],[4,5,6]]}");
 
     ASSERT_TRUE(status);
     printf("Parse Status: %s", status ? "true" : "false");
@@ -97,6 +47,71 @@ TEST (TestArray, GeoJSON)
     ASSERT_FALSE(status1);
     printf("\n Json Test: %s", status1 ? "true" : "false");
     json_drop(&json);
+}
+
+TEST (TestArray, HelpWorkingCarbonArchiveTranslation)
+{
+        /* use break points to understand how it works successfully */
+
+        struct archive   archive;
+        struct err       err;
+
+        const char        *json_string = "{ \"test\": 123 }";
+        const char        *archive_file = "tmp-test-archive.carbon";
+        bool               read_optimized = false;
+
+        bool status = archive_from_json(&archive, archive_file, &err, json_string,
+                                        PACK_NONE, SYNC, 0, read_optimized, true, NULL);
+        ASSERT_TRUE(status);
+
+        archive_close(&archive);
+}
+
+TEST (TestArray, HelpWorkingCarbonArchiveTranslationWithArray)
+{
+        /* use break points to understand how it works successfully */
+
+        struct archive   archive;
+        struct err       err;
+
+        const char        *json_string = "{ \"test\": [1,2,3] }";
+        const char        *archive_file = "tmp-test-archive.carbon";
+        bool               read_optimized = false;
+
+        bool status = archive_from_json(&archive, archive_file, &err, json_string,
+                                        PACK_NONE, SYNC, 0, read_optimized, true, NULL);
+        ASSERT_TRUE(status);
+
+        archive_close(&archive);
+}
+
+TEST (TestArray, HelpNOTWorkingCarbonArchiveTranslationWithArray)
+{
+        /* use break points to understand how it works successfully */
+        /* Number 3: is for the purpose of adding "arrays of arrays" disbale the "array of array condition" in
+         * json_test, and let the convertion happen and crash */
+
+        /* Your final goal until next week:
+         *      (1) understand principle workflow of carbon archives from Json by the 2 tests from above + ark-carbon
+         *      (2) disable "array of array" test condition
+         *      (3) understand where (!) it crashes
+         *      (4) speculate why (!) it crashes
+         *
+         * Next meeting: give you an understanging on "why" in depth, and a first hint towards a solution
+         */
+
+        struct archive   archive;
+        struct err       err;
+
+        const char        *json_string = "{ \"test\": [[1,2,3]] }";
+        const char        *archive_file = "tmp-test-archive.carbon";
+        bool               read_optimized = false;
+
+        bool status = archive_from_json(&archive, archive_file, &err, json_string,
+                                        PACK_NONE, SYNC, 0, read_optimized, true, NULL);
+        ASSERT_TRUE(status);
+
+        archive_close(&archive);
 }
 
 
