@@ -15,8 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CARBON_REVISION_H
-#define CARBON_REVISION_H
+#ifndef CARBON_COMMIT_HASH_H
+#define CARBON_COMMIT_HASH_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/error.h>
@@ -24,15 +24,15 @@
 
 ARK_BEGIN_DECL
 
-bool carbon_revision_create(struct memfile *file);
+bool carbon_commit_hash_create(struct memfile *file);
 
-bool carbon_revision_skip(struct memfile *file);
+bool carbon_commit_hash_skip(struct memfile *file);
 
-bool carbon_revision_read(u64 *revision, struct memfile *file);
+bool carbon_commit_hash_read(u64 *commit_hash, struct memfile *file);
 
-bool carbon_revision_peek(u64 *revision, struct memfile *file);
+bool carbon_commit_hash_peek(u64 *commit_hash, struct memfile *file);
 
-bool carbon_revision_inc(struct memfile *file);
+bool carbon_commit_hash_update(struct memfile *file);
 
 ARK_END_DECL
 

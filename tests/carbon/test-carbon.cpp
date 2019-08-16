@@ -32,7 +32,7 @@ TEST(CarbonTest, CreateCarbon) {
         EXPECT_TRUE(status);
         EXPECT_EQ(oid, 0);
 
-        status = carbon_revision(&rev, &doc);
+        status = carbon_commit_hash(&rev, &doc);
         EXPECT_TRUE(status);
         EXPECT_EQ(rev, 0);
 
@@ -54,7 +54,7 @@ TEST(CarbonTest, CreateCarbonRevisionNumbering) {
         status = carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
         EXPECT_TRUE(status);
 
-        status = carbon_revision(&rev, &doc);
+        status = carbon_commit_hash(&rev, &doc);
         EXPECT_TRUE(status);
         EXPECT_EQ(rev, 0);
 
@@ -62,11 +62,11 @@ TEST(CarbonTest, CreateCarbonRevisionNumbering) {
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_end(&revise);
 
-        status = carbon_revision(&rev, &doc);
+        status = carbon_commit_hash(&rev, &doc);
         EXPECT_TRUE(status);
         EXPECT_EQ(rev, 0);
 
-        status = carbon_revision(&rev, &rev_doc);
+        status = carbon_commit_hash(&rev, &rev_doc);
         EXPECT_TRUE(status);
         EXPECT_EQ(rev, 1);
 
@@ -95,7 +95,7 @@ TEST(CarbonTest, CreateCarbonRevisionAbort) {
         status = carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
         EXPECT_TRUE(status);
 
-        status = carbon_revision(&rev, &doc);
+        status = carbon_commit_hash(&rev, &doc);
         EXPECT_TRUE(status);
         EXPECT_EQ(rev, 0);
 
@@ -103,7 +103,7 @@ TEST(CarbonTest, CreateCarbonRevisionAbort) {
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_abort(&revise);
 
-        status = carbon_revision(&rev, &doc);
+        status = carbon_commit_hash(&rev, &doc);
         EXPECT_TRUE(status);
         EXPECT_EQ(rev, 0);
 
@@ -125,20 +125,20 @@ TEST(CarbonTest, CreateCarbonRevisionAsyncReading) {
         status = carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
         EXPECT_TRUE(status);
 
-        status = carbon_revision(&rev, &doc);
+        status = carbon_commit_hash(&rev, &doc);
         EXPECT_TRUE(status);
         EXPECT_EQ(rev, 0);
 
         struct carbon_revise revise;
         carbon_revise_begin(&revise, &rev_doc, &doc);
 
-        status = carbon_revision(&rev, &doc);
+        status = carbon_commit_hash(&rev, &doc);
         EXPECT_TRUE(status);
         EXPECT_EQ(rev, 0);
 
         carbon_revise_end(&revise);
 
-        status = carbon_revision(&rev, &doc);
+        status = carbon_commit_hash(&rev, &doc);
         EXPECT_TRUE(status);
         EXPECT_EQ(rev, 0);
 
@@ -160,16 +160,16 @@ TEST(CarbonTest, ForceCarbonRevisionVarLengthIncrease) {
         carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
 
         for (u32 i = 0; i < 20000; i++) {
-                status = carbon_revision(&old_rev, &doc);
+                status = carbon_commit_hash(&old_rev, &doc);
 
                 carbon_revise_begin(&revise, &rev_doc, &doc);
                 carbon_revise_end(&revise);
 
-                status = carbon_revision(&new_rev, &doc);
+                status = carbon_commit_hash(&new_rev, &doc);
                 EXPECT_TRUE(status);
                 EXPECT_EQ(new_rev, old_rev);
 
-                status = carbon_revision(&new_rev, &rev_doc);
+                status = carbon_commit_hash(&new_rev, &rev_doc);
                 EXPECT_TRUE(status);
                 EXPECT_EQ(new_rev, old_rev + 1);
 
@@ -196,14 +196,14 @@ TEST(CarbonTest, ModifyCarbonObjectId) {
         carbon_key_unsigned_value(&oid, &doc);
         EXPECT_EQ(oid, 0);
 
-        carbon_revision(&rev, &doc);
+        carbon_commit_hash(&rev, &doc);
         EXPECT_EQ(rev, 0);
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_key_generate(&new_oid, &revise);
         EXPECT_NE(oid, new_oid);
         carbon_revise_end(&revise);
 
-        carbon_revision(&rev, &rev_doc);
+        carbon_commit_hash(&rev, &rev_doc);
         EXPECT_NE(rev, 0);
 
         carbon_key_unsigned_value(&oid, &rev_doc);
@@ -3963,12 +3963,12 @@ TEST(CarbonTest, CarbonKeyTypeNoKeyNoRevInc)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revision(&rev_old, &doc);
+        carbon_commit_hash(&rev_old, &doc);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_end(&revise);
 
-        carbon_revision(&rev_new, &rev_doc);
+        carbon_commit_hash(&rev_new, &rev_doc);
 
         ASSERT_EQ(rev_old, 0);
         ASSERT_EQ(rev_new, rev_old);
@@ -4019,12 +4019,12 @@ TEST(CarbonTest, CarbonKeyTypeAutoKeyRevInc)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revision(&rev_old, &doc);
+        carbon_commit_hash(&rev_old, &doc);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_end(&revise);
 
-        carbon_revision(&rev_new, &rev_doc);
+        carbon_commit_hash(&rev_new, &rev_doc);
 
         ASSERT_EQ(rev_old, 1);
         ASSERT_EQ(rev_new, 2);
@@ -4218,12 +4218,12 @@ TEST(CarbonTest, CarbonKeyTypeSignedKeyRevInc)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revision(&rev_old, &doc);
+        carbon_commit_hash(&rev_old, &doc);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_end(&revise);
 
-        carbon_revision(&rev_new, &rev_doc);
+        carbon_commit_hash(&rev_new, &rev_doc);
 
         ASSERT_EQ(rev_old, 1);
         ASSERT_EQ(rev_new, 2);
@@ -4249,12 +4249,12 @@ TEST(CarbonTest, CarbonKeyTypeUnsignedKeyRevInc)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revision(&rev_old, &doc);
+        carbon_commit_hash(&rev_old, &doc);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_end(&revise);
 
-        carbon_revision(&rev_new, &rev_doc);
+        carbon_commit_hash(&rev_new, &rev_doc);
 
         ASSERT_EQ(rev_old, 1);
         ASSERT_EQ(rev_new, 2);
@@ -4280,12 +4280,12 @@ TEST(CarbonTest, CarbonKeyTypeStringKeyRevInc)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revision(&rev_old, &doc);
+        carbon_commit_hash(&rev_old, &doc);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_end(&revise);
 
-        carbon_revision(&rev_new, &rev_doc);
+        carbon_commit_hash(&rev_new, &rev_doc);
 
         ASSERT_EQ(rev_old, 1);
         ASSERT_EQ(rev_new, 2);

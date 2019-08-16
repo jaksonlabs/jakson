@@ -15,59 +15,50 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <ark-js/carbon/carbon-revision.h>
+#include <ark-js/carbon/carbon-commit.h>
 #include <ark-js/shared/stdx/varuint.h>
 
-bool carbon_revision_create(struct memfile *file)
+bool carbon_commit_hash_create(struct memfile *file)
 {
         error_if_null(file)
 
-        varuint_t revision = ARK_MEMFILE_PEEK(file, varuint_t);
-
-        /* in case not enough space is available for writing revision (variable-length) number, enlarge */
-        size_t remain = memfile_remain_size(file);
-        offset_t rev_off = memfile_tell(file);
-        if (unlikely(remain < varuint_max_blocks())) {
-                memfile_write_zero(file, varuint_max_blocks());
-                memfile_seek(file, rev_off);
-        }
-
-        u8 bytes_written = varuint_write(revision, 0);
-        memfile_skip(file, bytes_written);
+        u64 init_rev = 0;
+        memfile_ensure_space(file, sizeof(u64));
+        memfile_write(file, &init_rev, sizeof(u64));
 
         return true;
 }
 
-bool carbon_revision_skip(struct memfile *file)
+bool carbon_commit_hash_skip(struct memfile *file)
 {
         error_if_null(file)
-        memfile_read_varuint(NULL, file);
+        memfile_skip(file, sizeof(u64));
         return true;
 }
 
-bool carbon_revision_read(u64 *revision, struct memfile *file)
+bool carbon_commit_hash_read(u64 *commit_hash, struct memfile *file)
 {
         error_if_null(file)
-        error_if_null(revision)
-        *revision = memfile_read_varuint(NULL, file);
+        error_if_null(commit_hash)
+        *commit_hash = *ARK_MEMFILE_READ_TYPE(file, u64);
         return true;
 }
 
-bool carbon_revision_peek(u64 *revision, struct memfile *file)
+bool carbon_commit_hash_peek(u64 *commit_hash, struct memfile *file)
 {
         error_if_null(file)
-        error_if_null(revision)
-        *revision = memfile_peek_varuint(NULL, file);
+        error_if_null(commit_hash)
+        *commit_hash = *ARK_MEMFILE_PEEK(file, u64);
         return true;
 }
 
-bool carbon_revision_inc(struct memfile *file)
+bool carbon_commit_hash_update(struct memfile *file)
 {
         ark_declare_and_init(u64, rev)
 
-        carbon_revision_peek(&rev, file);
+        carbon_commit_hash_peek(&rev, file);
         rev++;
-        memfile_update_varuint(file, rev);
+        memfile_write(file, &rev, sizeof(u64));
 
         return true;
 }

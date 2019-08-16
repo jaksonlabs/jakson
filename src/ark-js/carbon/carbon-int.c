@@ -25,7 +25,7 @@
 #include <ark-js/carbon/carbon-column-it.h>
 #include <ark-js/carbon/carbon-object-it.h>
 #include <ark-js/carbon/carbon-key.h>
-#include <ark-js/carbon/carbon-revision.h>
+#include <ark-js/carbon/carbon-commit.h>
 #include <ark-js/shared/json/json.h>
 
 static void marker_insert(struct memfile *memfile, u8 marker);
@@ -432,7 +432,7 @@ offset_t carbon_int_payload_after_header(struct carbon *doc)
 
         if (likely(carbon_key_skip(&key_type, &doc->memfile))) {
                 if (key_type != CARBON_KEY_NOKEY) {
-                        carbon_revision_skip(&doc->memfile);
+                        carbon_commit_hash_skip(&doc->memfile);
                 }
                 result = memfile_tell(&doc->memfile);
         }
@@ -442,7 +442,7 @@ offset_t carbon_int_payload_after_header(struct carbon *doc)
         return result;
 }
 
-u64 carbon_int_header_get_rev(struct carbon *doc)
+u64 carbon_int_header_get_commit_hash(struct carbon *doc)
 {
         assert(doc);
         u64 rev = 0;
@@ -453,7 +453,7 @@ u64 carbon_int_header_get_rev(struct carbon *doc)
 
         carbon_key_skip(&key_type, &doc->memfile);
         if (key_type != CARBON_KEY_NOKEY) {
-                carbon_revision_read(&rev, &doc->memfile);
+                carbon_commit_hash_read(&rev, &doc->memfile);
         }
 
         memfile_restore_position(&doc->memfile);
