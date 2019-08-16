@@ -25,21 +25,21 @@
 
 ARK_BEGIN_DECL
 
-ARK_EXPORT(bool) carbon_key_create(struct memfile *file, enum carbon_primary_key_type type, struct err *err);
+bool carbon_key_create(struct memfile *file, enum carbon_key_type type, struct err *err);
 
-ARK_EXPORT(bool) carbon_key_skip(enum carbon_primary_key_type *out, struct memfile *file);
+bool carbon_key_skip(enum carbon_key_type *out, struct memfile *file);
 
-ARK_EXPORT(bool) carbon_key_read_type(enum carbon_primary_key_type *out, struct memfile *file);
+bool carbon_key_read_type(enum carbon_key_type *out, struct memfile *file);
 
-ARK_EXPORT(bool) carbon_key_write_unsigned(struct memfile *file, u64 key);
+bool carbon_key_write_unsigned(struct memfile *file, u64 key);
 
-ARK_EXPORT(bool) carbon_key_write_signed(struct memfile *file, i64 key);
+bool carbon_key_write_signed(struct memfile *file, i64 key);
 
-ARK_EXPORT(bool) carbon_key_write_string(struct memfile *file, const char *key);
+bool carbon_key_write_string(struct memfile *file, const char *key);
 
-ARK_EXPORT(bool) carbon_key_update_string(struct memfile *file, const char *key);
+bool carbon_key_update_string(struct memfile *file, const char *key);
 
-ARK_EXPORT(const void *) carbon_key_read(u64 *len, enum carbon_primary_key_type *out, struct memfile *file);
+const void *carbon_key_read(u64 *len, enum carbon_key_type *out, struct memfile *file);
 
 ARK_END_DECL
 

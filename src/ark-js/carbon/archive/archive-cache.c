@@ -15,28 +15,29 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include <ark-js/shared/common.h>
 #include <ark-js/shared/hash/bern.h>
 #include <ark-js/shared/error.h>
 #include <ark-js/carbon/archive/archive-cache.h>
 
 struct cache_entry {
-        struct cache_entry *prev, *next;
-        field_sid_t id;
-        char *string;
+    struct cache_entry *prev, *next;
+    field_sid_t id;
+    char *string;
 };
 
 struct lru_list {
-        struct cache_entry *most_recent;
-        struct cache_entry *lest_recent;
-        struct cache_entry entries[1024];
+    struct cache_entry *most_recent;
+    struct cache_entry *lest_recent;
+    struct cache_entry entries[1024];
 };
 
 struct string_cache {
-        struct vector ofType(struct lru_list) list_entries;
-        struct sid_cache_stats statistics;
-        struct archive_query query;
-        struct err err;
-        size_t capacity;
+    struct vector ofType(struct lru_list) list_entries;
+    struct sid_cache_stats statistics;
+    struct archive_query query;
+    struct err err;
+    size_t capacity;
 };
 
 static void init_list(struct lru_list *list)
@@ -51,7 +52,7 @@ static void init_list(struct lru_list *list)
         }
 }
 
-ARK_EXPORT(bool) string_id_cache_create_LRU(struct string_cache **cache, struct archive *archive)
+bool string_id_cache_create_LRU(struct string_cache **cache, struct archive *archive)
 {
         struct archive_info archive_info;
         archive_get_info(&archive_info, archive);
@@ -59,12 +60,12 @@ ARK_EXPORT(bool) string_id_cache_create_LRU(struct string_cache **cache, struct 
         return string_id_cache_create_LRU_ex(cache, archive, capacity);
 }
 
-ARK_EXPORT(bool) string_id_cache_create_LRU_ex(struct string_cache **cache, struct archive *archive, size_t capacity)
+bool string_id_cache_create_LRU_ex(struct string_cache **cache, struct archive *archive, size_t capacity)
 {
         error_if_null(cache)
         error_if_null(archive)
 
-        struct string_cache *result = malloc(sizeof(struct string_cache));
+        struct string_cache *result = ark_malloc(sizeof(struct string_cache));
 
         query_create(&result->query, archive);
         result->capacity = capacity;
@@ -84,7 +85,7 @@ ARK_EXPORT(bool) string_id_cache_create_LRU_ex(struct string_cache **cache, stru
         return true;
 }
 
-ARK_EXPORT(bool) string_id_cache_get_error(struct err *err, const struct string_cache *cache)
+bool string_id_cache_get_error(struct err *err, const struct string_cache *cache)
 {
         error_if_null(err)
         error_if_null(cache)
@@ -92,7 +93,7 @@ ARK_EXPORT(bool) string_id_cache_get_error(struct err *err, const struct string_
         return true;
 }
 
-ARK_EXPORT(bool) string_id_cache_get_size(size_t *size, const struct string_cache *cache)
+bool string_id_cache_get_size(size_t *size, const struct string_cache *cache)
 {
         error_if_null(size)
         error_if_null(cache)
@@ -119,7 +120,7 @@ static void make_most_recent(struct lru_list *list, struct cache_entry *entry)
         }
 }
 
-ARK_EXPORT(char *)string_id_cache_get(struct string_cache *cache, field_sid_t id)
+char *string_id_cache_get(struct string_cache *cache, field_sid_t id)
 {
         error_if_null(cache)
         hash32_t id_hash = ARK_HASH_BERNSTEIN(sizeof(field_sid_t), &id);
@@ -146,7 +147,7 @@ ARK_EXPORT(char *)string_id_cache_get(struct string_cache *cache, field_sid_t id
         return strdup(result);
 }
 
-ARK_EXPORT(bool) string_id_cache_get_statistics(struct sid_cache_stats *statistics, struct string_cache *cache)
+bool string_id_cache_get_statistics(struct sid_cache_stats *statistics, struct string_cache *cache)
 {
         error_if_null(statistics);
         error_if_null(cache);
@@ -154,14 +155,14 @@ ARK_EXPORT(bool) string_id_cache_get_statistics(struct sid_cache_stats *statisti
         return true;
 }
 
-ARK_EXPORT(bool) string_id_cache_reset_statistics(struct string_cache *cache)
+bool string_id_cache_reset_statistics(struct string_cache *cache)
 {
         error_if_null(cache);
         ark_zero_memory(&cache->statistics, sizeof(struct sid_cache_stats));
         return true;
 }
 
-ARK_EXPORT(bool) string_id_cache_drop(struct string_cache *cache)
+bool string_id_cache_drop(struct string_cache *cache)
 {
         error_if_null(cache);
         for (size_t i = 0; i < cache->list_entries.num_elems; i++) {

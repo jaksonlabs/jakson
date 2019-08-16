@@ -26,26 +26,26 @@ ARK_BEGIN_DECL
 #include <stdio.h>
 
 struct thread_pool_stats {
-        struct timespec creation_time;
-        unsigned int task_enqueued_count;
-        unsigned int task_complete_count;
-        long long complete_time;
-        long long wait_time;
-        long long avg_complete_time;
-        long long avg_wait_time;
+    struct timespec creation_time;
+    unsigned int task_enqueued_count;
+    unsigned int task_complete_count;
+    long long complete_time;
+    long long wait_time;
+    long long avg_complete_time;
+    long long avg_wait_time;
 };
 
 struct thread_stats {
-        struct timespec creation_time;
-        long long idle_time;
-        long long busy_time;
-        size_t task_count;
+    struct timespec creation_time;
+    long long idle_time;
+    long long busy_time;
+    size_t task_count;
 };
 
 struct task_stats {
-        struct timespec enqueue_time;
-        struct timespec execution_time;
-        struct timespec complete_time;
+    struct timespec enqueue_time;
+    struct timespec execution_time;
+    struct timespec complete_time;
 };
 
 static inline long long __get_time_diff(struct timespec *begin, struct timespec *end)

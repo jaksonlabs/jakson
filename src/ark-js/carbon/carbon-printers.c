@@ -15,511 +15,663 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "libs/libb64/libb64.h"
-
 #include <ark-js/carbon/carbon-printers.h>
-#include <ark-js/carbon/carbon.h>
+#include <ark-js/carbon/printers/json/json-compact.h>
+#include <ark-js/carbon/printers/json/json-extended.h>
+#include <ark-js/carbon/carbon-object-it.h>
+#include <ark-js/carbon/carbon-array-it.h>
+#include <ark-js/carbon/carbon-column-it.h>
 
-#define INIT_BUFFER_LEN 1024
-
-#define NULL_STR "null"
-
-struct json_formatter_extra
+bool carbon_printer_by_type(struct printer *printer, int impl)
 {
-        bool intent;
-        bool strict;
-        char *buffer;
-        size_t buffer_size;
-};
+        error_if_null(printer)
 
-inline static bool json_formatter_has_intention(struct carbon_printer *printer);
-inline static bool json_formatter_is_strict(struct carbon_printer *printer);
-
-static void json_formatter_drop(struct carbon_printer *self);
-
-static void json_formatter_carbon_begin(struct carbon_printer *self, struct string_builder *builder);
-static void json_formatter_carbon_end(struct carbon_printer *self, struct string_builder *builder);
-
-static void json_formatter_header_begin(struct carbon_printer *self, struct string_builder *builder);
-static void json_formatter_carbon_header_contents(struct carbon_printer *self, struct string_builder *builder,
-        enum carbon_primary_key_type key_type, const void *key, u64 key_length, u64 rev);
-static void json_formatter_carbon_header_end(struct carbon_printer *self, struct string_builder *builder);
-
-static void json_formatter_carbon_payload_begin(struct carbon_printer *self, struct string_builder *builder);
-static void json_formatter_carbon_payload_end(struct carbon_printer *self, struct string_builder *builder);
-
-static void json_formatter_carbon_array_begin(struct carbon_printer *self, struct string_builder *builder);
-static void json_formatter_carbon_array_end(struct carbon_printer *self, struct string_builder *builder);
-
-static void json_formatter_carbon_null(struct carbon_printer *self, struct string_builder *builder);
-static void json_formatter_carbon_true(struct carbon_printer *self, bool is_null, struct string_builder *builder);
-static void json_formatter_carbon_false(struct carbon_printer *self, bool is_null, struct string_builder *builder);
-
-static void json_formatter_carbon_signed(struct carbon_printer *self, struct string_builder *builder, const i64 *value);
-static void json_formatter_carbon_unsigned(struct carbon_printer *self, struct string_builder *builder, const u64 *value);
-static void json_formatter_carbon_float(struct carbon_printer *self, struct string_builder *builder, const float *value);
-
-static void json_formatter_carbon_string(struct carbon_printer *self, struct string_builder *builder, const char *value, u64 strlen);
-static void json_formatter_carbon_binary(struct carbon_printer *self, struct string_builder *builder, const struct carbon_binary *binary);
-
-static void json_formatter_carbon_comma(struct carbon_printer *self, struct string_builder *builder);
-
-static void json_formatter_carbon_prop_null(struct carbon_printer *self, struct string_builder *builder,
-        const char *key_name, u64 key_len);
-static void json_formatter_carbon_prop_true(struct carbon_printer *self, struct string_builder *builder,
-        const char *key_name, u64 key_len);
-static void json_formatter_carbon_prop_false(struct carbon_printer *self, struct string_builder *builder,
-        const char *key_name, u64 key_len);
-static void json_formatter_carbon_prop_signed(struct carbon_printer *self, struct string_builder *builder,
-        const char *key_name, u64 key_len, const i64 *value);
-static void json_formatter_carbon_prop_unsigned(struct carbon_printer *self, struct string_builder *builder,
-        const char *key_name, u64 key_len, const u64 *value);
-static void json_formatter_carbon_prop_float(struct carbon_printer *self, struct string_builder *builder,
-        const char *key_name, u64 key_len, const float *value);
-static void json_formatter_carbon_prop_string(struct carbon_printer *self, struct string_builder *builder,
-        const char *key_name, u64 key_len, const char *value, u64 strlen);
-static void json_formatter_carbon_prop_binary(struct carbon_printer *self, struct string_builder *builder,
-        const char *key_name, u64 key_len, const struct carbon_binary *binary);
-static void json_formatter_carbon_array_prop_name(struct carbon_printer *self, struct string_builder *builder,
-        const char *key_name, u64 key_len);
-static void json_formatter_carbon_column_prop_name(struct carbon_printer *self, struct string_builder *builder,
-        const char *key_name, u64 key_len);
-static void json_formatter_carbon_object_prop_name(struct carbon_printer *self, struct string_builder *builder,
-        const char *key_name, u64 key_len);
-static void json_formatter_carbon_object_begin(struct carbon_printer *self, struct string_builder *builder);
-static void json_formatter_carbon_object_end(struct carbon_printer *self, struct string_builder *builder);
-
-ARK_EXPORT(bool) carbon_json_formatter_create(struct carbon_printer *printer)
-{
-        error_if_null(printer);
-        printer->drop = json_formatter_drop;
-
-        printer->print_carbon_begin = json_formatter_carbon_begin;
-        printer->print_carbon_end = json_formatter_carbon_end;
-
-        printer->print_carbon_header_begin = json_formatter_header_begin;
-        printer->print_carbon_header_contents = json_formatter_carbon_header_contents;
-        printer->print_carbon_header_end = json_formatter_carbon_header_end;
-
-        printer->print_carbon_payload_begin = json_formatter_carbon_payload_begin;
-        printer->print_carbon_payload_end = json_formatter_carbon_payload_end;
-
-        printer->print_carbon_array_begin = json_formatter_carbon_array_begin;
-        printer->print_carbon_array_end = json_formatter_carbon_array_end;
-
-        printer->print_carbon_null = json_formatter_carbon_null;
-        printer->print_carbon_true = json_formatter_carbon_true;
-        printer->print_carbon_false = json_formatter_carbon_false;
-
-        printer->print_carbon_signed = json_formatter_carbon_signed;
-        printer->print_carbon_unsigned = json_formatter_carbon_unsigned;
-        printer->print_carbon_float = json_formatter_carbon_float;
-        printer->print_carbon_string = json_formatter_carbon_string;
-        printer->print_carbon_binary = json_formatter_carbon_binary;
-
-        printer->print_carbon_comma = json_formatter_carbon_comma;
-
-        printer->print_carbon_prop_null = json_formatter_carbon_prop_null;
-        printer->print_carbon_prop_true = json_formatter_carbon_prop_true;
-        printer->print_carbon_prop_false = json_formatter_carbon_prop_false;
-        printer->print_carbon_prop_signed = json_formatter_carbon_prop_signed;
-        printer->print_carbon_prop_unsigned = json_formatter_carbon_prop_unsigned;
-        printer->print_carbon_prop_float = json_formatter_carbon_prop_float;
-        printer->print_carbon_prop_string = json_formatter_carbon_prop_string;
-        printer->print_carbon_prop_binary = json_formatter_carbon_prop_binary;
-        printer->print_carbon_array_prop_name = json_formatter_carbon_array_prop_name;
-        printer->print_carbon_column_prop_name = json_formatter_carbon_column_prop_name;
-        printer->print_carbon_object_prop_name = json_formatter_carbon_object_prop_name;
-        printer->print_carbon_object_begin = json_formatter_carbon_object_begin;
-        printer->print_carbon_object_end = json_formatter_carbon_object_end;
-
-        printer->extra = malloc(sizeof(struct json_formatter_extra));
-        struct json_formatter_extra *extra = (struct json_formatter_extra *) printer->extra;
-        *extra = (struct json_formatter_extra) {
-                .intent = false,
-                .strict = true,
-                .buffer_size = INIT_BUFFER_LEN,
-                .buffer = malloc(INIT_BUFFER_LEN)
-        };
-        ark_zero_memory(extra->buffer, extra->buffer_size);
-
-        return true;
-}
-
-ARK_EXPORT(bool) carbon_json_formatter_set_intent(struct carbon_printer *printer, bool enable)
-{
-        error_if_null(printer);
-        ((struct json_formatter_extra *) printer->extra)->intent = enable;
-        return true;
-}
-
-ARK_EXPORT(bool) carbon_json_formatter_set_strict(struct carbon_printer *printer, bool enable)
-{
-        error_if_null(printer);
-        ((struct json_formatter_extra *) printer->extra)->strict = enable;
-        return true;
-}
-
-static void json_formatter_drop(struct carbon_printer *self)
-{
-        struct json_formatter_extra *extra = (struct json_formatter_extra *) self->extra;
-        free(extra->buffer);
-        free (self->extra);
-}
-
-ark_func_unused
-inline static bool json_formatter_has_intention(struct carbon_printer *printer)
-{
-        return ((struct json_formatter_extra *) printer->extra)->intent;
-}
-
-inline static bool json_formatter_is_strict(struct carbon_printer *printer)
-{
-        return ((struct json_formatter_extra *) printer->extra)->strict;
-}
-
-static void json_formatter_carbon_begin(struct carbon_printer *self, struct string_builder *builder)
-{
-        unused(self);
-        string_builder_append(builder, "{");
-}
-
-static void json_formatter_carbon_end(struct carbon_printer *self, struct string_builder *builder)
-{
-        unused(self);
-        string_builder_append(builder, "}");
-}
-
-static void json_formatter_header_begin(struct carbon_printer *self, struct string_builder *builder)
-{
-        unused(self);
-        if (json_formatter_is_strict(self)) {
-                string_builder_append(builder, "\"meta\": {");
-        } else {
-                string_builder_append(builder, "meta: {");
+        switch (impl) {
+                case JSON_EXTENDED:
+                        json_extended_printer_create(printer);
+                        break;
+                case JSON_COMPACT:
+                        json_compact_printer_create(printer);
+                        break;
+                default: error_print(ARK_ERR_NOTFOUND)
+                        return false;
         }
+        return true;
 }
 
-static void json_formatter_carbon_header_contents(struct carbon_printer *self, struct string_builder *builder,
-        enum carbon_primary_key_type key_type, const void *key, u64 key_length, u64 rev)
+bool carbon_printer_drop(struct printer *printer)
 {
-        if (json_formatter_is_strict(self)) {
-                string_builder_append(builder, "\"key\": {");
+        error_if_null(printer->drop);
+        printer->drop(printer);
+        return true;
+}
 
-                switch (key_type) {
-                case CARBON_KEY_NOKEY:
-                        string_builder_append(builder, "\"type\": \"nokey\", \"value\": null");
-                        break;
-                case CARBON_KEY_AUTOKEY:
-                        string_builder_append(builder, "\"type\": \"autokey\", \"value\": ");
-                        string_builder_append_u64(builder, *(u64 *) key);
-                        break;
-                case CARBON_KEY_UKEY:
-                        string_builder_append(builder, "\"type\": \"ukey\", \"value\": ");
-                        string_builder_append_u64(builder, *(u64 *) key);
-                        break;
-                case CARBON_KEY_IKEY:
-                        string_builder_append(builder, "\"type\": \"ikey\", \"value\": ");
-                        string_builder_append_u64(builder, *(i64 *) key);
-                        break;
-                case CARBON_KEY_SKEY:
-                        string_builder_append(builder, "\"type\": \"skey\", \"value\": ");
-                        if (key_length > 0) {
-                                string_builder_append(builder, "\"");
-                                string_builder_append_nchar(builder, key, key_length);
-                                string_builder_append(builder, "\"");
-                        } else {
-                                string_builder_append(builder, "null");
-                        }
+bool carbon_printer_begin(struct printer *printer, struct string *str)
+{
+        error_if_null(printer->record_begin);
+        printer->record_begin(printer, str);
+        return true;
+}
 
-                        break;
-                default:
-                        error_print(ARK_ERR_INTERNALERR);
+bool carbon_printer_end(struct printer *printer, struct string *str)
+{
+        error_if_null(printer->record_end);
+        printer->record_end(printer, str);
+        return true;
+}
+
+bool carbon_printer_header_begin(struct printer *printer, struct string *str)
+{
+        error_if_null(printer->meta_begin);
+        printer->meta_begin(printer, str);
+        return true;
+}
+
+bool carbon_printer_header_contents(struct printer *printer, struct string *str,
+                                           int key_type, const void *key, u64 key_length,
+                                           u64 rev)
+{
+        error_if_null(printer->drop);
+        printer->meta_data(printer, str, key_type, key, key_length, rev);
+        return true;
+}
+
+bool carbon_printer_header_end(struct printer *printer, struct string *str)
+{
+        error_if_null(printer->meta_end);
+        printer->meta_end(printer, str);
+        return true;
+}
+
+bool carbon_printer_payload_begin(struct printer *printer, struct string *str)
+{
+        error_if_null(printer->doc_begin);
+        printer->doc_begin(printer, str);
+        return true;
+}
+
+bool carbon_printer_payload_end(struct printer *printer, struct string *str)
+{
+        error_if_null(printer->doc_end);
+        printer->doc_end(printer, str);
+        return true;
+}
+
+bool carbon_printer_empty_record(struct printer *printer, struct string *str)
+{
+        error_if_null(printer->empty_record);
+        printer->empty_record(printer, str);
+        return true;
+}
+
+bool carbon_printer_array_begin(struct printer *printer, struct string *str)
+{
+        error_if_null(printer->array_begin);
+        printer->array_begin(printer, str);
+        return true;
+}
+
+bool carbon_printer_array_end(struct printer *printer, struct string *str)
+{
+        error_if_null(printer->array_end);
+        printer->array_end(printer, str);
+        return true;
+}
+
+bool carbon_printer_unit_array_begin(struct printer *printer, struct string *str)
+{
+        error_if_null(printer->unit_array_begin);
+        printer->unit_array_begin(printer, str);
+        return true;
+}
+
+bool carbon_printer_unit_array_end(struct printer *printer, struct string *str)
+{
+        error_if_null(printer->unit_array_end);
+        printer->unit_array_end(printer, str);
+        return true;
+}
+
+bool carbon_printer_object_begin(struct printer *printer, struct string *str)
+{
+        error_if_null(printer->obj_begin);
+        printer->obj_begin(printer, str);
+        return true;
+}
+
+bool carbon_printer_object_end(struct printer *printer, struct string *str)
+{
+        error_if_null(printer->obj_end);
+        printer->obj_end(printer, str);
+        return true;
+}
+
+bool carbon_printer_null(struct printer *printer, struct string *str)
+{
+        error_if_null(printer->const_null);
+        printer->const_null(printer, str);
+        return true;
+}
+
+bool carbon_printer_true(struct printer *printer, bool is_null, struct string *str)
+{
+        error_if_null(printer->const_true);
+        printer->const_true(printer, is_null, str);
+        return true;
+}
+
+bool carbon_printer_false(struct printer *printer, bool is_null, struct string *str)
+{
+        error_if_null(printer->const_false);
+        printer->const_false(printer, is_null, str);
+        return true;
+}
+
+bool carbon_printer_comma(struct printer *printer, struct string *str)
+{
+        error_if_null(printer->comma);
+        printer->comma(printer, str);
+        return true;
+}
+
+bool carbon_printer_signed_nonull(struct printer *printer, struct string *str, const i64 *value)
+{
+        error_if_null(printer->val_signed);
+        printer->val_signed(printer, str, value);
+        return true;
+}
+
+bool carbon_printer_unsigned_nonull(struct printer *printer, struct string *str, const u64 *value)
+{
+        error_if_null(printer->val_unsigned);
+        printer->val_unsigned(printer, str, value);
+        return true;
+}
+
+#define delegate_print_call(printer, str, value, null_test_func, print_func, ctype)                                    \
+({                                                                                                                     \
+        error_if_null(printer)                                                                                         \
+        error_if_null(str)                                                                                             \
+        bool status = false;                                                                                           \
+        if (null_test_func(value)) {                                                                                       \
+                status = carbon_printer_null(printer, str);                                                            \
+        } else {                                                                                                       \
+                ctype val = value;                                                                                     \
+                status = print_func(printer, str, &val);                                                               \
+        }                                                                                                              \
+        status;                                                                                                        \
+})
+
+bool carbon_printer_u8_or_null(struct printer *printer, struct string *str, u8 value)
+{
+        return delegate_print_call(printer, str, value, is_null_u8, carbon_printer_unsigned_nonull, u64);
+}
+
+bool carbon_printer_u16_or_null(struct printer *printer, struct string *str, u16 value)
+{
+        return delegate_print_call(printer, str, value, is_null_u16, carbon_printer_unsigned_nonull, u64);
+}
+
+bool carbon_printer_u32_or_null(struct printer *printer, struct string *str, u32 value)
+{
+        return delegate_print_call(printer, str, value, is_null_u32, carbon_printer_unsigned_nonull, u64);
+}
+
+bool carbon_printer_u64_or_null(struct printer *printer, struct string *str, u64 value)
+{
+        return delegate_print_call(printer, str, value, is_null_u64, carbon_printer_unsigned_nonull, u64);
+}
+
+bool carbon_printer_i8_or_null(struct printer *printer, struct string *str, i8 value)
+{
+        return delegate_print_call(printer, str, value, is_null_i8, carbon_printer_signed_nonull, i64);
+}
+
+bool carbon_printer_i16_or_null(struct printer *printer, struct string *str, i16 value)
+{
+        return delegate_print_call(printer, str, value, is_null_i16, carbon_printer_signed_nonull, i64);
+}
+
+bool carbon_printer_i32_or_null(struct printer *printer, struct string *str, i32 value)
+{
+        return delegate_print_call(printer, str, value, is_null_i32, carbon_printer_signed_nonull, i64);
+}
+
+bool carbon_printer_i64_or_null(struct printer *printer, struct string *str, i64 value)
+{
+        return delegate_print_call(printer, str, value, is_null_i64, carbon_printer_signed_nonull, i64);
+}
+
+bool carbon_printer_float(struct printer *printer, struct string *str, const float *value)
+{
+        error_if_null(printer->val_float);
+        printer->val_float(printer, str, value);
+        return true;
+}
+
+bool carbon_printer_string(struct printer *printer, struct string *str, const char *value, u64 strlen)
+{
+        error_if_null(printer->val_string);
+        printer->val_string(printer, str, value, strlen);
+        return true;
+}
+
+bool carbon_printer_binary(struct printer *printer, struct string *str, const struct carbon_binary *binary)
+{
+        error_if_null(printer->val_binary);
+        printer->val_binary(printer, str, binary);
+        return true;
+}
+
+bool carbon_printer_prop_null(struct printer *printer, struct string *str,
+                                     const char *key_name, u64 key_len)
+{
+        error_if_null(printer->prop_null);
+        printer->prop_null(printer, str, key_name, key_len);
+        return true;
+}
+
+bool carbon_printer_prop_true(struct printer *printer, struct string *str,
+                                     const char *key_name, u64 key_len)
+{
+        error_if_null(printer->prop_true);
+        printer->prop_true(printer, str, key_name, key_len);
+        return true;
+}
+
+bool carbon_printer_prop_false(struct printer *printer, struct string *str,
+                                      const char *key_name, u64 key_len)
+{
+        error_if_null(printer->prop_false);
+        printer->prop_false(printer, str, key_name, key_len);
+        return true;
+}
+
+bool carbon_printer_prop_signed(struct printer *printer, struct string *str,
+                                       const char *key_name, u64 key_len, const i64 *value)
+{
+        error_if_null(printer->prop_signed);
+        printer->prop_signed(printer, str, key_name, key_len, value);
+        return true;
+}
+
+bool carbon_printer_prop_unsigned(struct printer *printer, struct string *str,
+                                         const char *key_name, u64 key_len, const u64 *value)
+{
+        error_if_null(printer->prop_unsigned);
+        printer->prop_unsigned(printer, str, key_name, key_len, value);
+        return true;
+}
+
+bool carbon_printer_prop_float(struct printer *printer, struct string *str,
+                                      const char *key_name, u64 key_len, const float *value)
+{
+        error_if_null(printer->prop_float);
+        printer->prop_float(printer, str, key_name, key_len, value);
+        return true;
+}
+
+bool carbon_printer_prop_string(struct printer *printer, struct string *str,
+                                       const char *key_name, u64 key_len, const char *value, u64 strlen)
+{
+        error_if_null(printer->prop_string);
+        printer->prop_string(printer, str, key_name, key_len, value, strlen);
+        return true;
+}
+
+bool carbon_printer_prop_binary(struct printer *printer, struct string *str,
+                                       const char *key_name, u64 key_len, const struct carbon_binary *binary)
+{
+        error_if_null(printer->prop_binary);
+        printer->prop_binary(printer, str, key_name, key_len, binary);
+        return true;
+}
+
+bool carbon_printer_array_prop_name(struct printer *printer, struct string *str,
+                                           const char *key_name, u64 key_len)
+{
+        error_if_null(printer->array_prop_name);
+        printer->array_prop_name(printer, str, key_name, key_len);
+        return true;
+}
+
+bool carbon_printer_column_prop_name(struct printer *printer, struct string *str,
+                                            const char *key_name, u64 key_len)
+{
+        error_if_null(printer->column_prop_name);
+        printer->column_prop_name(printer, str, key_name, key_len);
+        return true;
+}
+
+bool carbon_printer_object_prop_name(struct printer *printer, struct string *str,
+                                            const char *key_name, u64 key_len)
+{
+        error_if_null(printer->obj_prop_name);
+        printer->obj_prop_name(printer, str, key_name, key_len);
+        return true;
+}
+
+bool carbon_printer_print_object(struct carbon_object_it *it, struct printer *printer, struct string *builder)
+{
+        assert(it);
+        assert(printer);
+        assert(builder);
+        bool is_null_value;
+        bool first_entry = true;
+        carbon_printer_object_begin(printer, builder);
+
+        while (carbon_object_it_next(it)) {
+                if (likely(!first_entry)) {
+                        carbon_printer_comma(printer, builder);
                 }
-                string_builder_append(builder, "}, \"rev\": ");
-                string_builder_append_u64(builder, rev);
-        } else {
-                string_builder_append(builder, "key: {");
+                enum carbon_field_type type;
+                u64 key_len;
+                const char *key_name = carbon_object_it_prop_name(&key_len, it);
 
-                switch (key_type) {
-                case CARBON_KEY_NOKEY:
-                        string_builder_append(builder, "type: nokey, value: null");
-                        break;
-                case CARBON_KEY_AUTOKEY:
-                        string_builder_append(builder, "type: autokey, value: ");
-                        string_builder_append_u64(builder, *(u64 *) key);
-                        break;
-                case CARBON_KEY_UKEY:
-                        string_builder_append(builder, "type: ukey, value: ");
-                        string_builder_append_u64(builder, *(u64 *) key);
-                        break;
-                case CARBON_KEY_IKEY:
-                        string_builder_append(builder, "type: ikey, value: ");
-                        string_builder_append_u64(builder, *(i64 *) key);
-                        break;
-                case CARBON_KEY_SKEY:
-                        string_builder_append(builder, "type: skey, value: ");
-                        if (key_length > 0) {
-                                string_builder_append(builder, "\"");
-                                string_builder_append_nchar(builder, key, key_length);
-                                string_builder_append(builder, "\"");
-                        } else {
-                                string_builder_append(builder, "null");
+                carbon_object_it_prop_type(&type, it);
+                switch (type) {
+                        case CARBON_FIELD_TYPE_NULL:
+                                carbon_printer_prop_null(printer, builder, key_name, key_len);
+                                break;
+                        case CARBON_FIELD_TYPE_TRUE:
+                                /* in an array, there is no TRUE constant that is set to NULL because it will be replaced with
+                                 * a constant NULL. In columns, there might be a NULL-encoded value */
+                                carbon_printer_prop_true(printer, builder, key_name, key_len);
+                                break;
+                        case CARBON_FIELD_TYPE_FALSE:
+                                /* in an array, there is no FALSE constant that is set to NULL because it will be replaced with
+                                 * a constant NULL. In columns, there might be a NULL-encoded value */
+                                carbon_printer_prop_false(printer, builder, key_name, key_len);
+                                break;
+                        case CARBON_FIELD_TYPE_NUMBER_U8:
+                        case CARBON_FIELD_TYPE_NUMBER_U16:
+                        case CARBON_FIELD_TYPE_NUMBER_U32:
+                        case CARBON_FIELD_TYPE_NUMBER_U64: {
+                                u64 value;
+                                carbon_object_it_unsigned_value(&is_null_value, &value, it);
+                                carbon_printer_prop_unsigned(printer, builder, key_name, key_len,
+                                                             is_null_value ? NULL : &value);
                         }
-                default:
-                error_print(ARK_ERR_INTERNALERR);
+                                break;
+                        case CARBON_FIELD_TYPE_NUMBER_I8:
+                        case CARBON_FIELD_TYPE_NUMBER_I16:
+                        case CARBON_FIELD_TYPE_NUMBER_I32:
+                        case CARBON_FIELD_TYPE_NUMBER_I64: {
+                                i64 value;
+                                carbon_object_it_signed_value(&is_null_value, &value, it);
+                                carbon_printer_prop_signed(printer, builder, key_name, key_len,
+                                                           is_null_value ? NULL : &value);
+                        }
+                                break;
+                        case CARBON_FIELD_TYPE_NUMBER_FLOAT: {
+                                float value;
+                                carbon_object_it_float_value(&is_null_value, &value, it);
+                                carbon_printer_prop_float(printer, builder, key_name, key_len,
+                                                          is_null_value ? NULL : &value);
+                        }
+                                break;
+                        case CARBON_FIELD_TYPE_STRING: {
+                                u64 strlen;
+                                const char *value = carbon_object_it_string_value(&strlen, it);
+                                carbon_printer_prop_string(printer, builder, key_name, key_len, value, strlen);
+                        }
+                                break;
+                        case CARBON_FIELD_TYPE_BINARY:
+                        case CARBON_FIELD_TYPE_BINARY_CUSTOM: {
+                                struct carbon_binary binary;
+                                carbon_object_it_binary_value(&binary, it);
+                                carbon_printer_prop_binary(printer, builder, key_name, key_len, &binary);
+                        }
+                                break;
+                        case CARBON_FIELD_TYPE_ARRAY: {
+                                struct carbon_array_it *array = carbon_object_it_array_value(it);
+                                carbon_printer_array_prop_name(printer, builder, key_name, key_len);
+                                carbon_printer_print_array(array, printer, builder, false);
+                                carbon_array_it_drop(array);
+                        }
+                                break;
+                        case CARBON_FIELD_TYPE_COLUMN_U8:
+                        case CARBON_FIELD_TYPE_COLUMN_U16:
+                        case CARBON_FIELD_TYPE_COLUMN_U32:
+                        case CARBON_FIELD_TYPE_COLUMN_U64:
+                        case CARBON_FIELD_TYPE_COLUMN_I8:
+                        case CARBON_FIELD_TYPE_COLUMN_I16:
+                        case CARBON_FIELD_TYPE_COLUMN_I32:
+                        case CARBON_FIELD_TYPE_COLUMN_I64:
+                        case CARBON_FIELD_TYPE_COLUMN_FLOAT:
+                        case CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
+                                struct carbon_column_it *column = carbon_object_it_column_value(it);
+                                carbon_printer_column_prop_name(printer, builder, key_name, key_len);
+                                carbon_printer_print_column(column, printer, builder);
+                        }
+                                break;
+                        case CARBON_FIELD_TYPE_OBJECT: {
+                                struct carbon_object_it *object = carbon_object_it_object_value(it);
+                                carbon_printer_object_prop_name(printer, builder, key_name, key_len);
+                                carbon_printer_print_object(object, printer, builder);
+                                carbon_object_it_drop(object);
+                        }
+                                break;
+                        default:
+                                carbon_printer_object_end(printer, builder);
+                                error(&it->err, ARK_ERR_CORRUPTED);
+                                return false;
                 }
-                string_builder_append(builder, "}, \"rev\": ");
-                string_builder_append_u64(builder, rev);
+                first_entry = false;
         }
+
+        carbon_printer_object_end(printer, builder);
+        return true;
 }
 
-static void json_formatter_carbon_header_end(struct carbon_printer *self, struct string_builder *builder)
+bool carbon_printer_print_array(struct carbon_array_it *it, struct printer *printer, struct string *builder,
+                        bool is_record_container)
 {
-        unused(self);
-        string_builder_append(builder, "}, ");
-}
+        assert(it);
+        assert(printer);
+        assert(builder);
 
-static void json_formatter_carbon_payload_begin(struct carbon_printer *self, struct string_builder *builder)
-{
-        if (json_formatter_is_strict(self)) {
-                string_builder_append(builder, "\"doc\": ");
+        bool first_entry = true;
+        bool has_entries = false;
+        bool is_single_entry_array = carbon_array_it_is_unit(it);
+
+        while (carbon_array_it_next(it)) {
+                bool is_null_value;
+
+                if (likely(!first_entry)) {
+                        carbon_printer_comma(printer, builder);
+                } else {
+                        if (is_single_entry_array && is_record_container) {
+                                carbon_printer_unit_array_begin(printer, builder);
+                        } else {
+                                carbon_printer_array_begin(printer, builder);
+                        }
+                        has_entries = true;
+                }
+                enum carbon_field_type type;
+                carbon_array_it_field_type(&type, it);
+                switch (type) {
+                        case CARBON_FIELD_TYPE_NULL:
+                                carbon_printer_null(printer, builder);
+                                break;
+                        case CARBON_FIELD_TYPE_TRUE:
+                                /* in an array, there is no TRUE constant that is set to NULL because it will be replaced with
+                                 * a constant NULL. In columns, there might be a NULL-encoded value */
+                                carbon_printer_true(printer, false, builder);
+                                break;
+                        case CARBON_FIELD_TYPE_FALSE:
+                                /* in an array, there is no FALSE constant that is set to NULL because it will be replaced with
+                                 * a constant NULL. In columns, there might be a NULL-encoded value */
+                                carbon_printer_false(printer, false, builder);
+                                break;
+                        case CARBON_FIELD_TYPE_NUMBER_U8:
+                        case CARBON_FIELD_TYPE_NUMBER_U16:
+                        case CARBON_FIELD_TYPE_NUMBER_U32:
+                        case CARBON_FIELD_TYPE_NUMBER_U64: {
+                                u64 value;
+                                carbon_array_it_unsigned_value(&is_null_value, &value, it);
+                                carbon_printer_unsigned_nonull(printer, builder, is_null_value ? NULL : &value);
+                        }
+                                break;
+                        case CARBON_FIELD_TYPE_NUMBER_I8:
+                        case CARBON_FIELD_TYPE_NUMBER_I16:
+                        case CARBON_FIELD_TYPE_NUMBER_I32:
+                        case CARBON_FIELD_TYPE_NUMBER_I64: {
+                                i64 value;
+                                carbon_array_it_signed_value(&is_null_value, &value, it);
+                                carbon_printer_signed_nonull(printer, builder, is_null_value ? NULL : &value);
+                        }
+                                break;
+                        case CARBON_FIELD_TYPE_NUMBER_FLOAT: {
+                                float value;
+                                carbon_array_it_float_value(&is_null_value, &value, it);
+                                carbon_printer_float(printer, builder, is_null_value ? NULL : &value);
+                        }
+                                break;
+                        case CARBON_FIELD_TYPE_STRING: {
+                                u64 strlen;
+                                const char *value = carbon_array_it_string_value(&strlen, it);
+                                carbon_printer_string(printer, builder, value, strlen);
+                        }
+                                break;
+                        case CARBON_FIELD_TYPE_BINARY:
+                        case CARBON_FIELD_TYPE_BINARY_CUSTOM: {
+                                struct carbon_binary binary;
+                                carbon_array_it_binary_value(&binary, it);
+                                carbon_printer_binary(printer, builder, &binary);
+                        }
+                                break;
+                        case CARBON_FIELD_TYPE_ARRAY: {
+                                struct carbon_array_it *array = carbon_array_it_array_value(it);
+                                carbon_printer_print_array(array, printer, builder, false);
+                                carbon_array_it_drop(array);
+                        }
+                                break;
+                        case CARBON_FIELD_TYPE_COLUMN_U8:
+                        case CARBON_FIELD_TYPE_COLUMN_U16:
+                        case CARBON_FIELD_TYPE_COLUMN_U32:
+                        case CARBON_FIELD_TYPE_COLUMN_U64:
+                        case CARBON_FIELD_TYPE_COLUMN_I8:
+                        case CARBON_FIELD_TYPE_COLUMN_I16:
+                        case CARBON_FIELD_TYPE_COLUMN_I32:
+                        case CARBON_FIELD_TYPE_COLUMN_I64:
+                        case CARBON_FIELD_TYPE_COLUMN_FLOAT:
+                        case CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
+                                struct carbon_column_it *column = carbon_array_it_column_value(it);
+                                carbon_printer_print_column(column, printer, builder);
+                        }
+                                break;
+                        case CARBON_FIELD_TYPE_OBJECT: {
+                                struct carbon_object_it *object = carbon_array_it_object_value(it);
+                                carbon_printer_print_object(object, printer, builder);
+                                carbon_object_it_drop(object);
+                        }
+                                break;
+                        default:
+                                carbon_printer_array_end(printer, builder);
+                                error(&it->err, ARK_ERR_CORRUPTED);
+                                return false;
+                }
+                first_entry = false;
+        }
+
+        if (has_entries) {
+                if (is_single_entry_array && is_record_container) {
+                        carbon_printer_unit_array_end(printer, builder);
+                } else {
+                        carbon_printer_array_end(printer, builder);
+                }
         } else {
-                string_builder_append(builder, "doc: ");
-        }
-}
-
-static void json_formatter_carbon_payload_end(struct carbon_printer *self, struct string_builder *builder)
-{
-        unused(self);
-        unused(builder);
-}
-
-static void json_formatter_carbon_array_begin(struct carbon_printer *self, struct string_builder *builder)
-{
-        unused(self);
-        string_builder_append(builder, "[");
-}
-
-static void json_formatter_carbon_array_end(struct carbon_printer *self, struct string_builder *builder)
-{
-        unused(self);
-        string_builder_append(builder, "]");
-}
-
-static void json_formatter_carbon_null(struct carbon_printer *self, struct string_builder *builder)
-{
-        unused(self);
-        string_builder_append(builder, "null");
-}
-
-static void json_formatter_carbon_true(struct carbon_printer *self, bool is_null, struct string_builder *builder)
-{
-        unused(self);
-        string_builder_append(builder, is_null ? "null" : "true");
-}
-
-static void json_formatter_carbon_false(struct carbon_printer *self, bool is_null, struct string_builder *builder)
-{
-        unused(self);
-        string_builder_append(builder, is_null ? "null" : "false");
-}
-
-static void json_formatter_carbon_signed(struct carbon_printer *self, struct string_builder *builder, const i64 *value)
-{
-        unused(self);
-        if (likely(value != NULL)) {
-                string_builder_append_i64(builder, *value);
-        } else {
-                string_builder_append(builder, NULL_STR);
+                if (is_record_container) {
+                        carbon_printer_empty_record(printer, builder);
+                } else {
+                        carbon_printer_array_begin(printer, builder);
+                        carbon_printer_array_end(printer, builder);
+                }
         }
 
+        return true;
 }
 
-static void json_formatter_carbon_unsigned(struct carbon_printer *self, struct string_builder *builder, const u64 *value)
+bool carbon_printer_print_column(struct carbon_column_it *it, struct printer *printer, struct string *builder)
 {
-        unused(self);
-        if (likely(value != NULL)) {
-                string_builder_append_u64(builder, *value);
-        } else {
-                string_builder_append(builder, NULL_STR);
+        error_if_null(it)
+        error_if_null(printer)
+        error_if_null(builder)
+
+        enum carbon_field_type type;
+        u32 nvalues;
+        const void *values = carbon_column_it_values(&type, &nvalues, it);
+
+        carbon_printer_array_begin(printer, builder);
+        for (u32 i = 0; i < nvalues; i++) {
+                switch (type) {
+                        case CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
+                                u8 value = ((u8 *) values)[i];
+                                if (is_null_boolean(value)) {
+                                        carbon_printer_null(printer, builder);
+                                } else if (value == CARBON_BOOLEAN_COLUMN_TRUE) {
+                                        carbon_printer_true(printer, false, builder);
+                                } else {
+                                        carbon_printer_false(printer, false, builder);
+                                }
+                        }
+                                break;
+                        case CARBON_FIELD_TYPE_COLUMN_U8: {
+                                u64 number = ((u8 *) values)[i];
+                                carbon_printer_unsigned_nonull(printer, builder, is_null_u8(number) ? NULL : &number);
+                        }
+                                break;
+                        case CARBON_FIELD_TYPE_COLUMN_U16: {
+                                u64 number = ((u16 *) values)[i];
+                                carbon_printer_unsigned_nonull(printer, builder, is_null_u16(number) ? NULL : &number);
+                        }
+                                break;
+                        case CARBON_FIELD_TYPE_COLUMN_U32: {
+                                u64 number = ((u32 *) values)[i];
+                                carbon_printer_unsigned_nonull(printer, builder, is_null_u32(number) ? NULL : &number);
+                        }
+                                break;
+                        case CARBON_FIELD_TYPE_COLUMN_U64: {
+                                u64 number = ((u64 *) values)[i];
+                                carbon_printer_unsigned_nonull(printer, builder, is_null_u64(number) ? NULL : &number);
+                        }
+                                break;
+                        case CARBON_FIELD_TYPE_COLUMN_I8: {
+                                i64 number = ((i8 *) values)[i];
+                                carbon_printer_signed_nonull(printer, builder, is_null_i8(number) ? NULL : &number);
+                        }
+                                break;
+                        case CARBON_FIELD_TYPE_COLUMN_I16: {
+                                i64 number = ((i16 *) values)[i];
+                                carbon_printer_signed_nonull(printer, builder, is_null_i16(number) ? NULL : &number);
+                        }
+                                break;
+                        case CARBON_FIELD_TYPE_COLUMN_I32: {
+                                i64 number = ((i32 *) values)[i];
+                                carbon_printer_signed_nonull(printer, builder, is_null_i32(number) ? NULL : &number);
+                        }
+                                break;
+                        case CARBON_FIELD_TYPE_COLUMN_I64: {
+                                i64 number = ((i64 *) values)[i];
+                                carbon_printer_signed_nonull(printer, builder, is_null_i64(number) ? NULL : &number);
+                        }
+                                break;
+                        case CARBON_FIELD_TYPE_COLUMN_FLOAT: {
+                                float number = ((float *) values)[i];
+                                carbon_printer_float(printer, builder, is_null_float(number) ? NULL : &number);
+                        }
+                                break;
+                        default:
+                                carbon_printer_array_end(printer, builder);
+                                error(&it->err, ARK_ERR_CORRUPTED);
+                                return false;
+                }
+                if (i + 1 < nvalues) {
+                        carbon_printer_comma(printer, builder);
+                }
         }
-}
+        carbon_printer_array_end(printer, builder);
 
-static void json_formatter_carbon_float(struct carbon_printer *self, struct string_builder *builder, const float *value)
-{
-        unused(self);
-        if (likely(value != NULL)) {
-                string_builder_append_float(builder, *value);
-        } else {
-                string_builder_append(builder, NULL_STR);
-        }
-}
-
-static void json_formatter_carbon_string(struct carbon_printer *self, struct string_builder *builder, const char *value, u64 strlen)
-{
-        unused(self);
-        string_builder_append_char(builder, '"');
-        string_builder_append_nchar(builder, value, strlen);
-        string_builder_append_char(builder, '"');
-}
-
-#define code_of(x, data_len)      (x + data_len + 2)
-#define data_of(x)      (x)
-
-static void print_binary(struct carbon_printer *self, struct string_builder *builder, const struct carbon_binary *binary)
-{
-        /* base64 code will be written into the extra's buffer after a null-terminated copy of the binary data */
-        struct json_formatter_extra *extra = (struct json_formatter_extra *) self->extra;
-        /* buffer of at least 2x data length for base64 code + 1x data length to hold the null-terminated value */
-        size_t required_buff_size = 3 * (binary->blob_len + 1);
-        /* increase buffer capacity if needed */
-        if (extra->buffer_size < required_buff_size) {
-                extra->buffer_size = required_buff_size * 1.7f;
-                extra->buffer = realloc(extra->buffer, extra->buffer_size);
-                error_print_if(!extra->buffer, ARK_ERR_REALLOCERR);
-        }
-        /* decrease buffer capacity if needed */
-        if (extra->buffer_size * 0.3f > required_buff_size) {
-                extra->buffer_size = required_buff_size;
-                extra->buffer = realloc(extra->buffer, extra->buffer_size);
-                error_print_if(!extra->buffer, ARK_ERR_REALLOCERR);
-        }
-
-        assert(extra->buffer_size >= required_buff_size);
-        ark_zero_memory(extra->buffer, extra->buffer_size);
-        /* copy binary data into buffer, and leave one (zero'd) byte free; null-termination is required by libb64 */
-        memcpy(data_of(extra->buffer), binary->blob, binary->blob_len);
-
-        string_builder_append(builder, "{ ");
-        string_builder_append(builder, "\"type\": \"");
-        string_builder_append_nchar(builder, binary->mime_type, binary->mime_type_strlen);
-        string_builder_append(builder, "\", \"encoding\": \"base64\", \"binary-string\": \"");
-
-        base64_encodestate state;
-        base64_init_encodestate(&state);
-
-        u64 code_len = base64_encode_block(data_of(extra->buffer), binary->blob_len + 2,
-                code_of(extra->buffer, binary->blob_len), &state);
-        base64_encode_blockend(code_of(extra->buffer, binary->blob_len), &state);
-        string_builder_append_nchar(builder, code_of(extra->buffer, binary->blob_len), code_len);
-
-
-        string_builder_append(builder, "\" }");
-}
-
-static void json_formatter_carbon_binary(struct carbon_printer *self, struct string_builder *builder, const struct carbon_binary *binary)
-{
-        print_binary(self, builder, binary);
-}
-
-static void json_formatter_carbon_comma(struct carbon_printer *self, struct string_builder *builder)
-{
-        unused(self);
-        string_builder_append(builder, ", ");
-}
-
-static void print_key(struct string_builder *builder, const char *key_name, u64 key_len)
-{
-        string_builder_append_char(builder, '"');
-        string_builder_append_nchar(builder, key_name, key_len);
-        string_builder_append(builder, "\":");
-}
-
-static void json_formatter_carbon_prop_null(struct carbon_printer *self, struct string_builder *builder,
-        const char *key_name, u64 key_len)
-{
-        unused(self);
-        print_key(builder, key_name, key_len);
-        string_builder_append(builder, "null");
-}
-
-static void json_formatter_carbon_prop_true(struct carbon_printer *self, struct string_builder *builder,
-        const char *key_name, u64 key_len)
-{
-        unused(self);
-        print_key(builder, key_name, key_len);
-        string_builder_append(builder, "true");
-}
-
-static void json_formatter_carbon_prop_false(struct carbon_printer *self, struct string_builder *builder,
-        const char *key_name, u64 key_len)
-{
-        unused(self);
-        print_key(builder, key_name, key_len);
-        string_builder_append(builder, "false");
-}
-
-static void json_formatter_carbon_prop_signed(struct carbon_printer *self, struct string_builder *builder,
-        const char *key_name, u64 key_len, const i64 *value)
-{
-        unused(self);
-        print_key(builder, key_name, key_len);
-        string_builder_append_i64(builder, *value);
-}
-
-static void json_formatter_carbon_prop_unsigned(struct carbon_printer *self, struct string_builder *builder,
-        const char *key_name, u64 key_len, const u64 *value)
-{
-        unused(self);
-        print_key(builder, key_name, key_len);
-        string_builder_append_u64(builder, *value);
-}
-
-static void json_formatter_carbon_prop_float(struct carbon_printer *self, struct string_builder *builder,
-        const char *key_name, u64 key_len, const float *value)
-{
-        unused(self);
-        print_key(builder, key_name, key_len);
-        string_builder_append_float(builder, *value);
-}
-
-static void json_formatter_carbon_prop_string(struct carbon_printer *self, struct string_builder *builder,
-        const char *key_name, u64 key_len, const char *value, u64 strlen)
-{
-        unused(self);
-        print_key(builder, key_name, key_len);
-        string_builder_append_char(builder, '"');
-        string_builder_append_nchar(builder, value, strlen);
-        string_builder_append_char(builder, '"');
-}
-
-static void json_formatter_carbon_prop_binary(struct carbon_printer *self, struct string_builder *builder,
-        const char *key_name, u64 key_len, const struct carbon_binary *binary)
-{
-        print_key(builder, key_name, key_len);
-        print_binary(self, builder, binary);
-}
-
-static void json_formatter_carbon_array_prop_name(struct carbon_printer *self, struct string_builder *builder,
-        const char *key_name, u64 key_len)
-{
-        unused(self)
-        print_key(builder, key_name, key_len);
-}
-
-static void json_formatter_carbon_column_prop_name(struct carbon_printer *self, struct string_builder *builder,
-        const char *key_name, u64 key_len)
-{
-        unused(self)
-        print_key(builder, key_name, key_len);
-}
-
-static void json_formatter_carbon_object_prop_name(struct carbon_printer *self, struct string_builder *builder,
-        const char *key_name, u64 key_len)
-{
-        unused(self)
-        print_key(builder, key_name, key_len);
-}
-
-static void json_formatter_carbon_object_begin(struct carbon_printer *self, struct string_builder *builder)
-{
-        unused(self)
-        string_builder_append(builder, "{");
-}
-
-static void json_formatter_carbon_object_end(struct carbon_printer *self, struct string_builder *builder)
-{
-        unused(self)
-        string_builder_append(builder, "}");
+        return true;
 }

@@ -23,9 +23,9 @@
 
 ARK_BEGIN_DECL
 
-ARK_EXPORT(i64) convert_atoi64(const char *string);
+i64 convert_atoi64(const char *string);
 
-ARK_EXPORT(u64) convert_atoiu64(const char *string);
+u64 convert_atoiu64(const char *string);
 
 ARK_END_DECL
 

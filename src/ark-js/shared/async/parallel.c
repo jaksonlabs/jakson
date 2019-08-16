@@ -17,7 +17,7 @@
 
 #include <ark-js/shared/async/parallel.h>
 
-ARK_EXPORT(void *)parallel_for_proxy_function(void *args)
+void *parallel_for_proxy_function(void *args)
 {
         ark_cast(struct parallel_func_proxy *, proxy_arg, args);
         proxy_arg->function(proxy_arg->start, proxy_arg->width, proxy_arg->len, proxy_arg->args, proxy_arg->tid);
@@ -39,128 +39,134 @@ ARK_EXPORT(void *)parallel_for_proxy_function(void *args)
     } else ark_parallel_error(PARALLEL_MSG_UNKNOWN_HINT, false);                                                    \
 }
 
-ARK_EXPORT(bool) parallel_for(const void *base, size_t width, size_t len, parallel_for_body_func_t f, void *args,
-        enum threading_hint hint, uint_fast16_t num_threads);
+bool parallel_for(const void *base, size_t width, size_t len, parallel_for_body_func_t f, void *args,
+                  enum threading_hint hint, uint_fast16_t num_threads);
 
-ARK_EXPORT(bool) parallel_map(void *dst, const void *src, size_t src_width, size_t len, size_t dst_width,
-        parallel_map_body_func_t f, void *args, enum threading_hint hint, uint_fast16_t num_threads);
+bool parallel_map(void *dst, const void *src, size_t src_width, size_t len, size_t dst_width,
+                  parallel_map_body_func_t f, void *args, enum threading_hint hint, uint_fast16_t num_threads);
 
-ARK_EXPORT(bool) parallel_gather(void *dst, const void *src, size_t width, const size_t *idx, size_t dstSrcLen,
-        enum threading_hint hint, uint_fast16_t num_threads);
+bool parallel_gather(void *dst, const void *src, size_t width, const size_t *idx, size_t dstSrcLen,
+                     enum threading_hint hint, uint_fast16_t num_threads);
 
-ARK_EXPORT(bool) parallel_gather_adr(void *dst, const void *src, size_t src_width, const size_t *idx, size_t num,
-        enum threading_hint hint, uint_fast16_t num_threads);
+bool parallel_gather_adr(void *dst, const void *src, size_t src_width, const size_t *idx, size_t num,
+                         enum threading_hint hint, uint_fast16_t num_threads);
 
-ARK_EXPORT(bool) parallel_scatter(void *dst, const void *src, size_t width, const size_t *idx, size_t num,
-        enum threading_hint hint, uint_fast16_t num_threads);
+bool parallel_scatter(void *dst, const void *src, size_t width, const size_t *idx, size_t num,
+                      enum threading_hint hint, uint_fast16_t num_threads);
 
-ARK_EXPORT(bool) parallel_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
-        const size_t *src_idx, size_t idxLen, enum threading_hint hint);
+bool parallel_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
+                      const size_t *src_idx, size_t idxLen, enum threading_hint hint);
 
-ARK_EXPORT(bool) parallel_filter_early(void *result, size_t *result_size, const void *src, size_t width, size_t len,
-        parallel_predicate_func_t pred, void *args, enum threading_hint hint, uint_fast16_t num_threads);
+bool parallel_filter_early(void *result, size_t *result_size, const void *src, size_t width, size_t len,
+                           parallel_predicate_func_t pred, void *args, enum threading_hint hint,
+                           uint_fast16_t num_threads);
 
-ARK_EXPORT(bool) parallel_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width, size_t len,
-        parallel_predicate_func_t pred, void *args, enum threading_hint hint, size_t num_threads);
+bool parallel_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width, size_t len,
+                          parallel_predicate_func_t pred, void *args, enum threading_hint hint, size_t num_threads);
 
-ARK_EXPORT(bool) parallel_sequential_for(const void *base, size_t width, size_t len, parallel_for_body_func_t f,
-        void *args);
-ARK_EXPORT(bool) parallel_parallel_for(const void *base, size_t width, size_t len, parallel_for_body_func_t f,
-        void *args, uint_fast16_t num_threads);
+bool parallel_sequential_for(const void *base, size_t width, size_t len, parallel_for_body_func_t f,
+                             void *args);
 
-ARK_EXPORT(bool) parallel_map_exec(void *dst, const void *src, size_t src_width, size_t len, size_t dst_width,
-        parallel_map_body_func_t f, void *args, enum threading_hint hint, uint_fast16_t num_threads);
+bool parallel_parallel_for(const void *base, size_t width, size_t len, parallel_for_body_func_t f,
+                           void *args, uint_fast16_t num_threads);
 
-ARK_EXPORT(bool) parallel_sequential_gather(void *dst, const void *src, size_t width, const size_t *idx,
-        size_t dstSrcLen);
-ARK_EXPORT(bool) parallel_parallel_gather(void *dst, const void *src, size_t width, const size_t *idx, size_t dstSrcLen,
-        uint_fast16_t num_threads);
+bool parallel_map_exec(void *dst, const void *src, size_t src_width, size_t len, size_t dst_width,
+                       parallel_map_body_func_t f, void *args, enum threading_hint hint, uint_fast16_t num_threads);
 
-ARK_EXPORT(bool) parallel_sequential_gather_adr(void *dst, const void *src, size_t src_width, const size_t *idx,
-        size_t num);
-ARK_EXPORT(bool) parallel_parallel_gather_adr_func(void *dst, const void *src, size_t src_width, const size_t *idx,
-        size_t num, uint_fast16_t num_threads);
+bool parallel_sequential_gather(void *dst, const void *src, size_t width, const size_t *idx,
+                                size_t dstSrcLen);
 
-ARK_EXPORT(bool) parallel_sequential_scatter_func(void *dst, const void *src, size_t width, const size_t *idx,
-        size_t num);
-ARK_EXPORT(bool) parallel_parallel_scatter_func(void *dst, const void *src, size_t width, const size_t *idx, size_t num,
-        uint_fast16_t num_threads);
+bool parallel_parallel_gather(void *dst, const void *src, size_t width, const size_t *idx, size_t dstSrcLen,
+                              uint_fast16_t num_threads);
 
-ARK_EXPORT(bool) parallel_sequential_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
-        const size_t *src_idx, size_t idx_len);
+bool parallel_sequential_gather_adr(void *dst, const void *src, size_t src_width, const size_t *idx,
+                                    size_t num);
 
-ARK_EXPORT(bool) parallel_parallel_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
-        const size_t *src_idx, size_t idx_len);
+bool parallel_parallel_gather_adr_func(void *dst, const void *src, size_t src_width, const size_t *idx,
+                                       size_t num, uint_fast16_t num_threads);
 
-ARK_EXPORT(bool) parallel_sequential_filter_early(void *result, size_t *result_size, const void *src, size_t width,
-        size_t len, parallel_predicate_func_t pred, void *args);
+bool parallel_sequential_scatter_func(void *dst, const void *src, size_t width, const size_t *idx,
+                                      size_t num);
 
-ARK_EXPORT(bool) parallel_parallel_filter_early(void *result, size_t *result_size, const void *src, size_t width,
-        size_t len, parallel_predicate_func_t pred, void *args, uint_fast16_t num_threads);
+bool parallel_parallel_scatter_func(void *dst, const void *src, size_t width, const size_t *idx, size_t num,
+                                    uint_fast16_t num_threads);
 
-ARK_EXPORT(bool) parallel_sequential_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width,
-        size_t len, parallel_predicate_func_t pred, void *args);
+bool parallel_sequential_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
+                                 const size_t *src_idx, size_t idx_len);
 
-ARK_EXPORT(bool) parallel_parallel_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width, size_t len,
-        parallel_predicate_func_t pred, void *args, size_t num_threads);
+bool parallel_parallel_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
+                               const size_t *src_idx, size_t idx_len);
 
-ARK_EXPORT(bool) parallel_for(const void *base, size_t width, size_t len, parallel_for_body_func_t f, void *args,
-        enum threading_hint hint, uint_fast16_t num_threads)
+bool parallel_sequential_filter_early(void *result, size_t *result_size, const void *src, size_t width,
+                                      size_t len, parallel_predicate_func_t pred, void *args);
+
+bool parallel_parallel_filter_early(void *result, size_t *result_size, const void *src, size_t width,
+                                    size_t len, parallel_predicate_func_t pred, void *args, uint_fast16_t num_threads);
+
+bool parallel_sequential_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width,
+                                     size_t len, parallel_predicate_func_t pred, void *args);
+
+bool parallel_parallel_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width, size_t len,
+                                   parallel_predicate_func_t pred, void *args, size_t num_threads);
+
+bool parallel_for(const void *base, size_t width, size_t len, parallel_for_body_func_t f, void *args,
+                  enum threading_hint hint, uint_fast16_t num_threads)
 {
         parallel_match(parallel_sequential_for(base, width, len, f, args),
-                parallel_parallel_for(base, width, len, f, args, num_threads))
+                       parallel_parallel_for(base, width, len, f, args, num_threads))
 }
 
-ARK_EXPORT(bool) parallel_map(void *dst, const void *src, size_t src_width, size_t len, size_t dst_width,
-        parallel_map_body_func_t f, void *args, enum threading_hint hint, uint_fast16_t num_threads)
+bool parallel_map(void *dst, const void *src, size_t src_width, size_t len, size_t dst_width,
+                  parallel_map_body_func_t f, void *args, enum threading_hint hint, uint_fast16_t num_threads)
 {
         return parallel_map_exec(dst, src, src_width, len, dst_width, f, args, hint, num_threads);
 }
 
-ARK_EXPORT(bool) parallel_gather(void *dst, const void *src, size_t width, const size_t *idx, size_t dst_src_len,
-        enum threading_hint hint, uint_fast16_t num_threads)
+bool parallel_gather(void *dst, const void *src, size_t width, const size_t *idx, size_t dst_src_len,
+                     enum threading_hint hint, uint_fast16_t num_threads)
 {
         parallel_match(parallel_sequential_gather(dst, src, width, idx, dst_src_len),
-                parallel_parallel_gather(dst, src, width, idx, dst_src_len, num_threads))
+                       parallel_parallel_gather(dst, src, width, idx, dst_src_len, num_threads))
 }
 
-ARK_EXPORT(bool) parallel_gather_adr(void *dst, const void *src, size_t src_width, const size_t *idx, size_t num,
-        enum threading_hint hint, uint_fast16_t num_threads)
+bool parallel_gather_adr(void *dst, const void *src, size_t src_width, const size_t *idx, size_t num,
+                         enum threading_hint hint, uint_fast16_t num_threads)
 {
         parallel_match(parallel_sequential_gather_adr(dst, src, src_width, idx, num),
-                parallel_parallel_gather_adr_func(dst, src, src_width, idx, num, num_threads))
+                       parallel_parallel_gather_adr_func(dst, src, src_width, idx, num, num_threads))
 }
 
-ARK_EXPORT(bool) parallel_scatter(void *dst, const void *src, size_t width, const size_t *idx, size_t num,
-        enum threading_hint hint, uint_fast16_t num_threads)
+bool parallel_scatter(void *dst, const void *src, size_t width, const size_t *idx, size_t num,
+                      enum threading_hint hint, uint_fast16_t num_threads)
 {
         parallel_match(parallel_sequential_scatter_func(dst, src, width, idx, num),
-                parallel_parallel_scatter_func(dst, src, width, idx, num, num_threads))
+                       parallel_parallel_scatter_func(dst, src, width, idx, num, num_threads))
 }
 
-ARK_EXPORT(bool) parallel_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
-        const size_t *src_idx, size_t idx_len, enum threading_hint hint)
+bool parallel_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
+                      const size_t *src_idx, size_t idx_len, enum threading_hint hint)
 {
         parallel_match(parallel_sequential_shuffle(dst, src, width, dst_idx, src_idx, idx_len),
-                parallel_parallel_shuffle(dst, src, width, dst_idx, src_idx, idx_len))
+                       parallel_parallel_shuffle(dst, src, width, dst_idx, src_idx, idx_len))
 }
 
-ARK_EXPORT(bool) parallel_filter_early(void *result, size_t *result_size, const void *src, size_t width, size_t len,
-        parallel_predicate_func_t pred, void *args, enum threading_hint hint, uint_fast16_t num_threads)
+bool parallel_filter_early(void *result, size_t *result_size, const void *src, size_t width, size_t len,
+                           parallel_predicate_func_t pred, void *args, enum threading_hint hint,
+                           uint_fast16_t num_threads)
 {
         parallel_match(parallel_sequential_filter_early(result, result_size, src, width, len, pred, args),
-                parallel_parallel_filter_early(result, result_size, src, width, len, pred, args, num_threads))
+                       parallel_parallel_filter_early(result, result_size, src, width, len, pred, args, num_threads))
 }
 
-ARK_EXPORT(bool) parallel_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width, size_t len,
-        parallel_predicate_func_t pred, void *args, enum threading_hint hint, size_t num_threads)
+bool parallel_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width, size_t len,
+                          parallel_predicate_func_t pred, void *args, enum threading_hint hint, size_t num_threads)
 {
         parallel_match(parallel_sequential_filter_late(pos, num_pos, src, width, len, pred, args),
-                parallel_parallel_filter_late(pos, num_pos, src, width, len, pred, args, num_threads))
+                       parallel_parallel_filter_late(pos, num_pos, src, width, len, pred, args, num_threads))
 }
 
-ARK_EXPORT(bool) parallel_sequential_for(const void *base, size_t width, size_t len, parallel_for_body_func_t f,
-        void *args)
+bool parallel_sequential_for(const void *base, size_t width, size_t len, parallel_for_body_func_t f,
+                             void *args)
 {
         error_if_null(base)
         error_if_null(width)
@@ -169,8 +175,8 @@ ARK_EXPORT(bool) parallel_sequential_for(const void *base, size_t width, size_t 
         return true;
 }
 
-ARK_EXPORT(bool) parallel_parallel_for(const void *base, size_t width, size_t len, parallel_for_body_func_t f,
-        void *args, uint_fast16_t num_threads)
+bool parallel_parallel_for(const void *base, size_t width, size_t len, parallel_for_body_func_t f,
+                           void *args, uint_fast16_t num_threads)
 {
         error_if_null(base)
         error_if_null(width)
@@ -220,15 +226,15 @@ void mapProxy(const void *src, size_t src_width, size_t len, void *args, thread_
         prefetch_read(mapArgs->args);
         prefetch_write(mapArgs->dst);
         mapArgs->map_func(mapArgs->dst + globalStart * mapArgs->dst_width,
-                src,
-                src_width,
-                mapArgs->dst_width,
-                len,
-                mapArgs->args);
+                          src,
+                          src_width,
+                          mapArgs->dst_width,
+                          len,
+                          mapArgs->args);
 }
 
-ARK_EXPORT(bool) parallel_map_exec(void *dst, const void *src, size_t src_width, size_t len, size_t dst_width,
-        parallel_map_body_func_t f, void *args, enum threading_hint hint, uint_fast16_t num_threads)
+bool parallel_map_exec(void *dst, const void *src, size_t src_width, size_t len, size_t dst_width,
+                       parallel_map_body_func_t f, void *args, enum threading_hint hint, uint_fast16_t num_threads)
 {
         error_if_null(src)
         error_if_null(src_width)
@@ -257,8 +263,8 @@ void gather_function(const void *start, size_t width, size_t len, void *args, th
                 size_t global_index_cur = global_index_start + i;
                 size_t global_index_next = global_index_start + next_i;
                 memcpy(gather_args->dst + global_index_cur * width,
-                        gather_args->src + gather_args->idx[global_index_cur] * width,
-                        width);
+                       gather_args->src + gather_args->idx[global_index_cur] * width,
+                       width);
 
                 bool has_next = (next_i < len);
                 prefetch_read(has_next ? gather_args->idx + global_index_next : NULL);
@@ -267,8 +273,8 @@ void gather_function(const void *start, size_t width, size_t len, void *args, th
         }
 }
 
-ARK_EXPORT(bool) parallel_sequential_gather(void *dst, const void *src, size_t width, const size_t *idx,
-        size_t dst_src_len)
+bool parallel_sequential_gather(void *dst, const void *src, size_t width, const size_t *idx,
+                                size_t dst_src_len)
 {
         error_if_null(dst)
         error_if_null(src)
@@ -295,8 +301,8 @@ ARK_EXPORT(bool) parallel_sequential_gather(void *dst, const void *src, size_t w
         return true;
 }
 
-ARK_EXPORT(bool) parallel_parallel_gather(void *dst, const void *src, size_t width, const size_t *idx,
-        size_t dst_src_len, uint_fast16_t num_threads)
+bool parallel_parallel_gather(void *dst, const void *src, size_t width, const size_t *idx,
+                              size_t dst_src_len, uint_fast16_t num_threads)
 {
         error_if_null(dst)
         error_if_null(src)
@@ -311,8 +317,8 @@ ARK_EXPORT(bool) parallel_parallel_gather(void *dst, const void *src, size_t wid
         return parallel_parallel_for(dst, width, dst_src_len, gather_function, &args, num_threads);
 }
 
-ARK_EXPORT(bool) parallel_sequential_gather_adr(void *dst, const void *src, size_t src_width, const size_t *idx,
-        size_t num)
+bool parallel_sequential_gather_adr(void *dst, const void *src, size_t src_width, const size_t *idx,
+                                    size_t num)
 {
         error_if_null(dst)
         error_if_null(src)
@@ -364,8 +370,8 @@ void parallel_gather_adr_func(const void *start, size_t width, size_t len, void 
         }
 }
 
-ARK_EXPORT(bool) parallel_parallel_gather_adr_func(void *dst, const void *src, size_t src_width, const size_t *idx,
-        size_t num, uint_fast16_t num_threads)
+bool parallel_parallel_gather_adr_func(void *dst, const void *src, size_t src_width, const size_t *idx,
+                                       size_t num, uint_fast16_t num_threads)
 {
         error_if_null(dst)
         error_if_null(src)
@@ -395,8 +401,8 @@ void parallel_scatter_func(const void *start, size_t width, size_t len, void *ar
                 size_t global_index_next = global_index_start + next_i;
 
                 memcpy(scatter_args->dst + scatter_args->idx[global_index_cur] * width,
-                        scatter_args->src + global_index_cur * width,
-                        width);
+                       scatter_args->src + global_index_cur * width,
+                       width);
 
                 bool has_next = (next_i < len);
                 prefetch_read(has_next ? scatter_args->idx + global_index_next : NULL);
@@ -405,8 +411,8 @@ void parallel_scatter_func(const void *start, size_t width, size_t len, void *ar
         }
 }
 
-ARK_EXPORT(bool) parallel_sequential_scatter_func(void *dst, const void *src, size_t width, const size_t *idx,
-        size_t num)
+bool parallel_sequential_scatter_func(void *dst, const void *src, size_t width, const size_t *idx,
+                                      size_t num)
 {
         error_if_null(dst)
         error_if_null(src)
@@ -428,8 +434,8 @@ ARK_EXPORT(bool) parallel_sequential_scatter_func(void *dst, const void *src, si
         return true;
 }
 
-ARK_EXPORT(bool) parallel_parallel_scatter_func(void *dst, const void *src, size_t width, const size_t *idx, size_t num,
-        uint_fast16_t num_threads)
+bool parallel_parallel_scatter_func(void *dst, const void *src, size_t width, const size_t *idx, size_t num,
+                                    uint_fast16_t num_threads)
 {
         error_if_null(dst)
         error_if_null(src)
@@ -444,8 +450,8 @@ ARK_EXPORT(bool) parallel_parallel_scatter_func(void *dst, const void *src, size
         return parallel_parallel_for(dst, width, num, parallel_scatter_func, &args, num_threads);
 }
 
-ARK_EXPORT(bool) parallel_sequential_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
-        const size_t *src_idx, size_t idx_len)
+bool parallel_sequential_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
+                                 const size_t *src_idx, size_t idx_len)
 {
         error_if_null(dst)
         error_if_null(src)
@@ -472,8 +478,8 @@ ARK_EXPORT(bool) parallel_sequential_shuffle(void *dst, const void *src, size_t 
         return true;
 }
 
-ARK_EXPORT(bool) parallel_parallel_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
-        const size_t *src_idx, size_t idx_len)
+bool parallel_parallel_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
+                               const size_t *src_idx, size_t idx_len)
 {
         unused(dst);
         unused(src);
@@ -484,8 +490,9 @@ ARK_EXPORT(bool) parallel_parallel_shuffle(void *dst, const void *src, size_t wi
         ARK_NOT_IMPLEMENTED
 }
 
-ARK_EXPORT(bool) parallel_sequential_filter_late(size_t *positions, size_t *num_positions, const void *source,
-        size_t width, size_t length, parallel_predicate_func_t predicate, void *arguments)
+bool parallel_sequential_filter_late(size_t *positions, size_t *num_positions, const void *source,
+                                     size_t width, size_t length, parallel_predicate_func_t predicate,
+                                     void *arguments)
 {
         error_if_null(positions);
         error_if_null(num_positions);
@@ -503,17 +510,17 @@ void *parallel_filter_proxy_func(void *args)
 {
         ark_cast(struct filter_arg *, proxy_arg, args);
         proxy_arg->pred(proxy_arg->src_positions,
-                &proxy_arg->num_positions,
-                proxy_arg->start,
-                proxy_arg->width,
-                proxy_arg->len,
-                proxy_arg->args,
-                proxy_arg->position_offset_to_add);
+                        &proxy_arg->num_positions,
+                        proxy_arg->start,
+                        proxy_arg->width,
+                        proxy_arg->len,
+                        proxy_arg->args,
+                        proxy_arg->position_offset_to_add);
         return NULL;
 }
 
-ARK_EXPORT(bool) parallel_parallel_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width, size_t len,
-        parallel_predicate_func_t pred, void *args, size_t num_threads)
+bool parallel_parallel_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width, size_t len,
+                                   parallel_predicate_func_t pred, void *args, size_t num_threads)
 {
         error_if_null(pos);
         error_if_null(num_pos);
@@ -544,7 +551,7 @@ ARK_EXPORT(bool) parallel_parallel_filter_late(size_t *pos, size_t *num_pos, con
                 for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
                         struct filter_arg *arg = thread_args + tid;
                         arg->num_positions = 0;
-                        arg->src_positions = malloc(chunk_len * sizeof(size_t));
+                        arg->src_positions = ark_malloc(chunk_len * sizeof(size_t));
                         arg->position_offset_to_add = tid * chunk_len;
                         arg->start = src + arg->position_offset_to_add * width;
                         arg->len = chunk_len;
@@ -559,16 +566,16 @@ ARK_EXPORT(bool) parallel_parallel_filter_late(size_t *pos, size_t *num_pos, con
         /** run f on this thread */
         prefetch_read(main_thread_base);
         size_t main_chunk_len = chunk_len + chunk_len_remain;
-        size_t *main_src_positions = malloc(main_chunk_len * sizeof(size_t));
+        size_t *main_src_positions = ark_malloc(main_chunk_len * sizeof(size_t));
         size_t main_num_positions = 0;
 
         pred(main_src_positions,
-                &main_num_positions,
-                main_thread_base,
-                width,
-                main_chunk_len,
-                args,
-                main_position_offset_to_add);
+             &main_num_positions,
+             main_thread_base,
+             width,
+             main_chunk_len,
+             args,
+             main_position_offset_to_add);
 
         size_t total_num_matching_positions = 0;
 
@@ -578,8 +585,8 @@ ARK_EXPORT(bool) parallel_parallel_filter_late(size_t *pos, size_t *num_pos, con
                         const struct filter_arg *thread_arg = (thread_args + tid);
                         if (thread_arg->num_positions > 0) {
                                 memcpy(pos + total_num_matching_positions,
-                                        thread_arg->src_positions,
-                                        thread_arg->num_positions * sizeof(size_t));
+                                       thread_arg->src_positions,
+                                       thread_arg->num_positions * sizeof(size_t));
                                 total_num_matching_positions += thread_arg->num_positions;
                         }
                         free(thread_args[tid].src_positions);
@@ -597,8 +604,8 @@ ARK_EXPORT(bool) parallel_parallel_filter_late(size_t *pos, size_t *num_pos, con
         return true;
 }
 
-ARK_EXPORT(bool) parallel_sequential_filter_early(void *result, size_t *result_size, const void *src, size_t width,
-        size_t len, parallel_predicate_func_t pred, void *args)
+bool parallel_sequential_filter_early(void *result, size_t *result_size, const void *src, size_t width,
+                                      size_t len, parallel_predicate_func_t pred, void *args)
 {
         error_if_null(result);
         error_if_null(result_size);
@@ -608,7 +615,7 @@ ARK_EXPORT(bool) parallel_sequential_filter_early(void *result, size_t *result_s
         error_if_null(pred);
 
         size_t num_matching_positions;
-        size_t *matching_positions = malloc(len * sizeof(size_t));
+        size_t *matching_positions = ark_malloc(len * sizeof(size_t));
 
         pred(matching_positions, &num_matching_positions, src, width, len, args, 0);
 
@@ -620,8 +627,8 @@ ARK_EXPORT(bool) parallel_sequential_filter_early(void *result, size_t *result_s
         return true;
 }
 
-ARK_EXPORT(bool) parallel_parallel_filter_early(void *result, size_t *result_size, const void *src, size_t width,
-        size_t len, parallel_predicate_func_t pred, void *args, uint_fast16_t num_threads)
+bool parallel_parallel_filter_early(void *result, size_t *result_size, const void *src, size_t width,
+                                    size_t len, parallel_predicate_func_t pred, void *args, uint_fast16_t num_threads)
 {
         error_if_null(result);
         error_if_null(result_size);
@@ -647,7 +654,7 @@ ARK_EXPORT(bool) parallel_parallel_filter_early(void *result, size_t *result_siz
         for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
                 struct filter_arg *arg = thread_args + tid;
                 arg->num_positions = 0;
-                arg->src_positions = malloc(chunk_len * sizeof(size_t));
+                arg->src_positions = ark_malloc(chunk_len * sizeof(size_t));
                 arg->position_offset_to_add = tid * chunk_len;
                 arg->start = src + arg->position_offset_to_add * width;
                 arg->len = chunk_len;
@@ -661,16 +668,16 @@ ARK_EXPORT(bool) parallel_parallel_filter_early(void *result, size_t *result_siz
         /** run f on this thread */
         prefetch_read(main_thread_base);
         size_t main_chunk_len = chunk_len + chunk_len_remain;
-        size_t *main_src_positions = malloc(main_chunk_len * sizeof(size_t));
+        size_t *main_src_positions = ark_malloc(main_chunk_len * sizeof(size_t));
         size_t main_num_positions = 0;
 
         pred(main_src_positions,
-                &main_num_positions,
-                main_thread_base,
-                width,
-                main_chunk_len,
-                args,
-                main_position_offset_to_add);
+             &main_num_positions,
+             main_thread_base,
+             width,
+             main_chunk_len,
+             args,
+             main_position_offset_to_add);
 
         size_t total_num_matching_positions = main_num_positions;
         size_t partial_num_matching_positions = 0;
@@ -687,12 +694,12 @@ ARK_EXPORT(bool) parallel_parallel_filter_early(void *result, size_t *result_siz
 
                 if (likely(thread_arg->num_positions > 0)) {
                         parallel_gather(result + partial_num_matching_positions * width,
-                                src,
-                                width,
-                                thread_arg->src_positions,
-                                thread_arg->num_positions,
-                                THREADING_HINT_MULTI,
-                                num_threads);
+                                        src,
+                                        width,
+                                        thread_arg->src_positions,
+                                        thread_arg->num_positions,
+                                        THREADING_HINT_MULTI,
+                                        num_threads);
                 }
 
                 partial_num_matching_positions += thread_arg->num_positions;
@@ -701,12 +708,12 @@ ARK_EXPORT(bool) parallel_parallel_filter_early(void *result, size_t *result_siz
 
         if (likely(main_num_positions > 0)) {
                 parallel_gather(result + partial_num_matching_positions * width,
-                        src,
-                        width,
-                        main_src_positions,
-                        main_num_positions,
-                        THREADING_HINT_MULTI,
-                        num_threads);
+                                src,
+                                width,
+                                main_src_positions,
+                                main_num_positions,
+                                THREADING_HINT_MULTI,
+                                num_threads);
         }
         free(main_src_positions);
 

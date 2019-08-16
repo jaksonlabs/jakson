@@ -23,66 +23,75 @@
 #include <ark-js/carbon/carbon.h>
 #include <ark-js/carbon/carbon-column-it.h>
 #include <ark-js/carbon/carbon-array-it.h>
+#include <ark-js/carbon/carbon-object-it.h>
 #include <ark-js/carbon/carbon-dot.h>
 #include <ark-js/carbon/carbon-path.h>
 
 ARK_BEGIN_DECL
 
-struct carbon_find
-{
-        struct carbon *doc;
-        enum carbon_field_type type;
-        struct err err;
-        struct carbon_path_evaluator path_evaluater;
+struct carbon_find {
+    struct carbon *doc;
+    enum carbon_field_type type;
+    struct err err;
+    struct carbon_path_evaluator path_evaluater;
 
-        bool value_is_nulled;
+    bool value_is_nulled;
 
-        union {
-                struct carbon_array_it *array_it;
-                struct carbon_column_it *column_it;
-                bool boolean;
-                u64 unsigned_number;
-                i64 signed_number;
-                float float_number;
+    union {
+        struct carbon_array_it *array_it;
+        struct carbon_column_it *column_it;
+        struct carbon_object_it *object_it;
+        bool boolean;
+        u64 unsigned_number;
+        i64 signed_number;
+        float float_number;
 
-                struct {
-                        const char *base;
-                        u64 len;
-                } string;
+        struct {
+            const char *base;
+            u64 len;
+        } string;
 
-                struct carbon_binary binary;
-        } value;
+        struct carbon_binary binary;
+    } value;
 };
 
 ARK_DEFINE_ERROR_GETTER(carbon_find)
 
-ARK_EXPORT(bool) carbon_find_open(struct carbon_find *out, const char *dot_path, struct carbon *doc);
+bool carbon_find_open(struct carbon_find *out, const char *dot_path, struct carbon *doc);
 
-ARK_EXPORT(bool) carbon_find_close(struct carbon_find *find);
+bool carbon_find_close(struct carbon_find *find);
 
-ARK_EXPORT(bool) carbon_find_create(struct carbon_find *find, struct carbon_dot_path *path, struct carbon *doc);
+bool carbon_find_create(struct carbon_find *find, struct carbon_dot_path *path, struct carbon *doc);
 
-ARK_EXPORT(bool) carbon_find_has_result(struct carbon_find *find);
+bool carbon_find_has_result(struct carbon_find *find);
 
-ARK_EXPORT(bool) carbon_find_result_type(enum carbon_field_type *type, struct carbon_find *find);
+const char *carbon_find_result_to_str(struct string *dst_str, enum carbon_printer_impl print_type, struct carbon_find *find);
 
-ARK_EXPORT(struct carbon_array_it *) carbon_find_result_array(struct carbon_find *find);
+const char *carbon_find_result_to_json_compact(struct string *dst_str, struct carbon_find *find);
 
-ARK_EXPORT(struct carbon_column_it *) carbon_find_result_column(struct carbon_find *find);
+char *carbon_find_result_to_json_compact_dup(struct carbon_find *find);
 
-ARK_EXPORT(bool) carbon_find_result_boolean(bool *out, struct carbon_find *find);
+bool carbon_find_result_type(enum carbon_field_type *type, struct carbon_find *find);
 
-ARK_EXPORT(bool) carbon_find_result_unsigned(u64 *out, struct carbon_find *find);
+struct carbon_array_it *carbon_find_result_array(struct carbon_find *find);
 
-ARK_EXPORT(bool) carbon_find_result_signed(i64 *out, struct carbon_find *find);
+struct carbon_object_it *carbon_find_result_object(struct carbon_find *find);
 
-ARK_EXPORT(bool) carbon_find_result_float(float *out, struct carbon_find *find);
+struct carbon_column_it *carbon_find_result_column(struct carbon_find *find);
 
-ARK_EXPORT(const char *) carbon_find_result_string(u64 *str_len, struct carbon_find *find);
+bool carbon_find_result_boolean(bool *out, struct carbon_find *find);
 
-ARK_EXPORT(struct carbon_binary *) carbon_find_result_binary(struct carbon_find *find);
+bool carbon_find_result_unsigned(u64 *out, struct carbon_find *find);
 
-ARK_EXPORT(bool) carbon_find_drop(struct carbon_find *find);
+bool carbon_find_result_signed(i64 *out, struct carbon_find *find);
+
+bool carbon_find_result_float(float *out, struct carbon_find *find);
+
+const char *carbon_find_result_string(u64 *str_len, struct carbon_find *find);
+
+struct carbon_binary *carbon_find_result_binary(struct carbon_find *find);
+
+bool carbon_find_drop(struct carbon_find *find);
 
 ARK_END_DECL
 

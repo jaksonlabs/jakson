@@ -24,33 +24,33 @@
 ARK_BEGIN_DECL
 
 struct bitmap {
-        struct vector ofType(u64) data;
-        u16 num_bits;
+    struct vector ofType(u64) data;
+    u16 num_bits;
 };
 
-ARK_EXPORT(bool) bitmap_create(struct bitmap *bitmap, u16 num_bits);
+bool bitmap_create(struct bitmap *bitmap, u16 num_bits);
 
-ARK_EXPORT(bool) bitmap_cpy(struct bitmap *dst, const struct bitmap *src);
+bool bitmap_cpy(struct bitmap *dst, const struct bitmap *src);
 
-ARK_EXPORT(bool) bitmap_drop(struct bitmap *map);
+bool bitmap_drop(struct bitmap *map);
 
-ARK_EXPORT(size_t) bitmap_nbits(const struct bitmap *map);
+size_t bitmap_nbits(const struct bitmap *map);
 
-ARK_EXPORT(bool) bitmap_clear(struct bitmap *map);
+bool bitmap_clear(struct bitmap *map);
 
-ARK_EXPORT(bool) bitmap_set(struct bitmap *map, u16 bit_position, bool on);
+bool bitmap_set(struct bitmap *map, u16 bit_position, bool on);
 
-ARK_EXPORT(bool) bitmap_get(struct bitmap *map, u16 bit_position);
+bool bitmap_get(struct bitmap *map, u16 bit_position);
 
-ARK_EXPORT(bool) bitmap_lshift(struct bitmap *map);
+bool bitmap_lshift(struct bitmap *map);
 
-ARK_EXPORT(bool) bitmap_print(FILE *file, const struct bitmap *map);
+bool bitmap_print(FILE *file, const struct bitmap *map);
 
-ARK_EXPORT(bool) bitmap_blocks(u32 **blocks, u32 *num_blocks, const struct bitmap *map);
+bool bitmap_blocks(u32 **blocks, u32 *num_blocks, const struct bitmap *map);
 
-ARK_EXPORT(void) bitmap_print_bits(FILE *file, u32 n);
+void bitmap_print_bits(FILE *file, u32 n);
 
-ARK_EXPORT(void) bitmap_print_bits_in_char(FILE *file, char n);
+void bitmap_print_bits_in_char(FILE *file, char n);
 
 ARK_END_DECL
 

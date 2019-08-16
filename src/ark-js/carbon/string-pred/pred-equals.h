@@ -24,7 +24,7 @@
 ARK_BEGIN_DECL
 
 ARK_BUILT_IN(static bool) __string_pred_equals_func(size_t *idxs_matching, size_t *num_matching, char **strings,
-                                                size_t num_strings, void *capture)
+                                                    size_t num_strings, void *capture)
 {
         size_t result_size = 0;
         const char *needle = (const char *) capture;

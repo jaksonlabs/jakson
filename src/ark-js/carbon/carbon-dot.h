@@ -22,77 +22,75 @@
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/error.h>
 #include <ark-js/shared/types.h>
-#include <ark-js/shared/stdx/string_builder.h>
+#include <ark-js/shared/stdx/string.h>
 #include <ark-js/carbon/carbon-array-it.h>
 #include <ark-js/carbon/carbon-column-it.h>
+#include <ark-js/carbon/carbon-object-it.h>
 
 ARK_BEGIN_DECL
 
 struct carbon; /* forwarded from carbon.h */
 
-enum carbon_dot_node_type
-{
-        DOT_NODE_ARRAY_IDX,
-        DOT_NODE_KEY_NAME
+enum carbon_dot_node_type {
+    DOT_NODE_ARRAY_IDX,
+    DOT_NODE_KEY_NAME
 };
 
-struct carbon_dot_node
-{
-        enum carbon_dot_node_type type;
-        union {
-                char *string;
-                u32 idx;
-        } identifier;
+struct carbon_dot_node {
+    enum carbon_dot_node_type type;
+    union {
+        char *string;
+        u32 idx;
+    } identifier;
 };
 
-struct carbon_dot_path
-{
-        struct carbon_dot_node nodes[256];
-        u32 path_len;
-        struct err err;
+struct carbon_dot_path {
+    struct carbon_dot_node nodes[256];
+    u32 path_len;
+    struct err err;
 };
 
-enum carbon_path_status
-{
-        carbon_PATH_RESOLVED,
-        carbon_PATH_EMPTY_DOC,
-        carbon_PATH_NOSUCHINDEX,
-        carbon_PATH_NOTTRAVERSABLE,
-        carbon_PATH_NOCONTAINER,
-        carbon_PATH_NOTANOBJECT,
-        carbon_PATH_NONESTING,
-        carbon_PATH_INTERNAL
+enum carbon_path_status {
+    CARBON_PATH_RESOLVED,
+    CARBON_PATH_EMPTY_DOC,
+    CARBON_PATH_NOSUCHINDEX,
+    CARBON_PATH_NOSUCHKEY,
+    CARBON_PATH_NOTTRAVERSABLE,
+    CARBON_PATH_NOCONTAINER,
+    CARBON_PATH_NOTANOBJECT,
+    CARBON_PATH_NONESTING,
+    CARBON_PATH_INTERNAL
 };
 
 ARK_DEFINE_ERROR_GETTER(carbon_dot_path)
 
-ARK_EXPORT(bool) carbon_dot_path_create(struct carbon_dot_path *path);
+bool carbon_dot_path_create(struct carbon_dot_path *path);
 
-ARK_EXPORT(bool) carbon_dot_path_from_string(struct carbon_dot_path *path, const char *path_string);
+bool carbon_dot_path_from_string(struct carbon_dot_path *path, const char *path_string);
 
-ARK_EXPORT(bool) carbon_dot_path_add_key(struct carbon_dot_path *dst, const char *key);
+bool carbon_dot_path_add_key(struct carbon_dot_path *dst, const char *key);
 
-ARK_EXPORT(bool) carbon_dot_path_add_nkey(struct carbon_dot_path *dst, const char *key, size_t len);
+bool carbon_dot_path_add_nkey(struct carbon_dot_path *dst, const char *key, size_t len);
 
-ARK_EXPORT(bool) carbon_dot_path_add_idx(struct carbon_dot_path *dst, u32 idx);
+bool carbon_dot_path_add_idx(struct carbon_dot_path *dst, u32 idx);
 
-ARK_EXPORT(bool) carbon_dot_path_len(u32 *len, const struct carbon_dot_path *path);
+bool carbon_dot_path_len(u32 *len, const struct carbon_dot_path *path);
 
-ARK_EXPORT(bool) carbon_dot_path_is_empty(const struct carbon_dot_path *path);
+bool carbon_dot_path_is_empty(const struct carbon_dot_path *path);
 
-ARK_EXPORT(bool) carbon_dot_path_type_at(enum carbon_dot_node_type *type_out, u32 pos, const struct carbon_dot_path *path);
+bool carbon_dot_path_type_at(enum carbon_dot_node_type *type_out, u32 pos, const struct carbon_dot_path *path);
 
-ARK_EXPORT(bool) carbon_dot_path_idx_at(u32 *idx, u32 pos, const struct carbon_dot_path *path);
+bool carbon_dot_path_idx_at(u32 *idx, u32 pos, const struct carbon_dot_path *path);
 
-ARK_EXPORT(const char *) carbon_dot_path_key_at(u32 pos, struct carbon_dot_path *path);
+const char *carbon_dot_path_key_at(u32 pos, const struct carbon_dot_path *path);
 
-ARK_EXPORT(bool) carbon_dot_path_drop(struct carbon_dot_path *path);
+bool carbon_dot_path_drop(struct carbon_dot_path *path);
 
-ARK_EXPORT(bool) carbon_dot_path_to_str(struct string_builder *sb, struct carbon_dot_path *path);
+bool carbon_dot_path_to_str(struct string *sb, struct carbon_dot_path *path);
 
-ARK_EXPORT(bool) carbon_dot_path_fprint(FILE *file, struct carbon_dot_path *path);
+bool carbon_dot_path_fprint(FILE *file, struct carbon_dot_path *path);
 
-ARK_EXPORT(bool) carbon_dot_path_print(struct carbon_dot_path *path);
+bool carbon_dot_path_print(struct carbon_dot_path *path);
 
 ARK_END_DECL
 

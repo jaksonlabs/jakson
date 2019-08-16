@@ -24,9 +24,9 @@
 
 #define  MARKER_SYMBOL_HUFFMAN_DIC_ENTRY   'd'
 
-ARK_EXPORT(bool) pack_huffman_init(struct packer *self)
+bool pack_huffman_init(struct packer *self)
 {
-        self->extra = malloc(sizeof(struct coding_huffman));
+        self->extra = ark_malloc(sizeof(struct coding_huffman));
         if (self->extra != NULL) {
                 struct coding_huffman *encoder = (struct coding_huffman *) self->extra;
                 coding_huffman_create(encoder);
@@ -36,12 +36,12 @@ ARK_EXPORT(bool) pack_huffman_init(struct packer *self)
         }
 }
 
-ARK_EXPORT(bool) pack_coding_huffman_cpy(const struct packer *self, struct packer *dst)
+bool pack_coding_huffman_cpy(const struct packer *self, struct packer *dst)
 {
         ark_check_tag(self->tag, PACK_HUFFMAN);
 
         *dst = *self;
-        dst->extra = malloc(sizeof(struct coding_huffman));
+        dst->extra = ark_malloc(sizeof(struct coding_huffman));
         if (dst->extra != NULL) {
                 struct coding_huffman *self_encoder = (struct coding_huffman *) self->extra;
                 struct coding_huffman *dst_encoder = (struct coding_huffman *) dst->extra;
@@ -51,7 +51,7 @@ ARK_EXPORT(bool) pack_coding_huffman_cpy(const struct packer *self, struct packe
         }
 }
 
-ARK_EXPORT(bool) pack_coding_huffman_drop(struct packer *self)
+bool pack_coding_huffman_drop(struct packer *self)
 {
         ark_check_tag(self->tag, PACK_HUFFMAN);
 
@@ -111,8 +111,8 @@ bool huffman_dump_string_table_entry(FILE *file, struct memfile *memfile)
         return true;
 }
 
-ARK_EXPORT(bool) pack_huffman_write_extra(struct packer *self, struct memfile *dst,
-        const struct vector ofType (const char *) *strings)
+bool pack_huffman_write_extra(struct packer *self, struct memfile *dst,
+                              const struct vector ofType (const char *) *strings)
 {
         ark_check_tag(self->tag, PACK_HUFFMAN);
 
@@ -124,7 +124,7 @@ ARK_EXPORT(bool) pack_huffman_write_extra(struct packer *self, struct memfile *d
         return true;
 }
 
-ARK_EXPORT(bool) pack_huffman_read_extra(struct packer *self, FILE *src, size_t nbytes)
+bool pack_huffman_read_extra(struct packer *self, FILE *src, size_t nbytes)
 {
         ark_check_tag(self->tag, PACK_HUFFMAN);
 
@@ -136,7 +136,7 @@ ARK_EXPORT(bool) pack_huffman_read_extra(struct packer *self, FILE *src, size_t 
         return false;
 }
 
-ARK_EXPORT(bool) pack_huffman_print_extra(struct packer *self, FILE *file, struct memfile *src)
+bool pack_huffman_print_extra(struct packer *self, FILE *file, struct memfile *src)
 {
         unused(self);
 
@@ -145,8 +145,8 @@ ARK_EXPORT(bool) pack_huffman_print_extra(struct packer *self, FILE *file, struc
         return true;
 }
 
-ARK_EXPORT(bool) pack_huffman_print_encoded(struct packer *self, FILE *file, struct memfile *src,
-        u32 decompressed_strlen)
+bool pack_huffman_print_encoded(struct packer *self, FILE *file, struct memfile *src,
+                                u32 decompressed_strlen)
 {
         unused(self);
         unused(file);
@@ -169,7 +169,7 @@ bool pack_huffman_encode_string(struct packer *self, struct memfile *dst, struct
         return status;
 }
 
-ARK_EXPORT(bool) pack_huffman_decode_string(struct packer *self, char *dst, size_t strlen, FILE *src)
+bool pack_huffman_decode_string(struct packer *self, char *dst, size_t strlen, FILE *src)
 {
         unused(self);
         unused(dst);

@@ -25,43 +25,41 @@ ARK_BEGIN_DECL
 
 struct memblock;
 
-ARK_EXPORT(bool) memblock_create(struct memblock **block, size_t size);
+bool memblock_create(struct memblock **block, size_t size);
 
-ARK_EXPORT(bool) memblock_zero_out(struct memblock *block);
+bool memblock_zero_out(struct memblock *block);
 
-ARK_EXPORT(bool) memblock_from_file(struct memblock **block, FILE *file, size_t nbytes);
+bool memblock_from_file(struct memblock **block, FILE *file, size_t nbytes);
 
-ARK_EXPORT(bool) memblock_drop(struct memblock *block);
+bool memblock_drop(struct memblock *block);
 
-ARK_EXPORT(bool) memblock_get_error(struct err *out, struct memblock *block);
+bool memblock_get_error(struct err *out, struct memblock *block);
 
-ARK_EXPORT(bool) memblock_size(offset_t *size, const struct memblock *block);
+bool memblock_size(offset_t *size, const struct memblock *block);
 
-ARK_EXPORT(offset_t) memblock_last_used_byte(const struct memblock *block);
+offset_t memblock_last_used_byte(const struct memblock *block);
 
-ARK_EXPORT(bool) memblock_write_to_file(FILE *file, const struct memblock *block);
+bool memblock_write_to_file(FILE *file, const struct memblock *block);
 
-ARK_EXPORT(const char *) memblock_raw_data(const struct memblock *block);
+const char *memblock_raw_data(const struct memblock *block);
 
-ARK_EXPORT(bool) memblock_resize(struct memblock *block, size_t size);
+bool memblock_resize(struct memblock *block, size_t size);
 
-ARK_EXPORT(bool) memblock_resize_ex(struct memblock *block, size_t size, bool zero_out);
+bool memblock_write(struct memblock *block, offset_t position, const char *data, offset_t nbytes);
 
-ARK_EXPORT(bool) memblock_write(struct memblock *block, offset_t position, const char *data, offset_t nbytes);
+bool memblock_cpy(struct memblock **dst, struct memblock *src);
 
-ARK_EXPORT(bool) memblock_cpy(struct memblock **dst, struct memblock *src);
+bool memblock_shrink(struct memblock *block);
 
-ARK_EXPORT(bool) memblock_shrink(struct memblock *block);
+bool memblock_move_right(struct memblock *block, offset_t where, size_t nbytes);
 
-ARK_EXPORT(bool) memblock_move_right(struct memblock *block, offset_t where, size_t nbytes);
+bool memblock_move_left(struct memblock *block, offset_t where, size_t nbytes);
 
-ARK_EXPORT(bool) memblock_move_left(struct memblock *block, offset_t where, size_t nbytes);
+bool memblock_move_ex(struct memblock *block, offset_t where, size_t nbytes, bool zero_out);
 
-ARK_EXPORT(bool) memblock_move_ex(struct memblock *block, offset_t where, size_t nbytes, bool zero_out);
+void *memblock_move_contents_and_drop(struct memblock *block);
 
-ARK_EXPORT(void *)memblock_move_contents_and_drop(struct memblock *block);
-
-ARK_EXPORT(bool) memfile_update_last_byte(struct memblock *block, size_t where);
+bool memfile_update_last_byte(struct memblock *block, size_t where);
 
 ARK_END_DECL
 

@@ -11,8 +11,8 @@ set(
         ${LIBS}
 )
 
-add_executable(test-thread-pool test-thread-pool.cpp ${LIB_SOURCES})
-target_link_libraries(test-thread-pool gtest ${TEST_LIBS})
+add_executable(test-thread-pool test-thread-pool.cpp)
+target_link_libraries(test-thread-pool PUBLIC gtest ${TEST_LIBS} PRIVATE ark-sources)
 
 ADD_DEPENDENCIES(tests test-thread-pool)
 

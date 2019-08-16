@@ -26,15 +26,15 @@ ARK_BEGIN_DECL
 struct archive; /* forwarded */
 struct io_context; /* forwarded */
 
-ARK_EXPORT(bool) io_context_create(struct io_context **context, struct err *err, const char *file_path);
+bool io_context_create(struct io_context **context, struct err *err, const char *file_path);
 
-ARK_EXPORT(struct err *) io_context_get_error(struct io_context *context);
+struct err *io_context_get_error(struct io_context *context);
 
-ARK_EXPORT(FILE *) io_context_lock_and_access(struct io_context *context);
+FILE *io_context_lock_and_access(struct io_context *context);
 
-ARK_EXPORT(bool) io_context_unlock(struct io_context *context);
+bool io_context_unlock(struct io_context *context);
 
-ARK_EXPORT(bool) io_context_drop(struct io_context *context);
+bool io_context_drop(struct io_context *context);
 
 ARK_END_DECL
 

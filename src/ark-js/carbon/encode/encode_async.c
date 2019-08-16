@@ -31,48 +31,48 @@
 #define HASH_FUNCTION                  ARK_HASH_SAX
 
 struct carrier {
-        struct strdic local_dictionary;
-        pthread_t thread;
-        size_t id;
+    struct strdic local_dictionary;
+    pthread_t thread;
+    size_t id;
 };
 
 struct async_extra {
-        struct vector ofType(carrier) carriers;
-        struct vector ofType(struct carrier *) carrier_mapping;
-        struct spinlock lock;
+    struct vector ofType(carrier) carriers;
+    struct vector ofType(struct carrier *) carrier_mapping;
+    struct spinlock lock;
 };
 
 struct parallel_insert_arg {
-        struct vector ofType(char *) strings;
-        field_sid_t *out;
-        struct carrier *carrier;
-        bool enable_write_out;
-        bool did_work;
-        uint_fast16_t insert_num_threads;
+    struct vector ofType(char *) strings;
+    field_sid_t *out;
+    struct carrier *carrier;
+    bool enable_write_out;
+    bool did_work;
+    uint_fast16_t insert_num_threads;
 };
 
 struct parallel_remove_arg {
-        struct vector ofType(field_sid_t) *local_ids;
-        struct carrier *carrier;
-        int result;
-        bool did_work;
+    struct vector ofType(field_sid_t) *local_ids;
+    struct carrier *carrier;
+    int result;
+    bool did_work;
 };
 
 struct parallel_locate_arg {
-        struct carrier *carrier;
-        field_sid_t *ids_out;
-        bool *found_mask_out;
-        size_t num_not_found_out;
-        struct vector ofType(char *) keys_in;
-        int result;
-        bool did_work;
+    struct carrier *carrier;
+    field_sid_t *ids_out;
+    bool *found_mask_out;
+    size_t num_not_found_out;
+    struct vector ofType(char *) keys_in;
+    int result;
+    bool did_work;
 };
 
 struct parallel_extract_arg {
-        struct vector ofType(field_sid_t) local_ids_in;
-        char **strings_out;
-        struct carrier *carrier;
-        bool did_work;
+    struct vector ofType(field_sid_t) local_ids_in;
+    char **strings_out;
+    struct carrier *carrier;
+    bool did_work;
 };
 
 #define HASHCODE_OF(string)                                                                                            \
@@ -88,30 +88,39 @@ struct parallel_extract_arg {
     ((~((field_sid_t) 0)) >> 10 & global_string_id);
 
 static bool this_drop(struct strdic *self);
+
 static bool this_insert(struct strdic *self, field_sid_t **out, char *const *strings, size_t num_strings,
-        size_t __num_threads);
+                        size_t __num_threads);
+
 static bool this_remove(struct strdic *self, field_sid_t *strings, size_t num_strings);
+
 static bool this_locate_safe(struct strdic *self, field_sid_t **out, bool **found_mask, size_t *num_not_found,
-        char *const *keys, size_t num_keys);
+                             char *const *keys, size_t num_keys);
+
 static bool this_locate_fast(struct strdic *self, field_sid_t **out, char *const *keys, size_t num_keys);
+
 static char **this_extract(struct strdic *self, const field_sid_t *ids, size_t num_ids);
+
 static bool this_free(struct strdic *self, void *ptr);
 
 static bool this_num_distinct(struct strdic *self, size_t *num);
+
 static bool this_get_contents(struct strdic *self, struct vector ofType (char *) *strings,
-        struct vector ofType(field_sid_t) *string_ids);
+                              struct vector ofType(field_sid_t) *string_ids);
 
 static bool this_reset_counters(struct strdic *self);
+
 static bool this_counters(struct strdic *self, struct strhash_counters *counters);
 
 static bool this_lock(struct strdic *self);
+
 static bool this_unlock(struct strdic *self);
 
 static bool this_create_extra(struct strdic *self, size_t capacity, size_t num_index_buckets,
-        size_t approx_num_unique_str, size_t num_threads);
+                              size_t approx_num_unique_str, size_t num_threads);
 
 static bool this_setup_carriers(struct strdic *self, size_t capacity, size_t num_index_buckets,
-        size_t approx_num_unique_str, size_t num_threads);
+                                size_t approx_num_unique_str, size_t num_threads);
 
 #define THIS_EXTRAS(self)                                                                                              \
 ({                                                                                                                     \
@@ -119,8 +128,8 @@ static bool this_setup_carriers(struct strdic *self, size_t capacity, size_t num
     (struct async_extra *) self->extra;                                                                                       \
 })
 
-ARK_EXPORT (int) encode_async_create(struct strdic *dic, size_t capacity, size_t num_index_buckets,
-        size_t approx_num_unique_strs, size_t num_threads, const struct allocator *alloc)
+int encode_async_create(struct strdic *dic, size_t capacity, size_t num_index_buckets,
+                        size_t approx_num_unique_strs, size_t num_threads, const struct allocator *alloc)
 {
         ark_check_success(alloc_this_or_std(&dic->alloc, alloc));
 
@@ -142,7 +151,7 @@ ARK_EXPORT (int) encode_async_create(struct strdic *dic, size_t capacity, size_t
 }
 
 static bool this_create_extra(struct strdic *self, size_t capacity, size_t num_index_buckets,
-        size_t approx_num_unique_str, size_t num_threads)
+                              size_t approx_num_unique_str, size_t num_threads)
 {
         assert(self);
 
@@ -177,9 +186,9 @@ void *parallel_remove_function(void *args)
         carrier_arg->did_work = len > 0;
 
         ark_debug(STRING_DIC_ASYNC_TAG,
-                "thread %zu spawned for remove task (%zu elements)",
-                carrier_arg->carrier->id,
-                vec_length(carrier_arg->local_ids));
+                  "thread %zu spawned for remove task (%zu elements)",
+                  carrier_arg->carrier->id,
+                  vec_length(carrier_arg->local_ids));
         if (len > 0) {
                 struct strdic *dic = &carrier_arg->carrier->local_dictionary;
                 field_sid_t *ids = vec_all(carrier_arg->local_ids, field_sid_t);
@@ -200,22 +209,22 @@ void *parallel_insert_function(void *args)
 
         ark_trace(STRING_DIC_ASYNC_TAG, "thread-local insert function started (thread %zu)", this_args->carrier->id);
         ark_debug(STRING_DIC_ASYNC_TAG,
-                "thread %zu spawned for insert task (%zu elements)",
-                this_args->carrier->id,
-                vec_length(&this_args->strings));
+                  "thread %zu spawned for insert task (%zu elements)",
+                  this_args->carrier->id,
+                  vec_length(&this_args->strings));
 
         if (this_args->did_work) {
                 ark_trace(STRING_DIC_ASYNC_TAG,
-                        "thread %zu starts insertion of %zu strings",
-                        this_args->carrier->id,
-                        vec_length(&this_args->strings));
+                          "thread %zu starts insertion of %zu strings",
+                          this_args->carrier->id,
+                          vec_length(&this_args->strings));
                 char **data = (char **) vec_data(&this_args->strings);
 
                 int status = strdic_insert(&this_args->carrier->local_dictionary,
-                        this_args->enable_write_out ? &this_args->out : NULL,
-                        data,
-                        vec_length(&this_args->strings),
-                        this_args->insert_num_threads);
+                                           this_args->enable_write_out ? &this_args->out : NULL,
+                                           data,
+                                           vec_length(&this_args->strings),
+                                           this_args->insert_num_threads);
 
                 /** internal error during thread-local string dictionary building process */
                 error_print_and_die_if(status != true, ARK_ERR_INTERNALERR);
@@ -233,21 +242,21 @@ void *parallel_locate_safe_function(void *args)
         this_args->did_work = vec_length(&this_args->keys_in) > 0;
 
         ark_trace(STRING_DIC_ASYNC_TAG,
-                "thread-local 'locate' function invoked for thread %zu...",
-                this_args->carrier->id)
+                  "thread-local 'locate' function invoked for thread %zu...",
+                  this_args->carrier->id)
 
         ark_debug(STRING_DIC_ASYNC_TAG,
-                "thread %zu spawned for locate (safe) task (%zu elements)",
-                this_args->carrier->id,
-                vec_length(&this_args->keys_in));
+                  "thread %zu spawned for locate (safe) task (%zu elements)",
+                  this_args->carrier->id,
+                  vec_length(&this_args->keys_in));
 
         if (this_args->did_work) {
                 this_args->result = strdic_locate_safe(&this_args->ids_out,
-                        &this_args->found_mask_out,
-                        &this_args->num_not_found_out,
-                        &this_args->carrier->local_dictionary,
-                        vec_all(&this_args->keys_in, char *),
-                        vec_length(&this_args->keys_in));
+                                                       &this_args->found_mask_out,
+                                                       &this_args->num_not_found_out,
+                                                       &this_args->carrier->local_dictionary,
+                                                       vec_all(&this_args->keys_in, char *),
+                                                       vec_length(&this_args->keys_in));
 
                 ark_debug(STRING_DIC_ASYNC_TAG, "thread %zu done", this_args->carrier->id);
         } else {
@@ -263,14 +272,14 @@ void *parallel_extract_function(void *args)
         this_args->did_work = vec_length(&this_args->local_ids_in) > 0;
 
         ark_debug(STRING_DIC_ASYNC_TAG,
-                "thread %zu spawned for extract task (%zu elements)",
-                this_args->carrier->id,
-                vec_length(&this_args->local_ids_in));
+                  "thread %zu spawned for extract task (%zu elements)",
+                  this_args->carrier->id,
+                  vec_length(&this_args->local_ids_in));
 
         if (this_args->did_work) {
                 this_args->strings_out = strdic_extract(&this_args->carrier->local_dictionary,
-                        vec_all(&this_args->local_ids_in, field_sid_t),
-                        vec_length(&this_args->local_ids_in));
+                                                        vec_all(&this_args->local_ids_in, field_sid_t),
+                                                        vec_length(&this_args->local_ids_in));
                 ark_debug(STRING_DIC_ASYNC_TAG, "thread %zu done", this_args->carrier->id);
         } else {
                 ark_warn(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", this_args->carrier->id);
@@ -294,13 +303,14 @@ static void synchronize(struct vector ofType(carrier) *carriers, size_t num_thre
         unused(duration);
 
         ark_debug(STRING_DIC_ASYNC_TAG,
-                "barrier passed for %d threads after %f seconds",
-                num_threads,
-                duration / 1000.0f);
+                  "barrier passed for %d threads after %f seconds",
+                  num_threads,
+                  duration / 1000.0f);
 }
 
 static void create_thread_assignment(atomic_uint_fast16_t **str_carrier_mapping, atomic_size_t **carrier_num_strings,
-        size_t **str_carrier_idx_mapping, struct allocator *alloc, size_t num_strings, size_t num_threads)
+                                     size_t **str_carrier_idx_mapping, struct allocator *alloc, size_t num_strings,
+                                     size_t num_threads)
 {
         /** parallel_map_exec string depending on hash values to a particular carrier */
         *str_carrier_mapping = alloc_malloc(alloc, num_strings * sizeof(atomic_uint_fast16_t));
@@ -317,7 +327,7 @@ static void create_thread_assignment(atomic_uint_fast16_t **str_carrier_mapping,
 }
 
 static void drop_thread_assignment(struct allocator *alloc, atomic_uint_fast16_t *str_carrier_mapping,
-        atomic_size_t *carrier_num_strings, size_t *str_carrier_idx_mapping)
+                                   atomic_size_t *carrier_num_strings, size_t *str_carrier_idx_mapping)
 {
         alloc_free(alloc, carrier_num_strings);
         alloc_free(alloc, str_carrier_mapping);
@@ -325,14 +335,14 @@ static void drop_thread_assignment(struct allocator *alloc, atomic_uint_fast16_t
 }
 
 struct thread_assign_arg {
-        atomic_uint_fast16_t *str_carrier_mapping;
-        size_t num_threads;
-        atomic_size_t *carrier_num_strings;
-        char *const *base_strings;
+    atomic_uint_fast16_t *str_carrier_mapping;
+    size_t num_threads;
+    atomic_size_t *carrier_num_strings;
+    char *const *base_strings;
 };
 
 static void parallel_compute_thread_assignment_function(const void *restrict start, size_t width, size_t len,
-        void *restrict args, thread_id_t tid)
+                                                        void *restrict args, thread_id_t tid)
 {
         unused(tid);
         unused(width);
@@ -354,22 +364,22 @@ static void parallel_compute_thread_assignment_function(const void *restrict sta
 }
 
 static void compute_thread_assignment(atomic_uint_fast16_t *str_carrier_mapping, atomic_size_t *carrier_num_strings,
-        char *const *strings, size_t num_strings, size_t num_threads)
+                                      char *const *strings, size_t num_strings, size_t num_threads)
 {
         struct thread_assign_arg args =
                 {.base_strings = strings, .carrier_num_strings = carrier_num_strings, .num_threads = num_threads, .str_carrier_mapping = str_carrier_mapping};
         parallel_for(strings,
-                sizeof(char *const *),
-                num_strings,
-                parallel_compute_thread_assignment_function,
-                &args,
-                THREADING_HINT_MULTI,
-                num_threads);
+                     sizeof(char *const *),
+                     num_strings,
+                     parallel_compute_thread_assignment_function,
+                     &args,
+                     THREADING_HINT_MULTI,
+                     num_threads);
 
 }
 
 static bool this_insert(struct strdic *self, field_sid_t **out, char *const *strings, size_t num_strings,
-        size_t __num_threads)
+                        size_t __num_threads)
 {
         timestamp_t begin = time_now_wallclock();
         ark_info(STRING_DIC_ASYNC_TAG, "insert operation invoked: %zu strings in total", num_strings)
@@ -388,11 +398,11 @@ static bool this_insert(struct strdic *self, field_sid_t **out, char *const *str
         atomic_size_t *carrier_num_strings;
 
         create_thread_assignment(&str_carrier_mapping,
-                &carrier_num_strings,
-                &str_carrier_idx_mapping,
-                &self->alloc,
-                num_strings,
-                num_threads);
+                                 &carrier_num_strings,
+                                 &str_carrier_idx_mapping,
+                                 &self->alloc,
+                                 num_strings,
+                                 num_threads);
 
         struct vector ofType(struct parallel_insert_arg *) carrier_args;
         vec_create(&carrier_args, &self->alloc, sizeof(struct parallel_insert_arg *), num_threads);
@@ -567,7 +577,7 @@ static bool this_remove(struct strdic *self, field_sid_t *strings, size_t num_st
 }
 
 static bool this_locate_safe(struct strdic *self, field_sid_t **out, bool **found_mask, size_t *num_not_found,
-        char *const *keys, size_t num_keys)
+                             char *const *keys, size_t num_keys)
 {
         timestamp_t begin = time_now_wallclock();
         ark_info(STRING_DIC_ASYNC_TAG, "locate (safe) operation started: %zu strings to locate", num_keys)
@@ -580,8 +590,8 @@ static bool this_locate_safe(struct strdic *self, field_sid_t **out, bool **foun
         uint_fast16_t num_threads = vec_length(&extra->carriers);
 
         /** global result output */
-        ark_malloc(field_sid_t, global_out, num_keys, &self->alloc);
-        ark_malloc(bool, global_found_mask, num_keys, &self->alloc);
+        ALLOC_MALLOC(field_sid_t, global_out, num_keys, &self->alloc);
+        ALLOC_MALLOC(bool, global_found_mask, num_keys, &self->alloc);
 
         size_t global_num_not_found = 0;
 
@@ -592,11 +602,11 @@ static bool this_locate_safe(struct strdic *self, field_sid_t **out, bool **foun
         struct parallel_locate_arg carrier_args[num_threads];
 
         create_thread_assignment(&str_carrier_mapping,
-                &carrier_num_strings,
-                &str_carrier_idx_mapping,
-                &self->alloc,
-                num_keys,
-                num_threads);
+                                 &carrier_num_strings,
+                                 &str_carrier_idx_mapping,
+                                 &self->alloc,
+                                 num_keys,
+                                 num_threads);
 
         /** compute which carrier is responsible for which string */
         compute_thread_assignment(str_carrier_mapping, carrier_num_strings, keys, num_keys, num_threads);
@@ -725,15 +735,15 @@ static char **this_extract(struct strdic *self, const field_sid_t *ids, size_t n
 
         this_lock(self);
 
-        ark_malloc(char *, globalResult, num_ids, &self->alloc);
+        ALLOC_MALLOC(char *, globalResult, num_ids, &self->alloc);
 
         struct async_extra *extra = (struct async_extra *) self->extra;
         uint_fast16_t num_threads = vec_length(&extra->carriers);
         size_t approx_num_strings_per_thread = ark_max(1, num_ids / num_threads);
 
-        ark_malloc(size_t, local_thread_idx, num_ids, &self->alloc);
-        ark_malloc(uint_fast16_t, owning_thread_ids, num_ids, &self->alloc);
-        ark_malloc(struct parallel_extract_arg, thread_args, num_threads, &self->alloc);
+        ALLOC_MALLOC(size_t, local_thread_idx, num_ids, &self->alloc);
+        ALLOC_MALLOC(uint_fast16_t, owning_thread_ids, num_ids, &self->alloc);
+        ALLOC_MALLOC(struct parallel_extract_arg, thread_args, num_threads, &self->alloc);
 
         for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
                 struct parallel_extract_arg *arg = thread_args + thread_id;
@@ -822,7 +832,7 @@ static bool this_num_distinct(struct strdic *self, size_t *num)
 }
 
 static bool this_get_contents(struct strdic *self, struct vector ofType (char *) *strings,
-        struct vector ofType(field_sid_t) *string_ids)
+                              struct vector ofType(field_sid_t) *string_ids)
 {
         ark_check_tag(self->tag, ASYNC);
         this_lock(self);
@@ -905,14 +915,14 @@ static bool this_counters(struct strdic *self, struct strhash_counters *counters
 }
 
 struct create_carrier_arg {
-        size_t local_capacity;
-        size_t local_bucket_num;
-        size_t local_bucket_cap;
-        const struct allocator *alloc;
+    size_t local_capacity;
+    size_t local_bucket_num;
+    size_t local_bucket_cap;
+    const struct allocator *alloc;
 };
 
 static void parallel_create_carrier(const void *restrict start, size_t width, size_t len, void *restrict args,
-        thread_id_t tid)
+                                    thread_id_t tid)
 {
         unused(tid);
         unused(width);
@@ -921,25 +931,27 @@ static void parallel_create_carrier(const void *restrict start, size_t width, si
         const struct create_carrier_arg *createArgs = (const struct create_carrier_arg *) args;
         while (len--) {
                 encode_sync_create(&carrier->local_dictionary,
-                        createArgs->local_capacity,
-                        createArgs->local_bucket_num,
-                        createArgs->local_bucket_cap,
-                        0,
-                        createArgs->alloc);
+                                   createArgs->local_capacity,
+                                   createArgs->local_bucket_num,
+                                   createArgs->local_bucket_cap,
+                                   0,
+                                   createArgs->alloc);
                 memset(&carrier->thread, 0, sizeof(pthread_t));
                 carrier++;
         }
 }
 
 static bool this_setup_carriers(struct strdic *self, size_t capacity, size_t num_index_buckets,
-        size_t approx_num_unique_str, size_t num_threads)
+                                size_t approx_num_unique_str, size_t num_threads)
 {
         struct async_extra *extra = THIS_EXTRAS(self);
         size_t local_bucket_num = ark_max(1, num_index_buckets / num_threads);
         struct carrier new_carrier;
 
         struct create_carrier_arg createArgs = {.local_capacity = ark_max(1,
-                capacity / num_threads), .local_bucket_num = local_bucket_num, .local_bucket_cap = ark_max(1,
+                                                                          capacity /
+                                                                          num_threads), .local_bucket_num = local_bucket_num, .local_bucket_cap = ark_max(
+                1,
                 approx_num_unique_str / num_threads / local_bucket_num / SLICE_KEY_COLUMN_MAX_ELEMS), .alloc = &self
                 ->alloc};
 
@@ -949,12 +961,12 @@ static bool this_setup_carriers(struct strdic *self, size_t capacity, size_t num
         }
 
         parallel_for(vec_all(&extra->carriers, struct carrier),
-                sizeof(struct carrier),
-                num_threads,
-                parallel_create_carrier,
-                &createArgs,
-                THREADING_HINT_MULTI,
-                num_threads);
+                     sizeof(struct carrier),
+                     num_threads,
+                     parallel_create_carrier,
+                     &createArgs,
+                     THREADING_HINT_MULTI,
+                     num_threads);
 
         return true;
 }

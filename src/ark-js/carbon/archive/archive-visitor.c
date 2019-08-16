@@ -22,12 +22,14 @@
 #include <ark-js/carbon/archive/archive-query.h>
 
 static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
-        struct vector ofType(struct path_entry) *path_stack, struct archive_visitor *visitor, int mask, void *capture,
-        bool is_root_object, field_sid_t parent_key, u32 parent_key_array_idx);
+                          struct vector ofType(struct path_entry) *path_stack, struct archive_visitor *visitor,
+                          int mask, void *capture,
+                          bool is_root_object, field_sid_t parent_key, u32 parent_key_array_idx);
 
 static void iterate_objects(struct archive *archive, const field_sid_t *keys, u32 num_pairs,
-        struct archive_value_vector *value_iter, struct vector ofType(struct path_entry) *path_stack,
-        struct archive_visitor *visitor, int mask, void *capture, bool is_root_object)
+                            struct archive_value_vector *value_iter,
+                            struct vector ofType(struct path_entry) *path_stack,
+                            struct archive_visitor *visitor, int mask, void *capture, bool is_root_object)
 {
         unused(num_pairs);
 
@@ -61,44 +63,44 @@ static void iterate_objects(struct archive *archive, const field_sid_t *keys, u3
                         enum visit_policy visit = VISIT_INCLUDE;
                         if (visitor->before_object_visit) {
                                 visit = visitor->before_object_visit(archive,
-                                        path_stack,
-                                        parent_object_id,
-                                        object_id,
-                                        i,
-                                        vector_length,
-                                        keys[i],
-                                        capture);
+                                                                     path_stack,
+                                                                     parent_object_id,
+                                                                     object_id,
+                                                                     i,
+                                                                     vector_length,
+                                                                     keys[i],
+                                                                     capture);
                         }
                         if (visit == VISIT_INCLUDE) {
                                 iterate_props(archive,
-                                        &prop_iter,
-                                        path_stack,
-                                        visitor,
-                                        mask,
-                                        capture,
-                                        false,
-                                        parent_key,
-                                        parent_key_array_idx);
+                                              &prop_iter,
+                                              path_stack,
+                                              visitor,
+                                              mask,
+                                              capture,
+                                              false,
+                                              parent_key,
+                                              parent_key_array_idx);
                                 ark_optional_call(visitor,
-                                        after_object_visit,
-                                        archive,
-                                        path_stack,
-                                        object_id,
-                                        i,
-                                        vector_length,
-                                        capture);
+                                                  after_object_visit,
+                                                  archive,
+                                                  path_stack,
+                                                  object_id,
+                                                  i,
+                                                  vector_length,
+                                                  capture);
                         }
                 } else {
                         ark_optional_call(visitor, visit_root_object, archive, object_id, capture);
                         iterate_props(archive,
-                                &prop_iter,
-                                path_stack,
-                                visitor,
-                                mask,
-                                capture,
-                                false,
-                                parent_key,
-                                parent_key_array_idx);
+                                      &prop_iter,
+                                      path_stack,
+                                      visitor,
+                                      mask,
+                                      capture,
+                                      false,
+                                      parent_key,
+                                      parent_key_array_idx);
                 }
 
                 //  vec_pop(path_stack);
@@ -146,8 +148,9 @@ static void iterate_objects(struct archive *archive, const field_sid_t *keys, u3
 }
 
 static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
-        struct vector ofType(struct path_entry) *path_stack, struct archive_visitor *visitor, int mask, void *capture,
-        bool is_root_object, field_sid_t parent_key, u32 parent_key_array_idx)
+                          struct vector ofType(struct path_entry) *path_stack, struct archive_visitor *visitor,
+                          int mask, void *capture,
+                          bool is_root_object, field_sid_t parent_key, u32 parent_key_array_idx)
 {
         object_id_t this_object_oid;
         struct archive_value_vector value_iter;
@@ -178,154 +181,154 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
 
                         for (u32 i = 0; i < num_pairs; i++) {
                                 ark_optional_call(visitor,
-                                        visit_object_property,
-                                        archive,
-                                        path_stack,
-                                        this_object_oid,
-                                        keys[i],
-                                        type,
-                                        is_array,
-                                        capture);
+                                                  visit_object_property,
+                                                  archive,
+                                                  path_stack,
+                                                  this_object_oid,
+                                                  keys[i],
+                                                  type,
+                                                  is_array,
+                                                  capture);
 
                                 struct path_entry e = {.key = keys[i], .idx = 666};
                                 vec_push(path_stack, &e, 1);
                                 //archive_visitor_print_path(stderr, archive, path_stack);
                                 ark_optional_call(visitor,
-                                        visit_object_array_prop,
-                                        archive,
-                                        path_stack,
-                                        this_object_oid,
-                                        keys[i],
-                                        type,
-                                        capture);
+                                                  visit_object_array_prop,
+                                                  archive,
+                                                  path_stack,
+                                                  this_object_oid,
+                                                  keys[i],
+                                                  type,
+                                                  capture);
                                 vec_pop(path_stack);
                         }
 
                         if (unlikely(first_type_group)) {
                                 ark_optional_call(visitor,
-                                        first_prop_type_group,
-                                        archive,
-                                        path_stack,
-                                        this_object_oid,
-                                        keys,
-                                        type,
-                                        is_array,
-                                        num_pairs,
-                                        capture);
+                                                  first_prop_type_group,
+                                                  archive,
+                                                  path_stack,
+                                                  this_object_oid,
+                                                  keys,
+                                                  type,
+                                                  is_array,
+                                                  num_pairs,
+                                                  capture);
                         } else {
                                 ark_optional_call(visitor,
-                                        next_prop_type_group,
-                                        archive,
-                                        path_stack,
-                                        this_object_oid,
-                                        keys,
-                                        type,
-                                        is_array,
-                                        num_pairs,
-                                        capture);
+                                                  next_prop_type_group,
+                                                  archive,
+                                                  path_stack,
+                                                  this_object_oid,
+                                                  keys,
+                                                  type,
+                                                  is_array,
+                                                  num_pairs,
+                                                  capture);
                         }
 
                         switch (type) {
-                        case FIELD_OBJECT:
-                                assert (!is_array);
-                                iterate_objects(archive,
-                                        keys,
-                                        num_pairs,
-                                        &value_iter,
-                                        path_stack,
-                                        visitor,
-                                        mask,
-                                        capture,
-                                        is_root_object);
-                                //for (size_t i = 0; i < num_pairs; i++) {
-                                //    iterate_objects(archive, &keys[i], 1, &value_iter, path_stack, visitor, mask, capture, is_root_object, keys[i], i);
-                                //}
-                                break;
-                        case FIELD_NULL:
-                                if (is_array) {
-                                        enum visit_policy visit = VISIT_INCLUDE;
-                                        if (visitor->visit_enter_null_array_pairs) {
-                                                visit = visitor->visit_enter_null_array_pairs(archive,
-                                                        path_stack,
-                                                        this_object_oid,
+                                case FIELD_OBJECT:
+                                        assert (!is_array);
+                                        iterate_objects(archive,
                                                         keys,
                                                         num_pairs,
-                                                        capture);
-                                        }
-                                        if (visit == VISIT_INCLUDE) {
-                                                const field_u32_t *num_values =
-                                                        archive_value_vector_get_null_arrays(NULL, &value_iter);
-                                                for (u32 prop_idx = 0; prop_idx < num_pairs; prop_idx++) {
-                                                        ark_optional_call(visitor,
-                                                                visit_enter_null_array_pair,
-                                                                archive,
-                                                                path_stack,
-                                                                this_object_oid,
-                                                                keys[prop_idx],
-                                                                prop_idx,
-                                                                num_values[prop_idx],
-                                                                capture);
-                                                        ark_optional_call(visitor,
-                                                                visit_null_array_pair,
-                                                                archive,
-                                                                path_stack,
-                                                                this_object_oid,
-                                                                keys[prop_idx],
-                                                                prop_idx,
-                                                                num_pairs,
-                                                                num_values[prop_idx],
-                                                                capture)
-                                                        ark_optional_call(visitor,
-                                                                visit_leave_null_array_pair,
-                                                                archive,
-                                                                path_stack,
-                                                                this_object_oid,
-                                                                prop_idx,
-                                                                num_pairs,
-                                                                capture);
+                                                        &value_iter,
+                                                        path_stack,
+                                                        visitor,
+                                                        mask,
+                                                        capture,
+                                                        is_root_object);
+                                        //for (size_t i = 0; i < num_pairs; i++) {
+                                        //    iterate_objects(archive, &keys[i], 1, &value_iter, path_stack, visitor, mask, capture, is_root_object, keys[i], i);
+                                        //}
+                                        break;
+                                case FIELD_NULL:
+                                        if (is_array) {
+                                                enum visit_policy visit = VISIT_INCLUDE;
+                                                if (visitor->visit_enter_null_array_pairs) {
+                                                        visit = visitor->visit_enter_null_array_pairs(archive,
+                                                                                                      path_stack,
+                                                                                                      this_object_oid,
+                                                                                                      keys,
+                                                                                                      num_pairs,
+                                                                                                      capture);
                                                 }
-                                                ark_optional_call(visitor,
-                                                        visit_leave_int8_array_pairs,
-                                                        archive,
-                                                        path_stack,
-                                                        this_object_oid,
-                                                        capture);
+                                                if (visit == VISIT_INCLUDE) {
+                                                        const field_u32_t *num_values =
+                                                                archive_value_vector_get_null_arrays(NULL, &value_iter);
+                                                        for (u32 prop_idx = 0; prop_idx < num_pairs; prop_idx++) {
+                                                                ark_optional_call(visitor,
+                                                                                  visit_enter_null_array_pair,
+                                                                                  archive,
+                                                                                  path_stack,
+                                                                                  this_object_oid,
+                                                                                  keys[prop_idx],
+                                                                                  prop_idx,
+                                                                                  num_values[prop_idx],
+                                                                                  capture);
+                                                                ark_optional_call(visitor,
+                                                                                  visit_null_array_pair,
+                                                                                  archive,
+                                                                                  path_stack,
+                                                                                  this_object_oid,
+                                                                                  keys[prop_idx],
+                                                                                  prop_idx,
+                                                                                  num_pairs,
+                                                                                  num_values[prop_idx],
+                                                                                  capture)
+                                                                ark_optional_call(visitor,
+                                                                                  visit_leave_null_array_pair,
+                                                                                  archive,
+                                                                                  path_stack,
+                                                                                  this_object_oid,
+                                                                                  prop_idx,
+                                                                                  num_pairs,
+                                                                                  capture);
+                                                        }
+                                                        ark_optional_call(visitor,
+                                                                          visit_leave_int8_array_pairs,
+                                                                          archive,
+                                                                          path_stack,
+                                                                          this_object_oid,
+                                                                          capture);
+                                                }
+                                        } else {
+                                                if (visitor->visit_null_pairs) {
+                                                        visitor->visit_null_pairs(archive,
+                                                                                  path_stack,
+                                                                                  this_object_oid,
+                                                                                  keys,
+                                                                                  num_pairs,
+                                                                                  capture);
+                                                }
                                         }
-                                } else {
-                                        if (visitor->visit_null_pairs) {
-                                                visitor->visit_null_pairs(archive,
-                                                        path_stack,
-                                                        this_object_oid,
-                                                        keys,
-                                                        num_pairs,
-                                                        capture);
-                                        }
-                                }
-                                break;
-                        case FIELD_INT8: SET_TYPE_SWITCH_CASE(int8, field_i8_t)
-                                break;
-                        case FIELD_INT16: SET_TYPE_SWITCH_CASE(int16, field_i16_t)
-                                break;
-                        case FIELD_INT32: SET_TYPE_SWITCH_CASE(int32, field_i32_t)
-                                break;
-                        case FIELD_INT64: SET_TYPE_SWITCH_CASE(int64, field_i64_t)
-                                break;
-                        case FIELD_UINT8: SET_TYPE_SWITCH_CASE(uint8, field_u8_t)
-                                break;
-                        case FIELD_UINT16: SET_TYPE_SWITCH_CASE(uint16, field_u16_t)
-                                break;
-                        case FIELD_UINT32: SET_TYPE_SWITCH_CASE(uint32, field_u32_t)
-                                break;
-                        case FIELD_UINT64: SET_TYPE_SWITCH_CASE(uint64, field_u64_t)
-                                break;
-                        case FIELD_FLOAT: SET_TYPE_SWITCH_CASE(number, field_number_t)
-                                break;
-                        case FIELD_STRING: SET_TYPE_SWITCH_CASE(string, field_sid_t)
-                                break;
-                        case FIELD_BOOLEAN: SET_TYPE_SWITCH_CASE(boolean, field_boolean_t)
-                                break;
-                        default:
-                                break;
+                                        break;
+                                case FIELD_INT8: SET_TYPE_SWITCH_CASE(int8, field_i8_t)
+                                        break;
+                                case FIELD_INT16: SET_TYPE_SWITCH_CASE(int16, field_i16_t)
+                                        break;
+                                case FIELD_INT32: SET_TYPE_SWITCH_CASE(int32, field_i32_t)
+                                        break;
+                                case FIELD_INT64: SET_TYPE_SWITCH_CASE(int64, field_i64_t)
+                                        break;
+                                case FIELD_UINT8: SET_TYPE_SWITCH_CASE(uint8, field_u8_t)
+                                        break;
+                                case FIELD_UINT16: SET_TYPE_SWITCH_CASE(uint16, field_u16_t)
+                                        break;
+                                case FIELD_UINT32: SET_TYPE_SWITCH_CASE(uint32, field_u32_t)
+                                        break;
+                                case FIELD_UINT64: SET_TYPE_SWITCH_CASE(uint64, field_u64_t)
+                                        break;
+                                case FIELD_FLOAT: SET_TYPE_SWITCH_CASE(number, field_number_t)
+                                        break;
+                                case FIELD_STRING: SET_TYPE_SWITCH_CASE(string, field_sid_t)
+                                        break;
+                                case FIELD_BOOLEAN: SET_TYPE_SWITCH_CASE(boolean, field_boolean_t)
+                                        break;
+                                default:
+                                        break;
                         }
 
                         first_type_group = false;
@@ -334,7 +337,7 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                         u32 num_column_groups;
                         keys = archive_collection_iter_get_keys(&num_column_groups, &collection_iter);
 
-                        bool *skip_groups_by_key = malloc(num_column_groups * sizeof(bool));
+                        bool *skip_groups_by_key = ark_malloc(num_column_groups * sizeof(bool));
                         ark_zero_memory(skip_groups_by_key, num_column_groups * sizeof(bool));
 
                         if (visitor->before_visit_object_array) {
@@ -345,10 +348,10 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
 
 
                                         enum visit_policy policy = visitor->before_visit_object_array(archive,
-                                                path_stack,
-                                                this_object_oid,
-                                                keys[i],
-                                                capture);
+                                                                                                      path_stack,
+                                                                                                      this_object_oid,
+                                                                                                      keys[i],
+                                                                                                      capture);
 
                                         //     vec_pop(path_stack);
 
@@ -366,19 +369,19 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                                         field_sid_t group_key = keys[current_group_idx];
                                         const object_id_t *column_group_object_ids =
                                                 archive_column_group_get_object_ids(&num_column_group_objs,
-                                                        &group_iter);
-                                        bool *skip_objects = malloc(num_column_group_objs * sizeof(bool));
+                                                                                    &group_iter);
+                                        bool *skip_objects = ark_malloc(num_column_group_objs * sizeof(bool));
                                         ark_zero_memory(skip_objects, num_column_group_objs * sizeof(bool));
 
                                         if (visitor->before_visit_object_array_objects) {
                                                 visitor->before_visit_object_array_objects(skip_objects,
-                                                        archive,
-                                                        path_stack,
-                                                        this_object_oid,
-                                                        group_key,
-                                                        column_group_object_ids,
-                                                        num_column_group_objs,
-                                                        capture);
+                                                                                           archive,
+                                                                                           path_stack,
+                                                                                           this_object_oid,
+                                                                                           group_key,
+                                                                                           column_group_object_ids,
+                                                                                           num_column_group_objs,
+                                                                                           capture);
                                         }
 
                                         u32 current_column_group_obj_idx = 0;
@@ -390,8 +393,8 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                                                         enum field_type current_column_entry_type;
 
                                                         archive_column_get_name(&current_column_name,
-                                                                &current_column_entry_type,
-                                                                &column_iter);
+                                                                                &current_column_entry_type,
+                                                                                &column_iter);
 
                                                         struct path_entry e = {.key = current_column_name, .idx = 0};
                                                         vec_push(path_stack, &e, 1);
@@ -409,13 +412,13 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                                                          */
 
                                                         ark_optional_call(visitor,
-                                                                visit_object_array_prop,
-                                                                archive,
-                                                                path_stack,
-                                                                this_object_oid,
-                                                                current_column_name,
-                                                                current_column_entry_type,
-                                                                capture);
+                                                                          visit_object_array_prop,
+                                                                          archive,
+                                                                          path_stack,
+                                                                          this_object_oid,
+                                                                          current_column_name,
+                                                                          current_column_entry_type,
+                                                                          capture);
 
                                                         bool skip_column = false;
                                                         if (visitor->before_visit_object_array_object_property) {
@@ -434,12 +437,13 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                                                         if (!skip_column) {
                                                                 u32 num_positions;
                                                                 const u32 *entry_positions =
-                                                                        archive_column_get_entry_positions(&num_positions,
+                                                                        archive_column_get_entry_positions(
+                                                                                &num_positions,
                                                                                 &column_iter);
                                                                 archive_column_entry_iter_t entry_iter;
 
                                                                 object_id_t *entry_object_containments =
-                                                                        malloc(num_positions * sizeof(object_id_t));
+                                                                        ark_malloc(num_positions * sizeof(object_id_t));
                                                                 for (u32 m = 0; m < num_positions; m++) {
                                                                         entry_object_containments[m] =
                                                                                 column_group_object_ids[entry_positions[m]];
@@ -448,11 +452,11 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                                                                 if (visitor->get_column_entry_count) {
                                                                         bool shall_continue =
                                                                                 visitor->get_column_entry_count(archive,
-                                                                                        path_stack,
-                                                                                        current_column_name,
-                                                                                        current_column_entry_type,
-                                                                                        num_positions,
-                                                                                        capture);
+                                                                                                                path_stack,
+                                                                                                                current_column_name,
+                                                                                                                current_column_entry_type,
+                                                                                                                num_positions,
+                                                                                                                capture);
                                                                         if (!shall_continue) {
                                                                                 break;
                                                                         }
@@ -460,147 +464,165 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
 
                                                                 u32 current_entry_idx = 0;
                                                                 while (archive_column_next_entry(&entry_iter,
-                                                                        &column_iter)) {
+                                                                                                 &column_iter)) {
 
                                                                         object_id_t current_nested_object_id =
                                                                                 entry_object_containments[current_entry_idx];
                                                                         u32 entry_length;
 
                                                                         switch (current_column_entry_type) {
-                                                                        case FIELD_INT8: {
-                                                                                SET_NESTED_ARRAY_SWITCH_CASE(int8s,
-                                                                                        field_i8_t)
-                                                                        }
-                                                                                break;
-                                                                        case FIELD_INT16: {
-                                                                                SET_NESTED_ARRAY_SWITCH_CASE(int16s,
-                                                                                        field_i16_t)
-                                                                        }
-                                                                                break;
-                                                                        case FIELD_INT32: {
-                                                                                SET_NESTED_ARRAY_SWITCH_CASE(int32s,
-                                                                                        field_i32_t)
-                                                                        }
-                                                                                break;
-                                                                        case FIELD_INT64: {
-                                                                                SET_NESTED_ARRAY_SWITCH_CASE(int64s,
-                                                                                        field_i64_t)
-                                                                        }
-                                                                                break;
-                                                                        case FIELD_UINT8: {
-                                                                                SET_NESTED_ARRAY_SWITCH_CASE(uint8s,
-                                                                                        field_u8_t)
-                                                                        }
-                                                                                break;
-                                                                        case FIELD_UINT16: {
-                                                                                SET_NESTED_ARRAY_SWITCH_CASE(uint16s,
-                                                                                        field_u16_t)
-                                                                        }
-                                                                                break;
-                                                                        case FIELD_UINT32: {
-                                                                                SET_NESTED_ARRAY_SWITCH_CASE(uint32s,
-                                                                                        field_u32_t)
-                                                                        }
-                                                                                break;
-                                                                        case FIELD_UINT64: {
-                                                                                SET_NESTED_ARRAY_SWITCH_CASE(uint64s,
-                                                                                        field_u64_t)
-                                                                        }
-                                                                                break;
-                                                                        case FIELD_FLOAT: {
-                                                                                SET_NESTED_ARRAY_SWITCH_CASE(numbers,
-                                                                                        field_number_t)
-                                                                        }
-                                                                                break;
-                                                                        case FIELD_STRING: {
-                                                                                SET_NESTED_ARRAY_SWITCH_CASE(strings,
-                                                                                        field_sid_t)
-                                                                        }
-                                                                                break;
-                                                                        case FIELD_BOOLEAN: {
-                                                                                SET_NESTED_ARRAY_SWITCH_CASE(booleans,
-                                                                                        field_boolean_t)
-                                                                        }
-                                                                                break;
-                                                                        case FIELD_NULL: {
-                                                                                SET_NESTED_ARRAY_SWITCH_CASE(nulls,
-                                                                                        field_u32_t)
-                                                                        }
-                                                                                break;
-                                                                        case FIELD_OBJECT: {
-                                                                                struct column_object_iter iter;
-                                                                                const struct archive_object
-                                                                                        *archive_object;
-                                                                                archive_column_entry_get_objects(&iter,
-                                                                                        &entry_iter);
-
-                                                                                while ((archive_object =
-                                                                                                archive_column_entry_object_iter_next_object(
-                                                                                                        &iter))
-                                                                                        != NULL) {
-                                                                                        object_id_t id;
-                                                                                        archive_object_get_object_id(&id,
-                                                                                                archive_object);
-
-                                                                                        bool skip_object = false;
-                                                                                        if (visitor
-                                                                                                ->before_object_array_object_property_object) {
-                                                                                                enum visit_policy
-                                                                                                        policy =
-                                                                                                        visitor->before_object_array_object_property_object(
-                                                                                                                archive,
-                                                                                                                path_stack,
-                                                                                                                this_object_oid,
-                                                                                                                group_key,
-                                                                                                                current_nested_object_id,
-                                                                                                                current_column_name,
-                                                                                                                id,
-                                                                                                                capture);
-                                                                                                skip_object = policy
-                                                                                                        == VISIT_EXCLUDE;
-                                                                                        }
-
-                                                                                        if (!skip_object) {
-
-
-                                                                                                //keys[i]
-
-                                                                                                //struct path_entry e = { .key = current_column_name, .idx = 0 };
-                                                                                                //vec_push(path_stack, &e, 1);
-
-                                                                                                vec_pop(path_stack);
-
-                                                                                                struct err err;
-                                                                                                struct prop_iter
-                                                                                                        nested_obj_prop_iter;
-                                                                                                archive_prop_iter_from_object(
-                                                                                                        &nested_obj_prop_iter,
-                                                                                                        mask,
-                                                                                                        &err,
-                                                                                                        archive_object);
-                                                                                                iterate_props(archive,
-                                                                                                        &nested_obj_prop_iter,
-                                                                                                        path_stack,
-                                                                                                        visitor,
-                                                                                                        mask,
-                                                                                                        capture,
-                                                                                                        false,
-                                                                                                        current_column_name,
-                                                                                                        current_group_idx);
-
-                                                                                                struct path_entry e =
-                                                                                                        {.key = current_column_name, .idx = 0};
-                                                                                                vec_push(path_stack,
-                                                                                                        &e,
-                                                                                                        1);
-
-                                                                                        }
-
+                                                                                case FIELD_INT8: {
+                                                                                        SET_NESTED_ARRAY_SWITCH_CASE(
+                                                                                                int8s,
+                                                                                                field_i8_t)
                                                                                 }
-                                                                        }
-                                                                                break;
-                                                                        default:
-                                                                                break;
+                                                                                        break;
+                                                                                case FIELD_INT16: {
+                                                                                        SET_NESTED_ARRAY_SWITCH_CASE(
+                                                                                                int16s,
+                                                                                                field_i16_t)
+                                                                                }
+                                                                                        break;
+                                                                                case FIELD_INT32: {
+                                                                                        SET_NESTED_ARRAY_SWITCH_CASE(
+                                                                                                int32s,
+                                                                                                field_i32_t)
+                                                                                }
+                                                                                        break;
+                                                                                case FIELD_INT64: {
+                                                                                        SET_NESTED_ARRAY_SWITCH_CASE(
+                                                                                                int64s,
+                                                                                                field_i64_t)
+                                                                                }
+                                                                                        break;
+                                                                                case FIELD_UINT8: {
+                                                                                        SET_NESTED_ARRAY_SWITCH_CASE(
+                                                                                                uint8s,
+                                                                                                field_u8_t)
+                                                                                }
+                                                                                        break;
+                                                                                case FIELD_UINT16: {
+                                                                                        SET_NESTED_ARRAY_SWITCH_CASE(
+                                                                                                uint16s,
+                                                                                                field_u16_t)
+                                                                                }
+                                                                                        break;
+                                                                                case FIELD_UINT32: {
+                                                                                        SET_NESTED_ARRAY_SWITCH_CASE(
+                                                                                                uint32s,
+                                                                                                field_u32_t)
+                                                                                }
+                                                                                        break;
+                                                                                case FIELD_UINT64: {
+                                                                                        SET_NESTED_ARRAY_SWITCH_CASE(
+                                                                                                uint64s,
+                                                                                                field_u64_t)
+                                                                                }
+                                                                                        break;
+                                                                                case FIELD_FLOAT: {
+                                                                                        SET_NESTED_ARRAY_SWITCH_CASE(
+                                                                                                numbers,
+                                                                                                field_number_t)
+                                                                                }
+                                                                                        break;
+                                                                                case FIELD_STRING: {
+                                                                                        SET_NESTED_ARRAY_SWITCH_CASE(
+                                                                                                strings,
+                                                                                                field_sid_t)
+                                                                                }
+                                                                                        break;
+                                                                                case FIELD_BOOLEAN: {
+                                                                                        SET_NESTED_ARRAY_SWITCH_CASE(
+                                                                                                booleans,
+                                                                                                field_boolean_t)
+                                                                                }
+                                                                                        break;
+                                                                                case FIELD_NULL: {
+                                                                                        SET_NESTED_ARRAY_SWITCH_CASE(
+                                                                                                nulls,
+                                                                                                field_u32_t)
+                                                                                }
+                                                                                        break;
+                                                                                case FIELD_OBJECT: {
+                                                                                        struct column_object_iter iter;
+                                                                                        const struct archive_object
+                                                                                                *archive_object;
+                                                                                        archive_column_entry_get_objects(
+                                                                                                &iter,
+                                                                                                &entry_iter);
+
+                                                                                        while ((archive_object =
+                                                                                                        archive_column_entry_object_iter_next_object(
+                                                                                                                &iter))
+                                                                                               != NULL) {
+                                                                                                object_id_t id;
+                                                                                                archive_object_get_object_id(
+                                                                                                        &id,
+                                                                                                        archive_object);
+
+                                                                                                bool skip_object = false;
+                                                                                                if (visitor
+                                                                                                        ->before_object_array_object_property_object) {
+                                                                                                        enum visit_policy
+                                                                                                                policy =
+                                                                                                                visitor->before_object_array_object_property_object(
+                                                                                                                        archive,
+                                                                                                                        path_stack,
+                                                                                                                        this_object_oid,
+                                                                                                                        group_key,
+                                                                                                                        current_nested_object_id,
+                                                                                                                        current_column_name,
+                                                                                                                        id,
+                                                                                                                        capture);
+                                                                                                        skip_object =
+                                                                                                                policy
+                                                                                                                ==
+                                                                                                                VISIT_EXCLUDE;
+                                                                                                }
+
+                                                                                                if (!skip_object) {
+
+
+                                                                                                        //keys[i]
+
+                                                                                                        //struct path_entry e = { .key = current_column_name, .idx = 0 };
+                                                                                                        //vec_push(path_stack, &e, 1);
+
+                                                                                                        vec_pop(path_stack);
+
+                                                                                                        struct err err;
+                                                                                                        struct prop_iter
+                                                                                                                nested_obj_prop_iter;
+                                                                                                        archive_prop_iter_from_object(
+                                                                                                                &nested_obj_prop_iter,
+                                                                                                                mask,
+                                                                                                                &err,
+                                                                                                                archive_object);
+                                                                                                        iterate_props(
+                                                                                                                archive,
+                                                                                                                &nested_obj_prop_iter,
+                                                                                                                path_stack,
+                                                                                                                visitor,
+                                                                                                                mask,
+                                                                                                                capture,
+                                                                                                                false,
+                                                                                                                current_column_name,
+                                                                                                                current_group_idx);
+
+                                                                                                        struct path_entry e =
+                                                                                                                {.key = current_column_name, .idx = 0};
+                                                                                                        vec_push(
+                                                                                                                path_stack,
+                                                                                                                &e,
+                                                                                                                1);
+
+                                                                                                }
+
+                                                                                        }
+                                                                                }
+                                                                                        break;
+                                                                                default:
+                                                                                        break;
                                                                         }
 
                                                                         current_entry_idx++;
@@ -624,8 +646,8 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
         vec_pop(path_stack);
 }
 
-ARK_EXPORT(bool) archive_visit_archive(struct archive *archive, const struct archive_visitor_desc *desc,
-        struct archive_visitor *visitor, void *capture)
+bool archive_visit_archive(struct archive *archive, const struct archive_visitor_desc *desc,
+                           struct archive_visitor *visitor, void *capture)
 {
         error_if_null(archive)
         error_if_null(visitor)
@@ -649,8 +671,8 @@ ARK_EXPORT(bool) archive_visit_archive(struct archive *archive, const struct arc
 
 #include <inttypes.h>
 
-ARK_EXPORT(void) archive_visitor_path_to_string(char path_buffer[2048], struct archive *archive,
-        const struct vector ofType(struct path_entry) *path_stack)
+void archive_visitor_path_to_string(char path_buffer[2048], struct archive *archive,
+                                    const struct vector ofType(struct path_entry) *path_stack)
 {
 
         struct archive_query *query = archive_query_default(archive);
@@ -668,8 +690,8 @@ ARK_EXPORT(void) archive_visitor_path_to_string(char path_buffer[2048], struct a
         }
 }
 
-ARK_EXPORT(bool) archive_visitor_print_path(FILE *file, struct archive *archive,
-        const struct vector ofType(struct path_entry) *path_stack)
+bool archive_visitor_print_path(FILE *file, struct archive *archive,
+                                const struct vector ofType(struct path_entry) *path_stack)
 {
         error_if_null(file)
         error_if_null(path_stack)
@@ -697,8 +719,8 @@ ARK_EXPORT(bool) archive_visitor_print_path(FILE *file, struct archive *archive,
         return true;
 }
 
-ARK_EXPORT(bool) archive_visitor_path_compare(const struct vector ofType(struct path_entry) *path,
-        field_sid_t *group_name, const char *path_str, struct archive *archive)
+bool archive_visitor_path_compare(const struct vector ofType(struct path_entry) *path,
+                                  field_sid_t *group_name, const char *path_str, struct archive *archive)
 {
         char path_buffer[2048];
         memset(path_buffer, 0, sizeof(path_buffer));

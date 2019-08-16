@@ -19,7 +19,7 @@
 #include <ark-js/carbon/archive/archive-int.h>
 
 void int_read_prop_offsets(struct archive_prop_offs *prop_offsets, struct memfile *memfile,
-        const union object_flags *flags)
+                           const union object_flags *flags)
 {
         ark_zero_memory(prop_offsets, sizeof(struct archive_prop_offs));
         if (flags->bits.has_null_props) {
@@ -154,47 +154,47 @@ field_e // TODO: check whether 'field_e' can be replaced by 'enum field_type'
 int_marker_to_field_type(char symbol)
 {
         switch (symbol) {
-        case MARKER_SYMBOL_PROP_NULL:
-        case MARKER_SYMBOL_PROP_NULL_ARRAY:
-                return FIELD_NULL;
-        case MARKER_SYMBOL_PROP_BOOLEAN:
-        case MARKER_SYMBOL_PROP_BOOLEAN_ARRAY:
-                return FIELD_BOOLEAN;
-        case MARKER_SYMBOL_PROP_INT8:
-        case MARKER_SYMBOL_PROP_INT8_ARRAY:
-                return FIELD_INT8;
-        case MARKER_SYMBOL_PROP_INT16:
-        case MARKER_SYMBOL_PROP_INT16_ARRAY:
-                return FIELD_INT16;
-        case MARKER_SYMBOL_PROP_INT32:
-        case MARKER_SYMBOL_PROP_INT32_ARRAY:
-                return FIELD_INT32;
-        case MARKER_SYMBOL_PROP_INT64:
-        case MARKER_SYMBOL_PROP_INT64_ARRAY:
-                return FIELD_INT64;
-        case MARKER_SYMBOL_PROP_UINT8:
-        case MARKER_SYMBOL_PROP_UINT8_ARRAY:
-                return FIELD_UINT8;
-        case MARKER_SYMBOL_PROP_UINT16:
-        case MARKER_SYMBOL_PROP_UINT16_ARRAY:
-                return FIELD_UINT16;
-        case MARKER_SYMBOL_PROP_UINT32:
-        case MARKER_SYMBOL_PROP_UINT32_ARRAY:
-                return FIELD_UINT32;
-        case MARKER_SYMBOL_PROP_UINT64:
-        case MARKER_SYMBOL_PROP_UINT64_ARRAY:
-                return FIELD_UINT64;
-        case MARKER_SYMBOL_PROP_REAL:
-        case MARKER_SYMBOL_PROP_REAL_ARRAY:
-                return FIELD_FLOAT;
-        case MARKER_SYMBOL_PROP_TEXT:
-        case MARKER_SYMBOL_PROP_TEXT_ARRAY:
-                return FIELD_STRING;
-        case MARKER_SYMBOL_PROP_OBJECT:
-        case MARKER_SYMBOL_PROP_OBJECT_ARRAY:
-                return FIELD_OBJECT;
-        default: {
-                print_error_and_die(ARK_ERR_MARKERMAPPING);
-        }
+                case MARKER_SYMBOL_PROP_NULL:
+                case MARKER_SYMBOL_PROP_NULL_ARRAY:
+                        return FIELD_NULL;
+                case MARKER_SYMBOL_PROP_BOOLEAN:
+                case MARKER_SYMBOL_PROP_BOOLEAN_ARRAY:
+                        return FIELD_BOOLEAN;
+                case MARKER_SYMBOL_PROP_INT8:
+                case MARKER_SYMBOL_PROP_INT8_ARRAY:
+                        return FIELD_INT8;
+                case MARKER_SYMBOL_PROP_INT16:
+                case MARKER_SYMBOL_PROP_INT16_ARRAY:
+                        return FIELD_INT16;
+                case MARKER_SYMBOL_PROP_INT32:
+                case MARKER_SYMBOL_PROP_INT32_ARRAY:
+                        return FIELD_INT32;
+                case MARKER_SYMBOL_PROP_INT64:
+                case MARKER_SYMBOL_PROP_INT64_ARRAY:
+                        return FIELD_INT64;
+                case MARKER_SYMBOL_PROP_UINT8:
+                case MARKER_SYMBOL_PROP_UINT8_ARRAY:
+                        return FIELD_UINT8;
+                case MARKER_SYMBOL_PROP_UINT16:
+                case MARKER_SYMBOL_PROP_UINT16_ARRAY:
+                        return FIELD_UINT16;
+                case MARKER_SYMBOL_PROP_UINT32:
+                case MARKER_SYMBOL_PROP_UINT32_ARRAY:
+                        return FIELD_UINT32;
+                case MARKER_SYMBOL_PROP_UINT64:
+                case MARKER_SYMBOL_PROP_UINT64_ARRAY:
+                        return FIELD_UINT64;
+                case MARKER_SYMBOL_PROP_REAL:
+                case MARKER_SYMBOL_PROP_REAL_ARRAY:
+                        return FIELD_FLOAT;
+                case MARKER_SYMBOL_PROP_TEXT:
+                case MARKER_SYMBOL_PROP_TEXT_ARRAY:
+                        return FIELD_STRING;
+                case MARKER_SYMBOL_PROP_OBJECT:
+                case MARKER_SYMBOL_PROP_OBJECT_ARRAY:
+                        return FIELD_OBJECT;
+                default: {
+                        print_error_and_die(ARK_ERR_MARKERMAPPING);
+                }
         }
 }

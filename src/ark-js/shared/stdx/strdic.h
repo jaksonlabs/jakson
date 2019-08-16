@@ -34,99 +34,99 @@ ARK_FORWARD_STRUCT_DECL(Vector)
 struct strhash_counters;
 
 enum strdic_tag {
-        SYNC, ASYNC
+    SYNC, ASYNC
 };
 
 /**
  * Thread-safe string pool implementation
  */
 struct strdic {
-        /**
-         * Implementation-specific fields
-         */
-        void *extra;
+    /**
+     * Implementation-specific fields
+     */
+    void *extra;
 
-        /**
-         * Tag determining the current implementation
-         */
-        enum strdic_tag tag;
+    /**
+     * Tag determining the current implementation
+     */
+    enum strdic_tag tag;
 
-        /**
-         * Memory allocator that is used to get memory for user data
-         */
-        struct allocator alloc;
+    /**
+     * Memory allocator that is used to get memory for user data
+     */
+    struct allocator alloc;
 
-        /**
-         * Frees up implementation-specific resources.
-         *
-         * Note: Implementation must ensure thread-safeness
-         */
-        bool (*drop)(struct strdic *self);
+    /**
+     * Frees up implementation-specific resources.
+     *
+     * Note: Implementation must ensure thread-safeness
+     */
+    bool (*drop)(struct strdic *self);
 
-        /**
-         * Inserts a particular number of strings into this dictionary and returns associated string identifiers.
-         *
-         * Note: Implementation must ensure thread-safeness
-        */
-        bool (*insert)(struct strdic *self, field_sid_t **out, char *const *strings, size_t nstrings, size_t nthreads);
+    /**
+     * Inserts a particular number of strings into this dictionary and returns associated string identifiers.
+     *
+     * Note: Implementation must ensure thread-safeness
+    */
+    bool (*insert)(struct strdic *self, field_sid_t **out, char *const *strings, size_t nstrings, size_t nthreads);
 
-        /**
-         * Removes a particular number of strings from this dictionary by their ids. The caller must ensure that
-         * all string identifiers in <code>strings</code> are valid.
-         *
-         * Note: Implementation must ensure thread-safeness
-         */
-        bool (*remove)(struct strdic *self, field_sid_t *strings, size_t nstrings);
+    /**
+     * Removes a particular number of strings from this dictionary by their ids. The caller must ensure that
+     * all string identifiers in <code>strings</code> are valid.
+     *
+     * Note: Implementation must ensure thread-safeness
+     */
+    bool (*remove)(struct strdic *self, field_sid_t *strings, size_t nstrings);
 
-        /**
-         * Get the string ids associated with <code>keys</code> in this parallel_map_exec (if any).
-         *
-         * Note: Implementation must ensure thread-safeness
-         */
-        bool (*locate_safe)(struct strdic *self, field_sid_t **out, bool **found_mask, size_t *num_not_found,
-                char *const *keys, size_t num_keys);
+    /**
+     * Get the string ids associated with <code>keys</code> in this parallel_map_exec (if any).
+     *
+     * Note: Implementation must ensure thread-safeness
+     */
+    bool (*locate_safe)(struct strdic *self, field_sid_t **out, bool **found_mask, size_t *num_not_found,
+                        char *const *keys, size_t num_keys);
 
-        /**
-         * Get the string ids associated with <code>keys</code> in this dic. All keys <u>must</u> exist.
-         *
-         * Note: Implementation must ensure thread-safeness
-        */
-        bool (*locate_fast)(struct strdic *self, field_sid_t **out, char *const *keys, size_t num_keys);
+    /**
+     * Get the string ids associated with <code>keys</code> in this dic. All keys <u>must</u> exist.
+     *
+     * Note: Implementation must ensure thread-safeness
+    */
+    bool (*locate_fast)(struct strdic *self, field_sid_t **out, char *const *keys, size_t num_keys);
 
-        /**
-         * Extracts strings given their string identifier. All <code>ids</code> must be known.
-         *
-         * Note: Implementation must ensure thread-safeness
-         */
-        char **(*extract)(struct strdic *self, const field_sid_t *ids, size_t num_ids);
+    /**
+     * Extracts strings given their string identifier. All <code>ids</code> must be known.
+     *
+     * Note: Implementation must ensure thread-safeness
+     */
+    char **(*extract)(struct strdic *self, const field_sid_t *ids, size_t num_ids);
 
-        /**
-         * Frees up memory allocated inside a function call via the allocator given in the constructor
-         *
-         * Note: Implementation must ensure thread-safeness
-         */
-        bool (*free)(struct strdic *self, void *ptr);
+    /**
+     * Frees up memory allocated inside a function call via the allocator given in the constructor
+     *
+     * Note: Implementation must ensure thread-safeness
+     */
+    bool (*free)(struct strdic *self, void *ptr);
 
-        /**
-         * Reset internal statistic counters
-         */
-        bool (*resetCounters)(struct strdic *self);
+    /**
+     * Reset internal statistic counters
+     */
+    bool (*resetCounters)(struct strdic *self);
 
-        /**
-         * Get internal statistic counters
-         */
-        bool (*counters)(struct strdic *self, struct strhash_counters *counters);
+    /**
+     * Get internal statistic counters
+     */
+    bool (*counters)(struct strdic *self, struct strhash_counters *counters);
 
-        /**
-         * Returns number of distinct strings stored in the dictionary
-         */
-        bool (*num_distinct)(struct strdic *self, size_t *num);
+    /**
+     * Returns number of distinct strings stored in the dictionary
+     */
+    bool (*num_distinct)(struct strdic *self, size_t *num);
 
-        /**
-         * Returns all contained (unique) strings and their mapped (unique) ids
-         */
-        bool (*get_contents)(struct strdic *self, struct vector ofType (char *) *strings,
-                struct vector ofType(field_sid_t) *string_ids);
+    /**
+     * Returns all contained (unique) strings and their mapped (unique) ids
+     */
+    bool (*get_contents)(struct strdic *self, struct vector ofType (char *) *strings,
+                         struct vector ofType(field_sid_t) *string_ids);
 };
 
 /**
@@ -143,7 +143,8 @@ static bool strdic_drop(struct strdic *dic)
 }
 
 ark_func_unused
-static bool strdic_insert(struct strdic *dic, field_sid_t **out, char *const *strings, size_t nstrings, size_t nthreads)
+static bool
+strdic_insert(struct strdic *dic, field_sid_t **out, char *const *strings, size_t nstrings, size_t nthreads)
 {
         error_if_null(dic);
         error_if_null(strings);
@@ -178,7 +179,7 @@ static bool strdic_remove(struct strdic *dic, field_sid_t *strings, size_t num_s
 
 ark_func_unused
 static bool strdic_locate_safe(field_sid_t **out, bool **found_mask, size_t *num_not_found, struct strdic *dic,
-        char *const *keys, size_t num_keys)
+                               char *const *keys, size_t num_keys)
 {
         error_if_null(out);
         error_if_null(found_mask);
@@ -228,7 +229,7 @@ static bool strdic_num_distinct(size_t *num, struct strdic *dic)
 
 ark_func_unused
 static bool strdic_get_contents(struct vector ofType (char *) *strings, struct vector ofType(field_sid_t) *string_ids,
-        struct strdic *dic)
+                                struct strdic *dic)
 {
         error_if_null(strings)
         error_if_null(string_ids)

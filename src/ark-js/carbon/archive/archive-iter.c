@@ -48,66 +48,66 @@ static bool init_object_from_memfile(struct archive_object *obj, struct memfile 
 inline static offset_t offset_by_state(struct prop_iter *iter)
 {
         switch (iter->prop_cursor) {
-        case PROP_ITER_NULLS:
-                return iter->object.prop_offsets.nulls;
-        case PROP_ITER_BOOLS:
-                return iter->object.prop_offsets.bools;
-        case PROP_ITER_INT8S:
-                return iter->object.prop_offsets.int8s;
-        case PROP_ITER_INT16S:
-                return iter->object.prop_offsets.int16s;
-        case PROP_ITER_INT32S:
-                return iter->object.prop_offsets.int32s;
-        case PROP_ITER_INT64S:
-                return iter->object.prop_offsets.int64s;
-        case PROP_ITER_UINT8S:
-                return iter->object.prop_offsets.uint8s;
-        case PROP_ITER_UINT16S:
-                return iter->object.prop_offsets.uint16s;
-        case PROP_ITER_UINT32S:
-                return iter->object.prop_offsets.uint32s;
-        case PROP_ITER_UINT64S:
-                return iter->object.prop_offsets.uint64s;
-        case PROP_ITER_FLOATS:
-                return iter->object.prop_offsets.floats;
-        case PROP_ITER_STRINGS:
-                return iter->object.prop_offsets.strings;
-        case PROP_ITER_OBJECTS:
-                return iter->object.prop_offsets.objects;
-        case PROP_ITER_NULL_ARRAYS:
-                return iter->object.prop_offsets.null_arrays;
-        case PROP_ITER_BOOL_ARRAYS:
-                return iter->object.prop_offsets.bool_arrays;
-        case PROP_ITER_INT8_ARRAYS:
-                return iter->object.prop_offsets.int8_arrays;
-        case PROP_ITER_INT16_ARRAYS:
-                return iter->object.prop_offsets.int16_arrays;
-        case PROP_ITER_INT32_ARRAYS:
-                return iter->object.prop_offsets.int32_arrays;
-        case PROP_ITER_INT64_ARRAYS:
-                return iter->object.prop_offsets.int64_arrays;
-        case PROP_ITER_UINT8_ARRAYS:
-                return iter->object.prop_offsets.uint8_arrays;
-        case PROP_ITER_UINT16_ARRAYS:
-                return iter->object.prop_offsets.uint16_arrays;
-        case PROP_ITER_UINT32_ARRAYS:
-                return iter->object.prop_offsets.uint32_arrays;
-        case PROP_ITER_UINT64_ARRAYS:
-                return iter->object.prop_offsets.uint64_arrays;
-        case PROP_ITER_FLOAT_ARRAYS:
-                return iter->object.prop_offsets.float_arrays;
-        case PROP_ITER_STRING_ARRAYS:
-                return iter->object.prop_offsets.string_arrays;
-        case PROP_ITER_OBJECT_ARRAYS:
-                return iter->object.prop_offsets.object_arrays;
-        default: print_error_and_die(ARK_ERR_INTERNALERR)
+                case PROP_ITER_NULLS:
+                        return iter->object.prop_offsets.nulls;
+                case PROP_ITER_BOOLS:
+                        return iter->object.prop_offsets.bools;
+                case PROP_ITER_INT8S:
+                        return iter->object.prop_offsets.int8s;
+                case PROP_ITER_INT16S:
+                        return iter->object.prop_offsets.int16s;
+                case PROP_ITER_INT32S:
+                        return iter->object.prop_offsets.int32s;
+                case PROP_ITER_INT64S:
+                        return iter->object.prop_offsets.int64s;
+                case PROP_ITER_UINT8S:
+                        return iter->object.prop_offsets.uint8s;
+                case PROP_ITER_UINT16S:
+                        return iter->object.prop_offsets.uint16s;
+                case PROP_ITER_UINT32S:
+                        return iter->object.prop_offsets.uint32s;
+                case PROP_ITER_UINT64S:
+                        return iter->object.prop_offsets.uint64s;
+                case PROP_ITER_FLOATS:
+                        return iter->object.prop_offsets.floats;
+                case PROP_ITER_STRINGS:
+                        return iter->object.prop_offsets.strings;
+                case PROP_ITER_OBJECTS:
+                        return iter->object.prop_offsets.objects;
+                case PROP_ITER_NULL_ARRAYS:
+                        return iter->object.prop_offsets.null_arrays;
+                case PROP_ITER_BOOL_ARRAYS:
+                        return iter->object.prop_offsets.bool_arrays;
+                case PROP_ITER_INT8_ARRAYS:
+                        return iter->object.prop_offsets.int8_arrays;
+                case PROP_ITER_INT16_ARRAYS:
+                        return iter->object.prop_offsets.int16_arrays;
+                case PROP_ITER_INT32_ARRAYS:
+                        return iter->object.prop_offsets.int32_arrays;
+                case PROP_ITER_INT64_ARRAYS:
+                        return iter->object.prop_offsets.int64_arrays;
+                case PROP_ITER_UINT8_ARRAYS:
+                        return iter->object.prop_offsets.uint8_arrays;
+                case PROP_ITER_UINT16_ARRAYS:
+                        return iter->object.prop_offsets.uint16_arrays;
+                case PROP_ITER_UINT32_ARRAYS:
+                        return iter->object.prop_offsets.uint32_arrays;
+                case PROP_ITER_UINT64_ARRAYS:
+                        return iter->object.prop_offsets.uint64_arrays;
+                case PROP_ITER_FLOAT_ARRAYS:
+                        return iter->object.prop_offsets.float_arrays;
+                case PROP_ITER_STRING_ARRAYS:
+                        return iter->object.prop_offsets.string_arrays;
+                case PROP_ITER_OBJECT_ARRAYS:
+                        return iter->object.prop_offsets.object_arrays;
+                default: print_error_and_die(ARK_ERR_INTERNALERR)
         }
 }
 
 static bool prop_iter_read_colum_entry(struct collection_iter_state *state, struct memfile *memfile)
 {
         assert(state->current_column_group.current_column.current_entry.idx
-                < state->current_column_group.current_column.num_elem);
+               < state->current_column_group.current_column.num_elem);
 
         u32 current_idx = state->current_column_group.current_column.current_entry.idx;
         offset_t entry_off = state->current_column_group.current_column.elem_offsets[current_idx];
@@ -117,7 +117,7 @@ static bool prop_iter_read_colum_entry(struct collection_iter_state *state, stru
         state->current_column_group.current_column.current_entry.array_base = ARK_MEMFILE_PEEK(memfile, void);
 
         return (++state->current_column_group.current_column.current_entry.idx)
-                < state->current_column_group.current_column.num_elem;
+               < state->current_column_group.current_column.num_elem;
 }
 
 static bool prop_iter_read_column(struct collection_iter_state *state, struct memfile *memfile)
@@ -195,11 +195,11 @@ static void prop_iter_cursor_init(struct prop_iter *iter)
                 iter->mode_collection.num_column_groups = header->num_entries;
                 iter->mode_collection.current_column_group_idx = 0;
                 iter->mode_collection.column_group_keys = ARK_MEMFILE_READ_TYPE_LIST(&iter->record_table_memfile,
-                        field_sid_t,
-                        iter->mode_collection.num_column_groups);
+                                                                                     field_sid_t,
+                                                                                     iter->mode_collection.num_column_groups);
                 iter->mode_collection.column_group_offsets = ARK_MEMFILE_READ_TYPE_LIST(&iter->record_table_memfile,
-                        offset_t,
-                        iter->mode_collection.num_column_groups);
+                                                                                        offset_t,
+                                                                                        iter->mode_collection.num_column_groups);
 
         } else {
                 iter->mode_object.current_prop_group_off = offset_by_state(iter);
@@ -226,143 +226,143 @@ static void prop_iter_cursor_init(struct prop_iter *iter)
 static enum prop_iter_state prop_iter_state_next(struct prop_iter *iter)
 {
         switch (iter->prop_cursor) {
-        case PROP_ITER_INIT: SET_STATE_FOR_FALL_THROUGH(iter,
-                nulls,
-                ARK_ARCHIVE_ITER_MASK_PRIMITIVES,
-                ARK_ARCHIVE_ITER_MASK_NULL,
-                PROP_ITER_NULLS)
-        case PROP_ITER_NULLS: SET_STATE_FOR_FALL_THROUGH(iter,
-                bools,
-                ARK_ARCHIVE_ITER_MASK_PRIMITIVES,
-                ARK_ARCHIVE_ITER_MASK_BOOLEAN,
-                PROP_ITER_BOOLS)
-        case PROP_ITER_BOOLS: SET_STATE_FOR_FALL_THROUGH(iter,
-                int8s,
-                ARK_ARCHIVE_ITER_MASK_PRIMITIVES,
-                ARK_ARCHIVE_ITER_MASK_INT8,
-                PROP_ITER_INT8S)
-        case PROP_ITER_INT8S: SET_STATE_FOR_FALL_THROUGH(iter,
-                int16s,
-                ARK_ARCHIVE_ITER_MASK_PRIMITIVES,
-                ARK_ARCHIVE_ITER_MASK_INT16,
-                PROP_ITER_INT16S)
-        case PROP_ITER_INT16S: SET_STATE_FOR_FALL_THROUGH(iter,
-                int32s,
-                ARK_ARCHIVE_ITER_MASK_PRIMITIVES,
-                ARK_ARCHIVE_ITER_MASK_INT32,
-                PROP_ITER_INT32S)
-        case PROP_ITER_INT32S: SET_STATE_FOR_FALL_THROUGH(iter,
-                int64s,
-                ARK_ARCHIVE_ITER_MASK_PRIMITIVES,
-                ARK_ARCHIVE_ITER_MASK_INT64,
-                PROP_ITER_INT64S)
-        case PROP_ITER_INT64S: SET_STATE_FOR_FALL_THROUGH(iter,
-                uint8s,
-                ARK_ARCHIVE_ITER_MASK_PRIMITIVES,
-                ARK_ARCHIVE_ITER_MASK_UINT8,
-                PROP_ITER_UINT8S)
-        case PROP_ITER_UINT8S: SET_STATE_FOR_FALL_THROUGH(iter,
-                uint16s,
-                ARK_ARCHIVE_ITER_MASK_PRIMITIVES,
-                ARK_ARCHIVE_ITER_MASK_UINT16,
-                PROP_ITER_UINT16S)
-        case PROP_ITER_UINT16S: SET_STATE_FOR_FALL_THROUGH(iter,
-                uint32s,
-                ARK_ARCHIVE_ITER_MASK_PRIMITIVES,
-                ARK_ARCHIVE_ITER_MASK_UINT32,
-                PROP_ITER_UINT32S)
-        case PROP_ITER_UINT32S: SET_STATE_FOR_FALL_THROUGH(iter,
-                uint64s,
-                ARK_ARCHIVE_ITER_MASK_PRIMITIVES,
-                ARK_ARCHIVE_ITER_MASK_UINT64,
-                PROP_ITER_UINT64S)
-        case PROP_ITER_UINT64S: SET_STATE_FOR_FALL_THROUGH(iter,
-                floats,
-                ARK_ARCHIVE_ITER_MASK_PRIMITIVES,
-                ARK_ARCHIVE_ITER_MASK_NUMBER,
-                PROP_ITER_FLOATS)
-        case PROP_ITER_FLOATS: SET_STATE_FOR_FALL_THROUGH(iter,
-                strings,
-                ARK_ARCHIVE_ITER_MASK_PRIMITIVES,
-                ARK_ARCHIVE_ITER_MASK_STRING,
-                PROP_ITER_STRINGS)
-        case PROP_ITER_STRINGS: SET_STATE_FOR_FALL_THROUGH(iter,
-                objects,
-                ARK_ARCHIVE_ITER_MASK_PRIMITIVES,
-                ARK_ARCHIVE_ITER_MASK_OBJECT,
-                PROP_ITER_OBJECTS)
-        case PROP_ITER_OBJECTS: SET_STATE_FOR_FALL_THROUGH(iter,
-                null_arrays,
-                ARK_ARCHIVE_ITER_MASK_ARRAYS,
-                ARK_ARCHIVE_ITER_MASK_NULL,
-                PROP_ITER_NULL_ARRAYS)
-        case PROP_ITER_NULL_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
-                bool_arrays,
-                ARK_ARCHIVE_ITER_MASK_ARRAYS,
-                ARK_ARCHIVE_ITER_MASK_BOOLEAN,
-                PROP_ITER_BOOL_ARRAYS)
-        case PROP_ITER_BOOL_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
-                int8_arrays,
-                ARK_ARCHIVE_ITER_MASK_ARRAYS,
-                ARK_ARCHIVE_ITER_MASK_INT8,
-                PROP_ITER_INT8_ARRAYS)
-        case PROP_ITER_INT8_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
-                int16_arrays,
-                ARK_ARCHIVE_ITER_MASK_ARRAYS,
-                ARK_ARCHIVE_ITER_MASK_INT16,
-                PROP_ITER_INT16_ARRAYS)
-        case PROP_ITER_INT16_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
-                int32_arrays,
-                ARK_ARCHIVE_ITER_MASK_ARRAYS,
-                ARK_ARCHIVE_ITER_MASK_INT32,
-                PROP_ITER_INT32_ARRAYS)
-        case PROP_ITER_INT32_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
-                int64_arrays,
-                ARK_ARCHIVE_ITER_MASK_ARRAYS,
-                ARK_ARCHIVE_ITER_MASK_INT64,
-                PROP_ITER_INT64_ARRAYS)
-        case PROP_ITER_INT64_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
-                uint8_arrays,
-                ARK_ARCHIVE_ITER_MASK_ARRAYS,
-                ARK_ARCHIVE_ITER_MASK_UINT8,
-                PROP_ITER_UINT8_ARRAYS)
-        case PROP_ITER_UINT8_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
-                uint16_arrays,
-                ARK_ARCHIVE_ITER_MASK_ARRAYS,
-                ARK_ARCHIVE_ITER_MASK_UINT16,
-                PROP_ITER_UINT16_ARRAYS)
-        case PROP_ITER_UINT16_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
-                uint32_arrays,
-                ARK_ARCHIVE_ITER_MASK_ARRAYS,
-                ARK_ARCHIVE_ITER_MASK_UINT32,
-                PROP_ITER_UINT32_ARRAYS)
-        case PROP_ITER_UINT32_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
-                uint64_arrays,
-                ARK_ARCHIVE_ITER_MASK_ARRAYS,
-                ARK_ARCHIVE_ITER_MASK_UINT64,
-                PROP_ITER_UINT64_ARRAYS)
-        case PROP_ITER_UINT64_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
-                float_arrays,
-                ARK_ARCHIVE_ITER_MASK_ARRAYS,
-                ARK_ARCHIVE_ITER_MASK_NUMBER,
-                PROP_ITER_FLOAT_ARRAYS)
-        case PROP_ITER_FLOAT_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
-                string_arrays,
-                ARK_ARCHIVE_ITER_MASK_ARRAYS,
-                ARK_ARCHIVE_ITER_MASK_STRING,
-                PROP_ITER_STRING_ARRAYS)
-        case PROP_ITER_STRING_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
-                object_arrays,
-                ARK_ARCHIVE_ITER_MASK_ARRAYS,
-                ARK_ARCHIVE_ITER_MASK_OBJECT,
-                PROP_ITER_OBJECT_ARRAYS)
-        case PROP_ITER_OBJECT_ARRAYS:
-                iter->prop_cursor = PROP_ITER_DONE;
-                break;
+                case PROP_ITER_INIT: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                nulls,
+                                                                ARK_ARCHIVE_ITER_MASK_PRIMITIVES,
+                                                                ARK_ARCHIVE_ITER_MASK_NULL,
+                                                                PROP_ITER_NULLS)
+                case PROP_ITER_NULLS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                 bools,
+                                                                 ARK_ARCHIVE_ITER_MASK_PRIMITIVES,
+                                                                 ARK_ARCHIVE_ITER_MASK_BOOLEAN,
+                                                                 PROP_ITER_BOOLS)
+                case PROP_ITER_BOOLS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                 int8s,
+                                                                 ARK_ARCHIVE_ITER_MASK_PRIMITIVES,
+                                                                 ARK_ARCHIVE_ITER_MASK_INT8,
+                                                                 PROP_ITER_INT8S)
+                case PROP_ITER_INT8S: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                 int16s,
+                                                                 ARK_ARCHIVE_ITER_MASK_PRIMITIVES,
+                                                                 ARK_ARCHIVE_ITER_MASK_INT16,
+                                                                 PROP_ITER_INT16S)
+                case PROP_ITER_INT16S: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                  int32s,
+                                                                  ARK_ARCHIVE_ITER_MASK_PRIMITIVES,
+                                                                  ARK_ARCHIVE_ITER_MASK_INT32,
+                                                                  PROP_ITER_INT32S)
+                case PROP_ITER_INT32S: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                  int64s,
+                                                                  ARK_ARCHIVE_ITER_MASK_PRIMITIVES,
+                                                                  ARK_ARCHIVE_ITER_MASK_INT64,
+                                                                  PROP_ITER_INT64S)
+                case PROP_ITER_INT64S: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                  uint8s,
+                                                                  ARK_ARCHIVE_ITER_MASK_PRIMITIVES,
+                                                                  ARK_ARCHIVE_ITER_MASK_UINT8,
+                                                                  PROP_ITER_UINT8S)
+                case PROP_ITER_UINT8S: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                  uint16s,
+                                                                  ARK_ARCHIVE_ITER_MASK_PRIMITIVES,
+                                                                  ARK_ARCHIVE_ITER_MASK_UINT16,
+                                                                  PROP_ITER_UINT16S)
+                case PROP_ITER_UINT16S: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                   uint32s,
+                                                                   ARK_ARCHIVE_ITER_MASK_PRIMITIVES,
+                                                                   ARK_ARCHIVE_ITER_MASK_UINT32,
+                                                                   PROP_ITER_UINT32S)
+                case PROP_ITER_UINT32S: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                   uint64s,
+                                                                   ARK_ARCHIVE_ITER_MASK_PRIMITIVES,
+                                                                   ARK_ARCHIVE_ITER_MASK_UINT64,
+                                                                   PROP_ITER_UINT64S)
+                case PROP_ITER_UINT64S: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                   floats,
+                                                                   ARK_ARCHIVE_ITER_MASK_PRIMITIVES,
+                                                                   ARK_ARCHIVE_ITER_MASK_NUMBER,
+                                                                   PROP_ITER_FLOATS)
+                case PROP_ITER_FLOATS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                  strings,
+                                                                  ARK_ARCHIVE_ITER_MASK_PRIMITIVES,
+                                                                  ARK_ARCHIVE_ITER_MASK_STRING,
+                                                                  PROP_ITER_STRINGS)
+                case PROP_ITER_STRINGS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                   objects,
+                                                                   ARK_ARCHIVE_ITER_MASK_PRIMITIVES,
+                                                                   ARK_ARCHIVE_ITER_MASK_OBJECT,
+                                                                   PROP_ITER_OBJECTS)
+                case PROP_ITER_OBJECTS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                   null_arrays,
+                                                                   ARK_ARCHIVE_ITER_MASK_ARRAYS,
+                                                                   ARK_ARCHIVE_ITER_MASK_NULL,
+                                                                   PROP_ITER_NULL_ARRAYS)
+                case PROP_ITER_NULL_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                       bool_arrays,
+                                                                       ARK_ARCHIVE_ITER_MASK_ARRAYS,
+                                                                       ARK_ARCHIVE_ITER_MASK_BOOLEAN,
+                                                                       PROP_ITER_BOOL_ARRAYS)
+                case PROP_ITER_BOOL_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                       int8_arrays,
+                                                                       ARK_ARCHIVE_ITER_MASK_ARRAYS,
+                                                                       ARK_ARCHIVE_ITER_MASK_INT8,
+                                                                       PROP_ITER_INT8_ARRAYS)
+                case PROP_ITER_INT8_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                       int16_arrays,
+                                                                       ARK_ARCHIVE_ITER_MASK_ARRAYS,
+                                                                       ARK_ARCHIVE_ITER_MASK_INT16,
+                                                                       PROP_ITER_INT16_ARRAYS)
+                case PROP_ITER_INT16_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                        int32_arrays,
+                                                                        ARK_ARCHIVE_ITER_MASK_ARRAYS,
+                                                                        ARK_ARCHIVE_ITER_MASK_INT32,
+                                                                        PROP_ITER_INT32_ARRAYS)
+                case PROP_ITER_INT32_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                        int64_arrays,
+                                                                        ARK_ARCHIVE_ITER_MASK_ARRAYS,
+                                                                        ARK_ARCHIVE_ITER_MASK_INT64,
+                                                                        PROP_ITER_INT64_ARRAYS)
+                case PROP_ITER_INT64_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                        uint8_arrays,
+                                                                        ARK_ARCHIVE_ITER_MASK_ARRAYS,
+                                                                        ARK_ARCHIVE_ITER_MASK_UINT8,
+                                                                        PROP_ITER_UINT8_ARRAYS)
+                case PROP_ITER_UINT8_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                        uint16_arrays,
+                                                                        ARK_ARCHIVE_ITER_MASK_ARRAYS,
+                                                                        ARK_ARCHIVE_ITER_MASK_UINT16,
+                                                                        PROP_ITER_UINT16_ARRAYS)
+                case PROP_ITER_UINT16_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                         uint32_arrays,
+                                                                         ARK_ARCHIVE_ITER_MASK_ARRAYS,
+                                                                         ARK_ARCHIVE_ITER_MASK_UINT32,
+                                                                         PROP_ITER_UINT32_ARRAYS)
+                case PROP_ITER_UINT32_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                         uint64_arrays,
+                                                                         ARK_ARCHIVE_ITER_MASK_ARRAYS,
+                                                                         ARK_ARCHIVE_ITER_MASK_UINT64,
+                                                                         PROP_ITER_UINT64_ARRAYS)
+                case PROP_ITER_UINT64_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                         float_arrays,
+                                                                         ARK_ARCHIVE_ITER_MASK_ARRAYS,
+                                                                         ARK_ARCHIVE_ITER_MASK_NUMBER,
+                                                                         PROP_ITER_FLOAT_ARRAYS)
+                case PROP_ITER_FLOAT_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                        string_arrays,
+                                                                        ARK_ARCHIVE_ITER_MASK_ARRAYS,
+                                                                        ARK_ARCHIVE_ITER_MASK_STRING,
+                                                                        PROP_ITER_STRING_ARRAYS)
+                case PROP_ITER_STRING_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                         object_arrays,
+                                                                         ARK_ARCHIVE_ITER_MASK_ARRAYS,
+                                                                         ARK_ARCHIVE_ITER_MASK_OBJECT,
+                                                                         PROP_ITER_OBJECT_ARRAYS)
+                case PROP_ITER_OBJECT_ARRAYS:
+                        iter->prop_cursor = PROP_ITER_DONE;
+                        break;
 
-        case PROP_ITER_DONE:
-                break;
-        default: print_error_and_die(ARK_ERR_INTERNALERR);
+                case PROP_ITER_DONE:
+                        break;
+                default: print_error_and_die(ARK_ERR_INTERNALERR);
         }
 
         iter->mode = iter->prop_cursor == PROP_ITER_OBJECT_ARRAYS ? PROP_ITER_MODE_COLLECTION : PROP_ITER_MODE_OBJECT;
@@ -382,7 +382,7 @@ static void prop_iter_state_init(struct prop_iter *iter)
 }
 
 static bool archive_prop_iter_from_memblock(struct prop_iter *iter, struct err *err, u16 mask,
-        struct memblock *memblock, offset_t object_offset)
+                                            struct memblock *memblock, offset_t object_offset)
 {
         error_if_null(iter)
         error_if_null(err)
@@ -409,14 +409,14 @@ static bool archive_prop_iter_from_memblock(struct prop_iter *iter, struct err *
         return true;
 }
 
-ARK_EXPORT(bool) archive_prop_iter_from_archive(struct prop_iter *iter, struct err *err, u16 mask,
-        struct archive *archive)
+bool archive_prop_iter_from_archive(struct prop_iter *iter, struct err *err, u16 mask,
+                                    struct archive *archive)
 {
         return archive_prop_iter_from_memblock(iter, err, mask, archive->record_table.recordDataBase, 0);
 }
 
-ARK_EXPORT(bool) archive_prop_iter_from_object(struct prop_iter *iter, u16 mask, struct err *err,
-        const struct archive_object *obj)
+bool archive_prop_iter_from_object(struct prop_iter *iter, u16 mask, struct err *err,
+                                   const struct archive_object *obj)
 {
         return archive_prop_iter_from_memblock(iter, err, mask, obj->memfile.memblock, obj->offset);
 }
@@ -424,119 +424,119 @@ ARK_EXPORT(bool) archive_prop_iter_from_object(struct prop_iter *iter, u16 mask,
 static enum field_type get_basic_type(enum prop_iter_state state)
 {
         switch (state) {
-        case PROP_ITER_NULLS:
-        case PROP_ITER_NULL_ARRAYS:
-                return FIELD_NULL;
-        case PROP_ITER_BOOLS:
-        case PROP_ITER_BOOL_ARRAYS:
-                return FIELD_BOOLEAN;
-        case PROP_ITER_INT8S:
-        case PROP_ITER_INT8_ARRAYS:
-                return FIELD_INT8;
-        case PROP_ITER_INT16S:
-        case PROP_ITER_INT16_ARRAYS:
-                return FIELD_INT16;
-        case PROP_ITER_INT32S:
-        case PROP_ITER_INT32_ARRAYS:
-                return FIELD_INT32;
-        case PROP_ITER_INT64S:
-        case PROP_ITER_INT64_ARRAYS:
-                return FIELD_INT64;
-        case PROP_ITER_UINT8S:
-        case PROP_ITER_UINT8_ARRAYS:
-                return FIELD_UINT8;
-        case PROP_ITER_UINT16S:
-        case PROP_ITER_UINT16_ARRAYS:
-                return FIELD_UINT16;
-        case PROP_ITER_UINT32S:
-        case PROP_ITER_UINT32_ARRAYS:
-                return FIELD_UINT32;
-        case PROP_ITER_UINT64S:
-        case PROP_ITER_UINT64_ARRAYS:
-                return FIELD_UINT64;
-        case PROP_ITER_FLOATS:
-        case PROP_ITER_FLOAT_ARRAYS:
-                return FIELD_FLOAT;
-        case PROP_ITER_STRINGS:
-        case PROP_ITER_STRING_ARRAYS:
-                return FIELD_STRING;
-        case PROP_ITER_OBJECTS:
-        case PROP_ITER_OBJECT_ARRAYS:
-                return FIELD_OBJECT;
-        default: print_error_and_die(ARK_ERR_INTERNALERR);
+                case PROP_ITER_NULLS:
+                case PROP_ITER_NULL_ARRAYS:
+                        return FIELD_NULL;
+                case PROP_ITER_BOOLS:
+                case PROP_ITER_BOOL_ARRAYS:
+                        return FIELD_BOOLEAN;
+                case PROP_ITER_INT8S:
+                case PROP_ITER_INT8_ARRAYS:
+                        return FIELD_INT8;
+                case PROP_ITER_INT16S:
+                case PROP_ITER_INT16_ARRAYS:
+                        return FIELD_INT16;
+                case PROP_ITER_INT32S:
+                case PROP_ITER_INT32_ARRAYS:
+                        return FIELD_INT32;
+                case PROP_ITER_INT64S:
+                case PROP_ITER_INT64_ARRAYS:
+                        return FIELD_INT64;
+                case PROP_ITER_UINT8S:
+                case PROP_ITER_UINT8_ARRAYS:
+                        return FIELD_UINT8;
+                case PROP_ITER_UINT16S:
+                case PROP_ITER_UINT16_ARRAYS:
+                        return FIELD_UINT16;
+                case PROP_ITER_UINT32S:
+                case PROP_ITER_UINT32_ARRAYS:
+                        return FIELD_UINT32;
+                case PROP_ITER_UINT64S:
+                case PROP_ITER_UINT64_ARRAYS:
+                        return FIELD_UINT64;
+                case PROP_ITER_FLOATS:
+                case PROP_ITER_FLOAT_ARRAYS:
+                        return FIELD_FLOAT;
+                case PROP_ITER_STRINGS:
+                case PROP_ITER_STRING_ARRAYS:
+                        return FIELD_STRING;
+                case PROP_ITER_OBJECTS:
+                case PROP_ITER_OBJECT_ARRAYS:
+                        return FIELD_OBJECT;
+                default: print_error_and_die(ARK_ERR_INTERNALERR);
         }
 }
 
 static bool is_array_type(enum prop_iter_state state)
 {
         switch (state) {
-        case PROP_ITER_NULLS:
-        case PROP_ITER_BOOLS:
-        case PROP_ITER_INT8S:
-        case PROP_ITER_INT16S:
-        case PROP_ITER_INT32S:
-        case PROP_ITER_INT64S:
-        case PROP_ITER_UINT8S:
-        case PROP_ITER_UINT16S:
-        case PROP_ITER_UINT32S:
-        case PROP_ITER_UINT64S:
-        case PROP_ITER_FLOATS:
-        case PROP_ITER_STRINGS:
-        case PROP_ITER_OBJECTS:
-                return false;
-        case PROP_ITER_NULL_ARRAYS:
-        case PROP_ITER_BOOL_ARRAYS:
-        case PROP_ITER_INT8_ARRAYS:
-        case PROP_ITER_INT16_ARRAYS:
-        case PROP_ITER_INT32_ARRAYS:
-        case PROP_ITER_INT64_ARRAYS:
-        case PROP_ITER_UINT8_ARRAYS:
-        case PROP_ITER_UINT16_ARRAYS:
-        case PROP_ITER_UINT32_ARRAYS:
-        case PROP_ITER_UINT64_ARRAYS:
-        case PROP_ITER_FLOAT_ARRAYS:
-        case PROP_ITER_STRING_ARRAYS:
-        case PROP_ITER_OBJECT_ARRAYS:
-                return true;
-        default: print_error_and_die(ARK_ERR_INTERNALERR);
+                case PROP_ITER_NULLS:
+                case PROP_ITER_BOOLS:
+                case PROP_ITER_INT8S:
+                case PROP_ITER_INT16S:
+                case PROP_ITER_INT32S:
+                case PROP_ITER_INT64S:
+                case PROP_ITER_UINT8S:
+                case PROP_ITER_UINT16S:
+                case PROP_ITER_UINT32S:
+                case PROP_ITER_UINT64S:
+                case PROP_ITER_FLOATS:
+                case PROP_ITER_STRINGS:
+                case PROP_ITER_OBJECTS:
+                        return false;
+                case PROP_ITER_NULL_ARRAYS:
+                case PROP_ITER_BOOL_ARRAYS:
+                case PROP_ITER_INT8_ARRAYS:
+                case PROP_ITER_INT16_ARRAYS:
+                case PROP_ITER_INT32_ARRAYS:
+                case PROP_ITER_INT64_ARRAYS:
+                case PROP_ITER_UINT8_ARRAYS:
+                case PROP_ITER_UINT16_ARRAYS:
+                case PROP_ITER_UINT32_ARRAYS:
+                case PROP_ITER_UINT64_ARRAYS:
+                case PROP_ITER_FLOAT_ARRAYS:
+                case PROP_ITER_STRING_ARRAYS:
+                case PROP_ITER_OBJECT_ARRAYS:
+                        return true;
+                default: print_error_and_die(ARK_ERR_INTERNALERR);
         }
 }
 
-ARK_EXPORT(bool) archive_prop_iter_next(enum prop_iter_mode *type, struct archive_value_vector *value_vector,
-        archive_collection_iter_t *collection_iter, struct prop_iter *prop_iter)
+bool archive_prop_iter_next(enum prop_iter_mode *type, struct archive_value_vector *value_vector,
+                            archive_collection_iter_t *collection_iter, struct prop_iter *prop_iter)
 {
         error_if_null(type);
         error_if_null(prop_iter);
 
         if (prop_iter->prop_cursor != PROP_ITER_DONE) {
                 switch (prop_iter->mode) {
-                case PROP_ITER_MODE_OBJECT: {
-                        value_vector->keys = prop_iter->mode_object.prop_group_header.keys;
+                        case PROP_ITER_MODE_OBJECT: {
+                                value_vector->keys = prop_iter->mode_object.prop_group_header.keys;
 
-                        prop_iter->mode_object.type = get_basic_type(prop_iter->prop_cursor);
-                        prop_iter->mode_object.is_array = is_array_type(prop_iter->prop_cursor);
+                                prop_iter->mode_object.type = get_basic_type(prop_iter->prop_cursor);
+                                prop_iter->mode_object.is_array = is_array_type(prop_iter->prop_cursor);
 
-                        value_vector->value_max_idx = prop_iter->mode_object.prop_group_header.header->num_entries;
-                        value_vector->prop_type = prop_iter->mode_object.type;
-                        value_vector->is_array = prop_iter->mode_object.is_array;
+                                value_vector->value_max_idx = prop_iter->mode_object.prop_group_header.header->num_entries;
+                                value_vector->prop_type = prop_iter->mode_object.type;
+                                value_vector->is_array = prop_iter->mode_object.is_array;
 
-                        if (value_vector
-                                && !archive_value_vector_from_prop_iter(value_vector, &prop_iter->err, prop_iter)) {
-                                error(&prop_iter->err, ARK_ERR_VITEROPEN_FAILED);
-                                return false;
+                                if (value_vector
+                                    && !archive_value_vector_from_prop_iter(value_vector, &prop_iter->err, prop_iter)) {
+                                        error(&prop_iter->err, ARK_ERR_VITEROPEN_FAILED);
+                                        return false;
+                                }
                         }
-                }
-                        break;
-                case PROP_ITER_MODE_COLLECTION: {
-                        collection_iter->state = prop_iter->mode_collection;
-                        memfile_open(&collection_iter->record_table_memfile,
-                                prop_iter->record_table_memfile.memblock,
-                                READ_ONLY);
-                        error_init(&collection_iter->err);
-                }
-                        break;
-                default: error(&prop_iter->err, ARK_ERR_INTERNALERR);
-                        return false;
+                                break;
+                        case PROP_ITER_MODE_COLLECTION: {
+                                collection_iter->state = prop_iter->mode_collection;
+                                memfile_open(&collection_iter->record_table_memfile,
+                                             prop_iter->record_table_memfile.memblock,
+                                             READ_ONLY);
+                                error_init(&collection_iter->err);
+                        }
+                                break;
+                        default: error(&prop_iter->err, ARK_ERR_INTERNALERR);
+                                return false;
                 }
                 *type = prop_iter->mode;
                 prop_iter_state_next(prop_iter);
@@ -546,7 +546,7 @@ ARK_EXPORT(bool) archive_prop_iter_next(enum prop_iter_mode *type, struct archiv
         }
 }
 
-ARK_EXPORT(const field_sid_t *)archive_collection_iter_get_keys(u32 *num_keys, archive_collection_iter_t *iter)
+const field_sid_t *archive_collection_iter_get_keys(u32 *num_keys, archive_collection_iter_t *iter)
 {
         if (num_keys && iter) {
                 *num_keys = iter->state.num_column_groups;
@@ -557,8 +557,8 @@ ARK_EXPORT(const field_sid_t *)archive_collection_iter_get_keys(u32 *num_keys, a
         }
 }
 
-ARK_EXPORT(bool) archive_collection_next_column_group(archive_column_group_iter_t *group_iter,
-        archive_collection_iter_t *iter)
+bool archive_collection_next_column_group(archive_column_group_iter_t *group_iter,
+                                          archive_collection_iter_t *iter)
 {
         error_if_null(group_iter)
         error_if_null(iter)
@@ -574,7 +574,7 @@ ARK_EXPORT(bool) archive_collection_next_column_group(archive_column_group_iter_
         }
 }
 
-ARK_EXPORT(const object_id_t *)archive_column_group_get_object_ids(u32 *num_objects, archive_column_group_iter_t *iter)
+const object_id_t *archive_column_group_get_object_ids(u32 *num_objects, archive_column_group_iter_t *iter)
 {
         if (num_objects && iter) {
                 *num_objects = iter->state.current_column_group.num_objects;
@@ -585,7 +585,7 @@ ARK_EXPORT(const object_id_t *)archive_column_group_get_object_ids(u32 *num_obje
         }
 }
 
-ARK_EXPORT(bool) archive_column_group_next_column(archive_column_iter_t *column_iter, archive_column_group_iter_t *iter)
+bool archive_column_group_next_column(archive_column_iter_t *column_iter, archive_column_group_iter_t *iter)
 {
         error_if_null(column_iter)
         error_if_null(iter)
@@ -601,7 +601,7 @@ ARK_EXPORT(bool) archive_column_group_next_column(archive_column_iter_t *column_
         }
 }
 
-ARK_EXPORT(bool) archive_column_get_name(field_sid_t *name, enum field_type *type, archive_column_iter_t *column_iter)
+bool archive_column_get_name(field_sid_t *name, enum field_type *type, archive_column_iter_t *column_iter)
 {
         error_if_null(column_iter)
         ark_optional_set(name, column_iter->state.current_column_group.current_column.name)
@@ -609,7 +609,7 @@ ARK_EXPORT(bool) archive_column_get_name(field_sid_t *name, enum field_type *typ
         return true;
 }
 
-ARK_EXPORT(const u32 *)archive_column_get_entry_positions(u32 *num_entry, archive_column_iter_t *column_iter)
+const u32 *archive_column_get_entry_positions(u32 *num_entry, archive_column_iter_t *column_iter)
 {
         if (num_entry && column_iter) {
                 *num_entry = column_iter->state.current_column_group.current_column.num_elem;
@@ -620,13 +620,13 @@ ARK_EXPORT(const u32 *)archive_column_get_entry_positions(u32 *num_entry, archiv
         }
 }
 
-ARK_EXPORT(bool) archive_column_next_entry(archive_column_entry_iter_t *entry_iter, archive_column_iter_t *iter)
+bool archive_column_next_entry(archive_column_entry_iter_t *entry_iter, archive_column_iter_t *iter)
 {
         error_if_null(entry_iter)
         error_if_null(iter)
 
         if (iter->state.current_column_group.current_column.current_entry.idx
-                < iter->state.current_column_group.current_column.num_elem) {
+            < iter->state.current_column_group.current_column.num_elem) {
                 prop_iter_read_colum_entry(&iter->state, &iter->record_table_memfile);
                 memfile_open(&entry_iter->record_table_memfile, iter->record_table_memfile.memblock, READ_ONLY);
                 entry_iter->state = iter->state;
@@ -637,7 +637,7 @@ ARK_EXPORT(bool) archive_column_next_entry(archive_column_entry_iter_t *entry_it
         }
 }
 
-ARK_EXPORT(bool) archive_column_entry_get_type(enum field_type *type, archive_column_entry_iter_t *entry)
+bool archive_column_entry_get_type(enum field_type *type, archive_column_entry_iter_t *entry)
 {
         error_if_null(type)
         error_if_null(entry)
@@ -646,7 +646,7 @@ ARK_EXPORT(bool) archive_column_entry_get_type(enum field_type *type, archive_co
 }
 
 #define DECLARE_ARK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(built_in_type, name, basic_type)                            \
-ARK_EXPORT(const built_in_type *)                                                                                   \
+const built_in_type *                                                                                   \
 archive_column_entry_get_##name(u32 *array_length, archive_column_entry_iter_t *entry)              \
 {                                                                                                                      \
     if (array_length && entry) {                                                                                       \
@@ -688,7 +688,7 @@ DECLARE_ARK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_boolean_t, booleans, FIELD
 
 DECLARE_ARK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_u32_t, nulls, FIELD_NULL);
 
-ARK_EXPORT(bool) archive_column_entry_get_objects(struct column_object_iter *iter, archive_column_entry_iter_t *entry)
+bool archive_column_entry_get_objects(struct column_object_iter *iter, archive_column_entry_iter_t *entry)
 {
         error_if_null(iter)
         error_if_null(entry)
@@ -696,15 +696,15 @@ ARK_EXPORT(bool) archive_column_entry_get_objects(struct column_object_iter *ite
         iter->entry_state = entry->state;
         memfile_open(&iter->memfile, entry->record_table_memfile.memblock, READ_ONLY);
         memfile_seek(&iter->memfile,
-                entry->state.current_column_group.current_column.elem_offsets[
-                        entry->state.current_column_group.current_column.current_entry.idx - 1] + sizeof(u32));
+                     entry->state.current_column_group.current_column.elem_offsets[
+                             entry->state.current_column_group.current_column.current_entry.idx - 1] + sizeof(u32));
         iter->next_obj_off = memfile_tell(&iter->memfile);
         error_init(&iter->err);
 
         return true;
 }
 
-ARK_EXPORT(const struct archive_object *)archive_column_entry_object_iter_next_object(struct column_object_iter *iter)
+const struct archive_object *archive_column_entry_object_iter_next_object(struct column_object_iter *iter)
 {
         if (iter) {
                 if (iter->next_obj_off != 0) {
@@ -725,7 +725,7 @@ ARK_EXPORT(const struct archive_object *)archive_column_entry_object_iter_next_o
         }
 }
 
-ARK_EXPORT(bool) archive_object_get_object_id(object_id_t *id, const struct archive_object *object)
+bool archive_object_get_object_id(object_id_t *id, const struct archive_object *object)
 {
         error_if_null(id)
         error_if_null(object)
@@ -733,7 +733,7 @@ ARK_EXPORT(bool) archive_object_get_object_id(object_id_t *id, const struct arch
         return true;
 }
 
-ARK_EXPORT(bool) archive_object_get_prop_iter(struct prop_iter *iter, const struct archive_object *object)
+bool archive_object_get_prop_iter(struct prop_iter *iter, const struct archive_object *object)
 {
         // XXXX archive_prop_iter_from_object()
         unused(iter);
@@ -741,7 +741,7 @@ ARK_EXPORT(bool) archive_object_get_prop_iter(struct prop_iter *iter, const stru
         return false;
 }
 
-ARK_EXPORT(bool) archive_value_vector_get_object_id(object_id_t *id, const struct archive_value_vector *iter)
+bool archive_value_vector_get_object_id(object_id_t *id, const struct archive_value_vector *iter)
 {
         error_if_null(id)
         error_if_null(iter)
@@ -749,7 +749,7 @@ ARK_EXPORT(bool) archive_value_vector_get_object_id(object_id_t *id, const struc
         return true;
 }
 
-ARK_EXPORT(const field_sid_t *)archive_value_vector_get_keys(u32 *num_keys, struct archive_value_vector *iter)
+const field_sid_t *archive_value_vector_get_keys(u32 *num_keys, struct archive_value_vector *iter)
 {
         if (num_keys && iter) {
                 *num_keys = iter->value_max_idx;
@@ -771,40 +771,42 @@ static void value_vector_init_fixed_length_types_basic(struct archive_value_vect
         assert(!value->is_array);
 
         switch (value->prop_type) {
-        case FIELD_INT8:
-                value->data.basic.values.int8s = ARK_MEMFILE_PEEK(&value->record_table_memfile, field_i8_t);
-                break;
-        case FIELD_INT16:
-                value->data.basic.values.int16s = ARK_MEMFILE_PEEK(&value->record_table_memfile, field_i16_t);
-                break;
-        case FIELD_INT32:
-                value->data.basic.values.int32s = ARK_MEMFILE_PEEK(&value->record_table_memfile, field_i32_t);
-                break;
-        case FIELD_INT64:
-                value->data.basic.values.int64s = ARK_MEMFILE_PEEK(&value->record_table_memfile, field_i64_t);
-                break;
-        case FIELD_UINT8:
-                value->data.basic.values.uint8s = ARK_MEMFILE_PEEK(&value->record_table_memfile, field_u8_t);
-                break;
-        case FIELD_UINT16:
-                value->data.basic.values.uint16s = ARK_MEMFILE_PEEK(&value->record_table_memfile, field_u16_t);
-                break;
-        case FIELD_UINT32:
-                value->data.basic.values.uint32s = ARK_MEMFILE_PEEK(&value->record_table_memfile, field_u32_t);
-                break;
-        case FIELD_UINT64:
-                value->data.basic.values.uint64s = ARK_MEMFILE_PEEK(&value->record_table_memfile, field_u64_t);
-                break;
-        case FIELD_FLOAT:
-                value->data.basic.values.numbers = ARK_MEMFILE_PEEK(&value->record_table_memfile, field_number_t);
-                break;
-        case FIELD_STRING:
-                value->data.basic.values.strings = ARK_MEMFILE_PEEK(&value->record_table_memfile, field_sid_t);
-                break;
-        case FIELD_BOOLEAN:
-                value->data.basic.values.booleans = ARK_MEMFILE_PEEK(&value->record_table_memfile, field_boolean_t);
-                break;
-        default: print_error_and_die(ARK_ERR_INTERNALERR);
+                case FIELD_INT8:
+                        value->data.basic.values.int8s = ARK_MEMFILE_PEEK(&value->record_table_memfile, field_i8_t);
+                        break;
+                case FIELD_INT16:
+                        value->data.basic.values.int16s = ARK_MEMFILE_PEEK(&value->record_table_memfile, field_i16_t);
+                        break;
+                case FIELD_INT32:
+                        value->data.basic.values.int32s = ARK_MEMFILE_PEEK(&value->record_table_memfile, field_i32_t);
+                        break;
+                case FIELD_INT64:
+                        value->data.basic.values.int64s = ARK_MEMFILE_PEEK(&value->record_table_memfile, field_i64_t);
+                        break;
+                case FIELD_UINT8:
+                        value->data.basic.values.uint8s = ARK_MEMFILE_PEEK(&value->record_table_memfile, field_u8_t);
+                        break;
+                case FIELD_UINT16:
+                        value->data.basic.values.uint16s = ARK_MEMFILE_PEEK(&value->record_table_memfile, field_u16_t);
+                        break;
+                case FIELD_UINT32:
+                        value->data.basic.values.uint32s = ARK_MEMFILE_PEEK(&value->record_table_memfile, field_u32_t);
+                        break;
+                case FIELD_UINT64:
+                        value->data.basic.values.uint64s = ARK_MEMFILE_PEEK(&value->record_table_memfile, field_u64_t);
+                        break;
+                case FIELD_FLOAT:
+                        value->data.basic.values.numbers = ARK_MEMFILE_PEEK(&value->record_table_memfile,
+                                                                            field_number_t);
+                        break;
+                case FIELD_STRING:
+                        value->data.basic.values.strings = ARK_MEMFILE_PEEK(&value->record_table_memfile, field_sid_t);
+                        break;
+                case FIELD_BOOLEAN:
+                        value->data.basic.values.booleans = ARK_MEMFILE_PEEK(&value->record_table_memfile,
+                                                                             field_boolean_t);
+                        break;
+                default: print_error_and_die(ARK_ERR_INTERNALERR);
         }
 }
 
@@ -824,41 +826,51 @@ static void value_vector_init_fixed_length_types_non_null_arrays(struct archive_
                 ARK_MEMFILE_READ_TYPE_LIST(&value->record_table_memfile, u32, value->value_max_idx);
 
         switch (value->prop_type) {
-        case FIELD_INT8:
-                value->data.arrays.values.int8s_base = ARK_MEMFILE_PEEK(&value->record_table_memfile, field_i8_t);
-                break;
-        case FIELD_INT16:
-                value->data.arrays.values.int16s_base = ARK_MEMFILE_PEEK(&value->record_table_memfile, field_i16_t);
-                break;
-        case FIELD_INT32:
-                value->data.arrays.values.int32s_base = ARK_MEMFILE_PEEK(&value->record_table_memfile, field_i32_t);
-                break;
-        case FIELD_INT64:
-                value->data.arrays.values.int64s_base = ARK_MEMFILE_PEEK(&value->record_table_memfile, field_i64_t);
-                break;
-        case FIELD_UINT8:
-                value->data.arrays.values.uint8s_base = ARK_MEMFILE_PEEK(&value->record_table_memfile, field_u8_t);
-                break;
-        case FIELD_UINT16:
-                value->data.arrays.values.uint16s_base = ARK_MEMFILE_PEEK(&value->record_table_memfile, field_u16_t);
-                break;
-        case FIELD_UINT32:
-                value->data.arrays.values.uint32s_base = ARK_MEMFILE_PEEK(&value->record_table_memfile, field_u32_t);
-                break;
-        case FIELD_UINT64:
-                value->data.arrays.values.uint64s_base = ARK_MEMFILE_PEEK(&value->record_table_memfile, field_u64_t);
-                break;
-        case FIELD_FLOAT:
-                value->data.arrays.values.numbers_base = ARK_MEMFILE_PEEK(&value->record_table_memfile, field_number_t);
-                break;
-        case FIELD_STRING:
-                value->data.arrays.values.strings_base = ARK_MEMFILE_PEEK(&value->record_table_memfile, field_sid_t);
-                break;
-        case FIELD_BOOLEAN:
-                value->data.arrays.values.booleans_base =
-                        ARK_MEMFILE_PEEK(&value->record_table_memfile, field_boolean_t);
-                break;
-        default: print_error_and_die(ARK_ERR_INTERNALERR);
+                case FIELD_INT8:
+                        value->data.arrays.values.int8s_base = ARK_MEMFILE_PEEK(&value->record_table_memfile,
+                                                                                field_i8_t);
+                        break;
+                case FIELD_INT16:
+                        value->data.arrays.values.int16s_base = ARK_MEMFILE_PEEK(&value->record_table_memfile,
+                                                                                 field_i16_t);
+                        break;
+                case FIELD_INT32:
+                        value->data.arrays.values.int32s_base = ARK_MEMFILE_PEEK(&value->record_table_memfile,
+                                                                                 field_i32_t);
+                        break;
+                case FIELD_INT64:
+                        value->data.arrays.values.int64s_base = ARK_MEMFILE_PEEK(&value->record_table_memfile,
+                                                                                 field_i64_t);
+                        break;
+                case FIELD_UINT8:
+                        value->data.arrays.values.uint8s_base = ARK_MEMFILE_PEEK(&value->record_table_memfile,
+                                                                                 field_u8_t);
+                        break;
+                case FIELD_UINT16:
+                        value->data.arrays.values.uint16s_base = ARK_MEMFILE_PEEK(&value->record_table_memfile,
+                                                                                  field_u16_t);
+                        break;
+                case FIELD_UINT32:
+                        value->data.arrays.values.uint32s_base = ARK_MEMFILE_PEEK(&value->record_table_memfile,
+                                                                                  field_u32_t);
+                        break;
+                case FIELD_UINT64:
+                        value->data.arrays.values.uint64s_base = ARK_MEMFILE_PEEK(&value->record_table_memfile,
+                                                                                  field_u64_t);
+                        break;
+                case FIELD_FLOAT:
+                        value->data.arrays.values.numbers_base = ARK_MEMFILE_PEEK(&value->record_table_memfile,
+                                                                                  field_number_t);
+                        break;
+                case FIELD_STRING:
+                        value->data.arrays.values.strings_base = ARK_MEMFILE_PEEK(&value->record_table_memfile,
+                                                                                  field_sid_t);
+                        break;
+                case FIELD_BOOLEAN:
+                        value->data.arrays.values.booleans_base =
+                                ARK_MEMFILE_PEEK(&value->record_table_memfile, field_boolean_t);
+                        break;
+                default: print_error_and_die(ARK_ERR_INTERNALERR);
         }
 }
 
@@ -880,16 +892,16 @@ static void value_vector_init_object(struct archive_value_vector *value)
         }
 }
 
-ARK_EXPORT(bool) archive_value_vector_from_prop_iter(struct archive_value_vector *value, struct err *err,
-        struct prop_iter *prop_iter)
+bool archive_value_vector_from_prop_iter(struct archive_value_vector *value, struct err *err,
+                                         struct prop_iter *prop_iter)
 {
         error_if_null(value);
         error_if_null(prop_iter);
 
         error_if_and_return (prop_iter->mode != PROP_ITER_MODE_OBJECT,
-                &prop_iter->err,
-                ARK_ERR_ITER_OBJECT_NEEDED,
-                false)
+                             &prop_iter->err,
+                             ARK_ERR_ITER_OBJECT_NEEDED,
+                             false)
 
         error_init(&value->err);
 
@@ -911,34 +923,34 @@ ARK_EXPORT(bool) archive_value_vector_from_prop_iter(struct archive_value_vector
         value->value_max_idx = prop_iter->mode_object.prop_group_header.header->num_entries;
 
         switch (value->prop_type) {
-        case FIELD_OBJECT:
-                value_vector_init_object(value);
-                break;
-        case FIELD_NULL:
-                if (value->is_array) {
-                        value_vector_init_fixed_length_types_null_arrays(value);
-                }
-                break;
-        case FIELD_INT8:
-        case FIELD_INT16:
-        case FIELD_INT32:
-        case FIELD_INT64:
-        case FIELD_UINT8:
-        case FIELD_UINT16:
-        case FIELD_UINT32:
-        case FIELD_UINT64:
-        case FIELD_FLOAT:
-        case FIELD_STRING:
-        case FIELD_BOOLEAN:
-                value_vector_init_fixed_length_types(value);
-                break;
-        default: print_error_and_die(ARK_ERR_INTERNALERR);
+                case FIELD_OBJECT:
+                        value_vector_init_object(value);
+                        break;
+                case FIELD_NULL:
+                        if (value->is_array) {
+                                value_vector_init_fixed_length_types_null_arrays(value);
+                        }
+                        break;
+                case FIELD_INT8:
+                case FIELD_INT16:
+                case FIELD_INT32:
+                case FIELD_INT64:
+                case FIELD_UINT8:
+                case FIELD_UINT16:
+                case FIELD_UINT32:
+                case FIELD_UINT64:
+                case FIELD_FLOAT:
+                case FIELD_STRING:
+                case FIELD_BOOLEAN:
+                        value_vector_init_fixed_length_types(value);
+                        break;
+                default: print_error_and_die(ARK_ERR_INTERNALERR);
         }
 
         return true;
 }
 
-ARK_EXPORT(bool) archive_value_vector_get_basic_type(enum field_type *type, const struct archive_value_vector *value)
+bool archive_value_vector_get_basic_type(enum field_type *type, const struct archive_value_vector *value)
 {
         error_if_null(type)
         error_if_null(value)
@@ -946,7 +958,7 @@ ARK_EXPORT(bool) archive_value_vector_get_basic_type(enum field_type *type, cons
         return true;
 }
 
-ARK_EXPORT(bool) archive_value_vector_is_array_type(bool *is_array, const struct archive_value_vector *value)
+bool archive_value_vector_is_array_type(bool *is_array, const struct archive_value_vector *value)
 {
         error_if_null(is_array)
         error_if_null(value)
@@ -954,7 +966,7 @@ ARK_EXPORT(bool) archive_value_vector_is_array_type(bool *is_array, const struct
         return true;
 }
 
-ARK_EXPORT(bool) archive_value_vector_get_length(u32 *length, const struct archive_value_vector *value)
+bool archive_value_vector_get_length(u32 *length, const struct archive_value_vector *value)
 {
         error_if_null(length)
         error_if_null(value)
@@ -962,7 +974,7 @@ ARK_EXPORT(bool) archive_value_vector_get_length(u32 *length, const struct archi
         return true;
 }
 
-ARK_EXPORT(bool) archive_value_vector_is_of_objects(bool *is_object, struct archive_value_vector *value)
+bool archive_value_vector_is_of_objects(bool *is_object, struct archive_value_vector *value)
 {
         error_if_null(is_object)
         error_if_null(value)
@@ -972,8 +984,8 @@ ARK_EXPORT(bool) archive_value_vector_is_of_objects(bool *is_object, struct arch
         return true;
 }
 
-ARK_EXPORT(bool) archive_value_vector_get_object_at(struct archive_object *object, u32 idx,
-        struct archive_value_vector *value)
+bool archive_value_vector_get_object_at(struct archive_object *object, u32 idx,
+                                        struct archive_value_vector *value)
 {
         error_if_null(object)
         error_if_null(value)
@@ -999,7 +1011,7 @@ ARK_EXPORT(bool) archive_value_vector_get_object_at(struct archive_object *objec
 }
 
 #define DECLARE_ARK_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(name, basic_type)                                            \
-ARK_EXPORT(bool)                                                                                                    \
+bool                                                                                                    \
 archive_value_vector_is_##name(bool *type_match, struct archive_value_vector *value)                          \
 {                                                                                                                      \
     error_if_null(type_match)                                                                               \
@@ -1035,7 +1047,7 @@ DECLARE_ARK_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(boolean, FIELD_BOOLEAN)
 DECLARE_ARK_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(null, FIELD_NULL)
 
 #define DECLARE_ARK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(names, name, built_in_type, err_code)                       \
-ARK_EXPORT(const built_in_type *)                                                                                   \
+const built_in_type *                                                                                   \
 archive_value_vector_get_##names(u32 *num_values, struct archive_value_vector *value)                    \
 {                                                                                                                      \
     error_if_null(value)                                                                                    \
@@ -1077,7 +1089,7 @@ DECLARE_ARK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(numbers, number, field_number_t,
 
 DECLARE_ARK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(booleans, boolean, field_boolean_t, ARK_ERR_ITER_NOBOOL)
 
-ARK_EXPORT(const field_u32_t *)archive_value_vector_get_null_arrays(u32 *num_values, struct archive_value_vector *value)
+const field_u32_t *archive_value_vector_get_null_arrays(u32 *num_values, struct archive_value_vector *value)
 {
         error_if_null(value)
 
@@ -1085,7 +1097,7 @@ ARK_EXPORT(const field_u32_t *)archive_value_vector_get_null_arrays(u32 *num_val
         bool type_match;
 
         if (archive_value_vector_is_array_type(&is_array, value) && archive_value_vector_is_null(&type_match, value)
-                && is_array) {
+            && is_array) {
                 ark_optional_set(num_values, value->value_max_idx);
                 return value->data.arrays.meta.num_nulls_contained;
         } else {
@@ -1094,7 +1106,7 @@ ARK_EXPORT(const field_u32_t *)archive_value_vector_get_null_arrays(u32 *num_val
 }
 
 #define DECLARE_ARK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(name, built_in_type, base)                               \
-ARK_EXPORT(const built_in_type *)                                                                                   \
+const built_in_type *                                                                                   \
 archive_value_vector_get_##name##_arrays_at(u32 *array_length, u32 idx,                               \
                                                struct archive_value_vector *value)                                   \
 {                                                                                                                      \

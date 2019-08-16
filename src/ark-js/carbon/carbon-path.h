@@ -23,59 +23,61 @@
 
 ARK_BEGIN_DECL
 
-struct carbon_path_evaluator
-{
-        struct carbon *doc;
-        struct carbon_array_it root_it;
-        enum carbon_path_status status;
-        struct err err;
+struct carbon_path_evaluator {
+    struct carbon *doc;
+    struct carbon_array_it root_it;
+    enum carbon_path_status status;
+    struct err err;
 
-        struct {
-                enum carbon_container_type container_type;
-                union {
-                        struct {
-                                struct carbon_array_it *it;
-                        } array;
+    struct {
+        enum carbon_container_type container_type;
+        union {
+            struct {
+                struct carbon_array_it it;
+            } array;
 
+            struct {
+                struct carbon_object_it it;
+            } object;
 
-                        struct {
-                                struct carbon_column_it *it;
-                                u32 elem_pos;
-                        } column;
+            struct {
+                struct carbon_column_it it;
+                u32 elem_pos;
+            } column;
 
-                } containers;
-        } result;
+        } containers;
+    } result;
 };
 
-ARK_EXPORT(bool) carbon_path_evaluator_begin(struct carbon_path_evaluator *eval, struct carbon_dot_path *path,
-        struct carbon *doc);
+bool carbon_path_evaluator_begin(struct carbon_path_evaluator *eval, struct carbon_dot_path *path,
+                                 struct carbon *doc);
 
-ARK_EXPORT(bool) carbon_path_evaluator_begin_mutable(struct carbon_path_evaluator *eval, const struct carbon_dot_path *path,
-        struct carbon_revise *context);
+bool carbon_path_evaluator_begin_mutable(struct carbon_path_evaluator *eval, const struct carbon_dot_path *path,
+                                         struct carbon_revise *context);
 
-ARK_EXPORT(bool) carbon_path_evaluator_status(enum carbon_path_status *status, struct carbon_path_evaluator *state);
+bool carbon_path_evaluator_status(enum carbon_path_status *status, struct carbon_path_evaluator *state);
 
-ARK_EXPORT(bool) carbon_path_evaluator_has_result(struct carbon_path_evaluator *state);
+bool carbon_path_evaluator_has_result(struct carbon_path_evaluator *state);
 
-ARK_EXPORT(bool) carbon_path_evaluator_end(struct carbon_path_evaluator *state);
+bool carbon_path_evaluator_end(struct carbon_path_evaluator *state);
 
-ARK_EXPORT(bool) carbon_path_exists(struct carbon *doc, const char *path);
+bool carbon_path_exists(struct carbon *doc, const char *path);
 
-ARK_EXPORT(bool) carbon_path_is_array(struct carbon *doc, const char *path);
+bool carbon_path_is_array(struct carbon *doc, const char *path);
 
-ARK_EXPORT(bool) carbon_path_is_column(struct carbon *doc, const char *path);
+bool carbon_path_is_column(struct carbon *doc, const char *path);
 
-ARK_EXPORT(bool) carbon_path_is_object(struct carbon *doc, const char *path);
+bool carbon_path_is_object(struct carbon *doc, const char *path);
 
-ARK_EXPORT(bool) carbon_path_is_container(struct carbon *doc, const char *path);
+bool carbon_path_is_container(struct carbon *doc, const char *path);
 
-ARK_EXPORT(bool) carbon_path_is_null(struct carbon *doc, const char *path);
+bool carbon_path_is_null(struct carbon *doc, const char *path);
 
-ARK_EXPORT(bool) carbon_path_is_number(struct carbon *doc, const char *path);
+bool carbon_path_is_number(struct carbon *doc, const char *path);
 
-ARK_EXPORT(bool) carbon_path_is_boolean(struct carbon *doc, const char *path);
+bool carbon_path_is_boolean(struct carbon *doc, const char *path);
 
-ARK_EXPORT(bool) carbon_path_is_string(struct carbon *doc, const char *path);
+bool carbon_path_is_string(struct carbon *doc, const char *path);
 
 ARK_END_DECL
 

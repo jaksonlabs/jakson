@@ -30,7 +30,7 @@ ARK_BEGIN_DECL
  * @param alloc must be non-null
  * @return STATUS_OK in case of non-null parameter alloc, STATUS_NULLPTR otherwise
  */
-ARK_EXPORT (int) trace_alloc_create(struct allocator *alloc);
+int trace_alloc_create(struct allocator *alloc);
 
 ARK_END_DECL
 
