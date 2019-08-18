@@ -8,6 +8,7 @@
   to `x.y` for an input `{"x": [{"y": "z"}]}`. The reason for the latter is not shadow user-data semantics, while the 
   first leads to compatibility to MongoDB and CouchDB and hides internal structure of carbon files.   
 - Results for `carbon_find` dot path expression can be printed with the default Json printer 
+- Commit hash based revision numbers for revised records
 
 ## 0.3.00.01 [2019-08-09]
 - Add thread pool implementation (`struct thread_pool`)
